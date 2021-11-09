@@ -36,6 +36,9 @@ build/
 local.properties
 *.iml
 
+# Externals
+libs
+
 # BUCK
 buck-out/
 \.buckd/

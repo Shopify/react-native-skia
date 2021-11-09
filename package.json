@@ -12,7 +12,14 @@
     "react-native-skia.podspec"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-skia-ios-arm": "ts-node ./scripts/build-externals.ts ios arm",
+    "build-skia-ios-arm64": "ts-node ./scripts/build-externals.ts ios arm64",
+    "build-skia-ios-x64": "ts-node ./scripts/build-externals.ts ios x64",
+    "build-skia-android-arm": "ts-node ./scripts/build-externals.ts android arm",
+    "build-skia-android-arm64": "ts-node ./scripts/build-externals.ts android arm64",
+    "build-skia-android-x86": "ts-node ./scripts/build-externals.ts android x86",
+    "build-skia-android-x64": "ts-node ./scripts/build-externals.ts android x64"
   },
   "repository": {
     "type": "git",
