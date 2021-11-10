@@ -24,5 +24,5 @@ module.exports = {
   },
 
   // quick workaround for another issue with symlinks
-  watchFolders: [path.resolve('.')],
+  watchFolders: [path.resolve('.'), path.resolve('../package')],
 };
