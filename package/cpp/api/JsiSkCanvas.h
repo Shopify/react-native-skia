@@ -10,6 +10,9 @@
 #include <jsi/jsi.h>
 #include <map>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkCanvas.h>
 #include <SkFont.h>
 #include <SkPaint.h>
@@ -17,6 +20,8 @@
 #include <SkRegion.h>
 #include <SkSurface.h>
 #include <SkTypeface.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 using namespace facebook;

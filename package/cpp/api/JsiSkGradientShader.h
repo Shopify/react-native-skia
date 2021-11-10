@@ -4,8 +4,13 @@
 #include "JsiSkHostObjects.h"
 #include <jsi/jsi.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkColorFilter.h>
 #include <SkImageFilters.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 

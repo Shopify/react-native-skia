@@ -23,3 +23,4 @@ Make sure you have all the tools required for building the skia libraries (XCode
 - Build the Skia libraries with `yarn build-skia`.
 - Copy Skia includes `yarn copy-skia-include-headers`
 - Copy Skia module includes `yarn copy-skia-module-headers`
+- Run pod install in the example project

@@ -4,7 +4,14 @@
 #include <JsiSkImageFilter.h>
 #include <JsiSkMaskFilter.h>
 #include <JsiSkShader.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkPaint.h>
+
+#pragma clang diagnostic pop
+
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -136,7 +143,6 @@ public:
   /**
    * Creates the function for construction a new instance of the SkPaint
    * wrapper
-   * @param pixelDensity Scale
    * @return A function for creating a new host object wrapper for the SkPaint
    * class
    */

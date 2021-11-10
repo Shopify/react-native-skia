@@ -34,7 +34,7 @@
       jsi::Runtime* jsRuntime = (jsi::Runtime*)cxxBridge.runtime;
       
       // Create platform context
-      _platformContext = std::make_shared<RNSkia::PlatformContext>();
+      _platformContext = std::make_shared<RNSkia::PlatformContext>(jsRuntime, callInvoker);
             
       // Create the RNSkiaManager (cross platform)
       _skManager = std::make_shared<RNSkia::RNSkManager>(jsRuntime,

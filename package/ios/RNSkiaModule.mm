@@ -1,14 +1,6 @@
 
 #import "RNSkiaModule.h"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
-
-#include <SkPath.h>
-
-#pragma clang diagnostic pop
-
-
 @implementation RNSkiaModule {
   SkiaManager* skiaManager;
 }

@@ -1,8 +1,15 @@
 #pragma once
 
 #include <JsiSkHostObjects.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkGradientShader.h>
 #include <SkShader.h>
+
+#pragma clang diagnostic pop
+
 #include <jsi/jsi.h>
 
 namespace RNSkia {

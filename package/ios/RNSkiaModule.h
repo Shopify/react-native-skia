@@ -1,7 +1,7 @@
 
 #import <React/RCTBridgeModule.h>
 
-#include <RNSkia-iOS/SkiaManager.h>
+#include "SkiaManager.h"
 
 @interface RNSkiaModule : NSObject <RCTBridgeModule>
 

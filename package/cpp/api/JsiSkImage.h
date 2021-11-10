@@ -6,9 +6,16 @@
 
 #include "JsiSkMatrix.h"
 #include <JsiSkHostObjects.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkImage.h>
 #include <SkStream.h>
 #include <include/codec/SkCodec.h>
+
+#pragma clang diagnostic pop
+
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -84,7 +91,7 @@ public:
                  localUri](std::unique_ptr<SkStream> stream) -> void {
                   auto codec = SkCodec::MakeFromStream(std::move(stream));
                   if (codec == nullptr) {
-                    context->getWorkletContext()->runOnJavascriptThread(
+                    context->runOnJavascriptThread(
                         [&runtime, context, promise, localUri]() {
                           promise->reject("Could not load image");
                         });
@@ -93,7 +100,7 @@ public:
 
                   auto result = codec->getImage();
                   if (std::get<1>(result) != SkCodec::Result::kSuccess) {
-                    context->getWorkletContext()->runOnJavascriptThread(
+                    context->runOnJavascriptThread(
                         [&runtime, context, promise, localUri]() {
                           promise->reject("Could not decode image");
                         });
@@ -103,7 +110,7 @@ public:
                   sk_sp<SkImage> image = std::get<0>(result);
 
                   // Schedule callback on the Javascript thread
-                  context->getWorkletContext()->runOnJavascriptThread(
+                  context->runOnJavascriptThread(
                       [&runtime, context, promise, localUri, image]() {
                         if (image == nullptr) {
                           promise->reject("Could not decode image");

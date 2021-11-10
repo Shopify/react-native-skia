@@ -1,6 +1,12 @@
 #include "JsiSkSvg.h"
 #include <ReactCommon/TurboModuleUtils.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkStream.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 using namespace facebook;
@@ -25,7 +31,7 @@ JsiSkSvgStatic::JsiSkSvgStatic(RNSkPlatformContext *context)
                     sk_sp<SkSVGDOM> svg_dom = SkSVGDOM::Builder().make(*stream);
 
                     // Schedule callback on the Javascript thread
-                    context->getWorkletContext()->runOnJavascriptThread(
+                    context->runOnJavascriptThread(
                         [&runtime, promise, context, svg_dom]() {
                           if (svg_dom == nullptr) {
                             promise->reject("Could not load svg from uri.");

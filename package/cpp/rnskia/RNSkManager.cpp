@@ -3,7 +3,6 @@
 #include <RNSkLog.h>
 
 #include <JsiSkApi.h>
-#include <JsiWorkletApi.h>
 
 namespace RNSkia {
 using namespace facebook;
@@ -14,7 +13,7 @@ void RNSkManager::registerSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
   drawCallbackInfo->view = view;
 
   if (drawCallbackInfo->callback != nullptr) {
-    _workletContext->runOnJavascriptThread([=]() {
+    _jsCallInvoker->invokeAsync([=]() {
       // We already have a draw callback - update the view
       view->setDrawCallback(drawCallbackInfo->callback);
     });
@@ -27,7 +26,6 @@ void RNSkManager::unregisterSkiaDrawView(size_t nativeId) {
   }
   auto drawCallbackInfo = _drawCallbacks.at(nativeId);
   if (drawCallbackInfo->view != nullptr) {
-    drawCallbackInfo->view->setWorkletContext(nullptr);
     drawCallbackInfo->view->setDrawCallback(nullptr);
   }
 
@@ -77,21 +75,25 @@ void RNSkManager::installSetDrawCallback() {
       [this](jsi::Runtime &runtime, const jsi::Value &thisValue,
              const jsi::Value *arguments, size_t count) -> jsi::Value {
     if (count != 2) {
-      return _platformContext->raiseError(
+      _platformContext->raiseError(
           std::string("setDrawCallback: Expected 2 arguments, got " +
                       std::to_string(count) + "."));
+      return jsi::Value::undefined();
     }
     if (!arguments[0].isNumber()) {
-      return _platformContext->raiseError(
+      _platformContext->raiseError(
           "setDrawCallback: First argument must be a number");
+      return jsi::Value::undefined();
     }
     if (!arguments[1].isObject()) {
-      return _platformContext->raiseError(
+      _platformContext->raiseError(
           "setDrawCallback: Second argument must be a function");
+      return jsi::Value::undefined();
     }
     if (!arguments[1].asObject(runtime).isFunction(runtime)) {
-      return _platformContext->raiseError(
+      _platformContext->raiseError(
           "setDrawCallback: Second argument must be a function");
+      return jsi::Value::undefined();
     }
 
     // find skia draw view
@@ -125,8 +127,9 @@ void RNSkManager::installUnsetDrawCallback() {
       [this](jsi::Runtime &runtime, const jsi::Value &thisValue,
              const jsi::Value *arguments, size_t count) -> jsi::Value {
     if (!arguments[0].isNumber()) {
-      return _platformContext->raiseError(
+        _platformContext->raiseError(
           "setDrawCallback: First argument ('nativeId') must be a number!");
+        return jsi::Value::undefined();
     }
 
     // find view
@@ -162,8 +165,9 @@ void RNSkManager::installInvalidateSkiaView() {
       [this](jsi::Runtime &rt, const jsi::Value &thisValue,
              const jsi::Value *arguments, size_t count) -> jsi::Value {
     if (!arguments[0].isNumber()) {
-      return _platformContext->raiseError(
+      _platformContext->raiseError(
           "invalidateSkiaView: First argument ('nativeId') must be a number.");
+      return jsi::Value::undefined();
     }
     // find view
     int nativeId = arguments[0].asNumber();

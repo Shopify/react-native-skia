@@ -1,9 +1,9 @@
 
 #import <React/RCTBridge+Private.h>
 
-#import "SkiaDrawViewManager.h"
-#import "ReactNativeSkiaModule.h"
-#import "SkiaManager.h"
+#include <SkiaDrawViewManager.h>
+#include <RNSkiaModule.h>
+#import <SkiaManager.h>
 
 @implementation SkiaDrawViewManager {
   SkiaManager* _skiaManager;
@@ -51,7 +51,7 @@ RCT_EXPORT_MODULE(ReactNativeSkiaView)
 
 - (void) setBridge:(RCTBridge *)bridge {
   [super setBridge:bridge];
-  auto skiaModule = (ReactNativeSkiaModule*)[bridge moduleForName:@"ReactNativeSkiaModule"];
+  auto skiaModule = (RNSkiaModule*)[bridge moduleForName:@"ReactNativeSkiaModule"];
   _skiaManager = [skiaModule manager];
 }
 

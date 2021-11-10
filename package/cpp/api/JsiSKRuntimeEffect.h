@@ -4,7 +4,12 @@
 #include <JsiSkShader.h>
 #include <jsi/jsi.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkRuntimeEffect.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 

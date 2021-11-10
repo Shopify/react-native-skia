@@ -3,11 +3,18 @@
 #include <map>
 
 #include "JsiSkHostObjects.h"
-#include "SkParsePath.h"
-#include "SkPath.h"
-#include "SkPathOps.h"
-#include "SkPathTypes.h"
-#include "SkTextUtils.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include <SkParsePath.h>
+#include <SkPath.h>
+#include <SkPathOps.h>
+#include <SkPathTypes.h>
+#include <SkTextUtils.h>
+
+#pragma clang diagnostic pop
+
 #include <jsi/jsi.h>
 
 namespace RNSkia {

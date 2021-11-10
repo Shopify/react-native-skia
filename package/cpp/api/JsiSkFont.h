@@ -6,8 +6,16 @@
 #include "JsiSkPaint.h"
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkFont.h>
+
+#pragma clang diagnostic pop
+
 #include <jsi/jsi.h>
+
 
 namespace RNSkia {
 

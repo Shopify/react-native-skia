@@ -1,19 +1,46 @@
 #pragma once
 
+#include <map>
+
 #include <RNSkLog.h>
 #include <SkStream.h>
+#include <jsi/jsi.h>
+
+#include <ReactCommon/CallInvoker.h>
 
 namespace RNSkia {
 
+using namespace facebook;
+
 class RNSkPlatformContext {
 public:
-  RNSkPlatformContext(float pixelDensity) : _pixelDensity(pixelDensity) {
+  RNSkPlatformContext(jsi::Runtime* runtime,
+                      std::shared_ptr<react::CallInvoker> callInvoker,
+                      float pixelDensity) :
+    _pixelDensity(pixelDensity),
+    _jsRuntime(runtime),
+    _callInvoker(callInvoker) {
     RNSkLogger::logToConsole("Created platform context with scale factor %0.2f",
                              pixelDensity);
   }
 
   ~RNSkPlatformContext() {
     RNSkLogger::logToConsole("Deleting platform context");
+  }
+  
+  /**
+   * Schedules the function to be run on the javascript thread async
+   * @param func Function to run
+   */
+  void runOnJavascriptThread(std::function<void()> func) {
+    _callInvoker->invokeAsync(std::move(func));
+  }
+  
+  /**
+   Returns the javascript runtime
+   */
+  jsi::Runtime* getJsRuntime() {
+    return _jsRuntime;
   }
 
   /**
@@ -24,7 +51,7 @@ public:
   virtual void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStream>)> &op) = 0;
-
+    
   /**
    * Raises an exception on the platform. This function does not necessarily
    * throw an exception and stop execution, so it is important to stop execution
@@ -94,6 +121,9 @@ public:
 
 private:
   float _pixelDensity;
+  
+  jsi::Runtime* _jsRuntime;
+  std::shared_ptr<react::CallInvoker> _callInvoker;
 
   size_t _listenerId = 0;
   std::map<size_t, std::function<void(double)>> _drawCallbacks;

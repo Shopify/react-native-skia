@@ -9,8 +9,8 @@
 #include <RNSkDrawView.h>
 
 namespace RNSkia {
+
 using namespace facebook;
-using namespace RNWorklet;
 
 using RNSkCallbackInfo = struct {
   std::shared_ptr<jsi::Function> callback;
@@ -32,12 +32,6 @@ public:
       : _jsRuntime(jsRuntime), _jsCallInvoker(jsCallInvoker),
         _platformContext(platformContext) {
 
-    // Create Worklet context
-    auto errorHandler = std::make_shared<JsiErrorHandler>(
-        [platformContext](const std::exception &err) {
-          platformContext->raiseError(err);
-        });
-
     // Install bindings
     installBindings();
   }
@@ -46,13 +40,11 @@ public:
     // Unregister all skia draw views
     for (auto drawCallbackInfo : _drawCallbacks) {
       if (drawCallbackInfo.second->view != nullptr) {
-        drawCallbackInfo.second->view->setWorkletContext(nullptr);
         drawCallbackInfo.second->view->setDrawCallback(nullptr);
         drawCallbackInfo.second->view = nullptr;
         drawCallbackInfo.second->callback = nullptr;
       }
     }
-    _platformContext->setWorkletContext(nullptr);
     _drawCallbacks.clear();
     _jsRuntime = nullptr;
     _platformContext = nullptr;

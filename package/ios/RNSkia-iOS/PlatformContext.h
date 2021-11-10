@@ -1,15 +1,26 @@
 #include <DisplayLink.h>
 #include <RNSkPlatformContext.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkStream.h>
+
+#pragma clang diagnostic pop
+
+#include <jsi/jsi.h>
+#include <ReactCommon/CallInvoker.h>
 
 namespace RNSkia {
 
+using namespace facebook;
+
 class PlatformContext : public RNSkPlatformContext {
 public:
-  PlatformContext() : RNSkPlatformContext([[UIScreen mainScreen] scale]) {}
+  PlatformContext(jsi::Runtime* runtime, std::shared_ptr<react::CallInvoker> callInvoker) : RNSkPlatformContext(runtime, callInvoker, [[UIScreen mainScreen] scale]) {}
 
   ~PlatformContext() { endDrawLoop(); }
-
+  
   void beginDrawLoop() override;
   void endDrawLoop() override;
 

@@ -1,7 +1,14 @@
 #pragma once
 
 #include "JsiSkHostObjects.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include "SkMatrix.h"
+
+#pragma clang diagnostic pop
+
 #include <jsi/jsi.h>
 
 namespace RNSkia {

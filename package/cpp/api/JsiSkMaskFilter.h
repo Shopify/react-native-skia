@@ -3,7 +3,14 @@
 #include <map>
 
 #include "JsiSkHostObjects.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include "SkMaskFilter.h"
+
+#pragma clang diagnostic pop
+
 #include <jsi/jsi.h>
 
 namespace RNSkia {

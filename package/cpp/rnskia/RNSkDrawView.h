@@ -3,14 +3,16 @@
 #include <JsiSkCanvas.h>
 #include <RNSkPlatformContext.h>
 
-#include <SkSurface.h>
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
 
+#include <SkSurface.h>
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
 
-namespace RNSkia {
+#pragma clang diagnostic pop
 
-using namespace RNWorklet;
+namespace RNSkia {
 
 using RNSkDrawCallback = std::function<void(
     std::shared_ptr<JsiSkCanvas>, int, int, double, RNSkPlatformContext *)>;

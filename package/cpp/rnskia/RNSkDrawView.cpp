@@ -9,14 +9,16 @@
 #include "RNSkLog.h"
 #include "RNSkMeasureTime.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkCanvas.h>
 #include <SkFont.h>
 #include <SkPaint.h>
-
-#include <JsiSharedValue.h>
-#include <JsiWorklet.h>
 #include <SkGraphics.h>
 #include <SkString.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 
@@ -29,31 +31,21 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   if (_originalCallback == nullptr) {
     // We can just reset everything - this is a signal that we're done.
-    unsubscribeToSharedValues();
     endDrawingLoop();
     return;
   }
 
   try {
-    // Resolve correct runtime
-    auto &callbackRuntime = _isWorklet ? _workletContext->getWorkletRuntime()
-                                       : *_workletContext->getJsRuntime();
-
     // Install as worklet if necessary
-    jsi::HostFunctionType callbackFunction;
-    if (_isWorklet) {
-      callbackFunction =
-          _workletContext->getWorklet((jsi::Function &)*callback);
-    } else {
-      callbackFunction = [callback](jsi::Runtime &rt, const jsi::Value &thisVal,
-                                    const jsi::Value *args,
-                                    size_t count) -> jsi::Value {
+    jsi::HostFunctionType callbackFunction =
+      [callback](jsi::Runtime &rt, const jsi::Value &thisVal,
+                 const jsi::Value *args,
+                 size_t count) -> jsi::Value {
         if (thisVal.isObject()) {
           return callback->callWithThis(rt, thisVal.asObject(rt), args, count);
         } else {
           return callback->call(rt, args, count);
         }
-      };
     };
 
     // Set up timing
@@ -61,37 +53,39 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     timingInfo->lastTimeStamp = -1;
     timingInfo->lastDurationIndex = 0;
     timingInfo->lastDurationsCount = 0;
+    
+    auto callbackRuntime = _platformContext->getJsRuntime();
 
     // Create draw callback wrapper
     _callback = std::make_shared<RNSkDrawCallback>(
-        [this, &callbackRuntime, callback, callbackFunction,
+        [this, callbackRuntime, callback, callbackFunction,
          timingInfo](std::shared_ptr<JsiSkCanvas> canvas, int width, int height,
                      double timestamp, RNSkPlatformContext *context) {
           auto start = high_resolution_clock::now();
 
           // First argument is the canvas
           auto canvasObj =
-              jsi::Object::createFromHostObject(callbackRuntime, canvas);
+              jsi::Object::createFromHostObject(*callbackRuntime, canvas);
 
           // Second argument should be the height/width
-          auto infoObj = jsi::Object(callbackRuntime);
-          infoObj.setProperty(callbackRuntime, "width", width);
-          infoObj.setProperty(callbackRuntime, "height", height);
+          auto infoObj = jsi::Object(*callbackRuntime);
+          infoObj.setProperty(*callbackRuntime, "width", width);
+          infoObj.setProperty(*callbackRuntime, "height", height);
 
           // Now the timestamp if available
-          infoObj.setProperty(callbackRuntime, "timestamp", timestamp);
+          infoObj.setProperty(*callbackRuntime, "timestamp", timestamp);
           double delta = 0;
           if (timingInfo->lastTimeStamp > -1) {
             delta = timestamp - timingInfo->lastTimeStamp;
           }
           timingInfo->lastTimeStamp = timestamp;
 
-          infoObj.setProperty(callbackRuntime, "delta", delta);
-          infoObj.setProperty(callbackRuntime, "fps", 1.0 / delta);
+          infoObj.setProperty(*callbackRuntime, "delta", delta);
+          infoObj.setProperty(*callbackRuntime, "fps", 1.0 / delta);
 
           // To be able to call the drawing function we'll wrap it once again
           auto p = jsi::Function::createFromHostFunction(
-              callbackRuntime, jsi::PropNameID::forUtf8(callbackRuntime, "fn"),
+              *callbackRuntime, jsi::PropNameID::forUtf8(*callbackRuntime, "fn"),
               0,
               [&callbackFunction](jsi::Runtime &rt, const jsi::Value &thisVal,
                                   const jsi::Value *args,
@@ -100,7 +94,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
               });
 
           // Call draw callback js function
-          p.callWithThis(callbackRuntime, p, canvasObj, infoObj);
+          p.callWithThis(*callbackRuntime, p, canvasObj, infoObj);
 
           // Draw debug overlays
           if (_showDebugOverlay) {
@@ -155,9 +149,6 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           }
         });
 
-    // Subscribe to shared values
-    subscribeToSharedValues();
-
     // Request redraw
     requestRedraw();
 
@@ -168,30 +159,6 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
   } catch (...) {
     return _platformContext->raiseError(
         "An unknown error occured when installing the draw callback.");
-  }
-}
-
-void RNSkDrawView::subscribeToSharedValues() {
-  if (_workletContext == nullptr || _originalCallback == nullptr ||
-      !_isWorklet) {
-    return;
-  }
-
-  unsubscribeToSharedValues();
-
-  if (getDrawingMode() == RNSkDrawingMode::Default) {
-    auto cb =
-        std::make_shared<std::function<void()>>([this]() { requestRedraw(); });
-
-    auto sharedValues =
-        _workletContext->getSharedValues((jsi::Function &)*_originalCallback);
-
-    // Subscribe on the JS Thread / runtime
-    for (size_t i = 0; i < sharedValues.size(); i++) {
-      auto id = sharedValues.at(i)->addListener(cb);
-      _sharedValueSubscriptions.push_back(
-          [sharedValues, i, id]() { sharedValues.at(i)->removeListener(id); });
-    }
   }
 }
 
@@ -255,7 +222,7 @@ void RNSkDrawView::requestRedraw() {
     _isDrawing = false;
   };
 
-  _workletContext->runOnJavascriptThread(performDraw);
+  _platformContext->runOnJavascriptThread(performDraw);
 }
 
 bool RNSkDrawView::isReadyToDraw() {
@@ -263,7 +230,7 @@ bool RNSkDrawView::isReadyToDraw() {
     return false;
   }
 
-  if (_workletContext == nullptr) {
+  if (_platformContext == nullptr) {
     endDrawingLoop();
     return false;
   }
@@ -281,7 +248,7 @@ void RNSkDrawView::beginDrawingLoop() {
     return;
   }
 
-  if (_drawingLoopIdentifier != -1 || _workletContext == nullptr) {
+  if (_drawingLoopIdentifier != -1 || _platformContext == nullptr) {
     return;
   }
 
@@ -306,15 +273,7 @@ void RNSkDrawView::beginDrawingLoop() {
           _isDrawing = false;
         };
 
-        if (!_workletContext) {
-          return;
-        }
-
-        if (_isWorklet) {
-          _workletContext->runOnWorkletThread(performDraw);
-        } else {
-          _workletContext->runOnJavascriptThread(performDraw);
-        }
+        _platformContext->runOnJavascriptThread(performDraw);
       });
 }
 
@@ -333,11 +292,6 @@ void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
   endDrawingLoop();
   _drawingMode = mode;
   requestRedraw();
-
-  if (_workletContext != nullptr) {
-    _workletContext->runOnJavascriptThread(
-        [this]() { subscribeToSharedValues(); });
-  }
 }
 
 } // namespace RNSkia
