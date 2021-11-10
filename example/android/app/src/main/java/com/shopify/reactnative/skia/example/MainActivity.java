@@ -1,4 +1,4 @@
-package com.rnskia;
+package com.shopify.reactnative.skia.example;
 
 import com.facebook.react.ReactActivity;
 

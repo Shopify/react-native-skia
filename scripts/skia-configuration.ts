@@ -42,7 +42,7 @@ export const configurations: Configuration = {
         '["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"]',
       ],
     ],
-    outputRoot: "libs/android",
+    outputRoot: "package/libs/android",
     outputNames: ["libskia.a", "libskshaper.a", "libsvg.a"],
     outputMapping: ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"],
   },
@@ -51,9 +51,13 @@ export const configurations: Configuration = {
     args: [
       ["skia_use_metal", true],
       ["skia_use_gl", true],
-      ["extra_cflags", '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF"]'],
+      [
+        "extra_cflags",
+        '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-mios-version-min=11.0"]',
+      ],
+      ["extra_ldflags", '["ios_version_min=11.0"]'],
     ],
-    outputRoot: "libs/ios",
+    outputRoot: "package/libs/ios",
     outputNames: ["libskia.a", "libskshaper.a", "libsvg.a"],
   },
 };

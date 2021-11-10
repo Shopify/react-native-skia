@@ -7,10 +7,11 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "pod-install": "npx pod-install ios"
   },
   "dependencies": {
-    "@shopify/react-native-skia": "link:../",
+    "@shopify/react-native-skia": "link:../package/",
     "react": "17.0.2",
     "react-native": "0.66.2"
   },

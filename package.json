@@ -1,50 +1,31 @@
 {
-  "name": "@shopify/react-native-skia",
-  "title": "@shopify/react Native Skia",
+  "name": "react-native-skia-dev-tools",
   "version": "1.0.0",
-  "description": "TODO",
+  "description": "## Getting started",
   "main": "index.js",
-  "files": [
-    "README.md",
-    "android",
-    "index.js",
-    "ios",
-    "react-native-skia.podspec"
-  ],
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "react": "^16.9.0",
+    "react-native": "^0.61.5",
+    "@types/node": "^16.11.7",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build-skia-ios-arm": "ts-node ./scripts/build-externals.ts ios arm",
     "build-skia-ios-arm64": "ts-node ./scripts/build-externals.ts ios arm64",
     "build-skia-ios-x64": "ts-node ./scripts/build-externals.ts ios x64",
     "build-skia-android-arm": "ts-node ./scripts/build-externals.ts android arm",
     "build-skia-android-arm64": "ts-node ./scripts/build-externals.ts android arm64",
     "build-skia-android-x86": "ts-node ./scripts/build-externals.ts android x86",
-    "build-skia-android-x64": "ts-node ./scripts/build-externals.ts android x64"
+    "build-skia-android-x64": "ts-node ./scripts/build-externals.ts android x64",
+    "build-skia-ios-fatlibs": "ts-node ./scripts/build-ios-fat-lib.ts",
+    "build-skia-ios": "yarn build-skia-ios-x64 && yarn build-skia-ios-arm64 && yarn build-skia-ios-arm && yarn build-skia-ios-fatlibs",
+    "build-skia-android": "yarn build-skia-android-x64 && yarn build-skia-android-arm64 && yarn build-skia-android-arm"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/github_account/@shopify/react-native-skia.git",
-    "baseUrl": "https://github.com/github_account/@shopify/react-native-skia"
-  },
-  "keywords": [
-    "react-native"
-  ],
-  "author": {
-    "name": "Your Name",
-    "email": "yourname@email.com"
-  },
-  "license": "MIT",
-  "licenseFilename": "LICENSE",
-  "readmeFilename": "README.md",
-  "peerDependencies": {
-    "react": ">=16.8.1",
-    "react-native": ">=0.60.0-rc.0 <1.0.x"
-  },
-  "devDependencies": {
-    "@types/node": "^16.11.7",
-    "react": "^16.9.0",
-    "react-native": "^0.61.5",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
-  }
+  "author": "",
+  "license": "ISC"
 }

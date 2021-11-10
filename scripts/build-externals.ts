@@ -1,6 +1,6 @@
 import { exec, execSync } from "child_process";
 import { exit } from "process";
-import { commonArgs, configurations, PlatformName } from "./args";
+import { commonArgs, configurations, PlatformName } from "./skia-configuration";
 const fs = require("fs");
 const typedKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
 

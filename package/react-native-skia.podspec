@@ -23,6 +23,12 @@ Pod::Spec.new do |s|
   s.source_files = "ios/**/*.{h,c,cc,cpp,m,mm,swift}"
   s.requires_arc = true
 
+  s.ios.vendored_libraries = [
+    'libs/ios/libskia.a', 
+    'libs/ios/libsvg.a', 
+    'libs/ios/libskshaper.a'
+  ]
+
   s.dependency "React"
   # ...
   # s.dependency "..."
