@@ -39,6 +39,7 @@ local.properties
 # Externals
 libs
 package/cpp/skia/include/
+package/cpp/skia/modules/
 
 # BUCK
 buck-out/
