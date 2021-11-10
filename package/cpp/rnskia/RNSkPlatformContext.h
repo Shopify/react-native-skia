@@ -1,0 +1,101 @@
+#pragma once
+
+#include <RNSkLog.h>
+#include <SkStream.h>
+
+namespace RNSkia {
+
+class RNSkPlatformContext {
+public:
+  RNSkPlatformContext(float pixelDensity) : _pixelDensity(pixelDensity) {
+    RNSkLogger::logToConsole("Created platform context with scale factor %0.2f",
+                             pixelDensity);
+  }
+
+  ~RNSkPlatformContext() {
+    RNSkLogger::logToConsole("Deleting platform context");
+  }
+
+  /**
+   * Returns an SkStream wrapping the require uri provided.
+   * @param sourceUri Uri for the resource to load as a string
+   * @op Operation to execute when the stream has successfuly been loaded.
+   */
+  virtual void performStreamOperation(
+      const std::string &sourceUri,
+      const std::function<void(std::unique_ptr<SkStream>)> &op) = 0;
+
+  /**
+   * Raises an exception on the platform. This function does not necessarily
+   * throw an exception and stop execution, so it is important to stop execution
+   * by returning after calling the function
+   * @param err Error to raise
+   */
+  virtual void raiseError(const std::exception &err) = 0;
+
+  /**
+   * Raises an exception on the platform. This function does not necessarily
+   * throw an exception and stop execution, so it is important to stop execution
+   * by returning after calling the function
+   * @param message Message to show
+   */
+  void raiseError(const std::string &message) {
+    return raiseError(std::runtime_error(message));
+  }
+
+  /**
+   * @return Current scale factor for pixels
+   */
+  float getPixelDensity() { return _pixelDensity; };
+
+  /**
+   * Starts (if not started) a loop that will call back on display sync
+   * @param callback Callback to call on sync
+   * @returns Identifier of the draw loop entry
+   */
+  size_t beginDrawLoop(std::function<void(double)> callback) {
+    size_t nextId = _listenerId++;
+    _drawCallbacks.emplace(nextId, std::move(callback));
+    if (_drawCallbacks.size() == 1) {
+      // Start
+      beginDrawLoop();
+    }
+    return nextId;
+  }
+
+  /**
+   * Ends (if running) the drawing loop that was started with beginDrawLoop.
+   * This method must be called symmetrically with the beginDrawLoop method.
+   * @param id Identifier of drawloop callback to end
+   */
+  void endDrawLoop(size_t id) {
+    if (_drawCallbacks.count(id) > 0) {
+      _drawCallbacks.erase(id);
+    }
+    if (_drawCallbacks.size() == 0) {
+      endDrawLoop();
+    }
+  }
+
+  /**
+   * Notifies all drawing callbacks
+   * @param timestamp Current timestamp
+   */
+  void notifyDrawLoop(double timestamp) {
+    for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
+      if (it->second != nullptr) {
+        it->second(timestamp);
+      }
+    }
+  }
+
+  virtual void beginDrawLoop() = 0;
+  virtual void endDrawLoop() = 0;
+
+private:
+  float _pixelDensity;
+
+  size_t _listenerId = 0;
+  std::map<size_t, std::function<void(double)>> _drawCallbacks;
+};
+} // namespace RNSkia

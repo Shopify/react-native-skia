@@ -21,4 +21,5 @@ Make sure you have all the tools required for building the skia libraries (XCode
 ### Building
 
 - Build the Skia libraries with `yarn build-skia`.
-- Copy Skia headers to the directory `packages/cpp/skia/include folder` -> `yarn copy-skia-headers`
+- Copy Skia includes `yarn copy-skia-include-headers`
+- Copy Skia module includes `yarn copy-skia-module-headers`

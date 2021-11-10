@@ -38,9 +38,9 @@ Pod::Spec.new do |s|
     "ios/**/*.{h,c,cc,cpp,m,mm,swift}",  
   ]
 
-  s.subspec 'Skia' do |ss|
+  s.subspec 'SkiaHeaders' do |ss|
     ss.header_mappings_dir = 'cpp/skia'
-    ss.source_files = "cpp/skia/include/**/*.{h,cpp}"
+    ss.source_files = "cpp/skia/**/*.{h,cpp}"
   end
 
   s.subspec 'Utils' do |ss|
@@ -51,6 +51,11 @@ Pod::Spec.new do |s|
   s.subspec 'Jsi' do |ss|
     ss.header_mappings_dir = 'cpp/jsi'
     ss.source_files = "cpp/jsi/**/*.{h,cpp}"
+  end
+
+  s.subspec 'Api' do |ss|
+    ss.header_mappings_dir = 'cpp/api'
+    ss.source_files = "cpp/api/**/*.{h,cpp}"
   end
 
   s.subspec 'RNSkia' do |ss|
