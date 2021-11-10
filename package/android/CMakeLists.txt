@@ -10,14 +10,11 @@ set (SKIA_SVG_LIB "svg")
 set (SKIA_SKSHAPER_LIB "skshaper")
 
 set(build_DIR ${CMAKE_SOURCE_DIR}/build)
-
-link_directories(../libs/android/${ANDROID_ABI}/)
-
+file (GLOB LIBRN_DIR "${build_DIR}/react-native-0*/jni/${ANDROID_ABI}")
 file(GLOB libfbjni_link_DIRS "${build_DIR}/fbjni*.aar/jni/${ANDROID_ABI}")
 file(GLOB libfbjni_include_DIRS "${build_DIR}/fbjni-*-headers.jar/")
 
-find_library(FBJNI_LIBRARY fbjni PATHS ${libfbjni_link_DIRS}
-NO_CMAKE_FIND_ROOT_PATH)
+link_directories(../libs/android/${ANDROID_ABI}/)
 
 add_library(
         ${PACKAGE_NAME}
@@ -27,8 +24,11 @@ add_library(
         jni/JniSkiaDrawView.cpp
         jni/JniPlatformContext.cpp
         
+        cpp/jsi/JsiHostObject.cpp
+
         cpp/rnskia/RNSkManager.cpp
         cpp/rnskia/RNSkDrawView.cpp
+
         cpp/api/JsiSkImageFilter.cpp
         cpp/api/JsiSkSvg.cpp        
 )
@@ -79,11 +79,42 @@ find_library(
         log
 )
 
+find_library(
+        JSI_LIB
+        jsi
+        PATHS ${LIBRN_DIR}
+        NO_CMAKE_FIND_ROOT_PATH
+)
+
+find_library(
+        REACT_LIB
+        react_nativemodule_core
+        PATHS ${LIBRN_DIR}
+        NO_CMAKE_FIND_ROOT_PATH
+)
+
+find_library(
+        FBJNI_LIBRARY 
+        fbjni 
+        PATHS ${libfbjni_link_DIRS}
+        NO_CMAKE_FIND_ROOT_PATH
+)
+
+find_library(
+        TURBOMODULES_LIB
+        turbomodulejsijni
+        PATHS ${LIBRN_DIR}
+        NO_CMAKE_FIND_ROOT_PATH
+)
+
 # Link
 target_link_libraries(
         ${PACKAGE_NAME}
         ${LOG_LIB}
         ${FBJNI_LIBRARY}
+        ${REACT_LIB}
+        ${JSI_LIB}
+        ${TURBOMODULES_LIB}
         ${SKIA_SVG_LIB}
         ${SKIA_SKSHAPER_LIB}
         ${SKIA_LIB}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fbjni/fbjni.h>
+#include <ReactCommon/CallInvokerHolder.h>
 
 #include "RNSkPlatformContext.h"
 
@@ -8,13 +9,19 @@ namespace RNSkia {
 
 using namespace facebook;
 
+using JSCallInvokerHolder =
+    jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;
+
 class JniPlatformContext : public jni::HybridClass<JniPlatformContext>,
                            public RNSkPlatformContext {
    public:
-    static auto constexpr kJavaDescriptor = "Lcom/RNSkia/PlatformContext;";
+    static auto constexpr kJavaDescriptor = "Lcom/shopify/reactnative/skia/PlatformContext;";
     static jni::local_ref<jhybriddata> initHybrid(
         jni::alias_ref<jhybridobject> jThis,
+        jlong jsContext,
+        JSCallInvokerHolder jsCallInvokerHolder,
         const float);
+
     static void registerNatives();
 
     ~JniPlatformContext() {
@@ -41,8 +48,10 @@ private:
 
     explicit JniPlatformContext(
         jni::alias_ref<JniPlatformContext::jhybridobject> jThis,
+        jsi::Runtime *runtime,
+        std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker,
         const float pixelDensity)
-        : RNSkPlatformContext(pixelDensity),
+        : RNSkPlatformContext(runtime, jsCallInvoker, pixelDensity),
           javaPart_(jni::make_global(jThis)) {}
 };
 } // namespace RNSkia

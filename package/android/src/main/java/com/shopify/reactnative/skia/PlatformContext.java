@@ -7,6 +7,7 @@ import android.view.Choreographer;
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.turbomodule.core.CallInvokerHolderImpl;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,7 +28,12 @@ public class PlatformContext {
 
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
-        mHybridData = initHybrid(reactContext.getResources().getDisplayMetrics().density);
+
+        CallInvokerHolderImpl holder = (CallInvokerHolderImpl)reactContext
+                .getCatalystInstance().getJSCallInvokerHolder();
+
+        mHybridData = initHybrid(reactContext.getJavaScriptContextHolder().get(), holder,
+                reactContext.getResources().getDisplayMetrics().density);
     }
 
     private byte[] getStreamAsBytes(InputStream is) throws IOException {
@@ -133,7 +139,7 @@ public class PlatformContext {
         super.finalize();
     }
 
-    private native HybridData initHybrid(float pixelDensity);
-
+    // Private c++ native methods
+    private native HybridData initHybrid(long jsContext, CallInvokerHolderImpl jsCallInvokerHolder, float pixelDensity);
     private native void notifyDrawLoop(double timestampNanos);
 }

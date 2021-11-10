@@ -10,6 +10,9 @@
 //   previous location:
 //   - https://github.com/facebook/react-native/blob/0.58-stable/local-cli/templates/HelloWorld/android/app/build.gradle
 
+// FBJNI build is based on:
+// https://github.com/facebookincubator/fbjni/blob/main/docs/android_setup.md
+
 // These defaults should reflect the SDK versions used by
 // the minimum React Native version supported.
 def DEFAULT_COMPILE_SDK_VERSION = 28
@@ -104,6 +107,9 @@ dependencies {
     extractHeaders("com.facebook.fbjni:fbjni:+:headers")
     //noinspection GradleDynamicVersion
     extractJNI("com.facebook.fbjni:fbjni:+")
+
+    def rnAAR = fileTree("${rootDir}/../node_modules/react-native/android").matching({ it.include "**/**/*.aar" }).singleFile
+    extractJNI(files(rnAAR))
 }
 
 def configureReactNativePom(def pom) {

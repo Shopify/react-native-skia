@@ -1,6 +1,6 @@
-#include <JniPlatformContext.h>
-#include <JniSkiaDrawView.h>
-#include <JniSkiaManager.h>
+#include "JniPlatformContext.h"
+#include "JniSkiaDrawView.h"
+#include "JniSkiaManager.h"
 #include <fbjni/fbjni.h>
 #include <jni.h>
 

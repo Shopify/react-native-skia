@@ -20,10 +20,11 @@ public class SkiaManager {
     @DoNotStrip
     SkiaManager(ReactContext context) {
         super();
-        mPlatformContext = new PlatformContext(context);
         mContext = context;
 
         CallInvokerHolderImpl holder = (CallInvokerHolderImpl) context.getCatalystInstance().getJSCallInvokerHolder();
+
+        mPlatformContext = new PlatformContext(context);
 
         mHybridData = initHybrid(context.getJavaScriptContextHolder().get(), holder, mPlatformContext);
 
@@ -53,11 +54,8 @@ public class SkiaManager {
     // private C++ functions
     private native HybridData initHybrid(long jsContext, CallInvokerHolderImpl jsCallInvokerHolder,
             PlatformContext platformContext);
-
     private native void initializeRuntime();
-
     private native void registerSkiaView(int nativeId, SkiaDrawView view);
-
     private native void unregisterSkiaView(int nativeId);
 
 }

@@ -17,6 +17,7 @@ using namespace facebook;
 
 using TSelf =
     jni::local_ref<jni::HybridClass<RNSkia::JniSkiaManager>::jhybriddata>;
+
 using JSCallInvokerHolder =
     jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;
 
@@ -24,7 +25,7 @@ using JavaPlatformContext = jni::alias_ref<JniPlatformContext::javaobject>;
 
 class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
    public:
-    static auto constexpr kJavaDescriptor = "Lcom/RNSkia/SkiaManager;";
+    static auto constexpr kJavaDescriptor = "Lcom/shopify/reactnative/skia/SkiaManager;";
     static auto constexpr TAG = "ReactNativeSkia";
 
     static TSelf initHybrid(
