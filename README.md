@@ -16,6 +16,4 @@ Make sure to check out the sub modules:
 
 You also need to install some tools for the build scripts to work. Run `yarn` in the root of the project to install them.
 
-Make sure you have all the tools required for building the skia libraries.
-
-You need to have cmake and the Android ndk installed.
+Make sure you have all the tools required for building the skia libraries (XCode, CMake, Android NDK / build tools)
