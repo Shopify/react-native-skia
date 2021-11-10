@@ -37,8 +37,8 @@ Pod::Spec.new do |s|
     "ios/**/*.{h,c,cc,cpp,m,mm,swift}",  
   ]
 
-  s.subspec 'skia-includes' do |ss|
-    ss.header_mappings_dir = '../externals/skia/include'
+  s.subspec 'Skia-Includes' do |ss|
+    ss.header_mappings_dir = 'cpp/skia/include'
     ss.source_files = "../externals/skia/include/**/*.{h,cpp}"
   end
 
@@ -50,6 +50,11 @@ Pod::Spec.new do |s|
   s.subspec 'Jsi' do |ss|
     ss.header_mappings_dir = 'cpp/jsi'
     ss.source_files = "cpp/jsi/**/*.{h,cpp}"
+  end
+
+  s.subspec 'RNSkia' do |ss|
+    ss.header_mappings_dir = 'cpp/rnskia'
+    ss.source_files = "cpp/rnskia/**/*.{h,cpp}"
   end
 
   s.dependency "React"
