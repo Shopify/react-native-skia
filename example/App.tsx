@@ -93,7 +93,23 @@ const App = () => {
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
           <Section title="Simple Skia Drawing">
-            <Skia.View style={styles.skiaview} onDraw={onDraw} />
+            <View
+              onTouchStart={evt => {
+                const path = Skia.Path();
+                path.moveTo(
+                  evt.nativeEvent.locationX,
+                  evt.nativeEvent.locationY,
+                );
+                paths.push(path);
+              }}
+              onTouchMove={evt => {
+                paths[paths.length - 1]?.lineTo(
+                  evt.nativeEvent.locationX,
+                  evt.nativeEvent.locationY,
+                );
+              }}>
+              <Skia.View style={styles.skiaview} onDraw={onDraw} />
+            </View>
           </Section>
         </View>
       </ScrollView>
