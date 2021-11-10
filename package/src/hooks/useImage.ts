@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { IImage } from "../skia/Image";
 import { Api } from "../skia/Api";
 import { ScaleToFit } from "../skia/Matrix";
-import { TileMode } from "..";
+import { TileMode } from "../skia/ImageFilter";
 
 /**
  * Returns a Skia Image object
