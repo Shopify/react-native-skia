@@ -9,10 +9,15 @@ set (SKIA_LIB "skia")
 set (SKIA_SVG_LIB "svg")
 set (SKIA_SKSHAPER_LIB "skshaper")
 
-set (BUILD_DIR ${CMAKE_SOURCE_DIR}/build)
-set (RN_SO_DIR ${NODE_MODULES_DIR}/react-native/ReactAndroid/src/main/jni/first-party/react/jni)
+set(build_DIR ${CMAKE_SOURCE_DIR}/build)
 
 link_directories(../libs/android/${ANDROID_ABI}/)
+
+file(GLOB libfbjni_link_DIRS "${build_DIR}/fbjni*.aar/jni/${ANDROID_ABI}")
+file(GLOB libfbjni_include_DIRS "${build_DIR}/fbjni-*-headers.jar/")
+
+find_library(FBJNI_LIBRARY fbjni PATHS ${libfbjni_link_DIRS}
+NO_CMAKE_FIND_ROOT_PATH)
 
 add_library(
         ${PACKAGE_NAME}
@@ -35,7 +40,17 @@ target_include_directories(
         
         "../node_modules/react-native/ReactCommon/callinvoker"
         "../node_modules/react-native/ReactCommon/jsi"
+        "../node_modules/react-native/ReactCommon/react/nativemodule/core"  
+        "../node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/turbomodule/core/jni"
 
+
+        cpp/skia/include/config/
+        cpp/skia/include/core/
+        cpp/skia/include/effects/
+        cpp/skia/include/utils/
+        cpp/skia/include/pathops/
+        cpp/skia/modules/
+        cpp/skia/include/
         cpp/skia
 
         cpp/api
@@ -43,6 +58,8 @@ target_include_directories(
         cpp/jni
         cpp/rnskia
         cpp/utils  
+
+        ${libfbjni_include_DIRS}
 )
 
 # Import prebuilt SKIA libraries
@@ -66,6 +83,7 @@ find_library(
 target_link_libraries(
         ${PACKAGE_NAME}
         ${LOG_LIB}
+        ${FBJNI_LIBRARY}
         ${SKIA_SVG_LIB}
         ${SKIA_SKSHAPER_LIB}
         ${SKIA_LIB}

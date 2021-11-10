@@ -71,10 +71,19 @@ android {
     packagingOptions {
         excludes = ["**/libc++_shared.so"]
     }
+
+    // Create new configurations that can be referred to in dependencies.
+    // The Android Gradle Plugin 3.* does not allow hooking into existing
+    // configurations like `implementation`.
+    configurations {
+        extractHeaders
+        extractJNI
+    }
 }
 
 repositories {
     // ref: https://www.baeldung.com/maven-local-repository
+    jcenter()
     mavenLocal()
     maven {
         // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
@@ -90,6 +99,11 @@ repositories {
 dependencies {
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
+
+    //noinspection GradleDynamicVersion
+    extractHeaders("com.facebook.fbjni:fbjni:+:headers")
+    //noinspection GradleDynamicVersion
+    extractJNI("com.facebook.fbjni:fbjni:+")
 }
 
 def configureReactNativePom(def pom) {
@@ -162,5 +176,38 @@ afterEvaluate { project ->
             repository url: "file://${projectDir}/../android/maven"
             configureReactNativePom pom
         }
+    }
+}
+
+task extractAARHeaders {
+    doLast {
+        configurations.extractHeaders.files.each {
+            def file = it.absoluteFile
+            copy {
+                from zipTree(file)
+                into "$buildDir/$file.name"
+                include "**/*.h"
+            }
+        }
+    }
+}
+
+task extractJNIFiles {
+    doLast {
+        configurations.extractJNI.files.each {
+            def file = it.absoluteFile
+            copy {
+                from zipTree(file)
+                into "$buildDir/$file.name"
+                include "jni/**/*"
+            }
+        }
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.contains('externalNativeBuild')) {
+        task.dependsOn(extractAARHeaders)
+        task.dependsOn(extractJNIFiles)
     }
 }
