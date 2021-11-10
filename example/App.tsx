@@ -1,6 +1,5 @@
-import React, {useMemo, useRef} from 'react';
+import React, {useMemo} from 'react';
 import {
-  Button,
   Dimensions,
   SafeAreaView,
   StatusBar,
@@ -82,8 +81,6 @@ const App = () => {
     [paint, pathPaint, paths],
   );
 
-  const skiaRef = useRef<Skia.View>(null);
-
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -105,16 +102,9 @@ const App = () => {
               );
             }}>
             <Skia.View
-              innerRef={skiaRef}
               style={styles.skiaview}
               onDraw={onDraw}
               mode="continuous"
-            />
-            <Button
-              title="Test"
-              onPress={() => {
-                console.log(skiaRef.current);
-              }}
             />
           </View>
         </Section>
