@@ -20,8 +20,11 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "9.0" }
   s.source       = { :git => "https://github.com/github_account/@shopify/react-native-skia.git", :tag => "#{s.version}" }
 
-  s.source_files = "ios/**/*.{h,c,cc,cpp,m,mm,swift}"
   s.requires_arc = true
+  s.xcconfig = {
+    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) SK_GL=1 SK_METAL=1'    
+  }
+  s.frameworks = 'GLKit', 'MetalKit'
 
   s.ios.vendored_libraries = [
     'libs/ios/libskia.a', 
@@ -29,8 +32,28 @@ Pod::Spec.new do |s|
     'libs/ios/libskshaper.a'
   ]
 
+  # All iOS cpp/h files
+  s.source_files = [
+    "ios/**/*.{h,c,cc,cpp,m,mm,swift}",  
+  ]
+
+  s.subspec 'skia-includes' do |ss|
+    ss.header_mappings_dir = '../externals/skia/include'
+    ss.source_files = "../externals/skia/include/**/*.{h,cpp}"
+  end
+
+  s.subspec 'Utils' do |ss|
+    ss.header_mappings_dir = 'cpp/utils'
+    ss.source_files = "cpp/utils/**/*.{h,cpp}"
+  end
+
+  s.subspec 'Jsi' do |ss|
+    ss.header_mappings_dir = 'cpp/jsi'
+    ss.source_files = "cpp/jsi/**/*.{h,cpp}"
+  end
+
   s.dependency "React"
-  # ...
-  # s.dependency "..."
+  s.dependency "React-callinvoker"
+  s.dependency "React-Core"
 end
 

@@ -274,6 +274,15 @@ PODS:
     - glog
   - react-native-skia (1.0.0):
     - React
+    - react-native-skia/Jsi (= 1.0.0)
+    - react-native-skia/skia-includes (= 1.0.0)
+    - react-native-skia/Utils (= 1.0.0)
+  - react-native-skia/Jsi (1.0.0):
+    - React
+  - react-native-skia/skia-includes (1.0.0):
+    - React
+  - react-native-skia/Utils (1.0.0):
+    - React
   - React-perflogger (0.66.2)
   - React-RCTActionSheet (0.66.2):
     - React-Core/RCTActionSheetHeaders (= 0.66.2)
@@ -511,7 +520,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 573adf0d6ce5e05c55872dfde5b1589acb88a96f
   React-jsinspector: b08b2d5e86cef9dc4bb69f0aa0bbe6d210fb7da5
   React-logger: faee236598b0f7e1a5e3b68577016ac451f1f993
-  react-native-skia: 283813fe4b0a113bf0ee4741173a2665a2b167f2
+  react-native-skia: 62490459a40415baac2d852887fb048ee5f3072e
   React-perflogger: 5ab487cacfe6ec19bfe3d3f8072bf71eb07d63da
   React-RCTActionSheet: 03f25695e095fb5aa003828620943c74cc281fec
   React-RCTAnimation: eaf82da39f0c36fb0ef2a28df797c5f73a2a98ea

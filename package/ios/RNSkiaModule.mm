@@ -1,8 +1,7 @@
-// Rnskia.m
 
-#import "Rnskia.h"
+#import "RNSkiaModule.h"
 
-@implementation Rnskia
+@implementation RNSkiaModule
 
 @synthesize bridge = _bridge;
 
