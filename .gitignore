@@ -35,6 +35,7 @@ build/
 .gradle
 local.properties
 *.iml
+.cxx
 
 # Externals
 libs
