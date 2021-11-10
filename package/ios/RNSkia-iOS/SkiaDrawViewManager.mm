@@ -51,7 +51,7 @@ RCT_EXPORT_MODULE(ReactNativeSkiaView)
 
 - (void) setBridge:(RCTBridge *)bridge {
   [super setBridge:bridge];
-  auto skiaModule = (RNSkiaModule*)[bridge moduleForName:@"ReactNativeSkiaModule"];
+  auto skiaModule = (RNSkiaModule*)[bridge moduleForName:@"RNSkiaModule"];
   _skiaManager = [skiaModule manager];
 }
 

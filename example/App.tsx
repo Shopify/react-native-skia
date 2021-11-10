@@ -2,7 +2,6 @@ import React, {useMemo} from 'react';
 import {
   Dimensions,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -85,34 +84,31 @@ const App = () => {
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Simple Skia Drawing">
-            <View
-              onTouchStart={evt => {
-                const path = Skia.Path();
-                path.moveTo(
-                  evt.nativeEvent.locationX,
-                  evt.nativeEvent.locationY,
-                );
-                paths.push(path);
-              }}
-              onTouchMove={evt => {
-                paths[paths.length - 1]?.lineTo(
-                  evt.nativeEvent.locationX,
-                  evt.nativeEvent.locationY,
-                );
-              }}>
-              <Skia.View style={styles.skiaview} onDraw={onDraw} />
-            </View>
-          </Section>
-        </View>
-      </ScrollView>
+      <View
+        style={{
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        }}>
+        <Section title="Simple Skia Drawing">
+          <View
+            onTouchStart={evt => {
+              const path = Skia.Path();
+              path.moveTo(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
+              paths.push(path);
+            }}
+            onTouchMove={evt => {
+              paths[paths.length - 1]?.lineTo(
+                evt.nativeEvent.locationX,
+                evt.nativeEvent.locationY,
+              );
+            }}>
+            <Skia.View
+              style={styles.skiaview}
+              onDraw={onDraw}
+              mode="continuous"
+            />
+          </View>
+        </Section>
+      </View>
     </SafeAreaView>
   );
 };

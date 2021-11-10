@@ -35,7 +35,7 @@ public:
   void runOnJavascriptThread(std::function<void()> func) {
     _callInvoker->invokeAsync(std::move(func));
   }
-  
+
   /**
    Returns the javascript runtime
    */
