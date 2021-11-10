@@ -138,13 +138,13 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
             }
 
             auto font = SkFont();
-            font.setSize(46);
+            font.setSize(16);
             auto paint = SkPaint();
             paint.setColor(SkColors::kRed);
 
             _jsiCanvas->getCanvas()->drawSimpleText(
                 debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8,
-                30, 50, font, paint);
+                18, 18, font, paint);
           }
         });
 
@@ -165,7 +165,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
                                  int height, double time,
                                  RNSkPlatformContext *context) {
 
-  auto measure = RNSkMeasureTime("RNSkDrawView::drawInSurface");
+  // auto measure = RNSkMeasureTime("RNSkDrawView::drawInSurface");
 
   try {
     // Get the canvas
@@ -174,9 +174,15 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
 
     // Call the draw callback and perform js based drawing
     if (_callback != nullptr) {
-      (*_callback)(_jsiCanvas, width / context->getPixelDensity(),
-                   height / context->getPixelDensity(), time, context);
-
+      // Make sure to scale correctly
+      auto pd = context->getPixelDensity();
+      skCanvas->save();
+      skCanvas->scale(pd, pd);
+      // Call draw function
+      ((RNSkDrawCallback)(*_callback))(
+                      _jsiCanvas, width / pd, height / pd, time, context);
+      // Restore canvas
+      skCanvas->restore();
       skCanvas->flush();
     }
   } catch (const jsi::JSError &err) {
@@ -250,7 +256,9 @@ void RNSkDrawView::beginDrawingLoop() {
   if (_drawingLoopIdentifier != -1 || _platformContext == nullptr) {
     return;
   }
-
+  
+  // Set to zero to avoid calling beginDrawLoop before we return
+  _drawingLoopIdentifier = 0;
   _drawingLoopIdentifier =
       _platformContext->beginDrawLoop([this](double timestamp) {
         auto performDraw = [=]() {

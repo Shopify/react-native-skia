@@ -1,5 +1,6 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useRef} from 'react';
 import {
+  Button,
   Dimensions,
   SafeAreaView,
   StatusBar,
@@ -61,7 +62,7 @@ const App = () => {
 
   const pathPaint = usePaint(p => {
     p.setColor(fgColor);
-    p.setStrokeWidth(15);
+    p.setStrokeWidth(5);
     p.setStyle(PaintStyle.Stroke);
     p.setStrokeCap(StrokeCap.Round);
   });
@@ -80,6 +81,8 @@ const App = () => {
     },
     [paint, pathPaint, paths],
   );
+
+  const skiaRef = useRef<Skia.View>(null);
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -102,9 +105,16 @@ const App = () => {
               );
             }}>
             <Skia.View
+              innerRef={skiaRef}
               style={styles.skiaview}
               onDraw={onDraw}
               mode="continuous"
+            />
+            <Button
+              title="Test"
+              onPress={() => {
+                console.log(skiaRef.current);
+              }}
             />
           </View>
         </Section>
@@ -136,7 +146,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 20,
     overflow: 'hidden',
-    backgroundColor: '#ECECEC',
   },
 });
 

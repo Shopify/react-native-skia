@@ -15,23 +15,24 @@ const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
   "ReactNativeSkiaView"
 );
 
-type RNSkiaViewProps = ViewProps & {
-  mode?: "continuous" | "default";
-  debug?: boolean;
-  onDraw?: RNSkiaDrawCallback;
-};
-
 type RefType = React.Component<NativeSkiaViewProps> & Readonly<NativeMethods>;
 
 let SkiaViewNativeId = 1000;
 
+type RNSkiaViewProps = ViewProps & {
+  mode?: "continuous" | "default";
+  debug?: boolean;
+  innerRef?: RefType;
+  onDraw?: RNSkiaDrawCallback;
+};
+
 export const RNSkiaView: React.FC<RNSkiaViewProps> = ({
   style,
+  innerRef,
   debug = __DEV__,
   mode = "default",
   onDraw,
 }) => {
-  const ref = useRef<RefType>(null);
   const nativeId = useRef<string>(`${SkiaViewNativeId++}`);
   const previousProcessor = useRef<
     ((canvas: Canvas, info: Info) => void) | undefined
@@ -76,7 +77,7 @@ export const RNSkiaView: React.FC<RNSkiaViewProps> = ({
     <View style={style}>
       <NativeSkiaView
         nativeID={nativeId.current}
-        ref={ref}
+        ref={innerRef}
         style={StyleSheet.absoluteFill}
         mode={mode}
         debug={debug}
