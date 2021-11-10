@@ -22,8 +22,9 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
   s.xcconfig = {
-    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) SK_GL=1 SK_METAL=1'    
+    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) SK_GL=1 SK_METAL=1'
   }
+
   s.frameworks = 'GLKit', 'MetalKit'
 
   s.ios.vendored_libraries = [
@@ -38,7 +39,7 @@ Pod::Spec.new do |s|
   ]
 
   s.subspec 'Skia' do |ss|
-    ss.header_mappings_dir = 'cpp/skia/include'
+    ss.header_mappings_dir = 'cpp/skia'
     ss.source_files = "cpp/skia/include/**/*.{h,cpp}"
   end
 
