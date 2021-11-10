@@ -26,6 +26,7 @@
     "build-skia-ios": "yarn build-skia-ios-x64 && yarn build-skia-ios-arm64 && yarn build-skia-ios-arm && yarn build-skia-ios-fatlibs",
     "build-skia-android": "yarn build-skia-android-x64 && yarn build-skia-android-arm64 && yarn build-skia-android-arm",
     "build-skia": "yarn build-skia-ios && yarn build-skia-android",
+    "copy-skia-headers": "yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
     "precommit": "yarn lint-java && yarn clang-format",
     "lint-java": "node ./scripts/lint-java.js",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",

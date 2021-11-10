@@ -15,39 +15,39 @@
 
 namespace RNSkia {
 class RNSkLogger {
-   public:
-    /**
-     * Logs message to console
-     * @param message Message to be written out
-     */
-    static void logToConsole(std::string message) {
+public:
+  /**
+   * Logs message to console
+   * @param message Message to be written out
+   */
+  static void logToConsole(std::string message) {
 #ifdef ANDROID
-        __android_log_write(ANDROID_LOG_INFO, "RNSkia", message.c_str());
+    __android_log_write(ANDROID_LOG_INFO, "RNSkia", message.c_str());
 #endif
 
 #ifdef TARGET_OS_IPHONE
-        syslog(LOG_ERR, "%s\n", message.c_str());
+    syslog(LOG_ERR, "%s\n", message.c_str());
 #endif
-    }
+  }
 
-    /**
-     * Logs to console
-     * @param fmt Format string
-     * @param ... Arguments to format string
-     */
-    static void logToConsole(const char *fmt, ...) {
-        va_list args;
-        va_start(args, fmt);
+  /**
+   * Logs to console
+   * @param fmt Format string
+   * @param ... Arguments to format string
+   */
+  static void logToConsole(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
 
-        static char buffer[512];
-        vsnprintf(buffer, 512, fmt, args);
+    static char buffer[512];
+    vsnprintf(buffer, 512, fmt, args);
 #ifdef ANDROID
-        __android_log_write(ANDROID_LOG_INFO, "RNSkia", buffer);
+    __android_log_write(ANDROID_LOG_INFO, "RNSkia", buffer);
 #endif
 #ifdef TARGET_OS_IPHONE
-        syslog(LOG_ERR, "%s\n", buffer);
+    syslog(LOG_ERR, "%s\n", buffer);
 #endif
-        va_end(args);
-    }
+    va_end(args);
+  }
 };
 } // namespace RNSkia

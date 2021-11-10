@@ -37,9 +37,9 @@ Pod::Spec.new do |s|
     "ios/**/*.{h,c,cc,cpp,m,mm,swift}",  
   ]
 
-  s.subspec 'Skia-Includes' do |ss|
+  s.subspec 'Skia' do |ss|
     ss.header_mappings_dir = 'cpp/skia/include'
-    ss.source_files = "../externals/skia/include/**/*.{h,cpp}"
+    ss.source_files = "cpp/skia/include/**/*.{h,cpp}"
   end
 
   s.subspec 'Utils' do |ss|
