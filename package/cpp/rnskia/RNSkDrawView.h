@@ -6,9 +6,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkSurface.h>
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
+#include <SkSurface.h>
 
 #pragma clang diagnostic pop
 

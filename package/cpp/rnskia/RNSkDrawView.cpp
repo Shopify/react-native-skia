@@ -14,8 +14,8 @@
 
 #include <SkCanvas.h>
 #include <SkFont.h>
-#include <SkPaint.h>
 #include <SkGraphics.h>
+#include <SkPaint.h>
 #include <SkString.h>
 
 #pragma clang diagnostic pop
@@ -38,14 +38,13 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
   try {
     // Install as worklet if necessary
     jsi::HostFunctionType callbackFunction =
-      [callback](jsi::Runtime &rt, const jsi::Value &thisVal,
-                 const jsi::Value *args,
-                 size_t count) -> jsi::Value {
-        if (thisVal.isObject()) {
-          return callback->callWithThis(rt, thisVal.asObject(rt), args, count);
-        } else {
-          return callback->call(rt, args, count);
-        }
+        [callback](jsi::Runtime &rt, const jsi::Value &thisVal,
+                   const jsi::Value *args, size_t count) -> jsi::Value {
+      if (thisVal.isObject()) {
+        return callback->callWithThis(rt, thisVal.asObject(rt), args, count);
+      } else {
+        return callback->call(rt, args, count);
+      }
     };
 
     // Set up timing
@@ -53,7 +52,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     timingInfo->lastTimeStamp = -1;
     timingInfo->lastDurationIndex = 0;
     timingInfo->lastDurationsCount = 0;
-    
+
     auto callbackRuntime = _platformContext->getJsRuntime();
 
     // Create draw callback wrapper
@@ -85,8 +84,8 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
           // To be able to call the drawing function we'll wrap it once again
           auto p = jsi::Function::createFromHostFunction(
-              *callbackRuntime, jsi::PropNameID::forUtf8(*callbackRuntime, "fn"),
-              0,
+              *callbackRuntime,
+              jsi::PropNameID::forUtf8(*callbackRuntime, "fn"), 0,
               [&callbackFunction](jsi::Runtime &rt, const jsi::Value &thisVal,
                                   const jsi::Value *args,
                                   size_t count) -> jsi::Value {

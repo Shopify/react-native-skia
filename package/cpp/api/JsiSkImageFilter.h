@@ -49,7 +49,7 @@ public:
             context, SkImageFilters::ColorFilter(cf, input)){};
 
   /**
-   * Composes two filters   
+   * Composes two filters
    * @param outer outer
    * @param inner inner
    */

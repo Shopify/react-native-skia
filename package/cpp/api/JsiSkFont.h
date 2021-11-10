@@ -16,7 +16,6 @@
 
 #include <jsi/jsi.h>
 
-
 namespace RNSkia {
 
 using namespace facebook;

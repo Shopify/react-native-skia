@@ -127,9 +127,9 @@ void RNSkManager::installUnsetDrawCallback() {
       [this](jsi::Runtime &runtime, const jsi::Value &thisValue,
              const jsi::Value *arguments, size_t count) -> jsi::Value {
     if (!arguments[0].isNumber()) {
-        _platformContext->raiseError(
+      _platformContext->raiseError(
           "setDrawCallback: First argument ('nativeId') must be a number!");
-        return jsi::Value::undefined();
+      return jsi::Value::undefined();
     }
 
     // find view

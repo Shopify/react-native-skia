@@ -110,15 +110,15 @@ public:
                   sk_sp<SkImage> image = std::get<0>(result);
 
                   // Schedule callback on the Javascript thread
-                  context->runOnJavascriptThread(
-                      [&runtime, context, promise, localUri, image]() {
-                        if (image == nullptr) {
-                          promise->reject("Could not decode image");
-                        }
-                        promise->resolve(jsi::Object::createFromHostObject(
-                            runtime, std::make_shared<JsiSkImage>(
-                                         context, image, localUri)));
-                      });
+                  context->runOnJavascriptThread([&runtime, context, promise,
+                                                  localUri, image]() {
+                    if (image == nullptr) {
+                      promise->reject("Could not decode image");
+                    }
+                    promise->resolve(jsi::Object::createFromHostObject(
+                        runtime, std::make_shared<JsiSkImage>(context, image,
+                                                              localUri)));
+                  });
                 });
           });
     };
