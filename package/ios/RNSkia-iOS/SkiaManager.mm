@@ -20,6 +20,7 @@
 }
 
 - (void) invalidate {
+    _skManager->getPlatformContext()->endDrawLoop();
   _skManager = nullptr;  
 }
 
