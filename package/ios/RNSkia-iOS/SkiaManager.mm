@@ -20,8 +20,7 @@
 }
 
 - (void) invalidate {
-  _skManager = nullptr;
-  _platformContext = nullptr;
+  _skManager = nullptr;  
 }
 
 - (instancetype) initWithBridge:(RCTBridge*)bridge {
