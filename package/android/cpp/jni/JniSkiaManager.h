@@ -38,6 +38,10 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
 
     JniSkiaManager() {}
 
+    ~JniSkiaManager() {
+        _context->endDrawLoop();
+    }
+
     explicit JniSkiaManager(
         jni::alias_ref<JniSkiaManager::jhybridobject> jThis,
         jsi::Runtime *runtime,
