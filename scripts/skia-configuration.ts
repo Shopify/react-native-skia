@@ -53,9 +53,10 @@ export const configurations: Configuration = {
       ["skia_use_gl", true],
       [
         "extra_cflags",
-        '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-mios-version-min=11.0"]',
+        '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-mios-version-min=10.0"]',
       ],
-      ["extra_ldflags", '["ios_version_min=11.0"]'],
+      // Can this be removed? Seems like it can
+      // ["extra_ldflags", '["ios_version_min=10.0"]'],
     ],
     outputRoot: "package/libs/ios",
     outputNames: ["libskia.a", "libskshaper.a", "libsvg.a"],
