@@ -3,6 +3,7 @@
 #include <map>
 
 #include <RNSkLog.h>
+#include <RNSKDispatchQueue.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -25,7 +26,8 @@ public:
                       std::shared_ptr<react::CallInvoker> callInvoker,
                       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
-        _callInvoker(callInvoker) {
+        _callInvoker(callInvoker),
+        _dispatchQueue(std::make_shared<RNSKDispatchQueue>("skia-render-thread", 1)){
     RNSkLogger::logToConsole("Created platform context with scale factor %0.2f",
                              pixelDensity);
   }
@@ -43,9 +45,18 @@ public:
   }
 
   /**
+   Runs the function on the render thread
+   */
+  void runOnRenderThread(std::function<void()> func) {
+    _dispatchQueue->dispatch(std::move(func));
+  }
+
+  /**
    Returns the javascript runtime
    */
-  jsi::Runtime *getJsRuntime() { return _jsRuntime; }
+  jsi::Runtime *getJsRuntime() {
+    return _jsRuntime;
+  }
 
   /**
    * Returns an SkStream wrapping the require uri provided.
@@ -128,6 +139,8 @@ private:
 
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;
+    
+  std::shared_ptr<RNSKDispatchQueue> _dispatchQueue;
 
   size_t _listenerId = 0;
   std::map<size_t, std::function<void(double)>> _drawCallbacks;

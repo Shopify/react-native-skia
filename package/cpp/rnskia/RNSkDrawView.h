@@ -36,7 +36,9 @@ public:
       : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
         _platformContext(context) {}
 
-  ~RNSkDrawView() { RNSkLogger::logToConsole("Deleting draw view"); }
+  ~RNSkDrawView() {
+      RNSkLogger::logToConsole("Deleting draw view");      
+  }
 
   /**
    * Repaints the Skia view using the underlying context and the drawcallback.

@@ -5,6 +5,8 @@
 #include "RNSkDrawView.h"
 
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 
 #include "RNSkLog.h"
 #include "RNSkMeasureTime.h"
@@ -36,17 +38,6 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
   }
 
   try {
-    // Install as worklet if necessary
-    jsi::HostFunctionType callbackFunction =
-        [callback](jsi::Runtime &rt, const jsi::Value &thisVal,
-                   const jsi::Value *args, size_t count) -> jsi::Value {
-      if (thisVal.isObject()) {
-        return callback->callWithThis(rt, thisVal.asObject(rt), args, count);
-      } else {
-        return callback->call(rt, args, count);
-      }
-    };
-
     // Set up timing
     auto timingInfo = std::make_shared<RNSkTimingInfo>();
     timingInfo->lastTimeStamp = -1;
@@ -57,43 +48,53 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
     // Create draw callback wrapper
     _callback = std::make_shared<RNSkDrawCallback>(
-        [this, callbackRuntime, callback, callbackFunction,
+        [this, callbackRuntime, callback,
          timingInfo](std::shared_ptr<JsiSkCanvas> canvas, int width, int height,
                      double timestamp, RNSkPlatformContext *context) {
           auto start = high_resolution_clock::now();
-
-          // First argument is the canvas
-          auto canvasObj =
-              jsi::Object::createFromHostObject(*callbackRuntime, canvas);
-
-          // Second argument should be the height/width
-          auto infoObj = jsi::Object(*callbackRuntime);
-          infoObj.setProperty(*callbackRuntime, "width", width);
-          infoObj.setProperty(*callbackRuntime, "height", height);
-
-          // Now the timestamp if available
-          infoObj.setProperty(*callbackRuntime, "timestamp", timestamp);
+                         
           double delta = 0;
           if (timingInfo->lastTimeStamp > -1) {
             delta = timestamp - timingInfo->lastTimeStamp;
           }
           timingInfo->lastTimeStamp = timestamp;
+                         
+          std::condition_variable cv;
+          std::mutex m;
+          std::unique_lock<std::mutex> lock(m);
+          
+          // The draw function will be called on the javascript context
+          // and when it is done it will continue on the render thread
+          _platformContext->runOnJavascriptThread([&cv, &m, canvas, &callback, &callbackRuntime,
+                                                   width, height, delta, &timingInfo, timestamp]() {
+          
+              // Lock
+              std::unique_lock<std::mutex> lock(m);
+              
+              // Set up arguments array
+              jsi::Value *args = new jsi::Value[2];
+              args[0] = jsi::Object::createFromHostObject(*callbackRuntime, canvas);
+              args[1] = jsi::Object(*callbackRuntime);
+              
+              // Second argument should be the height/width, timestamp, delta and fps
+              auto infoObject = args[1].asObject(*callbackRuntime);
+              infoObject.setProperty(*callbackRuntime, "width", width);
+              infoObject.setProperty(*callbackRuntime, "height", height);
+              infoObject.setProperty(*callbackRuntime, "timestamp", timestamp);
+              infoObject.setProperty(*callbackRuntime, "delta", delta);
+              infoObject.setProperty(*callbackRuntime, "fps", 1.0 / delta);
+              
+              // To be able to call the drawing function we'll wrap it once again
+              callback->call(*callbackRuntime, static_cast<const jsi::Value*>(args), (size_t)2);
+              
+              delete[] args;
 
-          infoObj.setProperty(*callbackRuntime, "delta", delta);
-          infoObj.setProperty(*callbackRuntime, "fps", 1.0 / delta);
-
-          // To be able to call the drawing function we'll wrap it once again
-          auto p = jsi::Function::createFromHostFunction(
-              *callbackRuntime,
-              jsi::PropNameID::forUtf8(*callbackRuntime, "fn"), 0,
-              [&callbackFunction](jsi::Runtime &rt, const jsi::Value &thisVal,
-                                  const jsi::Value *args,
-                                  size_t count) -> jsi::Value {
-                return callbackFunction(rt, thisVal, args, count);
-              });
-
-          // Call draw callback js function
-          p.callWithThis(*callbackRuntime, p, canvasObj, infoObj);
+              // Notify that Javascript is done drawing
+              cv.notify_one();
+          });
+                         
+          // Wait until the javascript drawing function has returned before we do our stuff
+          cv.wait(lock);
 
           // Draw debug overlays
           if (_showDebugOverlay) {
@@ -178,7 +179,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
       auto pd = context->getPixelDensity();
       skCanvas->save();
       skCanvas->scale(pd, pd);
-      // Call draw function
+      // Call draw function.
       ((RNSkDrawCallback)(*_callback))(_jsiCanvas, width / pd, height / pd,
                                        time, context);
       // Restore canvas
@@ -227,7 +228,7 @@ void RNSkDrawView::requestRedraw() {
     _isDrawing = false;
   };
 
-  _platformContext->runOnJavascriptThread(performDraw);
+  _platformContext->runOnRenderThread(performDraw);
 }
 
 bool RNSkDrawView::isReadyToDraw() {
@@ -280,7 +281,7 @@ void RNSkDrawView::beginDrawingLoop() {
           _isDrawing = false;
         };
 
-        _platformContext->runOnJavascriptThread(performDraw);
+        _platformContext->runOnRenderThread(performDraw);
       });
 }
 
