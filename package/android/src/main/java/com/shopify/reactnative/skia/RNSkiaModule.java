@@ -4,12 +4,15 @@ package com.shopify.reactnative.skia;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.module.annotations.ReactModule;
+
 import java.lang.ref.WeakReference;
 
+@ReactModule(name="RNSkia")
 public class RNSkiaModule extends ReactContextBaseJavaModule {
 
     private final WeakReference<ReactApplicationContext> weakReactContext;
-    private static SkiaManager skiaManager;
+    private SkiaManager skiaManager;
 
     static {
         System.loadLibrary("reactskia");
@@ -25,7 +28,7 @@ public class RNSkiaModule extends ReactContextBaseJavaModule {
         return "RNSkia";
     }
 
-    public static SkiaManager getSkiaManager() {
+    public SkiaManager getSkiaManager() {
         return skiaManager;
     }
 

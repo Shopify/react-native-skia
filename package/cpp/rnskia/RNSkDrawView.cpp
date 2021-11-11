@@ -288,9 +288,11 @@ void RNSkDrawView::endDrawingLoop() {
   if (_platformContext == nullptr) {
     return;
   }
+  
   if (_drawingLoopIdentifier == -1) {
     return;
   }
+  
   _platformContext->endDrawLoop(_drawingLoopIdentifier);
   _drawingLoopIdentifier = -1;
 }
