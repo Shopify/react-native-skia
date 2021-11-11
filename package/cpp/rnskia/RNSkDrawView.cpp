@@ -88,6 +88,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
               // To be able to call the drawing function we'll wrap it once again
               callback->call(*runtime, static_cast<const jsi::Value*>(args), (size_t)2);
               
+              // Clean up
               delete[] args;
 
               // Notify that Javascript is done drawing
