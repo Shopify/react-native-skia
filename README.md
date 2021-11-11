@@ -4,8 +4,6 @@
 
 `yarn add @shopify/react-native-skia`
 
-`npx pod-install example/ios`
-
 ## Library Development
 
 To develop react-native-skia, you need to build the skia libraries on your computer.
@@ -20,6 +18,9 @@ Make sure you have all the tools required for building the skia libraries (XCode
 
 ### Building
 
+- Install dependencies in the root project `yarn`.
+- Install dependencies in the package `cd package && yarn && cd..`
+- Install dependencies in the example `cd example && yarn && cd..`
 - Build the Skia libraries with `yarn build-skia`.
 - Copy Skia includes `yarn copy-skia-include-headers`
 - Copy Skia module includes `yarn copy-skia-module-headers`
