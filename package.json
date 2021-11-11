@@ -24,7 +24,7 @@
     "build-skia-android-x64": "ts-node ./scripts/build-skia.ts android x64",
     "build-skia-ios-fatlibs": "ts-node ./scripts/build-skia-ios-fatlibs.ts",
     "build-skia-ios": "yarn build-skia-ios-x64 && yarn build-skia-ios-arm64 && yarn build-skia-ios-arm && yarn build-skia-ios-fatlibs",
-    "build-skia-android": "yarn build-skia-android-x64 && yarn build-skia-android-arm64 && yarn build-skia-android-arm",
+    "build-skia-android": "yarn build-skia-android-x64 && yarn build-skia-android-arm64 && yarn build-skia-android-arm && yarn build-skia-android-x86",
     "build-skia": "yarn build-skia-ios && yarn build-skia-android",
     "copy-skia-include-headers": "yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
     "copy-skia-module-headers": "yarn rimraf ./package/cpp/skia/modules/ && mkdir -p ./package/cpp/skia/modules/svg/include && mkdir -p ./package/cpp/skia/modules/skresources/include && cp -a ./externals/skia/modules/svg/include/. ./package/cpp/skia/modules/svg/include && cp -a ./externals/skia/modules/skresources/include/. ./package/cpp/skia/modules/skresources/include",

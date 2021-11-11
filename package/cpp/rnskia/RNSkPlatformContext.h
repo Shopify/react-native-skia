@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <functional>
 
 #include <RNSkLog.h>
 #include <RNSKDispatchQueue.h>
