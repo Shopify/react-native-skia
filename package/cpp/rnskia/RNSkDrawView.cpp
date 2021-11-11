@@ -179,8 +179,8 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
       skCanvas->save();
       skCanvas->scale(pd, pd);
       // Call draw function
-      ((RNSkDrawCallback)(*_callback))(
-                      _jsiCanvas, width / pd, height / pd, time, context);
+      ((RNSkDrawCallback)(*_callback))(_jsiCanvas, width / pd, height / pd,
+                                       time, context);
       // Restore canvas
       skCanvas->restore();
       skCanvas->flush();
@@ -256,7 +256,7 @@ void RNSkDrawView::beginDrawingLoop() {
   if (_drawingLoopIdentifier != -1 || _platformContext == nullptr) {
     return;
   }
-  
+
   // Set to zero to avoid calling beginDrawLoop before we return
   _drawingLoopIdentifier = 0;
   _drawingLoopIdentifier =
@@ -288,11 +288,11 @@ void RNSkDrawView::endDrawingLoop() {
   if (_platformContext == nullptr) {
     return;
   }
-  
+
   if (_drawingLoopIdentifier == -1) {
     return;
   }
-  
+
   _platformContext->endDrawLoop(_drawingLoopIdentifier);
   _drawingLoopIdentifier = -1;
 }
