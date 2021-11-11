@@ -19,18 +19,18 @@ link_directories(../libs/android/${ANDROID_ABI}/)
 add_library(
         ${PACKAGE_NAME}
         SHARED
-        jni/JniLoad.cpp
-        jni/JniSkiaManager.cpp
-        jni/JniSkiaDrawView.cpp
-        jni/JniPlatformContext.cpp
+        "${PROJECT_SOURCE_DIR}/cpp/jni/JniLoad.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/jni/JniSkiaManager.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/jni/JniSkiaDrawView.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/jni/JniPlatformContext.cpp"
         
-        cpp/jsi/JsiHostObject.cpp
+        "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
 
-        cpp/rnskia/RNSkManager.cpp
-        cpp/rnskia/RNSkDrawView.cpp
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDrawView.cpp"
 
-        cpp/api/JsiSkImageFilter.cpp
-        cpp/api/JsiSkSvg.cpp        
+        "${PROJECT_SOURCE_DIR}/cpp/api/JsiSkImageFilter.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/api/JsiSkSvg.cpp" 
 )
 
 
