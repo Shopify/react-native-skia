@@ -9,7 +9,6 @@
 #include <mutex>
 
 #include "RNSkLog.h"
-#include "RNSkMeasureTime.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -50,14 +49,12 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
         (std::shared_ptr<JsiSkCanvas> canvas, int width, int height,
         double timestamp, RNSkPlatformContext *context) {
         
-          auto start = high_resolution_clock::now();
-                         
           double delta = 0;
           if (timingInfo->lastTimeStamp > -1) {
             delta = timestamp - timingInfo->lastTimeStamp;
           }
           timingInfo->lastTimeStamp = timestamp;
-          /*
+          
           std::condition_variable cv;
           std::mutex m;
           std::unique_lock<std::mutex> lock(m);
@@ -68,7 +65,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
               // Lock
               std::unique_lock<std::mutex> lock(m);
-            */
+            
               auto runtime = context->getJsRuntime();
 
               // Set up arguments array
@@ -89,24 +86,17 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
               
               // Clean up
               delete[] args;
-            /*y that Javascript is done drawing
+              // Notify that Javascript is done drawing
               cv.notify_one();
           });
                          
           // Wait until the javascript drawing function has returned before we do our stuff
           cv.wait(lock);
-*/
+
           // Draw debug overlays
           if (_showDebugOverlay) {
-            // Stop clock
-            auto stop = high_resolution_clock::now();
-
-            // Calculate duration
-            auto duration = duration_cast<milliseconds>(stop - start).count();
-
             // Average duration
-            timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
-                duration;
+            timingInfo->lastDurations[timingInfo->lastDurationIndex++] = _lastDuration;
             if (timingInfo->lastDurationIndex == LAST_DURATION_COUNT) {
               timingInfo->lastDurationIndex = 0;
             }
@@ -174,7 +164,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
       (*_callback)(_jsiCanvas, width / pd, height / pd, time, context);
       // Restore canvas
       skCanvas->restore();
-      skCanvas->flush();
+      skCanvas->flush();      
     }
   } catch (const jsi::JSError &err) {
     _callback = nullptr;
@@ -218,7 +208,7 @@ void RNSkDrawView::requestRedraw() {
     _isDrawing = false;
   };
 
-  _platformContext->runOnJavascriptThread(performDraw);
+  _platformContext->runOnRenderThread(performDraw);
 }
 
 bool RNSkDrawView::isReadyToDraw() {
@@ -271,7 +261,7 @@ void RNSkDrawView::beginDrawingLoop() {
           _isDrawing = false;
         };
 
-        _platformContext->runOnJavascriptThread(performDraw);
+        _platformContext->runOnRenderThread(performDraw);
       });
 }
 

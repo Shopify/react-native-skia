@@ -17,6 +17,7 @@ namespace RNSkia
         registerHybrid({
             makeNativeMethod("initHybrid", JniPlatformContext::initHybrid),
             makeNativeMethod("notifyDrawLoop", JniPlatformContext::notifyDrawLoopExternal),
+            makeNativeMethod("notifyTaskReady", JniPlatformContext::notifyTaskReadyExternal),
         });
     }
 
@@ -56,6 +57,22 @@ namespace RNSkia
     {
         jni::ThreadScope ts;
         notifyDrawLoop(timestampNanos / 1000000000);
+    }
+
+    void JniPlatformContext::notifyTaskReadyExternal()
+    {
+        _taskMutex->lock();
+        auto task = _taskCallbacks.front();
+        if (task != nullptr)
+        {
+            _taskCallbacks.pop();
+            _taskMutex->unlock();
+            task();
+        }
+        else
+        {
+            _taskMutex->unlock();
+        }
     }
 
     void JniPlatformContext::performStreamOperation(

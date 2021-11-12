@@ -10,11 +10,16 @@ import {
 } from '@shopify/react-native-skia';
 
 import {Section} from '../../Section';
+import {ExampleProps} from './types';
 
 const bgColor = Skia.Color('#7FC8A9');
 const fgColor = Skia.Color('#7F00A9');
 
-export const DrawingExample: React.FC = () => {
+export const DrawingExample: React.FC<ExampleProps> = ({
+  index,
+  isVisible,
+  onToggle,
+}) => {
   const paint = usePaint(p => p.setColor(bgColor));
 
   const pathPaint = usePaint(p => {
@@ -39,7 +44,12 @@ export const DrawingExample: React.FC = () => {
   );
 
   return (
-    <Section title="Drawing Example" description="Touch to draw!">
+    <Section
+      title="Drawing Example"
+      description="Touch to draw!"
+      index={index}
+      isVisible={isVisible}
+      onToggle={onToggle}>
       <View
         onTouchStart={evt => {
           const path = Skia.Path();
@@ -61,7 +71,7 @@ export const DrawingExample: React.FC = () => {
 const styles = StyleSheet.create({
   skiaview: {
     width: Dimensions.get('window').width * 0.85,
-    height: Dimensions.get('window').height * 0.25,
+    height: Dimensions.get('window').height * 0.45,
     marginBottom: 20,
     borderRadius: 20,
     overflow: 'hidden',

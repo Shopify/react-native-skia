@@ -18,19 +18,22 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PlatformContext {
     @DoNotStrip
     private final HybridData mHybridData;
     private final ReactContext mContext;
+    private ExecutorService mDrawCallbackThread = Executors.newSingleThreadExecutor();
 
     private boolean _drawLoopActive = false;
 
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
 
-        CallInvokerHolderImpl holder = (CallInvokerHolderImpl)reactContext
-                .getCatalystInstance().getJSCallInvokerHolder();
+        CallInvokerHolderImpl holder = (CallInvokerHolderImpl) reactContext.getCatalystInstance()
+                .getJSCallInvokerHolder();
 
         mHybridData = initHybrid(reactContext.getJavaScriptContextHolder().get(), holder,
                 reactContext.getResources().getDisplayMetrics().density);
@@ -87,6 +90,15 @@ public class PlatformContext {
         }
     }
 
+    public void triggerOnRenderThread() {
+        mDrawCallbackThread.execute(new Runnable() {
+            @Override
+            public void run() {
+                notifyTaskReady();
+            }
+        });
+    }
+
     public byte[] getJniStreamFromSource(String sourceUri) throws IOException {
         // First try loading the input as a resource directly
         int resourceId = mContext.getResources().getIdentifier(sourceUri, "drawable", mContext.getPackageName());
@@ -141,5 +153,8 @@ public class PlatformContext {
 
     // Private c++ native methods
     private native HybridData initHybrid(long jsContext, CallInvokerHolderImpl jsCallInvokerHolder, float pixelDensity);
+
     private native void notifyDrawLoop(double timestampNanos);
+
+    private native void notifyTaskReady();
 }

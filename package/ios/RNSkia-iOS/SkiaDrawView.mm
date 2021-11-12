@@ -2,7 +2,8 @@
 #import "SkiaDrawView.h"
 
 #import <RNSkLog.h>
-#import <RNSkMeasureTime.h>
+
+#import <chrono>
 
 SkiaDrawViewImpl::SkiaDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext* context):
     RNSkia::RNSkDrawView(context), _context(context), _view(view) {
@@ -43,9 +44,9 @@ void SkiaDrawViewImpl::drawFrame(double time) {
                                             grContextOptions);
   }
   
-  auto measure = RNSkia::RNSkMeasureTime("render");
-  
   auto sampleCount = 1;
+  auto start = std::chrono::high_resolution_clock::now();
+  
   id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
   GrMtlTextureInfo fbInfo;
   fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
@@ -77,7 +78,11 @@ void SkiaDrawViewImpl::drawFrame(double time) {
   id<MTLCommandBuffer> commandBuffer([_queue commandBuffer]);
   commandBuffer.label = @"Present";
   [commandBuffer presentDrawable:currentDrawable];
-  [commandBuffer commit];  
+  [commandBuffer commit];
+  
+  // Calculate duration
+  auto stop = std::chrono::high_resolution_clock::now();
+  setLastFrameDuration(std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
 }
 
 void SkiaDrawViewImpl::destroy() {

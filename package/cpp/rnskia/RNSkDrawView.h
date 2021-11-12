@@ -80,11 +80,13 @@ protected:
    * Setup and draw the frame
    */
   virtual void drawFrame(double time) = 0;
-
+  
   /**
-   * @return True if this draw view is backed by a worklet drawing callback
+   Updates the last duration value
    */
-  bool isWorklet() { return _isWorklet; }
+  void setLastFrameDuration(size_t duration) {
+    _lastDuration = duration;
+  }
 
 private:
   /**
@@ -140,11 +142,6 @@ private:
   std::atomic<bool> _isDrawing{false};
 
   /**
-   * True if the callback is a worklet
-   */
-  bool _isWorklet;
-
-  /**
    * Pointer to the platform context
    */
   RNSkPlatformContext *_platformContext;
@@ -163,6 +160,11 @@ private:
    * True if the drawing loop has been requested
    */
   size_t _drawingLoopIdentifier = -1;
+  
+  /**
+   Last render duration
+   */
+  size_t _lastDuration = 0;
 };
 
 } // namespace RNSkia

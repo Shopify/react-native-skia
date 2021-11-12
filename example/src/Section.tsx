@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {StyleSheet, Text, useColorScheme, View} from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
@@ -6,13 +6,15 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 export const Section: React.FC<{
   title: string;
   description?: string;
-}> = ({children, title, description}) => {
+  isVisible: boolean;
+  onToggle: (index: number) => void;
+  index: number;
+}> = ({children, title, description, isVisible, onToggle, index}) => {
   const isDarkMode = useColorScheme() === 'dark';
-  const [isVisible, setIsVisible] = useState<boolean>(false);
   return (
     <View style={styles.sectionContainer}>
       <Text
-        onPress={() => setIsVisible(p => !p)}
+        onPress={() => onToggle(index)}
         style={[
           styles.sectionTitle,
           {
@@ -23,7 +25,6 @@ export const Section: React.FC<{
       </Text>
       {description ? (
         <Text
-          onPress={() => setIsVisible(p => !p)}
           style={[
             styles.sectionDescription,
             {

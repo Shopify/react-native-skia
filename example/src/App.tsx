@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {SafeAreaView, StatusBar, useColorScheme, View} from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
@@ -11,6 +11,12 @@ const App = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const [selectedExample, setSelectedExample] = useState<number>(-1);
+  const toggleExample = useCallback(
+    (index: number) => setSelectedExample(p => (p === index ? -1 : index)),
+    [],
+  );
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -18,7 +24,11 @@ const App = () => {
         style={{
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
         }}>
-        <DrawingExample />
+        <DrawingExample
+          index={0}
+          onToggle={toggleExample}
+          isVisible={selectedExample === 0}
+        />
       </View>
     </SafeAreaView>
   );

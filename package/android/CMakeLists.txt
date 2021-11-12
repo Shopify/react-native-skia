@@ -26,8 +26,6 @@ add_library(
         
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
 
-        "${PROJECT_SOURCE_DIR}/cpp/utils/RNSKDispatchQueue.cpp"
-
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDrawView.cpp"
 
