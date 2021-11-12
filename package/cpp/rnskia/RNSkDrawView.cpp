@@ -44,11 +44,9 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     timingInfo->lastDurationIndex = 0;
     timingInfo->lastDurationsCount = 0;
 
-    auto runtime = _platformContext->getJsRuntime();
-
     // Create draw callback wrapper
     _callback = std::make_shared<RNSkDrawCallback>(
-        [this, runtime, callback, timingInfo]
+        [this, callback, timingInfo]
         (std::shared_ptr<JsiSkCanvas> canvas, int width, int height,
         double timestamp, RNSkPlatformContext *context) {
         
@@ -59,19 +57,20 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
             delta = timestamp - timingInfo->lastTimeStamp;
           }
           timingInfo->lastTimeStamp = timestamp;
-                         
+          /*
           std::condition_variable cv;
           std::mutex m;
           std::unique_lock<std::mutex> lock(m);
-          
+                    
           // The draw function will be called on the javascript context
           // and when it is done it will continue on the render thread
-          _platformContext->runOnJavascriptThread([&cv, &m, &canvas, &callback, &runtime, &timingInfo,
-                                                   width, height, delta, timestamp]() {
-          
+          context->runOnJavascriptThread([&cv, &m, &canvas, &callback, &context, width, height, delta, timestamp]() {
+
               // Lock
               std::unique_lock<std::mutex> lock(m);
-              
+            */
+              auto runtime = context->getJsRuntime();
+
               // Set up arguments array
               jsi::Value *args = new jsi::Value[2];
               args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
@@ -90,14 +89,13 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
               
               // Clean up
               delete[] args;
-
-              // Notify that Javascript is done drawing
+            /*y that Javascript is done drawing
               cv.notify_one();
           });
                          
           // Wait until the javascript drawing function has returned before we do our stuff
           cv.wait(lock);
-
+*/
           // Draw debug overlays
           if (_showDebugOverlay) {
             // Stop clock
@@ -128,13 +126,6 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
             if (_drawingMode == RNSkDrawingMode::Continuous) {
               debugString +=
                   " " + std::to_string((size_t)round(1.0 / delta)) + "fps";
-            }
-
-            if (_isWorklet) {
-              debugString += " worklet";
-            }
-
-            if (_drawingMode == RNSkDrawingMode::Continuous) {
               debugString += "/continuous";
             } else {
               debugString += "/default";
@@ -145,7 +136,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
             auto paint = SkPaint();
             paint.setColor(SkColors::kRed);
 
-            _jsiCanvas->getCanvas()->drawSimpleText(
+            canvas->getCanvas()->drawSimpleText(
                 debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8,
                 18, 18, font, paint);
           }
@@ -168,8 +159,6 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
                                  int height, double time,
                                  RNSkPlatformContext *context) {
 
-  // auto measure = RNSkMeasureTime("RNSkDrawView::drawInSurface");
-
   try {
     // Get the canvas
     auto skCanvas = surface->getCanvas();
@@ -182,8 +171,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
       skCanvas->save();
       skCanvas->scale(pd, pd);
       // Call draw function.
-      ((RNSkDrawCallback)(*_callback))(_jsiCanvas, width / pd, height / pd,
-                                       time, context);
+      (*_callback)(_jsiCanvas, width / pd, height / pd, time, context);
       // Restore canvas
       skCanvas->restore();
       skCanvas->flush();
@@ -230,7 +218,7 @@ void RNSkDrawView::requestRedraw() {
     _isDrawing = false;
   };
 
-  _platformContext->runOnRenderThread(performDraw);
+  _platformContext->runOnJavascriptThread(performDraw);
 }
 
 bool RNSkDrawView::isReadyToDraw() {
@@ -283,7 +271,7 @@ void RNSkDrawView::beginDrawingLoop() {
           _isDrawing = false;
         };
 
-        _platformContext->runOnRenderThread(performDraw);
+        _platformContext->runOnJavascriptThread(performDraw);
       });
 }
 

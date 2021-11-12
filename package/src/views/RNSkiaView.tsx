@@ -50,23 +50,10 @@ export const RNSkiaView: React.FC<RNSkiaViewProps> = ({
       return;
     }
 
-    if ("__nativeId" in onDraw) {
-      throw Error(
-        "A single draw callback can only be consumed by a single view (for now)."
-      );
-    }
-
-    Object.defineProperty(onDraw, "__nativeId", {
-      value: nativeId.current,
-    });
-
     setDrawCallback(nativeId.current, onDraw);
     previousProcessor.current = onDraw;
 
     return () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      onDraw.__nativeId = undefined;
       // eslint-disable-next-line react-hooks/exhaustive-deps
       previousProcessor.current && unsetDrawCallback(nativeId.current);
       previousProcessor.current = undefined;

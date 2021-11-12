@@ -1,6 +1,8 @@
 
 #import "SkiaDrawView.h"
+
 #import <RNSkLog.h>
+#import <RNSkMeasureTime.h>
 
 SkiaDrawViewImpl::SkiaDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext* context):
     RNSkia::RNSkDrawView(context), _context(context), _view(view) {
@@ -41,6 +43,8 @@ void SkiaDrawViewImpl::drawFrame(double time) {
                                             grContextOptions);
   }
   
+  auto measure = RNSkia::RNSkMeasureTime("render");
+  
   auto sampleCount = 1;
   id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
   GrMtlTextureInfo fbInfo;
@@ -73,7 +77,7 @@ void SkiaDrawViewImpl::drawFrame(double time) {
   id<MTLCommandBuffer> commandBuffer([_queue commandBuffer]);
   commandBuffer.label = @"Present";
   [commandBuffer presentDrawable:currentDrawable];
-  [commandBuffer commit];
+  [commandBuffer commit];  
 }
 
 void SkiaDrawViewImpl::destroy() {
@@ -128,9 +132,9 @@ void SkiaDrawViewImpl::destroy() {
   return _impl.get();
 }
 
-- (void) didMoveToWindow {
-  [super didMoveToWindow];
-  if (self.window == nil) {
+- (void) willMoveToWindow:(UIWindow *)newWindow {
+  [super willMoveToWindow: newWindow];
+  if (newWindow == nil) {
     _impl->destroy();
   }
 }
