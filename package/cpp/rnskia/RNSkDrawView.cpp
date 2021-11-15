@@ -55,7 +55,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           }
           timingInfo->lastTimeStamp = timestamp;
           
-          std::condition_variable cv;
+          /*std::condition_variable cv;
           std::mutex m;
           std::unique_lock<std::mutex> lock(m);
                     
@@ -65,7 +65,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
               // Lock
               std::unique_lock<std::mutex> lock(m);
-            
+            */
               auto runtime = context->getJsRuntime();
 
               // Set up arguments array
@@ -87,12 +87,12 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
               // Clean up
               delete[] args;
               // Notify that Javascript is done drawing
-              cv.notify_one();
+             /* cv.notify_one();
           });
                          
           // Wait until the javascript drawing function has returned before we do our stuff
           cv.wait(lock);
-
+*/
           // Draw debug overlays
           if (_showDebugOverlay) {
             // Average duration
@@ -208,7 +208,7 @@ void RNSkDrawView::requestRedraw() {
     _isDrawing = false;
   };
 
-  _platformContext->runOnRenderThread(performDraw);
+  _platformContext->runOnJavascriptThread(performDraw);
 }
 
 bool RNSkDrawView::isReadyToDraw() {
@@ -261,7 +261,7 @@ void RNSkDrawView::beginDrawingLoop() {
           _isDrawing = false;
         };
 
-        _platformContext->runOnRenderThread(performDraw);
+        _platformContext->runOnJavascriptThread(performDraw);
       });
 }
 
