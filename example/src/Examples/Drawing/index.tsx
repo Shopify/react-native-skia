@@ -67,11 +67,14 @@ export const DrawingExample: React.FC<ExampleProps> = ({
           if (prevPointRef.current === undefined) {
             return;
           }
+          // Get current path object
           const path = paths[paths.length - 1];
 
+          // Get current position
           const x = evt.nativeEvent.locationX;
           const y = evt.nativeEvent.locationY;
 
+          // Calculate and draw a smooth curve
           const x_mid = (prevPointRef.current.x + x) / 2;
           const y_mid = (prevPointRef.current.y + y) / 2;
 
@@ -85,7 +88,7 @@ export const DrawingExample: React.FC<ExampleProps> = ({
           prevPointRef.current = {x, y};
         }}>
         <Skia.View style={styles.skiaview} onDraw={onDraw} mode="continuous" />
-        <Button title="clear" onPress={() => (paths.length = 0)} />
+        <Button title="Clear" onPress={() => (paths.length = 0)} />
       </View>
     </Section>
   );

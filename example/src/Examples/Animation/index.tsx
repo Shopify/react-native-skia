@@ -9,6 +9,7 @@ import {
 
 import {Section} from '../../Section';
 import {ExampleProps} from '../types';
+import {Easing, interpolate, Extrapolate, normalize} from '../animation';
 
 const bgColor = Skia.Color('#7FC8A9');
 const fgColor = Skia.Color('#7F33A9');
@@ -28,20 +29,20 @@ export const AnimationExample: React.FC<ExampleProps> = ({
     (canvas, info) => {
       canvas.drawPaint(paint);
       let t = normalize(info.timestamp, {duration: 2});
-      canvas.drawText(
-        t.toFixed(6),
-        10,
-        info.height - 20,
-        font,
-        foregroundPaint,
+      t = Easing.inOut(t);
+      const posX = interpolate(
+        t,
+        [0, 0.5, 1],
+        [0, info.width - Size, 0],
+        Extrapolate.CLAMP,
       );
-      t = easingInOut(t);
-      canvas.drawCircle(
-        lerp(t, 0, info.width - Size),
-        lerp(t, 0, info.height - Size),
-        Size,
-        foregroundPaint,
+      const posY = interpolate(
+        t,
+        [0, 0.5, 1],
+        [0, info.height - Size, 0],
+        Extrapolate.CLAMP,
       );
+      canvas.drawCircle(posX, posY, Size, foregroundPaint);
     },
     [paint, foregroundPaint, font],
   );
@@ -57,19 +58,6 @@ export const AnimationExample: React.FC<ExampleProps> = ({
     </Section>
   );
 };
-
-const normalize = (
-  value: number,
-  params: {
-    duration: number;
-  },
-) => (value / params.duration / 1) % 1;
-
-const easingInOut = (t: number) => {
-  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-};
-
-const lerp = (t: number, from: number, to: number) => from + (to - from) * t;
 
 const styles = StyleSheet.create({
   skiaview: {

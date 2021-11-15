@@ -1,5 +1,6 @@
 package com.shopify.reactnative.skia;
 
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.BaseViewManager;
 import com.facebook.react.uimanager.LayoutShadowNode;
@@ -38,7 +39,7 @@ public class RNSkiaViewManager extends BaseViewManager<SkiaDrawView, LayoutShado
     public void setNativeId(@NonNull SkiaDrawView view, @Nullable String nativeId) {
         super.setNativeId(view, nativeId);
         mNativeId = Integer.parseInt(nativeId);
-        RNSkiaModule skiaModule = ((ReactContext)view.getContext()).getNativeModule(RNSkiaModule.class);
+        RNSkiaModule skiaModule = ((ReactContext)mView.getContext()).getNativeModule(RNSkiaModule.class);
         skiaModule.getSkiaManager().register(mNativeId, mView);
     }
 
@@ -52,11 +53,12 @@ public class RNSkiaViewManager extends BaseViewManager<SkiaDrawView, LayoutShado
         view.setDebugMode(show);
     }
 
-    /*@Overridepublic void onCatalystInstanceDestroy() {
-        RNSkiaModule skiaModule = ((ReactApplicationContext)view.getContext()).getNativeModule(RNSkiaModule.class);
+    @Override
+    public void onCatalystInstanceDestroy() {
+        RNSkiaModule skiaModule = ((ReactApplicationContext)mView.getContext()).getNativeModule(RNSkiaModule.class);
         skiaModule.getSkiaManager().unregister(mNativeId);
         super.onCatalystInstanceDestroy();
-    }*/
+    }
 
     @Override
     public void onDropViewInstance(@NonNull SkiaDrawView view) {

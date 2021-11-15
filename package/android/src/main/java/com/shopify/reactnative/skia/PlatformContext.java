@@ -1,5 +1,6 @@
 package com.shopify.reactnative.skia;
 
+import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Choreographer;
@@ -37,6 +38,7 @@ public class PlatformContext {
 
         mHybridData = initHybrid(reactContext.getJavaScriptContextHolder().get(), holder,
                 reactContext.getResources().getDisplayMetrics().density);
+
     }
 
     private byte[] getStreamAsBytes(InputStream is) throws IOException {
