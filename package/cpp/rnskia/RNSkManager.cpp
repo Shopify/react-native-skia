@@ -26,7 +26,7 @@ void RNSkManager::unregisterSkiaDrawView(size_t nativeId) {
   }
   auto drawCallbackInfo = _drawCallbacks.at(nativeId);
   if (drawCallbackInfo->view != nullptr) {
-    drawCallbackInfo->view->setDrawCallback(nullptr);    
+    drawCallbackInfo->view->setDrawCallback(nullptr);
   }
 
   checkAndClearEmptyCallbackInfo(nativeId);

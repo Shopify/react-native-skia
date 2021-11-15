@@ -13,7 +13,7 @@ import {Section} from '../../Section';
 import {ExampleProps} from '../types';
 
 const bgColor = Skia.Color('#7FC8A9');
-const fgColor = Skia.Color('#7F00A9');
+const fgColor = Skia.Color('#7F33A9');
 
 type Point = {x: number; y: number};
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <map>
 #include <functional>
+#include <map>
 
 #include <RNSkLog.h>
 
@@ -22,10 +22,11 @@ using namespace facebook;
 
 class RNSkPlatformContext {
 public:
-  RNSkPlatformContext(jsi::Runtime *runtime,
-                      std::shared_ptr<react::CallInvoker> callInvoker,
-                      const std::function<void(const std::function<void(void)>&)> dispatchOnRenderThread,
-                      float pixelDensity)
+  RNSkPlatformContext(
+      jsi::Runtime *runtime, std::shared_ptr<react::CallInvoker> callInvoker,
+      const std::function<void(const std::function<void(void)> &)>
+          dispatchOnRenderThread,
+      float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker),
         _dispatchOnRenderThread(dispatchOnRenderThread) {
@@ -55,9 +56,7 @@ public:
   /**
    Returns the javascript runtime
    */
-  jsi::Runtime *getJsRuntime() {
-    return _jsRuntime;
-  }
+  jsi::Runtime *getJsRuntime() { return _jsRuntime; }
 
   /**
    * Returns an SkStream wrapping the require uri provided.
@@ -140,8 +139,9 @@ private:
 
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;
-    
-  std::function<void(const std::function<void(void)>&)> _dispatchOnRenderThread;
+
+  std::function<void(const std::function<void(void)> &)>
+      _dispatchOnRenderThread;
 
   size_t _listenerId = 0;
   std::map<size_t, std::function<void(double)>> _drawCallbacks;

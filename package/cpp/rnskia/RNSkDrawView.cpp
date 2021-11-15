@@ -45,58 +45,61 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
     // Create draw callback wrapper
     _callback = std::make_shared<RNSkDrawCallback>(
-        [this, callback, timingInfo]
-        (std::shared_ptr<JsiSkCanvas> canvas, int width, int height,
-        double timestamp, RNSkPlatformContext *context) {
-        
+        [this, callback, timingInfo](std::shared_ptr<JsiSkCanvas> canvas,
+                                     int width, int height, double timestamp,
+                                     RNSkPlatformContext *context) {
           double delta = 0;
           if (timingInfo->lastTimeStamp > -1) {
             delta = timestamp - timingInfo->lastTimeStamp;
           }
           timingInfo->lastTimeStamp = timestamp;
-          
+
           /*std::condition_variable cv;
           std::mutex m;
           std::unique_lock<std::mutex> lock(m);
-                    
+
           // The draw function will be called on the javascript context
           // and when it is done it will continue on the render thread
-          context->runOnJavascriptThread([&cv, &m, &canvas, &callback, &context, width, height, delta, timestamp]() {
+          context->runOnJavascriptThread([&cv, &m, &canvas, &callback, &context,
+          width, height, delta, timestamp]() {
 
               // Lock
               std::unique_lock<std::mutex> lock(m);
             */
-              auto runtime = context->getJsRuntime();
+          auto runtime = context->getJsRuntime();
 
-              // Set up arguments array
-              jsi::Value *args = new jsi::Value[2];
-              args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
-              args[1] = jsi::Object(*runtime);
-              
-              // Second argument should be the height/width, timestamp, delta and fps
-              auto infoObject = args[1].asObject(*runtime);
-              infoObject.setProperty(*runtime, "width", width);
-              infoObject.setProperty(*runtime, "height", height);
-              infoObject.setProperty(*runtime, "timestamp", timestamp);
-              infoObject.setProperty(*runtime, "delta", delta);
-              infoObject.setProperty(*runtime, "fps", 1.0 / delta);
-              
-              // To be able to call the drawing function we'll wrap it once again
-              callback->call(*runtime, static_cast<const jsi::Value*>(args), (size_t)2);
-              
-              // Clean up
-              delete[] args;
-              // Notify that Javascript is done drawing
-             /* cv.notify_one();
-          });
-                         
-          // Wait until the javascript drawing function has returned before we do our stuff
-          cv.wait(lock);
+          // Set up arguments array
+          jsi::Value *args = new jsi::Value[2];
+          args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
+          args[1] = jsi::Object(*runtime);
+
+          // Second argument should be the height/width, timestamp, delta and
+          // fps
+          auto infoObject = args[1].asObject(*runtime);
+          infoObject.setProperty(*runtime, "width", width);
+          infoObject.setProperty(*runtime, "height", height);
+          infoObject.setProperty(*runtime, "timestamp", timestamp);
+          infoObject.setProperty(*runtime, "delta", delta);
+          infoObject.setProperty(*runtime, "fps", 1.0 / delta);
+
+          // To be able to call the drawing function we'll wrap it once again
+          callback->call(*runtime, static_cast<const jsi::Value *>(args),
+                         (size_t)2);
+
+          // Clean up
+          delete[] args;
+          // Notify that Javascript is done drawing
+          /* cv.notify_one();
+       });
+
+       // Wait until the javascript drawing function has returned before we do
+       our stuff cv.wait(lock);
 */
           // Draw debug overlays
           if (_showDebugOverlay) {
             // Average duration
-            timingInfo->lastDurations[timingInfo->lastDurationIndex++] = _lastDuration;
+            timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
+                _lastDuration;
             if (timingInfo->lastDurationIndex == LAST_DURATION_COUNT) {
               timingInfo->lastDurationIndex = 0;
             }
@@ -164,7 +167,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
       (*_callback)(_jsiCanvas, width / pd, height / pd, time, context);
       // Restore canvas
       skCanvas->restore();
-      skCanvas->flush();      
+      skCanvas->flush();
     }
   } catch (const jsi::JSError &err) {
     _callback = nullptr;

@@ -36,9 +36,7 @@ public:
       : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
         _platformContext(context) {}
 
-  ~RNSkDrawView() {
-      RNSkLogger::logToConsole("Deleting draw view");      
-  }
+  ~RNSkDrawView() { RNSkLogger::logToConsole("Deleting draw view"); }
 
   /**
    * Repaints the Skia view using the underlying context and the drawcallback.
@@ -80,13 +78,11 @@ protected:
    * Setup and draw the frame
    */
   virtual void drawFrame(double time) = 0;
-  
+
   /**
    Updates the last duration value
    */
-  void setLastFrameDuration(size_t duration) {
-    _lastDuration = duration;
-  }
+  void setLastFrameDuration(size_t duration) { _lastDuration = duration; }
 
 private:
   /**
@@ -160,7 +156,7 @@ private:
    * True if the drawing loop has been requested
    */
   size_t _drawingLoopIdentifier = -1;
-  
+
   /**
    Last render duration
    */

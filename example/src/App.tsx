@@ -3,6 +3,7 @@ import {SafeAreaView, StatusBar, useColorScheme, View} from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {DrawingExample} from './Examples';
+import {AnimationExample} from './Examples/Animation';
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -28,6 +29,11 @@ const App = () => {
           index={0}
           onToggle={toggleExample}
           isVisible={selectedExample === 0}
+        />
+        <AnimationExample
+          index={1}
+          onToggle={toggleExample}
+          isVisible={selectedExample === 1}
         />
       </View>
     </SafeAreaView>
