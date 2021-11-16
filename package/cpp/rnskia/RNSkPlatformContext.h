@@ -108,7 +108,7 @@ public:
   /**
    * Ends (if running) the drawing loop that was started with beginDrawLoop.
    * This method must be called symmetrically with the beginDrawLoop method.
-   * @param id Identifier of drawloop callback to end
+   * @param id Identifier of drawloop drawCallback to end
    */
   void endDrawLoop(size_t id) {
     if (_drawCallbacks.count(id) > 0) {

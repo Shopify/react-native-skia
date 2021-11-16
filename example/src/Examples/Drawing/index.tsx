@@ -3,18 +3,16 @@ import {Button, Dimensions, StyleSheet, View} from 'react-native';
 import type {IPath} from '@shopify/react-native-skia';
 import {
   Skia,
+  useTouchCallback,
   usePaint,
   useDrawCallback,
   PaintStyle,
   StrokeCap,
+  RNSkiaView,
 } from '@shopify/react-native-skia';
 
 import {Section} from '../../Section';
 import {ExampleProps} from '../types';
-import {RNSkiaView} from '@shopify/react-native-skia/src/views';
-
-const bgColor = Skia.Color('#7FC8A9');
-const fgColor = Skia.Color('#7F33A9');
 
 type Point = {x: number; y: number};
 
@@ -23,11 +21,11 @@ export const DrawingExample: React.FC<ExampleProps> = ({
   isVisible,
   onToggle,
 }) => {
-  const paint = usePaint(p => p.setColor(bgColor));
+  const paint = usePaint(p => p.setColor(Skia.Color('#7FC8A9')));
   const prevPointRef = useRef<Point>();
 
   const pathPaint = usePaint(p => {
-    p.setColor(fgColor);
+    p.setColor(Skia.Color('#7F33A9'));
     p.setStrokeWidth(5);
     p.setStyle(PaintStyle.Stroke);
     p.setStrokeCap(StrokeCap.Round);
@@ -36,13 +34,9 @@ export const DrawingExample: React.FC<ExampleProps> = ({
   const paths = useMemo(() => [] as IPath[], []);
   const isDrawing = useRef<boolean>(false);
 
-  const onDraw = useDrawCallback(
-    (canvas, info) => {
-      // Clear screen
-      canvas.drawPaint(paint);
-
+  const onTouches = useTouchCallback(
+    touches => {
       // Handle touches
-      const {touches} = info;
       if (isDrawing.current !== true && touches.length > 0) {
         // Begin
         isDrawing.current = true;
@@ -55,7 +49,6 @@ export const DrawingExample: React.FC<ExampleProps> = ({
           y: touches[0].y,
         };
       } else if (isDrawing.current === true && touches.length > 0) {
-        // Drawing
         // Get current path object
         const path = paths[paths.length - 1];
 
@@ -79,6 +72,14 @@ export const DrawingExample: React.FC<ExampleProps> = ({
         // Ended
         isDrawing.current = false;
       }
+    },
+    [paths],
+  );
+
+  const onDraw = useDrawCallback(
+    canvas => {
+      // Clear screen
+      canvas.drawPaint(paint);
 
       // Draw paths
       if (paths.length > 0) {
@@ -98,7 +99,12 @@ export const DrawingExample: React.FC<ExampleProps> = ({
       index={index}
       isVisible={isVisible}
       onToggle={onToggle}>
-      <Skia.View ref={skiaViewRef} style={styles.skiaview} onDraw={onDraw} />
+      <Skia.View
+        ref={skiaViewRef}
+        style={styles.skiaview}
+        onDraw={onDraw}
+        onTouch={onTouches}
+      />
       <View style={styles.buttons}>
         <Button
           title="Clear"

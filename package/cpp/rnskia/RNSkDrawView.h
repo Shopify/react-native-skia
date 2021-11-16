@@ -17,6 +17,14 @@ namespace RNSkia {
 using RNSkDrawCallback = std::function<void(
     std::shared_ptr<JsiSkCanvas>, int, int, double, RNSkPlatformContext *)>;
 
+
+using RNSkTouchPoint = struct {
+    double x;
+    double y;
+};
+
+using RNSkTouchCallback = std::function<void(std::vector<RNSkTouchPoint>)>;
+
 #define LAST_DURATION_COUNT 100
 using RNSkTimingInfo = struct {
   double lastTimeStamp;
@@ -26,11 +34,6 @@ using RNSkTimingInfo = struct {
 };
 
 enum RNSkDrawingMode { Default, Continuous };
-
-using RNSkTouchPoint = struct {
-  double x;
-  double y;  
-};
 
 class RNSkDrawView {
 public:
@@ -56,7 +59,12 @@ public:
   void setDrawCallback(std::shared_ptr<jsi::Function> callback);
 
   /**
-   * Call this method with a valid Skia surface to let the draw callback do
+   * Installs the touch callback for the view
+   */
+  void setTouchCallback(std::shared_ptr<jsi::Function> callback);
+
+  /**
+   * Call this method with a valid Skia surface to let the draw drawCallback do
    * its thing.
    * It is important that the height and width parameters are not resolved
    * against the scale factor - this is done by the drawing code itself.
@@ -74,14 +82,9 @@ public:
   void setShowDebugOverlays(bool show) { _showDebugOverlay = show; }
 
   /**
-   returns the drawing mode for the view
-   */
-  RNSkDrawingMode getDrawingMode() { return _drawingMode; }
-  
-  /**
     Update touch state with new touch points
    */
-  void updateTouchState(const std::vector<RNSkTouchPoint>& points);
+  void updateTouchState(const std::vector<RNSkTouchPoint> &points);
 
 protected:
   /**
@@ -93,7 +96,7 @@ protected:
    Updates the last duration value
    */
   void setLastFrameDuration(size_t duration) { _lastDuration = duration; }
-  
+
 private:
   /**
    * Checks preconditions for drawing
@@ -111,14 +114,14 @@ private:
   void endDrawingLoop();
 
   /**
-   * Stores the draw callback
+   * Stores the draw drawCallback
    */
-  std::shared_ptr<RNSkDrawCallback> _callback;
+  std::shared_ptr<RNSkDrawCallback> _drawCallback;
 
   /**
-   * Original callback
+   * Stores the touch callback
    */
-  std::shared_ptr<jsi::Function> _originalCallback;
+  std::shared_ptr<RNSkTouchCallback> _touchCallback;
 
   /**
    * Stores a pointer to the jsi wrapper for the canvas. The reason for
@@ -156,11 +159,6 @@ private:
    Last render duration
    */
   size_t _lastDuration = 0;
-  
-  /**
-   Touch points
-   */
-  std::vector<RNSkTouchPoint> _touchPoints;
 };
 
 } // namespace RNSkia

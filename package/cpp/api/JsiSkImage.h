@@ -109,7 +109,7 @@ public:
 
                   sk_sp<SkImage> image = std::get<0>(result);
 
-                  // Schedule callback on the Javascript thread
+                  // Schedule drawCallback on the Javascript thread
                   context->runOnJavascriptThread([&runtime, context, promise,
                                                   localUri, image]() {
                     if (image == nullptr) {

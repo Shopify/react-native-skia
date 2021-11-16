@@ -1,25 +1,49 @@
-import React from "react";
-import { NativeMethods, requireNativeComponent, ViewProps } from "react-native";
-import { RNSkiaView } from ".";
-import type { Canvas, Info } from "../skia/Canvas";
+import { requireNativeComponent, ViewProps } from "react-native";
+import type { Canvas } from "../skia/Canvas";
 
-declare global {
-  var invalidateSkiaView: (nativeId: number) => void;
-  var setDrawCallback: (nativeId: number, callback: RNSkiaDrawCallback) => void;
-  var unsetDrawCallback: (nativeId: number) => void;
+export interface ISkiaViewApi {
+  invalidateSkiaView: (nativeId: number) => void;
+  setDrawCallback: (
+    nativeId: number,
+    callback: RNSkiaDrawCallback | undefined
+  ) => void;
+  setTouchCallback: (
+    nativeId: number,
+    callback: RNSkiaTouchCallback | undefined
+  ) => void;
 }
+declare global {
+  var SkiaViewApi: ISkiaViewApi;
+}
+
+export const { SkiaViewApi } = global;
 
 export type NativeSkiaViewProps = ViewProps & {
   mode?: "continuous" | "default";
   debug?: boolean;
 };
 
-export type RNSkiaDrawCallback = (canvas: Canvas, info: Info) => void;
+export interface TouchInfo {
+  x: number;
+  y: number;
+}
+
+export interface DrawInfo {
+  width: number;
+  height: number;
+  timestamp: number;
+  delta: number;
+  fps: number;
+}
+
+export type RNSkiaDrawCallback = (canvas: Canvas, info: DrawInfo) => void;
+export type RNSkiaTouchCallback = (touches: TouchInfo[]) => void;
 
 export type RNSkiaViewProps = ViewProps & {
   mode?: "continuous" | "default";
   debug?: boolean;
   onDraw?: RNSkiaDrawCallback;
+  onTouch?: RNSkiaTouchCallback;
 };
 
 export const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(

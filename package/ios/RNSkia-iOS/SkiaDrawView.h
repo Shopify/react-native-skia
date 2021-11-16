@@ -21,7 +21,7 @@ public:
     _onDestroy = func;
   }
 
-  void setSize(int width, int height);    
+  void setSize(int width, int height);
 
 protected:
   void drawFrame(double time) override;

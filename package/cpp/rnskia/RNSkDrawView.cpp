@@ -25,138 +25,135 @@ namespace RNSkia {
 
 using namespace std::chrono;
 
+void RNSkDrawView::setTouchCallback(std::shared_ptr<jsi::Function> callback) {
+  if (callback == nullptr) {
+    _touchCallback = nullptr;
+    return;
+  }
+
+  _touchCallback = std::make_shared<RNSkTouchCallback>([this, callback](std::vector<RNSkTouchPoint> touchPoints) {
+    auto runtime = this->_platformContext->getJsRuntime();
+    // Add touch points
+    auto touches = jsi::Array(*runtime, touchPoints.size());
+    for (size_t i = 0; i < touchPoints.size(); i++) {
+      auto touchObj = jsi::Object(*runtime);
+      touchObj.setProperty(*runtime, "x", touchPoints.at(i).x);
+      touchObj.setProperty(*runtime, "y", touchPoints.at(i).y);
+      touches.setValueAtIndex(*runtime, i, touchObj);
+    }
+
+    if (callback) {
+      try {
+        callback->call(*runtime, touches, 1);
+      } catch (const jsi::JSError &err) {
+        _drawCallback = nullptr;
+        return _platformContext->raiseError(err);
+      } catch (const std::exception &err) {
+        _drawCallback = nullptr;
+        return _platformContext->raiseError(err);
+      } catch (const std::runtime_error &err) {
+        _drawCallback = nullptr;
+        return _platformContext->raiseError(err);
+      } catch (...) {
+        _drawCallback = nullptr;
+        return _platformContext->raiseError(
+            "An error occured while sending touch events to the Skia View.");
+      }
+    }
+  });
+}
+
 void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
-  _originalCallback = callback;
-  _callback = nullptr;
-
-  if (_originalCallback == nullptr) {
+  if (callback == nullptr) {
+    _drawCallback = nullptr;
     // We can just reset everything - this is a signal that we're done.
     endDrawingLoop();
     return;
   }
 
-  try {
-    // Set up timing
-    auto timingInfo = std::make_shared<RNSkTimingInfo>();
-    timingInfo->lastTimeStamp = -1;
-    timingInfo->lastDurationIndex = 0;
-    timingInfo->lastDurationsCount = 0;
+  // Set up timing
+  auto timingInfo = std::make_shared<RNSkTimingInfo>();
+  timingInfo->lastTimeStamp = -1;
+  timingInfo->lastDurationIndex = 0;
+  timingInfo->lastDurationsCount = 0;
 
-    // Create draw callback wrapper
-    _callback = std::make_shared<RNSkDrawCallback>(
-        [this, callback, timingInfo](std::shared_ptr<JsiSkCanvas> canvas,
-                                     int width, int height, double timestamp,
-                                     RNSkPlatformContext *context) {
-          double delta = 0;
-          if (timingInfo->lastTimeStamp > -1) {
-            delta = timestamp - timingInfo->lastTimeStamp;
+  // Create draw drawCallback wrapper
+  _drawCallback = std::make_shared<RNSkDrawCallback>(
+      [this, callback, timingInfo](std::shared_ptr<JsiSkCanvas> canvas,
+                                   int width, int height, double timestamp,
+                                   RNSkPlatformContext *context) {
+        double delta = 0;
+        if (timingInfo->lastTimeStamp > -1) {
+          delta = timestamp - timingInfo->lastTimeStamp;
+        }
+        timingInfo->lastTimeStamp = timestamp;
+
+        auto runtime = context->getJsRuntime();
+
+        // Set up arguments array
+        jsi::Value *args = new jsi::Value[2];
+        args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
+        args[1] = jsi::Object(*runtime);
+
+        // Second argument should be the height/width, timestamp, delta
+        // fps and touch points
+        auto infoObject = args[1].asObject(*runtime);
+        infoObject.setProperty(*runtime, "width", width);
+        infoObject.setProperty(*runtime, "height", height);
+        infoObject.setProperty(*runtime, "timestamp", timestamp);
+        infoObject.setProperty(*runtime, "delta", delta);
+        infoObject.setProperty(*runtime, "fps", 1.0 / delta);
+
+        // To be able to call the drawing function we'll wrap it once again
+        callback->call(*runtime, static_cast<const jsi::Value *>(args),
+                       (size_t)2);
+
+        // Clean up
+        delete[] args;
+
+        // Draw debug overlays
+        if (_showDebugOverlay) {
+          // Average duration
+          timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
+              _lastDuration;
+          if (timingInfo->lastDurationIndex == LAST_DURATION_COUNT) {
+            timingInfo->lastDurationIndex = 0;
           }
-          timingInfo->lastTimeStamp = timestamp;
 
-          /*std::condition_variable cv;
-          std::mutex m;
-          std::unique_lock<std::mutex> lock(m);
-
-          // The draw function will be called on the javascript context
-          // and when it is done it will continue on the render thread
-          context->runOnJavascriptThread([&cv, &m, &canvas, &callback, &context,
-          width, height, delta, timestamp]() {
-
-              // Lock
-              std::unique_lock<std::mutex> lock(m);
-            */
-          auto runtime = context->getJsRuntime();
-
-          // Set up arguments array
-          jsi::Value *args = new jsi::Value[2];
-          args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
-          args[1] = jsi::Object(*runtime);
-
-          // Second argument should be the height/width, timestamp, delta
-          // fps and touch points
-          auto infoObject = args[1].asObject(*runtime);
-          infoObject.setProperty(*runtime, "width", width);
-          infoObject.setProperty(*runtime, "height", height);
-          infoObject.setProperty(*runtime, "timestamp", timestamp);
-          infoObject.setProperty(*runtime, "delta", delta);
-          infoObject.setProperty(*runtime, "fps", 1.0 / delta);
-                                       
-          // Add touch points
-          auto touches = jsi::Array(*runtime, _touchPoints.size());
-          for(size_t i=0; i<_touchPoints.size(); i++) {
-            auto touchObj = jsi::Object(*runtime);
-            touchObj.setProperty(*runtime, "x", _touchPoints.at(i).x);
-            touchObj.setProperty(*runtime, "y", _touchPoints.at(i).y);
-            touches.setValueAtIndex(*runtime, i, touchObj);
+          if (timingInfo->lastDurationsCount < LAST_DURATION_COUNT) {
+            timingInfo->lastDurationsCount++;
           }
-                                       
-          infoObject.setProperty(*runtime, "touches", touches);
 
-          // To be able to call the drawing function we'll wrap it once again
-          callback->call(*runtime, static_cast<const jsi::Value *>(args),
-                         (size_t)2);
-
-          // Clean up
-          delete[] args;
-          // Notify that Javascript is done drawing
-          /* cv.notify_one();
-       });
-
-       // Wait until the javascript drawing function has returned before we do
-       our stuff cv.wait(lock);
-*/
-          // Draw debug overlays
-          if (_showDebugOverlay) {
-            // Average duration
-            timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
-                _lastDuration;
-            if (timingInfo->lastDurationIndex == LAST_DURATION_COUNT) {
-              timingInfo->lastDurationIndex = 0;
-            }
-
-            if (timingInfo->lastDurationsCount < LAST_DURATION_COUNT) {
-              timingInfo->lastDurationsCount++;
-            }
-
-            long average = 0;
-            for (size_t i = 0; i < timingInfo->lastDurationsCount; i++) {
-              average += timingInfo->lastDurations[i];
-            }
-            average = average / timingInfo->lastDurationsCount;
-
-            auto debugString = std::to_string(average) + "ms";
-
-            if (_drawingMode == RNSkDrawingMode::Continuous) {
-              debugString +=
-                  " " + std::to_string((size_t)round(1.0 / delta)) + "fps";
-              debugString += "/continuous";
-            } else {
-              debugString += "/default";
-            }
-
-            auto font = SkFont();
-            font.setSize(16);
-            auto paint = SkPaint();
-            paint.setColor(SkColors::kRed);
-
-            canvas->getCanvas()->drawSimpleText(
-                debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8,
-                18, 18, font, paint);
+          long average = 0;
+          for (size_t i = 0; i < timingInfo->lastDurationsCount; i++) {
+            average += timingInfo->lastDurations[i];
           }
-        });
+          average = average / timingInfo->lastDurationsCount;
 
-    // Request redraw
-    requestRedraw();
+          auto debugString = std::to_string(average) + "ms";
 
-  } catch (const jsi::JSError &err) {
-    return _platformContext->raiseError(err);
-  } catch (const std::exception &err) {
-    return _platformContext->raiseError(err);
-  } catch (...) {
-    return _platformContext->raiseError(
-        "An unknown error occured when installing the draw callback.");
-  }
+          if (_drawingMode == RNSkDrawingMode::Continuous) {
+            debugString +=
+                " " + std::to_string((size_t)round(1.0 / delta)) + "fps";
+            debugString += "/continuous";
+          } else {
+            debugString += "/default";
+          }
+
+          auto font = SkFont();
+          font.setSize(16);
+          auto paint = SkPaint();
+          paint.setColor(SkColors::kRed);
+
+          canvas->getCanvas()->drawSimpleText(
+              debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8,
+              18, 18, font, paint);
+        }
+      });
+
+  // Request redraw
+  requestRedraw();
 }
 
 void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
@@ -168,38 +165,43 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
     auto skCanvas = surface->getCanvas();
     _jsiCanvas->setCanvas(skCanvas);
 
-    // Call the draw callback and perform js based drawing
-    if (_callback != nullptr) {
+    // Call the draw drawCallback and perform js based drawing
+    if (_drawCallback != nullptr) {
       // Make sure to scale correctly
       auto pd = context->getPixelDensity();
       skCanvas->save();
       skCanvas->scale(pd, pd);
       // Call draw function.
-      (*_callback)(_jsiCanvas, width / pd, height / pd, time, context);
+      (*_drawCallback)(_jsiCanvas, width / pd, height / pd, time, context);
       // Restore canvas
       skCanvas->restore();
       skCanvas->flush();
     }
   } catch (const jsi::JSError &err) {
-    _callback = nullptr;
+    _drawCallback = nullptr;
     return _platformContext->raiseError(err);
   } catch (const std::exception &err) {
-    _callback = nullptr;
+    _drawCallback = nullptr;
     return _platformContext->raiseError(err);
   } catch (const std::runtime_error &err) {
-    _callback = nullptr;
+    _drawCallback = nullptr;
     return _platformContext->raiseError(err);
   } catch (...) {
-    _callback = nullptr;
+    _drawCallback = nullptr;
     return _platformContext->raiseError(
         "An error occured while rendering the Skia View.");
   }
 }
 
-void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint>& points) {
-  _touchPoints = points;
-  if(_drawingMode != RNSkDrawingMode::Continuous) {
-    requestRedraw();
+void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
+  if (_touchCallback != nullptr) {
+    _platformContext->runOnJavascriptThread([this, points]() {
+        (*_touchCallback)(points);
+    });
+
+    if (_drawingMode != RNSkDrawingMode::Continuous) {
+      requestRedraw();
+    }
   }
 }
 
@@ -244,7 +246,7 @@ bool RNSkDrawView::isReadyToDraw() {
     return false;
   }
 
-  if (_callback == nullptr) {
+  if (_drawCallback == nullptr) {
     endDrawingLoop();
     return false;
   }

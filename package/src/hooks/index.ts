@@ -1,4 +1,5 @@
 export * from "./useDrawCallback";
+export * from "./useTouchCallback";
 export * from "./usePaint";
 export * from "./usePath";
 export * from "./useShader";

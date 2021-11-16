@@ -7,15 +7,11 @@
 #include "RNSkPlatformContext.h"
 #include <JsiSkCanvas.h>
 #include <RNSkDrawView.h>
+#include <RNSkJsiViewApi.h>
 
 namespace RNSkia {
 
 using namespace facebook;
-
-using RNSkCallbackInfo = struct {
-  std::shared_ptr<jsi::Function> callback;
-  RNSkDrawView *view;
-};
 
 class RNSkManager {
 public:
@@ -30,22 +26,15 @@ public:
               std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker,
               RNSkPlatformContext *platformContext)
       : _jsRuntime(jsRuntime), _jsCallInvoker(jsCallInvoker),
-        _platformContext(platformContext) {
+        _platformContext(platformContext),
+        _viewApi(std::make_shared<RNSkJsiViewApi>(platformContext)) {
 
     // Install bindings
     installBindings();
   }
 
   ~RNSkManager() {
-    // Unregister all skia draw views
-    for (auto drawCallbackInfo : _drawCallbacks) {
-      if (drawCallbackInfo.second->view != nullptr) {
-        drawCallbackInfo.second->view->setDrawCallback(nullptr);
-        drawCallbackInfo.second->view = nullptr;
-        drawCallbackInfo.second->callback = nullptr;
-      }
-    }
-    _drawCallbacks.clear();
+    _viewApi = nullptr;
     _jsRuntime = nullptr;
     _platformContext = nullptr;
     RNSkLogger::logToConsole("RNSkManager destructor called");
@@ -65,7 +54,7 @@ public:
   void unregisterSkiaDrawView(size_t nativeId);
 
   /**
-   * @return Returns the platform context
+   * @return The platform context
    */
   RNSkPlatformContext *getPlatformContext() { return _platformContext; }
 
@@ -77,40 +66,10 @@ private:
    */
   void installBindings();
 
-  /**
-   * Installs the setDrawCallback global js method in the main runtime
-   */
-  void installSetDrawCallback();
-
-  /**
-   * Installs the unsetDrawCallback global js method in the main runtime
-   */
-  void installUnsetDrawCallback();
-
-  /**
-   * Installs the invalidateSkiaView global js method in the main runtime
-   */
-  void installInvalidateSkiaView();
-
-  /**
-   * Installs constructors for Skia jsi wrappers in the given runtime
-   */
-  void installApis(jsi::Runtime &runtime, RNSkPlatformContext *context);
-
-  /**
-   Ensures and returns the callback info struct for a given native id
-   */
-  std::shared_ptr<RNSkCallbackInfo> getEnsuredCallbackInfo(size_t nativeId);
-
-  /**
-   Checks to see if the callbackinfo is empty and removes it if so.
-   */
-  void checkAndClearEmptyCallbackInfo(size_t nativeId);
-
-  std::map<size_t, std::shared_ptr<RNSkCallbackInfo>> _drawCallbacks;
   jsi::Runtime *_jsRuntime;
   RNSkPlatformContext *_platformContext;
   std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
+  std::shared_ptr<RNSkJsiViewApi> _viewApi;
 };
 
 } // namespace RNSkia

@@ -7,19 +7,6 @@ import type { IPath } from "./Path";
 import type { IImage } from "./Image";
 import type { ISvgDom } from "./Svg";
 
-export interface TouchInfo {
-  x: number;
-  y: number;
-}
-export interface Info {
-  width: number;
-  height: number;
-  timestamp: number;
-  delta: number;
-  fps: number;
-  touches: TouchInfo[];
-}
-
 export type Canvas = {
   /** Draws the image at the given (x, y) position.
 

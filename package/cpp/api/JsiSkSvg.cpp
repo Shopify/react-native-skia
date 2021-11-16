@@ -30,7 +30,7 @@ JsiSkSvgStatic::JsiSkSvgStatic(RNSkPlatformContext *context)
                    context](std::unique_ptr<SkStream> stream) -> void {
                     sk_sp<SkSVGDOM> svg_dom = SkSVGDOM::Builder().make(*stream);
 
-                    // Schedule callback on the Javascript thread
+                    // Schedule drawCallback on the Javascript thread
                     context->runOnJavascriptThread(
                         [&runtime, promise, context, svg_dom]() {
                           if (svg_dom == nullptr) {

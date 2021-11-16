@@ -1,4 +1,5 @@
 import React from "react";
+import { RNSkiaTouchCallback } from ".";
 
 import { NativeSkiaView, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
 
@@ -8,24 +9,38 @@ export class RNSkiaView extends React.Component<RNSkiaViewProps> {
   constructor(props: RNSkiaViewProps) {
     super(props);
     this._nativeId = `${SkiaViewNativeId++}`;
-    const { onDraw } = props;
+    const { onDraw, onTouch } = props;
     if (onDraw) {
       assertDrawCallbacksEnabled();
       setDrawCallback(this._nativeId, onDraw);
+    }
+    if (onTouch) {
+      assertDrawCallbacksEnabled();
+      setTouchCallback(this._nativeId, onTouch);
     }
   }
 
   private _nativeId: string;
 
   componentDidUpdate(prevProps: RNSkiaViewProps) {
-    const { onDraw } = this.props;
+    const { onDraw, onTouch } = this.props;
     if (onDraw !== prevProps.onDraw) {
       assertDrawCallbacksEnabled();
       if (prevProps.onDraw) {
-        unsetDrawCallback(this._nativeId);
+        setDrawCallback(this._nativeId, undefined);
       }
       if (onDraw) {
         setDrawCallback(this._nativeId, onDraw);
+      }
+    }
+
+    if (onTouch !== prevProps.onTouch) {
+      assertDrawCallbacksEnabled();
+      if (prevProps.onTouch) {
+        setTouchCallback(this._nativeId, undefined);
+      }
+      if (onTouch) {
+        setTouchCallback(this._nativeId, onTouch);
       }
     }
   }
@@ -36,7 +51,7 @@ export class RNSkiaView extends React.Component<RNSkiaViewProps> {
   }
 
   render() {
-    const { style, mode, debug } = this.props;
+    const { style, mode, debug = __DEV__ ? true : false } = this.props;
     return (
       <NativeSkiaView
         style={style}
@@ -51,21 +66,28 @@ export class RNSkiaView extends React.Component<RNSkiaViewProps> {
 
 const setDrawCallback = (
   nativeId: string,
-  drawCallback: RNSkiaDrawCallback
+  drawCallback: RNSkiaDrawCallback | undefined
 ) => {
-  return global.setDrawCallback(parseInt(nativeId, 10), drawCallback);
+  return SkiaViewApi.setDrawCallback(parseInt(nativeId, 10), drawCallback);
 };
 
-const unsetDrawCallback = (nativeId: string) => {
-  global.unsetDrawCallback(parseInt(nativeId, 10));
+const setTouchCallback = (
+  nativeId: string,
+  drawCallback: RNSkiaTouchCallback | undefined
+) => {
+  return SkiaViewApi.setTouchCallback(parseInt(nativeId, 10), drawCallback);
 };
 
 const invalidateSkiaView = (nativeId: string) => {
-  global.invalidateSkiaView(parseInt(nativeId, 10));
+  SkiaViewApi.invalidateSkiaView(parseInt(nativeId, 10));
 };
 
 const assertDrawCallbacksEnabled = () => {
-  if (global.setDrawCallback == null || global.unsetDrawCallback == null) {
-    throw Error("Draw Processors are not enabled.");
+  if (
+    SkiaViewApi === null ||
+    SkiaViewApi.setDrawCallback == null ||
+    SkiaViewApi.invalidateSkiaView == null
+  ) {
+    throw Error("Skia Api is not enabled.");
   }
 };
