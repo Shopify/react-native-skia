@@ -1,83 +1,52 @@
-import React, { useRef, useEffect } from "react";
-import type { NativeMethods, ViewProps } from "react-native";
-import { View, StyleSheet, requireNativeComponent } from "react-native";
+import React from "react";
 
-import type { Canvas, Info } from "../skia/Canvas";
-
-type NativeSkiaViewProps = ViewProps & {
-  mode?: "continuous" | "default";
-  debug?: boolean;
-};
-
-export type RNSkiaDrawCallback = (canvas: Canvas, info: Info) => void;
-
-const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
-  "ReactNativeSkiaView"
-);
-
-type RefType = React.Component<NativeSkiaViewProps> & Readonly<NativeMethods>;
+import { NativeSkiaView, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
 
 let SkiaViewNativeId = 1000;
 
-type RNSkiaViewProps = ViewProps & {
-  mode?: "continuous" | "default";
-  debug?: boolean;
-  innerRef?: RefType;
-  onDraw?: RNSkiaDrawCallback;
-};
+export class RNSkiaView extends React.Component<RNSkiaViewProps> {
+  constructor(props: RNSkiaViewProps) {
+    super(props);
+    this._nativeId = `${SkiaViewNativeId++}`;
+    const { onDraw } = props;
+    if (onDraw) {
+      assertDrawCallbacksEnabled();
+      setDrawCallback(this._nativeId, onDraw);
+    }
+  }
 
-export const RNSkiaView: React.FC<RNSkiaViewProps> = ({
-  style,
-  innerRef,
-  debug = __DEV__,
-  mode = "default",
-  onDraw,
-}) => {
-  const nativeId = useRef<string>(`${SkiaViewNativeId++}`);
-  const previousProcessor = useRef<
-    ((canvas: Canvas, info: Info) => void) | undefined
-  >(onDraw);
+  private _nativeId: string;
 
-  useEffect(() => {
+  componentDidUpdate(prevProps: RNSkiaViewProps) {
+    const { onDraw } = this.props;
+    if (onDraw !== prevProps.onDraw) {
+      assertDrawCallbacksEnabled();
+      if (prevProps.onDraw) {
+        unsetDrawCallback(this._nativeId);
+      }
+      if (onDraw) {
+        setDrawCallback(this._nativeId, onDraw);
+      }
+    }
+  }
+
+  public redraw() {
     assertDrawCallbacksEnabled();
+    invalidateSkiaView(this._nativeId);
+  }
 
-    if (previousProcessor.current) {
-      unsetDrawCallback(nativeId.current);
-      previousProcessor.current = undefined;
-    }
-
-    if (!onDraw) {
-      return;
-    }
-
-    setDrawCallback(nativeId.current, onDraw);
-    previousProcessor.current = onDraw;
-
-    return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      previousProcessor.current && unsetDrawCallback(nativeId.current);
-      previousProcessor.current = undefined;
-    };
-  }, [onDraw]);
-
-  return (
-    <View style={style} collapsable={false}>
+  render() {
+    const { style, mode, debug } = this.props;
+    return (
       <NativeSkiaView
+        style={style}
         collapsable={false}
-        nativeID={nativeId.current}
-        ref={innerRef}
-        style={StyleSheet.absoluteFill}
+        nativeID={this._nativeId}
         mode={mode}
         debug={debug}
       />
-    </View>
-  );
-};
-
-declare global {
-  var invalidateSkiaView: (nativeId: number) => void;
-  var setDrawCallback: (nativeId: number, callback: RNSkiaDrawCallback) => void;
-  var unsetDrawCallback: (nativeId: number) => void;
+    );
+  }
 }
 
 const setDrawCallback = (
@@ -89,6 +58,10 @@ const setDrawCallback = (
 
 const unsetDrawCallback = (nativeId: string) => {
   global.unsetDrawCallback(parseInt(nativeId, 10));
+};
+
+const invalidateSkiaView = (nativeId: string) => {
+  global.invalidateSkiaView(parseInt(nativeId, 10));
 };
 
 const assertDrawCallbacksEnabled = () => {

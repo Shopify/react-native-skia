@@ -201,7 +201,10 @@ void RNSkDrawView::requestRedraw() {
 
     try {
       if (_platformContext != nullptr) {
-        drawFrame(-1);
+        milliseconds ms = std::chrono::duration_cast<milliseconds>(
+          system_clock::now().time_since_epoch()
+        );
+        drawFrame(ms.count());
       }
     } catch (...) {
       _isDrawing = false;
