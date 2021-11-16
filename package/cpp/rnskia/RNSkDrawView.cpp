@@ -197,11 +197,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
 }
 
 void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint>& points) {
-  // Add touches to touch list
-  _touchPoints.clear();
-  for(auto point: points) {
-    _touchPoints.push_back(point);
-  }
+  _touchPoints = points;
   if(_drawingMode != RNSkDrawingMode::Continuous) {
     requestRedraw();
   }
