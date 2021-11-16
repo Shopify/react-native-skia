@@ -8,4 +8,3 @@ export const Skia = {
 };
 
 export * from "./skia";
-export * from "./worklet";

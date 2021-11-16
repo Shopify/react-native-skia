@@ -109,7 +109,7 @@ dependencies {
     //noinspection GradleDynamicVersion
     extractJNI("com.facebook.fbjni:fbjni:+")
 
-    def rnAAR = fileTree("${rootDir}/../../example/node_modules/react-native/android").matching({ it.include "**/**/*.aar" }).singleFile
+    def rnAAR = fileTree("${rootDir}/../node_modules/react-native/android").matching({ it.include "**/**/*.aar" }).singleFile
     extractJNI(files(rnAAR))
 }
 

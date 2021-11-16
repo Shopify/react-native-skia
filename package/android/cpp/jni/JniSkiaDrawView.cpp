@@ -52,7 +52,9 @@ namespace RNSkia
                         makeNativeMethod("surfaceDestroyed", JniSkiaDrawView::surfaceDestroyed),
                         makeNativeMethod("surfaceSizeChanged", JniSkiaDrawView::surfaceSizeChanged),
                         makeNativeMethod("setMode", JniSkiaDrawView::setMode),
-                        makeNativeMethod("setDebugMode", JniSkiaDrawView::setDebugMode)});
+                        makeNativeMethod("setDebugMode", JniSkiaDrawView::setDebugMode),
+                        makeNativeMethod("updateTouchPoints", JniSkiaDrawView::updateTouchPoints)
+        });
     }
 
     void JniSkiaDrawView::setMode(std::string mode)
@@ -70,6 +72,21 @@ namespace RNSkia
     void JniSkiaDrawView::setDebugMode(bool show)
     {
         setShowDebugOverlays(show);
+    }
+
+    void JniSkiaDrawView::updateTouchPoints(jni::JArrayDouble touches) {
+        // Create touch points
+        size_t size = touches.size();
+        std::vector<jdouble> buffer(size + 1L);
+        std::vector<RNSkia::RNSkTouchPoint> points;
+        auto pin = touches.pin();
+        for (size_t i = 0; i < pin.size(); i+=2) {
+            RNSkTouchPoint point;
+            point.x = pin[i] / _platformContext->getPixelDensity();
+            point.y = pin[i+1] / _platformContext->getPixelDensity();
+            points.push_back(point);
+        }
+        updateTouchState(points);
     }
 
     void JniSkiaDrawView::surfaceAvailable(jobject surface, int width, int height)

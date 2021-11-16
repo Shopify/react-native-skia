@@ -38,12 +38,10 @@ target_include_directories(
         ${PACKAGE_NAME}
         PRIVATE
 
-        // We'll read the include files from the example project so that we don't get any clash
-        // with node-modules
-        "../../example/node_modules/react-native/ReactCommon/callinvoker"
-        "../../example/node_modules/react-native/ReactCommon/jsi"
-        "../../example/node_modules/react-native/ReactCommon/react/nativemodule/core"
-        "../../example/node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/turbomodule/core/jni"
+        "../node_modules/react-native/ReactCommon/callinvoker"
+        "../node_modules/react-native/ReactCommon/jsi"
+        "../node_modules/react-native/ReactCommon/react/nativemodule/core"
+        "../node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/turbomodule/core/jni"
 
 
         cpp/skia/include/config/

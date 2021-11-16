@@ -111,11 +111,6 @@ private:
   void endDrawingLoop();
 
   /**
-   * List of active subscriptions
-   */
-  std::vector<std::function<void()>> _sharedValueSubscriptions;
-
-  /**
    * Stores the draw callback
    */
   std::shared_ptr<RNSkDrawCallback> _callback;

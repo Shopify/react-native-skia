@@ -9,6 +9,7 @@
 
 #include <RNSkDrawView.h>
 #include "JniPlatformContext.h"
+#include "JniSkiaDrawView.h"
 
 namespace RNSkia
 {
@@ -43,7 +44,7 @@ namespace RNSkia
         void surfaceDestroyed();
         void surfaceSizeChanged(int, int);
 
-        void exposedRequestRedraw();
+        void updateTouchPoints(jni::JArrayDouble touches);
 
     protected:
         void drawFrame(double timestamp) override;

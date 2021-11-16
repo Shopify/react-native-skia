@@ -5,6 +5,8 @@ import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.MotionEvent;
+import androidx.core.view.MotionEventCompat;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
@@ -29,6 +31,29 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     protected void finalize() throws Throwable {
         super.finalize();
         mHybridData.resetNative();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        int action = ev.getAction();
+        // Up is the final event when the last touch point is released
+        if(action == MotionEvent.ACTION_UP) {
+            // Then we should just pass an empty array because there are
+            // no more touches left
+            updateTouchPoints(new double[0]);
+        } else {
+            // Otherwise pass the touches
+            int count = ev.getPointerCount();
+            MotionEvent.PointerCoords r = new MotionEvent.PointerCoords();
+            double[] points = new double[count*2];
+            for (int i = 0; i < count; i++) {
+                ev.getPointerCoords(i, r);
+                points[i] = r.x;
+                points[i+1] = r.y;
+            }
+            updateTouchPoints(points);
+        }
+        return true;
     }
 
     @Override
@@ -67,4 +92,6 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     public native void setMode(String mode);
 
     public native void setDebugMode(boolean show);
+
+    public native void updateTouchPoints(double[] points);
 }
