@@ -11,6 +11,16 @@
 // https://github.com/brodybits/create-react-native-module/issues/232
 
 const path = require('path');
+const exclusionList = require('metro-config/src/defaults/exclusionList');
+
+const glob = require('glob-to-regexp');
+
+function getBlacklist() {
+  const nodeModuleDirs = [
+    glob(`${path.resolve(__dirname, '../package')}/node_modules/*`),
+  ];
+  return exclusionList(nodeModuleDirs);
+}
 
 module.exports = {
   // workaround for an issue with symlinks encountered starting with
@@ -21,6 +31,8 @@ module.exports = {
       {},
       {get: (_, name) => path.resolve('.', 'node_modules', name)},
     ),
+    // /dist\/.*/
+    blacklistRE: getBlacklist(),
   },
 
   // quick workaround for another issue with symlinks
