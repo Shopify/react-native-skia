@@ -27,6 +27,11 @@ using RNSkTimingInfo = struct {
 
 enum RNSkDrawingMode { Default, Continuous };
 
+using RNSkTouchPoint = struct {
+  double x;
+  double y;  
+};
+
 class RNSkDrawView {
 public:
   /**
@@ -72,6 +77,11 @@ public:
    returns the drawing mode for the view
    */
   RNSkDrawingMode getDrawingMode() { return _drawingMode; }
+  
+  /**
+    Update touch state with new touch points
+   */
+  void updateTouchState(const std::vector<RNSkTouchPoint>& points);
 
 protected:
   /**
@@ -83,7 +93,7 @@ protected:
    Updates the last duration value
    */
   void setLastFrameDuration(size_t duration) { _lastDuration = duration; }
-
+  
 private:
   /**
    * Checks preconditions for drawing
@@ -99,16 +109,6 @@ private:
    Ends an ongoing update loop for this view
    */
   void endDrawingLoop();
-
-  /**
-   * Subscribe to shared values
-   */
-  void subscribeToSharedValues();
-
-  /***
-   * Unsubscribe to shared values
-   */
-  void unsubscribeToSharedValues();
 
   /**
    * List of active subscriptions
@@ -161,6 +161,11 @@ private:
    Last render duration
    */
   size_t _lastDuration = 0;
+  
+  /**
+   Touch points
+   */
+  std::vector<RNSkTouchPoint> _touchPoints;
 };
 
 } // namespace RNSkia

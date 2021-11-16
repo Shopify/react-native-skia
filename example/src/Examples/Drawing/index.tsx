@@ -11,6 +11,7 @@ import {
 
 import {Section} from '../../Section';
 import {ExampleProps} from '../types';
+import {RNSkiaView} from '@shopify/react-native-skia/src/views';
 
 const bgColor = Skia.Color('#7FC8A9');
 const fgColor = Skia.Color('#7F33A9');
@@ -33,10 +34,53 @@ export const DrawingExample: React.FC<ExampleProps> = ({
   });
 
   const paths = useMemo(() => [] as IPath[], []);
+  const isDrawing = useRef<boolean>(false);
 
   const onDraw = useDrawCallback(
-    canvas => {
+    (canvas, info) => {
+      // Clear screen
       canvas.drawPaint(paint);
+
+      // Handle touches
+      const {touches} = info;
+      if (isDrawing.current !== true && touches.length > 0) {
+        // Begin
+        isDrawing.current = true;
+        // Create new path
+        const path = Skia.Path();
+        paths.push(path);
+        path.moveTo(touches[0].x, touches[0].y);
+        prevPointRef.current = {
+          x: touches[0].x,
+          y: touches[0].y,
+        };
+      } else if (isDrawing.current === true && touches.length > 0) {
+        // Drawing
+        // Get current path object
+        const path = paths[paths.length - 1];
+
+        // Get current position
+        const x = touches[0].x;
+        const y = touches[0].y;
+
+        // Calculate and draw a smooth curve
+        const x_mid = (prevPointRef.current!.x + x) / 2;
+        const y_mid = (prevPointRef.current!.y + y) / 2;
+
+        path.quadTo(
+          prevPointRef.current!.x,
+          prevPointRef.current!.y,
+          x_mid,
+          y_mid,
+        );
+
+        prevPointRef.current = {x, y};
+      } else if (isDrawing.current === true && touches.length === 0) {
+        // Ended
+        isDrawing.current = false;
+      }
+
+      // Draw paths
       if (paths.length > 0) {
         for (let i = 0; i < paths.length; i++) {
           canvas.drawPath(paths[i], pathPaint);
@@ -46,6 +90,7 @@ export const DrawingExample: React.FC<ExampleProps> = ({
     [paint, pathPaint, paths],
   );
 
+  const skiaViewRef = useRef<RNSkiaView>(null);
   return (
     <Section
       title="Drawing Example"
@@ -53,42 +98,22 @@ export const DrawingExample: React.FC<ExampleProps> = ({
       index={index}
       isVisible={isVisible}
       onToggle={onToggle}>
-      <View
-        onTouchStart={evt => {
-          const path = Skia.Path();
-          paths.push(path);
-          path.moveTo(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
-          prevPointRef.current = {
-            x: evt.nativeEvent.locationX,
-            y: evt.nativeEvent.locationY,
-          };
-        }}
-        onTouchMove={evt => {
-          if (prevPointRef.current === undefined) {
-            return;
-          }
-          // Get current path object
-          const path = paths[paths.length - 1];
-
-          // Get current position
-          const x = evt.nativeEvent.locationX;
-          const y = evt.nativeEvent.locationY;
-
-          // Calculate and draw a smooth curve
-          const x_mid = (prevPointRef.current.x + x) / 2;
-          const y_mid = (prevPointRef.current.y + y) / 2;
-
-          path.quadTo(
-            prevPointRef.current.x,
-            prevPointRef.current.y,
-            x_mid,
-            y_mid,
-          );
-
-          prevPointRef.current = {x, y};
-        }}>
-        <Skia.View style={styles.skiaview} onDraw={onDraw} mode="continuous" />
-        <Button title="Clear" onPress={() => (paths.length = 0)} />
+      <Skia.View ref={skiaViewRef} style={styles.skiaview} onDraw={onDraw} />
+      <View style={styles.buttons}>
+        <Button
+          title="Clear"
+          onPress={() => {
+            paths.length = 0;
+            skiaViewRef.current?.redraw();
+          }}
+        />
+        <Button
+          title="Undo"
+          onPress={() => {
+            paths.length = Math.max(0, paths.length - 1);
+            skiaViewRef.current?.redraw();
+          }}
+        />
       </View>
     </Section>
   );
@@ -100,5 +125,8 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height * 0.45,
     borderRadius: 20,
     overflow: 'hidden',
+  },
+  buttons: {
+    flexDirection: 'row',
   },
 });

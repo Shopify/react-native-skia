@@ -73,14 +73,25 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
           args[1] = jsi::Object(*runtime);
 
-          // Second argument should be the height/width, timestamp, delta and
-          // fps
+          // Second argument should be the height/width, timestamp, delta
+          // fps and touch points
           auto infoObject = args[1].asObject(*runtime);
           infoObject.setProperty(*runtime, "width", width);
           infoObject.setProperty(*runtime, "height", height);
           infoObject.setProperty(*runtime, "timestamp", timestamp);
           infoObject.setProperty(*runtime, "delta", delta);
           infoObject.setProperty(*runtime, "fps", 1.0 / delta);
+                                       
+          // Add touch points
+          auto touches = jsi::Array(*runtime, _touchPoints.size());
+          for(size_t i=0; i<_touchPoints.size(); i++) {
+            auto touchObj = jsi::Object(*runtime);
+            touchObj.setProperty(*runtime, "x", _touchPoints.at(i).x);
+            touchObj.setProperty(*runtime, "y", _touchPoints.at(i).y);
+            touches.setValueAtIndex(*runtime, i, touchObj);
+          }
+                                       
+          infoObject.setProperty(*runtime, "touches", touches);
 
           // To be able to call the drawing function we'll wrap it once again
           callback->call(*runtime, static_cast<const jsi::Value *>(args),
@@ -185,6 +196,17 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
   }
 }
 
+void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint>& points) {
+  // Add touches to touch list
+  _touchPoints.clear();
+  for(auto point: points) {
+    _touchPoints.push_back(point);
+  }
+  if(_drawingMode != RNSkDrawingMode::Continuous) {
+    requestRedraw();
+  }
+}
+
 void RNSkDrawView::requestRedraw() {
   if (!isReadyToDraw()) {
     return;
@@ -202,8 +224,7 @@ void RNSkDrawView::requestRedraw() {
     try {
       if (_platformContext != nullptr) {
         milliseconds ms = std::chrono::duration_cast<milliseconds>(
-          system_clock::now().time_since_epoch()
-        );
+            system_clock::now().time_since_epoch());
         drawFrame(ms.count());
       }
     } catch (...) {

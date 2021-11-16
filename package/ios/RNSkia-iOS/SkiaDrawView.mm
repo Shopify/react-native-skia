@@ -1,6 +1,5 @@
 
 #import "SkiaDrawView.h"
-
 #import <RNSkLog.h>
 
 #import <chrono>
@@ -135,6 +134,34 @@ void SkiaDrawViewImpl::destroy() {
 
 - (SkiaDrawViewImpl*) impl {
   return _impl.get();
+}
+
+- (void) touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+  [self handleTouches:touches withEvent:event];
+}
+
+-(void) touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+  [self handleTouches:touches withEvent:event];
+}
+
+-(void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+  [self handleTouches:touches withEvent:event];
+}
+
+- (void) handleTouches:(NSSet<UITouch*>*) touches withEvent:(UIEvent*) event {
+  if (event.type == UIEventTypeTouches) {
+    std::vector<RNSkia::RNSkTouchPoint> nextTouches;
+    for (UITouch *touch in touches) {
+      auto position = [touch preciseLocationInView:self];
+      if([touch phase] != UITouchPhaseEnded) {
+        RNSkia::RNSkTouchPoint nextTouch;
+        nextTouch.x = position.x;
+        nextTouch.y = position.y;
+        nextTouches.push_back(nextTouch);
+      }
+    }
+    _impl->updateTouchState(nextTouches);
+  }
 }
 
 - (void) willMoveToWindow:(UIWindow *)newWindow {
