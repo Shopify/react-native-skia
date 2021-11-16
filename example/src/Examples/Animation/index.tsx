@@ -11,9 +11,6 @@ import {Section} from '../../Section';
 import {ExampleProps} from '../types';
 import {Animation} from '../animation';
 
-const bgColor = Skia.Color('#7FC8A9');
-const fgColor = Skia.Color('#7F33A9');
-
 const Size = 25;
 
 export const AnimationExample: React.FC<ExampleProps> = ({
@@ -21,8 +18,8 @@ export const AnimationExample: React.FC<ExampleProps> = ({
   isVisible,
   onToggle,
 }) => {
-  const paint = usePaint(p => p.setColor(bgColor));
-  const foregroundPaint = usePaint(p => p.setColor(fgColor));
+  const paint = usePaint(p => p.setColor(Skia.Color('#7FC8A9')));
+  const foregroundPaint = usePaint(p => p.setColor(Skia.Color('#7F33A9')));
   const font = useFont();
 
   const onDraw = useDrawCallback(
