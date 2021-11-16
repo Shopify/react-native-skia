@@ -96,9 +96,8 @@ export const DrawingExample: React.FC<ExampleProps> = ({
 
 const styles = StyleSheet.create({
   skiaview: {
-    width: Dimensions.get('window').width * 0.85,
+    width: '100%',
     height: Dimensions.get('window').height * 0.45,
-    marginBottom: 20,
     borderRadius: 20,
     overflow: 'hidden',
   },

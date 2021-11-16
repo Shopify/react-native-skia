@@ -9,7 +9,7 @@ import {
 
 import {Section} from '../../Section';
 import {ExampleProps} from '../types';
-import {Easing, interpolate, Extrapolate, normalize} from '../animation';
+import {Animation} from '../animation';
 
 const bgColor = Skia.Color('#7FC8A9');
 const fgColor = Skia.Color('#7F33A9');
@@ -28,20 +28,27 @@ export const AnimationExample: React.FC<ExampleProps> = ({
   const onDraw = useDrawCallback(
     (canvas, info) => {
       canvas.drawPaint(paint);
-      let t = normalize(info.timestamp, {duration: 2});
-      t = Easing.inOut(t);
-      const posX = interpolate(
+      // Normalize the timestamp to a value between 0 and 1 with a duration of 2 seconds
+      let t = Animation.normalize(info.timestamp, {durationSeconds: 2});
+
+      // Apply easing
+      t = Animation.Easing.inOut(t);
+
+      // Interpolate X/Y on the eased t value
+      const posX = Animation.interpolate(
         t,
         [0, 0.5, 1],
         [0, info.width - Size, 0],
-        Extrapolate.CLAMP,
+        Animation.Extrapolate.CLAMP,
       );
-      const posY = interpolate(
+      const posY = Animation.interpolate(
         t,
         [0, 0.5, 1],
         [0, info.height - Size, 0],
-        Extrapolate.CLAMP,
+        Animation.Extrapolate.CLAMP,
       );
+
+      // Draw the circle
       canvas.drawCircle(posX, posY, Size, foregroundPaint);
     },
     [paint, foregroundPaint, font],
@@ -61,9 +68,8 @@ export const AnimationExample: React.FC<ExampleProps> = ({
 
 const styles = StyleSheet.create({
   skiaview: {
-    width: Dimensions.get('window').width * 0.85,
+    width: '100%',
     height: Dimensions.get('window').height * 0.45,
-    marginBottom: 20,
     borderRadius: 20,
     overflow: 'hidden',
   },

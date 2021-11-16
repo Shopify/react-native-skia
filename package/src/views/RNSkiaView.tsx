@@ -61,8 +61,9 @@ export const RNSkiaView: React.FC<RNSkiaViewProps> = ({
   }, [onDraw]);
 
   return (
-    <View style={style}>
+    <View style={style} collapsable={false}>
       <NativeSkiaView
+        collapsable={false}
         nativeID={nativeId.current}
         ref={innerRef}
         style={StyleSheet.absoluteFill}

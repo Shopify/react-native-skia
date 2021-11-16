@@ -1,19 +1,19 @@
-export const normalize = (
+const normalize = (
   value: number,
   params: {
-    duration: number;
+    durationSeconds: number;
   },
-) => (value / params.duration / 1) % 1;
+) => (value / params.durationSeconds / 1) % 1;
 
 const easingInOut = (t: number) => {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 };
 
-export const Easing = {
+const Easing = {
   inOut: easingInOut,
 };
 
-export enum Extrapolate {
+enum Extrapolate {
   EXTEND = 0,
   CLAMP = 1,
   IDENTITY = 2,
@@ -53,7 +53,7 @@ const interpolateInternal = (
   return val;
 };
 
-export const interpolate = (
+const interpolate = (
   v: number,
   inputRange: Array<number>,
   outputRange: Array<number>,
@@ -97,4 +97,11 @@ export const interpolate = (
     narrowedInput[3],
     type,
   );
+};
+
+export const Animation = {
+  Easing,
+  Extrapolate,
+  interpolate,
+  normalize,
 };

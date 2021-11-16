@@ -54,7 +54,5 @@ const styles = StyleSheet.create({
   },
   sectionContent: {
     marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
   },
 });
