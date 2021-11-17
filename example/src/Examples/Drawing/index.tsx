@@ -34,7 +34,7 @@ export const DrawingExample: React.FC<ExampleProps> = ({
   const paths = useMemo(() => [] as IPath[], []);
   const isDrawing = useRef<boolean>(false);
 
-  const onTouches = useTouchCallback(
+  const onTouch = useTouchCallback(
     touches => {
       // Handle touches
       if (isDrawing.current !== true && touches.length > 0) {
@@ -92,6 +92,7 @@ export const DrawingExample: React.FC<ExampleProps> = ({
   );
 
   const skiaViewRef = useRef<RNSkiaView>(null);
+
   return (
     <Section
       title="Drawing Example"
@@ -103,7 +104,7 @@ export const DrawingExample: React.FC<ExampleProps> = ({
         ref={skiaViewRef}
         style={styles.skiaview}
         onDraw={onDraw}
-        onTouch={onTouches}
+        onTouch={onTouch}
       />
       <View style={styles.buttons}>
         <Button
