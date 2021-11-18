@@ -37,6 +37,8 @@ export const configurations: Configuration = {
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_gl", true],
+      ["cc", '"clang"'],
+      ["cxx", '"clang++"'],
       [
         "extra_cflags",
         '["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"]',
