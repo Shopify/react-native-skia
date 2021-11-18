@@ -22,12 +22,19 @@
   "keywords": [
     "react-native"
   ],
-  "author": {
-    "name": "Your Name",
-    "email": "yourname@email.com"
-  },
+  "author": "Shopify Inc.",
+  "contributors": [
+    {
+      "name": "Christian Falch",
+      "email": "christian.falch@gmail.com"
+    },
+    {
+      "name": "William Candillon",
+      "email": "wcandillon@gmail.com"
+    }
+  ],
   "license": "MIT",
-  "licenseFilename": "LICENSE",
+  "licenseFilename": "LICENSE.md",
   "readmeFilename": "README.md",
   "peerDependencies": {
     "react": ">=16.8.1",
