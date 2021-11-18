@@ -51,6 +51,8 @@ export const configurations: Configuration = {
     args: [
       ["skia_use_metal", true],
       ["skia_use_gl", true],
+      ["cc", '"clang"'],
+      ["cxx", '"clang++"'],
       [
         "extra_cflags",
         '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-mios-version-min=10.0"]',
