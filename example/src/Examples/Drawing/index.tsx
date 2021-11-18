@@ -1,5 +1,5 @@
 import React, {useMemo, useRef} from 'react';
-import {Button, Dimensions, StyleSheet, View} from 'react-native';
+import {Button, StyleSheet, View} from 'react-native';
 import type {IPath} from '@shopify/react-native-skia';
 import {
   Skia,
@@ -11,16 +11,9 @@ import {
   RNSkiaView,
 } from '@shopify/react-native-skia';
 
-import {Section} from '../../Section';
-import {ExampleProps} from '../types';
-
 type Point = {x: number; y: number};
 
-export const DrawingExample: React.FC<ExampleProps> = ({
-  index,
-  isVisible,
-  onToggle,
-}) => {
+export const DrawingExample: React.FC = () => {
   const paint = usePaint(p => p.setColor(Skia.Color('#7FC8A9')));
   const prevPointRef = useRef<Point>();
 
@@ -94,12 +87,7 @@ export const DrawingExample: React.FC<ExampleProps> = ({
   const skiaViewRef = useRef<RNSkiaView>(null);
 
   return (
-    <Section
-      title="Drawing Example"
-      description="Touch to draw!"
-      index={index}
-      isVisible={isVisible}
-      onToggle={onToggle}>
+    <>
       <Skia.View
         ref={skiaViewRef}
         style={styles.skiaview}
@@ -122,18 +110,19 @@ export const DrawingExample: React.FC<ExampleProps> = ({
           }}
         />
       </View>
-    </Section>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   skiaview: {
     width: '100%',
-    height: Dimensions.get('window').height * 0.45,
-    borderRadius: 20,
+    flex: 1,
     overflow: 'hidden',
   },
   buttons: {
     flexDirection: 'row',
+    paddingBottom: 24,
+    paddingHorizontal: 14,
   },
 });

@@ -1,41 +1,25 @@
-import React, {useCallback, useState} from 'react';
-import {SafeAreaView, StatusBar, useColorScheme, View} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import React from 'react';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
-import {DrawingExample, AnimationExample} from './Examples';
+import {HomeScreen, DrawingExample, AnimationExample} from './Examples';
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  const [selectedExample, setSelectedExample] = useState<number>(-1);
-  const toggleExample = useCallback(
-    (index: number) => setSelectedExample(p => (p === index ? -1 : index)),
-    [],
-  );
-
+  const Stack = createNativeStackNavigator();
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <View
-        style={{
-          backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        }}>
-        <DrawingExample
-          index={0}
-          onToggle={toggleExample}
-          isVisible={selectedExample === 0}
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            title: '🎨 Skia',
+          }}
         />
-        <AnimationExample
-          index={1}
-          onToggle={toggleExample}
-          isVisible={selectedExample === 1}
-        />
-      </View>
-    </SafeAreaView>
+        <Stack.Screen name="Drawing" component={DrawingExample} />
+        <Stack.Screen name="Animation" component={AnimationExample} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 

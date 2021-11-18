@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dimensions, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {
   Skia,
   usePaint,
@@ -7,17 +7,11 @@ import {
   useFont,
 } from '@shopify/react-native-skia';
 
-import {Section} from '../../Section';
-import {ExampleProps} from '../types';
-import {Animation} from '../animation';
+import {Animation} from '../../Animation';
 
 const Size = 25;
 
-export const AnimationExample: React.FC<ExampleProps> = ({
-  index,
-  isVisible,
-  onToggle,
-}) => {
+export const AnimationExample: React.FC = () => {
   const paint = usePaint(p => p.setColor(Skia.Color('#7FC8A9')));
   const foregroundPaint = usePaint(p => p.setColor(Skia.Color('#7F33A9')));
   const font = useFont();
@@ -52,22 +46,14 @@ export const AnimationExample: React.FC<ExampleProps> = ({
   );
 
   return (
-    <Section
-      title="Animation Example"
-      description="Using animations with Skia"
-      index={index}
-      isVisible={isVisible}
-      onToggle={onToggle}>
-      <Skia.View style={styles.skiaview} onDraw={onDraw} mode="continuous" />
-    </Section>
+    <Skia.View style={styles.skiaview} onDraw={onDraw} mode="continuous" />
   );
 };
 
 const styles = StyleSheet.create({
   skiaview: {
     width: '100%',
-    height: Dimensions.get('window').height * 0.45,
-    borderRadius: 20,
+    flex: 1,
     overflow: 'hidden',
   },
 });
