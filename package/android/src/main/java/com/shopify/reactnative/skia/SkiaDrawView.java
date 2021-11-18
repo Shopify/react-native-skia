@@ -36,23 +36,32 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
-        // Up is the final event when the last touch point is released
-        if(action == MotionEvent.ACTION_UP) {
-            // Then we should just pass an empty array because there are
-            // no more touches left
-            updateTouchPoints(new double[0]);
-        } else {
-            // Otherwise pass the touches
-            int count = ev.getPointerCount();
-            MotionEvent.PointerCoords r = new MotionEvent.PointerCoords();
-            double[] points = new double[count*2];
-            for (int i = 0; i < count; i++) {
-                ev.getPointerCoords(i, r);
-                points[i] = r.x;
-                points[i+1] = r.y;
+        int count = ev.getPointerCount();
+        MotionEvent.PointerCoords r = new MotionEvent.PointerCoords();
+        double[] points = new double[count*4];
+        for (int i = 0; i < count; i++) {
+            ev.getPointerCoords(i, r);
+            points[i] = r.x;
+            points[i+1] = r.y;
+            points[i+2] = ev.getPressure(i);
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    points[i+3] = 0;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    points[i+3] = 1;
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_POINTER_UP:
+                    points[i+3] = 2;
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    points[i+3] = 3;
+                    break;
             }
-            updateTouchPoints(points);
         }
+        updateTouchPoints(points);
         return true;
     }
 

@@ -10,6 +10,7 @@ import {
   StrokeCap,
   RNSkiaView,
 } from '@shopify/react-native-skia';
+import {TouchType} from '@shopify/react-native-skia/src/views';
 
 type Point = {x: number; y: number};
 
@@ -30,7 +31,11 @@ export const DrawingExample: React.FC = () => {
   const onTouch = useTouchCallback(
     touches => {
       // Handle touches
-      if (isDrawing.current !== true && touches.length > 0) {
+      if (touches.length === 0) {
+        return;
+      }
+
+      if (isDrawing.current !== true) {
         // Begin
         isDrawing.current = true;
         // Create new path
@@ -41,7 +46,8 @@ export const DrawingExample: React.FC = () => {
           x: touches[0].x,
           y: touches[0].y,
         };
-      } else if (isDrawing.current === true && touches.length > 0) {
+      } else if (isDrawing.current === true) {
+        console.log(touches[0].force);
         // Get current path object
         const path = paths[paths.length - 1];
 
@@ -61,9 +67,13 @@ export const DrawingExample: React.FC = () => {
         );
 
         prevPointRef.current = {x, y};
-      } else if (isDrawing.current === true && touches.length === 0) {
-        // Ended
-        isDrawing.current = false;
+
+        // Test if we should end
+        if (touches[0].type === TouchType.End) {
+          // Ended
+          isDrawing.current = false;
+          return;
+        }
       }
     },
     [paths],

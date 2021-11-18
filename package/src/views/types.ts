@@ -23,9 +23,18 @@ export type NativeSkiaViewProps = ViewProps & {
   debug?: boolean;
 };
 
+export enum TouchType {
+  Start,
+  Active,
+  End,
+  Cancelled,
+}
+
 export interface TouchInfo {
   x: number;
   y: number;
+  force: number;
+  type: TouchType;
 }
 
 export interface DrawInfo {

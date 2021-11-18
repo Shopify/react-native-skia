@@ -39,6 +39,8 @@ void RNSkDrawView::setTouchCallback(std::shared_ptr<jsi::Function> callback) {
       auto touchObj = jsi::Object(*runtime);
       touchObj.setProperty(*runtime, "x", touchPoints.at(i).x);
       touchObj.setProperty(*runtime, "y", touchPoints.at(i).y);
+      touchObj.setProperty(*runtime, "force", touchPoints.at(i).force);
+      touchObj.setProperty(*runtime, "type", (double)touchPoints.at(i).type);
       touches.setValueAtIndex(*runtime, i, touchObj);
     }
 
@@ -117,11 +119,12 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           // Average duration
           timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
               _lastDuration;
-          if (timingInfo->lastDurationIndex == LAST_DURATION_COUNT) {
+          
+          if (timingInfo->lastDurationIndex == NUMBER_OF_DURATION_SAMPLES) {
             timingInfo->lastDurationIndex = 0;
           }
 
-          if (timingInfo->lastDurationsCount < LAST_DURATION_COUNT) {
+          if (timingInfo->lastDurationsCount < NUMBER_OF_DURATION_SAMPLES) {
             timingInfo->lastDurationsCount++;
           }
 

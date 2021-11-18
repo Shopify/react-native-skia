@@ -153,12 +153,30 @@ void SkiaDrawViewImpl::destroy() {
     std::vector<RNSkia::RNSkTouchPoint> nextTouches;
     for (UITouch *touch in touches) {
       auto position = [touch preciseLocationInView:self];
-      if([touch phase] != UITouchPhaseEnded) {
-        RNSkia::RNSkTouchPoint nextTouch;
-        nextTouch.x = position.x;
-        nextTouch.y = position.y;
-        nextTouches.push_back(nextTouch);
+      RNSkia::RNSkTouchPoint nextTouch;
+      nextTouch.x = position.x;
+      nextTouch.y = position.y;
+      nextTouch.force = [touch force];
+      auto phase = [touch phase];
+      switch(phase) {
+        case UITouchPhaseBegan:
+          nextTouch.type = RNSkia::RNSkTouchType::Start;
+          break;
+        case UITouchPhaseMoved:
+          nextTouch.type = RNSkia::RNSkTouchType::Active;
+          break;
+        case UITouchPhaseEnded:
+          nextTouch.type = RNSkia::RNSkTouchType::End;
+          break;
+        case UITouchPhaseCancelled:
+          nextTouch.type = RNSkia::RNSkTouchType::Cancelled;
+          break;
+        default:
+          nextTouch.type = RNSkia::RNSkTouchType::Active;
+          break;
       }
+      
+      nextTouches.push_back(nextTouch);
     }
     _impl->updateTouchState(nextTouches);
   }

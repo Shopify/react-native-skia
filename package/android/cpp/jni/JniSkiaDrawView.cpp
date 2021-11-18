@@ -84,6 +84,8 @@ namespace RNSkia
             RNSkTouchPoint point;
             point.x = pin[i] / _platformContext->getPixelDensity();
             point.y = pin[i+1] / _platformContext->getPixelDensity();
+            point.force = pin[i+2];
+            point.type = (RNSkia::RNSkTouchType)pin[i+3];
             points.push_back(point);
         }
         updateTouchState(points);
