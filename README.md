@@ -12,6 +12,15 @@ You also need to install some tools for the build scripts to work. Run `yarn` in
 
 Make sure you have all the tools required for building the skia libraries (XCode, Ninja, CMake, Android NDK / build tools)
 
+On MacOS you can install Ninja via homebrew:
+
+```sh
+brew install ninja
+```
+
+If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
+`ANDROID_NDK=/Users/username/Library/Android/sdk/ndk-bundle` for instance.
+
 ### Building
 
 - Install dependencies in the root project `yarn`
