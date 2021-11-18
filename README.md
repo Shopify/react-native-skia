@@ -1,9 +1,5 @@
 # @shopify/react-native-skia
 
-## Getting started
-
-`yarn add @shopify/react-native-skia`
-
 ## Library Development
 
 To develop react-native-skia, you need to build the skia libraries on your computer.
