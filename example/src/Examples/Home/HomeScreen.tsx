@@ -5,6 +5,7 @@ import {HomeScreenButton} from './HomeScreenButton';
 export const HomeScreen: React.FC = () => {
   return (
     <View style={styles.container}>
+      <HomeScreenButton title="API" description="API examples" route="API" />
       <HomeScreenButton
         title="Drawing"
         description="Use touches to draw with Skia"

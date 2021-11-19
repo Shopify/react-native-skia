@@ -20,6 +20,7 @@ export const API = () => {
         component={List}
         options={{
           title: '🎨 Skia',
+          header: () => null,
         }}
       />
       <Stack.Screen

@@ -18,13 +18,7 @@ const App = () => {
           }}
         />
 
-        <Stack.Screen
-          name="API"
-          component={API}
-          options={{
-            title: '🎨 API',
-          }}
-        />
+        <Stack.Screen name="API" component={API} />
         <Stack.Screen name="Drawing" component={DrawingExample} />
         <Stack.Screen name="Animation" component={AnimationExample} />
       </Stack.Navigator>
