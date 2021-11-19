@@ -1,29 +1,29 @@
-import React, {useMemo, useState} from 'react';
-import {Button, StyleSheet, View} from 'react-native';
-
-import * as b2 from '@flyover/box2d';
+import React, { useMemo, useState } from "react";
+import { Button, StyleSheet, View } from "react-native";
+import * as b2 from "@flyover/box2d";
 import {
   PaintStyle,
   Skia,
+  SkiaView,
   useDrawCallback,
   usePaint,
-} from '@shopify/react-native-skia';
+} from "@shopify/react-native-skia";
 
-const e_columnCount = 4;
-const e_rowCount = 10;
+const ColumnCount = 4;
+const RowCount = 10;
 
 export const PhysicsExample: React.FC = () => {
   const [replay, setReplay] = useState<number>(0);
 
   const bodies = useMemo(() => {
-    return new Array(e_rowCount * e_columnCount) as b2.b2Body[];
+    return new Array(RowCount * ColumnCount) as b2.b2Body[];
   }, []);
 
   const world = useMemo(() => {
     const gravity: b2.b2Vec2 = new b2.b2Vec2(0, -10);
     const b2world = new b2.b2World(gravity);
 
-    const indices: number[] = new Array(e_rowCount * e_columnCount);
+    const indices: number[] = new Array(RowCount * ColumnCount);
 
     const bd = new b2.b2BodyDef();
     const ground = b2world.CreateBody(bd);
@@ -34,7 +34,7 @@ export const PhysicsExample: React.FC = () => {
 
     const xs = [0.0, -2.5, -5, 2.5, 5];
 
-    for (let j = 0; j < e_columnCount; ++j) {
+    for (let j = 0; j < ColumnCount; ++j) {
       const boxShape = new b2.b2PolygonShape();
       boxShape.SetAsBox(0.5, 0.5);
 
@@ -43,11 +43,11 @@ export const PhysicsExample: React.FC = () => {
       fd.density = 1.0;
       fd.friction = 0.3;
 
-      for (let i = 0; i < e_rowCount; ++i) {
+      for (let i = 0; i < RowCount; ++i) {
         const bodyDef = new b2.b2BodyDef();
         bodyDef.type = b2.b2BodyType.b2_dynamicBody;
 
-        const n = j * e_rowCount + i;
+        const n = j * RowCount + i;
         indices[n] = n;
         bodyDef.userData = indices[n];
 
@@ -65,14 +65,14 @@ export const PhysicsExample: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bodies, replay]);
 
-  const bg = usePaint(p => p.setColor(Skia.Color('#CECECE')));
-  const fg = usePaint(p => {
-    p.setColor(Skia.Color('#000'));
+  const bg = usePaint((p) => p.setColor(Skia.Color("#CECECE")));
+  const fg = usePaint((p) => {
+    p.setColor(Skia.Color("#000"));
     p.setStyle(PaintStyle.Stroke);
     p.setStrokeWidth(0.05);
   });
-  const fgfill = usePaint(p => {
-    p.setColor(Skia.Color('#337FA955'));
+  const fgfill = usePaint((p) => {
+    p.setColor(Skia.Color("#337FA955"));
     p.setStyle(PaintStyle.Fill);
   });
   const onDraw = useDrawCallback(
@@ -82,7 +82,7 @@ export const PhysicsExample: React.FC = () => {
       canvas.save();
       canvas.translate(info.width / 2, info.height / 2);
       canvas.scale(20, 20);
-      canvas.rotate(180);
+      canvas.rotate(180, 0, 0);
 
       // Tick screen
       world.Step(info.timestamp / 10000000, 4, 2);
@@ -91,31 +91,31 @@ export const PhysicsExample: React.FC = () => {
       for (let i = 0; i < bodies.length; i++) {
         canvas.save();
         canvas.translate(bodies[i].GetPosition().x, bodies[i].GetPosition().y);
-        canvas.rotate(bodies[i].GetAngle() * (180 / Math.PI));
-        canvas.drawRect(Skia.Rect(-0.5, -0.5, 1, 1), fg);
-        canvas.drawRect(Skia.Rect(-0.5, -0.5, 1, 1), fgfill);
+        canvas.rotate(bodies[i].GetAngle() * (180 / Math.PI), 0, 0);
+        canvas.drawRect(Skia.XYWHRect(-0.5, -0.5, 1, 1), fg);
+        canvas.drawRect(Skia.XYWHRect(-0.5, -0.5, 1, 1), fgfill);
         canvas.restore();
       }
       canvas.restore();
     },
-    [world],
+    [world]
   );
 
   return (
     <>
-      <Skia.View onDraw={onDraw} style={styles.container} mode={'continuous'} />
+      <SkiaView onDraw={onDraw} style={styles.container} mode={"continuous"} />
       <View style={styles.buttonContainer}>
-        <Button title="Replay" onPress={() => setReplay(p => p + 1)} />
+        <Button title="Replay" onPress={() => setReplay((p) => p + 1)} />
       </View>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1},
+  container: { flex: 1 },
   buttonContainer: {
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    alignItems: "center",
+    justifyContent: "flex-start",
     ...StyleSheet.absoluteFillObject,
   },
 });
