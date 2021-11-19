@@ -1,6 +1,8 @@
 import { Platform, processColor } from "react-native";
 
-export const Color = (color?: number | string): number => {
+export type Color = number;
+
+export const Color = (color?: number | string): Color => {
   let processedColor = processColor(color);
   if (typeof processedColor !== "number") {
     throw new Error(`Couldn't process color: ${color}`);
