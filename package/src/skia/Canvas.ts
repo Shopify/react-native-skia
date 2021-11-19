@@ -1,11 +1,25 @@
-import type { ProcessedColorValue } from "react-native";
-
-import type { IPaint } from "./Paint";
-import type { IRect } from "./Rect";
-import type { IFont } from "./Font";
-import type { IPath } from "./Path";
-import type { IImage } from "./Image";
+import type { Paint } from "./Paint";
+import type { Rect } from "./Rect";
+import type { Font } from "./Font";
+import type { Path } from "./Path";
+import type { Image } from "./Image";
 import type { ISvgDom } from "./Svg";
+import type { Color } from "./Color";
+import type { RRect } from "./RRect";
+import type { BlendMode } from "./Paint/BlendMode";
+import type { Point, PointMode } from "./Point";
+import type { Matrix } from "./Matrix";
+import type { ImageFilter } from "./ImageFilter";
+
+export interface Info {
+  width: number;
+  height: number;
+}
+
+export enum ClipOp {
+  Difference,
+  Intersect,
+}
 
 export type Canvas = {
   /** Draws the image at the given (x, y) position.
@@ -15,7 +29,7 @@ export type Canvas = {
         @param y y location
         @param paint  graphics state used to fill SkCanvas      
     */
-  drawImage: (image: IImage, x: number, y: number, paint?: IPaint) => void;
+  drawImage: (image: Image, x: number, y: number, paint?: Paint) => void;
 
   /** Draws the image in the given rectangle.
 
@@ -23,7 +37,7 @@ export type Canvas = {
         @param rect rect to draw in
         @param paint  graphics state used to fill SkCanvas      
     */
-  drawImageRect: (image: IImage, rect: IRect, paint?: IPaint) => void;
+  drawImageRect: (image: Image, rect: Rect, paint?: Paint) => void;
 
   /** Fills clip with SkPaint paint. SkPaint components, SkShader,
         SkColorFilter, SkImageFilter, and SkBlendMode affect drawing;
@@ -33,22 +47,8 @@ export type Canvas = {
 
         example: https://fiddle.skia.org/c/@Canvas_drawPaint
     */
-  drawPaint: (paint: IPaint) => void;
-  /** Draws point at (x, y) using clip, SkMatrix and SkPaint paint.
+  drawPaint: (paint: Paint) => void;
 
-        The shape of point drawn depends on paint SkPaint::Cap.
-        If paint is set to SkPaint::kRound_Cap, draw a circle of diameter
-        SkPaint stroke width. If paint is set to SkPaint::kSquare_Cap or SkPaint::kButt_Cap,
-        draw a square of width and height SkPaint stroke width.
-        SkPaint::Style is ignored, as if were set to SkPaint::kStroke_Style.
-
-        @param x      left edge of circle or square
-        @param y      top edge of circle or square
-        @param paint  stroke, blend, color, and so on, used to draw
-
-        example: https://fiddle.skia.org/c/@Canvas_drawPoint
-    */
-  drawPoint: (x: number, y: number, paint: IPaint) => void;
   /** Draws line segment from (x0, y0) to (x1, y1) using clip, SkMatrix, and SkPaint paint.
         In paint: SkPaint stroke width describes the line thickness;
         SkPaint::Cap draws the end rounded or square;
@@ -67,7 +67,7 @@ export type Canvas = {
     y0: number,
     x1: number,
     y1: number,
-    paint: IPaint
+    paint: Paint
   ) => void;
   /** Draws SkRect rect using clip, SkMatrix, and SkPaint paint.
         In paint: SkPaint::Style determines if rectangle is stroked or filled;
@@ -79,20 +79,50 @@ export type Canvas = {
 
         example: https://fiddle.skia.org/c/@Canvas_drawRect
     */
-  drawRect: (rect: IRect, paint: IPaint) => void;
-  /** Draws circle at (cx, cy) with radius using clip, SkMatrix, and SkPaint paint.
-        If radius is zero or less, nothing is drawn.
-        In paint: SkPaint::Style determines if circle is stroked or filled;
-        if stroked, SkPaint stroke width describes the line thickness.
+  drawRect: (rect: Rect, paint: Paint) => void;
 
-        @param cx      circle center on the x-axis
-        @param cy      circle center on the y-axis
-        @param radius  half the diameter of circle
-        @param paint   SkPaint stroke or fill, blend, color, and so on, used to draw
+  /**
+   * Draws a circle at (cx, cy) with the given radius.
+   * @param cx
+   * @param cy
+   * @param radius
+   * @param paint
+   */
+  drawCircle(cx: number, cy: number, radius: number, paint: Paint): void;
 
-        example: https://fiddle.skia.org/c/@Canvas_drawCircle
-    */
-  drawCircle: (cx: number, cy: number, radius: number, paint: IPaint) => void;
+  /**
+   * Draws a cubic patch defined by 12 control points [top, right, bottom, left] with optional
+   * colors and shader-coordinates [4] specifed for each corner [top-left, top-right, bottom-right, bottom-left]
+   * @param cubics 12 points : 4 connected cubics specifying the boundary of the patch
+   * @param colors optional colors interpolated across the patch
+   * @param texs optional shader coordinates interpolated across the patch
+   * @param mode Specifies how shader and colors blend (if both are specified)
+   * @param paint
+   */
+  drawPatch(
+    cubics: Point[],
+    colors?: Color[] | null,
+    texs?: Point[] | null,
+    mode?: BlendMode | null,
+    paint?: Paint
+  ): void;
+
+  /**
+   * Restores state to a previous stack value.
+   * @param saveCount
+   */
+  restoreToCount(saveCount: number): void;
+
+  /**
+   * Draws the given points using the current clip, current matrix, and the provided paint.
+   *
+   * See Canvas.h for more on the mode and its interaction with paint.
+   * @param mode
+   * @param points
+   * @param paint
+   */
+  drawPoints(mode: PointMode, points: Point[], paint: Paint): void;
+
   /** Draws arc using clip, SkMatrix, and SkPaint paint.
 
         Arc is part of oval bounded by oval, sweeping from startAngle to startAngle plus
@@ -114,30 +144,38 @@ export type Canvas = {
         @param paint       SkPaint stroke or fill, blend, color, and so on, used to draw
     */
   drawArc: (
-    oval: IRect,
+    oval: Rect,
     startAngle: number,
     sweepAngle: number,
     useCenter: boolean,
-    paint: IPaint
+    paint: Paint
   ) => void;
-  /** Draws SkRRect bounded by SkRect rect, with corner radii (rx, ry) using clip,
-        SkMatrix, and SkPaint paint.
 
-        In paint: SkPaint::Style determines if SkRRect is stroked or filled;
-        if stroked, SkPaint stroke width describes the line thickness.
-        If rx or ry are less than zero, they are treated as if they are zero.
-        If rx plus ry exceeds rect width or rect height, radii are scaled down to fit.
-        If rx and ry are zero, SkRRect is drawn as SkRect and if stroked is affected by
-        SkPaint::Join.
+  /**
+   * Draws the given rectangle with rounded corners using the current clip, current matrix,
+   * and the provided paint.
+   * @param rrect
+   * @param paint
+   */
+  drawRRect(rrect: RRect, paint: Paint): void;
 
-        @param rect   SkRect bounds of SkRRect to draw
-        @param rx     axis length on x-axis of oval describing rounded corners
-        @param ry     axis length on y-axis of oval describing rounded corners
-        @param paint  stroke, blend, color, and so on, used to draw
+  /**
+   * Draws RRect outer and inner using clip, Matrix, and Paint paint.
+   * outer must contain inner or the drawing is undefined.
+   * @param outer
+   * @param inner
+   * @param paint
+   */
+  drawDRRect(outer: RRect, inner: RRect, paint: Paint): void;
 
-        example: https://fiddle.skia.org/c/@Canvas_drawRoundRect
-    */
-  drawRoundRect: (rect: IRect, rx: number, ry: number, paint: IPaint) => void;
+  /**
+   * Draws an oval bounded by the given rectangle using the current clip, current matrix,
+   * and the provided paint.
+   * @param oval
+   * @param paint
+   */
+  drawOval(oval: Rect, paint: Paint): void;
+
   /** Draws SkPath path using clip, SkMatrix, and SkPaint paint.
         SkPath contains an array of path contour, each of which may be open or closed.
 
@@ -152,7 +190,7 @@ export type Canvas = {
 
         example: https://fiddle.skia.org/c/@Canvas_drawPath
     */
-  drawPath: (path: IPath, paint: IPaint) => void;
+  drawPath: (path: Path, paint: Paint) => void;
   /** Draws text, with origin at (x, y), using clip, SkMatrix, SkFont font,
         and SkPaint paint.
 
@@ -173,8 +211,8 @@ export type Canvas = {
     text: string,
     x: number,
     y: number,
-    font: IFont,
-    paint: IPaint
+    font: Font,
+    paint: Paint
   ) => void;
   /**
    * Renders the SVG Dom object to the canvas. If width/height are omitted,
@@ -198,26 +236,33 @@ export type Canvas = {
         example: https://fiddle.skia.org/c/@Canvas_save
     */
   save: () => number;
-  /** Saves SkMatrix and clip, and allocates a SkBitmap for subsequent drawing.
-        Calling restore() discards changes to SkMatrix and clip, and draws the SkBitmap.
 
-        SkMatrix may be changed by translate(), scale(), rotate(), skew(), concat(),
-        setMatrix(), and resetMatrix(). Clip may be changed by clipRect(), clipRRect(),
-        clipPath(), clipRegion().
+  /**
+   * Saves Matrix and clip, and allocates a SkBitmap for subsequent drawing.
+   * Calling restore() discards changes to Matrix and clip, and draws the SkBitmap.
+   * It returns the height of the stack.
+   * See Canvas.h for more.
+   * @param paint
+   * @param bounds
+   * @param backdrop
+   * @param flags
+   */
+  saveLayer(
+    paint?: Paint,
+    bounds?: Rect | null,
+    backdrop?: ImageFilter | null,
+    flags?: number
+  ): number;
 
-        SkRect bounds suggests but does not define the layer size. To clip drawing to
-        a specific rectangle, use clipRect().
+  /**
+   * Saves Matrix and clip, and allocates a SkBitmap for subsequent drawing.
+   * Calling restore() discards changes to Matrix and clip, and draws the SkBitmap.
+   * It returns the height of the stack.
+   * See Canvas.h for more.
+   * @param paint
+   */
+  saveLayerPaint(paint?: Paint): number;
 
-        Optional SkPaint paint applies alpha, SkColorFilter, SkImageFilter, and
-        SkBlendMode when restore() is called.
-
-        Call restoreToCount() with returned value to restore this and subsequent saves.
-
-        @param bounds  hint to limit the size of layer; may be nullptr
-        @param paint   graphics state for layer; may be nullptr
-        @return        depth of saved stack
-    */
-  saveLayer: (bounds: IRect, paint: IPaint) => number;
   /** Removes changes to SkMatrix and clip since SkCanvas state was
         last saved. The state is removed from the stack.
 
@@ -228,80 +273,82 @@ export type Canvas = {
         example: https://fiddle.skia.org/c/@Canvas_restore
     */
   restore: () => void;
-  /** Rotates SkMatrix by degrees. Positive degrees rotates clockwise.
 
-        Mathematically, replaces SkMatrix with a rotation matrix
-        premultiplied with SkMatrix.
-
-        This has the effect of rotating the drawing by degrees before transforming
-        the result with SkMatrix.
-
-        @param degrees  amount to rotate, in degrees
-
-        example: https://fiddle.skia.org/c/@Canvas_rotate
-    */
-  rotate: (degrees: number) => void;
-  /** Translates SkMatrix by dx along the x-axis and dy along the y-axis.
-
-        Mathematically, replaces SkMatrix with a translation matrix
-        premultiplied with SkMatrix.
-
-        This has the effect of moving the drawing by (dx, dy) before transforming
-        the result with SkMatrix.
-
-        @param dx  distance to translate on x-axis
-        @param dy  distance to translate on y-axis
-
-        example: https://fiddle.skia.org/c/@Canvas_translate
-    */
-  translate: (dx: number, dy: number) => void;
-  /** Scales SkMatrix by sx on the x-axis and sy on the y-axis.
-
-        Mathematically, replaces SkMatrix with a scale matrix
-        premultiplied with SkMatrix.
-
-        This has the effect of scaling the drawing by (sx, sy) before transforming
-        the result with SkMatrix.
-
-        @param sx  amount to scale on x-axis
-        @param sy  amount to scale on y-axis
-
-        example: https://fiddle.skia.org/c/@Canvas_scale
-    */
-  scale: (sx: number, sy: number) => void;
   /**
-   Skews SkMatrix by sx on the x-axis and sy on the y-axis.
-
-    A positive value of sx skews the drawing right as y-axis values increase; a positive value of sy skews the drawing
-    down as x-axis values increase.
-
-    Mathematically, replaces SkMatrix with a skew matrix premultiplied with SkMatrix.
-
-    This has the effect of skewing the drawing by (sx, sy) before transforming the result with SkMatrix.
-
-    Parameters
-    sx	amount to skew on x-axis
-    sy	amount to skew on y-axis
-    example: https://fiddle.skia.org/c/@Canvas_skew
+   * Rotates the current matrix by the number of degrees.
+   * @param rot - angle of rotation in degrees.
+   * @param rx
+   * @param ry
    */
-  skew: (sx: number, sy: number) => void;
-  /** Fills clip with color color.
-        mode determines how ARGB is combined with destination.
+  rotate(rotationInDegrees: number, rx: number, ry: number): void;
 
-        @param color  unpremultiplied ARGB
-        @param mode   TODO: SkBlendMode used to combine source color and destination
-
-        example: https://fiddle.skia.org/c/@Canvas_drawColor
-    */
-  drawColor: (color: ProcessedColorValue | null | undefined) => void;
   /**
-    Replaces clip with the intersection of clip and path.
-    Resulting clip is aliased; pixels are fully contained by the clip. SkPath::FillType determines if path describes
-    the area inside or outside its contours; and if path contour overlaps itself or another path contour,
-    whether the overlaps form part of the area. path is transformed by SkMatrix before it is combined with clip.
-
-    @param path	SkPath to combine with clip
-    @papram doAntiAlias	true if clip is to be anti-aliased
+   * Scales the current matrix by sx on the x-axis and sy on the y-axis.
+   * @param sx
+   * @param sy
    */
-  clipPath: (path: IPath, doAntiAlias: boolean) => void;
+  scale(sx: number, sy: number): void;
+
+  /**
+   *  Skews Matrix by sx on the x-axis and sy on the y-axis. A positive value of sx
+   *  skews the drawing right as y-axis values increase; a positive value of sy skews
+   *  the drawing down as x-axis values increase.
+   * @param sx
+   * @param sy
+   */
+  skew(sx: number, sy: number): void;
+
+  /**
+   * Translates Matrix by dx along the x-axis and dy along the y-axis.
+   * @param dx
+   * @param dy
+   */
+  translate(dx: number, dy: number): void;
+
+  /**
+   * Fills clip with the given color.
+   * @param color
+   * @param blendMode - defaults to SrcOver.
+   */
+  drawColor(color: Color, blendMode?: BlendMode): void;
+
+  /**
+   * Fills the current clip with the given color using Src BlendMode.
+   * This has the effect of replacing all pixels contained by clip with color.
+   * @param color
+   */
+  clear(color: Color): void;
+
+  /**
+   * Replaces clip with the intersection or difference of the current clip and path,
+   * with an aliased or anti-aliased clip edge.
+   * @param path
+   * @param op
+   * @param doAntiAlias
+   */
+  clipPath(path: Path, op: ClipOp, doAntiAlias: boolean): void;
+
+  /**
+   * Replaces clip with the intersection or difference of the current clip and rect,
+   * with an aliased or anti-aliased clip edge.
+   * @param rect
+   * @param op
+   * @param doAntiAlias
+   */
+  clipRect(rect: Rect, op: ClipOp, doAntiAlias: boolean): void;
+
+  /**
+   * Replaces clip with the intersection or difference of the current clip and rrect,
+   * with an aliased or anti-aliased clip edge.
+   * @param rrect
+   * @param op
+   * @param doAntiAlias
+   */
+  clipRRect(rrect: RRect, op: ClipOp, doAntiAlias: boolean): void;
+
+  /**
+   * Replaces current matrix with m premultiplied with the existing matrix.
+   * @param m
+   */
+  concat(m: Matrix): void;
 };

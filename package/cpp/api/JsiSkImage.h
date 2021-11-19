@@ -28,30 +28,45 @@ public:
              const std::string &localUri)
       : JsiSkWrappingSkPtrHostObject<SkImage>(context, image),
         _localUri(localUri) {
-    installReadonlyProperty("width", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->width()));
+
+    installFunction("width", JSI_FUNC_SIGNATURE {
+        return jsi::Value(getJsNumber(getObject()->width()));
     });
 
-    installReadonlyProperty("height", [this](jsi::Runtime &) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->height()));
+    installFunction("height", JSI_FUNC_SIGNATURE {
+        return jsi::Value(getJsNumber(getObject()->height()));
     });
 
     installReadonlyProperty("uri", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::String::createFromUtf8(rt, _localUri.c_str());
+        return jsi::String::createFromUtf8(rt, _localUri.c_str());
     });
 
-    installFunction(
-        "makeShader", JSI_FUNC_SIGNATURE {
-          auto tmx = arguments[0].asNumber();
-          auto tmy = arguments[1].asNumber();
-          auto m = count == 3
-                       ? JsiSkMatrix::fromValue(runtime, arguments[2]).get()
-                       : nullptr;
-          auto shader = getObject()->makeShader(
-              (SkTileMode)tmx, (SkTileMode)tmy, SkSamplingOptions(), m);
-          return jsi::Object::createFromHostObject(
-              runtime, std::make_shared<JsiSkShader>(context, shader));
-        });
+    installFunction("makeShaderOptions", JSI_FUNC_SIGNATURE {
+        auto tmx = (SkTileMode)arguments[0].asNumber();
+        auto tmy = (SkTileMode)arguments[1].asNumber();
+        auto fm = (SkFilterMode)arguments[2].asNumber();
+        auto mm = (SkMipmapMode)arguments[3].asNumber();
+        auto m = count > 4
+            ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
+            : nullptr;
+        auto shader = getObject()->makeShader(
+            tmx, tmy, SkSamplingOptions(fm, mm), m);
+        return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkShader>(context, shader));
+    });
+
+    installFunction("makeShaderCubic", JSI_FUNC_SIGNATURE {
+        auto tmx = (SkTileMode)arguments[0].asNumber();
+        auto tmy = (SkTileMode)arguments[1].asNumber();
+        auto B = (float)arguments[2].asNumber();
+        auto C = (float)arguments[3].asNumber();
+        auto m = count > 4
+                    ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
+                    : nullptr;
+        auto shader = getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
+        return jsi::Object::createFromHostObject(
+                runtime, std::make_shared<JsiSkShader>(context, shader));
+    });
   };
 
   /**

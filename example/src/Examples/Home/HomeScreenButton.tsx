@@ -1,7 +1,6 @@
-import {useNavigation} from '@react-navigation/core';
-import {CommonActions} from '@react-navigation/routers';
-import React, {useCallback} from 'react';
-import {TouchableOpacity, View, Text, StyleSheet} from 'react-native';
+import { useNavigation, CommonActions } from "@react-navigation/native";
+import React, { useCallback } from "react";
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 
 type Props = {
   title: string;
@@ -20,7 +19,7 @@ export const HomeScreenButton: React.FC<Props> = ({
       CommonActions.navigate({
         name: route,
         params: {},
-      }),
+      })
     );
   }, [route, navigation]);
   return (
@@ -36,17 +35,17 @@ export const HomeScreenButton: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
 
-    borderBottomColor: '#CCC',
+    borderBottomColor: "#CCC",
     borderBottomWidth: 1,
   },
   title: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingBottom: 4,
   },
   description: {},

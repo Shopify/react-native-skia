@@ -1,3 +1,3 @@
-export * from './Drawing';
-export * from './Animation';
-export * from './Home';
+export * from "./Drawing";
+export * from "./Animation";
+export * from "./Home";
