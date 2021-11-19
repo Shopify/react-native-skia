@@ -12,6 +12,7 @@
     "react-native-skia.podspec"
   ],
   "scripts": {
+    "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,12 +23,19 @@
   "keywords": [
     "react-native"
   ],
-  "author": {
-    "name": "Your Name",
-    "email": "yourname@email.com"
-  },
+  "author": "Shopify Inc.",
+  "contributors": [
+    {
+      "name": "Christian Falch",
+      "email": "christian.falch@gmail.com"
+    },
+    {
+      "name": "William Candillon",
+      "email": "wcandillon@gmail.com"
+    }
+  ],
   "license": "MIT",
-  "licenseFilename": "LICENSE",
+  "licenseFilename": "LICENSE.md",
   "readmeFilename": "README.md",
   "peerDependencies": {
     "react": ">=16.8.1",
@@ -35,7 +43,10 @@
   },
   "devDependencies": {
     "@types/react-native": "^0.65.0",
+    "eslint": "7.32.0",
+    "eslint-config-react-native-wcandillon": "^3.7.2",
     "react": "17.0.2",
-    "react-native": "0.66.2"
+    "react-native": "0.66.2",
+    "typescript": "^4.5.2"
   }
 }

@@ -4,9 +4,14 @@
 #include "JsiSkFont.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
+#include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
 #include "JsiSkPath.h"
+#include "JsiSkPoint.h"
+#include "JsiSkRRect.h"
 #include "JsiSkSvg.h"
+#include "JsiSkTypes.h"
+
 #include <jsi/jsi.h>
 #include <map>
 
@@ -33,24 +38,6 @@ public:
         "drawPaint", JSI_FUNC_SIGNATURE {
           auto paint = JsiSkPaint::fromValue(runtime, arguments[0]);
           _canvas->drawPaint(*paint);
-          return jsi::Value::undefined();
-        });
-
-    installFunction(
-        "drawPaint", JSI_FUNC_SIGNATURE {
-          auto paint = JsiSkPaint::fromValue(runtime, arguments[0]);
-          _canvas->drawPaint(*paint);
-          return jsi::Value::undefined();
-        });
-
-    installFunction(
-        "drawPoint", JSI_FUNC_SIGNATURE {
-          SkScalar x = arguments[0].asNumber();
-          SkScalar y = arguments[1].asNumber();
-
-          auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
-          _canvas->drawPoint(x, y, *paint);
-
           return jsi::Value::undefined();
         });
 
@@ -128,15 +115,117 @@ public:
         });
 
     installFunction(
-        "drawRoundRect", JSI_FUNC_SIGNATURE {
+        "drawRRect", JSI_FUNC_SIGNATURE {
+          auto rect = JsiSkRRect::fromValue(runtime, arguments[0]);
+          auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
+
+          _canvas->drawRRect(*rect, *paint);
+
+          return jsi::Value::undefined();
+        });
+
+    installFunction(
+        "drawDRRect", JSI_FUNC_SIGNATURE {
+          auto outer = JsiSkRRect::fromValue(runtime, arguments[0]);
+          auto inner = JsiSkRRect::fromValue(runtime, arguments[1]);
+          auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
+
+          _canvas->drawDRRect(*outer, *inner, *paint);
+
+          return jsi::Value::undefined();
+        });
+
+    installFunction(
+        "drawOval", JSI_FUNC_SIGNATURE {
           auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
+          auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
 
-          SkScalar cx = arguments[1].asNumber();
-          SkScalar cy = arguments[2].asNumber();
+          _canvas->drawOval(*rect, *paint);
 
-          auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-          _canvas->drawRoundRect(*rect, cx, cy, *paint);
+          return jsi::Value::undefined();
+        });
 
+    installFunction(
+        "drawOval", JSI_FUNC_SIGNATURE {
+          auto c = arguments[0].asNumber();
+          _canvas->restoreToCount(c);
+          return jsi::Value::undefined();
+        });
+
+    installFunction(
+        "getSaveCount", JSI_FUNC_SIGNATURE {
+          return jsi::Value(getJsNumber(_canvas->getSaveCount()));
+        });
+
+    installFunction(
+        "drawPoints", JSI_FUNC_SIGNATURE {
+          auto pointMode = arguments[0].asNumber();
+
+          std::vector<SkPoint> points;
+          auto jsiPoints = arguments[1].asObject(runtime).asArray(runtime);
+          auto pointsSize = jsiPoints.size(runtime);
+          for (int i = 0; i < pointsSize; i++) {
+            std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
+                runtime,
+                jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
+            points.push_back(*point.get());
+          }
+
+          auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
+
+          _canvas->drawPoints((SkCanvas::PointMode)pointMode, pointsSize,
+                              points.data(), *paint);
+
+          return jsi::Value::undefined();
+        });
+
+    installFunction(
+        "drawPatch", JSI_FUNC_SIGNATURE {
+          std::vector<SkPoint> cubics;
+          std::vector<SkColor> colors;
+          std::vector<SkPoint> texs;
+
+          auto jsiCubics = arguments[0].asObject(runtime).asArray(runtime);
+          auto cubicsSize = jsiCubics.size(runtime);
+          for (int i = 0; i < cubicsSize; i++) {
+            std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
+                runtime,
+                jsiCubics.getValueAtIndex(runtime, i).asObject(runtime));
+            cubics.push_back(*point.get());
+          }
+
+          if (!arguments[1].isNull()) {
+            auto jsiColors = arguments[1].asObject(runtime).asArray(runtime);
+            auto colorsSize = jsiColors.size(runtime);
+            for (int i = 0; i < colorsSize; i++) {
+              SkColor color = jsiColors.getValueAtIndex(runtime, i).asNumber();
+              colors.push_back(color);
+            }
+          }
+
+          if (!arguments[2].isNull()) {
+            auto jsiTexs = arguments[2].asObject(runtime).asArray(runtime);
+            auto texsSize = jsiCubics.size(runtime);
+            for (int i = 0; i < texsSize; i++) {
+              auto point = JsiSkPoint::fromValue(
+                  runtime,
+                  jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
+              texs.push_back(*point.get());
+            }
+          }
+
+          auto &jsiBlendMode = arguments[3];
+
+          auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+
+          if (jsiBlendMode.isNull()) {
+            _canvas->drawPatch(cubics.data(), colors.data(), texs.data(),
+                               *paint);
+          } else {
+            auto blendMode = (SkBlendMode)jsiBlendMode.asNumber();
+            _canvas->drawPatch(cubics.data(), colors.data(), texs.data(),
+                               blendMode, *paint);
+          }
           return jsi::Value::undefined();
         });
 
@@ -185,8 +274,27 @@ public:
     installFunction(
         "clipPath", JSI_FUNC_SIGNATURE {
           auto path = JsiSkPath::fromValue(runtime, arguments[0]);
-          auto doAntiAlias = arguments[1].getBool();
-          _canvas->clipPath(*path, doAntiAlias);
+          auto op = (SkClipOp)arguments[1].asNumber();
+          auto doAntiAlias = arguments[2].getBool();
+          _canvas->clipPath(*path, op, doAntiAlias);
+          return jsi::Value::undefined();
+        });
+
+    installFunction(
+        "clipRect", JSI_FUNC_SIGNATURE {
+          auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
+          auto op = (SkClipOp)arguments[1].asNumber();
+          auto doAntiAlias = arguments[2].getBool();
+          _canvas->clipRect(*rect, op, doAntiAlias);
+          return jsi::Value::undefined();
+        });
+
+    installFunction(
+        "clipRRect", JSI_FUNC_SIGNATURE {
+          auto rrect = JsiSkRRect::fromValue(runtime, arguments[0]);
+          auto op = (SkClipOp)arguments[1].asNumber();
+          auto doAntiAlias = arguments[2].getBool();
+          _canvas->clipRRect(*rrect, op, doAntiAlias);
           return jsi::Value::undefined();
         });
 
@@ -194,10 +302,29 @@ public:
         "save", JSI_FUNC_SIGNATURE { return jsi::Value(_canvas->save()); });
 
     installFunction(
+        "saveLayerPaint", JSI_FUNC_SIGNATURE {
+          auto paint = JsiSkPaint::fromValue(runtime, arguments[0]);
+          return jsi::Value(_canvas->saveLayer(nullptr, paint.get()));
+        });
+
+    installFunction(
         "saveLayer", JSI_FUNC_SIGNATURE {
-          auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-          auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-          return jsi::Value(_canvas->saveLayer(rect.get(), paint.get()));
+          SkPaint *paint =
+              arguments[0].isUndefined()
+                  ? nullptr
+                  : JsiSkPaint::fromValue(runtime, arguments[0]).get();
+          SkRect *bounds =
+              arguments[1].isNull() || arguments[1].isUndefined()
+                  ? nullptr
+                  : JsiSkRect::fromValue(runtime, arguments[1]).get();
+          SkImageFilter *backdrop =
+              arguments[2].isNull() || count < 3
+                  ? nullptr
+                  : JsiSkImageFilter::fromValue(runtime, arguments[2]).get();
+          SkCanvas::SaveLayerFlags flags =
+              count < 4 ? 0 : arguments[3].asNumber();
+          return jsi::Value(_canvas->saveLayer(
+              SkCanvas::SaveLayerRec(bounds, paint, backdrop, flags)));
         });
 
     installFunction(
@@ -209,7 +336,9 @@ public:
     installFunction(
         "rotate", JSI_FUNC_SIGNATURE {
           SkScalar degrees = arguments[0].asNumber();
-          _canvas->rotate(degrees);
+          SkScalar rx = arguments[1].asNumber();
+          SkScalar ry = arguments[2].asNumber();
+          _canvas->rotate(degrees, rx, ry);
           return jsi::Value::undefined();
         });
 
@@ -240,7 +369,26 @@ public:
     installFunction(
         "drawColor", JSI_FUNC_SIGNATURE {
           SkColor cl = arguments[0].asNumber();
-          _canvas->drawColor(cl);
+          if (count == 1) {
+            _canvas->drawColor(cl);
+          } else {
+            auto mode = (SkBlendMode)arguments[1].asNumber();
+            _canvas->drawColor(cl, mode);
+          }
+          return jsi::Value::undefined();
+        });
+
+    installFunction(
+        "clear", JSI_FUNC_SIGNATURE {
+          SkColor cl = arguments[0].asNumber();
+          _canvas->clear(cl);
+          return jsi::Value::undefined();
+        });
+
+    installFunction(
+        "concat", JSI_FUNC_SIGNATURE {
+          auto matrix = JsiSkMatrix::fromValue(runtime, arguments[0]);
+          _canvas->concat(*matrix.get());
           return jsi::Value::undefined();
         });
   }

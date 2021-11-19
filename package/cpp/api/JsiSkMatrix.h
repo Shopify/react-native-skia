@@ -1,15 +1,14 @@
 #pragma once
 
 #include "JsiSkHostObjects.h"
+#include <jsi/jsi.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkMatrix.h"
+#include <SkMatrix.h>
 
 #pragma clang diagnostic pop
-
-#include <jsi/jsi.h>
 
 namespace RNSkia {
 
@@ -17,8 +16,6 @@ using namespace facebook;
 
 class JsiSkMatrix : public JsiSkWrappingSharedPtrHostObject<SkMatrix> {
 public:
-  JsiSkMatrix(RNSkPlatformContext *context)
-      : JsiSkMatrix(context, SkMatrix::I()) {}
   JsiSkMatrix(RNSkPlatformContext *context, SkMatrix m)
       : JsiSkWrappingSharedPtrHostObject<SkMatrix>(
             context, std::make_shared<SkMatrix>(m)) {
@@ -165,9 +162,8 @@ public:
 
   static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
     return JSI_FUNC_SIGNATURE {
-      // Return the newly constructed object
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkMatrix>(context));
+          runtime, std::make_shared<JsiSkMatrix>(context, SkMatrix::I()));
     };
   }
 

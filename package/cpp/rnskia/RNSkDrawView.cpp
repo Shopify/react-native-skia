@@ -31,7 +31,9 @@ void RNSkDrawView::setTouchCallback(std::shared_ptr<jsi::Function> callback) {
     return;
   }
 
-  _touchCallback = std::make_shared<RNSkTouchCallback>([this, callback](std::vector<RNSkTouchPoint> touchPoints) {
+  _touchCallback = std::make_shared<
+      RNSkTouchCallback>([this,
+                          callback](std::vector<RNSkTouchPoint> touchPoints) {
     auto runtime = this->_platformContext->getJsRuntime();
     // Add touch points
     auto touches = jsi::Array(*runtime, touchPoints.size());
@@ -119,7 +121,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           // Average duration
           timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
               _lastDuration;
-          
+
           if (timingInfo->lastDurationIndex == NUMBER_OF_DURATION_SAMPLES) {
             timingInfo->lastDurationIndex = 0;
           }
@@ -198,9 +200,8 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
 
 void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
   if (_touchCallback != nullptr) {
-    _platformContext->runOnJavascriptThread([this, points]() {
-        (*_touchCallback)(points);
-    });
+    _platformContext->runOnJavascriptThread(
+        [this, points]() { (*_touchCallback)(points); });
 
     if (_drawingMode != RNSkDrawingMode::Continuous) {
       requestRedraw();

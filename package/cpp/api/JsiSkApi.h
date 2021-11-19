@@ -6,16 +6,25 @@
 
 #include "JsiSKRuntimeEffect.h"
 #include "JsiSkColorFilter.h"
+#include "JsiSkColorFilterFactory.h"
 #include "JsiSkFont.h"
-#include "JsiSkGradientShader.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageFilter.h"
+#include "JsiSkImageFilterFactory.h"
 #include "JsiSkMaskFilter.h"
+#include "JsiSkMaskFilterFactory.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
 #include "JsiSkPath.h"
+#include "JsiSkPathEffect.h"
+#include "JsiSkPathEffectFactory.h"
+#include "JsiSkPathFactory.h"
+#include "JsiSkPoint.h"
+#include "JsiSkRRect.h"
 #include "JsiSkRect.h"
+#include "JsiSkRuntimeEffectFactory.h"
 #include "JsiSkShader.h"
+#include "JsiSkShaderFactory.h"
 #include "JsiSkSvg.h"
 #include "JsiSkTypeface.h"
 
@@ -33,28 +42,30 @@ public:
   JsiSkApi(jsi::Runtime &runtime, RNSkPlatformContext *context)
       : JsiSkHostObject(context) {
 
-    installReadonlyProperty(
-        "PixelRatio", [context](jsi::Runtime &) -> jsi::Value {
-          return jsi::Value(static_cast<double>(context->getPixelDensity()));
-        });
-
-    installFunction("ColorFilter", JsiSkColorFilter::createCtor(context));
     installFunction("Font", JsiSkFont::createCtor(context));
     installFunction("Image", JsiSkImage::createCtor(context));
-    installFunction("MaskFilter", JsiSkMaskFilter::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
-    installFunction("Path", JsiSkPath::createCtor(context));
-    installFunction("Rect", JsiSkRect::createCtor(context));
-    installFunction("RuntimeEffects", JsiSkRuntimeEffect::createCtor(context));
-    installFunction("Shader", JsiSkShader::createCtor(context));
-    installFunction("Typeface", JsiSkTypeface::createCtor(context));
     installFunction("Matrix", JsiSkMatrix::createCtor(context));
+    installFunction("XYWHRect", JsiSkRect::createCtor(context));
+    installFunction("RRectXY", JsiSkRRect::createCtor(context));
+    installFunction("Point", JsiSkPoint::createCtor(context));
+    installFunction("Typeface", JsiSkTypeface::createCtor(context));
 
     // Static members
     installReadonlyProperty("ImageFilters",
-                            std::make_shared<JsiSkImageFilterStatic>(context));
+                            std::make_shared<JsiSkImageFilterFactory>(context));
+    installReadonlyProperty("PathEffect",
+                            std::make_shared<JsiSkPathEffectFactory>(context));
+    installReadonlyProperty("Path",
+                            std::make_shared<JsiSkPathFactory>(context));
+    installReadonlyProperty("ColorFilter",
+                            std::make_shared<JsiSkColorFilterFactory>(context));
+    installReadonlyProperty("MaskFilter",
+                            std::make_shared<JsiSkMaskFilterFactory>(context));
     installReadonlyProperty(
-        "GradientShader", std::make_shared<JsiSkGradientShaderStatic>(context));
+        "RuntimeEffect", std::make_shared<JsiSkRuntimeEffectFactory>(context));
+    installReadonlyProperty("Shader",
+                            std::make_shared<JsiSkShaderFactory>(context));
     installReadonlyProperty("Svg", std::make_shared<JsiSkSvgStatic>(context));
   };
 };
