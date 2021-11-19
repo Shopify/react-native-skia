@@ -17,14 +17,13 @@ namespace RNSkia {
 using RNSkDrawCallback = std::function<void(
     std::shared_ptr<JsiSkCanvas>, int, int, double, RNSkPlatformContext *)>;
 
-
 enum RNSkTouchType { Start, Active, End, Cancelled };
 
 using RNSkTouchPoint = struct {
-    double x;
-    double y;
-    double force;
-    RNSkTouchType type;
+  double x;
+  double y;
+  double force;
+  RNSkTouchType type;
 };
 
 using RNSkTouchCallback = std::function<void(std::vector<RNSkTouchPoint>)>;
