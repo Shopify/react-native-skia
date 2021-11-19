@@ -85,7 +85,7 @@ export const PhysicsExample: React.FC = () => {
       canvas.rotate(180);
 
       // Tick screen
-      world.Step(info.timestamp / 10000000, 8, 3);
+      world.Step(info.timestamp / 10000000, 4, 2);
 
       // Draw boxes
       for (let i = 0; i < bodies.length; i++) {
