@@ -59,7 +59,6 @@ const interpolate = (
   outputRange: Array<number>,
   type: Extrapolate = 0
 ) => {
-  "worklet";
   const { length } = inputRange;
   let narrowedInput: Array<number> = [];
   if (v < inputRange[0]) {
