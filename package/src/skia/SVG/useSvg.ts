@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import type { ISvgDom } from "./SVG";
-import { SvgObject } from './SVG';
+import { SvgObject } from "./SVG";
 
 /**
  * Returns a Skia SvgDom object loaded from file using require

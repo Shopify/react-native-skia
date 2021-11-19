@@ -24,4 +24,4 @@ export enum TileMode {
   Decal,
 }
 
-export interface ImageFilter extends SkJsiInstane<"ImageFilter"> {}
+export type ImageFilter = SkJsiInstane<"ImageFilter">;

@@ -1,3 +1,4 @@
+import type { SkJsiInstane } from "./JsiInstance";
 export enum BlurStyle {
   Normal, //!< fuzzy inside and outside
   Solid, //!< solid inside, fuzzy outside
@@ -5,7 +6,7 @@ export enum BlurStyle {
   Inner, //!< fuzzy inside, nothing outside
 }
 
-export interface MaskFilter {}
+export type MaskFilter = SkJsiInstane<"MaskFilter">;
 
 /**
  * See SkMaskFilter.h for more details.

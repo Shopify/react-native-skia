@@ -1,7 +1,7 @@
 import type { DependencyList } from "react";
 import { useMemo } from "react";
 
-import type { RNSkiaDrawCallback } from "../views";
+import type { RNSkiaDrawCallback } from ".";
 
 /**
  * Creates a memoized callback for the onDraw handler of a Skia component.

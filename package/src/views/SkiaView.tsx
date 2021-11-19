@@ -1,7 +1,13 @@
-import React from "react";
-import { RNSkiaTouchCallback } from "./types";
+/* global SkiaViewApi:false */
 
-import { NativeSkiaView, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
+import React from "react";
+
+import { NativeSkiaView } from "./types";
+import type {
+  RNSkiaTouchCallback,
+  RNSkiaDrawCallback,
+  RNSkiaViewProps,
+} from "./types";
 
 let SkiaViewNativeId = 1000;
 

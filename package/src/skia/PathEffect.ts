@@ -1,6 +1,6 @@
 import type { SkJsiInstane } from "./JsiInstance";
 
-export interface PathEffect extends SkJsiInstane<"PathEffect"> {}
+export type PathEffect = SkJsiInstane<"PathEffect">;
 
 export interface PathEffectFactory {
   /**

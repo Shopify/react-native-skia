@@ -1,3 +1,3 @@
 import type { SkJsiInstane } from "../JsiInstance";
 
-export interface ColorFilter extends SkJsiInstane<"ColorFilter"> {}
+export type ColorFilter = SkJsiInstane<"ColorFilter">;

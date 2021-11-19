@@ -1,4 +1,6 @@
-import { requireNativeComponent, ViewProps } from "react-native";
+import type { ViewProps } from "react-native";
+import { requireNativeComponent } from "react-native";
+
 import type { Canvas } from "../skia/Canvas";
 
 export interface ISkiaViewApi {
