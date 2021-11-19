@@ -1,38 +1,38 @@
-import * as React from 'react';
-import {ScrollView, StyleSheet, Text, View, Pressable} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import * as React from "react";
+import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import type {Routes} from './Routes';
+import type { Routes } from "./Routes";
 
 const examples = [
   {
-    screen: 'Shapes',
-    title: '🔺 Shapes',
+    screen: "Shapes",
+    title: "🔺 Shapes",
   },
   {
-    screen: 'Clipping',
-    title: '✂️ Clipping',
+    screen: "Clipping",
+    title: "✂️ Clipping",
   },
   {
-    screen: 'PathEffect',
-    title: '⭐️ Path Effect',
+    screen: "PathEffect",
+    title: "⭐️ Path Effect",
   },
   {
-    screen: 'Transform',
-    title: '🔄 Transformations',
+    screen: "Transform",
+    title: "🔄 Transformations",
   },
   {
-    screen: 'ColorFilter',
-    title: '🌃 Color & Image Filters',
+    screen: "ColorFilter",
+    title: "🌃 Color & Image Filters",
   },
   {
-    screen: 'Gradients',
-    title: '🌈 Gradients',
+    screen: "Gradients",
+    title: "🌈 Gradients",
   },
   {
-    screen: 'Path',
-    title: '🥾 Paths',
+    screen: "Path",
+    title: "🥾 Paths",
   },
 ] as const;
 
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   thumbnail: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 32,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
@@ -50,15 +50,17 @@ const styles = StyleSheet.create({
 });
 
 export const List = () => {
-  const {navigate} = useNavigation<NativeStackNavigationProp<Routes, 'List'>>();
+  const { navigate } =
+    useNavigation<NativeStackNavigationProp<Routes, "List">>();
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {examples.map(thumbnail => (
+      {examples.map((thumbnail) => (
         <Pressable
           key={thumbnail.screen}
           onPress={() => {
             navigate(thumbnail.screen);
-          }}>
+          }}
+        >
           <View style={styles.thumbnail}>
             <Text style={styles.title}>{thumbnail.title}</Text>
           </View>

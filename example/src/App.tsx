@@ -1,9 +1,9 @@
-import {NavigationContainer} from '@react-navigation/native';
-import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { NavigationContainer } from "@react-navigation/native";
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import {HomeScreen, DrawingExample, AnimationExample} from './Examples';
-import {API} from './API';
+import { HomeScreen, DrawingExample, AnimationExample } from "./Examples";
+import { API } from "./API";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -14,7 +14,7 @@ const App = () => {
           name="Home"
           component={HomeScreen}
           options={{
-            title: '🎨 Skia',
+            title: "🎨 Skia",
           }}
         />
 
@@ -26,4 +26,5 @@ const App = () => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
 export default App;

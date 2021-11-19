@@ -1,27 +1,27 @@
-import React from 'react';
-import {StyleSheet, Dimensions, ScrollView} from 'react-native';
+import React from "react";
+import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
   Skia,
   useDrawCallback,
   SkiaView,
   PaintStyle,
   useImage,
-} from '@shopify/react-native-skia';
+} from "@shopify/react-native-skia";
 
-import {Title} from './components/Title';
+import { Title } from "./components/Title";
 
-const card = require('../assets/card.png');
+const card = require("../assets/card.png");
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const SIZE = width;
-const center = {x: SIZE / 2, y: SIZE / 2};
+const center = { x: SIZE / 2, y: SIZE / 2 };
 const aspectRatio = 836 / 1324;
 const CARD_WIDTH = width - 64;
 const CARD_HEIHT = CARD_WIDTH * aspectRatio;
 
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
-paint.setColor(Skia.Color('#61DAFB'));
+paint.setColor(Skia.Color("#61DAFB"));
 
 const strokePaint = paint.copy();
 strokePaint.setStyle(PaintStyle.Stroke);
@@ -32,12 +32,12 @@ strokePaint.setStrokeWidth(2);
 export const Transform = () => {
   const image = useImage(card);
 
-  const onRotateDraw = useDrawCallback(canvas => {
+  const onRotateDraw = useDrawCallback((canvas) => {
     const rect = Skia.XYWHRect(
       center.x - CARD_WIDTH / 2,
       center.y - CARD_HEIHT / 2,
       CARD_WIDTH,
-      CARD_HEIHT,
+      CARD_HEIHT
     );
     if (image) {
       canvas.save();
@@ -53,12 +53,12 @@ export const Transform = () => {
     }
   }, []);
 
-  const onSkewDraw = useDrawCallback(canvas => {
+  const onSkewDraw = useDrawCallback((canvas) => {
     const rect = Skia.XYWHRect(
       center.x - CARD_WIDTH / 2,
       center.y - CARD_HEIHT / 2,
       CARD_WIDTH,
-      CARD_HEIHT,
+      CARD_HEIHT
     );
     if (image) {
       canvas.save();
@@ -73,12 +73,12 @@ export const Transform = () => {
     }
   }, []);
 
-  const onMatrixDraw = useDrawCallback(canvas => {
+  const onMatrixDraw = useDrawCallback((canvas) => {
     const rect = Skia.XYWHRect(
       center.x - CARD_WIDTH / 2,
       center.y - CARD_HEIHT / 2,
       CARD_WIDTH,
-      CARD_HEIHT,
+      CARD_HEIHT
     );
     if (image) {
       canvas.save();

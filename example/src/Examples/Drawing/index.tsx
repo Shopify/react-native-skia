@@ -1,6 +1,6 @@
-import React, {useMemo, useRef} from 'react';
-import {Button, StyleSheet, View} from 'react-native';
-import type {Path} from '@shopify/react-native-skia';
+import React, { useMemo, useRef } from "react";
+import { Button, StyleSheet, View } from "react-native";
+import type { Path } from "@shopify/react-native-skia";
 import {
   Skia,
   useTouchCallback,
@@ -9,17 +9,17 @@ import {
   PaintStyle,
   StrokeCap,
   SkiaView,
-} from '@shopify/react-native-skia';
-import {TouchType} from '@shopify/react-native-skia/src/views';
+} from "@shopify/react-native-skia";
+import { TouchType } from "@shopify/react-native-skia/src/views";
 
-type Point = {x: number; y: number};
+type Point = { x: number; y: number };
 
 export const DrawingExample: React.FC = () => {
-  const paint = usePaint(p => p.setColor(Skia.Color('#7FC8A9')));
+  const paint = usePaint((p) => p.setColor(Skia.Color("#7FC8A9")));
   const prevPointRef = useRef<Point>();
 
-  const pathPaint = usePaint(p => {
-    p.setColor(Skia.Color('#7F33A9'));
+  const pathPaint = usePaint((p) => {
+    p.setColor(Skia.Color("#7F33A9"));
     p.setStrokeWidth(5);
     p.setStyle(PaintStyle.Stroke);
     p.setStrokeCap(StrokeCap.Round);
@@ -29,7 +29,7 @@ export const DrawingExample: React.FC = () => {
   const isDrawing = useRef<boolean>(false);
 
   const onTouch = useTouchCallback(
-    touches => {
+    (touches) => {
       // Handle touches
       if (touches.length === 0) {
         return;
@@ -52,21 +52,21 @@ export const DrawingExample: React.FC = () => {
         const path = paths[paths.length - 1];
 
         // Get current position
-        const x = touches[0].x;
-        const y = touches[0].y;
+        const { x } = touches[0];
+        const { y } = touches[0];
 
         // Calculate and draw a smooth curve
-        const x_mid = (prevPointRef.current!.x + x) / 2;
-        const y_mid = (prevPointRef.current!.y + y) / 2;
+        const xMid = (prevPointRef.current!.x + x) / 2;
+        const yMid = (prevPointRef.current!.y + y) / 2;
 
         path.quadTo(
           prevPointRef.current!.x,
           prevPointRef.current!.y,
-          x_mid,
-          y_mid,
+          xMid,
+          yMid
         );
 
-        prevPointRef.current = {x, y};
+        prevPointRef.current = { x, y };
 
         // Test if we should end
         if (touches[0].type === TouchType.End) {
@@ -76,11 +76,11 @@ export const DrawingExample: React.FC = () => {
         }
       }
     },
-    [paths],
+    [paths]
   );
 
   const onDraw = useDrawCallback(
-    canvas => {
+    (canvas) => {
       // Clear screen
       canvas.drawPaint(paint);
 
@@ -91,7 +91,7 @@ export const DrawingExample: React.FC = () => {
         }
       }
     },
-    [paint, pathPaint, paths],
+    [paint, pathPaint, paths]
   );
 
   const skiaViewRef = useRef<SkiaView>(null);
@@ -126,12 +126,12 @@ export const DrawingExample: React.FC = () => {
 
 const styles = StyleSheet.create({
   skiaview: {
-    width: '100%',
+    width: "100%",
     flex: 1,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   buttons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingBottom: 24,
     paddingHorizontal: 14,
   },

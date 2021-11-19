@@ -2,7 +2,7 @@ const normalize = (
   value: number,
   params: {
     durationSeconds: number;
-  },
+  }
 ) => (value / params.durationSeconds / 1) % 1;
 
 const easingInOut = (t: number) => {
@@ -25,7 +25,7 @@ const interpolateInternal = (
   r: number,
   ll: number,
   rr: number,
-  type: Extrapolate,
+  type: Extrapolate
 ) => {
   if (r - l === 0) {
     return ll;
@@ -57,10 +57,10 @@ const interpolate = (
   v: number,
   inputRange: Array<number>,
   outputRange: Array<number>,
-  type: Extrapolate = 0,
+  type: Extrapolate = 0
 ) => {
-  'worklet';
-  const length = inputRange.length;
+  "worklet";
+  const { length } = inputRange;
   let narrowedInput: Array<number> = [];
   if (v < inputRange[0]) {
     narrowedInput = [
@@ -95,7 +95,7 @@ const interpolate = (
     narrowedInput[1],
     narrowedInput[2],
     narrowedInput[3],
-    type,
+    type
   );
 };
 

@@ -1,31 +1,31 @@
-import React from 'react';
-import {StyleSheet, Dimensions, ScrollView} from 'react-native';
-import type {Canvas, Paint} from '@shopify/react-native-skia';
+import React from "react";
+import { StyleSheet, Dimensions, ScrollView } from "react-native";
+import type { Canvas, Paint } from "@shopify/react-native-skia";
 import {
   Skia,
   useDrawCallback,
   SkiaView,
   PaintStyle,
-} from '@shopify/react-native-skia';
+} from "@shopify/react-native-skia";
 
-import {Title} from './components/Title';
+import { Title } from "./components/Title";
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const SIZE = width;
 const path = Skia.Path.MakeFromSVGString(
   // eslint-disable-next-line max-len
-  'M466 91C466 141.258 361.682 182 233 182C104.318 182 0 141.258 0 91C0 40.7421 104.318 0 233 0C361.682 0 466 40.7421 466 91Z',
+  "M466 91C466 141.258 361.682 182 233 182C104.318 182 0 141.258 0 91C0 40.7421 104.318 0 233 0C361.682 0 466 40.7421 466 91Z"
 )!;
 
 const vWidth = 466;
 const vHeight = 182;
-const vOrigin = {x: vWidth / 2, y: vHeight / 2};
+const vOrigin = { x: vWidth / 2, y: vHeight / 2 };
 const scale = (SIZE - 64) / vWidth;
-const origin = {x: (vWidth * scale) / 2, y: (vHeight * scale) / 2};
-const center = {x: SIZE / 2, y: SIZE / 2};
+const origin = { x: (vWidth * scale) / 2, y: (vHeight * scale) / 2 };
+const center = { x: SIZE / 2, y: SIZE / 2 };
 const basePaint = Skia.Paint();
 basePaint.setAntiAlias(true);
-basePaint.setColor(Skia.Color('#61DAFB'));
+basePaint.setColor(Skia.Color("#61DAFB"));
 
 const strokePaint = basePaint.copy();
 strokePaint.setStyle(PaintStyle.Stroke);
@@ -95,17 +95,17 @@ const drawSquaredLogo = (canvas: Canvas, paint: Paint) => {
 };
 
 export const PathEffect = () => {
-  const onMakeDiscreteDraw = useDrawCallback(canvas => {
+  const onMakeDiscreteDraw = useDrawCallback((canvas) => {
     const paint = strokePaint.copy();
     paint.setPathEffect(Skia.PathEffect.MakeDiscrete(10, 4, 0));
     drawLogo(canvas, paint);
   }, []);
-  const onMakeDashDraw = useDrawCallback(canvas => {
+  const onMakeDashDraw = useDrawCallback((canvas) => {
     const paint = strokePaint.copy();
     paint.setPathEffect(Skia.PathEffect.MakeDash([10, 10], 0));
     drawLogo(canvas, paint);
   }, []);
-  const onMakeCornerDraw = useDrawCallback(canvas => {
+  const onMakeCornerDraw = useDrawCallback((canvas) => {
     const paint = strokePaint.copy();
     paint.setPathEffect(Skia.PathEffect.MakeCorner(250)!);
     drawSquaredLogo(canvas, paint);

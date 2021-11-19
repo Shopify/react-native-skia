@@ -1,33 +1,33 @@
-import React from 'react';
-import {StyleSheet, Dimensions, ScrollView} from 'react-native';
+import React from "react";
+import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
   Skia,
   useDrawCallback,
   SkiaView,
   BlendMode,
   TileMode,
-} from '@shopify/react-native-skia';
+} from "@shopify/react-native-skia";
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const SIZE = width / 2;
 
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
 
 export const Gradients = () => {
-  const onGradientDraw = useDrawCallback(canvas => {
+  const onGradientDraw = useDrawCallback((canvas) => {
     // 1. Linear Gradient
     const r1 = Skia.XYWHRect(0, 0, SIZE, SIZE);
     const p1 = paint.copy();
-    const colors = [Skia.Color('#61DAFB'), Skia.Color('#fb61da')];
+    const colors = [Skia.Color("#61DAFB"), Skia.Color("#fb61da")];
     p1.setShader(
       Skia.Shader.MakeLinearGradient(
         Skia.Point(0, 0),
         Skia.Point(SIZE, SIZE),
         colors,
         null,
-        TileMode.Decal,
-      ),
+        TileMode.Decal
+      )
     );
     canvas.drawRect(r1, p1);
 
@@ -40,8 +40,8 @@ export const Gradients = () => {
         SIZE / 2,
         colors.reverse(),
         null,
-        TileMode.Decal,
-      ),
+        TileMode.Decal
+      )
     );
     canvas.drawRect(r2, p2);
 
@@ -57,8 +57,8 @@ export const Gradients = () => {
         SIZE / 4,
         colors.reverse(),
         null,
-        TileMode.Clamp,
-      ),
+        TileMode.Clamp
+      )
     );
     canvas.drawRect(r3, p3);
 
@@ -66,10 +66,10 @@ export const Gradients = () => {
     const r4 = Skia.XYWHRect(SIZE, SIZE, SIZE, SIZE);
     const p4 = paint.copy();
     const sweepColors = [
-      Skia.Color('#61DAFB'),
-      Skia.Color('#fb61da'),
-      Skia.Color('#dafb61'),
-      Skia.Color('#61DAFB'),
+      Skia.Color("#61DAFB"),
+      Skia.Color("#fb61da"),
+      Skia.Color("#dafb61"),
+      Skia.Color("#61DAFB"),
     ];
     p4.setShader(
       Skia.Shader.MakeSweepGradient(
@@ -77,8 +77,8 @@ export const Gradients = () => {
         SIZE + R,
         sweepColors,
         null,
-        TileMode.Clamp,
-      ),
+        TileMode.Clamp
+      )
     );
     canvas.drawRect(r4, p4);
 
@@ -91,7 +91,7 @@ export const Gradients = () => {
       2 * SIZE + R,
       sweepColors,
       null,
-      TileMode.Clamp,
+      TileMode.Clamp
     );
     const two = Skia.Shader.MakeTurbulence(0.05, 0.05, 4, 0, 0, 0);
     p5.setShader(Skia.Shader.MakeBlend(BlendMode.Difference, one, two));

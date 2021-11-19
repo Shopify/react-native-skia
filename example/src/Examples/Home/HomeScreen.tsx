@@ -1,6 +1,7 @@
-import React from 'react';
-import {StyleSheet, View} from 'react-native';
-import {HomeScreenButton} from './HomeScreenButton';
+import React from "react";
+import { StyleSheet, View } from "react-native";
+
+import { HomeScreenButton } from "./HomeScreenButton";
 
 export const HomeScreen: React.FC = () => {
   return (
