@@ -2,33 +2,35 @@
 
 #include <jsi/jsi.h>
 #include "JsiSkHostObjects.h"
+#include "JsiSkTypes.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkMaskFilter.h>
+#include <SkPathEffect.h>
 
 #pragma clang diagnostic pop
+
 
 namespace RNSkia {
 
     using namespace facebook;
 
-    class JsiSkMaskFilter : public JsiSkWrappingSkPtrHostObject<SkMaskFilter> {
+    class JsiSkPathEffect : public JsiSkWrappingSkPtrHostObject<SkPathEffect> {
     public:
-        JsiSkMaskFilter(RNSkPlatformContext *context, sk_sp<SkMaskFilter> maskFilter)
-                : JsiSkWrappingSkPtrHostObject<SkMaskFilter>(
+        JsiSkPathEffect(RNSkPlatformContext *context, sk_sp<SkPathEffect> pathEffect)
+                : JsiSkWrappingSkPtrHostObject<SkPathEffect>(
                 context,
-                maskFilter) {}
+                pathEffect) {}
 
         /**
           Returns the underlying object from a host object of this type
          */
-        static sk_sp<SkMaskFilter> fromValue(
+        static sk_sp<SkPathEffect> fromValue(
                 jsi::Runtime &runtime,
                 const jsi::Value &obj) {
             return obj.asObject(runtime)
-                    .asHostObject<JsiSkMaskFilter>(runtime)
+                    .asHostObject<JsiSkPathEffect>(runtime)
                     .get()
                     ->getObject();
         }

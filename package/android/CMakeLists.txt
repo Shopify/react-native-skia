@@ -29,7 +29,6 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDrawView.cpp"
 
-        "${PROJECT_SOURCE_DIR}/cpp/api/JsiSkImageFilter.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/api/JsiSkSvg.cpp" 
 )
 
