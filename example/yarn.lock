@@ -768,6 +768,13 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@flyover/box2d@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@flyover/box2d/-/box2d-1.0.1.tgz#1c05a480d8e2c79252bc5925637db6438b265e82"
+  integrity sha512-6qZCV2D7s4W8DJi7w1AhxXrtta+aKyM/LMbYXnnE9ykSqIWTLZKJTJu+CqlylLswdt43IV6irvAy8VzjS+ptOw==
+  dependencies:
+    "@types/systemjs" "^0.20.6"
+
 "@hapi/hoek@^9.0.0":
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.1.tgz#9551142a1980503752536b5050fd99f4a7f13b17"
@@ -1386,6 +1393,11 @@
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.1.tgz#20f18294f797f2209b5f65c8e3b5c8e8261d127c"
   integrity sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==
+
+"@types/systemjs@^0.20.6":
+  version "0.20.8"
+  resolved "https://registry.yarnpkg.com/@types/systemjs/-/systemjs-0.20.8.tgz#64d337071004392f1c66b0c4af177a06bf597d35"
+  integrity sha512-LO1LLPfKt5A/fqD4cxUHi1KCEQdwCgkHlT7zOIyFdWuwvZ2tDL8wUDbKY4YGOEsqifhzV6l5vE3aHJpYfwHZIg==
 
 "@types/yargs-parser@*":
   version "20.2.1"
