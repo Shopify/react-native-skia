@@ -5,6 +5,7 @@ import {
   usePaint,
   useDrawCallback,
   useFont,
+  RNSkiaView,
 } from '@shopify/react-native-skia';
 
 import {Animation} from '../../Animation';
@@ -46,7 +47,7 @@ export const AnimationExample: React.FC = () => {
   );
 
   return (
-    <Skia.View style={styles.skiaview} onDraw={onDraw} mode="continuous" />
+    <RNSkiaView style={styles.skiaview} onDraw={onDraw} mode="continuous" />
   );
 };
 

@@ -1,6 +1,6 @@
 import React, {useMemo, useRef} from 'react';
 import {Button, StyleSheet, View} from 'react-native';
-import type {IPath} from '@shopify/react-native-skia';
+import type {Path} from '@shopify/react-native-skia';
 import {
   Skia,
   useTouchCallback,
@@ -25,7 +25,7 @@ export const DrawingExample: React.FC = () => {
     p.setStrokeCap(StrokeCap.Round);
   });
 
-  const paths = useMemo(() => [] as IPath[], []);
+  const paths = useMemo(() => [] as Path[], []);
   const isDrawing = useRef<boolean>(false);
 
   const onTouch = useTouchCallback(
@@ -39,7 +39,7 @@ export const DrawingExample: React.FC = () => {
         // Begin
         isDrawing.current = true;
         // Create new path
-        const path = Skia.Path();
+        const path = Skia.Path.Make();
         paths.push(path);
         path.moveTo(touches[0].x, touches[0].y);
         prevPointRef.current = {
@@ -98,7 +98,7 @@ export const DrawingExample: React.FC = () => {
 
   return (
     <>
-      <Skia.View
+      <RNSkiaView
         ref={skiaViewRef}
         style={styles.skiaview}
         onDraw={onDraw}
