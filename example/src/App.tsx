@@ -3,6 +3,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {HomeScreen, DrawingExample, AnimationExample} from './Examples';
+import {API} from './API';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -14,6 +15,14 @@ const App = () => {
           component={HomeScreen}
           options={{
             title: '🎨 Skia',
+          }}
+        />
+
+        <Stack.Screen
+          name="API"
+          component={API}
+          options={{
+            title: '🎨 API',
           }}
         />
         <Stack.Screen name="Drawing" component={DrawingExample} />

@@ -1,12 +1,11 @@
 import type { ImageSourcePropType } from "react-native";
 import { useMemo, useState } from "react";
 
-import { Skia } from "../Skia";
 import { ScaleToFit } from "../Matrix";
 import { TileMode } from "../ImageFilter";
 
 import type { Image } from "./Image";
-import { MipmapMode, FilterMode } from "./Image";
+import { MipmapMode, FilterMode, ImageCtor } from './Image';
 
 /**
  * Returns a Skia Image object
@@ -15,7 +14,7 @@ export const useImage = (source: ImageSourcePropType) => {
   const [image, setImage] = useState<Image>();
   useMemo(
     () =>
-      Skia.Image(source).then((value) => {
+      ImageCtor(source).then((value) => {
         setImage(value);
       }),
     [source]
