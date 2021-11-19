@@ -8,7 +8,7 @@ import {
   useDrawCallback,
   PaintStyle,
   StrokeCap,
-  RNSkiaView,
+  SkiaView,
 } from '@shopify/react-native-skia';
 import {TouchType} from '@shopify/react-native-skia/src/views';
 
@@ -94,11 +94,11 @@ export const DrawingExample: React.FC = () => {
     [paint, pathPaint, paths],
   );
 
-  const skiaViewRef = useRef<RNSkiaView>(null);
+  const skiaViewRef = useRef<SkiaView>(null);
 
   return (
     <>
-      <RNSkiaView
+      <SkiaView
         ref={skiaViewRef}
         style={styles.skiaview}
         onDraw={onDraw}
