@@ -4,7 +4,7 @@
 
 #include "JsiSkHostObjects.h"
 
-#include "JsiSkRuntimeEffect.h"
+#include "JsiSKRuntimeEffect.h"
 #include "JsiSkRuntimeEffectFactory.h"
 #include "JsiSkImageFilterFactory.h"
 #include "JsiSkColorFilter.h"

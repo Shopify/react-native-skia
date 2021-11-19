@@ -206,7 +206,7 @@ class JsiSkPaint : public JsiSkWrappingSharedPtrHostObject<SkPaint> {
     /**
      * Creates the function for construction a new instance of the SkPaint
      * wrapper
-     * @param pixelDensity Scale
+     * @param context Platform context
      * @return A function for creating a new host object wrapper for the SkPaint
      * class
      */

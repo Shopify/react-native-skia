@@ -3,7 +3,7 @@
 #include <jsi/jsi.h>
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
-#include "JsiSkRuntimeEffect.h"
+#include "JsiSKRuntimeEffect.h"
 
 namespace RNSkia {
 

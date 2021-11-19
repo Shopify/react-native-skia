@@ -170,7 +170,7 @@ class JsiSkRuntimeEffect
                 case Type::kInt3:     su.columns = 3;               su.isInteger = true; break;
                 case Type::kInt4:     su.columns = 4;               su.isInteger = true; break;
             }
-            su.slot = it->offset / sizeof(float);
+            su.slot = (int)(it->offset / sizeof(float));
             result.setProperty(runtime, "columns", su.columns);
             result.setProperty(runtime, "rows", su.rows);
             result.setProperty(runtime, "slot", su.slot);

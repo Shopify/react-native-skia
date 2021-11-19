@@ -34,7 +34,7 @@ namespace RNSkia {
                         auto jsiIntervals =
                                 arguments[0].asObject(runtime).asArray(runtime);
                         int phase = arguments[1].asNumber();
-                        auto size = jsiIntervals.size(runtime);
+                        auto size = (int)jsiIntervals.size(runtime);
                         std::vector<SkScalar> intervals;
                         for (int i = 0; i < size; i++) {
                             SkScalar interval =

@@ -85,7 +85,7 @@ class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
                     );
                     points.push_back(*point.get());
                 }
-                getObject()->addPoly(points.data(), points.size(), close);
+                getObject()->addPoly(points.data(), (int)points.size(), close);
                 return jsi::Value::undefined();
             });
 

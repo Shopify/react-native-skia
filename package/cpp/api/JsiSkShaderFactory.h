@@ -30,7 +30,7 @@ class JsiSkShaderFactory : public JsiSkHostObject {
 
             auto jsiColors =
                 arguments[2].asObject(runtime).asArray(runtime);
-            int size = jsiColors.size(runtime);
+            auto size = jsiColors.size(runtime);
             std::vector<SkColor> colors;
             for (int i = 0; i < size; i++) {
                 SkColor color =
@@ -55,12 +55,12 @@ class JsiSkShaderFactory : public JsiSkHostObject {
             sk_sp<SkShader> gradient;
             if (count == 5) {
                 gradient = SkGradientShader::MakeLinear(
-                        pts, colors.data(), positions.data(), size, tileMode);
+                        pts, colors.data(), positions.data(), (int)size, tileMode);
             } else {
                 auto localMatrix = arguments[5].isUndefined()  || count < 6 ? nullptr : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
                 auto flag = count < 7 ? 0 : arguments[6].asNumber();
                 gradient = SkGradientShader::MakeLinear(
-                        pts, colors.data(), positions.data(), size, tileMode, flag, localMatrix);
+                        pts, colors.data(), positions.data(), (int)size, tileMode, flag, localMatrix);
             }
             return jsi::Object::createFromHostObject(
                     runtime,
@@ -77,7 +77,7 @@ class JsiSkShaderFactory : public JsiSkHostObject {
 
             auto jsiColors =
                     arguments[2].asObject(runtime).asArray(runtime);
-            int size = jsiColors.size(runtime);
+            int size = (int)jsiColors.size(runtime);
             std::vector<SkColor> colors;
             for (int i = 0; i < size; i++) {
                 SkColor color =
@@ -119,7 +119,7 @@ class JsiSkShaderFactory : public JsiSkHostObject {
             auto y = arguments[1].asNumber();
             auto jsiColors =
                     arguments[2].asObject(runtime).asArray(runtime);
-            int size = jsiColors.size(runtime);
+            auto size = jsiColors.size(runtime);
             std::vector<SkColor> colors;
             for (int i = 0; i < size; i++) {
                 SkColor color =
@@ -145,7 +145,7 @@ class JsiSkShaderFactory : public JsiSkHostObject {
             auto endAngle = (count < 9 || arguments[8].isUndefined()) ? 360 : arguments[8].asNumber();
             auto localMatrix = arguments[5].isUndefined() || arguments[5].isNull() || count < 6  ? nullptr : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
             sk_sp<SkShader> gradient = SkGradientShader::MakeSweep(
-                    x, y, colors.data(), positions.data(), size, tileMode, startAngle, endAngle, flags, localMatrix);
+                    x, y, colors.data(), positions.data(), (int)size, tileMode, startAngle, endAngle, flags, localMatrix);
             return jsi::Object::createFromHostObject(
                     runtime,
                     std::make_shared<JsiSkShader>(context, gradient));
@@ -166,7 +166,7 @@ class JsiSkShaderFactory : public JsiSkHostObject {
 
             auto jsiColors =
                     arguments[4].asObject(runtime).asArray(runtime);
-            int size = jsiColors.size(runtime);
+            auto size = jsiColors.size(runtime);
             std::vector<SkColor> colors;
             for (int i = 0; i < size; i++) {
                 SkColor color =
@@ -191,12 +191,12 @@ class JsiSkShaderFactory : public JsiSkHostObject {
             sk_sp<SkShader> gradient;
             if (count == 7) {
                 gradient = SkGradientShader::MakeTwoPointConical(
-                        start, startRadius, end, endRadius, colors.data(), positions.data(), size, tileMode);
+                        start, startRadius, end, endRadius, colors.data(), positions.data(), (int)size, tileMode);
             } else {
                 auto localMatrix = arguments[7].isUndefined() || count < 8 ? nullptr : JsiSkMatrix::fromValue(runtime, arguments[7]).get();
                 auto flag = count < 9 ? 0 : arguments[8].asNumber();
                 gradient = SkGradientShader::MakeTwoPointConical(
-                        start, startRadius, end, endRadius, colors.data(), positions.data(), size, tileMode, flag, localMatrix);
+                        start, startRadius, end, endRadius, colors.data(), positions.data(), (int)size, tileMode, flag, localMatrix);
             }
             return jsi::Object::createFromHostObject(
                     runtime,
