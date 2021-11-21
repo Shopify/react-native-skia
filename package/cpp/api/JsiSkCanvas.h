@@ -76,17 +76,103 @@ public:
         });
 
     installFunction(
-        "drawImageRect", JSI_FUNC_SIGNATURE {
+    "drawImageRect", JSI_FUNC_SIGNATURE {
+      auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+      auto src = JsiSkRect::fromValue(runtime, arguments[1]);
+      auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
+      auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+      auto fastSample = arguments[4].getBool();
+      _canvas->drawImageRect(image, *src, *dest, SkSamplingOptions(),
+                             paint.get(), fastSample ? SkCanvas::kFast_SrcRectConstraint:
+                                          SkCanvas::kStrict_SrcRectConstraint);
+      return jsi::Value::undefined();
+    });
+
+      installFunction(
+      "drawImageCubic", JSI_FUNC_SIGNATURE {
           auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-          auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
+          auto x = arguments[1].asNumber();
+          auto y = arguments[2].asNumber();
+          float B = arguments[3].asNumber();
+          float C = arguments[4].asNumber();
           std::shared_ptr<SkPaint> paint;
-          if (count == 3) {
-            paint = JsiSkPaint::fromValue(runtime, arguments[2]);
+          if (count == 6) {
+              if (!arguments[5].isNull()) {
+                  paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+              }
           }
-          _canvas->drawImageRect(image, *rect, SkSamplingOptions(),
-                                 paint.get());
+          _canvas->drawImage(image, x, y, SkSamplingOptions({ B, C }), paint.get());
           return jsi::Value::undefined();
-        });
+      });
+
+      installFunction(
+      "drawImageOptions", JSI_FUNC_SIGNATURE {
+          auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+          auto x = arguments[1].asNumber();
+          auto y = arguments[2].asNumber();
+          auto fm = (SkFilterMode)arguments[3].asNumber();
+          auto mm = (SkMipmapMode)arguments[4].asNumber();
+          std::shared_ptr<SkPaint> paint;
+          if (count == 6) {
+              if (!arguments[5].isNull()) {
+                  paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+              }
+          }
+          _canvas->drawImage(image, x, y, SkSamplingOptions(fm, mm), paint.get());
+          return jsi::Value::undefined();
+      });
+
+      installFunction(
+      "drawImageNine", JSI_FUNC_SIGNATURE {
+          auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+          auto center = JsiSkRect::fromValue(runtime, arguments[1]);
+          auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
+          auto fm = (SkFilterMode)arguments[3].asNumber();
+          std::shared_ptr<SkPaint> paint;
+          if (count == 5) {
+              if (!arguments[4].isNull()) {
+                  paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+              }
+          }
+          _canvas->drawImageNine(image.get(), center->round(), *dest, fm, paint.get());
+          return jsi::Value::undefined();
+      });
+
+      installFunction(
+      "drawImageRectCubic", JSI_FUNC_SIGNATURE {
+          auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+          auto src = JsiSkRect::fromValue(runtime, arguments[1]);
+          auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
+          float B = arguments[3].asNumber();
+          float C = arguments[4].asNumber();
+          std::shared_ptr<SkPaint> paint;
+          if (count == 6) {
+              if (!arguments[5].isNull()) {
+                  paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+              }
+          }
+          auto constraint = SkCanvas::kStrict_SrcRectConstraint;  // TODO: get from caller
+          _canvas->drawImageRect(image.get(), *src, *dest, SkSamplingOptions({ B, C }), paint.get(), constraint);
+          return jsi::Value::undefined();
+      });
+
+      installFunction(
+      "drawImageRectOptions", JSI_FUNC_SIGNATURE {
+          auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+          auto src = JsiSkRect::fromValue(runtime, arguments[1]);
+          auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
+          auto filter = (SkFilterMode)arguments[3].asNumber();
+          auto mipmap = (SkMipmapMode)arguments[4].asNumber();
+          std::shared_ptr<SkPaint> paint;
+          if (count == 6) {
+              if (!arguments[5].isNull()) {
+                  paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+              }
+          }
+          auto constraint = SkCanvas::kStrict_SrcRectConstraint;
+          _canvas->drawImageRect(image.get(), *src, *dest, {filter, mipmap}, paint.get(), constraint);
+          return jsi::Value::undefined();
+      });
 
     installFunction(
         "drawCircle", JSI_FUNC_SIGNATURE {
