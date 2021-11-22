@@ -1,8 +1,8 @@
-import type { Transforms2d } from "../../../skia/Matrix3Helper";
-import { processTransform2d, skiaMatrix3 } from "../../../skia/Matrix3Helper";
 import type { DrawingContext } from "../../DrawingContext";
 import type { Vector } from "../../math";
 import { neg } from "../../math";
+import type { Transforms2d } from "../../math/Matrix3";
+import { skiaMatrix3, processTransform2d } from "../../math/Matrix3";
 
 export interface TransformProps {
   transform?: Transforms2d;
