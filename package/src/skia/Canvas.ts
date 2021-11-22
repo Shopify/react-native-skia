@@ -10,6 +10,7 @@ import type { BlendMode } from "./Paint/BlendMode";
 import type { Point, PointMode } from "./Point";
 import type { Matrix } from "./Matrix";
 import type { ImageFilter } from "./ImageFilter";
+import type { MipmapMode, FilterMode } from "./Image/Image";
 
 export interface Info {
   width: number;
@@ -22,22 +23,127 @@ export enum ClipOp {
 }
 
 export type Canvas = {
-  /** Draws the image at the given (x, y) position.
-
-        @param image Image to draw
-        @param x x location
-        @param y y location
-        @param paint  graphics state used to fill SkCanvas      
-    */
+  /**
+   * Draws the given image with its top-left corner at (left, top) using the current clip,
+   * the current matrix, and optionally-provided paint.
+   * @param img
+   * @param left
+   * @param top
+   * @param paint
+   */
   drawImage: (image: Image, x: number, y: number, paint?: Paint) => void;
 
-  /** Draws the image in the given rectangle.
+  /**
+   * Draws sub-rectangle src from provided image, scaled and translated to fill dst rectangle.
+   * @param img
+   * @param src
+   * @param dest
+   * @param paint
+   * @param fastSample - if false, will filter strictly within src.
+   */
+  drawImageRect(
+    img: Image,
+    src: Rect,
+    dest: Rect,
+    paint: Paint,
+    fastSample?: boolean
+  ): void;
 
-        @param image Image to draw
-        @param rect rect to draw in
-        @param paint  graphics state used to fill SkCanvas      
-    */
-  drawImageRect: (image: Image, rect: Rect, paint?: Paint) => void;
+  /**
+   * Draws the given image with its top-left corner at (left, top) using the current clip,
+   * the current matrix. It will use the cubic sampling options B and C if necessary.
+   * @param img
+   * @param left
+   * @param top
+   * @param B - See CubicResampler in SkSamplingOptions.h for more information
+   * @param C - See CubicResampler in SkSamplingOptions.h for more information
+   * @param paint
+   */
+  drawImageCubic(
+    img: Image,
+    left: number,
+    top: number,
+    B: number,
+    C: number,
+    paint?: Paint | null
+  ): void;
+
+  /**
+   * Draws the given image with its top-left corner at (left, top) using the current clip,
+   * the current matrix. It will use the provided sampling options if necessary.
+   * @param img
+   * @param left
+   * @param top
+   * @param fm - The filter mode.
+   * @param mm - The mipmap mode. Note: for settings other than None, the image must have mipmaps
+   *             calculated with makeCopyWithDefaultMipmaps;
+   * @param paint
+   */
+  drawImageOptions(
+    img: Image,
+    left: number,
+    top: number,
+    fm: FilterMode,
+    mm: MipmapMode,
+    paint?: Paint | null
+  ): void;
+
+  /**
+   *  Draws the provided image stretched proportionally to fit into dst rectangle.
+   *  The center rectangle divides the image into nine sections: four sides, four corners, and
+   *  the center.
+   * @param img
+   * @param center
+   * @param dest
+   * @param filter - what technique to use when sampling the image
+   * @param paint
+   */
+  drawImageNine(
+    img: Image,
+    center: Rect,
+    dest: Rect,
+    filter: FilterMode,
+    paint?: Paint | null
+  ): void;
+
+  /**
+   * Draws sub-rectangle src from provided image, scaled and translated to fill dst rectangle.
+   * It will use the cubic sampling options B and C if necessary.
+   * @param img
+   * @param src
+   * @param dest
+   * @param B - See CubicResampler in SkSamplingOptions.h for more information
+   * @param C - See CubicResampler in SkSamplingOptions.h for more information
+   * @param paint
+   */
+  drawImageRectCubic(
+    img: Image,
+    src: Rect,
+    dest: Rect,
+    B: number,
+    C: number,
+    paint?: Paint | null
+  ): void;
+
+  /**
+   * Draws sub-rectangle src from provided image, scaled and translated to fill dst rectangle.
+   * It will use the provided sampling options if necessary.
+   * @param img
+   * @param src
+   * @param dest
+   * @param fm - The filter mode.
+   * @param mm - The mipmap mode. Note: for settings other than None, the image must have mipmaps
+   *             calculated with makeCopyWithDefaultMipmaps;
+   * @param paint
+   */
+  drawImageRectOptions(
+    img: Image,
+    src: Rect,
+    dest: Rect,
+    fm: FilterMode,
+    mm: MipmapMode,
+    paint?: Paint | null
+  ): void;
 
   /** Fills clip with SkPaint paint. SkPaint components, SkShader,
         SkColorFilter, SkImageFilter, and SkBlendMode affect drawing;
@@ -214,6 +320,7 @@ export type Canvas = {
     font: Font,
     paint: Paint
   ) => void;
+
   /**
    * Renders the SVG Dom object to the canvas. If width/height are omitted,
    * the SVG will be rendered to fit the canvas.

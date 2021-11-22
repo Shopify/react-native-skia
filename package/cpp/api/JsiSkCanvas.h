@@ -69,12 +69,13 @@ public:
 
   JSI_HOST_FUNCTION(drawImageRect) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
-    std::shared_ptr<SkPaint> paint;
-    if (count == 3) {
-      paint = JsiSkPaint::fromValue(runtime, arguments[2]);
-    }
-    _canvas->drawImageRect(image, *rect, SkSamplingOptions(), paint.get());
+    auto src = JsiSkRect::fromValue(runtime, arguments[1]);
+    auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    auto fastSample = count < 5 ?  false : arguments[4].getBool();
+    _canvas->drawImageRect(image, *src, *dest, SkSamplingOptions(),
+                           paint.get(), fastSample ? SkCanvas::kFast_SrcRectConstraint:
+                                        SkCanvas::kStrict_SrcRectConstraint);
     return jsi::Value::undefined();
   }
 
