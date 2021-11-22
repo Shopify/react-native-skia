@@ -2,7 +2,7 @@ import type { ReactNode, RefObject } from "react";
 
 import { NodeType, processChildren } from "../Host";
 import type { SkNode } from "../Host";
-import type { RRect, Path, Paint } from "../../skia";
+import type { IRRect, IPath, IPaint } from "../../skia";
 import { ClipOp, Skia } from "../../skia";
 
 import { processTransform, selectPaint, processPaint } from "./processors";
@@ -10,10 +10,10 @@ import type { CustomPaintProps, TransformProps } from "./processors";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
   children: ReactNode | ReactNode[];
-  clipRect?: RRect;
-  clipPath?: Path | string;
+  clipRect?: IRRect;
+  clipPath?: IPath | string;
   clipOp?: "difference" | "intersect";
-  rasterize?: { paint: RefObject<Paint> };
+  rasterize?: { paint: RefObject<IPaint> };
 }
 
 export const Group = (props: GroupProps) => {

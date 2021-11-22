@@ -1,4 +1,4 @@
-import type { SkJsiInstane } from "./JsiInstance";
+import type { SkJSIInstane } from "./JsiInstance";
 export enum BlurStyle {
   Normal, //!< fuzzy inside and outside
   Solid, //!< solid inside, fuzzy outside
@@ -6,7 +6,7 @@ export enum BlurStyle {
   Inner, //!< fuzzy inside, nothing outside
 }
 
-export type MaskFilter = SkJsiInstane<"MaskFilter">;
+export type IMaskFilter = SkJSIInstane<"MaskFilter">;
 
 /**
  * See SkMaskFilter.h for more details.
@@ -18,5 +18,5 @@ export interface MaskFilterFactory {
    * @param sigma - Standard deviation of the Gaussian blur to apply. Must be > 0.
    * @param respectCTM - if true the blur's sigma is modified by the CTM.
    */
-  MakeBlur(style: BlurStyle, sigma: number, respectCTM: boolean): MaskFilter;
+  MakeBlur(style: BlurStyle, sigma: number, respectCTM: boolean): IMaskFilter;
 }

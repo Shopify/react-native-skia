@@ -1,10 +1,10 @@
-import type { ImageFilter } from "../ImageFilter";
-import type { MaskFilter } from "../MaskFilter";
-import type { ColorFilter } from "../ColorFilter";
+import type { IImageFilter } from "../ImageFilter";
+import type { IMaskFilter } from "../MaskFilter";
+import type { IColorFilter } from "../ColorFilter";
 import type { IShader } from "../Shader";
 import type { Color } from "../Color";
-import type { PathEffect } from "../PathEffect";
-import type { SkJsiInstane } from "../JsiInstance";
+import type { IPathEffect } from "../PathEffect";
+import type { SkJSIInstane } from "../JsiInstance";
 
 import type { BlendMode } from "./BlendMode";
 
@@ -25,11 +25,11 @@ export enum StrokeJoin {
   Round,
 }
 
-export interface Paint extends SkJsiInstane<"Paint"> {
+export interface IPaint extends SkJSIInstane<"Paint"> {
   /**
    * Returns a copy of this paint.
    */
-  copy(): Paint;
+  copy(): IPaint;
 
   /**
    * Retrieves the alpha and RGB unpremultiplied. RGB are extended sRGB values
@@ -92,25 +92,25 @@ export interface Paint extends SkJsiInstane<"Paint"> {
    * Sets the current color filter, replacing the existing one if there was one.
    * @param filter
    */
-  setColorFilter(filter: ColorFilter): void;
+  setColorFilter(filter: IColorFilter): void;
 
   /**
    * Sets the current image filter, replacing the existing one if there was one.
    * @param filter
    */
-  setImageFilter(filter: ImageFilter): void;
+  setImageFilter(filter: IImageFilter): void;
 
   /**
    * Sets the current mask filter, replacing the existing one if there was one.
    * @param filter
    */
-  setMaskFilter(filter: MaskFilter): void;
+  setMaskFilter(filter: IMaskFilter): void;
 
   /**
    * Sets the current path effect, replacing the existing one if there was one.
    * @param effect
    */
-  setPathEffect(effect: PathEffect): void;
+  setPathEffect(effect: IPathEffect): void;
 
   /**
    * Sets the current shader, replacing the existing one if there was one.

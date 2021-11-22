@@ -1,7 +1,7 @@
 import type { Color } from "../Color";
 import type { BlendMode } from "../Paint/BlendMode";
 
-import type { ColorFilter } from "./ColorFilter";
+import type { IColorFilter } from "./ColorFilter";
 
 export type InputColorMatrix = number[];
 
@@ -10,21 +10,21 @@ export interface ColorFilterFactory {
    * Creates a color filter using the provided color matrix.
    * @param cMatrix
    */
-  MakeMatrix(cMatrix: InputColorMatrix): ColorFilter;
+  MakeMatrix(cMatrix: InputColorMatrix): IColorFilter;
 
   /**
    * Makes a color filter with the given color and blend mode.
    * @param color
    * @param mode
    */
-  MakeBlend(color: Color, mode: BlendMode): ColorFilter;
+  MakeBlend(color: Color, mode: BlendMode): IColorFilter;
 
   /**
    * Makes a color filter composing two color filters.
    * @param outer
    * @param inner
    */
-  MakeCompose(outer: ColorFilter, inner: ColorFilter): ColorFilter;
+  MakeCompose(outer: IColorFilter, inner: IColorFilter): IColorFilter;
 
   /**
    * Makes a color filter that is linearly interpolated between two other color filters.
@@ -32,15 +32,15 @@ export interface ColorFilterFactory {
    * @param dst
    * @param src
    */
-  MakeLerp(t: number, dst: ColorFilter, src: ColorFilter): ColorFilter;
+  MakeLerp(t: number, dst: IColorFilter, src: IColorFilter): IColorFilter;
 
   /**
    * Makes a color filter that converts between linear colors and sRGB colors.
    */
-  MakeLinearToSRGBGamma(): ColorFilter;
+  MakeLinearToSRGBGamma(): IColorFilter;
 
   /**
    * Makes a color filter that converts between sRGB colors and linear colors.
    */
-  MakeSRGBToLinearGamma(): ColorFilter;
+  MakeSRGBToLinearGamma(): IColorFilter;
 }

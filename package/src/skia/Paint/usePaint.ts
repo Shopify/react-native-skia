@@ -3,13 +3,13 @@ import { useMemo } from "react";
 
 import { Skia } from "../Skia";
 
-import type { Paint } from "./Paint";
+import type { IPaint } from "./Paint";
 
 /**
  * Returns a Skia Paint object
  * */
 export const usePaint = (
-  initializer?: (path: Paint) => void,
+  initializer?: (path: IPaint) => void,
   deps?: DependencyList
 ) =>
   useMemo(() => {

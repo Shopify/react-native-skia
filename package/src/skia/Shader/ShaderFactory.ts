@@ -1,5 +1,5 @@
 import type { TileMode } from "../ImageFilter";
-import type { Point } from "../Point";
+import type { IPoint } from "../Point";
 import type { Matrix } from "../Matrix";
 import type { Color } from "../Color";
 import type { BlendMode } from "../Paint/BlendMode";
@@ -23,8 +23,8 @@ export interface ShaderFactory {
    *                between them.
    */
   MakeLinearGradient(
-    start: Point,
-    end: Point,
+    start: IPoint,
+    end: IPoint,
     colors: Color[],
     pos: number[] | null,
     mode: TileMode,
@@ -46,7 +46,7 @@ export interface ShaderFactory {
    * @param flags - 0 to interpolate colors in unpremul, 1 to interpolate colors in premul.
    */
   MakeRadialGradient(
-    center: Point,
+    center: IPoint,
     radius: number,
     colors: Color[],
     pos: number[] | null,
@@ -70,9 +70,9 @@ export interface ShaderFactory {
    * @param flags
    */
   MakeTwoPointConicalGradient(
-    start: Point,
+    start: IPoint,
     startRadius: number,
-    end: Point,
+    end: IPoint,
     endRadius: number,
     colors: Color[],
     pos: number[] | null,

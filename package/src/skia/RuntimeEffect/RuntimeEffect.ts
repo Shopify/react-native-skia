@@ -1,5 +1,5 @@
 import type { IShader } from "../Shader";
-import type { SkJsiInstane } from "../JsiInstance";
+import type { SkJSIInstane } from "../JsiInstance";
 import type { Matrix } from "../Matrix";
 
 export interface SkSLUniform {
@@ -9,7 +9,7 @@ export interface SkSLUniform {
   slot: number;
 }
 
-export interface RuntimeEffect extends SkJsiInstane<"RuntimeEffect"> {
+export interface IRuntimeEffect extends SkJSIInstane<"RuntimeEffect"> {
   /**
    * Returns a shader executed using the given uniform data.
    * @param uniforms

@@ -4,7 +4,7 @@ import type { ImageSourcePropType } from "react-native";
 import type { TileMode } from "../ImageFilter";
 import type { IShader } from "../Shader";
 import type { Matrix } from "../Matrix";
-import type { SkJsiInstane } from "../JsiInstance";
+import type { SkJSIInstane } from "../JsiInstance";
 
 const resolveAssetSource = require("react-native/Libraries/Image/resolveAssetSource");
 
@@ -19,7 +19,7 @@ export enum MipmapMode {
   Linear,
 }
 
-export interface Image extends SkJsiInstane<"Image"> {
+export interface IImage extends SkJSIInstane<"Image"> {
   /**
    * Returns the possibly scaled height of the image.
    */

@@ -1,3 +1,3 @@
-import type { SkJsiInstane } from "../JsiInstance";
+import type { SkJSIInstane } from "../JsiInstance";
 
-export type IShader = SkJsiInstane<"Shader">;
+export type IShader = SkJSIInstane<"Shader">;

@@ -1,6 +1,6 @@
 import type { ForwardedRef } from "react";
 
-import type { Paint, RuntimeEffect } from "../skia";
+import type { IPaint, IRuntimeEffect } from "../skia";
 
 import type { DrawingContext } from "./DrawingContext";
 import type {
@@ -78,8 +78,8 @@ export interface NodeProps {
 }
 
 export interface NodeInstance {
-  [NodeType.Paint]: Paint;
-  [NodeType.RuntimeEffect]: RuntimeEffect;
+  [NodeType.Paint]: IPaint;
+  [NodeType.RuntimeEffect]: IRuntimeEffect;
   //[NodeType.Span]: string;
 }
 
@@ -115,14 +115,14 @@ declare global {
       skGroup: NodeProps[NodeType.Group];
       skCircle: NodeProps[NodeType.Circle];
       skFill: NodeProps[NodeType.Fill];
-      skPaint: NodeProps[NodeType.Paint] & RefProps<Paint>;
+      skPaint: NodeProps[NodeType.Paint] & RefProps<IPaint>;
       skRadialGradient: NodeProps[NodeType.RadialGradient];
       skLinearGradient: NodeProps[NodeType.LinearGradient];
       skColorMatrix: NodeProps[NodeType.ColorMatrix];
       skBlur: NodeProps[NodeType.Blur];
       skShader: NodeProps[NodeType.Shader];
       skRuntimeEffect: NodeProps[NodeType.RuntimeEffect] &
-        RefProps<RuntimeEffect>;
+        RefProps<IRuntimeEffect>;
       skImage: NodeProps[NodeType.Image];
       skImageShader: NodeProps[NodeType.ImageShader];
       skRect: NodeProps[NodeType.Rect];

@@ -1,6 +1,6 @@
 import { NodeType } from "../../Host";
 import type { SkNode } from "../../Host";
-import type { Image as IIMage } from "../../../skia";
+import type { IImage } from "../../../skia";
 import { useImage, ClipOp, Skia } from "../../../skia";
 
 export interface UnresolvedImageProps {
@@ -12,7 +12,7 @@ export interface UnresolvedImageProps {
 }
 
 export interface ImageProps extends Omit<UnresolvedImageProps, "source"> {
-  source: IIMage;
+  source: IImage;
 }
 
 export const Image = ({

@@ -1,3 +1,3 @@
-import type { SkJsiInstane } from "../JsiInstance";
+import type { SkJSIInstane } from "../JsiInstance";
 
-export type ColorFilter = SkJsiInstane<"ColorFilter">;
+export type IColorFilter = SkJSIInstane<"ColorFilter">;
