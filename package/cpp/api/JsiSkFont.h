@@ -22,35 +22,31 @@ using namespace facebook;
 
 class JsiSkFont : public JsiSkWrappingSharedPtrHostObject<SkFont> {
 public:
+  JSI_PROPERTY_GET(size) { return static_cast<double>(getObject()->getSize()); }
+  JSI_PROPERTY_SET(size) { getObject()->setSize(value.asNumber()); }
+
+  JSI_HOST_FUNCTION(measureText) {
+    auto textVal = arguments[0].asString(runtime).utf8(runtime);
+    auto text = textVal.c_str();
+    SkRect rect;
+    std::shared_ptr<SkPaint> paint = nullptr;
+    // Check if a paint argument was provided
+    if (count == 2) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[1]);
+    }
+    getObject()->measureText(text, strlen(text), SkTextEncoding::kUTF8, &rect,
+                             paint.get());
+    rect.setXYWH(0, 0, rect.width(), rect.height());
+    return JsiSkRect::toValue(runtime, getContext(), rect);
+  }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkFont, size))
+  JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(JsiSkFont, size))
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFont, measureText))
+
   JsiSkFont(RNSkPlatformContext *context, const SkFont &font)
       : JsiSkWrappingSharedPtrHostObject(context,
-                                         std::make_shared<SkFont>(font)) {
-    installProperty(
-        "size",
-        [this](jsi::Runtime &) -> jsi::Value {
-          return jsi::Value(getJsNumber(getObject()->getSize()));
-        },
-        [this](jsi::Runtime &, const jsi::Value &value) {
-          SkScalar size = value.asNumber();
-          getObject()->setSize(size);
-        });
-
-    installFunction(
-        "measureText", JSI_FUNC_SIGNATURE {
-          auto textVal = arguments[0].asString(runtime).utf8(runtime);
-          auto text = textVal.c_str();
-          SkRect rect;
-          std::shared_ptr<SkPaint> paint = nullptr;
-          // Check if a paint argument was provided
-          if (count == 2) {
-            paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-          }
-          getObject()->measureText(text, strlen(text), SkTextEncoding::kUTF8,
-                                   &rect, paint.get());
-          rect.setXYWH(0, 0, rect.width(), rect.height());
-          return JsiSkRect::toValue(runtime, context, rect);
-        });
-  };
+                                         std::make_shared<SkFont>(font)){};
 
   /**
     Returns the underlying object from a host object of this type
@@ -71,7 +67,7 @@ public:
    * class
    */
   static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
-    return JSI_FUNC_SIGNATURE {
+    return JSI_HOST_FUNCTION_LAMBDA {
       // Handle arguments
       if (count == 2) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);

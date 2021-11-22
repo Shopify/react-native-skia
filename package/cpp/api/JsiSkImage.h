@@ -24,55 +24,53 @@ using namespace facebook;
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 public:
+  // TODO-API: Properties?
+  JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
+  JSI_HOST_FUNCTION(height) {
+    return static_cast<double>(getObject()->width());
+  }
+
+  JSI_HOST_FUNCTION(makeShaderOptions) {
+    auto tmx = (SkTileMode)arguments[0].asNumber();
+    auto tmy = (SkTileMode)arguments[1].asNumber();
+    auto fm = (SkFilterMode)arguments[2].asNumber();
+    auto mm = (SkMipmapMode)arguments[3].asNumber();
+    auto m = count > 4 ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
+                       : nullptr;
+    auto shader =
+        getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+  }
+
+  JSI_HOST_FUNCTION(makeShaderCubic) {
+    auto tmx = (SkTileMode)arguments[0].asNumber();
+    auto tmy = (SkTileMode)arguments[1].asNumber();
+    auto B = (float)arguments[2].asNumber();
+    auto C = (float)arguments[3].asNumber();
+    auto m = count > 4 ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
+                       : nullptr;
+    auto shader =
+        getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+  }
+
+  JSI_PROPERTY_GET(uri) {
+    return jsi::String::createFromUtf8(runtime, _localUri.c_str());
+  }
+
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
+                       JSI_EXPORT_FUNC(JsiSkImage, height),
+                       JSI_EXPORT_FUNC(JsiSkImage, makeShaderOptions),
+                       JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic))
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkImage, uri))
+
   JsiSkImage(RNSkPlatformContext *context, const sk_sp<SkImage> image,
              const std::string &localUri)
       : JsiSkWrappingSkPtrHostObject<SkImage>(context, image),
-        _localUri(localUri) {
-
-    installFunction(
-        "width", JSI_FUNC_SIGNATURE {
-          return jsi::Value(getJsNumber(getObject()->width()));
-        });
-
-    installFunction(
-        "height", JSI_FUNC_SIGNATURE {
-          return jsi::Value(getJsNumber(getObject()->height()));
-        });
-
-    installReadonlyProperty("uri", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::String::createFromUtf8(rt, _localUri.c_str());
-    });
-
-    installFunction(
-        "makeShaderOptions", JSI_FUNC_SIGNATURE {
-          auto tmx = (SkTileMode)arguments[0].asNumber();
-          auto tmy = (SkTileMode)arguments[1].asNumber();
-          auto fm = (SkFilterMode)arguments[2].asNumber();
-          auto mm = (SkMipmapMode)arguments[3].asNumber();
-          auto m = count > 4
-                       ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
-                       : nullptr;
-          auto shader =
-              getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
-          return jsi::Object::createFromHostObject(
-              runtime, std::make_shared<JsiSkShader>(context, shader));
-        });
-
-    installFunction(
-        "makeShaderCubic", JSI_FUNC_SIGNATURE {
-          auto tmx = (SkTileMode)arguments[0].asNumber();
-          auto tmy = (SkTileMode)arguments[1].asNumber();
-          auto B = (float)arguments[2].asNumber();
-          auto C = (float)arguments[3].asNumber();
-          auto m = count > 4
-                       ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
-                       : nullptr;
-          auto shader =
-              getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
-          return jsi::Object::createFromHostObject(
-              runtime, std::make_shared<JsiSkShader>(context, shader));
-        });
-  };
+        _localUri(localUri){};
 
   /**
     Returns the underlying object from a host object of this type
@@ -93,7 +91,7 @@ public:
    * class
    */
   static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
-    return JSI_FUNC_SIGNATURE {
+    return JSI_HOST_FUNCTION_LAMBDA {
       auto jsiLocalUri = arguments[0].asString(runtime);
       auto localUri = jsiLocalUri.utf8(runtime);
 

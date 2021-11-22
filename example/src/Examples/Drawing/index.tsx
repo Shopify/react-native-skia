@@ -47,7 +47,6 @@ export const DrawingExample: React.FC = () => {
           y: touches[0].y,
         };
       } else if (isDrawing.current === true) {
-        console.log(touches[0].force);
         // Get current path object
         const path = paths[paths.length - 1];
 

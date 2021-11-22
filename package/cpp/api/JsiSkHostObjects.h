@@ -26,6 +26,11 @@ protected:
   */
   double getJsNumber(float number) { return number; }
 
+  /**
+   * @return A pointer to the platform context
+   */
+  RNSkPlatformContext *getContext() { return _context; }
+
 private:
   RNSkPlatformContext *_context;
 };
