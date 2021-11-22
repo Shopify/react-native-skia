@@ -37,7 +37,8 @@ export const ColorFilter = () => {
     const rect3 = Skia.XYWHRect(0, IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT);
     const rect4 = Skia.XYWHRect(IMG_WIDTH, IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT);
     if (image) {
-      canvas.drawImageRect(image, rect1, paint);
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
+      canvas.drawImageRect(image, imgRect, rect1, paint);
       const p2 = paint.copy();
       p2.setColorFilter(
         Skia.ColorFilter.MakeMatrix([
@@ -45,7 +46,7 @@ export const ColorFilter = () => {
           -0.703, 0, 0, 0, 0, 0, 1, 0,
         ])
       );
-      canvas.drawImageRect(image, rect2, p2);
+      canvas.drawImageRect(image, imgRect, rect2, p2);
       const p3 = paint.copy();
       p3.setColorFilter(
         Skia.ColorFilter.MakeMatrix([
@@ -53,7 +54,7 @@ export const ColorFilter = () => {
           0,
         ])
       );
-      canvas.drawImageRect(image, rect3, p3);
+      canvas.drawImageRect(image, imgRect, rect3, p3);
       const p4 = paint.copy();
       p4.setColorFilter(
         Skia.ColorFilter.MakeMatrix([
@@ -61,7 +62,7 @@ export const ColorFilter = () => {
           0.13, 0, 0, 0, 0, 0, 1, 0,
         ])
       );
-      canvas.drawImageRect(image, rect4, p4);
+      canvas.drawImageRect(image, imgRect, rect4, p4);
     }
   }, []);
 
@@ -69,9 +70,10 @@ export const ColorFilter = () => {
     const rect1 = Skia.XYWHRect(0, 0, IMG_WIDTH, IMG_HEIGHT);
     const rect2 = Skia.XYWHRect(IMG_WIDTH, 0, IMG_WIDTH, IMG_HEIGHT);
     if (image) {
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
       const p1 = paint.copy();
       p1.setImageFilter(Skia.ImageFilters.MakeBlur(5, 5, TileMode.Decal, null));
-      canvas.drawImageRect(image, rect1, p1);
+      canvas.drawImageRect(image, imgRect, rect1, p1);
       const p2 = paint.copy();
       p2.setImageFilter(
         Skia.ImageFilters.MakeColorFilter(
@@ -82,7 +84,7 @@ export const ColorFilter = () => {
           null
         )
       );
-      canvas.drawImageRect(image, rect2, p2);
+      canvas.drawImageRect(image, imgRect, rect2, p2);
     }
   }, []);
   return (

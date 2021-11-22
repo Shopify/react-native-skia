@@ -40,6 +40,7 @@ export const Transform = () => {
       CARD_HEIHT
     );
     if (image) {
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
       canvas.save();
       canvas.rotate(-30, center.x, center.y);
 
@@ -48,7 +49,7 @@ export const Transform = () => {
       canvas.scale(0.75, 0.75);
       canvas.translate(-center.x, -center.y);
 
-      canvas.drawImageRect(image, rect, paint);
+      canvas.drawImageRect(image, imgRect, rect, paint);
       canvas.restore();
     }
   }, []);
@@ -61,6 +62,7 @@ export const Transform = () => {
       CARD_HEIHT
     );
     if (image) {
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
       canvas.save();
 
       //  we pivot on the center of the card
@@ -68,7 +70,7 @@ export const Transform = () => {
       canvas.skew(-Math.PI / 6, 0);
       canvas.translate(-center.x, -center.y);
 
-      canvas.drawImageRect(image, rect, paint);
+      canvas.drawImageRect(image, imgRect, rect, paint);
       canvas.restore();
     }
   }, []);
@@ -81,6 +83,7 @@ export const Transform = () => {
       CARD_HEIHT
     );
     if (image) {
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
       canvas.save();
 
       //  we pivot on the center of the card
@@ -88,7 +91,7 @@ export const Transform = () => {
       canvas.skew(-Math.PI / 6, 0);
       canvas.translate(-center.x, -center.y);
 
-      canvas.drawImageRect(image, rect, paint);
+      canvas.drawImageRect(image, imgRect, rect, paint);
       canvas.restore();
     }
   }, []);
