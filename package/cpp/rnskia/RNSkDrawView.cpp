@@ -106,9 +106,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
         infoObject.setProperty(*runtime, "width", width);
         infoObject.setProperty(*runtime, "height", height);
         infoObject.setProperty(*runtime, "timestamp", timestamp);
-        infoObject.setProperty(*runtime, "delta", delta);
-        infoObject.setProperty(*runtime, "fps", 1.0 / delta);
-
+         
         // To be able to call the drawing function we'll wrap it once again
         callback->call(*runtime, static_cast<const jsi::Value *>(args),
                        (size_t)2);
@@ -139,8 +137,6 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           auto debugString = std::to_string(average) + "ms";
 
           if (_drawingMode == RNSkDrawingMode::Continuous) {
-            debugString +=
-                " " + std::to_string((size_t)round(1.0 / delta)) + "fps";
             debugString += "/continuous";
           } else {
             debugString += "/default";

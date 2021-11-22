@@ -43,8 +43,6 @@ export interface DrawInfo {
   width: number;
   height: number;
   timestamp: number;
-  delta: number;
-  fps: number;
 }
 
 export type RNSkiaDrawCallback = (canvas: Canvas, info: DrawInfo) => void;
