@@ -28,7 +28,7 @@ using RNSkTouchPoint = struct {
 
 using RNSkTouchCallback = std::function<void(std::vector<RNSkTouchPoint>)>;
 
-#define NUMBER_OF_DURATION_SAMPLES 100
+#define NUMBER_OF_DURATION_SAMPLES 10
 using RNSkTimingInfo = struct {
   double lastTimeStamp;
   long lastDurations[NUMBER_OF_DURATION_SAMPLES];

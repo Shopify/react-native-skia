@@ -9,24 +9,25 @@ using namespace facebook;
 
 class JsiSkRRect : public JsiSkWrappingSharedPtrHostObject<SkRRect> {
 public:
+  JSI_PROPERTY_GET(rx) {
+    return static_cast<double>(getObject()->getSimpleRadii().x());
+  }
+  JSI_PROPERTY_GET(ry) {
+    return static_cast<double>(getObject()->getSimpleRadii().y());
+  }
+  JSI_PROPERTY_GET(rect) {
+    return jsi::Object::createFromHostObject(
+        runtime,
+        std::make_shared<JsiSkRect>(getContext(), getObject()->getBounds()));
+  }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkRRect, rx),
+                              JSI_EXPORT_PROP_GET(JsiSkRRect, ry),
+                              JSI_EXPORT_PROP_GET(JsiSkRRect, rect))
+
   JsiSkRRect(RNSkPlatformContext *context, const SkRRect &rect)
       : JsiSkWrappingSharedPtrHostObject<SkRRect>(
-            context, std::make_shared<SkRRect>(rect)) {
-    installReadonlyProperty("rx", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->getSimpleRadii().y()));
-    });
-
-    installReadonlyProperty("ry", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->getSimpleRadii().y()));
-    });
-
-    installReadonlyProperty(
-        "rect", [this, context](jsi::Runtime &rt) -> jsi::Value {
-          return jsi::Object::createFromHostObject(
-              rt,
-              std::make_shared<JsiSkRect>(context, getObject()->getBounds()));
-        });
-  };
+            context, std::make_shared<SkRRect>(rect)){};
 
   /**
     Returns the underlying object from a host object of this type
@@ -56,7 +57,7 @@ public:
    * class
    */
   static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
-    return JSI_FUNC_SIGNATURE {
+    return JSI_HOST_FUNCTION_LAMBDA {
       // Set up the rect
       auto rect = JsiSkRect::fromValue(runtime, arguments[0]).get();
       auto rx = arguments[1].asNumber();

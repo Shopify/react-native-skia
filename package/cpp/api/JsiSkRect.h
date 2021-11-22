@@ -15,57 +15,45 @@ using namespace facebook;
 
 class JsiSkRect : public JsiSkWrappingSharedPtrHostObject<SkRect> {
 public:
+  JSI_PROPERTY_GET(x) { return static_cast<double>(getObject()->x()); }
+  JSI_PROPERTY_GET(y) { return static_cast<double>(getObject()->y()); }
+  JSI_PROPERTY_GET(width) { return static_cast<double>(getObject()->width()); }
+  JSI_PROPERTY_GET(height) {
+    return static_cast<double>(getObject()->height());
+  }
+  JSI_PROPERTY_GET(left) { return static_cast<double>(getObject()->left()); }
+  JSI_PROPERTY_GET(top) { return static_cast<double>(getObject()->top()); }
+  JSI_PROPERTY_GET(right) { return static_cast<double>(getObject()->right()); }
+  JSI_PROPERTY_GET(bottom) {
+    return static_cast<double>(getObject()->bottom());
+  }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkRect, x),
+                              JSI_EXPORT_PROP_GET(JsiSkRect, y),
+                              JSI_EXPORT_PROP_GET(JsiSkRect, width),
+                              JSI_EXPORT_PROP_GET(JsiSkRect, height))
+
+  JSI_HOST_FUNCTION(setXYWH) {
+    getObject()->setXYWH(arguments[0].asNumber(), arguments[1].asNumber(),
+                         arguments[2].asNumber(), arguments[3].asNumber());
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setLTRB) {
+    getObject()->setLTRB(arguments[0].asNumber(), arguments[1].asNumber(),
+                         arguments[2].asNumber(), arguments[3].asNumber());
+    return jsi::Value::undefined();
+  }
+
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRect, setXYWH),
+                       JSI_EXPORT_FUNC(JsiSkRect, setLTRB), )
+
+  /**
+   Constructor
+   */
   JsiSkRect(RNSkPlatformContext *context, const SkRect &rect)
       : JsiSkWrappingSharedPtrHostObject<SkRect>(
-            context, std::make_shared<SkRect>(rect)) {
-    installReadonlyProperty("x", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->x()));
-    });
-
-    installReadonlyProperty("y", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->y()));
-    });
-
-    installReadonlyProperty("width", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->width()));
-    });
-
-    installReadonlyProperty("height", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->height()));
-    });
-
-    installReadonlyProperty("left", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->left()));
-    });
-
-    installReadonlyProperty("top", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->top()));
-    });
-
-    installReadonlyProperty("right", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->right()));
-    });
-
-    installReadonlyProperty("bottom", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->bottom()));
-    });
-
-    installFunction(
-        "setXYWH", JSI_FUNC_SIGNATURE {
-          getObject()->setXYWH(arguments[0].asNumber(), arguments[1].asNumber(),
-                               arguments[2].asNumber(),
-                               arguments[3].asNumber());
-          return jsi::Value::undefined();
-        });
-
-    installFunction(
-        "setLTRB", JSI_FUNC_SIGNATURE {
-          getObject()->setLTRB(arguments[0].asNumber(), arguments[1].asNumber(),
-                               arguments[2].asNumber(),
-                               arguments[3].asNumber());
-          return jsi::Value::undefined();
-        });
-  };
+            context, std::make_shared<SkRect>(rect)){};
 
   /**
     Returns the underlying object from a host object of this type
@@ -95,7 +83,7 @@ public:
    * class
    */
   static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
-    return JSI_FUNC_SIGNATURE {
+    return JSI_HOST_FUNCTION_LAMBDA {
       // Set up the rect
       SkRect rect =
           SkRect::MakeXYWH(arguments[0].asNumber(), arguments[1].asNumber(),

@@ -223,15 +223,10 @@ void RNSkDrawView::requestRedraw() {
       return;
     }
 
-    try {
-      if (_platformContext != nullptr) {
-        milliseconds ms = std::chrono::duration_cast<milliseconds>(
-            system_clock::now().time_since_epoch());
-        drawFrame(ms.count());
-      }
-    } catch (...) {
-      _isDrawing = false;
-      throw;
+    if (_platformContext != nullptr) {
+      milliseconds ms = std::chrono::duration_cast<milliseconds>(
+          system_clock::now().time_since_epoch());
+      drawFrame(ms.count());
     }
 
     _isDrawing = false;
@@ -278,13 +273,8 @@ void RNSkDrawView::beginDrawingLoop() {
 
           _isDrawing = true;
 
-          try {
-            if (_platformContext != nullptr) {
-              drawFrame(timestamp);
-            }
-          } catch (...) {
-            _isDrawing = false;
-            throw;
+          if (_platformContext != nullptr) {
+            drawFrame(timestamp);
           }
 
           _isDrawing = false;
