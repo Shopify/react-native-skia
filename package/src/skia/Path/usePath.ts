@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import type { Font } from "../Font";
 import { Skia } from "../Skia";
 
-import type { IPath } from "./Path";
+import type { Path } from "./Path";
 
 /**
  * Memoizes and returns a Skia Path object with optional initializer
@@ -13,7 +13,7 @@ import type { IPath } from "./Path";
  * @returns
  */
 export const usePath = (
-  initializer?: (path: IPath) => void,
+  initializer?: (path: Path) => void,
   deps?: DependencyList
 ) =>
   useMemo(() => {

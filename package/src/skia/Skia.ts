@@ -5,11 +5,11 @@ import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
 import type { Font } from "./Font";
 import type { FontStyle, Typeface } from "./Typeface";
-import type { IImage } from "./Image";
+import type { Image } from "./Image";
 import { ImageCtor } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
-import type { IPaint } from "./Paint";
-import type { IRect } from "./Rect";
+import type { Paint } from "./Paint";
+import type { Rect } from "./Rect";
 import type { RRect } from "./RRect";
 import type { RuntimeEffectFactory } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
@@ -25,9 +25,9 @@ import type { Point } from "./Point";
  */
 export interface Skia {
   Point: (x: number, y: number) => Point;
-  XYWHRect: (x: number, y: number, width: number, height: number) => IRect;
-  RRectXY: (rect: IRect, rx: number, ry: number) => RRect;
-  Paint: () => IPaint;
+  XYWHRect: (x: number, y: number, width: number, height: number) => Rect;
+  RRectXY: (rect: Rect, rx: number, ry: number) => RRect;
+  Paint: () => Paint;
   Path: PathFactory;
   Matrix: () => Matrix;
   ColorFilter: ColorFilterFactory;
@@ -41,7 +41,7 @@ export interface Skia {
   Shader: ShaderFactory;
   PathEffect: PathEffectFactory;
   /* Below are private APIs */
-  Image: (localUri: string) => Promise<IImage>;
+  Image: (localUri: string) => Promise<Image>;
   Svg: ISvgStatic;
 }
 

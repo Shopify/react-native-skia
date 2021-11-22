@@ -19,7 +19,7 @@ export enum MipmapMode {
   Linear,
 }
 
-export interface IImage extends SkJsiInstane<"Image"> {
+export interface Image extends SkJsiInstane<"Image"> {
   /**
    * Returns the possibly scaled height of the image.
    */

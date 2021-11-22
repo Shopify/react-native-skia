@@ -1,13 +1,13 @@
-import type { IPath, PathOp } from "./Path";
+import type { Path, PathOp } from "./Path";
 
 export interface PathFactory {
-  Make(): IPath;
+  Make(): Path;
   /**
    * Creates a new path from the provided SVG string. If this fails, null will be
    * returned instead.
    * @param str
    */
-  MakeFromSVGString(str: string): IPath | null;
+  MakeFromSVGString(str: string): Path | null;
 
   /**
    * Creates a new path by combining the given paths according to op. If this fails, null will
@@ -16,5 +16,5 @@ export interface PathFactory {
    * @param two
    * @param op
    */
-  MakeFromOp(one: IPath, two: IPath, op: PathOp): IPath | null;
+  MakeFromOp(one: Path, two: Path, op: PathOp): Path | null;
 }

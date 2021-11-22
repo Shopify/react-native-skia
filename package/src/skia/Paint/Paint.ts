@@ -25,11 +25,11 @@ export enum StrokeJoin {
   Round,
 }
 
-export interface IPaint extends SkJsiInstane<"Paint"> {
+export interface Paint extends SkJsiInstane<"Paint"> {
   /**
    * Returns a copy of this paint.
    */
-  copy(): IPaint;
+  copy(): Paint;
 
   /**
    * Retrieves the alpha and RGB unpremultiplied. RGB are extended sRGB values

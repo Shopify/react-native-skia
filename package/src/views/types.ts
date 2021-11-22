@@ -1,7 +1,7 @@
 import type { ViewProps } from "react-native";
 import { requireNativeComponent } from "react-native";
 
-import type { ICanvas } from "../skia/Canvas";
+import type { Canvas } from "../skia/Canvas";
 
 export interface ISkiaViewApi {
   invalidateSkiaView: (nativeId: number) => void;
@@ -47,7 +47,7 @@ export interface DrawInfo {
   fps: number;
 }
 
-export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawInfo) => void;
+export type RNSkiaDrawCallback = (canvas: Canvas, info: DrawInfo) => void;
 export type RNSkiaTouchCallback = (touches: TouchInfo[]) => void;
 
 export type RNSkiaViewProps = ViewProps & {

@@ -9,7 +9,7 @@ export interface SkSLUniform {
   slot: number;
 }
 
-export interface IRuntimeEffect extends SkJsiInstane<"RuntimeEffect"> {
+export interface RuntimeEffect extends SkJsiInstane<"RuntimeEffect"> {
   /**
    * Returns a shader executed using the given uniform data.
    * @param uniforms

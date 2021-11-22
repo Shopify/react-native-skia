@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 
-import type { IRuntimeEffect as IRuntimeEffect } from "../../skia";
+import { RuntimeEffect as RuntimeEffect } from "../../skia";
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
 
@@ -8,7 +8,7 @@ export interface RuntimeEffectProps {
   source: string;
 }
 
-export const RuntimeEffect = forwardRef<IRuntimeEffect, RuntimeEffectProps>(
+export const RuntimeEffect = forwardRef<RuntimeEffect, RuntimeEffectProps>(
   (props, ref) => {
     return <skRuntimeEffect ref={ref} {...props} />;
   }
@@ -16,7 +16,7 @@ export const RuntimeEffect = forwardRef<IRuntimeEffect, RuntimeEffectProps>(
 
 export const RuntimeEffectNode = (
   props: RuntimeEffectProps,
-  instance: IRuntimeEffect
+  instance: RuntimeEffect
 ): SkNode<NodeType.RuntimeEffect> => ({
   type: NodeType.RuntimeEffect,
   props,

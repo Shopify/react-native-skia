@@ -1,9 +1,9 @@
-import type { ICanvas, IPaint } from "../skia";
+import type { Canvas, Paint } from "../skia";
 
 export interface DrawingContext {
   width: number;
   height: number;
-  canvas: ICanvas;
-  paint: IPaint;
+  canvas: Canvas;
+  paint: Paint;
   opacity: number;
 }

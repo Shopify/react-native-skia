@@ -2,10 +2,10 @@ import type { ReactNode, RefObject } from "react";
 
 import { NodeType, processChildren } from "../Host";
 import type { SkNode } from "../Host";
-import type { IRuntimeEffect } from "../../skia";
+import type { RuntimeEffect } from "../../skia";
 
 export interface ShaderProps {
-  rt: RefObject<IRuntimeEffect>;
+  rt: RefObject<RuntimeEffect>;
   uniforms: number[];
   children?: ReactNode | ReactNode[];
 }

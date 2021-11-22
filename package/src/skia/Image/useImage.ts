@@ -1,14 +1,14 @@
 import type { ImageSourcePropType } from "react-native";
 import { useMemo, useState } from "react";
 
-import type { IImage } from "./Image";
+import type { Image } from "./Image";
 import { ImageCtor } from "./Image";
 
 /**
  * Returns a Skia Image object
  * */
 export const useImage = (source: ImageSourcePropType) => {
-  const [image, setImage] = useState<IImage | null>(null);
+  const [image, setImage] = useState<Image | null>(null);
   useMemo(
     () =>
       ImageCtor(source).then((value) => {

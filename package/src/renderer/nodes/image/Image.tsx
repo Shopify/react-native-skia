@@ -1,6 +1,6 @@
 import { NodeType } from "../../Host";
 import type { SkNode } from "../../Host";
-import type { IImage as IIMage } from "../../../skia";
+import type { Image as IIMage } from "../../../skia";
 import { useImage, ClipOp, Skia } from "../../../skia";
 
 export interface UnresolvedImageProps {

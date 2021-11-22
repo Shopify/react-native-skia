@@ -1,8 +1,8 @@
-import type { IPaint } from "./Paint";
-import type { IRect } from "./Rect";
+import type { Paint } from "./Paint";
+import type { Rect } from "./Rect";
 import type { Font } from "./Font";
-import type { IPath } from "./Path";
-import type { IImage } from "./Image";
+import type { Path } from "./Path";
+import type { Image } from "./Image";
 import type { ISvgDom } from "./Svg";
 import type { Color } from "./Color";
 import type { RRect } from "./RRect";
@@ -22,7 +22,7 @@ export enum ClipOp {
   Intersect,
 }
 
-export type ICanvas = {
+export interface Canvas {
   /**
    * Draws the given image with its top-left corner at (left, top) using the current clip,
    * the current matrix, and optionally-provided paint.
@@ -31,7 +31,7 @@ export type ICanvas = {
    * @param top
    * @param paint
    */
-  drawImage: (image: IImage, x: number, y: number, paint?: IPaint) => void;
+  drawImage: (image: Image, x: number, y: number, paint?: Paint) => void;
 
   /**
    * Draws sub-rectangle src from provided image, scaled and translated to fill dst rectangle.
@@ -42,10 +42,10 @@ export type ICanvas = {
    * @param fastSample - if false, will filter strictly within src.
    */
   drawImageRect(
-    img: IImage,
-    src: IRect,
-    dest: IRect,
-    paint: IPaint,
+    img: Image,
+    src: Rect,
+    dest: Rect,
+    paint: Paint,
     fastSample?: boolean
   ): void;
 
@@ -60,12 +60,12 @@ export type ICanvas = {
    * @param paint
    */
   drawImageCubic(
-    img: IImage,
+    img: Image,
     left: number,
     top: number,
     B: number,
     C: number,
-    paint?: IPaint | null
+    paint?: Paint | null
   ): void;
 
   /**
@@ -80,12 +80,12 @@ export type ICanvas = {
    * @param paint
    */
   drawImageOptions(
-    img: IImage,
+    img: Image,
     left: number,
     top: number,
     fm: FilterMode,
     mm: MipmapMode,
-    paint?: IPaint | null
+    paint?: Paint | null
   ): void;
 
   /**
@@ -99,11 +99,11 @@ export type ICanvas = {
    * @param paint
    */
   drawImageNine(
-    img: IImage,
-    center: IRect,
-    dest: IRect,
+    img: Image,
+    center: Rect,
+    dest: Rect,
     filter: FilterMode,
-    paint?: IPaint | null
+    paint?: Paint | null
   ): void;
 
   /**
@@ -117,12 +117,12 @@ export type ICanvas = {
    * @param paint
    */
   drawImageRectCubic(
-    img: IImage,
-    src: IRect,
-    dest: IRect,
+    img: Image,
+    src: Rect,
+    dest: Rect,
     B: number,
     C: number,
-    paint?: IPaint | null
+    paint?: Paint | null
   ): void;
 
   /**
@@ -137,12 +137,12 @@ export type ICanvas = {
    * @param paint
    */
   drawImageRectOptions(
-    img: IImage,
-    src: IRect,
-    dest: IRect,
+    img: Image,
+    src: Rect,
+    dest: Rect,
     fm: FilterMode,
     mm: MipmapMode,
-    paint?: IPaint | null
+    paint?: Paint | null
   ): void;
 
   /** Fills clip with SkPaint paint. SkPaint components, SkShader,
@@ -153,7 +153,7 @@ export type ICanvas = {
 
         example: https://fiddle.skia.org/c/@Canvas_drawPaint
     */
-  drawPaint: (paint: IPaint) => void;
+  drawPaint: (paint: Paint) => void;
 
   /** Draws line segment from (x0, y0) to (x1, y1) using clip, SkMatrix, and SkPaint paint.
         In paint: SkPaint stroke width describes the line thickness;
@@ -173,7 +173,7 @@ export type ICanvas = {
     y0: number,
     x1: number,
     y1: number,
-    paint: IPaint
+    paint: Paint
   ) => void;
   /** Draws SkRect rect using clip, SkMatrix, and SkPaint paint.
         In paint: SkPaint::Style determines if rectangle is stroked or filled;
@@ -185,7 +185,7 @@ export type ICanvas = {
 
         example: https://fiddle.skia.org/c/@Canvas_drawRect
     */
-  drawRect: (rect: IRect, paint: IPaint) => void;
+  drawRect: (rect: Rect, paint: Paint) => void;
 
   /**
    * Draws a circle at (cx, cy) with the given radius.
@@ -194,7 +194,7 @@ export type ICanvas = {
    * @param radius
    * @param paint
    */
-  drawCircle(cx: number, cy: number, radius: number, paint: IPaint): void;
+  drawCircle(cx: number, cy: number, radius: number, paint: Paint): void;
 
   /**
    * Draws a cubic patch defined by 12 control points [top, right, bottom, left] with optional
@@ -210,7 +210,7 @@ export type ICanvas = {
     colors?: Color[] | null,
     texs?: Point[] | null,
     mode?: BlendMode | null,
-    paint?: IPaint
+    paint?: Paint
   ): void;
 
   /**
@@ -227,7 +227,7 @@ export type ICanvas = {
    * @param points
    * @param paint
    */
-  drawPoints(mode: PointMode, points: Point[], paint: IPaint): void;
+  drawPoints(mode: PointMode, points: Point[], paint: Paint): void;
 
   /** Draws arc using clip, SkMatrix, and SkPaint paint.
 
@@ -250,11 +250,11 @@ export type ICanvas = {
         @param paint       SkPaint stroke or fill, blend, color, and so on, used to draw
     */
   drawArc: (
-    oval: IRect,
+    oval: Rect,
     startAngle: number,
     sweepAngle: number,
     useCenter: boolean,
-    paint: IPaint
+    paint: Paint
   ) => void;
 
   /**
@@ -263,7 +263,7 @@ export type ICanvas = {
    * @param rrect
    * @param paint
    */
-  drawRRect(rrect: RRect, paint: IPaint): void;
+  drawRRect(rrect: RRect, paint: Paint): void;
 
   /**
    * Draws RRect outer and inner using clip, Matrix, and Paint paint.
@@ -272,7 +272,7 @@ export type ICanvas = {
    * @param inner
    * @param paint
    */
-  drawDRRect(outer: RRect, inner: RRect, paint: IPaint): void;
+  drawDRRect(outer: RRect, inner: RRect, paint: Paint): void;
 
   /**
    * Draws an oval bounded by the given rectangle using the current clip, current matrix,
@@ -280,7 +280,7 @@ export type ICanvas = {
    * @param oval
    * @param paint
    */
-  drawOval(oval: IRect, paint: IPaint): void;
+  drawOval(oval: Rect, paint: Paint): void;
 
   /** Draws SkPath path using clip, SkMatrix, and SkPaint paint.
         SkPath contains an array of path contour, each of which may be open or closed.
@@ -296,7 +296,7 @@ export type ICanvas = {
 
         example: https://fiddle.skia.org/c/@Canvas_drawPath
     */
-  drawPath: (path: IPath, paint: IPaint) => void;
+  drawPath: (path: Path, paint: Paint) => void;
   /** Draws text, with origin at (x, y), using clip, SkMatrix, SkFont font,
         and SkPaint paint.
 
@@ -318,7 +318,7 @@ export type ICanvas = {
     x: number,
     y: number,
     font: Font,
-    paint: IPaint
+    paint: Paint
   ) => void;
 
   /**
@@ -355,8 +355,8 @@ export type ICanvas = {
    * @param flags
    */
   saveLayer(
-    paint?: IPaint,
-    bounds?: IRect | null,
+    paint?: Paint,
+    bounds?: Rect | null,
     backdrop?: ImageFilter | null,
     flags?: number
   ): number;
@@ -368,7 +368,7 @@ export type ICanvas = {
    * See Canvas.h for more.
    * @param paint
    */
-  saveLayerPaint(paint?: IPaint): number;
+  saveLayerPaint(paint?: Paint): number;
 
   /** Removes changes to SkMatrix and clip since SkCanvas state was
         last saved. The state is removed from the stack.
@@ -433,7 +433,7 @@ export type ICanvas = {
    * @param op
    * @param doAntiAlias
    */
-  clipPath(path: IPath, op: ClipOp, doAntiAlias: boolean): void;
+  clipPath(path: Path, op: ClipOp, doAntiAlias: boolean): void;
 
   /**
    * Replaces clip with the intersection or difference of the current clip and rect,
@@ -442,7 +442,7 @@ export type ICanvas = {
    * @param op
    * @param doAntiAlias
    */
-  clipRect(rect: IRect, op: ClipOp, doAntiAlias: boolean): void;
+  clipRect(rect: Rect, op: ClipOp, doAntiAlias: boolean): void;
 
   /**
    * Replaces clip with the intersection or difference of the current clip and rrect,
@@ -458,4 +458,4 @@ export type ICanvas = {
    * @param m
    */
   concat(m: Matrix): void;
-};
+}

@@ -1,8 +1,8 @@
 import type { SkJsiInstane } from "./JsiInstance";
-import type { IRect } from "./Rect";
+import type { Rect } from "./Rect";
 
 export interface RRect extends SkJsiInstane<"RRect"> {
-  rect: IRect;
+  rect: Rect;
   readonly rx: number;
   readonly ry: number;
 }

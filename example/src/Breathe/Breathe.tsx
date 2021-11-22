@@ -1,5 +1,5 @@
 import React from "react";
-import { Canvas, Circle, Group } from "@shopify/react-native-skia";
+import { Canvas, Circle } from "@shopify/react-native-skia";
 
 export const Breathe = () => {
   return (

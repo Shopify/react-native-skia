@@ -1,4 +1,4 @@
-import type { IRuntimeEffect } from "./RuntimeEffect";
+import type { RuntimeEffect } from "./RuntimeEffect";
 
 export interface RuntimeEffectFactory {
   /**
@@ -7,6 +7,6 @@ export interface RuntimeEffectFactory {
    * @param callback - will be called with any compilation error. If not provided, errors will
    *                   be printed to console.log().
    */
-  Make: (sksl: string) => IRuntimeEffect | null;
+  Make: (sksl: string) => RuntimeEffect | null;
   //Make(sksl: string, callback?: (err: string) => void): RuntimeEffect | null;
 }
