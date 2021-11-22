@@ -9,7 +9,7 @@ import {
   usePaint,
 } from "@shopify/react-native-skia";
 
-const ColumnCount = 4;
+const ColumnCount = 2;
 const RowCount = 10;
 
 export const PhysicsExample: React.FC = () => {
@@ -53,7 +53,7 @@ export const PhysicsExample: React.FC = () => {
 
         const x = b2.b2RandomRange(-0.12, 0.12);
         //const x = i % 2 === 0 ? -0.04 : 0.04;
-        bodyDef.position.Set(xs[j] + x, 0.55 + 2 * i);
+        bodyDef.position.Set(xs[j] + x, 0.55 + 1.2 * i);
         const body = b2world.CreateBody(bodyDef);
 
         bodies[n] = body;
@@ -71,29 +71,33 @@ export const PhysicsExample: React.FC = () => {
     p.setStyle(PaintStyle.Stroke);
     p.setStrokeWidth(0.05);
   });
+
   const fgfill = usePaint((p) => {
     p.setColor(Skia.Color("#337FA955"));
     p.setStyle(PaintStyle.Fill);
   });
+
+  const rect = useMemo(() => Skia.XYWHRect(-0.5, -0.5, 1, 1), []);
+
   const onDraw = useDrawCallback(
     (canvas, info) => {
       // Clear screen
       canvas.drawPaint(bg);
       canvas.save();
-      canvas.translate(info.width / 2, info.height / 2);
-      canvas.scale(20, 20);
+      canvas.translate(info.width / 2, info.height);
+      canvas.scale(30, 30);
       canvas.rotate(180, 0, 0);
 
       // Tick screen
-      world.Step(info.timestamp / 10000000, 4, 2);
+      world.Step(info.timestamp / 10000000, 3, 3);
 
       // Draw boxes
       for (let i = 0; i < bodies.length; i++) {
         canvas.save();
         canvas.translate(bodies[i].GetPosition().x, bodies[i].GetPosition().y);
         canvas.rotate(bodies[i].GetAngle() * (180 / Math.PI), 0, 0);
-        canvas.drawRect(Skia.XYWHRect(-0.5, -0.5, 1, 1), fg);
-        canvas.drawRect(Skia.XYWHRect(-0.5, -0.5, 1, 1), fgfill);
+        canvas.drawRect(rect, fg);
+        canvas.drawRect(rect, fgfill);
         canvas.restore();
       }
       canvas.restore();

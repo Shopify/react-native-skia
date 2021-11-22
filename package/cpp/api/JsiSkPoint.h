@@ -15,21 +15,20 @@ using namespace facebook;
 
 class JsiSkPoint : public JsiSkWrappingSharedPtrHostObject<SkPoint> {
 public:
+  JSI_PROPERTY_GET(x) { return static_cast<double>(getObject()->x()); }
+
+  JSI_PROPERTY_GET(y) { return static_cast<double>(getObject()->y()); }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPoint, x),
+                              JSI_EXPORT_PROP_GET(JsiSkPoint, y))
+
   JsiSkPoint(RNSkPlatformContext *context, const SkPoint &point)
       : JsiSkWrappingSharedPtrHostObject<SkPoint>(
-            context, std::make_shared<SkPoint>(point)) {
-    installReadonlyProperty("x", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->x()));
-    });
-
-    installReadonlyProperty("y", [this](jsi::Runtime &rt) -> jsi::Value {
-      return jsi::Value(getJsNumber(getObject()->y()));
-    });
-  };
+            context, std::make_shared<SkPoint>(point)){};
 
   /**
-    Returns the underlying object from a host object of this type
-   */
+  Returns the underlying object from a host object of this type
+ */
   static std::shared_ptr<SkPoint> fromValue(jsi::Runtime &runtime,
                                             const jsi::Value &obj) {
     return obj.asObject(runtime)
@@ -39,8 +38,8 @@ public:
   }
 
   /**
-    Returns the jsi object from a host object of this type
-   */
+  Returns the jsi object from a host object of this type
+ */
   static jsi::Value toValue(jsi::Runtime &runtime, RNSkPlatformContext *context,
                             const SkPoint &point) {
     return jsi::Object::createFromHostObject(
@@ -55,7 +54,7 @@ public:
    * class
    */
   static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
-    return JSI_FUNC_SIGNATURE {
+    return JSI_HOST_FUNCTION_LAMBDA {
       auto point =
           SkPoint::Make(arguments[0].asNumber(), arguments[1].asNumber());
 

@@ -20,27 +20,14 @@ using namespace facebook;
 
 class JsiSkTypeface : public JsiSkWrappingSkPtrHostObject<SkTypeface> {
 public:
-  JsiSkTypeface(RNSkPlatformContext *context, const sk_sp<SkTypeface> typeface)
-      : JsiSkWrappingSkPtrHostObject(context, typeface) {
-    // Install functions
-    installProperty(
-        "bold",
-        [this](jsi::Runtime &) -> jsi::Value {
-          return jsi::Value(getObject()->isBold());
-        },
-        [](jsi::Runtime &, const jsi::Value &value) {
-          // Not possible to set this one
-        });
+  JSI_PROPERTY_GET(bold) { return jsi::Value(getObject()->isBold()); }
+  JSI_PROPERTY_GET(italic) { return jsi::Value(getObject()->isItalic()); }
 
-    installProperty(
-        "italic",
-        [this](jsi::Runtime &) -> jsi::Value {
-          return jsi::Value(getObject()->isItalic());
-        },
-        [](jsi::Runtime &, const jsi::Value &value) {
-          // Not possible to set this one
-        });
-  };
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkTypeface, bold),
+                              JSI_EXPORT_PROP_GET(JsiSkTypeface, italic))
+
+  JsiSkTypeface(RNSkPlatformContext *context, const sk_sp<SkTypeface> typeface)
+      : JsiSkWrappingSkPtrHostObject(context, typeface){};
 
   /**
     Returns the underlying object from a host object of this type
@@ -61,7 +48,7 @@ public:
    * SkTypeface class
    */
   static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
-    return JSI_FUNC_SIGNATURE {
+    return JSI_HOST_FUNCTION_LAMBDA {
       if (count == 2) {
         return jsi::Object::createFromHostObject(
             runtime,

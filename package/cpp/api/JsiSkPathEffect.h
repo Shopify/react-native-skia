@@ -1,7 +1,6 @@
 #pragma once
 
 #include "JsiSkHostObjects.h"
-#include "JsiSkTypes.h"
 #include <jsi/jsi.h>
 
 #pragma clang diagnostic push
