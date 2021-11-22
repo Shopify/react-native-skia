@@ -3,7 +3,6 @@ export * from "./image";
 export * from "./shaders";
 export * from "./filters";
 export * from "./processors";
-export * from "./text";
 
 export * from "./Group";
 export * from "./Fill";

@@ -1,10 +1,10 @@
-import type { Path as IPath } from "canvaskit-wasm";
-
 import type { SkNode } from "../../Host";
 import { NodeType } from "../../Host";
 import type { CustomPaintProps } from "../processors";
 import { selectPaint, processPaint } from "../processors";
 import type { DrawingContext } from "../../CanvasKitView";
+import { Skia } from "../../../skia";
+import type { Path as IPath } from "../../../skia";
 
 interface StrokeOpts {
   width?: number;
@@ -32,12 +32,12 @@ export const PathNode = (props: PathProps): SkNode<NodeType.Path> => ({
   type: NodeType.Path,
   props,
   draw: (ctx: DrawingContext, { offset, progress, ...pathProps }) => {
-    const { opacity, canvas, CanvasKit } = ctx;
+    const { opacity, canvas } = ctx;
     const paint = selectPaint(ctx.paint, pathProps);
-    processPaint(CanvasKit, paint, opacity, pathProps);
+    processPaint(paint, opacity, pathProps);
     const path =
       typeof pathProps.path === "string"
-        ? CanvasKit.Path.MakeFromSVGString(pathProps.path)
+        ? Skia.Path.MakeFromSVGString(pathProps.path)
         : pathProps.path.copy();
     if (path === null) {
       throw new Error("Invalid path:  " + pathProps.path);

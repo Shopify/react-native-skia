@@ -1,13 +1,13 @@
-import type { BlurStyleEnumValues } from "canvaskit-wasm";
-
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
+import { BlurStyle } from "../../skia/MaskFilter";
+import { Skia } from "../../skia";
 
 import type { SkEnum } from "./processors";
 import { enumKey } from "./processors";
 
 export interface BlurProps {
-  style: SkEnum<BlurStyleEnumValues>;
+  style: SkEnum<typeof BlurStyle>;
   sigma: number;
 }
 
@@ -18,13 +18,9 @@ export const Blur = (props: BlurProps) => {
 export const BlurNode = (props: BlurProps): SkNode<NodeType.Blur> => ({
   type: NodeType.Blur,
   props,
-  draw: ({ CanvasKit, paint }, { style, sigma }) => {
+  draw: ({ paint }, { style, sigma }) => {
     paint.setMaskFilter(
-      CanvasKit.MaskFilter.MakeBlur(
-        CanvasKit.BlurStyle[enumKey(style)],
-        sigma,
-        false
-      )
+      Skia.MaskFilter.MakeBlur(BlurStyle[enumKey(style)], sigma, false)
     );
   },
   children: [],

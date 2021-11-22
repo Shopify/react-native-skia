@@ -18,12 +18,12 @@ import type {
   ImageProps,
   PathProps,
   LineProps,
-  DropShadowProps,
-  ParagraphProps,
+  // DropShadowProps,
+  // ParagraphProps,
   ColorMatrixProps,
   DrawingProps,
-  TextProps,
-  SpanProps,
+  // TextProps,
+  // SpanProps,
 } from "./nodes";
 
 export enum NodeType {
@@ -44,10 +44,10 @@ export enum NodeType {
   Line = "skLine",
   Path = "skPath",
   Drawing = "skDrawing",
-  DropShadow = "skDropShadow",
-  Paragraph = "skParagraph",
-  Text = "skText",
-  Span = "skSpan",
+  // DropShadow = "skDropShadow",
+  // Paragraph = "skParagraph",
+  // Text = "skText",
+  // Span = "skSpan",
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -70,11 +70,11 @@ export interface NodeProps {
   [NodeType.Rect]: RectProps;
   [NodeType.Path]: PathProps;
   [NodeType.Drawing]: DrawingProps;
-  [NodeType.DropShadow]: DropShadowProps;
+  //[NodeType.DropShadow]: DropShadowProps;
   [NodeType.Line]: LineProps;
-  [NodeType.Paragraph]: ParagraphProps;
-  [NodeType.Text]: TextProps;
-  [NodeType.Span]: SpanProps;
+  //  [NodeType.Paragraph]: ParagraphProps;
+  // [NodeType.Text]: TextProps;
+  // [NodeType.Span]: SpanProps;
 }
 
 export interface NodeInstance {
@@ -128,11 +128,11 @@ declare global {
       skRect: NodeProps[NodeType.Rect];
       skLine: NodeProps[NodeType.Line];
       skPath: NodeProps[NodeType.Path];
-      skDropShadow: NodeProps[NodeType.DropShadow];
-      skParagraph: NodeProps[NodeType.Paragraph];
+      // skDropShadow: NodeProps[NodeType.DropShadow];
+      // skParagraph: NodeProps[NodeType.Paragraph];
       skDrawing: NodeProps[NodeType.Drawing];
-      skText: NodeProps[NodeType.Text];
-      skSpan: NodeProps[NodeType.Span];
+      // skText: NodeProps[NodeType.Text];
+      // skSpan: NodeProps[NodeType.Span];
     }
   }
 }
@@ -168,7 +168,8 @@ export const debugTree = ({
 }: SkNode): DebugTree => {
   return {
     type,
-    props: Object.keys(props)
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    props: Object.keys(props as object)
       .filter((key) => key !== "children")
       .reduce(
         (p, key) => ({ ...p, [key]: (props as Record<string, unknown>)[key] }),

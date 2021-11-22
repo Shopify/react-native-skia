@@ -19,9 +19,9 @@ export const LineNode = (props: LineProps): SkNode<NodeType.Line> => ({
   type: NodeType.Line,
   props,
   draw: (ctx: DrawingContext, { x1, y1, x2, y2, ...lineProps }) => {
-    const { opacity, canvas, CanvasKit } = ctx;
+    const { opacity, canvas } = ctx;
     const paint = selectPaint(ctx.paint, lineProps);
-    processPaint(CanvasKit, paint, opacity, lineProps);
+    processPaint(paint, opacity, lineProps);
     canvas.drawLine(x1, y1, x2, y2, paint);
   },
   children: [],

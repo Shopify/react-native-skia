@@ -1,9 +1,11 @@
 import type { ReactNode, RefObject } from "react";
-import type { RRect, Path, Paint } from "canvaskit-wasm";
 
 import type { DrawingContext } from "../CanvasKitView";
 import { NodeType, processChildren } from "../Host";
 import type { SkNode } from "../Host";
+import type { RRect } from "../../skia/RRect";
+import type { Path, Paint } from "../../skia";
+import { ClipOp, Skia } from "../../skia";
 
 import { processTransform, selectPaint, processPaint } from "./processors";
 import type { CustomPaintProps, TransformProps } from "./processors";
@@ -28,25 +30,22 @@ export const GroupNode = (props: GroupProps): SkNode<NodeType.Group> => ({
     { clipRect, rasterize, clipPath, clipOp, ...groupProps }: GroupProps,
     children: SkNode[]
   ) => {
-    const { canvas, CanvasKit, opacity } = ctx;
+    const { canvas, opacity } = ctx;
     const paint = selectPaint(ctx.paint, groupProps);
-    processPaint(CanvasKit, paint, opacity, groupProps);
+    processPaint(paint, opacity, groupProps);
     if (rasterize) {
       canvas.saveLayer(rasterize.paint.current ?? undefined);
     } else {
       canvas.save();
     }
-    const op =
-      clipOp === "difference"
-        ? CanvasKit.ClipOp.Difference
-        : CanvasKit.ClipOp.Intersect;
+    const op = clipOp === "difference" ? ClipOp.Difference : ClipOp.Intersect;
     if (clipRect) {
       canvas.clipRRect(clipRect, op, true);
     }
     if (clipPath) {
       const path =
         typeof clipPath === "string"
-          ? CanvasKit.Path.MakeFromSVGString(clipPath)
+          ? Skia.Path.MakeFromSVGString(clipPath)
           : clipPath;
       if (!path) {
         throw new Error("Invalid clipPath: " + clipPath);

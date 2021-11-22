@@ -18,7 +18,7 @@ export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
   props,
   draw: (ctx: DrawingContext, { onDraw, ...drawingProps }) => {
     const selectedPaint = selectPaint(ctx.paint, drawingProps);
-    processPaint(ctx.CanvasKit, selectedPaint, ctx.opacity, drawingProps);
+    processPaint(selectedPaint, ctx.opacity, drawingProps);
     onDraw({ ...ctx, paint: selectedPaint });
   },
   children: [],

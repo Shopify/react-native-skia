@@ -16,7 +16,7 @@ export const FillNode = (props: FillProps): SkNode<NodeType.Fill> => ({
   props,
   draw: (ctx: DrawingContext, fillProps) => {
     const paint = selectPaint(ctx.paint, fillProps);
-    processPaint(ctx.CanvasKit, paint, ctx.opacity, fillProps);
+    processPaint(paint, ctx.opacity, fillProps);
     ctx.canvas.drawPaint(paint);
   },
   children: [],

@@ -3,6 +3,7 @@ import { NodeType } from "../../Host";
 import type { SkNode } from "../../Host";
 import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
+import { Skia } from "../../../skia";
 
 export interface RectProps extends CustomPaintProps {
   x: number;
@@ -31,14 +32,11 @@ export const RectNode = (props: RectProps): SkNode<NodeType.Rect> => ({
   ) => {
     const { canvas, opacity } = ctx;
     const paint = selectPaint(ctx.paint, rectProps);
-    processPaint(ctx.CanvasKit, paint, opacity, rectProps);
-    const rect = [x, y, x + width, y + height];
+    processPaint(paint, opacity, rectProps);
+    const rect = Skia.XYWHRect(x, y, x + width, y + height);
     if (rx !== undefined || ry !== undefined) {
       const corner = [(rx ?? ry) as number, (ry ?? rx) as number];
-      canvas.drawRRect(
-        [...rect, ...corner, ...corner, ...corner, ...corner],
-        paint
-      );
+      canvas.drawRRect(Skia.RRectXY(rect, corner[0], corner[1]), paint);
     } else {
       canvas.drawRect(rect, paint);
     }

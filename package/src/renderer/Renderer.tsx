@@ -3,7 +3,9 @@ import type { ReactNode } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
-import { useDrawCallback, CanvasKitView } from "./CanvasKitView";
+import { SkiaView } from "../views/SkiaView";
+import { useDrawCallback } from "..";
+
 import { debug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 import { useCanvasKit } from "./CanvasKitProvider";
@@ -56,5 +58,5 @@ export const Skia = ({ children }: SkiaProps) => {
     },
     [tick]
   );
-  return <CanvasKitView onDraw={onDraw} />;
+  return <SkiaView onDraw={onDraw} />;
 };

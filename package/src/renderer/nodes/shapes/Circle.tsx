@@ -19,7 +19,7 @@ export const CircleNode = (props: CircleProps): SkNode<NodeType.Circle> => ({
   props,
   draw: (ctx: DrawingContext, { cx, cy, r, ...circleProps }) => {
     const selectedPaint = selectPaint(ctx.paint, circleProps);
-    processPaint(ctx.CanvasKit, selectedPaint, ctx.opacity, circleProps);
+    processPaint(selectedPaint, ctx.opacity, circleProps);
     ctx.canvas.drawCircle(cx, cy, r, selectedPaint);
   },
   children: [],

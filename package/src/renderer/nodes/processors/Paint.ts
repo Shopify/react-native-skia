@@ -9,19 +9,20 @@ import {
   StrokeCap,
 } from "../../../skia";
 import type { RuntimeEffect, Paint } from "../../../skia";
-import { Color } from "../../../skia/Color";
 
 export const useRTRef = () => useRef<RuntimeEffect>(null);
 export const usePaintRef = () => useRef<Paint>(null);
+
+export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export interface CustomPaintProps {
   paint?: RefObject<Paint>;
   color?: string;
   strokeWidth?: number;
-  blendMode?: Uncapitalize<keyof typeof BlendMode>;
-  paintStyle?: Uncapitalize<keyof typeof PaintStyle>;
-  strokeJoin?: Uncapitalize<keyof typeof StrokeJoin>;
-  strokeCap?: Uncapitalize<keyof typeof StrokeCap>;
+  blendMode?: SkEnum<typeof BlendMode>;
+  paintStyle?: SkEnum<typeof PaintStyle>;
+  strokeJoin?: SkEnum<typeof StrokeJoin>;
+  strokeCap?: SkEnum<typeof StrokeCap>;
   strokeMiter?: number;
   opacity?: number;
 }

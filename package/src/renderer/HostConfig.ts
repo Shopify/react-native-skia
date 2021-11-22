@@ -1,9 +1,7 @@
 /*global NodeJS, performance*/
 import type { HostConfig } from "react-reconciler";
-import type { CanvasKit } from "canvaskit-wasm";
-import _ from "lodash";
 
-import { exhaustiveCheck } from "../exhaustiveCheck";
+import { Skia } from "../skia";
 
 import {
   CircleNode,
@@ -20,11 +18,8 @@ import {
   RuntimeEffectNode,
   PathNode,
   LineNode,
-  DropShadowNode,
   ColorMatrixNode,
   DrawingNode,
-  ParagraphNode,
-  TextNode,
 } from "./nodes";
 import type {
   BlurProps,
@@ -41,16 +36,12 @@ import type {
   RuntimeEffectProps,
   PathProps,
   LineProps,
-  DropShadowProps,
   ColorMatrixProps,
   DrawingProps,
-  ParagraphProps,
-  SpanProps,
-  TextProps,
 } from "./nodes";
 import type { SkContainer, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
-import { SpanNode } from "./nodes/text/Text";
+import { exhaustiveCheck } from "./exhaustiveCheck";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -169,7 +160,7 @@ const insertBefore = (parent: SkNode, child: SkNode, before: SkNode) => {
   parent.children.splice(beforeIndex, 0, child);
 };
 
-const createNode = (CanvasKit: CanvasKit, type: NodeType, props: Props) => {
+const createNode = (type: NodeType, props: Props) => {
   switch (type) {
     case NodeType.Canvas:
       throw new Error("Cannot create canvas node");
@@ -188,7 +179,7 @@ const createNode = (CanvasKit: CanvasKit, type: NodeType, props: Props) => {
     case NodeType.Fill:
       return FillNode(props as FillProps);
     case NodeType.Paint:
-      const paint = new CanvasKit.Paint();
+      const paint = Skia.Paint();
       paint.setAntiAlias(true);
       return PaintNode(props as PaintProps, paint);
     case NodeType.ColorMatrix:
@@ -203,24 +194,24 @@ const createNode = (CanvasKit: CanvasKit, type: NodeType, props: Props) => {
       return ImageNode(props as ImageProps);
     case NodeType.ImageShader:
       return ImageShaderNode(props as ImageShaderProps);
-    case NodeType.DropShadow:
-      return DropShadowNode(props as DropShadowProps);
+    // case NodeType.DropShadow:
+    //   return DropShadowNode(props as DropShadowProps);
     case NodeType.RuntimeEffect:
       // TODO: move instance creation to finalize children?
       const rtProps = props as RuntimeEffectProps;
-      const rt = CanvasKit.RuntimeEffect.Make(rtProps.source);
+      const rt = Skia.RuntimeEffect.Make(rtProps.source);
       if (!rt) {
         throw new Error("Couldn't compile RT");
       }
       return RuntimeEffectNode(rtProps, rt);
     case NodeType.Shader:
       return ShaderNode(props as ShaderProps);
-    case NodeType.Paragraph:
-      return ParagraphNode(props as ParagraphProps);
-    case NodeType.Text:
-      return TextNode(props as TextProps);
-    case NodeType.Span:
-      return SpanNode(props as SpanProps);
+    // case NodeType.Paragraph:
+    //   return ParagraphNode(props as ParagraphProps);
+    // case NodeType.Text:
+    //   return TextNode(props as TextProps);
+    // case NodeType.Span:
+    //   return SpanNode(props as SpanProps);
     default:
       // TODO: here we need to throw a nice error message
       // This is the error that will show up when the user uses nodes not supported by Skia (View, Audio, etc)
@@ -269,18 +260,19 @@ export const skHostConfig: SkiaHostConfig = {
   },
 
   createTextInstance(
-    text,
+    _text,
     _rootContainerInstance,
     _hostContext,
     _internalInstanceHandle
   ) {
     debug("createTextInstance");
-    return SpanNode({}, text) as SkNode;
+    // return SpanNode({}, text) as SkNode;
+    throw new Error("Text nodes are not supported yet");
   },
 
-  createInstance(type, props, root, _hostContext, _internalInstanceHandle) {
+  createInstance(type, props, _root, _hostContext, _internalInstanceHandle) {
     debug("createInstance", type);
-    return createNode(root.CanvasKit, type, props) as SkNode;
+    return createNode(type, props) as SkNode;
   },
 
   appendInitialChild(parentInstance, child) {
@@ -357,11 +349,11 @@ export const skHostConfig: SkiaHostConfig = {
   },
 
   commitTextUpdate: (
-    textInstance: TextInstance,
+    _textInstance: TextInstance,
     _oldText: string,
-    newText: string
+    _newText: string
   ) => {
-    textInstance.instance = newText;
+    //  textInstance.instance = newText;
   },
 
   clearContainer: (container) => {
