@@ -3,7 +3,7 @@ import type { SkNode } from "../../Host";
 import { processColor } from "../processors";
 import type { Vector } from "../../math";
 import { point } from "../../math";
-import { Skia } from "../../../skia";
+import { Skia, TileMode } from "../../../skia";
 
 export interface RadialGradientProps {
   c: Vector;
@@ -20,14 +20,14 @@ export const RadialGradientNode = (
 ): SkNode<NodeType.RadialGradient> => ({
   type: NodeType.RadialGradient,
   props,
-  draw: ({ CanvasKit, paint, opacity }, { c, r, colors }) => {
+  draw: ({ paint, opacity }, { c, r, colors }) => {
     paint.setShader(
       Skia.Shader.MakeRadialGradient(
         point(c),
         r,
         colors.map((color) => processColor(color, opacity)),
         null,
-        CanvasKit.TileMode.Clamp
+        TileMode.Clamp
       )
     );
   },

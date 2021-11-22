@@ -1,5 +1,6 @@
 import { NodeType } from "../../Host";
 import type { SkNode } from "../../Host";
+import { Skia } from "../../../skia";
 
 export interface ColorMatrixProps {
   values: number[];
@@ -14,8 +15,8 @@ export const ColorMatrixNode = (
 ): SkNode<NodeType.ColorMatrix> => ({
   type: NodeType.ColorMatrix,
   props,
-  draw: ({ CanvasKit, paint }, { values }) => {
-    paint.setColorFilter(CanvasKit.ColorFilter.MakeMatrix(values));
+  draw: ({ paint }, { values }) => {
+    paint.setColorFilter(Skia.ColorFilter.MakeMatrix(values));
   },
   children: [],
   memoizable: true,

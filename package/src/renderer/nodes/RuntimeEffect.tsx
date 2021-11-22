@@ -1,6 +1,6 @@
-import type { RuntimeEffect as IRuntimeEffect } from "canvaskit-wasm";
 import { forwardRef } from "react";
 
+import type { RuntimeEffect as IRuntimeEffect } from "../../skia";
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
 

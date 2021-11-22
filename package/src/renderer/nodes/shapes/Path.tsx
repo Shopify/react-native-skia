@@ -2,9 +2,9 @@ import type { SkNode } from "../../Host";
 import { NodeType } from "../../Host";
 import type { CustomPaintProps } from "../processors";
 import { selectPaint, processPaint } from "../processors";
-import type { DrawingContext } from "../../CanvasKitView";
 import { Skia } from "../../../skia";
 import type { Path as IPath } from "../../../skia";
+import type { DrawingContext } from "../../DrawingContext";
 
 interface StrokeOpts {
   width?: number;

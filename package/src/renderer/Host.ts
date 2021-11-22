@@ -2,7 +2,7 @@ import type { ForwardedRef } from "react";
 
 import type { Paint, RuntimeEffect } from "../skia";
 
-import type { DrawingContext } from "./CanvasKitView";
+import type { DrawingContext } from "./DrawingContext";
 import type {
   ShaderProps,
   RuntimeEffectProps,
@@ -80,7 +80,7 @@ export interface NodeProps {
 export interface NodeInstance {
   [NodeType.Paint]: Paint;
   [NodeType.RuntimeEffect]: RuntimeEffect;
-  [NodeType.Span]: string;
+  //[NodeType.Span]: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

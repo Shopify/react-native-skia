@@ -1,4 +1,3 @@
-import type { DrawingContext } from "../CanvasKitView";
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
 
@@ -14,7 +13,7 @@ export const Fill = (props: FillProps) => {
 export const FillNode = (props: FillProps): SkNode<NodeType.Fill> => ({
   type: NodeType.Fill,
   props,
-  draw: (ctx: DrawingContext, fillProps) => {
+  draw: (ctx, fillProps) => {
     const paint = selectPaint(ctx.paint, fillProps);
     processPaint(paint, ctx.opacity, fillProps);
     ctx.canvas.drawPaint(paint);

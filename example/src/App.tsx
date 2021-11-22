@@ -9,6 +9,7 @@ import {
   PhysicsExample,
 } from "./Examples";
 import { API } from "./API";
+//import { Breathe } from "./Breathe";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -24,6 +25,7 @@ const App = () => {
         />
 
         <Stack.Screen name="API" component={API} />
+        {/* <Stack.Screen name="Breathe" component={Breathe} /> */}
         <Stack.Screen name="Drawing" component={DrawingExample} />
         <Stack.Screen name="Animation" component={AnimationExample} />
         <Stack.Screen name="Physics" component={PhysicsExample} />

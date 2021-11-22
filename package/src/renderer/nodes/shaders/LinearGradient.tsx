@@ -3,6 +3,7 @@ import type { SkNode } from "../../Host";
 import type { Vector } from "../../math/Vector";
 import { point } from "../../math/Vector";
 import { processColor } from "../processors/Paint";
+import { TileMode, Skia } from "../../../skia";
 
 export interface LinearGradientProps {
   start: Vector;
@@ -20,14 +21,14 @@ export const LinearGradientNode = (
 ): SkNode<NodeType.LinearGradient> => ({
   type: NodeType.LinearGradient,
   props,
-  draw: ({ CanvasKit, paint, opacity }, { start, end, positions, colors }) => {
+  draw: ({ paint, opacity }, { start, end, positions, colors }) => {
     paint.setShader(
-      CanvasKit.Shader.MakeLinearGradient(
+      Skia.Shader.MakeLinearGradient(
         point(start),
         point(end),
         colors.map((color) => processColor(color, opacity)),
         positions,
-        CanvasKit.TileMode.Clamp
+        TileMode.Clamp
       )
     );
   },

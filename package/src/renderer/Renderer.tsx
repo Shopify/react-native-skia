@@ -3,12 +3,11 @@ import type { ReactNode } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
-import { SkiaView } from "../views/SkiaView";
-import { useDrawCallback } from "..";
+import { SkiaView, useDrawCallback } from "../views";
+import { Skia } from "../skia";
 
 import { debug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
-import { useCanvasKit } from "./CanvasKitProvider";
 // import { debugTree } from "./nodes";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
@@ -30,30 +29,26 @@ const render = (
   });
 };
 
-interface SkiaProps {
+interface CanvasProps {
   children: ReactNode;
 }
 
-export const Skia = ({ children }: SkiaProps) => {
+export const Canvas = ({ children }: CanvasProps) => {
   const [tick, setTick] = useState(0);
   const redraw = useCallback(() => setTick((t) => t + 1), []);
-  const CanvasKit = useCanvasKit();
-  const tree = useMemo(
-    () => CanvasNode(CanvasKit, redraw),
-    [CanvasKit, redraw]
-  );
+  const tree = useMemo(() => CanvasNode(redraw), [redraw]);
   const container = useMemo(
     () => skiaReconciler.createContainer(tree, 0, false, null),
     [tree]
   );
   useEffect(() => {
     render(children, container, redraw);
-  }, [CanvasKit, children, container, redraw]);
+  }, [children, container, redraw]);
   const onDraw = useDrawCallback(
-    (_, canvas) => {
-      const paint = new CanvasKit.Paint();
+    (canvas, { width, height }) => {
+      const paint = Skia.Paint();
       paint.setAntiAlias(true);
-      const ctx = { CanvasKit, canvas, paint, opacity: 1 };
+      const ctx = { canvas, paint, opacity: 1, width, height };
       tree.draw(ctx, tree.props, tree.children);
     },
     [tick]

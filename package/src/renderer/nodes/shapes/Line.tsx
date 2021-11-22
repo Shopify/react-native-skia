@@ -1,4 +1,3 @@
-import type { DrawingContext } from "../../CanvasKitView";
 import { NodeType } from "../../Host";
 import type { SkNode } from "../../Host";
 import type { CustomPaintProps } from "../processors";
@@ -18,7 +17,7 @@ export const Line = (props: LineProps) => {
 export const LineNode = (props: LineProps): SkNode<NodeType.Line> => ({
   type: NodeType.Line,
   props,
-  draw: (ctx: DrawingContext, { x1, y1, x2, y2, ...lineProps }) => {
+  draw: (ctx, { x1, y1, x2, y2, ...lineProps }) => {
     const { opacity, canvas } = ctx;
     const paint = selectPaint(ctx.paint, lineProps);
     processPaint(paint, opacity, lineProps);

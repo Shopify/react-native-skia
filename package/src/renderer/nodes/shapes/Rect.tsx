@@ -1,4 +1,3 @@
-import type { DrawingContext } from "../../CanvasKitView";
 import { NodeType } from "../../Host";
 import type { SkNode } from "../../Host";
 import type { CustomPaintProps } from "../processors";
@@ -26,14 +25,12 @@ Rect.defaultProps = {
 export const RectNode = (props: RectProps): SkNode<NodeType.Rect> => ({
   type: NodeType.Rect,
   props,
-  draw: (
-    ctx: DrawingContext,
-    { x, y, width, height, rx, ry, ...rectProps }
-  ) => {
+  draw: (ctx, { x, y, width, height, rx, ry, ...rectProps }) => {
     const { canvas, opacity } = ctx;
     const paint = selectPaint(ctx.paint, rectProps);
     processPaint(paint, opacity, rectProps);
     const rect = Skia.XYWHRect(x, y, x + width, y + height);
+    [x, y, x + width, y + height];
     if (rx !== undefined || ry !== undefined) {
       const corner = [(rx ?? ry) as number, (ry ?? rx) as number];
       canvas.drawRRect(Skia.RRectXY(rect, corner[0], corner[1]), paint);

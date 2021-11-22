@@ -1,6 +1,5 @@
 import type { ReactNode, RefObject } from "react";
 
-import type { DrawingContext } from "../CanvasKitView";
 import { NodeType, processChildren } from "../Host";
 import type { SkNode } from "../Host";
 import type { RRect } from "../../skia/RRect";
@@ -26,7 +25,7 @@ export const GroupNode = (props: GroupProps): SkNode<NodeType.Group> => ({
   type: NodeType.Group,
   props,
   draw: (
-    ctx: DrawingContext,
+    ctx,
     { clipRect, rasterize, clipPath, clipOp, ...groupProps }: GroupProps,
     children: SkNode[]
   ) => {

@@ -1,6 +1,6 @@
-import type { DrawingContext } from "../../CanvasKitView";
 import type { Transforms2d } from "../../../skia/Matrix3Helper";
 import { processTransform2d, skiaMatrix3 } from "../../../skia/Matrix3Helper";
+import type { DrawingContext } from "../../DrawingContext";
 import type { Vector } from "../../math";
 import { neg } from "../../math";
 
