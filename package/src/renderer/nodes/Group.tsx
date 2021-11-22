@@ -2,8 +2,7 @@ import type { ReactNode, RefObject } from "react";
 
 import { NodeType, processChildren } from "../Host";
 import type { SkNode } from "../Host";
-import type { RRect } from "../../skia/RRect";
-import type { Path, Paint } from "../../skia";
+import type { RRect, Path, Paint } from "../../skia";
 import { ClipOp, Skia } from "../../skia";
 
 import { processTransform, selectPaint, processPaint } from "./processors";

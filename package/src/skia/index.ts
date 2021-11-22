@@ -2,6 +2,7 @@ export { Skia } from "./Skia";
 export * from "./Canvas";
 export * from "./Paint";
 export * from "./Rect";
+export * from "./RRect";
 export * from "./Point";
 export * from "./Path";
 export * from "./Font";
