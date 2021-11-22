@@ -8,7 +8,7 @@ import { ImageCtor } from "./Image";
  * Returns a Skia Image object
  * */
 export const useImage = (source: ImageSourcePropType) => {
-  const [image, setImage] = useState<IImage>();
+  const [image, setImage] = useState<IImage | null>(null);
   useMemo(
     () =>
       ImageCtor(source).then((value) => {

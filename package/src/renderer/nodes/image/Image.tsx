@@ -1,10 +1,10 @@
 import { NodeType } from "../../Host";
 import type { SkNode } from "../../Host";
 import type { IImage as IIMage } from "../../../skia";
-import { useImage } from "../../../skia";
+import { useImage, ClipOp, Skia } from "../../../skia";
 
 export interface UnresolvedImageProps {
-  source: string;
+  source: ReturnType<typeof require>;
   x: number;
   y: number;
   width: number;
@@ -38,11 +38,11 @@ Image.defaultProps = {
 export const ImageNode = (props: ImageProps): SkNode<NodeType.Image> => ({
   type: NodeType.Image,
   props,
-  draw: ({ CanvasKit, canvas, paint }, { source, x, y, width, height }) => {
+  draw: ({ canvas, paint }, { source, x, y, width, height }) => {
     canvas.save();
     canvas.clipRect(
-      [x, y, x + width, y + height],
-      CanvasKit.ClipOp.Intersect,
+      Skia.XYWHRect(x, y, x + width, y + height),
+      ClipOp.Intersect,
       true
     );
     canvas.drawImage(source, x, y, paint);

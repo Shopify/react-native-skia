@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import { useRef } from "react";
+import { Platform } from "react-native";
 
 import {
   Skia,
@@ -30,9 +31,29 @@ export interface CustomPaintProps {
 export const enumKey = <K extends string>(k: K) =>
   (k.charAt(0).toUpperCase() + k.slice(1)) as Capitalize<K>;
 
+const alpha = (c: number) => ((c >> 24) & 255) / 255;
+const red = (c: number) => (c >> 16) & 255;
+const green = (c: number) => (c >> 8) & 255;
+const blue = (c: number) => c & 255;
+const toColor = (r: number, g: number, b: number, af: number) => {
+  const a = Math.round(af * 255);
+  let processedColor = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0;
+  // On android we need to move the alpha byte to the start of the structure
+  if (Platform.OS === "android") {
+    processedColor = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
+  }
+  return processedColor;
+};
+
 // TODO: add support for currentOpacity
-export const processColor = (color: string, currentOpacity: number) =>
-  Skia.Color(color);
+export const processColor = (cl: string | number, currentOpacity: number) => {
+  const icl = typeof cl === "string" ? Skia.Color(cl) : cl;
+  const r = red(icl);
+  const g = green(icl);
+  const b = blue(icl);
+  const o = alpha(icl);
+  return toColor(r, g, b, o * currentOpacity);
+};
 
 export const processPaint = (
   paint: IPaint,
@@ -52,8 +73,8 @@ export const processPaint = (
     const c = processColor(color, currentOpacity);
     paint.setColor(c);
   } else {
-    const c = paint.getColor();
-    paint.setColor([c[0], c[1], c[2], c[3] * currentOpacity]);
+    const c = processColor(paint.getColor(), currentOpacity);
+    paint.setColor(c);
   }
   if (blendMode !== undefined) {
     const t = enumKey(blendMode);

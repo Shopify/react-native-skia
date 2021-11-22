@@ -1,6 +1,8 @@
 import { NodeType } from "../../Host";
 import type { SkNode } from "../../Host";
 import { useImage } from "../../../skia";
+import { TileMode } from "../../../skia/ImageFilter/ImageFilter";
+import { FilterMode, MipmapMode } from "../../../skia/Image/Image";
 
 import type { ImageProps, UnresolvedImageProps } from "./Image";
 
@@ -29,12 +31,12 @@ export const ImageShaderNode = (
 ): SkNode<NodeType.ImageShader> => ({
   type: NodeType.ImageShader,
   props,
-  draw: ({ CanvasKit, paint }, { source }) => {
+  draw: ({ paint }, { source }) => {
     const shader = source.makeShaderOptions(
-      CanvasKit.TileMode.Decal,
-      CanvasKit.TileMode.Decal,
-      CanvasKit.FilterMode.Linear,
-      CanvasKit.FilterMode.Linear
+      TileMode.Decal,
+      TileMode.Decal,
+      FilterMode.Linear,
+      MipmapMode.None
     );
     paint.setShader(shader);
     return shader;
