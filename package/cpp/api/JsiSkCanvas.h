@@ -72,10 +72,10 @@ public:
     auto src = JsiSkRect::fromValue(runtime, arguments[1]);
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    auto fastSample = count < 5 ?  false : arguments[4].getBool();
-    _canvas->drawImageRect(image, *src, *dest, SkSamplingOptions(),
-                           paint.get(), fastSample ? SkCanvas::kFast_SrcRectConstraint:
-                                        SkCanvas::kStrict_SrcRectConstraint);
+    auto fastSample = count < 5 ? false : arguments[4].getBool();
+    _canvas->drawImageRect(image, *src, *dest, SkSamplingOptions(), paint.get(),
+                           fastSample ? SkCanvas::kFast_SrcRectConstraint
+                                      : SkCanvas::kStrict_SrcRectConstraint);
     return jsi::Value::undefined();
   }
 

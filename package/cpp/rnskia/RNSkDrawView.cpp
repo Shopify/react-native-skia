@@ -25,48 +25,6 @@ namespace RNSkia {
 
 using namespace std::chrono;
 
-void RNSkDrawView::setTouchCallback(std::shared_ptr<jsi::Function> callback) {
-  if (callback == nullptr) {
-    _touchCallback = nullptr;
-    return;
-  }
-
-  _touchCallback = std::make_shared<
-      RNSkTouchCallback>([this,
-                          callback](std::vector<RNSkTouchPoint> touchPoints) {
-    auto runtime = this->_platformContext->getJsRuntime();
-    // Add touch points
-    auto touches = jsi::Array(*runtime, touchPoints.size());
-    for (size_t i = 0; i < touchPoints.size(); i++) {
-      auto touchObj = jsi::Object(*runtime);
-      touchObj.setProperty(*runtime, "x", touchPoints.at(i).x);
-      touchObj.setProperty(*runtime, "y", touchPoints.at(i).y);
-      touchObj.setProperty(*runtime, "force", touchPoints.at(i).force);
-      touchObj.setProperty(*runtime, "type", (double)touchPoints.at(i).type);
-      touches.setValueAtIndex(*runtime, i, touchObj);
-    }
-
-    if (callback) {
-      try {
-        callback->call(*runtime, touches, 1);
-      } catch (const jsi::JSError &err) {
-        _drawCallback = nullptr;
-        return _platformContext->raiseError(err);
-      } catch (const std::exception &err) {
-        _drawCallback = nullptr;
-        return _platformContext->raiseError(err);
-      } catch (const std::runtime_error &err) {
-        _drawCallback = nullptr;
-        return _platformContext->raiseError(err);
-      } catch (...) {
-        _drawCallback = nullptr;
-        return _platformContext->raiseError(
-            "An error occured while sending touch events to the Skia View.");
-      }
-    }
-  });
-}
-
 void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   if (callback == nullptr) {
@@ -87,29 +45,24 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
       [this, callback, timingInfo](std::shared_ptr<JsiSkCanvas> canvas,
                                    int width, int height, double timestamp,
                                    RNSkPlatformContext *context) {
-        double delta = 0;
-        if (timingInfo->lastTimeStamp > -1) {
-          delta = timestamp - timingInfo->lastTimeStamp;
-        }
         timingInfo->lastTimeStamp = timestamp;
 
         auto runtime = context->getJsRuntime();
 
+        // Update info parameter
+        _infoObject->update(width, height, timestamp);
+
         // Set up arguments array
         jsi::Value *args = new jsi::Value[2];
         args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
-        args[1] = jsi::Object(*runtime);
+        args[1] = jsi::Object::createFromHostObject(*runtime, _infoObject);
 
-        // Second argument should be the height/width, timestamp, delta
-        // fps and touch points
-        auto infoObject = args[1].asObject(*runtime);
-        infoObject.setProperty(*runtime, "width", width);
-        infoObject.setProperty(*runtime, "height", height);
-        infoObject.setProperty(*runtime, "timestamp", timestamp);
-         
         // To be able to call the drawing function we'll wrap it once again
         callback->call(*runtime, static_cast<const jsi::Value *>(args),
                        (size_t)2);
+
+        // Reset touches
+        _infoObject->resetTouches();
 
         // Clean up
         delete[] args;
@@ -195,13 +148,9 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
 }
 
 void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
-  if (_touchCallback != nullptr) {
-    _platformContext->runOnJavascriptThread(
-        [this, points]() { (*_touchCallback)(points); });
-
-    if (_drawingMode != RNSkDrawingMode::Continuous) {
-      requestRedraw();
-    }
+  _infoObject->updateTouches(points);
+  if (_drawingMode != RNSkDrawingMode::Continuous) {
+    requestRedraw();
   }
 }
 
