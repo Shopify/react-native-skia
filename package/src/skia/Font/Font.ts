@@ -1,5 +1,5 @@
-import type { Paint } from "../Paint";
-import type { Rect } from "../Rect";
+import type { IPaint } from "../Paint";
+import type { IRect } from "../Rect";
 
 export interface Font {
   /** Get/Sets text size in points.
@@ -17,5 +17,5 @@ export interface Font {
       @param paint       optional; may be nullptr
       @return            number of glyphs represented by text of length byteLength
   */
-  measureText: (text: string, paint?: Paint) => Rect;
+  measureText: (text: string, paint?: IPaint) => IRect;
 }

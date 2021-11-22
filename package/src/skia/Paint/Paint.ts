@@ -1,7 +1,7 @@
 import type { ImageFilter } from "../ImageFilter";
 import type { MaskFilter } from "../MaskFilter";
 import type { ColorFilter } from "../ColorFilter";
-import type { Shader } from "../Shader";
+import type { IShader } from "../Shader";
 import type { Color } from "../Color";
 import type { PathEffect } from "../PathEffect";
 import type { SkJsiInstane } from "../JsiInstance";
@@ -25,11 +25,11 @@ export enum StrokeJoin {
   Round,
 }
 
-export interface Paint extends SkJsiInstane<"Paint"> {
+export interface IPaint extends SkJsiInstane<"Paint"> {
   /**
    * Returns a copy of this paint.
    */
-  copy(): Paint;
+  copy(): IPaint;
 
   /**
    * Retrieves the alpha and RGB unpremultiplied. RGB are extended sRGB values
@@ -116,7 +116,7 @@ export interface Paint extends SkJsiInstane<"Paint"> {
    * Sets the current shader, replacing the existing one if there was one.
    * @param shader
    */
-  setShader(shader: Shader): void;
+  setShader(shader: IShader): void;
 
   /**
    * Sets the geometry drawn at the beginning and end of strokes.

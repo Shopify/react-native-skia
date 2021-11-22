@@ -3,7 +3,7 @@ import { NodeType } from "../../Host";
 import type { CustomPaintProps } from "../processors";
 import { selectPaint, processPaint } from "../processors";
 import { Skia } from "../../../skia";
-import type { Path as IPath } from "../../../skia";
+import type { IPath as IPath } from "../../../skia";
 import type { DrawingContext } from "../../DrawingContext";
 
 interface StrokeOpts {

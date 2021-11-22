@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import type { ReactNode } from "react";
+import type { ReactNode, ComponentProps } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
@@ -31,9 +31,10 @@ const render = (
 
 interface CanvasProps {
   children: ReactNode;
+  style?: ComponentProps<typeof SkiaView>["style"];
 }
 
-export const Canvas = ({ children }: CanvasProps) => {
+export const Canvas = ({ children, style }: CanvasProps) => {
   const [tick, setTick] = useState(0);
   const redraw = useCallback(() => setTick((t) => t + 1), []);
   const tree = useMemo(() => CanvasNode(redraw), [redraw]);
@@ -53,5 +54,5 @@ export const Canvas = ({ children }: CanvasProps) => {
     },
     [tick]
   );
-  return <SkiaView onDraw={onDraw} />;
+  return <SkiaView style={style} onDraw={onDraw} />;
 };

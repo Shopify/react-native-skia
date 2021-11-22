@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 
-import type { RuntimeEffect as IRuntimeEffect } from "../../skia";
+import type { IRuntimeEffect as IRuntimeEffect } from "../../skia";
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
 

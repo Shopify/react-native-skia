@@ -1,6 +1,6 @@
 import { Dimensions } from "react-native";
 import { Skia, PaintStyle } from "@shopify/react-native-skia";
-import type { Canvas } from "@shopify/react-native-skia";
+import type { ICanvas } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
 
@@ -31,7 +31,7 @@ whitePaint.setAntiAlias(true);
 strokePaint.setStyle(PaintStyle.Stroke);
 strokePaint.setStrokeWidth(strokeWidth);
 
-const drawCircles = (canvas: Canvas) => {
+const drawCircles = (canvas: ICanvas) => {
   const c = 12;
   const delta = 100 / c;
   new Array(c).fill(0).forEach((_, i) => {
@@ -43,7 +43,7 @@ const drawCircles = (canvas: Canvas) => {
   });
 };
 
-const drawPattern1 = (canvas: Canvas) => {
+const drawPattern1 = (canvas: ICanvas) => {
   strokePaint.setColor(c2);
   new Array(4).fill(0).forEach((_, i) => {
     const delta = i * strokeWidth;
@@ -76,7 +76,7 @@ const bg = Skia.Path.MakeFromSVGString(
   "M423.554 40.0679H69.3443C51.3334 40.0679 36.6796 54.7199 36.6796 72.7307V685.881C36.6796 703.892 51.3334 718.546 69.3443 718.546H423.554C441.565 718.546 456.219 703.892 456.219 685.881V72.7307C456.219 54.7199 441.565 40.0679 423.554 40.0679Z"
 )!;
 
-export const backface = (canvas: Canvas) => {
+export const backface = (canvas: ICanvas) => {
   canvas.save();
   canvas.scale(scale, scale);
   canvas.drawPath(borders, whitePaint);

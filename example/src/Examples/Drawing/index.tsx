@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from "react";
 import { Button, StyleSheet, View } from "react-native";
-import type { Path } from "@shopify/react-native-skia";
+import type { IPath } from "@shopify/react-native-skia";
 import {
   Skia,
   useTouchCallback,
@@ -25,7 +25,7 @@ export const DrawingExample: React.FC = () => {
     p.setStrokeCap(StrokeCap.Round);
   });
 
-  const paths = useMemo(() => [] as Path[], []);
+  const paths = useMemo(() => [] as IPath[], []);
   const isDrawing = useRef<boolean>(false);
 
   const onTouch = useTouchCallback(

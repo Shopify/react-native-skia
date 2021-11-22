@@ -8,6 +8,11 @@ export const HomeScreen: React.FC = () => {
     <View style={styles.container}>
       <HomeScreenButton title="API" description="API examples" route="API" />
       <HomeScreenButton
+        title="🧘 Breathe"
+        description="Simple declarative example"
+        route="Breathe"
+      />
+      <HomeScreenButton
         title="Drawing"
         description="Use touches to draw with Skia"
         route="Drawing"

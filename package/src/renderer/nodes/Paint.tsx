@@ -3,7 +3,7 @@ import { forwardRef } from "react";
 
 import type { SkNode } from "../Host";
 import { NodeType, processChildren } from "../Host";
-import type { Paint as IPaint } from "../../skia";
+import type { IPaint as IPaint } from "../../skia";
 
 import type { CustomPaintProps } from "./processors";
 import { processPaint } from "./processors";

@@ -8,15 +8,15 @@ import {
   StrokeJoin,
   StrokeCap,
 } from "../../../skia";
-import type { RuntimeEffect, Paint } from "../../../skia";
+import type { IRuntimeEffect, IPaint } from "../../../skia";
 
-export const useRTRef = () => useRef<RuntimeEffect>(null);
-export const usePaintRef = () => useRef<Paint>(null);
+export const useRTRef = () => useRef<IRuntimeEffect>(null);
+export const usePaintRef = () => useRef<IPaint>(null);
 
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export interface CustomPaintProps {
-  paint?: RefObject<Paint>;
+  paint?: RefObject<IPaint>;
   color?: string;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;
@@ -35,7 +35,7 @@ export const processColor = (color: string, currentOpacity: number) =>
   Skia.Color(color);
 
 export const processPaint = (
-  paint: Paint,
+  paint: IPaint,
   currentOpacity: number,
   {
     color,
@@ -80,7 +80,7 @@ export const processPaint = (
 };
 
 export const selectPaint = (
-  currentPaint: Paint,
+  currentPaint: IPaint,
   {
     paint,
     color,

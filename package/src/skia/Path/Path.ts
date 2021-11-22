@@ -1,5 +1,5 @@
 import type { Font } from "../Font";
-import type { Rect } from "../Rect";
+import type { IRect } from "../Rect";
 import type { Point } from "../Point";
 import type { RRect } from "../RRect";
 import type { StrokeJoin, StrokeCap } from "../Paint";
@@ -38,7 +38,7 @@ export enum PathOp {
   ReverseDifference,
 }
 
-export interface Path extends SkJsiInstane<"Path"> {
+export interface IPath extends SkJsiInstane<"Path"> {
   /**
    * Appends arc to Path, as the start of new contour. Arc added is part of ellipse
    * bounded by oval, from startAngle through sweepAngle. Both startAngle and
@@ -50,10 +50,10 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param sweepAngle
    */
   addArc(
-    oval: Rect,
+    oval: IRect,
     startAngleInDegrees: number,
     sweepAngleInDegrees: number
-  ): Path;
+  ): IPath;
 
   /**
    * Adds oval to Path, appending kMove_Verb, four kConic_Verb, and kClose_Verb.
@@ -64,7 +64,7 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param isCCW - if the path should be drawn counter-clockwise or not
    * @param startIndex - index of initial point of ellipse
    */
-  addOval(oval: Rect, isCCW?: boolean, startIndex?: number): void;
+  addOval(oval: IRect, isCCW?: boolean, startIndex?: number): void;
 
   /**
    * Returns the number of points in this path. Initially zero.
@@ -111,7 +111,7 @@ export interface Path extends SkJsiInstane<"Path"> {
    * instead of clockwise to achieve that effect. If such a transformation cannot
    * be done, null is returned.
    */
-  makeAsWinding(): Path | null;
+  makeAsWinding(): IPath | null;
 
   /**
    * Translates all the points in the path by dx, dy.
@@ -173,14 +173,14 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param x
    * @param y
    */
-  rMoveTo(x: number, y: number): Path;
+  rMoveTo(x: number, y: number): IPath;
 
   /**
    * Relative version of lineTo.
    * @param x
    * @param y
    */
-  rLineTo(x: number, y: number): Path;
+  rLineTo(x: number, y: number): IPath;
 
   /**
    * Relative version of quadTo.
@@ -189,7 +189,7 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param x2
    * @param y2
    */
-  rQuadTo(x1: number, y1: number, x2: number, y2: number): Path;
+  rQuadTo(x1: number, y1: number, x2: number, y2: number): IPath;
 
   /**
    * Sets FillType, the rule used to fill Path.
@@ -249,7 +249,7 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param outputArray - if provided, the bounding box will be copied into this array instead of
    *                      allocating a new one.
    */
-  computeTightBounds(outputArray?: Rect): Rect;
+  computeTightBounds(outputArray?: IRect): IRect;
 
   /**
    * Appends arc to Path. Arc added is part of ellipse
@@ -263,11 +263,11 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param forceMoveTo
    */
   arcToOval(
-    oval: Rect,
+    oval: IRect,
     startAngleInDegrees: number,
     sweepAngleInDegrees: number,
     forceMoveTo: boolean
-  ): Path;
+  ): IPath;
 
   /**
    * Appends arc to Path. Arc is implemented by one or more conics weighted to
@@ -291,7 +291,7 @@ export interface Path extends SkJsiInstane<"Path"> {
     isCCW: boolean,
     x: number,
     y: number
-  ): Path;
+  ): IPath;
 
   /**
    * Appends arc to Path, after appending line if needed. Arc is implemented by conic
@@ -311,7 +311,7 @@ export interface Path extends SkJsiInstane<"Path"> {
     x2: number,
     y2: number,
     radius: number
-  ): Path;
+  ): IPath;
 
   /**
    * Adds conic from last point towards (x1, y1), to (x2, y2), weighted by w.
@@ -324,7 +324,7 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param y2
    * @param w
    */
-  conicTo(x1: number, y1: number, x2: number, y2: number, w: number): Path;
+  conicTo(x1: number, y1: number, x2: number, y2: number, w: number): IPath;
 
   /**
    * Returns true if the point (x, y) is contained by Path, taking into
@@ -337,7 +337,7 @@ export interface Path extends SkJsiInstane<"Path"> {
   /**
    * Returns a copy of this Path.
    */
-  copy(): Path;
+  copy(): IPath;
 
   /**
    *  Adds cubic from last point towards (x1, y1), then towards (x2, y2), ending at
@@ -372,14 +372,14 @@ export interface Path extends SkJsiInstane<"Path"> {
    * Returns true if other path is equal to this path.
    * @param other
    */
-  equals(other: Path): boolean;
+  equals(other: IPath): boolean;
 
   /**
    * Returns minimum and maximum axes values of Point array.
    * Returns (0, 0, 0, 0) if Path contains no points. Returned bounds width and height may
    * be larger or smaller than area affected when Path is drawn.
    */
-  getBounds(): Rect;
+  getBounds(): IRect;
 
   /**
    * Return the FillType for this path.
@@ -414,7 +414,7 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param rect
    * @param isCCW
    */
-  addRect(rect: Rect, isCCW?: boolean): void;
+  addRect(rect: IRect, isCCW?: boolean): void;
 
   /**
    * Adds rrect to Path, creating a new closed contour.
@@ -422,7 +422,7 @@ export interface Path extends SkJsiInstane<"Path"> {
    * @param rrect
    * @param isCCW
    */
-  addRRect(rrect: RRect, isCCW?: boolean): Path;
+  addRRect(rrect: RRect, isCCW?: boolean): IPath;
 
   /**
    * Returns the Point at index in Point array. Valid range for index is
@@ -463,7 +463,7 @@ export interface Path extends SkJsiInstane<"Path"> {
                   inputs.
     @return True if the operation succeeded.
     */
-  op(path: Path, op: PathOp): boolean;
+  op(path: IPath, op: PathOp): boolean;
 
   /** Set this path to a set of non-overlapping contours that describe the
     same area as the original path.

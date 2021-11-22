@@ -1,4 +1,4 @@
-import type { Rect } from "./Rect";
+import type { IRect } from "./Rect";
 import type { SkJsiInstane } from "./JsiInstance";
 
 export enum MatrixIndex {
@@ -48,5 +48,5 @@ export interface Matrix extends SkJsiInstane<"Matrix"> {
   setPerspY(px: number): void;
   getPerspY(): number;
 
-  setRectToRect(src: Rect, dest: Rect, fit: ScaleToFit): void;
+  setRectToRect(src: IRect, dest: IRect, fit: ScaleToFit): void;
 }

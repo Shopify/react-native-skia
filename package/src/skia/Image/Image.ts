@@ -2,7 +2,7 @@
 import type { ImageSourcePropType } from "react-native";
 
 import type { TileMode } from "../ImageFilter";
-import type { Shader } from "../Shader";
+import type { IShader } from "../Shader";
 import type { Matrix } from "../Matrix";
 import type { SkJsiInstane } from "../JsiInstance";
 
@@ -19,7 +19,7 @@ export enum MipmapMode {
   Linear,
 }
 
-export interface Image extends SkJsiInstane<"Image"> {
+export interface IImage extends SkJsiInstane<"Image"> {
   /**
    * Returns the possibly scaled height of the image.
    */
@@ -47,7 +47,7 @@ export interface Image extends SkJsiInstane<"Image"> {
     fm: FilterMode,
     mm: MipmapMode,
     localMatrix?: Matrix
-  ): Shader;
+  ): IShader;
 
   /**
    * Returns this image as a shader with the specified tiling. It will use cubic sampling.
@@ -63,7 +63,7 @@ export interface Image extends SkJsiInstane<"Image"> {
     B: number,
     C: number,
     localMatrix?: Matrix
-  ): Shader;
+  ): IShader;
 }
 
 export const ImageCtor = (image: ImageSourcePropType) => {

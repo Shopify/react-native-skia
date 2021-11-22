@@ -1,2 +1,2 @@
-export * from "./Renderer";
+export * from "./Canvas";
 export * from "./nodes";
