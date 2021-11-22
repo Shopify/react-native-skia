@@ -16,42 +16,42 @@ export const PhysicsExample: React.FC = () => {
   const [replay, setReplay] = useState<number>(0);
 
   const bodies = useMemo(() => {
-    return new Array(RowCount * ColumnCount) as b2.b2Body[];
+    return new Array(RowCount * ColumnCount) as b2.Body[];
   }, []);
 
   const world = useMemo(() => {
-    const gravity: b2.b2Vec2 = new b2.b2Vec2(0, -10);
-    const b2world = new b2.b2World(gravity);
+    const gravity: b2.Vec2 = new b2.Vec2(0, -10);
+    const b2world = new b2.World(gravity);
 
     const indices: number[] = new Array(RowCount * ColumnCount);
 
-    const bd = new b2.b2BodyDef();
+    const bd = new b2.BodyDef();
     const ground = b2world.CreateBody(bd);
 
-    const shape = new b2.b2EdgeShape();
-    shape.Set(new b2.b2Vec2(-80.0, 0.0), new b2.b2Vec2(80.0, 0.0));
+    const shape = new b2.EdgeShape();
+    shape.SetTwoSided(new b2.Vec2(-80.0, 0.0), new b2.Vec2(80.0, 0.0));
     ground.CreateFixture(shape, 0.0);
 
     const xs = [0.0, -2.5, -5, 2.5, 5];
 
     for (let j = 0; j < ColumnCount; ++j) {
-      const boxShape = new b2.b2PolygonShape();
+      const boxShape = new b2.PolygonShape();
       boxShape.SetAsBox(0.5, 0.5);
 
-      const fd = new b2.b2FixtureDef();
+      const fd = new b2.FixtureDef();
       fd.shape = boxShape;
       fd.density = 1.0;
       fd.friction = 0.3;
 
       for (let i = 0; i < RowCount; ++i) {
-        const bodyDef = new b2.b2BodyDef();
-        bodyDef.type = b2.b2BodyType.b2_dynamicBody;
+        const bodyDef = new b2.BodyDef();
+        bodyDef.type = b2.BodyType.b2_dynamicBody;
 
         const n = j * RowCount + i;
         indices[n] = n;
         bodyDef.userData = indices[n];
 
-        const x = b2.b2RandomRange(-0.12, 0.12);
+        const x = b2.RandomRange(-0.12, 0.12);
         //const x = i % 2 === 0 ? -0.04 : 0.04;
         bodyDef.position.Set(xs[j] + x, 0.55 + 2 * i);
         const body = b2world.CreateBody(bodyDef);
