@@ -29,7 +29,7 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 
   /** Start by checking the cache for functions */
   auto runtimeCache = _cache.find(&runtime);
-  std::unordered_map<std::string, std::shared_ptr<jsi::Function>> *currentCache;
+  JsiHostFunctionCache *currentCache;
   if (runtimeCache != _cache.end()) {
     currentCache = &runtimeCache->second;
     // Check if the runtime cache as a cache of the host function
@@ -39,28 +39,28 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
     }
   } else {
     // Create cache for this runtime
-    std::unordered_map<std::string, std::shared_ptr<jsi::Function>>
-        runtimeCache;
-    _cache.emplace(&runtime, runtimeCache);
-    currentCache = &runtimeCache;
+    JsiHostFunctionCache runtimeCache;
+    _cache.emplace(&runtime, JsiHostFunctionCache{});
+    currentCache = &_cache.at(&runtime);
   }
 
   /* Check the static function map */
   auto funcs = getExportedFunctionMap();
   auto func = funcs.find(nameStr);
   if (func != funcs.end()) {
-    auto retVal =
-        std::make_shared<jsi::Function>(jsi::Function::createFromHostFunction(
-            runtime, name, 0,
-            std::bind(func->second, this, std::placeholders::_1,
-                      std::placeholders::_2, std::placeholders::_3,
-                      std::placeholders::_4)));
-
+    auto dispatcher = std::bind(func->second,
+                                (JsiHostObject*)this,
+                                std::placeholders::_1,
+                                std::placeholders::_2,
+                                std::placeholders::_3,
+                                std::placeholders::_4);
+    
     // Add to cache
-    currentCache->emplace(nameStr, retVal);
+    currentCache->emplace(nameStr, std::make_unique<jsi::Function>(
+      jsi::Function::createFromHostFunction(runtime, name, 0, dispatcher)));
 
     // return retVal;
-    return retVal->asFunction(runtime);
+    return currentCache->at(nameStr)->asFunction(runtime);
   }
 
   /** Check the static getters map */
