@@ -80,10 +80,11 @@ namespace RNSkia
         std::vector<jdouble> buffer(size + 1L);
         std::vector<RNSkia::RNSkTouchPoint> points;
         auto pin = touches.pin();
+        auto scale = _platformContext->getPixelDensity();
         for (size_t i = 0; i < pin.size(); i+=2) {
             RNSkTouchPoint point;
-            point.x = pin[i] / _platformContext->getPixelDensity();
-            point.y = pin[i+1] / _platformContext->getPixelDensity();
+            point.x = pin[i] / scale;
+            point.y = pin[i+1] / scale;
             point.force = pin[i+2];
             point.type = (RNSkia::RNSkTouchType)pin[i+3];
             points.push_back(point);

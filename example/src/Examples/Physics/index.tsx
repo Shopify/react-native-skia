@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button, StyleSheet, View } from "react-native";
-import * as b2 from "@flyover/box2d";
+import * as box2d from "@flyover/box2d";
 import {
   PaintStyle,
   Skia,
@@ -16,42 +16,42 @@ export const PhysicsExample: React.FC = () => {
   const [replay, setReplay] = useState<number>(0);
 
   const bodies = useMemo(() => {
-    return new Array(RowCount * ColumnCount) as b2.Body[];
+    return new Array(RowCount * ColumnCount) as box2d.Body[];
   }, []);
 
   const world = useMemo(() => {
-    const gravity: b2.Vec2 = new b2.Vec2(0, -10);
-    const b2world = new b2.World(gravity);
+    const gravity = new box2d.Vec2(0, -10);
+    const b2world = new box2d.World(gravity);
 
     const indices: number[] = new Array(RowCount * ColumnCount);
 
-    const bd = new b2.BodyDef();
+    const bd = new box2d.BodyDef();
     const ground = b2world.CreateBody(bd);
 
-    const shape = new b2.EdgeShape();
-    shape.SetTwoSided(new b2.Vec2(-80.0, 0.0), new b2.Vec2(80.0, 0.0));
+    const shape = new box2d.EdgeShape();
+    shape.SetTwoSided(new box2d.Vec2(-80.0, 0.0), new box2d.Vec2(80.0, 0.0));
     ground.CreateFixture(shape, 0.0);
 
     const xs = [0.0, -2.5, -5, 2.5, 5];
 
     for (let j = 0; j < ColumnCount; ++j) {
-      const boxShape = new b2.PolygonShape();
+      const boxShape = new box2d.PolygonShape();
       boxShape.SetAsBox(0.5, 0.5);
 
-      const fd = new b2.FixtureDef();
+      const fd = new box2d.FixtureDef();
       fd.shape = boxShape;
       fd.density = 1.0;
       fd.friction = 0.3;
 
       for (let i = 0; i < RowCount; ++i) {
-        const bodyDef = new b2.BodyDef();
-        bodyDef.type = b2.BodyType.b2_dynamicBody;
+        const bodyDef = new box2d.BodyDef();
+        bodyDef.type = box2d.BodyType.b2_dynamicBody;
 
         const n = j * RowCount + i;
         indices[n] = n;
         bodyDef.userData = indices[n];
 
-        const x = b2.RandomRange(-0.12, 0.12);
+        const x = box2d.RandomRange(-0.12, 0.12);
         //const x = i % 2 === 0 ? -0.04 : 0.04;
         bodyDef.position.Set(xs[j] + x, 0.55 + 1.2 * i);
         const body = b2world.CreateBody(bodyDef);
@@ -89,7 +89,7 @@ export const PhysicsExample: React.FC = () => {
       canvas.rotate(180, 0, 0);
 
       // Tick screen
-      world.Step(info.timestamp / 10000000, 3, 3);
+      world.Step(info.timestamp / 100000, 8, 4);
 
       // Draw boxes
       for (let i = 0; i < bodies.length; i++) {

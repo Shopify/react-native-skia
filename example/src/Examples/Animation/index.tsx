@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet } from "react-native";
+import React, { useMemo } from "react";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Skia,
   usePaint,
@@ -10,38 +10,70 @@ import {
 
 import { Animation } from "../../Animation";
 
-const Size = 25;
+const Size = 30;
+const Padding = 2.5;
 
 export const AnimationExample: React.FC = () => {
   const paint = usePaint((p) => p.setColor(Skia.Color("#7FC8A9")));
-  const foregroundPaint = usePaint((p) => p.setColor(Skia.Color("#7F33A9")));
+  const foregroundPaint = usePaint((p) => p.setColor(Skia.Color("#8A0707")));
   const font = useFont();
+
+  const { width, height } = useWindowDimensions();
+  const boxes = useMemo(() => {
+    const rowCount = Math.floor(height / (Size + Padding));
+    const colCount = Math.floor(width / (Size + Padding));
+    console.log(rowCount * colCount);
+    return new Array(rowCount * colCount)
+      .fill(rowCount * colCount)
+      .map((_, i) => {
+        const row = i % rowCount;
+        const col = i % colCount;
+        return { x: col * (Size + Padding), y: row * (Size + Padding) };
+      });
+  }, [height, width]);
+
+  const rect = useMemo(
+    () => Skia.XYWHRect(-Size / 2, -Size / 2, Size, Size),
+    []
+  );
+
+  const centerPoint = useMemo(
+    () => ({ x: width / 2, y: height / 2 }),
+    [width, height]
+  );
 
   const onDraw = useDrawCallback(
     (canvas, info) => {
       canvas.drawPaint(paint);
       // Normalize the timestamp to a value between 0 and 1 with a duration of 2 seconds
-      let t = Animation.normalize(info.timestamp, { durationSeconds: 2 });
-
-      // Apply easing
-      t = Animation.Easing.inOut(t);
-
-      // Interpolate X/Y on the eased t value
-      const posX = Animation.interpolate(
-        t,
-        [0, 0.5, 1],
-        [0, info.width - Size, 0],
-        Animation.Extrapolate.CLAMP
+      const t = Animation.Easing.inOut(
+        Animation.normalize(info.timestamp, { durationSeconds: 2.5 })
       );
-      const posY = Animation.interpolate(
+
+      // Interpolate scaling
+      const scale = Animation.interpolate(
         t,
-        [0, 0.5, 1],
-        [0, info.height - Size, 0],
+        [0, 0.25, 0.5, 0.75, 1],
+        [1, 0, 1, 0, 1],
         Animation.Extrapolate.CLAMP
       );
 
-      // Draw the circle
-      canvas.drawCircle(posX, posY, Size, foregroundPaint);
+      boxes.forEach((box) => {
+        canvas.save();
+        canvas.translate(
+          box.x + Size / 2 + Padding,
+          box.y + Size / 2 + Padding
+        );
+        // Stagger
+        const a = box.x + Size / 2 - centerPoint.x;
+        const b = box.y + Size / 2 - centerPoint.y;
+        const distance = Math.sqrt(a * a + b * b);
+        const normalizedDistance = Math.min(1.0, distance / (height / 2));
+        const finalScale = Math.min(1.0, scale + normalizedDistance);
+        canvas.scale(finalScale, finalScale);
+        canvas.drawRect(rect, foregroundPaint);
+        canvas.restore();
+      });
     },
     [paint, foregroundPaint, font]
   );

@@ -9,10 +9,6 @@ export interface ISkiaViewApi {
     nativeId: number,
     callback: RNSkiaDrawCallback | undefined
   ) => void;
-  setTouchCallback: (
-    nativeId: number,
-    callback: RNSkiaTouchCallback | undefined
-  ) => void;
 }
 declare global {
   var SkiaViewApi: ISkiaViewApi;
@@ -43,18 +39,15 @@ export interface DrawingInfo {
   width: number;
   height: number;
   timestamp: number;
-  delta: number;
-  fps: number;
+  getTouches: () => Array<Array<TouchInfo>>;
 }
 
 export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawingInfo) => void;
-export type RNSkiaTouchCallback = (touches: TouchInfo[]) => void;
 
 export type RNSkiaViewProps = ViewProps & {
   mode?: "continuous" | "default";
   debug?: boolean;
   onDraw?: RNSkiaDrawCallback;
-  onTouch?: RNSkiaTouchCallback;
 };
 
 export const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(

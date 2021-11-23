@@ -69,54 +69,6 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(setTouchCallback) {
-    if (count != 2) {
-      _platformContext->raiseError(
-          std::string("setTouchCallback: Expected 2 arguments, got " +
-                      std::to_string(count) + "."));
-      return jsi::Value::undefined();
-    }
-
-    if (!arguments[0].isNumber()) {
-      _platformContext->raiseError(
-          "setTouchCallback: First argument must be a number");
-      return jsi::Value::undefined();
-    }
-
-    // We accept undefined to zero out the drawCallback
-    if (!arguments[1].isUndefined()) {
-      if (!arguments[1].isObject()) {
-        _platformContext->raiseError(
-            "setTouchCallback: Second argument must be a function");
-        return jsi::Value::undefined();
-      }
-      if (!arguments[1].asObject(runtime).isFunction(runtime)) {
-        _platformContext->raiseError(
-            "setTouchCallback: Second argument must be a function");
-        return jsi::Value::undefined();
-      }
-    }
-
-    // find skia draw view
-    int nativeId = arguments[0].asNumber();
-
-    // and function to install as the draw drawCallback
-    auto info = getEnsuredCallbackInfo(nativeId);
-    if (arguments[1].isUndefined()) {
-      info->touchCallback = nullptr;
-    } else {
-      info->touchCallback = std::make_shared<jsi::Function>(
-          arguments[1].asObject(runtime).asFunction(runtime));
-    }
-
-    // Update view if set
-    if (info->view != nullptr && info->touchCallback != nullptr) {
-      info->view->setTouchCallback(info->touchCallback);
-    }
-
-    return jsi::Value::undefined();
-  }
-
   JSI_HOST_FUNCTION(invalidateSkiaView) {
     if (count != 1) {
       _platformContext->raiseError(
@@ -142,7 +94,6 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawCallback),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, setTouchCallback),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, invalidateSkiaView))
 
   /**
@@ -176,7 +127,6 @@ public:
     info->view = view;
     if (info->drawCallback != nullptr) {
       info->view->setDrawCallback(info->drawCallback);
-      info->view->setTouchCallback(info->touchCallback);
     }
   }
 
@@ -191,7 +141,6 @@ public:
     auto info = getEnsuredCallbackInfo(nativeId);
     if (info->view != nullptr) {
       info->view->setDrawCallback(nullptr);
-      info->view->setTouchCallback(nullptr);
     }
     info->view = nullptr;
     info->drawCallback = nullptr;

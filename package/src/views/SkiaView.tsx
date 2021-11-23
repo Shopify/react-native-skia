@@ -3,11 +3,7 @@
 import React from "react";
 
 import { NativeSkiaView } from "./types";
-import type {
-  RNSkiaTouchCallback,
-  RNSkiaDrawCallback,
-  RNSkiaViewProps,
-} from "./types";
+import type { RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
 
 let SkiaViewNativeId = 1000;
 
@@ -15,21 +11,17 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   constructor(props: RNSkiaViewProps) {
     super(props);
     this._nativeId = `${SkiaViewNativeId++}`;
-    const { onDraw, onTouch } = props;
+    const { onDraw } = props;
     if (onDraw) {
       assertDrawCallbacksEnabled();
       setDrawCallback(this._nativeId, onDraw);
-    }
-    if (onTouch) {
-      assertDrawCallbacksEnabled();
-      setTouchCallback(this._nativeId, onTouch);
     }
   }
 
   private _nativeId: string;
 
   componentDidUpdate(prevProps: RNSkiaViewProps) {
-    const { onDraw, onTouch } = this.props;
+    const { onDraw } = this.props;
     if (onDraw !== prevProps.onDraw) {
       assertDrawCallbacksEnabled();
       if (prevProps.onDraw) {
@@ -37,16 +29,6 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
       }
       if (onDraw) {
         setDrawCallback(this._nativeId, onDraw);
-      }
-    }
-
-    if (onTouch !== prevProps.onTouch) {
-      assertDrawCallbacksEnabled();
-      if (prevProps.onTouch) {
-        setTouchCallback(this._nativeId, undefined);
-      }
-      if (onTouch) {
-        setTouchCallback(this._nativeId, onTouch);
       }
     }
   }
@@ -75,13 +57,6 @@ const setDrawCallback = (
   drawCallback: RNSkiaDrawCallback | undefined
 ) => {
   return SkiaViewApi.setDrawCallback(parseInt(nativeId, 10), drawCallback);
-};
-
-const setTouchCallback = (
-  nativeId: string,
-  drawCallback: RNSkiaTouchCallback | undefined
-) => {
-  return SkiaViewApi.setTouchCallback(parseInt(nativeId, 10), drawCallback);
 };
 
 const invalidateSkiaView = (nativeId: string) => {
