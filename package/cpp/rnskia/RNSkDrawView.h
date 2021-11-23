@@ -1,7 +1,9 @@
 #pragma once
 
 #include <JsiSkCanvas.h>
+#include <RNSkInfoParameter.h>
 #include <RNSkPlatformContext.h>
+#include <mutex>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -16,17 +18,6 @@ namespace RNSkia {
 
 using RNSkDrawCallback = std::function<void(
     std::shared_ptr<JsiSkCanvas>, int, int, double, RNSkPlatformContext *)>;
-
-enum RNSkTouchType { Start, Active, End, Cancelled };
-
-using RNSkTouchPoint = struct {
-  double x;
-  double y;
-  double force;
-  RNSkTouchType type;
-};
-
-using RNSkTouchCallback = std::function<void(std::vector<RNSkTouchPoint>)>;
 
 #define NUMBER_OF_DURATION_SAMPLES 10
 using RNSkTimingInfo = struct {
@@ -45,7 +36,8 @@ public:
    */
   RNSkDrawView(RNSkPlatformContext *context)
       : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
-        _platformContext(context) {}
+        _platformContext(context),
+        _infoObject(std::make_shared<RNSkInfoObject>()) {}
 
   ~RNSkDrawView() { RNSkLogger::logToConsole("Deleting draw view"); }
 
@@ -60,11 +52,6 @@ public:
    * Installs the draw callback for the view
    */
   void setDrawCallback(std::shared_ptr<jsi::Function> callback);
-
-  /**
-   * Installs the touch callback for the view
-   */
-  void setTouchCallback(std::shared_ptr<jsi::Function> callback);
 
   /**
    * Call this method with a valid Skia surface to let the draw drawCallback do
@@ -122,11 +109,6 @@ private:
   std::shared_ptr<RNSkDrawCallback> _drawCallback;
 
   /**
-   * Stores the touch callback
-   */
-  std::shared_ptr<RNSkTouchCallback> _touchCallback;
-
-  /**
    * Stores a pointer to the jsi wrapper for the canvas. The reason for
    * storing this pointer and not recreate it is that it creates a set of
    * functions that we don't want to recreate on each render
@@ -162,6 +144,11 @@ private:
    Last render duration
    */
   size_t _lastDuration = 0;
+
+  /**
+   * Info object parameter
+   */
+  std::shared_ptr<RNSkInfoObject> _infoObject;
 };
 
 } // namespace RNSkia
