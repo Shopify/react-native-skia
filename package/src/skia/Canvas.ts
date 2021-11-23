@@ -12,11 +12,6 @@ import type { Matrix } from "./Matrix";
 import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
 
-export interface Info {
-  width: number;
-  height: number;
-}
-
 export enum ClipOp {
   Difference,
   Intersect,

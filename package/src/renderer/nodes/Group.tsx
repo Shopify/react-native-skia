@@ -6,7 +6,11 @@ import type { IRRect, IPath, IPaint } from "../../skia";
 import { ClipOp, Skia } from "../../skia";
 
 import { processTransform, selectPaint, processPaint } from "./processors";
-import type { CustomPaintProps, TransformProps } from "./processors";
+import type {
+  CustomPaintProps,
+  TransformProps,
+  AnimatedProps,
+} from "./processors";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
   children: ReactNode | ReactNode[];
@@ -16,19 +20,25 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
   rasterize?: { paint: RefObject<IPaint> };
 }
 
-export const Group = (props: GroupProps) => {
+export const Group = (props: AnimatedProps<GroupProps>) => {
   return <skGroup {...props} />;
 };
 
-export const GroupNode = (props: GroupProps): SkNode<NodeType.Group> => ({
+export const GroupNode = (
+  props: AnimatedProps<GroupProps>
+): SkNode<NodeType.Group> => ({
   type: NodeType.Group,
   props,
   draw: (
     ctx,
-    { clipRect, rasterize, clipPath, clipOp, ...groupProps }: GroupProps,
+    { clipRect, rasterize, clipPath, clipOp, animatedProps, ...remainingProps },
     children: SkNode[]
   ) => {
     const { canvas, opacity } = ctx;
+    const groupProps = {
+      ...remainingProps,
+      ...animatedProps(ctx),
+    };
     const paint = selectPaint(ctx.paint, groupProps);
     processPaint(paint, opacity, groupProps);
     if (rasterize) {

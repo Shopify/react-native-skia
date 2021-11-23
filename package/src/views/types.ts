@@ -39,7 +39,7 @@ export interface TouchInfo {
   type: TouchType;
 }
 
-export interface DrawInfo {
+export interface DrawingInfo {
   width: number;
   height: number;
   timestamp: number;
@@ -47,7 +47,7 @@ export interface DrawInfo {
   fps: number;
 }
 
-export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawInfo) => void;
+export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawingInfo) => void;
 export type RNSkiaTouchCallback = (touches: TouchInfo[]) => void;
 
 export type RNSkiaViewProps = ViewProps & {

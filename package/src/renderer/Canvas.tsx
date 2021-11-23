@@ -46,13 +46,13 @@ export const Canvas = ({ children, style }: CanvasProps) => {
     render(children, container, redraw);
   }, [children, container, redraw]);
   const onDraw = useDrawCallback(
-    (canvas, { width, height }) => {
+    (canvas, info) => {
       const paint = Skia.Paint();
       paint.setAntiAlias(true);
-      const ctx = { canvas, paint, opacity: 1, width, height };
+      const ctx = { canvas, paint, opacity: 1, ...info };
       tree.draw(ctx, tree.props, tree.children);
     },
     [tick]
   );
-  return <SkiaView style={style} onDraw={onDraw} />;
+  return <SkiaView style={style} onDraw={onDraw} mode="continuous" />;
 };

@@ -1,5 +1,6 @@
 /*global NodeJS, performance*/
 import type { HostConfig } from "react-reconciler";
+import type ComponentProps from "react";
 
 import { Skia } from "../skia";
 
@@ -165,7 +166,7 @@ const createNode = (type: NodeType, props: Props) => {
     case NodeType.Canvas:
       throw new Error("Cannot create canvas node");
     case NodeType.Group:
-      return GroupNode(props as GroupProps);
+      return GroupNode(props as Parameters<typeof GroupNode>[0]);
     case NodeType.Circle:
       return CircleNode(props as CircleProps);
     case NodeType.Rect:
@@ -307,6 +308,7 @@ export const skHostConfig: SkiaHostConfig = {
 
   resetAfterCommit(container) {
     debug("resetAfterCommit");
+    // TODO: this is not necessary in continuous rendering
     container.redraw();
   },
 

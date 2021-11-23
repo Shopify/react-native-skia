@@ -3,6 +3,7 @@ import type { ForwardedRef } from "react";
 import type { IPaint, IRuntimeEffect } from "../skia";
 
 import type { DrawingContext } from "./DrawingContext";
+import type { AnimatedProps } from "./nodes/processors/Animation";
 import type {
   ShaderProps,
   RuntimeEffectProps,
@@ -55,7 +56,7 @@ interface CanvasProps {}
 
 export interface NodeProps {
   [NodeType.Canvas]: CanvasProps;
-  [NodeType.Group]: GroupProps;
+  [NodeType.Group]: AnimatedProps<GroupProps>;
   [NodeType.Circle]: CircleProps;
   [NodeType.Fill]: FillProps;
   [NodeType.Paint]: PaintProps;
