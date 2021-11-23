@@ -1,6 +1,5 @@
 /*global NodeJS, performance*/
 import type { HostConfig } from "react-reconciler";
-import type ComponentProps from "react";
 
 import { Skia } from "../skia";
 
@@ -28,7 +27,6 @@ import type {
   LinearGradientProps,
   CircleProps,
   FillProps,
-  GroupProps,
   PaintProps,
   RectProps,
   ImageShaderProps,

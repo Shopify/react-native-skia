@@ -43,11 +43,13 @@ export interface DrawingInfo {
 }
 
 export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawingInfo) => void;
+export type RNSkiaTouchCallback = (touches: TouchInfo[]) => void;
 
 export type RNSkiaViewProps = ViewProps & {
   mode?: "continuous" | "default";
   debug?: boolean;
   onDraw?: RNSkiaDrawCallback;
+  onTouch?: RNSkiaTouchCallback;
 };
 
 export const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
