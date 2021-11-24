@@ -13,13 +13,19 @@ SkiaDrawViewImpl::SkiaDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext* 
     _layer.opaque = false;
     _layer.contentsScale = _context->getPixelDensity();
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    
-    _device = _layer.device;
+          
+    _device = MTLCreateSystemDefaultDevice();
     if(_device == nullptr) {
         NSLog(@"Failed to set current metal device");
        return;
     }
-    _queue = (id<MTLCommandQueue>)CFRetain((GrMTLHandle)[_device newCommandQueue]);
+      
+    id<MTLCommandQueue> queue = [_device newCommandQueue];
+    if(queue == nullptr) {
+       NSLog(@"Failed to create command queue");
+       return;
+    }
+    _queue = (id<MTLCommandQueue>)CFRetain((GrMTLHandle)queue);
 }
 
 void SkiaDrawViewImpl::setSize(int width, int height) {
@@ -33,6 +39,11 @@ void SkiaDrawViewImpl::setSize(int width, int height) {
 
 void SkiaDrawViewImpl::drawFrame(double time) {
   if(_width == -1 && _height == -1) {
+    return;
+  }
+  
+  if(_queue == nullptr) {
+    NSLog(@"Metal command queue not available.");
     return;
   }
   
@@ -97,11 +108,12 @@ void SkiaDrawViewImpl::destroy() {
   _skContext = nullptr;
 
   // Tear down Metal
-  if(_device) {
-    _device = NULL;
-  }
   if(_queue) {
     _queue = NULL;
+  }
+  
+  if(_device) {
+    _device = NULL;
   }
 }
 
@@ -186,6 +198,7 @@ void SkiaDrawViewImpl::destroy() {
   [super willMoveToWindow: newWindow];
   if (newWindow == nil) {
     _impl->destroy();
+    _impl = nullptr;
   }
 }
 
