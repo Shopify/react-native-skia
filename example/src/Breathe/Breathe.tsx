@@ -1,6 +1,6 @@
 import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
-import type { FrameCallback } from "@shopify/react-native-skia";
+import type { FrameValue } from "@shopify/react-native-skia";
 import {
   Blur,
   Canvas,
@@ -11,10 +11,9 @@ import {
   usePaintRef,
   polar2Canvas,
   useFrame,
-  useLoop,
-  Easing,
   mix,
   transformOrigin,
+  useSpring,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
@@ -24,7 +23,7 @@ const R = width / 4;
 
 interface RingProps {
   index: number;
-  progress: FrameCallback<number>;
+  progress: FrameValue<number>;
 }
 
 const Ring = ({ index, progress }: RingProps) => {
@@ -51,10 +50,7 @@ const Ring = ({ index, progress }: RingProps) => {
 };
 
 export const Breathe = () => {
-  const progress = useLoop({
-    duration: 3000,
-    easing: Easing.bezier(0.5, 0, 0.5, 1),
-  });
+  const progress = useSpring();
   const paint = usePaintRef();
   const transform = useFrame(
     (ctx) =>
