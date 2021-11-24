@@ -41,14 +41,14 @@ private:
   CAMetalLayer* _layer;
 #pragma clang diagnostic pop
   
-  id<MTLCommandQueue> _commandQueue;
-  id<MTLDevice> _device;
+  static id<MTLCommandQueue> _commandQueue;
+  static id<MTLDevice> _device;
 
   RNSkia::PlatformContext *_context;
 
   GrBackendRenderTarget _skRenderTarget;
   sk_sp<SkSurface> _skSurface;
-  sk_sp<GrDirectContext> _skContext;
+  static sk_sp<GrDirectContext> _skContext;
 
   std::shared_ptr<std::function<void()>> _onRemove;
 };

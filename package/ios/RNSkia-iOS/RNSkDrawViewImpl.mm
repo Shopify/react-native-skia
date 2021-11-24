@@ -1,22 +1,34 @@
 #import <RNSkDrawViewImpl.h>
 #import <SkiaDrawView.h>
 
+
+// These static class members are used by all the classes
+id<MTLDevice> RNSkDrawViewImpl::_device = MTLCreateSystemDefaultDevice();
+id<MTLCommandQueue> RNSkDrawViewImpl::_commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
+
+sk_sp<GrDirectContext> RNSkDrawViewImpl::_skContext = nullptr;
+
 RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext* context):
   _view(view), _context(context), RNSkia::RNSkDrawView(context) {
     
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
-    _layer = (CAMetalLayer*)_view.layer;
+    _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
     
-    _device = MTLCreateSystemDefaultDevice();
-    auto queue = [_device newCommandQueue];
-    if(queue == nullptr) {
-       NSLog(@"Failed to create command queue");
-       return;
+    if(_skContext == nullptr) {
+      GrContextOptions grContextOptions;
+      _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
+                                              (__bridge void*)_commandQueue,
+                                              grContextOptions);
     }
     
-    _commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)queue));
+    _layer.device = _device;
+    _layer.opaque = false;
+    _layer.contentsScale = _context->getPixelDensity();
+    // _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    _layer.frame = _view.bounds;
+    [_view.layer addSublayer:_layer];
 }
 
 RNSkDrawViewImpl::~RNSkDrawViewImpl() {
@@ -25,6 +37,7 @@ RNSkDrawViewImpl::~RNSkDrawViewImpl() {
 void RNSkDrawViewImpl::setSize(int width, int height) {
   _width = width;
   _height = height;
+  _layer.frame = CGRectMake(0, 0, width, height);
   _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
                                    height* _context->getPixelDensity());
   
@@ -35,19 +48,7 @@ void RNSkDrawViewImpl::drawFrame(double time) {
   if(_width == -1 && _height == -1) {
     return;
   }
-  
-  if(_commandQueue == nullptr) {
-    NSLog(@"Metal command queue not available.");
-    return;
-  }
-  
-  if(_skContext == nullptr) {
-    GrContextOptions grContextOptions;
-    _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
-                                            (__bridge void*)_commandQueue,
-                                            grContextOptions);
-  }
-  
+    
   auto sampleCount = 1;
   auto start = std::chrono::high_resolution_clock::now();
   
@@ -102,14 +103,6 @@ void RNSkDrawViewImpl::remove() {
   
   // Tear down Skia drawing
   _skSurface = nullptr;
-  _skSurface = nullptr;
-  _skContext = nullptr;
-
-  // Tear down Metal
-  if(_commandQueue != NULL) {
-    _commandQueue = NULL;
-  }
-  if(_device != NULL) {
-    _device = NULL;
-  }
+  
+  
 }

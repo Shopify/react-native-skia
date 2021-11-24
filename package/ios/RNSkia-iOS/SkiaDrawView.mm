@@ -6,12 +6,7 @@
   RNSkDrawViewImpl* _impl;
 }
 
--(void) dealloc {
-  if(_impl != nullptr) {
-    delete _impl;
-    _impl = nullptr;
-  }
-}
+#pragma mark Initialization and destruction
 
 - (instancetype)initWithContext: (RNSkia::PlatformContext*) context
 {
@@ -22,22 +17,35 @@
   return self;
 }
 
-+ (Class)layerClass
-{
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
-  return [CAMetalLayer class];
-#pragma clang diagnostic pop
+-(void) dealloc {
+  if(_impl != nullptr) {
+    delete _impl;
+    _impl = nullptr;
+  }
 }
+
+
+- (void) willMoveToWindow:(UIWindow *)newWindow {
+  [super willMoveToWindow: newWindow];
+  if (newWindow == nil) {
+    _impl->remove();
+  }
+}
+
+#pragma mark Layout
 
 - (void) layoutSubviews {
   [super layoutSubviews];
   _impl->setSize(self.bounds.size.width, self.bounds.size.height);
 }
 
+#pragma mark External API
+
 - (RNSkDrawViewImpl*) impl {
   return _impl;
 }
+
+#pragma mark Touch handling
 
 - (void) touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
   [self handleTouches:touches withEvent:event];
@@ -82,13 +90,6 @@
       nextTouches.push_back(nextTouch);
     }
     _impl->updateTouchState(nextTouches);
-  }
-}
-
-- (void) willMoveToWindow:(UIWindow *)newWindow {
-  [super willMoveToWindow: newWindow];
-  if (newWindow == nil) {
-    _impl->remove();    
   }
 }
 

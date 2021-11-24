@@ -26,7 +26,7 @@ public:
       : RNSkPlatformContext(runtime, callInvoker, dispatchOnRenderThread,
                             [[UIScreen mainScreen] scale]) {}
 
-  ~PlatformContext() { endDrawLoop(); }
+  ~PlatformContext() { }
 
   void beginDrawLoop() override;
   void endDrawLoop() override;
