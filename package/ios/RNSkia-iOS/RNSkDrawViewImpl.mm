@@ -1,7 +1,6 @@
 #import <RNSkDrawViewImpl.h>
 #import <SkiaDrawView.h>
 
-
 // These static class members are used by all the classes
 id<MTLDevice> RNSkDrawViewImpl::_device = MTLCreateSystemDefaultDevice();
 id<MTLCommandQueue> RNSkDrawViewImpl::_commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
@@ -26,13 +25,12 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext* 
     _layer.device = _device;
     _layer.opaque = false;
     _layer.contentsScale = _context->getPixelDensity();
-    // _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.frame = _view.bounds;
     [_view.layer addSublayer:_layer];
 }
 
-RNSkDrawViewImpl::~RNSkDrawViewImpl() {
-}
+RNSkDrawViewImpl::~RNSkDrawViewImpl() {}
 
 void RNSkDrawViewImpl::setSize(int width, int height) {
   _width = width;

@@ -13,7 +13,7 @@
 
 class RNSkDrawViewImpl : public RNSkia::RNSkDrawView {
 public:
-  RNSkDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext *context);
+  RNSkDrawViewImpl(SkiaDrawView *view, RNSkia::PlatformContext *context);
   ~RNSkDrawViewImpl();
 
   void remove();
@@ -34,21 +34,21 @@ private:
   int _width = -1;
   int _height = -1;
 
-  SkiaDrawView* _view;
-  
+  SkiaDrawView *_view;
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
-  CAMetalLayer* _layer;
+  CAMetalLayer *_layer;
 #pragma clang diagnostic pop
-  
+
   static id<MTLCommandQueue> _commandQueue;
   static id<MTLDevice> _device;
+  static sk_sp<GrDirectContext> _skContext;
 
   RNSkia::PlatformContext *_context;
 
   GrBackendRenderTarget _skRenderTarget;
   sk_sp<SkSurface> _skSurface;
-  static sk_sp<GrDirectContext> _skContext;
 
   std::shared_ptr<std::function<void()>> _onRemove;
 };
