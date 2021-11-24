@@ -17,19 +17,6 @@
 {
   self = [super init];
   if (self) {
-    
-    self.device = MTLCreateSystemDefaultDevice();
-    
-    self.layer.opaque = false;
-    self.layer.contentsScale = context->getPixelDensity();
-    
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
-    ((CAMetalLayer*)self.layer).pixelFormat = MTLPixelFormatBGRA8Unorm;
-#pragma clang diagnostic pop
-    
-    
-    self.device = MTLCreateSystemDefaultDevice();
     _impl = new RNSkDrawViewImpl((SkiaDrawView*)self, context);
   }
   return self;

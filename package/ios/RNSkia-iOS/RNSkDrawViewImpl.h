@@ -13,7 +13,7 @@
 
 class RNSkDrawViewImpl : public RNSkia::RNSkDrawView {
 public:
-  RNSkDrawViewImpl(MTKView* view, RNSkia::PlatformContext *context);
+  RNSkDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext *context);
   ~RNSkDrawViewImpl();
 
   void remove();
@@ -34,7 +34,8 @@ private:
   int _width = -1;
   int _height = -1;
 
-  MTKView* _view;
+  SkiaDrawView* _view;
+  
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   CAMetalLayer* _layer;

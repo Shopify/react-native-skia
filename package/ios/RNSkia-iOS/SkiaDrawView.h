@@ -3,11 +3,10 @@
 #import <PlatformContext.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <UIKit/UIKit.h>
-#import <MetalKit/MetalKit.h>
 
 class RNSkDrawViewImpl;
 
-@interface SkiaDrawView : MTKView
+@interface SkiaDrawView : UIView
 
 - (instancetype)initWithContext:(RNSkia::PlatformContext *)context;
 

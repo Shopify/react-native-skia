@@ -1,7 +1,7 @@
 #import <RNSkDrawViewImpl.h>
 #import <SkiaDrawView.h>
 
-RNSkDrawViewImpl::RNSkDrawViewImpl(MTKView* view, RNSkia::PlatformContext* context):
+RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext* context):
   _view(view), _context(context), RNSkia::RNSkDrawView(context) {
     
 #pragma clang diagnostic push
@@ -9,7 +9,7 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(MTKView* view, RNSkia::PlatformContext* conte
     _layer = (CAMetalLayer*)_view.layer;
 #pragma clang diagnostic pop
     
-    _device = view.device;
+    _device = MTLCreateSystemDefaultDevice();
     auto queue = [_device newCommandQueue];
     if(queue == nullptr) {
        NSLog(@"Failed to create command queue");
