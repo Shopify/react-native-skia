@@ -12,8 +12,24 @@ export const useFrame = <T>(
   // eslint-disable-next-line react-hooks/exhaustive-deps
 ) => useCallback(cb, deps ?? []);
 
-export type AnimatedProps<T> = T & {
-  animatedProps: (ctx: DrawingContext) => Partial<T>;
+const mapKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
+
+export const materialize = <T>(
+  ctx: DrawingContext,
+  props: AnimatedProps<T>
+) => {
+  const result = { ...props };
+  mapKeys(props).forEach((key) => {
+    const value = props[key];
+    if (typeof value === "function") {
+      result[key] = value(ctx);
+    }
+  });
+  return result as T;
+};
+
+export type AnimatedProps<T> = {
+  [K in keyof T]: T[K] | ((ctx: DrawingContext) => T[K]);
 };
 
 interface TimingConfig {

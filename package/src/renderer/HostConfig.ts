@@ -21,26 +21,11 @@ import {
   ColorMatrixNode,
   DrawingNode,
 } from "./nodes";
-import type {
-  BlurProps,
-  RadialGradientProps,
-  LinearGradientProps,
-  CircleProps,
-  FillProps,
-  PaintProps,
-  RectProps,
-  ImageShaderProps,
-  ImageProps,
-  ShaderProps,
-  RuntimeEffectProps,
-  PathProps,
-  LineProps,
-  ColorMatrixProps,
-  DrawingProps,
-} from "./nodes";
+import type { RuntimeEffectProps } from "./nodes";
 import type { SkContainer, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck } from "./exhaustiveCheck";
+import type { ImageShader } from "./nodes/image/ImageShader";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -168,31 +153,35 @@ const createNode = (type: NodeType, props: Props) => {
     case NodeType.Circle:
       return CircleNode(props as Parameters<typeof CircleNode>[0]);
     case NodeType.Rect:
-      return RectNode(props as RectProps);
+      return RectNode(props as Parameters<typeof RectNode>[0]);
     case NodeType.Path:
-      return PathNode(props as PathProps);
+      return PathNode(props as Parameters<typeof PathNode>[0]);
     case NodeType.Line:
-      return LineNode(props as LineProps);
+      return LineNode(props as Parameters<typeof LineNode>[0]);
     case NodeType.Drawing:
-      return DrawingNode(props as DrawingProps);
+      return DrawingNode(props as Parameters<typeof DrawingNode>[0]);
     case NodeType.Fill:
-      return FillNode(props as FillProps);
+      return FillNode(props as Parameters<typeof FillNode>[0]);
     case NodeType.Paint:
       const paint = Skia.Paint();
       paint.setAntiAlias(true);
-      return PaintNode(props as PaintProps, paint);
+      return PaintNode(props as Parameters<typeof PaintNode>[0], paint);
     case NodeType.ColorMatrix:
-      return ColorMatrixNode(props as ColorMatrixProps);
+      return ColorMatrixNode(props as Parameters<typeof ColorMatrixNode>[0]);
     case NodeType.RadialGradient:
-      return RadialGradientNode(props as RadialGradientProps);
+      return RadialGradientNode(
+        props as Parameters<typeof RadialGradientNode>[0]
+      );
     case NodeType.LinearGradient:
-      return LinearGradientNode(props as LinearGradientProps);
+      return LinearGradientNode(
+        props as Parameters<typeof LinearGradientNode>[0]
+      );
     case NodeType.Blur:
-      return BlurNode(props as BlurProps);
+      return BlurNode(props as Parameters<typeof BlurNode>[0]);
     case NodeType.Image:
-      return ImageNode(props as ImageProps);
+      return ImageNode(props as Parameters<typeof ImageNode>[0]);
     case NodeType.ImageShader:
-      return ImageShaderNode(props as ImageShaderProps);
+      return ImageShaderNode(props as Parameters<typeof ImageShader>[0]);
     // case NodeType.DropShadow:
     //   return DropShadowNode(props as DropShadowProps);
     case NodeType.RuntimeEffect:
@@ -204,7 +193,7 @@ const createNode = (type: NodeType, props: Props) => {
       }
       return RuntimeEffectNode(rtProps, rt);
     case NodeType.Shader:
-      return ShaderNode(props as ShaderProps);
+      return ShaderNode(props as Parameters<typeof ShaderNode>[0]);
     // case NodeType.Paragraph:
     //   return ParagraphNode(props as ParagraphProps);
     // case NodeType.Text:

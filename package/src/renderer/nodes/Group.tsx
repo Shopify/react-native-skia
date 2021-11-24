@@ -6,6 +6,7 @@ import type { IRRect, IPath, IPaint } from "../../skia";
 import { ClipOp, Skia } from "../../skia";
 
 import { processTransform, selectPaint, processPaint } from "./processors";
+import { materialize } from "./processors/Animations/Animations";
 import type {
   CustomPaintProps,
   TransformProps,
@@ -29,16 +30,10 @@ export const GroupNode = (
 ): SkNode<NodeType.Group> => ({
   type: NodeType.Group,
   props,
-  draw: (
-    ctx,
-    { clipRect, rasterize, clipPath, clipOp, animatedProps, ...remainingProps },
-    children: SkNode[]
-  ) => {
+  draw: (ctx, newProps, children) => {
+    const { clipRect, rasterize, clipPath, clipOp, ...groupProps } =
+      materialize(ctx, newProps);
     const { canvas, opacity } = ctx;
-    const groupProps = {
-      ...remainingProps,
-      ...animatedProps(ctx),
-    };
     const paint = selectPaint(ctx.paint, groupProps);
     processPaint(paint, opacity, groupProps);
     if (rasterize) {
