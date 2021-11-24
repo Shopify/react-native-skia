@@ -86,7 +86,7 @@ export const DrawingExample: React.FC = () => {
       canvas.drawPaint(paint);
 
       // Update from pending touches
-      handleTouches(info.getTouches());
+      handleTouches(info.touches);
 
       // Draw paths
       if (paths.length > 0) {

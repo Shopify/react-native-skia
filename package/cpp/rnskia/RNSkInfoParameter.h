@@ -19,15 +19,7 @@ public:
   JSI_PROPERTY_GET(height) { return _height; }
   JSI_PROPERTY_GET(timestamp) { return _timestamp; }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkInfoObject, width),
-                              JSI_EXPORT_PROP_GET(RNSkInfoObject, height),
-                              JSI_EXPORT_PROP_GET(RNSkInfoObject, timestamp)
-
-  )
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkInfoObject, getTouches))
-
-  JSI_HOST_FUNCTION(getTouches) {
+  JSI_PROPERTY_GET(touches) {
     auto ops = jsi::Array(runtime, _touchesCache.size());
     for (size_t i = 0; i < _touchesCache.size(); i++) {
       auto cur = _touchesCache.at(i);
@@ -44,6 +36,11 @@ public:
     }
     return ops;
   }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkInfoObject, width),
+                              JSI_EXPORT_PROP_GET(RNSkInfoObject, height),
+                              JSI_EXPORT_PROP_GET(RNSkInfoObject, timestamp),
+                              JSI_EXPORT_PROP_GET(RNSkInfoObject, touches))
 
   void update(int width, int height, double timestamp) {
     _width = width;
