@@ -13,7 +13,7 @@ using CallbackInfo = struct CallbackInfo {
     drawCallback = nullptr;
     view = nullptr;
   }
-  std::shared_ptr<jsi::Function> drawCallback;  
+  std::shared_ptr<jsi::Function> drawCallback;
   RNSkDrawView *view;
 };
 
@@ -104,9 +104,7 @@ public:
   /**
    * Destructor
    */
-  ~RNSkJsiViewApi() {
-    
-  }
+  ~RNSkJsiViewApi() {}
 
   /**
    * Registers a skia view
