@@ -25,6 +25,29 @@ namespace RNSkia {
 
 using namespace std::chrono;
 
+RNSkDrawView::~RNSkDrawView() {
+  {
+    // This is a very simple fix to an issue where the view posts a redraw
+    // function to the javascript thread, and the object is destroyed and then
+    // the redraw function is called and ends up executing on a destroyed draw
+    // view. Since _isDrawing is an atomic bool we know that as long as it is
+    // true we are drawing and should wait.
+    // It is limited to only wait for 500 milliseconds - if it is stuck we
+    // might have gotten an exception that caused the flag never to be reset.
+    milliseconds start = std::chrono::duration_cast<milliseconds>(
+        system_clock::now().time_since_epoch());
+
+    while (_isDrawing == true) {
+      milliseconds now = std::chrono::duration_cast<milliseconds>(
+          system_clock::now().time_since_epoch());
+
+      if (now.count() - start.count() > 500) {
+        break;
+      }
+    }
+  }
+}
+
 void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   if (callback == nullptr) {
@@ -168,11 +191,10 @@ void RNSkDrawView::requestRedraw() {
       return;
     }
 
-    if (_platformContext != nullptr) {
-      milliseconds ms = std::chrono::duration_cast<milliseconds>(
-          system_clock::now().time_since_epoch());
-      drawFrame(ms.count());
-    }
+    milliseconds ms = std::chrono::duration_cast<milliseconds>(
+        system_clock::now().time_since_epoch());
+
+    drawFrame(ms.count() / 1000.0);
 
     _isDrawing = false;
   };
@@ -199,11 +221,7 @@ bool RNSkDrawView::isReadyToDraw() {
 }
 
 void RNSkDrawView::beginDrawingLoop() {
-  if (_platformContext == nullptr) {
-    return;
-  }
-
-  if (_drawingLoopIdentifier != -1 || _platformContext == nullptr) {
+  if (_drawingLoopIdentifier != -1) {
     return;
   }
 
@@ -212,32 +230,23 @@ void RNSkDrawView::beginDrawingLoop() {
   _drawingLoopIdentifier =
       _platformContext->beginDrawLoop([this](double timestamp) {
         auto performDraw = [=]() {
-          if (!isReadyToDraw()) {
-            return;
-          }
+          milliseconds ms = std::chrono::duration_cast<milliseconds>(
+              system_clock::now().time_since_epoch());
 
-          _isDrawing = true;
-
-          if (_platformContext != nullptr) {
-            drawFrame(timestamp);
-          }
-
+          drawFrame(ms.count() / 1000.0);
           _isDrawing = false;
         };
 
+        if (!isReadyToDraw()) {
+          return;
+        }
+
+        _isDrawing = true;
         _platformContext->runOnJavascriptThread(performDraw);
       });
 }
 
 void RNSkDrawView::endDrawingLoop() {
-  if (_platformContext == nullptr) {
-    return;
-  }
-
-  if (_drawingLoopIdentifier == -1) {
-    return;
-  }
-
   _platformContext->endDrawLoop(_drawingLoopIdentifier);
   _drawingLoopIdentifier = -1;
 }
