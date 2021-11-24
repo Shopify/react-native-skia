@@ -2,6 +2,24 @@
 #include <set>
 
 namespace RNJsi {
+
+// int objCounter = 0;
+// std::vector<JsiHostObject*> objects;
+
+JsiHostObject::JsiHostObject() {
+  /*objects.push_back(this);
+  objCounter++;*/
+}
+JsiHostObject::~JsiHostObject() {
+  /* for(size_t i=0; i<objects.size(); ++i) {
+    if(objects.at(i) == this) {
+      objects.erase(objects.begin() + i);
+      break;
+    }
+  }
+  objCounter--;*/
+}
+
 void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,
                         const jsi::Value &value) {
   auto nameVal = name.utf8(rt);
@@ -48,16 +66,14 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
   auto funcs = getExportedFunctionMap();
   auto func = funcs.find(nameStr);
   if (func != funcs.end()) {
-    auto dispatcher = std::bind(func->second,
-                                (JsiHostObject*)this,
-                                std::placeholders::_1,
-                                std::placeholders::_2,
-                                std::placeholders::_3,
-                                std::placeholders::_4);
-    
+    auto dispatcher = std::bind(func->second, (JsiHostObject *)this,
+                                std::placeholders::_1, std::placeholders::_2,
+                                std::placeholders::_3, std::placeholders::_4);
+
     // Add to cache
     currentCache->emplace(nameStr, std::make_unique<jsi::Function>(
-      jsi::Function::createFromHostFunction(runtime, name, 0, dispatcher)));
+                                       jsi::Function::createFromHostFunction(
+                                           runtime, name, 0, dispatcher)));
 
     // return retVal;
     return currentCache->at(nameStr)->asFunction(runtime);

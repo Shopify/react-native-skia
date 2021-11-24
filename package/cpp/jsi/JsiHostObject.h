@@ -90,13 +90,18 @@ using JsPropertyType = struct {
   std::function<void(jsi::Runtime &, const jsi::Value &)> set;
 };
 
-using JsiHostFunctionCache = std::unordered_map<std::string, std::unique_ptr<jsi::Function>>;
-using JsiRuntimeCache = std::unordered_map<jsi::Runtime*, JsiHostFunctionCache>;
+using JsiHostFunctionCache =
+    std::unordered_map<std::string, std::unique_ptr<jsi::Function>>;
+using JsiRuntimeCache =
+    std::unordered_map<jsi::Runtime *, JsiHostFunctionCache>;
 
 /**
  * Base class for jsi host objects
  */
 class JsiHostObject : public jsi::HostObject {
+public:
+  JsiHostObject();
+  ~JsiHostObject();
 
 protected:
   /**
