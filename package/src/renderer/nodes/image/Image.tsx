@@ -3,12 +3,16 @@ import type { SkNode } from "../../Host";
 import type { IImage } from "../../../skia";
 import { useImage, ClipOp, Skia } from "../../../skia";
 
+// These behave like https://reactnative.dev/docs/image#resizemode
+export type ResizeMode = "cover" | "contain" | "stretch" | "center" | "repeat";
+
 export interface UnresolvedImageProps {
   source: ReturnType<typeof require>;
   x: number;
   y: number;
   width: number;
   height: number;
+  resizeMode?: ResizeMode;
 }
 
 export interface ImageProps extends Omit<UnresolvedImageProps, "source"> {
@@ -22,7 +26,7 @@ export const Image = ({
   width,
   height,
 }: UnresolvedImageProps) => {
-  const image = useImage({ uri: source });
+  const image = useImage(source);
   if (image === null) {
     return null;
   }
@@ -38,7 +42,7 @@ Image.defaultProps = {
 export const ImageNode = (props: ImageProps): SkNode<NodeType.Image> => ({
   type: NodeType.Image,
   props,
-  draw: ({ canvas, paint }, { source, x, y, width, height }) => {
+  draw: ({ canvas, paint }, { source, x, y, width, height, resizeMode }) => {
     canvas.save();
     canvas.clipRect(
       Skia.XYWHRect(x, y, x + width, y + height),

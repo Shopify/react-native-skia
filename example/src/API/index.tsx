@@ -5,7 +5,7 @@ import type { Routes } from "./Routes";
 import { List } from "./List";
 import { PathEffect } from "./PathEffect";
 import { Shapes } from "./Shapes";
-import { Clipping } from "./Clipping";
+import { Clipping } from "./Clipping2";
 import { Transform } from "./Transform";
 import { ColorFilter } from "./ColorFilter";
 import { Gradients } from "./Gradients";
