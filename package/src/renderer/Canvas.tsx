@@ -9,6 +9,8 @@ import { Skia } from "../skia";
 import { debug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
+import type { DrawingContext } from "./DrawingContext";
+import { vec } from "./math/Vector";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -29,12 +31,11 @@ const render = (
   });
 };
 
-interface CanvasProps {
+interface CanvasProps extends ComponentProps<typeof SkiaView> {
   children: ReactNode;
-  style?: ComponentProps<typeof SkiaView>["style"];
 }
 
-export const Canvas = ({ children, style }: CanvasProps) => {
+export const Canvas = ({ children, style, mode }: CanvasProps) => {
   const [tick, setTick] = useState(0);
   const redraw = useCallback(() => setTick((t) => t + 1), []);
   const tree = useMemo(() => CanvasNode(redraw), [redraw]);
@@ -49,10 +50,19 @@ export const Canvas = ({ children, style }: CanvasProps) => {
     (canvas, info) => {
       const paint = Skia.Paint();
       paint.setAntiAlias(true);
-      const ctx = { canvas, paint, opacity: 1, ...info };
+      // TODO: fix this
+      const ctx: DrawingContext = {
+        canvas,
+        paint,
+        opacity: 1,
+        width: info.width,
+        height: info.height,
+        timestamp: info.timestamp,
+        center: vec(info.width / 2, info.height / 2),
+      };
       tree.draw(ctx, tree.props, tree.children);
     },
     [tick]
   );
-  return <SkiaView style={style} onDraw={onDraw} mode="continuous" />;
+  return <SkiaView style={style} onDraw={onDraw} mode={mode} />;
 };

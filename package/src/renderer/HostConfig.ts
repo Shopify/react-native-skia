@@ -166,7 +166,7 @@ const createNode = (type: NodeType, props: Props) => {
     case NodeType.Group:
       return GroupNode(props as Parameters<typeof GroupNode>[0]);
     case NodeType.Circle:
-      return CircleNode(props as CircleProps);
+      return CircleNode(props as Parameters<typeof CircleNode>[0]);
     case NodeType.Rect:
       return RectNode(props as RectProps);
     case NodeType.Path:
