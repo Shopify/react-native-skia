@@ -1,3 +1,5 @@
+#pragma once
+
 #import <React/RCTBridge.h>
 
 #import <RNSkManager.h>

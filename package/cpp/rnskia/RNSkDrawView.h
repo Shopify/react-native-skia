@@ -39,7 +39,9 @@ public:
         _platformContext(context),
         _infoObject(std::make_shared<RNSkInfoObject>()) {}
 
-  ~RNSkDrawView() { RNSkLogger::logToConsole("Deleting draw view"); }
+  ~RNSkDrawView() {
+    RNSkLogger::logToConsole("Deleting draw view");    
+  }
 
   /**
    * Repaints the Skia view using the underlying context and the drawcallback.

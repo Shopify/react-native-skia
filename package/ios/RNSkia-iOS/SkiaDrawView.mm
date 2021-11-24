@@ -1,132 +1,36 @@
 
-#import "SkiaDrawView.h"
-#import <RNSkLog.h>
-
-#import <chrono>
-
-SkiaDrawViewImpl::SkiaDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext* context):
-    RNSkia::RNSkDrawView(context), _context(context), _view(view) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
-    _layer = (CAMetalLayer*)_view.layer;
-#pragma clang diagnostic pop
-    _layer.opaque = false;
-    _layer.contentsScale = _context->getPixelDensity();
-    _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-          
-    _device = MTLCreateSystemDefaultDevice();
-    if(_device == nullptr) {
-        NSLog(@"Failed to set current metal device");
-       return;
-    }
-      
-    id<MTLCommandQueue> queue = [_device newCommandQueue];
-    if(queue == nullptr) {
-       NSLog(@"Failed to create command queue");
-       return;
-    }
-    _queue = (id<MTLCommandQueue>)CFRetain((GrMTLHandle)queue);
-}
-
-void SkiaDrawViewImpl::setSize(int width, int height) {
-  _width = width;
-  _height = height;  
-  _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
-                                   height* _context->getPixelDensity());
-  
-  requestRedraw();
-}
-
-void SkiaDrawViewImpl::drawFrame(double time) {
-  if(_width == -1 && _height == -1) {
-    return;
-  }
-  
-  if(_queue == nullptr) {
-    NSLog(@"Metal command queue not available.");
-    return;
-  }
-  
-  if(_skContext == nullptr) {
-    GrContextOptions grContextOptions;
-    _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
-                                            (__bridge void*)_queue,
-                                            grContextOptions);
-  }
-  
-  auto sampleCount = 1;
-  auto start = std::chrono::high_resolution_clock::now();
-  
-  id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
-  GrMtlTextureInfo fbInfo;
-  fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
-
-  GrBackendRenderTarget backendRT(_width * _context->getPixelDensity(),
-                                  _height * _context->getPixelDensity(),
-                                  sampleCount,
-                                  fbInfo);
-
-  _skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
-                                                      backendRT,
-                                                      kTopLeft_GrSurfaceOrigin,
-                                                      kBGRA_8888_SkColorType,
-                                                      nullptr,
-                                                      nullptr);
-  
-  if(_skSurface == nullptr) {
-    RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
-    return;
-  }
-  
-  _skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
-  drawInSurface(_skSurface,
-                _width * _context->getPixelDensity(),
-                _height * _context->getPixelDensity(),
-                time,
-                _context);
-  
-  id<MTLCommandBuffer> commandBuffer([_queue commandBuffer]);
-  commandBuffer.label = @"Present";
-  [commandBuffer presentDrawable:currentDrawable];
-  [commandBuffer commit];
-  
-  // Calculate duration
-  auto stop = std::chrono::high_resolution_clock::now();
-  setLastFrameDuration(std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
-}
-
-void SkiaDrawViewImpl::destroy() {
-  // Call unregister code
-  if(_onDestroy != nullptr) {
-    (*_onDestroy.get())();
-    _onDestroy = nullptr;
-  }
-  
-  // Tear down Skia drawing
-  _skSurface = nullptr;
-  _skSurface = nullptr;
-  _skContext = nullptr;
-
-  // Tear down Metal
-  if(_queue) {
-    _queue = NULL;
-  }
-  
-  if(_device) {
-    _device = NULL;
-  }
-}
+#import <SkiaDrawView.h>
+#import <RNSkDrawViewImpl.h>
 
 @implementation SkiaDrawView {
-  std::unique_ptr<SkiaDrawViewImpl> _impl;
+  RNSkDrawViewImpl* _impl;
+}
+
+-(void) dealloc {
+  if(_impl != nullptr) {
+    delete _impl;
+    _impl = nullptr;
+  }
 }
 
 - (instancetype)initWithContext: (RNSkia::PlatformContext*) context
 {
   self = [super init];
   if (self) {
-    self.layer.opaque = true;
-    _impl = std::make_unique<SkiaDrawViewImpl>(self, context);
+    
+    self.device = MTLCreateSystemDefaultDevice();
+    
+    self.layer.opaque = false;
+    self.layer.contentsScale = context->getPixelDensity();
+    
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+    ((CAMetalLayer*)self.layer).pixelFormat = MTLPixelFormatBGRA8Unorm;
+#pragma clang diagnostic pop
+    
+    
+    self.device = MTLCreateSystemDefaultDevice();
+    _impl = new RNSkDrawViewImpl((SkiaDrawView*)self, context);
   }
   return self;
 }
@@ -144,8 +48,8 @@ void SkiaDrawViewImpl::destroy() {
   _impl->setSize(self.bounds.size.width, self.bounds.size.height);
 }
 
-- (SkiaDrawViewImpl*) impl {
-  return _impl.get();
+- (RNSkDrawViewImpl*) impl {
+  return _impl;
 }
 
 - (void) touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -197,8 +101,7 @@ void SkiaDrawViewImpl::destroy() {
 - (void) willMoveToWindow:(UIWindow *)newWindow {
   [super willMoveToWindow: newWindow];
   if (newWindow == nil) {
-    _impl->destroy();
-    _impl = nullptr;
+    _impl->remove();    
   }
 }
 

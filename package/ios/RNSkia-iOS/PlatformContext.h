@@ -1,3 +1,5 @@
+#pragma once
+
 #include <DisplayLink.h>
 #include <RNSkPlatformContext.h>
 
