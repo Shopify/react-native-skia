@@ -11,11 +11,9 @@ using namespace facebook;
 using CallbackInfo = struct CallbackInfo {
   CallbackInfo() {
     drawCallback = nullptr;
-    touchCallback = nullptr;
     view = nullptr;
   }
-  std::shared_ptr<jsi::Function> drawCallback;
-  std::shared_ptr<jsi::Function> touchCallback;
+  std::shared_ptr<jsi::Function> drawCallback;  
   RNSkDrawView *view;
 };
 
@@ -107,14 +105,7 @@ public:
    * Destructor
    */
   ~RNSkJsiViewApi() {
-    for (auto info : _callbackInfos) {
-      if (info.second.view != nullptr) {
-        info.second.view->setDrawCallback(nullptr);
-      }
-      info.second.view = nullptr;
-      info.second.drawCallback = nullptr;
-    }
-    _callbackInfos.clear();
+    
   }
 
   /**
@@ -144,7 +135,6 @@ public:
     }
     info->view = nullptr;
     info->drawCallback = nullptr;
-    info->touchCallback = nullptr;
     _callbackInfos.erase(nativeId);
   }
 
