@@ -9,7 +9,6 @@ import { Skia } from "../skia";
 import { debug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
-import type { DrawingContext } from "./DrawingContext";
 import { vec } from "./math/Vector";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
@@ -47,18 +46,18 @@ export const Canvas = ({ children, style, mode }: CanvasProps) => {
     render(children, container, redraw);
   }, [children, container, redraw]);
   const onDraw = useDrawCallback(
-    (canvas, info) => {
+    (canvas, { width, height, timestamp, getTouches }) => {
       const paint = Skia.Paint();
       paint.setAntiAlias(true);
-      // TODO: fix this
-      const ctx: DrawingContext = {
+      const ctx = {
         canvas,
         paint,
         opacity: 1,
-        width: info.width,
-        height: info.height,
-        timestamp: info.timestamp,
-        center: vec(info.width / 2, info.height / 2),
+        width,
+        height,
+        timestamp,
+        getTouches,
+        center: vec(width / 2, height / 2),
       };
       tree.draw(ctx, tree.props, tree.children);
     },
