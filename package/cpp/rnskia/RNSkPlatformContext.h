@@ -30,14 +30,7 @@ public:
       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker),
-        _dispatchOnRenderThread(dispatchOnRenderThread) {
-    RNSkLogger::logToConsole("Created platform context with scale factor %0.2f",
-                             pixelDensity);
-  }
-
-  ~RNSkPlatformContext() {
-    RNSkLogger::logToConsole("Deleting platform context");
-  }
+        _dispatchOnRenderThread(dispatchOnRenderThread) {}
 
   /**
    * Schedules the function to be run on the javascript thread async
@@ -97,16 +90,18 @@ public:
    * @returns Identifier of the draw loop entry
    */
   size_t beginDrawLoop(std::function<void(double)> callback) {
-    size_t nextId = _listenerId++;
+    size_t nextId;
     {
       std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+      nextId = ++_listenerId;
       _drawCallbacks.emplace(nextId, std::move(callback));
     }
-    
+
     if (_drawCallbacks.size() == 1) {
       // Start
       beginDrawLoop();
     }
+
     return nextId;
   }
 
@@ -134,9 +129,7 @@ public:
   void notifyDrawLoop(double timestamp) {
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
     for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
-      if (it->second != nullptr) {
-        it->second(timestamp);
-      }
+      it->second(timestamp);
     }
   }
 
