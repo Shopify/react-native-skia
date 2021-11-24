@@ -29,6 +29,8 @@
   [super willMoveToWindow: newWindow];
   if (newWindow == nil) {
     _impl->remove();
+    delete _impl;
+    _impl= nullptr;
   }
 }
 
