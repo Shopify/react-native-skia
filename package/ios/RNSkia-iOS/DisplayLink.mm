@@ -11,9 +11,8 @@
         // specify update method
         _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(update:)];
 
-        // add the display link to the run loop (will be called 60 times per second)
+        // add the display link to the main run loop
         [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
-        [[NSRunLoop currentRunLoop] run];
     }
 }
 
