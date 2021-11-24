@@ -13,8 +13,10 @@ import {
   useFrame,
   mix,
   transformOrigin,
-  useSpring,
 } from "@shopify/react-native-skia";
+
+import { useLoop } from "../../../package/src/renderer/nodes/processors/Animations/Timing";
+import { Easing } from "../../../package/src/renderer/nodes/processors/Animations/Easing";
 
 const { width } = Dimensions.get("window");
 const c1 = "#61bea2";
@@ -50,7 +52,10 @@ const Ring = ({ index, progress }: RingProps) => {
 };
 
 export const Breathe = () => {
-  const progress = useSpring();
+  const progress = useLoop({
+    duration: 3000,
+    easing: Easing.inOut(Easing.ease),
+  });
   const paint = usePaintRef();
   const transform = useFrame(
     (ctx) =>
