@@ -37,7 +37,6 @@ public:
     _viewApi = nullptr;
     _jsRuntime = nullptr;
     _platformContext = nullptr;
-    RNSkLogger::logToConsole("RNSkManager destructor called");
   }
 
   /**
