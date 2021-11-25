@@ -8,7 +8,7 @@ import {
   Group,
 } from "@shopify/react-native-skia";
 
-const oslo = require("../assets/oslo.jpg");
+import { useImage } from "../../../package/src/skia/Image/useImage";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 4;
@@ -37,6 +37,10 @@ const clipRRect = Skia.RRectXY(
 );
 
 export const Clipping = () => {
+  const oslo = useImage(require("../assets/oslo.jpg"));
+  if (oslo === null) {
+    return null;
+  }
   return (
     <ScrollView>
       <Canvas style={styles.container}>

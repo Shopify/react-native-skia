@@ -15,7 +15,7 @@ export type BoxFit =
   | "scaleDown";
 
 export interface UnresolvedImageProps {
-  source: ReturnType<typeof require>;
+  source: number | IImage;
   x: number;
   y: number;
   width: number;

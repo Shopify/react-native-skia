@@ -1,4 +1,5 @@
 export type Routes = {
+  Images: undefined;
   List: undefined;
   Shapes: undefined;
   PathEffect: undefined;

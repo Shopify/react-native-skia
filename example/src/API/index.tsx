@@ -10,6 +10,7 @@ import { Transform } from "./Transform";
 import { ColorFilter } from "./ColorFilter";
 import { Gradients } from "./Gradients";
 import { Path } from "./Path";
+import { Images } from "./Images";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -28,6 +29,13 @@ export const API = () => {
         component={Shapes}
         options={{
           title: "🔺 Shapes",
+        }}
+      />
+      <Stack.Screen
+        name="Images"
+        component={Images}
+        options={{
+          title: "🏞 Images",
         }}
       />
       <Stack.Screen

@@ -29,8 +29,7 @@ export const RectNode = (props: RectProps): SkNode<NodeType.Rect> => ({
     const { canvas, opacity } = ctx;
     const paint = selectPaint(ctx.paint, rectProps);
     processPaint(paint, opacity, rectProps);
-    const rect = Skia.XYWHRect(x, y, x + width, y + height);
-    [x, y, x + width, y + height];
+    const rect = Skia.XYWHRect(x, y, width, height);
     if (rx !== undefined || ry !== undefined) {
       const corner = [(rx ?? ry) as number, (ry ?? rx) as number];
       canvas.drawRRect(Skia.RRectXY(rect, corner[0], corner[1]), paint);
