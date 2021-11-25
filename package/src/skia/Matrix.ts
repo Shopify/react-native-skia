@@ -1,4 +1,3 @@
-import type { IRect } from "./Rect";
 import type { SkJSIInstane } from "./JsiInstance";
 
 export enum MatrixIndex {
@@ -11,14 +10,6 @@ export enum MatrixIndex {
   Persp0 = 6,
   Persp1 = 7,
   persp2 = 8,
-}
-
-// TODO: to delete
-export enum ScaleToFit {
-  Fill = 0,
-  Start = 1,
-  Center = 2,
-  End = 3,
 }
 
 export interface Matrix extends SkJSIInstane<"Matrix"> {
@@ -48,6 +39,4 @@ export interface Matrix extends SkJSIInstane<"Matrix"> {
 
   setPerspY(px: number): void;
   getPerspY(): number;
-  // TODO: to delete
-  setRectToRect(src: IRect, dest: IRect, fit: ScaleToFit): void;
 }

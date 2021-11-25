@@ -3,8 +3,8 @@ import type { SkJSIInstane } from "./JsiInstance";
 export interface IRect extends SkJSIInstane<"Rect"> {
   readonly x: number;
   readonly y: number;
-  readonly w: number;
-  readonly h: number;
+  readonly width: number;
+  readonly height: number;
   readonly top: number;
   readonly left: number;
   readonly right: number;

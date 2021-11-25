@@ -118,17 +118,7 @@ public:
     return jsi::Value(SkScalarToDouble(v));
   }
 
-  JSI_HOST_FUNCTION(setRectToRect) {
-    auto src = JsiSkRect::fromValue(runtime, arguments[0]).get();
-    auto dest = JsiSkRect::fromValue(runtime, arguments[1]).get();
-    auto scaleToFit = arguments[2].asNumber();
-    getObject()->setRectToRect(*src, *dest,
-                               JsiSkMatrix::getScaleToFit(scaleToFit));
-    return jsi::Value::undefined();
-  }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMatrix, setRectToRect),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getPerspY),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMatrix, getPerspY),
                        JSI_EXPORT_FUNC(JsiSkMatrix, setPerspY),
                        JSI_EXPORT_FUNC(JsiSkMatrix, getPerspX),
                        JSI_EXPORT_FUNC(JsiSkMatrix, setPerspX),
@@ -166,22 +156,6 @@ Returns the underlying object from a host object of this type
     return JSI_HOST_FUNCTION_LAMBDA {
       return jsi::Object::createFromHostObject(
           runtime, std::make_shared<JsiSkMatrix>(context, SkMatrix::I()));
-    };
-  }
-
-private:
-  static SkMatrix::ScaleToFit getScaleToFit(int scaleToFit) {
-    switch (scaleToFit) {
-    case 0:
-      return SkMatrix::kFill_ScaleToFit;
-    case 1:
-      return SkMatrix::kStart_ScaleToFit;
-    case 2:
-      return SkMatrix::kCenter_ScaleToFit;
-    case 3:
-      return SkMatrix::kEnd_ScaleToFit;
-    default:
-      return SkMatrix::kFill_ScaleToFit;
     };
   }
 };

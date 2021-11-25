@@ -79,6 +79,87 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(drawImageCubic) {
+    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+    auto x = arguments[1].asNumber();
+    auto y = arguments[2].asNumber();
+    float B = arguments[3].asNumber();
+    float C = arguments[4].asNumber();
+    std::shared_ptr<SkPaint> paint;
+    if (count == 6) {
+      if (!arguments[5].isNull()) {
+        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+      }
+    }
+    _canvas->drawImage(image, x, y, SkSamplingOptions({ B, C }), paint.get());
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(drawImageOptions) {
+    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+    auto x = arguments[1].asNumber();
+    auto y = arguments[2].asNumber();
+    auto fm = (SkFilterMode)arguments[3].asNumber();
+    auto mm = (SkMipmapMode)arguments[4].asNumber();
+    std::shared_ptr<SkPaint> paint;
+    if (count == 6) {
+      if (!arguments[5].isNull()) {
+        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+      }
+    }
+    _canvas->drawImage(image, x, y, SkSamplingOptions(fm, mm), paint.get());
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(drawImageNine) {
+    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+    auto center = JsiSkRect::fromValue(runtime, arguments[1]);
+    auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
+    auto fm = (SkFilterMode)arguments[3].asNumber();
+    std::shared_ptr<SkPaint> paint;
+    if (count == 5) {
+      if (!arguments[4].isNull()) {
+        paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+      }
+    }
+    _canvas->drawImageNine(image.get(), center->round(), *dest, fm, paint.get());
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(drawImageRectCubic) {
+    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+    auto src = JsiSkRect::fromValue(runtime, arguments[1]);
+    auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
+    float B = arguments[3].asNumber();
+    float C = arguments[4].asNumber();
+    std::shared_ptr<SkPaint> paint;
+    if (count == 6) {
+      if (!arguments[5].isNull()) {
+        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+      }
+    }
+    auto constraint = SkCanvas::kStrict_SrcRectConstraint;  // TODO: get from caller (not exposed by canvaskit)
+    _canvas->drawImageRect(image.get(), *src, *dest, SkSamplingOptions({ B, C }), paint.get(), constraint);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(drawImageRectOptions) {
+    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+    auto src = JsiSkRect::fromValue(runtime, arguments[1]);
+    auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
+    auto filter = (SkFilterMode)arguments[3].asNumber();
+    auto mipmap = (SkMipmapMode)arguments[4].asNumber();
+    std::shared_ptr<SkPaint> paint;
+    if (count == 6) {
+      if (!arguments[5].isNull()) {
+        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+      }
+    }
+    auto constraint = SkCanvas::kStrict_SrcRectConstraint;
+    _canvas->drawImageRect(image.get(), *src, *dest, {filter, mipmap}, paint.get(), constraint);
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(drawCircle) {
     SkScalar cx = arguments[0].asNumber();
     SkScalar cy = arguments[1].asNumber();
@@ -355,6 +436,11 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawRect),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawImage),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawImageRect),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageCubic),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageOptions),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageNine),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageRectCubic),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageRectOptions),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawCircle),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawArc),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawRRect),

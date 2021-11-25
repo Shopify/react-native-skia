@@ -24,7 +24,7 @@ ImageShader.defaultProps = {
   resizeMode: "contain",
 };
 
-export type ImageShaderProps = Omit<ImageProps, "x" | "y">;
+export type ImageShaderProps = Omit<ImageProps, "x" | "y" | "fit">;
 
 export const ImageShaderNode = (
   props: ImageShaderProps

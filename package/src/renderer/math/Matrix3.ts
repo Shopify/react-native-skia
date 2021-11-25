@@ -1,4 +1,5 @@
 import { Skia } from "../../skia";
+import { exhaustiveCheck } from "../exhaustiveCheck";
 
 export type Vec3 = readonly [number, number, number];
 
@@ -32,10 +33,6 @@ export type Transforms2d = (
   | Pick<Transformations, "skewY">
   | Pick<Transformations, "rotate">
 )[];
-
-const exhaustiveCheck = (a: never): never => {
-  throw new Error(`Unexhaustive handling for ${a}`);
-};
 
 const identityMatrix: Matrix3 = [
   [1, 0, 0],
