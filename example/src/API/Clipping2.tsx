@@ -3,7 +3,6 @@ import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
   Skia,
   useDrawCallback,
-  SkiaView,
   PaintStyle,
   useImage,
   ClipOp,

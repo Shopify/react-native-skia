@@ -43,14 +43,9 @@ export const ImageNode = (props: ImageProps): SkNode<NodeType.Image> => ({
   type: NodeType.Image,
   props,
   draw: ({ canvas, paint }, { source, x, y, width, height, resizeMode }) => {
-    canvas.save();
-    canvas.clipRect(
-      Skia.XYWHRect(x, y, x + width, y + height),
-      ClipOp.Intersect,
-      true
-    );
-    canvas.drawImage(source, x, y, paint);
-    canvas.restore();
+    const src = Skia.XYWHRect(0, 0, source.width(), source.height());
+    const rect = Skia.XYWHRect(x, y, x + width, y + height);
+    canvas.drawImageRect(source, src, rect, paint);
   },
   children: [],
 });
