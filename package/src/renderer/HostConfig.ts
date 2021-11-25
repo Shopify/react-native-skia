@@ -4,7 +4,6 @@ import type { HostConfig } from "react-reconciler";
 import { Skia } from "../skia";
 
 import {
-  FillNode,
   GroupNode,
   BlurNode,
   PaintNode,
@@ -15,7 +14,6 @@ import {
   ShaderNode,
   RuntimeEffectNode,
   PathNode,
-  LineNode,
   ColorMatrixNode,
   DrawingNode,
 } from "./nodes";
@@ -135,12 +133,8 @@ const createNode = (type: NodeType, props: Props) => {
       return RectNode(props as Parameters<typeof RectNode>[0]);
     case NodeType.Path:
       return PathNode(props as Parameters<typeof PathNode>[0]);
-    case NodeType.Line:
-      return LineNode(props as Parameters<typeof LineNode>[0]);
     case NodeType.Drawing:
       return DrawingNode(props as Parameters<typeof DrawingNode>[0]);
-    case NodeType.Fill:
-      return FillNode(props as Parameters<typeof FillNode>[0]);
     case NodeType.Paint:
       const paint = Skia.Paint();
       paint.setAntiAlias(true);

@@ -1,22 +1,16 @@
-import { NodeType } from "../Host";
-import type { SkNode } from "../Host";
-
 import type { CustomPaintProps } from "./processors";
-import { selectPaint, processPaint } from "./processors";
+import { selectPaint, processPaint, useFrame } from "./processors";
 
 export type FillProps = CustomPaintProps;
 
 export const Fill = (props: FillProps) => {
-  return <skFill {...props} />;
+  const onDraw = useFrame(
+    (ctx) => {
+      const paint = selectPaint(ctx.paint, props);
+      processPaint(paint, ctx.opacity, props);
+      ctx.canvas.drawPaint(paint);
+    },
+    [props]
+  );
+  return <skDrawing onDraw={onDraw} />;
 };
-
-export const FillNode = (props: FillProps): SkNode<NodeType.Fill> => ({
-  type: NodeType.Fill,
-  props,
-  draw: (ctx, fillProps) => {
-    const paint = selectPaint(ctx.paint, fillProps);
-    processPaint(paint, ctx.opacity, fillProps);
-    ctx.canvas.drawPaint(paint);
-  },
-  children: [],
-});

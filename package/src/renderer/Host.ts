@@ -12,11 +12,9 @@ import type {
   GroupProps,
   RadialGradientProps,
   LinearGradientProps,
-  FillProps,
   PaintProps,
   BlurProps,
   PathProps,
-  LineProps,
   // DropShadowProps,
   // ParagraphProps,
   ColorMatrixProps,
@@ -28,7 +26,6 @@ import type {
 export enum NodeType {
   Canvas = "skCanvas",
   Group = "skGroup",
-  Fill = "skFill",
   Paint = "skPaint",
   RadialGradient = "skRadialGradient",
   LinearGradient = "skLinearGradient",
@@ -38,7 +35,6 @@ export enum NodeType {
   RuntimeEffect = "skRuntimeEffect",
   ImageShader = "skImageShader",
   Rect = "skRect",
-  Line = "skLine",
   Path = "skPath",
   Drawing = "skDrawing",
   // DropShadow = "skDropShadow",
@@ -53,7 +49,6 @@ interface CanvasProps {}
 export interface NodeProps {
   [NodeType.Canvas]: CanvasProps;
   [NodeType.Group]: AnimatedProps<GroupProps>;
-  [NodeType.Fill]: FillProps;
   [NodeType.Paint]: PaintProps;
   [NodeType.RadialGradient]: RadialGradientProps;
   [NodeType.LinearGradient]: LinearGradientProps;
@@ -66,7 +61,6 @@ export interface NodeProps {
   [NodeType.Path]: PathProps;
   [NodeType.Drawing]: DrawingProps;
   //[NodeType.DropShadow]: DropShadowProps;
-  [NodeType.Line]: LineProps;
   //  [NodeType.Paragraph]: ParagraphProps;
   // [NodeType.Text]: TextProps;
   // [NodeType.Span]: SpanProps;
@@ -108,7 +102,6 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       skGroup: NodeProps[NodeType.Group];
-      skFill: NodeProps[NodeType.Fill];
       skPaint: NodeProps[NodeType.Paint] & RefProps<IPaint>;
       skRadialGradient: NodeProps[NodeType.RadialGradient];
       skLinearGradient: NodeProps[NodeType.LinearGradient];
@@ -119,7 +112,6 @@ declare global {
         RefProps<IRuntimeEffect>;
       skImageShader: NodeProps[NodeType.ImageShader];
       skRect: NodeProps[NodeType.Rect];
-      skLine: NodeProps[NodeType.Line];
       skPath: NodeProps[NodeType.Path];
       // skDropShadow: NodeProps[NodeType.DropShadow];
       // skParagraph: NodeProps[NodeType.Paragraph];

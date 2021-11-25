@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { useCallback } from "react";
 
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
@@ -12,12 +11,6 @@ type OnDrawCallback = (
   ctx: DrawingContext,
   children: SkNode<NodeType>[]
 ) => void;
-
-export const useDrawingCallback = (
-  cb: OnDrawCallback,
-  deps: Parameters<typeof useCallback>[1]
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-) => useCallback(cb, deps);
 
 export interface DrawingProps extends CustomPaintProps {
   onDraw: OnDrawCallback;

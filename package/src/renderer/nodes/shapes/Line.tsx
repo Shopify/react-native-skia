@@ -1,7 +1,5 @@
-import { NodeType } from "../../Host";
-import type { SkNode } from "../../Host";
 import type { CustomPaintProps } from "../processors";
-import { processPaint, selectPaint } from "../processors";
+import { processPaint, selectPaint, useFrame } from "../processors";
 
 export interface LineProps extends CustomPaintProps {
   x1: number;
@@ -11,17 +9,15 @@ export interface LineProps extends CustomPaintProps {
 }
 
 export const Line = (props: LineProps) => {
-  return <skLine {...props} />;
+  const onDraw = useFrame(
+    (ctx) => {
+      const { x1, y1, x2, y2, ...lineProps } = props;
+      const { opacity, canvas } = ctx;
+      const paint = selectPaint(ctx.paint, lineProps);
+      processPaint(paint, opacity, lineProps);
+      canvas.drawLine(x1, y1, x2, y2, paint);
+    },
+    [props]
+  );
+  return <skDrawing onDraw={onDraw} />;
 };
-
-export const LineNode = (props: LineProps): SkNode<NodeType.Line> => ({
-  type: NodeType.Line,
-  props,
-  draw: (ctx, { x1, y1, x2, y2, ...lineProps }) => {
-    const { opacity, canvas } = ctx;
-    const paint = selectPaint(ctx.paint, lineProps);
-    processPaint(paint, opacity, lineProps);
-    canvas.drawLine(x1, y1, x2, y2, paint);
-  },
-  children: [],
-});

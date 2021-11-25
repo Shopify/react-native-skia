@@ -2,8 +2,7 @@ import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import type { Vector } from "../../math/Vector";
-import { materialize } from "../processors/Animations/Animations";
-import { useDrawingCallback } from "../Drawing";
+import { materialize, useFrame } from "../processors/Animations";
 
 export interface CircleProps extends CustomPaintProps {
   r: number;
@@ -11,7 +10,7 @@ export interface CircleProps extends CustomPaintProps {
 }
 
 export const Circle = (props: AnimatedProps<CircleProps>) => {
-  const onDraw = useDrawingCallback(
+  const onDraw = useFrame(
     (ctx) => {
       const { c, r, ...circleProps } = materialize(ctx, props);
       const selectedPaint = selectPaint(ctx.paint, circleProps);
