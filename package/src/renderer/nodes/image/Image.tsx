@@ -64,13 +64,7 @@ interface Size {
   height: number;
 }
 
-interface FittedSizes {
-  source: Size;
-  destination: Size;
-}
-
-const size = (width: number, height: number) => ({ width, height });
-const zero = { width: 0, height: 0 };
+const size = (width = 0, height = 0) => ({ width, height });
 
 export const ImageNode = (props: ImageProps): SkNode<NodeType.Image> => ({
   type: NodeType.Image,
@@ -110,21 +104,17 @@ const inscribe = (
   );
 };
 
-const applyBoxFit = (
-  fit: BoxFit,
-  inputSize: Size,
-  outputSize: Size
-): FittedSizes => {
+const applyBoxFit = (fit: BoxFit, inputSize: Size, outputSize: Size) => {
+  let source = size(),
+    destination = size();
   if (
     inputSize.height <= 0.0 ||
     inputSize.width <= 0.0 ||
     outputSize.height <= 0.0 ||
     outputSize.width <= 0.0
   ) {
-    return { source: zero, destination: zero };
+    return { source, destination };
   }
-  let source = zero,
-    destination = zero;
   switch (fit) {
     case "fill":
       source = inputSize;
