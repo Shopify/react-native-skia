@@ -255,7 +255,7 @@ public:
       cubics.push_back(*point.get());
     }
 
-    if (!arguments[1].isNull()) {
+    if (count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined()) {
       auto jsiColors = arguments[1].asObject(runtime).asArray(runtime);
       auto colorsSize = jsiColors.size(runtime);
       for (int i = 0; i < colorsSize; i++) {
@@ -264,26 +264,25 @@ public:
       }
     }
 
-    if (!arguments[2].isNull()) {
+    if (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()) {
       auto jsiTexs = arguments[2].asObject(runtime).asArray(runtime);
       auto texsSize = jsiCubics.size(runtime);
       for (int i = 0; i < texsSize; i++) {
         auto point = JsiSkPoint::fromValue(
-            runtime, jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
+                runtime, jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
         texs.push_back(*point.get());
       }
     }
 
-    auto &jsiBlendMode = arguments[3];
+    auto paint = count >= 4 ? JsiSkPaint::fromValue(runtime, arguments[4]) : nullptr;
 
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
-
-    if (jsiBlendMode.isNull()) {
-      _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), *paint);
-    } else {
-      auto blendMode = (SkBlendMode)jsiBlendMode.asNumber();
+    if (count >= 3 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
+      auto blendMode = (SkBlendMode)arguments[3].asNumber();
       _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), blendMode,
                          *paint);
+      auto &jsiBlendMode = arguments[3];
+    } else {
+      _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), *paint);
     }
     return jsi::Value::undefined();
   }

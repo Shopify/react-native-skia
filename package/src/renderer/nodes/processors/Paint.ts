@@ -77,8 +77,7 @@ export const processPaint = (
     paint.setColor(c);
   }
   if (blendMode !== undefined) {
-    const t = enumKey(blendMode);
-    paint.setBlendMode(BlendMode[t]);
+    paint.setBlendMode(BlendMode[enumKey(blendMode)]);
   }
   if (paintStyle !== undefined) {
     paint.setStyle(PaintStyle[enumKey(paintStyle)]);

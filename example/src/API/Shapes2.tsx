@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Dimensions, ScrollView } from "react-native";
+import { StyleSheet, Dimensions, ScrollView, PixelRatio } from "react-native";
 import {
   Skia,
   useDrawCallback,
@@ -11,6 +11,9 @@ import {
   DRect,
   Group,
   Oval,
+  Line,
+  Points,
+  Patch,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -66,26 +69,6 @@ const inner = Skia.RRectXY(
 );
 
 export const Shapes = () => {
-  const onPointsDraw = useDrawCallback((canvas) => {
-    canvas.save();
-    canvas.translate(-100, 0);
-    canvas.drawPoints(PointMode.Points, cubics, strokePaint);
-    canvas.restore();
-    //const path = Skia.Path.Make();
-    //path.addPoly(cubics, true);
-    //canvas.drawPath(path, strokePaint);
-    canvas.drawPoints(PointMode.Polygon, cubics, strokePaint);
-    canvas.drawLine(c.x, c.y, SIZE, 0, strokePaint);
-  }, []);
-  const onPatchDraw = useDrawCallback((canvas) => {
-    const colors = [
-      Skia.Color("#61DAFB"),
-      Skia.Color("#fb61da"),
-      Skia.Color("#61fbcf"),
-      Skia.Color("#dafb61"),
-    ];
-    canvas.drawPatch(cubics, colors, null, null, paint);
-  }, []);
   return (
     <ScrollView>
       <Title>Rectangles</Title>
@@ -115,9 +98,24 @@ export const Shapes = () => {
         </Group>
       </Canvas>
       <Title>Points & Lines</Title>
-      <SkiaView style={styles.container} onDraw={onPointsDraw} />
+      <Canvas style={styles.container}>
+        <Group
+          color="#61DAFB"
+          paintStyle="stroke"
+          strokeWidth={PixelRatio.get()}
+        >
+          <Points mode="polygon" points={cubics} />
+          <Line x1={c.x} y1={c.y} x2={SIZE} y2={0} />
+          <Points mode="points" points={cubics} color="red" />
+        </Group>
+      </Canvas>
       <Title>Coon Patch</Title>
-      <SkiaView style={styles.container} onDraw={onPatchDraw} />
+      <Canvas style={styles.container}>
+        <Patch
+          colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
+          cubics={cubics}
+        />
+      </Canvas>
     </ScrollView>
   );
 };

@@ -4,3 +4,5 @@ export * from "./DRect";
 export * from "./Line";
 export * from "./Path";
 export * from "./Oval";
+export * from "./Points";
+export * from "./Patch";

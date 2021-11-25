@@ -2,14 +2,14 @@ import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint, useFrame } from "../processors";
 import { Skia } from "../../../skia";
 
-export interface RectProps extends CustomPaintProps {
+export interface OvalProps extends CustomPaintProps {
   x: number;
   y: number;
   width: number;
   height: number;
 }
 
-export const Oval = ({ x, y, width, height, ...rectProps }: RectProps) => {
+export const Oval = ({ x, y, width, height, ...rectProps }: OvalProps) => {
   const onDraw = useFrame(
     (ctx) => {
       const { canvas, opacity } = ctx;
