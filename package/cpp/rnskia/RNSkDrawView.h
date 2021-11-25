@@ -34,11 +34,11 @@ public:
   /**
    * Constructor
    */
-  RNSkDrawView(RNSkPlatformContext *context)
-      : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
-        _platformContext(context),
-        _infoObject(std::make_shared<RNSkInfoObject>()) {}
+  RNSkDrawView(RNSkPlatformContext *context);
 
+  /**
+   Destructor
+   */
   ~RNSkDrawView();
 
   /**

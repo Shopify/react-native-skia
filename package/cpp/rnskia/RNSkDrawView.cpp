@@ -25,6 +25,12 @@ namespace RNSkia {
 
 using namespace std::chrono;
 
+RNSkDrawView::RNSkDrawView(RNSkPlatformContext *context) :
+  _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
+  _platformContext(context),
+  _infoObject(std::make_shared<RNSkInfoObject>()) {
+}
+
 RNSkDrawView::~RNSkDrawView() {
   {
     // This is a very simple fix to an issue where the view posts a redraw
@@ -37,14 +43,15 @@ RNSkDrawView::~RNSkDrawView() {
     milliseconds start = std::chrono::duration_cast<milliseconds>(
         system_clock::now().time_since_epoch());
 
+    RNSkLogger::logToConsole("Starting to delete RNSkDrawView...");
     while (_isDrawing == true) {
       milliseconds now = std::chrono::duration_cast<milliseconds>(
-          system_clock::now().time_since_epoch());
-
+          system_clock::now().time_since_epoch());     
       if (now.count() - start.count() > 500) {
         break;
       }
     }
+    RNSkLogger::logToConsole("RNSkDrawView safely deleted.");
   }
 }
 
