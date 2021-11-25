@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { Routes } from "./Routes";
 import { List } from "./List";
 import { PathEffect } from "./PathEffect";
-import { Shapes } from "./Shapes";
+import { Shapes } from "./Shapes2";
 import { Clipping } from "./Clipping2";
 import { Transform } from "./Transform";
 import { ColorFilter } from "./ColorFilter";
