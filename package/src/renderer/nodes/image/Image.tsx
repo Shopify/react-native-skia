@@ -5,7 +5,7 @@ import { useImage, Skia } from "../../../skia";
 import { exhaustiveCheck } from "../../exhaustiveCheck";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
-export type BoxFit =
+export type Fit =
   | "cover"
   | "contain"
   | "fill"
@@ -20,7 +20,7 @@ export interface UnresolvedImageProps {
   y: number;
   width: number;
   height: number;
-  fit: BoxFit;
+  fit: Fit;
 }
 
 export interface ImageProps extends Omit<UnresolvedImageProps, "source"> {
@@ -104,7 +104,7 @@ const inscribe = (
   );
 };
 
-const applyBoxFit = (fit: BoxFit, inputSize: Size, outputSize: Size) => {
+const applyBoxFit = (fit: Fit, inputSize: Size, outputSize: Size) => {
   let source = size(),
     destination = size();
   if (
