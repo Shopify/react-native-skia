@@ -9,7 +9,7 @@ import { Clipping } from "./Clipping2";
 import { Transform } from "./Transform";
 import { ColorFilter } from "./ColorFilter";
 import { Gradients } from "./Gradients";
-import { Path } from "./Path";
+import { PathExample } from "./Path2";
 import { Images } from "./Images";
 
 const Stack = createNativeStackNavigator<Routes>();
@@ -61,7 +61,7 @@ export const API = () => {
       />
       <Stack.Screen
         name="Path"
-        component={Path}
+        component={PathExample}
         options={{
           title: "🥾 Paths",
         }}
