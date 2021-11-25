@@ -10,6 +10,7 @@ import {
   Rect,
   DRect,
   Group,
+  Oval,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -65,11 +66,6 @@ const inner = Skia.RRectXY(
 );
 
 export const Shapes = () => {
-  const onCircleDraw = useDrawCallback((canvas) => {
-    const r = SIZE / 2;
-    canvas.drawOval(Skia.XYWHRect(16, 16, 2 * SIZE, SIZE), paint);
-    canvas.drawCircle(2 * SIZE + 2 * 16 + r, 16 + r, r, paint);
-  }, []);
   const onPointsDraw = useDrawCallback((canvas) => {
     canvas.save();
     canvas.translate(-100, 0);
@@ -107,7 +103,17 @@ export const Shapes = () => {
         </Group>
       </Canvas>
       <Title>Ovals & Circles</Title>
-      <SkiaView style={styles.container} onDraw={onCircleDraw} />
+      <Canvas style={styles.container}>
+        <Group color="#61DAFB">
+          <Oval x={PADDING} y={PADDING} width={2 * SIZE} height={SIZE} />
+          <Oval
+            x={2 * SIZE + 2 * 16 + SIZE / 2}
+            y={PADDING}
+            width={SIZE}
+            height={SIZE}
+          />
+        </Group>
+      </Canvas>
       <Title>Points & Lines</Title>
       <SkiaView style={styles.container} onDraw={onPointsDraw} />
       <Title>Coon Patch</Title>
