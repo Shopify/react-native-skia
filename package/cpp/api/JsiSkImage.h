@@ -27,7 +27,7 @@ public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
   JSI_HOST_FUNCTION(height) {
-    return static_cast<double>(getObject()->width());
+    return static_cast<double>(getObject()->height());
   }
 
   JSI_HOST_FUNCTION(makeShaderOptions) {
