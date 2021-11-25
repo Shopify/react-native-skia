@@ -2,10 +2,7 @@ import React from "react";
 import { StyleSheet, Dimensions, ScrollView, PixelRatio } from "react-native";
 import {
   Skia,
-  useDrawCallback,
-  SkiaView,
   PaintStyle,
-  PointMode,
   Canvas,
   Rect,
   DRect,
