@@ -37,7 +37,7 @@ export const Images = () => {
       {fits.map((fit, i) => (
         <React.Fragment key={i}>
           <Title>{`fit="${fit}"`}</Title>
-          <Canvas style={styles.container}>
+          <Canvas style={styles.container} key={fit}>
             {rects.map(({ x, y, width, height }, index) => {
               return (
                 <React.Fragment key={index}>

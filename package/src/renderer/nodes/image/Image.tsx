@@ -1,5 +1,5 @@
-import { NodeType } from "../../Host";
-import type { SkNode } from "../../Host";
+import { useCallback } from "react";
+
 import type { IImage } from "../../../skia";
 import { useImage, Skia } from "../../../skia";
 import { exhaustiveCheck } from "../../exhaustiveCheck";
@@ -36,21 +36,33 @@ export const Image = ({
   fit: resizeMode,
 }: UnresolvedImageProps) => {
   const image = useImage(source);
-  if (image === null) {
-    return null;
-  }
-  return (
-    <>
-      <skImage
-        source={image}
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        fit={resizeMode}
-      />
-    </>
+  const onDraw = useCallback(
+    ({ canvas, paint }) => {
+      if (image === null) {
+        return;
+      }
+      const sizes = applyBoxFit(
+        resizeMode,
+        { width: image.width(), height: image.height() },
+        { width, height }
+      );
+      const inputSubrect = inscribe(sizes.source, {
+        x: 0,
+        y: 0,
+        width: image.width(),
+        height: image.height(),
+      });
+      const outputSubrect = inscribe(sizes.destination, {
+        x,
+        y,
+        width,
+        height,
+      });
+      canvas.drawImageRect(source, inputSubrect, outputSubrect, paint);
+    },
+    [height, image, resizeMode, source, width, x, y]
   );
+  return <skDrawing onDraw={onDraw} />;
 };
 
 Image.defaultProps = {
@@ -65,30 +77,6 @@ interface Size {
 }
 
 const size = (width = 0, height = 0) => ({ width, height });
-
-export const ImageNode = (props: ImageProps): SkNode<NodeType.Image> => ({
-  type: NodeType.Image,
-  props,
-  draw: (
-    { canvas, paint },
-    { source, x, y, width, height, fit: resizeMode }
-  ) => {
-    const sizes = applyBoxFit(
-      resizeMode,
-      { width: source.width(), height: source.height() },
-      { width, height }
-    );
-    const inputSubrect = inscribe(sizes.source, {
-      x: 0,
-      y: 0,
-      width: source.width(),
-      height: source.height(),
-    });
-    const outputSubrect = inscribe(sizes.destination, { x, y, width, height });
-    canvas.drawImageRect(source, inputSubrect, outputSubrect, paint);
-  },
-  children: [],
-});
 
 const inscribe = (
   { width, height }: Size,

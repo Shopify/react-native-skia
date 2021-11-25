@@ -16,7 +16,6 @@ import type {
   FillProps,
   PaintProps,
   BlurProps,
-  ImageProps,
   PathProps,
   LineProps,
   // DropShadowProps,
@@ -39,7 +38,6 @@ export enum NodeType {
   Blur = "skBlur",
   Shader = "skShader",
   RuntimeEffect = "skRuntimeEffect",
-  Image = "skImage",
   ImageShader = "skImageShader",
   Rect = "skRect",
   Line = "skLine",
@@ -66,7 +64,6 @@ export interface NodeProps {
   [NodeType.Blur]: BlurProps;
   [NodeType.Shader]: ShaderProps;
   [NodeType.RuntimeEffect]: RuntimeEffectProps;
-  [NodeType.Image]: ImageProps;
   [NodeType.ImageShader]: ImageShaderProps;
   [NodeType.Rect]: RectProps;
   [NodeType.Path]: PathProps;
@@ -124,7 +121,6 @@ declare global {
       skShader: NodeProps[NodeType.Shader];
       skRuntimeEffect: NodeProps[NodeType.RuntimeEffect] &
         RefProps<IRuntimeEffect>;
-      skImage: NodeProps[NodeType.Image];
       skImageShader: NodeProps[NodeType.ImageShader];
       skRect: NodeProps[NodeType.Rect];
       skLine: NodeProps[NodeType.Line];

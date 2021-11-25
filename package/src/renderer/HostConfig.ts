@@ -13,7 +13,6 @@ import {
   LinearGradientNode,
   RectNode,
   ImageShaderNode,
-  ImageNode,
   ShaderNode,
   RuntimeEffectNode,
   PathNode,
@@ -25,7 +24,6 @@ import type { RuntimeEffectProps } from "./nodes";
 import type { SkContainer, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck } from "./exhaustiveCheck";
-import type { ImageShader } from "./nodes/image/ImageShader";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -64,16 +62,6 @@ type SkiaHostConfig = HostConfig<
 
 const typedKeys = <O>(o: O) => Object.keys(o) as (keyof O)[];
 
-// The goal of this customEq is to make sure that that JSI instances with different identities have the same deep
-// equality (because the function doesn't see the hidden data).
-// This function might be tested more
-// const customEq = (oldVal: unknown, newVal: unknown) => {
-//   if (_.isObject(oldVal) && _.isObject(newVal) && !_.isPlainObject(oldVal)) {
-//     return newVal === oldVal;
-//   }
-//   return undefined;
-// };
-
 // Shallow eq on props (without children)
 const shallowEq = <P extends Props>(p1: P, p2: P): boolean => {
   const keys1 = typedKeys(p1);
@@ -85,12 +73,6 @@ const shallowEq = <P extends Props>(p1: P, p2: P): boolean => {
     if (key === "children") {
       continue;
     }
-
-    // TODO: This deep data eq needs to be tested more
-    // the biggest concern is that the JSI instances have different identities
-    // and are not caught by a deep data eq
-    // !_.isEqualWith(p1[key], p2[key], customEq)
-    // use p1[key] !== p2[key] for a more basic identity check
     if (p1[key] !== p2[key]) {
       return false;
     }
@@ -178,10 +160,8 @@ const createNode = (type: NodeType, props: Props) => {
       );
     case NodeType.Blur:
       return BlurNode(props as Parameters<typeof BlurNode>[0]);
-    case NodeType.Image:
-      return ImageNode(props as Parameters<typeof ImageNode>[0]);
     case NodeType.ImageShader:
-      return ImageShaderNode(props as Parameters<typeof ImageShader>[0]);
+      return ImageShaderNode(props as Parameters<typeof ImageShaderNode>[0]);
     // case NodeType.DropShadow:
     //   return DropShadowNode(props as DropShadowProps);
     case NodeType.RuntimeEffect:
