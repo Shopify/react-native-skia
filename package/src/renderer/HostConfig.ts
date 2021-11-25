@@ -9,11 +9,9 @@ import {
   PaintNode,
   RadialGradientNode,
   LinearGradientNode,
-  RectNode,
   ImageShaderNode,
   ShaderNode,
   RuntimeEffectNode,
-  PathNode,
   ColorMatrixNode,
   DrawingNode,
 } from "./nodes";
@@ -129,10 +127,6 @@ const createNode = (type: NodeType, props: Props) => {
       throw new Error("Cannot create canvas node");
     case NodeType.Group:
       return GroupNode(props as Parameters<typeof GroupNode>[0]);
-    case NodeType.Rect:
-      return RectNode(props as Parameters<typeof RectNode>[0]);
-    case NodeType.Path:
-      return PathNode(props as Parameters<typeof PathNode>[0]);
     case NodeType.Drawing:
       return DrawingNode(props as Parameters<typeof DrawingNode>[0]);
     case NodeType.Paint:

@@ -8,13 +8,11 @@ import type {
   ShaderProps,
   RuntimeEffectProps,
   ImageShaderProps,
-  RectProps,
   GroupProps,
   RadialGradientProps,
   LinearGradientProps,
   PaintProps,
   BlurProps,
-  PathProps,
   // DropShadowProps,
   // ParagraphProps,
   ColorMatrixProps,
@@ -34,8 +32,6 @@ export enum NodeType {
   Shader = "skShader",
   RuntimeEffect = "skRuntimeEffect",
   ImageShader = "skImageShader",
-  Rect = "skRect",
-  Path = "skPath",
   Drawing = "skDrawing",
   // DropShadow = "skDropShadow",
   // Paragraph = "skParagraph",
@@ -57,8 +53,6 @@ export interface NodeProps {
   [NodeType.Shader]: ShaderProps;
   [NodeType.RuntimeEffect]: RuntimeEffectProps;
   [NodeType.ImageShader]: ImageShaderProps;
-  [NodeType.Rect]: RectProps;
-  [NodeType.Path]: PathProps;
   [NodeType.Drawing]: DrawingProps;
   //[NodeType.DropShadow]: DropShadowProps;
   //  [NodeType.Paragraph]: ParagraphProps;
@@ -111,8 +105,6 @@ declare global {
       skRuntimeEffect: NodeProps[NodeType.RuntimeEffect] &
         RefProps<IRuntimeEffect>;
       skImageShader: NodeProps[NodeType.ImageShader];
-      skRect: NodeProps[NodeType.Rect];
-      skPath: NodeProps[NodeType.Path];
       // skDropShadow: NodeProps[NodeType.DropShadow];
       // skParagraph: NodeProps[NodeType.Paragraph];
       skDrawing: NodeProps[NodeType.Drawing];
