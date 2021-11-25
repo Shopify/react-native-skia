@@ -1,8 +1,7 @@
-import { useCallback } from "react";
-
 import type { IImage } from "../../../skia";
 import { useImage, Skia } from "../../../skia";
 import { exhaustiveCheck } from "../../exhaustiveCheck";
+import { useFrame } from "../processors/Animations/Animations";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -33,16 +32,16 @@ export const Image = ({
   y,
   width,
   height,
-  fit: resizeMode,
+  fit,
 }: UnresolvedImageProps) => {
   const image = useImage(source);
-  const onDraw = useCallback(
+  const onDraw = useFrame(
     ({ canvas, paint }) => {
       if (image === null) {
         return;
       }
       const sizes = applyBoxFit(
-        resizeMode,
+        fit,
         { width: image.width(), height: image.height() },
         { width, height }
       );
@@ -58,9 +57,9 @@ export const Image = ({
         width,
         height,
       });
-      canvas.drawImageRect(source, inputSubrect, outputSubrect, paint);
+      canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
     },
-    [height, image, resizeMode, source, width, x, y]
+    [image, fit, width, height, x, y]
   );
   return <skDrawing onDraw={onDraw} />;
 };

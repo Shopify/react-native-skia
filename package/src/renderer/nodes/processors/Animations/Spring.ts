@@ -133,7 +133,7 @@ export const useSpring = (
       state.current.lastTimestamp = 0;
       state.current.done = true;
     }
-    console.log(state.current.value);
     return state.current.value;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps ?? []);
 };

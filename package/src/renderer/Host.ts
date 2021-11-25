@@ -9,7 +9,6 @@ import type {
   RuntimeEffectProps,
   ImageShaderProps,
   RectProps,
-  CircleProps,
   GroupProps,
   RadialGradientProps,
   LinearGradientProps,
@@ -29,7 +28,6 @@ import type {
 export enum NodeType {
   Canvas = "skCanvas",
   Group = "skGroup",
-  Circle = "skCircle",
   Fill = "skFill",
   Paint = "skPaint",
   RadialGradient = "skRadialGradient",
@@ -55,7 +53,6 @@ interface CanvasProps {}
 export interface NodeProps {
   [NodeType.Canvas]: CanvasProps;
   [NodeType.Group]: AnimatedProps<GroupProps>;
-  [NodeType.Circle]: AnimatedProps<CircleProps>;
   [NodeType.Fill]: FillProps;
   [NodeType.Paint]: PaintProps;
   [NodeType.RadialGradient]: RadialGradientProps;
@@ -111,7 +108,6 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       skGroup: NodeProps[NodeType.Group];
-      skCircle: NodeProps[NodeType.Circle];
       skFill: NodeProps[NodeType.Fill];
       skPaint: NodeProps[NodeType.Paint] & RefProps<IPaint>;
       skRadialGradient: NodeProps[NodeType.RadialGradient];

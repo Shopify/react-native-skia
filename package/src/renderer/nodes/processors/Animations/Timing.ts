@@ -48,6 +48,7 @@ export const useTiming = (
       state.current.value = from + (to - from) * progress;
     }
     return state.current.value;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps ?? []);
 };
 
@@ -63,6 +64,7 @@ export const useLoop = (
     const currentIteration = Math.floor(timestamp / duration);
     const isGoingBack = currentIteration % 2 === 0;
     return isGoingBack && boomerang ? 1 - progress : progress;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps ?? []);
 
 const normalize = (timestamp: number, duration: number) =>

@@ -1,10 +1,9 @@
-import { NodeType } from "../../Host";
-import type { SkNode } from "../../Host";
 import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import type { Vector } from "../../math/Vector";
 import { materialize } from "../processors/Animations/Animations";
+import { useDrawingCallback } from "../Drawing";
 
 export interface CircleProps extends CustomPaintProps {
   r: number;
@@ -12,19 +11,14 @@ export interface CircleProps extends CustomPaintProps {
 }
 
 export const Circle = (props: AnimatedProps<CircleProps>) => {
-  return <skCircle {...props} />;
+  const onDraw = useDrawingCallback(
+    (ctx) => {
+      const { c, r, ...circleProps } = materialize(ctx, props);
+      const selectedPaint = selectPaint(ctx.paint, circleProps);
+      processPaint(selectedPaint, ctx.opacity, circleProps);
+      ctx.canvas.drawCircle(c.x, c.y, r, selectedPaint);
+    },
+    [props]
+  );
+  return <skDrawing onDraw={onDraw} />;
 };
-
-export const CircleNode = (
-  props: AnimatedProps<CircleProps>
-): SkNode<NodeType.Circle> => ({
-  type: NodeType.Circle,
-  props,
-  draw: (ctx, newProps) => {
-    const { c, r, ...circleProps } = materialize(ctx, newProps);
-    const selectedPaint = selectPaint(ctx.paint, circleProps);
-    processPaint(selectedPaint, ctx.opacity, circleProps);
-    ctx.canvas.drawCircle(c.x, c.y, r, selectedPaint);
-  },
-  children: [],
-});

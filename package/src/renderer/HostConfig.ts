@@ -4,7 +4,6 @@ import type { HostConfig } from "react-reconciler";
 import { Skia } from "../skia";
 
 import {
-  CircleNode,
   FillNode,
   GroupNode,
   BlurNode,
@@ -132,8 +131,6 @@ const createNode = (type: NodeType, props: Props) => {
       throw new Error("Cannot create canvas node");
     case NodeType.Group:
       return GroupNode(props as Parameters<typeof GroupNode>[0]);
-    case NodeType.Circle:
-      return CircleNode(props as Parameters<typeof CircleNode>[0]);
     case NodeType.Rect:
       return RectNode(props as Parameters<typeof RectNode>[0]);
     case NodeType.Path:
