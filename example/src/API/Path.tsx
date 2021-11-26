@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Dimensions, ScrollView, View } from "react-native";
+import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
   Skia,
   useDrawCallback,
@@ -10,11 +10,6 @@ import {
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
-import {
-  backface,
-  CARD_HEIGHT,
-  CARD_WIDTH,
-} from "./components/drawings/backface";
 
 const { width } = Dimensions.get("window");
 const SIZE = width;
@@ -65,9 +60,6 @@ export const Path = () => {
       canvas.drawPath(circle, strokePaint);
     }
   }, []);
-  const onMakeCardDraw = useDrawCallback((canvas) => {
-    backface(canvas);
-  }, []);
   const onStrokeDraw = useDrawCallback((canvas) => {
     s.offset(16, 16);
     s.stroke({
@@ -79,10 +71,6 @@ export const Path = () => {
     <ScrollView>
       <Title>Path Operations</Title>
       <SkiaView style={styles.container} onDraw={onMakePathOpDraw} />
-      <Title>Paths</Title>
-      <View style={styles.cardContainer}>
-        <SkiaView style={styles.card} onDraw={onMakeCardDraw} />
-      </View>
       <Title>Stroke</Title>
       <SkiaView style={styles.stroke} onDraw={onStrokeDraw} />
     </ScrollView>
@@ -93,14 +81,6 @@ const styles = StyleSheet.create({
   container: {
     width: SIZE,
     height: example1Height,
-  },
-  cardContainer: {
-    width,
-    padding: 16,
-  },
-  card: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
   },
   stroke: {
     width: SIZE,

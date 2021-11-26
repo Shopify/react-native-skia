@@ -5,7 +5,6 @@ import {
   Group,
   Path,
   Rect,
-  vec,
   translate,
 } from "@shopify/react-native-skia";
 
@@ -45,7 +44,7 @@ export const Circles = () => {
             path={path}
             paintStyle="stroke"
             strokeWidth={strokeWidth}
-            color={i % 2 === 0 ? "#204E71" : "#4A759B"}
+            color={i % 2 === 0 ? c1 : c2}
           />
         );
       })}
@@ -56,7 +55,7 @@ export const Circles = () => {
 const Pattern = () => {
   return (
     <>
-      {new Array(4).fill(0).forEach((_, i) => {
+      {new Array(4).fill(0).map((_, i) => {
         const delta = i * strokeWidth;
         const rect = Skia.XYWHRect(
           -delta,
@@ -67,23 +66,19 @@ const Pattern = () => {
         const path = Skia.Path.Make();
         path.addArc(rect, 0, 360);
         return (
-          <Group
-            key={i}
-            origin={vec(center.x / 2, center.y / 2)}
-            transform={[{ scale: 0.5 }]}
-          >
+          <Group key={i} origin={center} transform={[{ scale: 0.6 }]}>
             <Rect
               x={rect.x}
               y={rect.y}
               width={rect.width}
               height={rect.height}
-              color={i % 2 === 0 ? c2 : c1}
+              color={i % 2 === 0 ? c1 : c2}
               paintStyle="stroke"
               strokeWidth={strokeWidth}
             />
             <Path
               path={path}
-              color={i % 2 === 0 ? c2 : c1}
+              color={i % 2 === 0 ? c1 : c2}
               paintStyle="stroke"
               strokeWidth={strokeWidth}
             />
