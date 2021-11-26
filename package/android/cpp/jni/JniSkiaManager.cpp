@@ -19,6 +19,8 @@ void JniSkiaManager::registerNatives() {
         makeNativeMethod("registerSkiaView", JniSkiaManager::registerSkiaView),
         makeNativeMethod(
             "unregisterSkiaView", JniSkiaManager::unregisterSkiaView),
+        makeNativeMethod(
+            "invalidate", JniSkiaManager::invalidate),
     });
 }
 
@@ -28,8 +30,6 @@ TSelf JniSkiaManager::initHybrid(
     jlong jsContext,
     JSCallInvokerHolder jsCallInvokerHolder,
     JavaPlatformContext skiaContext) {
-    __android_log_write(
-        ANDROID_LOG_INFO, TAG, "Initializing JniSkiaManager...");
 
     // cast from JNI hybrid objects to C++ instances
     auto jsCallInvoker = jsCallInvokerHolder->cthis()->getCallInvoker();
@@ -43,23 +43,15 @@ TSelf JniSkiaManager::initHybrid(
 }
 
 void JniSkiaManager::initializeRuntime() {
-    __android_log_write(
-        ANDROID_LOG_INFO, TAG, "Initializing ReactNativeSkia JS-Runtime...");
-
     // Create the cross platform skia manager
-    _rnSkManager = std::make_unique<RNSkManager>(_jsRuntime, _jsCallInvoker, _context.get());
-
-    __android_log_write(
-        ANDROID_LOG_INFO, TAG, "ReactNativeSkia JS-Runtime initialized");
+    _rnSkManager = std::make_shared<RNSkManager>(_jsRuntime, _jsCallInvoker, _context);
 }
 
 void JniSkiaManager::registerSkiaView(int viewTag, JniSkiaDrawView *skiaView) {
-    __android_log_write(ANDROID_LOG_INFO, TAG, "Registering skia view");
     _rnSkManager->registerSkiaDrawView(viewTag, skiaView);
 }
 
 void JniSkiaManager::unregisterSkiaView(int viewTag) {
-    __android_log_write(ANDROID_LOG_INFO, TAG, "Unregistering skia view");
     _rnSkManager->unregisterSkiaDrawView(viewTag);
 }
 

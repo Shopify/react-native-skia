@@ -39,7 +39,7 @@ public:
    * Destructor
    */
   ~RNSkPlatformContext() {
-    // Do not allow destruction before we are completely done drawing
+    // Do not allow destruction before we are completely done with all drawing callback operations
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
   }
 

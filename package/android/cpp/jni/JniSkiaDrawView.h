@@ -89,7 +89,7 @@ namespace RNSkia
             JavaPlatformContext platformContext)
             : javaPart_(jni::make_global(jThis)),
               _platformContext(platformContext->cthis()),
-              RNSkDrawView(platformContext->cthis()) {}
+              RNSkDrawView((std::shared_ptr<RNSkia::RNSkPlatformContext>)platformContext->cthis()) {}
     };
 
 } // namespace RNSkia

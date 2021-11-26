@@ -37,10 +37,7 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
     static void registerNatives();
 
     JniSkiaManager() {}
-
-    ~JniSkiaManager() {
-        _context->endDrawLoop();
-    }
+    ~JniSkiaManager() {}
 
     explicit JniSkiaManager(
         jni::alias_ref<JniSkiaManager::jhybridobject> jThis,
@@ -54,6 +51,12 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
 
     void registerSkiaView(int viewTag, JniSkiaDrawView *skiaView);
     void unregisterSkiaView(int viewTag);
+
+    void invalidate() {
+        _context->stopDrawLoop();
+        _rnSkManager = nullptr;
+        _context = nullptr;
+    }
 
    private:
     friend HybridBase;

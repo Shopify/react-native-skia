@@ -42,8 +42,13 @@ void RNSkManager::unregisterSkiaDrawView(size_t nativeId) {
 
 void RNSkManager::installBindings() {
   // Create the Skia API object and install it on the global object in the
-  // provided runtime. This must be done on the Javascript thread to avoid
-  // threading issues
+  // provided runtime.
+  //
+  // This must be done on the Javascript thread to avoid threading issues
+  // when accessing the javascript objects from a thread not being the JS thread.
+  // On Android this is actually necessary, since we need to set up the API before
+  // the javascript starts to execute!
+#ifndef ANDROID
   std::mutex mu;
   std::condition_variable cond;
 
@@ -52,6 +57,7 @@ void RNSkManager::installBindings() {
 
   _platformContext->runOnJavascriptThread([&]() {
     std::lock_guard<std::mutex> lock(mu);
+#endif
 
     auto skiaApi = std::make_shared<JsiSkApi>(*_jsRuntime, _platformContext);
     _jsRuntime->global().setProperty(
@@ -62,10 +68,12 @@ void RNSkManager::installBindings() {
         *_jsRuntime, "SkiaViewApi",
         jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
 
-    isInstalled = true;
+#ifndef ANDROID
+  isInstalled = true;
     cond.notify_one();
   });
 
   cond.wait(lock, [&]() { return isInstalled; });
+#endif
 }
 } // namespace RNSkia
