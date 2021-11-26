@@ -82,6 +82,11 @@ protected:
    */
   void setLastFrameDuration(size_t duration) { _timingInfo->addLastDuration(duration); }
 
+  /**
+   * @return The platformcontext
+   */
+  std::shared_ptr<RNSkPlatformContext> getPlatformContext() { return _platformContext; }
+
 private:
   /**
    * Checks preconditions for drawing
