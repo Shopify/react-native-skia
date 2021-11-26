@@ -1,6 +1,5 @@
 #include "RNSkManager.h"
 
-#include <RNSkLog.h>
 #include <mutex>
 
 #include <JsiSkApi.h>
@@ -42,7 +41,6 @@ void RNSkManager::unregisterSkiaDrawView(size_t nativeId) {
 }
 
 void RNSkManager::installBindings() {
-  RNSkLogger::logToConsole("Starting to install bindings...");
   // Create the Skia API object and install it on the global object in the
   // provided runtime. This must be done on the Javascript thread to avoid
   // threading issues
@@ -55,7 +53,6 @@ void RNSkManager::installBindings() {
   _platformContext->runOnJavascriptThread([&]() {
     std::lock_guard<std::mutex> lock(mu);
 
-    RNSkLogger::logToConsole("Install bindings on the JS Thread...");
     auto skiaApi = std::make_shared<JsiSkApi>(*_jsRuntime, _platformContext);
     _jsRuntime->global().setProperty(
         *_jsRuntime, "SkiaApi",
@@ -66,11 +63,9 @@ void RNSkManager::installBindings() {
         jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
 
     isInstalled = true;
-    RNSkLogger::logToConsole("Done installing bindings on the JS Thread.");
     cond.notify_one();
   });
 
   cond.wait(lock, [&]() { return isInstalled; });
-  RNSkLogger::logToConsole("Done installing bindings.");
 }
 } // namespace RNSkia
