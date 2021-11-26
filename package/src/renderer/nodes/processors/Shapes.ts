@@ -13,11 +13,11 @@ export const rrect = (r: IRect, rx: number, ry: number) => ({
   ry,
 });
 
-export const isRectCtor = (def: RectDef): def is RectCtor =>
+export const isRectCtor = (def: RectOrRRectDef): def is RectCtor =>
   !def.hasOwnProperty("rect");
-export const isRect = (def: RectDef): def is IRect =>
+export const isRect = (def: RectOrRRectDef): def is IRect =>
   def.hasOwnProperty("rect");
-export const isRRect = (def: RectDef): def is IRRect =>
+export const isRRect = (def: RectOrRRectDef): def is IRRect =>
   !isRectCtor(def) && def.hasOwnProperty("rx");
 
 export interface RectCtor {
@@ -28,9 +28,19 @@ export interface RectCtor {
   rx?: number;
   ry?: number;
 }
-export type RectDef = RectCtor | { rect: IRect | IRRect };
+
+export type RectDef = RectCtor | { rect: IRect };
+export type RectOrRRectDef = RectCtor | { rect: IRect | IRRect };
 
 export const processRect = (def: RectDef) => {
+  if (isRectCtor(def)) {
+    return rect(def.x, def.y, def.width, def.height);
+  } else {
+    return def.rect;
+  }
+};
+
+export const processRectOrRRect = (def: RectOrRRectDef) => {
   if (
     isRectCtor(def) &&
     !def.hasOwnProperty("rx") &&

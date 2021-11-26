@@ -1,15 +1,15 @@
 import type { CustomPaintProps } from "../processors";
-import type { RectDef } from "../processors/Shapes";
+import type { RectOrRRectDef } from "../processors/Shapes";
 import { isRRect } from "../processors/Shapes";
 import type { IRect } from "../../../skia/Rect";
 import {
   processPaint,
   selectPaint,
   useFrame,
-  processRect,
+  processRectOrRRect,
 } from "../processors";
 
-export type RectProps = RectDef & CustomPaintProps;
+export type RectProps = RectOrRRectDef & CustomPaintProps;
 
 export const Rect = (rectProps: RectProps) => {
   const onDraw = useFrame(
@@ -17,7 +17,7 @@ export const Rect = (rectProps: RectProps) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, rectProps);
       processPaint(paint, opacity, rectProps);
-      const rect = processRect(rectProps);
+      const rect = processRectOrRRect(rectProps);
       if (isRRect(rect)) {
         canvas.drawRRect(rect, paint);
       } else {
@@ -27,9 +27,4 @@ export const Rect = (rectProps: RectProps) => {
     [rectProps]
   );
   return <skDrawing onDraw={onDraw} />;
-};
-
-Rect.defaultProps = {
-  x: 0,
-  y: 0,
 };

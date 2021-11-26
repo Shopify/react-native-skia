@@ -1,24 +1,20 @@
 import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint, useFrame } from "../processors";
-import { Skia } from "../../../skia";
+import type { RectDef } from "../processors/Shapes";
+import { processRect } from "../processors/Shapes";
 
-export interface OvalProps extends CustomPaintProps {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+export type OvalProps = RectDef & CustomPaintProps;
 
-export const Oval = ({ x, y, width, height, ...rectProps }: OvalProps) => {
+export const Oval = (rectProps: OvalProps) => {
   const onDraw = useFrame(
     (ctx) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, rectProps);
       processPaint(paint, opacity, rectProps);
-      const rect = Skia.XYWHRect(x, y, width, height);
+      const rect = processRect(rectProps);
       canvas.drawOval(rect, paint);
     },
-    [height, rectProps, width, x, y]
+    [rectProps]
   );
   return <skDrawing onDraw={onDraw} />;
 };

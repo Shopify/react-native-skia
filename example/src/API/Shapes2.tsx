@@ -78,10 +78,7 @@ export const Shapes = () => {
         <Group color="#61DAFB">
           <Oval x={PADDING} y={PADDING} width={2 * SIZE} height={SIZE} />
           <Oval
-            x={2 * SIZE + 2 * 16 + SIZE / 2}
-            y={PADDING}
-            width={SIZE}
-            height={SIZE}
+            rect={rect(2 * SIZE + 2 * 16 + SIZE / 2, PADDING, SIZE, SIZE)}
           />
         </Group>
       </Canvas>
