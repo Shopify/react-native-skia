@@ -21,7 +21,7 @@ export interface CustomPaintProps {
   color?: string;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;
-  paintStyle?: SkEnum<typeof PaintStyle>;
+  style?: SkEnum<typeof PaintStyle>;
   strokeJoin?: SkEnum<typeof StrokeJoin>;
   strokeCap?: SkEnum<typeof StrokeCap>;
   strokeMiter?: number;
@@ -61,7 +61,7 @@ export const processPaint = (
   {
     color,
     blendMode,
-    paintStyle,
+    style,
     strokeWidth,
     strokeJoin,
     strokeCap,
@@ -79,8 +79,8 @@ export const processPaint = (
   if (blendMode !== undefined) {
     paint.setBlendMode(BlendMode[enumKey(blendMode)]);
   }
-  if (paintStyle !== undefined) {
-    paint.setStyle(PaintStyle[enumKey(paintStyle)]);
+  if (style !== undefined) {
+    paint.setStyle(PaintStyle[enumKey(style)]);
   }
   if (strokeJoin !== undefined) {
     paint.setStrokeJoin(StrokeJoin[enumKey(strokeJoin)]);
@@ -105,7 +105,7 @@ export const selectPaint = (
     paint,
     color,
     blendMode,
-    paintStyle,
+    style: paintStyle,
     strokeWidth,
     strokeJoin,
     strokeCap,

@@ -42,7 +42,7 @@ export const Circles = () => {
           <Path
             key={i}
             path={path}
-            paintStyle="stroke"
+            style="stroke"
             strokeWidth={strokeWidth}
             color={i % 2 === 0 ? c1 : c2}
           />
@@ -73,13 +73,13 @@ const Pattern = () => {
               width={rect.width}
               height={rect.height}
               color={i % 2 === 0 ? c1 : c2}
-              paintStyle="stroke"
+              style="stroke"
               strokeWidth={strokeWidth}
             />
             <Path
               path={path}
               color={i % 2 === 0 ? c1 : c2}
-              paintStyle="stroke"
+              style="stroke"
               strokeWidth={strokeWidth}
             />
           </Group>

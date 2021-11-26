@@ -45,7 +45,7 @@ export const PathExample = () => {
     <ScrollView>
       <Title>Path Operations</Title>
       <Canvas style={styles.container}>
-        <Group paintStyle="stroke" color="#fb61da" strokeWidth={2}>
+        <Group style="stroke" color="#fb61da" strokeWidth={2}>
           <Path
             path={result}
             color="#61DAFB"
@@ -64,7 +64,7 @@ export const PathExample = () => {
       </View>
       <Title>Stroke</Title>
       <Canvas style={styles.stroke}>
-        <Path path={s} color="black" paintStyle="stroke" strokeWidth={1} />
+        <Path path={s} color="black" style="stroke" strokeWidth={1} />
       </Canvas>
     </ScrollView>
   );
