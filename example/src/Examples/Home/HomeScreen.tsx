@@ -17,11 +17,6 @@ export const HomeScreen: React.FC = () => {
         description="Animation with Skia"
         route="Animation"
       />
-      <HomeScreenButton
-        title="Physics"
-        description="Box2D physics with Skia"
-        route="Physics"
-      />
     </View>
   );
 };
