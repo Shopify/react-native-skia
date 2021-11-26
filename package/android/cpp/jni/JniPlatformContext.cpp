@@ -37,7 +37,7 @@ namespace RNSkia
             pixelDensity);
     }
 
-    void JniPlatformContext::beginDrawLoop()
+    void JniPlatformContext::startDrawLoop()
     {
         jni::ThreadScope ts;
         // Start drawing loop
@@ -45,7 +45,7 @@ namespace RNSkia
         method(javaPart_.get());
     }
 
-    void JniPlatformContext::endDrawLoop()
+    void JniPlatformContext::stopDrawLoop()
     {
         jni::ThreadScope ts;
         // Stop drawing loop

@@ -35,8 +35,8 @@ namespace RNSkia
 
         void raiseError(const std::exception &err) override;
 
-        void beginDrawLoop() override;
-        void endDrawLoop() override;
+        void startDrawLoop() override;
+        void stopDrawLoop() override;
 
         void notifyDrawLoopExternal(double timestampNanos);
 
