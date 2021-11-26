@@ -5,7 +5,6 @@ export * from "./filters";
 export * from "./processors";
 
 export * from "./Group";
-export * from "./Fill";
 export * from "./Canvas";
 export * from "./Blur";
 export * from "./Paint";

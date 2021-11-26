@@ -1,13 +1,9 @@
 import type { CustomPaintProps, SkEnum } from "../processors";
-import {
-  processPaint,
-  selectPaint,
-  useFrame,
-  enumKey,
-  processColor,
-} from "../processors";
+import { useFrame, enumKey, processColor } from "../processors";
 import type { IPoint } from "../../../skia";
 import { BlendMode } from "../../../skia/Paint/BlendMode";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 export interface PatchProps extends CustomPaintProps {
   colors: string[];
@@ -16,18 +12,11 @@ export interface PatchProps extends CustomPaintProps {
   blendMode?: SkEnum<typeof BlendMode>;
 }
 
-export const Patch = ({
-  colors,
-  cubics,
-  texs,
-  blendMode,
-  ...patchProps
-}: PatchProps) => {
+export const Patch = (props: AnimatedProps<PatchProps>) => {
   const onDraw = useFrame(
     (ctx) => {
-      const { canvas, opacity } = ctx;
-      const paint = selectPaint(ctx.paint, patchProps);
-      processPaint(paint, opacity, patchProps);
+      const { canvas, paint, opacity } = ctx;
+      const { colors, cubics, texs, blendMode } = materialize(ctx, props);
       const mode = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
       canvas.drawPatch(
         cubics,
@@ -37,7 +26,7 @@ export const Patch = ({
         paint
       );
     },
-    [blendMode, colors, cubics, patchProps, texs]
+    [props]
   );
-  return <skDrawing onDraw={onDraw} />;
+  return <skDrawing onDraw={onDraw} {...props} />;
 };

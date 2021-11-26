@@ -1,7 +1,9 @@
 import type { CustomPaintProps } from "../processors";
-import { selectPaint, processPaint, useFrame } from "../processors";
+import { useFrame } from "../processors";
 import type { IPath } from "../../../skia";
 import { Skia } from "../../../skia";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 interface StrokeOpts {
   width?: number;
@@ -11,17 +13,15 @@ interface StrokeOpts {
 
 export interface PathProps extends CustomPaintProps, StrokeOpts {
   path: IPath | string;
-  // TODO: Rename to start, end to be more symmetric to Skia and reflect the semantic better
-  progress: number;
-  offset: number;
+  start: number;
+  end: number;
 }
 
-export const Path = ({ offset, progress, ...pathProps }: PathProps) => {
+export const Path = (props: AnimatedProps<PathProps>) => {
   const onDraw = useFrame(
     (ctx) => {
-      const { opacity, canvas } = ctx;
-      const paint = selectPaint(ctx.paint, pathProps);
-      processPaint(paint, opacity, pathProps);
+      const { start, end, ...pathProps } = materialize(ctx, props);
+      const { canvas, paint } = ctx;
       const path =
         typeof pathProps.path === "string"
           ? Skia.Path.MakeFromSVGString(pathProps.path)
@@ -30,17 +30,17 @@ export const Path = ({ offset, progress, ...pathProps }: PathProps) => {
         throw new Error("Invalid path:  " + pathProps.path);
       }
       // path.stroke(pathProps);
-      if (offset !== 0 || progress !== 1) {
-        path.trim(offset, progress, false);
+      if (start !== 0 || end !== 1) {
+        path.trim(start, end, false);
       }
       canvas.drawPath(path, paint);
     },
-    [offset, pathProps, progress]
+    [props]
   );
-  return <skDrawing onDraw={onDraw} />;
+  return <skDrawing onDraw={onDraw} {...props} />;
 };
 
 Path.defaultProps = {
-  offset: 0,
-  progress: 1,
+  start: 0,
+  end: 1,
 };

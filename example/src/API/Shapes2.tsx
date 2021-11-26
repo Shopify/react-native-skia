@@ -62,7 +62,7 @@ export const Shapes = () => {
       <Title>Rectangles</Title>
       <Canvas style={styles.container}>
         <Group color="#61DAFB">
-          <Rect x={PADDING} y={PADDING} width={SIZE} height={SIZE} />
+          <Rect rect={{ x: 0, y: 0, width: 100, height: 100 }} />
           <Rect
             x={SIZE + 2 * PADDING}
             y={PADDING}

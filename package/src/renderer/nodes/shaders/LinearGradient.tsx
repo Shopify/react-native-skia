@@ -7,7 +7,7 @@ import { TileMode, Skia } from "../../../skia";
 export interface LinearGradientProps {
   start: Vector;
   end: Vector;
-  positions: number[];
+  positions?: number[];
   colors: string[];
 }
 
@@ -26,7 +26,7 @@ export const LinearGradientNode = (
         start,
         end,
         colors.map((color) => processColor(color, opacity)),
-        positions,
+        positions ?? null,
         TileMode.Clamp
       )
     );

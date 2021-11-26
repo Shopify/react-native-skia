@@ -1,22 +1,23 @@
 import type { CustomPaintProps } from "../processors";
-import { processPaint, selectPaint, useFrame } from "../processors";
+import { useFrame } from "../processors";
 import type { RectDef } from "../processors/Shapes";
 import { processRect } from "../processors/Shapes";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 export type OvalProps = RectDef & CustomPaintProps;
 
-export const Oval = (rectProps: OvalProps) => {
+export const Oval = (props: AnimatedProps<OvalProps>) => {
   const onDraw = useFrame(
     (ctx) => {
-      const { canvas, opacity } = ctx;
-      const paint = selectPaint(ctx.paint, rectProps);
-      processPaint(paint, opacity, rectProps);
+      const { canvas, paint } = ctx;
+      const rectProps = materialize(ctx, props);
       const rect = processRect(rectProps);
       canvas.drawOval(rect, paint);
     },
-    [rectProps]
+    [props]
   );
-  return <skDrawing onDraw={onDraw} />;
+  return <skDrawing onDraw={onDraw} {...props} />;
 };
 
 Oval.defaultProps = {

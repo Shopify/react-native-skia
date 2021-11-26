@@ -1,21 +1,22 @@
 import type { CustomPaintProps } from "../processors";
-import { processPaint, selectPaint, useFrame } from "../processors";
+import { useFrame } from "../processors";
 import type { IRRect } from "../../../skia/RRect";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 export interface DRectProps extends CustomPaintProps {
   inner: IRRect;
   outer: IRRect;
 }
 
-export const DRect = ({ inner, outer, ...rectProps }: DRectProps) => {
+export const DRect = (props: AnimatedProps<DRectProps>) => {
   const onDraw = useFrame(
     (ctx) => {
-      const { canvas, opacity } = ctx;
-      const paint = selectPaint(ctx.paint, rectProps);
-      processPaint(paint, opacity, rectProps);
+      const { canvas, paint } = ctx;
+      const { inner, outer } = materialize(ctx, props);
       canvas.drawDRRect(outer, inner, paint);
     },
-    [inner, outer, rectProps]
+    [props]
   );
-  return <skDrawing onDraw={onDraw} />;
+  return <skDrawing onDraw={onDraw} {...props} />;
 };

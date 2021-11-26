@@ -1,4 +1,5 @@
 import type { IRect, IRRect } from "../../../skia";
+import { vec } from "../../math/Vector";
 
 export const point = (x: number, y: number) => ({ x, y });
 export const rect = (x: number, y: number, width: number, height: number) => ({
@@ -12,6 +13,23 @@ export const rrect = (r: IRect, rx: number, ry: number) => ({
   rx,
   ry,
 });
+
+export const topLeft = (r: IRect | IRRect) =>
+  isRRect(r) ? vec(r.rect.x, r.rect.y) : vec(r.x, r.y);
+export const topRight = (r: IRect | IRRect) =>
+  isRRect(r) ? vec(r.rect.x + r.rect.width, r.rect.y) : vec(r.x + r.width, r.y);
+export const bottomLeft = (r: IRect | IRRect) =>
+  isRRect(r)
+    ? vec(r.rect.x, r.rect.y + r.rect.height)
+    : vec(r.x, r.y + r.height);
+export const bottomRight = (r: IRect | IRRect) =>
+  isRRect(r)
+    ? vec(r.rect.x + r.rect.width, r.rect.y + r.rect.height)
+    : vec(r.x + r.width, r.y + r.height);
+export const center = (r: IRect | IRRect) =>
+  isRRect(r)
+    ? vec(r.rect.x + r.rect.width / 2, r.rect.y + r.rect.height / 2)
+    : vec(r.x + r.width / 2, r.y + r.height / 2);
 
 export const isRectCtor = (def: RectOrRRectDef): def is RectCtor =>
   !def.hasOwnProperty("rect");

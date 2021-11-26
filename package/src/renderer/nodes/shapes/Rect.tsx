@@ -2,21 +2,17 @@ import type { CustomPaintProps } from "../processors";
 import type { RectOrRRectDef } from "../processors/Shapes";
 import { isRRect } from "../processors/Shapes";
 import type { IRect } from "../../../skia/Rect";
-import {
-  processPaint,
-  selectPaint,
-  useFrame,
-  processRectOrRRect,
-} from "../processors";
+import { useFrame, processRectOrRRect } from "../processors";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 export type RectProps = RectOrRRectDef & CustomPaintProps;
 
-export const Rect = (rectProps: RectProps) => {
+export const Rect = (props: AnimatedProps<RectProps>) => {
   const onDraw = useFrame(
     (ctx) => {
-      const { canvas, opacity } = ctx;
-      const paint = selectPaint(ctx.paint, rectProps);
-      processPaint(paint, opacity, rectProps);
+      const { canvas, paint } = ctx;
+      const rectProps = materialize(ctx, props);
       const rect = processRectOrRRect(rectProps);
       if (isRRect(rect)) {
         canvas.drawRRect(rect, paint);
@@ -24,7 +20,7 @@ export const Rect = (rectProps: RectProps) => {
         canvas.drawRect(rect as IRect, paint);
       }
     },
-    [rectProps]
+    [props]
   );
-  return <skDrawing onDraw={onDraw} />;
+  return <skDrawing onDraw={onDraw} {...props} />;
 };

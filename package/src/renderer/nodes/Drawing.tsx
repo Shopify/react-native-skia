@@ -1,20 +1,16 @@
-import type { ReactNode } from "react";
-
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
 
 import type { CustomPaintProps } from "./processors";
 import { processPaint, selectPaint } from "./processors";
+import type { AnimatedProps } from "./processors/Animations/Animations";
+import { materialize } from "./processors/Animations/Animations";
 
-type OnDrawCallback = (
-  ctx: DrawingContext,
-  children: SkNode<NodeType>[]
-) => void;
+type OnDrawCallback = (ctx: DrawingContext) => void;
 
-export interface DrawingProps extends CustomPaintProps {
+export interface DrawingProps extends AnimatedProps<CustomPaintProps> {
   onDraw: OnDrawCallback;
-  children?: ReactNode | ReactNode[];
 }
 
 export const Drawing = (props: DrawingProps) => {
@@ -24,10 +20,11 @@ export const Drawing = (props: DrawingProps) => {
 export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
   type: NodeType.Drawing,
   props,
-  draw: (ctx, { onDraw, ...drawingProps }, children) => {
+  draw: (ctx, { onDraw, ...newProps }) => {
+    const drawingProps = materialize(ctx, newProps);
     const selectedPaint = selectPaint(ctx.paint, drawingProps);
     processPaint(selectedPaint, ctx.opacity, drawingProps);
-    onDraw({ ...ctx, paint: selectedPaint }, children);
+    onDraw({ ...ctx, paint: selectedPaint });
   },
   children: [],
 });
