@@ -25,11 +25,10 @@ namespace RNSkia {
 
 using namespace std::chrono;
 
-RNSkDrawView::RNSkDrawView(RNSkPlatformContext *context) :
-  _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
-  _platformContext(context),
-  _infoObject(std::make_shared<RNSkInfoObject>()) {
-}
+RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
+    : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
+      _platformContext(context),
+      _infoObject(std::make_shared<RNSkInfoObject>()) {}
 
 RNSkDrawView::~RNSkDrawView() {
   {
@@ -46,7 +45,7 @@ RNSkDrawView::~RNSkDrawView() {
     RNSkLogger::logToConsole("Starting to delete RNSkDrawView...");
     while (_isDrawing == true) {
       milliseconds now = std::chrono::duration_cast<milliseconds>(
-          system_clock::now().time_since_epoch());     
+          system_clock::now().time_since_epoch());
       if (now.count() - start.count() > 500) {
         break;
       }
@@ -72,9 +71,9 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   // Create draw drawCallback wrapper
   _drawCallback = std::make_shared<RNSkDrawCallback>(
-      [this, callback, timingInfo](std::shared_ptr<JsiSkCanvas> canvas,
-                                   int width, int height, double timestamp,
-                                   RNSkPlatformContext *context) {
+      [this, callback, timingInfo](
+          std::shared_ptr<JsiSkCanvas> canvas, int width, int height,
+          double timestamp, std::shared_ptr<RNSkPlatformContext> context) {
         timingInfo->lastTimeStamp = timestamp;
 
         auto runtime = context->getJsRuntime();
@@ -98,7 +97,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
         delete[] args;
 
         // Draw debug overlays
-        if (_showDebugOverlay) {
+        if (_showDebugOverlay && timingInfo != nullptr) {
           // Average duration
           timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
               _lastDuration;
@@ -131,8 +130,8 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           paint.setColor(SkColors::kRed);
 
           canvas->getCanvas()->drawSimpleText(
-              debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8,
-              18, 18, font, paint);
+              debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
+              18, font, paint);
         }
       });
 
@@ -142,7 +141,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
 void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
                                  int height, double time,
-                                 RNSkPlatformContext *context) {
+                                 std::shared_ptr<RNSkPlatformContext> context) {
 
   try {
     // Get the canvas

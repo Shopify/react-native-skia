@@ -1,23 +1,33 @@
 #include <JsiHostObject.h>
 #include <set>
 
+// To be able to find objects that aren't cleaned up correctly,
+// we can set this value to 1 and debug the constructor/destructor
+#define DEBUG_ALLOCATIONS = 0
+
 namespace RNJsi {
 
-// int objCounter = 0;
-// std::vector<JsiHostObject*> objects;
+#ifdef DEBUG_ALLOCATIONS
+int objCounter = 0;
+std::vector<JsiHostObject *> objects;
+#endif
 
 JsiHostObject::JsiHostObject() {
-  /*objects.push_back(this);
-  objCounter++;*/
+#ifdef DEBUG_ALLOCATIONS
+  objects.push_back(this);
+  objCounter++;
+#endif
 }
 JsiHostObject::~JsiHostObject() {
-  /* for(size_t i=0; i<objects.size(); ++i) {
-    if(objects.at(i) == this) {
+#ifdef DEBUG_ALLOCATIONS
+  for (size_t i = 0; i < objects.size(); ++i) {
+    if (objects.at(i) == this) {
       objects.erase(objects.begin() + i);
       break;
     }
   }
-  objCounter--;*/
+  objCounter--;
+#endif
 }
 
 void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,

@@ -75,7 +75,7 @@ namespace RNSkia
         ANativeWindow *_nativeWindow = nullptr;
 
         sk_sp<SkSurface> _skSurface;
-        RNSkPlatformContext *_platformContext;
+        std::shared_ptr<RNSkPlatformContext> _platformContext;
 
         int _width = 0;
         int _height = 0;

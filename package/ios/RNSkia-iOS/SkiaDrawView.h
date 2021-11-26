@@ -8,7 +8,8 @@ class RNSkDrawViewImpl;
 
 @interface SkiaDrawView : UIView
 
-- (instancetype)initWithContext:(RNSkia::PlatformContext *)context;
+- (instancetype)initWithContext:
+    (std::shared_ptr<RNSkia::RNSkPlatformContext>)context;
 
 - (RNSkDrawViewImpl *)impl;
 

@@ -31,7 +31,7 @@ void PlatformContext::raiseError(const std::exception &err) {
     RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }
 
-void PlatformContext::beginDrawLoop() {
+void PlatformContext::startDrawLoop() {
   if(_displayLink == nullptr) {
     _displayLink = [[DisplayLink alloc] init];
     [_displayLink start:^(double time) {
@@ -40,7 +40,7 @@ void PlatformContext::beginDrawLoop() {
   }
 }
 
-void PlatformContext::endDrawLoop() {
+void PlatformContext::stopDrawLoop() {
   if(_displayLink != nullptr) {
     [_displayLink stop];
     _displayLink = nullptr;

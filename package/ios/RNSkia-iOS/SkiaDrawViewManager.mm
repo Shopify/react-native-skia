@@ -18,7 +18,7 @@ RCT_CUSTOM_VIEW_PROPERTY(nativeID, NSNumber, SkiaDrawView) {
   auto skManager = [_skiaManager skManager];
   skManager->registerSkiaDrawView(nativeId, [(SkiaDrawView*)view impl]);
   
-  auto onRemoved = std::make_shared<std::function<void()>>([=]() {
+  auto onRemoved = std::make_shared<std::function<void()>>([skManager, nativeId]() {
     skManager->unregisterSkiaDrawView(nativeId);
   });
   
@@ -44,7 +44,8 @@ RCT_EXPORT_MODULE(ReactNativeSkiaView)
 
 - (UIView *)view
 {
-  return [[SkiaDrawView alloc] initWithContext:(RNSkia::PlatformContext*)_skiaManager.skManager->getPlatformContext()];
+  auto skManager = [_skiaManager skManager];
+  return [[SkiaDrawView alloc] initWithContext:skManager->getPlatformContext()];
 }
 
 - (void) setBridge:(RCTBridge *)bridge {

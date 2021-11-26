@@ -82,7 +82,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkColorFilterFactory,
                                        MakeLinearToSRGBGamma))
 
-  JsiSkColorFilterFactory(RNSkPlatformContext *context)
+  JsiSkColorFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}
 };
 } // namespace RNSkia

@@ -16,8 +16,9 @@
 
 namespace RNSkia {
 
-using RNSkDrawCallback = std::function<void(
-    std::shared_ptr<JsiSkCanvas>, int, int, double, RNSkPlatformContext *)>;
+using RNSkDrawCallback =
+    std::function<void(std::shared_ptr<JsiSkCanvas>, int, int, double,
+                       std::shared_ptr<RNSkPlatformContext>)>;
 
 #define NUMBER_OF_DURATION_SAMPLES 10
 using RNSkTimingInfo = struct {
@@ -34,7 +35,7 @@ public:
   /**
    * Constructor
    */
-  RNSkDrawView(RNSkPlatformContext *context);
+  RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context);
 
   /**
    Destructor
@@ -59,7 +60,8 @@ public:
    * It is important that the height and width parameters are not resolved
    * against the scale factor - this is done by the drawing code itself.
    */
-  void drawInSurface(sk_sp<SkSurface>, int, int, double, RNSkPlatformContext *);
+  void drawInSurface(sk_sp<SkSurface>, int, int, double,
+                     std::shared_ptr<RNSkPlatformContext>);
 
   /**
    Sets the drawing mode for the view
@@ -123,7 +125,7 @@ private:
   /**
    * Pointer to the platform context
    */
-  RNSkPlatformContext *_platformContext;
+  std::shared_ptr<RNSkPlatformContext> _platformContext;
 
   /**
    Drawing mode

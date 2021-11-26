@@ -28,8 +28,8 @@ public:
 
   ~PlatformContext() {}
 
-  void beginDrawLoop() override;
-  void endDrawLoop() override;
+  void startDrawLoop() override;
+  void stopDrawLoop() override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,

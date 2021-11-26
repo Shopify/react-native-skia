@@ -23,6 +23,9 @@ using namespace facebook;
 
 class RNSkPlatformContext {
 public:
+  /**
+   * Constructor
+   */
   RNSkPlatformContext(
       jsi::Runtime *runtime, std::shared_ptr<react::CallInvoker> callInvoker,
       const std::function<void(const std::function<void(void)> &)>
@@ -31,6 +34,14 @@ public:
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker),
         _dispatchOnRenderThread(dispatchOnRenderThread) {}
+
+  /**
+   * Destructor
+   */
+  ~RNSkPlatformContext() {
+    // Do not allow destruction before we are completely done drawing
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+  }
 
   /**
    * Schedules the function to be run on the javascript thread async
@@ -90,16 +101,12 @@ public:
    * @returns Identifier of the draw loop entry
    */
   size_t beginDrawLoop(std::function<void(double)> callback) {
-    size_t nextId;
-    {
-      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-      nextId = ++_listenerId;
-      _drawCallbacks.emplace(nextId, std::move(callback));
-    }
-
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    size_t nextId = ++_listenerId;
+    _drawCallbacks.emplace(nextId, std::move(callback));
     if (_drawCallbacks.size() == 1) {
       // Start
-      beginDrawLoop();
+      startDrawLoop();
     }
 
     return nextId;
@@ -111,14 +118,12 @@ public:
    * @param identifier Identifier of drawloop drawCallback to end
    */
   void endDrawLoop(size_t identifier) {
-    {
-      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-      if (_drawCallbacks.count(identifier) > 0) {
-        _drawCallbacks.erase(identifier);
-      }
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    if (_drawCallbacks.count(identifier) > 0) {
+      _drawCallbacks.erase(identifier);
     }
     if (_drawCallbacks.size() == 0) {
-      endDrawLoop();
+      stopDrawLoop();
     }
   }
 
@@ -133,8 +138,8 @@ public:
     }
   }
 
-  virtual void beginDrawLoop() = 0;
-  virtual void endDrawLoop() = 0;
+  virtual void startDrawLoop() = 0;
+  virtual void stopDrawLoop() = 0;
 
 private:
   float _pixelDensity;

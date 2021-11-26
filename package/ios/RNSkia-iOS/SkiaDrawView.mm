@@ -8,7 +8,7 @@
 
 #pragma mark Initialization and destruction
 
-- (instancetype)initWithContext: (RNSkia::PlatformContext*) context
+- (instancetype)initWithContext: (std::shared_ptr<RNSkia::RNSkPlatformContext>) context
 {
   self = [super init];
   if (self) {
@@ -19,6 +19,7 @@
 
 -(void) dealloc {
   if(_impl != nullptr) {
+    _impl->remove();
     delete _impl;
     _impl = nullptr;
   }
@@ -27,10 +28,10 @@
 
 - (void) willMoveToWindow:(UIWindow *)newWindow {
   [super willMoveToWindow: newWindow];
-  if (newWindow == nil) {
+  if (newWindow == nil && _impl != nullptr) {
     _impl->remove();
     delete _impl;
-    _impl= nullptr;
+    _impl = nullptr;
   }
 }
 

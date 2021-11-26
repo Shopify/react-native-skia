@@ -16,7 +16,8 @@ using namespace facebook;
 
 class JsiSkPathEffect : public JsiSkWrappingSkPtrHostObject<SkPathEffect> {
 public:
-  JsiSkPathEffect(RNSkPlatformContext *context, sk_sp<SkPathEffect> pathEffect)
+  JsiSkPathEffect(std::shared_ptr<RNSkPlatformContext> context,
+                  sk_sp<SkPathEffect> pathEffect)
       : JsiSkWrappingSkPtrHostObject<SkPathEffect>(context, pathEffect) {}
 
   /**

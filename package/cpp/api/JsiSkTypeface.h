@@ -26,7 +26,8 @@ public:
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkTypeface, bold),
                               JSI_EXPORT_PROP_GET(JsiSkTypeface, italic))
 
-  JsiSkTypeface(RNSkPlatformContext *context, const sk_sp<SkTypeface> typeface)
+  JsiSkTypeface(std::shared_ptr<RNSkPlatformContext> context,
+                const sk_sp<SkTypeface> typeface)
       : JsiSkWrappingSkPtrHostObject(context, typeface){};
 
   /**
@@ -47,7 +48,8 @@ public:
    * @return A function for creating a new host object wrapper for the
    * SkTypeface class
    */
-  static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
+  static const jsi::HostFunctionType
+  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       if (count == 2) {
         return jsi::Object::createFromHostObject(

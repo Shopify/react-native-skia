@@ -7,7 +7,7 @@ id<MTLCommandQueue> RNSkDrawViewImpl::_commandQueue = id<MTLCommandQueue>(CFReta
 
 sk_sp<GrDirectContext> RNSkDrawViewImpl::_skContext = nullptr;
 
-RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, RNSkia::PlatformContext* context):
+RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::RNSkPlatformContext> context):
   _view(view), _context(context), RNSkia::RNSkDrawView(context) {
     
 #pragma clang diagnostic push

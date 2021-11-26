@@ -382,7 +382,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, clear),
                        JSI_EXPORT_FUNC(JsiSkCanvas, concat))
 
-  JsiSkCanvas(RNSkPlatformContext *context) : JsiSkHostObject(context) {}
+  JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiSkHostObject(context) {}
   void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
   SkCanvas *getCanvas() { return _canvas; }
 

@@ -56,7 +56,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromSVGString),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromOp))
 
-  JsiSkPathFactory(RNSkPlatformContext *context) : JsiSkHostObject(context) {}
+  JsiSkPathFactory(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiSkHostObject(context) {}
 };
 
 } // namespace RNSkia

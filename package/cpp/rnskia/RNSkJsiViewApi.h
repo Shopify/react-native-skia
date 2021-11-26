@@ -98,13 +98,24 @@ public:
    * Constructor
    * @param platformContext Platform context
    */
-  RNSkJsiViewApi(RNSkPlatformContext *platformContext)
+  RNSkJsiViewApi(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiHostObject(), _platformContext(platformContext) {}
 
   /**
    * Destructor
    */
-  ~RNSkJsiViewApi() {}
+  ~RNSkJsiViewApi() { unregisterAll(); }
+
+  /**
+   Call to remove all draw view infos
+   */
+  void unregisterAll() {
+    // Unregister all views
+    auto tempList = std::map<size_t, CallbackInfo>(_callbackInfos);
+    for (auto info : tempList) {
+      unregisterSkiaDrawView(info.first);
+    }
+  }
 
   /**
    * Registers a skia view
@@ -154,6 +165,6 @@ private:
   std::map<size_t, CallbackInfo> _callbackInfos;
 
   // Platform context
-  RNSkPlatformContext *_platformContext;
+  std::shared_ptr<RNSkPlatformContext> _platformContext;
 };
 } // namespace RNSkia

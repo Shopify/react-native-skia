@@ -88,7 +88,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
                                        MakeDropShadowOnly))
 
-  JsiSkImageFilterFactory(RNSkPlatformContext *context)
+  JsiSkImageFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}
 };
 

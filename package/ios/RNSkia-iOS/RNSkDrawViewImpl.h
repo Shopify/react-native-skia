@@ -13,7 +13,8 @@
 
 class RNSkDrawViewImpl : public RNSkia::RNSkDrawView {
 public:
-  RNSkDrawViewImpl(SkiaDrawView *view, RNSkia::PlatformContext *context);
+  RNSkDrawViewImpl(SkiaDrawView *view,
+                   std::shared_ptr<RNSkia::RNSkPlatformContext> context);
   ~RNSkDrawViewImpl();
 
   void remove();
@@ -45,7 +46,7 @@ private:
   static id<MTLDevice> _device;
   static sk_sp<GrDirectContext> _skContext;
 
-  RNSkia::PlatformContext *_context;
+  std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
 
   GrBackendRenderTarget _skRenderTarget;
   sk_sp<SkSurface> _skSurface;
