@@ -16,6 +16,7 @@ import {
   bottomRight,
   center,
   RadialGradient,
+  RuntimeEffect,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
@@ -26,8 +27,9 @@ paint.setAntiAlias(true);
 const r1 = rect(0, 0, SIZE, SIZE);
 const r2 = rect(SIZE, 0, SIZE, SIZE);
 const r3 = rect(0, SIZE, SIZE, SIZE);
-const r4 = rect(0, SIZE, SIZE, SIZE);
+const r4 = rect(SIZE, SIZE, SIZE, SIZE);
 const r5 = rect(0, 2 * SIZE, SIZE, SIZE);
+const r6 = rect(SIZE, 2 * SIZE, SIZE, SIZE);
 
 export const Gradients = () => {
   const onGradientDraw = useDrawCallback((canvas) => {
@@ -84,6 +86,7 @@ export const Gradients = () => {
 
   const p1 = usePaintRef();
   const p2 = usePaintRef();
+  const p6 = usePaintRef();
   return (
     <ScrollView>
       <Canvas style={styles.container}>
@@ -101,11 +104,13 @@ export const Gradients = () => {
             colors={["#fb61da", "#61DAFB"]}
           />
         </Paint>
+        <Paint ref={p6} />
         <Rect rect={r1} paint={p1} />
         <Rect rect={r2} paint={p2} />
         <Rect rect={r3} />
         <Rect rect={r4} />
         <Rect rect={r5} />
+        <Rect rect={r6} paint={p6} />
       </Canvas>
     </ScrollView>
   );
