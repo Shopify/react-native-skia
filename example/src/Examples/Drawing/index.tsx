@@ -102,7 +102,12 @@ export const DrawingExample: React.FC = () => {
 
   return (
     <>
-      <SkiaView ref={skiaViewRef} style={styles.skiaview} onDraw={onDraw} />
+      <SkiaView
+        ref={skiaViewRef}
+        style={styles.skiaview}
+        onDraw={onDraw}
+        debug
+      />
       <View style={styles.buttons}>
         <Button
           title="Clear"
