@@ -28,7 +28,8 @@ using namespace std::chrono;
 RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
     : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
       _platformContext(context),
-      _infoObject(std::make_shared<RNSkInfoObject>()) {}
+      _infoObject(std::make_shared<RNSkInfoObject>()),
+      _timingInfo(std::make_shared<RNSkTimingInfo>()) {}
 
 RNSkDrawView::~RNSkDrawView() {
   {
@@ -62,20 +63,16 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     endDrawingLoop();
     return;
   }
-
-  // Set up timing
-  auto timingInfo = std::make_shared<RNSkTimingInfo>();
-  timingInfo->lastTimeStamp = -1;
-  timingInfo->lastDurationIndex = 0;
-  timingInfo->lastDurationsCount = 0;
+  
+  // Reset timing info
+  _timingInfo->reset();
 
   // Create draw drawCallback wrapper
   _drawCallback = std::make_shared<RNSkDrawCallback>(
-      [this, callback, timingInfo](
+      [this, callback](
           std::shared_ptr<JsiSkCanvas> canvas, int width, int height,
           double timestamp, std::shared_ptr<RNSkPlatformContext> context) {
-        timingInfo->lastTimeStamp = timestamp;
-
+        
         auto runtime = context->getJsRuntime();
 
         // Update info parameter
@@ -97,25 +94,10 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
         delete[] args;
 
         // Draw debug overlays
-        if (_showDebugOverlay && timingInfo != nullptr) {
-          // Average duration
-          timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
-              _lastDuration;
-
-          if (timingInfo->lastDurationIndex == NUMBER_OF_DURATION_SAMPLES) {
-            timingInfo->lastDurationIndex = 0;
-          }
-
-          if (timingInfo->lastDurationsCount < NUMBER_OF_DURATION_SAMPLES) {
-            timingInfo->lastDurationsCount++;
-          }
-
-          long average = 0;
-          for (size_t i = 0; i < timingInfo->lastDurationsCount; i++) {
-            average += timingInfo->lastDurations[i];
-          }
-          average = average / timingInfo->lastDurationsCount;
-
+        if (_showDebugOverlay) {
+          
+          // Display average rendering timer
+          auto average = _timingInfo->getAverage();
           auto debugString = std::to_string(average) + "ms";
 
           if (_drawingMode == RNSkDrawingMode::Continuous) {

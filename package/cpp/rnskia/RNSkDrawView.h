@@ -3,6 +3,7 @@
 #include <JsiSkCanvas.h>
 #include <RNSkInfoParameter.h>
 #include <RNSkPlatformContext.h>
+#include <RNSkTimingInfo.h>
 #include <mutex>
 
 #pragma clang diagnostic push
@@ -19,14 +20,6 @@ namespace RNSkia {
 using RNSkDrawCallback =
     std::function<void(std::shared_ptr<JsiSkCanvas>, int, int, double,
                        std::shared_ptr<RNSkPlatformContext>)>;
-
-#define NUMBER_OF_DURATION_SAMPLES 10
-using RNSkTimingInfo = struct {
-  double lastTimeStamp;
-  long lastDurations[NUMBER_OF_DURATION_SAMPLES];
-  int lastDurationIndex;
-  int lastDurationsCount;
-};
 
 enum RNSkDrawingMode { Default, Continuous };
 
@@ -87,7 +80,7 @@ protected:
   /**
    Updates the last duration value
    */
-  void setLastFrameDuration(size_t duration) { _lastDuration = duration; }
+  void setLastFrameDuration(size_t duration) { _timingInfo->addLastDuration(duration); }
 
 private:
   /**
@@ -143,14 +136,14 @@ private:
   size_t _drawingLoopIdentifier = -1;
 
   /**
-   Last render duration
-   */
-  size_t _lastDuration = 0;
-
-  /**
    * Info object parameter
    */
   std::shared_ptr<RNSkInfoObject> _infoObject;
+  
+  /**
+   Timing information
+   */
+  std::shared_ptr<RNSkTimingInfo> _timingInfo;
 };
 
 } // namespace RNSkia
