@@ -21,9 +21,9 @@ export interface TransformProp {
 }
 
 type Transformations = {
-  [Name in Transform2dName]: number;
+  readonly [Name in Transform2dName]: number;
 };
-export type Transforms2d = (
+export type Transforms2d = readonly (
   | Pick<Transformations, "translateX">
   | Pick<Transformations, "translateY">
   | Pick<Transformations, "scale">

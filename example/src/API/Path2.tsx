@@ -1,35 +1,18 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView, View } from "react-native";
-import {
-  Skia,
-  useDrawCallback,
-  SkiaView,
-  PaintStyle,
-  StrokeJoin,
-  PathOp,
-  Canvas,
-  Path,
-  Group,
-} from "@shopify/react-native-skia";
+import { Skia, PathOp, Canvas, Path, Group } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
 import {
-  backface,
+  Backface,
   CARD_HEIGHT,
   CARD_WIDTH,
-} from "./components/drawings/backface";
+} from "./components/drawings/Backface";
 
 const { width } = Dimensions.get("window");
 const SIZE = width;
 
-const paint = Skia.Paint();
 const strokeWidth = 10;
-paint.setAntiAlias(true);
-paint.setColor(Skia.Color("#61DAFB"));
-paint.setStyle(PaintStyle.Stroke);
-paint.setStrokeWidth(strokeWidth);
-paint.setStrokeJoin(StrokeJoin.Round);
-const strokePaint = paint.copy();
 const r = 32;
 const d = 2 * r;
 const example1Height = 150;
@@ -43,12 +26,6 @@ s.stroke({
   width: 10,
 });
 
-const textPaint = Skia.Paint();
-textPaint.setAntiAlias(true);
-textPaint.setStyle(PaintStyle.Stroke);
-textPaint.setStrokeWidth(1);
-textPaint.setColor(Skia.Color("black"));
-
 const rect = Skia.Path.Make();
 rect.addRect(
   Skia.XYWHRect(
@@ -61,16 +38,9 @@ rect.addRect(
 const circle = Skia.Path.Make();
 circle.addCircle(SIZE / 2, example1Height / 2 - d / 2, r);
 const result = Skia.Path.MakeFromOp(rect, circle, PathOp.Difference)!;
-paint.setPathEffect(Skia.PathEffect.MakeCorner(r)!);
 result.simplify();
 
 export const PathExample = () => {
-  const onMakeCardDraw = useDrawCallback((canvas) => {
-    backface(canvas);
-  }, []);
-  const onStrokeDraw = useDrawCallback((canvas) => {
-    canvas.drawPath(s, textPaint);
-  }, []);
   return (
     <ScrollView>
       <Title>Path Operations</Title>
@@ -79,7 +49,7 @@ export const PathExample = () => {
           <Path
             path={result}
             color="#61DAFB"
-            strokeWidth={10}
+            strokeWidth={strokeWidth}
             strokeJoin="round"
           />
           <Path path={circle} />
@@ -88,7 +58,9 @@ export const PathExample = () => {
       </Canvas>
       <Title>Paths</Title>
       <View style={styles.cardContainer}>
-        <SkiaView style={styles.card} onDraw={onMakeCardDraw} />
+        <Canvas style={styles.card}>
+          <Backface />
+        </Canvas>
       </View>
       <Title>Stroke</Title>
       <Canvas style={styles.stroke}>

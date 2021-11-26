@@ -2,6 +2,7 @@ import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import type { FrameValue } from "@shopify/react-native-skia";
 import {
+  vec,
   Blur,
   Canvas,
   Circle,
@@ -12,16 +13,14 @@ import {
   polar2Canvas,
   useFrame,
   mix,
-  transformOrigin,
+  useLoop,
+  Easing,
 } from "@shopify/react-native-skia";
-
-import { useLoop } from "../../../package/src/renderer/nodes/processors/Animations/Timing";
-import { Easing } from "../../../package/src/renderer/nodes/processors/Animations/Easing";
-
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 const c1 = "#61bea2";
 const c2 = "#529ca0";
 const R = width / 4;
+const center = vec(width / 2, height / 2 - 64);
 
 interface RingProps {
   index: number;
@@ -37,16 +36,11 @@ const Ring = ({ index, progress }: RingProps) => {
       { x: 0, y: 0 }
     );
     const scale = mix(progressVal, 0.3, 1);
-    return transformOrigin(ctx.center, [
-      { translateX: x },
-      { translateY: y },
-      { scale },
-    ]);
+    return [{ translateX: x }, { translateY: y }, { scale }];
   }, []);
-  const c = useFrame(({ center }) => center);
   return (
-    <Group transform={transform}>
-      <Circle c={c} r={R} color={index % 2 ? c1 : c2} />
+    <Group origin={center} transform={transform}>
+      <Circle c={center} r={R} color={index % 2 ? c1 : c2} />
     </Group>
   );
 };
@@ -58,10 +52,7 @@ export const Breathe = () => {
   });
   const paint = usePaintRef();
   const transform = useFrame(
-    (ctx) =>
-      transformOrigin(ctx.center, [
-        { rotate: mix(progress(ctx), -Math.PI, 0) },
-      ]),
+    (ctx) => [{ rotate: mix(progress(ctx), -Math.PI, 0) }],
     []
   );
   return (
@@ -70,7 +61,7 @@ export const Breathe = () => {
         <Blur style="solid" sigma={40} />
       </Paint>
       <Fill color="rgb(36,43,56)" />
-      <Group transform={transform} paint={paint}>
+      <Group origin={center} transform={transform} paint={paint}>
         {new Array(6).fill(0).map((_, index) => {
           return <Ring key={index} index={index} progress={progress} />;
         })}
