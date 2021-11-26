@@ -4,7 +4,8 @@
 #include <jni.h>
 #include <string>
 #include <utility>
-#include "JsiSkPaint.h"
+
+#include "JniSkiaDrawView.h"
 
 namespace RNSkia {
 
@@ -25,21 +26,18 @@ void JniSkiaManager::registerNatives() {
 }
 
 // JNI init
-TSelf JniSkiaManager::initHybrid(
+jni::local_ref<jni::HybridClass<JniSkiaManager>::jhybriddata> JniSkiaManager::initHybrid(
     jni::alias_ref<jhybridobject> jThis,
     jlong jsContext,
     JSCallInvokerHolder jsCallInvokerHolder,
     JavaPlatformContext skiaContext) {
 
     // cast from JNI hybrid objects to C++ instances
-    auto jsCallInvoker = jsCallInvokerHolder->cthis()->getCallInvoker();
-    auto context = std::shared_ptr<JniPlatformContext>(skiaContext->cthis());
-
     return makeCxxInstance(
         jThis,
         reinterpret_cast<jsi::Runtime *>(jsContext),
-        jsCallInvoker,
-        context);
+        jsCallInvokerHolder->cthis()->getCallInvoker(),
+        skiaContext->cthis());
 }
 
 void JniSkiaManager::initializeRuntime() {

@@ -8,27 +8,25 @@
 #include <string>
 
 #include "JniPlatformContext.h"
-#include "JniSkiaDrawView.h"
 #include "RNSkManager.h"
 
 namespace RNSkia {
 
 using namespace facebook;
 
-using TSelf =
-    jni::local_ref<jni::HybridClass<RNSkia::JniSkiaManager>::jhybriddata>;
-
 using JSCallInvokerHolder =
     jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;
 
 using JavaPlatformContext = jni::alias_ref<JniPlatformContext::javaobject>;
+
+class JniSkiaDrawView;
 
 class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
    public:
     static auto constexpr kJavaDescriptor = "Lcom/shopify/reactnative/skia/SkiaManager;";
     static auto constexpr TAG = "ReactNativeSkia";
 
-    static TSelf initHybrid(
+    static jni::local_ref<jni::HybridClass<JniSkiaManager>::jhybriddata> initHybrid(
         jni::alias_ref<jhybridobject> jThis,
         jlong jsContext,
         JSCallInvokerHolder jsCallInvokerHolder,
@@ -37,20 +35,26 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
     static void registerNatives();
 
     JniSkiaManager() {}
-    ~JniSkiaManager() {}
+    ~JniSkiaManager() {
+        RNSkLogger::logToConsole("JniSkiaManager dtor");
+    }
 
     explicit JniSkiaManager(
         jni::alias_ref<JniSkiaManager::jhybridobject> jThis,
         jsi::Runtime *runtime,
         std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker,
-        std::shared_ptr<JniPlatformContext> platformContext)
+        JniPlatformContext* platformContext)
         : _javaPart(jni::make_global(jThis)),
           _jsRuntime(runtime),
           _jsCallInvoker(jsCallInvoker),
-          _context(platformContext) {}
+          _context(platformContext) {
+
+    }
 
     void registerSkiaView(int viewTag, JniSkiaDrawView *skiaView);
     void unregisterSkiaView(int viewTag);
+
+    std::shared_ptr<JniPlatformContext> getPlatformContext() { return _context; }
 
     void invalidate() {
         _context->stopDrawLoop();

@@ -8,16 +8,14 @@
 #include <thread>
 
 #include <RNSkDrawView.h>
-#include "JniPlatformContext.h"
+#include "JniSkiaManager.h"
 #include "JniSkiaDrawView.h"
 
 namespace RNSkia
 {
     using namespace facebook;
 
-    class JniSkiaManager;
-
-    using JavaPlatformContext = jni::alias_ref<JniPlatformContext::javaobject>;
+    using JavaSkiaManager = jni::alias_ref<JniSkiaManager::javaobject>;
 
     using DrawingContext = struct
     {
@@ -36,7 +34,7 @@ namespace RNSkia
 
         static jni::local_ref<jhybriddata> initHybrid(
             jni::alias_ref<jhybridobject>,
-            JavaPlatformContext);
+            JavaSkiaManager);
 
         static void registerNatives();
 
@@ -45,6 +43,9 @@ namespace RNSkia
         void surfaceSizeChanged(int, int);
 
         void updateTouchPoints(jni::JArrayDouble touches);
+
+        ~JniSkiaDrawView() {
+        }
 
     protected:
         void drawFrame(double timestamp) override;
@@ -75,7 +76,6 @@ namespace RNSkia
         ANativeWindow *_nativeWindow = nullptr;
 
         sk_sp<SkSurface> _skSurface;
-        std::shared_ptr<RNSkPlatformContext> _platformContext;
 
         int _width = 0;
         int _height = 0;
@@ -86,10 +86,9 @@ namespace RNSkia
 
         explicit JniSkiaDrawView(
             jni::alias_ref<JniSkiaDrawView::jhybridobject> jThis,
-            JavaPlatformContext platformContext)
+            JavaSkiaManager skiaManager)
             : javaPart_(jni::make_global(jThis)),
-              _platformContext(platformContext->cthis()),
-              RNSkDrawView((std::shared_ptr<RNSkia::RNSkPlatformContext>)platformContext->cthis()) {}
+              RNSkDrawView(skiaManager->cthis()->getPlatformContext()) {}
     };
 
 } // namespace RNSkia

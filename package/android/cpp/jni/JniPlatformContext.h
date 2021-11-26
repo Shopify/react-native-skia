@@ -29,6 +29,10 @@ namespace RNSkia
 
         static void registerNatives();
 
+        ~JniPlatformContext() {
+            RNSkLogger::logToConsole("Platform context removed");
+        }
+
         void performStreamOperation(
             const std::string &sourceUri,
             const std::function<void(std::unique_ptr<SkStream>)> &op) override;

@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.MotionEvent;
-import androidx.core.view.MotionEventCompat;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
@@ -22,14 +21,19 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     public SkiaDrawView(Context ctx) {
         super(ctx);
         RNSkiaModule skiaModule = ((ReactContext)ctx).getNativeModule(RNSkiaModule.class);
-        mHybridData = initHybrid(skiaModule.getSkiaManager().getPlatformContext());
+        mHybridData = initHybrid(skiaModule.getSkiaManager());
         setSurfaceTextureListener(this);
         setOpaque(false);
     }
 
     @Override
     protected void finalize() throws Throwable {
+        mHybridData.resetNative();
         super.finalize();
+    }
+
+
+    public void onRemoved() {
         mHybridData.resetNative();
     }
 
@@ -90,7 +94,7 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         // Nothing special to do here
     }
 
-    private native HybridData initHybrid(PlatformContext platformContext);
+    private native HybridData initHybrid(SkiaManager skiaManager);
 
     private native void surfaceAvailable(Object surface, int width, int height);
 
