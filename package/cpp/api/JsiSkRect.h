@@ -60,10 +60,19 @@ public:
    */
   static std::shared_ptr<SkRect> fromValue(jsi::Runtime &runtime,
                                            const jsi::Value &obj) {
-    return obj.asObject(runtime)
-        .asHostObject<JsiSkRect>(runtime)
-        .get()
-        ->getObject();
+    const auto object = obj.asObject(runtime);
+    if (object.isHostObject(runtime)) {
+      return obj.asObject(runtime)
+              .asHostObject<JsiSkRect>(runtime)
+              .get()
+              ->getObject();
+    } else {
+      auto x = object.getProperty(runtime, "x").asNumber();
+      auto y = object.getProperty(runtime, "y").asNumber();
+      auto width = object.getProperty(runtime, "width").asNumber();
+      auto height = object.getProperty(runtime, "height").asNumber();
+      return std::make_shared<SkRect>(SkRect::MakeXYWH(x, y, width, height));
+    }
   }
 
   /**

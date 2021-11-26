@@ -31,10 +31,17 @@ public:
  */
   static std::shared_ptr<SkPoint> fromValue(jsi::Runtime &runtime,
                                             const jsi::Value &obj) {
-    return obj.asObject(runtime)
-        .asHostObject<JsiSkPoint>(runtime)
-        .get()
-        ->getObject();
+    const auto object = obj.asObject(runtime);
+    if (object.isHostObject(runtime)) {
+      return object
+              .asHostObject<JsiSkPoint>(runtime)
+              .get()
+              ->getObject();
+    } else {
+      auto x = object.getProperty(runtime, "x").asNumber();
+      auto y = object.getProperty(runtime, "y").asNumber();
+      return std::make_shared<SkPoint>(SkPoint::Make(x, y));
+    }
   }
 
   /**

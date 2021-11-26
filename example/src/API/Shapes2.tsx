@@ -11,6 +11,9 @@ import {
   Line,
   Points,
   Patch,
+  vec,
+  rect,
+  rrect,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -28,39 +31,27 @@ strokePaint.setStrokeWidth(2);
 const c = { x: width / 2, y: SIZE / 2 + 16 };
 const S = 25;
 const c1 = [
-  Skia.Point(c.x - 2 * S, c.y - S),
-  Skia.Point(c.x - S, c.y - 2 * S),
-  Skia.Point(c.x - S, c.y - S),
+  vec(c.x - 2 * S, c.y - S),
+  vec(c.x - S, c.y - 2 * S),
+  vec(c.x - S, c.y - S),
 ];
 
-const c2 = [
-  Skia.Point(c.x, c.y - 2 * S),
-  Skia.Point(c.x + S, c.y),
-  Skia.Point(c.x + S, c.y - S),
-];
+const c2 = [vec(c.x, c.y - 2 * S), vec(c.x + S, c.y), vec(c.x + S, c.y - S)];
 
-const c3 = [
-  Skia.Point(c.x - 10, c.y + 10),
-  Skia.Point(c.x + S, c.y),
-  Skia.Point(c.x + S, c.y + S),
-];
+const c3 = [vec(c.x - 10, c.y + 10), vec(c.x + S, c.y), vec(c.x + S, c.y + S)];
 
 const c4 = [
-  Skia.Point(c.x - 2 * S, c.y + S),
-  Skia.Point(c.x - S, c.y + 2 * S),
-  Skia.Point(c.x - S, c.y + S),
+  vec(c.x - 2 * S, c.y + S),
+  vec(c.x - S, c.y + 2 * S),
+  vec(c.x - S, c.y + S),
 ];
 
 const cubics = [...c1, ...c2, ...c3, ...c4];
 
 const PADDING = 16;
-const outer = Skia.RRectXY(
-  Skia.XYWHRect(2 * SIZE + 3 * 16, PADDING, SIZE, SIZE),
-  25,
-  25
-);
-const inner = Skia.RRectXY(
-  Skia.XYWHRect(2 * SIZE + 4 * PADDING, 2 * PADDING, SIZE - 32, SIZE - 32),
+const outer = rrect(rect(2 * SIZE + 3 * 16, PADDING, SIZE, SIZE), 25, 25);
+const inner = rrect(
+  rect(2 * SIZE + 4 * PADDING, 2 * PADDING, SIZE - 32, SIZE - 32),
   0,
   0
 );

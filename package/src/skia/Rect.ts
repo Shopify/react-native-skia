@@ -1,6 +1,6 @@
 import type { SkJSIInstane } from "./JsiInstance";
 
-export interface IRect extends SkJSIInstane<"Rect"> {
+export interface JSIRect extends SkJSIInstane<"Rect"> {
   readonly x: number;
   readonly y: number;
   readonly width: number;
@@ -11,4 +11,11 @@ export interface IRect extends SkJSIInstane<"Rect"> {
   readonly bottom: number;
   setXYWH: (x: number, y: number, width: number, height: number) => void;
   setLTRB: (left: number, top: number, right: number, bottom: number) => void;
+}
+
+export interface IRect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
 }

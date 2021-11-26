@@ -1,6 +1,13 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView, View } from "react-native";
-import { Skia, PathOp, Canvas, Path, Group } from "@shopify/react-native-skia";
+import {
+  Skia,
+  PathOp,
+  Canvas,
+  Path,
+  Group,
+  rect,
+} from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
 import {
@@ -26,18 +33,13 @@ s.stroke({
   width: 10,
 });
 
-const rect = Skia.Path.Make();
-rect.addRect(
-  Skia.XYWHRect(
-    strokeWidth / 2,
-    (example1Height - d) / 2,
-    SIZE - strokeWidth,
-    70
-  )
+const rect1 = Skia.Path.Make();
+rect1.addRect(
+  rect(strokeWidth / 2, (example1Height - d) / 2, SIZE - strokeWidth, 70)
 );
 const circle = Skia.Path.Make();
 circle.addCircle(SIZE / 2, example1Height / 2 - d / 2, r);
-const result = Skia.Path.MakeFromOp(rect, circle, PathOp.Difference)!;
+const result = Skia.Path.MakeFromOp(rect1, circle, PathOp.Difference)!;
 result.simplify();
 
 export const PathExample = () => {
@@ -53,7 +55,7 @@ export const PathExample = () => {
             strokeJoin="round"
           />
           <Path path={circle} />
-          <Path path={rect} />
+          <Path path={rect1} />
         </Group>
       </Canvas>
       <Title>Paths</Title>
