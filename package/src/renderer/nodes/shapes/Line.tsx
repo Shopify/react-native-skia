@@ -1,21 +1,20 @@
 import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint, useFrame } from "../processors";
+import type { Vector } from "../../math/Vector";
 
 export interface LineProps extends CustomPaintProps {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  p1: Vector;
+  p2: Vector;
 }
 
 export const Line = (props: LineProps) => {
   const onDraw = useFrame(
     (ctx) => {
-      const { x1, y1, x2, y2, ...lineProps } = props;
+      const { p1, p2, ...lineProps } = props;
       const { opacity, canvas } = ctx;
       const paint = selectPaint(ctx.paint, lineProps);
       processPaint(paint, opacity, lineProps);
-      canvas.drawLine(x1, y1, x2, y2, paint);
+      canvas.drawLine(p1.x, p1.y, p2.x, p2.y, paint);
     },
     [props]
   );

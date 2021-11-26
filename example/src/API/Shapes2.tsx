@@ -89,7 +89,7 @@ export const Shapes = () => {
       <Canvas style={styles.container}>
         <Group color="#61DAFB" style="stroke" strokeWidth={PixelRatio.get()}>
           <Points mode="polygon" points={cubics} />
-          <Line x1={c.x} y1={c.y} x2={SIZE} y2={0} />
+          <Line p1={c} p2={vec(SIZE, 0)} />
           <Points mode="points" points={cubics} color="red" />
         </Group>
       </Canvas>
