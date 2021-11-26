@@ -1,39 +1,30 @@
 import type { CustomPaintProps } from "../processors";
-import { processPaint, selectPaint, useFrame } from "../processors";
-import { Skia } from "../../../skia";
+import type { RectDef } from "../processors/Shapes";
+import { isRRect } from "../processors/Shapes";
+import type { IRect } from "../../../skia/Rect";
+import {
+  processPaint,
+  selectPaint,
+  useFrame,
+  processRect,
+} from "../processors";
 
-export interface RectProps extends CustomPaintProps {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rx?: number;
-  ry?: number;
-}
+export type RectProps = RectDef & CustomPaintProps;
 
-export const Rect = ({
-  x,
-  y,
-  width,
-  height,
-  rx,
-  ry,
-  ...rectProps
-}: RectProps) => {
+export const Rect = (rectProps: RectProps) => {
   const onDraw = useFrame(
     (ctx) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, rectProps);
       processPaint(paint, opacity, rectProps);
-      const rect = Skia.XYWHRect(x, y, width, height);
-      if (rx !== undefined || ry !== undefined) {
-        const corner = [(rx ?? ry) as number, (ry ?? rx) as number];
-        canvas.drawRRect(Skia.RRectXY(rect, corner[0], corner[1]), paint);
+      const rect = processRect(rectProps);
+      if (isRRect(rect)) {
+        canvas.drawRRect(rect, paint);
       } else {
-        canvas.drawRect(rect, paint);
+        canvas.drawRect(rect as IRect, paint);
       }
     },
-    [height, rectProps, rx, ry, width, x, y]
+    [rectProps]
   );
   return <skDrawing onDraw={onDraw} />;
 };

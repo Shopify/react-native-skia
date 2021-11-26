@@ -6,6 +6,8 @@ import {
   SkiaView,
   BlendMode,
   TileMode,
+  vec,
+  rect,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
@@ -17,13 +19,13 @@ paint.setAntiAlias(true);
 export const Gradients = () => {
   const onGradientDraw = useDrawCallback((canvas) => {
     // 1. Linear Gradient
-    const r1 = Skia.XYWHRect(0, 0, SIZE, SIZE);
+    const r1 = rect(0, 0, SIZE, SIZE);
     const p1 = paint.copy();
     const colors = [Skia.Color("#61DAFB"), Skia.Color("#fb61da")];
     p1.setShader(
       Skia.Shader.MakeLinearGradient(
-        Skia.Point(0, 0),
-        Skia.Point(SIZE, SIZE),
+        vec(0, 0),
+        vec(SIZE, SIZE),
         colors,
         null,
         TileMode.Decal
@@ -36,7 +38,7 @@ export const Gradients = () => {
     const p2 = paint.copy();
     p2.setShader(
       Skia.Shader.MakeRadialGradient(
-        Skia.Point(SIZE + SIZE / 2, SIZE / 2),
+        vec(SIZE + SIZE / 2, SIZE / 2),
         SIZE / 2,
         colors.reverse(),
         null,
@@ -46,7 +48,7 @@ export const Gradients = () => {
     canvas.drawRect(r2, p2);
 
     // 3. Two Point Canonical
-    const r3 = Skia.XYWHRect(0, SIZE, SIZE, SIZE);
+    const r3 = rect(0, SIZE, SIZE, SIZE);
     const p3 = paint.copy();
     const R = SIZE / 2;
     p3.setShader(
@@ -63,7 +65,7 @@ export const Gradients = () => {
     canvas.drawRect(r3, p3);
 
     // 4. Angular Gradient
-    const r4 = Skia.XYWHRect(SIZE, SIZE, SIZE, SIZE);
+    const r4 = rect(SIZE, SIZE, SIZE, SIZE);
     const p4 = paint.copy();
     const sweepColors = [
       Skia.Color("#61DAFB"),
