@@ -46,7 +46,6 @@ export interface NodeProps {
   [NodeType.RuntimeEffect]: RuntimeEffectProps;
   [NodeType.Declaration]: DeclarationProps;
   [NodeType.Drawing]: DrawingProps;
-  //[NodeType.DropShadow]: DropShadowProps;
   //  [NodeType.Paragraph]: ParagraphProps;
   // [NodeType.Text]: TextProps;
   // [NodeType.Span]: SpanProps;

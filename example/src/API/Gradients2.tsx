@@ -13,6 +13,7 @@ import {
   center,
   RadialGradient,
   TwoPointConicalGradient,
+  SweepGradient,
   vec,
 } from "@shopify/react-native-skia";
 
@@ -60,6 +61,12 @@ export const Gradients = () => {
             colors={["#61DAFB", "#fb61da"]}
           />
         </Paint>
+        <Paint ref={p4}>
+          <SweepGradient
+            c={vec(SIZE + R, SIZE + R)}
+            colors={["#61DAFB", "#fb61da", "#dafb61", "#61DAFB"]}
+          />
+        </Paint>
         <Rect rect={r1} paint={p1} />
         <Rect rect={r2} paint={p2} />
         <Rect rect={r3} paint={p3} />
@@ -78,22 +85,6 @@ const styles = StyleSheet.create({
 });
 
 // const onGradientDraw = useDrawCallback((canvas) => {
-//   // 3. Two Point Canonical
-//   const r3 = rect(0, SIZE, SIZE, SIZE);
-//   const p3 = paint.copy();
-//   const R = SIZE / 2;
-//   p3.setShader(
-//     Skia.Shader.MakeTwoPointConicalGradient(
-//       Skia.Point(R, SIZE),
-//       R,
-//       Skia.Point(R, SIZE),
-//       SIZE / 4,
-//       colors.reverse(),
-//       null,
-//       TileMode.Clamp
-//     )
-//   );
-//   canvas.drawRect(r3, p3);
 
 //   // 4. Angular Gradient
 //   const p4 = paint.copy();
