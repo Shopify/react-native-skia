@@ -86,25 +86,6 @@ const styles = StyleSheet.create({
 
 // const onGradientDraw = useDrawCallback((canvas) => {
 
-//   // 4. Angular Gradient
-//   const p4 = paint.copy();
-//   const sweepColors = [
-//     Skia.Color("#61DAFB"),
-//     Skia.Color("#fb61da"),
-//     Skia.Color("#dafb61"),
-//     Skia.Color("#61DAFB"),
-//   ];
-//   p4.setShader(
-//     Skia.Shader.MakeSweepGradient(
-//       SIZE + R,
-//       SIZE + R,
-//       sweepColors,
-//       null,
-//       TileMode.Clamp
-//     )
-//   );
-//   canvas.drawRect(r4, p4);
-
 //   // 5. Turbulence
 //   const p5 = paint.copy();
 //   // p5.setColor(Skia.Color("#61DAFB"));

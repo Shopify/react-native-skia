@@ -1,12 +1,11 @@
 import type { ForwardedRef } from "react";
 
-import type { IPaint, IRuntimeEffect } from "../skia";
+import type { IPaint } from "../skia";
 
 import type { DrawingContext } from "./DrawingContext";
 import type { AnimatedProps } from "./nodes/processors/Animations";
 import type { DeclarationResult } from "./nodes/Declaration";
 import type {
-  RuntimeEffectProps,
   GroupProps,
   PaintProps,
   DeclarationProps,
@@ -23,7 +22,6 @@ export enum NodeType {
   Group = "skGroup",
   Paint = "skPaint",
   ColorMatrix = "skColorMatrix",
-  RuntimeEffect = "skRuntimeEffect",
   Declaration = "skDeclaration",
   Drawing = "skDrawing",
   // DropShadow = "skDropShadow",
@@ -40,7 +38,6 @@ export interface NodeProps {
   [NodeType.Group]: AnimatedProps<GroupProps>;
   [NodeType.Paint]: PaintProps;
   [NodeType.ColorMatrix]: ColorMatrixProps;
-  [NodeType.RuntimeEffect]: RuntimeEffectProps;
   [NodeType.Declaration]: DeclarationProps;
   [NodeType.Drawing]: DrawingProps;
   //  [NodeType.Paragraph]: ParagraphProps;
@@ -50,7 +47,6 @@ export interface NodeProps {
 
 export interface NodeInstance {
   [NodeType.Paint]: IPaint;
-  [NodeType.RuntimeEffect]: IRuntimeEffect;
   //[NodeType.Span]: string;
 }
 
@@ -83,8 +79,6 @@ declare global {
       skGroup: NodeProps[NodeType.Group];
       skPaint: NodeProps[NodeType.Paint] & RefProps<IPaint>;
       skColorMatrix: NodeProps[NodeType.ColorMatrix];
-      skRuntimeEffect: NodeProps[NodeType.RuntimeEffect] &
-        RefProps<IRuntimeEffect>;
       skDeclaration: NodeProps[NodeType.Declaration];
       // skDropShadow: NodeProps[NodeType.DropShadow];
       // skParagraph: NodeProps[NodeType.Paragraph];

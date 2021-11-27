@@ -7,11 +7,9 @@ import {
   GroupNode,
   PaintNode,
   DeclarationNode,
-  RuntimeEffectNode,
   ColorMatrixNode,
   DrawingNode,
 } from "./nodes";
-import type { RuntimeEffectProps } from "./nodes";
 import type { SkContainer, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
@@ -131,14 +129,6 @@ const createNode = (type: NodeType, props: Props) => {
       return ColorMatrixNode(props as Parameters<typeof ColorMatrixNode>[0]);
     case NodeType.Declaration:
       return DeclarationNode(props as Parameters<typeof DeclarationNode>[0]);
-    case NodeType.RuntimeEffect:
-      // TODO: move instance creation to finalize children?
-      const rtProps = props as RuntimeEffectProps;
-      const rt = Skia.RuntimeEffect.Make(rtProps.source);
-      if (!rt) {
-        throw new Error("Couldn't compile RT");
-      }
-      return RuntimeEffectNode(rtProps, rt);
     // case NodeType.Paragraph:
     //   return ParagraphNode(props as ParagraphProps);
     // case NodeType.Text:
