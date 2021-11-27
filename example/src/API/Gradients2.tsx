@@ -15,7 +15,11 @@ import {
   TwoPointConicalGradient,
   SweepGradient,
   vec,
+  Blend,
+  Turbulence,
 } from "@shopify/react-native-skia";
+
+import { ColorShader } from "../../../package/src/renderer/nodes/shaders/Color";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 2;
@@ -67,6 +71,12 @@ export const Gradients = () => {
             colors={["#61DAFB", "#fb61da", "#dafb61", "#61DAFB"]}
           />
         </Paint>
+        <Paint ref={p5}>
+          <Blend mode="difference">
+            <ColorShader color="#61DAFB" />
+            <Turbulence freqX={0.05} freqY={0.05} octaves={4} />
+          </Blend>
+        </Paint>
         <Rect rect={r1} paint={p1} />
         <Rect rect={r2} paint={p2} />
         <Rect rect={r3} paint={p3} />
@@ -83,20 +93,3 @@ const styles = StyleSheet.create({
     height: SIZE * 4,
   },
 });
-
-// const onGradientDraw = useDrawCallback((canvas) => {
-
-//   // 5. Turbulence
-//   const p5 = paint.copy();
-//   // p5.setColor(Skia.Color("#61DAFB"));
-//   const one = Skia.Shader.MakeSweepGradient(
-//     R,
-//     2 * SIZE + R,
-//     sweepColors,
-//     null,
-//     TileMode.Clamp
-//   );
-//   const two = Skia.Shader.MakeTurbulence(0.05, 0.05, 4, 0, 0, 0);
-//   p5.setShader(Skia.Shader.MakeBlend(BlendMode.Difference, one, two));
-//   canvas.drawRect(r5, p5);
-// }, []);
