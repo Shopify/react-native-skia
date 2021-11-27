@@ -6,7 +6,6 @@ import { Skia } from "../skia";
 import {
   GroupNode,
   PaintNode,
-  RadialGradientNode,
   DeclarationNode,
   RuntimeEffectNode,
   ColorMatrixNode,
@@ -130,10 +129,6 @@ const createNode = (type: NodeType, props: Props) => {
       return PaintNode(props as Parameters<typeof PaintNode>[0], paint);
     case NodeType.ColorMatrix:
       return ColorMatrixNode(props as Parameters<typeof ColorMatrixNode>[0]);
-    case NodeType.RadialGradient:
-      return RadialGradientNode(
-        props as Parameters<typeof RadialGradientNode>[0]
-      );
     case NodeType.Declaration:
       return DeclarationNode(props as Parameters<typeof DeclarationNode>[0]);
     case NodeType.RuntimeEffect:

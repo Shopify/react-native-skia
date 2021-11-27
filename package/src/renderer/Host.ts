@@ -8,7 +8,6 @@ import type { DeclarationResult } from "./nodes/Declaration";
 import type {
   RuntimeEffectProps,
   GroupProps,
-  RadialGradientProps,
   PaintProps,
   DeclarationProps,
   // DropShadowProps,
@@ -23,7 +22,6 @@ export enum NodeType {
   Canvas = "skCanvas",
   Group = "skGroup",
   Paint = "skPaint",
-  RadialGradient = "skRadialGradient",
   ColorMatrix = "skColorMatrix",
   RuntimeEffect = "skRuntimeEffect",
   Declaration = "skDeclaration",
@@ -41,7 +39,6 @@ export interface NodeProps {
   [NodeType.Canvas]: CanvasProps;
   [NodeType.Group]: AnimatedProps<GroupProps>;
   [NodeType.Paint]: PaintProps;
-  [NodeType.RadialGradient]: RadialGradientProps;
   [NodeType.ColorMatrix]: ColorMatrixProps;
   [NodeType.RuntimeEffect]: RuntimeEffectProps;
   [NodeType.Declaration]: DeclarationProps;
@@ -85,7 +82,6 @@ declare global {
     interface IntrinsicElements {
       skGroup: NodeProps[NodeType.Group];
       skPaint: NodeProps[NodeType.Paint] & RefProps<IPaint>;
-      skRadialGradient: NodeProps[NodeType.RadialGradient];
       skColorMatrix: NodeProps[NodeType.ColorMatrix];
       skRuntimeEffect: NodeProps[NodeType.RuntimeEffect] &
         RefProps<IRuntimeEffect>;
