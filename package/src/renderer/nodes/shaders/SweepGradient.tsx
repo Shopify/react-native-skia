@@ -1,32 +1,36 @@
-import type { Vector } from "../../math";
+import type { Vector } from "../../math/Vector";
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../Declaration";
 
 import type { GradientProps } from "./Gradient";
 import { processGradientProps } from "./Gradient";
 
-export interface RadialGradientProps extends GradientProps {
+export interface SweepGradientProps extends GradientProps {
   c: Vector;
-  r: number;
+  startAngleInDegrees?: number;
+  endAngleInDegrees?: number;
 }
 
-export const RadialGradient = ({
+export const SweepGradient = ({
   c,
-  r,
+  startAngleInDegrees,
+  endAngleInDegrees,
   ...gradientProps
-}: RadialGradientProps) => {
+}: SweepGradientProps) => {
   const onDeclare = useDeclaration(() => {
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(gradientProps);
-    return Skia.Shader.MakeRadialGradient(
-      c,
-      r,
+    return Skia.Shader.MakeSweepGradient(
+      c.x,
+      c.y,
       colors,
       positions,
       mode,
       localMatrix,
-      flags
+      flags,
+      startAngleInDegrees,
+      endAngleInDegrees
     );
-  }, [c, gradientProps, r]);
+  }, [c.x, c.y, endAngleInDegrees, gradientProps, startAngleInDegrees]);
   return <skDeclaration onDeclare={onDeclare} />;
 };
