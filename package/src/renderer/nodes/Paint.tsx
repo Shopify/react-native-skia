@@ -40,5 +40,6 @@ export const PaintNode = (
   },
   children: [],
   instance: paint,
+  // TODO: set to false if we animate the paint
   memoizable: true,
 });

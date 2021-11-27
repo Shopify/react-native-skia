@@ -31,11 +31,11 @@ export interface CustomPaintProps {
 export const enumKey = <K extends string>(k: K) =>
   (k.charAt(0).toUpperCase() + k.slice(1)) as Capitalize<K>;
 
-const alpha = (c: number) => ((c >> 24) & 255) / 255;
-const red = (c: number) => (c >> 16) & 255;
-const green = (c: number) => (c >> 8) & 255;
-const blue = (c: number) => c & 255;
-const toColor = (r: number, g: number, b: number, af: number) => {
+export const alpha = (c: number) => ((c >> 24) & 255) / 255;
+export const red = (c: number) => (c >> 16) & 255;
+export const green = (c: number) => (c >> 8) & 255;
+export const blue = (c: number) => c & 255;
+export const color = (r: number, g: number, b: number, af: number) => {
   const a = Math.round(af * 255);
   let processedColor = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0;
   // On android we need to move the alpha byte to the start of the structure
@@ -52,14 +52,14 @@ export const processColor = (cl: string | number, currentOpacity: number) => {
   const g = green(icl);
   const b = blue(icl);
   const o = alpha(icl);
-  return toColor(r, g, b, o * currentOpacity);
+  return color(r, g, b, o * currentOpacity);
 };
 
 export const processPaint = (
   paint: IPaint,
   currentOpacity: number,
   {
-    color,
+    color: cl,
     blendMode,
     style,
     strokeWidth,
@@ -69,8 +69,8 @@ export const processPaint = (
     opacity,
   }: CustomPaintProps
 ) => {
-  if (color !== undefined) {
-    const c = processColor(color, currentOpacity);
+  if (cl !== undefined) {
+    const c = processColor(cl, currentOpacity);
     paint.setColor(c);
   } else {
     const c = processColor(paint.getColor(), currentOpacity);
@@ -103,7 +103,7 @@ export const selectPaint = (
   currentPaint: IPaint,
   {
     paint,
-    color,
+    color: cl,
     blendMode,
     style: paintStyle,
     strokeWidth,
@@ -114,7 +114,7 @@ export const selectPaint = (
   }: CustomPaintProps
 ) => {
   const hasCustomPaint =
-    color !== undefined ||
+    cl !== undefined ||
     blendMode !== undefined ||
     paintStyle !== undefined ||
     strokeWidth !== undefined ||

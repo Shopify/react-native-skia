@@ -33,5 +33,6 @@ export const DeclarationNode = (
     return obj;
   },
   children: [],
+  // TODO: set to false if we animate the paint
   memoizable: true,
 });

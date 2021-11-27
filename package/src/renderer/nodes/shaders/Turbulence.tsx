@@ -1,5 +1,7 @@
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../Declaration";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 export interface TurbulenceProps {
   freqX: number;
@@ -10,24 +12,22 @@ export interface TurbulenceProps {
   tileHeight: number;
 }
 
-export const Turbulence = ({
-  freqX,
-  freqY,
-  octaves,
-  seed,
-  tileWidth,
-  tileHeight,
-}: TurbulenceProps) => {
-  const onDeclare = useDeclaration(() => {
-    return Skia.Shader.MakeTurbulence(
-      freqX,
-      freqY,
-      octaves,
-      seed,
-      tileWidth,
-      tileHeight
-    );
-  }, [freqX, freqY, octaves, seed, tileHeight, tileWidth]);
+export const Turbulence = (props: AnimatedProps<TurbulenceProps>) => {
+  const onDeclare = useDeclaration(
+    (ctx) => {
+      const { freqX, freqY, octaves, seed, tileWidth, tileHeight } =
+        materialize(ctx, props);
+      return Skia.Shader.MakeTurbulence(
+        freqX,
+        freqY,
+        octaves,
+        seed,
+        tileWidth,
+        tileHeight
+      );
+    },
+    [props]
+  );
   return <skDeclaration onDeclare={onDeclare} />;
 };
 
