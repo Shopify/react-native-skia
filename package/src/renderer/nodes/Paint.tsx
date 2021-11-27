@@ -6,6 +6,7 @@ import { NodeType, processChildren } from "../Host";
 import type { IPaint } from "../../skia";
 import { isShader } from "../../skia/Shader/Shader";
 import { isMaskFilter } from "../../skia/MaskFilter";
+import { isColorFilter } from "../../skia/ColorFilter/ColorFilter";
 
 import type { CustomPaintProps } from "./processors";
 import { processPaint } from "./processors";
@@ -35,6 +36,8 @@ export const PaintNode = (
         paint.setShader(child);
       } else if (isMaskFilter(child)) {
         paint.setMaskFilter(child);
+      } else if (isColorFilter(child)) {
+        paint.setColorFilter(child);
       }
     });
   },

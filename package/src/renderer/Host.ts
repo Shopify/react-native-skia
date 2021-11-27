@@ -11,7 +11,6 @@ import type {
   DeclarationProps,
   // DropShadowProps,
   // ParagraphProps,
-  ColorMatrixProps,
   DrawingProps,
   // TextProps,
   // SpanProps,
@@ -21,7 +20,6 @@ export enum NodeType {
   Canvas = "skCanvas",
   Group = "skGroup",
   Paint = "skPaint",
-  ColorMatrix = "skColorMatrix",
   Declaration = "skDeclaration",
   Drawing = "skDrawing",
   // DropShadow = "skDropShadow",
@@ -37,7 +35,6 @@ export interface NodeProps {
   [NodeType.Canvas]: CanvasProps;
   [NodeType.Group]: AnimatedProps<GroupProps>;
   [NodeType.Paint]: PaintProps;
-  [NodeType.ColorMatrix]: ColorMatrixProps;
   [NodeType.Declaration]: DeclarationProps;
   [NodeType.Drawing]: DrawingProps;
   //  [NodeType.Paragraph]: ParagraphProps;
@@ -78,7 +75,6 @@ declare global {
     interface IntrinsicElements {
       skGroup: NodeProps[NodeType.Group];
       skPaint: NodeProps[NodeType.Paint] & RefProps<IPaint>;
-      skColorMatrix: NodeProps[NodeType.ColorMatrix];
       skDeclaration: NodeProps[NodeType.Declaration];
       // skDropShadow: NodeProps[NodeType.DropShadow];
       // skParagraph: NodeProps[NodeType.Paragraph];

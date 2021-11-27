@@ -2,6 +2,7 @@ import type { IImage } from "../../../skia";
 import { useImage, Skia } from "../../../skia";
 import { exhaustiveCheck } from "../../typeddash";
 import { useFrame } from "../processors/Animations/Animations";
+import type { CustomPaintProps } from "../processors/Paint";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -13,7 +14,7 @@ export type Fit =
   | "none"
   | "scaleDown";
 
-export interface UnresolvedImageProps {
+export interface ImageProps extends CustomPaintProps {
   source: number | IImage;
   x: number;
   y: number;
@@ -22,18 +23,7 @@ export interface UnresolvedImageProps {
   fit: Fit;
 }
 
-export interface ImageProps extends Omit<UnresolvedImageProps, "source"> {
-  source: IImage;
-}
-
-export const Image = ({
-  source,
-  x,
-  y,
-  width,
-  height,
-  fit,
-}: UnresolvedImageProps) => {
+export const Image = ({ source, x, y, width, height, fit }: ImageProps) => {
   const image = useImage(source);
   const onDraw = useFrame(
     ({ canvas, paint }) => {
@@ -67,7 +57,7 @@ export const Image = ({
 Image.defaultProps = {
   x: 0,
   y: 0,
-  resizeMode: "contain",
+  fit: "contain",
 };
 
 interface Size {

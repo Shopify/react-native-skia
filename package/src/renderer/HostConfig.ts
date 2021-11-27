@@ -3,13 +3,7 @@ import type { HostConfig } from "react-reconciler";
 
 import { Skia } from "../skia";
 
-import {
-  GroupNode,
-  PaintNode,
-  DeclarationNode,
-  ColorMatrixNode,
-  DrawingNode,
-} from "./nodes";
+import { GroupNode, PaintNode, DeclarationNode, DrawingNode } from "./nodes";
 import type { SkContainer, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
@@ -125,8 +119,6 @@ const createNode = (type: NodeType, props: Props) => {
       const paint = Skia.Paint();
       paint.setAntiAlias(true);
       return PaintNode(props as Parameters<typeof PaintNode>[0], paint);
-    case NodeType.ColorMatrix:
-      return ColorMatrixNode(props as Parameters<typeof ColorMatrixNode>[0]);
     case NodeType.Declaration:
       return DeclarationNode(props as Parameters<typeof DeclarationNode>[0]);
     // case NodeType.Paragraph:

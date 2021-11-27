@@ -1,26 +1,16 @@
-import { NodeType } from "../../Host";
-import type { SkNode } from "../../Host";
 import { Skia } from "../../../skia";
+import { useDeclaration } from "../Declaration";
 
 export interface ColorMatrixProps {
-  values: number[];
+  value: number[];
 }
 
-export const ColorMatrix = (props: ColorMatrixProps) => {
-  return <skColorMatrix {...props} />;
+export const ColorMatrix = ({ value }: ColorMatrixProps) => {
+  const onDeclare = useDeclaration(() => {
+    return Skia.ColorFilter.MakeMatrix(value);
+  }, [value]);
+  return <skDeclaration onDeclare={onDeclare} />;
 };
-
-export const ColorMatrixNode = (
-  props: ColorMatrixProps
-): SkNode<NodeType.ColorMatrix> => ({
-  type: NodeType.ColorMatrix,
-  props,
-  draw: ({ paint }, { values }) => {
-    paint.setColorFilter(Skia.ColorFilter.MakeMatrix(values));
-  },
-  children: [],
-  memoizable: true,
-});
 
 export const OpacityMatrix = (opacity: number) => [
   1,

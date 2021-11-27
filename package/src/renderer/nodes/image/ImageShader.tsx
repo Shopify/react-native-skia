@@ -5,12 +5,12 @@ import { useDeclaration } from "../Declaration";
 import type { TransformProps } from "../processors";
 import { localMatrix } from "../processors/Transform";
 
-import type { UnresolvedImageProps } from "./Image";
+import type { ImageProps } from "./Image";
 
 // TODO: move to shaders folder
 // TODO: add fit property and infer the transform matrix from src and dst
 interface ImageShaderProps extends TransformProps {
-  source: UnresolvedImageProps["source"];
+  source: ImageProps["source"];
 }
 
 export const ImageShader = ({
