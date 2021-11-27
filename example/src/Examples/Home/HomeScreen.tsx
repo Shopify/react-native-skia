@@ -13,6 +13,11 @@ export const HomeScreen: React.FC = () => {
         route="Breathe"
       />
       <HomeScreenButton
+        title="🏞 Filters"
+        description="Simple Image Filters"
+        route="Filters"
+      />
+      <HomeScreenButton
         title="Drawing"
         description="Use touches to draw with Skia"
         route="Drawing"

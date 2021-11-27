@@ -1,46 +1,52 @@
 import type { Vector } from "../../math/Vector";
 import type { SkEnum } from "../processors/Paint";
-import { processColor, enumKey } from "../processors/Paint";
 import { TileMode, Skia } from "../../../skia";
 import { useDeclaration } from "../Declaration";
 import type { TransformProps } from "../processors/Transform";
 import { localMatrix } from "../processors/Transform";
+import { enumKey, processColor } from "../processors/Paint";
 
-export interface LinearGradientProps extends TransformProps {
+export interface TwoPointConicalGradientProps extends TransformProps {
   start: Vector;
+  startR: number;
   end: Vector;
+  endR: number;
   positions?: number[];
   colors: string[];
   mode: SkEnum<typeof TileMode>;
-  flags?: number;
+  flag?: number;
 }
 
-export const LinearGradient = ({
+export const TwoPointConicalGradient = ({
   start,
+  startR,
   end,
+  endR,
   positions,
   colors,
   mode,
-  flags,
+  flag,
   ...transformProps
-}: LinearGradientProps) => {
+}: TwoPointConicalGradientProps) => {
   const onDeclare = useDeclaration(
     ({ opacity }) => {
-      return Skia.Shader.MakeLinearGradient(
+      return Skia.Shader.MakeTwoPointConicalGradient(
         start,
+        startR,
         end,
+        endR,
         colors.map((color) => processColor(color, opacity)),
         positions ?? null,
         TileMode[enumKey(mode)],
         localMatrix(transformProps),
-        flags
+        flag
       );
     },
-    [colors, end, flags, mode, positions, start, transformProps]
+    [colors, end, endR, flag, mode, positions, start, startR, transformProps]
   );
   return <skDeclaration onDeclare={onDeclare} />;
 };
 
-LinearGradient.defaultProps = {
+TwoPointConicalGradient.defaultProps = {
   mode: "clamp",
 };

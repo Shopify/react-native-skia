@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import type { DrawingContext } from "../../../DrawingContext";
+import { mapKeys } from "../../../typeddash";
 
 export type FrameValue<T> = (ctx: DrawingContext) => T;
 
@@ -9,8 +10,6 @@ export const useFrame = <T>(
   deps?: Parameters<typeof useCallback>[1]
   // eslint-disable-next-line react-hooks/exhaustive-deps
 ) => useCallback(cb, deps ?? []);
-
-const mapKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
 
 export const materialize = <T>(
   ctx: DrawingContext,

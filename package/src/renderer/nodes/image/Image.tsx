@@ -1,6 +1,6 @@
 import type { IImage } from "../../../skia";
 import { useImage, Skia } from "../../../skia";
-import { exhaustiveCheck } from "../../exhaustiveCheck";
+import { exhaustiveCheck } from "../../typeddash";
 import { useFrame } from "../processors/Animations/Animations";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html

@@ -6,11 +6,9 @@ import type { DrawingContext } from "./DrawingContext";
 import type { AnimatedProps } from "./nodes/processors/Animations";
 import type { DeclarationResult } from "./nodes/Declaration";
 import type {
-  ShaderProps,
   RuntimeEffectProps,
   GroupProps,
   RadialGradientProps,
-  LinearGradientProps,
   PaintProps,
   DeclarationProps,
   // DropShadowProps,
@@ -26,9 +24,7 @@ export enum NodeType {
   Group = "skGroup",
   Paint = "skPaint",
   RadialGradient = "skRadialGradient",
-  LinearGradient = "skLinearGradient",
   ColorMatrix = "skColorMatrix",
-  Shader = "skShader",
   RuntimeEffect = "skRuntimeEffect",
   Declaration = "skDeclaration",
   Drawing = "skDrawing",
@@ -46,9 +42,7 @@ export interface NodeProps {
   [NodeType.Group]: AnimatedProps<GroupProps>;
   [NodeType.Paint]: PaintProps;
   [NodeType.RadialGradient]: RadialGradientProps;
-  [NodeType.LinearGradient]: LinearGradientProps;
   [NodeType.ColorMatrix]: ColorMatrixProps;
-  [NodeType.Shader]: ShaderProps;
   [NodeType.RuntimeEffect]: RuntimeEffectProps;
   [NodeType.Declaration]: DeclarationProps;
   [NodeType.Drawing]: DrawingProps;
@@ -93,9 +87,7 @@ declare global {
       skGroup: NodeProps[NodeType.Group];
       skPaint: NodeProps[NodeType.Paint] & RefProps<IPaint>;
       skRadialGradient: NodeProps[NodeType.RadialGradient];
-      skLinearGradient: NodeProps[NodeType.LinearGradient];
       skColorMatrix: NodeProps[NodeType.ColorMatrix];
-      skShader: NodeProps[NodeType.Shader];
       skRuntimeEffect: NodeProps[NodeType.RuntimeEffect] &
         RefProps<IRuntimeEffect>;
       skDeclaration: NodeProps[NodeType.Declaration];

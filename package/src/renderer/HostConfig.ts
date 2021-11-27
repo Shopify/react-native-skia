@@ -7,9 +7,7 @@ import {
   GroupNode,
   PaintNode,
   RadialGradientNode,
-  LinearGradientNode,
   DeclarationNode,
-  ShaderNode,
   RuntimeEffectNode,
   ColorMatrixNode,
   DrawingNode,
@@ -17,7 +15,7 @@ import {
 import type { RuntimeEffectProps } from "./nodes";
 import type { SkContainer, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
-import { exhaustiveCheck } from "./exhaustiveCheck";
+import { exhaustiveCheck, mapKeys } from "./typeddash";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -54,12 +52,10 @@ type SkiaHostConfig = HostConfig<
   NoTimeout
 >;
 
-const typedKeys = <O>(o: O) => Object.keys(o) as (keyof O)[];
-
 // Shallow eq on props (without children)
 const shallowEq = <P extends Props>(p1: P, p2: P): boolean => {
-  const keys1 = typedKeys(p1);
-  const keys2 = typedKeys(p2);
+  const keys1 = mapKeys(p1);
+  const keys2 = mapKeys(p2);
   if (keys1.length !== keys2.length) {
     return false;
   }
@@ -123,7 +119,7 @@ const insertBefore = (parent: SkNode, child: SkNode, before: SkNode) => {
 const createNode = (type: NodeType, props: Props) => {
   switch (type) {
     case NodeType.Canvas:
-      throw new Error("Cannot create canvas node");
+      throw new Error("Cannot create a canvas node");
     case NodeType.Group:
       return GroupNode(props as Parameters<typeof GroupNode>[0]);
     case NodeType.Drawing:
@@ -138,14 +134,8 @@ const createNode = (type: NodeType, props: Props) => {
       return RadialGradientNode(
         props as Parameters<typeof RadialGradientNode>[0]
       );
-    case NodeType.LinearGradient:
-      return LinearGradientNode(
-        props as Parameters<typeof LinearGradientNode>[0]
-      );
     case NodeType.Declaration:
       return DeclarationNode(props as Parameters<typeof DeclarationNode>[0]);
-    // case NodeType.DropShadow:
-    //   return DropShadowNode(props as DropShadowProps);
     case NodeType.RuntimeEffect:
       // TODO: move instance creation to finalize children?
       const rtProps = props as RuntimeEffectProps;
@@ -154,8 +144,6 @@ const createNode = (type: NodeType, props: Props) => {
         throw new Error("Couldn't compile RT");
       }
       return RuntimeEffectNode(rtProps, rt);
-    case NodeType.Shader:
-      return ShaderNode(props as Parameters<typeof ShaderNode>[0]);
     // case NodeType.Paragraph:
     //   return ParagraphNode(props as ParagraphProps);
     // case NodeType.Text:
@@ -295,7 +283,7 @@ export const skHostConfig: SkiaHostConfig = {
     if (shallowEq(prevProps, nextProps) && allChildrenAreMemoized(instance)) {
       return;
     }
-    instance.memoized = false;
+    bustBranchMemoization(instance);
     instance.props = nextProps;
   },
 

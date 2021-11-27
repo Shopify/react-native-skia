@@ -1,40 +1,30 @@
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode } from "react";
 
-import { NodeType, processChildren } from "../Host";
-import type { SkNode } from "../Host";
+import { isShader } from "../../skia";
 import type { IRuntimeEffect } from "../../skia";
 
+import { useDeclaration } from "./Declaration";
+
 export interface ShaderProps {
-  rt: RefObject<IRuntimeEffect>;
+  source: IRuntimeEffect;
   uniforms: number[];
   children?: ReactNode | ReactNode[];
 }
 
-export const Shader = (props: ShaderProps) => {
-  return <skShader {...props} />;
+export const Shader = ({ uniforms, source, ...props }: ShaderProps) => {
+  const onDeclare = useDeclaration(
+    (_, children) => {
+      return source.makeShaderWithChildren(
+        uniforms,
+        true,
+        children.filter(isShader)
+      );
+    },
+    [source, uniforms]
+  );
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 
 Shader.defaultProps = {
   uniforms: [],
 };
-
-export const ShaderNode = (props: ShaderProps): SkNode<NodeType.Shader> => ({
-  type: NodeType.Shader,
-  props,
-  draw: (ctx, { uniforms, rt }, children) => {
-    if (rt.current) {
-      // const { paint } = ctx;
-      // const shaderChildren = processChildren(ctx, children);
-      // const shader = rt.current.makeShaderWithChildren(
-      //   uniforms,
-      //   true,
-      //   shaderChildren
-      // );
-      // paint.setShader(shader);
-      // return shader;
-    }
-    return;
-  },
-  children: [],
-  memoizable: true,
-});

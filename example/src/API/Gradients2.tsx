@@ -2,10 +2,6 @@ import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
   Skia,
-  useDrawCallback,
-  BlendMode,
-  TileMode,
-  vec,
   rect,
   Canvas,
   Rect,
@@ -16,13 +12,13 @@ import {
   bottomRight,
   center,
   RadialGradient,
-  RuntimeEffect,
-  useImage,
-  ImageShader,
+  TwoPointConicalGradient,
+  vec,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 2;
+const R = SIZE / 2;
 
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
@@ -31,16 +27,13 @@ const r2 = rect(SIZE, 0, SIZE, SIZE);
 const r3 = rect(0, SIZE, SIZE, SIZE);
 const r4 = rect(SIZE, SIZE, SIZE, SIZE);
 const r5 = rect(0, 2 * SIZE, SIZE, SIZE);
-const r6 = rect(SIZE, 2 * SIZE, SIZE, SIZE);
 
 export const Gradients = () => {
-  const oslo = useImage(require("../assets/oslo.jpg"));
   const p1 = usePaintRef();
   const p2 = usePaintRef();
-  const p6 = usePaintRef();
-  if (oslo === null) {
-    return null;
-  }
+  const p3 = usePaintRef();
+  const p4 = usePaintRef();
+  const p5 = usePaintRef();
   return (
     <ScrollView>
       <Canvas style={styles.container}>
@@ -58,15 +51,20 @@ export const Gradients = () => {
             colors={["#fb61da", "#61DAFB"]}
           />
         </Paint>
-        <Paint ref={p6}>
-          <ImageShader source={oslo} />
+        <Paint ref={p3}>
+          <TwoPointConicalGradient
+            start={vec(R, SIZE)}
+            startR={R}
+            end={vec(R, R)}
+            endR={R}
+            colors={["#61DAFB", "#fb61da"]}
+          />
         </Paint>
         <Rect rect={r1} paint={p1} />
         <Rect rect={r2} paint={p2} />
-        <Rect rect={r3} />
-        <Rect rect={r4} />
-        <Rect rect={r5} />
-        <Rect rect={r6} paint={p6} />
+        <Rect rect={r3} paint={p3} />
+        <Rect rect={r4} paint={p4} />
+        <Rect rect={r5} paint={p5} />
       </Canvas>
     </ScrollView>
   );

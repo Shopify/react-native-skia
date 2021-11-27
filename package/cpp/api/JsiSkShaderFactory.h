@@ -50,7 +50,7 @@ public:
           arguments[5].isUndefined() || count < 6
               ? nullptr
               : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
-      auto flag = count < 7 ? 0 : arguments[6].asNumber();
+      auto flag = count >= 7 && !arguments[6].isUndefined() ? arguments[6].asNumber(): 0;
       gradient =
           SkGradientShader::MakeLinear(pts, colors.data(), positions.data(),
                                        (int)size, tileMode, flag, localMatrix);
@@ -94,7 +94,7 @@ public:
           arguments[5].isUndefined() || count < 6
               ? nullptr
               : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
-      auto flag = count < 7 ? 0 : arguments[6].asNumber();
+      auto flag = count >= 7 && !arguments[6].isUndefined() ? arguments[6].asNumber(): 0;
       gradient = SkGradientShader::MakeRadial(center, r, colors.data(),
                                               positions.data(), size, tileMode,
                                               flag, localMatrix);
@@ -125,7 +125,7 @@ public:
     }
 
     auto tileMode = (SkTileMode)arguments[4].asNumber();
-    auto flags = count < 7 ? 0 : arguments[6].asNumber();
+    auto flags = count >= 7 && !arguments[6].isUndefined() ? arguments[6].asNumber(): 0;
     auto startAngle =
         (count < 8 || arguments[7].isUndefined()) ? 0 : arguments[7].asNumber();
     auto endAngle = (count < 9 || arguments[8].isUndefined())
@@ -181,7 +181,7 @@ public:
           arguments[7].isUndefined() || count < 8
               ? nullptr
               : JsiSkMatrix::fromValue(runtime, arguments[7]).get();
-      auto flag = count < 9 ? 0 : arguments[8].asNumber();
+      auto flag = count >= 9 && !arguments[8].isUndefined() ? arguments[8].asNumber(): 0;
       gradient = SkGradientShader::MakeTwoPointConical(
           start, startRadius, end, endRadius, colors.data(), positions.data(),
           (int)size, tileMode, flag, localMatrix);
