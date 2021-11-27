@@ -23,7 +23,15 @@ export interface ImageProps extends CustomPaintProps {
   fit: Fit;
 }
 
-export const Image = ({ source, x, y, width, height, fit }: ImageProps) => {
+export const Image = ({
+  source,
+  x,
+  y,
+  width,
+  height,
+  fit,
+  ...props
+}: ImageProps) => {
   const image = useImage(source);
   const onDraw = useFrame(
     ({ canvas, paint }) => {
@@ -51,7 +59,7 @@ export const Image = ({ source, x, y, width, height, fit }: ImageProps) => {
     },
     [image, fit, width, height, x, y]
   );
-  return <skDrawing onDraw={onDraw} />;
+  return <skDrawing onDraw={onDraw} {...props} />;
 };
 
 Image.defaultProps = {
