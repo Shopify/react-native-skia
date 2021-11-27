@@ -5,11 +5,10 @@ import { Skia } from "../skia";
 
 import {
   GroupNode,
-  BlurNode,
   PaintNode,
   RadialGradientNode,
   LinearGradientNode,
-  ImageShaderNode,
+  DeclarationNode,
   ShaderNode,
   RuntimeEffectNode,
   ColorMatrixNode,
@@ -143,10 +142,8 @@ const createNode = (type: NodeType, props: Props) => {
       return LinearGradientNode(
         props as Parameters<typeof LinearGradientNode>[0]
       );
-    case NodeType.Blur:
-      return BlurNode(props as Parameters<typeof BlurNode>[0]);
-    case NodeType.ImageShader:
-      return ImageShaderNode(props as Parameters<typeof ImageShaderNode>[0]);
+    case NodeType.Declaration:
+      return DeclarationNode(props as Parameters<typeof DeclarationNode>[0]);
     // case NodeType.DropShadow:
     //   return DropShadowNode(props as DropShadowProps);
     case NodeType.RuntimeEffect:

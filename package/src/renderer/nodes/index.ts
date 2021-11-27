@@ -11,3 +11,4 @@ export * from "./Paint";
 export * from "./RuntimeEffect";
 export * from "./Shader";
 export * from "./Drawing";
+export * from "./Declaration";

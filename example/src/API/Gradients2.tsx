@@ -17,6 +17,8 @@ import {
   center,
   RadialGradient,
   RuntimeEffect,
+  useImage,
+  ImageShader,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
@@ -32,61 +34,13 @@ const r5 = rect(0, 2 * SIZE, SIZE, SIZE);
 const r6 = rect(SIZE, 2 * SIZE, SIZE, SIZE);
 
 export const Gradients = () => {
-  const onGradientDraw = useDrawCallback((canvas) => {
-    // 3. Two Point Canonical
-    const r3 = rect(0, SIZE, SIZE, SIZE);
-    const p3 = paint.copy();
-    const R = SIZE / 2;
-    p3.setShader(
-      Skia.Shader.MakeTwoPointConicalGradient(
-        Skia.Point(R, SIZE),
-        R,
-        Skia.Point(R, SIZE),
-        SIZE / 4,
-        colors.reverse(),
-        null,
-        TileMode.Clamp
-      )
-    );
-    canvas.drawRect(r3, p3);
-
-    // 4. Angular Gradient
-    const p4 = paint.copy();
-    const sweepColors = [
-      Skia.Color("#61DAFB"),
-      Skia.Color("#fb61da"),
-      Skia.Color("#dafb61"),
-      Skia.Color("#61DAFB"),
-    ];
-    p4.setShader(
-      Skia.Shader.MakeSweepGradient(
-        SIZE + R,
-        SIZE + R,
-        sweepColors,
-        null,
-        TileMode.Clamp
-      )
-    );
-    canvas.drawRect(r4, p4);
-
-    // 5. Turbulence
-    const p5 = paint.copy();
-    // p5.setColor(Skia.Color("#61DAFB"));
-    const one = Skia.Shader.MakeSweepGradient(
-      R,
-      2 * SIZE + R,
-      sweepColors,
-      null,
-      TileMode.Clamp
-    );
-    const two = Skia.Shader.MakeTurbulence(0.05, 0.05, 4, 0, 0, 0);
-    p5.setShader(Skia.Shader.MakeBlend(BlendMode.Difference, one, two));
-    canvas.drawRect(r5, p5);
-  }, []);
-
+  const oslo = useImage(require("../assets/oslo.jpg"));
   const p1 = usePaintRef();
   const p2 = usePaintRef();
   const p6 = usePaintRef();
+  if (oslo === null) {
+    return null;
+  }
   return (
     <ScrollView>
       <Canvas style={styles.container}>
@@ -104,7 +58,9 @@ export const Gradients = () => {
             colors={["#fb61da", "#61DAFB"]}
           />
         </Paint>
-        <Paint ref={p6} />
+        <Paint ref={p6}>
+          <ImageShader source={oslo} />
+        </Paint>
         <Rect rect={r1} paint={p1} />
         <Rect rect={r2} paint={p2} />
         <Rect rect={r3} />
@@ -122,3 +78,55 @@ const styles = StyleSheet.create({
     height: SIZE * 4,
   },
 });
+
+// const onGradientDraw = useDrawCallback((canvas) => {
+//   // 3. Two Point Canonical
+//   const r3 = rect(0, SIZE, SIZE, SIZE);
+//   const p3 = paint.copy();
+//   const R = SIZE / 2;
+//   p3.setShader(
+//     Skia.Shader.MakeTwoPointConicalGradient(
+//       Skia.Point(R, SIZE),
+//       R,
+//       Skia.Point(R, SIZE),
+//       SIZE / 4,
+//       colors.reverse(),
+//       null,
+//       TileMode.Clamp
+//     )
+//   );
+//   canvas.drawRect(r3, p3);
+
+//   // 4. Angular Gradient
+//   const p4 = paint.copy();
+//   const sweepColors = [
+//     Skia.Color("#61DAFB"),
+//     Skia.Color("#fb61da"),
+//     Skia.Color("#dafb61"),
+//     Skia.Color("#61DAFB"),
+//   ];
+//   p4.setShader(
+//     Skia.Shader.MakeSweepGradient(
+//       SIZE + R,
+//       SIZE + R,
+//       sweepColors,
+//       null,
+//       TileMode.Clamp
+//     )
+//   );
+//   canvas.drawRect(r4, p4);
+
+//   // 5. Turbulence
+//   const p5 = paint.copy();
+//   // p5.setColor(Skia.Color("#61DAFB"));
+//   const one = Skia.Shader.MakeSweepGradient(
+//     R,
+//     2 * SIZE + R,
+//     sweepColors,
+//     null,
+//     TileMode.Clamp
+//   );
+//   const two = Skia.Shader.MakeTurbulence(0.05, 0.05, 4, 0, 0, 0);
+//   p5.setShader(Skia.Shader.MakeBlend(BlendMode.Difference, one, two));
+//   canvas.drawRect(r5, p5);
+// }, []);

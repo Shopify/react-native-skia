@@ -4,6 +4,8 @@ import { forwardRef } from "react";
 import type { SkNode } from "../Host";
 import { NodeType, processChildren } from "../Host";
 import type { IPaint } from "../../skia";
+import { isShader } from "../../skia/Shader/Shader";
+import { isMaskFilter } from "../../skia/MaskFilter";
 
 import type { CustomPaintProps } from "./processors";
 import { processPaint } from "./processors";
@@ -22,9 +24,19 @@ export const PaintNode = (
 ): SkNode<NodeType.Paint> => ({
   type: NodeType.Paint,
   props,
-  draw: (ctx, paintProps, children) => {
+  draw: (ctx, paintProps, _children) => {
     processPaint(paint, ctx.opacity, paintProps);
-    processChildren({ ...ctx, paint, opacity: ctx.opacity }, children);
+    const children = processChildren(
+      { ...ctx, paint, opacity: ctx.opacity },
+      _children
+    );
+    children.forEach((child) => {
+      if (isShader(child)) {
+        paint.setShader(child);
+      } else if (isMaskFilter(child)) {
+        paint.setMaskFilter(child);
+      }
+    });
   },
   children: [],
   instance: paint,

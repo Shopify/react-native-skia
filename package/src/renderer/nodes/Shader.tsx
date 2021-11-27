@@ -23,15 +23,15 @@ export const ShaderNode = (props: ShaderProps): SkNode<NodeType.Shader> => ({
   props,
   draw: (ctx, { uniforms, rt }, children) => {
     if (rt.current) {
-      const { paint } = ctx;
-      const shaderChildren = processChildren(ctx, children);
-      const shader = rt.current.makeShaderWithChildren(
-        uniforms,
-        true,
-        shaderChildren
-      );
-      paint.setShader(shader);
-      return shader;
+      // const { paint } = ctx;
+      // const shaderChildren = processChildren(ctx, children);
+      // const shader = rt.current.makeShaderWithChildren(
+      //   uniforms,
+      //   true,
+      //   shaderChildren
+      // );
+      // paint.setShader(shader);
+      // return shader;
     }
     return;
   },

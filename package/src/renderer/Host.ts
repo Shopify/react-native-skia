@@ -4,15 +4,15 @@ import type { IPaint, IRuntimeEffect } from "../skia";
 
 import type { DrawingContext } from "./DrawingContext";
 import type { AnimatedProps } from "./nodes/processors/Animations";
+import type { DeclarationResult } from "./nodes/Declaration";
 import type {
   ShaderProps,
   RuntimeEffectProps,
-  ImageShaderProps,
   GroupProps,
   RadialGradientProps,
   LinearGradientProps,
   PaintProps,
-  BlurProps,
+  DeclarationProps,
   // DropShadowProps,
   // ParagraphProps,
   ColorMatrixProps,
@@ -28,10 +28,9 @@ export enum NodeType {
   RadialGradient = "skRadialGradient",
   LinearGradient = "skLinearGradient",
   ColorMatrix = "skColorMatrix",
-  Blur = "skBlur",
   Shader = "skShader",
   RuntimeEffect = "skRuntimeEffect",
-  ImageShader = "skImageShader",
+  Declaration = "skDeclaration",
   Drawing = "skDrawing",
   // DropShadow = "skDropShadow",
   // Paragraph = "skParagraph",
@@ -49,10 +48,9 @@ export interface NodeProps {
   [NodeType.RadialGradient]: RadialGradientProps;
   [NodeType.LinearGradient]: LinearGradientProps;
   [NodeType.ColorMatrix]: ColorMatrixProps;
-  [NodeType.Blur]: BlurProps;
   [NodeType.Shader]: ShaderProps;
   [NodeType.RuntimeEffect]: RuntimeEffectProps;
-  [NodeType.ImageShader]: ImageShaderProps;
+  [NodeType.Declaration]: DeclarationProps;
   [NodeType.Drawing]: DrawingProps;
   //[NodeType.DropShadow]: DropShadowProps;
   //  [NodeType.Paragraph]: ParagraphProps;
@@ -66,16 +64,13 @@ export interface NodeInstance {
   //[NodeType.Span]: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ReturnedValue = any; //Shader | Text[];
-
 export interface SkNode<T extends NodeType = NodeType> {
   readonly type: T;
   readonly draw: (
     ctx: DrawingContext,
     props: NodeProps[T],
     children: SkNode[]
-  ) => void | ReturnedValue;
+  ) => void | DeclarationResult;
   readonly children: SkNode[];
   readonly memoizable?: boolean;
   parent?: SkNode;
@@ -100,11 +95,10 @@ declare global {
       skRadialGradient: NodeProps[NodeType.RadialGradient];
       skLinearGradient: NodeProps[NodeType.LinearGradient];
       skColorMatrix: NodeProps[NodeType.ColorMatrix];
-      skBlur: NodeProps[NodeType.Blur];
       skShader: NodeProps[NodeType.Shader];
       skRuntimeEffect: NodeProps[NodeType.RuntimeEffect] &
         RefProps<IRuntimeEffect>;
-      skImageShader: NodeProps[NodeType.ImageShader];
+      skDeclaration: NodeProps[NodeType.Declaration];
       // skDropShadow: NodeProps[NodeType.DropShadow];
       // skParagraph: NodeProps[NodeType.Paragraph];
       skDrawing: NodeProps[NodeType.Drawing];
@@ -115,7 +109,7 @@ declare global {
 }
 
 export const processChildren = (ctx: DrawingContext, children: SkNode[]) => {
-  const returnedValues: ReturnedValue[] = [];
+  const returnedValues: Exclude<DeclarationResult, null>[] = [];
   children.forEach((child) => {
     if (!child.memoized) {
       const ret = child.draw(ctx, child.props, child.children);

@@ -16,7 +16,7 @@
     "react-hooks/exhaustive-deps": [
       "error",
       {
-        "additionalHooks": "(useFrame)"
+        "additionalHooks": "(useFrame|useDeclaration)"
       }
     ]
   }

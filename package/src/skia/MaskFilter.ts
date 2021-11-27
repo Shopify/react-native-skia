@@ -5,6 +5,8 @@ export enum BlurStyle {
   Outer, //!< nothing inside, fuzzy outside
   Inner, //!< fuzzy inside, nothing outside
 }
+export const isMaskFilter = (obj: SkJSIInstane<string>): obj is IMaskFilter =>
+  obj.__typename__ === "MaskFilter";
 
 export type IMaskFilter = SkJSIInstane<"MaskFilter">;
 
