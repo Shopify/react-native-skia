@@ -35,7 +35,7 @@ public:
     auto tmy = (SkTileMode)arguments[1].asNumber();
     auto fm = (SkFilterMode)arguments[2].asNumber();
     auto mm = (SkMipmapMode)arguments[3].asNumber();
-    auto m = count > 4 ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
+    auto m = count > 4 && !arguments[4].isUndefined() ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
                        : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
@@ -48,7 +48,7 @@ public:
     auto tmy = (SkTileMode)arguments[1].asNumber();
     auto B = (float)arguments[2].asNumber();
     auto C = (float)arguments[3].asNumber();
-    auto m = count > 4 ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
+    auto m = count > 4 && !arguments[4].isUndefined() ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
                        : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
