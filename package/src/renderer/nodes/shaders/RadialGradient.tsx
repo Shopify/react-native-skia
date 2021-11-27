@@ -1,47 +1,33 @@
 import { processColor } from "../processors";
 import type { Vector } from "../../math";
 import { Skia, TileMode } from "../../../skia";
-import type { TransformProps } from "../processors/Transform";
 import { useDeclaration } from "../Declaration";
-import type { SkEnum } from "../processors/Paint";
-import { enumKey } from "../processors/Paint";
-import { localMatrix } from "../processors/Transform";
 
-export interface RadialGradientProps extends TransformProps {
+import type { GradientProps } from "./Gradient";
+import { processGradientProps } from "./Gradient";
+
+export interface RadialGradientProps extends GradientProps {
   c: Vector;
   r: number;
-  colors: string[];
-  positions?: number[];
-  mode: SkEnum<typeof TileMode>;
-  flags?: number;
 }
 
 export const RadialGradient = ({
   c,
   r,
-  colors,
-  positions,
-  mode,
-  flags,
-  ...transformProps
+  ...gradientProps
 }: RadialGradientProps) => {
-  const onDeclare = useDeclaration(
-    ({ opacity }) => {
-      return Skia.Shader.MakeRadialGradient(
-        c,
-        r,
-        colors.map((color) => processColor(color, opacity)),
-        positions ?? null,
-        TileMode[enumKey(mode)],
-        localMatrix(transformProps),
-        flags
-      );
-    },
-    [c, colors, flags, mode, positions, r, transformProps]
-  );
+  const onDeclare = useDeclaration(() => {
+    const { colors, positions, mode, localMatrix, flags } =
+      processGradientProps(gradientProps);
+    return Skia.Shader.MakeRadialGradient(
+      c,
+      r,
+      colors,
+      positions,
+      mode,
+      localMatrix,
+      flags
+    );
+  }, [c, gradientProps, r]);
   return <skDeclaration onDeclare={onDeclare} />;
-};
-
-RadialGradient.defaultProps = {
-  mode: "clamp",
 };

@@ -1,20 +1,15 @@
 import type { Vector } from "../../math/Vector";
-import type { SkEnum } from "../processors/Paint";
-import { TileMode, Skia } from "../../../skia";
+import { Skia } from "../../../skia";
 import { useDeclaration } from "../Declaration";
-import type { TransformProps } from "../processors/Transform";
-import { localMatrix } from "../processors/Transform";
-import { enumKey, processColor } from "../processors/Paint";
 
-export interface TwoPointConicalGradientProps extends TransformProps {
+import type { GradientProps } from "./Gradient";
+import { processGradientProps } from "./Gradient";
+
+export interface TwoPointConicalGradientProps extends GradientProps {
   start: Vector;
   startR: number;
   end: Vector;
   endR: number;
-  positions?: number[];
-  colors: string[];
-  mode: SkEnum<typeof TileMode>;
-  flag?: number;
 }
 
 export const TwoPointConicalGradient = ({
@@ -22,31 +17,22 @@ export const TwoPointConicalGradient = ({
   startR,
   end,
   endR,
-  positions,
-  colors,
-  mode,
-  flag,
-  ...transformProps
+  ...gradientProps
 }: TwoPointConicalGradientProps) => {
-  const onDeclare = useDeclaration(
-    ({ opacity }) => {
-      return Skia.Shader.MakeTwoPointConicalGradient(
-        start,
-        startR,
-        end,
-        endR,
-        colors.map((color) => processColor(color, opacity)),
-        positions ?? null,
-        TileMode[enumKey(mode)],
-        localMatrix(transformProps),
-        flag
-      );
-    },
-    [colors, end, endR, flag, mode, positions, start, startR, transformProps]
-  );
+  const onDeclare = useDeclaration(() => {
+    const { colors, positions, mode, localMatrix, flags } =
+      processGradientProps(gradientProps);
+    return Skia.Shader.MakeTwoPointConicalGradient(
+      start,
+      startR,
+      end,
+      endR,
+      colors,
+      positions,
+      mode,
+      localMatrix,
+      flags
+    );
+  }, [end, endR, gradientProps, start, startR]);
   return <skDeclaration onDeclare={onDeclare} />;
-};
-
-TwoPointConicalGradient.defaultProps = {
-  mode: "clamp",
 };
