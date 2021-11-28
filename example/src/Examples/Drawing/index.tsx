@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { Button, StyleSheet, View } from "react-native";
-import { Path, TouchInfo, useFont } from "@shopify/react-native-skia";
+import type { Path, TouchInfo } from "@shopify/react-native-skia";
 import {
   Skia,
   usePaint,
