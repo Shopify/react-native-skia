@@ -26,7 +26,7 @@ export const Filters = () => {
       <Paint ref={paint}>
         <Shader source={source}>
           <ImageShader
-            source={require("../assets/oslo.jpg")}
+            source={require("../../assets/oslo.jpg")}
             transform={[{ scale: 0.25 }]}
           />
         </Shader>

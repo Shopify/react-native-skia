@@ -3,9 +3,9 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { HomeScreen, DrawingExample, AnimationExample } from "./Examples";
-import { API } from "./API";
-import { Breathe } from "./Breathe";
-import { Filters } from "./Filters";
+import { API } from "./Examples/API";
+import { Breathe } from "./Examples/Breathe";
+import { Filters } from "./Examples/Filters";
 
 const App = () => {
   const Stack = createNativeStackNavigator();

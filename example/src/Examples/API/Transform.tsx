@@ -10,7 +10,7 @@ import {
 
 import { Title } from "./components/Title";
 
-const card = require("../assets/card.png");
+const card = require("../../assets/card.png");
 
 const { width } = Dimensions.get("window");
 const SIZE = width;
