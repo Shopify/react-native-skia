@@ -1,9 +1,7 @@
 /*global NodeJS, performance*/
 import type { HostConfig } from "react-reconciler";
 
-import { Skia } from "../skia";
-
-import { PaintNode, DeclarationNode, DrawingNode } from "./nodes";
+import { DeclarationNode, DrawingNode } from "./nodes";
 import type { SkContainer, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
@@ -20,7 +18,7 @@ type Props = NodeProps[NodeType];
 type TextInstance = SkNode;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
-type PublicInstance = Instance["instance"];
+type PublicInstance = Instance;
 type HostContext = null;
 type UpdatePayload = true;
 type ChildSet = unknown;
@@ -113,18 +111,8 @@ const createNode = (type: NodeType, props: Props) => {
       throw new Error("Cannot create a canvas node");
     case NodeType.Drawing:
       return DrawingNode(props as Parameters<typeof DrawingNode>[0]);
-    case NodeType.Paint:
-      const paint = Skia.Paint();
-      paint.setAntiAlias(true);
-      return PaintNode(props as Parameters<typeof PaintNode>[0], paint);
     case NodeType.Declaration:
       return DeclarationNode(props as Parameters<typeof DeclarationNode>[0]);
-    // case NodeType.Paragraph:
-    //   return ParagraphNode(props as ParagraphProps);
-    // case NodeType.Text:
-    //   return TextNode(props as TextProps);
-    // case NodeType.Span:
-    //   return SpanNode(props as SpanProps);
     default:
       // TODO: here we need to throw a nice error message
       // This is the error that will show up when the user uses nodes not supported by Skia (View, Audio, etc)
@@ -226,7 +214,7 @@ export const skHostConfig: SkiaHostConfig = {
 
   getPublicInstance(node: Instance) {
     debug("getPublicInstance");
-    return node.instance;
+    return node;
   },
 
   prepareUpdate: (
