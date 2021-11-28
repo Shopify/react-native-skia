@@ -1,9 +1,8 @@
-import { BlurStyle } from "../../skia/MaskFilter";
-import { Skia } from "../../skia";
-
-import type { SkEnum } from "./processors";
-import { enumKey } from "./processors";
-import { useDeclaration } from "./Declaration";
+import { BlurStyle } from "../../../skia/MaskFilter";
+import { Skia } from "../../../skia";
+import { useDeclaration } from "../Declaration";
+import type { SkEnum } from "../processors";
+import { enumKey } from "../processors";
 
 export interface BlurProps {
   style: SkEnum<typeof BlurStyle>;

@@ -8,6 +8,5 @@ export * from "./maskFilters";
 export * from "./Group";
 export * from "./Canvas";
 export * from "./Paint";
-export * from "./Shader";
 export * from "./Drawing";
 export * from "./Declaration";
