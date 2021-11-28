@@ -101,7 +101,7 @@ public:
    * @param callback Callback to call on sync
    * @returns Identifier of the draw loop entry
    */
-  size_t beginDrawLoop(std::function<void(double)> callback) {
+  size_t beginDrawLoop(std::function<void(void)> callback) {
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
     size_t nextId = ++_listenerId;
     _drawCallbacks.emplace(nextId, std::move(callback));
@@ -130,12 +130,11 @@ public:
 
   /**
    * Notifies all drawing callbacks
-   * @param timestamp Current timestamp
    */
-  void notifyDrawLoop(double timestamp) {
+  void notifyDrawLoop() {
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
     for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
-      it->second(timestamp);
+      it->second();
     }
   }
 
@@ -152,7 +151,7 @@ private:
       _dispatchOnRenderThread;
 
   size_t _listenerId = 0;
-  std::map<size_t, std::function<void(double)>> _drawCallbacks;
+  std::map<size_t, std::function<void(void)>> _drawCallbacks;
   std::mutex _drawCallbacksLock;
 };
 } // namespace RNSkia

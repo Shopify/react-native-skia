@@ -51,10 +51,10 @@ namespace RNSkia
         method(javaPart_.get());
     }
 
-    void JniPlatformContext::notifyDrawLoopExternal(double timestampNanos)
+    void JniPlatformContext::notifyDrawLoopExternal()
     {
         jni::ThreadScope ts;
-        _onNotifyDrawLoop(timestampNanos);
+        _onNotifyDrawLoop();
     }
 
     void JniPlatformContext::notifyTaskReadyExternal()

@@ -215,7 +215,7 @@ void RNSkDrawView::beginDrawingLoop() {
   // Set to zero to avoid calling beginDrawLoop before we return
   _drawingLoopIdentifier = 0;
   _drawingLoopIdentifier =
-      _platformContext->beginDrawLoop([this](double timestamp) {
+      _platformContext->beginDrawLoop([this]() {
         auto performDraw = [=]() {
           milliseconds ms = std::chrono::duration_cast<milliseconds>(
               system_clock::now().time_since_epoch());

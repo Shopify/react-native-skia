@@ -36,7 +36,7 @@ namespace RNSkia
         void startDrawLoop();
         void stopDrawLoop();
 
-        void notifyDrawLoopExternal(double timestampNanos);
+        void notifyDrawLoopExternal();
 
         void notifyTaskReadyExternal();
 
@@ -44,7 +44,7 @@ namespace RNSkia
 
         float getPixelDensity() { return _pixelDensity; }
 
-        void setOnNotifyDrawLoop(const std::function<void(double)>& callback) {
+        void setOnNotifyDrawLoop(const std::function<void(void)>& callback) {
             _onNotifyDrawLoop = callback;
         }
 
@@ -54,7 +54,7 @@ namespace RNSkia
 
         float _pixelDensity;
 
-        std::function<void(double)> _onNotifyDrawLoop;
+        std::function<void(void)> _onNotifyDrawLoop;
 
         std::queue<std::function<void()>> _taskCallbacks;
 

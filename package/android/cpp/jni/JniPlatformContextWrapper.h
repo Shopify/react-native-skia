@@ -17,8 +17,8 @@ namespace RNSkia {
                                 jniPlatformContext->getPixelDensity()),
             _jniPlatformContext(jniPlatformContext) {
             // Hook onto the notify draw loop callback in the platform context
-            jniPlatformContext->setOnNotifyDrawLoop([this](double timestamp) {
-                notifyDrawLoop(timestamp);
+            jniPlatformContext->setOnNotifyDrawLoop([this]() {
+                notifyDrawLoop();
             });
         }
 
