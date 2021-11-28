@@ -1,9 +1,9 @@
 import type { CustomPaintProps } from "../processors";
-import { useFrame } from "../processors";
 import type { IPath } from "../../../skia";
 import { Skia } from "../../../skia";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
+import { useDrawing } from "../Drawing";
 
 interface StrokeOpts {
   width?: number;
@@ -18,7 +18,7 @@ export interface PathProps extends CustomPaintProps, StrokeOpts {
 }
 
 export const Path = (props: AnimatedProps<PathProps>) => {
-  const onDraw = useFrame(
+  const onDraw = useDrawing(
     (ctx) => {
       const { start, end, ...pathProps } = materialize(ctx, props);
       const { canvas, paint } = ctx;

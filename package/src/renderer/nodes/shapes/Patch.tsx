@@ -1,9 +1,10 @@
 import type { CustomPaintProps, SkEnum } from "../processors";
-import { useFrame, enumKey, processColor } from "../processors";
+import { enumKey, processColor } from "../processors";
 import type { IPoint } from "../../../skia";
 import { BlendMode } from "../../../skia/Paint/BlendMode";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
+import { useDrawing } from "../Drawing";
 
 export interface PatchProps extends CustomPaintProps {
   colors: string[];
@@ -13,7 +14,7 @@ export interface PatchProps extends CustomPaintProps {
 }
 
 export const Patch = (props: AnimatedProps<PatchProps>) => {
-  const onDraw = useFrame(
+  const onDraw = useDrawing(
     (ctx) => {
       const { canvas, paint, opacity } = ctx;
       const { colors, cubics, texs, blendMode } = materialize(ctx, props);

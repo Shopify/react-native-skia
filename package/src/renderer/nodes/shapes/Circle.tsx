@@ -1,7 +1,8 @@
 import type { CustomPaintProps } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import type { Vector } from "../../math/Vector";
-import { materialize, useFrame } from "../processors/Animations";
+import { materialize } from "../processors/Animations";
+import { useDrawing } from "../Drawing";
 
 export interface CircleProps extends CustomPaintProps {
   r: number;
@@ -9,7 +10,7 @@ export interface CircleProps extends CustomPaintProps {
 }
 
 export const Circle = (props: AnimatedProps<CircleProps>) => {
-  const onDraw = useFrame(
+  const onDraw = useDrawing(
     (ctx) => {
       const { canvas, paint } = ctx;
       const { c, r } = materialize(ctx, props);

@@ -1,8 +1,8 @@
 import type { IImage } from "../../../skia";
 import { useImage, Skia } from "../../../skia";
 import { exhaustiveCheck } from "../../typeddash";
-import { useFrame } from "../processors/Animations/Animations";
 import type { CustomPaintProps } from "../processors/Paint";
+import { useDrawing } from "../Drawing";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -33,7 +33,7 @@ export const Image = ({
   ...props
 }: ImageProps) => {
   const image = useImage(source);
-  const onDraw = useFrame(
+  const onDraw = useDrawing(
     ({ canvas, paint }) => {
       if (image === null) {
         return;

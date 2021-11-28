@@ -2,14 +2,15 @@ import type { CustomPaintProps } from "../processors";
 import type { RectOrRRectDef } from "../processors/Shapes";
 import { isRRect } from "../processors/Shapes";
 import type { IRect } from "../../../skia/Rect";
-import { useFrame, processRectOrRRect } from "../processors";
+import { processRectOrRRect } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
+import { useDrawing } from "../Drawing";
 
 export type RectProps = RectOrRRectDef & CustomPaintProps;
 
 export const Rect = (props: AnimatedProps<RectProps>) => {
-  const onDraw = useFrame(
+  const onDraw = useDrawing(
     (ctx) => {
       const { canvas, paint } = ctx;
       const rectProps = materialize(ctx, props);

@@ -1,9 +1,9 @@
 import type { CustomPaintProps, SkEnum } from "../processors";
-import { useFrame } from "../processors";
 import type { IPoint } from "../../../skia";
 import { PointMode } from "../../../skia";
 import { enumKey } from "../processors/Paint";
 import { materialize } from "../processors/Animations/Animations";
+import { useDrawing } from "../Drawing";
 
 export interface PointsProps extends CustomPaintProps {
   points: IPoint[];
@@ -11,7 +11,7 @@ export interface PointsProps extends CustomPaintProps {
 }
 
 export const Points = (props: PointsProps) => {
-  const onDraw = useFrame(
+  const onDraw = useDrawing(
     (ctx) => {
       const { canvas, paint } = ctx;
       const { points, mode } = materialize(ctx, props);

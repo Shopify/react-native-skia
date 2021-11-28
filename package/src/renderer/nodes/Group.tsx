@@ -6,7 +6,7 @@ import { ClipOp, Skia } from "../../skia";
 
 import { processTransform, selectPaint, processPaint } from "./processors";
 import { materialize } from "./processors/Animations/Animations";
-import { useDraw } from "./Drawing";
+import { useDrawing } from "./Drawing";
 import type {
   CustomPaintProps,
   TransformProps,
@@ -22,7 +22,7 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 }
 
 export const Group = (props: AnimatedProps<GroupProps>) => {
-  const onDraw = useDraw(
+  const onDraw = useDrawing(
     (ctx, children) => {
       const { clipRect, rasterize, clipPath, clipOp, ...groupProps } =
         materialize(ctx, props);

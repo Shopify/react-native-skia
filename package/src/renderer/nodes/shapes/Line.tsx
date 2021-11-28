@@ -1,8 +1,8 @@
 import type { CustomPaintProps } from "../processors";
-import { useFrame } from "../processors";
 import type { Vector } from "../../math/Vector";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
+import { useDrawing } from "../Drawing";
 
 export interface LineProps extends CustomPaintProps {
   p1: Vector;
@@ -10,7 +10,7 @@ export interface LineProps extends CustomPaintProps {
 }
 
 export const Line = (props: AnimatedProps<LineProps>) => {
-  const onDraw = useFrame(
+  const onDraw = useDrawing(
     (ctx) => {
       const { canvas, paint } = ctx;
       const { p1, p2 } = materialize(ctx, props);

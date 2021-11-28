@@ -45,6 +45,6 @@ export const interpolateColors = (
   inputRange: number[],
   _outputRange: string[]
 ) => {
-  const outputRange = _outputRange.map((color) => Skia.Color(color));
+  const outputRange = _outputRange.map((cl) => Skia.Color(cl));
   return interpolateColorsRGB(value, inputRange, outputRange);
 };

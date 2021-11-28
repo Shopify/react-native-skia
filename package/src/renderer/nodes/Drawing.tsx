@@ -11,7 +11,7 @@ import { materialize } from "./processors/Animations/Animations";
 
 type OnDrawCallback = (ctx: DrawingContext, children: SkNode[]) => void;
 
-export const useDraw = (
+export const useDrawing = (
   cb: OnDrawCallback,
   deps?: Parameters<typeof useCallback>[1]
   // eslint-disable-next-line react-hooks/exhaustive-deps
