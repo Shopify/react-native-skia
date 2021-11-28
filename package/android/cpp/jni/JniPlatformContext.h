@@ -16,42 +16,45 @@ namespace RNSkia
     using JSCallInvokerHolder =
         jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;
 
-    class JniPlatformContext : public jni::HybridClass<JniPlatformContext>,
-                               public RNSkPlatformContext
+    class JniPlatformContext : public jni::HybridClass<JniPlatformContext>
     {
     public:
         static auto constexpr kJavaDescriptor = "Lcom/shopify/reactnative/skia/PlatformContext;";
+
         static jni::local_ref<jhybriddata> initHybrid(
             jni::alias_ref<jhybridobject> jThis,
-            jlong jsContext,
-            JSCallInvokerHolder jsCallInvokerHolder,
             const float);
 
         static void registerNatives();
 
-        ~JniPlatformContext() {
-            RNSkLogger::logToConsole("Platform context removed");
-        }
-
         void performStreamOperation(
             const std::string &sourceUri,
-            const std::function<void(std::unique_ptr<SkStream>)> &op) override;
+            const std::function<void(std::unique_ptr<SkStream>)> &op);
 
-        void raiseError(const std::exception &err) override;
+        void raiseError(const std::exception &err);
 
-        void startDrawLoop() override;
-        void stopDrawLoop() override;
+        void startDrawLoop();
+        void stopDrawLoop();
 
         void notifyDrawLoopExternal(double timestampNanos);
 
         void notifyTaskReadyExternal();
 
+        void dispatchOnRenderThread (const std::function<void(void)>&func);
+
+        float getPixelDensity() { return _pixelDensity; }
+
+        void setOnNotifyDrawLoop(const std::function<void(double)>& callback) {
+            _onNotifyDrawLoop = callback;
+        }
+
     private:
         friend HybridBase;
         jni::global_ref<JniPlatformContext::javaobject> javaPart_;
 
-        size_t _listenerId = 0;
-        std::map<size_t, std::function<void(double)>> _drawCallbacks;
+        float _pixelDensity;
+
+        std::function<void(double)> _onNotifyDrawLoop;
 
         std::queue<std::function<void()>> _taskCallbacks;
 
@@ -59,23 +62,10 @@ namespace RNSkia
 
         explicit JniPlatformContext(
             jni::alias_ref<JniPlatformContext::jhybridobject> jThis,
-            jsi::Runtime *runtime,
-            std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker,
             const float pixelDensity)
-            : _taskMutex(std::make_shared<std::mutex>()), RNSkPlatformContext(
-                                                              runtime,
-                                                              jsCallInvoker,
-                                                              [this](const std::function<void()> &func)
-                                                              {
-                                                                  _taskMutex->lock();
-                                                                  _taskCallbacks.push(func);
-                                                                  _taskMutex->unlock();
-                                                                  static auto method =
-                                                                      javaPart_->getClass()->getMethod<void()>("triggerOnRenderThread");
-                                                                  method(javaPart_.get());
-                                                              },
-                                                              pixelDensity),
-              javaPart_(jni::make_global(jThis))
+            : _taskMutex(std::make_shared<std::mutex>()),
+              javaPart_(jni::make_global(jThis)),
+              _pixelDensity(pixelDensity)
         {
         }
     };
