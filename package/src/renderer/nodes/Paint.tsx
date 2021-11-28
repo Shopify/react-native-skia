@@ -11,31 +11,36 @@ import { isImageFilter } from "../../skia/ImageFilter/ImageFilter";
 import type { CustomPaintProps } from "./processors";
 import { processPaint } from "./processors";
 import { useDeclaration } from "./Declaration";
+import type { AnimatedProps } from "./processors/Animations/Animations";
+import { materialize } from "./processors/Animations/Animations";
 
 export interface PaintProps extends Omit<CustomPaintProps, "paint"> {
   children?: ReactNode | ReactNode[];
 }
 
-export const Paint = forwardRef<IPaint, PaintProps>((props, ref) => {
-  const paint = useMemo(() => Skia.Paint(), []);
-  useImperativeHandle(ref, () => paint, [paint]);
-  const onDeclare = useDeclaration(
-    (ctx, children) => {
-      processPaint(paint, ctx.opacity, props);
-      children.forEach((child) => {
-        if (isShader(child)) {
-          paint.setShader(child);
-        } else if (isMaskFilter(child)) {
-          paint.setMaskFilter(child);
-        } else if (isColorFilter(child)) {
-          paint.setColorFilter(child);
-        } else if (isImageFilter(child)) {
-          paint.setImageFilter(child);
-        }
-      });
-      return paint;
-    },
-    [props, paint]
-  );
-  return <skDeclaration onDeclare={onDeclare} {...props} />;
-});
+export const Paint = forwardRef<IPaint, AnimatedProps<PaintProps>>(
+  (props, ref) => {
+    const paint = useMemo(() => Skia.Paint(), []);
+    useImperativeHandle(ref, () => paint, [paint]);
+    const onDeclare = useDeclaration(
+      (ctx, children) => {
+        const paintProps = materialize(ctx, props);
+        processPaint(paint, ctx.opacity, paintProps);
+        children.forEach((child) => {
+          if (isShader(child)) {
+            paint.setShader(child);
+          } else if (isMaskFilter(child)) {
+            paint.setMaskFilter(child);
+          } else if (isColorFilter(child)) {
+            paint.setColorFilter(child);
+          } else if (isImageFilter(child)) {
+            paint.setImageFilter(child);
+          }
+        });
+        return paint;
+      },
+      [props, paint]
+    );
+    return <skDeclaration onDeclare={onDeclare} {...props} />;
+  }
+);

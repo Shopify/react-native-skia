@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { isShader } from "../../../skia";
 import type { IRuntimeEffect } from "../../../skia";
 import { useDeclaration } from "../Declaration";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 export interface ShaderProps {
   source: IRuntimeEffect;
@@ -10,16 +12,17 @@ export interface ShaderProps {
   children?: ReactNode | ReactNode[];
 }
 
-export const Shader = ({ uniforms, source, ...props }: ShaderProps) => {
+export const Shader = (props: AnimatedProps<ShaderProps>) => {
   const onDeclare = useDeclaration(
-    (_, children) => {
+    (ctx, children) => {
+      const { uniforms, source } = materialize(ctx, props);
       return source.makeShaderWithChildren(
         uniforms,
         true,
         children.filter(isShader)
       );
     },
-    [source, uniforms]
+    [props]
   );
   return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
