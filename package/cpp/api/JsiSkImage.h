@@ -67,8 +67,8 @@ public:
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkImage, uri))
 
-  JsiSkImage(RNSkPlatformContext *context, const sk_sp<SkImage> image,
-             const std::string &localUri)
+  JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
+             const sk_sp<SkImage> image, const std::string &localUri)
       : JsiSkWrappingSkPtrHostObject<SkImage>(context, image),
         _localUri(localUri){};
 
@@ -90,7 +90,8 @@ public:
    * @return A function for creating a new host object wrapper for the SkImage
    * class
    */
-  static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
+  static const jsi::HostFunctionType
+  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       auto jsiLocalUri = arguments[0].asString(runtime);
       auto localUri = jsiLocalUri.utf8(runtime);

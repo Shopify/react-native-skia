@@ -21,23 +21,21 @@ namespace RNSkia
         });
     }
 
-    TSelf JniPlatformContext::initHybrid(
-        jni::alias_ref<jhybridobject> jThis,
-        jlong jsContext,
-        JSCallInvokerHolder jsCallInvokerHolder,
-        float pixelDensity)
+    TSelf JniPlatformContext::initHybrid(jni::alias_ref<jhybridobject> jThis, float pixelDensity)
     {
-        // cast from JNI hybrid objects to C++ instances
-        auto jsCallInvoker = jsCallInvokerHolder->cthis()->getCallInvoker();
-
-        return makeCxxInstance(
-            jThis,
-            reinterpret_cast<jsi::Runtime *>(jsContext),
-            jsCallInvoker,
-            pixelDensity);
+        return makeCxxInstance(jThis, pixelDensity);
     }
 
-    void JniPlatformContext::beginDrawLoop()
+    void JniPlatformContext::dispatchOnRenderThread (const std::function<void(void)>&func) {
+        _taskMutex->lock();
+        _taskCallbacks.push(func);
+        _taskMutex->unlock();
+        static auto method =
+                javaPart_->getClass()->getMethod<void()>("triggerOnRenderThread");
+        method(javaPart_.get());
+    }
+
+    void JniPlatformContext::startDrawLoop()
     {
         jni::ThreadScope ts;
         // Start drawing loop
@@ -45,7 +43,7 @@ namespace RNSkia
         method(javaPart_.get());
     }
 
-    void JniPlatformContext::endDrawLoop()
+    void JniPlatformContext::stopDrawLoop()
     {
         jni::ThreadScope ts;
         // Stop drawing loop
@@ -53,10 +51,10 @@ namespace RNSkia
         method(javaPart_.get());
     }
 
-    void JniPlatformContext::notifyDrawLoopExternal(double timestampNanos)
+    void JniPlatformContext::notifyDrawLoopExternal()
     {
         jni::ThreadScope ts;
-        notifyDrawLoop(timestampNanos / 1000000000);
+        _onNotifyDrawLoop();
     }
 
     void JniPlatformContext::notifyTaskReadyExternal()

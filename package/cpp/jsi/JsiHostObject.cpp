@@ -1,7 +1,35 @@
 #include <JsiHostObject.h>
 #include <set>
 
+// To be able to find objects that aren't cleaned up correctly,
+// we can set this value to 1 and debug the constructor/destructor
+#define DEBUG_ALLOCATIONS = 0
+
 namespace RNJsi {
+
+#ifdef DEBUG_ALLOCATIONS
+int objCounter = 0;
+std::vector<JsiHostObject *> objects;
+#endif
+
+JsiHostObject::JsiHostObject() {
+#ifdef DEBUG_ALLOCATIONS
+  objects.push_back(this);
+  objCounter++;
+#endif
+}
+JsiHostObject::~JsiHostObject() {
+#ifdef DEBUG_ALLOCATIONS
+  for (size_t i = 0; i < objects.size(); ++i) {
+    if (objects.at(i) == this) {
+      objects.erase(objects.begin() + i);
+      break;
+    }
+  }
+  objCounter--;
+#endif
+}
+
 void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,
                         const jsi::Value &value) {
   auto nameVal = name.utf8(rt);
@@ -29,7 +57,7 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 
   /** Start by checking the cache for functions */
   auto runtimeCache = _cache.find(&runtime);
-  std::unordered_map<std::string, std::shared_ptr<jsi::Function>> *currentCache;
+  JsiHostFunctionCache *currentCache;
   if (runtimeCache != _cache.end()) {
     currentCache = &runtimeCache->second;
     // Check if the runtime cache as a cache of the host function
@@ -39,28 +67,26 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
     }
   } else {
     // Create cache for this runtime
-    std::unordered_map<std::string, std::shared_ptr<jsi::Function>>
-        runtimeCache;
-    _cache.emplace(&runtime, runtimeCache);
-    currentCache = &runtimeCache;
+    JsiHostFunctionCache runtimeCache;
+    _cache.emplace(&runtime, JsiHostFunctionCache{});
+    currentCache = &_cache.at(&runtime);
   }
 
   /* Check the static function map */
   auto funcs = getExportedFunctionMap();
   auto func = funcs.find(nameStr);
   if (func != funcs.end()) {
-    auto retVal =
-        std::make_shared<jsi::Function>(jsi::Function::createFromHostFunction(
-            runtime, name, 0,
-            std::bind(func->second, this, std::placeholders::_1,
-                      std::placeholders::_2, std::placeholders::_3,
-                      std::placeholders::_4)));
+    auto dispatcher = std::bind(func->second, (JsiHostObject *)this,
+                                std::placeholders::_1, std::placeholders::_2,
+                                std::placeholders::_3, std::placeholders::_4);
 
     // Add to cache
-    currentCache->emplace(nameStr, retVal);
+    currentCache->emplace(nameStr, std::make_unique<jsi::Function>(
+                                       jsi::Function::createFromHostFunction(
+                                           runtime, name, 0, dispatcher)));
 
     // return retVal;
-    return retVal->asFunction(runtime);
+    return currentCache->at(nameStr)->asFunction(runtime);
   }
 
   /** Check the static getters map */

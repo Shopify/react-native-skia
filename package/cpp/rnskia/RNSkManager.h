@@ -24,21 +24,9 @@ public:
   */
   RNSkManager(jsi::Runtime *jsRuntime,
               std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker,
-              RNSkPlatformContext *platformContext)
-      : _jsRuntime(jsRuntime), _jsCallInvoker(jsCallInvoker),
-        _platformContext(platformContext),
-        _viewApi(std::make_shared<RNSkJsiViewApi>(platformContext)) {
+              std::shared_ptr<RNSkPlatformContext> platformContext);
 
-    // Install bindings
-    installBindings();
-  }
-
-  ~RNSkManager() {
-    _viewApi = nullptr;
-    _jsRuntime = nullptr;
-    _platformContext = nullptr;
-    RNSkLogger::logToConsole("RNSkManager destructor called");
-  }
+  ~RNSkManager();
 
   /**
    * Registers a RNSkDrawView with the given native id
@@ -56,7 +44,9 @@ public:
   /**
    * @return The platform context
    */
-  RNSkPlatformContext *getPlatformContext() { return _platformContext; }
+  std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
+    return _platformContext;
+  }
 
 private:
   /**
@@ -67,7 +57,7 @@ private:
   void installBindings();
 
   jsi::Runtime *_jsRuntime;
-  RNSkPlatformContext *_platformContext;
+  std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
   std::shared_ptr<RNSkJsiViewApi> _viewApi;
 };

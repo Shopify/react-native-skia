@@ -19,15 +19,7 @@ public:
   JSI_PROPERTY_GET(height) { return _height; }
   JSI_PROPERTY_GET(timestamp) { return _timestamp; }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkInfoObject, width),
-                              JSI_EXPORT_PROP_GET(RNSkInfoObject, height),
-                              JSI_EXPORT_PROP_GET(RNSkInfoObject, timestamp)
-
-  )
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkInfoObject, getTouches))
-
-  JSI_HOST_FUNCTION(getTouches) {
+  JSI_PROPERTY_GET(touches) {
     auto ops = jsi::Array(runtime, _touchesCache.size());
     for (size_t i = 0; i < _touchesCache.size(); i++) {
       auto cur = _touchesCache.at(i);
@@ -45,18 +37,28 @@ public:
     return ops;
   }
 
-  void update(int width, int height, double timestamp) {
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkInfoObject, width),
+                              JSI_EXPORT_PROP_GET(RNSkInfoObject, height),
+                              JSI_EXPORT_PROP_GET(RNSkInfoObject, timestamp),
+                              JSI_EXPORT_PROP_GET(RNSkInfoObject, touches))
+
+  void beginDrawCallback(int width, int height, double timestamp) {
     _width = width;
     _height = height;
     _timestamp = timestamp;
 
-    // Copy touches
+    // Copy touches so that we can continue to add/receive touch points while
+    // in the drawing callback.
     std::lock_guard<std::mutex> lock(*_mutex);
-    _touchesCache = _currentTouches;
+    _touchesCache.clear();
+    _touchesCache.reserve(_currentTouches.size());
+    for (size_t i = 0; i < _currentTouches.size(); ++i) {
+      _touchesCache.push_back(_currentTouches.at(i));
+    }
     _currentTouches.clear();
   }
 
-  void resetTouches() { _touchesCache.clear(); }
+  void endDrawCallback() { _touchesCache.clear(); }
 
   void updateTouches(std::vector<RNSkTouchPoint> touches) {
     std::lock_guard<std::mutex> lock(*_mutex);

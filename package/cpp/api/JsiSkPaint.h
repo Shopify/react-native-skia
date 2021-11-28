@@ -182,7 +182,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPaint, setColor),
                        JSI_EXPORT_FUNC(JsiSkPaint, setAlphaf))
 
-  JsiSkPaint(RNSkPlatformContext *context, SkPaint paint)
+  JsiSkPaint(std::shared_ptr<RNSkPlatformContext> context, SkPaint paint)
       : JsiSkWrappingSharedPtrHostObject<SkPaint>(
             context, std::make_shared<SkPaint>(paint)) {}
 
@@ -204,7 +204,8 @@ Returns the underlying object from a host object of this type
    * @return A function for creating a new host object wrapper for the SkPaint
    * class
    */
-  static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
+  static const jsi::HostFunctionType
+  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       // Return the newly constructed object
       return jsi::Object::createFromHostObject(

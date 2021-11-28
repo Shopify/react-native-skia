@@ -78,7 +78,9 @@ export const AnimationExample: React.FC = () => {
     [paint, foregroundPaint, font]
   );
 
-  return <SkiaView style={styles.skiaview} onDraw={onDraw} mode="continuous" />;
+  return (
+    <SkiaView style={styles.skiaview} onDraw={onDraw} mode="continuous" debug />
+  );
 };
 
 const styles = StyleSheet.create({

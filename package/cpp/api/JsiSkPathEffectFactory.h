@@ -56,7 +56,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeDash),
                        JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeDiscrete))
 
-  JsiSkPathEffectFactory(RNSkPlatformContext *context)
+  JsiSkPathEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}
 };
 

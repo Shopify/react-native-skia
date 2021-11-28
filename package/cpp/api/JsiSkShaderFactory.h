@@ -244,7 +244,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeBlend),
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeColor))
 
-  JsiSkShaderFactory(RNSkPlatformContext *context) : JsiSkHostObject(context) {}
+  JsiSkShaderFactory(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiSkHostObject(context) {}
 };
 
 } // namespace RNSkia

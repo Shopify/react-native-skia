@@ -25,7 +25,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMaskFilterFactory, MakeBlur))
 
-  JsiSkMaskFilterFactory(RNSkPlatformContext *context)
+  JsiSkMaskFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}
 };
 

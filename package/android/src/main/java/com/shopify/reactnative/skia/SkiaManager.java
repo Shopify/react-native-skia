@@ -57,5 +57,6 @@ public class SkiaManager {
     private native void initializeRuntime();
     private native void registerSkiaView(int nativeId, SkiaDrawView view);
     private native void unregisterSkiaView(int nativeId);
+    public native void invalidate();
 
 }

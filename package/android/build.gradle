@@ -105,9 +105,9 @@ dependencies {
     implementation 'com.facebook.react:react-native:+'  // From node_modules
 
     //noinspection GradleDynamicVersion
-    extractHeaders("com.facebook.fbjni:fbjni:+:headers")
+    extractHeaders("com.facebook.fbjni:fbjni:0.2.2:headers")
     //noinspection GradleDynamicVersion
-    extractJNI("com.facebook.fbjni:fbjni:+")
+    extractJNI("com.facebook.fbjni:fbjni:0.2.2")
 
     def rnAAR = fileTree("${rootDir}/../node_modules/react-native/android").matching({ it.include "**/**/*.aar" }).singleFile
     extractJNI(files(rnAAR))

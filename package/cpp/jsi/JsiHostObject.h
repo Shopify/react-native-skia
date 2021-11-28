@@ -10,20 +10,36 @@
 #define STR_GET get_
 #define STR_SET set_
 
+/**
+ * Creates a new Host function declaration as a lambda with all deps passed
+ * with implicit lambda capture clause
+ */
 #define JSI_HOST_FUNCTION_LAMBDA                                               \
   [=](jsi::Runtime & runtime, const jsi::Value &thisValue,                     \
       const jsi::Value *arguments, size_t count) -> jsi::Value
 
+/**
+ * Creates a new Host function declaration
+ */
 #define JSI_HOST_FUNCTION(NAME)                                                \
   jsi::Value NAME(jsi::Runtime &runtime, const jsi::Value &thisValue,          \
                   const jsi::Value *arguments, size_t count)
 
+/**
+ * Creates a new property setter function declaration
+ */
 #define JSI_PROPERTY_SET(NAME)                                                 \
   void STR_CAT(STR_SET, NAME)(jsi::Runtime & runtime, const jsi::Value &value)
 
+/**
+ * Creates a new property getter function declaration
+ */
 #define JSI_PROPERTY_GET(NAME)                                                 \
   jsi::Value STR_CAT(STR_GET, NAME)(jsi::Runtime & runtime)
 
+/**
+ * Creates a JSI export function declaration
+ */
 #define JSI_EXPORT_FUNC(CLASS, FUNCTION)                                       \
   {                                                                            \
 #FUNCTION, (jsi::Value(JsiHostObject::*)(                                  \
@@ -32,6 +48,9 @@
                    CLASS::FUNCTION                                             \
   }
 
+/**
+ * Creates a JSI export functions statement
+ */
 #define JSI_EXPORT_FUNCTIONS(...)                                              \
   const std::unordered_map<std::string,                                        \
                            jsi::Value (JsiHostObject::*)(                      \
@@ -46,12 +65,18 @@
     return map;                                                                \
   }
 
+/**
+ * Creates a JSI export getter declaration
+ */
 #define JSI_EXPORT_PROP_GET(CLASS, FUNCTION)                                   \
   {                                                                            \
 #FUNCTION, (jsi::Value(JsiHostObject::*)(jsi::Runtime & runtime)) &        \
                    CLASS::STR_CAT(STR_GET, FUNCTION)                           \
   }
 
+/**
+ * Creates a JSI export getters statement
+ */
 #define JSI_EXPORT_PROPERTY_GETTERS(...)                                       \
   const std::unordered_map<std::string,                                        \
                            jsi::Value (JsiHostObject::*)(jsi::Runtime &)>      \
@@ -62,6 +87,9 @@
     return map;                                                                \
   }
 
+/**
+ * Creates a JSI export setter declaration
+ */
 #define JSI_EXPORT_PROP_SET(CLASS, FUNCTION)                                   \
   {                                                                            \
 #FUNCTION,                                                                 \
@@ -69,6 +97,9 @@
             CLASS::STR_CAT(STR_SET, FUNCTION)                                  \
   }
 
+/**
+ * Creates a JSI export setters statement
+ */
 #define JSI_EXPORT_PROPERTY_SETTERS(...)                                       \
   const std::unordered_map<std::string,                                        \
                            void (JsiHostObject::*)(jsi::Runtime &,             \
@@ -90,10 +121,18 @@ using JsPropertyType = struct {
   std::function<void(jsi::Runtime &, const jsi::Value &)> set;
 };
 
+using JsiHostFunctionCache =
+    std::unordered_map<std::string, std::unique_ptr<jsi::Function>>;
+using JsiRuntimeCache =
+    std::unordered_map<jsi::Runtime *, JsiHostFunctionCache>;
+
 /**
  * Base class for jsi host objects
  */
 class JsiHostObject : public jsi::HostObject {
+public:
+  JsiHostObject();
+  ~JsiHostObject();
 
 protected:
   /**
@@ -218,10 +257,6 @@ protected:
 private:
   std::unordered_map<std::string, jsi::HostFunctionType> _funcMap;
   std::unordered_map<std::string, JsPropertyType> _propMap;
-
-  std::unordered_map<
-      jsi::Runtime *,
-      std::unordered_map<std::string, std::shared_ptr<jsi::Function>>>
-      _cache;
+  JsiRuntimeCache _cache;
 };
 } // namespace RNJsi

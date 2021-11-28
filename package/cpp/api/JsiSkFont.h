@@ -44,7 +44,7 @@ public:
   JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(JsiSkFont, size))
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFont, measureText))
 
-  JsiSkFont(RNSkPlatformContext *context, const SkFont &font)
+  JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)
       : JsiSkWrappingSharedPtrHostObject(context,
                                          std::make_shared<SkFont>(font)){};
 
@@ -66,7 +66,8 @@ public:
    * @return A function for creating a new host object wrapper for the SkFont
    * class
    */
-  static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
+  static const jsi::HostFunctionType
+  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       // Handle arguments
       if (count == 2) {

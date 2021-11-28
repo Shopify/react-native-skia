@@ -16,7 +16,7 @@ using namespace facebook;
 
 class JsiSkColorFilter : public JsiSkWrappingSkPtrHostObject<SkColorFilter> {
 public:
-  JsiSkColorFilter(RNSkPlatformContext *context,
+  JsiSkColorFilter(std::shared_ptr<RNSkPlatformContext> context,
                    sk_sp<SkColorFilter> colorFilter)
       : JsiSkWrappingSkPtrHostObject<SkColorFilter>(context, colorFilter) {}
 

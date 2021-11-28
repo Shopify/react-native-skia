@@ -20,8 +20,9 @@
 }
 
 - (void) invalidate {
-    _skManager->getPlatformContext()->endDrawLoop();
-  _skManager = nullptr;  
+  _skManager->getPlatformContext()->stopDrawLoop();
+  _skManager = nullptr;
+  _platformContext = nullptr;
 }
 
 - (instancetype) initWithBridge:(RCTBridge*)bridge {
@@ -38,17 +39,15 @@
             
       auto queue = dispatch_queue_create("skia-render-thread", qos);
       
-      auto dispatchOnRender = [queue](std::function<void()> task) {
+      auto dispatchOnRenderThread = [queue](std::function<void()> task) {
         dispatch_async(queue, ^{ task(); });
       };
       
       // Create platform context
-      _platformContext = std::make_shared<RNSkia::PlatformContext>(jsRuntime, callInvoker, dispatchOnRender);
+      _platformContext = std::make_shared<RNSkia::PlatformContext>(jsRuntime, callInvoker, dispatchOnRenderThread);
             
       // Create the RNSkiaManager (cross platform)
-      _skManager = std::make_shared<RNSkia::RNSkManager>(jsRuntime,
-                                                         callInvoker,
-                                                         _platformContext.get());
+      _skManager = std::make_shared<RNSkia::RNSkManager>(jsRuntime, callInvoker, _platformContext);
           
     }
   }

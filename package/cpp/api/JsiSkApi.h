@@ -39,7 +39,7 @@ public:
    * and provide functions for accessing and creating the Skia wrapper objects
    * @param context Platform context
    */
-  JsiSkApi(jsi::Runtime &runtime, RNSkPlatformContext *context)
+  JsiSkApi(jsi::Runtime &runtime, std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {
 
     installFunction("Font", JsiSkFont::createCtor(context));

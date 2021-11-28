@@ -17,7 +17,8 @@ using namespace facebook;
 
 class JsiSkShader : public JsiSkWrappingSkPtrHostObject<SkShader> {
 public:
-  JsiSkShader(RNSkPlatformContext *context, sk_sp<SkShader> shader)
+  JsiSkShader(std::shared_ptr<RNSkPlatformContext> context,
+              sk_sp<SkShader> shader)
       : JsiSkWrappingSkPtrHostObject<SkShader>(context, shader) {}
 
   /**
