@@ -3,10 +3,8 @@ import type { ForwardedRef } from "react";
 import type { IPaint } from "../skia";
 
 import type { DrawingContext } from "./DrawingContext";
-import type { AnimatedProps } from "./nodes/processors/Animations";
 import type { DeclarationResult } from "./nodes/Declaration";
 import type {
-  GroupProps,
   PaintProps,
   DeclarationProps,
   // DropShadowProps,
@@ -18,14 +16,9 @@ import type {
 
 export enum NodeType {
   Canvas = "skCanvas",
-  Group = "skGroup",
   Paint = "skPaint",
   Declaration = "skDeclaration",
   Drawing = "skDrawing",
-  // DropShadow = "skDropShadow",
-  // Paragraph = "skParagraph",
-  // Text = "skText",
-  // Span = "skSpan",
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -33,18 +26,13 @@ interface CanvasProps {}
 
 export interface NodeProps {
   [NodeType.Canvas]: CanvasProps;
-  [NodeType.Group]: AnimatedProps<GroupProps>;
   [NodeType.Paint]: PaintProps;
   [NodeType.Declaration]: DeclarationProps;
   [NodeType.Drawing]: DrawingProps;
-  //  [NodeType.Paragraph]: ParagraphProps;
-  // [NodeType.Text]: TextProps;
-  // [NodeType.Span]: SpanProps;
 }
 
 export interface NodeInstance {
   [NodeType.Paint]: IPaint;
-  //[NodeType.Span]: string;
 }
 
 export interface SkNode<T extends NodeType = NodeType> {
@@ -73,7 +61,6 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      skGroup: NodeProps[NodeType.Group];
       skPaint: NodeProps[NodeType.Paint] & RefProps<IPaint>;
       skDeclaration: NodeProps[NodeType.Declaration];
       // skDropShadow: NodeProps[NodeType.DropShadow];

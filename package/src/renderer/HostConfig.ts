@@ -3,7 +3,7 @@ import type { HostConfig } from "react-reconciler";
 
 import { Skia } from "../skia";
 
-import { GroupNode, PaintNode, DeclarationNode, DrawingNode } from "./nodes";
+import { PaintNode, DeclarationNode, DrawingNode } from "./nodes";
 import type { SkContainer, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
@@ -111,8 +111,6 @@ const createNode = (type: NodeType, props: Props) => {
   switch (type) {
     case NodeType.Canvas:
       throw new Error("Cannot create a canvas node");
-    case NodeType.Group:
-      return GroupNode(props as Parameters<typeof GroupNode>[0]);
     case NodeType.Drawing:
       return DrawingNode(props as Parameters<typeof DrawingNode>[0]);
     case NodeType.Paint:
