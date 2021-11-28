@@ -32,12 +32,7 @@ public class PlatformContext {
 
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
-
-        CallInvokerHolderImpl holder = (CallInvokerHolderImpl) reactContext.getCatalystInstance()
-                .getJSCallInvokerHolder();
-
-        mHybridData = initHybrid(reactContext.getJavaScriptContextHolder().get(), holder,
-                reactContext.getResources().getDisplayMetrics().density);
+        mHybridData = initHybrid(reactContext.getResources().getDisplayMetrics().density);
 
     }
 
@@ -154,9 +149,7 @@ public class PlatformContext {
     }
 
     // Private c++ native methods
-    private native HybridData initHybrid(long jsContext, CallInvokerHolderImpl jsCallInvokerHolder, float pixelDensity);
-
+    private native HybridData initHybrid(float pixelDensity);
     private native void notifyDrawLoop(double timestampNanos);
-
     private native void notifyTaskReady();
 }

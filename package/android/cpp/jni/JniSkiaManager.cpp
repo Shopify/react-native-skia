@@ -42,15 +42,15 @@ jni::local_ref<jni::HybridClass<JniSkiaManager>::jhybriddata> JniSkiaManager::in
 
 void JniSkiaManager::initializeRuntime() {
     // Create the cross platform skia manager
-    _rnSkManager = std::make_shared<RNSkManager>(_jsRuntime, _jsCallInvoker, _context);
+    _skManager = std::make_shared<RNSkManager>(_jsRuntime, _jsCallInvoker, _context);
 }
 
 void JniSkiaManager::registerSkiaView(int viewTag, JniSkiaDrawView *skiaView) {
-    _rnSkManager->registerSkiaDrawView(viewTag, skiaView);
+    _skManager->registerSkiaDrawView(viewTag, skiaView);
 }
 
 void JniSkiaManager::unregisterSkiaView(int viewTag) {
-    _rnSkManager->unregisterSkiaDrawView(viewTag);
+    _skManager->unregisterSkiaDrawView(viewTag);
 }
 
 } // namespace RNSkia

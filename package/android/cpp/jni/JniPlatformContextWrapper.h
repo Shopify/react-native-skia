@@ -1,8 +1,54 @@
-//
-// Created by Christian Falch on 28/11/2021.
-//
+#pragma once
 
-#ifndef RNSKIA_JNIPLATFORMCONTEXTWRAPPER_H
-#define RNSKIA_JNIPLATFORMCONTEXTWRAPPER_H
+#include <JniPlatformContext.h>
+#include <RNSkPlatformContext.h>
 
-#endif //RNSKIA_JNIPLATFORMCONTEXTWRAPPER_H
+namespace RNSkia {
+    using namespace facebook;
+
+    class JniPlatformContextWrapper: public RNSkPlatformContext {
+    public:
+        JniPlatformContextWrapper(JniPlatformContext* jniPlatformContext,
+                                  jsi::Runtime *runtime,
+                                  std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker) :
+            RNSkPlatformContext(runtime,
+                                jsCallInvoker,
+                                [this](const std::function<void()> &func) { dispatchOnRenderThread(func); },
+                                jniPlatformContext->getPixelDensity()),
+            _jniPlatformContext(jniPlatformContext) {
+            // Hook onto the notify draw loop callback in the platform context
+            jniPlatformContext->setOnNotifyDrawLoop([this](double timestamp) {
+                notifyDrawLoop(timestamp);
+            });
+        }
+
+
+    void performStreamOperation(
+            const std::string &sourceUri,
+            const std::function<void(std::unique_ptr<SkStream>)> &op) override {
+        _jniPlatformContext->performStreamOperation(sourceUri, op);
+    }
+
+    void raiseError(const std::exception &err) override {
+        _jniPlatformContext->raiseError(err);
+    }
+
+    void startDrawLoop() override {
+        _jniPlatformContext->startDrawLoop();
+    }
+
+    void stopDrawLoop() override {
+        _jniPlatformContext->stopDrawLoop();
+    }
+
+    private:
+
+        void dispatchOnRenderThread (const std::function<void(void)>&func) {
+            _jniPlatformContext->dispatchOnRenderThread(func);
+        }
+
+        JniPlatformContext* _jniPlatformContext;
+    };
+
+}
+

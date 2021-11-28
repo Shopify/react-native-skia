@@ -7,8 +7,9 @@
 #include <memory>
 #include <string>
 
-#include "JniPlatformContext.h"
-#include "RNSkManager.h"
+#include <JniPlatformContext.h>
+#include <JniPlatformContextWrapper.h>
+#include <RNSkManager.h>
 
 namespace RNSkia {
 
@@ -47,31 +48,31 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
         : _javaPart(jni::make_global(jThis)),
           _jsRuntime(runtime),
           _jsCallInvoker(jsCallInvoker),
-          _context(platformContext) {
+          _context(std::make_shared<JniPlatformContextWrapper>(platformContext, runtime, jsCallInvoker)) {
 
     }
 
     void registerSkiaView(int viewTag, JniSkiaDrawView *skiaView);
     void unregisterSkiaView(int viewTag);
 
-    std::shared_ptr<JniPlatformContext> getPlatformContext() { return _context; }
+    std::shared_ptr<JniPlatformContextWrapper> getPlatformContext() { return _context; }
 
     void invalidate() {
         _context->stopDrawLoop();
-        _rnSkManager = nullptr;
+        _skManager = nullptr;
         _context = nullptr;
     }
 
    private:
     friend HybridBase;
 
-    std::shared_ptr<RNSkManager> _rnSkManager;
+    std::shared_ptr<RNSkManager> _skManager;
 
     jni::global_ref<JniSkiaManager::javaobject> _javaPart;
 
     jsi::Runtime *_jsRuntime;
     std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
-    std::shared_ptr<JniPlatformContext> _context;
+    std::shared_ptr<JniPlatformContextWrapper> _context;
 
     void initializeRuntime();
     void installJSIBindings();
