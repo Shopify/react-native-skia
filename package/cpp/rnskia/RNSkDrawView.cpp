@@ -63,16 +63,15 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     endDrawingLoop();
     return;
   }
-  
+
   // Reset timing info
   _timingInfo->reset();
 
   // Create draw drawCallback wrapper
   _drawCallback = std::make_shared<RNSkDrawCallback>(
-      [this, callback](
-          std::shared_ptr<JsiSkCanvas> canvas, int width, int height,
-          double timestamp, std::shared_ptr<RNSkPlatformContext> context) {
-        
+      [this, callback](std::shared_ptr<JsiSkCanvas> canvas, int width,
+                       int height, double timestamp,
+                       std::shared_ptr<RNSkPlatformContext> context) {
         auto runtime = context->getJsRuntime();
 
         // Update info parameter
@@ -95,7 +94,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
         // Draw debug overlays
         if (_showDebugOverlay) {
-          
+
           // Display average rendering timer
           auto average = _timingInfo->getAverage();
           auto debugString = std::to_string(average) + "ms";

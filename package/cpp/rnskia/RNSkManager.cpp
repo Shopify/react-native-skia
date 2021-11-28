@@ -45,9 +45,9 @@ void RNSkManager::installBindings() {
   // provided runtime.
   //
   // This must be done on the Javascript thread to avoid threading issues
-  // when accessing the javascript objects from a thread not being the JS thread.
-  // On Android this is actually necessary, since we need to set up the API before
-  // the javascript starts to execute!
+  // when accessing the javascript objects from a thread not being the JS
+  // thread. On Android this is actually necessary, since we need to set up the
+  // API before the javascript starts to execute!
 #ifndef ANDROID
   std::mutex mu;
   std::condition_variable cond;
@@ -69,7 +69,7 @@ void RNSkManager::installBindings() {
         jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
 
 #ifndef ANDROID
-  isInstalled = true;
+    isInstalled = true;
     cond.notify_one();
   });
 

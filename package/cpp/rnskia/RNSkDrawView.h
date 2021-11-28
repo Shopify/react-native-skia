@@ -80,12 +80,16 @@ protected:
   /**
    Updates the last duration value
    */
-  void setLastFrameDuration(size_t duration) { _timingInfo->addLastDuration(duration); }
+  void setLastFrameDuration(size_t duration) {
+    _timingInfo->addLastDuration(duration);
+  }
 
   /**
    * @return The platformcontext
    */
-  std::shared_ptr<RNSkPlatformContext> getPlatformContext() { return _platformContext; }
+  std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
+    return _platformContext;
+  }
 
 private:
   /**
@@ -144,7 +148,7 @@ private:
    * Info object parameter
    */
   std::shared_ptr<RNSkInfoObject> _infoObject;
-  
+
   /**
    Timing information
    */

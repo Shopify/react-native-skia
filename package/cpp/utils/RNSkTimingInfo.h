@@ -10,21 +10,20 @@ public:
     _lastDurationsCount = 0;
     _lastDuration = 0;
   }
-  
-  ~RNSkTimingInfo() {
-  }
-  
+
+  ~RNSkTimingInfo() {}
+
   void reset() {
     _lastDurationIndex = 0;
     _lastDurationsCount = 0;
     _lastDuration = 0;
   }
-  
+
   long getAverage() { return static_cast<long>(_average); }
-    
+
   void addLastDuration(long duration) {
     _lastDuration = duration;
-    
+
     // Average duration
     _lastDurations[_lastDurationIndex++] = _lastDuration;
 
@@ -42,6 +41,7 @@ public:
     }
     _average = _average / _lastDurationsCount;
   }
+
 private:
   double _lastTimeStamp;
   long _lastDurations[NUMBER_OF_DURATION_SAMPLES];
@@ -50,4 +50,4 @@ private:
   long _lastDuration;
   double _average;
 };
-}
+} // namespace RNSkia

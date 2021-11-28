@@ -27,8 +27,7 @@ public:
    * Constructor
    */
   RNSkPlatformContext(
-      jsi::Runtime *runtime,
-      std::shared_ptr<react::CallInvoker> callInvoker,
+      jsi::Runtime *runtime, std::shared_ptr<react::CallInvoker> callInvoker,
       const std::function<void(const std::function<void(void)> &)>
           dispatchOnRenderThread,
       float pixelDensity)
@@ -40,7 +39,8 @@ public:
    * Destructor
    */
   ~RNSkPlatformContext() {
-    // Do not allow destruction before we are completely done with all drawing callback operations
+    // Do not allow destruction before we are completely done with all drawing
+    // callback operations
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
   }
 
