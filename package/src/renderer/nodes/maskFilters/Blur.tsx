@@ -3,15 +3,21 @@ import { Skia } from "../../../skia";
 import { useDeclaration } from "../Declaration";
 import type { SkEnum } from "../processors";
 import { enumKey } from "../processors";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 export interface BlurProps {
   style: SkEnum<typeof BlurStyle>;
   sigma: number;
 }
 
-export const Blur = ({ style, sigma }: BlurProps) => {
-  const onDeclare = useDeclaration(() => {
-    return Skia.MaskFilter.MakeBlur(BlurStyle[enumKey(style)], sigma, false);
-  }, [sigma, style]);
+export const Blur = (props: AnimatedProps<BlurProps>) => {
+  const onDeclare = useDeclaration(
+    (ctx) => {
+      const { style, sigma } = materialize(ctx, props);
+      return Skia.MaskFilter.MakeBlur(BlurStyle[enumKey(style)], sigma, false);
+    },
+    [props]
+  );
   return <skDeclaration onDeclare={onDeclare} />;
 };

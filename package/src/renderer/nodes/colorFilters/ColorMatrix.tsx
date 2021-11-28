@@ -1,14 +1,20 @@
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../Declaration";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
-export interface ColorMatrixProps {
+interface ColorMatrixProps {
   value: number[];
 }
 
-export const ColorMatrix = ({ value }: ColorMatrixProps) => {
-  const onDeclare = useDeclaration(() => {
-    return Skia.ColorFilter.MakeMatrix(value);
-  }, [value]);
+export const ColorMatrix = (props: AnimatedProps<ColorMatrixProps>) => {
+  const onDeclare = useDeclaration(
+    (ctx) => {
+      const { value } = materialize(ctx, props);
+      return Skia.ColorFilter.MakeMatrix(value);
+    },
+    [props]
+  );
   return <skDeclaration onDeclare={onDeclare} />;
 };
 

@@ -5,6 +5,8 @@ import type { CustomPaintProps } from "../processors/Paint";
 import { useDrawing } from "../Drawing";
 import type { RectDef } from "../processors/Shapes";
 import { processRect } from "../processors/Shapes";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -22,14 +24,16 @@ export type ImageProps = RectDef &
     fit: Fit;
   };
 
-export const Image = ({ source, fit, ...props }: ImageProps) => {
-  const image = useImage(source);
+export const Image = (props: AnimatedProps<ImageProps, "source">) => {
+  const image = useImage(props.source);
   const onDraw = useDrawing(
-    ({ canvas, paint }) => {
+    (ctx) => {
       if (image === null) {
         return;
       }
-      const { x, y, width, height } = processRect(props);
+      const { canvas, paint } = ctx;
+      const { fit, ...rectProps } = materialize(ctx, props);
+      const { x, y, width, height } = processRect(rectProps);
       const sizes = applyBoxFit(
         fit,
         { width: image.width(), height: image.height() },
@@ -49,7 +53,7 @@ export const Image = ({ source, fit, ...props }: ImageProps) => {
       });
       canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
     },
-    [image, fit, props]
+    [image, props]
   );
   return <skDrawing onDraw={onDraw} {...props} />;
 };

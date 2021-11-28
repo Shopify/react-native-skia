@@ -6,6 +6,7 @@ import { isShader } from "../../skia/Shader/Shader";
 import { isMaskFilter } from "../../skia/MaskFilter";
 import { isColorFilter } from "../../skia/ColorFilter/ColorFilter";
 import { Skia } from "../../skia/Skia";
+import { isImageFilter } from "../../skia/ImageFilter/ImageFilter";
 
 import type { CustomPaintProps } from "./processors";
 import { processPaint } from "./processors";
@@ -28,6 +29,8 @@ export const Paint = forwardRef<IPaint, PaintProps>((props, ref) => {
           paint.setMaskFilter(child);
         } else if (isColorFilter(child)) {
           paint.setColorFilter(child);
+        } else if (isImageFilter(child)) {
+          paint.setImageFilter(child);
         }
       });
       return paint;
