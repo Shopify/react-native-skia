@@ -9,7 +9,7 @@ import { Skia } from "../skia";
 import { debug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
-import { vec } from "./math/Vector";
+import { vec } from "./processors";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 

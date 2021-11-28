@@ -1,5 +1,6 @@
 import type { IRect, IRRect } from "../../skia";
-import { vec } from "../math/Vector";
+
+import { vec } from "./math/Vector";
 
 export const point = (x: number, y: number) => ({ x, y });
 export const rect = (x: number, y: number, width: number, height: number) => ({

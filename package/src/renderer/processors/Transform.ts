@@ -1,8 +1,7 @@
 import type { DrawingContext } from "../DrawingContext";
-import type { Vector } from "../math";
-import { neg } from "../math";
-import type { Transforms2d } from "../math/Matrix3";
-import { skiaMatrix3, processTransform2d } from "../math/Matrix3";
+
+import { neg, skiaMatrix3, processTransform2d } from "./math";
+import type { Transforms2d, Vector } from "./math";
 
 // TODO: 1. Add support for supplying the matrix directly
 // TODO: 2. Add direct constructor of the matrix via jsiskmatrix::fromValue

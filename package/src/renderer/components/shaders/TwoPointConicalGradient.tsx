@@ -1,8 +1,7 @@
-import type { Vector } from "../../math/Vector";
+import type { Vector, AnimatedProps } from "../../processors";
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { materialize } from "../../processors/Animations/Animations";
+import { materialize } from "../../processors";
 
 import type { GradientProps } from "./Gradient";
 import { processGradientProps } from "./Gradient";

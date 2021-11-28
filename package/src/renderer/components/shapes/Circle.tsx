@@ -1,7 +1,5 @@
-import type { CustomPaintProps } from "../../processors";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { Vector } from "../../math/Vector";
-import { materialize } from "../../processors/Animations";
+import type { CustomPaintProps, Vector, AnimatedProps } from "../../processors";
+import { materialize } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
 
 export interface CircleProps extends CustomPaintProps {

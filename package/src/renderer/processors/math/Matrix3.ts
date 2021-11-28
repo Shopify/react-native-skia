@@ -1,5 +1,5 @@
-import { Skia } from "../../skia";
-import { exhaustiveCheck } from "../typeddash";
+import { Skia } from "../../../skia";
+import { exhaustiveCheck } from "../../typeddash";
 
 export type Vec3 = readonly [number, number, number];
 
