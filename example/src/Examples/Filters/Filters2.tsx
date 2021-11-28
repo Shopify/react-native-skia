@@ -27,7 +27,7 @@ export const Filters = () => {
         y={0}
         width={width}
         height={height}
-        source={require("../assets/oslo.jpg")}
+        source={require("../../assets/oslo.jpg")}
         fit="cover"
         paint={paint}
       />

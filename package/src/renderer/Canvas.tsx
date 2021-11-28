@@ -46,7 +46,8 @@ export const Canvas = ({ children, style, mode }: CanvasProps) => {
     render(children, container, redraw);
   }, [children, container, redraw]);
   const onDraw = useDrawCallback(
-    (canvas, { width, height, timestamp, getTouches }) => {
+    (canvas, info) => {
+      const { width, height, timestamp } = info;
       const paint = Skia.Paint();
       paint.setAntiAlias(true);
       const ctx = {
@@ -56,7 +57,7 @@ export const Canvas = ({ children, style, mode }: CanvasProps) => {
         width,
         height,
         timestamp,
-        getTouches,
+        getTouches: () => info.touches,
         center: vec(width / 2, height / 2),
       };
       tree.draw(ctx, tree.props, tree.children);

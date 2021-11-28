@@ -9,7 +9,7 @@ import {
   ClipOp,
 } from "@shopify/react-native-skia";
 
-const oslo = require("../assets/oslo.jpg");
+const oslo = require("../../assets/oslo.jpg");
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 4;

@@ -7,8 +7,7 @@ import {
   Image,
   Group,
 } from "@shopify/react-native-skia";
-
-import { useImage } from "../../../package/src/skia/Image/useImage";
+import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 4;
@@ -37,7 +36,7 @@ const clipRRect = Skia.RRectXY(
 );
 
 export const Clipping = () => {
-  const oslo = useImage(require("../assets/oslo.jpg"));
+  const oslo = useImage(require("../../assets/oslo.jpg"));
   if (oslo === null) {
     return null;
   }

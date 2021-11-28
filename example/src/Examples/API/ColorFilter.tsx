@@ -11,7 +11,7 @@ import {
 
 import { Title } from "./components/Title";
 
-const card = require("../assets/zurich.jpg");
+const card = require("../../assets/zurich.jpg");
 
 const { width } = Dimensions.get("window");
 const aspectRatio = 3057 / 5435;
