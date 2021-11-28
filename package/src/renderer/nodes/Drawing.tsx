@@ -3,11 +3,10 @@ import { useCallback } from "react";
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
-
-import type { CustomPaintProps } from "./processors";
-import { processPaint, selectPaint } from "./processors";
-import type { AnimatedProps } from "./processors/Animations/Animations";
-import { materialize } from "./processors/Animations/Animations";
+import type { CustomPaintProps } from "../processors";
+import { processPaint, selectPaint } from "../processors";
+import type { AnimatedProps } from "../processors/Animations/Animations";
+import { materialize } from "../processors/Animations/Animations";
 
 type OnDrawCallback = (ctx: DrawingContext, children: SkNode[]) => void;
 

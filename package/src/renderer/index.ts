@@ -1,4 +1,4 @@
 export * from "./CanvasProvider";
 export * from "./Canvas";
-export * from "./nodes";
+export * from "./components";
 export * from "./math";
