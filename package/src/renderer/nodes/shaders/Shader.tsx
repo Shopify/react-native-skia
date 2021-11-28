@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 
-import { isShader } from "../../skia";
-import type { IRuntimeEffect } from "../../skia";
-
-import { useDeclaration } from "./Declaration";
+import { isShader } from "../../../skia";
+import type { IRuntimeEffect } from "../../../skia";
+import { useDeclaration } from "../Declaration";
 
 export interface ShaderProps {
   source: IRuntimeEffect;
