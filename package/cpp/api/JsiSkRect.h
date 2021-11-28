@@ -51,7 +51,7 @@ public:
   /**
    Constructor
    */
-  JsiSkRect(RNSkPlatformContext *context, const SkRect &rect)
+  JsiSkRect(std::shared_ptr<RNSkPlatformContext> context, const SkRect &rect)
       : JsiSkWrappingSharedPtrHostObject<SkRect>(
             context, std::make_shared<SkRect>(rect)){};
 
@@ -78,7 +78,8 @@ public:
   /**
     Returns the jsi object from a host object of this type
    */
-  static jsi::Value toValue(jsi::Runtime &runtime, RNSkPlatformContext *context,
+  static jsi::Value toValue(jsi::Runtime &runtime,
+                            std::shared_ptr<RNSkPlatformContext> context,
                             const SkRect &rect) {
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkRect>(context, rect));
@@ -91,7 +92,8 @@ public:
    * @return A function for creating a new host object wrapper for the SkRect
    * class
    */
-  static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
+  static const jsi::HostFunctionType
+  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       // Set up the rect
       SkRect rect =

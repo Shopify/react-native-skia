@@ -40,9 +40,9 @@ namespace RNSkia
 
     TSelf JniSkiaDrawView::initHybrid(
         alias_ref<HybridClass::jhybridobject> jThis,
-        JavaPlatformContext platformContext)
+        JavaSkiaManager skiaManager)
     {
-        return makeCxxInstance(jThis, platformContext);
+        return makeCxxInstance(jThis, skiaManager);
     }
 
     void JniSkiaDrawView::registerNatives()
@@ -80,7 +80,7 @@ namespace RNSkia
         std::vector<jdouble> buffer(size + 1L);
         std::vector<RNSkia::RNSkTouchPoint> points;
         auto pin = touches.pin();
-        auto scale = _platformContext->getPixelDensity();
+        auto scale = getPlatformContext()->getPixelDensity();
         for (size_t i = 0; i < pin.size(); i+=2) {
             RNSkTouchPoint point;
             point.x = pin[i] / scale;
@@ -361,7 +361,7 @@ namespace RNSkia
         }
 
         // Draw in surface!
-        drawInSurface(_skSurface, _width, _height, timestamp, _platformContext);
+        drawInSurface(_skSurface, _width, _height, timestamp, getPlatformContext());
 
         if (getThreadDrawingContext()->skContext != nullptr)
         {

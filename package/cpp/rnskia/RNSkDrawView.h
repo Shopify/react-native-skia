@@ -3,6 +3,7 @@
 #include <JsiSkCanvas.h>
 #include <RNSkInfoParameter.h>
 #include <RNSkPlatformContext.h>
+#include <RNSkTimingInfo.h>
 #include <mutex>
 
 #pragma clang diagnostic push
@@ -16,16 +17,9 @@
 
 namespace RNSkia {
 
-using RNSkDrawCallback = std::function<void(
-    std::shared_ptr<JsiSkCanvas>, int, int, double, RNSkPlatformContext *)>;
-
-#define NUMBER_OF_DURATION_SAMPLES 10
-using RNSkTimingInfo = struct {
-  double lastTimeStamp;
-  long lastDurations[NUMBER_OF_DURATION_SAMPLES];
-  int lastDurationIndex;
-  int lastDurationsCount;
-};
+using RNSkDrawCallback =
+    std::function<void(std::shared_ptr<JsiSkCanvas>, int, int, double,
+                       std::shared_ptr<RNSkPlatformContext>)>;
 
 enum RNSkDrawingMode { Default, Continuous };
 
@@ -34,12 +28,12 @@ public:
   /**
    * Constructor
    */
-  RNSkDrawView(RNSkPlatformContext *context)
-      : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
-        _platformContext(context),
-        _infoObject(std::make_shared<RNSkInfoObject>()) {}
+  RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context);
 
-  ~RNSkDrawView() { RNSkLogger::logToConsole("Deleting draw view"); }
+  /**
+   Destructor
+   */
+  ~RNSkDrawView();
 
   /**
    * Repaints the Skia view using the underlying context and the drawcallback.
@@ -59,7 +53,8 @@ public:
    * It is important that the height and width parameters are not resolved
    * against the scale factor - this is done by the drawing code itself.
    */
-  void drawInSurface(sk_sp<SkSurface>, int, int, double, RNSkPlatformContext *);
+  void drawInSurface(sk_sp<SkSurface>, int, int, double,
+                     std::shared_ptr<RNSkPlatformContext>);
 
   /**
    Sets the drawing mode for the view
@@ -85,7 +80,16 @@ protected:
   /**
    Updates the last duration value
    */
-  void setLastFrameDuration(size_t duration) { _lastDuration = duration; }
+  void setLastFrameDuration(size_t duration) {
+    _timingInfo->addLastDuration(duration);
+  }
+
+  /**
+   * @return The platformcontext
+   */
+  std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
+    return _platformContext;
+  }
 
 private:
   /**
@@ -94,12 +98,12 @@ private:
   bool isReadyToDraw();
 
   /**
-   Starts update loop if the drawing mode is continuous
+   Starts beginDrawCallback loop if the drawing mode is continuous
    */
   void beginDrawingLoop();
 
   /**
-   Ends an ongoing update loop for this view
+   Ends an ongoing beginDrawCallback loop for this view
    */
   void endDrawingLoop();
 
@@ -123,7 +127,7 @@ private:
   /**
    * Pointer to the platform context
    */
-  RNSkPlatformContext *_platformContext;
+  std::shared_ptr<RNSkPlatformContext> _platformContext;
 
   /**
    Drawing mode
@@ -141,14 +145,14 @@ private:
   size_t _drawingLoopIdentifier = -1;
 
   /**
-   Last render duration
-   */
-  size_t _lastDuration = 0;
-
-  /**
    * Info object parameter
    */
   std::shared_ptr<RNSkInfoObject> _infoObject;
+
+  /**
+   Timing information
+   */
+  std::shared_ptr<RNSkTimingInfo> _timingInfo;
 };
 
 } // namespace RNSkia

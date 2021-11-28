@@ -768,12 +768,6 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@flyover/box2d@https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/flyover-box2d-v1.0.2.tgz?alt=media&token=dcc09713-c7a7-4d57-949c-bac224a74fb5":
-  version "1.0.2"
-  resolved "https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/flyover-box2d-v1.0.2.tgz?alt=media&token=dcc09713-c7a7-4d57-949c-bac224a74fb5#3122303d3d8f3be54b8aa2544d246574ff35095e"
-  dependencies:
-    "@types/systemjs" "^6.1.0"
-
 "@hapi/hoek@^9.0.0":
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.1.tgz#9551142a1980503752536b5050fd99f4a7f13b17"
@@ -1413,11 +1407,6 @@
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.1.tgz#20f18294f797f2209b5f65c8e3b5c8e8261d127c"
   integrity sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==
-
-"@types/systemjs@^6.1.0":
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/@types/systemjs/-/systemjs-6.1.1.tgz#eae17f2a080e867d01a2dd614f524ab227cf5a41"
-  integrity sha512-d1M6eDKBGWx7RbYy295VEFoOF9YDJkPI959QYnmzcmeaV+SP4D0xV7dEh3sN5XF3GvO3PhGzm+17Z598nvHQuQ==
 
 "@types/yargs-parser@*":
   version "20.2.1"

@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <map>
+#include <mutex>
 
 #include <RNSkLog.h>
 
@@ -22,6 +23,9 @@ using namespace facebook;
 
 class RNSkPlatformContext {
 public:
+  /**
+   * Constructor
+   */
   RNSkPlatformContext(
       jsi::Runtime *runtime, std::shared_ptr<react::CallInvoker> callInvoker,
       const std::function<void(const std::function<void(void)> &)>
@@ -29,13 +33,15 @@ public:
       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker),
-        _dispatchOnRenderThread(dispatchOnRenderThread) {
-    RNSkLogger::logToConsole("Created platform context with scale factor %0.2f",
-                             pixelDensity);
-  }
+        _dispatchOnRenderThread(dispatchOnRenderThread) {}
 
+  /**
+   * Destructor
+   */
   ~RNSkPlatformContext() {
-    RNSkLogger::logToConsole("Deleting platform context");
+    // Do not allow destruction before we are completely done with all drawing
+    // callback operations
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
   }
 
   /**
@@ -95,44 +101,45 @@ public:
    * @param callback Callback to call on sync
    * @returns Identifier of the draw loop entry
    */
-  size_t beginDrawLoop(std::function<void(double)> callback) {
-    size_t nextId = _listenerId++;
+  size_t beginDrawLoop(std::function<void(void)> callback) {
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    size_t nextId = ++_listenerId;
     _drawCallbacks.emplace(nextId, std::move(callback));
     if (_drawCallbacks.size() == 1) {
       // Start
-      beginDrawLoop();
+      startDrawLoop();
     }
+
     return nextId;
   }
 
   /**
    * Ends (if running) the drawing loop that was started with beginDrawLoop.
    * This method must be called symmetrically with the beginDrawLoop method.
-   * @param id Identifier of drawloop drawCallback to end
+   * @param identifier Identifier of drawloop drawCallback to end
    */
-  void endDrawLoop(size_t id) {
-    if (_drawCallbacks.count(id) > 0) {
-      _drawCallbacks.erase(id);
+  void endDrawLoop(size_t identifier) {
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    if (_drawCallbacks.count(identifier) > 0) {
+      _drawCallbacks.erase(identifier);
     }
     if (_drawCallbacks.size() == 0) {
-      endDrawLoop();
+      stopDrawLoop();
     }
   }
 
   /**
    * Notifies all drawing callbacks
-   * @param timestamp Current timestamp
    */
-  void notifyDrawLoop(double timestamp) {
+  void notifyDrawLoop() {
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
     for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
-      if (it->second != nullptr) {
-        it->second(timestamp);
-      }
+      it->second();
     }
   }
 
-  virtual void beginDrawLoop() = 0;
-  virtual void endDrawLoop() = 0;
+  virtual void startDrawLoop() = 0;
+  virtual void stopDrawLoop() = 0;
 
 private:
   float _pixelDensity;
@@ -144,6 +151,7 @@ private:
       _dispatchOnRenderThread;
 
   size_t _listenerId = 0;
-  std::map<size_t, std::function<void(double)>> _drawCallbacks;
+  std::map<size_t, std::function<void(void)>> _drawCallbacks;
+  std::mutex _drawCallbacksLock;
 };
 } // namespace RNSkia

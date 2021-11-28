@@ -18,7 +18,7 @@ using namespace facebook;
 
 class JsiSkImageFilter : public JsiSkWrappingSkPtrHostObject<SkImageFilter> {
 public:
-  JsiSkImageFilter(RNSkPlatformContext *context,
+  JsiSkImageFilter(std::shared_ptr<RNSkPlatformContext> context,
                    sk_sp<SkImageFilter> imageFilter)
       : JsiSkWrappingSkPtrHostObject<SkImageFilter>(context, imageFilter){};
 

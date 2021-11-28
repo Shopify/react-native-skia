@@ -16,7 +16,8 @@ using namespace facebook;
 
 class JsiSkMaskFilter : public JsiSkWrappingSkPtrHostObject<SkMaskFilter> {
 public:
-  JsiSkMaskFilter(RNSkPlatformContext *context, sk_sp<SkMaskFilter> maskFilter)
+  JsiSkMaskFilter(std::shared_ptr<RNSkPlatformContext> context,
+                  sk_sp<SkMaskFilter> maskFilter)
       : JsiSkWrappingSkPtrHostObject<SkMaskFilter>(context, maskFilter) {}
 
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?

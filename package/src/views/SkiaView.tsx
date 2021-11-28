@@ -39,7 +39,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   }
 
   render() {
-    const { style, mode, debug = __DEV__ ? true : false } = this.props;
+    const { style, mode, debug = false } = this.props;
     return (
       <NativeSkiaView
         style={style}

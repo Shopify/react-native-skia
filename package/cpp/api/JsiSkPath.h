@@ -493,7 +493,7 @@ public:
       JSI_EXPORT_FUNC(JsiSkPath, countPoints), JSI_EXPORT_FUNC(JsiSkPath, copy),
       JSI_EXPORT_FUNC(JsiSkPath, fromText), JSI_EXPORT_FUNC(JsiSkPath, op))
 
-  JsiSkPath(RNSkPlatformContext *context, SkPath path)
+  JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
       : JsiSkWrappingSharedPtrHostObject<SkPath>(
             context, std::make_shared<SkPath>(path)){};
 

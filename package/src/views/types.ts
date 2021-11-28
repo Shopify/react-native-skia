@@ -39,7 +39,7 @@ export interface DrawingInfo {
   width: number;
   height: number;
   timestamp: number;
-  getTouches: () => Array<Array<TouchInfo>>;
+  touches: Array<Array<TouchInfo>>;
 }
 
 export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawingInfo) => void;

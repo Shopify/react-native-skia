@@ -1,3 +1,5 @@
+#pragma once
+
 #include <DisplayLink.h>
 #include <RNSkPlatformContext.h>
 
@@ -24,10 +26,10 @@ public:
       : RNSkPlatformContext(runtime, callInvoker, dispatchOnRenderThread,
                             [[UIScreen mainScreen] scale]) {}
 
-  ~PlatformContext() { endDrawLoop(); }
+  ~PlatformContext() {}
 
-  void beginDrawLoop() override;
-  void endDrawLoop() override;
+  void startDrawLoop() override;
+  void stopDrawLoop() override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,

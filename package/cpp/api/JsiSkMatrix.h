@@ -137,7 +137,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkMatrix, get),
                        JSI_EXPORT_FUNC(JsiSkMatrix, set))
 
-  JsiSkMatrix(RNSkPlatformContext *context, SkMatrix m)
+  JsiSkMatrix(std::shared_ptr<RNSkPlatformContext> context, SkMatrix m)
       : JsiSkWrappingSharedPtrHostObject<SkMatrix>(
             context, std::make_shared<SkMatrix>(m)) {}
 
@@ -152,7 +152,8 @@ Returns the underlying object from a host object of this type
         ->getObject();
   }
 
-  static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
+  static const jsi::HostFunctionType
+  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       return jsi::Object::createFromHostObject(
           runtime, std::make_shared<JsiSkMatrix>(context, SkMatrix::I()));

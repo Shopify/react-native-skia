@@ -22,7 +22,7 @@ public:
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPoint, x),
                               JSI_EXPORT_PROP_GET(JsiSkPoint, y))
 
-  JsiSkPoint(RNSkPlatformContext *context, const SkPoint &point)
+  JsiSkPoint(std::shared_ptr<RNSkPlatformContext> context, const SkPoint &point)
       : JsiSkWrappingSharedPtrHostObject<SkPoint>(
             context, std::make_shared<SkPoint>(point)){};
 
@@ -47,7 +47,8 @@ public:
   /**
   Returns the jsi object from a host object of this type
  */
-  static jsi::Value toValue(jsi::Runtime &runtime, RNSkPlatformContext *context,
+  static jsi::Value toValue(jsi::Runtime &runtime,
+                            std::shared_ptr<RNSkPlatformContext> context,
                             const SkPoint &point) {
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkPoint>(context, point));
@@ -60,7 +61,8 @@ public:
    * @return A function for creating a new host object wrapper for the SkPoint
    * class
    */
-  static const jsi::HostFunctionType createCtor(RNSkPlatformContext *context) {
+  static const jsi::HostFunctionType
+  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       auto point =
           SkPoint::Make(arguments[0].asNumber(), arguments[1].asNumber());

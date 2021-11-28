@@ -54,17 +54,11 @@ public class RNSkiaViewManager extends BaseViewManager<SkiaDrawView, LayoutShado
     }
 
     @Override
-    public void onCatalystInstanceDestroy() {
-        RNSkiaModule skiaModule = ((ReactApplicationContext)mView.getContext()).getNativeModule(RNSkiaModule.class);
-        skiaModule.getSkiaManager().unregister(mNativeId);
-        super.onCatalystInstanceDestroy();
-    }
-
-    @Override
     public void onDropViewInstance(@NonNull SkiaDrawView view) {
         super.onDropViewInstance(view);
         RNSkiaModule skiaModule = ((ReactContext)view.getContext()).getNativeModule(RNSkiaModule.class);
         skiaModule.getSkiaManager().unregister(mNativeId);
+        view.onRemoved();
     }
 
     @NonNull

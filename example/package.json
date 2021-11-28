@@ -12,7 +12,6 @@
     "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
   },
   "dependencies": {
-    "@flyover/box2d": "https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/flyover-box2d-v1.0.2.tgz?alt=media&token=dcc09713-c7a7-4d57-949c-bac224a74fb5",
     "@react-navigation/native": "^6.0.6",
     "@react-navigation/native-stack": "^6.2.5",
     "@shopify/react-native-skia": "link:../package/",

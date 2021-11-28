@@ -25,6 +25,36 @@ namespace RNSkia {
 
 using namespace std::chrono;
 
+RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
+    : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
+      _platformContext(context),
+      _infoObject(std::make_shared<RNSkInfoObject>()),
+      _timingInfo(std::make_shared<RNSkTimingInfo>()) {}
+
+RNSkDrawView::~RNSkDrawView() {
+  {
+    // This is a very simple fix to an issue where the view posts a redraw
+    // function to the javascript thread, and the object is destroyed and then
+    // the redraw function is called and ends up executing on a destroyed draw
+    // view. Since _isDrawing is an atomic bool we know that as long as it is
+    // true we are drawing and should wait.
+    // It is limited to only wait for 500 milliseconds - if it is stuck we
+    // might have gotten an exception that caused the flag never to be reset.
+    milliseconds start = std::chrono::duration_cast<milliseconds>(
+        system_clock::now().time_since_epoch());
+
+    RNSkLogger::logToConsole("Starting to delete RNSkDrawView...");
+    while (_isDrawing == true) {
+      milliseconds now = std::chrono::duration_cast<milliseconds>(
+          system_clock::now().time_since_epoch());
+      if (now.count() - start.count() > 500) {
+        break;
+      }
+    }
+    RNSkLogger::logToConsole("RNSkDrawView safely deleted.");
+  }
+}
+
 void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   if (callback == nullptr) {
@@ -34,23 +64,18 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     return;
   }
 
-  // Set up timing
-  auto timingInfo = std::make_shared<RNSkTimingInfo>();
-  timingInfo->lastTimeStamp = -1;
-  timingInfo->lastDurationIndex = 0;
-  timingInfo->lastDurationsCount = 0;
+  // Reset timing info
+  _timingInfo->reset();
 
   // Create draw drawCallback wrapper
   _drawCallback = std::make_shared<RNSkDrawCallback>(
-      [this, callback, timingInfo](std::shared_ptr<JsiSkCanvas> canvas,
-                                   int width, int height, double timestamp,
-                                   RNSkPlatformContext *context) {
-        timingInfo->lastTimeStamp = timestamp;
-
+      [this, callback](std::shared_ptr<JsiSkCanvas> canvas, int width,
+                       int height, double timestamp,
+                       std::shared_ptr<RNSkPlatformContext> context) {
         auto runtime = context->getJsRuntime();
 
         // Update info parameter
-        _infoObject->update(width, height, timestamp);
+        _infoObject->beginDrawCallback(width, height, timestamp);
 
         // Set up arguments array
         jsi::Value *args = new jsi::Value[2];
@@ -62,31 +87,16 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
                        (size_t)2);
 
         // Reset touches
-        _infoObject->resetTouches();
+        _infoObject->endDrawCallback();
 
         // Clean up
         delete[] args;
 
         // Draw debug overlays
         if (_showDebugOverlay) {
-          // Average duration
-          timingInfo->lastDurations[timingInfo->lastDurationIndex++] =
-              _lastDuration;
 
-          if (timingInfo->lastDurationIndex == NUMBER_OF_DURATION_SAMPLES) {
-            timingInfo->lastDurationIndex = 0;
-          }
-
-          if (timingInfo->lastDurationsCount < NUMBER_OF_DURATION_SAMPLES) {
-            timingInfo->lastDurationsCount++;
-          }
-
-          long average = 0;
-          for (size_t i = 0; i < timingInfo->lastDurationsCount; i++) {
-            average += timingInfo->lastDurations[i];
-          }
-          average = average / timingInfo->lastDurationsCount;
-
+          // Display average rendering timer
+          auto average = _timingInfo->getAverage();
           auto debugString = std::to_string(average) + "ms";
 
           if (_drawingMode == RNSkDrawingMode::Continuous) {
@@ -101,8 +111,8 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           paint.setColor(SkColors::kRed);
 
           canvas->getCanvas()->drawSimpleText(
-              debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8,
-              18, 18, font, paint);
+              debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
+              18, font, paint);
         }
       });
 
@@ -112,7 +122,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
 void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
                                  int height, double time,
-                                 RNSkPlatformContext *context) {
+                                 std::shared_ptr<RNSkPlatformContext> context) {
 
   try {
     // Get the canvas
@@ -168,11 +178,10 @@ void RNSkDrawView::requestRedraw() {
       return;
     }
 
-    if (_platformContext != nullptr) {
-      milliseconds ms = std::chrono::duration_cast<milliseconds>(
-          system_clock::now().time_since_epoch());
-      drawFrame(ms.count());
-    }
+    milliseconds ms = std::chrono::duration_cast<milliseconds>(
+        system_clock::now().time_since_epoch());
+
+    drawFrame(ms.count() / 1000.0);
 
     _isDrawing = false;
   };
@@ -199,45 +208,32 @@ bool RNSkDrawView::isReadyToDraw() {
 }
 
 void RNSkDrawView::beginDrawingLoop() {
-  if (_platformContext == nullptr) {
-    return;
-  }
-
-  if (_drawingLoopIdentifier != -1 || _platformContext == nullptr) {
+  if (_drawingLoopIdentifier != -1) {
     return;
   }
 
   // Set to zero to avoid calling beginDrawLoop before we return
   _drawingLoopIdentifier = 0;
   _drawingLoopIdentifier =
-      _platformContext->beginDrawLoop([this](double timestamp) {
+      _platformContext->beginDrawLoop([this]() {
         auto performDraw = [=]() {
-          if (!isReadyToDraw()) {
-            return;
-          }
+          milliseconds ms = std::chrono::duration_cast<milliseconds>(
+              system_clock::now().time_since_epoch());
 
-          _isDrawing = true;
-
-          if (_platformContext != nullptr) {
-            drawFrame(timestamp);
-          }
-
+          drawFrame(ms.count() / 1000.0);
           _isDrawing = false;
         };
 
+        if (!isReadyToDraw()) {
+          return;
+        }
+
+        _isDrawing = true;
         _platformContext->runOnJavascriptThread(performDraw);
       });
 }
 
 void RNSkDrawView::endDrawingLoop() {
-  if (_platformContext == nullptr) {
-    return;
-  }
-
-  if (_drawingLoopIdentifier == -1) {
-    return;
-  }
-
   _platformContext->endDrawLoop(_drawingLoopIdentifier);
   _drawingLoopIdentifier = -1;
 }

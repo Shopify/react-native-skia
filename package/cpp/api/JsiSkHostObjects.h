@@ -18,7 +18,8 @@ public:
    * Default constructor
    * @param context Platform context
    */
-  JsiSkHostObject(RNSkPlatformContext *context) : _context(context){};
+  JsiSkHostObject(std::shared_ptr<RNSkPlatformContext> context)
+      : _context(context){};
 
 protected:
   /**
@@ -29,10 +30,10 @@ protected:
   /**
    * @return A pointer to the platform context
    */
-  RNSkPlatformContext *getContext() { return _context; }
+  std::shared_ptr<RNSkPlatformContext> getContext() { return _context; }
 
 private:
-  RNSkPlatformContext *_context;
+  std::shared_ptr<RNSkPlatformContext> _context;
 };
 
 template <typename T> class JsiSkWrappingHostObject : public JsiSkHostObject {
@@ -41,7 +42,8 @@ public:
    * Default constructor
    * @param context Platform context
    */
-  JsiSkWrappingHostObject(RNSkPlatformContext *context, const T &object)
+  JsiSkWrappingHostObject(std::shared_ptr<RNSkPlatformContext> context,
+                          const T &object)
       : JsiSkHostObject(context), _object(object){};
 
   /**
@@ -62,7 +64,7 @@ template <typename T>
 class JsiSkWrappingSharedPtrHostObject
     : public JsiSkWrappingHostObject<std::shared_ptr<T>> {
 public:
-  JsiSkWrappingSharedPtrHostObject(RNSkPlatformContext *context,
+  JsiSkWrappingSharedPtrHostObject(std::shared_ptr<RNSkPlatformContext> context,
                                    const std::shared_ptr<T> &object)
       : JsiSkWrappingHostObject<std::shared_ptr<T>>(context, object) {}
 };
@@ -70,7 +72,7 @@ public:
 template <typename T>
 class JsiSkWrappingSkPtrHostObject : public JsiSkWrappingHostObject<sk_sp<T>> {
 public:
-  JsiSkWrappingSkPtrHostObject(RNSkPlatformContext *context,
+  JsiSkWrappingSkPtrHostObject(std::shared_ptr<RNSkPlatformContext> context,
                                const sk_sp<T> &object)
       : JsiSkWrappingHostObject<sk_sp<T>>(context, object) {}
 };

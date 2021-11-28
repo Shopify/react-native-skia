@@ -189,7 +189,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkRuntimeEffect, getUniformName),
                        JSI_EXPORT_FUNC(JsiSkRuntimeEffect, getUniform))
 
-  JsiSkRuntimeEffect(RNSkPlatformContext *context, sk_sp<SkRuntimeEffect> rt)
+  JsiSkRuntimeEffect(std::shared_ptr<RNSkPlatformContext> context,
+                     sk_sp<SkRuntimeEffect> rt)
       : JsiSkWrappingSkPtrHostObject<SkRuntimeEffect>(context, rt){};
 };
 } // namespace RNSkia

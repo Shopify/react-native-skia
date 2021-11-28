@@ -24,6 +24,14 @@ public class RNSkiaModule extends ReactContextBaseJavaModule {
     }
 
     @Override
+    public void invalidate() {
+        super.invalidate();
+        this.skiaManager.invalidate();
+        this.skiaManager.destroy();
+        this.skiaManager = null;
+    }
+
+    @Override
     public String getName() {
         return "RNSkia";
     }
@@ -39,12 +47,5 @@ public class RNSkiaModule extends ReactContextBaseJavaModule {
         if(skiaManager == null) {
             skiaManager = new SkiaManager(weakReactContext.get());
         }
-    }
-
-    @Override
-    public void onCatalystInstanceDestroy() {
-        super.onCatalystInstanceDestroy();
-        this.skiaManager.destroy();
-        this.skiaManager = null;
     }
 }

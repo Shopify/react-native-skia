@@ -17,7 +17,7 @@ using namespace facebook;
 
 class JsiSkSvg : public JsiSkWrappingSkPtrHostObject<SkSVGDOM> {
 public:
-  JsiSkSvg(RNSkPlatformContext *context, sk_sp<SkSVGDOM> svgdom)
+  JsiSkSvg(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkSVGDOM> svgdom)
       : JsiSkWrappingSkPtrHostObject<SkSVGDOM>(context, svgdom){};
 
   /**
@@ -76,7 +76,8 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSvgStatic, fromString),
                        JSI_EXPORT_FUNC(JsiSkSvgStatic, fromLocalUri))
 
-  JsiSkSvgStatic(RNSkPlatformContext *context) : JsiSkHostObject(context) {}
+  JsiSkSvgStatic(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiSkHostObject(context) {}
 };
 
 } // namespace RNSkia

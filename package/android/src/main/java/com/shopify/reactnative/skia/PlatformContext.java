@@ -32,12 +32,7 @@ public class PlatformContext {
 
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
-
-        CallInvokerHolderImpl holder = (CallInvokerHolderImpl) reactContext.getCatalystInstance()
-                .getJSCallInvokerHolder();
-
-        mHybridData = initHybrid(reactContext.getJavaScriptContextHolder().get(), holder,
-                reactContext.getResources().getDisplayMetrics().density);
+        mHybridData = initHybrid(reactContext.getResources().getDisplayMetrics().density);
 
     }
 
@@ -55,7 +50,7 @@ public class PlatformContext {
         Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
             @Override
             public void doFrame(long frameTimeNanos) {
-                notifyDrawLoop(frameTimeNanos);
+                notifyDrawLoop();
                 if (_drawLoopActive) {
                     postFrameLoop();
                 }
@@ -154,9 +149,7 @@ public class PlatformContext {
     }
 
     // Private c++ native methods
-    private native HybridData initHybrid(long jsContext, CallInvokerHolderImpl jsCallInvokerHolder, float pixelDensity);
-
-    private native void notifyDrawLoop(double timestampNanos);
-
+    private native HybridData initHybrid(float pixelDensity);
+    private native void notifyDrawLoop();
     private native void notifyTaskReady();
 }

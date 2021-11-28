@@ -138,7 +138,7 @@ public:
         paint = JsiSkPaint::fromValue(runtime, arguments[5]);
       }
     }
-    auto constraint = SkCanvas::kStrict_SrcRectConstraint;  // TODO: get from caller (not exposed by canvaskit)
+    auto constraint = SkCanvas::kStrict_SrcRectConstraint;  // TODO: get from caller
     _canvas->drawImageRect(image.get(), *src, *dest, SkSamplingOptions({ B, C }), paint.get(), constraint);
     return jsi::Value::undefined();
   }
@@ -467,7 +467,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, clear),
                        JSI_EXPORT_FUNC(JsiSkCanvas, concat))
 
-  JsiSkCanvas(RNSkPlatformContext *context) : JsiSkHostObject(context) {}
+  JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiSkHostObject(context) {}
   void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
   SkCanvas *getCanvas() { return _canvas; }
 

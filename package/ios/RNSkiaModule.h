@@ -1,3 +1,4 @@
+#pragma once
 
 #import <React/RCTBridgeModule.h>
 

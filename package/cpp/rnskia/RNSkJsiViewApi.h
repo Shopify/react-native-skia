@@ -11,11 +11,9 @@ using namespace facebook;
 using CallbackInfo = struct CallbackInfo {
   CallbackInfo() {
     drawCallback = nullptr;
-    touchCallback = nullptr;
     view = nullptr;
   }
   std::shared_ptr<jsi::Function> drawCallback;
-  std::shared_ptr<jsi::Function> touchCallback;
   RNSkDrawView *view;
 };
 
@@ -100,21 +98,23 @@ public:
    * Constructor
    * @param platformContext Platform context
    */
-  RNSkJsiViewApi(RNSkPlatformContext *platformContext)
+  RNSkJsiViewApi(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiHostObject(), _platformContext(platformContext) {}
 
   /**
    * Destructor
    */
-  ~RNSkJsiViewApi() {
-    for (auto info : _callbackInfos) {
-      if (info.second.view != nullptr) {
-        info.second.view->setDrawCallback(nullptr);
-      }
-      info.second.view = nullptr;
-      info.second.drawCallback = nullptr;
+  ~RNSkJsiViewApi() { unregisterAll(); }
+
+  /**
+   Call to remove all draw view infos
+   */
+  void unregisterAll() {
+    // Unregister all views
+    auto tempList = std::map<size_t, CallbackInfo>(_callbackInfos);
+    for (auto info : tempList) {
+      unregisterSkiaDrawView(info.first);
     }
-    _callbackInfos.clear();
   }
 
   /**
@@ -144,7 +144,6 @@ public:
     }
     info->view = nullptr;
     info->drawCallback = nullptr;
-    info->touchCallback = nullptr;
     _callbackInfos.erase(nativeId);
   }
 
@@ -166,6 +165,6 @@ private:
   std::map<size_t, CallbackInfo> _callbackInfos;
 
   // Platform context
-  RNSkPlatformContext *_platformContext;
+  std::shared_ptr<RNSkPlatformContext> _platformContext;
 };
 } // namespace RNSkia
