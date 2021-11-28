@@ -14,7 +14,7 @@ import {
   Backface,
   CARD_HEIGHT,
   CARD_WIDTH,
-} from "./components/drawings/Backface";
+} from "./components/drawings/backface";
 
 const { width } = Dimensions.get("window");
 const SIZE = width;
