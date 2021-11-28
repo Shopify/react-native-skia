@@ -1,7 +1,7 @@
 export * from "./shapes";
 export * from "./image";
 export * from "./shaders";
-export * from "./filters";
+export * from "./colorFilters";
 export * from "./processors";
 
 export * from "./Group";
