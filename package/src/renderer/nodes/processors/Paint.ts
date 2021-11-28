@@ -37,15 +37,9 @@ export const green = (c: number) => (c >> 8) & 255;
 export const blue = (c: number) => c & 255;
 export const color = (r: number, g: number, b: number, af: number) => {
   const a = Math.round(af * 255);
-  let processedColor = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0;
-  // On android we need to move the alpha byte to the start of the structure
-  if (Platform.OS === "android") {
-    processedColor = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
-  }
-  return processedColor;
+  return ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
 };
 
-// TODO: add support for currentOpacity
 export const processColor = (cl: string | number, currentOpacity: number) => {
   const icl = typeof cl === "string" ? Skia.Color(cl) : cl;
   const r = red(icl);
