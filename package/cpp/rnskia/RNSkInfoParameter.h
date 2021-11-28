@@ -42,18 +42,23 @@ public:
                               JSI_EXPORT_PROP_GET(RNSkInfoObject, timestamp),
                               JSI_EXPORT_PROP_GET(RNSkInfoObject, touches))
 
-  void update(int width, int height, double timestamp) {
+  void beginDrawCallback(int width, int height, double timestamp) {
     _width = width;
     _height = height;
     _timestamp = timestamp;
 
-    // Copy touches
+    // Copy touches so that we can continue to add/receive touch points while
+    // in the drawing callback.
     std::lock_guard<std::mutex> lock(*_mutex);
-    _touchesCache = _currentTouches;
+    _touchesCache.clear();
+    _touchesCache.reserve(_currentTouches.size());
+    for (size_t i = 0; i < _currentTouches.size(); ++i) {
+      _touchesCache.push_back(_currentTouches.at(i));
+    }
     _currentTouches.clear();
   }
 
-  void resetTouches() { _touchesCache.clear(); }
+  void endDrawCallback() { _touchesCache.clear(); }
 
   void updateTouches(std::vector<RNSkTouchPoint> touches) {
     std::lock_guard<std::mutex> lock(*_mutex);

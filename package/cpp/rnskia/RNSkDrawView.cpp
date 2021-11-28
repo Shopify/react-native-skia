@@ -75,7 +75,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
         auto runtime = context->getJsRuntime();
 
         // Update info parameter
-        _infoObject->update(width, height, timestamp);
+        _infoObject->beginDrawCallback(width, height, timestamp);
 
         // Set up arguments array
         jsi::Value *args = new jsi::Value[2];
@@ -87,7 +87,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
                        (size_t)2);
 
         // Reset touches
-        _infoObject->resetTouches();
+        _infoObject->endDrawCallback();
 
         // Clean up
         delete[] args;

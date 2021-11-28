@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { Button, StyleSheet, View } from "react-native";
-import type { Path, TouchInfo } from "@shopify/react-native-skia";
+import { Path, TouchInfo, useFont } from "@shopify/react-native-skia";
 import {
   Skia,
   usePaint,
@@ -25,7 +25,6 @@ export const DrawingExample: React.FC = () => {
   });
 
   const paths = useMemo(() => [] as Path[], []);
-  const isDrawing = useRef<boolean>(false);
 
   const handleTouches = useCallback(
     (toucheOps: Array<Array<TouchInfo>>) => {
@@ -35,43 +34,41 @@ export const DrawingExample: React.FC = () => {
       }
       toucheOps.forEach((touches) => {
         if (touches.length > 0) {
-          if (isDrawing.current !== true) {
-            // Begin
-            isDrawing.current = true;
-            // Create new path
-            const path = Skia.Path.Make();
-            paths.push(path);
-            path.moveTo(touches[0].x, touches[0].y);
-            prevPointRef.current = {
-              x: touches[0].x,
-              y: touches[0].y,
-            };
-          } else if (isDrawing.current === true) {
-            // Get current path object
-            const path = paths[paths.length - 1];
+          switch (touches[0].type) {
+            case TouchType.Start: {
+              // Create new path
+              const path = Skia.Path.Make();
+              paths.push(path);
+              path.moveTo(touches[0].x, touches[0].y);
+              prevPointRef.current = {
+                x: touches[0].x,
+                y: touches[0].y,
+              };
+              break;
+            }
+            case TouchType.Active:
+            case TouchType.End:
+            case TouchType.Cancelled: {
+              // Get current path object
+              const path = paths[paths.length - 1];
 
-            // Get current position
-            const { x } = touches[0];
-            const { y } = touches[0];
+              // Get current position
+              const { x } = touches[0];
+              const { y } = touches[0];
 
-            // Calculate and draw a smooth curve
-            const xMid = (prevPointRef.current!.x + x) / 2;
-            const yMid = (prevPointRef.current!.y + y) / 2;
+              // Calculate and draw a smooth curve
+              const xMid = (prevPointRef.current!.x + x) / 2;
+              const yMid = (prevPointRef.current!.y + y) / 2;
 
-            path.quadTo(
-              prevPointRef.current!.x,
-              prevPointRef.current!.y,
-              xMid,
-              yMid
-            );
+              path.quadTo(
+                prevPointRef.current!.x,
+                prevPointRef.current!.y,
+                xMid,
+                yMid
+              );
 
-            prevPointRef.current = { x, y };
-
-            // Test if we should end
-            if (touches[0].type === TouchType.End) {
-              // Ended
-              isDrawing.current = false;
-              return;
+              prevPointRef.current = { x, y };
+              break;
             }
           }
         }

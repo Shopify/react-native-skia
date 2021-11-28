@@ -98,12 +98,12 @@ private:
   bool isReadyToDraw();
 
   /**
-   Starts update loop if the drawing mode is continuous
+   Starts beginDrawCallback loop if the drawing mode is continuous
    */
   void beginDrawingLoop();
 
   /**
-   Ends an ongoing update loop for this view
+   Ends an ongoing beginDrawCallback loop for this view
    */
   void endDrawingLoop();
 
