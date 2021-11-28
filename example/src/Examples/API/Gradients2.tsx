@@ -19,7 +19,7 @@ import {
   Turbulence,
 } from "@shopify/react-native-skia";
 
-import { ColorShader } from "../../../package/src/renderer/nodes/shaders/Color";
+import { ColorShader } from "@shopify/react-native-skia/src/renderer/nodes/shaders/Color";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 2;

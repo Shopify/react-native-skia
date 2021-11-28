@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import { Canvas, Image, Rect } from "@shopify/react-native-skia";
 
-import { useImage } from "../../../package/src/skia/Image/useImage";
+import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
 
 import { Title } from "./components/Title";
 
@@ -28,7 +28,7 @@ const rects = [
 ];
 
 export const Images = () => {
-  const oslo = useImage(require("../assets/oslo.jpg"));
+  const oslo = useImage(require("../../assets/oslo.jpg"));
   if (oslo === null) {
     return null;
   }
