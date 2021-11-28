@@ -11,6 +11,10 @@ const examples = [
     title: "🔺 Shapes",
   },
   {
+    screen: "Images",
+    title: "🏞 Images",
+  },
+  {
     screen: "Clipping",
     title: "✂️ Clipping",
   },

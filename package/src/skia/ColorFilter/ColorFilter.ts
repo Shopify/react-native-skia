@@ -1,3 +1,7 @@
-import type { SkJsiInstane } from "../JsiInstance";
+import type { SkJSIInstane } from "../JsiInstance";
 
-export type ColorFilter = SkJsiInstane<"ColorFilter">;
+export const isColorFilter = (
+  obj: SkJSIInstane<string> | null
+): obj is IColorFilter => obj !== null && obj.__typename__ === "ColorFilter";
+
+export type IColorFilter = SkJSIInstane<"ColorFilter">;

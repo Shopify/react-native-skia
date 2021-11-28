@@ -1,4 +1,5 @@
-import { Skia } from "./Skia";
+import { Skia } from "../../skia";
+import { exhaustiveCheck } from "../typeddash";
 
 export type Vec3 = readonly [number, number, number];
 
@@ -20,9 +21,9 @@ export interface TransformProp {
 }
 
 type Transformations = {
-  [Name in Transform2dName]: number;
+  readonly [Name in Transform2dName]: number;
 };
-export type Transforms2d = (
+export type Transforms2d = readonly (
   | Pick<Transformations, "translateX">
   | Pick<Transformations, "translateY">
   | Pick<Transformations, "scale">
@@ -32,10 +33,6 @@ export type Transforms2d = (
   | Pick<Transformations, "skewY">
   | Pick<Transformations, "rotate">
 )[];
-
-const exhaustiveCheck = (a: never): never => {
-  throw new Error(`Unexhaustive handling for ${a}`);
-};
 
 const identityMatrix: Matrix3 = [
   [1, 0, 0],

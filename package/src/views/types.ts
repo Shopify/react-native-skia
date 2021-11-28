@@ -1,7 +1,7 @@
 import type { ViewProps } from "react-native";
 import { requireNativeComponent } from "react-native";
 
-import type { Canvas } from "../skia/Canvas";
+import type { ICanvas } from "../skia/Canvas";
 
 export interface ISkiaViewApi {
   invalidateSkiaView: (nativeId: number) => void;
@@ -35,19 +35,21 @@ export interface TouchInfo {
   type: TouchType;
 }
 
-export interface DrawInfo {
+export interface DrawingInfo {
   width: number;
   height: number;
   timestamp: number;
   touches: Array<Array<TouchInfo>>;
 }
 
-export type RNSkiaDrawCallback = (canvas: Canvas, info: DrawInfo) => void;
+export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawingInfo) => void;
+export type RNSkiaTouchCallback = (touches: TouchInfo[]) => void;
 
 export type RNSkiaViewProps = ViewProps & {
   mode?: "continuous" | "default";
   debug?: boolean;
   onDraw?: RNSkiaDrawCallback;
+  onTouch?: RNSkiaTouchCallback;
 };
 
 export const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(

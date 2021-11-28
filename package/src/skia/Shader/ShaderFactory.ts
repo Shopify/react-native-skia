@@ -1,10 +1,10 @@
 import type { TileMode } from "../ImageFilter";
-import type { Point } from "../Point";
+import type { IPoint } from "../Point";
 import type { Matrix } from "../Matrix";
 import type { Color } from "../Color";
 import type { BlendMode } from "../Paint/BlendMode";
 
-import type { Shader } from "./Shader";
+import type { IShader } from "./Shader";
 
 export interface ShaderFactory {
   /**
@@ -23,15 +23,15 @@ export interface ShaderFactory {
    *                between them.
    */
   MakeLinearGradient(
-    start: Point,
-    end: Point,
+    start: IPoint,
+    end: IPoint,
     colors: Color[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: Matrix,
     flags?: number
     // colorSpace: ColorSpace
-  ): Shader;
+  ): IShader;
 
   /**
    * Returns a shader that generates a radial gradient given the center and radius.
@@ -46,7 +46,7 @@ export interface ShaderFactory {
    * @param flags - 0 to interpolate colors in unpremul, 1 to interpolate colors in premul.
    */
   MakeRadialGradient(
-    center: Point,
+    center: IPoint,
     radius: number,
     colors: Color[],
     pos: number[] | null,
@@ -54,7 +54,7 @@ export interface ShaderFactory {
     localMatrix?: Matrix,
     flags?: number
     // colorSpace?: ColorSpace
-  ): Shader;
+  ): IShader;
 
   /**
    * Returns a shader that generates a conical gradient given two circles.
@@ -70,9 +70,9 @@ export interface ShaderFactory {
    * @param flags
    */
   MakeTwoPointConicalGradient(
-    start: Point,
+    start: IPoint,
     startRadius: number,
-    end: Point,
+    end: IPoint,
     endRadius: number,
     colors: Color[],
     pos: number[] | null,
@@ -80,7 +80,7 @@ export interface ShaderFactory {
     localMatrix?: Matrix,
     flags?: number
     //  colorSpace?: ColorSpace
-  ): Shader;
+  ): IShader;
 
   /**
    * Returns a shader that generates a sweep gradient given a center.
@@ -107,7 +107,7 @@ export interface ShaderFactory {
     startAngleInDegrees?: number,
     endAngleInDegrees?: number
     //  colorSpace?: ColorSpace
-  ): Shader;
+  ): IShader;
 
   /**
    * Returns a shader with Perlin Turbulence.
@@ -128,7 +128,7 @@ export interface ShaderFactory {
     seed: number,
     tileW: number,
     tileH: number
-  ): Shader;
+  ): IShader;
 
   /**
    * Returns a shader with Perlin Fractal Noise.
@@ -149,7 +149,7 @@ export interface ShaderFactory {
     seed: number,
     tileW: number,
     tileH: number
-  ): Shader;
+  ): IShader;
 
   /**
    * Returns a shader that combines the given shaders with a BlendMode.
@@ -157,7 +157,7 @@ export interface ShaderFactory {
    * @param one
    * @param two
    */
-  MakeBlend(mode: BlendMode, one: Shader, two: Shader): Shader;
+  MakeBlend(mode: BlendMode, one: IShader, two: IShader): IShader;
 
   /**
    * Returns a shader with a given color and colorspace.
@@ -165,5 +165,5 @@ export interface ShaderFactory {
    */
   MakeColor(
     color: Color //,space: ColorSpace
-  ): Shader;
+  ): IShader;
 }

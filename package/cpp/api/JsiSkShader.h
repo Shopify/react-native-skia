@@ -21,6 +21,13 @@ public:
               sk_sp<SkShader> shader)
       : JsiSkWrappingSkPtrHostObject<SkShader>(context, shader) {}
 
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "Shader");
+  }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkShader, __typename__))
+
   /**
     Returns the underlying object from a host object of this type
    */

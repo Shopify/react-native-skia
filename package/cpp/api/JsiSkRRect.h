@@ -34,10 +34,19 @@ public:
    */
   static std::shared_ptr<SkRRect> fromValue(jsi::Runtime &runtime,
                                             const jsi::Value &obj) {
-    return obj.asObject(runtime)
-        .asHostObject<JsiSkRRect>(runtime)
-        .get()
-        ->getObject();
+
+    const auto object = obj.asObject(runtime);
+    if (object.isHostObject(runtime)) {
+      return obj.asObject(runtime)
+              .asHostObject<JsiSkRRect>(runtime)
+              .get()
+              ->getObject();
+    } else {
+      auto rect = JsiSkRect::fromValue(runtime, object.getProperty(runtime, "rect"));
+      auto rx = object.getProperty(runtime, "rx").asNumber();
+      auto ry = object.getProperty(runtime, "ry").asNumber();
+      return std::make_shared<SkRRect>(SkRRect::MakeRectXY(*rect, rx, ry));
+    }
   }
 
   /**

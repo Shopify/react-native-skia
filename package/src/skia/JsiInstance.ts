@@ -1,3 +1,3 @@
-export interface SkJsiInstane<T extends string> {
+export interface SkJSIInstane<T extends string> {
   __typename__: T;
 }

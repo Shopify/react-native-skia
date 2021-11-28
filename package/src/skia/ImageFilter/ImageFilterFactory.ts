@@ -1,7 +1,7 @@
 import type { Color } from "../Color";
-import type { ColorFilter } from "../ColorFilter/ColorFilter";
+import type { IColorFilter } from "../ColorFilter/ColorFilter";
 
-import type { ImageFilter, TileMode } from "./ImageFilter";
+import type { IImageFilter, TileMode } from "./ImageFilter";
 
 export interface ImageFilterFactory {
   /**
@@ -17,15 +17,15 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     mode: TileMode,
-    input: ImageFilter | null
-  ): ImageFilter;
+    input: IImageFilter | null
+  ): IImageFilter;
 
   /**
    * Create a filter that applies the color filter to the input filter results.
    * @param cf
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
    */
-  MakeColorFilter(cf: ColorFilter, input: ImageFilter | null): ImageFilter;
+  MakeColorFilter(cf: IColorFilter, input: IImageFilter | null): IImageFilter;
 
   /**
    * Create a filter that composes 'inner' with 'outer', such that the results of 'inner' are
@@ -35,9 +35,9 @@ export interface ImageFilterFactory {
    * @param inner - if null, it will use the dynamic source image (e.g. a saved layer)
    */
   MakeCompose(
-    outer: ImageFilter | null,
-    inner: ImageFilter | null
-  ): ImageFilter;
+    outer: IImageFilter | null,
+    inner: IImageFilter | null
+  ): IImageFilter;
 
   /**
    * Create a filter that draws a drop shadow under the input content.
@@ -56,8 +56,8 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     color: Color,
-    input?: ImageFilter
-  ) => ImageFilter;
+    input?: IImageFilter
+  ) => IImageFilter;
   /**
    * Create a filter that renders a drop shadow, in exactly the same manner as ::DropShadow, except
    * that the resulting image does not include the input content.
@@ -76,6 +76,6 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     color: Color,
-    input?: ImageFilter
-  ) => ImageFilter;
+    input?: IImageFilter
+  ) => IImageFilter;
 }

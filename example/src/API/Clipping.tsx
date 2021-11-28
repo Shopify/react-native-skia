@@ -28,8 +28,11 @@ const star = Skia.Path.MakeFromSVGString(
 
 export const Clipping = () => {
   const image = useImage(oslo);
-
   const onRectDraw = useDrawCallback((canvas) => {
+    if (!image) {
+      return;
+    }
+    const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
     const PADDING = 16;
     const rect1 = Skia.XYWHRect(PADDING, PADDING, SIZE, SIZE);
     const clipRect = Skia.XYWHRect(
@@ -52,7 +55,6 @@ export const Clipping = () => {
     const rect3 = Skia.XYWHRect(3 * PADDING + 2 * SIZE, PADDING, SIZE, SIZE);
     console.log({ rect3 });
     if (image) {
-      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
       canvas.save();
       canvas.clipRect(clipRect, ClipOp.Difference, true);
       canvas.drawImageRect(image, imgRect, rect1, paint);

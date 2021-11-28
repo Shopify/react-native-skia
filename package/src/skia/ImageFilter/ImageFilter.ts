@@ -1,4 +1,4 @@
-import type { SkJsiInstane } from "../JsiInstance";
+import type { SkJSIInstane } from "../JsiInstance";
 
 export enum TileMode {
   /**
@@ -24,4 +24,4 @@ export enum TileMode {
   Decal,
 }
 
-export type ImageFilter = SkJsiInstane<"ImageFilter">;
+export type IImageFilter = SkJSIInstane<"ImageFilter">;
