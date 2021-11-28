@@ -51,6 +51,10 @@ public class SkiaManager {
         unregisterSkiaView(nativeId);
     }
 
+    public void onHostResume() { mPlatformContext.onResume(); }
+
+    public void onHostPause() {  mPlatformContext.onPause(); }
+
     // private C++ functions
     private native HybridData initHybrid(long jsContext, CallInvokerHolderImpl jsCallInvokerHolder,
             PlatformContext platformContext);

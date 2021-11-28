@@ -3,6 +3,7 @@ package com.shopify.reactnative.skia;
 import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Choreographer;
 
 import com.facebook.jni.HybridData;
@@ -29,6 +30,9 @@ public class PlatformContext {
     private ExecutorService mDrawCallbackThread = Executors.newSingleThreadExecutor();
 
     private boolean _drawLoopActive = false;
+    private boolean _isPaused = false;
+
+    private final String TAG = "PlatformContext";
 
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
@@ -50,6 +54,9 @@ public class PlatformContext {
         Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
             @Override
             public void doFrame(long frameTimeNanos) {
+                if(_isPaused) {
+                    return;
+                }
                 notifyDrawLoop();
                 if (_drawLoopActive) {
                     postFrameLoop();
@@ -140,6 +147,25 @@ public class PlatformContext {
             e.printStackTrace();
         }
         return null;
+    }
+
+    void onPause() {
+        Log.i(TAG, "Paused");
+        _isPaused = true;
+    }
+
+    void onResume() {
+        _isPaused = false;
+        Log.i(TAG, "Resume");
+        if(_drawLoopActive) {
+            // Restart draw loop
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    postFrameLoop();
+                }
+            });
+        }
     }
 
     @Override
