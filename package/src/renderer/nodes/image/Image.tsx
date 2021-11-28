@@ -3,6 +3,8 @@ import { useImage, Skia } from "../../../skia";
 import { exhaustiveCheck } from "../../typeddash";
 import type { CustomPaintProps } from "../processors/Paint";
 import { useDrawing } from "../Drawing";
+import type { RectDef } from "../processors/Shapes";
+import { processRect } from "../processors/Shapes";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -14,30 +16,20 @@ export type Fit =
   | "none"
   | "scaleDown";
 
-export interface ImageProps extends CustomPaintProps {
-  source: number | IImage;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  fit: Fit;
-}
+export type ImageProps = RectDef &
+  CustomPaintProps & {
+    source: number | IImage;
+    fit: Fit;
+  };
 
-export const Image = ({
-  source,
-  x,
-  y,
-  width,
-  height,
-  fit,
-  ...props
-}: ImageProps) => {
+export const Image = ({ source, fit, ...props }: ImageProps) => {
   const image = useImage(source);
   const onDraw = useDrawing(
     ({ canvas, paint }) => {
       if (image === null) {
         return;
       }
+      const { x, y, width, height } = processRect(props);
       const sizes = applyBoxFit(
         fit,
         { width: image.width(), height: image.height() },
@@ -57,7 +49,7 @@ export const Image = ({
       });
       canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
     },
-    [image, fit, width, height, x, y]
+    [image, fit, props]
   );
   return <skDrawing onDraw={onDraw} {...props} />;
 };
