@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type { IImage } from "../../../skia";
 import { useImage } from "../../../skia";
 import type { CustomPaintProps } from "../../processors/Paint";
@@ -15,8 +17,12 @@ export type ImageProps = RectDef &
     fit: Fit;
   };
 
-export const Image = (props: AnimatedProps<ImageProps, "source">) => {
-  const image = useImage(props.source);
+export const Image = (defaultProps: AnimatedProps<ImageProps, "source">) => {
+  const image = useImage(defaultProps.source);
+  const props = useMemo<AnimatedProps<ImageProps, "source">>(
+    () => ({ ...defaultProps, image }),
+    [defaultProps, image]
+  );
   const onDraw = useDrawing(
     props,
     ({ canvas, paint }, { fit, ...rectProps }) => {
