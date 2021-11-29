@@ -24,7 +24,6 @@ export const useDeclaration = <T,>(
   props: AnimatedProps<T>,
   cb: UseDeclarationCallback<T>
 ) => {
-  const animated = useMemo(() => isAnimated(props), [props]);
   const onDeclare = useCallback<DeclarationCallback>(
     (ctx, children) => {
       const materializedProps = materialize(ctx, props);
@@ -32,7 +31,10 @@ export const useDeclaration = <T,>(
     },
     [cb, props]
   );
-  return { onDeclare, isAnimated: animated };
+  return useMemo(
+    () => ({ onDeclare, isAnimated: isAnimated(props) }),
+    [onDeclare, props]
+  );
 };
 
 export interface DeclarationProps {
@@ -53,5 +55,5 @@ export const DeclarationNode = (
     return obj;
   },
   children: [],
-  memoizable: props.declaration.isAnimated,
+  memoizable: !props.declaration.isAnimated,
 });

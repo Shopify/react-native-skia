@@ -32,9 +32,8 @@ export interface SkNode<T extends NodeType = NodeType> {
     children: SkNode[]
   ) => void | DeclarationResult;
   readonly children: SkNode[];
-  readonly memoizable?: boolean;
+  memoizable?: boolean;
   parent?: SkNode;
-
   props: NodeProps[T];
   memoized?: boolean;
 }

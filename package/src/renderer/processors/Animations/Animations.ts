@@ -17,7 +17,7 @@ const isAnimatedValue = (value: unknown): value is FrameValue<any> =>
   typeof value === "function";
 
 export const isAnimated = <T>(props: AnimatedProps<T>) => {
-  for (const value of mapKeys(props)) {
+  for (const value of Object.values(props)) {
     if (isAnimatedValue(value)) {
       return true;
     }

@@ -81,11 +81,25 @@ const bustBranchMemoization = (parent: SkNode) => {
   }
 };
 
-const appendNode = (parent: SkNode, child: SkNode) => {
+const bustBranchMemoizable = (parent: SkNode) => {
   if (parent.memoizable) {
-    child.parent = parent;
+    let ancestor: SkNode | undefined = parent;
+    while (ancestor) {
+      ancestor.memoizable = false;
+      ancestor = ancestor.parent;
+    }
   }
+};
+
+const appendNode = (parent: SkNode, child: SkNode) => {
+  child.parent = parent;
   bustBranchMemoization(parent);
+  if (!child.memoizable) {
+    bustBranchMemoizable(parent);
+  }
+  if (!parent.memoizable) {
+    child.memoizable = false;
+  }
   parent.children.push(child);
 };
 

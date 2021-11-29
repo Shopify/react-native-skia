@@ -31,7 +31,7 @@ export const Filters = () => {
       <Paint ref={paint}>
         <Shader
           source={source}
-          uniforms={(ctx) => [mix(progress(ctx), 3, 100)]}
+          uniforms={(ctx) => [mix(progress(ctx), 0, 100)]}
         >
           <ImageShader
             source={require("../../assets/oslo.jpg")}
