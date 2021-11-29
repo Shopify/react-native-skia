@@ -29,7 +29,8 @@ export const useDeclaration = <T,>(
       const materializedProps = materialize(ctx, props);
       return cb(materializedProps, children, ctx);
     },
-    [cb, props]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props]
   );
   return useMemo(
     () => ({ onDeclare, isAnimated: isAnimated(props) }),

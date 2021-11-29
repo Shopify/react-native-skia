@@ -3,7 +3,6 @@ import { enumKey, processColor } from "../../processors";
 import type { IPoint } from "../../../skia";
 import { BlendMode } from "../../../skia/Paint/BlendMode";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { materialize } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
 
 export interface PatchProps extends CustomPaintProps {
@@ -15,9 +14,8 @@ export interface PatchProps extends CustomPaintProps {
 
 export const Patch = (props: AnimatedProps<PatchProps>) => {
   const onDraw = useDrawing(
-    (ctx) => {
-      const { canvas, paint, opacity } = ctx;
-      const { colors, cubics, texs, blendMode } = materialize(ctx, props);
+    props,
+    ({ canvas, paint, opacity }, { colors, cubics, texs, blendMode }) => {
       const mode = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
       canvas.drawPatch(
         cubics,
@@ -26,8 +24,7 @@ export const Patch = (props: AnimatedProps<PatchProps>) => {
         mode,
         paint
       );
-    },
-    [props]
+    }
   );
   return <skDrawing onDraw={onDraw} {...props} />;
 };
