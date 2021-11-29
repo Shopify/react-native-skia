@@ -5,4 +5,5 @@ export * from "./SweepGradient";
 export * from "./Blend";
 export * from "./Color";
 export * from "./Turbulence";
+export * from "./FractalNoise";
 export * from "./Shader";
