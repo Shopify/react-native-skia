@@ -2,7 +2,7 @@ import type { IRect } from "../../../skia";
 import { useImage, TileMode, FilterMode, MipmapMode } from "../../../skia";
 import { useDeclaration } from "../../nodes";
 import type { TransformProps, SkEnum, AnimatedProps } from "../../processors";
-import { localMatrix, enumKey, materialize } from "../../processors";
+import { localMatrix, enumKey } from "../../processors";
 
 import type { ImageProps } from "./Image";
 import type { Fit } from "./BoxFit";
@@ -23,15 +23,12 @@ export const ImageShader = (
   props: AnimatedProps<ImageShaderProps, "source">
 ) => {
   const image = useImage(props.source);
-  const onDeclare = useDeclaration(
-    (ctx) => {
+  const declaration = useDeclaration(
+    props,
+    ({ tx, ty, fm, mm, fit, fitRect, ...transform }) => {
       if (image === null) {
         return null;
       }
-      const { tx, ty, fm, mm, fit, fitRect, ...transform } = materialize(
-        ctx,
-        props
-      );
       if (fitRect) {
         const rects = fitRects(fit, image, fitRect);
         const m3 = rect2rect(rects.src, rects.dst);
@@ -44,10 +41,9 @@ export const ImageShader = (
         MipmapMode[enumKey(mm)],
         localMatrix(transform)
       );
-    },
-    [image, props]
+    }
   );
-  return <skDeclaration onDeclare={onDeclare} />;
+  return <skDeclaration declaration={declaration} />;
 };
 
 ImageShader.defaultProps = {

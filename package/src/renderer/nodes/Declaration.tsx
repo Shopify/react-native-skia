@@ -11,7 +11,8 @@ export type DeclarationResult = SkJSIInstane<string> | null;
 
 type UseDeclarationCallback<T> = (
   props: T,
-  children: DeclarationResult[]
+  children: DeclarationResult[],
+  ctx: DrawingContext
 ) => DeclarationResult;
 
 type DeclarationCallback = (
@@ -27,7 +28,7 @@ export const useDeclaration = <T,>(
   const onDeclare = useCallback<DeclarationCallback>(
     (ctx, children) => {
       const materializedProps = materialize(ctx, props);
-      return cb(materializedProps, children);
+      return cb(materializedProps, children, ctx);
     },
     [cb, props]
   );

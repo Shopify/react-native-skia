@@ -11,7 +11,7 @@ export interface ComposeProps {
 }
 
 export const ComposeFilter = (props: AnimatedProps<ComposeProps>) => {
-  const onDeclare = useDeclaration((_, children) => {
+  const declaration = useDeclaration(props, (_, children) => {
     const [outer, inner] = children;
     if (isColorFilter(outer) && isColorFilter(inner)) {
       return Skia.ColorFilter.MakeCompose(outer, inner);
@@ -21,6 +21,6 @@ export const ComposeFilter = (props: AnimatedProps<ComposeProps>) => {
     throw new Error(
       "ComposeFilter can only compose ColorFilters and ImageFilters"
     );
-  }, []);
-  return <skDeclaration onDeclare={onDeclare} {...props} />;
+  });
+  return <skDeclaration declaration={declaration} {...props} />;
 };

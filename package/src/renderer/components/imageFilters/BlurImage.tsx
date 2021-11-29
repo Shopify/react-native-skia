@@ -16,7 +16,7 @@ export interface BlurImageProps {
 }
 
 export const BlurImage = (props: AnimatedProps<BlurImageProps>) => {
-  const onDeclare = useDeclaration(
+  const declaration = useDeclaration(
     (ctx, children) => {
       const { sigmaX, sigmaY, mode } = materialize(ctx, props);
       const [input] = children.filter(isImageFilter);
@@ -29,5 +29,5 @@ export const BlurImage = (props: AnimatedProps<BlurImageProps>) => {
     },
     [props]
   );
-  return <skDeclaration onDeclare={onDeclare} />;
+  return <skDeclaration declaration={declaration} />;
 };

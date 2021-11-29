@@ -8,8 +8,8 @@ export interface SRGBToLinearGammaProps {}
 export const SRGBToLinearGamma = (
   props: AnimatedProps<SRGBToLinearGammaProps>
 ) => {
-  const onDeclare = useDeclaration(() => {
+  const declaration = useDeclaration(props, () => {
     return Skia.ColorFilter.MakeSRGBToLinearGamma();
-  }, []);
-  return <skDeclaration onDeclare={onDeclare} {...props} />;
+  });
+  return <skDeclaration declaration={declaration} {...props} />;
 };
