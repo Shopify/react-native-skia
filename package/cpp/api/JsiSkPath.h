@@ -406,8 +406,8 @@ public:
     SkPoint last;
     getObject()->getLastPt(&last);
     auto point = jsi::Object(runtime);
-    point.setProperty(runtime, "x", getJsNumber(last.fX));
-    point.setProperty(runtime, "y", getJsNumber(last.fY));
+    point.setProperty(runtime, "x", static_cast<double>(last.fX));
+    point.setProperty(runtime, "y", static_cast<double>(last.fY));
     return point;
   }
 
