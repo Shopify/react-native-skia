@@ -7,6 +7,7 @@ export interface SkSLUniform {
   rows: number;
   /** The index into the uniforms array that this uniform begins. */
   slot: number;
+  isInteger: boolean;
 }
 
 export interface IRuntimeEffect extends SkJSIInstane<"RuntimeEffect"> {
@@ -43,7 +44,7 @@ export interface IRuntimeEffect extends SkJSIInstane<"RuntimeEffect"> {
   getUniform(index: number): SkSLUniform;
 
   /**
-   * Returns the number of uniforms on the effect.
+   * Returns the size of the uniforms on the effect.
    */
   getUniformCount(): number;
 
