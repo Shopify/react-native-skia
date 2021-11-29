@@ -25,6 +25,6 @@ export const materialize = <T>(
   return result as T;
 };
 
-export type AnimatedProps<T, E extends null | string = null> = {
+export type AnimatedProps<T, E extends string = never> = {
   [K in keyof T]: T[K] | (K extends E ? never : (ctx: DrawingContext) => T[K]);
 };
