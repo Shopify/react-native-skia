@@ -19,7 +19,7 @@ uniform shader image;
 uniform float r;
 
 half4 main(float2 xy) {   
-  coord.x += sin(coord.y / r) * 4;"
+  xy.x += sin(xy.y / r) * 4;
   return image.eval(xy).rgba;
 }`)!;
 

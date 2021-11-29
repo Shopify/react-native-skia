@@ -9,17 +9,17 @@ import { materialize } from "../../processors/Animations/Animations";
 export interface ShaderProps {
   source: IRuntimeEffect;
   uniforms: number[];
+  isOpaque?: boolean;
   children?: ReactNode | ReactNode[];
 }
 
 export const Shader = (props: AnimatedProps<ShaderProps>) => {
   const onDeclare = useDeclaration(
     (ctx, children) => {
-      const { uniforms, source } = materialize(ctx, props);
-      console.log({ uniforms });
+      const { uniforms, source, isOpaque } = materialize(ctx, props);
       return source.makeShaderWithChildren(
         uniforms,
-        true,
+        isOpaque,
         children.filter(isShader)
       );
     },

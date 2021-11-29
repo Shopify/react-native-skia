@@ -3,7 +3,6 @@ import { useImage, TileMode, FilterMode, MipmapMode } from "../../../skia";
 import { useDeclaration } from "../../nodes";
 import type { TransformProps, SkEnum, AnimatedProps } from "../../processors";
 import { localMatrix, enumKey, materialize } from "../../processors";
-import type { Transforms2d } from "../../processors/math/Matrix3";
 
 import type { ImageProps } from "./Image";
 import type { Fit } from "./BoxFit";
