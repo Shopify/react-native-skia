@@ -2,7 +2,6 @@ import {
   Canvas,
   Paint,
   Rect,
-  usePaintRef,
   ImageShader,
   Skia,
   Shader,
@@ -24,15 +23,11 @@ half4 main(float2 xy) {
 }`)!;
 
 export const Filters = () => {
-  const paint = usePaintRef();
   const progress = useLoop({ duration: 1500 });
   return (
-    <Canvas style={{ width, height }} mode="continuous">
-      <Paint ref={paint}>
-        <Shader
-          source={source}
-          uniforms={(ctx) => [mix(progress(ctx), 0, 100)]}
-        >
+    <Canvas style={{ width, height }}>
+      <Paint>
+        <Shader source={source} uniforms={[3]}>
           <ImageShader
             source={require("../../assets/oslo.jpg")}
             fit="cover"
@@ -40,7 +35,7 @@ export const Filters = () => {
           />
         </Shader>
       </Paint>
-      <Rect x={0} y={0} width={width} height={height} paint={paint} />
+      <Rect x={0} y={0} width={width} height={height} />
     </Canvas>
   );
 };
