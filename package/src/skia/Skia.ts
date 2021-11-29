@@ -37,7 +37,7 @@ export interface Skia {
     | (() => Typeface);
   MaskFilter: MaskFilterFactory;
   RuntimeEffect: RuntimeEffectFactory;
-  ImageFilters: ImageFilterFactory;
+  ImageFilter: ImageFilterFactory;
   Shader: ShaderFactory;
   PathEffect: PathEffectFactory;
   /* Below are private APIs */
@@ -67,7 +67,7 @@ export const Skia = {
   MaskFilter: SkiaApi.MaskFilter,
   RuntimeEffect: SkiaApi.RuntimeEffect,
   Shader: SkiaApi.Shader,
-  ImageFilters: SkiaApi.ImageFilters,
+  ImageFilter: SkiaApi.ImageFilter,
   PathEffect: SkiaApi.PathEffect,
   Matrix: SkiaApi.Matrix,
   Color,

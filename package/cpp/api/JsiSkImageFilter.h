@@ -22,6 +22,13 @@ public:
                    sk_sp<SkImageFilter> imageFilter)
       : JsiSkWrappingSkPtrHostObject<SkImageFilter>(context, imageFilter){};
 
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "ImageFilter");
+  }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkImageFilter, __typename__))
+
   /**
     Returns the underlying object from a host object of this type
    */

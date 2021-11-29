@@ -16,7 +16,7 @@ const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 
 half4 main(float2 xy) {                      
-  return image.eval(xy).bgra;
+  return image.eval(xy).rgba;
 }`)!;
 
 export const Filters = () => {

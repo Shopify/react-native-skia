@@ -24,4 +24,8 @@ export enum TileMode {
   Decal,
 }
 
+export const isImageFilter = (
+  obj: SkJSIInstane<string> | null
+): obj is IImageFilter => obj !== null && obj.__typename__ === "ImageFilter";
+
 export type IImageFilter = SkJSIInstane<"ImageFilter">;
