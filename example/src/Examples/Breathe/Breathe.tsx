@@ -9,7 +9,6 @@ import {
   Fill,
   Group,
   Paint,
-  usePaintRef,
   polar2Canvas,
   useFrame,
   mix,
@@ -50,18 +49,17 @@ export const Breathe = () => {
     duration: 3000,
     easing: Easing.inOut(Easing.ease),
   });
-  const paint = usePaintRef();
   const transform = useFrame(
     (ctx) => [{ rotate: mix(progress(ctx), -Math.PI, 0) }],
     []
   );
   return (
     <Canvas style={styles.container} mode="continuous">
-      <Paint ref={paint} blendMode="screen">
+      <Paint blendMode="screen">
         <Blur style="solid" sigma={40} />
       </Paint>
       <Fill color="rgb(36,43,56)" />
-      <Group origin={center} transform={transform} paint={paint}>
+      <Group origin={center} transform={transform}>
         {new Array(6).fill(0).map((_, index) => {
           return <Ring key={index} index={index} progress={progress} />;
         })}
