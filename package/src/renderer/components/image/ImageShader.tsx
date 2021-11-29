@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type { IRect } from "../../../skia";
 import { useImage, TileMode, FilterMode, MipmapMode } from "../../../skia";
 import { useDeclaration } from "../../nodes";
@@ -20,9 +22,13 @@ interface ImageShaderProps extends TransformProps {
 }
 
 export const ImageShader = (
-  props: AnimatedProps<ImageShaderProps, "source">
+  defaultProps: AnimatedProps<ImageShaderProps, "source">
 ) => {
-  const image = useImage(props.source);
+  const image = useImage(defaultProps.source);
+  const props = useMemo(
+    () => ({ ...defaultProps, image }),
+    [defaultProps, image]
+  );
   const declaration = useDeclaration(
     props,
     ({ tx, ty, fm, mm, fit, fitRect, ...transform }) => {
