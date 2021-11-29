@@ -1,8 +1,12 @@
 #pragma once
 
+#include <chrono>
+
 #include <JsiHostObject.h>
 
 namespace RNSkia {
+
+using namespace std::chrono;
 
 enum RNSkTouchType { Start, Active, End, Cancelled };
 
@@ -11,6 +15,7 @@ using RNSkTouchPoint = struct {
   double y;
   double force;
   RNSkTouchType type;
+  long timestamp;
 };
 
 class RNSkInfoObject : public JsiHostObject {
@@ -26,10 +31,12 @@ public:
       auto touches = jsi::Array(runtime, cur.size());
       for (size_t n = 0; n < cur.size(); n++) {
         auto touchObj = jsi::Object(runtime);
-        touchObj.setProperty(runtime, "x", cur.at(n).x);
-        touchObj.setProperty(runtime, "y", cur.at(n).y);
-        touchObj.setProperty(runtime, "force", cur.at(n).force);
-        touchObj.setProperty(runtime, "type", (double)cur.at(n).type);
+        auto t = cur.at(n);
+        touchObj.setProperty(runtime, "x", t.x);
+        touchObj.setProperty(runtime, "y", t.y);
+        touchObj.setProperty(runtime, "force", t.force);
+        touchObj.setProperty(runtime, "type", (double)t.type);
+        touchObj.setProperty(runtime, "timestamp", (double)t.timestamp / 1000.0);
         touches.setValueAtIndex(runtime, n, touchObj);
       }
       ops.setValueAtIndex(runtime, i, touches);
@@ -62,6 +69,13 @@ public:
 
   void updateTouches(std::vector<RNSkTouchPoint> touches) {
     std::lock_guard<std::mutex> lock(*_mutex);
+    // Add timestamp
+    auto ms = std::chrono::duration_cast<milliseconds>(
+        system_clock::now().time_since_epoch()).count();
+    
+    for(size_t i=0; i<touches.size(); i++) {
+      touches.at(i).timestamp = ms;
+    }
     _currentTouches.push_back(touches);
   }
 

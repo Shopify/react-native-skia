@@ -33,6 +33,7 @@ export interface TouchInfo {
   y: number;
   force: number;
   type: TouchType;
+  timestamp: number;
 }
 
 export interface DrawingInfo {
