@@ -280,7 +280,6 @@ public:
       auto blendMode = (SkBlendMode)arguments[3].asNumber();
       _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), blendMode,
                          *paint);
-      auto &jsiBlendMode = arguments[3];
     } else {
       _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), *paint);
     }
