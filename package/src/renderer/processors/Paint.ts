@@ -1,17 +1,15 @@
 import type { RefObject } from "react";
-import { useRef } from "react";
 
 import { Skia, BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
-import type { IRuntimeEffect, IPaint } from "../../skia";
-
-export const useRTRef = () => useRef<IRuntimeEffect>(null);
-export const usePaintRef = () => useRef<IPaint>(null);
+import type { IPaint } from "../../skia";
 
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
+export type ColorProp = string | number;
+
 export interface CustomPaintProps {
   paint?: RefObject<IPaint>;
-  color?: string;
+  color?: ColorProp;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;
   style?: SkEnum<typeof PaintStyle>;
@@ -33,7 +31,7 @@ export const color = (r: number, g: number, b: number, af: number) => {
   return ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
 };
 
-export const processColor = (cl: string | number, currentOpacity: number) => {
+export const processColor = (cl: ColorProp, currentOpacity: number) => {
   const icl = typeof cl === "string" ? Skia.Color(cl) : cl;
   const r = red(icl);
   const g = green(icl);

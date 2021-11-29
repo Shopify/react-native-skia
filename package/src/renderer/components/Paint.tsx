@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useMemo, forwardRef, useImperativeHandle } from "react";
+import { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 
 import type { IPaint } from "../../skia";
 import { isShader } from "../../skia/Shader/Shader";
@@ -12,6 +12,8 @@ import { processPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { useDeclaration } from "../nodes/Declaration";
+
+export const usePaintRef = () => useRef<IPaint>(null);
 
 export interface PaintProps extends Omit<CustomPaintProps, "paint"> {
   children?: ReactNode | ReactNode[];

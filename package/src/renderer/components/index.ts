@@ -7,3 +7,4 @@ export * from "./maskFilters";
 
 export * from "./Group";
 export * from "./Paint";
+export * from "./Compose";

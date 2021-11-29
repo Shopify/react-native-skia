@@ -1,11 +1,12 @@
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
+import type { ColorProp } from "../../processors/Paint";
 import { processColor } from "../../processors/Paint";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { materialize } from "../../processors/Animations/Animations";
 
 export interface ColorShaderProps {
-  color: string;
+  color: ColorProp;
 }
 
 export const ColorShader = (props: AnimatedProps<ColorShaderProps>) => {

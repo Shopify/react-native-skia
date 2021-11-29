@@ -72,11 +72,11 @@ export const ColorFilter = () => {
     if (image) {
       const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
       const p1 = paint.copy();
-      p1.setImageFilter(Skia.ImageFilters.MakeBlur(5, 5, TileMode.Decal, null));
+      p1.setImageFilter(Skia.ImageFilter.MakeBlur(5, 5, TileMode.Decal, null));
       canvas.drawImageRect(image, imgRect, rect1, p1);
       const p2 = paint.copy();
       p2.setImageFilter(
-        Skia.ImageFilters.MakeColorFilter(
+        Skia.ImageFilter.MakeColorFilter(
           Skia.ColorFilter.MakeMatrix([
             1.49, 0, 0, -0.247, 0, 1.49, 0, 0, -0.247, 0, 0, 1.49, 0, -0.247, 0,
             0, 0, 1, 0,

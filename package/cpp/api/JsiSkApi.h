@@ -52,7 +52,7 @@ public:
     installFunction("Typeface", JsiSkTypeface::createCtor(context));
 
     // Static members
-    installReadonlyProperty("ImageFilters",
+    installReadonlyProperty("ImageFilter",
                             std::make_shared<JsiSkImageFilterFactory>(context));
     installReadonlyProperty("PathEffect",
                             std::make_shared<JsiSkPathEffectFactory>(context));

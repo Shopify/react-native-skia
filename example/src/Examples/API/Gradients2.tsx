@@ -15,9 +15,9 @@ import {
   TwoPointConicalGradient,
   SweepGradient,
   vec,
-  Blend,
   Turbulence,
   ColorShader,
+  Blend,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
