@@ -6,7 +6,7 @@ import ReactReconciler from "react-reconciler";
 import { SkiaView, useDrawCallback } from "../views";
 import { Skia } from "../skia";
 
-import { debug, skHostConfig } from "./HostConfig";
+import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
 import { vec } from "./processors";
@@ -25,7 +25,7 @@ const render = (
   update: () => void
 ) => {
   skiaReconciler.updateContainer(element, container, null, () => {
-    debug("updateContainer");
+    hostDebug("updateContainer");
     update();
   });
 };
@@ -34,7 +34,7 @@ interface CanvasProps extends ComponentProps<typeof SkiaView> {
   children: ReactNode;
 }
 
-export const Canvas = ({ children, style, mode }: CanvasProps) => {
+export const Canvas = ({ children, style, debug, mode }: CanvasProps) => {
   const [tick, setTick] = useState(0);
   const redraw = useCallback(() => setTick((t) => t + 1), []);
   const tree = useMemo(() => CanvasNode(redraw), [redraw]);
@@ -64,5 +64,5 @@ export const Canvas = ({ children, style, mode }: CanvasProps) => {
     },
     [tick]
   );
-  return <SkiaView style={style} onDraw={onDraw} mode={mode} />;
+  return <SkiaView style={style} onDraw={onDraw} mode={mode} debug={debug} />;
 };
