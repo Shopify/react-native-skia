@@ -44,7 +44,7 @@ export interface IRuntimeEffect extends SkJSIInstane<"RuntimeEffect"> {
   getUniform(index: number): SkSLUniform;
 
   /**
-   * Returns the size of the uniforms on the effect.
+   * Returns the number of uniforms in the effect.
    */
   getUniformCount(): number;
 
