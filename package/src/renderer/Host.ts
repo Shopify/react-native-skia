@@ -1,3 +1,5 @@
+import { isPaint } from "../skia/Paint/Paint";
+
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationResult } from "./nodes/Declaration";
 import type {
@@ -32,9 +34,8 @@ export interface SkNode<T extends NodeType = NodeType> {
     children: SkNode[]
   ) => void | DeclarationResult;
   readonly children: SkNode[];
-  readonly memoizable?: boolean;
+  memoizable?: boolean;
   parent?: SkNode;
-
   props: NodeProps[T];
   memoized?: boolean;
 }
@@ -55,10 +56,14 @@ declare global {
 
 export const processChildren = (ctx: DrawingContext, children: SkNode[]) => {
   const returnedValues: Exclude<DeclarationResult, null>[] = [];
+  let currentCtx = ctx;
   children.forEach((child) => {
     if (!child.memoized) {
-      const ret = child.draw(ctx, child.props, child.children);
+      const ret = child.draw(currentCtx, child.props, child.children);
       if (ret) {
+        if (isPaint(ret)) {
+          currentCtx = { ...currentCtx, paint: ret };
+        }
         returnedValues.push(ret);
       }
       if (child.memoizable) {

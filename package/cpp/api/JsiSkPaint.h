@@ -19,6 +19,14 @@ using namespace facebook;
 
 class JsiSkPaint : public JsiSkWrappingSharedPtrHostObject<SkPaint> {
 public:
+
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "Paint");
+  }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPaint, __typename__))
+
   JSI_HOST_FUNCTION(copy) {
     auto paint = getObject().get();
     return jsi::Object::createFromHostObject(

@@ -2,7 +2,6 @@ import type { CustomPaintProps } from "../../processors";
 import type { IPath } from "../../../skia";
 import { Skia } from "../../../skia";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { materialize } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
 
 interface StrokeOpts {
@@ -19,9 +18,8 @@ export interface PathProps extends CustomPaintProps, StrokeOpts {
 
 export const Path = (props: AnimatedProps<PathProps>) => {
   const onDraw = useDrawing(
-    (ctx) => {
-      const { start, end, ...pathProps } = materialize(ctx, props);
-      const { canvas, paint } = ctx;
+    props,
+    ({ canvas, paint }, { start, end, ...pathProps }) => {
       const path =
         typeof pathProps.path === "string"
           ? Skia.Path.MakeFromSVGString(pathProps.path)
@@ -34,8 +32,7 @@ export const Path = (props: AnimatedProps<PathProps>) => {
         path.trim(start, end, false);
       }
       canvas.drawPath(path, paint);
-    },
-    [props]
+    }
   );
   return <skDrawing onDraw={onDraw} {...props} />;
 };

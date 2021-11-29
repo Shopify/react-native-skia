@@ -11,6 +11,20 @@ export const useFrame = <T>(
   // eslint-disable-next-line react-hooks/exhaustive-deps
 ) => useCallback(cb, deps ?? []);
 
+// TODO: refine detection here. Is the prototype accepting a drawing ctx for instance?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isAnimatedValue = (value: unknown): value is FrameValue<any> =>
+  typeof value === "function";
+
+export const isAnimated = <T>(props: AnimatedProps<T>) => {
+  for (const value of Object.values(props)) {
+    if (isAnimatedValue(value)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export const materialize = <T>(
   ctx: DrawingContext,
   props: AnimatedProps<T>
@@ -18,7 +32,7 @@ export const materialize = <T>(
   const result = { ...props };
   mapKeys(props).forEach((key) => {
     const value = props[key];
-    if (typeof value === "function") {
+    if (isAnimatedValue(value)) {
       result[key] = value(ctx);
     }
   });

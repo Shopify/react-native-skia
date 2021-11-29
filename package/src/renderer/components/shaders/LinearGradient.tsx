@@ -1,7 +1,6 @@
 import type { Vector, AnimatedProps } from "../../processors";
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
-import { materialize } from "../../processors";
 
 import type { GradientProps } from "./Gradient";
 import { processGradientProps } from "./Gradient";
@@ -12,9 +11,9 @@ export interface LinearGradientProps extends GradientProps {
 }
 
 export const LinearGradient = (props: AnimatedProps<LinearGradientProps>) => {
-  const onDeclare = useDeclaration(
-    (ctx) => {
-      const { start, end, ...gradientProps } = materialize(ctx, props);
+  const declaration = useDeclaration(
+    props,
+    ({ start, end, ...gradientProps }) => {
       const { colors, positions, mode, localMatrix, flags } =
         processGradientProps(gradientProps);
       return Skia.Shader.MakeLinearGradient(
@@ -26,8 +25,7 @@ export const LinearGradient = (props: AnimatedProps<LinearGradientProps>) => {
         localMatrix,
         flags
       );
-    },
-    [props]
+    }
   );
-  return <skDeclaration onDeclare={onDeclare} />;
+  return <skDeclaration declaration={declaration} />;
 };

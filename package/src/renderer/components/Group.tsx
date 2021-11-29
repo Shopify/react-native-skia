@@ -4,7 +4,6 @@ import { processChildren } from "../Host";
 import type { IRRect, IPath, IPaint } from "../../skia";
 import { ClipOp, Skia } from "../../skia";
 import { processTransform, selectPaint, processPaint } from "../processors";
-import { materialize } from "../processors/Animations/Animations";
 import type {
   CustomPaintProps,
   TransformProps,
@@ -22,9 +21,12 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 
 export const Group = (props: AnimatedProps<GroupProps>) => {
   const onDraw = useDrawing(
-    (ctx, children) => {
-      const { clipRect, rasterize, clipPath, clipOp, ...groupProps } =
-        materialize(ctx, props);
+    props,
+    (
+      ctx,
+      { clipRect, rasterize, clipPath, clipOp, ...groupProps },
+      children
+    ) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
@@ -53,8 +55,7 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
         children
       );
       canvas.restore();
-    },
-    [props]
+    }
   );
   return <skDrawing onDraw={onDraw} {...props} />;
 };

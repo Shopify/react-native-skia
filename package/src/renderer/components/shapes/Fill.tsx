@@ -5,9 +5,8 @@ import { useDrawing } from "../../nodes/Drawing";
 export type FillProps = CustomPaintProps;
 
 export const Fill = (props: AnimatedProps<FillProps>) => {
-  const onDraw = useDrawing((ctx) => {
-    const { canvas, paint } = ctx;
+  const onDraw = useDrawing(props, ({ canvas, paint }) => {
     canvas.drawPaint(paint);
-  }, []);
+  });
   return <skDrawing onDraw={onDraw} {...props} />;
 };

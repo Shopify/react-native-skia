@@ -8,16 +8,29 @@ import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 
-type OnDrawCallback = (ctx: DrawingContext, children: SkNode[]) => void;
+type DrawingCallback = (ctx: DrawingContext, children: SkNode[]) => void;
 
-export const useDrawing = (
-  cb: OnDrawCallback,
-  deps?: Parameters<typeof useCallback>[1]
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-) => useCallback(cb, deps ?? []);
+type UseDrawingCallback<T> = (
+  ctx: DrawingContext,
+  props: T,
+  children: SkNode[]
+) => void;
+
+export const useDrawing = <T,>(
+  props: AnimatedProps<T>,
+  cb: UseDrawingCallback<T>
+) =>
+  useCallback<DrawingCallback>(
+    (ctx, children) => {
+      const materializedProps = materialize(ctx, props);
+      cb(ctx, materializedProps, children);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props]
+  );
 
 export interface DrawingProps extends AnimatedProps<CustomPaintProps> {
-  onDraw: OnDrawCallback;
+  onDraw: DrawingCallback;
 }
 
 export const Drawing = (props: DrawingProps) => {

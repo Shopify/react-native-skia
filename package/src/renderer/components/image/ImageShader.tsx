@@ -1,14 +1,12 @@
-import { useImage } from "../../../skia";
-import { TileMode } from "../../../skia/ImageFilter/ImageFilter";
-import { FilterMode, MipmapMode } from "../../../skia/Image/Image";
-import { useDeclaration } from "../../nodes/Declaration";
-import type { TransformProps, SkEnum } from "../../processors";
-import { localMatrix } from "../../processors/Transform";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { materialize } from "../../processors/Animations/Animations";
-import { enumKey } from "../../processors";
+import type { IRect } from "../../../skia";
+import { useImage, TileMode, FilterMode, MipmapMode } from "../../../skia";
+import { useDeclaration } from "../../nodes";
+import type { TransformProps, SkEnum, AnimatedProps } from "../../processors";
+import { localMatrix, enumKey } from "../../processors";
 
 import type { ImageProps } from "./Image";
+import type { Fit } from "./BoxFit";
+import { rect2rect, fitRects } from "./BoxFit";
 
 // TODO: add fit property and infer the transform matrix from src and dst
 interface ImageShaderProps extends TransformProps {
@@ -17,18 +15,25 @@ interface ImageShaderProps extends TransformProps {
   ty: SkEnum<typeof TileMode>;
   fm: SkEnum<typeof FilterMode>;
   mm: SkEnum<typeof MipmapMode>;
+  fit: Fit;
+  fitRect?: IRect;
 }
 
 export const ImageShader = (
   props: AnimatedProps<ImageShaderProps, "source">
 ) => {
   const image = useImage(props.source);
-  const onDeclare = useDeclaration(
-    (ctx) => {
+  const declaration = useDeclaration(
+    props,
+    ({ tx, ty, fm, mm, fit, fitRect, ...transform }) => {
       if (image === null) {
         return null;
       }
-      const { tx, ty, fm, mm, ...transform } = materialize(ctx, props);
+      if (fitRect) {
+        const rects = fitRects(fit, image, fitRect);
+        const m3 = rect2rect(rects.src, rects.dst);
+        transform.transform = [...(transform.transform ?? []), ...m3];
+      }
       return image.makeShaderOptions(
         TileMode[enumKey(tx)],
         TileMode[enumKey(ty)],
@@ -36,10 +41,9 @@ export const ImageShader = (
         MipmapMode[enumKey(mm)],
         localMatrix(transform)
       );
-    },
-    [image, props]
+    }
   );
-  return <skDeclaration onDeclare={onDeclare} />;
+  return <skDeclaration declaration={declaration} />;
 };
 
 ImageShader.defaultProps = {
@@ -47,4 +51,6 @@ ImageShader.defaultProps = {
   ty: "decal",
   fm: "nearest",
   mm: "none",
+  fit: "none",
+  transform: [],
 } as const;

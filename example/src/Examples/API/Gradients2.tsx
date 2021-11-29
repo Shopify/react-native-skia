@@ -5,7 +5,6 @@ import {
   rect,
   Canvas,
   Rect,
-  usePaintRef,
   LinearGradient,
   Paint,
   topLeft,
@@ -33,29 +32,26 @@ const r4 = rect(SIZE, SIZE, SIZE, SIZE);
 const r5 = rect(0, 2 * SIZE, SIZE, SIZE);
 
 export const Gradients = () => {
-  const p1 = usePaintRef();
-  const p2 = usePaintRef();
-  const p3 = usePaintRef();
-  const p4 = usePaintRef();
-  const p5 = usePaintRef();
   return (
     <ScrollView>
       <Canvas style={styles.container}>
-        <Paint ref={p1}>
+        <Paint>
           <LinearGradient
             start={topLeft(r1)}
             end={bottomRight(r1)}
             colors={["#61DAFB", "#fb61da"]}
           />
         </Paint>
-        <Paint ref={p2}>
+        <Rect rect={r1} />
+        <Paint>
           <RadialGradient
             c={center(r2)}
             r={SIZE / 2}
             colors={["#fb61da", "#61DAFB"]}
           />
         </Paint>
-        <Paint ref={p3}>
+        <Rect rect={r2} />
+        <Paint>
           <TwoPointConicalGradient
             start={vec(R, SIZE)}
             startR={R}
@@ -64,23 +60,21 @@ export const Gradients = () => {
             colors={["#61DAFB", "#fb61da"]}
           />
         </Paint>
-        <Paint ref={p4}>
+        <Rect rect={r3} />
+        <Paint>
           <SweepGradient
             c={vec(SIZE + R, SIZE + R)}
             colors={["#61DAFB", "#fb61da", "#dafb61", "#61DAFB"]}
           />
         </Paint>
-        <Paint ref={p5}>
+        <Rect rect={r4} />
+        <Paint>
           <Blend mode="difference">
             <ColorShader color="#61DAFB" />
             <Turbulence freqX={0.05} freqY={0.05} octaves={4} />
           </Blend>
         </Paint>
-        <Rect rect={r1} paint={p1} />
-        <Rect rect={r2} paint={p2} />
-        <Rect rect={r3} paint={p3} />
-        <Rect rect={r4} paint={p4} />
-        <Rect rect={r5} paint={p5} />
+        <Rect rect={r5} />
       </Canvas>
     </ScrollView>
   );

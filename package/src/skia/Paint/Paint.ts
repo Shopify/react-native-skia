@@ -25,6 +25,9 @@ export enum StrokeJoin {
   Round,
 }
 
+export const isPaint = (obj: SkJSIInstane<string> | null): obj is IPaint =>
+  obj !== null && obj.__typename__ === "Paint";
+
 export interface IPaint extends SkJSIInstane<"Paint"> {
   /**
    * Returns a copy of this paint.

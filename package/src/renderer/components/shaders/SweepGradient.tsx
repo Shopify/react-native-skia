@@ -1,7 +1,6 @@
 import type { Vector, AnimatedProps } from "../../processors";
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
-import { materialize } from "../../processors";
 
 import type { GradientProps } from "./Gradient";
 import { processGradientProps } from "./Gradient";
@@ -13,10 +12,9 @@ export interface SweepGradientProps extends GradientProps {
 }
 
 export const SweepGradient = (props: AnimatedProps<SweepGradientProps>) => {
-  const onDeclare = useDeclaration(
-    (ctx) => {
-      const { c, startAngleInDegrees, endAngleInDegrees, ...gradientProps } =
-        materialize(ctx, props);
+  const declaration = useDeclaration(
+    props,
+    ({ c, startAngleInDegrees, endAngleInDegrees, ...gradientProps }) => {
       const { colors, positions, mode, localMatrix, flags } =
         processGradientProps(gradientProps);
       return Skia.Shader.MakeSweepGradient(
@@ -30,8 +28,7 @@ export const SweepGradient = (props: AnimatedProps<SweepGradientProps>) => {
         startAngleInDegrees,
         endAngleInDegrees
       );
-    },
-    [props]
+    }
   );
-  return <skDeclaration onDeclare={onDeclare} />;
+  return <skDeclaration declaration={declaration} />;
 };

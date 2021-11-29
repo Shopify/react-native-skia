@@ -1,7 +1,6 @@
 import type { Vector, AnimatedProps } from "../../processors";
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
-import { materialize } from "../../processors";
 
 import type { GradientProps } from "./Gradient";
 import { processGradientProps } from "./Gradient";
@@ -16,12 +15,9 @@ export interface TwoPointConicalGradientProps extends GradientProps {
 export const TwoPointConicalGradient = (
   props: AnimatedProps<TwoPointConicalGradientProps>
 ) => {
-  const onDeclare = useDeclaration(
-    (ctx) => {
-      const { start, startR, end, endR, ...gradientProps } = materialize(
-        ctx,
-        props
-      );
+  const declaration = useDeclaration(
+    props,
+    ({ start, startR, end, endR, ...gradientProps }) => {
       const { colors, positions, mode, localMatrix, flags } =
         processGradientProps(gradientProps);
       return Skia.Shader.MakeTwoPointConicalGradient(
@@ -35,8 +31,7 @@ export const TwoPointConicalGradient = (
         localMatrix,
         flags
       );
-    },
-    [props]
+    }
   );
-  return <skDeclaration onDeclare={onDeclare} />;
+  return <skDeclaration declaration={declaration} />;
 };
