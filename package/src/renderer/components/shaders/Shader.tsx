@@ -16,6 +16,7 @@ export const Shader = (props: AnimatedProps<ShaderProps>) => {
   const onDeclare = useDeclaration(
     (ctx, children) => {
       const { uniforms, source } = materialize(ctx, props);
+      console.log({ uniforms });
       return source.makeShaderWithChildren(
         uniforms,
         true,

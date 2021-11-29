@@ -19,6 +19,14 @@ interface Size {
 
 const size = (width = 0, height = 0) => ({ width, height });
 
+export const rect2rect = (src: IRect, dst: IRect) => {
+  const scaleX = dst.width / src.width;
+  const scaleY = dst.height / src.height;
+  const translateX = dst.x - src.x * scaleX;
+  const translateY = dst.y - src.y * scaleY;
+  return [{ translateX }, { translateY }, { scaleX }, { scaleY }] as const;
+};
+
 export const fitRects = (
   fit: Fit,
   image: IImage,
@@ -29,13 +37,13 @@ export const fitRects = (
     { width: image.width(), height: image.height() },
     { width, height }
   );
-  const src = inscribe(sizes.source, {
+  const src = inscribe(sizes.src, {
     x: 0,
     y: 0,
     width: image.width(),
     height: image.height(),
   });
-  const dst = inscribe(sizes.destination, {
+  const dst = inscribe(sizes.dst, {
     x,
     y,
     width,
@@ -58,93 +66,66 @@ const inscribe = (
   );
 };
 
-const applyBoxFit = (fit: Fit, inputSize: Size, outputSize: Size) => {
-  let source = size(),
-    destination = size();
+const applyBoxFit = (fit: Fit, input: Size, output: Size) => {
+  let src = size(),
+    dst = size();
   if (
-    inputSize.height <= 0.0 ||
-    inputSize.width <= 0.0 ||
-    outputSize.height <= 0.0 ||
-    outputSize.width <= 0.0
+    input.height <= 0.0 ||
+    input.width <= 0.0 ||
+    output.height <= 0.0 ||
+    output.width <= 0.0
   ) {
-    return { source, destination };
+    return { src, dst };
   }
   switch (fit) {
     case "fill":
-      source = inputSize;
-      destination = outputSize;
+      src = input;
+      dst = output;
       break;
     case "contain":
-      source = inputSize;
-      if (outputSize.width / outputSize.height > source.width / source.height) {
-        destination = size(
-          (source.width * outputSize.height) / source.height,
-          outputSize.height
-        );
+      src = input;
+      if (output.width / output.height > src.width / src.height) {
+        dst = size((src.width * output.height) / src.height, output.height);
       } else {
-        destination = size(
-          outputSize.width,
-          (source.height * outputSize.width) / source.width
-        );
+        dst = size(output.width, (src.height * output.width) / src.width);
       }
       break;
     case "cover":
-      if (
-        outputSize.width / outputSize.height >
-        inputSize.width / inputSize.height
-      ) {
-        source = size(
-          inputSize.width,
-          (inputSize.width * outputSize.height) / outputSize.width
-        );
+      if (output.width / output.height > input.width / input.height) {
+        src = size(input.width, (input.width * output.height) / output.width);
       } else {
-        source = size(
-          (inputSize.height * outputSize.width) / outputSize.height,
-          inputSize.height
-        );
+        src = size((input.height * output.width) / output.height, input.height);
       }
-      destination = outputSize;
+      dst = output;
       break;
     case "fitWidth":
-      source = size(
-        inputSize.width,
-        (inputSize.width * outputSize.height) / outputSize.width
-      );
-      destination = size(
-        outputSize.width,
-        (source.height * outputSize.width) / source.width
-      );
+      src = size(input.width, (input.width * output.height) / output.width);
+      dst = size(output.width, (src.height * output.width) / src.width);
       break;
     case "fitHeight":
-      source = size(
-        (inputSize.height * outputSize.width) / outputSize.height,
-        inputSize.height
-      );
-      destination = size(
-        (source.width * outputSize.height) / source.height,
-        outputSize.height
-      );
+      src = size((input.height * output.width) / output.height, input.height);
+      dst = size((src.width * output.height) / src.height, output.height);
       break;
     case "none":
-      source = size(
-        Math.min(inputSize.width, outputSize.width),
-        Math.min(inputSize.height, outputSize.height)
+      src = size(
+        Math.min(input.width, output.width),
+        Math.min(input.height, output.height)
       );
-      destination = source;
+      dst = src;
       break;
     case "scaleDown":
-      source = inputSize;
-      destination = inputSize;
-      const aspectRatio = inputSize.width / inputSize.height;
-      if (destination.height > outputSize.height) {
-        destination = size(outputSize.height * aspectRatio, outputSize.height);
+      src = input;
+      dst = input;
+      const aspectRatio = input.width / input.height;
+      if (dst.height > output.height) {
+        dst = size(output.height * aspectRatio, output.height);
       }
-      if (destination.width > outputSize.width) {
-        destination = size(outputSize.width, outputSize.width / aspectRatio);
+      if (dst.width > output.width) {
+        dst = size(output.width, output.width / aspectRatio);
       }
       break;
     default:
       exhaustiveCheck(fit);
   }
-  return { source, destination };
+  return { src, dst };
 };
