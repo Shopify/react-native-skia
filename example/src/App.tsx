@@ -7,6 +7,7 @@ import { API } from "./Examples/API";
 import { Breathe } from "./Examples/Breathe";
 import { Filters } from "./Examples/Filters";
 import { Gooey } from "./Examples/Gooey";
+import { Hue } from "./Examples/Hue";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -25,6 +26,7 @@ const App = () => {
         <Stack.Screen name="Breathe" component={Breathe} />
         <Stack.Screen name="Filters" component={Filters} />
         <Stack.Screen name="Gooey" component={Gooey} />
+        <Stack.Screen name="Hue" component={Hue} />
         <Stack.Screen name="Drawing" component={DrawingExample} />
       </Stack.Navigator>
     </NavigationContainer>

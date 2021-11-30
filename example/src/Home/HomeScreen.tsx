@@ -23,6 +23,11 @@ export const HomeScreen: React.FC = () => {
         route="Gooey"
       />
       <HomeScreenButton
+        title="💡 Hue"
+        description="Hue Color Selection"
+        route="Hue"
+      />
+      <HomeScreenButton
         title="Drawing"
         description="Use touches to draw with Skia"
         route="Drawing"

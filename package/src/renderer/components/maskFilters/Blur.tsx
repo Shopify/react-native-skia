@@ -16,3 +16,7 @@ export const Blur = (props: AnimatedProps<BlurProps>) => {
   });
   return <skDeclaration declaration={declaration} />;
 };
+
+Blur.defaultProps = {
+  style: "normal",
+};
