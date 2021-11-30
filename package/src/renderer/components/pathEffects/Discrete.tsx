@@ -21,6 +21,7 @@ export const DiscretePathEffect = (
       const [child] = children.filter(isPathEffect);
       const pe = Skia.PathEffect.MakeDiscrete(length, deviation, seed);
       if (child) {
+        console.log({ child });
         return Skia.PathEffect.MakeCompose(pe, child);
       }
       return pe;

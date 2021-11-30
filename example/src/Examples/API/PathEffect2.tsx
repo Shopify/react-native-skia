@@ -12,14 +12,13 @@ import {
   PaintStyle,
   DiscretePathEffect,
   DashPathEffect,
+  Defs,
+  usePaintRef,
+  CornerPathEffect,
+  rect,
+  Path,
+  Group,
 } from "@shopify/react-native-skia";
-
-import { Group } from "../../../../package/src/renderer/components/Group";
-import { Path } from "../../../../package/src/renderer/components/shapes/Path";
-import { rect } from "../../../../package/src/renderer/processors/Shapes";
-import { CornerPathEffect } from "../../../../package/src/renderer/components/pathEffects/Corner";
-import { usePaintRef } from "../../../../package/src/renderer/components/Paint";
-import { Defs } from "../../../../package/src/renderer/components/Defs";
 
 import { Title } from "./components/Title";
 
@@ -156,9 +155,9 @@ export const PathEffectDemo = () => {
       <Title>Compose</Title>
       <Canvas style={styles.container}>
         <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
-          <DiscretePathEffect length={10} deviation={4}>
-            <DashPathEffect intervals={[10, 10]} />
-          </DiscretePathEffect>
+          <DashPathEffect intervals={[10, 10]}>
+            <DiscretePathEffect length={10} deviation={10} />
+          </DashPathEffect>
         </Paint>
         <Logo />
       </Canvas>
