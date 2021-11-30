@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
-import type { ICanvas, IPaint } from "@shopify/react-native-skia";
 import {
+  Rect,
   Paint,
   transformOrigin,
   sub,
@@ -9,14 +9,17 @@ import {
   Circle,
   translate,
   Skia,
-  useDrawCallback,
-  SkiaView,
   PaintStyle,
-  PathEffect,
+  DiscretePathEffect,
+  DashPathEffect,
 } from "@shopify/react-native-skia";
 
 import { Group } from "../../../../package/src/renderer/components/Group";
 import { Path } from "../../../../package/src/renderer/components/shapes/Path";
+import { rect } from "../../../../package/src/renderer/processors/Shapes";
+import { CornerPathEffect } from "../../../../package/src/renderer/components/pathEffects/Corner";
+import { usePaintRef } from "../../../../package/src/renderer/components/Paint";
+import { Defs } from "../../../../package/src/renderer/components/Defs";
 
 import { Title } from "./components/Title";
 
@@ -50,14 +53,8 @@ transparentPaint.setAlphaf(0.2);
 const Logo = () => {
   return (
     <>
-      <Paint color="#61DAFB" style="stroke">
-        <PathEffect.Discrete length={10} deviation={4} />
-      </Paint>
       <Circle c={center} r={30} style="fill" />
       <Group>
-        <Group transform={[...translate(sub(center, origin)), { scale }]}>
-          <Path path={path} style="stroke" strokeWidth={15} />
-        </Group>
         <Group transform={[...translate(sub(center, origin)), { scale }]}>
           <Path path={path} style="stroke" strokeWidth={15} />
         </Group>
@@ -84,91 +81,87 @@ const Logo = () => {
   );
 };
 
-const drawLogo = (canvas: ICanvas, paint: IPaint) => {
-  canvas.drawCircle(center.x, center.y, 30, basePaint);
-  canvas.save();
-  canvas.translate(center.x - origin.x, center.y - origin.y);
-  canvas.scale(scale, scale);
-  canvas.drawPath(path, paint);
-  canvas.restore();
-
-  canvas.save();
-  canvas.translate(center.x - origin.x, center.y - origin.y);
-  canvas.scale(scale, scale);
-  canvas.translate(vOrigin.x, vOrigin.y);
-  canvas.rotate(60, 0, 0);
-  canvas.translate(-vOrigin.x, -vOrigin.y);
-  canvas.drawPath(path, paint);
-  canvas.restore();
-
-  canvas.save();
-  canvas.translate(center.x - origin.x, center.y - origin.y);
-  canvas.scale(scale, scale);
-  canvas.translate(vOrigin.x, vOrigin.y);
-  canvas.rotate(-60, 0, 0);
-  canvas.translate(-vOrigin.x, -vOrigin.y);
-  canvas.drawPath(path, paint);
-  canvas.restore();
-};
-
-const drawSquaredLogo = (canvas: ICanvas, paint: IPaint) => {
-  canvas.drawCircle(center.x, center.y, 30, basePaint);
-  canvas.save();
-  canvas.translate(center.x - origin.x, center.y - origin.y);
-  canvas.scale(scale, scale);
-  canvas.drawRect(Skia.XYWHRect(0, 0, vWidth, vHeight), paint);
-  canvas.drawRect(Skia.XYWHRect(0, 0, vWidth, vHeight), transparentPaint);
-  canvas.restore();
-
-  canvas.save();
-  canvas.translate(center.x - origin.x, center.y - origin.y);
-  canvas.scale(scale, scale);
-  canvas.translate(vOrigin.x, vOrigin.y);
-  canvas.rotate(60, 0, 0);
-  canvas.translate(-vOrigin.x, -vOrigin.y);
-  canvas.drawRect(Skia.XYWHRect(0, 0, vWidth, vHeight), paint);
-  canvas.drawRect(Skia.XYWHRect(0, 0, vWidth, vHeight), transparentPaint);
-  canvas.restore();
-
-  canvas.save();
-  canvas.translate(center.x - origin.x, center.y - origin.y);
-  canvas.scale(scale, scale);
-  canvas.translate(vOrigin.x, vOrigin.y);
-  canvas.rotate(-60, 0, 0);
-  canvas.translate(-vOrigin.x, -vOrigin.y);
-  canvas.drawRect(Skia.XYWHRect(0, 0, vWidth, vHeight), paint);
-  canvas.drawRect(Skia.XYWHRect(0, 0, vWidth, vHeight), transparentPaint);
-  canvas.restore();
+const rect1 = rect(0, 0, vWidth, vHeight);
+const SquaredLogo = () => {
+  const regularPaint = usePaintRef();
+  return (
+    <>
+      <Defs>
+        <Paint
+          ref={regularPaint}
+          color="#61DAFB"
+          opacity={0.5}
+          style="stroke"
+          strokeWidth={15}
+        />
+      </Defs>
+      <Circle c={center} r={30} style="fill" />
+      <Group>
+        <Group transform={[...translate(sub(center, origin)), { scale }]}>
+          <Rect rect={rect1} paint={regularPaint} />
+          <Rect rect={rect1} />
+        </Group>
+        <Group
+          transform={[
+            ...translate(sub(center, origin)),
+            { scale },
+            ...transformOrigin(vOrigin, [{ rotate: Math.PI / 3 }]),
+          ]}
+        >
+          <Rect rect={rect1} paint={regularPaint} />
+          <Rect rect={rect1} />
+        </Group>
+        <Group
+          transform={[
+            ...translate(sub(center, origin)),
+            { scale },
+            ...transformOrigin(vOrigin, [{ rotate: -Math.PI / 3 }]),
+          ]}
+        >
+          <Rect rect={rect1} paint={regularPaint} />
+          <Rect rect={rect1} />
+        </Group>
+      </Group>
+    </>
+  );
 };
 
 export const PathEffectDemo = () => {
-  const onMakeDiscreteDraw = useDrawCallback((canvas) => {
-    const paint = strokePaint.copy();
-    paint.setPathEffect(Skia.PathEffect.MakeDiscrete(10, 4, 0));
-    drawLogo(canvas, paint);
-  }, []);
-  const onMakeDashDraw = useDrawCallback((canvas) => {
-    const paint = strokePaint.copy();
-    paint.setPathEffect(Skia.PathEffect.MakeDash([10, 10], 0));
-    drawLogo(canvas, paint);
-  }, []);
-  const onMakeCornerDraw = useDrawCallback((canvas) => {
-    const paint = strokePaint.copy();
-    paint.setPathEffect(Skia.PathEffect.MakeCorner(250)!);
-    drawSquaredLogo(canvas, paint);
-  }, []);
   return (
     <ScrollView>
-      <Title>MakeDiscrete</Title>
+      <Title>Discrete</Title>
       <Canvas style={styles.container}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <DiscretePathEffect length={10} deviation={4} />
+        </Paint>
         <Logo />
       </Canvas>
 
-      <Title>MakeDash</Title>
-      <SkiaView style={styles.container} onDraw={onMakeDashDraw} />
+      <Title>Dash</Title>
+      <Canvas style={styles.container}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <DashPathEffect intervals={[10, 10]} />
+        </Paint>
+        <Logo />
+      </Canvas>
 
-      <Title>MakeCorner</Title>
-      <SkiaView style={styles.container} onDraw={onMakeCornerDraw} />
+      <Title>Corner</Title>
+      <Canvas style={styles.container}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <CornerPathEffect r={200} />
+        </Paint>
+        <SquaredLogo />
+      </Canvas>
+
+      <Title>Compose</Title>
+      <Canvas style={styles.container}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <DiscretePathEffect length={10} deviation={4}>
+            <DashPathEffect intervals={[10, 10]} />
+          </DiscretePathEffect>
+        </Paint>
+        <Logo />
+      </Canvas>
     </ScrollView>
   );
 };

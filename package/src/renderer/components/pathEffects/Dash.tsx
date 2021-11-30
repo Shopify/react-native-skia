@@ -5,21 +5,18 @@ import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { isPathEffect } from "../../../skia/PathEffect";
 
-export interface DiscretePathEffectProps {
-  length: number;
-  deviation: number;
-  seed: number;
+export interface DashPathEffectProps {
+  intervals: number[];
+  phase?: number;
   children?: ReactNode | ReactNode[];
 }
 
-export const DiscretePathEffect = (
-  props: AnimatedProps<DiscretePathEffectProps>
-) => {
+export const DashPathEffect = (props: AnimatedProps<DashPathEffectProps>) => {
   const declaration = useDeclaration(
     props,
-    ({ length, deviation, seed }, children) => {
+    ({ intervals, phase }, children) => {
       const [child] = children.filter(isPathEffect);
-      const pe = Skia.PathEffect.MakeDiscrete(length, deviation, seed);
+      const pe = Skia.PathEffect.MakeDash(intervals, phase);
       if (child) {
         return Skia.PathEffect.MakeCompose(pe, child);
       }
@@ -27,8 +24,4 @@ export const DiscretePathEffect = (
     }
   );
   return <skDeclaration declaration={declaration} {...props} />;
-};
-
-DiscretePathEffect.defaultProps = {
-  seed: 0,
 };

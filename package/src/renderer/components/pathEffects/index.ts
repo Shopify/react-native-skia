@@ -1,5 +1,3 @@
-import { Discrete } from "./Discrete";
-
-export const PathEffect = {
-  Discrete,
-};
+export * from "./Discrete";
+export * from "./Dash";
+export * from "./Corner";
