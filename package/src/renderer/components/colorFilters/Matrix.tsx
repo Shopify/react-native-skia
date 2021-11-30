@@ -2,11 +2,11 @@ import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
-interface ColorMatrixProps {
+interface MatrixProps {
   value: number[];
 }
 
-export const ColorMatrix = (props: AnimatedProps<ColorMatrixProps>) => {
+export const Matrix = (props: AnimatedProps<MatrixProps>) => {
   const declaration = useDeclaration(props, ({ value }) => {
     return Skia.ColorFilter.MakeMatrix(value);
   });

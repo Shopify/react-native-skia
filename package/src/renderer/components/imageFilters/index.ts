@@ -1,2 +1,7 @@
-export * from "./BlurImage";
-export * from "./ColorFilter";
+import { Blur } from "./Blur";
+import { ColorFilter } from "./ColorFilter";
+
+export const ImageFilter = {
+  Blur,
+  ColorFilter,
+};

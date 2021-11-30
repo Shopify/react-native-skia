@@ -4,12 +4,12 @@ import type { SkEnum, ColorProp } from "../../processors/Paint";
 import { enumKey } from "../../processors/Paint";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
-export interface BlendColorProps {
+export interface BlendProps {
   mode: SkEnum<typeof BlendMode>;
   color: ColorProp;
 }
 
-export const BlendColor = (props: AnimatedProps<BlendColorProps>) => {
+export const Blend = (props: AnimatedProps<BlendProps>) => {
   const declaration = useDeclaration(props, ({ mode, color }) => {
     return Skia.ColorFilter.MakeBlend(
       Skia.Color(color),

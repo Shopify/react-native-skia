@@ -12,9 +12,8 @@ import {
   mixVector,
   Paint,
   usePaintRef,
-  BlurImageFilter,
+  ImageFilter,
   ColorFilter,
-  ColorMatrix,
   Defs,
   Circle,
 } from "@shopify/react-native-skia";
@@ -61,14 +60,14 @@ export const Gooey = () => {
     <Canvas style={{ flex: 1 }} mode="continuous">
       <Defs>
         <Paint ref={paint}>
-          <ColorFilter>
-            <ColorMatrix
+          <ImageFilter.ColorFilter>
+            <ColorFilter.Matrix
               value={[
                 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
               ]}
             />
-            <BlurImageFilter sigmaX={20} sigmaY={20} />
-          </ColorFilter>
+            <ImageFilter.Blur sigmaX={20} sigmaY={20} />
+          </ImageFilter.ColorFilter>
         </Paint>
       </Defs>
       <Fill color={BG} />
