@@ -1,4 +1,4 @@
-import type { SkJSIInstane } from "../JsiInstance";
+import type { SkJSIInstance } from "../JsiInstance";
 
 export enum TileMode {
   /**
@@ -25,7 +25,7 @@ export enum TileMode {
 }
 
 export const isImageFilter = (
-  obj: SkJSIInstane<string> | null
+  obj: SkJSIInstance<string> | null
 ): obj is IImageFilter => obj !== null && obj.__typename__ === "ImageFilter";
 
-export type IImageFilter = SkJSIInstane<"ImageFilter">;
+export type IImageFilter = SkJSIInstance<"ImageFilter">;

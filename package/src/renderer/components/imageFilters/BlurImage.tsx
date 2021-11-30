@@ -7,14 +7,14 @@ import { enumKey } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { isImageFilter } from "../../../skia/ImageFilter/ImageFilter";
 
-export interface BlurImageProps {
+export interface BlurImageFilterProps {
   sigmaX: number;
   sigmaY: number;
   mode: SkEnum<typeof TileMode>;
   children?: ReactNode | ReactNode[];
 }
 
-export const BlurImage = (props: AnimatedProps<BlurImageProps>) => {
+export const BlurImageFilter = (props: AnimatedProps<BlurImageFilterProps>) => {
   const declaration = useDeclaration(
     props,
     ({ sigmaX, sigmaY, mode }, children) => {
@@ -30,6 +30,6 @@ export const BlurImage = (props: AnimatedProps<BlurImageProps>) => {
   return <skDeclaration declaration={declaration} />;
 };
 
-BlurImage.defaultProps = {
+BlurImageFilter.defaultProps = {
   mode: "decal",
 };

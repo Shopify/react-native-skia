@@ -1,4 +1,5 @@
-import type { SkJSIInstane } from "./JsiInstance";
+import type { SkJSIInstance } from "./JsiInstance";
+
 export enum BlurStyle {
   Normal, //!< fuzzy inside and outside
   Solid, //!< solid inside, fuzzy outside
@@ -7,10 +8,10 @@ export enum BlurStyle {
 }
 
 export const isMaskFilter = (
-  obj: SkJSIInstane<string> | null
+  obj: SkJSIInstance<string> | null
 ): obj is IMaskFilter => obj !== null && obj.__typename__ === "MaskFilter";
 
-export type IMaskFilter = SkJSIInstane<"MaskFilter">;
+export type IMaskFilter = SkJSIInstance<"MaskFilter">;
 
 /**
  * See SkMaskFilter.h for more details.

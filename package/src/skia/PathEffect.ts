@@ -1,6 +1,6 @@
-import type { SkJSIInstane } from "./JsiInstance";
+import type { SkJSIInstance } from "./JsiInstance";
 
-export type IPathEffect = SkJSIInstane<"PathEffect">;
+export type IPathEffect = SkJSIInstance<"PathEffect">;
 
 export interface PathEffectFactory {
   /**

@@ -1,4 +1,4 @@
-import type { SkJSIInstane } from "./JsiInstance";
+import type { SkJSIInstance } from "./JsiInstance";
 
 export enum MatrixIndex {
   ScaleX = 0,
@@ -12,7 +12,7 @@ export enum MatrixIndex {
   persp2 = 8,
 }
 
-export interface Matrix extends SkJSIInstane<"Matrix"> {
+export interface Matrix extends SkJSIInstance<"Matrix"> {
   set(i: number, v: number): void;
   get(i: number): number;
 

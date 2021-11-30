@@ -12,8 +12,7 @@ import {
   mixVector,
   Paint,
   usePaintRef,
-  BlurImage,
-  Compose,
+  BlurImageFilter,
   ColorFilter,
   ColorMatrix,
   Defs,
@@ -68,7 +67,7 @@ export const Gooey = () => {
                 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
               ]}
             />
-            <BlurImage sigmaX={20} sigmaY={20} />
+            <BlurImageFilter sigmaX={20} sigmaY={20} />
           </ColorFilter>
         </Paint>
       </Defs>

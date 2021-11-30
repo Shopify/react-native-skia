@@ -5,7 +5,7 @@ import {
   SkiaView,
   TileMode,
 } from "@shopify/react-native-skia";
-import { Dimensions, PixelRatio } from "react-native";
+import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 

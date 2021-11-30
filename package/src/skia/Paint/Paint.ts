@@ -4,7 +4,7 @@ import type { IColorFilter } from "../ColorFilter";
 import type { IShader } from "../Shader";
 import type { Color } from "../Color";
 import type { IPathEffect } from "../PathEffect";
-import type { SkJSIInstane } from "../JsiInstance";
+import type { SkJSIInstance } from "../JsiInstance";
 
 import type { BlendMode } from "./BlendMode";
 
@@ -25,10 +25,10 @@ export enum StrokeJoin {
   Round,
 }
 
-export const isPaint = (obj: SkJSIInstane<string> | null): obj is IPaint =>
+export const isPaint = (obj: SkJSIInstance<string> | null): obj is IPaint =>
   obj !== null && obj.__typename__ === "Paint";
 
-export interface IPaint extends SkJSIInstane<"Paint"> {
+export interface IPaint extends SkJSIInstance<"Paint"> {
   /**
    * Returns a copy of this paint.
    */
