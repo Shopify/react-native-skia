@@ -11,10 +11,10 @@ export interface ColorFilterProps {
 }
 
 export const ColorFilter = (props: AnimatedProps<ColorFilterProps>) => {
-  const declaration = useDeclaration((_, children) => {
+  const declaration = useDeclaration(props, (_, children) => {
     const [cf] = children.filter(isColorFilter);
     const [input] = children.filter(isImageFilter);
     return Skia.ImageFilter.MakeColorFilter(cf, input ?? null);
-  }, []);
+  });
   return <skDeclaration declaration={declaration} {...props} />;
 };

@@ -18,7 +18,7 @@ export const HomeScreen: React.FC = () => {
         route="Filters"
       />
       <HomeScreenButton
-        title="🟣"
+        title="🟣 Gooey Effect"
         description="Simple Gooey effect"
         route="Gooey"
       />

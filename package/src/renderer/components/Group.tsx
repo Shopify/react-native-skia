@@ -16,7 +16,7 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
   clipRect?: IRRect;
   clipPath?: IPath | string;
   clipOp?: "difference" | "intersect";
-  rasterize?: { paint: RefObject<IPaint> };
+  rasterize?: RefObject<IPaint>;
 }
 
 export const Group = (props: AnimatedProps<GroupProps>) => {
@@ -31,7 +31,7 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
       if (rasterize) {
-        canvas.saveLayer(rasterize.paint.current ?? undefined);
+        canvas.saveLayerPaint(rasterize.current ?? undefined);
       } else {
         canvas.save();
       }
