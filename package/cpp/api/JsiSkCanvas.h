@@ -219,7 +219,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(getSaveCount) {
-    return jsi::Value(getJsNumber(_canvas->getSaveCount()));
+    return static_cast<int>(_canvas->getSaveCount());
   }
 
   JSI_HOST_FUNCTION(drawPoints) {

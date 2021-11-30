@@ -22,10 +22,6 @@ public:
       : _context(context){};
 
 protected:
-  /**
-   Converts from a Skia number without scaling to a scaled number
-  */
-  double getJsNumber(float number) { return number; }
 
   /**
    * @return A pointer to the platform context
