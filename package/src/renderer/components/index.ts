@@ -4,6 +4,7 @@ export * from "./shaders";
 export * from "./colorFilters";
 export * from "./maskFilters";
 export * from "./imageFilters";
+export * from "./pathEffects";
 export * from "../processors";
 
 export * from "./Group";

@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import type { Routes } from "./Routes";
 import { List } from "./List";
-import { PathEffect } from "./PathEffect";
+import { PathEffectDemo } from "./PathEffect2";
 import { Shapes } from "./Shapes2";
 import { Clipping } from "./Clipping2";
 import { Transform } from "./Transform";
@@ -68,7 +68,7 @@ export const API = () => {
       />
       <Stack.Screen
         name="PathEffect"
-        component={PathEffect}
+        component={PathEffectDemo}
         options={{
           title: "⭐️ Path Effects",
         }}

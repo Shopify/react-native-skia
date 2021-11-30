@@ -8,6 +8,7 @@ export interface Vector {
 
 export const vec = (x = 0, y?: number) => ({ x, y: y ?? x });
 export const neg = (a: Vector) => vec(-a.x, -a.y);
+export const sub = (a: Vector, b: Vector) => vec(a.x - b.x, a.y - b.y);
 export const translate = ({ x, y }: Vector) =>
   [{ translateX: x }, { translateY: y }] as const;
 export const rotate = (tr: Vector, origin: Vector, rotation: number) => {

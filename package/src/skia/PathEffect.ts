@@ -2,6 +2,10 @@ import type { SkJSIInstance } from "./JsiInstance";
 
 export type IPathEffect = SkJSIInstance<"PathEffect">;
 
+export const isPathEffect = (
+  obj: SkJSIInstance<string> | null
+): obj is IPathEffect => obj !== null && obj.__typename__ === "PathEffect";
+
 export interface PathEffectFactory {
   /**
    * Returns a PathEffect that can turn sharp corners into rounded corners.
