@@ -6,11 +6,13 @@ import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { isImageFilter } from "../../../skia/ImageFilter/ImageFilter";
 import { isColorFilter } from "../../../skia/ColorFilter/ColorFilter";
 
-export interface ColorFilterProps {
+export interface ColorFilterAsImageFilterProps {
   children: ReactNode | ReactNode[];
 }
 
-export const ColorFilter = (props: AnimatedProps<ColorFilterProps>) => {
+export const ColorFilterAsImageFilter = (
+  props: AnimatedProps<ColorFilterAsImageFilterProps>
+) => {
   const declaration = useDeclaration(props, (_, children) => {
     const [cf] = children.filter(isColorFilter);
     const [input] = children.filter(isImageFilter);
