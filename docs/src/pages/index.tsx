@@ -29,8 +29,8 @@ export default function Home(): JSX.Element {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title="React Native Skia"
+      description="High Performance 2D Graphics">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
