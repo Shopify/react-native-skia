@@ -13,8 +13,8 @@ const config = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'shopify', // Usually your GitHub org/user name.
+  projectName: 'react-native-skia', // Usually your repo name.
 
   presets: [
     [
@@ -52,16 +52,16 @@ const config = {
         title: 'React Native Skia',
         logo: {
           alt: 'React Native Skia',
-          src: 'img/logo.svg',
+          src: 'img/logo.png',
         },
         items: [
           {
             type: 'doc',
-            docId: 'docs',
+            docId: 'installation',
             position: 'left',
             label: 'Docs',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
+          // {to: '/blog', label: 'Blog', position: 'left'},
           {
             label: 'GitHub',
             href: 'https://github.com/@shopify/react-native-skia',
@@ -77,7 +77,7 @@ const config = {
             items: [
               {
                 label: 'Tutorial',
-                to: '/docs/intro',
+                to: '/docs/introduction',
               },
             ],
           },
@@ -98,19 +98,19 @@ const config = {
           //     },
           //   ],
           // },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'Blog',
-                to: '/blog',
-              },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/@shopify/react-native-skia',
-              },
-            ],
-          },
+          // {
+          //   title: 'More',
+          //   items: [
+          //     {
+          //       label: 'Blog',
+          //       to: '/blog',
+          //     },
+          //     {
+          //       label: 'GitHub',
+          //       href: 'https://github.com/@shopify/react-native-skia',
+          //     },
+          //   ],
+          // },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Shopify, Inc. Built with Docusaurus.`,
       },
