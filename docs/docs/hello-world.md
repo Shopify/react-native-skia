@@ -28,11 +28,11 @@ import {Skia, SkiaView, useDrawCallback} from "@shopify/react-native-skia";
 
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
-paint.setColor(Skia.Color("lightblue"))
+paint.setColor(Skia.Color("lightblue"));
 
 export const HelloWorld = () => {
   const onDraw = useDrawCallback((canvas) => {
-    canvas.drawCircle(50, 50, 50, paint)
+    canvas.drawCircle(50, 50, 50, paint);
   });
   return (
     <SkiaView style={{ flex: 1 }} onDraw={onDraw} />
