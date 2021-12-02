@@ -1,14 +1,14 @@
-import type { CustomPaintProps, Vector, AnimatedProps } from "../../processors";
+import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
 import { vec } from "../../processors/math/Vector";
+import type { CircleDef } from "../../processors/Shapes";
+import { processCircle } from "../../processors/Shapes";
 
-export interface CircleProps extends CustomPaintProps {
-  r: number;
-  c: Vector;
-}
+export type CircleProps = CircleDef & CustomPaintProps;
 
 export const Circle = (props: AnimatedProps<CircleProps>) => {
-  const onDraw = useDrawing(props, ({ canvas, paint }, { c, r }) => {
+  const onDraw = useDrawing(props, ({ canvas, paint }, def) => {
+    const { c, r } = processCircle(def);
     canvas.drawCircle(c.x, c.y, r, paint);
   });
   return <skDrawing onDraw={onDraw} {...props} />;
