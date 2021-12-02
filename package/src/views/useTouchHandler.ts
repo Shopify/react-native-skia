@@ -1,19 +1,12 @@
 import { useCallback, useRef } from "react";
 
-import type { TouchInfo } from "./types";
+import type {
+  ExtendedTouchInfo,
+  TouchHandlers,
+  TouchHandler,
+  TouchInfo,
+} from "./types";
 import { TouchType } from "./types";
-
-type ExtendedTouchInfo = TouchInfo & {
-  // points per second
-  velocityX: number;
-  velocityY: number;
-};
-
-type TouchHandlers = {
-  onStart?: (touchInfo: TouchInfo) => void;
-  onMove?: (touchInfo: ExtendedTouchInfo) => void;
-  onEnd?: (touchInfo: ExtendedTouchInfo) => void;
-};
 
 /**
  * Provides a callback for handling touch events in the Skia View.
@@ -23,9 +16,9 @@ type TouchHandlers = {
  * update and handle touch events. Call it with the touches property from
  * the info object.
  */
-export const useTouchHandler = (handlers: TouchHandlers) => {
+export const useTouchHandler = (handlers: TouchHandlers): TouchHandler => {
   const prevTouchInfoRef = useRef<TouchInfo>();
-
+  const prevvelocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   return useCallback(
     (history: Array<Array<TouchInfo>>) => {
       // Process all items in the current touch history
@@ -37,8 +30,6 @@ export const useTouchHandler = (handlers: TouchHandlers) => {
         const touch = touches[0];
 
         // Calculate the velocity from the previous touch.
-        // Start by calculating the time difference between the current and the
-        // previous touch.
         const timeDiffseconds =
           touch.timestamp -
           (prevTouchInfoRef.current?.timestamp ?? touch.timestamp);
@@ -46,13 +37,18 @@ export const useTouchHandler = (handlers: TouchHandlers) => {
         const distX = touch.x - (prevTouchInfoRef.current?.x ?? touch.x);
         const distY = touch.y - (prevTouchInfoRef.current?.y ?? touch.y);
 
-        const velocityX = distX / timeDiffseconds;
-        const velocityY = distY / timeDiffseconds;
+        if (
+          touch.type !== TouchType.End &&
+          touch.type !== TouchType.Cancelled
+        ) {
+          prevvelocityRef.current.x = distX / Math.max(0.0001, timeDiffseconds);
+          prevvelocityRef.current.y = distY / Math.max(0.0001, timeDiffseconds);
+        }
 
         const extendedTouchInfo: ExtendedTouchInfo = {
           ...touch,
-          velocityX: Math.abs(velocityX),
-          velocityY: Math.abs(velocityY),
+          velocityX: -prevvelocityRef.current.x,
+          velocityY: -prevvelocityRef.current.y,
         };
 
         // Save previous touch
@@ -61,9 +57,9 @@ export const useTouchHandler = (handlers: TouchHandlers) => {
         if (touch.type === TouchType.Start) {
           handlers.onStart && handlers.onStart(touch);
         } else if (touch.type === TouchType.Active) {
-          handlers.onMove && handlers.onMove(extendedTouchInfo);
+          handlers.onActive && handlers.onActive(extendedTouchInfo);
         } else {
-          handlers.onMove && handlers.onMove(extendedTouchInfo);
+          handlers.onActive && handlers.onActive(extendedTouchInfo);
           handlers.onEnd && handlers.onEnd(extendedTouchInfo);
         }
       });

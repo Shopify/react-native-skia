@@ -1,4 +1,6 @@
-import type { TouchInfo, DrawingInfo } from "../views";
+import type { RefObject } from "react";
+
+import type { TouchInfo, DrawingInfo, SkiaView } from "../views";
 import type { ICanvas, IPaint } from "../skia";
 
 import type { Vector } from "./processors/math/Vector";
@@ -8,5 +10,6 @@ export interface DrawingContext extends Omit<DrawingInfo, "touches"> {
   paint: IPaint;
   opacity: number;
   center: Vector;
+  skiaRef: RefObject<SkiaView>;
   getTouches(): Array<Array<TouchInfo>>;
 }

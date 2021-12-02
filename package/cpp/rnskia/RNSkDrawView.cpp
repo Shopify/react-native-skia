@@ -166,9 +166,11 @@ void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
 
 void RNSkDrawView::requestRedraw() {
   if (!isReadyToDraw()) {
+    _redrawRequests++;
     return;
   }
-
+  
+  _redrawRequests = 0;
   _isDrawing = true;
 
   auto performDraw = [this]() {
@@ -184,6 +186,9 @@ void RNSkDrawView::requestRedraw() {
     drawFrame(ms.count() / 1000.0);
 
     _isDrawing = false;
+    if(_redrawRequests > 0) {
+      requestRedraw();
+    }
   };
 
   _platformContext->runOnJavascriptThread(performDraw);
@@ -239,9 +244,15 @@ void RNSkDrawView::endDrawingLoop() {
 }
 
 void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
-  endDrawingLoop();
-  _drawingMode = mode;
-  requestRedraw();
+  if(mode != _drawingMode) {
+    _drawingMode = mode;
+    if(mode == RNSkDrawingMode::Default) {
+      endDrawingLoop();
+    } else {
+      beginDrawingLoop();
+      requestRedraw();
+    }
+  }
 }
 
 } // namespace RNSkia

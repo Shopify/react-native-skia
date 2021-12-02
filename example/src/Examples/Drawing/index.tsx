@@ -33,7 +33,7 @@ export const DrawingExample: React.FC = () => {
       path.moveTo(x, y);
       prevPointRef.current = { x, y };
     },
-    onMove: ({ x, y }) => {
+    onActive: ({ x, y }) => {
       // Get current path object
       const path = paths[paths.length - 1];
 

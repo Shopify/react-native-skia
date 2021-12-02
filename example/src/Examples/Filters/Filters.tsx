@@ -1,3 +1,5 @@
+import React, { useRef } from "react";
+import { Dimensions } from "react-native";
 import {
   Canvas,
   Paint,
@@ -7,9 +9,9 @@ import {
   Shader,
   mix,
   useLoop,
+  useAnimation,
 } from "@shopify/react-native-skia";
-import React from "react";
-import { Dimensions } from "react-native";
+import type { SkiaView } from "@shopify/react-native-skia";
 
 const { width, height } = Dimensions.get("window");
 
@@ -23,9 +25,11 @@ half4 main(float2 xy) {
 }`)!;
 
 export const Filters = () => {
-  const progress = useLoop({ duration: 1500 });
+  const skiaRef = useRef<SkiaView>(null);
+  const progress = useAnimation(skiaRef);
+  useLoop(progress, { duration: 1500 });
   return (
-    <Canvas style={{ width, height }} mode="continuous">
+    <Canvas style={{ width, height }} innerRef={skiaRef}>
       <Paint>
         <Shader
           source={source}

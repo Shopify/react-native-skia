@@ -5,6 +5,8 @@ import React from "react";
 import { NativeSkiaView } from "./types";
 import type { RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
 
+import type { DrawMode } from ".";
+
 let SkiaViewNativeId = 1000;
 
 export class SkiaView extends React.Component<RNSkiaViewProps> {
@@ -19,6 +21,8 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   }
 
   private _nativeId: string;
+  private _isAnimating = false;
+  private _animatingValues: Array<unknown> = [];
 
   componentDidUpdate(prevProps: RNSkiaViewProps) {
     const { onDraw } = this.props;
@@ -33,9 +37,56 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
     }
   }
 
+  /**
+   * Sends a redraw request to the native SkiaView.
+   */
   public redraw() {
     assertDrawCallbacksEnabled();
     invalidateSkiaView(this._nativeId);
+  }
+
+  /**
+   * Updates the drawing mode for the skia view. This is the same
+   * as declaratively setting the mode property on the SkiaView.
+   * There are two drawing modes, "continuous" and "default",
+   * where the continuous mode will continuously redraw the view and
+   * the default mode will only redraw when any of the regular react
+   * properties are changed like size and margins.
+   * @param mode Drawing mode to use.
+   */
+  public setDrawMode(mode: DrawMode) {
+    assertDrawCallbacksEnabled();
+    setDrawingModeForSkiaView(this._nativeId, mode);
+  }
+
+  /**
+   * Increases the number of animations active in the view.
+   */
+  public startAnimation(owner: unknown) {
+    if (this._animatingValues.findIndex((p) => p === owner) === -1) {
+      this._animatingValues.push(owner);
+    }
+
+    if (!this._isAnimating) {
+      this._isAnimating = true;
+      this.setDrawMode("continuous");
+      setImmediate(this.redraw);
+    }
+  }
+
+  /**
+   * Decreases the number of animations active in the view.
+   */
+  public stopAnimation(owner: unknown) {
+    const indexOfOwner = this._animatingValues.indexOf(owner);
+    if (indexOfOwner !== -1) {
+      // Remove
+      this._animatingValues.splice(this._animatingValues.indexOf(owner), 1);
+    }
+    if (this._isAnimating && this._animatingValues.length === 0) {
+      this.setDrawMode("default");
+      this._isAnimating = false;
+    }
   }
 
   render() {
@@ -61,6 +112,10 @@ const setDrawCallback = (
 
 const invalidateSkiaView = (nativeId: string) => {
   SkiaViewApi.invalidateSkiaView(parseInt(nativeId, 10));
+};
+
+const setDrawingModeForSkiaView = (nativeId: string, mode: DrawMode) => {
+  SkiaViewApi.setDrawMode(parseInt(nativeId, 10), mode);
 };
 
 const assertDrawCallbacksEnabled = () => {

@@ -90,9 +90,39 @@ public:
     }
     return jsi::Value::undefined();
   }
+  
+  JSI_HOST_FUNCTION(setDrawMode) {
+    if (count != 2) {
+      _platformContext->raiseError(
+          std::string("setDrawMode: Expected 2 arguments, got " +
+                      std::to_string(count) + "."));
+      return jsi::Value::undefined();
+    }
+
+    if (!arguments[0].isNumber()) {
+      _platformContext->raiseError(
+          "setDrawMode: First argument must be a number");
+      return jsi::Value::undefined();
+    }
+
+    // find skia draw view
+    int nativeId = arguments[0].asNumber();
+    auto info = getEnsuredCallbackInfo(nativeId);
+    if (info->view != nullptr) {
+      auto nextMode = arguments[1].asString(runtime).utf8(runtime);
+      RNSkLogger::logToConsole(nextMode);
+      if(nextMode.compare("continuous") == 0) {
+        info->view->setDrawingMode(RNSkDrawingMode::Continuous);
+      } else {
+        info->view->setDrawingMode(RNSkDrawingMode::Default);
+      }
+    }
+    return jsi::Value::undefined();
+  }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawCallback),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, invalidateSkiaView))
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, invalidateSkiaView),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawMode))
 
   /**
    * Constructor

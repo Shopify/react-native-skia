@@ -1,2 +1,6 @@
+export * from "./Animation";
+export * from "./API";
+export * from "./Breathe";
 export * from "./Drawing";
-export * from "../Home";
+export * from "./Filters";
+export * from "./Gooey";
