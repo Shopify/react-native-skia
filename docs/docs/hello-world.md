@@ -10,12 +10,12 @@ React Native Skia has two APIs: a declarative API available as a React Native Re
 ## Declarative API
 
 ```tsx twoslash
-import {Canvas, Circle} from "@shopify/react-native-skia";
+import {Canvas, Circle, vec} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Circle cx={50} cy={50} r={50} color="blue" />
+      <Circle c={vec(50, 50)} r={50} />
     </Canvas>
   );
 };
