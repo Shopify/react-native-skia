@@ -1,7 +1,7 @@
-import type { AnimationValue } from "./types";
+import type { AnimationValue, AnimationFunctionWithState } from "./types";
 import type { SpringConfig, SpringAnimationState } from "./functions";
 import { spring } from "./functions";
-import { createAnimation } from "./createAnimation";
+import { createAnimation } from "./Animation";
 
 export interface SpringParams {
   from?: number;
@@ -17,8 +17,20 @@ export interface SpringParams {
  * @returns A function that can be called from the drawing loop
  */
 const run = (animationValue: AnimationValue<number>, params: SpringParams) => {
-  // This will a an animation to the animation queue for the given view
-  // represented in the animation object.
+  return create(animationValue, params).start();
+};
+
+/**
+ * Creates a spring animation where the animationValue will be updated with the
+ * current value of the spring function with the spring parameters.
+ * @param animationValue Value to be updated
+ * @param params Spring parameters
+ * @returns A function that can be called from the drawing loop
+ */
+export const create = (
+  animationValue: AnimationValue<number>,
+  params: SpringParams
+) => {
   const state: SpringAnimationState = {
     from: params?.from ?? animationValue.value ?? 0,
     to: params?.to ?? 1,
@@ -37,11 +49,16 @@ const run = (animationValue: AnimationValue<number>, params: SpringParams) => {
     lastTimestamp: 0,
   };
 
-  createAnimation(animationValue, spring, state);
+  return createAnimation(
+    animationValue,
+    spring as AnimationFunctionWithState,
+    state
+  );
 };
 
 export const Springs = {
   run,
+  create,
   Spring: (config: SpringConfig = {}) => ({
     mass: 1,
     stiffness: 100,

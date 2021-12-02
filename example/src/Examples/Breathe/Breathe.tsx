@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import type { AnimationValue } from "@shopify/react-native-skia";
 import {
@@ -10,7 +10,7 @@ import {
   Group,
   Paint,
   polar2Canvas,
-  useFrame,
+  Timing,
   mix,
   useLoop,
   Easing,
@@ -31,14 +31,15 @@ interface RingProps {
 
 const Ring = ({ index, progress }: RingProps) => {
   const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useFrame((ctx) => {
+  const transform = useCallback(() => {
     const { x, y } = polar2Canvas(
       { theta, radius: progress.value * R },
       { x: 0, y: 0 }
     );
     const scale = mix(progress.value, 0.3, 1);
     return [{ translateX: x }, { translateY: y }, { scale }];
-  }, []);
+  }, [progress.value, theta]);
+
   return (
     <Group origin={center} transform={transform}>
       <Circle c={center} r={R} color={index % 2 ? c1 : c2} />
@@ -48,11 +49,13 @@ const Ring = ({ index, progress }: RingProps) => {
 
 export const Breathe = () => {
   const progress = useValue(0);
-  useLoop(progress, {
-    duration: 3000,
-    yoyo: true,
-    easing: Easing.inOut(Easing.ease),
-  });
+  useLoop(
+    Timing.create(progress, {
+      duration: 3000,
+      easing: Easing.inOut(Easing.ease),
+    }),
+    true
+  );
 
   const touches = useTouchHandler({
     onStart: () => {}, //progress.pause(),

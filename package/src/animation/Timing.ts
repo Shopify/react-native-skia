@@ -1,15 +1,28 @@
 import { Easing } from "./Easing";
 import { timing } from "./functions";
-import { createAnimation } from "./createAnimation";
+import { createAnimation } from "./Animation";
 import type { TimingAnimationState, TimingConfig } from "./functions/types";
-import type { AnimationValue } from "./types";
+import type { AnimationValue, AnimationFunctionWithState } from "./types";
 
 /**
  * Run a timing animation on the animation value
- * @param animationValue Value to run the animation
+ * @param animationValue Value to run the animation on
  * @param config Timing configuration
  */
 const run = (animationValue: AnimationValue<number>, config: TimingConfig) => {
+  return create(animationValue, config).start();
+};
+
+/**
+ * Creates a timing animation
+ * @param animationValue Value to run the animation on
+ * @param config Timing configuration
+ * @returns Animation
+ */
+const create = (
+  animationValue: AnimationValue<number>,
+  config: TimingConfig
+) => {
   const state: TimingAnimationState = {
     from: config.from ?? animationValue.value ?? 0,
     to: config.to ?? 1,
@@ -20,10 +33,15 @@ const run = (animationValue: AnimationValue<number>, config: TimingConfig) => {
     startTime: null,
   };
 
-  createAnimation(animationValue, timing, state);
+  return createAnimation(
+    animationValue,
+    timing as AnimationFunctionWithState,
+    state
+  );
 };
 
-export const Timings = {
+export const Timing = {
   Easing,
+  create,
   run,
 };

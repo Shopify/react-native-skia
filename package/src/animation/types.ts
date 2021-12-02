@@ -1,19 +1,21 @@
-import type { DrawingContext } from "../renderer/DrawingContext";
-
 import type { BaseAnimationState } from "./functions/types";
 
-export type AnimationFunction<T = number> = (ctx: DrawingContext) => T;
-export type AnimationFunctionWithState<
-  S extends BaseAnimationState,
-  T = number
-> = (timestampSeconds: number, state: S) => T;
+export type AnimationFunction = (timestampSeconds: number) => number;
+export type AnimationFunctionWithState = (
+  timestampSeconds: number,
+  state: BaseAnimationState
+) => number;
 
 export interface AnimationValue<T = number> {
   value: T;
-  startAnimation: (fn: AnimationFunction<T>) => void;
-  endAnimation: () => void;
+  startAnimation: (fn: AnimationFunction, onAnimationDone?: () => void) => void;
+  endAnimation: (fn: AnimationFunction) => void;
 }
 
 export interface Animation {
-  a: number;
+  readonly value: AnimationValue<number>;
+  readonly state: BaseAnimationState;
+  readonly evaluate: AnimationFunctionWithState;
+  start: () => Promise<void>;
+  restart: () => void;
 }
