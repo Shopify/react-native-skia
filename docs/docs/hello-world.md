@@ -9,7 +9,7 @@ React Native Skia has two APIs: a declarative API available as a React Native Re
 
 ## Declarative API
 
-```tsx
+```tsx twoslash
 import {Canvas, Circle} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
@@ -22,3 +22,20 @@ export const HelloWorld = () => {
 ```
 
 ## Imperative API
+
+```tsx twoslash
+import {Skia, SkiaView, useDrawCallback} from "@shopify/react-native-skia";
+
+const paint = Skia.Paint();
+paint.setAntiAlias(true);
+paint.setColor(Skia.Color("lightblue"))
+
+export const HelloWorld = () => {
+  const onDraw = useDrawCallback((canvas) => {
+    canvas.drawCircle(50, 50, 50, paint)
+  });
+  return (
+    <SkiaView style={{ flex: 1 }} onDraw={onDraw} />
+  );
+};
+```
