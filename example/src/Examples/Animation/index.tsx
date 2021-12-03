@@ -34,7 +34,6 @@ export const AnimationExample: React.FC = () => {
   useLoop(
     Timeline.sequence([
       Timing.create(translateX, {
-        from: 0,
         to: width - Size,
         easing: Timing.Easing.inOut(Timing.Easing.cubic),
       }),

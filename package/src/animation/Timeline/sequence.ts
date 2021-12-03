@@ -2,7 +2,7 @@ import type { Animation } from "../types";
 import { WrappedAnimationListImpl } from "../Animation";
 
 /**
- * Plays a sequence of animations
+ * Plays a sequence of animations one after another
  * @param animations Animations to loop
  * @returns The sequence animation
  */
@@ -20,7 +20,6 @@ class SequenceAnimation extends WrappedAnimationListImpl {
   async start(): Promise<Animation> {
     this.assertAnimations();
     for (let i = 0; i < this.animations.length; i++) {
-      // Run the animation
       await (this._reversed
         ? this.activeAnimation.reverse()
         : this.activeAnimation.start());
