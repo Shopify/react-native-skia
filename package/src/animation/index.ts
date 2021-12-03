@@ -5,3 +5,4 @@ export * from "./Timeline";
 export * from "./Easing";
 export * from "./Value";
 export * from "./hooks";
+export * from "./Animation";

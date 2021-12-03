@@ -9,12 +9,12 @@ import { useAnimation } from "./useAnimation";
 export const useTiming = (
   animationValue: AnimationValue,
   config: TimingConfig,
-  startPaused = false
+  params?: { startPaused?: boolean }
 ) => {
   const animation = useMemo(
     () => Timing.create(animationValue, config),
     [animationValue, config]
   );
 
-  return useAnimation(animation, startPaused);
+  return useAnimation(animation, params?.startPaused);
 };

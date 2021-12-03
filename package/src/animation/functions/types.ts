@@ -5,6 +5,8 @@ export interface BaseAnimationState {
   to: number;
 }
 
+export type AnimationStateFactory = () => BaseAnimationState;
+
 export type EasingFunction = (value: number) => number;
 
 export interface TimingConfig {

@@ -23,15 +23,15 @@ const create = (
   animationValue: AnimationValue<number>,
   config: TimingConfig
 ) => {
-  const state: TimingAnimationState = {
+  const state = (): TimingAnimationState => ({
     from: config.from ?? animationValue.value ?? 0,
     to: config.to ?? 1,
     duration: config.duration ?? 1000,
     easing: config.easing ?? ((t: number) => t),
     done: false,
-    value: 0,
+    value: config.from ?? animationValue.value ?? 0,
     startTime: null,
-  };
+  });
 
   return createAnimation(
     animationValue,

@@ -14,8 +14,9 @@ export interface AnimationValue<T = number> {
 
 export interface Animation {
   readonly value: AnimationValue<number>;
-  readonly state: BaseAnimationState;
-  readonly evaluate: AnimationFunctionWithState;
-  start: () => Promise<void>;
-  restart: () => void;
+  readonly state: BaseAnimationState | undefined;
+  start: () => Promise<Animation>;
+  reverse: () => Promise<Animation>;
+  stop: () => void;
+  reset: () => void;
 }

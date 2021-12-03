@@ -77,7 +77,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   /**
    * Decreases the number of animations active in the view.
    */
-  public stopAnimation(owner: unknown) {
+  public endAnimation(owner: unknown) {
     const indexOfOwner = this._animatingValues.indexOf(owner);
     if (indexOfOwner !== -1) {
       // Remove

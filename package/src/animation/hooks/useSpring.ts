@@ -8,13 +8,12 @@ import { useAnimation } from "./useAnimation";
 
 export const useSpring = (
   animationValue: AnimationValue,
-  params: SpringParams,
-  startPaused = false
+  params: SpringParams & { startPaused?: boolean }
 ) => {
   const animation = useMemo(
     () => Springs.create(animationValue, params),
     [animationValue, params]
   );
 
-  return useAnimation(animation, startPaused);
+  return useAnimation(animation, params?.startPaused);
 };

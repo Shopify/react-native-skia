@@ -31,7 +31,7 @@ export const create = (
   animationValue: AnimationValue<number>,
   params: SpringParams
 ) => {
-  const state: SpringAnimationState = {
+  const state = (): SpringAnimationState => ({
     from: params?.from ?? animationValue.value ?? 0,
     to: params?.to ?? 1,
     config: {
@@ -47,7 +47,7 @@ export const create = (
     done: false,
     value: params.from ?? animationValue.value ?? 0,
     lastTimestamp: 0,
-  };
+  });
 
   return createAnimation(
     animationValue,

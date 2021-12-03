@@ -1,3 +1,6 @@
+import type React from "react";
+
+import type { SkiaView } from "../views";
 import { peekDrawingContext } from "../renderer/CanvasProvider";
 
 import type { AnimationFunction, AnimationValue } from "./types";
@@ -22,10 +25,13 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
   _value: T;
   _animationFunction: AnimationFunction | undefined;
   _animationDone: (() => void) | undefined;
+  _animationViews: Array<React.RefObject<SkiaView>> = [];
 
   public startAnimation(fn: AnimationFunction, onAnimationDone?: () => void) {
     this._animationFunction = fn;
     this._animationDone = onAnimationDone;
+    // Notify the skia view ref that we have started an animation
+    this._animationViews.forEach((view) => view.current?.startAnimation(this));
   }
 
   public endAnimation(fn: AnimationFunction) {
@@ -33,6 +39,8 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
       this._animationFunction = undefined;
       this._animationDone?.();
       this._animationDone = undefined;
+      // Notify the skia view ref that we have ended our animation
+      this._animationViews.forEach((view) => view.current?.endAnimation(this));
     }
   }
 
@@ -45,6 +53,11 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
       // Check the drawing context list to see if we are inside a drawing function
       const drawingContext = peekDrawingContext();
       if (drawingContext !== undefined) {
+        // Save view ref connection.
+        if (this._animationViews.indexOf(drawingContext.skiaRef) === -1) {
+          this._animationViews.push(drawingContext.skiaRef);
+        }
+
         // Check if we have an ongoing animation
         if (this._animationFunction) {
           // Make sure the skia view is aware that there are animations running
@@ -56,7 +69,7 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
           ) as never as T;
         } else {
           // Stop the skia view from running animations
-          drawingContext.skiaRef.current?.stopAnimation(this);
+          drawingContext.skiaRef.current?.endAnimation(this);
         }
       }
     }

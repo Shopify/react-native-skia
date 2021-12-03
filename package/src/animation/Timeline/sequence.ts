@@ -1,9 +1,5 @@
-import type {
-  Animation,
-  AnimationFunctionWithState,
-  AnimationValue,
-} from "../types";
-import type { BaseAnimationState } from "../functions";
+import type { Animation } from "../types";
+import { WrappedAnimationListImpl } from "../Animation";
 
 /**
  * Plays a sequence of animations
@@ -14,53 +10,49 @@ export const sequence = (animations: Animation[]): Animation => {
   return new SequenceAnimation(animations);
 };
 
-class SequenceAnimation implements Animation {
+class SequenceAnimation extends WrappedAnimationListImpl {
   constructor(animations: Animation[]) {
-    this._animations = animations;
-    this._activeAnimationIndex = 0;
+    super(animations);
   }
 
-  _animations: Animation[];
-  _activeAnimationIndex: number;
+  private _reversed = false;
 
-  private assertAnimations() {
-    console.assert(this._animations.length > 0, "No animations provided");
-  }
-
-  private get activeAnimation() {
-    return this._animations[this._activeAnimationIndex];
-  }
-
-  public get value(): AnimationValue {
+  async start(): Promise<Animation> {
     this.assertAnimations();
-    return this.activeAnimation.value;
-  }
+    for (let i = 0; i < this.animations.length; i++) {
+      // Run the animation
+      await (this._reversed
+        ? this.activeAnimation.reverse()
+        : this.activeAnimation.start());
 
-  public get state(): BaseAnimationState {
-    this.assertAnimations();
-    return this.activeAnimation.state;
-  }
-
-  public get evaluate(): AnimationFunctionWithState {
-    this.assertAnimations();
-    return this.activeAnimation.evaluate;
-  }
-
-  start(): Promise<void> {
-    this.assertAnimations();
-    // Let us start the first animation!
-    return this.activeAnimation.start().then(() => {
-      this._activeAnimationIndex++;
-      if (this._activeAnimationIndex < this._animations.length) {
-        return this.start();
-      } else {
-        return Promise.resolve();
+      if (this.activeAnimation.state?.done !== true) {
+        // Animation was interrupted and therefore we should stop
+        break;
       }
-    });
+      // Do not go the the next animation if we're already done.
+      if (i === this.animations.length - 1) {
+        break;
+      }
+      this._reversed
+        ? this.activeAnimationIndex--
+        : this.activeAnimationIndex++;
+    }
+    return this;
   }
 
-  restart() {
-    this._activeAnimationIndex = 0;
-    this.start();
+  reverse() {
+    this._reversed = true;
+    this.activeAnimationIndex = this.count - 1;
+    return this.start();
+  }
+
+  stop() {
+    this.animations.forEach((animation) => animation.stop());
+  }
+
+  reset() {
+    this.activeAnimationIndex = 0;
+    this._reversed = false;
+    this.animations.forEach((animation) => animation.reset());
   }
 }

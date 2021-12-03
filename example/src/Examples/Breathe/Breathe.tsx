@@ -15,7 +15,6 @@ import {
   useLoop,
   Easing,
   useValue,
-  useTouchHandler,
 } from "@shopify/react-native-skia";
 
 const { width, height } = Dimensions.get("window");
@@ -54,16 +53,11 @@ export const Breathe = () => {
       duration: 3000,
       easing: Easing.inOut(Easing.ease),
     }),
-    true
+    { yoyo: true }
   );
 
-  const touches = useTouchHandler({
-    onStart: () => {}, //progress.pause(),
-    onEnd: () => {}, //progress.play(),
-  });
-
   return (
-    <Canvas style={styles.container} onTouch={touches} debug>
+    <Canvas style={styles.container} debug>
       <Paint blendMode="screen">
         <Blur style="solid" sigma={40} />
       </Paint>

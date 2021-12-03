@@ -7,12 +7,11 @@ import { useAnimation } from "./useAnimation";
 
 export const useLoop = (
   animation: Animation,
-  yoyo = false,
-  startPaused = false
+  params?: { yoyo?: boolean; repeatCount?: number; startPaused?: boolean }
 ) => {
   const nextAnimation = useMemo(
-    () => Timeline.loop(animation, yoyo),
-    [animation, yoyo]
+    () => Timeline.loop(animation, params),
+    [animation, params]
   );
-  return useAnimation(nextAnimation, startPaused);
+  return useAnimation(nextAnimation, params?.startPaused);
 };
