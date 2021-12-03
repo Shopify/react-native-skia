@@ -1,3 +1,3 @@
 export * from "./WrappedAnimation";
-export * from "./Animation";
+export * from "./createAnimation";
 export * from "./AnimationList";
