@@ -29,12 +29,13 @@ const sidebars = {
       label: "Paint",
       items: [
         "paint",
+        "paint-properties"
       ],
     },
     {
       type: 'doc',
-      label: "Transformations",
-      id: "transform"
+      label: "Group",
+      id: "group"
     },
     {
       collapsed: false,

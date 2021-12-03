@@ -1,10 +1,10 @@
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
 import { vec } from "../../processors/math/Vector";
-import type { CircleDef } from "../../processors/Shapes";
+import type { CircleDef, ChildrenProps } from "../../processors/Shapes";
 import { processCircle } from "../../processors/Shapes";
 
-export type CircleProps = CircleDef & CustomPaintProps;
+export type CircleProps = CircleDef & CustomPaintProps & ChildrenProps;
 
 export const Circle = (props: AnimatedProps<CircleProps>) => {
   const onDraw = useDrawing(props, ({ canvas, paint }, def) => {
