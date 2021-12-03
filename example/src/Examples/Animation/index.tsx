@@ -11,6 +11,7 @@ import {
   Timing,
   Timeline,
   useLoop,
+  useDelay,
 } from "@shopify/react-native-skia";
 
 const Size = 100;
@@ -31,26 +32,29 @@ export const AnimationExample: React.FC = () => {
     { yoyo: true }
   );
 
-  useLoop(
-    Timeline.sequence([
-      Timing.create(translateX, {
-        to: width - Size,
-        easing: Timing.Easing.inOut(Timing.Easing.cubic),
-      }),
-      Timing.create(translateY, {
-        to: height * 0.9 - Size,
-        easing: Timing.Easing.inOut(Timing.Easing.cubic),
-      }),
-      Timing.create(translateX, {
-        to: 0,
-        easing: Timing.Easing.inOut(Timing.Easing.cubic),
-      }),
-      Timing.create(translateY, {
-        to: 0,
-        easing: Timing.Easing.inOut(Timing.Easing.cubic),
-      }),
-    ]),
-    { yoyo: true, repeatCount: 1 }
+  useDelay(
+    Timeline.loop(
+      Timeline.sequence([
+        Timing.create(translateX, {
+          to: width - Size,
+          easing: Timing.Easing.inOut(Timing.Easing.cubic),
+        }),
+        Timing.create(translateY, {
+          to: height * 0.9 - Size,
+          easing: Timing.Easing.inOut(Timing.Easing.cubic),
+        }),
+        Timing.create(translateX, {
+          to: 0,
+          easing: Timing.Easing.inOut(Timing.Easing.cubic),
+        }),
+        Timing.create(translateY, {
+          to: 0,
+          easing: Timing.Easing.inOut(Timing.Easing.cubic),
+        }),
+      ]),
+      { yoyo: true, repeatCount: 1 }
+    ),
+    { delaySeconds: 5 }
   );
 
   const touchHandler = useTouchHandler({

@@ -14,19 +14,6 @@ export const loop = (
   return new RepeatingAnimation(animation, params);
 };
 
-/**
- * Repeats the provided animation
- * @param animation Animation to loop
- * @param yoyo Wether it should invert it's output on each iteration
- * @returns The looped animation
- */
-export const repeat = (
-  animation: Animation,
-  params?: { yoyo?: boolean; repeatCount?: 1 }
-): Animation => {
-  return new RepeatingAnimation(animation, params);
-};
-
 export class RepeatingAnimation extends WrappedAnimationImpl {
   constructor(
     animation: Animation,
