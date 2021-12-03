@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Button, StyleSheet, useWindowDimensions } from "react-native";
 import {
   useTouchHandler,
@@ -10,8 +10,12 @@ import {
   color,
   Timing,
   Timeline,
+  createValue,
   useLoop,
   useDelay,
+  Skia,
+  Paint,
+  Blur,
 } from "@shopify/react-native-skia";
 
 const Size = 100;
@@ -23,6 +27,28 @@ export const AnimationExample: React.FC = () => {
   const translateY = useValue(0);
   const xDiff = useValue(0);
   const yDiff = useValue(0);
+
+  // Create some circles
+  const circles = useMemo(() => {
+    return new Array(10).fill(0).map((_, i) => ({
+      colorStr: "#FF0000",
+      value: createValue(0),
+      x: 20 + i * 40,
+    }));
+  }, []);
+
+  useLoop(
+    Timeline.stagger(
+      circles.map((c) =>
+        Timing.create(c.value, {
+          to: height * 0.8,
+          duration: 1000,
+          easing: Timing.Easing.cubic,
+        })
+      )
+    ),
+    { yoyo: true }
+  );
 
   const colorValue = useValue(0);
   useLoop(
@@ -52,7 +78,7 @@ export const AnimationExample: React.FC = () => {
           easing: Timing.Easing.inOut(Timing.Easing.cubic),
         }),
       ]),
-      { yoyo: true, repeatCount: 1 }
+      { yoyo: true }
     ),
     { delaySeconds: 2 }
   );
@@ -95,6 +121,19 @@ export const AnimationExample: React.FC = () => {
             color={() => color(colorValue.value * 0xff, 0x00, 0xff, 1)}
           />
         </Group>
+        <Paint blendMode="screen">
+          <Blur style="solid" sigma={10} />
+        </Paint>
+        {circles.map(({ colorStr, value, x }) => (
+          <Oval
+            key={x}
+            x={x}
+            y={() => value.value}
+            width={10}
+            height={10}
+            color={Skia.Color(colorStr)}
+          />
+        ))}
       </Canvas>
       <Button
         title="Animate"
