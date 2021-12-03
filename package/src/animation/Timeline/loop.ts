@@ -63,11 +63,11 @@ export class RepeatingAnimation extends WrappedAnimationImpl {
 
   stop() {
     this.animation.stop();
+    this._iterations = 0;
   }
 
   reset() {
     super.reset();
     this._reverse = false;
-    this._iterations = 0; // TODO!!
   }
 }

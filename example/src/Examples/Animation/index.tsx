@@ -54,7 +54,7 @@ export const AnimationExample: React.FC = () => {
       ]),
       { yoyo: true, repeatCount: 1 }
     ),
-    { delaySeconds: 5 }
+    { delaySeconds: 2 }
   );
 
   const touchHandler = useTouchHandler({
