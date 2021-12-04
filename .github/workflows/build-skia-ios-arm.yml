@@ -2,10 +2,11 @@ name: Build SKIA
 on:
   push:
     branches:
-      - testing1-2-3
+      - feature/git-workflows
 jobs:
   build:
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: macos-latest
     env:
       WORKING_DIRECTORY: ./
     concurrency:
@@ -53,4 +54,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: android-skia-arm
-          path: ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/*
+          path: ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/lib*.a
