@@ -2,7 +2,7 @@ name: Build SKIA
 on:
   push:
     branches:
-      - feature/git-workflows
+      - feature/git-workflows-remove-this-to-trigger-builds
 jobs:
   build:
     #runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
 
       - name: Build Skia iOS Fat libs
         working-directory: ${{ env.WORKING_DIRECTORY }}/
-        run: yarn build-skia-ios-fat-libs
+        run: yarn build-skia-ios-fatlibs
 
       - name: Upload artifacts - Android arm
         uses: actions/upload-artifact@v2
