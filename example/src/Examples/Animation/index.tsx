@@ -30,10 +30,10 @@ export const AnimationExample: React.FC = () => {
 
   // Create some circles
   const circles = useMemo(() => {
-    return new Array(10).fill(0).map((_, i) => ({
-      colorStr: "#FF0000",
+    return new Array(20).fill(0).map((_, i) => ({
+      colorStr: "#435589",
       value: createValue(0),
-      x: 20 + i * 40,
+      x: 20 + i * 15,
     }));
   }, []);
 
@@ -122,7 +122,7 @@ export const AnimationExample: React.FC = () => {
           />
         </Group>
         <Paint blendMode="screen">
-          <Blur style="solid" sigma={10} />
+          <Blur style="solid" sigma={5} />
         </Paint>
         {circles.map(({ colorStr, value, x }) => (
           <Oval

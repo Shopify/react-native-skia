@@ -2,7 +2,7 @@ import type { Animation } from "../types";
 import { WrappedAnimationListImpl } from "../Animation";
 
 export type StaggerParams = {
-  delay?: number;
+  delaySeconds?: number;
 };
 
 /**
@@ -21,18 +21,18 @@ export const stagger = (
 class StaggeredAnimation extends WrappedAnimationListImpl {
   constructor(animations: Animation[], params?: StaggerParams) {
     super(animations);
-    this._delay = params?.delay ?? 100;
+    this._delaySeconds = params?.delaySeconds ?? 0.1;
   }
 
   private _reversed = false;
-  private _delay: number;
+  private _delaySeconds: number;
 
   async start(): Promise<Animation> {
     this.assertAnimations();
     const promises: Array<Promise<Animation>> = [];
     for (let i = 0; i < this.animations.length; i++) {
       promises.push(
-        new Promise<Animation>((resolve) =>
+        new Promise<Animation>((resolve) => {
           setTimeout(() => {
             this.activeAnimationIndex = this._reversed
               ? this.animations.length - 1 - i
@@ -40,8 +40,8 @@ class StaggeredAnimation extends WrappedAnimationListImpl {
             this._reversed
               ? this.activeAnimation.reverse().then(resolve)
               : this.activeAnimation.start().then(resolve);
-          }, i * this._delay)
-        )
+          }, i * this._delaySeconds * 1000);
+        })
       );
     }
     await Promise.all(promises);
