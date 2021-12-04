@@ -1,8 +1,8 @@
 ---
-id: paint
+id: paint-overview
 title: Paint Overview
 sidebar_label: Overview
-slug: /paint
+slug: /paint/overview
 ---
 
 Anytime you draw something in Skia, and want to specify what color it is, or how it blends with the background, or what style to draw it in, you specify those attributes in a paint. In React Native Skia, there are many ways to specify a paint which are covering below.
@@ -103,7 +103,7 @@ export const PaintDemo = () => {
         <Defs>
           <Paint ref={paint} color="lightblue" />
         </Defs>
-        {/* We can assign the ref to any shape. This will be handy in complex use-case */}
+        {/* We can assign the ref to any shape. This will be handy in advanced use-case */}
         <Circle paint={paint} cx={50} cy={50} r={50} />
     </Canvas>
   );

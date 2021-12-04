@@ -28,7 +28,7 @@ const sidebars = {
       type: "category",
       label: "Paint",
       items: [
-        "paint",
+        "paint-overview",
         "paint-properties"
       ],
     },
