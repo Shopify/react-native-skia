@@ -13,7 +13,6 @@ import {
   createValue,
   useLoop,
   useDelay,
-  Skia,
   Paint,
   Blur,
 } from "@shopify/react-native-skia";
@@ -122,16 +121,16 @@ export const AnimationExample: React.FC = () => {
           />
         </Group>
         <Paint blendMode="screen">
-          <Blur style="solid" sigma={5} />
+          <Blur style="solid" sigma={15} />
         </Paint>
-        {circles.map(({ colorStr, value, x }) => (
+        {circles.map(({ value, x }, i) => (
           <Oval
             key={x}
             x={x}
             y={() => value.value}
             width={10}
             height={10}
-            color={Skia.Color(colorStr)}
+            color={() => color(0x00, i * 12, 0x00, 1)}
           />
         ))}
       </Canvas>
