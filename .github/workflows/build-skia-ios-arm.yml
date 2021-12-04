@@ -1,4 +1,4 @@
-name: Build SKIA Test
+name: Build SKIA
 on:
   push:
     branches:
