@@ -56,5 +56,5 @@ jobs:
           name: skia-ios-arm
           path: |
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/ios/arm/libskia.a
-            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/ios/arm/libshaper.a
-            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/andios/arm/libsvg.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/ios/arm/libskshaper.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/ios/arm/libsvg.a
