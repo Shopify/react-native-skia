@@ -53,5 +53,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: android-skia-arm
-          path: ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/lib*.a
+          name: android-skia-ios-arm
+          path: |
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskia.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libshaper.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libsvg.a
