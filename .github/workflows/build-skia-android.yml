@@ -1,0 +1,86 @@
+name: Build SKIA
+on:
+  push:
+    branches:
+      - feature/git-workflows
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      WORKING_DIRECTORY: ./
+    concurrency:
+      group: skia-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r22b
+
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Setup Nodejs and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Setup yarn
+        run: npm install -g yarn
+
+      - name: Setup Nodejs with yarn caching
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: yarn
+
+      - name: Install root node dependencies
+        run: yarn
+
+      - name: Build Skia
+        working-directory: ${{ env.WORKING_DIRECTORY }}/
+        env:
+          ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: yarn build-skia-android
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: skia-android-arm
+          path: |
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskia.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskshaper.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libsvg.a
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: skia-android-arm-64
+          path: |
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskia.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskshaper.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libsvg.a
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: skia-android-arm-x86
+          path: |
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskia.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskshaper.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libsvg.a
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: skia-android-arm-x64
+          path: |
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskia.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskshaper.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libsvg.a
