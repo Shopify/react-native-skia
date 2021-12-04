@@ -5,7 +5,6 @@ const fs = require("fs");
 const typedKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
 
 console.log("Starting SKIA Build.");
-console.log("Usage: yarn buildskia.ts platform cpu");
 console.log("");
 
 if (process.argv.length !== 4) {
@@ -36,7 +35,8 @@ const executeCmd = (
       console.log(`[${platform}/${cpu}]:`, data.trim());
     });
     proc.stderr?.on("data", function (data) {
-      console.log(`[${platform}/${cpu}]:`, data.trim());
+      console.error(`[${platform}/${cpu}]:`, data.trim());
+      exit(1);
     });
   }
 };
