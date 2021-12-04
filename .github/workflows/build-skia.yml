@@ -54,7 +54,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}/
         run: yarn build-skia-ios-fat-libs
 
-      - name: Upload artifacts
+      - name: Upload artifacts - Android arm
         uses: actions/upload-artifact@v2
         with:
           name: skia-android-arm
@@ -63,7 +63,7 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskshaper.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libsvg.a
 
-      - name: Upload artifacts
+      - name: Upload artifacts - Android arm64
         uses: actions/upload-artifact@v2
         with:
           name: skia-android-arm-64
@@ -72,7 +72,7 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskshaper.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libsvg.a
 
-      - name: Upload artifacts
+      - name: Upload artifacts - Android x86
         uses: actions/upload-artifact@v2
         with:
           name: skia-android-arm-x86
@@ -81,7 +81,7 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskshaper.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libsvg.a
 
-      - name: Upload artifacts
+      - name: Upload artifacts - Android x64
         uses: actions/upload-artifact@v2
         with:
           name: skia-android-arm-x64
@@ -90,7 +90,7 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskshaper.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libsvg.a
 
-      - name: Upload artifacts
+      - name: Upload artifacts - iOS Fat Libs
         uses: actions/upload-artifact@v2
         with:
           name: skia-ios-fat-libs
