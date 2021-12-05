@@ -30,15 +30,14 @@ console.log("Prerequisites verified successfully.");
 if (fs.existsSync("./dist")) {
   console.log("Cleaning dist folder...");
   fs.rmdirSync("./dist", { recursive: true });
-} else {
-  console.log("Creating dist folder");
-  fs.mkdirSync("./dist");
 }
+console.log("Creating dist folder");
+fs.mkdirSync("./dist");
 
 const currentDir = process.cwd();
 console.log("Entering directory `package`");
 process.chdir("./package");
-console.log("Running `npm pack`");
+console.log("Running `npm pack` in package folder", process.cwd());
 executeCmdSync("npm pack");
 process.chdir(currentDir);
 
