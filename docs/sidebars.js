@@ -31,7 +31,7 @@ const sidebars = {
         "paint-overview",
         "paint-properties",
         "shaders",
-        "mask-filter"
+        "mask-filters"
       ],
     },
     {

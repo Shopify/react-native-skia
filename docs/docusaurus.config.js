@@ -15,7 +15,25 @@ const config = {
   favicon: 'img/favicon.ico',
   organizationName: 'shopify', // Usually your GitHub org/user name.
   projectName: 'react-native-skia', // Usually your repo name.
-
+  // plugins: [
+  //   (context, options) => {
+  //     return {
+  //       name: 'my-plugin',
+  //       async loadContent() {
+  //         // ...
+  //       },
+  //       async contentLoaded({ content, actions }) {
+  //         console.log({ content, actions });
+  //       },
+  //       async injectHtmlTags({ content }) {
+  //         console.log({ content });
+  //       },
+  //       async postBuild({siteConfig, routesPaths, outDir}) {
+  //         console.log({siteConfig, routesPaths, outDir});
+  //       }
+  //     };
+  //   },
+  // ],
   presets: [
     [
       '@docusaurus/preset-classic',
