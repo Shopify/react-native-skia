@@ -1,20 +1,5 @@
 import { exit } from "process";
-import { executeCmdSync } from "./utils";
-const fs = require("fs");
-
-const checkFileExists = (filePath: string, message: string, error: string) => {
-  const exists = fs.existsSync(filePath);
-  if (!exists) {
-    console.log("");
-    console.log("Failed:");
-    console.log(message + " not found. (" + filePath + ")");
-    console.log(error);
-    console.log("");
-    exit(1);
-  } else {
-    console.log("☑ " + message);
-  }
-};
+import { executeCmdSync, checkFileExists } from "./utils";
 
 console.log("Testing to see if everything is set up correctly...");
 console.log("");
@@ -31,8 +16,8 @@ if (!process.env.ANDROID_NDK) {
   ["libskia.a", "libskshaper.a", "libsvg.a"].forEach((lib) => {
     checkFileExists(
       `./package/libs/android/${abi}/${lib}`,
-      `Skia ${abi}/${lib}`,
-      "Have you built the Skia Android binaries? Run yarn run build"
+      `Skia Android ${abi}/${lib}`,
+      "Have you built the Skia Android binaries? Run yarn run build-skia (it takes a while)"
     );
   });
 });
@@ -41,7 +26,7 @@ if (!process.env.ANDROID_NDK) {
 checkFileExists(
   "./package/cpp/skia/readme.txt",
   "Skia Headers Copied",
-  "Have copied Skia headers? Run yarn run build to build and copy headers."
+  "Have copied Skia headers? Run yarn run copy-skia-headers to copy the headers."
 );
 
 console.log("");

@@ -46,3 +46,6 @@ package/cpp/skia/modules/
 buck-out/
 \.buckd/
 *.keystore
+
+# Build
+dist

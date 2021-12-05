@@ -29,6 +29,8 @@
     "copy-skia-include-headers": "yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
     "copy-skia-module-headers": "yarn rimraf ./package/cpp/skia/modules/ && mkdir -p ./package/cpp/skia/modules/svg/include && mkdir -p ./package/cpp/skia/modules/skresources/include && cp -a ./externals/skia/modules/svg/include/. ./package/cpp/skia/modules/svg/include && cp -a ./externals/skia/modules/skresources/include/. ./package/cpp/skia/modules/skresources/include",
     "copy-skia-headers": "yarn copy-skia-module-headers && yarn copy-skia-include-headers",
+    "build-android": "yarn ts-node ./scripts/build-android.ts",
+    "build-npm": "yarn ts-node ./scripts/build-npm-package.ts",
     "build": "yarn build-skia && yarn copy-skia-headers",
     "precommit": "yarn lint-java && yarn clang-format",
     "lint-java": "node ./scripts/lint-java.js",

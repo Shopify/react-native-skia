@@ -6,10 +6,14 @@
   "main": "index.ts",
   "files": [
     "README.md",
-    "android",
+    "android/build/outputs/aar/shopify_react-native-skia-release.aar",
+    "src/**",
     "index.js",
     "ios",
-    "react-native-skia.podspec"
+    "react-native-skia.podspec",
+    "libs/ios/libskia.a",
+    "libs/ios/libskshaper.a",
+    "libs/ios/libsvg.a"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",

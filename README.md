@@ -29,3 +29,11 @@ If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 - Build the Skia libraries with `yarn build-skia` (this can take a while)
 - Copy Skia headers `yarn copy-skia-headers`
 - Run pod install in the example project
+
+### Publishing
+
+- Run the commands in the `Building` section
+- Build the Android binaries with `yarn build-android`
+- Build the NPM package with `yarn build-npm';
+
+Publish the NPM package manually. The output is found in the `dist` folder.
