@@ -29,7 +29,9 @@ const sidebars = {
       label: "Paint",
       items: [
         "paint-overview",
-        "paint-properties"
+        "paint-properties",
+        "shaders",
+        "mask-filter"
       ],
     },
     {

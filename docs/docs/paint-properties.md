@@ -15,8 +15,8 @@ import {Paint} from "@shopify/react-native-skia";
 
 <>
   <Paint color="red" />
-  {/* 0xff0000 is also red */}
-  <Paint color={0xff0000} />
+  {/* 0xffff0000 is also red (format is argb) */}
+  <Paint color={0xffff0000} />
 </>
 ```
 
