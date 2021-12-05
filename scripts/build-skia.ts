@@ -1,4 +1,4 @@
-import { exec, execSync } from "child_process";
+import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
 const fs = require("fs");
@@ -16,30 +16,8 @@ if (process.argv.length !== 4) {
     const config = configurations[platform];
     config.cpus.forEach((cpu) => console.log("  " + cpu));
   });
-  exit();
+  exit(1);
 }
-
-const executeCmdSync = (command: string) => {
-  execSync(command, { stdio: "inherit", env: process.env });
-};
-
-const executeCmd = (
-  command: string,
-  platform: PlatformName,
-  cpu: string,
-  callback: () => void
-) => {
-  const proc = exec(command, { env: process.env }, callback);
-  if (proc) {
-    proc.stdout?.on("data", function (data) {
-      console.log(`[${platform}/${cpu}]:`, data.trim());
-    });
-    proc.stderr?.on("data", function (data) {
-      console.error(`[${platform}/${cpu}]:`, data.trim());
-      exit(1);
-    });
-  }
-};
 
 const currentDir = process.cwd();
 const SkiaDir = "./externals/skia";
@@ -91,7 +69,11 @@ const buildPlatform = (
   callback: () => void
 ) => {
   console.log(`Building platform "${platform}" for cpu "${cpu}"`);
-  executeCmd(`ninja -C ${getOutDir(platform, cpu)}`, platform, cpu, callback);
+  executeCmd(
+    `ninja -C ${getOutDir(platform, cpu)}`,
+    `${platform}/${cpu}`,
+    callback
+  );
 };
 
 const processOutput = (platform: PlatformName, cpu: string) => {
@@ -116,7 +98,7 @@ const processOutput = (platform: PlatformName, cpu: string) => {
     libNames.forEach((libName) => {
       console.log(`Copying ${source}/${libName} to ${target}/`);
       console.log(`cp ${source}/${libName} ${target}/.`);
-      execSync(`cp ${source}/${libName} ${target}/.`);
+      executeCmdSync(`cp ${source}/${libName} ${target}/.`);
     });
   } else {
     throw new Error(
@@ -130,7 +112,7 @@ try {
   console.log("Running gclient sync...");
   process.chdir(SkiaDir);
   // Start by running sync
-  execSync("PATH=../depot_tools/:$PATH python2 tools/git-sync-deps");
+  executeCmdSync("PATH=../depot_tools/:$PATH python2 tools/git-sync-deps");
   console.log("gclient sync done");
   typedKeys(configurations).forEach((platform) => {
     if (SelectedPlatform === "" || SelectedPlatform === platform) {
