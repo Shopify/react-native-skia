@@ -18,18 +18,19 @@ const sidebars = {
       collapsed: false,
       type: "category",
       label: "Getting started",
-      items: ["installation", "helloworld"],
+      items: ["getting-started/installation", "getting-started/hello-world"],
     },
     {
       collapsed: false,
       type: "category",
       label: "Paint",
-      items: [
-        "paint/overview",
-        "paint/properties",
-        "paint/shaders",
-        "paint/mask-filters",
-      ],
+      items: ["paint/overview", "paint/properties"],
+    },
+    {
+      collapsed: false,
+      type: "category",
+      label: "Shaders",
+      items: ["shaders/shaders"],
     },
     {
       type: "doc",

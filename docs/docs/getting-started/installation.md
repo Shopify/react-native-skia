@@ -2,7 +2,7 @@
 id: installation
 title: Installation
 sidebar_label: Installation
-slug: /getting-started
+slug: /getting-started/installation
 ---
 
 React Native Skia bring the [Skia Graphics Library](https://skia.org/) to React Native.

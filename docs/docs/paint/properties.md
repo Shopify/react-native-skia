@@ -5,6 +5,14 @@ sidebar_label: Properties
 slug: /paint/properties
 ---
 
+Below are the properties that can be assigned to a Paint component.
+The following children can also be assigned to a Paint:
+* `Shader`
+* `ImageFilter`
+* `ColorFilter`
+* `MaskFilter`
+* `PathEffect`
+
 ## Color
 
 Sets alpha and RGB used when stroking and filling.

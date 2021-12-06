@@ -1,20 +1,20 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const lightCodeTheme = require("prism-react-renderer/themes/github");
+const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'React Native Skia',
-  tagline: 'High Performance 2D Graphics',
-  url: 'https://your-docusaurus-test-site.com',
-  baseUrl: '/',
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
-  organizationName: 'shopify', // Usually your GitHub org/user name.
-  projectName: 'react-native-skia', // Usually your repo name.
+  title: "React Native Skia",
+  tagline: "High Performance 2D Graphics",
+  url: "https://your-docusaurus-test-site.com",
+  baseUrl: "/",
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "warn",
+  favicon: "img/favicon.ico",
+  organizationName: "shopify", // Usually your GitHub org/user name.
+  projectName: "react-native-skia", // Usually your repo name.
   // plugins: [
   //   (context, options) => {
   //     return {
@@ -36,66 +36,66 @@ const config = {
   // ],
   presets: [
     [
-      '@docusaurus/preset-classic',
+      "@docusaurus/preset-classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: require.resolve('./sidebars.js'),
+          sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl: 'https://github.com/facebook/docusaurus/edit/main/website/',
+          editUrl: "https://github.com/facebook/docusaurus/edit/main/website/",
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/facebook/docusaurus/edit/main/website/blog/',
+            "https://github.com/facebook/docusaurus/edit/main/website/blog/",
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: require.resolve("./src/css/custom.css"),
         },
       }),
     ],
     [
-      'docusaurus-preset-shiki-twoslash',
+      "docusaurus-preset-shiki-twoslash",
       {
         themes: ["min-light", "nord"],
       },
-     ],
+    ],
   ],
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'React Native Skia',
+        title: "React Native Skia",
         logo: {
-          alt: 'React Native Skia',
-          src: 'img/logo.png',
+          alt: "React Native Skia",
+          src: "img/logo.png",
         },
         items: [
           {
-            type: 'doc',
-            docId: 'installation',
-            position: 'left',
-            label: 'Docs',
+            type: "doc",
+            docId: "getting-started/installation",
+            position: "left",
+            label: "Docs",
           },
           // {to: '/blog', label: 'Blog', position: 'left'},
           {
-            label: 'GitHub',
-            href: 'https://github.com/@shopify/react-native-skia',
-            position: 'right',
+            label: "GitHub",
+            href: "https://github.com/@shopify/react-native-skia",
+            position: "right",
           },
         ],
       },
       footer: {
-        style: 'dark',
+        style: "dark",
         links: [
           {
-            title: 'Docs',
+            title: "Docs",
             items: [
               {
-                label: 'Tutorial',
-                to: '/getting-started',
+                label: "Tutorial",
+                to: "/getting-started",
               },
             ],
           },

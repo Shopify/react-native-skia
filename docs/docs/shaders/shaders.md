@@ -2,7 +2,7 @@
 id: shaders
 title: Shaders
 sidebar_label: Shaders
-slug: /paint/shaders
+slug: /shaders/shaders
 ---
 
 Below is the list of available shaders.
