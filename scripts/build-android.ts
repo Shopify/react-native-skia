@@ -26,7 +26,7 @@ if (!process.env.ANDROID_NDK) {
 checkFileExists(
   "./package/cpp/skia/readme.txt",
   "Skia Headers Copied",
-  "Have copied Skia headers? Run yarn run copy-skia-headers to copy the headers."
+  "Have you copied the Skia headers? Run yarn run copy-skia-headers to copy the headers."
 );
 
 console.log("");

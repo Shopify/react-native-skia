@@ -23,6 +23,18 @@ export const executeCmd = (
   }
 };
 
+export const getDistFolder = () => "./dist";
+
+export const ensureDistFolder = (dirPath: string) => {
+  try {
+    console.log(`Ensuring that ${dirPath} exists...`);
+    return fs.mkdirSync(dirPath);
+  } catch (err) {
+    // @ts-ignore
+    if (err.code !== "EEXIST") throw err;
+  }
+};
+
 export const checkFileExists = (
   filePath: string,
   message: string,

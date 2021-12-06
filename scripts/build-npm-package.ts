@@ -1,4 +1,9 @@
-import { executeCmdSync, checkFileExists } from "./utils";
+import {
+  executeCmdSync,
+  checkFileExists,
+  ensureDistFolder,
+  getDistFolder,
+} from "./utils";
 import fs from "fs";
 import { exit } from "process";
 
@@ -25,14 +30,7 @@ checkFileExists(
 });
 
 console.log("Prerequisites verified successfully.");
-
-// Remove dist folder
-if (fs.existsSync("./dist")) {
-  console.log("Cleaning dist folder...");
-  fs.rmdirSync("./dist", { recursive: true });
-}
-console.log("Creating dist folder");
-fs.mkdirSync("./dist");
+ensureDistFolder(getDistFolder());
 
 const currentDir = process.cwd();
 console.log("Entering directory `package`");
@@ -47,7 +45,7 @@ console.log("Done building NPM package");
 const packageFilename = `shopify-react-native-skia-${pck.version}.tgz`;
 const packagePath = `./package/${packageFilename}`;
 console.log(process.cwd());
-fs.renameSync(packagePath, `./dist/${packageFilename}`);
+fs.renameSync(packagePath, `${getDistFolder()}/${packageFilename}`);
 
 // Done!
 console.log("The output is in the `./dist` folder.");
