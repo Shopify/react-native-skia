@@ -1,3 +1,5 @@
+import React from "react";
+
 import type { Vector, AnimatedProps } from "../../processors";
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";

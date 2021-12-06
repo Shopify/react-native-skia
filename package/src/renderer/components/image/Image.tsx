@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 import type { IImage } from "../../../skia";
 import { useImage } from "../../../skia";

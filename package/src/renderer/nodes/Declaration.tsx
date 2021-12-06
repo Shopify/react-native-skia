@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
 import type { SkNode } from "../Host";
@@ -20,7 +20,7 @@ type DeclarationCallback = (
   children: DeclarationResult[]
 ) => DeclarationResult;
 
-export const useDeclaration = <T,>(
+export const useDeclaration = <T extends React.ReactNode>(
   props: AnimatedProps<T>,
   cb: UseDeclarationCallback<T>
 ) => {

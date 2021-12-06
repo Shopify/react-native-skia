@@ -1,3 +1,4 @@
+import React from "react";
 import type { ReactNode, RefObject } from "react";
 
 import { processChildren } from "../Host";
