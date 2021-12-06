@@ -2,12 +2,11 @@
 id: shaders
 title: Shaders
 sidebar_label: Shaders
-slug: /shaders
+slug: /paint/shaders
 ---
 
-import {Example} from "../src/components/Example";
-
-Below are some of the shaders available.
+Below is the list of available shaders.
+You can also [create your own shader](runtime-effects).
 
 ## Image
 
@@ -53,7 +52,7 @@ export const ImageShaderDemo = () => {
 };
 ```
 ### Result
-![Image Shader](assets/shaders/image-shader.png)
+![Image Shader](assets/image-shader.png)
 
 ## Linear Gradient
 
@@ -98,7 +97,7 @@ export const LinearGradientDemo = () => {
 };
 ```
 ### Result
-![Linear Gradient](assets/shaders/linear-gradient.png)
+![Linear Gradient](assets/linear-gradient.png)
 
 ## Radial Gradient
 
@@ -143,7 +142,7 @@ export const RadialGradientDemo = () => {
 };
 ```
 ### Result
-![Radial Gradient](assets/shaders/radial-gradient.png)
+![Radial Gradient](assets/radial-gradient.png)
 
 ## Two Point Conical Gradient
 
@@ -192,7 +191,7 @@ export const TwoPointConicalGradientDemo = () => {
 };
 ```
 ### Result
-![Two Point Conical Gradient](assets/shaders/two-point-conical-gradient.png)
+![Two Point Conical Gradient](assets/two-point-conical-gradient.png)
 
 ## Sweep Gradient
 
@@ -236,7 +235,7 @@ export const SweepGradientDemo = () => {
 };
 ```
 ### Result
-![Sweep Gradient](assets/shaders/sweep-gradient.png)
+![Sweep Gradient](assets/sweep-gradient.png)
 
 ## Fractal Perlin Noise Shader
 
@@ -278,7 +277,7 @@ export const FractalNoiseDemo = () => {
 };
 ```
 ### Result
-![Fractal](assets/shaders/fractal.png)
+![Fractal](assets/fractal.png)
 
 ## Turbulence Perlin Noise Shader
 
@@ -320,7 +319,7 @@ export const TurbulenceDemo = () => {
 };
 ```
 ### Result
-![Turbulence](assets/shaders/turbulence.png)
+![Turbulence](assets/turbulence.png)
 
 ## Blend Shader
 
@@ -328,8 +327,8 @@ Returns a shader that combines the given shaders with a BlendMode.
 
 | Name        | Type           |  Description                    |
 |:------------|:---------------|:--------------------------------|
-| mode       | `BlendMode` | see [blend modes](paint-properties.md#blend-mode). |
-| children       | `ReactNode` | Shaders to blend |
+| mode        | `BlendMode` | see [blend modes](paint/properties.md#blend-mode). |
+| children    | `ReactNode` | Shaders to blend |
 
 ### Example
 ```tsx twoslash
@@ -366,7 +365,7 @@ export const BlendDemo = () => {
 };
 ```
 ### Result
-![Blend](assets/shaders/blend-shader.png)
+![Blend](assets/blend-shader.png)
 
 ## Color Shader
 
@@ -402,4 +401,4 @@ export const BlendDemo = () => {
 };
 ```
 ### Result
-![Color](assets/shaders/color-shader.png)
+![Color](assets/color-shader.png)

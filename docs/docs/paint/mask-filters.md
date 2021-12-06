@@ -5,8 +5,4 @@ sidebar_label: Mask Filters
 slug: /mask-filters
 ---
 
-import {Example} from "../src/components/Example";
-
 ## Blur Mask Filter
-
-<Example />

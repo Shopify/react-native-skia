@@ -1,6 +1,6 @@
 ---
-id: paint-overview
-title: Paint Overview
+id: overview
+title: Overview
 sidebar_label: Overview
 slug: /paint/overview
 ---

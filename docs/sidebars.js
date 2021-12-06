@@ -18,53 +18,51 @@ const sidebars = {
       collapsed: false,
       type: "category",
       label: "Getting started",
-      items: [
-        "installation",
-        "helloworld",
-      ],
+      items: ["installation", "helloworld"],
     },
     {
       collapsed: false,
       type: "category",
       label: "Paint",
       items: [
-        "paint-overview",
-        "paint-properties",
-        "shaders",
-        "mask-filters"
+        "paint/overview",
+        "paint/properties",
+        "paint/shaders",
+        "paint/mask-filters",
       ],
     },
     {
-      type: 'doc',
+      type: "doc",
       label: "Transformations",
-      id: "transformations"
+      id: "transformations",
     },
     {
-      type: 'doc',
+      type: "doc",
       label: "Images",
-      id: "images"
+      id: "images",
     },
     {
-      type: 'doc',
+      type: "doc",
       label: "Group",
-      id: "group"
+      id: "group",
+    },
+    {
+      type: "doc",
+      label: "Runtime Effects",
+      id: "runtime-effects",
     },
     {
       collapsed: false,
       type: "category",
       label: "Shapes",
-      items: [
-        "circle"
-      ],
+      items: ["circle"],
     },
     {
       collapsed: false,
       type: "category",
       label: "Animations",
-      items: [
-        "animations"
-      ],
-    }
+      items: ["animations"],
+    },
   ],
 };
 
