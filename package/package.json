@@ -1,7 +1,7 @@
 {
   "name": "@shopify/react-native-skia",
   "title": "React Native Skia",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Skia View for React Native",
   "main": "index.ts",
   "files": [
