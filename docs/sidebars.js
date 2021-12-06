@@ -36,6 +36,16 @@ const sidebars = {
     },
     {
       type: 'doc',
+      label: "Transformations",
+      id: "transformations"
+    },
+    {
+      type: 'doc',
+      label: "Images",
+      id: "images"
+    },
+    {
+      type: 'doc',
       label: "Group",
       id: "group"
     },

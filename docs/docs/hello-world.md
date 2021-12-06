@@ -15,7 +15,7 @@ import {Canvas, Circle} from "@shopify/react-native-skia";
 export const HelloWorld = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Circle cx={50} cy={50} r={50} color="lightblue" blendMode="screen" />
+      <Circle cx={50} cy={50} r={50} color="lightblue" />
     </Canvas>
   );
 };
