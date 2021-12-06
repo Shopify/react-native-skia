@@ -1,3 +1,5 @@
+import React from "react";
+
 import type { CustomPaintProps } from "../../processors";
 import type { IRRect } from "../../../skia/RRect";
 import type { AnimatedProps } from "../../processors/Animations/Animations";

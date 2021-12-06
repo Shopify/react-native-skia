@@ -1,3 +1,5 @@
+import React from "react";
+
 import { BlurStyle } from "../../../skia/MaskFilter";
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
