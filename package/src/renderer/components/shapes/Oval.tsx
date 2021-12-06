@@ -1,3 +1,5 @@
+import React from "react";
+
 import type { CustomPaintProps } from "../../processors";
 import type { RectDef } from "../../processors/Shapes";
 import { processRect } from "../../processors/Shapes";

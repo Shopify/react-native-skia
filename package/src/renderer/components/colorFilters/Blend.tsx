@@ -1,3 +1,5 @@
+import React from "react";
+
 import { BlendMode, Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { SkEnum, ColorProp } from "../../processors/Paint";

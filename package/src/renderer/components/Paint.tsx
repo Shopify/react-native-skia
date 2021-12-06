@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
+import React, { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 
 import type { IPaint } from "../../skia";
 import { isShader } from "../../skia/Shader/Shader";
