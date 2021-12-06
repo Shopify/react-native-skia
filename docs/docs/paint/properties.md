@@ -1,6 +1,6 @@
 ---
 id: properties
-title: Properties
+title: Paint Properties
 sidebar_label: Properties
 slug: /paint/properties
 ---

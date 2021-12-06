@@ -30,7 +30,13 @@ const sidebars = {
       collapsed: false,
       type: "category",
       label: "Shaders",
-      items: ["shaders/shaders"],
+      items: [
+        "shaders/overview",
+        "shaders/images",
+        "shaders/gradients",
+        "shaders/perlin-noise",
+        "shaders/colors",
+      ],
     },
     {
       type: "doc",
