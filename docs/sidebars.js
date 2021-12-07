@@ -40,6 +40,16 @@ const sidebars = {
     },
     {
       type: "doc",
+      label: "Mask Filters",
+      id: "mask-filters",
+    },
+    {
+      type: "doc",
+      label: "Color Filters",
+      id: "color-filters",
+    },
+    {
+      type: "doc",
       label: "Transformations",
       id: "transformations",
     },
@@ -52,11 +62,6 @@ const sidebars = {
       type: "doc",
       label: "Group",
       id: "group",
-    },
-    {
-      type: "doc",
-      label: "Runtime Effects",
-      id: "runtime-effects",
     },
     {
       collapsed: false,

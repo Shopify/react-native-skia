@@ -1,0 +1,39 @@
+---
+id: mask-filters
+title: Mask Filters
+sidebar_label: Mask Filters
+slug: /mask-filters
+---
+
+## Blur
+
+Creates a blur mask filter.
+
+| Name        | Type        |  Description                                          |
+|:------------|:------------|:------------------------------------------------------|
+| sigma       | `number`    | Standard deviation of the Gaussian blur. Must be > 0. |
+| style?      | `BlurStyle` | Can be `normal`, `solid`, `outer`, or `inner` (default is `normal`).        |
+| respectCTM? | `boolean`   | if true the blur's sigma is modified by the CTM (default is `false`).      |
+
+### Example
+
+```tsx twoslash
+import {Canvas, Fill, Paint, Circle, Blur, vec} from "@shopify/react-native-skia";
+
+const MaskFilterDemo = () => {
+  return (
+    <Canvas style={{ flex: 1}}>
+      <Paint>
+        <Blur sigma={20} style="normal" />
+      </Paint>
+      <Circle c={vec(128)} r={128} color="lightblue" />
+    </Canvas>
+  );
+};
+```
+
+| Style  |  Result                           |       |                                  |
+|:-------|:----------------------------------|:----- |:---------------------------------|
+| normal | ![Normal](assets/mask-filters/blur-normal.png) | inner | ![Inner](assets/mask-filters/blur-inner.png)  |
+| solid  | ![Solid](assets/mask-filters/blur-solid.png)   | outer | ![Outer](assets/mask-filters/blur-outer.png)  |
+

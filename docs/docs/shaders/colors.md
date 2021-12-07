@@ -57,7 +57,7 @@ Returns a shader with a given color.
 
 | Name        | Type           |  Description                    |
 |:------------|:---------------|:--------------------------------|
-| color       | `string` | Color |
+| color       | `string`       | Color                           |
 
 ### Example
 ```tsx twoslash
