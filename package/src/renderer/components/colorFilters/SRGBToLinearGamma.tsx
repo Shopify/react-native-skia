@@ -1,6 +1,9 @@
-import { Skia, isColorFilter } from "../../../skia";
+import React from "react";
+
+import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
+import { isColorFilter } from "../../../skia/ColorFilter/ColorFilter";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SRGBToLinearGammaProps {}

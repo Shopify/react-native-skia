@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { ColorProp } from "../../processors/Paint";

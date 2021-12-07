@@ -1,3 +1,5 @@
+import React from "react";
+
 import type { CustomPaintProps } from "../../processors";
 import type { IPath } from "../../../skia";
 import { Skia } from "../../../skia";
