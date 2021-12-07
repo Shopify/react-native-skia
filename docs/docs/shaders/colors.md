@@ -49,7 +49,7 @@ export const BlendDemo = () => {
 };
 ```
 ### Result
-![Blend](assets/blend-shader.png)
+![Blend](assets/blend.png)
 
 ## Color Shader
 
@@ -85,4 +85,4 @@ export const BlendDemo = () => {
 };
 ```
 ### Result
-![Color](assets/color-shader.png)
+![Color](assets/color.png)

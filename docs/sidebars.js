@@ -31,7 +31,7 @@ const sidebars = {
       type: "category",
       label: "Shaders",
       items: [
-        "shaders/overview",
+        "shaders/language",
         "shaders/images",
         "shaders/gradients",
         "shaders/perlin-noise",

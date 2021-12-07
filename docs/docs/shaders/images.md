@@ -49,4 +49,4 @@ export const ImageShaderDemo = () => {
 };
 ```
 ### Result
-![Image Shader](assets/image-shader.png)
+![Image Shader](assets/image.png)
