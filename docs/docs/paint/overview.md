@@ -7,22 +7,22 @@ slug: /paint/overview
 
 Anytime you draw something in Skia, and want to specify what color it is, or how it blends with the background, or what style to draw it in, you specify those attributes in a paint. In React Native Skia, there are many ways to specify a paint which are covering below.
 
-These are the properties that can be assigned to a paint:
-* `color`
-* `blendMode`
-* `style`
-* `strokeJoin`
-* `strokeCap`
-* `strokeMiter`
-* `strokeWidth`
-* `opacity`
+The following properties to the Paint component:
+* [color](properties.md#color)            
+* [blendMode](properties.md#blendMode)     
+* [style](properties.md#style)             
+* [strokeWidth](properties.md#strokeWidth) 
+* [strokeJoin](properties.md#strokeJoin)   
+* [strokeCap](properties.md#strokeCap)     
+* [strokeMiter](properties.md#strokeMiter) 
+* [opacity](properties.md#opacity)      
 
 A paint component can additionnaly receive the following components as children:
-* `Shader`
-* `ImageFilter`
-* `ColorFilter`
-* `MaskFilter`
-* `PathEffect`
+* [Shaders](/docs/shaders/overview) 
+* [Image Filters](/docs/image-filters)
+* [Color Filters](/docs/color-filters)
+* [Mask Filters](/docs/mask-filters)
+* [Path Effects](/docs/path-effects)
 
 The paint component is inherited by the following sibling and descendants.
 In the example below, the first circle will be filled with red and the second circle will have a light blue stroke.  
