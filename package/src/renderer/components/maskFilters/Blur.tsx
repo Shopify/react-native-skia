@@ -7,13 +7,13 @@ import type { SkEnum } from "../../processors";
 import { enumKey } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
-export interface BlurProps {
+export interface BlurMaskProps {
   style: SkEnum<typeof BlurStyle>;
   sigma: number;
   respectCTM: boolean;
 }
 
-export const Blur = (props: AnimatedProps<BlurProps>) => {
+export const BlurMask = (props: AnimatedProps<BlurMaskProps>) => {
   const declaration = useDeclaration(props, ({ style, sigma, respectCTM }) => {
     return Skia.MaskFilter.MakeBlur(
       BlurStyle[enumKey(style)],
@@ -24,7 +24,7 @@ export const Blur = (props: AnimatedProps<BlurProps>) => {
   return <skDeclaration declaration={declaration} />;
 };
 
-Blur.defaultProps = {
+BlurMask.defaultProps = {
   style: "normal",
   respectCTM: false,
 };

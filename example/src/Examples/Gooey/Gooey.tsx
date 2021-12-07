@@ -15,7 +15,7 @@ import {
   usePaintRef,
   Defs,
   Circle,
-  BlurImageFilter,
+  Blur,
   ColorMatrix,
   ColorFilterAsImageFilter,
 } from "@shopify/react-native-skia";
@@ -68,7 +68,7 @@ export const Gooey = () => {
                 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
               ]}
             />
-            <BlurImageFilter sigmaX={20} sigmaY={20} />
+            <Blur sigmaX={20} sigmaY={20} />
           </ColorFilterAsImageFilter>
         </Paint>
       </Defs>

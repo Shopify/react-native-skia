@@ -5,7 +5,9 @@ sidebar_label: Mask Filters
 slug: /mask-filters
 ---
 
-## Blur
+Mask filters are effects that manipulate the geometry and alpha channel of graphical objects. 
+
+## BlurMask
 
 Creates a blur mask filter.
 
@@ -18,13 +20,13 @@ Creates a blur mask filter.
 ### Example
 
 ```tsx twoslash
-import {Canvas, Fill, Paint, Circle, Blur, vec} from "@shopify/react-native-skia";
+import {Canvas, Fill, Paint, Circle, BlurMask, vec} from "@shopify/react-native-skia";
 
 const MaskFilterDemo = () => {
   return (
     <Canvas style={{ flex: 1}}>
       <Paint>
-        <Blur sigma={20} style="normal" />
+        <BlurMask sigma={20} style="normal" />
       </Paint>
       <Circle c={vec(128)} r={128} color="lightblue" />
     </Canvas>

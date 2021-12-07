@@ -50,6 +50,11 @@ const sidebars = {
     },
     {
       type: "doc",
+      label: "Image Filters",
+      id: "image-filters",
+    },
+    {
+      type: "doc",
       label: "Transformations",
       id: "transformations",
     },

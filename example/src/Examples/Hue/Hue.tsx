@@ -4,10 +4,10 @@ import {
   Circle,
   vec,
   Fill,
-  Blur,
   Paint,
   Skia,
   ShaderLib,
+  BlurMask,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -41,7 +41,7 @@ export const Hue = () => {
     <Canvas style={{ flex: 1 }}>
       <Fill color="#1f1f1f" />
       <Paint>
-        <Blur sigma={40} style="solid" />
+        <BlurMask sigma={40} style="solid" />
         <Shader source={source} uniforms={[c.x, c.y, r]} />
       </Paint>
       <Circle c={c} r={r} />
