@@ -7,6 +7,7 @@ import type { SkEnum } from "../../processors";
 import { enumKey } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { isImageFilter } from "../../../skia/ImageFilter/ImageFilter";
+import { isColorFilter } from "../../../skia/ColorFilter/ColorFilter";
 
 export interface BlurProps {
   sigmaX: number;
@@ -19,12 +20,14 @@ export const Blur = (props: AnimatedProps<BlurProps>) => {
   const declaration = useDeclaration(
     props,
     ({ sigmaX, sigmaY, mode }, children) => {
-      const [input] = children.filter(isImageFilter);
+      const [imgf] = children.filter(isImageFilter);
+      const [rawcf] = children.filter(isColorFilter);
+      const cf = rawcf ? Skia.ImageFilter.MakeColorFilter(rawcf, null) : null;
       return Skia.ImageFilter.MakeBlur(
         sigmaX,
         sigmaY,
         TileMode[enumKey(mode)],
-        input ?? null
+        imgf ?? cf ?? null
       );
     }
   );

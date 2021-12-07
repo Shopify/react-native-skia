@@ -19,7 +19,8 @@ The provided tile mode is used when the blur kernel goes outside the input image
 | mode?     | `TileMode`    |  (default is `decal`).                                  |
 | children? | `ImageFilter` | Optional image filter to be applied first.              | 
 
-## ColorFilter
+## ColorFilterAsImageFilter
 
 Creates an image filter that applies the color filter to the filter result.
+
 

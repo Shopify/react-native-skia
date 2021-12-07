@@ -1,10 +1,13 @@
+import React from "react";
 import type { ReactNode } from "react";
 
-import { BlendMode, Skia, isColorFilter } from "../../../skia";
+import { BlendMode, Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { SkEnum, ColorProp } from "../../processors/Paint";
 import { enumKey } from "../../processors/Paint";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
+
+import { composeColorFilter } from "./Compose";
 
 export interface BlendProps {
   mode: SkEnum<typeof BlendMode>;
@@ -14,15 +17,11 @@ export interface BlendProps {
 
 export const Blend = (props: AnimatedProps<BlendProps>) => {
   const declaration = useDeclaration(props, ({ mode, color }, children) => {
-    const [child] = children.filter(isColorFilter);
     const cf = Skia.ColorFilter.MakeBlend(
       Skia.Color(color),
       BlendMode[enumKey(mode)]
     );
-    if (child) {
-      return Skia.ColorFilter.MakeCompose(cf, child);
-    }
-    return cf;
+    return composeColorFilter(cf, children);
   });
   return <skDeclaration declaration={declaration} {...props} />;
 };
