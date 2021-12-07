@@ -1,17 +1,16 @@
+import React from "react";
 import type { ReactNode } from "react";
 
 import { Skia, isColorFilter } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
-interface MatrixColorFilterProps {
+interface ColorMatrixProps {
   value: number[];
   children?: ReactNode | ReactNode[];
 }
 
-export const MatrixColorFilter = (
-  props: AnimatedProps<MatrixColorFilterProps>
-) => {
+export const ColorMatrix = (props: AnimatedProps<ColorMatrixProps>) => {
   const declaration = useDeclaration(props, ({ value }, children) => {
     const [child] = children.filter(isColorFilter);
     const cf = Skia.ColorFilter.MakeMatrix(value);

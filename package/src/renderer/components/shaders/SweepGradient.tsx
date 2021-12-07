@@ -9,14 +9,14 @@ import { processGradientProps } from "./Gradient";
 
 export interface SweepGradientProps extends GradientProps {
   c: Vector;
-  startAngleInDegrees?: number;
-  endAngleInDegrees?: number;
+  start?: number;
+  end?: number;
 }
 
 export const SweepGradient = (props: AnimatedProps<SweepGradientProps>) => {
   const declaration = useDeclaration(
     props,
-    ({ c, startAngleInDegrees, endAngleInDegrees, ...gradientProps }) => {
+    ({ c, start, end, ...gradientProps }) => {
       const { colors, positions, mode, localMatrix, flags } =
         processGradientProps(gradientProps);
       return Skia.Shader.MakeSweepGradient(
@@ -27,8 +27,8 @@ export const SweepGradient = (props: AnimatedProps<SweepGradientProps>) => {
         mode,
         localMatrix,
         flags,
-        startAngleInDegrees,
-        endAngleInDegrees
+        start,
+        end
       );
     }
   );
