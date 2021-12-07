@@ -42,7 +42,7 @@ const sidebars = {
       collapsed: false,
       type: "category",
       label: "Effects",
-      items: ["mask-filters", "color-filters", "image-filters"],
+      items: ["mask-filters", "color-filters", "image-filters", "path-effects"],
     },
     {
       type: "doc",
