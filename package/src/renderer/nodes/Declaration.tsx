@@ -3,11 +3,11 @@ import { useCallback, useMemo } from "react";
 import type { DrawingContext } from "../DrawingContext";
 import type { SkNode } from "../Host";
 import { NodeType, processChildren } from "../Host";
-import type { SkJSIInstane } from "../../skia/JsiInstance";
+import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize, isAnimated } from "../processors/Animations/Animations";
 
-export type DeclarationResult = SkJSIInstane<string> | null;
+export type DeclarationResult = SkJSIInstance<string> | null;
 
 type UseDeclarationCallback<T> = (
   props: T,

@@ -47,6 +47,7 @@ export const Canvas = ({ children, style, debug, mode }: CanvasProps) => {
   }, [children, container, redraw]);
   const onDraw = useDrawCallback(
     (canvas, info) => {
+      // TODO: if tree is empty (count === 1) maybe we should not render?
       const { width, height, timestamp } = info;
       const paint = Skia.Paint();
       paint.setAntiAlias(true);

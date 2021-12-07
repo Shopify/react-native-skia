@@ -1,1 +1,2 @@
-export * from "./BlurImage";
+export * from "./Blur";
+export * from "./ColorFilter";

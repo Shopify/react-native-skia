@@ -1,6 +1,10 @@
-import type { SkJSIInstane } from "./JsiInstance";
+import type { SkJSIInstance } from "./JsiInstance";
 
-export type IPathEffect = SkJSIInstane<"PathEffect">;
+export type IPathEffect = SkJSIInstance<"PathEffect">;
+
+export const isPathEffect = (
+  obj: SkJSIInstance<string> | null
+): obj is IPathEffect => obj !== null && obj.__typename__ === "PathEffect";
 
 export interface PathEffectFactory {
   /**
@@ -28,4 +32,20 @@ export interface PathEffectFactory {
    * @param seedAssist - modifies the randomness. See SkDiscretePathEffect.h for more.
    */
   MakeDiscrete(segLength: number, dev: number, seedAssist: number): IPathEffect;
+
+  /**
+   *
+   * A pathEffect whose effect is to apply first the inner pathEffect and the the
+   * outer pathEffect (i.e. outer(inner(path))).
+   *
+   */
+  MakeCompose(outer: IPathEffect, inner: IPathEffect): IPathEffect;
+
+  /**
+   *
+   * A pathEffect pathEffect whose effect is to apply two effects,
+   * in sequence (i.e. first(path) + second(path)).
+   *
+   */
+  MakeSum(outer: IPathEffect, inner: IPathEffect): IPathEffect;
 }

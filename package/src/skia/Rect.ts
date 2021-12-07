@@ -1,6 +1,6 @@
-import type { SkJSIInstane } from "./JsiInstance";
+import type { SkJSIInstance } from "./JsiInstance";
 
-export interface JSIRect extends SkJSIInstane<"Rect"> {
+export interface JSIRect extends SkJSIInstance<"Rect"> {
   readonly x: number;
   readonly y: number;
   readonly width: number;

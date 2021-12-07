@@ -7,3 +7,4 @@ export * from "./Color";
 export * from "./Turbulence";
 export * from "./FractalNoise";
 export * from "./Shader";
+export * from "./ShaderLib";

@@ -1,6 +1,4 @@
-import React from "react";
-
-import { Skia } from "../../../skia";
+import { Skia, isColorFilter } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
@@ -10,8 +8,13 @@ export interface LinearToSRGBGammaProps {}
 export const LinearToSRGBGamma = (
   props: AnimatedProps<LinearToSRGBGammaProps>
 ) => {
-  const declaration = useDeclaration(props, () => {
-    return Skia.ColorFilter.MakeLinearToSRGBGamma();
+  const declaration = useDeclaration(props, (_props, children) => {
+    const [child] = children.filter(isColorFilter);
+    const cf = Skia.ColorFilter.MakeLinearToSRGBGamma();
+    if (child) {
+      return Skia.ColorFilter.MakeCompose(cf, child);
+    }
+    return cf;
   });
   return <skDeclaration declaration={declaration} {...props} />;
 };
