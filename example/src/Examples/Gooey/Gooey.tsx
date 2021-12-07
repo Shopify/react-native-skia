@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import React from "react";
 import {
   Canvas,
   Fill,
@@ -15,7 +16,7 @@ import {
   Defs,
   Circle,
   BlurImageFilter,
-  MatrixColorFilter,
+  ColorMatrix,
   ColorFilterAsImageFilter,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
@@ -62,7 +63,7 @@ export const Gooey = () => {
       <Defs>
         <Paint ref={paint}>
           <ColorFilterAsImageFilter>
-            <MatrixColorFilter
+            <ColorMatrix
               value={[
                 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
               ]}

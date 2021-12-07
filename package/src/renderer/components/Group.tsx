@@ -1,7 +1,8 @@
+import React from "react";
 import type { ReactNode, RefObject } from "react";
 
 import { processChildren } from "../Host";
-import type { IRRect, IPath, IPaint } from "../../skia";
+import type { IPath, IPaint } from "../../skia";
 import { ClipOp, Skia } from "../../skia";
 import { processTransform, selectPaint, processPaint } from "../processors";
 import type {
@@ -10,10 +11,12 @@ import type {
   AnimatedProps,
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
+import type { RectOrRRectDef } from "../processors/Shapes";
+import { processRectOrRRect, isRRect, rrect } from "../processors/Shapes";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
   children: ReactNode | ReactNode[];
-  clipRect?: IRRect;
+  clipRect?: RectOrRRectDef;
   clipPath?: IPath | string;
   clipOp?: "difference" | "intersect";
   rasterize?: RefObject<IPaint>;
@@ -37,7 +40,8 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       }
       const op = clipOp === "difference" ? ClipOp.Difference : ClipOp.Intersect;
       if (clipRect) {
-        canvas.clipRRect(clipRect, op, true);
+        const rect = processRectOrRRect(clipRect);
+        canvas.clipRRect(isRRect(rect) ? rect : rrect(rect, 0, 0), op, true);
       }
       if (clipPath) {
         const path =
