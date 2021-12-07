@@ -31,7 +31,7 @@ export const Blur = (props: AnimatedProps<BlurProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration declaration={declaration} {...props} />;
 };
 
 Blur.defaultProps = {

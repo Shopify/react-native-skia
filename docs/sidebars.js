@@ -55,18 +55,13 @@ const sidebars = {
     },
     {
       type: "doc",
-      label: "Transformations",
-      id: "transformations",
+      label: "Group",
+      id: "group",
     },
     {
       type: "doc",
       label: "Images",
       id: "images",
-    },
-    {
-      type: "doc",
-      label: "Group",
-      id: "group",
     },
     {
       collapsed: false,
