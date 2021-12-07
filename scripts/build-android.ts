@@ -31,13 +31,22 @@ checkFileExists(
 
 console.log("");
 
-console.log("Building Android...");
+console.log("Building Android release/debug aar libraries...");
 const currentDir = process.cwd();
+
 console.log("Entering example/android");
 process.chdir("./example/android");
-console.log("Cleaning build folders");
+
+const buildVariant = (variant: "Debug" | "Release") => {
+  console.log(`Building ${variant}...`);
+  executeCmdSync(`./gradlew :shopify_react-native-skia:assemble${variant}`);
+  console.log(`Done building ${variant}.`);
+};
+
+console.log("Cleaning build folders for ...");
 executeCmdSync("./gradlew :shopify_react-native-skia:clean");
-console.log("Building...");
-executeCmdSync("./gradlew :shopify_react-native-skia:assembleRelease");
-console.log("Done building.");
+
+buildVariant("Debug");
+buildVariant("Release");
+
 process.chdir(currentDir);
