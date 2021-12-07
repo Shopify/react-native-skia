@@ -39,23 +39,14 @@ const sidebars = {
       ],
     },
     {
-      type: "doc",
-      label: "Mask Filters",
-      id: "mask-filters",
+      collapsed: false,
+      type: "category",
+      label: "Effects",
+      items: ["mask-filters", "color-filters", "image-filters"],
     },
     {
       type: "doc",
-      label: "Color Filters",
-      id: "color-filters",
-    },
-    {
-      type: "doc",
-      label: "Image Filters",
-      id: "image-filters",
-    },
-    {
-      type: "doc",
-      label: "Group",
+      label: "Groups",
       id: "group",
     },
     {

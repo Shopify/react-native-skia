@@ -1,6 +1,6 @@
 ---
 id: group
-title: Group
-sidebar_label: Group
+title: Groups
+sidebar_label: Groups
 slug: /group
 ---
