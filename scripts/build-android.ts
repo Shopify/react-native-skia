@@ -43,7 +43,7 @@ const buildVariant = (variant: "Debug" | "Release") => {
   console.log(`Done building ${variant}.`);
 };
 
-console.log("Cleaning build folders for ...");
+console.log("Cleaning build folders ...");
 executeCmdSync("./gradlew :shopify_react-native-skia:clean");
 
 buildVariant("Debug");

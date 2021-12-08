@@ -52,3 +52,24 @@ export const checkFileExists = (
     console.log("☑ " + message);
   }
 };
+
+const getBackupFilename = (filePath: string) => filePath + ".bak";
+
+export const backupAndCopyFile = (
+  filePathToBeReplacedAndBackedUp: string,
+  filePathToCopy: string
+) => {
+  // Back up and replace
+  console.log(`Backing up and replacing ${filePathToBeReplacedAndBackedUp}...`);
+  const backupFilePath = getBackupFilename(filePathToBeReplacedAndBackedUp);
+  fs.renameSync(filePathToBeReplacedAndBackedUp, backupFilePath);
+
+  // Copy the Package file from the npm folder
+  fs.copyFileSync(filePathToCopy, filePathToBeReplacedAndBackedUp);
+};
+
+export const restoreFile = (filePathToBeRestored: string) => {
+  console.log(`Restoring ${getBackupFilename(filePathToBeRestored)}...`);
+  fs.unlinkSync(filePathToBeRestored);
+  fs.renameSync(getBackupFilename(filePathToBeRestored), filePathToBeRestored);
+};

@@ -53,6 +53,22 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    buildFeatures {
+        prefabPublishing true
+    }
+
+    // // Include the "reactskia" module from the native build system in the AAR,
+    // // and export the headers in cpp/jni/include to its consumers
+    // prefab {
+    //     reactskia {
+    //         headers "cpp/jni/include"
+    //     }
+    // }
+
+    packagingOptions {
+        excludes = ["**/libc++_shared.so", "**/libfbjni.so", "**/libjsi.so"]
+    }
 }
 
 repositories {
@@ -78,7 +94,7 @@ dependencies {
 
     // Precompiled Skia Android Library
     debugImplementation(name: "shopify_react-native-skia-debug", ext:"aar")
-    releaseImplementation(name: "shopify_react-native-skia-release", ext:"aar") 
+    releaseImplementation(name: "shopify_react-native-skia-release", ext:"aar")     
 }
 
 afterEvaluate { project ->

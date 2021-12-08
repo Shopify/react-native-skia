@@ -76,6 +76,14 @@ android {
         excludes = ["**/libc++_shared.so"]
     }
 
+    buildFeatures { prefab true }
+
+    prefab {
+        reactskia {
+            headers "cpp/jni/include"
+        }
+    }
+
     // Create new configurations that can be referred to in dependencies.
     // The Android Gradle Plugin 3.* does not allow hooking into existing
     // configurations like `implementation`.

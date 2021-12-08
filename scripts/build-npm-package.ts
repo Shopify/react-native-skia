@@ -3,6 +3,8 @@ import {
   checkFileExists,
   ensureDistFolder,
   getDistFolder,
+  backupAndCopyFile,
+  restoreFile,
 } from "./utils";
 import fs from "fs";
 import { exit } from "process";
@@ -38,19 +40,20 @@ checkFileExists(
 console.log("Prerequisites verified successfully.");
 ensureDistFolder(getDistFolder());
 
-// Now we need to do a little trick where we replace the gradle file
-// in the android folder with a special one that works with the
-// precompiled binaries.
-console.log("Backing up and replacing the build.gradle file...");
-const gradlePath = "./package/android/build.gradle";
-const gradleBackupPath = "./package/android/build.gradle.bak";
-fs.renameSync(gradlePath, gradleBackupPath);
+// Replace the build.gradle file
+backupAndCopyFile(
+  "./package/android/build.gradle",
+  "./npm/android/build.gradle"
+);
 
-// Copy the gradle file from the npm folder
-const gradleNpmPath = "./npm/android/build.gradle";
-fs.copyFileSync(gradleNpmPath, gradlePath);
+// Back up and replace the Package file
+backupAndCopyFile(
+  "./package/android/src/main/java/com/shopify/reactnative/skia/RNSkiaPackage.java",
+  "./npm/android/RNSkiaPackage.java"
+);
 
 // Create a temporary libs folder for android aar files
+console.log("Copying aar files...");
 const libsFolder = "./package/android/libs";
 if (!fs.existsSync(libsFolder)) {
   fs.mkdirSync(libsFolder);
@@ -78,10 +81,6 @@ process.chdir(currentDir);
 
 console.log("Done building NPM package");
 
-console.log("Restoring the build.gradle file...");
-fs.unlinkSync(gradlePath);
-fs.renameSync(gradleBackupPath, gradlePath);
-
 // Copy package to the dist folder
 const packageFilename = `shopify-react-native-skia-${pck.version}.tgz`;
 const packagePath = `./package/${packageFilename}`;
@@ -91,6 +90,12 @@ fs.renameSync(packagePath, `${getDistFolder()}/${packageFilename}`);
 fs.unlinkSync(libsFolder + "/shopify_react-native-skia-release.aar");
 fs.unlinkSync(libsFolder + "/shopify_react-native-skia-debug.aar");
 fs.rmdirSync(libsFolder);
+
+console.log("Restoring backup files...");
+restoreFile("./package/android/build.gradle");
+restoreFile(
+  "./package/android/src/main/java/com/shopify/reactnative/skia/RNSkiaPackage.java"
+);
 
 // Done!
 console.log("The output is in the `./dist` folder.");
