@@ -7,7 +7,7 @@ slug: /path-effects
 
 ## Discrete Path Effect
 
-Creates a PathEffect that breaks path into segments of a certain length, and randomly move the endpoints away from the original path by a maximum of deviation.
+Creates a path effect that breaks path into segments of a certain length, and randomly move the endpoints away from the original path by a maximum of deviation.
 
 
 | Name      | Type         |  Description                                                  |
@@ -43,7 +43,7 @@ const Discrete = () => {
 
 ## Dash Path Effect
 
-Creates a PathEffect that add dashes to the path.
+Creates a path effect that add dashes to the path.
 
 
 | Name      | Type         |  Description                                                  |
@@ -77,7 +77,7 @@ const Discrete = () => {
 
 ## Corner Path Effect
 
-Creates a PathEffect that can turn sharp corners into rounded corners.
+Creates a path effect that can turn sharp corners into rounded corners.
 
 | Name      | Type         |  Description                                                  |
 |:----------|:-------------|:--------------------------------------------------------------|

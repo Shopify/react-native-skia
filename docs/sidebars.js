@@ -58,7 +58,7 @@ const sidebars = {
       collapsed: false,
       type: "category",
       label: "Shapes",
-      items: ["circle"],
+      items: ["shapes/path", "shapes/polygons", "shapes/ellipses"],
     },
     {
       collapsed: false,
