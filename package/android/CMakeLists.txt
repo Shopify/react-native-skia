@@ -52,7 +52,7 @@ target_include_directories(
 
         cpp/api
         cpp/jsi
-        cpp/jni
+        cpp/jni/include
         cpp/rnskia
         cpp/utils  
 
