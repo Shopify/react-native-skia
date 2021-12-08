@@ -91,11 +91,11 @@ const config = {
         style: "dark",
         links: [
           {
-            title: "Docs",
+            title: "Resources",
             items: [
               {
-                label: "Tutorial",
-                to: "/getting-started",
+                label: "Documentation",
+                to: "/getting-started/installation",
               },
             ],
           },
