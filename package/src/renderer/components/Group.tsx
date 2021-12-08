@@ -18,7 +18,7 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
   children: ReactNode | ReactNode[];
   clipRect?: RectOrRRectDef;
   clipPath?: IPath | string;
-  clipOp?: "difference" | "intersect";
+  invertClip?: boolean;
   rasterize?: RefObject<IPaint>;
 }
 
@@ -27,7 +27,7 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
     props,
     (
       ctx,
-      { clipRect, rasterize, clipPath, clipOp, ...groupProps },
+      { clipRect, rasterize, clipPath, invertClip, ...groupProps },
       children
     ) => {
       const { canvas, opacity } = ctx;
@@ -38,7 +38,7 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       } else {
         canvas.save();
       }
-      const op = clipOp === "difference" ? ClipOp.Difference : ClipOp.Intersect;
+      const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
       if (clipRect) {
         const rect = processRectOrRRect(clipRect);
         canvas.clipRRect(isRRect(rect) ? rect : rrect(rect, 0, 0), op, true);

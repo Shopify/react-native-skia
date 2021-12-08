@@ -23,7 +23,6 @@ It will use cubic sampling.
 
 ### Example
 ```tsx twoslash
-import React from "react";
 import {
   Canvas,
   Paint,
@@ -33,7 +32,7 @@ import {
   Shader,
 } from "@shopify/react-native-skia";
 
-export const ImageShaderDemo = () => {
+const ImageShaderDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>

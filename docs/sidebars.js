@@ -27,6 +27,11 @@ const sidebars = {
       items: ["paint/overview", "paint/properties"],
     },
     {
+      type: "doc",
+      label: "Group",
+      id: "group",
+    },
+    {
       collapsed: false,
       type: "category",
       label: "Shaders",
@@ -43,11 +48,6 @@ const sidebars = {
       type: "category",
       label: "Effects",
       items: ["mask-filters", "color-filters", "image-filters", "path-effects"],
-    },
-    {
-      type: "doc",
-      label: "Groups",
-      id: "group",
     },
     {
       type: "doc",
