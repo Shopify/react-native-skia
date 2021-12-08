@@ -6,14 +6,15 @@
   "main": "index.ts",
   "files": [
     "README.md",
-    "android",
+    "android/build/outputs/aar/shopify_react-native-skia-release.aar",
+    "src/**",
     "index.js",
     "ios",
     "react-native-skia.podspec"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -42,12 +43,15 @@
     "react-native": ">=0.63.0-rc.0 <1.0.x"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.3",
     "@types/react-native": "^0.65.0",
     "@types/react-reconciler": "^0.26.4",
     "eslint": "7.32.0",
     "eslint-config-react-native-wcandillon": "^3.7.2",
+    "jest": "^27.4.3",
     "react": "17.0.2",
     "react-native": "0.66.2",
+    "ts-jest": "^27.0.7",
     "typescript": "^4.5.2"
   },
   "dependencies": {
