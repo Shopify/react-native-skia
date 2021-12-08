@@ -69,7 +69,8 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
 
     if (!this._isAnimating) {
       this._isAnimating = true;
-      this.setDrawMode("continuous");
+      (this.props.mode === "default" || this.props.mode === undefined) &&
+        this.setDrawMode("continuous");
       setImmediate(this.redraw);
     }
   }
@@ -84,8 +85,10 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
       this._animatingValues.splice(this._animatingValues.indexOf(owner), 1);
     }
     if (this._isAnimating && this._animatingValues.length === 0) {
-      this.setDrawMode("default");
+      (this.props.mode === "default" || this.props.mode === undefined) &&
+        this.setDrawMode("default");
       this._isAnimating = false;
+      setImmediate(this.redraw);
     }
   }
 
