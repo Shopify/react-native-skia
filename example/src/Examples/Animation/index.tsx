@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Button, StyleSheet, useWindowDimensions } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   useTouchHandler,
   Canvas,
@@ -9,15 +9,15 @@ import {
   useValue,
   color,
   Timing,
-  Timeline,
+  Timelines,
   createValue,
   useLoop,
   useDelay,
-  Paint,
-  Blur,
+  useStagger,
 } from "@shopify/react-native-skia";
 
 const Size = 100;
+const Top = 50;
 
 export const AnimationExample: React.FC = () => {
   const { width, height } = useWindowDimensions();
@@ -29,24 +29,24 @@ export const AnimationExample: React.FC = () => {
 
   // Create some circles
   const circles = useMemo(() => {
-    return new Array(20).fill(0).map((_, i) => ({
+    return new Array(35).fill(0).map((_, i) => ({
       colorStr: "#435589",
       value: createValue(0),
       x: 20 + i * 15,
     }));
   }, []);
 
-  useLoop(
-    Timeline.stagger(
-      circles.map((c) =>
+  useStagger(
+    circles.map((c) =>
+      Timelines.loop(
         Timing.create(c.value, {
-          to: height * 0.8,
+          to: height * 0.2,
           duration: 1000,
-          easing: Timing.Easing.cubic,
-        })
+          easing: Timing.Easing.inOut(Timing.Easing.cubic),
+        }),
+        { yoyo: true, repeatCount: Infinity }
       )
-    ),
-    { yoyo: true }
+    )
   );
 
   const colorValue = useValue(0);
@@ -58,8 +58,8 @@ export const AnimationExample: React.FC = () => {
   );
 
   useDelay(
-    Timeline.loop(
-      Timeline.sequence([
+    Timelines.loop(
+      Timelines.sequence([
         Timing.create(translateX, {
           to: width - Size,
           easing: Timing.Easing.inOut(Timing.Easing.cubic),
@@ -105,7 +105,11 @@ export const AnimationExample: React.FC = () => {
 
   return (
     <>
-      <Canvas style={StyleSheet.absoluteFill} onTouch={touchHandler} debug>
+      <Canvas
+        style={StyleSheet.absoluteFillObject}
+        onTouch={touchHandler}
+        debug
+      >
         <Group
           transform={() => [
             { translateX: translateX.value },
@@ -120,33 +124,20 @@ export const AnimationExample: React.FC = () => {
             color={() => color(colorValue.value * 0xff, 0x00, 0xff, 1)}
           />
         </Group>
-        <Paint blendMode="screen">
-          <Blur style="solid" sigma={15} />
-        </Paint>
+
         {circles.map(({ value, x }, i) => (
           <Oval
             key={x}
-            x={x}
+            x={i * 10 + Top}
             y={() => value.value}
             width={10}
             height={10}
-            color={() => color(0x00, i * 12, 0x00, 1)}
+            color={() =>
+              color(i * (255.0 / circles.length), 0xff * 0.5, 0x00, 1)
+            }
           />
         ))}
       </Canvas>
-      <Button
-        title="Animate"
-        onPress={() => {
-          Springs.run(translateX, {
-            to: Math.random() * (width - Size),
-            config: Springs.WobblySlow(),
-          });
-          Springs.run(translateY, {
-            to: Math.random() * (height - Size),
-            config: Springs.WobblySlow(),
-          });
-        }}
-      />
     </>
   );
 };

@@ -22,34 +22,32 @@ export class RepeatingAnimation extends WrappedAnimationImpl {
     super(animation);
     this._yoyo = params?.yoyo ?? false;
     this._repeatCount = params?.repeatCount ?? Infinity;
-    this._reverse = false;
   }
 
   private readonly _yoyo: boolean;
   private readonly _repeatCount: number;
 
   private _iterations = 0;
-  private _reverse: boolean;
 
-  private startInternal(forward: boolean) {
-    return (
-      this._reverse ? this.animation.reverse() : this.animation.start()
-    ).then(() => {
-      if (this.animation.state?.done !== true) {
-        // This animation was interrupted and then resolved.
-        return this;
+  private startInternal(forward: boolean): Promise<Animation> {
+    return (forward ? this.animation.start() : this.animation.reverse()).then(
+      () => {
+        if (this.animation.state?.done !== true) {
+          // This animation was interrupted and then resolved.
+          return this;
+        }
+        this._iterations++;
+        if (
+          this._repeatCount === Infinity ||
+          this._iterations <= this._repeatCount - 1
+        ) {
+          this.reset();
+          return this.startInternal(this._yoyo ? !forward : forward);
+        } else {
+          return Promise.resolve(this);
+        }
       }
-      this._iterations++;
-      if (
-        this._repeatCount === Infinity ||
-        this._iterations <= this._repeatCount
-      ) {
-        this.reset();
-        return forward ? this.reverse() : this.start();
-      } else {
-        return Promise.resolve(this);
-      }
-    });
+    );
   }
 
   start(): Promise<Animation> {
@@ -57,7 +55,6 @@ export class RepeatingAnimation extends WrappedAnimationImpl {
   }
 
   reverse(): Promise<Animation> {
-    this._reverse = this._yoyo && true;
     return this.startInternal(false);
   }
 
@@ -68,6 +65,5 @@ export class RepeatingAnimation extends WrappedAnimationImpl {
 
   reset() {
     super.reset();
-    this._reverse = false;
   }
 }

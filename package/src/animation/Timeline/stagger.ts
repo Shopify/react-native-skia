@@ -3,6 +3,7 @@ import { WrappedAnimationListImpl } from "../Animation";
 
 export type StaggerParams = {
   delaySeconds?: number;
+  staggerFunction?: (index: number, animations: Animation[]) => number;
 };
 
 /**
@@ -21,14 +22,29 @@ export const stagger = (
 class StaggeredAnimation extends WrappedAnimationListImpl {
   constructor(animations: Animation[], params?: StaggerParams) {
     super(animations);
-    this._delaySeconds = params?.delaySeconds ?? 0.1;
+    this._params = params;
+    this._delaySeconds = this.setupStagger(animations, params);
   }
 
   private _reversed = false;
-  private _delaySeconds: number;
+  private _delaySeconds: number[];
+  private _params: StaggerParams | undefined;
+
+  private setupStagger(animations: Animation[], params?: StaggerParams) {
+    return animations.map((_, i) => {
+      if (params && params.staggerFunction) {
+        return params.staggerFunction(i, animations);
+      } else if (params && params.delaySeconds) {
+        return params.delaySeconds * i;
+      } else {
+        return i * 100;
+      }
+    });
+  }
 
   async start(): Promise<Animation> {
     this.assertAnimations();
+    this._delaySeconds = this.setupStagger(this.animations, this._params);
     const promises: Array<Promise<Animation>> = [];
     for (let i = 0; i < this.animations.length; i++) {
       promises.push(
@@ -40,7 +56,7 @@ class StaggeredAnimation extends WrappedAnimationListImpl {
             this._reversed
               ? this.activeAnimation.reverse().then(resolve)
               : this.activeAnimation.start().then(resolve);
-          }, i * this._delaySeconds * 1000);
+          }, this._delaySeconds[i]);
         })
       );
     }

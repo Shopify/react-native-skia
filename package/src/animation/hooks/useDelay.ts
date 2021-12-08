@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import type { Animation } from "../types";
-import { Timeline } from "../Timeline";
+import { Timelines } from "../Timeline";
 
 import { useAnimation } from "./useAnimation";
 
@@ -10,7 +10,7 @@ export const useDelay = (
   params?: { delaySeconds?: number; startPaused?: boolean }
 ) => {
   const nextAnimation = useMemo(
-    () => Timeline.delay(animation, params),
+    () => Timelines.delay(animation, params),
     [animation, params]
   );
   return useAnimation(nextAnimation, params?.startPaused);

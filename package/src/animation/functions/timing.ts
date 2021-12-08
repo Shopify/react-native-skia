@@ -12,6 +12,7 @@ export const timing = (timestamp: number, state: TimingAnimationState) => {
   const runtime = now - state.startTime;
   if (runtime >= duration) {
     state.done = true;
+    state.value = to;
   } else {
     const progress = easing(runtime / duration);
     state.value = from + (to - from) * progress;

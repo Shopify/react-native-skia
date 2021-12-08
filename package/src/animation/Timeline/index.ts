@@ -4,7 +4,7 @@ import { parallel } from "./parallel";
 import { delay } from "./delay";
 import { stagger } from "./stagger";
 
-export const Timeline = {
+export const Timelines = {
   loop,
   sequence,
   parallel,
