@@ -34,19 +34,26 @@ Replaces alpha, leaving RGBA unchanged. 0 means fully transparent, 1.0 means opa
 When setting opacity in a Group component the alpha component of all descending colors will inherit that value.
 
 ```tsx twoslash
-import {Canvas, Circle, Group} from "@shopify/react-native-skia";
+import {Canvas, Circle, Group, Paint} from "@shopify/react-native-skia";
 
 export const OpacityDemo = () => {
+  const strokeWidth = 10;
+  const r = 128 - strokeWidth / 2;
   return (
     <Canvas style={{ flex: 1 }}>
       <Group opacity={0.5}>
-        <Circle cx={50} cy={50} r={50} color="red" />
+        <Circle cx={r + strokeWidth / 2} cy={r} r={r} color="red">
+          <Paint color="red" />
+          <Paint color="#adbce6" style="stroke" strokeWidth={strokeWidth} />
+          <Paint color="#ade6d8" style="stroke" strokeWidth={strokeWidth / 2} />
+        </Circle>
       </Group>
     </Canvas>
   )
 };
-
 ```
+
+![Opacity](./assets/opacity.png)
 
 ## Blend Mode
 

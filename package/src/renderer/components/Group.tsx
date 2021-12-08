@@ -55,11 +55,15 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       }
       processTransform(ctx, groupProps);
       processChildren(
-        { ...ctx, paint, opacity: groupProps.opacity ?? opacity },
+        {
+          ...ctx,
+          paint,
+          opacity: groupProps.opacity ? groupProps.opacity * opacity : opacity,
+        },
         children
       );
       canvas.restore();
     }
   );
-  return <skDrawing onDraw={onDraw} {...props} />;
+  return <skDrawing onDraw={onDraw} {...props} skipProcessing />;
 };
