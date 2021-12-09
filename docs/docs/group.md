@@ -9,7 +9,7 @@ The Group component is an important construct in React Native Skia.
 Group components can be deeply nested with one another.
 It can apply the following operations to its children:
 * [Paint properties](#paint-properties)
-* [Transformations](#transformation)
+* [Transformations](#transformations)
 * [Clipping operations](#clipping-operations)
 * [Bitmap Effects](#bitmap-effects)
 

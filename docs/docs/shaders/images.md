@@ -19,7 +19,7 @@ It will use cubic sampling.
 | mm?         | `MipmapMode` | Can be `none`, `linear` or `nearest`. |
 | fit?        | `Fit` | Calculate the transformation matrix to fit the rectangle defined by `fitRect`. See [images](images). |
 | fitRect     | `IRect` | The destination reactangle to calculate the transformation matrix via the `fit` property. |
-| transform?  | `Transforms2d` | see [transformations](transformations). |
+| transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
 ### Example
 ```tsx twoslash

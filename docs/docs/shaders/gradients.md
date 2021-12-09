@@ -17,7 +17,7 @@ Returns a shader that generates a linear gradient between the two specified poin
 | positions? | `number[]`     | The relative positions of colors. If supplied must be same length as colors. |
 | mode?      | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
 | flags?     | `number`       | By default gradients will interpolate their colors in unpremul space and then premultiply each of the results. By setting this to 1, the gradients will premultiply their colors first, and then interpolate between them. |
-| transform? | `Transforms2d` | see [transformations](transformations). |
+| transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
 ### Example
 ```tsx twoslash
@@ -62,7 +62,7 @@ Returns a shader that generates a radial gradient given the center and radius.
 | positions? | `number[]`     | The relative positions of colors. If supplied must be same length as colors. |
 | mode?      | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
 | flags?     | `number`       | By default gradients will interpolate their colors in unpremul space and then premultiply each of the results. By setting this to 1, the gradients will premultiply their colors first, and then interpolate between them. |
-| transform? | `Transforms2d` | see [transformations](transformations). |
+| transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
 ### Example
 ```tsx twoslash
@@ -109,7 +109,7 @@ Returns a shader that generates a conical gradient given two circles.
 | positions? | `number[]`     | The relative positions of colors. If supplied must be same length as colors. |
 | mode?      | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
 | flags?     | `number`       | By default gradients will interpolate their colors in unpremul space and then premultiply each of the results. By setting this to 1, the gradients will premultiply their colors first, and then interpolate between them. |
-| transform? | `Transforms2d` | see [transformations](transformations). |
+| transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
 ### Example
 ```tsx twoslash
@@ -156,7 +156,7 @@ Returns a shader that generates a sweep gradient given a center.
 | positions? | `number[]`     | The relative positions of colors. If supplied must be same length as colors. |
 | mode?      | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
 | flags?     | `number`       | By default gradients will interpolate their colors in unpremul space and then premultiply each of the results. By setting this to 1, the gradients will premultiply their colors first, and then interpolate between them. |
-| transform? | `Transforms2d` | see [transformations](transformations). |
+| transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
 ### Example
 ```tsx twoslash
