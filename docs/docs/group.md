@@ -100,7 +100,95 @@ const SimpleTransform = () => {
 `clipRect` or `clipPath` provide a clipping region that sets what part of the children should be shown.
 Parts that are inside the region are shown, while those outside are hidden. Using `invertClip`, parts outside the clipping region will be shown and parts inside will be hidden.
 
+### Clip Path
+
+```tsx twoslash
+import {Canvas, Group, Image} from "@shopify/react-native-skia";
+
+const Clip = () => {
+  const star =
+    "M128 0L167.552 80.128L256 93.056L192 155.392L207.104 243.456L128 201.856L48.896 243.456L64 155.392L0 93.056L88.448 80.128L128 0Z";
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group clipPath={star}>
+        <Image
+          source={require("./assets/oslo.jpg")}
+          x={0}
+          y={0}
+          width={256}
+          height={256}
+          fit="cover"
+        />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+![Clip Path](assets/group/clip.png)
+
+### Invert Clip
+
+```tsx twoslash
+import {Canvas, Group, Image} from "@shopify/react-native-skia";
+
+const Clip = () => {
+  const star =
+    "M128 0L167.552 80.128L256 93.056L192 155.392L207.104 243.456L128 201.856L48.896 243.456L64 155.392L0 93.056L88.448 80.128L128 0Z";
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group clipPath={star} invertClip>
+        <Image
+          source={require("./assets/oslo.jpg")}
+          x={0}
+          y={0}
+          width={256}
+          height={256}
+          fit="cover"
+        />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+![Invert Clip](assets/group/invert-clip.png)
+
 ## Bitmap Effects
 
 Using the `rasterize` property will create a bitmap drawing of the children to which you can apply effects.
 This is particularly useful to build effects that need to be applied to a group of elements and not one in particular.
+
+```tsx twoslash
+import {Canvas, Group, Circle, Blur, Defs, Paint, ColorMatrix, usePaintRef} from "@shopify/react-native-skia";
+
+const Clip = () => {
+  const paint = usePaintRef();
+  return (
+    <Canvas style={{ flex: 1 }}>
+      {/* Here we use <Defs /> so the paint is not used by the siblings and descendants */}
+      <Defs>
+        <Paint ref={paint}>
+          <ColorMatrix
+            value={[
+              1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
+            ]}
+          >
+            <Blur sigmaX={20} sigmaY={20} />
+          </ColorMatrix>
+        </Paint>
+      </Defs>
+      <Group color="lightblue" rasterize={paint}>
+        <Circle cx={0} cy={128} r={128 * 0.95} />
+        <Circle
+          cx={256}
+          cy={128}
+          r={128 * 0.95}
+        />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+![Rasterize](assets/group/rasterize.png)
