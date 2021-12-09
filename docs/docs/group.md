@@ -33,7 +33,7 @@ export const PaintDemo = () => {
   const r = 128;
   return (
     <Canvas style={{ flex: 1 }}>
-      <Circle cx={r} cy={r} r={r} color="red" />
+      <Circle cx={r} cy={r} r={r} color="#51AFED" />
       {/* The paint is inherited by the following sibling and descendants. */}
       <Group color="lightblue" style="stroke" strokeWidth={10}>
         <Circle cx={r} cy={r} r={r / 2} />
@@ -44,12 +44,56 @@ export const PaintDemo = () => {
 };
 ```
 
+![Paint Assignment](assets/group/paint-assignment.png)
+
 ## Transformations
 
 The transform property is identical to its [homonymous property in React Native](https://reactnative.dev/docs/transforms) except for one major difference: in React Native the origin of transformation is the center of the object whereas it is the top left position of the object in Skia.
 
-
 The origin property is an helper to set the origin of the transformation. This property is not inherited by its children.
+
+### Simple Transformation
+
+```tsx twoslash
+import {Canvas, Fill, Group, Rect} from "@shopify/react-native-skia";
+
+const SimpleTransform = () => {
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Fill color="#e8f4f8" />
+      <Group color="lightblue" transform={[{ skewX: Math.PI / 6 }]}>
+        <Rect x={64} y={64} width={128} height={128} rx={10} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+![Simple Transformation](assets/group/simple-transform.png)
+
+### Transformation of Origin
+
+```tsx twoslash
+import {Canvas, Fill, Group, Rect} from "@shopify/react-native-skia";
+
+const SimpleTransform = () => {
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Fill color="#e8f4f8" />
+      <Group
+        color="lightblue"
+        origin={{ x: 128, y: 128 }}
+        transform={[{ skewX: Math.PI / 6 }]}
+      >
+        <Rect x={64} y={64} width={128} height={128} rx={10} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+![Origin Transformation](assets/group/origin-transform.png)
+
 
 ## Clipping Operations
 
