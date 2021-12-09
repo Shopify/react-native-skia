@@ -32,6 +32,11 @@ const sidebars = {
       id: "group",
     },
     {
+      type: "doc",
+      label: "Image",
+      id: "image",
+    },
+    {
       collapsed: false,
       type: "category",
       label: "Shaders",
@@ -48,11 +53,6 @@ const sidebars = {
       type: "category",
       label: "Effects",
       items: ["mask-filters", "color-filters", "image-filters", "path-effects"],
-    },
-    {
-      type: "doc",
-      label: "Images",
-      id: "images",
     },
     {
       collapsed: false,

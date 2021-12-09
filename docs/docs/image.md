@@ -1,11 +1,9 @@
 ---
-id: images
-title: Images
-sidebar_label: Images
+id: image
+title: Image
+sidebar_label: Image
 slug: /images
 ---
-
-## Image
 
 Images can be draw by specifying the output rectangle and how the image should fit into that rectangle.
 
