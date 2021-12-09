@@ -5,7 +5,7 @@ sidebar_label: Properties
 slug: /paint/properties
 ---
 
-Below are the properties that can be assigned to a Paint component.
+Below are the properties of a Paint component.
 The following children can also be assigned to a Paint:
 * [Shaders](/docs/shaders/overview) 
 * [Image Filters](/docs/image-filters)
@@ -31,7 +31,7 @@ import {Paint} from "@shopify/react-native-skia";
 ## Opacity
 
 Replaces alpha, leaving RGBA unchanged. 0 means fully transparent, 1.0 means opaque.
-When setting opacity in a Group component the alpha component of all descending colors will inherit that value.
+When setting opacity in a Group component, the alpha component of all descending colors will inherit that value.
 
 ```tsx twoslash
 import {Canvas, Circle, Group, Paint} from "@shopify/react-native-skia";

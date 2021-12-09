@@ -5,7 +5,9 @@ sidebar_label: Hello World
 slug: /getting-started/hello-world
 ---
 
-React Native Skia has two APIs: a declarative API available as a React Native Renderer and an imperative API backed by JSI. The recommended way to use this library is via the declarative API. Library developers may take advantage of the imperative API to provide custom features built on top of Skia.
+React Native Skia has two APIs: a declarative API available as a React Native Renderer and an imperative API backed by JSI.
+The recommended way to use this library is via the declarative API.
+Library developers may take advantage of the imperative API to provide custom features.
 
 ## Declarative API
 

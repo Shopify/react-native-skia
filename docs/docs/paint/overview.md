@@ -5,7 +5,8 @@ sidebar_label: Overview
 slug: /paint/overview
 ---
 
-Anytime you draw something in Skia, and want to specify what color it is, or how it blends with the background, or what style to draw it in, you specify those attributes in a paint. In React Native Skia, there are many ways to specify a paint which are covering below.
+Anytime you draw something in Skia and want to specify what color it is, or how it blends with the background, or what style to draw it in, you specify those attributes in a paint.
+In React Native Skia, there are many ways to specify a paint.
 
 The following properties to the Paint component:
 * [color](properties.md#color)            
@@ -24,8 +25,8 @@ A paint component can additionnaly receive the following components as children:
 * [Mask Filters](/docs/mask-filters)
 * [Path Effects](/docs/path-effects)
 
-The paint component is inherited by the following sibling and descendants.
-In the example below, the first circle will be filled with red and the second circle will have a light blue stroke.  
+The paint component is inherited by its following sibling and descendants.
+In the example below, the first circle will be filled with red and, the second circle will have a light blue stroke.  
 
 ```tsx twoslash
 import {Canvas, Circle, Paint, Group} from "@shopify/react-native-skia";
@@ -47,7 +48,7 @@ export const PaintDemo = () => {
 
 ![Paint Inheritance](assets/inheritance.png)
 
-Alternatively, properties of a paint component can be assigned a shape directly.
+Alternatively, paint properties can be assigned to a shape directly.
 If you assign these properties to a Group component, these properties will be inherited by children.
 The example below produces the same result as above.
 
@@ -70,8 +71,8 @@ export const PaintDemo = () => {
 
 ![Paint Assignment](assets/assignment.png)
 
-You can also use the Paint component as child of a Shape.
-This is useful if you want to draw a shape with many different fills and strokes.
+You can also use the Paint component as a child of a Shape.
+This is useful to draw a shape with many different fills and strokes.
 
 ```tsx twoslash
 import {Canvas, Circle, Paint} from "@shopify/react-native-skia";
@@ -93,7 +94,7 @@ export const PaintDemo = () => {
 
 ![Paint Assignment](assets/strokes.png)
 
-Finally, we can can assign a ref to a Paint component for later use.
+Finally, we can assign a ref to a Paint component for later use.
 There a few use-cases where this is useful.
 By wrapping the Paint component into a Defs component, we make sure that the paint is not used automatically by the renderer: need to pass the paint explicitly as a property.
 

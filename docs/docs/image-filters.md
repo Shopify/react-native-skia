@@ -14,8 +14,8 @@ The provided tile mode is used when the blur kernel goes outside the input image
 
 | Name      | Type          |  Description                                                  |
 |:----------|:--------------|:--------------------------------------------------------------|
-| sigmaX    | `number`      | The Gaussian sigma value for blurring along the X axis.       |
-| sigmaY    | `number`      | The Gaussian sigma value for blurring along the Y axis.       |
+| sigmaX    | `number`      | The Gaussian sigma blur value along the X axis.       |
+| sigmaY    | `number`      | The Gaussian sigma blur value along the Y axis.       |
 | mode?     | `TileMode`    | `mirror`, `repeat`, `clamp`, or `decal` (default is `decal`). |
 | children? | `ImageFilter` | Optional image filter to be applied first.                    | 
 

@@ -20,7 +20,7 @@ It can apply the following operations to its children:
 | clipRect?   | `RectOrRRect`     | Rectangle or rounded rectangle to use to clip the children. |
 | clipPath?   | `Path or string`  | Path to use to clip the children |
 | invertClip? | `boolean`         | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden. |
-| rasterize? | `RefObject<Paint>` | Draws the children as a bitmap and apply the effects provided by the paint. |
+| rasterize? | `RefObject<Paint>` | Draws the children as a bitmap and applies the effects provided by the paint. |
 
 ## Paint Properties
 
@@ -50,7 +50,7 @@ export const PaintDemo = () => {
 
 The transform property is identical to its [homonymous property in React Native](https://reactnative.dev/docs/transforms) except for one major difference: in React Native the origin of transformation is the center of the object whereas it is the top left position of the object in Skia.
 
-The origin property is an helper to set the origin of the transformation. This property is not inherited by its children.
+The origin property is a helper to set the origin of the transformation. This property is not inherited by its children.
 
 ### Simple Transformation
 
@@ -98,7 +98,8 @@ const SimpleTransform = () => {
 ## Clipping Operations
 
 `clipRect` or `clipPath` provide a clipping region that sets what part of the children should be shown.
-Parts that are inside the region are shown, while those outside are hidden. Using `invertClip`, parts outside the clipping region will be shown and parts inside will be hidden.
+Parts inside the region are shown, while those outside are hidden.
+When using `invertClip`, everything outside the clipping region will be shown and, parts inside the clipping region will be hidden.
 
 ### Clip Path
 
@@ -156,7 +157,8 @@ const Clip = () => {
 
 ## Bitmap Effects
 
-Using the `rasterize` property will create a bitmap drawing of the children to which you can apply effects.
+Using the `rasterize` property will create a bitmap drawing of the children.
+You can use it to apply effects.
 This is particularly useful to build effects that need to be applied to a group of elements and not one in particular.
 
 ```tsx twoslash

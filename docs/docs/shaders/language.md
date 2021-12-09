@@ -5,11 +5,11 @@ sidebar_label: Language
 slug: /shaders/overview
 ---
 
-Skia provides its own shading language.
-You can be play with it [here](https://shaders.skia.org/).
+Skia provides a shading language.
+You can play with it [here](https://shaders.skia.org/).
 The syntax is very similar to GLSL.
 
-The first step to create your own shader is compile it using `RuntimeEffect.Make`.
+The first step is to create a shader and compile it using `RuntimeEffect.Make`.
 
 ```tsx twoslash
 import {Skia} from "@shopify/react-native-skia";

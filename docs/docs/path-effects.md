@@ -7,8 +7,7 @@ slug: /path-effects
 
 ## Discrete Path Effect
 
-Creates a path effect that breaks path into segments of a certain length, and randomly move the endpoints away from the original path by a maximum of deviation.
-
+Creates an effect that breaks a path into segments of a certain length and randomly moves the endpoints away from the original path by a maximum deviation.
 
 | Name      | Type         |  Description                                                  |
 |:----------|:-------------|:--------------------------------------------------------------|
@@ -43,13 +42,13 @@ const Discrete = () => {
 
 ## Dash Path Effect
 
-Creates a path effect that add dashes to the path.
+Creates an effect that adds dashes to the path.
 
 
 | Name      | Type         |  Description                                                  |
 |:----------|:-------------|:--------------------------------------------------------------|
-| intervals | `number[]`   | even number of entries with even indicies specifying the length of the "on" intervals, and the odd indices specifying the length of "off". |
-| phase     | `number`     | offset length into the intervals array. Defaults to 0.        |
+| intervals | `number[]`   | even number of entries with even indices specifying the length of the "on" intervals, and the odd indices specifying the length of "off". |
+| phase     | `number`     | offset into the intervals array. Defaults to 0.        |
 | children? | `PathEffect` | Optional path effect to apply.                                |
 
 ### Example

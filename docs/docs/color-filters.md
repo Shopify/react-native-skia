@@ -61,7 +61,7 @@ Creates a color filter that is linearly interpolated between two other color fil
 | Name      | Type          |  Description                               |
 |:----------|:--------------|:-------------------------------------------|
 | t         | `number`      | Value between 0 and 1.                     |
-| children  | `ColorFilter` | The two color filters to interpolate from. |
+| children  | `ColorFilter` | The two filters to interpolate from. |
 
 ## LinearToSRGBGamma
 
