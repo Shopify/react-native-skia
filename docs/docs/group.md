@@ -108,7 +108,7 @@ import {Canvas, Group, Image} from "@shopify/react-native-skia";
 
 const Clip = () => {
   const star =
-    "M128 0L167.552 80.128L256 93.056L192 155.392L207.104 243.456L128 201.856L48.896 243.456L64 155.392L0 93.056L88.448 80.128L128 0Z";
+    "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z";
   return (
     <Canvas style={{ flex: 1 }}>
       <Group clipPath={star}>
@@ -135,7 +135,7 @@ import {Canvas, Group, Image} from "@shopify/react-native-skia";
 
 const Clip = () => {
   const star =
-    "M128 0L167.552 80.128L256 93.056L192 155.392L207.104 243.456L128 201.856L48.896 243.456L64 155.392L0 93.056L88.448 80.128L128 0Z";
+    "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z";
   return (
     <Canvas style={{ flex: 1 }}>
       <Group clipPath={star} invertClip>
