@@ -82,7 +82,7 @@ const config = {
           // {to: '/blog', label: 'Blog', position: 'left'},
           {
             label: "GitHub",
-            href: "https://github.com/@shopify/react-native-skia",
+            href: "https://github.com/shopify/react-native-skia",
             position: "right",
           },
         ],
@@ -116,19 +116,19 @@ const config = {
           //     },
           //   ],
           // },
-          // {
-          //   title: 'More',
-          //   items: [
-          //     {
-          //       label: 'Blog',
-          //       to: '/blog',
-          //     },
-          //     {
-          //       label: 'GitHub',
-          //       href: 'https://github.com/@shopify/react-native-skia',
-          //     },
-          //   ],
-          // },
+          {
+            title: "More",
+            items: [
+              // {
+              //   label: "Blog",
+              //   to: "/blog",
+              // },
+              {
+                label: "GitHub",
+                href: "https://github.com/shopify/react-native-skia",
+              },
+            ],
+          },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Shopify, Inc. Built with Docusaurus.`,
       },
