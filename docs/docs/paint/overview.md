@@ -114,3 +114,10 @@ export const PaintDemo = () => {
   );
 };
 ```
+
+:::tip
+
+When using the Paint component, you always start from scratch.
+It doesn't inherit the properties of the paint available in the current context.
+
+:::

@@ -15,11 +15,11 @@ It can apply the following operations to its children:
 
 | Name       | Type               |  Description                                                  |
 |:-----------|:-------------------|:--------------------------------------------------------------|
-| transform? | `Transform2d`      | [Same API than in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is however difference: center in React Native, top-left in Skia. |
+| transform? | `Transform2d`      | [Same API than in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is however different. It is the center object in React Native and the top-left corner in Skia. |
 | origin?    | `Point`            | Sets the origin of the transformation. This property is not inherited by its children. |
 | clipRect?   | `RectOrRRect`     | Rectangle or rounded rectangle to use to clip the children. |
 | clipPath?   | `Path or string`  | Path to use to clip the children |
-| invertClip? | `boolean`         | Invert the clipping region: parts outside the clipping region will be shown and inside will be hidden. |
+| invertClip? | `boolean`         | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden. |
 | rasterize? | `RefObject<Paint>` | Draws the children as a bitmap and apply the effects provided by the paint. |
 
 ## Paint Properties
@@ -30,16 +30,14 @@ All paint properties applied to a group will be inherited by its children.
 import {Canvas, Circle, Paint, Group} from "@shopify/react-native-skia";
  
 export const PaintDemo = () => {
+  const r = 128;
   return (
     <Canvas style={{ flex: 1 }}>
-      <Circle cx={50} cy={50} r={50} color="red" />
+      <Circle cx={r} cy={r} r={r} color="red" />
       {/* The paint is inherited by the following sibling and descendants. */}
-      <Group
-        color="lightblue"
-        style="stroke"
-        strokeWidth={10}
-      >
-        <Circle cx={150} cy={150} r={50} />
+      <Group color="lightblue" style="stroke" strokeWidth={10}>
+        <Circle cx={r} cy={r} r={r / 2} />
+        <Circle cx={r} cy={r} r={r / 3} color="white" />
       </Group>
     </Canvas>
   );
