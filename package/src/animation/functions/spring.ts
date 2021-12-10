@@ -1,90 +1,97 @@
-import type { SpringAnimationState } from "./types";
-
-export const spring = (timestamp: number, state: SpringAnimationState) => {
-  const now = timestamp * 1000;
+/**
+ * @description Returns a cached jsContext function for a spring with duration
+ * @param mass The mass of the spring
+ * @param stiffness The stiffness of the spring
+ * @param damping Spring damping
+ * @param velocity The initial velocity
+ */
+export const createSpringEasing = (
+  params: Partial<{
+    mass: number;
+    stiffness: number;
+    damping: number;
+    velocity: number;
+  }>
+) => {
   const {
-    to,
-    value,
-    lastTimestamp,
-    config: {
-      damping: c,
-      mass: m,
-      stiffness: k,
-      overshootClamping,
-      stiffness,
-      restSpeedThreshold,
-      restDisplacementThreshold,
-      velocity,
-    },
-  } = state;
-  if (state.done) {
-    return to;
-  }
+    mass,
+    stiffness,
+    damping,
+    velocity = 0,
+  } = {
+    mass: 1,
+    stiffness: 100,
+    damping: 10,
+    ...params,
+  };
+  // TODO: Find correct velcoity
+  return getSpringEasing(mass, stiffness, damping, velocity / 100);
+};
 
-  const deltaTime = Math.min(now - lastTimestamp, 64);
-  state.lastTimestamp = now;
+const getSpringEasing = (
+  mass: number,
+  stiffness: number,
+  damping: number,
+  initialVelocity = 0
+): { solver: (t: number) => number; duration: number } => {
+  // Setup spring state
+  const state = {
+    w0: Math.sqrt(stiffness / mass),
+    zeta: 0,
+    wd: 0,
+    a: 1,
+    b: 0,
+  };
+  state.zeta = damping / (2 * Math.sqrt(stiffness * mass));
+  state.wd =
+    state.zeta < 1 ? state.w0 * Math.sqrt(1 - state.zeta * state.zeta) : 0;
+  state.a = 1;
+  state.b =
+    state.zeta < 1
+      ? (state.zeta * state.w0 + -initialVelocity) / state.wd
+      : -initialVelocity + state.w0;
 
-  const v0 = -velocity;
-  const x0 = to - value;
-
-  const zeta = c / (2 * Math.sqrt(k * m)); // damping ratio
-  const omega0 = Math.sqrt(k / m); // undamped angular frequency of the oscillator (rad/ms)
-  const omega1 = omega0 * Math.sqrt(1 - zeta ** 2); // exponential decay
-
-  const t = deltaTime / 1000;
-
-  const sin1 = Math.sin(omega1 * t);
-  const cos1 = Math.cos(omega1 * t);
-
-  // under damped
-  const underDampedEnvelope = Math.exp(-zeta * omega0 * t);
-  const underDampedFrag1 =
-    underDampedEnvelope *
-    (sin1 * ((v0 + zeta * omega0 * x0) / omega1) + x0 * cos1);
-
-  const underDampedPosition = to - underDampedFrag1;
-  // This looks crazy -- it's actually just the derivative of the oscillation function
-  const underDampedVelocity =
-    zeta * omega0 * underDampedFrag1 -
-    underDampedEnvelope *
-      (cos1 * (v0 + zeta * omega0 * x0) - omega1 * x0 * sin1);
-
-  // critically damped
-  const criticallyDampedEnvelope = Math.exp(-omega0 * t);
-  const criticallyDampedPosition =
-    to - criticallyDampedEnvelope * (x0 + (v0 + omega0 * x0) * t);
-
-  const criticallyDampedVelocity =
-    criticallyDampedEnvelope *
-    (v0 * (t * omega0 - 1) + t * x0 * omega0 * omega0);
-
-  const isOvershooting = () => {
-    if (overshootClamping && stiffness !== 0) {
-      return value < to ? state.value > to : state.value < to;
+  const solver = (t: number, duration?: number) => {
+    let progress = duration ? (duration * t) / 1000 : t;
+    if (state.zeta < 1) {
+      progress =
+        Math.exp(-progress * state.zeta * state.w0) *
+        (state.a * Math.cos(state.wd * progress) +
+          state.b * Math.sin(state.wd * progress));
     } else {
-      return false;
+      progress =
+        (state.a + state.b * progress) * Math.exp(-progress * state.w0);
     }
+    if (t === 0 || t === 1) {
+      return t;
+    }
+    return 1 - progress;
   };
 
-  const isVelocity = Math.abs(velocity) < restSpeedThreshold;
-  const isDisplacement =
-    stiffness === 0 || Math.abs(to - value) < restDisplacementThreshold;
-
-  if (zeta < 1) {
-    state.value = underDampedPosition;
-    state.config.velocity = underDampedVelocity;
-  } else {
-    state.value = criticallyDampedPosition;
-    state.config.velocity = criticallyDampedVelocity;
-  }
-
-  if (isOvershooting() || (isVelocity && isDisplacement)) {
-    if (stiffness !== 0) {
-      state.config.velocity = 0;
-      state.value = to;
+  const getDurationMs = () => {
+    var frame = 1 / 6;
+    var elapsed = 0;
+    var rest = 0;
+    while (true) {
+      elapsed += frame;
+      if (solver(elapsed) === 1) {
+        rest++;
+        if (rest >= 6) {
+          break;
+        }
+      } else {
+        rest = 0;
+      }
     }
-    state.lastTimestamp = 0;
-    state.done = true;
-  }
-  return state.value;
+    var durationMs = elapsed * frame * 1000;
+    return durationMs + 1000;
+  };
+
+  const durationMs = getDurationMs();
+
+  // Calculate duration
+  return {
+    solver: (t) => solver(t, durationMs),
+    duration: durationMs,
+  };
 };

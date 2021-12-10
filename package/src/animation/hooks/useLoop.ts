@@ -1,17 +1,17 @@
-import { useMemo } from "react";
+import { useCallback, useEffect } from "react";
 
-import type { Animation } from "../types";
-import { Timelines } from "../Timeline";
+import type { AnimationValue, Animation } from "../types";
 
-import { useAnimation } from "./useAnimation";
+export const useLoop = (value: AnimationValue, animation: Animation) => {
+  const startAnimation = useCallback(() => {
+    animation.start(value).then(() => {
+      return startAnimation();
+    });
+  }, [animation, value]);
 
-export const useLoop = (
-  animation: Animation,
-  params?: { yoyo?: boolean; repeatCount?: number; startPaused?: boolean }
-) => {
-  const nextAnimation = useMemo(
-    () => Timelines.loop(animation, params),
-    [animation, params]
-  );
-  return useAnimation(nextAnimation, params?.startPaused);
+  useEffect(() => {
+    startAnimation();
+  }, [startAnimation]);
+
+  return animation;
 };

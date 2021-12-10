@@ -1,23 +1,20 @@
-import type { AnimationStateFactory } from "../functions/types";
 import type {
   Animation,
+  AnimationStateFactory,
   AnimationFunctionWithState,
-  AnimationValue,
 } from "../types";
 
 import { AnimationImpl } from "./AnimationImp";
 
 /**
  * Creates a new animation object
- * @param value Animation value to animate
- * @param fn Animation function for evaluating values
- * @param stateFactory Factory for creating the state of the animation
- * @returns Animation controller object.
+ * @param evaluator Animation evaluator function
+ * @param stateFactory Animation State factory
+ * @returns A new animation object
  */
 export const createAnimation = (
-  value: AnimationValue<number>,
-  fn: AnimationFunctionWithState,
+  evaluator: AnimationFunctionWithState,
   stateFactory: AnimationStateFactory
 ): Animation => {
-  return new AnimationImpl(value, fn, stateFactory);
+  return new AnimationImpl(evaluator, stateFactory);
 };

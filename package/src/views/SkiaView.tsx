@@ -62,15 +62,17 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   /**
    * Increases the number of animations active in the view.
    */
-  public startAnimation(owner: unknown) {
+  public addAnimation(owner: unknown) {
     if (this._animatingValues.findIndex((p) => p === owner) === -1) {
       this._animatingValues.push(owner);
     }
 
     if (!this._isAnimating) {
       this._isAnimating = true;
-      (this.props.mode === "default" || this.props.mode === undefined) &&
+      if (this.props.mode === "default" || this.props.mode === undefined) {
+        console.log("SkiaView addAnimation - mode changed to continous");
         this.setDrawMode("continuous");
+      }
       setImmediate(this.redraw);
     }
   }
@@ -78,15 +80,17 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   /**
    * Decreases the number of animations active in the view.
    */
-  public endAnimation(owner: unknown) {
+  public removeAnimation(owner: unknown) {
     const indexOfOwner = this._animatingValues.indexOf(owner);
     if (indexOfOwner !== -1) {
       // Remove
-      this._animatingValues.splice(this._animatingValues.indexOf(owner), 1);
+      this._animatingValues = this._animatingValues.filter((p) => p !== owner);
     }
     if (this._isAnimating && this._animatingValues.length === 0) {
-      (this.props.mode === "default" || this.props.mode === undefined) &&
+      if (this.props.mode === "default" || this.props.mode === undefined) {
+        console.log("SkiaView removeAnimation - mode changed to default");
         this.setDrawMode("default");
+      }
       this._isAnimating = false;
       setImmediate(this.redraw);
     }

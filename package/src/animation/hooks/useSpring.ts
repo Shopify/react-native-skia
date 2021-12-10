@@ -1,19 +1,16 @@
 import { useMemo } from "react";
 
 import type { AnimationValue } from "../types";
-import { Springs } from "../Springs";
-import type { SpringParams } from "../Springs";
+import { Spring } from "../Spring";
+import type { SpringParams } from "../Spring";
 
 import { useAnimation } from "./useAnimation";
 
 export const useSpring = (
   animationValue: AnimationValue,
-  params: SpringParams & { startPaused?: boolean }
+  params: SpringParams
 ) => {
-  const animation = useMemo(
-    () => Springs.create(animationValue, params),
-    [animationValue, params]
-  );
+  const animation = useMemo(() => Spring.create(params), [params]);
 
-  return useAnimation(animation, params?.startPaused);
+  return useAnimation(animation, animationValue);
 };

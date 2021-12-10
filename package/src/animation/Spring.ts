@@ -1,7 +1,7 @@
-import type { AnimationValue, AnimationFunctionWithState } from "./types";
-import type { SpringConfig, SpringAnimationState } from "./functions";
-import { spring } from "./functions";
-import { createAnimation } from "./Animation";
+import type { AnimationValue } from "./types";
+import type { SpringConfig } from "./functions";
+import { createSpringEasing } from "./functions";
+import { Timing } from "./Timing";
 
 export interface SpringParams {
   from?: number;
@@ -17,46 +17,25 @@ export interface SpringParams {
  * @returns A function that can be called from the drawing loop
  */
 const run = (animationValue: AnimationValue<number>, params: SpringParams) => {
-  return create(animationValue, params).start();
+  return create(params).start(animationValue);
 };
 
 /**
- * Creates a spring animation where the animationValue will be updated with the
- * current value of the spring function with the spring parameters.
- * @param animationValue Value to be updated
+ * Creates a spring animation with the spring parameters.
  * @param params Spring parameters
- * @returns A function that can be called from the drawing loop
+ * @returns A spring animation object
  */
-export const create = (
-  animationValue: AnimationValue<number>,
-  params: SpringParams
-) => {
-  const state = (): SpringAnimationState => ({
-    from: params?.from ?? animationValue.value ?? 0,
-    to: params?.to ?? 1,
-    config: {
-      restDisplacementThreshold: 0.005,
-      restSpeedThreshold: 0.001,
-      damping: 10,
-      mass: 1,
-      stiffness: 100,
-      overshootClamping: false,
-      velocity: 0,
-      ...params?.config,
-    },
-    done: false,
-    value: params.from ?? animationValue.value ?? 0,
-    lastTimestamp: 0,
+export const create = (params: SpringParams) => {
+  const springEasing = createSpringEasing(params.config ?? {});
+  return Timing.create({
+    duration: springEasing.duration,
+    easing: springEasing.solver,
+    from: params.from,
+    to: params.to,
   });
-
-  return createAnimation(
-    animationValue,
-    spring as AnimationFunctionWithState,
-    state
-  );
 };
 
-export const Springs = {
+export const Spring = {
   run,
   create,
   Spring: (config: SpringConfig = {}) => ({

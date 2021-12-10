@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { createValue } from "../Value";
+import { Value } from "../Value";
 import type { AnimationValue } from "../types";
 
 /**
@@ -10,5 +10,5 @@ import type { AnimationValue } from "../types";
  * @returns A shared value
  */
 export const useValue = <T = number>(initialValue: T): AnimationValue<T> => {
-  return useMemo(() => createValue<T>(initialValue), [initialValue]);
+  return useMemo(() => Value.create<T>(initialValue), [initialValue]);
 };

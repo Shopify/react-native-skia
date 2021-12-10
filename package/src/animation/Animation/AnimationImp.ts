@@ -1,99 +1,82 @@
-import type {
-  BaseAnimationState,
-  AnimationStateFactory,
-} from "../functions/types";
+import { Value } from "../Value";
+import type { AnimationState } from "../functions/types";
 import type {
   Animation,
-  AnimationFunction,
   AnimationFunctionWithState,
+  AnimationStateFactory,
   AnimationValue,
 } from "../types";
 
 export class AnimationImpl implements Animation {
   constructor(
-    animationValue: AnimationValue,
-    fn: AnimationFunctionWithState,
+    evaluator: AnimationFunctionWithState,
     stateFactory: AnimationStateFactory
   ) {
-    this._animationValue = animationValue;
-    this._fn = fn;
+    this._evaluator = evaluator;
     this._stateFactory = stateFactory;
-    this._fnRunner = undefined;
     this._state = undefined;
   }
 
-  private _animationValue: AnimationValue;
-  private _fn: AnimationFunctionWithState;
-  private _fnRunner: AnimationFunction | undefined;
+  private _evaluator: AnimationFunctionWithState;
   private _stateFactory: AnimationStateFactory;
-  private _state: BaseAnimationState | undefined;
-  private _prevState: BaseAnimationState | undefined;
-  private _reversed = false;
+  private _state: AnimationState | undefined;
+  private _prevState: AnimationState | undefined;
+  private _currentValue: AnimationValue<number> | undefined = undefined;
 
-  public get value(): AnimationValue {
-    return this._animationValue;
+  public evaluate(timestampSeconds: number) {
+    if (this._state !== undefined) {
+      const retVal = this._evaluator(timestampSeconds, this._state);
+      if (this._state.done) {
+        this.stop();
+      }
+      return retVal;
+    } else {
+      return 0;
+    }
   }
 
-  public get state(): BaseAnimationState | undefined {
-    return this._state;
-  }
-
-  public get evaluate(): AnimationFunctionWithState {
-    return this._fn;
-  }
-
-  protected onAnimationTick(t: number): number {
-    return t;
-  }
-
-  public reset() {
-    this._reversed = false;
+  private reset() {
     this._prevState = this._state;
     this._state = undefined;
-    this._fnRunner = undefined;
   }
 
-  public start() {
+  public get duration(): number {
+    return this._stateFactory(0).duration;
+  }
+
+  public _begin(start: number) {
+    this.reset();
+
     // Set from / value on state
     const prev = this._prevState?.from;
-    this._state = this._stateFactory();
+    this._state = this._stateFactory(start);
 
     // Handle resolving from when reversing an existing animation
     if (prev !== undefined) {
       this._state.from = prev;
       this._state.value = prev;
     }
+    return this;
+  }
+
+  public start(animationValue?: AnimationValue<number>): Promise<Animation> {
+    this._currentValue = animationValue || Value.create(0);
+    this._begin(this._currentValue.value);
 
     return new Promise<Animation>((resolve) => {
-      if (this._fnRunner !== undefined) {
-        this.reset();
-      }
-
-      // Return the spring function to the AnimationValue
-      this._fnRunner = (timestampSeconds: number) => {
-        const retVal = this._fn(timestampSeconds, this.state!);
-        if (this.state?.done === true) {
-          this.stop();
-        }
-        return this._reversed
-          ? this.state!.to + this.state!.from - retVal
-          : retVal;
-      };
-      this._animationValue.startAnimation(this._fnRunner!, () => {
-        this._fnRunner = undefined;
+      this._currentValue!.startAnimation(this, () => {
         resolve(this);
       });
     });
   }
 
-  public reverse() {
-    this._reversed = true;
-    return this.start();
+  public stop() {
+    if (this._currentValue !== undefined) {
+      this._currentValue.stopAnimation(this);
+    }
   }
 
-  public stop() {
-    if (this._fnRunner !== undefined) {
-      this._animationValue.endAnimation(this._fnRunner);
-    }
+  public active() {
+    return this._currentValue !== undefined;
   }
 }

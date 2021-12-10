@@ -1,6 +1,6 @@
 export * from "./types";
 export * from "./Timing";
-export * from "./Springs";
+export * from "./Spring";
 export * from "./Timeline";
 export * from "./Easing";
 export * from "./Value";

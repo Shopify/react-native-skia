@@ -1,22 +1,32 @@
-import type { BaseAnimationState } from "./functions/types";
+import type { AnimationState } from "./functions/types";
 
 export type AnimationFunction = (timestampSeconds: number) => number;
 export type AnimationFunctionWithState = (
   timestampSeconds: number,
-  state: BaseAnimationState
+  state: AnimationState
 ) => number;
+
+export type AnimationStateFactory = (currentValue: number) => AnimationState;
 
 export interface AnimationValue<T = number> {
   value: T;
-  startAnimation: (fn: AnimationFunction, onAnimationDone?: () => void) => void;
-  endAnimation: (fn: AnimationFunction) => void;
+  startAnimation: (
+    animation: Animation,
+    onAnimationDone?: (animation: Animation) => void
+  ) => void;
+  stopAnimation: (animation: Animation) => void;
 }
 
 export interface Animation {
-  readonly value: AnimationValue<number>;
-  readonly state: BaseAnimationState | undefined;
-  start: () => Promise<Animation>;
-  reverse: () => Promise<Animation>;
+  _begin: (start: number) => Animation;
+  evaluate: AnimationFunction;
+  start: (value?: AnimationValue) => Promise<Animation>;
   stop: () => void;
-  reset: () => void;
+  active: () => boolean;
+  readonly duration: number;
+}
+
+export interface TimelineAnimation extends Animation {
+  readonly values: AnimationValue[];
+  start: () => Promise<TimelineAnimation>;
 }

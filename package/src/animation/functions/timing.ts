@@ -1,6 +1,6 @@
-import type { TimingAnimationState } from "./types";
+import type { AnimationState } from "./types";
 
-export const timing = (timestamp: number, state: TimingAnimationState) => {
+export const timing = (timestamp: number, state: AnimationState) => {
   const now = timestamp * 1000;
   const { to, from, duration, done, easing } = state;
   if (done) {
@@ -10,7 +10,7 @@ export const timing = (timestamp: number, state: TimingAnimationState) => {
     state.startTime = now;
   }
   const runtime = now - state.startTime;
-  if (runtime >= duration) {
+  if (runtime > duration) {
     state.done = true;
     state.value = to;
   } else {

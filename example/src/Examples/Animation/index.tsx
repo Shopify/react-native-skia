@@ -1,19 +1,17 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   useTouchHandler,
   Canvas,
   Group,
   Oval,
-  Springs,
+  Spring,
   useValue,
   color,
   Timing,
-  Timelines,
-  createValue,
   useLoop,
-  useDelay,
-  useStagger,
+  useTimeline,
+  Timeline,
 } from "@shopify/react-native-skia";
 
 const Size = 100;
@@ -27,60 +25,55 @@ export const AnimationExample: React.FC = () => {
   const xDiff = useValue(0);
   const yDiff = useValue(0);
 
-  // Create some circles
-  const circles = useMemo(() => {
-    return new Array(35).fill(0).map((_, i) => ({
-      colorStr: "#435589",
-      value: createValue(0),
-      x: 20 + i * 15,
-    }));
-  }, []);
-
-  useStagger(
-    circles.map((c) =>
-      Timelines.loop(
-        Timing.create(c.value, {
-          to: height * 0.2,
-          duration: 1000,
-          easing: Timing.Easing.inOut(Timing.Easing.cubic),
-        }),
-        { yoyo: true, repeatCount: Infinity }
-      )
-    )
-  );
+  // const circles = useTimeline(
+  //   new Array(35).fill(0).map(() =>
+  //     Spring.create({
+  //       from: Top,
+  //       to: 200 + Top,
+  //       config: Spring.Wobbly(),
+  //     })
+  //   ),
+  //   {
+  //     each: 125,
+  //   }
+  // );
 
   const colorValue = useValue(0);
   useLoop(
-    Timing.create(colorValue, {
-      duration: 750,
-    }),
-    { yoyo: true }
+    colorValue,
+    Timeline.add(
+      Timing.create({
+        duration: 750,
+      }),
+      colorValue,
+      { yoyo: true, repeat: 2 }
+    )
   );
 
-  useDelay(
-    Timelines.loop(
-      Timelines.sequence([
-        Timing.create(translateX, {
-          to: width - Size,
-          easing: Timing.Easing.inOut(Timing.Easing.cubic),
-        }),
-        Timing.create(translateY, {
-          to: height * 0.9 - Size,
-          easing: Timing.Easing.inOut(Timing.Easing.cubic),
-        }),
-        Timing.create(translateX, {
-          to: 0,
-          easing: Timing.Easing.inOut(Timing.Easing.cubic),
-        }),
-        Timing.create(translateY, {
-          to: 0,
-          easing: Timing.Easing.inOut(Timing.Easing.cubic),
-        }),
-      ]),
-      { yoyo: true }
-    ),
-    { delaySeconds: 2 }
-  );
+  // useDelay(
+  //   Timeline.loop(
+  //     Timeline.sequence([
+  //       Timing.create(translateX, {
+  //         to: width - Size,
+  //         easing: Timing.Easing.inOut(Timing.Easing.cubic),
+  //       }),
+  //       Timing.create(translateY, {
+  //         to: height * 0.9 - Size,
+  //         easing: Timing.Easing.inOut(Timing.Easing.cubic),
+  //       }),
+  //       Timing.create(translateX, {
+  //         to: 0,
+  //         easing: Timing.Easing.inOut(Timing.Easing.cubic),
+  //       }),
+  //       Timing.create(translateY, {
+  //         to: 0,
+  //         easing: Timing.Easing.inOut(Timing.Easing.cubic),
+  //       }),
+  //     ]),
+  //     { yoyo: true }
+  //   ),
+  //   { delaySeconds: 2 }
+  // );
 
   const touchHandler = useTouchHandler({
     onStart: ({ x, y }) => {
@@ -92,13 +85,13 @@ export const AnimationExample: React.FC = () => {
       translateY.value = y - yDiff.value;
     },
     onEnd: ({ velocityX, velocityY }) => {
-      Springs.run(translateX, {
+      Spring.run(translateX, {
         to: width / 2 - Size / 2,
-        config: Springs.WobblySlow({ velocity: -velocityX }),
+        config: Spring.WobblySlow({ velocity: -velocityX }),
       });
-      Springs.run(translateY, {
+      Spring.run(translateY, {
         to: width / 2 - Size / 2,
-        config: Springs.WobblySlow({ velocity: -velocityY }),
+        config: Spring.WobblySlow({ velocity: -velocityY }),
       });
     },
   });
@@ -124,19 +117,19 @@ export const AnimationExample: React.FC = () => {
             color={() => color(colorValue.value * 0xff, 0x00, 0xff, 1)}
           />
         </Group>
-
-        {circles.map(({ value, x }, i) => (
+        {/* 
+        {circles.values.map((c, i) => (
           <Oval
-            key={x}
-            x={i * 10 + Top}
-            y={() => value.value}
+            key={i}
+            x={i * 10 + 40}
+            y={() => c.value}
             width={10}
             height={10}
             color={() =>
-              color(i * (255.0 / circles.length), 0xff * 0.5, 0x00, 1)
+              color(i * (255.0 / circles.values.length), 0xff * 0.5, 0x00, 1)
             }
           />
-        ))}
+        ))} */}
       </Canvas>
     </>
   );

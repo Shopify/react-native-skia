@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 
-import type { Animation } from "../types";
+import type { Animation, AnimationValue } from "../types";
 
-export const useAnimation = (animation: Animation, startPaused = false) => {
+export const useAnimation = <T extends Animation>(
+  animation: T,
+  animationValue?: AnimationValue
+): T => {
   useEffect(() => {
-    if (!startPaused) {
-      animation.start();
-    }
-  }, [animation, startPaused]);
+    animation.start(animationValue);
+  }, [animation, animationValue]);
   return animation;
 };

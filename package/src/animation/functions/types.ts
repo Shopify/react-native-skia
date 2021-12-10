@@ -1,11 +1,12 @@
-export interface BaseAnimationState {
+export interface AnimationState {
+  duration: number;
+  startTime: number | null;
+  easing: EasingFunction;
   done: boolean;
   value: number;
   from: number;
   to: number;
 }
-
-export type AnimationStateFactory = () => BaseAnimationState;
 
 export type EasingFunction = (value: number) => number;
 
@@ -16,23 +17,9 @@ export interface TimingConfig {
   easing?: EasingFunction;
 }
 
-export interface TimingAnimationState extends BaseAnimationState {
-  duration: number;
-  easing: EasingFunction;
-  startTime: number | null;
-}
-
 export interface SpringConfig {
   mass?: number;
   stiffness?: number;
-  overshootClamping?: boolean;
-  restDisplacementThreshold?: number;
-  restSpeedThreshold?: number;
   velocity?: number;
   damping?: number;
-}
-
-export interface SpringAnimationState extends BaseAnimationState {
-  config: Required<SpringConfig>;
-  lastTimestamp: number;
 }
