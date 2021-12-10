@@ -1,5 +1,9 @@
 # @shopify/react-native-skia
 
+https://shopify.github.io/react-native-skia
+
+React Native Skia brings the Skia Graphics Library to React Native. Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and, Firefox OS, and many other products.
+
 ## Library Development
 
 To develop react-native-skia, you need to build the skia libraries on your computer.
