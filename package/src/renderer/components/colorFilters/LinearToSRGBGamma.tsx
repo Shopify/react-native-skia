@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Skia, isColorFilter } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";

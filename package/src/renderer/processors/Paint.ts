@@ -56,6 +56,7 @@ export const processPaint = (
 ) => {
   if (cl !== undefined) {
     const c = processColor(cl, currentOpacity);
+    paint.setShader(null);
     paint.setColor(c);
   } else {
     const c = processColor(paint.getColor(), currentOpacity);

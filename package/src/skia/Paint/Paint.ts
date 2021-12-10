@@ -95,31 +95,31 @@ export interface IPaint extends SkJSIInstance<"Paint"> {
    * Sets the current color filter, replacing the existing one if there was one.
    * @param filter
    */
-  setColorFilter(filter: IColorFilter): void;
+  setColorFilter(filter: IColorFilter | null): void;
 
   /**
    * Sets the current image filter, replacing the existing one if there was one.
    * @param filter
    */
-  setImageFilter(filter: IImageFilter): void;
+  setImageFilter(filter: IImageFilter | null): void;
 
   /**
    * Sets the current mask filter, replacing the existing one if there was one.
    * @param filter
    */
-  setMaskFilter(filter: IMaskFilter): void;
+  setMaskFilter(filter: IMaskFilter | null): void;
 
   /**
    * Sets the current path effect, replacing the existing one if there was one.
    * @param effect
    */
-  setPathEffect(effect: IPathEffect): void;
+  setPathEffect(effect: IPathEffect | null): void;
 
   /**
    * Sets the current shader, replacing the existing one if there was one.
    * @param shader
    */
-  setShader(shader: IShader): void;
+  setShader(shader: IShader | null): void;
 
   /**
    * Sets the geometry drawn at the beginning and end of strokes.

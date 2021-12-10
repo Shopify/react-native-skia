@@ -140,31 +140,31 @@ public:
   }
 
   JSI_HOST_FUNCTION(setMaskFilter) {
-    auto maskFilter = JsiSkMaskFilter::fromValue(runtime, arguments[0]);
+    auto maskFilter = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkMaskFilter::fromValue(runtime, arguments[0]);
     getObject()->setMaskFilter(maskFilter);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setImageFilter) {
-    auto imageFilter = JsiSkImageFilter::fromValue(runtime, arguments[0]);
+    auto imageFilter = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkImageFilter::fromValue(runtime, arguments[0]);
     getObject()->setImageFilter(imageFilter);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setColorFilter) {
-    auto colorFilter = JsiSkColorFilter::fromValue(runtime, arguments[0]);
+    auto colorFilter = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkColorFilter::fromValue(runtime, arguments[0]);
     getObject()->setColorFilter(colorFilter);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setShader) {
-    auto shader = JsiSkShader::fromValue(runtime, arguments[0]);
+    auto shader = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkShader::fromValue(runtime, arguments[0]);
     getObject()->setShader(shader);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setPathEffect) {
-    auto pathEffect = JsiSkPathEffect::fromValue(runtime, arguments[0]);
+    auto pathEffect = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkPathEffect::fromValue(runtime, arguments[0]);
     getObject()->setPathEffect(pathEffect);
     return jsi::Value::undefined();
   }
