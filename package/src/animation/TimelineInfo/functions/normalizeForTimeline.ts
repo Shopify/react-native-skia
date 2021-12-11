@@ -15,20 +15,5 @@ export const normalizeForTimeline = <T>(
     repeatDelay: tli.repeatDelay,
     yoyo: tli.yoyo,
   });
-  if (v < -0.1 || v > 1.0) {
-    if (tli.active === true) {
-      tli.active = false;
-      if ((tli.position ?? 0) < 0.5) {
-        tli.position = 0;
-      } else {
-        tli.position = 1;
-      }
-    }
-    return tli.position ?? 0;
-  }
-  if (tli.active !== true) {
-    tli.active = true;
-  }
-  tli.position = v;
   return Math.min(1.0, Math.max(0.0, v));
 };

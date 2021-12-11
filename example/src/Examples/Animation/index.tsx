@@ -1,136 +1,207 @@
-import React, { useEffect, useMemo } from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
+import React from "react";
+import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import {
-  useTouchHandler,
   Canvas,
-  Group,
-  Oval,
+  createTiming,
+  mix,
+  Rect,
+  runSpring,
   Spring,
-  useValue,
-  color,
   Timing,
-  useLoop,
+  useTiming,
+  useProgress,
   useTimeline,
-  Timeline,
+  useTouchHandler,
+  useValue,
+  useSpring,
 } from "@shopify/react-native-skia";
+import type { DrawingContext } from "@shopify/react-native-skia/src/renderer/DrawingContext";
 
-const Size = 100;
-const Top = 50;
+const Size = 20;
+const Padding = 20;
+const { width } = Dimensions.get("window");
 
 export const AnimationExample: React.FC = () => {
-  const { width, height } = useWindowDimensions();
-
-  const translateX = useValue(0);
-  const translateY = useValue(0);
-  const xDiff = useValue(0);
-  const yDiff = useValue(0);
-
-  // const circles = useTimeline(
-  //   new Array(35).fill(0).map(() =>
-  //     Spring.create({
-  //       from: Top,
-  //       to: 200 + Top,
-  //       config: Spring.Wobbly(),
-  //     })
-  //   ),
-  //   {
-  //     each: 125,
-  //   }
-  // );
-
-  const colorValue = useValue(0);
-  useLoop(
-    colorValue,
-    Timeline.add(
-      Timing.create({
-        duration: 750,
-      }),
-      colorValue,
-      { yoyo: true, repeat: 2 }
-    )
+  return (
+    <ScrollView style={styles.scrollview}>
+      {/* <SimpleValueOverTime />
+      <InterpolatingValueOverTime />
+      <InterpolatingValueOverTimeWithEasings />
+      <InterpolatingValueOverTimeWithSpring />
+      <AnimationWithTouchHandler /> */}
+      <SimpleTimelineAnimation />
+    </ScrollView>
   );
+};
 
-  // useDelay(
-  //   Timeline.loop(
-  //     Timeline.sequence([
-  //       Timing.create(translateX, {
-  //         to: width - Size,
-  //         easing: Timing.Easing.inOut(Timing.Easing.cubic),
-  //       }),
-  //       Timing.create(translateY, {
-  //         to: height * 0.9 - Size,
-  //         easing: Timing.Easing.inOut(Timing.Easing.cubic),
-  //       }),
-  //       Timing.create(translateX, {
-  //         to: 0,
-  //         easing: Timing.Easing.inOut(Timing.Easing.cubic),
-  //       }),
-  //       Timing.create(translateY, {
-  //         to: 0,
-  //         easing: Timing.Easing.inOut(Timing.Easing.cubic),
-  //       }),
-  //     ]),
-  //     { yoyo: true }
-  //   ),
-  //   { delaySeconds: 2 }
-  // );
+const SimpleValueOverTime = () => {
+  const progress = useValue(0);
+  useProgress(progress);
+  return (
+    <AnimationDemo title={"Simple animation of value over time"}>
+      <Canvas style={styles.canvas} debug>
+        <AnimationElement
+          x={(ctx) => mix(progress.value % 1, 10, ctx.width - 10)}
+        />
+      </Canvas>
+    </AnimationDemo>
+  );
+};
 
+const InterpolatingValueOverTime = () => {
+  const progress = useValue(0);
+  useTiming(progress, {
+    from: 0,
+    to: width - Size,
+    durationSeconds: 1,
+    repeat: true,
+    yoyo: true,
+  });
+  return (
+    <AnimationDemo
+      title={"Interpolating value between 0 and width over 1 second."}
+    >
+      <Canvas style={styles.canvas} debug>
+        <AnimationElement x={() => progress.value} />
+      </Canvas>
+    </AnimationDemo>
+  );
+};
+
+const InterpolatingValueOverTimeWithEasings = () => {
+  const progress = useValue(0);
+  useTiming(progress, {
+    from: 10,
+    to: width - Size - Padding,
+    durationSeconds: 1,
+    easing: Timing.Easing.inOut(Timing.Easing.cubic),
+    repeat: true,
+    yoyo: true,
+  });
+  return (
+    <AnimationDemo title={"Interpolating value using an easing."}>
+      <Canvas style={styles.canvas} debug>
+        <AnimationElement x={() => progress.value} />
+      </Canvas>
+    </AnimationDemo>
+  );
+};
+
+const InterpolatingValueOverTimeWithSpring = () => {
+  const progress = useValue(0);
+  useSpring(
+    progress,
+    {
+      from: (width - Size - Padding) * 0.25,
+      to: (width - Size - Padding) * 0.75,
+      repeat: true,
+      yoyo: true,
+    },
+    Spring.Wobbly()
+  );
+  return (
+    <AnimationDemo title={"Interpolating value using a spring."}>
+      <Canvas style={styles.canvas} debug>
+        <AnimationElement x={() => progress.value} />
+      </Canvas>
+    </AnimationDemo>
+  );
+};
+
+const AnimationWithTouchHandler = () => {
+  const translateX = useValue((width - Size - Padding) / 2);
+  const diffX = useValue(0);
   const touchHandler = useTouchHandler({
-    onStart: ({ x, y }) => {
-      xDiff.value = x - translateX.value;
-      yDiff.value = y - translateY.value;
+    onStart: ({ x }) => {
+      diffX.value = x - translateX.value;
+      // Stop any animations by updating the animation value
+      translateX.value = translateX.value;
     },
-    onActive: ({ x, y }) => {
-      translateX.value = x - xDiff.value;
-      translateY.value = y - yDiff.value;
-    },
-    onEnd: ({ velocityX, velocityY }) => {
-      Spring.run(translateX, {
-        to: width / 2 - Size / 2,
-        config: Spring.WobblySlow({ velocity: -velocityX }),
-      });
-      Spring.run(translateY, {
-        to: width / 2 - Size / 2,
-        config: Spring.WobblySlow({ velocity: -velocityY }),
-      });
+    onActive: ({ x }) => (translateX.value = x - diffX.value),
+    onEnd: ({ velocityX }) => {
+      runSpring(
+        translateX,
+        {
+          to: (width - Size - Padding) / 2,
+        },
+        Spring.Wobbly({ velocity: velocityX })
+      );
     },
   });
 
   return (
-    <>
-      <Canvas
-        style={StyleSheet.absoluteFillObject}
-        onTouch={touchHandler}
-        debug
-      >
-        <Group
-          transform={() => [
-            { translateX: translateX.value },
-            { translateY: translateY.value },
-          ]}
-        >
-          <Oval
-            x={0}
-            y={0}
-            width={Size}
-            height={Size}
-            color={() => color(colorValue.value * 0xff, 0x00, 0xff, 1)}
-          />
-        </Group>
-        {/* 
-        {circles.values.map((c, i) => (
-          <Oval
-            key={i}
-            x={i * 10 + 40}
-            y={() => c.value}
-            width={10}
-            height={10}
-            color={() =>
-              color(i * (255.0 / circles.values.length), 0xff * 0.5, 0x00, 1)
-            }
-          />
-        ))} */}
+    <AnimationDemo title={"Animation with touch handler."}>
+      <Canvas style={styles.canvas} debug onTouch={touchHandler}>
+        <AnimationElement x={() => translateX.value} />
       </Canvas>
-    </>
+    </AnimationDemo>
   );
 };
+
+const SimpleTimelineAnimation = () => {
+  const progress = useValue(0);
+  const x = useValue(0);
+  const y = useValue(0);
+  useTimeline(progress, (tl) => {
+    tl.add(createTiming({ from: 0, to: 1, durationSeconds: 1 }), x);
+    tl.add(createTiming({ from: 0, to: 1, durationSeconds: 0.3 }), y);
+    tl.add(createTiming({ from: 1, to: 0, durationSeconds: 1 }), x);
+    tl.add(createTiming({ from: 1, to: 0, durationSeconds: 0.4 }), y);
+  });
+
+  return (
+    <AnimationDemo
+      title={"Simple timeline animation with sequenced animations"}
+    >
+      <Canvas style={styles.canvas} debug>
+        <AnimationElement
+          x={({ width: w }) => x.value * (w - Size)}
+          y={({ height: h }) => y.value * (h - Size)}
+        />
+      </Canvas>
+    </AnimationDemo>
+  );
+};
+
+const AnimationElement: React.FC<{
+  x: number | ((ctx: DrawingContext) => number);
+  y?: number | ((ctx: DrawingContext) => number);
+}> = ({ x, y }) => {
+  return (
+    <Rect
+      x={x}
+      y={y ? y : (ctx) => ctx.height / 2 - Size / 2}
+      height={Size}
+      width={Size}
+      color="#7FC8A9"
+    />
+  );
+};
+
+const AnimationDemo: React.FC<{ title: string }> = ({ title, children }) => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>{title}</Text>
+      {children}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  scrollview: {
+    paddingVertical: 20,
+  },
+  container: {
+    marginBottom: 20,
+    paddingHorizontal: Padding / 2,
+  },
+  text: {
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  canvas: {
+    height: 80,
+    width: width - Padding,
+    backgroundColor: "#FEFEFE",
+  },
+});

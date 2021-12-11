@@ -21,7 +21,6 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   }
 
   private _nativeId: string;
-  private _isAnimating = false;
   private _animatingValues: Array<unknown> = [];
 
   componentDidUpdate(prevProps: RNSkiaViewProps) {
@@ -67,13 +66,11 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
       this._animatingValues.push(owner);
     }
 
-    if (!this._isAnimating) {
-      this._isAnimating = true;
+    if (this._animatingValues.length === 1) {
       if (this.props.mode === "default" || this.props.mode === undefined) {
-        console.log("SkiaView addAnimation - mode changed to continous");
+        //console.log("SkiaView addAnimation - mode changed to continous");
         this.setDrawMode("continuous");
       }
-      setImmediate(this.redraw);
     }
   }
 
@@ -86,13 +83,11 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
       // Remove
       this._animatingValues = this._animatingValues.filter((p) => p !== owner);
     }
-    if (this._isAnimating && this._animatingValues.length === 0) {
+    if (this._animatingValues.length === 0) {
       if (this.props.mode === "default" || this.props.mode === undefined) {
-        console.log("SkiaView removeAnimation - mode changed to default");
+        //console.log("SkiaView removeAnimation - mode changed to default");
         this.setDrawMode("default");
       }
-      this._isAnimating = false;
-      setImmediate(this.redraw);
     }
   }
 

@@ -1,9 +1,10 @@
-import type React from "react";
+import type { RefObject } from "react";
+import { useMemo } from "react";
 
 import type { SkiaView } from "../views";
 import { peekDrawingContext } from "../renderer/CanvasProvider";
 
-import type { Animation, AnimationValue } from "./types";
+import type { AnimationValue } from "./types";
 
 /**
  * Creates a shared value that can be used in animations and
@@ -13,6 +14,16 @@ import type { Animation, AnimationValue } from "./types";
  */
 const create = <T = number>(initialValue: T): AnimationValue<T> => {
   return new AnimationValueImpl<T>(initialValue);
+};
+
+/**
+ * Creates a shared value that can be used in animations and
+ * drawing in the Canvas children.
+ * @param initialValue
+ * @returns A shared value
+ */
+export const useValue = <T = number>(initialValue: T): AnimationValue<T> => {
+  return useMemo(() => Value.create<T>(initialValue), [initialValue]);
 };
 
 export const Value = {
@@ -27,24 +38,27 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
   }
 
   _value: T;
-  _animation: Animation | undefined;
-  _animationDone: ((animation: Animation) => void) | undefined;
-  _animationViews: Array<React.RefObject<SkiaView>> = [];
+  _animation: ((t: number) => number) | undefined;
+  _animationDone: ((animation: (t: number) => number) => void) | undefined;
+  _animationViews: Array<RefObject<SkiaView>> = [];
 
   public startAnimation(
-    animation: Animation,
-    onAnimationDone?: (animation: Animation) => void
+    animation: (t: number) => number,
+    onAnimationDone?: (animation: (t: number) => number) => void
   ) {
+    // this.forceStop();
     this._animation = animation;
     this._animationDone = onAnimationDone;
     // Notify the skia view ref that we have started an animation
+    console.log("Value: Starting animation");
     this._animationViews.forEach((view) =>
       view.current?.addAnimation(this._animation)
     );
   }
 
-  public stopAnimation(animation: Animation) {
-    if (this._animation && this._animation === animation) {
+  private forceStop() {
+    if (this._animation) {
+      console.log("Value: Stopping animation");
       // Notify the skia view ref that we have ended our animation
       this._animationViews.forEach((view) =>
         view.current?.removeAnimation(this._animation)
@@ -55,11 +69,23 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
     }
   }
 
+  public stopAnimation(animation: (t: number) => number) {
+    if (this._animation && this._animation === animation) {
+      this.forceStop();
+    }
+  }
+
   public toString() {
     return `${this._value}`;
   }
 
+  private _inUpdate = false;
+
   public get value(): T {
+    if (this._inUpdate) {
+      return this._value;
+    }
+    this._inUpdate = true;
     // We can only animate numbers
     if (typeof this._value === "number") {
       // Check the drawing context list to see if we are inside a drawing function
@@ -76,15 +102,14 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
           drawingContext.skiaRef.current?.addAnimation(this._animation);
           // Update value from the current animation - do not call the
           // value property since it will stop the animation
-          this._value = this._animation.evaluate(
-            drawingContext.timestamp
-          ) as never as T;
+          this._value = this._animation(drawingContext.timestamp) as never as T;
         } else {
           // Stop the skia view from running animations
           drawingContext.skiaRef.current?.removeAnimation(this._animation);
         }
       }
     }
+    this._inUpdate = false;
     return this._value;
   }
 

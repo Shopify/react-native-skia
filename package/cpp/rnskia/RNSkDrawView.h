@@ -154,10 +154,6 @@ private:
    */
   std::shared_ptr<RNSkTimingInfo> _timingInfo;
   
-  /**
-   Flag when request redraw was called while in a redraw
-   */
-  std::atomic<int> _redrawRequests;
 };
 
 } // namespace RNSkia

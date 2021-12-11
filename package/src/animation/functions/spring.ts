@@ -33,7 +33,7 @@ const getSpringEasing = (
   stiffness: number,
   damping: number,
   initialVelocity = 0
-): { solver: (t: number) => number; duration: number } => {
+) => {
   // Setup spring state
   const state = {
     w0: Math.sqrt(stiffness / mass),
@@ -51,7 +51,7 @@ const getSpringEasing = (
       ? (state.zeta * state.w0 + -initialVelocity) / state.wd
       : -initialVelocity + state.w0;
 
-  const solver = (t: number, duration?: number) => {
+  const update = (t: number, duration?: number) => {
     let progress = duration ? (duration * t) / 1000 : t;
     if (state.zeta < 1) {
       progress =
@@ -74,7 +74,7 @@ const getSpringEasing = (
     var rest = 0;
     while (true) {
       elapsed += frame;
-      if (solver(elapsed) === 1) {
+      if (update(elapsed) === 1) {
         rest++;
         if (rest >= 6) {
           break;
@@ -91,7 +91,7 @@ const getSpringEasing = (
 
   // Calculate duration
   return {
-    solver: (t) => solver(t, durationMs),
-    duration: durationMs,
+    update: (t: number) => update(t, durationMs),
+    durationSeconds: durationMs / 1000,
   };
 };

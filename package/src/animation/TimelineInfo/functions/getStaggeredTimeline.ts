@@ -9,6 +9,7 @@ import { sequential } from "./sequential";
  * offsets calculated with staggering
  * @param items TimelineInfos to stagger
  * @param params Stagger parameters. @see StaggerParams
+ * @param base Starting point of the staggered timeline
  * @returns A new array of timelines with updated offsets
  */
 export function getStaggeredTimeline<T>(

@@ -166,11 +166,9 @@ void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
 
 void RNSkDrawView::requestRedraw() {
   if (!isReadyToDraw()) {
-    _redrawRequests++;
     return;
   }
   
-  _redrawRequests = 0;
   _isDrawing = true;
 
   auto performDraw = [this]() {
@@ -185,10 +183,7 @@ void RNSkDrawView::requestRedraw() {
 
     drawFrame(ms.count() / 1000.0);
 
-    _isDrawing = false;
-    if(_redrawRequests > 0) {
-      requestRedraw();
-    }
+    _isDrawing = false;    
   };
 
   _platformContext->runOnJavascriptThread(performDraw);

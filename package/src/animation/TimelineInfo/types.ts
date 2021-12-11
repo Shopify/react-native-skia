@@ -20,10 +20,6 @@ export type TimelineInfo<T> = {
   data?: T;
   // Timeline label
   label?: string;
-  // Position
-  position?: number;
-  // Active
-  active?: boolean;
   // Children of timeline
   children: TimelineInfo<T>[];
   // Calculated offset
