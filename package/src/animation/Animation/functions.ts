@@ -6,6 +6,7 @@ import type {
   EasingInfo,
 } from "./interpolatorAnimationFactory";
 import { InterpolatorAnimationFactory } from "./interpolatorAnimationFactory";
+import type { TimelineAnimation } from "./timelineAnimationFactory";
 import { TimelineAnimationFactory } from "./timelineAnimationFactory";
 import type { BaseAnimation } from "./types";
 
@@ -13,8 +14,12 @@ import type { BaseAnimation } from "./types";
  * Creates a timeline animation object.
  * @returns
  */
-export const createTimeline = () => {
-  return TimelineAnimationFactory();
+export const createTimeline = (
+  initializer: (tla: TimelineAnimation) => void
+) => {
+  const tl = TimelineAnimationFactory();
+  initializer(tl);
+  return tl;
 };
 
 /**
@@ -55,10 +60,15 @@ export const createSpring = (
  */
 export const runTiming = (
   value: AnimationValue,
-  params: DurationInfoParameters & Pick<InterpolatorParams, "from" | "to">
+  params:
+    | number
+    | (DurationInfoParameters & Pick<InterpolatorParams, "from" | "to">)
 ) => {
   return new Promise<BaseAnimation>((resolve) => {
-    const animation = createTiming(params, () => resolve(animation));
+    const animation = createTiming(
+      typeof params === "number" ? { to: params } : params,
+      () => resolve(animation)
+    );
     animation.start(value);
   });
 };
@@ -72,11 +82,15 @@ export const runTiming = (
  */
 export const runSpring = (
   value: AnimationValue,
-  params: Pick<InterpolatorParams, "from" | "to">,
+  params: number | Pick<InterpolatorParams, "from" | "to">,
   config: EasingInfo
 ) => {
   return new Promise<BaseAnimation>((resolve) => {
-    const animation = createSpring(params, config, () => resolve(animation));
+    const animation = createSpring(
+      typeof params === "number" ? { to: params } : params,
+      config,
+      () => resolve(animation)
+    );
     animation.start(value);
   });
 };

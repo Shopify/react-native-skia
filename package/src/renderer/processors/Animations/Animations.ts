@@ -1,15 +1,7 @@
-import { useCallback } from "react";
-
 import type { DrawingContext } from "../../DrawingContext";
 import { mapKeys } from "../../typeddash";
 
 export type FrameValue<T> = (ctx: DrawingContext) => T;
-
-export const useFrame = <T>(
-  cb: FrameValue<T>,
-  deps?: Parameters<typeof useCallback>[1]
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-) => useCallback(cb, deps ?? []);
 
 // TODO: refine detection here. Is the prototype accepting a drawing ctx for instance?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

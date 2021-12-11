@@ -65,9 +65,13 @@ export const TimelineAnimationFactory = (): TimelineAnimation => {
 
   // Parent "driver" animation. Simple progress animation
   const driverAnimation = AnimationFactory(
-    (t) => t,
+    (t, _, stop) => {
+      if (t > state.timeline._duration / 1000) {
+        stop();
+      }
+      return t;
+    },
     () => {
-      console.log("Starting timeline");
       // dumpTimeline(state.timeline);
       // Now we need to start all child values so that the view / value knows
       // that they're part of an animation. We should create a unique set of

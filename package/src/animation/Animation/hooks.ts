@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import type { AnimationValue } from "../types";
 
@@ -11,6 +11,18 @@ import type {
 } from "./interpolatorAnimationFactory";
 import type { TimelineAnimation } from "./timelineAnimationFactory";
 import type { BaseAnimation } from "./types";
+
+const useAnimation = (
+  value: AnimationValue,
+  animation: BaseAnimation,
+  startPaused?: boolean
+) => {
+  useEffect(() => {
+    !startPaused && animation.start(value);
+    return () => animation.stop();
+  }, [startPaused, animation, value]);
+  return animation;
+};
 
 /**
  * Creates a new timeline animation.
@@ -25,23 +37,9 @@ export const useTimeline = (
   startPaused = false
 ) => {
   const retVal = useMemo(() => {
-    const tl = createTimeline();
-    initializer(tl);
-    return tl;
+    return createTimeline(initializer);
   }, [initializer]);
   return useAnimation(progress, retVal, startPaused);
-};
-
-const useAnimation = (
-  value: AnimationValue,
-  animation: BaseAnimation,
-  startPaused?: boolean
-) => {
-  useEffect(() => {
-    !startPaused && animation.start(value);
-    return () => animation.stop();
-  }, [startPaused, animation, value]);
-  return animation;
 };
 
 /**
@@ -100,4 +98,53 @@ export const useSpring = (
   return useAnimation(value, animation, startPaused);
 };
 
-export const useLoop = (animation: BaseAnimation, startPaused?: boolean) => {};
+type LoopParams = {
+  /*
+    Number of repeats, from 0 to infinity. Defaults to infinity
+    */
+  repeat?: number;
+  /*
+    Reverse on odd animation iterations. Defaults to false
+    */
+  yoyo?: boolean;
+};
+
+/**
+ * Runs the given animation in a loop
+ * @param value Value to run the animation on
+ * @param animation
+ * @param startPaused True if the animation should not be started immediately. Defaults to false
+ */
+export const useLoop = (
+  value: AnimationValue,
+  animation: BaseAnimation,
+  params?: LoopParams,
+  startPaused?: boolean
+) => {
+  const iterationsRef = useRef(0);
+  const paramsResolved = useMemo(
+    () => ({
+      repeat: params?.repeat ?? Infinity,
+      yoyo: params?.yoyo ?? false,
+    }),
+    [params]
+  );
+
+  const startAnimation = useCallback(() => {
+    if (
+      paramsResolved.repeat === Infinity ||
+      iterationsRef.current <= (paramsResolved.repeat ?? 0)
+    ) {
+      iterationsRef.current++;
+      (iterationsRef.current % 2 === 1 ? animation.start : animation.reverse)(
+        value
+      ).then(startAnimation);
+    }
+  }, [animation, value, paramsResolved]);
+
+  useEffect(() => {
+    !startPaused && startAnimation();
+    return () => animation.stop();
+  }, [startPaused, animation, value, startAnimation]);
+  return animation;
+};

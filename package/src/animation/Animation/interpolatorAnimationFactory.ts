@@ -35,15 +35,6 @@ export type InterpolatorParams = {
    * The end value of the animation. Defaults to 1
    */
   to?: number;
-  /**
-   * Set to true to repeat the animation indefinitely
-   */
-  repeat?: boolean;
-  /**
-   * If the animation is a repeated animation, setting yoyo to true will reverse the animation
-   * on every odd iteration
-   */
-  yoyo?: boolean;
 };
 
 export type InterpolatorFactoryParams = InterpolatorParams &
@@ -54,8 +45,6 @@ const DefaultParams = {
   to: 1,
   durationSeconds: 1,
   easing: (t: number) => t,
-  repeat: false,
-  yoyo: false,
 };
 
 /**
@@ -86,20 +75,30 @@ export const InterpolatorAnimationFactory = (
         : DefaultParams.durationSeconds;
   }
 
-  const config = {
+  const config: {
+    from: number;
+    prevFrom: number | undefined;
+    to: number;
+    durationSeconds: number;
+    easing: (t: number) => number;
+  } = {
     from,
+    prevFrom: undefined,
     to,
     durationSeconds,
     easing,
-    repeat: params?.repeat ?? DefaultParams.repeat,
-    yoyo: params?.yoyo ?? DefaultParams.yoyo,
   };
 
   // Handle setting the from parameter to the start value of the animation
   // if from is not set
   const handleStart = (animationValue: AnimationValue) => {
     if (params?.from === undefined) {
-      config.from = animationValue.value;
+      if (config.prevFrom === undefined) {
+        config.from = animationValue.value;
+        config.prevFrom = config.from;
+      } else {
+        config.from = config.prevFrom;
+      }
     }
   };
 
@@ -109,30 +108,23 @@ export const InterpolatorAnimationFactory = (
    */
   const update = (
     timestampSeconds: number,
-    _: AnimationState,
+    state: AnimationState,
     stop: () => void
   ) => {
     // Repeat / clamping
     const progress = config.easing(
-      config.repeat
-        ? (timestampSeconds / config.durationSeconds) % 1
-        : Math.max(
-            0.0,
-            Math.min(timestampSeconds / config.durationSeconds, 1.0)
-          )
+      Math.max(0.0, Math.min(timestampSeconds / config.durationSeconds, 1.0))
     );
-    // Yoyo / reversing
-    const progressWithYoyo =
-      config.yoyo && (timestampSeconds / config.durationSeconds) % 2 > 1
-        ? 1 - progress
-        : progress;
     // Stop?
-    if (!config.repeat && timestampSeconds / config.durationSeconds >= 1) {
+    if (timestampSeconds / config.durationSeconds >= 1) {
       stop();
       onAnimationDone && onAnimationDone();
     }
     // Interpolate
-    return config.from + (config.to - config.from) * progressWithYoyo;
+    return (
+      config.from +
+      (config.to - config.from) * (state.reverse ? 1 - progress : progress)
+    );
   };
 
   return AnimationFactory(update, handleStart, config.durationSeconds);

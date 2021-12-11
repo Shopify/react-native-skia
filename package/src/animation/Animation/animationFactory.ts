@@ -36,8 +36,9 @@ export const AnimationFactory = (
       state.durationSeconds = 0;
       return 0;
     }
-    state.durationSeconds =
-      durationSeconds ?? timestampSeconds - state.startTimeSeconds;
+    if (durationSeconds === undefined) {
+      state.durationSeconds = timestampSeconds - state.startTimeSeconds;
+    }
     return update(timestampSeconds - state.startTimeSeconds, state, stop);
   };
 

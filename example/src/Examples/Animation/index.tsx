@@ -2,19 +2,16 @@ import React, { useMemo } from "react";
 import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import {
   Canvas,
-  createTiming,
   mix,
   Rect,
-  runSpring,
   Spring,
   Timing,
-  useTiming,
   useProgress,
-  useTimeline,
   useTouchHandler,
   useValue,
-  useSpring,
   Value,
+  useLoop,
+  Timeline,
 } from "@shopify/react-native-skia";
 import type { DrawingContext } from "@shopify/react-native-skia/src/renderer/DrawingContext";
 
@@ -41,7 +38,7 @@ const SimpleValueOverTime = () => {
   useProgress(progress);
   return (
     <AnimationDemo title={"Simple animation of value over time"}>
-      <Canvas style={styles.canvas} debug>
+      <Canvas style={styles.canvas}>
         <AnimationElement
           x={(ctx) => mix(progress.value % 1, 10, ctx.width - 10)}
         />
@@ -52,18 +49,20 @@ const SimpleValueOverTime = () => {
 
 const InterpolatingValueOverTime = () => {
   const progress = useValue(0);
-  useTiming(progress, {
-    from: 0,
-    to: width - Size,
-    durationSeconds: 1,
-    repeat: true,
-    yoyo: true,
-  });
+  useLoop(
+    progress,
+    Timing.create({
+      from: 0,
+      to: width - Size,
+      durationSeconds: 1,
+    }),
+    { yoyo: true }
+  );
   return (
     <AnimationDemo
       title={"Interpolating value between 0 and width over 1 second."}
     >
-      <Canvas style={styles.canvas} debug>
+      <Canvas style={styles.canvas}>
         <AnimationElement x={() => progress.value} />
       </Canvas>
     </AnimationDemo>
@@ -72,17 +71,19 @@ const InterpolatingValueOverTime = () => {
 
 const InterpolatingValueOverTimeWithEasings = () => {
   const progress = useValue(0);
-  useTiming(progress, {
-    from: 10,
-    to: width - Size - Padding,
-    durationSeconds: 1,
-    easing: Timing.Easing.inOut(Timing.Easing.cubic),
-    repeat: true,
-    yoyo: true,
-  });
+  useLoop(
+    progress,
+    Timing.create({
+      from: 10,
+      to: width - Size - Padding,
+      durationSeconds: 1,
+      easing: Timing.Easing.inOut(Timing.Easing.cubic),
+    }),
+    { yoyo: true }
+  );
   return (
     <AnimationDemo title={"Interpolating value using an easing."}>
-      <Canvas style={styles.canvas} debug>
+      <Canvas style={styles.canvas}>
         <AnimationElement x={() => progress.value} />
       </Canvas>
     </AnimationDemo>
@@ -91,19 +92,20 @@ const InterpolatingValueOverTimeWithEasings = () => {
 
 const InterpolatingValueOverTimeWithSpring = () => {
   const progress = useValue(0);
-  useSpring(
+  useLoop(
     progress,
-    {
-      from: (width - Size - Padding) * 0.25,
-      to: (width - Size - Padding) * 0.75,
-      repeat: true,
-      yoyo: true,
-    },
-    Spring.Wobbly()
+    Spring.create(
+      {
+        from: (width - Size - Padding) * 0.25,
+        to: (width - Size - Padding) * 0.75,
+      },
+      Spring.Wobbly()
+    ),
+    { yoyo: true }
   );
   return (
     <AnimationDemo title={"Interpolating value using a spring."}>
-      <Canvas style={styles.canvas} debug>
+      <Canvas style={styles.canvas}>
         <AnimationElement x={() => progress.value} />
       </Canvas>
     </AnimationDemo>
@@ -121,11 +123,9 @@ const AnimationWithTouchHandler = () => {
     },
     onActive: ({ x }) => (translateX.value = x - diffX.value),
     onEnd: ({ velocityX }) => {
-      runSpring(
+      Spring.run(
         translateX,
-        {
-          to: (width - Size - Padding) / 2,
-        },
+        (width - Size - Padding) / 2,
         Spring.Wobbly({ velocity: velocityX })
       );
     },
@@ -133,7 +133,7 @@ const AnimationWithTouchHandler = () => {
 
   return (
     <AnimationDemo title={"Animation with touch handler."}>
-      <Canvas style={styles.canvas} debug onTouch={touchHandler}>
+      <Canvas style={styles.canvas} onTouch={touchHandler}>
         <AnimationElement x={() => translateX.value} />
       </Canvas>
     </AnimationDemo>
@@ -144,18 +144,22 @@ const SimpleTimelineAnimation = () => {
   const progress = useValue(0);
   const x = useValue(0);
   const y = useValue(0);
-  useTimeline(progress, (tl) => {
-    tl.add(createTiming({ from: 0, to: 1, durationSeconds: 1 }), x);
-    tl.add(createTiming({ from: 0, to: 1, durationSeconds: 0.3 }), y);
-    tl.add(createTiming({ from: 1, to: 0, durationSeconds: 1 }), x);
-    tl.add(createTiming({ from: 1, to: 0, durationSeconds: 0.4 }), y);
-  });
+  useLoop(
+    progress,
+    Timeline.create((tl) => {
+      tl.add(Timing.create({ from: 0, to: 1, durationSeconds: 1 }), x);
+      tl.add(Timing.create({ from: 0, to: 1, durationSeconds: 0.3 }), y);
+      tl.add(Timing.create({ from: 1, to: 0, durationSeconds: 1 }), x);
+      tl.add(Timing.create({ from: 1, to: 0, durationSeconds: 0.4 }), y);
+    }),
+    { yoyo: false }
+  );
 
   return (
     <AnimationDemo
       title={"Simple timeline animation with sequenced animations"}
     >
-      <Canvas style={styles.canvas} debug>
+      <Canvas style={styles.canvas}>
         <AnimationElement
           x={({ width: w }) => x.value * (w - Size)}
           y={({ height: h }) => y.value * (h - Size)}
@@ -167,7 +171,6 @@ const SimpleTimelineAnimation = () => {
 
 const StaggeredTimelineAnimation = () => {
   const progress = useValue(0);
-  const x = useValue(0);
   const values = useMemo(
     () =>
       new Array(Math.round((width - Size) / (Size * 1.5)))
@@ -176,22 +179,24 @@ const StaggeredTimelineAnimation = () => {
     []
   );
 
-  useTimeline(progress, (tl) => {
-    tl.add(createTiming({ from: 0, to: 1, durationSeconds: 1 }), x);
-    tl.stagger(
-      values.map(() => createTiming({ from: 0, to: 1, durationSeconds: 0.5 })),
-      values,
-      {
-        each: 50,
-        from: "center",
-        easing: Timing.Easing.cubic,
-      }
-    );
-  });
+  useLoop(
+    progress,
+    Timeline.create((tl) => {
+      tl.stagger(
+        values.map(() => Spring.create({ from: 0, to: 1 }, Spring.Wobbly())),
+        values,
+        {
+          each: 50,
+          from: "center",
+        }
+      );
+    }),
+    { yoyo: true }
+  );
 
   return (
     <AnimationDemo title={"Timeline animation with staggered animations"}>
-      <Canvas style={styles.canvas} debug>
+      <Canvas style={styles.canvas}>
         {values.map((v, i) => (
           <AnimationElement
             key={i}

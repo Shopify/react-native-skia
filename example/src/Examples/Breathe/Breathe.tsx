@@ -49,8 +49,9 @@ const Ring = ({ index, progress }: RingProps) => {
 export const Breathe = () => {
   const progress = useValue(0);
   useLoop(
-    Timing.create(progress, {
-      duration: 3000,
+    progress,
+    Timing.create({
+      durationSeconds: 3,
       easing: Easing.inOut(Easing.ease),
     }),
     { yoyo: true }

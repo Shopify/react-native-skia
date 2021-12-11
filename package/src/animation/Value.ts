@@ -46,7 +46,7 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
     animation: (t: number) => number,
     onAnimationDone?: (animation: (t: number) => number) => void
   ) {
-    // this.forceStop();
+    this.forceStop();
     this._animation = animation;
     this._animationDone = onAnimationDone;
     // Notify the skia view ref that we have started an animation
