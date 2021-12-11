@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import {
   Canvas,
@@ -14,6 +14,7 @@ import {
   useTouchHandler,
   useValue,
   useSpring,
+  Value,
 } from "@shopify/react-native-skia";
 import type { DrawingContext } from "@shopify/react-native-skia/src/renderer/DrawingContext";
 
@@ -23,13 +24,14 @@ const { width } = Dimensions.get("window");
 
 export const AnimationExample: React.FC = () => {
   return (
-    <ScrollView style={styles.scrollview}>
-      {/* <SimpleValueOverTime />
+    <ScrollView contentContainerStyle={styles.scrollview}>
+      <SimpleValueOverTime />
       <InterpolatingValueOverTime />
       <InterpolatingValueOverTimeWithEasings />
       <InterpolatingValueOverTimeWithSpring />
-      <AnimationWithTouchHandler /> */}
+      <AnimationWithTouchHandler />
       <SimpleTimelineAnimation />
+      <StaggeredTimelineAnimation />
     </ScrollView>
   );
 };
@@ -163,17 +165,59 @@ const SimpleTimelineAnimation = () => {
   );
 };
 
+const StaggeredTimelineAnimation = () => {
+  const progress = useValue(0);
+  const x = useValue(0);
+  const values = useMemo(
+    () =>
+      new Array(Math.round((width - Size) / (Size * 1.5)))
+        .fill(0)
+        .map(() => Value.create(0)),
+    []
+  );
+
+  useTimeline(progress, (tl) => {
+    tl.add(createTiming({ from: 0, to: 1, durationSeconds: 1 }), x);
+    tl.stagger(
+      values.map(() => createTiming({ from: 0, to: 1, durationSeconds: 0.5 })),
+      values,
+      {
+        each: 50,
+        from: "center",
+        easing: Timing.Easing.cubic,
+      }
+    );
+  });
+
+  return (
+    <AnimationDemo title={"Timeline animation with staggered animations"}>
+      <Canvas style={styles.canvas} debug>
+        {values.map((v, i) => (
+          <AnimationElement
+            key={i}
+            x={i * Size * 1.5}
+            y={({ height: h }) => v.value * (h - Size)}
+          />
+        ))}
+      </Canvas>
+    </AnimationDemo>
+  );
+};
+
 const AnimationElement: React.FC<{
   x: number | ((ctx: DrawingContext) => number);
   y?: number | ((ctx: DrawingContext) => number);
-}> = ({ x, y }) => {
+  w?: number | ((ctx: DrawingContext) => number);
+  h?: number | ((ctx: DrawingContext) => number);
+  color?: string | number;
+}> = ({ x, y, w, h, color = "#7FC8A9" }) => {
   return (
     <Rect
       x={x}
       y={y ? y : (ctx) => ctx.height / 2 - Size / 2}
-      height={Size}
-      width={Size}
-      color="#7FC8A9"
+      height={w ?? Size}
+      width={h ?? Size}
+      color={color}
     />
   );
 };
@@ -190,6 +234,7 @@ const AnimationDemo: React.FC<{ title: string }> = ({ title, children }) => {
 const styles = StyleSheet.create({
   scrollview: {
     paddingVertical: 20,
+    paddingBottom: 80,
   },
   container: {
     marginBottom: 20,

@@ -10,7 +10,7 @@ import {
   normalizeForTimeline,
 } from "../TimelineInfo/functions";
 import { getResolvedPosition } from "../TimelineInfo/parameters";
-import type { TimelineInfo } from "../TimelineInfo/types";
+import type { DistributeParams, TimelineInfo } from "../TimelineInfo/types";
 import type { AnimationValue } from "../types";
 
 type BaseAnimation = {
@@ -273,10 +273,15 @@ type TimelineState = {
 };
 
 type TimelineAnimation = BaseAnimation & {
-  add: (animation: BaseAnimation, value?: AnimationValue) => AnimationValue;
+  add: (
+    animation: BaseAnimation,
+    value?: AnimationValue,
+    position?: string | number | undefined
+  ) => AnimationValue;
   stagger: (
     animations: BaseAnimation[],
-    values?: AnimationValue[]
+    values?: AnimationValue[],
+    params?: DistributeParams<AnimationWithValue>
   ) => AnimationValue[];
 };
 
@@ -344,6 +349,7 @@ const TimelineAnimationFactory = (): TimelineAnimation => {
     const newTimeline = addTimeline(state.timeline, ...timelines);
     state.timeline = getTimeline(newTimeline);
     state.children = getTimelines(state.timeline).filter((tl) => tl.data);
+
     // Now we'll create a list of unique values from the resulting timelines.
     // This list will be used to start animations on the values.
     // We'll also use this list to create an animation update function that
@@ -362,6 +368,9 @@ const TimelineAnimationFactory = (): TimelineAnimation => {
                 driverAnimation.update(progressSeconds) * 1000; // Convert to milliseconds
 
               // Find the active timeline from the offset and current timeline point
+              if (valueTimelines.length === 1) {
+                return updateFromTimeline(runtimeSeconds, valueTimelines[0]);
+              }
               for (let i = valueTimelines.length - 1; i >= 0; i--) {
                 if (runtimeSeconds >= valueTimelines[i]._offset) {
                   return updateFromTimeline(runtimeSeconds, valueTimelines[i]);
@@ -385,8 +394,12 @@ const TimelineAnimationFactory = (): TimelineAnimation => {
    * @param value Optional value to run the animation on
    * @returns Animation value that can be used to set the value of the animation
    */
-  const add = (animation: BaseAnimation, value?: AnimationValue) => {
-    const startDelay = getResolvedPosition(state.timeline, "<") ?? 0;
+  const add = (
+    animation: BaseAnimation,
+    value?: AnimationValue,
+    position: string | number | undefined = "<"
+  ) => {
+    const startDelay = getResolvedPosition(state.timeline, position) ?? 0;
     const childTimeline = createAnimatedTimeline(startDelay, animation, value);
     updateState(childTimeline);
     return childTimeline.data!.value;
@@ -396,9 +409,14 @@ const TimelineAnimationFactory = (): TimelineAnimation => {
    * Adds a list of animations to the timeline and positions them using a stagger effect
    * @param animations Animations to add
    * @param values Optional values to run the animations on
+   * @param params Stagger configuration
    * @returns An array of values that can be used to set the values of the animations
    */
-  const stagger = (animations: BaseAnimation[], values?: AnimationValue[]) => {
+  const stagger = (
+    animations: BaseAnimation[],
+    values?: AnimationValue[],
+    params?: DistributeParams<AnimationWithValue>
+  ) => {
     if (values !== undefined && animations.length !== values?.length) {
       throw Error("Number of animations and values must match");
     }
@@ -413,7 +431,7 @@ const TimelineAnimationFactory = (): TimelineAnimation => {
     // calculate staggerd starting points
     const staggeredTimelines = getStaggeredTimeline<AnimationWithValue>(
       childTimelines,
-      { each: 100 },
+      params ?? { each: 125 },
       startDelay
     );
 

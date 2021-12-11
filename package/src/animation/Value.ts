@@ -50,7 +50,7 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
     this._animation = animation;
     this._animationDone = onAnimationDone;
     // Notify the skia view ref that we have started an animation
-    console.log("Value: Starting animation");
+    // console.log("Value: Starting animation");
     this._animationViews.forEach((view) =>
       view.current?.addAnimation(this._animation)
     );
@@ -58,7 +58,7 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
 
   private forceStop() {
     if (this._animation) {
-      console.log("Value: Stopping animation");
+      // console.log("Value: Stopping animation");
       // Notify the skia view ref that we have ended our animation
       this._animationViews.forEach((view) =>
         view.current?.removeAnimation(this._animation)
