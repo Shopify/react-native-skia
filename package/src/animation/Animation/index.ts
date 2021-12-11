@@ -1,1 +1,2 @@
-export * from "./Animation";
+export * from "./functions";
+export * from "./hooks";
