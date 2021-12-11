@@ -18,6 +18,8 @@ import {
   BlurImageFilter,
   ColorMatrix,
   ColorFilterAsImageFilter,
+  useValue,
+  Timing,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -57,7 +59,8 @@ const icons = [
 
 export const Gooey = () => {
   const paint = usePaintRef();
-  const progress = useLoop({ duration: 2000 });
+  const progress = useValue(0);
+  useLoop(progress, Timing.create({ durationSeconds: 2 }));
   return (
     <Canvas style={{ flex: 1 }} mode="continuous">
       <Defs>
@@ -77,7 +80,7 @@ export const Gooey = () => {
         {icons.map(({ dst }, i) => (
           <Group
             key={i}
-            transform={(ctx) => translate(mixVector(progress(ctx), c, dst))}
+            transform={() => translate(mixVector(progress.value, c, dst))}
           >
             <Circle r={R} color={FG} />
           </Group>
@@ -89,7 +92,7 @@ export const Gooey = () => {
       {icons.map(({ path, dst }, i) => (
         <Group
           key={i}
-          transform={(ctx) => translate(mixVector(progress(ctx), c, dst))}
+          transform={() => translate(mixVector(progress.value, c, dst))}
         >
           <Icon path={path} />
         </Group>
