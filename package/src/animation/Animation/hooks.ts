@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { InteractionManager } from "react-native";
 
 import type { AnimationValue } from "../types";
 
@@ -18,7 +19,8 @@ const useAnimation = (
   startPaused?: boolean
 ) => {
   useEffect(() => {
-    !startPaused && animation.start(value);
+    !startPaused &&
+      InteractionManager.runAfterInteractions(() => animation.start(value));
     return () => animation.stop();
   }, [startPaused, animation, value]);
   return animation;
