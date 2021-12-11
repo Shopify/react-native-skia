@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
+import React, { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 
 import type { IPaint } from "../../skia";
 import { isShader } from "../../skia/Shader/Shader";
@@ -11,6 +11,7 @@ import type { CustomPaintProps } from "../processors";
 import { processPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { useDeclaration } from "../nodes/Declaration";
+import { isPathEffect } from "../../skia/PathEffect";
 
 export const usePaintRef = () => useRef<IPaint>(null);
 
@@ -33,6 +34,8 @@ export const Paint = forwardRef<IPaint, AnimatedProps<PaintProps>>(
           paint.setColorFilter(child);
         } else if (isImageFilter(child)) {
           paint.setImageFilter(child);
+        } else if (isPathEffect(child)) {
+          paint.setPathEffect(child);
         }
       });
       return paint;

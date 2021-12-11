@@ -1,3 +1,5 @@
+import React from "react";
+
 import type { CustomPaintProps, SkEnum } from "../../processors";
 import type { IPoint } from "../../../skia";
 import { PointMode } from "../../../skia";

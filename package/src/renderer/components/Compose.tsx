@@ -1,3 +1,4 @@
+import React from "react";
 import type { ReactNode } from "react";
 
 import { Skia } from "../../skia";
@@ -10,9 +11,9 @@ export interface ComposeProps {
   children: ReactNode | ReactNode[];
 }
 
-export const ComposeFilter = (props: AnimatedProps<ComposeProps>) => {
+export const Compose = (props: AnimatedProps<ComposeProps>) => {
   const declaration = useDeclaration(props, (_, children) => {
-    const [outer, inner] = children;
+    const [inner, outer] = children;
     if (isColorFilter(outer) && isColorFilter(inner)) {
       return Skia.ColorFilter.MakeCompose(outer, inner);
     } else if (isImageFilter(outer) && isImageFilter(inner)) {

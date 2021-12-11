@@ -2,8 +2,8 @@ import React, { useCallback } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import type { AnimationValue } from "@shopify/react-native-skia";
 import {
-  vec,
   Blur,
+  vec,
   Canvas,
   Circle,
   Fill,

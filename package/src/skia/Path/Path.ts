@@ -4,7 +4,7 @@ import type { IPoint } from "../Point";
 import type { IRRect } from "../RRect";
 import type { StrokeJoin, StrokeCap } from "../Paint";
 import type { Matrix } from "../Matrix";
-import type { SkJSIInstane } from "../JsiInstance";
+import type { SkJSIInstance } from "../JsiInstance";
 
 /**
  * Options used for Path.stroke(). If an option is omitted, a sensible default will be used.
@@ -38,7 +38,7 @@ export enum PathOp {
   ReverseDifference,
 }
 
-export interface IPath extends SkJSIInstane<"Path"> {
+export interface IPath extends SkJSIInstance<"Path"> {
   /**
    * Appends arc to Path, as the start of new contour. Arc added is part of ellipse
    * bounded by oval, from startAngle through sweepAngle. Both startAngle and

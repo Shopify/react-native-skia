@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 import type { IRect } from "../../../skia";
 import { useImage, TileMode, FilterMode, MipmapMode } from "../../../skia";

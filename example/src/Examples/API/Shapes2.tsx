@@ -14,6 +14,8 @@ import {
   vec,
   rect,
   rrect,
+  Paint,
+  DashPathEffect,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -62,7 +64,7 @@ export const Shapes = () => {
       <Title>Rectangles</Title>
       <Canvas style={styles.container}>
         <Group color="#61DAFB">
-          <Rect rect={{ x: 0, y: 0, width: 100, height: 100 }} />
+          <Rect rect={{ x: PADDING, y: PADDING, width: 100, height: 100 }} />
           <Rect
             x={SIZE + 2 * PADDING}
             y={PADDING}
@@ -76,7 +78,16 @@ export const Shapes = () => {
       <Title>Ovals & Circles</Title>
       <Canvas style={styles.container}>
         <Group color="#61DAFB">
-          <Oval x={PADDING} y={PADDING} width={2 * SIZE} height={SIZE} />
+          <Oval x={PADDING} y={PADDING} width={2 * SIZE} height={SIZE}>
+            <Paint
+              style="stroke"
+              color="#61fbcf"
+              strokeWidth={10}
+              opacity={0.5}
+            >
+              <DashPathEffect intervals={[10, 10]} />
+            </Paint>
+          </Oval>
           <Oval
             rect={rect(2 * SIZE + 2 * 16 + SIZE / 2, PADDING, SIZE, SIZE)}
           />

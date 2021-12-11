@@ -1,10 +1,12 @@
+import React from "react";
+
 import type { CustomPaintProps } from "../../processors";
-import type { RectDef } from "../../processors/Shapes";
+import type { RectDef, ChildrenProps } from "../../processors/Shapes";
 import { processRect } from "../../processors/Shapes";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
 
-export type OvalProps = RectDef & CustomPaintProps;
+export type OvalProps = RectDef & CustomPaintProps & ChildrenProps;
 
 export const Oval = (props: AnimatedProps<OvalProps>) => {
   const onDraw = useDrawing(props, ({ canvas, paint }, rectProps) => {

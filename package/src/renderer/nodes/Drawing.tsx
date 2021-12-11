@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 
 import { NodeType } from "../Host";
 import type { SkNode } from "../Host";
@@ -7,6 +7,7 @@ import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
+import { isPaint } from "../../skia";
 
 type DrawingCallback = (ctx: DrawingContext, children: SkNode[]) => void;
 
@@ -44,7 +45,24 @@ export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
     const drawingProps = materialize(ctx, newProps);
     const selectedPaint = selectPaint(ctx.paint, drawingProps);
     processPaint(selectedPaint, ctx.opacity, drawingProps);
-    onDraw({ ...ctx, paint: selectedPaint }, children);
+    // to draw only once:
+    // onDraw({ ...ctx, paint: selectedPaint }, children);
+    [
+      selectedPaint,
+      ...children
+        .map((child) => {
+          if (child.type === NodeType.Declaration) {
+            const ret = child.draw(ctx, child.props, child.children);
+            if (ret) {
+              return ret;
+            }
+          }
+          return null;
+        })
+        .filter(isPaint),
+    ].forEach((paint) => {
+      onDraw({ ...ctx, paint }, children);
+    });
   },
   children: [],
 });

@@ -1,3 +1,5 @@
+import React from "react";
+
 import type { CustomPaintProps, Vector, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
 

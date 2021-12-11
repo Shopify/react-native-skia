@@ -18,6 +18,8 @@
       {
         "additionalHooks": "(useFrame)"
       }
-    ]
+    ],
+    "react/jsx-uses-react": "error",
+    "react/react-in-jsx-scope": "error"
   }
 }

@@ -1,6 +1,36 @@
+import type { ReactNode } from "react";
+
 import type { IRect, IRRect } from "../../skia";
 
+import type { Vector as Point } from "./math/Vector";
 import { vec } from "./math/Vector";
+
+export interface ChildrenProps {
+  children?: ReactNode | ReactNode[];
+}
+
+export { Point };
+
+interface PointCircleDef {
+  c: Point;
+  r: number;
+}
+
+interface ScalarCircleDef {
+  cx: number;
+  cy: number;
+  r: number;
+}
+
+export type CircleDef = PointCircleDef | ScalarCircleDef;
+const isCircleScalarDef = (def: CircleDef): def is ScalarCircleDef =>
+  def.hasOwnProperty("cx");
+export const processCircle = (def: CircleDef) => {
+  if (isCircleScalarDef(def)) {
+    return { c: vec(def.cx, def.cy), r: def.r };
+  }
+  return def;
+};
 
 export const point = (x: number, y: number) => ({ x, y });
 export const rect = (x: number, y: number, width: number, height: number) => ({

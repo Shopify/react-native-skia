@@ -1,3 +1,4 @@
+import React from "react";
 import type { ReactNode } from "react";
 
 import { Skia } from "../../../skia";
@@ -12,8 +13,12 @@ export interface LerpProps {
 
 export const Lerp = (props: AnimatedProps<LerpProps>) => {
   const declaration = useDeclaration(props, ({ t }, children) => {
-    const [src, dst] = children.filter(isColorFilter);
-    return Skia.ColorFilter.MakeLerp(t, dst, src);
+    const [src, dst, child] = children.filter(isColorFilter);
+    const cf = Skia.ColorFilter.MakeLerp(t, dst, src);
+    if (child) {
+      return Skia.ColorFilter.MakeCompose(cf, child);
+    }
+    return cf;
   });
   return <skDeclaration declaration={declaration} {...props} />;
 };

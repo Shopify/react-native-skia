@@ -1,5 +1,11 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import type { ReactNode, RefObject, ComponentProps } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
+import type { RefObject, ReactNode, ComponentProps } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
@@ -65,6 +71,7 @@ export const Canvas = ({
   // Draw callback
   const onDraw = useDrawCallback(
     (canvas, info) => {
+      // TODO: if tree is empty (count === 1) maybe we should not render?
       const { width, height, timestamp } = info;
       onTouch && onTouch(info.touches);
       const paint = Skia.Paint();
