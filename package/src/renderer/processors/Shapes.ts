@@ -23,8 +23,12 @@ interface ScalarCircleDef {
 }
 
 export type CircleDef = PointCircleDef | ScalarCircleDef;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const hasProperty = (obj: any, key: string) => !!(obj && key in obj);
+
 const isCircleScalarDef = (def: CircleDef): def is ScalarCircleDef =>
-  def.hasOwnProperty("cx");
+  hasProperty(def, "cx");
 export const processCircle = (def: CircleDef) => {
   if (isCircleScalarDef(def)) {
     return { c: vec(def.cx, def.cy), r: def.r };
@@ -63,11 +67,11 @@ export const center = (r: IRect | IRRect) =>
     : vec(r.x + r.width / 2, r.y + r.height / 2);
 
 export const isRectCtor = (def: RectOrRRectDef): def is RectCtor =>
-  !def.hasOwnProperty("rect");
+  !hasProperty(def, "rect");
 export const isRect = (def: RectOrRRectDef): def is IRect =>
-  def.hasOwnProperty("rect");
+  hasProperty(def, "rect");
 export const isRRect = (def: RectOrRRectDef): def is IRRect =>
-  !isRectCtor(def) && def.hasOwnProperty("rx");
+  !isRectCtor(def) && hasProperty(def, "rx");
 
 export interface RectCtor {
   x: number;
@@ -90,11 +94,7 @@ export const processRect = (def: RectDef) => {
 };
 
 export const processRectOrRRect = (def: RectOrRRectDef) => {
-  if (
-    isRectCtor(def) &&
-    !def.hasOwnProperty("rx") &&
-    !def.hasOwnProperty("ry")
-  ) {
+  if (isRectCtor(def) && !hasProperty(def, "rx") && !hasProperty(def, "ry")) {
     return rect(def.x, def.y, def.width, def.height);
   } else if (isRectCtor(def)) {
     const { rx, ry } = def;
