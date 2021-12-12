@@ -29,10 +29,12 @@ RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
     : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
       _platformContext(context),
       _infoObject(std::make_shared<RNSkInfoObject>()),
-      _timingInfo(std::make_shared<RNSkTimingInfo>()) {}
+      _timingInfo(std::make_shared<RNSkTimingInfo>()),
+      _isDeleted(false) {}
 
 RNSkDrawView::~RNSkDrawView() {
   {
+    _isDeleted = true;
     // This is a very simple fix to an issue where the view posts a redraw
     // function to the javascript thread, and the object is destroyed and then
     // the redraw function is called and ends up executing on a destroyed draw
@@ -48,6 +50,7 @@ RNSkDrawView::~RNSkDrawView() {
       milliseconds now = std::chrono::duration_cast<milliseconds>(
           system_clock::now().time_since_epoch());
       if (now.count() - start.count() > 500) {
+        RNSkLogger::logToConsole("Timed out waiting for RNSkDrawView delete...");
         break;
       }
     }
@@ -178,7 +181,11 @@ void RNSkDrawView::requestRedraw() {
       beginDrawingLoop();
       return;
     }
-
+    
+    if(_isDeleted) {
+      RNSkLogger::logToConsole("WARNING: Trying to redraw after delete!");
+    }
+    
     milliseconds ms = std::chrono::duration_cast<milliseconds>(
         system_clock::now().time_since_epoch());
 
@@ -224,8 +231,11 @@ void RNSkDrawView::beginDrawingLoop() {
         auto performDraw = [=]() {
           milliseconds ms = std::chrono::duration_cast<milliseconds>(
               system_clock::now().time_since_epoch());
-
-          drawFrame(ms.count() / 1000.0);
+          
+          if(!_isDeleted) {
+            // Only redraw if view is still alive
+            drawFrame(ms.count() / 1000.0);
+          }
           _isDrawing = false;
         };
 

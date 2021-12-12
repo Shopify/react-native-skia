@@ -157,6 +157,10 @@ private:
    Redraw queue counter
    */
   std::atomic<int> _redrawRequestCounter;
+  /**
+   Flag indicating that the view is no longer available
+   */
+  std::atomic<bool> _isDeleted;
 };
 
 } // namespace RNSkia
