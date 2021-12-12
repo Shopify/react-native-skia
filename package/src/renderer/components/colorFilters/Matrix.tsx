@@ -1,9 +1,11 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia, isColorFilter } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
+import { Skia } from "../../../skia";
+import { useDeclaration } from "../../nodes";
+import type { AnimatedProps } from "../../processors";
+
+import { composeColorFilter } from "./Compose";
 
 interface ColorMatrixProps {
   value: number[];
@@ -12,12 +14,8 @@ interface ColorMatrixProps {
 
 export const ColorMatrix = (props: AnimatedProps<ColorMatrixProps>) => {
   const declaration = useDeclaration(props, ({ value }, children) => {
-    const [child] = children.filter(isColorFilter);
     const cf = Skia.ColorFilter.MakeMatrix(value);
-    if (child) {
-      return Skia.ColorFilter.MakeCompose(cf, child);
-    }
-    return cf;
+    return composeColorFilter(cf, children);
   });
   return <skDeclaration declaration={declaration} {...props} />;
 };

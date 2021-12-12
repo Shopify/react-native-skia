@@ -19,7 +19,7 @@ uniform float r;
 
 half4 main(float2 xy) {   
   xy.x += sin(xy.y / r) * 4;
-  return image.eval(xy).rgba;
+  return image.eval(xy).rbga;
 }`)!;
 
 export const Filters = () => {
