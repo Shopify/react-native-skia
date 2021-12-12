@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { InteractionManager } from "react-native";
 
 import type { AnimationValue } from "../types";
+import { useValue } from "../Value";
 
 import { createSpring, createTimeline, createTiming } from "./functions";
 import { AnimationFactory } from "./animationFactory";
@@ -14,92 +15,75 @@ import type { TimelineAnimation } from "./timelineAnimationFactory";
 import type { BaseAnimation } from "./types";
 
 const useAnimation = (
-  value: AnimationValue,
   animation: BaseAnimation,
-  startPaused?: boolean
-) => {
+  from?: number
+): AnimationValue => {
+  const value = useValue(from ?? 0);
   useEffect(() => {
-    !startPaused &&
-      InteractionManager.runAfterInteractions(() => animation.start(value));
+    InteractionManager.runAfterInteractions(() => animation.start(value));
     return () => animation.stop();
-  }, [startPaused, animation, value]);
-  return animation;
+  }, [animation, value]);
+  return value;
 };
 
 /**
  * Creates a new timeline animation. A timeline animation can run multiple
  * animations with complex control over when each animation starts and stops using
  * advanced positioning and staggering options.
- * @param progress driver of the timeline animation
  * @param initializer Initialization callback for building the timeline
- * @param startPaused Whether the timeline should start paused or not. Default is false.
- * @returns
+ * @returns An animation value that will be updated by the animation
  */
-export const useTimeline = (
-  progress: AnimationValue,
-  initializer: (tla: TimelineAnimation) => void,
-  startPaused = false
-) => {
+export const useTimeline = (initializer: (tla: TimelineAnimation) => void) => {
   const retVal = useMemo(() => {
     return createTimeline(initializer);
   }, [initializer]);
-  return useAnimation(progress, retVal, startPaused);
+  return useAnimation(retVal);
 };
 
 /**
  * Creates a progress animation where the provided value will be updated with
  * the progress in seconds since the animation started.
- * @param value Value to run the animation on
- * @param startPaused True if the animation should not be started immediately. Defaults to false
- * @returns An animation object
+ * @returns An animation value that will be updated by the animation
  */
-export const useProgress = (value: AnimationValue, startPaused = false) => {
+export const useProgress = (): AnimationValue => {
   const animation = useMemo(() => {
     return AnimationFactory();
   }, []);
 
-  return useAnimation(value, animation, startPaused);
+  return useAnimation(animation);
 };
 
 /**
  * Creates an interpolated animation where the provided value will be updated with
  * the interpolated value between from and to over the duration of time.
- * @param value Value to run the animation on
  * @param params Parameters for the timing animation
- * @param startPaused True if the animation should not be started immediately. Defaults to false
- * @returns An animation object
+ * @returns An animation value that will be updated by the animation
  */
 export const useTiming = (
-  value: AnimationValue,
-  params: DurationInfoParameters & InterpolatorParams,
-  startPaused?: boolean
+  params: DurationInfoParameters & InterpolatorParams
 ) => {
   const animation = useMemo(() => {
     return createTiming(params);
   }, [params]);
 
-  return useAnimation(value, animation, startPaused);
+  return useAnimation(animation);
 };
 /**
  * Creates a spring based animation where the provided value will be updated with
  * the interpolated value between from and to over the duration of time.
- * @param value Value to run the animation on
- * @param params Configuration for the interpolation
- * @param config Configuration for the spring
- * @param startPaused True if the animation should not be started immediately. Defaults to false
- * @returns An animation object
+ * @param params a number for the destination value or an interpolation configuration
+ * @param config spring configuration
+ * @returns An animation value that will be updated by the animation
  */
 export const useSpring = (
-  value: AnimationValue,
   params: number | Pick<InterpolatorParams, "from" | "to">,
-  config: EasingInfo,
-  startPaused?: boolean
-) => {
+  config: EasingInfo
+): AnimationValue => {
   const animation = useMemo(() => {
     return createSpring(params, config);
   }, [params, config]);
 
-  return useAnimation(value, animation, startPaused);
+  return useAnimation(animation);
 };
 
 type LoopParams = {
@@ -115,16 +99,10 @@ type LoopParams = {
 
 /**
  * Runs the given animation in a loop
- * @param value Value to run the animation on
  * @param animation
- * @param startPaused True if the animation should not be started immediately. Defaults to false
+ * @returns An animation value that will be updated by the animation
  */
-export const useLoop = (
-  value: AnimationValue,
-  animation: BaseAnimation,
-  params?: LoopParams,
-  startPaused?: boolean
-) => {
+export const useLoop = (animation: BaseAnimation, params?: LoopParams) => {
   const iterationsRef = useRef(0);
   const paramsResolved = useMemo(
     () => ({
@@ -133,7 +111,7 @@ export const useLoop = (
     }),
     [params]
   );
-
+  const value = useValue(0);
   const startAnimation = useCallback(() => {
     if (
       paramsResolved.repeat === Infinity ||
@@ -147,8 +125,9 @@ export const useLoop = (
   }, [animation, value, paramsResolved]);
 
   useEffect(() => {
-    !startPaused && startAnimation();
+    InteractionManager.runAfterInteractions(startAnimation);
     return () => animation.stop();
-  }, [startPaused, animation, value, startAnimation]);
-  return animation;
+  }, [animation, startAnimation]);
+
+  return value;
 };

@@ -3,7 +3,6 @@ import { Dimensions, StyleSheet } from "react-native";
 import {
   Canvas,
   Spring,
-  useValue,
   Value,
   useLoop,
   Timeline,
@@ -14,7 +13,6 @@ import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
 const { width } = Dimensions.get("window");
 
 export const StaggeredTimelineAnimation = () => {
-  const progress = useValue(0);
   const values = useMemo(
     () =>
       new Array(Math.round((width - Size) / (Size * 1.5)))
@@ -24,10 +22,11 @@ export const StaggeredTimelineAnimation = () => {
   );
 
   useLoop(
-    progress,
     Timeline.create((tl) => {
       tl.stagger(
-        values.map(() => Spring.create({ from: 0, to: 1 }, Spring.Wobbly())),
+        values.map(() =>
+          Spring.create({ from: 0, to: 1 }, Spring.Config.Wobbly)
+        ),
         values,
         {
           each: 50,

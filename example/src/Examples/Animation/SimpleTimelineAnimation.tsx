@@ -13,11 +13,9 @@ import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
 const { width } = Dimensions.get("window");
 
 export const SimpleTimelineAnimation = () => {
-  const progress = useValue(0);
   const x = useValue(0);
   const y = useValue(0);
   useLoop(
-    progress,
     Timeline.create((tl) => {
       tl.add(Timing.create({ from: 0, to: 1, duration: 1000 }), x);
       tl.add(Timing.create({ from: 0, to: 1, duration: 300 }), y);
