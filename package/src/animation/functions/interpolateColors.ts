@@ -1,5 +1,11 @@
-import { Skia } from "../../../skia";
-import { red, blue, green, alpha, color } from "../Paint";
+import { Color } from "../../skia/Color";
+import {
+  red,
+  green,
+  blue,
+  alpha,
+  color,
+} from "../../renderer/processors/Paint";
 
 import { interpolate } from "./interpolate";
 
@@ -45,6 +51,6 @@ export const interpolateColors = (
   inputRange: number[],
   _outputRange: string[]
 ) => {
-  const outputRange = _outputRange.map((cl) => Skia.Color(cl));
+  const outputRange = _outputRange.map((cl) => Color(cl));
   return interpolateColorsRGB(value, inputRange, outputRange);
 };

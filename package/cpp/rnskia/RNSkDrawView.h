@@ -153,6 +153,14 @@ private:
    Timing information
    */
   std::shared_ptr<RNSkTimingInfo> _timingInfo;
+  /**
+   Redraw queue counter
+   */
+  std::atomic<int> _redrawRequestCounter;
+  /**
+   Flag indicating that the view is no longer available
+   */
+  std::atomic<bool> _isDeleted;
 };
 
 } // namespace RNSkia

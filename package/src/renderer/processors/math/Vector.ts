@@ -1,4 +1,4 @@
-import { interpolate } from "../Animations/interpolate";
+import { interpolate } from "../../../animation";
 
 import { canvas2Polar, polar2Canvas } from "./Coordinates";
 export interface Vector {

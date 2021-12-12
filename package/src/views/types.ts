@@ -9,6 +9,7 @@ export interface ISkiaViewApi {
     nativeId: number,
     callback: RNSkiaDrawCallback | undefined
   ) => void;
+  setDrawMode: (nativeId: number, mode: DrawMode) => void;
 }
 declare global {
   var SkiaViewApi: ISkiaViewApi;
@@ -16,8 +17,10 @@ declare global {
 
 export const { SkiaViewApi } = global;
 
+export type DrawMode = "continuous" | "default";
+
 export type NativeSkiaViewProps = ViewProps & {
-  mode?: "continuous" | "default";
+  mode?: DrawMode;
   debug?: boolean;
 };
 
@@ -33,6 +36,7 @@ export interface TouchInfo {
   y: number;
   force: number;
   type: TouchType;
+  timestamp: number;
 }
 
 export interface DrawingInfo {
@@ -42,15 +46,54 @@ export interface DrawingInfo {
   touches: Array<Array<TouchInfo>>;
 }
 
+export type ExtendedTouchInfo = TouchInfo & {
+  // points per second
+  velocityX: number;
+  velocityY: number;
+};
+
+export type TouchHandlers = {
+  onStart?: (touchInfo: TouchInfo) => void;
+  onActive?: (touchInfo: ExtendedTouchInfo) => void;
+  onEnd?: (touchInfo: ExtendedTouchInfo) => void;
+};
+
+export type TouchHandler = (touchInfo: Array<Array<TouchInfo>>) => void;
+
 export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawingInfo) => void;
 export type RNSkiaTouchCallback = (touches: TouchInfo[]) => void;
 
 export type RNSkiaViewProps = ViewProps & {
-  mode?: "continuous" | "default";
+  /**
+   * Sets the drawing mode for the skia view. There are two drawing
+   * modes, "continuous" and "default", where the continuous mode will
+   * continuously redraw the view, and the default mode will only
+   * redraw when any of the regular react properties are changed like
+   * sizes and margins.
+   */
+  mode?: DrawMode;
+  /**
+   * When set to true the view will display information about the
+   * average time it takes to render.
+   */
   debug?: boolean;
+  /**
+   * Draw callback. Will be called whenever the view is invalidated and
+   * needs to redraw. This is either caused by a change in a react
+   * property, a touch event, or a call to redraw. If the view is in
+   * continuous mode the callback will be called 60 frames per second
+   * by the native view.
+   */
   onDraw?: RNSkiaDrawCallback;
-  onTouch?: RNSkiaTouchCallback;
 };
+
+/**
+ * Listener interface for value changes
+ */
+export interface ValueListener {
+  addListener: (callback: () => void) => number;
+  removeListener: (id: number) => void;
+}
 
 export const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
   "ReactNativeSkiaView"

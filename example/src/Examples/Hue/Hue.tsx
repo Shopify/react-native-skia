@@ -7,6 +7,8 @@ import {
   Paint,
   Skia,
   ShaderLib,
+  useValue,
+  useTouchHandler,
   BlurMask,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
@@ -37,14 +39,28 @@ half4 main(vec2 uv) {
 
 export const Hue = () => {
   const r = (width - 32) / 2;
+  const translateX = useValue(c.x);
+  const translateY = useValue(c.y);
+  const onTouch = useTouchHandler({
+    onActive: ({ x, y }) => {
+      translateX.value = x;
+      translateY.value = y;
+    },
+  });
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ flex: 1 }} onTouch={onTouch}>
       <Fill color="#1f1f1f" />
       <Paint>
         <BlurMask sigma={40} style="solid" />
         <Shader source={source} uniforms={[c.x, c.y, r]} />
       </Paint>
       <Circle c={c} r={r} />
+      <Circle
+        r={20}
+        color="red"
+        cx={() => translateX.value}
+        cy={() => translateY.value}
+      />
     </Canvas>
   );
 };

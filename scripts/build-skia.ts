@@ -1,11 +1,11 @@
 import { exec, execSync } from "child_process";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
+
 const fs = require("fs");
 const typedKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
 
 console.log("Starting SKIA Build.");
-console.log("Usage: yarn buildskia.ts platform cpu");
 console.log("");
 
 if (process.argv.length !== 4) {
@@ -36,7 +36,8 @@ const executeCmd = (
       console.log(`[${platform}/${cpu}]:`, data.trim());
     });
     proc.stderr?.on("data", function (data) {
-      console.log(`[${platform}/${cpu}]:`, data.trim());
+      console.error(`[${platform}/${cpu}]: Error: `, data.trim());
+      exit(1);
     });
   }
 };
@@ -80,7 +81,9 @@ const configurePlatform = (platform: PlatformName, cpu: string) => {
     executeCmdSync(command);
     return true;
   } else {
-    console.log(`Could not find platform "${platform}" for tagetCpu "${cpu}" `);
+    console.log(
+      `Could not find platform "${platform}" for targetCpu "${cpu}" `
+    );
     return false;
   }
 };
