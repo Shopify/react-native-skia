@@ -25,7 +25,7 @@ interface ScalarCircleDef {
 export type CircleDef = PointCircleDef | ScalarCircleDef;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const hasProperty = (obj: any, key: string) => obj && key in obj;
+const hasProperty = (obj: any, key: string) => !!(obj && key in obj);
 
 const isCircleScalarDef = (def: CircleDef): def is ScalarCircleDef =>
   hasProperty(def, "cx");
