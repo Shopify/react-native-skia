@@ -60,7 +60,7 @@ const icons = [
 export const Gooey = () => {
   const paint = usePaintRef();
   const progress = useValue(0);
-  useLoop(progress, Timing.create({ durationSeconds: 2 }));
+  useLoop(progress, Timing.create({ duration: 2000 }));
   return (
     <Canvas style={{ flex: 1 }} mode="continuous">
       <Defs>

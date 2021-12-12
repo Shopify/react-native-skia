@@ -13,7 +13,6 @@ import {
   Timing,
   mix,
   useLoop,
-  Easing,
   useValue,
 } from "@shopify/react-native-skia";
 
@@ -51,8 +50,8 @@ export const Breathe = () => {
   useLoop(
     progress,
     Timing.create({
-      durationSeconds: 3,
-      easing: Easing.inOut(Easing.ease),
+      duration: 3000,
+      easing: Timing.Easing.inOut(Timing.Easing.ease),
     }),
     { yoyo: true }
   );

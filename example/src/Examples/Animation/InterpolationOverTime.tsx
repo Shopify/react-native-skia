@@ -13,7 +13,7 @@ export const InterpolatingValueOverTime = () => {
     Timing.create({
       from: 0,
       to: width - Size,
-      durationSeconds: 1,
+      duration: 1000,
     }),
     { yoyo: true }
   );

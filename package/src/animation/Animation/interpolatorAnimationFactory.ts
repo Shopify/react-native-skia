@@ -5,7 +5,7 @@ import { AnimationFactory } from "./animationFactory";
 
 export type EasingInfo = {
   update: (t: number) => number;
-  durationSeconds: number;
+  duration: number;
 };
 
 type EasingInfoParameters = {
@@ -17,9 +17,9 @@ type EasingInfoParameters = {
 
 export type DurationInfoParameters = {
   /**
-   * The duration of the animation in seconds. Defaults to 1000
+   * The duration of the animation in milliseconds. Defaults to 1000
    */
-  durationSeconds?: number;
+  duration?: number;
   /**
    * Easing function that will be applied to the animation. Defaults to linear
    */
@@ -43,12 +43,12 @@ export type InterpolatorFactoryParams = InterpolatorParams &
 const DefaultParams = {
   from: 0,
   to: 1,
-  durationSeconds: 1,
+  duration: 1000,
   easing: (t: number) => t,
 };
 
 /**
- * Creates an animation that interpolates between two values over a duration of time in seconds
+ * Creates an animation that interpolates between two values over a duration of time in milliseconds
  * @param params Configuration of the interpolation
  * @param onAnimationDone Optional callback that will be called when the animation has reaced its duration
  * @returns Animation object
@@ -61,31 +61,31 @@ export const InterpolatorAnimationFactory = (
   const to = params.to ?? DefaultParams.to;
   let easing: EasingInfo | ((t: number) => number) =
     params.easing ?? DefaultParams.easing;
-  let durationSeconds: number;
+  let duration: number;
 
   // Resolve easing from easing or easing information
-  if ("durationSeconds" in easing) {
+  if ("duration" in easing) {
     // eslint-disable-next-line prefer-destructuring
-    durationSeconds = easing.durationSeconds;
+    duration = easing.duration;
     easing = easing.update;
   } else {
-    durationSeconds =
-      "durationSeconds" in params
-        ? params.durationSeconds ?? DefaultParams.durationSeconds
-        : DefaultParams.durationSeconds;
+    duration =
+      "duration" in params
+        ? params.duration ?? DefaultParams.duration
+        : DefaultParams.duration;
   }
 
   const config: {
     from: number;
     prevFrom: number | undefined;
     to: number;
-    durationSeconds: number;
+    duration: number;
     easing: (t: number) => number;
   } = {
     from,
     prevFrom: undefined,
     to,
-    durationSeconds,
+    duration,
     easing,
   };
 
@@ -113,10 +113,11 @@ export const InterpolatorAnimationFactory = (
   ) => {
     // Repeat / clamping
     const progress = config.easing(
-      Math.max(0.0, Math.min(timestampSeconds / config.durationSeconds, 1.0))
+      Math.max(0.0, Math.min(timestampSeconds / config.duration, 1.0))
     );
+
     // Stop?
-    if (timestampSeconds / config.durationSeconds >= 1) {
+    if (timestampSeconds / config.duration >= 1) {
       stop();
       onAnimationDone && onAnimationDone();
     }
@@ -127,5 +128,5 @@ export const InterpolatorAnimationFactory = (
     );
   };
 
-  return AnimationFactory(update, handleStart, config.durationSeconds);
+  return AnimationFactory(update, handleStart, config.duration);
 };

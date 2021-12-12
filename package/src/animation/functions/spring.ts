@@ -92,6 +92,6 @@ const getSpringEasing = (
   // Calculate duration
   return {
     update: (t: number) => update(t, durationMs),
-    durationSeconds: durationMs / 1000,
+    duration: durationMs,
   };
 };

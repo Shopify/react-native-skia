@@ -13,7 +13,7 @@ export const SimpleValueOverTime = () => {
     <AnimationDemo title={"Simple animation of value over time"}>
       <Canvas style={styles.canvas}>
         <AnimationElement
-          x={(ctx) => mix(progress.value % 1, 10, ctx.width - 10)}
+          x={(ctx) => mix((progress.value / 1000) % 1, 10, ctx.width - 10)}
         />
       </Canvas>
     </AnimationDemo>

@@ -13,7 +13,7 @@ export const InterpolationWithEasing = () => {
     Timing.create({
       from: 10,
       to: width - Size - Padding,
-      durationSeconds: 1,
+      duration: 1000,
       easing: Timing.Easing.inOut(Timing.Easing.cubic),
     }),
     { yoyo: true }

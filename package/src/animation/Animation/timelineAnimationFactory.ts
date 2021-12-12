@@ -66,7 +66,7 @@ export const TimelineAnimationFactory = (): TimelineAnimation => {
   // Parent "driver" animation. Simple progress animation
   const driverAnimation = AnimationFactory(
     (t, _, stop) => {
-      if (t > state.timeline._duration / 1000) {
+      if (t > state.timeline._duration) {
         stop();
       }
       return t;
@@ -94,26 +94,22 @@ export const TimelineAnimationFactory = (): TimelineAnimation => {
     const childTimeline = createTimelineInternal({
       ...timelineConfig,
       data: { animation, value: value ?? Value.create(0) },
-      duration: animation.durationSeconds() * 1000, // timelines are in milliseconds
+      duration: animation.duration(),
       delay: startDelay,
     });
     return childTimeline;
   };
 
   const updateFromTimeline = (
-    progressSeconds: number,
+    progressMs: number,
     tli: AnimatedTimelineInfo
   ) => {
     // Now we have the active timeline for this value - normalize
     // the progress to the timeline:
-    const v = normalizeForTimeline(
-      progressSeconds,
-      tli,
-      state.timeline._duration
-    );
+    const v = normalizeForTimeline(progressMs, tli, state.timeline._duration);
 
     // Call the original animation update function with the normalized progress
-    return tli.data!.animation.update(v * (tli._duration / 1000));
+    return tli.data!.animation.update((v * tli._duration) / 1000);
   };
 
   const updateState = (...timelines: AnimatedTimelineInfo[]) => {
@@ -135,16 +131,16 @@ export const TimelineAnimationFactory = (): TimelineAnimation => {
           {
             value: child.data!.value,
             updater: (progressSeconds: number) => {
-              const runtimeSeconds =
-                driverAnimation.update(progressSeconds) * 1000; // Convert to milliseconds
+              const runtimeMs = driverAnimation.update(progressSeconds);
 
               // Find the active timeline from the offset and current timeline point
+              // With only one timeline, we can just use the first timeline
               if (valueTimelines.length === 1) {
-                return updateFromTimeline(runtimeSeconds, valueTimelines[0]);
+                return updateFromTimeline(runtimeMs, valueTimelines[0]);
               }
               for (let i = valueTimelines.length - 1; i >= 0; i--) {
-                if (runtimeSeconds >= valueTimelines[i]._offset) {
-                  return updateFromTimeline(runtimeSeconds, valueTimelines[i]);
+                if (runtimeMs >= valueTimelines[i]._offset) {
+                  return updateFromTimeline(runtimeMs, valueTimelines[i]);
                 }
               }
               // We didn't find an active timeline so we'll just return the first

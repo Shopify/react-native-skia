@@ -19,10 +19,10 @@ export const SimpleTimelineAnimation = () => {
   useLoop(
     progress,
     Timeline.create((tl) => {
-      tl.add(Timing.create({ from: 0, to: 1, durationSeconds: 1 }), x);
-      tl.add(Timing.create({ from: 0, to: 1, durationSeconds: 0.3 }), y);
-      tl.add(Timing.create({ from: 1, to: 0, durationSeconds: 1 }), x);
-      tl.add(Timing.create({ from: 1, to: 0, durationSeconds: 0.4 }), y);
+      tl.add(Timing.create({ from: 0, to: 1, duration: 1000 }), x);
+      tl.add(Timing.create({ from: 0, to: 1, duration: 300 }), y);
+      tl.add(Timing.create({ from: 1, to: 0, duration: 1000 }), x);
+      tl.add(Timing.create({ from: 1, to: 0, duration: 300 }), y);
     }),
     { yoyo: false }
   );

@@ -13,14 +13,10 @@ const { width } = Dimensions.get("window");
 
 export const AnimationWithTouchHandler = () => {
   const translateX = useValue((width - Size - Padding) / 2);
-  const diffX = useValue(0);
+  const offsetX = useValue(0);
   const touchHandler = useTouchHandler({
-    onStart: ({ x }) => {
-      diffX.value = x - translateX.value;
-      // Stop any animations by updating the animation value
-      translateX.value = translateX.value;
-    },
-    onActive: ({ x }) => (translateX.value = x - diffX.value),
+    onStart: ({ x }) => (offsetX.value = x - translateX.value),
+    onActive: ({ x }) => (translateX.value = x - offsetX.value),
     onEnd: ({ velocityX }) => {
       Spring.run(
         translateX,

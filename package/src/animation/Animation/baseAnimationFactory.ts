@@ -6,7 +6,7 @@ import type { BaseAnimation, AnimationState } from "./types";
  * Creates a base animation that calls the provided update function at each step
  * @param update Update function that will be called for each step with the current timestamp in seconds
  * @param onStart Called when the animation starts
- * @param durationSeconds optional duration of the animation in seconds. If not set,
+ * @param Seconds optional duration of the animation in milliseconds. If not set,
  * the duration will be calculated.
  * @returns Animation object
  */
@@ -17,13 +17,13 @@ export const BaseAnimationFactory = (
     stop: () => void
   ) => number,
   onStart?: (animationValue: AnimationValue, state: AnimationState) => void,
-  durationSeconds?: number
+  duration?: number
 ): BaseAnimation => {
   const state: AnimationState = {
-    startTimeSeconds: undefined,
+    startTime: undefined,
     currentValue: undefined,
-    durationSeconds: durationSeconds,
     onAnimationDone: undefined,
+    duration,
     reverse: false,
   };
 
@@ -32,7 +32,7 @@ export const BaseAnimationFactory = (
   };
 
   const startInternal = (animationValue: AnimationValue) => {
-    state.startTimeSeconds = undefined;
+    state.startTime = undefined;
     const retVal = new Promise<void>((resolve) => {
       state.onAnimationDone = resolve;
     });
@@ -80,6 +80,6 @@ export const BaseAnimationFactory = (
     reverse,
     update: updateWrapper,
     stop,
-    durationSeconds: () => state.durationSeconds ?? 0,
+    duration: () => state.duration ?? 0,
   };
 };

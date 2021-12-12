@@ -26,7 +26,7 @@ half4 main(float2 xy) {
 
 export const Filters = () => {
   const progress = useValue(0);
-  useLoop(progress, Timing.create({ durationSeconds: 1.5 }), { yoyo: true });
+  useLoop(progress, Timing.create({ duration: 1500 }), { yoyo: true });
   return (
     <Canvas style={{ width, height }}>
       <Paint>
