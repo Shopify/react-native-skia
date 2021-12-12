@@ -2,6 +2,7 @@ package com.shopify.reactnative.skia;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
@@ -24,6 +25,11 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         mHybridData = initHybrid(skiaModule.getSkiaManager());
         setSurfaceTextureListener(this);
         setOpaque(false);
+    }
+
+    @Override
+    public void setBackgroundColor(int color) {
+        // Texture view does not support setting the background color.
     }
 
     @Override
@@ -101,6 +107,8 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     private native void surfaceSizeChanged(int width, int height);
 
     private native void surfaceDestroyed();
+
+    private native void setBgColor(int color);
 
     public native void setMode(String mode);
 
