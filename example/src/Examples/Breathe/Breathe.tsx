@@ -2,7 +2,7 @@ import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import type { FrameValue } from "@shopify/react-native-skia";
 import {
-  Blur,
+  BlurMask,
   vec,
   Canvas,
   Circle,
@@ -56,7 +56,7 @@ export const Breathe = () => {
   return (
     <Canvas style={styles.container} mode="continuous">
       <Paint blendMode="screen">
-        <Blur style="solid" sigma={40} />
+        <BlurMask style="solid" sigma={40} />
       </Paint>
       <Fill color="rgb(36,43,56)" />
       <Group origin={center} transform={transform}>

@@ -51,7 +51,7 @@ export const Clipping = () => {
           height={SIZE}
           fit="cover"
         />
-        <Group clipRect={clipRRect} clipOp="difference">
+        <Group clipRect={clipRRect} invertClip>
           <Image
             source={oslo}
             x={SIZE + 2 * PADDING}
