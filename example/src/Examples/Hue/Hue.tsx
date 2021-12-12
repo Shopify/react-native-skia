@@ -9,7 +9,7 @@ import {
   ShaderLib,
   useValue,
   useTouchHandler,
-  BlurMask
+  BlurMask,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
