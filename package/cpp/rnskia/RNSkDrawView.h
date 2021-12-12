@@ -153,7 +153,10 @@ private:
    Timing information
    */
   std::shared_ptr<RNSkTimingInfo> _timingInfo;
-  
+  /**
+   Redraw queue counter
+   */
+  std::atomic<int> _redrawRequestCounter;
 };
 
 } // namespace RNSkia
