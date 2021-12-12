@@ -32,6 +32,7 @@ export const useDrawing = <T,>(
 
 export interface DrawingProps extends AnimatedProps<CustomPaintProps> {
   onDraw: DrawingCallback;
+  skipProcessing?: boolean;
 }
 
 export const Drawing = (props: DrawingProps) => {
@@ -41,28 +42,32 @@ export const Drawing = (props: DrawingProps) => {
 export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
   type: NodeType.Drawing,
   props,
-  draw: (ctx, { onDraw, ...newProps }, children) => {
-    const drawingProps = materialize(ctx, newProps);
-    const selectedPaint = selectPaint(ctx.paint, drawingProps);
-    processPaint(selectedPaint, ctx.opacity, drawingProps);
-    // to draw only once:
-    // onDraw({ ...ctx, paint: selectedPaint }, children);
-    [
-      selectedPaint,
-      ...children
-        .map((child) => {
-          if (child.type === NodeType.Declaration) {
-            const ret = child.draw(ctx, child.props, child.children);
-            if (ret) {
-              return ret;
+  draw: (ctx, { onDraw, skipProcessing, ...newProps }, children) => {
+    if (skipProcessing) {
+      onDraw(ctx, children);
+    } else {
+      const drawingProps = materialize(ctx, newProps);
+      const selectedPaint = selectPaint(ctx.paint, drawingProps);
+      processPaint(selectedPaint, ctx.opacity, drawingProps);
+      // to draw only once:
+      // onDraw({ ...ctx, paint: selectedPaint }, children);
+      [
+        selectedPaint,
+        ...children
+          .map((child) => {
+            if (child.type === NodeType.Declaration) {
+              const ret = child.draw(ctx, child.props, child.children);
+              if (ret) {
+                return ret;
+              }
             }
-          }
-          return null;
-        })
-        .filter(isPaint),
-    ].forEach((paint) => {
-      onDraw({ ...ctx, paint }, children);
-    });
+            return null;
+          })
+          .filter(isPaint),
+      ].forEach((paint) => {
+        onDraw({ ...ctx, paint }, children);
+      });
+    }
   },
   children: [],
 });
