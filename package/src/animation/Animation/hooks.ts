@@ -53,15 +53,15 @@ export const useProgress = (): AnimationValue => {
   return useAnimation(animation);
 };
 
+type TimingParams = DurationInfoParameters & InterpolatorParams;
+
 /**
  * Creates an interpolated animation where the provided value will be updated with
  * the interpolated value between from and to over the duration of time.
  * @param params Parameters for the timing animation
  * @returns An animation value that will be updated by the animation
  */
-export const useTiming = (
-  params: DurationInfoParameters & InterpolatorParams
-) => {
+export const useTiming = (params: TimingParams) => {
   const animation = useMemo(() => {
     return createTiming(params);
   }, [params]);
@@ -97,8 +97,6 @@ type LoopConfig = {
   yoyo?: boolean;
 };
 
-type LoopParams = DurationInfoParameters & InterpolatorParams;
-
 /**
  * Runs a timing animation in a loop
  * @param params Parameters for the timing animation
@@ -106,7 +104,7 @@ type LoopParams = DurationInfoParameters & InterpolatorParams;
  * @returns An animation value that will be updated by the animation
  */
 export const useLoop = (
-  params: LoopParams | BaseAnimation,
+  params: TimingParams | BaseAnimation,
   config?: LoopConfig
 ) => {
   const iterationsRef = useRef(0);
