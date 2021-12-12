@@ -1,2 +1,1 @@
-export * from "./functions";
-export * from "./hooks";
+export { useLoop, useProgress, useSpring, useTiming } from "./hooks";

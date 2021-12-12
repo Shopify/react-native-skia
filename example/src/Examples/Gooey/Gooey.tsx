@@ -6,7 +6,6 @@ import {
   Skia,
   translate,
   vec,
-  useLoop,
   Group,
   PathOp,
   rotate,
@@ -18,7 +17,6 @@ import {
   BlurImageFilter,
   ColorMatrix,
   ColorFilterAsImageFilter,
-  useValue,
   Spring,
   useTouchHandler,
   useSpring,
@@ -58,17 +56,12 @@ const icons = [
     dst: rotate(vec(c.x + 150, c.y), c, 0.75 * Math.PI),
   },
 ];
-// 3 ways
-// 1. create(config1, config2).start(value) (= run(value, config1, config2)) or create().stop()
 
 export const Gooey = () => {
   const paint = usePaintRef();
-  const [toggled, setToggle] = useState(false);
-  const onTouch = useTouchHandler({
-    onEnd: () => setToggle((t) => !t),
-  });
-  const progress = useValue(0);
-  useSpring(progress, { to: toggled ? 1 : 0 }, Spring.Wobbly());
+  const [toggled, setToggled] = useState(false);
+  const onTouch = useTouchHandler({ onEnd: () => setToggled(!toggled) });
+  const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch}>
       <Defs>

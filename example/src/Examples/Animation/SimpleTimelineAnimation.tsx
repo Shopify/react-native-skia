@@ -2,27 +2,25 @@ import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import {
   Canvas,
-  Timing,
   useValue,
   useLoop,
   Timeline,
 } from "@shopify/react-native-skia";
+import { createTiming } from "@shopify/react-native-skia/src/animation/Animation/functions";
 
 import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
 
 const { width } = Dimensions.get("window");
 
 export const SimpleTimelineAnimation = () => {
-  const progress = useValue(0);
   const x = useValue(0);
   const y = useValue(0);
   useLoop(
-    progress,
     Timeline.create((tl) => {
-      tl.add(Timing.create({ from: 0, to: 1, duration: 1000 }), x);
-      tl.add(Timing.create({ from: 0, to: 1, duration: 300 }), y);
-      tl.add(Timing.create({ from: 1, to: 0, duration: 1000 }), x);
-      tl.add(Timing.create({ from: 1, to: 0, duration: 300 }), y);
+      tl.add(createTiming({ from: 0, to: 1, duration: 1000 }), x);
+      tl.add(createTiming({ from: 0, to: 1, duration: 300 }), y);
+      tl.add(createTiming({ from: 1, to: 0, duration: 1000 }), x);
+      tl.add(createTiming({ from: 1, to: 0, duration: 300 }), y);
     }),
     { yoyo: false }
   );

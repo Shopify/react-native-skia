@@ -10,10 +10,9 @@ import {
   Group,
   Paint,
   polar2Canvas,
-  Timing,
+  Easing,
   mix,
   useLoop,
-  useValue,
 } from "@shopify/react-native-skia";
 
 const { width, height } = Dimensions.get("window");
@@ -46,13 +45,11 @@ const Ring = ({ index, progress }: RingProps) => {
 };
 
 export const Breathe = () => {
-  const progress = useValue(0);
-  useLoop(
-    progress,
-    Timing.create({
+  const progress = useLoop(
+    {
       duration: 3000,
-      easing: Timing.Easing.inOut(Timing.Easing.ease),
-    }),
+      easing: Easing.inOut(Easing.ease),
+    },
     { yoyo: true }
   );
 
