@@ -91,7 +91,7 @@ export const useTiming = (
  */
 export const useSpring = (
   value: AnimationValue,
-  params: InterpolatorParams,
+  params: number | Pick<InterpolatorParams, "from" | "to">,
   config: EasingInfo,
   startPaused?: boolean
 ) => {
