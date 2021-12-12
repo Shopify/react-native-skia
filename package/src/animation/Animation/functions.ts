@@ -11,8 +11,11 @@ import { TimelineAnimationFactory } from "./timelineAnimationFactory";
 import type { BaseAnimation } from "./types";
 
 /**
- * Creates a timeline animation object.
- * @returns
+ * Creates a new timeline animation. A timeline animation can run multiple
+ * animations with complex control over when each animation starts and stops using
+ * advanced positioning and staggering options.
+ * @param initializer callback to set up the timeline
+ * @returns timeline animation object
  */
 export const createTimeline = (
   initializer: (tla: TimelineAnimation) => void
@@ -20,6 +23,21 @@ export const createTimeline = (
   const tl = TimelineAnimationFactory();
   initializer(tl);
   return tl;
+};
+
+/**
+ * Creates a new timeline animation. A timeline animation can run multiple
+ * animations with complex control over when each animation starts and stops using
+ * advanced positioning and staggering options.
+ * @param progress Animation value to drive the timeline
+ * @param initializer callback to set up the timeline
+ * @returns timeline animation object
+ */
+export const runTimeline = (
+  progress: AnimationValue,
+  initializer: (tla: TimelineAnimation) => void
+) => {
+  return createTimeline(initializer).start(progress);
 };
 
 /**

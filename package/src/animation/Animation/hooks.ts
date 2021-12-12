@@ -27,8 +27,10 @@ const useAnimation = (
 };
 
 /**
- * Creates a new timeline animation.
- * @param progress Driver of the timeline animation
+ * Creates a new timeline animation. A timeline animation can run multiple
+ * animations with complex control over when each animation starts and stops using
+ * advanced positioning and staggering options.
+ * @param progress driver of the timeline animation
  * @param initializer Initialization callback for building the timeline
  * @param startPaused Whether the timeline should start paused or not. Default is false.
  * @returns
