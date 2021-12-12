@@ -16,10 +16,9 @@ import {
   Circle,
   Blur,
   ColorMatrix,
-  ColorFilterAsImageFilter,
   Spring,
   useTouchHandler,
-  useSpring
+  useSpring,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
