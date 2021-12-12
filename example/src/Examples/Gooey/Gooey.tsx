@@ -1,12 +1,11 @@
 /* eslint-disable max-len */
-import React from "react";
+import React, { useState } from "react";
 import {
   Canvas,
   Fill,
   Skia,
   translate,
   vec,
-  useLoop,
   Group,
   PathOp,
   rotate,
@@ -19,6 +18,8 @@ import {
   ColorMatrix,
   ColorFilterAsImageFilter,
   Spring,
+  useTouchHandler,
+  useSpring,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -58,9 +59,11 @@ const icons = [
 
 export const Gooey = () => {
   const paint = usePaintRef();
-  const progress = useLoop(Spring.create(1, Spring.Gentle()), { yoyo: true });
+  const [toggled, setToggled] = useState(false);
+  const onTouch = useTouchHandler({ onEnd: () => setToggled(!toggled) });
+  const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
   return (
-    <Canvas style={{ flex: 1 }} mode="continuous">
+    <Canvas style={{ flex: 1 }} onTouch={onTouch}>
       <Defs>
         <Paint ref={paint}>
           <ColorFilterAsImageFilter>

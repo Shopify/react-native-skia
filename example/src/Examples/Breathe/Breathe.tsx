@@ -10,7 +10,6 @@ import {
   Group,
   Paint,
   polar2Canvas,
-  createTiming,
   Easing,
   mix,
   useLoop,
@@ -47,10 +46,10 @@ const Ring = ({ index, progress }: RingProps) => {
 
 export const Breathe = () => {
   const progress = useLoop(
-    createTiming({
+    {
       duration: 3000,
       easing: Easing.inOut(Easing.ease),
-    }),
+    },
     { yoyo: true }
   );
 

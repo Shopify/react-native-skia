@@ -86,7 +86,7 @@ export const useSpring = (
   return useAnimation(animation);
 };
 
-type LoopParams = {
+type LoopConfig = {
   /*
     Number of repeats, from 0 to infinity. Defaults to infinity
     */
@@ -97,19 +97,32 @@ type LoopParams = {
   yoyo?: boolean;
 };
 
+type LoopParams = DurationInfoParameters & InterpolatorParams;
+
 /**
- * Runs the given animation in a loop
- * @param animation
+ * Runs a timing animation in a loop
+ * @param params Parameters for the timing animation
+ * @param config Loop configuration
  * @returns An animation value that will be updated by the animation
  */
-export const useLoop = (animation: BaseAnimation, params?: LoopParams) => {
+export const useLoop = (
+  params: LoopParams | BaseAnimation,
+  config?: LoopConfig
+) => {
   const iterationsRef = useRef(0);
+  const animation = useMemo(
+    () =>
+      "start" in params && "update" in params
+        ? (params as BaseAnimation)
+        : createTiming(params),
+    [params]
+  );
   const paramsResolved = useMemo(
     () => ({
-      repeat: params?.repeat ?? Infinity,
-      yoyo: params?.yoyo ?? false,
+      repeat: config?.repeat ?? Infinity,
+      yoyo: config?.yoyo ?? false,
     }),
-    [params]
+    [config]
   );
   const value = useValue(0);
   const startAnimation = useCallback(() => {

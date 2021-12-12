@@ -6,6 +6,7 @@ import {
   useTouchHandler,
   useValue,
 } from "@shopify/react-native-skia";
+import { runSpring } from "@shopify/react-native-skia/src/animation/Animation/functions";
 
 import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
 
@@ -18,7 +19,7 @@ export const AnimationWithTouchHandler = () => {
     onStart: ({ x }) => (offsetX.value = x - translateX.value),
     onActive: ({ x }) => (translateX.value = x - offsetX.value),
     onEnd: ({ velocityX }) => {
-      Spring.run(
+      runSpring(
         translateX,
         (width - Size - Padding) / 2,
         Spring.Wobbly({ velocity: velocityX })

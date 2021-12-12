@@ -1,6 +1,7 @@
 import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
-import { Canvas, Timing, useLoop } from "@shopify/react-native-skia";
+import { Canvas, Easing, useLoop } from "@shopify/react-native-skia";
+import { createTiming } from "@shopify/react-native-skia/src/animation/Animation/functions";
 
 import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
 
@@ -8,11 +9,11 @@ const { width } = Dimensions.get("window");
 
 export const InterpolationWithEasing = () => {
   const progress = useLoop(
-    Timing.create({
+    createTiming({
       from: 10,
       to: width - Size - Padding,
       duration: 1000,
-      easing: Timing.Easing.inOut(Timing.Easing.cubic),
+      easing: Easing.inOut(Easing.cubic),
     }),
     { yoyo: true }
   );

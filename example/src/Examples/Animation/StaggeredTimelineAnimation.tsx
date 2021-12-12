@@ -7,6 +7,7 @@ import {
   useLoop,
   Timeline,
 } from "@shopify/react-native-skia";
+import { createSpring } from "@shopify/react-native-skia/src/animation/Animation/functions";
 
 import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
 
@@ -25,7 +26,7 @@ export const StaggeredTimelineAnimation = () => {
     Timeline.create((tl) => {
       tl.stagger(
         values.map(() =>
-          Spring.create({ from: 0, to: 1 }, Spring.Config.Wobbly)
+          createSpring({ from: 0, to: 1 }, Spring.Config.Wobbly)
         ),
         values,
         {

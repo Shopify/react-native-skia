@@ -1,6 +1,5 @@
 import type { SpringConfig } from "./functions";
 import { createSpringEasing } from "./functions";
-import { createSpring, runSpring } from "./Animation";
 
 /*
   Spring animation configurations
@@ -34,8 +33,6 @@ const Config = {
 };
 
 export const Spring = {
-  create: createSpring,
-  run: runSpring,
   Config,
   Gentle: (config: SpringConfig = {}) =>
     createSpringEasing({

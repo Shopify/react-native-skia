@@ -1,6 +1,7 @@
 import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
-import { Canvas, Timing, useLoop } from "@shopify/react-native-skia";
+import { Canvas, useLoop } from "@shopify/react-native-skia";
+import { createTiming } from "@shopify/react-native-skia/src/animation/Animation/functions";
 
 import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
 
@@ -8,7 +9,7 @@ const { width } = Dimensions.get("window");
 
 export const InterpolatingValueOverTime = () => {
   const progress = useLoop(
-    Timing.create({
+    createTiming({
       from: 0,
       to: width - Size,
       duration: 1000,
