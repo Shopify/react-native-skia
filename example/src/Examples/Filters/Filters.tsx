@@ -9,7 +9,7 @@ import {
   Shader,
   mix,
   useLoop,
-  Timing,
+  createTiming,
 } from "@shopify/react-native-skia";
 
 const { width, height } = Dimensions.get("window");
@@ -24,7 +24,7 @@ half4 main(float2 xy) {
 }`)!;
 
 export const Filters = () => {
-  const progress = useLoop(Timing.create({ duration: 1500 }), { yoyo: true });
+  const progress = useLoop(createTiming({ duration: 1500 }), { yoyo: true });
   return (
     <Canvas style={{ width, height }}>
       <Paint>
