@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React from "react";
+import React, { useState } from "react";
 import {
   Canvas,
   Fill,
@@ -20,6 +20,8 @@ import {
   ColorFilterAsImageFilter,
   useValue,
   Spring,
+  useTouchHandler,
+  useSpring,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -56,13 +58,19 @@ const icons = [
     dst: rotate(vec(c.x + 150, c.y), c, 0.75 * Math.PI),
   },
 ];
+// 3 ways
+// 1. create(config1, config2).start(value) (= run(value, config1, config2)) or create().stop()
 
 export const Gooey = () => {
   const paint = usePaintRef();
+  const [toggled, setToggle] = useState(false);
+  const onTouch = useTouchHandler({
+    onEnd: () => setToggle((t) => !t),
+  });
   const progress = useValue(0);
-  useLoop(progress, Spring.create(1, Spring.Gentle()), { yoyo: true });
+  useSpring(progress, { to: toggled ? 1 : 0 }, Spring.Wobbly());
   return (
-    <Canvas style={{ flex: 1 }} mode="continuous">
+    <Canvas style={{ flex: 1 }} onTouch={onTouch}>
       <Defs>
         <Paint ref={paint}>
           <ColorFilterAsImageFilter>
