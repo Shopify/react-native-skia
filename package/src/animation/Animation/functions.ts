@@ -60,12 +60,13 @@ export const createTiming = (
  * @param onAnimationDone Optional callback that will be called when the animation has finished
  */
 export const createSpring = (
-  params: Pick<InterpolatorParams, "from" | "to">,
+  params: number | Pick<InterpolatorParams, "from" | "to">,
   config: EasingInfo,
   onAnimationDone?: () => void
 ) => {
+  const resolvedParams = typeof params === "number" ? { to: params } : params;
   return InterpolatorAnimationFactory(
-    { ...params, easing: config },
+    { ...resolvedParams, easing: config },
     onAnimationDone
   );
 };

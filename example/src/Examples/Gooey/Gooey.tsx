@@ -19,7 +19,7 @@ import {
   ColorMatrix,
   ColorFilterAsImageFilter,
   useValue,
-  Timing,
+  Spring,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -60,7 +60,7 @@ const icons = [
 export const Gooey = () => {
   const paint = usePaintRef();
   const progress = useValue(0);
-  useLoop(progress, Timing.create({ duration: 2000 }));
+  useLoop(progress, Spring.create(1, Spring.Gentle()), { yoyo: true });
   return (
     <Canvas style={{ flex: 1 }} mode="continuous">
       <Defs>
