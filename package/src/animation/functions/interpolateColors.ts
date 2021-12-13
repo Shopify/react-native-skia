@@ -4,7 +4,7 @@ import {
   green,
   blue,
   alpha,
-  color,
+  rgbaColor,
 } from "../../renderer/processors/Paint";
 
 import { interpolate } from "./interpolate";
@@ -43,7 +43,7 @@ const interpolateColorsRGB = (
     outputRange.map((c) => alpha(c)),
     CLAMP
   );
-  return color(r, g, b, a);
+  return rgbaColor(r, g, b, a);
 };
 
 export const interpolateColors = (
