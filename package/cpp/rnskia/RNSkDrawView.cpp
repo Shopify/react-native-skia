@@ -30,11 +30,11 @@ RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
       _platformContext(context),
       _infoObject(std::make_shared<RNSkInfoObject>()),
       _timingInfo(std::make_shared<RNSkTimingInfo>()),
-      _isDeleted(false) {}
+      _isRemoved(false) {}
 
 RNSkDrawView::~RNSkDrawView() {
   {
-    _isDeleted = true;
+    _isRemoved = true;
     // This is a very simple fix to an issue where the view posts a redraw
     // function to the javascript thread, and the object is destroyed and then
     // the redraw function is called and ends up executing on a destroyed draw
@@ -45,7 +45,7 @@ RNSkDrawView::~RNSkDrawView() {
     milliseconds start = std::chrono::duration_cast<milliseconds>(
         system_clock::now().time_since_epoch());
 
-    RNSkLogger::logToConsole("Starting to delete RNSkDrawView...");
+    // RNSkLogger::logToConsole("Starting to delete RNSkDrawView...");
     while (_isDrawing == true) {
       milliseconds now = std::chrono::duration_cast<milliseconds>(
           system_clock::now().time_since_epoch());
@@ -58,7 +58,12 @@ RNSkDrawView::~RNSkDrawView() {
   }
 }
 
-void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
+void RNSkDrawView::setIsRemoved() {
+  _isRemoved = true;
+  endDrawingLoop();
+}
+
+void RNSkDrawView::setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Function> callback) {
 
   if (callback == nullptr) {
     _drawCallback = nullptr;
@@ -66,6 +71,9 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     endDrawingLoop();
     return;
   }
+
+  // Update native id
+  _nativeId = nativeId;
 
   // Reset timing info
   _timingInfo->reset();
@@ -176,14 +184,16 @@ void RNSkDrawView::requestRedraw() {
   _isDrawing = true;
   
   auto performDraw = [this]() {
+    if(getIsRemoved()) {
+      RNSkLogger::logToConsole("WARNING: Trying to redraw after delete!");
+      _isDrawing = false;
+      return;
+    }
+
     if (_drawingMode == RNSkDrawingMode::Continuous) {
       _isDrawing = false;
       beginDrawingLoop();
       return;
-    }
-    
-    if(_isDeleted) {
-      RNSkLogger::logToConsole("WARNING: Trying to redraw after delete!");
     }
     
     milliseconds ms = std::chrono::duration_cast<milliseconds>(
@@ -192,6 +202,7 @@ void RNSkDrawView::requestRedraw() {
     drawFrame(ms.count() / 1000.0);
 
     _isDrawing = false;
+
     if(_redrawRequestCounter > 0) {
       _redrawRequestCounter = 0;
       requestRedraw();
@@ -203,6 +214,10 @@ void RNSkDrawView::requestRedraw() {
 
 bool RNSkDrawView::isReadyToDraw() {
   if (_isDrawing) {
+    return false;
+  }
+
+  if(getIsRemoved()) {
     return false;
   }
 
@@ -220,22 +235,31 @@ bool RNSkDrawView::isReadyToDraw() {
 }
 
 void RNSkDrawView::beginDrawingLoop() {
-  if (_drawingLoopIdentifier != -1) {
+  if(getIsRemoved()) {
     return;
   }
 
+  if (_drawingLoopId != -1) {
+    return;
+  }
+  
+  RNSkLogger::logToConsole("Starting draw loop for %i", _nativeId);
+
   // Set to zero to avoid calling beginDrawLoop before we return
-  _drawingLoopIdentifier = 0;
-  _drawingLoopIdentifier =
-      _platformContext->beginDrawLoop([this]() {
-        auto performDraw = [=]() {
+  _drawingLoopId = 0;
+  _drawingLoopId =
+      _platformContext->beginDrawLoop(_nativeId, [this]() {
+        auto performDraw = [&]() {
+          if(getIsRemoved()) {
+            return;
+          }
+
           milliseconds ms = std::chrono::duration_cast<milliseconds>(
               system_clock::now().time_since_epoch());
-          
-          if(!_isDeleted) {
-            // Only redraw if view is still alive
-            drawFrame(ms.count() / 1000.0);
-          }
+
+          // Only redraw if view is still alive
+          drawFrame(ms.count() / 1000.0);
+
           _isDrawing = false;
         };
 
@@ -249,11 +273,15 @@ void RNSkDrawView::beginDrawingLoop() {
 }
 
 void RNSkDrawView::endDrawingLoop() {
-  _platformContext->endDrawLoop(_drawingLoopIdentifier);
-  _drawingLoopIdentifier = -1;
+  RNSkLogger::logToConsole("Stopping draw loop for %i", _nativeId);
+    _platformContext->endDrawLoop(_nativeId);
+    _drawingLoopId = -1;
 }
 
 void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
+  if(getIsRemoved()) {
+    return;
+  }
   if(mode != _drawingMode) {
     _drawingMode = mode;
     if(mode == RNSkDrawingMode::Default) {

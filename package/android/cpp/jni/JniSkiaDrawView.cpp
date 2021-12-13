@@ -53,24 +53,22 @@ namespace RNSkia
                         makeNativeMethod("surfaceSizeChanged", JniSkiaDrawView::surfaceSizeChanged),
                         makeNativeMethod("setMode", JniSkiaDrawView::setMode),
                         makeNativeMethod("setDebugMode", JniSkiaDrawView::setDebugMode),
-                        makeNativeMethod("updateTouchPoints", JniSkiaDrawView::updateTouchPoints)
+                        makeNativeMethod("updateTouchPoints", JniSkiaDrawView::updateTouchPoints),
+                        makeNativeMethod("setIsRemoved", JniSkiaDrawView::setIsRemovedExternal)
         });
     }
 
     void JniSkiaDrawView::setMode(std::string mode)
     {
-        if (mode.compare("continuous") == 0)
-        {
+        if (mode.compare("continuous") == 0) {
             setDrawingMode(RNSkDrawingMode::Continuous);
         }
-        else
-        {
+        else {
             setDrawingMode(RNSkDrawingMode::Default);
         }
     }
 
-    void JniSkiaDrawView::setDebugMode(bool show)
-    {
+    void JniSkiaDrawView::setDebugMode(bool show) {
         setShowDebugOverlays(show);
     }
 

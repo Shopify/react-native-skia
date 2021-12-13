@@ -101,27 +101,25 @@ public:
    * @param callback Callback to call on sync
    * @returns Identifier of the draw loop entry
    */
-  size_t beginDrawLoop(std::function<void(void)> callback) {
+  size_t beginDrawLoop(size_t nativeId, std::function<void(void)> callback) {
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    size_t nextId = ++_listenerId;
-    _drawCallbacks.emplace(nextId, std::move(callback));
+    _drawCallbacks.emplace(nativeId, std::move(callback));
     if (_drawCallbacks.size() == 1) {
       // Start
       startDrawLoop();
     }
-
-    return nextId;
+    return nativeId;
   }
 
   /**
    * Ends (if running) the drawing loop that was started with beginDrawLoop.
    * This method must be called symmetrically with the beginDrawLoop method.
-   * @param identifier Identifier of drawloop drawCallback to end
+   * @param nativeId Identifier of view to end
    */
-  void endDrawLoop(size_t identifier) {
+  void endDrawLoop(size_t nativeId) {
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    if (_drawCallbacks.count(identifier) > 0) {
-      _drawCallbacks.erase(identifier);
+    if (_drawCallbacks.count(nativeId) > 0) {
+      _drawCallbacks.erase(nativeId);
     }
     if (_drawCallbacks.size() == 0) {
       stopDrawLoop();
@@ -150,7 +148,6 @@ private:
   std::function<void(const std::function<void(void)> &)>
       _dispatchOnRenderThread;
 
-  size_t _listenerId = 0;
   std::map<size_t, std::function<void(void)>> _drawCallbacks;
   std::mutex _drawCallbacksLock;
 };
