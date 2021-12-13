@@ -26,7 +26,7 @@ export const alpha = (c: number) => ((c >> 24) & 255) / 255;
 export const red = (c: number) => (c >> 16) & 255;
 export const green = (c: number) => (c >> 8) & 255;
 export const blue = (c: number) => c & 255;
-export const color = (r: number, g: number, b: number, af: number) => {
+export const rgbaColor = (r: number, g: number, b: number, af: number) => {
   const a = Math.round(af * 255);
   return ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
 };
@@ -37,14 +37,14 @@ export const processColor = (cl: ColorProp, currentOpacity: number) => {
   const g = green(icl);
   const b = blue(icl);
   const o = alpha(icl);
-  return color(r, g, b, o * currentOpacity);
+  return rgbaColor(r, g, b, o * currentOpacity);
 };
 
 export const processPaint = (
   paint: IPaint,
   currentOpacity: number,
   {
-    color: cl,
+    color,
     blendMode,
     style,
     strokeWidth,
@@ -54,8 +54,8 @@ export const processPaint = (
     opacity,
   }: CustomPaintProps
 ) => {
-  if (cl !== undefined) {
-    const c = processColor(cl, currentOpacity);
+  if (color !== undefined) {
+    const c = processColor(color, currentOpacity);
     paint.setShader(null);
     paint.setColor(c);
   } else {
