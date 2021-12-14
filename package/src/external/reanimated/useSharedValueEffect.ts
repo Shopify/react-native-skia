@@ -19,16 +19,24 @@ try {
 import type { SkiaView } from "../../views/SkiaView";
 import { invalidateSkiaView } from "../../views/SkiaView";
 
-type SharedValueTypeWrapper<T = number> =
-  | typeof Reanimated.SharedValue
-  | {
-      value: T;
-    };
+type SharedValueTypeWrapper<T = number> = {
+  value: T;
+};
 
 const repaintSkiaView = (nativeId: number) => {
   // console.log("Yes");
   // ref.current?.redraw();
   invalidateSkiaView(nativeId.toString());
+};
+
+const useSharedValueWrapper = (value: number) => {
+  return useMemo(() => {
+    if (Reanimated !== undefined) {
+      return Reanimated.AnimatedValue(value);
+    } else {
+      return { value: 0 };
+    }
+  }, [value]);
 };
 
 /**
@@ -43,7 +51,7 @@ export const useSharedValueEffect = <T = number>(
   value: SharedValueTypeWrapper<T>,
   ...values: SharedValueTypeWrapper<T>[]
 ) => {
-  const input = Reanimated.useSharedValue(0);
+  const input = useSharedValueWrapper(0);
   const { runOnJS, startMapper, stopMapper } = useMemo(() => {
     if (Reanimated && Core) {
       const { runOnJS } = Reanimated;
