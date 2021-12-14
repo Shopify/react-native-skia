@@ -15,10 +15,12 @@ Let's say we have a rectangle that we want to animate along its x-axis over time
 
 We'll start of by modifying a simple example that paints a red rectangle on the screen:
 
-```tsx
+```tsx twoslash
+import { Canvas, Rect } from "@shopify/react-native-skia";
+
 const myComponent = () => {
   return (
-    <Canvas style={styles.container}>
+    <Canvas>
       <Rect x={100} y={100} width={10} height={10} color={"red"} />
     </Canvas>
   );
@@ -29,11 +31,18 @@ To set up the animation we need an animation value that changes over time and kn
 
 We also need an `Animation` to provide new values to the animation value over time. A progress animation makes sense here - as it will update the animation value with the number of seconds passed since it was started.
 
-```tsx
+```tsx twoslash
+import {
+  Canvas,
+  Rect,
+  interpolate,
+  useProgress,
+} from "@shopify/react-native-skia";
+
 const myComponent = () => {
   const progress = useProgress();
   return (
-    <Canvas style={styles.container}>
+    <Canvas>
       <Rect
         x={(ctx) => interpolate(progress.value, [0, 1000], [0, ctx.width])}
         y={100}
@@ -73,22 +82,31 @@ The `useSpring` hook will create a spring based animation that changes the retur
 
 There is also a convinient hook for handling touches in the `SkiaViews`. This hook works well with animation values.
 
-```tsx
-const cx = useValue(center.x);
-const cy = useValue(center.y);
+```tsx twoslash
+import {
+  Canvas,
+  Circle,
+  useValue,
+  useTouchHandler,
+} from "@shopify/react-native-skia";
 
-const touchHandler = useTouchHandler({
-  onActive: ({ x, y }) => {
-    cx.value = x;
-    cy.value = y;
-  },
-});
+const MyComponent = () => {
+  const cx = useValue(100);
+  const cy = useValue(100);
 
-return (
-  <Canvas style={{ flex: 1 }} onTouch={touchHandler}>
-    <Circle cx={() => cx.value} cy={() => cy.value} r={10} color="red" />
-  </Canvas>
-);
+  const touchHandler = useTouchHandler({
+    onActive: ({ x, y }) => {
+      cx.value = x;
+      cy.value = y;
+    },
+  });
+
+  return (
+    <Canvas style={{ flex: 1 }} onTouch={touchHandler}>
+      <Circle cx={() => cx.value} cy={() => cy.value} r={10} color="red" />
+    </Canvas>
+  );
+};
 ```
 
 In the above example we can see that we are creating the `touchHandler` callback using the `useTouchHandler` hook - which can be provided as the onTouch callback on the `Canvas` or `SkiaView`.
