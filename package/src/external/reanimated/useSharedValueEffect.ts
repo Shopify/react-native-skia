@@ -76,7 +76,9 @@ export const useSharedValueEffect = <T = number>(
         [input]
       );
       return () => {
-        stopMapper?.(mapperId);
+        if (stopMapper && mapperId !== undefined) {
+          stopMapper(mapperId);
+        }
       };
     }
     return () => {};
