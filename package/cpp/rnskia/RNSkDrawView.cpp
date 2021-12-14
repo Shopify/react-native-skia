@@ -44,8 +44,7 @@ RNSkDrawView::~RNSkDrawView() {
     // might have gotten an exception that caused the flag never to be reset.
     milliseconds start = std::chrono::duration_cast<milliseconds>(
         system_clock::now().time_since_epoch());
-
-    // RNSkLogger::logToConsole("Starting to delete RNSkDrawView...");
+    
     while (_isDrawing == true) {
       milliseconds now = std::chrono::duration_cast<milliseconds>(
           system_clock::now().time_since_epoch());
@@ -54,7 +53,6 @@ RNSkDrawView::~RNSkDrawView() {
         break;
       }
     }
-    RNSkLogger::logToConsole("RNSkDrawView safely deleted.");
   }
 }
 
@@ -185,7 +183,7 @@ void RNSkDrawView::requestRedraw() {
   
   auto performDraw = [this]() {
     if(getIsRemoved()) {
-      RNSkLogger::logToConsole("WARNING: Trying to redraw after delete!");
+      RNSkLogger::logToConsole("Warning: Trying to redraw after delete!");
       _isDrawing = false;
       return;
     }
@@ -243,8 +241,6 @@ void RNSkDrawView::beginDrawingLoop() {
     return;
   }
   
-  RNSkLogger::logToConsole("Starting draw loop for %i", _nativeId);
-
   // Set to zero to avoid calling beginDrawLoop before we return
   _drawingLoopId = 0;
   _drawingLoopId =
@@ -273,9 +269,8 @@ void RNSkDrawView::beginDrawingLoop() {
 }
 
 void RNSkDrawView::endDrawingLoop() {
-  RNSkLogger::logToConsole("Stopping draw loop for %i", _nativeId);
-    _platformContext->endDrawLoop(_nativeId);
-    _drawingLoopId = -1;
+  _platformContext->endDrawLoop(_nativeId);
+  _drawingLoopId = -1;
 }
 
 void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
