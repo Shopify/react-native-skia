@@ -40,7 +40,8 @@
   "readmeFilename": "README.md",
   "peerDependencies": {
     "react": ">=16.8.1",
-    "react-native": ">=0.63.0-rc.0 <1.0.x"
+    "react-native": ">=0.63.0-rc.0 <1.0.x",
+    "react-native-reanimated": ">=2.0.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",
