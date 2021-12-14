@@ -23,6 +23,10 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   private _nativeId: string;
   private _animatingValues: Array<unknown> = [];
 
+  public get nativeId() {
+    return this._nativeId;
+  }
+
   componentDidUpdate(prevProps: RNSkiaViewProps) {
     const { onDraw } = this.props;
     if (onDraw !== prevProps.onDraw) {
@@ -112,7 +116,7 @@ const setDrawCallback = (
   return SkiaViewApi.setDrawCallback(parseInt(nativeId, 10), drawCallback);
 };
 
-const invalidateSkiaView = (nativeId: string) => {
+export const invalidateSkiaView = (nativeId: string) => {
   SkiaViewApi.invalidateSkiaView(parseInt(nativeId, 10));
 };
 

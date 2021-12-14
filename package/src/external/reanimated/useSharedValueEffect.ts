@@ -17,12 +17,19 @@ try {
 }
 
 import type { SkiaView } from "../../views/SkiaView";
+import { invalidateSkiaView } from "../../views/SkiaView";
 
 type SharedValueTypeWrapper<T = number> =
+  | typeof Reanimated.SharedValue
   | {
       value: T;
-    }
-  | typeof Reanimated.SharedValue;
+    };
+
+const repaintSkiaView = (nativeId: number) => {
+  // console.log("Yes");
+  // ref.current?.redraw();
+  invalidateSkiaView(nativeId.toString());
+};
 
 /**
  * Connects a shared value from reanimated to a SkiaView or Canvas
@@ -33,9 +40,9 @@ type SharedValueTypeWrapper<T = number> =
  */
 export const useSharedValueEffect = <T = number>(
   ref: RefObject<SkiaView>,
-  value: SharedValueTypeWrapper<T>,
   ...values: SharedValueTypeWrapper<T>[]
 ) => {
+  const input = Reanimated.useSharedValue(0);
   const { runOnJS, startMapper, stopMapper } = useMemo(() => {
     if (Reanimated && Core) {
       const { runOnJS } = Reanimated;
@@ -54,16 +61,24 @@ export const useSharedValueEffect = <T = number>(
   }, []);
 
   useEffect(() => {
-    const mapperId = startMapper?.(
-      () => {
-        "worklet";
-        runOnJS?.(ref.current?.redraw)();
-      },
-      values,
-      [value]
-    );
-    return () => {
-      stopMapper?.(mapperId);
-    };
-  }, [ref, runOnJS, startMapper, stopMapper, value, values]);
+    if (
+      startMapper !== undefined &&
+      runOnJS !== undefined &&
+      stopMapper !== undefined
+    ) {
+      const nativeId = ref.current?.nativeId;
+      const mapperId = startMapper(
+        () => {
+          "worklet";
+          runOnJS(repaintSkiaView)(nativeId);
+        },
+        values,
+        [input]
+      );
+      return () => {
+        stopMapper?.(mapperId);
+      };
+    }
+    return () => {};
+  }, [input, ref, runOnJS, startMapper, stopMapper, values]);
 };
