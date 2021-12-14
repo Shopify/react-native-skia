@@ -29,15 +29,10 @@ const repaintSkiaView = (nativeId: number) => {
   invalidateSkiaView(nativeId.toString());
 };
 
-const useSharedValueWrapper = (value: number) => {
-  return useMemo(() => {
-    if (Reanimated !== undefined) {
-      return Reanimated.AnimatedValue(value);
-    } else {
-      return { value: 0 };
-    }
-  }, [value]);
-};
+const useSharedValueWrapper =
+  Reanimated.useSharedValue === undefined
+    ? (value: number) => useMemo(() => ({ value }), [value])
+    : Reanimated.useSharedValue;
 
 /**
  * Connects a shared value from reanimated to a SkiaView or Canvas
