@@ -30,7 +30,7 @@ const repaintSkiaView = (nativeId: number) => {
 };
 
 const useSharedValueWrapper =
-  Reanimated.useSharedValue === undefined
+  Reanimated?.useSharedValue === undefined
     ? (value: number) => useMemo(() => ({ value }), [value])
     : Reanimated.useSharedValue;
 
