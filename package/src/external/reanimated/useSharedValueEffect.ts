@@ -40,6 +40,7 @@ const repaintSkiaView = (nativeId: number) => {
  */
 export const useSharedValueEffect = <T = number>(
   ref: RefObject<SkiaView>,
+  value: SharedValueTypeWrapper<T>,
   ...values: SharedValueTypeWrapper<T>[]
 ) => {
   const input = Reanimated.useSharedValue(0);
@@ -60,21 +61,30 @@ export const useSharedValueEffect = <T = number>(
     }
   }, []);
 
+  // To make sure we'll always provide one or more values as triggers
+  // we defined the input as either and always a single value - and
+  // then accept additional values if needed.
+  const triggers = useMemo(() => [value, ...values], [value, values]);
+
   useEffect(() => {
     if (
       startMapper !== undefined &&
       runOnJS !== undefined &&
       stopMapper !== undefined
     ) {
+      // Get the native id from the Skia View
       const nativeId = ref.current?.nativeId;
+
+      // Start a mapper in Reanimated
       const mapperId = startMapper(
         () => {
           "worklet";
           runOnJS(repaintSkiaView)(nativeId);
         },
-        values,
+        triggers,
         [input]
       );
+      // Return unregistering the mapper
       return () => {
         if (stopMapper && mapperId !== undefined) {
           stopMapper(mapperId);
@@ -82,5 +92,5 @@ export const useSharedValueEffect = <T = number>(
       };
     }
     return () => {};
-  }, [input, ref, runOnJS, startMapper, stopMapper, values]);
+  }, [input, ref, runOnJS, startMapper, stopMapper, triggers, values]);
 };
