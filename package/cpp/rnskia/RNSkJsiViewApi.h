@@ -61,7 +61,7 @@ public:
 
     // Update view if set
     if (info->view != nullptr && info->drawCallback != nullptr) {
-      info->view->setDrawCallback(info->drawCallback);
+      info->view->setDrawCallback(nativeId, info->drawCallback);
     }
 
     return jsi::Value::undefined();
@@ -110,7 +110,6 @@ public:
     auto info = getEnsuredCallbackInfo(nativeId);
     if (info->view != nullptr) {
       auto nextMode = arguments[1].asString(runtime).utf8(runtime);
-      RNSkLogger::logToConsole(nextMode);
       if(nextMode.compare("continuous") == 0) {
         info->view->setDrawingMode(RNSkDrawingMode::Continuous);
       } else {
@@ -156,7 +155,7 @@ public:
     auto info = getEnsuredCallbackInfo(nativeId);
     info->view = view;
     if (info->drawCallback != nullptr) {
-      info->view->setDrawCallback(info->drawCallback);
+      info->view->setDrawCallback(nativeId, info->drawCallback);
     }
   }
 
@@ -170,7 +169,7 @@ public:
     }
     auto info = getEnsuredCallbackInfo(nativeId);
     if (info->view != nullptr) {
-      info->view->setDrawCallback(nullptr);
+      info->view->setDrawCallback(nativeId, nullptr);
     }
     info->view = nullptr;
     info->drawCallback = nullptr;
