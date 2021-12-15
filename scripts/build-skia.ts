@@ -1,6 +1,7 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
+
 const fs = require("fs");
 const typedKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
 
@@ -58,7 +59,9 @@ const configurePlatform = (platform: PlatformName, cpu: string) => {
     executeCmdSync(command);
     return true;
   } else {
-    console.log(`Could not find platform "${platform}" for tagetCpu "${cpu}" `);
+    console.log(
+      `Could not find platform "${platform}" for targetCpu "${cpu}" `
+    );
     return false;
   }
 };

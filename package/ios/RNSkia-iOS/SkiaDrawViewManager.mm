@@ -27,17 +27,25 @@ RCT_CUSTOM_VIEW_PROPERTY(nativeID, NSNumber, SkiaDrawView) {
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(mode, NSString, SkiaDrawView) {
-  std::string mode = [[RCTConvert NSString:json] UTF8String];
-  if(mode.compare("continuous") == 0) {
-    [(SkiaDrawView*)view impl]->setDrawingMode(RNSkia::RNSkDrawingMode::Continuous);
+  if(json != NULL) {
+    std::string mode = [[RCTConvert NSString:json] UTF8String];
+    if(mode.compare("continuous") == 0) {
+      [(SkiaDrawView*)view impl]->setDrawingMode(RNSkia::RNSkDrawingMode::Continuous);
+    } else {
+      [(SkiaDrawView*)view impl]->setDrawingMode(RNSkia::RNSkDrawingMode::Default);
+    }
   } else {
     [(SkiaDrawView*)view impl]->setDrawingMode(RNSkia::RNSkDrawingMode::Default);
   }
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(debug, BOOL, SkiaDrawView) {
-  bool show = [RCTConvert BOOL:json];
-  [(SkiaDrawView*)view impl]->setShowDebugOverlays(show);
+  if(json != NULL) {
+    bool show = [RCTConvert BOOL:json];
+    [(SkiaDrawView*)view impl]->setShowDebugOverlays(show);
+  } else {
+    [(SkiaDrawView*)view impl]->setShowDebugOverlays(false);
+  }
 }
 
 RCT_EXPORT_MODULE(ReactNativeSkiaView)

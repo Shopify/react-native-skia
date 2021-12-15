@@ -357,17 +357,11 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveLayer) {
-    SkPaint *paint = arguments[0].isUndefined()
-                         ? nullptr
-                         : JsiSkPaint::fromValue(runtime, arguments[0]).get();
-    SkRect *bounds = arguments[1].isNull() || arguments[1].isUndefined()
-                         ? nullptr
-                         : JsiSkRect::fromValue(runtime, arguments[1]).get();
-    SkImageFilter *backdrop =
-        arguments[2].isNull() || count < 3
-            ? nullptr
-            : JsiSkImageFilter::fromValue(runtime, arguments[2]).get();
-    SkCanvas::SaveLayerFlags flags = count < 4 ? 0 : arguments[3].asNumber();
+    SkPaint *paint = (count >= 1 && !arguments[0].isUndefined()) ?
+                         JsiSkPaint::fromValue(runtime, arguments[0]).get() : nullptr;
+    SkRect *bounds = count >= 2 && !arguments[1].isNull() && arguments[1].isUndefined() ? JsiSkRect::fromValue(runtime, arguments[1]).get() : nullptr;
+    SkImageFilter *backdrop = count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined() ? JsiSkImageFilter::fromValue(runtime, arguments[2]).get() : nullptr;
+    SkCanvas::SaveLayerFlags flags = count >= 4 ? arguments[3].asNumber() : 0;
     return jsi::Value(_canvas->saveLayer(
         SkCanvas::SaveLayerRec(bounds, paint, backdrop, flags)));
   }

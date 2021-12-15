@@ -45,7 +45,7 @@ public:
   /**
    * Installs the draw callback for the view
    */
-  void setDrawCallback(std::shared_ptr<jsi::Function> callback);
+  void setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Function> callback);
 
   /**
    * Call this method with a valid Skia surface to let the draw drawCallback do
@@ -76,6 +76,16 @@ protected:
    * Setup and draw the frame
    */
   virtual void drawFrame(double time) = 0;
+
+  /**
+   * Mark view as removed from the RN view stack
+   */
+  void setIsRemoved();
+
+  /**
+   * @return True if the view was marked as deleted
+   */
+  bool getIsRemoved() { return _isRemoved; }
 
   /**
    Updates the last duration value
@@ -142,7 +152,7 @@ private:
   /**
    * True if the drawing loop has been requested
    */
-  size_t _drawingLoopIdentifier = -1;
+  size_t _drawingLoopId = -1;
 
   /**
    * Info object parameter
@@ -153,6 +163,19 @@ private:
    Timing information
    */
   std::shared_ptr<RNSkTimingInfo> _timingInfo;
+  /**
+   Redraw queue counter
+   */
+  std::atomic<int> _redrawRequestCounter;
+  /**
+   Flag indicating that the view is no longer available
+   */
+  std::atomic<bool> _isRemoved;
+
+  /**
+   * Native id
+   */
+  size_t _nativeId;
 };
 
 } // namespace RNSkia

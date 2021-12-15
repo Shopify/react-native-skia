@@ -1,4 +1,4 @@
-export * from "./ColorMatrix";
+export * from "./Matrix";
 export * from "./Blend";
 export * from "./Lerp";
 export * from "./LinearToSRGBGamma";

@@ -7,6 +7,7 @@ import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
+import { isPaint } from "../../skia";
 
 type DrawingCallback = (ctx: DrawingContext, children: SkNode[]) => void;
 
@@ -31,6 +32,7 @@ export const useDrawing = <T,>(
 
 export interface DrawingProps extends AnimatedProps<CustomPaintProps> {
   onDraw: DrawingCallback;
+  skipProcessing?: boolean;
 }
 
 export const Drawing = (props: DrawingProps) => {
@@ -40,11 +42,32 @@ export const Drawing = (props: DrawingProps) => {
 export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
   type: NodeType.Drawing,
   props,
-  draw: (ctx, { onDraw, ...newProps }, children) => {
-    const drawingProps = materialize(ctx, newProps);
-    const selectedPaint = selectPaint(ctx.paint, drawingProps);
-    processPaint(selectedPaint, ctx.opacity, drawingProps);
-    onDraw({ ...ctx, paint: selectedPaint }, children);
+  draw: (ctx, { onDraw, skipProcessing, ...newProps }, children) => {
+    if (skipProcessing) {
+      onDraw(ctx, children);
+    } else {
+      const drawingProps = materialize(ctx, newProps);
+      const selectedPaint = selectPaint(ctx.paint, drawingProps);
+      processPaint(selectedPaint, ctx.opacity, drawingProps);
+      // to draw only once:
+      // onDraw({ ...ctx, paint: selectedPaint }, children);
+      [
+        selectedPaint,
+        ...children
+          .map((child) => {
+            if (child.type === NodeType.Declaration) {
+              const ret = child.draw(ctx, child.props, child.children);
+              if (ret) {
+                return ret;
+              }
+            }
+            return null;
+          })
+          .filter(isPaint),
+      ].forEach((paint) => {
+        onDraw({ ...ctx, paint }, children);
+      });
+    }
   },
   children: [],
 });

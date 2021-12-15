@@ -2,7 +2,7 @@ import React from "react";
 import type { ReactNode, RefObject } from "react";
 
 import { processChildren } from "../Host";
-import type { IRRect, IPath, IPaint } from "../../skia";
+import type { IPath, IPaint, IRect, IRRect } from "../../skia";
 import { ClipOp, Skia } from "../../skia";
 import { processTransform, selectPaint, processPaint } from "../processors";
 import type {
@@ -11,13 +11,14 @@ import type {
   AnimatedProps,
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
+import { isRRect, rrect } from "../processors/Shapes";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
   children: ReactNode | ReactNode[];
-  clipRect?: IRRect;
+  clipRect?: IRect | IRRect;
   clipPath?: IPath | string;
-  clipOp?: "difference" | "intersect";
-  rasterize?: { paint: RefObject<IPaint> };
+  invertClip?: boolean;
+  rasterize?: RefObject<IPaint>;
 }
 
 export const Group = (props: AnimatedProps<GroupProps>) => {
@@ -25,20 +26,24 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
     props,
     (
       ctx,
-      { clipRect, rasterize, clipPath, clipOp, ...groupProps },
+      { clipRect, rasterize, clipPath, invertClip, ...groupProps },
       children
     ) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
       if (rasterize) {
-        canvas.saveLayer(rasterize.paint.current ?? undefined);
+        canvas.saveLayerPaint(rasterize.current ?? undefined);
       } else {
         canvas.save();
       }
-      const op = clipOp === "difference" ? ClipOp.Difference : ClipOp.Intersect;
+      const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
       if (clipRect) {
-        canvas.clipRRect(clipRect, op, true);
+        canvas.clipRRect(
+          isRRect(clipRect) ? clipRect : rrect(clipRect, 0, 0),
+          op,
+          true
+        );
       }
       if (clipPath) {
         const path =
@@ -52,11 +57,15 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       }
       processTransform(ctx, groupProps);
       processChildren(
-        { ...ctx, paint, opacity: groupProps.opacity ?? opacity },
+        {
+          ...ctx,
+          paint,
+          opacity: groupProps.opacity ? groupProps.opacity * opacity : opacity,
+        },
         children
       );
       canvas.restore();
     }
   );
-  return <skDrawing onDraw={onDraw} {...props} />;
+  return <skDrawing onDraw={onDraw} {...props} skipProcessing />;
 };

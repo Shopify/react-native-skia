@@ -18,12 +18,20 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @DoNotStrip
     private HybridData mHybridData;
 
+    @DoNotStrip
+    private boolean mIsRemoved = false;
+
     public SkiaDrawView(Context ctx) {
         super(ctx);
         RNSkiaModule skiaModule = ((ReactContext)ctx).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
         setSurfaceTextureListener(this);
         setOpaque(false);
+    }
+
+    @Override
+    public void setBackgroundColor(int color) {
+        // Texture view does not support setting the background color.
     }
 
     @Override
@@ -34,11 +42,19 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
 
 
     public void onRemoved() {
+        // We'll mark the view removed since we reset the native part.
+        // This means that none of the native methods should be called after
+        // this point.
+        mIsRemoved = true;
+        setIsRemoved();
         mHybridData.resetNative();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if(mIsRemoved) {
+            return false;
+        }
         int action = ev.getAction();
         int count = ev.getPointerCount();
         MotionEvent.PointerCoords r = new MotionEvent.PointerCoords();
@@ -71,21 +87,29 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+        if(mIsRemoved) {
+            return;
+        }
         Log.v(TAG, "onSurfaceTextureAvailable " + width + ", " + height);
         surfaceAvailable(new Surface(surface), width, height);
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        if(mIsRemoved) {
+            return;
+        }
         Log.v(TAG, "onSurfaceTextureSizeChanged " + width + ", " + height);
         surfaceSizeChanged(width, height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        if(mIsRemoved) {
+            return true;
+        }
         Log.v(TAG, "onSurfaceTextureDestroyed");
         surfaceDestroyed();
-        Log.v(TAG, "onSurfaceTextureDestroyed - clean up done.");
         return true;
     }
 
@@ -102,9 +126,13 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
 
     private native void surfaceDestroyed();
 
+    private native void setBgColor(int color);
+
     public native void setMode(String mode);
 
     public native void setDebugMode(boolean show);
 
     public native void updateTouchPoints(double[] points);
+
+    public native void setIsRemoved();
 }

@@ -20,6 +20,13 @@ public:
                   sk_sp<SkPathEffect> pathEffect)
       : JsiSkWrappingSkPtrHostObject<SkPathEffect>(context, pathEffect) {}
 
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "PathEffect");
+  }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPathEffect, __typename__))
+
   /**
     Returns the underlying object from a host object of this type
    */

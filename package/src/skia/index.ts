@@ -10,6 +10,7 @@ export * from "./Typeface";
 export * from "./MaskFilter";
 export * from "./ColorFilter";
 export * from "./ImageFilter";
+export * from "./PathEffect";
 export * from "./RuntimeEffect";
 export * from "./Shader";
 export * from "./Image";

@@ -19,3 +19,7 @@ export const Points = (props: AnimatedProps<PointsProps>) => {
   });
   return <skDrawing onDraw={onDraw} {...props} />;
 };
+
+Points.defaultProps = {
+  mode: "points",
+};

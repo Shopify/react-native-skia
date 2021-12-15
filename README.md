@@ -1,5 +1,9 @@
 # @shopify/react-native-skia
 
+https://shopify.github.io/react-native-skia
+
+React Native Skia brings the Skia Graphics Library to React Native. Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and, Firefox OS, and many other products.
+
 ## Library Development
 
 To develop react-native-skia, you need to build the skia libraries on your computer.
@@ -21,6 +25,10 @@ brew install ninja
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 `ANDROID_NDK=/Users/username/Library/Android/sdk/ndk-bundle` for instance.
 
+If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_
+
+And then the _SDK Location_ section. It will show you the NDK path, or the option to Download it if you don't have it installed.
+
 ### Building
 
 - Install dependencies in the root project `yarn`
@@ -37,3 +45,5 @@ If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 - Build the NPM package with `yarn build-npm';
 
 Publish the NPM package manually. The output is found in the `dist` folder.
+
+- Install Cocoapods in the example/ios folder `cd example/ios && pod install && cd ..`

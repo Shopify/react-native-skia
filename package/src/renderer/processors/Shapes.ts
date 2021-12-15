@@ -1,6 +1,40 @@
+import type { ReactNode } from "react";
+
 import type { IRect, IRRect } from "../../skia";
 
+import type { Vector as Point } from "./math/Vector";
 import { vec } from "./math/Vector";
+
+export interface ChildrenProps {
+  children?: ReactNode | ReactNode[];
+}
+
+export { Point };
+
+interface PointCircleDef {
+  c: Point;
+  r: number;
+}
+
+interface ScalarCircleDef {
+  cx: number;
+  cy: number;
+  r: number;
+}
+
+export type CircleDef = PointCircleDef | ScalarCircleDef;
+
+const hasProperty = (obj: unknown, key: string) =>
+  !!(typeof obj === "object" && obj !== null && key in obj);
+
+const isCircleScalarDef = (def: CircleDef): def is ScalarCircleDef =>
+  hasProperty(def, "cx");
+export const processCircle = (def: CircleDef) => {
+  if (isCircleScalarDef(def)) {
+    return { c: vec(def.cx, def.cy), r: def.r };
+  }
+  return def;
+};
 
 export const point = (x: number, y: number) => ({ x, y });
 export const rect = (x: number, y: number, width: number, height: number) => ({
@@ -33,11 +67,11 @@ export const center = (r: IRect | IRRect) =>
     : vec(r.x + r.width / 2, r.y + r.height / 2);
 
 export const isRectCtor = (def: RectOrRRectDef): def is RectCtor =>
-  !def.hasOwnProperty("rect");
+  !hasProperty(def, "rect");
 export const isRect = (def: RectOrRRectDef): def is IRect =>
-  def.hasOwnProperty("rect");
+  hasProperty(def, "rect");
 export const isRRect = (def: RectOrRRectDef): def is IRRect =>
-  !isRectCtor(def) && def.hasOwnProperty("rx");
+  !isRectCtor(def) && hasProperty(def, "rx");
 
 export interface RectCtor {
   x: number;
@@ -60,11 +94,7 @@ export const processRect = (def: RectDef) => {
 };
 
 export const processRectOrRRect = (def: RectOrRRectDef) => {
-  if (
-    isRectCtor(def) &&
-    !def.hasOwnProperty("rx") &&
-    !def.hasOwnProperty("ry")
-  ) {
+  if (isRectCtor(def) && !hasProperty(def, "rx") && !hasProperty(def, "ry")) {
     return rect(def.x, def.y, def.width, def.height);
   } else if (isRectCtor(def)) {
     const { rx, ry } = def;

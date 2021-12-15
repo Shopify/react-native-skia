@@ -29,13 +29,13 @@ public:
 
   JSI_HOST_FUNCTION(MakeDash) {
     auto jsiIntervals = arguments[0].asObject(runtime).asArray(runtime);
-    int phase = arguments[1].asNumber();
     auto size = (int)jsiIntervals.size(runtime);
     std::vector<SkScalar> intervals;
     for (int i = 0; i < size; i++) {
       SkScalar interval = jsiIntervals.getValueAtIndex(runtime, i).asNumber();
       intervals.push_back(interval);
     }
+    int phase = count >= 2 && !arguments[1].isUndefined() && !arguments[1].isNull() ? arguments[1].asNumber() : 0;
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkPathEffect>(
                      getContext(),
@@ -52,9 +52,29 @@ public:
                      SkDiscretePathEffect::Make(segLength, dec, seedAssist)));
   }
 
+  JSI_HOST_FUNCTION(MakeCompose) {
+    auto outer = JsiSkPathEffect::fromValue(runtime, arguments[0]);
+    auto inner = JsiSkPathEffect::fromValue(runtime, arguments[1]);
+
+    return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkPathEffect>(
+                    getContext(),  SkPathEffect::MakeCompose(outer, inner)));
+  }
+
+  JSI_HOST_FUNCTION(MakeSum) {
+    auto outer = JsiSkPathEffect::fromValue(runtime, arguments[0]);
+    auto inner = JsiSkPathEffect::fromValue(runtime, arguments[1]);
+
+    return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkPathEffect>(
+                    getContext(),  SkPathEffect::MakeSum(outer, inner)));
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeCorner),
                        JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeDash),
-                       JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeDiscrete))
+                       JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeDiscrete),
+                       JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeCompose),
+                       JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeSum))
 
   JsiSkPathEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}

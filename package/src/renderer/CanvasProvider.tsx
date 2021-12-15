@@ -1,37 +1,18 @@
-import type { ReactNode } from "react";
-import { createContext, useContext } from "react";
+import type { DrawingContext } from "./DrawingContext";
 
-interface CanvasContext {
-  width: number;
-  height: number;
-}
+const _drawingContexts: Array<DrawingContext> = [];
 
-const CanvasContext = createContext<CanvasContext | null>(null);
-
-export const useCanvas = () => {
-  const ctx = useContext(CanvasContext);
-  if (ctx === null) {
-    throw new Error(
-      "CanvasProvider not found. Are you using this hook in the Skia rendering context?"
-    );
-  }
-  return ctx;
+export const pushDrawingContext = (ctx: DrawingContext) => {
+  _drawingContexts.push(ctx);
 };
 
-interface CanvasProviderProps {
-  children: ReactNode | ReactNode[];
-  width: number;
-  height: number;
-}
+export const popDrawingContext = () => {
+  _drawingContexts.pop();
+};
 
-export const CanvasProvider = ({
-  children,
-  width,
-  height,
-}: CanvasProviderProps) => {
-  return (
-    <CanvasContext.Provider value={{ width, height }}>
-      {children}
-    </CanvasContext.Provider>
-  );
+export const peekDrawingContext = (): DrawingContext | undefined => {
+  if (_drawingContexts.length > 0) {
+    return _drawingContexts[_drawingContexts.length - 1];
+  }
+  return undefined;
 };
