@@ -40,17 +40,17 @@ jobs:
           workflow: "build-skia.yml"
           path: artifacts
 
-      - name: Copy artifacts to libs folder
+      - name: Copy Artifacts to libs folder
         run: yarn workflow-copy-libs
 
       - name: Copy Skia Headers
         run: yarn copy-skia-headers
 
-      # - name: Upload artifacts - iOS Fat Libs
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: skia-ios-fat-libs
-      #     path: |
-      #       ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskia.a
-      #       ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskshaper.a
-      #       ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libsvg.a
+      - name: Build NPM Package
+        run: yarn build-npm
+
+      - name: Upload artifacts - NPM Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: npm-package
+          path: ${{ env.WORKING_DIRECTORY }}/dist/*

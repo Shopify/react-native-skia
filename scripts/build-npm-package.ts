@@ -24,7 +24,7 @@ const pck = JSON.parse(fs.readFileSync("./package/package.json").toString());
  *
  */
 
-console.log("Building NPM package - version " + pck.version);
+console.log("Building NPM package");
 console.log("");
 
 console.log("Checking prerequisites...");
@@ -59,6 +59,15 @@ configurations.android.outputMapping!.forEach((cpu) =>
 
 console.log("Prerequisites verified successfully.");
 ensureFolderExists(getDistFolder());
+
+// Update version and save package.json
+const majorMinor = pck.version.split(".").slice(0, 2).join(".");
+const nextVersion = majorMinor + "." + process.env.GITHUB_RUN_NUMBER;
+pck.version = nextVersion;
+console.log("Building version:", nextVersion);
+
+// Overwrite the package.json file
+fs.writeFileSync("./package/package.json", JSON.stringify(pck, null, 2));
 
 // Now let's start to build it
 const currentDir = process.cwd();
