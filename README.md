@@ -25,9 +25,9 @@ brew install ninja
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 `ANDROID_NDK=/Users/username/Library/Android/sdk/ndk-bundle` for instance.
 
-If the NDK is not installed, you can install it via Android Studio by going to the menu *File > Project Structure*
+If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_
 
-And then the *SDK Location* section. It will show you the NDK path, or the option to Download it if you don't have it installed.
+And then the _SDK Location_ section. It will show you the NDK path, or the option to Download it if you don't have it installed.
 
 ### Building
 
@@ -36,4 +36,14 @@ And then the *SDK Location* section. It will show you the NDK path, or the optio
 - Install dependencies in the example `cd example && yarn && cd ..`
 - Build the Skia libraries with `yarn build-skia` (this can take a while)
 - Copy Skia headers `yarn copy-skia-headers`
+- Run pod install in the example project
+
+### Publishing
+
+- Run the commands in the `Building` section
+- Build the Android binaries with `yarn build-android`
+- Build the NPM package with `yarn build-npm';
+
+Publish the NPM package manually. The output is found in the `dist` folder.
+
 - Install Cocoapods in the example/ios folder `cd example/ios && pod install && cd ..`

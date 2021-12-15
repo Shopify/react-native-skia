@@ -1,25 +1,36 @@
 {
   "name": "@shopify/react-native-skia",
   "title": "React Native Skia",
-  "version": "1.0.0",
+  "version": "0.1.37",
   "description": "Skia View for React Native",
   "main": "index.ts",
   "files": [
     "README.md",
-    "android/build/outputs/aar/shopify_react-native-skia-release.aar",
+    "LICENSE.md",
+    "android/build.gradle",
+    "android/CMakeLists.txt",
+    "android/cpp/**",
+    "android/src/**",
+    "libs/android/**",
     "src/**",
     "index.js",
+    "cpp/**/*.{h,cpp}",
     "ios",
-    "react-native-skia.podspec"
+    "libs/ios/libskia.a",
+    "libs/ios/libskshaper.a",
+    "libs/ios/libsvg.a",
+    "react-native-skia.podspec",
+    "scripts/install-npm.js"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
-    "test": "jest"
+    "test": "jest",
+    "install": "yarn node scripts/install-npm.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/github_account/@shopify/react-native-skia.git",
-    "baseUrl": "https://github.com/github_account/@shopify/react-native-skia"
+    "url": "git+https://github.com/Shopify/react-native-skia.git",
+    "baseUrl": "https://github.com/Shopify/react-native-skia"
   },
   "keywords": [
     "react-native"

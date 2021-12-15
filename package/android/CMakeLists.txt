@@ -35,11 +35,17 @@ target_include_directories(
         ${PACKAGE_NAME}
         PRIVATE
 
+        # When installed in the development environment
         "../node_modules/react-native/ReactCommon/callinvoker"
         "../node_modules/react-native/ReactCommon/jsi"
         "../node_modules/react-native/ReactCommon/react/nativemodule/core"
         "../node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/turbomodule/core/jni"
 
+        # When installed as a package the paths are a bit different
+        "../../../react-native/ReactCommon/callinvoker"
+        "../../../react-native/ReactCommon/jsi"
+        "../../../react-native/ReactCommon/react/nativemodule/core"
+        "../../../react-native/ReactAndroid/src/main/java/com/facebook/react/turbomodule/core/jni"
 
         cpp/skia/include/config/
         cpp/skia/include/core/
@@ -52,7 +58,7 @@ target_include_directories(
 
         cpp/api
         cpp/jsi
-        cpp/jni
+        cpp/jni/include
         cpp/rnskia
         cpp/utils  
 
