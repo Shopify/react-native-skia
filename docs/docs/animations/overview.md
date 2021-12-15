@@ -19,16 +19,16 @@ We also need an `Animation` to provide new values to the animation value over ti
 import {
   Canvas,
   Rect,
-  interpolate,
-  useProgress,
+  mix,
+  useTiming,
 } from "@shopify/react-native-skia";
 
 const myComponent = () => {
-  const progress = useProgress();
+  const progress = useTiming(1, { duration: 1000 });
   return (
     <Canvas>
       <Rect
-        x={(ctx) => interpolate(progress.value, [0, 1000], [0, ctx.width])}
+        x={() => mix(progress.value, 0, 200)}
         y={100}
         width={10}
         height={10}
@@ -50,10 +50,6 @@ const progress = useValue(1000);
 const actualValue = progress.value; // actual value is 1000.
 ```
 
-### useProgress
-
-The `useProgress` hook will start an animation and return an animation value. The hook takes no parameters.
-
 ### useTiming
 
 The `useTiming` hook will create a timing based animation that changes the returned animation value over a given duration.
@@ -61,6 +57,10 @@ The `useTiming` hook will create a timing based animation that changes the retur
 ### useSpring
 
 The `useSpring` hook will create a spring based animation that changes the returned animation value with the results from doing a physics simulation.
+
+### useProgress
+
+The `useSprogress` hook will return an animation value that contains the number of milliseconds that passed since the cavans started to draw.
 
 ### useTouchHandler
 
