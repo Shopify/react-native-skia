@@ -7,6 +7,8 @@ import fs from "fs";
  *
  * The folder structure after downloading artifacts are:
  *
+ * artifacts:
+ *
  * ./skia-android-arm
  * ./skia-android-arm-64
  * ./skia-android-arm-x64
@@ -53,7 +55,9 @@ const destinations = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
 const files = ["libskia.a", "libskshaper.a", "libsvg.a"];
 
 const copyFiles = (from: string, to: string) => {
-  files.forEach((f) => fs.copyFileSync(from + "/" + f, to + "/" + f));
+  files.forEach((f) =>
+    fs.copyFileSync("artifacts/" + from + "/" + f, to + "/" + f)
+  );
 };
 
 console.log("Copying android files...");
