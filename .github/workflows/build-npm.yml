@@ -2,7 +2,7 @@ name: Build NPM Package
 on:
   push:
     branches:
-      - feature/git-workflows
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest

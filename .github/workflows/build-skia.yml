@@ -2,7 +2,7 @@ name: Build SKIA
 on:
   push:
     branches:
-      - feature/git-workflows
+      - main
     paths:
       - externals/**
 jobs:
