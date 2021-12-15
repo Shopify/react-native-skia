@@ -11,22 +11,6 @@ React Native Skia supports Animations through properties. Each property in all o
 
 ## Example
 
-Let's say we have a rectangle that we want to animate along its x-axis over time.
-
-We'll start of by modifying a simple example that paints a red rectangle on the screen:
-
-```tsx twoslash
-import { Canvas, Rect } from "@shopify/react-native-skia";
-
-const myComponent = () => {
-  return (
-    <Canvas>
-      <Rect x={100} y={100} width={10} height={10} color={"red"} />
-    </Canvas>
-  );
-};
-```
-
 To set up the animation we need an animation value that changes over time and knows how to notify the `Canvas` about its animation.
 
 We also need an `Animation` to provide new values to the animation value over time. A progress animation makes sense here - as it will update the animation value with the number of seconds passed since it was started.
