@@ -64,7 +64,7 @@ const sidebars = {
       collapsed: false,
       type: "category",
       label: "Animations",
-      items: ["animations/overview"],
+      items: ["animations/overview", "animations/reanimated"],
     },
   ],
 };

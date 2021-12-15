@@ -11,31 +11,24 @@ React Native Skia supports Animations through properties. Each property in all o
 
 ## Example
 
-Let's say we have a rectangle that we want to animate along its x-axis over time.
-
-We'll start of by modifying a simple example that paints a red rectangle on the screen:
-
-```tsx
-const myComponent = () => {
-  return (
-    <Canvas style={styles.container}>
-      <Rect x={100} y={100} width={10} height={10} color={"red"} />
-    </Canvas>
-  );
-};
-```
-
 To set up the animation we need an animation value that changes over time and knows how to notify the `Canvas` about its animation.
 
 We also need an `Animation` to provide new values to the animation value over time. A progress animation makes sense here - as it will update the animation value with the number of seconds passed since it was started.
 
-```tsx
+```tsx twoslash
+import {
+  Canvas,
+  Rect,
+  mix,
+  useTiming,
+} from "@shopify/react-native-skia";
+
 const myComponent = () => {
-  const progress = useProgress();
+  const progress = useTiming(1, { duration: 1000 });
   return (
-    <Canvas style={styles.container}>
+    <Canvas>
       <Rect
-        x={(ctx) => interpolate(progress.value, [0, 1000], [0, ctx.width])}
+        x={() => mix(progress.value, 0, 200)}
         y={100}
         width={10}
         height={10}
@@ -57,10 +50,6 @@ const progress = useValue(1000);
 const actualValue = progress.value; // actual value is 1000.
 ```
 
-### useProgress
-
-The `useProgress` hook will start an animation and return an animation value. The hook takes no parameters.
-
 ### useTiming
 
 The `useTiming` hook will create a timing based animation that changes the returned animation value over a given duration.
@@ -69,26 +58,39 @@ The `useTiming` hook will create a timing based animation that changes the retur
 
 The `useSpring` hook will create a spring based animation that changes the returned animation value with the results from doing a physics simulation.
 
+### useProgress
+
+The `useSprogress` hook will return an animation value that contains the number of milliseconds that passed since the cavans started to draw.
+
 ### useTouchHandler
 
 There is also a convinient hook for handling touches in the `SkiaViews`. This hook works well with animation values.
 
-```tsx
-const cx = useValue(center.x);
-const cy = useValue(center.y);
+```tsx twoslash
+import {
+  Canvas,
+  Circle,
+  useValue,
+  useTouchHandler,
+} from "@shopify/react-native-skia";
 
-const touchHandler = useTouchHandler({
-  onActive: ({ x, y }) => {
-    cx.value = x;
-    cy.value = y;
-  },
-});
+const MyComponent = () => {
+  const cx = useValue(100);
+  const cy = useValue(100);
 
-return (
-  <Canvas style={{ flex: 1 }} onTouch={touchHandler}>
-    <Circle cx={() => cx.value} cy={() => cy.value} r={10} color="red" />
-  </Canvas>
-);
+  const touchHandler = useTouchHandler({
+    onActive: ({ x, y }) => {
+      cx.value = x;
+      cy.value = y;
+    },
+  });
+
+  return (
+    <Canvas style={{ flex: 1 }} onTouch={touchHandler}>
+      <Circle cx={() => cx.value} cy={() => cy.value} r={10} color="red" />
+    </Canvas>
+  );
+};
 ```
 
 In the above example we can see that we are creating the `touchHandler` callback using the `useTouchHandler` hook - which can be provided as the onTouch callback on the `Canvas` or `SkiaView`.
