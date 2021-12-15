@@ -43,13 +43,6 @@ import fs from "fs";
 
 console.log("Copying Skia Binaries from artifacts to libs folder");
 
-const folders = [
-  "./skia-android-arm",
-  "./skia-android-arm-64",
-  "./skia-android-arm-x86",
-  "./skia-android-arm-x64",
-  "./skia-ios-fat-libs",
-];
 const destinations = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
 
 const files = ["libskia.a", "libskshaper.a", "libsvg.a"];
@@ -62,10 +55,10 @@ const copyFiles = (from: string, to: string) => {
 
 console.log("Copying android files...");
 destinations.forEach((d) => {
-  copyFiles("./skia-android-arm", "libs/" + d);
+  copyFiles("skia-android-arm", "libs/" + d);
 });
 
 console.log("Copying ios files...");
-copyFiles("./skia-ios-fat-libs", "libs/ios");
+copyFiles("skia-ios-fat-libs", "libs/ios");
 
 console.log("Done copying artifacts.");
