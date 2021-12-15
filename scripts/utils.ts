@@ -25,7 +25,7 @@ export const executeCmd = (
 
 export const getDistFolder = () => "./dist";
 
-export const ensureDistFolder = (dirPath: string) => {
+export const ensureFolderExists = (dirPath: string) => {
   try {
     console.log(`Ensuring that ${dirPath} exists...`);
     return fs.mkdirSync(dirPath);

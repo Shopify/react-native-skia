@@ -1,4 +1,5 @@
 import fs from "fs";
+import { ensureFolderExists } from "./utils";
 /**
  * This build script prepares the npm build command by copying
  * the Skia Binaries from the artifact folder into the libs folder
@@ -51,6 +52,7 @@ const copyFiles = (from: string, to: string) => {
   files.forEach((f) => {
     const source = "./artifacts/" + from + "/" + f;
     const target = to + "/" + f;
+    ensureFolderExists(target);
     if (!fs.existsSync(source)) {
       console.log(
         "Copying failed, the artifact source",

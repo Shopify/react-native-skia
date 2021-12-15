@@ -1,7 +1,7 @@
 import {
   executeCmdSync,
   checkFileExists,
-  ensureDistFolder,
+  ensureFolderExists,
   getDistFolder,
 } from "./utils";
 import fs from "fs";
@@ -58,7 +58,7 @@ configurations.android.outputMapping!.forEach((cpu) =>
 });
 
 console.log("Prerequisites verified successfully.");
-ensureDistFolder(getDistFolder());
+ensureFolderExists(getDistFolder());
 
 // Now let's start to build it
 const currentDir = process.cwd();
