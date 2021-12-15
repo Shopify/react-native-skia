@@ -1,12 +1,35 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
-
 const fs = require("fs");
 const typedKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
 
+/**
+ * This build script builds the Skia Binaries from the Skia repositories
+ * that are added as submodules to this repo. Both the Skia repo and
+ * the depottools (build tools) for building is included.
+ *
+ * The build script does not have any other requirements than that the
+ * Android NDK should be installed.
+ *
+ * This build script is run by the build-skia.yml github workflow
+ *
+ * Arguments:
+ * @param platform the current platform as defined in the file skia-configuration.ts
+ * @param cpu the cpu platform as defined in the file skia-configuration.ts
+ *
+ */
+
 console.log("Starting SKIA Build.");
 console.log("");
+
+// Test for existence of Android SDK
+if (!process.env.ANDROID_NDK) {
+  console.log("ANDROID_NDK not set.");
+  exit(1);
+} else {
+  console.log("☑ ANDROID_NDK");
+}
 
 if (process.argv.length !== 4) {
   console.log("Missing platform/cpu arguments");

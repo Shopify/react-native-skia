@@ -1,6 +1,23 @@
 import { exit } from "process";
+import { configurations } from "./skia-configuration";
 import { executeCmdSync, checkFileExists } from "./utils";
 
+/**
+ * This build script builds the debug/release aar files for the android
+ * version of the library.
+ *
+ * The prerequisites are:
+ *
+ * - NDK installed
+ * - Prebuilt Skia binaries available
+ * - Skia Headers copied
+ *
+ * The script does not take or use any parameters.
+ *
+ * NOTE: This script is not currently in use since we are
+ * distributing the library with sources in the first versions.
+ *
+ */
 console.log("Testing to see if everything is set up correctly...");
 console.log("");
 // Test for existence of Android SDK
@@ -12,7 +29,7 @@ if (!process.env.ANDROID_NDK) {
 }
 
 // Test for prebuilt Skia binaries
-["arm64-v8a", "armeabi-v7a", "x86", "x86_64"].forEach((abi) => {
+configurations.android.outputMapping!.forEach((abi) => {
   ["libskia.a", "libskshaper.a", "libsvg.a"].forEach((lib) => {
     checkFileExists(
       `./package/libs/android/${abi}/${lib}`,
