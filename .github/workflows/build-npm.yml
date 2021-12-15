@@ -35,9 +35,10 @@ jobs:
       #   run: yarn
 
       - name: Download Skia Binary Artifacts
-        uses: actions/download-artifact@v2
+        #uses: actions/download-artifact@v2
+        uses: dawidd6/action-download-artifact@v2
         with:
-          name: "Build SKIA"
+          workflow: "build-skia.yml"
           path: artifacts
 
       - name: Display structure of downloaded files
