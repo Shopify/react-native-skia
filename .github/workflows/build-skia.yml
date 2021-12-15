@@ -3,8 +3,7 @@ on:
   push:
     branches:
       - feature/git-workflows
-    paths:
-      - externals/**
+
 jobs:
   build:
     #runs-on: ubuntu-latest
