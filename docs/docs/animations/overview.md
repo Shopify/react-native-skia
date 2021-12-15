@@ -19,8 +19,7 @@ We also need an `Animation` to provide new values to the animation value over ti
 import {
   Canvas,
   Rect,
-  interpolate,
-  useProgress,
+  mix,
   useTiming,
 } from "@shopify/react-native-skia";
 
