@@ -49,16 +49,16 @@ const files = ["libskia.a", "libskshaper.a", "libsvg.a"];
 
 const copyFiles = (from: string, to: string) => {
   files.forEach((f) =>
-    fs.copyFileSync("artifacts/" + from + "/" + f, to + "/" + f)
+    fs.copyFileSync("./artifacts/" + from + "/" + f, to + "/" + f)
   );
 };
 
 console.log("Copying android files...");
 destinations.forEach((d) => {
-  copyFiles("skia-android-arm", "libs/" + d);
+  copyFiles("skia-android-arm", "./package/libs/android/" + d);
 });
 
 console.log("Copying ios files...");
-copyFiles("skia-ios-fat-libs", "libs/ios");
+copyFiles("skia-ios-fat-libs", "./package/libs/ios");
 
 console.log("Done copying artifacts.");
