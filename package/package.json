@@ -1,17 +1,17 @@
 {
   "name": "@shopify/react-native-skia",
   "title": "React Native Skia",
-  "version": "0.1.28",
+  "version": "0.1.36",
   "description": "Skia View for React Native",
   "main": "index.ts",
   "files": [
     "README.md",
     "LICENSE.md",
-    "android/libs/shopify_react-native-skia-release.aar",
-    "android/libs/shopify_react-native-skia-debug.aar",
-    "android/src/main/java/com/shopify/reactnative/skia/RNSkiaPackage.java",
-    "android/src/main/AndroidManifest.xml",
     "android/build.gradle",
+    "android/CMakeLists.txt",
+    "android/cpp/**",
+    "android/src/**",
+    "libs/android/**",
     "src/**",
     "index.js",
     "cpp/**/*.{h,cpp}",
@@ -19,11 +19,13 @@
     "libs/ios/libskia.a",
     "libs/ios/libskshaper.a",
     "libs/ios/libsvg.a",
-    "react-native-skia.podspec"
+    "react-native-skia.podspec",
+    "scripts/install-npm.js"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
-    "test": "jest"
+    "test": "jest",
+    "install": "yarn node scripts/install-npm.js"
   },
   "repository": {
     "type": "git",
