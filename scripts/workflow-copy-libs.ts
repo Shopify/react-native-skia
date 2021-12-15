@@ -49,10 +49,10 @@ const destinations = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
 const files = ["libskia.a", "libskshaper.a", "libsvg.a"];
 
 const copyFiles = (from: string, to: string) => {
+  ensureFolderExists(to);
   files.forEach((f) => {
     const source = "./artifacts/" + from + "/" + f;
     const target = to + "/" + f;
-    ensureFolderExists(to);
     if (!fs.existsSync(source)) {
       console.log(
         "Copying failed, the artifact source",
@@ -72,6 +72,7 @@ const copyFiles = (from: string, to: string) => {
       process.exit(1);
     }
     fs.copyFileSync(source, target);
+    console.log("Copied", source, target);
   });
 };
 
