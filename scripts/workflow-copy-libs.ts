@@ -52,7 +52,7 @@ const copyFiles = (from: string, to: string) => {
   files.forEach((f) => {
     const source = "./artifacts/" + from + "/" + f;
     const target = to + "/" + f;
-    ensureFolderExists(target);
+    ensureFolderExists(to);
     if (!fs.existsSync(source)) {
       console.log(
         "Copying failed, the artifact source",
