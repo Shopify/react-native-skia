@@ -2,7 +2,9 @@ name: Build SKIA
 on:
   push:
     branches:
-      - feature/git-workflows-remove-this-to-trigger-builds
+      - feature/git-workflows
+    paths:
+      - externals/**
 jobs:
   build:
     #runs-on: ubuntu-latest
