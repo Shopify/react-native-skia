@@ -48,9 +48,29 @@ const destinations = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
 const files = ["libskia.a", "libskshaper.a", "libsvg.a"];
 
 const copyFiles = (from: string, to: string) => {
-  files.forEach((f) =>
-    fs.copyFileSync("./artifacts/" + from + "/" + f, to + "/" + f)
-  );
+  files.forEach((f) => {
+    const source = "./artifacts/" + from + "/" + f;
+    const target = to + "/" + f;
+    if (!fs.existsSync(source)) {
+      console.log(
+        "Copying failed, the artifact source",
+        source,
+        "was not found. Current dir is:",
+        process.cwd()
+      );
+      process.exit(1);
+    }
+    if (!fs.existsSync(to)) {
+      console.log(
+        "Copying failed, the destination",
+        to,
+        "was not found. Current dir is:",
+        process.cwd()
+      );
+      process.exit(1);
+    }
+    fs.copyFileSync(source, target);
+  });
 };
 
 console.log("Copying android files...");
