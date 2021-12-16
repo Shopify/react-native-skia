@@ -16,7 +16,7 @@ $ yarn add @shopify/react-native-skia
 Or using npm:
 
 ```sh
-$ yarn add @shopify/react-native-skia
+$ npm install @shopify/react-native-skia
 ```
 
 ### iOS
