@@ -53,25 +53,25 @@ jobs:
         id: get_npm_package_name
         run: echo "::set-output name=npm_package_name::$(yarn get-filename-npm| grep ^'shopify')"
 
-      - name: Upload artifacts - NPM Package
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{steps.get_npm_package_name.outputs.npm_package_name}}
-          path: ${{ env.WORKING_DIRECTORY }}/dist/*
-
-      - name: Get NPM Package version
-        id: get_npm_package_version
-        run: echo "::set-output name=npm_package_version::$(yarn get-version-npm| tail -2)"
-
       - name: Create zipped version of npm package
         uses: montudor/action-zip@v1
         with:
           args: zip -qq -r ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}.zip ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
 
+      - name: Upload artifacts - NPM Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{steps.get_npm_package_name.outputs.npm_package_name}}
+          path: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}.zip
+
+      - name: Get NPM Package version
+        id: get_npm_package_version
+        run: echo "::set-output name=npm_package_version::$(yarn get-version-npm| tail -2)"
+
       - name: Create Github Release
         uses: ncipollo/release-action@v1
         with:
           tag: "release-${{steps.get_npm_package_version.outputs.npm_package_version}}"
-          artifacts: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
+          artifacts: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}.zip
           artifactContentType: application/zip
           token: ${{ secrets.GITHUB_TOKEN }}
