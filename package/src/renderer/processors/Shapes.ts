@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 
 import type { IRect, IRRect } from "../../skia";
 
-import type { Vector as Point } from "./math/Vector";
-import { vec } from "./math/Vector";
+import { vec, Vector as Point  } from "./math/Vector";
 
 export interface ChildrenProps {
   children?: ReactNode | ReactNode[];
