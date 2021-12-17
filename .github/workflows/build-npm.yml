@@ -50,11 +50,13 @@ jobs:
         run: yarn build-npm
 
       - name: Get NPM Package name
-        id: get_output_path
-        run: echo "::set-output name=npm_package_name::$(yarn get-version-npm| grep ^'shopify')"
+        id: get_npm_package
+        run: |
+          echo "::set-output name=npm_package_name::$(yarn get-filename-npm| grep ^'shopify')"
+          echo "::set-output name=npm_package_version::$(yarn get-version-npm)"
 
       - name: Upload artifacts - NPM Package
         uses: actions/upload-artifact@v2
         with:
-          name: ${{join(steps.get_output_path.outputs.npm_package_name, '\n')}}
+          name: ${{steps.get_npm_package.outputs.npm_package_version}}
           path: ${{ env.WORKING_DIRECTORY }}/dist/*
