@@ -63,6 +63,11 @@ jobs:
         id: get_npm_package_version
         run: echo "::set-output name=npm_package_version::$(yarn get-version-npm| tail -2)"
 
+      - name: Create zipped version of npm package
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}.zip ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
+
       - name: Create Github Release
         uses: ncipollo/release-action@v1
         with:
