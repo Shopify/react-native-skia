@@ -11,9 +11,7 @@ import java.lang.ref.WeakReference;
 
 @ReactModule(name="RNSkia")
 public class RNSkiaModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
-
-    private final WeakReference<ReactApplicationContext> weakReactContext;
-    private SkiaManager skiaManager;
+    private static SkiaManager sharedSkiaManager;
 
     static {
         System.loadLibrary("reactskia");
@@ -21,7 +19,6 @@ public class RNSkiaModule extends ReactContextBaseJavaModule implements Lifecycl
 
     public RNSkiaModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        this.weakReactContext = new WeakReference<>(reactContext);
         reactContext.addLifecycleEventListener(this);
     }
 
@@ -33,9 +30,11 @@ public class RNSkiaModule extends ReactContextBaseJavaModule implements Lifecycl
             getReactApplicationContext().removeLifecycleEventListener(this);
         }
 
-        this.skiaManager.invalidate();
-        this.skiaManager.destroy();
-        this.skiaManager = null;
+        if (sharedSkiaManager != null) {
+            sharedSkiaManager.invalidate();
+            sharedSkiaManager.destroy();
+            sharedSkiaManager = null;
+        }
     }
 
     @Override
@@ -44,26 +43,26 @@ public class RNSkiaModule extends ReactContextBaseJavaModule implements Lifecycl
     }
 
     public SkiaManager getSkiaManager() {
-        return skiaManager;
+        if (sharedSkiaManager == null) {
+            throw new RuntimeException("Skia Manager is not initialized! Did you forget to add `RNSkiaModulePackage` to your `getJSIModulePackage()` method in your app's `MainApplication.java`? Also make sure to disable any remote debugger (e.g. Chrome)");
+        }
+        return sharedSkiaManager;
     }
 
-    @Override
-    public void initialize() {
-        super.initialize();
-
-        if(skiaManager == null) {
-            skiaManager = new SkiaManager(weakReactContext.get());
+    public static void initializeSkiaManager(ReactApplicationContext reactContext) {
+        if(sharedSkiaManager == null) {
+            sharedSkiaManager = new SkiaManager(reactContext);
         }
     }
 
     @Override
     public void onHostResume() {
-        if(skiaManager != null) skiaManager.onHostResume();
+        if(sharedSkiaManager != null) sharedSkiaManager.onHostResume();
     }
 
     @Override
     public void onHostPause() {
-        if(skiaManager != null) skiaManager.onHostPause();
+        if(sharedSkiaManager != null) sharedSkiaManager.onHostPause();
     }
 
     @Override
