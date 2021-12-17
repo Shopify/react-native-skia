@@ -6,7 +6,6 @@ import {
 } from "./utils";
 import fs from "fs";
 import { exit } from "process";
-import { configurations } from "./skia-configuration";
 
 const pck = JSON.parse(fs.readFileSync("./package/package.json").toString());
 
