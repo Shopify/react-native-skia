@@ -65,6 +65,6 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
-          tag: "release/${{steps.get_npm_package_version.outputs.npm_package_version}}"
-          artifacts: ${{steps.get_npm_package_name.outputs.npm_package_name}}
+          tag: "release-${{steps.get_npm_package_version.outputs.npm_package_version}}"
+          artifacts: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
           token: ${{ secrets.GITHUB_TOKEN }}
