@@ -31,6 +31,7 @@
     "copy-skia-headers": "yarn copy-skia-module-headers && yarn copy-skia-include-headers",
     "build-android-aar": "yarn ts-node ./scripts/build-android.ts",
     "build-npm": "yarn ts-node ./scripts/build-npm-package.ts",
+    "get-version-npm": "yarn ts-node ./scripts/get-npm-filename.ts",
     "build": "yarn build-skia && yarn copy-skia-headers",
     "precommit": "yarn lint-java && yarn clang-format",
     "lint-java": "node ./scripts/lint-java.js",

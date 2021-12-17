@@ -49,8 +49,12 @@ jobs:
       - name: Build NPM Package
         run: yarn build-npm
 
+      - name: Get NPM Package name
+        id: get_output_path
+        run: echo "::set-output name=npm_package_name::$(yarn get-version-npm| grep './dist')"
+
       - name: Upload artifacts - NPM Package
         uses: actions/upload-artifact@v2
         with:
-          name: npm-package
+          name: ${{join(steps.get_output_path.outputs.npm_package_name, '\n')}}
           path: ${{ env.WORKING_DIRECTORY }}/dist/*
