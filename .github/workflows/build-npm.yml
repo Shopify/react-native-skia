@@ -51,12 +51,16 @@ jobs:
 
       - name: Get NPM Package name
         id: get_npm_package
-        run: |
-          echo "::set-output name=npm_package_name::$(yarn get-filename-npm| grep ^'shopify')"
-          echo "::set-output name=npm_package_version::$(yarn get-version-npm)"| tail -2
+        run: echo "::set-output name=npm_package_name::$(yarn get-filename-npm| grep ^'shopify')"
 
-      - name: Upload artifacts - NPM Package ${{steps.get_npm_package.outputs.npm_package_version}}
+      - name: Upload artifacts - NPM Package
         uses: actions/upload-artifact@v2
         with:
           name: ${{steps.get_npm_package.outputs.npm_package_name}}
           path: ${{ env.WORKING_DIRECTORY }}/dist/*
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: ${{ env.WORKING_DIRECTORY }}/dist/*
