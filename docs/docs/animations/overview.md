@@ -24,7 +24,7 @@ import {
 } from "@shopify/react-native-skia";
 
 const myComponent = () => {
-  const progress = useTiming(1, { duration: 1000 });
+  const progress = useTiming({ from: 1, duration: 1000 });
   return (
     <Canvas>
       <Rect
