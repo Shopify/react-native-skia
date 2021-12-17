@@ -35,7 +35,29 @@ export default function Home() {
       description="High Performance 2D Graphics"
     >
       <HomepageHeader />
-      <main />
+      <main>
+        <div
+          className="container"
+          style={{
+            display: "flex",
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "2rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/EHxEX78alZE"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </main>
     </Layout>
   );
 }
