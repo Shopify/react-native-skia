@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[1076],{5850:function(a){a.exports=JSON.parse('{"allTagsPath":"/react-native-skia/blog/tags","slug":"/react-native-skia/blog/tags/hola","name":"hola","count":1,"permalink":"/react-native-skia/blog/tags/hola"}')}}]);
