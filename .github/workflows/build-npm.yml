@@ -73,5 +73,5 @@ jobs:
         with:
           tag: "release-${{steps.get_npm_package_version.outputs.npm_package_version}}"
           artifacts: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
-          artifactContentType: application/gzip
+          artifactContentType: application/zip
           token: ${{ secrets.GITHUB_TOKEN }}
