@@ -71,5 +71,5 @@ jobs:
           artifacts: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
           artifactContentType: application/gzip
           generateReleaseNotes: true
-          prerelease: true
+          replacesArtifacts: false
           token: ${{ secrets.GITHUB_TOKEN }}
