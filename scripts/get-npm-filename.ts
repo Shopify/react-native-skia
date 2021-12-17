@@ -19,8 +19,7 @@ const pck = JSON.parse(fs.readFileSync("./package/package.json").toString());
 
 // Copy package to the dist folder
 const packageFilename = `shopify-react-native-skia-${pck.version}.tgz`;
-const outputPath = `${getDistFolder()}/${packageFilename}`;
 
 // Done!
-console.log(outputPath);
+console.log(packageFilename);
 exit(0);
