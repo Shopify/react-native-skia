@@ -8,14 +8,25 @@ slug: /getting-started/installation
 React Native Skia brings the [Skia Graphics Library](https://skia.org/) to React Native.
 Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and, Firefox OS, and many other products.
 
+
+:::warning
+
+This is an alpha release.
+Use with caution.
+
+:::
+
+When reading these lines, the package is not yet available on npm.
+Use the link below to install the package.
+
 ```sh
-$ yarn add @shopify/react-native-skia
+$ yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
 ```
 
 Or using npm:
 
 ```sh
-$ npm add @shopify/react-native-skia
+$ npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
 ```
 
 ## iOS

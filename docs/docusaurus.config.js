@@ -8,8 +8,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const config = {
   title: "React Native Skia",
   tagline: "High Performance 2D Graphics",
-  url: "https://your-docusaurus-test-site.com",
-  baseUrl: "/",
+  url: "https://shopify.github.io/",
+  baseUrl: "/react-native-skia/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
@@ -71,7 +71,7 @@ const config = {
         title: "React Native Skia",
         logo: {
           alt: "React Native Skia",
-          src: "img/logo.png",
+          src: "/react-native-skia/img/logo.png",
         },
         items: [
           {
