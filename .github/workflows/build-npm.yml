@@ -53,7 +53,7 @@ jobs:
         id: get_npm_package
         run: |
           echo "::set-output name=npm_package_name::$(yarn get-filename-npm| grep ^'shopify')"
-          echo "::set-output name=npm_package_version::$(yarn get-version-npm)"
+          echo "::set-output name=npm_package_version::$(yarn get-version-npm)| tail -2"
 
       - name: Upload artifacts - NPM Package ${{steps.get_npm_package.outputs.npm_package_version}}
         uses: actions/upload-artifact@v2
