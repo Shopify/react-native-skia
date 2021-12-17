@@ -64,6 +64,6 @@ jobs:
         run: echo "::set-output name=npm_package_version::$(yarn get-version-npm| tail -2)"
 
       - uses: ncipollo/release-action@v1
-      with:
-        artifacts: ${{steps.get_npm_package_name.outputs.npm_package_name}}
-        token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          artifacts: ${{steps.get_npm_package_name.outputs.npm_package_name}}
+          token: ${{ secrets.GITHUB_TOKEN }}
