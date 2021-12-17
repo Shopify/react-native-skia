@@ -34,7 +34,7 @@ You will need to disable Bitcode in order to create a release build: `Build Sett
 
 ### Android
 
-> **Version compatibility**: `react-native@>=66` is required.
+> **Version compatibility**: `react-native@>=0.66` is required.
 
 Currently, you will need Android NDK to be installed.
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
