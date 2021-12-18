@@ -18,13 +18,21 @@ export interface PathProps extends CustomPaintProps, StrokeOpts {
   end: number;
 }
 
+const pathCache: { [key: string]: IPath | null } = {};
+const getCachedPath = (p: string): IPath => {
+  if (pathCache[p] == null) {
+    pathCache[p] = Skia.Path.MakeFromSVGString(p);
+  }
+  return pathCache[p]!;
+};
+
 export const Path = (props: AnimatedProps<PathProps>) => {
   const onDraw = useDrawing(
     props,
     ({ canvas, paint }, { start, end, ...pathProps }) => {
       const path =
         typeof pathProps.path === "string"
-          ? Skia.Path.MakeFromSVGString(pathProps.path)
+          ? getCachedPath(pathProps.path)
           : pathProps.path.copy();
       if (path === null) {
         throw new Error("Invalid path:  " + pathProps.path);
