@@ -25,7 +25,7 @@ def safeExtGet(prop, fallback) {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 buildscript {
     // The Android Gradle plugin is only required when opening the android folder stand-alone.
@@ -35,11 +35,13 @@ buildscript {
     if (project == rootProject) {
         repositories {
             google()
+            mavenCentral()
         }
         dependencies {
             // This should reflect the Gradle plugin version used by
             // the minimum React Native version supported.
-            classpath 'com.android.tools.build:gradle:3.4.1'
+            //classpath 'com.android.tools.build:gradle:3.4.1'
+            classpath 'com.android.tools.build:gradle:4.2.2'
         }
     }
 }
@@ -76,7 +78,9 @@ android {
         excludes = ["**/libc++_shared.so"]
     }
 
-    buildFeatures { prefab true }
+    buildFeatures {
+        prefab true
+    }
 
     prefab {
         reactskia {
@@ -159,12 +163,12 @@ afterEvaluate { project ->
     }
 
     task androidJavadocJar(type: Jar, dependsOn: androidJavadoc) {
-        classifier = 'javadoc'
+        archiveClassifier.set("javadoc")
         from androidJavadoc.destinationDir
     }
 
     task androidSourcesJar(type: Jar) {
-        classifier = 'sources'
+        archiveClassifier.set("sources")
         from android.sourceSets.main.java.srcDirs
         include '**/*.java'
     }
@@ -182,7 +186,7 @@ afterEvaluate { project ->
         archives androidSourcesJar
         archives androidJavadocJar
     }
-
+    /**
     task installArchives(type: Upload) {
         configuration = configurations.archives
         repositories.mavenDeployer {
@@ -191,6 +195,7 @@ afterEvaluate { project ->
             configureReactNativePom pom
         }
     }
+    **/
 }
 
 task extractAARHeaders {
