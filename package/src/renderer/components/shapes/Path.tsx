@@ -18,12 +18,12 @@ export interface PathProps extends CustomPaintProps, StrokeOpts {
   end: number;
 }
 
-const pathCache: { [key: string]: IPath | null } = {};
-const getCachedPath = (p: string): IPath => {
-  if (pathCache[p] == null) {
-    pathCache[p] = Skia.Path.MakeFromSVGString(p);
+const pathCache = new Map<string, IPath | null>()
+const getCachedPath = (p: string): IPath | null => {
+  if (!pathCache.has(p)) {
+    pathCache.set(p, Skia.Path.MakeFromSVGString(p));
   }
-  return pathCache[p]!;
+  return pathCache.get(p)!;
 };
 
 export const Path = (props: AnimatedProps<PathProps>) => {
