@@ -6,8 +6,9 @@ import { PointMode } from "../../../skia";
 import { enumKey } from "../../processors/Paint";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
+import type { ChildrenProps } from "../../processors/Shapes";
 
-export interface PointsProps extends CustomPaintProps {
+export interface PointsProps extends CustomPaintProps, ChildrenProps {
   points: IPoint[];
   mode: SkEnum<typeof PointMode>;
 }

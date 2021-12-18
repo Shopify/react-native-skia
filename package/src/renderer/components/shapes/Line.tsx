@@ -2,8 +2,9 @@ import React from "react";
 
 import type { CustomPaintProps, Vector, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
+import type { ChildrenProps } from "../../processors/Shapes";
 
-export interface LineProps extends CustomPaintProps {
+export interface LineProps extends CustomPaintProps, ChildrenProps {
   p1: Vector;
   p2: Vector;
 }

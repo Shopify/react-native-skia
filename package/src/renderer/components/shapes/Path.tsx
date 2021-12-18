@@ -5,6 +5,7 @@ import type { IPath } from "../../../skia";
 import { Skia } from "../../../skia";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
+import type { ChildrenProps } from "../../processors/Shapes";
 
 interface StrokeOpts {
   width?: number;
@@ -12,7 +13,7 @@ interface StrokeOpts {
   precision?: number;
 }
 
-export interface PathProps extends CustomPaintProps, StrokeOpts {
+export interface PathProps extends CustomPaintProps, StrokeOpts, ChildrenProps {
   path: IPath | string;
   start: number;
   end: number;
