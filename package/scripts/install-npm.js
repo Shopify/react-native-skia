@@ -4,12 +4,21 @@ const path = require("path");
 console.log("Updating symlinks for Android build...");
 
 const createSymlink = (p) => {
-  console.log(`Creating symlink to ${p}`, __dirname, process.cwd());
-  fs.symlinkSync(
-    path.resolve(`./cpp/${p}`),
-    path.resolve(`./android/cpp/${p}`),
-    "dir"
-  );
+  const srcDir = path.resolve(`./cpp/${p}`);
+  const dstDir = path.resolve(`./android/cpp/${p}`);
+
+  try {
+    console.log(`Creating symlink to ${p}`, __dirname, process.cwd());
+
+    fs.symlinkSync(srcDir, dstDir, "dir");
+  } catch (err) {
+    if (err && err.code === "EEXIST") {
+      console.log("Directory already exists:", dstDir);
+      return;
+    }
+
+    throw err;
+  }
 };
 
 // Copy common cpp files from the package root to the android folder
