@@ -16,13 +16,13 @@ console.log("");
 
 console.log("Checking prerequisites...");
 
-// Check that Android Skia libs are built
+// Check that iOS Skia libs are built
 ["arm", "arm64", "x64"].forEach((cpu) =>
   ["libskia.a", "libskshaper.a", "libsvg.a"].forEach((lib) => {
     checkFileExists(
-      `./package/libs/android/${cpu}/${lib}`,
-      `Skia Android ${cpu}/${lib}`,
-      "Have you built the Skia Android binaries? Run yarn run build."
+      `./package/libs/ios/${cpu}/${lib}`,
+      `Skia iOS ${cpu}/${lib}`,
+      "Have you built the Skia iOS binaries? Run yarn run build."
     );
   })
 );
