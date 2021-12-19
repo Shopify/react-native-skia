@@ -3,16 +3,12 @@ const path = require("path");
 
 console.log("Updating symlinks for Android build...");
 
-const isExists = (path) => {
-  return fs.existsSync(path);
-}
-
 const createSymlink = (p) => {
   console.log(`Creating symlink to ${p}`, __dirname, process.cwd());
   const srcDir = path.resolve(`./cpp/${p}`);
   const dstDir = path.resolve(`./android/cpp/${p}`);
 
-  if (isExists(dstDir)) {
+  if (fs.existsSync(dstDir)) {
     fs.unlinkSync(dstDir);
   }
 
