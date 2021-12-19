@@ -60,7 +60,7 @@ The `useSpring` hook will create a spring based animation that changes the retur
 
 ### useProgress
 
-The `useSprogress` hook will return an animation value that contains the number of milliseconds that passed since the cavans started to draw.
+The `useProgress` hook will return an animation value that contains the number of milliseconds that passed since the cavans started to draw.
 
 ### useTouchHandler
 
