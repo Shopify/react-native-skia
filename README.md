@@ -4,14 +4,14 @@
 
 Checkout the full documentation [here](https://shopify.github.io/react-native-skia).
 
-React Native Skia brings the Skia Graphics Library to React Native. Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and, Firefox OS, and many other products.
+React Native Skia brings the Skia Graphics Library to React Native. Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and Firefox OS, and many other products.
 
 *This is an alpha release. Use with caution.*
 
 ## Installation
 
 React Native Skia brings the [Skia Graphics Library](https://skia.org/) to React Native.
-Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and, Firefox OS, and many other products.
+Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and Firefox OS, and many other products.
 
 When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
@@ -160,7 +160,7 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 
 - Run the commands in the `Building` section
 - Build the Android binaries with `yarn build-android`
-- Build the NPM package with `yarn build-npm';
+- Build the NPM package with `yarn build-npm`;
 
 Publish the NPM package manually. The output is found in the `dist` folder.
 
