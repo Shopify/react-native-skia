@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import { configurations } from "./skia-configuration";
 import { executeCmdSync, checkFileExists } from "./utils";
 
 /**
@@ -17,8 +18,8 @@ console.log("");
 console.log("Checking prerequisites...");
 
 // Check that iOS Skia libs are built
-["arm", "arm64", "x64"].forEach((cpu) =>
-  ["libskia.a", "libskshaper.a", "libsvg.a"].forEach((lib) => {
+configurations.ios.cpus.forEach((cpu) =>
+  configurations.ios.outputNames.forEach((lib) => {
     checkFileExists(
       `./package/libs/ios/${cpu}/${lib}`,
       `Skia iOS ${cpu}/${lib}`,
@@ -27,12 +28,9 @@ console.log("Checking prerequisites...");
   })
 );
 
-executeCmdSync(
-  "lipo -create package/libs/ios/arm/libskia.a package/libs/ios/arm64/libskia.a package/libs/ios/x64/libskia.a -output package/libs/ios/libskia.a"
-);
-executeCmdSync(
-  "lipo -create package/libs/ios/arm/libsvg.a package/libs/ios/arm64/libsvg.a package/libs/ios/x64/libsvg.a -output package/libs/ios/libsvg.a"
-);
-executeCmdSync(
-  "lipo -create package/libs/ios/arm/libskshaper.a package/libs/ios/arm64/libskshaper.a package/libs/ios/x64/libskshaper.a -output package/libs/ios/libskshaper.a"
-);
+configurations.ios.outputNames.forEach((lib) => {
+  const paths = configurations.ios.cpus.map((cpu) => `package/libs/ios/${cpu}/${lib}`).join(' ');
+  executeCmdSync(
+    `lipo -create ${paths} -output package/libs/ios/${lib}`
+  );
+});
