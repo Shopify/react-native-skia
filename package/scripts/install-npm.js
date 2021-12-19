@@ -4,7 +4,7 @@ const path = require("path");
 console.log("Updating symlinks for Android build...");
 
 const isExists = (path) => {
-  return fs.existsSync(path)
+  return fs.existsSync(path);
 }
 
 const createSymlink = (p) => {
