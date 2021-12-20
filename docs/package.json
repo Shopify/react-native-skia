@@ -30,7 +30,7 @@
     "url-loader": "^4.1.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.0.0-beta.10",
+    "@docusaurus/module-type-aliases": "^2.0.0-beta.13",
     "@tsconfig/docusaurus": "^1.0.4",
     "eslint": "^8.5.0",
     "eslint-config-react-native-wcandillon": "^3.7.2",
