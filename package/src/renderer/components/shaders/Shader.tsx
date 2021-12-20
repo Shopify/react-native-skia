@@ -28,7 +28,7 @@ export const Shader = (props: AnimatedProps<ShaderProps>) => {
   const declaration = useDeclaration<ShaderProps>(
     props,
     ({ uniforms, source, isOpaque, ...transform }, children) => {
-      const progressUniforms = new Array(source.getUniformCount())
+      const processedUniforms = new Array(source.getUniformCount())
         .fill(0)
         .map((_, i) => {
           const name = source.getUniformName(i);
@@ -40,7 +40,7 @@ export const Shader = (props: AnimatedProps<ShaderProps>) => {
         })
         .flat(4);
       return source.makeShaderWithChildren(
-        progressUniforms,
+        processedUniforms,
         isOpaque,
         children.filter(isShader),
         localMatrix(transform)
