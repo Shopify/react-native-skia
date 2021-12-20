@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.16.5",
-    "@babel/runtime": "^7.12.5",
+    "@babel/runtime": "^7.16.5",
     "@types/jest": "^27.0.3",
     "@types/react-native": "^0.66.9",
     "@types/react-test-renderer": "^17.0.1",
