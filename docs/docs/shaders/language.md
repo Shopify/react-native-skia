@@ -68,7 +68,7 @@ The following uniform types are supported: `float`, `float2`, `float3`, `float4`
 Complex uniform values need to be flattened as an input.
 
 ```tsx twoslash
-import {Canvas, Skia, Paint, Shader, Fill} from "@shopify/react-native-skia";
+import {Canvas, Skia, Paint, Shader, Fill, vec} from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
 uniform vec2 c;
