@@ -13,3 +13,15 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  - package-ecosystem: npm
+    directory: /docs
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /example
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /package
+    schedule:
+      interval: weekly
