@@ -16,7 +16,7 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.0.0-beta.10",
+    "@docusaurus/core": "^2.0.0-beta.13",
     "@docusaurus/preset-classic": "^2.0.0-beta.10",
     "@mdx-js/react": "^1.6.21",
     "@shopify/react-native-skia": "link:../package/",
