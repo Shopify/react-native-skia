@@ -8,7 +8,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^16.11.7",
+    "@types/node": "^16.11.14",
     "clang-format": "^1.6.0",
     "rimraf": "^3.0.2",
     "ts-node": "^10.4.0",
