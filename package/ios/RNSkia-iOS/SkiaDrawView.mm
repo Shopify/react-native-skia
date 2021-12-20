@@ -25,16 +25,6 @@
   }
 }
 
-
-- (void) willMoveToWindow:(UIWindow *)newWindow {
-  [super willMoveToWindow: newWindow];
-  if (newWindow == nil && _impl != nullptr) {
-    _impl->remove();
-    delete _impl;
-    _impl = nullptr;
-  }
-}
-
 #pragma mark Layout
 
 - (void) layoutSubviews {
@@ -89,7 +79,7 @@
           nextTouch.type = RNSkia::RNSkTouchType::Active;
           break;
       }
-      
+
       nextTouches.push_back(nextTouch);
     }
     _impl->updateTouchState(nextTouches);
