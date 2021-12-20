@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",
-    "@types/react-native": "^0.65.0",
+    "@types/react-native": "^0.66.9",
     "@types/react-reconciler": "^0.26.4",
     "eslint": "8.5.0",
     "eslint-config-react-native-wcandillon": "^3.7.2",
