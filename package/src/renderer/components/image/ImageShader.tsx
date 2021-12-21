@@ -14,8 +14,8 @@ import { rect2rect, fitRects } from "./BoxFit";
 
 const getRect = (props: Partial<ImageShaderProps>): IRect | undefined => {
   const { x, y, width, height } = props;
-  if (props.fitRect) {
-    return props.fitRect;
+  if (props.rect) {
+    return props.rect;
   } else if (
     x !== undefined &&
     y !== undefined &&
@@ -35,7 +35,7 @@ interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   fm: SkEnum<typeof FilterMode>;
   mm: SkEnum<typeof MipmapMode>;
   fit: Fit;
-  fitRect?: IRect;
+  rect?: IRect;
 }
 
 export const ImageShader = (
