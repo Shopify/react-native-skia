@@ -31,7 +31,10 @@ export const Filters = () => {
           <ImageShader
             source={require("../../assets/oslo.jpg")}
             fit="cover"
-            fitRect={{ x: 0, y: 0, width, height }}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
           />
         </Shader>
       </Paint>
