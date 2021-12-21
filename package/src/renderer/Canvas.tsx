@@ -38,7 +38,7 @@ const render = (
   });
 };
 
-interface CanvasProps extends ComponentProps<typeof SkiaView> {
+export interface CanvasProps extends ComponentProps<typeof SkiaView> {
   innerRef?: RefObject<SkiaView>;
   children: ReactNode;
   onTouch?: TouchHandler;
