@@ -5,11 +5,14 @@ console.log("Updating symlinks for Android build...");
 
 const createSymlink = (p) => {
   console.log(`Creating symlink to ${p}`, __dirname, process.cwd());
-  fs.symlinkSync(
-    path.resolve(`./cpp/${p}`),
-    path.resolve(`./android/cpp/${p}`),
-    "dir"
-  );
+  const srcDir = path.resolve(`./cpp/${p}`);
+  const dstDir = path.resolve(`./android/cpp/${p}`);
+
+  if (fs.existsSync(dstDir)) {
+    fs.unlinkSync(dstDir);
+  }
+
+  fs.symlinkSync(srcDir, dstDir, "dir");
 };
 
 // Copy common cpp files from the package root to the android folder
