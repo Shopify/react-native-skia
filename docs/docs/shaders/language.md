@@ -65,7 +65,6 @@ const SimpleShader = () => {
 
 Uniforms are variables used to parametrize shaders.
 The following uniform types are supported: `float`, `float2`, `float3`, `float4`, `float2x2`, `float3x3`, `float4x4`, `int`, `int2`, `int3` and, `int4`.
-Complex uniform values need to be flattened as an input.
 
 ```tsx twoslash
 import {Canvas, Skia, Paint, Shader, Fill, vec} from "@shopify/react-native-skia";
