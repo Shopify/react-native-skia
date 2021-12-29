@@ -41,6 +41,11 @@ public:
    * thread and js runtime.
    */
   void requestRedraw();
+  
+  /**
+   Calls the drawing callback on the javascript thread
+   */
+  void performDraw();
 
   /**
    * Installs the draw callback for the view
@@ -85,7 +90,7 @@ protected:
   /**
    * Setup and draw the frame
    */
-  virtual void drawFrame(double time) = 0;
+  virtual void drawFrame(double time) {};
 
   /**
    * Mark view as invalidated
@@ -140,9 +145,9 @@ private:
   std::shared_ptr<JsiSkCanvas> _jsiCanvas;
 
   /**
-   * is drawing flag
+   * drawing mutex
    */
-  std::atomic<bool> _isDrawing{false};
+  std::timed_mutex* _isDrawing;
 
   /**
    * Pointer to the platform context
