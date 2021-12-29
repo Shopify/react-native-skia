@@ -27,6 +27,11 @@ public:
               std::shared_ptr<RNSkPlatformContext> platformContext);
 
   ~RNSkManager();
+  
+  /**
+   Invalidates the Skia Manager
+   */
+  void invalidate();
 
   /**
    * Registers a RNSkDrawView with the given native id
@@ -40,6 +45,13 @@ public:
    * @param nativeId Native view Id
    */
   void unregisterSkiaDrawView(size_t nativeId);
+  
+  /**
+   Sets the view pointed to by nativeId to the provided value.
+   Used when we want to remove a view without unregistering it
+   - this happens typically on iOS.
+   */
+  void setSkiaDrawView(size_t nativeId, RNSkDrawView *view);
 
   /**
    * @return The platform context
@@ -60,6 +72,7 @@ private:
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
   std::shared_ptr<RNSkJsiViewApi> _viewApi;
+  bool _isValid = true;
 };
 
 } // namespace RNSkia
