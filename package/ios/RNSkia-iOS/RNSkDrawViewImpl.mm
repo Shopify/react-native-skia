@@ -88,19 +88,3 @@ void RNSkDrawViewImpl::drawFrame(double time) {
   auto stop = std::chrono::high_resolution_clock::now();
   setLastFrameDuration(std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
 }
-
-void RNSkDrawViewImpl::remove() {
-  // Call onRemove callback to unregister view
-  if(_onRemove != nullptr) {
-    (*_onRemove.get())();
-    _onRemove = nullptr;
-  }
-  
-  // Set view to null
-  _view = nullptr;
-  
-  // Tear down Skia drawing
-  _skSurface = nullptr;
-  
-  
-}
