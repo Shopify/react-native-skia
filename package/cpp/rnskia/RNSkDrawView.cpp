@@ -29,11 +29,11 @@ RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
     : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
       _platformContext(context),
       _infoObject(std::make_shared<RNSkInfoObject>()),
-      _timingInfo(std::make_shared<RNSkTimingInfo>()),
-      _isRemoved(false) {}
+      _timingInfo(std::make_shared<RNSkTimingInfo>())
+      {}
 
 RNSkDrawView::~RNSkDrawView() {
-  setIsRemoved();
+  invalidate();
   // This is a very simple fix to an issue where the view posts a redraw
   // function to the javascript thread, and the object is destroyed and then
   // the redraw function is called and ends up executing on a destroyed draw
@@ -54,8 +54,8 @@ RNSkDrawView::~RNSkDrawView() {
   }
 }
 
-void RNSkDrawView::setIsRemoved() {
-  _isRemoved = true;
+void RNSkDrawView::invalidate() {
+  _isValid = false;
   endDrawingLoop();
 }
 
@@ -129,7 +129,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
                                  std::shared_ptr<RNSkPlatformContext> context) {
 
   try {
-    if(getIsRemoved()) {
+    if(!isValid()) {
       return;
     }
 
@@ -181,7 +181,7 @@ void RNSkDrawView::requestRedraw() {
   _isDrawing = true;
   
   auto performDraw = [this]() {
-    if(getIsRemoved()) {
+    if(!isValid()) {
       RNSkLogger::logToConsole("Warning: Trying to redraw after delete!");
       _isDrawing = false;
       return;
@@ -214,7 +214,7 @@ bool RNSkDrawView::isReadyToDraw() {
     return false;
   }
 
-  if(getIsRemoved()) {
+  if(!isValid()) {
     return false;
   }
 
@@ -232,7 +232,7 @@ bool RNSkDrawView::isReadyToDraw() {
 }
 
 void RNSkDrawView::beginDrawingLoop() {
-  if(getIsRemoved()) {
+  if(!isValid()) {
     return;
   }
 
@@ -244,7 +244,7 @@ void RNSkDrawView::beginDrawingLoop() {
   _drawingLoopId =
       _platformContext->beginDrawLoop(_nativeId, [this]() {
         auto performDraw = [&]() {
-          if(getIsRemoved()) {
+          if(!isValid()) {
             _isDrawing = false;
             return;
           }
@@ -275,7 +275,7 @@ void RNSkDrawView::endDrawingLoop() {
 }
 
 void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
-  if(getIsRemoved()) {
+  if(!isValid()) {
     return;
   }
   if(mode != _drawingMode) {

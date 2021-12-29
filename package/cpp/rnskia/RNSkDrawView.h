@@ -88,14 +88,14 @@ protected:
   virtual void drawFrame(double time) = 0;
 
   /**
-   * Mark view as removed from the RN view stack
+   * Mark view as invalidated
    */
-  void setIsRemoved();
+  void invalidate();
 
   /**
    * @return True if the view was marked as deleted
    */
-  bool getIsRemoved() { return _isRemoved; }
+  bool isValid() { return _isValid; }
 
   /**
    Updates the last duration value
@@ -178,9 +178,9 @@ private:
    */
   std::atomic<int> _redrawRequestCounter;
   /**
-   Flag indicating that the view is no longer available
+   Flag indicating that the view is valid / invalid
    */
-  std::atomic<bool> _isRemoved;
+  std::atomic<bool> _isValid { true };
 
   /**
    * Native id
