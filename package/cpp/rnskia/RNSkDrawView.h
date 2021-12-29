@@ -45,7 +45,17 @@ public:
   /**
    * Installs the draw callback for the view
    */
-  void setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Function> callback);
+  void setDrawCallback(std::shared_ptr<jsi::Function> callback);
+  
+  /**
+   Sets the native id of the view
+   */
+  void setNativeId(size_t nativeId) { _nativeId = nativeId; }
+  
+  /**
+   Returns the native id
+   */
+  size_t getNativeId() { return _nativeId; }
 
   /**
    * Call this method with a valid Skia surface to let the draw drawCallback do
@@ -152,7 +162,7 @@ private:
   /**
    * True if the drawing loop has been requested
    */
-  size_t _drawingLoopId = -1;
+  size_t _drawingLoopId = 0;
 
   /**
    * Info object parameter
