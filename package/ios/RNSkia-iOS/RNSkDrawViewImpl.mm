@@ -30,8 +30,6 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::R
     [_view.layer addSublayer:_layer];
 }
 
-RNSkDrawViewImpl::~RNSkDrawViewImpl() {}
-
 void RNSkDrawViewImpl::setSize(int width, int height) {
   _width = width;
   _height = height;
@@ -60,20 +58,20 @@ void RNSkDrawViewImpl::drawFrame(double time) {
                                   sampleCount,
                                   fbInfo);
 
-  _skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
-                                                      backendRT,
-                                                      kTopLeft_GrSurfaceOrigin,
-                                                      kBGRA_8888_SkColorType,
-                                                      nullptr,
-                                                      nullptr);
+  auto skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
+                                                          backendRT,
+                                                          kTopLeft_GrSurfaceOrigin,
+                                                          kBGRA_8888_SkColorType,
+                                                          nullptr,
+                                                          nullptr);
   
-  if(_skSurface == nullptr) {
+  if(skSurface == nullptr || skSurface->getCanvas() == nullptr) {
     RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
     return;
   }
   
-  _skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
-  drawInSurface(_skSurface,
+  skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
+  drawInSurface(skSurface,
                 _width * _context->getPixelDensity(),
                 _height * _context->getPixelDensity(),
                 time,
