@@ -75,7 +75,6 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
     std::shared_ptr<JniPlatformContextWrapper> _context;
 
     void initializeRuntime();
-    void installJSIBindings();
 };
 
 } // namespace RNSkia
