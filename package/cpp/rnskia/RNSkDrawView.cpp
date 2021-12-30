@@ -134,6 +134,10 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
                                  std::shared_ptr<RNSkPlatformContext> context) {
 
   try {
+    if(getIsRemoved()) {
+      return;
+    }
+
     // Get the canvas
     auto skCanvas = surface->getCanvas();
     _jsiCanvas->setCanvas(skCanvas);
