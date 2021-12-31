@@ -30,11 +30,11 @@ if (!source) {
 Creates a shader from source.
 Shaders can be nested with one another.
 
-| Name     | Type            |  Description                  |
-|:---------|:----------------|:------------------------------|
-| source   | `RuntimeEffect` | Compiled shaders              |
-| uniforms | `number`        | uniform values                |
-| children | `Shader`        | Shaders to be used as uniform |
+| Name     | Type                                                                 |  Description                  |
+|:---------|:---------------------------------------------------------------------|:------------------------------|
+| source   | `RuntimeEffect`                                                      | Compiled shaders              |
+| uniforms | <code>{ [name: string]: number &#124; Vector &#124; number[]}</code> | uniform values                |
+| children | `Shader`                                                             | Shaders to be used as uniform |
 
 ### Simple Shader
 
@@ -65,7 +65,6 @@ const SimpleShader = () => {
 
 Uniforms are variables used to parametrize shaders.
 The following uniform types are supported: `float`, `float2`, `float3`, `float4`, `float2x2`, `float3x3`, `float4x4`, `int`, `int2`, `int3` and, `int4`.
-Complex uniform values need to be flattened as an input.
 
 ```tsx twoslash
 import {Canvas, Skia, Paint, Shader, Fill, vec} from "@shopify/react-native-skia";
@@ -87,7 +86,7 @@ const UniformShader = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
-        <Shader source={source} uniforms={[c.x, c.y, r, blue]} />
+        <Shader source={source} uniforms={{ c, r, blue }} />
       </Paint>
       <Fill />
     </Canvas>
