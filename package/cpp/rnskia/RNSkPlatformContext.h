@@ -39,9 +39,16 @@ public:
    * Destructor
    */
   ~RNSkPlatformContext() {
-    // Do not allow destruction before we are completely done with all drawing
-    // callback operations
+    invalidate();
+  }
+  
+  void invalidate() {
+    if(!_isValid) {
+      return;
+    }
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    stopDrawLoop();
+    _isValid = false;
   }
 
   /**
@@ -49,6 +56,7 @@ public:
    * @param func Function to run
    */
   void runOnJavascriptThread(std::function<void()> func) {
+    if(!_isValid) { return; }
     _callInvoker->invokeAsync(std::move(func));
   }
 
@@ -56,6 +64,7 @@ public:
    Runs the function on the render thread
    */
   void runOnRenderThread(std::function<void()> func) {
+    if(!_isValid) { return; }
     _dispatchOnRenderThread(std::move(func));
   }
 
@@ -102,6 +111,7 @@ public:
    * @returns Identifier of the draw loop entry
    */
   size_t beginDrawLoop(size_t nativeId, std::function<void(void)> callback) {
+    if(!_isValid) { return 0; }
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
     _drawCallbacks.emplace(nativeId, std::move(callback));
     if (_drawCallbacks.size() == 1) {
@@ -117,6 +127,7 @@ public:
    * @param nativeId Identifier of view to end
    */
   void endDrawLoop(size_t nativeId) {
+    if(!_isValid) { return; }
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
     if (_drawCallbacks.count(nativeId) > 0) {
       _drawCallbacks.erase(nativeId);
@@ -130,6 +141,7 @@ public:
    * Notifies all drawing callbacks
    */
   void notifyDrawLoop() {
+    if(!_isValid) { return; }
     std::lock_guard<std::mutex> lock(_drawCallbacksLock);
     for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
       it->second();
@@ -150,5 +162,6 @@ private:
 
   std::map<size_t, std::function<void(void)>> _drawCallbacks;
   std::mutex _drawCallbacksLock;
+  std::atomic<bool> _isValid = {true};
 };
 } // namespace RNSkia

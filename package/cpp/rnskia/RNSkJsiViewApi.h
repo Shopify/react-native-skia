@@ -61,7 +61,8 @@ public:
 
     // Update view if set
     if (info->view != nullptr && info->drawCallback != nullptr) {
-      info->view->setDrawCallback(nativeId, info->drawCallback);
+      info->view->setNativeId(nativeId);
+      info->view->setDrawCallback(info->drawCallback);
     }
 
     return jsi::Value::undefined();
@@ -144,6 +145,7 @@ public:
     for (auto info : tempList) {
       unregisterSkiaDrawView(info.first);
     }
+    _callbackInfos.clear();
   }
 
   /**
@@ -155,7 +157,8 @@ public:
     auto info = getEnsuredCallbackInfo(nativeId);
     info->view = view;
     if (info->drawCallback != nullptr) {
-      info->view->setDrawCallback(nativeId, info->drawCallback);
+      info->view->setNativeId(nativeId);
+      info->view->setDrawCallback(info->drawCallback);
     }
   }
 
@@ -169,11 +172,31 @@ public:
     }
     auto info = getEnsuredCallbackInfo(nativeId);
     if (info->view != nullptr) {
-      info->view->setDrawCallback(nativeId, nullptr);
+      info->view->setDrawCallback(nullptr);
     }
     info->view = nullptr;
     info->drawCallback = nullptr;
     _callbackInfos.erase(nativeId);
+  }
+  
+  /**
+   Sets a skia draw view for the given id. This function can be used
+   to mark that an underlying SkiaView is not available (it could be
+   removed due to ex. a transition). The view can be set to a nullptr
+   or a valid view, effectively toggling the view's availability. If
+   a valid view is set, the setDrawCallback method is called on the
+   view (if a valid callback exists).
+   */
+  void setSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
+    if (_callbackInfos.count(nativeId) == 0) {
+      return;
+    }
+    auto info = getEnsuredCallbackInfo(nativeId);
+    info->view = view;
+    if (view != nullptr && info->drawCallback != nullptr) {
+      info->view->setNativeId(nativeId);
+      info->view->setDrawCallback(info->drawCallback);
+    }
   }
 
 private:
