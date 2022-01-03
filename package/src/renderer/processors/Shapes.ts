@@ -78,12 +78,15 @@ export interface RectCtor {
   y: number;
   width: number;
   height: number;
+}
+
+export interface RRectCtor extends RectCtor {
   rx?: number;
   ry?: number;
 }
 
 export type RectDef = RectCtor | { rect: IRect };
-export type RectOrRRectDef = RectCtor | { rect: IRect | IRRect };
+export type RectOrRRectDef = RRectCtor | { rect: IRect | IRRect };
 
 export const processRect = (def: RectDef) => {
   if (isRectCtor(def)) {
