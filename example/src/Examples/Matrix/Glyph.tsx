@@ -8,8 +8,8 @@ import {
 import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-export const COLS = 5;
-export const ROWS = 5;
+export const COLS = 10;
+export const ROWS = 10;
 export const GLYPH = { width: width / COLS, height: height / ROWS };
 
 /* eslint-disable max-len */
