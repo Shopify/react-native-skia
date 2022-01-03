@@ -4,8 +4,15 @@ import React, {
   useState,
   useCallback,
   useMemo,
+  useContext,
 } from "react";
-import type { RefObject, ReactNode, ComponentProps } from "react";
+import type {
+  RefObject,
+  ReactNode,
+  ComponentProps,
+  Context,
+  ReactElement,
+} from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
@@ -18,6 +25,25 @@ import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
 import { vec } from "./processors";
 import { popDrawingContext, pushDrawingContext } from "./CanvasProvider";
+
+// useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useContextBridge = (...contexts: Context<any>[]) => {
+  const values =
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    contexts.map((context) => useContext(context));
+  return useMemo(
+    () =>
+      ({ children }: { children: ReactNode }) =>
+        contexts.reduceRight(
+          (acc, Context, i) => (
+            <Context.Provider value={values[i]} children={acc} />
+          ),
+          children
+        ) as ReactElement,
+    [contexts, values]
+  );
+};
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
