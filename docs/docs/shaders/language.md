@@ -30,11 +30,11 @@ if (!source) {
 Creates a shader from source.
 Shaders can be nested with one another.
 
-| Name     | Type            |  Description                  |
-|:---------|:----------------|:------------------------------|
-| source   | `RuntimeEffect` | Compiled shaders              |
-| uniforms | `number`        | uniform values                |
-| children | `Shader`        | Shaders to be used as uniform |
+| Name     | Type                                                                 |  Description                  |
+|:---------|:---------------------------------------------------------------------|:------------------------------|
+| source   | `RuntimeEffect`                                                      | Compiled shaders              |
+| uniforms | <code>{ [name: string]: number &#124; Vector &#124; number[]}</code> | uniform values                |
+| children | `Shader`                                                             | Shaders to be used as uniform |
 
 ### Simple Shader
 
@@ -63,25 +63,30 @@ const SimpleShader = () => {
 
 ### Using Uniforms
 
+Uniforms are variables used to parametrize shaders.
+The following uniform types are supported: `float`, `float2`, `float3`, `float4`, `float2x2`, `float3x3`, `float4x4`, `int`, `int2`, `int3` and, `int4`.
+
 ```tsx twoslash
-import {Canvas, Skia, Paint, Shader, Fill} from "@shopify/react-native-skia";
+import {Canvas, Skia, Paint, Shader, Fill, vec} from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
-uniform float blue;
+uniform vec2 c;
 uniform float r;
+uniform float blue;
 
 vec4 main(vec2 pos) {
   vec2 normalized = pos/vec2(2 * r);
-  return distance(pos, vec2(r)) > r ? vec4(1) : vec4(normalized.x, normalized.y, blue, 1);
+  return distance(pos, c) > r ? vec4(1) : vec4(normalized, blue, 1);
 }`)!;
 
 const UniformShader = () => {
-  const blue = 1.0;
   const r = 128;
+  const c = vec(2 * r, r);
+  const blue = 1.0;
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
-        <Shader source={source} uniforms={[blue, r]} />
+        <Shader source={source} uniforms={{ c, r, blue }} />
       </Paint>
       <Fill />
     </Canvas>
