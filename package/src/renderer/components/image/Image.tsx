@@ -30,7 +30,11 @@ export const Image = (defaultProps: AnimatedProps<ImageProps, "source">) => {
         return;
       }
       const rect = processRect(rectProps);
-      const { src, dst } = fitRects(fit, image, rect);
+      const { src, dst } = fitRects(
+        fit,
+        { x: 0, y: 0, width: image.width(), height: image.height() },
+        rect
+      );
       canvas.drawImageRect(image, src, dst, paint);
     }
   );

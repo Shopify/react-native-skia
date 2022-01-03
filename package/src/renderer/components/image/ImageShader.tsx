@@ -36,7 +36,11 @@ export const ImageShader = (
         return null;
       }
       if (fitRect) {
-        const rects = fitRects(fit, image, fitRect);
+        const rects = fitRects(
+          fit,
+          { x: 0, y: 0, width: image.width(), height: image.height() },
+          fitRect
+        );
         const m3 = rect2rect(rects.src, rects.dst);
         transform.transform = [...(transform.transform ?? []), ...m3];
       }

@@ -8,6 +8,7 @@ import { Breathe } from "./Examples/Breathe";
 import { Filters } from "./Examples/Filters";
 import { Gooey } from "./Examples/Gooey";
 import { Hue } from "./Examples/Hue";
+import { Matrix } from "./Examples/Matrix";
 import { HomeScreen } from "./Home";
 
 const App = () => {
@@ -28,6 +29,7 @@ const App = () => {
         <Stack.Screen name="Filters" component={Filters} />
         <Stack.Screen name="Gooey" component={Gooey} />
         <Stack.Screen name="Hue" component={Hue} />
+        <Stack.Screen name="Matrix" component={Matrix} />
         <Stack.Screen name="Drawing" component={DrawingExample} />
         <Stack.Screen name="Animation" component={AnimationExample} />
       </Stack.Navigator>
