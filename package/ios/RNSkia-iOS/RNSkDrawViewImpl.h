@@ -15,14 +15,7 @@ class RNSkDrawViewImpl : public RNSkia::RNSkDrawView {
 public:
   RNSkDrawViewImpl(SkiaDrawView *view,
                    std::shared_ptr<RNSkia::RNSkPlatformContext> context);
-  ~RNSkDrawViewImpl();
-
-  void remove();
-
-  void setOnRemoved(std::shared_ptr<std::function<void()>> func) {
-    _onRemove = func;
-  }
-
+  
   void setSize(int width, int height);
 
 protected:
@@ -48,8 +41,5 @@ private:
 
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
 
-  GrBackendRenderTarget _skRenderTarget;
-  sk_sp<SkSurface> _skSurface;
-
-  std::shared_ptr<std::function<void()>> _onRemove;
+  GrBackendRenderTarget _skRenderTarget;  
 };

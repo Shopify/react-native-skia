@@ -251,7 +251,9 @@ namespace RNSkia
             return false;
         }
 
-        if (!_skRenderTarget.isValid() || _prevWidth != _width ||
+        if (_skSurface == nullptr ||
+            !_skRenderTarget.isValid() ||
+            _prevWidth != _width ||
             _prevHeight != _height)
         {
             RNSkMeasureTime measure =

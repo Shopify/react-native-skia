@@ -3,11 +3,13 @@ import type { RefObject } from "react";
 import { Skia, BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
 import type { IPaint } from "../../skia";
 
+import type { ChildrenProps } from "./Shapes";
+
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export type ColorProp = string | number;
 
-export interface CustomPaintProps {
+export interface CustomPaintProps extends ChildrenProps {
   paint?: RefObject<IPaint>;
   color?: ColorProp;
   strokeWidth?: number;

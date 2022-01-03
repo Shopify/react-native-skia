@@ -21,10 +21,10 @@
 
 - (void) invalidate {
   if(_skManager != nullptr) {
-    _skManager->getPlatformContext()->stopDrawLoop();
+    _skManager->invalidate();
   }
   _skManager = nullptr;
-  _platformContext = nullptr;    
+  _platformContext = nullptr;
 }
 
 - (instancetype) initWithBridge:(RCTBridge*)bridge {
