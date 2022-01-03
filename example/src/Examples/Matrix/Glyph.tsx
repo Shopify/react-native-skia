@@ -7,9 +7,11 @@ import {
 } from "@shopify/react-native-skia/src/renderer/components/image/BoxFit";
 import { Dimensions } from "react-native";
 
+import { glyphs } from "./Symbols";
+
 const { width, height } = Dimensions.get("window");
-export const COLS = 10;
-export const ROWS = 10;
+export const COLS = 15;
+export const ROWS = 25;
 export const GLYPH = { width: width / COLS, height: height / ROWS };
 
 /* eslint-disable max-len */
@@ -29,7 +31,6 @@ interface State {
 interface GlyphProps {
   x: number;
   y: number;
-  glyphs: { path: IPath; bounds: IRect }[];
   state: State;
   progress: AnimationValue<number>;
   index: number;
@@ -38,7 +39,6 @@ interface GlyphProps {
 export const Glyph = ({
   x,
   y,
-  glyphs,
   state: { opacity, color },
   progress: frame,
   index,
@@ -49,27 +49,20 @@ export const Glyph = ({
     const v = Math.floor(progress * (glyphs.length - 1));
     return index;
   };
+  const b = glyphs[index].bounds;
   return (
     <Group
-      transform={[{ scaleY: -1 }]}
-      origin={vec(
-        x + PADDING + (GLYPH.width - 2 * PADDING) / 2,
-        y + PADDING + (GLYPH.height - 2 * PADDING) / 2
+      transform={viewBox(
+        glyphs[index].bounds,
+        rect(
+          x + PADDING,
+          y + PADDING,
+          GLYPH.width - 2 * PADDING,
+          GLYPH.height - 2 * PADDING
+        )
       )}
     >
-      <Group
-        transform={viewBox(
-          glyphs[index].bounds,
-          rect(
-            x + PADDING,
-            y + PADDING,
-            GLYPH.width - 2 * PADDING,
-            GLYPH.height - 2 * PADDING
-          )
-        )}
-      >
-        <Path color={color} path={glyphs[index].path} opacity={opacity} />
-      </Group>
+      <Path color={color} path={glyphs[index].path} opacity={opacity} />
     </Group>
   );
 };

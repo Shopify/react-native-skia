@@ -28,7 +28,7 @@ export const HomeScreen: React.FC = () => {
         route="Hue"
       />
       <HomeScreenButton
-        title="⛈ Digital Rain"
+        title="🌧 Digital Rain"
         description="Digital Rain"
         route="Matrix"
       />

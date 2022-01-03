@@ -1,9 +1,8 @@
 /* eslint-disable max-len */
 
 import { Skia } from "@shopify/react-native-skia";
-import { useMemo } from "react";
 
-const glyphs: string[] = [
+export const glyphs = [
   "M155 -86c79 84 137 173 168 262l31 -51l39 78l-39 63c27 77 44 180 63 324l-39 51l-156 -8c15 47 22 86 31 137l-71 27c-20 -172 -65 -324 -132 -453l58 -47c47 99 78 182 94 250h125c0 -79 -11 -148 -31 -211c-27 31 -51 62 -82 94l-35 -75c25 -25 58 -62 89 -109 c-31 -104 -84 -192 -168 -269z",
   "M93 633l12 -78c47 0 93 4 141 15v-140h-196v-86h196c0 -147 -35 -260 -114 -348l59 -74c88 109 133 250 133 422h160v86h-160v160c41 11 80 26 121 58l-39 75c-100 -57 -204 -85 -313 -90z",
   "M179 648c27 -61 43 -135 59 -218l66 47c-16 83 -41 155 -66 218zM472 656l-82 20c-5 -349 -91 -571 -258 -664l47 -78c193 124 289 359 293 722zM109 637l-59 -47c27 -63 47 -138 63 -227l66 47c-21 93 -45 170 -70 227z",
@@ -72,21 +71,16 @@ const glyphs: string[] = [
   "M429 379l-55 74c-57 -197 -138 -320 -242 -367v613h-82v-672l47 -58c175 83 280 217 332 410z",
   "M428 691h-378v-339h78v253h222v-105c0 -224 -67 -377 -203 -461l47 -78c156 120 234 299 234 539v191z",
   "M472 180h-422v-86h422v86zM410 625h-301v-86h301v86z",
-];
-
-const symbols = (paths: string[]) =>
-  paths.map((d) => {
-    const path = Skia.Path.MakeFromSVGString(d);
-    if (!path) {
-      throw new Error("Couldn't parse: " + d);
-    }
-    const bounds = path.getBounds();
-    return {
-      path,
-      bounds,
-    };
-  });
-
-export const useGlyphs = () => {
-  return useMemo(() => symbols(glyphs), []);
-};
+].map((d) => {
+  const path = Skia.Path.MakeFromSVGString(d);
+  if (!path) {
+    throw new Error("Couldn't parse: " + d);
+  }
+  // Why do we need to do this?
+  path.computeTightBounds();
+  const bounds = path.getBounds();
+  return {
+    path,
+    bounds,
+  };
+});

@@ -2,10 +2,8 @@ import { Canvas, Fill, useProgress } from "@shopify/react-native-skia";
 import React from "react";
 
 import { COLS, ROWS, Glyph, GLYPH } from "./Glyph";
-import { useGlyphs } from "./Symbols";
 
 export const Matrix = () => {
-  const glyphs = useGlyphs();
   const progress = useProgress();
   return (
     <Canvas style={{ flex: 1 }}>
@@ -15,13 +13,12 @@ export const Matrix = () => {
           .fill(0)
           .map((_j, j) => (
             <Glyph
-              glyphs={glyphs}
               key={`${i}-${j}`}
               x={i * GLYPH.width}
               y={j * GLYPH.height}
               state={{ color: "rgb(0, 255, 70)", opacity: 1 }}
               progress={progress}
-              index={i}
+              index={i + j}
             />
           ));
       })}
