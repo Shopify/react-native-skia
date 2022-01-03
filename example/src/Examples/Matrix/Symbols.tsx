@@ -75,8 +75,11 @@ const glyphs: string[] = [
 ];
 
 const symbols = (paths: string[]) =>
-  paths.map((s) => {
-    const path = Skia.Path.MakeFromSVGString(s)!;
+  paths.map((s, i) => {
+    const path = Skia.Path.MakeFromSVGString(s);
+    if (!path) {
+      throw new Error("Couldn't parse: " + s);
+    }
     const bounds = path.getBounds();
     return {
       path,

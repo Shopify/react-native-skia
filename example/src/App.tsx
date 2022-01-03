@@ -29,7 +29,13 @@ const App = () => {
         <Stack.Screen name="Filters" component={Filters} />
         <Stack.Screen name="Gooey" component={Gooey} />
         <Stack.Screen name="Hue" component={Hue} />
-        <Stack.Screen name="Matrix" component={Matrix} />
+        <Stack.Screen
+          name="Matrix"
+          component={Matrix}
+          options={{
+            header: () => null,
+          }}
+        />
         <Stack.Screen name="Drawing" component={DrawingExample} />
         <Stack.Screen name="Animation" component={AnimationExample} />
       </Stack.Navigator>
