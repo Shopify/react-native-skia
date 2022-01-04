@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
-import type { IPath, IRect, AnimationValue } from "@shopify/react-native-skia";
-import { rect, vec, Path, Group } from "@shopify/react-native-skia";
+import type { IRect, AnimationValue } from "@shopify/react-native-skia";
+import { vec, rect, Path, Group } from "@shopify/react-native-skia";
 import {
   fitRects,
   rect2rect,
@@ -25,22 +25,17 @@ const viewBox = (src: IRect, dest: IRect) => {
 
 interface State {
   opacity: number;
-  color: string;
+  color: number;
 }
 
 interface GlyphProps {
   x: number;
   y: number;
-  state: State;
+  state: () => State;
   progress: AnimationValue<number>;
 }
 
-export const Glyph = ({
-  x,
-  y,
-  state: { opacity, color },
-  progress,
-}: GlyphProps) => {
+export const Glyph = ({ x, y, state, progress }: GlyphProps) => {
   const offset = useRef(Math.round(Math.random() * (glyphs.length - 1)));
   const range = useRef(Math.round(250 + Math.random() * 1000));
   const i = () => {
@@ -51,19 +46,31 @@ export const Glyph = ({
   };
   return (
     <Group
-      transform={() =>
-        viewBox(
-          glyphs[i()].bounds,
-          rect(
-            x + PADDING,
-            y + PADDING,
-            GLYPH.width - 2 * PADDING,
-            GLYPH.height - 2 * PADDING
-          )
-        )
-      }
+      transform={[{ scaleY: -1 }]}
+      origin={vec(
+        x + PADDING + (GLYPH.width - 2 * PADDING) / 2,
+        y + PADDING + (GLYPH.height - 2 * PADDING) / 2
+      )}
     >
-      <Path color={color} path={() => glyphs[i()].path} opacity={opacity} />
+      <Group
+        transform={() =>
+          viewBox(
+            glyphs[i()].bounds,
+            rect(
+              x + PADDING,
+              y + PADDING,
+              GLYPH.width - 2 * PADDING,
+              GLYPH.height - 2 * PADDING
+            )
+          )
+        }
+      >
+        <Path
+          color={() => state().color}
+          path={() => glyphs[i()].path}
+          opacity={() => state().opacity}
+        />
+      </Group>
     </Group>
   );
 };
