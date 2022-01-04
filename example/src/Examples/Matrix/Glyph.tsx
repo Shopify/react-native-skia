@@ -1,6 +1,11 @@
 import React, { useRef } from "react";
 import type { AnimationValue } from "@shopify/react-native-skia";
-import { Drawing, Skia } from "@shopify/react-native-skia";
+import {
+  interpolate,
+  interpolateColors,
+  Drawing,
+  Skia,
+} from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -12,23 +17,31 @@ interface GlyphProps {
   i: number;
   j: number;
   progress: AnimationValue<number>;
+  value: number;
 }
 
 const typeface = Skia.Typeface();
 const font = Skia.Font(typeface, GLYPH.height);
-const paint = Skia.Paint();
-paint.setColor(Skia.Color("rgb(0, 255, 70)"));
-const symbols = "abcdefghijklmnopqrstuvwxyz"
+const symbols = "0123456789" //abcdefghijklmnopqrstuvwxyz
   .split("")
-  .map((char) => ({ char, bounds: font.measureText(char, paint) }));
+  .map((char) => ({ char, bounds: font.measureText(char) }));
 
-export const Glyph = ({ i, j, progress }: GlyphProps) => {
+export const Glyph = ({ i, j, progress, value }: GlyphProps) => {
   const range = useRef(60 + Math.random() * 300);
   return (
     <>
       <Drawing
         onDraw={({ canvas }) => {
           const t = Math.floor(progress.value / range.current);
+          const paint = Skia.Paint();
+          paint.setColor(
+            interpolateColors(
+              value,
+              [0.8, 1],
+              ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]
+            )
+          );
+          paint.setAlphaf(value);
           const idx = t % (symbols.length - 1);
           const { bounds, char } = symbols[idx];
           const x = i * GLYPH.width;
