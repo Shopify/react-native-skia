@@ -9,10 +9,13 @@ const arr = (from: number, to: number, blank?: boolean) => {
 };
 const cols = new Array(COLS).fill(0);
 const rows = new Array(ROWS).fill(0);
-const streams = cols.map(() => {
+const streams = cols.map((_, i) => {
   return new Array(3)
     .fill(0)
-    .map(() => [arr(8, 16), arr(4, 8, true)])
+    .map(() => {
+      const input = [arr(8, 16), arr(4, 8, true)];
+      return i % 2 === 0 ? input.reverse() : input;
+    })
     .flat(2);
 });
 
@@ -28,7 +31,7 @@ export const Matrix = () => {
             key={`${i}-${j}`}
             i={i}
             j={j}
-            value={streams[i][j]}
+            stream={streams[i]}
           />
         ))
       )}

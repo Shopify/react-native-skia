@@ -17,7 +17,7 @@ interface GlyphProps {
   i: number;
   j: number;
   progress: AnimationValue<number>;
-  value: number;
+  stream: number[];
 }
 
 const typeface = Skia.Typeface();
@@ -25,13 +25,18 @@ const font = Skia.Font(typeface, GLYPH.height);
 const symbols = "0123456789" //abcdefghijklmnopqrstuvwxyz
   .split("")
   .map((char) => ({ char, bounds: font.measureText(char) }));
+const SPEED = 0.01;
+const shift = (stream: number[], index: number) =>
+  stream.slice(index).concat(stream.slice(0, index));
 
-export const Glyph = ({ i, j, progress, value }: GlyphProps) => {
+export const Glyph = ({ i, j, progress, stream }: GlyphProps) => {
   const range = useRef(60 + Math.random() * 300);
   return (
     <>
       <Drawing
         onDraw={({ canvas }) => {
+          const index = Math.round((progress.value * SPEED) % stream.length);
+          const value = shift(stream, index)[j];
           const t = Math.floor(progress.value / range.current);
           const paint = Skia.Paint();
           paint.setColor(
