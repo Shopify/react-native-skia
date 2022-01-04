@@ -1,4 +1,10 @@
-import { Canvas, Fill, useProgress } from "@shopify/react-native-skia";
+import {
+  BlurMask,
+  Canvas,
+  Fill,
+  Paint,
+  useProgress,
+} from "@shopify/react-native-skia";
 import React from "react";
 
 import { COLS, ROWS, Glyph } from "./Glyph";
@@ -24,6 +30,9 @@ export const Matrix = () => {
   return (
     <Canvas style={{ flex: 1 }} debug>
       <Fill color="black" />
+      <Paint>
+        <BlurMask sigma={10} style="solid" />
+      </Paint>
       {cols.map((_i, i) =>
         rows.map((_j, j) => (
           <Glyph
