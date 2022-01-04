@@ -26,8 +26,13 @@ const symbols = "0123456789" //abcdefghijklmnopqrstuvwxyz
   .split("")
   .map((char) => ({ char, bounds: font.measureText(char) }));
 const SPEED = 0.01;
-const shift = (stream: number[], index: number) =>
-  stream.slice(index).concat(stream.slice(0, index));
+// const shift = (stream: number[], index: number) =>
+//   stream.slice(index).concat(stream.slice(0, index));
+
+const shiftReverse = (stream: number[], index: number) => {
+  const j = stream.length - 1 - index;
+  return stream.slice(j).concat(stream.slice(0, j));
+};
 
 export const Glyph = ({ i, j, progress, stream }: GlyphProps) => {
   const range = useRef(60 + Math.random() * 300);
@@ -36,7 +41,7 @@ export const Glyph = ({ i, j, progress, stream }: GlyphProps) => {
       <Drawing
         onDraw={({ canvas }) => {
           const index = Math.round((progress.value * SPEED) % stream.length);
-          const value = shift(stream, index)[j];
+          const value = shiftReverse(stream, index)[j];
           const t = Math.floor(progress.value / range.current);
           const paint = Skia.Paint();
           paint.setColor(
