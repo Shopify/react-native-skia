@@ -40,7 +40,7 @@ const shiftReverse = (stream: number[], index: number) => {
 };
 
 export const Glyph = ({ i, j, progress, stream }: GlyphProps) => {
-  const range = useRef(60 + Math.random() * 300);
+  const range = useRef(150 + Math.random() * 600);
   return (
     <Drawing
       onDraw={({ canvas, paint }) => {
