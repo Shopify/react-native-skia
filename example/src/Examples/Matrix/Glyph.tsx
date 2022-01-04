@@ -33,36 +33,37 @@ interface GlyphProps {
   y: number;
   state: State;
   progress: AnimationValue<number>;
-  index: number;
 }
 
 export const Glyph = ({
   x,
   y,
   state: { opacity, color },
-  progress: frame,
-  index,
+  progress,
 }: GlyphProps) => {
-  const range = useRef(Math.round(150 + Math.random() * 600));
+  const offset = useRef(Math.round(Math.random() * (glyphs.length - 1)));
+  const range = useRef(Math.round(250 + Math.random() * 1000));
   const i = () => {
-    const progress = (frame.value % range.current) / range.current;
-    const v = Math.floor(progress * (glyphs.length - 1));
-    return index;
+    return (
+      (offset.current + Math.floor(progress.value / range.current)) %
+      (glyphs.length - 1)
+    );
   };
-  const b = glyphs[index].bounds;
   return (
     <Group
-      transform={viewBox(
-        glyphs[index].bounds,
-        rect(
-          x + PADDING,
-          y + PADDING,
-          GLYPH.width - 2 * PADDING,
-          GLYPH.height - 2 * PADDING
+      transform={() =>
+        viewBox(
+          glyphs[i()].bounds,
+          rect(
+            x + PADDING,
+            y + PADDING,
+            GLYPH.width - 2 * PADDING,
+            GLYPH.height - 2 * PADDING
+          )
         )
-      )}
+      }
     >
-      <Path color={color} path={glyphs[index].path} opacity={opacity} />
+      <Path color={color} path={() => glyphs[i()].path} opacity={opacity} />
     </Group>
   );
 };

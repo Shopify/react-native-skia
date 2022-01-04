@@ -77,8 +77,7 @@ export const glyphs = [
     throw new Error("Couldn't parse: " + d);
   }
   // Why do we need to do this?
-  path.computeTightBounds();
-  const bounds = path.getBounds();
+  const bounds = path.computeTightBounds();
   return {
     path,
     bounds,

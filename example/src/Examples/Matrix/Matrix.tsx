@@ -18,7 +18,6 @@ export const Matrix = () => {
               y={j * GLYPH.height}
               state={{ color: "rgb(0, 255, 70)", opacity: 1 }}
               progress={progress}
-              index={i + j}
             />
           ));
       })}
