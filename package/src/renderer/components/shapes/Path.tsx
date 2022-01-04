@@ -12,16 +12,17 @@ interface StrokeOpts {
   precision?: number;
 }
 
-export interface PathProps extends CustomPaintProps, StrokeOpts {
+export interface PathProps extends CustomPaintProps {
   path: IPath | string;
   start: number;
   end: number;
+  stroke?: StrokeOpts;
 }
 
 export const Path = (props: AnimatedProps<PathProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint }, { start, end, ...pathProps }) => {
+    ({ canvas, paint }, { start, end, stroke, ...pathProps }) => {
       const path =
         typeof pathProps.path === "string"
           ? Skia.Path.MakeFromSVGString(pathProps.path)
@@ -29,7 +30,9 @@ export const Path = (props: AnimatedProps<PathProps>) => {
       if (path === null) {
         throw new Error("Invalid path:  " + pathProps.path);
       }
-      // path.stroke(pathProps);
+      if (stroke) {
+        path.stroke(stroke);
+      }
       if (start !== 0 || end !== 1) {
         path.trim(start, end, false);
       }

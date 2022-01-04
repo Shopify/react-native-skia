@@ -5,8 +5,7 @@
 #include "RNSkDrawView.h"
 
 #include <chrono>
-#include <condition_variable>
-#include <mutex>
+#include <functional>
 
 #include "RNSkLog.h"
 
@@ -30,38 +29,26 @@ RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
       _platformContext(context),
       _infoObject(std::make_shared<RNSkInfoObject>()),
       _timingInfo(std::make_shared<RNSkTimingInfo>()),
-      _isRemoved(false) {}
+      _isDrawing(new std::timed_mutex())
+      {}
 
 RNSkDrawView::~RNSkDrawView() {
-  {
-    _isRemoved = true;
-    // This is a very simple fix to an issue where the view posts a redraw
-    // function to the javascript thread, and the object is destroyed and then
-    // the redraw function is called and ends up executing on a destroyed draw
-    // view. Since _isDrawing is an atomic bool we know that as long as it is
-    // true we are drawing and should wait.
-    // It is limited to only wait for 500 milliseconds - if it is stuck we
-    // might have gotten an exception that caused the flag never to be reset.
-    milliseconds start = std::chrono::duration_cast<milliseconds>(
-        system_clock::now().time_since_epoch());
-    
-    while (_isDrawing == true) {
-      milliseconds now = std::chrono::duration_cast<milliseconds>(
-          system_clock::now().time_since_epoch());
-      if (now.count() - start.count() > 500) {
-        RNSkLogger::logToConsole("Timed out waiting for RNSkDrawView delete...");
-        break;
-      }
-    }
+  invalidate();
+  
+  // Wait for the drawing lock (if set)
+  if(!_isDrawing->try_lock_for(system_clock::now().time_since_epoch() + milliseconds(500))) {
+    RNSkLogger::logToConsole("Failed to delete since drawing is still locked for native view with id %i", _nativeId);
   }
+  
+  delete _isDrawing;  
 }
 
-void RNSkDrawView::setIsRemoved() {
-  _isRemoved = true;
+void RNSkDrawView::invalidate() {
   endDrawingLoop();
+  _isValid = false;
 }
 
-void RNSkDrawView::setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Function> callback) {
+void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   if (callback == nullptr) {
     _drawCallback = nullptr;
@@ -69,9 +56,6 @@ void RNSkDrawView::setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Functio
     endDrawingLoop();
     return;
   }
-
-  // Update native id
-  _nativeId = nativeId;
 
   // Reset timing info
   _timingInfo->reset();
@@ -82,7 +66,7 @@ void RNSkDrawView::setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Functio
                        int height, double timestamp,
                        std::shared_ptr<RNSkPlatformContext> context) {
         auto runtime = context->getJsRuntime();
-
+                         
         // Update info parameter
         _infoObject->beginDrawCallback(width, height, timestamp);
 
@@ -134,7 +118,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
                                  std::shared_ptr<RNSkPlatformContext> context) {
 
   try {
-    if(getIsRemoved()) {
+    if(!isValid()) {
       return;
     }
 
@@ -177,49 +161,50 @@ void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
   }
 }
 
+void RNSkDrawView::performDraw() {
+  if(isValid()) {
+    // Calculate milliseconds since start
+    milliseconds ms = duration_cast<milliseconds>(
+        system_clock::now().time_since_epoch());
+    
+    // Call draw frame method in sub class
+    drawFrame(ms.count() / 1000.0);
+    
+    // Unlock the drawing lock
+    _isDrawing->unlock();
+    
+    // Should we request a new redraw?
+    if(_drawingMode != RNSkDrawingMode::Continuous && _redrawRequestCounter > 0) {
+      _redrawRequestCounter = 0;
+      requestRedraw();
+    }
+  } else {
+    _isDrawing->unlock();
+  }
+}
+
 void RNSkDrawView::requestRedraw() {
   if (!isReadyToDraw()) {
+    return;
+  }
+  
+  // If we are in continuous mode, we can just start the drawing loop
+  if (_drawingMode == RNSkDrawingMode::Continuous) {
+    beginDrawingLoop();
+    return;
+  }
+  
+  // Check if we are already in a draw
+  if(!_isDrawing->try_lock()) {
     _redrawRequestCounter++;
     return;
   }
   
-  _isDrawing = true;
-  
-  auto performDraw = [this]() {
-    if(getIsRemoved()) {
-      RNSkLogger::logToConsole("Warning: Trying to redraw after delete!");
-      _isDrawing = false;
-      return;
-    }
-
-    if (_drawingMode == RNSkDrawingMode::Continuous) {
-      _isDrawing = false;
-      beginDrawingLoop();
-      return;
-    }
-    
-    milliseconds ms = std::chrono::duration_cast<milliseconds>(
-        system_clock::now().time_since_epoch());
-
-    drawFrame(ms.count() / 1000.0);
-
-    _isDrawing = false;
-
-    if(_redrawRequestCounter > 0) {
-      _redrawRequestCounter = 0;
-      requestRedraw();
-    }
-  };
-
-  _platformContext->runOnJavascriptThread(performDraw);
+  _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
 }
 
 bool RNSkDrawView::isReadyToDraw() {
-  if (_isDrawing) {
-    return false;
-  }
-
-  if(getIsRemoved()) {
+  if(!isValid()) {
     return false;
   }
 
@@ -237,58 +222,40 @@ bool RNSkDrawView::isReadyToDraw() {
 }
 
 void RNSkDrawView::beginDrawingLoop() {
-  if(getIsRemoved()) {
+  if(!isValid()) {
     return;
   }
 
-  if (_drawingLoopId != -1) {
+  if (_drawingLoopId != 0 || _nativeId == 0) {
     return;
   }
   
   // Set to zero to avoid calling beginDrawLoop before we return
-  _drawingLoopId = 0;
   _drawingLoopId =
       _platformContext->beginDrawLoop(_nativeId, [this]() {
-        auto performDraw = [&]() {
-          if(getIsRemoved()) {
-            return;
-          }
-
-          milliseconds ms = std::chrono::duration_cast<milliseconds>(
-              system_clock::now().time_since_epoch());
-
-          // Only redraw if view is still alive
-          drawFrame(ms.count() / 1000.0);
-
-          _isDrawing = false;
-        };
-
-        if (!isReadyToDraw()) {
-          return;
+        if(_isDrawing->try_lock()) {
+          _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
         }
-
-        _isDrawing = true;
-        _platformContext->runOnJavascriptThread(performDraw);
       });
 }
 
 void RNSkDrawView::endDrawingLoop() {
-  _platformContext->endDrawLoop(_nativeId);
-  _drawingLoopId = -1;
+  if(_drawingLoopId != 0) {
+    _drawingLoopId = 0;
+    _platformContext->endDrawLoop(_nativeId);
+  }
 }
 
 void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
-  if(getIsRemoved()) {
+  if(!isValid() || mode == _drawingMode || _nativeId == 0) {
     return;
   }
-  if(mode != _drawingMode) {
-    _drawingMode = mode;
-    if(mode == RNSkDrawingMode::Default) {
-      endDrawingLoop();
-    } else {
-      beginDrawingLoop();
-      requestRedraw();
-    }
+  _drawingMode = mode;
+  if(mode == RNSkDrawingMode::Default) {
+    endDrawingLoop();
+  } else {
+    beginDrawingLoop();
+    requestRedraw();
   }
 }
 

@@ -41,11 +41,26 @@ public:
    * thread and js runtime.
    */
   void requestRedraw();
+  
+  /**
+   Calls the drawing callback on the javascript thread
+   */
+  void performDraw();
 
   /**
    * Installs the draw callback for the view
    */
-  void setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Function> callback);
+  void setDrawCallback(std::shared_ptr<jsi::Function> callback);
+  
+  /**
+   Sets the native id of the view
+   */
+  void setNativeId(size_t nativeId) { _nativeId = nativeId; }
+  
+  /**
+   Returns the native id
+   */
+  size_t getNativeId() { return _nativeId; }
 
   /**
    * Call this method with a valid Skia surface to let the draw drawCallback do
@@ -75,17 +90,17 @@ protected:
   /**
    * Setup and draw the frame
    */
-  virtual void drawFrame(double time) = 0;
+  virtual void drawFrame(double time) {};
 
   /**
-   * Mark view as removed from the RN view stack
+   * Mark view as invalidated
    */
-  void setIsRemoved();
+  void invalidate();
 
   /**
    * @return True if the view was marked as deleted
    */
-  bool getIsRemoved() { return _isRemoved; }
+  bool isValid() { return _isValid; }
 
   /**
    Updates the last duration value
@@ -130,9 +145,9 @@ private:
   std::shared_ptr<JsiSkCanvas> _jsiCanvas;
 
   /**
-   * is drawing flag
+   * drawing mutex
    */
-  std::atomic<bool> _isDrawing{false};
+  std::timed_mutex* _isDrawing;
 
   /**
    * Pointer to the platform context
@@ -152,7 +167,7 @@ private:
   /**
    * True if the drawing loop has been requested
    */
-  size_t _drawingLoopId = -1;
+  size_t _drawingLoopId = 0;
 
   /**
    * Info object parameter
@@ -168,9 +183,9 @@ private:
    */
   std::atomic<int> _redrawRequestCounter;
   /**
-   Flag indicating that the view is no longer available
+   Flag indicating that the view is valid / invalid
    */
-  std::atomic<bool> _isRemoved;
+  std::atomic<bool> _isValid { true };
 
   /**
    * Native id

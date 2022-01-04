@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { IRect, IRRect } from "../../skia";
+import { hasProperty } from "../typeddash";
 
 import type { Vector as Point } from "./math/Vector";
 import { vec } from "./math/Vector";
@@ -23,9 +24,6 @@ interface ScalarCircleDef {
 }
 
 export type CircleDef = PointCircleDef | ScalarCircleDef;
-
-const hasProperty = (obj: unknown, key: string) =>
-  !!(typeof obj === "object" && obj !== null && key in obj);
 
 const isCircleScalarDef = (def: CircleDef): def is ScalarCircleDef =>
   hasProperty(def, "cx");
@@ -78,12 +76,15 @@ export interface RectCtor {
   y: number;
   width: number;
   height: number;
+}
+
+export interface RRectCtor extends RectCtor {
   rx?: number;
   ry?: number;
 }
 
 export type RectDef = RectCtor | { rect: IRect };
-export type RectOrRRectDef = RectCtor | { rect: IRect | IRRect };
+export type RectOrRRectDef = RRectCtor | { rect: IRect | IRRect };
 
 export const processRect = (def: RectDef) => {
   if (isRectCtor(def)) {

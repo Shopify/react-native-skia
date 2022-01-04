@@ -27,11 +27,17 @@ export const Filters = () => {
   return (
     <Canvas style={{ width, height }}>
       <Paint>
-        <Shader source={source} uniforms={() => [mix(progress.value, 1, 100)]}>
+        <Shader
+          source={source}
+          uniforms={() => ({ r: mix(progress.value, 1, 100) })}
+        >
           <ImageShader
             source={require("../../assets/oslo.jpg")}
             fit="cover"
-            fitRect={{ x: 0, y: 0, width, height }}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
           />
         </Shader>
       </Paint>
