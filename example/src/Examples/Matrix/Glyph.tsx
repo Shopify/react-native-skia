@@ -1,76 +1,36 @@
-import React, { useRef } from "react";
-import type { IRect, AnimationValue } from "@shopify/react-native-skia";
-import { vec, rect, Path, Group } from "@shopify/react-native-skia";
-import {
-  fitRects,
-  rect2rect,
-} from "@shopify/react-native-skia/src/renderer/components/image/BoxFit";
+import React from "react";
+import { Drawing, Skia } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
-import { glyphs } from "./Symbols";
-
 const { width, height } = Dimensions.get("window");
-export const COLS = 15;
+export const COLS = 14;
 export const ROWS = 25;
 export const GLYPH = { width: width / COLS, height: height / ROWS };
 
-/* eslint-disable max-len */
-// https://scifi.stackexchange.com/questions/137575/is-there-a-list-of-the-symbols-shown-in-the-matrixthe-symbols-rain-how-many
-const PADDING = 4;
-const viewBox = (src: IRect, dest: IRect) => {
-  const rects = fitRects("contain", src, dest);
-  const tr = rect2rect(rects.src, rects.dst);
-  return tr;
-};
-
-interface State {
-  opacity: number;
-  color: number;
-}
-
 interface GlyphProps {
-  x: number;
-  y: number;
-  state: () => State;
-  progress: AnimationValue<number>;
+  i: number;
+  j: number;
 }
 
-export const Glyph = ({ x, y, state, progress }: GlyphProps) => {
-  const offset = useRef(Math.round(Math.random() * (glyphs.length - 1)));
-  const range = useRef(Math.round(250 + Math.random() * 1000));
-  const i = () => {
-    return (
-      (offset.current + Math.floor(progress.value / range.current)) %
-      (glyphs.length - 1)
-    );
-  };
+const typeface = Skia.Typeface();
+const font = Skia.Font(typeface, GLYPH.height);
+const paint = Skia.Paint();
+paint.setColor(Skia.Color("rgb(0, 255, 70)"));
+
+export const Glyph = ({ i, j }: GlyphProps) => {
+  const a = `${Math.round(Math.random() * 9)}`;
+  const m = font.measureText(a, paint);
+  const x = i * GLYPH.width;
+  const y = j * GLYPH.height;
+  const dx = (GLYPH.width - m.width) / 2;
+  const dy = (GLYPH.height - m.height) / 2;
   return (
-    <Group
-      transform={[{ scaleY: -1 }]}
-      origin={vec(
-        x + PADDING + (GLYPH.width - 2 * PADDING) / 2,
-        y + PADDING + (GLYPH.height - 2 * PADDING) / 2
-      )}
-    >
-      <Group
-        transform={() =>
-          viewBox(
-            glyphs[i()].bounds,
-            rect(
-              x + PADDING,
-              y + PADDING,
-              GLYPH.width - 2 * PADDING,
-              GLYPH.height - 2 * PADDING
-            )
-          )
-        }
-      >
-        <Path
-          color={() => state().color}
-          path={() => glyphs[i()].path}
-          opacity={() => state().opacity}
-        />
-      </Group>
-    </Group>
+    <>
+      <Drawing
+        onDraw={({ canvas }) => {
+          canvas.drawText(a, x + dx, y + m.height + dy, font, paint);
+        }}
+      />
+    </>
   );
 };
