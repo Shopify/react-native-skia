@@ -15,8 +15,6 @@ Draws a rectangle.
 | y      | `number` | Y coordinate.                                                 |
 | width  | `number` | Width of the rectangle.                                       |
 | height | `number` | Height of the rectangle.                                      |
-| rx?    | `number` | Horizontal corner radius. Defaults to `ry` if specified or 0. |
-| ry?    | `number` | Vertical corner radius. Defaults to `rx` if specified or 0.   |
 
 ```tsx twoslash
 import {Canvas, Rect} from "@shopify/react-native-skia";
@@ -25,6 +23,37 @@ const RectDemo = () => {
   return (
     <Canvas style={{ flex: 1}}>
       <Rect
+        x={0}
+        y={0}
+        width={256}
+        height={256}
+        color="lightblue"
+      />
+    </Canvas>
+  );
+};
+```
+
+## RRect
+
+Draws a rounded rectangle.
+
+| Name   | Type     |  Description                                                  |
+|:-------|:---------|:--------------------------------------------------------------|
+| x      | `number` | X coordinate.                                                 |
+| y      | `number` | Y coordinate.                                                 |
+| width  | `number` | Width of the rectangle.                                       |
+| height | `number` | Height of the rectangle.                                      |
+| rx?    | `number` | Horizontal corner radius. Defaults to `ry` if specified or 0. |
+| ry?    | `number` | Vertical corner radius. Defaults to `rx` if specified or 0.   |
+
+```tsx twoslash
+import {Canvas, RRect} from "@shopify/react-native-skia";
+
+const RectDemo = () => {
+  return (
+    <Canvas style={{ flex: 1}}>
+      <RRect
         x={0}
         y={0}
         width={256}
