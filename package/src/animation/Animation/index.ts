@@ -1,1 +1,1 @@
-export { useLoop, useProgress, useSpring, useTiming } from "./hooks";
+export { useLoop, useTimestamp, useSpring, useTiming } from "./hooks";
