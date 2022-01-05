@@ -1,21 +1,12 @@
 import React, { useRef } from "react";
 import type { AnimationValue } from "@shopify/react-native-skia";
-import {
-  interpolate,
-  interpolateColors,
-  Drawing,
-  Skia,
-} from "@shopify/react-native-skia";
+import { interpolateColors, Drawing, Skia } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
-
-const resolveAssetSource = require("react-native/Libraries/Image/resolveAssetSource");
 
 const { width, height } = Dimensions.get("window");
 export const COLS = 14;
 export const ROWS = 25;
 export const GLYPH = { width: width / COLS, height: height / ROWS };
-
-console.log(resolveAssetSource(require("./matrix-code-nfi.otf")));
 
 interface GlyphProps {
   i: number;

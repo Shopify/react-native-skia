@@ -5,7 +5,7 @@ import {
   Paint,
   useProgress,
 } from "@shopify/react-native-skia";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { COLS, ROWS, Glyph } from "./Glyph";
 
@@ -25,8 +25,28 @@ const streams = cols.map((_, i) => {
     .flat(2);
 });
 
+const resolveAssetSource = require("react-native/Libraries/Image/resolveAssetSource");
+
+const resolveAsset = async (asset: ReturnType<typeof require>) => {
+  const resp = await fetch(resolveAssetSource(asset).uri);
+  const data = await resp.blob();
+
+  return {
+    asset,
+    data,
+  };
+};
+
 export const Matrix = () => {
   const progress = useProgress();
+  useEffect(() => {
+    resolveAsset(require("./matrix-code-nfi.otf"))
+      .then((res) => {
+        console.log("OK");
+        console.log({ res });
+      })
+      .catch((err) => console.error({ err }));
+  }, []);
   return (
     <Canvas style={{ flex: 1 }} debug>
       <Fill color="black" />
