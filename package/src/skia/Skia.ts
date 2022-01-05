@@ -4,7 +4,7 @@ import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
 import type { Font } from "./Font";
-import type { FontStyle, Typeface } from "./Typeface";
+import type { Typeface } from "./Typeface";
 import type { IImage } from "./Image";
 import { ImageCtor } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
@@ -32,9 +32,7 @@ export interface Skia {
   Matrix: () => Matrix;
   ColorFilter: ColorFilterFactory;
   Font: (typeface?: Typeface, size?: number) => Font;
-  Typeface:
-    | ((fontName?: string, style?: FontStyle) => Typeface)
-    | (() => Typeface);
+  Typeface: (localUri: string) => Promise<Typeface>;
   MaskFilter: MaskFilterFactory;
   RuntimeEffect: RuntimeEffectFactory;
   ImageFilter: ImageFilterFactory;

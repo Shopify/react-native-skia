@@ -3,11 +3,13 @@ import {
   Canvas,
   Fill,
   Paint,
+  Skia,
   useProgress,
+  useTypeface,
 } from "@shopify/react-native-skia";
-import React, { useEffect } from "react";
+import React from "react";
 
-import { COLS, ROWS, Glyph } from "./Glyph";
+import { COLS, ROWS, Glyph, GLYPH } from "./Glyph";
 
 const arr = (from: number, to: number, blank?: boolean) => {
   const length = from + Math.floor(Math.random() * (to - from));
@@ -16,7 +18,7 @@ const arr = (from: number, to: number, blank?: boolean) => {
 const cols = new Array(COLS).fill(0);
 const rows = new Array(ROWS).fill(0);
 const streams = cols.map((_, i) => {
-  return new Array(3)
+  return new Array(6)
     .fill(0)
     .map(() => {
       const input = [arr(8, 16), arr(4, 8, true)];
@@ -25,30 +27,28 @@ const streams = cols.map((_, i) => {
     .flat(2);
 });
 
-const resolveAssetSource = require("react-native/Libraries/Image/resolveAssetSource");
-
-const resolveAsset = async (asset: ReturnType<typeof require>) => {
-  const resp = await fetch(resolveAssetSource(asset).uri);
-  const data = await resp.blob();
-
-  return {
-    asset,
-    data,
-  };
+const useMatrixTypeface = () => {
+  const typeface = useTypeface(require("./matrix-code-nfi.otf"));
+  if (typeface === null) {
+    return null;
+  }
+  const font = Skia.Font(typeface, GLYPH.height);
+  const symbols = "abcdefghijklmnopqrstuvwxyz".split("").map((char) => ({
+    char,
+    bounds: font.measureText(char),
+  }));
+  return { font, symbols };
 };
 
 export const Matrix = () => {
   const progress = useProgress();
-  useEffect(() => {
-    resolveAsset(require("./matrix-code-nfi.otf"))
-      .then((res) => {
-        console.log("OK");
-        console.log({ res });
-      })
-      .catch((err) => console.error({ err }));
-  }, []);
+  const typeface = useMatrixTypeface();
+  if (typeface === null) {
+    return null;
+  }
+  const { font, symbols } = typeface;
   return (
-    <Canvas style={{ flex: 1 }} debug>
+    <Canvas style={{ flex: 1 }}>
       <Fill color="black" />
       <Paint>
         <BlurMask sigma={10} style="solid" />
@@ -61,6 +61,8 @@ export const Matrix = () => {
             i={i}
             j={j}
             stream={streams[i]}
+            symbols={symbols}
+            font={font}
           />
         ))
       )}

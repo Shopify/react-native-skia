@@ -1,11 +1,11 @@
 import React, { useRef } from "react";
-import type { AnimationValue } from "@shopify/react-native-skia";
-import { interpolateColors, Drawing, Skia } from "@shopify/react-native-skia";
+import type { AnimationValue, Font, IRect } from "@shopify/react-native-skia";
+import { interpolateColors, Drawing } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-export const COLS = 14;
-export const ROWS = 25;
+export const COLS = 8;
+export const ROWS = 15;
 export const GLYPH = { width: width / COLS, height: height / ROWS };
 
 interface GlyphProps {
@@ -13,14 +13,10 @@ interface GlyphProps {
   j: number;
   progress: AnimationValue<number>;
   stream: number[];
+  symbols: { char: string; bounds: IRect }[];
+  font: Font;
 }
 
-const typeface = Skia.Typeface();
-const font = Skia.Font(typeface, GLYPH.height);
-const symbols = "0123456789".split("").map((char) => ({
-  char,
-  bounds: font.measureText(char),
-}));
 const SPEED = 0.01;
 // const shift = (stream: number[], index: number) =>
 //   stream.slice(index).concat(stream.slice(0, index));
@@ -30,8 +26,15 @@ const shiftReverse = (stream: number[], index: number) => {
   return stream.slice(j).concat(stream.slice(0, j));
 };
 
-export const Glyph = ({ i, j, progress, stream }: GlyphProps) => {
-  const range = useRef(150 + Math.random() * 600);
+export const Glyph = ({
+  i,
+  j,
+  progress,
+  stream,
+  symbols,
+  font,
+}: GlyphProps) => {
+  const range = useRef(300 + Math.random() * 300);
   return (
     <Drawing
       onDraw={({ canvas, paint }) => {
@@ -58,3 +61,7 @@ export const Glyph = ({ i, j, progress, stream }: GlyphProps) => {
     />
   );
 };
+
+// <Text value="" />
+// 2. Asset FontManager
+// <Paragraph> <Span>asdasdasd</Span> </Paragraph>
