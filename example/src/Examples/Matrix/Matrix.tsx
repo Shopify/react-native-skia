@@ -27,26 +27,20 @@ const streams = cols.map((_, i) => {
     .flat(2);
 });
 
-const useMatrixTypeface = () => {
+const useMatrixFont = () => {
   const typeface = useTypeface(require("./matrix-code-nfi.otf"));
   if (typeface === null) {
     return null;
   }
-  const font = Skia.Font(typeface, GLYPH.height);
-  const symbols = "abcdefghijklmnopqrstuvwxyz".split("").map((value) => ({
-    value,
-    bounds: font.measureText(value),
-  }));
-  return { font, symbols };
+  return Skia.Font(typeface, GLYPH.height);
 };
 
 export const Matrix = () => {
   const progress = useProgress();
-  const typeface = useMatrixTypeface();
-  if (typeface === null) {
+  const font = useMatrixFont();
+  if (font === null) {
     return null;
   }
-  const { font, symbols } = typeface;
   return (
     <Canvas style={{ flex: 1 }} debug>
       <Fill color="black" />
@@ -61,7 +55,6 @@ export const Matrix = () => {
             i={i}
             j={j}
             stream={streams[i]}
-            symbols={symbols}
             font={font}
           />
         ))
