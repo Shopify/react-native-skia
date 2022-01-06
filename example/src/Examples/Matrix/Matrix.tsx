@@ -18,7 +18,7 @@ const arr = (from: number, to: number, blank?: boolean) => {
 const cols = new Array(COLS).fill(0);
 const rows = new Array(ROWS).fill(0);
 const streams = cols.map((_, i) => {
-  return new Array(6)
+  return new Array(3)
     .fill(0)
     .map(() => {
       const input = [arr(8, 16), arr(4, 8, true)];
@@ -33,9 +33,9 @@ const useMatrixTypeface = () => {
     return null;
   }
   const font = Skia.Font(typeface, GLYPH.height);
-  const symbols = "abcdefghijklmnopqrstuvwxyz".split("").map((char) => ({
-    char,
-    bounds: font.measureText(char),
+  const symbols = "abcdefghijklmnopqrstuvwxyz".split("").map((value) => ({
+    value,
+    bounds: font.measureText(value),
   }));
   return { font, symbols };
 };
@@ -48,7 +48,7 @@ export const Matrix = () => {
   }
   const { font, symbols } = typeface;
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ flex: 1 }} debug>
       <Fill color="black" />
       <Paint>
         <BlurMask sigma={10} style="solid" />

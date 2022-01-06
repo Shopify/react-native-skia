@@ -11,15 +11,20 @@ import type { AnimatedProps } from "../../processors/Animations/Animations";
 import type { Fit } from "./BoxFit";
 import { fitRects } from "./BoxFit";
 
+export interface SourceProps {
+  source: number | IImage;
+}
+
 export type ImageProps = RectDef &
   CustomPaintProps & {
-    source: number | IImage;
     fit: Fit;
   };
 
-export const Image = (defaultProps: AnimatedProps<ImageProps, "source">) => {
+export const Image = (
+  defaultProps: AnimatedProps<ImageProps> & SourceProps
+) => {
   const image = useImage(defaultProps.source);
-  const props = useMemo<AnimatedProps<ImageProps, "source">>(
+  const props = useMemo<AnimatedProps<ImageProps>>(
     () => ({ ...defaultProps, image }),
     [defaultProps, image]
   );

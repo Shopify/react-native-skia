@@ -1,16 +1,6 @@
-import type { FC } from "react";
 import React, { useRef } from "react";
-import type {
-  AnimatedProps,
-  AnimationValue,
-  Font,
-  IRect,
-} from "@shopify/react-native-skia";
-import {
-  materialize,
-  interpolateColors,
-  Text,
-} from "@shopify/react-native-skia";
+import type { AnimationValue, Font, IRect } from "@shopify/react-native-skia";
+import { interpolateColors, Text } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -23,7 +13,7 @@ interface GlyphProps {
   j: number;
   progress: AnimationValue<number>;
   stream: number[];
-  symbols: { char: string; bounds: IRect }[];
+  symbols: { value: string; bounds: IRect }[];
   font: Font;
 }
 
@@ -44,8 +34,9 @@ export const Glyph = ({
   symbols,
   font,
 }: GlyphProps) => {
+  const offset = useRef(Math.round(Math.random() * (symbols.length - 1)));
   const range = useRef(300 + Math.random() * 300);
-  const text = () => {
+  const animatedProps = () => {
     const index = Math.round((progress.value * SPEED) % stream.length);
     const opacity = shiftReverse(stream, index)[j];
     const t = Math.floor(progress.value / range.current);
@@ -54,28 +45,20 @@ export const Glyph = ({
       [0.8, 1],
       ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]
     );
-    const idx = t % (symbols.length - 1);
-    const { bounds, char } = symbols[idx];
+    const idx = (offset.current + t) % (symbols.length - 1);
+    const { bounds, value } = symbols[idx];
     const x = i * GLYPH.width;
     const y = j * GLYPH.height;
     const dx = (GLYPH.width - bounds.width) / 2;
     const dy = (GLYPH.height - bounds.height) / 2;
     return {
-      value: char,
+      value,
       x: x + dx,
       y: y + bounds.height + dy,
       color,
       opacity,
+      font,
     };
   };
-  return (
-    <Text
-      value={() => text().value}
-      x={() => text().x}
-      y={() => text().y}
-      font={font}
-      color={() => text().color}
-      opacity={() => text().opacity}
-    />
-  );
+  return <Text animatedProps={animatedProps} />;
 };

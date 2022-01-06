@@ -21,6 +21,9 @@ export const materialize = <T>(
   ctx: DrawingContext,
   props: AnimatedProps<T>
 ) => {
+  if ("animatedProps" in props) {
+    return props.animatedProps(ctx);
+  }
   const result = { ...props };
   mapKeys(props).forEach((key) => {
     const value = props[key];
@@ -31,6 +34,8 @@ export const materialize = <T>(
   return result as T;
 };
 
-export type AnimatedProps<T, E extends string = never> = {
-  [K in keyof T]: T[K] | (K extends E ? never : (ctx: DrawingContext) => T[K]);
-};
+export type AnimatedProps<T> =
+  | { animatedProps: (ctx: DrawingContext) => T }
+  | {
+      [K in keyof T]: T[K] | ((ctx: DrawingContext) => T[K]);
+    };
