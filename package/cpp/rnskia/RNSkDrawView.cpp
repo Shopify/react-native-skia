@@ -113,31 +113,46 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
   requestRedraw();
 }
 
-void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
-                                 int height, double time,
+void RNSkDrawView::drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
+                                int width,
+                                int height,
+                                double time) {
+  
+  // Call the draw drawCallback and perform js based drawing
+  auto skCanvas = canvas->getCanvas();
+  if (_drawCallback != nullptr && skCanvas != nullptr) {
+    // Make sure to scale correctly
+    auto pd = _platformContext->getPixelDensity();
+    skCanvas->save();
+    skCanvas->scale(pd, pd);
+    // Call draw function.
+    (*_drawCallback)(canvas, width / pd, height / pd, time, _platformContext);
+    // Restore canvas
+    skCanvas->restore();
+    skCanvas->flush();
+  }
+}
+
+void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface,
+                                 int width,
+                                 int height,
+                                 double time,
                                  std::shared_ptr<RNSkPlatformContext> context) {
 
   try {
     if(!isValid()) {
       return;
     }
+    
+    _lastWidth = width;
+    _lastHeight = height;
 
     // Get the canvas
     auto skCanvas = surface->getCanvas();
     _jsiCanvas->setCanvas(skCanvas);
-
-    // Call the draw drawCallback and perform js based drawing
-    if (_drawCallback != nullptr) {
-      // Make sure to scale correctly
-      auto pd = context->getPixelDensity();
-      skCanvas->save();
-      skCanvas->scale(pd, pd);
-      // Call draw function.
-      (*_drawCallback)(_jsiCanvas, width / pd, height / pd, time, context);
-      // Restore canvas
-      skCanvas->restore();
-      skCanvas->flush();
-    }
+    drawInCanvas(_jsiCanvas, width, height, time);
+    _jsiCanvas->setCanvas(nullptr);
+    
   } catch (const jsi::JSError &err) {
     _drawCallback = nullptr;
     return _platformContext->raiseError(err);
@@ -151,6 +166,29 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
     _drawCallback = nullptr;
     return _platformContext->raiseError(
         "An error occured while rendering the Skia View.");
+  }
+}
+
+sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
+  // Assert width/height
+  if(_lastWidth == -1 || _lastHeight == -1) {
+    return nullptr;
+  }
+  auto surface = SkSurface::MakeRasterN32Premul(_lastWidth, _lastHeight);
+  auto canvas = surface->getCanvas();
+  auto jsiCanvas = std::make_shared<JsiSkCanvas>(_platformContext);
+  jsiCanvas->setCanvas(canvas);
+  
+  milliseconds ms = duration_cast<milliseconds>(
+      system_clock::now().time_since_epoch());
+  
+  drawInCanvas(jsiCanvas, _lastWidth, _lastHeight, ms.count() / 1000);
+  
+  if(bounds != nullptr) {
+    SkIRect b = SkIRect::MakeXYWH(bounds->x(), bounds->y(), bounds->width(), bounds->height());
+    return surface->makeImageSnapshot(b);
+  } else {
+    return surface->makeImageSnapshot();
   }
 }
 

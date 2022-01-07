@@ -27,6 +27,7 @@
 #include "JsiSkShaderFactory.h"
 #include "JsiSkSvg.h"
 #include "JsiSkTypeface.h"
+#include "JsiSkSurfaceFactory.h"
 
 namespace RNSkia {
 
@@ -67,6 +68,7 @@ public:
     installReadonlyProperty("Shader",
                             std::make_shared<JsiSkShaderFactory>(context));
     installReadonlyProperty("Svg", std::make_shared<JsiSkSvgStatic>(context));
+    installReadonlyProperty("Surface", std::make_shared<JsiSkSurfaceFactory>(context));
   };
 };
 } // namespace RNSkia

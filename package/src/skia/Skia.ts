@@ -19,6 +19,7 @@ import { Color } from "./Color";
 import type { Matrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
 import type { IPoint } from "./Point";
+import type { SurfaceFactory } from "./Surface";
 
 /**
  * Declares the interface for the native Skia API
@@ -40,6 +41,7 @@ export interface Skia {
   ImageFilter: ImageFilterFactory;
   Shader: ShaderFactory;
   PathEffect: PathEffectFactory;
+  Surface: SurfaceFactory;
   /* Below are private APIs */
   Image: (localUri: string) => Promise<IImage>;
   Svg: ISvgStatic;
@@ -73,4 +75,5 @@ export const Skia = {
   Color,
   Image: ImageCtor,
   Svg: SvgObject,
+  Surface: SkiaApi.Surface,
 };

@@ -1,10 +1,12 @@
 import type { ViewProps } from "react-native";
 import { requireNativeComponent } from "react-native";
 
+import type { IRect, IImage } from "../skia";
 import type { ICanvas } from "../skia/Canvas";
 
 export interface ISkiaViewApi {
   invalidateSkiaView: (nativeId: number) => void;
+  makeImageSnapshot: (nativeId: number, rect?: IRect) => IImage;
   setDrawCallback: (
     nativeId: number,
     callback: RNSkiaDrawCallback | undefined

@@ -10,6 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include <SkBase64.h>
 #include <SkImage.h>
 #include <SkStream.h>
 #include <include/codec/SkCodec.h>
@@ -56,21 +57,44 @@ public:
         runtime, std::make_shared<JsiSkShader>(getContext(), shader));
   }
 
-  JSI_PROPERTY_GET(uri) {
-    return jsi::String::createFromUtf8(runtime, _localUri.c_str());
+  JSI_HOST_FUNCTION(toByteData) {
+    auto data = getObject()->encodeToData();
+    auto arrayCtor = runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
+    size_t size = data->size();
+    
+    jsi::Object array = arrayCtor.callAsConstructor(runtime, static_cast<double>(size)).getObject(runtime);
+    jsi::ArrayBuffer buffer = array
+              .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+              .asObject(runtime)
+              .getArrayBuffer(runtime);
+
+    auto bfrPtr = reinterpret_cast<uint8_t*>(buffer.data(runtime));
+    memcpy(bfrPtr, data->bytes(), size);
+    return array;
+  }
+  
+  JSI_HOST_FUNCTION(toBase64) {
+    auto data = getObject()->encodeToData();
+    auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
+    auto buffer = std::string(len + 1, 0);
+    SkBase64::Encode(data->bytes(), data->size(), (void*)&buffer[0]);
+    return jsi::String::createFromUtf8(runtime, buffer);
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
                        JSI_EXPORT_FUNC(JsiSkImage, height),
                        JSI_EXPORT_FUNC(JsiSkImage, makeShaderOptions),
-                       JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic))
+                       JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
+                       JSI_EXPORT_FUNC(JsiSkImage, toByteData),
+                       JSI_EXPORT_FUNC(JsiSkImage, toBase64))
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkImage, uri))
+  JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
+             const sk_sp<SkImage> image) :
+    JsiSkWrappingSkPtrHostObject<SkImage>(context, image)  {};
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image, const std::string &localUri)
-      : JsiSkWrappingSkPtrHostObject<SkImage>(context, image),
-        _localUri(localUri){};
+      : JsiSkWrappingSkPtrHostObject<SkImage>(context, image) {};
 
   /**
     Returns the underlying object from a host object of this type
@@ -142,8 +166,5 @@ public:
           });
     };
   }
-
-private:
-  std::string _localUri;
 };
 } // namespace RNSkia

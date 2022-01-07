@@ -30,8 +30,6 @@ export interface IImage extends SkJSIInstance<"Image"> {
    */
   width(): number;
 
-  readonly uri: string;
-
   /**
    * Returns this image as a shader with the specified tiling. It will use cubic sampling.
    * @param tx - tile mode in the x direction.
@@ -64,6 +62,30 @@ export interface IImage extends SkJSIInstance<"Image"> {
     C: number,
     localMatrix?: Matrix
   ): IShader;
+
+  /** Encodes SkImage pixels, returning result as UInt8Array. Returns existing
+     encoded data if present; otherwise, SkImage is encoded with
+     SkEncodedImageFormat::kPNG. Skia must be built with SK_ENCODE_PNG to encode
+     SkImage.
+
+    Returns nullptr if existing encoded data is missing or invalid, and
+    encoding fails.
+
+    @return  Uint8Array with data
+  */
+  toByteData(): Uint8Array;
+
+  /** Encodes SkImage pixels, returning result as base 64 encoded string. Returns existing
+     encoded data if present; otherwise, SkImage is encoded with
+     SkEncodedImageFormat::kPNG. Skia must be built with SK_ENCODE_PNG to encode
+     SkImage.
+
+    Returns nullptr if existing encoded data is missing or invalid, and
+    encoding fails.
+
+    @return  base64 encoded string of data
+  */
+  toBase64(): string;
 }
 
 export const ImageCtor = (image: ImageSourcePropType) => {
