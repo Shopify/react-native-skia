@@ -6,10 +6,11 @@ import type { IRuntimeEffect } from "../../../skia";
 import type { Vector, AnimatedProps, TransformProps } from "../../processors";
 import { useDeclaration } from "../../nodes/Declaration";
 import { localMatrix } from "../../processors";
-import { hasProperty } from "../../typeddash";
 
+// We need to use any here because hasOwnProperty doesn't work on JSI instances
 const isVector = (obj: unknown): obj is Vector =>
-  hasProperty(obj, "x") && hasProperty(obj, "y");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (obj as any).x !== undefined && (obj as any).y !== undefined;
 
 type Uniform = number | number[] | Vector;
 
