@@ -28,7 +28,7 @@ const shiftReverse = (stream: number[], index: number) => {
 
 export const Glyph = ({ i, j, progress, stream, font }: GlyphProps) => {
   const offset = useRef(Math.round(Math.random() * (symbols.length - 1)));
-  const range = useRef(300 + Math.random() * 300);
+  const range = useRef(50 + Math.random() * 500);
   const x = i * GLYPH.width;
   const y = j * GLYPH.height;
   const value = () => {

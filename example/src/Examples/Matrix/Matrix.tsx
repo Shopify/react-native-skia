@@ -21,7 +21,7 @@ const streams = cols.map((_, i) => {
   return new Array(3)
     .fill(0)
     .map(() => {
-      const input = [arr(8, 16), arr(4, 8, true)];
+      const input = [arr(8, 16), arr(2, 8, true)];
       return i % 2 === 0 ? input.reverse() : input;
     })
     .flat(2);
