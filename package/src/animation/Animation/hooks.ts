@@ -45,7 +45,7 @@ export const useTimeline = (initializer: (tla: TimelineAnimation) => void) => {
  * the progress in seconds since the animation started.
  * @returns An animation value that will be updated by the animation
  */
-export const useProgress = (): AnimationValue => {
+export const useTimestamp = (): AnimationValue => {
   const animation = useMemo(() => {
     return AnimationFactory();
   }, []);
