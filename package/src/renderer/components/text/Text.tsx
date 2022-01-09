@@ -16,7 +16,7 @@ export const Text = (props: AnimatedProps<TextProps>) => {
   const onDraw = useDrawing(
     props,
     ({ canvas, paint }, { value, x, y, font }) => {
-      canvas.drawText(value, x, y, font, paint);
+      canvas.drawText(value, x, y, paint, font);
     }
   );
   return <skDrawing onDraw={onDraw} {...props} />;

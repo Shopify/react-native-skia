@@ -301,8 +301,8 @@ public:
     SkScalar x = arguments[1].asNumber();
     SkScalar y = arguments[2].asNumber();
 
-    auto font = JsiSkFont::fromValue(runtime, arguments[3]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    auto font = JsiSkFont::fromValue(runtime, arguments[4]);
 
     _canvas->drawSimpleText(text, strlen(text), SkTextEncoding::kUTF8, x, y,
                             *font, *paint);

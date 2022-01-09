@@ -21,15 +21,13 @@ const randomArray = (from: number, to: number, blank?: boolean) => {
 };
 
 const streams = cols.map(() =>
-  new Array(6)
+  new Array(3)
     .fill(0)
-    .map(() =>
-      [
-        randomArray(1, 4, true),
-        randomArray(4, 16),
-        randomArray(2, 8, true),
-      ].flat()
-    )
+    .map(() => [
+      ...randomArray(1, 4, true),
+      ...randomArray(4, 16),
+      ...randomArray(2, 8, true),
+    ])
     .flat()
 );
 

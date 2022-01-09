@@ -30,7 +30,7 @@ export const Symbol = ({ i, j, font, timestamp, stream }: SymbolProps) => {
   };
   const opacity = () => {
     const idx = Math.round(timestamp.value / 100);
-    return stream[(stream.length + j - idx) % stream.length];
+    return stream[(stream.length - j + idx) % stream.length];
   };
   return (
     <Text
