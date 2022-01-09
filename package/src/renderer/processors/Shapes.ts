@@ -67,9 +67,9 @@ export const center = (r: IRect | IRRect) =>
     : vec(r.x + r.width / 2, r.y + r.height / 2);
 
 export const isRRectCtor = (def: RRectDef): def is RRectCtor =>
-  (def as any).rect !== undefined;
+  (def as any).rect === undefined;
 export const isRectCtor = (def: RectDef): def is RectCtor =>
-  (def as any).rect !== undefined;
+  (def as any).rect === undefined;
 export const isRRect = (def: IRect | IRRect): def is IRRect =>
   (def as any).rect !== undefined;
 
