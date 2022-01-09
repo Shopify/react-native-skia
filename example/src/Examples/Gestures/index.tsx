@@ -1,14 +1,16 @@
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { PanGesture } from "./PanGesture";
+import { PinchGesture } from "./PinchGesture";
 
 export const GestureExample: React.FC = () => {
   return (
-    <ScrollView contentContainerStyle={styles.scrollview}>
-      {/* <SimpleValueOverTime /> */}
-      <PanGesture />
-    </ScrollView>
+    <GestureHandlerRootView>
+      <ScrollView contentContainerStyle={styles.scrollview}>
+        <PinchGesture />
+      </ScrollView>
+    </GestureHandlerRootView>
   );
 };
 
