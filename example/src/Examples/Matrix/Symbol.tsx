@@ -39,11 +39,13 @@ export const Symbol = ({ i, j, font, timestamp, stream }: SymbolProps) => {
       font={font}
       value={value}
       opacity={opacity}
-      color={interpolateColors(
-        opacity(),
-        [0.8, 1],
-        ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]
-      )}
+      color={() =>
+        interpolateColors(
+          opacity(),
+          [0.8, 1],
+          ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]
+        )
+      }
     />
   );
 };

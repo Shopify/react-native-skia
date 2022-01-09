@@ -17,7 +17,7 @@ const rows = new Array(ROWS).fill(0).map((_, i) => i);
 const randomArray = (from: number, to: number, blank?: boolean) => {
   const size = Math.round(from + Math.random() * (to - from));
   const a = new Array(size).fill(0).map((_, i) => (blank ? 0 : i / size));
-  return a;
+  return a.reverse();
 };
 
 const streams = cols.map(() =>
