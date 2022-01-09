@@ -8,6 +8,7 @@ import { Breathe } from "./Examples/Breathe";
 import { Filters } from "./Examples/Filters";
 import { Gooey } from "./Examples/Gooey";
 import { Hue } from "./Examples/Hue";
+import { GestureExample } from "./Examples/Gestures";
 import { HomeScreen } from "./Home";
 
 const App = () => {
@@ -30,6 +31,7 @@ const App = () => {
         <Stack.Screen name="Hue" component={Hue} />
         <Stack.Screen name="Drawing" component={DrawingExample} />
         <Stack.Screen name="Animation" component={AnimationExample} />
+        <Stack.Screen name="Gesture" component={GestureExample} />
       </Stack.Navigator>
     </NavigationContainer>
   );
