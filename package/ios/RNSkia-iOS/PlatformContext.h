@@ -33,7 +33,7 @@ public:
 
   virtual void performStreamOperation(
       const std::string &sourceUri,
-      const std::function<void(std::unique_ptr<SkStream>)> &op) override;
+      const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
 
   void raiseError(const std::exception &err) override;
 

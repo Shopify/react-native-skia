@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ReactCommon/TurboModuleUtils.h>
+
 #include <map>
 
 #include "JsiSkHostObjects.h"
@@ -51,20 +53,37 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-      if (count == 2) {
-        return jsi::Object::createFromHostObject(
-            runtime,
-            std::make_shared<JsiSkTypeface>(
-                context,
-                SkTypeface::MakeFromName(
-                    arguments[0].asString(runtime).utf8(runtime).c_str(),
-                    getFontStyleFromNumber(arguments[1].asNumber()))));
-      } else {
-        // Return the newly constructed object
-        return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkTypeface>(
-                         context, SkTypeface::MakeDefault()));
-      }
+        auto jsiLocalUri = arguments[0].asString(runtime);
+        auto localUri = jsiLocalUri.utf8(runtime);
+
+        // Return a promise to Javascript that will be resolved when
+        // the image file has been successfully loaded.
+        return react::createPromiseAsJSIValue(
+                runtime,
+                [context, localUri](jsi::Runtime &runtime,
+                                    std::shared_ptr<react::Promise> promise) -> void {
+                    // Create a stream operation - this will be run in a
+                    // separate thread
+                    context->performStreamOperation(
+                            localUri,
+                            [&runtime, context, promise,
+                                    localUri](std::unique_ptr<SkStreamAsset> stream) -> void {
+                                auto typeface = SkTypeface::MakeFromStream(std::move(stream));
+                                if (typeface == nullptr) {
+                                  context->runOnJavascriptThread(
+                                          [&runtime, context, promise, localUri]() {
+                                              promise->reject("Could not load typeface");
+                                          });
+                                  return;
+                                }
+                                // Schedule drawCallback on the Javascript thread
+                                context->runOnJavascriptThread([&runtime, context, promise,
+                                                                       localUri, typeface]() {
+                                    promise->resolve(jsi::Object::createFromHostObject(
+                                            runtime, std::make_shared<JsiSkTypeface>(context, typeface)));
+                                });
+                            });
+                });
     };
   }
 
