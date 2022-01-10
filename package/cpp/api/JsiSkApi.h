@@ -76,7 +76,6 @@ public:
         "RuntimeEffect", std::make_shared<JsiSkRuntimeEffectFactory>(context));
     installReadonlyProperty("Shader",
                             std::make_shared<JsiSkShaderFactory>(context));
-    installReadonlyProperty("Svg", std::make_shared<JsiSkSvgStatic>(context));
   };
 };
 } // namespace RNSkia
