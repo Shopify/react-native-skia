@@ -1,12 +1,7 @@
-/*global SkiaApi*/
-import type { ImageSourcePropType } from "react-native";
-
 import type { TileMode } from "../ImageFilter";
 import type { IShader } from "../Shader";
 import type { Matrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
-
-const resolveAssetSource = require("react-native/Libraries/Image/resolveAssetSource");
 
 export enum FilterMode {
   Linear,
@@ -65,8 +60,3 @@ export interface IImage extends SkJSIInstance<"Image"> {
     localMatrix?: Matrix
   ): IShader;
 }
-
-export const ImageCtor = (image: ImageSourcePropType) => {
-  const asset = resolveAssetSource(image);
-  return SkiaApi.Image(asset.uri);
-};

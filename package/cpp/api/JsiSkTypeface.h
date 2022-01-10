@@ -43,50 +43,6 @@ public:
         ->getObject();
   }
 
-  /**
-   * Creates the function for construction a new instance of the SkTypeface
-   * wrapper
-   * @param context Platform Context
-   * @return A function for creating a new host object wrapper for the
-   * SkTypeface class
-   */
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-        auto jsiLocalUri = arguments[0].asString(runtime);
-        auto localUri = jsiLocalUri.utf8(runtime);
-
-        // Return a promise to Javascript that will be resolved when
-        // the image file has been successfully loaded.
-        return react::createPromiseAsJSIValue(
-                runtime,
-                [context, localUri](jsi::Runtime &runtime,
-                                    std::shared_ptr<react::Promise> promise) -> void {
-                    // Create a stream operation - this will be run in a
-                    // separate thread
-                    context->performStreamOperation(
-                            localUri,
-                            [&runtime, context, promise,
-                                    localUri](std::unique_ptr<SkStreamAsset> stream) -> void {
-                                auto typeface = SkTypeface::MakeFromStream(std::move(stream));
-                                if (typeface == nullptr) {
-                                  context->runOnJavascriptThread(
-                                          [&runtime, context, promise, localUri]() {
-                                              promise->reject("Could not load typeface");
-                                          });
-                                  return;
-                                }
-                                // Schedule drawCallback on the Javascript thread
-                                context->runOnJavascriptThread([&runtime, context, promise,
-                                                                       localUri, typeface]() {
-                                    promise->resolve(jsi::Object::createFromHostObject(
-                                            runtime, std::make_shared<JsiSkTypeface>(context, typeface)));
-                                });
-                            });
-                });
-    };
-  }
-
 private:
   static SkFontStyle getFontStyleFromNumber(int fontStyle) {
     switch (fontStyle) {
