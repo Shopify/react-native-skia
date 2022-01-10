@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 
 import type { IImage } from "../../../skia";
-import { useImage } from "../../../skia";
 import type { CustomPaintProps } from "../../processors/Paint";
 import { useDrawing } from "../../nodes/Drawing";
 import type { RectDef } from "../../processors/Shapes";
@@ -12,35 +11,31 @@ import type { Fit } from "./BoxFit";
 import { fitRects } from "./BoxFit";
 
 export interface SourceProps {
-  source: number | IImage;
+  source: IImage;
 }
 
 export type ImageProps = RectDef &
-  CustomPaintProps & {
+  CustomPaintProps &
+  SourceProps & {
     fit: Fit;
   };
 
-export const Image = (
-  defaultProps: AnimatedProps<ImageProps> & SourceProps
-) => {
-  const image = useImage(defaultProps.source);
-  const props = useMemo<AnimatedProps<ImageProps>>(
-    () => ({ ...defaultProps, image }),
-    [defaultProps, image]
-  );
+export const Image = (props: AnimatedProps<ImageProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint }, { fit, ...rectProps }) => {
-      if (image === null) {
-        return;
-      }
+    ({ canvas, paint }, { fit, source, ...rectProps }) => {
       const rect = processRect(rectProps);
       const { src, dst } = fitRects(
         fit,
-        { x: 0, y: 0, width: image.width(), height: image.height() },
+        {
+          x: 0,
+          y: 0,
+          width: source.width(),
+          height: source.height(),
+        },
         rect
       );
-      canvas.drawImageRect(image, src, dst, paint);
+      canvas.drawImageRect(source, src, dst, paint);
     }
   );
   return <skDrawing onDraw={onDraw} {...props} />;
