@@ -26,7 +26,8 @@
 #include "JsiSkRuntimeEffectFactory.h"
 #include "JsiSkShader.h"
 #include "JsiSkShaderFactory.h"
-#include "JsiSkSvg.h"
+#include "JsiSkSVG.h"
+#include "JsiSkSVGFactory.h"
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkDataFactory.h"
@@ -53,6 +54,8 @@ public:
     installFunction("Point", JsiSkPoint::createCtor(context));
 
     // Static members
+    installReadonlyProperty("SVG",
+                              std::make_shared<JsiSkSVGFactory>(context));
     installReadonlyProperty("Image",
                             std::make_shared<JsiSkImageFactory>(context));
     installReadonlyProperty("Typeface",

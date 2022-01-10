@@ -3,7 +3,7 @@ import type { IRect } from "./Rect";
 import type { Font } from "./Font";
 import type { IPath } from "./Path";
 import type { IImage } from "./Image";
-import type { ISvgDom } from "./Svg";
+import type { SVG } from "./Svg";
 import type { Color } from "./Color";
 import type { IRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
@@ -308,7 +308,7 @@ export interface ICanvas {
    * Renders the SVG Dom object to the canvas. If width/height are omitted,
    * the SVG will be rendered to fit the canvas.
    */
-  drawSvg: (svgDom: ISvgDom, width?: number, height?: number) => void;
+  drawSvg: (svgDom: SVG, width?: number, height?: number) => void;
   /** Saves SkMatrix and clip.
         Calling restore() discards changes to SkMatrix and clip,
         restoring the SkMatrix and clip to their state when save() was called.

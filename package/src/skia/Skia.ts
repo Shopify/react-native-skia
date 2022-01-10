@@ -1,5 +1,4 @@
 /*global SkiaApi*/
-
 import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
@@ -12,13 +11,12 @@ import type { IRect } from "./Rect";
 import type { IRRect } from "./RRect";
 import type { RuntimeEffectFactory } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
-import type { ISvgStatic } from "./SVG";
-import { SvgObject } from "./SVG";
 import { Color } from "./Color";
 import type { Matrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
 import type { IPoint } from "./Point";
 import type { DataFactory } from "./Data";
+import type { SVGFactory } from "./SVG";
 
 /**
  * Declares the interface for the native Skia API
@@ -40,7 +38,7 @@ export interface Skia {
   PathEffect: PathEffectFactory;
   Data: DataFactory;
   Image: ImageFactory;
-  Svg: ISvgStatic;
+  SVG: SVGFactory;
 }
 
 /**
@@ -69,8 +67,8 @@ export const Skia = {
   PathEffect: SkiaApi.PathEffect,
   Data: SkiaApi.Data,
   Matrix: SkiaApi.Matrix,
+  SVG: SkiaApi.SVG,
   Color,
   // Here symmetry is broken to be comptatible with CanvasKit
   MakeImageFromEncoded: SkiaApi.Image.MakeFromEncoded,
-  Svg: SvgObject,
 };
