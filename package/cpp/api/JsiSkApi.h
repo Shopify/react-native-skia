@@ -54,6 +54,8 @@ public:
     // Static members
     installReadonlyProperty("ImageFilter",
                             std::make_shared<JsiSkImageFilterFactory>(context));
+    installReadonlyProperty("ImageFilter",
+                            std::make_shared<JsiSkImageFilterFactory>(context));
     installReadonlyProperty("PathEffect",
                             std::make_shared<JsiSkPathEffectFactory>(context));
     installReadonlyProperty("Path",

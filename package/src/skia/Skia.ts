@@ -40,6 +40,7 @@ export interface Skia {
   ImageFilter: ImageFilterFactory;
   Shader: ShaderFactory;
   PathEffect: PathEffectFactory;
+  Asset: AssetFactory;
   /* Below are private APIs */
   Image: (localUri: string) => Promise<IImage>;
   Svg: ISvgStatic;
