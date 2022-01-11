@@ -1,5 +1,6 @@
-import { useData } from "../Data/Data";
 import { Skia } from "../Skia";
+import type { DataSource } from "../Data/Data";
+import { useRawData } from "../Data/Data";
 
-export const useSVG = (source: ReturnType<typeof require>) =>
-  useData(source, Skia.SVG.MakeFromData);
+export const useSVG = (source: DataSource) =>
+  useRawData(source, Skia.SVG.MakeFromData);

@@ -7,8 +7,10 @@ export type Data = SkJSIInstance<"Data">;
 
 const resolveAsset = require("react-native/Libraries/Image/resolveAssetSource");
 
-export const useData = <T>(
-  source: ReturnType<typeof require>,
+export type DataSource = ReturnType<typeof require>;
+
+export const useRawData = <T>(
+  source: DataSource,
   factory: (data: Data) => T
 ) => {
   const [data, setData] = useState<T | null>(null);
@@ -18,3 +20,7 @@ export const useData = <T>(
   }, [factory, source]);
   return data;
 };
+
+const identity = (data: Data) => data;
+
+export const useData = (source: DataSource) => useRawData(source, identity);

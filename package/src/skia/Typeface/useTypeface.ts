@@ -1,8 +1,9 @@
 import { Skia } from "../Skia";
-import { useData } from "../Data/Data";
+import type { DataSource } from "../Data/Data";
+import { useRawData } from "../Data/Data";
 
 /**
  * Returns a Skia Typeface object
  * */
-export const useTypeface = (source: ReturnType<typeof require>) =>
-  useData(source, Skia.Typeface.MakeFreeTypeFaceFromData);
+export const useTypeface = (source: DataSource) =>
+  useRawData(source, Skia.Typeface.MakeFreeTypeFaceFromData);

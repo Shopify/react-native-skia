@@ -8,6 +8,7 @@ import {
 } from "@shopify/react-native-skia";
 import React from "react";
 import { useTimestamp } from "@shopify/react-native-skia/src/animation/Animation/hooks";
+import { useData } from "@shopify/react-native-skia/src/skia/Data";
 
 import { COLS, ROWS, Symbol, SYMBOL } from "./Symbol";
 
@@ -42,8 +43,13 @@ const useMatrixFont = () => {
 export const Matrix = () => {
   const timestamp = useTimestamp();
   const font = useMatrixFont();
-  if (font === null) {
+  const data = useData(require("./matrix-code-nfi.otf"));
+  if (font === null || data === null) {
     return null;
+  }
+  const fontMgr = Skia.FontMgr.FromData(data);
+  if (fontMgr !== null) {
+    console.log(fontMgr.countFamilies());
   }
   return (
     <Canvas style={{ flex: 1 }}>

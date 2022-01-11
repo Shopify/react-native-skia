@@ -31,6 +31,7 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkDataFactory.h"
+#include "JsiSkFontMgrFactory.h"
 
 namespace RNSkia {
 
@@ -54,6 +55,8 @@ public:
     installFunction("Point", JsiSkPoint::createCtor(context));
 
     // Static members
+    installReadonlyProperty("FontMgr",
+                            std::make_shared<JsiSkFontMgrFactory>(context));
     installReadonlyProperty("SVG",
                               std::make_shared<JsiSkSVGFactory>(context));
     installReadonlyProperty("Image",

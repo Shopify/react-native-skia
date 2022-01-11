@@ -17,6 +17,7 @@ import type { PathEffectFactory } from "./PathEffect";
 import type { IPoint } from "./Point";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
+import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
 
 /**
  * Declares the interface for the native Skia API
@@ -39,6 +40,7 @@ export interface Skia {
   Data: DataFactory;
   Image: ImageFactory;
   SVG: SVGFactory;
+  FontMgr: FontMgrFactory;
 }
 
 /**
@@ -68,6 +70,7 @@ export const Skia = {
   Data: SkiaApi.Data,
   Matrix: SkiaApi.Matrix,
   SVG: SkiaApi.SVG,
+  FontMgr: SkiaApi.FontMgr,
   Color,
   // Here symmetry is broken to be comptatible with CanvasKit
   MakeImageFromEncoded: SkiaApi.Image.MakeFromEncoded,
