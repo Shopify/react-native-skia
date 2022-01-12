@@ -65,9 +65,7 @@ const ImageDemo = () => {
 
 ![fit="none"](assets/images/none.png)
 
-## Imperative API
-
-Image additionally has some imperative methods that can be used when drawing images.
+## Image Instance Methods
 
 | Name              | Description                                                                           |
 | :---------------- | :------------------------------------------------------------------------------------ |
