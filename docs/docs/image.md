@@ -7,22 +7,19 @@ slug: /images
 
 Images can be draw by specifying the output rectangle and how the image should fit into that rectangle.
 
-| Name      | Type      |  Description                                                  |
-|:----------|:----------|:--------------------------------------------------------------|
-| source    | `require` | Source of the image.                                          |
-| x         | `number`  | Left position of the destination image.                       |
-| y         | `number`  | Right position of the destination image.                      |
-| width     | `number`  | Width of the destination image.                               |
-| height    | `number`  | Height of the destination image.                              |
-| fit?      | `Fit`     | Method to make the image fit into the rectangle. Value can be `contain`, `fill`, `cover` `fitHeight`, `fitWidth`, `scaleDown`, `none` (default is `contain`).                 | 
+| Name   | Type      | Description                                                                                                                                                   |
+| :----- | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| source | `require` | Source of the image.                                                                                                                                          |
+| x      | `number`  | Left position of the destination image.                                                                                                                       |
+| y      | `number`  | Right position of the destination image.                                                                                                                      |
+| width  | `number`  | Width of the destination image.                                                                                                                               |
+| height | `number`  | Height of the destination image.                                                                                                                              |
+| fit?   | `Fit`     | Method to make the image fit into the rectangle. Value can be `contain`, `fill`, `cover` `fitHeight`, `fitWidth`, `scaleDown`, `none` (default is `contain`). |
 
 ### Example
 
 ```tsx twoslash
-import {
-  Canvas,
-  Image,
-} from "@shopify/react-native-skia";
+import { Canvas, Image } from "@shopify/react-native-skia";
 
 const ImageDemo = () => {
   return (
@@ -67,3 +64,16 @@ const ImageDemo = () => {
 ### fit="none"
 
 ![fit="none"](assets/images/none.png)
+
+## Imperative API
+
+Image additionally has some imperative methods that can be used when drawing images.
+
+| Name              | Description                                                                           |
+| :---------------- | :------------------------------------------------------------------------------------ |
+| height            | Returns the possibly scaled height of the image.                                      |
+| width             | Returns the possibly scaled width of the image.                                       |
+| makeShaderOptions | Returns this image as a shader with the specified tiling. It will use cubic sampling. |
+| makeShaderCubic   | Returns this image as a shader with the specified tiling. It will use cubic sampling. |
+| toByteArray       | Encodes Image pixels, returning result as UInt8Array                                  |
+| toBase64          | Encodes Image pixels, returning result as a base64 encoded string                     |

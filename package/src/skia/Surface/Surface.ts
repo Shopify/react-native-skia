@@ -3,21 +3,20 @@ import type { ICanvas } from "../Canvas";
 import type { SkJSIInstance } from "../JsiInstance";
 
 export interface ISurface extends SkJSIInstance<"Surface"> {
-  /** Returns SkCanvas that draws into SkSurface. Subsequent calls return the
-     same SkCanvas. SkCanvas returned is managed and owned by SkSurface, and is
-     deleted when SkSurface is deleted.
+  /** Returns Canvas that draws into the surface. Subsequent calls return the
+     same Canvas. Canvas returned is managed and owned by Surface, and is
+     deleted when Surface is deleted.
 
-      @return  drawing SkCanvas for SkSurface
+      @return  drawing Canvas for Surface
 
       example: https://fiddle.skia.org/c/@Surface_getCanvas
   */
   getCanvas(): ICanvas;
 
-  /** Returns SkImage capturing SkSurface contents. Subsequent drawing to
-     SkSurface contents are not captured. SkImage allocation is accounted for if
-     SkSurface was created with SkBudgeted::kYes.
+  /** Returns Image capturing Surface contents. Subsequent drawing to
+     Surface contents are not captured.
 
-      @return  SkImage initialized with SkSurface contents
+      @return  Image initialized with Surface contents
 
       example: https://fiddle.skia.org/c/@Surface_makeImageSnapshot
   */

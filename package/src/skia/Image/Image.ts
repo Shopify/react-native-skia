@@ -63,7 +63,7 @@ export interface IImage extends SkJSIInstance<"Image"> {
     localMatrix?: Matrix
   ): IShader;
 
-  /** Encodes SkImage pixels, returning result as UInt8Array. Returns existing
+  /** Encodes Image pixels, returning result as UInt8Array. Returns existing
      encoded data if present; otherwise, SkImage is encoded with
      SkEncodedImageFormat::kPNG. Skia must be built with SK_ENCODE_PNG to encode
      SkImage.
@@ -75,7 +75,7 @@ export interface IImage extends SkJSIInstance<"Image"> {
   */
   toByteData(): Uint8Array;
 
-  /** Encodes SkImage pixels, returning result as base 64 encoded string. Returns existing
+  /** Encodes Image pixels, returning result as a base64 encoded string. Returns existing
      encoded data if present; otherwise, SkImage is encoded with
      SkEncodedImageFormat::kPNG. Skia must be built with SK_ENCODE_PNG to encode
      SkImage.
