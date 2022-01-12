@@ -1,6 +1,7 @@
 import type { IImage } from "../Image";
 import type { ICanvas } from "../Canvas";
 import type { SkJSIInstance } from "../JsiInstance";
+import type { IRect } from "../Rect";
 
 export interface ISurface extends SkJSIInstance<"Surface"> {
   /** Returns Canvas that draws into the surface. Subsequent calls return the
@@ -16,9 +17,11 @@ export interface ISurface extends SkJSIInstance<"Surface"> {
   /** Returns Image capturing Surface contents. Subsequent drawing to
      Surface contents are not captured.
 
+      @param bounds A rectangle specifying the subset of the surface that
+   is of interest.
       @return  Image initialized with Surface contents
 
       example: https://fiddle.skia.org/c/@Surface_makeImageSnapshot
   */
-  makeImageSnapshot(): IImage;
+  makeImageSnapshot(bounds?: IRect): IImage;
 }

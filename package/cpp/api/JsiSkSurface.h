@@ -35,8 +35,14 @@ public:
     }
 
     JSI_HOST_FUNCTION(makeImageSnapshot) {
-        auto image = getObject()->makeImageSnapshot();
-        return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(getContext(), image));
+      sk_sp<SkImage> image;
+      if(count == 1) {
+        auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
+        image = getObject()->makeImageSnapshot(SkIRect::MakeXYWH(rect->x(), rect->y(), rect->width(), rect->height()));
+      } else {
+        image = getObject()->makeImageSnapshot();
+      }
+      return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(getContext(), image));
     }
 
     JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkSurface, __typename__))
