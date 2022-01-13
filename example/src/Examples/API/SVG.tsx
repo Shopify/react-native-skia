@@ -1,6 +1,6 @@
 import React from "react";
 import { Dimensions } from "react-native";
-import { Canvas, Drawing, useSVG } from "@shopify/react-native-skia";
+import { Canvas, ImageSVG, useSVG } from "@shopify/react-native-skia";
 
 const { width, height } = Dimensions.get("window");
 
@@ -11,7 +11,7 @@ export const SVG = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
-      <Drawing onDraw={({ canvas }) => canvas.drawSvg(svg, width, height)} />
+      <ImageSVG source={svg} width={width} height={height} />
     </Canvas>
   );
 };

@@ -22,6 +22,7 @@ Images can be draw by specifying the output rectangle and how the image should f
 import {
   Canvas,
   Image,
+  useImage
 } from "@shopify/react-native-skia";
 
 const ImageDemo = () => {

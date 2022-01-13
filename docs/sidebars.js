@@ -36,9 +36,10 @@ const sidebars = {
       id: "group",
     },
     {
-      type: "doc",
+      collapsed: false,
+      type: "category",
       label: "Image",
-      id: "image",
+      items: ["image", "image-svg"],
     },
     {
       collapsed: false,
