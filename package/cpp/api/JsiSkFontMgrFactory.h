@@ -3,8 +3,9 @@
 #include "JsiSkHostObjects.h"
 #include "JsiSkFontMgr.h"
 #include "JsiSKData.h"
+#include <SkFontMgr.h>
 
-// TODO include proper header instead
+// TODO: include proper header instead, this might require a Skia version upgrade?
 sk_sp<SkFontMgr> SkFontMgr_New_Custom_Data(sk_sp<SkData>* datas, int n);
 
 #include <jsi/jsi.h>
@@ -28,7 +29,16 @@ namespace RNSkia {
             runtime, std::make_shared<JsiSkFontMgr>(getContext(), fontMgr));
         }
 
-        JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgrFactory, FromData))
+        JSI_HOST_FUNCTION(RefDefault) {
+            auto fontMgr = SkFontMgr::RefDefault();
+            return jsi::Object::createFromHostObject(
+                    runtime, std::make_shared<JsiSkFontMgr>(getContext(), fontMgr));
+        }
+
+        JSI_EXPORT_FUNCTIONS(
+                JSI_EXPORT_FUNC(JsiSkFontMgrFactory, FromData),
+                JSI_EXPORT_FUNC(JsiSkFontMgrFactory, RefDefault)
+        )
 
         JsiSkFontMgrFactory(std::shared_ptr<RNSkPlatformContext> context)
                 : JsiSkHostObject(context) {}

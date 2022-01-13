@@ -7,7 +7,23 @@ export type Data = SkJSIInstance<"Data">;
 
 const resolveAsset = require("react-native/Libraries/Image/resolveAssetSource");
 
-export type DataSource = ReturnType<typeof require>;
+export type DataSource = ReturnType<typeof require> | string;
+
+export const useDataCollection = <T>(
+  sources: DataSource[],
+  factory: (data: Data[]) => T
+) => {
+  const [data, setData] = useState<T | null>(null);
+  useEffect(() => {
+    const uris = sources.map((source) =>
+      typeof source === "string" ? source : resolveAsset(source).uri
+    );
+    Promise.all(uris.map((uri) => Skia.Data.fromURI(uri))).then((d) =>
+      setData(factory(d))
+    );
+  }, [factory, sources]);
+  return data;
+};
 
 export const useRawData = <T>(
   source: DataSource,
@@ -15,7 +31,7 @@ export const useRawData = <T>(
 ) => {
   const [data, setData] = useState<T | null>(null);
   useEffect(() => {
-    const { uri } = resolveAsset(source);
+    const uri = typeof source === "string" ? source : resolveAsset(source).uri;
     Skia.Data.fromURI(uri).then((d) => setData(factory(d)));
   }, [factory, source]);
   return data;

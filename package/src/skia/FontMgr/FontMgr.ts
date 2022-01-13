@@ -1,4 +1,3 @@
-import type { Data } from "../Data";
 import type { SkJSIInstance } from "../JsiInstance";
 import type { Typeface } from "../Typeface/Typeface";
 
@@ -15,6 +14,4 @@ export interface FontMgr extends SkJSIInstance<"FontMgr"> {
   getFamilyName(index: number): string;
 
   matchFamilyStyle(familyName: string): Typeface | null;
-
-  makeFromData(data: Data): Typeface | null;
 }
