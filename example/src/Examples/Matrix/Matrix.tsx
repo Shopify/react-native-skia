@@ -1,17 +1,9 @@
-import {
-  BlurMask,
-  Canvas,
-  Fill,
-  Paint,
-  Skia,
-  useTypeface,
-} from "@shopify/react-native-skia";
+import { BlurMask, Canvas, Fill, Paint } from "@shopify/react-native-skia";
 import React from "react";
 import { useTimestamp } from "@shopify/react-native-skia/src/animation/Animation/hooks";
-import { useData } from "@shopify/react-native-skia/src/skia/Data";
 import { useFontMgr } from "@shopify/react-native-skia/src/skia/FontMgr/FontMgrFactory";
 
-import { COLS, ROWS, Symbol, SYMBOL } from "./Symbol";
+import { COLS, ROWS, Symbol } from "./Symbol";
 
 const cols = new Array(COLS).fill(0).map((_, i) => i);
 const rows = new Array(ROWS).fill(0).map((_, i) => i);
