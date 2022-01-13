@@ -7,7 +7,7 @@ export const getBounds = (element: DrawingElement, translate = true): IRect => {
   let rect: IRect;
   switch (element.type) {
     case "path":
-      rect = element.primitive.getBounds();
+      rect = element.primitive.computeTightBounds();
       break;
     case "rect":
     case "circle":

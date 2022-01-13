@@ -90,11 +90,12 @@ export const PathToolbarItem: React.FC<PathToolbarItemProps> = ({
     p.setStyle(PaintStyle.Fill);
   });
 
+  const bounds = useMemo(() => path?.computeTightBounds(), [path]);
+
   const onDraw = useDrawCallback(
     (canvas, info) => {
-      if (path) {
+      if (path && bounds) {
         canvas.save();
-        const bounds = path.getBounds();
         const offset = { x: bounds.x, y: bounds.y };
         const factor = {
           x: (info.width / (bounds.width + offset.x)) * 0.8,
@@ -107,9 +108,11 @@ export const PathToolbarItem: React.FC<PathToolbarItemProps> = ({
         canvas.scale(factor.x, factor.y);
         canvas.drawPath(path, paint);
         canvas.restore();
+      } else {
+        console.log("***** Path empty");
       }
     },
-    [path]
+    [path, bounds]
   );
   return <BaseSkiaToolbarItem onDraw={onDraw} onPress={onPress} />;
 };
