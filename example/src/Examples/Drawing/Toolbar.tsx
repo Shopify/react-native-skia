@@ -4,7 +4,7 @@ import { View, StyleSheet } from "react-native";
 import type { IPaint } from "@shopify/react-native-skia";
 import { PaintStyle } from "@shopify/react-native-skia";
 
-import type { ElementType } from "./types";
+import type { ElementType, ToolType } from "./types";
 import {
   CircleToolPath,
   ImageToolPath,
@@ -20,10 +20,12 @@ import {
 } from "./ToolbarItems";
 
 type DrawingToolbarProps = {
-  type: ElementType | undefined;
+  elementType: ElementType;
+  toolType: ToolType;
   style: ViewStyle;
   size: number;
   color: string;
+  onSelectPressed: () => void;
   onColorPressed: () => void;
   onTypePressed: () => void;
   onDeletePressed: () => void;
@@ -33,30 +35,39 @@ type DrawingToolbarProps = {
 
 export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
   style,
-  type,
+  elementType,
+  toolType,
   size,
   color,
   onColorPressed,
   onDeletePressed,
   onSizePressed,
   onTypePressed,
+  onSelectPressed,
   onImagePressed,
 }) => {
   const typeIcon = useMemo(() => {
-    switch (type) {
+    switch (elementType) {
       case "path":
         return PenToolPath;
       case "circle":
         return CircleToolPath;
       case "rect":
         return RectToolPath;
-      default:
-        return SelectToolPath;
     }
-  }, [type]);
+  }, [elementType]);
   return (
     <View style={[style, styles.container]}>
-      <PathToolbarItem path={typeIcon} onPress={onTypePressed} />
+      <PathToolbarItem
+        path={typeIcon}
+        selected={toolType === "draw"}
+        onPress={onTypePressed}
+      />
+      <PathToolbarItem
+        path={SelectToolPath}
+        selected={toolType === "select"}
+        onPress={onSelectPressed}
+      />
       <PathToolbarItem path={DeleteToolPath} onPress={onDeletePressed} />
       <PathToolbarItem path={ImageToolPath} onPress={onImagePressed} />
       <SizeToolbarItem onPress={onSizePressed} size={size} />
@@ -134,9 +145,8 @@ export const SizeToolbar: React.FC<SizeToolbarProps> = ({
 };
 
 type TypeToolbarProps = {
-  type: ElementType | undefined;
   style: ViewStyle;
-  onSelectType: (type: ElementType | undefined) => void;
+  onSelectType: (type: ElementType) => void;
 };
 
 export const TypeToolbar: React.FC<TypeToolbarProps> = ({
@@ -144,15 +154,11 @@ export const TypeToolbar: React.FC<TypeToolbarProps> = ({
   onSelectType,
 }) => {
   const handlePress = useCallback(
-    (type: ElementType | undefined) => onSelectType(type),
+    (type: ElementType) => onSelectType(type),
     [onSelectType]
   );
   return (
     <View style={[style, styles.container, styles.verticalContainer]}>
-      <PathToolbarItem
-        path={SelectToolPath}
-        onPress={() => handlePress(undefined)}
-      />
       <PathToolbarItem path={PenToolPath} onPress={() => handlePress("path")} />
       <PathToolbarItem
         path={RectToolPath}

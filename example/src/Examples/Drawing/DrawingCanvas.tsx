@@ -16,7 +16,12 @@ import {
 } from "@shopify/react-native-skia";
 import { fitRects } from "@shopify/react-native-skia/src/renderer/components/image/BoxFit";
 
-import type { DrawingElement, DrawingElements, ElementType } from "./types";
+import type {
+  DrawingElement,
+  DrawingElements,
+  ToolType,
+  ElementType,
+} from "./types";
 import { drawFocus, findElement, getBounds } from "./functions";
 
 type Props = {
@@ -24,7 +29,8 @@ type Props = {
   selectedElement: DrawingElement | undefined;
   paint: IPaint;
   background: IPaint;
-  type: ElementType | undefined;
+  elementType: ElementType;
+  toolType: ToolType;
   innerRef: React.RefObject<SkiaView>;
   style: ViewStyle;
   backgroundImage: ImageSourcePropType | undefined;
@@ -39,7 +45,8 @@ export const DrawingCanvas: React.FC<Props> = ({
   background,
   innerRef,
   style,
-  type,
+  elementType,
+  toolType,
   backgroundImage,
   onAddElement,
   onSelecteElement,
@@ -59,20 +66,25 @@ export const DrawingCanvas: React.FC<Props> = ({
 
   const touchHandler = useTouchHandler({
     onStart: ({ x, y }) => {
-      switch (type) {
-        case "path": {
-          const path = Skia.Path.Make();
-          onAddElement({ type, primitive: path, p: paint });
-          path.moveTo(x, y);
+      switch (toolType) {
+        case "draw": {
+          switch (elementType) {
+            case "path": {
+              const path = Skia.Path.Make();
+              onAddElement({ type: elementType, primitive: path, p: paint });
+              path.moveTo(x, y);
+              break;
+            }
+            case "rect":
+            case "circle": {
+              const rect = Skia.XYWHRect(x, y, 0, 0);
+              onAddElement({ type: elementType, primitive: rect, p: paint });
+              break;
+            }
+          }
           break;
         }
-        case "rect":
-        case "circle": {
-          const rect = Skia.XYWHRect(x, y, 0, 0);
-          onAddElement({ type, primitive: rect, p: paint });
-          break;
-        }
-        default: {
+        case "select": {
           const el = findElement(x, y, elements);
           onSelecteElement(el);
           innerRef.current?.redraw();
@@ -81,7 +93,7 @@ export const DrawingCanvas: React.FC<Props> = ({
       prevPointRef.current = { x, y };
     },
     onActive: ({ x, y }) => {
-      if (elements.length > 0 && type !== undefined) {
+      if (elements.length > 0 && toolType === "draw") {
         // Get current drawing object
         const element = elements[elements.length - 1];
         switch (element.type) {

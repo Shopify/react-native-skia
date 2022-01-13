@@ -7,26 +7,31 @@ import { fitRects } from "@shopify/react-native-skia/src/renderer/components/ima
 
 import { ShareToolPath } from "./assets";
 import { ColorPalette, DefaultPaint } from "./constants";
-import type { DrawingElements, ElementType, DrawingElement } from "./types";
+import type {
+  DrawingElements,
+  ElementType,
+  DrawingElement,
+  ToolType,
+} from "./types";
 import { PathToolbarItem } from "./ToolbarItems";
 
-type SelectedToolbar = "size" | "color" | "type";
+type VisibleToolbar = "size" | "color" | "type";
+
 const BackgroundImage = require("../../assets/oslo.jpg");
 
 export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
   const elements = useMemo(() => [] as DrawingElements, []);
   const [selectedElement, setSelectedElement] = useState<DrawingElement>();
-  const [currentType, setCurrentType] = useState<ElementType | undefined>(
-    "path"
-  );
+  const [currentType, setCurrentType] = useState<ElementType>("path");
+  const [currentTool, setCurrentTool] = useState<ToolType>("draw");
   const [currentColor, setCurrentColor] = useState<string>(ColorPalette[1]);
   const [currentPaint, setCurrentPaint] = useState<IPaint>(DefaultPaint);
   const [currentImage, setCurrentImage] = useState(undefined);
   const [selectedToolbar, setSelectedToolbar] = useState<
-    SelectedToolbar | undefined
+    VisibleToolbar | undefined
   >(undefined);
 
-  const toggleToolbar = useCallback((next: SelectedToolbar | undefined) => {
+  const toggleToolbar = useCallback((next: VisibleToolbar | undefined) => {
     setSelectedToolbar((p) => (p === next ? undefined : next));
   }, []);
 
@@ -62,17 +67,28 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
   );
 
   const handleTypeSelected = useCallback(
-    (type: ElementType | undefined) => {
+    (type: ElementType) => {
       setCurrentType(type);
       toggleToolbar(undefined);
     },
     [toggleToolbar]
   );
 
-  const handleTypePressed = useCallback(
-    () => toggleToolbar("type"),
-    [toggleToolbar]
-  );
+  const handleSelectPressed = useCallback(() => {
+    setCurrentTool("select");
+    toggleToolbar(undefined);
+  }, [toggleToolbar]);
+
+  const handleTypePressed = useCallback(() => {
+    setCurrentTool((p) => {
+      if (p === "draw") {
+        toggleToolbar("type");
+      } else {
+        toggleToolbar(undefined);
+      }
+      return "draw";
+    });
+  }, [toggleToolbar]);
 
   const handleColorPressed = useCallback(
     () => toggleToolbar("color"),
@@ -159,11 +175,13 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
       handleSizePressed,
       handleSizeSelected,
       handleTypePressed,
+      handleSelectPressed,
       handleTypeSelected,
       selectedElement,
       selectedToolbar,
       currentPaint,
       currentType,
+      currentTool,
       currentColor,
       currentImage,
     }),
@@ -171,6 +189,7 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
       currentImage,
       currentPaint,
       currentType,
+      currentTool,
       currentColor,
       elements,
       handleAddElement,
@@ -183,6 +202,7 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
       handleSizeSelected,
       handleTypePressed,
       handleTypeSelected,
+      handleSelectPressed,
       selectedElement,
       selectedToolbar,
     ]

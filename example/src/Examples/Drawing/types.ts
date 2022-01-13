@@ -13,3 +13,5 @@ export type DrawingElement = {
 );
 
 export type DrawingElements = DrawingElement[];
+
+export type ToolType = "draw" | "select";

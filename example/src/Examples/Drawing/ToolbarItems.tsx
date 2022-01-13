@@ -11,17 +11,22 @@ import {
 } from "@shopify/react-native-skia";
 
 type BaseToolbarItemProps = {
+  selected?: boolean;
   onPress?: () => void;
 };
 
 export const ToolbarItemSize = 22;
 
 const BaseToolbarItem: React.FC<BaseToolbarItemProps> = ({
+  selected,
   onPress,
   children,
 }) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.container, selected ? styles.selected : {}]}
+      onPress={onPress}
+    >
       {children}
     </TouchableOpacity>
   );
@@ -29,32 +34,36 @@ const BaseToolbarItem: React.FC<BaseToolbarItemProps> = ({
 
 type BaseSkiaToolbarItemProps = BaseToolbarItemProps & {
   innerRef?: React.RefObject<SkiaView>;
+  selected?: boolean;
   onDraw: RNSkiaDrawCallback;
 };
 
 const BaseSkiaToolbarItem: React.FC<BaseSkiaToolbarItemProps> = ({
   innerRef,
+  selected,
   onDraw,
   onPress,
 }) => {
   return (
-    <BaseToolbarItem onPress={onPress}>
+    <BaseToolbarItem onPress={onPress} selected={selected}>
       <SkiaView ref={innerRef} style={styles.toolbarItem} onDraw={onDraw} />
     </BaseToolbarItem>
   );
 };
 
 type ToolbarItemProps = {
+  selected?: boolean;
   onPress?: () => void;
 };
 
 type ColorToolbarItemProps = ToolbarItemProps & { color: string };
 export const ColorToolbarItem: React.FC<ColorToolbarItemProps> = ({
   color,
+  selected,
   onPress,
 }) => {
   return (
-    <BaseToolbarItem onPress={onPress}>
+    <BaseToolbarItem onPress={onPress} selected={selected}>
       <View style={[styles.colorItem, { backgroundColor: color }]} />
     </BaseToolbarItem>
   );
@@ -63,6 +72,7 @@ export const ColorToolbarItem: React.FC<ColorToolbarItemProps> = ({
 type SizeToolbarItemProps = ToolbarItemProps & { size: number };
 export const SizeToolbarItem: React.FC<SizeToolbarItemProps> = ({
   size,
+  selected,
   onPress,
 }) => {
   const p = useMemo(() => {
@@ -77,12 +87,19 @@ export const SizeToolbarItem: React.FC<SizeToolbarItemProps> = ({
   const onDraw = useDrawCallback((canvas, info) => {
     canvas.drawLine(info.width / 2, 2, info.width / 2, info.height - 2, p);
   }, []);
-  return <BaseSkiaToolbarItem onPress={onPress} onDraw={onDraw} />;
+  return (
+    <BaseSkiaToolbarItem
+      onPress={onPress}
+      onDraw={onDraw}
+      selected={selected}
+    />
+  );
 };
 
 type PathToolbarItemProps = ToolbarItemProps & { path: IPath | null };
 export const PathToolbarItem: React.FC<PathToolbarItemProps> = ({
   path,
+  selected,
   onPress,
 }) => {
   const paint = usePaint((p) => {
@@ -114,7 +131,13 @@ export const PathToolbarItem: React.FC<PathToolbarItemProps> = ({
     },
     [path, bounds]
   );
-  return <BaseSkiaToolbarItem onDraw={onDraw} onPress={onPress} />;
+  return (
+    <BaseSkiaToolbarItem
+      onDraw={onDraw}
+      onPress={onPress}
+      selected={selected}
+    />
+  );
 };
 
 const styles = StyleSheet.create({
@@ -131,5 +154,9 @@ const styles = StyleSheet.create({
     width: ToolbarItemSize,
     height: ToolbarItemSize,
     borderRadius: ToolbarItemSize / 2,
+  },
+  selected: {
+    backgroundColor: "#CCC",
+    borderRadius: 4,
   },
 });

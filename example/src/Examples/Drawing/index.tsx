@@ -24,6 +24,7 @@ export const DrawingExample: React.FC = () => {
     currentPaint,
     currentType,
     currentColor,
+    currentTool,
     elements,
     handleAddElement,
     handleColorPressed,
@@ -31,6 +32,7 @@ export const DrawingExample: React.FC = () => {
     handleDeleteElement,
     handleImage,
     handleSelectElement,
+    handleSelectPressed,
     handleSizePressed,
     handleSizeSelected,
     handleTypePressed,
@@ -47,7 +49,8 @@ export const DrawingExample: React.FC = () => {
         selectedElement={selectedElement}
         background={BackgroundPaint}
         paint={currentPaint}
-        type={currentType}
+        elementType={currentType}
+        toolType={currentTool}
         style={styles.canvas}
         backgroundImage={currentImage}
         onSelecteElement={handleSelectElement}
@@ -56,17 +59,18 @@ export const DrawingExample: React.FC = () => {
       <DrawingToolbar
         size={currentPaint.getStrokeWidth()}
         color={currentColor}
-        type={currentType}
+        elementType={currentType}
+        toolType={currentTool}
         style={styles.toolbar}
         onColorPressed={handleColorPressed}
         onSizePressed={handleSizePressed}
+        onSelectPressed={handleSelectPressed}
         onDeletePressed={handleDeleteElement}
         onImagePressed={handleImage}
         onTypePressed={handleTypePressed}
       />
       {selectedToolbar === "type" ? (
         <TypeToolbar
-          type={currentType}
           style={styles.typeToolbar}
           onSelectType={handleTypeSelected}
         />
@@ -91,7 +95,7 @@ export const DrawingExample: React.FC = () => {
 };
 
 const { width, height } = Dimensions.get("window");
-const toolbarWidth = ToolbarItemSize * 11;
+const toolbarWidth = ToolbarItemSize * 12;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -108,7 +112,7 @@ const styles = StyleSheet.create({
   typeToolbar: {
     position: "absolute",
     bottom: height * 0.05 + 54,
-    left: width / 2 - toolbarWidth / 2 + ToolbarItemSize / 2,
+    left: width / 2 - toolbarWidth / 2 + ToolbarItemSize / 2.25,
   },
   colorToolbar: {
     position: "absolute",
@@ -118,6 +122,6 @@ const styles = StyleSheet.create({
   sizeToolbar: {
     position: "absolute",
     bottom: height * 0.05 + 54,
-    right: width / 2 - toolbarWidth / 2 + ToolbarItemSize * 2.5,
+    right: width / 2 - toolbarWidth / 2 + ToolbarItemSize * 2.25,
   },
 });
