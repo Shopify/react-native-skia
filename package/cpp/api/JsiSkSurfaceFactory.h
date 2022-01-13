@@ -21,7 +21,7 @@ namespace RNSkia {
     public:
         JSI_HOST_FUNCTION(Make) {
             auto width = static_cast<int>(arguments[0].asNumber());
-            auto height = static_cast<int>(arguments[0].asNumber());
+            auto height = static_cast<int>(arguments[1].asNumber());
             auto surface = SkSurface::MakeRasterN32Premul(width, height);
             return jsi::Object::createFromHostObject(runtime,
                 std::make_shared<JsiSkSurface>(getContext(), surface));
