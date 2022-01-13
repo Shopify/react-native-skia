@@ -50,7 +50,6 @@ export const findElement = (
       }
     })
     .sort((a, b) => a.distance - b.distance);
-  console.log(distances.map((d) => d.type + ": " + d.distance));
   return elements.find(
     (el) =>
       el.primitive === distances[0].primitive &&
