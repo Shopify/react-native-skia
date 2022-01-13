@@ -79,7 +79,8 @@ export const drawFocus = (
       rect.width + offset + 2,
       rect.height + offset + 2
     );
-    canvas.drawRect(selectedRect, selectedPaintBg);
-    canvas.drawRect(selectedRect, selectedPaintBorder);
+    const rrect = Skia.RRectXY(selectedRect, 3, 3);
+    canvas.drawRRect(rrect, selectedPaintBg);
+    canvas.drawRRect(rrect, selectedPaintBorder);
   }
 };

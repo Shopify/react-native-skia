@@ -1,14 +1,5 @@
 import { Skia, PaintStyle, StrokeCap } from "@shopify/react-native-skia";
 
-const DefaultPaint = Skia.Paint();
-DefaultPaint.setColor(Skia.Color("#000"));
-DefaultPaint.setAntiAlias(true);
-DefaultPaint.setStrokeWidth(5);
-DefaultPaint.setStyle(PaintStyle.Stroke);
-DefaultPaint.setStrokeCap(StrokeCap.Round);
-
-export { DefaultPaint };
-
 export const ColorPalette = [
   "#000000",
   "rgba(218,54,45,1)",
@@ -23,5 +14,14 @@ export const ColorPalette = [
   "rgba(183,55,183,1)",
   "rgba(214,92,163,1)",
 ];
+
+const DefaultPaint = Skia.Paint();
+DefaultPaint.setColor(Skia.Color(ColorPalette[1]));
+DefaultPaint.setAntiAlias(true);
+DefaultPaint.setStrokeWidth(5);
+DefaultPaint.setStyle(PaintStyle.Stroke);
+DefaultPaint.setStrokeCap(StrokeCap.Round);
+
+export { DefaultPaint };
 
 export const SizeConstants = [1, 2, 4, 8, 10];
