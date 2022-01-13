@@ -25,12 +25,17 @@ const streams = cols.map(() =>
     .flat()
 );
 
+// TODO: should deps be passed explicitly?
+// (so we could inline: useFontMgr([...fonts])) without triggering an infite loop?
+const FONTS = [require("./matrix-code-nfi.otf")];
+
 export const Matrix = () => {
   const timestamp = useTimestamp();
-  const fontMgr = useFontMgr([require("./matrix-code-nfi.otf")]);
+  const fontMgr = useFontMgr(FONTS);
   if (fontMgr === null) {
     return null;
   }
+
   return (
     <Canvas style={{ flex: 1 }} fontMgr={fontMgr}>
       <Fill color="black" />
