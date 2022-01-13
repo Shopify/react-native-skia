@@ -43,6 +43,12 @@ const sidebars = {
     {
       collapsed: false,
       type: "category",
+      label: "Text",
+      items: ["text/fonts", "text/text"],
+    },
+    {
+      collapsed: false,
+      type: "category",
       label: "Shaders",
       items: [
         "shaders/language",

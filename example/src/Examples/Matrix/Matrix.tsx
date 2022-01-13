@@ -1,7 +1,12 @@
-import { BlurMask, Canvas, Fill, Paint } from "@shopify/react-native-skia";
+import {
+  BlurMask,
+  Canvas,
+  Fill,
+  Paint,
+  useFontMgr,
+} from "@shopify/react-native-skia";
 import React from "react";
 import { useTimestamp } from "@shopify/react-native-skia/src/animation/Animation/hooks";
-import { useFontMgr } from "@shopify/react-native-skia/src/skia/FontMgr/FontMgrFactory";
 
 import { COLS, ROWS, Symbol } from "./Symbol";
 
@@ -25,13 +30,9 @@ const streams = cols.map(() =>
     .flat()
 );
 
-// TODO: should deps be passed explicitly?
-// (so we could inline: useFontMgr([...fonts])) without triggering an infite loop?
-const FONTS = [require("./matrix-code-nfi.otf")];
-
 export const Matrix = () => {
   const timestamp = useTimestamp();
-  const fontMgr = useFontMgr(FONTS);
+  const fontMgr = useFontMgr([require("./matrix-code-nfi.otf")]);
   if (fontMgr === null) {
     return null;
   }

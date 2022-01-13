@@ -1,3 +1,5 @@
+import type { DependencyList } from "react";
+
 import type { Data, DataSource } from "../Data";
 import { useDataCollection } from "../Data/Data";
 import { Skia } from "../Skia";
@@ -11,5 +13,5 @@ export interface FontMgrFactory {
 
 const fontMgrFactory = (data: Data[]) => Skia.FontMgr.FromData(...data);
 
-export const useFontMgr = (data: DataSource[]) =>
-  useDataCollection(data, fontMgrFactory);
+export const useFontMgr = (data: DataSource[], deps: DependencyList = []) =>
+  useDataCollection(data, fontMgrFactory, deps);
