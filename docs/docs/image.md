@@ -9,7 +9,7 @@ Images can be draw by specifying the output rectangle and how the image should f
 
 | Name      | Type      |  Description                                                  |
 |:----------|:----------|:--------------------------------------------------------------|
-| source    | `require` or `strong` | Source of the image or an HTTP(s) URL. |
+| source    | `require` or `string` | Source of the image or an HTTP(s) URL. |
 | x         | `number`  | Left position of the destination image.                       |
 | y         | `number`  | Right position of the destination image.                      |
 | width     | `number`  | Width of the destination image.                               |
