@@ -71,19 +71,16 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
         _infoObject->beginDrawCallback(width, height, timestamp);
 
         // Set up arguments array
-        jsi::Value *args = new jsi::Value[2];
+        std::vector<jsi::Value> args(2);
         args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
         args[1] = jsi::Object::createFromHostObject(*runtime, _infoObject);
 
         // To be able to call the drawing function we'll wrap it once again
-        callback->call(*runtime, static_cast<const jsi::Value *>(args),
+        callback->call(*runtime, static_cast<const jsi::Value *>(args.data()),
                        (size_t)2);
 
         // Reset touches
         _infoObject->endDrawCallback();
-
-        // Clean up
-        delete[] args;
 
         // Draw debug overlays
         if (_showDebugOverlay) {
