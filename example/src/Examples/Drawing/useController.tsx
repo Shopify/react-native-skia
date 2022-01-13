@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { IPaint, SkiaView } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 import { Alert, Share } from "react-native";
+import { fitRects } from "@shopify/react-native-skia/src/renderer/components/image/BoxFit";
 
 import { ShareToolPath } from "./assets";
 import { ColorPalette, DefaultPaint } from "./constants";
@@ -112,8 +113,20 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
   );
 
   const handleShare = useCallback(() => {
-    const image = skiaViewRef.current?.makeImageSnapshot();
+    let image = skiaViewRef.current?.makeImageSnapshot();
     if (image) {
+      if (image.width() > 1000 || image.height() > 1000) {
+        console.log("Resizing");
+        // Resize image based on width and height
+        const ratio = image.width() / image.height();
+        const newWidth = 1000;
+        const newHeight = 1000 / ratio;
+        const rect = Skia.XYWHRect(0, 0, newWidth, newHeight);
+        const surface = Skia.Surface.Make(newWidth, newHeight);
+        const { src, dst } = fitRects("cover", image, rect);
+        surface.getCanvas().drawImageRect(image, src, dst, Skia.Paint());
+        image = surface.makeImageSnapshot();
+      }
       const data = image.toBase64();
       const url = `data:image/png;base64,${data}`;
       Share.share({
