@@ -14,7 +14,7 @@ type BaseToolbarItemProps = {
   onPress?: () => void;
 };
 
-const ToolbarItemSize = 22;
+export const ToolbarItemSize = 22;
 
 const BaseToolbarItem: React.FC<BaseToolbarItemProps> = ({
   onPress,

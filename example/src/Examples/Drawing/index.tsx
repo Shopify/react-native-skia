@@ -12,6 +12,7 @@ import {
 } from "./Toolbar";
 import { ColorPalette, SizeConstants } from "./constants";
 import { useController } from "./useController";
+import { ToolbarItemSize } from "./ToolbarItems";
 
 const BackgroundPaint = Skia.Paint();
 BackgroundPaint.setColor(Skia.Color("#FFF"));
@@ -90,6 +91,7 @@ export const DrawingExample: React.FC = () => {
 };
 
 const { width, height } = Dimensions.get("window");
+const toolbarWidth = ToolbarItemSize * 11;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -99,23 +101,23 @@ const styles = StyleSheet.create({
   },
   toolbar: {
     position: "absolute",
-    left: width * 0.1,
-    right: width * 0.1,
+    left: width / 2 - toolbarWidth / 2,
+    right: width / 2 - toolbarWidth / 2,
     bottom: height * 0.05,
   },
   typeToolbar: {
     position: "absolute",
     bottom: height * 0.05 + 54,
-    left: width * 0.12,
+    left: width / 2 - toolbarWidth / 2 + ToolbarItemSize / 2,
   },
   colorToolbar: {
     position: "absolute",
     bottom: height * 0.05 + 54,
-    right: width * 0.125,
+    right: width / 2 - toolbarWidth / 2 + ToolbarItemSize / 2,
   },
   sizeToolbar: {
     position: "absolute",
     bottom: height * 0.05 + 54,
-    right: width * 0.295,
+    right: width / 2 - toolbarWidth / 2 + ToolbarItemSize * 2.5,
   },
 });
