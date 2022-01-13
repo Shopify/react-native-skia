@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { IPaint, SkiaView } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
-import { Share } from "react-native";
+import { Alert, Share } from "react-native";
 
 import { ShareToolPath } from "./assets";
 import { ColorPalette, DefaultPaint } from "./constants";
@@ -114,9 +114,13 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
   const handleShare = useCallback(() => {
     const image = skiaViewRef.current?.makeImageSnapshot();
     if (image) {
+      const data = image.toBase64();
+      const url = `data:image/png;base64,${data}`;
       Share.share({
-        url: `data:image/png;base64,${image.toBase64()}`,
+        url,
         title: "Drawing",
+      }).catch(() => {
+        Alert.alert("An error occurred when sharing the image.");
       });
     }
   }, [skiaViewRef]);

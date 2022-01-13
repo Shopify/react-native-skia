@@ -76,9 +76,9 @@ public:
   JSI_HOST_FUNCTION(toBase64) {
     auto data = getObject()->encodeToData();
     auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
-    auto buffer = std::string(len + 1, 0);
+    auto buffer = std::string(len, 0);
     SkBase64::Encode(data->bytes(), data->size(), (void*)&buffer[0]);
-    return jsi::String::createFromUtf8(runtime, buffer);
+    return jsi::String::createFromAscii(runtime, buffer);
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
