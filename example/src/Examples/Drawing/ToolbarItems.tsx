@@ -95,13 +95,14 @@ export const PathToolbarItem: React.FC<PathToolbarItemProps> = ({
       if (path) {
         canvas.save();
         const bounds = path.getBounds();
+        const offset = { x: bounds.x, y: bounds.y };
         const factor = {
-          x: (info.width / bounds.width) * 0.8,
-          y: (info.height / bounds.height) * 0.8,
+          x: (info.width / (bounds.width + offset.x)) * 0.8,
+          y: (info.height / (bounds.height + offset.y)) * 0.8,
         };
         canvas.translate(
-          info.width / 2 - (bounds.height * factor.x) / 2,
-          info.height / 2 - (bounds.height * factor.y) / 2
+          info.width / 2 - ((bounds.width + offset.x) * factor.x) / 2,
+          info.height / 2 - ((bounds.height + offset.y) * factor.y) / 2
         );
         canvas.scale(factor.x, factor.y);
         canvas.drawPath(path, paint);
