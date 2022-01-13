@@ -88,6 +88,7 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
       }
       return "draw";
     });
+    setSelectedElement(undefined);
   }, [toggleToolbar]);
 
   const handleColorPressed = useCallback(
