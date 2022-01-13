@@ -1,5 +1,6 @@
 export * from "./Circle";
 export * from "./Rect";
+export * from "./RoundRect";
 export * from "./DiffRect";
 export * from "./Line";
 export * from "./Path";

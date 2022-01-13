@@ -3,15 +3,15 @@ import React from "react";
 import { useDrawing } from "../../nodes/Drawing";
 import type { CustomPaintProps } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { RectDef } from "../../processors/Shapes";
-import { processRect } from "../../processors/Shapes";
+import type { RRectDef } from "../../processors/Shapes";
+import { processRRect } from "../../processors/Shapes";
 
-export type RectProps = RectDef & CustomPaintProps;
+export type RoundRectProps = RRectDef & CustomPaintProps;
 
-export const Rect = (props: AnimatedProps<RectProps>) => {
+export const RoundRect = (props: AnimatedProps<RoundRectProps>) => {
   const onDraw = useDrawing(props, ({ canvas, paint }, rectProps) => {
-    const rect = processRect(rectProps);
-    canvas.drawRect(rect, paint);
+    const rrect = processRRect(rectProps);
+    canvas.drawRRect(rrect, paint);
   });
   return <skDrawing onDraw={onDraw} {...props} />;
 };
