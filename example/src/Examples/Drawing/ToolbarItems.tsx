@@ -125,8 +125,6 @@ export const PathToolbarItem: React.FC<PathToolbarItemProps> = ({
         canvas.scale(factor.x, factor.y);
         canvas.drawPath(path, paint);
         canvas.restore();
-      } else {
-        console.log("***** Path empty");
       }
     },
     [path, bounds]
