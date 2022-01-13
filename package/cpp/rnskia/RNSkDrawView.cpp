@@ -162,7 +162,7 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface,
   } catch (...) {
     _drawCallback = nullptr;
     return _platformContext->raiseError(
-        "An error occured while rendering the Skia View.");
+        "An error occurred while rendering the Skia View.");
   }
 }
 
