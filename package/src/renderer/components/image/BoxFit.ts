@@ -29,19 +29,19 @@ export const rect2rect = (src: IRect, dst: IRect) => {
 
 export const fitRects = (
   fit: Fit,
-  image: IRect,
+  rect: IRect,
   { x, y, width, height }: IRect
 ) => {
   const sizes = applyBoxFit(
     fit,
-    { width: image.width, height: image.height },
+    { width: rect.width, height: rect.height },
     { width, height }
   );
   const src = inscribe(sizes.src, {
     x: 0,
     y: 0,
-    width: image.width,
-    height: image.height,
+    width: rect.width,
+    height: rect.height,
   });
   const dst = inscribe(sizes.dst, {
     x,

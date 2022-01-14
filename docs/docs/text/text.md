@@ -9,8 +9,6 @@ The text component can be used to draw a simple text.
 The font family and the font size must be specified.
 The fonts available in the canvas are described in [here](/docs/text/fonts).
 
-Images can be draw by specifying the output rectangle and how the image should fit into that rectangle.
-
 | Name       | Type      |  Description                                                  |
 |:-----------|:----------|:--------------------------------------------------------------|
 | value      | `string`  | Text to draw                                                  |

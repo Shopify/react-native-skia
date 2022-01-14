@@ -1,7 +1,5 @@
 #pragma once
 
-#include <ReactCommon/TurboModuleUtils.h>
-
 #include <map>
 
 #include "JsiSkHostObjects.h"
@@ -49,8 +47,15 @@ namespace RNSkia {
 
         JSI_HOST_FUNCTION(matchFamilyStyle) {
             auto familyName = arguments[0].asString(runtime).utf8(runtime);
-            // TODO: add SkFontStyle
-            auto typeface = getObject()->matchFamilyStyle(familyName.c_str(), SkFontStyle::Normal());
+            auto fontStyle = SkFontStyle::Normal();
+            if (count >= 2) {
+                auto object = arguments[1].asObject(runtime);
+                int weight = object.getProperty(runtime, "weight").asNumber();
+                int width = object.getProperty(runtime, "width").asNumber();
+                SkFontStyle::Slant slant = (SkFontStyle::Slant)object.getProperty(runtime, "slant").asNumber();
+                fontStyle = SkFontStyle(width, weight, slant);
+            }
+            auto typeface = getObject()->matchFamilyStyle(familyName.c_str(), fontStyle);
             if (typeface == nullptr) {
                 return jsi::Value::null();
             }

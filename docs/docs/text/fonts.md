@@ -25,7 +25,7 @@ export const HelloWorld = () => {
 };
 ```
 
-Alternatively, you can use your own set of custom fonts to be available in the cavans, as seen below.
+Alternatively, you can use your own set of custom fonts to be available in the canvas, as seen below.
 
 ```tsx twoslash
 import {Canvas, Text, useFontMgr} from "@shopify/react-native-skia";
