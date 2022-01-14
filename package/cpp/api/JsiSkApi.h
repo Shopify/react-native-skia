@@ -27,6 +27,7 @@
 #include "JsiSkShaderFactory.h"
 #include "JsiSkSvg.h"
 #include "JsiSkTypeface.h"
+#include "JsiSkVertices.h"
 
 namespace RNSkia {
 
@@ -50,6 +51,7 @@ public:
     installFunction("RRectXY", JsiSkRRect::createCtor(context));
     installFunction("Point", JsiSkPoint::createCtor(context));
     installFunction("Typeface", JsiSkTypeface::createCtor(context));
+    installFunction("MakeVertices", JsiSkVertices::createCtor(context));
 
     // Static members
     installReadonlyProperty("ImageFilter",
