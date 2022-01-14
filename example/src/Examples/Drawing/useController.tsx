@@ -79,7 +79,7 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
     toggleToolbar(undefined);
   }, [toggleToolbar]);
 
-  const handleTypePressed = useCallback(() => {
+  const handleTypeToolPressed = useCallback(() => {
     setCurrentTool((p) => {
       if (p === "draw") {
         toggleToolbar("type");
@@ -91,12 +91,12 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
     setSelectedElement(undefined);
   }, [toggleToolbar]);
 
-  const handleColorPressed = useCallback(
+  const handleColorToolPressed = useCallback(
     () => toggleToolbar("color"),
     [toggleToolbar]
   );
 
-  const handleSizePressed = useCallback(
+  const handleSizeToolPressed = useCallback(
     () => toggleToolbar("size"),
     [toggleToolbar]
   );
@@ -169,13 +169,13 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
       elements,
       handleAddElement,
       handleColorSelected,
-      handleColorPressed,
+      handleColorToolPressed,
       handleDeleteElement,
       handleImage,
       handleSelectElement,
-      handleSizePressed,
+      handleSizeToolPressed,
       handleSizeSelected,
-      handleTypePressed,
+      handleTypeToolPressed,
       handleSelectPressed,
       handleTypeSelected,
       selectedElement,
@@ -194,14 +194,14 @@ export const useController = (skiaViewRef: React.RefObject<SkiaView>) => {
       currentColor,
       elements,
       handleAddElement,
-      handleColorPressed,
+      handleColorToolPressed,
       handleColorSelected,
       handleDeleteElement,
       handleImage,
       handleSelectElement,
-      handleSizePressed,
+      handleSizeToolPressed,
       handleSizeSelected,
-      handleTypePressed,
+      handleTypeToolPressed,
       handleTypeSelected,
       handleSelectPressed,
       selectedElement,
