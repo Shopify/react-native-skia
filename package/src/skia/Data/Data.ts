@@ -16,7 +16,6 @@ export const useDataCollection = <T>(
 ) => {
   const [data, setData] = useState<T | null>(null);
   useEffect(() => {
-    console.log("useDataCollection()");
     const uris = sources.map((source) =>
       typeof source === "string" ? source : Image.resolveAssetSource(source).uri
     );
