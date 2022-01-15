@@ -16,9 +16,9 @@ export const Rect = (props: AnimatedProps<RectProps>) => {
   return <skDrawing onDraw={onDraw} {...props} />;
 };
 
-export type RRectProps = RRectDef & CustomPaintProps;
+export type RoundRectProps = RRectDef & CustomPaintProps;
 
-export const RRect = (props: AnimatedProps<RRectProps>) => {
+export const RoundRect = (props: AnimatedProps<RoundRectProps>) => {
   const onDraw = useDrawing(props, ({ canvas, paint }, rectProps) => {
     const rrect = processRRect(rectProps);
     canvas.drawRRect(rrect, paint);
