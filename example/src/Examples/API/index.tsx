@@ -11,6 +11,7 @@ import { ColorFilter } from "./ColorFilter";
 import { Gradients } from "./Gradients2";
 import { PathExample } from "./Path2";
 import { Images } from "./Images";
+import { SVG } from "./SVG";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -78,6 +79,13 @@ export const API = () => {
         component={Transform}
         options={{
           title: "🔄 Transformations",
+        }}
+      />
+      <Stack.Screen
+        name="SVG"
+        component={SVG}
+        options={{
+          title: "🖋 SVG",
         }}
       />
     </Stack.Navigator>
