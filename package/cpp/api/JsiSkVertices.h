@@ -95,7 +95,7 @@ namespace RNSkia {
                         colors.push_back(index);
                     }
                 }
-                auto isVolatile = false;//count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined() ? true : arguments[5].getBool();
+                auto isVolatile = count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined() ? arguments[5].getBool() : false;
                 auto flags = 0;
                 // These flags are from SkVertices.h and should be kept in sync with those.
                 if (texs.size() > 0) {
