@@ -44,10 +44,10 @@ namespace RNSkia {
         }
 
         /**
-         * Creates the function for construction a new instance of the SkRect
+         * Creates the function for construction a new instance of the SkVertices
          * wrapper
          * @param context platform context
-         * @return A function for creating a new host object wrapper for the SkRect
+         * @return A function for creating a new host object wrapper for the SkVertices
          * class
          */
         static const jsi::HostFunctionType
