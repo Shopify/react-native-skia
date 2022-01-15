@@ -21,11 +21,13 @@ namespace RNSkia {
         : JsiSkWrappingSkPtrHostObject<SkVertices>(context, vertices) {}
 
         JSI_HOST_FUNCTION(bounds) {
-            return jsi::Value::undefined();
+            auto result = getObject()->bounds();
+            return jsi::Object::createFromHostObject(
+                    runtime, std::make_shared<JsiSkRect>(getContext(), result));
         }
 
         JSI_HOST_FUNCTION(uniqueID) {
-            return jsi::Value::undefined();
+            return static_cast<double>(getObject()->uniqueID());
         }
 
         JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkVertices, bounds),
