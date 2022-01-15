@@ -109,9 +109,24 @@ namespace RNSkia {
                 if (!isVolatile) {
                     flags |= (1 << 2);
                 }
-                auto builder = SkVertices::Builder(mode, positionsSize, indicesSize, flags);
-                auto vertices = SkVertices::MakeCopy(mode, positionsSize, positions.data(), texs.data(), colors.data(), indicesSize, indices.data());
+                auto builder = SkVertices::Builder(mode, positionsSize/2, indicesSize, flags);
+
+                std::copy(std::begin(positions), std::end(positions), builder.positions());
+               // std::copy(positions.data(), positions.data() + positionsSize, builder.positions());
+                if (builder.texCoords()) {
+                    std::copy(std::begin(texs), std::end(texs), builder.texCoords());
+                    //std::copy(texs.data(), texs.data() + texs.size(), builder.texCoords());
+                }
+                if (builder.colors()) {
+                    std::copy(std::begin(colors), std::end(colors), builder.colors());
+                    //std::copy(colors.data(), colors.data() + colors.size(), builder.colors());
+                }
+                if (builder.indices()) {
+                    std::copy(std::begin(indices), std::end(indices), builder.indices());
+                    // std::copy(indices.data(), indices.data() + indices.size(), builder.indices());
+                }
                 //auto vertices = builder.detach();
+                auto vertices = SkVertices::MakeCopy(mode, positionsSize, positions.data(), texs.data(), colors.data(), indicesSize, indices.data());
                 return jsi::Object::createFromHostObject(
                         runtime, std::make_shared<JsiSkVertices>(context, vertices));
             };
