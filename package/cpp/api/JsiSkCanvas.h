@@ -10,6 +10,7 @@
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
 #include "JsiSkSvg.h"
+#include "JsiSkVertices.h"
 
 #include <jsi/jsi.h>
 #include <map>
@@ -242,6 +243,15 @@ public:
     return jsi::Value::undefined();
   }
 
+
+  JSI_HOST_FUNCTION(drawVertices) {
+    auto vertices = JsiSkVertices::fromValue(runtime, arguments[0]);
+    auto blendMode = (SkBlendMode)arguments[1].getNumber();
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
+    _canvas->drawVertices(vertices, blendMode, *paint);
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(drawPatch) {
     std::vector<SkPoint> cubics;
     std::vector<SkColor> colors;
@@ -443,6 +453,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPoints),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPatch),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawVertices),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawText),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawSvg),
                        JSI_EXPORT_FUNC(JsiSkCanvas, clipPath),

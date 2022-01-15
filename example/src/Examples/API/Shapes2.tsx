@@ -17,6 +17,7 @@ import {
   Paint,
   DashPathEffect,
   RRect,
+  Vertices,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -107,6 +108,14 @@ export const Shapes = () => {
         <Patch
           colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
           cubics={cubics}
+        />
+      </Canvas>
+      <Title>Vertices</Title>
+      <Canvas style={styles.container}>
+        <Vertices
+          positions={[vec(0, 0), vec(250, 0), vec(100, 100), vec(0, 250)]}
+          texs={[vec(0, 0), vec(250, 0), vec(250, 250), vec(250, 0)]}
+          colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
         />
       </Canvas>
     </ScrollView>

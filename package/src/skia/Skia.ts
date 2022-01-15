@@ -90,6 +90,7 @@ export const Skia = {
   ImageFilter: SkiaApi.ImageFilter,
   PathEffect: SkiaApi.PathEffect,
   Matrix: SkiaApi.Matrix,
+  MakeVertices: SkiaApi.MakeVertices,
   Color,
   Image: ImageCtor,
   Svg: SvgObject,
