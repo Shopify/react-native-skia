@@ -9,37 +9,31 @@ slug: /shapes/polygons
 
 Draws a rectangle.
 
-| Name   | Type     |  Description                                                  |
-|:-------|:---------|:--------------------------------------------------------------|
-| x      | `number` | X coordinate.                                                 |
-| y      | `number` | Y coordinate.                                                 |
-| width  | `number` | Width of the rectangle.                                       |
-| height | `number` | Height of the rectangle.                                      |
+| Name   | Type     | Description              |
+| :----- | :------- | :----------------------- |
+| x      | `number` | X coordinate.            |
+| y      | `number` | Y coordinate.            |
+| width  | `number` | Width of the rectangle.  |
+| height | `number` | Height of the rectangle. |
 
 ```tsx twoslash
-import {Canvas, Rect} from "@shopify/react-native-skia";
+import { Canvas, Rect } from "@shopify/react-native-skia";
 
 const RectDemo = () => {
   return (
-    <Canvas style={{ flex: 1}}>
-      <Rect
-        x={0}
-        y={0}
-        width={256}
-        height={256}
-        color="lightblue"
-      />
+    <Canvas style={{ flex: 1 }}>
+      <Rect x={0} y={0} width={256} height={256} color="lightblue" />
     </Canvas>
   );
 };
 ```
 
-## RRect
+## RoundRect
 
 Draws a rounded rectangle.
 
-| Name   | Type     |  Description                                                  |
-|:-------|:---------|:--------------------------------------------------------------|
+| Name   | Type     | Description                                                   |
+| :----- | :------- | :------------------------------------------------------------ |
 | x      | `number` | X coordinate.                                                 |
 | y      | `number` | Y coordinate.                                                 |
 | width  | `number` | Width of the rectangle.                                       |
@@ -48,12 +42,12 @@ Draws a rounded rectangle.
 | ry?    | `number` | Vertical corner radius. Defaults to `rx` if specified or 0.   |
 
 ```tsx twoslash
-import {Canvas, RRect} from "@shopify/react-native-skia";
+import { Canvas, RoundRect } from "@shopify/react-native-skia";
 
 const RectDemo = () => {
   return (
-    <Canvas style={{ flex: 1}}>
-      <RRect
+    <Canvas style={{ flex: 1 }}>
+      <RoundRect
         x={0}
         y={0}
         width={256}
@@ -68,28 +62,24 @@ const RectDemo = () => {
 
 ![Rounded Rectangle](assets/polygons/rect.png)
 
-## DRect
+## DiffRect
 
 Draws the difference between two rectangles.
 
-| Name   | Type          |  Description     |
-|:-------|:--------------|:-----------------|
-| outer  | `RectOrRRect` | Outer rectangle. |
-| inner  | `RectOrRRect` | Inner rectangle. |
+| Name  | Type          | Description      |
+| :---- | :------------ | :--------------- |
+| outer | `RectOrRRect` | Outer rectangle. |
+| inner | `RectOrRRect` | Inner rectangle. |
 
 ```tsx twoslash
-import {Canvas, DRect, rect, rrect} from "@shopify/react-native-skia";
+import { Canvas, DiffRect, rect, rrect } from "@shopify/react-native-skia";
 
 const DRectDemo = () => {
   const outer = rrect(rect(0, 0, 256, 256), 25, 25);
-  const inner = rrect(
-    rect(50, 50, 256 - 100, 256 - 100),
-    50,
-    50
-  );
+  const inner = rrect(rect(50, 50, 256 - 100, 256 - 100), 50, 50);
   return (
-    <Canvas style={{ flex: 1}}>
-      <DRect inner={inner} outer={outer} color="lightblue" />
+    <Canvas style={{ flex: 1 }}>
+      <DiffRect inner={inner} outer={outer} color="lightblue" />
     </Canvas>
   );
 };
@@ -101,17 +91,17 @@ const DRectDemo = () => {
 
 Draws a line between two points.
 
-| Name | Type    |  Description     |
-|:-----|:--------|:-----------------|
-| p1   | `Point` | Start point.     |
-| p2   | `Point` | End point.       |
+| Name | Type    | Description  |
+| :--- | :------ | :----------- |
+| p1   | `Point` | Start point. |
+| p2   | `Point` | End point.   |
 
 ```tsx twoslash
-import {Canvas, Line, vec} from "@shopify/react-native-skia";
+import { Canvas, Line, vec } from "@shopify/react-native-skia";
 
 const LineDemo = () => {
   return (
-    <Canvas style={{ flex: 1}}>
+    <Canvas style={{ flex: 1 }}>
       <Line
         p1={vec(0, 0)}
         p2={vec(256, 256)}
@@ -130,13 +120,13 @@ const LineDemo = () => {
 
 Draws points and optionally draws the connection between them.
 
-| Name   | Type        |  Description     |
-|:-------|:------------|:-----------------|
-| points | `Point`     | Points to draw.  |
-| mode   | `PointMode` | How should the points be connected. Can be `points` (no connection), `lines` (connect pairs of points), or `polygon` (connect lines). Default is `points`.       |
+| Name   | Type        | Description                                                                                                                                                |
+| :----- | :---------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| points | `Point`     | Points to draw.                                                                                                                                            |
+| mode   | `PointMode` | How should the points be connected. Can be `points` (no connection), `lines` (connect pairs of points), or `polygon` (connect lines). Default is `points`. |
 
 ```tsx twoslash
-import {Canvas, Points, vec} from "@shopify/react-native-skia";
+import { Canvas, Points, vec } from "@shopify/react-native-skia";
 
 const PointsDemo = () => {
   const points = [

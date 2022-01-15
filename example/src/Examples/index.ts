@@ -4,3 +4,4 @@ export * from "./Breathe";
 export * from "./Drawing";
 export * from "./Filters";
 export * from "./Gooey";
+export * from "./Matrix";
