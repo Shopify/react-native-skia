@@ -28,7 +28,7 @@ const RectDemo = () => {
 };
 ```
 
-## RoundRect
+## RoundedRect
 
 Draws a rounded rectangle.
 
@@ -42,12 +42,12 @@ Draws a rounded rectangle.
 | ry?    | `number` | Vertical corner radius. Defaults to `rx` if specified or 0.   |
 
 ```tsx twoslash
-import { Canvas, RoundRect } from "@shopify/react-native-skia";
+import { Canvas, RoundedRect } from "@shopify/react-native-skia";
 
 const RectDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <RoundRect
+      <RoundedRect
         x={0}
         y={0}
         width={256}
