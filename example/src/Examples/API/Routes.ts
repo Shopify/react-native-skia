@@ -8,4 +8,5 @@ export type Routes = {
   Transform: undefined;
   ColorFilter: undefined;
   Gradients: undefined;
+  SVG: undefined;
 };

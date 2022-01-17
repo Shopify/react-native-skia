@@ -19,12 +19,14 @@ import ReactReconciler from "react-reconciler";
 import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { Skia } from "../skia";
+import type { FontMgr } from "../skia/FontMgr/FontMgr";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
 import { vec } from "./processors";
 import { popDrawingContext, pushDrawingContext } from "./CanvasProvider";
+import type { DrawingContext } from "./DrawingContext";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,6 +70,7 @@ export interface CanvasProps extends ComponentProps<typeof SkiaView> {
   innerRef?: RefObject<SkiaView>;
   children: ReactNode;
   onTouch?: TouchHandler;
+  fontMgr?: FontMgr;
 }
 
 export const Canvas = ({
@@ -77,6 +80,7 @@ export const Canvas = ({
   debug,
   mode,
   onTouch,
+  fontMgr,
 }: CanvasProps) => {
   const [tick, setTick] = useState(0);
   const redraw = useCallback(() => setTick((t) => t + 1), []);
@@ -102,7 +106,7 @@ export const Canvas = ({
       onTouch && onTouch(info.touches);
       const paint = Skia.Paint();
       paint.setAntiAlias(true);
-      const ctx = {
+      const ctx: DrawingContext = {
         canvas,
         paint,
         opacity: 1,
@@ -112,6 +116,7 @@ export const Canvas = ({
         skiaRef,
         getTouches: () => info.touches,
         center: vec(width / 2, height / 2),
+        fontMgr: fontMgr ?? Skia.FontMgr.RefDefault(),
       };
       pushDrawingContext(ctx);
       tree.draw(ctx, tree.props, tree.children);
