@@ -25,7 +25,7 @@ namespace RNSkia {
 
     void performStreamOperation(
             const std::string &sourceUri,
-            const std::function<void(std::unique_ptr<SkStream>)> &op) override {
+            const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override {
         _jniPlatformContext->performStreamOperation(sourceUri, op);
     }
 

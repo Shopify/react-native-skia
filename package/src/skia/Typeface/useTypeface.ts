@@ -1,19 +1,9 @@
-import type { DependencyList } from "react";
-import { useMemo } from "react";
-
 import { Skia } from "../Skia";
-
-import type { Typeface, FontStyle } from "./Typeface";
+import type { DataSource } from "../Data/Data";
+import { useRawData } from "../Data/Data";
 
 /**
  * Returns a Skia Typeface object
  * */
-export const useTypeface = (
-  name?: string,
-  fontStyle?: FontStyle,
-  deps: DependencyList = []
-): Typeface =>
-  useMemo(() => {
-    return name && fontStyle ? Skia.Typeface(name, fontStyle) : Skia.Typeface();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+export const useTypeface = (source: DataSource) =>
+  useRawData(source, Skia.Typeface.MakeFreeTypeFaceFromData);
