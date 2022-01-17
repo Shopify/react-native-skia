@@ -9,6 +9,7 @@
 #include "JsiSkColorFilterFactory.h"
 #include "JsiSkFont.h"
 #include "JsiSkImage.h"
+#include "JsiSkImageFactory.h"
 #include "JsiSkImageFilter.h"
 #include "JsiSkImageFilterFactory.h"
 #include "JsiSkMaskFilter.h"
@@ -25,8 +26,12 @@
 #include "JsiSkRuntimeEffectFactory.h"
 #include "JsiSkShader.h"
 #include "JsiSkShaderFactory.h"
-#include "JsiSkSvg.h"
+#include "JsiSkSVG.h"
+#include "JsiSkSVGFactory.h"
 #include "JsiSkTypeface.h"
+#include "JsiSkTypefaceFactory.h"
+#include "JsiSkDataFactory.h"
+#include "JsiSkFontMgrFactory.h"
 
 namespace RNSkia {
 
@@ -43,15 +48,23 @@ public:
       : JsiSkHostObject(context) {
 
     installFunction("Font", JsiSkFont::createCtor(context));
-    installFunction("Image", JsiSkImage::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
     installFunction("Matrix", JsiSkMatrix::createCtor(context));
     installFunction("XYWHRect", JsiSkRect::createCtor(context));
     installFunction("RRectXY", JsiSkRRect::createCtor(context));
     installFunction("Point", JsiSkPoint::createCtor(context));
-    installFunction("Typeface", JsiSkTypeface::createCtor(context));
 
     // Static members
+    installReadonlyProperty("FontMgr",
+                            std::make_shared<JsiSkFontMgrFactory>(context));
+    installReadonlyProperty("SVG",
+                              std::make_shared<JsiSkSVGFactory>(context));
+    installReadonlyProperty("Image",
+                            std::make_shared<JsiSkImageFactory>(context));
+    installReadonlyProperty("Typeface",
+                            std::make_shared<JsiSkTypefaceFactory>(context));
+    installReadonlyProperty("Data",
+                            std::make_shared<JsiSkDataFactory>(context));
     installReadonlyProperty("ImageFilter",
                             std::make_shared<JsiSkImageFilterFactory>(context));
     installReadonlyProperty("PathEffect",
@@ -66,7 +79,6 @@ public:
         "RuntimeEffect", std::make_shared<JsiSkRuntimeEffectFactory>(context));
     installReadonlyProperty("Shader",
                             std::make_shared<JsiSkShaderFactory>(context));
-    installReadonlyProperty("Svg", std::make_shared<JsiSkSvgStatic>(context));
   };
 };
 } // namespace RNSkia

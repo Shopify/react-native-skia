@@ -30,10 +30,10 @@ export const useDrawing = <T,>(
     [props]
   );
 
-export interface DrawingProps extends AnimatedProps<CustomPaintProps> {
+export type DrawingProps = AnimatedProps<CustomPaintProps> & {
   onDraw: DrawingCallback;
   skipProcessing?: boolean;
-}
+};
 
 export const Drawing = (props: DrawingProps) => {
   return <skDrawing {...props} />;

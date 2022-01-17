@@ -38,6 +38,10 @@ const examples = [
     screen: "Path",
     title: "🥾 Paths",
   },
+  {
+    screen: "SVG",
+    title: "🖋 SVG",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

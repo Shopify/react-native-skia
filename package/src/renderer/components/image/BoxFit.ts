@@ -1,6 +1,6 @@
 import { exhaustiveCheck } from "../../typeddash";
 import { Skia } from "../../../skia";
-import type { IImage, IRect } from "../../../skia";
+import type { IRect } from "../../../skia";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -29,19 +29,19 @@ export const rect2rect = (src: IRect, dst: IRect) => {
 
 export const fitRects = (
   fit: Fit,
-  image: IImage,
+  rect: IRect,
   { x, y, width, height }: IRect
 ) => {
   const sizes = applyBoxFit(
     fit,
-    { width: image.width(), height: image.height() },
+    { width: rect.width, height: rect.height },
     { width, height }
   );
   const src = inscribe(sizes.src, {
     x: 0,
     y: 0,
-    width: image.width(),
-    height: image.height(),
+    width: rect.width,
+    height: rect.height,
   });
   const dst = inscribe(sizes.dst, {
     x,
