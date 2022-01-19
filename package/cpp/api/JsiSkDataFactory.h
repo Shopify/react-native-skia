@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiSKData.h"
+#include "JsiSkData.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {

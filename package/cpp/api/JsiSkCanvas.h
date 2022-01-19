@@ -266,7 +266,7 @@ public:
 
     if (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()) {
       auto jsiTexs = arguments[2].asObject(runtime).asArray(runtime);
-      auto texsSize = jsiCubics.size(runtime);
+      auto texsSize = jsiTexs.size(runtime);
       for (int i = 0; i < texsSize; i++) {
         auto point = JsiSkPoint::fromValue(
                 runtime, jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
