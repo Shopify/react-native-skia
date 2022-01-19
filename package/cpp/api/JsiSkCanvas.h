@@ -9,7 +9,7 @@
 #include "JsiSkPath.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
-#include "JsiSkSvg.h"
+#include "JsiSkSVG.h"
 
 #include <jsi/jsi.h>
 #include <map>
@@ -301,8 +301,8 @@ public:
     SkScalar x = arguments[1].asNumber();
     SkScalar y = arguments[2].asNumber();
 
-    auto font = JsiSkFont::fromValue(runtime, arguments[3]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    auto font = JsiSkFont::fromValue(runtime, arguments[4]);
 
     _canvas->drawSimpleText(text, strlen(text), SkTextEncoding::kUTF8, x, y,
                             *font, *paint);
@@ -311,7 +311,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawSvg) {
-    auto svgdom = JsiSkSvg::fromValue(runtime, arguments[0]);
+    auto svgdom = JsiSkSVG::fromValue(runtime, arguments[0]);
     if (count == 3) {
       // read size
       auto w = arguments[1].asNumber();

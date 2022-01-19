@@ -8,7 +8,7 @@ import { localMatrix, enumKey } from "../../processors";
 import type { RectCtor } from "../../processors/Shapes";
 import { rect } from "../../processors/Shapes";
 
-import type { ImageProps } from "./Image";
+import type { SourceProps } from "./Image";
 import type { Fit } from "./BoxFit";
 import { rect2rect, fitRects } from "./BoxFit";
 
@@ -29,7 +29,6 @@ const getRect = (props: Partial<ImageShaderProps>): IRect | undefined => {
 };
 
 interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
-  source: ImageProps["source"];
   tx: SkEnum<typeof TileMode>;
   ty: SkEnum<typeof TileMode>;
   fm: SkEnum<typeof FilterMode>;
@@ -39,7 +38,7 @@ interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
 }
 
 export const ImageShader = (
-  defaultProps: AnimatedProps<ImageShaderProps, "source">
+  defaultProps: AnimatedProps<ImageShaderProps> & SourceProps
 ) => {
   const image = useImage(defaultProps.source);
   const props = useMemo(
@@ -54,7 +53,11 @@ export const ImageShader = (
       }
       const rct = getRect(imageShaderProps);
       if (rct) {
-        const rects = fitRects(fit, image, rct);
+        const rects = fitRects(
+          fit,
+          { x: 0, y: 0, width: image.width(), height: image.height() },
+          rct
+        );
         const m3 = rect2rect(rects.src, rects.dst);
         imageShaderProps.transform = [
           ...(imageShaderProps.transform ?? []),

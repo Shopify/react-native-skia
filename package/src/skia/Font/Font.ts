@@ -19,3 +19,54 @@ export interface Font {
   */
   measureText: (text: string, paint?: IPaint) => IRect;
 }
+
+const fontStyle = (
+  weight: FontWeight,
+  width: FontWidth,
+  slant: FontSlant
+): FontStyle => ({ weight, width, slant });
+
+export interface FontStyle {
+  weight?: FontWeight;
+  width?: FontWidth;
+  slant?: FontSlant;
+}
+
+export enum FontWeight {
+  Invisible = 0,
+  Thin = 100,
+  ExtraLight = 200,
+  Light = 300,
+  Normal = 400,
+  Medium = 500,
+  SemiBold = 600,
+  Bold = 700,
+  ExtraBold = 800,
+  Black = 900,
+  ExtraBlack = 1000,
+}
+
+export enum FontWidth {
+  UltraCondensed = 1,
+  ExtraCondensed = 2,
+  Condensed = 3,
+  SemiCondensed = 4,
+  Normal = 5,
+  SemiExpanded = 6,
+  Expanded = 7,
+  ExtraExpanded = 8,
+  UltraExpanded = 9,
+}
+
+export enum FontSlant {
+  Upright,
+  Italic,
+  Oblique,
+}
+
+export const FontStyle = {
+  Normal: fontStyle(FontWeight.Normal, FontWidth.Normal, FontSlant.Upright),
+  Bold: fontStyle(FontWeight.Bold, FontWidth.Normal, FontSlant.Upright),
+  Italic: fontStyle(FontWeight.Normal, FontWidth.Normal, FontSlant.Italic),
+  BoldItalic: fontStyle(FontWeight.Bold, FontWidth.Normal, FontSlant.Italic),
+};

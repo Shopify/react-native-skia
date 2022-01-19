@@ -9,6 +9,8 @@ slug: /shaders/gradients
 
 Below are the properties common to all gradient components.
 
+| Name       | Type           |  Description                    |
+|:-----------|:---------------|:--------------------------------|
 | colors     | `string[]`     | Colors to be distributed between start and end. |
 | positions? | `number[]`     | The relative positions of colors. If supplied, it must be of the same length as colors. |
 | mode?      | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |

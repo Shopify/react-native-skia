@@ -19,152 +19,99 @@
 
 #include <jsi/jsi.h>
 
-namespace RNSkia {
+namespace RNSkia
+{
 
-using namespace facebook;
+  using namespace facebook;
 
-class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
-public:
-  // TODO-API: Properties?
-  JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
-  JSI_HOST_FUNCTION(height) {
-    return static_cast<double>(getObject()->height());
-  }
+  class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage>
+  {
+  public:
+    // TODO-API: Properties?
+    JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
+    JSI_HOST_FUNCTION(height)
+    {
+      return static_cast<double>(getObject()->height());
+    }
 
-  JSI_HOST_FUNCTION(makeShaderOptions) {
-    auto tmx = (SkTileMode)arguments[0].asNumber();
-    auto tmy = (SkTileMode)arguments[1].asNumber();
-    auto fm = (SkFilterMode)arguments[2].asNumber();
-    auto mm = (SkMipmapMode)arguments[3].asNumber();
-    auto m = count > 4 && !arguments[4].isUndefined() ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
-                       : nullptr;
-    auto shader =
-        getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), shader));
-  }
+    JSI_HOST_FUNCTION(makeShaderOptions)
+    {
+      auto tmx = (SkTileMode)arguments[0].asNumber();
+      auto tmy = (SkTileMode)arguments[1].asNumber();
+      auto fm = (SkFilterMode)arguments[2].asNumber();
+      auto mm = (SkMipmapMode)arguments[3].asNumber();
+      auto m = count > 4 && !arguments[4].isUndefined() ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
+                                                        : nullptr;
+      auto shader =
+          getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
+      return jsi::Object::createFromHostObject(
+          runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+    }
 
-  JSI_HOST_FUNCTION(makeShaderCubic) {
-    auto tmx = (SkTileMode)arguments[0].asNumber();
-    auto tmy = (SkTileMode)arguments[1].asNumber();
-    auto B = (float)arguments[2].asNumber();
-    auto C = (float)arguments[3].asNumber();
-    auto m = count > 4 && !arguments[4].isUndefined() ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
-                       : nullptr;
-    auto shader =
-        getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), shader));
-  }
+    JSI_HOST_FUNCTION(makeShaderCubic)
+    {
+      auto tmx = (SkTileMode)arguments[0].asNumber();
+      auto tmy = (SkTileMode)arguments[1].asNumber();
+      auto B = (float)arguments[2].asNumber();
+      auto C = (float)arguments[3].asNumber();
+      auto m = count > 4 && !arguments[4].isUndefined() ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
+                                                        : nullptr;
+      auto shader =
+          getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
+      return jsi::Object::createFromHostObject(
+          runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+    }
 
-  JSI_HOST_FUNCTION(toByteData) {
-    auto data = getObject()->encodeToData();
-    auto arrayCtor = runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
-    size_t size = data->size();
-    
-    jsi::Object array = arrayCtor.callAsConstructor(runtime, static_cast<double>(size)).getObject(runtime);
-    jsi::ArrayBuffer buffer = array
-              .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
-              .asObject(runtime)
-              .getArrayBuffer(runtime);
+    JSI_HOST_FUNCTION(toByteData)
+    {
+      auto data = getObject()->encodeToData();
+      auto arrayCtor = runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
+      size_t size = data->size();
 
-    auto bfrPtr = reinterpret_cast<uint8_t*>(buffer.data(runtime));
-    memcpy(bfrPtr, data->bytes(), size);
-    return array;
-  }
-  
-  JSI_HOST_FUNCTION(toBase64) {
-    auto data = getObject()->encodeToData();
-    auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
-    auto buffer = std::string(len, 0);
-    SkBase64::Encode(data->bytes(), data->size(), (void*)&buffer[0]);
-    return jsi::String::createFromAscii(runtime, buffer);
-  }
+      jsi::Object array = arrayCtor.callAsConstructor(runtime, static_cast<double>(size)).getObject(runtime);
+      jsi::ArrayBuffer buffer = array
+                                    .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+                                    .asObject(runtime)
+                                    .getArrayBuffer(runtime);
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
-                       JSI_EXPORT_FUNC(JsiSkImage, height),
-                       JSI_EXPORT_FUNC(JsiSkImage, makeShaderOptions),
-                       JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
-                       JSI_EXPORT_FUNC(JsiSkImage, toByteData),
-                       JSI_EXPORT_FUNC(JsiSkImage, toBase64))
+      auto bfrPtr = reinterpret_cast<uint8_t *>(buffer.data(runtime));
+      memcpy(bfrPtr, data->bytes(), size);
+      return array;
+    }
 
-  JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
-             const sk_sp<SkImage> image) :
-    JsiSkWrappingSkPtrHostObject<SkImage>(context, image)  {};
+    JSI_HOST_FUNCTION(toBase64)
+    {
+      auto data = getObject()->encodeToData();
+      auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
+      auto buffer = std::string(len, 0);
+      SkBase64::Encode(data->bytes(), data->size(), (void *)&buffer[0]);
+      return jsi::String::createFromAscii(runtime, buffer);
+    }
 
-  JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
-             const sk_sp<SkImage> image, const std::string &localUri)
-      : JsiSkWrappingSkPtrHostObject<SkImage>(context, image) {};
+    JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
+                         JSI_EXPORT_FUNC(JsiSkImage, height),
+                         JSI_EXPORT_FUNC(JsiSkImage, makeShaderOptions),
+                         JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
+                         JSI_EXPORT_FUNC(JsiSkImage, toByteData),
+                         JSI_EXPORT_FUNC(JsiSkImage, toBase64))
 
-  /**
+    JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
+               const sk_sp<SkImage> image) : JsiSkWrappingSkPtrHostObject<SkImage>(context, image){};
+
+    JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
+               const sk_sp<SkImage> image)
+        : JsiSkWrappingSkPtrHostObject<SkImage>(context, image){};
+
+    /**
     Returns the underlying object from a host object of this type
    */
-  static sk_sp<SkImage> fromValue(jsi::Runtime &runtime,
-                                  const jsi::Value &obj) {
-    return obj.asObject(runtime)
-        .asHostObject<JsiSkImage>(runtime)
-        .get()
-        ->getObject();
-  }
-
-  /**
-   * Creates the function for construction a new instance of the SkImage
-   * wrapper
-   * @param context Platform context
-   * @return A function for creating a new host object wrapper for the SkImage
-   * class
-   */
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-      auto jsiLocalUri = arguments[0].asString(runtime);
-      auto localUri = jsiLocalUri.utf8(runtime);
-
-      // Return a promise to Javascript that will be resolved when
-      // the image file has been successfully loaded.
-      return react::createPromiseAsJSIValue(
-          runtime,
-          [context, localUri](jsi::Runtime &runtime,
-                              std::shared_ptr<react::Promise> promise) -> void {
-            // Create a stream operation - this will be run in a
-            // separate thread
-            context->performStreamOperation(
-                localUri,
-                [&runtime, context, promise,
-                 localUri](std::unique_ptr<SkStream> stream) -> void {
-                  auto codec = SkCodec::MakeFromStream(std::move(stream));
-                  if (codec == nullptr) {
-                    context->runOnJavascriptThread(
-                        [&runtime, context, promise, localUri]() {
-                          promise->reject("Could not load image");
-                        });
-                    return;
-                  }
-
-                  auto result = codec->getImage();
-                  if (std::get<1>(result) != SkCodec::Result::kSuccess) {
-                    context->runOnJavascriptThread(
-                        [&runtime, context, promise, localUri]() {
-                          promise->reject("Could not decode image");
-                        });
-                    return;
-                  }
-
-                  sk_sp<SkImage> image = std::get<0>(result);
-
-                  // Schedule drawCallback on the Javascript thread
-                  context->runOnJavascriptThread([&runtime, context, promise,
-                                                  localUri, image]() {
-                    if (image == nullptr) {
-                      promise->reject("Could not decode image");
-                    }
-                    promise->resolve(jsi::Object::createFromHostObject(
-                        runtime, std::make_shared<JsiSkImage>(context, image,
-                                                              localUri)));
-                  });
-                });
-          });
-    };
-  }
-};
+    static sk_sp<SkImage> fromValue(jsi::Runtime &runtime,
+                                    const jsi::Value &obj)
+    {
+      return obj.asObject(runtime)
+          .asHostObject<JsiSkImage>(runtime)
+          .get()
+          ->getObject();
+    }
+  };
 } // namespace RNSkia

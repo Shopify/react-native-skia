@@ -80,7 +80,7 @@ public:
    */
   virtual void performStreamOperation(
       const std::string &sourceUri,
-      const std::function<void(std::unique_ptr<SkStream>)> &op) = 0;
+      const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) = 0;
 
   /**
    * Raises an exception on the platform. This function does not necessarily
