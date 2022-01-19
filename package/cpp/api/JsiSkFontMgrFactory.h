@@ -2,7 +2,7 @@
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkFontMgr.h"
-#include "JsiSKData.h"
+#include "JsiSkData.h"
 #include <SkFontMgr.h>
 
 // TODO: include proper header instead, this might require a Skia version upgrade?
