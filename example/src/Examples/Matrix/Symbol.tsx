@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import type { AnimationValue } from "@shopify/react-native-skia";
+import type { AnimationValue, Font } from "@shopify/react-native-skia";
 import { Text } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -16,9 +16,10 @@ interface SymbolProps {
   j: number;
   timestamp: AnimationValue<number>;
   stream: number[];
+  font: Font;
 }
 
-export const Symbol = ({ i, j, timestamp, stream }: SymbolProps) => {
+export const Symbol = ({ i, j, timestamp, stream, font }: SymbolProps) => {
   const offset = useRef(Math.round(Math.random() * (symbols.length - 1)));
   const range = useRef(100 + Math.random() * 900);
   const x = i * SYMBOL.width;
@@ -35,8 +36,7 @@ export const Symbol = ({ i, j, timestamp, stream }: SymbolProps) => {
     <Text
       x={x + SYMBOL.width / 4}
       y={y + SYMBOL.height}
-      familyName="Matrix Code NFI"
-      size={SYMBOL.height}
+      font={font}
       value={value}
       opacity={opacity}
       color={() =>

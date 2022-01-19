@@ -16,7 +16,7 @@ import {
   rrect,
   Paint,
   DashPathEffect,
-  RoundRect,
+  RoundedRect,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -66,7 +66,7 @@ export const Shapes = () => {
       <Canvas style={styles.container}>
         <Group color="#61DAFB">
           <Rect rect={{ x: PADDING, y: PADDING, width: 100, height: 100 }} />
-          <RoundRect
+          <RoundedRect
             x={SIZE + 2 * PADDING}
             y={PADDING}
             width={SIZE}
