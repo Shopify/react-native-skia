@@ -48,11 +48,6 @@ const sidebars = {
       items: ["text/fonts", "text/text"],
     },
     {
-      type: "doc",
-      label: "Surface",
-      id: "surface",
-    },
-    {
       collapsed: false,
       type: "category",
       label: "Shaders",
