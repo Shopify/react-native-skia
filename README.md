@@ -17,13 +17,13 @@ When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
 
 ```sh
-$ yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
+$ yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.63-alpha/shopify-react-native-skia-0.1.63.tgz
 ```
 
 Or using npm:
 
 ```sh
-$ npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
+$ npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.63-alpha/shopify-react-native-skia-0.1.63.tgz
 ```
 
 ### iOS
