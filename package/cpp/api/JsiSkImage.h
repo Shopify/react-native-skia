@@ -62,9 +62,16 @@ namespace RNSkia
           runtime, std::make_shared<JsiSkShader>(getContext(), shader));
     }
 
-    JSI_HOST_FUNCTION(toByteData)
+    JSI_HOST_FUNCTION(encodeToBytes)
     {
-      auto data = getObject()->encodeToData();
+      // Get optional parameters
+      auto format = count >= 1 ? getFormatFromNumber(
+        static_cast<int>(arguments[0].asNumber())) : SkEncodedImageFormat::kPNG;
+      
+      auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
+      
+      // Get data
+      auto data = getObject()->encodeToData(format, quality);
       auto arrayCtor = runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
       size_t size = data->size();
 
@@ -79,9 +86,15 @@ namespace RNSkia
       return array;
     }
 
-    JSI_HOST_FUNCTION(toBase64)
+    JSI_HOST_FUNCTION(encodeToBase64)
     {
-      auto data = getObject()->encodeToData();
+      // Get optional parameters
+      auto format = count >= 1 ? getFormatFromNumber(
+        static_cast<int>(arguments[0].asNumber())) : SkEncodedImageFormat::kPNG;
+      
+      auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
+      
+      auto data = getObject()->encodeToData(format, quality);
       auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
       auto buffer = std::string(len, 0);
       SkBase64::Encode(data->bytes(), data->size(), (void *)&buffer[0]);
@@ -92,8 +105,8 @@ namespace RNSkia
                          JSI_EXPORT_FUNC(JsiSkImage, height),
                          JSI_EXPORT_FUNC(JsiSkImage, makeShaderOptions),
                          JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
-                         JSI_EXPORT_FUNC(JsiSkImage, toByteData),
-                         JSI_EXPORT_FUNC(JsiSkImage, toBase64))
+                         JSI_EXPORT_FUNC(JsiSkImage, encodeToBytes),
+                         JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64))
 
     JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkImage> image)
@@ -110,5 +123,20 @@ namespace RNSkia
           .get()
           ->getObject();
     }
+  private:
+    
+    SkEncodedImageFormat getFormatFromNumber(int value) {
+      switch(value) {
+        case 0: // PNG
+          return SkEncodedImageFormat::kPNG;
+        case 1: // JPEG
+          return SkEncodedImageFormat::kJPEG;
+        case 2: // WEBP
+          return SkEncodedImageFormat::kWEBP;
+        default:
+          return SkEncodedImageFormat::kPNG;
+      }
+    }
   };
+
 } // namespace RNSkia

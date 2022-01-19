@@ -14,6 +14,12 @@ export enum MipmapMode {
   Linear,
 }
 
+export enum ImageFormat {
+  PNG,
+  JPEG,
+  WEBP,
+}
+
 export interface IImage extends SkJSIInstance<"Image"> {
   /**
    * Returns the possibly scaled height of the image.
@@ -66,9 +72,12 @@ export interface IImage extends SkJSIInstance<"Image"> {
     Returns nullptr if existing encoded data is missing or invalid, and
     encoding fails.
 
+    @param fmt - PNG is the default value.
+    @param quality - a value from 0 to 100; 100 is the least lossy. May be ignored.
+
     @return  Uint8Array with data
   */
-  toByteData(): Uint8Array;
+  encodeToBytes(fmt?: ImageFormat, quality?: number): Uint8Array;
 
   /** Encodes Image pixels, returning result as a base64 encoded string. Returns existing
      encoded data if present; otherwise, SkImage is encoded with
@@ -78,7 +87,10 @@ export interface IImage extends SkJSIInstance<"Image"> {
     Returns nullptr if existing encoded data is missing or invalid, and
     encoding fails.
 
+    @param fmt - PNG is the default value.
+    @param quality - a value from 0 to 100; 100 is the least lossy. May be ignored.
+
     @return  base64 encoded string of data
   */
-  toBase64(): string;
+  encodeToBase64(fmt?: ImageFormat, quality?: number): string;
 }
