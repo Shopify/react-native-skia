@@ -96,9 +96,6 @@ namespace RNSkia
                          JSI_EXPORT_FUNC(JsiSkImage, toBase64))
 
     JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
-               const sk_sp<SkImage> image) : JsiSkWrappingSkPtrHostObject<SkImage>(context, image){};
-
-    JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkImage> image)
         : JsiSkWrappingSkPtrHostObject<SkImage>(context, image){};
 
