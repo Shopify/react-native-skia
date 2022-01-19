@@ -16,6 +16,13 @@ file(GLOB libfbjni_include_DIRS "${build_DIR}/fbjni-*-headers.jar/")
 
 link_directories(../libs/android/${ANDROID_ABI}/)
 
+if(${REACT_NATIVE_VERSION} LESS 66)
+        set (
+                INCLUDE_JSI_CPP
+                "${NODE_MODULES_DIR}/react-native/ReactCommon/jsi/jsi/jsi.cpp"
+        )
+endif()
+
 add_library(
         ${PACKAGE_NAME}
         SHARED
@@ -28,6 +35,8 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDrawView.cpp"
+
+        ${INCLUDE_JSI_CPP} # only on older RN versions
 )
 
 
@@ -82,12 +91,18 @@ find_library(
         log
 )
 
-find_library(
-        JSI_LIB
-        jsi
-        PATHS ${LIBRN_DIR}
-        NO_CMAKE_FIND_ROOT_PATH
-)
+if(${REACT_NATIVE_VERSION} LESS 66)
+        # JSI lib didn't exist on RN 0.65 and before. Simply omit it.
+        set (JSI_LIB "")
+else()
+        # RN 0.66 distributes libjsi.so, can be used instead of compiling jsi.cpp manually.
+        find_library(
+                JSI_LIB
+                jsi
+                PATHS ${LIBRN_DIR}
+                NO_CMAKE_FIND_ROOT_PATH
+        )
+endif()
 
 find_library(
         REACT_LIB

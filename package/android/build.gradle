@@ -13,6 +13,26 @@
 // FBJNI build is based on:
 // https://github.com/facebookincubator/fbjni/blob/main/docs/android_setup.md
 
+import java.nio.file.Paths
+
+static def findNodeModules(baseDir) {
+  def basePath = baseDir.toPath().normalize()
+  // Node's module resolution algorithm searches up to the root directory,
+  // after which the base path will be null
+  while (basePath) {
+    def nodeModulesPath = Paths.get(basePath.toString(), "node_modules")
+    def reactNativePath = Paths.get(nodeModulesPath.toString(), "react-native")
+    if (nodeModulesPath.toFile().exists() && reactNativePath.toFile().exists()) {
+      return nodeModulesPath.toString()
+    }
+    basePath = basePath.getParent()
+  }
+  throw new GradleException("react-native-skia: Failed to find node_modules/ path!")
+}
+
+def nodeModules = findNodeModules(projectDir)
+logger.warn("react-native-skia: node_modules/ found at: ${nodeModules}")
+
 // These defaults should reflect the SDK versions used by
 // the minimum React Native version supported.
 def DEFAULT_COMPILE_SDK_VERSION = 28
@@ -44,6 +64,10 @@ buildscript {
     }
 }
 
+def reactProperties = new Properties()
+file("$nodeModules/react-native/ReactAndroid/gradle.properties").withInputStream { reactProperties.load(it) }
+def REACT_NATIVE_VERSION = reactProperties.getProperty("VERSION_NAME").split("\\.")[1].toInteger()
+
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
     buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
@@ -57,7 +81,9 @@ android {
             cmake {
                 cppFlags "-fexceptions", "-frtti", "-std=c++1y", "-DONANDROID"
                 abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
-                arguments '-DANDROID_STL=c++_shared'
+                arguments '-DANDROID_STL=c++_shared',
+                          "-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION}",
+                          "-DNODE_MODULES_DIR=${nodeModules}"
             }
         }
     }
@@ -99,11 +125,11 @@ repositories {
     mavenLocal()
     maven {
         // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-        url "$rootDir/../node_modules/react-native/android"
+        url file("$nodeModules/react-native/android").toString()
     }
     maven {
         // Android JSC is installed from npm
-        url "$rootDir/../node_modules/jsc-android/dist"
+        url file("$nodeModules/jsc-android/dist").toString()
     }
     google()
 }
@@ -117,7 +143,7 @@ dependencies {
     //noinspection GradleDynamicVersion
     extractJNI("com.facebook.fbjni:fbjni:0.2.2")
 
-    def rnAAR = fileTree("${rootDir}/../node_modules/react-native/android").matching({ it.include "**/**/*.aar" }).singleFile
+    def rnAAR = fileTree(file("$nodeModules/react-native/android").toString()).matching({ it.include "**/**/*.aar" }).singleFile
     extractJNI(files(rnAAR))
 }
 
