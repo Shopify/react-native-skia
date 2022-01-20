@@ -10,6 +10,8 @@
   "devDependencies": {
     "@types/node": "^16.11.7",
     "clang-format": "^1.6.0",
+    "colors": "^1.4.0",
+    "commander": "^8.3.0",
     "rimraf": "^3.0.2",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
@@ -33,6 +35,9 @@
     "build-npm": "yarn ts-node ./scripts/build-npm-package.ts",
     "get-filename-npm": "yarn ts-node ./scripts/get-npm-filename.ts",
     "get-version-npm": "yarn ts-node ./scripts/get-npm-version.ts",
+    "version:patch": "ts-node ./scripts/update-project-version.ts --releaseType patch",
+    "version:minor": "ts-node ./scripts/update-project-version.ts --releaseType patch",
+    "version:major": "ts-node ./scripts/update-project-version.ts --releaseType patch",
     "build": "yarn build-skia && yarn copy-skia-headers",
     "precommit": "yarn lint-java && yarn clang-format",
     "lint-java": "node ./scripts/lint-java.js",

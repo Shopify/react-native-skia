@@ -1,7 +1,9 @@
 import fs from "fs";
 import { exit } from "process";
 
-const pck = JSON.parse(fs.readFileSync("./package/package.json").toString());
+const pck = JSON.parse(
+  fs.readFileSync(`${__dirname}/../package/package.json`).toString()
+);
 
 /**
  * This build script returns the filename of the npm package and
