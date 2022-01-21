@@ -40,6 +40,33 @@ const ImageSVGDemo = () => {
 };
 ```
 
+You can also use an inlined string as SVG (using `Skia.SVG.MakeFromString`:
+
+```tsx twoslash
+import React from "react";
+import { Canvas, ImageSVG, Skia } from "@shopify/react-native-skia";
+
+const svg = Skia.SVG.MakeFromString(
+  `<svg viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'>
+    <circle cx='31' cy='325' r='120px' fill='#c02aaa'/>
+  </svg>`
+)!;
+
+export const SVG = () => {
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <ImageSVG
+        source={svg}
+        x={0}
+        y={0}
+        width={290}
+        height={500}
+      />
+    </Canvas>
+  );
+};
+```
+
 ## SVG Support
 
 We use the [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg).
