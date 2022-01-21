@@ -133,6 +133,6 @@ The single quote syntax won't work either.
 
 Some SVGs contain inlined SVGs via the `<image>` or `<feImage>` elements. This is not supported.
 
-### Browser fallback
+### Fallbacks
 
 Some SVG with issues display nicely in the browser because they are so tolerant of errors. We found that the Skia SVG module is much less forgiving.
