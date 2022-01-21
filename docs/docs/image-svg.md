@@ -126,7 +126,7 @@ The single quote syntax won't work either.
 // This won't work
 <text font-family="'MyFont', monospace" />
 // This will work if MyFont is available in the app
-<text font-family="'MyFont', monospace" />
+<text font-family="MyFont, monospace" />
 ```
 
 ### Inlined SVGs
