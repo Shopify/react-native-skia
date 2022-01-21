@@ -74,19 +74,17 @@ export const increaseVersion = (
   versionToIncrease: string
 ) => {
   let version = "";
-  const splitVersion = versionToIncrease.split(".");
+  const [major, minor, patch] = versionToIncrease.split(".");
 
   switch (versionType) {
     case "major":
-      version += `${+splitVersion[0] + 1}.0.0`;
+      version += `${+major + 1}.0.0`;
       break;
     case "minor":
-      version += `${splitVersion[0]}.${+splitVersion[1] + 1}.0`;
+      version += `${major}.${+minor + 1}.0`;
       break;
     case "patch":
-      version += `${splitVersion[0]}.${splitVersion[1]}.${
-        +splitVersion[2] + 1
-      }`;
+      version += `${major}.${minor}.${+patch + 1}`;
       break;
   }
   return version;
