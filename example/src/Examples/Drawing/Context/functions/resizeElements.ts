@@ -1,5 +1,5 @@
-import type { IRect } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
+import type { IRect, Matrix } from "@shopify/react-native-skia";
 import { rect2rect } from "@shopify/react-native-skia/src/renderer/components/image/BoxFit";
 
 import type { DrawingElements, ResizeMode } from "../types";
@@ -36,10 +36,10 @@ export const resizeElementsBy = (
 
   const matrix = Skia.Matrix();
   const m3 = rect2rect(source, dest);
-  matrix.setTranslateX(m3[0].translateX);
-  matrix.setTranslateY(m3[1].translateY);
-  matrix.setScaleX(m3[2].scaleX);
-  matrix.setScaleY(m3[3].scaleY);
+  dest.width > 0 && matrix.setTranslateX(m3[0].translateX);
+  dest.height > 0 && matrix.setTranslateY(m3[1].translateY);
+  dest.width > 0 && matrix.setScaleX(m3[2].scaleX);
+  dest.height > 0 && matrix.setScaleY(m3[3].scaleY);
 
   // use to scale elements
   for (let i = 0; i < elements.length; i++) {
