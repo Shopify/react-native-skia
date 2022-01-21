@@ -16,10 +16,7 @@ BackgroundPaint.setColor(Skia.Color("#FFF"));
 export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
   const drawContext = useDrawContext();
   useEffect(
-    () =>
-      drawContext.addListener(() => {
-        innerRef.current?.redraw();
-      }),
+    () => drawContext.addListener(() => innerRef.current?.redraw()),
     [drawContext, innerRef]
   );
 

@@ -51,8 +51,8 @@ export type DrawCommands = {
   setColor: (color: string) => void;
   addElement: (element: DrawingElement) => void;
   setSelectedElements: (...elements: DrawingElements) => void;
-  setSelection: (selection: IRect | undefined) => void;
-  deleteSelection: () => void;
+  setSelectionRect: (selection: IRect | undefined) => void;
+  deleteSelectedElements: () => void;
   setResizeMode: (resizeMode: ResizeMode | undefined) => void;
 };
 

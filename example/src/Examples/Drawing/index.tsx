@@ -64,6 +64,6 @@ const createStyle = (width: number, height: number) =>
     sizeMenu: {
       position: "absolute",
       bottom: height * 0.05 + 54,
-      right: width / 2 - toolbarWidth / 2 + ToolbarItemSize * 2.25,
+      right: width / 2 - toolbarWidth / 2 + ToolbarItemSize * 2.45,
     },
   });

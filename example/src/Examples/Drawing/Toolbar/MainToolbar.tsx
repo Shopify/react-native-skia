@@ -62,7 +62,7 @@ export const MainToolbar: React.FC<Props> = ({ style }) => {
 
   const handleDelete = useCallback(() => {
     uxContext.commands.toggleMenu(undefined);
-    drawContext.commands.deleteSelection();
+    drawContext.commands.deleteSelectedElements();
   }, [drawContext.commands, uxContext.commands]);
 
   const handleSizePressed = useCallback(

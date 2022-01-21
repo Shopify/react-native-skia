@@ -68,7 +68,7 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
             // Not part of selection - we'll select it
             drawContext.commands.setSelectedElements(el);
             // Reset the selection rectangle
-            drawContext.commands.setSelection(undefined);
+            drawContext.commands.setSelectionRect(undefined);
             break;
           }
 
@@ -85,7 +85,12 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
             // elements and start a new selection - clear existing
             drawContext.commands.setSelectedElements();
             // Reset the selection rectangle
-            drawContext.commands.setSelection({ x, y, width: 0, height: 0 });
+            drawContext.commands.setSelectionRect({
+              x,
+              y,
+              width: 0,
+              height: 0,
+            });
           }
 
           // Redraw
@@ -141,7 +146,7 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
           } else {
             // No selection made - let us update the selection rect instead.
             if (drawContext.state.currentSelectionRect) {
-              drawContext.commands.setSelection({
+              drawContext.commands.setSelectionRect({
                 x: drawContext.state.currentSelectionRect!.x,
                 y: drawContext.state.currentSelectionRect!.y,
                 width: x - drawContext.state.currentSelectionRect!.x,
@@ -156,7 +161,15 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
     onEnd: () => {
       switch (uxContext.state.activeTool) {
         case "draw": {
-          // No action needed
+          // Change to selection mode when we have added an image, rect or cirle
+          if (drawContext.state.elements.length > 0) {
+            // Get current drawing object
+            const element =
+              drawContext.state.elements[drawContext.state.elements.length - 1];
+            if (element.type !== "path") {
+              uxContext.commands.setTool("selection");
+            }
+          }
           break;
         }
         case "selection": {
@@ -171,7 +184,7 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
               drawContext.commands.setSelectedElements(...elements);
             }
             // Clear selection rect
-            drawContext.commands.setSelection(undefined);
+            drawContext.commands.setSelectionRect(undefined);
           }
         }
       }

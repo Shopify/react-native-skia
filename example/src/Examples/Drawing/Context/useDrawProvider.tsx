@@ -35,27 +35,37 @@ const createDrawProviderValue = (): DrawContextType => {
       state.color = color;
       state.paint = state.paint.copy();
       state.paint.setColor(Skia.Color(color));
+      // Update the selected elements
+      state.selectedElements.forEach((e) => {
+        e.p = e.p.copy();
+        e.p.setColor(Skia.Color(color));
+      });
       notifyListeners(state);
     },
     setSize: (size: number) => {
       state.size = size;
       state.paint = state.paint.copy();
       state.paint.setStrokeWidth(size);
+      // Update the selected elements
+      state.selectedElements.forEach((e) => {
+        e.p = e.p.copy();
+        e.p.setStrokeWidth(size);
+      });
       notifyListeners(state);
     },
     addElement: (element: DrawingElement) => {
-      // Do not call notify listeners here
       state.elements.push(element);
+      notifyListeners(state);
     },
     setSelectedElements: (...elements: DrawingElements) => {
       state.selectedElements = elements;
       notifyListeners(state);
     },
-    setSelection: (rect: IRect | undefined) => {
+    setSelectionRect: (rect: IRect | undefined) => {
       state.currentSelectionRect = rect;
       notifyListeners(state);
     },
-    deleteSelection: () => {
+    deleteSelectedElements: () => {
       state.elements = state.elements.filter(
         (el) => !state.selectedElements.includes(el)
       );

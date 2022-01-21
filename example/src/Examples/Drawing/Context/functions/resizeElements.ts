@@ -34,15 +34,16 @@ export const resizeElementsBy = (
       dest = resizeBounds(sx, sy, 0, 0, source);
   }
 
+  const matrix = Skia.Matrix();
+  const m3 = rect2rect(source, dest);
+  matrix.setTranslateX(m3[0].translateX);
+  matrix.setTranslateY(m3[1].translateY);
+  matrix.setScaleX(m3[2].scaleX);
+  matrix.setScaleY(m3[3].scaleY);
+
   // use to scale elements
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];
-    const matrix = Skia.Matrix();
-    const m3 = rect2rect(source, dest);
-    matrix.setTranslateX(m3[0].translateX);
-    matrix.setTranslateY(m3[1].translateY);
-    matrix.setScaleX(m3[2].scaleX);
-    matrix.setScaleY(m3[3].scaleY);
     element.primitive.transform(matrix);
   }
 };
