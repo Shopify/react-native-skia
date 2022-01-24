@@ -72,9 +72,6 @@ export const SVG = () => {
 
 ## SVG Support
 
-* Test the skia examples from illustrator
-* document the width/height
-
 The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) is used to display SVGs as images.
 Its capabilities and compliance level is fairly strong.
 We expect most SVG files correctly out of the box, especially if they come from Figma or illustrator
