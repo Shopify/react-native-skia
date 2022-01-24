@@ -161,15 +161,7 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
     onEnd: () => {
       switch (uxContext.state.activeTool) {
         case "draw": {
-          // Change to selection mode when we have added an image, rect or cirle
-          if (drawContext.state.elements.length > 0) {
-            // Get current drawing object
-            const element =
-              drawContext.state.elements[drawContext.state.elements.length - 1];
-            if (element.type !== "path") {
-              uxContext.commands.setTool("selection");
-            }
-          }
+          // Do nothing on touch end when drawing
           break;
         }
         case "selection": {
