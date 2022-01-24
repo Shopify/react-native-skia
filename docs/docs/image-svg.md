@@ -7,11 +7,14 @@ slug: /images-svg
 
 Draw an SVG (see [SVG Support](#svg-support)).
 
+If the root dimensions are in absolute units, then the with/height properties have no effect since the initial viewport is fixed.
+
 | Name      | Type      |  Description                                                  |
 |:----------|:----------|:--------------------------------------------------------------|
 | source    | `require` or `string` | Source of the SVG or an HTTP(s) URL. |
-| width?     | `number`  | Width of the destination image.                               |
-| height?    | `number`  | Height of the destination image.                              |
+| width?     | `number`  | Width of the destination image. This is used to resolve the initial viewport when the root SVG width is specified in relative units. |
+| height?    | `number`  | Height of the destination image. This is used to resolve the initial viewport when the root SVG height is specified in relative units.                              |
+
 
 ### Example
 
@@ -69,9 +72,12 @@ export const SVG = () => {
 
 ## SVG Support
 
-We use the [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg).
-As far as we tested it, we found its capabilities and compliance level to be strong.
-We expect most SVG files correctly out of the box.
+* Test the skia examples from illustrator
+* document the width/height
+
+The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) is used to display SVGs as images.
+Its capabilities and compliance level is fairly strong.
+We expect most SVG files correctly out of the box, especially if they come from Figma or illustrator
 However, please be aware of some of the quirks below when using it.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
 
@@ -116,9 +122,10 @@ This is [a known issue](https://github.com/google/skia/blob/main/modules/svg/src
 The fallback syntax won't work:
 ```jsx
 // Here we assume that if MyFont is not available, it will default to monospace.
-// This won't work.
-// If MyFont is available, this syntax will be accepted.
+// But it won't work. If MyFont is available, this syntax will be accepted.
 <text font-family="MyFont, monospace" />
+// This is really all that is supported:
+<text font-family="MyFont" />
 ```
 
 The single quote syntax won't work either.
