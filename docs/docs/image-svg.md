@@ -74,7 +74,7 @@ export const SVG = () => {
 
 The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) is used to display SVGs as images.
 Its capabilities and compliance level is fairly strong.
-We expect most SVG files correctly out of the box, especially if they come from Figma or illustrator
+We expect most SVG files correctly out of the box, especially if they come from Figma or Illustrator
 However, please be aware of some of the quirks below when using it.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
 
