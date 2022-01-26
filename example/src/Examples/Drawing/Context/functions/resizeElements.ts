@@ -1,5 +1,5 @@
 import { Skia } from "@shopify/react-native-skia";
-import type { IRect, Matrix } from "@shopify/react-native-skia";
+import type { IRect } from "@shopify/react-native-skia";
 import { rect2rect } from "@shopify/react-native-skia/src/renderer/components/image/BoxFit";
 
 import type { DrawingElements, ResizeMode } from "../types";

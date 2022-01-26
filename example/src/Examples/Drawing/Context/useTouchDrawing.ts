@@ -30,25 +30,46 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
           switch (uxContext.state.drawingTool) {
             case "path": {
               drawContext.commands.addElement(
-                createPath(x, y, drawContext.state.paint)
+                createPath(
+                  x,
+                  y,
+                  drawContext.state.color,
+                  drawContext.state.size
+                )
               );
               break;
             }
             case "rectangle": {
               drawContext.commands.addElement(
-                createRect(x, y, drawContext.state.paint)
+                createRect(
+                  x,
+                  y,
+                  drawContext.state.color,
+                  drawContext.state.size
+                )
               );
               break;
             }
             case "circle": {
               drawContext.commands.addElement(
-                createOval(x, y, drawContext.state.paint)
+                createOval(
+                  x,
+                  y,
+                  drawContext.state.color,
+                  drawContext.state.size
+                )
               );
               break;
             }
             case "image": {
               drawContext.commands.addElement(
-                createImage(x, y, oslo!, drawContext.state.paint)
+                createImage(
+                  x,
+                  y,
+                  oslo!,
+                  drawContext.state.color,
+                  drawContext.state.size
+                )
               );
               break;
             }
@@ -64,7 +85,7 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
 
           // Check if we have clicked an element that is not part
           // of the current selection
-          if (el && !drawContext.state.selectedElements.includes(el)) {
+          if (el && drawContext.state.selectedElements.length === 0) {
             // Not part of selection - we'll select it
             drawContext.commands.setSelectedElements(el);
             // Reset the selection rectangle

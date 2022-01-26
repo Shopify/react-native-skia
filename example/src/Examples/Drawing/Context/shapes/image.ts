@@ -1,4 +1,4 @@
-import type { IImage, IPaint } from "@shopify/react-native-skia";
+import type { IImage } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 
 import type { DrawingElement } from "../types";
@@ -7,7 +7,8 @@ export const createImage = (
   x: number,
   y: number,
   image: IImage,
-  currentPaint: IPaint
+  color: string,
+  size: number
 ): DrawingElement => {
   const path = Skia.Path.Make();
   path.addRect({ x, y, width: 1, height: 1 });
@@ -15,6 +16,7 @@ export const createImage = (
     type: "image",
     image,
     primitive: path,
-    p: currentPaint,
+    color,
+    size,
   };
 };

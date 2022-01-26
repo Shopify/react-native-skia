@@ -1,4 +1,3 @@
-import type { IPaint } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 
 import type { DrawingElement } from "../types";
@@ -6,7 +5,8 @@ import type { DrawingElement } from "../types";
 export const createRect = (
   x: number,
   y: number,
-  currentPaint: IPaint
+  color: string,
+  size: number
 ): DrawingElement => {
   const path = Skia.Path.Make();
   path.moveTo(x, y);
@@ -17,6 +17,7 @@ export const createRect = (
   return {
     type: "rectangle",
     primitive: path,
-    p: currentPaint,
+    color,
+    size,
   };
 };

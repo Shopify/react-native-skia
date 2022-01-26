@@ -1,44 +1,100 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { ViewStyle } from "react-native";
-import { SkiaView, Skia, useDrawCallback } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Path,
+  Fill,
+  Rect,
+  Group,
+  Paint,
+  DashPathEffect,
+  Image,
+} from "@shopify/react-native-skia";
+import type { IRect, SkiaView } from "@shopify/react-native-skia";
 
-import { drawElements, drawSelectionRect } from "./Context/functions";
 import { useDrawContext, useTouchDrawing } from "./Context";
+import type { DrawingElements } from "./Context/types";
+import { SelectionFrame } from "./SelectionFrame";
+import { getBounds } from "./Context/functions";
 
 type Props = {
   innerRef: React.RefObject<SkiaView>;
   style: ViewStyle;
 };
 
-const BackgroundPaint = Skia.Paint();
-BackgroundPaint.setColor(Skia.Color("#FFF"));
-
 export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
   const drawContext = useDrawContext();
+  const [elements, setElements] = useState<DrawingElements>([]);
+  const [selectedElements, setSelectedElements] = useState<DrawingElements>();
+  const [selectionRect, setSelectionRect] = useState<IRect>();
+
+  // Draw context updated effect
   useEffect(
-    () => drawContext.addListener(() => innerRef.current?.redraw()),
+    () =>
+      drawContext.addListener((state) => {
+        setElements([...state.elements]);
+        setSelectionRect(state.currentSelectionRect);
+        setSelectedElements([...state.selectedElements]);
+      }),
     [drawContext, innerRef]
   );
 
   const touchHandler = useTouchDrawing(innerRef);
-  const onDraw = useDrawCallback((canvas, info) => {
-    // Update from pending touches
-    touchHandler(info.touches);
 
-    // Clear screen
-    canvas.drawPaint(BackgroundPaint);
+  const elementComponents = useMemo(() => {
+    return elements.map((el, i) => {
+      switch (el.type) {
+        case "path":
+        case "rectangle":
+        case "circle":
+          return (
+            <Path
+              key={i}
+              path={el.primitive}
+              color={el.color}
+              style="stroke"
+              strokeWidth={el.size}
+              strokeCap="round"
+            />
+          );
+        case "image":
+          return (
+            <Image
+              fit="fill"
+              key={i}
+              source={el.image}
+              rect={() => getBounds(el)}
+            />
+          );
+        default:
+          return null;
+      }
+    });
+  }, [elements]);
 
-    // Draw elements
-    drawElements(
-      canvas,
-      drawContext.state.elements,
-      drawContext.state.selectedElements
-    );
-
-    // Draw selection rectangle
-    if (drawContext.state.currentSelectionRect) {
-      drawSelectionRect(canvas, drawContext.state.currentSelectionRect);
-    }
-  }, []);
-  return <SkiaView ref={innerRef} style={style} onDraw={onDraw} />;
+  return (
+    <Canvas innerRef={innerRef} style={style} onTouch={touchHandler}>
+      <Fill color="#FFF" />
+      {/** Render elements */}
+      {elementComponents}
+      {/** Render selected elements */}
+      {selectedElements ? (
+        <SelectionFrame selectedElements={selectedElements} />
+      ) : null}
+      {/** Render selection rectangle */}
+      {selectionRect ? (
+        <Group>
+          <Paint style="stroke" strokeWidth={2} color="rgba(0, 0, 0, 1)">
+            <DashPathEffect intervals={[4, 4]} />
+          </Paint>
+          <Rect
+            x={selectionRect.x}
+            y={selectionRect.y}
+            width={selectionRect.width}
+            height={selectionRect.height}
+          />
+        </Group>
+      ) : null}
+    </Canvas>
+  );
 };

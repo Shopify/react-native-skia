@@ -1,4 +1,4 @@
-import type { IImage, IPaint, IPath, IRect } from "@shopify/react-native-skia";
+import type { IImage, IPath, IRect } from "@shopify/react-native-skia";
 
 export type Tool = "draw" | "selection";
 export type Menu = "drawing" | "size" | "color";
@@ -24,7 +24,8 @@ export type UxContextType = {
 
 export type DrawingElement = {
   type: DrawingTool;
-  p: IPaint;
+  color: string;
+  size: number;
 } & (
   | { type: "path"; primitive: IPath }
   | { type: "rectangle"; primitive: IPath }
@@ -39,7 +40,6 @@ export type ResizeMode = "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
 export type DrawState = {
   color: string;
   size: number;
-  paint: IPaint;
   elements: DrawingElements;
   selectedElements: DrawingElements;
   currentSelectionRect: IRect | undefined;
