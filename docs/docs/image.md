@@ -80,3 +80,5 @@ const ImageDemo = () => {
 | makeShaderCubic   | Returns this image as a shader with the specified tiling. It will use cubic sampling. |
 | encodeToBytes     | Encodes Image pixels, returning result as UInt8Array                                  |
 | encodeToBase64    | Encodes Image pixels, returning result as a base64 encoded string                     |
+
+## Declarative methods

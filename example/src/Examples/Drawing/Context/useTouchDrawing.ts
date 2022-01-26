@@ -93,8 +93,9 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
             break;
           }
 
-          // Lets test to see if we have clicked inside the selection boundary
           const bounds = getBoundingBox(drawContext.state.selectedElements);
+
+          // Lets test to see if we have clicked inside the selection boundary
           if (bounds && pointInRect({ x, y }, bounds)) {
             // We have a selection and we have clicked it - let us calculate the
             // selection mode - ie. which corner we are resizing from
@@ -104,14 +105,18 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
           } else {
             // We didn't find an element at x/y, so we'll deselect existing
             // elements and start a new selection - clear existing
-            drawContext.commands.setSelectedElements();
-            // Reset the selection rectangle
-            drawContext.commands.setSelectionRect({
-              x,
-              y,
-              width: 0,
-              height: 0,
-            });
+            if (el) {
+              drawContext.commands.setSelectedElements(el);
+            } else {
+              drawContext.commands.setSelectedElements();
+              // Reset the selection rectangle
+              drawContext.commands.setSelectionRect({
+                x,
+                y,
+                width: 0,
+                height: 0,
+              });
+            }
           }
 
           // Redraw
