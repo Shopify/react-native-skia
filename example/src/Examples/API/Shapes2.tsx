@@ -111,7 +111,7 @@ export const Shapes = () => {
       <Canvas style={styles.container}>
         <Patch
           colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
-          controlPoints={[topLeft, topRight, bottomRight, bottomLeft]}
+          cubics={[topLeft, topRight, bottomRight, bottomLeft]}
         />
       </Canvas>
     </ScrollView>
