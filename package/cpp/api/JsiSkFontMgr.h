@@ -60,7 +60,7 @@ namespace RNSkia {
                 return jsi::Value::null();
             }
             return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkTypeface>(getContext(), sk_sp(typeface)));;
+                    runtime, std::make_shared<JsiSkTypeface>(getContext(), sk_sp<SkTypeface>(typeface)));;
         }
 
         JSI_EXPORT_FUNCTIONS(

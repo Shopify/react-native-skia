@@ -1,22 +1,21 @@
 /*global SkiaApi*/
-import type { DependencyList } from "react";
 import { useMemo } from "react";
 
+import type { DataSource } from "../Data";
 import { Skia } from "../Skia";
-import type { Typeface } from "../Typeface";
+import { useTypeface } from "../Typeface";
 
 import type { Font } from "./Font";
 
 /**
  * Returns a Skia Font object
  * */
-export const useFont = (
-  typeface?: Typeface,
-  size?: number,
-  deps: DependencyList = []
-): Font =>
-  useMemo(() => {
-    if (typeface && size) {
+export const useFont = (font: DataSource, size?: number): Font | null => {
+  const typeface = useTypeface(font);
+  return useMemo(() => {
+    if (typeface === null) {
+      return null;
+    } else if (typeface && size) {
       return Skia.Font(typeface, size);
     } else if (typeface && !size) {
       return Skia.Font(typeface);
@@ -24,4 +23,5 @@ export const useFont = (
       return Skia.Font();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [typeface]);
+};

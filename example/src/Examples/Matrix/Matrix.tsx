@@ -3,12 +3,13 @@ import {
   Canvas,
   Fill,
   Paint,
+  useFont,
   useFontMgr,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { useTimestamp } from "@shopify/react-native-skia/src/animation/Animation/hooks";
 
-import { COLS, ROWS, Symbol } from "./Symbol";
+import { COLS, ROWS, Symbol, SYMBOL } from "./Symbol";
 
 const cols = new Array(COLS).fill(0).map((_, i) => i);
 const rows = new Array(ROWS).fill(0).map((_, i) => i);
@@ -32,13 +33,12 @@ const streams = cols.map(() =>
 
 export const Matrix = () => {
   const timestamp = useTimestamp();
-  const fontMgr = useFontMgr([require("./matrix-code-nfi.otf")]);
-  if (fontMgr === null) {
+  const font = useFont(require("./matrix-code-nfi.otf"), SYMBOL.height);
+  if (font === null) {
     return null;
   }
-
   return (
-    <Canvas style={{ flex: 1 }} fontMgr={fontMgr}>
+    <Canvas style={{ flex: 1 }}>
       <Fill color="black" />
       <Paint>
         <BlurMask sigma={10} style="solid" />
@@ -46,6 +46,7 @@ export const Matrix = () => {
       {cols.map((_i, i) =>
         rows.map((_j, j) => (
           <Symbol
+            font={font}
             timestamp={timestamp}
             key={`${i}-${j}`}
             i={i}
