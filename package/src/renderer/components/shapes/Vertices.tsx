@@ -12,9 +12,9 @@ import { processColor } from "../../processors/Paint";
 
 export interface VerticesProps extends CustomPaintProps {
   colors?: string[];
-  positions: IPoint[];
-  texs?: IPoint[];
-  vertexMode?: SkEnum<typeof VertexMode>;
+  vertices: IPoint[];
+  textures?: IPoint[];
+  mode: SkEnum<typeof VertexMode>;
   blendMode?: SkEnum<typeof BlendMode>;
   indices?: number[];
 }
@@ -24,21 +24,29 @@ export const Vertices = (props: AnimatedProps<VerticesProps>) => {
     props,
     (
       { canvas, paint, opacity },
-      { colors, positions, texs, blendMode, vertexMode, indices }
+      { colors, vertices, textures, blendMode, mode, indices }
     ) => {
-      const blend = blendMode ? BlendMode[enumKey(blendMode)] : BlendMode.Src;
-      const mode = vertexMode
-        ? VertexMode[enumKey(vertexMode)]
+      // If the colors are provided, the default blendMode is set to dstOver, if not, the default is set to srcOver
+      const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
+      const blend = blendMode
+        ? BlendMode[enumKey(blendMode)]
+        : defaultBlendMode;
+      const vertexMode = mode
+        ? VertexMode[enumKey(mode)]
         : VertexMode.Triangles;
-      const vertices = Skia.MakeVertices(
-        mode,
-        positions,
-        texs,
+      const vert = Skia.MakeVertices(
+        vertexMode,
+        vertices,
+        textures,
         colors ? colors.map((c) => processColor(c, opacity)) : undefined,
         indices
       );
-      canvas.drawVertices(vertices, blend, paint);
+      canvas.drawVertices(vert, blend, paint);
     }
   );
   return <skDrawing onDraw={onDraw} {...props} />;
+};
+
+Vertices.defaultProps = {
+  mode: "triangles",
 };

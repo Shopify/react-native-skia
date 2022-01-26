@@ -113,8 +113,13 @@ export const Shapes = () => {
       <Title>Vertices</Title>
       <Canvas style={styles.container}>
         <Vertices
-          positions={[vec(0, 0), vec(250, 0), vec(100, 100), vec(0, 250)]}
-          texs={[vec(0, 0), vec(250, 0), vec(250, 250), vec(250, 0)]}
+          mode="triangleFan"
+          vertices={[
+            vec(16, 0),
+            vec(250, 0),
+            vec(100, SIZE / 2),
+            vec(16, SIZE + 32),
+          ]}
           colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
         />
       </Canvas>
