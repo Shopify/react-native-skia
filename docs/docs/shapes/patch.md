@@ -14,7 +14,7 @@ Draws a [Coons patch](https://en.wikipedia.org/wiki/Coons_patch).
 | colors?    | `string[]`   | Optional colors to be associated to each corner |
 | blendMode? | `BlendMode`  | If `colors` is provided, colors are blended with the paint using the blend mode. Default is `dstOver` if colors are provided, `srcOver` if not |
 
-### Using SVG Notation
+## Example
 
 ```tsx twoslash
 import {Canvas, Patch, vec} from "@shopify/react-native-skia";
