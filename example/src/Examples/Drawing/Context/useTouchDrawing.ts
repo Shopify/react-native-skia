@@ -25,6 +25,8 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
 
   return useTouchHandler({
     onStart: ({ x, y }) => {
+      // Close any menus
+      uxContext.commands.toggleMenu(undefined);
       switch (uxContext.state.activeTool) {
         case "draw": {
           switch (uxContext.state.drawingTool) {
