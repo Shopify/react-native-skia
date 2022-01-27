@@ -24,7 +24,7 @@ export type UxContextType = {
 
 export type DrawingElement = {
   type: DrawingTool;
-  color: string;
+  color: number;
   size: number;
 } & (
   | { type: "path"; primitive: IPath }
@@ -38,7 +38,7 @@ export type DrawingElements = DrawingElement[];
 export type ResizeMode = "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
 
 export type DrawState = {
-  color: string;
+  color: number;
   size: number;
   elements: DrawingElements;
   selectedElements: DrawingElements;
@@ -48,7 +48,7 @@ export type DrawState = {
 
 export type DrawCommands = {
   setSize: (size: number) => void;
-  setColor: (color: string) => void;
+  setColor: (color: number) => void;
   addElement: (element: DrawingElement) => void;
   setSelectedElements: (...elements: DrawingElements) => void;
   setSelectionRect: (selection: IRect | undefined) => void;

@@ -14,7 +14,7 @@ import { PathToolbarItem } from "./Items";
 
 export const DrawingToolMenu: React.FC<BaseToolbarProps> = ({
   style,
-  vertical,
+  mode,
 }) => {
   const uxContext = useUxContext();
   const [visible, setVisible] = useState(uxContext.state.menu === "drawing");
@@ -30,7 +30,7 @@ export const DrawingToolMenu: React.FC<BaseToolbarProps> = ({
   );
 
   return visible ? (
-    <BaseToolbar style={style} vertical={vertical}>
+    <BaseToolbar style={style} mode={mode}>
       <PathToolbarItem
         path={ImageToolPath!}
         selected={drawingTool === "image"}

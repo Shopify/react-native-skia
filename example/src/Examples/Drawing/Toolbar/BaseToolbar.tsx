@@ -2,27 +2,29 @@ import React from "react";
 import type { ViewStyle } from "react-native";
 import { StyleSheet, View } from "react-native";
 
+type Direction = "vertical" | "horizontal" | "square";
+
 export type BaseToolbarProps = {
   style?: ViewStyle;
-  vertical?: boolean;
+  mode?: Direction | undefined;
 };
 export const BaseToolbar: React.FC<BaseToolbarProps> = ({
   children,
-  vertical = false,
+  mode = "horizontal",
   style,
 }) => {
-  return (
-    <View
-      style={[
-        style,
-        vertical
-          ? [styles.container, styles.verticalContainer]
-          : styles.container,
-      ]}
-    >
-      {children}
-    </View>
-  );
+  return <View style={[style, getStyleFromMode(mode)]}>{children}</View>;
+};
+
+const getStyleFromMode = (mode: Direction) => {
+  switch (mode) {
+    case "vertical":
+      return [styles.container, styles.verticalContainer];
+    case "horizontal":
+      return styles.container;
+    default:
+      return [styles.container, styles.squareContainer];
+  }
 };
 
 export const styles = StyleSheet.create({
@@ -45,6 +47,10 @@ export const styles = StyleSheet.create({
   verticalContainer: {
     flexDirection: "column",
     paddingHorizontal: 4,
+    paddingVertical: 14,
+  },
+  squareContainer: {
+    paddingHorizontal: 14,
     paddingVertical: 14,
   },
 });

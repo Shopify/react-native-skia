@@ -99,9 +99,12 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
           if (bounds && pointInRect({ x, y }, bounds)) {
             // We have a selection and we have clicked it - let us calculate the
             // selection mode - ie. which corner we are resizing from
-            drawContext.commands.setResizeMode(
-              findResizeMode({ x, y }, drawContext.state.selectedElements)
+            const resizeMode = findResizeMode(
+              { x, y },
+              drawContext.state.selectedElements
             );
+            console.log(resizeMode);
+            drawContext.commands.setResizeMode(resizeMode);
           } else {
             // We didn't find an element at x/y, so we'll deselect existing
             // elements and start a new selection - clear existing

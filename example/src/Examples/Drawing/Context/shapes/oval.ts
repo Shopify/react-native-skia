@@ -5,7 +5,7 @@ import type { DrawingElement } from "../types";
 export const createOval = (
   x: number,
   y: number,
-  color: string,
+  color: number,
   size: number
 ): DrawingElement => {
   const path = Skia.Path.Make();

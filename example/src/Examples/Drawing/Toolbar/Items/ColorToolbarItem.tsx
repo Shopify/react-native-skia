@@ -6,7 +6,7 @@ import { BaseToolbarItem } from "./BaseToolbarItem";
 import { styles } from "./styles";
 
 type Props = BaseToolbarItemProps & {
-  color: string;
+  color: number;
 };
 
 export const ColorToolbarItem: React.FC<Props> = ({

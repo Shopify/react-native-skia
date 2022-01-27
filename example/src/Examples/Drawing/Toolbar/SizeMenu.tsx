@@ -10,7 +10,7 @@ type Props = BaseToolbarProps & {
   sizes: number[];
 };
 
-export const SizeMenu: React.FC<Props> = ({ style, sizes, vertical }) => {
+export const SizeMenu: React.FC<Props> = ({ style, sizes, mode }) => {
   const uxContext = useUxContext();
   const drawContext = useDrawContext();
 
@@ -33,7 +33,7 @@ export const SizeMenu: React.FC<Props> = ({ style, sizes, vertical }) => {
   );
 
   return visible ? (
-    <BaseToolbar style={style} vertical={vertical}>
+    <BaseToolbar style={style} mode={mode}>
       {sizes.map((s) => (
         <SizeToolbarItem
           key={s}

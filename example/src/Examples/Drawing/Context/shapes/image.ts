@@ -7,7 +7,7 @@ export const createImage = (
   x: number,
   y: number,
   image: IImage,
-  color: string,
+  color: number,
   size: number
 ): DrawingElement => {
   const path = Skia.Path.Make();

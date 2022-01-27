@@ -76,5 +76,5 @@ export const Skia = {
   Color,
   // Here symmetry is broken to be comptatible with CanvasKit
   MakeSurface: SkiaApi.Surface.Make,
-  MakeImageFromEncoded: SkiaApi.Image.MakeFromEncoded,
+  MakeImageFromEncoded: SkiaApi.Image.MakeImageFromEncoded,
 };

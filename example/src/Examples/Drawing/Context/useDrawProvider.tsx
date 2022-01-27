@@ -1,4 +1,5 @@
 import type { IRect } from "@shopify/react-native-skia";
+import { Skia } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 
 import * as constants from "../constants";
@@ -18,7 +19,7 @@ export const DrawContext = React.createContext<DrawContextType | undefined>(
 const createDrawProviderValue = (): DrawContextType => {
   const state: DrawState = {
     size: constants.SizeConstants[1],
-    color: constants.ColorPalette[0],
+    color: Skia.Color("#000000"),
     elements: [],
     selectedElements: [],
     currentSelectionRect: undefined,
@@ -29,7 +30,7 @@ const createDrawProviderValue = (): DrawContextType => {
   const notifyListeners = (s: DrawState) => listeners.forEach((l) => l(s));
 
   const commands = {
-    setColor: (color: string) => {
+    setColor: (color: number) => {
       state.color = color;
       // Update the selected elements
       state.selectedElements.forEach((e) => (e.color = color));

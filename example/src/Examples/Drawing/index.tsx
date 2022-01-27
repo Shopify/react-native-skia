@@ -4,8 +4,8 @@ import { StyleSheet, useWindowDimensions, View } from "react-native";
 import type { SkiaView } from "@shopify/react-native-skia";
 
 import { DrawingCanvas } from "./DrawingCanvas";
-import { ColorPalette, SizeConstants } from "./constants";
-import { ColorMenu, DrawingToolMenu, MainToolbar, SizeMenu } from "./Toolbar";
+import { SizeConstants } from "./constants";
+import { ColorPicker, DrawingToolMenu, MainToolbar, SizeMenu } from "./Toolbar";
 import { ToolbarItemSize } from "./Toolbar/Items/styles";
 import { useUxProvider, useDrawProvider } from "./Context";
 import { useShareNavButton } from "./Hooks";
@@ -27,9 +27,13 @@ export const DrawingExample: React.FC = () => {
         <DrawProvider>
           <DrawingCanvas innerRef={skiaViewRef} style={styles.canvas} />
           <MainToolbar style={styles.toolbar} />
-          <DrawingToolMenu vertical style={styles.drawingModeMenu} />
-          <ColorMenu vertical style={styles.colorMenu} colors={ColorPalette} />
-          <SizeMenu vertical style={styles.sizeMenu} sizes={SizeConstants} />
+          <DrawingToolMenu mode={"vertical"} style={styles.drawingModeMenu} />
+          <ColorPicker mode={"square"} style={styles.colorPicker} />
+          <SizeMenu
+            mode={"vertical"}
+            style={styles.sizeMenu}
+            sizes={SizeConstants}
+          />
         </DrawProvider>
       </UxProvider>
     </View>
@@ -53,17 +57,18 @@ const createStyle = (width: number, height: number) =>
     },
     drawingModeMenu: {
       position: "absolute",
-      bottom: height * 0.05 + 54,
-      left: width / 2 - toolbarWidth / 2 + ToolbarItemSize / 2.25,
+      bottom: height * 0.05 + 60,
+      left: width / 2 - toolbarWidth / 2 + ToolbarItemSize / 2.45,
     },
-    colorMenu: {
+    colorPicker: {
       position: "absolute",
-      bottom: height * 0.05 + 54,
-      right: width / 2 - toolbarWidth / 2 + ToolbarItemSize / 2,
+      bottom: height * 0.05 + 60,
+      left: width / 2 - toolbarWidth / 2,
+      right: width / 2 - toolbarWidth / 2,
     },
     sizeMenu: {
       position: "absolute",
-      bottom: height * 0.05 + 54,
+      bottom: height * 0.05 + 60,
       right: width / 2 - toolbarWidth / 2 + ToolbarItemSize * 2.45,
     },
   });
