@@ -143,7 +143,7 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
                 // Calculate and add a smooth curve to the current path
                 const xMid = (prevPointRef.current!.x + x) / 2;
                 const yMid = (prevPointRef.current!.y + y) / 2;
-                element.primitive.quadTo(
+                element.path.quadTo(
                   prevPointRef.current!.x,
                   prevPointRef.current!.y,
                   xMid,

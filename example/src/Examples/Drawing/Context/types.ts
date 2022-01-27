@@ -27,10 +27,10 @@ export type DrawingElement = {
   color: number;
   size: number;
 } & (
-  | { type: "path"; primitive: IPath }
-  | { type: "rectangle"; primitive: IPath }
-  | { type: "circle"; primitive: IPath }
-  | { type: "image"; primitive: IPath; image: IImage }
+  | { type: "path"; path: IPath }
+  | { type: "rectangle"; path: IPath }
+  | { type: "circle"; path: IPath }
+  | { type: "image"; path: IPath; image: IImage }
 );
 
 export type DrawingElements = DrawingElement[];

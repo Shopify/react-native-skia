@@ -15,7 +15,7 @@ export const createImage = (
   return {
     type: "image",
     image,
-    primitive: path,
+    path: path,
     color,
     size,
   };

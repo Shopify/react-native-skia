@@ -44,7 +44,7 @@ export const resizeElementsBy = (
   // use to scale elements
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];
-    element.primitive.transform(matrix);
+    element.path.transform(matrix);
   }
 };
 

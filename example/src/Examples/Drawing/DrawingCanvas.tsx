@@ -50,7 +50,7 @@ export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
           return (
             <Path
               key={i}
-              path={el.primitive}
+              path={el.path}
               color={el.color}
               style="stroke"
               strokeWidth={el.size}

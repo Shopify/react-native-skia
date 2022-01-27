@@ -14,7 +14,7 @@ export const findClosestElementToPoint = (
   }
   // Check if we any of the paths (in reverse top-down order) contains the point
   for (let i = elements.length - 1; i >= 0; i--) {
-    if (elements[i].primitive.contains(point.x, point.y)) {
+    if (elements[i].path.contains(point.x, point.y)) {
       return elements[i];
     }
   }
@@ -41,7 +41,6 @@ export const findClosestElementToPoint = (
 
   return elements.find(
     (el) =>
-      el.primitive === distances[0].primitive &&
-      distances[0].distance < Number.MAX_VALUE
+      el.path === distances[0].path && distances[0].distance < Number.MAX_VALUE
   );
 };

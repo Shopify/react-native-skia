@@ -12,7 +12,7 @@ export const createPath = (
   path.moveTo(x, y);
   return {
     type: "path",
-    primitive: path,
+    path: path,
     color,
     size,
   };

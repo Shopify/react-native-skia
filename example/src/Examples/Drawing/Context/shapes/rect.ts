@@ -16,7 +16,7 @@ export const createRect = (
   path.lineTo(x, y);
   return {
     type: "rectangle",
-    primitive: path,
+    path: path,
     color,
     size,
   };

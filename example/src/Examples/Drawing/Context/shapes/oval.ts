@@ -12,7 +12,7 @@ export const createOval = (
   path.addOval({ x, y, width: 1, height: 1 });
   return {
     type: "circle",
-    primitive: path,
+    path: path,
     color,
     size,
   };
