@@ -10,6 +10,7 @@ import { Filters } from "./Examples/Filters";
 import { Gooey } from "./Examples/Gooey";
 import { Hue } from "./Examples/Hue";
 import { Matrix } from "./Examples/Matrix";
+import { Aurora } from "./Examples/Aurora";
 import { HomeScreen } from "./Home";
 
 const App = () => {
@@ -39,6 +40,7 @@ const App = () => {
               header: () => null,
             }}
           />
+          <Stack.Screen name="Aurora" component={Aurora} />
           <Stack.Screen name="Drawing" component={DrawingExample} />
           <Stack.Screen name="Animation" component={AnimationExample} />
         </Stack.Navigator>
