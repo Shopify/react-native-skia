@@ -1,6 +1,12 @@
 import React, { useMemo } from "react";
 
-import type { UxContextType, Menu, Tool, UxState, DrawingTool } from "./types";
+import type {
+  UxContextType,
+  Menu,
+  Tool,
+  UxState,
+  DrawingTool,
+} from "../Context";
 
 export const UxContext = React.createContext<UxContextType | undefined>(
   undefined

@@ -10,7 +10,7 @@ import {
   SelectToolPath,
 } from "../assets";
 import type { DrawingTool } from "../Context/types";
-import { useDrawContext, useUxContext } from "../Context";
+import { useDrawContext, useUxContext } from "../Hooks";
 
 import { BaseToolbar } from "./BaseToolbar";
 import { ColorToolbarItem, PathToolbarItem, SizeToolbarItem } from "./Items";

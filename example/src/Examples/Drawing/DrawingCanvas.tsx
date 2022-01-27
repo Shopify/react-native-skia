@@ -12,10 +12,10 @@ import {
 } from "@shopify/react-native-skia";
 import type { IRect, SkiaView } from "@shopify/react-native-skia";
 
-import { useDrawContext, useTouchDrawing } from "./Context";
 import type { DrawingElements } from "./Context/types";
 import { SelectionFrame } from "./SelectionFrame";
 import { getBounds } from "./Context/functions";
+import { useTouchDrawing, useDrawContext } from "./Hooks";
 
 type Props = {
   innerRef: React.RefObject<SkiaView>;

@@ -1,6 +1,7 @@
 import { useContext } from "react";
 
-import type { DrawContextType } from "./types";
+import type { DrawContextType } from "../Context/types";
+
 import { DrawContext } from "./useDrawProvider";
 
 export const useDrawContext = (): DrawContextType => {

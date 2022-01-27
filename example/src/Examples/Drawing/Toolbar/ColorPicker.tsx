@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { polar2Color } from "../../Hue/Helpers";
-import { useDrawContext, useUxContext } from "../Context";
+import { useDrawContext, useUxContext } from "../Hooks";
 
 import type { BaseToolbarProps } from "./BaseToolbar";
 import { BaseToolbar } from "./BaseToolbar";

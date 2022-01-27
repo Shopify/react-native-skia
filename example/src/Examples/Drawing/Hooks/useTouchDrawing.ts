@@ -3,17 +3,21 @@ import { useRef } from "react";
 import type { Point, SkiaView } from "@shopify/react-native-skia";
 import { useImage, useTouchHandler } from "@shopify/react-native-skia";
 
-import { useDrawContext } from "./useDrawContext";
-import { useUxContext } from "./useUxContext";
 import {
   findClosestElementToPoint,
   findElementsInRect,
   findResizeMode,
   pointInRect,
   resizeElementsBy,
-} from "./functions";
-import { getBoundingBox } from "./functions/getBoundingBox";
-import { createPath, createRect, createOval, createImage } from "./shapes";
+  createPath,
+  createRect,
+  createOval,
+  createImage,
+  getBoundingBox,
+} from "../Context";
+
+import { useDrawContext } from "./useDrawContext";
+import { useUxContext } from "./useUxContext";
 
 const osloImg = require("../../../assets/card.png");
 

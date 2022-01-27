@@ -7,8 +7,7 @@ import { DrawingCanvas } from "./DrawingCanvas";
 import { SizeConstants } from "./constants";
 import { ColorPicker, DrawingToolMenu, MainToolbar, SizeMenu } from "./Toolbar";
 import { ToolbarItemSize } from "./Toolbar/Items/styles";
-import { useUxProvider, useDrawProvider } from "./Context";
-import { useShareNavButton } from "./Hooks";
+import { useUxProvider, useDrawProvider, useShareNavButton } from "./Hooks";
 
 export const DrawingExample: React.FC = () => {
   const skiaViewRef = useRef<SkiaView>(null);

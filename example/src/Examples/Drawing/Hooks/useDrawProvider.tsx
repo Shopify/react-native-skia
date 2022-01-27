@@ -3,14 +3,13 @@ import { Skia } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 
 import * as constants from "../constants";
-
 import type {
   DrawState,
   DrawContextType,
   DrawingElement,
   DrawingElements,
   ResizeMode,
-} from "./types";
+} from "../Context/types";
 
 export const DrawContext = React.createContext<DrawContextType | undefined>(
   undefined

@@ -1,6 +1,7 @@
 import { useContext } from "react";
 
-import type { UxContextType } from "./types";
+import type { UxContextType } from "../Context";
+
 import { UxContext } from "./useUxProvider";
 
 export const useUxContext = (): UxContextType => {
