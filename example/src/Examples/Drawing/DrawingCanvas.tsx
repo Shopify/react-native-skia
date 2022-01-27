@@ -44,19 +44,6 @@ export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
   const elementComponents = useMemo(() => {
     return elements.map((el, i) => {
       switch (el.type) {
-        case "path":
-        case "rectangle":
-        case "circle":
-          return (
-            <Path
-              key={i}
-              path={el.path}
-              color={el.color}
-              style="stroke"
-              strokeWidth={el.size}
-              strokeCap="round"
-            />
-          );
         case "image":
           return (
             <Image
@@ -67,7 +54,16 @@ export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
             />
           );
         default:
-          return null;
+          return (
+            <Path
+              key={i}
+              path={el.path}
+              color={el.color}
+              style="stroke"
+              strokeWidth={el.size}
+              strokeCap="round"
+            />
+          );
       }
     });
   }, [elements]);

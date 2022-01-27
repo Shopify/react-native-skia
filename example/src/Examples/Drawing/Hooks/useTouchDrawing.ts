@@ -33,52 +33,22 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
       uxContext.commands.toggleMenu(undefined);
       switch (uxContext.state.activeTool) {
         case "draw": {
+          const { color, size } = drawContext.state;
           switch (uxContext.state.drawingTool) {
-            case "path": {
+            case "path":
+              drawContext.commands.addElement(createPath(x, y, color, size));
+              break;
+            case "rectangle":
+              drawContext.commands.addElement(createRect(x, y, color, size));
+              break;
+            case "circle":
+              drawContext.commands.addElement(createOval(x, y, color, size));
+              break;
+            case "image":
               drawContext.commands.addElement(
-                createPath(
-                  x,
-                  y,
-                  drawContext.state.color,
-                  drawContext.state.size
-                )
+                createImage(x, y, oslo!, color, size)
               );
               break;
-            }
-            case "rectangle": {
-              drawContext.commands.addElement(
-                createRect(
-                  x,
-                  y,
-                  drawContext.state.color,
-                  drawContext.state.size
-                )
-              );
-              break;
-            }
-            case "circle": {
-              drawContext.commands.addElement(
-                createOval(
-                  x,
-                  y,
-                  drawContext.state.color,
-                  drawContext.state.size
-                )
-              );
-              break;
-            }
-            case "image": {
-              drawContext.commands.addElement(
-                createImage(
-                  x,
-                  y,
-                  oslo!,
-                  drawContext.state.color,
-                  drawContext.state.size
-                )
-              );
-              break;
-            }
           }
           break;
         }
@@ -105,12 +75,9 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
           if (bounds && pointInRect({ x, y }, bounds)) {
             // We have a selection and we have clicked it - let us calculate the
             // selection mode - ie. which corner we are resizing from
-            const resizeMode = findResizeMode(
-              { x, y },
-              drawContext.state.selectedElements
+            drawContext.commands.setResizeMode(
+              findResizeMode({ x, y }, drawContext.state.selectedElements)
             );
-            console.log(resizeMode);
-            drawContext.commands.setResizeMode(resizeMode);
           } else {
             // We didn't find an element at x/y, so we'll deselect existing
             // elements and start a new selection - clear existing
@@ -143,7 +110,7 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
               drawContext.state.elements[drawContext.state.elements.length - 1];
 
             switch (element.type) {
-              case "path": {
+              case "path":
                 // Calculate and add a smooth curve to the current path
                 const xMid = (prevPointRef.current!.x + x) / 2;
                 const yMid = (prevPointRef.current!.y + y) / 2;
@@ -154,17 +121,14 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
                   yMid
                 );
                 break;
-              }
-              default: {
+              default:
                 resizeElementsBy(
                   x - prevPointRef.current!.x,
                   y - prevPointRef.current!.y,
                   "bottomRight",
                   [element]
                 );
-
                 break;
-              }
             }
           }
           break;

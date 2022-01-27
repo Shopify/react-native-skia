@@ -22,14 +22,15 @@ export type UxContextType = {
   addListener: (listener: (state: UxState) => void) => () => void;
 };
 
+export type DrawingElementType = "path" | "shape" | "image";
+
 export type DrawingElement = {
-  type: DrawingTool;
+  type: DrawingElementType;
   color: number;
   size: number;
+  path: IPath;
 } & (
-  | { type: "path"; path: IPath }
-  | { type: "rectangle"; path: IPath }
-  | { type: "circle"; path: IPath }
+  | { type: "path" | "shape"; path: IPath }
   | { type: "image"; path: IPath; image: IImage }
 );
 

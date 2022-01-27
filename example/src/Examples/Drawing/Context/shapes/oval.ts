@@ -11,8 +11,8 @@ export const createOval = (
   const path = Skia.Path.Make();
   path.addOval({ x, y, width: 1, height: 1 });
   return {
-    type: "circle",
-    path: path,
+    type: "shape",
+    path,
     color,
     size,
   };
