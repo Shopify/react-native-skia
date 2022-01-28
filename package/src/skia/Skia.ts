@@ -18,6 +18,7 @@ import type { IPoint } from "./Point";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
 import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
+import "./NativeSetup";
 
 /**
  * Declares the interface for the native Skia API

@@ -6,7 +6,7 @@
   SkiaManager* skiaManager;
 }
 
-RCT_EXPORT_MODULE()
+RCT_EXPORT_MODULE(RNSkia)
 
 #pragma Accessors
 
