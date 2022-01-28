@@ -92,6 +92,29 @@ public:
     return jsi::Value::undefined();
   }
   
+  JSI_HOST_FUNCTION(makeImageSnapshot) {
+    
+    // find skia draw view
+    int nativeId = arguments[0].asNumber();
+    sk_sp<SkImage> image;
+    auto info = getEnsuredCallbackInfo(nativeId);
+    if (info->view != nullptr) {
+      if(count > 1 && !arguments[1].isUndefined() && arguments[1].isNull()) {
+        auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
+        image = info->view->makeImageSnapshot(rect);
+      } else {
+        image = info->view->makeImageSnapshot(nullptr);
+      }
+      if(image == nullptr) {
+        jsi::detail::throwJSError(runtime, "Could not create image from current surface.");
+        return jsi::Value::undefined();
+      }
+      return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(_platformContext, image));
+    }
+    jsi::detail::throwJSError(runtime, "No Skia View currently available.");
+    return jsi::Value::undefined();
+  }
+  
   JSI_HOST_FUNCTION(setDrawMode) {
     if (count != 2) {
       _platformContext->raiseError(
@@ -122,6 +145,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawCallback),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, invalidateSkiaView),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawMode))
 
   /**

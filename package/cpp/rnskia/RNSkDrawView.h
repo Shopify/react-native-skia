@@ -85,13 +85,19 @@ public:
     Update touch state with new touch points
    */
   void updateTouchState(const std::vector<RNSkTouchPoint> &points);
+  
+  /**
+   Draws the view's surface into an image
+   return an SkImage
+   */
+  sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds);
 
 protected:
   /**
    * Setup and draw the frame
    */
   virtual void drawFrame(double time) {};
-
+  
   /**
    * Mark view as invalidated
    */
@@ -131,7 +137,15 @@ private:
    Ends an ongoing beginDrawCallback loop for this view
    */
   void endDrawingLoop();
-
+  
+  /**
+   Draw in canvas
+   */
+  void drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
+                    int width,
+                    int height,
+                    double time);
+  
   /**
    * Stores the draw drawCallback
    */
@@ -143,7 +157,7 @@ private:
    * functions that we don't want to recreate on each render
    */
   std::shared_ptr<JsiSkCanvas> _jsiCanvas;
-
+  
   /**
    * drawing mutex
    */
@@ -191,6 +205,12 @@ private:
    * Native id
    */
   size_t _nativeId;
+  
+  /**
+   Last size when drawing
+   */
+  int _lastWidth = -1;
+  int _lastHeight = -1;
 };
 
 } // namespace RNSkia

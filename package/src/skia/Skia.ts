@@ -18,6 +18,7 @@ import type { IPoint } from "./Point";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
 import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
+import type { SurfaceFactory } from "./Surface";
 
 /**
  * Declares the interface for the native Skia API
@@ -41,6 +42,7 @@ export interface Skia {
   Image: ImageFactory;
   SVG: SVGFactory;
   FontMgr: FontMgrFactory;
+  Surface: SurfaceFactory;
 }
 
 /**
@@ -73,5 +75,6 @@ export const Skia = {
   FontMgr: SkiaApi.FontMgr,
   Color,
   // Here symmetry is broken to be comptatible with CanvasKit
-  MakeImageFromEncoded: SkiaApi.Image.MakeFromEncoded,
+  MakeSurface: SkiaApi.Surface.Make,
+  MakeImageFromEncoded: SkiaApi.Image.MakeImageFromEncoded,
 };

@@ -504,4 +504,32 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * Converts the text to a path with the given font at location x / y.
    */
   fromText(text: string, x: number, y: number, font: Font): void;
+
+  /**
+   * Interpolates between Path with point array of equal size.
+   * Copy verb array and weights to result, and set result path to a weighted
+   * average of this path array and ending path.
+
+   *  weight is most useful when between zero (ending path) and
+      one (this path); will work with values outside of this
+      range.
+
+   * interpolate() returns undefined if path is not
+   * the same size as ending path. Call isInterpolatable() to check Path
+   * compatibility prior to calling interpolate().
+
+   * @param ending  path to interpolate with
+   * @param weight  contribution of this path, and
+   *                 one minus contribution of ending path
+   * @return        Path replaced by interpolated averages or undefined if 
+   *                not interpolatable
+   * */
+  interpolate(end: IPath, weight: number): IPath;
+
+  /** Returns true if Path contain equal verbs and equal weights.
+   *     @param compare  path to compare
+   *     @return         true if Path can be interpolated equivalent
+   *
+   * */
+  isInterpolatable(compare: IPath): boolean;
 }

@@ -38,12 +38,17 @@ export const HomeScreen = () => {
         route="Aurora"
       />
       <HomeScreenButton
-        title="Drawing"
+        title="🖌 Drawing"
         description="Use touches to draw with Skia"
         route="Drawing"
       />
       <HomeScreenButton
-        title="Animation"
+        title="📉 Graphs"
+        description="Animated graphs with Skia"
+        route="Graphs"
+      />
+      <HomeScreenButton
+        title="🎥 Animation"
         description="Animated with Skia"
         route="Animation"
       />
