@@ -59,6 +59,11 @@ const inner = rrect(
   0
 );
 
+const topLeft = { src: vec(0, 0), c1: vec(0, 15), c2: vec(15, 0) };
+const topRight = { src: vec(100, 0), c1: vec(100, 15), c2: vec(85, 0) };
+const bottomRight = { src: vec(100, 100), c1: vec(100, 85), c2: vec(85, 100) };
+const bottomLeft = { src: vec(0, 100), c1: vec(0, 85), c2: vec(15, 100) };
+
 export const Shapes = () => {
   return (
     <ScrollView>
@@ -106,7 +111,7 @@ export const Shapes = () => {
       <Canvas style={styles.container}>
         <Patch
           colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
-          cubics={cubics}
+          cubics={[topLeft, topRight, bottomRight, bottomLeft]}
         />
       </Canvas>
     </ScrollView>

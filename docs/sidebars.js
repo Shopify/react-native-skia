@@ -69,7 +69,12 @@ const sidebars = {
       collapsed: false,
       type: "category",
       label: "Shapes",
-      items: ["shapes/path", "shapes/polygons", "shapes/ellipses"],
+      items: [
+        "shapes/path",
+        "shapes/polygons",
+        "shapes/ellipses",
+        "shapes/patch",
+      ],
     },
     {
       collapsed: false,
