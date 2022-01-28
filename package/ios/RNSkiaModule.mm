@@ -1,5 +1,6 @@
 
 #import "RNSkiaModule.h"
+#import <React/RCTBridge+Private.h>
 
 @implementation RNSkiaModule {
   SkiaManager* skiaManager;
