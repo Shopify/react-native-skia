@@ -38,6 +38,11 @@ export const HomeScreen: React.FC = () => {
         route="Drawing"
       />
       <HomeScreenButton
+        title="📉 Graphs"
+        description="Animated graphs with Skia"
+        route="Graphs"
+      />
+      <HomeScreenButton
         title="Animation"
         description="Animated with Skia"
         route="Animation"
