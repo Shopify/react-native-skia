@@ -2,8 +2,8 @@ import React from "react";
 
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
-import type { ColorProp } from "../../processors/Paint";
-import { processColor } from "../../processors/Paint";
+import type { ColorProp } from "../../processors";
+import { processColor } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
 export interface ColorShaderProps {

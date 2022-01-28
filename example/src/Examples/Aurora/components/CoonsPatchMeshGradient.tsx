@@ -1,9 +1,8 @@
 import type { Vector } from "@shopify/react-native-skia";
 import {
   Paint,
-  processColorAsUnitArray,
+  mixColors,
   Circle,
-  mix,
   Canvas,
   Patch,
   processColor,
@@ -19,9 +18,9 @@ const bilinearInterpolate = (
   pos: Vector
 ) => {
   const uv = vec(pos.x / size.x, pos.y / size.y);
-  const colorA = mix(uv.x, color0, color1);
-  const colorB = mix(uv.x, color2, color3);
-  return mix(uv.y, colorA, colorB);
+  const colorA = mixColors(uv.x, color0, color1);
+  const colorB = mixColors(uv.x, color2, color3);
+  return mixColors(uv.y, colorA, colorB);
 };
 
 interface CoonsPatchMeshGradientProps {
@@ -54,10 +53,10 @@ export const CoonsPatchMeshGradient = ({
         const tr = vec(x + dx, y);
         const br = vec(x + dx, y + dy);
         const bl = vec(x, y + dy);
-        // const tlCl = bilinearInterpolate(colors, size, tl);
-        // const trCl = bilinearInterpolate(colors, size, tr);
-        // const brCl = bilinearInterpolate(colors, size, br);
-        // const blCl = bilinearInterpolate(colors, size, bl);
+        const tlCl = bilinearInterpolate(colors, size, tl);
+        const trCl = bilinearInterpolate(colors, size, tr);
+        const brCl = bilinearInterpolate(colors, size, br);
+        const blCl = bilinearInterpolate(colors, size, bl);
         const topLeft = {
           src: tl,
           c1: tl,
@@ -78,11 +77,15 @@ export const CoonsPatchMeshGradient = ({
           c1: bl,
           c2: bl,
         };
-        return [topLeft, topRight, bottomRight, bottomLeft] as const;
+        return {
+          patch: [topLeft, topRight, bottomRight, bottomLeft] as const,
+          colors: [tlCl, trCl, brCl, blCl] as const,
+        };
       })
     )
     .flat();
   const nonEdges = patches
+    .map(({ patch }) => patch)
     .flat()
     .map(({ src }) => src)
     .filter(({ x, y }) => !(x === 0 || y === 0 || x === width || y === height))
@@ -96,17 +99,14 @@ export const CoonsPatchMeshGradient = ({
   return (
     <Canvas style={{ width, height }}>
       <Paint>
-        <BilinearGradient
-          colors={colors}
-          rect={{ x: 0, y: 0, width, height }}
-        />
+        <BilinearGradient colors={colors} size={size} />
       </Paint>
-      {patches.map((patch, key) => (
-        <Patch key={key} patch={patch} />
+      {patches.map((data, key) => (
+        <Patch key={key} patch={data.patch} />
       ))}
       {nonEdges.map((pos, key) => (
         <Circle r={10} c={pos} key={key}>
-          <Paint color="red" />
+          <Paint color={bilinearInterpolate(colors, size, pos)} />
           <Paint color="white" style="stroke" strokeWidth={4} />
         </Circle>
       ))}

@@ -19,7 +19,7 @@ interface CubicBezier {
 }
 
 export interface PatchProps extends CustomPaintProps {
-  colors?: ColorProp[];
+  colors?: readonly ColorProp[];
   patch: readonly [CubicBezier, CubicBezier, CubicBezier, CubicBezier];
   texs?: IPoint[];
   blendMode?: SkEnum<typeof BlendMode>;

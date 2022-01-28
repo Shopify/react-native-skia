@@ -1,5 +1,5 @@
 import React from "react";
-import type { ColorProp, IRect } from "@shopify/react-native-skia";
+import type { ColorProp, IRect, Vector } from "@shopify/react-native-skia";
 import {
   processColorAsUnitArray,
   Shader,
@@ -22,22 +22,18 @@ vec4 main(vec2 pos) {
 }`)!;
 
 interface BilinearGradientProps {
-  rect: IRect;
+  size: Vector;
   colors: ColorProp[];
 }
 
-export const BilinearGradient = ({
-  rect: { width, height },
-  colors,
-}: BilinearGradientProps) => {
+export const BilinearGradient = ({ size, colors }: BilinearGradientProps) => {
   const [color0, color1, color2, color3] = colors.map((cl) =>
     processColorAsUnitArray(cl, 1)
   );
-  console.log([color0, color1, color2, color3]);
   return (
     <Shader
       source={source}
-      uniforms={{ size: vec(width, height), color0, color1, color2, color3 }}
+      uniforms={{ size, color0, color1, color2, color3 }}
     />
   );
 };
