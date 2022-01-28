@@ -24,7 +24,7 @@ export interface CustomPaintProps extends ChildrenProps {
 export const enumKey = <K extends string>(k: K) =>
   (k.charAt(0).toUpperCase() + k.slice(1)) as Capitalize<K>;
 
-export const alpha = (c: number) => ((c >> 24) & 255) / 255;
+export const alphaf = (c: number) => ((c >> 24) & 255) / 255;
 export const red = (c: number) => (c >> 16) & 255;
 export const green = (c: number) => (c >> 8) & 255;
 export const blue = (c: number) => c & 255;
@@ -38,8 +38,20 @@ export const processColor = (cl: ColorProp, currentOpacity: number) => {
   const r = red(icl);
   const g = green(icl);
   const b = blue(icl);
-  const o = alpha(icl);
+  const o = alphaf(icl);
   return rgbaColor(r, g, b, o * currentOpacity);
+};
+
+export const processColorAsUnitArray = (
+  cl: ColorProp,
+  currentOpacity: number
+) => {
+  const icl = typeof cl === "string" ? Skia.Color(cl) : cl;
+  const r = red(icl);
+  const g = green(icl);
+  const b = blue(icl);
+  const o = alphaf(icl);
+  return [r / 255, g / 255, b / 255, o * currentOpacity] as const;
 };
 
 export const processPaint = (

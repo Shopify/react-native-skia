@@ -1,6 +1,11 @@
 import React from "react";
 
-import type { CustomPaintProps, SkEnum, Vector } from "../../processors";
+import type {
+  CustomPaintProps,
+  SkEnum,
+  Vector,
+  ColorProp,
+} from "../../processors";
 import { enumKey, processColor } from "../../processors";
 import type { IPoint } from "../../../skia";
 import { BlendMode } from "../../../skia/Paint/BlendMode";
@@ -14,7 +19,7 @@ interface CubicBezier {
 }
 
 export interface PatchProps extends CustomPaintProps {
-  colors: string[];
+  colors?: ColorProp[];
   cubics: [CubicBezier, CubicBezier, CubicBezier, CubicBezier];
   texs?: IPoint[];
   blendMode?: SkEnum<typeof BlendMode>;
@@ -29,7 +34,7 @@ export const Patch = (props: AnimatedProps<PatchProps>) => {
       const mode = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
       canvas.drawPatch(
         cubics.map(({ src, c1, c2 }) => [src, c1, c2]).flat(),
-        colors.map((c) => processColor(c, opacity)),
+        colors ? colors.map((c) => processColor(c, opacity)) : undefined,
         texs,
         mode,
         paint
