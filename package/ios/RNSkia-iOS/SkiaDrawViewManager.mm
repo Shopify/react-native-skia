@@ -6,8 +6,12 @@
 #include <RNSkDrawViewImpl.h>
 #include <SkiaDrawView.h>
 
-@implementation SkiaDrawViewManager {
-  SkiaManager* _skiaManager;
+@implementation SkiaDrawViewManager
+
+- (SkiaManager*) skiaManager {
+  auto bridge = [RCTBridge currentBridge];
+  auto skiaModule = (RNSkiaModule*)[bridge moduleForName:@"RNSkia"];
+  return [skiaModule manager];
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(nativeID, NSNumber, SkiaDrawView) {
@@ -30,15 +34,9 @@ RCT_EXPORT_MODULE(ReactNativeSkiaView)
 
 - (UIView *)view
 {
-  auto skManager = [_skiaManager skManager];
+  auto skManager = [[self skiaManager] skManager];
   // Pass SkManager as a raw pointer to avoid circular dependenciesr
   return [[SkiaDrawView alloc] initWithManager:skManager.get()];
-}
-
-- (void) setBridge:(RCTBridge *)bridge {
-  [super setBridge:bridge];
-  auto skiaModule = (RNSkiaModule*)[bridge moduleForName:@"RNSkiaModule"];
-  _skiaManager = [skiaModule manager];
 }
 
 @end
