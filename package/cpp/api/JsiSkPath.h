@@ -460,6 +460,20 @@ public:
     return jsi::Value(false);
   }
 
+  JSI_HOST_FUNCTION(isInterpolatable) {
+    auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
+    return getObject()->isInterpolatable(*path2);
+  }
+
+  JSI_HOST_FUNCTION(interpolate) {
+    auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
+    auto weight = arguments[1].asNumber();
+    SkPath result;
+    getObject()->interpolate(*path2, weight, &result);
+    return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkPath>(getContext(), result));
+  }
+
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkPath, addArc), JSI_EXPORT_FUNC(JsiSkPath, addOval),
       JSI_EXPORT_FUNC(JsiSkPath, addPoly), JSI_EXPORT_FUNC(JsiSkPath, addRect),
@@ -491,7 +505,8 @@ public:
       JSI_EXPORT_FUNC(JsiSkPath, getLastPt), JSI_EXPORT_FUNC(JsiSkPath, close),
       JSI_EXPORT_FUNC(JsiSkPath, simplify),
       JSI_EXPORT_FUNC(JsiSkPath, countPoints), JSI_EXPORT_FUNC(JsiSkPath, copy),
-      JSI_EXPORT_FUNC(JsiSkPath, fromText), JSI_EXPORT_FUNC(JsiSkPath, op))
+      JSI_EXPORT_FUNC(JsiSkPath, fromText), JSI_EXPORT_FUNC(JsiSkPath, op),
+      JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable), JSI_EXPORT_FUNC(JsiSkPath, interpolate))
 
   JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
       : JsiSkWrappingSharedPtrHostObject<SkPath>(
