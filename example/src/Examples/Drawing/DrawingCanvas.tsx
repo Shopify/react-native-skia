@@ -69,7 +69,7 @@ export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
   }, [elements]);
 
   return (
-    <Canvas innerRef={innerRef} style={style} onTouch={touchHandler}>
+    <Canvas ref={innerRef} style={style} onTouch={touchHandler}>
       <Fill color="#FFF" />
       {/** Render elements */}
       {elementComponents}

@@ -70,13 +70,13 @@ const ImageDemo = () => {
 
 ![fit="none"](assets/images/none.png)
 
-## Image Instance Methods
+## Instance Methods
 
 | Name              | Description                                                                           |
 | :---------------- | :------------------------------------------------------------------------------------ |
 | height            | Returns the possibly scaled height of the image.                                      |
 | width             | Returns the possibly scaled width of the image.                                       |
-| makeShaderOptions | Returns this image as a shader with the specified tiling. It will use cubic sampling. |
-| makeShaderCubic   | Returns this image as a shader with the specified tiling. It will use cubic sampling. |
 | encodeToBytes     | Encodes Image pixels, returning result as UInt8Array                                  |
 | encodeToBase64    | Encodes Image pixels, returning result as a base64 encoded string                     |
+| makeShaderOptions | Returns this image as a shader with the specified tiling. It will use cubic sampling. |
+| makeShaderCubic   | Returns this image as a shader with the specified tiling. It will use cubic sampling. |

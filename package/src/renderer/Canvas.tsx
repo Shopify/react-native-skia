@@ -1,11 +1,11 @@
 import React, {
-  useRef,
   useEffect,
   useState,
   useCallback,
   useMemo,
   useContext,
   forwardRef,
+  useRef,
 } from "react";
 import type {
   RefObject,
@@ -67,6 +67,8 @@ const render = (
   });
 };
 
+export const useCanvasRef = () => useRef<SkiaView>(null);
+
 export interface CanvasProps extends ComponentProps<typeof SkiaView> {
   ref?: RefObject<SkiaView>;
   children: ReactNode;
@@ -75,7 +77,9 @@ export interface CanvasProps extends ComponentProps<typeof SkiaView> {
 }
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
-  ({ children, style, debug, mode, onTouch, fontMgr }, ref) => {
+  ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
+    const defaultRef = useCanvasRef();
+    const ref = forwardedRef || defaultRef;
     const [tick, setTick] = useState(0);
     const redraw = useCallback(() => setTick((t) => t + 1), []);
     const tree = useMemo(() => CanvasNode(redraw), [redraw]);
@@ -92,6 +96,11 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
+        if (typeof ref === "function") {
+          throw new Error(
+            "Ref callbacks are not supported. Use useCanvasRef() or useRef() instead"
+          );
+        }
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
         onTouch && onTouch(info.touches);
@@ -104,7 +113,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           width,
           height,
           timestamp,
-          skiaRef: ref,
+          ref,
           getTouches: () => info.touches,
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? Skia.FontMgr.RefDefault(),
