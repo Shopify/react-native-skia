@@ -39,7 +39,7 @@ export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
     [drawContext, innerRef]
   );
 
-  const touchHandler = useTouchDrawing(innerRef);
+  const touchHandler = useTouchDrawing();
 
   const elementComponents = useMemo(() => {
     return elements.map((el, i) => {

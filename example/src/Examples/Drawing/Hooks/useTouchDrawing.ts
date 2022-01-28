@@ -1,6 +1,5 @@
-import type React from "react";
 import { useRef } from "react";
-import type { Point, SkiaView } from "@shopify/react-native-skia";
+import type { Point } from "@shopify/react-native-skia";
 import { useImage, useTouchHandler } from "@shopify/react-native-skia";
 
 import {
@@ -21,7 +20,7 @@ import { useUxContext } from "./useUxContext";
 
 const osloImg = require("../../../assets/card.png");
 
-export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
+export const useTouchDrawing = () => {
   const prevPointRef = useRef<Point>();
   const drawContext = useDrawContext();
   const uxContext = useUxContext();
@@ -94,9 +93,6 @@ export const useTouchDrawing = (skiaViewRef: React.RefObject<SkiaView>) => {
               });
             }
           }
-
-          // Redraw
-          skiaViewRef.current?.redraw();
         }
       }
       prevPointRef.current = { x, y };
