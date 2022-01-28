@@ -78,5 +78,3 @@ const ImageDemo = () => {
 | width             | Returns the possibly scaled width of the image.                                       |
 | encodeToBytes     | Encodes Image pixels, returning result as UInt8Array                                  |
 | encodeToBase64    | Encodes Image pixels, returning result as a base64 encoded string                     |
-| makeShaderOptions | Returns this image as a shader with the specified tiling. It will use cubic sampling. |
-| makeShaderCubic   | Returns this image as a shader with the specified tiling. It will use cubic sampling. |
