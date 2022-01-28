@@ -2,7 +2,7 @@
 id: contexts
 title: Contexts
 sidebar_label: Contexts
-slug: /getting-started/contexts
+slug: /canvas/contexts
 ---
 
 React Native Skia is using its own React renderer.

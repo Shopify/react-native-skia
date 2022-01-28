@@ -2,10 +2,10 @@
 
 import React from "react";
 
-import { NativeSkiaView } from "./types";
-import type { RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
+import type { IRect } from "../skia";
 
-import type { DrawMode } from ".";
+import { NativeSkiaView } from "./types";
+import type { DrawMode, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
 
 let SkiaViewNativeId = 1000;
 
@@ -38,6 +38,16 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
         setDrawCallback(this._nativeId, onDraw);
       }
     }
+  }
+
+  /**
+   * Creates a snapshot from the canvas in the surface
+   * @param rect Rect to use as bounds. Optional.
+   * @returns An Image object.
+   */
+  public makeImageSnapshot(rect?: IRect) {
+    assertDrawCallbacksEnabled();
+    return makeImageSnapshot(this._nativeId, rect);
   }
 
   /**
@@ -118,6 +128,10 @@ const setDrawCallback = (
 
 export const invalidateSkiaView = (nativeId: string) => {
   SkiaViewApi.invalidateSkiaView(parseInt(nativeId, 10));
+};
+
+export const makeImageSnapshot = (nativeId: string, rect?: IRect) => {
+  return SkiaViewApi.makeImageSnapshot(parseInt(nativeId, 10), rect);
 };
 
 const setDrawingModeForSkiaView = (nativeId: string, mode: DrawMode) => {

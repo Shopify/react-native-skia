@@ -33,7 +33,7 @@ export const HomeScreen: React.FC = () => {
         route="Matrix"
       />
       <HomeScreenButton
-        title="Drawing"
+        title="🖌 Drawing"
         description="Use touches to draw with Skia"
         route="Drawing"
       />
@@ -43,7 +43,7 @@ export const HomeScreen: React.FC = () => {
         route="Graphs"
       />
       <HomeScreenButton
-        title="Animation"
+        title="🎥 Animation"
         description="Animated with Skia"
         route="Animation"
       />
