@@ -462,6 +462,11 @@ public:
 
   JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}
+
+  JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context, SkCanvas* canvas): JsiSkCanvas(context) {
+    setCanvas(canvas);
+  }
+
   void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
   SkCanvas *getCanvas() { return _canvas; }
 
