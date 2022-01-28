@@ -45,6 +45,54 @@ export const CoonsPatchMeshGradient = ({
   const rows = new Array(rowNum).fill(0).map((_, i) => i);
   const cols = new Array(colNum).fill(0).map((_, i) => i);
   const size = vec(width, height);
+  const patches = rows
+    .map((row) =>
+      cols.map((col) => {
+        const x = dx * col;
+        const y = dy * row;
+        const tl = vec(x, y);
+        const tr = vec(x + dx, y);
+        const br = vec(x + dx, y + dy);
+        const bl = vec(x, y + dy);
+        // const tlCl = bilinearInterpolate(colors, size, tl);
+        // const trCl = bilinearInterpolate(colors, size, tr);
+        // const brCl = bilinearInterpolate(colors, size, br);
+        // const blCl = bilinearInterpolate(colors, size, bl);
+        const topLeft = {
+          src: tl,
+          c1: tl,
+          c2: tl,
+        };
+        const topRight = {
+          src: tr,
+          c1: tr,
+          c2: tr,
+        };
+        const bottomRight = {
+          src: br,
+          c1: br,
+          c2: br,
+        };
+        const bottomLeft = {
+          src: bl,
+          c1: bl,
+          c2: bl,
+        };
+        return [topLeft, topRight, bottomRight, bottomLeft] as const;
+      })
+    )
+    .flat();
+  const nonEdges = patches
+    .flat()
+    .map(({ src }) => src)
+    .filter(({ x, y }) => !(x === 0 || y === 0 || x === width || y === height))
+    .reduce((acc, { x, y }) => {
+      const found = acc.find((v) => v.x === x && v.y === y);
+      if (!found) {
+        acc.push({ x, y });
+      }
+      return acc;
+    }, [] as Vector[]);
   return (
     <Canvas style={{ width, height }}>
       <Paint>
@@ -53,56 +101,15 @@ export const CoonsPatchMeshGradient = ({
           rect={{ x: 0, y: 0, width, height }}
         />
       </Paint>
-      {rows.map((row) =>
-        cols.map((col) => {
-          const x = dx * col;
-          const y = dy * row;
-          const tl = vec(x, y);
-          const tr = vec(x + dx, y);
-          const br = vec(x + dx, y + dy);
-          const bl = vec(x, y + dy);
-          const tlCl = bilinearInterpolate(colors, size, tl);
-          const trCl = bilinearInterpolate(colors, size, tr);
-          const brCl = bilinearInterpolate(colors, size, br);
-          const blCl = bilinearInterpolate(colors, size, bl);
-          const topLeft = {
-            src: tl,
-            c1: tl,
-            c2: tl,
-          };
-          const topRight = {
-            src: tr,
-            c1: tr,
-            c2: tr,
-          };
-          const bottomRight = {
-            src: br,
-            c1: br,
-            c2: br,
-          };
-          const bottomLeft = {
-            src: bl,
-            c1: bl,
-            c2: bl,
-          };
-          return (
-            <React.Fragment key={`${col}-${row}`}>
-              <Patch
-                key={`${col}-${row}`}
-                cubics={[topLeft, topRight, bottomRight, bottomLeft]}
-              />
-              <Circle r={10} c={topLeft.src} color={tlCl} />
-              <Circle
-                r={10}
-                c={topLeft.src}
-                style="stroke"
-                color="white"
-                strokeWidth={4}
-              />
-            </React.Fragment>
-          );
-        })
-      )}
+      {patches.map((patch, key) => (
+        <Patch key={key} patch={patch} />
+      ))}
+      {nonEdges.map((pos, key) => (
+        <Circle r={10} c={pos} key={key}>
+          <Paint color="red" />
+          <Paint color="white" style="stroke" strokeWidth={4} />
+        </Circle>
+      ))}
     </Canvas>
   );
 };
