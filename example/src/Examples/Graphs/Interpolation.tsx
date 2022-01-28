@@ -33,7 +33,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
   }, [progress, toggled]);
 
   return (
-    <View style={{ height }} onTouchEnd={onPress}>
+    <View style={{ height, marginBottom: 10 }} onTouchEnd={onPress}>
       <Canvas style={styles.graph}>
         <Fill color="black" />
         <Paint>

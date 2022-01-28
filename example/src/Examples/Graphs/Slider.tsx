@@ -1,4 +1,6 @@
+import type { IPath } from "@shopify/react-native-skia";
 import {
+  Line,
   Canvas,
   Circle,
   Fill,
@@ -7,6 +9,7 @@ import {
   Path,
   useTouchHandler,
   useValue,
+  Text as SkiaText,
   vec,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
@@ -21,14 +24,17 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
     [height, width]
   );
 
-  const progress = useValue(width / 2);
+  const progress = useValue(
+    getPointAtPositionInPath(width / 2, width, 60, path)
+  );
 
   const touchHandler = useTouchHandler({
-    onActive: ({ x }) => (progress.value = Math.max(1, Math.min(width, x))),
+    onActive: ({ x }) =>
+      (progress.value = getPointAtPositionInPath(x, width, 60, path)),
   });
 
   return (
-    <View style={{ height }}>
+    <View style={{ height, marginBottom: 10 }}>
       <Canvas style={styles.graph} onTouch={touchHandler}>
         <Fill color="black" />
         <Paint>
@@ -46,21 +52,43 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
           strokeCap="round"
         />
         <Paint color="#fff" />
-        <Circle
-          cx={() => progress.value - 5}
-          cy={() => path.getPoint(Math.round(progress.value / (width / 60))).y}
-          r={10}
+        <Circle c={() => progress.value} r={10} />
+        <Circle color="#DA4167" c={() => progress.value} r={7.5} />
+        <SkiaText
+          familyName="Arial"
+          size={12}
+          x={() => progress.value.x - 24}
+          y={() => progress.value.y - 18}
+          value={() => "$ " + progress.value.x.toFixed(2)}
         />
-        <Circle
-          color="#DA4167"
-          cx={() => progress.value - 5}
-          cy={() => path.getPoint(Math.round(progress.value / (width / 60))).y}
-          r={7.5}
+        <Line
+          p1={() => vec(progress.value.x, progress.value.y + 14)}
+          p2={() => vec(progress.value.x, height)}
         />
       </Canvas>
       <Text>Touch and drag to move center point</Text>
     </View>
   );
+};
+
+const getPointAtPositionInPath = (
+  x: number,
+  width: number,
+  steps: number,
+  path: IPath
+) => {
+  const index = Math.max(0, Math.floor(x / (width / steps)));
+  const fraction = (x / (width / steps)) % 1;
+  const p1 = path.getPoint(index);
+  if (index < path.countPoints() - 1) {
+    const p2 = path.getPoint(index + 1);
+    // Interpolate between p1 and p2
+    return {
+      x: p1.x + (p2.x - p1.x) * fraction,
+      y: p1.y + (p2.y - p1.y) * fraction,
+    };
+  }
+  return p1;
 };
 
 const styles = StyleSheet.create({

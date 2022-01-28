@@ -12,8 +12,8 @@ export const createGraphPath = (
   const prevPt = { x: 0, y };
   for (let i = 0; i < width; i += width / steps) {
     // increase y by a random amount between -10 and 10
-    y += Math.random() * 20 - 10;
-    y = Math.max(height * 0.1, Math.min(y, height * 0.8));
+    y += Math.random() * 30 - 15;
+    y = Math.max(height * 0.2, Math.min(y, height * 0.7));
 
     if (round && i > 0) {
       const xMid = (prevPt.x + i) / 2;

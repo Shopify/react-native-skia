@@ -1,14 +1,14 @@
 import {
   Canvas,
+  Easing,
   Fill,
   LinearGradient,
   Paint,
   Path,
-  Spring,
   useValue,
   vec,
 } from "@shopify/react-native-skia";
-import { runSpring } from "@shopify/react-native-skia/src/animation/Animation/functions";
+import { runTiming } from "@shopify/react-native-skia/src/animation/Animation/functions";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -16,11 +16,11 @@ import { createGraphPath, createZeroPath } from "./createGraphPath";
 import type { GraphProps } from "./types";
 
 export const MountAnimation: React.FC<GraphProps> = ({ height, width }) => {
-  const path = useMemo(
+  const zeroPath = useMemo(
     () => createZeroPath(width, height, 60),
     [height, width]
   );
-  const path2 = useMemo(
+  const path = useMemo(
     () => createGraphPath(width, height, 60, false),
     [height, width]
   );
@@ -30,11 +30,15 @@ export const MountAnimation: React.FC<GraphProps> = ({ height, width }) => {
   const onPress = useCallback(() => setToggled((p) => !p), []);
 
   useEffect(() => {
-    runSpring(progress, toggled ? 1 : 0, Spring.Config.Gentle);
+    runTiming(progress, {
+      to: toggled ? 1 : 0,
+      duration: 350,
+      easing: Easing.inOut(Easing.cubic),
+    });
   }, [progress, toggled]);
 
   return (
-    <View style={{ height }} onTouchEnd={onPress}>
+    <View style={{ height, marginBottom: 10 }} onTouchEnd={onPress}>
       <Canvas style={styles.graph}>
         <Fill color="black" />
         <Paint>
@@ -45,14 +49,14 @@ export const MountAnimation: React.FC<GraphProps> = ({ height, width }) => {
           />
         </Paint>
         <Path
-          path={() => path.interpolate(path2, progress.value)}
+          path={() => path.interpolate(zeroPath, progress.value)}
           strokeWidth={4}
           style="stroke"
           strokeJoin="round"
           strokeCap="round"
         />
       </Canvas>
-      <Text>Touch graph to "mount"</Text>
+      <Text>Touch to toggle between "unmounted" and "mounted"</Text>
     </View>
   );
 };
