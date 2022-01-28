@@ -1,5 +1,6 @@
-import type { Vector } from "@shopify/react-native-skia";
+import type { CubicBezier, Vector } from "@shopify/react-native-skia";
 import {
+  useValue,
   Paint,
   mixColors,
   Circle,
@@ -11,6 +12,8 @@ import {
 import React from "react";
 
 import { BilinearGradient } from "./BilinearGradient";
+import type { Mesh } from "./Cubic";
+import { Cubic } from "./Cubic";
 
 const bilinearInterpolate = (
   [color0, color1, color2, color3]: number[],
@@ -44,72 +47,61 @@ export const CoonsPatchMeshGradient = ({
   const rows = new Array(rowNum).fill(0).map((_, i) => i);
   const cols = new Array(colNum).fill(0).map((_, i) => i);
   const size = vec(width, height);
-  const patches = rows
-    .map((row) =>
-      cols.map((col) => {
-        const x = dx * col;
-        const y = dy * row;
-        const tl = vec(x, y);
-        const tr = vec(x + dx, y);
-        const br = vec(x + dx, y + dy);
-        const bl = vec(x, y + dy);
-        const tlCl = bilinearInterpolate(colors, size, tl);
-        const trCl = bilinearInterpolate(colors, size, tr);
-        const brCl = bilinearInterpolate(colors, size, br);
-        const blCl = bilinearInterpolate(colors, size, bl);
-        const topLeft = {
-          src: tl,
-          c1: tl,
-          c2: tl,
-        };
-        const topRight = {
-          src: tr,
-          c1: tr,
-          c2: tr,
-        };
-        const bottomRight = {
-          src: br,
-          c1: br,
-          c2: br,
-        };
-        const bottomLeft = {
-          src: bl,
-          c1: bl,
-          c2: bl,
-        };
-        return {
-          patch: [topLeft, topRight, bottomRight, bottomLeft] as const,
-          colors: [tlCl, trCl, brCl, blCl] as const,
-        };
-      })
+  const flatMesh = [...rows, rowNum].map((row) =>
+    [...cols, colNum].map((col) => {
+      const src = vec(dx * col, dy * row);
+      return {
+        src,
+        c1: src,
+        c2: src,
+      };
+    })
+  );
+  const nonEdges = flatMesh
+    .map((row, i) =>
+      row.map(({ src: { x, y } }, col) => ({
+        row: i,
+        col,
+        edge: x === 0 || y === 0 || x === width || y === height,
+      }))
     )
-    .flat();
-  const nonEdges = patches
-    .map(({ patch }) => patch)
     .flat()
-    .map(({ src }) => src)
-    .filter(({ x, y }) => !(x === 0 || y === 0 || x === width || y === height))
-    .reduce((acc, { x, y }) => {
-      const found = acc.find((v) => v.x === x && v.y === y);
-      if (!found) {
-        acc.push({ x, y });
-      }
-      return acc;
-    }, [] as Vector[]);
+    .filter(({ edge }) => !edge);
+  const mesh = useValue(flatMesh);
   return (
     <Canvas style={{ width, height }}>
       <Paint>
         <BilinearGradient colors={colors} size={size} />
       </Paint>
-      {patches.map((data, key) => (
-        <Patch key={key} patch={data.patch} />
-      ))}
-      {nonEdges.map((pos, key) => (
-        <Circle r={10} c={pos} key={key}>
-          <Paint color={bilinearInterpolate(colors, size, pos)} />
-          <Paint color="white" style="stroke" strokeWidth={4} />
-        </Circle>
-      ))}
+      {rows.map((row) =>
+        cols.map((col) => (
+          <Patch
+            key={`patch-${row}-${col}`}
+            patch={() => [
+              mesh.value[row][col],
+              mesh.value[row][col + 1],
+              mesh.value[row + 1][col + 1],
+              mesh.value[row + 1][col],
+            ]}
+          />
+        ))
+      )}
+      {nonEdges.map(({ row, col }) => {
+        const color = bilinearInterpolate(
+          colors,
+          size,
+          mesh.value[row][col].src
+        );
+        return (
+          <Cubic
+            key={`cubic-${row}-${col}`}
+            mesh={mesh}
+            row={row}
+            col={col}
+            color={color}
+          />
+        );
+      })}
     </Canvas>
   );
 };

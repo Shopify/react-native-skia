@@ -12,7 +12,7 @@ import { BlendMode } from "../../../skia/Paint/BlendMode";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
 
-interface CubicBezier {
+export interface CubicBezier {
   src: Vector;
   c1: Vector;
   c2: Vector;
