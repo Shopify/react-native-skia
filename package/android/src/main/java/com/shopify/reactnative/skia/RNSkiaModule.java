@@ -68,7 +68,7 @@ public class RNSkiaModule extends ReactContextBaseJavaModule implements Lifecycl
             skiaManager = new SkiaManager(context);
             return true;
         } catch (Exception exception) {
-            Log.e(NAME, "Failed to initialize Skia Manager!", exception)
+            Log.e(NAME, "Failed to initialize Skia Manager!", exception);
             return false;
         }
     }
