@@ -18,9 +18,6 @@ public class RNSkiaModule extends ReactContextBaseJavaModule implements Lifecycl
     private final WeakReference<ReactApplicationContext> weakReactContext;
     private SkiaManager skiaManager;
 
-    static {
-    }
-
     public RNSkiaModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.weakReactContext = new WeakReference<>(reactContext);
