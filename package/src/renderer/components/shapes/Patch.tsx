@@ -21,21 +21,21 @@ export interface CubicBezier {
 export interface PatchProps extends CustomPaintProps {
   colors?: readonly ColorProp[];
   patch: readonly [CubicBezier, CubicBezier, CubicBezier, CubicBezier];
-  texs?: IPoint[];
+  textures?: IPoint[];
   blendMode?: SkEnum<typeof BlendMode>;
 }
 
 export const Patch = (props: AnimatedProps<PatchProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint, opacity }, { colors, patch, texs, blendMode }) => {
+    ({ canvas, paint, opacity }, { colors, patch, textures, blendMode }) => {
       // If the colors are provided, the default blendMode is set to dstOver, if not, the default is set to srcOver
       const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
       const mode = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
       canvas.drawPatch(
         patch.map(({ src, c1, c2 }) => [src, c1, c2]).flat(),
         colors ? colors.map((c) => processColor(c, opacity)) : undefined,
-        texs,
+        textures,
         mode,
         paint
       );

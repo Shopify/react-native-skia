@@ -1,9 +1,12 @@
-import type { CubicBezier, Vector } from "@shopify/react-native-skia";
+import type { Vector } from "@shopify/react-native-skia";
 import {
+  add,
+  Fill,
+  dist,
+  useTouchHandler,
   useValue,
   Paint,
   mixColors,
-  Circle,
   Canvas,
   Patch,
   processColor,
@@ -12,8 +15,10 @@ import {
 import React from "react";
 
 import { BilinearGradient } from "./BilinearGradient";
-import type { Mesh } from "./Cubic";
 import { Cubic } from "./Cubic";
+
+const C = 0; //50;
+const inRadius = (a: Vector, b: Vector, r = 20) => dist(a, b) < r;
 
 const bilinearInterpolate = (
   [color0, color1, color2, color3]: number[],
@@ -52,8 +57,8 @@ export const CoonsPatchMeshGradient = ({
       const src = vec(dx * col, dy * row);
       return {
         src,
-        c1: src,
-        c2: src,
+        c1: add(src, vec(0, C)),
+        c2: add(src, vec(C, 0)),
       };
     })
   );
@@ -68,8 +73,37 @@ export const CoonsPatchMeshGradient = ({
     .flat()
     .filter(({ edge }) => !edge);
   const mesh = useValue(flatMesh);
+  const onTouch = useTouchHandler({
+    onActive: (pt) => {
+      nonEdges.forEach(({ row, col }) => {
+        const { src, c1, c2 } = mesh.value[row][col];
+        if (inRadius(pt, src)) {
+          mesh.value[row][col] = {
+            src: pt,
+            c1,
+            c2,
+          };
+          mesh.value = [...mesh.value];
+        } else if (inRadius(pt, c1)) {
+          mesh.value[row][col] = {
+            src,
+            c1: pt,
+            c2,
+          };
+          mesh.value = [...mesh.value];
+        } else if (inRadius(pt, c2)) {
+          mesh.value[row][col] = {
+            src,
+            c1,
+            c2: pt,
+          };
+          mesh.value = [...mesh.value];
+        }
+      });
+    },
+  });
   return (
-    <Canvas style={{ width, height }}>
+    <Canvas style={{ width, height }} onTouch={onTouch}>
       <Paint>
         <BilinearGradient colors={colors} size={size} />
       </Paint>
@@ -82,6 +116,12 @@ export const CoonsPatchMeshGradient = ({
               mesh.value[row][col + 1],
               mesh.value[row + 1][col + 1],
               mesh.value[row + 1][col],
+            ]}
+            textures={[
+              flatMesh[row][col].src,
+              flatMesh[row][col + 1].src,
+              flatMesh[row + 1][col + 1].src,
+              flatMesh[row + 1][col].src,
             ]}
           />
         ))
