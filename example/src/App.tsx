@@ -3,7 +3,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 
-import { AnimationExample, DrawingExample } from "./Examples";
+import { AnimationExample, DrawingExample, GraphsScreen } from "./Examples";
 import { API } from "./Examples/API";
 import { Breathe } from "./Examples/Breathe";
 import { Filters } from "./Examples/Filters";
@@ -40,6 +40,7 @@ const App = () => {
             }}
           />
           <Stack.Screen name="Drawing" component={DrawingExample} />
+          <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
         </Stack.Navigator>
       </NavigationContainer>

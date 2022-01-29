@@ -18,14 +18,16 @@ const sidebars = {
       collapsed: false,
       type: "category",
       label: "Getting started",
-      items: [
-        "getting-started/installation",
-        "getting-started/hello-world",
-        "getting-started/contexts",
-      ],
+      items: ["getting-started/installation", "getting-started/hello-world"],
     },
     {
-      collapsed: false,
+      collapsed: true,
+      type: "category",
+      label: "Canvas",
+      items: ["canvas/canvas", "canvas/contexts"],
+    },
+    {
+      collapsed: true,
       type: "category",
       label: "Paint",
       items: ["paint/overview", "paint/properties"],
@@ -36,19 +38,19 @@ const sidebars = {
       id: "group",
     },
     {
-      collapsed: false,
+      collapsed: true,
       type: "category",
       label: "Image",
       items: ["image", "image-svg"],
     },
     {
-      collapsed: false,
+      collapsed: true,
       type: "category",
       label: "Text",
       items: ["text/fonts", "text/text"],
     },
     {
-      collapsed: false,
+      collapsed: true,
       type: "category",
       label: "Shaders",
       items: [
@@ -60,13 +62,13 @@ const sidebars = {
       ],
     },
     {
-      collapsed: false,
+      collapsed: true,
       type: "category",
       label: "Effects",
       items: ["mask-filters", "color-filters", "image-filters", "path-effects"],
     },
     {
-      collapsed: false,
+      collapsed: true,
       type: "category",
       label: "Shapes",
       items: [
@@ -77,7 +79,7 @@ const sidebars = {
       ],
     },
     {
-      collapsed: false,
+      collapsed: true,
       type: "category",
       label: "Animations",
       items: ["animations/overview", "animations/reanimated"],

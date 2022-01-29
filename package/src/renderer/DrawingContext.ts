@@ -11,7 +11,7 @@ export interface DrawingContext extends Omit<DrawingInfo, "touches"> {
   paint: IPaint;
   opacity: number;
   center: Vector;
-  skiaRef: RefObject<SkiaView>;
+  ref: RefObject<SkiaView>;
   getTouches(): Array<Array<TouchInfo>>;
   fontMgr: FontMgr;
 }
