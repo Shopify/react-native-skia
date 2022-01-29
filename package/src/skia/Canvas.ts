@@ -3,7 +3,7 @@ import type { IRect } from "./Rect";
 import type { Font } from "./Font";
 import type { IPath } from "./Path";
 import type { IImage } from "./Image";
-import type { SVG } from "./Svg";
+import type { SVG } from "./SVG";
 import type { Color } from "./Color";
 import type { IRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
