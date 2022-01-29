@@ -1,9 +1,8 @@
 import React from "react";
-import type { ColorProp, IRect, Vector } from "@shopify/react-native-skia";
+import type { ColorProp, Vector } from "@shopify/react-native-skia";
 import {
   processColorAsUnitArray,
   Shader,
-  vec,
   Skia,
 } from "@shopify/react-native-skia";
 

@@ -1,5 +1,8 @@
 import type { Vector } from "@shopify/react-native-skia";
 import {
+  rect,
+  useImage,
+  ImageShader,
   add,
   Fill,
   dist,
@@ -17,8 +20,9 @@ import React from "react";
 import { BilinearGradient } from "./BilinearGradient";
 import { Cubic } from "./Cubic";
 
-const C = 0; //50;
+const C = 0;
 const inRadius = (a: Vector, b: Vector, r = 20) => dist(a, b) < r;
+const cubic = (src: Vector) => ({ src, c1: src, c2: src });
 
 const bilinearInterpolate = (
   [color0, color1, color2, color3]: number[],
@@ -105,8 +109,35 @@ export const CoonsPatchMeshGradient = ({
   return (
     <Canvas style={{ width, height }} onTouch={onTouch}>
       <Paint>
-        <BilinearGradient colors={colors} size={size} />
+        <ImageShader
+          source={require("../../../assets/oslo.jpg")}
+          fit="cover"
+          rect={rect(0, 0, width, height)}
+        />
       </Paint>
+      {/* <Patch
+        patch={() => [
+          cubic(vec(0, 0)),
+          cubic(vec(dx, 0)),
+          cubic(vec(dx, dy)),
+          cubic(vec(0, dy)),
+        ]}
+        textures={() => [vec(0, 0), vec(dx, 0), vec(dx, dy), vec(0, dy)]}
+      />
+      <Patch
+        patch={() => [
+          cubic(vec(dx, 0)),
+          cubic(vec(2 * dx, 0)),
+          cubic(vec(2 * dx, dy)),
+          cubic(vec(dx, dy)),
+        ]}
+        textures={() => [
+          vec(dx, 0),
+          vec(2 * dx, 0),
+          vec(2 * dx, dy),
+          vec(dx, dy),
+        ]}
+      /> */}
       {rows.map((row) =>
         cols.map((col) => (
           <Patch
