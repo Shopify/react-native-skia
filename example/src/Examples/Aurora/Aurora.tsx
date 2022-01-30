@@ -1,9 +1,8 @@
 import React from "react";
 import { Dimensions } from "react-native";
 
-import { CoonsPatchMeshGradient } from "./components/CoonsPatchMeshGradient";
-
-const { width, height } = Dimensions.get("window");
+//import { CoonsPatchMeshGradient } from "./components/CoonsPatchMeshGradient";
+import { PatchMeshGradient } from "./components/PatchMeshGradient";
 
 // #FEF8C4
 // #372CE6
@@ -11,13 +10,13 @@ const { width, height } = Dimensions.get("window");
 // #DC4C87
 export const Aurora = () => {
   return (
-    <CoonsPatchMeshGradient
-      rows={2}
-      cols={2}
-      //colors={["red", "blue", "green", "yellow"]}
-      colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
-      width={width}
-      height={height}
+    <PatchMeshGradient
+    // rows={2}
+    // cols={2}
+    // //colors={["red", "blue", "green", "yellow"]}
+    // colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
+    // width={width}
+    // height={height}
     />
   );
 };
