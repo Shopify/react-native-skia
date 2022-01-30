@@ -18,6 +18,27 @@ import { Cubic } from "./Cubic";
 const inRadius = (a: Vector, b: Vector, r = 40) => dist(a, b) < r;
 
 //interface PatchMeshGradientProps {}
+enum CubicCtrlPts {
+  TopP0 = 0,
+  TopP1 = 1,
+  TopP2 = 2,
+  TopP3 = 3,
+
+  RightP0 = 3,
+  RightP1 = 4,
+  RightP2 = 5,
+  RightP3 = 6,
+
+  BottomP0 = 9,
+  BottomP1 = 8,
+  BottomP2 = 7,
+  BottomP3 = 6,
+
+  LeftP0 = 0,
+  LeftP1 = 11,
+  LeftP2 = 10,
+  LeftP3 = 9,
+}
 
 const c = (
   pos: AnimationValue<Vector>,
@@ -84,26 +105,10 @@ export const PatchMeshGradient = () => {
           rect={rect(0, 0, width, height)}
         />
       </Paint>
-      <Patch
-        patch={rectToPatch(r1)}
-        textures={rectToTexture(r1)}
-        // colors={["red", "green", "yellow", "blue"]}
-      />
-      <Patch
-        patch={rectToPatch(r2)}
-        textures={rectToTexture(r2)}
-        //        colors={["red", "green", "yellow", "blue"]}
-      />
-      <Patch
-        patch={rectToPatch(r3)}
-        textures={rectToTexture(r3)}
-        //         colors={["red", "green", "yellow", "blue"]}
-      />
-      <Patch
-        patch={rectToPatch(r4)}
-        textures={rectToTexture(r4)}
-        //        colors={["red", "green", "yellow", "blue"]}
-      />
+      <Patch patch={rectToPatch(r1)} texture={rectToTexture(r1)} />
+      <Patch patch={rectToPatch(r2)} texture={rectToTexture(r2)} />
+      <Patch patch={rectToPatch(r3)} texture={rectToTexture(r3)} />
+      <Patch patch={rectToPatch(r4)} texture={rectToTexture(r4)} />
       <Cubic pos={P4} />
     </Canvas>
   );

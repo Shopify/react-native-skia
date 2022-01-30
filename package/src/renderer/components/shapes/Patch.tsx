@@ -44,14 +44,14 @@ export interface CubicBezier {
 export interface PatchProps extends CustomPaintProps {
   colors?: readonly ColorProp[];
   patch: readonly Vector[]; //readonly [CubicBezier, CubicBezier, CubicBezier, CubicBezier];
-  textures?: readonly [IPoint, IPoint, IPoint, IPoint];
+  texture?: readonly [IPoint, IPoint, IPoint, IPoint];
   blendMode?: SkEnum<typeof BlendMode>;
 }
 
 export const Patch = (props: AnimatedProps<PatchProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint, opacity }, { colors, patch, textures, blendMode }) => {
+    ({ canvas, paint, opacity }, { colors, patch, texture, blendMode }) => {
       // If the colors are provided, the default blendMode is set to dstOver, if not, the default is set to srcOver
       const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
       const mode = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
@@ -59,7 +59,7 @@ export const Patch = (props: AnimatedProps<PatchProps>) => {
         // https://github.com/google/skia/blob/main/src/utils/SkPatchUtils.cpp#L20
         patch,
         colors ? colors.map((c) => processColor(c, opacity)) : undefined,
-        textures,
+        texture,
         mode,
         paint
       );
