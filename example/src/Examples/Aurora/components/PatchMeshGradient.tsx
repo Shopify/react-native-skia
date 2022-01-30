@@ -44,7 +44,7 @@ const rectToPatch =
     AnimationValue<Vector>
   ]) =>
   () =>
-    [c(tl, bl, tl), c(tr, tl, tr), c(br, tr, br), c(bl, br, bl)] as const;
+    [tl, tl, tr, tr, tr, br, br, br, bl, bl, bl, tl].map((v) => v.value);
 
 const { width, height } = Dimensions.get("window");
 const dx = width / 2;
