@@ -92,20 +92,20 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
       const drawingContext = peekDrawingContext();
       if (drawingContext !== undefined) {
         // Save view ref connection.
-        if (this._animationViews.indexOf(drawingContext.skiaRef) === -1) {
-          this._animationViews.push(drawingContext.skiaRef);
+        if (this._animationViews.indexOf(drawingContext.ref) === -1) {
+          this._animationViews.push(drawingContext.ref);
         }
 
         // Check if we have an ongoing animation
         if (this._animation) {
           // Make sure the skia view is aware that there are animations running
-          drawingContext.skiaRef.current?.addAnimation(this._animation);
+          drawingContext.ref.current?.addAnimation(this._animation);
           // Update value from the current animation - do not call the
           // value property since it will stop the animation
           this._value = this._animation(drawingContext.timestamp) as never as T;
         } else {
           // Stop the skia view from running animations
-          drawingContext.skiaRef.current?.removeAnimation(this._animation);
+          drawingContext.ref.current?.removeAnimation(this._animation);
         }
       }
     }

@@ -38,17 +38,17 @@ void RNSkManager::invalidate() {
 }
 
 void RNSkManager::registerSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
-  if (_viewApi != nullptr)
+  if (_viewApi != nullptr && _platformContext != nullptr && _jsCallInvoker != nullptr)
     _viewApi->registerSkiaDrawView(nativeId, view);
 }
 
 void RNSkManager::unregisterSkiaDrawView(size_t nativeId) {
-  if (_viewApi != nullptr)
+  if (_viewApi != nullptr && _platformContext != nullptr && _jsCallInvoker != nullptr)
     _viewApi->unregisterSkiaDrawView(nativeId);
 }
 
 void RNSkManager::setSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
-  if (_viewApi != nullptr)
+  if (_viewApi != nullptr && _platformContext != nullptr && _jsCallInvoker != nullptr)
     _viewApi->setSkiaDrawView(nativeId, view);
 }
 
