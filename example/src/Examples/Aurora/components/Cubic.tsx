@@ -17,16 +17,16 @@ export const Cubic = ({ row, col, mesh, color }: CubicProps) => {
       <Line
         strokeWidth={2}
         color="white"
-        p1={() => mesh.value[row][col].src}
+        p1={() => mesh.value[row][col].pos}
         p2={() => mesh.value[row][col].c1}
       />
       <Line
         strokeWidth={2}
         color="white"
-        p1={() => mesh.value[row][col].src}
+        p1={() => mesh.value[row][col].pos}
         p2={() => mesh.value[row][col].c2}
       />
-      <Circle c={() => mesh.value[row][col].src} r={16} color={color}>
+      <Circle c={() => mesh.value[row][col].pos} r={16} color={color}>
         <Paint style="stroke" strokeWidth={4} color="white" />
       </Circle>
       <Circle c={() => mesh.value[row][col].c1} r={10} color="white" />

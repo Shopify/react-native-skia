@@ -14,8 +14,8 @@ export const Aurora = () => {
     <CoonsPatchMeshGradient
       rows={2}
       cols={2}
-      colors={["red", "blue", "green", "yellow"]}
-      //colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
+      //colors={["red", "blue", "green", "yellow"]}
+      colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
       width={width}
       height={height}
     />

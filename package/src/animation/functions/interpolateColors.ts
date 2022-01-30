@@ -1,5 +1,3 @@
-import { Platform } from "react-native";
-
 import { Color } from "../../skia/Color";
 import type { ColorProp } from "../../renderer/processors/Colors";
 import {

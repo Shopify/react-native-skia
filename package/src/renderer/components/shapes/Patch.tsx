@@ -13,7 +13,7 @@ import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
 
 export interface CubicBezier {
-  src: Vector;
+  pos: Vector;
   c1: Vector;
   c2: Vector;
 }
@@ -33,7 +33,21 @@ export const Patch = (props: AnimatedProps<PatchProps>) => {
       const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
       const mode = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
       canvas.drawPatch(
-        patch.map(({ src, c1, c2 }) => [src, c1, c2]).flat(),
+        // https://github.com/google/skia/blob/main/src/utils/SkPatchUtils.cpp#L20
+        [
+          patch[0].pos,
+          patch[0].c2,
+          patch[1].c1,
+          patch[1].pos,
+          patch[1].c2,
+          patch[2].c1,
+          patch[2].pos,
+          patch[2].c2,
+          patch[3].c1,
+          patch[3].pos,
+          patch[3].c2,
+          patch[0].c1,
+        ],
         colors ? colors.map((c) => processColor(c, opacity)) : undefined,
         textures,
         mode,
