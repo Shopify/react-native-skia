@@ -29,6 +29,13 @@ const c = (
   c2: c2.value,
 });
 
+const rectToTexture = ([tl, tr, br, bl]: readonly [
+  AnimationValue<Vector>,
+  AnimationValue<Vector>,
+  AnimationValue<Vector>,
+  AnimationValue<Vector>
+]) => [tl.value, tr.value, br.value, bl.value] as const;
+
 const rectToPatch =
   ([tl, tr, br, bl]: readonly [
     AnimationValue<Vector>,
@@ -79,19 +86,22 @@ export const PatchMeshGradient = () => {
       </Paint>
       <Patch
         patch={rectToPatch(r1)}
-
+        textures={rectToTexture(r1)}
         // colors={["red", "green", "yellow", "blue"]}
       />
       <Patch
         patch={rectToPatch(r2)}
+        textures={rectToTexture(r2)}
         //        colors={["red", "green", "yellow", "blue"]}
       />
       <Patch
         patch={rectToPatch(r3)}
+        textures={rectToTexture(r3)}
         //         colors={["red", "green", "yellow", "blue"]}
       />
       <Patch
         patch={rectToPatch(r4)}
+        textures={rectToTexture(r4)}
         //        colors={["red", "green", "yellow", "blue"]}
       />
       <Cubic pos={P4} />
