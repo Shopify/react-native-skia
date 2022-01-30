@@ -1,36 +1,31 @@
 import React from "react";
-import type { AnimationValue, CubicBezier } from "@shopify/react-native-skia";
-import { Line, Paint, Circle } from "@shopify/react-native-skia";
-
-export type Mesh = CubicBezier[][];
+import type { AnimationValue, Vector } from "@shopify/react-native-skia";
+import { Paint, Circle } from "@shopify/react-native-skia";
 
 interface CubicProps {
-  row: number;
-  col: number;
-  mesh: AnimationValue<Mesh>;
-  color: number;
+  pos: AnimationValue<Vector>;
 }
 
-export const Cubic = ({ row, col, mesh, color }: CubicProps) => {
+export const Cubic = ({ pos }: CubicProps) => {
   return (
     <>
-      <Line
+      {/* <Line
         strokeWidth={2}
         color="white"
-        p1={() => mesh.value[row][col].pos}
-        p2={() => mesh.value[row][col].c1}
+        p1={() => cubic.value.pos}
+        p2={() => cubic.value.c1}
       />
       <Line
         strokeWidth={2}
         color="white"
-        p1={() => mesh.value[row][col].pos}
-        p2={() => mesh.value[row][col].c2}
-      />
-      <Circle c={() => mesh.value[row][col].pos} r={16} color={color}>
+        p1={() => cubic.value.pos}
+        p2={() => cubic.value.c2}
+      /> */}
+      <Circle c={() => pos.value} r={16} color="black">
         <Paint style="stroke" strokeWidth={4} color="white" />
       </Circle>
-      <Circle c={() => mesh.value[row][col].c1} r={10} color="white" />
-      <Circle c={() => mesh.value[row][col].c2} r={10} color="white" />
+      {/* <Circle c={() => cubic.value.c1} r={10} color="white" />
+      <Circle c={() => cubic.value.c2} r={10} color="white" /> */}
     </>
   );
 };
