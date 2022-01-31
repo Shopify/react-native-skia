@@ -128,13 +128,11 @@ export const CoonsPatchMeshGradient = ({
       } else if (inRadius(pt, P4H.value)) {
         P4H.value = pt;
       } else if (inRadius(pt, P4H1)) {
-        const d = dist(pt, vertices.value[4]);
-        P4H.value = getPointAtLength(2 * d, pt, vertices.value[4]);
+        P4H.value = symmetric(pt, vertices.value[4]);
       } else if (inRadius(pt, P4V.value)) {
         P4V.value = pt;
       } else if (inRadius(pt, P4V1)) {
-        const d = dist(pt, vertices.value[4]);
-        P4V.value = getPointAtLength(2 * d, pt, vertices.value[4]);
+        P4V.value = symmetric(pt, vertices.value[4]);
       }
     },
   });
