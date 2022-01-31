@@ -3,7 +3,6 @@ import type { AnimationValue, Vector } from "@shopify/react-native-skia";
 import {
   sub,
   add,
-  dist,
   useTouchHandler,
   useValue,
   Canvas,
@@ -16,19 +15,10 @@ import {
 import { Dimensions } from "react-native";
 
 import { Cubic } from "./Cubic";
-import {
-  getPointAtLength,
-  inRadius,
-  bilinearInterpolate,
-  symmetric,
-} from "./Math";
+import { inRadius, bilinearInterpolate, symmetric } from "./Math";
 
 const { width, height } = Dimensions.get("window");
-const dx = width / 2;
-const dy = height / 2;
-const C = dx / 4;
 const size = vec(width, height);
-const debug = true;
 
 const rectToTexture = (
   vertices: Vector[],
@@ -52,7 +42,8 @@ const rectToPatch =
     vertices: AnimationValue<Vector[]>,
     indices: readonly number[],
     P4H: AnimationValue<Vector>,
-    P4V: AnimationValue<Vector>
+    P4V: AnimationValue<Vector>,
+    C: number
   ) =>
   () => {
     const tl = vertices.value[indices[0]];
@@ -86,26 +77,31 @@ const rectToPatch =
   };
 
 interface CoonsPatchMeshGradientProps {
+  handles: number;
   colors: string[];
+  debug?: boolean;
 }
 
 export const CoonsPatchMeshGradient = ({
+  handles,
   colors: rawColors,
+  debug,
 }: CoonsPatchMeshGradientProps) => {
   const colors = rawColors.map((color) => processColor(color, 1));
-  const P0 = vec(0, 0);
-  const P1 = vec(dx, 0);
-  const P2 = vec(dx * 2, 0);
+  const dx = width / (handles + 1);
+  const dy = height / (handles + 1);
+  const C = dx / 4;
 
-  const P3 = vec(0, dy);
   const P4 = vec(dx, dy);
-  const P5 = vec(dx * 2, dy);
 
-  const P6 = vec(0, 2 * dy);
-  const P7 = vec(dx, 2 * dy);
-  const P8 = vec(dx * 2, 2 * dy);
-
-  const defaultVertices = [P0, P1, P2, P3, P4, P5, P6, P7, P8];
+  const defaultVertices = new Array(handles + 2)
+    .fill(0)
+    .map((_c, col) =>
+      new Array(handles + 2).fill(0).map((_r, row) => {
+        return vec(row * dx, col * dy);
+      })
+    )
+    .flat(2);
 
   const vertices = useValue(defaultVertices);
   const P4H = useValue(add(P4, vec(-C, 0)));
@@ -115,6 +111,7 @@ export const CoonsPatchMeshGradient = ({
   const r2 = [1, 2, 5, 4] as const;
   const r3 = [3, 4, 7, 6] as const;
   const r4 = [4, 5, 8, 7] as const;
+  const rects = [r1, r2, r3, r4];
 
   const onTouch = useTouchHandler({
     onActive: (pt) => {
@@ -145,34 +142,16 @@ export const CoonsPatchMeshGradient = ({
           ty="repeat"
         />
       </Paint>
-      <Patch
-        patch={rectToPatch(vertices, r1, P4H, P4V)}
-        colors={rectToColors(colors, defaultVertices, r1)}
-        texture={rectToTexture(defaultVertices, r1)}
-        blendMode={debug ? "srcOver" : "dstOver"}
-        debug={debug}
-      />
-      <Patch
-        patch={rectToPatch(vertices, r2, P4H, P4V)}
-        colors={rectToColors(colors, defaultVertices, r2)}
-        blendMode={debug ? "srcOver" : "dstOver"}
-        texture={rectToTexture(defaultVertices, r2)}
-        debug={debug}
-      />
-      <Patch
-        patch={rectToPatch(vertices, r3, P4H, P4V)}
-        colors={rectToColors(colors, defaultVertices, r3)}
-        blendMode={debug ? "srcOver" : "dstOver"}
-        texture={rectToTexture(defaultVertices, r3)}
-        debug={debug}
-      />
-      <Patch
-        patch={rectToPatch(vertices, r4, P4H, P4V)}
-        colors={rectToColors(colors, defaultVertices, r4)}
-        texture={rectToTexture(defaultVertices, r4)}
-        blendMode={debug ? "srcOver" : "dstOver"}
-        debug={debug}
-      />
+      {rects.map((r, i) => (
+        <Patch
+          key={i}
+          patch={rectToPatch(vertices, r, P4H, P4V, C)}
+          colors={rectToColors(colors, defaultVertices, r)}
+          texture={rectToTexture(defaultVertices, r)}
+          blendMode={debug ? "srcOver" : "dstOver"}
+          debug={debug}
+        />
+      ))}
       <Cubic
         vertices={vertices}
         index={4}
