@@ -5,9 +5,13 @@ import { Paint, Circle } from "@shopify/react-native-skia";
 interface CubicProps {
   vertices: AnimationValue<Vector[]>;
   index: number;
+  c1: AnimationValue<Vector>;
+  c2: AnimationValue<Vector>;
+  c3: AnimationValue<Vector>;
+  c4: AnimationValue<Vector>;
 }
 
-export const Cubic = ({ vertices, index }: CubicProps) => {
+export const Cubic = ({ vertices, index, c1, c2, c3, c4 }: CubicProps) => {
   return (
     <>
       {/* <Line
@@ -25,8 +29,10 @@ export const Cubic = ({ vertices, index }: CubicProps) => {
       <Circle c={() => vertices.value[index]} r={16} color="black">
         <Paint style="stroke" strokeWidth={4} color="white" />
       </Circle>
-      {/* <Circle c={() => cubic.value.c1} r={10} color="white" />
-      <Circle c={() => cubic.value.c2} r={10} color="white" /> */}
+      <Circle c={() => c1.value} r={10} color="white" />
+      <Circle c={() => c2.value} r={10} color="white" />
+      <Circle c={() => c3.value} r={10} color="white" />
+      <Circle c={() => c4.value} r={10} color="white" />
     </>
   );
 };

@@ -38,25 +38,25 @@ const rectToPatch =
     return [
       {
         pos: tl,
-        c1: add(tl, vec(0, C)),
-        c2: add(tl, vec(C, 0)),
+        c1: indices[0] === 4 ? P4V.value : add(tl, vec(0, C)),
+        c2: indices[0] === 4 ? P4H.value : add(tl, vec(C, 0)),
       },
       {
         pos: tr,
-        c1: add(tr, vec(-C, 0)),
-        c2: add(tr, vec(0, C)),
+        c1: indices[1] === 4 ? P4H.value : add(tr, vec(-C, 0)),
+        c2: indices[1] === 4 ? P4V.value : add(tr, vec(0, C)),
       },
       {
         pos: br,
-        c1: add(br, vec(0, -C)),
-        c2: add(br, vec(-C, 0)),
+        c1: indices[2] === 4 ? P4V.value : add(br, vec(0, -C)),
+        c2: indices[2] === 4 ? P4H.value : add(br, vec(-C, 0)),
       },
       {
         pos: bl,
-        c1: add(bl, vec(C, 0)),
-        c2: add(bl, vec(0, -C)),
+        c1: indices[3] === 4 ? P4H.value : add(bl, vec(C, 0)),
+        c2: indices[3] === 4 ? P4V.value : add(bl, vec(0, -C)),
       },
-    ];
+    ] as const;
   };
 
 const { width, height } = Dimensions.get("window");
@@ -82,6 +82,8 @@ export const PatchMeshGradient = () => {
   const vertices = useValue(defaultVertices);
   const P4H = useValue(add(P4, vec(-C, 0)));
   const P4V = useValue(add(P4, vec(0, -C)));
+  const P4H1 = useValue(add(P4, vec(C, 0)));
+  const P4V1 = useValue(add(P4, vec(0, C)));
 
   const r1 = [0, 1, 4, 3] as const;
   const r2 = [1, 2, 5, 4] as const;
@@ -92,6 +94,10 @@ export const PatchMeshGradient = () => {
     onActive: (pt) => {
       if (inRadius(pt, vertices.value[4])) {
         vertices.value[4] = pt;
+        P4H.value = add(pt, vec(-C, 0));
+        P4V.value = add(pt, vec(0, -C));
+        P4H1.value = add(pt, vec(C, 0));
+        P4V1.value = add(pt, vec(0, C));
       }
     },
   });
@@ -127,7 +133,14 @@ export const PatchMeshGradient = () => {
         patch={rectToPatch(vertices, r4, P4H, P4V)}
         texture={rectToTexture(defaultVertices, r4)}
       />
-      <Cubic vertices={vertices} index={4} />
+      <Cubic
+        vertices={vertices}
+        index={4}
+        c1={P4V}
+        c2={P4H}
+        c3={P4V1}
+        c4={P4H1}
+      />
     </Canvas>
   );
 };
