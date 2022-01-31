@@ -7,6 +7,7 @@ import type {
   ColorProp,
 } from "../../processors";
 import { enumKey, processColor } from "../../processors";
+import { Skia, PaintStyle } from "../../../skia";
 import type { IPoint } from "../../../skia";
 import { BlendMode } from "../../../skia/Paint/BlendMode";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
@@ -23,12 +24,16 @@ export interface PatchProps extends CustomPaintProps {
   patch: readonly [CubicBezier, CubicBezier, CubicBezier, CubicBezier];
   texture?: readonly [IPoint, IPoint, IPoint, IPoint];
   blendMode?: SkEnum<typeof BlendMode>;
+  debug?: boolean;
 }
 
 export const Patch = (props: AnimatedProps<PatchProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint, opacity }, { colors, patch, texture, blendMode }) => {
+    (
+      { canvas, paint, opacity },
+      { colors, patch, texture, blendMode, debug }
+    ) => {
       // If the colors are provided, the default blendMode is set to dstOver, if not, the default is set to srcOver
       const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
       const mode = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
@@ -53,6 +58,20 @@ export const Patch = (props: AnimatedProps<PatchProps>) => {
         mode,
         paint
       );
+      if (debug) {
+        const debugPaint = Skia.Paint();
+        debugPaint.setColor(Skia.Color("red"));
+        const linePaint = debugPaint.copy();
+        linePaint.setStrokeWidth(1);
+        linePaint.setStyle(PaintStyle.Stroke);
+        patch.forEach(({ pos, c1, c2 }) => {
+          canvas.drawLine(c1.x, c1.y, pos.x, pos.y, linePaint);
+          canvas.drawLine(c2.x, c2.y, pos.x, pos.y, linePaint);
+          canvas.drawCircle(pos.x, pos.y, 10, debugPaint);
+          canvas.drawCircle(c1.x, c1.y, 5, debugPaint);
+          canvas.drawCircle(c2.x, c2.y, 5, debugPaint);
+        });
+      }
     }
   );
   return <skDrawing onDraw={onDraw} {...props} />;

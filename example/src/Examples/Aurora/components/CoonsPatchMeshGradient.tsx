@@ -161,23 +161,27 @@ export const CoonsPatchMeshGradient = ({
         patch={rectToPatch(vertices, r1, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r1)}
         //texture={rectToTexture(defaultVertices, r1)}
+        debug
       />
       <Patch
         patch={rectToPatch(vertices, r2, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r2)}
         //texture={rectToTexture(defaultVertices, r2)}
+        debug
       />
       <Patch
         patch={rectToPatch(vertices, r3, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r3)}
         //texture={rectToTexture(defaultVertices, r3)}
+        debug
       />
       <Patch
         patch={rectToPatch(vertices, r4, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r4)}
         //texture={rectToTexture(defaultVertices, r4)}
+        debug
       />
-      <Cubic
+      {/* <Cubic
         vertices={vertices}
         index={4}
         c1={P4V}
@@ -186,7 +190,7 @@ export const CoonsPatchMeshGradient = ({
         c4={P4H1}
         colors={colors}
         size={size}
-      />
+      /> */}
       {/* <Paint>
         <BilinearGradient colors={colors} size={vec(width, height)} />
       </Paint>
