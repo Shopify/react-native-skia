@@ -9,7 +9,8 @@ import { CoonsPatchMeshGradient } from "./components/CoonsPatchMeshGradient";
 export const Aurora = () => {
   return (
     <CoonsPatchMeshGradient
-      handles={1}
+      rows={2}
+      cols={2}
       colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
       debug
     />

@@ -77,27 +77,29 @@ const rectToPatch =
   };
 
 interface CoonsPatchMeshGradientProps {
-  handles: number;
+  rows: number;
+  cols: number;
   colors: string[];
   debug?: boolean;
 }
 
 export const CoonsPatchMeshGradient = ({
-  handles,
+  rows,
+  cols,
   colors: rawColors,
   debug,
 }: CoonsPatchMeshGradientProps) => {
   const colors = rawColors.map((color) => processColor(color, 1));
-  const dx = width / (handles + 1);
-  const dy = height / (handles + 1);
+  const dx = width / cols;
+  const dy = height / rows;
   const C = dx / 4;
 
   const P4 = vec(dx, dy);
 
-  const defaultVertices = new Array(handles + 2)
+  const defaultVertices = new Array(cols + 1)
     .fill(0)
     .map((_c, col) =>
-      new Array(handles + 2).fill(0).map((_r, row) => {
+      new Array(rows + 1).fill(0).map((_r, row) => {
         return vec(row * dx, col * dy);
       })
     )
@@ -106,13 +108,19 @@ export const CoonsPatchMeshGradient = ({
   const vertices = useValue(defaultVertices);
   const P4H = useValue(add(P4, vec(-C, 0)));
   const P4V = useValue(add(P4, vec(0, -C)));
-
-  const r1 = [0, 1, 4, 3] as const;
-  const r2 = [1, 2, 5, 4] as const;
-  const r3 = [3, 4, 7, 6] as const;
-  const r4 = [4, 5, 8, 7] as const;
-  const rects = [r1, r2, r3, r4];
-
+  const rects = new Array(rows)
+    .fill(0)
+    .map((_r, row) =>
+      new Array(cols).fill(0).map((_c, col) => {
+        const l = cols + 1;
+        const tl = row * l + col;
+        const tr = tl + 1;
+        const bl = (row + 1) * l + col;
+        const br = bl + 1;
+        return [tl, tr, br, bl] as const;
+      })
+    )
+    .flat();
   const onTouch = useTouchHandler({
     onActive: (pt) => {
       const P4H1 = symmetric(P4H.value, vertices.value[4]);
