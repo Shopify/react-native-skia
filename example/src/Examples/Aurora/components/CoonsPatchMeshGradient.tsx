@@ -58,23 +58,23 @@ const rectToPatch =
     return [
       {
         pos: tl,
-        c1: indices[0] === 4 ? P4V.value : add(tl, vec(0, C)),
-        c2: indices[0] === 4 ? P4H.value : add(tl, vec(C, 0)),
+        c1: add(tl, vec(0, C)),
+        c2: add(tl, vec(C, 0)),
       },
       {
         pos: tr,
-        c1: indices[1] === 4 ? P4H.value : add(tr, vec(-C, 0)),
-        c2: indices[1] === 4 ? P4V.value : add(tr, vec(0, C)),
+        c1: add(tr, vec(-C, 0)),
+        c2: add(tr, vec(0, C)),
       },
       {
         pos: br,
-        c1: indices[2] === 4 ? P4V.value : add(br, vec(0, -C)),
-        c2: indices[2] === 4 ? P4H.value : add(br, vec(-C, 0)),
+        c1: add(br, vec(0, -C)),
+        c2: add(br, vec(-C, 0)),
       },
       {
         pos: bl,
-        c1: indices[3] === 4 ? P4H.value : add(bl, vec(C, 0)),
-        c2: indices[3] === 4 ? P4V.value : add(bl, vec(0, -C)),
+        c1: add(bl, vec(C, 0)),
+        c2: add(bl, vec(0, -C)),
       },
     ] as const;
   };
@@ -166,21 +166,22 @@ export const CoonsPatchMeshGradient = ({
       <Patch
         patch={rectToPatch(vertices, r2, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r2)}
-        //texture={rectToTexture(defaultVertices, r2)}
+        //texture={rectToTexture(defaultVertices, r1)}
         debug
       />
       <Patch
         patch={rectToPatch(vertices, r3, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r3)}
-        //texture={rectToTexture(defaultVertices, r3)}
+        //texture={rectToTexture(defaultVertices, r1)}
         debug
       />
       <Patch
         patch={rectToPatch(vertices, r4, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r4)}
-        //texture={rectToTexture(defaultVertices, r4)}
+        //texture={rectToTexture(defaultVertices, r1)}
         debug
       />
+
       {/* <Cubic
         vertices={vertices}
         index={4}
