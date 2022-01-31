@@ -1,7 +1,6 @@
 import React from "react";
 import type { AnimationValue, Vector } from "@shopify/react-native-skia";
 import {
-  Fill,
   sub,
   add,
   dist,
@@ -17,7 +16,12 @@ import {
 import { Dimensions } from "react-native";
 
 import { Cubic } from "./Cubic";
-import { getPointAtLength, inRadius, bilinearInterpolate } from "./Math";
+import {
+  getPointAtLength,
+  inRadius,
+  bilinearInterpolate,
+  symmetric,
+} from "./Math";
 
 const { width, height } = Dimensions.get("window");
 const dx = width / 2;
@@ -48,25 +52,25 @@ const rectToPatch =
     vertices: AnimationValue<Vector[]>,
     indices: readonly number[],
     P4H: AnimationValue<Vector>,
-    P4H1: AnimationValue<Vector>,
-    P4V: AnimationValue<Vector>,
-    P4V1: AnimationValue<Vector>
+    P4V: AnimationValue<Vector>
   ) =>
   () => {
     const tl = vertices.value[indices[0]];
     const tr = vertices.value[indices[1]];
     const br = vertices.value[indices[2]];
     const bl = vertices.value[indices[3]];
+    const P4H1 = symmetric(P4H.value, vertices.value[4]);
+    const P4V1 = symmetric(P4V.value, vertices.value[4]);
     return [
       {
         pos: tl,
-        c1: indices[0] === 4 ? P4V1.value : add(tl, vec(0, C)),
-        c2: indices[0] === 4 ? P4H1.value : add(tl, vec(C, 0)),
+        c1: indices[0] === 4 ? P4V1 : add(tl, vec(0, C)),
+        c2: indices[0] === 4 ? P4H1 : add(tl, vec(C, 0)),
       },
       {
         pos: tr,
         c1: indices[1] === 4 ? P4H.value : add(tr, vec(-C, 0)),
-        c2: indices[1] === 4 ? P4V1.value : add(tr, vec(0, C)),
+        c2: indices[1] === 4 ? P4V1 : add(tr, vec(0, C)),
       },
       {
         pos: br,
@@ -75,7 +79,7 @@ const rectToPatch =
       },
       {
         pos: bl,
-        c1: indices[3] === 4 ? P4H1.value : add(bl, vec(C, 0)),
+        c1: indices[3] === 4 ? P4H1 : add(bl, vec(C, 0)),
         c2: indices[3] === 4 ? P4V.value : add(bl, vec(0, -C)),
       },
     ] as const;
@@ -106,8 +110,6 @@ export const CoonsPatchMeshGradient = ({
   const vertices = useValue(defaultVertices);
   const P4H = useValue(add(P4, vec(-C, 0)));
   const P4V = useValue(add(P4, vec(0, -C)));
-  const P4H1 = useValue(add(P4, vec(C, 0)));
-  const P4V1 = useValue(add(P4, vec(0, C)));
 
   const r1 = [0, 1, 4, 3] as const;
   const r2 = [1, 2, 5, 4] as const;
@@ -116,27 +118,21 @@ export const CoonsPatchMeshGradient = ({
 
   const onTouch = useTouchHandler({
     onActive: (pt) => {
+      const P4H1 = symmetric(P4H.value, vertices.value[4]);
+      const P4V1 = symmetric(P4V.value, vertices.value[4]);
       if (inRadius(pt, vertices.value[4])) {
         const delta = sub(vertices.value[4], pt);
         vertices.value[4] = pt;
         P4H.value = sub(P4H.value, delta);
         P4V.value = sub(P4V.value, delta);
-        P4H1.value = sub(P4H1.value, delta);
-        P4V1.value = sub(P4V1.value, delta);
       } else if (inRadius(pt, P4H.value)) {
         P4H.value = pt;
-        const d = dist(pt, vertices.value[4]);
-        P4H1.value = getPointAtLength(2 * d, pt, vertices.value[4]);
-      } else if (inRadius(pt, P4H1.value)) {
-        P4H1.value = pt;
+      } else if (inRadius(pt, P4H1)) {
         const d = dist(pt, vertices.value[4]);
         P4H.value = getPointAtLength(2 * d, pt, vertices.value[4]);
       } else if (inRadius(pt, P4V.value)) {
         P4V.value = pt;
-        const d = dist(pt, vertices.value[4]);
-        P4V1.value = getPointAtLength(2 * d, pt, vertices.value[4]);
-      } else if (inRadius(pt, P4V1.value)) {
-        P4V1.value = pt;
+      } else if (inRadius(pt, P4V1)) {
         const d = dist(pt, vertices.value[4]);
         P4V.value = getPointAtLength(2 * d, pt, vertices.value[4]);
       }
@@ -152,28 +148,28 @@ export const CoonsPatchMeshGradient = ({
         />
       </Paint>
       <Patch
-        patch={rectToPatch(vertices, r1, P4H, P4H1, P4V, P4V1)}
+        patch={rectToPatch(vertices, r1, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r1)}
         texture={rectToTexture(defaultVertices, r1)}
         blendMode={debug ? "srcOver" : "dstOver"}
         debug={debug}
       />
       <Patch
-        patch={rectToPatch(vertices, r2, P4H, P4H1, P4V, P4V1)}
+        patch={rectToPatch(vertices, r2, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r2)}
         blendMode={debug ? "srcOver" : "dstOver"}
         texture={rectToTexture(defaultVertices, r2)}
         debug={debug}
       />
       <Patch
-        patch={rectToPatch(vertices, r3, P4H, P4H1, P4V, P4V1)}
+        patch={rectToPatch(vertices, r3, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r3)}
         blendMode={debug ? "srcOver" : "dstOver"}
         texture={rectToTexture(defaultVertices, r3)}
         debug={debug}
       />
       <Patch
-        patch={rectToPatch(vertices, r4, P4H, P4H1, P4V, P4V1)}
+        patch={rectToPatch(vertices, r4, P4H, P4V)}
         colors={rectToColors(colors, defaultVertices, r4)}
         texture={rectToTexture(defaultVertices, r4)}
         blendMode={debug ? "srcOver" : "dstOver"}
@@ -184,8 +180,6 @@ export const CoonsPatchMeshGradient = ({
         index={4}
         c1={P4V}
         c2={P4H}
-        c3={P4V1}
-        c4={P4H1}
         colors={colors}
         size={size}
       />

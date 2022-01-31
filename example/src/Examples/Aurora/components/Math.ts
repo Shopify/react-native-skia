@@ -20,3 +20,8 @@ export const getPointAtLength = (length: number, from: Vector, to: Vector) => {
   const y = from.y + length * Math.sin(angle);
   return vec(x, y);
 };
+
+export const symmetric = (v: Vector, center: Vector) => {
+  const d = dist(v, center);
+  return getPointAtLength(d * 2, v, center);
+};
