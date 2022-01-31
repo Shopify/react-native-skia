@@ -1,6 +1,6 @@
 import React from "react";
 import type { AnimationValue, Vector } from "@shopify/react-native-skia";
-import { Paint, Circle } from "@shopify/react-native-skia";
+import { Line, Paint, Circle } from "@shopify/react-native-skia";
 
 interface CubicProps {
   vertices: AnimationValue<Vector[]>;
@@ -14,18 +14,18 @@ interface CubicProps {
 export const Cubic = ({ vertices, index, c1, c2, c3, c4 }: CubicProps) => {
   return (
     <>
-      {/* <Line
+      <Line
         strokeWidth={2}
         color="white"
-        p1={() => cubic.value.pos}
-        p2={() => cubic.value.c1}
+        p1={() => c1.value}
+        p2={() => c3.value}
       />
       <Line
         strokeWidth={2}
         color="white"
-        p1={() => cubic.value.pos}
-        p2={() => cubic.value.c2}
-      /> */}
+        p1={() => c2.value}
+        p2={() => c4.value}
+      />
       <Circle c={() => vertices.value[index]} r={16} color="black">
         <Paint style="stroke" strokeWidth={4} color="white" />
       </Circle>

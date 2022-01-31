@@ -17,6 +17,12 @@ import { Dimensions } from "react-native";
 import { Cubic } from "./Cubic";
 
 const inRadius = (a: Vector, b: Vector, r = 40) => dist(a, b) < r;
+const getPointAtLength = (length: number, from: Vector, to: Vector) => {
+  const angle = Math.atan2(to.y - from.y, to.x - from.x);
+  const x = from.x + length * Math.cos(angle);
+  const y = from.y + length * Math.sin(angle);
+  return vec(x, y);
+};
 
 const rectToTexture = (
   vertices: Vector[],
@@ -98,6 +104,14 @@ export const PatchMeshGradient = () => {
         P4V.value = add(pt, vec(0, -C));
         P4H1.value = add(pt, vec(C, 0));
         P4V1.value = add(pt, vec(0, C));
+      } else if (inRadius(pt, P4H.value)) {
+        P4H.value = pt;
+        const d = dist(pt, vertices.value[4]);
+        P4H1.value = getPointAtLength(2 * d, pt, vertices.value[4]);
+      } else if (inRadius(pt, P4H1.value)) {
+        P4H1.value = pt;
+        const d = dist(pt, vertices.value[4]);
+        P4H.value = getPointAtLength(2 * d, pt, vertices.value[4]);
       }
     },
   });
