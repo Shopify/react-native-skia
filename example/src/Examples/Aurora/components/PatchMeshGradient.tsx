@@ -1,6 +1,7 @@
 import React from "react";
 import type { AnimationValue, Vector } from "@shopify/react-native-skia";
 import {
+  sub,
   add,
   rect,
   dist,
@@ -99,11 +100,12 @@ export const PatchMeshGradient = () => {
   const onTouch = useTouchHandler({
     onActive: (pt) => {
       if (inRadius(pt, vertices.value[4])) {
+        const delta = sub(vertices.value[4], pt);
         vertices.value[4] = pt;
-        P4H.value = add(pt, vec(-C, 0));
-        P4V.value = add(pt, vec(0, -C));
-        P4H1.value = add(pt, vec(C, 0));
-        P4V1.value = add(pt, vec(0, C));
+        P4H.value = sub(P4H.value, delta);
+        P4V.value = sub(P4V.value, delta);
+        P4H1.value = sub(P4H1.value, delta);
+        P4V1.value = sub(P4V1.value, delta);
       } else if (inRadius(pt, P4H.value)) {
         P4H.value = pt;
         const d = dist(pt, vertices.value[4]);
