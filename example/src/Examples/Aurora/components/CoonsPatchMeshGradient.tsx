@@ -1,7 +1,10 @@
 import React from "react";
-import type { AnimationValue, Vector } from "@shopify/react-native-skia";
+import type {
+  AnimationValue,
+  CubicBezier,
+  Vector,
+} from "@shopify/react-native-skia";
 import {
-  sub,
   add,
   useTouchHandler,
   useValue,
@@ -14,64 +17,60 @@ import {
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
-import { Cubic } from "./Cubic";
-import { inRadius, bilinearInterpolate, symmetric } from "./Math";
+import { bilinearInterpolate, symmetric } from "./Math";
 
 const { width, height } = Dimensions.get("window");
 const size = vec(width, height);
 
 const rectToTexture = (
-  vertices: Vector[],
-  [tl, tr, br, bl]: readonly [number, number, number, number]
-) => [vertices[tl], vertices[tr], vertices[br], vertices[bl]] as const;
-
-const rectToColors = (
-  colors: number[],
-  vertices: Vector[],
+  vertices: CubicBezier[],
   [tl, tr, br, bl]: readonly [number, number, number, number]
 ) =>
   [
-    bilinearInterpolate(colors, size, vertices[tl]),
-    bilinearInterpolate(colors, size, vertices[tr]),
-    bilinearInterpolate(colors, size, vertices[br]),
-    bilinearInterpolate(colors, size, vertices[bl]),
+    vertices[tl].pos,
+    vertices[tr].pos,
+    vertices[br].pos,
+    vertices[bl].pos,
+  ] as const;
+
+const rectToColors = (
+  colors: number[],
+  vertices: CubicBezier[],
+  [tl, tr, br, bl]: readonly [number, number, number, number]
+) =>
+  [
+    bilinearInterpolate(colors, size, vertices[tl].pos),
+    bilinearInterpolate(colors, size, vertices[tr].pos),
+    bilinearInterpolate(colors, size, vertices[br].pos),
+    bilinearInterpolate(colors, size, vertices[bl].pos),
   ] as const;
 
 const rectToPatch =
-  (
-    vertices: AnimationValue<Vector[]>,
-    indices: readonly number[],
-    P4H: AnimationValue<Vector>,
-    P4V: AnimationValue<Vector>,
-    C: number
-  ) =>
-  () => {
-    const tl = vertices.value[indices[0]];
-    const tr = vertices.value[indices[1]];
-    const br = vertices.value[indices[2]];
-    const bl = vertices.value[indices[3]];
-    const P4H1 = symmetric(P4H.value, vertices.value[4]);
-    const P4V1 = symmetric(P4V.value, vertices.value[4]);
+  (mesh: AnimationValue<CubicBezier[]>, indices: readonly number[]) => () => {
+    const tl = mesh.value[indices[0]];
+    const tr = mesh.value[indices[1]];
+    const br = mesh.value[indices[2]];
+    const bl = mesh.value[indices[3]];
     return [
       {
-        pos: tl,
-        c1: indices[0] === 4 ? P4V1 : add(tl, vec(0, C)),
-        c2: indices[0] === 4 ? P4H1 : add(tl, vec(C, 0)),
+        pos: tl.pos,
+        c1: tl.c2,
+        c2: tl.c1,
       },
       {
-        pos: tr,
-        c1: indices[1] === 4 ? P4H.value : add(tr, vec(-C, 0)),
-        c2: indices[1] === 4 ? P4V1 : add(tr, vec(0, C)),
+        pos: tr.pos,
+        c1: symmetric(tr.c1, tr.pos),
+        c2: tr.c2,
       },
       {
-        pos: br,
-        c1: indices[2] === 4 ? P4V.value : add(br, vec(0, -C)),
-        c2: indices[2] === 4 ? P4H.value : add(br, vec(-C, 0)),
+        pos: br.pos,
+        c1: symmetric(br.c2, br.pos),
+        c2: symmetric(br.c1, br.pos),
       },
       {
-        pos: bl,
-        c1: indices[3] === 4 ? P4H1 : add(bl, vec(C, 0)),
-        c2: indices[3] === 4 ? P4V.value : add(bl, vec(0, -C)),
+        pos: bl.pos,
+        c1: bl.c1,
+        c2: symmetric(bl.c2, bl.pos),
       },
     ] as const;
   };
@@ -96,18 +95,21 @@ export const CoonsPatchMeshGradient = ({
 
   const P4 = vec(dx, dy);
 
-  const defaultVertices = new Array(cols + 1)
+  const defaultMesh = new Array(cols + 1)
     .fill(0)
     .map((_c, col) =>
       new Array(rows + 1).fill(0).map((_r, row) => {
-        return vec(row * dx, col * dy);
+        const pos = vec(row * dx, col * dy);
+        return {
+          pos,
+          c1: add(pos, vec(C, 0)),
+          c2: add(pos, vec(0, C)),
+        };
       })
     )
     .flat(2);
 
-  const vertices = useValue(defaultVertices);
-  const P4H = useValue(add(P4, vec(-C, 0)));
-  const P4V = useValue(add(P4, vec(0, -C)));
+  const mesh = useValue(defaultMesh);
   const rects = new Array(rows)
     .fill(0)
     .map((_r, row) =>
@@ -123,22 +125,22 @@ export const CoonsPatchMeshGradient = ({
     .flat();
   const onTouch = useTouchHandler({
     onActive: (pt) => {
-      const P4H1 = symmetric(P4H.value, vertices.value[4]);
-      const P4V1 = symmetric(P4V.value, vertices.value[4]);
-      if (inRadius(pt, vertices.value[4])) {
-        const delta = sub(vertices.value[4], pt);
-        vertices.value[4] = pt;
-        P4H.value = sub(P4H.value, delta);
-        P4V.value = sub(P4V.value, delta);
-      } else if (inRadius(pt, P4H.value)) {
-        P4H.value = pt;
-      } else if (inRadius(pt, P4H1)) {
-        P4H.value = symmetric(pt, vertices.value[4]);
-      } else if (inRadius(pt, P4V.value)) {
-        P4V.value = pt;
-      } else if (inRadius(pt, P4V1)) {
-        P4V.value = symmetric(pt, vertices.value[4]);
-      }
+      // const P4H1 = symmetric(P4H.value, vertices.value[4]);
+      // const P4V1 = symmetric(P4V.value, vertices.value[4]);
+      // if (inRadius(pt, vertices.value[4])) {
+      //   const delta = sub(vertices.value[4], pt);
+      //   vertices.value[4] = pt;
+      //   P4H.value = sub(P4H.value, delta);
+      //   P4V.value = sub(P4V.value, delta);
+      // } else if (inRadius(pt, P4H.value)) {
+      //   P4H.value = pt;
+      // } else if (inRadius(pt, P4H1)) {
+      //   P4H.value = symmetric(pt, vertices.value[4]);
+      // } else if (inRadius(pt, P4V.value)) {
+      //   P4V.value = pt;
+      // } else if (inRadius(pt, P4V1)) {
+      //   P4V.value = symmetric(pt, vertices.value[4]);
+      // }
     },
   });
   return (
@@ -153,21 +155,21 @@ export const CoonsPatchMeshGradient = ({
       {rects.map((r, i) => (
         <Patch
           key={i}
-          patch={rectToPatch(vertices, r, P4H, P4V, C)}
-          colors={rectToColors(colors, defaultVertices, r)}
-          texture={rectToTexture(defaultVertices, r)}
+          patch={rectToPatch(mesh, r)}
+          colors={rectToColors(colors, defaultMesh, r)}
+          texture={rectToTexture(defaultMesh, r)}
           blendMode={debug ? "srcOver" : "dstOver"}
           debug={debug}
         />
       ))}
-      <Cubic
+      {/* <Cubic
         vertices={vertices}
         index={4}
         c1={P4V}
         c2={P4H}
         colors={colors}
         size={size}
-      />
+      /> */}
     </Canvas>
   );
 };
