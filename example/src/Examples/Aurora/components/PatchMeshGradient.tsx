@@ -114,6 +114,14 @@ export const PatchMeshGradient = () => {
         P4H1.value = pt;
         const d = dist(pt, vertices.value[4]);
         P4H.value = getPointAtLength(2 * d, pt, vertices.value[4]);
+      } else if (inRadius(pt, P4V.value)) {
+        P4V.value = pt;
+        const d = dist(pt, vertices.value[4]);
+        P4V1.value = getPointAtLength(2 * d, pt, vertices.value[4]);
+      } else if (inRadius(pt, P4V1.value)) {
+        P4V1.value = pt;
+        const d = dist(pt, vertices.value[4]);
+        P4V.value = getPointAtLength(2 * d, pt, vertices.value[4]);
       }
     },
   });
