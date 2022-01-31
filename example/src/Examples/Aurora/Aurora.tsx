@@ -11,12 +11,12 @@ import { PatchMeshGradient } from "./components/PatchMeshGradient";
 export const Aurora = () => {
   return (
     <PatchMeshGradient
-    // rows={2}
-    // cols={2}
-    // //colors={["red", "blue", "green", "yellow"]}
-    // colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
-    // width={width}
-    // height={height}
+      // rows={2}
+      // cols={2}
+      // //colors={["red", "blue", "green", "yellow"]}
+      colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
+      // width={width}
+      // height={height}
     />
   );
 };

@@ -16,6 +16,7 @@ import {
 import { Dimensions } from "react-native";
 
 import { Cubic } from "./Cubic";
+import { BilinearGradient } from "./BilinearGradient";
 
 const inRadius = (a: Vector, b: Vector, r = 40) => dist(a, b) < r;
 const getPointAtLength = (length: number, from: Vector, to: Vector) => {
@@ -71,7 +72,11 @@ const dx = width / 2;
 const dy = height / 2;
 const C = dx / 4;
 
-export const PatchMeshGradient = () => {
+interface PatchMeshGradientProps {
+  colors: string[];
+}
+
+export const PatchMeshGradient = ({ colors }: PatchMeshGradientProps) => {
   const P0 = vec(0, 0);
   const P1 = vec(dx, 0);
   const P2 = vec(dx * 2, 0);
@@ -135,11 +140,12 @@ export const PatchMeshGradient = () => {
           ty="repeat"
           // rect={rect(0, 0, width, dy * 2)}
         /> */}
-        <ImageShader
+        {/* <ImageShader
           source={require("../../../assets/oslo.jpg")}
           fit="cover"
           rect={rect(0, 0, width, dy * 2)}
-        />
+        /> */}
+        <BilinearGradient colors={colors} size={vec(width, height)} />
       </Paint>
       <Patch
         patch={rectToPatch(vertices, r1, P4H, P4V)}
