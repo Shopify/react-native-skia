@@ -18,6 +18,7 @@ import {
 import { Dimensions } from "react-native";
 
 import { bilinearInterpolate, symmetric } from "./Math";
+import { Cubic } from "./Cubic";
 
 const { width, height } = Dimensions.get("window");
 const size = vec(width, height);
@@ -93,8 +94,6 @@ export const CoonsPatchMeshGradient = ({
   const dy = height / rows;
   const C = dx / 4;
 
-  const P4 = vec(dx, dy);
-
   const defaultMesh = new Array(cols + 1)
     .fill(0)
     .map((_c, col) =>
@@ -162,14 +161,22 @@ export const CoonsPatchMeshGradient = ({
           debug={debug}
         />
       ))}
-      {/* <Cubic
-        vertices={vertices}
-        index={4}
-        c1={P4V}
-        c2={P4H}
-        colors={colors}
-        size={size}
-      /> */}
+      {defaultMesh.map(({ pos }, index) => {
+        const edge =
+          pos.x === 0 || pos.y === 0 || pos.x === width || pos.y === height;
+        if (edge) {
+          return null;
+        }
+        return (
+          <Cubic
+            key={index}
+            mesh={mesh}
+            index={index}
+            colors={colors}
+            size={size}
+          />
+        );
+      })}
     </Canvas>
   );
 };
