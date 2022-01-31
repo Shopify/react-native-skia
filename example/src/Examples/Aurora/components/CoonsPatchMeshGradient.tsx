@@ -18,13 +18,13 @@ import { Dimensions } from "react-native";
 
 import { Cubic } from "./Cubic";
 import { getPointAtLength, inRadius, bilinearInterpolate } from "./Math";
-import { BilinearGradient } from "./BilinearGradient";
 
 const { width, height } = Dimensions.get("window");
 const dx = width / 2;
 const dy = height / 2;
 const C = dx / 4;
 const size = vec(width, height);
+const debug = true;
 
 const rectToTexture = (
   vertices: Vector[],
@@ -48,7 +48,9 @@ const rectToPatch =
     vertices: AnimationValue<Vector[]>,
     indices: readonly number[],
     P4H: AnimationValue<Vector>,
-    P4V: AnimationValue<Vector>
+    P4H1: AnimationValue<Vector>,
+    P4V: AnimationValue<Vector>,
+    P4V1: AnimationValue<Vector>
   ) =>
   () => {
     const tl = vertices.value[indices[0]];
@@ -58,23 +60,23 @@ const rectToPatch =
     return [
       {
         pos: tl,
-        c1: add(tl, vec(0, C)),
-        c2: add(tl, vec(C, 0)),
+        c1: indices[0] === 4 ? P4V1.value : add(tl, vec(0, C)),
+        c2: indices[0] === 4 ? P4H1.value : add(tl, vec(C, 0)),
       },
       {
         pos: tr,
-        c1: add(tr, vec(-C, 0)),
-        c2: add(tr, vec(0, C)),
+        c1: indices[1] === 4 ? P4H.value : add(tr, vec(-C, 0)),
+        c2: indices[1] === 4 ? P4V1.value : add(tr, vec(0, C)),
       },
       {
         pos: br,
-        c1: add(br, vec(0, -C)),
-        c2: add(br, vec(-C, 0)),
+        c1: indices[2] === 4 ? P4V.value : add(br, vec(0, -C)),
+        c2: indices[2] === 4 ? P4H.value : add(br, vec(-C, 0)),
       },
       {
         pos: bl,
-        c1: add(bl, vec(C, 0)),
-        c2: add(bl, vec(0, -C)),
+        c1: indices[3] === 4 ? P4H1.value : add(bl, vec(C, 0)),
+        c2: indices[3] === 4 ? P4V.value : add(bl, vec(0, -C)),
       },
     ] as const;
   };
@@ -145,44 +147,39 @@ export const CoonsPatchMeshGradient = ({
       <Paint>
         <ImageShader
           source={require("../../../assets/debug.png")}
-          //fit="cover"
           tx="repeat"
           ty="repeat"
-          // rect={rect(0, 0, width, dy * 2)}
         />
-        {/* <ImageShader
-          source={require("../../../assets/oslo.jpg")}
-          fit="cover"
-          rect={rect(0, 0, width, dy * 2)}
-        /> */}
-        {/* <BilinearGradient colors={colors} size={vec(width, height)} /> */}
       </Paint>
       <Patch
-        patch={rectToPatch(vertices, r1, P4H, P4V)}
+        patch={rectToPatch(vertices, r1, P4H, P4H1, P4V, P4V1)}
         colors={rectToColors(colors, defaultVertices, r1)}
-        //texture={rectToTexture(defaultVertices, r1)}
-        debug
+        texture={rectToTexture(defaultVertices, r1)}
+        blendMode={debug ? "srcOver" : "dstOver"}
+        debug={debug}
       />
       <Patch
-        patch={rectToPatch(vertices, r2, P4H, P4V)}
+        patch={rectToPatch(vertices, r2, P4H, P4H1, P4V, P4V1)}
         colors={rectToColors(colors, defaultVertices, r2)}
-        //texture={rectToTexture(defaultVertices, r1)}
-        debug
+        blendMode={debug ? "srcOver" : "dstOver"}
+        texture={rectToTexture(defaultVertices, r2)}
+        debug={debug}
       />
       <Patch
-        patch={rectToPatch(vertices, r3, P4H, P4V)}
+        patch={rectToPatch(vertices, r3, P4H, P4H1, P4V, P4V1)}
         colors={rectToColors(colors, defaultVertices, r3)}
-        //texture={rectToTexture(defaultVertices, r1)}
-        debug
+        blendMode={debug ? "srcOver" : "dstOver"}
+        texture={rectToTexture(defaultVertices, r3)}
+        debug={debug}
       />
       <Patch
-        patch={rectToPatch(vertices, r4, P4H, P4V)}
+        patch={rectToPatch(vertices, r4, P4H, P4H1, P4V, P4V1)}
         colors={rectToColors(colors, defaultVertices, r4)}
-        //texture={rectToTexture(defaultVertices, r1)}
-        debug
+        texture={rectToTexture(defaultVertices, r4)}
+        blendMode={debug ? "srcOver" : "dstOver"}
+        debug={debug}
       />
-
-      {/* <Cubic
+      <Cubic
         vertices={vertices}
         index={4}
         c1={P4V}
@@ -191,11 +188,7 @@ export const CoonsPatchMeshGradient = ({
         c4={P4H1}
         colors={colors}
         size={size}
-      /> */}
-      {/* <Paint>
-        <BilinearGradient colors={colors} size={vec(width, height)} />
-      </Paint>
-      <Fill /> */}
+      />
     </Canvas>
   );
 };
