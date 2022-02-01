@@ -16,9 +16,9 @@
   },
   "scripts": {
     "build-skia-ios-framework": "ts-node ./scripts/build-skia-ios-framework.ts",
-    "build-skia-ios": "ts-node ./scripts/build-skia-ios.ts",
+    "build-skia-ios": "ts-node ./scripts/build-skia-ios.ts && yarn build-skia-ios-framework",
     "build-skia-android": "ts-node ./scripts/build-skia-android.ts",
-    "build-skia": "yarn build-skia-ios && yarn build-skia-android && yarn build-skia-ios-framework",
+    "build-skia": "yarn build-skia-ios && yarn build-skia-android",
     "copy-skia-include-headers": "yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
     "copy-skia-module-headers": "yarn rimraf ./package/cpp/skia/modules/ && mkdir -p ./package/cpp/skia/modules/svg/include && mkdir -p ./package/cpp/skia/modules/skresources/include && cp -a ./externals/skia/modules/svg/include/. ./package/cpp/skia/modules/svg/include && cp -a ./externals/skia/modules/skresources/include/. ./package/cpp/skia/modules/skresources/include",
     "copy-skia-headers": "yarn copy-skia-module-headers && yarn copy-skia-include-headers",
