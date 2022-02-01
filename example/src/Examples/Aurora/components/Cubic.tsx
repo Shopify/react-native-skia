@@ -1,7 +1,7 @@
 import React from "react";
 import type {
   AnimationValue,
-  CubicBezier,
+  CubicBezierHandle,
   Vector,
 } from "@shopify/react-native-skia";
 import { Line, Paint, Circle } from "@shopify/react-native-skia";
@@ -9,7 +9,7 @@ import { Line, Paint, Circle } from "@shopify/react-native-skia";
 import { bilinearInterpolate, symmetric } from "./Math";
 
 interface CubicProps {
-  mesh: AnimationValue<CubicBezier[]>;
+  mesh: AnimationValue<CubicBezierHandle[]>;
   index: number;
   colors: number[];
   size: Vector;

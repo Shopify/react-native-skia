@@ -1,10 +1,10 @@
 import React from "react";
 import type {
   AnimationValue,
-  CubicBezier,
-  Vector,
+  CubicBezierHandle,
 } from "@shopify/react-native-skia";
 import {
+  sub,
   add,
   useTouchHandler,
   useValue,
@@ -17,14 +17,14 @@ import {
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
-import { bilinearInterpolate, symmetric } from "./Math";
+import { bilinearInterpolate, symmetric, inRadius } from "./Math";
 import { Cubic } from "./Cubic";
 
 const { width, height } = Dimensions.get("window");
 const size = vec(width, height);
 
 const rectToTexture = (
-  vertices: CubicBezier[],
+  vertices: CubicBezierHandle[],
   [tl, tr, br, bl]: readonly [number, number, number, number]
 ) =>
   [
@@ -36,7 +36,7 @@ const rectToTexture = (
 
 const rectToColors = (
   colors: number[],
-  vertices: CubicBezier[],
+  vertices: CubicBezierHandle[],
   [tl, tr, br, bl]: readonly [number, number, number, number]
 ) =>
   [
@@ -47,7 +47,8 @@ const rectToColors = (
   ] as const;
 
 const rectToPatch =
-  (mesh: AnimationValue<CubicBezier[]>, indices: readonly number[]) => () => {
+  (mesh: AnimationValue<CubicBezierHandle[]>, indices: readonly number[]) =>
+  () => {
     const tl = mesh.value[indices[0]];
     const tr = mesh.value[indices[1]];
     const br = mesh.value[indices[2]];
@@ -92,7 +93,7 @@ export const CoonsPatchMeshGradient = ({
   const colors = rawColors.map((color) => processColor(color, 1));
   const dx = width / cols;
   const dy = height / rows;
-  const C = dx / 4;
+  const C = dx / 3;
 
   const defaultMesh = new Array(cols + 1)
     .fill(0)
@@ -124,22 +125,34 @@ export const CoonsPatchMeshGradient = ({
     .flat();
   const onTouch = useTouchHandler({
     onActive: (pt) => {
-      // const P4H1 = symmetric(P4H.value, vertices.value[4]);
-      // const P4V1 = symmetric(P4V.value, vertices.value[4]);
-      // if (inRadius(pt, vertices.value[4])) {
-      //   const delta = sub(vertices.value[4], pt);
-      //   vertices.value[4] = pt;
-      //   P4H.value = sub(P4H.value, delta);
-      //   P4V.value = sub(P4V.value, delta);
-      // } else if (inRadius(pt, P4H.value)) {
-      //   P4H.value = pt;
-      // } else if (inRadius(pt, P4H1)) {
-      //   P4H.value = symmetric(pt, vertices.value[4]);
-      // } else if (inRadius(pt, P4V.value)) {
-      //   P4V.value = pt;
-      // } else if (inRadius(pt, P4V1)) {
-      //   P4V.value = symmetric(pt, vertices.value[4]);
-      // }
+      defaultMesh.every(({ pos: p }, index) => {
+        const edge = p.x === 0 || p.y === 0 || p.x === width || p.y === height;
+        if (!edge) {
+          const { pos, c1, c2 } = mesh.value[index];
+          const c3 = symmetric(c1, pos);
+          const c4 = symmetric(c2, pos);
+          if (inRadius(pt, pos)) {
+            const delta = sub(pos, pt);
+            mesh.value[index].pos = pt;
+            mesh.value[index].c1 = sub(c1, delta);
+            mesh.value[index].c2 = sub(c2, delta);
+            return false;
+          } else if (inRadius(pt, c1)) {
+            mesh.value[index].c1 = pt;
+            return false;
+          } else if (inRadius(pt, c2)) {
+            mesh.value[index].c2 = pt;
+            return false;
+          } else if (inRadius(pt, c3)) {
+            mesh.value[index].c1 = symmetric(pt, mesh.value[index].pos);
+            return false;
+          } else if (inRadius(pt, c4)) {
+            mesh.value[index].c2 = symmetric(pt, mesh.value[index].pos);
+            return false;
+          }
+        }
+        return true;
+      });
     },
   });
   return (
@@ -158,7 +171,6 @@ export const CoonsPatchMeshGradient = ({
           colors={rectToColors(colors, defaultMesh, r)}
           texture={rectToTexture(defaultMesh, r)}
           blendMode={debug ? "srcOver" : "dstOver"}
-          debug={debug}
         />
       ))}
       {defaultMesh.map(({ pos }, index) => {

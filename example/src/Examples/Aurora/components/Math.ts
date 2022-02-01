@@ -12,7 +12,7 @@ export const bilinearInterpolate = (
   return mixColors(uv.y, colorA, colorB);
 };
 
-export const inRadius = (a: Vector, b: Vector, r = 40) => dist(a, b) < r;
+export const inRadius = (a: Vector, b: Vector, r = 20) => dist(a, b) < r;
 
 export const getPointAtLength = (length: number, from: Vector, to: Vector) => {
   const angle = Math.atan2(to.y - from.y, to.x - from.x);

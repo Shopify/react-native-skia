@@ -22,15 +22,15 @@ import {Canvas, Patch, vec} from "@shopify/react-native-skia";
 const PatchDemo = () => {
   const colors = ["#61dafb", "#fb61da", "#61fbcf", "#dafb61"];
   const C = 64;
-  const topLeft = { src: vec(0, 0), c1: vec(C, 0), c2: vec(0, C) };
-  const topRight = { src: vec(256, 0), c1: vec(256 + C, 0), c2: vec(256, C) };
+  const topLeft = { pos: vec(0, 0), c1: vec(C, 0), c2: vec(0, C) };
+  const topRight = { pos: vec(256, 0), c1: vec(256 + C, 0), c2: vec(256, C) };
   const bottomRight = {
-    src: vec(256, 256),
+    pos: vec(256, 256),
     c1: vec(256 - 2 * C, 256),
     c2: vec(256, 256 - 2 * C),
   };
   const bottomLeft = {
-    src: vec(0, 256),
+    pos: vec(0, 256),
     c1: vec(-2 * C, 256),
     c2: vec(0, 256 - 2 * C),
   };
