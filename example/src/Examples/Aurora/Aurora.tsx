@@ -12,6 +12,7 @@ export const Aurora = () => {
       rows={3}
       cols={3}
       colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
+      lines
     />
   );
 };
