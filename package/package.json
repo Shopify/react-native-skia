@@ -4,7 +4,7 @@
     "access": "public"
   },
   "title": "React Native Skia",
-  "version": "0.1.37",
+  "version": "0.1.100",
   "description": "Skia View for React Native",
   "main": "index.ts",
   "files": [
@@ -19,9 +19,9 @@
     "index.js",
     "cpp/**/*.{h,cpp}",
     "ios",
-    "libs/ios/libskia.a",
-    "libs/ios/libskshaper.a",
-    "libs/ios/libsvg.a",
+    "libs/ios/libskia.xcframework",
+    "libs/ios/libskshaper.xcframework",
+    "libs/ios/libsvg.xcframework",
     "react-native-skia.podspec",
     "scripts/install-npm.js"
   ],
