@@ -19,6 +19,8 @@ import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
 import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
 import type { SurfaceFactory } from "./Surface";
+import "./NativeSetup";
+
 
 /**
  * Declares the interface for the native Skia API
