@@ -57,7 +57,7 @@ export const interpolateColors = (
   return interpolateColorsRGB(value, inputRange, outputRange);
 };
 
-// This is fast. To be reconciller with other interpolate color functions
+// This is fast. To be reconcilled with interpolateColors
 // it looks like interpolateColors may not be working as expected
 // these functions need to be tested more thoroughly on both platform
 export const mixColors = (value: number, x: number, y: number) => {
