@@ -36,15 +36,8 @@ const rectToTexture = (
 
 const rectToColors = (
   colors: number[],
-  vertices: CubicBezierHandle[],
   [tl, tr, br, bl]: readonly [number, number, number, number]
-) =>
-  [
-    bilinearInterpolate(colors, size, vertices[tl].pos),
-    bilinearInterpolate(colors, size, vertices[tr].pos),
-    bilinearInterpolate(colors, size, vertices[br].pos),
-    bilinearInterpolate(colors, size, vertices[bl].pos),
-  ] as const;
+) => [colors[tl], colors[tr], colors[br], colors[bl]] as const;
 
 const rectToPatch =
   (mesh: AnimationValue<CubicBezierHandle[]>, indices: readonly number[]) =>
@@ -142,7 +135,7 @@ export const CoonsPatchMeshGradient = ({
           <React.Fragment key={i}>
             <Patch
               patch={patch}
-              colors={debug ? undefined : rectToColors(colors, defaultMesh, r)}
+              colors={debug ? undefined : rectToColors(colors, r)}
               texture={rectToTexture(defaultMesh, r)}
             />
             {lines && <Curves patch={patch} />}
