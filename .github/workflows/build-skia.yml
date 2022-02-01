@@ -52,9 +52,9 @@ jobs:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: yarn build-skia
 
-      - name: Build Skia iOS Fat libs
+      - name: Build Skia iOS xcframeworks
         working-directory: ${{ env.WORKING_DIRECTORY }}/
-        run: yarn build-skia-ios-fatlibs
+        run: yarn build-skia-ios-frameworks
 
       - name: Upload artifacts - Android arm
         uses: actions/upload-artifact@v2
