@@ -149,13 +149,7 @@ export const CoonsPatchMeshGradient = ({
           return null;
         }
         return (
-          <Cubic
-            key={index}
-            mesh={mesh}
-            index={index}
-            colors={colors}
-            size={size}
-          />
+          <Cubic key={index} mesh={mesh} index={index} color={colors[index]} />
         );
       })}
     </Canvas>
