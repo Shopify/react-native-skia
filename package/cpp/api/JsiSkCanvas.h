@@ -9,7 +9,7 @@
 #include "JsiSkPath.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
-#include "JsiSkSvg.h"
+#include "JsiSkSVG.h"
 
 #include <jsi/jsi.h>
 #include <map>
@@ -266,7 +266,7 @@ public:
 
     if (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()) {
       auto jsiTexs = arguments[2].asObject(runtime).asArray(runtime);
-      auto texsSize = jsiCubics.size(runtime);
+      auto texsSize = jsiTexs.size(runtime);
       for (int i = 0; i < texsSize; i++) {
         auto point = JsiSkPoint::fromValue(
                 runtime, jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
@@ -301,8 +301,8 @@ public:
     SkScalar x = arguments[1].asNumber();
     SkScalar y = arguments[2].asNumber();
 
-    auto font = JsiSkFont::fromValue(runtime, arguments[3]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    auto font = JsiSkFont::fromValue(runtime, arguments[4]);
 
     _canvas->drawSimpleText(text, strlen(text), SkTextEncoding::kUTF8, x, y,
                             *font, *paint);
@@ -311,7 +311,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawSvg) {
-    auto svgdom = JsiSkSvg::fromValue(runtime, arguments[0]);
+    auto svgdom = JsiSkSVG::fromValue(runtime, arguments[0]);
     if (count == 3) {
       // read size
       auto w = arguments[1].asNumber();
@@ -462,6 +462,11 @@ public:
 
   JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}
+
+  JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context, SkCanvas* canvas): JsiSkCanvas(context) {
+    setCanvas(canvas);
+  }
+
   void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
   SkCanvas *getCanvas() { return _canvas; }
 

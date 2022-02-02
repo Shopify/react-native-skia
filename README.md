@@ -17,13 +17,13 @@ When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
 
 ```sh
-$ yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
+yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.92-alpha/shopify-react-native-skia-0.1.92.tgz
 ```
 
 Or using npm:
 
 ```sh
-$ npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
+npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.92-alpha/shopify-react-native-skia-0.1.92.tgz
 ```
 
 ### iOS
@@ -43,6 +43,16 @@ If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_
 
 And then the _SDK Location_ section. It will show you the NDK path, or the option to Download it if you don't have it installed.
+
+And them the _Modules_ section. click on `shopify_react-native-skia` and select _NDK version_ with dropdown, and click on apply.
+
+#### TroubleShooting
+
+For error **_CMake 'X.X.X' was not found in SDK, PATH, or by cmake.dir property._**
+
+open _Tools > SDK Manager_, switch to the _SDK Tools_ tab.
+Find `CMake` and click _Show Package Details_ and download compatiable version **'X.X.X'**, and apply to install.
+
 
 ### Playground
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ReactCommon/TurboModuleUtils.h>
+
 #include <map>
 
 #include "JsiSkHostObjects.h"
@@ -39,33 +41,6 @@ public:
         .asHostObject<JsiSkTypeface>(runtime)
         .get()
         ->getObject();
-  }
-
-  /**
-   * Creates the function for construction a new instance of the SkTypeface
-   * wrapper
-   * @param context Platform Context
-   * @return A function for creating a new host object wrapper for the
-   * SkTypeface class
-   */
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-      if (count == 2) {
-        return jsi::Object::createFromHostObject(
-            runtime,
-            std::make_shared<JsiSkTypeface>(
-                context,
-                SkTypeface::MakeFromName(
-                    arguments[0].asString(runtime).utf8(runtime).c_str(),
-                    getFontStyleFromNumber(arguments[1].asNumber()))));
-      } else {
-        // Return the newly constructed object
-        return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkTypeface>(
-                         context, SkTypeface::MakeDefault()));
-      }
-    };
   }
 
 private:

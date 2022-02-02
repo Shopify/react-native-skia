@@ -7,34 +7,36 @@ slug: /images
 
 Images can be draw by specifying the output rectangle and how the image should fit into that rectangle.
 
-| Name      | Type      |  Description                                                  |
-|:----------|:----------|:--------------------------------------------------------------|
-| source    | `require` | Source of the image.                                          |
-| x         | `number`  | Left position of the destination image.                       |
-| y         | `number`  | Right position of the destination image.                      |
-| width     | `number`  | Width of the destination image.                               |
-| height    | `number`  | Height of the destination image.                              |
-| fit?      | `Fit`     | Method to make the image fit into the rectangle. Value can be `contain`, `fill`, `cover` `fitHeight`, `fitWidth`, `scaleDown`, `none` (default is `contain`).                 | 
+| Name   | Type                  | Description                                                                                                                                                   |
+| :----- | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| source | `require` or `string` | Source of the image or an HTTP(s) URL.                                                                                                                        |
+| x      | `number`              | Left position of the destination image.                                                                                                                       |
+| y      | `number`              | Right position of the destination image.                                                                                                                      |
+| width  | `number`              | Width of the destination image.                                                                                                                               |
+| height | `number`              | Height of the destination image.                                                                                                                              |
+| fit?   | `Fit`                 | Method to make the image fit into the rectangle. Value can be `contain`, `fill`, `cover` `fitHeight`, `fitWidth`, `scaleDown`, `none` (default is `contain`). |
 
 ### Example
 
 ```tsx twoslash
-import {
-  Canvas,
-  Image,
-} from "@shopify/react-native-skia";
+import { Canvas, Image, useImage } from "@shopify/react-native-skia";
 
 const ImageDemo = () => {
+  // Alternatively, you can pass an image URL directly
+  // for instance: const source = useImage("https://bit.ly/3fkulX5");
+  const source = useImage(require("../../assets/oslo.jpg"));
   return (
     <Canvas style={{ flex: 1 }}>
-      <Image
-        source={require("../../assets/oslo.jpg")}
-        fit="contain"
-        x={0}
-        y={0}
-        width={256}
-        height={256}
-      />
+      {source && (
+        <Image
+          source={source}
+          fit="contain"
+          x={0}
+          y={0}
+          width={256}
+          height={256}
+        />
+      )}
     </Canvas>
   );
 };
@@ -67,3 +69,12 @@ const ImageDemo = () => {
 ### fit="none"
 
 ![fit="none"](assets/images/none.png)
+
+## Instance Methods
+
+| Name              | Description                                                                           |
+| :---------------- | :------------------------------------------------------------------------------------ |
+| height            | Returns the possibly scaled height of the image.                                      |
+| width             | Returns the possibly scaled width of the image.                                       |
+| encodeToBytes     | Encodes Image pixels, returning result as UInt8Array                                  |
+| encodeToBase64    | Encodes Image pixels, returning result as a base64 encoded string                     |
