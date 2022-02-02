@@ -38,18 +38,27 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
 }
 
 // Check that Android Skia libs are built
-configurations.android.outputMapping!.forEach((cpu) =>
-  ["libskia.a", "libskshaper.a", "libsvg.a"].forEach((lib) => {
+Object.keys(configurations.android.targets).forEach((targetKey) => {
+  const target = configurations.android.targets[targetKey];
+  configurations.android.outputNames.forEach((name) => {
+    const path = `./package/libs/android/${
+      target.output ?? target.cpu
+    }/${name}`;
+
     checkFileExists(
-      `./package/libs/android/${cpu}/${lib}`,
-      `Skia Android ${cpu}/${lib}`,
+      path,
+      `Skia Android ${path}`,
       "Have you built the Skia Android binaries? Run yarn run build."
     );
-  })
-);
+  });
+});
 
-// Check that iOS Skia libs are built
-["libskia.a", "libskshaper.a", "libsvg.a"].forEach((lib) => {
+// Check that iOS Skia frameworks are built
+[
+  "libskia.xcframework",
+  "libskshaper.xcframework",
+  "libsvg.xcframework",
+].forEach((lib) => {
   checkFileExists(
     `./package/libs/ios/${lib}`,
     `Skia iOS ${lib}`,

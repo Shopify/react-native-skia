@@ -3,7 +3,11 @@ import { exit } from "process";
 const fs = require("fs");
 
 export const executeCmdSync = (command: string) => {
-  execSync(command, { stdio: "inherit", env: process.env });
+  try {
+    return execSync(command);
+  } catch (e) {
+    exit(1);
+  }
 };
 
 export const executeCmd = (
