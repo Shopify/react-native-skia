@@ -3,13 +3,14 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 
-import { AnimationExample, DrawingExample } from "./Examples";
+import { AnimationExample, DrawingExample, GraphsScreen } from "./Examples";
 import { API } from "./Examples/API";
 import { Breathe } from "./Examples/Breathe";
 import { Filters } from "./Examples/Filters";
 import { Gooey } from "./Examples/Gooey";
 import { Hue } from "./Examples/Hue";
 import { Matrix } from "./Examples/Matrix";
+import { Aurora } from "./Examples/Aurora";
 import { HomeScreen } from "./Home";
 
 const App = () => {
@@ -39,7 +40,15 @@ const App = () => {
               header: () => null,
             }}
           />
+          <Stack.Screen
+            name="Aurora"
+            component={Aurora}
+            options={{
+              header: () => null,
+            }}
+          />
           <Stack.Screen name="Drawing" component={DrawingExample} />
+          <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
         </Stack.Navigator>
       </NavigationContainer>

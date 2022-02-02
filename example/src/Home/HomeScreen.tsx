@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 
 import { HomeScreenButton } from "./HomeScreenButton";
 
-export const HomeScreen: React.FC = () => {
+export const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <HomeScreenButton title="API" description="API examples" route="API" />
@@ -33,12 +33,22 @@ export const HomeScreen: React.FC = () => {
         route="Matrix"
       />
       <HomeScreenButton
-        title="Drawing"
+        title="☀️ Aurora"
+        description="Aurora Design via Mesh Gradients"
+        route="Aurora"
+      />
+      <HomeScreenButton
+        title="🖌 Drawing"
         description="Use touches to draw with Skia"
         route="Drawing"
       />
       <HomeScreenButton
-        title="Animation"
+        title="📉 Graphs"
+        description="Animated graphs with Skia"
+        route="Graphs"
+      />
+      <HomeScreenButton
+        title="🎥 Animation"
         description="Animated with Skia"
         route="Animation"
       />

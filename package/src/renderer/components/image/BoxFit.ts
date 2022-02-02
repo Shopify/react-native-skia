@@ -12,12 +12,12 @@ export type Fit =
   | "none"
   | "scaleDown";
 
-interface Size {
+export interface Size {
   width: number;
   height: number;
 }
 
-const size = (width = 0, height = 0) => ({ width, height });
+export const size = (width = 0, height = 0) => ({ width, height });
 
 export const rect2rect = (src: IRect, dst: IRect) => {
   const scaleX = dst.width / src.width;
