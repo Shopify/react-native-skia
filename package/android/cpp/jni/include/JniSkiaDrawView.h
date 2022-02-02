@@ -44,7 +44,7 @@ namespace RNSkia
 
         void updateTouchPoints(jni::JArrayDouble touches);
 
-        void setIsRemovedExternal() { setIsRemoved(); }
+        void setIsRemovedExternal() { invalidate(); }
 
         ~JniSkiaDrawView() {
         }

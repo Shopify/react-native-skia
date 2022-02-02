@@ -1,13 +1,13 @@
 import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
-import { Canvas, mix, useProgress } from "@shopify/react-native-skia";
+import { Canvas, mix, useTimestamp } from "@shopify/react-native-skia";
 
 import { AnimationElement, AnimationDemo, Padding } from "./Components";
 
 const { width } = Dimensions.get("window");
 
 export const SimpleValueOverTime = () => {
-  const progress = useProgress();
+  const progress = useTimestamp();
   return (
     <AnimationDemo title={"Simple animation of value over time"}>
       <Canvas style={styles.canvas}>

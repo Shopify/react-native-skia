@@ -62,7 +62,7 @@ public:
                                            const jsi::Value &obj) {
     const auto object = obj.asObject(runtime);
     if (object.isHostObject(runtime)) {
-      return obj.asObject(runtime)
+      return object
               .asHostObject<JsiSkRect>(runtime)
               .get()
               ->getObject();

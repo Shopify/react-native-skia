@@ -1,6 +1,5 @@
 package com.shopify.reactnative.skia;
 
-import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.BaseViewManager;
 import com.facebook.react.uimanager.LayoutShadowNode;
@@ -10,10 +9,11 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.HashMap;
+
 public class RNSkiaViewManager extends BaseViewManager<SkiaDrawView, LayoutShadowNode> {
 
-    private SkiaDrawView mView;
-    private int mNativeId;
+    final private HashMap<SkiaDrawView, Integer> mViewMapping = new HashMap();
 
     @NonNull
     @Override
@@ -38,9 +38,10 @@ public class RNSkiaViewManager extends BaseViewManager<SkiaDrawView, LayoutShado
     @Override
     public void setNativeId(@NonNull SkiaDrawView view, @Nullable String nativeId) {
         super.setNativeId(view, nativeId);
-        mNativeId = Integer.parseInt(nativeId);
-        RNSkiaModule skiaModule = ((ReactContext)mView.getContext()).getNativeModule(RNSkiaModule.class);
-        skiaModule.getSkiaManager().register(mNativeId, mView);
+        int nativeIdResolved = Integer.parseInt(nativeId);
+        RNSkiaModule skiaModule = ((ReactContext)view.getContext()).getNativeModule(RNSkiaModule.class);
+        skiaModule.getSkiaManager().register(nativeIdResolved, view);
+        mViewMapping.put(view, nativeIdResolved);
     }
 
     @ReactProp(name = "mode")
@@ -57,14 +58,15 @@ public class RNSkiaViewManager extends BaseViewManager<SkiaDrawView, LayoutShado
     public void onDropViewInstance(@NonNull SkiaDrawView view) {
         super.onDropViewInstance(view);
         RNSkiaModule skiaModule = ((ReactContext)view.getContext()).getNativeModule(RNSkiaModule.class);
-        skiaModule.getSkiaManager().unregister(mNativeId);
+        Integer nativeId = mViewMapping.get(view);
+        skiaModule.getSkiaManager().unregister(nativeId);
+        mViewMapping.remove(view);
         view.onRemoved();
     }
 
     @NonNull
     @Override
     protected SkiaDrawView createViewInstance(@NonNull ThemedReactContext reactContext) {
-        mView = new SkiaDrawView(reactContext);
-        return mView;
+        return new SkiaDrawView(reactContext);
     }
 }

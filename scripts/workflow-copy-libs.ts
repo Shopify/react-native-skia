@@ -1,45 +1,10 @@
 import fs from "fs";
-import { ensureFolderExists } from "./utils";
+import { ensureFolderExists, copyRecursiveSync } from "./utils";
 /**
  * This build script prepares the npm build command by copying
  * the Skia Binaries from the artifact folder into the libs folder
  * in the checkout directory. This build script is run by the
  * build-npm.yml workflow and does not require anything.
- *
- * The folder structure after downloading artifacts are:
- *
- * artifacts:
- *
- * ./skia-android-arm
- * ./skia-android-arm-64
- * ./skia-android-arm-x64
- * ./skia-android-arm-x86
- * ./skia-ios-fat-libs
- *
- * ./skia-android-arm:
- * libskia.a
- * libskshaper.a
- * libsvg.a
- *
- * ./skia-android-arm-64:
- * libskia.a
- * libskshaper.a
- * libsvg.a
- *
- * ./skia-android-arm-x64:
- * libskia.a
- * libskshaper.a
- * libsvg.a
- *
- * ./skia-android-arm-x86:
- * libskia.a
- * libskshaper.a
- * libsvg.a
- *
- * ./skia-ios-fat-libs:
- * libskia.a
- * libskshaper.a
- * libsvg.a
  */
 
 console.log("Copying Skia Binaries from artifacts to libs folder");
@@ -53,9 +18,14 @@ const sources = [
 
 const destinations = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
 
-const files = ["libskia.a", "libskshaper.a", "libsvg.a"];
+const androidFiles = ["libskia.a", "libskshaper.a", "libsvg.a"];
+const iosFiles = [
+  "libskia.xcframework",
+  "libskshaper.xcframework",
+  "libsvg.xcframework",
+];
 
-const copyFiles = (from: string, to: string) => {
+const copyFiles = (from: string, to: string, files: string[]) => {
   ensureFolderExists(to);
   files.forEach((f) => {
     const source = "./artifacts/" + from + "/" + f;
@@ -78,17 +48,17 @@ const copyFiles = (from: string, to: string) => {
       );
       process.exit(1);
     }
-    fs.copyFileSync(source, target);
+    copyRecursiveSync(source, target);
     console.log("Copied", source, target);
   });
 };
 
 console.log("Copying android files...");
 destinations.forEach((d, i) => {
-  copyFiles(sources[i], "./package/libs/android/" + d);
+  copyFiles(sources[i], "./package/libs/android/" + d, androidFiles);
 });
 
 console.log("Copying ios files...");
-copyFiles("skia-ios-fat-libs", "./package/libs/ios");
+copyFiles("skia-ios-xcframeworks", "./package/libs/ios", iosFiles);
 
 console.log("Done copying artifacts.");

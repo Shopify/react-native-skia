@@ -8,7 +8,7 @@
 namespace RNSkia {
 
   void PlatformContext::performStreamOperation(const std::string &sourceUri,
-                                              const std::function<void(std::unique_ptr<SkStream>)> &op) {
+                                              const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) {
   
     RNSkMeasureTime("PlatformContext::performStreamOperation");
     auto loader = [=]() {

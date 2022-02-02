@@ -18,7 +18,7 @@ It will use cubic sampling.
 | fm?         | `FilterMode` | Can be `linear` or `nearest`. |
 | mm?         | `MipmapMode` | Can be `none`, `linear` or `nearest`. |
 | fit?        | `Fit` | Calculate the transformation matrix to fit the rectangle defined by `fitRect`. See [images](images). |
-| fitRect     | `IRect` | The destination reactangle to calculate the transformation matrix via the `fit` property. |
+| rect?     | `IRect` | The destination reactangle to calculate the transformation matrix via the `fit` property. |
 | transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
 ### Example
@@ -39,7 +39,7 @@ const ImageShaderDemo = () => {
         <ImageShader
           source={require("../../assets/oslo.jpg")}
           fit="cover"
-          fitRect={{ x: 0, y: 0, width: 256, height: 256 }}
+          rect={{ x: 0, y: 0, width: 256, height: 256 }}
         />
       </Paint>
       <Circle cx={128} cy={128} r={128} />

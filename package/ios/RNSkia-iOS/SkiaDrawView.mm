@@ -1,37 +1,59 @@
-
 #import <SkiaDrawView.h>
 #import <RNSkDrawViewImpl.h>
+#import <RNSkManager.h>
 
 @implementation SkiaDrawView {
   RNSkDrawViewImpl* _impl;
+  RNSkia::RNSkManager* _manager;
+  RNSkia::RNSkDrawingMode _drawingMode;
+  bool _debugMode;
+  size_t _nativeId;
 }
 
 #pragma mark Initialization and destruction
 
-- (instancetype)initWithContext: (std::shared_ptr<RNSkia::RNSkPlatformContext>) context
+- (instancetype) initWithManager: (RNSkia::RNSkManager*)manager;
 {
   self = [super init];
   if (self) {
-    _impl = new RNSkDrawViewImpl((SkiaDrawView*)self, context);
+    _manager = manager;
+    _nativeId = 0;
+    _debugMode = false;
+    _drawingMode = RNSkia::RNSkDrawingMode::Default;
   }
   return self;
 }
 
--(void) dealloc {
-  if(_impl != nullptr) {
-    _impl->remove();
-    delete _impl;
-    _impl = nullptr;
-  }
+- (void)dealloc {
+  _manager->unregisterSkiaDrawView(_nativeId);
 }
 
+#pragma mark Lifecycle
 
 - (void) willMoveToWindow:(UIWindow *)newWindow {
   [super willMoveToWindow: newWindow];
-  if (newWindow == nil && _impl != nullptr) {
-    _impl->remove();
-    delete _impl;
-    _impl = nullptr;
+  
+  if (newWindow == NULL) {
+    // Remove implementation view when the parent view is not set
+    if(_impl != nullptr) {
+      if(_nativeId != 0) {
+        _manager->setSkiaDrawView(_nativeId, nullptr);
+      }
+      delete _impl;
+      _impl = nullptr;
+    }
+  } else {
+    // Create implementation view when the parent view is set
+    if(_impl == nullptr) {
+      __weak typeof(self) weakSelf = self;
+      _impl = new RNSkDrawViewImpl(weakSelf, _manager->getPlatformContext());
+      if(_nativeId != 0) {
+        _manager->setSkiaDrawView(_nativeId, _impl);
+      }
+      _impl->setDrawingMode(_drawingMode);
+      _impl->setShowDebugOverlays(_debugMode);
+      
+    }
   }
 }
 
@@ -39,7 +61,34 @@
 
 - (void) layoutSubviews {
   [super layoutSubviews];
-  _impl->setSize(self.bounds.size.width, self.bounds.size.height);
+  if(_impl != nullptr) {
+    _impl->setSize(self.bounds.size.width, self.bounds.size.height);
+  }
+}
+
+#pragma mark Properties
+
+-(void) setDrawingMode:(std::string) mode {
+  _drawingMode = mode.compare("continuous") == 0 ? RNSkia::RNSkDrawingMode::Continuous : RNSkia::RNSkDrawingMode::Default;
+  
+  if(_impl != nullptr) {
+    _impl->setDrawingMode(_drawingMode);
+  }
+}
+
+-(void) setDebugMode:(bool) debugMode {
+  _debugMode = debugMode;
+  if(_impl != nullptr) {
+    _impl->setShowDebugOverlays(debugMode);
+  }
+}
+
+- (void) setNativeId:(size_t) nativeId {
+  _nativeId = nativeId;
+  
+  if(_impl != nullptr) {
+    _manager->registerSkiaDrawView(nativeId, _impl);
+  }
 }
 
 #pragma mark External API
@@ -92,7 +141,9 @@
       
       nextTouches.push_back(nextTouch);
     }
-    _impl->updateTouchState(nextTouches);
+    if(_impl != nullptr) {
+      _impl->updateTouchState(nextTouches);
+    }
   }
 }
 

@@ -75,7 +75,7 @@ namespace RNSkia
 
     void JniPlatformContext::performStreamOperation(
         const std::string &sourceUri,
-        const std::function<void(std::unique_ptr<SkStream>)> &op)
+        const std::function<void(std::unique_ptr<SkStreamAsset>)> &op)
     {
         auto measure =
             RNSkMeasureTime("JniPlatformContext::performStreamOperation");
