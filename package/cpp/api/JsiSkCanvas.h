@@ -281,7 +281,7 @@ public:
       _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), blendMode,
                          *paint);
     } else {
-      _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), *paint);
+      _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), SkBlendMode::kClear, *paint);
     }
     return jsi::Value::undefined();
   }
