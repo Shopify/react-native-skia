@@ -38,7 +38,7 @@ const PatchDemo = () => {
     <Canvas style={{ flex: 1 }}>
       <Patch
         colors={colors}
-        cubics={[topLeft, topRight, bottomRight, bottomLeft]}
+        patch={[topLeft, topRight, bottomRight, bottomLeft]}
       />
     </Canvas>
   );
