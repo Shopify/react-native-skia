@@ -67,7 +67,7 @@ namespace RNSkia {
                 std::vector<uint16_t> indices;
 
                 auto jsiPositions = arguments[1].asObject(runtime).asArray(runtime);
-                auto positionsSize = jsiPositions.size(runtime);
+                auto positionsSize = (int)jsiPositions.size(runtime);
                 for (int i = 0; i < positionsSize; i++) {
                     std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
                             runtime, jsiPositions.getValueAtIndex(runtime, i).asObject(runtime));
@@ -93,10 +93,10 @@ namespace RNSkia {
                     }
                 }
 
-                auto indicesSize = 0;
+                int indicesSize = 0;
                 if (count >= 5 && !arguments[4].isNull() && !arguments[4].isUndefined()) {
                     auto jsiIndices = arguments[4].asObject(runtime).asArray(runtime);
-                    indicesSize = jsiIndices.size(runtime);
+                    indicesSize = (int)jsiIndices.size(runtime);
                     for (int i = 0; i < indicesSize; i++) {
                         uint16_t index = jsiIndices.getValueAtIndex(runtime, i).asNumber();
                         colors.push_back(index);
