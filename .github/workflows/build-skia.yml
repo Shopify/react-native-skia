@@ -49,7 +49,7 @@ jobs:
 
       - name: Build Skia iOS xcframeworks
         working-directory: ${{ env.WORKING_DIRECTORY }}/
-        run: yarn build-skia-ios-frameworks
+        run: yarn build-skia-ios-framework
 
       - name: Upload artifacts - Android arm
         uses: actions/upload-artifact@v2
