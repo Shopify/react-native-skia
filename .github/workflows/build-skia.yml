@@ -47,10 +47,6 @@ jobs:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: yarn build-skia
 
-      - name: Build Skia iOS xcframeworks
-        working-directory: ${{ env.WORKING_DIRECTORY }}/
-        run: yarn build-skia-ios-framework
-
       - name: Upload artifacts - Android arm
         uses: actions/upload-artifact@v2
         with:
