@@ -10,6 +10,7 @@ import { Filters } from "./Examples/Filters";
 import { Gooey } from "./Examples/Gooey";
 import { Hue } from "./Examples/Hue";
 import { Matrix } from "./Examples/Matrix";
+import { Aurora } from "./Examples/Aurora";
 import { HomeScreen } from "./Home";
 
 const App = () => {
@@ -35,6 +36,13 @@ const App = () => {
           <Stack.Screen
             name="Matrix"
             component={Matrix}
+            options={{
+              header: () => null,
+            }}
+          />
+          <Stack.Screen
+            name="Aurora"
+            component={Aurora}
             options={{
               header: () => null,
             }}
