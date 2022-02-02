@@ -9,7 +9,8 @@
 #include "JsiSkPath.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
-#include "JsiSkSVG.h"
+#include "JsiSkSvg.h"
+#include "JsiSkVertices.h"
 
 #include <jsi/jsi.h>
 #include <map>
@@ -242,6 +243,15 @@ public:
     return jsi::Value::undefined();
   }
 
+
+  JSI_HOST_FUNCTION(drawVertices) {
+    auto vertices = JsiSkVertices::fromValue(runtime, arguments[0]);
+    auto blendMode = (SkBlendMode)arguments[1].getNumber();
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
+    _canvas->drawVertices(vertices, blendMode, *paint);
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(drawPatch) {
     std::vector<SkPoint> cubics;
     std::vector<SkColor> colors;
@@ -275,14 +285,8 @@ public:
     }
 
     auto paint = count >= 4 ? JsiSkPaint::fromValue(runtime, arguments[4]) : nullptr;
-
-    if (count >= 3 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
-      auto blendMode = (SkBlendMode)arguments[3].asNumber();
-      _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), blendMode,
-                         *paint);
-    } else {
-      _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), SkBlendMode::kClear, *paint);
-    }
+    auto blendMode = (SkBlendMode)arguments[3].asNumber();
+    _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), blendMode, *paint);
     return jsi::Value::undefined();
   }
 
@@ -443,6 +447,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPoints),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPatch),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawVertices),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawText),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawSvg),
                        JSI_EXPORT_FUNC(JsiSkCanvas, clipPath),

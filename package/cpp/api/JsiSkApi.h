@@ -29,6 +29,7 @@
 #include "JsiSkSVG.h"
 #include "JsiSkSVGFactory.h"
 #include "JsiSkTypeface.h"
+#include "JsiSkVertices.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkDataFactory.h"
 #include "JsiSkFontMgrFactory.h"
@@ -51,12 +52,13 @@ namespace RNSkia
         : JsiSkHostObject(context)
     {
 
-      installFunction("Font", JsiSkFont::createCtor(context));
-      installFunction("Paint", JsiSkPaint::createCtor(context));
-      installFunction("Matrix", JsiSkMatrix::createCtor(context));
-      installFunction("XYWHRect", JsiSkRect::createCtor(context));
-      installFunction("RRectXY", JsiSkRRect::createCtor(context));
-      installFunction("Point", JsiSkPoint::createCtor(context));
+    installFunction("Font", JsiSkFont::createCtor(context));
+    installFunction("Paint", JsiSkPaint::createCtor(context));
+    installFunction("Matrix", JsiSkMatrix::createCtor(context));
+    installFunction("XYWHRect", JsiSkRect::createCtor(context));
+    installFunction("RRectXY", JsiSkRRect::createCtor(context));
+    installFunction("Point", JsiSkPoint::createCtor(context));
+    installFunction("MakeVertices", JsiSkVertices::createCtor(context));
 
       // Static members
       installReadonlyProperty("FontMgr",

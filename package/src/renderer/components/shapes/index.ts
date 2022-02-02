@@ -7,4 +7,5 @@ export * from "./Path";
 export * from "./Oval";
 export * from "./Points";
 export * from "./Patch";
+export * from "./Vertices";
 export * from "./Fill";

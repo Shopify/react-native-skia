@@ -15,6 +15,7 @@ import {
   rrect,
   Paint,
   DashPathEffect,
+  Vertices,
   RoundedRect,
   Patch,
 } from "@shopify/react-native-skia";
@@ -112,6 +113,19 @@ export const Shapes = () => {
         <Patch
           colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
           patch={[topLeft, topRight, bottomRight, bottomLeft]}
+        />
+      </Canvas>
+      <Title>Vertices</Title>
+      <Canvas style={styles.container}>
+        <Vertices
+          mode="triangleFan"
+          vertices={[
+            vec(16, 0),
+            vec(250, 0),
+            vec(100, SIZE / 2),
+            vec(16, SIZE + 32),
+          ]}
+          colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
         />
       </Canvas>
     </ScrollView>

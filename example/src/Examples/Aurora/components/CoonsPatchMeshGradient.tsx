@@ -15,13 +15,12 @@ import {
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
-import { bilinearInterpolate, symmetric } from "./Math";
+import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";
 import { Curves } from "./Curves";
 import { useHandles } from "./useHandles";
 
 const { width, height } = Dimensions.get("window");
-const size = vec(width, height);
 
 const rectToTexture = (
   vertices: CubicBezierHandle[],
