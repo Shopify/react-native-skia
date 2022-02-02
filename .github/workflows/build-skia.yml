@@ -1,10 +1,5 @@
 name: Build SKIA
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - externals/**
+on: workflow_dispatch
 jobs:
   build:
     #runs-on: ubuntu-latest
