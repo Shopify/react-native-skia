@@ -21,18 +21,17 @@ export const commonArgs = [
   ["is_component_build", false],
 ];
 
+export const IS_MACOS = process.platform === "darwin";
 // Get paths to iPhone SDKs
-export const iPhoneosSdk = executeCmdSync(
-  "xcrun --sdk iphoneos --show-sdk-path"
-)
-  .toString()
-  .trim();
+export const iPhoneosSdk = IS_MACOS
+  ? executeCmdSync("xcrun --sdk iphoneos --show-sdk-path").toString().trim()
+  : undefined;
 
-export const iPhoneSimulatorSdk = executeCmdSync(
-  "xcrun --sdk iphonesimulator --show-sdk-path"
-)
-  .toString()
-  .trim();
+export const iPhoneSimulatorSdk = IS_MACOS
+  ? executeCmdSync("xcrun --sdk iphonesimulator --show-sdk-path")
+      .toString()
+      .trim()
+  : undefined;
 
 export type PlatformName = "ios" | "android";
 

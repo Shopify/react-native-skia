@@ -1,12 +1,13 @@
-import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import {
   commonArgs,
   configurations,
   iPhoneosSdk,
   iPhoneSimulatorSdk,
+  IS_MACOS,
   PlatformName,
 } from "./skia-configuration";
+import { executeCmd, executeCmdSync } from "./utils";
 const fs = require("fs");
 const typedKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
 
@@ -38,14 +39,18 @@ if (!process.env.ANDROID_NDK) {
 }
 
 // Test for existence of iOS SDK
-if (!iPhoneosSdk) {
+if (!IS_MACOS) {
+  console.log("Skipping iPhoneOS SDK.");
+} else if (!iPhoneosSdk) {
   console.log("iPhoneOS SDK not set.");
   exit(1);
 } else {
   console.log("☑ iPhoneOS SDK");
 }
 
-if (!iPhoneSimulatorSdk) {
+if (!IS_MACOS) {
+  console.log("Skipping iPhoneSimulatorOS SDK.");
+} else if (!iPhoneSimulatorSdk) {
   console.log("iPhoneSimulatorOS SDK not set.");
   exit(1);
 } else {
@@ -185,7 +190,7 @@ try {
   console.log("Running gclient sync...");
   process.chdir(SkiaDir);
   // Start by running sync
-  executeCmdSync("PATH=../depot_tools/:$PATH python2 tools/git-sync-deps");
+  executeCmdSync("PATH=../depot_tools/:$PATH python tools/git-sync-deps");
   console.log("gclient sync done");
 
   // Find platform/target
