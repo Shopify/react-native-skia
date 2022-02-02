@@ -52,7 +52,6 @@ namespace RNSkia
         : JsiSkHostObject(context)
     {
 
-<<<<<<< HEAD
     installFunction("Font", JsiSkFont::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
     installFunction("Matrix", JsiSkMatrix::createCtor(context));
@@ -60,14 +59,6 @@ namespace RNSkia
     installFunction("RRectXY", JsiSkRRect::createCtor(context));
     installFunction("Point", JsiSkPoint::createCtor(context));
     installFunction("MakeVertices", JsiSkVertices::createCtor(context));
-=======
-      installFunction("Font", JsiSkFont::createCtor(context));
-      installFunction("Paint", JsiSkPaint::createCtor(context));
-      installFunction("Matrix", JsiSkMatrix::createCtor(context));
-      installFunction("XYWHRect", JsiSkRect::createCtor(context));
-      installFunction("RRectXY", JsiSkRRect::createCtor(context));
-      installFunction("Point", JsiSkPoint::createCtor(context));
->>>>>>> main
 
       // Static members
       installReadonlyProperty("FontMgr",

@@ -2,7 +2,6 @@ import React from "react";
 import type {
   AnimationValue,
   CubicBezierHandle,
-  Vector,
 } from "@shopify/react-native-skia";
 import { Line, Paint, Circle } from "@shopify/react-native-skia";
 

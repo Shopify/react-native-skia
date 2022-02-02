@@ -20,6 +20,11 @@ namespace RNSkia {
         sk_sp<SkVertices> vertices)
         : JsiSkWrappingSkPtrHostObject<SkVertices>(context, vertices) {}
 
+        // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+        JSI_PROPERTY_GET(__typename__) {
+            return jsi::String::createFromUtf8(runtime, "Vertices");
+        }
+
         JSI_HOST_FUNCTION(bounds) {
             auto result = getObject()->bounds();
             return jsi::Object::createFromHostObject(

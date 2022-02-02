@@ -1,14 +1,13 @@
 import React from "react";
 
 import type { CustomPaintProps, SkEnum } from "../../processors";
-import { enumKey } from "../../processors";
+import { enumKey, processColor } from "../../processors";
 import type { IPoint } from "../../../skia";
 import { BlendMode } from "../../../skia/Paint/BlendMode";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
 import { VertexMode } from "../../../skia/Vertices/Vertices";
 import { Skia } from "../../../skia/Skia";
-import { processColor } from "../../processors/Paint";
 
 export interface VerticesProps extends CustomPaintProps {
   colors?: string[];
