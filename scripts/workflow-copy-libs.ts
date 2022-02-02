@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { ensureFolderExists } from "./utils";
 /**
  * This build script prepares the npm build command by copying
@@ -48,7 +49,7 @@ const copyFiles = (from: string, to: string, files: string[]) => {
       );
       process.exit(1);
     }
-    fs.copyFileSync(source, target);
+    copyRecursiveSync(source, target);
     console.log("Copied", source, target);
   });
 };
@@ -62,3 +63,28 @@ console.log("Copying ios files...");
 copyFiles("skia-ios-xcframeworks", "./package/libs/ios", iosFiles);
 
 console.log("Done copying artifacts.");
+
+/**
+ * Look ma, it's cp -R.
+ * @param {string} src  The path to the thing to copy.
+ * @param {string} dest The path to the new copy.
+ */
+var copyRecursiveSync = function (src: string, dest: string) {
+  var exists = fs.existsSync(src);
+  if (!exists) {
+    return;
+  }
+  var stats = fs.statSync(src);
+  var isDirectory = stats.isDirectory();
+  if (isDirectory) {
+    fs.mkdirSync(dest);
+    fs.readdirSync(src).forEach(function (childItemName) {
+      copyRecursiveSync(
+        path.join(src, childItemName),
+        path.join(dest, childItemName)
+      );
+    });
+  } else {
+    fs.copyFileSync(src, dest);
+  }
+};
