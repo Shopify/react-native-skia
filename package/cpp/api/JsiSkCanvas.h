@@ -9,7 +9,7 @@
 #include "JsiSkPath.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
-#include "JsiSkSvg.h"
+#include "JsiSkSVG.h"
 #include "JsiSkVertices.h"
 
 #include <jsi/jsi.h>
