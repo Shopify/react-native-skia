@@ -89,16 +89,16 @@ export const configurations: Configuration = {
   ios: {
     targets: {
       // This one can probably be removed now?
-      arm: {
-        cpu: "arm",
-        args: [
-          ["ios_min_target", '"10.0"'],
-          [
-            "extra_cflags",
-            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios"]',
-          ],
-        ],
-      },
+      // arm: {
+      //   cpu: "arm",
+      //   args: [
+      //     ["ios_min_target", '"10.0"'],
+      //     [
+      //       "extra_cflags",
+      //       '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios"]',
+      //     ],
+      //   ],
+      // },
       "arm64-iphoneos": {
         cpu: "arm64",
         args: [
