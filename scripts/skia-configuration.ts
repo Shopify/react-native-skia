@@ -1,3 +1,5 @@
+import { executeCmdSync } from "./utils";
+
 const NdkDir: string = process.env.ANDROID_NDK ?? "";
 
 export const commonArgs = [
@@ -19,20 +21,57 @@ export const commonArgs = [
   ["is_component_build", false],
 ];
 
+// Get paths to iPhone SDKs
+export const iPhoneosSdk = executeCmdSync(
+  "xcrun --sdk iphoneos --show-sdk-path"
+)
+  .toString()
+  .trim();
+
+export const iPhoneSimulatorSdk = executeCmdSync(
+  "xcrun --sdk iphonesimulator --show-sdk-path"
+)
+  .toString()
+  .trim();
+
 export type PlatformName = "ios" | "android";
 
-type Configuration = { [K in PlatformName]: Platform };
-type Platform = {
-  cpus: string[];
-  args: (string | boolean | number)[][];
+type Arg = (string | boolean | number)[];
+export type Target = {
+  args?: Arg[];
+  cpu: string;
+  output?: string;
+  options?: Arg[];
+};
+export type Configuration = { [K in PlatformName]: Platform };
+export type Platform = {
+  targets: { [key: string]: Target };
+  args: Arg[];
   outputRoot: string;
   outputNames: string[];
-  outputMapping?: string[];
+  options?: Arg[];
 };
 
 export const configurations: Configuration = {
   android: {
-    cpus: ["arm", "arm64", "x86", "x64"],
+    targets: {
+      arm: {
+        cpu: "arm",
+        output: "armeabi-v7a",
+      },
+      arm64: {
+        cpu: "arm64",
+        output: "arm64-v8a",
+      },
+      x86: {
+        cpu: "x86",
+        output: "x86",
+      },
+      x64: {
+        cpu: "x64",
+        output: "x86_64",
+      },
+    },
     args: [
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
@@ -46,21 +85,62 @@ export const configurations: Configuration = {
     ],
     outputRoot: "package/libs/android",
     outputNames: ["libskia.a", "libskshaper.a", "libsvg.a"],
-    outputMapping: ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"],
   },
   ios: {
-    cpus: ["arm", "arm64", "x64"],
+    targets: {
+      // This one can probably be removed now?
+      // arm: {
+      //   cpu: "arm",
+      //   args: [
+      //     ["ios_min_target", '"10.0"'],
+      //     [
+      //       "extra_cflags",
+      //       '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios"]',
+      //     ],
+      //   ],
+      // },
+      "arm64-iphoneos": {
+        cpu: "arm64",
+        args: [
+          ["ios_min_target", '"11.0"'],
+          ["xcode_sysroot", `"${iPhoneosSdk}"`],
+          ["extra_ldflags", `["--sysroot='${iPhoneosSdk}'"]`],
+          [
+            "extra_cflags",
+            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios", "-fembed-bitcode"]',
+          ],
+        ],
+      },
+      "arm64-iphonesimulator": {
+        cpu: "arm64",
+        args: [
+          ["ios_min_target", '"11.0"'],
+          ["xcode_sysroot", `"${iPhoneSimulatorSdk}"`],
+          ["extra_ldflags", `["--sysroot='${iPhoneSimulatorSdk}'"]`],
+          [
+            "extra_cflags",
+            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios-simulator"]',
+          ],
+        ],
+      },
+      x64: {
+        cpu: "x64",
+        args: [
+          ["ios_min_target", '"11.0"'],
+          ["xcode_sysroot", `"${iPhoneSimulatorSdk}"`],
+          ["extra_ldflags", `["--sysroot='${iPhoneSimulatorSdk}'"]`],
+          [
+            "extra_cflags",
+            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios-simulator"]',
+          ],
+        ],
+      },
+    },
     args: [
       ["skia_use_metal", true],
       ["skia_use_gl", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
-      [
-        "extra_cflags",
-        '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-mios-version-min=10.0"]',
-      ],
-      // Can this be removed? Seems like it can
-      // ["extra_ldflags", '["ios_version_min=10.0"]'],
     ],
     outputRoot: "package/libs/ios",
     outputNames: ["libskia.a", "libskshaper.a", "libsvg.a"],

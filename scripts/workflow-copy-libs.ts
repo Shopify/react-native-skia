@@ -36,10 +36,10 @@ import { ensureFolderExists } from "./utils";
  * libskshaper.a
  * libsvg.a
  *
- * ./skia-ios-fat-libs:
- * libskia.a
- * libskshaper.a
- * libsvg.a
+ * ./skia-ios-xc-frameworks:
+ * libskia.xcframework
+ * libskshaper.xcframework
+ * libsvg.xcframework
  */
 
 console.log("Copying Skia Binaries from artifacts to libs folder");
@@ -89,6 +89,6 @@ destinations.forEach((d, i) => {
 });
 
 console.log("Copying ios files...");
-copyFiles("skia-ios-fat-libs", "./package/libs/ios");
+copyFiles("skia-ios-xcframeworks", "./package/libs/ios");
 
 console.log("Done copying artifacts.");
