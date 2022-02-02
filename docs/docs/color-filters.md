@@ -16,9 +16,10 @@ A playground to build color matrices is available [here](https://fecolormatrix.c
 | children? | `ColorFilter` | Optional color filter to be applied first. |
 
 ```tsx twoslash
-import { Canvas, Paint, ColorMatrix, Image } from "@shopify/react-native-skia";
+import { Canvas, Paint, ColorMatrix, Image, useImage } from "@shopify/react-native-skia";
 
 const MatrixColorFilter = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
@@ -29,14 +30,14 @@ const MatrixColorFilter = () => {
           ]}
         />
       </Paint>
-      <Image
+      { image && (<Image
         x={0}
         y={0}
         width={256}
         height={256}
-        source={require("./assets/oslo.jpg")}
+        image={image}
         fit="cover"
-      />
+      />)}
     </Canvas>
   );
 };
