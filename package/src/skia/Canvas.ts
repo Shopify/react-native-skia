@@ -201,9 +201,9 @@ export interface ICanvas {
    * @param paint
    */
   drawPatch(
-    cubics: IPoint[],
-    colors?: Color[] | null,
-    texs?: IPoint[] | null,
+    cubics: readonly IPoint[],
+    colors?: readonly Color[] | null,
+    texs?: readonly IPoint[] | null,
     mode?: BlendMode | null,
     paint?: IPaint
   ): void;
