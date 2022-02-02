@@ -10,10 +10,10 @@ slug: /color-filters
 Creates a color filter using the provided color matrix.
 A playground to build color matrices is available [here](https://fecolormatrix.com/). 
 
-| Name       | Type          |  Description                               |
-|:-----------|:--------------|:-------------------------------------------|
-| value      | `number[]`    | Color Matrix (5x4)                         |
-| children?  | `ColorFilter` | Optional color filter to be applied first. |
+| Name      | Type          |  Description                               |
+|:----------|:--------------|:-------------------------------------------|
+| matrix    | `number[]`    | Color Matrix (5x4)                         |
+| children? | `ColorFilter` | Optional color filter to be applied first. |
 
 ```tsx twoslash
 import { Canvas, Paint, ColorMatrix, Image } from "@shopify/react-native-skia";
@@ -23,7 +23,7 @@ const MatrixColorFilter = () => {
     <Canvas style={{ flex: 1 }}>
       <Paint>
         <ColorMatrix
-          value={[
+          matrix={[
             -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015,
             1.69, -0.703, 0, 0, 0, 0, 0, 1, 0,
           ]}
