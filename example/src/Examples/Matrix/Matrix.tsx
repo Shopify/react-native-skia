@@ -37,7 +37,7 @@ export const Matrix = () => {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ flex: 1 }} debug>
       <Fill color="black" />
       <Paint>
         <BlurMask sigma={10} style="solid" />
