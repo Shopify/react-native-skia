@@ -1,19 +1,15 @@
 /*
-	This script is used to increase react-native-skia version.
+	This script is used to update react-native-skia version.
 	It will update those files:
-		- package/package.json (JavaScript)
+		- package/package.json
     - README.md
     - docs/docs/getting-started/installation.md
-
-	Parameters accepted: [ 'minor', 'major', 'patch' ].
 */
 
-import fs from "fs";
-import { exit } from "process";
 import colors from "colors";
-import { Command, Option } from "commander";
+import { Command } from "commander";
+import fs from "fs";
 
-const ACCEPTABLE_ARGUMENT_VALUES = ["major", "minor", "patch"];
 const JAVASCRIPT_FILE_PATH = `${__dirname}/../package/package.json`;
 const README_FILE_PATH = `${__dirname}/../README.md`;
 const WEBSITE_INSTALLATION_FILE_PATH = `${__dirname}/../docs/docs/getting-started/installation.md`;
@@ -26,14 +22,13 @@ const printDiff = (oldVersionName: string, newVersionName: string) => {
 };
 
 const updatePackageDotJsonVersion = (
-  versionType: "major" | "minor" | "patch",
+  version: string,
   packageDotJson: string
 ): string => {
   const pck = JSON.parse(fs.readFileSync(packageDotJson).toString());
 
   const oldJavascriptVersionName = pck.version.replace(/"/g, "");
-  const versionToIncrease = pck.version;
-  pck.version = increaseVersion(versionType, versionToIncrease);
+  pck.version = version;
 
   printDiff(oldJavascriptVersionName, pck.version);
 
@@ -69,44 +64,16 @@ const updateDocVersion = (docPath: string, version: string) => {
   fs.writeFileSync(docPath, updatedDocWithNpm);
 };
 
-export const increaseVersion = (
-  versionType: "major" | "minor" | "patch",
-  versionToIncrease: string
-) => {
-  let version = "";
-  const [major, minor, patch] = versionToIncrease.split(".");
-
-  switch (versionType) {
-    case "major":
-      version += `${+major + 1}.0.0`;
-      break;
-    case "minor":
-      version += `${major}.${+minor + 1}.0`;
-      break;
-    case "patch":
-      version += `${major}.${minor}.${+patch + 1}`;
-      break;
-  }
-  return version;
-};
-
 const program = new Command();
 
 program
-  .addOption(
-    new Option("-r, --releaseType <type>", "Type of the upgrade").choices(
-      ACCEPTABLE_ARGUMENT_VALUES
-    )
+  .requiredOption(
+    "-r, --releaseVersion <type>",
+    "New version of react-native-skia"
   )
   .action((args) => {
-    if (!args.releaseType) {
-      console.log(
-        "error: option '-r, --releaseType <type>' must be set. Allowed choices are major, minor, patch."
-      );
-      exit(1);
-    }
     const newVersion = updatePackageDotJsonVersion(
-      args.releaseType,
+      args.releaseVersion,
       JAVASCRIPT_FILE_PATH
     );
     updateDocVersion(README_FILE_PATH, newVersion);
