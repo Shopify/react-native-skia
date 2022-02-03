@@ -60,14 +60,14 @@ namespace RNSkia {
         static const jsi::HostFunctionType
         createCtor(std::shared_ptr<RNSkPlatformContext> context) {
             return JSI_HOST_FUNCTION_LAMBDA {
-                auto mode = (SkVertices::VertexMode)arguments[0].getNumber();
+                auto mode = static_cast<SkVertices::VertexMode>(arguments[0].getNumber());
                 std::vector<SkPoint> positions;
                 std::vector<SkPoint> texs;
                 std::vector<SkColor> colors;
                 std::vector<uint16_t> indices;
 
                 auto jsiPositions = arguments[1].asObject(runtime).asArray(runtime);
-                auto positionsSize = (int)jsiPositions.size(runtime);
+                auto positionsSize = static_cast<int>(jsiPositions.size(runtime));
                 for (int i = 0; i < positionsSize; i++) {
                     std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
                             runtime, jsiPositions.getValueAtIndex(runtime, i).asObject(runtime));
@@ -96,7 +96,7 @@ namespace RNSkia {
                 int indicesSize = 0;
                 if (count >= 5 && !arguments[4].isNull() && !arguments[4].isUndefined()) {
                     auto jsiIndices = arguments[4].asObject(runtime).asArray(runtime);
-                    indicesSize = (int)jsiIndices.size(runtime);
+                    indicesSize = static_cast<int>(jsiIndices.size(runtime));
                     for (int i = 0; i < indicesSize; i++) {
                         uint16_t index = jsiIndices.getValueAtIndex(runtime, i).asNumber();
                         colors.push_back(index);
