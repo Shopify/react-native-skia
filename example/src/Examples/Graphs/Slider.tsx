@@ -24,13 +24,13 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
     [height, width]
   );
 
-  const progress = useValue(
+  const touchPos = useValue(
     getPointAtPositionInPath(width / 2, width, 60, path)
   );
 
   const touchHandler = useTouchHandler({
     onActive: ({ x }) =>
-      (progress.value = getPointAtPositionInPath(x, width, 60, path)),
+      (touchPos.value = getPointAtPositionInPath(x, width, 60, path)),
   });
 
   return (
@@ -52,18 +52,18 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
           strokeCap="round"
         />
         <Paint color="#fff" />
-        <Circle c={() => progress.value} r={10} />
-        <Circle color="#DA4167" c={() => progress.value} r={7.5} />
+        <Circle c={() => touchPos.value} r={10} />
+        <Circle color="#DA4167" c={() => touchPos.value} r={7.5} />
         <SkiaText
           familyName="Arial"
           size={12}
-          x={() => progress.value.x - 24}
-          y={() => progress.value.y - 18}
-          value={() => "$ " + progress.value.x.toFixed(2)}
+          x={() => touchPos.value.x - 24}
+          y={() => touchPos.value.y - 18}
+          value={() => "$ " + (touchPos.value.y * -1).toFixed(2)}
         />
         <Line
-          p1={() => vec(progress.value.x, progress.value.y + 14)}
-          p2={() => vec(progress.value.x, height)}
+          p1={() => vec(touchPos.value.x, touchPos.value.y + 14)}
+          p2={() => vec(touchPos.value.x, height)}
         />
       </Canvas>
       <Text>Touch and drag to move center point</Text>

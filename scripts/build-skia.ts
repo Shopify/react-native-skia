@@ -1,6 +1,12 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
-import { commonArgs, configurations, PlatformName } from "./skia-configuration";
+import {
+  commonArgs,
+  configurations,
+  iPhoneosSdk,
+  iPhoneSimulatorSdk,
+  PlatformName,
+} from "./skia-configuration";
 const fs = require("fs");
 const typedKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[];
 
@@ -31,59 +37,99 @@ if (!process.env.ANDROID_NDK) {
   console.log("☑ ANDROID_NDK");
 }
 
+// Test for existence of iOS SDK
+if (!iPhoneosSdk) {
+  console.log("iPhoneOS SDK not set.");
+  exit(1);
+} else {
+  console.log("☑ iPhoneOS SDK");
+}
+
+if (!iPhoneSimulatorSdk) {
+  console.log("iPhoneSimulatorOS SDK not set.");
+  exit(1);
+} else {
+  console.log("☑ iPhoneSimulatorOS SDK");
+}
+console.log("");
+console.log("Requirements met. Starting build.");
+console.log("");
+
 if (process.argv.length !== 4) {
-  console.log("Missing platform/cpu arguments");
-  console.log("Available platforms:");
+  console.log("Missing platform/target arguments");
+  console.log("Available platforms/targets:");
   console.log("");
   typedKeys(configurations).forEach((platform) => {
     console.log(platform);
     const config = configurations[platform];
-    config.cpus.forEach((cpu) => console.log("  " + cpu));
+    Object.keys(config.targets).forEach((target) => console.log("  " + target));
   });
   exit(1);
 }
 
 const currentDir = process.cwd();
 const SkiaDir = "./externals/skia";
-const SelectedPlatform = process.argv[2] ?? "";
-const SelectedCpu = process.argv[3] ?? "";
+const SelectedPlatform = (process.argv[2] as PlatformName) ?? "";
+const SelectedTarget = process.argv[3] ?? "";
 
 if (SkiaDir === undefined) {
   throw new Error("No Skia root directory specified.");
 }
 
-const getOutDir = (platform: PlatformName, cpu: string) => {
-  return `out/${platform}/${cpu}`;
+const getOutDir = (platform: PlatformName, targetName: string) => {
+  return `out/${platform}/${targetName}`;
 };
 
-const configurePlatform = (platform: PlatformName, cpu: string) => {
-  console.log(`Configuring platform "${platform}" for cpu "${cpu}"`);
+const configurePlatform = (platform: PlatformName, targetName: string) => {
+  console.log(`Configuring platform "${platform}" for target "${targetName}"`);
   console.log("Current directory", process.cwd());
 
   const configuration = configurations[platform];
   if (configuration) {
+    const target = configuration.targets[targetName];
+    if (!target) {
+      console.log(`Target ${targetName} not found for platform ${platform}`);
+      exit(1);
+    }
+
     const commandline = `PATH=../depot_tools/:$PATH gn gen ${getOutDir(
       platform,
-      cpu
+      targetName
     )}`;
 
     const args = configuration.args.reduce(
-      (a, cur) => (a += `${cur[0]}=${cur[1]} `),
+      (a, cur) => (a += `${cur[0]}=${cur[1]} \n`),
       ""
     );
 
     const common = commonArgs.reduce(
-      (a, cur) => (a += `${cur[0]}=${cur[1]} `),
+      (a, cur) => (a += `${cur[0]}=${cur[1]} \n`),
       ""
     );
 
-    const command = `${commandline} --args='target_os="${platform}" target_cpu="${cpu}" ${common} ${args}'`;
+    const targetArgs =
+      target.args?.reduce((a, cur) => (a += `${cur[0]}=${cur[1]} \n`), "") ||
+      "";
+
+    const options =
+      configuration.options?.reduce(
+        (a, cur) => (a += `--${cur[0]}=${cur[1]} `),
+        ""
+      ) || "";
+
+    const targetOptions =
+      target.options?.reduce((a, cur) => (a += `--${cur[0]}=${cur[1]} `), "") ||
+      "";
+
+    const command = `${commandline} ${options} ${targetOptions} --args='target_os="${platform}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
+    console.log("Command:");
     console.log(command);
+    console.log("===============================");
     executeCmdSync(command);
     return true;
   } else {
     console.log(
-      `Could not find platform "${platform}" for targetCpu "${cpu}" `
+      `Could not find platform "${platform}" for target "${targetName}" `
     );
     return false;
   }
@@ -91,44 +137,45 @@ const configurePlatform = (platform: PlatformName, cpu: string) => {
 
 const buildPlatform = (
   platform: PlatformName,
-  cpu: string,
+  targetName: string,
   callback: () => void
 ) => {
-  console.log(`Building platform "${platform}" for cpu "${cpu}"`);
+  console.log(`Building platform "${platform}" for target "${targetName}"`);
   executeCmd(
-    `ninja -C ${getOutDir(platform, cpu)}`,
-    `${platform}/${cpu}`,
+    `ninja -C ${getOutDir(platform, targetName)}`,
+    `${platform}/${targetName}`,
     callback
   );
 };
 
-const processOutput = (platform: PlatformName, cpu: string) => {
-  console.log(`Copying output for platform "${platform}" and cpu "${cpu}"`);
-  const source = getOutDir(platform, cpu);
-  const configuration = configurations[platform];
+const processOutput = (platformName: PlatformName, targetName: string) => {
+  console.log(
+    `Copying output for platform "${platformName}" and cpu "${targetName}"`
+  );
+  const source = getOutDir(platformName, targetName);
+  const configuration = configurations[platformName];
   if (configuration) {
     const libNames = configuration.outputNames;
-    let target = `${currentDir}/${configurations[platform].outputRoot}/${cpu}`;
-    // Check if we have any mappings here
-    if (configuration.outputMapping) {
-      const indexOfCpu = configuration.cpus.indexOf(cpu);
-      const mappedTo = configuration.outputMapping[indexOfCpu];
-      target = `${currentDir}/${configurations[platform].outputRoot}/${mappedTo}`;
+    let targetDir = `${currentDir}/${configurations[platformName].outputRoot}/${targetName}`;
+    // Check if we have any output mappings here
+    const target = configuration.targets[targetName];
+    if (target.output) {
+      targetDir = `${currentDir}/${configurations[platformName].outputRoot}/${target.output}`;
     }
 
-    if (!fs.existsSync(target)) {
-      console.log(`Creating directory '${target}'...`);
-      fs.mkdirSync(target + "/", { recursive: true });
+    if (!fs.existsSync(targetDir)) {
+      console.log(`Creating directory '${targetDir}'...`);
+      fs.mkdirSync(targetDir + "/", { recursive: true });
     }
 
     libNames.forEach((libName) => {
-      console.log(`Copying ${source}/${libName} to ${target}/`);
-      console.log(`cp ${source}/${libName} ${target}/.`);
-      executeCmdSync(`cp ${source}/${libName} ${target}/.`);
+      console.log(`Copying ${source}/${libName} to ${targetDir}/`);
+      console.log(`cp ${source}/${libName} ${targetDir}/.`);
+      executeCmdSync(`cp ${source}/${libName} ${targetDir}/.`);
     });
   } else {
     throw new Error(
-      `Could not find platform "${platform}" for tagetCpu "${cpu}" `
+      `Could not find platform "${platformName}" for tagetCpu "${targetName}" `
     );
   }
 };
@@ -140,33 +187,40 @@ try {
   // Start by running sync
   executeCmdSync("PATH=../depot_tools/:$PATH python2 tools/git-sync-deps");
   console.log("gclient sync done");
-  typedKeys(configurations).forEach((platform) => {
-    if (SelectedPlatform === "" || SelectedPlatform === platform) {
-      const config = configurations[platform];
-      config.cpus.forEach((cpu) => {
-        if (SelectedCpu === "" || SelectedCpu === cpu) {
-          try {
-            // Configure the platform
-            if (!configurePlatform(platform, cpu)) {
-              throw Error(
-                `Error configuring platform "${platform}" for cpu "${cpu}"`
-              );
-            }
-            // Spawn build
-            buildPlatform(platform, cpu, () => {
-              process.chdir(SkiaDir);
-              // Copy the output
-              processOutput(platform, cpu);
-              // Revert back to original directory
-              process.chdir(currentDir);
-            });
-          } catch (err) {
-            console.log(`ERROR ${platform}/${cpu}: ${err}`);
-          }
-        }
-      });
+
+  // Find platform/target
+  const platform = configurations[SelectedPlatform];
+  if (!platform) {
+    console.log(`Could not find platform ${SelectedPlatform}`);
+    exit(1);
+  }
+  const target = platform.targets[SelectedTarget];
+  if (!target) {
+    console.log(
+      `Could not find target ${SelectedTarget} for platform ${SelectedPlatform}`
+    );
+    exit(1);
+  }
+
+  try {
+    // Configure the platform
+    if (!configurePlatform(SelectedPlatform, SelectedTarget)) {
+      throw Error(
+        `Error configuring platform "${SelectedPlatform}" for cpu "${SelectedTarget}"`
+      );
     }
-  });
+    // Spawn build
+    buildPlatform(SelectedPlatform, SelectedTarget, () => {
+      process.chdir(SkiaDir);
+      // Copy the output
+      processOutput(SelectedPlatform, SelectedTarget);
+      // Revert back to original directory
+      process.chdir(currentDir);
+    });
+  } catch (err) {
+    console.log(`ERROR ${SelectedPlatform}/${SelectedTarget}: ${err}`);
+  }
+
   process.chdir(currentDir);
 } catch (err) {
   console.log(err);

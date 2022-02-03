@@ -57,12 +57,20 @@ namespace RNSkia {
 
             // Calculate length
             size_t len;
-            SkBase64::Decode(&base64.utf8(runtime).c_str()[0], size, nullptr, &len);
+            auto err = SkBase64::Decode(&base64.utf8(runtime).c_str()[0], size, nullptr, &len);
+            if(err != SkBase64::Error::kNoError) {
+              jsi::detail::throwJSError(runtime, "Error decoding base64 string");
+              return jsi::Value::undefined();
+            }
 
             // Create data object and decode
             auto data = SkData::MakeUninitialized(len);
-            SkBase64::Decode(&base64.utf8(runtime).c_str()[0], size, data->writable_data(), &len);
-
+            err = SkBase64::Decode(&base64.utf8(runtime).c_str()[0], size, data->writable_data(), &len);
+            if(err != SkBase64::Error::kNoError) {
+              jsi::detail::throwJSError(runtime, "Error decoding base64 string");
+              return jsi::Value::undefined();
+            }
+          
             return jsi::Object::createFromHostObject(runtime,
                                                      std::make_shared<JsiSkData>(
                                                              getContext(), data));
