@@ -22,6 +22,12 @@ using namespace facebook;
 
 class JsiSkFont : public JsiSkWrappingSharedPtrHostObject<SkFont> {
 public:
+
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "Font");
+  }
+
   JSI_PROPERTY_GET(size) { return static_cast<double>(getObject()->getSize()); }
   JSI_PROPERTY_SET(size) { getObject()->setSize(value.asNumber()); }
 
@@ -40,7 +46,7 @@ public:
     return JsiSkRect::toValue(runtime, getContext(), rect);
   }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkFont, size))
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkFont, size), JSI_EXPORT_PROP_GET(JsiSkFont, __typename__))
   JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(JsiSkFont, size))
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFont, measureText))
 
