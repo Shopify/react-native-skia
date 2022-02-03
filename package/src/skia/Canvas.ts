@@ -319,6 +319,24 @@ export interface ICanvas {
   drawText(str: string, x: number, y: number, paint: IPaint, font: Font): void;
 
   /**
+   * Draws a run of glyphs, at corresponding positions, in a given font.
+   * @param glyphs the array of glyph IDs (Uint16TypedArray)
+   * @param positions the array of x,y floats to position each glyph
+   * @param x x-coordinate of the origin of the entire run
+   * @param y y-coordinate of the origin of the entire run
+   * @param font the font that contains the glyphs
+   * @param paint
+   */
+  drawGlyphs(
+    glyphs: number[],
+    positions: IPoint[],
+    x: number,
+    y: number,
+    font: Font,
+    paint: IPaint
+  ): void;
+
+  /**
    * Renders the SVG Dom object to the canvas. If width/height are omitted,
    * the SVG will be rendered to fit the canvas.
    */
