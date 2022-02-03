@@ -36,6 +36,7 @@ build/
 local.properties
 *.iml
 .cxx
+cmake-build-debug/
 
 # Externals
 libs

@@ -16,18 +16,6 @@ file(GLOB libfbjni_include_DIRS "${build_DIR}/fbjni-*-headers.jar/")
 
 link_directories(../libs/android/${ANDROID_ABI}/)
 
-if(${REACT_NATIVE_TARGET_VERSION} LESS 66)
-    set (
-            INCLUDE_JSI_CPP
-            "${NODE_MODULES_DIR}/react-native/ReactCommon/jsi/jsi/jsi.cpp"
-    )
-    set (
-            INCLUDE_JSIDYNAMIC_CPP
-            "${NODE_MODULES_DIR}/react-native/ReactCommon/jsi/jsi/JSIDynamic.cpp"
-    )
-endif()
-
-
 add_library(
         ${PACKAGE_NAME}
         SHARED
