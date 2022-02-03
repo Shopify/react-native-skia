@@ -3,9 +3,8 @@ import type { ReactNode } from "react";
 
 import { BlendMode, Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
-import type { SkEnum, ColorProp } from "../../processors/Paint";
-import { enumKey } from "../../processors/Paint";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
+import type { SkEnum, ColorProp, AnimatedProps } from "../../processors";
+import { enumKey } from "../../processors";
 
 import { composeColorFilter } from "./Compose";
 

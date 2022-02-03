@@ -12,7 +12,7 @@ const isVector = (obj: unknown): obj is Vector =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (obj as any).x !== undefined && (obj as any).y !== undefined;
 
-type Uniform = number | number[] | Vector;
+type Uniform = number | readonly number[] | Vector;
 
 interface Uniforms {
   [name: string]: Uniform;
@@ -21,14 +21,14 @@ interface Uniforms {
 export interface ShaderProps extends TransformProps {
   source: IRuntimeEffect;
   uniforms: Uniforms;
-  isOpaque?: boolean;
+  opaque?: boolean;
   children?: ReactNode | ReactNode[];
 }
 
 export const Shader = (props: AnimatedProps<ShaderProps>) => {
   const declaration = useDeclaration<ShaderProps>(
     props,
-    ({ uniforms, source, isOpaque, ...transform }, children) => {
+    ({ uniforms, source, opaque, ...transform }, children) => {
       const processedUniforms = new Array(source.getUniformCount())
         .fill(0)
         .map((_, i) => {
@@ -42,7 +42,7 @@ export const Shader = (props: AnimatedProps<ShaderProps>) => {
         .flat(4);
       return source.makeShaderWithChildren(
         processedUniforms,
-        isOpaque,
+        opaque,
         children.filter(isShader),
         localMatrix(transform)
       );

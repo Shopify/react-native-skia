@@ -11,6 +11,7 @@ import type { IPoint, PointMode } from "./Point";
 import type { Matrix } from "./Matrix";
 import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
+import type { Vertices } from "./Vertices";
 
 export enum ClipOp {
   Difference,
@@ -192,6 +193,19 @@ export interface ICanvas {
   drawCircle(cx: number, cy: number, radius: number, paint: IPaint): void;
 
   /**
+   * Draws the given vertices (a triangle mesh) using the current clip, current matrix, and the
+   * provided paint.
+   *  If paint contains an Shader and vertices does not contain texCoords, the shader
+   *  is mapped using the vertices' positions.
+   *  If vertices colors are defined in vertices, and Paint paint contains Shader,
+   *  BlendMode mode combines vertices colors with Shader.
+   * @param verts
+   * @param mode
+   * @param paint
+   */
+  drawVertices(verts: Vertices, mode: BlendMode, paint: IPaint): void;
+
+  /**
    * Draws a cubic patch defined by 12 control points [top, right, bottom, left] with optional
    * colors and shader-coordinates [4] specifed for each corner [top-left, top-right, bottom-right, bottom-left]
    * @param cubics 12 points : 4 connected cubics specifying the boundary of the patch
@@ -201,9 +215,9 @@ export interface ICanvas {
    * @param paint
    */
   drawPatch(
-    cubics: IPoint[],
-    colors?: Color[] | null,
-    texs?: IPoint[] | null,
+    cubics: readonly IPoint[],
+    colors?: readonly Color[] | null,
+    texs?: readonly IPoint[] | null,
     mode?: BlendMode | null,
     paint?: IPaint
   ): void;

@@ -72,7 +72,7 @@ namespace RNSkia
 
     JSI_HOST_FUNCTION(getUniformCount)
     {
-      return static_cast<int>(getObject()->uniforms().count());
+      return static_cast<int>(getObject()->uniforms().size());
     }
 
     JSI_HOST_FUNCTION(getUniformFloatCount)
@@ -82,14 +82,14 @@ namespace RNSkia
 
     JSI_HOST_FUNCTION(getUniformName)
     {
-      auto i = arguments[0].asNumber();
+      auto i = static_cast<int>(arguments[0].asNumber());
       auto it = getObject()->uniforms().begin() + i;
       return jsi::String::createFromAscii(runtime, it->name.c_str());
     }
 
     JSI_HOST_FUNCTION(getUniform)
     {
-      auto i = arguments[0].asNumber();
+      auto i = static_cast<int>(arguments[0].asNumber());
       auto it = getObject()->uniforms().begin() + i;
       auto result = jsi::Object(runtime);
       RuntimeEffectUniform su = fromUniform(*it);
@@ -122,8 +122,8 @@ namespace RNSkia
       // verify size of input uniforms
       if (jsiUniformsSize * sizeof(float) != getObject()->uniformSize())
       {
-        jsi::detail::throwJSError(
-            runtime, "Uniforms size differs from effect's uniform size.");
+        std::string msg = "Uniforms size differs from effect's uniform size. Received " + std::to_string(jsiUniformsSize) + " expected " + std::to_string(getObject()->uniformSize() / sizeof(float));
+        jsi::detail::throwJSError(runtime, msg.c_str());
       }
 
       auto uniforms = SkData::MakeUninitialized(getObject()->uniformSize());

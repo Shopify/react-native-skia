@@ -1,13 +1,13 @@
 import type { RefObject } from "react";
 
-import { Skia, BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
+import { BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
 import type { IPaint } from "../../skia";
 
 import type { ChildrenProps } from "./Shapes";
+import type { ColorProp } from "./Colors";
+import { processColor } from "./Colors";
 
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
-
-export type ColorProp = string | number;
 
 export interface CustomPaintProps extends ChildrenProps {
   paint?: RefObject<IPaint>;
@@ -23,24 +23,6 @@ export interface CustomPaintProps extends ChildrenProps {
 
 export const enumKey = <K extends string>(k: K) =>
   (k.charAt(0).toUpperCase() + k.slice(1)) as Capitalize<K>;
-
-export const alpha = (c: number) => ((c >> 24) & 255) / 255;
-export const red = (c: number) => (c >> 16) & 255;
-export const green = (c: number) => (c >> 8) & 255;
-export const blue = (c: number) => c & 255;
-export const rgbaColor = (r: number, g: number, b: number, af: number) => {
-  const a = Math.round(af * 255);
-  return ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
-};
-
-export const processColor = (cl: ColorProp, currentOpacity: number) => {
-  const icl = typeof cl === "string" ? Skia.Color(cl) : cl;
-  const r = red(icl);
-  const g = green(icl);
-  const b = blue(icl);
-  const o = alpha(icl);
-  return rgbaColor(r, g, b, o * currentOpacity);
-};
 
 export const processPaint = (
   paint: IPaint,
