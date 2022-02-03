@@ -44,7 +44,8 @@ export const Symbol = ({ i, j, timestamp, stream, font }: SymbolProps) => {
     );
   return (
     <Glyphs
-      origin={vec(x + SYMBOL.width / 4, y + SYMBOL.height)}
+      x={x + SYMBOL.width / 4}
+      y={y + SYMBOL.height}
       font={font}
       glyphs={glyphs}
       opacity={opacity}
