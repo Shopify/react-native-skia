@@ -193,5 +193,5 @@ namespace RNSkia
       su.slot = (int)(u.offset / sizeof(float));
       return su;
     }
-  };
+  }
 } // namespace RNSkia
