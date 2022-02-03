@@ -1,7 +1,8 @@
+import type { SkJSIInstance } from "../JsiInstance";
 import type { IPaint } from "../Paint";
 import type { IRect } from "../Rect";
 
-export interface Font {
+export interface IFont extends SkJSIInstance<"Font"> {
   /** Get/Sets text size in points.
     Has no effect if textSize is not greater than or equal to zero.
   */

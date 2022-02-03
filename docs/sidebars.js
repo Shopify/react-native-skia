@@ -47,7 +47,7 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Text",
-      items: ["text/fonts", "text/text"],
+      items: ["text/fonts", "text/text", "text/glyphs"],
     },
     {
       collapsed: true,

@@ -1,9 +1,12 @@
 import React from "react";
 
-import type { CustomPaintProps } from "../../processors/Paint";
+import type {
+  CustomPaintProps,
+  AnimatedProps,
+  FontDef,
+} from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
-import type { AnimatedProps, FontDef } from "../../processors";
-import type { IPoint } from "../../../skia/Point";
+import type { IPoint } from "../../../skia";
 import { processFont } from "../../processors";
 
 export interface Glyph {
@@ -41,4 +44,9 @@ export const Glyphs = (props: AnimatedProps<GlyphsProps>) => {
     }
   );
   return <skDrawing onDraw={onDraw} {...props} />;
+};
+
+Glyphs.defaultProps = {
+  x: 0,
+  y: 0,
 };

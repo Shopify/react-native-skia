@@ -10,7 +10,7 @@ import { processFont } from "../../processors";
 
 type TextProps = CustomPaintProps &
   FontDef & {
-    value: string;
+    text: string;
     x: number;
     y: number;
   };
@@ -18,10 +18,15 @@ type TextProps = CustomPaintProps &
 export const Text = (props: AnimatedProps<TextProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint, fontMgr }, { value, x, y, ...fontDef }) => {
+    ({ canvas, paint, fontMgr }, { text, x, y, ...fontDef }) => {
       const font = processFont(fontMgr, fontDef);
-      canvas.drawText(value, x, y, paint, font);
+      canvas.drawText(text, x, y, paint, font);
     }
   );
   return <skDrawing onDraw={onDraw} {...props} />;
+};
+
+Text.defaultProps = {
+  x: 0,
+  y: 0,
 };

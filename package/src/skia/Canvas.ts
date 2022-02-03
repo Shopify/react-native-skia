@@ -1,6 +1,6 @@
 import type { IPaint } from "./Paint";
 import type { IRect } from "./Rect";
-import type { Font } from "./Font";
+import type { IFont } from "./Font";
 import type { IPath } from "./Path";
 import type { IImage } from "./Image";
 import type { SVG } from "./SVG";
@@ -316,7 +316,7 @@ export interface ICanvas {
    * @param paint
    * @param font
    */
-  drawText(str: string, x: number, y: number, paint: IPaint, font: Font): void;
+  drawText(str: string, x: number, y: number, paint: IPaint, font: IFont): void;
 
   /**
    * Draws a run of glyphs, at corresponding positions, in a given font.
@@ -332,7 +332,7 @@ export interface ICanvas {
     positions: IPoint[],
     x: number,
     y: number,
-    font: Font,
+    font: IFont,
     paint: IPaint
   ): void;
 

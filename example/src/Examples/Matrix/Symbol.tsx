@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import type { AnimationValue, Font } from "@shopify/react-native-skia";
+import type { AnimationValue, IFont } from "@shopify/react-native-skia";
 import { vec, Glyphs } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -20,7 +20,7 @@ interface SymbolProps {
   j: number;
   timestamp: AnimationValue<number>;
   stream: number[];
-  font: Font;
+  font: IFont;
 }
 
 export const Symbol = ({ i, j, timestamp, stream, font }: SymbolProps) => {
@@ -44,8 +44,7 @@ export const Symbol = ({ i, j, timestamp, stream, font }: SymbolProps) => {
     );
   return (
     <Glyphs
-      x={x + SYMBOL.width / 4}
-      y={y + SYMBOL.height}
+      origin={vec(x + SYMBOL.width / 4, y + SYMBOL.height)}
       font={font}
       glyphs={glyphs}
       opacity={opacity}

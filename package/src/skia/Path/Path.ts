@@ -1,4 +1,4 @@
-import type { Font } from "../Font";
+import type { IFont } from "../Font";
 import type { IRect } from "../Rect";
 import type { IPoint } from "../Point";
 import type { IRRect } from "../RRect";
@@ -503,7 +503,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
   /**
    * Converts the text to a path with the given font at location x / y.
    */
-  fromText(text: string, x: number, y: number, font: Font): void;
+  fromText(text: string, x: number, y: number, font: IFont): void;
 
   /**
    * Interpolates between Path with point array of equal size.

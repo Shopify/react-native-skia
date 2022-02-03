@@ -37,10 +37,10 @@ export const Matrix = () => {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }} debug>
+    <Canvas style={{ flex: 1 }}>
       <Fill color="black" />
       <Paint>
-        <BlurMask sigma={10} style="solid" />
+        <BlurMask sigma={8} style="solid" />
       </Paint>
       {cols.map((_i, i) =>
         rows.map((_j, j) => (
