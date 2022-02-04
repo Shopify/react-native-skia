@@ -61,6 +61,12 @@ public:
    Returns the native id
    */
   size_t getNativeId() { return _nativeId; }
+  
+  /**
+   Updated the dependency count for the view, and if the count is more than zero the view
+   will put itself into continuous mode untill the dependency count goes down to zero again.
+   */
+  void setDependencyCount(size_t dependencyCount);
 
   /**
    * Call this method with a valid Skia surface to let the draw drawCallback do
@@ -205,6 +211,11 @@ private:
    * Native id
    */
   size_t _nativeId;
+  
+  /**
+   Depencency count
+   */
+  size_t _dependencyCount;
   
   /**
    Last size when drawing

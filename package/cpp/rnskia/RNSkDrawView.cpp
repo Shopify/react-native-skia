@@ -256,6 +256,15 @@ bool RNSkDrawView::isReadyToDraw() {
   return true;
 }
 
+void RNSkDrawView::setDependencyCount(size_t dependencyCount) {
+  _dependencyCount = dependencyCount;
+  if(dependencyCount > 0) {
+    setDrawingMode(RNSkDrawingMode::Continuous);
+  } else {
+    setDrawingMode(RNSkDrawingMode::Default);
+  }
+}
+
 void RNSkDrawView::beginDrawingLoop() {
   if(!isValid()) {
     return;
@@ -286,7 +295,7 @@ void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
     return;
   }
   _drawingMode = mode;
-  if(mode == RNSkDrawingMode::Default) {
+  if(mode == RNSkDrawingMode::Default && _dependencyCount == 0) {
     endDrawingLoop();
   } else {
     beginDrawingLoop();

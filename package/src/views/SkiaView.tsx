@@ -3,6 +3,7 @@
 import React from "react";
 
 import type { IRect } from "../skia";
+import type { IReadonlyValue } from "../values";
 
 import { NativeSkiaView } from "./types";
 import type { DrawMode, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
@@ -73,6 +74,16 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   }
 
   /**
+   * Registers a value as a dependant value of the Skia View. The view will
+   * redraw when the value changes
+   * @param value Value to register
+   */
+  public registerValue(value: IReadonlyValue<unknown>) {
+    assertDrawCallbacksEnabled();
+    return registerValueInSkiaView(this._nativeId, value);
+  }
+
+  /**
    * Increases the number of animations active in the view.
    */
   public addAnimation(owner: unknown) {
@@ -136,6 +147,13 @@ export const makeImageSnapshot = (nativeId: string, rect?: IRect) => {
 
 const setDrawingModeForSkiaView = (nativeId: string, mode: DrawMode) => {
   SkiaViewApi.setDrawMode(parseInt(nativeId, 10), mode);
+};
+
+const registerValueInSkiaView = (
+  nativeId: string,
+  value: IReadonlyValue<unknown>
+) => {
+  SkiaViewApi.registerValueInView(parseInt(nativeId, 10), value);
 };
 
 const assertDrawCallbacksEnabled = () => {

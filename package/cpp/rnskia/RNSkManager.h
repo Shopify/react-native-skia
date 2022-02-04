@@ -8,6 +8,7 @@
 #include <JsiSkCanvas.h>
 #include <RNSkDrawView.h>
 #include <RNSkJsiViewApi.h>
+#include <RNSkValueApi.h>
 
 namespace RNSkia {
 

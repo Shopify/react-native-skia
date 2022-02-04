@@ -3,6 +3,7 @@
 #include <JsiHostObject.h>
 #include <RNSkDrawView.h>
 #include <RNSkPlatformContext.h>
+#include <RNSkValue.h>
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -12,9 +13,11 @@ using CallbackInfo = struct CallbackInfo {
   CallbackInfo() {
     drawCallback = nullptr;
     view = nullptr;
+    dependencyCount = 0;
   }
   std::shared_ptr<jsi::Function> drawCallback;
   RNSkDrawView *view;
+  int dependencyCount;
 };
 
 class RNSkJsiViewApi : public JsiHostObject {
@@ -142,11 +145,35 @@ public:
     }
     return jsi::Value::undefined();
   }
-
+  
+  JSI_HOST_FUNCTION(registerValueInView) {
+    // Check params
+    if(!arguments[1].isObject() || !arguments[1].asObject(runtime).isHostObject(runtime)) {
+      jsi::detail::throwJSError(runtime, "Expected value object as second parameter");
+      return jsi::Value::undefined();
+    }
+    
+    int nativeId = arguments[0].asNumber();
+    
+    // increase dependency count on the Skia View
+    valueDependencyAdded(nativeId);
+    
+    // Add listener
+    return jsi::Function::createFromHostFunction(runtime,
+                                                 jsi::PropNameID::forUtf8(runtime, "unsubscribe"),
+                                                 0,
+                                                 JSI_HOST_FUNCTION_LAMBDA {
+      // decrease dependency count on the Skia View
+      valueDependencyRemoved(nativeId);
+      return jsi::Value::undefined();
+    });
+  }
+  
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawCallback),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, invalidateSkiaView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawMode))
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawMode),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValueInView))
 
   /**
    * Constructor
@@ -183,6 +210,7 @@ public:
     if (info->drawCallback != nullptr) {
       info->view->setNativeId(nativeId);
       info->view->setDrawCallback(info->drawCallback);
+      info->view->setDependencyCount(info->dependencyCount);
     }
   }
 
@@ -220,6 +248,7 @@ public:
     if (view != nullptr && info->drawCallback != nullptr) {
       info->view->setNativeId(nativeId);
       info->view->setDrawCallback(info->drawCallback);
+      info->view->setDependencyCount(info->dependencyCount);
     }
   }
 
@@ -236,10 +265,34 @@ private:
     }
     return &_callbackInfos.at(nativeId);
   }
-
+  
+  /**
+    Increases the dependency count for a view - puts the view in continous mode if the dependency count
+    is more than zero.
+   */
+  void valueDependencyAdded(size_t nativeId) {
+    auto info = getEnsuredCallbackInfo(nativeId);
+    info->dependencyCount++;
+    if(info->view != nullptr) {
+      info->view->setDependencyCount(info->dependencyCount);
+    }
+  }
+  
+  /**
+   Decreases the dependency count for a view - puts the view in default mode if the dependency count
+   is zero or less.
+   */
+  void valueDependencyRemoved(size_t nativeId) {
+    auto info = getEnsuredCallbackInfo(nativeId);
+    info->dependencyCount--;
+    if(info->view != nullptr) {
+      info->view->setDependencyCount(info->dependencyCount);
+    }
+  }
+  
   // List of callbacks
   std::map<size_t, CallbackInfo> _callbackInfos;
-
+  
   // Platform context
   std::shared_ptr<RNSkPlatformContext> _platformContext;
 };

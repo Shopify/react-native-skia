@@ -5,3 +5,4 @@ export * from "./views";
 export * from "./skia";
 export * from "./animation";
 export * from "./external";
+export * from "./values";

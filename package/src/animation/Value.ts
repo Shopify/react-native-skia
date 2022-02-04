@@ -33,14 +33,21 @@ export const Value = {
 class AnimationValueImpl<T = number> implements AnimationValue<T> {
   constructor(initialValue: T) {
     this._value = initialValue;
+    console.log("Initial value", this._value);
     this._animation = undefined;
     this._animationDone = undefined;
   }
 
-  _value: T;
-  _animation: ((t: number) => number) | undefined;
-  _animationDone: ((animation: (t: number) => number) => void) | undefined;
-  _animationViews: Array<RefObject<SkiaView>> = [];
+  private _value: T;
+  private _animation: ((t: number) => number) | undefined;
+  private _animationDone:
+    | ((animation: (t: number) => number) => void)
+    | undefined;
+  private _animationViews: Array<RefObject<SkiaView>> = [];
+  private _listeners: ((v: T) => void)[] = [];
+  private _inUpdate = false;
+
+  public readonly __typename__ = "AnimationValue";
 
   public startAnimation(
     animation: (t: number) => number,
@@ -69,6 +76,17 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
     }
   }
 
+  public setValue(value: T) {
+    this._value = value;
+    // End any ongoing animations - if you are setting the value we know it
+    // is done from the outside and we want the animation to be stopped.
+    if (this._animation) {
+      this.stopAnimation(this._animation);
+    }
+    // Notify listeners
+    this._listeners.forEach((listener) => listener(this._value));
+  }
+
   public stopAnimation(animation: (t: number) => number) {
     if (this._animation && this._animation === animation) {
       this.forceStop();
@@ -79,7 +97,9 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
     return `${this._value}`;
   }
 
-  private _inUpdate = false;
+  public set value(v: T) {
+    this.setValue(v);
+  }
 
   public get value(): T {
     if (this._inUpdate) {
@@ -113,12 +133,15 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
     return this._value;
   }
 
-  public set value(v: T) {
-    this._value = v;
-    // End any ongoing animations - if you are setting the value we know it
-    // is done from the outside and we want the animation to be stopped.
-    if (this._animation) {
-      this.stopAnimation(this._animation);
-    }
+  /**
+   * Adds a listener that will be notified when the value changes.
+   * @param listener Callback
+   * @returns Unsubscribe method
+   */
+  public addListener(listener: (v: T) => void): () => void {
+    this._listeners.push(listener);
+    return () => {
+      this._listeners.splice(this._listeners.indexOf(listener), 1);
+    };
   }
 }

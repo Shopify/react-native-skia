@@ -1,16 +1,36 @@
+import type { IReadonlyValue } from "../../../values";
 import type { DrawingContext } from "../../DrawingContext";
 import { mapKeys } from "../../typeddash";
 
 export type FrameValue<T> = (ctx: DrawingContext) => T;
+type ValueType = IReadonlyValue<unknown>;
 
 // TODO: refine detection here. Is the prototype accepting a drawing ctx for instance?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isAnimatedValue = (value: unknown): value is FrameValue<any> =>
+const isPropCallback = (value: unknown): value is FrameValue<any> =>
   typeof value === "function";
+
+export const isAnimationValue = (value: unknown): value is ValueType => {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  try {
+    if (
+      typeof value === "object" &&
+      "__typename__" in value &&
+      (value as unknown as ValueType).__typename__ === "RNSkValue"
+    ) {
+      return true;
+    }
+  } catch {}
+  return false;
+};
 
 export const isAnimated = <T>(props: AnimatedProps<T>) => {
   for (const value of Object.values(props)) {
-    if (isAnimatedValue(value)) {
+    if (isPropCallback(value)) {
+      return true;
+    } else if (isAnimationValue(value)) {
       return true;
     }
   }
@@ -24,13 +44,15 @@ export const materialize = <T>(
   const result = { ...props };
   mapKeys(props).forEach((key) => {
     const value = props[key];
-    if (isAnimatedValue(value)) {
+    if (isPropCallback(value)) {
       result[key] = value(ctx);
+    } else if (isAnimationValue(value)) {
+      result[key] = (value as unknown as IReadonlyValue<T[typeof key]>).value;
     }
   });
   return result as T;
 };
 
 export type AnimatedProps<T> = {
-  [K in keyof T]: T[K] | ((ctx: DrawingContext) => T[K]);
+  [K in keyof T]: T[K] | ((ctx: DrawingContext) => T[K]) | IReadonlyValue<T[K]>;
 };
