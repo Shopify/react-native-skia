@@ -2,7 +2,7 @@ import type { SkJSIInstance } from "../JsiInstance";
 import type { IPaint } from "../Paint";
 import type { IRect } from "../Rect";
 import type { IPoint } from "../Point";
-import type { Typeface } from "../Typeface/Typeface";
+import type { ITypeface } from "../Typeface/Typeface";
 
 export interface FontMetrics {
   ascent: number; // suggested space above the baseline. < 0
@@ -84,7 +84,7 @@ export interface IFont extends SkJSIInstance<"Font"> {
   /**
    * Returns the Typeface set for this font.
    */
-  getTypeface(): Typeface | null;
+  getTypeface(): ITypeface | null;
 }
 
 const fontStyle = (
