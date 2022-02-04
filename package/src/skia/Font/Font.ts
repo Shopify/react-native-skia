@@ -2,6 +2,13 @@ import type { SkJSIInstance } from "../JsiInstance";
 import type { IPaint } from "../Paint";
 import type { IRect } from "../Rect";
 
+export interface FontMetrics {
+  ascent: number; // suggested space above the baseline. < 0
+  descent: number; // suggested space below the baseline. > 0
+  leading: number; // suggested spacing between descent of previous line and ascent of next line.
+  bounds?: IRect; // smallest rect containing all glyphs (relative to 0,0)
+}
+
 export interface IFont extends SkJSIInstance<"Font"> {
   /** Get/Sets text size in points.
     Has no effect if textSize is not greater than or equal to zero.
@@ -19,6 +26,20 @@ export interface IFont extends SkJSIInstance<"Font"> {
       @return            number of glyphs represented by text of length byteLength
   */
   measureText: (text: string, paint?: IPaint) => IRect;
+
+  /**
+   * Returns the FontMetrics for this font.
+   */
+  getMetrics(): FontMetrics;
+
+  /**
+   * Retrieves the glyph ids for each code point in the provided string. This call is passed to
+   * the typeface of this font. Note that glyph IDs are typeface-dependent; different faces
+   * may have different ids for the same code point.
+   * @param str
+   * @param numCodePoints - the number of code points in the string. Defaults to str.length.
+   */
+  getGlyphIDs(str: string, numCodePoints?: number): number[];
 }
 
 const fontStyle = (

@@ -10,10 +10,6 @@ export const COLS = 5;
 export const ROWS = 10;
 export const SYMBOL = { width: width / COLS, height: height / ROWS };
 const pos = vec(0, 0);
-const symbols = "abcdefghijklmnopqrstuvwxyz"
-  .toUpperCase()
-  .split("")
-  .map((c) => c.codePointAt(0)!);
 
 interface SymbolProps {
   i: number;
@@ -21,9 +17,17 @@ interface SymbolProps {
   timestamp: AnimationValue<number>;
   stream: number[];
   font: IFont;
+  symbols: number[];
 }
 
-export const Symbol = ({ i, j, timestamp, stream, font }: SymbolProps) => {
+export const Symbol = ({
+  i,
+  j,
+  timestamp,
+  stream,
+  font,
+  symbols,
+}: SymbolProps) => {
   const offset = useRef(Math.round(Math.random() * (symbols.length - 1)));
   const range = useRef(100 + Math.random() * 900);
   const x = i * SYMBOL.width;

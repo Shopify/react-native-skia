@@ -11,6 +11,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include <SkFont.h>
+#include <SkFontMetrics.h>
 
 #pragma clang diagnostic pop
 
@@ -46,9 +47,46 @@ public:
     return JsiSkRect::toValue(runtime, getContext(), rect);
   }
 
+  JSI_HOST_FUNCTION(getMetrics) {
+    SkFontMetrics fm;
+    getObject()->getMetrics(&fm);
+    auto metrics = jsi::Object(runtime);
+    metrics.setProperty(runtime, "ascent",  fm.fAscent);
+    metrics.setProperty(runtime, "descent", fm.fDescent);
+    metrics.setProperty(runtime, "leading", fm.fLeading);
+    if (!(fm.fFlags & SkFontMetrics::kBoundsInvalid_Flag)) {
+      const float rect[] = {
+              fm.fXMin, fm.fTop, fm.fXMax, fm.fBottom
+      };
+      auto bounds = SkRect::MakeLTRB(fm.fXMin,fm.fTop, fm.fXMax, fm.fBottom );
+      auto jsiBounds = JsiSkRect::toValue(runtime, getContext(), bounds);
+      metrics.setProperty(runtime, "bounds",  jsiBounds);
+    }
+    return metrics;
+  }
+
+  JSI_HOST_FUNCTION(getGlyphIDs) {
+    auto str = arguments[0].asString(runtime).utf8(runtime);
+    auto numGlyphIDs = count > 1 && !arguments[1].isNull() && !arguments[1].isUndefined()
+            ? arguments[1].asNumber() : str.length();
+    int bytesPerGlyph = 2;
+    auto glyphIDs = static_cast<SkGlyphID*>(malloc(numGlyphIDs * bytesPerGlyph));
+    getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
+                               glyphIDs, numGlyphIDs);
+    auto jsiGlyphIDs = jsi::Array(runtime, numGlyphIDs);
+    for (int i = 0; i < numGlyphIDs; i++) {
+      jsiGlyphIDs.setValueAtIndex(runtime, i, jsi::Value(static_cast<int>(glyphIDs[i])));
+    }
+    return jsiGlyphIDs;
+  }
+
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkFont, size), JSI_EXPORT_PROP_GET(JsiSkFont, __typename__))
   JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(JsiSkFont, size))
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFont, measureText))
+  JSI_EXPORT_FUNCTIONS(
+    JSI_EXPORT_FUNC(JsiSkFont, measureText),
+    JSI_EXPORT_FUNC(JsiSkFont, getMetrics),
+    JSI_EXPORT_FUNC(JsiSkFont, getGlyphIDs)
+  )
 
   JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)
       : JsiSkWrappingSharedPtrHostObject(context,
