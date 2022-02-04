@@ -25,7 +25,9 @@ export const HelloWorld = () => {
   if (font === null) {
     return null;
   }
-  const glyphs = font.getGlyphIDs("Hello World!").map((id, i) => ({ id, pos: vec(0, i*32) }));
+  const glyphs = font
+    .getGlyphIDs("Hello World!")
+    .map((id, i) => ({ id, pos: vec(0, i*32) }));
   return (
     <Canvas style={{ flex:  1 }}>
       <Glyphs

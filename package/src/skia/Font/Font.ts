@@ -85,6 +85,70 @@ export interface IFont extends SkJSIInstance<"Font"> {
    * Returns the Typeface set for this font.
    */
   getTypeface(): ITypeface | null;
+
+  /**
+   * Requests, but does not require, that edge pixels draw opaque or with partial transparency.
+   * @param edging
+   */
+  setEdging(edging: FontEdging): void;
+
+  /**
+   * Requests, but does not require, to use bitmaps in fonts instead of outlines.
+   * @param embeddedBitmaps
+   */
+  setEmbeddedBitmaps(embeddedBitmaps: boolean): void;
+
+  /**
+   * Sets level of glyph outline adjustment.
+   * @param hinting
+   */
+  setHinting(hinting: FontHinting): void;
+
+  /**
+   * Requests, but does not require, linearly scalable font and glyph metrics.
+   *
+   * For outline fonts 'true' means font and glyph metrics should ignore hinting and rounding.
+   * Note that some bitmap formats may not be able to scale linearly and will ignore this flag.
+   * @param linearMetrics
+   */
+  setLinearMetrics(linearMetrics: boolean): void;
+
+  /**
+   * Sets the text scale on the x-axis.
+   * @param sx
+   */
+  setScaleX(sx: number): void;
+
+  /**
+   * Sets the text size in points on this font.
+   * @param points
+   */
+  setSize(points: number): void;
+
+  /**
+   * Sets the text-skew on the x axis for this font.
+   * @param sx
+   */
+  setSkewX(sx: number): void;
+
+  /**
+   * Set embolden effect for this font.
+   * @param embolden
+   */
+  setEmbolden(embolden: boolean): void;
+
+  /**
+   * Requests, but does not require, that glyphs respect sub-pixel positioning.
+   * @param subpixel
+   */
+  setSubpixel(subpixel: boolean): void;
+
+  /**
+   * Sets the typeface to use with this font. null means to clear the typeface and use the
+   * default one.
+   * @param face
+   */
+  setTypeface(face: ITypeface | null): void;
 }
 
 const fontStyle = (
@@ -129,6 +193,19 @@ export enum FontSlant {
   Upright,
   Italic,
   Oblique,
+}
+
+export enum FontEdging {
+  Alias,
+  AntiAlias,
+  SubpixelAntiAlias,
+}
+
+export enum FontHinting {
+  None,
+  Slight,
+  Normal,
+  Full,
 }
 
 export const FontStyle = {

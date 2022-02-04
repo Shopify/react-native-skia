@@ -129,6 +129,66 @@ public:
     return JsiSkTypeface::toValue(runtime, getContext(), sk_sp(getObject()->getTypeface()));
   }
 
+  JSI_HOST_FUNCTION(setEdging) {
+    auto edging = arguments[0].asNumber();
+    getObject()->setEdging(static_cast<SkFont::Edging>(edging));
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(embeddedBitmaps) {
+    auto embeddedBitmaps = arguments[0].getBool();
+    getObject()->setEmbeddedBitmaps(embeddedBitmaps);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setHinting) {
+    auto hinting = arguments[0].asNumber();
+    getObject()->setHinting(static_cast<SkFontHinting>(hinting));
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setLinearMetrics) {
+    auto linearMetrics = arguments[0].getBool();
+    getObject()->setLinearMetrics(linearMetrics);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setScaleX) {
+    auto scaleX = arguments[0].asNumber();
+    getObject()->setScaleX(scaleX);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setSkewX) {
+    auto skewX = arguments[0].asNumber();
+    getObject()->setSkewX(skewX);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setSize) {
+    auto size = arguments[0].asNumber();
+    getObject()->setSize(size);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setEmbolden) {
+    auto embolden = arguments[0].asNumber();
+    getObject()->setEmbolden(embolden);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setSubpixel) {
+    auto subpixel = arguments[0].asNumber();
+    getObject()->setSubpixel(subpixel);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setTypeface) {
+    auto typeface = arguments[0].isNull() ? nullptr : JsiSkTypeface::fromValue(runtime, arguments[0]);
+    getObject()->setTypeface(typeface);
+    return jsi::Value::undefined();
+  }
+
   JSI_EXPORT_FUNCTIONS(
     JSI_EXPORT_FUNC(JsiSkFont, measureText),
     JSI_EXPORT_FUNC(JsiSkFont, getMetrics),
@@ -137,6 +197,16 @@ public:
     JSI_EXPORT_FUNC(JsiSkFont, getScaleX),
     JSI_EXPORT_FUNC(JsiSkFont, getSkewX),
     JSI_EXPORT_FUNC(JsiSkFont, getTypeface),
+    JSI_EXPORT_FUNC(JsiSkFont, setEdging),
+    JSI_EXPORT_FUNC(JsiSkFont, embeddedBitmaps),
+    JSI_EXPORT_FUNC(JsiSkFont, setHinting),
+    JSI_EXPORT_FUNC(JsiSkFont, setLinearMetrics),
+    JSI_EXPORT_FUNC(JsiSkFont, setScaleX),
+    JSI_EXPORT_FUNC(JsiSkFont, setSkewX),
+    JSI_EXPORT_FUNC(JsiSkFont, setSize),
+    JSI_EXPORT_FUNC(JsiSkFont, setEmbolden),
+    JSI_EXPORT_FUNC(JsiSkFont, setSubpixel),
+    JSI_EXPORT_FUNC(JsiSkFont, setTypeface),
   )
 
   JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)
