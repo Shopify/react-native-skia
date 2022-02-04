@@ -16,6 +16,7 @@
 #include "JsiSkMaskFilterFactory.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
+#include "JsiSkRSXform.h"
 #include "JsiSkPath.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
@@ -54,6 +55,7 @@ namespace RNSkia
 
     installFunction("Font", JsiSkFont::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
+    installFunction("RSXform", JsiSkRSXform::createCtor(context));
     installFunction("Matrix", JsiSkMatrix::createCtor(context));
     installFunction("XYWHRect", JsiSkRect::createCtor(context));
     installFunction("RRectXY", JsiSkRRect::createCtor(context));
