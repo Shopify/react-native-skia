@@ -58,7 +58,7 @@ export interface ISkiaValueApi {
    * Creates an animated value that will update its value every frame redraw with
    * the current number of milliseconds since it was started.
    */
-  createAnimationValue: () => IAnimationValue;
+  createAnimationValue: (startRunning?: boolean) => IAnimationValue;
 }
 
 declare global {

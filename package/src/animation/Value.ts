@@ -33,7 +33,6 @@ export const Value = {
 class AnimationValueImpl<T = number> implements AnimationValue<T> {
   constructor(initialValue: T) {
     this._value = initialValue;
-    console.log("Initial value", this._value);
     this._animation = undefined;
     this._animationDone = undefined;
   }
@@ -57,7 +56,6 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
     this._animation = animation;
     this._animationDone = onAnimationDone;
     // Notify the skia view ref that we have started an animation
-    // console.log("Value: Starting animation");
     this._animationViews.forEach((view) =>
       view.current?.addAnimation(this._animation)
     );
@@ -65,7 +63,6 @@ class AnimationValueImpl<T = number> implements AnimationValue<T> {
 
   private forceStop() {
     if (this._animation) {
-      // console.log("Value: Stopping animation");
       // Notify the skia view ref that we have ended our animation
       this._animationViews.forEach((view) =>
         view.current?.removeAnimation(this._animation)

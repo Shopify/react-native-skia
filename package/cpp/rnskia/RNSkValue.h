@@ -184,11 +184,13 @@ enum AnimationValueState {
 };
   
 public:
-  RNSkAnimationValue(std::shared_ptr<RNSkPlatformContext> platformContext, jsi::Runtime& runtime, size_t identifier)
+  RNSkAnimationValue(std::shared_ptr<RNSkPlatformContext> platformContext, jsi::Runtime& runtime, size_t identifier, bool startRunning)
       : RNSkReadonlyValue(platformContext), _runtime(runtime), _identifier(identifier) {
     _start = std::chrono::high_resolution_clock::now();
     setValue(_runtime, static_cast<double>(0));
-    startAnimation();
+    if(startRunning) {
+      startAnimation();
+    }
   }
   
   ~RNSkAnimationValue() {

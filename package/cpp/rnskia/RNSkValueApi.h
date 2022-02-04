@@ -37,8 +37,12 @@ public:
   }
   
   JSI_HOST_FUNCTION(createAnimationValue) {
+    auto startRunning = count == 1 ? arguments[0].getBool() : true;
     return jsi::Object::createFromHostObject(runtime,
-      std::make_shared<RNSkAnimationValue>(_platformContext, runtime, ++_valueIdentifier));
+      std::make_shared<RNSkAnimationValue>(_platformContext,
+                                           runtime,
+                                           ++_valueIdentifier,
+                                           startRunning));
   }
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValueApi, createValue),
