@@ -57,14 +57,13 @@ namespace RNSkia {
                         .asHostObject<JsiSkRSXform>(runtime)
                         .get()
                         ->getObject();
-            } else if(object.isArray(runtime)) {
+            } else {
                 auto scos = object.getArray(runtime).getValueAtIndex(runtime, 0).asNumber();
                 auto ssin = object.getArray(runtime).getValueAtIndex(runtime, 1).asNumber();
                 auto tx = object.getArray(runtime).getValueAtIndex(runtime, 2).asNumber();
                 auto ty = object.getArray(runtime).getValueAtIndex(runtime, 3).asNumber();
                 return std::make_shared<SkRSXform>(SkRSXform::Make(scos, ssin, tx, ty));
             }
-            jsi::detail::throwJSError(runtime, "Invalid RSXform");
         }
 
         /**
