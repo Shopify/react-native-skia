@@ -45,6 +45,24 @@ public:
     return JsiSkRect::toValue(runtime, getContext(), rect);
   }
 
+  JSI_HOST_FUNCTION(getGlyphWidths) {
+      auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
+      auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
+      int bytesPerWidth = 4;
+      std::vector<SkGlyphID> glyphs;
+      int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+      auto widthPtr = static_cast<SkScalar*>(malloc(glyphsSize * bytesPerWidth));
+      for (int i = 0; i < glyphsSize; i++) {
+          glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
+      }
+      getObject()->getWidthsBounds(glyphs.data(), glyphsSize, widthPtr, nullptr, paint.get());
+      auto jsiWidths = jsi::Array(runtime, glyphsSize);
+      for (int i = 0; i <glyphsSize; i++) {
+          jsiWidths.setValueAtIndex(runtime, i, jsi::Value(widthPtr[i]));
+      }
+      return jsiWidths;
+  }
+
   JSI_HOST_FUNCTION(getMetrics) {
     SkFontMetrics fm;
     getObject()->getMetrics(&fm);
@@ -207,6 +225,7 @@ public:
     JSI_EXPORT_FUNC(JsiSkFont, setEmbolden),
     JSI_EXPORT_FUNC(JsiSkFont, setSubpixel),
     JSI_EXPORT_FUNC(JsiSkFont, setTypeface),
+    JSI_EXPORT_FUNC(JsiSkFont, getGlyphWidths)
   )
 
   JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)
