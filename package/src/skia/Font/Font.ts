@@ -1,6 +1,8 @@
 import type { SkJSIInstance } from "../JsiInstance";
 import type { IPaint } from "../Paint";
 import type { IRect } from "../Rect";
+import type { IPoint } from "../Point";
+import type { Typeface } from "../Typeface/Typeface";
 
 export interface FontMetrics {
   ascent: number; // suggested space above the baseline. < 0
@@ -10,10 +12,6 @@ export interface FontMetrics {
 }
 
 export interface IFont extends SkJSIInstance<"Font"> {
-  /** Get/Sets text size in points.
-    Has no effect if textSize is not greater than or equal to zero.
-  */
-  size: number;
   /** Returns the advance width of text.
       The advance is the normal distance to move before drawing additional text.
       Returns the bounding box of text if bounds is not nullptr. The paint
@@ -40,6 +38,53 @@ export interface IFont extends SkJSIInstance<"Font"> {
    * @param numCodePoints - the number of code points in the string. Defaults to str.length.
    */
   getGlyphIDs(str: string, numCodePoints?: number): number[];
+
+  /**
+   * Computes any intersections of a thick "line" and a run of positionsed glyphs.
+   * The thick line is represented as a top and bottom coordinate (positive for
+   * below the baseline, negative for above). If there are no intersections
+   * (e.g. if this is intended as an underline, and there are no "collisions")
+   * then the returned array will be empty. If there are intersections, the array
+   * will contain pairs of X coordinates [start, end] for each segment that
+   * intersected with a glyph.
+   *
+   * @param glyphs        the glyphs to intersect with
+   * @param positions     x,y coordinates (2 per glyph) for each glyph
+   * @param top           top of the thick "line" to use for intersection testing
+   * @param bottom        bottom of the thick "line" to use for intersection testing
+   * @return              array of [start, end] x-coordinate pairs. Maybe be empty.
+   */
+  getGlyphIntercepts(
+    glyphs: number[],
+    positions: IPoint[],
+    top: number,
+    bottom: number
+  ): number[];
+
+  /**
+   * Returns text scale on x-axis. Default value is 1.
+   */
+  getScaleX(): number;
+
+  /**
+   * Returns text size in points.
+   */
+  getSize(): number;
+
+  /**
+   * Returns text skew on x-axis. Default value is zero.
+   */
+  getSkewX(): number;
+
+  /**
+   * Returns embolden effect for this font. Default value is false.
+   */
+  isEmbolden(): boolean;
+
+  /**
+   * Returns the Typeface set for this font.
+   */
+  getTypeface(): Typeface | null;
 }
 
 const fontStyle = (

@@ -6,6 +6,7 @@
 #include "JsiSkPaint.h"
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
+#include "JsiSkPoint.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,9 +29,6 @@ public:
   JSI_PROPERTY_GET(__typename__) {
     return jsi::String::createFromUtf8(runtime, "Font");
   }
-
-  JSI_PROPERTY_GET(size) { return static_cast<double>(getObject()->getSize()); }
-  JSI_PROPERTY_SET(size) { getObject()->setSize(value.asNumber()); }
 
   JSI_HOST_FUNCTION(measureText) {
     auto textVal = arguments[0].asString(runtime).utf8(runtime);
@@ -80,12 +78,65 @@ public:
     return jsiGlyphIDs;
   }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkFont, size), JSI_EXPORT_PROP_GET(JsiSkFont, __typename__))
-  JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(JsiSkFont, size))
+  JSI_HOST_FUNCTION(getGlyphIntercepts) {
+      auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
+      auto jsiPositions = arguments[1].asObject(runtime).asArray(runtime);
+      auto top = arguments[2].asNumber();
+      auto bottom = arguments[3].asNumber();
+      std::vector<SkPoint> positions;
+      int pointsSize = static_cast<int>(jsiPositions.size(runtime));
+      for (int i = 0; i < pointsSize; i++) {
+          std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
+                  runtime, jsiPositions.getValueAtIndex(runtime, i).asObject(runtime));
+          positions.push_back(*point.get());
+      }
+
+      std::vector<SkGlyphID> glyphs;
+      int glyphsSize = static_cast<int>(jsiPositions.size(runtime));
+      for (int i = 0; i < glyphsSize; i++) {
+          glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
+      }
+
+      if (glyphs.size() > positions.size()) {
+          jsi::detail::throwJSError(runtime, "Not enough x,y position pairs for glyphs");
+          return jsi::Value::null();
+      }
+      auto sects  = getObject()->getIntercepts(glyphs.data(), SkToInt(glyphs.size()), positions.data(), top, bottom);
+      auto jsiSects = jsi::Array(runtime, sects.size());
+      for (int i = 0; i < sects.size(); i++) {
+          jsiSects.setValueAtIndex(runtime, i, jsi::Value(static_cast<int>(sects.at(i))));
+      }
+      return jsiSects;
+  }
+
+  JSI_HOST_FUNCTION(getScaleX) {
+      return jsi::Value(SkScalarToDouble(getObject()->getScaleX()));
+  }
+
+  JSI_HOST_FUNCTION(getSize) {
+      return jsi::Value(SkScalarToDouble(getObject()->getSize()));
+  }
+
+  JSI_HOST_FUNCTION(getSkewX) {
+    return jsi::Value(SkScalarToDouble(getObject()->getSkewX()));
+  }
+
+  JSI_HOST_FUNCTION(isEmbolden) {
+    return jsi::Value(getObject()->isEmbolden());
+  }
+
+  JSI_HOST_FUNCTION(getTypeface) {
+    return JsiSkTypeface::toValue(runtime, getContext(), sk_sp(getObject()->getTypeface()));
+  }
+
   JSI_EXPORT_FUNCTIONS(
     JSI_EXPORT_FUNC(JsiSkFont, measureText),
     JSI_EXPORT_FUNC(JsiSkFont, getMetrics),
-    JSI_EXPORT_FUNC(JsiSkFont, getGlyphIDs)
+    JSI_EXPORT_FUNC(JsiSkFont, getGlyphIDs),
+    JSI_EXPORT_FUNC(JsiSkFont, getGlyphIntercepts),
+    JSI_EXPORT_FUNC(JsiSkFont, getScaleX),
+    JSI_EXPORT_FUNC(JsiSkFont, getSkewX),
+    JSI_EXPORT_FUNC(JsiSkFont, getTypeface),
   )
 
   JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)

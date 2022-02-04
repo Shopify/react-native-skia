@@ -4,6 +4,7 @@ import {
   Fill,
   Paint,
   useFont,
+  vec,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { useTimestamp } from "@shopify/react-native-skia/src/animation/Animation/hooks";
