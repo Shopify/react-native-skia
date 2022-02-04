@@ -92,7 +92,7 @@ public:
       }
 
       std::vector<SkGlyphID> glyphs;
-      int glyphsSize = static_cast<int>(jsiPositions.size(runtime));
+      int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
       for (int i = 0; i < glyphsSize; i++) {
           glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
       }

@@ -35,6 +35,7 @@
 #include "JsiSkDataFactory.h"
 #include "JsiSkFontMgrFactory.h"
 #include "JsiSkSurfaceFactory.h"
+#include "JsiSkTextBlobFactory.h"
 
 namespace RNSkia
 {
@@ -87,6 +88,7 @@ namespace RNSkia
           "RuntimeEffect", std::make_shared<JsiSkRuntimeEffectFactory>(context));
       installReadonlyProperty("Shader",
                               std::make_shared<JsiSkShaderFactory>(context));
+      installReadonlyProperty("TextBlob", std::make_shared<JsiSkTextBlobFactory>(context));
       installReadonlyProperty("Surface", std::make_shared<JsiSkSurfaceFactory>(context));
     };
   };

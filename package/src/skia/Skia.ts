@@ -18,6 +18,7 @@ import type { IPoint } from "./Point";
 import type { Vertices, VertexMode } from "./Vertices/Vertices";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
+import type { TextBlobFactory } from "./TextBlob";
 import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
 import type { SurfaceFactory } from "./Surface";
 import "./NativeSetup";
@@ -64,6 +65,7 @@ export interface Skia {
   Image: ImageFactory;
   SVG: SVGFactory;
   FontMgr: FontMgrFactory;
+  TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
 }
 
@@ -93,13 +95,14 @@ export const Skia = {
   PathEffect: SkiaApi.PathEffect,
   Data: SkiaApi.Data,
   Matrix: SkiaApi.Matrix,
-  MakeVertices: SkiaApi.MakeVertices,
   SVG: SkiaApi.SVG,
   FontMgr: SkiaApi.FontMgr,
+  TextBlob: SkiaApi.TextBlob,
   // Here are constructors for data types which are represented as typed arrays in CanvasKit
   Color,
   RSXform: SkiaApi.RSXform,
   // Here the factory symmetry is broken to be comptatible with CanvasKit
   MakeSurface: SkiaApi.Surface.Make,
   MakeImageFromEncoded: SkiaApi.Image.MakeImageFromEncoded,
+  MakeVertices: SkiaApi.MakeVertices,
 };
