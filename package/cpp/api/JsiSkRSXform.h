@@ -65,7 +65,6 @@ namespace RNSkia {
                 return std::make_shared<SkRSXform>(SkRSXform::Make(scos, ssin, tx, ty));
             }
             jsi::detail::throwJSError(runtime, "Invalid RSXform");
-            return jsi::Value::undefined();
         }
 
         /**
