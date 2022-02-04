@@ -45,10 +45,13 @@ export const PlaygroundScreen: React.FC = () => {
   // Info / Text value
   const info = useDerivedValue((t) => `eased: ${t.toFixed(2)}`, [eased]);
 
+  // Transform
+  const transform = useDerivedValue((pt) => [{ translateX: pt.x }], [xy]);
+
   return (
     <View style={styles.container}>
       <Canvas style={styles.container} debug>
-        <Group>
+        <Group transform={transform}>
           <Circle c={xy} r={radius} color={color} />
           <Text
             familyName="Courier New"
