@@ -56,6 +56,9 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     endDrawingLoop();
     return;
   }
+  
+  // Start draw loop callback
+  beginDrawingLoop();
 
   // Reset timing info
   _timingInfo->reset();
@@ -68,7 +71,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
         auto runtime = context->getJsRuntime();
                          
         // Update info parameter
-        _infoObject->beginDrawCallback(width, height, timestamp);
+        _infoObject->beginDrawOperation(width, height, timestamp);
 
         // Set up arguments array
         std::vector<jsi::Value> args(2);
@@ -80,7 +83,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
                        (size_t)2);
 
         // Reset touches
-        _infoObject->endDrawCallback();
+        _infoObject->endDrawOperation();
 
         // Draw debug overlays
         if (_showDebugOverlay) {
@@ -191,9 +194,7 @@ sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
 
 void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
   _infoObject->updateTouches(points);
-  if (_drawingMode != RNSkDrawingMode::Continuous) {
-    requestRedraw();
-  }
+  requestRedraw();
 }
 
 void RNSkDrawView::performDraw() {
@@ -207,35 +208,14 @@ void RNSkDrawView::performDraw() {
     
     // Unlock the drawing lock
     _isDrawing->unlock();
-    
-    // Should we request a new redraw?
-    if(_drawingMode != RNSkDrawingMode::Continuous && _redrawRequestCounter > 0) {
-      _redrawRequestCounter = 0;
-      requestRedraw();
-    }
+        
   } else {
     _isDrawing->unlock();
   }
 }
 
 void RNSkDrawView::requestRedraw() {
-  if (!isReadyToDraw()) {
-    return;
-  }
-  
-  // If we are in continuous mode, we can just start the drawing loop
-  if (_drawingMode == RNSkDrawingMode::Continuous) {
-    beginDrawingLoop();
-    return;
-  }
-  
-  // Check if we are already in a draw
-  if(!_isDrawing->try_lock()) {
-    _redrawRequestCounter++;
-    return;
-  }
-  
-  _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
+  _redrawRequestCounter++;
 }
 
 bool RNSkDrawView::isReadyToDraw() {
@@ -256,15 +236,6 @@ bool RNSkDrawView::isReadyToDraw() {
   return true;
 }
 
-void RNSkDrawView::setDependencyCount(size_t dependencyCount) {
-  _dependencyCount = dependencyCount;
-  if(dependencyCount > 0) {
-    setDrawingMode(RNSkDrawingMode::Continuous);
-  } else {
-    setDrawingMode(RNSkDrawingMode::Default);
-  }
-}
-
 void RNSkDrawView::beginDrawingLoop() {
   if(!isValid()) {
     return;
@@ -275,12 +246,17 @@ void RNSkDrawView::beginDrawingLoop() {
   }
   
   // Set to zero to avoid calling beginDrawLoop before we return
-  _drawingLoopId =
-      _platformContext->beginDrawLoop(_nativeId, [this]() {
-        if(_isDrawing->try_lock()) {
-          _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
-        }
-      });
+  _drawingLoopId = _platformContext->beginDrawLoop(_nativeId,
+                                                   std::bind(&RNSkDrawView::drawLoopCallback, this));
+}
+
+void RNSkDrawView::drawLoopCallback() {
+  if(_redrawRequestCounter > 0 || _drawingMode == RNSkDrawingMode::Continuous) {
+    if(_isDrawing->try_lock()) {
+      _redrawRequestCounter = 0;
+      _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
+    }
+  }
 }
 
 void RNSkDrawView::endDrawingLoop() {
@@ -295,12 +271,6 @@ void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
     return;
   }
   _drawingMode = mode;
-  if(mode == RNSkDrawingMode::Default && _dependencyCount == 0) {
-    endDrawingLoop();
-  } else {
-    beginDrawingLoop();
-    requestRedraw();
-  }
 }
 
 } // namespace RNSkia

@@ -13,11 +13,9 @@ using CallbackInfo = struct CallbackInfo {
   CallbackInfo() {
     drawCallback = nullptr;
     view = nullptr;
-    dependencyCount = 0;
   }
   std::shared_ptr<jsi::Function> drawCallback;
   RNSkDrawView *view;
-  int dependencyCount;
 };
 
 class RNSkJsiViewApi : public JsiHostObject {
@@ -149,14 +147,22 @@ public:
   JSI_HOST_FUNCTION(registerValueInView) {
     // Check params
     if(!arguments[1].isObject() || !arguments[1].asObject(runtime).isHostObject(runtime)) {
-      jsi::detail::throwJSError(runtime, "Expected value object as second parameter");
+      jsi::detail::throwJSError(runtime, "Expected Value object as second parameter");
       return jsi::Value::undefined();
     }
     
     int nativeId = arguments[0].asNumber();
     
-    // increase dependency count on the Skia View
-    valueDependencyAdded(nativeId);
+    auto value = arguments[1].asObject(runtime).asHostObject<RNSkReadonlyValue>(runtime);
+    if(value == nullptr) {
+      jsi::detail::throwJSError(runtime, "Expected Value object as second parameter");
+      return jsi::Value::undefined();
+    }
+    
+    // Add change listener
+    auto unsubscribe = value->addListener([this, nativeId](jsi::Runtime&){
+      requestRedrawView(nativeId);
+    });
     
     // Add listener
     return jsi::Function::createFromHostFunction(runtime,
@@ -164,7 +170,7 @@ public:
                                                  0,
                                                  JSI_HOST_FUNCTION_LAMBDA {
       // decrease dependency count on the Skia View
-      valueDependencyRemoved(nativeId);
+      unsubscribe();
       return jsi::Value::undefined();
     });
   }
@@ -210,7 +216,6 @@ public:
     if (info->drawCallback != nullptr) {
       info->view->setNativeId(nativeId);
       info->view->setDrawCallback(info->drawCallback);
-      info->view->setDependencyCount(info->dependencyCount);
     }
   }
 
@@ -248,7 +253,6 @@ public:
     if (view != nullptr && info->drawCallback != nullptr) {
       info->view->setNativeId(nativeId);
       info->view->setDrawCallback(info->drawCallback);
-      info->view->setDependencyCount(info->dependencyCount);
     }
   }
 
@@ -267,26 +271,12 @@ private:
   }
   
   /**
-    Increases the dependency count for a view - puts the view in continous mode if the dependency count
-    is more than zero.
+    Send a redraw request to the view
    */
-  void valueDependencyAdded(size_t nativeId) {
+  void requestRedrawView(size_t nativeId) {
     auto info = getEnsuredCallbackInfo(nativeId);
-    info->dependencyCount++;
     if(info->view != nullptr) {
-      info->view->setDependencyCount(info->dependencyCount);
-    }
-  }
-  
-  /**
-   Decreases the dependency count for a view - puts the view in default mode if the dependency count
-   is zero or less.
-   */
-  void valueDependencyRemoved(size_t nativeId) {
-    auto info = getEnsuredCallbackInfo(nativeId);
-    info->dependencyCount--;
-    if(info->view != nullptr) {
-      info->view->setDependencyCount(info->dependencyCount);
+      info->view->requestRedraw();
     }
   }
   
