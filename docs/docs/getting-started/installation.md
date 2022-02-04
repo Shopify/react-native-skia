@@ -20,7 +20,7 @@ When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
 
 ```sh
-yarn addhttps://github.com/Shopify/react-native-skia/releases/download/v0.1.103-alpha/shopify-react-native-skia-0.1.103.tgz
+yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.103-alpha/shopify-react-native-skia-0.1.103.tgz
 ```
 
 Or using npm:
