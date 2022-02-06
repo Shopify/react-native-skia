@@ -9,7 +9,7 @@ Images can be draw by specifying the output rectangle and how the image should f
 
 | Name   | Type                  | Description                                                                                                                                                   |
 | :----- | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| source | `require` or `string` | Source of the image or an HTTP(s) URL.                                                                                                                        |
+| image  | `IImage`              | Image instance.                                                                                                                     |
 | x      | `number`              | Left position of the destination image.                                                                                                                       |
 | y      | `number`              | Right position of the destination image.                                                                                                                      |
 | width  | `number`              | Width of the destination image.                                                                                                                               |
@@ -23,13 +23,13 @@ import { Canvas, Image, useImage } from "@shopify/react-native-skia";
 
 const ImageDemo = () => {
   // Alternatively, you can pass an image URL directly
-  // for instance: const source = useImage("https://bit.ly/3fkulX5");
-  const source = useImage(require("../../assets/oslo.jpg"));
+  // for instance: const image = useImage("https://bit.ly/3fkulX5");
+  const image = useImage(require("../../assets/oslo.jpg"));
   return (
     <Canvas style={{ flex: 1 }}>
-      {source && (
+      {image && (
         <Image
-          source={source}
+          image={image}
           fit="contain"
           x={0}
           y={0}
