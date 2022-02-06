@@ -23,6 +23,8 @@ import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
 import type { SurfaceFactory } from "./Surface";
 import "./NativeSetup";
 import type { IRSXform } from "./RSXform";
+import type { IPath } from "./Path/Path";
+import type { IContourMeasureIter } from "./ContourMeasure";
 
 /**
  * Declares the interface for the native Skia API
@@ -32,6 +34,11 @@ export interface Skia {
   XYWHRect: (x: number, y: number, width: number, height: number) => IRect;
   RRectXY: (rect: IRect, rx: number, ry: number) => IRRect;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => IRSXform;
+  ContourMeasureIter: (
+    path: IPath,
+    forceClosed: boolean,
+    resScale: number
+  ) => IContourMeasureIter;
   Paint: () => IPaint;
   Path: PathFactory;
   Matrix: () => Matrix;
@@ -80,13 +87,7 @@ declare global {
  * Declares the implemented API with overrides.
  */
 export const Skia = {
-  Point: SkiaApi.Point,
-  XYWHRect: SkiaApi.XYWHRect,
-  RRectXY: SkiaApi.RRectXY,
-  Paint: SkiaApi.Paint,
-  Path: SkiaApi.Path,
-  ColorFilter: SkiaApi.ColorFilter,
-  Font: SkiaApi.Font,
+  // Factories
   Typeface: SkiaApi.Typeface,
   MaskFilter: SkiaApi.MaskFilter,
   RuntimeEffect: SkiaApi.RuntimeEffect,
@@ -94,14 +95,23 @@ export const Skia = {
   ImageFilter: SkiaApi.ImageFilter,
   PathEffect: SkiaApi.PathEffect,
   Data: SkiaApi.Data,
-  Matrix: SkiaApi.Matrix,
   SVG: SkiaApi.SVG,
   FontMgr: SkiaApi.FontMgr,
   TextBlob: SkiaApi.TextBlob,
+  // Constructors
+  Matrix: SkiaApi.Matrix,
+  Font: SkiaApi.Font,
+  Point: SkiaApi.Point,
+  XYWHRect: SkiaApi.XYWHRect,
+  RRectXY: SkiaApi.RRectXY,
+  Paint: SkiaApi.Paint,
+  Path: SkiaApi.Path,
+  ColorFilter: SkiaApi.ColorFilter,
+  ContourMeasureIter: SkiaApi.ContourMeasureIter,
   // Here are constructors for data types which are represented as typed arrays in CanvasKit
   Color,
   RSXform: SkiaApi.RSXform,
-  // Here the factory symmetry is broken to be comptatible with CanvasKit
+  // For the following methods the factory symmetry is broken to be comptatible with CanvasKit
   MakeSurface: SkiaApi.Surface.Make,
   MakeImageFromEncoded: SkiaApi.Image.MakeImageFromEncoded,
   MakeVertices: SkiaApi.MakeVertices,

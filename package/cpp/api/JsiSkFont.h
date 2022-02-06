@@ -71,9 +71,6 @@ public:
     metrics.setProperty(runtime, "descent", fm.fDescent);
     metrics.setProperty(runtime, "leading", fm.fLeading);
     if (!(fm.fFlags & SkFontMetrics::kBoundsInvalid_Flag)) {
-      const float rect[] = {
-              fm.fXMin, fm.fTop, fm.fXMax, fm.fBottom
-      };
       auto bounds = SkRect::MakeLTRB(fm.fXMin,fm.fTop, fm.fXMax, fm.fBottom );
       auto jsiBounds = JsiSkRect::toValue(runtime, getContext(), bounds);
       metrics.setProperty(runtime, "bounds",  jsiBounds);

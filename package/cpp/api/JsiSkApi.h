@@ -36,6 +36,7 @@
 #include "JsiSkFontMgrFactory.h"
 #include "JsiSkSurfaceFactory.h"
 #include "JsiSkTextBlobFactory.h"
+#include "JsiSkContourMeasureIter.h"
 
 namespace RNSkia
 {
@@ -61,6 +62,7 @@ namespace RNSkia
     installFunction("XYWHRect", JsiSkRect::createCtor(context));
     installFunction("RRectXY", JsiSkRRect::createCtor(context));
     installFunction("Point", JsiSkPoint::createCtor(context));
+    installFunction("ContourMeasureIter", JsiSkContourMeasureIter::createCtor(context));
     installFunction("MakeVertices", JsiSkVertices::createCtor(context));
 
       // Static members
