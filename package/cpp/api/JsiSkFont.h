@@ -47,7 +47,6 @@ public:
 
   JSI_HOST_FUNCTION(getGlyphWidths) {
       auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
-      auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
       int bytesPerWidth = 4;
       std::vector<SkGlyphID> glyphs;
       int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
@@ -55,10 +54,15 @@ public:
       for (int i = 0; i < glyphsSize; i++) {
           glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
       }
-      getObject()->getWidthsBounds(glyphs.data(), glyphsSize, widthPtr, nullptr, paint.get());
+      if (count > 1) {
+          auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
+          getObject()->getWidthsBounds(glyphs.data(), glyphsSize, widthPtr, nullptr, paint.get());
+      } else {
+          getObject()->getWidthsBounds(glyphs.data(), glyphsSize, widthPtr, nullptr, nullptr);
+      }
       auto jsiWidths = jsi::Array(runtime, glyphsSize);
       for (int i = 0; i <glyphsSize; i++) {
-          jsiWidths.setValueAtIndex(runtime, i, jsi::Value(widthPtr[i]));
+          jsiWidths.setValueAtIndex(runtime, i, jsi::Value(SkScalarToDouble(widthPtr[i])));
       }
       return jsiWidths;
   }

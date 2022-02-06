@@ -522,6 +522,15 @@ public:
         .get()
         ->getObject();
   }
+
+    static jsi::Value toValue(jsi::Runtime &runtime,
+                              std::shared_ptr<RNSkPlatformContext> context,
+                              const SkPath &path) {
+      return jsi::Object::createFromHostObject(
+              runtime,
+              std::make_shared<JsiSkPath>(context, path)
+      );
+    }
 };
 
 } // namespace RNSkia

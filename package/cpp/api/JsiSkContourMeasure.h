@@ -22,12 +22,54 @@ namespace RNSkia {
                   const sk_sp<SkContourMeasure> contourMeasure)
                 : JsiSkWrappingSkPtrHostObject(context, contourMeasure){};
 
+        JSI_HOST_FUNCTION(getPosTan) {
+            auto dist = arguments[0].asNumber();
+            SkPoint* position = (SkPoint *)malloc(sizeof (SkPoint));
+            SkPoint* tangent = (SkPoint *)malloc(sizeof (SkPoint));
+            auto result = getObject()->getPosTan(dist, position, tangent);
+            if (!result) {
+                jsi::detail::throwJSError(runtime, "getSegment() failed");
+            }
+            auto posTan = jsi::Object(runtime);
+            posTan.setProperty(runtime, "px",  position->x());
+            posTan.setProperty(runtime, "py", position->y());
+            posTan.setProperty(runtime, "tx", tangent->x());
+            posTan.setProperty(runtime, "ty", tangent->y());
+            return posTan;
+        }
+
+        JSI_HOST_FUNCTION(length) {
+            return jsi::Value(SkScalarToDouble(getObject()->length()));
+        }
+
+        JSI_HOST_FUNCTION(isClosed) {
+            return jsi::Value(getObject()->isClosed());
+        }
+
+        JSI_HOST_FUNCTION(getSegment) {
+            auto start = arguments[0].asNumber();
+            auto end = arguments[1].asNumber();
+            auto startWithMoveTo = arguments[2].getBool();
+            SkPath path;
+            auto result = getObject()->getSegment(start, end, &path, startWithMoveTo);
+            if (!result) {
+                jsi::detail::throwJSError(runtime, "getSegment() failed");
+            }
+            return JsiSkPath::toValue(runtime, getContext(), path);
+        }
 
         JSI_PROPERTY_GET(__typename__) {
-                return jsi::String::createFromUtf8(runtime, "ContourMeasure");
+            return jsi::String::createFromUtf8(runtime, "ContourMeasure");
         }
 
         JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkContourMeasure, __typename__))
+
+        JSI_EXPORT_FUNCTIONS(
+                JSI_EXPORT_FUNC(JsiSkContourMeasure, getPosTan),
+                JSI_EXPORT_FUNC(JsiSkContourMeasure, length),
+                JSI_EXPORT_FUNC(JsiSkContourMeasure, isClosed),
+                JSI_EXPORT_FUNC(JsiSkContourMeasure, getSegment)
+        )
 
         /**
           Returns the underlying object from a host object of this type
