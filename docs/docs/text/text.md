@@ -26,9 +26,9 @@ export const HelloWorld = () => {
       <Text
         x={0}
         y={0}
-        value="Hello World"
+        text="Hello World"
         familyName="serif"
-        text={32}
+        size={32}
       />
     </Canvas>
   );
