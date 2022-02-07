@@ -11,14 +11,24 @@ import { processFont } from "../../processors/Font";
 export type TextPathProps = CustomPaintProps &
   FontDef & {
     text: string;
-    path: IPath;
+    path: IPath | string;
     initialOffset: number;
   };
 
 export const TextPath = (props: AnimatedProps<TextPathProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint, fontMgr }, { text, path, initialOffset, ...fontDef }) => {
+    (
+      { canvas, paint, fontMgr },
+      { text, initialOffset, path: pathDef, ...fontDef }
+    ) => {
+      const path =
+        typeof pathDef === "string"
+          ? Skia.Path.MakeFromSVGString(pathDef)
+          : pathDef;
+      if (path === null) {
+        throw new Error("Invalid path: " + pathDef);
+      }
       const font = processFont(fontMgr, fontDef);
       const ids = font.getGlyphIDs(text);
       const widths = font.getGlyphWidths(ids, paint);

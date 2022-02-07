@@ -16,3 +16,8 @@ export const TextBlob = (props: AnimatedProps<TextBlobProps>) => {
   });
   return <skDrawing onDraw={onDraw} {...props} />;
 };
+
+TextBlob.defaultProps = {
+  x: 0,
+  y: 0,
+};
