@@ -3,21 +3,23 @@ import React from "react";
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
 import type { IPath } from "../../../skia/Path";
-import type { IFont } from "../../../skia/Font";
 import type { IRSXform } from "../../../skia/RSXform";
 import { Skia } from "../../../skia/Skia";
+import type { FontDef } from "../../processors/Font";
+import { processFont } from "../../processors/Font";
 
-export interface TextPathProps extends CustomPaintProps {
-  text: string;
-  path: IPath;
-  font: IFont;
-  initialOffset: number;
-}
+export type TextPathProps = CustomPaintProps &
+  FontDef & {
+    text: string;
+    path: IPath;
+    initialOffset: number;
+  };
 
 export const TextPath = (props: AnimatedProps<TextPathProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint }, { text, path, font, initialOffset }) => {
+    ({ canvas, paint, fontMgr }, { text, path, initialOffset, ...fontDef }) => {
+      const font = processFont(fontMgr, fontDef);
       const ids = font.getGlyphIDs(text);
       const widths = font.getGlyphWidths(ids, paint);
       const rsx: IRSXform[] = [];
