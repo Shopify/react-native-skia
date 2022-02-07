@@ -3,7 +3,6 @@ import {
   Canvas,
   Fill,
   Paint,
-  Skia,
   useFont,
 } from "@shopify/react-native-skia";
 import React from "react";

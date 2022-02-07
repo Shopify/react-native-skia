@@ -12,7 +12,7 @@ This component raws a run of glyphs, at corresponding positions, in a given font
 | glyphs      | `Ghlyph[]` | Glyphs to draw                                                         |
 | x?          | `number`.  | x coordinate of the origin of the entire run. Default is 0             |
 | y?          | `number`.  | y coordinate of the origin of the entire run. Default is 0             |
-| font        | `font`     | Font to use                                                            |
+| font        | `font`     | Font to use (see [Fonts](/docs/text/fonts))                            |
 
 
 ## Draw text vertically
