@@ -1,51 +1,67 @@
-import React, { useMemo } from "react";
+import React from "react";
 
-import type { IRect } from "../../../skia";
-import { useImage, TileMode, FilterMode, MipmapMode } from "../../../skia";
+import type { IRect, IImage } from "../../../skia";
+import { TileMode, FilterMode, MipmapMode } from "../../../skia";
 import { useDeclaration } from "../../nodes";
 import type { TransformProps, SkEnum, AnimatedProps } from "../../processors";
 import { localMatrix, enumKey } from "../../processors";
+import type { RectCtor } from "../../processors/Shapes";
+import { rect } from "../../processors/Shapes";
 
-import type { ImageProps } from "./Image";
 import type { Fit } from "./BoxFit";
 import { rect2rect, fitRects } from "./BoxFit";
 
-// TODO: add fit property and infer the transform matrix from src and dst
-interface ImageShaderProps extends TransformProps {
-  source: ImageProps["source"];
+const getRect = (
+  props: Omit<ImageShaderProps, "tx" | "ty" | "fm" | "mm" | "fit" | "image">
+): IRect | undefined => {
+  const { x, y, width, height } = props;
+  if (props.rect) {
+    return props.rect;
+  } else if (
+    x !== undefined &&
+    y !== undefined &&
+    width !== undefined &&
+    height !== undefined
+  ) {
+    return rect(x, y, width, height);
+  } else {
+    return undefined;
+  }
+};
+
+interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   tx: SkEnum<typeof TileMode>;
   ty: SkEnum<typeof TileMode>;
   fm: SkEnum<typeof FilterMode>;
   mm: SkEnum<typeof MipmapMode>;
   fit: Fit;
-  fitRect?: IRect;
+  rect?: IRect;
+  image: IImage;
 }
 
-export const ImageShader = (
-  defaultProps: AnimatedProps<ImageShaderProps, "source">
-) => {
-  const image = useImage(defaultProps.source);
-  const props = useMemo(
-    () => ({ ...defaultProps, image }),
-    [defaultProps, image]
-  );
+export const ImageShader = (props: AnimatedProps<ImageShaderProps>) => {
   const declaration = useDeclaration(
     props,
-    ({ tx, ty, fm, mm, fit, fitRect, ...transform }) => {
-      if (image === null) {
-        return null;
-      }
-      if (fitRect) {
-        const rects = fitRects(fit, image, fitRect);
+    ({ tx, ty, fm, mm, fit, image, ...imageShaderProps }) => {
+      const rct = getRect(imageShaderProps);
+      if (rct) {
+        const rects = fitRects(
+          fit,
+          { x: 0, y: 0, width: image.width(), height: image.height() },
+          rct
+        );
         const m3 = rect2rect(rects.src, rects.dst);
-        transform.transform = [...(transform.transform ?? []), ...m3];
+        imageShaderProps.transform = [
+          ...(imageShaderProps.transform ?? []),
+          ...m3,
+        ];
       }
       return image.makeShaderOptions(
         TileMode[enumKey(tx)],
         TileMode[enumKey(ty)],
         FilterMode[enumKey(fm)],
         MipmapMode[enumKey(mm)],
-        localMatrix(transform)
+        localMatrix(imageShaderProps)
       );
     }
   );

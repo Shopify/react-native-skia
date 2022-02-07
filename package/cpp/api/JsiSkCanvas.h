@@ -9,7 +9,8 @@
 #include "JsiSkPath.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
-#include "JsiSkSvg.h"
+#include "JsiSkSVG.h"
+#include "JsiSkVertices.h"
 
 #include <jsi/jsi.h>
 #include <map>
@@ -242,6 +243,15 @@ public:
     return jsi::Value::undefined();
   }
 
+
+  JSI_HOST_FUNCTION(drawVertices) {
+    auto vertices = JsiSkVertices::fromValue(runtime, arguments[0]);
+    auto blendMode = (SkBlendMode)arguments[1].getNumber();
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
+    _canvas->drawVertices(vertices, blendMode, *paint);
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(drawPatch) {
     std::vector<SkPoint> cubics;
     std::vector<SkColor> colors;
@@ -266,7 +276,7 @@ public:
 
     if (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()) {
       auto jsiTexs = arguments[2].asObject(runtime).asArray(runtime);
-      auto texsSize = jsiCubics.size(runtime);
+      auto texsSize = jsiTexs.size(runtime);
       for (int i = 0; i < texsSize; i++) {
         auto point = JsiSkPoint::fromValue(
                 runtime, jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
@@ -275,14 +285,8 @@ public:
     }
 
     auto paint = count >= 4 ? JsiSkPaint::fromValue(runtime, arguments[4]) : nullptr;
-
-    if (count >= 3 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
-      auto blendMode = (SkBlendMode)arguments[3].asNumber();
-      _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), blendMode,
-                         *paint);
-    } else {
-      _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), *paint);
-    }
+    auto blendMode = static_cast<SkBlendMode>(arguments[3].asNumber());
+    _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), blendMode, *paint);
     return jsi::Value::undefined();
   }
 
@@ -301,8 +305,8 @@ public:
     SkScalar x = arguments[1].asNumber();
     SkScalar y = arguments[2].asNumber();
 
-    auto font = JsiSkFont::fromValue(runtime, arguments[3]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    auto font = JsiSkFont::fromValue(runtime, arguments[4]);
 
     _canvas->drawSimpleText(text, strlen(text), SkTextEncoding::kUTF8, x, y,
                             *font, *paint);
@@ -311,7 +315,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawSvg) {
-    auto svgdom = JsiSkSvg::fromValue(runtime, arguments[0]);
+    auto svgdom = JsiSkSVG::fromValue(runtime, arguments[0]);
     if (count == 3) {
       // read size
       auto w = arguments[1].asNumber();
@@ -405,7 +409,7 @@ public:
     if (count == 1) {
       _canvas->drawColor(cl);
     } else {
-      auto mode = (SkBlendMode)arguments[1].asNumber();
+      auto mode = static_cast<SkBlendMode>(arguments[1].asNumber());
       _canvas->drawColor(cl, mode);
     }
     return jsi::Value::undefined();
@@ -443,6 +447,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPoints),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPatch),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawVertices),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawText),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawSvg),
                        JSI_EXPORT_FUNC(JsiSkCanvas, clipPath),
@@ -462,6 +467,11 @@ public:
 
   JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}
+
+  JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context, SkCanvas* canvas): JsiSkCanvas(context) {
+    setCanvas(canvas);
+  }
+
   void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
   SkCanvas *getCanvas() { return _canvas; }
 

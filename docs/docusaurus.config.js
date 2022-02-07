@@ -67,6 +67,11 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      algolia: {
+        appId: "LFNAM0RNW3",
+        apiKey: "52424a97bf8bfa39b690587e466e0fec",
+        indexName: "react-native-skia",
+      },
       navbar: {
         title: "React Native Skia",
         logo: {

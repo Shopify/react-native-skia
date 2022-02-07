@@ -58,9 +58,9 @@ The `useTiming` hook will create a timing based animation that changes the retur
 
 The `useSpring` hook will create a spring based animation that changes the returned animation value with the results from doing a physics simulation.
 
-### useProgress
+### useTimestamp
 
-The `useSprogress` hook will return an animation value that contains the number of milliseconds that passed since the cavans started to draw.
+The `useTimestamp` hook will return an animation value that contains the number of milliseconds that passed since the cavans started to draw.
 
 ### useTouchHandler
 

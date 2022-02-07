@@ -32,7 +32,7 @@ namespace RNSkia
     {
       auto uniforms = castUniforms(runtime, arguments[0]);
       auto isOpaque = count >= 2 && arguments[1].isBool() ? arguments[1].getBool() : false;
-      auto matrix = count == 3 ? JsiSkMatrix::fromValue(runtime, arguments[2]).get() : nullptr;
+      auto matrix = count >= 3 && !arguments[2].isUndefined()  && !arguments[2].isNull()  ? JsiSkMatrix::fromValue(runtime, arguments[2]).get() : nullptr;
 
       // Create and return shader as host object
       auto shader = getObject()->makeShader(std::move(uniforms), nullptr,
@@ -60,7 +60,7 @@ namespace RNSkia
         children.push_back(shader);
       }
 
-      auto matrix = count == 4 ? JsiSkMatrix::fromValue(runtime, arguments[3]).get() : nullptr;
+      auto matrix = count >= 4 && !arguments[3].isUndefined()  && !arguments[3].isNull() ? JsiSkMatrix::fromValue(runtime, arguments[3]).get() : nullptr;
 
       // Create and return shader as host object
       auto shader = getObject()->makeShader(std::move(uniforms), children.data(),
@@ -72,7 +72,7 @@ namespace RNSkia
 
     JSI_HOST_FUNCTION(getUniformCount)
     {
-      return static_cast<int>(getObject()->uniforms().count());
+      return static_cast<int>(getObject()->uniforms().size());
     }
 
     JSI_HOST_FUNCTION(getUniformFloatCount)
@@ -82,14 +82,14 @@ namespace RNSkia
 
     JSI_HOST_FUNCTION(getUniformName)
     {
-      auto i = arguments[0].asNumber();
+      auto i = static_cast<int>(arguments[0].asNumber());
       auto it = getObject()->uniforms().begin() + i;
       return jsi::String::createFromAscii(runtime, it->name.c_str());
     }
 
     JSI_HOST_FUNCTION(getUniform)
     {
-      auto i = arguments[0].asNumber();
+      auto i = static_cast<int>(arguments[0].asNumber());
       auto it = getObject()->uniforms().begin() + i;
       auto result = jsi::Object(runtime);
       RuntimeEffectUniform su = fromUniform(*it);
@@ -122,8 +122,8 @@ namespace RNSkia
       // verify size of input uniforms
       if (jsiUniformsSize * sizeof(float) != getObject()->uniformSize())
       {
-        jsi::detail::throwJSError(
-            runtime, "Uniforms size differs from effect's uniform size.");
+        std::string msg = "Uniforms size differs from effect's uniform size. Received " + std::to_string(jsiUniformsSize) + " expected " + std::to_string(getObject()->uniformSize() / sizeof(float));
+        jsi::detail::throwJSError(runtime, msg.c_str());
       }
 
       auto uniforms = SkData::MakeUninitialized(getObject()->uniformSize());
@@ -131,8 +131,11 @@ namespace RNSkia
       // Convert to skia uniforms
       for (int i = 0; i < jsiUniformsSize; i++)
       {
-        // We only support floats for now
-        float value = jsiUniforms.getValueAtIndex(runtime, i).asNumber();
+        auto it = getObject()->uniforms().begin() + i;
+        RuntimeEffectUniform u = fromUniform(*it);
+        float fValue = jsiUniforms.getValueAtIndex(runtime, i).asNumber();
+        int iValue = static_cast<int>(fValue);
+        auto value = u.isInteger ? iValue : fValue;
         memcpy(SkTAddOffset<void>(uniforms->writable_data(), i * sizeof(value)),
                &value, sizeof(value));
       }

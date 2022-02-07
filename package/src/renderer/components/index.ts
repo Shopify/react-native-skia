@@ -1,6 +1,7 @@
 export * from "./shapes";
 export * from "./image";
 export * from "./shaders";
+export * from "./text";
 export * from "./colorFilters";
 export * from "./maskFilters";
 export * from "./imageFilters";

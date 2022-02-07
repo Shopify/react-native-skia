@@ -20,20 +20,24 @@ When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
 
 ```sh
-$ yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
+yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.103-alpha/shopify-react-native-skia-0.1.103.tgz
 ```
 
 Or using npm:
 
 ```sh
-$ npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
+npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.103-alpha/shopify-react-native-skia-0.1.103.tgz
 ```
 
 ## iOS
 
 Run `pod install` on the `ios/` directory.
 
+You will need to disable Bitcode in order to create a release build: `Build Settings > Build Options > Enable Bitcode -> Release -> No`. In Expo managed apps, set `ios.bitcode` to `false` in `app.json`.
+
 ## Android
+
+> **Version compatibility**: `react-native@>=0.66` is required.
 
 Currently, you will need Android NDK to be installed.
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
@@ -48,9 +52,9 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 We have an example project you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/example).
 
 ```sh
-$ yarn
-$ cd package && yarn && cd ..
-$ cd example && yarn && yarn start
+yarn
+cd package && yarn && cd ..
+cd example && yarn && yarn start
 ```
 
 To run the example project on iOS, you will need to run `pod install` and on Android you will also need Android NDK to be installed ([see here](#android)).

@@ -3,7 +3,7 @@ import type { IRect } from "./Rect";
 import type { Font } from "./Font";
 import type { IPath } from "./Path";
 import type { IImage } from "./Image";
-import type { ISvgDom } from "./Svg";
+import type { SVG } from "./SVG";
 import type { Color } from "./Color";
 import type { IRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
@@ -11,6 +11,7 @@ import type { IPoint, PointMode } from "./Point";
 import type { Matrix } from "./Matrix";
 import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
+import type { Vertices } from "./Vertices";
 
 export enum ClipOp {
   Difference,
@@ -192,6 +193,19 @@ export interface ICanvas {
   drawCircle(cx: number, cy: number, radius: number, paint: IPaint): void;
 
   /**
+   * Draws the given vertices (a triangle mesh) using the current clip, current matrix, and the
+   * provided paint.
+   *  If paint contains an Shader and vertices does not contain texCoords, the shader
+   *  is mapped using the vertices' positions.
+   *  If vertices colors are defined in vertices, and Paint paint contains Shader,
+   *  BlendMode mode combines vertices colors with Shader.
+   * @param verts
+   * @param mode
+   * @param paint
+   */
+  drawVertices(verts: Vertices, mode: BlendMode, paint: IPaint): void;
+
+  /**
    * Draws a cubic patch defined by 12 control points [top, right, bottom, left] with optional
    * colors and shader-coordinates [4] specifed for each corner [top-left, top-right, bottom-right, bottom-left]
    * @param cubics 12 points : 4 connected cubics specifying the boundary of the patch
@@ -201,9 +215,9 @@ export interface ICanvas {
    * @param paint
    */
   drawPatch(
-    cubics: IPoint[],
-    colors?: Color[] | null,
-    texs?: IPoint[] | null,
+    cubics: readonly IPoint[],
+    colors?: readonly Color[] | null,
+    texs?: readonly IPoint[] | null,
     mode?: BlendMode | null,
     paint?: IPaint
   ): void;
@@ -292,35 +306,23 @@ export interface ICanvas {
         example: https://fiddle.skia.org/c/@Canvas_drawPath
     */
   drawPath: (path: IPath, paint: IPaint) => void;
-  /** Draws text, with origin at (x, y), using clip, SkMatrix, SkFont font,
-        and SkPaint paint.
 
-        Text size is affected by SkMatrix and SkFont text size. Default text
-        size is 12 point.
-
-        All elements of paint: SkPathEffect, SkMaskFilter, SkShader,
-        SkColorFilter, and SkImageFilter; apply to text. By
-        default, draws filled black glyphs.
-
-        @param text        character code points or glyphs drawn
-        @param x           start of text on x-axis
-        @param y           start of text on y-axis
-        @param font        SkFont used to draw text
-        @param paint       blend, color, and so on, used to draw
-    */
-  drawText: (
-    text: string,
-    x: number,
-    y: number,
-    font: Font,
-    paint: IPaint
-  ) => void;
+  /**
+   * Draw the given text at the location (x, y) using the provided paint and font. The text will
+   * be drawn as is; no shaping, left-to-right, etc.
+   * @param str
+   * @param x
+   * @param y
+   * @param paint
+   * @param font
+   */
+  drawText(str: string, x: number, y: number, paint: IPaint, font: Font): void;
 
   /**
    * Renders the SVG Dom object to the canvas. If width/height are omitted,
    * the SVG will be rendered to fit the canvas.
    */
-  drawSvg: (svgDom: ISvgDom, width?: number, height?: number) => void;
+  drawSvg: (svgDom: SVG, width?: number, height?: number) => void;
   /** Saves SkMatrix and clip.
         Calling restore() discards changes to SkMatrix and clip,
         restoring the SkMatrix and clip to their state when save() was called.

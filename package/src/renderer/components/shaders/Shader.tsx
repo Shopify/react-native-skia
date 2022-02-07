@@ -3,24 +3,48 @@ import type { ReactNode } from "react";
 
 import { isShader } from "../../../skia";
 import type { IRuntimeEffect } from "../../../skia";
+import type { Vector, AnimatedProps, TransformProps } from "../../processors";
 import { useDeclaration } from "../../nodes/Declaration";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
+import { localMatrix } from "../../processors";
 
-export interface ShaderProps {
+// We need to use any here because hasOwnProperty doesn't work on JSI instances
+const isVector = (obj: unknown): obj is Vector =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (obj as any).x !== undefined && (obj as any).y !== undefined;
+
+type Uniform = number | readonly number[] | Vector;
+
+interface Uniforms {
+  [name: string]: Uniform;
+}
+
+export interface ShaderProps extends TransformProps {
   source: IRuntimeEffect;
-  uniforms: number[];
-  isOpaque?: boolean;
+  uniforms: Uniforms;
+  opaque?: boolean;
   children?: ReactNode | ReactNode[];
 }
 
 export const Shader = (props: AnimatedProps<ShaderProps>) => {
   const declaration = useDeclaration<ShaderProps>(
     props,
-    ({ uniforms, source, isOpaque }, children) => {
+    ({ uniforms, source, opaque, ...transform }, children) => {
+      const processedUniforms = new Array(source.getUniformCount())
+        .fill(0)
+        .map((_, i) => {
+          const name = source.getUniformName(i);
+          const value = uniforms[name];
+          if (isVector(value)) {
+            return [value.x, value.y];
+          }
+          return value;
+        })
+        .flat(4);
       return source.makeShaderWithChildren(
-        uniforms,
-        isOpaque,
-        children.filter(isShader)
+        processedUniforms,
+        opaque,
+        children.filter(isShader),
+        localMatrix(transform)
       );
     }
   );

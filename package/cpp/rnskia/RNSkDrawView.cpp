@@ -5,8 +5,7 @@
 #include "RNSkDrawView.h"
 
 #include <chrono>
-#include <condition_variable>
-#include <mutex>
+#include <functional>
 
 #include "RNSkLog.h"
 
@@ -30,38 +29,26 @@ RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
       _platformContext(context),
       _infoObject(std::make_shared<RNSkInfoObject>()),
       _timingInfo(std::make_shared<RNSkTimingInfo>()),
-      _isRemoved(false) {}
+      _isDrawing(new std::timed_mutex())
+      {}
 
 RNSkDrawView::~RNSkDrawView() {
-  {
-    _isRemoved = true;
-    // This is a very simple fix to an issue where the view posts a redraw
-    // function to the javascript thread, and the object is destroyed and then
-    // the redraw function is called and ends up executing on a destroyed draw
-    // view. Since _isDrawing is an atomic bool we know that as long as it is
-    // true we are drawing and should wait.
-    // It is limited to only wait for 500 milliseconds - if it is stuck we
-    // might have gotten an exception that caused the flag never to be reset.
-    milliseconds start = std::chrono::duration_cast<milliseconds>(
-        system_clock::now().time_since_epoch());
-    
-    while (_isDrawing == true) {
-      milliseconds now = std::chrono::duration_cast<milliseconds>(
-          system_clock::now().time_since_epoch());
-      if (now.count() - start.count() > 500) {
-        RNSkLogger::logToConsole("Timed out waiting for RNSkDrawView delete...");
-        break;
-      }
-    }
+  invalidate();
+  
+  // Wait for the drawing lock (if set)
+  if(!_isDrawing->try_lock_for(system_clock::now().time_since_epoch() + milliseconds(500))) {
+    RNSkLogger::logToConsole("Failed to delete since drawing is still locked for native view with id %i", _nativeId);
   }
+  
+  delete _isDrawing;  
 }
 
-void RNSkDrawView::setIsRemoved() {
-  _isRemoved = true;
+void RNSkDrawView::invalidate() {
   endDrawingLoop();
+  _isValid = false;
 }
 
-void RNSkDrawView::setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Function> callback) {
+void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   if (callback == nullptr) {
     _drawCallback = nullptr;
@@ -69,9 +56,6 @@ void RNSkDrawView::setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Functio
     endDrawingLoop();
     return;
   }
-
-  // Update native id
-  _nativeId = nativeId;
 
   // Reset timing info
   _timingInfo->reset();
@@ -82,24 +66,21 @@ void RNSkDrawView::setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Functio
                        int height, double timestamp,
                        std::shared_ptr<RNSkPlatformContext> context) {
         auto runtime = context->getJsRuntime();
-
+                         
         // Update info parameter
         _infoObject->beginDrawCallback(width, height, timestamp);
 
         // Set up arguments array
-        jsi::Value *args = new jsi::Value[2];
+        std::vector<jsi::Value> args(2);
         args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
         args[1] = jsi::Object::createFromHostObject(*runtime, _infoObject);
 
         // To be able to call the drawing function we'll wrap it once again
-        callback->call(*runtime, static_cast<const jsi::Value *>(args),
+        callback->call(*runtime, static_cast<const jsi::Value *>(args.data()),
                        (size_t)2);
 
         // Reset touches
         _infoObject->endDrawCallback();
-
-        // Clean up
-        delete[] args;
 
         // Draw debug overlays
         if (_showDebugOverlay) {
@@ -129,27 +110,46 @@ void RNSkDrawView::setDrawCallback(size_t nativeId, std::shared_ptr<jsi::Functio
   requestRedraw();
 }
 
-void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
-                                 int height, double time,
+void RNSkDrawView::drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
+                                int width,
+                                int height,
+                                double time) {
+  
+  // Call the draw drawCallback and perform js based drawing
+  auto skCanvas = canvas->getCanvas();
+  if (_drawCallback != nullptr && skCanvas != nullptr) {
+    // Make sure to scale correctly
+    auto pd = _platformContext->getPixelDensity();
+    skCanvas->save();
+    skCanvas->scale(pd, pd);
+    // Call draw function.
+    (*_drawCallback)(canvas, width / pd, height / pd, time, _platformContext);
+    // Restore canvas
+    skCanvas->restore();
+    skCanvas->flush();
+  }
+}
+
+void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface,
+                                 int width,
+                                 int height,
+                                 double time,
                                  std::shared_ptr<RNSkPlatformContext> context) {
 
   try {
+    if(!isValid()) {
+      return;
+    }
+    
+    _lastWidth = width;
+    _lastHeight = height;
+
     // Get the canvas
     auto skCanvas = surface->getCanvas();
     _jsiCanvas->setCanvas(skCanvas);
-
-    // Call the draw drawCallback and perform js based drawing
-    if (_drawCallback != nullptr) {
-      // Make sure to scale correctly
-      auto pd = context->getPixelDensity();
-      skCanvas->save();
-      skCanvas->scale(pd, pd);
-      // Call draw function.
-      (*_drawCallback)(_jsiCanvas, width / pd, height / pd, time, context);
-      // Restore canvas
-      skCanvas->restore();
-      skCanvas->flush();
-    }
+    drawInCanvas(_jsiCanvas, width, height, time);
+    _jsiCanvas->setCanvas(nullptr);
+    
   } catch (const jsi::JSError &err) {
     _drawCallback = nullptr;
     return _platformContext->raiseError(err);
@@ -162,7 +162,30 @@ void RNSkDrawView::drawInSurface(sk_sp<SkSurface> surface, int width,
   } catch (...) {
     _drawCallback = nullptr;
     return _platformContext->raiseError(
-        "An error occured while rendering the Skia View.");
+        "An error occurred while rendering the Skia View.");
+  }
+}
+
+sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
+  // Assert width/height
+  if(_lastWidth == -1 || _lastHeight == -1) {
+    return nullptr;
+  }
+  auto surface = SkSurface::MakeRasterN32Premul(_lastWidth, _lastHeight);
+  auto canvas = surface->getCanvas();
+  auto jsiCanvas = std::make_shared<JsiSkCanvas>(_platformContext);
+  jsiCanvas->setCanvas(canvas);
+  
+  milliseconds ms = duration_cast<milliseconds>(
+      system_clock::now().time_since_epoch());
+  
+  drawInCanvas(jsiCanvas, _lastWidth, _lastHeight, ms.count() / 1000);
+  
+  if(bounds != nullptr) {
+    SkIRect b = SkIRect::MakeXYWH(bounds->x(), bounds->y(), bounds->width(), bounds->height());
+    return surface->makeImageSnapshot(b);
+  } else {
+    return surface->makeImageSnapshot();
   }
 }
 
@@ -173,49 +196,50 @@ void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
   }
 }
 
+void RNSkDrawView::performDraw() {
+  if(isValid()) {
+    // Calculate milliseconds since start
+    milliseconds ms = duration_cast<milliseconds>(
+        system_clock::now().time_since_epoch());
+    
+    // Call draw frame method in sub class
+    drawFrame(ms.count() / 1000.0);
+    
+    // Unlock the drawing lock
+    _isDrawing->unlock();
+    
+    // Should we request a new redraw?
+    if(_drawingMode != RNSkDrawingMode::Continuous && _redrawRequestCounter > 0) {
+      _redrawRequestCounter = 0;
+      requestRedraw();
+    }
+  } else {
+    _isDrawing->unlock();
+  }
+}
+
 void RNSkDrawView::requestRedraw() {
   if (!isReadyToDraw()) {
+    return;
+  }
+  
+  // If we are in continuous mode, we can just start the drawing loop
+  if (_drawingMode == RNSkDrawingMode::Continuous) {
+    beginDrawingLoop();
+    return;
+  }
+  
+  // Check if we are already in a draw
+  if(!_isDrawing->try_lock()) {
     _redrawRequestCounter++;
     return;
   }
   
-  _isDrawing = true;
-  
-  auto performDraw = [this]() {
-    if(getIsRemoved()) {
-      RNSkLogger::logToConsole("Warning: Trying to redraw after delete!");
-      _isDrawing = false;
-      return;
-    }
-
-    if (_drawingMode == RNSkDrawingMode::Continuous) {
-      _isDrawing = false;
-      beginDrawingLoop();
-      return;
-    }
-    
-    milliseconds ms = std::chrono::duration_cast<milliseconds>(
-        system_clock::now().time_since_epoch());
-
-    drawFrame(ms.count() / 1000.0);
-
-    _isDrawing = false;
-
-    if(_redrawRequestCounter > 0) {
-      _redrawRequestCounter = 0;
-      requestRedraw();
-    }
-  };
-
-  _platformContext->runOnJavascriptThread(performDraw);
+  _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
 }
 
 bool RNSkDrawView::isReadyToDraw() {
-  if (_isDrawing) {
-    return false;
-  }
-
-  if(getIsRemoved()) {
+  if(!isValid()) {
     return false;
   }
 
@@ -233,58 +257,40 @@ bool RNSkDrawView::isReadyToDraw() {
 }
 
 void RNSkDrawView::beginDrawingLoop() {
-  if(getIsRemoved()) {
+  if(!isValid()) {
     return;
   }
 
-  if (_drawingLoopId != -1) {
+  if (_drawingLoopId != 0 || _nativeId == 0) {
     return;
   }
   
   // Set to zero to avoid calling beginDrawLoop before we return
-  _drawingLoopId = 0;
   _drawingLoopId =
       _platformContext->beginDrawLoop(_nativeId, [this]() {
-        auto performDraw = [&]() {
-          if(getIsRemoved()) {
-            return;
-          }
-
-          milliseconds ms = std::chrono::duration_cast<milliseconds>(
-              system_clock::now().time_since_epoch());
-
-          // Only redraw if view is still alive
-          drawFrame(ms.count() / 1000.0);
-
-          _isDrawing = false;
-        };
-
-        if (!isReadyToDraw()) {
-          return;
+        if(_isDrawing->try_lock()) {
+          _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
         }
-
-        _isDrawing = true;
-        _platformContext->runOnJavascriptThread(performDraw);
       });
 }
 
 void RNSkDrawView::endDrawingLoop() {
-  _platformContext->endDrawLoop(_nativeId);
-  _drawingLoopId = -1;
+  if(_drawingLoopId != 0) {
+    _drawingLoopId = 0;
+    _platformContext->endDrawLoop(_nativeId);
+  }
 }
 
 void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
-  if(getIsRemoved()) {
+  if(!isValid() || mode == _drawingMode || _nativeId == 0) {
     return;
   }
-  if(mode != _drawingMode) {
-    _drawingMode = mode;
-    if(mode == RNSkDrawingMode::Default) {
-      endDrawingLoop();
-    } else {
-      beginDrawingLoop();
-      requestRedraw();
-    }
+  _drawingMode = mode;
+  if(mode == RNSkDrawingMode::Default) {
+    endDrawingLoop();
+  } else {
+    beginDrawingLoop();
+    requestRedraw();
   }
 }
 

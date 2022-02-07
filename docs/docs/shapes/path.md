@@ -12,6 +12,7 @@ In Skia, paths are semantically identical to [SVG Paths](https://developer.mozil
 | path      | `IPath` or `string` | Path to draw. Can be a string using the [SVG Path notation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#line_commands) or an object created with `Skia.Path.Make()`. |
 | start     | `number` | Trims the start of the path. Value is in the range `[0, 1]` (default is 0). |
 | end       | `number` | Trims the end of the path. Value is in the range `[0, 1]` (default is 1). |
+| stroke    | `StrokeOptions` | Turns this path into the filled equivalent of the stroked path. This will fail if the path is a hairline. `StrokeOptions` describes how the stroked path should look. It contains three properties: `width`, `strokeMiterlimit` and, `precision` |
 
 ### Using SVG Notation
 
