@@ -31,5 +31,8 @@ jobs:
       - name: Install root node dependencies
         run: yarn
 
-      - name: Lint typescript code
+      - name: Lint TypeScript code
         run: yarn lint-ts
+
+      - name: Check TypeScript code
+        run: yarn tsc
