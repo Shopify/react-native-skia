@@ -12,13 +12,13 @@ It will use cubic sampling.
 
 | Name       | Type           |  Description                       |
 |:-----------|:---------------|:-----------------------------------|
-| source      | `ReturnType<typeof require>` | Source of the image |
-| tx?         | `TileMode`   | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
-| ty?         | `TileMode`   | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
-| fm?         | `FilterMode` | Can be `linear` or `nearest`. |
-| mm?         | `MipmapMode` | Can be `none`, `linear` or `nearest`. |
-| fit?        | `Fit` | Calculate the transformation matrix to fit the rectangle defined by `fitRect`. See [images](images). |
-| rect?     | `IRect` | The destination reactangle to calculate the transformation matrix via the `fit` property. |
+| image      | `IImage`       | Image instance. |
+| tx?        | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
+| ty?        | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
+| fm?        | `FilterMode`.  | Can be `linear` or `nearest`. |
+| mm?        | `MipmapMode`   | Can be `none`, `linear` or `nearest`. |
+| fit?       | `Fit`.         | Calculate the transformation matrix to fit the rectangle defined by `fitRect`. See [images](images). |
+| rect?      | `IRect`        | The destination reactangle to calculate the transformation matrix via the `fit` property. |
 | transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
 ### Example
@@ -30,14 +30,19 @@ import {
   ImageShader,
   Skia,
   Shader,
+  useImage
 } from "@shopify/react-native-skia";
 
 const ImageShaderDemo = () => {
+  const image = useImage(require("../../assets/oslo.jpg"));
+  if (image === null) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
         <ImageShader
-          source={require("../../assets/oslo.jpg")}
+          image={image}
           fit="cover"
           rect={{ x: 0, y: 0, width: 256, height: 256 }}
         />

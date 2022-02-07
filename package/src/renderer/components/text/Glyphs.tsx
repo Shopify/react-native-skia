@@ -2,19 +2,21 @@ import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
-import type { IPoint, IFont } from "../../../skia";
+import type { IPoint } from "../../../skia";
+import type { FontDef } from "../../processors/Font";
+import { processFont } from "../../processors/Font";
 
 export interface Glyph {
   id: number;
   pos: IPoint;
 }
 
-export interface GlyphsProps extends CustomPaintProps {
-  x: number;
-  y: number;
-  glyphs: Glyph[];
-  font: IFont;
-}
+export type GlyphsProps = CustomPaintProps &
+  FontDef & {
+    x: number;
+    y: number;
+    glyphs: Glyph[];
+  };
 
 interface ProcessedGlyphs {
   glyphs: number[];
@@ -24,7 +26,8 @@ interface ProcessedGlyphs {
 export const Glyphs = (props: AnimatedProps<GlyphsProps>) => {
   const onDraw = useDrawing(
     props,
-    ({ canvas, paint }, { glyphs: rawGlyphs, x, y, font }) => {
+    ({ canvas, paint, fontMgr }, { glyphs: rawGlyphs, x, y, ...fontDef }) => {
+      const font = processFont(fontMgr, fontDef);
       const { glyphs, positions } = rawGlyphs.reduce<ProcessedGlyphs>(
         (acc, glyph) => {
           const { id, pos } = glyph;
