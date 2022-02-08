@@ -7,6 +7,7 @@ import type { IValue } from "../types";
  * @param v Value to hold
  * @returns A Value of type of v
  */
-export const useValueEx = <T>(v: T): IValue<T> => {
-  return useMemo(() => global.SkiaValueApi.createValue(v), [v]);
+export const useValue = <T>(v: T): IValue<T> => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => global.SkiaValueApi.createValue(v), []);
 };

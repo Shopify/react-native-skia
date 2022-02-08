@@ -1,5 +1,7 @@
 import type { IPath } from "@shopify/react-native-skia";
 import {
+  useDerivedValue,
+  useValue,
   Line,
   Canvas,
   Circle,
@@ -8,7 +10,6 @@ import {
   Paint,
   Path,
   useTouchHandler,
-  useValue,
   Text as SkiaText,
   vec,
 } from "@shopify/react-native-skia";
@@ -33,6 +34,16 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
       (touchPos.value = getPointAtPositionInPath(x, width, 60, path)),
   });
 
+  const label = useDerivedValue(
+    (p) => "$ " + (p ? (p.y * -1).toFixed(2) : "-"),
+    [touchPos]
+  );
+
+  const textX = useDerivedValue((t) => t.x - 24, [touchPos]);
+  const textY = useDerivedValue((t) => t.y - 18, [touchPos]);
+  const lineP1 = useDerivedValue((t) => vec(t.x, t.y + 14), [touchPos]);
+  const lineP2 = useDerivedValue((t) => vec(t.x, height), [touchPos]);
+
   return (
     <View style={{ height, marginBottom: 10 }}>
       <Canvas style={styles.graph} onTouch={touchHandler}>
@@ -52,19 +63,16 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
           strokeCap="round"
         />
         <Paint color="#fff" />
-        <Circle c={() => touchPos.value} r={10} />
-        <Circle color="#DA4167" c={() => touchPos.value} r={7.5} />
+        <Circle c={touchPos} r={10} />
+        <Circle color="#DA4167" c={touchPos} r={7.5} />
         <SkiaText
           familyName="Arial"
           size={12}
-          x={() => touchPos.value.x - 24}
-          y={() => touchPos.value.y - 18}
-          value={() => "$ " + (touchPos.value.y * -1).toFixed(2)}
+          x={textX}
+          y={textY}
+          value={label}
         />
-        <Line
-          p1={() => vec(touchPos.value.x, touchPos.value.y + 14)}
-          p2={() => vec(touchPos.value.x, height)}
-        />
+        <Line p1={lineP1} p2={lineP2} />
       </Canvas>
       <Text>Touch and drag to move center point</Text>
     </View>

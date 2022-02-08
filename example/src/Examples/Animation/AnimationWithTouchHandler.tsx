@@ -2,11 +2,11 @@ import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import {
   Canvas,
+  runSpring,
   Spring,
   useTouchHandler,
   useValue,
 } from "@shopify/react-native-skia";
-import { runSpring } from "@shopify/react-native-skia/src/animation/Animation/functions";
 
 import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
 
@@ -30,7 +30,7 @@ export const AnimationWithTouchHandler = () => {
   return (
     <AnimationDemo title={"Animation with touch handler."}>
       <Canvas style={styles.canvas} onTouch={touchHandler}>
-        <AnimationElement x={() => translateX.value} />
+        <AnimationElement x={translateX} />
       </Canvas>
     </AnimationDemo>
   );

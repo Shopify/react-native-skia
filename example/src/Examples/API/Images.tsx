@@ -1,7 +1,6 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
-import { Canvas, Image, Rect } from "@shopify/react-native-skia";
-import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
+import { useImage, Canvas, Image, Rect } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
 

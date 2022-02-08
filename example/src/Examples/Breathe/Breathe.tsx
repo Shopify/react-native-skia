@@ -1,7 +1,9 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
-import type { AnimationValue } from "@shopify/react-native-skia";
+import type { IReadonlyValue } from "@shopify/react-native-skia";
 import {
+  useDerivedValue,
+  useTiming,
   BlurMask,
   vec,
   Canvas,
@@ -12,7 +14,6 @@ import {
   polar2Canvas,
   Easing,
   mix,
-  useLoop,
 } from "@shopify/react-native-skia";
 
 const { width, height } = Dimensions.get("window");
@@ -23,19 +24,19 @@ const center = vec(width / 2, height / 2 - 64);
 
 interface RingProps {
   index: number;
-  progress: AnimationValue<number>;
+  progress: IReadonlyValue<number>;
 }
 
 const Ring = ({ index, progress }: RingProps) => {
   const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useCallback(() => {
-    const { x, y } = polar2Canvas(
-      { theta, radius: progress.value * R },
-      { x: 0, y: 0 }
-    );
-    const scale = mix(progress.value, 0.3, 1);
-    return [{ translateX: x }, { translateY: y }, { scale }];
-  }, [progress.value, theta]);
+  const transform = useDerivedValue(
+    (p) => {
+      const { x, y } = polar2Canvas({ theta, radius: p * R }, { x: 0, y: 0 });
+      const scale = mix(p, 0.3, 1);
+      return [{ translateX: x }, { translateY: y }, { scale }];
+    },
+    [progress]
+  );
 
   return (
     <Group origin={center} transform={transform}>
@@ -45,12 +46,17 @@ const Ring = ({ index, progress }: RingProps) => {
 };
 
 export const Breathe = () => {
-  const progress = useLoop(
+  const progress = useTiming(
     {
-      duration: 3000,
-      easing: Easing.inOut(Easing.ease),
+      yoyo: true,
+      loop: true,
     },
-    { yoyo: true }
+    { duration: 3000, easing: Easing.inOut(Easing.ease) }
+  );
+
+  const transform = useDerivedValue(
+    (p) => [{ rotate: mix(p, -Math.PI, 0) }],
+    [progress]
   );
 
   return (
@@ -59,10 +65,7 @@ export const Breathe = () => {
         <BlurMask style="solid" sigma={40} />
       </Paint>
       <Fill color="rgb(36,43,56)" />
-      <Group
-        origin={center}
-        transform={() => [{ rotate: mix(progress.value, -Math.PI, 0) }]}
-      >
+      <Group origin={center} transform={transform}>
         {new Array(6).fill(0).map((_, index) => {
           return <Ring key={index} index={index} progress={progress} />;
         })}

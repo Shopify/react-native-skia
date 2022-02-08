@@ -4,6 +4,11 @@ export interface IReadonlyValue<T = number> {
    */
   readonly value: T;
   /**
+   * Adds a listener that is called when value changes.
+   * Returns unsubscribe method.
+   */
+  addListener: (cb: (value: T) => void) => () => void;
+  /**
    * Field to make typechecking easier
    */
   __typename__: "RNSkValue";
@@ -14,6 +19,21 @@ export interface IValue<T = number> extends IReadonlyValue<T> {
    * Get/sets the value hold by the Value object
    */
   value: T;
+  /**
+   * Adds another value as the driver of this value. When the driver
+   * value change, this value will be updated with either the value of the
+   * dependant value, or if the cb parameter is provided, the result of the
+   * callback. To remove a dependency, just call addDependency with an undefined
+   * value.
+   */
+  setDriver: <DepT>(
+    value: IReadonlyValue<DepT> | undefined,
+    cb?: (v: DepT) => T
+  ) => void;
+  /**
+   * Returns the current dependency of this value.
+   */
+  getDriver: () => IReadonlyValue<T> | undefined;
 }
 
 export interface IAnimationValue extends IReadonlyValue<number> {
@@ -57,8 +77,9 @@ export interface ISkiaValueApi {
   /**
    * Creates an animated value that will update its value every frame redraw with
    * the current number of milliseconds since it was started.
+   * @param immediate If true, the value start running immediately
    */
-  createAnimationValue: (startRunning?: boolean) => IAnimationValue;
+  createAnimationValue: (immediate?: boolean) => IAnimationValue;
 }
 
 declare global {

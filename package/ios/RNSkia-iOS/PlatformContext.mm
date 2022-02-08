@@ -44,7 +44,7 @@ void PlatformContext::stopDrawLoop() {
   if(_displayLink != nullptr) {
     [_displayLink stop];
     _displayLink = nullptr;
-  }
+  }  
 }
 
 }

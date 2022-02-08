@@ -1,13 +1,6 @@
-import { Color } from "../../skia/Color";
-import type { ColorProp } from "../../renderer/processors/Colors";
-import {
-  red,
-  green,
-  blue,
-  alphaf,
-  rgbaColor,
-} from "../../renderer/processors/Colors";
-import { mix } from "../../renderer/processors/math/Math";
+import type { ColorProp } from "../../../renderer";
+import { alphaf, blue, green, mix, red, rgbaColor } from "../../../renderer";
+import { Color } from "../../../skia/Color";
 
 import { interpolate } from "./interpolate";
 

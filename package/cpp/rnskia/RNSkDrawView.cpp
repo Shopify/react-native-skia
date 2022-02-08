@@ -36,7 +36,7 @@ RNSkDrawView::~RNSkDrawView() {
   invalidate();
   
   // Wait for the drawing lock (if set)
-  if(!_isDrawing->try_lock_for(system_clock::now().time_since_epoch() + milliseconds(500))) {
+  if(!_isDrawing->try_lock_for(milliseconds(500))) {
     RNSkLogger::logToConsole("Failed to delete since drawing is still locked for native view with id %i", _nativeId);
   }
   
@@ -246,15 +246,16 @@ void RNSkDrawView::beginDrawingLoop() {
   }
   
   // Set to zero to avoid calling beginDrawLoop before we return
-  _drawingLoopId = _platformContext->beginDrawLoop(_nativeId,
-                                                   std::bind(&RNSkDrawView::drawLoopCallback, this));
+  _drawingLoopId = _platformContext->beginDrawLoop(
+    _nativeId, std::bind(&RNSkDrawView::drawLoopCallback, this));
 }
 
 void RNSkDrawView::drawLoopCallback() {
   if(_redrawRequestCounter > 0 || _drawingMode == RNSkDrawingMode::Continuous) {
     if(_isDrawing->try_lock()) {
       _redrawRequestCounter = 0;
-      _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
+      _platformContext->runOnJavascriptThread(
+        std::bind(&RNSkDrawView::performDraw, this));
     }
   }
 }

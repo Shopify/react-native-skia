@@ -88,7 +88,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       () => skiaReconciler.createContainer(tree, 0, false, null),
       [tree]
     );
-    // Add subscription to child properties
+    // Add subscription to values in all child properties
     useEffect(() => {
       const subscriptions: Array<() => void> = [];
       const enumChildren = (c: React.ReactNode) => {

@@ -6,7 +6,6 @@ export * from "./Filters";
 export * from "./Gooey";
 export * from "./Matrix";
 export * from "./Graphs";
-export * from "./Playground";
 export * from "./API";
 export * from "./Breathe";
 export * from "./Filters";

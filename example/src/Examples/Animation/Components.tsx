@@ -1,16 +1,16 @@
-import { Rect } from "@shopify/react-native-skia";
-import type { DrawingContext } from "@shopify/react-native-skia/src/renderer/DrawingContext";
 import React from "react";
+import type { IReadonlyValue } from "@shopify/react-native-skia";
+import { Rect } from "@shopify/react-native-skia";
 import { StyleSheet, Text, View } from "react-native";
 
 export const Size = 20;
 export const Padding = 10;
 
 export const AnimationElement: React.FC<{
-  x: number | ((ctx: DrawingContext) => number);
-  y?: number | ((ctx: DrawingContext) => number);
-  w?: number | ((ctx: DrawingContext) => number);
-  h?: number | ((ctx: DrawingContext) => number);
+  x: number | IReadonlyValue<number>;
+  y?: number | IReadonlyValue<number>;
+  w?: number | IReadonlyValue<number>;
+  h?: number | IReadonlyValue<number>;
   color?: string | number;
 }> = ({ x, y, w, h, color = "#7FC8A9" }) => {
   return (

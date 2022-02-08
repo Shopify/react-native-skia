@@ -14,7 +14,6 @@ import {
   GraphsScreen,
   Hue,
   Matrix,
-  PlaygroundScreen,
 } from "./Examples";
 import { HomeScreen } from "./Home";
 
@@ -55,7 +54,6 @@ const App = () => {
           <Stack.Screen name="Drawing" component={DrawingExample} />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
-          <Stack.Screen name="Playground" component={PlaygroundScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </>

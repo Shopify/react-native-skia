@@ -5,9 +5,9 @@ import { AnimationWithTouchHandler } from "./AnimationWithTouchHandler";
 import { InterpolationWithSpring } from "./InterplationWithSpring";
 import { InterpolatingValueOverTime } from "./InterpolationOverTime";
 import { InterpolationWithEasing } from "./InterpolationWithEasing";
-import { SimpleTimelineAnimation } from "./SimpleTimelineAnimation";
+//import { SimpleTimelineAnimation } from "./SimpleTimelineAnimation";
 import { SimpleValueOverTime } from "./SimpleValueOverTime";
-import { StaggeredTimelineAnimation } from "./StaggeredTimelineAnimation";
+//import { StaggeredTimelineAnimation } from "./StaggeredTimelineAnimation";
 
 export const AnimationExample: React.FC = () => {
   return (
@@ -17,8 +17,8 @@ export const AnimationExample: React.FC = () => {
       <InterpolationWithEasing />
       <InterpolationWithSpring />
       <AnimationWithTouchHandler />
-      <SimpleTimelineAnimation />
-      <StaggeredTimelineAnimation />
+      {/* <SimpleTimelineAnimation /> */}
+      {/* <StaggeredTimelineAnimation /> */}
     </ScrollView>
   );
 };

@@ -112,9 +112,13 @@ public:
    */
   size_t beginDrawLoop(size_t nativeId, std::function<void(void)> callback) {
     if(!_isValid) { return 0; }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    _drawCallbacks.emplace(nativeId, std::move(callback));
-    if (_drawCallbacks.size() == 1) {
+    auto shouldStart = false;
+    {
+      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+      _drawCallbacks.emplace(nativeId, std::move(callback));
+      shouldStart = _drawCallbacks.size() == 1;
+    }
+    if (shouldStart) {
       // Start
       startDrawLoop();
     }
@@ -128,11 +132,15 @@ public:
    */
   void endDrawLoop(size_t nativeId) {
     if(!_isValid) { return; }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    if (_drawCallbacks.count(nativeId) > 0) {
-      _drawCallbacks.erase(nativeId);
+    auto shouldStop = false;
+    {
+      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+      if (_drawCallbacks.count(nativeId) > 0) {
+        _drawCallbacks.erase(nativeId);
+      }
+      shouldStop = _drawCallbacks.size() == 0;
     }
-    if (_drawCallbacks.size() == 0) {
+    if (shouldStop) {
       stopDrawLoop();
     }
   }
@@ -142,10 +150,14 @@ public:
    */
   void notifyDrawLoop() {
     if(!_isValid) { return; }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
-      it->second();
+    std::map<size_t, std::function<void()>> tmp;
+    {
+      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+      tmp.insert(_drawCallbacks.begin(), _drawCallbacks.end());      
     }
+    for (auto it = tmp.begin(); it != tmp.end(); it++) {
+      it->second();
+    }    
   }
 
   virtual void startDrawLoop() = 0;
