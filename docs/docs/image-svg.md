@@ -11,9 +11,9 @@ If the root dimensions are in absolute units, then the with/height properties ha
 
 | Name      | Type      |  Description                                                  |
 |:----------|:----------|:--------------------------------------------------------------|
-| source    | `require` or `string` | Source of the SVG or an HTTP(s) URL. |
-| width?     | `number`  | Width of the destination image. This is used to resolve the initial viewport when the root SVG width is specified in relative units. |
-| height?    | `number`  | Height of the destination image. This is used to resolve the initial viewport when the root SVG height is specified in relative units.                              |
+| svg.      | `SVG` | SVG Image. |
+| width?    | `number`  | Width of the destination image. This is used to resolve the initial viewport when the root SVG width is specified in relative units. |
+| height?   | `number`  | Height of the destination image. This is used to resolve the initial viewport when the root SVG height is specified in relative units.                              |
 
 
 ### Example
@@ -27,13 +27,15 @@ import {
 
 const ImageSVGDemo = () => {
   // Alternatively, you can pass an image URL directly
-  // for instance: const source = useSVG("https://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg");
-  const source = useSVG(require("../../assets/tiger.svg"));
+  // for instance: const svg = useSVG("https://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg");
+  const svg = useSVG(require("../../assets/tiger.svg"));
   return (
     <Canvas style={{ flex: 1 }}>
-      { source && (
+      { svg && (
         <ImageSVG
-          source={source}
+          svg={svg}
+          x={0}
+          y={0}
           width={256}
           height={256}
         />)
@@ -59,7 +61,7 @@ export const SVG = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <ImageSVG
-        source={svg}
+        svg={svg}
         x={0}
         y={0}
         width={290}

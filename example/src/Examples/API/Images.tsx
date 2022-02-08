@@ -48,7 +48,7 @@ export const Images = () => {
                     color="lightblue"
                   />
                   <Image
-                    source={oslo}
+                    image={oslo}
                     x={x}
                     y={y}
                     width={width}

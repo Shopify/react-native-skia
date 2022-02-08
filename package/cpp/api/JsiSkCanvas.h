@@ -285,7 +285,7 @@ public:
     }
 
     auto paint = count >= 4 ? JsiSkPaint::fromValue(runtime, arguments[4]) : nullptr;
-    auto blendMode = (SkBlendMode)arguments[3].asNumber();
+    auto blendMode = static_cast<SkBlendMode>(arguments[3].asNumber());
     _canvas->drawPatch(cubics.data(), colors.data(), texs.data(), blendMode, *paint);
     return jsi::Value::undefined();
   }
@@ -409,7 +409,7 @@ public:
     if (count == 1) {
       _canvas->drawColor(cl);
     } else {
-      auto mode = (SkBlendMode)arguments[1].asNumber();
+      auto mode = static_cast<SkBlendMode>(arguments[1].asNumber());
       _canvas->drawColor(cl, mode);
     }
     return jsi::Value::undefined();

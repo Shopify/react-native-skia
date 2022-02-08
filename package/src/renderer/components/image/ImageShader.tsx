@@ -1,18 +1,19 @@
-import React, { useMemo } from "react";
+import React from "react";
 
-import type { IRect } from "../../../skia";
-import { useImage, TileMode, FilterMode, MipmapMode } from "../../../skia";
+import type { IRect, IImage } from "../../../skia";
+import { TileMode, FilterMode, MipmapMode } from "../../../skia";
 import { useDeclaration } from "../../nodes";
 import type { TransformProps, SkEnum, AnimatedProps } from "../../processors";
 import { localMatrix, enumKey } from "../../processors";
 import type { RectCtor } from "../../processors/Shapes";
 import { rect } from "../../processors/Shapes";
 
-import type { SourceProps } from "./Image";
 import type { Fit } from "./BoxFit";
 import { rect2rect, fitRects } from "./BoxFit";
 
-const getRect = (props: Partial<ImageShaderProps>): IRect | undefined => {
+const getRect = (
+  props: Omit<ImageShaderProps, "tx" | "ty" | "fm" | "mm" | "fit" | "image">
+): IRect | undefined => {
   const { x, y, width, height } = props;
   if (props.rect) {
     return props.rect;
@@ -35,22 +36,13 @@ interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   mm: SkEnum<typeof MipmapMode>;
   fit: Fit;
   rect?: IRect;
+  image: IImage;
 }
 
-export const ImageShader = (
-  defaultProps: AnimatedProps<ImageShaderProps> & SourceProps
-) => {
-  const image = useImage(defaultProps.source);
-  const props = useMemo(
-    () => ({ ...defaultProps, image }),
-    [defaultProps, image]
-  );
+export const ImageShader = (props: AnimatedProps<ImageShaderProps>) => {
   const declaration = useDeclaration(
     props,
-    ({ tx, ty, fm, mm, fit, ...imageShaderProps }) => {
-      if (image === null) {
-        return null;
-      }
+    ({ tx, ty, fm, mm, fit, image, ...imageShaderProps }) => {
       const rct = getRect(imageShaderProps);
       if (rct) {
         const rects = fitRects(

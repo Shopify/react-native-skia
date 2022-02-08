@@ -8,13 +8,13 @@ import type { AnimatedProps } from "../../processors";
 import { composeColorFilter } from "./Compose";
 
 interface ColorMatrixProps {
-  value: number[];
+  matrix: number[];
   children?: ReactNode | ReactNode[];
 }
 
 export const ColorMatrix = (props: AnimatedProps<ColorMatrixProps>) => {
-  const declaration = useDeclaration(props, ({ value }, children) => {
-    const cf = Skia.ColorFilter.MakeMatrix(value);
+  const declaration = useDeclaration(props, ({ matrix }, children) => {
+    const cf = Skia.ColorFilter.MakeMatrix(matrix);
     return composeColorFilter(cf, children);
   });
   return <skDeclaration declaration={declaration} {...props} />;
