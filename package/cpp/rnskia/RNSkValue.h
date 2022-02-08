@@ -275,17 +275,9 @@ private:
     if(_deleting->try_lock()) {
       _deleting->unlock();
 
-      std::mutex mu;
-      std::condition_variable cond;
-      
-      std::unique_lock<std::mutex> lock(mu);
-      
       // Ensure we call any updates from the draw loop on the javascript thread
       getPlatformContext()->runOnJavascriptThread(
-        [this, &cond, &mu, deleting](){
-          
-        std::lock_guard<std::mutex> lock(mu);
-        
+        [this, deleting](){
         // Avoid calling update if the dtor was started
         if(deleting->try_lock()) {
           auto now = std::chrono::high_resolution_clock::now();
@@ -293,11 +285,7 @@ private:
           update(_runtime, static_cast<double>(deltaFromStart));
           deleting->unlock();
         }
-        
-        cond.notify_one();
       });
-    
-      cond.wait_for(lock, milliseconds(500));
     };
   }
 
