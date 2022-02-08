@@ -27,7 +27,6 @@ import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
 import { vec, isAnimationValue } from "./processors";
-import { popDrawingContext, pushDrawingContext } from "./CanvasProvider";
 import type { DrawingContext } from "./DrawingContext";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
@@ -145,9 +144,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? Skia.FontMgr.RefDefault(),
         };
-        pushDrawingContext(ctx);
         tree.draw(ctx, tree.props, tree.children);
-        popDrawingContext();
       },
       [tick, onTouch]
     );
