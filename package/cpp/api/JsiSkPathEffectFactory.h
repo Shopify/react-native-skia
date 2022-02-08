@@ -85,7 +85,6 @@ public:
   JSI_HOST_FUNCTION(MakePath2D) {
     auto matrix = JsiSkMatrix::fromValue(runtime, arguments[0]);
     auto path = JsiSkPath::fromValue(runtime, arguments[1]);
-
     return jsi::Object::createFromHostObject(
             runtime, std::make_shared<JsiSkPathEffect>(
                     getContext(),  SkPath2DPathEffect::Make(*matrix, *path)));
