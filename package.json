@@ -9,8 +9,6 @@
   "devDependencies": {
     "@types/node": "^16.11.7",
     "clang-format": "^1.6.0",
-    "eslint": "7.32.0",
-    "eslint-config-react-native-wcandillon": "^3.7.2",
     "rimraf": "^3.0.2",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
@@ -30,12 +28,6 @@
     "build": "yarn build-skia && yarn copy-skia-headers",
     "precommit": "yarn lint-java && yarn clang-format",
     "lint-java": "node ./scripts/lint-java.js",
-    "lint-ts-package": "cd package; yarn lint",
-    "lint-ts-example": "cd example; yarn lint",
-    "lint-ts": "yarn lint-ts-example && yarn lint-ts-package",
-    "tsc-package": "cd package; yarn tsc",
-    "tsc-example": "cd example; yarn tsc",
-    "tsc": "yarn tsc-example && yarn tsc-package",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
     "clang-format-ios": "find package/ios/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
     "clang-format-android": "find package/android/src/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
