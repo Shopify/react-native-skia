@@ -1,5 +1,5 @@
-import { Skia } from "../../../skia";
 import { exhaustiveCheck } from "../../typeddash";
+import type { IMatrix } from "../../../skia/Matrix";
 
 export type Vec3 = readonly [number, number, number];
 
@@ -105,24 +105,18 @@ export const multiply3 = (m1: Matrix3, m2: Matrix3) => {
   ] as const;
 };
 
-export const transformSvg = (transform: Transforms2d) =>
-  serializeToSVG(processTransform2d(transform));
-
-export const serializeToSVG = (m: Matrix3) =>
-  `matrix(${m[0][0]}, ${m[1][0]}, ${m[0][1]}, ${m[1][1]}, ${m[0][2]}, ${m[1][2]})`;
-
-export const skiaMatrix3 = (m: Matrix3) => {
-  const r = Skia.Matrix();
-  r.set(0, m[0][0]);
-  r.set(1, m[0][1]);
-  r.set(2, m[0][2]);
-  r.set(3, m[1][0]);
-  r.set(4, m[1][1]);
-  r.set(5, m[1][2]);
-  r.set(6, m[2][0]);
-  r.set(7, m[2][1]);
-  r.set(8, m[2][2]);
-  return r;
+export const skiaMatrix3 = (m: Matrix3): IMatrix => {
+  return [
+    m[0][0],
+    m[0][1],
+    m[0][2],
+    m[1][0],
+    m[1][1],
+    m[1][2],
+    m[2][0],
+    m[2][1],
+    m[2][2],
+  ];
 };
 
 export const processTransform2d = (transforms: Transforms2d) =>

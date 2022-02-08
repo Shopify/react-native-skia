@@ -1,25 +1,29 @@
 import type { DrawingContext } from "../DrawingContext";
+import type { IMatrix } from "../../skia/Matrix";
 
 import { neg, skiaMatrix3, processTransform2d } from "./math";
 import type { Transforms2d, Vector } from "./math";
 
-// TODO: 1. Add support for supplying the matrix directly
-// TODO: 2. Add direct constructor of the matrix via jsiskmatrix::fromValue
 export interface TransformProps {
   transform?: Transforms2d;
   origin?: Vector;
+  matrix?: IMatrix;
 }
 
 export const processTransform = (
   { canvas }: DrawingContext,
-  { transform, origin }: TransformProps
+  { transform, origin, matrix }: TransformProps
 ) => {
   if (transform) {
-    const m3 = processTransform2d(
-      origin ? transformOrigin(origin, transform) : transform
-    );
-    const sm = skiaMatrix3(m3);
-    canvas.concat(sm);
+    if (matrix) {
+      canvas.concat(matrix);
+    } else {
+      const m3 = processTransform2d(
+        origin ? transformOrigin(origin, transform) : transform
+      );
+      const sm = skiaMatrix3(m3);
+      canvas.concat(sm);
+    }
   }
 };
 
