@@ -3,7 +3,7 @@ import { Dimensions, StyleSheet } from "react-native";
 import type { IReadonlyValue } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
-  useTiming,
+  useLoop,
   BlurMask,
   vec,
   Canvas,
@@ -46,13 +46,10 @@ const Ring = ({ index, progress }: RingProps) => {
 };
 
 export const Breathe = () => {
-  const progress = useTiming(
-    {
-      yoyo: true,
-      loop: true,
-    },
-    { duration: 3000, easing: Easing.inOut(Easing.ease) }
-  );
+  const progress = useLoop({
+    duration: 3000,
+    easing: Easing.inOut(Easing.ease),
+  });
 
   const transform = useDerivedValue(
     (p) => [{ rotate: mix(p, -Math.PI, 0) }],

@@ -7,6 +7,7 @@ import { useValue } from "../hooks";
 import { getResolvedParams } from "./params";
 import type { AnimationParams, TimingConfig, SpringConfig } from "./types";
 import { internalRunTiming } from "./run";
+import { Spring } from "./Spring";
 
 /**
  * Creats a timing based animation value that will run whenever
@@ -30,7 +31,23 @@ export const useTiming = (
 export const useSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): IValue<number> => useInternalTiming(toOrParams, config);
+): IValue<number> =>
+  useInternalTiming(toOrParams, config ?? Spring.Config.Default);
+
+/**
+ * Configures a looped timing value. The value will go back and forth
+ * between 0 and 1 and back.
+ * @param config Timing configuration for easing and duration
+ * @returns A value that can be used for further animations
+ */
+export const useLoop = (config?: TimingConfig) =>
+  useTiming(
+    {
+      yoyo: true,
+      loop: true,
+    },
+    config
+  );
 
 /**
  * Creats an animation value that will run whenever
