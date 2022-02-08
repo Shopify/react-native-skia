@@ -4,23 +4,23 @@ import type { ReactNode } from "react";
 import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { Path1DEffectStyle, isPathEffect } from "../../../skia/PathEffect";
-import type { IPath } from "../../../skia/Path/Path";
-import { enumKey } from "../../processors/Paint";
+import { isPathEffect } from "../../../skia/PathEffect";
 import type { Matrix } from "../../../skia/Matrix";
+import type { PathDef } from "../../processors/Paths";
+import { processPath } from "../../processors/Paths";
 
-export interface Path1DPathEffectProps {
+export interface Path2DPathEffectProps {
   children?: ReactNode | ReactNode[];
-  path: IPath | string;
   matrix: Matrix;
+  path: PathDef;
 }
 
-export const Path1DPathEffect = (
-  props: AnimatedProps<Path1DPathEffectProps>
+export const Path2DPathEffect = (
+  props: AnimatedProps<Path2DPathEffectProps>
 ) => {
   const declaration = useDeclaration(props, ({ path, matrix }, children) => {
     const [child] = children.filter(isPathEffect);
-    const pe = Skia.PathEffect.MakePath2D(matrix, path);
+    const pe = Skia.PathEffect.MakePath2D(matrix, processPath(path));
     if (child) {
       if (!pe) {
         return child;
