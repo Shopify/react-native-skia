@@ -10,7 +10,7 @@ const DefaultParameters = {
 };
 
 const DefaultTimingConfig = {
-  duration: 350,
+  duration: 1000,
   easing: (t: number) => t,
 };
 
