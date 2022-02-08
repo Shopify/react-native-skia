@@ -1,7 +1,7 @@
 import type { DrawingContext } from "../DrawingContext";
 import type { IMatrix } from "../../skia/Matrix";
 
-import { neg, skiaMatrix3, processTransform2d } from "./math";
+import { neg, processTransform2d } from "./math";
 import type { Transforms2d, Vector } from "./math";
 
 export interface TransformProps {
@@ -21,18 +21,16 @@ export const processTransform = (
       const m3 = processTransform2d(
         origin ? transformOrigin(origin, transform) : transform
       );
-      const sm = skiaMatrix3(m3);
-      canvas.concat(sm);
+      canvas.concat(m3);
     }
   }
 };
 
 export const localMatrix = ({ transform, origin }: TransformProps) => {
   if (transform) {
-    const m3 = processTransform2d(
+    return processTransform2d(
       origin ? transformOrigin(origin, transform) : transform
     );
-    return skiaMatrix3(m3);
   }
   return undefined;
 };
