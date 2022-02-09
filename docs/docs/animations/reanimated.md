@@ -32,7 +32,7 @@ const MyComponent = () => {
   useSharedValueEffect(canvasRef, progress);
 
   return (
-    <Canvas style={styles.container} innerRef={canvasRef}>
+    <Canvas style={styles.container} ref={canvasRef}>
       <Rect
         x={() => mix(progress.value, 0, 100)}
         y={100}
