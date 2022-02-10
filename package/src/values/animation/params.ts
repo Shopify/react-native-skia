@@ -3,7 +3,7 @@ import type { AnimationParams, TimingConfig, SpringConfig } from "./types";
 
 const DefaultParameters = {
   to: 1,
-  from: 0,
+  //from: 0,
   loop: false,
   yoyo: false,
   immediate: true,
@@ -14,6 +14,9 @@ const DefaultTimingConfig = {
   easing: (t: number) => t,
 };
 
+export type RequiredAnimationParams = Required<Omit<AnimationParams, "from">> &
+  Pick<AnimationParams, "from">;
+
 /**
  * Resolves parameters from optional values to a single object
  * @param toOrParams Params or to value
@@ -22,8 +25,8 @@ const DefaultTimingConfig = {
 export const getResolvedParams = (
   toOrParams: number | AnimationParams,
   config?: TimingConfig | SpringConfig
-): Required<AnimationParams> & Required<TimingConfig> => {
-  let resolvedParameters: Required<AnimationParams> = {
+): RequiredAnimationParams & Required<TimingConfig> => {
+  let resolvedParameters: RequiredAnimationParams = {
     ...DefaultParameters,
   };
 

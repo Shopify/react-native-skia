@@ -1,6 +1,7 @@
 import type { IValue } from "../types";
 
 import { internalCreateTiming } from "./create";
+import type { RequiredAnimationParams } from "./params";
 import { getResolvedParams } from "./params";
 import type {
   AnimationParams,
@@ -68,7 +69,7 @@ export const runSpring = (
  */
 export const internalRunTiming = (
   value: IValue<number>,
-  params: Required<AnimationParams> & Required<TimingConfig>
+  params: RequiredAnimationParams & Required<TimingConfig>
 ): IAnimation => {
   return internalCreateTiming(params, value);
 };

@@ -1,6 +1,7 @@
 import type { IValue } from "../types";
 import { Value } from "../Values";
 
+import type { RequiredAnimationParams } from "./params";
 import { getResolvedParams } from "./params";
 import { timing } from "./timing";
 import type {
@@ -62,13 +63,15 @@ export const createSpring = (
  * the animation.
  */
 export const internalCreateTiming = (
-  params: Required<AnimationParams> & Required<TimingConfig>,
+  params: RequiredAnimationParams & Required<TimingConfig>,
   value?: IValue<number>
 ): IAnimation => {
   // Create driver value
   const driver = Value.createAnimationValue(params.immediate);
   // Create the animation value
-  const resolvedValue = value ?? Value.createValue(params.from);
+  const resolvedValue = value ?? Value.createValue(params.from ?? 0);
+  // Update from
+  params.from = params.from ?? resolvedValue.value;
 
   // Set the driver on the value
   const updateFunction = (t: number) => {
@@ -84,7 +87,7 @@ export const internalCreateTiming = (
         driver.stop();
       }
     );
-    return p * (params.to - params.from) + params.from;
+    return p * (params.to - params.from!) + params.from!;
   };
 
   resolvedValue.setDriver(driver, updateFunction);
