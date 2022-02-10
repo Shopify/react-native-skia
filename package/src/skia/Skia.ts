@@ -26,7 +26,6 @@ import type { IRSXform } from "./RSXform";
 import type { IPath } from "./Path/Path";
 import type { IContourMeasureIter } from "./ContourMeasure";
 
-
 /**
  * Declares the interface for the native Skia API
  */
