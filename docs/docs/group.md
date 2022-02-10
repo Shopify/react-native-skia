@@ -135,12 +135,15 @@ const Clip = () => {
 ### Invert Clip
 
 ```tsx twoslash
-import {Canvas, Group, Image, image} from "@shopify/react-native-skia";
+import {Canvas, Group, Image, useImage} from "@shopify/react-native-skia";
 
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
   const star =
     "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z";
+  if (!image) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Group clipPath={star} invertClip>
