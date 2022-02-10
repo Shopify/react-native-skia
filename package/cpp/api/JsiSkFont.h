@@ -145,7 +145,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(getTypeface) {
-    return JsiSkTypeface::toValue(runtime, getContext(), sk_sp(getObject()->getTypeface()));
+    return JsiSkTypeface::toValue(runtime, getContext(), sk_sp<SkTypeface>(getObject()->getTypeface()));
   }
 
   JSI_HOST_FUNCTION(setEdging) {
