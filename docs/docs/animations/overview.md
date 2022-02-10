@@ -7,71 +7,158 @@ slug: /animations/overview
 
 # Animations
 
-React Native Skia supports Animations through properties. Each property in all our declarative elements can be animated by providing a callback that calculates the property value instead of the value directly.
+React Native Skia supports Animations through animations values. An animation value can be seen as the state in the library - where a change in a value will trigger a repaint request on the `Canvas` component where it is used.
 
-## Example
+A simple example is shown below shows how a value is used as a property for the x position of the `Rect` element.
 
-To set up the animation we need an animation value that changes over time and knows how to notify the `Canvas` about its animation.
+```tsx twoslash
+import { Canvas, Rect, useValue } from "@shopify/react-native-skia";
+import { useCallback } from "react";
+import { Button } from "react-native";
 
-We also need an `Animation` to provide new values to the animation value over time. A progress animation makes sense here - as it will update the animation value with the number of seconds passed since it was started.
+const MyComponent = () => {
+  const position = useValue(0);
+  const updateValue = useCallback(
+    () => (position.value = position.value + 10),
+    [position]
+  );
+
+  return (
+    <>
+      <Canvas style={{ flex: 1 }}>
+        <Rect x={position} y={100} width={10} height={10} color={"red"} />
+      </Canvas>
+      <Button title="Move it" onPress={updateValue} />
+    </>
+  );
+};
+```
+
+## Values
+
+The basic `value` shown above is a value that stores some kind of Javascript value. It can be used to store numbers, strings, booleans, objects and even arrays:
+
+```tsx twoslash
+import { useValue } from "@shopify/react-native-skia";
+const progress = useValue({ x: 100, y: 100 });
+const actualValue = progress.value; // actualValue is now {x: 100, y: 100}
+```
+
+There are a few more value types in the library that will be described below.
+
+### Derived value
+
+This value is a value that is derived from other values. It takes as its input an existing
+value and a function that will calculate the new value based on the input. The function will be evaluated every time the input value changes.
+
+```tsx twoslash
+import { useValue, useDerivedValue } from "@shopify/react-native-skia";
+
+const progress = useValue(100);
+const derived = useDerivedValue((p) => p * 10, [progress]);
+const actualValue = derived.value; // actualValue is now 1000
+progress.value = 200; // derived.value is now 2000
+```
+
+| **NOTE:** You can use multiple values as inputs to a derived value.
+
+### AnimationValue
+
+This value is a value that updates on every display frame on the device. It can be used to derive values and drive animations.
+
+The animation value will be updated with the number of seconds elapsed since it was started.
+
+## Animation
+
+The ´Canvas´ component knows about values and will register any animation value used in the component or its child components so that changes in any value will trigger a repaint request like we saw in the first example.
+
+By combining animation values and derived values we can build a simple animation with React Native Skia:
 
 ```tsx twoslash
 import {
   Canvas,
   Rect,
-  mix,
-  useTiming,
+  useAnimationValue,
+  useDerivedValue,
 } from "@shopify/react-native-skia";
 
-const myComponent = () => {
-  const progress = useTiming({ from: 1, duration: 1000 });
+const MyComponent = () => {
+  const timestamp = useAnimationValue();
+  const position = useDerivedValue(
+    (p) => ((p / 1000) % 1.0) * 100,
+    [timestamp]
+  );
   return (
-    <Canvas>
-      <Rect
-        x={() => mix(progress.value, 0, 200)}
-        y={100}
-        width={10}
-        height={10}
-        color={"red"}
-      />
+    <Canvas style={{ flex: 1 }}>
+      <Rect x={timestamp} y={100} width={10} height={10} color={"red"} />
     </Canvas>
   );
 };
 ```
 
-### Animation value
+In this example we are using the animation value to drive a derived value which in turn is used in the `Rect` component to set the position on the x axis. Since the animation value will be updated on every frame, the position value will be recalculated and notify the `Canvas` component that it needs to be repainted.
 
-The animation value can be used in animations and in property callbacks.
+## Animation utilities
 
-The value contained in an animation value can be read/written to using its `value` property:
+To ease the process of building animation, the library provides some utilities to help you. There are two types of utility functions - imperative functions and hooks.
 
-```tsx
-const progress = useValue(1000);
-const actualValue = progress.value; // actual value is 1000.
+If you have an animation value that you want to animate declaratively, a hook is the best choice.
+
+In the example below we want the position of the rectangle to animate when we toggle a value, and we want it to do this with a spring animation.
+
+### Declarative animation
+
+```tsx twoslash
+import React, { useState } from "react";
+import { Canvas, Rect, useSpring } from "@shopify/react-native-skia";
+import { Button, StyleSheet } from "react-native";
+
+export const AnimationExample = () => {
+  const [toggled, setToggled] = useState(false);
+  const position = useSpring(toggled ? 100 : 0);
+  return (
+    <>
+      <Canvas style={{ flex: 1 }}>
+        <Rect x={position} y={100} width={10} height={10} color={"red"} />
+      </Canvas>
+      <Button title="Toggle" onPress={() => setToggled((p) => !p)} />
+    </>
+  );
+};
 ```
 
-### useTiming
+### Imperative animation
 
-The `useTiming` hook will create a timing based animation that changes the returned animation value over a given duration.
+Almost the same thing can be accomplished with an imperative function (except that we are not toggling back and forth in this example):
 
-### useSpring
+```tsx twoslash
+import { Canvas, Rect, runSpring, useValue } from "@shopify/react-native-skia";
+import { Button } from "react-native";
 
-The `useSpring` hook will create a spring based animation that changes the returned animation value with the results from doing a physics simulation.
-
-### useTimestamp
-
-The `useTimestamp` hook will return an animation value that contains the number of milliseconds that passed since the cavans started to draw.
+export const AnimationExample = () => {
+  const position = useValue(0);
+  const changePosition = () => runSpring(position, 100);
+  return (
+    <>
+      <Canvas style={{ flex: 1 }}>
+        <Rect x={position} y={100} width={10} height={10} color={"red"} />
+      </Canvas>
+      <Button title="Toggle" onPress={changePosition} />
+    </>
+  );
+};
+```
 
 ### useTouchHandler
 
-There is also a convinient hook for handling touches in the `SkiaViews`. This hook works well with animation values.
+The library has a hook for handling touches in the `Canvas`. This hook works well with animation values:
 
 ```tsx twoslash
 import {
   Canvas,
   Circle,
-  useValue,
   useTouchHandler,
+  useValue,
 } from "@shopify/react-native-skia";
 
 const MyComponent = () => {
@@ -87,26 +174,8 @@ const MyComponent = () => {
 
   return (
     <Canvas style={{ flex: 1 }} onTouch={touchHandler}>
-      <Circle cx={() => cx.value} cy={() => cy.value} r={10} color="red" />
+      <Circle cx={cx} cy={cy} r={10} color="red" />
     </Canvas>
   );
 };
 ```
-
-In the above example we can see that we are creating the `touchHandler` callback using the `useTouchHandler` hook - which can be provided as the onTouch callback on the `Canvas` or `SkiaView`.
-
-The hook has the following callbacks:
-
-- onStart - called when a touch is received
-- onActive - called when an existing touch is moved
-- onEnd - called when a touch is ended or cancelled.
-
-A `SkiaView` or `Canvas` will automatically get a repaint request when it receives touches, so there is no need to repaint manually or start animations to update the view.
-
-## Animation system
-
-The animation value will (when it is part of a Skia drawing tree) notify the underlying `SkiaView` that it has an active animation. This will change the drawing mode of the `SkiaView` so that is continuously redraws itself until there are no more animations running in the view.
-
-Each time the view is repainted it will look at its properties and see if any of them are declared as callbacks. For the example above we did exactly this - the `x` property is a callback and will be re-evaluated on repaint.
-
-In the callback we are reading the current value of `progress`, and since it has an active animation it will return the animation's updated value - and the `x` property callback can interpolate this value and return a new position that moves the `Rect` across the x-axis.
