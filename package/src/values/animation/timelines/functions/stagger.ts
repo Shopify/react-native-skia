@@ -11,7 +11,7 @@ import { distribute } from "./distribute";
  * @returns A new array of timelines with updated offsets
  */
 export function getStaggeredTimeline<T>(
-  params: number | DistributeParams<T> | undefined,
+  params: number | DistributeParams | undefined,
   items: TimelineInfo<T>[]
 ): TimelineInfo<T>[] {
   if (params === undefined) {
