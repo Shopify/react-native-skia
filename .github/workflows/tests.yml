@@ -1,4 +1,4 @@
-name: Test Pull Requests
+name: Tests
 on: [pull_request]
 jobs:
   build:
