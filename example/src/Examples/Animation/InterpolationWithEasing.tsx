@@ -10,7 +10,7 @@ export const InterpolationWithEasing = () => {
   const progress = useTiming(
     {
       from: 10,
-      to: width - Size - Padding,
+      to: width - (Size + Padding),
       loop: true,
       yoyo: true,
     },
