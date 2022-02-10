@@ -12,7 +12,7 @@ import type { IRRect } from "./RRect";
 import type { RuntimeEffectFactory } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
 import { Color } from "./Color";
-import type { Matrix } from "./Matrix";
+import type { IMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
 import type { IPoint } from "./Point";
 import type { Vertices, VertexMode } from "./Vertices/Vertices";
@@ -25,6 +25,7 @@ import "./NativeSetup";
 import type { IRSXform } from "./RSXform";
 import type { IPath } from "./Path/Path";
 import type { IContourMeasureIter } from "./ContourMeasure";
+
 
 /**
  * Declares the interface for the native Skia API
@@ -41,7 +42,7 @@ export interface Skia {
   ) => IContourMeasureIter;
   Paint: () => IPaint;
   Path: PathFactory;
-  Matrix: () => Matrix;
+  Matrix: () => IMatrix;
   ColorFilter: ColorFilterFactory;
   Font: (typeface?: ITypeface, size?: number) => IFont;
   Typeface: TypefaceFactory;
