@@ -99,7 +99,7 @@ const UniformShader = () => {
 ### Nested Shaders
 
 ```tsx twoslash
-import {Canvas, Skia, ImageShader, Paint, Shader, Fill} from "@shopify/react-native-skia";
+import {Canvas, Skia, ImageShader, Paint, Shader, Fill, useImage} from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -110,14 +110,18 @@ half4 main(float2 xy) {
 }`)!;
 
 const NestedShader = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
+  if (!image) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
         <Shader source={source}>
           <ImageShader
-            source={require("./assets/oslo.jpg")}
+            image={image}
             fit="cover"
-            fitRect={{ x: 0, y: 0, width: 256, height: 256 }}
+            rect={{ x: 0, y: 0, width: 256, height: 256 }}
           />
         </Shader>
       </Paint>

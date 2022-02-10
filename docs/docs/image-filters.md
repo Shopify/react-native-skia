@@ -22,9 +22,13 @@ The provided tile mode is used when the blur kernel goes outside the input image
 ## Simple Blur
 
 ```tsx twoslash
-import { Canvas, Paint, Blur, Image } from "@shopify/react-native-skia";
+import { Canvas, Paint, Blur, Image, useImage } from "@shopify/react-native-skia";
 
 const BlurImageFilter = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
+  if (!image) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
@@ -35,7 +39,7 @@ const BlurImageFilter = () => {
         y={0}
         width={256}
         height={256}
-        source={require("./assets/oslo.jpg")}
+        image={image}
         fit="cover"
       />
     </Canvas>
@@ -52,15 +56,19 @@ const BlurImageFilter = () => {
 ### Composing Filters
 
 ```tsx twoslash
-import { Canvas, Paint, Blur, Image, ColorMatrix } from "@shopify/react-native-skia";
+import { Canvas, Paint, Blur, Image, ColorMatrix, useImage } from "@shopify/react-native-skia";
 
 const ComposeImageFilter = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
+  if (!image) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
         <Blur sigmaX={2} sigmaY={2} mode="clamp">
           <ColorMatrix
-            value={[
+            matrix={[
               -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015,
               1.69, -0.703, 0, 0, 0, 0, 0, 1, 0,
             ]}
@@ -72,7 +80,7 @@ const ComposeImageFilter = () => {
         y={0}
         width={256}
         height={256}
-        source={require("./assets/oslo.jpg")}
+        image={image}
         fit="cover"
       />
     </Canvas>
