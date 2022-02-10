@@ -27,7 +27,7 @@ It can apply the following operations to its children:
 All paint properties applied to a group will be inherited by its children.
 
 ```tsx twoslash
-import {Canvas, Circle, Paint, Group} from "@shopify/react-native-skia";
+import {Canvas, Circle, Group} from "@shopify/react-native-skia";
  
 export const PaintDemo = () => {
   const r = 128;
@@ -104,16 +104,20 @@ When using `invertClip`, everything outside the clipping region will be shown an
 ### Clip Path
 
 ```tsx twoslash
-import {Canvas, Group, Image} from "@shopify/react-native-skia";
+import {Canvas, Group, Image, useImage} from "@shopify/react-native-skia";
 
 const Clip = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
   const star =
     "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z";
+  if (!image) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Group clipPath={star}>
         <Image
-          source={require("./assets/oslo.jpg")}
+          image={image}
           x={0}
           y={0}
           width={256}
@@ -131,16 +135,17 @@ const Clip = () => {
 ### Invert Clip
 
 ```tsx twoslash
-import {Canvas, Group, Image} from "@shopify/react-native-skia";
+import {Canvas, Group, Image, image} from "@shopify/react-native-skia";
 
 const Clip = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
   const star =
     "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z";
   return (
     <Canvas style={{ flex: 1 }}>
       <Group clipPath={star} invertClip>
         <Image
-          source={require("./assets/oslo.jpg")}
+          image={image}
           x={0}
           y={0}
           width={256}
