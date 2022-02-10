@@ -22,7 +22,7 @@ useSharedValueEffect(ref: RefObject<SkiaView>, ...values: Reanimated.SharedValue
 It is used by connecting a SkiaView or Canvas with a shared value. In the example below we are running a Reanimated animation on the shared value named progress - and then we connect our Canvas and shared value by using the `useSharedValueEffect` hook:
 
 ```tsx twoslash
-import {useRef, useEffect} from "react";
+import {useEffect} from "react";
 import {Canvas, SkiaView, Rect, mix, useSharedValueEffect, useCanvasRef} from "@shopify/react-native-skia";
 import {useSharedValue, withRepeat, withTiming} from "react-native-reanimated";
 

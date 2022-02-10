@@ -31,5 +31,27 @@ jobs:
       - name: Install root node dependencies
         run: yarn
 
-      - name: Lint typescript code
-        run: yarn lint-ts
+      - name: Install Package
+        run: cd package; yarn;
+
+      - name: Lint Package
+        run: cd package; yarn lint;
+
+      - name: TypeScript Package
+        run: cd package; yarn tsc;
+
+      - name: Install Example
+        run: cd example; yarn;
+
+      - name: Lint Example
+        run: cd example; yarn lint;
+
+      - name: TypeScript Example
+        run: cd example; yarn tsc;
+        
+      - name: Install Docs
+        run: cd docs; yarn;
+
+      - name: TypeScript Example Docs
+        run: cd docs; yarn build;
+
