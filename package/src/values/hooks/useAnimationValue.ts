@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import "../types";
 
 /**
@@ -7,8 +7,10 @@ import "../types";
  * created in the stopped state.
  */
 export const useAnimationValue = (immediate = true) => {
-  return useMemo(
+  const value = useMemo(
     () => global.SkiaValueApi.createAnimationValue(immediate),
     [immediate]
   );
+  useEffect(() => () => value.stop(), [value]);
+  return value;
 };
