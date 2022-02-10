@@ -70,7 +70,7 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
           size={12}
           x={textX}
           y={textY}
-          value={label}
+          text={label}
         />
         <Line p1={lineP1} p2={lineP2} />
       </Canvas>

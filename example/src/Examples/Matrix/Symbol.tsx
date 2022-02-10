@@ -1,35 +1,45 @@
 import React, { useRef } from "react";
-import type { Font, IReadonlyValue } from "@shopify/react-native-skia";
+import type { IReadonlyValue, IFont } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   interpolateColors,
-  Text,
+  vec,
+  Glyphs,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-export const COLS = 8;
-export const ROWS = 15;
+export const COLS = 5;
+export const ROWS = 10;
 export const SYMBOL = { width: width / COLS, height: height / ROWS };
-const symbols = "abcdefghijklmnopqrstuvwxyz".split("");
+const pos = vec(0, 0);
 
 interface SymbolProps {
   i: number;
   j: number;
   timestamp: IReadonlyValue<number>;
   stream: number[];
-  font: Font;
+  font: IFont;
+  symbols: number[];
 }
 
-export const Symbol = ({ i, j, timestamp, stream, font }: SymbolProps) => {
+export const Symbol = ({
+  i,
+  j,
+  timestamp,
+  stream,
+  font,
+  symbols,
+}: SymbolProps) => {
   const offset = useRef(Math.round(Math.random() * (symbols.length - 1)));
   const range = useRef(100 + Math.random() * 900);
   const x = i * SYMBOL.width;
   const y = j * SYMBOL.height;
-  const value = useDerivedValue(
+
+  const glyphs = useDerivedValue(
     (t) => {
       const idx = offset.current + Math.floor(t / range.current);
-      return symbols[idx % symbols.length];
+      return [{ id: symbols[idx % symbols.length], pos }];
     },
     [timestamp]
   );
@@ -49,11 +59,11 @@ export const Symbol = ({ i, j, timestamp, stream, font }: SymbolProps) => {
   );
 
   return (
-    <Text
+    <Glyphs
       x={x + SYMBOL.width / 4}
       y={y + SYMBOL.height}
       font={font}
-      value={value}
+      glyphs={glyphs}
       opacity={opacity}
       color={color}
     />

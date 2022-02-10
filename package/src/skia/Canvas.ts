@@ -1,6 +1,6 @@
 import type { IPaint } from "./Paint";
 import type { IRect } from "./Rect";
-import type { Font } from "./Font";
+import type { IFont } from "./Font";
 import type { IPath } from "./Path";
 import type { IImage } from "./Image";
 import type { SVG } from "./SVG";
@@ -8,10 +8,11 @@ import type { Color } from "./Color";
 import type { IRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
 import type { IPoint, PointMode } from "./Point";
-import type { Matrix } from "./Matrix";
+import type { IMatrix } from "./Matrix";
 import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
 import type { Vertices } from "./Vertices";
+import type { ITextBlob } from "./TextBlob";
 
 export enum ClipOp {
   Difference,
@@ -316,7 +317,35 @@ export interface ICanvas {
    * @param paint
    * @param font
    */
-  drawText(str: string, x: number, y: number, paint: IPaint, font: Font): void;
+  drawText(str: string, x: number, y: number, paint: IPaint, font: IFont): void;
+
+  /**
+   * Draws the given TextBlob at (x, y) using the current clip, current matrix, and the
+   * provided paint. Reminder that the fonts used to draw TextBlob are part of the blob.
+   * @param blob
+   * @param x
+   * @param y
+   * @param paint
+   */
+  drawTextBlob(blob: ITextBlob, x: number, y: number, paint: IPaint): void;
+
+  /**
+   * Draws a run of glyphs, at corresponding positions, in a given font.
+   * @param glyphs the array of glyph IDs (Uint16TypedArray)
+   * @param positions the array of x,y floats to position each glyph
+   * @param x x-coordinate of the origin of the entire run
+   * @param y y-coordinate of the origin of the entire run
+   * @param font the font that contains the glyphs
+   * @param paint
+   */
+  drawGlyphs(
+    glyphs: number[],
+    positions: IPoint[],
+    x: number,
+    y: number,
+    font: IFont,
+    paint: IPaint
+  ): void;
 
   /**
    * Renders the SVG Dom object to the canvas. If width/height are omitted,
@@ -454,5 +483,5 @@ export interface ICanvas {
    * Replaces current matrix with m premultiplied with the existing matrix.
    * @param m
    */
-  concat(m: Matrix): void;
+  concat(m: IMatrix): void;
 }

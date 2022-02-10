@@ -6,11 +6,13 @@
 #include "JsiSkPaint.h"
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
+#include "JsiSkPoint.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include <SkFont.h>
+#include <SkFontMetrics.h>
 
 #pragma clang diagnostic pop
 
@@ -22,8 +24,11 @@ using namespace facebook;
 
 class JsiSkFont : public JsiSkWrappingSharedPtrHostObject<SkFont> {
 public:
-  JSI_PROPERTY_GET(size) { return static_cast<double>(getObject()->getSize()); }
-  JSI_PROPERTY_SET(size) { getObject()->setSize(value.asNumber()); }
+
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "Font");
+  }
 
   JSI_HOST_FUNCTION(measureText) {
     auto textVal = arguments[0].asString(runtime).utf8(runtime);
@@ -40,9 +45,189 @@ public:
     return JsiSkRect::toValue(runtime, getContext(), rect);
   }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkFont, size))
-  JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(JsiSkFont, size))
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFont, measureText))
+  JSI_HOST_FUNCTION(getGlyphWidths) {
+      auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
+      int bytesPerWidth = 4;
+      std::vector<SkGlyphID> glyphs;
+      int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+      auto widthPtr = static_cast<SkScalar*>(malloc(glyphsSize * bytesPerWidth));
+      for (int i = 0; i < glyphsSize; i++) {
+          glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
+      }
+      if (count > 1) {
+          auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
+          getObject()->getWidthsBounds(glyphs.data(), glyphsSize, widthPtr, nullptr, paint.get());
+      } else {
+          getObject()->getWidthsBounds(glyphs.data(), glyphsSize, widthPtr, nullptr, nullptr);
+      }
+      auto jsiWidths = jsi::Array(runtime, glyphsSize);
+      for (int i = 0; i <glyphsSize; i++) {
+          jsiWidths.setValueAtIndex(runtime, i, jsi::Value(SkScalarToDouble(widthPtr[i])));
+      }
+      return jsiWidths;
+  }
+
+  JSI_HOST_FUNCTION(getMetrics) {
+    SkFontMetrics fm;
+    getObject()->getMetrics(&fm);
+    auto metrics = jsi::Object(runtime);
+    metrics.setProperty(runtime, "ascent",  fm.fAscent);
+    metrics.setProperty(runtime, "descent", fm.fDescent);
+    metrics.setProperty(runtime, "leading", fm.fLeading);
+    if (!(fm.fFlags & SkFontMetrics::kBoundsInvalid_Flag)) {
+      auto bounds = SkRect::MakeLTRB(fm.fXMin,fm.fTop, fm.fXMax, fm.fBottom );
+      auto jsiBounds = JsiSkRect::toValue(runtime, getContext(), bounds);
+      metrics.setProperty(runtime, "bounds",  jsiBounds);
+    }
+    return metrics;
+  }
+
+  JSI_HOST_FUNCTION(getGlyphIDs) {
+    auto str = arguments[0].asString(runtime).utf8(runtime);
+    auto numGlyphIDs = count > 1 && !arguments[1].isNull() && !arguments[1].isUndefined()
+            ? arguments[1].asNumber() : str.length();
+    int bytesPerGlyph = 2;
+    auto glyphIDs = static_cast<SkGlyphID*>(malloc(numGlyphIDs * bytesPerGlyph));
+    getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
+                               glyphIDs, numGlyphIDs);
+    auto jsiGlyphIDs = jsi::Array(runtime, numGlyphIDs);
+    for (int i = 0; i < numGlyphIDs; i++) {
+      jsiGlyphIDs.setValueAtIndex(runtime, i, jsi::Value(static_cast<int>(glyphIDs[i])));
+    }
+    return jsiGlyphIDs;
+  }
+
+  JSI_HOST_FUNCTION(getGlyphIntercepts) {
+      auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
+      auto jsiPositions = arguments[1].asObject(runtime).asArray(runtime);
+      auto top = arguments[2].asNumber();
+      auto bottom = arguments[3].asNumber();
+      std::vector<SkPoint> positions;
+      int pointsSize = static_cast<int>(jsiPositions.size(runtime));
+      for (int i = 0; i < pointsSize; i++) {
+          std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
+                  runtime, jsiPositions.getValueAtIndex(runtime, i).asObject(runtime));
+          positions.push_back(*point.get());
+      }
+
+      std::vector<SkGlyphID> glyphs;
+      int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+      for (int i = 0; i < glyphsSize; i++) {
+          glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
+      }
+
+      if (glyphs.size() > positions.size()) {
+          jsi::detail::throwJSError(runtime, "Not enough x,y position pairs for glyphs");
+          return jsi::Value::null();
+      }
+      auto sects  = getObject()->getIntercepts(glyphs.data(), SkToInt(glyphs.size()), positions.data(), top, bottom);
+      auto jsiSects = jsi::Array(runtime, sects.size());
+      for (int i = 0; i < sects.size(); i++) {
+          jsiSects.setValueAtIndex(runtime, i, jsi::Value(static_cast<int>(sects.at(i))));
+      }
+      return jsiSects;
+  }
+
+  JSI_HOST_FUNCTION(getScaleX) {
+      return jsi::Value(SkScalarToDouble(getObject()->getScaleX()));
+  }
+
+  JSI_HOST_FUNCTION(getSize) {
+      return jsi::Value(SkScalarToDouble(getObject()->getSize()));
+  }
+
+  JSI_HOST_FUNCTION(getSkewX) {
+    return jsi::Value(SkScalarToDouble(getObject()->getSkewX()));
+  }
+
+  JSI_HOST_FUNCTION(isEmbolden) {
+    return jsi::Value(getObject()->isEmbolden());
+  }
+
+  JSI_HOST_FUNCTION(getTypeface) {
+    return JsiSkTypeface::toValue(runtime, getContext(), sk_sp(getObject()->getTypeface()));
+  }
+
+  JSI_HOST_FUNCTION(setEdging) {
+    auto edging = arguments[0].asNumber();
+    getObject()->setEdging(static_cast<SkFont::Edging>(edging));
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(embeddedBitmaps) {
+    auto embeddedBitmaps = arguments[0].getBool();
+    getObject()->setEmbeddedBitmaps(embeddedBitmaps);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setHinting) {
+    auto hinting = arguments[0].asNumber();
+    getObject()->setHinting(static_cast<SkFontHinting>(hinting));
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setLinearMetrics) {
+    auto linearMetrics = arguments[0].getBool();
+    getObject()->setLinearMetrics(linearMetrics);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setScaleX) {
+    auto scaleX = arguments[0].asNumber();
+    getObject()->setScaleX(scaleX);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setSkewX) {
+    auto skewX = arguments[0].asNumber();
+    getObject()->setSkewX(skewX);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setSize) {
+    auto size = arguments[0].asNumber();
+    getObject()->setSize(size);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setEmbolden) {
+    auto embolden = arguments[0].asNumber();
+    getObject()->setEmbolden(embolden);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setSubpixel) {
+    auto subpixel = arguments[0].asNumber();
+    getObject()->setSubpixel(subpixel);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setTypeface) {
+    auto typeface = arguments[0].isNull() ? nullptr : JsiSkTypeface::fromValue(runtime, arguments[0]);
+    getObject()->setTypeface(typeface);
+    return jsi::Value::undefined();
+  }
+
+  JSI_EXPORT_FUNCTIONS(
+    JSI_EXPORT_FUNC(JsiSkFont, measureText),
+    JSI_EXPORT_FUNC(JsiSkFont, getMetrics),
+    JSI_EXPORT_FUNC(JsiSkFont, getGlyphIDs),
+    JSI_EXPORT_FUNC(JsiSkFont, getGlyphIntercepts),
+    JSI_EXPORT_FUNC(JsiSkFont, getScaleX),
+    JSI_EXPORT_FUNC(JsiSkFont, getSkewX),
+    JSI_EXPORT_FUNC(JsiSkFont, getTypeface),
+    JSI_EXPORT_FUNC(JsiSkFont, setEdging),
+    JSI_EXPORT_FUNC(JsiSkFont, embeddedBitmaps),
+    JSI_EXPORT_FUNC(JsiSkFont, setHinting),
+    JSI_EXPORT_FUNC(JsiSkFont, setLinearMetrics),
+    JSI_EXPORT_FUNC(JsiSkFont, setScaleX),
+    JSI_EXPORT_FUNC(JsiSkFont, setSkewX),
+    JSI_EXPORT_FUNC(JsiSkFont, setSize),
+    JSI_EXPORT_FUNC(JsiSkFont, setEmbolden),
+    JSI_EXPORT_FUNC(JsiSkFont, setSubpixel),
+    JSI_EXPORT_FUNC(JsiSkFont, setTypeface),
+    JSI_EXPORT_FUNC(JsiSkFont, getGlyphWidths)
+  )
 
   JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)
       : JsiSkWrappingSharedPtrHostObject(context,
