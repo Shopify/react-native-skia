@@ -3,6 +3,7 @@
 #include <functional>
 #include <map>
 #include <mutex>
+#include <thread>
 
 #include <RNSkLog.h>
 
@@ -33,7 +34,9 @@ public:
       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker),
-        _dispatchOnRenderThread(dispatchOnRenderThread) {}
+        _dispatchOnRenderThread(dispatchOnRenderThread) {
+          _jsThreadId = std::this_thread::get_id();
+        }
 
   /**
    * Destructor
@@ -50,7 +53,14 @@ public:
     stopDrawLoop();
     _isValid = false;
   }
-
+  
+  /*
+   Returns true if the current execution context is the javascript thread.
+   */
+  bool isOnJavascriptThread() {
+    return _jsThreadId == std::this_thread::get_id();
+  };
+  
   /**
    * Schedules the function to be run on the javascript thread async
    * @param func Function to run
@@ -81,7 +91,7 @@ public:
   virtual void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) = 0;
-
+  
   /**
    * Raises an exception on the platform. This function does not necessarily
    * throw an exception and stop execution, so it is important to stop execution
@@ -165,6 +175,8 @@ public:
 
 private:
   float _pixelDensity;
+  
+  std::thread::id _jsThreadId;
 
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;

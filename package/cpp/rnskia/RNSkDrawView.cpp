@@ -69,7 +69,9 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
                        int height, double timestamp,
                        std::shared_ptr<RNSkPlatformContext> context) {
         auto runtime = context->getJsRuntime();
-                         
+                                 
+      auto draw = [&, callback]() {
+        
         // Update info parameter
         _infoObject->beginDrawOperation(width, height, timestamp);
 
@@ -79,35 +81,59 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
         args[1] = jsi::Object::createFromHostObject(*runtime, _infoObject);
 
         // To be able to call the drawing function we'll wrap it once again
-        callback->call(*runtime, static_cast<const jsi::Value *>(args.data()),
+        callback->call(*runtime,
+                       static_cast<const jsi::Value *>(args.data()),
                        (size_t)2);
 
         // Reset touches
         _infoObject->endDrawOperation();
+      };
+                         
+      if(_platformContext->isOnJavascriptThread()) {
+        // We can just draw - the drawcallback was called on the
+        // javascript thread
+        draw();
+      } else {
+        // We need to do some synchronization when drawing
+        std::mutex mu;
+        std::condition_variable cond;
 
-        // Draw debug overlays
-        if (_showDebugOverlay) {
+        bool isDoneDrawing = false;
+        std::unique_lock<std::mutex> lock(mu);
+        
+        _platformContext->runOnJavascriptThread([&]() {
+          std::lock_guard<std::mutex> lock(mu);
+          draw();
+          isDoneDrawing = true;
+          cond.notify_one();
+        });
+        
+        cond.wait(lock, [&]() { return isDoneDrawing; });
+      }
 
-          // Display average rendering timer
-          auto average = _timingInfo->getAverage();
-          auto debugString = std::to_string(average) + "ms";
+      // Draw debug overlays
+      if (_showDebugOverlay) {
 
-          if (_drawingMode == RNSkDrawingMode::Continuous) {
-            debugString += "/continuous";
-          } else {
-            debugString += "/default";
-          }
+        // Display average rendering timer
+        auto average = _timingInfo->getAverage();
+        auto debugString = std::to_string(average) + "ms";
 
-          auto font = SkFont();
-          font.setSize(16);
-          auto paint = SkPaint();
-          paint.setColor(SkColors::kRed);
-
-          canvas->getCanvas()->drawSimpleText(
-              debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
-              18, font, paint);
+        if (_drawingMode == RNSkDrawingMode::Continuous) {
+          debugString += "/continuous";
+        } else {
+          debugString += "/default";
         }
-      });
+
+        auto font = SkFont();
+        font.setSize(16);
+        auto paint = SkPaint();
+        paint.setColor(SkColors::kRed);
+
+        canvas->getCanvas()->drawSimpleText(
+            debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
+            18, font, paint);
+      }
+    });
 
   // Request redraw
   requestRedraw();
@@ -199,18 +225,17 @@ void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
 
 void RNSkDrawView::performDraw() {
   if(isValid()) {
-    // Calculate milliseconds since start
-    milliseconds ms = duration_cast<milliseconds>(
-        system_clock::now().time_since_epoch());
-    
-    // Call draw frame method in sub class
-    drawFrame(ms.count() / 1000.0);
-    
-    // Unlock the drawing lock
-    _isDrawing->unlock();
-        
-  } else {
-    _isDrawing->unlock();
+    if(_isDrawing->try_lock()) {
+      // Calculate milliseconds since start
+      milliseconds ms = duration_cast<milliseconds>(
+              system_clock::now().time_since_epoch());
+
+      // Call draw frame method in sub class
+      drawFrame(ms.count() / 1000.0);
+
+      // Unlock the drawing lock (the lock was done by the callback from the draw loop)
+      _isDrawing->unlock();
+    }
   }
 }
 
@@ -252,11 +277,10 @@ void RNSkDrawView::beginDrawingLoop() {
 
 void RNSkDrawView::drawLoopCallback() {
   if(_redrawRequestCounter > 0 || _drawingMode == RNSkDrawingMode::Continuous) {
-    if(_isDrawing->try_lock()) {
       _redrawRequestCounter = 0;
+      // We render on the javascript thread. 
       _platformContext->runOnJavascriptThread(
         std::bind(&RNSkDrawView::performDraw, this));
-    }
   }
 }
 
