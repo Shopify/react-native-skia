@@ -41,26 +41,46 @@ export interface IAnimationValue extends IReadonlyValue<number> {
   stop: () => void;
 }
 
-type RV<T> = IReadonlyValue<T>;
 export type CreateDerivedValue = {
-  <R, T1>(cb: (...v: [T1]) => R, deps: [RV<T1>]): RV<R>;
-  <R, T1, T2>(cb: (...v: [T1, T2]) => R, deps: [RV<T1>, RV<T2>]): RV<R>;
+  <R, T1>(cb: (...v: [T1]) => R, deps: [IReadonlyValue<T1>]): IReadonlyValue<R>;
+  <R, T1, T2>(
+    cb: (...v: [T1, T2]) => R,
+    deps: [IReadonlyValue<T1>, IReadonlyValue<T2>]
+  ): IReadonlyValue<R>;
   <R, T1, T2, T3>(
     cb: (...v: [T1, T2, T3]) => R,
-    deps: [RV<T1>, RV<T2>, RV<T3>]
-  ): RV<R>;
+    deps: [IReadonlyValue<T1>, IReadonlyValue<T2>, IReadonlyValue<T3>]
+  ): IReadonlyValue<R>;
   <R, T1, T2, T3, T4>(
     cb: (...v: [T1, T2, T3, T4]) => R,
-    deps: [RV<T1>, RV<T2>, RV<T3>, RV<T4>]
-  ): RV<R>;
+    deps: [
+      IReadonlyValue<T1>,
+      IReadonlyValue<T2>,
+      IReadonlyValue<T3>,
+      IReadonlyValue<T4>
+    ]
+  ): IReadonlyValue<R>;
   <R, T1, T2, T3, T4, T5>(
     cb: (...v: [T1, T2, T3, T4, T5]) => R,
-    deps: [RV<T1>, RV<T2>, RV<T3>, RV<T4>, RV<T5>]
-  ): RV<R>;
+    deps: [
+      IReadonlyValue<T1>,
+      IReadonlyValue<T2>,
+      IReadonlyValue<T3>,
+      IReadonlyValue<T4>,
+      IReadonlyValue<T5>
+    ]
+  ): IReadonlyValue<R>;
   <R, T1, T2, T3, T4, T5, T6>(
     cb: (...v: [T1, T2, T3, T4, T5, T6]) => R,
-    deps: [RV<T1>, RV<T2>, RV<T3>, RV<T4>, RV<T5>, RV<T6>]
-  ): RV<R>;
+    deps: [
+      IReadonlyValue<T1>,
+      IReadonlyValue<T2>,
+      IReadonlyValue<T3>,
+      IReadonlyValue<T4>,
+      IReadonlyValue<T5>,
+      IReadonlyValue<T6>
+    ]
+  ): IReadonlyValue<R>;
 };
 
 export interface ISkiaValueApi {

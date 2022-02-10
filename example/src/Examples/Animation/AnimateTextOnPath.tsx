@@ -3,7 +3,6 @@ import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
   Easing,
-  Path,
   Skia,
   TextPath,
   useDerivedValue,
@@ -24,11 +23,15 @@ const ExampleHeight = 160;
 
 export const AnimateTextOnPath = () => {
   const { width } = useWindowDimensions();
+
+  // Create a progress going from 0..1 and back with a
+  // yoyo effect
   const progress = useTiming(
     { loop: true, yoyo: true },
     { duration: 700, easing: Easing.inOut(Easing.cubic) }
   );
 
+  // Create the start path
   const path1 = usePath((p) => {
     p.moveTo(Padding, ExampleHeight / 2);
     p.quadTo(
@@ -40,6 +43,7 @@ export const AnimateTextOnPath = () => {
     p.simplify();
   });
 
+  // Create the end path
   const path2 = usePath((p) => {
     p.moveTo(Padding, ExampleHeight / 2);
     p.quadTo(
@@ -51,6 +55,8 @@ export const AnimateTextOnPath = () => {
     p.simplify();
   });
 
+  // Create a derived value that interpolates between
+  // the start and end path
   const path = useDerivedValue(
     (p) => {
       if (p > 1.0 || p < 0) {
@@ -65,7 +71,6 @@ export const AnimateTextOnPath = () => {
     <AnimationDemo title={"Interpolating text on path."}>
       <Canvas style={styles.canvas}>
         <TextPath path={path} font={font} text="Hello World from RN Skia!" />
-        <Path path={path} color="red" style="stroke" />
       </Canvas>
     </AnimationDemo>
   );
