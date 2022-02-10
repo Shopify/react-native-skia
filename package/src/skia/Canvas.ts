@@ -8,7 +8,7 @@ import type { Color } from "./Color";
 import type { IRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
 import type { IPoint, PointMode } from "./Point";
-import type { Matrix } from "./Matrix";
+import type { IMatrix } from "./Matrix";
 import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
 import type { Vertices } from "./Vertices";
@@ -454,5 +454,5 @@ export interface ICanvas {
    * Replaces current matrix with m premultiplied with the existing matrix.
    * @param m
    */
-  concat(m: Matrix): void;
+  concat(m: IMatrix): void;
 }
