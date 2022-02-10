@@ -102,8 +102,8 @@ export const useInternalTiming = (
     [config, toOrParams]
   );
   // Create animation value
-  const value = useValue(resolvedParameters.from);
-  // Current animatino
+  const value = useValue(resolvedParameters.from ?? 0);
+  // Current animation
   const animation = useRef<IAnimation>();
   // Run animation as a side effect of the value changing
   useEffect(() => {

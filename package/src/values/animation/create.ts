@@ -69,9 +69,11 @@ export const internalCreateTiming = (
   // Create driver value
   const driver = Value.createAnimationValue(params.immediate);
   // Create the animation value
+  console.log(params.from, value);
   const resolvedValue = value ?? Value.createValue(params.from ?? 0);
   // Update from
   params.from = params.from ?? resolvedValue.value;
+  console.log(JSON.stringify(params, null, 2), resolvedValue.value);
 
   // Set the driver on the value
   const updateFunction = (t: number) => {
