@@ -36,15 +36,17 @@ export const Matrix = () => {
   if (font === null) {
     return null;
   }
+  const symbols = font.getGlyphIDs("abcdefghijklmnopqrstuvwxyz");
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="black" />
       <Paint>
-        <BlurMask sigma={10} style="solid" />
+        <BlurMask sigma={8} style="solid" />
       </Paint>
       {cols.map((_i, i) =>
         rows.map((_j, j) => (
           <Symbol
+            symbols={symbols}
             font={font}
             timestamp={timestamp}
             key={`${i}-${j}`}
