@@ -180,7 +180,7 @@ const Clip = () => {
       <Defs>
         <Paint ref={paint}>
           <ColorMatrix
-            value={[
+            matrix={[
               1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
             ]}
           >
