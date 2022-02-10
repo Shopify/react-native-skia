@@ -3,7 +3,7 @@ import {
   Canvas,
   Fill,
   Paint,
-  useAnimationValue,
+  useTimestamp,
   useFont,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -31,7 +31,7 @@ const streams = cols.map(() =>
 );
 
 export const Matrix = () => {
-  const timestamp = useAnimationValue();
+  const timestamp = useTimestamp();
   const font = useFont(require("./matrix-code-nfi.otf"), SYMBOL.height);
   if (font === null) {
     return null;

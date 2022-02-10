@@ -3,6 +3,7 @@ import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
   Easing,
+  Fill,
   Skia,
   TextPath,
   useDerivedValue,
@@ -70,6 +71,7 @@ export const AnimateTextOnPath = () => {
   return (
     <AnimationDemo title={"Interpolating text on path."}>
       <Canvas style={styles.canvas}>
+        <Fill color="white" />
         <TextPath path={path} font={font} text="Hello World from RN Skia!" />
       </Canvas>
     </AnimationDemo>

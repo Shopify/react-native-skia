@@ -81,6 +81,12 @@ export type CreateDerivedValue = {
       IReadonlyValue<T6>
     ]
   ): IReadonlyValue<R>;
+  <R>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cb: (...args: Array<any>) => R,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    values: Array<IReadonlyValue<any>>
+  ): IReadonlyValue<R>;
 };
 
 export interface ISkiaValueApi {

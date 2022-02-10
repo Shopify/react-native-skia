@@ -3,6 +3,7 @@ import { Dimensions, StyleSheet } from "react-native";
 import {
   Canvas,
   Circle,
+  Fill,
   runSpring,
   Spring,
   useTouchHandler,
@@ -35,6 +36,7 @@ export const AnimationWithTouchHandler = () => {
   return (
     <AnimationDemo title={"Animation with touch handler."}>
       <Canvas style={styles.canvas} onTouch={touchHandler}>
+        <Fill color="white" />
         <Circle cx={translateX} cy={40} r={20} color="#EEE" />
         <Circle cx={translateX} cy={40} r={15} color="#CECECE" />
       </Canvas>

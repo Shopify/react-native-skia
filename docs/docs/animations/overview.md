@@ -78,12 +78,12 @@ By combining animation values and derived values we can build a simple animation
 import {
   Canvas,
   Rect,
-  useAnimationValue,
+  useTimestamp,
   useDerivedValue,
 } from "@shopify/react-native-skia";
 
 const MyComponent = () => {
-  const timestamp = useAnimationValue();
+  const timestamp = useTimestamp();
   const position = useDerivedValue(
     (p) => ((p / 1000) % 1.0) * 100,
     [timestamp]

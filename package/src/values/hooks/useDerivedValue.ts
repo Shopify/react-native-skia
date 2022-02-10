@@ -1,4 +1,3 @@
-import type { DependencyList } from "react";
 import { useMemo } from "react";
 
 import type { CreateDerivedValue, IReadonlyValue } from "../types";
@@ -12,14 +11,10 @@ import type { CreateDerivedValue, IReadonlyValue } from "../types";
  */
 export const useDerivedValue: CreateDerivedValue = <R>(
   cb: (...args: Array<unknown>) => R,
-  values: Array<IReadonlyValue<unknown>>,
-  deps?: DependencyList
+  values: Array<IReadonlyValue<unknown>>
 ): IReadonlyValue<R> => {
   return useMemo(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     () => global.SkiaValueApi.createDerivedValue(cb, values),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cb, values, deps]
+    [cb, values]
   );
 };
