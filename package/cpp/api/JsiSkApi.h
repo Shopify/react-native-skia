@@ -35,6 +35,8 @@
 #include "JsiSkDataFactory.h"
 #include "JsiSkFontMgrFactory.h"
 #include "JsiSkSurfaceFactory.h"
+#include "JsiSkTextBlobFactory.h"
+#include "JsiSkContourMeasureIter.h"
 
 namespace RNSkia
 {
@@ -60,6 +62,7 @@ namespace RNSkia
     installFunction("XYWHRect", JsiSkRect::createCtor(context));
     installFunction("RRectXY", JsiSkRRect::createCtor(context));
     installFunction("Point", JsiSkPoint::createCtor(context));
+    installFunction("ContourMeasureIter", JsiSkContourMeasureIter::createCtor(context));
     installFunction("MakeVertices", JsiSkVertices::createCtor(context));
 
       // Static members
@@ -87,6 +90,7 @@ namespace RNSkia
           "RuntimeEffect", std::make_shared<JsiSkRuntimeEffectFactory>(context));
       installReadonlyProperty("Shader",
                               std::make_shared<JsiSkShaderFactory>(context));
+      installReadonlyProperty("TextBlob", std::make_shared<JsiSkTextBlobFactory>(context));
       installReadonlyProperty("Surface", std::make_shared<JsiSkSurfaceFactory>(context));
     };
   };

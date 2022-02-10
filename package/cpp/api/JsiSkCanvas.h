@@ -11,6 +11,7 @@
 #include "JsiSkRRect.h"
 #include "JsiSkSVG.h"
 #include "JsiSkVertices.h"
+#include "JsiSkTextBlob.h"
 
 #include <jsi/jsi.h>
 #include <map>
@@ -314,6 +315,15 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(drawTextBlob) {
+    auto blob = JsiSkTextBlob::fromValue(runtime, arguments[0]);
+    SkScalar x = arguments[1].asNumber();
+    SkScalar y = arguments[2].asNumber();
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    _canvas->drawTextBlob(blob, x, y, *paint);
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(drawGlyphs) {
     auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
     auto jsiPositions = arguments[1].asObject(runtime).asArray(runtime);
@@ -484,6 +494,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawVertices),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawText),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawTextBlob),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawGlyphs),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawSvg),
                        JSI_EXPORT_FUNC(JsiSkCanvas, clipPath),

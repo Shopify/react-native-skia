@@ -12,6 +12,7 @@ import type { IMatrix } from "./Matrix";
 import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
 import type { Vertices } from "./Vertices";
+import type { ITextBlob } from "./TextBlob";
 
 export enum ClipOp {
   Difference,
@@ -317,6 +318,16 @@ export interface ICanvas {
    * @param font
    */
   drawText(str: string, x: number, y: number, paint: IPaint, font: IFont): void;
+
+  /**
+   * Draws the given TextBlob at (x, y) using the current clip, current matrix, and the
+   * provided paint. Reminder that the fonts used to draw TextBlob are part of the blob.
+   * @param blob
+   * @param x
+   * @param y
+   * @param paint
+   */
+  drawTextBlob(blob: ITextBlob, x: number, y: number, paint: IPaint): void;
 
   /**
    * Draws a run of glyphs, at corresponding positions, in a given font.

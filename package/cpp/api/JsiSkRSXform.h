@@ -77,10 +77,10 @@ namespace RNSkia {
         }
 
         /**
-         * Creates the function for construction a new instance of the SkPoint
+         * Creates the function for construction a new instance of the SkRSXform
          * wrapper
          * @param context platform context
-         * @return A function for creating a new host object wrapper for the SkPoint
+         * @return A function for creating a new host object wrapper for the SkRSXform
          * class
          */
         static const jsi::HostFunctionType

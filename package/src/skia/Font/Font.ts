@@ -40,6 +40,20 @@ export interface IFont extends SkJSIInstance<"Font"> {
   getGlyphIDs(str: string, numCodePoints?: number): number[];
 
   /**
+   * Retrieves the advanceX measurements for each glyph.
+   * If paint is not null, its stroking, PathEffect, and MaskFilter fields are respected.
+   * One width per glyph is returned in the returned array.
+   * @param glyphs
+   * @param paint
+   * @param output - if provided, the results will be copied into this array.
+   */
+  getGlyphWidths(
+    glyphs: number[],
+    paint?: IPaint | null,
+    output?: Float32Array
+  ): Float32Array;
+
+  /**
    * Computes any intersections of a thick "line" and a run of positionsed glyphs.
    * The thick line is represented as a top and bottom coordinate (positive for
    * below the baseline, negative for above). If there are no intersections
