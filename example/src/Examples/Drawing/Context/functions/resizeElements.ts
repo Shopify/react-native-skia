@@ -1,4 +1,4 @@
-import { Skia } from "@shopify/react-native-skia";
+import { processTransform2d } from "@shopify/react-native-skia";
 import type { IRect } from "@shopify/react-native-skia";
 
 import type { DrawingElements, ResizeMode } from "../types";
@@ -37,14 +37,16 @@ export const resizeElementsBy = (
     return;
   }
 
-  const matrix = Skia.Matrix();
   const scaleX = dest.width / source.width;
   const scaleY = dest.height / source.height;
-  matrix.setScaleX(scaleX);
-  matrix.setScaleY(scaleY);
-  matrix.setTranslateX(dest.x - source.x * scaleX);
-  matrix.setTranslateY(dest.y - source.y * scaleY);
-
+  const translateX = dest.x - source.x * scaleX;
+  const translateY = dest.y - source.y * scaleY;
+  const matrix = processTransform2d([
+    { translateX },
+    { translateY },
+    { scaleX },
+    { scaleY },
+  ]);
   // use to scale elements
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];

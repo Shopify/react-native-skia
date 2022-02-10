@@ -1,6 +1,6 @@
 import type { TileMode } from "../ImageFilter";
 import type { IPoint } from "../Point";
-import type { Matrix } from "../Matrix";
+import type { IMatrix } from "../Matrix";
 import type { Color } from "../Color";
 import type { BlendMode } from "../Paint/BlendMode";
 
@@ -28,7 +28,7 @@ export interface ShaderFactory {
     colors: Color[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: Matrix,
+    localMatrix?: IMatrix,
     flags?: number
     // colorSpace: ColorSpace
   ): IShader;
@@ -51,7 +51,7 @@ export interface ShaderFactory {
     colors: Color[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: Matrix,
+    localMatrix?: IMatrix,
     flags?: number
     // colorSpace?: ColorSpace
   ): IShader;
@@ -77,7 +77,7 @@ export interface ShaderFactory {
     colors: Color[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: Matrix,
+    localMatrix?: IMatrix,
     flags?: number
     //  colorSpace?: ColorSpace
   ): IShader;
@@ -102,7 +102,7 @@ export interface ShaderFactory {
     colors: Color[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: Matrix | null,
+    localMatrix?: IMatrix | null,
     flags?: number,
     startAngleInDegrees?: number,
     endAngleInDegrees?: number
