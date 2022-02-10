@@ -41,8 +41,7 @@ namespace RNSkia {
         JSI_HOST_FUNCTION(MakeFromRSXform) {
             auto str = arguments[0].asString(runtime).utf8(runtime);
             auto jsiRsxforms = arguments[1].asObject(runtime).asArray(runtime);
-            auto font = JsiSkFont::fromValue(runtime, arguments[2]);
-            int bytesPerGlyph = 2;
+            auto font = JsiSkFont::fromValue(runtime, arguments[2]);            
             std::vector<SkRSXform> rsxforms;
             int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
             for (int i = 0; i < rsxformsSize; i++) {
