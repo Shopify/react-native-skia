@@ -1,7 +1,7 @@
 import type { DependencyList } from "react";
 import { useMemo } from "react";
 
-import type { Font } from "../Font";
+import type { IFont } from "../Font";
 import { Skia } from "../Skia";
 
 import type { IPath } from "./Path";
@@ -45,7 +45,7 @@ export const useSvgPath = (svgpath: string) =>
  * @param svgpath
  * @returns
  */
-export const useTextPath = (text: string, x: number, y: number, font: Font) =>
+export const useTextPath = (text: string, x: number, y: number, font: IFont) =>
   usePath(
     (p) => {
       p.fromText(text, x, y, font);

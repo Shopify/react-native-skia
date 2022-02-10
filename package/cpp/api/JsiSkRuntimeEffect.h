@@ -122,7 +122,10 @@ namespace RNSkia
       // verify size of input uniforms
       if (jsiUniformsSize * sizeof(float) != getObject()->uniformSize())
       {
-        std::string msg = "Uniforms size differs from effect's uniform size. Received " + std::to_string(jsiUniformsSize) + " expected " + std::to_string(getObject()->uniformSize() / sizeof(float));
+        std::string msg = "Uniforms size differs from effect's uniform size. Received " +
+                std::to_string(jsiUniformsSize) +
+                " expected " +
+                std::to_string(getObject()->uniformSize() / sizeof(float));
         jsi::detail::throwJSError(runtime, msg.c_str());
       }
 

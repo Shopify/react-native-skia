@@ -1,6 +1,6 @@
 import type { IPaint } from "./Paint";
 import type { IRect } from "./Rect";
-import type { Font } from "./Font";
+import type { IFont } from "./Font";
 import type { IPath } from "./Path";
 import type { IImage } from "./Image";
 import type { SVG } from "./SVG";
@@ -316,7 +316,25 @@ export interface ICanvas {
    * @param paint
    * @param font
    */
-  drawText(str: string, x: number, y: number, paint: IPaint, font: Font): void;
+  drawText(str: string, x: number, y: number, paint: IPaint, font: IFont): void;
+
+  /**
+   * Draws a run of glyphs, at corresponding positions, in a given font.
+   * @param glyphs the array of glyph IDs (Uint16TypedArray)
+   * @param positions the array of x,y floats to position each glyph
+   * @param x x-coordinate of the origin of the entire run
+   * @param y y-coordinate of the origin of the entire run
+   * @param font the font that contains the glyphs
+   * @param paint
+   */
+  drawGlyphs(
+    glyphs: number[],
+    positions: IPoint[],
+    x: number,
+    y: number,
+    font: IFont,
+    paint: IPaint
+  ): void;
 
   /**
    * Renders the SVG Dom object to the canvas. If width/height are omitted,

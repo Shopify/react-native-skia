@@ -2,8 +2,8 @@
 import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
-import type { Font } from "./Font";
-import type { Typeface, TypefaceFactory } from "./Typeface";
+import type { IFont } from "./Font";
+import type { ITypeface, TypefaceFactory } from "./Typeface";
 import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
 import type { IPaint } from "./Paint";
@@ -21,6 +21,7 @@ import type { SVGFactory } from "./SVG";
 import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
 import type { SurfaceFactory } from "./Surface";
 import "./NativeSetup";
+import type { IRSXform } from "./RSXform";
 
 /**
  * Declares the interface for the native Skia API
@@ -29,11 +30,12 @@ export interface Skia {
   Point: (x: number, y: number) => IPoint;
   XYWHRect: (x: number, y: number, width: number, height: number) => IRect;
   RRectXY: (rect: IRect, rx: number, ry: number) => IRRect;
+  RSXform: (scos: number, ssin: number, tx: number, ty: number) => IRSXform;
   Paint: () => IPaint;
   Path: PathFactory;
   Matrix: () => IMatrix;
   ColorFilter: ColorFilterFactory;
-  Font: (typeface?: Typeface, size?: number) => Font;
+  Font: (typeface?: ITypeface, size?: number) => IFont;
   Typeface: TypefaceFactory;
   MaskFilter: MaskFilterFactory;
   RuntimeEffect: RuntimeEffectFactory;
@@ -94,8 +96,10 @@ export const Skia = {
   MakeVertices: SkiaApi.MakeVertices,
   SVG: SkiaApi.SVG,
   FontMgr: SkiaApi.FontMgr,
+  // Here are constructors for data types which are represented as typed arrays in CanvasKit
   Color,
-  // Here symmetry is broken to be comptatible with CanvasKit
+  RSXform: SkiaApi.RSXform,
+  // Here the factory symmetry is broken to be comptatible with CanvasKit
   MakeSurface: SkiaApi.Surface.Make,
   MakeImageFromEncoded: SkiaApi.Image.MakeImageFromEncoded,
 };

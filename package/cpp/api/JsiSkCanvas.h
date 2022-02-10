@@ -314,6 +314,41 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(drawGlyphs) {
+    auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
+    auto jsiPositions = arguments[1].asObject(runtime).asArray(runtime);
+    auto x = arguments[2].asNumber();
+    auto y = arguments[3].asNumber();
+    auto font = JsiSkFont::fromValue(runtime, arguments[4]);
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+    SkPoint origin = SkPoint::Make(x, y);
+
+    std::vector<SkPoint> positions;
+    int pointsSize = static_cast<int>(jsiPositions.size(runtime));
+    for (int i = 0; i < pointsSize; i++) {
+      std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
+              runtime, jsiPositions.getValueAtIndex(runtime, i).asObject(runtime));
+      positions.push_back(*point.get());
+    }
+
+    std::vector<SkGlyphID> glyphs;
+    int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+    for (int i = 0; i < glyphsSize; i++) {
+      glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
+    }
+
+    _canvas->drawGlyphs(
+            glyphsSize,
+            glyphs.data(),
+            positions.data(),
+            origin,
+            *font,
+            *paint
+    );
+
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(drawSvg) {
     auto svgdom = JsiSkSVG::fromValue(runtime, arguments[0]);
     if (count == 3) {
@@ -449,6 +484,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawVertices),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawText),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawGlyphs),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawSvg),
                        JSI_EXPORT_FUNC(JsiSkCanvas, clipPath),
                        JSI_EXPORT_FUNC(JsiSkCanvas, clipRect),
