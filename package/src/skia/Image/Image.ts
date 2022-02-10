@@ -1,6 +1,6 @@
 import type { TileMode } from "../ImageFilter";
 import type { IShader } from "../Shader";
-import type { Matrix } from "../Matrix";
+import type { IMatrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 
 export enum FilterMode {
@@ -45,7 +45,7 @@ export interface IImage extends SkJSIInstance<"Image"> {
     ty: TileMode,
     fm: FilterMode,
     mm: MipmapMode,
-    localMatrix?: Matrix
+    localMatrix?: IMatrix
   ): IShader;
 
   /**
@@ -61,7 +61,7 @@ export interface IImage extends SkJSIInstance<"Image"> {
     ty: TileMode,
     B: number,
     C: number,
-    localMatrix?: Matrix
+    localMatrix?: IMatrix
   ): IShader;
 
   /** Encodes Image pixels, returning result as UInt8Array. Returns existing

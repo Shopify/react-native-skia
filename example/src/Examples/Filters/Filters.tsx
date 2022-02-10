@@ -1,14 +1,13 @@
 import React from "react";
 import { Dimensions } from "react-native";
 import {
+  useImage,
   Canvas,
   Paint,
-  Rect,
   ImageShader,
   Skia,
   Shader,
-  mix,
-  useLoop,
+  Fill,
 } from "@shopify/react-native-skia";
 
 const { width, height } = Dimensions.get("window");
@@ -23,16 +22,16 @@ half4 main(float2 xy) {
 }`)!;
 
 export const Filters = () => {
-  const progress = useLoop({ duration: 1500 }, { yoyo: true });
+  const image = useImage(require("../../assets/oslo.jpg"));
+  if (image === null) {
+    return null;
+  }
   return (
     <Canvas style={{ width, height }}>
       <Paint>
-        <Shader
-          source={source}
-          uniforms={() => ({ r: mix(progress.value, 1, 100) })}
-        >
+        <Shader source={source} uniforms={() => ({ r: 100 })}>
           <ImageShader
-            source={require("../../assets/oslo.jpg")}
+            image={image}
             fit="cover"
             x={0}
             y={0}
@@ -41,7 +40,7 @@ export const Filters = () => {
           />
         </Shader>
       </Paint>
-      <Rect x={0} y={0} width={width} height={height} />
+      <Fill />
     </Canvas>
   );
 };

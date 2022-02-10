@@ -7,6 +7,8 @@ import {
   Path,
   Group,
   rect,
+  TextPath,
+  useFont,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -43,6 +45,10 @@ const result = Skia.Path.MakeFromOp(rect1, circle, PathOp.Difference)!;
 result.simplify();
 
 export const PathExample = () => {
+  const font = useFont(require("./Roboto-Regular.otf"), 32);
+  if (!font) {
+    return null;
+  }
   return (
     <ScrollView>
       <Title>Path Operations</Title>
@@ -68,6 +74,12 @@ export const PathExample = () => {
       <Canvas style={styles.stroke}>
         <Path path={s} color="black" style="stroke" strokeWidth={1} />
       </Canvas>
+      <Title>Text Path</Title>
+      <Canvas style={styles.textPath}>
+        <Group transform={[{ translateY: 25 }]}>
+          <TextPath path={circle} font={font} text="Hello World!" />
+        </Group>
+      </Canvas>
     </ScrollView>
   );
 };
@@ -86,6 +98,10 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
   },
   stroke: {
+    width: SIZE,
+    height: SIZE,
+  },
+  textPath: {
     width: SIZE,
     height: SIZE,
   },

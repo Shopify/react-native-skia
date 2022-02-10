@@ -44,7 +44,7 @@ export const Clipping = () => {
     <ScrollView>
       <Canvas style={styles.container}>
         <Image
-          source={oslo}
+          image={oslo}
           x={PADDING}
           y={PADDING}
           width={SIZE}
@@ -53,7 +53,7 @@ export const Clipping = () => {
         />
         <Group clipRect={clipRRect} invertClip>
           <Image
-            source={oslo}
+            image={oslo}
             x={SIZE + 2 * PADDING}
             y={PADDING}
             width={SIZE}
@@ -63,7 +63,7 @@ export const Clipping = () => {
         </Group>
         <Group clipPath={star}>
           <Image
-            source={oslo}
+            image={oslo}
             x={2 * SIZE + 3 * PADDING}
             y={PADDING}
             width={SIZE}

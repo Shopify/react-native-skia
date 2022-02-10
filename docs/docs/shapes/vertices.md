@@ -19,18 +19,22 @@ Draws vertices.
 ## Using texture mapping
 
 ```tsx twoslash
-import { Canvas, Paint, ImageShader, Vertices, Group, vec } from "@shopify/react-native-skia";
+import { Canvas, Paint, ImageShader, Vertices, Group, vec, useImage } from "@shopify/react-native-skia";
 
 const VerticesDemo = () => {
+  const image = useImage(require("./assets/squares.png"));
   const vertices = [vec(64, 0), vec(128, 256), vec(0, 256)];
   const colors = ["#61dafb", "#fb61da", "#dafb61"];
   const textures = [vec(0, 0), vec(0, 128), vec(64, 256)];
+  if (!image) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       {/* This is our texture */}
       <Paint>
         <ImageShader
-          source={require("./assets/squares.png")}
+          image={image}
           tx="repeat"
           ty="repeat"
         />
@@ -56,19 +60,23 @@ Then we use the indices property to define the two triangles we would like to dr
 * Second triangle: `0, 2, 3` (top-left, bottom-right, bottom-left).
 
 ```tsx twoslash
-import { Canvas, Paint, ImageShader, Vertices, vec } from "@shopify/react-native-skia";
+import { Canvas, Paint, ImageShader, Vertices, vec, useImage } from "@shopify/react-native-skia";
 
 const IndicesDemo = () => {
+  const image = useImage(require("./assets/squares.png"));
   const vertices = [vec(0, 0), vec(256, 0), vec(256, 256), vec(0, 256)];
   const colors = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"];
   const triangle1 = [0, 1, 2];
   const triangle2 = [0, 2, 3];
   const indices = [...triangle1, ...triangle2];
+  if (!image) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
         <ImageShader
-          source={require("./assets/squares.png")}
+          image={image}
           tx="repeat"
           ty="repeat"
         />

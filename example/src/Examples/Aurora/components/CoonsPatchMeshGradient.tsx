@@ -12,6 +12,7 @@ import {
   vec,
   Paint,
   processColor,
+  useImage,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -84,6 +85,7 @@ export const CoonsPatchMeshGradient = ({
   debug,
   lines,
 }: CoonsPatchMeshGradientProps) => {
+  const image = useImage(require("../../../assets/debug.png"));
   const colors = rawColors.map((color) => processColor(color, 1));
   const dx = width / cols;
   const dy = height / rows;
@@ -119,14 +121,13 @@ export const CoonsPatchMeshGradient = ({
     .flat();
 
   const onTouch = useHandles(mesh, defaultMesh, width, height);
+  if (image === null) {
+    return null;
+  }
   return (
     <Canvas style={{ width, height }} onTouch={onTouch}>
       <Paint>
-        <ImageShader
-          source={require("../../../assets/debug.png")}
-          tx="repeat"
-          ty="repeat"
-        />
+        <ImageShader image={image} tx="repeat" ty="repeat" />
       </Paint>
       {rects.map((r, i) => {
         const patch = rectToPatch(mesh, r);

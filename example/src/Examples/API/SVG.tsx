@@ -11,13 +11,7 @@ export const SVG = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
-      <ImageSVG
-        source={svg}
-        x={0}
-        y={0}
-        width={width / 2}
-        height={height / 2}
-      />
+      <ImageSVG svg={svg} x={0} y={0} width={width / 2} height={height / 2} />
     </Canvas>
   );
 };

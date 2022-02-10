@@ -1,5 +1,7 @@
 # @shopify/react-native-skia
 
+[![Tests](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml)
+
 <img width="400" alt="skia" src="https://user-images.githubusercontent.com/306134/146549218-b7959ad9-0107-4c1c-b439-b96c780f5230.png">
 
 Checkout the full documentation [here](https://shopify.github.io/react-native-skia).

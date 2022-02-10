@@ -59,7 +59,7 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
           size={12}
           x={() => touchPos.value.x - 24}
           y={() => touchPos.value.y - 18}
-          value={() => "$ " + (touchPos.value.y * -1).toFixed(2)}
+          text={() => "$ " + (touchPos.value.y * -1).toFixed(2)}
         />
         <Line
           p1={() => vec(touchPos.value.x, touchPos.value.y + 14)}
