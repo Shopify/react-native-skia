@@ -52,6 +52,6 @@ jobs:
       - name: Install Docs
         run: cd docs; yarn;
 
-      - name: TypeScript Example Docs
-        run: cd docs; yarn build;
+#     - name: TypeScript Example Docs
+#       run: cd docs; yarn build;
 
