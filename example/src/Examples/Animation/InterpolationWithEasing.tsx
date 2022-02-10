@@ -1,15 +1,15 @@
 import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
-import { Canvas, Easing, useTiming } from "@shopify/react-native-skia";
+import { Canvas, Circle, Easing, useTiming } from "@shopify/react-native-skia";
 
-import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
+import { AnimationDemo, Size, Padding } from "./Components";
 
 const { width } = Dimensions.get("window");
 
 export const InterpolationWithEasing = () => {
   const progress = useTiming(
     {
-      from: 10,
+      from: 20,
       to: width - (Size + Padding),
       loop: true,
       yoyo: true,
@@ -19,7 +19,7 @@ export const InterpolationWithEasing = () => {
   return (
     <AnimationDemo title={"Interpolating value using an easing."}>
       <Canvas style={styles.canvas}>
-        <AnimationElement x={progress} />
+        <Circle cx={progress} cy={40} r={15} color="#DC4C4C" />
       </Canvas>
     </AnimationDemo>
   );

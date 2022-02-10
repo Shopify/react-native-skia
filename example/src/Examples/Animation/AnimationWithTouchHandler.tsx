@@ -2,13 +2,14 @@ import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import {
   Canvas,
+  Circle,
   runSpring,
   Spring,
   useTouchHandler,
   useValue,
 } from "@shopify/react-native-skia";
 
-import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
+import { AnimationDemo, Size, Padding } from "./Components";
 
 const { width } = Dimensions.get("window");
 
@@ -34,7 +35,8 @@ export const AnimationWithTouchHandler = () => {
   return (
     <AnimationDemo title={"Animation with touch handler."}>
       <Canvas style={styles.canvas} onTouch={touchHandler}>
-        <AnimationElement x={translateX} />
+        <Circle cx={translateX} cy={40} r={20} color="#AAA" />
+        <Circle cx={translateX} cy={40} r={15} color="#CCC" />
       </Canvas>
     </AnimationDemo>
   );

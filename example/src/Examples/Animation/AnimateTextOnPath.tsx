@@ -25,18 +25,15 @@ const ExampleHeight = 160;
 export const AnimateTextOnPath = () => {
   const { width } = useWindowDimensions();
   const progress = useTiming(
-    {
-      loop: true,
-      yoyo: true,
-    },
-    { duration: 1000, easing: Easing.inOut(Easing.cubic) }
+    { loop: true, yoyo: true },
+    { duration: 700, easing: Easing.inOut(Easing.cubic) }
   );
 
   const path1 = usePath((p) => {
     p.moveTo(Padding, ExampleHeight / 2);
     p.quadTo(
-      width - Padding * 2,
-      ExampleHeight / 2,
+      (width - Padding * 2) / 2,
+      ExampleHeight,
       width - Padding * 2,
       ExampleHeight / 2
     );
@@ -47,7 +44,7 @@ export const AnimateTextOnPath = () => {
     p.moveTo(Padding, ExampleHeight / 2);
     p.quadTo(
       (width - Padding * 2) / 2,
-      (ExampleHeight - Padding) / 6,
+      0,
       width - Padding * 2,
       ExampleHeight / 2
     );
@@ -56,11 +53,9 @@ export const AnimateTextOnPath = () => {
 
   const path = useDerivedValue(
     (p) => {
-      if (!path1.isInterpolatable(path2)) {
-        console.log("Paths are not interpolatable");
-        return path1;
+      if (p > 1.0 || p < 0) {
+        console.log(p.toFixed(4));
       }
-
       return path1.interpolate(path2, p);
     },
     [progress]
