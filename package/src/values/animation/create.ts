@@ -1,9 +1,14 @@
-import type { IAnimationValue } from "../types";
+import type { IValue } from "../types";
 import { Value } from "../Values";
 
 import { getResolvedParams } from "./params";
 import { timing } from "./timing";
-import type { AnimationParams, TimingConfig, SpringConfig } from "./types";
+import type {
+  AnimationParams,
+  TimingConfig,
+  SpringConfig,
+  IAnimation,
+} from "./types";
 
 /**
  * Creates a new value that will be driven by an animation (clock) value.
@@ -20,8 +25,8 @@ import type { AnimationParams, TimingConfig, SpringConfig } from "./types";
 export const createTiming = (
   toOrParams: number | AnimationParams,
   config?: TimingConfig
-): IAnimationValue => {
-  return internalCreateTiming(toOrParams, config);
+): IAnimation => {
+  return internalCreateTiming(getResolvedParams(toOrParams, config));
 };
 
 /**
@@ -39,8 +44,8 @@ export const createTiming = (
 export const createSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): IAnimationValue => {
-  return internalCreateTiming(toOrParams, config);
+): IAnimation => {
+  return internalCreateTiming(getResolvedParams(toOrParams, config));
 };
 
 /**
@@ -50,45 +55,62 @@ export const createSpring = (
  * the value has reached its desired "to" value the animation
  * will be stopped.
  *
- * @param toOrParams To value or Animation parameters
+ * @param params Animation parameters
  * @param config Spring or timing configuration
+ * @param value Optional value that the animation will update
  * @params an animation value that can be used to start/stop
  * the animation.
  */
 export const internalCreateTiming = (
-  toOrParams: number | AnimationParams,
-  config?: TimingConfig | SpringConfig
-): IAnimationValue => {
-  // Resolve parameters
-  const resolvedParameters = getResolvedParams(toOrParams, config);
+  params: Required<AnimationParams> & Required<TimingConfig>,
+  value?: IValue<number>
+): IAnimation => {
   // Create driver value
-  const driver = Value.createAnimationValue(resolvedParameters.immediate);
+  const driver = Value.createAnimationValue(params.immediate);
   // Create the animation value
-  const value = Value.createValue(resolvedParameters.from);
+  const resolvedValue = value ?? Value.createValue(params.from);
 
   // Set the driver on the value
-  value.setDriver(driver, (t: number) => {
+  const updateFunction = (t: number) => {
     const p = timing(
       t,
-      resolvedParameters.duration,
-      resolvedParameters.easing,
-      resolvedParameters.loop ?? false,
-      resolvedParameters.yoyo ?? false,
+      params.duration,
+      params.easing,
+      params.loop ?? false,
+      params.yoyo ?? false,
       () => {
         // Animation has reached its duration and to value
-        value.setDriver(undefined);
+        resolvedValue.setDriver(undefined);
         driver.stop();
       }
     );
-    return (
-      p * (resolvedParameters.to - resolvedParameters.from) +
-      resolvedParameters.from
-    );
-  });
+    return p * (params.to - params.from) + params.from;
+  };
+
+  resolvedValue.setDriver(driver, updateFunction);
+
+  const seek = (t: number) => {
+    driver.stop();
+    const nextValue = updateFunction(t * params.duration);
+    const tmpValue = Value.createValue(nextValue);
+    resolvedValue.setDriver(tmpValue);
+    tmpValue.value = nextValue;
+  };
+
+  const stop = () => {
+    resolvedValue.setDriver(undefined);
+    driver.stop();
+  };
+
+  const start = () => {
+    resolvedValue.setDriver(driver, updateFunction);
+    driver.start();
+  };
 
   return {
-    ...value,
-    stop: driver.stop,
-    start: driver.start,
+    value: resolvedValue,
+    stop,
+    start,
+    seek,
   };
 };

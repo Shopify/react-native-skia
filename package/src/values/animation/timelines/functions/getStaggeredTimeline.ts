@@ -14,7 +14,7 @@ import { sequential } from "./sequential";
  */
 export function getStaggeredTimeline<T>(
   items: TimelineInfo<T>[],
-  params: number | DistributeParams<T> | undefined,
+  params: number | DistributeParams | undefined,
   base?: number
 ): TimelineInfo<T>[] {
   if (params === undefined) {

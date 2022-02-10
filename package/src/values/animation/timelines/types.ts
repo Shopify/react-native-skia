@@ -38,7 +38,7 @@ export type DistributeFrom = "start" | "end" | "center" | "edges" | "random";
  */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-export type DistributeParams<T> = {
+export type DistributeParams = {
   /*
    * Base of the stagger distribution. Default is 0
    */

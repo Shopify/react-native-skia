@@ -16,7 +16,11 @@ export const AnimationWithTouchHandler = () => {
   const translateX = useValue((width - Size - Padding) / 2);
   const offsetX = useValue(0);
   const touchHandler = useTouchHandler({
-    onStart: ({ x }) => (offsetX.value = x - translateX.value),
+    onStart: ({ x }) => {
+      offsetX.value = x - translateX.value;
+      // Take over the value (stop any animations)
+      translateX.setDriver(undefined);
+    },
     onActive: ({ x }) => (translateX.value = x - offsetX.value),
     onEnd: ({ velocityX }) => {
       runSpring(

@@ -12,6 +12,7 @@ export const InterpolationWithSpring = () => {
       from: (width - Size - Padding) * 0.25,
       to: (width - Size - Padding) * 0.75,
       yoyo: true,
+      loop: true,
     },
     Spring.Config.Wobbly
   );

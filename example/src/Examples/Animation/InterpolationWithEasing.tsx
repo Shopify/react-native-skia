@@ -11,6 +11,7 @@ export const InterpolationWithEasing = () => {
     {
       from: 10,
       to: width - Size - Padding,
+      loop: true,
       yoyo: true,
     },
     { duration: 1000, easing: Easing.inOut(Easing.cubic) }

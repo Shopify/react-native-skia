@@ -7,9 +7,9 @@ import { shuffle } from "./shuffle";
  * @description Distributes values from an array
  * @param params @see DistributeParams
  */
-export function distribute<T>(params: number | DistributeParams<T>) {
+export function distribute<T>(params: number | DistributeParams) {
   // Resolve parameters
-  const resolvedParams: DistributeParams<T> =
+  const resolvedParams: DistributeParams =
     typeof params === "number" ? { each: params as number } : params;
 
   // Validate input

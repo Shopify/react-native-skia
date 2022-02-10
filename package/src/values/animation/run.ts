@@ -1,9 +1,13 @@
-import type { IAnimationValue, IValue } from "../types";
-import { Value } from "../Values";
+import type { IValue } from "../types";
 
+import { internalCreateTiming } from "./create";
 import { getResolvedParams } from "./params";
-import { timing } from "./timing";
-import type { AnimationParams, TimingConfig, SpringConfig } from "./types";
+import type {
+  AnimationParams,
+  TimingConfig,
+  SpringConfig,
+  IAnimation,
+} from "./types";
 
 /**
  * Creates a new animation on an existing value that will be driven by
@@ -22,7 +26,7 @@ export const runTiming = (
   value: IValue<number>,
   toOrParams: number | AnimationParams,
   config?: TimingConfig
-): IAnimationValue => {
+): IAnimation => {
   const resolvedParams = getResolvedParams(toOrParams, config);
   return internalRunTiming(value, resolvedParams);
 };
@@ -44,7 +48,7 @@ export const runSpring = (
   value: IValue<number>,
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): IAnimationValue => {
+): IAnimation => {
   const resolvedParams = getResolvedParams(toOrParams, config);
   return internalRunTiming(value, resolvedParams);
 };
@@ -65,47 +69,6 @@ export const runSpring = (
 export const internalRunTiming = (
   value: IValue<number>,
   params: Required<AnimationParams> & Required<TimingConfig>
-): IAnimationValue => {
-  // Make sure we'll start at the current value
-  const resolvedParameters = { ...params };
-  resolvedParameters.from = value.value;
-
-  // Create driver value
-  const driver = Value.createAnimationValue(resolvedParameters.immediate);
-
-  // Stop any existing animations on the value
-  const prevDriver = value.getDriver();
-  if (prevDriver && "stop" in prevDriver) {
-    (prevDriver as IAnimationValue).stop();
-  }
-
-  // Set the driver on the value
-  value.setDriver(driver, (t: number) => {
-    const p = timing(
-      t,
-      resolvedParameters.duration,
-      resolvedParameters.easing,
-      resolvedParameters.loop,
-      resolvedParameters.yoyo,
-      () => {
-        // Animation has reached its duration and "to" value
-        // And is not looping
-        value.setDriver(undefined);
-        driver.stop();
-      }
-    );
-    return (
-      p * (resolvedParameters.to - resolvedParameters.from) +
-      resolvedParameters.from
-    );
-  });
-
-  return {
-    ...value,
-    stop: () => {
-      value.setDriver(undefined);
-      driver.stop();
-    },
-    start: driver.start,
-  };
+): IAnimation => {
+  return internalCreateTiming(params, value);
 };
