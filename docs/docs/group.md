@@ -55,14 +55,14 @@ The origin property is a helper to set the origin of the transformation. This pr
 ### Simple Transformation
 
 ```tsx twoslash
-import {Canvas, Fill, Group, Rect} from "@shopify/react-native-skia";
+import {Canvas, Fill, Group, RoundedRect} from "@shopify/react-native-skia";
 
 const SimpleTransform = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="#e8f4f8" />
       <Group color="lightblue" transform={[{ skewX: Math.PI / 6 }]}>
-        <Rect x={64} y={64} width={128} height={128} rx={10} />
+        <RoundedRect x={64} y={64} width={128} height={128} rx={10} />
       </Group>
     </Canvas>
   );
@@ -74,7 +74,7 @@ const SimpleTransform = () => {
 ### Transformation of Origin
 
 ```tsx twoslash
-import {Canvas, Fill, Group, Rect} from "@shopify/react-native-skia";
+import {Canvas, Fill, Group, RoundedRect} from "@shopify/react-native-skia";
 
 const SimpleTransform = () => {
   return (
@@ -85,7 +85,7 @@ const SimpleTransform = () => {
         origin={{ x: 128, y: 128 }}
         transform={[{ skewX: Math.PI / 6 }]}
       >
-        <Rect x={64} y={64} width={128} height={128} rx={10} />
+        <RoundedRect x={64} y={64} width={128} height={128} rx={10} />
       </Group>
     </Canvas>
   );
