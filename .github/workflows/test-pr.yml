@@ -48,4 +48,10 @@ jobs:
 
       - name: TypeScript Example
         run: cd example; yarn tsc;
+        
+      - name: Install Docs
+        run: cd docs; yarn;
+
+      - name: TypeScript Example Docs
+        run: cd docs; yarn build;
 
