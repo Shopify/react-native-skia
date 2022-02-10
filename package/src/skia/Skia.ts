@@ -12,7 +12,7 @@ import type { IRRect } from "./RRect";
 import type { RuntimeEffectFactory } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
 import { Color } from "./Color";
-import type { Matrix } from "./Matrix";
+import type { IMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
 import type { IPoint } from "./Point";
 import type { Vertices, VertexMode } from "./Vertices/Vertices";
@@ -31,7 +31,7 @@ export interface Skia {
   RRectXY: (rect: IRect, rx: number, ry: number) => IRRect;
   Paint: () => IPaint;
   Path: PathFactory;
-  Matrix: () => Matrix;
+  Matrix: () => IMatrix;
   ColorFilter: ColorFilterFactory;
   Font: (typeface?: Typeface, size?: number) => Font;
   Typeface: TypefaceFactory;
