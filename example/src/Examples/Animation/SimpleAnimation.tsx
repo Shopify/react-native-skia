@@ -8,7 +8,7 @@ import {
   useTimestamp,
 } from "@shopify/react-native-skia";
 
-import { AnimationDemo, Padding, Size } from "./Components";
+import { AnimationDemo, Size } from "./Components";
 
 export const SimpleAnimation = () => {
   const { width } = useWindowDimensions();
