@@ -15,7 +15,7 @@ export const SimpleAnimation = () => {
   const timestamp = useTimestamp();
   const normalized = useDerivedValue((t) => (t / 1000) % 1.0, [timestamp]);
   const rect = useDerivedValue(
-    (p) => ({ x: Padding, y: 30, width: p * width, height: Size }),
+    (p) => ({ x: 0, y: 30, width: p * width, height: Size }),
     [normalized]
   );
   return (
