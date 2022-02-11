@@ -27,7 +27,7 @@ export const timing = (
   // calculate return value
   let n = p % 1;
   if (yoyo) {
-    n = p % 2.0 > 1.0 ? 1 - (p % 1) : p % 1;
+    n = p % 2.0 >= 1.0 ? 1 - (p % 1) : p % 1;
   } else if (!loop) {
     if (p >= 1.0) {
       n = 1.0;

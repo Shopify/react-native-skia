@@ -18,7 +18,7 @@ const typeface = Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica");
 if (!typeface) {
   throw new Error("Helvetica not found");
 }
-const font = Skia.Font(typeface, 30);
+const font = Skia.Font(typeface, 22);
 
 const ExampleHeight = 160;
 
@@ -58,15 +58,7 @@ export const AnimateTextOnPath = () => {
 
   // Create a derived value that interpolates between
   // the start and end path
-  const path = useDerivedValue(
-    (p) => {
-      if (p > 1.0 || p < 0) {
-        console.log(p.toFixed(4));
-      }
-      return path1.interpolate(path2, p);
-    },
-    [progress]
-  );
+  const path = useDerivedValue((p) => path1.interpolate(path2, p), [progress]);
 
   return (
     <AnimationDemo title={"Interpolating text on path."}>
