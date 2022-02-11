@@ -34,7 +34,13 @@ namespace RNSkia {
         )
 
         JSI_HOST_FUNCTION(next) {
-            return JsiSkContourMeasure::toValue(runtime, getContext(), getObject()->next());
+          auto next = getObject()->next();
+          if(next == nullptr) {
+            return jsi::Value::undefined();
+          }
+          auto nextObject = std::make_shared<JsiSkContourMeasure>(getContext(), next);
+          
+          return jsi::Object::createFromHostObject(runtime, nextObject);
         }
 
         JSI_EXPORT_FUNCTIONS(

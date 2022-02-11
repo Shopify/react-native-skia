@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -20,21 +19,23 @@ namespace RNSkia {
     public:
         JsiSkContourMeasure(std::shared_ptr<RNSkPlatformContext> context,
                   const sk_sp<SkContourMeasure> contourMeasure)
-                : JsiSkWrappingSkPtrHostObject(context, contourMeasure){};
+                : JsiSkWrappingSkPtrHostObject(context, contourMeasure) {
+                  assert(contourMeasure != nullptr);
+                };
 
         JSI_HOST_FUNCTION(getPosTan) {
             auto dist = arguments[0].asNumber();
-            SkPoint* position = (SkPoint *)malloc(sizeof (SkPoint));
-            SkPoint* tangent = (SkPoint *)malloc(sizeof (SkPoint));
-            auto result = getObject()->getPosTan(dist, position, tangent);
+            SkPoint position;
+            SkPoint tangent;
+            auto result = getObject()->getPosTan(dist, &position, &tangent);
             if (!result) {
                 jsi::detail::throwJSError(runtime, "getSegment() failed");
             }
             auto posTan = jsi::Object(runtime);
-            posTan.setProperty(runtime, "px",  position->x());
-            posTan.setProperty(runtime, "py", position->y());
-            posTan.setProperty(runtime, "tx", tangent->x());
-            posTan.setProperty(runtime, "ty", tangent->y());
+            posTan.setProperty(runtime, "px",  position.x());
+            posTan.setProperty(runtime, "py", position.y());
+            posTan.setProperty(runtime, "tx", tangent.x());
+            posTan.setProperty(runtime, "ty", tangent.y());
             return posTan;
         }
 
@@ -80,15 +81,6 @@ namespace RNSkia {
                     .asHostObject<JsiSkContourMeasure>(runtime)
                     .get()
                     ->getObject();
-        }
-
-        static jsi::Value toValue(jsi::Runtime &runtime,
-                                  std::shared_ptr<RNSkPlatformContext> context,
-                                  sk_sp<SkContourMeasure> contourMeasure) {
-            return jsi::Object::createFromHostObject(
-                    runtime,
-                    std::make_shared<JsiSkContourMeasure>(context, contourMeasure)
-            );
         }
     };
 } // namespace RNSkia
