@@ -200,7 +200,7 @@ private:
   /**
    Redraw queue counter
    */
-  std::atomic<int> _redrawRequestCounter;
+  std::atomic<int> _redrawRequestCounter = { 1 };
   /**
    Flag indicating that the view is valid / invalid
    */
