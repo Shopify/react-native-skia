@@ -11,6 +11,7 @@ import { Gooey } from "./Examples/Gooey";
 import { Hue } from "./Examples/Hue";
 import { Matrix } from "./Examples/Matrix";
 import { Aurora } from "./Examples/Aurora";
+import { Glassmorphism } from "./Examples/Glassmorphism";
 import { HomeScreen } from "./Home";
 
 const App = () => {
@@ -43,6 +44,13 @@ const App = () => {
           <Stack.Screen
             name="Aurora"
             component={Aurora}
+            options={{
+              header: () => null,
+            }}
+          />
+          <Stack.Screen
+            name="Glassmorphism"
+            component={Glassmorphism}
             options={{
               header: () => null,
             }}

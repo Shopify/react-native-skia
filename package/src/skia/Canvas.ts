@@ -19,6 +19,11 @@ export enum ClipOp {
   Intersect,
 }
 
+export enum SaveLayerFlag {
+  SaveLayerInitWithPrevious = 1 << 2,
+  SaveLayerF16ColorType = 1 << 4,
+}
+
 export interface ICanvas {
   /**
    * Draws the given image with its top-left corner at (left, top) using the current clip,
@@ -384,17 +389,8 @@ export interface ICanvas {
     paint?: IPaint,
     bounds?: IRect | null,
     backdrop?: IImageFilter | null,
-    flags?: number
+    flags?: SaveLayerFlag
   ): number;
-
-  /**
-   * Saves Matrix and clip, and allocates a SkBitmap for subsequent drawing.
-   * Calling restore() discards changes to Matrix and clip, and draws the SkBitmap.
-   * It returns the height of the stack.
-   * See Canvas.h for more.
-   * @param paint
-   */
-  saveLayerPaint(paint?: IPaint): number;
 
   /** Removes changes to SkMatrix and clip since SkCanvas state was
         last saved. The state is removed from the stack.

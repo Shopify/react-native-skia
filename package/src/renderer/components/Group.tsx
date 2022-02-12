@@ -33,7 +33,7 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
       if (rasterize) {
-        canvas.saveLayerPaint(rasterize.current ?? undefined);
+        canvas.saveLayer(rasterize.current ?? undefined);
       } else {
         canvas.save();
       }

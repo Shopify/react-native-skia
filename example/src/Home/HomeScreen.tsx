@@ -38,6 +38,11 @@ export const HomeScreen = () => {
         route="Aurora"
       />
       <HomeScreenButton
+        title="🪞 Glassmorphism"
+        description="Glassmorphism"
+        route="Glassmorphism"
+      />
+      <HomeScreenButton
         title="🖌 Drawing"
         description="Use touches to draw with Skia"
         route="Drawing"
