@@ -13,6 +13,7 @@ import { AnimationDemo, Size, Padding } from "./Components";
 const { width } = Dimensions.get("window");
 
 export const InterpolationWithEasing = () => {
+  // Create timing animation that loops forever
   const progress = useTiming(
     {
       from: 20,
