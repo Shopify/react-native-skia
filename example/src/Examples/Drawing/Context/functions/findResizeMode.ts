@@ -1,4 +1,4 @@
-import type { Point } from "@shopify/react-native-skia";
+import type { IPoint } from "@shopify/react-native-skia";
 
 import type { DrawingElements, ResizeMode } from "../types";
 
@@ -7,7 +7,7 @@ import { getBoundingBox } from "./getBoundingBox";
 const hitSlop = 8;
 
 export const findResizeMode = (
-  point: Point,
+  point: IPoint,
   selectedElements: DrawingElements
 ): ResizeMode | undefined => {
   const bounds = getBoundingBox(selectedElements);

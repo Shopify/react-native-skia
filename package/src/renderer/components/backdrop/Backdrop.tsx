@@ -6,7 +6,7 @@ import type { AnimatedProps, RectDef, RRectDef } from "../../processors";
 import type { Color, ICanvas } from "../../../skia";
 import { useDrawing } from "../../nodes";
 import { processChildren } from "../../Host";
-import { isRectDef, processRect, processRRect } from "../../processors";
+import { isRRectDef, processRect, processRRect } from "../../processors";
 import type { PathDef } from "../../processors/Paths";
 import { isPathDef } from "../../processors/Paths";
 
@@ -27,12 +27,13 @@ const clip = (canvas: ICanvas, def: ClipDef, op: ClipOp) => {
   if (isPathDef(def)) {
     const path = processPath(def.path);
     canvas.clipPath(path, op, true);
-  } else if (isRectDef(def)) {
+  } else if (isRRectDef(def)) {
+    const rrect = processRRect(def);
+    console.log({ rrect });
+    canvas.clipRRect(rrect, op, true);
+  } else {
     const rect = processRect(def);
     canvas.clipRect(rect, op, true);
-  } else {
-    const rrect = processRRect(def);
-    canvas.clipRRect(rrect, op, true);
   }
 };
 

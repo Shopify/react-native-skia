@@ -32,7 +32,12 @@ export const Glassmorphism = () => {
         />
       </Paint>
       <Circle c={c} r={() => mix(progress.value, r, r / 2)} />
-      <BackdropBlur color="rgba(0, 0, 0, 0.3)" intensity={20} rect={rect} />
+      <BackdropBlur
+        color="rgba(0, 0, 0, 0.3)"
+        intensity={20}
+        rect={rect}
+        rx={150}
+      />
     </Canvas>
   );
 };
