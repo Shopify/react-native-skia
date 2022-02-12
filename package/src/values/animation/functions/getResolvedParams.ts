@@ -1,5 +1,5 @@
-import { Easing } from "./Easing";
-import type { AnimationParams, TimingConfig, SpringConfig } from "./types";
+import { Easing } from "../Easing";
+import type { AnimationParams, TimingConfig, SpringConfig } from "../types";
 
 const DefaultParameters = {
   to: 1,
