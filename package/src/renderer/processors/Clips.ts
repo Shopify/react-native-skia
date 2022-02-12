@@ -8,8 +8,6 @@ import { isRRect } from "./Rects";
 export type ClipDef = IRRect | IRect | PathDef;
 
 export const processClip = (canvas: ICanvas, def: ClipDef, op: ClipOp) => {
-  console.log({ def });
-
   if (isPathDef(def)) {
     const path = processPath(def);
     canvas.clipPath(path, op, true);
