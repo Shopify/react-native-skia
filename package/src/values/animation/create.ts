@@ -1,5 +1,5 @@
-import type { IValue } from "../types";
-import { Value } from "../Values";
+import type { IValue, IReadonlyValue } from "../types";
+import { Value } from "../api";
 
 import type { RequiredAnimationParams } from "./params";
 import { getResolvedParams } from "./params";
@@ -49,6 +49,24 @@ export const createSpring = (
   return internalCreateTiming(getResolvedParams(toOrParams, config));
 };
 
+type INativeValue = IValue & {
+  /**
+   * Adds another value as the driver of this value. When the driver
+   * value change, this value will be updated with either the value of the
+   * dependant value, or if the cb parameter is provided, the result of the
+   * callback. To remove a dependency, just call addDependency with an undefined
+   * value.
+   */
+  setDriver: <DepT>(
+    value: IReadonlyValue<DepT> | undefined,
+    cb?: (v: DepT) => number
+  ) => void;
+  /**
+   * Returns the current dependency of this value.
+   */
+  getDriver: () => IReadonlyValue | undefined;
+};
+
 /**
  * Creates a new value that will be driven by an animation (clock) value.
  * The value will be run from / to the value in params and modified
@@ -69,7 +87,8 @@ export const internalCreateTiming = (
   // Create driver value
   const driver = Value.createAnimationValue(params.immediate);
   // Create the animation value
-  const resolvedValue = value ?? Value.createValue(params.from ?? 0);
+  const resolvedValue = (value ??
+    Value.createValue(params.from ?? 0)) as INativeValue;
   // Update from
   params.from = params.from ?? resolvedValue.value;
   // Set the driver on the value

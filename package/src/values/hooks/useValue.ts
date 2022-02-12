@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { Value } from "../api";
 import type { IValue } from "../types";
 
 /**
@@ -9,5 +10,5 @@ import type { IValue } from "../types";
  */
 export const useValue = <T>(v: T): IValue<T> => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => global.SkiaValueApi.createValue(v), []);
+  return useMemo(() => Value.createValue(v), []);
 };

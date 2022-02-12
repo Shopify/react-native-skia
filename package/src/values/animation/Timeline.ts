@@ -1,5 +1,5 @@
 import type { IValue } from "../types";
-import { Value } from "../Values";
+import { Value } from "../api";
 
 import { getResolvedParams } from "./params";
 import {

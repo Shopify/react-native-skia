@@ -90,7 +90,7 @@ const MyComponent = () => {
   );
   return (
     <Canvas style={{ flex: 1 }}>
-      <Rect x={timestamp} y={100} width={10} height={10} color={"red"} />
+      <Rect x={position} y={100} width={10} height={10} color={"red"} />
     </Canvas>
   );
 };

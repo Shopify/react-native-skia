@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 
-import type { CreateDerivedValue, IReadonlyValue } from "../types";
+import type { IReadonlyValue } from "../types";
+import { Value } from "../api";
+
+type CreateDerivedvalue = typeof Value.createDerivedValue;
 
 /**
  * Creates a new derived value - a value that will calculate its value depending
@@ -9,12 +12,9 @@ import type { CreateDerivedValue, IReadonlyValue } from "../types";
  * @param values Depenedant values
  * @returns A readonly value
  */
-export const useDerivedValue: CreateDerivedValue = <R>(
+export const useDerivedValue: CreateDerivedvalue = <R>(
   cb: (...args: Array<unknown>) => R,
   values: Array<IReadonlyValue<unknown>>
 ): IReadonlyValue<R> => {
-  return useMemo(
-    () => global.SkiaValueApi.createDerivedValue(cb, values),
-    [cb, values]
-  );
+  return useMemo(() => Value.createDerivedValue(cb, values), [cb, values]);
 };

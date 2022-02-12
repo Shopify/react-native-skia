@@ -1,4 +1,6 @@
 import { useEffect, useMemo } from "react";
+
+import { Value } from "../api";
 import "../types";
 
 /**
@@ -9,7 +11,7 @@ import "../types";
  */
 export const useTimestamp = (immediate = true) => {
   const value = useMemo(
-    () => global.SkiaValueApi.createAnimationValue(immediate),
+    () => Value.createAnimationValue(immediate),
     [immediate]
   );
   useEffect(() => () => value.stop(), [value]);
