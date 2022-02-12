@@ -1,4 +1,5 @@
 export * from "./shapes";
+export * from "./backdrop";
 export * from "./image";
 export * from "./shaders";
 export * from "./text";

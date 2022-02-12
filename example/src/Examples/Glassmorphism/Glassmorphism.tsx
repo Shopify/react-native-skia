@@ -9,11 +9,10 @@ import {
   Fill,
   useLoop,
   mix,
+  BackdropBlur,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
-
-import { BackdropBlur } from "./BackdropBlur";
 
 const { width, height } = Dimensions.get("window");
 const c = vec(width / 2, height / 2);

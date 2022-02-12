@@ -72,6 +72,8 @@ export const isRectCtor = (def: RectDef): def is RectCtor =>
   (def as any).rect === undefined;
 export const isRRect = (def: IRect | IRRect): def is IRRect =>
   (def as any).rect !== undefined;
+export const isRectDef = (def: unknown): def is RectDef =>
+  (def as any).rect !== undefined || (def as any).x !== undefined;
 
 export interface RectCtor {
   x: number;
