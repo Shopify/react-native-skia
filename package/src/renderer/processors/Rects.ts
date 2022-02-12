@@ -43,10 +43,7 @@ const isRectCtor = (def: RectDef): def is RectCtor =>
   (def as any).rect === undefined;
 export const isRRect = (def: IRect | IRRect): def is IRRect =>
   (def as any).rect !== undefined;
-export const isRRectDef = (def: RectDef | RRectDef): def is RRectDef => {
-  const root = (def as any).rect ? (def as any).rect : def;
-  return root.rx !== undefined || root.ry !== undefined;
-};
+
 export interface RectCtor {
   x: number;
   y: number;

@@ -1,29 +1,25 @@
 import React from "react";
-import type { ReactNode, RefObject } from "react";
+import type { RefObject } from "react";
 
 import { processChildren } from "../Host";
-import type { IPaint, IRect, IRRect } from "../../skia";
+import type { IPaint } from "../../skia";
 import { ClipOp } from "../../skia";
 import {
   processTransform,
   selectPaint,
   processPaint,
-  isRRect,
-  rrect,
-  processPath,
+  processClip,
 } from "../processors";
 import type {
   CustomPaintProps,
   TransformProps,
   AnimatedProps,
-  PathDef,
+  ClipDef,
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
-  children: ReactNode | ReactNode[];
-  clipRect?: IRect | IRRect;
-  clipPath?: PathDef;
+  clip?: ClipDef;
   invertClip?: boolean;
   rasterize?: RefObject<IPaint>;
 }
@@ -31,11 +27,7 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 export const Group = (props: AnimatedProps<GroupProps>) => {
   const onDraw = useDrawing(
     props,
-    (
-      ctx,
-      { clipRect, rasterize, clipPath, invertClip, ...groupProps },
-      children
-    ) => {
+    (ctx, { rasterize, clip, invertClip, ...groupProps }, children) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
@@ -44,17 +36,9 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       } else {
         canvas.save();
       }
-      const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
-      if (clipRect) {
-        canvas.clipRRect(
-          isRRect(clipRect) ? clipRect : rrect(clipRect, 0, 0),
-          op,
-          true
-        );
-      }
-      if (clipPath) {
-        const path = processPath(clipPath);
-        canvas.clipPath(path, op, true);
+      if (clip) {
+        const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
+        processClip(canvas, clip, op);
       }
       processTransform(ctx, groupProps);
       processChildren(

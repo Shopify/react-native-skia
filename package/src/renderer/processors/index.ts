@@ -6,3 +6,4 @@ export * from "./Rects";
 export * from "./math";
 export * from "./Font";
 export * from "./Paths";
+export * from "./Clips";

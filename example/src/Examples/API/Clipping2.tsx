@@ -51,7 +51,7 @@ export const Clipping = () => {
           height={SIZE}
           fit="cover"
         />
-        <Group clipRect={clipRRect} invertClip>
+        <Group clip={clipRRect} invertClip>
           <Image
             image={oslo}
             x={SIZE + 2 * PADDING}
@@ -61,7 +61,7 @@ export const Clipping = () => {
             fit="cover"
           />
         </Group>
-        <Group clipPath={star}>
+        <Group clip={star}>
           <Image
             image={oslo}
             x={2 * SIZE + 3 * PADDING}
