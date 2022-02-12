@@ -91,14 +91,6 @@ export const internalCreateTiming = (
 
   resolvedValue.setDriver(driver, updateFunction);
 
-  const seek = (t: number) => {
-    driver.stop();
-    const nextValue = updateFunction(t * params.duration);
-    const tmpValue = Value.createValue(nextValue);
-    resolvedValue.setDriver(tmpValue);
-    tmpValue.value = nextValue;
-  };
-
   const stop = () => {
     resolvedValue.setDriver(undefined);
     driver.stop();
@@ -113,6 +105,5 @@ export const internalCreateTiming = (
     value: resolvedValue,
     stop,
     start,
-    seek,
   };
 };

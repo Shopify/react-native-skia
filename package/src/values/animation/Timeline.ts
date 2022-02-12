@@ -79,8 +79,6 @@ export type ITimeline = {
   start: () => void;
   // Stops the timeline
   stop: () => void;
-  // Seeks into the timeline with a number between 0 and 1
-  seek: (t: number) => void;
   // Contains all values of the timeline. Each timeline child
   // will be a value
   readonly values: IValue<number>[];
@@ -229,7 +227,6 @@ const build = (
   return {
     start: driver.start,
     stop: driver.stop,
-    seek: driver.seek,
     values,
     duration: tlb.timelineInfo().duration,
     destroy: () => {

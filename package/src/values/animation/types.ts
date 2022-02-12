@@ -29,5 +29,4 @@ export interface IAnimation {
   value: IValue;
   start: () => void;
   stop: () => void;
-  seek: (t: number) => void;
 }
