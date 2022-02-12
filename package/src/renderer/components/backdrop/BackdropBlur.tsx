@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Blur } from "..";
+import { Blur } from "../imageFilters";
 
 import type { BaseBackdropProps } from "./Backdrop";
 import { Backdrop } from "./Backdrop";

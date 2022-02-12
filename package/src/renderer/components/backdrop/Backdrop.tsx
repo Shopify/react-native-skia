@@ -3,17 +3,14 @@ import type { ReactNode } from "react";
 
 import { Skia, processColor, isImageFilter, ClipOp } from "../../../skia";
 import type { AnimatedProps, RectDef, RRectDef } from "../../processors";
-import type { IPath, Color, ICanvas } from "../../../skia";
+import type { Color, ICanvas } from "../../../skia";
 import { useDrawing } from "../../nodes";
 import { processChildren } from "../../Host";
 import { isRectDef, processRect, processRRect } from "../../processors";
+import type { PathDef } from "../../processors/Paths";
+import { isPathDef } from "../../processors/Paths";
 
-type PathDef = string | IPath;
 type ClipDef = RectDef | RRectDef | { path: PathDef };
-
-const isPath = (shape: unknown): shape is { path: PathDef } =>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (shape as any).path !== undefined;
 
 const processPath = (rawPath: PathDef) => {
   const path =
@@ -27,7 +24,7 @@ const processPath = (rawPath: PathDef) => {
 };
 
 const clip = (canvas: ICanvas, def: ClipDef, op: ClipOp) => {
-  if (isPath(def)) {
+  if (isPathDef(def)) {
     const path = processPath(def.path);
     canvas.clipPath(path, op, true);
   } else if (isRectDef(def)) {
