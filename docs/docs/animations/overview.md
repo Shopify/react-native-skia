@@ -66,7 +66,7 @@ progress.value = 200; // derived.value is now 2000
 
 This value is a value that updates on every display frame on the device. It can be used to derive values and drive animations.
 
-The animation value will be updated with the number of seconds elapsed since it was started.
+The animation value will be updated with the number of milliseconds elapsed since it was started.
 
 ## Animation
 
