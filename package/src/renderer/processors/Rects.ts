@@ -1,15 +1,9 @@
 // Here we use any because hasOwnProperty doesn't work on JSI instances not does the (key in obj) syntax
 // And using Object.keys for such use-case is incredibly slow
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ReactNode } from "react";
-
 import type { IRect, IRRect } from "../../skia";
 
 import { vec } from "./math/Vector";
-
-export interface ChildrenProps {
-  children?: ReactNode | ReactNode[];
-}
 
 export const point = (x: number, y: number) => ({ x, y });
 export const rect = (x: number, y: number, width: number, height: number) => ({

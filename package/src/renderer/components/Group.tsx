@@ -4,16 +4,21 @@ import type { ReactNode, RefObject } from "react";
 import { processChildren } from "../Host";
 import type { IPaint, IRect, IRRect } from "../../skia";
 import { ClipOp } from "../../skia";
-import { processTransform, selectPaint, processPaint } from "../processors";
+import {
+  processTransform,
+  selectPaint,
+  processPaint,
+  isRRect,
+  rrect,
+  processPath,
+} from "../processors";
 import type {
   CustomPaintProps,
   TransformProps,
   AnimatedProps,
+  PathDef,
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
-import { isRRect, rrect } from "../processors/Shapes";
-import type { PathDef } from "../processors/Paths";
-import { processPath } from "../processors/Paths";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
   children: ReactNode | ReactNode[];
