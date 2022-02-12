@@ -2,17 +2,17 @@ import React from "react";
 
 import { Blur } from "../imageFilters";
 
-import type { BackdropProps } from "./Backdrop";
-import { Backdrop } from "./Backdrop";
+import type { BackdropFilterProps } from "./BackdropFilter";
+import { BackdropFilter } from "./BackdropFilter";
 
-interface BackdropBlurProps extends Omit<BackdropProps, "children"> {
+interface BackdropBlurProps extends Omit<BackdropFilterProps, "children"> {
   intensity: number;
 }
 
 export const BackdropBlur = ({ intensity, ...props }: BackdropBlurProps) => {
   return (
-    <Backdrop {...props}>
+    <BackdropFilter {...props}>
       <Blur sigmaX={intensity} sigmaY={intensity} />
-    </Backdrop>
+    </BackdropFilter>
   );
 };

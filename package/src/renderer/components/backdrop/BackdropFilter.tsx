@@ -10,13 +10,13 @@ import { processChildren } from "../../Host";
 import { isColorFilter } from "../../../skia/ColorFilter/ColorFilter";
 import { Skia } from "../../../skia/Skia";
 
-export interface BackdropProps {
+export interface BackdropFilterProps {
   color?: Color;
   clip: ClipDef;
   children: ReactNode | ReactNode[];
 }
 
-export const Backdrop = (props: AnimatedProps<BackdropProps>) => {
+export const BackdropFilter = (props: AnimatedProps<BackdropFilterProps>) => {
   const onDraw = useDrawing(props, (ctx, { color, clip }, children) => {
     const filters = processChildren(ctx, children);
     const [imgf] = filters.filter(isImageFilter);
