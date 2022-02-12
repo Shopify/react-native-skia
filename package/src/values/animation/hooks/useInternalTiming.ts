@@ -10,7 +10,7 @@ import type {
   SpringConfig,
   IAnimation,
 } from "../types";
-import { internalRunTiming } from "../run";
+import { internalRunTiming } from "../run/internalRunTiming";
 
 /**
  * Creats an animation value that will run whenever
