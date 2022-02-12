@@ -3,10 +3,10 @@ import type { SkEnum } from "../../processors/Paint";
 import type { TransformProps } from "../../processors/Transform";
 import { enumKey } from "../../processors/Paint";
 import { localMatrix } from "../../processors/Transform";
-import type { ColorProp } from "../../processors/Colors";
+import type { Color } from "../../../skia/Color";
 
 export interface GradientProps extends TransformProps {
-  colors: ColorProp[];
+  colors: Color[];
   positions?: number[];
   mode?: SkEnum<typeof TileMode>;
   flags?: number;

@@ -1,5 +1,5 @@
 import React from "react";
-import type { Color, Vector } from "@shopify/react-native-skia";
+import type { Vector, IColor } from "@shopify/react-native-skia";
 import {
   processColorAsUnitArray,
   Shader,
@@ -22,7 +22,7 @@ vec4 main(vec2 pos) {
 
 interface BilinearGradientProps {
   size: Vector;
-  colors: Color[];
+  colors: IColor[];
 }
 
 export const BilinearGradient = ({ size, colors }: BilinearGradientProps) => {

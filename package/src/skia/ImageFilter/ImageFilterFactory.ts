@@ -1,4 +1,4 @@
-import type { Color } from "../Color";
+import type { IColor } from "../Color";
 import type { IColorFilter } from "../ColorFilter/ColorFilter";
 
 import type { IImageFilter, TileMode } from "./ImageFilter";
@@ -55,7 +55,7 @@ export interface ImageFilterFactory {
     dy: number,
     sigmaX: number,
     sigmaY: number,
-    color: Color,
+    color: IColor,
     input?: IImageFilter
   ) => IImageFilter;
   /**
@@ -75,7 +75,7 @@ export interface ImageFilterFactory {
     dy: number,
     sigmaX: number,
     sigmaY: number,
-    color: Color,
+    color: IColor,
     input?: IImageFilter
   ) => IImageFilter;
 }

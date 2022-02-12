@@ -11,11 +11,12 @@ import type { IRect } from "./Rect";
 import type { IRRect } from "./RRect";
 import type { RuntimeEffectFactory } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
-import { Color } from "./Color";
+import type { IColor } from "./Color";
+import { processColor } from "./Color";
 import type { IMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
 import type { IPoint } from "./Point";
-import type { Vertices, VertexMode } from "./Vertices/Vertices";
+import type { IVertices, VertexMode } from "./Vertices/Vertices";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
 import type { TextBlobFactory } from "./TextBlob";
@@ -64,10 +65,10 @@ export interface Skia {
     mode: VertexMode,
     positions: IPoint[],
     textureCoordinates?: IPoint[] | null,
-    colors?: Color[],
+    colors?: IColor[],
     indices?: number[] | null,
     isVolatile?: boolean
-  ): Vertices;
+  ): IVertices;
   Data: DataFactory;
   Image: ImageFactory;
   SVG: SVGFactory;
@@ -109,7 +110,7 @@ export const Skia = {
   ColorFilter: SkiaApi.ColorFilter,
   ContourMeasureIter: SkiaApi.ContourMeasureIter,
   // Here are constructors for data types which are represented as typed arrays in CanvasKit
-  Color,
+  Color: (color: Parameters<typeof processColor>[0]) => processColor(color, 1),
   RSXform: SkiaApi.RSXform,
   // For the following methods the factory symmetry is broken to be comptatible with CanvasKit
   MakeSurface: SkiaApi.Surface.Make,

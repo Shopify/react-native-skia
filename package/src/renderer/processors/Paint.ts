@@ -2,16 +2,16 @@ import type { RefObject } from "react";
 
 import { BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
 import type { IPaint } from "../../skia";
+import type { Color } from "../../skia/Color";
+import { processColor } from "../../skia/Color";
 
 import type { ChildrenProps } from "./Shapes";
-import type { ColorProp } from "./Colors";
-import { processColor } from "./Colors";
 
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export interface CustomPaintProps extends ChildrenProps {
   paint?: RefObject<IPaint>;
-  color?: ColorProp;
+  color?: Color;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;
   style?: SkEnum<typeof PaintStyle>;

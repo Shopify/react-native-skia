@@ -1,21 +1,12 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { isImageFilter } from "../../../skia/ImageFilter/ImageFilter";
-import type { RectDef, RRectDef, Color } from "../../processors";
-import type { IPath } from "../../../skia/Path/Path";
-import { useDrawing } from "../../nodes/Drawing";
+import { Skia, processColor, isImageFilter, ClipOp } from "../../../skia";
+import type { AnimatedProps, RectDef, RRectDef } from "../../processors";
+import type { IPath, Color, ICanvas } from "../../../skia";
+import { useDrawing } from "../../nodes";
 import { processChildren } from "../../Host";
-import type { ICanvas } from "../../../skia/Canvas";
-import { ClipOp } from "../../../skia/Canvas";
-import {
-  isRectDef,
-  processRect,
-  processRRect,
-  processColor,
-} from "../../processors";
+import { isRectDef, processRect, processRRect } from "../../processors";
 
 type PathDef = string | IPath;
 type ClipDef = RectDef | RRectDef | { path: PathDef };

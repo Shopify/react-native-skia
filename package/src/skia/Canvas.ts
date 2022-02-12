@@ -4,14 +4,14 @@ import type { IFont } from "./Font";
 import type { IPath } from "./Path";
 import type { IImage } from "./Image";
 import type { SVG } from "./SVG";
-import type { Color } from "./Color";
+import type { IColor } from "./Color";
 import type { IRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
 import type { IPoint, PointMode } from "./Point";
 import type { IMatrix } from "./Matrix";
 import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
-import type { Vertices } from "./Vertices";
+import type { IVertices } from "./Vertices";
 import type { ITextBlob } from "./TextBlob";
 
 export enum ClipOp {
@@ -209,7 +209,7 @@ export interface ICanvas {
    * @param mode
    * @param paint
    */
-  drawVertices(verts: Vertices, mode: BlendMode, paint: IPaint): void;
+  drawVertices(verts: IVertices, mode: BlendMode, paint: IPaint): void;
 
   /**
    * Draws a cubic patch defined by 12 control points [top, right, bottom, left] with optional
@@ -222,7 +222,7 @@ export interface ICanvas {
    */
   drawPatch(
     cubics: readonly IPoint[],
-    colors?: readonly Color[] | null,
+    colors?: readonly IColor[] | null,
     texs?: readonly IPoint[] | null,
     mode?: BlendMode | null,
     paint?: IPaint
@@ -439,14 +439,14 @@ export interface ICanvas {
    * @param color
    * @param blendMode - defaults to SrcOver.
    */
-  drawColor(color: Color, blendMode?: BlendMode): void;
+  drawColor(color: IColor, blendMode?: BlendMode): void;
 
   /**
    * Fills the current clip with the given color using Src BlendMode.
    * This has the effect of replacing all pixels contained by clip with color.
    * @param color
    */
-  clear(color: Color): void;
+  clear(color: IColor): void;
 
   /**
    * Replaces clip with the intersection or difference of the current clip and path,
