@@ -6,9 +6,16 @@ import { processClip } from "../../processors";
 import type { AnimatedProps, ClipDef } from "../../processors";
 import type { Color } from "../../../skia";
 import { useDrawing } from "../../nodes";
+import type { SkNode } from "../../Host";
 import { processChildren } from "../../Host";
 import { getInput } from "../imageFilters/getInput";
-import type { IImageFilter } from "../../../skia/ImageFilter/ImageFilter";
+
+const disableFilterMemoization = (children: SkNode[]) => {
+  children.forEach((child) => {
+    child.memoizable = false;
+    disableFilterMemoization(child.children);
+  });
+};
 
 export interface BackdropFilterProps {
   color?: Color;
@@ -18,6 +25,7 @@ export interface BackdropFilterProps {
 
 export const BackdropFilter = (props: AnimatedProps<BackdropFilterProps>) => {
   const onDraw = useDrawing(props, (ctx, { color, clip }, children) => {
+    disableFilterMemoization(children);
     const toFilter = processChildren(ctx, children);
     const filter = getInput(toFilter);
     if (!filter) {
