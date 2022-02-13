@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
   Circle,
@@ -10,9 +10,8 @@ import {
 
 import { AnimationDemo, Size, Padding } from "./Components";
 
-const { width } = Dimensions.get("window");
-
 export const InterpolationWithEasing = () => {
+  const { width } = useWindowDimensions();
   // Create timing animation that loops forever
   const progress = useTiming(
     {
@@ -36,7 +35,7 @@ export const InterpolationWithEasing = () => {
 const styles = StyleSheet.create({
   canvas: {
     height: 80,
-    width: width - Padding,
+    width: "100%",
     backgroundColor: "#FEFEFE",
   },
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
   Circle,
@@ -12,9 +12,8 @@ import {
 
 import { AnimationDemo, Size, Padding } from "./Components";
 
-const { width } = Dimensions.get("window");
-
 export const AnimationWithTouchHandler = () => {
+  const { width } = useWindowDimensions();
   // Timestamp for driving the animation
   const timestamp = useTimestamp();
 
@@ -74,7 +73,7 @@ export const AnimationWithTouchHandler = () => {
 const styles = StyleSheet.create({
   canvas: {
     height: 80,
-    width: width - Padding,
+    width: "100%",
     backgroundColor: "#FEFEFE",
   },
 });
