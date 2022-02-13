@@ -8,12 +8,12 @@ export type INativeValue = IValue & {
    * callback. To remove a dependency, just call addDependency with an undefined
    * value.
    */
-  setDriver: <DepT>(
+  _setDriver: <DepT>(
     value: IReadonlyValue<DepT> | undefined,
     cb?: (v: DepT) => number
   ) => void;
   /**
    * Returns the current dependency of this value.
    */
-  getDriver: () => IReadonlyValue | undefined;
+  _getDriver: () => IReadonlyValue | undefined;
 };

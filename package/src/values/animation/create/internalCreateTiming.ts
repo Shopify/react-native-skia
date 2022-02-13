@@ -40,22 +40,22 @@ export const internalCreateTiming = (
       params.yoyo ?? false,
       () => {
         // Animation has reached its duration and to value
-        resolvedValue.setDriver(undefined);
+        resolvedValue._setDriver(undefined);
         driver.stop();
       }
     );
     return p * (params.to - params.from!) + params.from!;
   };
 
-  resolvedValue.setDriver(driver, updateFunction);
+  resolvedValue._setDriver(driver, updateFunction);
 
   const stop = () => {
-    resolvedValue.setDriver(undefined);
+    resolvedValue._setDriver(undefined);
     driver.stop();
   };
 
   const start = () => {
-    resolvedValue.setDriver(driver, updateFunction);
+    resolvedValue._setDriver(driver, updateFunction);
     driver.start();
   };
 

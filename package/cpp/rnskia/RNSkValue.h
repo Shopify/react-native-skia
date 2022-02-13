@@ -330,7 +330,7 @@ public:
    * The function takes two parameter, the first one is the value to add a dependency to - and the
    * second one is an option function for transforming the value (like in the derived value).
    */
-  JSI_HOST_FUNCTION(setDriver) {
+  JSI_HOST_FUNCTION(_setDriver) {
     // Remove previous dependency (if set)
     clearDependency();
     
@@ -373,17 +373,8 @@ public:
     return jsi::Value::undefined();
   }
   
-  JSI_HOST_FUNCTION(getDriver) {
-    if(_dependency == nullptr) {
-      return jsi::Value::undefined();
-    }
-    
-    return jsi::Object::createFromHostObject(runtime, _dependency);
-  }
-  
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, addListener),
-                       JSI_EXPORT_FUNC(RNSkValue, setDriver),
-                       JSI_EXPORT_FUNC(RNSkValue, getDriver))
+                       JSI_EXPORT_FUNC(RNSkValue, _setDriver))
   
 private:
   
