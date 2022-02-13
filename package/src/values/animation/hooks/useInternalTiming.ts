@@ -24,12 +24,14 @@ export const useInternalTiming = (
   config?: TimingConfig | SpringConfig
 ): IValue<number> => {
   // Resolve parameters
-  const resolvedParameters = useMemo(
-    () => getResolvedParams(toOrParams, config),
-    [config, toOrParams]
-  );
+  const resolvedParameters = useMemo(() => {
+    const p = getResolvedParams(toOrParams, config);
+    // resolve from - we don't have a from value
+    p.from = p.from ?? 0;
+    return p;
+  }, [config, toOrParams]);
   // Create animation value
-  const value = useValue(resolvedParameters.from ?? 0);
+  const value = useValue(resolvedParameters.from!);
   // Current animation
   const animation = useRef<IAnimation>();
   // Run animation as a side effect of the value changing
