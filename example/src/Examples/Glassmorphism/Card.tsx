@@ -28,22 +28,18 @@ export const Glassmorphism = () => {
   const y = useValue((height - CARD_HEIGHT) / 2);
   const offsetX = useValue(0);
   const offsetY = useValue(0);
-  const offsetX1 = useValue(0);
-  const offsetY1 = useValue(0);
   const onTouch = useTouchHandler({
     onStart: (pos) => {
-      offsetX.value = pos.x;
-      offsetY.value = pos.y;
-      offsetX1.value = x.value;
-      offsetY1.value = x.value;
+      offsetX.value = x.value - pos.x;
+      offsetY.value = y.value - pos.y;
     },
     onActive: (pos) => {
-      x.value = offsetX1.value + pos.x - offsetX.value;
-      y.value = offsetY1.value + pos.y - offsetX.value;
+      x.value = offsetX.value + pos.x;
+      y.value = offsetY.value + pos.y;
     },
   });
   return (
-    <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
+    <Canvas style={{ flex: 1 }} onTouch={onTouch}>
       <Background />
       <Ball r={100} c={vec(75, 75)} />
       <Ball r={50} c={vec(width, height / 2)} />
