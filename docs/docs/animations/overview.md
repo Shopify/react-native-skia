@@ -70,7 +70,7 @@ The animation value will be updated with the number of milliseconds elapsed sinc
 
 ## Animation
 
-The ´Canvas´ component knows about values and will register any animation value used in the component or its child components so that changes in any value will trigger a repaint request like we saw in the first example.
+The `Canvas` component knows about values and will register any animation value used in the component or its child components so that changes in any value will trigger a repaint request like we saw in the first example.
 
 By combining animation values and derived values we can build a simple animation with React Native Skia:
 
