@@ -28,7 +28,7 @@ export const AnimateTextOnPath = () => {
   // Create a progress going from 0..1 and back with a
   // yoyo effect
   const progress = useTiming(
-    { loop: true, yoyo: true },
+    { loop: true, yoyo: true, from: 0, to: 1 },
     { duration: 700, easing: Easing.inOut(Easing.cubic) }
   );
 
