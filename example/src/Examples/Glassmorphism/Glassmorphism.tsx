@@ -9,7 +9,10 @@ import {
   Fill,
   useLoop,
   mix,
-  BackdropBlur,
+  Turbulence,
+  BackdropFilter,
+  DisplacementMap,
+  Offset,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -32,7 +35,14 @@ export const Glassmorphism = () => {
         />
       </Paint>
       <Circle c={c} r={() => mix(progress.value, r, r / 2)} />
-      <BackdropBlur color="rgba(0, 0, 0, 0.3)" intensity={20} clip={rect} />
+      <BackdropFilter color="rgba(0, 0, 0, 0.3)" clip={rect}>
+        {/* <Offset x={100} y={0}>
+          <Turbulence freqX={0.01} freqY={0.05} octaves={2} />
+        </Offset> */}
+        <DisplacementMap channelX="r" channelY="a" scale={20}>
+          <Turbulence freqX={0.01} freqY={0.05} octaves={2} />
+        </DisplacementMap>
+      </BackdropFilter>
     </Canvas>
   );
 };

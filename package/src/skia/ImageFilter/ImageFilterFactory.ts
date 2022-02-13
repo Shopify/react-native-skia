@@ -1,9 +1,26 @@
 import type { IColor } from "../Color";
 import type { IColorFilter } from "../ColorFilter/ColorFilter";
+import type { IShader } from "../Shader/Shader";
 
 import type { IImageFilter, TileMode } from "./ImageFilter";
 
+export enum ColorChannel {
+  R,
+  G,
+  B,
+  A,
+}
+
 export interface ImageFilterFactory {
+  MakeOffset(dx: number, dy: number, input: IImageFilter | null): IImageFilter;
+  MakeDisplacementMap(
+    channelX: ColorChannel,
+    channelY: ColorChannel,
+    scale: number,
+    in1: IImageFilter,
+    in2: IImageFilter | null
+  ): IImageFilter;
+  MakeShader(shader: IShader, input: IImageFilter | null): IImageFilter;
   /**
    * Create a filter that blurs its input by the separate X and Y sigmas. The provided tile mode
    * is used when the blur kernel goes outside the input image.
