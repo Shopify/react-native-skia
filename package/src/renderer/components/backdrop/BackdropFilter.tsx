@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import type { ReactNode } from "react";
 
 import { processColor, ClipOp } from "../../../skia";
