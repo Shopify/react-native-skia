@@ -1,14 +1,21 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { processColor, isImageFilter, ClipOp } from "../../../skia";
+import { processColor, ClipOp } from "../../../skia";
 import { processClip } from "../../processors";
 import type { AnimatedProps, ClipDef } from "../../processors";
 import type { Color } from "../../../skia";
 import { useDrawing } from "../../nodes";
+import type { SkNode } from "../../Host";
 import { processChildren } from "../../Host";
-import { isColorFilter } from "../../../skia/ColorFilter/ColorFilter";
-import { Skia } from "../../../skia/Skia";
+import { getInput } from "../imageFilters/getInput";
+
+const disableFilterMemoization = (children: SkNode[]) => {
+  children.forEach((child) => {
+    child.memoizable = false;
+    disableFilterMemoization(child.children);
+  });
+};
 
 export interface BackdropFilterProps {
   color?: Color;
@@ -18,13 +25,9 @@ export interface BackdropFilterProps {
 
 export const BackdropFilter = (props: AnimatedProps<BackdropFilterProps>) => {
   const onDraw = useDrawing(props, (ctx, { color, clip }, children) => {
-    const filters = processChildren(ctx, children);
-    const [imgf] = filters.filter(isImageFilter);
-    const [rawcf] = filters.filter(isColorFilter);
-    const filter = rawcf
-      ? Skia.ImageFilter.MakeColorFilter(rawcf, imgf ?? null)
-      : imgf;
-
+    disableFilterMemoization(children);
+    const toFilter = processChildren(ctx, children);
+    const filter = getInput(toFilter);
     if (!filter) {
       throw new Error("No image filter provided to the background");
     }
