@@ -47,22 +47,24 @@ public:
 
   JSI_HOST_FUNCTION(getGlyphWidths) {
       auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
-      int bytesPerWidth = 4;
       std::vector<SkGlyphID> glyphs;
       int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
-      auto widthPtr = static_cast<SkScalar*>(malloc(glyphsSize * bytesPerWidth));
+      
+      std::vector<SkScalar> widthPtrs;
+      widthPtrs.resize(glyphsSize);
+          
       for (int i = 0; i < glyphsSize; i++) {
           glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
       }
       if (count > 1) {
           auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-          getObject()->getWidthsBounds(glyphs.data(), glyphsSize, widthPtr, nullptr, paint.get());
+          getObject()->getWidthsBounds(glyphs.data(), glyphsSize, static_cast<SkScalar*>(widthPtrs.data()), nullptr, paint.get());
       } else {
-          getObject()->getWidthsBounds(glyphs.data(), glyphsSize, widthPtr, nullptr, nullptr);
+          getObject()->getWidthsBounds(glyphs.data(), glyphsSize, static_cast<SkScalar*>(widthPtrs.data()), nullptr, nullptr);
       }
       auto jsiWidths = jsi::Array(runtime, glyphsSize);
       for (int i = 0; i <glyphsSize; i++) {
-          jsiWidths.setValueAtIndex(runtime, i, jsi::Value(SkScalarToDouble(widthPtr[i])));
+          jsiWidths.setValueAtIndex(runtime, i, jsi::Value(SkScalarToDouble(static_cast<SkScalar*>(widthPtrs.data())[i])));
       }
       return jsiWidths;
   }
@@ -86,10 +88,10 @@ public:
     auto str = arguments[0].asString(runtime).utf8(runtime);
     auto numGlyphIDs = count > 1 && !arguments[1].isNull() && !arguments[1].isUndefined()
             ? arguments[1].asNumber() : str.length();
-    int bytesPerGlyph = 2;
-    auto glyphIDs = static_cast<SkGlyphID*>(malloc(numGlyphIDs * bytesPerGlyph));
+    std::vector<SkGlyphID> glyphIDs;
+    glyphIDs.resize(numGlyphIDs);
     getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
-                               glyphIDs, numGlyphIDs);
+                               static_cast<SkGlyphID*>(glyphIDs.data()), numGlyphIDs);
     auto jsiGlyphIDs = jsi::Array(runtime, numGlyphIDs);
     for (int i = 0; i < numGlyphIDs; i++) {
       jsiGlyphIDs.setValueAtIndex(runtime, i, jsi::Value(static_cast<int>(glyphIDs[i])));
