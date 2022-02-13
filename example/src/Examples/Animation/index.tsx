@@ -10,8 +10,8 @@ export const AnimationExample: React.FC = () => {
   return (
     <View style={styles.container}>
       <SimpleAnimation />
-      <AnimationWithTouchHandler />
       <InterpolationWithEasing />
+      <AnimationWithTouchHandler />
       <AnimateTextOnPath />
     </View>
   );
