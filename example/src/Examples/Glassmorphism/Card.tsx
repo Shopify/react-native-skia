@@ -24,18 +24,22 @@ const CARD_HEIGHT = CARD_WIDTH * 0.61;
 const clip = rrect(rect(0, 0, CARD_WIDTH, CARD_HEIGHT), 20, 20);
 
 export const Glassmorphism = () => {
-  const x = useValue(0); //(width - CARD_WIDTH) / 2
-  const y = useValue(0); //(height - CARD_HEIGHT) / 2
+  const x = useValue((width - CARD_WIDTH) / 2);
+  const y = useValue((height - CARD_HEIGHT) / 2);
   const offsetX = useValue(0);
   const offsetY = useValue(0);
+  const offsetX1 = useValue(0);
+  const offsetY1 = useValue(0);
   const onTouch = useTouchHandler({
     onStart: (pos) => {
       offsetX.value = pos.x;
       offsetY.value = pos.y;
+      offsetX1.value = x.value;
+      offsetY1.value = x.value;
     },
     onActive: (pos) => {
-      x.value = pos.x - offsetX.value;
-      y.value = pos.y - offsetX.value;
+      x.value = offsetX1.value + pos.x - offsetX.value;
+      y.value = offsetY1.value + pos.y - offsetX.value;
     },
   });
   return (
