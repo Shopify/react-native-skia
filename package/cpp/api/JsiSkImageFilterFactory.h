@@ -43,6 +43,43 @@ public:
                      getContext(), SkImageFilters::ColorFilter(cf, input)));
   }
 
+  JSI_HOST_FUNCTION(MakeOffset) {
+    auto x = arguments[0].asNumber();
+    auto y = arguments[1].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[2].isNull()) {
+        input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
+    }
+    return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkImageFilter>(
+                    getContext(), SkImageFilters::Offset(x, y, input)));
+  }
+
+  JSI_HOST_FUNCTION(MakeDisplacementMap) {
+    auto fXChannelSelector = static_cast<SkColorChannel>(arguments[0].asNumber());
+    auto fYChannelSelector = static_cast<SkColorChannel>(arguments[1].asNumber());
+    auto scale = arguments[2].asNumber();
+    auto in2 = JsiSkImageFilter::fromValue(runtime, arguments[3]);
+    sk_sp<SkImageFilter> input;
+    if (!arguments[4].isNull()) {
+     input = JsiSkImageFilter::fromValue(runtime, arguments[4]);
+    }
+    return jsi::Object::createFromHostObject(
+    runtime,
+    std::make_shared<JsiSkImageFilter>(
+    getContext(),
+                SkImageFilters::DisplacementMap(fXChannelSelector, fYChannelSelector, scale, in2, input)
+        )
+    );
+  }
+
+  JSI_HOST_FUNCTION(MakeShader) {
+    auto shader = JsiSkShader::fromValue(runtime, arguments[0]);
+    return jsi::Object::createFromHostObject(
+                runtime, std::make_shared<JsiSkImageFilter>(
+                        getContext(), SkImageFilters::Shader(shader)));
+  }
+
   JSI_HOST_FUNCTION(MakeCompose) {
     auto outer = JsiSkImageFilter::fromValue(runtime, arguments[0]);
     sk_sp<SkImageFilter> inner;
@@ -81,8 +118,12 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeOffset),
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
                                        MakeColorFilter),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
+                                       MakeShader),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDisplacementMap),
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeCompose),
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadow),
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
