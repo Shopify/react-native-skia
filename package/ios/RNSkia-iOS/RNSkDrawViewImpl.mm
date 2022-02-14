@@ -14,14 +14,14 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::R
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
     _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
-      
+    
     if(_skContext == nullptr) {
       GrContextOptions grContextOptions;
       _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
                                               (__bridge void*)_commandQueue,
                                               grContextOptions);
     }
-
+    
     _layer.framebufferOnly = NO;
     _layer.device = _device;
     _layer.opaque = false;
@@ -50,6 +50,7 @@ void RNSkDrawViewImpl::drawFrame(double time) {
   auto start = std::chrono::high_resolution_clock::now();
   
   id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
+  
   GrMtlTextureInfo fbInfo;
   fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
 
