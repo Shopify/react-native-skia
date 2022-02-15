@@ -7,7 +7,7 @@ slug: /animations/overview
 
 # Animations
 
-React Native Skia supports Animations through animations values. An animation value can be seen as the state in the library - where a change in a value will trigger a repaint request on the `Canvas` component where it is used.
+React Native Skia supports Animations through a construct called `values`. A value can be seen as the state in the library where a change in a value will trigger a repaint request on the `Canvas` component where it is used.
 
 A simple example is shown below shows how a value is used as a property for the x position of the `Rect` element.
 
@@ -62,32 +62,29 @@ progress.value = 200; // derived.value is now 2000
 
 | **NOTE:** You can use multiple values as inputs to a derived value.
 
-### AnimationValue
+### ClockValue
 
 This value is a value that updates on every display frame on the device. It can be used to derive values and drive animations.
 
-The animation value will be updated with the number of milliseconds elapsed since it was started.
+The value will be updated with the number of milliseconds elapsed since it was started.
 
 ## Animation
 
-The `Canvas` component knows about values and will register any animation value used in the component or its child components so that changes in any value will trigger a repaint request like we saw in the first example.
+The `Canvas` component knows about values and will register any values used in the component or its child components so that changes in any value will trigger a repaint request like we saw in the first example.
 
-By combining animation values and derived values we can build a simple animation with React Native Skia:
+By combining values and derived values we can build a simple animation with React Native Skia:
 
 ```tsx twoslash
 import {
   Canvas,
   Rect,
-  useTimestamp,
+  useClockValue,
   useDerivedValue,
 } from "@shopify/react-native-skia";
 
 const MyComponent = () => {
-  const timestamp = useTimestamp();
-  const position = useDerivedValue(
-    (p) => ((p / 1000) % 1.0) * 100,
-    [timestamp]
-  );
+  const clock = useClockValue();
+  const position = useDerivedValue((c) => ((c / 1000) % 1.0) * 100, [clock]);
   return (
     <Canvas style={{ flex: 1 }}>
       <Rect x={position} y={100} width={10} height={10} color={"red"} />
@@ -96,13 +93,13 @@ const MyComponent = () => {
 };
 ```
 
-In this example we are using the animation value to drive a derived value which in turn is used in the `Rect` component to set the position on the x axis. Since the animation value will be updated on every frame, the position value will be recalculated and notify the `Canvas` component that it needs to be repainted.
+In this example we are using the clock value to drive a derived value which in turn is used in the `Rect` component to set the position on the x axis. Since the clock value will be updated on every frame, the position value will be recalculated and notify the `Canvas` component that it needs to be repainted.
 
 ## Animation utilities
 
 To ease the process of building animation, the library provides some utilities to help you. There are two types of utility functions - imperative functions and hooks.
 
-If you have an animation value that you want to animate declaratively, a hook is the best choice.
+If you have an value that you want to animate declaratively, a hook is the best choice.
 
 In the example below we want the position of the rectangle to animate when we toggle a value, and we want it to do this with a spring animation.
 
@@ -151,7 +148,7 @@ export const AnimationExample = () => {
 
 ### useTouchHandler
 
-The library has a hook for handling touches in the `Canvas`. This hook works well with animation values:
+The library has a hook for handling touches in the `Canvas`. This hook works well with values:
 
 ```tsx twoslash
 import {
