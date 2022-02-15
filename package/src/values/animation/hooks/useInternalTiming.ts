@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef } from "react";
-import { InteractionManager } from "react-native";
 
 import type { IValue } from "../../types";
 import { useValue } from "../../hooks";
@@ -36,9 +35,7 @@ export const useInternalTiming = (
   useEffect(() => {
     // Wait until all UX interactions has finished
     if (resolvedParameters.immediate) {
-      InteractionManager.runAfterInteractions(() => {
-        animation.current = internalRunTiming(value, resolvedParameters);
-      });
+      animation.current = internalRunTiming(value, resolvedParameters);
     }
     return () => {
       animation.current?.stop();
