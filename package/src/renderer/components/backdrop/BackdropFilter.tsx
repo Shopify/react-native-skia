@@ -20,7 +20,7 @@ export type BackdropFilterProps = GroupProps;
 export const BackdropFilter = (
   allProps: AnimatedProps<BackdropFilterProps>
 ) => {
-  const { children: allChildren, clip, ...props } = allProps;
+  const { children: allChildren, ...props } = allProps;
   const [filterChild, ...groupChildren] = Children.toArray(allChildren);
   const onDraw = useDrawing(props, (ctx, _, children) => {
     disableFilterMemoization(children);
@@ -35,12 +35,10 @@ export const BackdropFilter = (
   });
   return (
     <Group {...props}>
-      <Group clip={clip}>
-        <skDrawing onDraw={onDraw} skipProcessing>
-          {filterChild}
-        </skDrawing>
-        {groupChildren}
-      </Group>
+      <skDrawing onDraw={onDraw} skipProcessing>
+        {filterChild}
+      </skDrawing>
+      {groupChildren}
     </Group>
   );
 };

@@ -36,11 +36,11 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       } else {
         canvas.save();
       }
+      processTransform(ctx, groupProps);
       if (clip) {
         const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
         processClip(canvas, clip, op);
       }
-      processTransform(ctx, groupProps);
       processChildren(
         {
           ...ctx,
