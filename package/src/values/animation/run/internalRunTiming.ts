@@ -1,4 +1,4 @@
-import type { IValue } from "../../types";
+import type { Value } from "../../types";
 import { internalCreateTiming } from "../create/internalCreateTiming";
 import type { RequiredAnimationParams } from "../functions/getResolvedParams";
 import type { TimingConfig, IAnimation } from "../types";
@@ -16,7 +16,7 @@ import type { TimingConfig, IAnimation } from "../types";
  * the animation.
  */
 export const internalRunTiming = (
-  value: IValue<number>,
+  value: Value<number>,
   params: RequiredAnimationParams & Required<TimingConfig>
 ): IAnimation => {
   return internalCreateTiming(params, value);

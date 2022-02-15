@@ -3,7 +3,7 @@ import {
   Canvas,
   Fill,
   Paint,
-  useTimestamp,
+  useClockValue,
   useFont,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -31,7 +31,7 @@ const streams = cols.map(() =>
 );
 
 export const Matrix = () => {
-  const timestamp = useTimestamp();
+  const clock = useClockValue();
   const font = useFont(require("./matrix-code-nfi.otf"), SYMBOL.height);
   if (font === null) {
     return null;
@@ -48,7 +48,7 @@ export const Matrix = () => {
           <Symbol
             symbols={symbols}
             font={font}
-            timestamp={timestamp}
+            timestamp={clock}
             key={`${i}-${j}`}
             i={i}
             j={j}

@@ -1,5 +1,5 @@
-import type { IValue } from "../../types";
-import { Value } from "../../api";
+import type { Value } from "../../types";
+import { ValueApi } from "../../api";
 import type { RequiredAnimationParams } from "../functions/getResolvedParams";
 import { timing } from "../functions/timing";
 import type { TimingConfig, IAnimation } from "../types";
@@ -21,13 +21,13 @@ import type { INativeValue } from "./types";
  */
 export const internalCreateTiming = (
   params: RequiredAnimationParams & Required<TimingConfig>,
-  value?: IValue<number>
+  value?: Value<number>
 ): IAnimation => {
   // Create driver value
-  const driver = Value.createAnimationValue(params.immediate);
+  const driver = ValueApi.createClockValue(params.immediate);
   // Create the animation value
   const resolvedValue = (value ??
-    Value.createValue(params.from ?? 0)) as INativeValue;
+    ValueApi.createValue(params.from ?? 0)) as INativeValue;
   // Update from
   params.from = params.from ?? resolvedValue.value;
   // Set the driver on the value
@@ -60,7 +60,6 @@ export const internalCreateTiming = (
   };
 
   return {
-    value: resolvedValue,
     stop,
     start,
   };

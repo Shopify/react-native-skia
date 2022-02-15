@@ -1,6 +1,6 @@
-import type { IValue, IReadonlyValue } from "../../types";
+import type { Value, ReadonlyValue } from "../../types";
 
-export type INativeValue = IValue & {
+export type INativeValue = Value & {
   /**
    * Adds another value as the driver of this value. When the driver
    * value change, this value will be updated with either the value of the
@@ -9,11 +9,11 @@ export type INativeValue = IValue & {
    * value.
    */
   _setDriver: <DepT>(
-    value: IReadonlyValue<DepT> | undefined,
+    value: ReadonlyValue<DepT> | undefined,
     cb?: (v: DepT) => number
   ) => void;
   /**
    * Returns the current dependency of this value.
    */
-  _getDriver: () => IReadonlyValue | undefined;
+  _getDriver: () => ReadonlyValue | undefined;
 };

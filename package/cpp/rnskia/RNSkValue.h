@@ -203,16 +203,16 @@ private:
  Implements a readonly Value that is updated every time the screen is redrawn. Its value will be the
  number of milliseconds since the animation value was started.
  */
-class RNSkAnimationValue : public RNSkReadonlyValue
+class RNSkClockValue : public RNSkReadonlyValue
 {
-enum RNSkAnimationValueState {
+enum RNSkClockState {
     NotStarted = 0,
     Running = 1,
     Stopped = 2
 };
   
 public:
-  RNSkAnimationValue(std::shared_ptr<RNSkPlatformContext> platformContext, size_t identifier,
+  RNSkClockValue(std::shared_ptr<RNSkPlatformContext> platformContext, size_t identifier,
                      jsi::Runtime& runtime, const jsi::Value *arguments, size_t count)
       : RNSkReadonlyValue(platformContext),
         _runtime(runtime),
@@ -227,8 +227,8 @@ public:
     }
   }
   
-  ~RNSkAnimationValue() {
-    _state = RNSkAnimationValueState::Stopped;
+  ~RNSkClockValue() {
+    _state = RNSkClockState::Stopped;
     getPlatformContext()->endDrawLoop(_identifier);
     _deleting->lock();
   }
@@ -244,29 +244,29 @@ public:
   }
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkReadonlyValue, addListener),
-                       JSI_EXPORT_FUNC(RNSkAnimationValue, start),
-                       JSI_EXPORT_FUNC(RNSkAnimationValue, stop))
+                       JSI_EXPORT_FUNC(RNSkClockValue, start),
+                       JSI_EXPORT_FUNC(RNSkClockValue, stop))
   
 private:
   void startAnimation() {
-    if(_state == RNSkAnimationValueState::Running) {
+    if(_state == RNSkClockState::Running) {
       return;
     }
-    _state = RNSkAnimationValueState::Running;
+    _state = RNSkClockState::Running;
     _start = std::chrono::high_resolution_clock::now();
-    auto dispatch = std::bind(&RNSkAnimationValue::notifyUpdate, this);
+    auto dispatch = std::bind(&RNSkClockValue::notifyUpdate, this);
     getPlatformContext()->beginDrawLoop(_identifier, dispatch);
   }
   
   void stopAnimation() {
-    if(_state == RNSkAnimationValueState::Running) {
-      _state = RNSkAnimationValueState::Stopped;
+    if(_state == RNSkClockState::Running) {
+      _state = RNSkClockState::Stopped;
       getPlatformContext()->endDrawLoop(_identifier);
     }
   }
   
   void notifyUpdate() {
-    if(_state != RNSkAnimationValueState::Running) {
+    if(_state != RNSkClockState::Running) {
       return;
     }
     auto deleting = _deleting;
@@ -292,7 +292,7 @@ private:
   jsi::Runtime &_runtime;
   size_t _identifier;
   std::chrono::time_point<steady_clock> _start;
-  std::atomic<RNSkAnimationValueState> _state;
+  std::atomic<RNSkClockState> _state;
   std::shared_ptr<std::timed_mutex> _deleting;
 };
 

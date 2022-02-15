@@ -1,5 +1,3 @@
-import type { IValue } from "../types";
-
 export interface SpringConfig {
   duration: number;
   update: (t: number) => number;
@@ -26,7 +24,6 @@ export interface AnimationParams
     AnimationValueParams {}
 
 export interface IAnimation {
-  value: IValue;
   start: () => void;
   stop: () => void;
 }

@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 
-import type { IReadonlyValue } from "../types";
-import { Value } from "../api";
+import type { ReadonlyValue } from "../types";
+import { ValueApi } from "../api";
 
-type CreateDerivedvalue = typeof Value.createDerivedValue;
+type CreateDerivedvalue = typeof ValueApi.createDerivedValue;
 
 /**
  * Creates a new derived value - a value that will calculate its value depending
@@ -14,7 +14,7 @@ type CreateDerivedvalue = typeof Value.createDerivedValue;
  */
 export const useDerivedValue: CreateDerivedvalue = <R>(
   cb: (...args: Array<unknown>) => R,
-  values: Array<IReadonlyValue<unknown>>
-): IReadonlyValue<R> => {
-  return useMemo(() => Value.createDerivedValue(cb, values), [cb, values]);
+  values: Array<ReadonlyValue<unknown>>
+): ReadonlyValue<R> => {
+  return useMemo(() => ValueApi.createDerivedValue(cb, values), [cb, values]);
 };

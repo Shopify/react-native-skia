@@ -1,4 +1,4 @@
-import type { IValue } from "../../types";
+import type { Value } from "../../types";
 import type { AnimationParams, SpringConfig } from "../types";
 import { Spring } from "../Spring";
 
@@ -14,5 +14,5 @@ import { useInternalTiming } from "./useInternalTiming";
 export const useSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): IValue<number> =>
+): Value<number> =>
   useInternalTiming(toOrParams, config ?? Spring.Config.Default);

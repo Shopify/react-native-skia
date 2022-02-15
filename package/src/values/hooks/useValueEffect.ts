@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-import type { IReadonlyValue } from "../types";
+import type { ReadonlyValue } from "../types";
 
 /**
  * Sets up an effect that will be run whenever the value changes
@@ -8,7 +8,7 @@ import type { IReadonlyValue } from "../types";
  * @param cb Callback to run when value changes
  */
 export const useValueEffect = <T>(
-  value: IReadonlyValue<T>,
+  value: ReadonlyValue<T>,
   cb: (v: T) => void
 ) => {
   const memoizedCb = useMemo(() => cb, [cb]);

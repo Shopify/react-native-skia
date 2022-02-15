@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import type { IValue } from "../../types";
+import type { Value } from "../../types";
 import { useValue } from "../../hooks";
 import { getResolvedParams } from "../functions/getResolvedParams";
 import type {
@@ -21,7 +21,7 @@ import { internalRunTiming } from "../run/internalRunTiming";
 export const useInternalTiming = (
   toOrParams: number | AnimationParams,
   config?: TimingConfig | SpringConfig
-): IValue<number> => {
+): Value<number> => {
   // Resolve parameters
   const resolvedParameters = useMemo(
     () => getResolvedParams(toOrParams, config),

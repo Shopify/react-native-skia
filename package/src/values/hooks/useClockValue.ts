@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-import { Value } from "../api";
+import { ValueApi } from "../api";
 import "../types";
 
 /**
@@ -9,9 +9,9 @@ import "../types";
  * @param immediate - defaults to true. If false, the animation value will be
  * created in the stopped state.
  */
-export const useTimestamp = (immediate = true) => {
+export const useClockValue = (immediate = true) => {
   const value = useMemo(
-    () => Value.createAnimationValue(immediate),
+    () => ValueApi.createClockValue(immediate),
     [immediate]
   );
   useEffect(() => () => value.stop(), [value]);

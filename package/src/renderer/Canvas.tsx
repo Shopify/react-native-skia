@@ -21,7 +21,7 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { Skia } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
-import type { IReadonlyValue } from "../values";
+import type { ReadonlyValue } from "../values";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
@@ -98,7 +98,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
               if (key === "children") {
                 enumChildren(child.props.children);
               } else if (isAnimationValue(child.props[key])) {
-                const value = child.props[key] as IReadonlyValue<unknown>;
+                const value = child.props[key] as ReadonlyValue<unknown>;
                 const unsub =
                   (typeof ref !== "function" &&
                     ref.current?.registerValue(value)) ||

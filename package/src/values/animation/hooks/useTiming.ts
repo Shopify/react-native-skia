@@ -1,4 +1,4 @@
-import type { IValue } from "../../types";
+import type { Value } from "../../types";
 import type { AnimationParams, TimingConfig } from "../types";
 
 import { useInternalTiming } from "./useInternalTiming";
@@ -13,4 +13,4 @@ import { useInternalTiming } from "./useInternalTiming";
 export const useTiming = (
   toOrParams: number | AnimationParams,
   config?: TimingConfig
-): IValue<number> => useInternalTiming(toOrParams, config);
+): Value<number> => useInternalTiming(toOrParams, config);

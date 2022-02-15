@@ -3,7 +3,7 @@
 import React from "react";
 
 import type { IRect } from "../skia";
-import type { IReadonlyValue } from "../values";
+import type { ReadonlyValue } from "../values";
 
 import { NativeSkiaView } from "./types";
 import type { DrawMode, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
@@ -78,7 +78,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
    * redraw when the value changes
    * @param value Value to register
    */
-  public registerValue(value: IReadonlyValue<unknown>) {
+  public registerValue(value: ReadonlyValue<unknown>) {
     assertDrawCallbacksEnabled();
     return registerValueInSkiaView(this._nativeId, value);
   }
@@ -151,7 +151,7 @@ const setDrawingModeForSkiaView = (nativeId: string, mode: DrawMode) => {
 
 const registerValueInSkiaView = (
   nativeId: string,
-  value: IReadonlyValue<unknown>
+  value: ReadonlyValue<unknown>
 ) => {
   SkiaViewApi.registerValueInView(parseInt(nativeId, 10), value);
 };

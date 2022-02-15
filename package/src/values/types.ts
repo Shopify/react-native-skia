@@ -1,4 +1,4 @@
-export interface IReadonlyValue<T = number> {
+export interface ReadonlyValue<T = number> {
   /**
    * Gets the value hold by the Value object
    */
@@ -14,14 +14,14 @@ export interface IReadonlyValue<T = number> {
   __typename__: "RNSkValue";
 }
 
-export interface IValue<T = number> extends IReadonlyValue<T> {
+export interface Value<T = number> extends ReadonlyValue<T> {
   /**
    * Get/sets the value hold by the Value object
    */
   value: T;
 }
 
-export interface IAnimationValue extends IReadonlyValue<number> {
+export interface ClockValue extends ReadonlyValue<number> {
   start: () => void;
   stop: () => void;
 }

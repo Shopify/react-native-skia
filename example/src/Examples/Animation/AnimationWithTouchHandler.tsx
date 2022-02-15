@@ -4,7 +4,7 @@ import {
   Canvas,
   Circle,
   Fill,
-  useTimestamp,
+  useClockValue,
   useTouchHandler,
   useValue,
   useValueEffect,
@@ -14,8 +14,8 @@ import { AnimationDemo, Size, Padding } from "./Components";
 
 export const AnimationWithTouchHandler = () => {
   const { width } = useWindowDimensions();
-  // Timestamp for driving the animation
-  const timestamp = useTimestamp();
+  // Clock for driving the animation
+  const clock = useClockValue();
 
   // Translate X value for the circle
   const translateX = useValue((width - Size - Padding) / 2);
@@ -24,9 +24,9 @@ export const AnimationWithTouchHandler = () => {
   // The circle's velocity
   const circleVelocity = useValue(0);
 
-  // Effect that will listen for updates on the timestamp and
+  // Effect that will listen for updates on the clock and
   // calculate the next position of the cicrle
-  useValueEffect(timestamp, () => {
+  useValueEffect(clock, () => {
     const leftBoundary = Size;
     const rightBoundary = width - Size - Padding;
     let nextValue = translateX.value + circleVelocity.value;
@@ -44,7 +44,7 @@ export const AnimationWithTouchHandler = () => {
   // Touch handler
   const touchHandler = useTouchHandler({
     onStart: ({ x }) => {
-      timestamp.stop();
+      clock.stop();
       offsetX.value = x - translateX.value;
     },
     onActive: ({ x }) => {
@@ -55,7 +55,7 @@ export const AnimationWithTouchHandler = () => {
     },
     onEnd: ({ velocityX }) => {
       circleVelocity.value = -(velocityX * 0.015);
-      timestamp.start();
+      clock.start();
     },
   });
 

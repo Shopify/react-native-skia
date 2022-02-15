@@ -1,9 +1,9 @@
-import type { IReadonlyValue } from "../../../values";
+import type { ReadonlyValue } from "../../../values";
 import type { DrawingContext } from "../../DrawingContext";
 import { mapKeys } from "../../typeddash";
 
 export type FrameValue<T> = (ctx: DrawingContext) => T;
-type ValueType = IReadonlyValue<unknown>;
+type ValueType = ReadonlyValue<unknown>;
 
 // TODO: refine detection here. Is the prototype accepting a drawing ctx for instance?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,12 +47,12 @@ export const materialize = <T>(
     if (isPropCallback(value)) {
       result[key] = value(ctx);
     } else if (isAnimationValue(value)) {
-      result[key] = (value as unknown as IReadonlyValue<T[typeof key]>).value;
+      result[key] = (value as unknown as ReadonlyValue<T[typeof key]>).value;
     }
   });
   return result as T;
 };
 
 export type AnimatedProps<T> = {
-  [K in keyof T]: T[K] | ((ctx: DrawingContext) => T[K]) | IReadonlyValue<T[K]>;
+  [K in keyof T]: T[K] | ((ctx: DrawingContext) => T[K]) | ReadonlyValue<T[K]>;
 };

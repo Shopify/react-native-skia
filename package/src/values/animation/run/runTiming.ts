@@ -1,4 +1,4 @@
-import type { IValue } from "../../types";
+import type { Value } from "../../types";
 import { getResolvedParams } from "../functions/getResolvedParams";
 import type { AnimationParams, TimingConfig, IAnimation } from "../types";
 
@@ -18,7 +18,7 @@ import { internalRunTiming } from "./internalRunTiming";
  * the animation.
  */
 export const runTiming = (
-  value: IValue<number>,
+  value: Value<number>,
   toOrParams: number | AnimationParams,
   config?: TimingConfig
 ): IAnimation => {
