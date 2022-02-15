@@ -76,3 +76,5 @@ export const ValueApi: ISkiaValueApi = {
   createDerivedValue: global.SkiaValueApi.createDerivedValue,
   createClockValue: global.SkiaValueApi.createClockValue,
 };
+
+export const { createValue, createDerivedValue, createClockValue } = ValueApi;
