@@ -7,7 +7,7 @@ import { symmetric } from "./Math";
 interface CubicProps {
   mesh: Value<CubicBezierHandle[]>;
   index: number;
-  color: number;
+  color: string;
 }
 
 export const Cubic = ({ mesh, index, color }: CubicProps) => {
