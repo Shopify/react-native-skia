@@ -21,7 +21,6 @@ export const DisplacementMap = (props: AnimatedProps<DisplacementMapProps>) => {
     props,
     ({ channelX, channelY, scale }, children) => {
       const [in1, in2] = children.filter((c) => !!c);
-      console.log({ in1, in2 });
       const x = ColorChannel[enumKey(channelX)];
       const y = ColorChannel[enumKey(channelY)];
       const map = getInput([in1]);

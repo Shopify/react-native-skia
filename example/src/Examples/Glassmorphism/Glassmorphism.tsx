@@ -36,7 +36,7 @@ export const Glassmorphism = () => {
         />
       </Paint>
       <Circle c={c} r={() => mix(progress.value, r, r / 2)} />
-      <BackdropFilter color="rgba(0, 0, 0, 0.3)" clip={rect}>
+      <BackdropFilter clip={rect}>
         <Blur sigmaX={2} sigmaY={2}>
           <Offset x={-5} y={0}>
             <DisplacementMap channelX="r" channelY="a" scale={20}>
@@ -44,6 +44,7 @@ export const Glassmorphism = () => {
             </DisplacementMap>
           </Offset>
         </Blur>
+        <Fill color="rgba(0, 0, 0, 0.3)" />
       </BackdropFilter>
     </Canvas>
   );

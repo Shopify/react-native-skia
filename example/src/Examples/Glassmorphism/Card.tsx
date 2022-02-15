@@ -4,13 +4,13 @@ import {
   rect,
   rrect,
   vec,
-  Group,
   useValue,
   useTouchHandler,
   Rect,
   LinearGradient,
   Paint,
   Text,
+  Group,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -52,8 +52,7 @@ export const Glassmorphism = () => {
           clip={clip}
           intensity={15}
           color="rgba(255, 255, 255, 0.3)"
-        />
-        <Group clip={clip}>
+        >
           <Paint>
             <LinearGradient
               start={vec(0, 0)}
@@ -100,7 +99,7 @@ export const Glassmorphism = () => {
             size={18}
             familyName="source-sans-pro-semi-bold"
           />
-        </Group>
+        </BackdropBlur>
       </Group>
     </Canvas>
   );

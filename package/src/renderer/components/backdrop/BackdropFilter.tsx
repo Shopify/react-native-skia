@@ -1,14 +1,12 @@
-import React from "react";
-import type { ReactNode } from "react";
+import React, { Children } from "react";
 
-import { processColor, ClipOp } from "../../../skia";
-import { processClip } from "../../processors";
-import type { AnimatedProps, ClipDef } from "../../processors";
-import type { Color } from "../../../skia";
+import type { AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes";
 import type { SkNode } from "../../Host";
 import { processChildren } from "../../Host";
 import { getInput } from "../imageFilters/getInput";
+import type { GroupProps } from "../Group";
+import { Group } from "../Group";
 
 const disableFilterMemoization = (children: SkNode[]) => {
   children.forEach((child) => {
@@ -17,29 +15,30 @@ const disableFilterMemoization = (children: SkNode[]) => {
   });
 };
 
-export interface BackdropFilterProps {
-  color?: Color;
-  clip: ClipDef;
-  children: ReactNode | ReactNode[];
-}
+export type BackdropFilterProps = GroupProps;
 
-export const BackdropFilter = (props: AnimatedProps<BackdropFilterProps>) => {
-  const onDraw = useDrawing(props, (ctx, { color, clip }, children) => {
+export const BackdropFilter = (
+  allProps: AnimatedProps<BackdropFilterProps>
+) => {
+  const { children: allChildren, ...props } = allProps;
+  const [filterChild, ...groupChildren] = Children.toArray(allChildren);
+  const onDraw = useDrawing(props, (ctx, _, children) => {
     disableFilterMemoization(children);
     const toFilter = processChildren(ctx, children);
     const filter = getInput(toFilter);
     if (!filter) {
       throw new Error("No image filter provided to the background");
     }
-    const { canvas, opacity } = ctx;
-    canvas.save();
-    processClip(canvas, clip, ClipOp.Intersect);
+    const { canvas } = ctx;
     canvas.saveLayer(undefined, null, filter);
-    if (color) {
-      canvas.drawColor(processColor(color, opacity));
-    }
-    canvas.restore();
     canvas.restore();
   });
-  return <skDrawing onDraw={onDraw} {...props} skipProcessing />;
+  return (
+    <Group {...props}>
+      <skDrawing onDraw={onDraw} skipProcessing>
+        {filterChild}
+      </skDrawing>
+      {groupChildren}
+    </Group>
+  );
 };
