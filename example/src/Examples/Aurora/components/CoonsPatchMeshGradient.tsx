@@ -8,7 +8,6 @@ import {
   Patch,
   vec,
   Paint,
-  processColor,
   useImage,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
@@ -32,7 +31,7 @@ const rectToTexture = (
   ] as const;
 
 const rectToColors = (
-  colors: number[],
+  colors: string[],
   [tl, tr, br, bl]: readonly [number, number, number, number]
 ) => [colors[tl], colors[tr], colors[br], colors[bl]] as const;
 
@@ -77,12 +76,11 @@ interface CoonsPatchMeshGradientProps {
 export const CoonsPatchMeshGradient = ({
   rows,
   cols,
-  colors: rawColors,
+  colors,
   debug,
   lines,
 }: CoonsPatchMeshGradientProps) => {
   const image = useImage(require("../../../assets/debug.png"));
-  const colors = rawColors.map((color) => processColor(color, 1));
   const dx = width / cols;
   const dy = height / rows;
   const C = dx / 3;

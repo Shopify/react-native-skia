@@ -38,7 +38,7 @@ export const AnimationWithTouchHandler = () => {
       circleVelocity.value *= 0.75;
     }
     translateX.value = nextValue;
-    circleVelocity.value *= 0.95;
+    circleVelocity.value *= 0.75;
   });
 
   // Touch handler
