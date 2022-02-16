@@ -22,6 +22,7 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::R
                                               grContextOptions);
     }
     
+    _layer.framebufferOnly = NO;
     _layer.device = _device;
     _layer.opaque = false;
     _layer.contentsScale = _context->getPixelDensity();

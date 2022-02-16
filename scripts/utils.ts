@@ -1,9 +1,14 @@
 import { exec, execSync } from "child_process";
 import { exit } from "process";
-const fs = require("fs");
+import path from "path";
+import fs from "fs";
 
 export const executeCmdSync = (command: string) => {
-  execSync(command, { stdio: "inherit", env: process.env });
+  try {
+    return execSync(command);
+  } catch (e) {
+    exit(1);
+  }
 };
 
 export const executeCmd = (
@@ -72,4 +77,31 @@ export const restoreFile = (filePathToBeRestored: string) => {
   console.log(`Restoring ${getBackupFilename(filePathToBeRestored)}...`);
   fs.unlinkSync(filePathToBeRestored);
   fs.renameSync(getBackupFilename(filePathToBeRestored), filePathToBeRestored);
+};
+
+/**
+ * Look ma, it's cp -R.
+ * @param {string} src  The path to the thing to copy.
+ * @param {string} dest The path to the new copy.
+ */
+export var copyRecursiveSync = function (src: string, dest: string) {
+  var exists = fs.existsSync(src);
+  if (!exists) {
+    return;
+  }
+  var stats = fs.statSync(src);
+  var isDirectory = stats.isDirectory();
+  if (isDirectory) {
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest);
+    }
+    fs.readdirSync(src).forEach((childItemName) => {
+      copyRecursiveSync(
+        path.join(src, childItemName),
+        path.join(dest, childItemName)
+      );
+    });
+  } else {
+    fs.copyFileSync(src, dest);
+  }
 };

@@ -16,126 +16,6 @@ using namespace facebook;
 
 class JsiSkMatrix : public JsiSkWrappingSharedPtrHostObject<SkMatrix> {
 public:
-  // TODO-API: Properties?
-  JSI_HOST_FUNCTION(set) {
-    auto i = arguments[0].asNumber();
-    auto v = arguments[1].asNumber();
-    getObject()->set(i, v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(get) {
-    auto i = arguments[0].asNumber();
-    auto v = getObject()->get(i);
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_HOST_FUNCTION(setScaleX) {
-    auto v = arguments[0].asNumber();
-    getObject()->setScaleX(v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(getScaleX) {
-    auto v = getObject()->getScaleX();
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_HOST_FUNCTION(setScaleY) {
-    auto v = arguments[0].asNumber();
-    getObject()->setScaleY(v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(getScaleY) {
-    auto v = getObject()->getScaleY();
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_HOST_FUNCTION(setSkewX) {
-    auto v = arguments[0].asNumber();
-    getObject()->setSkewX(v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(getSkewX) {
-    auto v = getObject()->getSkewX();
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_HOST_FUNCTION(setSkewY) {
-    auto v = arguments[0].asNumber();
-    getObject()->setSkewY(v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(getSkewY) {
-    auto v = getObject()->getSkewY();
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_HOST_FUNCTION(setTranslateX) {
-    auto v = arguments[0].asNumber();
-    getObject()->setTranslateX(v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(getTranslateX) {
-    auto v = getObject()->getTranslateX();
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_HOST_FUNCTION(setTranslateY) {
-    auto v = arguments[0].asNumber();
-    getObject()->setTranslateY(v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(getTranslateY) {
-    auto v = getObject()->getTranslateY();
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_HOST_FUNCTION(setPerspX) {
-    auto v = arguments[0].asNumber();
-    getObject()->setPerspX(v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(getPerspX) {
-    auto v = getObject()->getPerspX();
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_HOST_FUNCTION(setPerspY) {
-    auto v = arguments[0].asNumber();
-    getObject()->setPerspY(v);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(getPerspY) {
-    auto v = getObject()->getPerspX();
-    return jsi::Value(SkScalarToDouble(v));
-  }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMatrix, getPerspY),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setPerspY),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getPerspX),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setPerspX),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getTranslateY),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setTranslateY),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getTranslateX),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setTranslateX),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getSkewY),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setSkewY),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getSkewX),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setSkewX),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getScaleY),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setScaleY),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getScaleX),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setScaleX),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, get),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, set))
 
   JsiSkMatrix(std::shared_ptr<RNSkPlatformContext> context, SkMatrix m)
       : JsiSkWrappingSharedPtrHostObject<SkMatrix>(
@@ -146,10 +26,28 @@ Returns the underlying object from a host object of this type
 */
   static std::shared_ptr<SkMatrix> fromValue(jsi::Runtime &runtime,
                                              const jsi::Value &obj) {
-    return obj.asObject(runtime)
-        .asHostObject<JsiSkMatrix>(runtime)
-        .get()
-        ->getObject();
+    const auto object = obj.asObject(runtime);
+    if (object.isHostObject(runtime)) {
+      return object
+              .asHostObject<JsiSkMatrix>(runtime)
+              .get()
+              ->getObject();
+    } else {
+      auto array = object.asArray(runtime);
+      auto scaleX = array.getValueAtIndex(runtime, 0).asNumber();
+      auto skewX = array.getValueAtIndex(runtime, 1).asNumber();
+      auto transX = array.getValueAtIndex(runtime, 2).asNumber();
+      auto skewY = array.getValueAtIndex(runtime, 3).asNumber();
+      auto scaleY = array.getValueAtIndex(runtime, 4).asNumber();
+      auto transY = array.getValueAtIndex(runtime, 5).asNumber();
+      auto pers0 = array.getValueAtIndex(runtime, 6).asNumber();
+      auto pers1 = array.getValueAtIndex(runtime, 7).asNumber();
+      auto pers2 = array.getValueAtIndex(runtime, 8).asNumber();
+      return std::make_shared<SkMatrix>(SkMatrix::MakeAll(
+        scaleX, skewX, transX,
+        skewY,  scaleY, transY,
+        pers0,  pers1,  pers2));
+    }
   }
 
   static const jsi::HostFunctionType

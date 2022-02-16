@@ -16,6 +16,7 @@
 #include "JsiSkMaskFilterFactory.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
+#include "JsiSkRSXform.h"
 #include "JsiSkPath.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
@@ -29,10 +30,13 @@
 #include "JsiSkSVG.h"
 #include "JsiSkSVGFactory.h"
 #include "JsiSkTypeface.h"
+#include "JsiSkVertices.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkDataFactory.h"
 #include "JsiSkFontMgrFactory.h"
 #include "JsiSkSurfaceFactory.h"
+#include "JsiSkTextBlobFactory.h"
+#include "JsiSkContourMeasureIter.h"
 
 namespace RNSkia
 {
@@ -51,12 +55,15 @@ namespace RNSkia
         : JsiSkHostObject(context)
     {
 
-      installFunction("Font", JsiSkFont::createCtor(context));
-      installFunction("Paint", JsiSkPaint::createCtor(context));
-      installFunction("Matrix", JsiSkMatrix::createCtor(context));
-      installFunction("XYWHRect", JsiSkRect::createCtor(context));
-      installFunction("RRectXY", JsiSkRRect::createCtor(context));
-      installFunction("Point", JsiSkPoint::createCtor(context));
+    installFunction("Font", JsiSkFont::createCtor(context));
+    installFunction("Paint", JsiSkPaint::createCtor(context));
+    installFunction("RSXform", JsiSkRSXform::createCtor(context));
+    installFunction("Matrix", JsiSkMatrix::createCtor(context));
+    installFunction("XYWHRect", JsiSkRect::createCtor(context));
+    installFunction("RRectXY", JsiSkRRect::createCtor(context));
+    installFunction("Point", JsiSkPoint::createCtor(context));
+    installFunction("ContourMeasureIter", JsiSkContourMeasureIter::createCtor(context));
+    installFunction("MakeVertices", JsiSkVertices::createCtor(context));
 
       // Static members
       installReadonlyProperty("FontMgr",
@@ -83,6 +90,7 @@ namespace RNSkia
           "RuntimeEffect", std::make_shared<JsiSkRuntimeEffectFactory>(context));
       installReadonlyProperty("Shader",
                               std::make_shared<JsiSkShaderFactory>(context));
+      installReadonlyProperty("TextBlob", std::make_shared<JsiSkTextBlobFactory>(context));
       installReadonlyProperty("Surface", std::make_shared<JsiSkSurfaceFactory>(context));
     };
   };

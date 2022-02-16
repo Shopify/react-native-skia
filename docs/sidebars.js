@@ -47,7 +47,13 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Text",
-      items: ["text/fonts", "text/text"],
+      items: [
+        "text/fonts",
+        "text/text",
+        "text/glyphs",
+        "text/path",
+        "text/blob",
+      ],
     },
     {
       collapsed: true,
@@ -75,6 +81,7 @@ const sidebars = {
         "shapes/path",
         "shapes/polygons",
         "shapes/ellipses",
+        "shapes/vertices",
         "shapes/patch",
       ],
     },

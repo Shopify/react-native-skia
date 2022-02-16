@@ -15,6 +15,7 @@ using namespace facebook;
 
 class JsiSkPoint : public JsiSkWrappingSharedPtrHostObject<SkPoint> {
 public:
+
   JSI_PROPERTY_GET(x) { return static_cast<double>(getObject()->x()); }
 
   JSI_PROPERTY_GET(y) { return static_cast<double>(getObject()->y()); }

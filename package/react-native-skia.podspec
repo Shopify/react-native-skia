@@ -27,10 +27,10 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'GLKit', 'MetalKit'
 
-  s.ios.vendored_libraries = [
-    'libs/ios/libskia.a', 
-    'libs/ios/libsvg.a', 
-    'libs/ios/libskshaper.a'
+  s.ios.vendored_frameworks = [
+    'libs/ios/libskia.xcframework', 
+    'libs/ios/libsvg.xcframework', 
+    'libs/ios/libskshaper.xcframework'
   ]
 
   # All iOS cpp/h files

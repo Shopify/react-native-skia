@@ -49,7 +49,7 @@ export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
             <Image
               fit="fill"
               key={i}
-              source={el.image}
+              image={el.image}
               rect={() => getBounds(el)}
             />
           );

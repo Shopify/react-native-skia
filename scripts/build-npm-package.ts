@@ -6,7 +6,6 @@ import {
 } from "./utils";
 import fs from "fs";
 import { exit } from "process";
-import { configurations } from "./skia-configuration";
 
 const pck = JSON.parse(fs.readFileSync("./package/package.json").toString());
 
@@ -38,18 +37,29 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
 }
 
 // Check that Android Skia libs are built
-configurations.android.outputMapping!.forEach((cpu) =>
-  ["libskia.a", "libskshaper.a", "libsvg.a"].forEach((lib) => {
-    checkFileExists(
-      `./package/libs/android/${cpu}/${lib}`,
-      `Skia Android ${cpu}/${lib}`,
-      "Have you built the Skia Android binaries? Run yarn run build."
-    );
-  })
-);
+// SKIP for now since we can't use configuration here since it depends on
+// iPhone SDKs that we get from xcrun... TODO!
+// Object.keys(configurations.android.targets).forEach((targetKey) => {
+//   const target = configurations.android.targets[targetKey];
+//   configurations.android.outputNames.forEach((name) => {
+//     const path = `./package/libs/android/${
+//       target.output ?? target.cpu
+//     }/${name}`;
 
-// Check that iOS Skia libs are built
-["libskia.a", "libskshaper.a", "libsvg.a"].forEach((lib) => {
+//     checkFileExists(
+//       path,
+//       `Skia Android ${path}`,
+//       "Have you built the Skia Android binaries? Run yarn run build."
+//     );
+//   });
+// });
+
+// Check that iOS Skia frameworks are built
+[
+  "libskia.xcframework",
+  "libskshaper.xcframework",
+  "libsvg.xcframework",
+].forEach((lib) => {
   checkFileExists(
     `./package/libs/ios/${lib}`,
     `Skia iOS ${lib}`,
