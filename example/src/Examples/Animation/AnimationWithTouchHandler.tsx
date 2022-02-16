@@ -38,7 +38,7 @@ export const AnimationWithTouchHandler = () => {
       circleVelocity.value *= 0.75;
     }
     translateX.value = nextValue;
-    circleVelocity.value *= 0.75;
+    circleVelocity.value *= 0.95;
   });
 
   // Touch handler
@@ -54,7 +54,7 @@ export const AnimationWithTouchHandler = () => {
       );
     },
     onEnd: ({ velocityX }) => {
-      circleVelocity.value = -(velocityX * 0.015);
+      circleVelocity.value = velocityX * 0.05;
       clock.start();
     },
   });
