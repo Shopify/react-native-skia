@@ -24,6 +24,6 @@ export interface AnimationParams
     AnimationValueParams {}
 
 export interface IAnimation {
-  start: () => void;
+  start: (onFinished?: (a: IAnimation) => void) => void;
   stop: () => void;
 }

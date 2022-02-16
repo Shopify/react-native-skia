@@ -4,8 +4,6 @@ import type { RequiredAnimationParams } from "../functions/getResolvedParams";
 import { timing } from "../functions/timing";
 import type { TimingConfig, IAnimation } from "../types";
 
-import type { INativeValue } from "./types";
-
 /**
  * Creates a new value that will be driven by an animation (clock) value.
  * The value will be run from / to the value in params and modified
@@ -25,11 +23,12 @@ export const internalCreateTiming = (
 ): IAnimation => {
   // Create driver value
   const driver = ValueApi.createClockValue(params.immediate);
-  // Create the animation value
-  const resolvedValue = (value ??
-    ValueApi.createValue(params.from ?? 0)) as INativeValue;
+  // Resolve animation value
+  const resolvedValue = value ?? ValueApi.createValue(params.from ?? 0);
   // Update from
   params.from = params.from ?? resolvedValue.value;
+  // Set up unsubscription
+  let unsubscribe: (() => void) | undefined;
   // Set the driver on the value
   const updateFunction = (t: number) => {
     const p = timing(
@@ -40,27 +39,44 @@ export const internalCreateTiming = (
       params.yoyo ?? false,
       () => {
         // Animation has reached its duration and to value
-        resolvedValue._setDriver(undefined);
+        unsubscribe && unsubscribe();
         driver.stop();
       }
     );
-    return p * (params.to - params.from!) + params.from!;
+    resolvedValue.value = p * (params.to - params.from!) + params.from!;
   };
 
-  resolvedValue._setDriver(driver, updateFunction);
+  // Subscribe to changes
+  unsubscribe = driver.addListener(updateFunction);
+
+  // Save onFinished
+  let onFinishedHandler: ((a: IAnimation) => void) | undefined;
+  const animationRef: { current: IAnimation | undefined } = {
+    current: undefined,
+  };
 
   const stop = () => {
-    resolvedValue._setDriver(undefined);
+    // Unsubscribe and stop driver
+    unsubscribe && unsubscribe();
     driver.stop();
+    // Call onFinished
+    animationRef.current &&
+      onFinishedHandler &&
+      onFinishedHandler(animationRef.current);
   };
 
-  const start = () => {
-    resolvedValue._setDriver(driver, updateFunction);
+  const start = (onFinished?: (a: IAnimation) => void) => {
+    onFinishedHandler = onFinished;
+    // Unsubscribe and start subscription and clock
+    unsubscribe && unsubscribe();
+    unsubscribe = driver.addListener(updateFunction);
     driver.start();
   };
 
-  return {
+  animationRef.current = {
     stop,
     start,
   };
+
+  return animationRef.current;
 };

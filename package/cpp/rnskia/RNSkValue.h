@@ -312,7 +312,6 @@ public:
       }
   
   ~RNSkValue() {
-    clearDependency();
   }
     
   JSI_PROPERTY_SET(value) {
@@ -324,88 +323,8 @@ public:
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkReadonlyValue, __typename__),
                               JSI_EXPORT_PROP_GET(RNSkReadonlyValue, value))
   
-  /**
-   * Adds a value as a dependency to this value. Only one value can be set as a dependency,
-   * and when added as a dependency subscription and unsubscription will be handled automatically.
-   * The function takes two parameter, the first one is the value to add a dependency to - and the
-   * second one is an option function for transforming the value (like in the derived value).
-   */
-  JSI_HOST_FUNCTION(_setDriver) {
-    // Remove previous dependency (if set)
-    clearDependency();
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, addListener))
     
-    // Check for clearing
-    if(arguments[0].isUndefined() || arguments[0].isNull()) {
-      return jsi::Value::undefined();
-    }
-
-    // Verify input - first parameter should be the value we are depending on
-    if(!arguments[0].isObject()) {
-      jsi::detail::throwJSError(runtime, "Expected dependency value as first parameter");
-      return jsi::Value::undefined();
-    }
-
-    // Get the dependant value
-    auto value = arguments[0].asObject(runtime).asHostObject<RNSkReadonlyValue>(runtime);
-    if(value == nullptr) {
-      jsi::detail::throwJSError(runtime, "Expected dependency value as first parameter");
-      return jsi::Value::undefined();
-    }
-
-    // Second parameter is optional and is a calculation function
-    if(count > 1) {
-      if (!arguments[1].isObject() ||
-          !arguments[1].asObject(runtime).isFunction(runtime)) {
-        jsi::detail::throwJSError(runtime, "Expected callback function as first parameter");
-        return jsi::Value::undefined();
-      }
-      _dependencyUpdater = std::make_shared<jsi::Function>(arguments[1].asObject(runtime).asFunction(runtime));
-    }
-    
-    // Subscribe
-    _dependencyUnsubcriptor = value->addListener([this](jsi::Runtime& runtime) {
-      updateValueFromDependecy(runtime);
-    });
-
-    // Save dependency
-    _dependency = value;
-    
-    return jsi::Value::undefined();
-  }
-  
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, addListener),
-                       JSI_EXPORT_FUNC(RNSkValue, _setDriver))
-  
-private:
-  
-  void updateValueFromDependecy(jsi::Runtime& runtime) {
-    if(_dependency == nullptr) {
-      return;
-    }
-    auto dependencyValue = _dependency->get_value(runtime);
-    if(_dependencyUpdater != nullptr) {
-      // Set this value's value to the dependant value's value - through the
-      // callback that calculates a new value
-      auto nextValue = _dependencyUpdater->call(runtime, dependencyValue);
-      update(runtime, nextValue);
-    } else {
-      update(runtime, dependencyValue);
-    }
-  }
-  
-  void clearDependency() {
-    if(_dependency != nullptr || _dependencyUnsubcriptor != nullptr) {
-      // Remove subscription
-      _dependencyUnsubcriptor();
-      _dependencyUnsubcriptor = nullptr;
-      _dependencyUpdater = nullptr;
-      _dependency = nullptr;
-    }
-  }
-  
-  std::shared_ptr<jsi::Function> _dependencyUpdater;
-  std::shared_ptr<RNSkReadonlyValue> _dependency;
-  std::function<void()> _dependencyUnsubcriptor;
 };
 
 }
