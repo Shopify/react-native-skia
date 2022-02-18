@@ -20,6 +20,8 @@ export const internalRunTiming = (
   params: RequiredAnimationParams & Required<TimingConfig>
 ): ControllableValue => {
   const retVal = internalCreateTiming(params, value);
-  retVal.start();
+  if (params.immediate) {
+    retVal.start();
+  }
   return retVal;
 };
