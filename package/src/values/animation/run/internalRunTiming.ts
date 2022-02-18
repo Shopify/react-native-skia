@@ -1,7 +1,7 @@
-import type { Value } from "../../types";
+import type { Value, ControllableValue } from "../../types";
 import { internalCreateTiming } from "../create/internalCreateTiming";
 import type { RequiredAnimationParams } from "../functions/getResolvedParams";
-import type { TimingConfig, IAnimation } from "../types";
+import type { TimingConfig } from "../types";
 /**
  * Creates a new animation on an existing value that will be driven by
  * an animation value. The value will be run from / to the value in
@@ -18,6 +18,8 @@ import type { TimingConfig, IAnimation } from "../types";
 export const internalRunTiming = (
   value: Value<number>,
   params: RequiredAnimationParams & Required<TimingConfig>
-): IAnimation => {
-  return internalCreateTiming(params, value);
+): ControllableValue => {
+  const retVal = internalCreateTiming(params, value);
+  retVal.start();
+  return retVal;
 };

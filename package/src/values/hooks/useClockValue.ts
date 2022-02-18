@@ -6,14 +6,14 @@ import "../types";
 /**
  * @returns A new value that will be updated on every frame redraw with the
  * number of milliseconds elapsed since the value was started.
- * @param immediate - defaults to true. If false, the animation value will be
- * created in the stopped state.
+ * The clock is created in the stopped state.
  */
-export const useClockValue = (immediate = true) => {
-  const value = useMemo(
-    () => ValueApi.createClockValue(immediate),
-    [immediate]
-  );
-  useEffect(() => () => value.stop(), [value]);
+export const useClockValue = () => {
+  const value = useMemo(() => ValueApi.createClockValue(), []);
+  useEffect(() => {
+    value.start();
+    return () => value.stop();
+  }, [value]);
+
   return value;
 };

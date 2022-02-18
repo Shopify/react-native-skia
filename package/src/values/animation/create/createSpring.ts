@@ -1,5 +1,6 @@
+import type { ControllableValue } from "../../types";
 import { getResolvedParams } from "../functions/getResolvedParams";
-import type { AnimationParams, SpringConfig, IAnimation } from "../types";
+import type { AnimationParams, SpringConfig } from "../types";
 
 import { internalCreateTiming } from "./internalCreateTiming";
 
@@ -18,6 +19,6 @@ import { internalCreateTiming } from "./internalCreateTiming";
 export const createSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): IAnimation => {
+): ControllableValue => {
   return internalCreateTiming(getResolvedParams(toOrParams, config));
 };

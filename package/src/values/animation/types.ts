@@ -22,8 +22,3 @@ export interface AnimationValueParams {
 export interface AnimationParams
   extends AnimationControllerParams,
     AnimationValueParams {}
-
-export interface IAnimation {
-  start: (onFinished?: (a: IAnimation) => void) => void;
-  stop: () => void;
-}

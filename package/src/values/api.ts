@@ -1,4 +1,4 @@
-import type { ClockValue, ReadonlyValue, Value } from "./types";
+import type { ControllableValue, ReadonlyValue, Value } from "./types";
 
 export type CreateDerivedValue = {
   <R, T1>(cb: (...v: [T1]) => R, deps: [ReadonlyValue<T1>]): ReadonlyValue<R>;
@@ -61,10 +61,23 @@ export interface ISkiaValueApi {
   createDerivedValue: CreateDerivedValue;
   /**
    * Creates a value that will update its value every frame redraw with
-   * the current number of milliseconds since it was started.
-   * @param immediate If true, the value start running immediately
+   * the current number of milliseconds since it was started. The clock
+   * has a start/stop method. It starts in paused mode.
    */
-  createClockValue: (immediate?: boolean) => ClockValue;
+  createClockValue: () => ControllableValue;
+  /**
+   * Creates a value that is driven from a clock and updated every frame with
+   * start/stop methods attached. The value has to be started in order to be running.
+   * @param cb Callback to calculate next value from time. The callback is called with
+   * @param value Optional value that the animation will update
+   * two parameters, the current time in milliseconds and a method for stopping the animation.
+   * @returns A value with start/stop method.
+   */
+  createAnimationValue: (
+    cb: (t: number, stop: () => void) => number,
+    value?: Value<number>,
+    immediate?: boolean
+  ) => ControllableValue;
 }
 
 declare global {
@@ -75,6 +88,7 @@ export const ValueApi: ISkiaValueApi = {
   createValue: global.SkiaValueApi.createValue,
   createDerivedValue: global.SkiaValueApi.createDerivedValue,
   createClockValue: global.SkiaValueApi.createClockValue,
+  createAnimationValue: global.SkiaValueApi.createAnimationValue,
 };
 
 export const { createValue, createDerivedValue, createClockValue } = ValueApi;

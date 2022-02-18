@@ -21,7 +21,7 @@ export interface Value<T = number> extends ReadonlyValue<T> {
   value: T;
 }
 
-export interface ClockValue extends ReadonlyValue<number> {
+export interface ControllableValue extends ReadonlyValue<number> {
   start: () => void;
   stop: () => void;
 }

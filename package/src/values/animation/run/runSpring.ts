@@ -1,6 +1,7 @@
-import type { Value } from "../../types";
+import { Spring } from "../Spring";
+import type { Value, ControllableValue } from "../../types";
 import { getResolvedParams } from "../functions/getResolvedParams";
-import type { AnimationParams, SpringConfig, IAnimation } from "../types";
+import type { AnimationParams, SpringConfig } from "../types";
 
 import { internalRunTiming } from "./internalRunTiming";
 
@@ -21,7 +22,10 @@ export const runSpring = (
   value: Value<number>,
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): IAnimation => {
-  const resolvedParams = getResolvedParams(toOrParams, config);
+): ControllableValue => {
+  const resolvedParams = getResolvedParams(
+    toOrParams,
+    config ?? Spring.Config.Default
+  );
   return internalRunTiming(value, resolvedParams);
 };

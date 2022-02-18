@@ -1,6 +1,6 @@
-import type { Value } from "../../types";
+import type { Value, ControllableValue } from "../../types";
 import { getResolvedParams } from "../functions/getResolvedParams";
-import type { AnimationParams, TimingConfig, IAnimation } from "../types";
+import type { AnimationParams, TimingConfig } from "../types";
 
 import { internalRunTiming } from "./internalRunTiming";
 
@@ -21,7 +21,7 @@ export const runTiming = (
   value: Value<number>,
   toOrParams: number | AnimationParams,
   config?: TimingConfig
-): IAnimation => {
+): ControllableValue => {
   const resolvedParams = getResolvedParams(toOrParams, config);
   return internalRunTiming(value, resolvedParams);
 };
