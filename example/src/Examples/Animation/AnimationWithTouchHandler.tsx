@@ -39,6 +39,11 @@ export const AnimationWithTouchHandler = () => {
     }
     translateX.value = nextValue;
     circleVelocity.value *= 0.95;
+
+    // Stop clock when we reach threshold
+    if (Math.abs(circleVelocity.value) < 0.001) {
+      clock.stop();
+    }
   });
 
   // Touch handler
@@ -60,7 +65,7 @@ export const AnimationWithTouchHandler = () => {
   });
 
   return (
-    <AnimationDemo title={"Animation with touch handler."}>
+    <AnimationDemo title={"Bouncing animation with touch handler"}>
       <Canvas style={styles.canvas} onTouch={touchHandler}>
         <Fill color="white" />
         <Circle cx={translateX} cy={40} r={20} color="#3E3E" />

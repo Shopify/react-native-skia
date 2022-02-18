@@ -18,11 +18,11 @@ export const SimpleAnimation = () => {
   const normalized = useDerivedValue((t) => (t / 1000) % 1.0, [clock]);
   // Create a rect as a derived value
   const rect = useDerivedValue(
-    (p) => ({ x: 0, y: 30, width: p * width, height: Size }),
+    (p) => ({ x: 0, y: 10, width: p * width, height: Size }),
     [normalized]
   );
   return (
-    <AnimationDemo title={"Basic animation with derived values"}>
+    <AnimationDemo title={"Basic animation using derived values"}>
       <Canvas style={styles.canvas}>
         <Fill color="white" />
         <Rect rect={rect} color="#8556E5" />
@@ -33,7 +33,7 @@ export const SimpleAnimation = () => {
 
 const styles = StyleSheet.create({
   canvas: {
-    height: 80,
+    height: 40,
     width: "100%",
     backgroundColor: "#FEFEFE",
   },

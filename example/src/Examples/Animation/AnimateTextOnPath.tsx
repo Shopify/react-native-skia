@@ -18,9 +18,9 @@ const typeface = Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica");
 if (!typeface) {
   throw new Error("Helvetica not found");
 }
-const font = Skia.Font(typeface, 22);
+const font = Skia.Font(typeface, 14);
 
-const ExampleHeight = 160;
+const ExampleHeight = 60;
 
 export const AnimateTextOnPath = () => {
   const { width } = useWindowDimensions();

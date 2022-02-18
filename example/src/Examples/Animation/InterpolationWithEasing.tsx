@@ -23,10 +23,10 @@ export const InterpolationWithEasing = () => {
     { duration: 1000, easing: Easing.inOut(Easing.cubic) }
   );
   return (
-    <AnimationDemo title={"Interpolating value using an easing."}>
+    <AnimationDemo title={"Interpolating value using an easing"}>
       <Canvas style={styles.canvas}>
         <Fill color="white" />
-        <Circle cx={progress} cy={40} r={15} color="#DC4C4C" />
+        <Circle cx={progress} cy={20} r={15} color="#DC4C4C" />
       </Canvas>
     </AnimationDemo>
   );
@@ -34,7 +34,7 @@ export const InterpolationWithEasing = () => {
 
 const styles = StyleSheet.create({
   canvas: {
-    height: 80,
+    height: 40,
     width: "100%",
     backgroundColor: "#FEFEFE",
   },
