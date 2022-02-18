@@ -4,6 +4,9 @@
 #include <JsiHostObject.h>
 #include <RNSkPlatformContext.h>
 #include <RNSkValue.h>
+#include <RNSkClockValue.h>
+#include <RNSkDerivedValue.h>
+#include <RNSkAnimationValue.h>
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -39,6 +42,15 @@ public:
   JSI_HOST_FUNCTION(createClockValue) {
     return jsi::Object::createFromHostObject(runtime,
       std::make_shared<RNSkClockValue>(_platformContext,
+                                       ++_valueIdentifier,
+                                       runtime,
+                                       arguments,
+                                       count));
+  }
+  
+  JSI_HOST_FUNCTION(createAnimationValue) {
+    return jsi::Object::createFromHostObject(runtime,
+      std::make_shared<RNSkAnimationValue>(_platformContext,
                                            ++_valueIdentifier,
                                            runtime,
                                            arguments,
@@ -47,7 +59,8 @@ public:
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValueApi, createValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createDerivedValue),
-                       JSI_EXPORT_FUNC(RNSkValueApi, createClockValue))
+                       JSI_EXPORT_FUNC(RNSkValueApi, createClockValue),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createAnimationValue))
 
 private:
   // Platform context
