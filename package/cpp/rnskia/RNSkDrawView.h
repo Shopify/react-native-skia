@@ -141,7 +141,7 @@ private:
   /**
     Draw loop callback
    */
-  void drawLoopCallback();
+  void drawLoopCallback(bool invalidated);
   
   /**
    Draw in canvas

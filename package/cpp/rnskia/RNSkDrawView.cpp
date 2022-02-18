@@ -272,10 +272,14 @@ void RNSkDrawView::beginDrawingLoop() {
   
   // Set to zero to avoid calling beginDrawLoop before we return
   _drawingLoopId = _platformContext->beginDrawLoop(
-    _nativeId, std::bind(&RNSkDrawView::drawLoopCallback, this));
+    _nativeId, std::bind(&RNSkDrawView::drawLoopCallback, this, std::placeholders::_1));
 }
 
-void RNSkDrawView::drawLoopCallback() {
+void RNSkDrawView::drawLoopCallback(bool invalidated) {
+  if(invalidated) {
+    return;
+  }
+  
   if(_redrawRequestCounter > 0 || _drawingMode == RNSkDrawingMode::Continuous) {
       _redrawRequestCounter = 0;
       // We render on the javascript thread. 

@@ -49,8 +49,11 @@ public:
     if(!_isValid) {
       return;
     }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    // Stop the refresh loop
     stopDrawLoop();
+    // Notify draw loop listeners once with the invalidated parameter
+    // set to true signalling that we are done and can clean up.
+    notifyDrawLoop(true);
     _isValid = false;
   }
   
@@ -120,7 +123,7 @@ public:
    * @param callback Callback to call on sync
    * @returns Identifier of the draw loop entry
    */
-  size_t beginDrawLoop(size_t nativeId, std::function<void(void)> callback) {
+  size_t beginDrawLoop(size_t nativeId, std::function<void(bool)> callback) {
     if(!_isValid) { return 0; }
     auto shouldStart = false;
     {
@@ -157,16 +160,18 @@ public:
 
   /**
    * Notifies all drawing callbacks
+   * @param invalidated True if the context was invalidated, otherwise false. This
+   * can be used to receive a notification that we have stopped the main drawloop
    */
-  void notifyDrawLoop() {
+  void notifyDrawLoop(bool invalidated) {
     if(!_isValid) { return; }
-    std::map<size_t, std::function<void()>> tmp;
+    std::map<size_t, std::function<void(bool)>> tmp;
     {
       std::lock_guard<std::mutex> lock(_drawCallbacksLock);
       tmp.insert(_drawCallbacks.begin(), _drawCallbacks.end());      
     }
     for (auto it = tmp.begin(); it != tmp.end(); it++) {
-      it->second();
+      it->second(invalidated);
     }    
   }
 
@@ -184,7 +189,7 @@ private:
   std::function<void(const std::function<void(void)> &)>
       _dispatchOnRenderThread;
 
-  std::map<size_t, std::function<void(void)>> _drawCallbacks;
+  std::map<size_t, std::function<void(bool)>> _drawCallbacks;
   std::mutex _drawCallbacksLock;
   std::atomic<bool> _isValid = {true};
 };

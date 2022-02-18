@@ -18,7 +18,7 @@ namespace RNSkia {
             _jniPlatformContext(jniPlatformContext) {
             // Hook onto the notify draw loop callback in the platform context
             jniPlatformContext->setOnNotifyDrawLoop([this]() {
-                notifyDrawLoop();
+                notifyDrawLoop(false);
             });
         }
 
