@@ -13,6 +13,7 @@ import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
 import type { Vertices } from "./Vertices";
 import type { ITextBlob } from "./TextBlob";
+import type { IPicture } from "./Picture";
 
 export enum ClipOp {
   Difference,
@@ -20,6 +21,11 @@ export enum ClipOp {
 }
 
 export interface ICanvas {
+  /**
+   * Draws the given picture using the current clip, current matrix, and the provided paint.
+   * @param picture
+   */
+  drawPicture(picture: IPicture): void;
   /**
    * Draws the given image with its top-left corner at (left, top) using the current clip,
    * the current matrix, and optionally-provided paint.
