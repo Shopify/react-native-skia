@@ -8,8 +8,9 @@ import "../types";
  * number of milliseconds elapsed since the value was started.
  * The clock is created in the stopped state.
  */
+
 export const useClockValue = () => {
-  const value = useMemo(() => ValueApi.createClockValue(), []);
+  const value = useMemo(() => ValueApi.createAnimationValue((t) => t), []);
   useEffect(() => {
     value.start();
     return () => value.stop();
