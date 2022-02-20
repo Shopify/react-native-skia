@@ -60,12 +60,6 @@ export interface ISkiaValueApi {
    */
   createDerivedValue: CreateDerivedValue;
   /**
-   * Creates a value that will update its value every frame redraw with
-   * the current number of milliseconds since it was started. The clock
-   * has a start/stop method. It starts in paused mode.
-   */
-  createClockValue: () => ControllableValue;
-  /**
    * Creates a value that is driven from a clock and updated every frame with
    * start/stop methods attached. The value has to be started in order to be running.
    * @param cb Callback to calculate next value from time. The callback is called with
@@ -87,8 +81,7 @@ declare global {
 export const ValueApi: ISkiaValueApi = {
   createValue: global.SkiaValueApi.createValue,
   createDerivedValue: global.SkiaValueApi.createDerivedValue,
-  createClockValue: global.SkiaValueApi.createClockValue,
   createAnimationValue: global.SkiaValueApi.createAnimationValue,
 };
 
-export const { createValue, createDerivedValue, createClockValue } = ValueApi;
+export const { createValue, createDerivedValue } = ValueApi;
