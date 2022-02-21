@@ -16,7 +16,7 @@ import type { IMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
 import type { IPoint } from "./Point";
 import type { Vertices, VertexMode } from "./Vertices/Vertices";
-import type { Data, DataFactory } from "./Data";
+import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
 import type { TextBlobFactory } from "./TextBlob";
 import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
@@ -25,7 +25,6 @@ import "./NativeSetup";
 import type { IRSXform } from "./RSXform";
 import type { IPath } from "./Path/Path";
 import type { IContourMeasureIter } from "./ContourMeasure";
-import type { IPicture } from "./Picture";
 
 /**
  * Declares the interface for the native Skia API
@@ -69,7 +68,6 @@ export interface Skia {
     indices?: number[] | null,
     isVolatile?: boolean
   ): Vertices;
-  MakePicture(data: Data): IPicture;
   Data: DataFactory;
   Image: ImageFactory;
   SVG: SVGFactory;
@@ -118,5 +116,4 @@ export const Skia = {
   MakeImageFromEncoded: SkiaApi.Image.MakeImageFromEncoded,
   MakeImage: SkiaApi.Image.MakeImage,
   MakeVertices: SkiaApi.MakeVertices,
-  MakePicture: SkiaApi.MakePicture,
 };

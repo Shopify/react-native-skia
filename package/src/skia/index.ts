@@ -18,4 +18,3 @@ export * from "./Matrix";
 export * from "./SVG";
 export * from "./Surface";
 export * from "./FontMgr";
-export * from "./Picture";

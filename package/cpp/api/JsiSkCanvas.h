@@ -12,7 +12,6 @@
 #include "JsiSkSVG.h"
 #include "JsiSkVertices.h"
 #include "JsiSkTextBlob.h"
-#include "JsiSkPicture.h"
 
 #include <jsi/jsi.h>
 #include <map>
@@ -161,12 +160,6 @@ public:
     }
     auto constraint = SkCanvas::kStrict_SrcRectConstraint;
     _canvas->drawImageRect(image.get(), *src, *dest, {filter, mipmap}, paint.get(), constraint);
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(drawPicture) {
-    auto picture = JsiSkPicture::fromValue(runtime, arguments[0]);
-    _canvas->drawPicture(picture);
     return jsi::Value::undefined();
   }
 
@@ -481,7 +474,6 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkCanvas, drawPaint),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawPicture),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawLine),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawRect),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawImage),

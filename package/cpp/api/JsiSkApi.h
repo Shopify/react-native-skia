@@ -31,7 +31,6 @@
 #include "JsiSkSVGFactory.h"
 #include "JsiSkTypeface.h"
 #include "JsiSkVertices.h"
-#include "JsiSkPicture.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkDataFactory.h"
 #include "JsiSkFontMgrFactory.h"
@@ -65,7 +64,6 @@ namespace RNSkia
     installFunction("Point", JsiSkPoint::createCtor(context));
     installFunction("ContourMeasureIter", JsiSkContourMeasureIter::createCtor(context));
     installFunction("MakeVertices", JsiSkVertices::createCtor(context));
-    installFunction("MakePicture", JsiSkPicture::createCtor(context));
 
       // Static members
       installReadonlyProperty("FontMgr",
