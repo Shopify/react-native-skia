@@ -27,3 +27,7 @@ export const BackdropBlur = ({
     </BackdropFilter>
   );
 };
+
+BackdropBlur.defaultProps = {
+  color: "transparent",
+};
