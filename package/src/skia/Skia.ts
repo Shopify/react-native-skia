@@ -116,6 +116,7 @@ export const Skia = {
   // For the following methods the factory symmetry is broken to be comptatible with CanvasKit
   MakeSurface: SkiaApi.Surface.Make,
   MakeImageFromEncoded: SkiaApi.Image.MakeImageFromEncoded,
+  MakeImage: SkiaApi.Image.MakeImage,
   MakeVertices: SkiaApi.MakeVertices,
   MakePicture: SkiaApi.MakePicture,
 };
