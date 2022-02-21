@@ -10,7 +10,6 @@ import {
   LinearGradient,
   Paint,
   Text,
-  Group,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -48,7 +47,7 @@ export const Glassmorphism = () => {
       <BackdropBlur
         clip={clip}
         intensity={15}
-        color="rgba(255, 255, 255, 0.3)"
+        color="rgba(255, 255, 255, 0.1)"
         transform={() => [{ translateY: y.value }, { translateX: x.value }]}
       >
         <Paint>
