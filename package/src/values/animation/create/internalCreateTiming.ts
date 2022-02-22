@@ -24,11 +24,11 @@ export const internalCreateTiming = (
 ): ControllableValue => {
   // Update from to be either the declared from value,
   // the current value of the value or zero
-  params.from = params.from ?? value?.value ?? 0;
+  const from = params.from ?? value?.value ?? 0;
 
   // Update function for the animation value
   const updateFunction = (t: number, stop: () => void) => {
-    if (params.to === params.from) {
+    if (params.to === from) {
       stop();
     }
     const p = timing(
@@ -39,7 +39,7 @@ export const internalCreateTiming = (
       params.yoyo ?? false,
       stop
     );
-    return p * (params.to - params.from!) + params.from!;
+    return p * (params.to - from!) + from!;
   };
 
   // Create animation value
