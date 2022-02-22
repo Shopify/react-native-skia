@@ -37,6 +37,9 @@ export const isAnimated = <T>(props: AnimatedProps<T>) => {
   return false;
 };
 
+export const processProps = <T>(props: T, cb: (value: unknown) => void) =>
+  mapKeys(props).forEach((key) => cb(props[key]));
+
 export const materialize = <T>(
   ctx: DrawingContext,
   props: AnimatedProps<T>

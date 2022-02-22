@@ -8,6 +8,9 @@ export const CanvasNode = (redraw: () => void): SkContainer => ({
   draw: (ctx: DrawingContext, _props, children: SkNode[]) => {
     processChildren(ctx, children);
   },
+  visitProps: (node, cb) => {
+    node.children.forEach((c) => c.visitProps(c, cb));
+  },
   children: [],
   redraw,
 });

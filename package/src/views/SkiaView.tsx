@@ -74,13 +74,13 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   }
 
   /**
-   * Registers a value as a dependant value of the Skia View. The view will
-   * redraw when the value changes
+   * Registers one or move values as a dependant value of the Skia View. The view will
+   * The view will redraw itself when any of the values change.
    * @param value Value to register
    */
-  public registerValue(value: ReadonlyValue<unknown>) {
+  public registerValues(values: ReadonlyValue<unknown>[]) {
     assertDrawCallbacksEnabled();
-    return registerValueInSkiaView(this._nativeId, value);
+    return registerValuesInSkiaView(this._nativeId, values);
   }
 
   /**
@@ -149,11 +149,11 @@ const setDrawingModeForSkiaView = (nativeId: string, mode: DrawMode) => {
   SkiaViewApi.setDrawMode(parseInt(nativeId, 10), mode);
 };
 
-const registerValueInSkiaView = (
+const registerValuesInSkiaView = (
   nativeId: string,
-  value: ReadonlyValue<unknown>
+  values: ReadonlyValue<unknown>[]
 ) => {
-  SkiaViewApi.registerValueInView(parseInt(nativeId, 10), value);
+  return SkiaViewApi.registerValuesInView(parseInt(nativeId, 10), values);
 };
 
 const assertDrawCallbacksEnabled = () => {

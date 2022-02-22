@@ -6,7 +6,7 @@ import type { DrawingContext } from "../DrawingContext";
 import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
-import { materialize } from "../processors/Animations/Animations";
+import { materialize, processProps } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
 
 type DrawingCallback = (ctx: DrawingContext, children: SkNode[]) => void;
@@ -42,6 +42,10 @@ export const Drawing = (props: DrawingProps) => {
 export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
   type: NodeType.Drawing,
   props,
+  visitProps: (node, cb) => {
+    processProps(node.props, cb);
+    node.children.forEach((c) => c.visitProps(c, cb));
+  },
   draw: (ctx, { onDraw, skipProcessing, ...newProps }, children) => {
     if (skipProcessing) {
       onDraw(ctx, children);
