@@ -31,7 +31,6 @@ import { CanvasNode } from "./nodes/Canvas";
 import { vec } from "./processors";
 import type { DrawingContext } from "./DrawingContext";
 import { createDependencyManager } from "./DependecyManager";
-import { isAnimationValue } from "./processors/Animations/Animations";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,11 +129,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     // our children and register their dependencies.
     useEffect(() => {
       // Register all values in the current tree
-      tree.visitProps(tree, (value) => {
-        if (isAnimationValue(value)) {
-          depsManager.registerValue(value);
-        }
-      });
+      depsManager.visitChildren(tree);
       // Subscrube / return unsubscribe function
       depsManager.subscribe();
       return depsManager.unsubscribe;

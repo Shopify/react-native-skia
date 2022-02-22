@@ -5,11 +5,7 @@ import type { SkNode } from "../Host";
 import { NodeType, processChildren } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
-import {
-  materialize,
-  processProps,
-  isAnimated,
-} from "../processors/Animations/Animations";
+import { materialize, isAnimated } from "../processors/Animations/Animations";
 
 export type DeclarationResult = SkJSIInstance<string> | null;
 
@@ -54,10 +50,6 @@ export const DeclarationNode = (
 ): SkNode<NodeType.Declaration> => ({
   type: NodeType.Declaration,
   props,
-  visitProps: (node, cb) => {
-    processProps(node.props, cb);
-    node.children.forEach((c) => c.visitProps(c, cb));
-  },
   draw: (ctx, { declaration: { onDeclare } }, unProcessedChildren) => {
     const children = processChildren(ctx, unProcessedChildren);
     const obj = onDeclare(ctx, children);
