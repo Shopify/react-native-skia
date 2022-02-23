@@ -16,16 +16,20 @@ export const useInternalTiming = (
   toOrParams: number | AnimationParams,
   config?: TimingConfig | SpringConfig
 ): ControllableValue => {
-  // Resolve parameters
-  const resolvedParameters = useMemo(
-    () => getResolvedParams(toOrParams, config),
-    [config, toOrParams]
-  );
+  // Resolve parameters - keep a cached version to avoid
+  // unnecesary re-renders.
+  const prevCfgRef = useRef<ReturnType<typeof getResolvedParams>>();
+  const resolvedParameters = useMemo(() => {
+    const nextParams = getResolvedParams(toOrParams, config);
+    if (JSON.stringify(prevCfgRef.current) !== JSON.stringify(nextParams)) {
+      prevCfgRef.current = nextParams;
+    }
+    return prevCfgRef.current!;
+  }, [config, toOrParams]);
 
   // Create timing
   const prevAnimationRef = useRef<ControllableValue>();
   const animation = useMemo(() => {
-    prevAnimationRef.current?.stop();
     prevAnimationRef.current = internalCreateTiming(
       resolvedParameters,
       prevAnimationRef.current
@@ -35,9 +39,9 @@ export const useInternalTiming = (
 
   // Run animation as a side effect of the value changing
   useEffect(() => {
-    animation.start();
+    resolvedParameters.immediate && animation.start();
     return animation.stop;
-  }, [animation]);
+  }, [animation, resolvedParameters.immediate]);
 
   // Return the animation
   return animation;

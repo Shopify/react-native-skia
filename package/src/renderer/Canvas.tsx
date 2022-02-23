@@ -13,6 +13,8 @@ import type {
   ComponentProps,
   Context,
   ReactElement,
+  ForwardedRef,
+  MutableRefObject,
 } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
@@ -21,13 +23,14 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { Skia } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
-import type { ReadonlyValue } from "../values";
+import { usePaint } from "../skia/Paint";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
-import { vec, isAnimationValue } from "./processors";
+import { vec } from "./processors";
 import type { DrawingContext } from "./DrawingContext";
+import { createDependencyManager } from "./DependecyManager";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -78,69 +81,41 @@ export interface CanvasProps extends ComponentProps<typeof SkiaView> {
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
   ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
-    const defaultRef = useCanvasRef();
-    const ref = forwardedRef || defaultRef;
+    const innerRef = useCanvasRef();
+    const ref = useCombinedRefs(forwardedRef, innerRef);
+
     const [tick, setTick] = useState(0);
     const redraw = useCallback(() => setTick((t) => t + 1), []);
+
     const tree = useMemo(() => CanvasNode(redraw), [redraw]);
+
     const container = useMemo(
       () => skiaReconciler.createContainer(tree, 0, false, null),
       [tree]
     );
-    // Add subscription to values in all child properties
-    useEffect(() => {
-      const subscriptions: Array<() => void> = [];
-      const enumChildren = (c: React.ReactNode) => {
-        React.Children.forEach(c, (child) => {
-          if (React.isValidElement(child)) {
-            // Look for AnimationValues
-            Object.keys(child.props).forEach((key) => {
-              if (key === "children") {
-                enumChildren(child.props.children);
-              } else if (isAnimationValue(child.props[key])) {
-                const value = child.props[key] as ReadonlyValue<unknown>;
-                const unsub =
-                  (typeof ref !== "function" &&
-                    ref.current?.registerValue(value)) ||
-                  (() => {});
-                subscriptions.push(unsub);
-              }
-            });
-          }
-        });
-      };
-      enumChildren(children);
-      // Unsub
-      return () => subscriptions.forEach((sub) => sub());
-    }, [children, ref]);
-
     // Render effect
     useEffect(() => {
       render(children, container, redraw);
     }, [children, container, redraw]);
 
+    const depsManager = useMemo(() => createDependencyManager(ref), [ref]);
+
+    const paint = usePaint((p) => p.setAntiAlias(true));
+
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
-        if (typeof ref === "function") {
-          throw new Error(
-            "Ref callbacks are not supported. Use useCanvasRef() or useRef() instead"
-          );
-        }
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
         onTouch && onTouch(info.touches);
-        const paint = Skia.Paint();
-        paint.setAntiAlias(true);
         const ctx: DrawingContext = {
-          canvas,
-          paint,
-          opacity: 1,
           width,
           height,
           timestamp,
+          canvas,
+          paint,
+          opacity: 1,
           ref,
-          getTouches: () => info.touches,
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? Skia.FontMgr.RefDefault(),
         };
@@ -148,6 +123,18 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       },
       [tick, onTouch]
     );
+
+    // Handle value dependency registration of values to the underlying
+    // SkiaView. Every time the tree changes (children), we will visit all
+    // our children and register their dependencies.
+    useEffect(() => {
+      // Register all values in the current tree
+      depsManager.visitChildren(tree);
+      // Subscrube / return unsubscribe function
+      depsManager.subscribe();
+      return depsManager.unsubscribe;
+    }, [depsManager, tree, children]);
+
     return (
       <SkiaView
         ref={ref}
@@ -159,3 +146,28 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     );
   }
 );
+
+/**
+ * Combines a list of refs into a single ref. This can be used to provide
+ * both a forwarded ref and an internal ref keeping the same functionality
+ * on both of the refs.
+ * @param refs Array of refs to combine
+ * @returns A single ref that can be used in a ref prop.
+ */
+function useCombinedRefs<T>(
+  ...refs: Array<MutableRefObject<T> | ForwardedRef<T>>
+) {
+  const targetRef = React.useRef<T>(null);
+  React.useEffect(() => {
+    refs.forEach((ref) => {
+      if (ref) {
+        if (typeof ref === "function") {
+          ref(targetRef.current);
+        } else {
+          ref.current = targetRef.current;
+        }
+      }
+    });
+  }, [refs]);
+  return targetRef;
+}

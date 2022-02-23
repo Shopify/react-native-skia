@@ -13,9 +13,9 @@ export interface ISkiaViewApi {
     callback: RNSkiaDrawCallback | undefined
   ) => void;
   setDrawMode: (nativeId: number, mode: DrawMode) => void;
-  registerValueInView: (
+  registerValuesInView: (
     nativeId: number,
-    value: ReadonlyValue<unknown>
+    values: ReadonlyValue<unknown>[]
   ) => () => void;
 }
 declare global {
