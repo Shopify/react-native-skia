@@ -21,7 +21,7 @@ export const useInternalTiming = (
   const prevCfgRef = useRef<ReturnType<typeof getResolvedParams>>();
   const resolvedParameters = useMemo(() => {
     const nextParams = getResolvedParams(toOrParams, config);
-    if (JSON.stringify(prevCfgRef.current) !== JSON.stringify(nextParams)) {
+    if (!equals(prevCfgRef.current, nextParams)) {
       prevCfgRef.current = nextParams;
     }
     return prevCfgRef.current!;
@@ -29,20 +29,31 @@ export const useInternalTiming = (
 
   // Create timing
   const prevAnimationRef = useRef<ControllableValue>();
+  const prevParamsRef = useRef<typeof resolvedParameters>();
   const animation = useMemo(() => {
-    prevAnimationRef.current = internalCreateTiming(
-      resolvedParameters,
-      prevAnimationRef.current
-    );
-    return prevAnimationRef.current;
+    if (!equals(prevParamsRef.current, resolvedParameters)) {
+      prevParamsRef.current = resolvedParameters;
+      prevAnimationRef.current = internalCreateTiming(
+        resolvedParameters,
+        prevAnimationRef.current
+      );
+    }
+    return prevAnimationRef.current!;
   }, [resolvedParameters]);
 
-  // Run animation as a side effect of the value changing
+  // Run animation as a side effect of the animation being
+  // recreated
   useEffect(() => {
-    resolvedParameters.immediate && animation.start();
+    if (resolvedParameters.immediate) {
+      animation.start();
+    }
     return animation.stop;
   }, [animation, resolvedParameters.immediate]);
 
   // Return the animation
   return animation;
+};
+
+const equals = <T1, T2>(a: T1, b: T2) => {
+  return JSON.stringify(a) === JSON.stringify(b);
 };

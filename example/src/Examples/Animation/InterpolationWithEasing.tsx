@@ -5,28 +5,32 @@ import {
   Circle,
   Easing,
   Fill,
-  useTiming,
+  mix,
+  useDerivedValue,
+  useLoop,
 } from "@shopify/react-native-skia";
 
 import { AnimationDemo, Size, Padding } from "./Components";
 
 export const InterpolationWithEasing = () => {
   const { width } = useWindowDimensions();
-  // Create timing animation that loops forever
-  const progress = useTiming(
-    {
-      from: 20,
-      to: width - (Size + Padding),
-      loop: true,
-      yoyo: true,
-    },
-    { duration: 1000, easing: Easing.inOut(Easing.cubic) }
+  // Create timing loop
+  const progress = useLoop({
+    duration: 1000,
+    easing: Easing.inOut(Easing.cubic),
+  });
+  // Create position of circle
+  const position = useDerivedValue(
+    (p) => mix(p, 10, width - (Size + Padding)),
+    [progress]
   );
+  // Create radius of circle
+  const r = useDerivedValue((p) => 5 + p * 55, [progress]);
   return (
     <AnimationDemo title={"Interpolating value using an easing"}>
       <Canvas style={styles.canvas}>
         <Fill color="white" />
-        <Circle cx={progress} cy={20} r={15} color="#DC4C4C" />
+        <Circle cx={position} cy={20} r={r} color="#DC4C4C" />
       </Canvas>
     </AnimationDemo>
   );
