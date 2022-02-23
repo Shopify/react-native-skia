@@ -8,7 +8,7 @@ import {
   TextPath,
   useDerivedValue,
   usePath,
-  useTiming,
+  useLoop,
 } from "@shopify/react-native-skia";
 
 import { AnimationDemo, Padding } from "./Components";
@@ -25,12 +25,11 @@ const ExampleHeight = 60;
 export const AnimateTextOnPath = () => {
   const { width } = useWindowDimensions();
 
-  // Create a progress going from 0..1 and back with a
-  // yoyo effect
-  const progress = useTiming(
-    { loop: true, yoyo: true, from: 0, to: 1 },
-    { duration: 700, easing: Easing.inOut(Easing.cubic) }
-  );
+  // Create a progress going from 0..1 and back
+  const progress = useLoop({
+    duration: 700,
+    easing: Easing.inOut(Easing.cubic),
+  });
 
   // Create the start path
   const path1 = usePath((p) => {
