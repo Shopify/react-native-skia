@@ -1,4 +1,4 @@
-import type { SpringConfig } from "./functions";
+import type { SpringConfig } from "./types";
 import { createSpringEasing } from "./functions";
 
 /*

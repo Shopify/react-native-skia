@@ -1,7 +1,9 @@
 import type { Value, ControllableValue } from "../../types";
-import { internalCreateTiming } from "../create/internalCreateTiming";
-import type { RequiredAnimationParams } from "../functions/getResolvedParams";
-import type { TimingConfig } from "../types";
+import type { AnimationParams, SpringConfig } from "../types";
+import { runTiming } from "../timing/runTiming";
+
+import { Spring } from "./Spring";
+
 /**
  * Creates a new animation on an existing value that will be driven by
  * an animation value. The value will be run from / to the value in
@@ -11,17 +13,14 @@ import type { TimingConfig } from "../types";
  *
  * @param value The value to animate
  * @param toOrParams To value or Animation parameters
- * @param config Spring or timing configuration
+ * @param config Spring configuration
  * @returns an animation value that can be used to start/stop
  * the animation.
  */
-export const internalRunTiming = (
+export const runSpring = (
   value: Value<number>,
-  params: RequiredAnimationParams & Required<TimingConfig>
+  toOrParams: number | AnimationParams,
+  config?: SpringConfig
 ): ControllableValue => {
-  const retVal = internalCreateTiming(params, value);
-  if (params.immediate) {
-    retVal.start();
-  }
-  return retVal;
+  return runTiming(value, toOrParams, config ?? Spring.Config.Default);
 };

@@ -1,5 +1,5 @@
-import { Easing } from "../Easing";
-import type { AnimationParams, TimingConfig, SpringConfig } from "../types";
+import type { AnimationParams, TimingConfig, SpringConfig } from "../../types";
+import type { RequiredAnimationParams } from "../../factory/types";
 
 const DefaultParameters = {
   to: 1,
@@ -13,9 +13,6 @@ const DefaultTimingConfig = {
   duration: 1000,
   easing: (t: number) => t,
 };
-
-export type RequiredAnimationParams = Required<Omit<AnimationParams, "from">> &
-  Pick<AnimationParams, "from">;
 
 /**
  * Resolves parameters from optional values to a single object
@@ -50,7 +47,7 @@ export const getResolvedParams = (
       resolvedConfig.easing = config.update;
     } else {
       resolvedConfig.duration = config.duration;
-      resolvedConfig.easing = config.easing ?? Easing.linear;
+      resolvedConfig.easing = config.easing ?? ((t) => t);
     }
   }
 
