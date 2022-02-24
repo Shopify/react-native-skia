@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import type { ControllableValue } from "../../types";
-import { getResolvedParams } from "../functions/getResolvedParams";
 import type { AnimationParams, TimingConfig, SpringConfig } from "../types";
-import { internalCreateTiming } from "../create/internalCreateTiming";
+
+import { getResolvedParams } from "./functions";
+import { createTiming } from "./createTiming";
 
 /**
  * Creats an animation value that will run whenever
@@ -12,7 +13,7 @@ import { internalCreateTiming } from "../create/internalCreateTiming";
  * @param config
  * @returns
  */
-export const useInternalTiming = (
+export const useTiming = (
   toOrParams: number | AnimationParams,
   config?: TimingConfig | SpringConfig
 ): ControllableValue => {
@@ -33,7 +34,7 @@ export const useInternalTiming = (
   const animation = useMemo(() => {
     if (!equals(prevParamsRef.current, resolvedParameters)) {
       prevParamsRef.current = resolvedParameters;
-      prevAnimationRef.current = internalCreateTiming(
+      prevAnimationRef.current = createTiming(
         resolvedParameters,
         prevAnimationRef.current
       );

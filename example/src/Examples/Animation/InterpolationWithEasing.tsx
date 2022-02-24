@@ -19,18 +19,18 @@ export const InterpolationWithEasing = () => {
     duration: 1000,
     easing: Easing.inOut(Easing.cubic),
   });
-  // Create position of circle
+  // Animate position of circle
   const position = useDerivedValue(
     (p) => mix(p, 10, width - (Size + Padding)),
     [progress]
   );
-  // Create radius of circle
-  const r = useDerivedValue((p) => 5 + p * 55, [progress]);
+  // Animate radius of circle
+  const radius = useDerivedValue((p) => 5 + p * 55, [progress]);
   return (
     <AnimationDemo title={"Interpolating value using an easing"}>
       <Canvas style={styles.canvas}>
         <Fill color="white" />
-        <Circle cx={position} cy={20} r={r} color="#DC4C4C" />
+        <Circle cx={position} cy={20} r={radius} color="#DC4C4C" />
       </Canvas>
     </AnimationDemo>
   );
