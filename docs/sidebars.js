@@ -76,7 +76,7 @@ const sidebars = {
         "color-filters",
         "image-filters",
         "path-effects",
-        "backdrops",
+        "backdrops-filters",
       ],
     },
     {
