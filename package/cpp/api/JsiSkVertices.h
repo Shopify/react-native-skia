@@ -25,6 +25,8 @@ namespace RNSkia {
             return jsi::String::createFromUtf8(runtime, "Vertices");
         }
 
+        JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkVertices, __typename__))
+
         JSI_HOST_FUNCTION(bounds) {
             auto result = getObject()->bounds();
             return jsi::Object::createFromHostObject(
