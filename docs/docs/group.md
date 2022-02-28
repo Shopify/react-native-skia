@@ -96,7 +96,7 @@ const SimpleTransform = () => {
 
 ## Clipping Operations
 
-`clip` provides a clipping a region that sets what part of the children should be shown.
+`clip` provides a clipping region that sets what part of the children should be shown.
 Parts inside the region are shown, while those outside are hidden.
 When using `invertClip`, everything outside the clipping region will be shown and, parts inside the clipping region will be hidden.
 
