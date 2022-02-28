@@ -19,3 +19,8 @@ export const Offset = (props: AnimatedProps<OffsetProps>) => {
   });
   return <skDeclaration declaration={declaration} {...props} />;
 };
+
+Offset.defaultProps = {
+  x: 0,
+  y: 0,
+};

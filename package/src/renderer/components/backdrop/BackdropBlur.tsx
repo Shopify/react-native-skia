@@ -1,7 +1,5 @@
 import React from "react";
 
-import { Fill } from "../shapes";
-import type { Color } from "../../../skia";
 import { Blur } from "../imageFilters";
 import type { AnimatedProps } from "../../processors";
 
@@ -10,7 +8,6 @@ import { BackdropFilter } from "./BackdropFilter";
 
 interface BackdropBlurProps extends BackdropFilterProps {
   intensity: number;
-  color?: Color;
 }
 
 export const BackdropBlur = ({
@@ -22,12 +19,7 @@ export const BackdropBlur = ({
   return (
     <BackdropFilter {...props}>
       <Blur sigmaX={intensity} sigmaY={intensity} />
-      <Fill color={color} />
       {children}
     </BackdropFilter>
   );
-};
-
-BackdropBlur.defaultProps = {
-  color: "transparent",
 };
