@@ -10,4 +10,5 @@ export type Routes = {
   Gradients: undefined;
   SVG: undefined;
   BlendModes: undefined;
+  Data: undefined;
 };
