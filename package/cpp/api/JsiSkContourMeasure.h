@@ -20,7 +20,9 @@ namespace RNSkia {
         JsiSkContourMeasure(std::shared_ptr<RNSkPlatformContext> context,
                             const sk_sp<SkContourMeasure> contourMeasure)
                 : JsiSkWrappingSkPtrHostObject(context, contourMeasure) {
-            assert(contourMeasure != nullptr);
+            if(contourMeasure == nullptr) {
+                jsi::detail::throwJSError(*context->getJsRuntime(), "Contour measure is null");
+            }
         };
 
         JSI_HOST_FUNCTION(getPosTan) {
