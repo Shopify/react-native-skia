@@ -2,8 +2,8 @@ import React from "react";
 import type { ReactNode, RefObject } from "react";
 
 import { processChildren } from "../Host";
-import type { IPath, IPaint, IRect, IRRect } from "../../skia";
-import { ClipOp, Skia } from "../../skia";
+import type { IPaint, IRect, IRRect } from "../../skia";
+import { ClipOp } from "../../skia";
 import { processTransform, selectPaint, processPaint } from "../processors";
 import type {
   CustomPaintProps,
@@ -12,11 +12,13 @@ import type {
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
 import { isRRect, rrect } from "../processors/Shapes";
+import type { PathDef } from "../processors/Paths";
+import { processPath } from "../processors/Paths";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
   children: ReactNode | ReactNode[];
   clipRect?: IRect | IRRect;
-  clipPath?: IPath | string;
+  clipPath?: PathDef;
   invertClip?: boolean;
   rasterize?: RefObject<IPaint>;
 }
@@ -46,14 +48,7 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
         );
       }
       if (clipPath) {
-        const path =
-          typeof clipPath === "string"
-            ? Skia.Path.MakeFromSVGString(clipPath)
-            : clipPath;
-        if (!path) {
-          throw new Error("Invalid clipPath: " + clipPath);
-        }
-        canvas.clipPath(path, op, true);
+        canvas.clipPath(processPath(clipPath), op, true);
       }
       processTransform(ctx, groupProps);
       processChildren(
