@@ -1,10 +1,18 @@
 import type { SkJSIInstance } from "./JsiInstance";
+import type { IPath } from "./Path/Path";
+import type { IMatrix } from "./Matrix";
 
 export type IPathEffect = SkJSIInstance<"PathEffect">;
 
 export const isPathEffect = (
   obj: SkJSIInstance<string> | null
 ): obj is IPathEffect => obj !== null && obj.__typename__ === "PathEffect";
+
+export enum Path1DEffectStyle {
+  Translate,
+  Rotate,
+  Morph,
+}
 
 export interface PathEffectFactory {
   /**
@@ -48,4 +56,38 @@ export interface PathEffectFactory {
    *
    */
   MakeSum(outer: IPathEffect, inner: IPathEffect): IPathEffect;
+
+  /**
+   * Returns a PathEffect that will fill the drawing path with a pattern made by applying
+   * the given matrix to a repeating set of infinitely long lines of the given width.
+   * For example, the scale of the provided matrix will determine how far apart the lines
+   * should be drawn its rotation affects the lines' orientation.
+   * @param width - must be >= 0
+   * @param matrix
+   */
+  MakeLine2D(width: number, matrix: IMatrix): IPathEffect | null;
+
+  /**
+   * Returns a PathEffect which implements dashing by replicating the specified path.
+   *   @param path The path to replicate (dash)
+   *   @param advance The space between instances of path
+   *   @param phase distance (mod advance) along path for its initial position
+   *   @param style how to transform path at each point (based on the current
+   *                position and tangent)
+   */
+  MakePath1D(
+    path: IPath,
+    advance: number,
+    phase: number,
+    style: Path1DEffectStyle
+  ): IPathEffect | null;
+
+  /**
+   * Returns a PathEffect that will fill the drawing path with a pattern by repeating the
+   * given path according to the provided matrix. For example, the scale of the matrix
+   * determines how far apart the path instances should be drawn.
+   * @param matrix
+   * @param path
+   */
+  MakePath2D(matrix: IMatrix, path: IPath): IPathEffect | null;
 }
