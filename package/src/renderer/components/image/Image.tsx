@@ -3,8 +3,8 @@ import React from "react";
 import type { IImage } from "../../../skia";
 import type { CustomPaintProps } from "../../processors/Paint";
 import { useDrawing } from "../../nodes/Drawing";
-import type { RectDef } from "../../processors/Shapes";
-import { processRect } from "../../processors/Shapes";
+import type { RectDef } from "../../processors/Rects";
+import { processRect } from "../../processors/Rects";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
 import type { Fit } from "./BoxFit";

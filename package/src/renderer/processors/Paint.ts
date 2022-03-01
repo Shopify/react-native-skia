@@ -3,9 +3,9 @@ import type { RefObject } from "react";
 import { BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
 import type { IPaint } from "../../skia";
 
-import type { ChildrenProps } from "./Shapes";
 import type { ColorProp } from "./Colors";
 import { processColor } from "./Colors";
+import type { ChildrenProps } from "./Rects";
 
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
