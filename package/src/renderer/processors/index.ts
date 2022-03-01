@@ -6,3 +6,4 @@ export * from "./Circles";
 export * from "./Rects";
 export * from "./Paths";
 export * from "./math";
+export * from "./Font";

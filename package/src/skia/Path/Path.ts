@@ -1,9 +1,9 @@
-import type { Font } from "../Font";
+import type { IFont } from "../Font";
 import type { IRect } from "../Rect";
 import type { IPoint } from "../Point";
 import type { IRRect } from "../RRect";
 import type { StrokeJoin, StrokeCap } from "../Paint";
-import type { Matrix } from "../Matrix";
+import type { IMatrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 
 /**
@@ -498,12 +498,12 @@ export interface IPath extends SkJSIInstance<"Path"> {
   /**
    * Transforms the path by the specified matrix.
    */
-  transform(m3: Matrix): void;
+  transform(m3: IMatrix): void;
 
   /**
    * Converts the text to a path with the given font at location x / y.
    */
-  fromText(text: string, x: number, y: number, font: Font): void;
+  fromText(text: string, x: number, y: number, font: IFont): void;
 
   /**
    * Interpolates between Path with point array of equal size.

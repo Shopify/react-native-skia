@@ -6,15 +6,14 @@ slug: /text/text
 ---
 
 The text component can be used to draw a simple text.
-The font family and the font size must be specified.
 The fonts available in the canvas are described in [here](/docs/text/fonts).
 
-| Name       | Type      |  Description                                                  |
-|:-----------|:----------|:--------------------------------------------------------------|
-| value      | `string`  | Text to draw                                                  |
-| familyName | `string`  | Font family name                                              |
-| size       | `number`  | Font size                                                     |
-| font       | `font`    | Custom font to use (loaded with useFont)                      |
+| Name        | Type      |  Description                                                  |
+|:------------|:----------|:--------------------------------------------------------------|
+| text        | `string`  | Text to draw                                                  |
+| font        | `Font`     | Font to use (see [Fonts](/docs/text/fonts))                  |
+| familyName? | `string`   | Font family name to use  (see [Fonts](/docs/text/fonts))     |
+| size?       | `number`   | Font size if `familName` is provided                         |
 
 ### Example
 
@@ -27,7 +26,7 @@ export const HelloWorld = () => {
       <Text
         x={0}
         y={0}
-        value="Hello World"
+        text="Hello World"
         familyName="serif"
         size={32}
       />
@@ -36,27 +35,3 @@ export const HelloWorld = () => {
 };
 ```
 
-## Using a custom font
-
-Alternatively, you can use your own set of custom fonts to be available in the canvas, as seen below.
-
-```tsx twoslash
-import {Canvas, Text, useFont} from "@shopify/react-native-skia";
-
-export const HelloWorld = () => {
-  const font = useFont(require("./my-custom-font.otf"), 16);
-  if (font === null) {
-    return null;
-  }
-  return (
-    <Canvas style={{ flex: 1 }}>
-      <Text
-        x={0}
-        y={0}
-        font={font}
-        value="Hello World"
-      />
-    </Canvas>
-  );
-};
-```

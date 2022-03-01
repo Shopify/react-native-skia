@@ -1,5 +1,3 @@
-import type { SkJSIInstance } from "./JsiInstance";
-
 export enum MatrixIndex {
   ScaleX = 0,
   SkewX = 1,
@@ -12,31 +10,14 @@ export enum MatrixIndex {
   persp2 = 8,
 }
 
-export interface Matrix extends SkJSIInstance<"Matrix"> {
-  set(i: number, v: number): void;
-  get(i: number): number;
-
-  setScaleX(sx: number): void;
-  getScaleX(): number;
-
-  setScaleY(sy: number): void;
-  getScaleY(): number;
-
-  setSkewX(sx: number): void;
-  getSkewX(): number;
-
-  setSkewY(sy: number): void;
-  getSkewY(): number;
-
-  setTranslateX(tx: number): void;
-  getTranslateX(): number;
-
-  setTranslateY(ty: number): void;
-  getTranslateY(): number;
-
-  setPerspX(px: number): void;
-  getPerspX(): number;
-
-  setPerspY(px: number): void;
-  getPerspY(): number;
+export interface IMatrix {
+  0: number;
+  1: number;
+  2: number;
+  3: number;
+  4: number;
+  5: number;
+  6: number;
+  7: number;
+  8: number;
 }

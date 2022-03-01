@@ -5,12 +5,12 @@ import type { DataSource } from "../Data";
 import { Skia } from "../Skia";
 import { useTypeface } from "../Typeface";
 
-import type { Font } from "./Font";
+import type { IFont } from "./Font";
 
 /**
  * Returns a Skia Font object
  * */
-export const useFont = (font: DataSource, size?: number): Font | null => {
+export const useFont = (font: DataSource, size?: number): IFont | null => {
   const typeface = useTypeface(font);
   return useMemo(() => {
     if (typeface === null) {

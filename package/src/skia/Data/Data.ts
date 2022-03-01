@@ -7,7 +7,8 @@ import { Skia } from "../Skia";
 
 export type Data = SkJSIInstance<"Data">;
 
-export type DataSource = ReturnType<typeof require> | string;
+type Require = number;
+export type DataSource = Require | string | Uint8Array;
 
 export const useDataCollection = <T>(
   sources: DataSource[],
@@ -16,12 +17,21 @@ export const useDataCollection = <T>(
 ) => {
   const [data, setData] = useState<T | null>(null);
   useEffect(() => {
-    const uris = sources.map((source) =>
-      typeof source === "string" ? source : Image.resolveAssetSource(source).uri
-    );
-    Promise.all(uris.map((uri) => Skia.Data.fromURI(uri))).then((d) =>
-      setData(factory(d))
-    );
+    const bytesOrURIs = sources.map((source) => {
+      if (source instanceof Uint8Array) {
+        return source;
+      }
+      return typeof source === "string"
+        ? source
+        : Image.resolveAssetSource(source).uri;
+    });
+    Promise.all(
+      bytesOrURIs.map((bytesOrURI) =>
+        bytesOrURI instanceof Uint8Array
+          ? Skia.Data.fromBytes(bytesOrURI)
+          : Skia.Data.fromURI(bytesOrURI)
+      )
+    ).then((d) => setData(factory(d)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
   return data;
@@ -33,11 +43,15 @@ export const useRawData = <T>(
 ) => {
   const [data, setData] = useState<T | null>(null);
   useEffect(() => {
-    const uri =
-      typeof source === "string"
-        ? source
-        : Image.resolveAssetSource(source).uri;
-    Skia.Data.fromURI(uri).then((d) => setData(factory(d)));
+    if (source instanceof Uint8Array) {
+      setData(factory(Skia.Data.fromBytes(source)));
+    } else {
+      const uri =
+        typeof source === "string"
+          ? source
+          : Image.resolveAssetSource(source).uri;
+      Skia.Data.fromURI(uri).then((d) => setData(factory(d)));
+    }
   }, [factory, source]);
   return data;
 };

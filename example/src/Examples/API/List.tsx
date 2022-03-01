@@ -42,6 +42,14 @@ const examples = [
     screen: "SVG",
     title: "🖋 SVG",
   },
+  {
+    screen: "BlendModes",
+    title: "🎨 Blend Modes",
+  },
+  {
+    screen: "Data",
+    title: "📊 Data",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

@@ -9,4 +9,6 @@ export type Routes = {
   ColorFilter: undefined;
   Gradients: undefined;
   SVG: undefined;
+  BlendModes: undefined;
+  Data: undefined;
 };

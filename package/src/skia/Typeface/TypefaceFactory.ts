@@ -1,7 +1,7 @@
 import type { Data } from "../Data/Data";
 
-import type { Typeface } from "./Typeface";
+import type { ITypeface } from "./Typeface";
 
 export interface TypefaceFactory {
-  MakeFreeTypeFaceFromData(data: Data): Typeface | null;
+  MakeFreeTypeFaceFromData(data: Data): ITypeface | null;
 }
