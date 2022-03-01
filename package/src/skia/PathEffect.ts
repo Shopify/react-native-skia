@@ -1,6 +1,6 @@
 import type { SkJSIInstance } from "./JsiInstance";
 import type { IPath } from "./Path/Path";
-import type { Matrix } from "./Matrix";
+import type { IMatrix } from "./Matrix";
 
 export type IPathEffect = SkJSIInstance<"PathEffect">;
 
@@ -65,7 +65,7 @@ export interface PathEffectFactory {
    * @param width - must be >= 0
    * @param matrix
    */
-  MakeLine2D(width: number, matrix: Matrix): IPathEffect | null;
+  MakeLine2D(width: number, matrix: IMatrix): IPathEffect | null;
 
   /**
    * Returns a PathEffect which implements dashing by replicating the specified path.
@@ -89,5 +89,5 @@ export interface PathEffectFactory {
    * @param matrix
    * @param path
    */
-  MakePath2D(matrix: Matrix, path: IPath): IPathEffect | null;
+  MakePath2D(matrix: IMatrix, path: IPath): IPathEffect | null;
 }
