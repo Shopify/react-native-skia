@@ -23,7 +23,6 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { Skia } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
-import { usePaint } from "../skia/Paint";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
@@ -99,14 +98,14 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
 
     const depsManager = useMemo(() => createDependencyManager(ref), [ref]);
 
-    const paint = usePaint((p) => p.setAntiAlias(true));
-
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
         onTouch && onTouch(info.touches);
+        const paint = Skia.Paint();
+        paint.setAntiAlias(true);
         const ctx: DrawingContext = {
           width,
           height,
