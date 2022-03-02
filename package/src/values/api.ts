@@ -67,7 +67,7 @@ export interface ISkiaValueApi {
    * two parameters, the current time in milliseconds and a method for stopping the animation.
    * @returns A value with start/stop method.
    */
-  createAnimationValue: (
+  createAnimation: (
     cb: (t: number, stop: () => void) => number,
     value?: Value<number>,
     immediate?: boolean
@@ -81,7 +81,7 @@ declare global {
 export const ValueApi: ISkiaValueApi = {
   createValue: global.SkiaValueApi.createValue,
   createDerivedValue: global.SkiaValueApi.createDerivedValue,
-  createAnimationValue: global.SkiaValueApi.createAnimationValue,
+  createAnimation: global.SkiaValueApi.createAnimation,
 };
 
 export const { createValue, createDerivedValue } = ValueApi;

@@ -1,4 +1,4 @@
-import { useAnimationValue } from "./useAnimationValue";
+import { useAnimation } from "./useAnimation";
 
 /**
  * @returns A new value that will be updated on every frame redraw with the
@@ -7,5 +7,5 @@ import { useAnimationValue } from "./useAnimationValue";
  */
 
 export const useClockValue = () => {
-  return useAnimationValue((t) => t);
+  return useAnimation((t) => t);
 };

@@ -5,7 +5,7 @@
 #include <RNSkPlatformContext.h>
 #include <RNSkValue.h>
 #include <RNSkDerivedValue.h>
-#include <RNSkAnimationValue.h>
+#include <RNSkAnimation.h>
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -38,18 +38,18 @@ public:
       std::make_shared<RNSkDerivedValue>(_platformContext, runtime, arguments, count));
   }
   
-  JSI_HOST_FUNCTION(createAnimationValue) {
+  JSI_HOST_FUNCTION(createAnimation) {
     return jsi::Object::createFromHostObject(runtime,
-      std::make_shared<RNSkAnimationValue>(_platformContext,
-                                           ++_valueIdentifier,
-                                           runtime,
-                                           arguments,
-                                           count));
+      std::make_shared<RNSkAnimation>(_platformContext,
+                                      ++_valueIdentifier,
+                                      runtime,
+                                      arguments,
+                                      count));
   }
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValueApi, createValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createDerivedValue),
-                       JSI_EXPORT_FUNC(RNSkValueApi, createAnimationValue))
+                       JSI_EXPORT_FUNC(RNSkValueApi, createAnimation))
 
 private:
   // Platform context

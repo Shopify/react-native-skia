@@ -9,13 +9,10 @@ import type { ControllableValue } from "../types";
  * @param cb Callback to calculate the result value
  * @returns A controllable value that be started/stopped in addition to being a value
  */
-export const useAnimationValue = (
+export const useAnimation = (
   cb: (t: number, stop: () => void) => number
 ): ControllableValue => {
-  const retVal = useMemo(
-    () => ValueApi.createAnimationValue(cb, undefined),
-    [cb]
-  );
+  const retVal = useMemo(() => ValueApi.createAnimation(cb, undefined), [cb]);
   // Auto start/stop
   useEffect(() => {
     retVal.start();

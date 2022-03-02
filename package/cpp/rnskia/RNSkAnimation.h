@@ -16,11 +16,11 @@ using namespace facebook;
  Implements a readonly Value that is updated every time the screen is redrawn. Its value will be the
  number of milliseconds since the animation value was started.
  */
-class RNSkAnimationValue : public RNSkClockValue, public std::enable_shared_from_this<RNSkAnimationValue>
+class RNSkAnimation : public RNSkClockValue, public std::enable_shared_from_this<RNSkAnimation>
 {
   
 public:
-  RNSkAnimationValue(std::shared_ptr<RNSkPlatformContext> platformContext,
+  RNSkAnimation(std::shared_ptr<RNSkPlatformContext> platformContext,
                      size_t identifier,
                      jsi::Runtime& runtime,
                      const jsi::Value *arguments,
@@ -48,7 +48,7 @@ public:
     tick(runtime, get_value(runtime));
   }
   
-  ~RNSkAnimationValue() {
+  ~RNSkAnimation() {
     // We need to stop/unsubscribe
     stopAnimation();
     _controlledValue = nullptr;
@@ -97,7 +97,7 @@ private:
       _driverId = _controlledValue->addDriver(shared_from_this());
       
       // Subscribe to changes in controlled value
-      auto dispatch = std::bind(&RNSkAnimationValue::controlledValueDidUpdate, this, std::placeholders::_1);
+      auto dispatch = std::bind(&RNSkAnimation::controlledValueDidUpdate, this, std::placeholders::_1);
       _unsubscribe = std::make_shared<std::function<void()>>(
         _controlledValue->addListener(dispatch));
     }

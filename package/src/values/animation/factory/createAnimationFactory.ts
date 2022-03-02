@@ -41,6 +41,6 @@ export const createAnimationFactory = <T extends RequiredAnimationParams>(
     };
 
     // Create animation value
-    return ValueApi.createAnimationValue(upd, value);
+    return ValueApi.createAnimation(upd, value);
   };
 };

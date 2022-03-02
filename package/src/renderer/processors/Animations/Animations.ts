@@ -10,7 +10,7 @@ type ValueType = ReadonlyValue<unknown>;
 const isPropCallback = (value: unknown): value is FrameValue<any> =>
   typeof value === "function";
 
-export const isAnimationValue = (value: unknown): value is ValueType => {
+export const isValue = (value: unknown): value is ValueType => {
   if (value === undefined || value === null) {
     return false;
   }
@@ -30,7 +30,7 @@ export const isAnimated = <T>(props: AnimatedProps<T>) => {
   for (const value of Object.values(props)) {
     if (isPropCallback(value)) {
       return true;
-    } else if (isAnimationValue(value)) {
+    } else if (isValue(value)) {
       return true;
     }
   }
@@ -49,7 +49,7 @@ export const materialize = <T>(
     const value = props[key];
     if (isPropCallback(value)) {
       result[key] = value(ctx);
-    } else if (isAnimationValue(value)) {
+    } else if (isValue(value)) {
       result[key] = (value as unknown as ReadonlyValue<T[typeof key]>).value;
     }
   });

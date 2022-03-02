@@ -4,7 +4,7 @@ import type { SkiaView } from "../views";
 import type { ReadonlyValue } from "../values";
 
 import type { SkNode } from "./Host";
-import { isAnimationValue, processProps } from "./processors";
+import { isValue, processProps } from "./processors";
 
 export const createDependencyManager = (ref: RefObject<SkiaView>) => {
   const values: ReadonlyValue<unknown>[] = [];
@@ -13,7 +13,7 @@ export const createDependencyManager = (ref: RefObject<SkiaView>) => {
   return {
     visitChildren: function (node: SkNode) {
       processProps(node.props, (value) => {
-        if (isAnimationValue(value)) {
+        if (isValue(value)) {
           this.registerValue(value);
         }
       });
