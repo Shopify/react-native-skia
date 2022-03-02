@@ -28,7 +28,13 @@ using namespace facebook;
 
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
 public:
-  JSI_HOST_FUNCTION(addArc) {
+
+    // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+    JSI_PROPERTY_GET(__typename__) {
+      return jsi::String::createFromUtf8(runtime, "Path");
+    }
+
+    JSI_HOST_FUNCTION(addArc) {
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]).get();
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
@@ -474,39 +480,42 @@ public:
             runtime, std::make_shared<JsiSkPath>(getContext(), result));
   }
 
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPath, __typename__))
+
   JSI_EXPORT_FUNCTIONS(
-      JSI_EXPORT_FUNC(JsiSkPath, addArc), JSI_EXPORT_FUNC(JsiSkPath, addOval),
-      JSI_EXPORT_FUNC(JsiSkPath, addPoly), JSI_EXPORT_FUNC(JsiSkPath, addRect),
-      JSI_EXPORT_FUNC(JsiSkPath, addRRect),
-      JSI_EXPORT_FUNC(JsiSkPath, arcToOval),
-      JSI_EXPORT_FUNC(JsiSkPath, arcToRotated),
-      JSI_EXPORT_FUNC(JsiSkPath, rArcTo),
-      JSI_EXPORT_FUNC(JsiSkPath, arcToTangent),
-      JSI_EXPORT_FUNC(JsiSkPath, computeTightBounds),
-      JSI_EXPORT_FUNC(JsiSkPath, getBounds),
-      JSI_EXPORT_FUNC(JsiSkPath, conicTo), JSI_EXPORT_FUNC(JsiSkPath, rConicTo),
-      JSI_EXPORT_FUNC(JsiSkPath, contains), JSI_EXPORT_FUNC(JsiSkPath, dash),
-      JSI_EXPORT_FUNC(JsiSkPath, equals),
-      JSI_EXPORT_FUNC(JsiSkPath, getFillType),
-      JSI_EXPORT_FUNC(JsiSkPath, setFillType),
-      JSI_EXPORT_FUNC(JsiSkPath, setIsVolatile),
-      JSI_EXPORT_FUNC(JsiSkPath, isVolatile),
-      JSI_EXPORT_FUNC(JsiSkPath, transform), JSI_EXPORT_FUNC(JsiSkPath, stroke),
-      JSI_EXPORT_FUNC(JsiSkPath, trim), JSI_EXPORT_FUNC(JsiSkPath, getPoint),
-      JSI_EXPORT_FUNC(JsiSkPath, toSVGString),
-      JSI_EXPORT_FUNC(JsiSkPath, makeAsWinding),
-      JSI_EXPORT_FUNC(JsiSkPath, isEmpty), JSI_EXPORT_FUNC(JsiSkPath, offset),
-      JSI_EXPORT_FUNC(JsiSkPath, moveTo), JSI_EXPORT_FUNC(JsiSkPath, rMoveTo),
-      JSI_EXPORT_FUNC(JsiSkPath, lineTo), JSI_EXPORT_FUNC(JsiSkPath, rlineTo),
-      JSI_EXPORT_FUNC(JsiSkPath, cubicTo), JSI_EXPORT_FUNC(JsiSkPath, rCubicTo),
-      JSI_EXPORT_FUNC(JsiSkPath, reset), JSI_EXPORT_FUNC(JsiSkPath, rewind),
-      JSI_EXPORT_FUNC(JsiSkPath, quadTo), JSI_EXPORT_FUNC(JsiSkPath, rQuadTo),
-      JSI_EXPORT_FUNC(JsiSkPath, addCircle),
-      JSI_EXPORT_FUNC(JsiSkPath, getLastPt), JSI_EXPORT_FUNC(JsiSkPath, close),
-      JSI_EXPORT_FUNC(JsiSkPath, simplify),
-      JSI_EXPORT_FUNC(JsiSkPath, countPoints), JSI_EXPORT_FUNC(JsiSkPath, copy),
-      JSI_EXPORT_FUNC(JsiSkPath, fromText), JSI_EXPORT_FUNC(JsiSkPath, op),
-      JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable), JSI_EXPORT_FUNC(JsiSkPath, interpolate))
+    JSI_EXPORT_FUNC(JsiSkPath, addArc), JSI_EXPORT_FUNC(JsiSkPath, addOval),
+    JSI_EXPORT_FUNC(JsiSkPath, addPoly), JSI_EXPORT_FUNC(JsiSkPath, addRect),
+    JSI_EXPORT_FUNC(JsiSkPath, addRRect),
+    JSI_EXPORT_FUNC(JsiSkPath, arcToOval),
+    JSI_EXPORT_FUNC(JsiSkPath, arcToRotated),
+    JSI_EXPORT_FUNC(JsiSkPath, rArcTo),
+    JSI_EXPORT_FUNC(JsiSkPath, arcToTangent),
+    JSI_EXPORT_FUNC(JsiSkPath, computeTightBounds),
+    JSI_EXPORT_FUNC(JsiSkPath, getBounds),
+    JSI_EXPORT_FUNC(JsiSkPath, conicTo), JSI_EXPORT_FUNC(JsiSkPath, rConicTo),
+    JSI_EXPORT_FUNC(JsiSkPath, contains), JSI_EXPORT_FUNC(JsiSkPath, dash),
+    JSI_EXPORT_FUNC(JsiSkPath, equals),
+    JSI_EXPORT_FUNC(JsiSkPath, getFillType),
+    JSI_EXPORT_FUNC(JsiSkPath, setFillType),
+    JSI_EXPORT_FUNC(JsiSkPath, setIsVolatile),
+    JSI_EXPORT_FUNC(JsiSkPath, isVolatile),
+    JSI_EXPORT_FUNC(JsiSkPath, transform), JSI_EXPORT_FUNC(JsiSkPath, stroke),
+    JSI_EXPORT_FUNC(JsiSkPath, trim), JSI_EXPORT_FUNC(JsiSkPath, getPoint),
+    JSI_EXPORT_FUNC(JsiSkPath, toSVGString),
+    JSI_EXPORT_FUNC(JsiSkPath, makeAsWinding),
+    JSI_EXPORT_FUNC(JsiSkPath, isEmpty), JSI_EXPORT_FUNC(JsiSkPath, offset),
+    JSI_EXPORT_FUNC(JsiSkPath, moveTo), JSI_EXPORT_FUNC(JsiSkPath, rMoveTo),
+    JSI_EXPORT_FUNC(JsiSkPath, lineTo), JSI_EXPORT_FUNC(JsiSkPath, rlineTo),
+    JSI_EXPORT_FUNC(JsiSkPath, cubicTo), JSI_EXPORT_FUNC(JsiSkPath, rCubicTo),
+    JSI_EXPORT_FUNC(JsiSkPath, reset), JSI_EXPORT_FUNC(JsiSkPath, rewind),
+    JSI_EXPORT_FUNC(JsiSkPath, quadTo), JSI_EXPORT_FUNC(JsiSkPath, rQuadTo),
+    JSI_EXPORT_FUNC(JsiSkPath, addCircle),
+    JSI_EXPORT_FUNC(JsiSkPath, getLastPt), JSI_EXPORT_FUNC(JsiSkPath, close),
+    JSI_EXPORT_FUNC(JsiSkPath, simplify),
+    JSI_EXPORT_FUNC(JsiSkPath, countPoints), JSI_EXPORT_FUNC(JsiSkPath, copy),
+    JSI_EXPORT_FUNC(JsiSkPath, fromText), JSI_EXPORT_FUNC(JsiSkPath, op),
+    JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable), JSI_EXPORT_FUNC(JsiSkPath, interpolate)
+  )
 
   JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
       : JsiSkWrappingSharedPtrHostObject<SkPath>(

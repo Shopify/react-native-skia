@@ -71,7 +71,13 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Effects",
-      items: ["mask-filters", "color-filters", "image-filters", "path-effects"],
+      items: [
+        "mask-filters",
+        "color-filters",
+        "image-filters",
+        "path-effects",
+        "backdrops-filters",
+      ],
     },
     {
       collapsed: true,

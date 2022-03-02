@@ -38,6 +38,9 @@ export enum PathOp {
   ReverseDifference,
 }
 
+export const isPath = (obj: SkJSIInstance<string> | null): obj is IPath =>
+  obj !== null && obj.__typename__ === "Path";
+
 export interface IPath extends SkJSIInstance<"Path"> {
   /**
    * Appends arc to Path, as the start of new contour. Arc added is part of ellipse

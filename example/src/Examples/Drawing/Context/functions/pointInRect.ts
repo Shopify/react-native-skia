@@ -1,6 +1,6 @@
-import type { IRect, Point } from "@shopify/react-native-skia";
+import type { IRect, IPoint } from "@shopify/react-native-skia";
 
-export const pointInRect = (p: Point, rect: IRect, offset = 10) => {
+export const pointInRect = (p: IPoint, rect: IRect, offset = 10) => {
   return (
     p.x + offset >= rect.x &&
     p.x - offset <= rect.x + rect.width &&

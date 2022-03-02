@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import type { Point } from "@shopify/react-native-skia";
+import type { IPoint } from "@shopify/react-native-skia";
 import { useImage, useTouchHandler } from "@shopify/react-native-skia";
 
 import {
@@ -21,7 +21,7 @@ import { useUxContext } from "./useUxContext";
 const osloImg = require("../../../assets/card.png");
 
 export const useTouchDrawing = () => {
-  const prevPointRef = useRef<Point>();
+  const prevPointRef = useRef<IPoint>();
   const drawContext = useDrawContext();
   const uxContext = useUxContext();
   const oslo = useImage(osloImg);

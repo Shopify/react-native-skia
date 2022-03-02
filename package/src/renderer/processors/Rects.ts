@@ -1,48 +1,19 @@
 // Here we use any because hasOwnProperty doesn't work on JSI instances not does the (key in obj) syntax
 // And using Object.keys for such use-case is incredibly slow
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ReactNode } from "react";
-
 import type { IRect, IRRect } from "../../skia";
 
-import type { Vector as Point } from "./math/Vector";
 import { vec } from "./math/Vector";
 
-export interface ChildrenProps {
-  children?: ReactNode | ReactNode[];
-}
-
-export { Point };
-
-interface PointCircleDef {
-  c: Point;
-  r: number;
-}
-
-interface ScalarCircleDef {
-  cx: number;
-  cy: number;
-  r: number;
-}
-
-export type CircleDef = PointCircleDef | ScalarCircleDef;
-
-const isCircleScalarDef = (def: CircleDef): def is ScalarCircleDef =>
-  (def as any).cx;
-export const processCircle = (def: CircleDef) => {
-  if (isCircleScalarDef(def)) {
-    return { c: vec(def.cx, def.cy), r: def.r };
-  }
-  return def;
-};
-
 export const point = (x: number, y: number) => ({ x, y });
+
 export const rect = (x: number, y: number, width: number, height: number) => ({
   x,
   y,
   width,
   height,
 });
+
 export const rrect = (r: IRect, rx: number, ry: number) => ({
   rect: r,
   rx,
@@ -66,9 +37,9 @@ export const center = (r: IRect | IRRect) =>
     ? vec(r.rect.x + r.rect.width / 2, r.rect.y + r.rect.height / 2)
     : vec(r.x + r.width / 2, r.y + r.height / 2);
 
-export const isRRectCtor = (def: RRectDef): def is RRectCtor =>
+const isRRectCtor = (def: RRectDef): def is RRectCtor =>
   (def as any).rect === undefined;
-export const isRectCtor = (def: RectDef): def is RectCtor =>
+const isRectCtor = (def: RectDef): def is RectCtor =>
   (def as any).rect === undefined;
 export const isRRect = (def: IRect | IRRect): def is IRRect =>
   (def as any).rect !== undefined;

@@ -1,10 +1,12 @@
 import React from "react";
 
-import { useDrawing } from "../../nodes/Drawing";
-import type { CustomPaintProps } from "../../processors";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { RRectDef } from "../../processors/Shapes";
-import { processRRect } from "../../processors/Shapes";
+import { useDrawing } from "../../nodes";
+import type {
+  CustomPaintProps,
+  RRectDef,
+  AnimatedProps,
+} from "../../processors";
+import { processRRect } from "../../processors";
 
 export type RoundedRectProps = RRectDef & CustomPaintProps;
 

@@ -3,10 +3,13 @@ import React from "react";
 import type { IRect, IImage } from "../../../skia";
 import { TileMode, FilterMode, MipmapMode } from "../../../skia";
 import { useDeclaration } from "../../nodes";
-import type { TransformProps, SkEnum, AnimatedProps } from "../../processors";
-import { localMatrix, enumKey } from "../../processors";
-import type { RectCtor } from "../../processors/Shapes";
-import { rect } from "../../processors/Shapes";
+import type {
+  TransformProps,
+  SkEnum,
+  AnimatedProps,
+  RectCtor,
+} from "../../processors";
+import { localMatrix, enumKey, rect } from "../../processors";
 
 import type { Fit } from "./BoxFit";
 import { rect2rect, fitRects } from "./BoxFit";

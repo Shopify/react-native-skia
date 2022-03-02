@@ -4,19 +4,24 @@ import type { IFont } from "./Font";
 import type { IPath } from "./Path";
 import type { IImage } from "./Image";
 import type { SVG } from "./SVG";
-import type { Color } from "./Color";
+import type { IColor } from "./Color";
 import type { IRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
 import type { IPoint, PointMode } from "./Point";
 import type { IMatrix } from "./Matrix";
 import type { IImageFilter } from "./ImageFilter";
 import type { MipmapMode, FilterMode } from "./Image/Image";
-import type { Vertices } from "./Vertices";
+import type { IVertices } from "./Vertices";
 import type { ITextBlob } from "./TextBlob";
 
 export enum ClipOp {
   Difference,
   Intersect,
+}
+
+export enum SaveLayerFlag {
+  SaveLayerInitWithPrevious = 1 << 2,
+  SaveLayerF16ColorType = 1 << 4,
 }
 
 export interface ICanvas {
@@ -204,7 +209,7 @@ export interface ICanvas {
    * @param mode
    * @param paint
    */
-  drawVertices(verts: Vertices, mode: BlendMode, paint: IPaint): void;
+  drawVertices(verts: IVertices, mode: BlendMode, paint: IPaint): void;
 
   /**
    * Draws a cubic patch defined by 12 control points [top, right, bottom, left] with optional
@@ -217,7 +222,7 @@ export interface ICanvas {
    */
   drawPatch(
     cubics: readonly IPoint[],
-    colors?: readonly Color[] | null,
+    colors?: readonly IColor[] | null,
     texs?: readonly IPoint[] | null,
     mode?: BlendMode | null,
     paint?: IPaint
@@ -384,17 +389,8 @@ export interface ICanvas {
     paint?: IPaint,
     bounds?: IRect | null,
     backdrop?: IImageFilter | null,
-    flags?: number
+    flags?: SaveLayerFlag
   ): number;
-
-  /**
-   * Saves Matrix and clip, and allocates a SkBitmap for subsequent drawing.
-   * Calling restore() discards changes to Matrix and clip, and draws the SkBitmap.
-   * It returns the height of the stack.
-   * See Canvas.h for more.
-   * @param paint
-   */
-  saveLayerPaint(paint?: IPaint): number;
 
   /** Removes changes to SkMatrix and clip since SkCanvas state was
         last saved. The state is removed from the stack.
@@ -443,14 +439,14 @@ export interface ICanvas {
    * @param color
    * @param blendMode - defaults to SrcOver.
    */
-  drawColor(color: Color, blendMode?: BlendMode): void;
+  drawColor(color: IColor, blendMode?: BlendMode): void;
 
   /**
    * Fills the current clip with the given color using Src BlendMode.
    * This has the effect of replacing all pixels contained by clip with color.
    * @param color
    */
-  clear(color: Color): void;
+  clear(color: IColor): void;
 
   /**
    * Replaces clip with the intersection or difference of the current clip and path,
