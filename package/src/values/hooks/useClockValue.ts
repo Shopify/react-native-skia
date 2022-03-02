@@ -1,7 +1,5 @@
 import { useAnimationValue } from "./useAnimationValue";
 
-import "../types";
-
 /**
  * @returns A new value that will be updated on every frame redraw with the
  * number of milliseconds elapsed since the value was started.
