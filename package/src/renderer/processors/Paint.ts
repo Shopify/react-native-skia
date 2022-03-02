@@ -1,6 +1,12 @@
 import type { ReactNode, RefObject } from "react";
 
-import { BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
+import {
+  BlendMode,
+  PaintStyle,
+  StrokeJoin,
+  StrokeCap,
+  processColor,
+} from "../../skia";
 import type { IPaint, Color } from "../../skia";
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
