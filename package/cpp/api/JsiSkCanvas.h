@@ -26,6 +26,7 @@
 #include <SkRegion.h>
 #include <SkSurface.h>
 #include <SkTypeface.h>
+#include <SkPicture.h>
 
 #pragma clang diagnostic pop
 

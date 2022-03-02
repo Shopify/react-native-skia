@@ -3,8 +3,8 @@ import React from "react";
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
 import { vec } from "../../processors/math/Vector";
-import type { CircleDef } from "../../processors/Shapes";
-import { processCircle } from "../../processors/Shapes";
+import type { CircleDef } from "../../processors/Circles";
+import { processCircle } from "../../processors/Circles";
 
 export type CircleProps = CircleDef & CustomPaintProps;
 

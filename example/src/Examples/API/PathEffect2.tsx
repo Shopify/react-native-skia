@@ -17,7 +17,11 @@ import {
   CornerPathEffect,
   rect,
   Path,
+  Path1DPathEffect,
+  Path2DPathEffect,
+  Line2DPathEffect,
   Group,
+  processTransform2d,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -150,6 +154,41 @@ export const PathEffectDemo = () => {
           <CornerPathEffect r={200} />
         </Paint>
         <SquaredLogo />
+      </Canvas>
+
+      <Title>Path1D</Title>
+      <Canvas style={styles.container}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <Path1DPathEffect
+            path="M -10 0 L 0 -10, 10 0, 0 10 Z"
+            advance={20}
+            phase={0}
+            style="rotate"
+          />
+        </Paint>
+        <Logo />
+      </Canvas>
+
+      <Title>Path2D</Title>
+      <Canvas style={styles.container}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <Path2DPathEffect
+            path="M -10 0 L 0 -10, 10 0, 0 10 Z"
+            matrix={processTransform2d([{ scale: 40 }])}
+          />
+        </Paint>
+        <Logo />
+      </Canvas>
+
+      <Title>Line2D</Title>
+      <Canvas style={styles.container}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <Line2DPathEffect
+            width={0}
+            matrix={processTransform2d([{ scale: 8 }])}
+          />
+        </Paint>
+        <Logo />
       </Canvas>
 
       <Title>Compose</Title>

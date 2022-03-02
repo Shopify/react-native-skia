@@ -3,8 +3,8 @@ import React from "react";
 import { useDrawing } from "../../nodes/Drawing";
 import type { CustomPaintProps } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { RRectDef } from "../../processors/Shapes";
-import { processRRect } from "../../processors/Shapes";
+import type { RRectDef } from "../../processors/Rects";
+import { processRRect } from "../../processors/Rects";
 
 export type RoundedRectProps = RRectDef & CustomPaintProps;
 

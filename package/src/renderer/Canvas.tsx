@@ -13,8 +13,8 @@ import type {
   ComponentProps,
   Context,
   ReactElement,
-  ForwardedRef,
   MutableRefObject,
+  ForwardedRef,
 } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
@@ -83,7 +83,6 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
   ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
-
     const [tick, setTick] = useState(0);
     const redraw = useCallback(() => setTick((t) => t + 1), []);
 
@@ -154,9 +153,9 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
  * @param refs Array of refs to combine
  * @returns A single ref that can be used in a ref prop.
  */
-function useCombinedRefs<T>(
+const useCombinedRefs = <T,>(
   ...refs: Array<MutableRefObject<T> | ForwardedRef<T>>
-) {
+) => {
   const targetRef = React.useRef<T>(null);
   React.useEffect(() => {
     refs.forEach((ref) => {
@@ -170,4 +169,4 @@ function useCombinedRefs<T>(
     });
   }, [refs]);
   return targetRef;
-}
+};
