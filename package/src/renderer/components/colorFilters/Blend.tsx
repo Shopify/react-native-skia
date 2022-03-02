@@ -2,15 +2,16 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { BlendMode, Skia } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
-import type { SkEnum, ColorProp, AnimatedProps } from "../../processors";
+import { useDeclaration } from "../../nodes";
+import type { SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
+import type { Color } from "../../../skia";
 
 import { composeColorFilter } from "./Compose";
 
 export interface BlendProps {
   mode: SkEnum<typeof BlendMode>;
-  color: ColorProp;
+  color: Color;
   children?: ReactNode | ReactNode[];
 }
 

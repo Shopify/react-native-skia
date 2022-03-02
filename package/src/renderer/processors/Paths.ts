@@ -1,5 +1,5 @@
-import type { IPath } from "../../skia/Path/Path";
-import { Skia } from "../../skia/Skia";
+import type { IPath } from "../../skia";
+import { Skia, isPath } from "../../skia";
 
 export type PathDef = string | IPath;
 
@@ -13,3 +13,7 @@ export const processPath = (rawPath: PathDef) => {
   }
   return path;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isPathDef = (def: any): def is PathDef =>
+  typeof def === "string" || isPath(def);

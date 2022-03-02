@@ -7,7 +7,7 @@ export enum VertexMode {
   TriangleFan,
 }
 
-export interface Vertices extends SkJSIInstance<"Vertices"> {
+export interface IVertices extends SkJSIInstance<"Vertices"> {
   /**
    * Return the bounding area for the vertices.
    */

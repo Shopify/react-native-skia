@@ -14,6 +14,7 @@ import {
   GraphsScreen,
   Hue,
   Matrix,
+  Glassmorphism,
 } from "./Examples";
 import { HomeScreen } from "./Home";
 
@@ -47,6 +48,13 @@ const App = () => {
           <Stack.Screen
             name="Aurora"
             component={Aurora}
+            options={{
+              header: () => null,
+            }}
+          />
+          <Stack.Screen
+            name="Glassmorphism"
+            component={Glassmorphism}
             options={{
               header: () => null,
             }}

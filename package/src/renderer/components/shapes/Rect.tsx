@@ -1,10 +1,12 @@
 import React from "react";
 
 import { useDrawing } from "../../nodes/Drawing";
-import type { CustomPaintProps } from "../../processors";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { RectDef } from "../../processors/Rects";
-import { processRect } from "../../processors/Rects";
+import type {
+  CustomPaintProps,
+  RectDef,
+  AnimatedProps,
+} from "../../processors";
+import { processRect } from "../../processors";
 
 export type RectProps = RectDef & CustomPaintProps;
 

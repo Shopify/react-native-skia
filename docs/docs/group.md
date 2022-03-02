@@ -17,8 +17,7 @@ It can apply the following operations to its children:
 |:-----------|:-------------------|:--------------------------------------------------------------|
 | transform? | `Transform2d`      | [Same API than in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is however different. It is the center object in React Native and the top-left corner in Skia. |
 | origin?    | `Point`            | Sets the origin of the transformation. This property is not inherited by its children. |
-| clipRect?   | `RectOrRRect`     | Rectangle or rounded rectangle to use to clip the children. |
-| clipPath?   | `Path or string`  | Path to use to clip the children |
+| clip?   | `RectOrRRectOrPath`     | Rectangle, rounded rectangle, or Path to use to clip the children. |
 | invertClip? | `boolean`         | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden. |
 | rasterize? | `RefObject<Paint>` | Draws the children as a bitmap and applies the effects provided by the paint. |
 
@@ -97,7 +96,7 @@ const SimpleTransform = () => {
 
 ## Clipping Operations
 
-`clipRect` or `clipPath` provide a clipping region that sets what part of the children should be shown.
+`clip` provides a clipping region that sets what part of the children should be shown.
 Parts inside the region are shown, while those outside are hidden.
 When using `invertClip`, everything outside the clipping region will be shown and, parts inside the clipping region will be hidden.
 
@@ -115,7 +114,7 @@ const Clip = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
-      <Group clipPath={star}>
+      <Group clip={star}>
         <Image
           image={image}
           x={0}
@@ -146,7 +145,7 @@ const Clip = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
-      <Group clipPath={star} invertClip>
+      <Group clip={star} invertClip>
         <Image
           image={image}
           x={0}

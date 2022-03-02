@@ -2,7 +2,7 @@ import type { IImageFilter } from "../ImageFilter";
 import type { IMaskFilter } from "../MaskFilter";
 import type { IColorFilter } from "../ColorFilter";
 import type { IShader } from "../Shader";
-import type { Color } from "../Color";
+import type { IColor } from "../Color";
 import type { IPathEffect } from "../PathEffect";
 import type { SkJSIInstance } from "../JsiInstance";
 
@@ -38,7 +38,7 @@ export interface IPaint extends SkJSIInstance<"Paint"> {
    * Retrieves the alpha and RGB unpremultiplied. RGB are extended sRGB values
    * (sRGB gamut, and encoded with the sRGB transfer function).
    */
-  getColor(): Color;
+  getColor(): IColor;
 
   /**
    * Returns the geometry drawn at the beginning and end of strokes.
@@ -89,7 +89,7 @@ export interface IPaint extends SkJSIInstance<"Paint"> {
    *
    *    example: https://fiddle.skia.org/c/@Paint_setColor
    */
-  setColor(color: Color): void;
+  setColor(color: IColor): void;
 
   /**
    * Sets the current color filter, replacing the existing one if there was one.
