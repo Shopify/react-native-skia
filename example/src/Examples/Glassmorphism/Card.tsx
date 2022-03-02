@@ -10,6 +10,7 @@ import {
   LinearGradient,
   Paint,
   Text,
+  useDerivedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -37,8 +38,12 @@ export const Glassmorphism = () => {
       y.value = offsetY.value + pos.y;
     },
   });
+  const transform = useDerivedValue(
+    (xval, yval) => [{ translateY: yval }, { translateX: xval }],
+    [x, y]
+  );
   return (
-    <Canvas style={{ flex: 1 }} onTouch={onTouch}>
+    <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
       <Background />
       <Ball r={100} c={vec(75, 75)} />
       <Ball r={50} c={vec(width, height / 2)} />
@@ -48,7 +53,7 @@ export const Glassmorphism = () => {
         clip={clip}
         intensity={15}
         color="rgba(255, 255, 255, 0.1)"
-        transform={() => [{ translateY: y.value }, { translateX: x.value }]}
+        transform={transform}
       >
         <Paint>
           <LinearGradient

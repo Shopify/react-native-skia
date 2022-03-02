@@ -13,3 +13,4 @@ export * from "./Gooey";
 export * from "./Hue";
 export * from "./Matrix";
 export * from "./Aurora";
+export * from "./Glassmorphism";
