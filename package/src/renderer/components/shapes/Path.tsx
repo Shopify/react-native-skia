@@ -25,11 +25,16 @@ export const Path = (props: AnimatedProps<PathProps>) => {
   const onDraw = useDrawing(
     props,
     ({ canvas, paint }, { start, end, stroke, ...pathProps }) => {
-      const path = processPath(pathProps.path).copy();
-      if (stroke) {
+      const hasStartOffset = start !== 0;
+      const hasEndOffset = start !== 1;
+      const hasStrokeOptions = stroke !== undefined;
+      const willMutatePath = hasStartOffset || hasEndOffset || hasStrokeOptions;
+      const pristinePath = processPath(pathProps.path);
+      const path = willMutatePath ? pristinePath.copy() : pristinePath;
+      if (hasStrokeOptions) {
         path.stroke(stroke);
       }
-      if (start !== 0 || end !== 1) {
+      if (hasStartOffset || hasEndOffset) {
         path.trim(start, end, false);
       }
       canvas.drawPath(path, paint);
