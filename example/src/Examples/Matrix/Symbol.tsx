@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import type { AnimationValue, IFont } from "@shopify/react-native-skia";
+import type { AnimationValue, SkFont } from "@shopify/react-native-skia";
 import { vec, Glyphs } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -16,7 +16,7 @@ interface SymbolProps {
   j: number;
   timestamp: AnimationValue<number>;
   stream: number[];
-  font: IFont;
+  font: SkFont;
   symbols: number[];
 }
 

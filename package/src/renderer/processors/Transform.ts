@@ -1,5 +1,5 @@
 import type { DrawingContext } from "../DrawingContext";
-import type { IMatrix } from "../../skia/Matrix";
+import type { SkMatrix } from "../../skia/Matrix";
 
 import { neg, processTransform2d } from "./math";
 import type { Transforms2d, Vector } from "./math";
@@ -7,7 +7,7 @@ import type { Transforms2d, Vector } from "./math";
 export interface TransformProps {
   transform?: Transforms2d;
   origin?: Vector;
-  matrix?: IMatrix;
+  matrix?: SkMatrix;
 }
 
 export const processTransform = (

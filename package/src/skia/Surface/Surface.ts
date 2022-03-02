@@ -1,7 +1,7 @@
-import type { IImage } from "../Image";
-import type { ICanvas } from "../Canvas";
+import type { SkImage } from "../Image";
+import type { SkCanvas } from "../Canvas";
 import type { SkJSIInstance } from "../JsiInstance";
-import type { IRect } from "../Rect";
+import type { SkRect } from "../Rect";
 
 export interface ISurface extends SkJSIInstance<"Surface"> {
   /** Returns Canvas that draws into the surface. Subsequent calls return the
@@ -12,7 +12,7 @@ export interface ISurface extends SkJSIInstance<"Surface"> {
 
       example: https://fiddle.skia.org/c/@Surface_getCanvas
   */
-  getCanvas(): ICanvas;
+  getCanvas(): SkCanvas;
 
   /** Returns Image capturing Surface contents. Subsequent drawing to
      Surface contents are not captured.
@@ -23,5 +23,5 @@ export interface ISurface extends SkJSIInstance<"Surface"> {
 
       example: https://fiddle.skia.org/c/@Surface_makeImageSnapshot
   */
-  makeImageSnapshot(bounds?: IRect): IImage;
+  makeImageSnapshot(bounds?: SkRect): SkImage;
 }

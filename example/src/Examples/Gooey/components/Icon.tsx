@@ -1,11 +1,11 @@
-import type { IPath } from "@shopify/react-native-skia";
+import type { SkPath } from "@shopify/react-native-skia";
 import { Group, Path, vec } from "@shopify/react-native-skia";
 import React from "react";
 
 export const R = 50;
 
 interface IconProps {
-  path: IPath;
+  path: SkPath;
 }
 
 export const Icon = ({ path }: IconProps) => {

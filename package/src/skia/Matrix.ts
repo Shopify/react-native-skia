@@ -10,7 +10,7 @@ export enum MatrixIndex {
   persp2 = 8,
 }
 
-export interface IMatrix {
+export interface SkMatrix {
   0: number;
   1: number;
   2: number;
