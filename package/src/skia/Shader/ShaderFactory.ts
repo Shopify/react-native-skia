@@ -1,7 +1,7 @@
 import type { TileMode } from "../ImageFilter";
 import type { IPoint } from "../Point";
 import type { IMatrix } from "../Matrix";
-import type { Color } from "../Color";
+import type { IColor } from "../Color";
 import type { BlendMode } from "../Paint/BlendMode";
 
 import type { IShader } from "./Shader";
@@ -25,7 +25,7 @@ export interface ShaderFactory {
   MakeLinearGradient(
     start: IPoint,
     end: IPoint,
-    colors: Color[],
+    colors: IColor[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: IMatrix,
@@ -48,7 +48,7 @@ export interface ShaderFactory {
   MakeRadialGradient(
     center: IPoint,
     radius: number,
-    colors: Color[],
+    colors: IColor[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: IMatrix,
@@ -74,7 +74,7 @@ export interface ShaderFactory {
     startRadius: number,
     end: IPoint,
     endRadius: number,
-    colors: Color[],
+    colors: IColor[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: IMatrix,
@@ -99,7 +99,7 @@ export interface ShaderFactory {
   MakeSweepGradient(
     cx: number,
     cy: number,
-    colors: Color[],
+    colors: IColor[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: IMatrix | null,
@@ -164,6 +164,6 @@ export interface ShaderFactory {
    * @param color
    */
   MakeColor(
-    color: Color //,space: ColorSpace
+    color: IColor //,space: ColorSpace
   ): IShader;
 }

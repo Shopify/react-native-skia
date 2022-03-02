@@ -1,17 +1,22 @@
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 
-import { BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
-import type { IPaint } from "../../skia";
-
-import type { ColorProp } from "./Colors";
-import { processColor } from "./Colors";
-import type { ChildrenProps } from "./Rects";
-
+import {
+  BlendMode,
+  PaintStyle,
+  StrokeJoin,
+  StrokeCap,
+  processColor,
+} from "../../skia";
+import type { IPaint, Color } from "../../skia";
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
+
+export interface ChildrenProps {
+  children?: ReactNode | ReactNode[];
+}
 
 export interface CustomPaintProps extends ChildrenProps {
   paint?: RefObject<IPaint>;
-  color?: ColorProp;
+  color?: Color;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;
   style?: SkEnum<typeof PaintStyle>;

@@ -1,10 +1,13 @@
 import React from "react";
 
-import type { CustomPaintProps, AnimatedProps } from "../../processors";
+import type {
+  CustomPaintProps,
+  AnimatedProps,
+  CircleDef,
+} from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
 import { vec } from "../../processors/math/Vector";
-import type { CircleDef } from "../../processors/Circles";
-import { processCircle } from "../../processors/Circles";
+import { processCircle } from "../../processors";
 
 export type CircleProps = CircleDef & CustomPaintProps;
 
@@ -17,5 +20,5 @@ export const Circle = (props: AnimatedProps<CircleProps>) => {
 };
 
 Circle.defaultProps = {
-  c: vec(),
+  c: vec(0, 0),
 };

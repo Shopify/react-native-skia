@@ -1,24 +1,25 @@
 import React from "react";
-import type { ReactNode, RefObject } from "react";
+import type { RefObject } from "react";
 
 import { processChildren } from "../Host";
-import type { IPaint, IRect, IRRect } from "../../skia";
+import type { IPaint } from "../../skia";
 import { ClipOp } from "../../skia";
-import { processTransform, selectPaint, processPaint } from "../processors";
+import {
+  processTransform,
+  selectPaint,
+  processPaint,
+  processClip,
+} from "../processors";
 import type {
   CustomPaintProps,
   TransformProps,
   AnimatedProps,
+  ClipDef,
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
-import { isRRect, rrect } from "../processors/Rects";
-import type { PathDef } from "../processors/Paths";
-import { processPath } from "../processors/Paths";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
-  children: ReactNode | ReactNode[];
-  clipRect?: IRect | IRRect;
-  clipPath?: PathDef;
+  clip?: ClipDef;
   invertClip?: boolean;
   rasterize?: RefObject<IPaint>;
 }
@@ -26,31 +27,20 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 export const Group = (props: AnimatedProps<GroupProps>) => {
   const onDraw = useDrawing(
     props,
-    (
-      ctx,
-      { clipRect, rasterize, clipPath, invertClip, ...groupProps },
-      children
-    ) => {
+    (ctx, { rasterize, clip, invertClip, ...groupProps }, children) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
       if (rasterize) {
-        canvas.saveLayerPaint(rasterize.current ?? undefined);
+        canvas.saveLayer(rasterize.current ?? undefined);
       } else {
         canvas.save();
       }
-      const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
-      if (clipRect) {
-        canvas.clipRRect(
-          isRRect(clipRect) ? clipRect : rrect(clipRect, 0, 0),
-          op,
-          true
-        );
-      }
-      if (clipPath) {
-        canvas.clipPath(processPath(clipPath), op, true);
-      }
       processTransform(ctx, groupProps);
+      if (clip) {
+        const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
+        processClip(canvas, clip, op);
+      }
       processChildren(
         {
           ...ctx,
