@@ -12,14 +12,36 @@ export enum ColorChannel {
 }
 
 export interface ImageFilterFactory {
+  /**
+   * Offsets the input image
+   *
+   * @param dx - Offset along the X axis
+   * @param dy - Offset along the X axis
+   * @param input - if null, it will use the dynamic source image
+   */
   MakeOffset(dx: number, dy: number, input: IImageFilter | null): IImageFilter;
+  /**
+   * Spatially displace pixel values of the filtered image
+   *
+   * @param channelX - Color channel to be used along the X axis
+   * @param channelY - Color channel to be used along the Y axis
+   * @param scale - Scale factor to be used in the displacement
+   * @param in1 - Source image filter to use for the displacement
+   * @param input - if null, it will use the dynamic source image
+   */
   MakeDisplacementMap(
     channelX: ColorChannel,
     channelY: ColorChannel,
     scale: number,
     in1: IImageFilter,
-    in2: IImageFilter | null
+    input: IImageFilter | null
   ): IImageFilter;
+  /**
+   * Transforms a shader into an impage filter
+   *
+   * @param shader - The Shader to be transformed
+   * @param input - if null, it will use the dynamic source image
+   */
   MakeShader(shader: IShader, input: IImageFilter | null): IImageFilter;
   /**
    * Create a filter that blurs its input by the separate X and Y sigmas. The provided tile mode
