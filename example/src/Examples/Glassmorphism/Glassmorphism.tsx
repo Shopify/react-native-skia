@@ -9,10 +9,7 @@ import {
   Fill,
   useLoop,
   mix,
-  Turbulence,
   BackdropFilter,
-  DisplacementMap,
-  Offset,
   Blur,
 } from "@shopify/react-native-skia";
 import React from "react";
