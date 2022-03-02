@@ -30,22 +30,28 @@ namespace RNSkia {
         }
 
         JSI_EXPORT_PROPERTY_GETTERS(
-            JSI_EXPORT_PROP_GET(JsiSkContourMeasureIter, __typename__),
+                JSI_EXPORT_PROP_GET(JsiSkContourMeasureIter, __typename__),
         )
 
         JSI_HOST_FUNCTION(next) {
-            return JsiSkContourMeasure::toValue(runtime, getContext(), getObject()->next());
+            auto next = getObject()->next();
+            if(next == nullptr) {
+                return jsi::Value::undefined();
+            }
+            auto nextObject = std::make_shared<JsiSkContourMeasure>(getContext(), next);
+
+            return jsi::Object::createFromHostObject(runtime, nextObject);
         }
 
         JSI_EXPORT_FUNCTIONS(
-            JSI_EXPORT_FUNC(JsiSkContourMeasureIter, next)
+                JSI_EXPORT_FUNC(JsiSkContourMeasureIter, next)
         )
 
         /**
         Returns the underlying object from a host object of this type
        */
         static std::shared_ptr<SkContourMeasureIter> fromValue(jsi::Runtime &runtime,
-                                                  const jsi::Value &obj) {
+                                                               const jsi::Value &obj) {
             return obj.asObject(runtime)
                     .asHostObject<JsiSkContourMeasureIter>(runtime)
                     .get()
