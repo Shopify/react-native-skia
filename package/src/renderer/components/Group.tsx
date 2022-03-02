@@ -11,7 +11,7 @@ import type {
   AnimatedProps,
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
-import { isRRect, rrect } from "../processors/Shapes";
+import { isRRect, rrect } from "../processors/Rects";
 import type { PathDef } from "../processors/Paths";
 import { processPath } from "../processors/Paths";
 
