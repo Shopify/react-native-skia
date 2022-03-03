@@ -1,14 +1,14 @@
 import React from "react";
 
 import type { CustomPaintProps, SkEnum } from "../../processors";
-import type { IPoint } from "../../../skia";
+import type { SkPoint } from "../../../skia";
 import { PointMode } from "../../../skia";
 import { enumKey } from "../../processors/Paint";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
 
 export interface PointsProps extends CustomPaintProps {
-  points: IPoint[];
+  points: SkPoint[];
   mode: SkEnum<typeof PointMode>;
 }
 

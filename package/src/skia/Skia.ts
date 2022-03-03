@@ -2,49 +2,49 @@
 import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
-import type { IFont } from "./Font";
+import type { SkFont } from "./Font";
 import type { ITypeface, TypefaceFactory } from "./Typeface";
 import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
-import type { IPaint } from "./Paint";
-import type { IRect } from "./Rect";
-import type { IRRect } from "./RRect";
+import type { SkPaint } from "./Paint";
+import type { SkRect } from "./Rect";
+import type { SkRRect } from "./RRect";
 import type { RuntimeEffectFactory } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
-import type { IColor } from "./Color";
+import type { SkColor } from "./Color";
 import { processColor } from "./Color";
-import type { IMatrix } from "./Matrix";
+import type { SkMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
-import type { IPoint } from "./Point";
-import type { IVertices, VertexMode } from "./Vertices/Vertices";
+import type { SkPoint } from "./Point";
+import type { SkVertices, VertexMode } from "./Vertices/Vertices";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
 import type { TextBlobFactory } from "./TextBlob";
 import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
 import type { SurfaceFactory } from "./Surface";
 import "./NativeSetup";
-import type { IRSXform } from "./RSXform";
-import type { IPath } from "./Path/Path";
-import type { IContourMeasureIter } from "./ContourMeasure";
+import type { SkRSXform } from "./RSXform";
+import type { SkPath } from "./Path/Path";
+import type { SkContourMeasureIter } from "./ContourMeasure";
 
 /**
  * Declares the interface for the native Skia API
  */
 export interface Skia {
-  Point: (x: number, y: number) => IPoint;
-  XYWHRect: (x: number, y: number, width: number, height: number) => IRect;
-  RRectXY: (rect: IRect, rx: number, ry: number) => IRRect;
-  RSXform: (scos: number, ssin: number, tx: number, ty: number) => IRSXform;
+  Point: (x: number, y: number) => SkPoint;
+  XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
+  RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
+  RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
   ContourMeasureIter: (
-    path: IPath,
+    path: SkPath,
     forceClosed: boolean,
     resScale: number
-  ) => IContourMeasureIter;
-  Paint: () => IPaint;
+  ) => SkContourMeasureIter;
+  Paint: () => SkPaint;
   Path: PathFactory;
-  Matrix: () => IMatrix;
+  Matrix: () => SkMatrix;
   ColorFilter: ColorFilterFactory;
-  Font: (typeface?: ITypeface, size?: number) => IFont;
+  Font: (typeface?: ITypeface, size?: number) => SkFont;
   Typeface: TypefaceFactory;
   MaskFilter: MaskFilterFactory;
   RuntimeEffect: RuntimeEffectFactory;
@@ -63,12 +63,12 @@ export interface Skia {
    */
   MakeVertices(
     mode: VertexMode,
-    positions: IPoint[],
-    textureCoordinates?: IPoint[] | null,
-    colors?: IColor[],
+    positions: SkPoint[],
+    textureCoordinates?: SkPoint[] | null,
+    colors?: SkColor[],
     indices?: number[] | null,
     isVolatile?: boolean
-  ): IVertices;
+  ): SkVertices;
   Data: DataFactory;
   Image: ImageFactory;
   SVG: SVGFactory;

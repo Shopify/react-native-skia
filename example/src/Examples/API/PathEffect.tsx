@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
-import type { ICanvas, IPaint } from "@shopify/react-native-skia";
+import type { SkCanvas, SkPaint } from "@shopify/react-native-skia";
 import {
   Skia,
   useDrawCallback,
@@ -37,7 +37,7 @@ transparentPaint.setStyle(PaintStyle.Stroke);
 transparentPaint.setStrokeWidth(15);
 transparentPaint.setAlphaf(0.2);
 
-const drawLogo = (canvas: ICanvas, paint: IPaint) => {
+const drawLogo = (canvas: SkCanvas, paint: SkPaint) => {
   canvas.drawCircle(center.x, center.y, 30, basePaint);
   canvas.save();
   canvas.translate(center.x - origin.x, center.y - origin.y);
@@ -64,7 +64,7 @@ const drawLogo = (canvas: ICanvas, paint: IPaint) => {
   canvas.restore();
 };
 
-const drawSquaredLogo = (canvas: ICanvas, paint: IPaint) => {
+const drawSquaredLogo = (canvas: SkCanvas, paint: SkPaint) => {
   canvas.drawCircle(center.x, center.y, 30, basePaint);
   canvas.save();
   canvas.translate(center.x - origin.x, center.y - origin.y);

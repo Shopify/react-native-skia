@@ -2,7 +2,7 @@ import React from "react";
 import type { RefObject } from "react";
 
 import { processChildren } from "../Host";
-import type { IPaint } from "../../skia";
+import type { SkPaint } from "../../skia";
 import { ClipOp } from "../../skia";
 import {
   processTransform,
@@ -21,7 +21,7 @@ import { useDrawing } from "../nodes/Drawing";
 export interface GroupProps extends CustomPaintProps, TransformProps {
   clip?: ClipDef;
   invertClip?: boolean;
-  rasterize?: RefObject<IPaint>;
+  rasterize?: RefObject<SkPaint>;
 }
 
 export const Group = (props: AnimatedProps<GroupProps>) => {
