@@ -28,6 +28,13 @@ public:
   ~RNSkValue() {
     unsubscribe();
   }
+
+  JSI_HOST_FUNCTION(cancelAnimation) {
+    if(_animation != nullptr) {
+      _animation->_cancel();
+    }
+    return jsi::Value::undefined();
+  }
   
   JSI_PROPERTY_SET(value) {
     // When someone else is setting the value we need to stop any ongoing
@@ -35,7 +42,6 @@ public:
     unsubscribe();
     update(runtime, value);
   }
-  
   
   JSI_PROPERTY_SET(animation) {
     // Cancel existing animation
@@ -69,7 +75,10 @@ public:
                               JSI_EXPORT_PROP_GET(RNSkValue, value),
                               JSI_EXPORT_PROP_GET(RNSkValue, animation))
   
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, addListener))
+  JSI_EXPORT_FUNCTIONS(
+          JSI_EXPORT_FUNC(RNSkValue, addListener),
+          JSI_EXPORT_FUNC(RNSkValue, cancelAnimation)
+  )
 
 private:
   void subscribe(std::shared_ptr<RNSkAnimation> animation) {
