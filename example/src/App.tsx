@@ -13,6 +13,7 @@ import { Matrix } from "./Examples/Matrix";
 import { Aurora } from "./Examples/Aurora";
 import { Glassmorphism } from "./Examples/Glassmorphism";
 import { HomeScreen } from "./Home";
+import { Neumorphism } from "./Examples/Neumorphism/Neumorphism";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -55,6 +56,7 @@ const App = () => {
               header: () => null,
             }}
           />
+          <Stack.Screen name="Neumorphism" component={Neumorphism} />
           <Stack.Screen name="Drawing" component={DrawingExample} />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />

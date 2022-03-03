@@ -52,7 +52,7 @@ export interface RectCtor {
 }
 
 export interface RRectCtor extends RectCtor {
-  rx?: number;
+  rx: number;
   ry?: number;
 }
 
@@ -70,11 +70,7 @@ export const processRect = (def: RectDef) => {
 export const processRRect = (def: RRectDef) => {
   if (isRRectCtor(def)) {
     const { rx, ry } = def;
-    return rrect(
-      rect(def.x, def.y, def.width, def.height),
-      (rx ?? ry) as number,
-      (ry ?? rx) as number
-    );
+    return rrect(rect(def.x, def.y, def.width, def.height), rx, ry ?? rx);
   } else {
     return def.rect;
   }

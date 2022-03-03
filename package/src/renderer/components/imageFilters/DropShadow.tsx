@@ -21,7 +21,7 @@ export interface DropShadowProps {
   shadowOnly?: boolean;
 }
 
-export const Blur = (props: AnimatedProps<DropShadowProps>) => {
+export const DropShadow = (props: AnimatedProps<DropShadowProps>) => {
   const declaration = useDeclaration(
     props,
     (
@@ -47,6 +47,6 @@ export const Blur = (props: AnimatedProps<DropShadowProps>) => {
   return <skDeclaration declaration={declaration} {...props} />;
 };
 
-Blur.defaultProps = {
+DropShadow.defaultProps = {
   mode: "decal",
 };
