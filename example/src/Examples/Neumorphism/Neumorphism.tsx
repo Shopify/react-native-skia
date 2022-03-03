@@ -1,5 +1,4 @@
 import {
-  Canvas,
   DropShadow,
   Fill,
   Group,
@@ -8,13 +7,15 @@ import {
 } from "@shopify/react-native-skia";
 import React from "react";
 
+import { ExportableCanvas } from "../../components/ExportableCanvas";
+
 const PADDING = 32;
 const SIZE = 256 - 64;
 const R = 32;
 
 export const Neumorphism = () => {
   return (
-    <Canvas style={{ width: 256, height: 256 }}>
+    <ExportableCanvas style={{ width: 256, height: 256 }}>
       <Fill color="lightblue" />
       <Group>
         <Paint>
@@ -37,6 +38,6 @@ export const Neumorphism = () => {
           color="lightblue"
         />
       </Group>
-    </Canvas>
+    </ExportableCanvas>
   );
 };
