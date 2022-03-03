@@ -27,8 +27,8 @@ The example below creates two drop shadows.
 It is equivalent to the following CSS notation
 
 ```css
-.filter {
-  box-shadow: 12px 12px 25px #93b8c4, -12px -12px 25px #c7f8ff;
+.paint {
+  filter: drop-shadow(12px 12px 25px #93b8c4) drop-shadow(-12px -12px 25px #c7f8ff);
 }
 ```
 
