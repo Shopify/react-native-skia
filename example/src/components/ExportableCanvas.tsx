@@ -8,7 +8,7 @@ export const ExportableCanvas = ({ children, style }: CanvasProps) => {
   const handleShare = useCallback(() => {
     const image = ref.current?.makeImageSnapshot();
     if (image) {
-      const data = image.encodeToBase64(ImageFormat.JPEG, 100);
+      const data = image.encodeToBase64(ImageFormat.PNG, 100);
       const url = `data:image/png;base64,${data}`;
       Share.share({
         url,

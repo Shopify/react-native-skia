@@ -46,7 +46,3 @@ export const DropShadow = (props: AnimatedProps<DropShadowProps>) => {
   );
   return <skDeclaration declaration={declaration} {...props} />;
 };
-
-DropShadow.defaultProps = {
-  mode: "decal",
-};
