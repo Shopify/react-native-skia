@@ -2,9 +2,9 @@ import React, { useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
+  Circle,
   Fill,
   Line,
-  Rect,
   runSpring,
   Spring,
   useDerivedValue,
@@ -13,6 +13,9 @@ import {
 } from "@shopify/react-native-skia";
 
 import { AnimationDemo, Size, Padding } from "./Components";
+
+const FgColor = "#DC4C4C";
+const BgColor = "#EC795A";
 
 export const SpringBackTouchAnimation = () => {
   const { width } = useWindowDimensions();
@@ -57,16 +60,17 @@ export const SpringBackTouchAnimation = () => {
         <Line
           p1={{ x: width / 2 - (Size - Padding), y: 0 }}
           p2={rectCenter}
-          color="#D4B3B7"
+          color={BgColor}
           strokeWidth={2}
           style="fill"
         />
-        <Rect
-          x={rectX}
-          y={rectY}
-          width={Size * 2}
-          height={Size * 2}
-          color="#D4B3B7"
+        <Circle c={rectCenter} r={Size} color={FgColor} />
+        <Circle
+          c={rectCenter}
+          r={Size}
+          color={BgColor}
+          strokeWidth={5}
+          style="stroke"
         />
       </Canvas>
     </AnimationDemo>

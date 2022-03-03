@@ -11,6 +11,7 @@ import {
   Paint,
   Text,
   useDerivedValue,
+  runDecay,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -36,6 +37,10 @@ export const Glassmorphism = () => {
     onActive: (pos) => {
       x.value = offsetX.value + pos.x;
       y.value = offsetY.value + pos.y;
+    },
+    onEnd: ({ velocityX, velocityY }) => {
+      runDecay(x, { velocity: velocityX });
+      runDecay(y, { velocity: velocityY });
     },
   });
   const transform = useDerivedValue(

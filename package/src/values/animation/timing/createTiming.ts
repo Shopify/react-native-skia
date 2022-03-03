@@ -1,7 +1,6 @@
-import type { RequiredAnimationParams } from "../factory";
-import type { TimingConfig } from "../types";
-import { createAnimationFactory } from "../factory";
-import type { AnimationState } from "../../types";
+import type { TimingConfig, RequiredAnimationParams } from "../types";
+import type { AnimationState, Value } from "../../types";
+import { ValueApi } from "../../api";
 
 import { timing } from "./functions";
 
@@ -19,16 +18,38 @@ import { timing } from "./functions";
  * @params an animation value that can be used to start/stop
  * the animation.
  */
-export const createTiming = createAnimationFactory<
-  RequiredAnimationParams & Required<TimingConfig>
->(
-  (t: number, params, state: AnimationState | undefined): AnimationState =>
-    timing(
+export const createTiming = (
+  params: RequiredAnimationParams & Required<TimingConfig>,
+  value?: Value<number>
+) => {
+  // Update from to be either the declared from value,
+  // the current value of the value or zero
+  const resolvedParams = {
+    ...params,
+    from: params.from ?? value?.value ?? 0,
+  };
+
+  // Update function for the animation value
+  const animationFunction = (t: number, state: AnimationState | undefined) => {
+    // Update the input value using the provided update function
+    const nextState = timing(
       t,
       params.duration,
       params.easing,
       params.loop ?? false,
       params.yoyo ?? false,
       state ?? { current: params.from!, finished: false }
-    )
-);
+    );
+
+    return {
+      ...nextState,
+      current:
+        // Interpolate value
+        nextState.current * (resolvedParams.to - resolvedParams.from!) +
+        resolvedParams.from!,
+    };
+  };
+
+  // Create animation value
+  return ValueApi.createAnimation(animationFunction);
+};

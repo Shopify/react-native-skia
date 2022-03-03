@@ -75,8 +75,8 @@ export interface ISkiaValueApi {
    * @param cb Callback to calculate next value from time.
    * @returns An animation object that can control a value.
    */
-  createAnimation: (
-    cb: (t: number, state: AnimationState | undefined) => AnimationState
+  createAnimation: <S extends AnimationState = AnimationState>(
+    cb: (t: number, state: S | undefined) => S
   ) => Animation;
 }
 

@@ -1,9 +1,12 @@
-import type { AnimationParams, TimingConfig, SpringConfig } from "../../types";
-import type { RequiredAnimationParams } from "../../factory/types";
+import type {
+  RequiredAnimationParams,
+  AnimationParams,
+  TimingConfig,
+  SpringConfig,
+} from "../../types";
 
 const DefaultParameters = {
   to: 1,
-  //from: 0,
   loop: false,
   yoyo: false,
   immediate: true,

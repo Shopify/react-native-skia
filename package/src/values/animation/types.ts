@@ -14,3 +14,6 @@ export interface AnimationParams {
   loop?: boolean;
   yoyo?: boolean;
 }
+
+export type RequiredAnimationParams = Required<Omit<AnimationParams, "from">> &
+  Pick<AnimationParams, "from">;
