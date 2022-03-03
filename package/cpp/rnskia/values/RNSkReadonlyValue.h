@@ -34,10 +34,11 @@ public:
       return jsi::Value::undefined();
     }
     return _valueHolder->getProperty(runtime, "value");
-  }
+  }  
   
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkReadonlyValue, __typename__),
                               JSI_EXPORT_PROP_GET(RNSkReadonlyValue, value))
+    
   
   JSI_HOST_FUNCTION(addListener) {
     if(!arguments[0].isObject() || !arguments[0].asObject(runtime).isFunction(runtime)) {
@@ -58,6 +59,8 @@ public:
       return jsi::Value::undefined();
     });
   }
+  
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkReadonlyValue, addListener))
     
   /**
   * Adds a callback that will be called whenever the value changes
@@ -73,8 +76,6 @@ public:
     };
   }
   
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkReadonlyValue, addListener))
-  
   /**
     Updates the underlying value and notifies all listeners about the change
    @param runtime Current JS Runtime
@@ -88,33 +89,6 @@ public:
     notifyListeners(runtime);
   }
   
-  /**
-   Adds a driver dependency - this is another Value that updates this value. Used for keeping
-   references alive.
-   @param driver Value that updates this value.
-   @return Identifier of driver to be used when removing the driver.
-   */
-  long addDriver(const std::shared_ptr<RNSkReadonlyValue> driver) {
-    std::lock_guard<std::mutex> lock(_driverLock);
-    auto nextId = ++_driverId;
-    _drivers.emplace(nextId, driver);
-    return nextId;
-  }
-  
-  /**
-   Remove driver
-   @param driverId Identifier of driver to remove.
-   */
-  void removeDriver(long driverId) {
-    if(_drivers.count(driverId) > 0) {
-      auto tmp = _drivers.at(driverId);
-      {
-        std::lock_guard<std::mutex> lock(_driverLock);
-        _drivers.erase(driverId);
-      }
-    }    
-  }
-
 protected:
   /**
     Notifies listeners about changes
@@ -149,12 +123,9 @@ protected:
 
 private:
   std::shared_ptr<RNSkPlatformContext> _platformContext;
-  std::shared_ptr<jsi::Object> _valueHolder;
+  std::shared_ptr<jsi::Object> _valueHolder;  
   long _listenerId = 0;
   std::map<long, std::function<void(jsi::Runtime&)>> _listeners;
   std::mutex _mutex;
-  long _driverId = 0;
-  std::map<long, std::shared_ptr<RNSkReadonlyValue>> _drivers;
-  std::mutex _driverLock;
 };
 }

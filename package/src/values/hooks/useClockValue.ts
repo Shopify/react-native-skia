@@ -1,4 +1,6 @@
-import { useAnimation } from "./useAnimation";
+import { useEffect, useMemo } from "react";
+
+import { ValueApi } from "../api";
 
 /**
  * @returns A new value that will be updated on every frame redraw with the
@@ -7,5 +9,10 @@ import { useAnimation } from "./useAnimation";
  */
 
 export const useClockValue = () => {
-  return useAnimation((t) => t);
+  const clock = useMemo(() => ValueApi.createClockValue(), []);
+  useEffect(() => {
+    clock.start();
+    return clock.stop;
+  }, [clock]);
+  return clock;
 };

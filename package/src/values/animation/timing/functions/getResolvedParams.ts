@@ -35,7 +35,6 @@ export const getResolvedParams = (
       to: toOrParams.to ?? resolvedParameters.to,
       loop: toOrParams.loop ?? resolvedParameters.loop,
       yoyo: toOrParams.yoyo ?? resolvedParameters.yoyo,
-      immediate: toOrParams.immediate ?? resolvedParameters.immediate,
     };
   }
 

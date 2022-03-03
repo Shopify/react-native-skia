@@ -1,3 +1,5 @@
+import type { AnimationState } from "../../../types";
+
 /**
  * Calculates and returns a timing value based on the
  * input parameters. The timing value is a number between
@@ -16,22 +18,27 @@ export const timing = (
   easing: (t: number) => number,
   loop: boolean,
   yoyo: boolean,
-  onStop: () => void
+  state: AnimationState
 ) => {
-  let p = t / duration;
+  let current = t / duration;
+  let { finished } = state;
   // Side effect to stop animation when duration is reached (if loop is false)
-  if (p >= 1.0 && !loop) {
-    onStop();
-    p = 1.0;
+  if (current >= 1.0 && !loop) {
+    finished = true;
+    current = 1.0;
   }
   // calculate return value
-  let n = p % 1;
+  let n = current % 1;
   if (yoyo) {
-    n = p % 2.0 >= 1.0 ? 1 - (p % 1) : p % 1;
+    n = current % 2.0 >= 1.0 ? 1 - (current % 1) : current % 1;
   } else if (!loop) {
-    if (p >= 1.0) {
+    if (current >= 1.0) {
       n = 1.0;
     }
   }
-  return easing(Math.max(0, Math.min(1, n)));
+  current = easing(Math.max(0, Math.min(1, n)));
+  return {
+    current,
+    finished,
+  };
 };

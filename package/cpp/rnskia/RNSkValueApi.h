@@ -47,8 +47,18 @@ public:
                                       count));
   }
   
+  JSI_HOST_FUNCTION(createClockValue) {
+    return jsi::Object::createFromHostObject(runtime,
+      std::make_shared<RNSkClockValue>(_platformContext,
+                                      ++_valueIdentifier,
+                                      runtime,
+                                      arguments,
+                                      count));
+  }
+  
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValueApi, createValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createDerivedValue),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createClockValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createAnimation))
 
 private:

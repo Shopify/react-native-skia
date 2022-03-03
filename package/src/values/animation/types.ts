@@ -13,5 +13,4 @@ export interface AnimationParams {
   to?: number;
   loop?: boolean;
   yoyo?: boolean;
-  immediate?: boolean;
 }

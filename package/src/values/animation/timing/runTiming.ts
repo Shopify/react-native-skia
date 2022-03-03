@@ -1,4 +1,4 @@
-import type { Value, ControllableValue } from "../../types";
+import type { Value, Animation } from "../../types";
 import type { AnimationParams, TimingConfig } from "../types";
 
 import { getResolvedParams } from "./functions";
@@ -20,11 +20,9 @@ export const runTiming = (
   value: Value<number>,
   toOrParams: number | AnimationParams,
   config?: TimingConfig
-): ControllableValue => {
+): Animation => {
   const resolvedParameters = getResolvedParams(toOrParams, config);
-  const retVal = createTiming(resolvedParameters, value);
-  if (resolvedParameters.immediate) {
-    retVal.start();
-  }
-  return retVal;
+  const animation = createTiming(resolvedParameters, value);
+  value.animation = animation;
+  return animation;
 };

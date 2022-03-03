@@ -1,4 +1,4 @@
-import type { Value, ControllableValue } from "../../types";
+import type { Value, Animation } from "../../types";
 import type { AnimationParams, SpringConfig } from "../types";
 import { runTiming } from "../timing/runTiming";
 
@@ -21,6 +21,6 @@ export const runSpring = (
   value: Value<number>,
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): ControllableValue => {
+): Animation => {
   return runTiming(value, toOrParams, config ?? Spring.Config.Default);
 };

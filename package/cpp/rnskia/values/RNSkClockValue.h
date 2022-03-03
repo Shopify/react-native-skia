@@ -41,16 +41,16 @@ public:
   }
   
   ~RNSkClockValue() {
-    stopAnimation();
+    stopClock();
   }
   
   JSI_HOST_FUNCTION(start) {
-    startAnimation();
+    startClock();
     return jsi::Value::undefined();
   }
   
   JSI_HOST_FUNCTION(stop) {
-    stopAnimation();
+    stopClock();
     return jsi::Value::undefined();
   }
   
@@ -59,7 +59,7 @@ public:
                        JSI_EXPORT_FUNC(RNSkClockValue, stop))
   
   
-  virtual void startAnimation() {
+  virtual void startClock() {
     if(_state == RNSkClockState::Running) {
       return;
     }
@@ -79,7 +79,7 @@ public:
     getPlatformContext()->beginDrawLoop(_identifier, dispatch);
   }
   
-  virtual void stopAnimation() {
+  virtual void stopClock() {
     if(_state == RNSkClockState::Running) {
       _state = RNSkClockState::Stopped;
       _stop = std::chrono::high_resolution_clock::now();
@@ -94,7 +94,7 @@ protected:
   
   void notifyUpdate(bool invalidated) {
     if(invalidated) {
-      stopAnimation();
+      stopClock();
       return;
     }
     

@@ -19,9 +19,22 @@ export interface Value<T = number> extends ReadonlyValue<T> {
    * Get/sets the value hold by the Value object
    */
   value: T;
+  /**
+   * Get/sets the animation controlling the value
+   * */
+  animation: Animation | undefined;
 }
 
-export interface ControllableValue extends ReadonlyValue<number> {
+export interface ClockValue extends ReadonlyValue<number> {
   start: () => void;
   stop: () => void;
+}
+
+export interface Animation {
+  cancelAnimation: () => void;
+}
+
+export interface AnimationState {
+  current: number;
+  finished: boolean;
 }
