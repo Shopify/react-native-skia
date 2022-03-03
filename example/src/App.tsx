@@ -3,17 +3,21 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 
-import { AnimationExample, DrawingExample, GraphsScreen } from "./Examples";
-import { API } from "./Examples/API";
-import { Breathe } from "./Examples/Breathe";
-import { Filters } from "./Examples/Filters";
-import { Gooey } from "./Examples/Gooey";
-import { Hue } from "./Examples/Hue";
-import { Matrix } from "./Examples/Matrix";
-import { Aurora } from "./Examples/Aurora";
-import { Glassmorphism } from "./Examples/Glassmorphism";
-import { HomeScreen } from "./Home";
-import { Neumorphism } from "./Examples/Neumorphism/Neumorphism";
+import { HomeScreen } from "./Home/HomeScreen";
+import {
+  AnimationExample,
+  DrawingExample,
+  GraphsScreen,
+  Neumorphism,
+  API,
+  Breathe,
+  Filters,
+  Gooey,
+  Hue,
+  Matrix,
+  Aurora,
+  Glassmorphism,
+} from "./Examples";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
