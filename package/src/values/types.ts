@@ -23,10 +23,6 @@ export interface Value<T = number> extends ReadonlyValue<T> {
    * Get/sets the animation controlling the value
    * */
   animation: Animation | undefined;
-  /**
-   * Cancel running animation if there is one.
-   */
-  cancelAnimation: () => void;
 }
 
 export interface ClockValue extends ReadonlyValue<number> {

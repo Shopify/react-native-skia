@@ -37,8 +37,6 @@ export const SpringBackTouchAnimation = () => {
   // Touch handler
   const touchHandler = useTouchHandler({
     onStart: ({ x, y }) => {
-      rectX.cancelAnimation();
-      rectY.cancelAnimation();
       offsetX.value = x - rectX.value;
       offsetY.value = y - rectY.value;
     },

@@ -69,7 +69,6 @@ export const AnimationWithTouchHandler = () => {
   // Touch handler
   const touchHandler = useTouchHandler({
     onStart: ({ x }) => {
-      translateX.cancelAnimation();
       offsetX.value = x - translateX.value;
     },
     onActive: ({ x }) => {

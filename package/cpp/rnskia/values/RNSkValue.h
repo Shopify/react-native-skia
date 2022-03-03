@@ -28,13 +28,6 @@ public:
   ~RNSkValue() {
     unsubscribe();
   }
-
-  JSI_HOST_FUNCTION(cancelAnimation) {
-    if(_animation != nullptr) {
-      _animation->_cancel();
-    }
-    return jsi::Value::undefined();
-  }
   
   JSI_PROPERTY_SET(value) {
     // When someone else is setting the value we need to stop any ongoing
@@ -76,8 +69,7 @@ public:
                               JSI_EXPORT_PROP_GET(RNSkValue, animation))
   
   JSI_EXPORT_FUNCTIONS(
-          JSI_EXPORT_FUNC(RNSkValue, addListener),
-          JSI_EXPORT_FUNC(RNSkValue, cancelAnimation)
+    JSI_EXPORT_FUNC(RNSkValue, addListener),
   )
 
 private:
