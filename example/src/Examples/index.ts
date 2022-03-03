@@ -8,5 +8,5 @@ export * from "./Matrix";
 export * from "./Graphs";
 export * from "./Aurora";
 export * from "./Neumorphism";
-export * from "./HUE";
+export * from "./Hue";
 export * from "./Glassmorphism";
