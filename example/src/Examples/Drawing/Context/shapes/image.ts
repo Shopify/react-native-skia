@@ -1,4 +1,4 @@
-import type { IImage } from "@shopify/react-native-skia";
+import type { SkImage } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 
 import type { DrawingElement } from "../types";
@@ -6,7 +6,7 @@ import type { DrawingElement } from "../types";
 export const createImage = (
   x: number,
   y: number,
-  image: IImage,
+  image: SkImage,
   color: number,
   size: number
 ): DrawingElement => {

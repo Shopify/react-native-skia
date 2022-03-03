@@ -1,4 +1,4 @@
-import type { IRect } from "@shopify/react-native-skia";
+import type { SkRect } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 
@@ -49,7 +49,7 @@ const createDrawProviderValue = (): DrawContextType => {
       state.selectedElements = elements;
       notifyListeners(state);
     },
-    setSelectionRect: (rect: IRect | undefined) => {
+    setSelectionRect: (rect: SkRect | undefined) => {
       state.currentSelectionRect = rect;
       notifyListeners(state);
     },

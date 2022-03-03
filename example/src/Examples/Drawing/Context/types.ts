@@ -1,4 +1,4 @@
-import type { IImage, IPath, IRect } from "@shopify/react-native-skia";
+import type { SkImage, SkPath, SkRect } from "@shopify/react-native-skia";
 
 export type Tool = "draw" | "selection";
 export type Menu = "drawing" | "size" | "color";
@@ -28,10 +28,10 @@ export type DrawingElement = {
   type: DrawingElementType;
   color: number;
   size: number;
-  path: IPath;
+  path: SkPath;
 } & (
-  | { type: "path" | "shape"; path: IPath }
-  | { type: "image"; path: IPath; image: IImage }
+  | { type: "path" | "shape"; path: SkPath }
+  | { type: "image"; path: SkPath; image: SkImage }
 );
 
 export type DrawingElements = DrawingElement[];
@@ -43,7 +43,7 @@ export type DrawState = {
   size: number;
   elements: DrawingElements;
   selectedElements: DrawingElements;
-  currentSelectionRect: IRect | undefined;
+  currentSelectionRect: SkRect | undefined;
   resizeMode: ResizeMode | undefined;
 };
 
@@ -52,7 +52,7 @@ export type DrawCommands = {
   setColor: (color: number) => void;
   addElement: (element: DrawingElement) => void;
   setSelectedElements: (...elements: DrawingElements) => void;
-  setSelectionRect: (selection: IRect | undefined) => void;
+  setSelectionRect: (selection: SkRect | undefined) => void;
   deleteSelectedElements: () => void;
   setResizeMode: (resizeMode: ResizeMode | undefined) => void;
 };

@@ -2,14 +2,14 @@ import React from "react";
 
 import type { CustomPaintProps, SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
-import type { IPoint } from "../../../skia";
+import type { SkPoint } from "../../../skia";
 import { BlendMode, VertexMode, Skia, processColor } from "../../../skia";
 import { useDrawing } from "../../nodes";
 
 export interface VerticesProps extends CustomPaintProps {
   colors?: string[];
-  vertices: IPoint[];
-  textures?: IPoint[];
+  vertices: SkPoint[];
+  textures?: SkPoint[];
   mode: SkEnum<typeof VertexMode>;
   blendMode?: SkEnum<typeof BlendMode>;
   indices?: number[];

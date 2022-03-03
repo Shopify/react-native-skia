@@ -1,13 +1,13 @@
 import React from "react";
 
 import type { CustomPaintProps } from "../../processors";
-import type { IRRect } from "../../../skia/RRect";
+import type { SkRRect } from "../../../skia/RRect";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { useDrawing } from "../../nodes/Drawing";
 
 export interface DiffRectProps extends CustomPaintProps {
-  inner: IRRect;
-  outer: IRRect;
+  inner: SkRRect;
+  outer: SkRRect;
 }
 
 export const DiffRect = (props: AnimatedProps<DiffRectProps>) => {

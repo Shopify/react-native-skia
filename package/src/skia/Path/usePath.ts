@@ -1,10 +1,10 @@
 import type { DependencyList } from "react";
 import { useMemo } from "react";
 
-import type { IFont } from "../Font";
+import type { SkFont } from "../Font";
 import { Skia } from "../Skia";
 
-import type { IPath } from "./Path";
+import type { SkPath } from "./Path";
 
 /**
  * Memoizes and returns a Skia Path object with optional initializer
@@ -13,7 +13,7 @@ import type { IPath } from "./Path";
  * @returns
  */
 export const usePath = (
-  initializer?: (path: IPath) => void,
+  initializer?: (path: SkPath) => void,
   deps?: DependencyList
 ) =>
   useMemo(() => {
@@ -45,7 +45,7 @@ export const useSvgPath = (svgpath: string) =>
  * @param svgpath
  * @returns
  */
-export const useTextPath = (text: string, x: number, y: number, font: IFont) =>
+export const useTextPath = (text: string, x: number, y: number, font: SkFont) =>
   usePath(
     (p) => {
       p.fromText(text, x, y, font);

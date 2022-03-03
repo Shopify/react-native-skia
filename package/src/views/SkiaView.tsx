@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import type { IRect } from "../skia";
+import type { SkRect } from "../skia";
 
 import { NativeSkiaView } from "./types";
 import type { DrawMode, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
@@ -45,7 +45,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
    * @param rect Rect to use as bounds. Optional.
    * @returns An Image object.
    */
-  public makeImageSnapshot(rect?: IRect) {
+  public makeImageSnapshot(rect?: SkRect) {
     assertDrawCallbacksEnabled();
     return makeImageSnapshot(this._nativeId, rect);
   }
@@ -130,7 +130,7 @@ export const invalidateSkiaView = (nativeId: string) => {
   SkiaViewApi.invalidateSkiaView(parseInt(nativeId, 10));
 };
 
-export const makeImageSnapshot = (nativeId: string, rect?: IRect) => {
+export const makeImageSnapshot = (nativeId: string, rect?: SkRect) => {
   return SkiaViewApi.makeImageSnapshot(parseInt(nativeId, 10), rect);
 };
 
