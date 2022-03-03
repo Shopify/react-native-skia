@@ -6,6 +6,12 @@ import {
   Canvas,
   Image,
   Group,
+  Circle,
+  Paint,
+  LumaColorFilter,
+  LinearGradient,
+  vec,
+  Rect,
 } from "@shopify/react-native-skia";
 import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
 
@@ -70,6 +76,22 @@ export const Clipping = () => {
             height={SIZE}
             fit="cover"
           />
+        </Group>
+      </Canvas>
+      <Canvas style={{ width, height: 200 }}>
+        <Group>
+          <Paint>
+            <LumaColorFilter />
+            <LinearGradient
+              start={vec(0, 0)}
+              end={vec(200, 200)}
+              colors={["white", "#ffffff00"]}
+            />
+          </Paint>
+          <Circle cx={100} cy={100} r={100} />
+        </Group>
+        <Group blendMode="srcIn">
+          <Rect x={0} y={0} width={200} height={200} color="red" />
         </Group>
       </Canvas>
     </ScrollView>
