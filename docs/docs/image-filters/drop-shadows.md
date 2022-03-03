@@ -14,8 +14,7 @@ There is a `shadowOnly` property that renders the drop shadow excluding the inpu
 |:------------|:--------------|:--------------------------------------------------------------|
 | dx          | `number`      | The X offset of the shadow.                                   |
 | dy          | `number`      | The Y offset of the shadow.                                   |
-| sigmaX      | `number`      | The blur radius for the shadow, along the X axis              |
-| sigmaY      | `number`      | The blur radius for the shadow, along the Y axis              |
+| blur        | `number`      | The blur radius for the shadow                                |
 | color       | `Color`       | The color of the drop shadow                                  |
 | cropRect    | `IRect`       | Optional rectangle that crops the input and output            |
 | shadowOnly? | `boolean`     | If true, the result does not include the input content        | 
@@ -48,8 +47,8 @@ const Neumorphism = () => {
       <Fill color="lightblue" />
       <Group>
         <Paint>
-          <DropShadow dx={12} dy={12} sigmaX={25} sigmaY={25} color="#93b8c4" />
-          <DropShadow dx={-12} dy={-12} sigmaX={25} sigmaY={25} color="#c7f8ff" />
+          <DropShadow dx={12} dy={12} blur={25} color="#93b8c4" />
+          <DropShadow dx={-12} dy={-12} blur={25} color="#c7f8ff" />
         </Paint>
         <RoundedRect x={32} y={32} width={192} height={192} rx={32} color="lightblue" />
       </Group>

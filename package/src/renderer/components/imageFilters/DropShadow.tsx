@@ -13,8 +13,7 @@ import { getInput } from "./getInput";
 export interface DropShadowProps {
   dx: number;
   dy: number;
-  sigmaX: number;
-  sigmaY: number;
+  blur: number;
   color: Color;
   children?: ReactNode | ReactNode[];
   cropRect?: IRect;
@@ -24,11 +23,7 @@ export interface DropShadowProps {
 export const DropShadow = (props: AnimatedProps<DropShadowProps>) => {
   const declaration = useDeclaration(
     props,
-    (
-      { dx, dy, sigmaX, sigmaY, color, shadowOnly, cropRect },
-      children,
-      { opacity }
-    ) => {
+    ({ dx, dy, blur, color, shadowOnly, cropRect }, children, { opacity }) => {
       const input = getInput(children);
       const factory = shadowOnly
         ? Skia.ImageFilter.MakeDropShadowOnly
@@ -36,8 +31,8 @@ export const DropShadow = (props: AnimatedProps<DropShadowProps>) => {
       return factory(
         dx,
         dy,
-        sigmaX,
-        sigmaY,
+        blur,
+        blur,
         processColor(color, opacity),
         input,
         cropRect
