@@ -1,6 +1,7 @@
 import type { IColor } from "../Color";
 import type { IColorFilter } from "../ColorFilter/ColorFilter";
 import type { IShader } from "../Shader/Shader";
+import type { IRect } from "../Rect";
 
 import type { IImageFilter, TileMode } from "./ImageFilter";
 
@@ -95,7 +96,8 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     color: IColor,
-    input?: IImageFilter
+    input: IImageFilter | null,
+    cropRect?: IRect
   ) => IImageFilter;
   /**
    * Create a filter that renders a drop shadow, in exactly the same manner as ::DropShadow, except
@@ -115,6 +117,7 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     color: IColor,
-    input?: IImageFilter
+    input: IImageFilter | null,
+    cropRect?: IRect
   ) => IImageFilter;
 }

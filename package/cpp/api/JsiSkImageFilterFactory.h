@@ -97,11 +97,19 @@ public:
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
     auto color = arguments[4].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[5].isNull()) {
+      input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 6 && !arguments[6].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
+    }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY,
-                                                     color, nullptr)));
+                                                     color, input, cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeDropShadowOnly) {
@@ -110,11 +118,19 @@ public:
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
     auto color = arguments[4].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[5].isNull()) {
+      input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 6 && !arguments[6].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
+    }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY,
-                                                         color, nullptr)));
+                                                         color, input, cropRect)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
