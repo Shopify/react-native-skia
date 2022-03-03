@@ -6,6 +6,7 @@ import { isShader } from "../../skia/Shader/Shader";
 import { isMaskFilter } from "../../skia/MaskFilter";
 import { isColorFilter } from "../../skia/ColorFilter/ColorFilter";
 import { Skia } from "../../skia/Skia";
+import type { IImageFilter } from "../../skia/ImageFilter/ImageFilter";
 import { isImageFilter } from "../../skia/ImageFilter/ImageFilter";
 import type { CustomPaintProps } from "../processors";
 import { processPaint } from "../processors";
@@ -32,12 +33,18 @@ export const Paint = forwardRef<IPaint, AnimatedProps<PaintProps>>(
           paint.setMaskFilter(child);
         } else if (isColorFilter(child)) {
           paint.setColorFilter(child);
-        } else if (isImageFilter(child)) {
-          paint.setImageFilter(child);
         } else if (isPathEffect(child)) {
           paint.setPathEffect(child);
         }
       });
+      paint.setImageFilter(
+        children
+          .filter(isImageFilter)
+          .reduce<IImageFilter | null>(
+            (acc, filter) => Skia.ImageFilter.MakeCompose(acc, filter),
+            null
+          )
+      );
       return paint;
     });
     return <skDeclaration declaration={declaration} {...props} />;

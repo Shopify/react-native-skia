@@ -81,9 +81,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeCompose) {
-    auto outer = JsiSkImageFilter::fromValue(runtime, arguments[0]);
+    sk_sp<SkImageFilter> outer;
+    if (!arguments[0].isNull()) {
+      outer = JsiSkImageFilter::fromValue(runtime, arguments[0]);
+    }
     sk_sp<SkImageFilter> inner;
-    if (arguments[1].isNull()) {
+    if (!arguments[1].isNull()) {
       inner = JsiSkImageFilter::fromValue(runtime, arguments[1]);
     }
     return jsi::Object::createFromHostObject(
