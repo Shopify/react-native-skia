@@ -12,7 +12,7 @@ import { createTiming } from "./createTiming";
  * the animation parameters change. The animation start immediately.
  * @param toOrParams
  * @param config
- * @returns
+ * @returns A value that is animated
  */
 export const useTiming = (
   toOrParams: number | AnimationParams,
