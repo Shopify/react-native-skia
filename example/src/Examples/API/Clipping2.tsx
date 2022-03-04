@@ -2,18 +2,12 @@ import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
   Skia,
-  PaintStyle,
   Canvas,
   Image,
   Group,
   Circle,
-  Paint,
-  LumaColorFilter,
-  LinearGradient,
-  vec,
   Rect,
-  Defs,
-  usePaintRef,
+  Mask,
 } from "@shopify/react-native-skia";
 import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
 
@@ -37,7 +31,6 @@ const clipRRect = Skia.RRectXY(
 );
 
 export const Clipping = () => {
-  const paint = usePaintRef();
   const oslo = useImage(require("../../assets/oslo.jpg"));
   if (oslo === null) {
     return null;
@@ -75,27 +68,10 @@ export const Clipping = () => {
         </Group>
       </Canvas>
       <Canvas style={{ width, height: 200 }}>
-        <Defs>
-          <Paint ref={paint}>
-            <LumaColorFilter />
-          </Paint>
-        </Defs>
-        <Group>
-          <Group rasterize={paint}>
-            <Paint>
-              <LinearGradient
-                start={vec(0, 0)}
-                end={vec(200, 200)}
-                colors={["white", "black"]}
-              />
-            </Paint>
-            <Circle cx={100} cy={100} r={100} />
-            <Circle cx={100} cy={100} r={25} color="black" />
-          </Group>
-        </Group>
-        <Group blendMode="srcIn">
-          <Rect x={0} y={0} width={200} height={200} color="red" />
-        </Group>
+        <Mask>
+          <Circle cx={100} cy={100} r={100} color="white" />
+          <Rect x={0} y={0} width={200} height={200} color="lightblue" />
+        </Mask>
       </Canvas>
     </ScrollView>
   );
