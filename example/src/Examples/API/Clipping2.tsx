@@ -8,6 +8,7 @@ import {
   Circle,
   Rect,
   Mask,
+  useImage,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
