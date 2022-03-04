@@ -105,7 +105,7 @@ public:
       input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
     }
     SkImageFilters::CropRect cropRect = {};
-    if (count > 6 && !arguments[6].isUndefined() && !arguments[6].isUndefined()) {
+    if (count > 6 && !arguments[6].isUndefined()) {
       cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
     }
     return jsi::Object::createFromHostObject(
