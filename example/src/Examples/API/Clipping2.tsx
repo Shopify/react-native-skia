@@ -8,11 +8,8 @@ import {
   Circle,
   Rect,
   Mask,
-  rect,
 } from "@shopify/react-native-skia";
 import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
-
-import { ExportableCanvas } from "../../components/ExportableCanvas";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 4;
