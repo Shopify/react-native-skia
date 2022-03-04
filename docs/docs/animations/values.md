@@ -17,7 +17,7 @@ import { Button } from "react-native";
 const MyComponent = () => {
   const position = useValue(0);
   const updateValue = useCallback(
-    () => (position.value = position.value + 10),
+    () => (position.current = position.current + 10),
     [position]
   );
 
