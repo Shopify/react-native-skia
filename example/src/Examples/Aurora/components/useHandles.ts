@@ -17,51 +17,51 @@ export const useHandles = (
   const selection = useValue<TouchSelection>(null);
   return useTouchHandler({
     onActive: (pt) => {
-      if (selection.value) {
-        const { index, point } = selection.value;
-        const { pos, c1, c2 } = mesh.value[index];
+      if (selection.current) {
+        const { index, point } = selection.current;
+        const { pos, c1, c2 } = mesh.current[index];
         if (point === "pos") {
           const delta = sub(pos, pt);
-          mesh.value[index].pos = pt;
-          mesh.value[index].c1 = sub(c1, delta);
-          mesh.value[index].c2 = sub(c2, delta);
+          mesh.current[index].pos = pt;
+          mesh.current[index].c1 = sub(c1, delta);
+          mesh.current[index].c2 = sub(c2, delta);
         } else if (point === "c3") {
-          mesh.value[index].c1 = symmetric(pt, mesh.value[index].pos);
+          mesh.current[index].c1 = symmetric(pt, mesh.current[index].pos);
         } else if (point === "c4") {
-          mesh.value[index].c2 = symmetric(pt, mesh.value[index].pos);
+          mesh.current[index].c2 = symmetric(pt, mesh.current[index].pos);
         } else {
-          mesh.value[index][point] = pt;
+          mesh.current[index][point] = pt;
         }
       } else {
         defaultMesh.every(({ pos: p }, index) => {
           const edge =
             p.x === 0 || p.y === 0 || p.x === width || p.y === height;
           if (!edge) {
-            const { pos, c1, c2 } = mesh.value[index];
+            const { pos, c1, c2 } = mesh.current[index];
             const c3 = symmetric(c1, pos);
             const c4 = symmetric(c2, pos);
             if (inRadius(pt, pos)) {
               const delta = sub(pos, pt);
-              mesh.value[index].pos = pt;
-              mesh.value[index].c1 = sub(c1, delta);
-              mesh.value[index].c2 = sub(c2, delta);
-              selection.value = { index, point: "pos" };
+              mesh.current[index].pos = pt;
+              mesh.current[index].c1 = sub(c1, delta);
+              mesh.current[index].c2 = sub(c2, delta);
+              selection.current = { index, point: "pos" };
               return false;
             } else if (inRadius(pt, c1)) {
-              mesh.value[index].c1 = pt;
-              selection.value = { index, point: "c1" };
+              mesh.current[index].c1 = pt;
+              selection.current = { index, point: "c1" };
               return false;
             } else if (inRadius(pt, c2)) {
-              mesh.value[index].c2 = pt;
-              selection.value = { index, point: "c2" };
+              mesh.current[index].c2 = pt;
+              selection.current = { index, point: "c2" };
               return false;
             } else if (inRadius(pt, c3)) {
-              mesh.value[index].c1 = symmetric(pt, mesh.value[index].pos);
-              selection.value = { index, point: "c3" };
+              mesh.current[index].c1 = symmetric(pt, mesh.current[index].pos);
+              selection.current = { index, point: "c3" };
               return false;
             } else if (inRadius(pt, c4)) {
-              mesh.value[index].c2 = symmetric(pt, mesh.value[index].pos);
-              selection.value = { index, point: "c4" };
+              mesh.current[index].c2 = symmetric(pt, mesh.current[index].pos);
+              selection.current = { index, point: "c4" };
               return false;
             }
           }
@@ -70,7 +70,7 @@ export const useHandles = (
       }
     },
     onEnd: () => {
-      selection.value = null;
+      selection.current = null;
     },
   });
 };

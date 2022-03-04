@@ -31,12 +31,12 @@ export const Glassmorphism = () => {
   const offsetY = useValue(0);
   const onTouch = useTouchHandler({
     onStart: (pos) => {
-      offsetX.value = x.value - pos.x;
-      offsetY.value = y.value - pos.y;
+      offsetX.current = x.current - pos.x;
+      offsetY.current = y.current - pos.y;
     },
     onActive: (pos) => {
-      x.value = offsetX.value + pos.x;
-      y.value = offsetY.value + pos.y;
+      x.current = offsetX.current + pos.x;
+      y.current = offsetY.current + pos.y;
     },
     onEnd: ({ velocityX, velocityY }) => {
       runDecay(x, { velocity: velocityX });

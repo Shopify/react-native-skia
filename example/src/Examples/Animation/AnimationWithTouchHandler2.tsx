@@ -26,7 +26,7 @@ const runBouncing = (translate: SkiaValue<number>, initialVelocity: number) => {
     (now, state) => {
       if (state === undefined) {
         return {
-          current: translate.value,
+          current: translate.current,
           velocity: initialVelocity,
           finished: false,
         };
@@ -69,12 +69,12 @@ export const AnimationWithTouchHandler = () => {
   // Touch handler
   const touchHandler = useTouchHandler({
     onStart: ({ x }) => {
-      offsetX.value = x - translateX.value;
+      offsetX.current = x - translateX.current;
     },
     onActive: ({ x }) => {
-      translateX.value = Math.max(
+      translateX.current = Math.max(
         Size,
-        Math.min(width - Size - Padding, x - offsetX.value)
+        Math.min(width - Size - Padding, x - offsetX.current)
       );
     },
     onEnd: ({ velocityX }) => {

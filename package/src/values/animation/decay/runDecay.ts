@@ -16,7 +16,7 @@ export const runDecay = (value: SkiaValue<number>, config?: DecayConfig) => {
     deceleration: 0.998,
     velocityFactor: 1,
     velocity: 0,
-    from: value.value,
+    from: value.current,
     ...config,
   };
   const updateFunction = (t: number, state: DecayState | undefined) => {

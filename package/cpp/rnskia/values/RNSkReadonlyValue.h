@@ -29,7 +29,7 @@ public:
     return jsi::String::createFromUtf8(runtime, "RNSkValue");
   }
   
-  JSI_PROPERTY_GET(value) {
+  JSI_PROPERTY_GET(current) {
     if(_valueHolder == nullptr) {
       return jsi::Value::undefined();
     }
@@ -37,7 +37,7 @@ public:
   }  
   
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkReadonlyValue, __typename__),
-                              JSI_EXPORT_PROP_GET(RNSkReadonlyValue, value))
+                              JSI_EXPORT_PROP_GET(RNSkReadonlyValue, current))
     
   
   JSI_HOST_FUNCTION(addListener) {
@@ -48,7 +48,7 @@ public:
     auto callback = std::make_shared<jsi::Function>(arguments[0].asObject(runtime).asFunction(runtime));
     
     auto unsubscribe = addListener([this, callback = std::move(callback)](jsi::Runtime& runtime){
-      callback->call(runtime, get_value(runtime));
+      callback->call(runtime, get_current(runtime));
     });
     
     return jsi::Function::createFromHostFunction(runtime,

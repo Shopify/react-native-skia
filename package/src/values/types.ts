@@ -2,7 +2,7 @@ export interface SkiaReadonlyValue<T = number> {
   /**
    * Gets the value hold by the Value object
    */
-  readonly value: T;
+  readonly current: T;
   /**
    * Adds a listener that is called when value changes.
    * Returns unsubscribe method.
@@ -18,7 +18,7 @@ export interface SkiaValue<T = number> extends SkiaReadonlyValue<T> {
   /**
    * Get/sets the value hold by the Value object
    */
-  value: T;
+  current: T;
   /**
    * Get/sets the animation controlling the value
    * */

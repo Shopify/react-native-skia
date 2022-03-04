@@ -37,15 +37,15 @@ export const SpringBackTouchAnimation = () => {
   // Touch handler
   const touchHandler = useTouchHandler({
     onStart: ({ x, y }) => {
-      offsetX.value = x - rectX.value;
-      offsetY.value = y - rectY.value;
+      offsetX.current = x - rectX.current;
+      offsetY.current = y - rectY.current;
     },
     onActive: ({ x, y }) => {
-      rectX.value = Math.max(
+      rectX.current = Math.max(
         Size,
-        Math.min(width - Size - Padding, x - offsetX.value)
+        Math.min(width - Size - Padding, x - offsetX.current)
       );
-      rectY.value = y - offsetY.value;
+      rectY.current = y - offsetY.current;
     },
     onEnd: ({ velocityX, velocityY }) => {
       runSpring(rectX, centerX, Spring.Gentle({ velocity: velocityX }));

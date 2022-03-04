@@ -26,7 +26,7 @@ export const createTiming = (
   // the current value of the value or zero
   const resolvedParams = {
     ...params,
-    from: params.from ?? value?.value ?? 0,
+    from: params.from ?? value?.current ?? 0,
   };
 
   // Update function for the animation value

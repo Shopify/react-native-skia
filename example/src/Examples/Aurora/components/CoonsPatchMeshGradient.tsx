@@ -37,10 +37,10 @@ const rectToColors = (
 
 const rectToPatch =
   (mesh: SkiaValue<CubicBezierHandle[]>, indices: readonly number[]) => () => {
-    const tl = mesh.value[indices[0]];
-    const tr = mesh.value[indices[1]];
-    const br = mesh.value[indices[2]];
-    const bl = mesh.value[indices[3]];
+    const tl = mesh.current[indices[0]];
+    const tr = mesh.current[indices[1]];
+    const br = mesh.current[indices[2]];
+    const bl = mesh.current[indices[3]];
     return [
       {
         pos: tl.pos,

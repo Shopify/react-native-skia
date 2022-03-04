@@ -52,7 +52,7 @@ export const materialize = <T>(
     } else if (isValue(value)) {
       result[key] = (
         value as unknown as SkiaReadonlyValue<T[typeof key]>
-      ).value;
+      ).current;
     }
   });
   return result as T;

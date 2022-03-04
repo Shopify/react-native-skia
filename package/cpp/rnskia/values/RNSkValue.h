@@ -29,7 +29,7 @@ public:
     unsubscribe();
   }
   
-  JSI_PROPERTY_SET(value) {
+  JSI_PROPERTY_SET(current) {
     // When someone else is setting the value we need to stop any ongoing
     // animations
     unsubscribe();
@@ -61,11 +61,11 @@ public:
     return jsi::Value::undefined();
   }
   
-  JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(RNSkValue, value),
+  JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(RNSkValue, current),
                               JSI_EXPORT_PROP_SET(RNSkValue, animation))
   
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkReadonlyValue, __typename__),
-                              JSI_EXPORT_PROP_GET(RNSkValue, value),
+                              JSI_EXPORT_PROP_GET(RNSkValue, current),
                               JSI_EXPORT_PROP_GET(RNSkValue, animation))
   
   JSI_EXPORT_FUNCTIONS(
@@ -87,7 +87,7 @@ private:
   void animationDidUpdate(jsi::Runtime& runtime) {
     if(_animation != nullptr) {
       // Update ourselves from the current animation value
-      update(runtime, _animation->get_value(runtime));
+      update(runtime, _animation->get_current(runtime));
     }
   }
   
