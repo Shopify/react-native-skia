@@ -31,7 +31,7 @@ export interface ClockValue extends ReadonlyValue<number> {
 }
 
 export interface Animation {
-  cancelAnimation: () => void;
+  cancel: () => void;
 }
 
 export interface AnimationState {

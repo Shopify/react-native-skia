@@ -36,7 +36,6 @@ public:
     update(runtime, value);
   }
   
-  
   JSI_PROPERTY_SET(animation) {
     // Cancel existing animation
     unsubscribe();
@@ -69,7 +68,9 @@ public:
                               JSI_EXPORT_PROP_GET(RNSkValue, value),
                               JSI_EXPORT_PROP_GET(RNSkValue, animation))
   
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, addListener))
+  JSI_EXPORT_FUNCTIONS(
+    JSI_EXPORT_FUNC(RNSkValue, addListener),
+  )
 
 private:
   void subscribe(std::shared_ptr<RNSkAnimation> animation) {

@@ -36,12 +36,13 @@ public:
     stopClock();
   }
   
-  JSI_HOST_FUNCTION(cancelAnimation) {
+  JSI_HOST_FUNCTION(cancel) {
     stopClock();
     return jsi::Value::undefined();
   }
   
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkAnimation, cancelAnimation))
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkAnimation, cancel))
+
     
 protected:
    
