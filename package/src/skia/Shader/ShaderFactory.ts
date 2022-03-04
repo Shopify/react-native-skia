@@ -1,7 +1,7 @@
 import type { TileMode } from "../ImageFilter";
-import type { IPoint } from "../Point";
-import type { IMatrix } from "../Matrix";
-import type { IColor } from "../Color";
+import type { SkPoint } from "../Point";
+import type { SkMatrix } from "../Matrix";
+import type { SkColor } from "../Color";
 import type { BlendMode } from "../Paint/BlendMode";
 
 import type { IShader } from "./Shader";
@@ -23,12 +23,12 @@ export interface ShaderFactory {
    *                between them.
    */
   MakeLinearGradient(
-    start: IPoint,
-    end: IPoint,
-    colors: IColor[],
+    start: SkPoint,
+    end: SkPoint,
+    colors: SkColor[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: IMatrix,
+    localMatrix?: SkMatrix,
     flags?: number
     // colorSpace: ColorSpace
   ): IShader;
@@ -46,12 +46,12 @@ export interface ShaderFactory {
    * @param flags - 0 to interpolate colors in unpremul, 1 to interpolate colors in premul.
    */
   MakeRadialGradient(
-    center: IPoint,
+    center: SkPoint,
     radius: number,
-    colors: IColor[],
+    colors: SkColor[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: IMatrix,
+    localMatrix?: SkMatrix,
     flags?: number
     // colorSpace?: ColorSpace
   ): IShader;
@@ -70,14 +70,14 @@ export interface ShaderFactory {
    * @param flags
    */
   MakeTwoPointConicalGradient(
-    start: IPoint,
+    start: SkPoint,
     startRadius: number,
-    end: IPoint,
+    end: SkPoint,
     endRadius: number,
-    colors: IColor[],
+    colors: SkColor[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: IMatrix,
+    localMatrix?: SkMatrix,
     flags?: number
     //  colorSpace?: ColorSpace
   ): IShader;
@@ -99,10 +99,10 @@ export interface ShaderFactory {
   MakeSweepGradient(
     cx: number,
     cy: number,
-    colors: IColor[],
+    colors: SkColor[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: IMatrix | null,
+    localMatrix?: SkMatrix | null,
     flags?: number,
     startAngleInDegrees?: number,
     endAngleInDegrees?: number
@@ -164,6 +164,6 @@ export interface ShaderFactory {
    * @param color
    */
   MakeColor(
-    color: IColor //,space: ColorSpace
+    color: SkColor //,space: ColorSpace
   ): IShader;
 }

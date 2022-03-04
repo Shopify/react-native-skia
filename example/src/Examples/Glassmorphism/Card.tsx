@@ -56,7 +56,7 @@ export const Glassmorphism = () => {
       <Ball r={75} c={vec(300, height / 2 - 200)} />
       <BackdropBlur
         clip={clip}
-        intensity={15}
+        blur={15}
         color="rgba(255, 255, 255, 0.1)"
         transform={transform}
       >

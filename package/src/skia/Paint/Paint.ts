@@ -1,8 +1,8 @@
-import type { IImageFilter } from "../ImageFilter";
+import type { SkImageFilter } from "../ImageFilter";
 import type { IMaskFilter } from "../MaskFilter";
 import type { IColorFilter } from "../ColorFilter";
 import type { IShader } from "../Shader";
-import type { IColor } from "../Color";
+import type { SkColor } from "../Color";
 import type { IPathEffect } from "../PathEffect";
 import type { SkJSIInstance } from "../JsiInstance";
 
@@ -25,20 +25,20 @@ export enum StrokeJoin {
   Round,
 }
 
-export const isPaint = (obj: SkJSIInstance<string> | null): obj is IPaint =>
+export const isPaint = (obj: SkJSIInstance<string> | null): obj is SkPaint =>
   obj !== null && obj.__typename__ === "Paint";
 
-export interface IPaint extends SkJSIInstance<"Paint"> {
+export interface SkPaint extends SkJSIInstance<"Paint"> {
   /**
    * Returns a copy of this paint.
    */
-  copy(): IPaint;
+  copy(): SkPaint;
 
   /**
    * Retrieves the alpha and RGB unpremultiplied. RGB are extended sRGB values
    * (sRGB gamut, and encoded with the sRGB transfer function).
    */
-  getColor(): IColor;
+  getColor(): SkColor;
 
   /**
    * Returns the geometry drawn at the beginning and end of strokes.
@@ -89,7 +89,7 @@ export interface IPaint extends SkJSIInstance<"Paint"> {
    *
    *    example: https://fiddle.skia.org/c/@Paint_setColor
    */
-  setColor(color: IColor): void;
+  setColor(color: SkColor): void;
 
   /**
    * Sets the current color filter, replacing the existing one if there was one.
@@ -101,7 +101,7 @@ export interface IPaint extends SkJSIInstance<"Paint"> {
    * Sets the current image filter, replacing the existing one if there was one.
    * @param filter
    */
-  setImageFilter(filter: IImageFilter | null): void;
+  setImageFilter(filter: SkImageFilter | null): void;
 
   /**
    * Sets the current mask filter, replacing the existing one if there was one.

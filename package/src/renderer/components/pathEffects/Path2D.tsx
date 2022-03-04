@@ -5,13 +5,13 @@ import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { isPathEffect } from "../../../skia/PathEffect";
-import type { IMatrix } from "../../../skia/Matrix";
+import type { SkMatrix } from "../../../skia/Matrix";
 import type { PathDef } from "../../processors/Paths";
 import { processPath } from "../../processors/Paths";
 
 export interface Path2DPathEffectProps {
   children?: ReactNode | ReactNode[];
-  matrix: IMatrix;
+  matrix: SkMatrix;
   path: PathDef;
 }
 

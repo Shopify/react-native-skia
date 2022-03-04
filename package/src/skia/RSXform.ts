@@ -1,3 +1,3 @@
 import type { SkJSIInstance } from "./JsiInstance";
 
-export type IRSXform = SkJSIInstance<"RSXform">;
+export type SkRSXform = SkJSIInstance<"RSXform">;

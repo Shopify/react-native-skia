@@ -1,13 +1,13 @@
-import type { ICanvas, ClipOp } from "../../skia/Canvas";
-import type { IRect, IRRect } from "../../skia";
+import type { SkCanvas, ClipOp } from "../../skia/Canvas";
+import type { SkRect, SkRRect } from "../../skia";
 
 import type { PathDef } from "./Paths";
 import { processPath, isPathDef } from "./Paths";
 import { isRRect } from "./Rects";
 
-export type ClipDef = IRRect | IRect | PathDef;
+export type ClipDef = SkRRect | SkRect | PathDef;
 
-export const processClip = (canvas: ICanvas, def: ClipDef, op: ClipOp) => {
+export const processClip = (canvas: SkCanvas, def: ClipDef, op: ClipOp) => {
   if (isPathDef(def)) {
     const path = processPath(def);
     canvas.clipPath(path, op, true);

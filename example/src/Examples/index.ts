@@ -12,5 +12,6 @@ export * from "./Filters";
 export * from "./Gooey";
 export * from "./Hue";
 export * from "./Matrix";
+export * from "./Neumorphism";
 export * from "./Aurora";
 export * from "./Glassmorphism";

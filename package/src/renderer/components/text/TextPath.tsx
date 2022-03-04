@@ -2,8 +2,8 @@ import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
-import type { IPath } from "../../../skia/Path";
-import type { IRSXform } from "../../../skia/RSXform";
+import type { SkPath } from "../../../skia/Path";
+import type { SkRSXform } from "../../../skia/RSXform";
 import { Skia } from "../../../skia/Skia";
 import type { FontDef } from "../../processors/Font";
 import { processFont } from "../../processors/Font";
@@ -11,7 +11,7 @@ import { processFont } from "../../processors/Font";
 export type TextPathProps = CustomPaintProps &
   FontDef & {
     text: string;
-    path: IPath | string;
+    path: SkPath | string;
     initialOffset: number;
   };
 
@@ -32,7 +32,7 @@ export const TextPath = (props: AnimatedProps<TextPathProps>) => {
       const font = processFont(fontMgr, fontDef);
       const ids = font.getGlyphIDs(text);
       const widths = font.getGlyphWidths(ids, paint);
-      const rsx: IRSXform[] = [];
+      const rsx: SkRSXform[] = [];
       const meas = Skia.ContourMeasureIter(path, false, 1);
       let cont = meas.next();
       let dist = initialOffset;

@@ -2,13 +2,13 @@ import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
-import type { IPoint } from "../../../skia";
+import type { SkPoint } from "../../../skia";
 import type { FontDef } from "../../processors/Font";
 import { processFont } from "../../processors/Font";
 
 export interface Glyph {
   id: number;
-  pos: IPoint;
+  pos: SkPoint;
 }
 
 export type GlyphsProps = CustomPaintProps &
@@ -20,7 +20,7 @@ export type GlyphsProps = CustomPaintProps &
 
 interface ProcessedGlyphs {
   glyphs: number[];
-  positions: IPoint[];
+  positions: SkPoint[];
 }
 
 export const Glyphs = (props: AnimatedProps<GlyphsProps>) => {

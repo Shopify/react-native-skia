@@ -1,9 +1,9 @@
-import type { IFont } from "../Font";
-import type { IRect } from "../Rect";
-import type { IPoint } from "../Point";
-import type { IRRect } from "../RRect";
+import type { SkFont } from "../Font";
+import type { SkRect } from "../Rect";
+import type { SkPoint } from "../Point";
+import type { SkRRect } from "../RRect";
 import type { StrokeJoin, StrokeCap } from "../Paint";
-import type { IMatrix } from "../Matrix";
+import type { SkMatrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 
 /**
@@ -38,10 +38,10 @@ export enum PathOp {
   ReverseDifference,
 }
 
-export const isPath = (obj: SkJSIInstance<string> | null): obj is IPath =>
+export const isPath = (obj: SkJSIInstance<string> | null): obj is SkPath =>
   obj !== null && obj.__typename__ === "Path";
 
-export interface IPath extends SkJSIInstance<"Path"> {
+export interface SkPath extends SkJSIInstance<"Path"> {
   /**
    * Appends arc to Path, as the start of new contour. Arc added is part of ellipse
    * bounded by oval, from startAngle through sweepAngle. Both startAngle and
@@ -53,10 +53,10 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param sweepAngle
    */
   addArc(
-    oval: IRect,
+    oval: SkRect,
     startAngleInDegrees: number,
     sweepAngleInDegrees: number
-  ): IPath;
+  ): SkPath;
 
   /**
    * Adds oval to Path, appending kMove_Verb, four kConic_Verb, and kClose_Verb.
@@ -67,7 +67,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param isCCW - if the path should be drawn counter-clockwise or not
    * @param startIndex - index of initial point of ellipse
    */
-  addOval(oval: IRect, isCCW?: boolean, startIndex?: number): void;
+  addOval(oval: SkRect, isCCW?: boolean, startIndex?: number): void;
 
   /**
    * Returns the number of points in this path. Initially zero.
@@ -83,7 +83,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param points
    * @param close - if true, will add a line connecting last point to the first point.
    */
-  addPoly(points: IPoint[], close: boolean): void;
+  addPoly(points: SkPoint[], close: boolean): void;
 
   /** Adds beginning of contour at SkPoint (x, y).
 
@@ -114,7 +114,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * instead of clockwise to achieve that effect. If such a transformation cannot
    * be done, null is returned.
    */
-  makeAsWinding(): IPath | null;
+  makeAsWinding(): SkPath | null;
 
   /**
    * Translates all the points in the path by dx, dy.
@@ -176,14 +176,14 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param x
    * @param y
    */
-  rMoveTo(x: number, y: number): IPath;
+  rMoveTo(x: number, y: number): SkPath;
 
   /**
    * Relative version of lineTo.
    * @param x
    * @param y
    */
-  rLineTo(x: number, y: number): IPath;
+  rLineTo(x: number, y: number): SkPath;
 
   /**
    * Relative version of quadTo.
@@ -192,7 +192,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param x2
    * @param y2
    */
-  rQuadTo(x1: number, y1: number, x2: number, y2: number): IPath;
+  rQuadTo(x1: number, y1: number, x2: number, y2: number): SkPath;
 
   /**
    * Sets FillType, the rule used to fill Path.
@@ -252,7 +252,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param outputArray - if provided, the bounding box will be copied into this array instead of
    *                      allocating a new one.
    */
-  computeTightBounds(outputArray?: IRect): IRect;
+  computeTightBounds(outputArray?: SkRect): SkRect;
 
   /**
    * Appends arc to Path. Arc added is part of ellipse
@@ -266,11 +266,11 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param forceMoveTo
    */
   arcToOval(
-    oval: IRect,
+    oval: SkRect,
     startAngleInDegrees: number,
     sweepAngleInDegrees: number,
     forceMoveTo: boolean
-  ): IPath;
+  ): SkPath;
 
   /**
    * Appends arc to Path. Arc is implemented by one or more conics weighted to
@@ -294,7 +294,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
     isCCW: boolean,
     x: number,
     y: number
-  ): IPath;
+  ): SkPath;
 
   /**
    * Appends arc to Path, after appending line if needed. Arc is implemented by conic
@@ -314,7 +314,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
     x2: number,
     y2: number,
     radius: number
-  ): IPath;
+  ): SkPath;
 
   /**
    * Adds conic from last point towards (x1, y1), to (x2, y2), weighted by w.
@@ -327,7 +327,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param y2
    * @param w
    */
-  conicTo(x1: number, y1: number, x2: number, y2: number, w: number): IPath;
+  conicTo(x1: number, y1: number, x2: number, y2: number, w: number): SkPath;
 
   /**
    * Returns true if the point (x, y) is contained by Path, taking into
@@ -340,7 +340,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
   /**
    * Returns a copy of this Path.
    */
-  copy(): IPath;
+  copy(): SkPath;
 
   /**
    *  Adds cubic from last point towards (x1, y1), then towards (x2, y2), ending at
@@ -375,14 +375,14 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * Returns true if other path is equal to this path.
    * @param other
    */
-  equals(other: IPath): boolean;
+  equals(other: SkPath): boolean;
 
   /**
    * Returns minimum and maximum axes values of Point array.
    * Returns (0, 0, 0, 0) if Path contains no points. Returned bounds width and height may
    * be larger or smaller than area affected when Path is drawn.
    */
-  getBounds(): IRect;
+  getBounds(): SkRect;
 
   /**
    * Return the FillType for this path.
@@ -417,7 +417,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param rect
    * @param isCCW
    */
-  addRect(rect: IRect, isCCW?: boolean): void;
+  addRect(rect: SkRect, isCCW?: boolean): void;
 
   /**
    * Adds rrect to Path, creating a new closed contour.
@@ -425,14 +425,14 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @param rrect
    * @param isCCW
    */
-  addRRect(rrect: IRRect, isCCW?: boolean): IPath;
+  addRRect(rrect: SkRRect, isCCW?: boolean): SkPath;
 
   /**
    * Returns the Point at index in Point array. Valid range for index is
    * 0 to countPoints() - 1.
    * @param index
    */
-  getPoint(index: number): IPoint;
+  getPoint(index: number): SkPoint;
 
   /**
    * Returns true if there are no verbs in the path.
@@ -466,7 +466,7 @@ export interface IPath extends SkJSIInstance<"Path"> {
                   inputs.
     @return True if the operation succeeded.
     */
-  op(path: IPath, op: PathOp): boolean;
+  op(path: SkPath, op: PathOp): boolean;
 
   /** Set this path to a set of non-overlapping contours that describe the
     same area as the original path.
@@ -501,12 +501,12 @@ export interface IPath extends SkJSIInstance<"Path"> {
   /**
    * Transforms the path by the specified matrix.
    */
-  transform(m3: IMatrix): void;
+  transform(m3: SkMatrix): void;
 
   /**
    * Converts the text to a path with the given font at location x / y.
    */
-  fromText(text: string, x: number, y: number, font: IFont): void;
+  fromText(text: string, x: number, y: number, font: SkFont): void;
 
   /**
    * Interpolates between Path with point array of equal size.
@@ -527,12 +527,12 @@ export interface IPath extends SkJSIInstance<"Path"> {
    * @return        Path replaced by interpolated averages or undefined if 
    *                not interpolatable
    * */
-  interpolate(end: IPath, weight: number): IPath;
+  interpolate(end: SkPath, weight: number): SkPath;
 
   /** Returns true if Path contain equal verbs and equal weights.
    *     @param compare  path to compare
    *     @return         true if Path can be interpolated equivalent
    *
    * */
-  isInterpolatable(compare: IPath): boolean;
+  isInterpolatable(compare: SkPath): boolean;
 }

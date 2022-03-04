@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { IImage } from "../../../skia";
+import type { SkImage } from "../../../skia";
 import type {
   CustomPaintProps,
   RectDef,
@@ -13,7 +13,7 @@ import type { Fit } from "./BoxFit";
 import { fitRects } from "./BoxFit";
 
 export type SourceImageProps = {
-  image: IImage;
+  image: SkImage;
 };
 
 export type BaseImageProps = RectDef &

@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { IRect, IImage } from "../../../skia";
+import type { SkRect, SkImage } from "../../../skia";
 import { TileMode, FilterMode, MipmapMode } from "../../../skia";
 import { useDeclaration } from "../../nodes";
 import type {
@@ -16,7 +16,7 @@ import { rect2rect, fitRects } from "./BoxFit";
 
 const getRect = (
   props: Omit<ImageShaderProps, "tx" | "ty" | "fm" | "mm" | "fit" | "image">
-): IRect | undefined => {
+): SkRect | undefined => {
   const { x, y, width, height } = props;
   if (props.rect) {
     return props.rect;
@@ -38,8 +38,8 @@ interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   fm: SkEnum<typeof FilterMode>;
   mm: SkEnum<typeof MipmapMode>;
   fit: Fit;
-  rect?: IRect;
-  image: IImage;
+  rect?: SkRect;
+  image: SkImage;
 }
 
 export const ImageShader = (props: AnimatedProps<ImageShaderProps>) => {
