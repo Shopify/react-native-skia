@@ -1,6 +1,6 @@
-import React, { Children } from "react";
+import type { ReactNode } from "react";
+import React from "react";
 
-import type { ChildrenProps } from "../processors/Paint";
 import type { SkRect } from "../../skia/Rect";
 
 import { usePaintRef, Paint } from "./Paint";
@@ -11,14 +11,15 @@ import { Group } from "./Group";
 // Here we ask the user to provide the bounds of content
 // We could compute it ourselve but prefer not to unless
 // other similar use-cases come up
-interface MaskProps extends ChildrenProps {
+interface MaskProps {
   mode: "luminance" | "alpha";
   bounds?: SkRect;
+  mask: ReactNode | ReactNode[];
+  children: ReactNode | ReactNode[];
 }
 
-export const Mask = ({ children, mode, bounds }: MaskProps) => {
+export const Mask = ({ children, mask, mode, bounds }: MaskProps) => {
   const paint = usePaintRef();
-  const [mask, ...content] = Children.toArray(children);
   return (
     <>
       <Defs>
@@ -27,7 +28,7 @@ export const Mask = ({ children, mode, bounds }: MaskProps) => {
       <Group rasterize={mode === "luminance" ? paint : undefined} clip={bounds}>
         {mask}
       </Group>
-      <Group blendMode="srcIn">{content}</Group>
+      <Group blendMode="srcIn">{children}</Group>
     </>
   );
 };
