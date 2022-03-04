@@ -68,9 +68,19 @@ export const Clipping = () => {
         </Group>
       </Canvas>
       <Canvas style={{ width, height: 200 }}>
-        <Mask>
-          <Circle cx={100} cy={100} r={100} color="white" />
+        <Mask mode="alpha">
+          <Group>
+            <Circle cx={100} cy={100} r={100} color="#00000066" />
+            <Circle cx={100} cy={100} r={40} color="black" />
+          </Group>
           <Rect x={0} y={0} width={200} height={200} color="lightblue" />
+        </Mask>
+        <Mask mode="luminance">
+          <Group>
+            <Circle cx={300} cy={100} r={100} color="white" />
+            <Circle cx={300} cy={100} r={40} color="black" />
+          </Group>
+          <Rect x={200} y={0} width={200} height={200} color="lightblue" />
         </Mask>
       </Canvas>
     </ScrollView>

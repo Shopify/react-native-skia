@@ -21,7 +21,7 @@ export const Mask = ({ children, mode }: MaskProps) => {
       </Defs>
       <Group rasterize={paint}>
         {/* We could clip the mask to with the bounds of content. Not sure the overhead is worth it*/}
-        <Group>{mask}</Group>
+        {mask}
       </Group>
       <Group blendMode="srcIn">{content}</Group>
     </>
