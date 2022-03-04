@@ -1,11 +1,11 @@
 import {
   Canvas,
-  Easing,
   Fill,
   LinearGradient,
   Paint,
   Path,
-  runTiming,
+  runSpring,
+  Spring,
   useDerivedValue,
   useValue,
   vec,
@@ -31,10 +31,7 @@ export const MountAnimation: React.FC<GraphProps> = ({ height, width }) => {
   const onPress = useCallback(() => setToggled((p) => !p), []);
 
   useEffect(() => {
-    runTiming(progress, toggled ? 1 : 0, {
-      duration: 350,
-      easing: Easing.inOut(Easing.cubic),
-    });
+    runSpring(progress, toggled ? 1 : 0, Spring.Config.Gentle);
   }, [progress, toggled]);
 
   const interpolatedPath = useDerivedValue(
