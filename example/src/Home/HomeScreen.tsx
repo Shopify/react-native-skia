@@ -1,11 +1,11 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView } from "react-native";
 
 import { HomeScreenButton } from "./HomeScreenButton";
 
 export const HomeScreen = () => {
   return (
-    <View style={styles.container}>
+    <ScrollView>
       <HomeScreenButton title="API" description="API examples" route="API" />
       <HomeScreenButton
         title="🧘 Breathe"
@@ -53,16 +53,15 @@ export const HomeScreen = () => {
         route="Graphs"
       />
       <HomeScreenButton
+        title="💚 Neumorphism"
+        description="Drop Shadows"
+        route="Neumorphism"
+      />
+      <HomeScreenButton
         title="🎥 Animation"
         description="Animated with Skia"
         route="Animation"
       />
-    </View>
+    </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

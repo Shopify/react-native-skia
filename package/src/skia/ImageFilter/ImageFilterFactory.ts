@@ -1,6 +1,7 @@
 import type { SkColor } from "../Color";
 import type { IColorFilter } from "../ColorFilter/ColorFilter";
 import type { IShader } from "../Shader/Shader";
+import type { SkRect } from "../Rect";
 
 import type { SkImageFilter, TileMode } from "./ImageFilter";
 
@@ -99,7 +100,8 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     color: SkColor,
-    input?: SkImageFilter
+    input: SkImageFilter | null,
+    cropRect?: SkRect
   ) => SkImageFilter;
   /**
    * Create a filter that renders a drop shadow, in exactly the same manner as ::DropShadow, except
@@ -119,6 +121,7 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     color: SkColor,
-    input?: SkImageFilter
+    input: SkImageFilter | null,
+    cropRect?: SkRect
   ) => SkImageFilter;
 }
