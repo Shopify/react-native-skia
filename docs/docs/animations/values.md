@@ -39,7 +39,7 @@ The basic `SkiaValue` is a value that stores some kind of Javascript value. It c
 ```tsx twoslash
 import { useValue } from "@shopify/react-native-skia";
 const progress = useValue({ x: 100, y: 100 });
-const actualValue = progress.value; // actualValue is now {x: 100, y: 100}
+const actualValue = progress.current; // actualValue is now {x: 100, y: 100}
 ```
 
 There are a few more value types in the library that will be described below.
@@ -55,7 +55,7 @@ import { useValue, useDerivedValue } from "@shopify/react-native-skia";
 const radius = useValue(100);
 const theta = useValue(Math.PI);
 const length = useDerivedValue((r, t) => r * t, [radius, theta]);
-console.log(length.value); // 314.1592653589793
+console.log(length.current); // 314.1592653589793
 ```
 
 ## Clock Value
