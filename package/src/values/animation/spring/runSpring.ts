@@ -1,4 +1,4 @@
-import type { Value, Animation } from "../../types";
+import type { SkiaValue, SkiaAnimation } from "../../types";
 import type { AnimationParams, SpringConfig } from "../types";
 import { runTiming } from "../timing/runTiming";
 
@@ -18,9 +18,9 @@ import { Spring } from "./Spring";
  * the animation.
  */
 export const runSpring = (
-  value: Value<number>,
+  value: SkiaValue<number>,
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): Animation => {
+): SkiaAnimation => {
   return runTiming(value, toOrParams, config ?? Spring.Config.Default);
 };

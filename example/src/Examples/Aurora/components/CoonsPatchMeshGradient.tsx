@@ -1,5 +1,5 @@
 import React from "react";
-import type { Value, CubicBezierHandle } from "@shopify/react-native-skia";
+import type { SkiaValue, CubicBezierHandle } from "@shopify/react-native-skia";
 import {
   add,
   useValue,
@@ -36,7 +36,7 @@ const rectToColors = (
 ) => [colors[tl], colors[tr], colors[br], colors[bl]] as const;
 
 const rectToPatch =
-  (mesh: Value<CubicBezierHandle[]>, indices: readonly number[]) => () => {
+  (mesh: SkiaValue<CubicBezierHandle[]>, indices: readonly number[]) => () => {
     const tl = mesh.value[indices[0]];
     const tr = mesh.value[indices[1]];
     const br = mesh.value[indices[2]];

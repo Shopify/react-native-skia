@@ -1,7 +1,7 @@
 import type { ViewProps } from "react-native";
 import { requireNativeComponent } from "react-native";
 
-import type { ReadonlyValue } from "../values";
+import type { SkiaReadonlyValue } from "../values";
 import type { IRect, IImage } from "../skia";
 import type { ICanvas } from "../skia/Canvas";
 
@@ -15,7 +15,7 @@ export interface ISkiaViewApi {
   setDrawMode: (nativeId: number, mode: DrawMode) => void;
   registerValuesInView: (
     nativeId: number,
-    values: ReadonlyValue<unknown>[]
+    values: SkiaReadonlyValue<unknown>[]
   ) => () => void;
 }
 declare global {

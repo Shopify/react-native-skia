@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Dimensions } from "react-native";
-import type { AnimationState, Value } from "@shopify/react-native-skia";
+import type { AnimationState, SkiaValue } from "@shopify/react-native-skia";
 import {
   ValueApi,
   Canvas,
@@ -21,7 +21,7 @@ interface PhysicsAnimationState extends AnimationState {
   velocity: number;
 }
 
-const runBouncing = (translate: Value<number>, initialVelocity: number) => {
+const runBouncing = (translate: SkiaValue<number>, initialVelocity: number) => {
   translate.animation = ValueApi.createAnimation<PhysicsAnimationState>(
     (now, state) => {
       if (state === undefined) {

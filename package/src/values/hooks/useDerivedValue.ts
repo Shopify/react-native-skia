@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import type { ReadonlyValue } from "../types";
+import type { SkiaReadonlyValue } from "../types";
 import { ValueApi } from "../api";
 
 type CreateDerivedvalue = typeof ValueApi.createDerivedValue;
@@ -14,7 +14,7 @@ type CreateDerivedvalue = typeof ValueApi.createDerivedValue;
  */
 export const useDerivedValue: CreateDerivedvalue = <R>(
   cb: (...args: Array<unknown>) => R,
-  values: Array<ReadonlyValue<unknown>>
-): ReadonlyValue<R> => {
+  values: Array<SkiaReadonlyValue<unknown>>
+): SkiaReadonlyValue<R> => {
   return useMemo(() => ValueApi.createDerivedValue(cb, values), [cb, values]);
 };

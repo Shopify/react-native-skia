@@ -1,4 +1,4 @@
-import type { Value, Animation } from "../../types";
+import type { SkiaValue, SkiaAnimation } from "../../types";
 import type { AnimationParams, TimingConfig } from "../types";
 
 import { getResolvedParams } from "./functions";
@@ -17,10 +17,10 @@ import { createTiming } from "./createTiming";
  * the animation.
  */
 export const runTiming = (
-  value: Value<number>,
+  value: SkiaValue<number>,
   toOrParams: number | AnimationParams,
   config?: TimingConfig
-): Animation => {
+): SkiaAnimation => {
   const resolvedParameters = getResolvedParams(toOrParams, config);
   const animation = createTiming(resolvedParameters, value);
   value.animation = animation;
