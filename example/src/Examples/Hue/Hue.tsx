@@ -51,25 +51,20 @@ export const Hue = () => {
         { theta, radius: Math.min(radius, r) },
         center
       );
-      translateX.value = x;
-      translateY.value = y;
-      color.value = polar2Color(theta, Math.min(radius, r), r);
+      translateX.current = x;
+      translateY.current = y;
+      color.current = polar2Color(theta, Math.min(radius, r), r);
     },
   });
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch}>
-      <Fill color={() => color.value} />
+      <Fill color={color} />
       <Paint>
         <BlurMask sigma={40} style="solid" />
         <Shader source={source} uniforms={{ c, r }} />
       </Paint>
       <Circle c={c} r={r} />
-      <Circle
-        r={20}
-        color="#1f1f1f"
-        cx={() => translateX.value}
-        cy={() => translateY.value}
-      />
+      <Circle r={20} color="#1f1f1f" cx={translateX} cy={translateY} />
     </Canvas>
   );
 };

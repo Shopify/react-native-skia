@@ -35,7 +35,7 @@ void PlatformContext::startDrawLoop() {
   if(_displayLink == nullptr) {
     _displayLink = [[DisplayLink alloc] init];
     [_displayLink start:^(double time) {
-      notifyDrawLoop();
+      notifyDrawLoop(false);
     }];
   }
 }
@@ -44,7 +44,7 @@ void PlatformContext::stopDrawLoop() {
   if(_displayLink != nullptr) {
     [_displayLink stop];
     _displayLink = nullptr;
-  }
+  }  
 }
 
 }

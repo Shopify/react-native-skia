@@ -60,6 +60,7 @@ target_include_directories(
         cpp/jsi
         cpp/jni/include
         cpp/rnskia
+        cpp/rnskia/values
         cpp/utils  
 
         ${libfbjni_include_DIRS}

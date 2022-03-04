@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 
-import type { TouchInfo, DrawingInfo, SkiaView } from "../views";
+import type { DrawingInfo, SkiaView } from "../views";
 import type { SkCanvas, SkPaint } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
 
@@ -12,6 +12,5 @@ export interface DrawingContext extends Omit<DrawingInfo, "touches"> {
   opacity: number;
   center: Vector;
   ref: RefObject<SkiaView>;
-  getTouches(): Array<Array<TouchInfo>>;
   fontMgr: FontMgr;
 }

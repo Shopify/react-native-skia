@@ -10,6 +10,8 @@ import {
   LinearGradient,
   Paint,
   Text,
+  useDerivedValue,
+  runDecay,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -29,16 +31,24 @@ export const Glassmorphism = () => {
   const offsetY = useValue(0);
   const onTouch = useTouchHandler({
     onStart: (pos) => {
-      offsetX.value = x.value - pos.x;
-      offsetY.value = y.value - pos.y;
+      offsetX.current = x.current - pos.x;
+      offsetY.current = y.current - pos.y;
     },
     onActive: (pos) => {
-      x.value = offsetX.value + pos.x;
-      y.value = offsetY.value + pos.y;
+      x.current = offsetX.current + pos.x;
+      y.current = offsetY.current + pos.y;
+    },
+    onEnd: ({ velocityX, velocityY }) => {
+      runDecay(x, { velocity: velocityX });
+      runDecay(y, { velocity: velocityY });
     },
   });
+  const transform = useDerivedValue(
+    (xval, yval) => [{ translateY: yval }, { translateX: xval }],
+    [x, y]
+  );
   return (
-    <Canvas style={{ flex: 1 }} onTouch={onTouch}>
+    <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
       <Background />
       <Ball r={100} c={vec(75, 75)} />
       <Ball r={50} c={vec(width, height / 2)} />
@@ -48,7 +58,7 @@ export const Glassmorphism = () => {
         clip={clip}
         blur={15}
         color="rgba(255, 255, 255, 0.1)"
-        transform={() => [{ translateY: y.value }, { translateX: x.value }]}
+        transform={transform}
       >
         <Paint>
           <LinearGradient

@@ -59,6 +59,7 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
 
     void invalidate() {
         _context->stopDrawLoop();
+        _context->notifyDrawLoop(true);
         _skManager = nullptr;
         _context = nullptr;
     }

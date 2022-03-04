@@ -1,9 +1,12 @@
 import React, { useRef } from "react";
-import type { AnimationValue, SkFont } from "@shopify/react-native-skia";
-import { vec, Glyphs } from "@shopify/react-native-skia";
+import type { SkiaReadonlyValue, SkFont } from "@shopify/react-native-skia";
+import {
+  useDerivedValue,
+  interpolateColors,
+  vec,
+  Glyphs,
+} from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
-
-import { interpolateColors } from "../../../../package/src/animation/functions/interpolateColors";
 
 const { width, height } = Dimensions.get("window");
 export const COLS = 5;
@@ -14,7 +17,7 @@ const pos = vec(0, 0);
 interface SymbolProps {
   i: number;
   j: number;
-  timestamp: AnimationValue<number>;
+  timestamp: SkiaReadonlyValue<number>;
   stream: number[];
   font: SkFont;
   symbols: number[];
@@ -32,20 +35,29 @@ export const Symbol = ({
   const range = useRef(100 + Math.random() * 900);
   const x = i * SYMBOL.width;
   const y = j * SYMBOL.height;
-  const glyphs = () => {
-    const idx = offset.current + Math.floor(timestamp.value / range.current);
-    return [{ id: symbols[idx % symbols.length], pos }];
-  };
-  const opacity = () => {
-    const idx = Math.round(timestamp.value / 100);
-    return stream[(stream.length - j + idx) % stream.length];
-  };
-  const color = () =>
-    interpolateColors(
-      opacity(),
-      [0.8, 1],
-      ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]
-    );
+
+  const glyphs = useDerivedValue(
+    (t) => {
+      const idx = offset.current + Math.floor(t / range.current);
+      return [{ id: symbols[idx % symbols.length], pos }];
+    },
+    [timestamp]
+  );
+
+  const opacity = useDerivedValue(
+    (t) => {
+      const idx = Math.round(t / 100);
+      return stream[(stream.length - j + idx) % stream.length];
+    },
+    [timestamp]
+  );
+
+  const color = useDerivedValue(
+    (o) =>
+      interpolateColors(o, [0.8, 1], ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]),
+    [opacity]
+  );
+
   return (
     <Glyphs
       x={x + SYMBOL.width / 4}

@@ -1,8 +1,5 @@
 import React from "react";
-import type {
-  AnimationValue,
-  CubicBezierHandle,
-} from "@shopify/react-native-skia";
+import type { SkiaValue, CubicBezierHandle } from "@shopify/react-native-skia";
 import {
   add,
   useValue,
@@ -11,7 +8,6 @@ import {
   Patch,
   vec,
   Paint,
-  processColor,
   useImage,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
@@ -35,17 +31,16 @@ const rectToTexture = (
   ] as const;
 
 const rectToColors = (
-  colors: number[],
+  colors: string[],
   [tl, tr, br, bl]: readonly [number, number, number, number]
 ) => [colors[tl], colors[tr], colors[br], colors[bl]] as const;
 
 const rectToPatch =
-  (mesh: AnimationValue<CubicBezierHandle[]>, indices: readonly number[]) =>
-  () => {
-    const tl = mesh.value[indices[0]];
-    const tr = mesh.value[indices[1]];
-    const br = mesh.value[indices[2]];
-    const bl = mesh.value[indices[3]];
+  (mesh: SkiaValue<CubicBezierHandle[]>, indices: readonly number[]) => () => {
+    const tl = mesh.current[indices[0]];
+    const tr = mesh.current[indices[1]];
+    const br = mesh.current[indices[2]];
+    const bl = mesh.current[indices[3]];
     return [
       {
         pos: tl.pos,
@@ -81,12 +76,11 @@ interface CoonsPatchMeshGradientProps {
 export const CoonsPatchMeshGradient = ({
   rows,
   cols,
-  colors: rawColors,
+  colors,
   debug,
   lines,
 }: CoonsPatchMeshGradientProps) => {
   const image = useImage(require("../../../assets/debug.png"));
-  const colors = rawColors.map((color) => processColor(color, 1));
   const dx = width / cols;
   const dy = height / rows;
   const C = dx / 3;
