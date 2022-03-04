@@ -1,6 +1,6 @@
 import { exhaustiveCheck } from "../../typeddash";
 import { Skia } from "../../../skia";
-import type { IRect } from "../../../skia";
+import type { SkRect } from "../../../skia";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -19,7 +19,7 @@ export interface Size {
 
 export const size = (width = 0, height = 0) => ({ width, height });
 
-export const rect2rect = (src: IRect, dst: IRect) => {
+export const rect2rect = (src: SkRect, dst: SkRect) => {
   const scaleX = dst.width / src.width;
   const scaleY = dst.height / src.height;
   const translateX = dst.x - src.x * scaleX;
@@ -29,8 +29,8 @@ export const rect2rect = (src: IRect, dst: IRect) => {
 
 export const fitRects = (
   fit: Fit,
-  rect: IRect,
-  { x, y, width, height }: IRect
+  rect: SkRect,
+  { x, y, width, height }: SkRect
 ) => {
   const sizes = applyBoxFit(
     fit,

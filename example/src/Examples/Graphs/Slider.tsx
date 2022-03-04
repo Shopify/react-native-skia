@@ -1,4 +1,4 @@
-import type { IPath } from "@shopify/react-native-skia";
+import type { SkPath } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   useValue,
@@ -83,7 +83,7 @@ const getPointAtPositionInPath = (
   x: number,
   width: number,
   steps: number,
-  path: IPath
+  path: SkPath
 ) => {
   const index = Math.max(0, Math.floor(x / (width / steps)));
   const fraction = (x / (width / steps)) % 1;

@@ -1,4 +1,4 @@
-import type { IColor } from "../Color";
+import type { SkColor } from "../Color";
 import type { BlendMode } from "../Paint/BlendMode";
 
 import type { IColorFilter } from "./ColorFilter";
@@ -17,7 +17,7 @@ export interface ColorFilterFactory {
    * @param color
    * @param mode
    */
-  MakeBlend(color: IColor, mode: BlendMode): IColorFilter;
+  MakeBlend(color: SkColor, mode: BlendMode): IColorFilter;
 
   /**
    * Makes a color filter composing two color filters.

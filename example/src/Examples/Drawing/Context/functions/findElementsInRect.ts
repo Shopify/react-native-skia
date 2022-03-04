@@ -1,11 +1,11 @@
-import type { IRect } from "@shopify/react-native-skia";
+import type { SkRect } from "@shopify/react-native-skia";
 
 import type { DrawingElements } from "../types";
 
 import { getBounds } from "./getBounds";
 
 export const findElementsInRect = (
-  rect: IRect,
+  rect: SkRect,
   elements: DrawingElements
 ): DrawingElements | undefined => {
   const retVal: DrawingElements = [];

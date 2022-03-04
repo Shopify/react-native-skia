@@ -5,12 +5,12 @@ import { Skia } from "../../../skia";
 import { useDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { isPathEffect } from "../../../skia/PathEffect";
-import type { IMatrix } from "../../../skia/Matrix";
+import type { SkMatrix } from "../../../skia/Matrix";
 
 export interface Line2DPathEffectProps {
   children?: ReactNode | ReactNode[];
   width: number;
-  matrix: IMatrix;
+  matrix: SkMatrix;
 }
 
 export const Line2DPathEffect = (

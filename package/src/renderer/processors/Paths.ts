@@ -1,7 +1,7 @@
-import type { IPath } from "../../skia";
+import type { SkPath } from "../../skia";
 import { Skia, isPath } from "../../skia";
 
-export type PathDef = string | IPath;
+export type PathDef = string | SkPath;
 
 export const processPath = (rawPath: PathDef) => {
   const path =

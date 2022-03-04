@@ -2,12 +2,12 @@ import type { ViewProps } from "react-native";
 import { requireNativeComponent } from "react-native";
 
 import type { ReadonlyValue } from "../values";
-import type { IRect, IImage } from "../skia";
-import type { ICanvas } from "../skia/Canvas";
+import type { SkRect, SkImage } from "../skia";
+import type { SkCanvas } from "../skia/Canvas";
 
 export interface ISkiaViewApi {
   invalidateSkiaView: (nativeId: number) => void;
-  makeImageSnapshot: (nativeId: number, rect?: IRect) => IImage;
+  makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
   setDrawCallback: (
     nativeId: number,
     callback: RNSkiaDrawCallback | undefined
@@ -67,7 +67,7 @@ export type TouchHandlers = {
 
 export type TouchHandler = (touchInfo: Array<Array<TouchInfo>>) => void;
 
-export type RNSkiaDrawCallback = (canvas: ICanvas, info: DrawingInfo) => void;
+export type RNSkiaDrawCallback = (canvas: SkCanvas, info: DrawingInfo) => void;
 
 export type RNSkiaViewProps = ViewProps & {
   /**

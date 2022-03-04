@@ -1,7 +1,7 @@
-import type { IRect } from "./Rect";
+import type { SkRect } from "./Rect";
 
-export interface IRRect {
-  readonly rect: IRect;
+export interface SkRRect {
+  readonly rect: SkRect;
   readonly rx: number;
   readonly ry: number;
 }

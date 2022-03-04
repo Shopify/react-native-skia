@@ -1,5 +1,5 @@
 import { exhaustiveCheck } from "../../typeddash";
-import type { IMatrix } from "../../../skia/Matrix";
+import type { SkMatrix } from "../../../skia/Matrix";
 
 export type Vec3 = readonly [number, number, number];
 
@@ -102,7 +102,7 @@ const multiply3 = (m1: Matrix3, m2: Matrix3) => {
   ] as const;
 };
 
-const skiaMatrix3 = (m: Matrix3): IMatrix => {
+const skiaMatrix3 = (m: Matrix3): SkMatrix => {
   return [
     m[0][0],
     m[0][1],

@@ -1,7 +1,7 @@
 import { Platform, processColor as processColorRN } from "react-native";
 
-// This is the JSI color. Currently a number. This may change to a string.
-export type IColor = number;
+// This is the JSI color. Currently a number. This may change.
+export type SkColor = number;
 
 export type Color = string | number;
 
@@ -14,7 +14,7 @@ export const rgbaColor = (r: number, g: number, b: number, af: number) => {
   return ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
 };
 
-export const processColorAsInt = (color?: number | string): IColor => {
+export const processColorAsInt = (color?: number | string): SkColor => {
   let processedColor = processColorRN(color);
   if (typeof processedColor !== "number") {
     throw new Error(`Couldn't process color: ${color}`);
