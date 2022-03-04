@@ -17,3 +17,7 @@ export const RoundedRect = (props: AnimatedProps<RoundedRectProps>) => {
   });
   return <skDrawing onDraw={onDraw} {...props} />;
 };
+
+RoundedRect.defaultProps = {
+  rx: 0,
+};

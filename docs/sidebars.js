@@ -79,6 +79,7 @@ const sidebars = {
       items: [
         "mask-filters",
         "color-filters",
+        "image-filters/drop-shadows",
         "image-filters",
         "path-effects",
         "backdrops-filters",

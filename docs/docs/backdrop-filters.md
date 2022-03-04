@@ -54,7 +54,7 @@ Creates a backdrop blur. All properties from the [group component](/docs/group) 
 
 | Name      | Type                |  Description                                             |
 |:----------|:--------------------|:---------------------------------------------------------|
-| intensity | `number`            | intensity of the blur                                    |
+| blur      | `number`            | Blur radius                                              |
 
 ## Example
 
@@ -77,7 +77,7 @@ const Filter = () => {
         fit="cover"
       />
       <BackdropBlur
-        intensity={4}
+        blur={4}
         clip={{ x: 0, y: 128, width: 256, height: 128 }}
       >
         <Fill color="rgba(0, 0, 0, 0.2)" />
