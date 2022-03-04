@@ -6,7 +6,7 @@ import type { AnimatedProps } from "../../processors";
 import type { BackdropFilterProps } from "./BackdropFilter";
 import { BackdropFilter } from "./BackdropFilter";
 
-interface BackdropBlurProps extends BackdropFilterProps {
+interface BackdropBlurProps extends Omit<BackdropFilterProps, "filter"> {
   intensity: number;
 }
 
@@ -17,8 +17,10 @@ export const BackdropBlur = ({
   ...props
 }: AnimatedProps<BackdropBlurProps>) => {
   return (
-    <BackdropFilter {...props}>
-      <Blur sigmaX={intensity} sigmaY={intensity} />
+    <BackdropFilter
+      filter={<Blur sigmaX={intensity} sigmaY={intensity} />}
+      {...props}
+    >
       {children}
     </BackdropFilter>
   );
