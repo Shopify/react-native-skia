@@ -1,4 +1,5 @@
 import { useCallback, useRef } from "react";
+import { PixelRatio } from "react-native";
 
 import type {
   ExtendedTouchInfo,
@@ -38,17 +39,22 @@ export const useTouchHandler = (handlers: TouchHandlers): TouchHandler => {
         const distY = touch.y - (prevTouchInfoRef.current?.y ?? touch.y);
 
         if (
+          touch.type !== TouchType.Start &&
           touch.type !== TouchType.End &&
           touch.type !== TouchType.Cancelled
         ) {
-          prevvelocityRef.current.x = distX / Math.max(0.0001, timeDiffseconds);
-          prevvelocityRef.current.y = distY / Math.max(0.0001, timeDiffseconds);
+          if (timeDiffseconds > 0) {
+            prevvelocityRef.current.x =
+              distX / timeDiffseconds / PixelRatio.get();
+            prevvelocityRef.current.y =
+              distY / timeDiffseconds / PixelRatio.get();
+          }
         }
 
         const extendedTouchInfo: ExtendedTouchInfo = {
           ...touch,
-          velocityX: -prevvelocityRef.current.x,
-          velocityY: -prevvelocityRef.current.y,
+          velocityX: prevvelocityRef.current.x,
+          velocityY: prevvelocityRef.current.y,
         };
 
         // Save previous touch

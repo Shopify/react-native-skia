@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Canvas,
   Fill,
@@ -16,9 +16,10 @@ import {
   Circle,
   Blur,
   ColorMatrix,
-  Spring,
   useTouchHandler,
   useSpring,
+  Spring,
+  createDerivedValue,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -61,6 +62,18 @@ export const Gooey = () => {
   const [toggled, setToggled] = useState(false);
   const onTouch = useTouchHandler({ onEnd: () => setToggled(!toggled) });
   const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
+
+  const transforms = useMemo(
+    () =>
+      icons.map((icon) =>
+        createDerivedValue(
+          (p) => translate(mixVector(p, c, icon.dst)),
+          [progress]
+        )
+      ),
+    [progress]
+  );
+
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch}>
       <Defs>
@@ -75,11 +88,8 @@ export const Gooey = () => {
       </Defs>
       <Fill color={BG} />
       <Group rasterize={paint}>
-        {icons.map(({ dst }, i) => (
-          <Group
-            key={i}
-            transform={() => translate(mixVector(progress.value, c, dst))}
-          >
+        {icons.map((_, i) => (
+          <Group key={i} transform={transforms[i]}>
             <Circle r={R} color={FG} />
           </Group>
         ))}
@@ -87,11 +97,8 @@ export const Gooey = () => {
           <Circle r={R} color={FG} />
         </Group>
       </Group>
-      {icons.map(({ path, dst }, i) => (
-        <Group
-          key={i}
-          transform={() => translate(mixVector(progress.value, c, dst))}
-        >
+      {icons.map(({ path }, i) => (
+        <Group key={i} transform={transforms[i]}>
           <Icon path={path} />
         </Group>
       ))}

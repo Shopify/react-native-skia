@@ -3,9 +3,7 @@ import React from "react";
 import { CoonsPatchMeshGradient } from "./components/CoonsPatchMeshGradient";
 
 export const Aurora = () => {
-  return (
-    <CoonsPatchMeshGradient rows={3} cols={3} colors={palette.skia} debug />
-  );
+  return <CoonsPatchMeshGradient rows={3} cols={3} colors={palette.otto} />;
 };
 
 const palette = {

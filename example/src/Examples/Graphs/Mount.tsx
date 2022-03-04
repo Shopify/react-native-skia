@@ -1,14 +1,15 @@
 import {
   Canvas,
-  Easing,
   Fill,
   LinearGradient,
   Paint,
   Path,
+  runSpring,
+  Spring,
+  useDerivedValue,
   useValue,
   vec,
 } from "@shopify/react-native-skia";
-import { runTiming } from "@shopify/react-native-skia/src/animation/Animation/functions";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -30,12 +31,13 @@ export const MountAnimation: React.FC<GraphProps> = ({ height, width }) => {
   const onPress = useCallback(() => setToggled((p) => !p), []);
 
   useEffect(() => {
-    runTiming(progress, {
-      to: toggled ? 1 : 0,
-      duration: 350,
-      easing: Easing.inOut(Easing.cubic),
-    });
+    runSpring(progress, toggled ? 1 : 0, Spring.Config.Gentle);
   }, [progress, toggled]);
+
+  const interpolatedPath = useDerivedValue(
+    (p) => path.interpolate(zeroPath, p),
+    [progress]
+  );
 
   return (
     <View style={{ height, marginBottom: 10 }} onTouchEnd={onPress}>
@@ -49,7 +51,7 @@ export const MountAnimation: React.FC<GraphProps> = ({ height, width }) => {
           />
         </Paint>
         <Path
-          path={() => path.interpolate(zeroPath, progress.value)}
+          path={interpolatedPath}
           strokeWidth={4}
           style="stroke"
           strokeJoin="round"

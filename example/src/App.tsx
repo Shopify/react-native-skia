@@ -3,21 +3,21 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 
-import { HomeScreen } from "./Home/HomeScreen";
 import {
   AnimationExample,
-  DrawingExample,
-  GraphsScreen,
-  Neumorphism,
   API,
+  Aurora,
   Breathe,
+  DrawingExample,
   Filters,
   Gooey,
+  GraphsScreen,
   Hue,
   Matrix,
-  Aurora,
   Glassmorphism,
+  Neumorphism,
 } from "./Examples";
+import { HomeScreen } from "./Home";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
