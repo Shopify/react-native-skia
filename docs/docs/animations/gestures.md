@@ -5,7 +5,6 @@ sidebar_label: Touch Events
 slug: /animations/touch-events
 ---
 
-
 ### useTouchHandler
 
 The `useTouchHandler` hook handles touches in the `Canvas`.
@@ -25,8 +24,8 @@ const MyComponent = () => {
 
   const touchHandler = useTouchHandler({
     onActive: ({ x, y }) => {
-      cx.value = x;
-      cy.value = y;
+      cx.current = x;
+      cy.current = y;
     },
   });
 

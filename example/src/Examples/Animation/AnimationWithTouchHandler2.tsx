@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Dimensions } from "react-native";
-import type { AnimationState, Value } from "@shopify/react-native-skia";
+import type { AnimationState, SkiaValue } from "@shopify/react-native-skia";
 import {
   ValueApi,
   Canvas,
@@ -21,12 +21,12 @@ interface PhysicsAnimationState extends AnimationState {
   velocity: number;
 }
 
-const runBouncing = (translate: Value<number>, initialVelocity: number) => {
+const runBouncing = (translate: SkiaValue<number>, initialVelocity: number) => {
   translate.animation = ValueApi.createAnimation<PhysicsAnimationState>(
     (now, state) => {
       if (state === undefined) {
         return {
-          current: translate.value,
+          current: translate.current,
           velocity: initialVelocity,
           finished: false,
         };
@@ -69,12 +69,12 @@ export const AnimationWithTouchHandler = () => {
   // Touch handler
   const touchHandler = useTouchHandler({
     onStart: ({ x }) => {
-      offsetX.value = x - translateX.value;
+      offsetX.current = x - translateX.current;
     },
     onActive: ({ x }) => {
-      translateX.value = Math.max(
+      translateX.current = Math.max(
         Size,
-        Math.min(width - Size - Padding, x - offsetX.value)
+        Math.min(width - Size - Padding, x - offsetX.current)
       );
     },
     onEnd: ({ velocityX }) => {

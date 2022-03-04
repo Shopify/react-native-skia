@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import type { ReadonlyValue, Animation } from "../../types";
+import type { SkiaReadonlyValue, SkiaAnimation } from "../../types";
 import type { AnimationParams, TimingConfig, SpringConfig } from "../types";
 import { useValue } from "../../hooks/useValue";
 
@@ -17,7 +17,7 @@ import { createTiming } from "./createTiming";
 export const useTiming = (
   toOrParams: number | AnimationParams,
   config?: TimingConfig | SpringConfig
-): ReadonlyValue<number> => {
+): SkiaReadonlyValue<number> => {
   // Resolve parameters - keep a cached version to avoid
   // unnecesary re-renders.
   const prevCfgRef = useRef<ReturnType<typeof getResolvedParams>>();
@@ -34,7 +34,7 @@ export const useTiming = (
 
   // Create timing animation - keep a cached version to avoid
   // uneccessary recreation of animations
-  const prevAnimationRef = useRef<Animation>();
+  const prevAnimationRef = useRef<SkiaAnimation>();
   const prevParamsRef = useRef<typeof resolvedParameters>();
   const animation = useMemo(() => {
     if (!equals(prevParamsRef.current, resolvedParameters)) {

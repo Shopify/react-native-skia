@@ -31,7 +31,7 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
 
   const touchHandler = useTouchHandler({
     onActive: ({ x }) =>
-      (touchPos.value = getPointAtPositionInPath(x, width, 60, path)),
+      (touchPos.current = getPointAtPositionInPath(x, width, 60, path)),
   });
 
   const label = useDerivedValue(

@@ -29,19 +29,19 @@ export const AnimationWithTouchHandler = () => {
   useValueEffect(clock, () => {
     const leftBoundary = Size;
     const rightBoundary = width - Size - Padding;
-    let nextValue = translateX.value + circleVelocity.value;
+    let nextValue = translateX.current + circleVelocity.current;
     if (nextValue <= leftBoundary || nextValue >= rightBoundary) {
       // Reverse direction
-      circleVelocity.value *= -1;
+      circleVelocity.current *= -1;
       nextValue = Math.max(leftBoundary, Math.min(rightBoundary, nextValue));
       // Reduce force on the circle
-      circleVelocity.value *= 0.75;
+      circleVelocity.current *= 0.75;
     }
-    translateX.value = nextValue;
-    circleVelocity.value *= 0.95;
+    translateX.current = nextValue;
+    circleVelocity.current *= 0.95;
 
     // Stop clock when we reach threshold
-    if (Math.abs(circleVelocity.value) < 0.001) {
+    if (Math.abs(circleVelocity.current) < 0.001) {
       clock.stop();
     }
   });
@@ -50,16 +50,16 @@ export const AnimationWithTouchHandler = () => {
   const touchHandler = useTouchHandler({
     onStart: ({ x }) => {
       clock.stop();
-      offsetX.value = x - translateX.value;
+      offsetX.current = x - translateX.current;
     },
     onActive: ({ x }) => {
-      translateX.value = Math.max(
+      translateX.current = Math.max(
         Size,
-        Math.min(width - Size - Padding, x - offsetX.value)
+        Math.min(width - Size - Padding, x - offsetX.current)
       );
     },
     onEnd: ({ velocityX }) => {
-      circleVelocity.value = velocityX * 0.05;
+      circleVelocity.current = velocityX * 0.05;
       clock.start();
     },
   });

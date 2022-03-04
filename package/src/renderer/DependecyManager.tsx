@@ -1,13 +1,13 @@
 import type { RefObject } from "react";
 
 import type { SkiaView } from "../views";
-import type { ReadonlyValue } from "../values";
+import type { SkiaReadonlyValue } from "../values";
 
 import type { SkNode } from "./Host";
 import { isValue, processProps } from "./processors";
 
 export const createDependencyManager = (ref: RefObject<SkiaView>) => {
-  const values: ReadonlyValue<unknown>[] = [];
+  const values: SkiaReadonlyValue<unknown>[] = [];
   const unsubscribe: Array<() => void> = [];
 
   return {
@@ -19,7 +19,7 @@ export const createDependencyManager = (ref: RefObject<SkiaView>) => {
       });
       node.children.forEach((c) => this.visitChildren(c));
     },
-    registerValue: function <T>(value: ReadonlyValue<T>) {
+    registerValue: function <T>(value: SkiaReadonlyValue<T>) {
       if (!ref.current) {
         throw new Error("Canvas ref is not set");
       }

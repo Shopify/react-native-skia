@@ -1,4 +1,4 @@
-import type { ReadonlyValue } from "../../types";
+import type { SkiaReadonlyValue } from "../../types";
 import type { AnimationParams, SpringConfig } from "../types";
 import { useTiming } from "../timing";
 
@@ -14,5 +14,5 @@ import { Spring } from "./Spring";
 export const useSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig
-): ReadonlyValue<number> =>
+): SkiaReadonlyValue<number> =>
   useTiming(toOrParams, config ?? Spring.Config.Default);

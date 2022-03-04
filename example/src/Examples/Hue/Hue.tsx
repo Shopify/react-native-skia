@@ -51,9 +51,9 @@ export const Hue = () => {
         { theta, radius: Math.min(radius, r) },
         center
       );
-      translateX.value = x;
-      translateY.value = y;
-      color.value = polar2Color(theta, Math.min(radius, r), r);
+      translateX.current = x;
+      translateY.current = y;
+      color.current = polar2Color(theta, Math.min(radius, r), r);
     },
   });
   return (

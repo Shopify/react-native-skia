@@ -1,5 +1,5 @@
 import type { TimingConfig, RequiredAnimationParams } from "../types";
-import type { AnimationState, Value } from "../../types";
+import type { AnimationState, SkiaValue } from "../../types";
 import { ValueApi } from "../../api";
 
 import { timing } from "./functions";
@@ -20,13 +20,13 @@ import { timing } from "./functions";
  */
 export const createTiming = (
   params: RequiredAnimationParams & Required<TimingConfig>,
-  value?: Value<number>
+  value?: SkiaValue<number>
 ) => {
   // Update from to be either the declared from value,
   // the current value of the value or zero
   const resolvedParams = {
     ...params,
-    from: params.from ?? value?.value ?? 0,
+    from: params.from ?? value?.current ?? 0,
   };
 
   // Update function for the animation value

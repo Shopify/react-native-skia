@@ -1,8 +1,8 @@
-export interface ReadonlyValue<T = number> {
+export interface SkiaReadonlyValue<T = number> {
   /**
    * Gets the value hold by the Value object
    */
-  readonly value: T;
+  readonly current: T;
   /**
    * Adds a listener that is called when value changes.
    * Returns unsubscribe method.
@@ -14,23 +14,23 @@ export interface ReadonlyValue<T = number> {
   __typename__: "RNSkValue";
 }
 
-export interface Value<T = number> extends ReadonlyValue<T> {
+export interface SkiaValue<T = number> extends SkiaReadonlyValue<T> {
   /**
    * Get/sets the value hold by the Value object
    */
-  value: T;
+  current: T;
   /**
    * Get/sets the animation controlling the value
    * */
-  animation: Animation | undefined;
+  animation: SkiaAnimation | undefined;
 }
 
-export interface ClockValue extends ReadonlyValue<number> {
+export interface SkiaClockValue extends SkiaReadonlyValue<number> {
   start: () => void;
   stop: () => void;
 }
 
-export interface Animation {
+export interface SkiaAnimation {
   cancel: () => void;
 }
 

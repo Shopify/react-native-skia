@@ -4,13 +4,14 @@ import {
   LinearGradient,
   Paint,
   Path,
-  runTiming,
+  runSpring,
+  Spring,
   useDerivedValue,
   useValue,
   vec,
 } from "@shopify/react-native-skia";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Easing, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { createGraphPath } from "./createGraphPath";
 import type { GraphProps } from "./types";
@@ -30,10 +31,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
   const [toggled, setToggled] = useState(false);
   const onPress = useCallback(() => setToggled((p) => !p), []);
   useEffect(() => {
-    runTiming(progress, toggled ? 1 : 0, {
-      duration: 500,
-      easing: Easing.inOut(Easing.cubic),
-    });
+    runSpring(progress, toggled ? 1 : 0, Spring.Config.Gentle);
   }, [progress, toggled]);
 
   const interpolatedPath = useDerivedValue(

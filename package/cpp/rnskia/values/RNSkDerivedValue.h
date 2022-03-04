@@ -79,7 +79,7 @@ private:
     std::vector<jsi::Value> dependencyValues;
     dependencyValues.resize(_deps.size());
     for(size_t i=0; i<_deps.size(); ++i) {
-      dependencyValues[i] = (_deps[i]->get_value(runtime));
+      dependencyValues[i] = (_deps[i]->get_current(runtime));
     }
     
     auto nextValue = _callback->call(
