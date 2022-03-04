@@ -1,6 +1,13 @@
 /* eslint-disable max-len */
 import React from "react";
-import { Canvas, Circle, Group, Path, Skia } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Circle,
+  Group,
+  Path,
+  Skia,
+  Text,
+} from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -72,8 +79,17 @@ export const BlendModes = () => {
             ]}
             key={blendMode}
           >
-            <Path path={src} color="lightblue" blendMode={blendMode} />
-            <Path path={dst} color="pink" blendMode={blendMode} />
+            <Group blendMode={blendMode}>
+              <Path path={src} color="lightblue" />
+              <Path path={dst} color="pink" />
+            </Group>
+            <Text
+              text={blendMode}
+              x={0}
+              y={0}
+              familyName="source-sans-pro-semi-bold"
+              size={50}
+            />
           </Group>
         ))}
       </Group>
