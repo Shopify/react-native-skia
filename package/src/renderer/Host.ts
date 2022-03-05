@@ -31,6 +31,7 @@ export abstract class SkNode<T extends NodeType = NodeType> {
   readonly children: SkNode[] = [];
   props: NodeProps[T];
   memoizable = false;
+  memoized = false;
   parent?: SkNode;
 
   constructor(type: T, props: NodeProps[T]) {
