@@ -1,8 +1,7 @@
 import { useCallback, useMemo } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
-import type { SkNode } from "../Host";
-import { NodeType, processChildren } from "../Host";
+import { SkNode, NodeType } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize, isAnimated } from "../processors/Animations/Animations";
@@ -45,16 +44,16 @@ export interface DeclarationProps {
   };
 }
 
-export const DeclarationNode = (
-  props: DeclarationProps
-): SkNode<NodeType.Declaration> => ({
-  type: NodeType.Declaration,
-  props,
-  draw: (ctx, { declaration: { onDeclare } }, unProcessedChildren) => {
-    const children = processChildren(ctx, unProcessedChildren);
+export class DeclarationNode extends SkNode<NodeType.Declaration> {
+  constructor(props: DeclarationProps) {
+    super(NodeType.Declaration, props);
+    this.memoizable = !props.declaration.isAnimated;
+  }
+
+  draw(ctx: DrawingContext) {
+    const { onDeclare } = this.props.declaration;
+    const children = this.visit(ctx);
     const obj = onDeclare(ctx, children);
     return obj;
-  },
-  children: [],
-  memoizable: !props.declaration.isAnimated,
-});
+  }
+}

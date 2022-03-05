@@ -1,13 +1,12 @@
 import type { DrawingContext } from "../DrawingContext";
-import type { SkContainer, SkNode } from "../Host";
-import { NodeType, processChildren } from "../Host";
+import { SkContainer } from "../Host";
 
-export const CanvasNode = (redraw: () => void): SkContainer => ({
-  type: NodeType.Canvas,
-  props: {},
-  draw: (ctx: DrawingContext, _props, children: SkNode[]) => {
-    processChildren(ctx, children);
-  },
-  children: [],
-  redraw,
-});
+export class CanvasNode extends SkContainer {
+  constructor(redraw: () => void) {
+    super(redraw);
+  }
+
+  draw(ctx: DrawingContext) {
+    this.visit(ctx);
+  }
+}

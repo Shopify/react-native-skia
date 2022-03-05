@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*global NodeJS, performance*/
 import type { HostConfig } from "react-reconciler";
 
@@ -124,9 +125,9 @@ const createNode = (type: NodeType, props: Props) => {
     case NodeType.Canvas:
       throw new Error("Cannot create a canvas node");
     case NodeType.Drawing:
-      return DrawingNode(props as Parameters<typeof DrawingNode>[0]);
+      return new DrawingNode(props as any);
     case NodeType.Declaration:
-      return DeclarationNode(props as Parameters<typeof DeclarationNode>[0]);
+      return new DeclarationNode(props as any);
     default:
       // TODO: here we need to throw a nice error message
       // This is the error that will show up when the user uses nodes not supported by Skia (View, Audio, etc)

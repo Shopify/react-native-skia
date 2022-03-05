@@ -1,7 +1,6 @@
 import React, { useCallback } from "react";
 
-import { NodeType } from "../Host";
-import type { SkNode } from "../Host";
+import { NodeType, SkNode } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
 import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
@@ -9,12 +8,12 @@ import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
 
-type DrawingCallback = (ctx: DrawingContext, children: SkNode[]) => void;
+type DrawingCallback = (ctx: DrawingContext, node: SkNode) => void;
 
 type UseDrawingCallback<T> = (
   ctx: DrawingContext,
   props: T,
-  children: SkNode[]
+  node: SkNode
 ) => void;
 
 export const useDrawing = <T,>(
@@ -22,9 +21,9 @@ export const useDrawing = <T,>(
   cb: UseDrawingCallback<T>
 ) =>
   useCallback<DrawingCallback>(
-    (ctx, children) => {
+    (ctx, node) => {
       const materializedProps = materialize(ctx, props);
-      cb(ctx, materializedProps, children);
+      cb(ctx, materializedProps, node);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props]
@@ -39,12 +38,15 @@ export const Drawing = (props: DrawingProps) => {
   return <skDrawing {...props} />;
 };
 
-export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
-  type: NodeType.Drawing,
-  props,
-  draw: (ctx, { onDraw, skipProcessing, ...newProps }, children) => {
+export class DrawingNode extends SkNode<NodeType.Drawing> {
+  constructor(props: DrawingProps) {
+    super(NodeType.Drawing, props);
+  }
+
+  draw(ctx: DrawingContext) {
+    const { skipProcessing, onDraw, ...newProps } = this.props;
     if (skipProcessing) {
-      onDraw(ctx, children);
+      onDraw(ctx, this);
     } else {
       const drawingProps = materialize(ctx, newProps);
       const selectedPaint = selectPaint(ctx.paint, drawingProps);
@@ -53,10 +55,10 @@ export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
       // onDraw({ ...ctx, paint: selectedPaint }, children);
       [
         selectedPaint,
-        ...children
+        ...this.children
           .map((child) => {
             if (child.type === NodeType.Declaration) {
-              const ret = child.draw(ctx, child.props, child.children);
+              const ret = child.draw(ctx);
               if (ret) {
                 return ret;
               }
@@ -65,9 +67,8 @@ export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
           })
           .filter(isPaint),
       ].forEach((paint) => {
-        onDraw({ ...ctx, paint }, children);
+        onDraw({ ...ctx, paint }, this);
       });
     }
-  },
-  children: [],
-});
+  }
+}

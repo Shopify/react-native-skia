@@ -85,7 +85,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     const [tick, setTick] = useState(0);
     const redraw = useCallback(() => setTick((t) => t + 1), []);
 
-    const tree = useMemo(() => CanvasNode(redraw), [redraw]);
+    const tree = useMemo(() => new CanvasNode(redraw), [redraw]);
 
     const container = useMemo(
       () => skiaReconciler.createContainer(tree, 0, false, null),
@@ -117,7 +117,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? Skia.FontMgr.RefDefault(),
         };
-        tree.draw(ctx, tree.props, tree.children);
+        tree.draw(ctx);
       },
       [tick, onTouch]
     );

@@ -1,7 +1,6 @@
 import React from "react";
 import type { RefObject } from "react";
 
-import { processChildren } from "../Host";
 import type { SkPaint } from "../../skia";
 import { ClipOp } from "../../skia";
 import {
@@ -27,7 +26,7 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 export const Group = (props: AnimatedProps<GroupProps>) => {
   const onDraw = useDrawing(
     props,
-    (ctx, { rasterize, clip, invertClip, ...groupProps }, children) => {
+    (ctx, { rasterize, clip, invertClip, ...groupProps }, node) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
@@ -41,14 +40,11 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
         const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
         processClip(canvas, clip, op);
       }
-      processChildren(
-        {
-          ...ctx,
-          paint,
-          opacity: groupProps.opacity ? groupProps.opacity * opacity : opacity,
-        },
-        children
-      );
+      node.visit({
+        ...ctx,
+        paint,
+        opacity: groupProps.opacity ? groupProps.opacity * opacity : opacity,
+      });
       canvas.restore();
     }
   );

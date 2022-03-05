@@ -4,7 +4,6 @@ import React from "react";
 import type { AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes";
 import type { SkNode } from "../../Host";
-import { processChildren } from "../../Host";
 import { getInput } from "../imageFilters/getInput";
 import type { GroupProps } from "../Group";
 import { Group } from "../Group";
@@ -25,9 +24,9 @@ export const BackdropFilter = ({
   children: groupChildren,
   ...props
 }: AnimatedProps<BackdropFilterProps>) => {
-  const onDraw = useDrawing(props, (ctx, _, children) => {
-    disableFilterMemoization(children);
-    const toFilter = processChildren(ctx, children);
+  const onDraw = useDrawing(props, (ctx, _, node) => {
+    disableFilterMemoization(node.children);
+    const toFilter = node.visit(ctx);
     const filter = getInput(toFilter);
     if (!filter) {
       throw new Error("No image filter provided to the background");

@@ -26,22 +26,48 @@ export interface NodeProps {
   [NodeType.Drawing]: DrawingProps;
 }
 
-export interface SkNode<T extends NodeType = NodeType> {
+export abstract class SkNode<T extends NodeType = NodeType> {
   readonly type: T;
-  readonly draw: (
-    ctx: DrawingContext,
-    props: NodeProps[T],
-    children: SkNode[]
-  ) => void | DeclarationResult;
-  readonly children: SkNode[];
-  memoizable?: boolean;
-  parent?: SkNode;
+  readonly children: SkNode[] = [];
   props: NodeProps[T];
-  memoized?: boolean;
+  memoizable = false;
+  parent?: SkNode;
+
+  constructor(type: T, props: NodeProps[T]) {
+    this.type = type;
+    this.props = props;
+  }
+
+  abstract draw(ctx: DrawingContext): void | DeclarationResult;
+
+  visit(ctx: DrawingContext) {
+    const returnedValues: Exclude<DeclarationResult, null>[] = [];
+    let currentCtx = ctx;
+    this.children.forEach((child) => {
+      if (!child.memoized) {
+        const ret = child.draw(currentCtx);
+        if (ret) {
+          if (isPaint(ret)) {
+            currentCtx = { ...currentCtx, paint: ret };
+          }
+          returnedValues.push(ret);
+        }
+        if (child.memoizable) {
+          child.memoized = true;
+        }
+      }
+    });
+    return returnedValues;
+  }
 }
 
-export interface SkContainer extends SkNode<NodeType.Canvas> {
+export abstract class SkContainer extends SkNode<NodeType.Canvas> {
   redraw: () => void;
+
+  constructor(redraw: () => void) {
+    super(NodeType.Canvas, {});
+    this.redraw = redraw;
+  }
 }
 
 declare global {
@@ -53,26 +79,6 @@ declare global {
     }
   }
 }
-
-export const processChildren = (ctx: DrawingContext, children: SkNode[]) => {
-  const returnedValues: Exclude<DeclarationResult, null>[] = [];
-  let currentCtx = ctx;
-  children.forEach((child) => {
-    if (!child.memoized) {
-      const ret = child.draw(currentCtx, child.props, child.children);
-      if (ret) {
-        if (isPaint(ret)) {
-          currentCtx = { ...currentCtx, paint: ret };
-        }
-        returnedValues.push(ret);
-      }
-      if (child.memoizable) {
-        child.memoized = true;
-      }
-    }
-  });
-  return returnedValues;
-};
 
 interface DebugTree {
   type: NodeType;
