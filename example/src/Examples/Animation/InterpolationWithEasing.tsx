@@ -1,26 +1,36 @@
 import React from "react";
-import { Dimensions, StyleSheet } from "react-native";
-import { Canvas, Easing, useLoop } from "@shopify/react-native-skia";
-import { createTiming } from "@shopify/react-native-skia/src/animation/Animation/functions";
+import { StyleSheet, useWindowDimensions } from "react-native";
+import {
+  Canvas,
+  Circle,
+  Easing,
+  Fill,
+  mix,
+  useDerivedValue,
+  useLoop,
+} from "@shopify/react-native-skia";
 
-import { AnimationElement, AnimationDemo, Size, Padding } from "./Components";
-
-const { width } = Dimensions.get("window");
+import { AnimationDemo, Size, Padding } from "./Components";
 
 export const InterpolationWithEasing = () => {
-  const progress = useLoop(
-    createTiming({
-      from: 10,
-      to: width - Size - Padding,
-      duration: 1000,
-      easing: Easing.inOut(Easing.cubic),
-    }),
-    { yoyo: true }
+  const { width } = useWindowDimensions();
+  // Create timing loop
+  const progress = useLoop({
+    duration: 1000,
+    easing: Easing.inOut(Easing.cubic),
+  });
+  // Animate position of circle
+  const position = useDerivedValue(
+    (p) => mix(p, 10, width - (Size + Padding)),
+    [progress]
   );
+  // Animate radius of circle
+  const radius = useDerivedValue((p) => 5 + p * 55, [progress]);
   return (
-    <AnimationDemo title={"Interpolating value using an easing."}>
+    <AnimationDemo title={"Interpolating value using an easing"}>
       <Canvas style={styles.canvas}>
-        <AnimationElement x={() => progress.value} />
+        <Fill color="white" />
+        <Circle cx={position} cy={20} r={radius} color="#DC4C4C" />
       </Canvas>
     </AnimationDemo>
   );
@@ -28,8 +38,8 @@ export const InterpolationWithEasing = () => {
 
 const styles = StyleSheet.create({
   canvas: {
-    height: 80,
-    width: width - Padding,
+    height: 40,
+    width: "100%",
     backgroundColor: "#FEFEFE",
   },
 });

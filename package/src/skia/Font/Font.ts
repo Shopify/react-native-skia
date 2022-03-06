@@ -1,17 +1,17 @@
 import type { SkJSIInstance } from "../JsiInstance";
-import type { IPaint } from "../Paint";
-import type { IRect } from "../Rect";
-import type { IPoint } from "../Point";
+import type { SkPaint } from "../Paint";
+import type { SkRect } from "../Rect";
+import type { SkPoint } from "../Point";
 import type { ITypeface } from "../Typeface/Typeface";
 
 export interface FontMetrics {
   ascent: number; // suggested space above the baseline. < 0
   descent: number; // suggested space below the baseline. > 0
   leading: number; // suggested spacing between descent of previous line and ascent of next line.
-  bounds?: IRect; // smallest rect containing all glyphs (relative to 0,0)
+  bounds?: SkRect; // smallest rect containing all glyphs (relative to 0,0)
 }
 
-export interface IFont extends SkJSIInstance<"Font"> {
+export interface SkFont extends SkJSIInstance<"Font"> {
   /** Returns the advance width of text.
       The advance is the normal distance to move before drawing additional text.
       Returns the bounding box of text if bounds is not nullptr. The paint
@@ -23,7 +23,7 @@ export interface IFont extends SkJSIInstance<"Font"> {
       @param paint       optional; may be nullptr
       @return            number of glyphs represented by text of length byteLength
   */
-  measureText: (text: string, paint?: IPaint) => IRect;
+  measureText: (text: string, paint?: SkPaint) => SkRect;
 
   /**
    * Returns the FontMetrics for this font.
@@ -49,7 +49,7 @@ export interface IFont extends SkJSIInstance<"Font"> {
    */
   getGlyphWidths(
     glyphs: number[],
-    paint?: IPaint | null,
+    paint?: SkPaint | null,
     output?: Float32Array
   ): Float32Array;
 
@@ -70,7 +70,7 @@ export interface IFont extends SkJSIInstance<"Font"> {
    */
   getGlyphIntercepts(
     glyphs: number[],
-    positions: IPoint[],
+    positions: SkPoint[],
     top: number,
     bottom: number
   ): number[];

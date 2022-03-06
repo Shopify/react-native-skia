@@ -74,6 +74,7 @@ const sidebars = {
       items: [
         "mask-filters",
         "color-filters",
+        "image-filters/drop-shadows",
         "image-filters",
         "path-effects",
         "backdrops-filters",
@@ -95,7 +96,12 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Animations",
-      items: ["animations/overview", "animations/reanimated"],
+      items: [
+        "animations/values",
+        "animations/animations",
+        "animations/touch-events",
+        "animations/reanimated",
+      ],
     },
   ],
 };

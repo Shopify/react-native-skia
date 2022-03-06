@@ -7,7 +7,10 @@ import {
   ImageShader,
   Skia,
   Shader,
+  mix,
+  useDerivedValue,
   Fill,
+  useLoop,
 } from "@shopify/react-native-skia";
 
 const { width, height } = Dimensions.get("window");
@@ -22,6 +25,10 @@ half4 main(float2 xy) {
 }`)!;
 
 export const Filters = () => {
+  const progress = useLoop({ duration: 1500 });
+
+  const uniforms = useDerivedValue((p) => ({ r: mix(p, 1, 100) }), [progress]);
+
   const image = useImage(require("../../assets/oslo.jpg"));
   if (image === null) {
     return null;
@@ -29,7 +36,7 @@ export const Filters = () => {
   return (
     <Canvas style={{ width, height }}>
       <Paint>
-        <Shader source={source} uniforms={() => ({ r: 100 })}>
+        <Shader source={source} uniforms={uniforms}>
           <ImageShader
             image={image}
             fit="cover"

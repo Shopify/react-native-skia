@@ -6,8 +6,8 @@ import {
   Canvas,
   Image,
   Group,
+  useImage,
 } from "@shopify/react-native-skia";
-import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 4;

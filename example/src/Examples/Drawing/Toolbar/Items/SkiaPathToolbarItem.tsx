@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import type { IPath } from "@shopify/react-native-skia";
+import type { SkPath } from "@shopify/react-native-skia";
 import { Canvas, Group, Path } from "@shopify/react-native-skia";
 
 import type { BaseToolbarItemProps } from "./BaseToolbarItem";
@@ -7,7 +7,7 @@ import { BaseToolbarItem } from "./BaseToolbarItem";
 import { styles } from "./styles";
 
 type Props = BaseToolbarItemProps & {
-  path: IPath;
+  path: SkPath;
 };
 
 export const PathToolbarItem: React.FC<Props> = ({

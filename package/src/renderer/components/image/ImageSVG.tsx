@@ -1,12 +1,12 @@
 import React from "react";
 
-import type { SVG } from "../../../skia";
+import type { SkSVG } from "../../../skia";
 import { useDrawing } from "../../nodes";
 import type { AnimatedProps, RectDef } from "../../processors";
 import { processRect } from "../../processors";
 
 export type ImageSVGProps = RectDef & {
-  svg: SVG;
+  svg: SkSVG;
 };
 
 export const ImageSVG = (props: AnimatedProps<ImageSVGProps>) => {

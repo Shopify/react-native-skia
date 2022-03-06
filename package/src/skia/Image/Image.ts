@@ -1,6 +1,6 @@
 import type { TileMode } from "../ImageFilter";
 import type { IShader } from "../Shader";
-import type { IMatrix } from "../Matrix";
+import type { SkMatrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 
 export enum FilterMode {
@@ -20,7 +20,7 @@ export enum ImageFormat {
   WEBP,
 }
 
-export interface IImage extends SkJSIInstance<"Image"> {
+export interface SkImage extends SkJSIInstance<"Image"> {
   /**
    * Returns the possibly scaled height of the image.
    */
@@ -45,7 +45,7 @@ export interface IImage extends SkJSIInstance<"Image"> {
     ty: TileMode,
     fm: FilterMode,
     mm: MipmapMode,
-    localMatrix?: IMatrix
+    localMatrix?: SkMatrix
   ): IShader;
 
   /**
@@ -61,7 +61,7 @@ export interface IImage extends SkJSIInstance<"Image"> {
     ty: TileMode,
     B: number,
     C: number,
-    localMatrix?: IMatrix
+    localMatrix?: SkMatrix
   ): IShader;
 
   /** Encodes Image pixels, returning result as UInt8Array. Returns existing

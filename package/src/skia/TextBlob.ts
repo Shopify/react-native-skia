@@ -1,8 +1,8 @@
 import type { SkJSIInstance } from "./JsiInstance";
-import type { IFont } from "./Font/Font";
-import type { IRSXform } from "./RSXform";
+import type { SkFont } from "./Font/Font";
+import type { SkRSXform } from "./RSXform";
 
-export type ITextBlob = SkJSIInstance<"TextBlob">;
+export type SkTextBlob = SkJSIInstance<"TextBlob">;
 
 export interface TextBlobFactory {
   /**
@@ -15,7 +15,7 @@ export interface TextBlobFactory {
    * @param str
    * @param font
    */
-  MakeFromText(str: string, font: IFont): ITextBlob;
+  MakeFromText(str: string, font: SkFont): SkTextBlob;
   /**
    * Return a TextBlob with a single run of text.
    *
@@ -25,7 +25,7 @@ export interface TextBlobFactory {
    * @param glyphs - if using Malloc'd array, be sure to use CanvasKit.MallocGlyphIDs().
    * @param font
    */
-  MakeFromGlyphs(glyphs: number[], font: IFont): ITextBlob;
+  MakeFromGlyphs(glyphs: number[], font: SkFont): SkTextBlob;
 
   /**
    * Returns a TextBlob built from a single run of text with rotation, scale, and translations.
@@ -35,7 +35,7 @@ export interface TextBlobFactory {
    * @param rsxforms
    * @param font
    */
-  MakeFromRSXform(str: string, rsxforms: IRSXform[], font: IFont): ITextBlob;
+  MakeFromRSXform(str: string, rsxforms: SkRSXform[], font: SkFont): SkTextBlob;
 
   /**
    * Returns a TextBlob built from a single run of text with rotation, scale, and translations.
@@ -46,7 +46,7 @@ export interface TextBlobFactory {
    */
   MakeFromRSXformGlyphs(
     glyphs: number[],
-    rsxforms: IRSXform[],
-    font: IFont
-  ): ITextBlob;
+    rsxforms: SkRSXform[],
+    font: SkFont
+  ): SkTextBlob;
 }

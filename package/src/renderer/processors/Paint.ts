@@ -7,7 +7,7 @@ import {
   StrokeCap,
   processColor,
 } from "../../skia";
-import type { IPaint, Color } from "../../skia";
+import type { SkPaint, Color } from "../../skia";
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export interface ChildrenProps {
@@ -15,7 +15,7 @@ export interface ChildrenProps {
 }
 
 export interface CustomPaintProps extends ChildrenProps {
-  paint?: RefObject<IPaint>;
+  paint?: RefObject<SkPaint>;
   color?: Color;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;
@@ -30,7 +30,7 @@ export const enumKey = <K extends string>(k: K) =>
   (k.charAt(0).toUpperCase() + k.slice(1)) as Capitalize<K>;
 
 export const processPaint = (
-  paint: IPaint,
+  paint: SkPaint,
   currentOpacity: number,
   {
     color,
@@ -75,7 +75,7 @@ export const processPaint = (
 };
 
 export const selectPaint = (
-  currentPaint: IPaint,
+  currentPaint: SkPaint,
   {
     paint,
     color: cl,

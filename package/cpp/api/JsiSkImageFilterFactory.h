@@ -81,9 +81,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeCompose) {
-    auto outer = JsiSkImageFilter::fromValue(runtime, arguments[0]);
+    sk_sp<SkImageFilter> outer;
+    if (!arguments[0].isNull()&& !arguments[0].isUndefined()) {
+      outer = JsiSkImageFilter::fromValue(runtime, arguments[0]);
+    }
     sk_sp<SkImageFilter> inner;
-    if (arguments[1].isNull()) {
+    if (!arguments[1].isNull() && !arguments[1].isUndefined()) {
       inner = JsiSkImageFilter::fromValue(runtime, arguments[1]);
     }
     return jsi::Object::createFromHostObject(
@@ -97,11 +100,19 @@ public:
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
     auto color = arguments[4].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[5].isNull() && !arguments[5].isUndefined()) {
+      input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 6 && !arguments[6].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
+    }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY,
-                                                     color, nullptr)));
+                                                     color, input, cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeDropShadowOnly) {
@@ -110,11 +121,19 @@ public:
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
     auto color = arguments[4].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[5].isNull() && !arguments[5].isUndefined()) {
+      input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 6 && !arguments[6].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
+    }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY,
-                                                         color, nullptr)));
+                                                         color, input, cropRect)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),

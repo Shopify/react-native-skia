@@ -26,6 +26,6 @@ export enum TileMode {
 
 export const isImageFilter = (
   obj: SkJSIInstance<string> | null
-): obj is IImageFilter => obj !== null && obj.__typename__ === "ImageFilter";
+): obj is SkImageFilter => obj !== null && obj.__typename__ === "ImageFilter";
 
-export type IImageFilter = SkJSIInstance<"ImageFilter">;
+export type SkImageFilter = SkJSIInstance<"ImageFilter">;

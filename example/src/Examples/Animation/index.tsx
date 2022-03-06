@@ -1,30 +1,26 @@
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 
+import { AnimateTextOnPath } from "./AnimateTextOnPath";
 import { AnimationWithTouchHandler } from "./AnimationWithTouchHandler";
-import { InterpolationWithSpring } from "./InterplationWithSpring";
-import { InterpolatingValueOverTime } from "./InterpolationOverTime";
 import { InterpolationWithEasing } from "./InterpolationWithEasing";
-import { SimpleTimelineAnimation } from "./SimpleTimelineAnimation";
-import { SimpleValueOverTime } from "./SimpleValueOverTime";
-import { StaggeredTimelineAnimation } from "./StaggeredTimelineAnimation";
+import { SimpleAnimation } from "./SimpleAnimation";
+import { SpringBackTouchAnimation } from "./SpringBackTouch";
 
 export const AnimationExample: React.FC = () => {
   return (
-    <ScrollView contentContainerStyle={styles.scrollview}>
-      <SimpleValueOverTime />
-      <InterpolatingValueOverTime />
+    <View style={styles.container}>
+      <SimpleAnimation />
       <InterpolationWithEasing />
-      <InterpolationWithSpring />
       <AnimationWithTouchHandler />
-      <SimpleTimelineAnimation />
-      <StaggeredTimelineAnimation />
-    </ScrollView>
+      <AnimateTextOnPath />
+      <SpringBackTouchAnimation />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollview: {
+  container: {
     paddingVertical: 20,
     paddingBottom: 80,
   },

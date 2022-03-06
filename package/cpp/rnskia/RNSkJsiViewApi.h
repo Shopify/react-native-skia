@@ -3,6 +3,7 @@
 #include <JsiHostObject.h>
 #include <RNSkDrawView.h>
 #include <RNSkPlatformContext.h>
+#include <RNSkValue.h>
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -142,11 +143,51 @@ public:
     }
     return jsi::Value::undefined();
   }
-
+  
+  JSI_HOST_FUNCTION(registerValuesInView) {
+    // Check params
+    if(!arguments[1].isObject() || !arguments[1].asObject(runtime).isArray(runtime)) {
+      jsi::detail::throwJSError(runtime, "Expected array of Values as second parameter");
+      return jsi::Value::undefined();
+    }
+    
+    // Get identifier of native SkiaView
+    int nativeId = arguments[0].asNumber();
+    
+    // Get values that should be added as dependencies
+    auto values = arguments[1].asObject(runtime).asArray(runtime);
+    std::vector<std::function<void()>> unsubscribers;
+    
+    for(size_t i=0; i<values.size(runtime); ++i) {
+      auto value = values.getValueAtIndex(runtime, i).asObject(runtime).asHostObject<RNSkReadonlyValue>(runtime);
+      
+      if(value != nullptr) {
+        // Add change listener
+        unsubscribers.push_back(value->addListener([this, nativeId](jsi::Runtime&){
+          requestRedrawView(nativeId);
+        }));
+      }
+    }
+    
+    // Return unsubscribe method that unsubscribes to all values
+    // that we subscribed to.
+    return jsi::Function::createFromHostFunction(runtime,
+                                                 jsi::PropNameID::forUtf8(runtime, "unsubscribe"),
+                                                 0,
+                                                 JSI_HOST_FUNCTION_LAMBDA {
+      // decrease dependency count on the Skia View
+      for(auto &unsub : unsubscribers) {
+        unsub();
+      }
+      return jsi::Value::undefined();
+    });
+  }
+  
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawCallback),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, invalidateSkiaView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawMode))
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawMode),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView))
 
   /**
    * Constructor
@@ -236,10 +277,20 @@ private:
     }
     return &_callbackInfos.at(nativeId);
   }
-
+  
+  /**
+    Send a redraw request to the view
+   */
+  void requestRedrawView(size_t nativeId) {
+    auto info = getEnsuredCallbackInfo(nativeId);
+    if(info->view != nullptr) {
+      info->view->requestRedraw();
+    }
+  }
+  
   // List of callbacks
   std::map<size_t, CallbackInfo> _callbackInfos;
-
+  
   // Platform context
   std::shared_ptr<RNSkPlatformContext> _platformContext;
 };
