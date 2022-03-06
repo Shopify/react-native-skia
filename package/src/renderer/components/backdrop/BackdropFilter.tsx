@@ -7,6 +7,7 @@ import type { SkNode } from "../../Host";
 import { getInput } from "../imageFilters/getInput";
 import type { GroupProps } from "../Group";
 import { Group } from "../Group";
+import { useBounds } from "../../nodes/Drawing";
 
 const disableFilterMemoization = (children: SkNode[]) => {
   children.forEach((child) => {
@@ -35,9 +36,16 @@ export const BackdropFilter = ({
     canvas.saveLayer(undefined, null, filter);
     canvas.restore();
   });
+  // TODO: is this correct?
+  const onBounds = useBounds(props, () => ({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  }));
   return (
     <Group {...props}>
-      <skDrawing onDraw={onDraw} skipProcessing>
+      <skDrawing onBounds={onBounds} onDraw={onDraw} skipProcessing>
         {filterChild}
       </skDrawing>
       {groupChildren}

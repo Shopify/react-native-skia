@@ -5,7 +5,8 @@ import type { SkPoint } from "../../../skia";
 import { PointMode } from "../../../skia";
 import { enumKey } from "../../processors/Paint";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { useDrawing } from "../../nodes/Drawing";
+import { useDrawing, useBounds } from "../../nodes/Drawing";
+import { rect } from "../../processors/Rects";
 
 export interface PointsProps extends CustomPaintProps {
   points: SkPoint[];
@@ -17,7 +18,11 @@ export const Points = (props: AnimatedProps<PointsProps>) => {
     const pointMode = PointMode[enumKey(mode)];
     canvas.drawPoints(pointMode, points, paint);
   });
-  return <skDrawing onDraw={onDraw} {...props} />;
+  const onBounds = useBounds(props, () => {
+    // TODO: implement
+    return rect(0, 0, 10, 10);
+  });
+  return <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} />;
 };
 
 Points.defaultProps = {

@@ -15,7 +15,8 @@ import type {
   AnimatedProps,
   ClipDef,
 } from "../processors";
-import { useDrawing } from "../nodes/Drawing";
+import { useDrawing, useBounds } from "../nodes/Drawing";
+import { bounds } from "../processors/Rects";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
   clip?: ClipDef;
@@ -48,5 +49,10 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       canvas.restore();
     }
   );
-  return <skDrawing onDraw={onDraw} {...props} skipProcessing />;
+  const onBounds = useBounds(props, (_, _props, node) =>
+    bounds(node.children.bounds())
+  );
+  return (
+    <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} skipProcessing />
+  );
 };

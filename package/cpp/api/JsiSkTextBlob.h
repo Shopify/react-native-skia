@@ -22,6 +22,19 @@ namespace RNSkia {
 
         // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
 
+        JSI_HOST_FUNCTION(bounds) {
+            auto result = getObject()->bounds();
+            return jsi::Object::createFromHostObject(
+                    runtime, std::make_shared<JsiSkRect>(getContext(), result));
+        }
+
+        JSI_HOST_FUNCTION(uniqueID) {
+            return static_cast<double>(getObject()->uniqueID());
+        }
+
+        JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextBlob, bounds),
+                             JSI_EXPORT_FUNC(JsiSkTextBlob, uniqueID))
+
         JSI_PROPERTY_GET(__typename__) {
             return jsi::String::createFromUtf8(runtime, "TextBlob");
         }

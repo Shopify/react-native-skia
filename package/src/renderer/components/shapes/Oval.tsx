@@ -7,6 +7,7 @@ import type {
 } from "../../processors";
 import { processRect } from "../../processors";
 import { useDrawing } from "../../nodes";
+import { useBounds } from "../../nodes/Drawing";
 
 export type OvalProps = RectDef & CustomPaintProps;
 
@@ -15,7 +16,10 @@ export const Oval = (props: AnimatedProps<OvalProps>) => {
     const rect = processRect(rectProps);
     canvas.drawOval(rect, paint);
   });
-  return <skDrawing onDraw={onDraw} {...props} />;
+  const onBounds = useBounds(props, (_, rectProps) => {
+    return processRect(rectProps);
+  });
+  return <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} />;
 };
 
 Oval.defaultProps = {

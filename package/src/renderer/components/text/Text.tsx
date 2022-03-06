@@ -5,8 +5,9 @@ import type {
   AnimatedProps,
   FontDef,
 } from "../../processors";
-import { useDrawing } from "../../nodes/Drawing";
+import { useDrawing, useBounds } from "../../nodes/Drawing";
 import { processFont } from "../../processors";
+import { rect } from "../../processors/Rects";
 
 type TextProps = CustomPaintProps &
   FontDef & {
@@ -23,7 +24,15 @@ export const Text = (props: AnimatedProps<TextProps>) => {
       canvas.drawText(text, x, y, paint, font);
     }
   );
-  return <skDrawing onDraw={onDraw} {...props} />;
+  const onBounds = useBounds(
+    props,
+    ({ fontMgr }, { text, x, y, ...fontDef }) => {
+      const font = processFont(fontMgr, fontDef);
+      const { width, height } = font.measureText(text);
+      return rect(x, y, width, height);
+    }
+  );
+  return <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} />;
 };
 
 Text.defaultProps = {

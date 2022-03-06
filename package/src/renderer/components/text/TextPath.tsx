@@ -1,7 +1,7 @@
 import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
-import { useDrawing } from "../../nodes/Drawing";
+import { useDrawing, useBounds } from "../../nodes/Drawing";
 import type { SkPath } from "../../../skia/Path";
 import type { SkRSXform } from "../../../skia/RSXform";
 import { Skia } from "../../../skia/Skia";
@@ -62,7 +62,17 @@ export const TextPath = (props: AnimatedProps<TextPathProps>) => {
       canvas.drawTextBlob(blob, 0, 0, paint);
     }
   );
-  return <skDrawing onDraw={onDraw} {...props} />;
+  const onBounds = useBounds(props, (_, { path: pathDef }) => {
+    const path =
+      typeof pathDef === "string"
+        ? Skia.Path.MakeFromSVGString(pathDef)
+        : pathDef;
+    if (path === null) {
+      throw new Error("Invalid path: " + pathDef);
+    }
+    return path.getBounds();
+  });
+  return <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} />;
 };
 
 TextPath.defaultProps = {

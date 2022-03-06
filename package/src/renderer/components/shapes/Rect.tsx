@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useDrawing } from "../../nodes/Drawing";
+import { useDrawing, useBounds } from "../../nodes/Drawing";
 import type {
   CustomPaintProps,
   RectDef,
@@ -15,5 +15,9 @@ export const Rect = (props: AnimatedProps<RectProps>) => {
     const rect = processRect(rectProps);
     canvas.drawRect(rect, paint);
   });
-  return <skDrawing onDraw={onDraw} {...props} />;
+  const onBounds = useBounds(props, (_, rectProps) => {
+    const rect = processRect(rectProps);
+    return rect;
+  });
+  return <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} />;
 };

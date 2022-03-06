@@ -5,9 +5,10 @@ import type {
   AnimatedProps,
   CircleDef,
 } from "../../processors";
-import { useDrawing } from "../../nodes/Drawing";
+import { useDrawing, useBounds } from "../../nodes/Drawing";
 import { vec } from "../../processors/math/Vector";
 import { processCircle } from "../../processors";
+import { rect } from "../../processors/Rects";
 
 export type CircleProps = CircleDef & CustomPaintProps;
 
@@ -16,7 +17,11 @@ export const Circle = (props: AnimatedProps<CircleProps>) => {
     const { c, r } = processCircle(def);
     canvas.drawCircle(c.x, c.y, r, paint);
   });
-  return <skDrawing onDraw={onDraw} {...props} />;
+  const onBounds = useBounds(props, (_, def) => {
+    const { c, r } = processCircle(def);
+    return rect(c.x - r, c.y - r, r * 2, r * 2);
+  });
+  return <skDrawing onBounds={onBounds} onDraw={onDraw} {...props} />;
 };
 
 Circle.defaultProps = {

@@ -7,14 +7,22 @@ import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
+import type { SkRect } from "../../skia/Rect";
 
 type DrawingCallback = (ctx: DrawingContext, node: SkNode) => void;
+type BoundsCallback = (ctx: DrawingContext, node: SkNode) => SkRect;
 
 type UseDrawingCallback<T> = (
   ctx: DrawingContext,
   props: T,
   node: SkNode
 ) => void;
+
+type UseBoundsCallback<T> = (
+  ctx: DrawingContext,
+  props: T,
+  node: SkNode
+) => SkRect;
 
 export const useDrawing = <T,>(
   props: AnimatedProps<T>,
@@ -29,8 +37,22 @@ export const useDrawing = <T,>(
     [props]
   );
 
+export const useBounds = <T,>(
+  props: AnimatedProps<T>,
+  cb: UseBoundsCallback<T>
+) =>
+  useCallback<BoundsCallback>(
+    (ctx, node) => {
+      const materializedProps = materialize(ctx, props);
+      return cb(ctx, materializedProps, node);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props]
+  );
+
 export type DrawingProps = AnimatedProps<CustomPaintProps> & {
   onDraw: DrawingCallback;
+  onBounds: BoundsCallback;
   skipProcessing?: boolean;
 };
 
@@ -44,7 +66,7 @@ export class DrawingNode extends SkNode<NodeType.Drawing> {
   }
 
   draw(ctx: DrawingContext) {
-    const { skipProcessing, onDraw, ...newProps } = this.props;
+    const { skipProcessing, onDraw, onBounds, ...newProps } = this.props;
     if (skipProcessing) {
       onDraw(ctx, this);
     } else {

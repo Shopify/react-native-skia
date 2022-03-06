@@ -11,6 +11,8 @@ import type { SkPoint, Color } from "../../../skia";
 import { BlendMode } from "../../../skia";
 import { useDrawing } from "../../nodes";
 import { processColor } from "../../../skia/Color";
+import { useBounds } from "../../nodes/Drawing";
+import { rect } from "../../processors/Rects";
 
 export interface CubicBezierHandle {
   pos: Vector;
@@ -64,5 +66,9 @@ export const Patch = (props: AnimatedProps<PatchProps>) => {
       );
     }
   );
-  return <skDrawing onDraw={onDraw} {...props} />;
+  const onBounds = useBounds(props, () => {
+    // TODO: implement
+    return rect(0, 0, 10, 10);
+  });
+  return <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} />;
 };

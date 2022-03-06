@@ -1,8 +1,19 @@
 import type { SkJSIInstance } from "./JsiInstance";
 import type { SkFont } from "./Font/Font";
 import type { SkRSXform } from "./RSXform";
+import type { SkRect } from "./Rect";
 
-export type SkTextBlob = SkJSIInstance<"TextBlob">;
+export interface SkTextBlob extends SkJSIInstance<"TextBlob"> {
+  /**
+   * Return the bounding area for the text blob.
+   */
+  bounds(): SkRect;
+
+  /**
+   * Return a unique ID for this text blob object.
+   */
+  uniqueID(): number;
+}
 
 export interface TextBlobFactory {
   /**

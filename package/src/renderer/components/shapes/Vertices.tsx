@@ -5,6 +5,7 @@ import { enumKey } from "../../processors";
 import type { SkPoint } from "../../../skia";
 import { BlendMode, VertexMode, Skia, processColor } from "../../../skia";
 import { useDrawing } from "../../nodes";
+import { useBounds } from "../../nodes/Drawing";
 
 export interface VerticesProps extends CustomPaintProps {
   colors?: string[];
@@ -40,7 +41,19 @@ export const Vertices = (props: AnimatedProps<VerticesProps>) => {
       canvas.drawVertices(vert, blend, paint);
     }
   );
-  return <skDrawing onDraw={onDraw} {...props} />;
+  const onBounds = useBounds(props, (_, { vertices, mode, indices }) => {
+    // TODO: we definitely don't want to do that
+    const vertexMode = mode ? VertexMode[enumKey(mode)] : VertexMode.Triangles;
+    const vert = Skia.MakeVertices(
+      vertexMode,
+      vertices,
+      undefined,
+      undefined,
+      indices
+    );
+    return vert.bounds();
+  });
+  return <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} />;
 };
 
 Vertices.defaultProps = {
