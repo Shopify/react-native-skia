@@ -2,14 +2,7 @@ import { isPaint } from "../skia/Paint/Paint";
 
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationResult } from "./nodes/Declaration";
-import type {
-  DeclarationProps,
-  // DropShadowProps,
-  // ParagraphProps,
-  DrawingProps,
-  // TextProps,
-  // SpanProps,
-} from "./nodes";
+import type { DeclarationProps, DrawingProps } from "./nodes";
 
 export enum NodeType {
   Canvas = "skCanvas",

@@ -10,6 +10,8 @@ export interface DrawingContext extends Omit<DrawingInfo, "touches"> {
   canvas: SkCanvas;
   paint: SkPaint;
   opacity: number;
+  width: number;
+  height: number;
   center: Vector;
   ref: RefObject<SkiaView>;
   fontMgr: FontMgr;

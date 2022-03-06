@@ -28,7 +28,6 @@ import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
 import { vec } from "./processors";
-import type { DrawingContext } from "./DrawingContext";
 import { createDependencyManager } from "./DependecyManager";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
@@ -106,7 +105,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         onTouch && onTouch(info.touches);
         const paint = Skia.Paint();
         paint.setAntiAlias(true);
-        const ctx: DrawingContext = {
+        const ctx = {
           width,
           height,
           timestamp,
