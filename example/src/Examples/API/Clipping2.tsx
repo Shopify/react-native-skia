@@ -72,18 +72,18 @@ export const Clipping = () => {
           mode="alpha"
           mask={
             <Group>
-              <Circle cx={100} cy={100} r={100} color="#00000066" />
+              <Circle cx={100} cy={100} r={200} color="#00000066" />
               <Circle cx={100} cy={100} r={50} color="black" />
             </Group>
           }
         >
-          <Rect x={0} y={0} width={256} height={256} color="lightblue" />
+          <Rect x={0} y={0} width={200} height={200} color="lightblue" />
         </Mask>
         <Mask
           mode="luminance"
           mask={
             <Group>
-              <Circle cx={300} cy={100} r={100} color="white" />
+              <Circle cx={300} cy={100} r={200} color="white" />
               <Circle cx={300} cy={100} r={50} color="black" />
             </Group>
           }
