@@ -5,6 +5,7 @@ import { SkNode, NodeType } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize, isAnimated } from "../processors/Animations/Animations";
+import { rect } from "../processors/Rects";
 
 export type DeclarationResult = SkJSIInstance<string> | null;
 
@@ -55,5 +56,9 @@ export class DeclarationNode extends SkNode<NodeType.Declaration> {
     const children = this.visit(ctx);
     const obj = onDeclare(ctx, children);
     return obj;
+  }
+
+  bounds() {
+    return rect(0, 0, 0, 0);
   }
 }

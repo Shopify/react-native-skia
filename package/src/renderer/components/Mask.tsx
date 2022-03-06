@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 import type { SkRect } from "../../skia/Rect";
 

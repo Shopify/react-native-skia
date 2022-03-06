@@ -49,8 +49,8 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       canvas.restore();
     }
   );
-  const onBounds = useBounds(props, (_, _props, node) =>
-    bounds(node.children.bounds())
+  const onBounds = useBounds(props, (ctx, _props, node) =>
+    bounds(node.children.map((child) => child.bounds(ctx)))
   );
   return (
     <skDrawing onDraw={onDraw} onBounds={onBounds} {...props} skipProcessing />

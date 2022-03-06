@@ -93,4 +93,10 @@ export class DrawingNode extends SkNode<NodeType.Drawing> {
       });
     }
   }
+
+  bounds(ctx: DrawingContext) {
+    const { onBounds } = this.props;
+    const result = onBounds(ctx, this);
+    return result;
+  }
 }

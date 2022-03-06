@@ -1,4 +1,5 @@
 import { isPaint } from "../skia/Paint/Paint";
+import type { SkRect } from "../skia/Rect";
 
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationResult } from "./nodes/Declaration";
@@ -33,6 +34,7 @@ export abstract class SkNode<T extends NodeType = NodeType> {
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
+  abstract bounds(ctx: DrawingContext): SkRect;
 
   visit(ctx: DrawingContext) {
     const returnedValues: Exclude<DeclarationResult, null>[] = [];
