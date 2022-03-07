@@ -49,6 +49,21 @@ export const useContextBridge = (...contexts: Context<any>[]) => {
   );
 };
 
+interface CanvasContext {
+  width: number;
+  height: number;
+}
+
+const CanvasContext = React.createContext<CanvasContext | null>(null);
+
+export const useCanvas = () => {
+  const canvas = useContext(CanvasContext);
+  if (!canvas) {
+    throw new Error("Canvas context is not available");
+  }
+  return canvas;
+};
+
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
 skiaReconciler.injectIntoDevTools({
@@ -86,13 +101,20 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
 
     const tree = useMemo(() => new Container(redraw), [redraw]);
 
+    const canvasCtx = useRef({ width: 0, height: 0 });
     const container = useMemo(
       () => skiaReconciler.createContainer(tree, 0, false, null),
       [tree]
     );
     // Render effect
     useEffect(() => {
-      render(children, container, redraw);
+      render(
+        <CanvasContext.Provider value={canvasCtx.current}>
+          {children}
+        </CanvasContext.Provider>,
+        container,
+        redraw
+      );
     }, [children, container, redraw]);
 
     const depsManager = useMemo(() => createDependencyManager(ref), [ref]);
@@ -102,6 +124,8 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       (canvas, info) => {
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
+        canvasCtx.current.width = width;
+        canvasCtx.current.height = height;
         onTouch && onTouch(info.touches);
         const paint = Skia.Paint();
         paint.setAntiAlias(true);

@@ -1,8 +1,8 @@
 import { Group, Rect } from "@shopify/react-native-skia";
 import React from "react";
 type Props = {
-  x: () => number;
-  y: () => number;
+  x: number;
+  y: number;
   size: number;
 };
 
@@ -11,8 +11,8 @@ export const SelectionResizeHandle: React.FC<Props> = ({ x, y, size }) => {
     <Group>
       {/** Rect */}
       <Rect
-        x={() => x() - size / 2}
-        y={() => y() - size / 2}
+        x={x - size / 2}
+        y={y - size / 2}
         width={size}
         height={size}
         color="#4185F4"
@@ -20,8 +20,8 @@ export const SelectionResizeHandle: React.FC<Props> = ({ x, y, size }) => {
         style="stroke"
       />
       <Rect
-        x={() => x() - size / 2}
-        y={() => y() - size / 2}
+        x={x - size / 2}
+        y={y - size / 2}
         width={size}
         height={size}
         color="#FFF"
