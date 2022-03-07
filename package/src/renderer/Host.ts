@@ -34,6 +34,14 @@ export abstract class SkNode<T extends NodeType = NodeType> {
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
+  set props(props: NodeProps[T]) {
+    this._props = props;
+  }
+
+  get props() {
+    return this._props;
+  }
+
   visit(ctx: DrawingContext) {
     const returnedValues: Exclude<DeclarationResult, null>[] = [];
     let currentCtx = ctx;
