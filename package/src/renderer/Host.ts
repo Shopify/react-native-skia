@@ -5,7 +5,7 @@ import type { DeclarationResult } from "./nodes/Declaration";
 import type { DeclarationProps, DrawingProps } from "./nodes";
 
 export enum NodeType {
-  Canvas = "skCanvas",
+  Container = "skContainer",
   Declaration = "skDeclaration",
   Drawing = "skDrawing",
 }
@@ -14,7 +14,7 @@ export enum NodeType {
 interface CanvasProps {}
 
 export interface NodeProps {
-  [NodeType.Canvas]: CanvasProps;
+  [NodeType.Container]: CanvasProps;
   [NodeType.Declaration]: DeclarationProps;
   [NodeType.Drawing]: DrawingProps;
 }
@@ -55,12 +55,16 @@ export abstract class SkNode<T extends NodeType = NodeType> {
   }
 }
 
-export abstract class SkContainer extends SkNode<NodeType.Canvas> {
+export class Container extends SkNode<NodeType.Container> {
   redraw: () => void;
 
   constructor(redraw: () => void) {
-    super(NodeType.Canvas, {});
+    super(NodeType.Container, {});
     this.redraw = redraw;
+  }
+
+  draw(ctx: DrawingContext) {
+    this.visit(ctx);
   }
 }
 

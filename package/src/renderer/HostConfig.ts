@@ -2,7 +2,7 @@
 import type { HostConfig } from "react-reconciler";
 
 import { DeclarationNode, DrawingNode } from "./nodes";
-import type { SkContainer, SkNode, NodeProps } from "./Host";
+import type { Container, SkNode, NodeProps } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
 
@@ -28,7 +28,7 @@ type NoTimeout = -1;
 type SkiaHostConfig = HostConfig<
   NodeType,
   Props,
-  SkContainer,
+  Container,
   Instance,
   TextInstance,
   SuspenseInstance,
@@ -121,8 +121,8 @@ const insertBefore = (parent: SkNode, child: SkNode, before: SkNode) => {
 
 const createNode = (type: NodeType, props: Props) => {
   switch (type) {
-    case NodeType.Canvas:
-      throw new Error("Cannot create a canvas node");
+    case NodeType.Container:
+      throw new Error("No more than one container is allowed");
     case NodeType.Drawing:
       return new DrawingNode(props as NodeProps[NodeType.Drawing]);
     case NodeType.Declaration:

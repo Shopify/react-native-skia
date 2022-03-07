@@ -25,10 +25,10 @@ import { Skia } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
-import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
 import { vec } from "./processors";
 import { createDependencyManager } from "./DependecyManager";
+import { Container } from "./Host";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,7 +84,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     const [tick, setTick] = useState(0);
     const redraw = useCallback(() => setTick((t) => t + 1), []);
 
-    const tree = useMemo(() => new CanvasNode(redraw), [redraw]);
+    const tree = useMemo(() => new Container(redraw), [redraw]);
 
     const container = useMemo(
       () => skiaReconciler.createContainer(tree, 0, false, null),
