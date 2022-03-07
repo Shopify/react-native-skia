@@ -12,11 +12,8 @@ type DrawingCallback<T> = (ctx: DrawingContext, props: T, node: SkNode) => void;
 
 type OnDrawCallback<T> = (ctx: DrawingContext, props: T, node: SkNode) => void;
 
-export const createDrawing =
-  <T,>(cb: OnDrawCallback<T>): DrawingCallback<T> =>
-  (ctx, props, node) => {
-    cb(ctx, props, node);
-  };
+export const createDrawing = <T,>(cb: OnDrawCallback<T>): DrawingCallback<T> =>
+  cb;
 
 export type DrawingProps<T> = AnimatedProps<CustomPaintProps> & {
   onDraw: DrawingCallback<T>;

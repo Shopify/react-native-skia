@@ -12,11 +12,9 @@ type DeclarationCallback<T> = (
   ctx: DrawingContext
 ) => DeclarationResult;
 
-export const createDeclaration =
-  <T,>(cb: DeclarationCallback<T>): DeclarationCallback<T> =>
-  (props, children, ctx) => {
-    return cb(props, children, ctx);
-  };
+export const createDeclaration = <T,>(
+  cb: DeclarationCallback<T>
+): DeclarationCallback<T> => cb;
 
 export type DeclarationProps<T> = {
   onDeclare: DeclarationCallback<T>;
