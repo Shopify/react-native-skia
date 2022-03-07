@@ -31,27 +31,26 @@ export const useDeclaration = <T,>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props]
   );
-  return useMemo(
-    () => ({ onDeclare, isAnimated: isAnimated(props) }),
-    [onDeclare, props]
-  );
+  return useMemo(() => onDeclare, [onDeclare]);
 };
 
 export interface DeclarationProps {
-  declaration: {
-    onDeclare: DeclarationCallback;
-    isAnimated: boolean;
-  };
+  onDeclare: DeclarationCallback;
 }
 
 export class DeclarationNode extends SkNode<NodeType.Declaration> {
   constructor(props: DeclarationProps) {
     super(NodeType.Declaration, props);
-    this.memoizable = !props.declaration.isAnimated;
+    this.memoizable = isAnimated(props as any);
+  }
+
+  set props(props: DeclarationProps) {
+    this.memoizable = isAnimated(props as any);
+    super.props = props;
   }
 
   draw(ctx: DrawingContext) {
-    const { onDeclare } = this.props.declaration;
+    const { onDeclare } = this.props;
     const children = this.visit(ctx);
     const obj = onDeclare(ctx, children);
     return obj;
