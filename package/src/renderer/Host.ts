@@ -10,11 +10,9 @@ export enum NodeType {
   Drawing = "skDrawing",
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface CanvasProps {}
-
 export interface NodeProps {
-  [NodeType.Container]: CanvasProps;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  [NodeType.Container]: {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [NodeType.Declaration]: DeclarationProps<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
