@@ -21,7 +21,7 @@ export const BlurMask = (props: AnimatedProps<BlurMaskProps>) => {
       respectCTM
     );
   });
-  return <skDeclaration onDeclare={onDeclare} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 
 BlurMask.defaultProps = {

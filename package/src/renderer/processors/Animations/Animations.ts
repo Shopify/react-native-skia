@@ -22,21 +22,17 @@ export const isValue = (value: unknown): value is ValueType => {
 };
 
 export const isAnimated = <T>(props: AnimatedProps<T>) => {
-  return mapKeys(props).reduce((result, key) => {
-    const value = props[key];
+  for (const value of Object.values(props)) {
     if (isValue(value)) {
       return true;
     }
-    return result;
-  }, false);
+  }
+  return false;
 };
 
 export const processProps = <T>(props: T, cb: (value: unknown) => void) =>
   mapKeys(props).forEach((key) => {
-    console.log({ props, key });
-    if (key !== "onDraw" && key !== "onDeclare") {
-      cb(props[key]);
-    }
+    cb(props[key]);
   });
 
 export const materialize = <T>(props: AnimatedProps<T>) => {
@@ -44,9 +40,7 @@ export const materialize = <T>(props: AnimatedProps<T>) => {
   mapKeys(props).forEach((key) => {
     const value = props[key];
     if (isValue(value)) {
-      result[key] = (
-        value as unknown as SkiaReadonlyValue<T[typeof key]>
-      ).current;
+      result[key] = (value as SkiaReadonlyValue<T[typeof key]>).current;
     }
   });
   return result as T;

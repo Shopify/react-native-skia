@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
 import { SkNode, NodeType } from "../Host";
@@ -22,8 +22,8 @@ type DeclarationCallback = (
 export const useDeclaration = <T,>(
   props: AnimatedProps<T>,
   cb: UseDeclarationCallback<T>
-) => {
-  const onDeclare = useCallback<DeclarationCallback>(
+) =>
+  useCallback<DeclarationCallback>(
     (ctx, children) => {
       const materializedProps = materialize(props);
       return cb(materializedProps, children, ctx);
@@ -31,8 +31,6 @@ export const useDeclaration = <T,>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props]
   );
-  return useMemo(() => onDeclare, [onDeclare]);
-};
 
 export interface DeclarationProps {
   onDeclare: DeclarationCallback;
@@ -41,14 +39,12 @@ export interface DeclarationProps {
 export class DeclarationNode extends SkNode<NodeType.Declaration> {
   constructor(props: DeclarationProps) {
     super(NodeType.Declaration, props);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.memoizable = isAnimated(props as any);
+    this.props = props;
   }
 
   set props(props: DeclarationProps) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.memoizable = isAnimated(props as any);
-    super.props = props;
+    this.memoizable = !isAnimated(props);
+    this._props = props;
   }
 
   get props() {

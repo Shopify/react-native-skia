@@ -56,10 +56,12 @@ export const Breathe = () => {
     [progress]
   );
 
+  const sigma = useDerivedValue((p) => mix(p, 0, 40), [progress]);
+
   return (
     <Canvas style={styles.container} debug>
       <Paint blendMode="screen">
-        <BlurMask style="solid" sigma={40} />
+        <BlurMask style="solid" sigma={sigma} />
       </Paint>
       <Fill color="rgb(36,43,56)" />
       <Group origin={center} transform={transform}>
