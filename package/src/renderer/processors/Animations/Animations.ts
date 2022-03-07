@@ -47,7 +47,8 @@ export const materialize = <T>(
   const result = { ...props };
   mapKeys(props).forEach((key) => {
     const value = props[key];
-    if (isPropCallback(value)) {
+    // TODO: we 100% need to remove this
+    if (isPropCallback(value) && key !== "onDraw") {
       result[key] = value(ctx);
     } else if (isValue(value)) {
       result[key] = (
@@ -61,6 +62,7 @@ export const materialize = <T>(
 export type AnimatedProps<T> = {
   [K in keyof T]:
     | T[K]
+    // TODO: let's remove it
     | ((ctx: DrawingContext) => T[K])
     | SkiaReadonlyValue<T[K]>;
 };

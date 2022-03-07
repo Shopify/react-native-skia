@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 
 import { NodeType, SkNode } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
@@ -10,24 +10,14 @@ import { isPaint } from "../../skia";
 
 type DrawingCallback = (ctx: DrawingContext, node: SkNode) => void;
 
-type UseDrawingCallback<T> = (
-  ctx: DrawingContext,
-  props: T,
-  node: SkNode
-) => void;
+type OnDrawCallback<T> = (ctx: DrawingContext, props: T, node: SkNode) => void;
 
-export const useDrawing = <T,>(
-  props: AnimatedProps<T>,
-  cb: UseDrawingCallback<T>
-) =>
-  useCallback<DrawingCallback>(
-    (ctx, node) => {
-      const materializedProps = materialize(ctx, props);
-      cb(ctx, materializedProps, node);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props]
-  );
+export const createDrawing =
+  <T,>(cb: OnDrawCallback<T>): DrawingCallback =>
+  (ctx, node) => {
+    const materializedProps = materialize(ctx, node.props as AnimatedProps<T>);
+    cb(ctx, materializedProps, node);
+  };
 
 export type DrawingProps = AnimatedProps<CustomPaintProps> & {
   onDraw: DrawingCallback;

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useDrawing } from "../../nodes";
+import { createDrawing } from "../../nodes";
 import type {
   CustomPaintProps,
   RRectDef,
@@ -10,11 +10,13 @@ import { processRRect } from "../../processors";
 
 export type RoundedRectProps = RRectDef & CustomPaintProps;
 
-export const RoundedRect = (props: AnimatedProps<RoundedRectProps>) => {
-  const onDraw = useDrawing(props, ({ canvas, paint }, rectProps) => {
+const onDraw = createDrawing<RoundedRectProps>(
+  ({ canvas, paint }, rectProps) => {
     const rrect = processRRect(rectProps);
     canvas.drawRRect(rrect, paint);
-  });
+  }
+);
+export const RoundedRect = (props: AnimatedProps<RoundedRectProps>) => {
   return <skDrawing onDraw={onDraw} {...props} />;
 };
 

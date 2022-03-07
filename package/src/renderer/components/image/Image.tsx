@@ -6,7 +6,7 @@ import type {
   RectDef,
   AnimatedProps,
 } from "../../processors";
-import { useDrawing } from "../../nodes/Drawing";
+import { createDrawing } from "../../nodes/Drawing";
 import { processRect } from "../../processors";
 
 import type { Fit } from "./BoxFit";
@@ -23,24 +23,23 @@ export type BaseImageProps = RectDef &
 
 export type ImageProps = CustomPaintProps & BaseImageProps;
 
+const onDraw = createDrawing<ImageProps>(
+  ({ canvas, paint }, { fit, image, ...rectProps }) => {
+    const rect = processRect(rectProps);
+    const { src, dst } = fitRects(
+      fit,
+      {
+        x: 0,
+        y: 0,
+        width: image.width(),
+        height: image.height(),
+      },
+      rect
+    );
+    canvas.drawImageRect(image, src, dst, paint);
+  }
+);
 export const Image = (props: AnimatedProps<ImageProps>) => {
-  const onDraw = useDrawing(
-    props,
-    ({ canvas, paint }, { fit, image, ...rectProps }) => {
-      const rect = processRect(rectProps);
-      const { src, dst } = fitRects(
-        fit,
-        {
-          x: 0,
-          y: 0,
-          width: image.width(),
-          height: image.height(),
-        },
-        rect
-      );
-      canvas.drawImageRect(image, src, dst, paint);
-    }
-  );
   return <skDrawing onDraw={onDraw} {...props} />;
 };
 
