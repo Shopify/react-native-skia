@@ -21,7 +21,6 @@ type DeclarationCallback = (
 export const createDeclaration =
   <T,>(cb: UseDeclarationCallback<T>): DeclarationCallback =>
   (ctx, node, children) => {
-    console.log({ node, children });
     const materializedProps = materialize(node.props as AnimatedProps<T>);
     return cb(materializedProps, children, ctx);
   };
