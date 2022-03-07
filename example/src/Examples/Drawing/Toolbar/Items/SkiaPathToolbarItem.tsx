@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import type { SkPath } from "@shopify/react-native-skia";
-import { useCanvas, Canvas, Group, Path } from "@shopify/react-native-skia";
+import { Canvas, Group, Path, useCanvas } from "@shopify/react-native-skia";
 
 import type { BaseToolbarItemProps } from "./BaseToolbarItem";
 import { BaseToolbarItem } from "./BaseToolbarItem";

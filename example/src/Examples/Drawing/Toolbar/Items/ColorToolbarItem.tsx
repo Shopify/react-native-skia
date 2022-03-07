@@ -28,12 +28,12 @@ interface ItemProps {
 }
 
 const Item = ({ color }: ItemProps) => {
-  const { width, height } = useCanvas();
+  const canvas = useCanvas();
   return (
     <Circle
-      cx={width / 2}
-      cy={height / 2}
-      r={width / 2}
+      cx={canvas.width / 2}
+      cy={canvas.height / 2}
+      r={canvas.width / 2}
       color={color}
       style="fill"
     />
