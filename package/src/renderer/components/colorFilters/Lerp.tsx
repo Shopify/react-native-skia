@@ -14,7 +14,7 @@ export interface LerpProps {
 }
 
 export const Lerp = (props: AnimatedProps<LerpProps>) => {
-  const declaration = useDeclaration(props, ({ t }, children) => {
+  const onDeclare = useDeclaration(props, ({ t }, children) => {
     const [src, dst] = children.filter(isColorFilter);
     const cf = Skia.ColorFilter.MakeLerp(t, dst, src);
     return composeColorFilter(
@@ -22,5 +22,5 @@ export const Lerp = (props: AnimatedProps<LerpProps>) => {
       children.filter((c) => c !== src && c !== dst)
     );
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

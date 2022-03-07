@@ -13,16 +13,13 @@ export interface DashPathEffectProps {
 }
 
 export const DashPathEffect = (props: AnimatedProps<DashPathEffectProps>) => {
-  const declaration = useDeclaration(
-    props,
-    ({ intervals, phase }, children) => {
-      const [child] = children.filter(isPathEffect);
-      const pe = Skia.PathEffect.MakeDash(intervals, phase);
-      if (child) {
-        return Skia.PathEffect.MakeCompose(pe, child);
-      }
-      return pe;
+  const onDeclare = useDeclaration(props, ({ intervals, phase }, children) => {
+    const [child] = children.filter(isPathEffect);
+    const pe = Skia.PathEffect.MakeDash(intervals, phase);
+    if (child) {
+      return Skia.PathEffect.MakeCompose(pe, child);
     }
-  );
-  return <skDeclaration declaration={declaration} {...props} />;
+    return pe;
+  });
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

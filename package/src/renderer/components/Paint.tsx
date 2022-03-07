@@ -24,7 +24,7 @@ export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
   (props, ref) => {
     const paint = useMemo(() => Skia.Paint(), []);
     useImperativeHandle(ref, () => paint, [paint]);
-    const declaration = useDeclaration(props, (paintProps, children, ctx) => {
+    const onDeclare = useDeclaration(props, (paintProps, children, ctx) => {
       processPaint(paint, ctx.opacity, paintProps);
       children.forEach((child) => {
         if (isShader(child)) {
@@ -48,6 +48,6 @@ export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
       }
       return paint;
     });
-    return <skDeclaration declaration={declaration} {...props} />;
+    return <skDeclaration onDeclare={onDeclare} {...props} />;
   }
 );

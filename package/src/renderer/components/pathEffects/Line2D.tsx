@@ -16,7 +16,7 @@ export interface Line2DPathEffectProps {
 export const Line2DPathEffect = (
   props: AnimatedProps<Line2DPathEffectProps>
 ) => {
-  const declaration = useDeclaration(props, ({ width, matrix }, children) => {
+  const onDeclare = useDeclaration(props, ({ width, matrix }, children) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakeLine2D(width, matrix);
     if (child) {
@@ -27,5 +27,5 @@ export const Line2DPathEffect = (
     }
     return pe;
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

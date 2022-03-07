@@ -11,9 +11,9 @@ export interface SumPathEffectProps {
 }
 
 export const SumPathEffect = (props: AnimatedProps<SumPathEffectProps>) => {
-  const declaration = useDeclaration(props, (_, children) => {
+  const onDeclare = useDeclaration(props, (_, children) => {
     const [outer, inner] = children.filter(isPathEffect);
     return Skia.PathEffect.MakeCompose(outer, inner);
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

@@ -14,7 +14,7 @@ export interface CornerPathEffectProps {
 export const CornerPathEffect = (
   props: AnimatedProps<CornerPathEffectProps>
 ) => {
-  const declaration = useDeclaration(props, ({ r }, children) => {
+  const onDeclare = useDeclaration(props, ({ r }, children) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakeCorner(r);
     if (child) {
@@ -25,5 +25,5 @@ export const CornerPathEffect = (
     }
     return pe;
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

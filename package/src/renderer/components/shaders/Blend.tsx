@@ -14,9 +14,9 @@ export interface BlendShaderProps {
 }
 
 export const BlendShader = (props: AnimatedProps<BlendShaderProps>) => {
-  const declaration = useDeclaration(props, ({ mode }, children) => {
+  const onDeclare = useDeclaration(props, ({ mode }, children) => {
     const [one, two] = children.filter(isShader);
     return Skia.Shader.MakeBlend(BlendMode[enumKey(mode)], one, two);
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

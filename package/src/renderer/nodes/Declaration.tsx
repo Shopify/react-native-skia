@@ -25,7 +25,7 @@ export const useDeclaration = <T,>(
 ) => {
   const onDeclare = useCallback<DeclarationCallback>(
     (ctx, children) => {
-      const materializedProps = materialize(ctx, props);
+      const materializedProps = materialize(props);
       return cb(materializedProps, children, ctx);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,12 +41,18 @@ export interface DeclarationProps {
 export class DeclarationNode extends SkNode<NodeType.Declaration> {
   constructor(props: DeclarationProps) {
     super(NodeType.Declaration, props);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.memoizable = isAnimated(props as any);
   }
 
   set props(props: DeclarationProps) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.memoizable = isAnimated(props as any);
     super.props = props;
+  }
+
+  get props() {
+    return this._props;
   }
 
   draw(ctx: DrawingContext) {

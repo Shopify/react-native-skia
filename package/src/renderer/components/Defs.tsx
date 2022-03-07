@@ -8,11 +8,11 @@ export interface DefsProps {
 }
 
 export const Defs = (props: DefsProps) => {
-  const declaration = useDeclaration(props, () => {
+  const onDeclare = useDeclaration(props, () => {
     // Do nothing.
     // The goal of this component is to avoid declared paint from
     // being used in the drawing context automatically
     return null;
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

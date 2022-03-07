@@ -10,8 +10,8 @@ export interface ColorShaderProps {
 }
 
 export const ColorShader = (props: AnimatedProps<ColorShaderProps>) => {
-  const declaration = useDeclaration(props, ({ color }) => {
+  const onDeclare = useDeclaration(props, ({ color }) => {
     return Skia.Shader.MakeColor(processColor(color, 1));
   });
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} />;
 };

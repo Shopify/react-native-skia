@@ -10,9 +10,9 @@ import { composeColorFilter } from "./Compose";
 export interface LumaColorFilterProps {}
 
 export const LumaColorFilter = (props: AnimatedProps<LumaColorFilterProps>) => {
-  const declaration = useDeclaration(props, (_props, children) => {
+  const onDeclare = useDeclaration(props, (_props, children) => {
     const cf = Skia.ColorFilter.MakeLumaColorFilter();
     return composeColorFilter(cf, children);
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

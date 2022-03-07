@@ -16,7 +16,7 @@ export interface DiscretePathEffectProps {
 export const DiscretePathEffect = (
   props: AnimatedProps<DiscretePathEffectProps>
 ) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ length, deviation, seed }, children) => {
       const [child] = children.filter(isPathEffect);
@@ -27,7 +27,7 @@ export const DiscretePathEffect = (
       return pe;
     }
   );
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 
 DiscretePathEffect.defaultProps = {

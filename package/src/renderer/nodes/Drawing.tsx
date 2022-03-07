@@ -15,7 +15,7 @@ type OnDrawCallback<T> = (ctx: DrawingContext, props: T, node: SkNode) => void;
 export const createDrawing =
   <T,>(cb: OnDrawCallback<T>): DrawingCallback =>
   (ctx, node) => {
-    const materializedProps = materialize(ctx, node.props as AnimatedProps<T>);
+    const materializedProps = materialize(node.props as AnimatedProps<T>);
     cb(ctx, materializedProps, node);
   };
 
@@ -38,7 +38,7 @@ export class DrawingNode extends SkNode<NodeType.Drawing> {
     if (skipProcessing) {
       onDraw(ctx, this);
     } else {
-      const drawingProps = materialize(ctx, newProps);
+      const drawingProps = materialize(newProps);
       const selectedPaint = selectPaint(ctx.paint, drawingProps);
       processPaint(selectedPaint, ctx.opacity, drawingProps);
       // to draw only once:

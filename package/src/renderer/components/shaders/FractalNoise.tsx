@@ -14,7 +14,7 @@ export interface FractalNoiseProps {
 }
 
 export const FractalNoise = (props: AnimatedProps<FractalNoiseProps>) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ freqX, freqY, octaves, seed, tileWidth, tileHeight }) => {
       return Skia.Shader.MakeFractalNoise(
@@ -27,7 +27,7 @@ export const FractalNoise = (props: AnimatedProps<FractalNoiseProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} />;
 };
 
 FractalNoise.defaultProps = {

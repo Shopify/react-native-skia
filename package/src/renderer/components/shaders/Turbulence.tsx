@@ -14,7 +14,7 @@ export interface TurbulenceProps {
 }
 
 export const Turbulence = (props: AnimatedProps<TurbulenceProps>) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ freqX, freqY, octaves, seed, tileWidth, tileHeight }) => {
       return Skia.Shader.MakeTurbulence(
@@ -27,7 +27,7 @@ export const Turbulence = (props: AnimatedProps<TurbulenceProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} />;
 };
 
 Turbulence.defaultProps = {

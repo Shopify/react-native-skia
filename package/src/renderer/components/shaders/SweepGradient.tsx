@@ -14,7 +14,7 @@ export interface SweepGradientProps extends GradientProps {
 }
 
 export const SweepGradient = (props: AnimatedProps<SweepGradientProps>) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ c, start, end, ...gradientProps }) => {
       const { colors, positions, mode, localMatrix, flags } =
@@ -32,5 +32,5 @@ export const SweepGradient = (props: AnimatedProps<SweepGradientProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} />;
 };

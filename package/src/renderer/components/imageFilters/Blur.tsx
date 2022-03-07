@@ -17,7 +17,7 @@ export interface BlurProps {
 }
 
 export const Blur = (props: AnimatedProps<BlurProps>) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ sigmaX, sigmaY, mode }, children) => {
       return Skia.ImageFilter.MakeBlur(
@@ -28,7 +28,7 @@ export const Blur = (props: AnimatedProps<BlurProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 
 Blur.defaultProps = {

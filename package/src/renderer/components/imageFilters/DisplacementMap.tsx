@@ -17,7 +17,7 @@ export interface DisplacementMapProps {
 }
 
 export const DisplacementMap = (props: AnimatedProps<DisplacementMapProps>) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ channelX, channelY, scale }, children) => {
       const [in1, in2] = children.filter((c) => !!c);
@@ -31,5 +31,5 @@ export const DisplacementMap = (props: AnimatedProps<DisplacementMapProps>) => {
       return Skia.ImageFilter.MakeDisplacementMap(x, y, scale, map, input);
     }
   );
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

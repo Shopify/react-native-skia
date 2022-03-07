@@ -17,7 +17,7 @@ export interface TwoPointConicalGradientProps extends GradientProps {
 export const TwoPointConicalGradient = (
   props: AnimatedProps<TwoPointConicalGradientProps>
 ) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ start, startR, end, endR, ...gradientProps }) => {
       const { colors, positions, mode, localMatrix, flags } =
@@ -35,5 +35,5 @@ export const TwoPointConicalGradient = (
       );
     }
   );
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} />;
 };

@@ -14,10 +14,10 @@ export interface OffsetProps {
 }
 
 export const Offset = (props: AnimatedProps<OffsetProps>) => {
-  const declaration = useDeclaration(props, ({ x, y }, children) => {
+  const onDeclare = useDeclaration(props, ({ x, y }, children) => {
     return Skia.ImageFilter.MakeOffset(x, y, getInput(children));
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 
 Offset.defaultProps = {

@@ -13,7 +13,7 @@ export interface LinearGradientProps extends GradientProps {
 }
 
 export const LinearGradient = (props: AnimatedProps<LinearGradientProps>) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ start, end, ...gradientProps }) => {
       const { colors, positions, mode, localMatrix, flags } =
@@ -29,5 +29,5 @@ export const LinearGradient = (props: AnimatedProps<LinearGradientProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} />;
 };

@@ -18,7 +18,7 @@ export interface Path2DPathEffectProps {
 export const Path2DPathEffect = (
   props: AnimatedProps<Path2DPathEffectProps>
 ) => {
-  const declaration = useDeclaration(props, ({ path, matrix }, children) => {
+  const onDeclare = useDeclaration(props, ({ path, matrix }, children) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakePath2D(matrix, processPath(path));
     if (child) {
@@ -29,5 +29,5 @@ export const Path2DPathEffect = (
     }
     return pe;
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

@@ -26,7 +26,7 @@ export interface ShaderProps extends TransformProps {
 }
 
 export const Shader = (props: AnimatedProps<ShaderProps>) => {
-  const declaration = useDeclaration<ShaderProps>(
+  const onDeclare = useDeclaration<ShaderProps>(
     props,
     ({ uniforms, source, opaque, ...transform }, children) => {
       const processedUniforms = new Array(source.getUniformCount())
@@ -48,7 +48,7 @@ export const Shader = (props: AnimatedProps<ShaderProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 
 Shader.defaultProps = {

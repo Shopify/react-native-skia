@@ -14,14 +14,14 @@ export interface BlurMaskProps {
 }
 
 export const BlurMask = (props: AnimatedProps<BlurMaskProps>) => {
-  const declaration = useDeclaration(props, ({ style, sigma, respectCTM }) => {
+  const onDeclare = useDeclaration(props, ({ style, sigma, respectCTM }) => {
     return Skia.MaskFilter.MakeBlur(
       BlurStyle[enumKey(style)],
       sigma,
       respectCTM
     );
   });
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} />;
 };
 
 BlurMask.defaultProps = {

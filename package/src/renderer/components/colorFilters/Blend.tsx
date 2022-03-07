@@ -16,12 +16,12 @@ export interface BlendProps {
 }
 
 export const Blend = (props: AnimatedProps<BlendProps>) => {
-  const declaration = useDeclaration(props, ({ mode, color }, children) => {
+  const onDeclare = useDeclaration(props, ({ mode, color }, children) => {
     const cf = Skia.ColorFilter.MakeBlend(
       Skia.Color(color),
       BlendMode[enumKey(mode)]
     );
     return composeColorFilter(cf, children);
   });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

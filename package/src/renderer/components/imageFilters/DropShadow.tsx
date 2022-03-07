@@ -21,7 +21,7 @@ export interface DropShadowProps {
 }
 
 export const DropShadow = (props: AnimatedProps<DropShadowProps>) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ dx, dy, blur, color, shadowOnly, cropRect }, children, { opacity }) => {
       const input = getInput(children);
@@ -39,5 +39,5 @@ export const DropShadow = (props: AnimatedProps<DropShadowProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

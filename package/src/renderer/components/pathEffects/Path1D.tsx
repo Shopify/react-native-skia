@@ -21,7 +21,7 @@ export interface Path1DPathEffectProps {
 export const Path1DPathEffect = (
   props: AnimatedProps<Path1DPathEffectProps>
 ) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ path, advance, phase, style }, children) => {
       const [child] = children.filter(isPathEffect);
@@ -40,5 +40,5 @@ export const Path1DPathEffect = (
       return pe;
     }
   );
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

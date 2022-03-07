@@ -43,7 +43,7 @@ interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
 }
 
 export const ImageShader = (props: AnimatedProps<ImageShaderProps>) => {
-  const declaration = useDeclaration(
+  const onDeclare = useDeclaration(
     props,
     ({ tx, ty, fm, mm, fit, image, ...imageShaderProps }) => {
       const rct = getRect(imageShaderProps);
@@ -68,7 +68,7 @@ export const ImageShader = (props: AnimatedProps<ImageShaderProps>) => {
       );
     }
   );
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} />;
 };
 
 ImageShader.defaultProps = {
