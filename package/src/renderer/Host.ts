@@ -22,14 +22,14 @@ export interface NodeProps {
 export abstract class SkNode<T extends NodeType = NodeType> {
   readonly type: T;
   readonly children: SkNode[] = [];
-  props: NodeProps[T];
+  _props: NodeProps[T];
   memoizable = false;
   memoized = false;
   parent?: SkNode;
 
   constructor(type: T, props: NodeProps[T]) {
     this.type = type;
-    this.props = props;
+    this._props = props;
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
@@ -77,39 +77,3 @@ declare global {
     }
   }
 }
-
-interface DebugTree {
-  type: NodeType;
-  props: Record<string, unknown>;
-  children: DebugTree[];
-  memoized?: boolean;
-}
-
-export const debugTree = ({
-  type,
-  children,
-  props,
-  memoized,
-}: SkNode): DebugTree => {
-  return {
-    type,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    props: Object.keys(props as object)
-      .filter((key) => key !== "children")
-      .reduce(
-        (p, key) => ({ ...p, [key]: (props as Record<string, unknown>)[key] }),
-        {}
-      ),
-    children: children.map((child) => debugTree(child)),
-    memoized,
-  };
-};
-
-export const countNodes = (node: SkNode): number => {
-  if (node.children.length === 0) {
-    return 1;
-  }
-  return node.children
-    .map((child) => countNodes(child))
-    .reduce((a, b) => a + b, 0);
-};
