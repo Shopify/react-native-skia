@@ -8,37 +8,36 @@ import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
 
-type DrawingCallback = (ctx: DrawingContext, node: SkNode) => void;
+type DrawingCallback<T> = (ctx: DrawingContext, props: T, node: SkNode) => void;
 
 type OnDrawCallback<T> = (ctx: DrawingContext, props: T, node: SkNode) => void;
 
 export const createDrawing =
-  <T,>(cb: OnDrawCallback<T>): DrawingCallback =>
-  (ctx, node) => {
-    const materializedProps = materialize(node.props as AnimatedProps<T>);
-    cb(ctx, materializedProps, node);
+  <T,>(cb: OnDrawCallback<T>): DrawingCallback<T> =>
+  (ctx, props, node) => {
+    cb(ctx, props, node);
   };
 
-export type DrawingProps = AnimatedProps<CustomPaintProps> & {
-  onDraw: DrawingCallback;
+export type DrawingProps<T> = AnimatedProps<CustomPaintProps> & {
+  onDraw: DrawingCallback<T>;
   skipProcessing?: boolean;
 };
 
-export const Drawing = (props: DrawingProps) => {
+export const Drawing = <T,>(props: DrawingProps<T>) => {
   return <skDrawing {...props} />;
 };
 
-export class DrawingNode extends SkNode<NodeType.Drawing> {
-  constructor(props: DrawingProps) {
+export class DrawingNode<T> extends SkNode<NodeType.Drawing> {
+  constructor(props: DrawingProps<T>) {
     super(NodeType.Drawing, props);
   }
 
   draw(ctx: DrawingContext) {
     const { skipProcessing, onDraw, ...newProps } = this.props;
+    const drawingProps = materialize(newProps as AnimatedProps<T>);
     if (skipProcessing) {
-      onDraw(ctx, this);
+      onDraw(ctx, drawingProps, this);
     } else {
-      const drawingProps = materialize(newProps);
       const selectedPaint = selectPaint(ctx.paint, drawingProps);
       processPaint(selectedPaint, ctx.opacity, drawingProps);
       // to draw only once:
@@ -57,7 +56,7 @@ export class DrawingNode extends SkNode<NodeType.Drawing> {
           })
           .filter(isPaint),
       ].forEach((paint) => {
-        onDraw({ ...ctx, paint }, this);
+        onDraw({ ...ctx, paint }, drawingProps, this);
       });
     }
   }

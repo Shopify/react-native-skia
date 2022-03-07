@@ -15,8 +15,10 @@ interface CanvasProps {}
 
 export interface NodeProps {
   [NodeType.Container]: CanvasProps;
-  [NodeType.Declaration]: DeclarationProps;
-  [NodeType.Drawing]: DrawingProps;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [NodeType.Declaration]: DeclarationProps<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [NodeType.Drawing]: DrawingProps<any>;
 }
 
 export abstract class SkNode<T extends NodeType = NodeType> {

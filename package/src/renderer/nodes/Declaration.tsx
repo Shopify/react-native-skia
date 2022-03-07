@@ -2,40 +2,33 @@ import type { DrawingContext } from "../DrawingContext";
 import { SkNode, NodeType } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
-import { materialize, isAnimated } from "../processors/Animations/Animations";
+import { isAnimated, materialize } from "../processors/Animations/Animations";
 
 export type DeclarationResult = SkJSIInstance<string> | null;
 
-type UseDeclarationCallback<T> = (
+type DeclarationCallback<T> = (
   props: T,
   children: DeclarationResult[],
   ctx: DrawingContext
 ) => DeclarationResult;
 
-type DeclarationCallback = (
-  ctx: DrawingContext,
-  node: SkNode,
-  children: DeclarationResult[]
-) => DeclarationResult;
-
 export const createDeclaration =
-  <T,>(cb: UseDeclarationCallback<T>): DeclarationCallback =>
-  (ctx, node, children) => {
-    const materializedProps = materialize(node.props as AnimatedProps<T>);
-    return cb(materializedProps, children, ctx);
+  <T,>(cb: DeclarationCallback<T>): DeclarationCallback<T> =>
+  (props, children, ctx) => {
+    return cb(props, children, ctx);
   };
 
-export interface DeclarationProps {
-  onDeclare: DeclarationCallback;
-}
+export type DeclarationProps<T> = {
+  onDeclare: DeclarationCallback<T>;
+};
 
-export class DeclarationNode extends SkNode<NodeType.Declaration> {
-  constructor(props: DeclarationProps) {
+export class DeclarationNode<T> extends SkNode<NodeType.Declaration> {
+  constructor(props: DeclarationProps<T>) {
     super(NodeType.Declaration, props);
     this.props = props;
   }
 
-  set props(props: DeclarationProps) {
+  set props(props: DeclarationProps<T>) {
     this.memoizable = !isAnimated(props);
     this._props = props;
   }
@@ -45,9 +38,10 @@ export class DeclarationNode extends SkNode<NodeType.Declaration> {
   }
 
   draw(ctx: DrawingContext) {
-    const { onDeclare } = this.props;
     const children = this.visit(ctx);
-    const obj = onDeclare(ctx, this, children);
+    const { onDeclare, ...newProps } = this.props;
+    const props = materialize(newProps as AnimatedProps<T>);
+    const obj = onDeclare(props, children, ctx);
     return obj;
   }
 }
