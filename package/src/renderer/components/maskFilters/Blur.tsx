@@ -2,7 +2,7 @@ import React from "react";
 
 import { BlurStyle } from "../../../skia/MaskFilter";
 import { Skia } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
+import { createDeclaration } from "../../nodes/Declaration";
 import type { SkEnum } from "../../processors";
 import { enumKey } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
@@ -13,14 +13,17 @@ export interface BlurMaskProps {
   respectCTM: boolean;
 }
 
-export const BlurMask = (props: AnimatedProps<BlurMaskProps>) => {
-  const onDeclare = useDeclaration(props, ({ style, sigma, respectCTM }) => {
+const onDeclare = createDeclaration<BlurMaskProps>(
+  ({ style, sigma, respectCTM }) => {
     return Skia.MaskFilter.MakeBlur(
       BlurStyle[enumKey(style)],
       sigma,
       respectCTM
     );
-  });
+  }
+);
+
+export const BlurMask = (props: AnimatedProps<BlurMaskProps>) => {
   return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 

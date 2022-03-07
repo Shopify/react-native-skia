@@ -2,7 +2,7 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { Skia } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
+import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import type { SkRect } from "../../../skia/Rect";
 import type { Color } from "../../../skia/Color";
@@ -20,24 +20,24 @@ export interface DropShadowProps {
   shadowOnly?: boolean;
 }
 
+const onDeclare = createDeclaration<DropShadowProps>(
+  ({ dx, dy, blur, color, shadowOnly, cropRect }, children, { opacity }) => {
+    const input = getInput(children);
+    const factory = shadowOnly
+      ? Skia.ImageFilter.MakeDropShadowOnly
+      : Skia.ImageFilter.MakeDropShadow;
+    return factory(
+      dx,
+      dy,
+      blur,
+      blur,
+      processColor(color, opacity),
+      input,
+      cropRect
+    );
+  }
+);
+
 export const DropShadow = (props: AnimatedProps<DropShadowProps>) => {
-  const onDeclare = useDeclaration(
-    props,
-    ({ dx, dy, blur, color, shadowOnly, cropRect }, children, { opacity }) => {
-      const input = getInput(children);
-      const factory = shadowOnly
-        ? Skia.ImageFilter.MakeDropShadowOnly
-        : Skia.ImageFilter.MakeDropShadow;
-      return factory(
-        dx,
-        dy,
-        blur,
-        blur,
-        processColor(color, opacity),
-        input,
-        cropRect
-      );
-    }
-  );
   return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

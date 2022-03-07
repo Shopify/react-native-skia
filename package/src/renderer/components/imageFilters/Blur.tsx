@@ -2,7 +2,7 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { Skia, TileMode } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
+import { createDeclaration } from "../../nodes/Declaration";
 import type { SkEnum } from "../../processors";
 import { enumKey } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
@@ -16,18 +16,18 @@ export interface BlurProps {
   children?: ReactNode | ReactNode[];
 }
 
+const onDeclare = createDeclaration<BlurProps>(
+  ({ sigmaX, sigmaY, mode }, children) => {
+    return Skia.ImageFilter.MakeBlur(
+      sigmaX,
+      sigmaY,
+      TileMode[enumKey(mode)],
+      getInput(children)
+    );
+  }
+);
+
 export const Blur = (props: AnimatedProps<BlurProps>) => {
-  const onDeclare = useDeclaration(
-    props,
-    ({ sigmaX, sigmaY, mode }, children) => {
-      return Skia.ImageFilter.MakeBlur(
-        sigmaX,
-        sigmaY,
-        TileMode[enumKey(mode)],
-        getInput(children)
-      );
-    }
-  );
   return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 

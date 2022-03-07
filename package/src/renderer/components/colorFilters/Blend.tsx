@@ -2,7 +2,7 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { BlendMode, Skia } from "../../../skia";
-import { useDeclaration } from "../../nodes";
+import { createDeclaration } from "../../nodes";
 import type { SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
 import type { Color } from "../../../skia";
@@ -15,13 +15,14 @@ export interface BlendProps {
   children?: ReactNode | ReactNode[];
 }
 
+const onDeclare = createDeclaration<BlendProps>(({ mode, color }, children) => {
+  const cf = Skia.ColorFilter.MakeBlend(
+    Skia.Color(color),
+    BlendMode[enumKey(mode)]
+  );
+  return composeColorFilter(cf, children);
+});
+
 export const Blend = (props: AnimatedProps<BlendProps>) => {
-  const onDeclare = useDeclaration(props, ({ mode, color }, children) => {
-    const cf = Skia.ColorFilter.MakeBlend(
-      Skia.Color(color),
-      BlendMode[enumKey(mode)]
-    );
-    return composeColorFilter(cf, children);
-  });
   return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

@@ -2,7 +2,7 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { BlendMode, Skia } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
+import { createDeclaration } from "../../nodes/Declaration";
 import type { SkEnum } from "../../processors/Paint";
 import { isShader } from "../../../skia/Shader/Shader";
 import { enumKey } from "../../processors/Paint";
@@ -13,10 +13,11 @@ export interface BlendShaderProps {
   children: ReactNode | ReactNode[];
 }
 
+const onDeclare = createDeclaration<BlendShaderProps>(({ mode }, children) => {
+  const [one, two] = children.filter(isShader);
+  return Skia.Shader.MakeBlend(BlendMode[enumKey(mode)], one, two);
+});
+
 export const BlendShader = (props: AnimatedProps<BlendShaderProps>) => {
-  const onDeclare = useDeclaration(props, ({ mode }, children) => {
-    const [one, two] = children.filter(isShader);
-    return Skia.Shader.MakeBlend(BlendMode[enumKey(mode)], one, two);
-  });
   return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

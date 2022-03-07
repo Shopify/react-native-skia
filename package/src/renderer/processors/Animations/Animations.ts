@@ -30,6 +30,7 @@ export const isAnimated = <T>(props: AnimatedProps<T>) => {
   return false;
 };
 
+// TODO: to remove
 export const processProps = <T>(props: T, cb: (value: unknown) => void) =>
   mapKeys(props).forEach((key) => {
     cb(props[key]);

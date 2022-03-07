@@ -1,5 +1,3 @@
-import { useCallback } from "react";
-
 import type { DrawingContext } from "../DrawingContext";
 import { SkNode, NodeType } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
@@ -16,21 +14,17 @@ type UseDeclarationCallback<T> = (
 
 type DeclarationCallback = (
   ctx: DrawingContext,
+  node: SkNode,
   children: DeclarationResult[]
 ) => DeclarationResult;
 
-export const useDeclaration = <T,>(
-  props: AnimatedProps<T>,
-  cb: UseDeclarationCallback<T>
-) =>
-  useCallback<DeclarationCallback>(
-    (ctx, children) => {
-      const materializedProps = materialize(props);
-      return cb(materializedProps, children, ctx);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props]
-  );
+export const createDeclaration =
+  <T,>(cb: UseDeclarationCallback<T>): DeclarationCallback =>
+  (ctx, node, children) => {
+    console.log({ node, children });
+    const materializedProps = materialize(node.props as AnimatedProps<T>);
+    return cb(materializedProps, children, ctx);
+  };
 
 export interface DeclarationProps {
   onDeclare: DeclarationCallback;
@@ -54,7 +48,7 @@ export class DeclarationNode extends SkNode<NodeType.Declaration> {
   draw(ctx: DrawingContext) {
     const { onDeclare } = this.props;
     const children = this.visit(ctx);
-    const obj = onDeclare(ctx, children);
+    const obj = onDeclare(ctx, this, children);
     return obj;
   }
 }
