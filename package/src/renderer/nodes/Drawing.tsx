@@ -1,6 +1,6 @@
 import React from "react";
 
-import { NodeType, SkNode } from "../Host";
+import { SkNode } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
 import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
@@ -8,9 +8,17 @@ import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
 
-type DrawingCallback<T> = (ctx: DrawingContext, props: T, node: SkNode) => void;
+type DrawingCallback<T> = (
+  ctx: DrawingContext,
+  props: T,
+  node: SkNode<AnimatedProps<DrawingProps<T>>>
+) => void;
 
-type OnDrawCallback<T> = (ctx: DrawingContext, props: T, node: SkNode) => void;
+type OnDrawCallback<T> = (
+  ctx: DrawingContext,
+  props: T,
+  node: SkNode<AnimatedProps<DrawingProps<T>>>
+) => void;
 
 export const createDrawing = <T,>(cb: OnDrawCallback<T>): DrawingCallback<T> =>
   cb;
@@ -24,9 +32,9 @@ export const Drawing = <T,>(props: DrawingProps<T>) => {
   return <skDrawing {...props} />;
 };
 
-export class DrawingNode<T> extends SkNode<NodeType.Drawing> {
+export class DrawingNode<T> extends SkNode<DrawingProps<T>> {
   constructor(props: DrawingProps<T>) {
-    super(NodeType.Drawing, props);
+    super(props);
   }
 
   draw(ctx: DrawingContext) {
@@ -43,12 +51,12 @@ export class DrawingNode<T> extends SkNode<NodeType.Drawing> {
         selectedPaint,
         ...this.children
           .map((child) => {
-            if (child.type === NodeType.Declaration) {
-              const ret = child.draw(ctx);
-              if (ret) {
-                return ret;
-              }
+            //if (child.type === NodeType.Declaration) {
+            const ret = child.draw(ctx);
+            if (ret) {
+              return ret;
             }
+            //}
             return null;
           })
           .filter(isPaint),

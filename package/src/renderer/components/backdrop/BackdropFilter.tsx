@@ -8,7 +8,7 @@ import { getInput } from "../imageFilters/getInput";
 import type { GroupProps } from "../Group";
 import { Group } from "../Group";
 
-const disableFilterMemoization = (children: SkNode[]) => {
+const disableFilterMemoization = (children: SkNode<unknown>[]) => {
   children.forEach((child) => {
     child.memoizable = false;
     disableFilterMemoization(child.children);

@@ -5,36 +5,24 @@ import type { DeclarationResult } from "./nodes/Declaration";
 import type { DeclarationProps, DrawingProps } from "./nodes";
 
 export enum NodeType {
-  Container = "skContainer",
   Declaration = "skDeclaration",
   Drawing = "skDrawing",
 }
 
-export interface NodeProps {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  [NodeType.Container]: {};
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [NodeType.Declaration]: DeclarationProps<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [NodeType.Drawing]: DrawingProps<any>;
-}
-
-export abstract class SkNode<T extends NodeType = NodeType> {
-  readonly type: T;
-  readonly children: SkNode[] = [];
-  _props: NodeProps[T];
+export abstract class SkNode<P> {
+  readonly children: SkNode<unknown>[] = [];
+  _props: P;
   memoizable = false;
   memoized = false;
-  parent?: SkNode;
+  parent?: SkNode<unknown>;
 
-  constructor(type: T, props: NodeProps[T]) {
-    this.type = type;
+  constructor(props: P) {
     this._props = props;
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
-  set props(props: NodeProps[T]) {
+  set props(props: P) {
     this._props = props;
   }
 
@@ -63,11 +51,11 @@ export abstract class SkNode<T extends NodeType = NodeType> {
   }
 }
 
-export class Container extends SkNode<NodeType.Container> {
+export class Container extends SkNode<unknown> {
   redraw: () => void;
 
   constructor(redraw: () => void) {
-    super(NodeType.Container, {});
+    super({});
     this.redraw = redraw;
   }
 
@@ -80,8 +68,10 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      skDeclaration: NodeProps[NodeType.Declaration];
-      skDrawing: NodeProps[NodeType.Drawing];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      skDeclaration: DeclarationProps<any>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      skDrawing: DrawingProps<any>;
     }
   }
 }

@@ -11,7 +11,7 @@ export const createDependencyManager = (ref: RefObject<SkiaView>) => {
   const unsubscribe: Array<() => void> = [];
 
   return {
-    visitChildren: function (node: SkNode) {
+    visitChildren: function (node: SkNode<unknown>) {
       processProps(node.props, (value) => {
         if (isValue(value)) {
           this.registerValue(value);

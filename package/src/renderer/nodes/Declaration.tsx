@@ -1,5 +1,5 @@
 import type { DrawingContext } from "../DrawingContext";
-import { SkNode, NodeType } from "../Host";
+import { SkNode } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { isAnimated, materialize } from "../processors/Animations/Animations";
@@ -20,9 +20,9 @@ export type DeclarationProps<T> = {
   onDeclare: DeclarationCallback<T>;
 };
 
-export class DeclarationNode<T> extends SkNode<NodeType.Declaration> {
+export class DeclarationNode<T> extends SkNode<DeclarationProps<T>> {
   constructor(props: DeclarationProps<T>) {
-    super(NodeType.Declaration, props);
+    super(props);
     this.props = props;
   }
 
