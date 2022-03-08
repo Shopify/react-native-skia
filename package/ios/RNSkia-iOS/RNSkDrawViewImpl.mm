@@ -1,7 +1,7 @@
 #import <RNSkDrawViewImpl.h>
 #import <SkiaDrawView.h>
 
-// These static class members are used by all the classes
+// These static class members are used by all Skia Views
 id<MTLDevice> RNSkDrawViewImpl::_device = MTLCreateSystemDefaultDevice();
 id<MTLCommandQueue> RNSkDrawViewImpl::_commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
 
@@ -14,13 +14,6 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::R
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
     _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
-    
-    if(_skContext == nullptr) {
-      GrContextOptions grContextOptions;
-      _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
-                                              (__bridge void*)_commandQueue,
-                                              grContextOptions);
-    }
     
     _layer.framebufferOnly = NO;
     _layer.device = _device;
@@ -41,22 +34,26 @@ void RNSkDrawViewImpl::setSize(int width, int height) {
   requestRedraw();
 }
 
-void RNSkDrawViewImpl::drawFrame(double time) {
+void RNSkDrawViewImpl::drawFrame(const sk_sp<SkPicture> picture) {
   if(_width == -1 && _height == -1) {
     return;
   }
-    
-  auto sampleCount = 1;
-  auto start = std::chrono::high_resolution_clock::now();
+  
+  if(_skContext == nullptr) {
+    GrContextOptions grContextOptions;
+    _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
+                                            (__bridge void*)_commandQueue,
+                                            grContextOptions);
+  }
   
   id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
   
   GrMtlTextureInfo fbInfo;
   fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
 
-  GrBackendRenderTarget backendRT(_width * _context->getPixelDensity(),
-                                  _height * _context->getPixelDensity(),
-                                  sampleCount,
+  GrBackendRenderTarget backendRT(_layer.drawableSize.width,
+                                  _layer.drawableSize.height,
+                                  1,
                                   fbInfo);
 
   auto skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
@@ -72,18 +69,10 @@ void RNSkDrawViewImpl::drawFrame(double time) {
   }
   
   skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
-  drawInSurface(skSurface,
-                _width * _context->getPixelDensity(),
-                _height * _context->getPixelDensity(),
-                time,
-                _context);
+  skSurface->getCanvas()->drawPicture(picture);
+  skSurface->getCanvas()->flush();
   
   id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
-  commandBuffer.label = @"Present";
   [commandBuffer presentDrawable:currentDrawable];
   [commandBuffer commit];
-  
-  // Calculate duration
-  auto stop = std::chrono::high_resolution_clock::now();
-  setLastFrameDuration(std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
 }

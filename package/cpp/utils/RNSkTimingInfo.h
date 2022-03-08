@@ -18,6 +18,15 @@ public:
     _lastDurationsCount = 0;
     _lastDuration = 0;
   }
+  
+  void beginTiming() {
+    _start = std::chrono::high_resolution_clock::now();
+  }
+  
+  void stopTiming() {
+    auto stop = std::chrono::high_resolution_clock::now();
+    addLastDuration(std::chrono::duration_cast<std::chrono::milliseconds>(stop - _start).count());
+  }
 
   long getAverage() { return static_cast<long>(_average); }
 
@@ -37,7 +46,7 @@ public:
 
     _average = 0;
     for (size_t i = 0; i < _lastDurationsCount; i++) {
-      _average += _lastDurations[i];
+      _average = _average + _lastDurations[i];
     }
     _average = _average / _lastDurationsCount;
   }
@@ -48,6 +57,7 @@ private:
   int _lastDurationIndex;
   int _lastDurationsCount;
   long _lastDuration;
-  double _average;
+  std::atomic<double> _average;
+  std::chrono::time_point<steady_clock> _start;
 };
 } // namespace RNSkia
