@@ -1,9 +1,9 @@
-import type { IColorFilter } from "../../../skia";
+import type { SkColorFilter } from "../../../skia";
 import { isColorFilter, isImageFilter, Skia } from "../../../skia";
 import type { DeclarationResult } from "../../nodes";
 
 export const composeColorFilter = (
-  cf: IColorFilter,
+  cf: SkColorFilter,
   children: DeclarationResult[]
 ) => {
   const [col] = children.filter(isColorFilter);

@@ -1,5 +1,5 @@
 import type { SkColor } from "../Color";
-import type { IColorFilter } from "../ColorFilter/ColorFilter";
+import type { SkColorFilter } from "../ColorFilter/ColorFilter";
 import type { IShader } from "../Shader/Shader";
 import type { SkRect } from "../Rect";
 
@@ -69,7 +69,10 @@ export interface ImageFilterFactory {
    * @param cf
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
    */
-  MakeColorFilter(cf: IColorFilter, input: SkImageFilter | null): SkImageFilter;
+  MakeColorFilter(
+    cf: SkColorFilter,
+    input: SkImageFilter | null
+  ): SkImageFilter;
 
   /**
    * Create a filter that composes 'inner' with 'outer', such that the results of 'inner' are

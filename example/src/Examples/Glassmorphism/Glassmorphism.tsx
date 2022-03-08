@@ -44,8 +44,7 @@ export const Glassmorphism = () => {
         />
       </Paint>
       <Circle c={c} r={radius} />
-      <BackdropFilter clip={rect}>
-        <Blur sigmaX={10} sigmaY={10} />
+      <BackdropFilter filter={<Blur sigmaX={10} sigmaY={10} />} clip={rect}>
         <Fill color="rgba(0, 0, 0, 0.3)" />
       </BackdropFilter>
     </Canvas>

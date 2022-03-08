@@ -38,6 +38,11 @@ const sidebars = {
       id: "group",
     },
     {
+      type: "doc",
+      label: "Mask",
+      id: "mask",
+    },
+    {
       collapsed: true,
       type: "category",
       label: "Image",
