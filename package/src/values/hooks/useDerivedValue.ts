@@ -16,5 +16,5 @@ export const useDerivedValue: CreateDerivedvalue = <R>(
   cb: (...args: Array<unknown>) => R,
   values: Array<SkiaReadonlyValue<unknown>>
 ): SkiaReadonlyValue<R> => {
-  return useMemo(() => ValueApi.createDerivedValue(cb, values), [cb, values]);
+  return useMemo(() => ValueApi.createDerivedValue(cb, values), values);
 };
