@@ -5,11 +5,11 @@ sidebar_label: FitBox
 slug: /shapes/fibox
 ---
 
-The `FitBox` components allows you to automatically scales drawings to you Canvas.
+The `FitBox` components allows you to automatically scale drawings so they fit into a destination rectangle.
 
 | Name | Type     |  Description                                       |
 |:-----|:---------|:---------------------------------------------------|
-| src  | `SKRect` | Bounding rectangle of the drawings before scaling  |
+| src  | `SKRect` | Bounding rectangle of the drawing before scaling  |
 | dst  | `SKRect` | Bounding rectangle of the drawing after scale      |
 | fit? | `Fit`    | Method to make the image fit into the rectangle. Value can be `contain`, `fill`, `cover` `fitHeight`, `fitWidth`, `scaleDown`, `none` (default is `contain`) |
 
