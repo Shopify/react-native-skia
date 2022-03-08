@@ -9,7 +9,7 @@ Images can be draw by specifying the output rectangle and how the image should f
 
 | Name   | Type                  | Description                                                                                                                                                   |
 | :----- | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| image  | `IImage`              | Image instance.                                                                                                                     |
+| image  | `SkImage`              | Image instance.                                                                                                                     |
 | x      | `number`              | Left position of the destination image.                                                                                                                       |
 | y      | `number`              | Right position of the destination image.                                                                                                                      |
 | width  | `number`              | Width of the destination image.                                                                                                                               |

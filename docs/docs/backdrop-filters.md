@@ -37,9 +37,10 @@ const Filter = () => {
         height={256}
         fit="cover"
       />
-      <BackdropFilter clip={{ x: 0, y: 128, width: 256, height: 128 }}>
-        <ColorMatrix matrix={BLACK_AND_WHITE} />
-      </BackdropFilter>
+      <BackdropFilter
+        clip={{ x: 0, y: 128, width: 256, height: 128 }}
+        filter={<ColorMatrix matrix={BLACK_AND_WHITE} />}
+      />
     </Canvas>
   );
 };

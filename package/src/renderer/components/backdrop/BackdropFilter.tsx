@@ -1,4 +1,5 @@
-import React, { Children } from "react";
+import type { ReactNode } from "react";
+import React from "react";
 
 import type { AnimatedProps } from "../../processors";
 import { useDrawing } from "../../nodes";
@@ -15,13 +16,15 @@ const disableFilterMemoization = (children: SkNode[]) => {
   });
 };
 
-export type BackdropFilterProps = GroupProps;
+export interface BackdropFilterProps extends GroupProps {
+  filter: ReactNode | ReactNode[];
+}
 
-export const BackdropFilter = (
-  allProps: AnimatedProps<BackdropFilterProps>
-) => {
-  const { children: allChildren, ...props } = allProps;
-  const [filterChild, ...groupChildren] = Children.toArray(allChildren);
+export const BackdropFilter = ({
+  filter: filterChild,
+  children: groupChildren,
+  ...props
+}: AnimatedProps<BackdropFilterProps>) => {
   const onDraw = useDrawing(props, (ctx, _, children) => {
     disableFilterMemoization(children);
     const toFilter = processChildren(ctx, children);

@@ -59,7 +59,7 @@ export const API = () => {
         name="Clipping"
         component={Clipping}
         options={{
-          title: "✂️ Clipping",
+          title: "🎭 Clipping & Masking",
         }}
       />
       <Stack.Screen

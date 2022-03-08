@@ -10,6 +10,7 @@ export * from "./pathEffects";
 export * from "../processors";
 
 export * from "./Group";
+export * from "./Mask";
 export * from "./Paint";
 export * from "./Compose";
 export * from "./Defs";

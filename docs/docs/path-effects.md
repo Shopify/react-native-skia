@@ -159,7 +159,7 @@ Stamp the specified path to fill the shape, using the matrix to define the latic
 | Name      | Type         |  Description                  |
 |:----------|:-------------|:------------------------------|
 | path      | `PathDef`    | The path to use               |
-| matrix    | `IMatrix`    |  Matrix to be applied         |
+| matrix    | `SkMatrix`    |  Matrix to be applied         |
 | children? | `PathEffect` | Optional path effect to apply |
 
 ### Example

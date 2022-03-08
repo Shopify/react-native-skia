@@ -16,7 +16,7 @@ const examples = [
   },
   {
     screen: "Clipping",
-    title: "✂️ Clipping",
+    title: "✂️ & 🎭 Clipping & Masking",
   },
   {
     screen: "PathEffect",
