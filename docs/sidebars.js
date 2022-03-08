@@ -95,6 +95,7 @@ const sidebars = {
         "shapes/ellipses",
         "shapes/vertices",
         "shapes/patch",
+        "shapes/fitbox",
       ],
     },
     {
