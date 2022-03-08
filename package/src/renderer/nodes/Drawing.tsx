@@ -1,47 +1,56 @@
+import type { ReactNode } from "react";
 import React from "react";
 
 import { SkNode } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
-import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
 
-type DrawingCallback<T> = (
+type DrawingCallback<P> = (
   ctx: DrawingContext,
-  props: T,
-  node: SkNode<AnimatedProps<DrawingProps<T>>>
+  props: P,
+  node: SkNode<P>
 ) => void;
 
-type OnDrawCallback<T> = (
+type OnDrawCallback<P> = (
   ctx: DrawingContext,
-  props: T,
-  node: SkNode<AnimatedProps<DrawingProps<T>>>
+  props: P,
+  node: SkNode<P>
 ) => void;
 
-export const createDrawing = <T,>(cb: OnDrawCallback<T>): DrawingCallback<T> =>
+export const createDrawing = <P,>(cb: OnDrawCallback<P>): DrawingCallback<P> =>
   cb;
 
-export type DrawingProps<T> = AnimatedProps<CustomPaintProps> & {
+export type DrawingProps<T> = {
   onDraw: DrawingCallback<T>;
   skipProcessing?: boolean;
+  children?: ReactNode | ReactNode[];
 };
 
-export const Drawing = <T,>(props: DrawingProps<T>) => {
+export const Drawing = <P,>(props: DrawingProps<P>) => {
   return <skDrawing {...props} />;
 };
 
-export class DrawingNode<T> extends SkNode<DrawingProps<T>> {
-  constructor(props: DrawingProps<T>) {
+export class DrawingNode<P> extends SkNode<P> {
+  onDraw: DrawingCallback<P>;
+  skipProcessing: boolean;
+
+  constructor(
+    onDraw: DrawingCallback<P>,
+    skipProcessing: boolean,
+    props: AnimatedProps<P>
+  ) {
     super(props);
+    this.onDraw = onDraw;
+    this.skipProcessing = skipProcessing;
   }
 
   draw(ctx: DrawingContext) {
-    const { skipProcessing, onDraw, ...newProps } = this.props;
-    const drawingProps = materialize(newProps as AnimatedProps<T>);
-    if (skipProcessing) {
-      onDraw(ctx, drawingProps, this);
+    const drawingProps = materialize(this.props);
+    if (this.skipProcessing) {
+      this.onDraw(ctx, drawingProps, this);
     } else {
       const selectedPaint = selectPaint(ctx.paint, drawingProps);
       processPaint(selectedPaint, ctx.opacity, drawingProps);
@@ -61,7 +70,7 @@ export class DrawingNode<T> extends SkNode<DrawingProps<T>> {
           })
           .filter(isPaint),
       ].forEach((paint) => {
-        onDraw({ ...ctx, paint }, drawingProps, this);
+        this.onDraw({ ...ctx, paint }, drawingProps, this);
       });
     }
   }

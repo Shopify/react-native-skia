@@ -16,17 +16,20 @@ export const createDeclaration = <T,>(
   cb: DeclarationCallback<T>
 ): DeclarationCallback<T> => cb;
 
-export type DeclarationProps<T> = {
-  onDeclare: DeclarationCallback<T>;
-};
+export interface DeclarationProps<P> {
+  onDeclare: DeclarationCallback<P>;
+}
 
-export class DeclarationNode<T> extends SkNode<DeclarationProps<T>> {
-  constructor(props: DeclarationProps<T>) {
+export class DeclarationNode<P> extends SkNode<P> {
+  private onDeclare: DeclarationCallback<P>;
+
+  constructor(onDeclare: DeclarationCallback<P>, props: AnimatedProps<P>) {
     super(props);
     this.props = props;
+    this.onDeclare = onDeclare;
   }
 
-  set props(props: DeclarationProps<T>) {
+  set props(props: AnimatedProps<P>) {
     this.memoizable = !isAnimated(props);
     this._props = props;
   }
@@ -37,9 +40,8 @@ export class DeclarationNode<T> extends SkNode<DeclarationProps<T>> {
 
   draw(ctx: DrawingContext) {
     const children = this.visit(ctx);
-    const { onDeclare, ...newProps } = this.props;
-    const props = materialize(newProps as AnimatedProps<T>);
-    const obj = onDeclare(props, children, ctx);
+    const props = materialize(this.props);
+    const obj = this.onDeclare(props, children, ctx);
     return obj;
   }
 }

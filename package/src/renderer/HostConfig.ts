@@ -5,8 +5,6 @@ import { DeclarationNode, DrawingNode } from "./nodes";
 import type { Container, SkNode } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
-import type { DrawingProps } from "./nodes/Drawing";
-import type { DeclarationProps } from "./nodes/Declaration";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -16,7 +14,8 @@ export const debug = (...args: Parameters<typeof console.log>) => {
 };
 
 type Instance = SkNode<unknown>;
-type Props = unknown;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Props = any;
 type TextInstance = SkNode<unknown>;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
@@ -128,9 +127,11 @@ const insertBefore = (
 const createNode = (type: NodeType, props: Props) => {
   switch (type) {
     case NodeType.Drawing:
-      return new DrawingNode(props as DrawingProps<unknown>);
+      const { onDraw, skipProcessing, ...p1 } = props;
+      return new DrawingNode(onDraw, skipProcessing, p1);
     case NodeType.Declaration:
-      return new DeclarationNode(props as DeclarationProps<unknown>);
+      const { onDeclare, ...p2 } = props;
+      return new DeclarationNode(onDeclare, p2);
     default:
       // TODO: here we need to throw a nice error message
       // This is the error that will show up when the user uses nodes not supported by Skia (View, Audio, etc)

@@ -1,8 +1,9 @@
 import { isPaint } from "../skia/Paint/Paint";
 
 import type { DrawingContext } from "./DrawingContext";
-import type { DeclarationResult } from "./nodes/Declaration";
-import type { DeclarationProps, DrawingProps } from "./nodes";
+import type { DeclarationResult, DeclarationProps } from "./nodes/Declaration";
+import type { DrawingProps } from "./nodes";
+import type { AnimatedProps } from "./processors/Animations/Animations";
 
 export enum NodeType {
   Declaration = "skDeclaration",
@@ -11,18 +12,18 @@ export enum NodeType {
 
 export abstract class SkNode<P> {
   readonly children: SkNode<unknown>[] = [];
-  _props: P;
+  _props: AnimatedProps<P>;
   memoizable = false;
   memoized = false;
   parent?: SkNode<unknown>;
 
-  constructor(props: P) {
+  constructor(props: AnimatedProps<P>) {
     this._props = props;
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
-  set props(props: P) {
+  set props(props: AnimatedProps<P>) {
     this._props = props;
   }
 
