@@ -14,11 +14,12 @@ The first child of `Mask` is the drawing to be used as a mask, and the remaining
 
 By default, the mask is not clipped. If you want to clip the mask with the bounds of the content it is masking, use the `bounds` property. 
 
-| Name      | Type                    | Description                                                   |
-|:----------|:------------------------|:--------------------------------------------------------------|
-| mode?     | `alpha` or `luminance` | Is it a luminance or alpha mask (default is `alpha`)          |
-| bounds?   | `SkRect`                | Optional rectangle to clip the mask with                      |
-| children? | `ReactNode[]`           | The first child of `Mask` is the drawing to be used as a mask, and the remaining children are the drawings to mask |
+| Name      | Type                      | Description                                                   |
+|:----------|:--------------------------|:--------------------------------------------------------------|
+| mode?     | `alpha` or `luminance`    | Is it a luminance or alpha mask (default is `alpha`)          |
+| bounds?   | `SkRect`                  | Optional rectangle to clip the mask with                      |
+| mask      | `ReactNode[] | ReactNode` | Mask definition | 
+| children  | `ReactNode[] | ReactNode` | Content to mask |
 
 ## Alpha Mask
 
