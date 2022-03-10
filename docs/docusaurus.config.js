@@ -71,6 +71,7 @@ const config = {
         appId: "LFNAM0RNW3",
         apiKey: "52424a97bf8bfa39b690587e466e0fec",
         indexName: "react-native-skia",
+        contextualSearch: false,
       },
       navbar: {
         title: "React Native Skia",
