@@ -34,27 +34,20 @@ public:
       auto jsiPositions = arguments[3].asObject(runtime).asArray(runtime);
       auto positionsSize = jsiPositions.size(runtime);
       for (int i = 0; i < positionsSize; i++) {
-        SkColor color = jsiPositions.getValueAtIndex(runtime, i).asNumber();
-        positions.push_back(color);
+        SkScalar pos = jsiPositions.getValueAtIndex(runtime, i).asNumber();
+        positions.push_back(pos);
       }
     }
 
-    auto tileMode = (SkTileMode)arguments[4].asNumber();
+    auto tileMode = static_cast<SkTileMode>(arguments[4].asNumber());
+    auto flag = count >= 7 && !arguments[6].isUndefined() ? arguments[6].asNumber(): 0;
+    auto localMatrix =
+            arguments[5].isUndefined() || count < 6
+            ? nullptr
+            : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
 
-    sk_sp<SkShader> gradient;
-    if (count == 5) {
-      gradient = SkGradientShader::MakeLinear(
-          pts, colors.data(), positions.data(), (int)size, tileMode);
-    } else {
-      auto localMatrix =
-          arguments[5].isUndefined() || count < 6
-              ? nullptr
-              : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
-      auto flag = count >= 7 && !arguments[6].isUndefined() ? arguments[6].asNumber(): 0;
-      gradient =
-          SkGradientShader::MakeLinear(pts, colors.data(), positions.data(),
-                                       (int)size, tileMode, flag, localMatrix);
-    }
+    sk_sp<SkShader> gradient = SkGradientShader::MakeLinear(pts, colors.data(), positions.data(),
+                                       size, tileMode, flag, localMatrix);
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
   }
@@ -66,7 +59,7 @@ public:
     auto r = arguments[1].asNumber();
 
     auto jsiColors = arguments[2].asObject(runtime).asArray(runtime);
-    int size = (int)jsiColors.size(runtime);
+    int size = jsiColors.size(runtime);
     std::vector<SkColor> colors;
     for (int i = 0; i < size; i++) {
       SkColor color = jsiColors.getValueAtIndex(runtime, i).asNumber();
@@ -76,29 +69,23 @@ public:
     std::vector<SkScalar> positions;
     if (!arguments[3].isNull()) {
       auto jsiPositions = arguments[3].asObject(runtime).asArray(runtime);
-      auto positionsSize = jsiPositions.size(runtime);
+      int positionsSize = jsiPositions.size(runtime);
       for (int i = 0; i < positionsSize; i++) {
-        SkColor color = jsiPositions.getValueAtIndex(runtime, i).asNumber();
-        positions.push_back(color);
+        auto pos = jsiPositions.getValueAtIndex(runtime, i).asNumber();
+        positions.push_back(pos);
       }
     }
 
-    auto tileMode = (SkTileMode)arguments[4].asNumber();
+    auto tileMode = static_cast<SkTileMode>(arguments[4].asNumber());
+    auto localMatrix =
+            arguments[5].isUndefined() || count < 6
+            ? nullptr
+            : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
+    auto flag = count >= 7 && !arguments[6].isUndefined() ? arguments[6].asNumber(): 0;
 
-    sk_sp<SkShader> gradient;
-    if (count == 5) {
-      gradient = SkGradientShader::MakeRadial(center, r, colors.data(),
-                                              positions.data(), size, tileMode);
-    } else {
-      auto localMatrix =
-          arguments[5].isUndefined() || count < 6
-              ? nullptr
-              : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
-      auto flag = count >= 7 && !arguments[6].isUndefined() ? arguments[6].asNumber(): 0;
-      gradient = SkGradientShader::MakeRadial(center, r, colors.data(),
+    sk_sp<SkShader> gradient = SkGradientShader::MakeRadial(center, r, colors.data(),
                                               positions.data(), size, tileMode,
                                               flag, localMatrix);
-    }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
   }
@@ -119,12 +106,12 @@ public:
       auto jsiPositions = arguments[3].asObject(runtime).asArray(runtime);
       auto positionsSize = jsiPositions.size(runtime);
       for (int i = 0; i < positionsSize; i++) {
-        SkColor color = jsiPositions.getValueAtIndex(runtime, i).asNumber();
-        positions.push_back(color);
+        SkScalar pos = jsiPositions.getValueAtIndex(runtime, i).asNumber();
+        positions.push_back(pos);
       }
     }
 
-    auto tileMode = (SkTileMode)arguments[4].asNumber();
+    auto tileMode = static_cast<SkTileMode>(arguments[4].asNumber());
     auto flags = count >= 7 && !arguments[6].isUndefined() ? arguments[6].asNumber(): 0;
     auto startAngle =
         (count < 8 || arguments[7].isUndefined()) ? 0 : arguments[7].asNumber();
@@ -136,7 +123,7 @@ public:
             ? nullptr
             : JsiSkMatrix::fromValue(runtime, arguments[5]).get();
     sk_sp<SkShader> gradient = SkGradientShader::MakeSweep(
-        x, y, colors.data(), positions.data(), (int)size, tileMode, startAngle,
+        x, y, colors.data(), positions.data(), size, tileMode, startAngle,
         endAngle, flags, localMatrix);
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
@@ -164,28 +151,22 @@ public:
       auto jsiPositions = arguments[5].asObject(runtime).asArray(runtime);
       auto positionsSize = jsiPositions.size(runtime);
       for (int i = 0; i < positionsSize; i++) {
-        SkColor color = jsiPositions.getValueAtIndex(runtime, i).asNumber();
-        positions.push_back(color);
+        SkScalar pos = jsiPositions.getValueAtIndex(runtime, i).asNumber();
+        positions.push_back(pos);
       }
     }
 
-    auto tileMode = (SkTileMode)arguments[6].asNumber();
+    auto tileMode = static_cast<SkTileMode>(arguments[6].asNumber());
+    auto localMatrix =
+            arguments[7].isUndefined() || count < 8
+            ? nullptr
+            : JsiSkMatrix::fromValue(runtime, arguments[7]).get();
+    auto flag = count >= 9 && !arguments[8].isUndefined() ? arguments[8].asNumber(): 0;
 
-    sk_sp<SkShader> gradient;
-    if (count == 7) {
-      gradient = SkGradientShader::MakeTwoPointConical(
-          start, startRadius, end, endRadius, colors.data(), positions.data(),
-          (int)size, tileMode);
-    } else {
-      auto localMatrix =
-          arguments[7].isUndefined() || count < 8
-              ? nullptr
-              : JsiSkMatrix::fromValue(runtime, arguments[7]).get();
-      auto flag = count >= 9 && !arguments[8].isUndefined() ? arguments[8].asNumber(): 0;
-      gradient = SkGradientShader::MakeTwoPointConical(
-          start, startRadius, end, endRadius, colors.data(), positions.data(),
-          (int)size, tileMode, flag, localMatrix);
-    }
+    sk_sp<SkShader> gradient = SkGradientShader::MakeTwoPointConical(
+            start, startRadius, end, endRadius, colors.data(), positions.data(),
+            size, tileMode, flag, localMatrix);
+
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
   }
