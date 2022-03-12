@@ -1,8 +1,10 @@
 /* eslint-disable max-len */
 import React from "react";
 import {
+  BlendMode,
   Canvas,
   Circle,
+  enumKey,
   Group,
   Path,
   Skia,
@@ -70,28 +72,34 @@ export const BlendModes = () => {
         <Circle cx={2.5 * r} cy={2 * r} r={r} color="yellow" />
       </Group>
       <Group transform={[{ translateY: 3 * r + 32 }]}>
-        {blendModes.map((blendMode, i) => (
-          <Group
-            transform={[
-              { translateX: SIZE * (i % COLS) + 256 * 0.025 },
-              { translateY: SIZE * Math.floor(i / COLS) + 256 * 0.025 },
-              { scale: 0.2 },
-            ]}
-            key={blendMode}
-          >
-            <Group blendMode={blendMode}>
-              <Path path={src} color="lightblue" />
+        {blendModes.map((blendMode, i) => {
+          const p2 = Skia.Paint();
+          const paint = Skia.Paint();
+          paint.setBlendMode(BlendMode[enumKey(blendMode)]);
+          return (
+            <Group
+              transform={[
+                { translateX: SIZE * (i % COLS) + 256 * 0.025 },
+                { translateY: SIZE * Math.floor(i / COLS) + 256 * 0.025 },
+                { scale: 0.2 },
+              ]}
+              key={blendMode}
+              rasterize={{ current: p2 }}
+            >
               <Path path={dst} color="pink" />
+              <Group rasterize={{ current: paint }}>
+                <Path path={src} color="lightblue" />
+              </Group>
+              <Text
+                text={blendMode}
+                x={0}
+                y={0}
+                familyName="source-sans-pro-semi-bold"
+                size={50}
+              />
             </Group>
-            <Text
-              text={blendMode}
-              x={0}
-              y={0}
-              familyName="source-sans-pro-semi-bold"
-              size={50}
-            />
-          </Group>
-        ))}
+          );
+        })}
       </Group>
     </Canvas>
   );
