@@ -1,17 +1,12 @@
-endi:
-  name: Endilie Yacop Sucipto
-  title: Maintainer of Docusaurus
-  url: https://github.com/endiliey
-  image_url: https://github.com/endiliey.png
+chrfalch:
+  name: Christian Falch
+  title: React Native Skia Maintainer
+  url: https://github.com/chrfalch
+  image_url: https://github.com/chrfalch.png
 
-yangshun:
-  name: Yangshun Tay
-  title: Front End Engineer @ Facebook
-  url: https://github.com/yangshun
-  image_url: https://github.com/yangshun.png
+wcandillon:
+  name: William Candillon
+  title: React Native Skia Maintainer
+  url: https://github.com/wcandillon
+  image_url: https://github.com/wcandillon.png
 
-slorber:
-  name: Sébastien Lorber
-  title: Docusaurus maintainer
-  url: https://sebastienlorber.com
-  image_url: https://github.com/slorber.png
