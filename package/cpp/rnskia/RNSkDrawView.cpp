@@ -187,10 +187,10 @@ void RNSkDrawView::performDraw() {
       SkPictureRecorder recorder;
       SkRTreeFactory factory;
       SkCanvas* canvas = recorder.beginRecording(getWidth(), getHeight(), &factory);
-      auto jsiCanvas = std::make_shared<JsiSkCanvas>(getPlatformContext(), canvas);
+      _jsiCanvas->setCanvas(canvas);
       
       // Perform the javascript drawing
-      drawInCanvas(jsiCanvas, getWidth(), getHeight(), ms.count() / 1000.0);
+      drawInCanvas(_jsiCanvas, getWidth(), getHeight(), ms.count() / 1000.0);
       
       // Finish drawing operations
       auto p = recorder.finishRecordingAsPicture();
