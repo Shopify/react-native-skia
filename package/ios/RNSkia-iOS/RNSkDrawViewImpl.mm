@@ -46,35 +46,41 @@ void RNSkDrawViewImpl::drawFrame(const sk_sp<SkPicture> picture) {
                                             grContextOptions);
   }
   
-  id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
-  if(currentDrawable == nullptr) {
-    return;
-  }
-  
-  GrMtlTextureInfo fbInfo;
-  fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
-  
-  GrBackendRenderTarget backendRT(_layer.drawableSize.width,
-                                  _layer.drawableSize.height,
-                                  1,
-                                  fbInfo);
+  // Wrap in auto release pool since we want the system to clean up after rendering
+  // and not wait until later - we've seen some example of memory usage growing very
+  // fast in the simulator without this.
+  @autoreleasepool
+  {
+    id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
+    if(currentDrawable == nullptr) {
+      return;
+    }
+    
+    GrMtlTextureInfo fbInfo;
+    fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
+    
+    GrBackendRenderTarget backendRT(_layer.drawableSize.width,
+                                    _layer.drawableSize.height,
+                                    1,
+                                    fbInfo);
 
-  auto skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
-                                                          backendRT,
-                                                          kTopLeft_GrSurfaceOrigin,
-                                                          kBGRA_8888_SkColorType,
-                                                          nullptr,
-                                                          nullptr);
-  
-  if(skSurface == nullptr || skSurface->getCanvas() == nullptr) {
-    RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
-    return;
+    auto skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
+                                                            backendRT,
+                                                            kTopLeft_GrSurfaceOrigin,
+                                                            kBGRA_8888_SkColorType,
+                                                            nullptr,
+                                                            nullptr);
+    
+    if(skSurface == nullptr || skSurface->getCanvas() == nullptr) {
+      RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
+      return;
+    }
+    
+    skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
+    skSurface->getCanvas()->drawPicture(picture);
+    
+    id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
+    [commandBuffer presentDrawable:currentDrawable];
+    [commandBuffer commit];
   }
-  
-  skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
-  skSurface->getCanvas()->drawPicture(picture);
-  
-  id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
-  [commandBuffer presentDrawable:currentDrawable];
-  [commandBuffer commit];
 }
