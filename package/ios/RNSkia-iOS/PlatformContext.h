@@ -20,11 +20,8 @@ using namespace facebook;
 class PlatformContext : public RNSkPlatformContext {
 public:
   PlatformContext(jsi::Runtime *runtime,
-                  std::shared_ptr<react::CallInvoker> callInvoker,
-                  const std::function<void(const std::function<void(void)> &)>
-                      dispatchOnRenderThread)
-      : RNSkPlatformContext(runtime, callInvoker, dispatchOnRenderThread,
-                            [[UIScreen mainScreen] scale]) {}
+                  std::shared_ptr<react::CallInvoker> callInvoker)
+      : RNSkPlatformContext(runtime, callInvoker, [[UIScreen mainScreen] scale]) {}
 
   ~PlatformContext() {}
 

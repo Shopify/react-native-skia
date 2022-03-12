@@ -13,7 +13,6 @@ namespace RNSkia {
                                   std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker) :
             RNSkPlatformContext(runtime,
                                 jsCallInvoker,
-                                [this](const std::function<void()> &func) { dispatchOnRenderThread(func); },
                                 jniPlatformContext->getPixelDensity()),
             _jniPlatformContext(jniPlatformContext) {
             // Hook onto the notify draw loop callback in the platform context
@@ -42,10 +41,6 @@ namespace RNSkia {
     }
 
     private:
-
-        void dispatchOnRenderThread (const std::function<void(void)>&func) {
-            _jniPlatformContext->dispatchOnRenderThread(func);
-        }
 
         JniPlatformContext* _jniPlatformContext;
     };
