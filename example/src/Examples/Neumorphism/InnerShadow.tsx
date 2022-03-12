@@ -26,15 +26,8 @@ export const Neumorphism = () => {
       <Rect x={width / 2} y={0} width={width / 2} height={height} color="red" />
       <Group>
         <Paint>
-          <InnerShadow dx={4} dy={4} blur={8} color="rgba(0, 255, 255, 0.5)" />
+          <InnerShadow dx={4} dy={4} blur={8} color="rgba(0, 0, 0, 0.5)" />
         </Paint>
-        <Rect rect={rct} color="rgba(255, 0, 255, 1)" />
-      </Group>
-      {/* <Group>
-        <Paint>
-          <BoxShadow dx={4} dy={4} blur={10} color="rgba(0, 0, 0, 0.5)" />
-        </Paint>
-        <Rect rect={rct} color="rgba(255, 255, 255, 0.59)" />
         <Text
           text="Hello"
           familyName="sans-serif-black"
@@ -43,7 +36,8 @@ export const Neumorphism = () => {
           x={32}
           y={200}
         />
-      </Group> */}
+        <Rect rect={rct} color="rgba(255, 0, 255, 1)" />
+      </Group>
     </Canvas>
   );
 };
