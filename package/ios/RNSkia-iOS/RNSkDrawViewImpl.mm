@@ -47,10 +47,13 @@ void RNSkDrawViewImpl::drawFrame(const sk_sp<SkPicture> picture) {
   }
   
   id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
+  if(currentDrawable == nullptr) {
+    return;
+  }
   
   GrMtlTextureInfo fbInfo;
   fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
-
+  
   GrBackendRenderTarget backendRT(_layer.drawableSize.width,
                                   _layer.drawableSize.height,
                                   1,
@@ -70,7 +73,6 @@ void RNSkDrawViewImpl::drawFrame(const sk_sp<SkPicture> picture) {
   
   skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
   skSurface->getCanvas()->drawPicture(picture);
-  skSurface->getCanvas()->flush();
   
   id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
   [commandBuffer presentDrawable:currentDrawable];
