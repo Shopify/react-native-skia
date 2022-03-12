@@ -12,6 +12,8 @@ import { Gradients } from "./Gradients2";
 import { PathExample } from "./Path2";
 import { Images } from "./Images";
 import { SVG } from "./SVG";
+import { BlendModes } from "./BlendModes";
+import { Data } from "./Data";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -57,7 +59,7 @@ export const API = () => {
         name="Clipping"
         component={Clipping}
         options={{
-          title: "✂️ Clipping",
+          title: "🎭 Clipping & Masking",
         }}
       />
       <Stack.Screen
@@ -86,6 +88,20 @@ export const API = () => {
         component={SVG}
         options={{
           title: "🖋 SVG",
+        }}
+      />
+      <Stack.Screen
+        name="BlendModes"
+        component={BlendModes}
+        options={{
+          title: "🎨 Blend Modes",
+        }}
+      />
+      <Stack.Screen
+        name="Data"
+        component={Data}
+        options={{
+          title: "📊 Data",
         }}
       />
     </Stack.Navigator>

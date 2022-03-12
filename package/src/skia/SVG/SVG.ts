@@ -1,3 +1,3 @@
 import type { SkJSIInstance } from "../JsiInstance";
 
-export type SVG = SkJSIInstance<"SVG">;
+export type SkSVG = SkJSIInstance<"SVG">;

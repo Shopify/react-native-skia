@@ -3,6 +3,7 @@
 #include <functional>
 #include <map>
 #include <mutex>
+#include <thread>
 
 #include <RNSkLog.h>
 
@@ -33,7 +34,9 @@ public:
       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker),
-        _dispatchOnRenderThread(dispatchOnRenderThread) {}
+        _dispatchOnRenderThread(dispatchOnRenderThread) {
+          _jsThreadId = std::this_thread::get_id();
+        }
 
   /**
    * Destructor
@@ -46,11 +49,21 @@ public:
     if(!_isValid) {
       return;
     }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    // Stop the refresh loop
     stopDrawLoop();
+    // Notify draw loop listeners once with the invalidated parameter
+    // set to true signalling that we are done and can clean up.
+    notifyDrawLoop(true);
     _isValid = false;
   }
-
+  
+  /*
+   Returns true if the current execution context is the javascript thread.
+   */
+  bool isOnJavascriptThread() {
+    return _jsThreadId == std::this_thread::get_id();
+  };
+  
   /**
    * Schedules the function to be run on the javascript thread async
    * @param func Function to run
@@ -81,7 +94,7 @@ public:
   virtual void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) = 0;
-
+  
   /**
    * Raises an exception on the platform. This function does not necessarily
    * throw an exception and stop execution, so it is important to stop execution
@@ -110,11 +123,15 @@ public:
    * @param callback Callback to call on sync
    * @returns Identifier of the draw loop entry
    */
-  size_t beginDrawLoop(size_t nativeId, std::function<void(void)> callback) {
+  size_t beginDrawLoop(size_t nativeId, std::function<void(bool)> callback) {
     if(!_isValid) { return 0; }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    _drawCallbacks.emplace(nativeId, std::move(callback));
-    if (_drawCallbacks.size() == 1) {
+    auto shouldStart = false;
+    {
+      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+      _drawCallbacks.emplace(nativeId, std::move(callback));
+      shouldStart = _drawCallbacks.size() == 1;
+    }
+    if (shouldStart) {
       // Start
       startDrawLoop();
     }
@@ -128,24 +145,34 @@ public:
    */
   void endDrawLoop(size_t nativeId) {
     if(!_isValid) { return; }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    if (_drawCallbacks.count(nativeId) > 0) {
-      _drawCallbacks.erase(nativeId);
+    auto shouldStop = false;
+    {
+      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+      if (_drawCallbacks.count(nativeId) > 0) {
+        _drawCallbacks.erase(nativeId);
+      }
+      shouldStop = _drawCallbacks.size() == 0;
     }
-    if (_drawCallbacks.size() == 0) {
+    if (shouldStop) {
       stopDrawLoop();
     }
   }
 
   /**
    * Notifies all drawing callbacks
+   * @param invalidated True if the context was invalidated, otherwise false. This
+   * can be used to receive a notification that we have stopped the main drawloop
    */
-  void notifyDrawLoop() {
+  void notifyDrawLoop(bool invalidated) {
     if(!_isValid) { return; }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
-      it->second();
+    std::map<size_t, std::function<void(bool)>> tmp;
+    {
+      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+      tmp.insert(_drawCallbacks.begin(), _drawCallbacks.end());      
     }
+    for (auto it = tmp.begin(); it != tmp.end(); it++) {
+      it->second(invalidated);
+    }    
   }
 
   virtual void startDrawLoop() = 0;
@@ -153,6 +180,8 @@ public:
 
 private:
   float _pixelDensity;
+  
+  std::thread::id _jsThreadId;
 
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;
@@ -160,7 +189,7 @@ private:
   std::function<void(const std::function<void(void)> &)>
       _dispatchOnRenderThread;
 
-  std::map<size_t, std::function<void(void)>> _drawCallbacks;
+  std::map<size_t, std::function<void(bool)>> _drawCallbacks;
   std::mutex _drawCallbacksLock;
   std::atomic<bool> _isValid = {true};
 };

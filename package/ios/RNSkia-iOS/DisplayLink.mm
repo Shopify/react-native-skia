@@ -21,7 +21,7 @@
     // check whether the loop is already stopped
     if (_displayLink != nil) {
         // if the display link is present, it gets invalidated (loop stops)
-        [_displayLink removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+        
         [_displayLink invalidate];
         _displayLink = nil;
     }

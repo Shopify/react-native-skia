@@ -1,9 +1,53 @@
-import type { Color } from "../Color";
-import type { IColorFilter } from "../ColorFilter/ColorFilter";
+import type { SkColor } from "../Color";
+import type { SkColorFilter } from "../ColorFilter/ColorFilter";
+import type { IShader } from "../Shader/Shader";
+import type { SkRect } from "../Rect";
 
-import type { IImageFilter, TileMode } from "./ImageFilter";
+import type { SkImageFilter, TileMode } from "./ImageFilter";
+
+export enum ColorChannel {
+  R,
+  G,
+  B,
+  A,
+}
 
 export interface ImageFilterFactory {
+  /**
+   * Offsets the input image
+   *
+   * @param dx - Offset along the X axis
+   * @param dy - Offset along the X axis
+   * @param input - if null, it will use the dynamic source image
+   */
+  MakeOffset(
+    dx: number,
+    dy: number,
+    input: SkImageFilter | null
+  ): SkImageFilter;
+  /**
+   * Spatially displace pixel values of the filtered image
+   *
+   * @param channelX - Color channel to be used along the X axis
+   * @param channelY - Color channel to be used along the Y axis
+   * @param scale - Scale factor to be used in the displacement
+   * @param in1 - Source image filter to use for the displacement
+   * @param input - if null, it will use the dynamic source image
+   */
+  MakeDisplacementMap(
+    channelX: ColorChannel,
+    channelY: ColorChannel,
+    scale: number,
+    in1: SkImageFilter,
+    input: SkImageFilter | null
+  ): SkImageFilter;
+  /**
+   * Transforms a shader into an impage filter
+   *
+   * @param shader - The Shader to be transformed
+   * @param input - if null, it will use the dynamic source image
+   */
+  MakeShader(shader: IShader, input: SkImageFilter | null): SkImageFilter;
   /**
    * Create a filter that blurs its input by the separate X and Y sigmas. The provided tile mode
    * is used when the blur kernel goes outside the input image.
@@ -17,15 +61,18 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     mode: TileMode,
-    input: IImageFilter | null
-  ): IImageFilter;
+    input: SkImageFilter | null
+  ): SkImageFilter;
 
   /**
    * Create a filter that applies the color filter to the input filter results.
    * @param cf
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
    */
-  MakeColorFilter(cf: IColorFilter, input: IImageFilter | null): IImageFilter;
+  MakeColorFilter(
+    cf: SkColorFilter,
+    input: SkImageFilter | null
+  ): SkImageFilter;
 
   /**
    * Create a filter that composes 'inner' with 'outer', such that the results of 'inner' are
@@ -35,9 +82,9 @@ export interface ImageFilterFactory {
    * @param inner - if null, it will use the dynamic source image (e.g. a saved layer)
    */
   MakeCompose(
-    outer: IImageFilter | null,
-    inner: IImageFilter | null
-  ): IImageFilter;
+    outer: SkImageFilter | null,
+    inner: SkImageFilter | null
+  ): SkImageFilter;
 
   /**
    * Create a filter that draws a drop shadow under the input content.
@@ -55,9 +102,10 @@ export interface ImageFilterFactory {
     dy: number,
     sigmaX: number,
     sigmaY: number,
-    color: Color,
-    input?: IImageFilter
-  ) => IImageFilter;
+    color: SkColor,
+    input: SkImageFilter | null,
+    cropRect?: SkRect
+  ) => SkImageFilter;
   /**
    * Create a filter that renders a drop shadow, in exactly the same manner as ::DropShadow, except
    * that the resulting image does not include the input content.
@@ -75,7 +123,8 @@ export interface ImageFilterFactory {
     dy: number,
     sigmaX: number,
     sigmaY: number,
-    color: Color,
-    input?: IImageFilter
-  ) => IImageFilter;
+    color: SkColor,
+    input: SkImageFilter | null,
+    cropRect?: SkRect
+  ) => SkImageFilter;
 }

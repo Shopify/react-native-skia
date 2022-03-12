@@ -2,7 +2,8 @@
 
 import React from "react";
 
-import type { IRect } from "../skia";
+import type { SkRect } from "../skia";
+import type { SkiaReadonlyValue } from "../values";
 
 import { NativeSkiaView } from "./types";
 import type { DrawMode, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
@@ -45,7 +46,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
    * @param rect Rect to use as bounds. Optional.
    * @returns An Image object.
    */
-  public makeImageSnapshot(rect?: IRect) {
+  public makeImageSnapshot(rect?: SkRect) {
     assertDrawCallbacksEnabled();
     return makeImageSnapshot(this._nativeId, rect);
   }
@@ -70,6 +71,16 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   public setDrawMode(mode: DrawMode) {
     assertDrawCallbacksEnabled();
     setDrawingModeForSkiaView(this._nativeId, mode);
+  }
+
+  /**
+   * Registers one or move values as a dependant value of the Skia View. The view will
+   * The view will redraw itself when any of the values change.
+   * @param value Value to register
+   */
+  public registerValues(values: SkiaReadonlyValue<unknown>[]) {
+    assertDrawCallbacksEnabled();
+    return registerValuesInSkiaView(this._nativeId, values);
   }
 
   /**
@@ -130,12 +141,19 @@ export const invalidateSkiaView = (nativeId: string) => {
   SkiaViewApi.invalidateSkiaView(parseInt(nativeId, 10));
 };
 
-export const makeImageSnapshot = (nativeId: string, rect?: IRect) => {
+export const makeImageSnapshot = (nativeId: string, rect?: SkRect) => {
   return SkiaViewApi.makeImageSnapshot(parseInt(nativeId, 10), rect);
 };
 
 const setDrawingModeForSkiaView = (nativeId: string, mode: DrawMode) => {
   SkiaViewApi.setDrawMode(parseInt(nativeId, 10), mode);
+};
+
+const registerValuesInSkiaView = (
+  nativeId: string,
+  values: SkiaReadonlyValue<unknown>[]
+) => {
+  return SkiaViewApi.registerValuesInView(parseInt(nativeId, 10), values);
 };
 
 const assertDrawCallbacksEnabled = () => {

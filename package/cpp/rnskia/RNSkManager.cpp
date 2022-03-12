@@ -53,7 +53,7 @@ void RNSkManager::setSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
 }
 
 void RNSkManager::installBindings() {
-  // Create the Skia API object and install it on the global object in the
+  // Create the API objects and install it on the global object in the
   // provided runtime.
 
   auto skiaApi = std::make_shared<JsiSkApi>(*_jsRuntime, _platformContext);
@@ -65,5 +65,9 @@ void RNSkManager::installBindings() {
       *_jsRuntime, "SkiaViewApi",
       jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
 
+  auto skiaValueApi = std::make_shared<RNSkValueApi>(_platformContext);
+  _jsRuntime->global().setProperty(
+    *_jsRuntime, "SkiaValueApi",
+    jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaValueApi)));
 }
 } // namespace RNSkia

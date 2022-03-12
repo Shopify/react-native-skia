@@ -61,7 +61,7 @@ public:
    Returns the native id
    */
   size_t getNativeId() { return _nativeId; }
-
+  
   /**
    * Call this method with a valid Skia surface to let the draw drawCallback do
    * its thing.
@@ -139,6 +139,11 @@ private:
   void endDrawingLoop();
   
   /**
+    Draw loop callback
+   */
+  void drawLoopCallback(bool invalidated);
+  
+  /**
    Draw in canvas
    */
   void drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
@@ -195,7 +200,7 @@ private:
   /**
    Redraw queue counter
    */
-  std::atomic<int> _redrawRequestCounter;
+  std::atomic<int> _redrawRequestCounter = { 1 };
   /**
    Flag indicating that the view is valid / invalid
    */

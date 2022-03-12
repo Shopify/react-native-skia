@@ -110,3 +110,116 @@ const Discrete = () => {
 ### Result
 
 ![Corner Path Effect](assets/path-effects/corner.png)
+
+## Path 1D Path Effect
+
+Dash by replicating the specified path.
+
+| Name      | Type                |  Description                                                                    |
+|:----------|:--------------------|:--------------------------------------------------------------------------------|
+| path      | `PathDef`           | The path to replicate (dash)                                                    |
+| advance   | `number`            |  The space between instances of path                                            |
+| phase     | `number`            | distance (mod advance) along path for its initial position                      |
+| style     | `Path1DEffectStyle` | how to transform path at each point (based on the current position and tangent) |
+| children? | `PathEffect`        | Optional path effect to apply.                                                  |
+
+### Example
+
+```tsx twoslash
+import {Canvas, Paint, Path1DPathEffect, Path} from "@shopify/react-native-skia";
+
+const logo = "M256 128.015C256 111.057 234.762...";
+
+const Path1D = () => {
+  return (
+      <Canvas style={{ flex: 1 }}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <Path1DPathEffect
+            path="M -10 0 L 0 -10, 10 0, 0 10 Z"
+            advance={20}
+            phase={0}
+            style="rotate"
+          />
+        </Paint>
+        <Path path={logo} color="#61DAFB" />
+      </Canvas> 
+  );
+};
+```
+
+### Result
+
+![Corner Path Effect](assets/path-effects/path1d.png)
+
+
+## Path 2D Path Effect
+
+Stamp the specified path to fill the shape, using the matrix to define the latice.
+
+| Name      | Type         |  Description                  |
+|:----------|:-------------|:------------------------------|
+| path      | `PathDef`    | The path to use               |
+| matrix    | `SkMatrix`    |  Matrix to be applied         |
+| children? | `PathEffect` | Optional path effect to apply |
+
+### Example
+
+```tsx twoslash
+import {Canvas, Paint, Path2DPathEffect, Path, processTransform2d} from "@shopify/react-native-skia";
+
+const logo = "M256 128.015C256 111.057 234.762...";
+
+const Path2D = () => {
+  return (
+      <Canvas style={{ flex: 1 }}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <Path2DPathEffect
+            path="M -10 0 L 0 -10, 10 0, 0 10 Z"
+            matrix={processTransform2d([{ scale: 40 }])}
+          />
+        </Paint>
+        <Path path={logo} color="#61DAFB" />
+      </Canvas> 
+  );
+};
+```
+
+### Result
+
+![Corner Path Effect](assets/path-effects/path2d.png)
+
+## Line 2D Path Effect
+
+Stamp the specified path to fill the shape, using the matrix to define the latice.
+
+| Name      | Type         |  Description                  |
+|:----------|:-------------|:------------------------------|
+| width      | `PathDef`    | The path to use               |
+| matrix    | `IMatrix`    |  Matrix to be applied         |
+| children? | `PathEffect` | Optional path effect to apply |
+
+### Example
+
+```tsx twoslash
+import {Canvas, Paint, Line2DPathEffect, Path, processTransform2d} from "@shopify/react-native-skia";
+
+const logo = "M256 128.015C256 111.057 234.762...";
+
+const Line2D = () => {
+  return (
+      <Canvas style={{ flex: 1 }}>
+        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+          <Line2DPathEffect
+            width={0}
+            matrix={processTransform2d([{ scale: 8 }])}
+          />
+        </Paint>
+        <Path path={logo} color="#61DAFB" />
+      </Canvas> 
+  );
+};
+```
+
+### Result
+
+![Corner Path Effect](assets/path-effects/line2d.png)

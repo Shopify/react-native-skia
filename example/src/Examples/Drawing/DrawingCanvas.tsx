@@ -10,7 +10,7 @@ import {
   DashPathEffect,
   Image,
 } from "@shopify/react-native-skia";
-import type { IRect, SkiaView } from "@shopify/react-native-skia";
+import type { SkRect, SkiaView } from "@shopify/react-native-skia";
 
 import type { DrawingElements } from "./Context/types";
 import { SelectionFrame } from "./SelectionFrame";
@@ -26,7 +26,7 @@ export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
   const drawContext = useDrawContext();
   const [elements, setElements] = useState<DrawingElements>([]);
   const [selectedElements, setSelectedElements] = useState<DrawingElements>();
-  const [selectionRect, setSelectionRect] = useState<IRect>();
+  const [selectionRect, setSelectionRect] = useState<SkRect>();
 
   // Draw context updated effect
   useEffect(

@@ -8,6 +8,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include <SkColorFilter.h>
+#include <SkLumaColorFilter.h>
 
 #pragma clang diagnostic pop
 
@@ -59,12 +60,12 @@ public:
                      getContext(), SkColorFilters::Lerp(t, dst, src)));
   }
 
-  JSI_HOST_FUNCTION(MakeSRGBToLinearGamma) {
-    // Return the newly constructed object
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::SRGBToLinearGamma()));
-  }
+    JSI_HOST_FUNCTION(MakeSRGBToLinearGamma) {
+      // Return the newly constructed object
+      return jsi::Object::createFromHostObject(
+              runtime, std::make_shared<JsiSkColorFilter>(
+                      getContext(), SkColorFilters::SRGBToLinearGamma()));
+    }
 
   JSI_HOST_FUNCTION(MakeLinearToSRGBGamma) {
     // Return the newly constructed object
@@ -73,14 +74,22 @@ public:
                      getContext(), SkColorFilters::LinearToSRGBGamma()));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeMatrix),
-                       JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeBlend),
-                       JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeCompose),
-                       JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeLerp),
-                       JSI_EXPORT_FUNC(JsiSkColorFilterFactory,
-                                       MakeSRGBToLinearGamma),
-                       JSI_EXPORT_FUNC(JsiSkColorFilterFactory,
-                                       MakeLinearToSRGBGamma))
+  JSI_HOST_FUNCTION(MakeLumaColorFilter) {
+    // Return the newly constructed object
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkColorFilter>(
+                     getContext(), SkLumaColorFilter::Make()));
+  }
+
+  JSI_EXPORT_FUNCTIONS(
+    JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeMatrix),
+    JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeBlend),
+    JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeCompose),
+    JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeLerp),
+    JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeSRGBToLinearGamma),
+    JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeLinearToSRGBGamma),
+    JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeLumaColorFilter)
+  )
 
   JsiSkColorFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}

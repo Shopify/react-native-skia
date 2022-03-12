@@ -1,10 +1,12 @@
 import React from "react";
 
-import type { CustomPaintProps } from "../../processors";
-import type { RectDef } from "../../processors/Shapes";
-import { processRect } from "../../processors/Shapes";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { useDrawing } from "../../nodes/Drawing";
+import type {
+  CustomPaintProps,
+  RectDef,
+  AnimatedProps,
+} from "../../processors";
+import { processRect } from "../../processors";
+import { useDrawing } from "../../nodes";
 
 export type OvalProps = RectDef & CustomPaintProps;
 

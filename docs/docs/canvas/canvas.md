@@ -13,7 +13,7 @@ Behind the scenes, it is using its own React renderer.
 |:-----|:---------|:-----------------|
 | style   | `ViewStyle` | View style. |
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
-| onTouch?    | `TouchHandler` | Touch handler for the Canvas (see [touch handler](/docs/animations/overview#usetouchhandler)).        |
+| onTouch?    | `TouchHandler` | Touch handler for the Canvas (see [touch handler](/docs/animations/touch-events#usetouchhandler)).        |
 
 ## Getting a Canvas Snapshot
 
@@ -27,7 +27,7 @@ import {Canvas, Image, useCanvasRef, Circle} from "@shopify/react-native-skia";
 
 export const Demo = () => {
   const ref = useCanvasRef();
-  const onPress = useEffect(() => {
+  useEffect(() => {
     setTimeout(() => {
       // you can pass an optional rectangle
       // to only save part of the image

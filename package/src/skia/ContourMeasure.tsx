@@ -1,5 +1,5 @@
 import type { SkJSIInstance } from "./JsiInstance";
-import type { IPath } from "./Path/Path";
+import type { SkPath } from "./Path/Path";
 
 export interface PosTan {
   px: number;
@@ -8,7 +8,7 @@ export interface PosTan {
   ty: number;
 }
 
-export interface IContourMeasure extends SkJSIInstance<"ContourMeasureIter"> {
+export interface SkContourMeasure extends SkJSIInstance<"ContourMeasureIter"> {
   /**
    * Returns the given position and tangent line for the distance on the given contour.
    * The return value is 4 floats in this order: posX, posY, vecX, vecY.
@@ -24,7 +24,7 @@ export interface IContourMeasure extends SkJSIInstance<"ContourMeasureIter"> {
    * @param stopD - will be pinned between 0 and length()
    * @param startWithMoveTo
    */
-  getSegment(startD: number, stopD: number, startWithMoveTo: boolean): IPath;
+  getSegment(startD: number, stopD: number, startWithMoveTo: boolean): SkPath;
 
   /**
    * Returns true if the contour is closed.
@@ -37,7 +37,7 @@ export interface IContourMeasure extends SkJSIInstance<"ContourMeasureIter"> {
   length(): number;
 }
 
-export interface IContourMeasureIter
+export interface SkContourMeasureIter
   extends SkJSIInstance<"ContourMeasureIter"> {
   /**
    *  Iterates through contours in path, returning a contour-measure object for each contour
@@ -45,5 +45,5 @@ export interface IContourMeasureIter
    *
    *  See SkContourMeasure.h for more details.
    */
-  next(): IContourMeasure | null;
+  next(): SkContourMeasure | null;
 }

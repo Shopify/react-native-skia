@@ -4,13 +4,13 @@ import type {
   CustomPaintProps,
   SkEnum,
   Vector,
-  ColorProp,
+  AnimatedProps,
 } from "../../processors";
-import { enumKey, processColor } from "../../processors";
-import type { IPoint } from "../../../skia";
-import { BlendMode } from "../../../skia/Paint/BlendMode";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { useDrawing } from "../../nodes/Drawing";
+import { enumKey } from "../../processors";
+import type { SkPoint, Color } from "../../../skia";
+import { BlendMode } from "../../../skia";
+import { useDrawing } from "../../nodes";
+import { processColor } from "../../../skia/Color";
 
 export interface CubicBezierHandle {
   pos: Vector;
@@ -19,14 +19,14 @@ export interface CubicBezierHandle {
 }
 
 export interface PatchProps extends CustomPaintProps {
-  colors?: readonly ColorProp[];
+  colors?: readonly Color[];
   patch: readonly [
     CubicBezierHandle,
     CubicBezierHandle,
     CubicBezierHandle,
     CubicBezierHandle
   ];
-  texture?: readonly [IPoint, IPoint, IPoint, IPoint];
+  texture?: readonly [SkPoint, SkPoint, SkPoint, SkPoint];
   blendMode?: SkEnum<typeof BlendMode>;
 }
 

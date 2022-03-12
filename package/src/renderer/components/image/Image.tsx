@@ -1,17 +1,19 @@
 import React from "react";
 
-import type { IImage } from "../../../skia";
-import type { CustomPaintProps } from "../../processors/Paint";
+import type { SkImage } from "../../../skia";
+import type {
+  CustomPaintProps,
+  RectDef,
+  AnimatedProps,
+} from "../../processors";
 import { useDrawing } from "../../nodes/Drawing";
-import type { RectDef } from "../../processors/Shapes";
-import { processRect } from "../../processors/Shapes";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
+import { processRect } from "../../processors";
 
 import type { Fit } from "./BoxFit";
 import { fitRects } from "./BoxFit";
 
 export type SourceImageProps = {
-  image: IImage;
+  image: SkImage;
 };
 
 export type BaseImageProps = RectDef &

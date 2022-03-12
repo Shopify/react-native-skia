@@ -26,6 +26,7 @@
 #include <SkRegion.h>
 #include <SkSurface.h>
 #include <SkTypeface.h>
+#include <SkPicture.h>
 
 #pragma clang diagnostic pop
 
@@ -400,11 +401,6 @@ public:
 
   JSI_HOST_FUNCTION(save) { return jsi::Value(_canvas->save()); }
 
-  JSI_HOST_FUNCTION(saveLayerPaint) {
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[0]);
-    return jsi::Value(_canvas->saveLayer(nullptr, paint.get()));
-  }
-
   JSI_HOST_FUNCTION(saveLayer) {
     SkPaint *paint = (count >= 1 && !arguments[0].isUndefined()) ?
                          JsiSkPaint::fromValue(runtime, arguments[0]).get() : nullptr;
@@ -502,7 +498,6 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, clipRRect),
                        JSI_EXPORT_FUNC(JsiSkCanvas, save),
                        JSI_EXPORT_FUNC(JsiSkCanvas, saveLayer),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, saveLayerPaint),
                        JSI_EXPORT_FUNC(JsiSkCanvas, restore),
                        JSI_EXPORT_FUNC(JsiSkCanvas, rotate),
                        JSI_EXPORT_FUNC(JsiSkCanvas, translate),

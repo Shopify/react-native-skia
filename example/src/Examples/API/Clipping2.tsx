@@ -2,22 +2,17 @@ import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
   Skia,
-  PaintStyle,
   Canvas,
   Image,
   Group,
+  Circle,
+  Rect,
+  Mask,
+  useImage,
 } from "@shopify/react-native-skia";
-import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 4;
-const paint = Skia.Paint();
-paint.setAntiAlias(true);
-paint.setColor(Skia.Color("#61DAFB"));
-
-const strokePaint = paint.copy();
-strokePaint.setStyle(PaintStyle.Stroke);
-strokePaint.setStrokeWidth(2);
 
 const star = Skia.Path.MakeFromSVGString(
   // eslint-disable-next-line max-len
@@ -51,7 +46,7 @@ export const Clipping = () => {
           height={SIZE}
           fit="cover"
         />
-        <Group clipRect={clipRRect} invertClip>
+        <Group clip={clipRRect} invertClip>
           <Image
             image={oslo}
             x={SIZE + 2 * PADDING}
@@ -61,7 +56,7 @@ export const Clipping = () => {
             fit="cover"
           />
         </Group>
-        <Group clipPath={star}>
+        <Group clip={star}>
           <Image
             image={oslo}
             x={2 * SIZE + 3 * PADDING}
@@ -71,6 +66,30 @@ export const Clipping = () => {
             fit="cover"
           />
         </Group>
+      </Canvas>
+      <Canvas style={{ width, height: 200 }}>
+        <Mask
+          mode="alpha"
+          mask={
+            <Group>
+              <Circle cx={100} cy={100} r={100} color="#00000066" />
+              <Circle cx={100} cy={100} r={50} color="black" />
+            </Group>
+          }
+        >
+          <Rect x={0} y={0} width={256} height={256} color="lightblue" />
+        </Mask>
+        <Mask
+          mode="luminance"
+          mask={
+            <Group>
+              <Circle cx={300} cy={100} r={100} color="white" />
+              <Circle cx={300} cy={100} r={50} color="black" />
+            </Group>
+          }
+        >
+          <Rect x={200} y={0} width={200} height={200} color="lightblue" />
+        </Mask>
       </Canvas>
     </ScrollView>
   );

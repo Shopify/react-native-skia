@@ -1,5 +1,7 @@
 # @shopify/react-native-skia
 
+[![Tests](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml)
+
 <img width="400" alt="skia" src="https://user-images.githubusercontent.com/306134/146549218-b7959ad9-0107-4c1c-b439-b96c780f5230.png">
 
 Checkout the full documentation [here](https://shopify.github.io/react-native-skia).
@@ -17,13 +19,13 @@ When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
 
 ```sh
-yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.103-alpha/shopify-react-native-skia-0.1.103.tgz
+yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.105-alpha/shopify-react-native-skia-0.1.105.tgz
 ```
 
 Or using npm:
 
 ```sh
-npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.103-alpha/shopify-react-native-skia-0.1.103.tgz
+npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.105-alpha/shopify-react-native-skia-0.1.105.tgz
 ```
 
 ### iOS

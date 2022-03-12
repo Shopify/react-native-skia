@@ -38,6 +38,11 @@ const sidebars = {
       id: "group",
     },
     {
+      type: "doc",
+      label: "Mask",
+      id: "mask",
+    },
+    {
       collapsed: true,
       type: "category",
       label: "Image",
@@ -71,7 +76,14 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Effects",
-      items: ["mask-filters", "color-filters", "image-filters", "path-effects"],
+      items: [
+        "mask-filters",
+        "color-filters",
+        "image-filters/drop-shadows",
+        "image-filters",
+        "path-effects",
+        "backdrops-filters",
+      ],
     },
     {
       collapsed: true,
@@ -83,13 +95,19 @@ const sidebars = {
         "shapes/ellipses",
         "shapes/vertices",
         "shapes/patch",
+        "shapes/fitbox",
       ],
     },
     {
       collapsed: true,
       type: "category",
       label: "Animations",
-      items: ["animations/overview", "animations/reanimated"],
+      items: [
+        "animations/values",
+        "animations/animations",
+        "animations/touch-events",
+        "animations/reanimated",
+      ],
     },
   ],
 };

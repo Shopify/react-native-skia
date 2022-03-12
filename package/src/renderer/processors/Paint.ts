@@ -1,17 +1,22 @@
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 
-import { BlendMode, PaintStyle, StrokeJoin, StrokeCap } from "../../skia";
-import type { IPaint } from "../../skia";
-
-import type { ChildrenProps } from "./Shapes";
-import type { ColorProp } from "./Colors";
-import { processColor } from "./Colors";
-
+import {
+  BlendMode,
+  PaintStyle,
+  StrokeJoin,
+  StrokeCap,
+  processColor,
+} from "../../skia";
+import type { SkPaint, Color } from "../../skia";
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
+export interface ChildrenProps {
+  children?: ReactNode | ReactNode[];
+}
+
 export interface CustomPaintProps extends ChildrenProps {
-  paint?: RefObject<IPaint>;
-  color?: ColorProp;
+  paint?: RefObject<SkPaint>;
+  color?: Color;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;
   style?: SkEnum<typeof PaintStyle>;
@@ -25,7 +30,7 @@ export const enumKey = <K extends string>(k: K) =>
   (k.charAt(0).toUpperCase() + k.slice(1)) as Capitalize<K>;
 
 export const processPaint = (
-  paint: IPaint,
+  paint: SkPaint,
   currentOpacity: number,
   {
     color,
@@ -70,7 +75,7 @@ export const processPaint = (
 };
 
 export const selectPaint = (
-  currentPaint: IPaint,
+  currentPaint: SkPaint,
   {
     paint,
     color: cl,
