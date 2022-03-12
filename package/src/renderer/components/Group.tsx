@@ -18,21 +18,30 @@ import type {
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isPaint = (obj: any): obj is SkPaint => obj.__typename__ === "Paint";
+
 export interface GroupProps extends CustomPaintProps, TransformProps {
   clip?: ClipDef;
   invertClip?: boolean;
-  rasterize?: RefObject<SkPaint>;
+  layer?: RefObject<SkPaint> | SkPaint | boolean;
 }
 
 export const Group = (props: AnimatedProps<GroupProps>) => {
   const onDraw = useDrawing(
     props,
-    (ctx, { rasterize, clip, invertClip, ...groupProps }, children) => {
+    (ctx, { layer: rasterize, clip, invertClip, ...groupProps }, children) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
       if (rasterize) {
-        canvas.saveLayer(rasterize.current ?? undefined);
+        if (typeof rasterize === "boolean") {
+          canvas.saveLayer();
+        } else if (isPaint(rasterize)) {
+          canvas.saveLayer(rasterize);
+        } else {
+          canvas.saveLayer(rasterize.current ?? undefined);
+        }
       } else {
         canvas.save();
       }

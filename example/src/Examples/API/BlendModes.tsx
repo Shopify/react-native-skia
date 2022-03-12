@@ -10,10 +10,8 @@ import {
   Skia,
   Text,
 } from "@shopify/react-native-skia";
-import { Dimensions } from "react-native";
 
-const { width } = Dimensions.get("window");
-const r = width / 6;
+const r = 50;
 
 const blendModes = [
   "clear",
@@ -71,9 +69,13 @@ export const BlendModes = () => {
         <Circle cx={1.5 * r} cy={2 * r} r={r} color="magenta" />
         <Circle cx={2.5 * r} cy={2 * r} r={r} color="yellow" />
       </Group>
+      <Group blendMode="plus" transform={[{ translateX: 3 * r }]}>
+        <Circle cx={2 * r} cy={r} r={r} color="#ff0000" />
+        <Circle cx={1.5 * r} cy={2 * r} r={r} color="#00ff00" />
+        <Circle cx={2.5 * r} cy={2 * r} r={r} color="#0000ff" />
+      </Group>
       <Group transform={[{ translateY: 3 * r + 32 }]}>
         {blendModes.map((blendMode, i) => {
-          const p2 = Skia.Paint();
           const paint = Skia.Paint();
           paint.setBlendMode(BlendMode[enumKey(blendMode)]);
           return (
@@ -84,10 +86,10 @@ export const BlendModes = () => {
                 { scale: 0.2 },
               ]}
               key={blendMode}
-              rasterize={{ current: p2 }}
+              layer
             >
               <Path path={dst} color="pink" />
-              <Group rasterize={{ current: paint }}>
+              <Group layer={paint}>
                 <Path path={src} color="lightblue" />
               </Group>
               <Text

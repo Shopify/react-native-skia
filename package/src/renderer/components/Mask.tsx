@@ -25,7 +25,7 @@ export const Mask = ({ children, mask, mode, bounds }: MaskProps) => {
       <Defs>
         <Paint ref={paint}>{mode === "luminance" && <LumaColorFilter />}</Paint>
       </Defs>
-      <Group rasterize={mode === "luminance" ? paint : undefined} clip={bounds}>
+      <Group layer={mode === "luminance" ? paint : undefined} clip={bounds}>
         {mask}
       </Group>
       <Group blendMode="srcIn">{children}</Group>
