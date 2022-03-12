@@ -18,8 +18,8 @@ import type {
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isPaint = (obj: any): obj is SkPaint => obj.__typename__ === "Paint";
+const isSkPaint = (obj: RefObject<SkPaint> | SkPaint): obj is SkPaint =>
+  "__typename__" in obj && obj.__typename__ === "Paint";
 
 export interface GroupProps extends CustomPaintProps, TransformProps {
   clip?: ClipDef;
@@ -37,7 +37,7 @@ export const Group = (props: AnimatedProps<GroupProps>) => {
       if (layer) {
         if (typeof layer === "boolean") {
           canvas.saveLayer();
-        } else if (isPaint(layer)) {
+        } else if (isSkPaint(layer)) {
           canvas.saveLayer(layer);
         } else {
           canvas.saveLayer(layer.current ?? undefined);
