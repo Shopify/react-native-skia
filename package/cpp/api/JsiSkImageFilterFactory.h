@@ -100,7 +100,7 @@ public:
     sk_sp<SkImageFilter> background = JsiSkImageFilter::fromValue(runtime, arguments[1]);
     sk_sp<SkImageFilter> foreground = nullptr;
 
-    if(count > 2) {
+    if(count > 2 && !arguments[2].isNull()) {
       foreground = JsiSkImageFilter::fromValue(runtime, arguments[2]);
     }
 
