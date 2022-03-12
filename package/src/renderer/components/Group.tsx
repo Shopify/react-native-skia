@@ -30,17 +30,17 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 export const Group = (props: AnimatedProps<GroupProps>) => {
   const onDraw = useDrawing(
     props,
-    (ctx, { layer: rasterize, clip, invertClip, ...groupProps }, children) => {
+    (ctx, { layer, clip, invertClip, ...groupProps }, children) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
-      if (rasterize) {
-        if (typeof rasterize === "boolean") {
+      if (layer) {
+        if (typeof layer === "boolean") {
           canvas.saveLayer();
-        } else if (isPaint(rasterize)) {
-          canvas.saveLayer(rasterize);
+        } else if (isPaint(layer)) {
+          canvas.saveLayer(layer);
         } else {
-          canvas.saveLayer(rasterize.current ?? undefined);
+          canvas.saveLayer(layer.current ?? undefined);
         }
       } else {
         canvas.save();
