@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
+  useLoop,
   Skia,
   Canvas,
   Image,
@@ -9,6 +10,8 @@ import {
   Rect,
   Mask,
   useImage,
+  useDerivedValue,
+  mix,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
@@ -31,6 +34,8 @@ const clipRRect = Skia.RRectXY(
 );
 
 export const Clipping = () => {
+  const progress = useLoop({ duration: 3000 });
+  const x = useDerivedValue(() => mix(progress.current, 0, 200), [progress]);
   const oslo = useImage(require("../../assets/oslo.jpg"));
   if (oslo === null) {
     return null;
@@ -68,7 +73,7 @@ export const Clipping = () => {
         </Group>
       </Canvas>
       <Canvas style={{ width, height: 200 }}>
-        <Rect x={100} y={0} width={200} height={200} color="green" />
+        <Rect x={x} y={0} width={200} height={200} color="green" />
         <Mask
           mode="alpha"
           mask={
