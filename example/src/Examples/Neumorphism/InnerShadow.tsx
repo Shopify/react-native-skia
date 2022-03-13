@@ -1,43 +1,82 @@
 import {
-  DropShadow,
   Canvas,
+  Circle,
   Fill,
   Group,
+  LinearGradient,
   Paint,
-  RoundedRect,
-  Rect,
+  add,
+  vec,
+  DropShadow,
   InnerShadow,
-  rect,
-  Text,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-const PADDING = 32;
-const SIZE = 256 - 64;
-const R = 32;
-const rct = rect(32, height / 2 - 100, 300, 300);
+const c = vec(width / 2, height / 2);
+const r = 85;
+const r1 = 60;
 
 export const Neumorphism = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Fill color="lightblue" />
-      <Rect x={width / 2} y={0} width={width / 2} height={height} color="red" />
       <Group>
         <Paint>
-          <InnerShadow dx={4} dy={4} blur={8} color="rgba(0, 0, 0, 0.5)" />
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(0, height)}
+            colors={["#2A2D32", "#131313"]}
+          />
         </Paint>
-        <Text
-          text="Hello"
-          familyName="sans-serif-black"
-          size={128}
-          color="cyan"
-          x={32}
-          y={200}
-        />
-        <Rect rect={rct} color="rgba(255, 0, 255, 1)" />
+        <Fill />
+      </Group>
+      <Group>
+        <Paint>
+          <LinearGradient
+            start={add(c, vec(-r, 0))}
+            end={add(c, vec(r, 0))}
+            colors={["#2B2F33", "#101113"]}
+          />
+          <DropShadow dx={18} dy={18} blur={65} color="#141415" />
+          <DropShadow dx={-18} dy={-18} blur={65} color="#485057" />
+        </Paint>
+        <Circle c={c} r={r} />
+      </Group>
+      <Group>
+        <Paint>
+          <InnerShadow dx={2} dy={1} blur={2} color="rgba(255, 255, 255, 0.5)">
+            <InnerShadow
+              dx={-26}
+              dy={-26}
+              blur={66}
+              color="rgba(59, 68, 81, 0.5)"
+            >
+              <InnerShadow
+                dx={26}
+                dy={26}
+                blur={81}
+                color="rgba(0, 0, 0, 0.5)"
+              />
+            </InnerShadow>
+          </InnerShadow>
+        </Paint>
+        <Circle c={c} r={r1} color="#32363B" />
       </Group>
     </Canvas>
   );
 };
+
+/* <InnerShadow
+dx={2}
+dy={1}
+blur={2}
+color="rgba(255, 255, 255, 0.5)"
+/>
+<InnerShadow
+dx={-26}
+dy={-26}
+blur={66}
+color="rgba(59, 68, 81, 0.5)"
+/>
+<InnerShadow dx={26} dy={26} blur={81} color="rgba(0, 0, 0, 0.5)" /> */
