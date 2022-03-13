@@ -1,1 +1,1 @@
-export { Neumorphism } from "./InnerShadow";
+export { Neumorphism } from "./Dashboard";
