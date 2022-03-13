@@ -1,11 +1,9 @@
 import type { ReactNode } from "react";
-import React from "react";
+import React, { useMemo } from "react";
 
 import type { SkRect } from "../../skia/Rect";
+import { BlendMode, Skia } from "../../skia";
 
-import { usePaintRef, Paint } from "./Paint";
-import { Defs } from "./Defs";
-import { LumaColorFilter } from "./colorFilters/LumaColorFilter";
 import { Group } from "./Group";
 
 // Here we ask the user to provide the bounds of content
@@ -19,17 +17,21 @@ interface MaskProps {
 }
 
 export const Mask = ({ children, mask, mode, bounds }: MaskProps) => {
-  const paint = usePaintRef();
+  const paint = useMemo(() => {
+    const p = Skia.Paint();
+    p.setBlendMode(BlendMode.Src);
+    if (mode === "luminance") {
+      p.setColorFilter(Skia.ColorFilter.MakeLumaColorFilter());
+    }
+    return p;
+  }, [mode]);
   return (
-    <>
-      <Defs>
-        <Paint ref={paint}>{mode === "luminance" && <LumaColorFilter />}</Paint>
-      </Defs>
-      <Group layer={mode === "luminance" ? paint : undefined} clip={bounds}>
+    <Group layer>
+      <Group layer={paint} clip={bounds}>
         {mask}
       </Group>
       <Group blendMode="srcIn">{children}</Group>
-    </>
+    </Group>
   );
 };
 
