@@ -9,13 +9,13 @@ import type { Color } from "../../../skia";
 
 import { composeColorFilter } from "./Compose";
 
-export interface BlendProps {
+export interface BlendColorProps {
   mode: SkEnum<typeof BlendMode>;
   color: Color;
   children?: ReactNode | ReactNode[];
 }
 
-export const Blend = (props: AnimatedProps<BlendProps>) => {
+export const BlendColor = (props: AnimatedProps<BlendColorProps>) => {
   const declaration = useDeclaration(props, ({ mode, color }, children) => {
     const cf = Skia.ColorFilter.MakeBlend(
       Skia.Color(color),
