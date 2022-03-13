@@ -8,7 +8,6 @@ import {
   add,
   vec,
   DropShadow,
-  InnerShadow,
   Path,
   Text,
   Skia,
@@ -17,6 +16,7 @@ import {
   useDerivedValue,
   mix,
   useFont,
+  InnerShadow,
   RoundedRect,
 } from "@shopify/react-native-skia";
 import React from "react";

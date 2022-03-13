@@ -5,6 +5,7 @@ import {
   Group,
   Paint,
   RoundedRect,
+  InnerShadow,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -24,6 +25,21 @@ export const Neumorphism = () => {
         <RoundedRect
           x={PADDING}
           y={PADDING}
+          width={SIZE}
+          height={SIZE}
+          rx={R}
+          color="lightblue"
+        />
+      </Group>
+
+      <Group>
+        <Paint>
+          <InnerShadow dx={12} dy={12} blur={25} color="#93b8c4" />
+          <InnerShadow dx={-12} dy={-12} blur={25} color="#c7f8ff" />
+        </Paint>
+        <RoundedRect
+          x={PADDING}
+          y={2 * PADDING + SIZE}
           width={SIZE}
           height={SIZE}
           rx={R}
