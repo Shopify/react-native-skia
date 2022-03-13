@@ -17,7 +17,7 @@ It will use cubic sampling.
 | ty?        | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
 | fm?        | `FilterMode`.  | Can be `linear` or `nearest`. |
 | mm?        | `MipmapMode`   | Can be `none`, `linear` or `nearest`. |
-| fit?       | `Fit`.         | Calculate the transformation matrix to fit the rectangle defined by `fitRect`. See [images](images). |
+| fit?       | `Fit`.         | Calculate the transformation matrix to fit the rectangle defined by `fitRect`. See [images](/docs/images). |
 | rect?      | SkRect`        | The destination reactangle to calculate the transformation matrix via the `fit` property. |
 | transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
