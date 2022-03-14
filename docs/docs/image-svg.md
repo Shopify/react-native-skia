@@ -26,7 +26,7 @@ import {
 } from "@shopify/react-native-skia";
 
 const ImageSVGDemo = () => {
-  // Alternatively, you can pass a SVG URL directly
+  // Alternatively, you can pass an SVG URL directly
   // for instance: const svg = useSVG("https://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg");
   const svg = useSVG(require("../../assets/tiger.svg"));
   return (
