@@ -183,7 +183,7 @@ const Clip = () => {
               1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
             ]}
           >
-            <Blur sigmaX={20} sigmaY={20} />
+            <Blur blur={20} />
           </ColorMatrix>
         </Paint>
       </Defs>
