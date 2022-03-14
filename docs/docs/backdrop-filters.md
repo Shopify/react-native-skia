@@ -12,7 +12,7 @@ Applies an image filter to the area behind the whole canvas or behind a defined 
 
 ### Example
 
-Apply a black and white color matrix to the clipping area
+Apply a black and white color matrix to the clipping area:
 
 ```tsx twoslash
 import { Canvas, BackdropFilter, Fill, Image, ColorMatrix, useImage } from "@shopify/react-native-skia";
