@@ -1,5 +1,5 @@
 export * from "./Matrix";
-export * from "./Blend";
+export * from "./BlendColor";
 export * from "./Lerp";
 export * from "./LinearToSRGBGamma";
 export * from "./SRGBToLinearGamma";

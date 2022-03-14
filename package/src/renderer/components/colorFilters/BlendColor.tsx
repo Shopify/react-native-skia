@@ -9,20 +9,22 @@ import type { Color } from "../../../skia";
 
 import { composeColorFilter } from "./Compose";
 
-export interface BlendProps {
+export interface BlendColorProps {
   mode: SkEnum<typeof BlendMode>;
   color: Color;
   children?: ReactNode | ReactNode[];
 }
 
-const onDeclare = createDeclaration<BlendProps>(({ mode, color }, children) => {
-  const cf = Skia.ColorFilter.MakeBlend(
-    Skia.Color(color),
-    BlendMode[enumKey(mode)]
-  );
-  return composeColorFilter(cf, children);
-});
+const onDeclare = createDeclaration<BlendColorProps>(
+  ({ mode, color }, children) => {
+    const cf = Skia.ColorFilter.MakeBlend(
+      Skia.Color(color),
+      BlendMode[enumKey(mode)]
+    );
+    return composeColorFilter(cf, children);
+  }
+);
 
-export const Blend = (props: AnimatedProps<BlendProps>) => {
+export const BlendColor = (props: AnimatedProps<BlendColorProps>) => {
   return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
