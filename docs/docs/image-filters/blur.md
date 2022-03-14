@@ -8,12 +8,11 @@ slug: /image-filters/blur
 Creates an image filter that blurs its input by the separate X and Y sigmas.
 The provided tile mode is used when the blur kernel goes outside the input image.
 
-| Name      | Type          |  Description                                                  |
-|:----------|:--------------|:--------------------------------------------------------------|
-| sigmaX    | `number`      | The Gaussian sigma blur value along the X axis.               |
-| sigmaY    | `number`      | The Gaussian sigma blur value along the Y axis.               |
-| mode?     | `TileMode`    | `mirror`, `repeat`, `clamp`, or `decal` (default is `decal`). |
-| children? | `ImageFilter` | Optional image filter to be applied first.                    | 
+| Name      | Type                 |  Description                                                  |
+|:----------|:---------------------|:--------------------------------------------------------------|
+| blur      | `number` or `Vector` | The Gaussian sigma blur value                                 |
+| mode?     | `TileMode`           | `mirror`, `repeat`, `clamp`, or `decal` (default is `decal`). |
+| children? | `ImageFilter`        | Optional image filter to be applied first.                    | 
 
 ## Simple Blur
 
@@ -28,7 +27,7 @@ const BlurImageFilter = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
-        <Blur sigmaX={4} sigmaY={4} />
+        <Blur blur={4} />
       </Paint>
       <Image
         x={0}

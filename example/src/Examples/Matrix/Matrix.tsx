@@ -41,7 +41,7 @@ export const Matrix = () => {
     <Canvas style={{ flex: 1 }}>
       <Fill color="black" />
       <Paint>
-        <BlurMask sigma={8} style="solid" />
+        <BlurMask blur={8} style="solid" />
       </Paint>
       {cols.map((_i, i) =>
         rows.map((_j, j) => (
