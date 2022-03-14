@@ -18,21 +18,30 @@ import type {
 } from "../processors";
 import { useDrawing } from "../nodes/Drawing";
 
+const isSkPaint = (obj: RefObject<SkPaint> | SkPaint): obj is SkPaint =>
+  "__typename__" in obj && obj.__typename__ === "Paint";
+
 export interface GroupProps extends CustomPaintProps, TransformProps {
   clip?: ClipDef;
   invertClip?: boolean;
-  rasterize?: RefObject<SkPaint>;
+  layer?: RefObject<SkPaint> | SkPaint | boolean;
 }
 
 export const Group = (props: AnimatedProps<GroupProps>) => {
   const onDraw = useDrawing(
     props,
-    (ctx, { rasterize, clip, invertClip, ...groupProps }, children) => {
+    (ctx, { layer, clip, invertClip, ...groupProps }, children) => {
       const { canvas, opacity } = ctx;
       const paint = selectPaint(ctx.paint, groupProps);
       processPaint(paint, opacity, groupProps);
-      if (rasterize) {
-        canvas.saveLayer(rasterize.current ?? undefined);
+      if (layer) {
+        if (typeof layer === "boolean") {
+          canvas.saveLayer();
+        } else if (isSkPaint(layer)) {
+          canvas.saveLayer(layer);
+        } else {
+          canvas.saveLayer(layer.current ?? undefined);
+        }
       } else {
         canvas.save();
       }
