@@ -26,7 +26,7 @@ import {
   Shader,
   Fill,
   RadialGradient,
-  BlendShader,
+  Blend,
   vec
 } from "@shopify/react-native-skia";
 
@@ -34,14 +34,14 @@ export const BlendDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
-        <BlendShader mode="difference">
+        <Blend mode="difference">
           <RadialGradient
             r={128}
             c={vec(128, 128)}
             colors={["blue", "yellow"]}
           />
           <Turbulence freqX={0.05} freqY={0.05} octaves={4} />
-        </BlendShader>
+        </Blend>
       </Paint>
       <Rect x={0} y={0} width={256} height={256} />
     </Canvas>

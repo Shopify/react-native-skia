@@ -1,9 +1,11 @@
 ---
-id: drop-shadows
-title: Drop Shadows
-sidebar_label: Drop Shadows
-slug: /image-filters/drop-shadows
+id: shadows
+title: Shadows
+sidebar_label: Shadows
+slug: /image-filters/shadows
 ---
+
+## Drop Shadow
 
 The `DropShadow` image filter is equivalent to its [SVG counterpart](https://developer.mozilla.org/en-US/docs/Web/CSS/filter-function/drop-shadow()).
 It creates a filter that draws a drop shadow under the input content.
@@ -16,11 +18,10 @@ There is a `shadowOnly` property that renders the drop shadow excluding the inpu
 | dy          | `number`      | The Y offset of the shadow.                                   |
 | blur        | `number`      | The blur radius for the shadow                                |
 | color       | `Color`       | The color of the drop shadow                                  |
-| cropRect    | `IRect`       | Optional rectangle that crops the input and output            |
 | shadowOnly? | `boolean`     | If true, the result does not include the input content        | 
 | children?   | `ImageFilter` | Optional image filter to be applied first                     | 
 
-## Example
+### Example
 
 The example below creates two drop shadows.
 It is equivalent to the following CSS notation
@@ -60,3 +61,49 @@ const Neumorphism = () => {
 ### Result
 
 ![Drop Shadow](assets/drop-shadow.png)
+
+## Inner Shadow
+
+Inner shadows are drawn within the input content.
+
+
+| Name        | Type          |  Description                                                  |
+|:------------|:--------------|:--------------------------------------------------------------|
+| dx          | `number`      | The X offset of the shadow.                                   |
+| dy          | `number`      | The Y offset of the shadow.                                   |
+| blur        | `number`      | The blur radius for the shadow                                |
+| color       | `Color`       | The color of the drop shadow                                  |
+| shadowOnly? | `boolean`     | If true, the result does not include the input content        | 
+| children?   | `ImageFilter` | Optional image filter to be applied first                     | 
+
+### Example
+
+```tsx twoslash
+import {
+  InnerShadow,
+  Fill,
+  Group,
+  Paint,
+  RoundedRect,
+  Canvas
+} from "@shopify/react-native-skia";
+
+const Neumorphism = () => {
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Fill color="lightblue" />
+      <Group>
+        <Paint>
+          <InnerShadow dx={12} dy={12} blur={25} color="#93b8c4" />
+          <InnerShadow dx={-12} dy={-12} blur={25} color="#c7f8ff" />
+        </Paint>
+        <RoundedRect x={32} y={32} width={192} height={192} rx={32} color="lightblue" />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+### Result
+
+![Drop Shadow](assets/inner-shadow.png)
