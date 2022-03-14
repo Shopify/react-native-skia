@@ -61,7 +61,7 @@ const SimpleTransform = () => {
     <Canvas style={{ flex: 1 }}>
       <Fill color="#e8f4f8" />
       <Group color="lightblue" transform={[{ skewX: Math.PI / 6 }]}>
-        <RoundedRect x={64} y={64} width={128} height={128} rx={10} />
+        <RoundedRect x={64} y={64} width={128} height={128} r={10} />
       </Group>
     </Canvas>
   );
@@ -84,7 +84,7 @@ const SimpleTransform = () => {
         origin={{ x: 128, y: 128 }}
         transform={[{ skewX: Math.PI / 6 }]}
       >
-        <RoundedRect x={64} y={64} width={128} height={128} rx={10} />
+        <RoundedRect x={64} y={64} width={128} height={128} r={10} />
       </Group>
     </Canvas>
   );
