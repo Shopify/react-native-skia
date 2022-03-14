@@ -8,7 +8,7 @@ slug: /paint/properties
 Below are the properties of a Paint component.
 The following children can also be assigned to a Paint:
 * [Shaders](/docs/shaders/overview) 
-* [Image Filters](/docs/image-filters)
+* [Image Filters](/docs/image-filters/overview)
 * [Color Filters](/docs/color-filters)
 * [Mask Filters](/docs/mask-filters)
 * [Path Effects](/docs/path-effects)

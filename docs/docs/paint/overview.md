@@ -20,7 +20,7 @@ The following properties to the Paint component:
 
 A paint component can additionnaly receive the following components as children:
 * [Shaders](/docs/shaders/overview) 
-* [Image Filters](/docs/image-filters)
+* [Image Filters](/docs/image-filters/overview)
 * [Color Filters](/docs/color-filters)
 * [Mask Filters](/docs/mask-filters)
 * [Path Effects](/docs/path-effects)

@@ -18,12 +18,7 @@ export const Examples = ({ children, exportable }: ExamplesProps) => {
   const examples = Children.toArray(children);
   const CANVAS = exportable ? ExportableCanvas : Canvas;
   return (
-    <ScrollView
-      contentContainerStyle={{
-        flexDirection: exportable ? "column" : "row",
-        flexWrap: "wrap",
-      }}
-    >
+    <ScrollView>
       {examples.map((example, index) => (
         <CANVAS style={{ width: SIZE, height: SIZE }} key={index}>
           {example}

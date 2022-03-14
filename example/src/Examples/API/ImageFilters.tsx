@@ -82,7 +82,7 @@ const MorphologyDemo = () => {
 
 export const ImageFilters = () => {
   return (
-    <Examples exportable>
+    <Examples>
       <DisplacementMapDemo />
       <OffsetDemo />
       <MorphologyDemo />

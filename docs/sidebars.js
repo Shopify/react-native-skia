@@ -85,6 +85,7 @@ const sidebars = {
       type: "category",
       label: "Image Filters",
       items: [
+        "image-filters/overview",
         "image-filters/shadows",
         "image-filters/blur",
         "image-filters/displacement-map",
