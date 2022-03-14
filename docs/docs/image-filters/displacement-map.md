@@ -5,8 +5,6 @@ sidebar_label: Displacement Map
 slug: /image-filters/displacement-map
 ---
 
-## Displacement Map
-
 The displacement map image filter is identical to its [SVG counterpart](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feDisplacementMap). The pixel values from the child image is used to spatially displace the filtered image.
 The formula for the transformation looks like this:
 
@@ -23,7 +21,7 @@ where `P(x,y)` is the child image, in, and `P'(x,y)` is the destination. `XC(x,y
 | scale     | `number`       | Displacement scale factor to be used                                                  |
 | children? | `ImageFilter`  | Optional image filter to be applied first.                                            | 
 
-### Example
+## Example
 
 In the example below, we use a [Perlin Noise](/docs/shaders/perlin-noise) as a displacement map.
 
@@ -38,8 +36,8 @@ const Filter = () => {
   return (
     <Canvas style={{ width: 256, height: 256 }}>
       <Paint>
-        <DisplacementMap channelX="r" channelY="a" scale={20}>
-          <Turbulence freqX={0.01} freqY={0.05} octaves={2} />
+        <DisplacementMap channelX="g" channelY="a" scale={20}>
+          <Turbulence freqX={0.01} freqY={0.05} octaves={2} seed={2} />
         </DisplacementMap>
       </Paint>
       <Image
@@ -54,3 +52,5 @@ const Filter = () => {
   );
 };
 ```
+![Morphology Image Filter](./assets/displacement-map.png)
+<img alt="Morphology Image Filter" src="./assets/displacement-map.png" width="256" height="256" />

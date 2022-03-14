@@ -89,6 +89,7 @@ const sidebars = {
         "image-filters/blur",
         "image-filters/displacement-map",
         "image-filters/offset",
+        "image-filters/morphology",
       ],
     },
     {

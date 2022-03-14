@@ -5,8 +5,6 @@ sidebar_label: Blur
 slug: /image-filters/blur
 ---
 
-## Blur
-
 Creates an image filter that blurs its input by the separate X and Y sigmas.
 The provided tile mode is used when the blur kernel goes outside the input image.
 
@@ -17,7 +15,7 @@ The provided tile mode is used when the blur kernel goes outside the input image
 | mode?     | `TileMode`    | `mirror`, `repeat`, `clamp`, or `decal` (default is `decal`). |
 | children? | `ImageFilter` | Optional image filter to be applied first.                    | 
 
-### Simple Blur
+## Simple Blur
 
 ```tsx twoslash
 import { Canvas, Paint, Blur, Image, useImage } from "@shopify/react-native-skia";
@@ -47,6 +45,6 @@ const BlurImageFilter = () => {
 
 ![Simple Blur](./assets/decal-blur.png)
 
-### With mode="clamp"
+## With mode="clamp"
 
 ![Clamp Blur](./assets/clamp-blur.png)

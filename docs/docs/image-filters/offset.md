@@ -5,8 +5,6 @@ sidebar_label: Offset
 slug: /image-filters/offset
 ---
 
-## Offset
-
 This offset filter is identical to its [SVG counterpart](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feDisplacementMap). It allow to offset the filtered image. 
 
 | Name      | Type           |  Description                               |
@@ -15,10 +13,10 @@ This offset filter is identical to its [SVG counterpart](https://developer.mozil
 | y         | `number`       | Offset along the Y axis.                   |
 | children? | `ImageFilter`  | Optional image filter to be applied first. | 
 
-### Example
+## Example
 
 ```tsx twoslash
-import { Canvas, Paint, Image, Offset, useImage } from "@shopify/react-native-skia";
+import { Canvas, Paint, Image, Offset, useImage, Fill } from "@shopify/react-native-skia";
 
 const Filter = () => {
   const image = useImage(require("./assets/oslo.jpg"));
@@ -27,8 +25,9 @@ const Filter = () => {
   }
   return (
     <Canvas style={{ width: 256, height: 256 }}>
+      <Fill color="lightblue" />
       <Paint>
-        <Offset x={30} />
+        <Offset x={64} y={64} />
       </Paint>
       <Image
         image={image}
@@ -42,3 +41,5 @@ const Filter = () => {
   );
 };
 ```
+
+![Offset](./assets/offset.png)
