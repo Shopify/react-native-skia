@@ -52,5 +52,5 @@ const Filter = () => {
   );
 };
 ```
+
 ![Morphology Image Filter](./assets/displacement-map.png)
-<img alt="Morphology Image Filter" src="./assets/displacement-map.png" width="256" height="256" />

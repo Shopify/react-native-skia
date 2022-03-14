@@ -23,7 +23,7 @@ const ComposeImageFilter = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Paint>
-        <Blur sigmaX={2} sigmaY={2} mode="clamp">
+        <Blur blur={2} mode="clamp">
           <ColorMatrix
             matrix={[
               -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015,
