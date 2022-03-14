@@ -1,17 +1,17 @@
 /* eslint-disable max-len */
 import React from "react";
 import {
+  BlendMode,
   Canvas,
   Circle,
+  enumKey,
   Group,
   Path,
   Skia,
   Text,
 } from "@shopify/react-native-skia";
-import { Dimensions } from "react-native";
 
-const { width } = Dimensions.get("window");
-const r = width / 6;
+const r = 50;
 
 const blendModes = [
   "clear",
@@ -69,29 +69,39 @@ export const BlendModes = () => {
         <Circle cx={1.5 * r} cy={2 * r} r={r} color="magenta" />
         <Circle cx={2.5 * r} cy={2 * r} r={r} color="yellow" />
       </Group>
+      <Group blendMode="plus" transform={[{ translateX: 3 * r }]}>
+        <Circle cx={2 * r} cy={r} r={r} color="#ff0000" />
+        <Circle cx={1.5 * r} cy={2 * r} r={r} color="#00ff00" />
+        <Circle cx={2.5 * r} cy={2 * r} r={r} color="#0000ff" />
+      </Group>
       <Group transform={[{ translateY: 3 * r + 32 }]}>
-        {blendModes.map((blendMode, i) => (
-          <Group
-            transform={[
-              { translateX: SIZE * (i % COLS) + 256 * 0.025 },
-              { translateY: SIZE * Math.floor(i / COLS) + 256 * 0.025 },
-              { scale: 0.2 },
-            ]}
-            key={blendMode}
-          >
-            <Group blendMode={blendMode}>
-              <Path path={src} color="lightblue" />
+        {blendModes.map((blendMode, i) => {
+          const paint = Skia.Paint();
+          paint.setBlendMode(BlendMode[enumKey(blendMode)]);
+          return (
+            <Group
+              transform={[
+                { translateX: SIZE * (i % COLS) + 256 * 0.025 },
+                { translateY: SIZE * Math.floor(i / COLS) + 256 * 0.025 },
+                { scale: 0.2 },
+              ]}
+              key={blendMode}
+              layer
+            >
               <Path path={dst} color="pink" />
+              <Group layer={paint}>
+                <Path path={src} color="lightblue" />
+              </Group>
+              <Text
+                text={blendMode}
+                x={0}
+                y={0}
+                familyName="source-sans-pro-semi-bold"
+                size={50}
+              />
             </Group>
-            <Text
-              text={blendMode}
-              x={0}
-              y={0}
-              familyName="source-sans-pro-semi-bold"
-              size={50}
-            />
-          </Group>
-        ))}
+          );
+        })}
       </Group>
     </Canvas>
   );

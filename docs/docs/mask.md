@@ -12,14 +12,14 @@ Just like its [CSS counterpart](https://developer.mozilla.org/en-US/docs/Web/CSS
 
 The first child of `Mask` is the drawing to be used as a mask, and the remaining children are the drawings to mask.
 
-By default, the mask is not clipped. If you want to clip the mask with the bounds of the content it is masking, use the `bounds` property. 
+By default, the mask is not clipped. If you want to clip the mask with the bounds of the contentuse the `clip` property. 
 
 | Name      | Type                      | Description                                                   |
 |:----------|:--------------------------|:--------------------------------------------------------------|
 | mode?     | `alpha` or `luminance`    | Is it a luminance or alpha mask (default is `alpha`)          |
-| bounds?   | `SkRect`                  | Optional rectangle to clip the mask with                      |
-| mask      | `ReactNode[] | ReactNode` | Mask definition | 
-| children  | `ReactNode[] | ReactNode` | Content to mask |
+| clip?     | `boolean`                 | clip the mask so it doesn't exceed the content                |
+| mask      | `ReactNode[] | ReactNode` | Mask definition                                               | 
+| children  | `ReactNode[] | ReactNode` | Content to mask                                               |
 
 ## Alpha Mask
 

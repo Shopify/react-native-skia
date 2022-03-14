@@ -87,7 +87,7 @@ export const Gooey = () => {
         </Paint>
       </Defs>
       <Fill color={BG} />
-      <Group rasterize={paint}>
+      <Group layer={paint}>
         {icons.map((_, i) => (
           <Group key={i} transform={transforms[i]}>
             <Circle r={R} color={FG} />
