@@ -77,7 +77,7 @@ export const Shapes = () => {
             y={PADDING}
             width={SIZE}
             height={SIZE}
-            rx={25}
+            r={25}
           />
           <DiffRect outer={outer} inner={inner} />
         </Group>

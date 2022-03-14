@@ -89,8 +89,7 @@ export const ColorPicker: React.FC<Props> = ({ style, mode }) => {
           y={0}
           width={DarkGrayWidth}
           height={PickerHeight}
-          rx={4}
-          ry={4}
+          r={4}
         />
       </Canvas>
       <View style={{ width: 24 }} />

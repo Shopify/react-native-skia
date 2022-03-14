@@ -13,7 +13,7 @@ Creates a blur mask filter.
 
 | Name        | Type        |  Description                                          |
 |:------------|:------------|:------------------------------------------------------|
-| sigma       | `number`    | Standard deviation of the Gaussian blur. Must be > 0. |
+| blur        | `number`    | Standard deviation of the Gaussian blur. Must be > 0. |
 | style?      | `BlurStyle` | Can be `normal`, `solid`, `outer`, or `inner` (default is `normal`).        |
 | respectCTM? | `boolean`   | if true the blur's sigma is modified by the CTM (default is `false`).      |
 
@@ -26,7 +26,7 @@ const MaskFilterDemo = () => {
   return (
     <Canvas style={{ flex: 1}}>
       <Paint>
-        <BlurMask sigma={20} style="normal" />
+        <BlurMask blur={20} style="normal" />
       </Paint>
       <Circle c={vec(128)} r={128} color="lightblue" />
     </Canvas>

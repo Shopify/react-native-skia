@@ -4,6 +4,8 @@
 import type { SkRect, SkRRect } from "../../skia";
 
 import { vec } from "./math/Vector";
+import type { Radius } from "./Radius";
+import { processRadius } from "./Radius";
 
 export const point = (x: number, y: number) => ({ x, y });
 
@@ -52,8 +54,7 @@ export interface RectCtor {
 }
 
 export interface RRectCtor extends RectCtor {
-  rx: number;
-  ry?: number;
+  r: Radius;
 }
 
 export type RectDef = RectCtor | { rect: SkRect };
@@ -69,8 +70,8 @@ export const processRect = (def: RectDef) => {
 
 export const processRRect = (def: RRectDef) => {
   if (isRRectCtor(def)) {
-    const { rx, ry } = def;
-    return rrect(rect(def.x, def.y, def.width, def.height), rx, ry ?? rx);
+    const r = processRadius(def.r);
+    return rrect(rect(def.x, def.y, def.width, def.height), r.x, r.y);
   } else {
     return def.rect;
   }
