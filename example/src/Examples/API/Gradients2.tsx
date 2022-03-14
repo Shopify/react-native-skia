@@ -16,7 +16,7 @@ import {
   vec,
   Turbulence,
   ColorShader,
-  BlendShader,
+  Blend,
 } from "@shopify/react-native-skia";
 
 const { width } = Dimensions.get("window");
@@ -70,10 +70,10 @@ export const Gradients = () => {
         </Paint>
         <Rect rect={r4} />
         <Paint>
-          <BlendShader mode="difference">
+          <Blend mode="difference">
             <ColorShader color="#61DAFB" />
             <Turbulence freqX={0.05} freqY={0.05} octaves={4} />
-          </BlendShader>
+          </Blend>
         </Paint>
         <Rect rect={r5} />
         <Paint>

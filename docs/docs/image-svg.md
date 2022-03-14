@@ -7,7 +7,7 @@ slug: /images-svg
 
 Draw an SVG (see [SVG Support](#svg-support)).
 
-If the root dimensions are in absolute units, then the with/height properties have no effect since the initial viewport is fixed.
+If the root dimensions are in absolute units, then the width/height properties have no effect since the initial viewport is fixed.
 
 | Name      | Type      |  Description                                                  |
 |:----------|:----------|:--------------------------------------------------------------|
@@ -26,7 +26,7 @@ import {
 } from "@shopify/react-native-skia";
 
 const ImageSVGDemo = () => {
-  // Alternatively, you can pass an image URL directly
+  // Alternatively, you can pass an SVG URL directly
   // for instance: const svg = useSVG("https://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg");
   const svg = useSVG(require("../../assets/tiger.svg"));
   return (
@@ -76,7 +76,7 @@ export const SVG = () => {
 
 The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) is used to display SVGs as images.
 Its capabilities and compliance level is fairly strong.
-We expect most SVG files correctly out of the box, especially if they come from Figma or Illustrator
+We expect most SVG files render correctly out of the box, especially if they come from Figma or Illustrator.
 However, please be aware of some of the quirks below when using it.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
 

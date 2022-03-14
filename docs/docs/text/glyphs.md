@@ -5,7 +5,7 @@ sidebar_label: Glyphs
 slug: /text/glyphs
 ---
 
-This component raws a run of glyphs, at corresponding positions, in a given font.
+This component draws a run of glyphs, at corresponding positions, in a given font.
 
 | Name        | Type       |  Description                                                           |
 |:------------|:-----------|:-----------------------------------------------------------------------|
@@ -14,7 +14,7 @@ This component raws a run of glyphs, at corresponding positions, in a given font
 | y?          | `number`.  | y coordinate of the origin of the entire run. Default is 0             |
 | font        | `Font`     | Font to use (see [Fonts](/docs/text/fonts))                            |
 | familyName? | `string`   | Font family name to use  (see [Fonts](/docs/text/fonts))               |
-| size?       | `number`   | Font size if `familName` is provided                                   |
+| size?       | `number`   | Font size if `familyName` is provided                                  |
 
 ## Draw text vertically
 

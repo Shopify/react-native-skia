@@ -162,9 +162,9 @@ const Clip = () => {
 
 ![Invert Clip](assets/group/invert-clip.png)
 
-## Bitmap Effects
+## Layer Effects
 
-Using the `rasterize` property will create a bitmap drawing of the children.
+Using the `layer` property will create a bitmap drawing of the children.
 You can use it to apply effects.
 This is particularly useful to build effects that need to be applied to a group of elements and not one in particular.
 
@@ -187,7 +187,7 @@ const Clip = () => {
           </ColorMatrix>
         </Paint>
       </Defs>
-      <Group color="lightblue" rasterize={paint}>
+      <Group color="lightblue" layer={paint}>
         <Circle cx={0} cy={128} r={128 * 0.95} />
         <Circle
           cx={256}

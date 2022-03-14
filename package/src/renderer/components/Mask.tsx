@@ -1,38 +1,43 @@
 import type { ReactNode } from "react";
-import React from "react";
+import React, { useMemo } from "react";
 
-import type { SkRect } from "../../skia/Rect";
+import { BlendMode, Skia } from "../../skia";
 
-import { usePaintRef, Paint } from "./Paint";
-import { Defs } from "./Defs";
-import { LumaColorFilter } from "./colorFilters/LumaColorFilter";
 import { Group } from "./Group";
 
-// Here we ask the user to provide the bounds of content
-// We could compute it ourselve but prefer not to unless
-// other similar use-cases come up
 interface MaskProps {
   mode: "luminance" | "alpha";
-  bounds?: SkRect;
+  clip: boolean;
   mask: ReactNode | ReactNode[];
   children: ReactNode | ReactNode[];
 }
 
-export const Mask = ({ children, mask, mode, bounds }: MaskProps) => {
-  const paint = usePaintRef();
+export const Mask = ({ children, mask, mode, clip }: MaskProps) => {
+  const maskPaint = useMemo(() => {
+    const paint = Skia.Paint();
+    paint.setBlendMode(BlendMode.Src);
+    if (mode === "luminance") {
+      paint.setColorFilter(Skia.ColorFilter.MakeLumaColorFilter());
+    }
+    return paint;
+  }, [mode]);
+  const clippingPaint = useMemo(() => {
+    const paint = Skia.Paint();
+    paint.setBlendMode(BlendMode.DstIn);
+    return paint;
+  }, []);
   return (
-    <>
-      <Defs>
-        <Paint ref={paint}>{mode === "luminance" && <LumaColorFilter />}</Paint>
-      </Defs>
-      <Group rasterize={mode === "luminance" ? paint : undefined} clip={bounds}>
+    <Group layer>
+      <Group layer={maskPaint}>
         {mask}
+        {clip && <Group layer={clippingPaint}>{children}</Group>}
       </Group>
       <Group blendMode="srcIn">{children}</Group>
-    </>
+    </Group>
   );
 };
 
 Mask.defaultProps = {
   mode: "alpha",
+  clip: true,
 };

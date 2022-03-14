@@ -40,10 +40,9 @@ export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
       const filters = children.filter(isImageFilter);
       if (filters.length > 0) {
         paint.setImageFilter(
-          filters.reduce<SkImageFilter | null>(
-            Skia.ImageFilter.MakeCompose,
-            null
-          )
+          filters
+            .reverse()
+            .reduce<SkImageFilter | null>(Skia.ImageFilter.MakeCompose, null)
         );
       }
       return paint;

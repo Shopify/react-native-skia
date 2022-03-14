@@ -14,7 +14,7 @@ The fonts available in the canvas are described in [here](/docs/text/fonts).
 | text        | `string`           | Text to draw                                                 |
 | font        | `Font`             | Font to use (see [Fonts](/docs/text/fonts))                  |
 | familyName? | `string`           | Font family name to use  (see [Fonts](/docs/text/fonts))     |
-| size?       | `number`           | Font size if `familName` is provided                         |
+| size?       | `number`           | Font size if `familyName` is provided                        |
 
 ## Example
 
