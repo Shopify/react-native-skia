@@ -32,10 +32,6 @@ npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.
 
 Run `pod install` on the `ios/` directory.
 
-| NOTE: Device builds now includes Bitcode generation on iOS - so there is no longer necessary to build with bitcode disabled for release builds.
-
-| You can re-enable Bitcode if it was previously disabled: `Build Settings > Build Options > Enable Bitcode -> Release -> Yes`. In Expo managed apps, set `ios.bitcode` to `true` in `app.json`.
-
 ### Android
 
 > **Version compatibility**: `react-native@>=0.66` is required.

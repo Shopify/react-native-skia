@@ -33,8 +33,6 @@ npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.
 
 Run `pod install` on the `ios/` directory.
 
-You will need to disable Bitcode in order to create a release build: `Build Settings > Build Options > Enable Bitcode -> Release -> No`. In Expo managed apps, set `ios.bitcode` to `false` in `app.json`.
-
 ## Android
 
 > **Version compatibility**: `react-native@>=0.66` is required.
