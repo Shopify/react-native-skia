@@ -8,7 +8,7 @@ slug: /animations/touch-events
 ### useTouchHandler
 
 The `useTouchHandler` hook handles touches in the `Canvas`.
-It is meant to be used with values to animate elements of the canvas.
+It is meant to be used with values to animate canvas elements.
 
 ```tsx twoslash
 import {

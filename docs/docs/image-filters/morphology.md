@@ -55,4 +55,4 @@ export const MorphologyDemo = () => {
 };
 ```
 
-![Morphology Image Filter](./assets/morphology.png)
+![Morphology Image Filter](./assets/morphology.png)e

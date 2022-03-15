@@ -5,7 +5,7 @@ sidebar_label: Text Blob
 slug: /text/blob
 ---
 
-A text blob contains glyphs, their positions, and paint attributes specific to text.
+A text blob contains glyphs, positions, and paint attributes specific to the text.
 
 | Name        | Type       |  Description                                                 |
 |:------------|:-----------|:-------------------------------------------------------------|

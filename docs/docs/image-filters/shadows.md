@@ -9,7 +9,7 @@ slug: /image-filters/shadows
 
 The `DropShadow` image filter is equivalent to its [SVG counterpart](https://developer.mozilla.org/en-US/docs/Web/CSS/filter-function/drop-shadow()).
 It creates a filter that draws a drop shadow under the input content.
-There is a `shadowOnly` property that renders the drop shadow excluding the input content.
+A `shadowOnly` property renders the drop shadow, excluding the input content.
 
 
 | Name        | Type          |  Description                                                  |
@@ -24,7 +24,7 @@ There is a `shadowOnly` property that renders the drop shadow excluding the inpu
 ### Example
 
 The example below creates two drop shadows.
-It is equivalent to the following CSS notation
+It is equivalent to the following CSS notation.
 
 ```css
 .paint {

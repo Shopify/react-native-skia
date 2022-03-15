@@ -10,7 +10,7 @@ Image filters are effects that operate on all the color bits of pixels that make
 ## Composing Filters
 
 Color Filters and Shaders and also be used as Image filters.
-In the example below, we first apply a color matrix to the content and then a blur image filter.
+In the example below, we first apply a color matrix to the content and a blur image filter.
 
 ```tsx twoslash
 import { Canvas, Paint, Blur, Image, ColorMatrix, useImage } from "@shopify/react-native-skia";

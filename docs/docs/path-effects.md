@@ -47,7 +47,7 @@ Creates an effect that adds dashes to the path.
 
 | Name      | Type         |  Description                                                  |
 |:----------|:-------------|:--------------------------------------------------------------|
-| intervals | `number[]`   | even number of entries with even indices specifying the length of the "on" intervals, and the odd indices specifying the length of "off". |
+| intervals | `number[]`   | even number of entries with even indices specifying the length of the "on" intervals, and the odd index specifying the length of "off". |
 | phase     | `number`     | offset into the intervals array. Defaults to 0.        |
 | children? | `PathEffect` | Optional path effect to apply.                                |
 
@@ -119,7 +119,7 @@ Dash by replicating the specified path.
 |:----------|:--------------------|:--------------------------------------------------------------------------------|
 | path      | `PathDef`           | The path to replicate (dash)                                                    |
 | advance   | `number`            |  The space between instances of path                                            |
-| phase     | `number`            | distance (mod advance) along path for its initial position                      |
+| phase     | `number`            | distance (mod advance) along the path for its initial position                      |
 | style     | `Path1DEffectStyle` | how to transform path at each point (based on the current position and tangent) |
 | children? | `PathEffect`        | Optional path effect to apply.                                                  |
 
@@ -154,7 +154,7 @@ const Path1D = () => {
 
 ## Path 2D Path Effect
 
-Stamp the specified path to fill the shape, using the matrix to define the latice.
+Stamp the specified path to fill the shape, using the matrix to define the lattice.
 
 | Name      | Type         |  Description                  |
 |:----------|:-------------|:------------------------------|
@@ -190,7 +190,7 @@ const Path2D = () => {
 
 ## Line 2D Path Effect
 
-Stamp the specified path to fill the shape, using the matrix to define the latice.
+Stamp the specified path to fill the shape, using the matrix to define the lattice.
 
 | Name      | Type         |  Description                  |
 |:----------|:-------------|:------------------------------|

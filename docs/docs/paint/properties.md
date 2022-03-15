@@ -15,7 +15,7 @@ The following children can also be assigned to a Paint:
 
 ## Color
 
-Sets alpha and RGB used when stroking and filling.
+Sets the alpha and RGB used when stroking and filling.
 The color is a string or a number.
 
 ```tsx twoslash
@@ -64,7 +64,7 @@ The following values are available: `clear`, `src`, `dst`, `srcOver`, `dstOver`,
 
 ## Style
 
-The style of the paint can be `fill` (default) or `stroke`.
+The paint style can be `fill` (default) or `stroke`.
 
 ## Stroke Width
 
