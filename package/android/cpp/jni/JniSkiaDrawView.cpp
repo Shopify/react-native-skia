@@ -9,8 +9,6 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
-#include <RNSkMeasureTime.h>
-
 namespace RNSkia
 {
     using namespace facebook;
@@ -256,9 +254,6 @@ namespace RNSkia
             _prevWidth != _width ||
             _prevHeight != _height)
         {
-            RNSkMeasureTime measure =
-                RNSkMeasureTime("JniSkiaDrawView::ensureSkiaRenderTarget");
-
             glViewport(0, 0, _width, _height);
 
             _prevWidth = _width;
@@ -305,10 +300,8 @@ namespace RNSkia
         return true;
     }
 
-    void JniSkiaDrawView::drawFrame(double timestamp)
+    void JniSkiaDrawView::drawFrame(const sk_sp<SkPicture> picture)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-
         // Ensure we have got the surface from the java view
         if (_nativeWindow == nullptr)
         {
@@ -361,7 +354,7 @@ namespace RNSkia
         }
 
         // Draw in surface!
-        drawInSurface(_skSurface, _width, _height, timestamp, getPlatformContext());
+        _skSurface->getCanvas()->drawPicture(picture);
 
         if (getThreadDrawingContext()->skContext != nullptr)
         {
@@ -373,10 +366,6 @@ namespace RNSkia
             RNSkLogger::logToConsole(
                 "eglSwapBuffers failed: %d\n", eglGetError());
         }
-
-        // Calculate duration
-        auto stop = std::chrono::high_resolution_clock::now();
-        setLastFrameDuration(std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
     }
 
 } // namespace RNSkia

@@ -15,3 +15,4 @@ export * from "./Matrix";
 export * from "./Neumorphism";
 export * from "./Aurora";
 export * from "./Glassmorphism";
+export * from "./Performance";

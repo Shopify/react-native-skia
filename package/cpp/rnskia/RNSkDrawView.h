@@ -9,6 +9,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include <SkPicture.h>
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include <SkSurface.h>
@@ -63,15 +64,6 @@ public:
   size_t getNativeId() { return _nativeId; }
   
   /**
-   * Call this method with a valid Skia surface to let the draw drawCallback do
-   * its thing.
-   * It is important that the height and width parameters are not resolved
-   * against the scale factor - this is done by the drawing code itself.
-   */
-  void drawInSurface(sk_sp<SkSurface>, int, int, double,
-                     std::shared_ptr<RNSkPlatformContext>);
-
-  /**
    Sets the drawing mode for the view
    */
   void setDrawingMode(RNSkDrawingMode mode);
@@ -96,7 +88,10 @@ protected:
   /**
    * Setup and draw the frame
    */
-  virtual void drawFrame(double time) {};
+  virtual void drawFrame(const sk_sp<SkPicture> picture) {};
+  
+  virtual int getWidth() { return -1; };
+  virtual int getHeight() { return -1; };
   
   /**
    * Mark view as invalidated
@@ -107,13 +102,6 @@ protected:
    * @return True if the view was marked as deleted
    */
   bool isValid() { return _isValid; }
-
-  /**
-   Updates the last duration value
-   */
-  void setLastFrameDuration(size_t duration) {
-    _timingInfo->addLastDuration(duration);
-  }
 
   /**
    * @return The platformcontext
@@ -164,9 +152,14 @@ private:
   std::shared_ptr<JsiSkCanvas> _jsiCanvas;
   
   /**
-   * drawing mutex
+   * JS Drawing mutex
    */
-  std::timed_mutex* _isDrawing;
+  std::timed_mutex* _inJSDrawing;
+  
+  /**
+   * SKIA Drawing mutex
+   */
+  std::timed_mutex* _inSkiaDrawing;
 
   /**
    * Pointer to the platform context
@@ -194,9 +187,15 @@ private:
   std::shared_ptr<RNSkInfoObject> _infoObject;
 
   /**
-   Timing information
+   Timing information for javascript drawing
    */
-  std::shared_ptr<RNSkTimingInfo> _timingInfo;
+  RNSkTimingInfo _jsTimingInfo;
+  
+  /**
+   Timing information for GPU rendering
+   */
+  RNSkTimingInfo _gpuTimingInfo;
+  
   /**
    Redraw queue counter
    */
@@ -211,11 +210,6 @@ private:
    */
   size_t _nativeId;
   
-  /**
-   Last size when drawing
-   */
-  int _lastWidth = -1;
-  int _lastHeight = -1;
 };
 
 } // namespace RNSkia

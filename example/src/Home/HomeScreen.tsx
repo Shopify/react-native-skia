@@ -57,6 +57,11 @@ export const HomeScreen = () => {
         description="Animated with Skia"
         route="Animation"
       />
+      <HomeScreenButton
+        title="🏎 Performance"
+        description="Drawing Performance Test"
+        route="Performance"
+      />
     </ScrollView>
   );
 };
