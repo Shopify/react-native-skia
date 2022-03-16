@@ -68,6 +68,8 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   // Reset timing info
   _jsTimingInfo.reset();
+  _gpuTimingInfo.reset();
+  _vsyncTimingInfo.reset();
   
   // Set up debug font/paints
   auto font = SkFont();
