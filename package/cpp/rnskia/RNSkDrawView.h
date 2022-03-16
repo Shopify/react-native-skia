@@ -159,7 +159,7 @@ private:
   /**
    * SKIA Drawing mutex
    */
-  std::timed_mutex* _inSkiaDrawing;
+  std::timed_mutex* _inGpuDrawing;
 
   /**
    * Pointer to the platform context
@@ -195,6 +195,11 @@ private:
    Timing information for GPU rendering
    */
   RNSkTimingInfo _gpuTimingInfo;
+  
+  /**
+   Measures vsync framerate
+   */
+  RNSkTimingInfo _vsyncTimingInfo;
   
   /**
    Redraw queue counter
