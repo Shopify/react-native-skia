@@ -5,11 +5,11 @@ sidebar_label: Animations
 slug: /animations/animations
 ---
 
-To ease the process of building animation, the library provides some utilities to help you. There are two types of utility functions - imperative functions and hooks.
+To ease building animation, the library provides some utilities to help you. There are two types of utility functions - imperative functions and hooks.
 
 If you have a Skia Value that you want to animate declaratively, a hook is the best choice.
 
-In the example below we want the position of the rectangle to animate when we toggle a given value, and we want it to do this with a spring animation.
+In the example below, we want the position of the rectangle to animate when we toggle a given value, and we want it to do this with a spring animation.
 
 ## Declarative animation
 

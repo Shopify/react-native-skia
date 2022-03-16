@@ -122,8 +122,7 @@ export const Neumorphism = () => {
           y={height / 2 + 32}
           width={width - 64}
           height={height / 2 - 32}
-          rx={25}
-          ry={25}
+          r={25}
           color="#202122"
         />
       </Group>

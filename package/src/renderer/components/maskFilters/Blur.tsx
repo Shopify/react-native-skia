@@ -9,15 +9,15 @@ import type { AnimatedProps } from "../../processors/Animations/Animations";
 
 export interface BlurMaskProps {
   style: SkEnum<typeof BlurStyle>;
-  sigma: number;
+  blur: number;
   respectCTM: boolean;
 }
 
 export const BlurMask = (props: AnimatedProps<BlurMaskProps>) => {
-  const declaration = useDeclaration(props, ({ style, sigma, respectCTM }) => {
+  const declaration = useDeclaration(props, ({ style, blur, respectCTM }) => {
     return Skia.MaskFilter.MakeBlur(
       BlurStyle[enumKey(style)],
-      sigma,
+      blur,
       respectCTM
     );
   });

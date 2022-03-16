@@ -6,10 +6,10 @@ slug: /canvas/contexts
 ---
 
 React Native Skia is using its own React renderer.
-Currently, it is not possible to automatically share a React context between two renderers.
+It is currently impossible to automatically share a React context between two renderers.
 This means that a React Native context won't be available from your drawing directly.
-We recommend that you prepare the data needed for your drawing outside the `<Canvas>` element.
-However, if you need to use a React context within your drawing, you will need to re-inject it.
+We recommend preparing the data needed for your drawing outside the `<Canvas>` element.
+However, if you need to use a React context within your drawing, you must re-inject it.
 This module provides the `useContextBridge` hook from [pmndrs/drei](https://github.com/pmndrs/drei#usecontextbridge) to help you bridge between contexts.
 
 ## Manual Context Injection

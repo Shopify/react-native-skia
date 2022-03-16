@@ -60,7 +60,7 @@ export const Hue = () => {
     <Canvas style={{ flex: 1 }} onTouch={onTouch}>
       <Fill color={color} />
       <Paint>
-        <BlurMask sigma={40} style="solid" />
+        <BlurMask blur={40} style="solid" />
         <Shader source={source} uniforms={{ c, r }} />
       </Paint>
       <Circle c={c} r={r} />

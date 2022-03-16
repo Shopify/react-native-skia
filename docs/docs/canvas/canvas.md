@@ -6,7 +6,7 @@ slug: /canvas/overview
 ---
 
 The Canvas component is the root of your Skia drawing.
-You can treat it as a regular React Native view and assign a view style to it.
+You can treat it as a regular React Native view and assign a view style.
 Behind the scenes, it is using its own React renderer.
 
 | Name | Type     |  Description.    |

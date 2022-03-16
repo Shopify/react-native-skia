@@ -27,7 +27,7 @@ export const Neumorphism = () => {
           y={PADDING}
           width={SIZE}
           height={SIZE}
-          rx={R}
+          r={R}
           color="lightblue"
         />
       </Group>
@@ -42,7 +42,7 @@ export const Neumorphism = () => {
           y={2 * PADDING + SIZE}
           width={SIZE}
           height={SIZE}
-          rx={R}
+          r={R}
           color="lightblue"
         />
       </Group>

@@ -8,7 +8,7 @@ slug: /backdrops-filters
 In Skia, backdrop filters are equivalent to their [CSS counterpart](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter). They allow you to apply image filters such as blurring to the area behind a [clipping mask](/docs/group#clipping-operations). A backdrop filter extends the [Group component](/docs/group#clipping-operations). All properties from the [group component](/docs/group) can be applied to a backdrop filter.
 
 ## Backdrop Filter
-Applies an image filter to the area behind the whole canvas or behind a defined clipping mask. The first child of a backdrop filter is the image filter to apply. All properties from the [group component](/docs/group) can be applied to a backdrop filter.
+Applies an image filter to the area behind the canvas or behind a defined clipping mask. The first child of a backdrop filter is the image filter to use. All properties from the [group component](/docs/group) can be applied to a backdrop filter.
 
 ### Example
 
