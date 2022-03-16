@@ -223,10 +223,10 @@ void RNSkDrawView::performDraw() {
         _inGpuDrawing->unlock();
         
       } else {
-        if(DEBUG) {
-          static size_t framesSkipped = 0;
-          printf("SKIA/GPU: Skipped frames: %lu\n", ++framesSkipped);
-        }
+#ifdef DEBUG
+        static size_t framesSkipped = 0;
+        printf("SKIA/GPU: Skipped frames: %lu\n", ++framesSkipped);
+#endif
         requestRedraw();
       }
     }
@@ -286,10 +286,10 @@ void RNSkDrawView::drawLoopCallback(bool invalidated) {
     if(_inJSDrawing->try_lock()) {
       _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
     } else {
-      if(DEBUG) {
-        static size_t framesSkipped = 0;
-        printf("SKIA/JS: Skipped frames: %lu\n", ++framesSkipped);
-      }
+#ifdef DEBUG
+      static size_t framesSkipped = 0;
+      printf("SKIA/JS: Skipped frames: %lu\n", ++framesSkipped);
+#endif
       requestRedraw();
     }
     
