@@ -8,7 +8,6 @@ import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { processRadius } from "../../processors/Radius";
 import { createDeclaration } from "../../nodes";
 
-
 import { getInput } from "./getInput";
 
 export interface BlurProps {
