@@ -6,14 +6,14 @@ slug: /animations/reanimated
 ---
 
 You can connect Reanimated values to a Skia canvas.
-A common use-case is to have an gesture from `react-native-gesture-handler` driving a Skia canvas using Reanimated.
+A common use-case is a gesture from `react-native-gesture-handler` driving a Skia canvas using Reanimated.
 
-When using the `useSharedValueEffect` hook the canvas will redraw whenever the shared value changes.
+When using the `useSharedValueEffect` hook, the canvas will redraw whenever the shared value changes.
 
 ## Definition
 
 ```tsx
-useSharedValueEffect(values: Reanimated.SharedValue<any>[], callback: () => void);
+useSharedValueEffect(callback: () => void, values: Reanimated.SharedValue<any>[]);
 ```
 
 ## Example
@@ -33,9 +33,9 @@ const MyComponent = () => {
     progress.value = withRepeat(withTiming(1, { duration: 3000 }), -1, true);
   }, [progress]);
 
-  useSharedValueEffect([progress], () => {
+  useSharedValueEffect(() => {
     x.current = mix(progress.value, 0, 100);
-  });
+  }, progress); // you can pass other shared values as extra parameters
 
   return (
     <Canvas style={{ flex: 1 }}>

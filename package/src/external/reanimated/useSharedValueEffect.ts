@@ -27,15 +27,16 @@ const useSharedValueWrapper =
 /**
  * Connects a shared value from reanimated to a SkiaView or Canvas
  * so whenever the shared value changes the SkiaView will redraw.
- * @param ref Reference to the SkiaView or Canvas
- * @param value Shared value to add change listeners for
- * @param values Additional (optional) shared values to add change listeners for
+ * @param cb Callback that will be called whenever the shared value changes.
+ * @param values One or more shared values to listen for.
  */
 export const useSharedValueEffect = <T = number>(
-  values: SharedValueTypeWrapper<T>[],
-  cb: () => void
+  cb: () => void,
+  value: SharedValueTypeWrapper<T>,
+  ...values: SharedValueTypeWrapper<T>[]
 ) => {
   const input = useSharedValueWrapper(0);
+  const triggers = useMemo(() => [value, ...values], [value, values]);
   const { runOnJS, startMapper, stopMapper } = useMemo(() => {
     if (Reanimated && Core) {
       const { runOnJS } = Reanimated;
@@ -65,7 +66,7 @@ export const useSharedValueEffect = <T = number>(
           "worklet";
           runOnJS(cb)();
         },
-        values,
+        triggers,
         [input]
       );
       // Return unregistering the mapper
@@ -76,5 +77,5 @@ export const useSharedValueEffect = <T = number>(
       };
     }
     return () => {};
-  }, [input, runOnJS, startMapper, stopMapper, values, cb]);
+  }, [cb, input, runOnJS, startMapper, stopMapper, triggers]);
 };
