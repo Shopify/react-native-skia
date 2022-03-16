@@ -59,9 +59,9 @@ export abstract class SkNode<P> {
 
 export class Container extends SkNode<unknown> {
   values: SkiaReadonlyValue<unknown>[] = [];
-  subscription: (() => void) | null = null;
   redraw: () => void;
-  ref: RefObject<SkiaView>;
+  private subscriptions: (() => void)[] = [];
+  private ref: RefObject<SkiaView>;
 
   constructor(ref: RefObject<SkiaView>, redraw: () => void) {
     super({});
@@ -88,15 +88,16 @@ export class Container extends SkNode<unknown> {
     if (this.values.length === 0) {
       return;
     }
-    this.subscription = this.ref.current.registerValues(this.values);
+    this.subscriptions.push(this.ref.current.registerValues(this.values));
     this.values.splice(0, this.values.length);
   }
 
   unsubscribe() {
-    if (this.subscription !== null) {
-      this.subscription();
-      this.subscription = null;
+    if (this.subscriptions.length === 0) {
+      return;
     }
+    this.subscriptions.forEach((unsub) => unsub());
+    this.subscriptions.splice(0, this.subscriptions.length);
   }
 }
 
