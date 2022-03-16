@@ -67,7 +67,7 @@ export const Hue = () => {
       <Circle c={c} r={r} />
       <Group>
         <Paint>
-          <BlurMask sigma={10} style="solid" />
+          <BlurMask blur={10} style="solid" />
         </Paint>
         <Circle r={20} color="black" cx={translateX} cy={translateY} />
       </Group>
