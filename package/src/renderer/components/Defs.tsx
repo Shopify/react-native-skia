@@ -1,18 +1,19 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { useDeclaration } from "../nodes";
+import { createDeclaration } from "../nodes";
 
 export interface DefsProps {
   children: ReactNode | ReactNode[];
 }
 
+const onDeclare = createDeclaration(() => {
+  // Do nothing.
+  // The goal of this component is to avoid declared paint from
+  // being used in the drawing context automatically
+  return null;
+});
+
 export const Defs = (props: DefsProps) => {
-  const declaration = useDeclaration(props, () => {
-    // Do nothing.
-    // The goal of this component is to avoid declared paint from
-    // being used in the drawing context automatically
-    return null;
-  });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

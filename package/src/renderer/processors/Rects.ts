@@ -22,6 +22,14 @@ export const rrect = (r: SkRect, rx: number, ry: number) => ({
   ry,
 });
 
+export const bounds = (rects: SkRect[]) => {
+  const x = Math.min(...rects.map((r) => r.x));
+  const y = Math.min(...rects.map((r) => r.y));
+  const width = Math.max(...rects.map((r) => r.x + r.width));
+  const height = Math.max(...rects.map((r) => r.y + r.height));
+  return rect(x, y, width, height);
+};
+
 export const topLeft = (r: SkRect | SkRRect) =>
   isRRect(r) ? vec(r.rect.x, r.rect.y) : vec(r.x, r.y);
 export const topRight = (r: SkRect | SkRRect) =>

@@ -68,6 +68,7 @@ export const useHandles = (
           return true;
         });
       }
+      mesh.current = mesh.current.slice();
     },
     onEnd: () => {
       selection.current = null;

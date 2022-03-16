@@ -1,5 +1,5 @@
 import React from "react";
-import { Canvas, Circle } from "@shopify/react-native-skia";
+import { Canvas, Circle, useCanvas } from "@shopify/react-native-skia";
 
 import type { BaseToolbarItemProps } from "./BaseToolbarItem";
 import { BaseToolbarItem } from "./BaseToolbarItem";
@@ -17,14 +17,25 @@ export const ColorToolbarItem: React.FC<Props> = ({
   return (
     <BaseToolbarItem onPress={onPress} selected={selected}>
       <Canvas style={styles.toolbarItem}>
-        <Circle
-          cx={(ctx) => ctx.width / 2}
-          cy={(ctx) => ctx.height / 2}
-          r={(ctx) => ctx.width / 2}
-          color={color}
-          style="fill"
-        />
+        <Item color={color} />
       </Canvas>
     </BaseToolbarItem>
+  );
+};
+
+interface ItemProps {
+  color: number;
+}
+
+const Item = ({ color }: ItemProps) => {
+  const canvas = useCanvas();
+  return (
+    <Circle
+      cx={canvas.width / 2}
+      cy={canvas.height / 2}
+      r={canvas.width / 2}
+      color={color}
+      style="fill"
+    />
   );
 };

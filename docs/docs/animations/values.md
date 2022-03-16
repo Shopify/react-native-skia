@@ -88,3 +88,36 @@ const Demo = () => {
   );
 };
 ```
+
+## Value Effect
+
+The `useValueEffect` hook allows you to execute change on value change.
+In the example below we execute a callback on every frame (everytime the clock value changes).
+
+```tsx twoslash
+import React, { useEffect } from "react";
+import {Animated} from "react-native";
+import {
+  Canvas,
+  Rect,
+  mix,
+  useClockValue,
+  useValueEffect,
+  useValue,
+  interpolate
+} from "@shopify/react-native-skia";
+
+export const Demo = () => {
+  const clock = useClockValue();
+  const x = useValue(0);
+
+  useValueEffect(clock, () => {
+    x.current = interpolate(clock.current, [0, 4000], [0, 200]);
+  });
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Rect x={x} y={100} width={10} height={10} color="red" />
+    </Canvas>
+  );
+};
+```

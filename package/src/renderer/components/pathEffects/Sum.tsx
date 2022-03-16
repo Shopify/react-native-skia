@@ -2,7 +2,7 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { Skia } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
+import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { isPathEffect } from "../../../skia/PathEffect";
 
@@ -10,10 +10,11 @@ export interface SumPathEffectProps {
   children?: ReactNode | ReactNode[];
 }
 
+const onDeclare = createDeclaration<SumPathEffectProps>((_, children) => {
+  const [outer, inner] = children.filter(isPathEffect);
+  return Skia.PathEffect.MakeCompose(outer, inner);
+});
+
 export const SumPathEffect = (props: AnimatedProps<SumPathEffectProps>) => {
-  const declaration = useDeclaration(props, (_, children) => {
-    const [outer, inner] = children.filter(isPathEffect);
-    return Skia.PathEffect.MakeCompose(outer, inner);
-  });
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

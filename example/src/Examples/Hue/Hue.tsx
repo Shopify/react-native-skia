@@ -12,6 +12,7 @@ import {
   BlurMask,
   canvas2Polar,
   polar2Canvas,
+  Group,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -57,14 +58,20 @@ export const Hue = () => {
     },
   });
   return (
-    <Canvas style={{ flex: 1 }} onTouch={onTouch}>
+    <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
       <Fill color={color} />
       <Paint>
         <BlurMask blur={40} style="solid" />
         <Shader source={source} uniforms={{ c, r }} />
       </Paint>
       <Circle c={c} r={r} />
-      <Circle r={20} color="#1f1f1f" cx={translateX} cy={translateY} />
+      <Group>
+        <Paint>
+          <BlurMask blur={10} style="solid" />
+        </Paint>
+        <Circle r={20} color="black" cx={translateX} cy={translateY} />
+      </Group>
+      <Circle r={15} color={color} cx={translateX} cy={translateY} />
     </Canvas>
   );
 };

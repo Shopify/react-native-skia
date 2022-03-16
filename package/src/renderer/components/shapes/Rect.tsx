@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useDrawing } from "../../nodes/Drawing";
+import { createDrawing } from "../../nodes/Drawing";
 import type {
   CustomPaintProps,
   RectDef,
@@ -10,10 +10,11 @@ import { processRect } from "../../processors";
 
 export type RectProps = RectDef & CustomPaintProps;
 
+const onDraw = createDrawing<RectProps>(({ canvas, paint }, rectProps) => {
+  const rect = processRect(rectProps);
+  canvas.drawRect(rect, paint);
+});
+
 export const Rect = (props: AnimatedProps<RectProps>) => {
-  const onDraw = useDrawing(props, ({ canvas, paint }, rectProps) => {
-    const rect = processRect(rectProps);
-    canvas.drawRect(rect, paint);
-  });
   return <skDrawing onDraw={onDraw} {...props} />;
 };

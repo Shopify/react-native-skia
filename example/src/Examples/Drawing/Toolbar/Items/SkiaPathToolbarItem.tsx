@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import type { SkPath } from "@shopify/react-native-skia";
-import { Canvas, Group, Path } from "@shopify/react-native-skia";
+import { Canvas, Group, Path, useCanvas } from "@shopify/react-native-skia";
 
 import type { BaseToolbarItemProps } from "./BaseToolbarItem";
 import { BaseToolbarItem } from "./BaseToolbarItem";
@@ -16,6 +16,21 @@ export const PathToolbarItem: React.FC<Props> = ({
   selected,
   onPress,
 }) => {
+  return (
+    <BaseToolbarItem onPress={onPress} disabled={disabled} selected={selected}>
+      <Canvas style={styles.toolbarItem}>
+        <Item path={path} />
+      </Canvas>
+    </BaseToolbarItem>
+  );
+};
+
+interface ItemProps {
+  path: SkPath;
+}
+
+const Item = ({ path }: ItemProps) => {
+  const canvas = useCanvas();
   const bounds = useMemo(() => path.computeTightBounds(), [path]);
   const getTransform = useCallback(
     (width: number, height: number) => {
@@ -37,14 +52,9 @@ export const PathToolbarItem: React.FC<Props> = ({
     },
     [bounds.height, bounds.width, bounds.x, bounds.y]
   );
-
   return (
-    <BaseToolbarItem onPress={onPress} disabled={disabled} selected={selected}>
-      <Canvas style={styles.toolbarItem}>
-        <Group transform={(ctx) => getTransform(ctx.width, ctx.height)}>
-          <Path path={path} color="#000" style={"fill"} />
-        </Group>
-      </Canvas>
-    </BaseToolbarItem>
+    <Group transform={getTransform(canvas.width, canvas.height)}>
+      <Path path={path} color="#000" style={"fill"} />
+    </Group>
   );
 };

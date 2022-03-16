@@ -1,60 +1,47 @@
-import { useCallback, useMemo } from "react";
-
 import type { DrawingContext } from "../DrawingContext";
-import type { SkNode } from "../Host";
-import { NodeType, processChildren } from "../Host";
+import { SkNode } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
-import { materialize, isAnimated } from "../processors/Animations/Animations";
+import { isAnimated, materialize } from "../processors/Animations/Animations";
 
 export type DeclarationResult = SkJSIInstance<string> | null;
 
-type UseDeclarationCallback<T> = (
+type DeclarationCallback<T> = (
   props: T,
   children: DeclarationResult[],
   ctx: DrawingContext
 ) => DeclarationResult;
 
-type DeclarationCallback = (
-  ctx: DrawingContext,
-  children: DeclarationResult[]
-) => DeclarationResult;
+export const createDeclaration = <T,>(
+  cb: DeclarationCallback<T>
+): DeclarationCallback<T> => cb;
 
-export const useDeclaration = <T,>(
-  props: AnimatedProps<T>,
-  cb: UseDeclarationCallback<T>
-) => {
-  const onDeclare = useCallback<DeclarationCallback>(
-    (ctx, children) => {
-      const materializedProps = materialize(ctx, props);
-      return cb(materializedProps, children, ctx);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props]
-  );
-  return useMemo(
-    () => ({ onDeclare, isAnimated: isAnimated(props) }),
-    [onDeclare, props]
-  );
-};
-
-export interface DeclarationProps {
-  declaration: {
-    onDeclare: DeclarationCallback;
-    isAnimated: boolean;
-  };
+export interface DeclarationProps<P> {
+  onDeclare: DeclarationCallback<P>;
 }
 
-export const DeclarationNode = (
-  props: DeclarationProps
-): SkNode<NodeType.Declaration> => ({
-  type: NodeType.Declaration,
-  props,
-  draw: (ctx, { declaration: { onDeclare } }, unProcessedChildren) => {
-    const children = processChildren(ctx, unProcessedChildren);
-    const obj = onDeclare(ctx, children);
+export class DeclarationNode<P> extends SkNode<P> {
+  private onDeclare: DeclarationCallback<P>;
+
+  constructor(onDeclare: DeclarationCallback<P>, props: AnimatedProps<P>) {
+    super(props);
+    this.props = props;
+    this.onDeclare = onDeclare;
+  }
+
+  set props(props: AnimatedProps<P>) {
+    this.memoizable = !isAnimated(props);
+    this._props = props;
+  }
+
+  get props() {
+    return this._props;
+  }
+
+  draw(ctx: DrawingContext) {
+    const children = this.visit(ctx);
+    const props = materialize(this.props);
+    const obj = this.onDeclare(props, children, ctx);
     return obj;
-  },
-  children: [],
-  memoizable: !props.declaration.isAnimated,
-});
+  }
+}

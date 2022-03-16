@@ -5,7 +5,7 @@ import type {
   AnimatedProps,
   PathDef,
 } from "../../processors";
-import { useDrawing } from "../../nodes";
+import { createDrawing } from "../../nodes";
 import { processPath } from "../../processors";
 
 interface StrokeOpts {
@@ -21,25 +21,25 @@ export interface PathProps extends CustomPaintProps {
   stroke?: StrokeOpts;
 }
 
-export const Path = (props: AnimatedProps<PathProps>) => {
-  const onDraw = useDrawing(
-    props,
-    ({ canvas, paint }, { start, end, stroke, ...pathProps }) => {
-      const hasStartOffset = start !== 0;
-      const hasEndOffset = start !== 1;
-      const hasStrokeOptions = stroke !== undefined;
-      const willMutatePath = hasStartOffset || hasEndOffset || hasStrokeOptions;
-      const pristinePath = processPath(pathProps.path);
-      const path = willMutatePath ? pristinePath.copy() : pristinePath;
-      if (hasStrokeOptions) {
-        path.stroke(stroke);
-      }
-      if (hasStartOffset || hasEndOffset) {
-        path.trim(start, end, false);
-      }
-      canvas.drawPath(path, paint);
+const onDraw = createDrawing<PathProps>(
+  ({ canvas, paint }, { start, end, stroke, ...pathProps }) => {
+    const hasStartOffset = start !== 0;
+    const hasEndOffset = start !== 1;
+    const hasStrokeOptions = stroke !== undefined;
+    const willMutatePath = hasStartOffset || hasEndOffset || hasStrokeOptions;
+    const pristinePath = processPath(pathProps.path);
+    const path = willMutatePath ? pristinePath.copy() : pristinePath;
+    if (hasStrokeOptions) {
+      path.stroke(stroke);
     }
-  );
+    if (hasStartOffset || hasEndOffset) {
+      path.trim(start, end, false);
+    }
+    canvas.drawPath(path, paint);
+  }
+);
+
+export const Path = (props: AnimatedProps<PathProps>) => {
   return <skDrawing onDraw={onDraw} {...props} />;
 };
 

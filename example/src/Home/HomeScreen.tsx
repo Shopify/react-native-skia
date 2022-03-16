@@ -43,11 +43,6 @@ export const HomeScreen = () => {
         route="Glassmorphism"
       />
       <HomeScreenButton
-        title="🖌 Drawing"
-        description="Use touches to draw with Skia"
-        route="Drawing"
-      />
-      <HomeScreenButton
         title="📉 Graphs"
         description="Animated graphs with Skia"
         route="Graphs"

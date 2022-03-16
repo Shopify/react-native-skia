@@ -1,5 +1,5 @@
 import React from "react";
-import { Canvas, Line } from "@shopify/react-native-skia";
+import { Canvas, Line, useCanvas } from "@shopify/react-native-skia";
 
 import type { BaseToolbarItemProps } from "./BaseToolbarItem";
 import { BaseToolbarItem } from "./BaseToolbarItem";
@@ -17,13 +17,24 @@ export const SizeToolbarItem: React.FC<Props> = ({
   return (
     <BaseToolbarItem onPress={onPress} selected={selected}>
       <Canvas style={styles.toolbarItem}>
-        <Line
-          p1={(ctx) => ({ x: ctx.width / 2, y: 0 })}
-          p2={(ctx) => ({ x: ctx.width / 2, y: ctx.height })}
-          strokeWidth={size}
-          color={"#000"}
-        />
+        <Item size={size} />
       </Canvas>
     </BaseToolbarItem>
+  );
+};
+
+interface ItemProps {
+  size: number;
+}
+
+const Item = ({ size }: ItemProps) => {
+  const canvas = useCanvas();
+  return (
+    <Line
+      p1={{ x: canvas.width / 2, y: 0 }}
+      p2={{ x: canvas.width / 2, y: canvas.height }}
+      strokeWidth={size}
+      color={"#000"}
+    />
   );
 };
