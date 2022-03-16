@@ -11,7 +11,7 @@ Draws vertices.
 | :--------- | :----------- | :----------------------- |
 | vertices   | `Point[]`    | Vertices to draw |
 | mode?      | `VertexMode` | Can be `triangles`, `trianglesStripe` or `triangleFan`. Default is `triangles` |
-| indices?   | `number[]`   | Indices of the vertices that form the triangles. If not provided, the order of the vertices will be taken. Using this property enables you to not duplicate vertices. |
+| indices?   | `number[]`   | Indices of the vertices that form the triangles. If not provided, the order of the vertices will be taken. Using this property enables you not to duplicate vertices. |
 | textures   | `Point[]`.   | [Texture mapping](https://en.wikipedia.org/wiki/Texture_mapping). The texture is the shader provided by the paint. |
 | colors?    | `string[]`   | Optional colors to be associated to each vertex |
 | blendMode? | `BlendMode`  | If `colors` is provided, colors are blended with the paint using the blend mode. Default is `dstOver` if colors are provided, `srcOver` if not. |
@@ -54,7 +54,7 @@ const VerticesDemo = () => {
 
 ## Using indices
 
-In the example below we defined four vertices, representing four corners of a rectangle.
+In the example below, we defined four vertices, representing four corners of a rectangle.
 Then we use the indices property to define the two triangles we would like to draw based on these four vertices.
 * First triangle: `0, 1, 2` (top-left, top-right, bottom-right).
 * Second triangle: `0, 2, 3` (top-left, bottom-right, bottom-left).

@@ -28,7 +28,11 @@ const examples = [
   },
   {
     screen: "ColorFilter",
-    title: "🌃 Color & Image Filters",
+    title: "🌃 Color Filters",
+  },
+  {
+    screen: "ImageFilters",
+    title: "💧 Image Filters",
   },
   {
     screen: "Gradients",

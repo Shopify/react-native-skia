@@ -38,8 +38,7 @@ Draws a rounded rectangle.
 | y      | `number` | Y coordinate.                                                 |
 | width  | `number` | Width of the rectangle.                                       |
 | height | `number` | Height of the rectangle.                                      |
-| rx?    | `number` | Horizontal corner radius. Defaults to `ry` if specified or 0. |
-| ry?    | `number` | Vertical corner radius. Defaults to `rx` if specified or 0.   |
+| r?    | `number` or `Vector` | Corner radius. Defaults to `ry` if specified or 0. |
 
 ```tsx twoslash
 import { Canvas, RoundedRect } from "@shopify/react-native-skia";
@@ -52,7 +51,7 @@ const RectDemo = () => {
         y={0}
         width={256}
         height={256}
-        rx={25}
+        r={25}
         color="lightblue"
       />
     </Canvas>

@@ -7,12 +7,12 @@ slug: /mask
 
 The `Mask` component hides an element by masking the content at specific points.
 Just like its [CSS counterpart](https://developer.mozilla.org/en-US/docs/Web/CSS/mask), there are two modes available:
-* `alpha`: This mode indicates that the transparency (alpha channel) values of the mask layer image should be used as the mask values. This is how masks work in Figma.
+* `alpha`: This mode indicates that the mask layer image's transparency (alpha channel) values should be used as the mask values. This is how masks work in Figma.
 * `luminance`: This mode indicates that the luminance values of the mask layer image should be used as the mask values. This is how masks work in SVG.
 
-The first child of `Mask` is the drawing to be used as a mask, and the remaining children are the drawings to mask.
+The first child of `Mask` is the drawing used as a mask, and the remaining children are the drawings to mask.
 
-By default, the mask is not clipped. If you want to clip the mask with the bounds of the contentuse the `clip` property. 
+By default, the mask is not clipped if you want to clip the mask with the bounds of the contents, the `clip` property. 
 
 | Name      | Type                      | Description                                                   |
 |:----------|:--------------------------|:--------------------------------------------------------------|

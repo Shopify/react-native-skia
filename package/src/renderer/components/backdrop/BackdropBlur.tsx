@@ -1,13 +1,13 @@
 import React from "react";
 
 import { Blur } from "../imageFilters";
-import type { AnimatedProps } from "../../processors";
+import type { AnimatedProps, Radius } from "../../processors";
 
 import type { BackdropFilterProps } from "./BackdropFilter";
 import { BackdropFilter } from "./BackdropFilter";
 
 interface BackdropBlurProps extends Omit<BackdropFilterProps, "filter"> {
-  blur: number;
+  blur: Radius;
 }
 
 export const BackdropBlur = ({
@@ -16,7 +16,7 @@ export const BackdropBlur = ({
   ...props
 }: AnimatedProps<BackdropBlurProps>) => {
   return (
-    <BackdropFilter filter={<Blur sigmaX={blur} sigmaY={blur} />} {...props}>
+    <BackdropFilter filter={<Blur blur={blur} />} {...props}>
       {children}
     </BackdropFilter>
   );

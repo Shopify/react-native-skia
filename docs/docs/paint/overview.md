@@ -5,7 +5,7 @@ sidebar_label: Overview
 slug: /paint/overview
 ---
 
-Anytime you draw something in Skia and want to specify what color it is, or how it blends with the background, or what style to draw it in, you specify those attributes in a paint.
+Anytime you draw something in Skia and want to specify what color it is, how it blends with the background, or what style to draw it in, you specify those attributes in a paint.
 In React Native Skia, there are many ways to specify a paint.
 
 The following properties to the Paint component:
@@ -20,13 +20,13 @@ The following properties to the Paint component:
 
 A paint component can additionnaly receive the following components as children:
 * [Shaders](/docs/shaders/overview) 
-* [Image Filters](/docs/image-filters)
+* [Image Filters](/docs/image-filters/overview)
 * [Color Filters](/docs/color-filters)
 * [Mask Filters](/docs/mask-filters)
 * [Path Effects](/docs/path-effects)
 
 The paint component is inherited by its following sibling and descendants.
-In the example below, the first circle will be filled with red and, the second circle will have a light blue stroke.  
+The first circle will be filled with red in the example below, and the second circle will have a light blue stroke.  
 
 ```tsx twoslash
 import {Canvas, Circle, Paint, Group} from "@shopify/react-native-skia";
@@ -95,8 +95,8 @@ export const PaintDemo = () => {
 ![Paint Assignment](assets/strokes.png)
 
 Finally, we can assign a ref to a Paint component for later use.
-There a few use-cases where this is useful.
-By wrapping the Paint component into a Defs component, we make sure that the paint is not used automatically by the renderer: need to pass the paint explicitly as a property.
+There are a few use-cases where this is useful.
+By wrapping the Paint component into a `Defs` component, we ensure that the renderer does not use the paint automatically: we need to pass the paint explicitly as a property.
 
 ```tsx twoslash
 import {Canvas, Circle, Paint, Defs, usePaintRef} from "@shopify/react-native-skia";

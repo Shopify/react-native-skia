@@ -1,10 +1,19 @@
 import type { CanvasProps, SkiaView } from "@shopify/react-native-skia";
-import { ImageFormat, Canvas } from "@shopify/react-native-skia";
+import {
+  useTouchHandler,
+  ImageFormat,
+  Canvas,
+} from "@shopify/react-native-skia";
 import React, { useCallback, useRef } from "react";
-import { Alert, Share, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Share } from "react-native";
 
 export const ExportableCanvas = ({ children, style }: CanvasProps) => {
   const ref = useRef<SkiaView>(null);
+  const onTouch = useTouchHandler({
+    onEnd: () => {
+      handleShare();
+    },
+  });
   const handleShare = useCallback(() => {
     const image = ref.current?.makeImageSnapshot();
     if (image) {
@@ -23,12 +32,8 @@ export const ExportableCanvas = ({ children, style }: CanvasProps) => {
     }
   }, [ref]);
   return (
-    <TouchableWithoutFeedback onPress={handleShare}>
-      <View style={{ flex: 1 }}>
-        <Canvas style={style} ref={ref}>
-          {children}
-        </Canvas>
-      </View>
-    </TouchableWithoutFeedback>
+    <Canvas style={style} ref={ref} onTouch={onTouch}>
+      {children}
+    </Canvas>
   );
 };
