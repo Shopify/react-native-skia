@@ -5,7 +5,7 @@ sidebar_label: Group
 slug: /group
 ---
 
-The Group component is an important construct in React Native Skia.
+The Group component is an essential construct in React Native Skia.
 Group components can be deeply nested with one another.
 It can apply the following operations to its children:
 * [Paint properties](#paint-properties)
@@ -15,7 +15,7 @@ It can apply the following operations to its children:
 
 | Name       | Type               |  Description                                                  |
 |:-----------|:-------------------|:--------------------------------------------------------------|
-| transform? | `Transform2d`      | [Same API than in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is however different. It is the center object in React Native and the top-left corner in Skia. |
+| transform? | `Transform2d`      | [Same API than in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is, however, different. It is the center object in React Native and the top-left corner in Skia. |
 | origin?    | `Point`            | Sets the origin of the transformation. This property is not inherited by its children. |
 | clip?   | `RectOrRRectOrPath`     | Rectangle, rounded rectangle, or Path to use to clip the children. |
 | invertClip? | `boolean`         | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden. |
@@ -23,7 +23,7 @@ It can apply the following operations to its children:
 
 ## Paint Properties
 
-All paint properties applied to a group will be inherited by its children.
+Its children will inherit all paint properties applied to a group.
 
 ```tsx twoslash
 import {Canvas, Circle, Group} from "@shopify/react-native-skia";
@@ -47,7 +47,7 @@ export const PaintDemo = () => {
 
 ## Transformations
 
-The transform property is identical to its [homonymous property in React Native](https://reactnative.dev/docs/transforms) except for one major difference: in React Native the origin of transformation is the center of the object whereas it is the top left position of the object in Skia.
+The transform property is identical to its [homonymous property in React Native](https://reactnative.dev/docs/transforms) except for one significant difference: in React Native, the origin of transformation is the center of the object, whereas it is the top-left position of the object in Skia.
 
 The origin property is a helper to set the origin of the transformation. This property is not inherited by its children.
 
@@ -61,7 +61,7 @@ const SimpleTransform = () => {
     <Canvas style={{ flex: 1 }}>
       <Fill color="#e8f4f8" />
       <Group color="lightblue" transform={[{ skewX: Math.PI / 6 }]}>
-        <RoundedRect x={64} y={64} width={128} height={128} rx={10} />
+        <RoundedRect x={64} y={64} width={128} height={128} r={10} />
       </Group>
     </Canvas>
   );
@@ -84,7 +84,7 @@ const SimpleTransform = () => {
         origin={{ x: 128, y: 128 }}
         transform={[{ skewX: Math.PI / 6 }]}
       >
-        <RoundedRect x={64} y={64} width={128} height={128} rx={10} />
+        <RoundedRect x={64} y={64} width={128} height={128} r={10} />
       </Group>
     </Canvas>
   );
@@ -98,7 +98,7 @@ const SimpleTransform = () => {
 
 `clip` provides a clipping region that sets what part of the children should be shown.
 Parts inside the region are shown, while those outside are hidden.
-When using `invertClip`, everything outside the clipping region will be shown and, parts inside the clipping region will be hidden.
+When using `invertClip`, everything outside the clipping region will be shown, and parts inside the clipping region will be hidden.
 
 ### Clip Path
 
@@ -183,7 +183,7 @@ const Clip = () => {
               1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
             ]}
           >
-            <Blur sigmaX={20} sigmaY={20} />
+            <Blur blur={20} />
           </ColorMatrix>
         </Paint>
       </Defs>

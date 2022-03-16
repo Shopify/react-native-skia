@@ -7,7 +7,7 @@ slug: /animations/values
 
 React Native Skia supports Animations through the concept of Skia Values. A value can be seen as the state in the library where a change in will trigger a repaint request on the `Canvas` component where it is used.
 
-A simple example is shown below shows how a value is used as a property for the x position of the `Rect` element.
+A simple example below shows how a value is used as a property for the x position of the `Rect` element.
 
 ```tsx twoslash
 import { Canvas, Rect, useValue } from "@shopify/react-native-skia";
@@ -47,7 +47,7 @@ There are a few more value types in the library that will be described below.
 ## Derived value
 
 This value is a Skia Value that is derived from other Skia Values.
-It takes as its input one or more existing values and a function that will calculate the new value based on the input. The function will be evaluated every time the input value changes.
+It takes one or more existing values and a function that will calculate the new value based on the input. The function will be evaluated every time the input value changes.
 
 ```tsx twoslash
 import { useValue, useDerivedValue } from "@shopify/react-native-skia";

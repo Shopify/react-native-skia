@@ -7,7 +7,7 @@ slug: /images-svg
 
 Draw an SVG (see [SVG Support](#svg-support)).
 
-If the root dimensions are in absolute units, then the width/height properties have no effect since the initial viewport is fixed.
+If the root dimensions are in absolute units, the width/height properties have no effect since the initial viewport is fixed.
 
 | Name      | Type      |  Description                                                  |
 |:----------|:----------|:--------------------------------------------------------------|
@@ -74,9 +74,9 @@ export const SVG = () => {
 
 ## SVG Support
 
-The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) is used to display SVGs as images.
-Its capabilities and compliance level is fairly strong.
-We expect most SVG files render correctly out of the box, especially if they come from Figma or Illustrator.
+The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) displays SVGs as images.
+Its capabilities and compliance level are pretty strong.
+We expect most SVG files to render correctly out of the box, especially from Figma or Illustrator.
 However, please be aware of some of the quirks below when using it.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
 
@@ -86,7 +86,7 @@ Using [SVGO](https://github.com/svg/svgo) to normalize the SVG file helps a lot.
 
 ### RGBA Colors
 
-The RGBA color syntax is not supported. Instead, you need to use the `fill-opacity` and `stroke-opacity` attributes. Consider the example below.
+The RGBA color syntax is not supported. Instead, it would help if you used the `fill-opacity` and `stroke-opacity` attributes. Consider the example below.
 
 ```xml
 <circle
@@ -112,11 +112,11 @@ Would need to be rewritten as:
 />
 ```
 
-There is also the `opacity` attribute that applies to both the `fill` and `stroke` attributes.
+The `opacity` attribute also applies to both the `fill` and `stroke` attributes.
 
 ### Font Familly
 
-When rendering your SVG with Skia, all fonts available in your app are also available to your SVG. However, the way you can set the `font-family` attribute is not flexible at all.
+When rendering your SVG with Skia, all fonts available in your app are also available to your SVG. However, the way you can set the `font-family` attribute is not flexible.
 This is [a known issue](https://github.com/google/skia/blob/main/modules/svg/src/SkSVGText.cpp#L77) in the SVG Skia module. 
 The fallback syntax won't work:
 ```jsx
@@ -141,4 +141,4 @@ Some SVGs contain inlined SVGs via the `<image>` or `<feImage>` elements. This i
 
 ### Fallbacks
 
-Some SVG with issues display nicely in the browser because they are so tolerant of errors. We found that the Skia SVG module is much less forgiving.
+Some SVG with issues display nicely in the browser because they are very tolerant of errors. We found that the Skia SVG module is much less forgiving.

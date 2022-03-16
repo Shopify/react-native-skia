@@ -21,5 +21,5 @@ export const RoundedRect = (props: AnimatedProps<RoundedRectProps>) => {
 };
 
 RoundedRect.defaultProps = {
-  rx: 0,
+  r: 0,
 };
