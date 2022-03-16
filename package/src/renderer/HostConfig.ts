@@ -124,13 +124,15 @@ const insertBefore = (
   parent.children.splice(beforeIndex, 0, child);
 };
 
-const createNode = (type: NodeType, props: Props) => {
+const createNode = (container: Container, type: NodeType, props: Props) => {
   switch (type) {
     case NodeType.Drawing:
       const { onDraw, skipProcessing, ...p1 } = props;
+      container.registerValues(p1);
       return new DrawingNode(onDraw, skipProcessing, p1);
     case NodeType.Declaration:
       const { onDeclare, ...p2 } = props;
+      container.registerValues(p2);
       return new DeclarationNode(onDeclare, p2);
     default:
       // TODO: here we need to throw a nice error message
@@ -190,9 +192,15 @@ export const skHostConfig: SkiaHostConfig = {
     throw new Error("Text nodes are not supported yet");
   },
 
-  createInstance(type, props, _root, _hostContext, _internalInstanceHandle) {
+  createInstance(
+    type,
+    props,
+    container,
+    _hostContext,
+    _internalInstanceHandle
+  ) {
     debug("createInstance", type);
-    return createNode(type, props) as SkNode<unknown>;
+    return createNode(container, type, props) as SkNode<unknown>;
   },
 
   appendInitialChild(parentInstance, child) {
@@ -240,7 +248,7 @@ export const skHostConfig: SkiaHostConfig = {
     type,
     oldProps,
     newProps,
-    _rootContainerInstance,
+    container,
     _hostContext
   ) => {
     debug("prepareUpdate");
@@ -249,6 +257,7 @@ export const skHostConfig: SkiaHostConfig = {
       return null;
     }
     debug("update ", type);
+    container.registerValues(newProps);
     return true;
   },
 

@@ -1,9 +1,14 @@
+import type { RefObject } from "react";
+
 import { isPaint } from "../skia/Paint/Paint";
+import type { SkiaReadonlyValue } from "../values";
+import type { SkiaView } from "../views";
 
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationResult, DeclarationProps } from "./nodes/Declaration";
 import type { DrawingProps } from "./nodes";
 import type { AnimatedProps } from "./processors/Animations/Animations";
+import { isValue } from "./processors/Animations/Animations";
 
 export enum NodeType {
   Declaration = "skDeclaration",
@@ -53,15 +58,45 @@ export abstract class SkNode<P> {
 }
 
 export class Container extends SkNode<unknown> {
+  values: SkiaReadonlyValue<unknown>[] = [];
+  subscription: (() => void) | null = null;
   redraw: () => void;
+  ref: RefObject<SkiaView>;
 
-  constructor(redraw: () => void) {
+  constructor(ref: RefObject<SkiaView>, redraw: () => void) {
     super({});
+    this.ref = ref;
     this.redraw = redraw;
   }
 
   draw(ctx: DrawingContext) {
     this.visit(ctx);
+  }
+
+  registerValues(props: { [s: string]: unknown }) {
+    Object.values(props).forEach((value) => {
+      if (isValue(value)) {
+        this.values.push(value);
+      }
+    });
+  }
+
+  subscribe() {
+    if (!this.ref.current) {
+      throw new Error("Canvas ref is not set");
+    }
+    if (this.values.length === 0) {
+      return;
+    }
+    this.subscription = this.ref.current.registerValues(this.values);
+    this.values.splice(0, this.values.length);
+  }
+
+  unsubscribe() {
+    if (this.subscription !== null) {
+      this.subscription();
+      this.subscription = null;
+    }
   }
 }
 

@@ -1,7 +1,6 @@
 import React, {
   useEffect,
   useState,
-  useCallback,
   useMemo,
   useContext,
   forwardRef,
@@ -27,8 +26,8 @@ import type { FontMgr } from "../skia/FontMgr/FontMgr";
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
 import { vec } from "./processors";
-import { createDependencyManager } from "./DependecyManager";
 import { Container } from "./Host";
+import type { Vector } from "./processors/math/Vector";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,6 +51,7 @@ export const useContextBridge = (...contexts: Context<any>[]) => {
 interface CanvasContext {
   width: number;
   height: number;
+  center: Vector;
 }
 
 const CanvasContext = React.createContext<CanvasContext | null>(null);
@@ -72,14 +72,10 @@ skiaReconciler.injectIntoDevTools({
   rendererPackageName: "react-native-skia",
 });
 
-const render = (
-  element: ReactNode,
-  container: OpaqueRoot,
-  update: () => void
-) => {
-  skiaReconciler.updateContainer(element, container, null, () => {
+const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
+  skiaReconciler.updateContainer(element, root, null, () => {
     hostDebug("updateContainer");
-    update();
+    container.subscribe();
   });
 };
 
@@ -97,14 +93,15 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const [tick, setTick] = useState(0);
-    const redraw = useCallback(() => setTick((t) => t + 1), []);
-
-    const tree = useMemo(() => new Container(redraw), [redraw]);
-
-    const canvasCtx = useRef({ width: 0, height: 0 });
     const container = useMemo(
-      () => skiaReconciler.createContainer(tree, 0, false, null),
-      [tree]
+      () => new Container(ref, () => setTick((t) => t + 1)),
+      [ref]
+    );
+
+    const canvasCtx = useRef({ width: 0, height: 0, center: vec(0, 0) });
+    const root = useMemo(
+      () => skiaReconciler.createContainer(container, 0, false, null),
+      [container]
     );
     // Render effect
     useEffect(() => {
@@ -112,21 +109,19 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         <CanvasContext.Provider value={canvasCtx.current}>
           {children}
         </CanvasContext.Provider>,
-        container,
-        redraw
+        root,
+        container
       );
-    }, [children, container, redraw]);
-
-    const depsManager = useMemo(() => createDependencyManager(ref), [ref]);
+    }, [children, root, container]);
 
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
-        canvasCtx.current.width = width;
-        canvasCtx.current.height = height;
-        onTouch && onTouch(info.touches);
+        if (onTouch) {
+          onTouch(info.touches);
+        }
         const paint = Skia.Paint();
         paint.setAntiAlias(true);
         const ctx = {
@@ -140,21 +135,17 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? Skia.FontMgr.RefDefault(),
         };
-        tree.draw(ctx);
+        canvasCtx.current = ctx;
+        container.draw(ctx);
       },
       [tick, onTouch]
     );
 
-    // Handle value dependency registration of values to the underlying
-    // SkiaView. Every time the tree changes (children), we will visit all
-    // our children and register their dependencies.
     useEffect(() => {
-      // Register all values in the current tree
-      depsManager.visitChildren(tree);
-      // Subscrube / return unsubscribe function
-      depsManager.subscribe();
-      return depsManager.unsubscribe;
-    }, [depsManager, tree, children]);
+      return () => {
+        container.unsubscribe();
+      };
+    }, [container]);
 
     return (
       <SkiaView
