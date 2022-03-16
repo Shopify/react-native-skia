@@ -6,7 +6,7 @@ slug: /getting-started/installation
 ---
 
 React Native Skia brings the [Skia Graphics Library](https://skia.org/) to React Native.
-Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and, Firefox OS, and many other products.
+Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox, Firefox OS, and many other products.
 
 
 :::warning
@@ -45,7 +45,7 @@ If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 
 If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_
 
-And then the _SDK Location_ section. It will show you the NDK path, or the option to Download it if you don't have it installed.
+And then the _SDK Location_ section. It will show you the NDK path, or the option to download it if you don't have it installed.
 
 ## Playground
 
@@ -57,4 +57,4 @@ cd package && yarn && cd ..
 cd example && yarn && yarn start
 ```
 
-To run the example project on iOS, you will need to run `pod install` and on Android you will also need Android NDK to be installed ([see here](#android)).
+To run the example project on iOS, you will need to run `pod install`, and on Android, you will also need Android NDK to be installed ([see here](#android)).

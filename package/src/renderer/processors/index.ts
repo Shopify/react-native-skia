@@ -7,3 +7,4 @@ export * from "./math";
 export * from "./Font";
 export * from "./Paths";
 export * from "./Clips";
+export * from "./Radius";
