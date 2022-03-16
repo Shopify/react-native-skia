@@ -3,8 +3,6 @@ import { useMemo } from "react";
 import type { SkiaReadonlyValue } from "../types";
 import { ValueApi } from "../api";
 
-type CreateDerivedvalue = typeof ValueApi.createDerivedValue;
-
 /**
  * Creates a new derived value - a value that will calculate its value depending
  * on other values.
@@ -12,9 +10,12 @@ type CreateDerivedvalue = typeof ValueApi.createDerivedValue;
  * @param values Depenedant values
  * @returns A readonly value
  */
-export const useDerivedValue: CreateDerivedvalue = <R>(
-  cb: (...args: Array<unknown>) => R,
+export const useDerivedValue = <R>(
+  cb: () => R,
   values: Array<SkiaReadonlyValue<unknown>>
 ): SkiaReadonlyValue<R> => {
-  return useMemo(() => ValueApi.createDerivedValue(cb, values), [cb, values]);
+  return useMemo(
+    () => ValueApi.createDerivedValue<R>(cb, values),
+    [cb, values]
+  );
 };

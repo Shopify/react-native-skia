@@ -15,10 +15,13 @@ export const SimpleAnimation = () => {
   // Clock for driving the animation
   const clock = useClockValue();
   // Normalize the clock value to a value between 0 and 1
-  const normalized = useDerivedValue((t) => (t / 1000) % 1.0, [clock]);
+  const normalized = useDerivedValue(
+    () => (clock.current / 1000) % 1.0,
+    [clock]
+  );
   // Create a rect as a derived value
   const rect = useDerivedValue(
-    (p) => ({ x: 0, y: 10, width: p * width, height: Size }),
+    () => ({ x: 0, y: 10, width: normalized.current * width, height: Size }),
     [normalized]
   );
   return (

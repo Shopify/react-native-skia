@@ -54,7 +54,7 @@ import { useValue, useDerivedValue } from "@shopify/react-native-skia";
 
 const radius = useValue(100);
 const theta = useValue(Math.PI);
-const length = useDerivedValue((r, t) => r * t, [radius, theta]);
+const length = useDerivedValue(() => radius.current * theta.current, [radius, theta]);
 console.log(length.current); // 314.1592653589793
 ```
 
@@ -76,8 +76,8 @@ const interval = 3000;
 const Demo = () => {
   const clock = useClockValue();
   const opacity = useDerivedValue(
-    (t) => {
-      return (t % interval) / interval;
+    () => {
+      return (clock.current % interval) / interval;
     },
     [clock]
   );

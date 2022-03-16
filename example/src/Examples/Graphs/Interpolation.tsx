@@ -35,7 +35,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
   }, [progress, toggled]);
 
   const interpolatedPath = useDerivedValue(
-    (p) => path.interpolate(path2, p),
+    () => path.interpolate(path2, progress.current),
     [progress]
   );
 
