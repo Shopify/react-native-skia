@@ -46,7 +46,7 @@ export const Neumorphism = () => {
   }
   const pos = font.measureText("30%");
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ flex: 1 }} debug>
       <Group>
         <Paint>
           <LinearGradient
@@ -96,7 +96,7 @@ export const Neumorphism = () => {
             blur={66}
             color="rgba(59, 68, 81, 0.5)"
           />
-          <InnerShadow dx={26} dy={26} blur={81} color="rgba(0, 0, 0, 0.5)" />
+          <InnerShadow dx={26} dy={26} blur={10} color="rgba(0, 0, 0, 0.5)" />
         </Paint>
         <Circle c={c} r={r1} color="#32363B" />
       </Group>
