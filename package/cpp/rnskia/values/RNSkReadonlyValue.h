@@ -23,18 +23,18 @@ class RNSkReadonlyValue : public JsiHostObject
 {
 public:
   RNSkReadonlyValue(std::shared_ptr<RNSkPlatformContext> platformContext)
-      : JsiHostObject(), _platformContext(platformContext) {}
+      : JsiHostObject(),
+    _platformContext(platformContext),
+    _propNameId(jsi::PropNameID::forUtf8(*platformContext->getJsRuntime(), "value"))
+  {}
 
   JSI_PROPERTY_GET(__typename__) {
     return jsi::String::createFromUtf8(runtime, "RNSkValue");
   }
   
   JSI_PROPERTY_GET(current) {
-    if(_valueHolder == nullptr) {
-      return jsi::Value::undefined();
-    }
-    return _valueHolder->getProperty(runtime, "value");
-  }  
+    return getCurrent(runtime);
+  }
   
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkReadonlyValue, __typename__),
                               JSI_EXPORT_PROP_GET(RNSkReadonlyValue, current))
@@ -85,8 +85,15 @@ public:
     if(_valueHolder == nullptr) {
       _valueHolder = std::make_shared<jsi::Object>(runtime);
     }
-    _valueHolder->setProperty(runtime, "value", value);
+    _valueHolder->setProperty(runtime, _propNameId, value);
     notifyListeners(runtime);
+  }
+  
+  jsi::Value getCurrent(jsi::Runtime &runtime) {
+    if(_valueHolder == nullptr) {
+      return jsi::Value::undefined();
+    }
+    return _valueHolder->getProperty(runtime, _propNameId);
   }
   
 protected:
@@ -122,8 +129,9 @@ protected:
   }
 
 private:
+  jsi::PropNameID _propNameId;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
-  std::shared_ptr<jsi::Object> _valueHolder;  
+  std::shared_ptr<jsi::Object> _valueHolder;
   long _listenerId = 0;
   std::map<long, std::function<void(jsi::Runtime&)>> _listeners;
   std::mutex _mutex;

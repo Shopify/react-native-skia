@@ -40,8 +40,6 @@ namespace RNSkia
 
         void notifyTaskReadyExternal();
 
-        void dispatchOnRenderThread (const std::function<void(void)>&func);
-
         float getPixelDensity() { return _pixelDensity; }
 
         void setOnNotifyDrawLoop(const std::function<void(void)>& callback) {

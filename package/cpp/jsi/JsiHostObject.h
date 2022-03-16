@@ -42,7 +42,7 @@
  */
 #define JSI_EXPORT_FUNC(CLASS, FUNCTION)                                       \
   {                                                                            \
-#FUNCTION, (jsi::Value(JsiHostObject::*)(                                  \
+#FUNCTION, (jsi::Value(JsiHostObject::*)(                                      \
                    jsi::Runtime & runtime, const jsi::Value &thisValue,        \
                    const jsi::Value *arguments, size_t)) &                     \
                    CLASS::FUNCTION                                             \
@@ -52,16 +52,8 @@
  * Creates a JSI export functions statement
  */
 #define JSI_EXPORT_FUNCTIONS(...)                                              \
-  const std::unordered_map<std::string,                                        \
-                           jsi::Value (JsiHostObject::*)(                      \
-                               jsi::Runtime &, const jsi::Value &,             \
-                               const jsi::Value *, size_t)>                    \
-      &getExportedFunctionMap() override {                                     \
-    static std::unordered_map<std::string,                                     \
-                              jsi::Value (JsiHostObject::*)(                   \
-                                  jsi::Runtime &, const jsi::Value &,          \
-                                  const jsi::Value *, size_t)>                 \
-        map = {__VA_ARGS__};                                                   \
+  const JsiFunctionMap &getExportedFunctionMap() override {                    \
+    static JsiFunctionMap map = {__VA_ARGS__};                                 \
     return map;                                                                \
   }
 
@@ -70,7 +62,7 @@
  */
 #define JSI_EXPORT_PROP_GET(CLASS, FUNCTION)                                   \
   {                                                                            \
-#FUNCTION, (jsi::Value(JsiHostObject::*)(jsi::Runtime & runtime)) &        \
+#FUNCTION, (jsi::Value(JsiHostObject::*)(jsi::Runtime & runtime)) &            \
                    CLASS::STR_CAT(STR_GET, FUNCTION)                           \
   }
 
@@ -78,21 +70,17 @@
  * Creates a JSI export getters statement
  */
 #define JSI_EXPORT_PROPERTY_GETTERS(...)                                       \
-  const std::unordered_map<std::string,                                        \
-                           jsi::Value (JsiHostObject::*)(jsi::Runtime &)>      \
-      &getExportedPropertyGettersMap() override {                              \
-    static std::unordered_map<std::string,                                     \
-                              jsi::Value (JsiHostObject::*)(jsi::Runtime &)>   \
-        map = {__VA_ARGS__};                                                   \
-    return map;                                                                \
-  }
+  const JsiPropertyGettersMap &getExportedPropertyGettersMap() override {      \
+  static JsiPropertyGettersMap map = {__VA_ARGS__};                            \
+  return map;                                                                  \
+}
 
 /**
  * Creates a JSI export setter declaration
  */
 #define JSI_EXPORT_PROP_SET(CLASS, FUNCTION)                                   \
   {                                                                            \
-#FUNCTION,                                                                 \
+#FUNCTION,                                                                     \
         (void(JsiHostObject::*)(jsi::Runtime & runtime, const jsi::Value &)) & \
             CLASS::STR_CAT(STR_SET, FUNCTION)                                  \
   }
@@ -101,14 +89,8 @@
  * Creates a JSI export setters statement
  */
 #define JSI_EXPORT_PROPERTY_SETTERS(...)                                       \
-  const std::unordered_map<std::string,                                        \
-                           void (JsiHostObject::*)(jsi::Runtime &,             \
-                                                   const jsi::Value &)>        \
-      &getExportedPropertySettersMap() override {                              \
-    static std::unordered_map<std::string,                                     \
-                              void (JsiHostObject::*)(jsi::Runtime &,          \
-                                                      const jsi::Value &)>     \
-        map = {__VA_ARGS__};                                                   \
+  const JsiPropertySettersMap &getExportedPropertySettersMap() override {      \
+    static JsiPropertySettersMap map = {__VA_ARGS__};                          \
     return map;                                                                \
   }
 
@@ -121,8 +103,20 @@ using JsPropertyType = struct {
   std::function<void(jsi::Runtime &, const jsi::Value &)> set;
 };
 
+class JsiHostObject;
+
+using JsiFunctionMap = std::unordered_map<std::string,
+  jsi::Value (JsiHostObject::*)(jsi::Runtime &, const jsi::Value &, const jsi::Value *, size_t)>;
+
+using JsiPropertyGettersMap = std::unordered_map<std::string,
+  jsi::Value (JsiHostObject::*)(jsi::Runtime &)>;
+
+using JsiPropertySettersMap = std::unordered_map<std::string,
+  void (JsiHostObject::*)(jsi::Runtime &, const jsi::Value &)>;
+
 using JsiHostFunctionCache =
     std::unordered_map<std::string, std::unique_ptr<jsi::Function>>;
+
 using JsiRuntimeCache =
     std::unordered_map<jsi::Runtime *, JsiHostFunctionCache>;
 
@@ -138,41 +132,24 @@ protected:
   /**
    Override to return map of name/functions
    */
-  virtual const std::unordered_map<
-      std::string,
-      jsi::Value (JsiHostObject::*)(jsi::Runtime &, const jsi::Value &,
-                                    const jsi::Value *, size_t)> &
-  getExportedFunctionMap() {
-    static const std::unordered_map<std::string,
-                                    jsi::Value (JsiHostObject::*)(
-                                        jsi::Runtime &, const jsi::Value &,
-                                        const jsi::Value *, size_t)>
-        empty;
+  virtual const JsiFunctionMap &getExportedFunctionMap() {
+    static const JsiFunctionMap empty;
     return empty;
   };
 
   /**
    Override to get property getters map of name/functions
    */
-  virtual const std::unordered_map<
-      std::string, jsi::Value (JsiHostObject::*)(jsi::Runtime &)> &
-  getExportedPropertyGettersMap() {
-    static const std::unordered_map<std::string, jsi::Value (JsiHostObject::*)(
-                                                     jsi::Runtime &)>
-        empty;
+  virtual const JsiPropertyGettersMap &getExportedPropertyGettersMap() {
+    static const JsiPropertyGettersMap empty;
     return empty;
   };
 
   /**
    Override to get property setters map of name/functions
    */
-  virtual const std::unordered_map<
-      std::string, void (JsiHostObject::*)(jsi::Runtime &, const jsi::Value &)>
-      &getExportedPropertySettersMap() {
-    static const std::unordered_map<std::string,
-                                    void (JsiHostObject::*)(jsi::Runtime &,
-                                                            const jsi::Value &)>
-        empty;
+  virtual const JsiPropertySettersMap &getExportedPropertySettersMap() {
+    static const JsiPropertySettersMap empty;
     return empty;
   };
 

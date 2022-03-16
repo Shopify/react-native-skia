@@ -26,15 +26,6 @@ namespace RNSkia
         return makeCxxInstance(jThis, pixelDensity);
     }
 
-    void JniPlatformContext::dispatchOnRenderThread (const std::function<void(void)>&func) {
-        _taskMutex->lock();
-        _taskCallbacks.push(func);
-        _taskMutex->unlock();
-        static auto method =
-                javaPart_->getClass()->getMethod<void()>("triggerOnRenderThread");
-        method(javaPart_.get());
-    }
-
     void JniPlatformContext::startDrawLoop()
     {
         jni::ThreadScope ts;

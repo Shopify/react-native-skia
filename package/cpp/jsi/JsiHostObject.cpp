@@ -32,11 +32,12 @@ JsiHostObject::~JsiHostObject() {
 
 void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,
                         const jsi::Value &value) {
+  
   auto nameVal = name.utf8(rt);
   auto nameStr = nameVal.c_str();
 
   /** Check the static setters map */
-  auto setters = getExportedPropertySettersMap();
+  const JsiPropertySettersMap &setters = getExportedPropertySettersMap();
   auto setter = setters.find(nameStr);
   if (setter != setters.end()) {
     auto dispatcher = std::bind(setter->second, this, std::placeholders::_1,
@@ -54,8 +55,16 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
                               const jsi::PropNameID &name) {
   auto nameVal = name.utf8(runtime);
   auto nameStr = nameVal.c_str();
+  
+  // Check the static getters map
+  const JsiPropertyGettersMap &getters = getExportedPropertyGettersMap();
+  auto getter = getters.find(nameStr);
+  if (getter != getters.end()) {
+    auto dispatcher = std::bind(getter->second, this, std::placeholders::_1);
+    return dispatcher(runtime);
+  }
 
-  /** Start by checking the cache for functions */
+  // Check the cache for functions
   auto runtimeCache = _cache.find(&runtime);
   JsiHostFunctionCache *currentCache;
   if (runtimeCache != _cache.end()) {
@@ -72,8 +81,8 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
     currentCache = &_cache.at(&runtime);
   }
 
-  /* Check the static function map */
-  auto funcs = getExportedFunctionMap();
+  // Check the static function map
+  const JsiFunctionMap &funcs = getExportedFunctionMap();
   auto func = funcs.find(nameStr);
   if (func != funcs.end()) {
     auto dispatcher = std::bind(func->second, (JsiHostObject *)this,
@@ -87,14 +96,6 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 
     // return retVal;
     return currentCache->at(nameStr)->asFunction(runtime);
-  }
-
-  /** Check the static getters map */
-  auto getters = getExportedPropertyGettersMap();
-  auto getter = getters.find(nameStr);
-  if (getter != getters.end()) {
-    auto dispatcher = std::bind(getter->second, this, std::placeholders::_1);
-    return dispatcher(runtime);
   }
 
   if (_funcMap.count(nameStr) > 0) {
@@ -122,14 +123,14 @@ JsiHostObject::getPropertyNames(jsi::Runtime &runtime) {
   // Statically exported property getters
   auto getters = getExportedPropertyGettersMap();
   for (auto it = getters.begin(); it != getters.end(); ++it) {
-    propNames.push_back(jsi::PropNameID::forAscii(runtime, it->first));
+    propNames.push_back(jsi::PropNameID::forUtf8(runtime, it->first));
   }
 
   // Statically exported property setters
   auto setters = getExportedPropertySettersMap();
   for (auto it = getters.begin(); it != getters.end(); ++it) {
     if (getters.count(it->first) == 0) {
-      propNames.push_back(jsi::PropNameID::forAscii(runtime, it->first));
+      propNames.push_back(jsi::PropNameID::forUtf8(runtime, it->first));
     }
   }
 

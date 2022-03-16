@@ -6,6 +6,7 @@
 #include <thread>
 
 #include <RNSkLog.h>
+#include <RNSkDispatchQueue.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -29,12 +30,10 @@ public:
    */
   RNSkPlatformContext(
       jsi::Runtime *runtime, std::shared_ptr<react::CallInvoker> callInvoker,
-      const std::function<void(const std::function<void(void)> &)>
-          dispatchOnRenderThread,
       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker),
-        _dispatchOnRenderThread(dispatchOnRenderThread) {
+        _dispatchQueue(std::make_unique<RNSkDispatchQueue>("skia-render-thread")) {
           _jsThreadId = std::this_thread::get_id();
         }
 
@@ -78,7 +77,7 @@ public:
    */
   void runOnRenderThread(std::function<void()> func) {
     if(!_isValid) { return; }
-    _dispatchOnRenderThread(std::move(func));
+    _dispatchQueue->dispatch(std::move(func));
   }
 
   /**
@@ -185,9 +184,7 @@ private:
 
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;
-
-  std::function<void(const std::function<void(void)> &)>
-      _dispatchOnRenderThread;
+  std::unique_ptr<RNSkDispatchQueue> _dispatchQueue;
 
   std::map<size_t, std::function<void(bool)>> _drawCallbacks;
   std::mutex _drawCallbacksLock;
