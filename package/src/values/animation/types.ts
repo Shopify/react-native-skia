@@ -1,6 +1,8 @@
 export interface SpringConfig {
-  duration: number;
-  update: (t: number) => number;
+  mass: number;
+  stiffness: number;
+  damping: number;
+  velocity: number;
 }
 
 export interface TimingConfig {

@@ -3,6 +3,7 @@ import type { AnimationParams, SpringConfig } from "../types";
 import { runTiming } from "../timing/runTiming";
 
 import { Spring } from "./Spring";
+import { createSpringEasing } from "./functions/spring";
 
 /**
  * Creates a new animation on an existing value that will be driven by
@@ -22,5 +23,9 @@ export const runSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig
 ): SkiaAnimation => {
-  return runTiming(value, toOrParams, config ?? Spring.Config.Default);
+  return runTiming(
+    value,
+    toOrParams,
+    createSpringEasing(config ?? Spring.Config.Default)
+  );
 };
