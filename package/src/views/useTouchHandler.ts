@@ -73,5 +73,6 @@ export const useTouchHandler = (
         handlers.onEnd && handlers.onEnd(extendedTouchInfo);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 };
