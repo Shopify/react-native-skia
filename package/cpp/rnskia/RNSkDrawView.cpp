@@ -178,7 +178,7 @@ sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
 
 void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
   _infoObject->updateTouches(points);
-  //requestRedraw();
+  requestRedraw();
 }
 
 void RNSkDrawView::performDraw() {

@@ -58,7 +58,8 @@ export abstract class SkNode<P> {
 }
 
 export class Container extends SkNode<unknown> {
-  values: SkiaReadonlyValue<unknown>[] = [];
+  private registeredValues: SkiaReadonlyValue<unknown>[] = [];
+  private values: SkiaReadonlyValue<unknown>[] = [];
   redraw: () => void;
   private subscriptions: (() => void)[] = [];
   private ref: RefObject<SkiaView>;
@@ -74,8 +75,9 @@ export class Container extends SkNode<unknown> {
   }
 
   registerValues(props: { [s: string]: unknown }) {
+    console.log({ registered: this.registeredValues.map((v) => v.current) });
     Object.values(props).forEach((value) => {
-      if (isValue(value)) {
+      if (isValue(value) && !this.registeredValues.includes(value)) {
         this.values.push(value);
       }
     });
@@ -89,6 +91,7 @@ export class Container extends SkNode<unknown> {
       return;
     }
     this.subscriptions.push(this.ref.current.registerValues(this.values));
+    this.registeredValues.push(...this.values);
     this.values.splice(0, this.values.length);
   }
 
@@ -97,7 +100,8 @@ export class Container extends SkNode<unknown> {
       return;
     }
     this.subscriptions.forEach((unsub) => unsub());
-    this.subscriptions.splice(0, this.subscriptions.length);
+    this.subscriptions = [];
+    this.registeredValues = [];
   }
 }
 
