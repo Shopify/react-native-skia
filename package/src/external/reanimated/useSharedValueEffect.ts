@@ -77,5 +77,5 @@ export const useSharedValueEffect = <T = number>(
     }
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cb, input, runOnJS, startMapper, stopMapper, value, ...values]);
+  }, [input, runOnJS, startMapper, stopMapper, value, ...values]);
 };
