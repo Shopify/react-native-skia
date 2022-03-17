@@ -117,8 +117,10 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
                                                       
         // Build string
         std::ostringstream stream;
-        stream << "js:" << jsAvg << "ms/" << jsFps << "fps " << "gpu:" << gpuAvg << "ms/" <<
-          gpuFps << "fps" << " total:" << total << "ms/" << vsyncFps << "fps";
+
+        stream << "js: " << jsAvg << "ms gpu: " << gpuAvg << "ms " << " total: " << total << "ms";
+//        stream << "js:" << jsAvg << "ms/" << jsFps << "fps " << "gpu:" << gpuAvg << "ms/" <<
+//          gpuFps << "fps" << " total:" << total << "ms/" << vsyncFps << "fps";
         
         std::string debugString = stream.str();
         
@@ -176,7 +178,7 @@ sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
 
 void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
   _infoObject->updateTouches(points);
-  requestRedraw();
+  //requestRedraw();
 }
 
 void RNSkDrawView::performDraw() {
