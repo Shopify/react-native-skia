@@ -36,7 +36,6 @@ export const useSharedValueEffect = <T = number>(
   ...values: SharedValueTypeWrapper<T>[]
 ) => {
   const input = useSharedValueWrapper(0);
-  const triggers = useMemo(() => [value, ...values], [value, values]);
   const { runOnJS, startMapper, stopMapper } = useMemo(() => {
     if (Reanimated && Core) {
       const { runOnJS } = Reanimated;
@@ -66,7 +65,7 @@ export const useSharedValueEffect = <T = number>(
           "worklet";
           runOnJS(cb)();
         },
-        triggers,
+        [value, ...values],
         [input]
       );
       // Return unregistering the mapper
@@ -77,5 +76,6 @@ export const useSharedValueEffect = <T = number>(
       };
     }
     return () => {};
-  }, [cb, input, runOnJS, startMapper, stopMapper, triggers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cb, input, runOnJS, startMapper, stopMapper, value, ...values]);
 };
