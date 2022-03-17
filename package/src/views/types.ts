@@ -91,6 +91,7 @@ export type RNSkiaViewProps = ViewProps & {
    * by the native view.
    */
   onDraw?: RNSkiaDrawCallback;
+  onTouch?: TouchHandler;
 };
 
 /**

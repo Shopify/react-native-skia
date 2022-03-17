@@ -161,6 +161,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         ref={ref}
         style={style}
         onDraw={onDraw}
+        onTouch={onTouch}
         mode={mode}
         debug={debug}
       />
