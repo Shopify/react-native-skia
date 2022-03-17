@@ -6,7 +6,12 @@ import type { SkRect } from "../skia";
 import type { SkiaReadonlyValue } from "../values";
 
 import { NativeSkiaView } from "./types";
-import type { DrawMode, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
+import type {
+  DrawMode,
+  RNSkiaDrawCallback,
+  RNSkiaViewProps,
+  TouchHandler,
+} from "./types";
 
 let SkiaViewNativeId = 1000;
 
@@ -14,10 +19,13 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   constructor(props: RNSkiaViewProps) {
     super(props);
     this._nativeId = `${SkiaViewNativeId++}`;
-    const { onDraw } = props;
+    const { onDraw, onTouch } = props;
     if (onDraw) {
       assertDrawCallbacksEnabled();
       setDrawCallback(this._nativeId, onDraw);
+    }
+    if (onTouch) {
+      setTouchHandler(this._nativeId, onTouch);
     }
   }
 
@@ -135,6 +143,13 @@ const setDrawCallback = (
   drawCallback: RNSkiaDrawCallback | undefined
 ) => {
   return SkiaViewApi.setDrawCallback(parseInt(nativeId, 10), drawCallback);
+};
+
+const setTouchHandler = (
+  nativeId: string,
+  touchHandler: TouchHandler | undefined
+) => {
+  return SkiaViewApi.setTouchHandler(parseInt(nativeId, 10), touchHandler);
 };
 
 export const invalidateSkiaView = (nativeId: string) => {

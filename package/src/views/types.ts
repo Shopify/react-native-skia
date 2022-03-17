@@ -12,6 +12,10 @@ export interface ISkiaViewApi {
     nativeId: number,
     callback: RNSkiaDrawCallback | undefined
   ) => void;
+  setTouchHandler: (
+    nativeId: number,
+    callback: TouchHandler | undefined
+  ) => void;
   setDrawMode: (nativeId: number, mode: DrawMode) => void;
   registerValuesInView: (
     nativeId: number,

@@ -126,7 +126,6 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         const { width, height, timestamp } = info;
         canvasCtx.current.width = width;
         canvasCtx.current.height = height;
-        onTouch && onTouch(info.touches);
         const paint = Skia.Paint();
         paint.setAntiAlias(true);
         const ctx = {

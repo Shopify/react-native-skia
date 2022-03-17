@@ -54,6 +54,10 @@ void RNSkDrawView::invalidate() {
   _isValid = false;
 }
 
+void RNSkDrawView::setTouchHandler(std::shared_ptr<jsi::Function> callback) {
+  _touchHandler = callback;
+}
+
 void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
   if (callback == nullptr) {
@@ -176,7 +180,10 @@ sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
 
 void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
   _infoObject->updateTouches(points);
-  //requestRedraw();
+  if (_touchHandler != nullptr) {
+    auto runtime = _platformContext->getJsRuntime();
+    _touchHandler->call(*runtime, jsi::Object::createFromHostObject(*runtime, _infoObject), 1);
+  }
 }
 
 void RNSkDrawView::performDraw() {

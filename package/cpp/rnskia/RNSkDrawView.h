@@ -52,6 +52,11 @@ public:
    * Installs the draw callback for the view
    */
   void setDrawCallback(std::shared_ptr<jsi::Function> callback);
+
+  /**
+   * Installs the touch handler for the view
+   */
+  void setTouchHandler(std::shared_ptr<jsi::Function> callback);
   
   /**
    Sets the native id of the view
@@ -143,6 +148,7 @@ private:
    * Stores the draw drawCallback
    */
   std::shared_ptr<RNSkDrawCallback> _drawCallback;
+  std::shared_ptr<jsi::Function> _touchHandler;
 
   /**
    * Stores a pointer to the jsi wrapper for the canvas. The reason for

@@ -12,14 +12,39 @@ using namespace facebook;
 using CallbackInfo = struct CallbackInfo {
   CallbackInfo() {
     drawCallback = nullptr;
+    touchHandler = nullptr;
     view = nullptr;
   }
   std::shared_ptr<jsi::Function> drawCallback;
+  std::shared_ptr<jsi::Function> touchHandler;
   RNSkDrawView *view;
 };
 
 class RNSkJsiViewApi : public JsiHostObject {
 public:
+  JSI_HOST_FUNCTION(setTouchHandler) {
+
+    // find skia draw view
+    int nativeId = arguments[0].asNumber();
+
+    // and function to install as the draw drawCallback
+    auto info = getEnsuredCallbackInfo(nativeId);
+    if (arguments[1].isUndefined()) {
+      info->touchHandler = nullptr;
+    } else {
+      info->touchHandler = std::make_shared<jsi::Function>(
+              arguments[1].asObject(runtime).asFunction(runtime));
+    }
+
+    // Update view if set
+    if (info->view != nullptr && info->touchHandler != nullptr) {
+      info->view->setNativeId(nativeId);
+      info->view->setTouchHandler(info->touchHandler);
+    }
+
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(setDrawCallback) {
     if (count != 2) {
       _platformContext->raiseError(
@@ -184,6 +209,7 @@ public:
   }
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawCallback),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, setTouchHandler),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, invalidateSkiaView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawMode),
