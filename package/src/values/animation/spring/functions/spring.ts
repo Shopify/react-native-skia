@@ -11,21 +11,19 @@ import type { TimingConfig } from "../../types";
 export const createSpringEasing = (
   params: Partial<SpringConfig>
 ): TimingConfig => {
-  const { mass, stiffness, damping, velocity } = {
+  const config = {
     mass: 1,
     stiffness: 100,
     damping: 10,
+    velocity: 0,
     ...params,
   };
-  return getSpringEasing(mass, stiffness, damping, velocity);
+  config.velocity /= 100;
+  return getSpringEasing(config);
 };
 
-const getSpringEasing = (
-  mass: number,
-  stiffness: number,
-  damping: number,
-  initialVelocity = 0
-): TimingConfig => {
+const getSpringEasing = (config: Required<SpringConfig>) => {
+  const { stiffness, mass, damping, velocity: initialVelocity } = config;
   // Setup spring state
   const state = {
     w0: Math.sqrt(stiffness / mass),
