@@ -7,15 +7,11 @@ import { ValueApi } from "../api";
  * Creates a new derived value - a value that will calculate its value depending
  * on other values.
  * @param cb Callback to calculate new value
- * @param values Depenedant values
+ * @param values Dependant values
  * @returns A readonly value
  */
 export const useDerivedValue = <R>(
   cb: () => R,
-  values: Array<SkiaReadonlyValue<unknown>>
-): SkiaReadonlyValue<R> => {
-  return useMemo(
-    () => ValueApi.createDerivedValue<R>(cb, values),
-    [cb, values]
-  );
-};
+  values: SkiaReadonlyValue<unknown>[]
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+) => useMemo(() => ValueApi.createDerivedValue<R>(cb, values), values);
