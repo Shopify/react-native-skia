@@ -3,12 +3,12 @@ import React from "react";
 
 import type { AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes";
-import type { SkNode } from "../../Host";
+import type { Node } from "../../Host";
 import { getInput } from "../imageFilters/getInput";
 import type { GroupProps } from "../Group";
 import { Group } from "../Group";
 
-const disableFilterMemoization = (children: SkNode<unknown>[]) => {
+const disableFilterMemoization = (children: Node<unknown>[]) => {
   children.forEach((child) => {
     child.memoizable = false;
     disableFilterMemoization(child.children);
