@@ -34,6 +34,12 @@ namespace RNSkia
         return threadContexts.at(threadId);
     }
 
+    /**** DTOR ***/
+    JniSkiaDrawView::~JniSkiaDrawView()
+    {
+        _invalidated = true;
+    }
+
     /**** JNI ****/
 
     TSelf JniSkiaDrawView::initHybrid(
@@ -350,6 +356,11 @@ namespace RNSkia
         }
         else
         {
+            return;
+        }
+
+        // Last sanity check to ensure we still have a valid surface and view
+        if(_invalidated || _glSurface == EGL_NO_SURFACE) {
             return;
         }
 

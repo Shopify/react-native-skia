@@ -48,8 +48,7 @@ namespace RNSkia
 
         void setIsRemovedExternal() { invalidate(); }
 
-        ~JniSkiaDrawView() {
-        }
+        ~JniSkiaDrawView();
 
     protected:
         void drawFrame(const sk_sp<SkPicture> picture) override;
@@ -89,6 +88,8 @@ namespace RNSkia
         int _height = 0;
         int _prevWidth = 0;
         int _prevHeight = 0;
+
+        std::atomic<bool> _invalidated = {false};
 
         jni::global_ref<JniSkiaDrawView::javaobject> javaPart_;
 

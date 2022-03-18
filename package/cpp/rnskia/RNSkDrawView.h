@@ -99,11 +99,6 @@ protected:
   void invalidate();
 
   /**
-   * @return True if the view was marked as deleted
-   */
-  bool isValid() { return _isValid; }
-
-  /**
    * @return The platformcontext
    */
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
@@ -208,7 +203,7 @@ private:
   /**
    Flag indicating that the view is valid / invalid
    */
-  std::atomic<bool> _isValid { true };
+  std::atomic<bool> _isInvalidated { false };
 
   /**
    * Native id
