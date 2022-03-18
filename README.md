@@ -1,4 +1,6 @@
-# @shopify/react-native-skia
+# React Native Skia
+
+High-performance 2d Graphics for React Native using Skia
 
 [![Tests](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml)
 
