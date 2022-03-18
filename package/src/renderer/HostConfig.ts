@@ -2,7 +2,7 @@
 import type { HostConfig } from "react-reconciler";
 
 import { DeclarationNode, DrawingNode } from "./nodes";
-import type { Container, SkNode } from "./Host";
+import type { Container, Node } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
 
@@ -13,10 +13,10 @@ export const debug = (...args: Parameters<typeof console.log>) => {
   }
 };
 
-type Instance = SkNode<unknown>;
+type Instance = Node;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Props = any;
-type TextInstance = SkNode<unknown>;
+type TextInstance = Node;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
 type PublicInstance = Instance;
@@ -72,9 +72,9 @@ const allChildrenAreMemoized = (node: Instance) => {
   return true;
 };
 
-const bustBranchMemoization = (parent: SkNode<unknown>) => {
+const bustBranchMemoization = (parent: Node) => {
   if (parent.memoizable) {
-    let ancestor: SkNode<unknown> | undefined = parent;
+    let ancestor: Node | undefined = parent;
     while (ancestor) {
       ancestor.memoized = false;
       ancestor = ancestor.parent;
@@ -82,9 +82,9 @@ const bustBranchMemoization = (parent: SkNode<unknown>) => {
   }
 };
 
-const bustBranchMemoizable = (parent: SkNode<unknown>) => {
+const bustBranchMemoizable = (parent: Node) => {
   if (parent.memoizable) {
-    let ancestor: SkNode<unknown> | undefined = parent;
+    let ancestor: Node | undefined = parent;
     while (ancestor) {
       ancestor.memoizable = false;
       ancestor = ancestor.parent;
@@ -92,7 +92,7 @@ const bustBranchMemoizable = (parent: SkNode<unknown>) => {
   }
 };
 
-const appendNode = (parent: SkNode<unknown>, child: SkNode<unknown>) => {
+const appendNode = (parent: Node, child: Node) => {
   child.parent = parent;
   bustBranchMemoization(parent);
   if (!child.memoizable) {
@@ -104,17 +104,13 @@ const appendNode = (parent: SkNode<unknown>, child: SkNode<unknown>) => {
   parent.children.push(child);
 };
 
-const removeNode = (parent: SkNode<unknown>, child: SkNode<unknown>) => {
+const removeNode = (parent: Node, child: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   parent.children.splice(index, 1);
 };
 
-const insertBefore = (
-  parent: SkNode<unknown>,
-  child: SkNode<unknown>,
-  before: SkNode<unknown>
-) => {
+const insertBefore = (parent: Node, child: Node, before: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   if (index !== -1) {
@@ -165,7 +161,7 @@ export const skHostConfig: SkiaHostConfig = {
     appendNode(parent, child);
   },
 
-  getRootHostContext: (_rootContainerInstance: SkNode<unknown>) => {
+  getRootHostContext: (_rootContainerInstance: Node) => {
     debug("getRootHostContext");
     return null;
   },
@@ -192,7 +188,7 @@ export const skHostConfig: SkiaHostConfig = {
 
   createInstance(type, props, _root, _hostContext, _internalInstanceHandle) {
     debug("createInstance", type);
-    return createNode(type, props) as SkNode<unknown>;
+    return createNode(type, props) as Node;
   },
 
   appendInitialChild(parentInstance, child) {
