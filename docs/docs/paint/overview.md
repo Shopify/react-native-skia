@@ -18,7 +18,7 @@ The following properties to the Paint component:
 * [strokeMiter](properties.md#strokeMiter) 
 * [opacity](properties.md#opacity)      
 
-A paint component can additionnaly receive the following components as children:
+A paint component can additionally receive the following components as children:
 * [Shaders](/docs/shaders/overview) 
 * [Image Filters](/docs/image-filters/overview)
 * [Color Filters](/docs/color-filters)
