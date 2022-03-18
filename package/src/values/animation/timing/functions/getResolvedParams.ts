@@ -1,6 +1,6 @@
 import type {
   RequiredAnimationParams,
-  AnimationParams,
+  TimingParams,
   TimingConfig,
 } from "../../types";
 
@@ -22,7 +22,7 @@ const DefaultTimingConfig = {
  * @param config timing/spring configuration
  */
 export const getResolvedParams = (
-  toOrParams: number | AnimationParams,
+  toOrParams: number | TimingParams,
   config?: TimingConfig
 ): RequiredAnimationParams & Required<TimingConfig> => {
   let resolvedParameters: RequiredAnimationParams = {

@@ -10,12 +10,14 @@ export interface TimingConfig {
   easing?: (t: number) => number;
 }
 
-export interface AnimationParams {
+export interface TimingParams {
   from?: number;
   to?: number;
   loop?: boolean;
   yoyo?: boolean;
 }
 
-export type RequiredAnimationParams = Required<Omit<AnimationParams, "from">> &
-  Pick<AnimationParams, "from">;
+export type RequiredAnimationParams = Required<Omit<TimingParams, "from">> &
+  Pick<TimingParams, "from">;
+
+export type AnimationCallback = (current: number) => void;
