@@ -9,6 +9,7 @@ import {
   vec,
   Paint,
   useImage,
+  useDerivedValue,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -35,35 +36,41 @@ const rectToColors = (
   [tl, tr, br, bl]: readonly [number, number, number, number]
 ) => [colors[tl], colors[tr], colors[br], colors[bl]] as const;
 
-const rectToPatch =
-  (mesh: SkiaValue<CubicBezierHandle[]>, indices: readonly number[]) => () => {
-    const tl = mesh.current[indices[0]];
-    const tr = mesh.current[indices[1]];
-    const br = mesh.current[indices[2]];
-    const bl = mesh.current[indices[3]];
-    return [
-      {
-        pos: tl.pos,
-        c1: tl.c2,
-        c2: tl.c1,
-      },
-      {
-        pos: tr.pos,
-        c1: symmetric(tr.c1, tr.pos),
-        c2: tr.c2,
-      },
-      {
-        pos: br.pos,
-        c1: symmetric(br.c2, br.pos),
-        c2: symmetric(br.c1, br.pos),
-      },
-      {
-        pos: bl.pos,
-        c1: bl.c1,
-        c2: symmetric(bl.c2, bl.pos),
-      },
-    ] as const;
-  };
+const useRectToPatch = (
+  mesh: SkiaValue<CubicBezierHandle[]>,
+  indices: readonly number[]
+) =>
+  useDerivedValue(
+    (m) => {
+      const tl = m[indices[0]];
+      const tr = m[indices[1]];
+      const br = m[indices[2]];
+      const bl = m[indices[3]];
+      return [
+        {
+          pos: tl.pos,
+          c1: tl.c2,
+          c2: tl.c1,
+        },
+        {
+          pos: tr.pos,
+          c1: symmetric(tr.c1, tr.pos),
+          c2: tr.c2,
+        },
+        {
+          pos: br.pos,
+          c1: symmetric(br.c2, br.pos),
+          c2: symmetric(br.c1, br.pos),
+        },
+        {
+          pos: bl.pos,
+          c1: bl.c1,
+          c2: symmetric(bl.c2, bl.pos),
+        },
+      ] as const;
+    },
+    [mesh]
+  );
 
 interface CoonsPatchMeshGradientProps {
   rows: number;
@@ -124,16 +131,16 @@ export const CoonsPatchMeshGradient = ({
         <ImageShader image={image} tx="repeat" ty="repeat" />
       </Paint>
       {rects.map((r, i) => {
-        const patch = rectToPatch(mesh, r);
         return (
-          <React.Fragment key={i}>
-            <Patch
-              patch={patch}
-              colors={debug ? undefined : rectToColors(colors, r)}
-              texture={rectToTexture(defaultMesh, r)}
-            />
-            {lines && <Curves patch={patch} />}
-          </React.Fragment>
+          <RectPatch
+            key={i}
+            r={r}
+            mesh={mesh}
+            debug={debug}
+            lines={lines}
+            colors={colors}
+            defaultMesh={defaultMesh}
+          />
         );
       })}
       {defaultMesh.map(({ pos }, index) => {
@@ -147,5 +154,35 @@ export const CoonsPatchMeshGradient = ({
         );
       })}
     </Canvas>
+  );
+};
+
+interface RectPatchProps {
+  r: readonly [number, number, number, number];
+  debug?: boolean;
+  lines?: boolean;
+  colors: string[];
+  mesh: SkiaValue<CubicBezierHandle[]>;
+  defaultMesh: CubicBezierHandle[];
+}
+
+const RectPatch = ({
+  r,
+  debug,
+  lines,
+  colors,
+  mesh,
+  defaultMesh,
+}: RectPatchProps) => {
+  const patch = useRectToPatch(mesh, r);
+  return (
+    <>
+      <Patch
+        patch={patch}
+        colors={debug ? undefined : rectToColors(colors, r)}
+        texture={rectToTexture(defaultMesh, r)}
+      />
+      {lines && <Curves patch={patch} />}
+    </>
   );
 };

@@ -46,12 +46,7 @@ export const DrawingCanvas: React.FC<Props> = ({ innerRef, style }) => {
       switch (el.type) {
         case "image":
           return (
-            <Image
-              fit="fill"
-              key={i}
-              image={el.image}
-              rect={() => getBounds(el)}
-            />
+            <Image fit="fill" key={i} image={el.image} rect={getBounds(el)} />
           );
         default:
           return (

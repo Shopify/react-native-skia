@@ -1,14 +1,19 @@
 #pragma once
 
+#include <iostream>
+
 #define NUMBER_OF_DURATION_SAMPLES 10
 
 namespace RNSkia {
+
+using namespace std::chrono;
+using frame = duration<int32_t, std::ratio<1, 60>>;
+using ms = duration<float, std::milli>;
+
 class RNSkTimingInfo {
 public:
   RNSkTimingInfo() {
-    _lastDurationIndex = 0;
-    _lastDurationsCount = 0;
-    _lastDuration = 0;
+    reset();
   }
 
   ~RNSkTimingInfo() {}
@@ -17,9 +22,23 @@ public:
     _lastDurationIndex = 0;
     _lastDurationsCount = 0;
     _lastDuration = 0;
+    _prevFpsTimer = -1;
+    _frameCount = 0;
+    _lastFrameCount = -1;
+  }
+  
+  void beginTiming() {
+    _start = high_resolution_clock::now();
+  }
+  
+  void stopTiming() {
+    time_point<steady_clock> stop = high_resolution_clock::now();
+    addLastDuration(duration_cast<milliseconds>(stop - _start).count());
+    tick(stop);
   }
 
   long getAverage() { return static_cast<long>(_average); }
+  long getFps() { return _lastFrameCount; }
 
   void addLastDuration(long duration) {
     _lastDuration = duration;
@@ -37,17 +56,36 @@ public:
 
     _average = 0;
     for (size_t i = 0; i < _lastDurationsCount; i++) {
-      _average += _lastDurations[i];
+      _average = _average + _lastDurations[i];
     }
     _average = _average / _lastDurationsCount;
   }
 
 private:
+  
+  void tick(time_point<steady_clock> now) {
+    auto ms = duration_cast<milliseconds>(now.time_since_epoch()).count();
+    
+    if(_prevFpsTimer == -1) {
+      _prevFpsTimer = ms;
+    } else if(ms - _prevFpsTimer >= 1000) {
+      _lastFrameCount = _frameCount;
+      _prevFpsTimer = ms;
+      _frameCount = 0;
+    }
+    _frameCount++;
+  }
+  
   double _lastTimeStamp;
   long _lastDurations[NUMBER_OF_DURATION_SAMPLES];
   int _lastDurationIndex;
   int _lastDurationsCount;
   long _lastDuration;
-  double _average;
+  std::atomic<double> _average;
+  time_point<steady_clock> _start;
+  long _prevFpsTimer;
+  double _frameCount;
+  double _lastFrameCount;
 };
+
 } // namespace RNSkia

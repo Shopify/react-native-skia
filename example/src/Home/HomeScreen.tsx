@@ -43,11 +43,6 @@ export const HomeScreen = () => {
         route="Glassmorphism"
       />
       <HomeScreenButton
-        title="🖌 Drawing"
-        description="Use touches to draw with Skia"
-        route="Drawing"
-      />
-      <HomeScreenButton
         title="📉 Graphs"
         description="Animated graphs with Skia"
         route="Graphs"
@@ -61,6 +56,11 @@ export const HomeScreen = () => {
         title="🎥 Animation"
         description="Animated with Skia"
         route="Animation"
+      />
+      <HomeScreenButton
+        title="🏎 Performance"
+        description="Drawing Performance Test"
+        route="Performance"
       />
     </ScrollView>
   );

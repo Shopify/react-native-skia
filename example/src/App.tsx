@@ -16,6 +16,7 @@ import {
   Matrix,
   Glassmorphism,
   Neumorphism,
+  PerformanceDrawingTest,
 } from "./Examples";
 import { HomeScreen } from "./Home";
 
@@ -64,6 +65,7 @@ const App = () => {
           <Stack.Screen name="Drawing" component={DrawingExample} />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
+          <Stack.Screen name="Performance" component={PerformanceDrawingTest} />
         </Stack.Navigator>
       </NavigationContainer>
     </>

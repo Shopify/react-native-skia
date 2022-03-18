@@ -11,6 +11,8 @@
 #include "JniSkiaManager.h"
 #include "JniSkiaDrawView.h"
 
+#include <SkPicture.h>
+
 namespace RNSkia
 {
     using namespace facebook;
@@ -50,7 +52,11 @@ namespace RNSkia
         }
 
     protected:
-        void drawFrame(double timestamp) override;
+        void drawFrame(const sk_sp<SkPicture> picture) override;
+
+        int getWidth() override { return _width; }
+        int getHeight() override { return _height; }
+
         void setMode(std::string mode);
         void setDebugMode(bool show);
 

@@ -2,7 +2,7 @@
 import type { HostConfig } from "react-reconciler";
 
 import { DeclarationNode, DrawingNode } from "./nodes";
-import type { SkContainer, SkNode, NodeProps } from "./Host";
+import type { Container, Node } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
 
@@ -13,9 +13,10 @@ export const debug = (...args: Parameters<typeof console.log>) => {
   }
 };
 
-type Instance = SkNode;
-type Props = NodeProps[NodeType];
-type TextInstance = SkNode;
+type Instance = Node;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Props = any;
+type TextInstance = Node;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
 type PublicInstance = Instance;
@@ -28,7 +29,7 @@ type NoTimeout = -1;
 type SkiaHostConfig = HostConfig<
   NodeType,
   Props,
-  SkContainer,
+  Container,
   Instance,
   TextInstance,
   SuspenseInstance,
@@ -71,9 +72,9 @@ const allChildrenAreMemoized = (node: Instance) => {
   return true;
 };
 
-const bustBranchMemoization = (parent: SkNode) => {
+const bustBranchMemoization = (parent: Node) => {
   if (parent.memoizable) {
-    let ancestor: SkNode | undefined = parent;
+    let ancestor: Node | undefined = parent;
     while (ancestor) {
       ancestor.memoized = false;
       ancestor = ancestor.parent;
@@ -81,9 +82,9 @@ const bustBranchMemoization = (parent: SkNode) => {
   }
 };
 
-const bustBranchMemoizable = (parent: SkNode) => {
+const bustBranchMemoizable = (parent: Node) => {
   if (parent.memoizable) {
-    let ancestor: SkNode | undefined = parent;
+    let ancestor: Node | undefined = parent;
     while (ancestor) {
       ancestor.memoizable = false;
       ancestor = ancestor.parent;
@@ -91,7 +92,7 @@ const bustBranchMemoizable = (parent: SkNode) => {
   }
 };
 
-const appendNode = (parent: SkNode, child: SkNode) => {
+const appendNode = (parent: Node, child: Node) => {
   child.parent = parent;
   bustBranchMemoization(parent);
   if (!child.memoizable) {
@@ -103,13 +104,13 @@ const appendNode = (parent: SkNode, child: SkNode) => {
   parent.children.push(child);
 };
 
-const removeNode = (parent: SkNode, child: SkNode) => {
+const removeNode = (parent: Node, child: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   parent.children.splice(index, 1);
 };
 
-const insertBefore = (parent: SkNode, child: SkNode, before: SkNode) => {
+const insertBefore = (parent: Node, child: Node, before: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   if (index !== -1) {
@@ -121,12 +122,12 @@ const insertBefore = (parent: SkNode, child: SkNode, before: SkNode) => {
 
 const createNode = (type: NodeType, props: Props) => {
   switch (type) {
-    case NodeType.Canvas:
-      throw new Error("Cannot create a canvas node");
     case NodeType.Drawing:
-      return DrawingNode(props as Parameters<typeof DrawingNode>[0]);
+      const { onDraw, skipProcessing, ...p1 } = props;
+      return new DrawingNode(onDraw, skipProcessing, p1);
     case NodeType.Declaration:
-      return DeclarationNode(props as Parameters<typeof DeclarationNode>[0]);
+      const { onDeclare, ...p2 } = props;
+      return new DeclarationNode(onDeclare, p2);
     default:
       // TODO: here we need to throw a nice error message
       // This is the error that will show up when the user uses nodes not supported by Skia (View, Audio, etc)
@@ -160,7 +161,7 @@ export const skHostConfig: SkiaHostConfig = {
     appendNode(parent, child);
   },
 
-  getRootHostContext: (_rootContainerInstance: SkNode) => {
+  getRootHostContext: (_rootContainerInstance: Node) => {
     debug("getRootHostContext");
     return null;
   },
@@ -187,7 +188,7 @@ export const skHostConfig: SkiaHostConfig = {
 
   createInstance(type, props, _root, _hostContext, _internalInstanceHandle) {
     debug("createInstance", type);
-    return createNode(type, props) as SkNode;
+    return createNode(type, props) as Node;
   },
 
   appendInitialChild(parentInstance, child) {
@@ -222,7 +223,6 @@ export const skHostConfig: SkiaHostConfig = {
 
   resetAfterCommit(container) {
     debug("resetAfterCommit");
-    // TODO: this is not necessary in continuous rendering
     container.redraw();
   },
 

@@ -4,6 +4,8 @@
 import type { SkRect, SkRRect } from "../../skia";
 
 import { vec } from "./math/Vector";
+import type { Radius } from "./Radius";
+import { processRadius } from "./Radius";
 
 export const point = (x: number, y: number) => ({ x, y });
 
@@ -19,6 +21,14 @@ export const rrect = (r: SkRect, rx: number, ry: number) => ({
   rx,
   ry,
 });
+
+export const bounds = (rects: SkRect[]) => {
+  const x = Math.min(...rects.map((r) => r.x));
+  const y = Math.min(...rects.map((r) => r.y));
+  const width = Math.max(...rects.map((r) => r.x + r.width));
+  const height = Math.max(...rects.map((r) => r.y + r.height));
+  return rect(x, y, width, height);
+};
 
 export const topLeft = (r: SkRect | SkRRect) =>
   isRRect(r) ? vec(r.rect.x, r.rect.y) : vec(r.x, r.y);
@@ -52,8 +62,7 @@ export interface RectCtor {
 }
 
 export interface RRectCtor extends RectCtor {
-  rx: number;
-  ry?: number;
+  r: Radius;
 }
 
 export type RectDef = RectCtor | { rect: SkRect };
@@ -69,8 +78,8 @@ export const processRect = (def: RectDef) => {
 
 export const processRRect = (def: RRectDef) => {
   if (isRRectCtor(def)) {
-    const { rx, ry } = def;
-    return rrect(rect(def.x, def.y, def.width, def.height), rx, ry ?? rx);
+    const r = processRadius(def.r);
+    return rrect(rect(def.x, def.y, def.width, def.height), r.x, r.y);
   } else {
     return def.rect;
   }

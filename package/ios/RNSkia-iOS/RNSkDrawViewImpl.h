@@ -8,6 +8,7 @@
 #import <GrMtlBackendContext.h>
 #import <MetalKit/MetalKit.h>
 #import <QuartzCore/CAMetalLayer.h>
+#import <SkPicture.h>
 
 @class SkiaDrawView;
 
@@ -19,7 +20,10 @@ public:
   void setSize(int width, int height);
 
 protected:
-  void drawFrame(double time) override;
+  void drawFrame(const sk_sp<SkPicture> picture) override;
+  
+  int getWidth() override { return _width * _context->getPixelDensity(); };
+  int getHeight() override { return _height * _context->getPixelDensity(); };
 
 private:
   bool createSkiaSurface();
@@ -40,6 +44,4 @@ private:
   static sk_sp<GrDirectContext> _skContext;
 
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
-
-  GrBackendRenderTarget _skRenderTarget;  
 };

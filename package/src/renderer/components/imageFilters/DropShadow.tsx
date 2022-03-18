@@ -1,9 +1,10 @@
 import React from "react";
 
-import { Skia, processColor } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
-import type { AnimatedProps } from "../../processors";
-import type { Color } from "../../../skia";
+import { Skia } from "../../../skia";
+import { createDeclaration } from "../../nodes/Declaration";
+import type { AnimatedProps } from "../../processors/Animations/Animations";
+import type { Color } from "../../../skia/Color";
+import { processColor } from "../../../skia/Color";
 
 import { getInput } from "./getInput";
 
@@ -15,17 +16,16 @@ export interface DropShadowProps {
   shadowOnly?: boolean;
 }
 
+const onDeclare = createDeclaration<DropShadowProps>(
+  ({ dx, dy, blur, color, shadowOnly }, children, { opacity }) => {
+    const input = getInput(children);
+    const factory = shadowOnly
+      ? Skia.ImageFilter.MakeDropShadowOnly
+      : Skia.ImageFilter.MakeDropShadow;
+    return factory(dx, dy, blur, blur, processColor(color, opacity), input);
+  }
+);
+
 export const DropShadow = (props: AnimatedProps<DropShadowProps>) => {
-  const declaration = useDeclaration(
-    props,
-    ({ dx, dy, blur, color, shadowOnly }, children, { opacity }) => {
-      const input = getInput(children);
-      const cl = processColor(color, opacity);
-      const factory = shadowOnly
-        ? Skia.ImageFilter.MakeDropShadowOnly
-        : Skia.ImageFilter.MakeDropShadow;
-      return factory(dx, dy, blur, blur, cl, input);
-    }
-  );
-  return <skDeclaration declaration={declaration} {...props} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

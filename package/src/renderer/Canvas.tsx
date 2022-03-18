@@ -25,11 +25,10 @@ import { Skia } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
-import { CanvasNode } from "./nodes/Canvas";
 // import { debugTree } from "./nodes";
 import { vec } from "./processors";
-import type { DrawingContext } from "./DrawingContext";
 import { createDependencyManager } from "./DependecyManager";
+import { Container } from "./Host";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,6 +47,21 @@ export const useContextBridge = (...contexts: Context<any>[]) => {
         ) as ReactElement,
     [contexts, values]
   );
+};
+
+interface CanvasContext {
+  width: number;
+  height: number;
+}
+
+const CanvasContext = React.createContext<CanvasContext | null>(null);
+
+export const useCanvas = () => {
+  const canvas = useContext(CanvasContext);
+  if (!canvas) {
+    throw new Error("Canvas context is not available");
+  }
+  return canvas;
 };
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
@@ -85,15 +99,22 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     const [tick, setTick] = useState(0);
     const redraw = useCallback(() => setTick((t) => t + 1), []);
 
-    const tree = useMemo(() => CanvasNode(redraw), [redraw]);
+    const tree = useMemo(() => new Container(redraw), [redraw]);
 
+    const canvasCtx = useRef({ width: 0, height: 0 });
     const container = useMemo(
       () => skiaReconciler.createContainer(tree, 0, false, null),
       [tree]
     );
     // Render effect
     useEffect(() => {
-      render(children, container, redraw);
+      render(
+        <CanvasContext.Provider value={canvasCtx.current}>
+          {children}
+        </CanvasContext.Provider>,
+        container,
+        redraw
+      );
     }, [children, container, redraw]);
 
     const depsManager = useMemo(() => createDependencyManager(ref), [ref]);
@@ -103,10 +124,12 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       (canvas, info) => {
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
+        canvasCtx.current.width = width;
+        canvasCtx.current.height = height;
         onTouch && onTouch(info.touches);
         const paint = Skia.Paint();
         paint.setAntiAlias(true);
-        const ctx: DrawingContext = {
+        const ctx = {
           width,
           height,
           timestamp,
@@ -117,7 +140,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? Skia.FontMgr.RefDefault(),
         };
-        tree.draw(ctx, tree.props, tree.children);
+        tree.draw(ctx);
       },
       [tick, onTouch]
     );

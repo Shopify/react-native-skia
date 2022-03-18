@@ -24,7 +24,7 @@ export const Ball = ({ c, r }: BallProps) => {
           end={add(c, vec(r, 0))}
           colors={["#FBE1FF", "#E1ABED"]}
         />
-        <BlurMask sigma={5} style="solid" />
+        <BlurMask blur={5} style="solid" />
       </Paint>
       <Group transform={[{ rotate: Math.PI / 3 }]} origin={c}>
         <Circle c={c} r={r} />

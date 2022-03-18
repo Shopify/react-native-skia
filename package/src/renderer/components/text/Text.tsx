@@ -5,7 +5,7 @@ import type {
   AnimatedProps,
   FontDef,
 } from "../../processors";
-import { useDrawing } from "../../nodes/Drawing";
+import { createDrawing } from "../../nodes/Drawing";
 import { processFont } from "../../processors";
 
 type TextProps = CustomPaintProps &
@@ -15,14 +15,14 @@ type TextProps = CustomPaintProps &
     y: number;
   };
 
+const onDraw = createDrawing<TextProps>(
+  ({ canvas, paint, fontMgr }, { text, x, y, ...fontDef }) => {
+    const font = processFont(fontMgr, fontDef);
+    canvas.drawText(text, x, y, paint, font);
+  }
+);
+
 export const Text = (props: AnimatedProps<TextProps>) => {
-  const onDraw = useDrawing(
-    props,
-    ({ canvas, paint, fontMgr }, { text, x, y, ...fontDef }) => {
-      const font = processFont(fontMgr, fontDef);
-      canvas.drawText(text, x, y, paint, font);
-    }
-  );
   return <skDrawing onDraw={onDraw} {...props} />;
 };
 

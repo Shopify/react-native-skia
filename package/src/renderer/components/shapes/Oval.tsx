@@ -6,15 +6,16 @@ import type {
   AnimatedProps,
 } from "../../processors";
 import { processRect } from "../../processors";
-import { useDrawing } from "../../nodes";
+import { createDrawing } from "../../nodes";
 
 export type OvalProps = RectDef & CustomPaintProps;
 
+const onDraw = createDrawing<OvalProps>(({ canvas, paint }, rectProps) => {
+  const rect = processRect(rectProps);
+  canvas.drawOval(rect, paint);
+});
+
 export const Oval = (props: AnimatedProps<OvalProps>) => {
-  const onDraw = useDrawing(props, ({ canvas, paint }, rectProps) => {
-    const rect = processRect(rectProps);
-    canvas.drawOval(rect, paint);
-  });
   return <skDrawing onDraw={onDraw} {...props} />;
 };
 

@@ -1,4 +1,6 @@
-# @shopify/react-native-skia
+# React Native Skia
+
+High-performance 2d Graphics for React Native using Skia
 
 [![Tests](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml)
 
@@ -19,22 +21,18 @@ When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
 
 ```sh
-yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.106-alpha/shopify-react-native-skia-0.1.106.tgz
+yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.107-alpha/shopify-react-native-skia-0.1.107.tgz
 ```
 
 Or using npm:
 
 ```sh
-npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.106-alpha/shopify-react-native-skia-0.1.106.tgz
+npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.107-alpha/shopify-react-native-skia-0.1.107.tgz
 ```
 
 ### iOS
 
 Run `pod install` on the `ios/` directory.
-
-| NOTE: Device builds now includes Bitcode generation on iOS - so there is no longer necessary to build with bitcode disabled for release builds.
-
-| You can re-enable Bitcode if it was previously disabled: `Build Settings > Build Options > Enable Bitcode -> Release -> Yes`. In Expo managed apps, set `ios.bitcode` to `true` in `app.json`.
 
 ### Android
 

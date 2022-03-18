@@ -2,7 +2,7 @@ import React from "react";
 
 import type { SkRect, SkImage } from "../../../skia";
 import { TileMode, FilterMode, MipmapMode } from "../../../skia";
-import { useDeclaration } from "../../nodes";
+import { createDeclaration } from "../../nodes";
 import type {
   TransformProps,
   SkEnum,
@@ -42,33 +42,33 @@ interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   image: SkImage;
 }
 
-export const ImageShader = (props: AnimatedProps<ImageShaderProps>) => {
-  const declaration = useDeclaration(
-    props,
-    ({ tx, ty, fm, mm, fit, image, ...imageShaderProps }) => {
-      const rct = getRect(imageShaderProps);
-      if (rct) {
-        const rects = fitRects(
-          fit,
-          { x: 0, y: 0, width: image.width(), height: image.height() },
-          rct
-        );
-        const m3 = rect2rect(rects.src, rects.dst);
-        imageShaderProps.transform = [
-          ...(imageShaderProps.transform ?? []),
-          ...m3,
-        ];
-      }
-      return image.makeShaderOptions(
-        TileMode[enumKey(tx)],
-        TileMode[enumKey(ty)],
-        FilterMode[enumKey(fm)],
-        MipmapMode[enumKey(mm)],
-        localMatrix(imageShaderProps)
+const onDeclare = createDeclaration<ImageShaderProps>(
+  ({ tx, ty, fm, mm, fit, image, ...imageShaderProps }) => {
+    const rct = getRect(imageShaderProps);
+    if (rct) {
+      const rects = fitRects(
+        fit,
+        { x: 0, y: 0, width: image.width(), height: image.height() },
+        rct
       );
+      const m3 = rect2rect(rects.src, rects.dst);
+      imageShaderProps.transform = [
+        ...(imageShaderProps.transform ?? []),
+        ...m3,
+      ];
     }
-  );
-  return <skDeclaration declaration={declaration} />;
+    return image.makeShaderOptions(
+      TileMode[enumKey(tx)],
+      TileMode[enumKey(ty)],
+      FilterMode[enumKey(fm)],
+      MipmapMode[enumKey(mm)],
+      localMatrix(imageShaderProps)
+    );
+  }
+);
+
+export const ImageShader = (props: AnimatedProps<ImageShaderProps>) => {
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 
 ImageShader.defaultProps = {

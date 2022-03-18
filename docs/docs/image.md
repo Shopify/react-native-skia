@@ -5,7 +5,7 @@ sidebar_label: Image
 slug: /images
 ---
 
-Images can be draw by specifying the output rectangle and how the image should fit into that rectangle.
+Images can be drawn by specifying the output rectangle and how the image should fit into that rectangle.
 
 | Name   | Type                  | Description                                                                                                                                                   |
 | :----- | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |

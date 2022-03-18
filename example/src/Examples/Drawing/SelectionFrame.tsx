@@ -1,5 +1,4 @@
-import React, { useRef } from "react";
-import type { SkRect } from "@shopify/react-native-skia";
+import React, { useMemo } from "react";
 import { Group, Rect } from "@shopify/react-native-skia";
 
 import type { DrawingElements } from "./Context/types";
@@ -13,45 +12,34 @@ type Props = {
 const SelecctionHandleSize = 6;
 
 export const SelectionFrame: React.FC<Props> = ({ selectedElements }) => {
-  const boundingBoxRef = useRef<SkRect | undefined>(undefined);
+  const boundingBox = useMemo(
+    () => getBoundingBox(selectedElements)!,
+    [selectedElements]
+  );
   return selectedElements.length > 0 ? (
     <Group>
       {/** Rect around selected elements */}
-      <Rect
-        rect={() => {
-          // Update the cached bounding box to avoid having to
-          // recreate it every time.
-          boundingBoxRef.current = getBoundingBox(selectedElements);
-          return boundingBoxRef.current!;
-        }}
-        color="#4185F4"
-        strokeWidth={2}
-        style="stroke"
-      />
-      <Rect
-        rect={() => boundingBoxRef.current!}
-        color="#4185F418"
-        style="fill"
-      />
+      <Rect rect={boundingBox} color="#4185F4" strokeWidth={2} style="stroke" />
+      <Rect rect={boundingBox} color="#4185F418" style="fill" />
       {/** Resize handles */}
       <SelectionResizeHandle
-        x={() => boundingBoxRef.current!.x}
-        y={() => boundingBoxRef.current!.y}
+        x={boundingBox.x}
+        y={boundingBox.y}
         size={SelecctionHandleSize}
       />
       <SelectionResizeHandle
-        x={() => boundingBoxRef.current!.x + boundingBoxRef.current!.width}
-        y={() => boundingBoxRef.current!.y}
+        x={boundingBox.x + boundingBox.width}
+        y={boundingBox.y}
         size={SelecctionHandleSize}
       />
       <SelectionResizeHandle
-        x={() => boundingBoxRef.current!.x + boundingBoxRef.current!.width}
-        y={() => boundingBoxRef.current!.y + boundingBoxRef.current!.height}
+        x={boundingBox.x + boundingBox.width}
+        y={boundingBox.y + boundingBox.height}
         size={SelecctionHandleSize}
       />
       <SelectionResizeHandle
-        x={() => boundingBoxRef.current!.x}
-        y={() => boundingBoxRef.current!.y + boundingBoxRef.current!.height}
+        x={boundingBox.x}
+        y={boundingBox.y + boundingBox.height}
         size={SelecctionHandleSize}
       />
     </Group>

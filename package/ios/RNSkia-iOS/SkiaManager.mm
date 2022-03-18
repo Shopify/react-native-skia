@@ -36,17 +36,8 @@
       auto callInvoker = bridge.jsCallInvoker;
       jsi::Runtime* jsRuntime = (jsi::Runtime*)cxxBridge.runtime;
       
-      // Create queue
-      dispatch_queue_attr_t qos = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INITIATED, -1);
-            
-      auto queue = dispatch_queue_create("skia-render-thread", qos);
-      
-      auto dispatchOnRenderThread = [queue](std::function<void()> task) {
-        dispatch_async(queue, ^{ task(); });
-      };
-      
       // Create platform context
-      _platformContext = std::make_shared<RNSkia::PlatformContext>(jsRuntime, callInvoker, dispatchOnRenderThread);
+      _platformContext = std::make_shared<RNSkia::PlatformContext>(jsRuntime, callInvoker);
             
       // Create the RNSkiaManager (cross platform)
       _skManager = std::make_shared<RNSkia::RNSkManager>(jsRuntime, callInvoker, _platformContext);

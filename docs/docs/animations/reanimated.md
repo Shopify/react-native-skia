@@ -5,41 +5,42 @@ sidebar_label: Reanimated
 slug: /animations/reanimated
 ---
 
-# Reanimated integration
+You can connect Reanimated values to a Skia canvas.
+A common use-case is a gesture from `react-native-gesture-handler` driving a Skia canvas using Reanimated.
 
-This library works well with other animation providers, and it is possible to use it with `react-native-reanimated`.
-
-For this to work the library provides a hook that connects a `SkiaView` or `Canvas` to a Reanimated Shared Value. When using this hook the SkiaView will redraw whenever the shared value changes.
+When using the `useSharedValueEffect` hook, the canvas will redraw whenever the shared value changes.
 
 ## Definition
 
 ```tsx
-useSharedValueEffect(ref: RefObject<SkiaView>, ...values: Reanimated.SharedValue<any>)
+useSharedValueEffect(callback: () => void, values: Reanimated.SharedValue<any>[]);
 ```
 
 ## Example
 
-It is used by connecting a SkiaView or Canvas with a shared value. In the example below we are running a Reanimated animation on the shared value named progress - and then we connect our Canvas and shared value by using the `useSharedValueEffect` hook:
+In the example below we are running a Reanimated animation on the shared value named progress - and then we have callback invoked on any shared value change thanks to the `useSharedValueEffect` hook:
 
 ```tsx twoslash
 import {useEffect} from "react";
-import {Canvas, SkiaView, Rect, mix, useSharedValueEffect, useCanvasRef} from "@shopify/react-native-skia";
+import {Canvas, Rect, mix, useSharedValueEffect, useValue} from "@shopify/react-native-skia";
 import {useSharedValue, withRepeat, withTiming} from "react-native-reanimated";
 
 const MyComponent = () => {
+  const x = useValue(0);
   const progress = useSharedValue(0);
 
   useEffect(() => {
     progress.value = withRepeat(withTiming(1, { duration: 3000 }), -1, true);
   }, [progress]);
 
-  const ref = useCanvasRef();
-  useSharedValueEffect(ref, progress);
+  useSharedValueEffect(() => {
+    x.current = mix(progress.value, 0, 100);
+  }, progress); // you can pass other shared values as extra parameters
 
   return (
-    <Canvas style={{ flex: 1 }} ref={ref}>
+    <Canvas style={{ flex: 1 }}>
       <Rect
-        x={() => mix(progress.value, 0, 100)}
+        x={x}
         y={100}
         width={10}
         height={10}

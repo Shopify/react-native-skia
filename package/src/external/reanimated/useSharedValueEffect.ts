@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useEffect, useMemo } from "react";
-import type { RefObject } from "react";
 
 // @ts-ignore
 let Reanimated: typeof import("react-native-reanimated") | undefined;
@@ -16,17 +15,8 @@ try {
   // Ignore
 }
 
-import type { SkiaView } from "../../views/SkiaView";
-import { invalidateSkiaView } from "../../views/SkiaView";
-
 type SharedValueTypeWrapper<T = number> = {
   value: T;
-};
-
-const repaintSkiaView = (nativeId: number) => {
-  // console.log("Yes");
-  // ref.current?.redraw();
-  invalidateSkiaView(nativeId.toString());
 };
 
 const useSharedValueWrapper =
@@ -37,16 +27,16 @@ const useSharedValueWrapper =
 /**
  * Connects a shared value from reanimated to a SkiaView or Canvas
  * so whenever the shared value changes the SkiaView will redraw.
- * @param ref Reference to the SkiaView or Canvas
- * @param value Shared value to add change listeners for
- * @param values Additional (optional) shared values to add change listeners for
+ * @param cb Callback that will be called whenever the shared value changes.
+ * @param values One or more shared values to listen for.
  */
 export const useSharedValueEffect = <T = number>(
-  ref: RefObject<SkiaView>,
+  cb: () => void,
   value: SharedValueTypeWrapper<T>,
   ...values: SharedValueTypeWrapper<T>[]
 ) => {
   const input = useSharedValueWrapper(0);
+  const triggers = useMemo(() => [value, ...values], [value, values]);
   const { runOnJS, startMapper, stopMapper } = useMemo(() => {
     if (Reanimated && Core) {
       const { runOnJS } = Reanimated;
@@ -64,25 +54,17 @@ export const useSharedValueEffect = <T = number>(
     }
   }, []);
 
-  // To make sure we'll always provide one or more values as triggers
-  // we defined the input as either and always a single value - and
-  // then accept additional values if needed.
-  const triggers = useMemo(() => [value, ...values], [value, values]);
-
   useEffect(() => {
     if (
       startMapper !== undefined &&
       runOnJS !== undefined &&
       stopMapper !== undefined
     ) {
-      // Get the native id from the Skia View
-      const nativeId = ref.current?.nativeId;
-
       // Start a mapper in Reanimated
       const mapperId = startMapper(
         () => {
           "worklet";
-          runOnJS(repaintSkiaView)(nativeId);
+          runOnJS(cb)();
         },
         triggers,
         [input]
@@ -95,5 +77,5 @@ export const useSharedValueEffect = <T = number>(
       };
     }
     return () => {};
-  }, [input, ref, runOnJS, startMapper, stopMapper, triggers, values]);
+  }, [cb, input, runOnJS, startMapper, stopMapper, triggers]);
 };
