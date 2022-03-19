@@ -39,7 +39,7 @@ const VerticesDemo = () => {
           ty="repeat"
         />
       </Paint>
-      {/* Here we specificed colors, the default blendMode is dstOver */}
+      {/* Here we specified colors, the default blendMode is dstOver */}
       <Vertices vertices={vertices} colors={colors} />
       <Group transform={[{ translateX: 128 }]}>
         {/* Here we didn't specify colors, the default blendMode is srcOver */}

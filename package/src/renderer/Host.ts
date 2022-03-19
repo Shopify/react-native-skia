@@ -10,12 +10,12 @@ export enum NodeType {
   Drawing = "skDrawing",
 }
 
-export abstract class SkNode<P> {
-  readonly children: SkNode<unknown>[] = [];
+export abstract class Node<P = unknown> {
+  readonly children: Node[] = [];
   _props: AnimatedProps<P>;
   memoizable = false;
   memoized = false;
-  parent?: SkNode<unknown>;
+  parent?: Node;
 
   constructor(props: AnimatedProps<P>) {
     this._props = props;
@@ -52,7 +52,7 @@ export abstract class SkNode<P> {
   }
 }
 
-export class Container extends SkNode<unknown> {
+export class Container extends Node {
   redraw: () => void;
 
   constructor(redraw: () => void) {

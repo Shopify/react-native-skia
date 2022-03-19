@@ -27,7 +27,7 @@ namespace RNSkia {
             return jsi::String::createFromUtf8(runtime, "FontMgr");
         }
 
-        JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkShader, __typename__))
+        JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkFontMgr, __typename__))
 
         JsiSkFontMgr(std::shared_ptr<RNSkPlatformContext> context,
                      sk_sp<SkFontMgr> fontMgr)
