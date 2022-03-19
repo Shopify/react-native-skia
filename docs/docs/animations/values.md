@@ -92,7 +92,7 @@ const Demo = () => {
 ## Value Effect
 
 The `useValueEffect` hook allows you to execute change on value change.
-In the example below we execute a callback on every frame (everytime the clock value changes).
+In the example below we execute a callback on every frame (every time the clock value changes).
 
 ```tsx twoslash
 import React, { useEffect } from "react";

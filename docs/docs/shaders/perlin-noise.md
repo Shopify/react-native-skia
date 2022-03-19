@@ -17,7 +17,7 @@ Returns a shader with Perlin Fractal Noise.
 | octaves     | `number`         |  |
 | seed        | `number`     | |
 | tileWidth?  | `number`     | if this and `tileHeight` are non-zero, the frequencies will be modified so that the noise will be tileable for the given size. |
-| tileHeigth? | `number`       | if this and `tileWidth` are non-zero, the frequencies will be modified so that the noise will be tileable for the given size. |
+| tileHeight? | `number`       | if this and `tileWidth` are non-zero, the frequencies will be modified so that the noise will be tileable for the given size. |
 
 ### Example
 ```tsx twoslash
@@ -59,7 +59,7 @@ Returns a shader with Perlin Turbulence.
 | octaves     | `number`         |  |
 | seed        | `number`     | |
 | tileWidth?  | `number`     | if this and `tileHeight` are non-zero, the frequencies will be modified so that the noise will be tileable for the given size. |
-| tileHeigth? | `number`       | if this and `tileWidth` are non-zero, the frequencies will be modified so that the noise will be tileable for the given size. |
+| tileHeight? | `number`       | if this and `tileWidth` are non-zero, the frequencies will be modified so that the noise will be tileable for the given size. |
 
 ### Example
 ```tsx twoslash
