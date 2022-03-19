@@ -2,7 +2,7 @@
 id: fitbox
 title: FitBox
 sidebar_label: FitBox
-slug: /shapes/fibox
+slug: /shapes/fitbox
 ---
 
 The `FitBox` component allows you to scale drawings to fit into a destination rectangle automatically.
