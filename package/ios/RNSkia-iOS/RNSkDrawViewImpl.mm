@@ -75,8 +75,7 @@ void RNSkDrawViewImpl::drawFrame(const sk_sp<SkPicture> picture) {
       RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
       return;
     }
-    
-    skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
+
     skSurface->getCanvas()->drawPicture(picture);
     
     id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);

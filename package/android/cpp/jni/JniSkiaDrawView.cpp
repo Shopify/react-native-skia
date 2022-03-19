@@ -340,10 +340,6 @@ namespace RNSkia
             return;
         }
 
-        // Clear with transparent
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
         if (getThreadDrawingContext()->skContext != nullptr)
         {
             getThreadDrawingContext()->skContext->resetContext();
