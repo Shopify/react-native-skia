@@ -122,7 +122,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
-        canvas.clear(0x00000000);
+        canvas.clear(0);
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
         canvasCtx.current.width = width;
