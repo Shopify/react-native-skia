@@ -10,5 +10,5 @@ interface ButtonProps {
 }
 
 export const Button = ({ children }: ButtonProps) => {
-  return <View />;
+  return null;
 };
