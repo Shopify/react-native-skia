@@ -27,7 +27,7 @@ import type { FontMgr } from "../skia/FontMgr/FontMgr";
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
 import { vec } from "./processors";
-import { createDependencyManager } from "./DependecyManager";
+import { createDependencyManager } from "./DependencyManager";
 import { Container } from "./Host";
 
 // useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
