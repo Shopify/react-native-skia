@@ -11,7 +11,7 @@ If the root dimensions are in absolute units, the width/height properties have n
 
 | Name      | Type      |  Description                                                  |
 |:----------|:----------|:--------------------------------------------------------------|
-| svg.      | `SVG` | SVG Image. |
+| svg       | `SVG` | SVG Image. |
 | width?    | `number`  | Width of the destination image. This is used to resolve the initial viewport when the root SVG width is specified in relative units. |
 | height?   | `number`  | Height of the destination image. This is used to resolve the initial viewport when the root SVG height is specified in relative units.                              |
 
@@ -45,7 +45,7 @@ const ImageSVGDemo = () => {
 };
 ```
 
-You can also use an inlined string as SVG (using `Skia.SVG.MakeFromString`:
+You can also use an inlined string as SVG (using `Skia.SVG.MakeFromString`):
 
 ```tsx twoslash
 import React from "react";
@@ -114,7 +114,7 @@ Would need to be rewritten as:
 
 The `opacity` attribute also applies to both the `fill` and `stroke` attributes.
 
-### Font Familly
+### Font Family
 
 When rendering your SVG with Skia, all fonts available in your app are also available to your SVG. However, the way you can set the `font-family` attribute is not flexible.
 This is [a known issue](https://github.com/google/skia/blob/main/modules/svg/src/SkSVGText.cpp#L77) in the SVG Skia module. 
