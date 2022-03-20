@@ -37,7 +37,14 @@ namespace RNSkia
     /**** DTOR ***/
     JniSkiaDrawView::~JniSkiaDrawView()
     {
-        _invalidated = true;
+        if (!_isDrawingLock->try_lock_for(250ms))
+        {
+            RNSkLogger::logToConsole("Warning: Skia View with id %i still locked after 250ms", getNativeId());
+        }
+        _isDrawingLock = nullptr;
+#if LOG_ALL_DRAWING
+        RNSkLogger::logToConsole("JniSkiaDrawView::~JniSkiaDrawView %i", getNativeId());
+#endif
     }
 
     /**** JNI ****/
@@ -57,38 +64,41 @@ namespace RNSkia
                         makeNativeMethod("surfaceSizeChanged", JniSkiaDrawView::surfaceSizeChanged),
                         makeNativeMethod("setMode", JniSkiaDrawView::setMode),
                         makeNativeMethod("setDebugMode", JniSkiaDrawView::setDebugMode),
-                        makeNativeMethod("updateTouchPoints", JniSkiaDrawView::updateTouchPoints),
-                        makeNativeMethod("setIsRemoved", JniSkiaDrawView::setIsRemovedExternal)
-        });
+                        makeNativeMethod("updateTouchPoints", JniSkiaDrawView::updateTouchPoints)});
     }
 
     void JniSkiaDrawView::setMode(std::string mode)
     {
-        if (mode.compare("continuous") == 0) {
+        if (mode.compare("continuous") == 0)
+        {
             setDrawingMode(RNSkDrawingMode::Continuous);
         }
-        else {
+        else
+        {
             setDrawingMode(RNSkDrawingMode::Default);
         }
     }
 
-    void JniSkiaDrawView::setDebugMode(bool show) {
+    void JniSkiaDrawView::setDebugMode(bool show)
+    {
         setShowDebugOverlays(show);
     }
 
-    void JniSkiaDrawView::updateTouchPoints(jni::JArrayDouble touches) {
+    void JniSkiaDrawView::updateTouchPoints(jni::JArrayDouble touches)
+    {
         // Create touch points
         size_t size = touches.size();
         std::vector<jdouble> buffer(size + 1L);
         std::vector<RNSkia::RNSkTouchPoint> points;
         auto pin = touches.pin();
         auto scale = getPlatformContext()->getPixelDensity();
-        for (size_t i = 0; i < pin.size(); i+=2) {
+        for (size_t i = 0; i < pin.size(); i += 2)
+        {
             RNSkTouchPoint point;
             point.x = pin[i] / scale;
-            point.y = pin[i+1] / scale;
-            point.force = pin[i+2];
-            point.type = (RNSkia::RNSkTouchType)pin[i+3];
+            point.y = pin[i + 1] / scale;
+            point.force = pin[i + 2];
+            point.type = (RNSkia::RNSkTouchType)pin[i + 3];
             points.push_back(point);
         }
         updateTouchState(points);
@@ -96,6 +106,10 @@ namespace RNSkia
 
     void JniSkiaDrawView::surfaceAvailable(jobject surface, int width, int height)
     {
+#if LOG_ALL_DRAWING
+        RNSkLogger::logToConsole("JniSkiaDrawView::surfaceAvailable %i", getNativeId());
+#endif
+
         _width = width;
         _height = height;
 
@@ -107,6 +121,10 @@ namespace RNSkia
 
     void JniSkiaDrawView::surfaceSizeChanged(int width, int height)
     {
+#if LOG_ALL_DRAWING
+        RNSkLogger::logToConsole("JniSkiaDrawView::surfaceSizeChanged %i", getNativeId());
+#endif
+
         _width = width;
         _height = height;
 
@@ -116,13 +134,29 @@ namespace RNSkia
 
     void JniSkiaDrawView::surfaceDestroyed()
     {
-        _nativeWindow = nullptr;
-        _skSurface = nullptr;
+#if LOG_ALL_DRAWING
+        RNSkLogger::logToConsole("JniSkiaDrawView::surfaceDestroyed %i", getNativeId());
+#endif
 
-        if (_glSurface != EGL_NO_SURFACE)
+        if (_isDrawingLock->try_lock_for(250ms))
         {
-            eglDestroySurface(_glDisplay, _glSurface);
-            _glSurface = EGL_NO_SURFACE;
+            _nativeWindow = nullptr;
+            _skSurface = nullptr;
+
+            if (_glSurface != EGL_NO_SURFACE)
+            {
+                // NOTE: Seems like we should NOT call eglDestroySurface here,
+                // the surface's undelying texture is removed and this
+                // call will therefore fail.
+                // DO NOT CALL eglDestroySurface(_glDisplay, _glSurface);
+                _glSurface = EGL_NO_SURFACE;
+            }
+
+            _isDrawingLock->unlock();
+        }
+        else
+        {
+            RNSkLogger::logToConsole("Warning: Could not destroy surface! Skia View with id %i still locked after 250ms", getNativeId());
         }
     }
 
@@ -314,68 +348,69 @@ namespace RNSkia
             return;
         }
 
-        // Ensure we have an initialized static OpenGL context and Skia GL context
-        if (!ensureStaticOpenGLContext())
+        if (_isDrawingLock->try_lock())
         {
-            RNSkLogger::logToConsole(
-                "JniSkiaDrawView::drawFrame - not possible to setup global opengl context");
-            return;
-        }
 
-        // Ensure we have an initialized GL surface for the surface
-        if (!ensureOpenGLSurface())
-        {
-            RNSkLogger::logToConsole(
-                "JniSkiaDrawView::drawFrame - not possible local gl surface");
-            return;
-        }
+            // Ensure we have an initialized static OpenGL context and Skia GL context
+            if (!ensureStaticOpenGLContext())
+            {
+                RNSkLogger::logToConsole(
+                    "JniSkiaDrawView::drawFrame - not possible to setup global opengl context - %i", getNativeId());
+                _isDrawingLock->unlock();
+                return;
+            }
 
-        // Ensure we have the initialized static Skia context
-        if (!ensureStaticSkiaContext())
-        {
-            RNSkLogger::logToConsole(
-                "JniSkiaDrawView::drawFrame - not possible to create skia context");
-            return;
-        }
+            // Ensure we have an initialized GL surface for the surface
+            if (!ensureOpenGLSurface())
+            {
+                RNSkLogger::logToConsole(
+                    "JniSkiaDrawView::drawFrame - not possible local gl surface - %i", getNativeId());
+                _isDrawingLock->unlock();
+                return;
+            }
 
-        // Ensure that we have a skia surface on top of the gl surface
-        if (!ensureSkiaRenderTarget())
-        {
-            RNSkLogger::logToConsole(
-                "JniSkiaDrawView::drawFrame - not possible to set skia render target");
-            return;
-        }
+            // Ensure we have the initialized static Skia context
+            if (!ensureStaticSkiaContext())
+            {
+                RNSkLogger::logToConsole(
+                    "JniSkiaDrawView::drawFrame - not possible to create skia context - %i", getNativeId());
+                _isDrawingLock->unlock();
+                return;
+            }
 
-        // Clear with transparent
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+            // Ensure that we have a skia surface on top of the gl surface
+            if (!ensureSkiaRenderTarget())
+            {
+                RNSkLogger::logToConsole(
+                    "JniSkiaDrawView::drawFrame - not possible to set skia render target");
+                _isDrawingLock->unlock();
+                return;
+            }
 
-        if (getThreadDrawingContext()->skContext != nullptr)
-        {
-            getThreadDrawingContext()->skContext->resetContext();
-        }
-        else
-        {
-            return;
-        }
+            // Clear with transparent
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        // Last sanity check to ensure we still have a valid surface and view
-        if(_invalidated || _glSurface == EGL_NO_SURFACE) {
-            return;
-        }
+            if (getThreadDrawingContext()->skContext != nullptr)
+            {
+                getThreadDrawingContext()->skContext->resetContext();
+            }
+            else
+            {
+                _isDrawingLock->unlock();
+                return;
+            }
 
-        // Draw in surface!
-        _skSurface->getCanvas()->drawPicture(picture);
+            // Draw in surface!
+            _skSurface->getCanvas()->drawPicture(picture);
 
-        if (getThreadDrawingContext()->skContext != nullptr)
-        {
-            getThreadDrawingContext()->skContext->flush();
-        }
+            if (!eglSwapBuffers(_glDisplay, _glSurface))
+            {
+                RNSkLogger::logToConsole(
+                    "eglSwapBuffers failed: %d\n", eglGetError());
+            }
 
-        if (!eglSwapBuffers(_glDisplay, _glSurface))
-        {
-            RNSkLogger::logToConsole(
-                "eglSwapBuffers failed: %d\n", eglGetError());
+            _isDrawingLock->unlock();
         }
     }
 

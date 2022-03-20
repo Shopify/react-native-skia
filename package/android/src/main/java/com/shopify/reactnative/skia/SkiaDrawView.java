@@ -46,7 +46,6 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         // This means that none of the native methods should be called after
         // this point.
         mIsRemoved = true;
-        setIsRemoved();
         mHybridData.resetNative();
     }
 
@@ -90,7 +89,6 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         if(mIsRemoved) {
             return;
         }
-        Log.v(TAG, "onSurfaceTextureAvailable " + width + ", " + height);
         surfaceAvailable(new Surface(surface), width, height);
     }
 
@@ -99,7 +97,6 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         if(mIsRemoved) {
             return;
         }
-        Log.v(TAG, "onSurfaceTextureSizeChanged " + width + ", " + height);
         surfaceSizeChanged(width, height);
     }
 
@@ -108,7 +105,6 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         if(mIsRemoved) {
             return true;
         }
-        Log.v(TAG, "onSurfaceTextureDestroyed");
         surfaceDestroyed();
         return true;
     }
@@ -133,6 +129,4 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     public native void setDebugMode(boolean show);
 
     public native void updateTouchPoints(double[] points);
-
-    public native void setIsRemoved();
 }
