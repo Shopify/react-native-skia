@@ -18,6 +18,8 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @DoNotStrip
     private HybridData mHybridData;
 
+    private Surface mSurface;
+
     @DoNotStrip
     private boolean mIsRemoved = false;
 
@@ -89,7 +91,8 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         if(mIsRemoved) {
             return;
         }
-        surfaceAvailable(new Surface(surface), width, height);
+        mSurface = new Surface(surface);
+        surfaceAvailable(mSurface, width, height);
     }
 
     @Override
@@ -106,6 +109,8 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
             return true;
         }
         surfaceDestroyed();
+        mSurface.release();
+        mSurface = null;
         return true;
     }
 
