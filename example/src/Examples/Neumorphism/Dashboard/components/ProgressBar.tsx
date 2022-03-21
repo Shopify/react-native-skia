@@ -30,8 +30,8 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
   if (font === null) {
     return null;
   }
-  const text = `${Math.round(progress * 100)}%`;
-  const pos = font.measureText("30%");
+  const text = `${Math.round(progress * 100)}°C`;
+  const pos = font.measureText(text);
   return (
     <Group transform={translate({ x: 100, y: 223 })}>
       <Group>

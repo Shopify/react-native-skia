@@ -1,7 +1,9 @@
 import React from "react";
 import { Dimensions } from "react-native";
 import {
+  Blur,
   Canvas,
+  Circle,
   Fill,
   FitBox,
   Group,
@@ -19,6 +21,7 @@ import { Control } from "./components/Control";
 import { Wind } from "./components/icons/Wind";
 import { Sun } from "./components/icons/Sun";
 import { Power } from "./components/icons/Power";
+import { Mode } from "./components/Mode";
 
 const window = Dimensions.get("window");
 const width = 390;
@@ -46,6 +49,18 @@ export const Neumorphism = () => {
           </Paint>
           <Fill />
         </Group>
+        <Group>
+          <Paint>
+            <Blur blur={60} />
+          </Paint>
+          <Circle
+            color="#56CCF2"
+            opacity={0.2}
+            cx={width}
+            cy={height}
+            r={150}
+          />
+        </Group>
         <Title title="Climate" />
         <ProgressBar progress={0.3} />
         <Control
@@ -67,6 +82,7 @@ export const Neumorphism = () => {
         <Control x={0} y={464 + 140 + 75} label="Auto" font={font}>
           <Power />
         </Control>
+        <Mode />
       </FitBox>
     </Canvas>
   );
