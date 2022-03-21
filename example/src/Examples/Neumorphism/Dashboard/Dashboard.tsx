@@ -2,6 +2,7 @@ import React from "react";
 import { Dimensions } from "react-native";
 import type { Vector } from "@shopify/react-native-skia";
 import {
+  runSpring,
   mix,
   Blur,
   Canvas,
@@ -37,8 +38,8 @@ const src = rect(0, 0, width, height);
 const dst = rect(0, 0, window.width, window.height);
 const rects = fitRects("cover", src, dst);
 const transform = rect2rect(rects.src, rects.dst);
-const offsetX = 30 + 50 + 50 + 16;
-const offsetY = 464 + 4;
+// const offsetX = 30 + 50 + 50 + 16;
+// const offsetY = 464 + 4;
 
 // const project2 = (v: Vector, tr: Transforms2d) => {
 //   const matrix = processTransform2dRaw(tr);
@@ -46,11 +47,12 @@ const offsetY = 464 + 4;
 //   return { x, y };
 // };
 
-const isInKnobArea = (pt: Vector, x: number, y: number) =>
-  pt.x >= x && pt.y >= y && pt.x <= x + 25 && pt.y <= y + 25;
+// const isInKnobArea = (pt: Vector, x: number, y: number) =>
+//   pt.x >= x && pt.y >= y && pt.x <= x + 25 && pt.y <= y + 25;
 
 export const Neumorphism = () => {
-  const knobActive = useValue(false);
+  const translateY = useValue(0);
+  const offsetY = useValue(0);
   const t = useLoop({ duration: 3000 });
   const x = useDerivedValue(() => mix(t.current, 0, 180), [t]);
   const p0 = useValue(0);
@@ -58,17 +60,13 @@ export const Neumorphism = () => {
   const font = useFont(require("./components/SF-Pro-Display-Bold.otf"), 17);
   const onTouch = useTouchHandler({
     onStart: (pt) => {
-      if (isInKnobArea(pt, offsetX + x.current, offsetY)) {
-        knobActive.current = true;
-      }
+      offsetY.current = translateY.current - pt.y;
     },
-    onActive: () => {
-      if (knobActive.current) {
-        //  x.current = clamp(pt.x - offsetX, offsetX, 192);
-      }
+    onActive: (pt) => {
+      translateY.current = offsetY.current + pt.y;
     },
     onEnd: () => {
-      knobActive.current = false;
+      runSpring(translateY, 0);
     },
   });
   if (!font) {
@@ -126,7 +124,7 @@ export const Neumorphism = () => {
         >
           <Power />
         </Control>
-        <Mode />
+        <Mode translateY={translateY} />
       </Group>
     </Canvas>
   );

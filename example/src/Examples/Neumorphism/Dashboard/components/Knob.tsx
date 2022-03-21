@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  InnerShadow,
   RoundedRect,
   Group,
   LinearGradient,
@@ -21,7 +20,7 @@ export const Knob = () => {
         </Paint>
         <RoundedRect x={0} y={0} width={27.5} height={17} r={6} />
       </Group>
-      <Group>
+      {/* <Group>
         <Paint>
           <InnerShadow
             dx={-1}
@@ -51,7 +50,7 @@ export const Knob = () => {
           y={2}
           r={1}
         />
-      </Group>
+      </Group> */}
     </Group>
   );
 };

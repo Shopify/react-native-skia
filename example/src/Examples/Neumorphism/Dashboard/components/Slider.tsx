@@ -59,7 +59,6 @@ export const Slider = ({ x, y, progress }: SliderProps) => {
             end={vec(0, 192)}
             colors={["#2FB8FF", "#9EECD9"]}
           />
-          <BlurMask style="solid" blur={1} />
         </Paint>
         <RoundedRect x={0} y={3.5} width={width} height={8} r={25} />
       </Group>
