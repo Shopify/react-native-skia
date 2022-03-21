@@ -41,8 +41,8 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
     <Group transform={translate({ x: 100, y: 223 })}>
       <Group>
         <Paint>
-          <DropShadow dx={20} dy={20} color="#141415" blur={60} />
-          <DropShadow dx={-20} dy={-20} color="#485057" blur={60} />
+          <DropShadow dx={20} dy={20} color="#141415" blur={10} />
+          <DropShadow dx={-20} dy={-20} color="#485057" blur={10} />
           <LinearGradient
             start={vec(12, 12)}
             end={vec(24 + 2 * r2, 24 + 2 * r2)}
@@ -63,9 +63,9 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
             dx={-25}
             dy={-25}
             color="rgba(59, 68, 81, 0.5)"
-            blur={65}
+            blur={10}
           />
-          <InnerShadow dx={25} dy={25} color="rgba(0, 0,0, 0.55)" blur={80} />
+          <InnerShadow dx={25} dy={25} color="rgba(0, 0,0, 0.55)" blur={10} />
         </Paint>
         <Circle cx={37 + r1} cy={37 + r1} r={r1} color="#32363B" />
       </Group>

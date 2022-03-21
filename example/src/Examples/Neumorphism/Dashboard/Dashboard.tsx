@@ -1,15 +1,12 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Dimensions } from "react-native";
-import type { Transforms2d, Vector } from "@shopify/react-native-skia";
+import type { Vector } from "@shopify/react-native-skia";
 import {
   mix,
-  processTransform2dRaw,
-  matrixVecMul3,
   Blur,
   Canvas,
   Circle,
   Fill,
-  FitBox,
   Group,
   LinearGradient,
   Paint,
@@ -17,13 +14,10 @@ import {
   useFont,
   vec,
   useTouchHandler,
-  Rect,
   useValue,
   fitRects,
   rect2rect,
-  processTransform2d,
   useDerivedValue,
-  clamp,
   useLoop,
 } from "@shopify/react-native-skia";
 
@@ -46,11 +40,11 @@ const transform = rect2rect(rects.src, rects.dst);
 const offsetX = 30 + 50 + 50 + 16;
 const offsetY = 464 + 4;
 
-const project2 = (v: Vector, tr: Transforms2d) => {
-  const matrix = processTransform2dRaw(tr);
-  const [x, y] = matrixVecMul3(matrix, [v.x, v.y, 0]);
-  return { x, y };
-};
+// const project2 = (v: Vector, tr: Transforms2d) => {
+//   const matrix = processTransform2dRaw(tr);
+//   const [x, y] = matrixVecMul3(matrix, [v.x, v.y, 0]);
+//   return { x, y };
+// };
 
 const isInKnobArea = (pt: Vector, x: number, y: number) =>
   pt.x >= x && pt.y >= y && pt.x <= x + 25 && pt.y <= y + 25;
@@ -68,7 +62,7 @@ export const Neumorphism = () => {
         knobActive.current = true;
       }
     },
-    onActive: (pt) => {
+    onActive: () => {
       if (knobActive.current) {
         //  x.current = clamp(pt.x - offsetX, offsetX, 192);
       }

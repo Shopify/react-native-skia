@@ -31,7 +31,10 @@ const meter = Skia.Path.Make();
 meter.addCircle(c.x, c.y, r);
 
 export const Neumorphism = () => {
-  const font = useFont(require("./SF-Mono-Semibold.otf"), 32);
+  const font = useFont(
+    require("./Dashboard/components/SF-Mono-Semibold.otf"),
+    32
+  );
   const progress = useLoop({ duration: 15000 });
   const end = useDerivedValue(
     () => mix(progress.current, 0.2, 0.95),

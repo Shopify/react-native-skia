@@ -88,5 +88,6 @@ export const Control = ({
 };
 
 Control.defaultProps = {
+  progress: 0,
   active: false,
 };
