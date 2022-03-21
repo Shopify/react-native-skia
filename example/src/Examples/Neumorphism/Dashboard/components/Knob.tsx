@@ -6,10 +6,7 @@ import {
   LinearGradient,
   vec,
   Paint,
-  Rect,
 } from "@shopify/react-native-skia";
-
-interface KnobProps {}
 
 export const Knob = () => {
   return (

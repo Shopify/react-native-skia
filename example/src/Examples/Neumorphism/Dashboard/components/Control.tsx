@@ -1,6 +1,4 @@
-import type { SkFont } from "@shopify/react-native-skia";
 import {
-  BlurMask,
   DropShadow,
   vec,
   Paint,
@@ -10,6 +8,7 @@ import {
   Text,
   Circle,
 } from "@shopify/react-native-skia";
+import type { SkiaReadonlyValue, SkFont } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
 
@@ -20,7 +19,7 @@ const r = 25;
 interface ControlProps {
   x: number;
   y: number;
-  progress: number;
+  progress: SkiaReadonlyValue<number>;
   label: string;
   children: ReactNode;
   active: boolean;
@@ -82,13 +81,12 @@ export const Control = ({
             {children}
           </Group>
         </Group>
-        <Slider x={2 * r + 16} y={r - 8} progress={progress} active={active} />
+        <Slider x={2 * r + 16} y={r - 8} progress={progress} />
       </Group>
     </Group>
   );
 };
 
 Control.defaultProps = {
-  progress: 0,
   active: false,
 };

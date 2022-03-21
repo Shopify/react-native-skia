@@ -1,3 +1,4 @@
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   RoundedRect,
   Paint,
@@ -7,19 +8,24 @@ import {
   LinearGradient,
   vec,
   BlurMask,
+  useDerivedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 
 import { Knob } from "./Knob";
 
 interface SliderProps {
-  progress: number;
-  active: boolean;
   x: number;
   y: number;
+  progress: SkiaReadonlyValue<number>;
 }
 
-export const Slider = ({ x, y, progress, active }: SliderProps) => {
+export const Slider = ({ x, y, progress }: SliderProps) => {
+  const width = useDerivedValue(() => progress.current * 192, [progress]);
+  const transform = useDerivedValue(
+    () => [{ translateX: progress.current * 192 }],
+    [progress]
+  );
   return (
     <Group transform={translate({ x, y })}>
       <Group>
@@ -55,9 +61,9 @@ export const Slider = ({ x, y, progress, active }: SliderProps) => {
           />
           <BlurMask style="solid" blur={1} />
         </Paint>
-        <RoundedRect x={0} y={3.5} width={progress * 192} height={8} r={25} />
+        <RoundedRect x={0} y={3.5} width={width} height={8} r={25} />
       </Group>
-      <Group transform={[{ translateX: progress * 192 }]}>
+      <Group transform={transform}>
         <Knob />
       </Group>
     </Group>

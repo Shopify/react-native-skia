@@ -1,3 +1,4 @@
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   Group,
   LinearGradient,
@@ -12,6 +13,7 @@ import {
   SweepGradient,
   useFont,
   Text,
+  useDerivedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -22,16 +24,19 @@ path.addCircle(12 + r2, 12 + r2, r2);
 const c = vec(12 + r2, 12 + r2);
 
 interface ProgressBarProps {
-  progress: number;
+  progress: SkiaReadonlyValue<number>;
 }
 
 export const ProgressBar = ({ progress }: ProgressBarProps) => {
   const font = useFont(require("./SF-Mono-Semibold.otf"), 32);
+  const text = useDerivedValue(
+    () => `${Math.round(progress.current * 100)}°C`,
+    [progress]
+  );
   if (font === null) {
     return null;
   }
-  const text = `${Math.round(progress * 100)}°C`;
-  const pos = font.measureText(text);
+  const pos = font.measureText("00°C");
   return (
     <Group transform={translate({ x: 100, y: 223 })}>
       <Group>

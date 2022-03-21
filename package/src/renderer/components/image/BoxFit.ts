@@ -24,6 +24,7 @@ export const rect2rect = (src: SkRect, dst: SkRect) => {
   const scaleY = dst.height / src.height;
   const translateX = dst.x - src.x * scaleX;
   const translateY = dst.y - src.y * scaleY;
+  console.log({ scaleX });
   return [{ translateX }, { translateY }, { scaleX }, { scaleY }] as const;
 };
 
