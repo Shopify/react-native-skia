@@ -1,5 +1,7 @@
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
+  rect,
+  rrect,
   Group,
   LinearGradient,
   translate,
@@ -13,6 +15,7 @@ import {
   useFont,
   Text,
   useDerivedValue,
+  Box,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -21,6 +24,9 @@ const r2 = 85;
 const path = Skia.Path.Make();
 path.addCircle(12 + r2, 12 + r2, r2);
 const c = vec(12 + r2, 12 + r2);
+
+const fromCircle = (cx: number, cy: number, r: number) =>
+  rrect(rect(cx - r, cy - r, 2 * r, 2 * r), r, r);
 
 interface ProgressBarProps {
   progress: SkiaReadonlyValue<number>;
@@ -50,26 +56,15 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
         </Paint>
         <Circle cx={12 + r2} cy={12 + r2} r={r2} />
       </Group>
-      <Group>
-        <Paint>
-          <Shadow
-            dx={2}
-            dy={1}
-            color="rgba(255, 255, 255, 0.5)"
-            blur={2}
-            inner
-          />
-          <Shadow
-            dx={-25}
-            dy={-25}
-            color="rgba(59, 68, 81, 0.5)"
-            blur={10}
-            inner
-          />
-          <Shadow dx={25} dy={25} color="rgba(0, 0,0, 0.55)" blur={10} inner />
-        </Paint>
-        <Circle cx={37 + r1} cy={37 + r1} r={r1} color="#32363B" />
-      </Group>
+      <Box
+        box={fromCircle(37 + r1, 37 + r1, r1)}
+        color="#32363B"
+        shadows={[
+          { dx: 2, dy: 1, color: "rgba(255, 255, 255, 0.5)", blur: 2 },
+          { dx: -25, dy: -25, color: "rgba(59, 68, 81, 0.5)", blur: 10 },
+          { dx: 25, dy: 25, color: "rgba(0, 0,0, 0.55)", blur: 10 },
+        ]}
+      />
       <Group>
         <Paint>
           <SweepGradient

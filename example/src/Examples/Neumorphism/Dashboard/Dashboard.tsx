@@ -108,7 +108,7 @@ export const Neumorphism = () => {
         >
           <Snow />
         </Control>
-        <Control x={0} y={464 + 75} label="Fan" font={font} progress={p0}>
+        {/* <Control x={0} y={464 + 75} label="Fan" font={font} progress={p0}>
           <Wind />
         </Control>
         <Control x={0} y={464 + 140} label="Heat" font={font} progress={p0}>
@@ -122,7 +122,7 @@ export const Neumorphism = () => {
           progress={p0}
         >
           <Power />
-        </Control>
+        </Control> */}
         <Mode translateY={translateY} />
       </Group>
     </Canvas>
