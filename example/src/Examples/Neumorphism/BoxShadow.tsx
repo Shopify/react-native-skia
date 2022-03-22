@@ -1,18 +1,14 @@
 import React from "react";
-import type { Color, SkRRect } from "@shopify/react-native-skia";
 import {
-  add,
-  BlurMask,
-  DiffRect,
-  Group,
+  FitBox,
+  Path,
   Paint,
+  Box,
   Canvas,
   Fill,
   vec,
   rrect,
   rect,
-  RoundedRect,
-  Circle,
   Shadow,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
@@ -24,68 +20,7 @@ const c1 = vec(width / 2, 75 + 3 * r);
 
 const rct = rrect(rect(c.x - r, c.y - r, 2 * r, 2 * r), r, r);
 
-interface BoxShadowProps {
-  dx: number;
-  dy: number;
-  blur: number;
-  box: SkRRect;
-  color: Color;
-  inner?: boolean;
-  children?: React.ReactNode;
-}
-
-const BoxShadow = ({
-  box,
-  blur,
-  dx,
-  dy,
-  color,
-  inner,
-  children,
-}: BoxShadowProps) => {
-  const padding = add(vec(10, 10), vec(Math.abs(dx), Math.abs(dy)));
-  const ajustedBox = rrect(
-    rect(box.rect.x + dx, box.rect.y + dy, box.rect.width, box.rect.height),
-    box.rx,
-    box.ry
-  );
-  if (!inner) {
-    return (
-      <>
-        <Group>
-          <Paint color={color}>
-            <BlurMask blur={blur * 2} style="normal" />
-          </Paint>
-          <RoundedRect rect={ajustedBox} />
-        </Group>
-        {children}
-      </>
-    );
-  }
-  return (
-    <>
-      {children}
-      <Group clip={box}>
-        <Paint color={color}>
-          <BlurMask blur={blur * 2} style="normal" />
-        </Paint>
-        <DiffRect
-          inner={ajustedBox}
-          outer={rrect(
-            rect(
-              ajustedBox.rect.x - padding.x,
-              ajustedBox.rect.y - padding.y,
-              ajustedBox.rect.width + 2 * padding.x,
-              box.rect.height + 2 * padding.y
-            ),
-            0,
-            0
-          )}
-        />
-      </Group>
-    </>
-  );
-};
+//color="blue" dx={dx} dy={dy} blur={15} inner
 
 export const Neumorphism = () => {
   const dx = 10;
@@ -93,19 +28,24 @@ export const Neumorphism = () => {
   return (
     <Canvas style={{ flex: 1 }} mode="continuous" debug>
       <Fill color="lightblue" />
-      <BoxShadow box={rct} color="blue" dx={dx} dy={dy} blur={15} inner>
-        <RoundedRect rect={rct} color="white" />
-      </BoxShadow>
-      {/* <Group transform={[{ translateY: 300 }]}>
-        <RoundedRect rect={rct} color="white" />
-        <BoxShadow box={rct} color="blue" dx={dx} dy={dy} blur={15} inner />
-      </Group> */}
-      <Group>
+      <Box
+        box={rct}
+        color="white"
+        shadows={[
+          { dx, dy, blur: 15, inner: false, color: "blue", spread: 10 },
+          { dx, dy, blur: 15, inner: true, color: "red" },
+        ]}
+      />
+      <FitBox src={rect(0, 0, 24, 24)} dst={rect(50, 350, 300, 300)}>
         <Paint>
-          <Shadow dx={dx} dy={dy} blur={15} color="blue" inner />
+          <Shadow dx={1} dy={1} blur={1} color="red" inner />
+          <Shadow dx={1} dy={1} blur={1} color="blue" />
         </Paint>
-        <Circle c={c1} r={r} color="white" />
-      </Group>
+        <Path
+          path="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"
+          color="white"
+        />
+      </FitBox>
     </Canvas>
   );
 };
