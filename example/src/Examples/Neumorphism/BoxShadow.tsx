@@ -31,7 +31,7 @@ export const Neumorphism = () => {
         box={rct}
         color="white"
         shadows={[
-          { dx, dy, blur: 15, inner: false, color: "blue", spread: 10 },
+          { dx: -dx, dy: -dy, blur: 15, color: "blue" },
           { dx, dy, blur: 15, inner: true, color: "red" },
         ]}
       />

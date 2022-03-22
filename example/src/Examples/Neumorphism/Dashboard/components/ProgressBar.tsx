@@ -46,21 +46,24 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
     <Group transform={translate({ x: 100, y: 223 })}>
       <Group>
         <Paint>
-          <Shadow dx={20} dy={20} color="#141415" blur={10} />
-          <Shadow dx={-20} dy={-20} color="#485057" blur={10} />
           <LinearGradient
             start={vec(12, 12)}
             end={vec(24 + 2 * r2, 24 + 2 * r2)}
             colors={["#101113", "#2B2F33"]}
           />
         </Paint>
-        <Circle cx={12 + r2} cy={12 + r2} r={r2} />
+        <Box
+          box={fromCircle(12 + r2, 12 + r2, r2)}
+          shadows={[
+            { dx: 18, dy: 18, color: "#141415", blur: 60 },
+            { dx: -18, dy: -18, color: "#485057", blur: 60 },
+          ]}
+        />
       </Group>
       <Box
         box={fromCircle(37 + r1, 37 + r1, r1)}
         color="#32363B"
         shadows={[
-          { dx: 2, dy: 1, color: "rgba(255, 255, 255, 0.5)", blur: 2 },
           { dx: -25, dy: -25, color: "rgba(59, 68, 81, 0.5)", blur: 10 },
           { dx: 25, dy: 25, color: "rgba(0, 0,0, 0.55)", blur: 10 },
         ]}
