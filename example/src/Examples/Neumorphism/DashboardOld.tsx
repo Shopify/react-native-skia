@@ -7,7 +7,7 @@ import {
   Paint,
   add,
   vec,
-  DropShadow,
+  Shadow,
   Path,
   Text,
   Skia,
@@ -16,7 +16,6 @@ import {
   useDerivedValue,
   mix,
   useFont,
-  InnerShadow,
   RoundedRect,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -67,8 +66,8 @@ export const Neumorphism = () => {
             end={add(c, vec(r, 0))}
             colors={["#2B2F33", "#101113"]}
           />
-          <DropShadow dx={18} dy={18} blur={65} color="#141415" />
-          <DropShadow dx={-18} dy={-18} blur={65} color="#485057" />
+          <Shadow dx={18} dy={18} blur={65} color="#141415" />
+          <Shadow dx={-18} dy={-18} blur={65} color="#485057" />
         </Paint>
         <Circle c={c} r={r} />
       </Group>
@@ -87,19 +86,21 @@ export const Neumorphism = () => {
       </Group>
       <Group>
         <Paint>
-          <InnerShadow
+          <Shadow
             dx={2}
             dy={1}
             blur={2}
             color="rgba(255, 255, 255, 0.5)"
+            inner
           />
-          <InnerShadow
+          <Shadow
             dx={-26}
             dy={-26}
             blur={66}
             color="rgba(59, 68, 81, 0.5)"
+            inner
           />
-          <InnerShadow dx={26} dy={26} blur={10} color="rgba(0, 0, 0, 0.5)" />
+          <Shadow dx={26} dy={26} blur={81} color="rgba(0, 0, 0, 0.5)" inner />
         </Paint>
         <Circle c={c} r={r1} color="#32363B" />
       </Group>
@@ -112,13 +113,14 @@ export const Neumorphism = () => {
       />
       <Group>
         <Paint>
-          <InnerShadow
+          <Shadow
             dx={-3}
             dy={-3}
             blur={6}
             color="rgba(255, 255, 255, 0.25)"
+            inner
           />
-          <InnerShadow dx={6} dy={6} blur={6} color="black" />
+          <Shadow dx={6} dy={6} blur={6} color="black" inner />
         </Paint>
         <RoundedRect
           x={32}
