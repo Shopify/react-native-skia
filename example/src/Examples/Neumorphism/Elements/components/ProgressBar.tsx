@@ -1,8 +1,7 @@
 import React from "react";
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
-  InnerShadow,
-  DropShadow,
+  Shadow,
   Group,
   Paint,
   mix,
@@ -36,36 +35,27 @@ export const ProgressBar = ({ progress, x, y, width }: ProgressBarProps) => {
     <FitBox src={container} dst={rect(x, y, width, width * aspectRatio)}>
       <Group>
         <Paint>
-          <DropShadow dx={-1} dy={-1} blur={3} color="rgba(255, 255, 255, 1)" />
-          <DropShadow
-            dx={1.5}
-            dy={1.5}
-            blur={3}
-            color="rgba(174, 174, 192, 0.4)"
-          />
+          <Shadow dx={-1} dy={-1} blur={3} color="rgba(255, 255, 255, 1)" />
+          <Shadow dx={1.5} dy={1.5} blur={3} color="rgba(174, 174, 192, 0.4)" />
         </Paint>
         <RoundedRect rect={rct1} color={Theme.white1} />
       </Group>
       <Group>
         <Paint>
-          <InnerShadow
+          <Shadow
             dx={-1}
             dy={-1}
             blur={1}
             color="rgba(255, 255, 255, 0.7)"
+            inner
           />
-          <InnerShadow
-            dx={1}
-            dy={1}
-            blur={2}
-            color="rgba(174, 174, 192, 0.2)"
-          />
+          <Shadow dx={1} dy={1} blur={2} color="rgba(174, 174, 192, 0.2)" />
         </Paint>
         <RoundedRect rect={rct2} color={Theme.white2} />
       </Group>
       <Group>
         <Paint>
-          <DropShadow dx={0} dy={0} blur={2} color="rgba(	114, 138, 183, 0.7)" />
+          <Shadow dx={0} dy={0} blur={2} color="rgba(	114, 138, 183, 0.7)" />
         </Paint>
         <RoundedRect rect={rct3} color={"#728AB7"} />
       </Group>

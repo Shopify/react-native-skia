@@ -1,5 +1,5 @@
 import {
-  DropShadow,
+  Shadow,
   vec,
   Paint,
   LinearGradient,
@@ -48,7 +48,7 @@ export const Control = ({
       <Group transform={[{ translateX: 50 }]}>
         <Group>
           <Paint>
-            <DropShadow dx={4} dy={6} blur={20} color="rgba(0, 0,0,0.25)" />
+            <Shadow dx={4} dy={6} blur={20} color="rgba(0, 0,0,0.25)" />
             <LinearGradient
               start={vec(0, 0)}
               end={vec(50, 50)}

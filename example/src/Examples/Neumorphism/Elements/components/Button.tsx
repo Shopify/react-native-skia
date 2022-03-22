@@ -1,9 +1,8 @@
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
-  DropShadow,
+  Shadow,
   FitBox,
   Group,
-  InnerShadow,
   mix,
   Paint,
   rect,
@@ -47,18 +46,13 @@ export const Button = ({ x, y, size, pressed }: ButtonProps) => {
     <FitBox src={container} dst={rect(x, y, size, size)}>
       <Group>
         <Paint>
-          <DropShadow dx={-1} dy={-1} blur={3} color="white" />
-          <DropShadow
-            dx={1.5}
-            dy={1.5}
-            blur={6}
-            color="rgba(174, 174, 192, 0.4)"
-          />
+          <Shadow dx={-1} dy={-1} blur={3} color="white" />
+          <Shadow dx={1.5} dy={1.5} blur={6} color="rgba(174, 174, 192, 0.4)" />
         </Paint>
         <RoundedRect rect={rrect(container, 5, 5)} color={Theme.white2} />
         <Paint>
-          <InnerShadow dx={-1} dy={-1} blur={2} color={c1} />
-          <InnerShadow dx={1.5} dy={1.5} blur={2} color={c2} />
+          <Shadow dx={-1} dy={-1} blur={2} color={c1} inner />
+          <Shadow dx={1.5} dy={1.5} blur={2} color={c2} inner />
         </Paint>
         <RoundedRect
           rect={rrect(rect(1, 1, 22, 22), 5, 5)}

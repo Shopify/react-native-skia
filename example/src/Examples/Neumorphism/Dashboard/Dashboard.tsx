@@ -1,6 +1,5 @@
 import React from "react";
 import { Dimensions } from "react-native";
-import type { Vector } from "@shopify/react-native-skia";
 import {
   runSpring,
   mix,

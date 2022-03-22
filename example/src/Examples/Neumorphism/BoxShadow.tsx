@@ -16,7 +16,6 @@ import { Dimensions } from "react-native";
 const { width } = Dimensions.get("window");
 const r = 150;
 const c = vec(width / 2, r);
-const c1 = vec(width / 2, 75 + 3 * r);
 
 const rct = rrect(rect(c.x - r, c.y - r, 2 * r, 2 * r), r, r);
 

@@ -2,12 +2,11 @@ import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   RoundedRect,
   Paint,
-  InnerShadow,
+  Shadow,
   Group,
   translate,
   LinearGradient,
   vec,
-  BlurMask,
   useDerivedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -30,17 +29,19 @@ export const Slider = ({ x, y, progress }: SliderProps) => {
     <Group transform={translate({ x, y })}>
       <Group>
         <Paint>
-          <InnerShadow
+          <Shadow
             dx={-1.25}
             dy={-1.25}
             color="rgba(255, 255, 255, 0.8)"
             blur={6}
+            inner
           />
-          <InnerShadow
+          <Shadow
             dx={1.25}
             dy={1.25}
             color="rgba(0, 0, 0, 0.8)"
             blur={6}
+            inner
           />
         </Paint>
         <RoundedRect
