@@ -5,7 +5,6 @@ import {
   rrect,
   RoundedRect,
   Paint,
-  Shadow,
   Group,
   translate,
   LinearGradient,

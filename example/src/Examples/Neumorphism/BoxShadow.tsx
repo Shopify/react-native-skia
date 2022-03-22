@@ -32,7 +32,9 @@ export const Neumorphism = () => {
         color="white"
         shadows={[
           { dx: -dx, dy: -dy, blur: 15, color: "blue" },
-          { dx, dy, blur: 15, inner: true, color: "red" },
+          { dx, dy, blur: 15, inner: true, color: "green" },
+          { dx, dy, blur: 15, inner: false, color: "red" },
+          { dx: -dx, dy: -dy, blur: 15, inner: true, color: "yellow" },
         ]}
       />
       <FitBox src={rect(0, 0, 24, 24)} dst={rect(50, 350, 300, 300)}>

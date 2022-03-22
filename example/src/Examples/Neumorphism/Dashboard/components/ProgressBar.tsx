@@ -55,8 +55,8 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
         <Box
           box={fromCircle(12 + r2, 12 + r2, r2)}
           shadows={[
-            { dx: 18, dy: 18, color: "#141415", blur: 60 },
-            { dx: -18, dy: -18, color: "#485057", blur: 60 },
+            { dx: 18, dy: 18, color: "#141415", blur: 20 },
+            { dx: -9, dy: -9, color: "#485057", blur: 20 },
           ]}
         />
       </Group>
@@ -64,8 +64,20 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
         box={fromCircle(37 + r1, 37 + r1, r1)}
         color="#32363B"
         shadows={[
-          { dx: -25, dy: -25, color: "rgba(59, 68, 81, 0.5)", blur: 10 },
-          { dx: 25, dy: 25, color: "rgba(0, 0,0, 0.55)", blur: 10 },
+          {
+            dx: -25,
+            dy: -25,
+            color: "rgba(59, 68, 81, 0.5)",
+            blur: 20,
+            inner: true,
+          },
+          {
+            dx: 25,
+            dy: 25,
+            color: "rgba(0, 0,0, 0.3)",
+            blur: 20,
+            inner: true,
+          },
         ]}
       />
       <Group>

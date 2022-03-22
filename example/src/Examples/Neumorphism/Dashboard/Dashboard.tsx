@@ -98,7 +98,7 @@ export const Neumorphism = () => {
         </Group>
         <Title title="Climate" />
         <ProgressBar progress={progress} />
-        {/* <Control
+        <Control
           x={0}
           y={464}
           label="Ac"
@@ -107,7 +107,7 @@ export const Neumorphism = () => {
           font={font}
         >
           <Snow />
-        </Control> */}
+        </Control>
         {/* <Control x={0} y={464 + 75} label="Fan" font={font} progress={p0}>
           <Wind />
         </Control>

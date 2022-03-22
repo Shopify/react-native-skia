@@ -1,8 +1,10 @@
 import React from "react";
 
 import type { Color, SkRRect } from "../../../skia";
-import type { CustomPaintProps } from "../../processors";
-import { add, vec, rrect } from "../../processors";
+import { ClipOp, BlurStyle, Skia, processColor } from "../../../skia";
+import { createDrawing } from "../../nodes";
+import type { AnimatedProps, CustomPaintProps } from "../../processors";
+import { processPaint, add, vec, rrect } from "../../processors";
 import { rect } from "../../processors/Rects";
 import { Group } from "../Group";
 import { BlurMask } from "../maskFilters";
@@ -40,7 +42,7 @@ interface BoxProps extends CustomPaintProps {
   shadows: BoxShadow[];
 }
 
-export const Box = ({ box, shadows, ...props }: BoxProps) => {
+const BoxOld = ({ box, shadows, ...props }: BoxProps) => {
   return (
     <>
       {shadows
@@ -76,6 +78,45 @@ export const Box = ({ box, shadows, ...props }: BoxProps) => {
         })}
     </>
   );
+};
+
+const onDraw = createDrawing<BoxProps>(
+  ({ canvas, paint, opacity }, { box, shadows }) => {
+    shadows
+      .filter((shadow) => !shadow.inner)
+      .map((shadow) => {
+        const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
+        const lPaint = Skia.Paint();
+        lPaint.setColor(processColor(color, opacity));
+        lPaint.setMaskFilter(
+          Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
+        );
+        canvas.drawRRect(inflate(box, spread, spread, dx, dy), lPaint);
+      });
+    canvas.drawRRect(box, paint);
+
+    shadows
+      .filter((shadow) => shadow.inner)
+      .map((shadow) => {
+        const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
+        const delta = add(vec(10, 10), vec(Math.abs(dx), Math.abs(dy)));
+        canvas.save();
+        canvas.clipRRect(box, ClipOp.Intersect, false);
+        const lPaint = Skia.Paint();
+        lPaint.setColor(processColor(color, opacity));
+        lPaint.setMaskFilter(
+          Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
+        );
+        const inner = deflate(box, spread, spread, dx, dy);
+        const outer = inflate(box, delta.x, delta.y);
+        canvas.drawDRRect(outer, inner, lPaint);
+        canvas.restore();
+      });
+  }
+);
+
+export const Box = (props: AnimatedProps<BoxProps>) => {
+  return <skDrawing onDraw={onDraw} {...props} />;
 };
 
 Box.defaultProps = {
