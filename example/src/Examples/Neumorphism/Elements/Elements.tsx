@@ -8,7 +8,7 @@ import {
   runTiming,
 } from "@shopify/react-native-skia";
 
-import { Switch } from "./components/Switch";
+import { Button } from "./components/Button";
 
 const { width, height } = Dimensions.get("window");
 const PADDING = 32;
@@ -26,7 +26,7 @@ export const Neumorphism = () => {
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
       <Fill color="#F0F0F3" />
-      <Switch x={x} y={y} width={size} value={value} />
+      <Button />
     </Canvas>
   );
 };
