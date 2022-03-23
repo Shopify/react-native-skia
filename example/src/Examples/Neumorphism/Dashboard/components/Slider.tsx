@@ -1,5 +1,6 @@
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
+  BoxShadow,
   Box,
   rect,
   rrect,
@@ -29,26 +30,22 @@ export const Slider = ({ x, y, progress }: SliderProps) => {
   );
   return (
     <Group transform={translate({ x, y })}>
-      <Box
-        box={rrect(rect(0, 3.5, 192, 8), 25, 25)}
-        color="#1B1B1D"
-        shadows={[
-          {
-            dx: -1.25,
-            dy: -1.25,
-            blur: 6,
-            color: "rgba(255, 255, 255, 0.8)",
-            inner: true,
-          },
-          {
-            dx: 1.25,
-            dy: 1.25,
-            blur: 6,
-            color: "rgba(0, 0, 0, 0.8)",
-            inner: true,
-          },
-        ]}
-      />
+      <Box box={rrect(rect(0, 3.5, 192, 8), 25, 25)} color="#1B1B1D">
+        <BoxShadow
+          dx={-1.25}
+          dy={-1.25}
+          blur={6}
+          color="rgba(255, 255, 255, 0.8)"
+          inner
+        />
+        <BoxShadow
+          dx={1.25}
+          dy={1.25}
+          blur={6}
+          color="rgba(0, 0, 0, 0.8)"
+          inner
+        />
+      </Box>
       <Group>
         <Paint>
           <LinearGradient

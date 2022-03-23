@@ -72,7 +72,7 @@ export const Neumorphism = () => {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }} onTouch={onTouch} mode="continuous" debug>
+    <Canvas style={{ flex: 1 }} debug onTouch={onTouch}>
       <Group transform={transform}>
         <Group>
           <Paint>
@@ -86,7 +86,7 @@ export const Neumorphism = () => {
         </Group>
         <Group>
           <Paint>
-            <Blur blur={60} />
+            <Blur blur={30} />
           </Paint>
           <Circle
             color="#56CCF2"
@@ -98,31 +98,6 @@ export const Neumorphism = () => {
         </Group>
         <Title title="Climate" />
         <ProgressBar progress={progress} />
-        <Control
-          x={0}
-          y={464}
-          label="Ac"
-          active={true}
-          progress={progress}
-          font={font}
-        >
-          <Snow />
-        </Control>
-        {/* <Control x={0} y={464 + 75} label="Fan" font={font} progress={p0}>
-          <Wind />
-        </Control>
-        <Control x={0} y={464 + 140} label="Heat" font={font} progress={p0}>
-          <Sun />
-        </Control>
-        <Control
-          x={0}
-          y={464 + 140 + 75}
-          label="Auto"
-          font={font}
-          progress={p0}
-        >
-          <Power />
-        </Control> */}
         <Mode translateY={translateY} />
       </Group>
     </Canvas>
