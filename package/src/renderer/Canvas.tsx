@@ -72,8 +72,11 @@ skiaReconciler.injectIntoDevTools({
   rendererPackageName: "react-native-skia",
 });
 
-const render = (element: ReactNode, root: OpaqueRoot) => {
+const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
   skiaReconciler.updateContainer(element, root, null, () => {
+    // On the first mount this will register pending animations values
+    // In subsequence updates this method will do nothing
+    container.start();
     hostDebug("updateContainer");
   });
 };
@@ -108,9 +111,10 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         <CanvasContext.Provider value={canvasCtx.current}>
           {children}
         </CanvasContext.Provider>,
-        root
+        root,
+        container
       );
-    }, [children, root]);
+    }, [children, container, root]);
 
     // Draw callback
     const onDraw = useDrawCallback(
@@ -141,7 +145,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
 
     useEffect(() => {
       return () => {
-        console.log("DISPOSE EVERYTHING!");
+        container.dispose;
       };
     }, [container]);
 

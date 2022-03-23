@@ -127,7 +127,7 @@ const createNode = (container: Container, type: NodeType, props: Props) => {
     case NodeType.Drawing:
       const { onDraw, skipProcessing, ...p1 } = props;
       return new DrawingNode(
-        container.ref.current!.registerValues,
+        container.skiaValueRegistration,
         onDraw,
         skipProcessing,
         p1
@@ -135,7 +135,7 @@ const createNode = (container: Container, type: NodeType, props: Props) => {
     case NodeType.Declaration:
       const { onDeclare, ...p2 } = props;
       return new DeclarationNode(
-        container.ref.current!.registerValues,
+        container.skiaValueRegistration,
         onDeclare,
         p2
       );

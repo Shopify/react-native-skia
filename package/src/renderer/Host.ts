@@ -30,7 +30,7 @@ export abstract class Node<P = unknown> {
   private valueRegistration: ValueRegistration;
   private unsubscriptions: Unsubscription | null = null;
 
-  private registerValues(props: AnimatedProps<P>) {
+  protected registerValues(props: AnimatedProps<P>) {
     if (this.unsubscriptions) {
       this.unsubscriptions();
     }
@@ -83,13 +83,62 @@ export abstract class Node<P = unknown> {
   }
 }
 
+type PendingValueRegistration = {
+  values: SkiaReadonlyValue<unknown>[];
+  unsubscribe: null | Unsubscription;
+};
+
 export class Container extends Node {
   ref: RefObject<SkiaView>;
 
+  // When mounting the tree the first time, the skia view is not yet available.
+  // We will delay registrations when the tree is ready in start()
+  private pending: PendingValueRegistration[] = [];
   redraw: () => void;
 
+  skiaValueRegistration: ValueRegistration = (
+    values: SkiaReadonlyValue<unknown>[]
+  ) => {
+    // 1. No props are animated. Do nothing.
+    if (values.length === 0) {
+      return () => {};
+    }
+    // 2. The skia view is already available
+    if (this.ref.current) {
+      return this.ref.current.registerValues(values);
+    }
+    // 3. The skia view is not available yet. We keep track of the values to register in start()
+    const valueReg: PendingValueRegistration = { values, unsubscribe: null };
+    this.pending.push(valueReg);
+    return () => {
+      if (valueReg.unsubscribe !== null) {
+        valueReg.unsubscribe();
+      } else {
+        console.log({ valueReg });
+        throw new Error("We found a value that wasn't registered");
+      }
+      this.pending.splice(this.pending.indexOf(valueReg), 1);
+    };
+  };
+
+  start() {
+    this.pending.forEach((registration) => {
+      if (this.ref.current) {
+        registration.unsubscribe = this.ref.current.registerValues(
+          registration.values
+        );
+      } else {
+        throw new Error("The Skia View hasn't been thrown");
+      }
+    });
+  }
+
+  dispose() {
+    this.pending.forEach((sub) => sub.unsubscribe!());
+  }
+
   constructor(ref: RefObject<SkiaView>, redraw: () => void) {
-    super(ref.current!.registerValues, {});
+    super(() => () => {}, {});
     this.ref = ref;
     this.redraw = redraw;
   }
