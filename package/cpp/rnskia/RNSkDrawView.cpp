@@ -29,29 +29,37 @@ RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
     : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
       _platformContext(context),
       _infoObject(std::make_shared<RNSkInfoObject>()),
-      _inJSDrawing(new std::timed_mutex()),
-      _inGpuDrawing(new std::timed_mutex())
+      _jsDrawingLock(std::make_shared<std::timed_mutex>()),
+      _gpuDrawingLock(std::make_shared<std::timed_mutex>())
       {}
 
 RNSkDrawView::~RNSkDrawView() {
-  invalidate();
+#if LOG_ALL_DRAWING
+  RNSkLogger::logToConsole("RNSkDrawView::~RNSkDrawView - %i", getNativeId());
+#endif
+  
+  _isInvalidated = true;
+  
+  endDrawingLoop();
   
   // Wait for the drawing locks
-  if(!_inJSDrawing->try_lock_for(milliseconds(250))) {
-    RNSkLogger::logToConsole("Failed to delete since JS drawing is still locked for native view with id %i", _nativeId);
+  if(!_jsDrawingLock->try_lock_for(1250ms)) {
+    RNSkLogger::logToConsole("Warning: JS drawing is still locked for native view with id %i", _nativeId);
   }
   
-  if(!_inGpuDrawing->try_lock_for(milliseconds(250))) {
-    RNSkLogger::logToConsole("Failed to delete since SKIA drawing is still locked for native view with id %i", _nativeId);
+  if(!_gpuDrawingLock->try_lock_for(1250ms)) {
+    RNSkLogger::logToConsole("Warning: SKIA drawing is still locked for native view with id %i", _nativeId);
   }
   
-  delete _inJSDrawing;
-  delete _inGpuDrawing;
+  onInvalidated();
+
+  _jsDrawingLock = nullptr;
+  _gpuDrawingLock = nullptr;
 }
 
-void RNSkDrawView::invalidate() {
-  endDrawingLoop();
-  _isValid = false;
+void RNSkDrawView::setNativeId(size_t nativeId) {
+  _nativeId = nativeId;
+  beginDrawingLoop();
 }
 
 void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
@@ -63,9 +71,6 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     return;
   }
   
-  // Start draw loop callback
-  beginDrawingLoop();
-
   // Reset timing info
   _jsTimingInfo.reset();
   _gpuTimingInfo.reset();
@@ -181,10 +186,9 @@ void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
 }
 
 void RNSkDrawView::performDraw() {
-  // Ensure we're not invalidated
-  if(!isValid()) {
-    return;
-  }
+#if LOG_ALL_DRAWING
+  RNSkLogger::logToConsole("RNSkDrawView::performDraw - %i", getNativeId());
+#endif
   
   // Start timing
   _jsTimingInfo.beginTiming();
@@ -209,63 +213,54 @@ void RNSkDrawView::performDraw() {
   // Calculate duration
   _jsTimingInfo.stopTiming();
   
-  // Post drawing message to the render thread where the picture recorded
-  // will be sent to the GPU/backend for rendering to screen.
-  getPlatformContext()->runOnRenderThread([this, p = std::move(p)]() {
-    if(isValid()) {
-      if(_inGpuDrawing->try_lock()) {
-        
-        _gpuTimingInfo.beginTiming();
-        
-        // Draw the picture recorded on the real GPU canvas
-        drawFrame(p);
-        
-        _gpuTimingInfo.stopTiming();
-        
-        // Unlock GPU drawing
-        _inGpuDrawing->unlock();
-        
-      } else {
-#ifdef DEBUG
-        static size_t framesSkipped = 0;
-        printf("SKIA/GPU: Skipped frames: %lu\n", ++framesSkipped);
-#endif
-        requestRedraw();
+  if(_gpuDrawingLock->try_lock()) {
+
+    // Post drawing message to the render thread where the picture recorded
+    // will be sent to the GPU/backend for rendering to screen.
+    auto gpuLock = _gpuDrawingLock;
+    getPlatformContext()->runOnRenderThread([this, p = std::move(p), gpuLock]() {
+      
+      if(isInvalidated()) {
+        gpuLock->unlock();
+        return;
       }
-    }
-  });
+      
+      _gpuTimingInfo.beginTiming();
+
+      // Draw the picture recorded on the real GPU canvas
+      if(_nativeDrawFunc != nullptr) {
+#if LOG_ALL_DRAWING
+          RNSkLogger::logToConsole("RNSkDrawView::drawFrame - %i", getNativeId());
+#endif
+        _nativeDrawFunc(p);
+      } else {
+#if LOG_ALL_DRAWING
+          RNSkLogger::logToConsole("RNSkDrawView::drawFrame - %i SKIPPING, draw func is null", getNativeId());
+#endif
+      }
+
+      _gpuTimingInfo.stopTiming();
+
+      // Unlock GPU drawing
+      gpuLock->unlock();
+    });
+  } else {
+#ifdef DEBUG
+    static size_t framesSkipped = 0;
+    printf("SKIA/GPU: Skipped frames: %lu\n", ++framesSkipped);
+#endif
+    requestRedraw();
+  }
   
   // Unlock JS drawing
-  _inJSDrawing->unlock();
+  _jsDrawingLock->unlock();
 }
 
 void RNSkDrawView::requestRedraw() {
   _redrawRequestCounter++;
 }
 
-bool RNSkDrawView::isReadyToDraw() {
-  if(!isValid()) {
-    return false;
-  }
-
-  if (_platformContext == nullptr) {
-    endDrawingLoop();
-    return false;
-  }
-
-  if (_drawCallback == nullptr) {
-    endDrawingLoop();
-    return false;
-  }
-
-  return true;
-}
-
 void RNSkDrawView::beginDrawingLoop() {
-  if(!isValid()) {
-    return;
-  }
-
   if (_drawingLoopId != 0 || _nativeId == 0) {
     return;
   }
@@ -277,6 +272,11 @@ void RNSkDrawView::beginDrawingLoop() {
 
 void RNSkDrawView::drawLoopCallback(bool invalidated) {
   if(invalidated) {
+    _isInvalidated = true;
+    onInvalidated();
+#if LOG_ALL_DRAWING
+  RNSkLogger::logToConsole("RNSkDrawView::onInvalidated - %i", getNativeId());
+#endif
     return;
   }
   
@@ -286,7 +286,7 @@ void RNSkDrawView::drawLoopCallback(bool invalidated) {
     _vsyncTimingInfo.beginTiming();
     
     // We render on the javascript thread.
-    if(_inJSDrawing->try_lock()) {
+    if(_jsDrawingLock->try_lock()) {
       _platformContext->runOnJavascriptThread(std::bind(&RNSkDrawView::performDraw, this));
     } else {
 #ifdef DEBUG
@@ -308,7 +308,7 @@ void RNSkDrawView::endDrawingLoop() {
 }
 
 void RNSkDrawView::setDrawingMode(RNSkDrawingMode mode) {
-  if(!isValid() || mode == _drawingMode || _nativeId == 0) {
+  if(mode == _drawingMode || _nativeId == 0) {
     return;
   }
   _drawingMode = mode;

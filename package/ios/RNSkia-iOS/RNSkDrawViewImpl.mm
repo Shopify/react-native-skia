@@ -22,6 +22,8 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::R
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.frame = _view.bounds;
     [_view.layer addSublayer:_layer];
+    
+    setNativeDrawFunc(std::bind(&RNSkDrawViewImpl::drawFrame, this, std::placeholders::_1));
 }
 
 void RNSkDrawViewImpl::setSize(int width, int height) {

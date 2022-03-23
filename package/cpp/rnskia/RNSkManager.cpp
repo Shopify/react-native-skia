@@ -28,27 +28,28 @@ RNSkManager::~RNSkManager() {
 }
 
 void RNSkManager::invalidate() {
-  if(!_isValid) {
+  if(_isInvalidated) {
     return;
   }
-  _isValid = false;
+  _isInvalidated = true;
+  
   // We need to unregister all views when we get here
   _viewApi->unregisterAll();
   _platformContext->invalidate();
 }
 
 void RNSkManager::registerSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
-  if (_viewApi != nullptr && _platformContext != nullptr && _jsCallInvoker != nullptr)
+  if (!_isInvalidated && _viewApi != nullptr)
     _viewApi->registerSkiaDrawView(nativeId, view);
 }
 
 void RNSkManager::unregisterSkiaDrawView(size_t nativeId) {
-  if (_viewApi != nullptr && _platformContext != nullptr && _jsCallInvoker != nullptr)
+  if (!_isInvalidated && _viewApi != nullptr)
     _viewApi->unregisterSkiaDrawView(nativeId);
 }
 
 void RNSkManager::setSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
-  if (_viewApi != nullptr && _platformContext != nullptr && _jsCallInvoker != nullptr)
+  if (!_isInvalidated && _viewApi != nullptr)
     _viewApi->setSkiaDrawView(nativeId, view);
 }
 
