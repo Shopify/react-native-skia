@@ -23,11 +23,11 @@ import {
 
 import { Title } from "./components/Title";
 import { ProgressBar } from "./components/ProgressBar";
-// import { Snow } from "./components/icons/Snow";
-// import { Control } from "./components/Control";
-// import { Wind } from "./components/icons/Wind";
-// import { Sun } from "./components/icons/Sun";
-// import { Power } from "./components/icons/Power";
+import { Snow } from "./components/icons/Snow";
+import { Control } from "./components/Control";
+import { Wind } from "./components/icons/Wind";
+import { Sun } from "./components/icons/Sun";
+import { Power } from "./components/icons/Power";
 import { Mode } from "./components/Mode";
 
 const window = Dimensions.get("window");
@@ -43,7 +43,7 @@ export const Neumorphism = () => {
   const offsetY = useValue(0);
   const t = useLoop({ duration: 3000 });
   const x = useDerivedValue(() => mix(t.current, 0, 180), [t]);
-  //const p0 = useValue(0);
+  const p0 = useValue(0);
   const progress = useDerivedValue(() => x.current / 192, [x]);
   const font = useFont(require("./components/SF-Pro-Display-Bold.otf"), 17);
   const onTouch = useTouchHandler({
@@ -61,7 +61,7 @@ export const Neumorphism = () => {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }} debug onTouch={onTouch}>
+    <Canvas style={{ flex: 1 }} mode="continuous" debug onTouch={onTouch}>
       <Group transform={transform}>
         <Group>
           <Paint>
