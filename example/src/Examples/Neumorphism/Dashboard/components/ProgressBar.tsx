@@ -8,7 +8,6 @@ import {
   Circle,
   Paint,
   Skia,
-  Shadow,
   vec,
   Path,
   SweepGradient,
