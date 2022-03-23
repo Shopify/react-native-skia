@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import React from "react";
 
+import type { ValueRegistration } from "../Host";
 import { Node } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
 import { processPaint, selectPaint } from "../processors";
@@ -34,11 +35,12 @@ export class DrawingNode<P> extends Node<P> {
   skipProcessing: boolean;
 
   constructor(
+    valueRegistration: ValueRegistration,
     onDraw: DrawingCallback<P>,
     skipProcessing: boolean,
     props: AnimatedProps<P>
   ) {
-    super(props);
+    super(valueRegistration, props);
     this.onDraw = onDraw;
     this.skipProcessing = skipProcessing;
   }

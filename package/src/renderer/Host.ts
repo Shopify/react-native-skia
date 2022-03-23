@@ -15,6 +15,11 @@ export enum NodeType {
   Drawing = "skDrawing",
 }
 
+type Unsubscription = () => void;
+export type ValueRegistration = (
+  values: SkiaReadonlyValue<unknown>[]
+) => Unsubscription;
+
 export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
   _props: AnimatedProps<P>;
@@ -22,13 +27,34 @@ export abstract class Node<P = unknown> {
   memoized = false;
   parent?: Node;
 
-  constructor(props: AnimatedProps<P>) {
+  private valueRegistration: ValueRegistration;
+  private unsubscriptions: Unsubscription | null = null;
+
+  private registerValues(props: AnimatedProps<P>) {
+    if (this.unsubscriptions) {
+      this.unsubscriptions();
+    }
+    this.unsubscriptions = this.valueRegistration(
+      Object.values(props).filter(isValue)
+    );
+  }
+
+  constructor(valueRegistration: ValueRegistration, props: AnimatedProps<P>) {
+    this.valueRegistration = valueRegistration;
+    this.registerValues(props);
     this._props = props;
+  }
+
+  dispose() {
+    if (this.unsubscriptions) {
+      this.unsubscriptions();
+    }
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
   set props(props: AnimatedProps<P>) {
+    this.registerValues(props);
     this._props = props;
   }
 
@@ -58,50 +84,18 @@ export abstract class Node<P = unknown> {
 }
 
 export class Container extends Node {
-  private registeredValues: SkiaReadonlyValue<unknown>[] = [];
-  private values: SkiaReadonlyValue<unknown>[] = [];
+  ref: RefObject<SkiaView>;
+
   redraw: () => void;
-  private subscriptions: (() => void)[] = [];
-  private ref: RefObject<SkiaView>;
 
   constructor(ref: RefObject<SkiaView>, redraw: () => void) {
-    super({});
+    super(ref.current!.registerValues, {});
     this.ref = ref;
     this.redraw = redraw;
   }
 
   draw(ctx: DrawingContext) {
     this.visit(ctx);
-  }
-
-  registerValues(props: { [s: string]: unknown }) {
-    console.log({ registered: this.registeredValues.map((v) => v.current) });
-    Object.values(props).forEach((value) => {
-      if (isValue(value) && !this.registeredValues.includes(value)) {
-        this.values.push(value);
-      }
-    });
-  }
-
-  subscribe() {
-    if (!this.ref.current) {
-      throw new Error("Canvas ref is not set");
-    }
-    if (this.values.length === 0) {
-      return;
-    }
-    this.subscriptions.push(this.ref.current.registerValues(this.values));
-    this.registeredValues.push(...this.values);
-    this.values.splice(0, this.values.length);
-  }
-
-  unsubscribe() {
-    if (this.subscriptions.length === 0) {
-      return;
-    }
-    this.subscriptions.forEach((unsub) => unsub());
-    this.subscriptions = [];
-    this.registeredValues = [];
   }
 }
 

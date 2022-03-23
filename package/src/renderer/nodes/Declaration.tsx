@@ -1,4 +1,5 @@
 import type { DrawingContext } from "../DrawingContext";
+import type { ValueRegistration } from "../Host";
 import { Node } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
@@ -23,15 +24,19 @@ export interface DeclarationProps<P> {
 export class DeclarationNode<P> extends Node<P> {
   private onDeclare: DeclarationCallback<P>;
 
-  constructor(onDeclare: DeclarationCallback<P>, props: AnimatedProps<P>) {
-    super(props);
+  constructor(
+    valueRegistration: ValueRegistration,
+    onDeclare: DeclarationCallback<P>,
+    props: AnimatedProps<P>
+  ) {
+    super(valueRegistration, props);
     this.props = props;
     this.onDeclare = onDeclare;
   }
 
   set props(props: AnimatedProps<P>) {
     this.memoizable = !isAnimated(props);
-    this._props = props;
+    super.props = props;
   }
 
   get props() {

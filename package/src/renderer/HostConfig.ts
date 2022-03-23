@@ -107,7 +107,9 @@ const appendNode = (parent: Node, child: Node) => {
 const removeNode = (parent: Node, child: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
+  child.dispose();
   parent.children.splice(index, 1);
+  console.log("REMOVE NODE");
 };
 
 const insertBefore = (parent: Node, child: Node, before: Node) => {
@@ -124,12 +126,19 @@ const createNode = (container: Container, type: NodeType, props: Props) => {
   switch (type) {
     case NodeType.Drawing:
       const { onDraw, skipProcessing, ...p1 } = props;
-      container.registerValues(p1);
-      return new DrawingNode(onDraw, skipProcessing, p1);
+      return new DrawingNode(
+        container.ref.current!.registerValues,
+        onDraw,
+        skipProcessing,
+        p1
+      );
     case NodeType.Declaration:
       const { onDeclare, ...p2 } = props;
-      container.registerValues(p2);
-      return new DeclarationNode(onDeclare, p2);
+      return new DeclarationNode(
+        container.ref.current!.registerValues,
+        onDeclare,
+        p2
+      );
     default:
       // TODO: here we need to throw a nice error message
       // This is the error that will show up when the user uses nodes not supported by Skia (View, Audio, etc)
@@ -244,7 +253,7 @@ export const skHostConfig: SkiaHostConfig = {
     type,
     oldProps,
     newProps,
-    container,
+    _container,
     _hostContext
   ) => {
     debug("prepareUpdate");
@@ -253,7 +262,6 @@ export const skHostConfig: SkiaHostConfig = {
       return null;
     }
     debug("update ", type);
-    container.registerValues(newProps);
     return true;
   },
 
