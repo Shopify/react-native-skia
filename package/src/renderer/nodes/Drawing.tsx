@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import React from "react";
 
-import { SkNode } from "../Host";
+import { Node } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
@@ -11,14 +11,10 @@ import { isPaint } from "../../skia";
 type DrawingCallback<P> = (
   ctx: DrawingContext,
   props: P,
-  node: SkNode<P>
+  node: Node<P>
 ) => void;
 
-type OnDrawCallback<P> = (
-  ctx: DrawingContext,
-  props: P,
-  node: SkNode<P>
-) => void;
+type OnDrawCallback<P> = (ctx: DrawingContext, props: P, node: Node<P>) => void;
 
 export const createDrawing = <P,>(cb: OnDrawCallback<P>): DrawingCallback<P> =>
   cb;
@@ -33,7 +29,7 @@ export const Drawing = <P,>(props: DrawingProps<P>) => {
   return <skDrawing {...props} />;
 };
 
-export class DrawingNode<P> extends SkNode<P> {
+export class DrawingNode<P> extends Node<P> {
   onDraw: DrawingCallback<P>;
   skipProcessing: boolean;
 

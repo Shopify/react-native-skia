@@ -3,7 +3,7 @@ import type { RefObject } from "react";
 import type { SkiaView } from "../views";
 import type { SkiaReadonlyValue } from "../values";
 
-import type { SkNode } from "./Host";
+import type { Node } from "./Host";
 import { isValue, processProps } from "./processors";
 
 export const createDependencyManager = (ref: RefObject<SkiaView>) => {
@@ -11,7 +11,7 @@ export const createDependencyManager = (ref: RefObject<SkiaView>) => {
   const unsubscribe: Array<() => void> = [];
 
   return {
-    visitChildren: function (node: SkNode<unknown>) {
+    visitChildren: function (node: Node<unknown>) {
       processProps(node.props, (value) => {
         if (isValue(value)) {
           this.registerValue(value);
