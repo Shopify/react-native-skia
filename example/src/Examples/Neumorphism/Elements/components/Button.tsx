@@ -1,4 +1,4 @@
-import type SkiaReadonlyValue from "@shopify/react-native-skia";
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   FitBox,
   rect,

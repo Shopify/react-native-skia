@@ -10,6 +10,7 @@ import {
   rrect,
   rect,
   Shadow,
+  BoxShadow,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -19,24 +20,16 @@ const c = vec(width / 2, r);
 
 const rct = rrect(rect(c.x - r, c.y - r, 2 * r, 2 * r), r, r);
 
-//color="blue" dx={dx} dy={dy} blur={15} inner
-
 export const Neumorphism = () => {
   const dx = 10;
   const dy = 10;
   return (
     <Canvas style={{ flex: 1 }} mode="continuous" debug>
       <Fill color="lightblue" />
-      <Box
-        box={rct}
-        color="white"
-        shadows={[
-          { dx: -dx, dy: -dy, blur: 15, color: "blue" },
-          { dx, dy, blur: 15, inner: true, color: "green" },
-          { dx, dy, blur: 15, inner: false, color: "red" },
-          { dx: -dx, dy: -dy, blur: 15, inner: true, color: "yellow" },
-        ]}
-      />
+      <Box box={rct} color="white">
+        <BoxShadow dx={-dx} dy={-dy} blur={15} color="blue" />
+        <BoxShadow dx={dx} dy={dy} blur={15} color="green" inner />
+      </Box>
       <FitBox src={rect(0, 0, 24, 24)} dst={rect(50, 350, 300, 300)}>
         <Paint>
           <Shadow dx={1} dy={1} blur={1} color="red" inner />

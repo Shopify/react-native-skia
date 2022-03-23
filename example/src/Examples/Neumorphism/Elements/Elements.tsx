@@ -6,16 +6,11 @@ import {
   useValue,
   useTouchHandler,
   runTiming,
-  Group,
-  Path,
-  vec,
-  mix,
-  useDerivedValue,
 } from "@shopify/react-native-skia";
 
 import { Switch } from "./components/Switch";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 const PADDING = 32;
 const size = width - PADDING * 2;
 const x = PADDING;

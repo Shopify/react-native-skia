@@ -5,8 +5,6 @@ import {
   Group,
   Paint,
   RoundedRect,
-  useValue,
-  useTouchHandler,
 } from "@shopify/react-native-skia";
 import React from "react";
 

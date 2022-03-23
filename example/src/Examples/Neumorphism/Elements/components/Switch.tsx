@@ -1,6 +1,5 @@
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
-  vec,
   mix,
   Group,
   BoxShadow,
