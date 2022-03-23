@@ -6,6 +6,9 @@
 #include "EGL/egl.h"
 #include "GLES2/gl2.h"
 
+#include <thread>
+#include <map>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -22,6 +25,16 @@
 
 namespace RNSkia
 {
+    using DrawingContext = struct
+    {
+        EGLContext glContext;
+        EGLDisplay glDisplay;
+        EGLConfig glConfig;
+        sk_sp<GrDirectContext> skContext;
+    };
+
+    static std::map<std::thread::id, std::shared_ptr<DrawingContext>> threadContexts;
+
     enum RenderState : int {
         Initializing,
         Rendering,
@@ -122,12 +135,12 @@ namespace RNSkia
          */
         void finishSkiaSurface();
 
-        /* OpenGL/Skia contexts and their corresponding members are kept as static
-         * to ensure we can reuse them between instances of the OpenGL renderer */
-        static EGLContext _glContext;
-        static EGLDisplay _glDisplay;
-        static EGLConfig _glConfig;
-        static sk_sp<GrDirectContext> _skContext;
+        /**
+         * To be able to use static contexts (and avoid reloading the skia context for each
+         * new view, we track the OpenGL and Skia drawing context per thread.
+         * @return The drawing context for the current thread
+         */
+        static std::shared_ptr<DrawingContext> getThreadDrawingContext();
 
         EGLSurface _glSurface = EGL_NO_SURFACE;
 

@@ -128,15 +128,19 @@ namespace RNSkia
             // Start teardown
             _renderer->teardown();
 
-            // Ask for a redraw
+            // Ask for a redraw to tear down the render pipeline. This
+            // needs to be done on the render thread since OpenGL demands
+            // same thread access for OpenGL contexts.
             getPlatformContext()->runOnRenderThread([this](){
                 if(_renderer != nullptr) {
                     _renderer->render(nullptr, 0, 0);
                 }
             });
 
+            // Wait until the above render has finished.
             _renderer->waitForTeardown();
 
+            // Delete renderer. All resources should be released during teardown.
             delete _renderer;
             _renderer = nullptr;
         }
