@@ -35,7 +35,7 @@ export const MountAnimation: React.FC<GraphProps> = ({ height, width }) => {
   }, [progress, toggled]);
 
   const interpolatedPath = useDerivedValue(
-    (p) => path.interpolate(zeroPath, p),
+    () => path.interpolate(zeroPath, progress.current),
     [progress]
   );
 

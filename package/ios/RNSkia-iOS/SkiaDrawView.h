@@ -1,8 +1,11 @@
 #pragma once
 
+#import <memory>
+
 #import <CoreFoundation/CoreFoundation.h>
-#import <RNSkManager.h>
 #import <UIKit/UIKit.h>
+
+#import <RNSkManager.h>
 
 class RNSkDrawViewImpl;
 
@@ -10,7 +13,7 @@ class RNSkDrawViewImpl;
 
 - (instancetype)initWithManager: (RNSkia::RNSkManager*)manager;
 
-- (RNSkDrawViewImpl *)impl;
+- (std::shared_ptr<RNSkDrawViewImpl>) impl;
 
 - (void) setDrawingMode:(std::string) mode;
 - (void) setDebugMode:(bool) debugMode;

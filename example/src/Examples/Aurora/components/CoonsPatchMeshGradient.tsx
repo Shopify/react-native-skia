@@ -40,37 +40,34 @@ const useRectToPatch = (
   mesh: SkiaValue<CubicBezierHandle[]>,
   indices: readonly number[]
 ) =>
-  useDerivedValue(
-    (m) => {
-      const tl = m[indices[0]];
-      const tr = m[indices[1]];
-      const br = m[indices[2]];
-      const bl = m[indices[3]];
-      return [
-        {
-          pos: tl.pos,
-          c1: tl.c2,
-          c2: tl.c1,
-        },
-        {
-          pos: tr.pos,
-          c1: symmetric(tr.c1, tr.pos),
-          c2: tr.c2,
-        },
-        {
-          pos: br.pos,
-          c1: symmetric(br.c2, br.pos),
-          c2: symmetric(br.c1, br.pos),
-        },
-        {
-          pos: bl.pos,
-          c1: bl.c1,
-          c2: symmetric(bl.c2, bl.pos),
-        },
-      ] as const;
-    },
-    [mesh]
-  );
+  useDerivedValue(() => {
+    const tl = mesh.current[indices[0]];
+    const tr = mesh.current[indices[1]];
+    const br = mesh.current[indices[2]];
+    const bl = mesh.current[indices[3]];
+    return [
+      {
+        pos: tl.pos,
+        c1: tl.c2,
+        c2: tl.c1,
+      },
+      {
+        pos: tr.pos,
+        c1: symmetric(tr.c1, tr.pos),
+        c2: tr.c2,
+      },
+      {
+        pos: br.pos,
+        c1: symmetric(br.c2, br.pos),
+        c2: symmetric(br.c1, br.pos),
+      },
+      {
+        pos: bl.pos,
+        c1: bl.c1,
+        c2: symmetric(bl.c2, bl.pos),
+      },
+    ] as const;
+  }, [mesh]);
 
 interface CoonsPatchMeshGradientProps {
   rows: number;
