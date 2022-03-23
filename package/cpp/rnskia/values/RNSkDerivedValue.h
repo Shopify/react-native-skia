@@ -38,6 +38,9 @@ public:
       jsi::detail::throwJSError(runtime, "Expected array of dependencies as second parameter");
     }
         
+    // Save dependencies
+    std::vector<std::shared_ptr<RNSkReadonlyValue>> dependencies;
+        
     // Ensure that all dependencies are Values
     auto deps = arguments[1].asObject(runtime).asArray(runtime);
     for(size_t i=0; i<deps.size(runtime); ++i) {
@@ -50,14 +53,14 @@ public:
       if(value == nullptr) {
         continue;
       }
-      _deps.push_back(value);
+      dependencies.push_back(value);
     }
     
     // Get callback for calculating result
     _callback = std::make_shared<jsi::Function>(arguments[0].asObject(runtime).asFunction(runtime));
 
     // register change handler on dependencies
-    for(const auto &dep: _deps) {
+    for(const auto &dep: dependencies) {
       auto dispatcher = std::bind(&RNSkDerivedValue::dependencyUpdated, this, std::placeholders::_1);
       _unsubscribers.push_back(dep->addListener(dispatcher));
     }
@@ -76,20 +79,10 @@ public:
 private:
   void dependencyUpdated(jsi::Runtime &runtime) {
     // Calculate new value
-    std::vector<jsi::Value> dependencyValues;
-    dependencyValues.resize(_deps.size());
-    for(size_t i=0; i<_deps.size(); ++i) {
-      dependencyValues[i] = (_deps[i]->get_current(runtime));
-    }
-    
-    auto nextValue = _callback->call(
-    runtime, static_cast<const jsi::Value*>(dependencyValues.data()), _deps.size());
-
-    update(runtime, nextValue);
+    update(runtime, _callback->call(runtime, nullptr, 0));
   }
 
   std::shared_ptr<jsi::Function> _callback;
-  std::vector<std::shared_ptr<RNSkReadonlyValue>> _deps;
   std::vector<std::function<void()>> _unsubscribers;
 };
 }

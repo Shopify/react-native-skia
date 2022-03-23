@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import type { SkiaReadonlyValue, SkiaAnimation } from "../../types";
-import type { AnimationParams, TimingConfig, SpringConfig } from "../types";
+import type {
+  AnimationParams,
+  TimingConfig,
+  AnimationCallback,
+} from "../types";
 import { useValue } from "../../hooks/useValue";
 
 import { getResolvedParams } from "./functions";
@@ -16,7 +20,8 @@ import { createTiming } from "./createTiming";
  */
 export const useTiming = (
   toOrParams: number | AnimationParams,
-  config?: TimingConfig | SpringConfig
+  config?: TimingConfig,
+  callback?: AnimationCallback
 ): SkiaReadonlyValue<number> => {
   // Resolve parameters - keep a cached version to avoid
   // unnecesary re-renders.
@@ -39,10 +44,14 @@ export const useTiming = (
   const animation = useMemo(() => {
     if (!equals(prevParamsRef.current, resolvedParameters)) {
       prevParamsRef.current = resolvedParameters;
-      prevAnimationRef.current = createTiming(resolvedParameters, value);
+      prevAnimationRef.current = createTiming(
+        resolvedParameters,
+        value,
+        callback
+      );
     }
     return prevAnimationRef.current!;
-  }, [resolvedParameters, value]);
+  }, [callback, resolvedParameters, value]);
 
   // Run animation on the value - and stop it on unmount
   useEffect(() => {

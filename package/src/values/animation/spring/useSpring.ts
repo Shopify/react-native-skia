@@ -1,8 +1,13 @@
 import type { SkiaReadonlyValue } from "../../types";
-import type { AnimationParams, SpringConfig } from "../types";
+import type {
+  SpringConfig,
+  AnimationParams,
+  AnimationCallback,
+} from "../types";
 import { useTiming } from "../timing";
 
 import { Spring } from "./Spring";
+import { createSpringEasing } from "./functions/spring";
 
 /**
  * Creats a spring based animation value that will run whenever
@@ -13,6 +18,11 @@ import { Spring } from "./Spring";
  */
 export const useSpring = (
   toOrParams: number | AnimationParams,
-  config?: SpringConfig
+  config?: SpringConfig,
+  callback?: AnimationCallback
 ): SkiaReadonlyValue<number> =>
-  useTiming(toOrParams, config ?? Spring.Config.Default);
+  useTiming(
+    toOrParams,
+    createSpringEasing(config ?? Spring.Config.Default),
+    callback
+  );
