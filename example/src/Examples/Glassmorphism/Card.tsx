@@ -44,7 +44,7 @@ export const Glassmorphism = () => {
     },
   });
   const transform = useDerivedValue(
-    (xval, yval) => [{ translateY: yval }, { translateX: xval }],
+    () => [{ translateY: x.current }, { translateX: y.current }],
     [x, y]
   );
   return (
