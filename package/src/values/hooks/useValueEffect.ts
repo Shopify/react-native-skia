@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 import type { SkiaReadonlyValue } from "../types";
 
@@ -11,8 +11,8 @@ export const useValueEffect = <T>(
   value: SkiaReadonlyValue<T>,
   cb: (v: T) => void
 ) => {
-  const memoizedCb = useMemo(() => cb, [cb]);
   useEffect(() => {
-    return value.addListener(memoizedCb);
-  }, [memoizedCb, value]);
+    return value.addListener(cb);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 };
