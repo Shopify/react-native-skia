@@ -227,13 +227,16 @@ void RNSkDrawView::performDraw() {
       
       _gpuTimingInfo.beginTiming();
 
-#if LOG_ALL_DRAWING
-      RNSkLogger::logToConsole("RNSkDrawView::drawFrame - %i", getNativeId());
-#endif
-      
       // Draw the picture recorded on the real GPU canvas
       if(_nativeDrawFunc != nullptr) {
+#if LOG_ALL_DRAWING
+          RNSkLogger::logToConsole("RNSkDrawView::drawFrame - %i", getNativeId());
+#endif
         _nativeDrawFunc(p);
+      } else {
+#if LOG_ALL_DRAWING
+          RNSkLogger::logToConsole("RNSkDrawView::drawFrame - %i SKIPPING, draw func is null", getNativeId());
+#endif
       }
 
       _gpuTimingInfo.stopTiming();

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
 #include <fbjni/fbjni.h>
 #include <jni.h>
 #include <jsi/jsi.h>
@@ -10,6 +8,7 @@
 #include <RNSkDrawView.h>
 #include "JniSkiaManager.h"
 #include "JniSkiaDrawView.h"
+#include "SkiaOpenGLRenderer.h"
 
 #include <SkPicture.h>
 
@@ -18,14 +17,6 @@ namespace RNSkia
     using namespace facebook;
 
     using JavaSkiaManager = jni::alias_ref<JniSkiaManager::javaobject>;
-
-    using DrawingContext = struct
-    {
-        EGLContext glContext;
-        sk_sp<GrDirectContext> skContext;
-    };
-
-    static std::map<std::thread::id, std::shared_ptr<DrawingContext>> threadContexts;
 
     class JniSkiaDrawView : public jni::HybridClass<JniSkiaDrawView>,
                             public RNSkDrawView
@@ -49,10 +40,6 @@ namespace RNSkia
         ~JniSkiaDrawView();
 
     protected:
-        void onInvalidated() override {
-            setNativeDrawFunc(nullptr);
-        };
-
         int getWidth() override { return _width; }
         int getHeight() override { return _height; }
 
@@ -64,34 +51,10 @@ namespace RNSkia
 
         void drawFrame(const sk_sp<SkPicture> picture);
 
-        bool ensureOpenGLSurface();
-        bool ensureSkiaRenderTarget();
-
-        static bool ensureStaticOpenGLContext();
-        static bool ensureStaticSkiaContext();
-
-        /** To be able to use static contexts (and avoid reloading the skia context for each
-     * new view, we track the OpenGL and Skia drawing context per thread.
-     * @return The drawing context for the current thread
-     */
-        static std::shared_ptr<DrawingContext> getThreadDrawingContext();
-
-        static EGLDisplay _glDisplay;
-        static EGLConfig _glConfig;
-
-        GrBackendRenderTarget _skRenderTarget;
-        EGLSurface _glSurface = EGL_NO_SURFACE;
-
-        ANativeWindow *_nativeWindow = nullptr;
-
-        sk_sp<SkSurface> _skSurface;
-
         int _width = 0;
         int _height = 0;
-        int _prevWidth = 0;
-        int _prevHeight = 0;
 
-        std::shared_ptr<std::timed_mutex> _isDrawingLock;
+        SkiaOpenGLRenderer* _renderer = nullptr;
 
         jni::global_ref<JniSkiaDrawView::javaobject> javaPart_;
 
@@ -99,9 +62,7 @@ namespace RNSkia
             jni::alias_ref<JniSkiaDrawView::jhybridobject> jThis,
             JavaSkiaManager skiaManager)
             : javaPart_(jni::make_global(jThis)),
-              RNSkDrawView(skiaManager->cthis()->getPlatformContext()),
-              _isDrawingLock(std::make_shared<std::timed_mutex>()) {
-            setNativeDrawFunc(std::bind(&JniSkiaDrawView::drawFrame, this, std::placeholders::_1));
+              RNSkDrawView(skiaManager->cthis()->getPlatformContext()) {
         }
     };
 

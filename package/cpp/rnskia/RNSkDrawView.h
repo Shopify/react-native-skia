@@ -88,7 +88,11 @@ public:
 
 protected:
   void setNativeDrawFunc(std::function<void(const sk_sp<SkPicture>)> drawFunc) {
-    _nativeDrawFunc = drawFunc;    
+    if(!_gpuDrawingLock->try_lock_for(250ms)) {
+      RNSkLogger::logToConsole("Could not lock drawing when clearing drawing function - %i", _nativeId);
+    }
+    _nativeDrawFunc = drawFunc;
+    _gpuDrawingLock->unlock();
   }
   
   /**
