@@ -47,10 +47,7 @@ namespace RNSkia
     public:
         SkiaOpenGLRenderer(ANativeWindow *nativeWindow, size_t renderId) :
             _nativeWindow(nativeWindow),
-            _renderId(renderId),
-            _renderState(RenderState::Initializing)
-        {
-        }
+            _renderId(renderId) { }
 
         /**
          * Initializes, renders and tears down the render pipeline depending on the state of the
@@ -87,7 +84,7 @@ namespace RNSkia
          * Initializes all required OpenGL and Skia objects
          * @return True if initialization went well.
          */
-        bool init();
+        bool ensureInitialised();
 
         /**
          * Initializes the static OpenGL context that is shared between

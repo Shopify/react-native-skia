@@ -25,16 +25,18 @@ namespace RNSkia
         {
         case RenderState::Initializing:
         {
-            if (!init())
-            {
-                break;
-            }
             _renderState = RenderState::Rendering;
             // Just let the case drop to drawing - we have initialized
             // and we should be able to render (if the picture is set)
         }
         case RenderState::Rendering:
         {
+            // Make sure to initialize the rendering pipeline
+            if (!ensureInitialised())
+            {
+                break;
+            }
+
             // Ensure we have the Skia surface to draw on. We need to
             // pass width and height since the surface will be recreated
             // when the view is resized.
@@ -45,7 +47,8 @@ namespace RNSkia
 
             if (picture != nullptr)
             {
-                // Reset context
+                // Reset Skia Context since it might be modified by another Skia View during
+                // rendering.
                 getThreadDrawingContext()->skContext->resetContext();
 
                 // Clear with transparent
@@ -80,7 +83,7 @@ namespace RNSkia
         }
     }
 
-    bool SkiaOpenGLRenderer::init()
+    bool SkiaOpenGLRenderer::ensureInitialised()
     {
         // Set up static OpenGL context
         if (!initStaticGLContext())
