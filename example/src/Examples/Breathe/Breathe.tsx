@@ -29,14 +29,14 @@ interface RingProps {
 
 const Ring = ({ index, progress }: RingProps) => {
   const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useDerivedValue(
-    (p) => {
-      const { x, y } = polar2Canvas({ theta, radius: p * R }, { x: 0, y: 0 });
-      const scale = mix(p, 0.3, 1);
-      return [{ translateX: x }, { translateY: y }, { scale }];
-    },
-    [progress]
-  );
+  const transform = useDerivedValue(() => {
+    const { x, y } = polar2Canvas(
+      { theta, radius: progress.current * R },
+      { x: 0, y: 0 }
+    );
+    const scale = mix(progress.current, 0.3, 1);
+    return [{ translateX: x }, { translateY: y }, { scale }];
+  }, [progress]);
 
   return (
     <Group origin={center} transform={transform}>
@@ -52,7 +52,7 @@ export const Breathe = () => {
   });
 
   const transform = useDerivedValue(
-    (p) => [{ rotate: mix(p, -Math.PI, 0) }],
+    () => [{ rotate: mix(progress.current, -Math.PI, 0) }],
     [progress]
   );
 
