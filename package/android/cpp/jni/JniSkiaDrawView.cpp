@@ -15,7 +15,6 @@ namespace RNSkia
 
     using TSelf = local_ref<HybridClass<JniSkiaDrawView>::jhybriddata>;
 
-
     /**** DTOR ***/
     JniSkiaDrawView::~JniSkiaDrawView()
     {
@@ -90,10 +89,11 @@ namespace RNSkia
         _width = width;
         _height = height;
 
-        if(_renderer == nullptr) {
+        if (_renderer == nullptr)
+        {
             // Create renderer!
             _renderer = new SkiaOpenGLRenderer(
-                    ANativeWindow_fromSurface(Environment::current(), surface), getNativeId());
+                ANativeWindow_fromSurface(Environment::current(), surface), getNativeId());
 
             // Set the draw function
             setNativeDrawFunc(std::bind(&JniSkiaDrawView::drawFrame, this, std::placeholders::_1));
@@ -121,7 +121,8 @@ namespace RNSkia
 #if LOG_ALL_DRAWING
         RNSkLogger::logToConsole("JniSkiaDrawView::surfaceDestroyed %i", getNativeId());
 #endif
-        if(_renderer != nullptr) {
+        if (_renderer != nullptr)
+        {
             // Turn off drawing
             setNativeDrawFunc(nullptr);
 
@@ -131,11 +132,11 @@ namespace RNSkia
             // Ask for a redraw to tear down the render pipeline. This
             // needs to be done on the render thread since OpenGL demands
             // same thread access for OpenGL contexts.
-            getPlatformContext()->runOnRenderThread([this](){
+            getPlatformContext()->runOnRenderThread([this]()
+                                                    {
                 if(_renderer != nullptr) {
                     _renderer->run(nullptr, 0, 0);
-                }
-            });
+                } });
 
             // Wait until the above render has finished.
             _renderer->waitForTeardown();
@@ -150,9 +151,8 @@ namespace RNSkia
 
     void JniSkiaDrawView::drawFrame(const sk_sp<SkPicture> picture)
     {
-        if(_renderer != nullptr) {
-            _renderer->run(picture, _width, _height);
-        }
+        // No need to check if the renderer is nullptr since we only get here if it is not.
+        _renderer->run(picture, _width, _height);
     }
 
 } // namespace RNSkia
