@@ -20,12 +20,14 @@ public:
   void setSize(int width, int height);
 
 protected:
-  void drawFrame(const sk_sp<SkPicture> picture) override;
-  
   int getWidth() override { return _width * _context->getPixelDensity(); };
   int getHeight() override { return _height * _context->getPixelDensity(); };
-
+  void onInvalidated() override {
+    setNativeDrawFunc(nullptr);
+  };
+  
 private:
+  void drawFrame(const sk_sp<SkPicture> picture);
   bool createSkiaSurface();
 
   int _nativeId;

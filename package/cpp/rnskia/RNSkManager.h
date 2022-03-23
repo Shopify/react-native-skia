@@ -73,7 +73,7 @@ private:
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
   std::shared_ptr<RNSkJsiViewApi> _viewApi;
-  bool _isValid = true;
+  std::atomic<bool> _isInvalidated = {false};
 };
 
 } // namespace RNSkia
