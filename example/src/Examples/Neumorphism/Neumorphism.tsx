@@ -5,6 +5,8 @@ import {
   Group,
   Paint,
   RoundedRect,
+  useValue,
+  useTouchHandler,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -14,7 +16,7 @@ const R = 32;
 
 export const Neumorphism = () => {
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas>
       <Fill color="lightblue" />
       <Group>
         <Paint>
