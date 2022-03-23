@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import type { SkiaReadonlyValue, SkiaAnimation } from "../../types";
-import type { TimingParams, TimingConfig, AnimationCallback } from "../types";
+import type {
+  AnimationParams,
+  TimingConfig,
+  AnimationCallback,
+} from "../types";
 import { useValue } from "../../hooks/useValue";
 
 import { getResolvedParams } from "./functions";
@@ -15,7 +19,7 @@ import { createTiming } from "./createTiming";
  * @returns A value that is animated
  */
 export const useTiming = (
-  toOrParams: number | TimingParams,
+  toOrParams: number | AnimationParams,
   config?: TimingConfig,
   callback?: AnimationCallback
 ): SkiaReadonlyValue<number> => {

@@ -1,5 +1,9 @@
 import type { SkiaValue, SkiaAnimation } from "../../types";
-import type { TimingParams, SpringConfig, AnimationCallback } from "../types";
+import type {
+  AnimationParams,
+  SpringConfig,
+  AnimationCallback,
+} from "../types";
 import { runTiming } from "../timing/runTiming";
 
 import { Spring } from "./Spring";
@@ -20,7 +24,7 @@ import { createSpringEasing } from "./functions/spring";
  */
 export const runSpring = (
   value: SkiaValue<number>,
-  toOrParams: number | TimingParams,
+  toOrParams: number | AnimationParams,
   config?: SpringConfig,
   callback?: AnimationCallback
 ): SkiaAnimation => {
