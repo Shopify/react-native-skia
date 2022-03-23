@@ -3,6 +3,7 @@ import type { AnimationParams, SpringConfig } from "../types";
 import { useTiming } from "../timing";
 
 import { Spring } from "./Spring";
+import { createSpringEasing } from "./functions/spring";
 
 /**
  * Creats a spring based animation value that will run whenever
@@ -15,4 +16,4 @@ export const useSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig
 ): SkiaReadonlyValue<number> =>
-  useTiming(toOrParams, config ?? Spring.Config.Default);
+  useTiming(toOrParams, createSpringEasing(config ?? Spring.Config.Default));

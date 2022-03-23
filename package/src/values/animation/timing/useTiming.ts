@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import type { SkiaReadonlyValue, SkiaAnimation } from "../../types";
-import type { AnimationParams, TimingConfig, SpringConfig } from "../types";
+import type { AnimationParams, TimingConfig } from "../types";
 import { useValue } from "../../hooks/useValue";
 
 import { getResolvedParams } from "./functions";
@@ -16,7 +16,7 @@ import { createTiming } from "./createTiming";
  */
 export const useTiming = (
   toOrParams: number | AnimationParams,
-  config?: TimingConfig | SpringConfig
+  config?: TimingConfig
 ): SkiaReadonlyValue<number> => {
   // Resolve parameters - keep a cached version to avoid
   // unnecesary re-renders.
