@@ -133,7 +133,7 @@ namespace RNSkia
             // same thread access for OpenGL contexts.
             getPlatformContext()->runOnRenderThread([this](){
                 if(_renderer != nullptr) {
-                    _renderer->render(nullptr, 0, 0);
+                    _renderer->run(nullptr, 0, 0);
                 }
             });
 
@@ -151,7 +151,7 @@ namespace RNSkia
     void JniSkiaDrawView::drawFrame(const sk_sp<SkPicture> picture)
     {
         if(_renderer != nullptr) {
-            _renderer->render(picture, _width, _height);
+            _renderer->run(picture, _width, _height);
         }
     }
 

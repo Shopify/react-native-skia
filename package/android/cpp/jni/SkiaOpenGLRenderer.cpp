@@ -19,7 +19,7 @@ namespace RNSkia
         return threadContexts.at(threadId);
     }
 
-    void SkiaOpenGLRenderer::render(const sk_sp<SkPicture> picture, int width, int height)
+    void SkiaOpenGLRenderer::run(const sk_sp<SkPicture> picture, int width, int height)
     {
         switch (_renderState)
         {

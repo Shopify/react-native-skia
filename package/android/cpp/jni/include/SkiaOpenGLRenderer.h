@@ -61,7 +61,7 @@ namespace RNSkia
          * @param width Width of surface to render if there is a picture
          * @param height Height of surface to render if there is a picture
          */
-        void render(const sk_sp<SkPicture> picture, int width, int height);
+        void run(const sk_sp<SkPicture> picture, int width, int height);
 
         /**
          * Sets the state to finishing. Next time the renderer will be called it
