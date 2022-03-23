@@ -1,6 +1,8 @@
 export interface SpringConfig {
-  duration: number;
-  update: (t: number) => number;
+  mass: number;
+  stiffness: number;
+  damping: number;
+  velocity: number;
 }
 
 export interface TimingConfig {
@@ -17,3 +19,5 @@ export interface AnimationParams {
 
 export type RequiredAnimationParams = Required<Omit<AnimationParams, "from">> &
   Pick<AnimationParams, "from">;
+
+export type AnimationCallback = (current: number) => void;

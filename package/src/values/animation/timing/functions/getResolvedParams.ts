@@ -2,7 +2,6 @@ import type {
   RequiredAnimationParams,
   AnimationParams,
   TimingConfig,
-  SpringConfig,
 } from "../../types";
 
 const DefaultParameters = {
@@ -24,7 +23,7 @@ const DefaultTimingConfig = {
  */
 export const getResolvedParams = (
   toOrParams: number | AnimationParams,
-  config?: TimingConfig | SpringConfig
+  config?: TimingConfig
 ): RequiredAnimationParams & Required<TimingConfig> => {
   let resolvedParameters: RequiredAnimationParams = {
     ...DefaultParameters,
@@ -43,14 +42,8 @@ export const getResolvedParams = (
 
   const resolvedConfig: Required<TimingConfig> = { ...DefaultTimingConfig };
   if (config) {
-    if ("update" in config) {
-      // Spring
-      resolvedConfig.duration = config.duration;
-      resolvedConfig.easing = config.update;
-    } else {
-      resolvedConfig.duration = config.duration;
-      resolvedConfig.easing = config.easing ?? ((t) => t);
-    }
+    resolvedConfig.duration = config.duration;
+    resolvedConfig.easing = config.easing ?? ((t) => t);
   }
 
   return { ...resolvedParameters, ...resolvedConfig };
