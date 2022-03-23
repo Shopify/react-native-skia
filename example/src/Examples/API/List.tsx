@@ -66,7 +66,9 @@ const styles = StyleSheet.create({
     padding: 32,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  title: {},
+  title: {
+    color: "black",
+  },
 });
 
 export const List = () => {
