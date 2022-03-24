@@ -6,8 +6,10 @@
 #include "EGL/egl.h"
 #include "GLES2/gl2.h"
 
+#include <condition_variable>
+#include <mutex>
 #include <thread>
-#include <map>
+#include <unordered_map>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -20,8 +22,6 @@
 
 #pragma clang diagnostic pop
 
-#include <mutex>
-#include <condition_variable>
 
 namespace RNSkia
 {
@@ -33,7 +33,7 @@ namespace RNSkia
         sk_sp<GrDirectContext> skContext;
     };
 
-    static std::map<std::thread::id, std::shared_ptr<DrawingContext>> threadContexts;
+    static std::unordered_map<std::thread::id, std::shared_ptr<DrawingContext>> threadContexts;
 
     enum RenderState : int {
         Initializing,

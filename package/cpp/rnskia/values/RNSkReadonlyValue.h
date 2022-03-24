@@ -10,6 +10,7 @@
 #include <functional>
 #include <chrono>
 #include <mutex>
+#include <unordered_map>
 
 namespace RNSkia
 {
@@ -102,10 +103,10 @@ protected:
    @param runtime Current JS Runtime
    */
   void notifyListeners(jsi::Runtime &runtime) {
-    std::map<long, std::function<void(jsi::Runtime&)>> tmp;
+    std::unordered_map<long, std::function<void(jsi::Runtime&)>> tmp;
     {
       std::lock_guard<std::mutex> lock(_mutex);
-      tmp.insert(_listeners.begin(), _listeners.end());
+      tmp.insert(_listeners.cbegin(), _listeners.cend());
     }
     for(const auto &listener: tmp) {
       listener.second(runtime);
@@ -133,7 +134,7 @@ private:
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<jsi::Object> _valueHolder;
   long _listenerId = 0;
-  std::map<long, std::function<void(jsi::Runtime&)>> _listeners;
+  std::unordered_map<long, std::function<void(jsi::Runtime&)>> _listeners;
   std::mutex _mutex;
 };
 }
