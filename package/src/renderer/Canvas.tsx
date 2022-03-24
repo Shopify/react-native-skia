@@ -151,7 +151,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     useEffect(() => {
       // Register all values in the current tree
       depsManager.visitChildren(tree);
-      // Subscrube / return unsubscribe function
+      // Subscribe / return unsubscribe function
       depsManager.subscribe();
       return depsManager.unsubscribe;
     }, [depsManager, tree, children]);
