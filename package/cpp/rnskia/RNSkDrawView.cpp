@@ -204,8 +204,14 @@ void RNSkDrawView::performDraw() {
   milliseconds ms = duration_cast<milliseconds>(
           system_clock::now().time_since_epoch());
   
-  // Perform the javascript drawing
-  drawInCanvas(_jsiCanvas, getWidth(), getHeight(), ms.count() / 1000.0);
+  try {
+    // Perform the javascript drawing
+    drawInCanvas(_jsiCanvas, getWidth(), getHeight(), ms.count() / 1000.0);
+  } catch(...) {
+    _jsTimingInfo.stopTiming();
+    _jsDrawingLock->unlock();
+    throw;
+  }
   
   // Finish drawing operations
   auto p = recorder.finishRecordingAsPicture();
