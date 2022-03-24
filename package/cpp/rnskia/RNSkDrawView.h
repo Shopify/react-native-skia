@@ -16,6 +16,8 @@
 
 #pragma clang diagnostic pop
 
+#define LOG_ALL_DRAWING 0
+
 namespace RNSkia {
 
 using RNSkDrawCallback =
@@ -56,7 +58,7 @@ public:
   /**
    Sets the native id of the view
    */
-  void setNativeId(size_t nativeId) { _nativeId = nativeId; }
+  void setNativeId(size_t nativeId);
   
   /**
    Returns the native id
@@ -85,24 +87,34 @@ public:
   sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds);
 
 protected:
-  /**
-   * Setup and draw the frame
-   */
-  virtual void drawFrame(const sk_sp<SkPicture> picture) {};
+  void setNativeDrawFunc(std::function<void(const sk_sp<SkPicture>)> drawFunc) {
+    if(!_gpuDrawingLock->try_lock_for(250ms)) {
+      RNSkLogger::logToConsole("Could not lock drawing when clearing drawing function - %i", _nativeId);
+    }
+    _nativeDrawFunc = drawFunc;
+    _gpuDrawingLock->unlock();
+  }
   
+  /**
+   Returns the scaled width of the view
+   */
   virtual int getWidth() { return -1; };
+  
+  /**
+   Returns the scaled height of the view
+   */
   virtual int getHeight() { return -1; };
   
   /**
-   * Mark view as invalidated
+   Returns true if the view is invalidated
    */
-  void invalidate();
-
+  volatile bool isInvalidated() { return _isInvalidated; }
+  
   /**
-   * @return True if the view was marked as deleted
+   Override to be notified on invalidation
    */
-  bool isValid() { return _isValid; }
-
+  virtual void onInvalidated() {};
+  
   /**
    * @return The platformcontext
    */
@@ -110,12 +122,7 @@ protected:
     return _platformContext;
   }
 
-private:
-  /**
-   * Checks preconditions for drawing
-   */
-  bool isReadyToDraw();
-
+private:  
   /**
    Starts beginDrawCallback loop if the drawing mode is continuous
    */
@@ -154,12 +161,12 @@ private:
   /**
    * JS Drawing mutex
    */
-  std::timed_mutex* _inJSDrawing;
+  std::shared_ptr<std::timed_mutex> _jsDrawingLock;
   
   /**
    * SKIA Drawing mutex
    */
-  std::timed_mutex* _inGpuDrawing;
+  std::shared_ptr<std::timed_mutex> _gpuDrawingLock;
 
   /**
    * Pointer to the platform context
@@ -205,15 +212,21 @@ private:
    Redraw queue counter
    */
   std::atomic<int> _redrawRequestCounter = { 1 };
-  /**
-   Flag indicating that the view is valid / invalid
-   */
-  std::atomic<bool> _isValid { true };
-
+  
   /**
    * Native id
    */
   size_t _nativeId;
+  
+  /**
+   Invalidation flag
+   */
+  std::atomic<bool> _isInvalidated = { false };
+  
+  /**
+   Native draw handler
+   */
+  std::function<void(const sk_sp<SkPicture>)> _nativeDrawFunc;  
   
 };
 

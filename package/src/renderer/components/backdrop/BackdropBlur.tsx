@@ -16,7 +16,7 @@ export const BackdropBlur = ({
   ...props
 }: AnimatedProps<BackdropBlurProps>) => {
   return (
-    <BackdropFilter filter={<Blur blur={blur} />} {...props}>
+    <BackdropFilter filter={<Blur blur={blur} mode="clamp" />} {...props}>
       {children}
     </BackdropFilter>
   );

@@ -3,7 +3,7 @@
 #import <RNSkManager.h>
 
 @implementation SkiaDrawView {
-  RNSkDrawViewImpl* _impl;
+  std::shared_ptr<RNSkDrawViewImpl> _impl;
   RNSkia::RNSkManager* _manager;
   RNSkia::RNSkDrawingMode _drawingMode;
   bool _debugMode;
@@ -25,7 +25,9 @@
 }
 
 - (void)dealloc {
-  _manager->unregisterSkiaDrawView(_nativeId);
+  if(_manager != nullptr) {
+    _manager->unregisterSkiaDrawView(_nativeId);
+  }
 }
 
 #pragma mark Lifecycle
@@ -39,20 +41,18 @@
       if(_nativeId != 0) {
         _manager->setSkiaDrawView(_nativeId, nullptr);
       }
-      delete _impl;
       _impl = nullptr;
     }
   } else {
     // Create implementation view when the parent view is set
-    if(_impl == nullptr) {
+    if(_impl == nullptr && _manager != nullptr) {
       __weak typeof(self) weakSelf = self;
-      _impl = new RNSkDrawViewImpl(weakSelf, _manager->getPlatformContext());
+      _impl = std::make_shared<RNSkDrawViewImpl>(weakSelf, _manager->getPlatformContext());
       if(_nativeId != 0) {
-        _manager->setSkiaDrawView(_nativeId, _impl);
+        _manager->setSkiaDrawView(_nativeId, _impl.get());
       }
       _impl->setDrawingMode(_drawingMode);
-      _impl->setShowDebugOverlays(_debugMode);
-      
+      _impl->setShowDebugOverlays(_debugMode);      
     }
   }
 }
@@ -87,13 +87,13 @@
   _nativeId = nativeId;
   
   if(_impl != nullptr) {
-    _manager->registerSkiaDrawView(nativeId, _impl);
+    _manager->registerSkiaDrawView(nativeId, _impl.get());
   }
 }
 
 #pragma mark External API
 
-- (RNSkDrawViewImpl*) impl {
+- (std::shared_ptr<RNSkDrawViewImpl>) impl {
   return _impl;
 }
 

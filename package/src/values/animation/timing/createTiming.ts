@@ -1,4 +1,8 @@
-import type { TimingConfig, RequiredAnimationParams } from "../types";
+import type {
+  TimingConfig,
+  RequiredAnimationParams,
+  AnimationCallback,
+} from "../types";
 import type { AnimationState, SkiaValue } from "../../types";
 import { ValueApi } from "../../api";
 
@@ -20,7 +24,8 @@ import { timing } from "./functions";
  */
 export const createTiming = (
   params: RequiredAnimationParams & Required<TimingConfig>,
-  value?: SkiaValue<number>
+  value?: SkiaValue<number>,
+  callback?: AnimationCallback
 ) => {
   // Update from to be either the declared from value,
   // the current value of the value or zero
@@ -40,13 +45,15 @@ export const createTiming = (
       params.yoyo ?? false,
       state ?? { current: params.from!, finished: false }
     );
-
+    const current =
+      nextState.current * (resolvedParams.to - resolvedParams.from!) +
+      resolvedParams.from!;
+    if (callback && nextState.finished === true) {
+      callback(current);
+    }
     return {
       ...nextState,
-      current:
-        // Interpolate value
-        nextState.current * (resolvedParams.to - resolvedParams.from!) +
-        resolvedParams.from!,
+      current,
     };
   };
 

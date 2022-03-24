@@ -206,8 +206,8 @@ public:
    */
   void unregisterAll() {
     // Unregister all views
-    auto tempList = std::map<size_t, CallbackInfo>(_callbackInfos);
-    for (auto info : tempList) {
+    auto tempList = _callbackInfos;
+    for (const auto& info : tempList) {
       unregisterSkiaDrawView(info.first);
     }
     _callbackInfos.clear();
@@ -253,7 +253,7 @@ public:
    view (if a valid callback exists).
    */
   void setSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
-    if (_callbackInfos.count(nativeId) == 0) {
+    if (_callbackInfos.find(nativeId) == _callbackInfos.end()) {
       return;
     }
     auto info = getEnsuredCallbackInfo(nativeId);
@@ -289,7 +289,7 @@ private:
   }
   
   // List of callbacks
-  std::map<size_t, CallbackInfo> _callbackInfos;
+  std::unordered_map<size_t, CallbackInfo> _callbackInfos;
   
   // Platform context
   std::shared_ptr<RNSkPlatformContext> _platformContext;

@@ -1,5 +1,9 @@
 import type { SkiaValue, SkiaAnimation } from "../../types";
-import type { AnimationParams, TimingConfig } from "../types";
+import type {
+  AnimationParams,
+  TimingConfig,
+  AnimationCallback,
+} from "../types";
 
 import { getResolvedParams } from "./functions";
 import { createTiming } from "./createTiming";
@@ -19,10 +23,11 @@ import { createTiming } from "./createTiming";
 export const runTiming = (
   value: SkiaValue<number>,
   toOrParams: number | AnimationParams,
-  config?: TimingConfig
+  config?: TimingConfig,
+  callback?: AnimationCallback
 ): SkiaAnimation => {
   const resolvedParameters = getResolvedParams(toOrParams, config);
-  const animation = createTiming(resolvedParameters, value);
+  const animation = createTiming(resolvedParameters, value, callback);
   value.animation = animation;
   return animation;
 };

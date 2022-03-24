@@ -1,3 +1,6 @@
+import type { SpringConfig } from "../types";
+import type { TimingConfig } from "../../types";
+
 /**
  * @description Returns a cached jsContext function for a spring with duration
  * @param mass The mass of the spring
@@ -6,34 +9,21 @@
  * @param velocity The initial velocity
  */
 export const createSpringEasing = (
-  params: Partial<{
-    mass: number;
-    stiffness: number;
-    damping: number;
-    velocity: number;
-  }>
-) => {
-  const {
-    mass,
-    stiffness,
-    damping,
-    velocity = 0,
-  } = {
+  params: Partial<SpringConfig>
+): TimingConfig => {
+  const config = {
     mass: 1,
     stiffness: 100,
     damping: 10,
+    velocity: 0,
     ...params,
   };
-  // TODO: Find correct velcoity
-  return getSpringEasing(mass, stiffness, damping, velocity / 100);
+  config.velocity /= 100;
+  return getSpringEasing(config);
 };
 
-const getSpringEasing = (
-  mass: number,
-  stiffness: number,
-  damping: number,
-  initialVelocity = 0
-) => {
+const getSpringEasing = (config: Required<SpringConfig>) => {
+  const { stiffness, mass, damping, velocity: initialVelocity } = config;
   // Setup spring state
   const state = {
     w0: Math.sqrt(stiffness / mass),
@@ -89,9 +79,8 @@ const getSpringEasing = (
 
   const durationMs = getDurationMs();
 
-  // Calculate duration
   return {
-    update: (t: number) => update(t, durationMs),
+    easing: (t: number) => update(t, durationMs),
     duration: durationMs,
   };
 };

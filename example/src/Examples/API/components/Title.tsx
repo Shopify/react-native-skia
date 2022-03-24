@@ -14,5 +14,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     padding: 16,
+    color: "black",
   },
 });

@@ -30,7 +30,7 @@ export const SpringBackTouchAnimation = () => {
   const offsetY = useValue(0);
 
   const rectCenter = useDerivedValue(
-    (x, y) => ({ x: x + Size, y: y + Size }),
+    () => ({ x: rectX.current + Size, y: rectY.current + Size }),
     [rectX, rectY]
   );
 

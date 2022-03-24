@@ -27,7 +27,10 @@ half4 main(float2 xy) {
 export const Filters = () => {
   const progress = useLoop({ duration: 1500 });
 
-  const uniforms = useDerivedValue((p) => ({ r: mix(p, 1, 100) }), [progress]);
+  const uniforms = useDerivedValue(
+    () => ({ r: mix(progress.current, 1, 100) }),
+    [progress]
+  );
 
   const image = useImage(require("../../assets/oslo.jpg"));
   if (image === null) {
