@@ -10,14 +10,13 @@ type Unsubscribe = () => void;
 export class DependencyManager {
   ref: RefObject<SkiaView>;
   values: SkiaReadonlyValue<unknown>[] = [];
-  unsub: Unsubscribe | null = null;
+  unsubscriptions: Unsubscribe[] = [];
 
   constructor(ref: RefObject<SkiaView>) {
     this.ref = ref;
   }
 
   addValues(props: { [key: string]: unknown }) {
-    console.log({ props });
     Object.values(props)
       .filter(isValue)
       .forEach((value) => {
@@ -32,14 +31,12 @@ export class DependencyManager {
     if (!this.ref.current) {
       throw new Error("Canvas ref is not set");
     }
-    this.unsub = this.ref.current.registerValues(this.values);
+    this.unsubscriptions.push(this.ref.current.registerValues(this.values));
   }
 
   unsubscribe() {
-    if (this.unsub) {
-      this.unsub();
-      this.unsub = null;
-      this.values = [];
-    }
+    console.log("UNSUBSCRIBE");
+    this.unsubscriptions.forEach((unsubscribe) => unsubscribe());
+    this.unsubscriptions = [];
   }
 }
