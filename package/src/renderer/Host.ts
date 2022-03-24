@@ -4,6 +4,7 @@ import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationResult, DeclarationProps } from "./nodes/Declaration";
 import type { DrawingProps } from "./nodes";
 import type { AnimatedProps } from "./processors/Animations/Animations";
+import type { DependencyManager } from "./DependencyManager";
 
 export enum NodeType {
   Declaration = "skDeclaration",
@@ -16,14 +17,18 @@ export abstract class Node<P = unknown> {
   memoizable = false;
   memoized = false;
   parent?: Node;
+  depMgr: DependencyManager;
 
-  constructor(props: AnimatedProps<P>) {
+  constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
     this._props = props;
+    this.depMgr = depMgr;
+    this.depMgr.addValues(props);
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
   set props(props: AnimatedProps<P>) {
+    this.depMgr.addValues(props);
     this._props = props;
   }
 
@@ -55,8 +60,8 @@ export abstract class Node<P = unknown> {
 export class Container extends Node {
   redraw: () => void;
 
-  constructor(redraw: () => void) {
-    super({});
+  constructor(depMgr: DependencyManager, redraw: () => void) {
+    super(depMgr, {});
     this.redraw = redraw;
   }
 
