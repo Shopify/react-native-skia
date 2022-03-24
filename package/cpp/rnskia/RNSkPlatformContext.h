@@ -1,9 +1,9 @@
 #pragma once
 
 #include <functional>
-#include <map>
 #include <mutex>
 #include <thread>
+#include <unordered_map>
 
 #include <RNSkLog.h>
 #include <RNSkDispatchQueue.h>
@@ -164,10 +164,10 @@ public:
    */
   void notifyDrawLoop(bool invalidated) {
     if(!_isValid) { return; }
-    std::map<size_t, std::function<void(bool)>> tmp;
+    std::unordered_map<size_t, std::function<void(bool)>> tmp;
     {
       std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-      tmp.insert(_drawCallbacks.begin(), _drawCallbacks.end());      
+      tmp.insert(_drawCallbacks.cbegin(), _drawCallbacks.cend());      
     }
     for (auto it = tmp.begin(); it != tmp.end(); it++) {
       it->second(invalidated);
@@ -186,7 +186,7 @@ private:
   std::shared_ptr<react::CallInvoker> _callInvoker;
   std::unique_ptr<RNSkDispatchQueue> _dispatchQueue;
 
-  std::map<size_t, std::function<void(bool)>> _drawCallbacks;
+  std::unordered_map<size_t, std::function<void(bool)>> _drawCallbacks;
   std::mutex _drawCallbacksLock;
   std::atomic<bool> _isValid = {true};
 };

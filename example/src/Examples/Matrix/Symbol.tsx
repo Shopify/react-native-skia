@@ -36,25 +36,23 @@ export const Symbol = ({
   const x = i * SYMBOL.width;
   const y = j * SYMBOL.height;
 
-  const glyphs = useDerivedValue(
-    (t) => {
-      const idx = offset.current + Math.floor(t / range.current);
-      return [{ id: symbols[idx % symbols.length], pos }];
-    },
-    [timestamp]
-  );
+  const glyphs = useDerivedValue(() => {
+    const idx = offset.current + Math.floor(timestamp.current / range.current);
+    return [{ id: symbols[idx % symbols.length], pos }];
+  }, [timestamp]);
 
-  const opacity = useDerivedValue(
-    (t) => {
-      const idx = Math.round(t / 100);
-      return stream[(stream.length - j + idx) % stream.length];
-    },
-    [timestamp]
-  );
+  const opacity = useDerivedValue(() => {
+    const idx = Math.round(timestamp.current / 100);
+    return stream[(stream.length - j + idx) % stream.length];
+  }, [timestamp]);
 
   const color = useDerivedValue(
-    (o) =>
-      interpolateColors(o, [0.8, 1], ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]),
+    () =>
+      interpolateColors(
+        opacity.current,
+        [0.8, 1],
+        ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]
+      ),
     [opacity]
   );
 

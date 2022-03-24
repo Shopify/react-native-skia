@@ -67,7 +67,7 @@ export const Gooey = () => {
     () =>
       icons.map((icon) =>
         createDerivedValue(
-          (p) => translate(mixVector(p, c, icon.dst)),
+          () => translate(mixVector(progress.current, c, icon.dst)),
           [progress]
         )
       ),

@@ -35,14 +35,21 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
   });
 
   const label = useDerivedValue(
-    (p) => "$ " + (p ? (p.y * -1).toFixed(2) : "-"),
+    () =>
+      "$ " + (touchPos.current ? (touchPos.current.y * -1).toFixed(2) : "-"),
     [touchPos]
   );
 
-  const textX = useDerivedValue((t) => t.x - 24, [touchPos]);
-  const textY = useDerivedValue((t) => t.y - 18, [touchPos]);
-  const lineP1 = useDerivedValue((t) => vec(t.x, t.y + 14), [touchPos]);
-  const lineP2 = useDerivedValue((t) => vec(t.x, height), [touchPos]);
+  const textX = useDerivedValue(() => touchPos.current.x - 24, [touchPos]);
+  const textY = useDerivedValue(() => touchPos.current.y - 18, [touchPos]);
+  const lineP1 = useDerivedValue(
+    () => vec(touchPos.current.x, touchPos.current.y + 14),
+    [touchPos]
+  );
+  const lineP2 = useDerivedValue(
+    () => vec(touchPos.current.x, height),
+    [touchPos]
+  );
 
   return (
     <View style={{ height, marginBottom: 10 }}>
