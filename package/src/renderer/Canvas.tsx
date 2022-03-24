@@ -140,6 +140,8 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     );
 
     useEffect(() => {
+      // In a case of a hot reload, we want to make sure we forget about the past :)
+      container.dispose();
       container.create();
       return () => {
         container.dispose();

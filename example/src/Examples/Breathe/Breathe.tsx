@@ -63,7 +63,7 @@ export const Breathe = () => {
       </Paint>
       <Fill color="rgb(36,43,56)" />
       <Group origin={center} transform={transform}>
-        {new Array(2).fill(0).map((_, index) => {
+        {new Array(6).fill(0).map((_, index) => {
           return <Ring key={index} index={index} progress={progress} />;
         })}
       </Group>
