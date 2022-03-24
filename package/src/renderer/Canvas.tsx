@@ -74,9 +74,6 @@ skiaReconciler.injectIntoDevTools({
 
 const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
   skiaReconciler.updateContainer(element, root, null, () => {
-    // On the first mount this will register pending animations values
-    // In subsequence updates this method will do nothing
-    container.start();
     hostDebug("updateContainer");
   });
 };
@@ -144,6 +141,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     );
 
     useEffect(() => {
+      container.create();
       return () => {
         container.dispose();
       };

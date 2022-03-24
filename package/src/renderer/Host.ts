@@ -120,7 +120,7 @@ export class Container extends Node {
     };
   };
 
-  start() {
+  create() {
     this.pending.forEach((registration) => {
       if (this.ref.current) {
         registration.unsubscribe = this.ref.current.registerValues(
