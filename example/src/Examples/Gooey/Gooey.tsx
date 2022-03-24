@@ -20,7 +20,6 @@ import {
   useSpring,
   Spring,
   createDerivedValue,
-  useDerivedValue,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
