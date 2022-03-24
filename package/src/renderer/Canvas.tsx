@@ -145,7 +145,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
 
     useEffect(() => {
       return () => {
-        container.dispose;
+        container.dispose();
       };
     }, [container]);
 
