@@ -109,7 +109,6 @@ const removeNode = (parent: Node, child: Node) => {
   const index = parent.children.indexOf(child);
   child.dispose();
   parent.children.splice(index, 1);
-  console.log("REMOVE NODE");
 };
 
 const insertBefore = (parent: Node, child: Node, before: Node) => {
