@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
-import type { SkiaReadonlyValue } from "../types";
 import { ValueApi } from "../api";
+import { isValue } from "../../renderer";
 
 /**
  * Creates a new derived value - a value that will calculate its value depending
@@ -10,8 +10,9 @@ import { ValueApi } from "../api";
  * @param values Dependant values
  * @returns A readonly value
  */
-export const useDerivedValue = <R>(
-  cb: () => R,
-  values: SkiaReadonlyValue<unknown>[]
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-) => useMemo(() => ValueApi.createDerivedValue<R>(cb, values), values);
+export const useDerivedValue = <R>(cb: () => R, values: unknown[]) =>
+  useMemo(
+    () => ValueApi.createDerivedValue<R>(cb, values.filter(isValue)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    values
+  );
