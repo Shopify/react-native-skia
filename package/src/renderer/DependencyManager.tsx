@@ -27,7 +27,6 @@ export class DependencyManager {
   }
 
   subscribe() {
-    console.log("SUBSCRIBE");
     if (!this.ref.current) {
       throw new Error("Canvas ref is not set");
     }
@@ -35,7 +34,6 @@ export class DependencyManager {
   }
 
   unsubscribe() {
-    console.log("UNSUBSCRIBE");
     this.unsubscriptions.forEach((unsubscribe) => unsubscribe());
     this.unsubscriptions = [];
   }
