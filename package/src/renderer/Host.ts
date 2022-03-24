@@ -114,7 +114,6 @@ export class Container extends Node {
       if (valueReg.unsubscribe !== null) {
         valueReg.unsubscribe();
       } else {
-        console.log({ valueReg });
         throw new Error("We found a value that wasn't registered");
       }
       this.pending.splice(this.pending.indexOf(valueReg), 1);
@@ -128,7 +127,9 @@ export class Container extends Node {
           registration.values
         );
       } else {
-        throw new Error("The Skia View hasn't been thrown");
+        throw new Error(
+          "Tried to registered animation values Skia View ref was null."
+        );
       }
     });
   }
