@@ -34,7 +34,7 @@ const Ring = ({ index, progress }: RingProps) => {
       { theta, radius: progress.current * R },
       { x: 0, y: 0 }
     );
-    const scale = mix(progress.current, 0, 1);
+    const scale = mix(progress.current, 0.3, 1);
     return [{ translateX: x }, { translateY: y }, { scale }];
   }, [progress]);
 
