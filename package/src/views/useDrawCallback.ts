@@ -10,10 +10,10 @@ import type { RNSkiaDrawCallback } from "./types";
  * */
 export const useDrawCallback = (
   callback: RNSkiaDrawCallback,
-  deps: DependencyList | undefined = []
+  deps: DependencyList = []
 ) => {
   return useMemo(() => {
     return callback;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [callback, ...deps]);
+  }, deps);
 };
