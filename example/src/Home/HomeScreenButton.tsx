@@ -47,6 +47,9 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: "bold",
     paddingBottom: 4,
+    color: "black",
   },
-  description: {},
+  description: {
+    color: "black",
+  },
 });
