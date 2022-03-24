@@ -137,7 +137,12 @@ export class Container extends Node {
   }
 
   dispose() {
-    this.pending.forEach((sub) => sub.unsubscribe!());
+    this.pending.forEach((sub) => {
+      if (sub.unsubscribe) {
+        sub.unsubscribe();
+      }
+    });
+    this.pending.splice(0, this.pending.length);
   }
 
   constructor(ref: RefObject<SkiaView>, redraw: () => void) {
