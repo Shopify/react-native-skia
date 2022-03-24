@@ -114,8 +114,13 @@ export class Container extends Node {
       if (valueReg.unsubscribe !== null) {
         valueReg.unsubscribe();
       } else {
-        console.log({ valueReg });
-        throw new Error("We found a value that wasn't registered");
+        if (__DEV__) {
+          console.warn("We tried to unregister a value that wasn't registered");
+        } else {
+          throw new Error(
+            "We tried to unregister a value that wasn't registered"
+          );
+        }
       }
       this.pending.splice(this.pending.indexOf(valueReg), 1);
     };

@@ -140,10 +140,8 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     );
 
     useEffect(() => {
-      console.log("CREATE CONTAINER");
       container.create();
       return () => {
-        console.log("DISPOSE CONTAINER");
         container.dispose();
       };
     }, [container]);

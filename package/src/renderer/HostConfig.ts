@@ -6,7 +6,7 @@ import type { Container, Node } from "./Host";
 import { NodeType } from "./Host";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
 
-const DEBUG = true;
+const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
