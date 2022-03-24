@@ -1,78 +1,66 @@
-import React from "react";
-import { Dimensions, StyleSheet } from "react-native";
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
+  Rect,
+  runTiming,
+  mix,
   useDerivedValue,
-  useLoop,
-  BlurMask,
-  vec,
   Canvas,
-  Circle,
   Fill,
   Group,
-  Paint,
-  polar2Canvas,
-  Easing,
-  mix,
+  useValue,
+  useTouchHandler,
 } from "@shopify/react-native-skia";
+import React, { useState, useEffect } from "react";
 
-const { width, height } = Dimensions.get("window");
-const c1 = "#61bea2";
-const c2 = "#529ca0";
-const R = width / 4;
-const center = vec(width / 2, height / 2 - 64);
-
-interface RingProps {
-  index: number;
-  progress: SkiaReadonlyValue<number>;
+interface ButtonProps {
+  pressed: SkiaValue<number>;
 }
 
-const Ring = ({ index, progress }: RingProps) => {
-  const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useDerivedValue(() => {
-    const { x, y } = polar2Canvas(
-      { theta, radius: progress.current * R },
-      { x: 0, y: 0 }
-    );
-    const scale = mix(progress.current, 0.3, 1);
-    return [{ translateX: x }, { translateY: y }, { scale }];
-  }, [progress]);
-
+const Button = ({ pressed }: ButtonProps) => {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setDone(true);
+    }, 4000);
+  }, []);
+  const color = useDerivedValue(() => {
+    return `rgb(0, 0, ${Math.round(mix(pressed.current, 0, 255))})`;
+  }, [pressed]);
+  const opacity = useDerivedValue(
+    () => mix(pressed.current, 0.5, 1),
+    [pressed]
+  );
   return (
-    <Group origin={center} transform={transform}>
-      <Circle c={center} r={R} color={index % 2 ? c1 : c2} />
-    </Group>
+    <Rect
+      x={0}
+      y={0}
+      width={24}
+      height={24}
+      opacity={opacity}
+      color={done ? "rgb(255, 0, 255)" : color}
+    />
   );
 };
 
 export const Breathe = () => {
-  const progress = useLoop({
-    duration: 3000,
-    easing: Easing.inOut(Easing.ease),
+  const pressed = useValue(0);
+  const onTouch = useTouchHandler({
+    onStart: () => {
+      runTiming(pressed, 1, { duration: 1000 });
+    },
+    onEnd: () => {
+      runTiming(pressed, 0, { duration: 1000 });
+    },
   });
-
-  const transform = useDerivedValue(
-    () => [{ rotate: mix(progress.current, -Math.PI, 0) }],
-    [progress]
-  );
-
   return (
-    <Canvas style={styles.container} debug>
-      <Paint blendMode="screen">
-        <BlurMask style="solid" blur={40} />
-      </Paint>
-      <Fill color="rgb(36,43,56)" />
-      <Group origin={center} transform={transform}>
-        {new Array(6).fill(0).map((_, index) => {
-          return <Ring key={index} index={index} progress={progress} />;
-        })}
+    <Canvas style={{ flex: 1 }} debug onTouch={onTouch}>
+      <Fill color="#F0F0F3" />
+      {/* <Group transform={[{ scale: 4 }, { translateX: 10 }, { translateY: 10 }]}>
+        <Button pressed={pressed} />
+      </Group> */}
+      <Group transform={[{ scale: 4 }, { translateX: 60 }, { translateY: 10 }]}>
+        <Button pressed={pressed} />
       </Group>
     </Canvas>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

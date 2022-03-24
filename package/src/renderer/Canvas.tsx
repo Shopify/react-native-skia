@@ -72,7 +72,7 @@ skiaReconciler.injectIntoDevTools({
   rendererPackageName: "react-native-skia",
 });
 
-const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
+const render = (element: ReactNode, root: OpaqueRoot) => {
   skiaReconciler.updateContainer(element, root, null, () => {
     hostDebug("updateContainer");
   });
@@ -108,8 +108,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         <CanvasContext.Provider value={canvasCtx.current}>
           {children}
         </CanvasContext.Provider>,
-        root,
-        container
+        root
       );
     }, [children, container, root]);
 
@@ -141,8 +140,10 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     );
 
     useEffect(() => {
+      console.log("CREATE CONTAINER");
       container.create();
       return () => {
+        console.log("DISPOSE CONTAINER");
         container.dispose();
       };
     }, [container]);

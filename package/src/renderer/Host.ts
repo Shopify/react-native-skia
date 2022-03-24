@@ -92,7 +92,7 @@ export class Container extends Node {
   ref: RefObject<SkiaView>;
 
   // When mounting the tree the first time, the skia view is not yet available.
-  // We will delay registrations when the tree is ready in start()
+  // We will delay registrations when the tree is ready in create()
   private pending: PendingValueRegistration[] = [];
   redraw: () => void;
 
@@ -107,13 +107,14 @@ export class Container extends Node {
     if (this.ref.current) {
       return this.ref.current.registerValues(values);
     }
-    // 3. The skia view is not available yet. We keep track of the values to register in start()
+    // 3. The skia view is not available yet. We keep track of the values to register in create()
     const valueReg: PendingValueRegistration = { values, unsubscribe: null };
     this.pending.push(valueReg);
     return () => {
       if (valueReg.unsubscribe !== null) {
         valueReg.unsubscribe();
       } else {
+        console.log({ valueReg });
         throw new Error("We found a value that wasn't registered");
       }
       this.pending.splice(this.pending.indexOf(valueReg), 1);
