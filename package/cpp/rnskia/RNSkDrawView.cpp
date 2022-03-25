@@ -111,14 +111,14 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
 
         // Display average rendering timer
         auto jsAvg = _jsTimingInfo.getAverage();
-        auto jsFps = _jsTimingInfo.getFps();
+        //auto jsFps = _jsTimingInfo.getFps();
         
         auto gpuAvg = _gpuTimingInfo.getAverage();
-        auto gpuFps = _gpuTimingInfo.getFps();
+        //auto gpuFps = _gpuTimingInfo.getFps();
         
         auto total = jsAvg + gpuAvg;
         
-        auto vsyncFps = _vsyncTimingInfo.getFps();
+        //auto vsyncFps = _vsyncTimingInfo.getFps();
                                                       
         // Build string
         std::ostringstream stream;

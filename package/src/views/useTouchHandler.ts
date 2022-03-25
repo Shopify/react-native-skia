@@ -65,6 +65,8 @@ export const useTouchHandler = (
       prevTouchInfoRef.current = touch;
 
       if (touch.type === TouchType.Start) {
+        prevvelocityRef.current.x = 0;
+        prevvelocityRef.current.y = 0;
         handlers.onStart && handlers.onStart(touch);
       } else if (touch.type === TouchType.Active) {
         handlers.onActive && handlers.onActive(extendedTouchInfo);
