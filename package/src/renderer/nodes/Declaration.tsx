@@ -30,7 +30,6 @@ export class DeclarationNode<P> extends Node<P> {
     props: AnimatedProps<P>
   ) {
     super(depMgr, props);
-    this.props = props;
     this.onDeclare = onDeclare;
   }
 

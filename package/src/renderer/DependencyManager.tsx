@@ -4,37 +4,56 @@ import type { SkiaView } from "../views";
 import type { SkiaReadonlyValue } from "../values";
 
 import { isValue } from "./processors";
+import type { Node } from "./Host";
 
 type Unsubscribe = () => void;
+type Props = { [key: string]: unknown };
 
 export class DependencyManager {
   ref: RefObject<SkiaView>;
-  values: SkiaReadonlyValue<unknown>[] = [];
-  unsubscriptions: Unsubscribe[] = [];
+  subscriptions: Map<
+    Node,
+    { values: SkiaReadonlyValue<unknown>[]; unsubscribe: null | Unsubscribe }
+  > = new Map();
 
   constructor(ref: RefObject<SkiaView>) {
     this.ref = ref;
   }
 
-  addValues(props: { [key: string]: unknown }) {
-    Object.values(props)
-      .filter(isValue)
-      .forEach((value) => {
-        if (this.values.indexOf(value) === -1) {
-          this.values.push(value);
-        }
-      });
+  unSubscribeNode(node: Node) {
+    const subscription = this.subscriptions.get(node);
+    if (subscription && subscription.unsubscribe) {
+      subscription.unsubscribe();
+    }
+    this.subscriptions.delete(node);
+  }
+
+  subscribeNode(node: Node, props: Props) {
+    const values = Object.values(props).filter(isValue);
+    if (values.length > 0) {
+      this.subscriptions.set(node, { values, unsubscribe: null });
+    }
   }
 
   subscribe() {
-    if (!this.ref.current) {
+    if (this.ref.current === null) {
       throw new Error("Canvas ref is not set");
     }
-    this.unsubscriptions.push(this.ref.current.registerValues(this.values));
+    this.subscriptions.forEach((subscription) => {
+      if (subscription.unsubscribe === null) {
+        subscription.unsubscribe = this.ref.current!.registerValues(
+          subscription.values
+        );
+      }
+    });
   }
 
   unsubscribe() {
-    this.unsubscriptions.forEach((unsubscribe) => unsubscribe());
-    this.unsubscriptions = [];
+    this.subscriptions.forEach(({ unsubscribe }) => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    });
+    this.subscriptions.clear();
   }
 }

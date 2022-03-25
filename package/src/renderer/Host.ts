@@ -22,13 +22,15 @@ export abstract class Node<P = unknown> {
   constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
     this._props = props;
     this.depMgr = depMgr;
-    this.depMgr.addValues(props);
+    this.depMgr.unSubscribeNode(this);
+    this.depMgr.subscribeNode(this, props);
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
   set props(props: AnimatedProps<P>) {
-    this.depMgr.addValues(props);
+    this.depMgr.unSubscribeNode(this);
+    this.depMgr.subscribeNode(this, props);
     this._props = props;
   }
 

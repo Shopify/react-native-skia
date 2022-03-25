@@ -108,6 +108,7 @@ const removeNode = (parent: Node, child: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   parent.children.splice(index, 1);
+  child.depMgr.unSubscribeNode(child);
 };
 
 const insertBefore = (parent: Node, child: Node, before: Node) => {
