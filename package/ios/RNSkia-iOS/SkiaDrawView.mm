@@ -1,3 +1,5 @@
+#import "RCTBridge.h"
+
 #import <SkiaDrawView.h>
 #import <RNSkDrawViewImpl.h>
 #import <RNSkManager.h>
@@ -20,6 +22,15 @@
     _nativeId = 0;
     _debugMode = false;
     _drawingMode = RNSkia::RNSkDrawingMode::Default;
+    // Listen to notifications about module invalidation
+    auto nc = [NSNotificationCenter defaultCenter];
+    [nc addObserverForName:RCTBridgeWillInvalidateModulesNotification
+                    object:nil
+                     queue:nil
+                usingBlock:^(NSNotification *notification){
+      // Remove local variables
+      self->_manager = nullptr;                
+    }];
   }
   return self;
 }
@@ -38,7 +49,7 @@
   if (newWindow == NULL) {
     // Remove implementation view when the parent view is not set
     if(_impl != nullptr) {
-      if(_nativeId != 0) {
+      if(_nativeId != 0 && _manager != nullptr) {
         _manager->setSkiaDrawView(_nativeId, nullptr);
       }
       _impl = nullptr;
