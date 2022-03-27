@@ -26,9 +26,12 @@ public:
   RNSkReadonlyValue(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiHostObject(),
     _platformContext(platformContext),
-    _propNameId(jsi::PropNameID::forUtf8(*platformContext->getJsRuntime(), "value"))
-  {}
-
+    _propNameId(jsi::PropNameID::forUtf8(*platformContext->getJsRuntime(), "value")) {}
+  
+  ~RNSkReadonlyValue() {
+    _invalidated = true;
+  }
+  
   JSI_PROPERTY_GET(__typename__) {
     return jsi::String::createFromUtf8(runtime, "RNSkValue");
   }
@@ -73,7 +76,9 @@ public:
     auto listenerId = _listenerId++;
     _listeners.emplace(listenerId, cb);
     return [this, listenerId]() {
-      removeListener(listenerId);
+      if(!_invalidated) {
+        removeListener(listenerId);
+      }
     };
   }
   
@@ -128,6 +133,8 @@ protected:
   const std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
     return _platformContext;
   }
+  
+  std::atomic<bool> _invalidated = { false };
 
 private:
   jsi::PropNameID _propNameId;
