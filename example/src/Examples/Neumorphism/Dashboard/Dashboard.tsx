@@ -23,11 +23,11 @@ import {
 
 import { Title } from "./components/Title";
 import { ProgressBar } from "./components/ProgressBar";
-import { Snow } from "./components/icons/Snow";
-import { Control } from "./components/Control";
-import { Wind } from "./components/icons/Wind";
-import { Sun } from "./components/icons/Sun";
-import { Power } from "./components/icons/Power";
+// import { Snow } from "./components/icons/Snow";
+// import { Control } from "./components/Control";
+// import { Wind } from "./components/icons/Wind";
+// import { Sun } from "./components/icons/Sun";
+// import { Power } from "./components/icons/Power";
 import { Mode } from "./components/Mode";
 
 const window = Dimensions.get("window");
@@ -61,7 +61,7 @@ export const Neumorphism = () => {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }} mode="continuous" debug onTouch={onTouch}>
+    <Canvas style={{ flex: 1 }} mode="continuous" onTouch={onTouch}>
       <Group transform={transform}>
         <Group>
           <Paint>
