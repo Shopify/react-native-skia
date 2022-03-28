@@ -24,7 +24,7 @@ export const useTouchHandler = (
   deps: DependencyList = []
 ): TouchHandler => {
   const prevTouchInfoRef = useRef<TouchInfo>();
-  const prevvelocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const prevVelocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   return useCallback((history: Array<Array<TouchInfo>>) => {
     // Process all items in the current touch history
     history.forEach((touches) => {
@@ -48,25 +48,25 @@ export const useTouchHandler = (
         touch.type !== TouchType.Cancelled
       ) {
         if (timeDiffseconds > 0) {
-          prevvelocityRef.current.x =
+          prevVelocityRef.current.x =
             distX / timeDiffseconds / PixelRatio.get();
-          prevvelocityRef.current.y =
+          prevVelocityRef.current.y =
             distY / timeDiffseconds / PixelRatio.get();
         }
       }
 
       const extendedTouchInfo: ExtendedTouchInfo = {
         ...touch,
-        velocityX: prevvelocityRef.current.x,
-        velocityY: prevvelocityRef.current.y,
+        velocityX: prevVelocityRef.current.x,
+        velocityY: prevVelocityRef.current.y,
       };
 
       // Save previous touch
       prevTouchInfoRef.current = touch;
 
       if (touch.type === TouchType.Start) {
-        prevvelocityRef.current.x = 0;
-        prevvelocityRef.current.y = 0;
+        prevVelocityRef.current.x = 0;
+        prevVelocityRef.current.y = 0;
         handlers.onStart && handlers.onStart(touch);
       } else if (touch.type === TouchType.Active) {
         handlers.onActive && handlers.onActive(extendedTouchInfo);

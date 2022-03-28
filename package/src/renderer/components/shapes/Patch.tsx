@@ -40,7 +40,7 @@ const onDraw = createDrawing<PatchProps>(
       // M tl
       // C c1 c2 br
       // C c1 c2 bl
-      // C c1 c2 tl (the redudand point in the last command is removed)
+      // C c1 c2 tl (the redundant point in the last command is removed)
       [
         patch[0].pos,
         patch[0].c2,
