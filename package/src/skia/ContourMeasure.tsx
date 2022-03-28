@@ -19,7 +19,7 @@ export interface SkContourMeasure extends SkJSIInstance<"ContourMeasureIter"> {
   getPosTan(distance: number, output?: PosTan): PosTan;
 
   /**
-   * Returns an Path representing the segement of this contour.
+   * Returns an Path representing the segment of this contour.
    * @param startD - will be pinned between 0 and length()
    * @param stopD - will be pinned between 0 and length()
    * @param startWithMoveTo
