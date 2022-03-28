@@ -33,8 +33,8 @@ void RNSkManager::invalidate() {
   }
   _isInvalidated = true;
   
-  // We need to unregister all views when we get here
-  _viewApi->unregisterAll();
+  // Invalidate members
+  _viewApi->invalidate();
   _platformContext->invalidate();
 }
 

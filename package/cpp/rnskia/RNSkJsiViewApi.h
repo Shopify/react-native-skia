@@ -197,9 +197,11 @@ public:
       : JsiHostObject(), _platformContext(platformContext) {}
 
   /**
-   * Destructor
+   * Invalidates the api object
    */
-  ~RNSkJsiViewApi() { unregisterAll(); }
+  void invalidate() {
+    unregisterAll();
+  }
 
   /**
    Call to remove all draw view infos

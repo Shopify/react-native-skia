@@ -9,11 +9,11 @@
 #include <algorithm>
 #include <functional>
 #include <chrono>
-#include <mutex>
 
 namespace RNSkia
 {
 using namespace facebook;
+
 /**
   Creates a readonly value that depends on one or more other values. The derived value has a callback
   function that is used to calculate the new value when any of the dependencies change.

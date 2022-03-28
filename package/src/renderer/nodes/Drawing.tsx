@@ -7,6 +7,7 @@ import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
+import type { DependencyManager } from "../DependencyManager";
 
 type DrawingCallback<P> = (
   ctx: DrawingContext,
@@ -34,11 +35,12 @@ export class DrawingNode<P> extends Node<P> {
   skipProcessing: boolean;
 
   constructor(
+    depMgr: DependencyManager,
     onDraw: DrawingCallback<P>,
     skipProcessing: boolean,
     props: AnimatedProps<P>
   ) {
-    super(props);
+    super(depMgr, props);
     this.onDraw = onDraw;
     this.skipProcessing = skipProcessing;
   }
