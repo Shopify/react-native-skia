@@ -9,10 +9,10 @@ import { Card } from "./components/Card";
 import { Actions } from "./components/Actions";
 import { Modal } from "./components/Modal";
 import { Tabbar } from "./components/Tabbar";
+import { CANVAS } from "./components/Canvas";
 
 const { width: w, height: h } = Dimensions.get("window");
-const width = 375;
-const height = 812;
+const { width, height } = CANVAS;
 const src = rect(0, 0, width, height);
 const dst = rect(0, 0, w, h);
 const tr = fitbox("fill", src, dst);
