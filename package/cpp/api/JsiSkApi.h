@@ -37,6 +37,8 @@
 #include "JsiSkSurfaceFactory.h"
 #include "JsiSkTextBlobFactory.h"
 #include "JsiSkContourMeasureIter.h"
+#include "JsiSkPictureRecorder.h"
+#include "JsiSkPictureFactory.h"
 
 namespace RNSkia
 {
@@ -55,15 +57,16 @@ namespace RNSkia
         : JsiSkHostObject(context)
     {
 
-    installFunction("Font", JsiSkFont::createCtor(context));
-    installFunction("Paint", JsiSkPaint::createCtor(context));
-    installFunction("RSXform", JsiSkRSXform::createCtor(context));
-    installFunction("Matrix", JsiSkMatrix::createCtor(context));
-    installFunction("XYWHRect", JsiSkRect::createCtor(context));
-    installFunction("RRectXY", JsiSkRRect::createCtor(context));
-    installFunction("Point", JsiSkPoint::createCtor(context));
-    installFunction("ContourMeasureIter", JsiSkContourMeasureIter::createCtor(context));
-    installFunction("MakeVertices", JsiSkVertices::createCtor(context));
+      installFunction("Font", JsiSkFont::createCtor(context));
+      installFunction("Paint", JsiSkPaint::createCtor(context));
+      installFunction("RSXform", JsiSkRSXform::createCtor(context));
+      installFunction("Matrix", JsiSkMatrix::createCtor(context));
+      installFunction("XYWHRect", JsiSkRect::createCtor(context));
+      installFunction("RRectXY", JsiSkRRect::createCtor(context));
+      installFunction("Point", JsiSkPoint::createCtor(context));
+      installFunction("ContourMeasureIter", JsiSkContourMeasureIter::createCtor(context));
+      installFunction("MakeVertices", JsiSkVertices::createCtor(context));
+      installFunction("PictureRecorder", JsiSkPictureRecorder::createCtor(context));
 
       // Static members
       installReadonlyProperty("FontMgr",
@@ -92,6 +95,7 @@ namespace RNSkia
                               std::make_shared<JsiSkShaderFactory>(context));
       installReadonlyProperty("TextBlob", std::make_shared<JsiSkTextBlobFactory>(context));
       installReadonlyProperty("Surface", std::make_shared<JsiSkSurfaceFactory>(context));
+      installReadonlyProperty("Picture", std::make_shared<JsiSkPictureFactory>(context));
     };
   };
 } // namespace RNSkia
