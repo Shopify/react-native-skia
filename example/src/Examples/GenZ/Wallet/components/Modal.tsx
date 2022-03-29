@@ -46,23 +46,17 @@ export const Modal = () => {
       <Asset
         title="EUR"
         subtitle="164.42"
-        value={0.012}
+        value="+0.12"
         y={64 + 17}
         image={images.EUR}
+        plus
       />
       <Asset
         title="USD"
         subtitle="164.42"
-        value={0.012}
+        value="-0,81"
         y={64 + 89}
         image={images.USD}
-      />
-      <Asset
-        title="CHF"
-        subtitle="164.42"
-        value={0.012}
-        y={64 + 161}
-        image={images.CHF}
       />
     </Group>
   );
