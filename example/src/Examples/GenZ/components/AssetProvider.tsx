@@ -1,8 +1,9 @@
 import React, { useState, createContext, useEffect, useContext } from "react";
 import { Image } from "react-native";
-import type { SkImage, SkTypeface } from "@shopify/react-native-skia";
+import type { SkImage, Data, SkTypeface } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
+import type { SkJSIInstance } from "@shopify/react-native-skia/src/skia/JsiInstance";
 
 interface Typefaces {
   [name: string]: SkTypeface;
@@ -19,9 +20,11 @@ interface AssetContext {
 
 const AssetContext = createContext<AssetContext>({ typefaces: {}, images: {} });
 
+type Sources = { [name: string]: ReturnType<typeof require> };
+
 interface AssetProviderProps {
-  typefaces: { [name: string]: ReturnType<typeof require> };
-  images: { [name: string]: ReturnType<typeof require> };
+  typefaces: Sources;
+  images: Sources;
   children?: ReactNode | ReactNode[];
 }
 
@@ -38,6 +41,24 @@ export const useImages = () => {
   return images;
 };
 
+const load = async <T,>(
+  sources: Sources,
+  factory: (data: Data) => T | null
+) => {
+  const data = await Promise.all(
+    Object.entries(sources).map(([name, src]) => {
+      return Skia.Data.fromURI(Image.resolveAssetSource(src).uri).then(
+        (typeface) => {
+          return {
+            [name]: factory(typeface)!,
+          };
+        }
+      );
+    })
+  );
+  return data.reduce<{ [name: string]: T }>((r, i) => Object.assign(r, i), {});
+};
+
 export const AssetProvider = ({
   typefaces: typefaceSources,
   images: imagesSources,
@@ -48,32 +69,12 @@ export const AssetProvider = ({
   useEffect(() => {
     (async () => {
       if (typefaces === null) {
-        const data = await Promise.all(
-          Object.entries(typefaceSources).map(([name, src]) => {
-            return Skia.Data.fromURI(Image.resolveAssetSource(src).uri).then(
-              (typeface) => {
-                return {
-                  [name]: Skia.Typeface.MakeFreeTypeFaceFromData(typeface),
-                };
-              }
-            );
-          })
+        setTypeFaces(
+          await load(typefaceSources, Skia.Typeface.MakeFreeTypeFaceFromData)
         );
-        setTypeFaces(data.reduce<Typefaces>((r, i) => Object.assign(r, i), {}));
       }
       if (images === null) {
-        const data = await Promise.all(
-          Object.entries(imagesSources).map(([name, src]) => {
-            return Skia.Data.fromURI(Image.resolveAssetSource(src).uri).then(
-              (img) => {
-                return {
-                  [name]: Skia.MakeImageFromEncoded(img)!,
-                };
-              }
-            );
-          })
-        );
-        setImages(data.reduce<Images>((r, i) => Object.assign(r, i), {}));
+        setImages(await load(imagesSources, Skia.MakeImageFromEncoded));
       }
     })();
   }, [images, imagesSources, typefaceSources, typefaces]);
