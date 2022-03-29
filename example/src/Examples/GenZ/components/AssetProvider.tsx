@@ -34,6 +34,9 @@ export const AssetProvider = ({
   const [typefaces, setTypeFaces] = useState<null | Typefaces>(null);
   useEffect(() => {
     (async () => {
+      if (typefaces) {
+        return;
+      }
       const data = await Promise.all(
         Object.entries(typefaceSources).map(([name, src]) => {
           return Skia.Data.fromURI(Image.resolveAssetSource(src).uri).then(
@@ -47,7 +50,7 @@ export const AssetProvider = ({
       );
       setTypeFaces(data.reduce<Typefaces>((r, i) => Object.assign(r, i), {}));
     })();
-  }, [typefaceSources]);
+  }, [typefaceSources, typefaces]);
   if (typefaces === null) {
     return null;
   }
