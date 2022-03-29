@@ -62,6 +62,7 @@ export const HomeScreen = () => {
         description="Drawing Performance Test"
         route="Performance"
       />
+      <HomeScreenButton title="☀️ GenZ" description="Gen Z Mode" route="GenZ" />
     </ScrollView>
   );
 };
