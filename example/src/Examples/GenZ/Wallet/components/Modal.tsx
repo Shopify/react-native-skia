@@ -1,9 +1,10 @@
 import React from "react";
 import { Group, RoundedRect, Text } from "@shopify/react-native-skia";
 
-import { useFont } from "../../components/AssetProvider";
+import { useFont, useImages } from "../../components/AssetProvider";
 
 import { CANVAS } from "./Canvas";
+import { Asset } from "./Asset";
 
 const { center } = CANVAS;
 
@@ -17,6 +18,7 @@ const Heading = () => {
 };
 
 export const Modal = () => {
+  const images = useImages();
   const text = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
     new Date()
   );
@@ -41,6 +43,30 @@ export const Modal = () => {
         text={text}
         color="rgba(172, 172, 176, 0.8)"
       />
+      <Asset
+        title="EUR"
+        subtitle="164.42"
+        value={0.012}
+        y={64 + 17}
+        image={images.EUR}
+      />
+      <Asset
+        title="USD"
+        subtitle="164.42"
+        value={0.012}
+        y={64 + 89}
+        image={images.USD}
+      />
+      <Asset
+        title="CHF"
+        subtitle="164.42"
+        value={0.012}
+        y={64 + 161}
+        image={images.CHF}
+      />
     </Group>
   );
 };
+// title: string;
+// subtitle: string;
+// value: number;

@@ -9,24 +9,19 @@ import { Card } from "./components/Card";
 import { Actions } from "./components/Actions";
 import { Modal } from "./components/Modal";
 import { Tabbar } from "./components/Tabbar";
-import { CANVAS } from "./components/Canvas";
+import { CANVAS, Images, Typefaces } from "./components/Canvas";
 
 const { width: w, height: h } = Dimensions.get("window");
 const { width, height } = CANVAS;
 const src = rect(0, 0, width, height);
 const dst = rect(0, 0, w, h);
-const tr = fitbox("fill", src, dst);
-console.log({ tr });
+const transform = fitbox("contain", src, dst);
+
 export const Wallet = () => {
   return (
     <Canvas style={{ width: w, height: h }}>
-      <AssetProvider
-        typefaces={{
-          DMSansRegular: require("../assets/DM_Sans/DMSans-Regular.ttf"),
-          DMSansMedium: require("../assets/DM_Sans/DMSans-Medium.ttf"),
-        }}
-      >
-        <Group transform={fitbox("contain", src, dst)}>
+      <AssetProvider typefaces={Typefaces} images={Images}>
+        <Group transform={transform}>
           <Fill color="#F6F6F6" />
           <Topbar />
           <Card />
