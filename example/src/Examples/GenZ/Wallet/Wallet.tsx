@@ -7,6 +7,8 @@ import { AssetProvider } from "../components/AssetProvider";
 import { Topbar } from "./components/Topbar";
 import { Card } from "./components/Card";
 import { Actions } from "./components/Actions";
+import { Modal } from "./components/Modal";
+import { Tabbar } from "./components/Tabbar";
 
 const { width: w, height: h } = Dimensions.get("window");
 const width = 375;
@@ -29,6 +31,8 @@ export const Wallet = () => {
           <Topbar />
           <Card />
           <Actions />
+          <Modal />
+          <Tabbar />
         </Group>
       </AssetProvider>
     </Canvas>
