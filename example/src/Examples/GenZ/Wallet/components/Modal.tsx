@@ -1,10 +1,11 @@
 import React from "react";
-import { Group, RoundedRect, Text } from "@shopify/react-native-skia";
+import { Group, RoundedRect, Text, Image } from "@shopify/react-native-skia";
 
 import { useFont, useImages } from "../../components/AssetProvider";
 
 import { CANVAS } from "./Canvas";
 import { Asset } from "./Asset";
+import { ActionCard } from "./ActionCard";
 
 const { center } = CANVAS;
 
@@ -58,9 +59,7 @@ export const Modal = () => {
         y={64 + 89}
         image={images.USD}
       />
+      <ActionCard y={64 + 161} />
     </Group>
   );
 };
-// title: string;
-// subtitle: string;
-// value: number;
