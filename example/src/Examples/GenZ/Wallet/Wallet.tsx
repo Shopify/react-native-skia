@@ -6,6 +6,7 @@ import { AssetProvider } from "../components/AssetProvider";
 
 import { Topbar } from "./components/Topbar";
 import { Card } from "./components/Card";
+import { Actions } from "./components/Actions";
 
 const { width: w, height: h } = Dimensions.get("window");
 const width = 375;
@@ -23,10 +24,11 @@ export const Wallet = () => {
           DMSansMedium: require("../assets/DM_Sans/DMSans-Medium.ttf"),
         }}
       >
-        <Group transform={fitbox("cover", src, dst)}>
+        <Group transform={fitbox("contain", src, dst)}>
           <Fill color="#F6F6F6" />
           <Topbar />
           <Card />
+          <Actions />
         </Group>
       </AssetProvider>
     </Canvas>
