@@ -1,6 +1,4 @@
 /* eslint-disable max-len */
-import { text } from "stream/consumers";
-
 import { Group, Path, RoundedRect, Text } from "@shopify/react-native-skia";
 import React from "react";
 
