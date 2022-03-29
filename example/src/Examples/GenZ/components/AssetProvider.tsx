@@ -1,4 +1,5 @@
-import React, { useState, createContext, useEffect } from "react";
+import React, { useState, createContext, useEffect, useContext } from "react";
+import { Image } from "react-native";
 import type { ITypeface } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
@@ -18,6 +19,14 @@ interface AssetProviderProps {
   children?: ReactNode | ReactNode[];
 }
 
+export const useFont = (name: string, size: number) => {
+  const { typefaces } = useContext(AssetContext);
+  if (!typefaces[name]) {
+    throw new Error(`No typeface named ${name}`);
+  }
+  return Skia.Font(typefaces[name], size);
+};
+
 export const AssetProvider = ({
   typefaces: typefaceSources,
   children,
@@ -25,9 +34,18 @@ export const AssetProvider = ({
   const [typefaces, setTypeFaces] = useState<null | Typefaces>(null);
   useEffect(() => {
     (async () => {
-      const tfs = Promise.all(
-        typefaceSources.map((tf) => Skia.Font.loadTypeface(tf))
+      const data = await Promise.all(
+        Object.entries(typefaceSources).map(([name, src]) => {
+          return Skia.Data.fromURI(Image.resolveAssetSource(src).uri).then(
+            (typeface) => {
+              return {
+                [name]: Skia.Typeface.MakeFreeTypeFaceFromData(typeface),
+              };
+            }
+          );
+        })
       );
+      setTypeFaces(data.reduce<Typefaces>((r, i) => Object.assign(r, i), {}));
     })();
   }, [typefaceSources]);
   if (typefaces === null) {
