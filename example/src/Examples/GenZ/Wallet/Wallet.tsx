@@ -1,8 +1,10 @@
-import { Canvas, Fill, FitBox, rect } from "@shopify/react-native-skia";
+import { Canvas, FitBox, rect } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
 
 import { AssetProvider } from "../components/AssetProvider";
+
+import { Topbar } from "./components/Topbar";
 
 const { width: w, height: h } = Dimensions.get("window");
 const width = 375;
@@ -16,10 +18,11 @@ export const Wallet = () => {
       <AssetProvider
         typefaces={{
           DMSansRegular: require("../assets/DM_Sans/DMSans-Regular.ttf"),
+          DMSansMedium: require("../assets/DM_Sans/DMSans-Medium.ttf"),
         }}
       >
         <FitBox src={src} dst={dst}>
-          <Fill color="red" />
+          <Topbar />
         </FitBox>
       </AssetProvider>
     </Canvas>

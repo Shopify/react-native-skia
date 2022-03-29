@@ -1,11 +1,11 @@
 import React, { useState, createContext, useEffect, useContext } from "react";
 import { Image } from "react-native";
-import type { ITypeface } from "@shopify/react-native-skia";
+import type { SkTypeface } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 
 interface Typefaces {
-  [name: string]: ITypeface;
+  [name: string]: SkTypeface;
 }
 
 interface AssetContext {
