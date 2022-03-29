@@ -3,8 +3,6 @@ import {
   ImageShader,
   Paint,
   Group,
-  Rect,
-  Image,
   RoundedRect,
   Text,
 } from "@shopify/react-native-skia";
