@@ -1,5 +1,5 @@
 import React from "react";
-import { Group, RoundedRect, Text, Image } from "@shopify/react-native-skia";
+import { Group, RoundedRect, Text } from "@shopify/react-native-skia";
 
 import { useFont, useImages } from "../../components/AssetProvider";
 
