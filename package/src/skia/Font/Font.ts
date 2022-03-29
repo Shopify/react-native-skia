@@ -2,7 +2,7 @@ import type { SkJSIInstance } from "../JsiInstance";
 import type { SkPaint } from "../Paint";
 import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
-import type { ITypeface } from "../Typeface/Typeface";
+import type { SkTypeface } from "../Typeface/Typeface";
 
 export interface FontMetrics {
   ascent: number; // suggested space above the baseline. < 0
@@ -98,7 +98,7 @@ export interface SkFont extends SkJSIInstance<"Font"> {
   /**
    * Returns the Typeface set for this font.
    */
-  getTypeface(): ITypeface | null;
+  getTypeface(): SkTypeface | null;
 
   /**
    * Requests, but does not require, that edge pixels draw opaque or with partial transparency.
@@ -162,7 +162,7 @@ export interface SkFont extends SkJSIInstance<"Font"> {
    * default one.
    * @param face
    */
-  setTypeface(face: ITypeface | null): void;
+  setTypeface(face: SkTypeface | null): void;
 }
 
 const fontStyle = (

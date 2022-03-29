@@ -3,7 +3,7 @@ import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
 import type { SkFont } from "./Font";
-import type { ITypeface, TypefaceFactory } from "./Typeface";
+import type { SkTypeface, TypefaceFactory } from "./Typeface";
 import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
 import type { SkPaint } from "./Paint";
@@ -44,7 +44,7 @@ export interface Skia {
   Path: PathFactory;
   Matrix: () => SkMatrix;
   ColorFilter: ColorFilterFactory;
-  Font: (typeface?: ITypeface, size?: number) => SkFont;
+  Font: (typeface?: SkTypeface, size?: number) => SkFont;
   Typeface: TypefaceFactory;
   MaskFilter: MaskFilterFactory;
   RuntimeEffect: RuntimeEffectFactory;
