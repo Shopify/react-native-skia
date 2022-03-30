@@ -60,7 +60,7 @@ export const Wallet = () => {
           <Group transform={tr}>
             <Card mode={mode} />
             <Group transform={[{ translateX: width }]}>
-              <Graph />
+              <Graph mode={mode} />
             </Group>
           </Group>
           <Circle cx={176} cy={346} r={4} color="#828282" />
