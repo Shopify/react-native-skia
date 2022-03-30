@@ -6,7 +6,8 @@
   "title": "React Native Skia",
   "version": "0.1.100",
   "description": "Skia View for React Native",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "README.md",
     "LICENSE.md",
@@ -23,7 +24,8 @@
     "libs/ios/libskshaper.xcframework",
     "libs/ios/libsvg.xcframework",
     "react-native-skia.podspec",
-    "scripts/install-npm.js"
+    "scripts/install-npm.js",
+    "dist/**"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
