@@ -17,15 +17,17 @@ interface BaseCardProps {
   mode: SkiaReadonlyValue<number>;
   rect: SkRRect;
   y: number;
+  baseColors?: [string, string, string];
 }
 
 export const BaseCard = ({
   mode,
   rect: { rect },
   rect: rrect,
+  baseColors,
   y,
 }: BaseCardProps) => {
-  const colors = useGradientsColors(mode);
+  const colors = useGradientsColors(mode, baseColors);
   const blur = useDerivedValue(() => mix(mode.current, 0, 100), [mode]);
   return (
     <Group y={y}>

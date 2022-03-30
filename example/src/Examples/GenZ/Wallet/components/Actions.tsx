@@ -1,16 +1,28 @@
 /* eslint-disable max-len */
-import { Group, Path, RoundedRect, Text } from "@shopify/react-native-skia";
+import {
+  Group,
+  Path,
+  rect,
+  RoundedRect,
+  rrect,
+  Text,
+} from "@shopify/react-native-skia";
 import React from "react";
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 
 import { useFont } from "../../components/AssetProvider";
 
-interface ActionProps {
+import type { ModeProps } from "./Canvas";
+import { BaseCard } from "./BaseCard";
+
+interface ActionProps extends ModeProps {
   path: string;
   label: string;
   x: number;
+  mode: SkiaReadonlyValue<number>;
 }
 
-const Action = ({ path, label, x }: ActionProps) => {
+const Action = ({ path, label, x, mode }: ActionProps) => {
   const font = useFont("DMSansMedium", 12);
   const pos = font.measureText(label);
   return (
@@ -22,6 +34,16 @@ const Action = ({ path, label, x }: ActionProps) => {
         height={44}
         r={8}
         color="rgba(172, 172, 176, 0.24)"
+      />
+      <BaseCard
+        baseColors={[
+          "rgba(172, 172, 176, 0.24)",
+          "rgba(172, 172, 176, 0.24)",
+          "rgba(172, 172, 176, 0.24)",
+        ]}
+        rect={rrect(rect(24.5, 0, 44, 44), 8, 8)}
+        mode={mode}
+        y={0}
       />
       <Group x={24.5 + (44 - 24) / 2} y={(44 - 24) / 2}>
         <Path
@@ -43,19 +65,21 @@ const Action = ({ path, label, x }: ActionProps) => {
   );
 };
 
-export const Actions = () => {
+export const Actions = ({ mode }: ModeProps) => {
   return (
     <Group y={350 + 24}>
-      <Action x={24} path="M12 5V19M5 12H19" label="Add Card" />
+      <Action x={24} path="M12 5V19M5 12H19" label="Add Card" mode={mode} />
       <Action
         x={133}
         path="M1 7H23M3 1H21C22.1046 1 23 1.89543 23 3V15C23 16.1046 22.1046 17 21 17H3C1.89543 17 1 16.1046 1 15V3C1 1.89543 1.89543 1 3 1Z"
         label="Transfer to card"
+        mode={mode}
       />
       <Action
         x={242}
         path="M21 1L10 12M21 1L14 21L10 12M21 1L1 8L10 12"
         label="Send Money"
+        mode={mode}
       />
     </Group>
   );
