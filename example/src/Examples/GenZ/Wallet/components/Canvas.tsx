@@ -1,4 +1,12 @@
-import { vec } from "@shopify/react-native-skia";
+import type SkiaReadonlyValue from "@shopify/react-native-skia";
+import {
+  LinearGradient,
+  mixColors,
+  Paint,
+  Skia,
+  useDerivedValue,
+  vec,
+} from "@shopify/react-native-skia";
 
 const width = 375;
 const height = 812;
@@ -18,3 +26,21 @@ export const Images = {
   EUR: require("../../assets/eur.png"),
   USD: require("../../assets/usd.png"),
 };
+
+export const useGradientsColors = (mode: SkiaReadonlyValue<number>) =>
+  useDerivedValue(
+    () => [
+      mixColors(mode.current, Skia.Color("#547AFF"), Skia.Color("#0B86EC")),
+      mixColors(
+        mode.current,
+        Skia.Color("rgb(74.5, 91.5, 255)"),
+        Skia.Color("#7D1EDF")
+      ),
+      mixColors(mode.current, Skia.Color("#413DFF"), Skia.Color("#DB4959")),
+    ],
+    [mode]
+  );
+
+export interface ModeProps {
+  mode: SkiaReadonlyValue<number>;
+}

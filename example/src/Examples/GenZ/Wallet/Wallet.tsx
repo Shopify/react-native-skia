@@ -1,16 +1,13 @@
-import type { Vector, SkRect } from "@shopify/react-native-skia";
 import {
   Canvas,
   fitbox,
   Group,
   rect,
-  Fill,
   Circle,
   useValue,
   useTouchHandler,
   runTiming,
   useDerivedValue,
-  Rect,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -24,6 +21,7 @@ import { Modal } from "./components/Modal";
 import { Tabbar } from "./components/Tabbar";
 import { CANVAS, Images, Typefaces } from "./components/Canvas";
 import { Graph } from "./components/Graph";
+import { Background } from "./components/Background";
 
 const { width: w, height: h } = Dimensions.get("window");
 const { width, height } = CANVAS;
@@ -43,7 +41,7 @@ export const Wallet = () => {
     [translateX]
   );
   const onTouch = useTouchHandler({
-    onStart: (pt) => {
+    onEnd: (pt) => {
       if (pt.y < 200 * transform[3].scaleY) {
         runTiming(mode, mode.current === 1 ? 0 : 1, { duration: 450 });
       } else if (pt.y > 346 * transform[3].scaleY) {
@@ -57,10 +55,10 @@ export const Wallet = () => {
     <Canvas style={{ width: w, height: h }} onTouch={onTouch}>
       <AssetProvider typefaces={Typefaces} images={Images}>
         <Group transform={transform}>
-          <Fill color="#F6F6F6" />
+          <Background mode={mode} />
           <Topbar mode={mode} />
           <Group transform={tr}>
-            <Card />
+            <Card mode={mode} />
             <Group transform={[{ translateX: width }]}>
               <Graph />
             </Group>
@@ -68,7 +66,7 @@ export const Wallet = () => {
           <Circle cx={176} cy={346} r={4} color="#828282" />
           <Circle cx={191} cy={346} r={4} color="#BDBDBD" />
           <Actions />
-          <Modal />
+          <Modal mode={mode} />
           <Tabbar />
         </Group>
       </AssetProvider>

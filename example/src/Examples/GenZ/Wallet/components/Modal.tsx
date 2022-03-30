@@ -1,5 +1,7 @@
 import React from "react";
+import type SkiaReadonlyValue from "@shopify/react-native-skia";
 import { Group, RoundedRect, Text } from "@shopify/react-native-skia";
+import type { ModalProps } from "react-native";
 
 import { useFont, useImages } from "../../components/AssetProvider";
 
@@ -18,7 +20,11 @@ const Heading = () => {
   );
 };
 
-export const Modal = () => {
+interface ModalProps {
+  mode: SkiaReadonlyValue<number>;
+}
+
+export const Modal = ({ mode }: ModalProps) => {
   const images = useImages();
   const text = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
     new Date()
@@ -59,7 +65,7 @@ export const Modal = () => {
         y={64 + 89}
         image={images.USD}
       />
-      <ActionCard y={64 + 161} />
+      <ActionCard y={64 + 161} mode={mode} />
     </Group>
   );
 };
