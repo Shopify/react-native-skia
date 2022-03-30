@@ -28,6 +28,7 @@ export const Images = {
   rocket: require("../../assets/rocket.png"),
   cherries: require("../../assets/cherries.png"),
   money: require("../../assets/money.png"),
+  star: require("../../assets/star.png"),
 };
 
 export const useGradientsColors = (
