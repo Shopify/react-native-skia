@@ -1,8 +1,6 @@
-import type SkiaReadonlyValue from "@shopify/react-native-skia";
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
-  LinearGradient,
   mixColors,
-  Paint,
   Skia,
   useDerivedValue,
   vec,
