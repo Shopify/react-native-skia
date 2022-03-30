@@ -1,3 +1,5 @@
+import { Mode } from "fs";
+
 import React from "react";
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
@@ -11,25 +13,30 @@ import {
 
 import { useFont, useImages } from "../../components/AssetProvider";
 
+import type { ModeProps } from "./Canvas";
 import { CANVAS } from "./Canvas";
 import { Asset } from "./Asset";
 import { ActionCard } from "./ActionCard";
 
 const { center } = CANVAS;
 
-const Heading = () => {
+const Heading = ({ mode }: ModeProps) => {
   const text = "History";
   const font = useFont("DMSansMedium", 14);
   const pos = font.measureText(text);
+  const color = useDerivedValue(
+    () => mixColors(mode.current, Skia.Color("#1E1E20"), Skia.Color("white")),
+    [mode]
+  );
   return (
-    <Text text={text} x={24} y={28 + pos.height} font={font} color="#1E1E20" />
+    <Text text={text} x={24} y={28 + pos.height} font={font} color={color} />
   );
 };
 
 interface ModalProps {
   mode: SkiaReadonlyValue<number>;
 }
-//1F1F1F
+
 export const Modal = ({ mode }: ModalProps) => {
   const images = useImages();
   const text = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
@@ -52,7 +59,7 @@ export const Modal = ({ mode }: ModalProps) => {
         r={99}
         color="rgba(172, 172, 176, 0.24)"
       />
-      <Heading />
+      <Heading mode={mode} />
       <Text
         x={center.x - pos.width / 2}
         y={48 + pos.height}

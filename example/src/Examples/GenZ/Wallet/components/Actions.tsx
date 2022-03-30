@@ -23,14 +23,16 @@ import { BaseCard } from "./BaseCard";
 interface ActionProps extends ModeProps {
   path: string;
   label: string;
+  label2: string;
   x: number;
   mode: SkiaReadonlyValue<number>;
   emoji: SkImage;
 }
 
-const Action = ({ path, label, x, mode, emoji }: ActionProps) => {
+const Action = ({ path, label, x, mode, emoji, label2 }: ActionProps) => {
   const font = useFont("DMSansMedium", 12);
   const pos = font.measureText(label);
+  const pos2 = font.measureText(label2);
   const matrix = useDerivedValue(() => OpacityMatrix(mode.current), [mode]);
   const opacity = useDerivedValue(() => 1 - mode.current, [mode]);
   return (
@@ -76,6 +78,14 @@ const Action = ({ path, label, x, mode, emoji }: ActionProps) => {
         x={(93 - pos.width) / 2}
         y={48 + pos.height}
       />
+      <Text
+        text={label2}
+        font={font}
+        x={(93 - pos2.width) / 2}
+        y={48 + pos2.height}
+        color="white"
+        opacity={mode}
+      />
     </Group>
   );
 };
@@ -90,6 +100,7 @@ export const Actions = ({ mode }: ModeProps) => {
         label="Add Card"
         mode={mode}
         emoji={rocket}
+        label2="Add Card"
       />
       <Action
         x={133}
@@ -97,6 +108,7 @@ export const Actions = ({ mode }: ModeProps) => {
         label="Transfer to card"
         mode={mode}
         emoji={cherries}
+        label2="Earn Crypto"
       />
       <Action
         x={242}
@@ -104,6 +116,7 @@ export const Actions = ({ mode }: ModeProps) => {
         label="Send Money"
         mode={mode}
         emoji={money}
+        label2="Send Money"
       />
     </Group>
   );
