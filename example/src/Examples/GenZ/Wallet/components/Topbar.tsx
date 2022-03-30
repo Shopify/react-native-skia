@@ -1,3 +1,4 @@
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import { Group, Text } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -7,9 +8,12 @@ import { Switch } from "./Switch";
 import { CANVAS } from "./Canvas";
 
 const { width } = CANVAS;
-//interface TopbarProps {}
 
-export const Topbar = () => {
+interface TopbarProps {
+  mode: SkiaReadonlyValue<number>;
+}
+
+export const Topbar = ({ mode }: TopbarProps) => {
   const text = "Wallet";
   const font = useFont("DMSansMedium", 24);
   const { height } = font.measureText(text);
@@ -19,7 +23,7 @@ export const Topbar = () => {
     <Group y={y}>
       <Text text={text} font={font} x={x} y={height} color="#1E1E20" />
       <Group x={width - 16 - 48}>
-        <Switch />
+        <Switch value={mode} />
       </Group>
     </Group>
   );

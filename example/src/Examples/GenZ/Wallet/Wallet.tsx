@@ -30,12 +30,13 @@ const { width, height } = CANVAS;
 const src = rect(0, 0, width, height);
 const dst = rect(0, 0, w, h);
 const transform = fitbox("cover", src, dst);
-const pagination = rect(0, 340, width, 21);
+//const pagination = rect(0, 340, width, 21);
 
 // const isInRect = (pt: Vector, { x, y, width: w1, height: h1 }: SkRect) =>
 //   pt.x >= x && pt.x <= x + w1 && pt.y >= y && pt.y <= y + h1;
 
 export const Wallet = () => {
+  const mode = useValue(0);
   const translateX = useValue(0);
   const tr = useDerivedValue(
     () => [{ translateX: translateX.current }],
@@ -43,7 +44,9 @@ export const Wallet = () => {
   );
   const onTouch = useTouchHandler({
     onStart: (pt) => {
-      if (pt.y > 346 * transform[3].scaleY) {
+      if (pt.y < 200 * transform[3].scaleY) {
+        runTiming(mode, mode.current === 1 ? 0 : 1, { duration: 450 });
+      } else if (pt.y > 346 * transform[3].scaleY) {
         runTiming(translateX, translateX.current !== 0 ? 0 : -width, {
           duration: 600,
         });
@@ -55,7 +58,7 @@ export const Wallet = () => {
       <AssetProvider typefaces={Typefaces} images={Images}>
         <Group transform={transform}>
           <Fill color="#F6F6F6" />
-          <Topbar />
+          <Topbar mode={mode} />
           <Group transform={tr}>
             <Card />
             <Group transform={[{ translateX: width }]}>
