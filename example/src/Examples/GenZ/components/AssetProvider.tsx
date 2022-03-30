@@ -1,9 +1,8 @@
 import React, { useState, createContext, useEffect, useContext } from "react";
 import { Image } from "react-native";
-import type { SkImage, Data, SkTypeface } from "@shopify/react-native-skia";
+import type { SkImage, SkData, SkTypeface } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
-import type { SkJSIInstance } from "@shopify/react-native-skia/src/skia/JsiInstance";
 
 interface Typefaces {
   [name: string]: SkTypeface;
@@ -43,7 +42,7 @@ export const useImages = () => {
 
 const load = async <T,>(
   sources: Sources,
-  factory: (data: Data) => T | null
+  factory: (data: SkData) => T | null
 ) => {
   const data = await Promise.all(
     Object.entries(sources).map(([name, src]) => {

@@ -1,27 +1,18 @@
 import React from "react";
-import {
-  Group,
-  Paint,
-  RoundedRect,
-  LinearGradient,
-  vec,
-} from "@shopify/react-native-skia";
+import { Group, rrect, rect } from "@shopify/react-native-skia";
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+
+import { BaseCard } from "./BaseCard";
 
 interface ActionCardProps {
   y: number;
+  mode: SkiaReadonlyValue<number>;
 }
 
-export const ActionCard = ({ y }: ActionCardProps) => {
+export const ActionCard = ({ y, mode }: ActionCardProps) => {
   return (
     <Group y={y}>
-      <Paint>
-        <LinearGradient
-          start={vec(8, 72)}
-          end={vec(8 + 343, 0)}
-          colors={["#547AFF", "#413DFF"]}
-        />
-      </Paint>
-      <RoundedRect x={8} y={0} width={343} height={73} r={12} />
+      <BaseCard mode={mode} rect={rrect(rect(16, 0, 343, 73), 12, 12)} />
     </Group>
   );
 };
