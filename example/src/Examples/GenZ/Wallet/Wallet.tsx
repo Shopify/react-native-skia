@@ -67,7 +67,7 @@ export const Wallet = () => {
           <Circle cx={191} cy={346} r={4} color="#BDBDBD" />
           <Actions mode={mode} />
           <Modal mode={mode} />
-          <Tabbar />
+          <Tabbar mode={mode} />
         </Group>
       </AssetProvider>
     </Canvas>
