@@ -1,17 +1,35 @@
 import type { SkImage } from "@shopify/react-native-skia";
 import {
+  OpacityMatrix,
+  ColorMatrix,
+  Skia,
+  useDerivedValue,
   ImageShader,
   Paint,
   Group,
   RoundedRect,
   Text,
+  // useDerivedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 
 import { useFont } from "../../components/AssetProvider";
 
-interface AssetProps {
-  image: SkImage;
+import type { ModeProps } from "./Canvas";
+
+// const source = Skia.RuntimeEffect.Make(`
+// uniform shader image1;
+// uniform shader image2;
+// uniform float progress;
+
+// half4 main(float2 xy) {
+//   return vec4(image1.eval(xy).rgb, 1.0);
+//   //return vec4(mix(vec3(progress), image1.eval(xy).rgb, image2.eval(xy).rgb), 1.0);
+// }`)!;
+
+interface AssetProps extends ModeProps {
+  image1: SkImage;
+  image2: SkImage;
   title: string;
   subtitle: string;
   value: string;
@@ -24,7 +42,9 @@ export const Asset = ({
   subtitle,
   value,
   y,
-  image,
+  image1,
+  image2,
+  mode,
   plus,
 }: AssetProps) => {
   const valueFont = useFont("DMSansMedium", 16);
@@ -33,18 +53,33 @@ export const Asset = ({
   const titlePos = titleFont.measureText(title);
   const subtitlePos = subtitleFont.measureText(subtitle);
   const valuePos = valueFont.measureText(value);
+  const matrix = useDerivedValue(() => OpacityMatrix(1 - mode.current), [mode]);
   return (
     <Group x={8} y={y}>
       <Group>
         <Paint>
           <ImageShader
-            image={image}
+            image={image2}
             x={16}
             y={16}
             width={40}
             height={40}
             fit="contain"
           />
+        </Paint>
+        <RoundedRect x={16} y={16} width={40} height={40} r={12} />
+      </Group>
+      <Group>
+        <Paint>
+          <ImageShader
+            image={image1}
+            x={16}
+            y={16}
+            width={40}
+            height={40}
+            fit="contain"
+          />
+          <ColorMatrix matrix={matrix} />
         </Paint>
         <RoundedRect x={16} y={16} width={40} height={40} r={12} />
       </Group>

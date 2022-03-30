@@ -23,6 +23,8 @@ export const Images = {
   CHF: require("../../assets/chf.png"),
   EUR: require("../../assets/eur.png"),
   USD: require("../../assets/usd.png"),
+  ETH: require("../../assets/eth.png"),
+  BTC: require("../../assets/btc.png"),
 };
 
 export const useGradientsColors = (

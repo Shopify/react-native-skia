@@ -9,7 +9,6 @@ import {
   Skia,
   LinearGradient,
   Paint,
-  mix,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -53,6 +52,17 @@ export const Tabbar = ({ mode }: ModeProps) => {
           x={2 * size + x}
           y={24}
         >
+          {/* <Group>
+            <Paint>
+              <RadialGradient
+                c={vec(12, 12)}
+                r={24}
+                colors={["white", "transparent"]}
+              />
+              <Blur blur={4} />
+            </Paint>
+            <Rect x={0} y={0} width={24} height={24} />
+          </Group> */}
           <Paint>
             <LinearGradient
               colors={colors}
