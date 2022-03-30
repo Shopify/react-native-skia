@@ -1,5 +1,5 @@
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
-import { mix, useDerivedValue, Group, Text } from "@shopify/react-native-skia";
+import { useDerivedValue, Group, Text } from "@shopify/react-native-skia";
 import React from "react";
 
 import { useFont } from "../../components/AssetProvider";

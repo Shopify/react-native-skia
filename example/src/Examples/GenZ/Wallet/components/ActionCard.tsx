@@ -12,7 +12,7 @@ interface ActionCardProps {
 export const ActionCard = ({ y, mode }: ActionCardProps) => {
   return (
     <Group y={y}>
-      <BaseCard mode={mode} rect={rrect(rect(16, 0, 343, 73), 12, 12)} />
+      <BaseCard y={0} mode={mode} rect={rrect(rect(16, 0, 343, 73), 12, 12)} />
     </Group>
   );
 };

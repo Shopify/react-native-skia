@@ -1,5 +1,5 @@
 import React from "react";
-import type SkiaReadonlyValue from "@shopify/react-native-skia";
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   Group,
   mixColors,
@@ -8,7 +8,6 @@ import {
   Text,
   useDerivedValue,
 } from "@shopify/react-native-skia";
-import type { ModalProps } from "react-native";
 
 import { useFont, useImages } from "../../components/AssetProvider";
 
@@ -66,7 +65,9 @@ export const Modal = ({ mode }: ModalProps) => {
         subtitle="164.42"
         value="+0.12"
         y={64 + 17}
-        image={images.EUR}
+        image1={images.EUR}
+        image2={images.ETH}
+        mode={mode}
         plus
       />
       <Asset
@@ -74,7 +75,9 @@ export const Modal = ({ mode }: ModalProps) => {
         subtitle="164.42"
         value="-0,81"
         y={64 + 89}
-        image={images.USD}
+        image1={images.USD}
+        image2={images.BTC}
+        mode={mode}
       />
       <ActionCard y={64 + 161} mode={mode} />
     </Group>

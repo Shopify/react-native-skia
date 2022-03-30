@@ -52,7 +52,7 @@ export const Wallet = () => {
     },
   });
   return (
-    <Canvas style={{ width: w, height: h }} onTouch={onTouch}>
+    <Canvas style={{ width: w, height: h }} onTouch={onTouch} mode="continuous">
       <AssetProvider typefaces={Typefaces} images={Images}>
         <Group transform={transform}>
           <Background mode={mode} />

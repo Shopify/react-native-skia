@@ -1,6 +1,6 @@
 import React, { useState, createContext, useEffect, useContext } from "react";
 import { Image } from "react-native";
-import type { SkImage, SkData, SkTypeface } from "@shopify/react-native-skia";
+import type { SkImage, Data, SkTypeface } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 
@@ -42,7 +42,7 @@ export const useImages = () => {
 
 const load = async <T,>(
   sources: Sources,
-  factory: (data: SkData) => T | null
+  factory: (data: Data) => T | null
 ) => {
   const data = await Promise.all(
     Object.entries(sources).map(([name, src]) => {
