@@ -91,7 +91,7 @@ const Action = ({ path, label, x, mode, emoji, label2 }: ActionProps) => {
 };
 
 export const Actions = ({ mode }: ModeProps) => {
-  const { rocket, cherries, money } = useImages();
+  const { rocket, eyes, money } = useImages();
   return (
     <Group y={350 + 24}>
       <Action
@@ -107,7 +107,7 @@ export const Actions = ({ mode }: ModeProps) => {
         path="M1 7H23M3 1H21C22.1046 1 23 1.89543 23 3V15C23 16.1046 22.1046 17 21 17H3C1.89543 17 1 16.1046 1 15V3C1 1.89543 1.89543 1 3 1Z"
         label="Transfer to card"
         mode={mode}
-        emoji={cherries}
+        emoji={eyes}
         label2="Earn Crypto"
       />
       <Action
