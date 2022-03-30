@@ -25,16 +25,15 @@ export const Images = {
   USD: require("../../assets/usd.png"),
 };
 
-export const useGradientsColors = (mode: SkiaReadonlyValue<number>) =>
+export const useGradientsColors = (
+  mode: SkiaReadonlyValue<number>,
+  baseColors = ["#547AFF", "rgb(74.5, 91.5, 255)", "#7D1EDF"]
+) =>
   useDerivedValue(
     () => [
-      mixColors(mode.current, Skia.Color("#547AFF"), Skia.Color("#0B86EC")),
-      mixColors(
-        mode.current,
-        Skia.Color("rgb(74.5, 91.5, 255)"),
-        Skia.Color("#7D1EDF")
-      ),
-      mixColors(mode.current, Skia.Color("#413DFF"), Skia.Color("#DB4959")),
+      mixColors(mode.current, Skia.Color(baseColors[0]), Skia.Color("#0B86EC")),
+      mixColors(mode.current, Skia.Color(baseColors[1]), Skia.Color("#7D1EDF")),
+      mixColors(mode.current, Skia.Color(baseColors[2]), Skia.Color("#DB4959")),
     ],
     [mode]
   );
