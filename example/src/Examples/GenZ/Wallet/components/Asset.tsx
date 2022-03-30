@@ -10,6 +10,7 @@ import {
   RoundedRect,
   Text,
   // useDerivedValue,
+  mixColors,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -31,6 +32,7 @@ interface AssetProps extends ModeProps {
   image1: SkImage;
   image2: SkImage;
   title: string;
+  title2: string;
   subtitle: string;
   value: string;
   y: number;
@@ -39,6 +41,7 @@ interface AssetProps extends ModeProps {
 
 export const Asset = ({
   title,
+  title2,
   subtitle,
   value,
   y,
@@ -51,9 +54,14 @@ export const Asset = ({
   const titleFont = useFont("DMSansMedium", 14);
   const subtitleFont = useFont("DMSansMedium", 12);
   const titlePos = titleFont.measureText(title);
+  const title2Pos = titleFont.measureText(title2);
   const subtitlePos = subtitleFont.measureText(subtitle);
   const valuePos = valueFont.measureText(value);
   const matrix = useDerivedValue(() => OpacityMatrix(1 - mode.current), [mode]);
+  const color = useDerivedValue(
+    () => mixColors(mode.current, Skia.Color("#1A1B27"), Skia.Color("#EB001B")),
+    [mode]
+  );
   return (
     <Group x={8} y={y}>
       <Group>
@@ -91,6 +99,14 @@ export const Asset = ({
         color="#1E1E20"
       />
       <Text
+        text={title2}
+        x={72}
+        y={16.5 + title2Pos.height}
+        font={titleFont}
+        color="white"
+        opacity={mode}
+      />
+      <Text
         text={subtitle}
         x={72}
         y={16.5 + 22 + subtitlePos.height}
@@ -102,7 +118,7 @@ export const Asset = ({
         x={286}
         y={25 + valuePos.height}
         font={valueFont}
-        color={plus ? "#20BC56" : "#1A1B27"}
+        color={plus ? "#20BC56" : color}
       />
     </Group>
   );

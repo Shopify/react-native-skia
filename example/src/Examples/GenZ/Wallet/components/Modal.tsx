@@ -69,6 +69,7 @@ export const Modal = ({ mode }: ModalProps) => {
       />
       <Asset
         title="EUR"
+        title2="Ethereum"
         subtitle="164.42"
         value="+0.12"
         y={64 + 17}
@@ -79,6 +80,7 @@ export const Modal = ({ mode }: ModalProps) => {
       />
       <Asset
         title="USD"
+        title2="Bitcoin"
         subtitle="164.42"
         value="-0,81"
         y={64 + 89}
