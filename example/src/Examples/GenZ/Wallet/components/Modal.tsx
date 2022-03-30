@@ -1,6 +1,13 @@
 import React from "react";
 import type SkiaReadonlyValue from "@shopify/react-native-skia";
-import { Group, RoundedRect, Text } from "@shopify/react-native-skia";
+import {
+  Group,
+  mixColors,
+  RoundedRect,
+  Skia,
+  Text,
+  useDerivedValue,
+} from "@shopify/react-native-skia";
 import type { ModalProps } from "react-native";
 
 import { useFont, useImages } from "../../components/AssetProvider";
@@ -23,7 +30,7 @@ const Heading = () => {
 interface ModalProps {
   mode: SkiaReadonlyValue<number>;
 }
-
+//1F1F1F
 export const Modal = ({ mode }: ModalProps) => {
   const images = useImages();
   const text = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
@@ -31,9 +38,13 @@ export const Modal = ({ mode }: ModalProps) => {
   );
   const font = useFont("DMSansMedium", 12);
   const pos = font.measureText(text);
+  const color = useDerivedValue(
+    () => mixColors(mode.current, Skia.Color("white"), Skia.Color("#1F1F1F")),
+    [mode]
+  );
   return (
     <Group y={463}>
-      <RoundedRect x={8} y={0} height={750} width={359} color="white" r={24} />
+      <RoundedRect x={8} y={0} height={750} width={359} color={color} r={24} />
       <RoundedRect
         x={163}
         y={16}
