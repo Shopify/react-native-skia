@@ -2,6 +2,7 @@
 import {
   Circle,
   Group,
+  mix,
   Paint,
   Path,
   rect,
@@ -9,9 +10,11 @@ import {
   Skia,
   useDerivedValue,
   vec,
+  LinearGradient,
+  BlurMask,
+  mixColors,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { LinearGradient } from "@shopify/react-native-skia";
 
 import type { ModeProps } from "./Canvas";
 import { CANVAS } from "./Canvas";
@@ -31,16 +34,37 @@ const body1 = Skia.Path.MakeFromSVGString(
 )!;
 
 const body2 = Skia.Path.MakeFromSVGString(
-  "M-33.5 233C-33.5 233 67.3066 21.7455 100 21.7455C127.21 21.7455 103.574 168.799 148.5 169.5C208.472 170.436 228.35 28.9332 265.551 32.2275C302.753 35.5218 272.599 155 300.5 155C338.485 155 376.601 13.8227 419.84 21.7455C443.83 26.1411 459 39.7146 459 39.7146 V 200 H 0 Z"
+  "M-33.5 233C-33.5 233 67.3066 21.7455 100 21.7455C127.21 21.7455 103.574 168.799 148.5 169.5C208.472 170.436 228.35 28.9332 265.551 32.2275C302.753 35.5218 272.599 155 300.5 155C338.485 155 376.601 13.8227 419.84 21.7455C443.83 26.1411 459 39.7146 459 39.7146 V 200 H -20 Z"
 )!;
 
 export const Graph = ({ mode }: ModeProps) => {
   const graph = useDerivedValue(
-    () => graph1.interpolate(graph2, mode.current),
+    () => graph1.interpolate(graph2, 1 - mode.current),
     [mode]
   );
   const body = useDerivedValue(
-    () => body1.interpolate(body2, mode.current),
+    () => body1.interpolate(body2, 1 - mode.current),
+    [mode]
+  );
+  const c = useDerivedValue(
+    () => vec(mix(mode.current, 232.4, 229), mix(mode.current, 40.4, 72)),
+    [mode]
+  );
+  const opacity = useDerivedValue(() => 1 - mode.current, [mode]);
+  const blur = useDerivedValue(() => mix(mode.current, 0, 30), [mode]);
+  const colors = useDerivedValue(
+    () => [
+      mixColors(mode.current, Skia.Color("#2F80ED"), Skia.Color("#107A85")),
+      mixColors(mode.current, Skia.Color("#2F80ED"), Skia.Color("#08A2FD")),
+      mixColors(mode.current, Skia.Color("#2F80ED"), Skia.Color("#3679F6")),
+      mixColors(mode.current, Skia.Color("#2F80ED"), Skia.Color("#5A5DF5")),
+      mixColors(mode.current, Skia.Color("#2F80ED"), Skia.Color("#7A40F0")),
+      mixColors(mode.current, Skia.Color("#2F80ED"), Skia.Color("#7F2186")),
+    ],
+    [mode]
+  );
+  const color = useDerivedValue(
+    () => mixColors(mode.current, Skia.Color("#2F80ED"), Skia.Color("#5A5DF5")),
     [mode]
   );
   return (
@@ -52,6 +76,7 @@ export const Graph = ({ mode }: ModeProps) => {
         width={width - 16}
         height={200}
         r={24}
+        opacity={opacity}
       />
       <Group>
         <Paint>
@@ -63,20 +88,24 @@ export const Graph = ({ mode }: ModeProps) => {
         </Paint>
         <Path path={body} />
       </Group>
-      <Path
-        path={graph}
-        color="#2F80ED"
-        style="stroke"
-        strokeCap="round"
-        strokeWidth={5}
-      />
+      <Group>
+        <Paint>
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(width - 16, 200)}
+            colors={colors}
+          />
+          <BlurMask blur={blur} style="solid" />
+        </Paint>
+        <Path path={graph} style="stroke" strokeCap="round" strokeWidth={5} />
+      </Group>
       <Path
         path="M208 20C208 8.95431 216.954 0 228 0H236C247.046 0 256 8.95431 256 20V200H208V20Z"
         color="#2F80ED"
         opacity={0.2}
       />
-      <Circle cx={232.4} cy={40.4} r={15} color="white" />
-      <Circle cx={232.4} cy={40.4} r={10} color="#2F80ED" />
+      <Circle c={c} r={15} color="white" />
+      <Circle c={c} r={10} color={color} />
     </Group>
   );
 };
