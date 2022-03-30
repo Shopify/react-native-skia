@@ -25,6 +25,9 @@ export const Images = {
   USD: require("../../assets/usd.png"),
   ETH: require("../../assets/eth.png"),
   BTC: require("../../assets/btc.png"),
+  rocket: require("../../assets/rocket.png"),
+  cherries: require("../../assets/cherries.png"),
+  money: require("../../assets/money.png"),
 };
 
 export const useGradientsColors = (
