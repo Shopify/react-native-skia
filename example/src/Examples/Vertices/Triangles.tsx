@@ -6,20 +6,19 @@ const f = ({ x, y }: Vector) => [x, y].join(",");
 
 interface TrianglesProps {
   vertices: SkiaReadonlyValue<Vector[]>;
+  triangles: [number, number, number][];
 }
 
-export const Triangles = ({ vertices }: TrianglesProps) => {
+export const Triangles = ({ vertices, triangles }: TrianglesProps) => {
   const path = useDerivedValue(() => {
-    return vertices.current
-      .map((a, i) => {
-        const b = vertices.current[i + 1];
-        const c = vertices.current[i + 4];
-        if (c === undefined) {
-          return "";
-        }
-        return `M${f(a)} L${f(b)} L${f(c)} Z`;
+    return triangles
+      .map(([a, b, c]) => {
+        const v1 = vertices.current[a];
+        const v2 = vertices.current[b];
+        const v3 = vertices.current[c];
+        return `M${f(v1)} L${f(v2)} L${f(v3)} Z`;
       })
-      .join(" ");
+      .join("");
   }, [vertices]);
 
   return <Path path={path} strokeWidth={3} color="black" style="stroke" />;
