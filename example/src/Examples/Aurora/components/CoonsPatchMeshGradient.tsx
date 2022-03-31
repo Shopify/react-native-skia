@@ -21,6 +21,7 @@ import SimplexNoise from "simplex-noise";
 import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";
 import { Curves } from "./Curves";
+import { useHandles } from "./useHandles";
 
 const { width, height } = Dimensions.get("window");
 
@@ -79,6 +80,8 @@ interface CoonsPatchMeshGradientProps {
   colors: string[];
   debug?: boolean;
   lines?: boolean;
+  handles?: boolean;
+  play?: boolean;
 }
 
 const F = 10000;
@@ -90,6 +93,8 @@ export const CoonsPatchMeshGradient = ({
   colors,
   debug,
   lines,
+  handles,
+  play,
 }: CoonsPatchMeshGradientProps) => {
   const clock = useClockValue();
   const image = useImage(require("../../../assets/debug.png"));
@@ -123,7 +128,7 @@ export const CoonsPatchMeshGradient = ({
       })
     )
     .flat();
-  const mesh = useDerivedValue(() => {
+  const meshNoise = useDerivedValue(() => {
     return defaultMesh.map((pt, i) => {
       const isEdge =
         pt.pos.x === 0 ||
@@ -150,12 +155,15 @@ export const CoonsPatchMeshGradient = ({
     });
   }, [clock]);
 
-  //const onTouch = useHandles(mesh, defaultMesh, width, height);
+  const meshGesture = useValue(defaultMesh);
+
+  const onTouch = useHandles(meshGesture, defaultMesh, width, height);
+  const mesh = play ? meshNoise : meshGesture;
   if (image === null) {
     return null;
   }
   return (
-    <Canvas style={{ width, height }}>
+    <Canvas style={{ width, height }} onTouch={onTouch}>
       <Paint>
         <ImageShader image={image} tx="repeat" ty="repeat" />
       </Paint>
@@ -175,7 +183,7 @@ export const CoonsPatchMeshGradient = ({
       {defaultMesh.map(({ pos }, index) => {
         const edge =
           pos.x === 0 || pos.y === 0 || pos.x === width || pos.y === height;
-        if (edge) {
+        if (edge || !handles) {
           return null;
         }
         return (
