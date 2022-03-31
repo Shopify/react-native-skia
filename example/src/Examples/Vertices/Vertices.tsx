@@ -21,7 +21,24 @@ const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);
 const hSize = width / N;
 const vSize = height / N;
-const baseColors = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"];
+const baseColors = [
+  "#FEF8C4",
+  "#E1F1D5",
+  "#C4EBE5",
+  "#ECA171",
+  "#FFFCF3",
+  "#D4B3B7",
+  "#B5A8D2",
+  "#F068A1",
+  "#EDD9A2",
+  "#FEEFAB",
+  "#A666C0",
+  "#8556E5",
+  "#DC4C4C",
+  "#EC795A",
+  "#E599F0",
+  "#96EDF2",
+];
 
 const defaultVertices = n
   .map((col) => n.map((row) => vec(col * hSize, row * vSize)))
@@ -36,7 +53,8 @@ const denormalizedColors = triangles
     return [v1, v2, v3];
   })
   .flat();
-const A = hSize * 1;
+const AX = hSize * 0.45;
+const AV = vSize * 0.45;
 const F = 5000;
 
 export const Demo = () => {
@@ -50,8 +68,8 @@ export const Demo = () => {
         }
         const noise = new SimplexNoise(`${x}-${y}`);
         return vec(
-          x + noise.noise2D(clock.current / F, 0) * A,
-          y + noise.noise2D(0, clock.current / F) * A
+          x + noise.noise2D(clock.current / F, 0) * AX,
+          y + noise.noise2D(0, clock.current / F) * AV
         );
       }),
     [clock]
