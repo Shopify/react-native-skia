@@ -1,3 +1,4 @@
+import "./cdt2d.d";
 import type { Vector } from "@shopify/react-native-skia";
 import {
   useClockValue,
@@ -12,8 +13,6 @@ import {
 import React from "react";
 import { Dimensions } from "react-native";
 import SimplexNoise from "simplex-noise";
-
-/// <reference path="cdt2d.d.ts" />
 import cdt2d from "cdt2d";
 
 const { width, height } = Dimensions.get("window");
