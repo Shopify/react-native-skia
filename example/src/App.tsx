@@ -30,6 +30,13 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen
+            name="Aurora"
+            component={Aurora}
+            options={{
+              header: () => null,
+            }}
+          />
+          <Stack.Screen
             name="Vertices"
             component={Vertices}
             options={{

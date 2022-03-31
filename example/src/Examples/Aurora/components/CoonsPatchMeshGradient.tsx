@@ -1,6 +1,10 @@
 import React from "react";
-import type { SkiaValue, CubicBezierHandle } from "@shopify/react-native-skia";
+import type {
+  CubicBezierHandle,
+  SkiaReadonlyValue,
+} from "@shopify/react-native-skia";
 import {
+  useClockValue,
   add,
   useValue,
   Canvas,
@@ -12,11 +16,11 @@ import {
   useDerivedValue,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
+import SimplexNoise from "simplex-noise";
 
 import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";
 import { Curves } from "./Curves";
-import { useHandles } from "./useHandles";
 
 const { width, height } = Dimensions.get("window");
 
@@ -37,7 +41,7 @@ const rectToColors = (
 ) => [colors[tl], colors[tr], colors[br], colors[bl]] as const;
 
 const useRectToPatch = (
-  mesh: SkiaValue<CubicBezierHandle[]>,
+  mesh: SkiaReadonlyValue<CubicBezierHandle[]>,
   indices: readonly number[]
 ) =>
   useDerivedValue(() => {
@@ -77,6 +81,9 @@ interface CoonsPatchMeshGradientProps {
   lines?: boolean;
 }
 
+const F = 10000;
+const A = 80;
+
 export const CoonsPatchMeshGradient = ({
   rows,
   cols,
@@ -84,6 +91,7 @@ export const CoonsPatchMeshGradient = ({
   debug,
   lines,
 }: CoonsPatchMeshGradientProps) => {
+  const clock = useClockValue();
   const image = useImage(require("../../../assets/debug.png"));
   const dx = width / cols;
   const dy = height / rows;
@@ -102,8 +110,6 @@ export const CoonsPatchMeshGradient = ({
       })
     )
     .flat(2);
-
-  const mesh = useValue(defaultMesh);
   const rects = new Array(rows)
     .fill(0)
     .map((_r, row) =>
@@ -117,13 +123,39 @@ export const CoonsPatchMeshGradient = ({
       })
     )
     .flat();
+  const mesh = useDerivedValue(() => {
+    return defaultMesh.map((pt, i) => {
+      const isEdge =
+        pt.pos.x === 0 ||
+        pt.pos.y === 0 ||
+        pt.pos.x === width ||
+        pt.pos.y === height;
+      if (isEdge) {
+        return pt;
+      }
+      const noisePos = new SimplexNoise(`${i}-pos`);
+      const noiseC1 = new SimplexNoise(`${i}-c1`);
+      const noiseC2 = new SimplexNoise(`${i}-c2`);
+      const p = { ...pt };
+      p.pos = { ...pt.pos };
+      p.c1 = { ...pt.c1 };
+      p.c2 = { ...pt.c2 };
+      p.pos.x += A * noisePos.noise2D(clock.current / F, 0);
+      p.pos.y += A * noisePos.noise2D(0, clock.current / F);
+      p.c1.x += A * noiseC1.noise2D(clock.current / F, 0);
+      p.c1.y += A * noiseC1.noise2D(0, clock.current / F);
+      p.c2.x += A * noiseC2.noise2D(clock.current / F, 0);
+      p.c2.y += A * noiseC2.noise2D(0, clock.current / F);
+      return p;
+    });
+  }, [clock]);
 
-  const onTouch = useHandles(mesh, defaultMesh, width, height);
+  //const onTouch = useHandles(mesh, defaultMesh, width, height);
   if (image === null) {
     return null;
   }
   return (
-    <Canvas style={{ width, height }} onTouch={onTouch}>
+    <Canvas style={{ width, height }}>
       <Paint>
         <ImageShader image={image} tx="repeat" ty="repeat" />
       </Paint>
@@ -159,7 +191,7 @@ interface RectPatchProps {
   debug?: boolean;
   lines?: boolean;
   colors: string[];
-  mesh: SkiaValue<CubicBezierHandle[]>;
+  mesh: SkiaReadonlyValue<CubicBezierHandle[]>;
   defaultMesh: CubicBezierHandle[];
 }
 
