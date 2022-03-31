@@ -18,6 +18,7 @@ import {
   Neumorphism,
   PerformanceDrawingTest,
   GenZ,
+  Vertices,
 } from "./Examples";
 import { HomeScreen } from "./Home";
 
@@ -28,6 +29,13 @@ const App = () => {
       <StatusBar hidden />
       <NavigationContainer>
         <Stack.Navigator>
+          <Stack.Screen
+            name="Vertices"
+            component={Vertices}
+            options={{
+              header: () => null,
+            }}
+          />
           <Stack.Screen
             name="GenZ"
             component={GenZ}

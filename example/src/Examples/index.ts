@@ -17,3 +17,4 @@ export * from "./Aurora";
 export * from "./Glassmorphism";
 export * from "./Performance";
 export * from "./GenZ";
+export * from "./Vertices";
