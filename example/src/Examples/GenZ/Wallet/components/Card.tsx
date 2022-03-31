@@ -13,10 +13,11 @@ import {
   ColorMatrix,
   useDerivedValue,
   OpacityMatrix,
-  useFont,
   Text,
 } from "@shopify/react-native-skia";
 import React from "react";
+
+import { useFont } from "../../components/AssetProvider";
 
 import { BaseCard } from "./BaseCard";
 import type { ModeProps } from "./Canvas";
@@ -36,8 +37,8 @@ const path = Skia.Path.MakeFromSVGString(
 path.setFillType(FillType.EvenOdd);
 
 export const Card = ({ mode }: ModeProps) => {
-  const addressFont = useFont("DMSansMedium", 16)!;
-  const titleFont = useFont("DMSansMedium", 20)!;
+  const addressFont = useFont("DMSansMedium", 16);
+  const titleFont = useFont("DMSansMedium", 20);
   const title = "ETH 1.065250";
   const address = "00x3B0b53B71c4Ff9A9F56E...";
   const titlePos = titleFont.measureText(title);

@@ -1,5 +1,3 @@
-import { Mode } from "fs";
-
 import React from "react";
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
