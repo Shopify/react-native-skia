@@ -1,19 +1,23 @@
+import React from "react";
+import { Dimensions } from "react-native";
 import {
   Canvas,
   Fill,
   Points,
   useClockValue,
+  useValue,
   vec,
   useDerivedValue,
   Vertices,
+  ImageShader,
+  Paint,
   Group,
+  useImage,
 } from "@shopify/react-native-skia";
-import React from "react";
-import { Dimensions } from "react-native";
-import "./cdt2d.d";
 import cdt2d from "cdt2d";
 import SimplexNoise from "simplex-noise";
 
+import "./cdt2d.d";
 import { Triangles } from "./Triangles";
 
 const { width, height } = Dimensions.get("window");
@@ -21,81 +25,48 @@ const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);
 const hSize = width / N;
 const vSize = height / N;
-const baseColors = [
-  "#FEF8C4",
-  "#E1F1D5",
-  "#C4EBE5",
-  "#ECA171",
-  "#FFFCF3",
-  "#D4B3B7",
-  "#B5A8D2",
-  "#F068A1",
-  "#EDD9A2",
-  "#FEEFAB",
-  "#A666C0",
-  "#8556E5",
-  "#DC4C4C",
-  "#EC795A",
-  "#E599F0",
-  "#96EDF2",
-];
-
+const AX = hSize * 0.65;
+const AY = vSize * 0.65;
+const F = 3000;
+const palette = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"];
 const defaultVertices = n
   .map((col) => n.map((row) => vec(col * hSize, row * vSize)))
   .flat();
-
 const triangles = cdt2d(defaultVertices.map(({ x, y }) => [x, y]));
-const denormalizedColors = triangles
-  .map(([a, b, c]) => {
-    const v1 = baseColors[a % baseColors.length];
-    const v2 = baseColors[b % baseColors.length];
-    const v3 = baseColors[c % baseColors.length];
-    return [v1, v2, v3];
-  })
-  .flat();
-const AX = hSize * 0.45;
-const AV = vSize * 0.45;
-const F = 5000;
+const indices = triangles.flat();
+const colors = indices.map((i) => palette[i % palette.length]);
 
 export const Demo = () => {
+  const oslo = useImage(require("../../assets/oslo.jpg"));
   const clock = useClockValue();
   const vertices = useDerivedValue(
     () =>
-      defaultVertices.map(({ x, y }) => {
+      defaultVertices.map(({ x, y }, i) => {
         const isEdge = x === 0 || y === 0 || x === width || y === height;
         if (isEdge) {
-          return vec(x, y);
+          return { x, y };
         }
-        const noise = new SimplexNoise(`${x}-${y}`);
-        return vec(
-          x + noise.noise2D(clock.current / F, 0) * AX,
-          y + noise.noise2D(0, clock.current / F) * AV
-        );
+        const noise = new SimplexNoise(i);
+        return {
+          x: x + AX * noise.noise2D(clock.current / F, 0),
+          y: y + AY * noise.noise2D(0, clock.current / F),
+        };
       }),
     [clock]
   );
-  const denormalizedVertices = useDerivedValue(() => {
-    return triangles
-      .map(([a, b, c]) => {
-        const v1 = vertices.current[a];
-        const v2 = vertices.current[b];
-        const v3 = vertices.current[c];
-        return [v1, v2, v3];
-      })
-      .flat();
-  }, [vertices]);
+  if (!oslo) {
+    return null;
+  }
   return (
     <Canvas style={{ width, height }}>
-      <Fill color="white" />
-      <Group transform={[{ scale: 1 }]} origin={vec(width / 2, height / 2)}>
-        <Vertices
-          vertices={denormalizedVertices}
-          colors={denormalizedColors}
-          // textures={defaultDenormalizedVertices}
-        />
-      </Group>
+      <Vertices
+        vertices={vertices}
+        indices={indices}
+        textures={defaultVertices}
+        colors={colors}
+      />
+      <Points points={vertices} style="stroke" color="white" strokeWidth={6} />
       <Triangles vertices={vertices} triangles={triangles} />
-      <Points points={vertices} style="stroke" strokeWidth={8} color="red" />
     </Canvas>
   );
 };
