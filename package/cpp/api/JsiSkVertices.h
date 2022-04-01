@@ -101,7 +101,7 @@ namespace RNSkia {
                     indicesSize = static_cast<int>(jsiIndices.size(runtime));
                     for (int i = 0; i < indicesSize; i++) {
                         uint16_t index = jsiIndices.getValueAtIndex(runtime, i).asNumber();
-                        colors.push_back(index);
+                        indices.push_back(index);
                     }
                 }
 // TODO: this is the technic used in CanvasKit: https://github.com/google/skia/blob/main/modules/canvaskit/interface.js#L1216
