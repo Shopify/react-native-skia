@@ -21,5 +21,5 @@ export const Triangles = ({ vertices, triangles }: TrianglesProps) => {
       .join("");
   }, [vertices]);
 
-  return <Path path={path} strokeWidth={3} color="black" style="stroke" />;
+  return <Path path={path} strokeWidth={3} color="white" style="stroke" />;
 };
