@@ -9,7 +9,7 @@ import type { SkPaint } from "./Paint";
  * Returns a Skia Paint object
  * */
 export const usePaint = (
-  initializer?: (path: SkPaint) => void,
+  initializer?: (paint: SkPaint) => void,
   deps?: DependencyList
 ) =>
   useMemo(() => {
