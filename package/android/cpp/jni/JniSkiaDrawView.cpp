@@ -3,10 +3,22 @@
 
 #include <memory>
 #include <string>
-#include <chrono>
+#include <vector>
 
+#include <GLES2/gl2.h>
+#include <EGL/eglplatform.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+
+#include <SkCanvas.h>
+#include <SkImageInfo.h>
+#include <SkSurface.h>
+#include <gpu/GrDirectContext.h>
+#include <gpu/GrBackendSurface.h>
+#include <gpu/gl/GrGLInterface.h>
+#include <gpu/gl/GrGLTypes.h>
+#include <gpu/GrTypes.h>
+#include <RNSkInfoParameter.h>
 
 namespace RNSkia
 {
@@ -154,5 +166,4 @@ namespace RNSkia
         // No need to check if the renderer is nullptr since we only get here if it is not.
         _renderer->run(picture, _width, _height);
     }
-
 } // namespace RNSkia

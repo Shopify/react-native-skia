@@ -2,7 +2,6 @@
 
 #include "RNSkPlatformContext.h"
 #include <JsiHostObject.h>
-#include <map>
 
 namespace RNSkia {
 

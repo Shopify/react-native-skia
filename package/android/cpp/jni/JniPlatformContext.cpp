@@ -1,9 +1,14 @@
 #include "JniPlatformContext.h"
-#include <RNSkMeasureTime.h>
+
+#include <exception>
 #include <thread>
+#include <utility>
+
+#include <RNSkMeasureTime.h>
 #include "SkData.h"
 #include "SkRefCnt.h"
 #include "SkTypes.h"
+#include "SkStream.h"
 
 namespace RNSkia
 {

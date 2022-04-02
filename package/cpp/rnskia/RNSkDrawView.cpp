@@ -7,17 +7,27 @@
 #include <chrono>
 #include <functional>
 #include <sstream>
+#include <string>
+#include <memory>
+#include <vector>
+#include <utility>
+
+#include <JsiSkCanvas.h>
+#include <RNSkLog.h>
+#include <RNSkPlatformContext.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include <SkBBHFactory.h>
 #include <SkCanvas.h>
 #include <SkFont.h>
+#include <SkFontTypes.h>
 #include <SkGraphics.h>
 #include <SkPaint.h>
-#include <SkString.h>
 #include <SkPictureRecorder.h>
-#include <SkBBHFactory.h>
+#include <SkSurface.h>
+#include <SkRect.h>
 
 #pragma clang diagnostic pop
 

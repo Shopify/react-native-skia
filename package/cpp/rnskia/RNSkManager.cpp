@@ -2,6 +2,8 @@
 
 #include <JsiSkApi.h>
 #include <RNSkJsiViewApi.h>
+#include <RNSkDrawView.h>
+#include <RNSkValueApi.h>
 
 namespace RNSkia {
 using namespace facebook;

@@ -1,5 +1,12 @@
 #pragma once
 
+#include <map>
+#include <memory>
+#include <thread>
+#include <string>
+
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
 #include <fbjni/fbjni.h>
 #include <jni.h>
 #include <jsi/jsi.h>
@@ -10,7 +17,13 @@
 #include "JniSkiaDrawView.h"
 #include "SkiaOpenGLRenderer.h"
 
-#include <SkPicture.h>
+#include <SkSurface.h>
+#include <SkRefCnt.h>
+#include <gpu/GrBackendSurface.h>
+#include <gpu/GrDirectContext.h>
+
+class SkPicture;
+class ANativeWindow;
 
 namespace RNSkia
 {
