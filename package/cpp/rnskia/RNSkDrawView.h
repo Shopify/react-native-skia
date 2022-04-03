@@ -1,25 +1,34 @@
 #pragma once
 
-#include <JsiSkCanvas.h>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <vector>
+#include <string>
+
+#include <jsi/jsi.h>
+
 #include <RNSkInfoParameter.h>
 #include <RNSkPlatformContext.h>
 #include <RNSkTimingInfo.h>
-#include <mutex>
+#include <RNSkLog.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPicture.h>
-#include "include/gpu/GrDirectContext.h"
-#include "include/gpu/gl/GrGLInterface.h"
-#include <SkSurface.h>
+#include <SkRefCnt.h>
 
 #pragma clang diagnostic pop
 
 #define LOG_ALL_DRAWING 0
 
-namespace RNSkia {
+class SkPicture;
+class SkRect;
+class SkImage;
 
+namespace RNSkia {
+class JsiSkCanvas;
+using namespace facebook;
 using RNSkDrawCallback =
     std::function<void(std::shared_ptr<JsiSkCanvas>, int, int, double,
                        std::shared_ptr<RNSkPlatformContext>)>;

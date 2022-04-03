@@ -1,8 +1,10 @@
 #pragma once
 
+#include <functional>
+#include <memory>
+
 #include <JsiHostObject.h>
 #include <RNSkPlatformContext.h>
-#include <RNSkMeasureTime.h>
 #include <RNSkReadonlyValue.h>
 #include <RNSkAnimation.h>
 #include <jsi/jsi.h>

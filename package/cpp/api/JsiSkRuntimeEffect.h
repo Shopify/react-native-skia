@@ -1,7 +1,14 @@
 #pragma once
 
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <JsiSkHostObjects.h>
 #include <JsiSkShader.h>
+#include <JsiSkMatrix.h>
+
 #include <jsi/jsi.h>
 
 #pragma clang diagnostic push

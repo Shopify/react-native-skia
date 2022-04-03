@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push

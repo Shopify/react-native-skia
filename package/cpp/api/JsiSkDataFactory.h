@@ -3,6 +3,8 @@
 #include "JsiSkData.h"
 #include <jsi/jsi.h>
 
+#include <ReactCommon/TurboModuleUtils.h>
+
 namespace RNSkia {
 
     using namespace facebook;

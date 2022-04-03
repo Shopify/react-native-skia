@@ -1,5 +1,15 @@
 #import <RNSkDrawViewImpl.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#import <SkSurface.h>
+#import <SkCanvas.h>
+
+#pragma clang diagnostic pop
+
 #import <SkiaDrawView.h>
+#import <RNSkLog.h>
 
 // These static class members are used by all Skia Views
 id<MTLDevice> RNSkDrawViewImpl::_device = MTLCreateSystemDefaultDevice();
