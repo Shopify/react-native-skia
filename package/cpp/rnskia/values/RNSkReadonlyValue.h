@@ -1,9 +1,8 @@
 
 #pragma once
 
-#include <JsiHostObject.h>
+#include <JsiSkHostObjects.h>
 #include <RNSkPlatformContext.h>
-#include <RNSkMeasureTime.h>
 #include <jsi/jsi.h>
 
 #include <algorithm>
@@ -11,6 +10,7 @@
 #include <chrono>
 #include <mutex>
 #include <unordered_map>
+#include <memory>
 
 namespace RNSkia
 {
@@ -20,18 +20,17 @@ using namespace facebook;
  Implements a readonly Value that is updated every time the screen is redrawn. Its value will be the
  number of milliseconds since the animation value was started.
  */
-class RNSkReadonlyValue : public JsiHostObject
+class RNSkReadonlyValue : public JsiSkHostObject
 {
 public:
   RNSkReadonlyValue(std::shared_ptr<RNSkPlatformContext> platformContext)
-      : JsiHostObject(),
-    _platformContext(platformContext),
+      : JsiSkHostObject(platformContext),
     _propNameId(jsi::PropNameID::forUtf8(*platformContext->getJsRuntime(), "value")) {}
   
   ~RNSkReadonlyValue() {
     _invalidated = true;
   }
-  
+
   JSI_PROPERTY_GET(__typename__) {
     return jsi::String::createFromUtf8(runtime, "RNSkValue");
   }
@@ -126,19 +125,11 @@ protected:
     std::lock_guard<std::mutex> lock(_mutex);
     _listeners.erase(listenerId);
   }
-    
-  /**
-   * @return Platform context
-   */
-  const std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
-    return _platformContext;
-  }
-  
+
   std::atomic<bool> _invalidated = { false };
 
 private:
   jsi::PropNameID _propNameId;
-  std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<jsi::Object> _valueHolder;
   long _listenerId = 0;
   std::unordered_map<long, std::function<void(jsi::Runtime&)>> _listeners;

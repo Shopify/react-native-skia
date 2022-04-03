@@ -1,5 +1,6 @@
 #include "SkiaOpenGLRenderer.h"
 
+#include <RNSkLog.h>
 namespace RNSkia
 {
 

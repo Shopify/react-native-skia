@@ -1,5 +1,10 @@
 #pragma once
 
+#include <functional>
+#include <string>
+#include <memory>
+#include <exception>
+
 #include <JniPlatformContext.h>
 #include <RNSkPlatformContext.h>
 

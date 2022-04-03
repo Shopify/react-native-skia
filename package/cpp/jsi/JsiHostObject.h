@@ -4,6 +4,8 @@
 
 #include <functional>
 #include <unordered_map>
+#include <memory>
+#include <string>
 
 #define STR_CAT_NX(A, B) A##B
 #define STR_CAT(A, B) STR_CAT_NX(A, B)
@@ -201,7 +203,7 @@ protected:
   }
 
   /**
-   * Installs a property with only gettter
+   * Installs a property with only getter
    * @param name Name of property to install
    * @param get Getter function
    */
@@ -215,7 +217,7 @@ protected:
   }
 
   /**
-   * Installs a property wich points to a given host object
+   * Installs a property which points to a given host object
    * @param name Name of property to install
    * @param hostObject Object to return
    */

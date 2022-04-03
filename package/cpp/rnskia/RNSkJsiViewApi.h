@@ -1,5 +1,10 @@
 #pragma once
 
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <JsiHostObject.h>
 #include <RNSkDrawView.h>
 #include <RNSkPlatformContext.h>
