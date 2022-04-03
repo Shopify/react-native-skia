@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -17,18 +22,17 @@ namespace RNSkia {
     public:
         JsiSkImageInfo(std::shared_ptr<RNSkPlatformContext> context, const SkImageInfo &imageInfo)
                 : JsiSkWrappingSharedPtrHostObject<SkImageInfo>(
-                context, std::make_shared<SkImageInfo>(imageInfo)){};
+                std::move(context), std::make_shared<SkImageInfo>(imageInfo)){}
 
         /**
         Returns the underlying object from a host object of this type
        */
         static std::shared_ptr<SkImageInfo> fromValue(jsi::Runtime &runtime,
                                                   const jsi::Value &obj) {
-            const auto object = obj.asObject(runtime);
+            const auto& object = obj.asObject(runtime);
             if (object.isHostObject(runtime)) {
                 return object
                         .asHostObject<JsiSkImageInfo>(runtime)
-                        .get()
                         ->getObject();
             } else {
                 auto width = object.getProperty(runtime, "width").asNumber();
@@ -47,7 +51,7 @@ namespace RNSkia {
                                   std::shared_ptr<RNSkPlatformContext> context,
                                   const SkImageInfo &imageInfo) {
             return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkImageInfo>(context, imageInfo));
+                    runtime, std::make_shared<JsiSkImageInfo>(std::move(context), imageInfo));
         }
     };
 } // namespace RNSkia

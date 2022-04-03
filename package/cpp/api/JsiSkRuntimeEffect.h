@@ -46,7 +46,7 @@ namespace RNSkia
                                             0, matrix, isOpaque);
 
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+          runtime, std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
     }
 
     JSI_HOST_FUNCTION(makeShaderWithChildren)
@@ -74,7 +74,7 @@ namespace RNSkia
                                             children.size(), matrix, isOpaque);
 
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+          runtime, std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
     }
 
     JSI_HOST_FUNCTION(getUniformCount)
@@ -124,7 +124,7 @@ namespace RNSkia
 
     JsiSkRuntimeEffect(std::shared_ptr<RNSkPlatformContext> context,
                        sk_sp<SkRuntimeEffect> rt)
-        : JsiSkWrappingSkPtrHostObject<SkRuntimeEffect>(context, rt){};
+        : JsiSkWrappingSkPtrHostObject<SkRuntimeEffect>(std::move(context), std::move(rt)){}
 
   private:
     sk_sp<SkData> castUniforms(jsi::Runtime &runtime, const jsi::Value &value)

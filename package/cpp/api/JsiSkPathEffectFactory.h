@@ -1,11 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <vector>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkPathEffect.h"
-#include <jsi/jsi.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -63,7 +65,7 @@ public:
 
     return jsi::Object::createFromHostObject(
             runtime, std::make_shared<JsiSkPathEffect>(
-                    getContext(),  SkPathEffect::MakeCompose(outer, inner)));
+                    getContext(),  SkPathEffect::MakeCompose(std::move(outer), std::move(inner))));
   }
 
   JSI_HOST_FUNCTION(MakeSum) {
@@ -72,7 +74,7 @@ public:
 
     return jsi::Object::createFromHostObject(
             runtime, std::make_shared<JsiSkPathEffect>(
-                    getContext(),  SkPathEffect::MakeSum(outer, inner)));
+                    getContext(),  SkPathEffect::MakeSum(std::move(outer), std::move(inner))));
   }
 
   JSI_HOST_FUNCTION(MakePath1D) {
@@ -114,7 +116,7 @@ public:
    )
 
   JsiSkPathEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(context) {}
+      : JsiSkHostObject(std::move(context)) {}
 };
 
 } // namespace RNSkia

@@ -1,7 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <utility>
+#include <jsi/jsi.h>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
 
@@ -21,7 +24,7 @@ namespace RNSkia {
 
         JsiSkVertices(std::shared_ptr<RNSkPlatformContext> context,
         sk_sp<SkVertices> vertices)
-        : JsiSkWrappingSkPtrHostObject<SkVertices>(context, vertices) {}
+        : JsiSkWrappingSkPtrHostObject<SkVertices>(std::move(context), std::move(vertices)) {}
 
         // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
         JSI_PROPERTY_GET(__typename__) {
@@ -31,7 +34,7 @@ namespace RNSkia {
         JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkVertices, __typename__))
 
         JSI_HOST_FUNCTION(bounds) {
-            auto result = getObject()->bounds();
+            const auto& result = getObject()->bounds();
             return jsi::Object::createFromHostObject(
                     runtime, std::make_shared<JsiSkRect>(getContext(), result));
         }
@@ -48,10 +51,8 @@ namespace RNSkia {
          */
         static sk_sp<SkVertices> fromValue(jsi::Runtime &runtime,
                                                  const jsi::Value &obj) {
-            const auto object = obj.asObject(runtime);
-                return object
+            return obj.asObject(runtime)
                         .asHostObject<JsiSkVertices>(runtime)
-                        .get()
                         ->getObject();
         }
 
@@ -135,7 +136,7 @@ namespace RNSkia {
 //                auto vertices = builder.detach();
                 auto vertices = SkVertices::MakeCopy(mode, positionsSize, positions.data(), texs.data(), colors.data(), indicesSize, indices.data());
                 return jsi::Object::createFromHostObject(
-                        runtime, std::make_shared<JsiSkVertices>(context, vertices));
+                        runtime, std::make_shared<JsiSkVertices>(context, std::move(vertices)));
             };
         }
     };

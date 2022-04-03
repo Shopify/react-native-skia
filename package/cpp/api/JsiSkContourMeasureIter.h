@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include "JsiSkHostObjects.h"
 #include "JsiSkContourMeasure.h"
 
@@ -22,7 +25,7 @@ namespace RNSkia
                     std::shared_ptr<RNSkPlatformContext> context,
                     const SkPath &path,
                     bool forceClosed,
-                    SkScalar resScale = 1) : JsiSkWrappingSharedPtrHostObject<SkContourMeasureIter>(context, std::make_shared<SkContourMeasureIter>(path, forceClosed, resScale)) {}
+                    SkScalar resScale = 1) : JsiSkWrappingSharedPtrHostObject<SkContourMeasureIter>(std::move(context), std::make_shared<SkContourMeasureIter>(path, forceClosed, resScale)) {}
 
                 // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
                 JSI_PROPERTY_GET(__typename__)
@@ -40,9 +43,9 @@ namespace RNSkia
                         {
                                 return jsi::Value::undefined();
                         }
-                        auto nextObject = std::make_shared<JsiSkContourMeasure>(getContext(), next);
+                        auto nextObject = std::make_shared<JsiSkContourMeasure>(getContext(), std::move(next));
 
-                        return jsi::Object::createFromHostObject(runtime, nextObject);
+                        return jsi::Object::createFromHostObject(runtime, std::move(nextObject));
                 }
 
                 JSI_EXPORT_FUNCTIONS(
@@ -56,7 +59,6 @@ namespace RNSkia
                 {
                         return obj.asObject(runtime)
                             .asHostObject<JsiSkContourMeasureIter>(runtime)
-                            .get()
                             ->getObject();
                 }
 
@@ -78,7 +80,7 @@ namespace RNSkia
                                 // Return the newly constructed object
                                 return jsi::Object::createFromHostObject(
                                     runtime, std::make_shared<JsiSkContourMeasureIter>(
-                                                 context,
+                                                 std::move(context),
                                                  *path,
                                                  forceClosed,
                                                  resScale));

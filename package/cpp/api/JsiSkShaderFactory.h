@@ -1,15 +1,22 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <vector>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
-#include <jsi/jsi.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
 
 #include <SkColorFilter.h>
 #include <SkImageFilters.h>
 #include <SkPerlinNoiseShader.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 
@@ -80,7 +87,7 @@ public:
     sk_sp<SkShader> gradient = SkGradientShader::MakeLinear(pts, colors.data(), positions.data(),
                                                   static_cast<int>(colors.size()), tileMode, flag, localMatrix);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
+        runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
   }
 
   JSI_HOST_FUNCTION(MakeRadialGradient) {
@@ -98,7 +105,7 @@ public:
                                               positions.data(), static_cast<int>(colors.size()), tileMode,
                                               flag, localMatrix);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
+        runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
   }
 
   JSI_HOST_FUNCTION(MakeSweepGradient) {
@@ -118,7 +125,7 @@ public:
         x, y, colors.data(), positions.data(), static_cast<int>(colors.size()), tileMode, startAngle,
         endAngle, flag, localMatrix);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
+        runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
   }
 
   JSI_HOST_FUNCTION(MakeTwoPointConicalGradient) {
@@ -141,7 +148,7 @@ public:
             static_cast<int>(colors.size()), tileMode, flag, localMatrix);
 
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
+        runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
   }
 
   JSI_HOST_FUNCTION(MakeTurbulence) {
@@ -155,7 +162,7 @@ public:
     sk_sp<SkShader> gradient = SkPerlinNoiseShader::MakeTurbulence(
         baseFreqX, baseFreqY, octaves, seed, &size);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
+        runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
   }
 
   JSI_HOST_FUNCTION(MakeFractalNoise) {
@@ -169,7 +176,7 @@ public:
     sk_sp<SkShader> gradient = SkPerlinNoiseShader::MakeFractalNoise(
         baseFreqX, baseFreqY, octaves, seed, &size);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
+        runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
   }
 
   JSI_HOST_FUNCTION(MakeBlend) {
@@ -178,14 +185,14 @@ public:
     auto two = JsiSkShader::fromValue(runtime, arguments[2]);
     sk_sp<SkShader> gradient = SkShaders::Blend(blendMode, one, two);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
+        runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
   }
 
   JSI_HOST_FUNCTION(MakeColor) {
     auto color = arguments[0].asNumber();
     sk_sp<SkShader> gradient = SkShaders::Color(color);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), gradient));
+        runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeLinearGradient),
@@ -199,7 +206,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeColor))
 
   JsiSkShaderFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(context) {}
+      : JsiSkHostObject(std::move(context)) {}
 };
 
 } // namespace RNSkia

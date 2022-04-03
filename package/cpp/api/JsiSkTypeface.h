@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -9,8 +14,6 @@
 #include <SkTypeface.h>
 
 #pragma clang diagnostic pop
-
-#include <jsi/jsi.h>
 
 namespace RNSkia {
 
@@ -30,8 +33,8 @@ public:
                               JSI_EXPORT_PROP_GET(JsiSkTypeface, __typename__))
 
   JsiSkTypeface(std::shared_ptr<RNSkPlatformContext> context,
-                const sk_sp<SkTypeface> typeface)
-      : JsiSkWrappingSkPtrHostObject(context, typeface){};
+                sk_sp<SkTypeface> typeface)
+      : JsiSkWrappingSkPtrHostObject(std::move(context), std::move(typeface)){}
 
   /**
     Returns the underlying object from a host object of this type
@@ -40,7 +43,6 @@ public:
                                      const jsi::Value &obj) {
     return obj.asObject(runtime)
         .asHostObject<JsiSkTypeface>(runtime)
-        .get()
         ->getObject();
   }
 
@@ -49,9 +51,9 @@ public:
   */
   static jsi::Value toValue(jsi::Runtime &runtime,
                               std::shared_ptr<RNSkPlatformContext> context,
-                              const sk_sp<SkTypeface> tf) {
+                              sk_sp<SkTypeface> tf) {
     return jsi::Object::createFromHostObject(
-              runtime, std::make_shared<JsiSkTypeface>(context, tf));
+              runtime, std::make_shared<JsiSkTypeface>(std::move(context), std::move(tf)));
   }
 
 private:

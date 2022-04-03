@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "JsiSkFont.h"
@@ -509,9 +510,9 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, concat))
 
   JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(context) {}
+      : JsiSkHostObject(std::move(context)) {}
 
-  JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context, SkCanvas* canvas): JsiSkCanvas(context) {
+  JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context, SkCanvas* canvas): JsiSkCanvas(std::move(context)) {
     setCanvas(canvas);
   }
 

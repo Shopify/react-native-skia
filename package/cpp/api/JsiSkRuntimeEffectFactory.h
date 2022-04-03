@@ -1,12 +1,14 @@
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
+#include <utility>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkRuntimeEffect.h"
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
-#include <jsi/jsi.h>
 
 namespace RNSkia {
 
@@ -27,13 +29,13 @@ public:
       return jsi::Value::null();
     }
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRuntimeEffect>(getContext(), effect));
+        runtime, std::make_shared<JsiSkRuntimeEffect>(getContext(), std::move(effect)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make))
 
   JsiSkRuntimeEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(context) {}
+      : JsiSkHostObject(std::move(context)) {}
 };
 
 } // namespace RNSkia
