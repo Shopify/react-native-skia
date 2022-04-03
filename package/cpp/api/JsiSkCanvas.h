@@ -1,6 +1,8 @@
 #pragma once
 
-#include "JsiSkCanvas.h"
+#include <memory>
+#include <vector>
+
 #include "JsiSkFont.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
@@ -15,7 +17,6 @@
 #include "JsiSkPicture.h"
 
 #include <jsi/jsi.h>
-#include <map>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

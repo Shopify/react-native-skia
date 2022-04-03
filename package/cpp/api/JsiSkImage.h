@@ -1,11 +1,11 @@
 #pragma once
 
-#include <ReactCommon/TurboModuleUtils.h>
-
-#include <tuple>
+#include <string>
+#include <memory>
 
 #include "JsiSkMatrix.h"
 #include <JsiSkHostObjects.h>
+#include "JsiSkShader.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

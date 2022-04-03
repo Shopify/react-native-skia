@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include <chrono>
 
 #define NUMBER_OF_DURATION_SAMPLES 10
 
