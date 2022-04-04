@@ -10,6 +10,8 @@ It creates a filter that draws a drop shadow under the input content.
 A `shadowOnly` property renders the drop shadow, excluding the input content.
 It can also render an inner shadow via the `inner` property.
 
+If you want to render inner shadows to a rounded rectangle, [box shadows](/shapes/box.md) are much faster.
+
 | Name        | Type          |  Description                                                  |
 |:------------|:--------------|:--------------------------------------------------------------|
 | dx          | `number`      | The X offset of the shadow.                                   |
