@@ -17,6 +17,8 @@ It can apply the following operations to its children:
 |:-----------|:-------------------|:--------------------------------------------------------------|
 | transform? | `Transform2d`      | [Same API than in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is, however, different. It is the center object in React Native and the top-left corner in Skia. |
 | origin?    | `Point`            | Sets the origin of the transformation. This property is not inherited by its children. |
+| x? | `number` | Shorthand for the `translateX` transform property |
+| y? | `number` | Shorthand for the `translateY` transform property |
 | clip?   | `RectOrRRectOrPath`     | Rectangle, rounded rectangle, or Path to use to clip the children. |
 | invertClip? | `boolean`         | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden. |
 | rasterize? | `RefObject<Paint>` | Draws the children as a bitmap and applies the effects provided by the paint. |
