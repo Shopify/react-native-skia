@@ -61,6 +61,7 @@ namespace RNSkia
             std::vector<SkScalar> widthPtrs;
             widthPtrs.resize(glyphsSize);
 
+            glyphs.reserve(glyphsSize);
             for (int i = 0; i < glyphsSize; i++)
             {
                 glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
@@ -125,6 +126,7 @@ namespace RNSkia
             auto bottom = arguments[3].asNumber();
             std::vector<SkPoint> positions;
             int pointsSize = static_cast<int>(jsiPositions.size(runtime));
+            positions.reserve(pointsSize);
             for (int i = 0; i < pointsSize; i++)
             {
                 std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
@@ -134,6 +136,7 @@ namespace RNSkia
 
             std::vector<SkGlyphID> glyphs;
             int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+            glyphs.reserve(glyphsSize);
             for (int i = 0; i < glyphsSize; i++)
             {
                 glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());

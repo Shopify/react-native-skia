@@ -48,6 +48,7 @@ std::vector<SkColor> getColors(jsi::Runtime &runtime, const jsi::Value& value) {
   if (!value.isNull()) {
     auto jsiColors = value.asObject(runtime).asArray(runtime);
     auto size = jsiColors.size(runtime);
+    colors.reserve(size);
     for (int i = 0; i < size; i++) {
       SkColor color = jsiColors.getValueAtIndex(runtime, i).asNumber();
       colors.push_back(color);
@@ -61,6 +62,7 @@ std::vector<SkScalar> getPositions(jsi::Runtime &runtime, const jsi::Value& valu
   if (!value.isNull()) {
     auto jsiPositions = value.asObject(runtime).asArray(runtime);
     auto size = jsiPositions.size(runtime);
+    positions.reserve(size);
     for (int i = 0; i < size; i++) {
       SkScalar position = jsiPositions.getValueAtIndex(runtime, i).asNumber();
       positions.push_back(position);

@@ -38,6 +38,7 @@ public:
     auto jsiIntervals = arguments[0].asObject(runtime).asArray(runtime);
     auto size = (int)jsiIntervals.size(runtime);
     std::vector<SkScalar> intervals;
+    intervals.reserve(size);
     for (int i = 0; i < size; i++) {
       SkScalar interval = jsiIntervals.getValueAtIndex(runtime, i).asNumber();
       intervals.push_back(interval);

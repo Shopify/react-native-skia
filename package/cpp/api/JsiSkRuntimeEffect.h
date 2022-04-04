@@ -58,6 +58,7 @@ namespace RNSkia
       std::vector<sk_sp<SkShader>> children;
       auto jsiChildren = arguments[2].asObject(runtime).asArray(runtime);
       auto jsiChildCount = jsiChildren.size(runtime);
+      children.reserve(jsiChildCount);
       for (int i = 0; i < jsiChildCount; i++)
       {
         auto shader = jsiChildren.getValueAtIndex(runtime, i)
