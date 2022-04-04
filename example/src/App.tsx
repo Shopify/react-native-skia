@@ -17,7 +17,6 @@ import {
   Glassmorphism,
   Neumorphism,
   PerformanceDrawingTest,
-  GenZ,
   Vertices,
 } from "./Examples";
 import { HomeScreen } from "./Home";

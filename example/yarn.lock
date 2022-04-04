@@ -2507,11 +2507,6 @@ define-property@^2.0.2:
     is-descriptor "^1.0.2"
     isobject "^3.0.1"
 
-delatin@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/delatin/-/delatin-0.2.0.tgz#c54f6ac395e5ba9e6eb6cd8b7cdfa6acf27128f6"
-  integrity sha512-HvDx6I5Jju/mqFp58/qeSL1wx6rYxsLWpWVSCQvL1Ps8MhVlttwm+Ohl38dUSTN439uxag//vXJm09PqFz+/Og==
-
 delayed-stream@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/delayed-stream/-/delayed-stream-1.0.0.tgz#df3ae199acadfb7d440aaae0b29e2272b24ec619"

@@ -2,16 +2,11 @@ import React from "react";
 import { Dimensions } from "react-native";
 import {
   Canvas,
-  Fill,
   Points,
   useClockValue,
-  useValue,
   vec,
   useDerivedValue,
   Vertices,
-  ImageShader,
-  Paint,
-  Group,
   useImage,
 } from "@shopify/react-native-skia";
 import cdt2d from "cdt2d";
@@ -65,7 +60,7 @@ export const Demo = () => {
         textures={defaultVertices}
         colors={colors}
       />
-      <Points points={vertices} style="stroke" color="white" strokeWidth={6} />
+      <Points points={vertices} style="stroke" color="white" strokeWidth={1} />
       <Triangles vertices={vertices} triangles={triangles} />
     </Canvas>
   );

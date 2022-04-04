@@ -17,7 +17,6 @@
     "@shopify/react-native-skia": "link:../package/",
     "cdt2d": "^1.0.0",
     "color": "^4.2.1",
-    "delatin": "^0.2.0",
     "react": "17.0.2",
     "react-native": "0.66.2",
     "react-native-safe-area-context": "^3.3.2",
