@@ -5,9 +5,10 @@ import { ClipOp, BlurStyle, Skia, processColor } from "../../../skia";
 import { createDrawing } from "../../nodes";
 import type { AnimatedProps, CustomPaintProps } from "../../processors";
 import { add, vec, rrect } from "../../processors";
-import { rect } from "../../processors/Rects";
+import { rect, isRRect } from "../../processors/Rects";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { SkJSIInstance } from "../../../skia/JsiInstance";
+import type { SkRect } from "../../../skia/Rect";
 
 const inflate = (box: SkRRect, dx: number, dy: number, tx = 0, ty = 0) =>
   rrect(
@@ -49,10 +50,11 @@ const isBoxShadow = (s: SkJSIInstance<string>): s is BoxShadowDecl =>
   s.__typename__ === "BoxShadow";
 
 interface BoxProps extends CustomPaintProps {
-  box: SkRRect;
+  box: SkRRect | SkRect;
 }
 
-const onDraw = createDrawing<BoxProps>((ctx, { box }, node) => {
+const onDraw = createDrawing<BoxProps>((ctx, { box: defaultBox }, node) => {
+  const box = isRRect(defaultBox) ? defaultBox : rrect(defaultBox, 0, 0);
   const { canvas, paint, opacity } = ctx;
   const shadows = node.visit(ctx).filter<BoxShadowDecl>(isBoxShadow);
   shadows
