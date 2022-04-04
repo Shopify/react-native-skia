@@ -102,10 +102,8 @@ const multiply3 = (m1: Matrix3, m2: Matrix3) => {
   ] as const;
 };
 
-export const matrixVecMul3 = (m: Matrix3, v: Vec3) => {
-  "worklet";
-  return [dot3(m[0], v), dot3(m[1], v), dot3(m[2], v)] as const;
-};
+export const matrixVecMul3 = (m: Matrix3, v: Vec3) =>
+  [dot3(m[0], v), dot3(m[1], v), dot3(m[2], v)] as const;
 
 const skiaMatrix3 = (m: Matrix3): SkMatrix => {
   return [
@@ -122,9 +120,9 @@ const skiaMatrix3 = (m: Matrix3): SkMatrix => {
 };
 
 export const processTransform2d = (transforms: Transforms2d) =>
-  skiaMatrix3(processTransform2dRaw(transforms));
+  skiaMatrix3(processTransform(transforms));
 
-export const processTransform2dRaw = (transforms: Transforms2d) =>
+const processTransform = (transforms: Transforms2d) =>
   transforms.reduce((acc, transform) => {
     const key = Object.keys(transform)[0] as Transform2dName;
     const value = (transform as Pick<Transformations, typeof key>)[key];

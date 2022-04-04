@@ -43,7 +43,6 @@ export const Neumorphism = () => {
   const offsetY = useValue(0);
   const t = useLoop({ duration: 3000 });
   const x = useDerivedValue(() => mix(t.current, 0, 180), [t]);
-  const p0 = useValue(0);
   const progress = useDerivedValue(() => x.current / 192, [x]);
   const font = useFont(require("./components/SF-Pro-Display-Bold.otf"), 17);
   const onTouch = useTouchHandler({
