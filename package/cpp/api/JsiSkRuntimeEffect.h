@@ -139,15 +139,18 @@ namespace RNSkia
       auto uniforms = SkData::MakeUninitialized(getObject()->uniformSize());
 
       // Convert to skia uniforms
-      for (int i = 0; i < jsiUniformsSize; i++)
+      const auto& u = getObject()->uniforms();
+      for (std::size_t i = 0; i < u.size(); i++)
       {
         auto it = getObject()->uniforms().begin() + i;
-        RuntimeEffectUniform u = fromUniform(*it);
-        float fValue = jsiUniforms.getValueAtIndex(runtime, i).asNumber();
-        int iValue = static_cast<int>(fValue);
-        auto value = u.isInteger ? iValue : fValue;
-        memcpy(SkTAddOffset<void>(uniforms->writable_data(), i * sizeof(value)),
-               &value, sizeof(value));
+        RuntimeEffectUniform reu = fromUniform(*it);
+        for (std::size_t j = 0; j < reu.columns * reu.rows; ++j) {
+          const std::size_t offset = reu.slot + j;
+          float fValue = jsiUniforms.getValueAtIndex(runtime, offset).asNumber();
+          int iValue = static_cast<int>(fValue);
+          auto value = reu.isInteger ? iValue : fValue;
+          memcpy(SkTAddOffset<void>(uniforms->writable_data(), offset * sizeof(value)), &value, sizeof(value));
+        }
       }
       return uniforms;
     }

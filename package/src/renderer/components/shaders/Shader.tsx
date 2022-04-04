@@ -12,7 +12,12 @@ const isVector = (obj: unknown): obj is Vector =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (obj as any).x !== undefined && (obj as any).y !== undefined;
 
-type Uniform = number | readonly number[] | Vector;
+type Uniform =
+  | number
+  | ReadonlyArray<number>
+  | ReadonlyArray<number>[]
+  | Vector
+  | Vector[];
 
 interface Uniforms {
   [name: string]: Uniform;
@@ -34,6 +39,14 @@ const onDeclare = createDeclaration<ShaderProps>(
         const value = uniforms[name];
         if (isVector(value)) {
           return [value.x, value.y];
+        }
+        if (Array.isArray(value)) {
+          return value.flatMap((v) => {
+            if (isVector(v)) {
+              return [v.x, v.y];
+            }
+            return v;
+          });
         }
         return value;
       })
