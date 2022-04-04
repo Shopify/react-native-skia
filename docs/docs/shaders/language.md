@@ -53,7 +53,7 @@ vec4 main(vec2 pos) {
 
 const SimpleShader = () => {
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width: 256, height: 256 }}>
       <Paint>
         <Shader source={source} />
       </Paint>
@@ -88,7 +88,7 @@ const UniformShader = () => {
   const c = vec(2 * r, r);
   const blue = 1.0;
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width: 256, height: 256 }}>
       <Paint>
         <Shader source={source} uniforms={{ c, r, blue }} />
       </Paint>
@@ -119,7 +119,7 @@ const NestedShader = () => {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width: 256, height: 256 }}>
       <Paint>
         <Shader source={source}>
           <ImageShader
