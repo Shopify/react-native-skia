@@ -1,6 +1,7 @@
 #pragma once
 
 #import <memory>
+#import <string>
 
 #import <CoreFoundation/CoreFoundation.h>
 #import <UIKit/UIKit.h>

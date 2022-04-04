@@ -1,6 +1,7 @@
 #pragma once
 
-#include <map>
+#include <memory>
+#include <vector>
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkPaint.h"

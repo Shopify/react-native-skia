@@ -1,11 +1,13 @@
 #pragma once
 
+#include <exception>
 #include <functional>
 #include <mutex>
+#include <memory>
+#include <string>
 #include <thread>
 #include <unordered_map>
 
-#include <RNSkLog.h>
 #include <RNSkDispatchQueue.h>
 
 #pragma clang diagnostic push

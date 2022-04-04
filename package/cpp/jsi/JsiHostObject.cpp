@@ -1,5 +1,6 @@
 #include <JsiHostObject.h>
-#include <set>
+#include <functional>
+#include <vector>
 
 // To be able to find objects that aren't cleaned up correctly,
 // we can set this value to 1 and debug the constructor/destructor

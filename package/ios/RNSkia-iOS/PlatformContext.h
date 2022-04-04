@@ -1,5 +1,9 @@
 #pragma once
 
+#include <functional>
+#include <memory>
+#include <string>
+
 #include <DisplayLink.h>
 #include <RNSkPlatformContext.h>
 
@@ -10,8 +14,13 @@
 
 #pragma clang diagnostic pop
 
-#include <ReactCommon/CallInvoker.h>
 #include <jsi/jsi.h>
+
+namespace facebook {
+  namespace react {
+    class CallInvoker;
+  }
+}
 
 namespace RNSkia {
 
