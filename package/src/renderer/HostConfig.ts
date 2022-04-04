@@ -108,6 +108,11 @@ const removeNode = (parent: Node, child: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   parent.children.splice(index, 1);
+  child.depMgr.unSubscribeNode(child);
+  // unsubscribe to all children as well
+  for (const c of child.children) {
+    removeNode(child, c);
+  }
 };
 
 const insertBefore = (parent: Node, child: Node, before: Node) => {
@@ -120,14 +125,14 @@ const insertBefore = (parent: Node, child: Node, before: Node) => {
   parent.children.splice(beforeIndex, 0, child);
 };
 
-const createNode = (type: NodeType, props: Props) => {
+const createNode = (container: Container, type: NodeType, props: Props) => {
   switch (type) {
     case NodeType.Drawing:
       const { onDraw, skipProcessing, ...p1 } = props;
-      return new DrawingNode(onDraw, skipProcessing, p1);
+      return new DrawingNode(container.depMgr, onDraw, skipProcessing, p1);
     case NodeType.Declaration:
       const { onDeclare, ...p2 } = props;
-      return new DeclarationNode(onDeclare, p2);
+      return new DeclarationNode(container.depMgr, onDeclare, p2);
     default:
       // TODO: here we need to throw a nice error message
       // This is the error that will show up when the user uses nodes not supported by Skia (View, Audio, etc)
@@ -186,9 +191,15 @@ export const skHostConfig: SkiaHostConfig = {
     throw new Error("Text nodes are not supported yet");
   },
 
-  createInstance(type, props, _root, _hostContext, _internalInstanceHandle) {
+  createInstance(
+    type,
+    props,
+    container,
+    _hostContext,
+    _internalInstanceHandle
+  ) {
     debug("createInstance", type);
-    return createNode(type, props) as Node;
+    return createNode(container, type, props) as Node;
   },
 
   appendInitialChild(parentInstance, child) {

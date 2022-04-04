@@ -3,9 +3,10 @@ import type { DrawingContext } from "../../DrawingContext";
 import { mapKeys } from "../../typeddash";
 
 export type FrameValue<T> = (ctx: DrawingContext) => T;
-type ValueType = SkiaReadonlyValue<unknown>;
 
-export const isValue = (value: unknown): value is ValueType => {
+export const isValue = (
+  value: unknown
+): value is SkiaReadonlyValue<unknown> => {
   if (value === undefined || value === null) {
     return false;
   }
@@ -13,7 +14,8 @@ export const isValue = (value: unknown): value is ValueType => {
     if (
       typeof value === "object" &&
       "__typename__" in value &&
-      (value as unknown as ValueType).__typename__ === "RNSkValue"
+      (value as unknown as SkiaReadonlyValue<unknown>).__typename__ ===
+        "RNSkValue"
     ) {
       return true;
     }
@@ -29,12 +31,6 @@ export const isAnimated = <T>(props: AnimatedProps<T>) => {
   }
   return false;
 };
-
-// TODO: to remove
-export const processProps = <T>(props: T, cb: (value: unknown) => void) =>
-  mapKeys(props).forEach((key) => {
-    cb(props[key]);
-  });
 
 export const materialize = <T>(props: AnimatedProps<T>) => {
   const result = { ...props };

@@ -1,17 +1,19 @@
 #pragma once
 
 #include <jsi/jsi.h>
-#include <map>
 #include <memory>
 
 #include "RNSkPlatformContext.h"
-#include <JsiSkCanvas.h>
-#include <RNSkDrawView.h>
-#include <RNSkJsiViewApi.h>
-#include <RNSkValueApi.h>
+
+namespace facebook {
+  namespace react {
+    class CallInvoker;
+  }
+}
 
 namespace RNSkia {
-
+class RNSkDrawView;
+class RNSkJsiViewApi;
 using namespace facebook;
 
 class RNSkManager {

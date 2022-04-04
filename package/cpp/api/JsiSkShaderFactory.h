@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
 #include <jsi/jsi.h>

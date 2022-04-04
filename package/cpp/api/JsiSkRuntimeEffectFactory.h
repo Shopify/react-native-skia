@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <memory>
+
 #include "JsiSkRuntimeEffect.h"
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"

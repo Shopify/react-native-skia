@@ -5,6 +5,7 @@
 #pragma once
 
 #include <chrono>
+#include <string>
 
 #include <RNSkLog.h>
 

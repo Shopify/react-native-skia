@@ -3,46 +3,57 @@ import type { RefObject } from "react";
 import type { SkiaView } from "../views";
 import type { SkiaReadonlyValue } from "../values";
 
+import { isValue } from "./processors";
 import type { Node } from "./Host";
-import { isValue, processProps } from "./processors";
 
-export const createDependencyManager = (ref: RefObject<SkiaView>) => {
-  const values: SkiaReadonlyValue<unknown>[] = [];
-  const unsubscribe: Array<() => void> = [];
+type Unsubscribe = () => void;
+type Props = { [key: string]: unknown };
 
-  return {
-    visitChildren: function (node: Node<unknown>) {
-      processProps(node.props, (value) => {
-        if (isValue(value)) {
-          this.registerValue(value);
-        }
-      });
-      node.children.forEach((c) => this.visitChildren(c));
-    },
-    registerValue: function <T>(value: SkiaReadonlyValue<T>) {
-      if (!ref.current) {
-        throw new Error("Canvas ref is not set");
+export class DependencyManager {
+  ref: RefObject<SkiaView>;
+  subscriptions: Map<
+    Node,
+    { values: SkiaReadonlyValue<unknown>[]; unsubscribe: null | Unsubscribe }
+  > = new Map();
+
+  constructor(ref: RefObject<SkiaView>) {
+    this.ref = ref;
+  }
+
+  unSubscribeNode(node: Node) {
+    const subscription = this.subscriptions.get(node);
+    if (subscription && subscription.unsubscribe) {
+      subscription.unsubscribe();
+    }
+    this.subscriptions.delete(node);
+  }
+
+  subscribeNode(node: Node, props: Props) {
+    const values = Object.values(props).filter(isValue);
+    if (values.length > 0) {
+      this.subscriptions.set(node, { values, unsubscribe: null });
+    }
+  }
+
+  subscribe() {
+    if (this.ref.current === null) {
+      throw new Error("Canvas ref is not set");
+    }
+    this.subscriptions.forEach((subscription) => {
+      if (subscription.unsubscribe === null) {
+        subscription.unsubscribe = this.ref.current!.registerValues(
+          subscription.values
+        );
       }
-      if (values.indexOf(value) === -1) {
-        values.push(value);
+    });
+  }
+
+  unsubscribe() {
+    this.subscriptions.forEach(({ unsubscribe }) => {
+      if (unsubscribe) {
+        unsubscribe();
       }
-    },
-    subscribe: function () {
-      if (!ref.current) {
-        throw new Error("Canvas ref is not set");
-      }
-      if (values.length === 0) {
-        return;
-      }
-      unsubscribe.push(ref.current.registerValues(values));
-      values.splice(0, values.length);
-    },
-    unsubscribe: function () {
-      if (unsubscribe.length === 0) {
-        return;
-      }
-      unsubscribe.forEach((unsub) => unsub());
-      unsubscribe.splice(0, unsubscribe.length);
-    },
-  };
-};
+    });
+    this.subscriptions.clear();
+  }
+}
