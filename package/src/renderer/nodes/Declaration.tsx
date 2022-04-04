@@ -3,6 +3,7 @@ import { Node } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { isAnimated, materialize } from "../processors/Animations/Animations";
+import type { DependencyManager } from "../DependencyManager";
 
 export type DeclarationResult = SkJSIInstance<string> | null;
 
@@ -23,15 +24,18 @@ export interface DeclarationProps<P> {
 export class DeclarationNode<P> extends Node<P> {
   private onDeclare: DeclarationCallback<P>;
 
-  constructor(onDeclare: DeclarationCallback<P>, props: AnimatedProps<P>) {
-    super(props);
-    this.props = props;
+  constructor(
+    depMgr: DependencyManager,
+    onDeclare: DeclarationCallback<P>,
+    props: AnimatedProps<P>
+  ) {
+    super(depMgr, props);
     this.onDeclare = onDeclare;
   }
 
   set props(props: AnimatedProps<P>) {
     this.memoizable = !isAnimated(props);
-    this._props = props;
+    super.props = props;
   }
 
   get props() {

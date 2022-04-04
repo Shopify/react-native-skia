@@ -121,7 +121,7 @@ const configurePlatform = (platform: PlatformName, targetName: string) => {
       target.options?.reduce((a, cur) => (a += `--${cur[0]}=${cur[1]} `), "") ||
       "";
 
-    const command = `${commandline} ${options} ${targetOptions} --args='target_os="${platform}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
+    const command = `${commandline} ${options} ${targetOptions} --script-executable=python3 --args='target_os="${platform}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
     console.log("Command:");
     console.log(command);
     console.log("===============================");
@@ -141,11 +141,15 @@ const buildPlatform = (
   callback: () => void
 ) => {
   console.log(`Building platform "${platform}" for target "${targetName}"`);
-  executeCmd(
-    `ninja -C ${getOutDir(platform, targetName)}`,
-    `${platform}/${targetName}`,
-    callback
-  );
+  // We need to include the path to our custom python2 -> python3 mapping script
+  // to make sure we can run all scripts that uses #!/usr/bin/env python as shebang
+  // https://groups.google.com/g/skia-discuss/c/BYyB-TwA8ow
+  const command = `PATH=${process.cwd()}/../bin:$PATH ninja -C ${getOutDir(
+    platform,
+    targetName
+  )}`;
+  console.log(command);
+  executeCmd(command, `${platform}/${targetName}`, callback);
 };
 
 const processOutput = (platformName: PlatformName, targetName: string) => {
@@ -185,7 +189,7 @@ try {
   console.log("Running gclient sync...");
   process.chdir(SkiaDir);
   // Start by running sync
-  executeCmdSync("PATH=../depot_tools/:$PATH python2 tools/git-sync-deps");
+  executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
 
   // Find platform/target

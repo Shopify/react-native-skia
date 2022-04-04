@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "JsiSkHostObjects.h"
 #include "JsiSkFontMgr.h"
 #include "JsiSkData.h"

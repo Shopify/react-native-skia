@@ -24,7 +24,7 @@ export const Cubic = ({ mesh, index, color }: CubicProps) => {
   const c2 = useDerivedValue(() => mesh.current[index].c2, [mesh]);
   const c2S = useDerivedValue(
     () => symmetric(mesh.current[index].c2, mesh.current[index].pos),
-    []
+    [mesh]
   );
   const pos = useDerivedValue(() => mesh.current[index].pos, [mesh]);
   return (

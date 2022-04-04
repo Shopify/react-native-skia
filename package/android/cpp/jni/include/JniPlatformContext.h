@@ -5,9 +5,14 @@
 
 #include <queue>
 #include <mutex>
+#include <functional>
+#include <memory>
+#include <string>
+#include <exception>
 
 #include "RNSkPlatformContext.h"
 
+class SkStreamAsset;
 namespace RNSkia
 {
 

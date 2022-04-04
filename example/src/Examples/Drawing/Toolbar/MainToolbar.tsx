@@ -78,7 +78,7 @@ export const MainToolbar: React.FC<Props> = ({ style }) => {
   return (
     <BaseToolbar style={style}>
       <PathToolbarItem
-        path={getPathFordrawingMode(drawingTool)}
+        path={getPathForDrawingMode(drawingTool)}
         selected={activeTool === "draw"}
         onPress={handleDrawingToolPressed}
       />
@@ -98,7 +98,7 @@ export const MainToolbar: React.FC<Props> = ({ style }) => {
   );
 };
 
-const getPathFordrawingMode = (drawingMode: DrawingTool) => {
+const getPathForDrawingMode = (drawingMode: DrawingTool) => {
   switch (drawingMode) {
     case "path":
       return PenToolPath!;

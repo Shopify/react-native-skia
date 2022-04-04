@@ -8,7 +8,15 @@
 #import <GrMtlBackendContext.h>
 #import <MetalKit/MetalKit.h>
 #import <QuartzCore/CAMetalLayer.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #import <SkPicture.h>
+#import <SkRefCnt.h>
+#import <include/gpu/GrDirectContext.h>
+
+#pragma clang diagnostic pop
 
 @class SkiaDrawView;
 

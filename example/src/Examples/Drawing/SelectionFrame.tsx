@@ -9,7 +9,7 @@ type Props = {
   selectedElements: DrawingElements;
 };
 
-const SelecctionHandleSize = 6;
+const SelectionHandleSize = 6;
 
 export const SelectionFrame: React.FC<Props> = ({ selectedElements }) => {
   const boundingBox = useMemo(
@@ -25,22 +25,22 @@ export const SelectionFrame: React.FC<Props> = ({ selectedElements }) => {
       <SelectionResizeHandle
         x={boundingBox.x}
         y={boundingBox.y}
-        size={SelecctionHandleSize}
+        size={SelectionHandleSize}
       />
       <SelectionResizeHandle
         x={boundingBox.x + boundingBox.width}
         y={boundingBox.y}
-        size={SelecctionHandleSize}
+        size={SelectionHandleSize}
       />
       <SelectionResizeHandle
         x={boundingBox.x + boundingBox.width}
         y={boundingBox.y + boundingBox.height}
-        size={SelecctionHandleSize}
+        size={SelectionHandleSize}
       />
       <SelectionResizeHandle
         x={boundingBox.x}
         y={boundingBox.y + boundingBox.height}
-        size={SelecctionHandleSize}
+        size={SelectionHandleSize}
       />
     </Group>
   ) : null;

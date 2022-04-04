@@ -60,7 +60,7 @@ const icons = [
 export const Gooey = () => {
   const paint = usePaintRef();
   const [toggled, setToggled] = useState(false);
-  const onTouch = useTouchHandler({ onEnd: () => setToggled(!toggled) });
+  const onTouch = useTouchHandler({ onEnd: () => setToggled((t) => !t) });
   const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
 
   const transforms = useMemo(

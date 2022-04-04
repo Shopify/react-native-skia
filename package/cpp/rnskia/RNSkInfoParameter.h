@@ -1,11 +1,18 @@
 #pragma once
 
 #include <chrono>
+#include <memory>
+#include <mutex>
+#include <vector>
+
+#include <jsi/jsi.h>
 
 #include <JsiHostObject.h>
 
 namespace RNSkia {
 
+using namespace facebook;
+using namespace RNJsi;
 using namespace std::chrono;
 
 enum RNSkTouchType { Start, Active, End, Cancelled };

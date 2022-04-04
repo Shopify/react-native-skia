@@ -1,9 +1,7 @@
 
 #pragma once
 
-#include <JsiHostObject.h>
 #include <RNSkPlatformContext.h>
-#include <RNSkMeasureTime.h>
 #include <RNSkReadonlyValue.h>
 #include <jsi/jsi.h>
 
@@ -76,14 +74,14 @@ public:
     
     _state = RNSkClockState::Running;
     auto dispatch = std::bind(&RNSkClockValue::notifyUpdate, this, std::placeholders::_1);
-    getPlatformContext()->beginDrawLoop(_identifier, dispatch);
+    getContext()->beginDrawLoop(_identifier, dispatch);
   }
   
   virtual void stopClock() {
     if(_state == RNSkClockState::Running) {
       _state = RNSkClockState::Stopped;
       _stop = std::chrono::high_resolution_clock::now();
-      getPlatformContext()->endDrawLoop(_identifier);
+      getContext()->endDrawLoop(_identifier);
     }
   }
   
@@ -104,11 +102,11 @@ protected:
     
     // Avoid moving on if we are being called after the dtor was started
     // Ensure we call any updates from the draw loop on the javascript thread
-    getPlatformContext()->runOnJavascriptThread(
+    getContext()->runOnJavascriptThread(
       [this]() {
       if(_state == RNSkClockState::Running) {
         auto now = std::chrono::high_resolution_clock::now();
-        auto deltaFromStart = duration_cast<milliseconds>(now - _start).count();
+        auto deltaFromStart = std::chrono::duration_cast<std::chrono::milliseconds>(now - _start).count();
         tick(_runtime, static_cast<double>(deltaFromStart));
       }
     });
@@ -127,8 +125,8 @@ protected:
 
   jsi::Runtime &_runtime;
   size_t _identifier;
-  std::chrono::time_point<steady_clock> _start;
-  std::chrono::time_point<steady_clock> _stop;
+  std::chrono::time_point<std::chrono::steady_clock> _start;
+  std::chrono::time_point<std::chrono::steady_clock> _stop;
   std::atomic<RNSkClockState> _state;
 };
 

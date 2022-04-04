@@ -25,7 +25,7 @@ export const AnimationWithTouchHandler = () => {
   const circleVelocity = useValue(0);
 
   // Effect that will listen for updates on the clock and
-  // calculate the next position of the cicrle
+  // calculate the next position of the circle
   useValueEffect(clock, () => {
     const leftBoundary = Size;
     const rightBoundary = width - Size - Padding;
