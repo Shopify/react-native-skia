@@ -1,7 +1,14 @@
 #pragma once
 
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <JsiSkHostObjects.h>
 #include <JsiSkShader.h>
+#include <JsiSkMatrix.h>
+
 #include <jsi/jsi.h>
 
 #pragma clang diagnostic push
@@ -83,6 +90,9 @@ namespace RNSkia
     JSI_HOST_FUNCTION(getUniformName)
     {
       auto i = static_cast<int>(arguments[0].asNumber());
+      if (i < 0 || i >= getObject()->uniforms().size()) {
+        jsi::detail::throwJSError(runtime, "invalid uniform index");
+      }
       auto it = getObject()->uniforms().begin() + i;
       return jsi::String::createFromAscii(runtime, it->name.c_str());
     }
@@ -90,6 +100,9 @@ namespace RNSkia
     JSI_HOST_FUNCTION(getUniform)
     {
       auto i = static_cast<int>(arguments[0].asNumber());
+      if (i < 0 || i >= getObject()->uniforms().size()) {
+        jsi::detail::throwJSError(runtime, "invalid uniform index");
+      }
       auto it = getObject()->uniforms().begin() + i;
       auto result = jsi::Object(runtime);
       RuntimeEffectUniform su = fromUniform(*it);
@@ -132,15 +145,18 @@ namespace RNSkia
       auto uniforms = SkData::MakeUninitialized(getObject()->uniformSize());
 
       // Convert to skia uniforms
-      for (int i = 0; i < jsiUniformsSize; i++)
+      const auto& u = getObject()->uniforms();
+      for (std::size_t i = 0; i < u.size(); i++)
       {
         auto it = getObject()->uniforms().begin() + i;
-        RuntimeEffectUniform u = fromUniform(*it);
-        float fValue = jsiUniforms.getValueAtIndex(runtime, i).asNumber();
-        int iValue = static_cast<int>(fValue);
-        auto value = u.isInteger ? iValue : fValue;
-        memcpy(SkTAddOffset<void>(uniforms->writable_data(), i * sizeof(value)),
-               &value, sizeof(value));
+        RuntimeEffectUniform reu = fromUniform(*it);
+        for (std::size_t j = 0; j < reu.columns * reu.rows; ++j) {
+          const std::size_t offset = reu.slot + j;
+          float fValue = jsiUniforms.getValueAtIndex(runtime, offset).asNumber();
+          int iValue = static_cast<int>(fValue);
+          auto value = reu.isInteger ? iValue : fValue;
+          memcpy(SkTAddOffset<void>(uniforms->writable_data(), offset * sizeof(value)), &value, sizeof(value));
+        }
       }
       return uniforms;
     }

@@ -1,14 +1,15 @@
 
 #pragma once
 
-#include <JsiHostObject.h>
+#include "RNSkReadonlyValue.h"
 #include <RNSkPlatformContext.h>
-#include <RNSkMeasureTime.h>
 #include <jsi/jsi.h>
 
 #include <algorithm>
 #include <functional>
 #include <chrono>
+#include <memory>
+#include <vector>
 
 namespace RNSkia
 {

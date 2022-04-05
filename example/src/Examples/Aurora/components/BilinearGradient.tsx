@@ -8,15 +8,12 @@ import {
 
 const source = Skia.RuntimeEffect.Make(`
 uniform vec2 size;
-uniform vec4 color0;
-uniform vec4 color1;
-uniform vec4 color2;
-uniform vec4 color3;
+uniform vec4 colors[4];
 
 vec4 main(vec2 pos) {
   vec2 uv = pos/size;
-  vec4 colorA = mix(color0, color1, uv.x);
-  vec4 colorB = mix(color2, color3, uv.x);
+  vec4 colorA = mix(colors[0], colors[1], uv.x);
+  vec4 colorB = mix(colors[2], colors[3], uv.x);
   return mix(colorA, colorB, uv.y);
 }`)!;
 
@@ -26,13 +23,8 @@ interface BilinearGradientProps {
 }
 
 export const BilinearGradient = ({ size, colors }: BilinearGradientProps) => {
-  const [color0, color1, color2, color3] = colors.map((cl) =>
-    processColorAsUnitArray(cl, 1)
-  );
+  const processedColors = colors.map((cl) => processColorAsUnitArray(cl, 1));
   return (
-    <Shader
-      source={source}
-      uniforms={{ size, color0, color1, color2, color3 }}
-    />
+    <Shader source={source} uniforms={{ size, colors: processedColors }} />
   );
 };

@@ -1,6 +1,9 @@
 #import "RCTBridge.h"
 
 #import <SkiaDrawView.h>
+
+#include <vector>
+
 #import <RNSkDrawViewImpl.h>
 #import <RNSkManager.h>
 

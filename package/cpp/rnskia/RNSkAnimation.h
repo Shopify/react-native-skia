@@ -1,9 +1,10 @@
 
 #pragma once
 
+#include <array>
+
 #include <JsiHostObject.h>
 #include <RNSkPlatformContext.h>
-#include <RNSkMeasureTime.h>
 #include <RNSkClockValue.h>
 #include <jsi/jsi.h>
 
