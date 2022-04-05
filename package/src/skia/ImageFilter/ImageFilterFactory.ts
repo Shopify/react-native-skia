@@ -1,9 +1,54 @@
-import type { Color } from "../Color";
-import type { IColorFilter } from "../ColorFilter/ColorFilter";
+import type { SkColor } from "../Color";
+import type { SkColorFilter } from "../ColorFilter/ColorFilter";
+import type { IShader } from "../Shader/Shader";
+import type { SkRect } from "../Rect";
+import type { BlendMode } from "../Paint/BlendMode";
 
-import type { IImageFilter, TileMode } from "./ImageFilter";
+import type { SkImageFilter, TileMode } from "./ImageFilter";
+
+export enum ColorChannel {
+  R,
+  G,
+  B,
+  A,
+}
 
 export interface ImageFilterFactory {
+  /**
+   * Offsets the input image
+   *
+   * @param dx - Offset along the X axis
+   * @param dy - Offset along the X axis
+   * @param input - if null, it will use the dynamic source image
+   */
+  MakeOffset(
+    dx: number,
+    dy: number,
+    input: SkImageFilter | null
+  ): SkImageFilter;
+  /**
+   * Spatially displace pixel values of the filtered image
+   *
+   * @param channelX - Color channel to be used along the X axis
+   * @param channelY - Color channel to be used along the Y axis
+   * @param scale - Scale factor to be used in the displacement
+   * @param in1 - Source image filter to use for the displacement
+   * @param input - if null, it will use the dynamic source image
+   */
+  MakeDisplacementMap(
+    channelX: ColorChannel,
+    channelY: ColorChannel,
+    scale: number,
+    in1: SkImageFilter,
+    input: SkImageFilter | null
+  ): SkImageFilter;
+  /**
+   * Transforms a shader into an impage filter
+   *
+   * @param shader - The Shader to be transformed
+   * @param input - if null, it will use the dynamic source image
+   */
+  MakeShader(shader: IShader, input: SkImageFilter | null): SkImageFilter;
   /**
    * Create a filter that blurs its input by the separate X and Y sigmas. The provided tile mode
    * is used when the blur kernel goes outside the input image.
@@ -17,15 +62,18 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     mode: TileMode,
-    input: IImageFilter | null
-  ): IImageFilter;
+    input: SkImageFilter | null
+  ): SkImageFilter;
 
   /**
    * Create a filter that applies the color filter to the input filter results.
    * @param cf
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
    */
-  MakeColorFilter(cf: IColorFilter, input: IImageFilter | null): IImageFilter;
+  MakeColorFilter(
+    cf: SkColorFilter,
+    input: SkImageFilter | null
+  ): SkImageFilter;
 
   /**
    * Create a filter that composes 'inner' with 'outer', such that the results of 'inner' are
@@ -35,9 +83,9 @@ export interface ImageFilterFactory {
    * @param inner - if null, it will use the dynamic source image (e.g. a saved layer)
    */
   MakeCompose(
-    outer: IImageFilter | null,
-    inner: IImageFilter | null
-  ): IImageFilter;
+    outer: SkImageFilter | null,
+    inner: SkImageFilter | null
+  ): SkImageFilter;
 
   /**
    * Create a filter that draws a drop shadow under the input content.
@@ -55,9 +103,10 @@ export interface ImageFilterFactory {
     dy: number,
     sigmaX: number,
     sigmaY: number,
-    color: Color,
-    input?: IImageFilter
-  ) => IImageFilter;
+    color: SkColor,
+    input: SkImageFilter | null,
+    cropRect?: SkRect
+  ) => SkImageFilter;
   /**
    * Create a filter that renders a drop shadow, in exactly the same manner as ::DropShadow, except
    * that the resulting image does not include the input content.
@@ -75,7 +124,49 @@ export interface ImageFilterFactory {
     dy: number,
     sigmaX: number,
     sigmaY: number,
-    color: Color,
-    input?: IImageFilter
-  ) => IImageFilter;
+    color: SkColor,
+    input: SkImageFilter | null,
+    cropRect?: SkRect
+  ) => SkImageFilter;
+  /**
+   *  Create a filter that erodes each input pixel's channel values to the minimum channel value
+   *  within the given radii along the x and y axes.
+   *  @param radiusX  The distance to erode along the x axis to either side of each pixel.
+   *  @param radiusY  The distance to erode along the y axis to either side of each pixel.
+   *  @param input    The image filter that is eroded, using source bitmap if this is null.
+   *  @param cropRect Optional rectangle that crops the input and output.
+   */
+  MakeErode: (
+    rx: number,
+    ry: number,
+    input: SkImageFilter | null,
+    cropRect?: SkRect
+  ) => SkImageFilter;
+  /**
+   *  Create a filter that dilates each input pixel's channel values to the max value within the
+   *  given radii along the x and y axes.
+   *  @param radiusX  The distance to dilate along the x axis to either side of each pixel.
+   *  @param radiusY  The distance to dilate along the y axis to either side of each pixel.
+   *  @param input    The image filter that is dilated, using source bitmap if this is null.
+   *  @param cropRect Optional rectangle that crops the input and output.
+   */
+  MakeDilate: (
+    rx: number,
+    ry: number,
+    input: SkImageFilter | null,
+    cropRect?: SkRect
+  ) => SkImageFilter;
+  /**
+   *  This filter takes an SkBlendMode and uses it to composite the two filters together.
+   *  @param mode       The blend mode that defines the compositing operation
+   *  @param background The Dst pixels used in blending, if null the source bitmap is used.
+   *  @param foreground The Src pixels used in blending, if null the source bitmap is used.
+   *  @cropRect         Optional rectangle to crop input and output.
+   */
+  MakeBlend: (
+    mode: BlendMode,
+    background: SkImageFilter,
+    foreground: SkImageFilter | null,
+    cropRect?: SkRect
+  ) => SkImageFilter;
 }

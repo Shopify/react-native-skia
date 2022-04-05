@@ -1,18 +1,18 @@
 #pragma once
 
+#include <ReactCommon/CallInvoker.h>
 #include <ReactCommon/CallInvokerHolder.h>
 #include <fbjni/fbjni.h>
 #include <jsi/jsi.h>
-#include <map>
 #include <memory>
-#include <string>
 
 #include <JniPlatformContext.h>
 #include <JniPlatformContextWrapper.h>
-#include <RNSkManager.h>
+
+#include <RNSkLog.h>
 
 namespace RNSkia {
-
+class RNSkManager;
 using namespace facebook;
 
 using JSCallInvokerHolder =
@@ -59,6 +59,7 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
 
     void invalidate() {
         _context->stopDrawLoop();
+        _context->notifyDrawLoop(true);
         _skManager = nullptr;
         _context = nullptr;
     }

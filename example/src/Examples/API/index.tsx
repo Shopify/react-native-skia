@@ -11,6 +11,10 @@ import { ColorFilter } from "./ColorFilter";
 import { Gradients } from "./Gradients2";
 import { PathExample } from "./Path2";
 import { Images } from "./Images";
+import { SVG } from "./SVG";
+import { BlendModes } from "./BlendModes";
+import { Data } from "./Data";
+import { ImageFilters } from "./ImageFilters";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -42,7 +46,14 @@ export const API = () => {
         name="ColorFilter"
         component={ColorFilter}
         options={{
-          title: "🌃 Color & Image Filters",
+          title: "🌃 ColorFilters",
+        }}
+      />
+      <Stack.Screen
+        name="ImageFilters"
+        component={ImageFilters}
+        options={{
+          title: "💧 Image Filters",
         }}
       />
       <Stack.Screen
@@ -56,7 +67,7 @@ export const API = () => {
         name="Clipping"
         component={Clipping}
         options={{
-          title: "✂️ Clipping",
+          title: "🎭 Clipping & Masking",
         }}
       />
       <Stack.Screen
@@ -78,6 +89,27 @@ export const API = () => {
         component={Transform}
         options={{
           title: "🔄 Transformations",
+        }}
+      />
+      <Stack.Screen
+        name="SVG"
+        component={SVG}
+        options={{
+          title: "🖋 SVG",
+        }}
+      />
+      <Stack.Screen
+        name="BlendModes"
+        component={BlendModes}
+        options={{
+          title: "🎨 Blend Modes",
+        }}
+      />
+      <Stack.Screen
+        name="Data"
+        component={Data}
+        options={{
+          title: "📊 Data",
         }}
       />
     </Stack.Navigator>

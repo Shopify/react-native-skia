@@ -2,36 +2,32 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { Skia, TileMode } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
-import type { SkEnum } from "../../processors";
+import type { Radius, SkEnum } from "../../processors";
 import { enumKey } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { isImageFilter } from "../../../skia/ImageFilter/ImageFilter";
-import { isColorFilter } from "../../../skia/ColorFilter/ColorFilter";
+import { processRadius } from "../../processors/Radius";
+import { createDeclaration } from "../../nodes";
+
+import { getInput } from "./getInput";
 
 export interface BlurProps {
-  sigmaX: number;
-  sigmaY: number;
+  blur: Radius;
   mode: SkEnum<typeof TileMode>;
   children?: ReactNode | ReactNode[];
 }
 
-export const Blur = (props: AnimatedProps<BlurProps>) => {
-  const declaration = useDeclaration(
-    props,
-    ({ sigmaX, sigmaY, mode }, children) => {
-      const [imgf] = children.filter(isImageFilter);
-      const [rawcf] = children.filter(isColorFilter);
-      const cf = rawcf ? Skia.ImageFilter.MakeColorFilter(rawcf, null) : null;
-      return Skia.ImageFilter.MakeBlur(
-        sigmaX,
-        sigmaY,
-        TileMode[enumKey(mode)],
-        imgf ?? cf ?? null
-      );
-    }
+const onDeclare = createDeclaration<BlurProps>(({ blur, mode }, children) => {
+  const sigma = processRadius(blur);
+  return Skia.ImageFilter.MakeBlur(
+    sigma.x,
+    sigma.y,
+    TileMode[enumKey(mode)],
+    getInput(children)
   );
-  return <skDeclaration declaration={declaration} {...props} />;
+});
+
+export const Blur = (props: AnimatedProps<BlurProps>) => {
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };
 
 Blur.defaultProps = {

@@ -1,9 +1,14 @@
 #include "JniPlatformContext.h"
-#include <RNSkMeasureTime.h>
+
+#include <exception>
 #include <thread>
+#include <utility>
+
+#include <RNSkMeasureTime.h>
 #include "SkData.h"
 #include "SkRefCnt.h"
 #include "SkTypes.h"
+#include "SkStream.h"
 
 namespace RNSkia
 {
@@ -24,15 +29,6 @@ namespace RNSkia
     TSelf JniPlatformContext::initHybrid(jni::alias_ref<jhybridobject> jThis, float pixelDensity)
     {
         return makeCxxInstance(jThis, pixelDensity);
-    }
-
-    void JniPlatformContext::dispatchOnRenderThread (const std::function<void(void)>&func) {
-        _taskMutex->lock();
-        _taskCallbacks.push(func);
-        _taskMutex->unlock();
-        static auto method =
-                javaPart_->getClass()->getMethod<void()>("triggerOnRenderThread");
-        method(javaPart_.get());
     }
 
     void JniPlatformContext::startDrawLoop()
@@ -75,7 +71,7 @@ namespace RNSkia
 
     void JniPlatformContext::performStreamOperation(
         const std::string &sourceUri,
-        const std::function<void(std::unique_ptr<SkStream>)> &op)
+        const std::function<void(std::unique_ptr<SkStreamAsset>)> &op)
     {
         auto measure =
             RNSkMeasureTime("JniPlatformContext::performStreamOperation");

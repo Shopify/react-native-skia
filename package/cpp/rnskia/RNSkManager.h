@@ -1,16 +1,19 @@
 #pragma once
 
 #include <jsi/jsi.h>
-#include <map>
 #include <memory>
 
 #include "RNSkPlatformContext.h"
-#include <JsiSkCanvas.h>
-#include <RNSkDrawView.h>
-#include <RNSkJsiViewApi.h>
+
+namespace facebook {
+  namespace react {
+    class CallInvoker;
+  }
+}
 
 namespace RNSkia {
-
+class RNSkDrawView;
+class RNSkJsiViewApi;
 using namespace facebook;
 
 class RNSkManager {
@@ -72,7 +75,7 @@ private:
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
   std::shared_ptr<RNSkJsiViewApi> _viewApi;
-  bool _isValid = true;
+  std::atomic<bool> _isInvalidated = {false};
 };
 
 } // namespace RNSkia

@@ -1,4 +1,8 @@
-# @shopify/react-native-skia
+# React Native Skia
+
+High-performance 2d Graphics for React Native using Skia
+
+[![Tests](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml)
 
 <img width="400" alt="skia" src="https://user-images.githubusercontent.com/306134/146549218-b7959ad9-0107-4c1c-b439-b96c780f5230.png">
 
@@ -6,7 +10,7 @@ Checkout the full documentation [here](https://shopify.github.io/react-native-sk
 
 React Native Skia brings the Skia Graphics Library to React Native. Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and Firefox OS, and many other products.
 
-*This is an alpha release. Use with caution.*
+_This is an alpha release. Use with caution._
 
 ## Installation
 
@@ -17,20 +21,18 @@ When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
 
 ```sh
-$ yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
+yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.109-alpha/shopify-react-native-skia-0.1.109.tgz
 ```
 
 Or using npm:
 
 ```sh
-$ npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.43-alpha/shopify-react-native-skia-0.1.43.tgz
+npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.109-alpha/shopify-react-native-skia-0.1.109.tgz
 ```
 
 ### iOS
 
 Run `pod install` on the `ios/` directory.
-
-You will need to disable Bitcode in order to create a release build: `Build Settings > Build Options > Enable Bitcode -> Release -> No`. In Expo managed apps, set `ios.bitcode` to `false` in `app.json`.
 
 ### Android
 
@@ -43,6 +45,15 @@ If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_
 
 And then the _SDK Location_ section. It will show you the NDK path, or the option to Download it if you don't have it installed.
+
+And them the _Modules_ section. click on `shopify_react-native-skia` and select _NDK version_ with dropdown, and click on apply.
+
+#### TroubleShooting
+
+For error **_CMake 'X.X.X' was not found in SDK, PATH, or by cmake.dir property._**
+
+open _Tools > SDK Manager_, switch to the _SDK Tools_ tab.
+Find `CMake` and click _Show Package Details_ and download compatiable version **'X.X.X'**, and apply to install.
 
 ### Playground
 
@@ -58,7 +69,6 @@ To run the example project on iOS, you will need to run `pod install` and on And
 
 ## Hello World
 
-
 React Native Skia has two APIs: a declarative API available as a React Native Renderer and an imperative API backed by JSI.
 The recommended way to use this library is via the declarative API.
 Library developers may take advantage of the imperative API to provide custom features.
@@ -68,7 +78,7 @@ Library developers may take advantage of the imperative API to provide custom fe
 ### Example
 
 ```tsx twoslash
-import {Canvas, Circle, Group} from "@shopify/react-native-skia";
+import { Canvas, Circle, Group } from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
   const width = 256;
@@ -79,12 +89,7 @@ export const HelloWorld = () => {
       <Group blendMode="multiply">
         <Circle cx={r} cy={r} r={r} color="cyan" />
         <Circle cx={width - r} cy={r} r={r} color="magenta" />
-        <Circle
-          cx={width/2}
-          cy={height - r}
-          r={r}
-          color="yellow"
-        />
+        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
       </Group>
     </Canvas>
   );
@@ -96,7 +101,12 @@ export const HelloWorld = () => {
 ### Example
 
 ```tsx twoslash
-import {Skia, BlendMode, SkiaView, useDrawCallback} from "@shopify/react-native-skia";
+import {
+  Skia,
+  BlendMode,
+  SkiaView,
+  useDrawCallback,
+} from "@shopify/react-native-skia";
 
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
@@ -118,11 +128,9 @@ export const HelloWorld = () => {
     // Yellow Circle
     const yellow = paint.copy();
     yellow.setColor(Skia.Color("yellow"));
-    canvas.drawCircle(width/2, height - r, r, yellow);
+    canvas.drawCircle(width / 2, height - r, r, yellow);
   });
-  return (
-    <SkiaView style={{ flex: 1 }} onDraw={onDraw} />
-  );
+  return <SkiaView style={{ flex: 1 }} onDraw={onDraw} />;
 };
 ```
 
@@ -159,6 +167,16 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 - Build the Skia libraries with `yarn build-skia` (this can take a while)
 - Copy Skia headers `yarn copy-skia-headers`
 - Run pod install in the example project
+
+### Upgrading
+
+If a new version of Skia is included in an upgrade of this library, you need to perform a few extra steps before continuing:
+
+1. Update submodules: `git submodule update --recursive`
+2. Copy Skia Headers: `yarn copy-skia-headers`
+3. Clean Skia: `yarn clean-skia`
+4. Build Skia: `yarn build-skia`
+5. Run pod install in the example project
 
 ### Publishing
 

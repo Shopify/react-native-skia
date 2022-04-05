@@ -1,6 +1,6 @@
 import type { IShader } from "../Shader";
 import type { SkJSIInstance } from "../JsiInstance";
-import type { Matrix } from "../Matrix";
+import type { SkMatrix } from "../Matrix";
 
 export interface SkSLUniform {
   columns: number;
@@ -20,7 +20,7 @@ export interface IRuntimeEffect extends SkJSIInstance<"RuntimeEffect"> {
   makeShader(
     uniforms: number[],
     isOpaque?: boolean,
-    localMatrix?: Matrix
+    localMatrix?: SkMatrix
   ): IShader;
 
   /**
@@ -34,7 +34,7 @@ export interface IRuntimeEffect extends SkJSIInstance<"RuntimeEffect"> {
     uniforms: number[],
     isOpaque?: boolean,
     children?: IShader[],
-    localMatrix?: Matrix
+    localMatrix?: SkMatrix
   ): IShader;
 
   /**

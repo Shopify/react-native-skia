@@ -5,18 +5,19 @@ import {
   PaintStyle,
   Canvas,
   Rect,
-  DRect,
+  DiffRect,
   Group,
   Oval,
   Line,
   Points,
-  Patch,
   vec,
   rect,
   rrect,
   Paint,
   DashPathEffect,
-  RRect,
+  Vertices,
+  RoundedRect,
+  Patch,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -59,6 +60,11 @@ const inner = rrect(
   0
 );
 
+const topLeft = { pos: vec(16, 0), c1: vec(0, 15), c2: vec(15, 0) };
+const topRight = { pos: vec(100, 0), c1: vec(80, 15), c2: vec(85, 0) };
+const bottomRight = { pos: vec(100, 100), c1: vec(100, 85), c2: vec(85, 100) };
+const bottomLeft = { pos: vec(16, 100), c1: vec(0, 85), c2: vec(15, 100) };
+
 export const Shapes = () => {
   return (
     <ScrollView>
@@ -66,14 +72,14 @@ export const Shapes = () => {
       <Canvas style={styles.container}>
         <Group color="#61DAFB">
           <Rect rect={{ x: PADDING, y: PADDING, width: 100, height: 100 }} />
-          <RRect
+          <RoundedRect
             x={SIZE + 2 * PADDING}
             y={PADDING}
             width={SIZE}
             height={SIZE}
-            rx={25}
+            r={25}
           />
-          <DRect outer={outer} inner={inner} />
+          <DiffRect outer={outer} inner={inner} />
         </Group>
       </Canvas>
       <Title>Ovals & Circles</Title>
@@ -106,7 +112,20 @@ export const Shapes = () => {
       <Canvas style={styles.container}>
         <Patch
           colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
-          cubics={cubics}
+          patch={[topLeft, topRight, bottomRight, bottomLeft]}
+        />
+      </Canvas>
+      <Title>Vertices</Title>
+      <Canvas style={styles.container}>
+        <Vertices
+          mode="triangleFan"
+          vertices={[
+            vec(16, 0),
+            vec(250, 0),
+            vec(100, SIZE / 2),
+            vec(16, SIZE + 32),
+          ]}
+          colors={["#61DAFB", "#fb61da", "#61fbcf", "#dafb61"]}
         />
       </Canvas>
     </ScrollView>

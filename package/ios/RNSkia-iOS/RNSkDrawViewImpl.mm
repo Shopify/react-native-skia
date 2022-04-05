@@ -1,7 +1,17 @@
 #import <RNSkDrawViewImpl.h>
-#import <SkiaDrawView.h>
 
-// These static class members are used by all the classes
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#import <SkSurface.h>
+#import <SkCanvas.h>
+
+#pragma clang diagnostic pop
+
+#import <SkiaDrawView.h>
+#import <RNSkLog.h>
+
+// These static class members are used by all Skia Views
 id<MTLDevice> RNSkDrawViewImpl::_device = MTLCreateSystemDefaultDevice();
 id<MTLCommandQueue> RNSkDrawViewImpl::_commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
 
@@ -15,19 +25,15 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::R
     _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
     
-    if(_skContext == nullptr) {
-      GrContextOptions grContextOptions;
-      _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
-                                              (__bridge void*)_commandQueue,
-                                              grContextOptions);
-    }
-    
+    _layer.framebufferOnly = NO;
     _layer.device = _device;
     _layer.opaque = false;
     _layer.contentsScale = _context->getPixelDensity();
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.frame = _view.bounds;
     [_view.layer addSublayer:_layer];
+    
+    setNativeDrawFunc(std::bind(&RNSkDrawViewImpl::drawFrame, this, std::placeholders::_1));
 }
 
 void RNSkDrawViewImpl::setSize(int width, int height) {
@@ -40,49 +46,53 @@ void RNSkDrawViewImpl::setSize(int width, int height) {
   requestRedraw();
 }
 
-void RNSkDrawViewImpl::drawFrame(double time) {
+void RNSkDrawViewImpl::drawFrame(const sk_sp<SkPicture> picture) {
   if(_width == -1 && _height == -1) {
     return;
   }
-    
-  auto sampleCount = 1;
-  auto start = std::chrono::high_resolution_clock::now();
   
-  id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
-  
-  GrMtlTextureInfo fbInfo;
-  fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
-
-  GrBackendRenderTarget backendRT(_width * _context->getPixelDensity(),
-                                  _height * _context->getPixelDensity(),
-                                  sampleCount,
-                                  fbInfo);
-
-  auto skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
-                                                          backendRT,
-                                                          kTopLeft_GrSurfaceOrigin,
-                                                          kBGRA_8888_SkColorType,
-                                                          nullptr,
-                                                          nullptr);
-  
-  if(skSurface == nullptr || skSurface->getCanvas() == nullptr) {
-    RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
-    return;
+  if(_skContext == nullptr) {
+    GrContextOptions grContextOptions;
+    _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
+                                            (__bridge void*)_commandQueue,
+                                            grContextOptions);
   }
   
-  skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
-  drawInSurface(skSurface,
-                _width * _context->getPixelDensity(),
-                _height * _context->getPixelDensity(),
-                time,
-                _context);
-  
-  id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
-  commandBuffer.label = @"Present";
-  [commandBuffer presentDrawable:currentDrawable];
-  [commandBuffer commit];
-  
-  // Calculate duration
-  auto stop = std::chrono::high_resolution_clock::now();
-  setLastFrameDuration(std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
+  // Wrap in auto release pool since we want the system to clean up after rendering
+  // and not wait until later - we've seen some example of memory usage growing very
+  // fast in the simulator without this.
+  @autoreleasepool
+  {
+    id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
+    if(currentDrawable == nullptr) {
+      return;
+    }
+    
+    GrMtlTextureInfo fbInfo;
+    fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
+    
+    GrBackendRenderTarget backendRT(_layer.drawableSize.width,
+                                    _layer.drawableSize.height,
+                                    1,
+                                    fbInfo);
+
+    auto skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
+                                                            backendRT,
+                                                            kTopLeft_GrSurfaceOrigin,
+                                                            kBGRA_8888_SkColorType,
+                                                            nullptr,
+                                                            nullptr);
+    
+    if(skSurface == nullptr || skSurface->getCanvas() == nullptr) {
+      RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
+      return;
+    }
+    
+    skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
+    skSurface->getCanvas()->drawPicture(picture);
+    
+    id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
+    [commandBuffer presentDrawable:currentDrawable];
+    [commandBuffer commit];
+  }
 }

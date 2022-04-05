@@ -1,18 +1,18 @@
 import React from "react";
 
-import { Skia } from "../../../skia";
-import { useDeclaration } from "../../nodes/Declaration";
-import type { ColorProp } from "../../processors/Paint";
-import { processColor } from "../../processors/Paint";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
+import { Skia, processColor } from "../../../skia";
+import { createDeclaration } from "../../nodes";
+import type { AnimatedProps } from "../../processors";
+import type { Color } from "../../../skia";
 
 export interface ColorShaderProps {
-  color: ColorProp;
+  color: Color;
 }
 
+const onDeclare = createDeclaration<ColorShaderProps>(({ color }) => {
+  return Skia.Shader.MakeColor(processColor(color, 1));
+});
+
 export const ColorShader = (props: AnimatedProps<ColorShaderProps>) => {
-  const declaration = useDeclaration(props, ({ color }) => {
-    return Skia.Shader.MakeColor(processColor(color, 1));
-  });
-  return <skDeclaration declaration={declaration} />;
+  return <skDeclaration onDeclare={onDeclare} {...props} />;
 };

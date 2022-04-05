@@ -1,22 +1,34 @@
 #pragma once
 
-#include <JsiSkCanvas.h>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <vector>
+#include <string>
+
+#include <jsi/jsi.h>
+
 #include <RNSkInfoParameter.h>
 #include <RNSkPlatformContext.h>
 #include <RNSkTimingInfo.h>
-#include <mutex>
+#include <RNSkLog.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "include/gpu/GrDirectContext.h"
-#include "include/gpu/gl/GrGLInterface.h"
-#include <SkSurface.h>
+#include <SkRefCnt.h>
 
 #pragma clang diagnostic pop
 
-namespace RNSkia {
+#define LOG_ALL_DRAWING 0
 
+class SkPicture;
+class SkRect;
+class SkImage;
+
+namespace RNSkia {
+class JsiSkCanvas;
+using namespace facebook;
 using RNSkDrawCallback =
     std::function<void(std::shared_ptr<JsiSkCanvas>, int, int, double,
                        std::shared_ptr<RNSkPlatformContext>)>;
@@ -55,22 +67,13 @@ public:
   /**
    Sets the native id of the view
    */
-  void setNativeId(size_t nativeId) { _nativeId = nativeId; }
+  void setNativeId(size_t nativeId);
   
   /**
    Returns the native id
    */
   size_t getNativeId() { return _nativeId; }
-
-  /**
-   * Call this method with a valid Skia surface to let the draw drawCallback do
-   * its thing.
-   * It is important that the height and width parameters are not resolved
-   * against the scale factor - this is done by the drawing code itself.
-   */
-  void drawInSurface(sk_sp<SkSurface>, int, int, double,
-                     std::shared_ptr<RNSkPlatformContext>);
-
+  
   /**
    Sets the drawing mode for the view
    */
@@ -85,30 +88,42 @@ public:
     Update touch state with new touch points
    */
   void updateTouchState(const std::vector<RNSkTouchPoint> &points);
+  
+  /**
+   Draws the view's surface into an image
+   return an SkImage
+   */
+  sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds);
 
 protected:
-  /**
-   * Setup and draw the frame
-   */
-  virtual void drawFrame(double time) {};
-
-  /**
-   * Mark view as invalidated
-   */
-  void invalidate();
-
-  /**
-   * @return True if the view was marked as deleted
-   */
-  bool isValid() { return _isValid; }
-
-  /**
-   Updates the last duration value
-   */
-  void setLastFrameDuration(size_t duration) {
-    _timingInfo->addLastDuration(duration);
+  void setNativeDrawFunc(std::function<void(const sk_sp<SkPicture>)> drawFunc) {
+    if(!_gpuDrawingLock->try_lock_for(250ms)) {
+      RNSkLogger::logToConsole("Could not lock drawing when clearing drawing function - %i", _nativeId);
+    }
+    _nativeDrawFunc = drawFunc;
+    _gpuDrawingLock->unlock();
   }
-
+  
+  /**
+   Returns the scaled width of the view
+   */
+  virtual int getWidth() { return -1; };
+  
+  /**
+   Returns the scaled height of the view
+   */
+  virtual int getHeight() { return -1; };
+  
+  /**
+   Returns true if the view is invalidated
+   */
+  volatile bool isInvalidated() { return _isInvalidated; }
+  
+  /**
+   Override to be notified on invalidation
+   */
+  virtual void onInvalidated() {};
+  
   /**
    * @return The platformcontext
    */
@@ -116,12 +131,7 @@ protected:
     return _platformContext;
   }
 
-private:
-  /**
-   * Checks preconditions for drawing
-   */
-  bool isReadyToDraw();
-
+private:  
   /**
    Starts beginDrawCallback loop if the drawing mode is continuous
    */
@@ -131,7 +141,20 @@ private:
    Ends an ongoing beginDrawCallback loop for this view
    */
   void endDrawingLoop();
-
+  
+  /**
+    Draw loop callback
+   */
+  void drawLoopCallback(bool invalidated);
+  
+  /**
+   Draw in canvas
+   */
+  void drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
+                    int width,
+                    int height,
+                    double time);
+  
   /**
    * Stores the draw drawCallback
    */
@@ -143,11 +166,16 @@ private:
    * functions that we don't want to recreate on each render
    */
   std::shared_ptr<JsiSkCanvas> _jsiCanvas;
-
+  
   /**
-   * drawing mutex
+   * JS Drawing mutex
    */
-  std::timed_mutex* _isDrawing;
+  std::shared_ptr<std::timed_mutex> _jsDrawingLock;
+  
+  /**
+   * SKIA Drawing mutex
+   */
+  std::shared_ptr<std::timed_mutex> _gpuDrawingLock;
 
   /**
    * Pointer to the platform context
@@ -175,22 +203,40 @@ private:
   std::shared_ptr<RNSkInfoObject> _infoObject;
 
   /**
-   Timing information
+   Timing information for javascript drawing
    */
-  std::shared_ptr<RNSkTimingInfo> _timingInfo;
+  RNSkTimingInfo _jsTimingInfo;
+  
+  /**
+   Timing information for GPU rendering
+   */
+  RNSkTimingInfo _gpuTimingInfo;
+  
+  /**
+   Measures vsync framerate
+   */
+  RNSkTimingInfo _vsyncTimingInfo;
+  
   /**
    Redraw queue counter
    */
-  std::atomic<int> _redrawRequestCounter;
-  /**
-   Flag indicating that the view is valid / invalid
-   */
-  std::atomic<bool> _isValid { true };
-
+  std::atomic<int> _redrawRequestCounter = { 1 };
+  
   /**
    * Native id
    */
   size_t _nativeId;
+  
+  /**
+   Invalidation flag
+   */
+  std::atomic<bool> _isInvalidated = { false };
+  
+  /**
+   Native draw handler
+   */
+  std::function<void(const sk_sp<SkPicture>)> _nativeDrawFunc;  
+  
 };
 
 } // namespace RNSkia

@@ -1,36 +1,48 @@
+import type { SkiaReadonlyValue } from "../../../values";
 import type { DrawingContext } from "../../DrawingContext";
 import { mapKeys } from "../../typeddash";
 
 export type FrameValue<T> = (ctx: DrawingContext) => T;
 
-// TODO: refine detection here. Is the prototype accepting a drawing ctx for instance?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isAnimatedValue = (value: unknown): value is FrameValue<any> =>
-  typeof value === "function";
+export const isValue = (
+  value: unknown
+): value is SkiaReadonlyValue<unknown> => {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  try {
+    if (
+      typeof value === "object" &&
+      "__typename__" in value &&
+      (value as unknown as SkiaReadonlyValue<unknown>).__typename__ ===
+        "RNSkValue"
+    ) {
+      return true;
+    }
+  } catch {}
+  return false;
+};
 
 export const isAnimated = <T>(props: AnimatedProps<T>) => {
   for (const value of Object.values(props)) {
-    if (isAnimatedValue(value)) {
+    if (isValue(value)) {
       return true;
     }
   }
   return false;
 };
 
-export const materialize = <T>(
-  ctx: DrawingContext,
-  props: AnimatedProps<T>
-) => {
+export const materialize = <T>(props: AnimatedProps<T>) => {
   const result = { ...props };
   mapKeys(props).forEach((key) => {
     const value = props[key];
-    if (isAnimatedValue(value)) {
-      result[key] = value(ctx);
+    if (isValue(value)) {
+      result[key] = (value as SkiaReadonlyValue<T[typeof key]>).current;
     }
   });
   return result as T;
 };
 
-export type AnimatedProps<T, E extends string = never> = {
-  [K in keyof T]: T[K] | (K extends E ? never : (ctx: DrawingContext) => T[K]);
+export type AnimatedProps<T> = {
+  [K in keyof T]: T[K] | SkiaReadonlyValue<T[K]>;
 };

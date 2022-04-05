@@ -16,3 +16,7 @@ export * from "./Shader";
 export * from "./Image";
 export * from "./Matrix";
 export * from "./SVG";
+export * from "./Surface";
+export * from "./FontMgr";
+export * from "./Vertices";
+export * from "./Color";

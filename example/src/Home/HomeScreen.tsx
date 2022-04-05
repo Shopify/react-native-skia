@@ -1,11 +1,11 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView } from "react-native";
 
 import { HomeScreenButton } from "./HomeScreenButton";
 
-export const HomeScreen: React.FC = () => {
+export const HomeScreen = () => {
   return (
-    <View style={styles.container}>
+    <ScrollView>
       <HomeScreenButton title="API" description="API examples" route="API" />
       <HomeScreenButton
         title="🧘 Breathe"
@@ -28,12 +28,32 @@ export const HomeScreen: React.FC = () => {
         route="Hue"
       />
       <HomeScreenButton
-        title="Drawing"
-        description="Use touches to draw with Skia"
-        route="Drawing"
+        title="🌧 Digital Rain"
+        description="Digital Rain"
+        route="Matrix"
       />
       <HomeScreenButton
-        title="Animation"
+        title="☀️ Aurora"
+        description="Aurora Design via Mesh Gradients"
+        route="Aurora"
+      />
+      <HomeScreenButton
+        title="🪞 Glassmorphism"
+        description="Glassmorphism"
+        route="Glassmorphism"
+      />
+      <HomeScreenButton
+        title="📉 Graphs"
+        description="Animated graphs with Skia"
+        route="Graphs"
+      />
+      <HomeScreenButton
+        title="💚 Neumorphism"
+        description="Drop Shadows"
+        route="Neumorphism"
+      />
+      <HomeScreenButton
+        title="🎥 Animation"
         description="Animated with Skia"
         route="Animation"
       />
@@ -42,12 +62,11 @@ export const HomeScreen: React.FC = () => {
         description="Gestures with Skia"
         route="Gesture"
       />
-    </View>
+      <HomeScreenButton
+        title="🏎 Performance"
+        description="Drawing Performance Test"
+        route="Performance"
+      />
+    </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

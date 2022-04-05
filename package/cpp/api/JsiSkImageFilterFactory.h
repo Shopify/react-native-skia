@@ -43,15 +43,75 @@ public:
                      getContext(), SkImageFilters::ColorFilter(cf, input)));
   }
 
+  JSI_HOST_FUNCTION(MakeOffset) {
+    auto x = arguments[0].asNumber();
+    auto y = arguments[1].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[2].isNull()) {
+        input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
+    }
+    return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkImageFilter>(
+                    getContext(), SkImageFilters::Offset(x, y, input)));
+  }
+
+  JSI_HOST_FUNCTION(MakeDisplacementMap) {
+    auto fXChannelSelector = static_cast<SkColorChannel>(arguments[0].asNumber());
+    auto fYChannelSelector = static_cast<SkColorChannel>(arguments[1].asNumber());
+    auto scale = arguments[2].asNumber();
+    auto in2 = JsiSkImageFilter::fromValue(runtime, arguments[3]);
+    sk_sp<SkImageFilter> input;
+    if (!arguments[4].isNull()) {
+     input = JsiSkImageFilter::fromValue(runtime, arguments[4]);
+    }
+    return jsi::Object::createFromHostObject(
+    runtime,
+    std::make_shared<JsiSkImageFilter>(
+    getContext(),
+                SkImageFilters::DisplacementMap(fXChannelSelector, fYChannelSelector, scale, in2, input)
+        )
+    );
+  }
+
+  JSI_HOST_FUNCTION(MakeShader) {
+    auto shader = JsiSkShader::fromValue(runtime, arguments[0]);
+    return jsi::Object::createFromHostObject(
+                runtime, std::make_shared<JsiSkImageFilter>(
+                        getContext(), SkImageFilters::Shader(shader)));
+  }
+
   JSI_HOST_FUNCTION(MakeCompose) {
-    auto outer = JsiSkImageFilter::fromValue(runtime, arguments[0]);
+    sk_sp<SkImageFilter> outer;
+    if (!arguments[0].isNull()&& !arguments[0].isUndefined()) {
+      outer = JsiSkImageFilter::fromValue(runtime, arguments[0]);
+    }
     sk_sp<SkImageFilter> inner;
-    if (arguments[1].isNull()) {
+    if (!arguments[1].isNull() && !arguments[1].isUndefined()) {
       inner = JsiSkImageFilter::fromValue(runtime, arguments[1]);
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImageFilter>(
                      getContext(), SkImageFilters::Compose(outer, inner)));
+  }
+
+
+  JSI_HOST_FUNCTION(MakeBlend) {
+    auto mode = static_cast<SkBlendMode>(arguments[0].asNumber());
+    sk_sp<SkImageFilter> background = JsiSkImageFilter::fromValue(runtime, arguments[1]);
+    sk_sp<SkImageFilter> foreground = nullptr;
+
+    if(count > 2 && !arguments[2].isNull()) {
+      foreground = JsiSkImageFilter::fromValue(runtime, arguments[2]);
+    }
+
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 3 && !arguments[3].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[3]);
+    }
+
+    return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkImageFilter>(
+                    getContext(), SkImageFilters::Blend(mode, background, foreground, cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeDropShadow) {
@@ -60,11 +120,19 @@ public:
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
     auto color = arguments[4].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[5].isNull() && !arguments[5].isUndefined()) {
+      input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 6 && !arguments[6].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
+    }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY,
-                                                     color, nullptr)));
+                                                     color, input, cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeDropShadowOnly) {
@@ -73,17 +141,67 @@ public:
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
     auto color = arguments[4].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[5].isNull() && !arguments[5].isUndefined()) {
+      input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 6 && !arguments[6].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
+    }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY,
-                                                         color, nullptr)));
+                                                         color, input, cropRect)));
+  }
+
+  JSI_HOST_FUNCTION(MakeErode) {
+    auto rx = arguments[0].asNumber();
+    auto ry = arguments[1].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[2].isNull() && !arguments[2].isUndefined()) {
+      input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 3 && !arguments[3].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[3]);
+    }
+    return jsi::Object::createFromHostObject(
+            runtime,
+            std::make_shared<JsiSkImageFilter>(
+                    getContext(), SkImageFilters::Erode(rx, ry, input, cropRect))
+    );
+  }
+
+  JSI_HOST_FUNCTION(MakeDilate) {
+    auto rx = arguments[0].asNumber();
+    auto ry = arguments[1].asNumber();
+    sk_sp<SkImageFilter> input;
+    if (!arguments[2].isNull() && !arguments[2].isUndefined()) {
+      input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (count > 3 && !arguments[3].isUndefined()) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[3]);
+    }
+    return jsi::Object::createFromHostObject(
+            runtime,
+            std::make_shared<JsiSkImageFilter>(
+                    getContext(), SkImageFilters::Dilate(rx, ry, input, cropRect)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeOffset),
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
                                        MakeColorFilter),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
+                                       MakeShader),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDisplacementMap),
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeCompose),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeErode),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDilate),
+                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlend),
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadow),
                        JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
                                        MakeDropShadowOnly))

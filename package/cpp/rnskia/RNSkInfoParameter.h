@@ -1,11 +1,18 @@
 #pragma once
 
 #include <chrono>
+#include <memory>
+#include <mutex>
+#include <vector>
+
+#include <jsi/jsi.h>
 
 #include <JsiHostObject.h>
 
 namespace RNSkia {
 
+using namespace facebook;
+using namespace RNJsi;
 using namespace std::chrono;
 
 enum RNSkTouchType { Start, Active, End, Cancelled };
@@ -49,7 +56,7 @@ public:
                               JSI_EXPORT_PROP_GET(RNSkInfoObject, timestamp),
                               JSI_EXPORT_PROP_GET(RNSkInfoObject, touches))
 
-  void beginDrawCallback(int width, int height, double timestamp) {
+  void beginDrawOperation(int width, int height, double timestamp) {
     _width = width;
     _height = height;
     _timestamp = timestamp;
@@ -65,7 +72,7 @@ public:
     _currentTouches.clear();
   }
 
-  void endDrawCallback() { _touchesCache.clear(); }
+  void endDrawOperation() { _touchesCache.clear(); }
 
   void updateTouches(std::vector<RNSkTouchPoint> touches) {
     std::lock_guard<std::mutex> lock(*_mutex);

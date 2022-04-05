@@ -1,18 +1,21 @@
 import React from "react";
 
-import type { CustomPaintProps } from "../../processors";
-import type { RectDef } from "../../processors/Shapes";
-import { processRect } from "../../processors/Shapes";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { useDrawing } from "../../nodes/Drawing";
+import type {
+  CustomPaintProps,
+  RectDef,
+  AnimatedProps,
+} from "../../processors";
+import { processRect } from "../../processors";
+import { createDrawing } from "../../nodes";
 
 export type OvalProps = RectDef & CustomPaintProps;
 
+const onDraw = createDrawing<OvalProps>(({ canvas, paint }, rectProps) => {
+  const rect = processRect(rectProps);
+  canvas.drawOval(rect, paint);
+});
+
 export const Oval = (props: AnimatedProps<OvalProps>) => {
-  const onDraw = useDrawing(props, ({ canvas, paint }, rectProps) => {
-    const rect = processRect(rectProps);
-    canvas.drawOval(rect, paint);
-  });
   return <skDrawing onDraw={onDraw} {...props} />;
 };
 

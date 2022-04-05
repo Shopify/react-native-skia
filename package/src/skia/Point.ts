@@ -4,7 +4,7 @@ export enum PointMode {
   Polygon,
 }
 
-export interface IPoint {
+export interface SkPoint {
   readonly x: number;
   readonly y: number;
 }

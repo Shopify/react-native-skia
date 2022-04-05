@@ -1,48 +1,80 @@
 /*global SkiaApi*/
-
 import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
-import type { Font } from "./Font";
-import type { FontStyle, Typeface } from "./Typeface";
-import type { IImage } from "./Image";
-import { ImageCtor } from "./Image";
+import type { SkFont } from "./Font";
+import type { SkTypeface, TypefaceFactory } from "./Typeface";
+import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
-import type { IPaint } from "./Paint";
-import type { IRect } from "./Rect";
-import type { IRRect } from "./RRect";
+import type { SkPaint } from "./Paint";
+import type { SkRect } from "./Rect";
+import type { SkRRect } from "./RRect";
 import type { RuntimeEffectFactory } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
-import type { ISvgStatic } from "./SVG";
-import { SvgObject } from "./SVG";
-import { Color } from "./Color";
-import type { Matrix } from "./Matrix";
+import type { SkColor } from "./Color";
+import { processColor } from "./Color";
+import type { SkMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
-import type { IPoint } from "./Point";
+import type { SkPoint } from "./Point";
+import type { SkVertices, VertexMode } from "./Vertices/Vertices";
+import type { DataFactory } from "./Data";
+import type { SVGFactory } from "./SVG";
+import type { TextBlobFactory } from "./TextBlob";
+import type { FontMgrFactory } from "./FontMgr/FontMgrFactory";
+import type { SurfaceFactory } from "./Surface";
+import "./NativeSetup";
+import type { SkRSXform } from "./RSXform";
+import type { SkPath } from "./Path/Path";
+import type { SkContourMeasureIter } from "./ContourMeasure";
 
 /**
  * Declares the interface for the native Skia API
  */
 export interface Skia {
-  Point: (x: number, y: number) => IPoint;
-  XYWHRect: (x: number, y: number, width: number, height: number) => IRect;
-  RRectXY: (rect: IRect, rx: number, ry: number) => IRRect;
-  Paint: () => IPaint;
+  Point: (x: number, y: number) => SkPoint;
+  XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
+  RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
+  RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
+  ContourMeasureIter: (
+    path: SkPath,
+    forceClosed: boolean,
+    resScale: number
+  ) => SkContourMeasureIter;
+  Paint: () => SkPaint;
   Path: PathFactory;
-  Matrix: () => Matrix;
+  Matrix: () => SkMatrix;
   ColorFilter: ColorFilterFactory;
-  Font: (typeface?: Typeface, size?: number) => Font;
-  Typeface:
-    | ((fontName?: string, style?: FontStyle) => Typeface)
-    | (() => Typeface);
+  Font: (typeface?: SkTypeface, size?: number) => SkFont;
+  Typeface: TypefaceFactory;
   MaskFilter: MaskFilterFactory;
   RuntimeEffect: RuntimeEffectFactory;
   ImageFilter: ImageFilterFactory;
   Shader: ShaderFactory;
   PathEffect: PathEffectFactory;
-  /* Below are private APIs */
-  Image: (localUri: string) => Promise<IImage>;
-  Svg: ISvgStatic;
+  /**
+   * Returns an Vertices based on the given positions and optional parameters.
+   * See SkVertices.h (especially the Builder) for more details.
+   * @param mode
+   * @param positions
+   * @param textureCoordinates
+   * @param colors - either a list of int colors or a flattened color array.
+   * @param indices
+   * @param isVolatile
+   */
+  MakeVertices(
+    mode: VertexMode,
+    positions: SkPoint[],
+    textureCoordinates?: SkPoint[] | null,
+    colors?: SkColor[],
+    indices?: number[] | null,
+    isVolatile?: boolean
+  ): SkVertices;
+  Data: DataFactory;
+  Image: ImageFactory;
+  SVG: SVGFactory;
+  FontMgr: FontMgrFactory;
+  TextBlob: TextBlobFactory;
+  Surface: SurfaceFactory;
 }
 
 /**
@@ -56,21 +88,33 @@ declare global {
  * Declares the implemented API with overrides.
  */
 export const Skia = {
-  Point: SkiaApi.Point,
-  XYWHRect: SkiaApi.XYWHRect,
-  RRectXY: SkiaApi.RRectXY,
-  Paint: SkiaApi.Paint,
-  Path: SkiaApi.Path,
-  ColorFilter: SkiaApi.ColorFilter,
-  Font: SkiaApi.Font,
+  // Factories
   Typeface: SkiaApi.Typeface,
   MaskFilter: SkiaApi.MaskFilter,
   RuntimeEffect: SkiaApi.RuntimeEffect,
   Shader: SkiaApi.Shader,
   ImageFilter: SkiaApi.ImageFilter,
   PathEffect: SkiaApi.PathEffect,
+  Data: SkiaApi.Data,
+  SVG: SkiaApi.SVG,
+  FontMgr: SkiaApi.FontMgr,
+  TextBlob: SkiaApi.TextBlob,
+  // Constructors
   Matrix: SkiaApi.Matrix,
-  Color,
-  Image: ImageCtor,
-  Svg: SvgObject,
+  Font: SkiaApi.Font,
+  Point: SkiaApi.Point,
+  XYWHRect: SkiaApi.XYWHRect,
+  RRectXY: SkiaApi.RRectXY,
+  Paint: SkiaApi.Paint,
+  Path: SkiaApi.Path,
+  ColorFilter: SkiaApi.ColorFilter,
+  ContourMeasureIter: SkiaApi.ContourMeasureIter,
+  // Here are constructors for data types which are represented as typed arrays in CanvasKit
+  Color: (color: Parameters<typeof processColor>[0]) => processColor(color, 1),
+  RSXform: SkiaApi.RSXform,
+  // For the following methods the factory symmetry is broken to be comptatible with CanvasKit
+  MakeSurface: SkiaApi.Surface.Make,
+  MakeImageFromEncoded: SkiaApi.Image.MakeImageFromEncoded,
+  MakeImage: SkiaApi.Image.MakeImage,
+  MakeVertices: SkiaApi.MakeVertices,
 };

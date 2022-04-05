@@ -1,5 +1,10 @@
 #pragma once
 
+#include <functional>
+#include <string>
+#include <memory>
+#include <exception>
+
 #include <JniPlatformContext.h>
 #include <RNSkPlatformContext.h>
 
@@ -13,19 +18,18 @@ namespace RNSkia {
                                   std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker) :
             RNSkPlatformContext(runtime,
                                 jsCallInvoker,
-                                [this](const std::function<void()> &func) { dispatchOnRenderThread(func); },
                                 jniPlatformContext->getPixelDensity()),
             _jniPlatformContext(jniPlatformContext) {
             // Hook onto the notify draw loop callback in the platform context
             jniPlatformContext->setOnNotifyDrawLoop([this]() {
-                notifyDrawLoop();
+                notifyDrawLoop(false);
             });
         }
 
 
     void performStreamOperation(
             const std::string &sourceUri,
-            const std::function<void(std::unique_ptr<SkStream>)> &op) override {
+            const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override {
         _jniPlatformContext->performStreamOperation(sourceUri, op);
     }
 
@@ -42,10 +46,6 @@ namespace RNSkia {
     }
 
     private:
-
-        void dispatchOnRenderThread (const std::function<void(void)>&func) {
-            _jniPlatformContext->dispatchOnRenderThread(func);
-        }
 
         JniPlatformContext* _jniPlatformContext;
     };

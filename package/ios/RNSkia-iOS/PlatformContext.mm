@@ -8,7 +8,7 @@
 namespace RNSkia {
 
   void PlatformContext::performStreamOperation(const std::string &sourceUri,
-                                              const std::function<void(std::unique_ptr<SkStream>)> &op) {
+                                              const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) {
   
     RNSkMeasureTime("PlatformContext::performStreamOperation");
     auto loader = [=]() {
@@ -35,7 +35,7 @@ void PlatformContext::startDrawLoop() {
   if(_displayLink == nullptr) {
     _displayLink = [[DisplayLink alloc] init];
     [_displayLink start:^(double time) {
-      notifyDrawLoop();
+      notifyDrawLoop(false);
     }];
   }
 }
@@ -44,7 +44,7 @@ void PlatformContext::stopDrawLoop() {
   if(_displayLink != nullptr) {
     [_displayLink stop];
     _displayLink = nullptr;
-  }
+  }  
 }
 
 }

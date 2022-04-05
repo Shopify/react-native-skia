@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -22,9 +20,14 @@ class JsiSkTypeface : public JsiSkWrappingSkPtrHostObject<SkTypeface> {
 public:
   JSI_PROPERTY_GET(bold) { return jsi::Value(getObject()->isBold()); }
   JSI_PROPERTY_GET(italic) { return jsi::Value(getObject()->isItalic()); }
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "Typeface");
+  }
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkTypeface, bold),
-                              JSI_EXPORT_PROP_GET(JsiSkTypeface, italic))
+                              JSI_EXPORT_PROP_GET(JsiSkTypeface, italic),
+                              JSI_EXPORT_PROP_GET(JsiSkTypeface, __typename__))
 
   JsiSkTypeface(std::shared_ptr<RNSkPlatformContext> context,
                 const sk_sp<SkTypeface> typeface)
@@ -42,30 +45,13 @@ public:
   }
 
   /**
-   * Creates the function for construction a new instance of the SkTypeface
-   * wrapper
-   * @param context Platform Context
-   * @return A function for creating a new host object wrapper for the
-   * SkTypeface class
-   */
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-      if (count == 2) {
-        return jsi::Object::createFromHostObject(
-            runtime,
-            std::make_shared<JsiSkTypeface>(
-                context,
-                SkTypeface::MakeFromName(
-                    arguments[0].asString(runtime).utf8(runtime).c_str(),
-                    getFontStyleFromNumber(arguments[1].asNumber()))));
-      } else {
-        // Return the newly constructed object
-        return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkTypeface>(
-                         context, SkTypeface::MakeDefault()));
-      }
-    };
+   Returns the jsi object from a host object of this type
+  */
+  static jsi::Value toValue(jsi::Runtime &runtime,
+                              std::shared_ptr<RNSkPlatformContext> context,
+                              const sk_sp<SkTypeface> tf) {
+    return jsi::Object::createFromHostObject(
+              runtime, std::make_shared<JsiSkTypeface>(context, tf));
   }
 
 private:

@@ -1,23 +1,21 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
+  useLoop,
   Skia,
-  PaintStyle,
   Canvas,
   Image,
   Group,
+  Circle,
+  Rect,
+  Mask,
+  useImage,
+  useDerivedValue,
+  mix,
 } from "@shopify/react-native-skia";
-import { useImage } from "@shopify/react-native-skia/src/skia/Image/useImage";
 
 const { width } = Dimensions.get("window");
 const SIZE = width / 4;
-const paint = Skia.Paint();
-paint.setAntiAlias(true);
-paint.setColor(Skia.Color("#61DAFB"));
-
-const strokePaint = paint.copy();
-strokePaint.setStyle(PaintStyle.Stroke);
-strokePaint.setStrokeWidth(2);
 
 const star = Skia.Path.MakeFromSVGString(
   // eslint-disable-next-line max-len
@@ -36,6 +34,8 @@ const clipRRect = Skia.RRectXY(
 );
 
 export const Clipping = () => {
+  const progress = useLoop({ duration: 3000 });
+  const x = useDerivedValue(() => mix(progress.current, 0, 200), [progress]);
   const oslo = useImage(require("../../assets/oslo.jpg"));
   if (oslo === null) {
     return null;
@@ -44,16 +44,16 @@ export const Clipping = () => {
     <ScrollView>
       <Canvas style={styles.container}>
         <Image
-          source={oslo}
+          image={oslo}
           x={PADDING}
           y={PADDING}
           width={SIZE}
           height={SIZE}
           fit="cover"
         />
-        <Group clipRect={clipRRect} invertClip>
+        <Group clip={clipRRect} invertClip>
           <Image
-            source={oslo}
+            image={oslo}
             x={SIZE + 2 * PADDING}
             y={PADDING}
             width={SIZE}
@@ -61,9 +61,9 @@ export const Clipping = () => {
             fit="cover"
           />
         </Group>
-        <Group clipPath={star}>
+        <Group clip={star}>
           <Image
-            source={oslo}
+            image={oslo}
             x={2 * SIZE + 3 * PADDING}
             y={PADDING}
             width={SIZE}
@@ -71,6 +71,31 @@ export const Clipping = () => {
             fit="cover"
           />
         </Group>
+      </Canvas>
+      <Canvas style={{ width, height: 200 }}>
+        <Rect x={x} y={0} width={200} height={200} color="green" />
+        <Mask
+          mode="alpha"
+          mask={
+            <Group>
+              <Circle cx={100} cy={100} r={120} color="#00000066" />
+              <Circle cx={100} cy={100} r={50} color="black" />
+            </Group>
+          }
+        >
+          <Rect x={0} y={0} width={200} height={200} color="lightblue" />
+        </Mask>
+        <Mask
+          mode="luminance"
+          mask={
+            <Group>
+              <Circle cx={300} cy={100} r={100} color="white" />
+              <Circle cx={300} cy={100} r={50} color="black" />
+            </Group>
+          }
+        >
+          <Rect x={200} y={0} width={200} height={200} color="lightblue" />
+        </Mask>
       </Canvas>
     </ScrollView>
   );

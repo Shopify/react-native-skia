@@ -9,6 +9,15 @@
 #import <MetalKit/MetalKit.h>
 #import <QuartzCore/CAMetalLayer.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#import <SkPicture.h>
+#import <SkRefCnt.h>
+#import <include/gpu/GrDirectContext.h>
+
+#pragma clang diagnostic pop
+
 @class SkiaDrawView;
 
 class RNSkDrawViewImpl : public RNSkia::RNSkDrawView {
@@ -19,9 +28,14 @@ public:
   void setSize(int width, int height);
 
 protected:
-  void drawFrame(double time) override;
-
+  int getWidth() override { return _width * _context->getPixelDensity(); };
+  int getHeight() override { return _height * _context->getPixelDensity(); };
+  void onInvalidated() override {
+    setNativeDrawFunc(nullptr);
+  };
+  
 private:
+  void drawFrame(const sk_sp<SkPicture> picture);
   bool createSkiaSurface();
 
   int _nativeId;
@@ -40,6 +54,4 @@ private:
   static sk_sp<GrDirectContext> _skContext;
 
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
-
-  GrBackendRenderTarget _skRenderTarget;  
 };

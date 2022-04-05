@@ -1,6 +1,6 @@
 import { exhaustiveCheck } from "../../typeddash";
 import { Skia } from "../../../skia";
-import type { IImage, IRect } from "../../../skia";
+import type { SkRect } from "../../../skia";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -12,14 +12,14 @@ export type Fit =
   | "none"
   | "scaleDown";
 
-interface Size {
+export interface Size {
   width: number;
   height: number;
 }
 
-const size = (width = 0, height = 0) => ({ width, height });
+export const size = (width = 0, height = 0) => ({ width, height });
 
-export const rect2rect = (src: IRect, dst: IRect) => {
+export const rect2rect = (src: SkRect, dst: SkRect) => {
   const scaleX = dst.width / src.width;
   const scaleY = dst.height / src.height;
   const translateX = dst.x - src.x * scaleX;
@@ -29,19 +29,19 @@ export const rect2rect = (src: IRect, dst: IRect) => {
 
 export const fitRects = (
   fit: Fit,
-  image: IImage,
-  { x, y, width, height }: IRect
+  rect: SkRect,
+  { x, y, width, height }: SkRect
 ) => {
   const sizes = applyBoxFit(
     fit,
-    { width: image.width(), height: image.height() },
+    { width: rect.width, height: rect.height },
     { width, height }
   );
   const src = inscribe(sizes.src, {
     x: 0,
     y: 0,
-    width: image.width(),
-    height: image.height(),
+    width: rect.width,
+    height: rect.height,
   });
   const dst = inscribe(sizes.dst, {
     x,

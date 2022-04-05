@@ -16,7 +16,7 @@ const examples = [
   },
   {
     screen: "Clipping",
-    title: "✂️ Clipping",
+    title: "✂️ & 🎭 Clipping & Masking",
   },
   {
     screen: "PathEffect",
@@ -28,7 +28,11 @@ const examples = [
   },
   {
     screen: "ColorFilter",
-    title: "🌃 Color & Image Filters",
+    title: "🌃 Color Filters",
+  },
+  {
+    screen: "ImageFilters",
+    title: "💧 Image Filters",
   },
   {
     screen: "Gradients",
@@ -37,6 +41,18 @@ const examples = [
   {
     screen: "Path",
     title: "🥾 Paths",
+  },
+  {
+    screen: "SVG",
+    title: "🖋 SVG",
+  },
+  {
+    screen: "BlendModes",
+    title: "🎨 Blend Modes",
+  },
+  {
+    screen: "Data",
+    title: "📊 Data",
   },
 ] as const;
 
@@ -50,7 +66,9 @@ const styles = StyleSheet.create({
     padding: 32,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  title: {},
+  title: {
+    color: "black",
+  },
 });
 
 export const List = () => {

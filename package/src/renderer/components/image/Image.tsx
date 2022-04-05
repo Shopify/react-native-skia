@@ -1,39 +1,45 @@
-import React, { useMemo } from "react";
+import React from "react";
 
-import type { IImage } from "../../../skia";
-import { useImage } from "../../../skia";
-import type { CustomPaintProps } from "../../processors/Paint";
-import { useDrawing } from "../../nodes/Drawing";
-import type { RectDef } from "../../processors/Shapes";
-import { processRect } from "../../processors/Shapes";
-import type { AnimatedProps } from "../../processors/Animations/Animations";
+import type { SkImage } from "../../../skia";
+import type {
+  CustomPaintProps,
+  RectDef,
+  AnimatedProps,
+} from "../../processors";
+import { createDrawing } from "../../nodes/Drawing";
+import { processRect } from "../../processors";
 
 import type { Fit } from "./BoxFit";
 import { fitRects } from "./BoxFit";
 
-export type ImageProps = RectDef &
-  CustomPaintProps & {
-    source: number | IImage;
+export type SourceImageProps = {
+  image: SkImage;
+};
+
+export type BaseImageProps = RectDef &
+  SourceImageProps & {
     fit: Fit;
   };
 
-export const Image = (defaultProps: AnimatedProps<ImageProps, "source">) => {
-  const image = useImage(defaultProps.source);
-  const props = useMemo<AnimatedProps<ImageProps, "source">>(
-    () => ({ ...defaultProps, image }),
-    [defaultProps, image]
-  );
-  const onDraw = useDrawing(
-    props,
-    ({ canvas, paint }, { fit, ...rectProps }) => {
-      if (image === null) {
-        return;
-      }
-      const rect = processRect(rectProps);
-      const { src, dst } = fitRects(fit, image, rect);
-      canvas.drawImageRect(image, src, dst, paint);
-    }
-  );
+export type ImageProps = CustomPaintProps & BaseImageProps;
+
+const onDraw = createDrawing<ImageProps>(
+  ({ canvas, paint }, { fit, image, ...rectProps }) => {
+    const rect = processRect(rectProps);
+    const { src, dst } = fitRects(
+      fit,
+      {
+        x: 0,
+        y: 0,
+        width: image.width(),
+        height: image.height(),
+      },
+      rect
+    );
+    canvas.drawImageRect(image, src, dst, paint);
+  }
+);
+export const Image = (props: AnimatedProps<ImageProps>) => {
   return <skDrawing onDraw={onDraw} {...props} />;
 };
 

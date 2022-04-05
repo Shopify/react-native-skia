@@ -1,5 +1,9 @@
 #pragma once
 
+#include <functional>
+#include <memory>
+#include <string>
+
 #include <DisplayLink.h>
 #include <RNSkPlatformContext.h>
 
@@ -10,8 +14,13 @@
 
 #pragma clang diagnostic pop
 
-#include <ReactCommon/CallInvoker.h>
 #include <jsi/jsi.h>
+
+namespace facebook {
+  namespace react {
+    class CallInvoker;
+  }
+}
 
 namespace RNSkia {
 
@@ -20,11 +29,8 @@ using namespace facebook;
 class PlatformContext : public RNSkPlatformContext {
 public:
   PlatformContext(jsi::Runtime *runtime,
-                  std::shared_ptr<react::CallInvoker> callInvoker,
-                  const std::function<void(const std::function<void(void)> &)>
-                      dispatchOnRenderThread)
-      : RNSkPlatformContext(runtime, callInvoker, dispatchOnRenderThread,
-                            [[UIScreen mainScreen] scale]) {}
+                  std::shared_ptr<react::CallInvoker> callInvoker)
+      : RNSkPlatformContext(runtime, callInvoker, [[UIScreen mainScreen] scale]) {}
 
   ~PlatformContext() {}
 
@@ -33,7 +39,7 @@ public:
 
   virtual void performStreamOperation(
       const std::string &sourceUri,
-      const std::function<void(std::unique_ptr<SkStream>)> &op) override;
+      const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
 
   void raiseError(const std::exception &err) override;
 

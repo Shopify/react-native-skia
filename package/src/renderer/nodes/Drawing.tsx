@@ -1,73 +1,75 @@
-import React, { useCallback } from "react";
+import type { ReactNode } from "react";
+import React from "react";
 
-import { NodeType } from "../Host";
-import type { SkNode } from "../Host";
+import { Node } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
-import type { CustomPaintProps } from "../processors";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
+import type { DependencyManager } from "../DependencyManager";
 
-type DrawingCallback = (ctx: DrawingContext, children: SkNode[]) => void;
-
-type UseDrawingCallback<T> = (
+type DrawingCallback<P> = (
   ctx: DrawingContext,
-  props: T,
-  children: SkNode[]
+  props: P,
+  node: Node<P>
 ) => void;
 
-export const useDrawing = <T,>(
-  props: AnimatedProps<T>,
-  cb: UseDrawingCallback<T>
-) =>
-  useCallback<DrawingCallback>(
-    (ctx, children) => {
-      const materializedProps = materialize(ctx, props);
-      cb(ctx, materializedProps, children);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props]
-  );
+type OnDrawCallback<P> = (ctx: DrawingContext, props: P, node: Node<P>) => void;
 
-export interface DrawingProps extends AnimatedProps<CustomPaintProps> {
-  onDraw: DrawingCallback;
+export const createDrawing = <P,>(cb: OnDrawCallback<P>): DrawingCallback<P> =>
+  cb;
+
+export type DrawingProps<T> = {
+  onDraw: DrawingCallback<T>;
   skipProcessing?: boolean;
-}
+  children?: ReactNode | ReactNode[];
+};
 
-export const Drawing = (props: DrawingProps) => {
+export const Drawing = <P,>(props: DrawingProps<P>) => {
   return <skDrawing {...props} />;
 };
 
-export const DrawingNode = (props: DrawingProps): SkNode<NodeType.Drawing> => ({
-  type: NodeType.Drawing,
-  props,
-  draw: (ctx, { onDraw, skipProcessing, ...newProps }, children) => {
-    if (skipProcessing) {
-      onDraw(ctx, children);
+export class DrawingNode<P> extends Node<P> {
+  onDraw: DrawingCallback<P>;
+  skipProcessing: boolean;
+
+  constructor(
+    depMgr: DependencyManager,
+    onDraw: DrawingCallback<P>,
+    skipProcessing: boolean,
+    props: AnimatedProps<P>
+  ) {
+    super(depMgr, props);
+    this.onDraw = onDraw;
+    this.skipProcessing = skipProcessing;
+  }
+
+  draw(ctx: DrawingContext) {
+    const drawingProps = materialize(this.props);
+    if (this.skipProcessing) {
+      this.onDraw(ctx, drawingProps, this);
     } else {
-      const drawingProps = materialize(ctx, newProps);
       const selectedPaint = selectPaint(ctx.paint, drawingProps);
       processPaint(selectedPaint, ctx.opacity, drawingProps);
       // to draw only once:
       // onDraw({ ...ctx, paint: selectedPaint }, children);
       [
         selectedPaint,
-        ...children
+        ...this.children
           .map((child) => {
-            if (child.type === NodeType.Declaration) {
-              const ret = child.draw(ctx, child.props, child.children);
-              if (ret) {
-                return ret;
-              }
+            //if (child.type === NodeType.Declaration) {
+            const ret = child.draw(ctx);
+            if (ret) {
+              return ret;
             }
+            //}
             return null;
           })
           .filter(isPaint),
       ].forEach((paint) => {
-        onDraw({ ...ctx, paint }, children);
+        this.onDraw({ ...ctx, paint }, drawingProps, this);
       });
     }
-  },
-  children: [],
-});
+  }
+}

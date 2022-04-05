@@ -5,9 +5,14 @@
 
 #include <queue>
 #include <mutex>
+#include <functional>
+#include <memory>
+#include <string>
+#include <exception>
 
 #include "RNSkPlatformContext.h"
 
+class SkStreamAsset;
 namespace RNSkia
 {
 
@@ -29,7 +34,7 @@ namespace RNSkia
 
         void performStreamOperation(
             const std::string &sourceUri,
-            const std::function<void(std::unique_ptr<SkStream>)> &op);
+            const std::function<void(std::unique_ptr<SkStreamAsset>)> &op);
 
         void raiseError(const std::exception &err);
 
@@ -39,8 +44,6 @@ namespace RNSkia
         void notifyDrawLoopExternal();
 
         void notifyTaskReadyExternal();
-
-        void dispatchOnRenderThread (const std::function<void(void)>&func);
 
         float getPixelDensity() { return _pixelDensity; }
 
