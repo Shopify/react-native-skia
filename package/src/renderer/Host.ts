@@ -1,9 +1,12 @@
 import { isPaint } from "../skia/Paint/Paint";
 
 import type { DrawingContext } from "./DrawingContext";
-import type { DeclarationResult, DeclarationProps } from "./nodes/Declaration";
-import type { DrawingProps } from "./nodes";
-import type { AnimatedProps } from "./processors/Animations/Animations";
+import type {
+  DeclarationResult,
+  DeclarationProps,
+  DrawingProps,
+} from "./nodes";
+import type { AnimatedProps } from "./processors";
 import type { DependencyManager } from "./DependencyManager";
 
 export enum NodeType {
