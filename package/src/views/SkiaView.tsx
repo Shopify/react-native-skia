@@ -68,7 +68,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
    */
   public makeImageSnapshot(rect?: SkRect) {
     assertDrawCallbacksEnabled();
-    return makeImageSnapshot(this._nativeId, rect);
+    return SkiaViewApi.makeImageSnapshot(this._nativeId, rect);
   }
 
   /**
@@ -76,7 +76,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
    */
   public redraw() {
     assertDrawCallbacksEnabled();
-    invalidateSkiaView(this._nativeId);
+    SkiaViewApi.invalidateSkiaView(this._nativeId);
   }
 
   /**
@@ -90,7 +90,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
    */
   public setDrawMode(mode: DrawMode) {
     assertDrawCallbacksEnabled();
-    setDrawingModeForSkiaView(this._nativeId, mode);
+    SkiaViewApi.setDrawMode(this._nativeId, mode);
   }
 
   /**
@@ -100,7 +100,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
    */
   public registerValues(values: SkiaReadonlyValue<unknown>[]) {
     assertDrawCallbacksEnabled();
-    return registerValuesInSkiaView(this._nativeId, values);
+    return SkiaViewApi.registerValuesInView(this._nativeId, values);
   }
 
   /**
@@ -155,25 +155,6 @@ const setDrawCallback = (
   drawCallback: RNSkiaDrawCallback | undefined
 ) => {
   return SkiaViewApi.setDrawCallback(nativeId, drawCallback);
-};
-
-export const invalidateSkiaView = (nativeId: number) => {
-  SkiaViewApi.invalidateSkiaView(nativeId);
-};
-
-export const makeImageSnapshot = (nativeId: number, rect?: SkRect) => {
-  return SkiaViewApi.makeImageSnapshot(nativeId, rect);
-};
-
-const setDrawingModeForSkiaView = (nativeId: number, mode: DrawMode) => {
-  SkiaViewApi.setDrawMode(nativeId, mode);
-};
-
-const registerValuesInSkiaView = (
-  nativeId: number,
-  values: SkiaReadonlyValue<unknown>[]
-) => {
-  return SkiaViewApi.registerValuesInView(nativeId, values);
 };
 
 const assertDrawCallbacksEnabled = () => {
