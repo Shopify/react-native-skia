@@ -2653,8 +2653,9 @@
   integrity sha512-W/J0fNYVO01tioHjvYWQ9m6RgndVtbElzYozBq1ZPrHO/iCzlqoySHl4gO/fpCl9QEFjvJfjPgtPMTMlsoq5DQ==
 
 "@shopify/react-native-skia@link:../package":
-  version "0.0.0"
-  uid ""
+  version "0.1.100"
+  dependencies:
+    react-reconciler "^0.26.2"
 
 "@sideway/address@^4.1.3":
   version "4.1.3"
