@@ -32,9 +32,6 @@ const processValue = (value: UniformValue): number | readonly number[] => {
   return value;
 };
 
-const isUniformArray = (value: Uniform): value is UniformValue =>
-  Array.isArray(value);
-
 export interface ShaderProps extends TransformProps {
   source: IRuntimeEffect;
   uniforms: Uniforms;
@@ -49,10 +46,10 @@ const onDeclare = createDeclaration<ShaderProps>(
       .map((_, i) => {
         const name = source.getUniformName(i);
         const value: Uniform = uniforms[name];
-        if (!isUniformArray(value)) {
+        if (Array.isArray(value)) {
           return value.flatMap(processValue);
         }
-        return processValue(value);
+        return processValue(value as UniformValue);
       })
       .flat(4);
     return source.makeShaderWithChildren(
