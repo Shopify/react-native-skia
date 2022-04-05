@@ -6,9 +6,16 @@
   "title": "React Native Skia",
   "version": "0.1.100",
   "description": "Skia View for React Native",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "lib/commonjs/index.js",
+  "types": "lib/typescript/src/index.d.ts",
+  "react-native": "src/index.ts",
+  "module": "lib/module/index.js",
   "files": [
+    "src",
+    "lib",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
     "README.md",
     "LICENSE.md",
     "android/build.gradle",
@@ -30,7 +37,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "test": "jest",
-    "install": "yarn node scripts/install-npm.js"
+    "prepare": "yarn node scripts/install-npm.js && bob build"
   },
   "repository": {
     "type": "git",
@@ -60,6 +67,7 @@
     "react-native-reanimated": ">=2.0.0"
   },
   "devDependencies": {
+    "@react-native-community/bob": "^0.17.1",
     "@types/jest": "^27.0.3",
     "@types/react-native": "^0.65.0",
     "@types/react-reconciler": "^0.26.4",
@@ -72,6 +80,20 @@
     "typescript": "^4.6.2"
   },
   "dependencies": {
+    "@react-native-community/bob": "^0.17.1",
     "react-reconciler": "^0.26.2"
-  }
+  },
+  "@react-native-community/bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      "typescript"
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ]
 }

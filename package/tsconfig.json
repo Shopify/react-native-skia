@@ -3,22 +3,5 @@
   "compilerOptions": {
     "noUncheckedIndexedAccess": false,
     "module": "commonjs",
-    "outDir": "./dist",
-    "declaration": true,
-    "noEmit": false,
-    "lib": [
-      "es2017",
-      "es7",
-      "es6",
-      "dom"
-    ],
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "index.ts",
-  ],
-  "exclude": [
-    "./dist/**/*",
-  ]
+  }
 }
