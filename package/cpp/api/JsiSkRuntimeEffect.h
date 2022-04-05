@@ -90,6 +90,9 @@ namespace RNSkia
     JSI_HOST_FUNCTION(getUniformName)
     {
       auto i = static_cast<int>(arguments[0].asNumber());
+      if (i < 0 || i >= getObject()->uniforms().size()) {
+        jsi::detail::throwJSError(runtime, "invalid uniform index");
+      }
       auto it = getObject()->uniforms().begin() + i;
       return jsi::String::createFromAscii(runtime, it->name.c_str());
     }
@@ -97,6 +100,9 @@ namespace RNSkia
     JSI_HOST_FUNCTION(getUniform)
     {
       auto i = static_cast<int>(arguments[0].asNumber());
+      if (i < 0 || i >= getObject()->uniforms().size()) {
+        jsi::detail::throwJSError(runtime, "invalid uniform index");
+      }
       auto it = getObject()->uniforms().begin() + i;
       auto result = jsi::Object(runtime);
       RuntimeEffectUniform su = fromUniform(*it);
