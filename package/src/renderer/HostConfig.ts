@@ -1,9 +1,8 @@
 /*global NodeJS, performance*/
 import type { HostConfig } from "react-reconciler";
 
-import { DeclarationNode, DrawingNode } from "./nodes";
-import type { Container, Node } from "./Host";
-import { NodeType } from "./Host";
+import type { Node, Container } from "./nodes";
+import { DeclarationNode, DrawingNode, NodeType } from "./nodes";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
 
 const DEBUG = false;
