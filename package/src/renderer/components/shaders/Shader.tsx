@@ -12,11 +12,28 @@ const isVector = (obj: unknown): obj is Vector =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (obj as any).x !== undefined && (obj as any).y !== undefined;
 
-type Uniform = number | readonly number[] | Vector;
+type UniformValue =
+  | number
+  | Vector
+  | readonly [number, number]
+  | readonly [number, number, number]
+  | readonly [number, number, number, number];
+
+type Uniform = UniformValue | readonly UniformValue[];
 
 interface Uniforms {
   [name: string]: Uniform;
 }
+
+const processValue = (value: UniformValue): number | readonly number[] => {
+  if (isVector(value)) {
+    return [value.x, value.y];
+  }
+  return value;
+};
+
+const isUniformArray = (value: Uniform): value is UniformValue =>
+  Array.isArray(value);
 
 export interface ShaderProps extends TransformProps {
   source: IRuntimeEffect;
@@ -31,11 +48,11 @@ const onDeclare = createDeclaration<ShaderProps>(
       .fill(0)
       .map((_, i) => {
         const name = source.getUniformName(i);
-        const value = uniforms[name];
-        if (isVector(value)) {
-          return [value.x, value.y];
+        const value: Uniform = uniforms[name];
+        if (!isUniformArray(value)) {
+          return value.flatMap(processValue);
         }
-        return value;
+        return processValue(value);
       })
       .flat(4);
     return source.makeShaderWithChildren(
