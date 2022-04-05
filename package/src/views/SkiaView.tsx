@@ -13,7 +13,7 @@ import type {
 
 let SkiaViewNativeId = 1000;
 
-export const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
+const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
   "ReactNativeSkiaView"
 );
 
