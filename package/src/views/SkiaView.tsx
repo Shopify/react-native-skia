@@ -42,7 +42,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
     const { onDraw } = props;
     if (onDraw) {
       assertDrawCallbacksEnabled();
-      setDrawCallback(this._nativeId, onDraw);
+      SkiaViewApi.setDrawCallback(this._nativeId, onDraw);
     }
   }
 
@@ -57,7 +57,7 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
     const { onDraw } = this.props;
     if (onDraw !== prevProps.onDraw) {
       assertDrawCallbacksEnabled();
-      setDrawCallback(this._nativeId, onDraw);
+      SkiaViewApi.setDrawCallback(this._nativeId, onDraw);
     }
   }
 
@@ -149,13 +149,6 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
     );
   }
 }
-
-const setDrawCallback = (
-  nativeId: number,
-  drawCallback: RNSkiaDrawCallback | undefined
-) => {
-  return SkiaViewApi.setDrawCallback(nativeId, drawCallback);
-};
 
 const assertDrawCallbacksEnabled = () => {
   if (
