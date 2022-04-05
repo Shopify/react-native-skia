@@ -35,6 +35,7 @@
     "dist/**"
   ],
   "scripts": {
+    "tsc": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "test": "jest",
     "prepare": "yarn node scripts/install-npm.js && bob build"
