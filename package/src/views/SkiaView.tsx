@@ -1,14 +1,39 @@
-/* global SkiaViewApi:false */
-
 import React from "react";
+import { requireNativeComponent } from "react-native";
 
-import type { SkRect } from "../skia";
+import type { SkImage, SkRect } from "../skia";
 import type { SkiaReadonlyValue } from "../values";
 
-import { NativeSkiaView } from "./types";
-import type { DrawMode, RNSkiaDrawCallback, RNSkiaViewProps } from "./types";
+import type {
+  DrawMode,
+  NativeSkiaViewProps,
+  RNSkiaDrawCallback,
+  RNSkiaViewProps,
+} from "./types";
 
 let SkiaViewNativeId = 1000;
+
+export const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
+  "ReactNativeSkiaView"
+);
+
+declare global {
+  var SkiaViewApi: {
+    invalidateSkiaView: (nativeId: number) => void;
+    makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
+    setDrawCallback: (
+      nativeId: number,
+      callback: RNSkiaDrawCallback | undefined
+    ) => void;
+    setDrawMode: (nativeId: number, mode: DrawMode) => void;
+    registerValuesInView: (
+      nativeId: number,
+      values: SkiaReadonlyValue<unknown>[]
+    ) => () => void;
+  };
+}
+
+const { SkiaViewApi } = global;
 
 export class SkiaView extends React.Component<RNSkiaViewProps> {
   constructor(props: RNSkiaViewProps) {

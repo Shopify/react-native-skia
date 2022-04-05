@@ -1,30 +1,6 @@
 import type { ViewProps } from "react-native";
-import { requireNativeComponent } from "react-native";
 
-import type { SkiaReadonlyValue } from "../values";
 import type { SkCanvas } from "../skia/Canvas";
-import type { SkRect } from "../skia/Rect";
-import type { SkImage } from "../skia/Image";
-
-export interface ISkiaViewApi {
-  invalidateSkiaView: (nativeId: number) => void;
-  makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
-  setDrawCallback: (
-    nativeId: number,
-    callback: RNSkiaDrawCallback | undefined
-  ) => void;
-  setDrawMode: (nativeId: number, mode: DrawMode) => void;
-  registerValuesInView: (
-    nativeId: number,
-    values: SkiaReadonlyValue<unknown>[]
-  ) => () => void;
-}
-
-declare global {
-  var SkiaViewApi: ISkiaViewApi;
-}
-
-export const { SkiaViewApi } = global;
 
 export type DrawMode = "continuous" | "default";
 
@@ -102,7 +78,3 @@ export interface ValueListener {
   addListener: (callback: () => void) => number;
   removeListener: (id: number) => void;
 }
-
-export const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
-  "ReactNativeSkiaView"
-);
