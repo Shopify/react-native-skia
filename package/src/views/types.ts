@@ -2,8 +2,9 @@ import type { ViewProps } from "react-native";
 import { requireNativeComponent } from "react-native";
 
 import type { SkiaReadonlyValue } from "../values";
-import type { SkRect, SkImage } from "../skia";
 import type { SkCanvas } from "../skia/Canvas";
+import type { SkRect } from "../skia/Rect";
+import type { SkImage } from "../skia/Image";
 
 export interface ISkiaViewApi {
   invalidateSkiaView: (nativeId: number) => void;
@@ -18,6 +19,7 @@ export interface ISkiaViewApi {
     values: SkiaReadonlyValue<unknown>[]
   ) => () => void;
 }
+
 declare global {
   var SkiaViewApi: ISkiaViewApi;
 }

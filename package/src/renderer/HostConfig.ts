@@ -1,7 +1,7 @@
 /*global NodeJS, performance*/
 import type { HostConfig } from "react-reconciler";
 
-import type { Node, Container } from "./nodes";
+import type { Node, Container, DeclarationProps, DrawingProps } from "./nodes";
 import { DeclarationNode, DrawingNode, NodeType } from "./nodes";
 import { exhaustiveCheck, mapKeys } from "./typeddash";
 
@@ -11,6 +11,18 @@ export const debug = (...args: Parameters<typeof console.log>) => {
     console.log(...args);
   }
 };
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      skDeclaration: DeclarationProps<any>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      skDrawing: DrawingProps<any>;
+    }
+  }
+}
 
 type Instance = Node;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
