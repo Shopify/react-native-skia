@@ -8,7 +8,7 @@ const createSymlink = (p) => {
   const srcDir = path.resolve(`./cpp/${p}`);
   const dstDir = path.resolve(`./android/cpp/${p}`);
 
-  if (!fs.lstatSync(dstDir).isSymbolicLink()) {
+  if (!fs.existsSync(dstDir) || !fs.lstatSync(dstDir).isSymbolicLink()) {
     fs.symlinkSync(srcDir, dstDir, "dir");
   }
 };
