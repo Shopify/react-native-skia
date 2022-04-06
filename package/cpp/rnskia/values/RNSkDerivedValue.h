@@ -44,7 +44,9 @@ public:
         
     // Ensure that all dependencies are Values
     auto deps = arguments[1].asObject(runtime).asArray(runtime);
-    for(size_t i=0; i<deps.size(runtime); ++i) {
+    const std::size_t size = deps.size(runtime);
+    dependencies.reserve(size);
+    for(size_t i=0; i<size; ++i) {
       auto dep = deps.getValueAtIndex(runtime, i);
       if(!dep.isObject() ||
          !dep.asObject(runtime).isHostObject(runtime)) {
@@ -61,6 +63,7 @@ public:
     _callback = std::make_shared<jsi::Function>(arguments[0].asObject(runtime).asFunction(runtime));
 
     // register change handler on dependencies
+    _unsubscribers.reserve(_unsubscribers.size() + size);
     for(const auto &dep: dependencies) {
       auto dispatcher = std::bind(&RNSkDerivedValue::dependencyUpdated, this, std::placeholders::_1);
       _unsubscribers.push_back(dep->addListener(dispatcher));

@@ -2,6 +2,7 @@
 
 #import <SkiaDrawView.h>
 
+#include <utility>
 #include <vector>
 
 #import <RNSkDrawViewImpl.h>
@@ -156,7 +157,7 @@
       nextTouches.push_back(nextTouch);
     }
     if(_impl != nullptr) {
-      _impl->updateTouchState(nextTouches);
+      _impl->updateTouchState(std::move(nextTouches));
     }
   }
 }

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <GLES2/gl2.h>
@@ -75,12 +76,11 @@ namespace RNSkia
     void JniSkiaDrawView::updateTouchPoints(jni::JArrayDouble touches)
     {
         // Create touch points
-        size_t size = touches.size();
-        std::vector<jdouble> buffer(size + 1L);
         std::vector<RNSkia::RNSkTouchPoint> points;
         auto pin = touches.pin();
         auto scale = getPlatformContext()->getPixelDensity();
-        for (size_t i = 0; i < pin.size(); i += 2)
+        points.reserve(pin.size() / 4);
+        for (size_t i = 0; i < pin.size(); i += 4)
         {
             RNSkTouchPoint point;
             point.x = pin[i] / scale;
@@ -89,7 +89,7 @@ namespace RNSkia
             point.type = (RNSkia::RNSkTouchType)pin[i + 3];
             points.push_back(point);
         }
-        updateTouchState(points);
+        updateTouchState(std::move(points));
     }
 
     void JniSkiaDrawView::surfaceAvailable(jobject surface, int width, int height)
