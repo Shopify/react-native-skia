@@ -1,5 +1,5 @@
 import type { DependencyList, ReactNode } from "react";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 
 import { Node } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
@@ -28,10 +28,6 @@ export type DrawingProps<T> = {
   onDraw: DrawingCallback<T>;
   skipProcessing?: boolean;
   children?: ReactNode | ReactNode[];
-};
-
-export const Drawing = <P,>(props: DrawingProps<P>) => {
-  return <skDrawing {...props} />;
 };
 
 export class DrawingNode<P> extends Node<P> {
