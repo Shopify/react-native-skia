@@ -1,13 +1,22 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <vector>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkTextBlob.h"
 #include "JsiSkRSXform.h"
-#include <jsi/jsi.h>
+#include "JsiSkFont.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkTextBlob.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 
@@ -21,7 +30,7 @@ namespace RNSkia {
             auto textBlob = SkTextBlob::MakeFromString(str.c_str(), *font);
             return jsi::Object::createFromHostObject(
                     runtime,
-                    std::make_shared<JsiSkTextBlob>(getContext(), textBlob)
+                    std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob))
             );
         }
 
@@ -37,7 +46,7 @@ namespace RNSkia {
             auto textBlob =  SkTextBlob::MakeFromText(glyphs.data(), glyphs.size() * bytesPerGlyph, *font, SkTextEncoding::kGlyphID);
             return jsi::Object::createFromHostObject(
                     runtime,
-                    std::make_shared<JsiSkTextBlob>(getContext(), textBlob)
+                    std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob))
             );
         }
 
@@ -54,7 +63,7 @@ namespace RNSkia {
             auto textBlob = SkTextBlob::MakeFromRSXform(str.c_str(), str.length(), rsxforms.data(), *font);
             return jsi::Object::createFromHostObject(
                     runtime,
-                    std::make_shared<JsiSkTextBlob>(getContext(), textBlob)
+                    std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob))
             );
         }
 
@@ -77,7 +86,7 @@ namespace RNSkia {
             auto textBlob = SkTextBlob::MakeFromRSXform(glyphs.data(), glyphs.size() * bytesPerGlyph, rsxforms.data(), *font, SkTextEncoding::kGlyphID);
             return jsi::Object::createFromHostObject(
                     runtime,
-                    std::make_shared<JsiSkTextBlob>(getContext(), textBlob)
+                    std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob))
             );
         }
 
@@ -90,7 +99,7 @@ namespace RNSkia {
         )
 
         JsiSkTextBlobFactory(std::shared_ptr<RNSkPlatformContext> context)
-                : JsiSkHostObject(context) {}
+                : JsiSkHostObject(std::move(context)) {}
     };
 
 } // namespace RNSkia

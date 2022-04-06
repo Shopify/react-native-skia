@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -9,7 +14,6 @@
 
 #pragma clang diagnostic pop
 
-#include <jsi/jsi.h>
 
 namespace RNSkia
 {
@@ -21,7 +25,7 @@ namespace RNSkia
     public:
         JsiSkContourMeasure(std::shared_ptr<RNSkPlatformContext> context,
                             const sk_sp<SkContourMeasure> contourMeasure)
-            : JsiSkWrappingSkPtrHostObject(context, contourMeasure)
+            : JsiSkWrappingSkPtrHostObject(std::move(context), std::move(contourMeasure))
         {
             if (contourMeasure == nullptr)
             {
@@ -68,7 +72,7 @@ namespace RNSkia
             {
                 jsi::detail::throwJSError(runtime, "getSegment() failed");
             }
-            return JsiSkPath::toValue(runtime, getContext(), path);
+            return JsiSkPath::toValue(runtime, getContext(), std::move(path));
         }
 
         JSI_PROPERTY_GET(__typename__)
@@ -92,7 +96,6 @@ namespace RNSkia
         {
             return obj.asObject(runtime)
                 .asHostObject<JsiSkContourMeasure>(runtime)
-                .get()
                 ->getObject();
         }
     };

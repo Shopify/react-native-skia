@@ -1,8 +1,12 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageFilter.h"
-#include <jsi/jsi.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -40,7 +44,7 @@ public:
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImageFilter>(
-                     getContext(), SkImageFilters::ColorFilter(cf, input)));
+                     getContext(), SkImageFilters::ColorFilter(std::move(cf), std::move(input))));
   }
 
   JSI_HOST_FUNCTION(MakeOffset) {
@@ -52,7 +56,7 @@ public:
     }
     return jsi::Object::createFromHostObject(
             runtime, std::make_shared<JsiSkImageFilter>(
-                    getContext(), SkImageFilters::Offset(x, y, input)));
+                    getContext(), SkImageFilters::Offset(x, y, std::move(input))));
   }
 
   JSI_HOST_FUNCTION(MakeDisplacementMap) {
@@ -68,7 +72,7 @@ public:
     runtime,
     std::make_shared<JsiSkImageFilter>(
     getContext(),
-                SkImageFilters::DisplacementMap(fXChannelSelector, fYChannelSelector, scale, in2, input)
+                SkImageFilters::DisplacementMap(fXChannelSelector, fYChannelSelector, scale, std::move(in2), std::move(input))
         )
     );
   }
@@ -77,7 +81,7 @@ public:
     auto shader = JsiSkShader::fromValue(runtime, arguments[0]);
     return jsi::Object::createFromHostObject(
                 runtime, std::make_shared<JsiSkImageFilter>(
-                        getContext(), SkImageFilters::Shader(shader)));
+                        getContext(), SkImageFilters::Shader(std::move(shader))));
   }
 
   JSI_HOST_FUNCTION(MakeCompose) {
@@ -91,7 +95,7 @@ public:
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImageFilter>(
-                     getContext(), SkImageFilters::Compose(outer, inner)));
+                     getContext(), SkImageFilters::Compose(std::move(outer), std::move(inner))));
   }
 
 
@@ -111,7 +115,7 @@ public:
 
     return jsi::Object::createFromHostObject(
             runtime, std::make_shared<JsiSkImageFilter>(
-                    getContext(), SkImageFilters::Blend(mode, background, foreground, cropRect)));
+                    getContext(), SkImageFilters::Blend(std::move(mode), std::move(background), std::move(foreground), cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeDropShadow) {
@@ -132,7 +136,7 @@ public:
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY,
-                                                     color, input, cropRect)));
+                                                     color, std::move(input), cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeDropShadowOnly) {
@@ -153,7 +157,7 @@ public:
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY,
-                                                         color, input, cropRect)));
+                                                         color, std::move(input), cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeErode) {
@@ -170,7 +174,7 @@ public:
     return jsi::Object::createFromHostObject(
             runtime,
             std::make_shared<JsiSkImageFilter>(
-                    getContext(), SkImageFilters::Erode(rx, ry, input, cropRect))
+                    getContext(), SkImageFilters::Erode(rx, ry, std::move(input), cropRect))
     );
   }
 
@@ -188,7 +192,7 @@ public:
     return jsi::Object::createFromHostObject(
             runtime,
             std::make_shared<JsiSkImageFilter>(
-                    getContext(), SkImageFilters::Dilate(rx, ry, input, cropRect)));
+                    getContext(), SkImageFilters::Dilate(rx, ry, std::move(input), cropRect)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
@@ -207,7 +211,7 @@ public:
                                        MakeDropShadowOnly))
 
   JsiSkImageFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(context) {}
+      : JsiSkHostObject(std::move(context)) {}
 };
 
 } // namespace RNSkia

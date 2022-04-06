@@ -87,7 +87,7 @@ public:
   /**
     Update touch state with new touch points
    */
-  void updateTouchState(const std::vector<RNSkTouchPoint> &points);
+  void updateTouchState(std::vector<RNSkTouchPoint>&& points);
   
   /**
    Draws the view's surface into an image
@@ -122,7 +122,7 @@ protected:
   /**
    Override to be notified on invalidation
    */
-  virtual void onInvalidated() {};
+  virtual void onInvalidated() {}
   
   /**
    * @return The platformcontext

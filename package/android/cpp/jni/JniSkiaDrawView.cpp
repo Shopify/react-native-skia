@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <GLES2/gl2.h>
@@ -89,7 +90,7 @@ namespace RNSkia
             point.type = (RNSkia::RNSkTouchType)pin[i + 3];
             points.push_back(point);
         }
-        updateTouchState(points);
+        updateTouchState(std::move(points));
     }
 
     void JniSkiaDrawView::surfaceAvailable(jobject surface, int width, int height)

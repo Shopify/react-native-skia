@@ -1,9 +1,13 @@
 #pragma once
 
-#include "JsiSkData.h"
-#include <jsi/jsi.h>
+#include <memory>
+#include <utility>
 
+#include <jsi/jsi.h>
 #include <ReactCommon/TurboModuleUtils.h>
+
+#include "JsiSkData.h"
+
 
 namespace RNSkia {
 
@@ -17,23 +21,22 @@ namespace RNSkia {
             auto context = getContext();
             return react::createPromiseAsJSIValue(
                     runtime,
-                    [context, localUri](jsi::Runtime &runtime,
+                    [context = std::move(context), localUri = std::move(localUri)](jsi::Runtime &runtime,
                                         std::shared_ptr<react::Promise> promise) -> void {
                         // Create a stream operation - this will be run in a
                         // separate thread
                         context->performStreamOperation(
                                 localUri,
-                                [&runtime, context, promise,
-                                        localUri](
+                                [&runtime, context = std::move(context), promise = std::move(promise)](
                                         std::unique_ptr<SkStreamAsset> stream) -> void {
                                     // Schedule drawCallback on the Javascript thread
                                     auto result = SkData::MakeFromStream(stream.get(), stream->getLength());
-                                    context->runOnJavascriptThread([&runtime, context, promise,
-                                                                           localUri, result]() {
+                                    context->runOnJavascriptThread([&runtime, context = std::move(context), promise = std::move(promise),
+                                                                           result = std::move(result)]() {
                                         promise->resolve(jsi::Object::createFromHostObject(
                                                 runtime,
-                                                std::make_shared<JsiSkData>(context,
-                                                                                   result)));
+                                                std::make_shared<JsiSkData>(std::move(context),
+                                                                            std::move(result))));
                                     });
                         });
             });
@@ -49,7 +52,7 @@ namespace RNSkia {
             auto data = SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
             return jsi::Object::createFromHostObject(runtime,
                                                      std::make_shared<JsiSkData>(
-                                                             getContext(), data));
+                                                             getContext(), std::move(data)));
         }
 
         JSI_HOST_FUNCTION(fromBase64) {
@@ -75,7 +78,7 @@ namespace RNSkia {
           
             return jsi::Object::createFromHostObject(runtime,
                                                      std::make_shared<JsiSkData>(
-                                                             getContext(), data));
+                                                             getContext(), std::move(data)));
         }
 
         JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkDataFactory, fromURI),
@@ -83,7 +86,7 @@ namespace RNSkia {
                              JSI_EXPORT_FUNC(JsiSkDataFactory, fromBase64))
 
         JsiSkDataFactory(std::shared_ptr<RNSkPlatformContext> context)
-                : JsiSkHostObject(context) {}
+                : JsiSkHostObject(std::move(context)) {}
     };
 
 } // namespace RNSkia

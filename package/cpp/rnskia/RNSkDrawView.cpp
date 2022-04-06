@@ -37,7 +37,7 @@ using namespace std::chrono;
 
 RNSkDrawView::RNSkDrawView(std::shared_ptr<RNSkPlatformContext> context)
     : _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
-      _platformContext(context),
+      _platformContext(std::move(context)),
       _infoObject(std::make_shared<RNSkInfoObject>()),
       _jsDrawingLock(std::make_shared<std::timed_mutex>()),
       _gpuDrawingLock(std::make_shared<std::timed_mutex>())
@@ -94,7 +94,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
   
   // Create draw drawCallback wrapper
   _drawCallback = std::make_shared<RNSkDrawCallback>(
-      [this, paint, font, callback](std::shared_ptr<JsiSkCanvas> canvas, int width,
+      [this, paint = std::move(paint), font = std::move(font), callback = std::move(callback)](std::shared_ptr<JsiSkCanvas> canvas, int width,
                                     int height, double timestamp,
                                     std::shared_ptr<RNSkPlatformContext> context) {
 
@@ -190,8 +190,8 @@ sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
   }
 }
 
-void RNSkDrawView::updateTouchState(const std::vector<RNSkTouchPoint> &points) {
-  _infoObject->updateTouches(points);
+void RNSkDrawView::updateTouchState(std::vector<RNSkTouchPoint>&& points) {
+  _infoObject->updateTouches(std::move(points));
   requestRedraw();
 }
 
