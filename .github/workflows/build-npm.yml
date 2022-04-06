@@ -63,7 +63,6 @@ jobs:
       - name: Publish to NPM
         uses: JS-DevTools/npm-publish@v1
         with:
-          dry-run: true
           token: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Github Release
