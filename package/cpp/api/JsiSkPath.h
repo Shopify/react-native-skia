@@ -1,13 +1,15 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <vector>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
 #include "JsiSkRect.h"
-#include <jsi/jsi.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -57,8 +59,9 @@ public:
   JSI_HOST_FUNCTION(addPoly) {
     std::vector<SkPoint> points;
     auto jsiPoints = arguments[0].asObject(runtime).asArray(runtime);
-    auto pointsSize = jsiPoints.size(runtime);
     auto close = arguments[1].getBool();
+    auto pointsSize = jsiPoints.size(runtime);
+    points.reserve(pointsSize);
     for (int i = 0; i < pointsSize; i++) {
       std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
@@ -140,14 +143,14 @@ public:
   JSI_HOST_FUNCTION(computeTightBounds) {
     auto result = getObject()->computeTightBounds();
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), result));
+        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(result)));
   }
 
   // TODO-API: Should this be a property?
   JSI_HOST_FUNCTION(getBounds) {
     auto result = getObject()->getBounds();
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), result));
+        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(result)));
   }
 
   JSI_HOST_FUNCTION(conicTo) {
@@ -310,7 +313,7 @@ public:
     SkPath out;
     if (AsWinding(*getObject(), &out)) {
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPath>(getContext(), out));
+          runtime, std::make_shared<JsiSkPath>(getContext(), std::move(out)));
     }
     return jsi::Value::null();
   }
@@ -438,7 +441,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(copy) {
-    auto path = getObject().get();
+    const auto* path = getObject().get();
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkPath>(getContext(), SkPath(*path)));
   }
@@ -478,7 +481,7 @@ public:
     SkPath result;
     getObject()->interpolate(*path2, weight, &result);
     return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkPath>(getContext(), result));
+            runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPath, __typename__))
@@ -520,7 +523,7 @@ public:
 
   JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
       : JsiSkWrappingSharedPtrHostObject<SkPath>(
-            context, std::make_shared<SkPath>(path)){};
+            std::move(context), std::make_shared<SkPath>(std::move(path))){}
 
   /**
     Returns the underlying object from a host object of this type
@@ -529,7 +532,6 @@ public:
                                            const jsi::Value &obj) {
     return obj.asObject(runtime)
         .asHostObject<JsiSkPath>(runtime)
-        .get()
         ->getObject();
   }
 
@@ -538,7 +540,16 @@ public:
                               const SkPath &path) {
       return jsi::Object::createFromHostObject(
               runtime,
-              std::make_shared<JsiSkPath>(context, path)
+              std::make_shared<JsiSkPath>(std::move(context), path)
+      );
+    }
+
+    static jsi::Value toValue(jsi::Runtime &runtime,
+                              std::shared_ptr<RNSkPlatformContext> context,
+                              SkPath&& path) {
+      return jsi::Object::createFromHostObject(
+              runtime,
+              std::make_shared<JsiSkPath>(std::move(context), std::move(path))
       );
     }
 };

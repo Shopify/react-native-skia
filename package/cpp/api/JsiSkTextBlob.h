@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -18,7 +23,7 @@ namespace RNSkia {
         JsiSkTextBlob(
                 std::shared_ptr<RNSkPlatformContext> context,
                 sk_sp<SkTextBlob> shader
-        ) : JsiSkWrappingSkPtrHostObject<SkTextBlob>(context, shader) {}
+        ) : JsiSkWrappingSkPtrHostObject<SkTextBlob>(std::move(context), std::move(shader)) {}
 
         // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
 
@@ -35,10 +40,8 @@ namespace RNSkia {
        */
         static sk_sp<SkTextBlob> fromValue(jsi::Runtime &runtime,
                                                     const jsi::Value &obj) {
-            const auto object = obj.asObject(runtime);
-            return object
+            return obj.asObject(runtime)
                         .asHostObject<JsiSkTextBlob>(runtime)
-                        .get()
                         ->getObject();
 
         }

@@ -1,7 +1,11 @@
 #pragma once
 
-#include <JsiSkHostObjects.h>
+#include <memory>
+#include <utility>
+
 #include <jsi/jsi.h>
+
+#include <JsiSkHostObjects.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -19,7 +23,7 @@ class JsiSkShader : public JsiSkWrappingSkPtrHostObject<SkShader> {
 public:
   JsiSkShader(std::shared_ptr<RNSkPlatformContext> context,
               sk_sp<SkShader> shader)
-      : JsiSkWrappingSkPtrHostObject<SkShader>(context, shader) {}
+      : JsiSkWrappingSkPtrHostObject<SkShader>(std::move(context), std::move(shader)) {}
 
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
   JSI_PROPERTY_GET(__typename__) {
@@ -35,7 +39,6 @@ public:
                                    const jsi::Value &obj) {
     return obj.asObject(runtime)
         .asHostObject<JsiSkShader>(runtime)
-        .get()
         ->getObject();
   }
 };

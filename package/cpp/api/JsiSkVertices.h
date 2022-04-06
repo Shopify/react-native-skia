@@ -1,7 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <utility>
+#include <jsi/jsi.h>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
 
@@ -21,7 +24,7 @@ namespace RNSkia {
 
         JsiSkVertices(std::shared_ptr<RNSkPlatformContext> context,
         sk_sp<SkVertices> vertices)
-        : JsiSkWrappingSkPtrHostObject<SkVertices>(context, vertices) {}
+        : JsiSkWrappingSkPtrHostObject<SkVertices>(std::move(context), std::move(vertices)) {}
 
         // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
         JSI_PROPERTY_GET(__typename__) {
@@ -31,7 +34,7 @@ namespace RNSkia {
         JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkVertices, __typename__))
 
         JSI_HOST_FUNCTION(bounds) {
-            auto result = getObject()->bounds();
+            const auto& result = getObject()->bounds();
             return jsi::Object::createFromHostObject(
                     runtime, std::make_shared<JsiSkRect>(getContext(), result));
         }
@@ -48,10 +51,8 @@ namespace RNSkia {
          */
         static sk_sp<SkVertices> fromValue(jsi::Runtime &runtime,
                                                  const jsi::Value &obj) {
-            const auto object = obj.asObject(runtime);
-                return object
+            return obj.asObject(runtime)
                         .asHostObject<JsiSkVertices>(runtime)
-                        .get()
                         ->getObject();
         }
 
@@ -73,6 +74,7 @@ namespace RNSkia {
 
                 auto jsiPositions = arguments[1].asObject(runtime).asArray(runtime);
                 auto positionsSize = static_cast<int>(jsiPositions.size(runtime));
+                positions.reserve(positionsSize);
                 for (int i = 0; i < positionsSize; i++) {
                     std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
                             runtime, jsiPositions.getValueAtIndex(runtime, i).asObject(runtime));
@@ -82,6 +84,7 @@ namespace RNSkia {
                 if (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()) {
                     auto jsiTexs = arguments[2].asObject(runtime).asArray(runtime);
                     auto texsSize = jsiTexs.size(runtime);
+                    texs.reserve(texsSize);
                     for (int i = 0; i < texsSize; i++) {
                         auto point = JsiSkPoint::fromValue(
                                 runtime, jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
@@ -92,6 +95,7 @@ namespace RNSkia {
                 if (count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
                     auto jsiColors = arguments[3].asObject(runtime).asArray(runtime);
                     auto colorsSize = jsiColors.size(runtime);
+                    colors.reserve(colorsSize);
                     for (int i = 0; i < colorsSize; i++) {
                         SkColor color = jsiColors.getValueAtIndex(runtime, i).asNumber();
                         colors.push_back(color);
@@ -102,6 +106,7 @@ namespace RNSkia {
                 if (count >= 5 && !arguments[4].isNull() && !arguments[4].isUndefined()) {
                     auto jsiIndices = arguments[4].asObject(runtime).asArray(runtime);
                     indicesSize = static_cast<int>(jsiIndices.size(runtime));
+                    indices.reserve(indicesSize);
                     for (int i = 0; i < indicesSize; i++) {
                         uint16_t index = jsiIndices.getValueAtIndex(runtime, i).asNumber();
                         indices.push_back(index);
@@ -135,7 +140,7 @@ namespace RNSkia {
 //                auto vertices = builder.detach();
                 auto vertices = SkVertices::MakeCopy(mode, positionsSize, positions.data(), texs.data(), colors.data(), indicesSize, indices.data());
                 return jsi::Object::createFromHostObject(
-                        runtime, std::make_shared<JsiSkVertices>(context, vertices));
+                        runtime, std::make_shared<JsiSkVertices>(context, std::move(vertices)));
             };
         }
     };

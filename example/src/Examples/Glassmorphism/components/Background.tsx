@@ -1,4 +1,4 @@
-import { Fill, Group, Paint, vec } from "@shopify/react-native-skia";
+import { Fill, Group, Paint, rect } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
 
@@ -12,7 +12,7 @@ export const Background = () => {
       <Paint>
         <BilinearGradient
           colors={["#FAC6C0", "#EBBFF6", "#F5DFE6", "#F2DCF6"]}
-          size={vec(width, height)}
+          rect={rect(0, 0, width, height)}
         />
       </Paint>
       <Fill />
