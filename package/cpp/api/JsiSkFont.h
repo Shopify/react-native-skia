@@ -1,7 +1,10 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <vector>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkPaint.h"
@@ -17,7 +20,6 @@
 
 #pragma clang diagnostic pop
 
-#include <jsi/jsi.h>
 
 namespace RNSkia
 {
@@ -47,7 +49,7 @@ namespace RNSkia
             getObject()->measureText(text, strlen(text), SkTextEncoding::kUTF8, &rect,
                                      paint.get());
             rect.setXYWH(0, 0, rect.width(), rect.height());
-            return JsiSkRect::toValue(runtime, getContext(), rect);
+            return JsiSkRect::toValue(runtime, getContext(), std::move(rect));
         }
 
         JSI_HOST_FUNCTION(getGlyphWidths)
@@ -59,6 +61,7 @@ namespace RNSkia
             std::vector<SkScalar> widthPtrs;
             widthPtrs.resize(glyphsSize);
 
+            glyphs.reserve(glyphsSize);
             for (int i = 0; i < glyphsSize; i++)
             {
                 glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
@@ -91,8 +94,8 @@ namespace RNSkia
             if (!(fm.fFlags & SkFontMetrics::kBoundsInvalid_Flag))
             {
                 auto bounds = SkRect::MakeLTRB(fm.fXMin, fm.fTop, fm.fXMax, fm.fBottom);
-                auto jsiBounds = JsiSkRect::toValue(runtime, getContext(), bounds);
-                metrics.setProperty(runtime, "bounds", jsiBounds);
+                auto jsiBounds = JsiSkRect::toValue(runtime, getContext(), std::move(bounds));
+                metrics.setProperty(runtime, "bounds", std::move(jsiBounds));
             }
             return metrics;
         }
@@ -123,6 +126,7 @@ namespace RNSkia
             auto bottom = arguments[3].asNumber();
             std::vector<SkPoint> positions;
             int pointsSize = static_cast<int>(jsiPositions.size(runtime));
+            positions.reserve(pointsSize);
             for (int i = 0; i < pointsSize; i++)
             {
                 std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
@@ -132,6 +136,7 @@ namespace RNSkia
 
             std::vector<SkGlyphID> glyphs;
             int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+            glyphs.reserve(glyphsSize);
             for (int i = 0; i < glyphsSize; i++)
             {
                 glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
@@ -267,8 +272,8 @@ namespace RNSkia
             JSI_EXPORT_FUNC(JsiSkFont, getGlyphWidths))
 
         JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)
-            : JsiSkWrappingSharedPtrHostObject(context,
-                                               std::make_shared<SkFont>(font)){};
+            : JsiSkWrappingSharedPtrHostObject(std::move(context),
+                                               std::make_shared<SkFont>(font)){}
 
         /**
           Returns the underlying object from a host object of this type
@@ -278,7 +283,6 @@ namespace RNSkia
         {
             return obj.asObject(runtime)
                 .asHostObject<JsiSkFont>(runtime)
-                .get()
                 ->getObject();
         }
 
@@ -301,19 +305,19 @@ namespace RNSkia
                     auto size = arguments[1].asNumber();
                     return jsi::Object::createFromHostObject(
                         runtime,
-                        std::make_shared<JsiSkFont>(context, SkFont(typeface, size)));
+                        std::make_shared<JsiSkFont>(std::move(context), SkFont(typeface, size)));
                 }
                 else if (count == 1)
                 {
                     auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
                     return jsi::Object::createFromHostObject(
-                        runtime, std::make_shared<JsiSkFont>(context, SkFont(typeface)));
+                        runtime, std::make_shared<JsiSkFont>(std::move(context), SkFont(typeface)));
                 }
                 else
                 {
                     // Return the newly constructed object
                     return jsi::Object::createFromHostObject(
-                        runtime, std::make_shared<JsiSkFont>(context, SkFont()));
+                        runtime, std::make_shared<JsiSkFont>(std::move(context), SkFont()));
                 }
             };
         }

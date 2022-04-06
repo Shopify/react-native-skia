@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -17,7 +22,7 @@ namespace RNSkia {
     public:
         JsiSkRSXform(std::shared_ptr<RNSkPlatformContext> context, const SkRSXform &rsxform)
                 : JsiSkWrappingSharedPtrHostObject<SkRSXform>(
-                context, std::make_shared<SkRSXform>(rsxform)){};
+                std::move(context), std::make_shared<SkRSXform>(rsxform)){}
 
         // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
 
@@ -51,11 +56,10 @@ namespace RNSkia {
        */
         static std::shared_ptr<SkRSXform> fromValue(jsi::Runtime &runtime,
                                                   const jsi::Value &obj) {
-            const auto object = obj.asObject(runtime);
+            const auto& object = obj.asObject(runtime);
             if (object.isHostObject(runtime)) {
                 return object
                         .asHostObject<JsiSkRSXform>(runtime)
-                        .get()
                         ->getObject();
             } else {
                 auto scos = object.getArray(runtime).getValueAtIndex(runtime, 0).asNumber();
@@ -73,7 +77,7 @@ namespace RNSkia {
                                   std::shared_ptr<RNSkPlatformContext> context,
                                   const SkRSXform &rsxform) {
             return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkRSXform>(context, rsxform));
+                    runtime, std::make_shared<JsiSkRSXform>(std::move(context), rsxform));
         }
 
         /**
@@ -94,7 +98,7 @@ namespace RNSkia {
                     );
                     // Return the newly constructed object
                     return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkRSXform>(context, rsxform));
+                    runtime, std::make_shared<JsiSkRSXform>(std::move(context), std::move(rsxform)));
             };
         }
     };

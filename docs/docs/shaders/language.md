@@ -16,7 +16,10 @@ import {Skia} from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
 vec4 main(vec2 pos) {
-  vec2 normalized = pos/vec2(256.0, 256.0);
+  // The canvas is 256x256
+  vec2 canvas = vec2(256);
+  // normalized x,y values go from 0 to 1
+  vec2 normalized = pos/canvas;
   return vec4(normalized.x, normalized.y, 0.5, 1);
 }`);
 
@@ -30,11 +33,11 @@ if (!source) {
 Creates a shader from source.
 Shaders can be nested with one another.
 
-| Name     | Type                                                                 |  Description                  |
-|:---------|:---------------------------------------------------------------------|:------------------------------|
-| source   | `RuntimeEffect`                                                      | Compiled shaders              |
-| uniforms | <code>{ [name: string]: number &#124; Vector &#124; number[]}</code> | uniform values                |
-| children | `Shader`                                                             | Shaders to be used as uniform |
+| Name     | Type                                                                                                    |  Description                  |
+|:---------|:--------------------------------------------------------------------------------------------------------|:------------------------------|
+| source   | `RuntimeEffect`                                                                                         | Compiled shaders              |
+| uniforms | <code>{ [name: string]: number &#124; Vector &#124; Vector[] &#124; number[] &#124; number[][] }</code> | uniform values                |
+| children | `Shader`                                                                                                | Shaders to be used as uniform |
 
 ### Simple Shader
 
@@ -43,13 +46,14 @@ import {Skia, Canvas, Paint, Shader, Fill} from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
 vec4 main(vec2 pos) {
+  // normalized x,y values go from 0 to 1, the canvas is 256x256
   vec2 normalized = pos/vec2(256);
   return vec4(normalized.x, normalized.y, 0.5, 1);
 }`)!;
 
 const SimpleShader = () => {
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width: 256, height: 256 }}>
       <Paint>
         <Shader source={source} />
       </Paint>
@@ -65,6 +69,7 @@ const SimpleShader = () => {
 
 Uniforms are variables used to parametrize shaders.
 The following uniform types are supported: `float`, `float2`, `float3`, `float4`, `float2x2`, `float3x3`, `float4x4`, `int`, `int2`, `int3` and, `int4`.
+The types can also be used as arrays, e.g. `uniform float3 colors[12]`. 
 
 ```tsx twoslash
 import {Canvas, Skia, Paint, Shader, Fill, vec} from "@shopify/react-native-skia";
@@ -84,7 +89,7 @@ const UniformShader = () => {
   const c = vec(2 * r, r);
   const blue = 1.0;
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width: 256, height: 256 }}>
       <Paint>
         <Shader source={source} uniforms={{ c, r, blue }} />
       </Paint>
@@ -115,7 +120,7 @@ const NestedShader = () => {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width: 256, height: 256 }}>
       <Paint>
         <Shader source={source}>
           <ImageShader

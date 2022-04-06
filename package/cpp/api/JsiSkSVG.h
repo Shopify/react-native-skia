@@ -1,7 +1,11 @@
 #pragma once
 
-#include <JsiSkHostObjects.h>
+#include <memory>
+#include <utility>
+
 #include <jsi/jsi.h>
+
+#include <JsiSkHostObjects.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -17,7 +21,7 @@ using namespace facebook;
 class JsiSkSVG : public JsiSkWrappingSkPtrHostObject<SkSVGDOM> {
 public:
   JsiSkSVG(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkSVGDOM> svgdom)
-      : JsiSkWrappingSkPtrHostObject<SkSVGDOM>(context, svgdom){};
+      : JsiSkWrappingSkPtrHostObject<SkSVGDOM>(std::move(context), std::move(svgdom)){}
 
   JSI_PROPERTY_GET(__typename__) {
     return jsi::String::createFromUtf8(runtime, "SVG");
@@ -32,7 +36,6 @@ public:
                                    const jsi::Value &obj) {
     return obj.asObject(runtime)
         .asHostObject<JsiSkSVG>(runtime)
-        .get()
         ->getObject();
   }
 };
