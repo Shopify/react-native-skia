@@ -13,10 +13,9 @@ import {
   canvas2Polar,
   polar2Canvas,
   Group,
+  Shader,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
-
-import { Shader } from "../../../../package/src/renderer/components/shaders/Shader";
 
 import { polar2Color } from "./Helpers";
 

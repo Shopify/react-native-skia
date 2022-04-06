@@ -4,7 +4,7 @@ import type { SkiaView } from "../views";
 import type { SkiaReadonlyValue } from "../values";
 
 import { isValue } from "./processors";
-import type { Node } from "./Host";
+import type { Node } from "./nodes";
 
 type Unsubscribe = () => void;
 type Props = { [key: string]: unknown };
