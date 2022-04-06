@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Canvas,
   Circle,
@@ -57,12 +57,13 @@ export const Hue = () => {
       color.current = polar2Color(theta, Math.min(radius, r), r);
     },
   });
+  const uniforms = useMemo(() => ({ c, r }), [r]);
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
       <Fill color={color} />
       <Paint>
         <BlurMask blur={40} style="solid" />
-        <Shader source={source} uniforms={{ c, r }} />
+        <Shader source={source} uniforms={uniforms} />
       </Paint>
       <Circle c={c} r={r} />
       <Group>

@@ -30,6 +30,7 @@ export class DeclarationNode<P> extends Node<P> {
     props: AnimatedProps<P>
   ) {
     super(depMgr, props);
+    super.memoizable = !isAnimated(props);
     this.onDeclare = onDeclare;
   }
 
