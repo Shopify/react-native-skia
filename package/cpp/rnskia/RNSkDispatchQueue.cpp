@@ -1,5 +1,9 @@
 #include "RNSkDispatchQueue.h"
 
+#include <memory>
+#include <mutex>
+#include <utility>
+
 namespace RNSkia
 {
 

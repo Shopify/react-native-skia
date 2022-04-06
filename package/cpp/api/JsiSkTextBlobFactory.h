@@ -1,13 +1,22 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <vector>
+
+#include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkTextBlob.h"
 #include "JsiSkRSXform.h"
-#include <jsi/jsi.h>
+#include "JsiSkFont.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkTextBlob.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 
@@ -21,7 +30,7 @@ namespace RNSkia {
             auto textBlob = SkTextBlob::MakeFromString(str.c_str(), *font);
             return jsi::Object::createFromHostObject(
                     runtime,
-                    std::make_shared<JsiSkTextBlob>(getContext(), textBlob)
+                    std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob))
             );
         }
 
@@ -31,13 +40,14 @@ namespace RNSkia {
             int bytesPerGlyph = 2;
             std::vector<SkGlyphID> glyphs;
             int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+            glyphs.reserve(glyphsSize);
             for (int i = 0; i < glyphsSize; i++) {
                 glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
             }
             auto textBlob =  SkTextBlob::MakeFromText(glyphs.data(), glyphs.size() * bytesPerGlyph, *font, SkTextEncoding::kGlyphID);
             return jsi::Object::createFromHostObject(
                     runtime,
-                    std::make_shared<JsiSkTextBlob>(getContext(), textBlob)
+                    std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob))
             );
         }
 
@@ -47,6 +57,7 @@ namespace RNSkia {
             auto font = JsiSkFont::fromValue(runtime, arguments[2]);            
             std::vector<SkRSXform> rsxforms;
             int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
+            rsxforms.reserve(rsxformsSize);
             for (int i = 0; i < rsxformsSize; i++) {
                 auto rsxform = JsiSkRSXform::fromValue(runtime, jsiRsxforms.getValueAtIndex(runtime, i));
                 rsxforms.push_back(*rsxform);
@@ -54,7 +65,7 @@ namespace RNSkia {
             auto textBlob = SkTextBlob::MakeFromRSXform(str.c_str(), str.length(), rsxforms.data(), *font);
             return jsi::Object::createFromHostObject(
                     runtime,
-                    std::make_shared<JsiSkTextBlob>(getContext(), textBlob)
+                    std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob))
             );
         }
 
@@ -65,11 +76,13 @@ namespace RNSkia {
             int bytesPerGlyph = 2;
             std::vector<SkGlyphID> glyphs;
             int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+            glyphs.reserve(glyphsSize);
             for (int i = 0; i < glyphsSize; i++) {
                 glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
             }
             std::vector<SkRSXform> rsxforms;
             int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
+            rsxforms.reserve(rsxformsSize);
             for (int i = 0; i < rsxformsSize; i++) {
                 auto rsxform = JsiSkRSXform::fromValue(runtime, jsiRsxforms.getValueAtIndex(runtime, i));
                 rsxforms.push_back(*rsxform);
@@ -77,7 +90,7 @@ namespace RNSkia {
             auto textBlob = SkTextBlob::MakeFromRSXform(glyphs.data(), glyphs.size() * bytesPerGlyph, rsxforms.data(), *font, SkTextEncoding::kGlyphID);
             return jsi::Object::createFromHostObject(
                     runtime,
-                    std::make_shared<JsiSkTextBlob>(getContext(), textBlob)
+                    std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob))
             );
         }
 
@@ -90,7 +103,7 @@ namespace RNSkia {
         )
 
         JsiSkTextBlobFactory(std::shared_ptr<RNSkPlatformContext> context)
-                : JsiSkHostObject(context) {}
+                : JsiSkHostObject(std::move(context)) {}
     };
 
 } // namespace RNSkia

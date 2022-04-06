@@ -3,6 +3,7 @@
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
 #include <jsi/jsi.h>
+#include <utility>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -29,7 +30,7 @@ public:
     // Return the newly constructed object
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::Matrix(matrix)));
+                     getContext(), SkColorFilters::Matrix(std::move(matrix))));
   }
 
   JSI_HOST_FUNCTION(MakeBlend) {
@@ -47,7 +48,7 @@ public:
     // Return the newly constructed object
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::Compose(outer, inner)));
+                     getContext(), SkColorFilters::Compose(std::move(outer), std::move(inner))));
   }
 
   JSI_HOST_FUNCTION(MakeLerp) {
@@ -57,7 +58,7 @@ public:
     // Return the newly constructed object
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::Lerp(t, dst, src)));
+                     getContext(), SkColorFilters::Lerp(t, std::move(dst), std::move(src))));
   }
 
     JSI_HOST_FUNCTION(MakeSRGBToLinearGamma) {
@@ -92,6 +93,6 @@ public:
   )
 
   JsiSkColorFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(context) {}
+      : JsiSkHostObject(std::move(context)) {}
 };
 } // namespace RNSkia

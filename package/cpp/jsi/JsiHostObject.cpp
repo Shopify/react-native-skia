@@ -114,33 +114,38 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 
 std::vector<jsi::PropNameID>
 JsiHostObject::getPropertyNames(jsi::Runtime &runtime) {
-  std::vector<jsi::PropNameID> propNames;
   // statically exported functions
-  auto funcs = getExportedFunctionMap();
-  for (auto it = funcs.begin(); it != funcs.end(); ++it) {
+  const auto& funcs = getExportedFunctionMap();
+
+  // Statically exported property getters
+  const auto& getters = getExportedPropertyGettersMap();
+
+  // Statically exported property setters
+  const auto& setters = getExportedPropertySettersMap();
+
+  std::vector<jsi::PropNameID> propNames;
+  propNames.reserve(funcs.size() + getters.size() + setters.size() + _funcMap.size() + _propMap.size());
+
+  for (auto it = funcs.cbegin(); it != funcs.cend(); ++it) {
     propNames.push_back(jsi::PropNameID::forAscii(runtime, it->first));
   }
 
-  // Statically exported property getters
-  auto getters = getExportedPropertyGettersMap();
-  for (auto it = getters.begin(); it != getters.end(); ++it) {
+  for (auto it = getters.cbegin(); it != getters.cend(); ++it) {
     propNames.push_back(jsi::PropNameID::forUtf8(runtime, it->first));
   }
 
-  // Statically exported property setters
-  auto setters = getExportedPropertySettersMap();
-  for (auto it = getters.begin(); it != getters.end(); ++it) {
+  for (auto it = getters.cbegin(); it != getters.cend(); ++it) {
     if (getters.count(it->first) == 0) {
       propNames.push_back(jsi::PropNameID::forUtf8(runtime, it->first));
     }
   }
 
   // functions
-  for (auto it = _funcMap.begin(); it != _funcMap.end(); ++it) {
+  for (auto it = _funcMap.cbegin(); it != _funcMap.cend(); ++it) {
     propNames.push_back(jsi::PropNameID::forAscii(runtime, it->first));
   }
   // props
-  for (auto it = _propMap.begin(); it != _propMap.end(); ++it) {
+  for (auto it = _propMap.cbegin(); it != _propMap.cend(); ++it) {
     propNames.push_back(jsi::PropNameID::forAscii(runtime, it->first));
   }
   return propNames;
