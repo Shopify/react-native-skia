@@ -45,7 +45,7 @@ namespace RNSkia
       auto shader =
           getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+          runtime, std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
     }
 
     JSI_HOST_FUNCTION(makeShaderCubic)
@@ -59,7 +59,7 @@ namespace RNSkia
       auto shader =
           getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+          runtime, std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
     }
 
     JSI_HOST_FUNCTION(encodeToBytes)
@@ -110,7 +110,7 @@ namespace RNSkia
 
     JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkImage> image)
-        : JsiSkWrappingSkPtrHostObject<SkImage>(context, image){};
+        : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context), std::move(image)){}
 
     /**
     Returns the underlying object from a host object of this type
@@ -120,7 +120,6 @@ namespace RNSkia
     {
       return obj.asObject(runtime)
           .asHostObject<JsiSkImage>(runtime)
-          .get()
           ->getObject();
     }
   private:

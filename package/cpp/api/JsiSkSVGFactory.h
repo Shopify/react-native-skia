@@ -1,10 +1,22 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkTypeface.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkData.h"
 #include "JsiSkSVG.h"
-#include <jsi/jsi.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include <SkSVGDOM.h>
+#include <SkStream.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 
@@ -17,7 +29,7 @@ namespace RNSkia {
             auto stream = SkMemoryStream::Make(data);
             auto svg_dom = SkSVGDOM::Builder().make(*stream);
             return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkSVG>(getContext(), svg_dom));
+                    runtime, std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom)));
         }
 
         JSI_HOST_FUNCTION(MakeFromString) {
@@ -25,13 +37,13 @@ namespace RNSkia {
             auto stream = SkMemoryStream::MakeDirect(svgText.c_str(), svgText.size());
             auto svg_dom = SkSVGDOM::Builder().make(*stream);
             return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkSVG>(getContext(), svg_dom));
+                    runtime, std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom)));
         }
 
         JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSVGFactory, MakeFromData), JSI_EXPORT_FUNC(JsiSkSVGFactory, MakeFromString))
 
         JsiSkSVGFactory(std::shared_ptr<RNSkPlatformContext> context)
-                : JsiSkHostObject(context) {}
+                : JsiSkHostObject(std::move(context)) {}
     };
 
 } // namespace RNSkia

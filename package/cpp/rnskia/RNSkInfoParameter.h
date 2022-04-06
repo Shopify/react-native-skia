@@ -3,6 +3,7 @@
 #include <chrono>
 #include <memory>
 #include <mutex>
+#include <utility>
 #include <vector>
 
 #include <jsi/jsi.h>
@@ -63,7 +64,7 @@ public:
 
     // Copy touches so that we can continue to add/receive touch points while
     // in the drawing callback.
-    std::lock_guard<std::mutex> lock(*_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     _touchesCache.clear();
     _touchesCache.reserve(_currentTouches.size());
     for (size_t i = 0; i < _currentTouches.size(); ++i) {
@@ -74,8 +75,8 @@ public:
 
   void endDrawOperation() { _touchesCache.clear(); }
 
-  void updateTouches(std::vector<RNSkTouchPoint> touches) {
-    std::lock_guard<std::mutex> lock(*_mutex);
+  void updateTouches(std::vector<RNSkTouchPoint>&& touches) {
+    std::lock_guard<std::mutex> lock(_mutex);
     // Add timestamp
     auto ms = std::chrono::duration_cast<milliseconds>(
         system_clock::now().time_since_epoch()).count();
@@ -83,10 +84,10 @@ public:
     for(size_t i=0; i<touches.size(); i++) {
       touches.at(i).timestamp = ms;
     }
-    _currentTouches.push_back(touches);
+    _currentTouches.push_back(std::move(touches));
   }
 
-  RNSkInfoObject() : JsiHostObject(), _mutex(std::make_shared<std::mutex>()) {}
+  RNSkInfoObject() : JsiHostObject() {}
 
 private:
   int _width;
@@ -94,6 +95,6 @@ private:
   double _timestamp;
   std::vector<std::vector<RNSkTouchPoint>> _currentTouches;
   std::vector<std::vector<RNSkTouchPoint>> _touchesCache;
-  std::shared_ptr<std::mutex> _mutex;
+  std::mutex _mutex;
 };
 } // namespace RNSkia
