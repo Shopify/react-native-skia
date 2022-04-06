@@ -48,4 +48,5 @@ buck-out/
 *.keystore
 
 # Build
+dist
 package/lib
