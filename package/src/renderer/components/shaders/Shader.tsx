@@ -12,12 +12,7 @@ const isVector = (obj: unknown): obj is Vector =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (obj as any).x !== undefined && (obj as any).y !== undefined;
 
-type UniformValue =
-  | number
-  | Vector
-  | readonly [number, number]
-  | readonly [number, number, number]
-  | readonly [number, number, number, number];
+type UniformValue = number | Vector | readonly number[];
 
 type Uniform = UniformValue | readonly UniformValue[];
 
