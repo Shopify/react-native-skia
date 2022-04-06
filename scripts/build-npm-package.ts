@@ -81,7 +81,7 @@ const currentDir = process.cwd();
 console.log("Entering directory `package`");
 process.chdir("./package");
 
-console.log("Running `tsc` in package folder", process.cwd());
+console.log("Build package", process.cwd());
 executeCmdSync("yarn build");
 
 console.log("Running `npm pack` in package folder", process.cwd());
