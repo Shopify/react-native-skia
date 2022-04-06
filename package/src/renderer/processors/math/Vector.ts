@@ -1,6 +1,5 @@
 import { interpolate } from "../../../values/animation/functions/interpolate";
 
-import { canvas2Polar, polar2Canvas } from "./Coordinates";
 export interface Vector {
   x: number;
   y: number;
@@ -13,10 +12,6 @@ export const sub = (a: Vector, b: Vector) => vec(a.x - b.x, a.y - b.y);
 export const dist = (a: Vector, b: Vector) => Math.hypot(a.x - b.x, a.y - b.y);
 export const translate = ({ x, y }: Vector) =>
   [{ translateX: x }, { translateY: y }] as const;
-export const rotate = (tr: Vector, origin: Vector, rotation: number) => {
-  const { radius, theta } = canvas2Polar(tr, origin);
-  return polar2Canvas({ radius, theta: theta + rotation }, origin);
-};
 
 export const interpolateVector = (
   value: number,
