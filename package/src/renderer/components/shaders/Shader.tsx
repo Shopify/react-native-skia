@@ -43,15 +43,17 @@ const onDeclare = createDeclaration<ShaderProps>(
   ({ uniforms, source, opaque, ...transform }, children) => {
     const processedUniforms = new Array(source.getUniformCount())
       .fill(0)
-      .map((_, i) => {
+      .flatMap((_, i) => {
         const name = source.getUniformName(i);
-        const value: Uniform = uniforms[name];
+        const value = uniforms[name];
+        if (value === undefined) {
+          throw new Error(`No value specified for uniform ${name}`);
+        }
         if (Array.isArray(value)) {
           return value.flatMap(processValue);
         }
         return processValue(value as UniformValue);
-      })
-      .flat(4);
+      });
     return source.makeShaderWithChildren(
       processedUniforms,
       opaque,
