@@ -53,6 +53,11 @@ export const HomeScreen = () => {
         route="Neumorphism"
       />
       <HomeScreenButton
+        title="🍏 Wallpaper"
+        description="Wallpaper"
+        route="Wallpaper"
+      />
+      <HomeScreenButton
         title="🎥 Animation"
         description="Animated with Skia"
         route="Animation"

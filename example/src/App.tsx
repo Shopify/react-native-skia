@@ -17,6 +17,7 @@ import {
   Glassmorphism,
   Neumorphism,
   PerformanceDrawingTest,
+  Wallpaper,
 } from "./Examples";
 import { HomeScreen } from "./Home";
 
@@ -62,6 +63,13 @@ const App = () => {
             }}
           />
           <Stack.Screen name="Neumorphism" component={Neumorphism} />
+          <Stack.Screen
+            name="Wallpaper"
+            component={Wallpaper}
+            options={{
+              header: () => null,
+            }}
+          />
           <Stack.Screen name="Drawing" component={DrawingExample} />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
