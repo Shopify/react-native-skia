@@ -229,10 +229,12 @@ public:
 
   JSI_HOST_FUNCTION(drawPoints) {
     auto pointMode = arguments[0].asNumber();
-
     std::vector<SkPoint> points;
+
     auto jsiPoints = arguments[1].asObject(runtime).asArray(runtime);
     auto pointsSize = jsiPoints.size(runtime);
+    points.reserve(pointsSize);
+
     for (int i = 0; i < pointsSize; i++) {
       std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
@@ -263,6 +265,7 @@ public:
 
     auto jsiCubics = arguments[0].asObject(runtime).asArray(runtime);
     auto cubicsSize = jsiCubics.size(runtime);
+    cubics.reserve(cubicsSize);
     for (int i = 0; i < cubicsSize; i++) {
       std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
           runtime, jsiCubics.getValueAtIndex(runtime, i).asObject(runtime));
@@ -272,6 +275,7 @@ public:
     if (count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined()) {
       auto jsiColors = arguments[1].asObject(runtime).asArray(runtime);
       auto colorsSize = jsiColors.size(runtime);
+      colors.reserve(colorsSize);
       for (int i = 0; i < colorsSize; i++) {
         SkColor color = jsiColors.getValueAtIndex(runtime, i).asNumber();
         colors.push_back(color);
@@ -281,6 +285,7 @@ public:
     if (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()) {
       auto jsiTexs = arguments[2].asObject(runtime).asArray(runtime);
       auto texsSize = jsiTexs.size(runtime);
+      texs.reserve(texsSize);
       for (int i = 0; i < texsSize; i++) {
         auto point = JsiSkPoint::fromValue(
                 runtime, jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
@@ -338,6 +343,7 @@ public:
 
     std::vector<SkPoint> positions;
     int pointsSize = static_cast<int>(jsiPositions.size(runtime));
+    positions.reserve(pointsSize);
     for (int i = 0; i < pointsSize; i++) {
       std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
               runtime, jsiPositions.getValueAtIndex(runtime, i).asObject(runtime));
@@ -346,6 +352,7 @@ public:
 
     std::vector<SkGlyphID> glyphs;
     int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+    glyphs.reserve(glyphsSize);
     for (int i = 0; i < glyphsSize; i++) {
       glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
     }

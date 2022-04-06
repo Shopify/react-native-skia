@@ -59,8 +59,9 @@ public:
   JSI_HOST_FUNCTION(addPoly) {
     std::vector<SkPoint> points;
     auto jsiPoints = arguments[0].asObject(runtime).asArray(runtime);
-    auto pointsSize = jsiPoints.size(runtime);
     auto close = arguments[1].getBool();
+    auto pointsSize = jsiPoints.size(runtime);
+    points.reserve(pointsSize);
     for (int i = 0; i < pointsSize; i++) {
       std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));

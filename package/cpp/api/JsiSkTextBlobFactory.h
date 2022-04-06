@@ -40,6 +40,7 @@ namespace RNSkia {
             int bytesPerGlyph = 2;
             std::vector<SkGlyphID> glyphs;
             int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+            glyphs.reserve(glyphsSize);
             for (int i = 0; i < glyphsSize; i++) {
                 glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
             }
@@ -56,6 +57,7 @@ namespace RNSkia {
             auto font = JsiSkFont::fromValue(runtime, arguments[2]);            
             std::vector<SkRSXform> rsxforms;
             int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
+            rsxforms.reserve(rsxformsSize);
             for (int i = 0; i < rsxformsSize; i++) {
                 auto rsxform = JsiSkRSXform::fromValue(runtime, jsiRsxforms.getValueAtIndex(runtime, i));
                 rsxforms.push_back(*rsxform);
@@ -74,11 +76,13 @@ namespace RNSkia {
             int bytesPerGlyph = 2;
             std::vector<SkGlyphID> glyphs;
             int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
+            glyphs.reserve(glyphsSize);
             for (int i = 0; i < glyphsSize; i++) {
                 glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
             }
             std::vector<SkRSXform> rsxforms;
             int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
+            rsxforms.reserve(rsxformsSize);
             for (int i = 0; i < rsxformsSize; i++) {
                 auto rsxform = JsiSkRSXform::fromValue(runtime, jsiRsxforms.getValueAtIndex(runtime, i));
                 rsxforms.push_back(*rsxform);
