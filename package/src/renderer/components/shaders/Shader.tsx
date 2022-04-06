@@ -54,6 +54,23 @@ const onDeclare = createDeclaration<ShaderProps>(
         }
         return processValue(value as UniformValue);
       });
+    const names = Object.keys(uniforms);
+    if (names.length > source.getUniformCount()) {
+      const usedUniforms = new Array(source.getUniformCount())
+        .fill(0)
+        .map((_, i) => source.getUniformName(i));
+      const unusedUniform = names
+        .map((name) => {
+          if (usedUniforms.indexOf(name) === -1) {
+            return name;
+          }
+          return null;
+        })
+        .filter((n) => n !== null);
+      console.warn(
+        "Unused uniforms were provided: " + unusedUniform.join(", ")
+      );
+    }
     return source.makeShaderWithChildren(
       processedUniforms,
       opaque,

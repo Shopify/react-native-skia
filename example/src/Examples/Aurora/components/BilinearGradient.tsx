@@ -19,7 +19,7 @@ vec4 main(vec2 pos) {
 
 interface BilinearGradientProps {
   rect: SkRect;
-  colors: [Color, Color, Color, Color];
+  colors: readonly [Color, Color, Color, Color];
 }
 
 export const BilinearGradient = ({ rect, colors }: BilinearGradientProps) => {
