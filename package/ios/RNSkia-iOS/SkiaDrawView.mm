@@ -61,7 +61,7 @@
   } else {
     // Create implementation view when the parent view is set
     if(_impl == nullptr && _manager != nullptr) {
-      __weak typeof(self) weakSelf = self;
+      __weak decltype(self) weakSelf = self;
       _impl = std::make_shared<RNSkDrawViewImpl>(weakSelf, _manager->getPlatformContext());
       if(_nativeId != 0) {
         _manager->setSkiaDrawView(_nativeId, _impl.get());
