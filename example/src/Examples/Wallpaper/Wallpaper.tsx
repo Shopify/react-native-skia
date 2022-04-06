@@ -6,27 +6,16 @@ import {
   vec,
   Paint,
   Rect,
+  interpolate,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
 
 const { height, width: wWidth } = Dimensions.get("window");
 const length = 9;
-const STRIPES = new Array(Math.ceil(length / 2)).fill(0).map((_, i) => i);
+const STRIPES = new Array(length).fill(0).map((_, i) => i);
 const width = wWidth / length;
 const origin = vec(width / 2, height / 2);
-
-// 0 -> 1
-// 1 -> 0.9
-// 2 -> 0.8
-// 3 -> 0.7
-
-// 4 -> 0.6
-
-// 5 -> 0.7
-// 6 -> 0.8
-// 7 -> 0.9
-// 8 -> 1
 
 export const Wallpaper = () => {
   return (
@@ -53,28 +42,20 @@ export const Wallpaper = () => {
           <Group
             key={i}
             origin={origin}
-            transform={[{ translateX: i * width }, { scaleY: 1 - 0.1 * i }]}
+            transform={[
+              { translateX: i * width },
+              {
+                scaleY: interpolate(
+                  i,
+                  [0, (length - 1) / 2, length - 1],
+                  [1, 0.6, 1]
+                ),
+              },
+            ]}
           >
             <Rect x={0} y={0} width={width} height={height} />
           </Group>
         ))}
-        <Group
-          transform={[{ translateX: 5 * width }, { scaleX: -1 }]}
-          origin={vec(4 * width, height / 2)}
-        >
-          {STRIPES.map((i) => (
-            <Group
-              key={i}
-              origin={origin}
-              transform={[
-                { translateX: (4 + i) * width },
-                { scaleY: 1 - 0.1 * i },
-              ]}
-            >
-              <Rect x={0} y={0} width={width} height={height} />
-            </Group>
-          ))}
-        </Group>
       </Group>
     </Canvas>
   );
