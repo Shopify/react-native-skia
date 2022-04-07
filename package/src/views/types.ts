@@ -47,8 +47,7 @@ export type TouchHandler = (touchInfo: Array<Array<TouchInfo>>) => void;
 
 export type RNSkiaDrawCallback = (canvas: SkCanvas, info: DrawingInfo) => void;
 
-export type SkiaViewProps = {
-  style?: ViewProps["style"];
+export type SkiaViewProps = ViewProps & {
   /**
    * Sets the drawing mode for the skia view. There are two drawing
    * modes, "continuous" and "default", where the continuous mode will

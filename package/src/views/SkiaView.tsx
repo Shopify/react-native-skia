@@ -111,14 +111,14 @@ export class SkiaView extends React.Component<SkiaViewProps> {
   }
 
   render() {
-    const { style, mode, debug = false } = this.props;
+    const { mode, debug = false, ...viewProps } = this.props;
     return (
       <NativeSkiaView
-        style={style}
         collapsable={false}
         nativeID={`${this._nativeId}`}
         mode={mode}
         debug={debug}
+        {...viewProps}
       />
     );
   }
