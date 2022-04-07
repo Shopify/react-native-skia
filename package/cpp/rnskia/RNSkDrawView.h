@@ -95,6 +95,16 @@ public:
    */
   sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds);
 
+  /**
+   Returns the scaled width of the view
+   */
+  virtual int getWidth() { return -1; };
+
+  /**
+   Returns the scaled height of the view
+   */
+  virtual int getHeight() { return -1; };
+
 protected:
   void setNativeDrawFunc(std::function<void(const sk_sp<SkPicture>)> drawFunc) {
     if(!_gpuDrawingLock->try_lock_for(250ms)) {
@@ -103,16 +113,7 @@ protected:
     _nativeDrawFunc = drawFunc;
     _gpuDrawingLock->unlock();
   }
-  
-  /**
-   Returns the scaled width of the view
-   */
-  virtual int getWidth() { return -1; };
-  
-  /**
-   Returns the scaled height of the view
-   */
-  virtual int getHeight() { return -1; };
+
   
   /**
    Returns true if the view is invalidated

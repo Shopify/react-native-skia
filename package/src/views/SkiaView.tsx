@@ -1,5 +1,5 @@
 import React from "react";
-import { requireNativeComponent } from "react-native";
+import { PixelRatio, requireNativeComponent } from "react-native";
 
 import type { SkImage, SkRect } from "../skia";
 import type { SkiaReadonlyValue } from "../values";
@@ -30,6 +30,7 @@ declare global {
       nativeId: number,
       values: SkiaReadonlyValue<unknown>[]
     ) => () => void;
+    getSize: (nativeId: number) => { width: number; height: number };
   };
 }
 
@@ -47,9 +48,16 @@ export class SkiaView extends React.Component<SkiaViewProps> {
   }
 
   private _nativeId: number;
-
   public get nativeId() {
     return this._nativeId;
+  }
+
+  public get size() {
+    const { width, height } = SkiaViewApi.getSize(this._nativeId);
+    return {
+      width: width / PixelRatio.get(),
+      height: height / PixelRatio.get(),
+    };
   }
 
   componentDidUpdate(prevProps: SkiaViewProps) {

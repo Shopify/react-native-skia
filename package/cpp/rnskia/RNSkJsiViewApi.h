@@ -25,6 +25,23 @@ using CallbackInfo = struct CallbackInfo {
 
 class RNSkJsiViewApi : public JsiHostObject {
 public:
+  JSI_HOST_FUNCTION(getSize) {
+    // find skia draw view
+    int nativeId = arguments[0].asNumber();
+    // and function to install as the draw drawCallback
+    auto info = getEnsuredCallbackInfo(nativeId);
+    auto width = -1;
+    auto height = -1;
+    if (info->view != nullptr) {
+      width = info->view->getWidth()/info->view;
+      height = info->view->getHeight();
+    }
+    auto size = jsi::Object(runtime);
+    size.setProperty(runtime, "width", width);
+    size.setProperty(runtime, "height", height);
+    return size;
+  }
+
   JSI_HOST_FUNCTION(setDrawCallback) {
     if (count != 2) {
       _platformContext->raiseError(
@@ -193,7 +210,8 @@ public:
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, invalidateSkiaView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, setDrawMode),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView))
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, getSize))
 
   /**
    * Constructor

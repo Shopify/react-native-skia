@@ -49,21 +49,6 @@ export const useContextBridge = (...contexts: Context<any>[]) => {
   );
 };
 
-interface CanvasContext {
-  width: number;
-  height: number;
-}
-
-const CanvasContext = React.createContext<CanvasContext | null>(null);
-
-export const useCanvas = () => {
-  const canvas = useContext(CanvasContext);
-  if (!canvas) {
-    throw new Error("Canvas context is not available");
-  }
-  return canvas;
-};
-
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
 skiaReconciler.injectIntoDevTools({
@@ -103,20 +88,13 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       [redraw, ref]
     );
 
-    const canvasCtx = useRef({ width: 0, height: 0 });
     const root = useMemo(
       () => skiaReconciler.createContainer(container, 0, false, null),
       [container]
     );
     // Render effect
     useEffect(() => {
-      render(
-        <CanvasContext.Provider value={canvasCtx.current}>
-          {children}
-        </CanvasContext.Provider>,
-        root,
-        container
-      );
+      render(children, root, container);
     }, [children, root, redraw, container]);
 
     // Draw callback
@@ -140,7 +118,6 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? defaultFontMgr,
         };
-        canvasCtx.current = ctx;
         container.draw(ctx);
       },
       [tick, onTouch]
