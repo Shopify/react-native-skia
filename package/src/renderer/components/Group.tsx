@@ -31,11 +31,7 @@ const onDraw = createDrawing<GroupProps>(
     const { canvas, opacity } = ctx;
     const paint = selectPaint(ctx.paint, groupProps);
     processPaint(paint, opacity, groupProps);
-    const hasTransform =
-      !!groupProps.transform ||
-      !!groupProps.x ||
-      !!groupProps.y ||
-      !!groupProps.matrix;
+    const hasTransform = !!groupProps.transform || !!groupProps.matrix;
     const hasClip = !!clip;
     const shouldSave = hasTransform || hasClip;
     if (shouldSave) {

@@ -5,8 +5,6 @@ import { neg, processTransform2d } from "./math";
 import type { Transforms2d, Vector } from "./math";
 
 export interface TransformProps {
-  x?: number;
-  y?: number;
   transform?: Transforms2d;
   origin?: Vector;
   matrix?: SkMatrix;
@@ -14,23 +12,15 @@ export interface TransformProps {
 
 export const processTransform = (
   { canvas }: DrawingContext,
-  { transform, origin, matrix, x, y }: TransformProps
+  { transform, origin, matrix }: TransformProps
 ) => {
-  if (transform || x || y) {
+  if (transform) {
     if (matrix) {
       canvas.concat(matrix);
     } else {
-      let tr: Transforms2d = [];
-      if (x) {
-        tr = [{ translateX: x }];
-      }
-      if (y) {
-        tr = [...tr, { translateY: y }];
-      }
-      if (transform) {
-        tr = [...tr, ...transform];
-      }
-      const m3 = processTransform2d(origin ? transformOrigin(origin, tr) : tr);
+      const m3 = processTransform2d(
+        origin ? transformOrigin(origin, transform) : transform
+      );
       canvas.concat(m3);
     }
   }
