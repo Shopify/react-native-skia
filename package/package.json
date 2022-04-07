@@ -6,10 +6,7 @@
   "title": "React Native Skia",
   "version": "0.1.100",
   "description": "Skia View for React Native",
-  "main": "lib/module/index.js",
-  "types": "lib/typescript/index.d.ts",
-  "react-native": "lib/module/index.js",
-  "module": "lib/module/index.js",
+  "main": "index.ts",
   "files": [
     "src",
     "lib",
