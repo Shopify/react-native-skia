@@ -74,8 +74,7 @@ export const useCanvas = () => {
   if (canvas === null) {
     throw new Error("No canvas context found");
   }
-  const { width, height } = canvas.current!.size;
-  return { width, height };
+  return canvas.current!.size;
 };
 
 export interface CanvasProps extends ComponentProps<typeof SkiaView> {
