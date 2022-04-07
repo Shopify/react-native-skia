@@ -5,7 +5,7 @@
   },
   "title": "React Native Skia",
   "version": "0.1.100",
-  "description": "Skia View for React Native",
+  "description": "High-performance React Native Graphics using Skia",
   "main": "index.ts",
   "files": [
     "src",
