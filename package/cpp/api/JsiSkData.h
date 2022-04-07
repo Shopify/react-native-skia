@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -10,7 +15,6 @@
 
 #pragma clang diagnostic pop
 
-#include <jsi/jsi.h>
 
 namespace RNSkia {
 
@@ -19,8 +23,8 @@ namespace RNSkia {
     class JsiSkData : public JsiSkWrappingSkPtrHostObject<SkData> {
     public:
         JsiSkData(std::shared_ptr<RNSkPlatformContext> context,
-                      const sk_sp<SkData> asset)
-                : JsiSkWrappingSkPtrHostObject(context, asset){};
+                      sk_sp<SkData> asset)
+                : JsiSkWrappingSkPtrHostObject(std::move(context), std::move(asset)){}
 
 
         JSI_PROPERTY_GET(__typename__) {
@@ -36,7 +40,6 @@ namespace RNSkia {
                                            const jsi::Value &obj) {
             return obj.asObject(runtime)
                     .asHostObject<JsiSkData>(runtime)
-                    .get()
                     ->getObject();
         }
     };

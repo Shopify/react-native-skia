@@ -2,6 +2,8 @@
 
 #include "JsiSkHostObjects.h"
 #include <jsi/jsi.h>
+#include <memory>
+#include <utility>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -18,7 +20,7 @@ class JsiSkColorFilter : public JsiSkWrappingSkPtrHostObject<SkColorFilter> {
 public:
   JsiSkColorFilter(std::shared_ptr<RNSkPlatformContext> context,
                    sk_sp<SkColorFilter> colorFilter)
-      : JsiSkWrappingSkPtrHostObject<SkColorFilter>(context, colorFilter) {}
+      : JsiSkWrappingSkPtrHostObject<SkColorFilter>(std::move(context), std::move(colorFilter)) {}
 
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
   JSI_PROPERTY_GET(__typename__) {
@@ -34,7 +36,6 @@ public:
                                         const jsi::Value &obj) {
     return obj.asObject(runtime)
         .asHostObject<JsiSkColorFilter>(runtime)
-        .get()
         ->getObject();
   }
 };

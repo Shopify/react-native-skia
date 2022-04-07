@@ -1,15 +1,16 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 #include "JsiSkPathEffect.h"
-#include <jsi/jsi.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkCornerPathEffect.h>
-#include <SkDashPathEffect.h>
-#include <SkDiscretePathEffect.h>
 #include <SkPath.h>
 #include <SkPathOps.h>
 
@@ -36,7 +37,7 @@ public:
     }
 
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), result));
+        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
 
   JSI_HOST_FUNCTION(MakeFromOp) {
@@ -49,7 +50,7 @@ public:
       return jsi::Value(nullptr);
     }
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), result));
+        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathFactory, Make),
@@ -57,7 +58,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromOp))
 
   JsiSkPathFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(context) {}
+      : JsiSkHostObject(std::move(context)) {}
 };
 
 } // namespace RNSkia

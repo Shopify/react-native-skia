@@ -3,12 +3,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import type { Routes } from "./Routes";
 import { List } from "./List";
-import { PathEffectDemo } from "./PathEffect2";
-import { Shapes } from "./Shapes2";
-import { Clipping } from "./Clipping2";
+import { PathEffectDemo } from "./PathEffect";
+import { Shapes } from "./Shapes";
+import { Clipping } from "./Clipping";
 import { Transform } from "./Transform";
 import { ColorFilter } from "./ColorFilter";
-import { Gradients } from "./Gradients2";
+import { Gradients } from "./Gradients";
 import { PathExample } from "./Path2";
 import { Images } from "./Images";
 import { SVG } from "./SVG";

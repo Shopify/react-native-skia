@@ -6,8 +6,16 @@
   "title": "React Native Skia",
   "version": "0.1.100",
   "description": "Skia View for React Native",
-  "main": "index.ts",
+  "main": "lib/module/index.js",
+  "types": "lib/typescript/index.d.ts",
+  "react-native": "lib/module/index.js",
+  "module": "lib/module/index.js",
   "files": [
+    "src",
+    "lib",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
     "README.md",
     "LICENSE.md",
     "android/build.gradle",
@@ -23,12 +31,15 @@
     "libs/ios/libskshaper.xcframework",
     "libs/ios/libsvg.xcframework",
     "react-native-skia.podspec",
-    "scripts/install-npm.js"
+    "scripts/install-npm.js",
+    "dist/**"
   ],
   "scripts": {
+    "tsc": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "test": "jest",
-    "install": "yarn node scripts/install-npm.js"
+    "postinstall": "yarn node scripts/install-npm.js",
+    "build": "bob build"
   },
   "repository": {
     "type": "git",
@@ -66,10 +77,24 @@
     "jest": "^27.4.3",
     "react": "17.0.2",
     "react-native": "0.66.2",
+    "react-native-builder-bob": "^0.18.2",
     "ts-jest": "^27.0.7",
     "typescript": "^4.6.2"
   },
   "dependencies": {
     "react-reconciler": "^0.26.2"
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ],
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      "typescript"
+    ]
   }
 }

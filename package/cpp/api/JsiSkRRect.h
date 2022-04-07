@@ -1,7 +1,18 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
-#include "SkRRect.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include <SkRRect.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia {
 
@@ -27,7 +38,7 @@ public:
 
   JsiSkRRect(std::shared_ptr<RNSkPlatformContext> context, const SkRRect &rect)
       : JsiSkWrappingSharedPtrHostObject<SkRRect>(
-            context, std::make_shared<SkRRect>(rect)){};
+            std::move(context), std::make_shared<SkRRect>(rect)){}
 
   /**
     Returns the underlying object from a host object of this type
@@ -35,11 +46,10 @@ public:
   static std::shared_ptr<SkRRect> fromValue(jsi::Runtime &runtime,
                                             const jsi::Value &obj) {
 
-    const auto object = obj.asObject(runtime);
+    const auto& object = obj.asObject(runtime);
     if (object.isHostObject(runtime)) {
       return obj.asObject(runtime)
               .asHostObject<JsiSkRRect>(runtime)
-              .get()
               ->getObject();
     } else {
       auto rect = JsiSkRect::fromValue(runtime, object.getProperty(runtime, "rect"));
@@ -56,7 +66,7 @@ public:
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkRRect &rect) {
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRRect>(context, rect));
+        runtime, std::make_shared<JsiSkRRect>(std::move(context), rect));
   }
 
   /**
@@ -76,7 +86,7 @@ public:
       auto rrect = SkRRect::MakeRectXY(*rect, rx, ry);
       // Return the newly constructed object
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkRRect>(context, rrect));
+          runtime, std::make_shared<JsiSkRRect>(std::move(context), std::move(rrect)));
     };
   }
 };

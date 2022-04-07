@@ -15,7 +15,7 @@ import type {
   AnimatedProps,
   ClipDef,
 } from "../processors";
-import { createDrawing } from "../nodes/Drawing";
+import { createDrawing } from "../nodes";
 
 const isSkPaint = (obj: RefObject<SkPaint> | SkPaint): obj is SkPaint =>
   "__typename__" in obj && obj.__typename__ === "Paint";

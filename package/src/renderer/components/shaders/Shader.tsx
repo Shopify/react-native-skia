@@ -12,11 +12,20 @@ const isVector = (obj: unknown): obj is Vector =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (obj as any).x !== undefined && (obj as any).y !== undefined;
 
-type Uniform = number | readonly number[] | Vector;
+type UniformValue = number | Vector | readonly number[];
+
+type Uniform = UniformValue | readonly UniformValue[];
 
 interface Uniforms {
   [name: string]: Uniform;
 }
+
+const processValue = (value: UniformValue): number | readonly number[] => {
+  if (isVector(value)) {
+    return [value.x, value.y];
+  }
+  return value;
+};
 
 export interface ShaderProps extends TransformProps {
   source: IRuntimeEffect;
@@ -29,15 +38,34 @@ const onDeclare = createDeclaration<ShaderProps>(
   ({ uniforms, source, opaque, ...transform }, children) => {
     const processedUniforms = new Array(source.getUniformCount())
       .fill(0)
-      .map((_, i) => {
+      .flatMap((_, i) => {
         const name = source.getUniformName(i);
         const value = uniforms[name];
-        if (isVector(value)) {
-          return [value.x, value.y];
+        if (value === undefined) {
+          throw new Error(`No value specified for uniform ${name}`);
         }
-        return value;
-      })
-      .flat(4);
+        if (Array.isArray(value)) {
+          return value.flatMap(processValue);
+        }
+        return processValue(value as UniformValue);
+      });
+    const names = Object.keys(uniforms);
+    if (names.length > source.getUniformCount()) {
+      const usedUniforms = new Array(source.getUniformCount())
+        .fill(0)
+        .map((_, i) => source.getUniformName(i));
+      const unusedUniform = names
+        .map((name) => {
+          if (usedUniforms.indexOf(name) === -1) {
+            return name;
+          }
+          return null;
+        })
+        .filter((n) => n !== null);
+      console.warn(
+        "Unused uniforms were provided: " + unusedUniform.join(", ")
+      );
+    }
     return source.makeShaderWithChildren(
       processedUniforms,
       opaque,
