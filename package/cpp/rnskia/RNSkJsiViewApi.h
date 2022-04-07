@@ -33,7 +33,7 @@ public:
     auto width = -1;
     auto height = -1;
     if (info->view != nullptr) {
-      width = info->view->getWidth()/info->view;
+      width = info->view->getWidth();
       height = info->view->getHeight();
     }
     auto size = jsi::Object(runtime);
