@@ -72,7 +72,6 @@
     "eslint": "7.32.0",
     "eslint-config-react-native-wcandillon": "^3.7.2",
     "jest": "^27.4.3",
-    "npe": "^1.2.0",
     "react": "17.0.2",
     "react-native": "0.66.2",
     "react-native-builder-bob": "^0.18.2",

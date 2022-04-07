@@ -5861,11 +5861,6 @@ merge2@^1.3.0, merge2@^1.4.1:
   resolved "https://registry.yarnpkg.com/merge2/-/merge2-1.4.1.tgz#4368892f885e907455a6fd7dc55c0c9d404990ae"
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
-merge@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/merge/-/merge-2.1.1.tgz#59ef4bf7e0b3e879186436e8481c06a6c162ca98"
-  integrity sha512-jz+Cfrg9GWOZbQAnDQ4hlVnQky+341Yk5ru8bZSe6sIDTCIg8n9i/u7hSQGSVOF3C7lH6mGtqjkiT9G4wFLL0w==
-
 metro-babel-register@0.66.2:
   version "0.66.2"
   resolved "https://registry.yarnpkg.com/metro-babel-register/-/metro-babel-register-0.66.2.tgz#c6bbe36c7a77590687ccd74b425dc020d17d05af"
@@ -6340,15 +6335,6 @@ normalize-path@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/normalize-path/-/normalize-path-3.0.0.tgz#0dcd69ff23a1c9b11fd0978316644a0388216a65"
   integrity sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==
-
-npe@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/npe/-/npe-1.2.0.tgz#a54d78f868267de93ae822f33072fa5ed4e9d36f"
-  integrity sha512-sVbC5+7ljSI/039fvfKKnlH9kYQKskrsq81k6cwScvZ3CIpSDCrFIKVPpbb8VetVk6z/2mH4oDRlsiTWHUetyQ==
-  dependencies:
-    merge "^2.1.1"
-    minimist "^1.2.5"
-    steeltoe "^1.0.1"
 
 npm-run-path@^2.0.0:
   version "2.0.2"
@@ -7627,11 +7613,6 @@ static-extend@^0.1.1:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha1-Fhx9rBd2Wf2YEfQ3cfqZOBR4Yow=
-
-steeltoe@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/steeltoe/-/steeltoe-1.0.1.tgz#5be2f44d6def856cc04d9b48f7f23180223aa8c9"
-  integrity sha1-W+L0TW3vhWzATZtI9/IxgCI6qMk=
 
 stream-buffers@2.2.x:
   version "2.2.0"
