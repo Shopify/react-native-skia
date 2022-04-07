@@ -6,6 +6,7 @@ import React, {
   useContext,
   forwardRef,
   useRef,
+  createContext,
 } from "react";
 import type {
   RefObject,
@@ -66,6 +67,16 @@ const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
 };
 
 export const useCanvasRef = () => useRef<SkiaView>(null);
+const CanvasContext = createContext<RefObject<SkiaView> | null>(null);
+
+export const useCanvas = () => {
+  const canvas = useContext(CanvasContext);
+  if (canvas === null) {
+    throw new Error("No canvas context found");
+  }
+  const { width, height } = canvas.current!.size;
+  return { width, height };
+};
 
 export interface CanvasProps extends ComponentProps<typeof SkiaView> {
   ref?: RefObject<SkiaView>;
@@ -94,8 +105,14 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     );
     // Render effect
     useEffect(() => {
-      render(children, root, container);
-    }, [children, root, redraw, container]);
+      render(
+        <CanvasContext.Provider value={innerRef}>
+          {children}
+        </CanvasContext.Provider>,
+        root,
+        container
+      );
+    }, [children, root, redraw, container, innerRef]);
 
     // Draw callback
     const onDraw = useDrawCallback(
