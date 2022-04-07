@@ -17,6 +17,7 @@ import {
   Glassmorphism,
   Neumorphism,
   PerformanceDrawingTest,
+  Vertices,
 } from "./Examples";
 import { HomeScreen } from "./Home";
 
@@ -34,7 +35,13 @@ const App = () => {
               title: "🎨 Skia",
             }}
           />
-
+          <Stack.Screen
+            name="Vertices"
+            component={Vertices}
+            options={{
+              header: () => null,
+            }}
+          />
           <Stack.Screen name="API" component={API} />
           <Stack.Screen name="Breathe" component={Breathe} />
           <Stack.Screen name="Filters" component={Filters} />
