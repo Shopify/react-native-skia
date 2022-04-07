@@ -82,10 +82,10 @@ console.log("Entering directory `package`");
 process.chdir("./package");
 
 console.log("Build package", process.cwd());
-executeCmdSync("npe main lib/module/index.js");
-executeCmdSync("npe types lib/typescript/index.d.ts");
-executeCmdSync("npe react-native lib/module/index.js");
-executeCmdSync("npe module lib/module/index.js");
+executeCmdSync("$(yarn bin)/npe main lib/module/index.js");
+executeCmdSync("$(yarn bin)/npe types lib/typescript/index.d.ts");
+executeCmdSync("$(yarn bin)/npe react-native lib/module/index.js");
+executeCmdSync("$(yarn bin)/npe module lib/module/index.js");
 executeCmdSync("yarn build");
 
 console.log("Running `npm pack` in package folder", process.cwd());
