@@ -1,13 +1,14 @@
 import type { ReactNode } from "react";
 import React from "react";
 
-import { Node } from "../Host";
 import type { DrawingContext } from "../DrawingContext";
 import { processPaint, selectPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
 import type { DependencyManager } from "../DependencyManager";
+
+import { Node } from "./Node";
 
 type DrawingCallback<P> = (
   ctx: DrawingContext,

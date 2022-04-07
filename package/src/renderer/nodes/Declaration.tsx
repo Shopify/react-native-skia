@@ -1,9 +1,10 @@
 import type { DrawingContext } from "../DrawingContext";
-import { Node } from "../Host";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
-import type { AnimatedProps } from "../processors/Animations/Animations";
-import { isAnimated, materialize } from "../processors/Animations/Animations";
+import type { AnimatedProps } from "../processors";
+import { isAnimated, materialize } from "../processors";
 import type { DependencyManager } from "../DependencyManager";
+
+import { Node } from "./Node";
 
 export type DeclarationResult = SkJSIInstance<string> | null;
 
@@ -30,6 +31,7 @@ export class DeclarationNode<P> extends Node<P> {
     props: AnimatedProps<P>
   ) {
     super(depMgr, props);
+    super.memoizable = !isAnimated(props);
     this.onDeclare = onDeclare;
   }
 

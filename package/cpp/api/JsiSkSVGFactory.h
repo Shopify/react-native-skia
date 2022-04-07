@@ -13,7 +13,6 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkSVGDOM.h>
 #include <SkStream.h>
 
 #pragma clang diagnostic pop

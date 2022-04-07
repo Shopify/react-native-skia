@@ -1,15 +1,15 @@
-import { isPaint } from "../skia/Paint/Paint";
-
-import type { DrawingContext } from "./DrawingContext";
-import type { DeclarationResult, DeclarationProps } from "./nodes/Declaration";
-import type { DrawingProps } from "./nodes";
-import type { AnimatedProps } from "./processors/Animations/Animations";
-import type { DependencyManager } from "./DependencyManager";
+import { isPaint } from "../../skia";
+import type { SkJSIInstance } from "../../skia/JsiInstance";
+import type { DependencyManager } from "../DependencyManager";
+import type { DrawingContext } from "../DrawingContext";
+import type { AnimatedProps } from "../processors";
 
 export enum NodeType {
   Declaration = "skDeclaration",
   Drawing = "skDrawing",
 }
+
+type DeclarationResult = SkJSIInstance<string> | null;
 
 export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
@@ -56,30 +56,5 @@ export abstract class Node<P = unknown> {
       }
     });
     return returnedValues;
-  }
-}
-
-export class Container extends Node {
-  redraw: () => void;
-
-  constructor(depMgr: DependencyManager, redraw: () => void) {
-    super(depMgr, {});
-    this.redraw = redraw;
-  }
-
-  draw(ctx: DrawingContext) {
-    this.visit(ctx);
-  }
-}
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface IntrinsicElements {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      skDeclaration: DeclarationProps<any>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      skDrawing: DrawingProps<any>;
-    }
   }
 }
