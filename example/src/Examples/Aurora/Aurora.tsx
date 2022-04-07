@@ -10,7 +10,6 @@ export const Aurora = () => {
       colors={palette.otto}
       handles
       lines
-      debug
     />
   );
 };

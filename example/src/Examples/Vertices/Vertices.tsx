@@ -2,7 +2,6 @@ import React from "react";
 import { Dimensions } from "react-native";
 import {
   Canvas,
-  Points,
   useClockValue,
   vec,
   useDerivedValue,
@@ -13,16 +12,15 @@ import cdt2d from "cdt2d";
 import SimplexNoise from "simplex-noise";
 
 import "./cdt2d.d";
-import { Triangles } from "./Triangles";
 
 const { width, height } = Dimensions.get("window");
 const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);
 const hSize = width / N;
 const vSize = height / N;
-const AX = hSize * 0.65;
-const AY = vSize * 0.65;
-const F = 3000;
+const AX = hSize * 0.45;
+const AY = vSize * 0.45;
+const F = 6000;
 const palette = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"];
 const defaultVertices = n
   .map((col) => n.map((row) => vec(col * hSize, row * vSize)))
@@ -60,8 +58,8 @@ export const Demo = () => {
         textures={defaultVertices}
         colors={colors}
       />
-      <Points points={vertices} style="stroke" color="white" strokeWidth={1} />
-      <Triangles vertices={vertices} triangles={triangles} />
+      {/* <Points points={vertices} style="stroke" color="white" strokeWidth={1} />
+      <Triangles vertices={vertices} triangles={triangles} /> */}
     </Canvas>
   );
 };
