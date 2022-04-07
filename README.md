@@ -21,13 +21,13 @@ When reading these lines, the package is not yet available on npm.
 Use the link below to install the package.
 
 ```sh
-yarn add https://github.com/Shopify/react-native-skia/releases/download/v0.1.111-alpha/shopify-react-native-skia-0.1.111.tgz
+yarn add @shopify/react-native-skia
 ```
 
 Or using npm:
 
 ```sh
-npm install https://github.com/Shopify/react-native-skia/releases/download/v0.1.111-alpha/shopify-react-native-skia-0.1.111.tgz
+npm install @shopify/react-native-skia
 ```
 
 ### iOS
