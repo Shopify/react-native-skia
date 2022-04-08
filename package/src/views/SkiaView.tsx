@@ -1,4 +1,5 @@
 import React from "react";
+import type { ViewProps } from "react-native";
 import { requireNativeComponent } from "react-native";
 
 import type { SkImage, SkRect } from "../skia";
@@ -6,7 +7,6 @@ import type { SkiaReadonlyValue } from "../values";
 
 import type {
   DrawMode,
-  SkiaViewProps,
   RNSkiaDrawCallback,
   NativeSkiaViewProps,
 } from "./types";
@@ -34,6 +34,30 @@ declare global {
 }
 
 const { SkiaViewApi } = global;
+
+export interface SkiaViewProps extends ViewProps {
+  /**
+   * Sets the drawing mode for the skia view. There are two drawing
+   * modes, "continuous" and "default", where the continuous mode will
+   * continuously redraw the view, and the default mode will only
+   * redraw when any of the regular react properties are changed like
+   * sizes and margins.
+   */
+  mode?: DrawMode;
+  /**
+   * When set to true the view will display information about the
+   * average time it takes to render.
+   */
+  debug?: boolean;
+  /**
+   * Draw callback. Will be called whenever the view is invalidated and
+   * needs to redraw. This is either caused by a change in a react
+   * property, a touch event, or a call to redraw. If the view is in
+   * continuous mode the callback will be called 60 frames per second
+   * by the native view.
+   */
+  onDraw?: RNSkiaDrawCallback;
+}
 
 export class SkiaView extends React.Component<SkiaViewProps> {
   constructor(props: SkiaViewProps) {
@@ -103,14 +127,14 @@ export class SkiaView extends React.Component<SkiaViewProps> {
   }
 
   render() {
-    const { style, mode, debug = false } = this.props;
+    const { mode, debug = false, ...viewProps } = this.props;
     return (
       <NativeSkiaView
-        style={style}
         collapsable={false}
         nativeID={`${this._nativeId}`}
         mode={mode}
         debug={debug}
+        {...viewProps}
       />
     );
   }
