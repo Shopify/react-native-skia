@@ -24,6 +24,8 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { Skia } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
+import { useValue } from "../values";
+import type { SkiaReadonlyValue } from "../../lib/typescript/src/values/types";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
@@ -67,14 +69,22 @@ const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
 };
 
 export const useCanvasRef = () => useRef<SkiaView>(null);
-const CanvasContext = createContext<RefObject<SkiaView> | null>(null);
+
+interface CanvasContext {
+  width: number;
+  height: number;
+}
+
+const CanvasContext = createContext<SkiaReadonlyValue<CanvasContext> | null>(
+  null
+);
 
 export const useCanvas = () => {
   const canvas = useContext(CanvasContext);
   if (canvas === null) {
     throw new Error("No canvas context found");
   }
-  return canvas.current!.size;
+  return canvas;
 };
 
 export interface CanvasProps extends ComponentProps<typeof SkiaView> {
@@ -88,6 +98,7 @@ const defaultFontMgr = Skia.FontMgr.RefDefault();
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
   ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
+    const canvasValue = useValue({ width: -1, height: -1 });
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const [tick, setTick] = useState(0);
@@ -104,22 +115,35 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     );
     // Render effect
     useEffect(() => {
+      if (
+        canvasValue.current.width === -1 &&
+        canvasValue.current.height === -1
+      ) {
+        canvasValue.current = innerRef.current!.size;
+      }
       render(
-        <CanvasContext.Provider value={innerRef}>
+        <CanvasContext.Provider value={canvasValue}>
           {children}
         </CanvasContext.Provider>,
         root,
         container
       );
-    }, [children, root, redraw, container, innerRef]);
+    }, [children, root, redraw, container, canvasValue, innerRef]);
 
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
+        console.log({ info });
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
         if (onTouch) {
           onTouch(info.touches);
+        }
+        if (
+          canvasValue.current.width !== width ||
+          canvasValue.current.height !== height
+        ) {
+          canvasValue.current = { width, height };
         }
         const paint = Skia.Paint();
         paint.setAntiAlias(true);

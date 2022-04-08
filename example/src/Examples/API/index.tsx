@@ -15,6 +15,7 @@ import { SVG } from "./SVG";
 import { BlendModes } from "./BlendModes";
 import { Data } from "./Data";
 import { ImageFilters } from "./ImageFilters";
+import { UseCanvas } from "./UseCanvas";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -110,6 +111,13 @@ export const API = () => {
         component={Data}
         options={{
           title: "📊 Data",
+        }}
+      />
+      <Stack.Screen
+        name="UseCanvas"
+        component={UseCanvas}
+        options={{
+          title: "↕️ UseCanvas",
         }}
       />
     </Stack.Navigator>

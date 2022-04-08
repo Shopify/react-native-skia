@@ -12,4 +12,5 @@ export type Routes = {
   SVG: undefined;
   BlendModes: undefined;
   Data: undefined;
+  UseCanvas: undefined;
 };
