@@ -44,7 +44,7 @@ jobs:
         run: yarn copy-skia-headers
 
       - name: Build NPM Package
-        run: yarn build-npm
+        run: cd package; yarn; cd ..; yarn build-npm
 
       - name: Get NPM Package name
         id: get_npm_package_name
@@ -59,6 +59,15 @@ jobs:
       - name: Get NPM Package version
         id: get_npm_package_version
         run: echo "::set-output name=npm_package_version::$(yarn get-version-npm| tail -2)"
+        
+      - name: Publish to NPM
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          package: ./package/package.json
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish documentation
+        run: cd docs; USE_SSH=true yarn deploy
 
       - name: Create Github Release
         uses: ncipollo/release-action@v1

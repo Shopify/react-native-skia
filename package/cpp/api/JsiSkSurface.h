@@ -1,7 +1,11 @@
 #pragma once
 
-#include "JsiSkHostObjects.h"
+#include <memory>
+#include <utility>
+
 #include <jsi/jsi.h>
+
+#include "JsiSkHostObjects.h"
 
 #include <JsiSkSurfaceFactory.h>
 #include <JsiSkImage.h>
@@ -22,7 +26,7 @@ class JsiSkSurface : public JsiSkWrappingSkPtrHostObject<SkSurface> {
 public:
     JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                  sk_sp<SkSurface> surface)
-            : JsiSkWrappingSkPtrHostObject<SkSurface>(context, surface) {}
+            : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context), std::move(surface)) {}
 
     // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
     JSI_PROPERTY_GET(__typename__) {
@@ -43,7 +47,7 @@ public:
       } else {
         image = getObject()->makeImageSnapshot();
       }
-      return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(getContext(), image));
+      return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
     }
 
     JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkSurface, __typename__))
@@ -56,7 +60,6 @@ public:
     static sk_sp<SkSurface> fromValue(jsi::Runtime &runtime, const jsi::Value &obj) {
         return obj.asObject(runtime)
                 .asHostObject<JsiSkSurface>(runtime)
-                .get()
                 ->getObject();
     }
 };

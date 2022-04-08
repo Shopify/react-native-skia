@@ -1,11 +1,15 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include <JsiSkHostObjects.h>
 #include <JsiSkImageFilter.h>
 #include <JsiSkMaskFilter.h>
 #include <JsiSkPathEffect.h>
 #include <JsiSkShader.h>
-#include <jsi/jsi.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,7 +32,7 @@ public:
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPaint, __typename__))
 
   JSI_HOST_FUNCTION(copy) {
-    auto paint = getObject().get();
+    const auto* paint = getObject().get();
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkPaint>(getContext(), SkPaint(*paint)));
   }
@@ -141,31 +145,31 @@ public:
 
   JSI_HOST_FUNCTION(setMaskFilter) {
     auto maskFilter = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkMaskFilter::fromValue(runtime, arguments[0]);
-    getObject()->setMaskFilter(maskFilter);
+    getObject()->setMaskFilter(std::move(maskFilter));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setImageFilter) {
     auto imageFilter = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkImageFilter::fromValue(runtime, arguments[0]);
-    getObject()->setImageFilter(imageFilter);
+    getObject()->setImageFilter(std::move(imageFilter));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setColorFilter) {
     auto colorFilter = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkColorFilter::fromValue(runtime, arguments[0]);
-    getObject()->setColorFilter(colorFilter);
+    getObject()->setColorFilter(std::move(colorFilter));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setShader) {
     auto shader = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkShader::fromValue(runtime, arguments[0]);
-    getObject()->setShader(shader);
+    getObject()->setShader(std::move(shader));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setPathEffect) {
     auto pathEffect = arguments[0].isNull() || arguments[0].isUndefined() ? nullptr : JsiSkPathEffect::fromValue(runtime, arguments[0]);
-    getObject()->setPathEffect(pathEffect);
+    getObject()->setPathEffect(std::move(pathEffect));
     return jsi::Value::undefined();
   }
 
@@ -192,7 +196,7 @@ public:
 
   JsiSkPaint(std::shared_ptr<RNSkPlatformContext> context, SkPaint paint)
       : JsiSkWrappingSharedPtrHostObject<SkPaint>(
-            context, std::make_shared<SkPaint>(paint)) {}
+            std::move(context), std::make_shared<SkPaint>(std::move(paint))) {}
 
   /**
 Returns the underlying object from a host object of this type
@@ -201,7 +205,6 @@ Returns the underlying object from a host object of this type
                                             const jsi::Value &obj) {
     return obj.asObject(runtime)
         .asHostObject<JsiSkPaint>(runtime)
-        .get()
         ->getObject();
   }
 
@@ -217,7 +220,7 @@ Returns the underlying object from a host object of this type
     return JSI_HOST_FUNCTION_LAMBDA {
       // Return the newly constructed object
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPaint>(context, SkPaint()));
+          runtime, std::make_shared<JsiSkPaint>(std::move(context), SkPaint()));
     };
   }
 };

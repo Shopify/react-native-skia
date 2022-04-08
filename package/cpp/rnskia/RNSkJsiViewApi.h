@@ -162,8 +162,9 @@ public:
     // Get values that should be added as dependencies
     auto values = arguments[1].asObject(runtime).asArray(runtime);
     std::vector<std::function<void()>> unsubscribers;
-    
-    for(size_t i=0; i<values.size(runtime); ++i) {
+    const std::size_t size = values.size(runtime);
+    unsubscribers.reserve(size);
+    for(size_t i=0; i<size; ++i) {
       auto value = values.getValueAtIndex(runtime, i).asObject(runtime).asHostObject<RNSkReadonlyValue>(runtime);
       
       if(value != nullptr) {

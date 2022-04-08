@@ -38,6 +38,11 @@ export const HomeScreen = () => {
         route="Aurora"
       />
       <HomeScreenButton
+        title="🌈 Mesh Gradient"
+        description="Mesh Gradients"
+        route="Vertices"
+      />
+      <HomeScreenButton
         title="🪞 Glassmorphism"
         description="Glassmorphism"
         route="Glassmorphism"
@@ -62,6 +67,7 @@ export const HomeScreen = () => {
         description="Drawing Performance Test"
         route="Performance"
       />
+      <HomeScreenButton title="☀️ GenZ" description="Gen Z Mode" route="GenZ" />
     </ScrollView>
   );
 };

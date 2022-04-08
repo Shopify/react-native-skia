@@ -1,7 +1,11 @@
 #pragma once
 
-#include "JsiSkHostObjects.h"
+#include <memory>
+#include <utility>
+
 #include <jsi/jsi.h>
+
+#include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -19,21 +23,20 @@ public:
 
   JsiSkMatrix(std::shared_ptr<RNSkPlatformContext> context, SkMatrix m)
       : JsiSkWrappingSharedPtrHostObject<SkMatrix>(
-            context, std::make_shared<SkMatrix>(m)) {}
+            context, std::make_shared<SkMatrix>(std::move(m))) {}
 
   /**
 Returns the underlying object from a host object of this type
 */
   static std::shared_ptr<SkMatrix> fromValue(jsi::Runtime &runtime,
                                              const jsi::Value &obj) {
-    const auto object = obj.asObject(runtime);
+    const auto& object = obj.asObject(runtime);
     if (object.isHostObject(runtime)) {
       return object
               .asHostObject<JsiSkMatrix>(runtime)
-              .get()
               ->getObject();
     } else {
-      auto array = object.asArray(runtime);
+      const auto& array = object.asArray(runtime);
       auto scaleX = array.getValueAtIndex(runtime, 0).asNumber();
       auto skewX = array.getValueAtIndex(runtime, 1).asNumber();
       auto transX = array.getValueAtIndex(runtime, 2).asNumber();
@@ -54,7 +57,7 @@ Returns the underlying object from a host object of this type
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkMatrix>(context, SkMatrix::I()));
+          runtime, std::make_shared<JsiSkMatrix>(std::move(context), SkMatrix::I()));
     };
   }
 };

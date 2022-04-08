@@ -1,10 +1,14 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkData.h"
-#include <jsi/jsi.h>
 
 namespace RNSkia {
 
@@ -19,7 +23,7 @@ namespace RNSkia {
                 return jsi::Value::null();
             }
             return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkImage>(getContext(), image));
+                    runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
         }
 
         JSI_HOST_FUNCTION(MakeImage) {
@@ -31,7 +35,7 @@ namespace RNSkia {
                 return jsi::Value::null();
             }
             return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkImage>(getContext(), image));
+                    runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
         }
 
         JSI_EXPORT_FUNCTIONS(
@@ -40,7 +44,7 @@ namespace RNSkia {
         )
 
         JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
-                : JsiSkHostObject(context) {}
+                : JsiSkHostObject(std::move(context)) {}
     };
 
 } // namespace RNSkia

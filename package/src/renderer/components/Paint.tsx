@@ -1,18 +1,18 @@
 import type { ReactNode } from "react";
 import React, { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 
-import type { SkPaint } from "../../skia";
-import { isShader } from "../../skia/Shader/Shader";
-import { isMaskFilter } from "../../skia/MaskFilter";
-import { isColorFilter } from "../../skia/ColorFilter/ColorFilter";
-import { Skia } from "../../skia/Skia";
-import type { SkImageFilter } from "../../skia/ImageFilter/ImageFilter";
-import { isImageFilter } from "../../skia/ImageFilter/ImageFilter";
-import type { CustomPaintProps } from "../processors";
+import type { SkPaint, SkImageFilter } from "../../skia";
+import {
+  isShader,
+  isMaskFilter,
+  isColorFilter,
+  Skia,
+  isImageFilter,
+  isPathEffect,
+} from "../../skia";
+import type { CustomPaintProps, AnimatedProps } from "../processors";
 import { processPaint } from "../processors";
-import type { AnimatedProps } from "../processors/Animations/Animations";
-import { createDeclaration } from "../nodes/Declaration";
-import { isPathEffect } from "../../skia/PathEffect";
+import { createDeclaration } from "../nodes";
 
 export const usePaintRef = () => useRef<SkPaint>(null);
 

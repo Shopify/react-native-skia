@@ -36,23 +36,20 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
   process.exit(1);
 }
 
-// Check that Android Skia libs are built
-// SKIP for now since we can't use configuration here since it depends on
-// iPhone SDKs that we get from xcrun... TODO!
-// Object.keys(configurations.android.targets).forEach((targetKey) => {
-//   const target = configurations.android.targets[targetKey];
-//   configurations.android.outputNames.forEach((name) => {
-//     const path = `./package/libs/android/${
-//       target.output ?? target.cpu
-//     }/${name}`;
+// FIXME: We can't use skia configuration here since it depends on
+// iPhone SDKs that we get from xcrun...
 
-//     checkFileExists(
-//       path,
-//       `Skia Android ${path}`,
-//       "Have you built the Skia Android binaries? Run yarn run build."
-//     );
-//   });
-// });
+// Check that Android Skia libs are built
+["armeabi-v7a", "arm64-v8a", "x86", "x86_64"].forEach((cpu) => {
+  ["libskia.a", "libskshaper.a", "libsvg.a"].forEach((target) => {
+    const path = `./package/libs/android/${cpu}/${target}`;
+    checkFileExists(
+      path,
+      `Skia Android ${path}`,
+      "Have you built the Skia Android binaries? Run yarn run build."
+    );
+  });
+});
 
 // Check that iOS Skia frameworks are built
 [
@@ -74,6 +71,10 @@ ensureFolderExists(getDistFolder());
 const majorMinor = pck.version.split(".").slice(0, 2).join(".");
 const nextVersion = majorMinor + "." + process.env.GITHUB_RUN_NUMBER;
 pck.version = nextVersion;
+pck.types = "lib/typescript/index.d.ts";
+pck.main = "lib/module/index.js";
+pck.module = "lib/module/index.js";
+pck["react-native"] = "lib/module/index.js";
 console.log("Building version:", nextVersion);
 
 // Overwrite the package.json file
@@ -83,6 +84,10 @@ fs.writeFileSync("./package/package.json", JSON.stringify(pck, null, 2));
 const currentDir = process.cwd();
 console.log("Entering directory `package`");
 process.chdir("./package");
+
+console.log("Build package", process.cwd());
+executeCmdSync("yarn build");
+
 console.log("Running `npm pack` in package folder", process.cwd());
 executeCmdSync("npm pack");
 process.chdir(currentDir);
@@ -95,5 +100,7 @@ const packagePath = `./package/${packageFilename}`;
 fs.renameSync(packagePath, `${getDistFolder()}/${packageFilename}`);
 
 // Done!
-console.log("The output is in the `./dist` folder.");
+console.log(
+  `Written NPM package ${packageFilename} to ${getDistFolder()} folder.`
+);
 exit(0);
