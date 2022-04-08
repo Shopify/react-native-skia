@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import React from "react";
+import type { DependencyList, ReactNode } from "react";
+import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
 import { processPaint, selectPaint } from "../processors";
@@ -21,14 +21,14 @@ type OnDrawCallback<P> = (ctx: DrawingContext, props: P, node: Node<P>) => void;
 export const createDrawing = <P,>(cb: OnDrawCallback<P>): DrawingCallback<P> =>
   cb;
 
+export const useDrawing = <P,>(cb: OnDrawCallback<P>, deps?: DependencyList) =>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useCallback(cb, deps ?? []);
+
 export type DrawingProps<T> = {
   onDraw: DrawingCallback<T>;
   skipProcessing?: boolean;
   children?: ReactNode | ReactNode[];
-};
-
-export const Drawing = <P,>(props: DrawingProps<P>) => {
-  return <skDrawing {...props} />;
 };
 
 export class DrawingNode<P> extends Node<P> {

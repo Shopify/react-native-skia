@@ -1,3 +1,6 @@
+import type { DependencyList } from "react";
+import { useCallback } from "react";
+
 import type { DrawingContext } from "../DrawingContext";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors";
@@ -17,6 +20,13 @@ type DeclarationCallback<T> = (
 export const createDeclaration = <T,>(
   cb: DeclarationCallback<T>
 ): DeclarationCallback<T> => cb;
+
+export const useDeclaration = <P,>(
+  cb: DeclarationCallback<P>,
+  deps?: DependencyList
+) =>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useCallback(cb, deps ?? []);
 
 export interface DeclarationProps<P> {
   onDeclare: DeclarationCallback<P>;
