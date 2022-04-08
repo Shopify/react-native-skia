@@ -15,6 +15,7 @@
 #include "JsiSkSVG.h"
 #include "JsiSkVertices.h"
 #include "JsiSkTextBlob.h"
+#include "JsiSkPicture.h"
 
 #include <jsi/jsi.h>
 
@@ -476,6 +477,12 @@ public:
     _canvas->concat(*matrix.get());
     return jsi::Value::undefined();
   }
+  
+  JSI_HOST_FUNCTION(drawPicture) {
+    auto picture = JsiSkPicture::fromValue(runtime, arguments[0]);
+    _canvas->drawPicture(picture);
+    return jsi::Value::undefined();
+  }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkCanvas, drawPaint),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawLine),
@@ -514,7 +521,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, skew),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawColor),
                        JSI_EXPORT_FUNC(JsiSkCanvas, clear),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, concat))
+                       JSI_EXPORT_FUNC(JsiSkCanvas, concat),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawPicture))
 
   JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

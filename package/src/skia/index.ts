@@ -20,4 +20,5 @@ export * from "./Surface";
 export * from "./FontMgr";
 export * from "./Vertices";
 export * from "./Color";
+export * from "./Picture";
 export * from "./Data";

@@ -14,6 +14,7 @@ import { Images } from "./Images";
 import { SVG } from "./SVG";
 import { BlendModes } from "./BlendModes";
 import { Data } from "./Data";
+import { PictureExample } from "./Picture";
 import { ImageFilters } from "./ImageFilters";
 
 const Stack = createNativeStackNavigator<Routes>();
@@ -110,6 +111,13 @@ export const API = () => {
         component={Data}
         options={{
           title: "📊 Data",
+        }}
+      />
+      <Stack.Screen
+        name="Picture"
+        component={PictureExample}
+        options={{
+          title: "🖼 Picture",
         }}
       />
     </Stack.Navigator>
