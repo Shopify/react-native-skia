@@ -33,7 +33,7 @@ const onDraw = createDrawing<GroupProps>(
     processPaint(paint, opacity, groupProps);
     const hasTransform = !!groupProps.transform || !!groupProps.matrix;
     const hasClip = !!clip;
-    const shouldSave = hasTransform || hasClip;
+    const shouldSave = hasTransform || hasClip || !!layer;
     if (shouldSave) {
       if (layer) {
         if (typeof layer === "boolean") {
