@@ -21,8 +21,8 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { Skia } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
-import type { SkiaReadonlyValue } from "../../lib/typescript/src/values/types";
 import { useValue } from "../values/hooks/useValue";
+import type { SkiaReadonlyValue } from "../values/types";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
