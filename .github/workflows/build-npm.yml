@@ -77,10 +77,13 @@ jobs:
           replacesArtifacts: false
           token: ${{ secrets.GITHUB_TOKEN }}
           
+      - name: Install Docs
+        run: cd package; yarn; cd docs; yarn; yarn build;
+          
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          publish_dir: ./docs/build
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
