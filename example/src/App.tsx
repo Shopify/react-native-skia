@@ -8,7 +8,6 @@ import {
   API,
   Aurora,
   Breathe,
-  DrawingExample,
   Filters,
   Gooey,
   GraphsScreen,
@@ -18,6 +17,7 @@ import {
   Neumorphism,
   PerformanceDrawingTest,
   Wallpaper,
+  Vertices,
 } from "./Examples";
 import { HomeScreen } from "./Home";
 
@@ -35,7 +35,13 @@ const App = () => {
               title: "🎨 Skia",
             }}
           />
-
+          <Stack.Screen
+            name="Vertices"
+            component={Vertices}
+            options={{
+              header: () => null,
+            }}
+          />
           <Stack.Screen name="API" component={API} />
           <Stack.Screen name="Breathe" component={Breathe} />
           <Stack.Screen name="Filters" component={Filters} />
@@ -70,7 +76,6 @@ const App = () => {
               header: () => null,
             }}
           />
-          <Stack.Screen name="Drawing" component={DrawingExample} />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
           <Stack.Screen name="Performance" component={PerformanceDrawingTest} />

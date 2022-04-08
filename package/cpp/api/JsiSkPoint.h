@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -25,18 +30,17 @@ public:
 
   JsiSkPoint(std::shared_ptr<RNSkPlatformContext> context, const SkPoint &point)
       : JsiSkWrappingSharedPtrHostObject<SkPoint>(
-            context, std::make_shared<SkPoint>(point)){};
+            std::move(context), std::make_shared<SkPoint>(point)){}
 
   /**
   Returns the underlying object from a host object of this type
  */
   static std::shared_ptr<SkPoint> fromValue(jsi::Runtime &runtime,
                                             const jsi::Value &obj) {
-    const auto object = obj.asObject(runtime);
+    const auto& object = obj.asObject(runtime);
     if (object.isHostObject(runtime)) {
       return object
               .asHostObject<JsiSkPoint>(runtime)
-              .get()
               ->getObject();
     } else {
       auto x = object.getProperty(runtime, "x").asNumber();
@@ -52,7 +56,7 @@ public:
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkPoint &point) {
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPoint>(context, point));
+        runtime, std::make_shared<JsiSkPoint>(std::move(context), point));
   }
 
   /**
@@ -70,7 +74,7 @@ public:
 
       // Return the newly constructed object
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPoint>(context, point));
+          runtime, std::make_shared<JsiSkPoint>(std::move(context), std::move(point)));
     };
   }
 };

@@ -20,6 +20,7 @@
       }
     ],
     "react/jsx-uses-react": "error",
-    "react/react-in-jsx-scope": "error"
+    "react/react-in-jsx-scope": "error",
+    "import/no-cycle": [2, { "ignoreExternal": true }]
   }
 }

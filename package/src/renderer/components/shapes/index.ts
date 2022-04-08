@@ -10,3 +10,4 @@ export * from "./Patch";
 export * from "./Vertices";
 export * from "./Fill";
 export * from "./FitBox";
+export * from "./Box";

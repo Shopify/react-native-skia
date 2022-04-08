@@ -8,6 +8,7 @@ export * from "./maskFilters";
 export * from "./imageFilters";
 export * from "./pathEffects";
 export * from "../processors";
+export * from "./Picture";
 
 export * from "./Group";
 export * from "./Mask";
@@ -15,3 +16,4 @@ export * from "./Paint";
 export * from "./Compose";
 export * from "./Blend";
 export * from "./Defs";
+export * from "./Drawing";

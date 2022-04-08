@@ -1,5 +1,10 @@
 #include "RNSkManager.h"
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include <JsiSkApi.h>
 #include <RNSkJsiViewApi.h>
 #include <RNSkDrawView.h>

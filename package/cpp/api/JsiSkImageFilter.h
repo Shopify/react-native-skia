@@ -1,8 +1,12 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
-#include <jsi/jsi.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -20,7 +24,7 @@ class JsiSkImageFilter : public JsiSkWrappingSkPtrHostObject<SkImageFilter> {
 public:
   JsiSkImageFilter(std::shared_ptr<RNSkPlatformContext> context,
                    sk_sp<SkImageFilter> imageFilter)
-      : JsiSkWrappingSkPtrHostObject<SkImageFilter>(context, imageFilter){};
+      : JsiSkWrappingSkPtrHostObject<SkImageFilter>(std::move(context), std::move(imageFilter)){}
 
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
   JSI_PROPERTY_GET(__typename__) {
@@ -36,7 +40,6 @@ public:
                                         const jsi::Value &obj) {
     return obj.asObject(runtime)
         .asHostObject<JsiSkImageFilter>(runtime)
-        .get()
         ->getObject();
   }
 };

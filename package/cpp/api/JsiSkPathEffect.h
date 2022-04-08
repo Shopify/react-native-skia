@@ -1,7 +1,11 @@
 #pragma once
 
-#include "JsiSkHostObjects.h"
+#include <memory>
+#include <utility>
+
 #include <jsi/jsi.h>
+
+#include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -18,7 +22,7 @@ class JsiSkPathEffect : public JsiSkWrappingSkPtrHostObject<SkPathEffect> {
 public:
   JsiSkPathEffect(std::shared_ptr<RNSkPlatformContext> context,
                   sk_sp<SkPathEffect> pathEffect)
-      : JsiSkWrappingSkPtrHostObject<SkPathEffect>(context, pathEffect) {}
+      : JsiSkWrappingSkPtrHostObject<SkPathEffect>(std::move(context), std::move(pathEffect)) {}
 
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
   JSI_PROPERTY_GET(__typename__) {
@@ -34,7 +38,6 @@ public:
                                        const jsi::Value &obj) {
     return obj.asObject(runtime)
         .asHostObject<JsiSkPathEffect>(runtime)
-        .get()
         ->getObject();
   }
 };

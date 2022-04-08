@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { ValueApi } from "../api";
-import { isValue } from "../../renderer";
+import { isValue } from "../../renderer/processors";
 
 /**
  * Creates a new derived value - a value that will calculate its value depending

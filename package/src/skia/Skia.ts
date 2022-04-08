@@ -26,6 +26,7 @@ import "./NativeSetup";
 import type { SkRSXform } from "./RSXform";
 import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
+import type { PictureFactory, SkPictureRecorder } from "./Picture";
 
 /**
  * Declares the interface for the native Skia API
@@ -41,6 +42,8 @@ export interface Skia {
     resScale: number
   ) => SkContourMeasureIter;
   Paint: () => SkPaint;
+  PictureRecorder: () => SkPictureRecorder;
+  Picture: PictureFactory;
   Path: PathFactory;
   Matrix: () => SkMatrix;
   ColorFilter: ColorFilterFactory;
@@ -106,6 +109,8 @@ export const Skia = {
   XYWHRect: SkiaApi.XYWHRect,
   RRectXY: SkiaApi.RRectXY,
   Paint: SkiaApi.Paint,
+  PictureRecorder: SkiaApi.PictureRecorder,
+  Picture: SkiaApi.Picture,
   Path: SkiaApi.Path,
   ColorFilter: SkiaApi.ColorFilter,
   ContourMeasureIter: SkiaApi.ContourMeasureIter,

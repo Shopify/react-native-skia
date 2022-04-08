@@ -3,18 +3,20 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import type { Routes } from "./Routes";
 import { List } from "./List";
-import { PathEffectDemo } from "./PathEffect2";
-import { Shapes } from "./Shapes2";
-import { Clipping } from "./Clipping2";
+import { PathEffectDemo } from "./PathEffect";
+import { Shapes } from "./Shapes";
+import { Clipping } from "./Clipping";
 import { Transform } from "./Transform";
 import { ColorFilter } from "./ColorFilter";
-import { Gradients } from "./Gradients2";
+import { Gradients } from "./Gradients";
 import { PathExample } from "./Path2";
 import { Images } from "./Images";
 import { SVG } from "./SVG";
 import { BlendModes } from "./BlendModes";
 import { Data } from "./Data";
+import { PictureExample } from "./Picture";
 import { ImageFilters } from "./ImageFilters";
+import { UseCanvas } from "./UseCanvas";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -110,6 +112,20 @@ export const API = () => {
         component={Data}
         options={{
           title: "📊 Data",
+        }}
+      />
+      <Stack.Screen
+        name="Picture"
+        component={PictureExample}
+        options={{
+          title: "🖼 Picture",
+        }}
+      />
+      <Stack.Screen
+        name="UseCanvas"
+        component={UseCanvas}
+        options={{
+          title: "↕️ UseCanvas",
         }}
       />
     </Stack.Navigator>

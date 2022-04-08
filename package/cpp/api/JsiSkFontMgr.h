@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
+#include <jsi/jsi.h>
+
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -11,7 +16,6 @@
 
 #pragma clang diagnostic pop
 
-#include <jsi/jsi.h>
 
 namespace RNSkia {
 
@@ -29,7 +33,7 @@ namespace RNSkia {
 
         JsiSkFontMgr(std::shared_ptr<RNSkPlatformContext> context,
                      sk_sp<SkFontMgr> fontMgr)
-                : JsiSkWrappingSkPtrHostObject(context, fontMgr) {};
+                : JsiSkWrappingSkPtrHostObject(std::move(context), std::move(fontMgr)) {}
 
         JSI_HOST_FUNCTION(countFamilies) {
             auto families = getObject()->countFamilies();
@@ -53,12 +57,12 @@ namespace RNSkia {
                 SkFontStyle::Slant slant = (SkFontStyle::Slant)object.getProperty(runtime, "slant").asNumber();
                 fontStyle = SkFontStyle(width, weight, slant);
             }
-            auto typeface = getObject()->matchFamilyStyle(familyName.c_str(), fontStyle);
+            auto typeface = getObject()->matchFamilyStyle(familyName.c_str(), std::move(fontStyle));
             if (typeface == nullptr) {
                 return jsi::Value::null();
             }
             return jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkTypeface>(getContext(), sk_sp<SkTypeface>(typeface)));;
+                    runtime, std::make_shared<JsiSkTypeface>(getContext(), sk_sp<SkTypeface>(std::move(typeface))));;
         }
 
         JSI_EXPORT_FUNCTIONS(
@@ -74,7 +78,6 @@ namespace RNSkia {
                                            const jsi::Value &obj) {
             return obj.asObject(runtime)
                     .asHostObject<JsiSkFontMgr>(runtime)
-                    .get()
                     ->getObject();
         }
     };

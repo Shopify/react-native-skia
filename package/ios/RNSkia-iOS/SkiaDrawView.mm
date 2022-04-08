@@ -2,6 +2,7 @@
 
 #import <SkiaDrawView.h>
 
+#include <utility>
 #include <vector>
 
 #import <RNSkDrawViewImpl.h>
@@ -60,7 +61,7 @@
   } else {
     // Create implementation view when the parent view is set
     if(_impl == nullptr && _manager != nullptr) {
-      __weak typeof(self) weakSelf = self;
+      __weak decltype(self) weakSelf = self;
       _impl = std::make_shared<RNSkDrawViewImpl>(weakSelf, _manager->getPlatformContext());
       if(_nativeId != 0) {
         _manager->setSkiaDrawView(_nativeId, _impl.get());
@@ -156,7 +157,7 @@
       nextTouches.push_back(nextTouch);
     }
     if(_impl != nullptr) {
-      _impl->updateTouchState(nextTouches);
+      _impl->updateTouchState(std::move(nextTouches));
     }
   }
 }

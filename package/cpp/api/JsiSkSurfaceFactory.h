@@ -1,7 +1,11 @@
 #pragma once
 
-#include "JsiSkHostObjects.h"
+#include <memory>
+#include <utility>
+
 #include <jsi/jsi.h>
+
+#include "JsiSkHostObjects.h"
 
 #include <JsiSkSurface.h>
 
@@ -27,13 +31,13 @@ namespace RNSkia {
                 return jsi::Value::null();
             }
             return jsi::Object::createFromHostObject(runtime,
-                std::make_shared<JsiSkSurface>(getContext(), surface));
+                std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
         }
       
         JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurfaceFactory, Make))
 
         JsiSkSurfaceFactory(std::shared_ptr<RNSkPlatformContext> context)
-            : JsiSkHostObject(context) {}
+            : JsiSkHostObject(std::move(context)) {}
 
     };
 

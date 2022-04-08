@@ -1,10 +1,20 @@
 #pragma once
 
-#include "JsiSkColorFilter.h"
-#include "JsiSkHostObjects.h"
+#include <memory>
+#include <utility>
+
 #include <jsi/jsi.h>
 
+#include "JsiSkColorFilter.h"
+#include "JsiSkHostObjects.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <SkMaskFilter.h>
+
+#pragma clang diagnostic pop
+
 
 namespace RNSkia {
 
@@ -26,7 +36,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMaskFilterFactory, MakeBlur))
 
   JsiSkMaskFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(context) {}
+      : JsiSkHostObject(std::move(context)) {}
 };
 
 } // namespace RNSkia

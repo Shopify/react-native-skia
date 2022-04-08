@@ -13,11 +13,13 @@ interface FitProps {
   children: ReactNode | ReactNode[];
 }
 
+export const fitbox = (fit: Fit, src: SkRect, dst: SkRect) => {
+  const rects = fitRects(fit, src, dst);
+  return rect2rect(rects.src, rects.dst);
+};
+
 export const FitBox = ({ fit, src, dst, children }: FitProps) => {
-  const transform = useMemo(() => {
-    const rects = fitRects(fit, src, dst);
-    return rect2rect(rects.src, rects.dst);
-  }, [dst, fit, src]);
+  const transform = useMemo(() => fitbox(fit, src, dst), [dst, fit, src]);
   return <Group transform={transform}>{children}</Group>;
 };
 
