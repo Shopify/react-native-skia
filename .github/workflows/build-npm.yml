@@ -77,8 +77,8 @@ jobs:
           replacesArtifacts: false
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Install Docs
-        run: cd package; yarn; cd docs; yarn; yarn build;
+      - name: Install & Build Docs
+        run: cd package; yarn; cd ../docs; yarn; yarn build;
           
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
