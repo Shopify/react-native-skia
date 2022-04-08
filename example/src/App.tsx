@@ -8,7 +8,6 @@ import {
   API,
   Aurora,
   Breathe,
-  DrawingExample,
   Filters,
   Gooey,
   GraphsScreen,
@@ -69,7 +68,6 @@ const App = () => {
             }}
           />
           <Stack.Screen name="Neumorphism" component={Neumorphism} />
-          <Stack.Screen name="Drawing" component={DrawingExample} />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
           <Stack.Screen name="Performance" component={PerformanceDrawingTest} />
