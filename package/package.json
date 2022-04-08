@@ -35,7 +35,7 @@
     "tsc": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "test": "jest",
-    "postinstall": "yarn node scripts/install-npm.js",
+    "postinstall": "node scripts/install-npm.js",
     "build": "bob build"
   },
   "repository": {
