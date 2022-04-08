@@ -54,6 +54,10 @@ const examples = [
     screen: "Data",
     title: "📊 Data",
   },
+  {
+    screen: "Picture",
+    title: "🖼 Picture",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
