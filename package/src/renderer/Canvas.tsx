@@ -72,7 +72,7 @@ const defaultFontMgr = Skia.FontMgr.RefDefault();
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
   ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
-    const canvasCtx = useValue({ width: -1, height: -1 });
+    const canvasCtx = useValue({ width: 0, height: 0 });
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const [tick, setTick] = useState(0);
