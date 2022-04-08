@@ -16,6 +16,7 @@ import { BlendModes } from "./BlendModes";
 import { Data } from "./Data";
 import { PictureExample } from "./Picture";
 import { ImageFilters } from "./ImageFilters";
+import { UseCanvas } from "./UseCanvas";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -118,6 +119,13 @@ export const API = () => {
         component={PictureExample}
         options={{
           title: "🖼 Picture",
+        }}
+      />
+      <Stack.Screen
+        name="UseCanvas"
+        component={UseCanvas}
+        options={{
+          title: "↕️ UseCanvas",
         }}
       />
     </Stack.Navigator>

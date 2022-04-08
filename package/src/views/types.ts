@@ -47,31 +47,6 @@ export type TouchHandler = (touchInfo: Array<Array<TouchInfo>>) => void;
 
 export type RNSkiaDrawCallback = (canvas: SkCanvas, info: DrawingInfo) => void;
 
-export type SkiaViewProps = {
-  style?: ViewProps["style"];
-  /**
-   * Sets the drawing mode for the skia view. There are two drawing
-   * modes, "continuous" and "default", where the continuous mode will
-   * continuously redraw the view, and the default mode will only
-   * redraw when any of the regular react properties are changed like
-   * sizes and margins.
-   */
-  mode?: DrawMode;
-  /**
-   * When set to true the view will display information about the
-   * average time it takes to render.
-   */
-  debug?: boolean;
-  /**
-   * Draw callback. Will be called whenever the view is invalidated and
-   * needs to redraw. This is either caused by a change in a react
-   * property, a touch event, or a call to redraw. If the view is in
-   * continuous mode the callback will be called 60 frames per second
-   * by the native view.
-   */
-  onDraw?: RNSkiaDrawCallback;
-};
-
 /**
  * Listener interface for value changes
  */

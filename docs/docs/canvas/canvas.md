@@ -11,9 +11,16 @@ Behind the scenes, it is using its own React renderer.
 
 | Name | Type     |  Description.    |
 |:-----|:---------|:-----------------|
-| style   | `ViewStyle` | View style. |
+| style?   | `ViewStyle` | View style |
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
-| onTouch?    | `TouchHandler` | Touch handler for the Canvas (see [touch handler](/docs/animations/touch-events#usetouchhandler)).        |
+| onTouch?    | `TouchHandler` | Touch handler for the Canvas (see [touch handler](/docs/animations/touch-events#usetouchhandler)) |
+| onLayout? | `NativeEvent<LayoutEvent>` | Invoked on mount and on layout changes. (see [onLayout](https://reactnative.dev/docs/view#onlayout)) |
+
+## Getting the Canvas size
+
+If the size of the Canvas is unknown, there are two ways to access it:
+  * In React components using the `onLayout` prop like you would on any regular React Native View. 
+  * As a Skia value using `useCanvasSize()` (see [useCanvasSize()](/docs/animations/values#canvas-size)).
 
 ## Getting a Canvas Snapshot
 
