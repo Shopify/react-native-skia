@@ -5,11 +5,8 @@
   },
   "title": "React Native Skia",
   "version": "0.1.100",
-  "description": "Skia View for React Native",
-  "main": "lib/module/index.js",
-  "types": "lib/typescript/index.d.ts",
-  "react-native": "lib/module/index.js",
-  "module": "lib/module/index.js",
+  "description": "High-performance React Native Graphics using Skia",
+  "main": "index.ts",
   "files": [
     "src",
     "lib",
@@ -38,7 +35,7 @@
     "tsc": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "test": "jest",
-    "postinstall": "yarn node scripts/install-npm.js",
+    "postinstall": "node scripts/install-npm.js",
     "build": "bob build"
   },
   "repository": {

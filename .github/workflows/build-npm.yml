@@ -66,6 +66,9 @@ jobs:
           package: ./package/package.json
           token: ${{ secrets.NPM_TOKEN }}
 
+      - name: Publish documentation
+        run: cd docs; USE_SSH=true yarn deploy
+
       - name: Create Github Release
         uses: ncipollo/release-action@v1
         with:

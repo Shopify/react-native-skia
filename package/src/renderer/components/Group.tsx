@@ -31,28 +31,35 @@ const onDraw = createDrawing<GroupProps>(
     const { canvas, opacity } = ctx;
     const paint = selectPaint(ctx.paint, groupProps);
     processPaint(paint, opacity, groupProps);
-    if (layer) {
-      if (typeof layer === "boolean") {
-        canvas.saveLayer();
-      } else if (isSkPaint(layer)) {
-        canvas.saveLayer(layer);
+    const hasTransform = !!groupProps.transform || !!groupProps.matrix;
+    const hasClip = !!clip;
+    const shouldSave = hasTransform || hasClip;
+    if (shouldSave) {
+      if (layer) {
+        if (typeof layer === "boolean") {
+          canvas.saveLayer();
+        } else if (isSkPaint(layer)) {
+          canvas.saveLayer(layer);
+        } else {
+          canvas.saveLayer(layer.current ?? undefined);
+        }
       } else {
-        canvas.saveLayer(layer.current ?? undefined);
+        canvas.save();
       }
-    } else {
-      canvas.save();
-    }
-    processTransform(ctx, groupProps);
-    if (clip) {
-      const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
-      processClip(canvas, clip, op);
+      processTransform(ctx, groupProps);
+      if (clip) {
+        const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
+        processClip(canvas, clip, op);
+      }
     }
     node.visit({
       ...ctx,
       paint,
       opacity: groupProps.opacity ? groupProps.opacity * opacity : opacity,
     });
-    canvas.restore();
+    if (shouldSave) {
+      canvas.restore();
+    }
   }
 );
 

@@ -6,9 +6,9 @@ import type { SkiaReadonlyValue } from "../values";
 
 import type {
   DrawMode,
-  NativeSkiaViewProps,
+  SkiaViewProps,
   RNSkiaDrawCallback,
-  RNSkiaViewProps,
+  NativeSkiaViewProps,
 } from "./types";
 
 let SkiaViewNativeId = 1000;
@@ -35,8 +35,8 @@ declare global {
 
 const { SkiaViewApi } = global;
 
-export class SkiaView extends React.Component<RNSkiaViewProps> {
-  constructor(props: RNSkiaViewProps) {
+export class SkiaView extends React.Component<SkiaViewProps> {
+  constructor(props: SkiaViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId++;
     const { onDraw } = props;
@@ -47,13 +47,12 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   }
 
   private _nativeId: number;
-  private _animatingValues: Array<unknown> = [];
 
   public get nativeId() {
     return this._nativeId;
   }
 
-  componentDidUpdate(prevProps: RNSkiaViewProps) {
+  componentDidUpdate(prevProps: SkiaViewProps) {
     const { onDraw } = this.props;
     if (onDraw !== prevProps.onDraw) {
       assertDrawCallbacksEnabled();
@@ -101,39 +100,6 @@ export class SkiaView extends React.Component<RNSkiaViewProps> {
   public registerValues(values: SkiaReadonlyValue<unknown>[]) {
     assertDrawCallbacksEnabled();
     return SkiaViewApi.registerValuesInView(this._nativeId, values);
-  }
-
-  /**
-   * Increases the number of animations active in the view.
-   */
-  public addAnimation(owner: unknown) {
-    if (this._animatingValues.findIndex((p) => p === owner) === -1) {
-      this._animatingValues.push(owner);
-    }
-
-    if (this._animatingValues.length === 1) {
-      if (this.props.mode === "default" || this.props.mode === undefined) {
-        //console.log("SkiaView addAnimation - mode changed to continuous");
-        this.setDrawMode("continuous");
-      }
-    }
-  }
-
-  /**
-   * Decreases the number of animations active in the view.
-   */
-  public removeAnimation(owner: unknown) {
-    const indexOfOwner = this._animatingValues.indexOf(owner);
-    if (indexOfOwner !== -1) {
-      // Remove
-      this._animatingValues = this._animatingValues.filter((p) => p !== owner);
-    }
-    if (this._animatingValues.length === 0) {
-      if (this.props.mode === "default" || this.props.mode === undefined) {
-        //console.log("SkiaView removeAnimation - mode changed to default");
-        this.setDrawMode("default");
-      }
-    }
   }
 
   render() {

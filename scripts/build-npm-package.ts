@@ -71,6 +71,10 @@ ensureFolderExists(getDistFolder());
 const majorMinor = pck.version.split(".").slice(0, 2).join(".");
 const nextVersion = majorMinor + "." + process.env.GITHUB_RUN_NUMBER;
 pck.version = nextVersion;
+pck.types = "lib/typescript/index.d.ts";
+pck.main = "lib/module/index.js";
+pck.module = "lib/module/index.js";
+pck["react-native"] = "lib/module/index.js";
 console.log("Building version:", nextVersion);
 
 // Overwrite the package.json file
@@ -86,7 +90,6 @@ executeCmdSync("yarn build");
 
 console.log("Running `npm pack` in package folder", process.cwd());
 executeCmdSync("npm pack");
-
 process.chdir(currentDir);
 
 console.log("Done building NPM package");
