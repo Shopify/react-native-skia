@@ -7,6 +7,8 @@ import {
   Paint,
   Rect,
   interpolate,
+  Mask,
+  Shadow,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -37,6 +39,7 @@ export const Wallpaper = () => {
             end={vec(0, height)}
             colors={["#5a3ec3", "#eba5c5", "#e1d4b7", "#e9b74c", "#cf1403"]}
           />
+          <Shadow dx={10} dy={0} blur={20} color="rgba(0, 0, 0, 0.8)" />
         </Paint>
         {STRIPES.map((i) => (
           <Group
@@ -53,7 +56,24 @@ export const Wallpaper = () => {
               },
             ]}
           >
-            <Rect x={0} y={0} width={width} height={height} />
+            <Mask
+              mask={
+                <Group>
+                  <Paint>
+                    <LinearGradient
+                      start={vec(0, 0)}
+                      end={vec(0, height)}
+                      positions={[0, 0.1, 0.9, 1]}
+                      colors={["transparent", "black", "black", "transparent"]}
+                    />
+                    <Shadow dx={10} dy={0} blur={20} color="black" />
+                  </Paint>
+                  <Rect x={0} y={0} width={width} height={height} />
+                </Group>
+              }
+            >
+              <Rect x={0} y={0} width={width} height={height} />
+            </Mask>
           </Group>
         ))}
       </Group>

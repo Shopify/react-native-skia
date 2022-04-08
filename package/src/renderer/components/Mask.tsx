@@ -39,5 +39,5 @@ export const Mask = ({ children, mask, mode, clip }: MaskProps) => {
 
 Mask.defaultProps = {
   mode: "alpha",
-  clip: true,
+  clip: false,
 };
