@@ -1,11 +1,10 @@
 import {
-  DropShadow,
+  Shadow,
   Canvas,
   Fill,
   Group,
   Paint,
   RoundedRect,
-  InnerShadow,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -15,12 +14,12 @@ const R = 32;
 
 export const Neumorphism = () => {
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas>
       <Fill color="lightblue" />
       <Group>
         <Paint>
-          <DropShadow dx={12} dy={12} blur={25} color="#93b8c4" />
-          <DropShadow dx={-12} dy={-12} blur={25} color="#c7f8ff" />
+          <Shadow dx={12} dy={12} blur={25} color="#93b8c4" />
+          <Shadow dx={-12} dy={-12} blur={25} color="#c7f8ff" />
         </Paint>
         <RoundedRect
           x={PADDING}
@@ -34,8 +33,8 @@ export const Neumorphism = () => {
 
       <Group>
         <Paint>
-          <InnerShadow dx={12} dy={12} blur={25} color="#93b8c4" />
-          <InnerShadow dx={-12} dy={-12} blur={25} color="#c7f8ff" />
+          <Shadow dx={12} dy={12} blur={25} color="#93b8c4" inner />
+          <Shadow dx={-12} dy={-12} blur={25} color="#c7f8ff" inner />
         </Paint>
         <RoundedRect
           x={PADDING}
