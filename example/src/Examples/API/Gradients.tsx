@@ -19,6 +19,8 @@ import {
   Blend,
 } from "@shopify/react-native-skia";
 
+import { BilinearGradient } from "../Aurora/components/BilinearGradient";
+
 const { width } = Dimensions.get("window");
 const SIZE = width / 2;
 const R = SIZE / 2;
@@ -31,6 +33,7 @@ const r3 = rect(0, SIZE, SIZE, SIZE);
 const r4 = rect(SIZE, SIZE, SIZE, SIZE);
 const r5 = rect(0, 2 * SIZE, SIZE, SIZE);
 const r6 = rect(SIZE, 2 * SIZE, SIZE, SIZE);
+const r7 = rect(0, 3 * SIZE, SIZE, SIZE);
 
 export const Gradients = () => {
   return (
@@ -77,14 +80,21 @@ export const Gradients = () => {
         </Paint>
         <Rect rect={r5} />
         <Paint>
+          <BilinearGradient
+            rect={r6}
+            colors={["#dafb61", "#61DAFB", "#fb61da", "#61fbcf"]}
+          />
+        </Paint>
+        <Rect rect={r6} />
+        <Paint>
           <LinearGradient
-            start={topLeft(r6)}
-            end={bottomRight(r6)}
+            start={topLeft(r7)}
+            end={bottomRight(r7)}
             colors={["#dafb61", "#61DAFB", "#fb61da"]}
             positions={[0, 0.85, 1]}
           />
         </Paint>
-        <Rect rect={r6} />
+        <Rect rect={r7} />
       </Canvas>
     </ScrollView>
   );

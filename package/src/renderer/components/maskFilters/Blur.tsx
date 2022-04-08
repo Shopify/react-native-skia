@@ -29,5 +29,5 @@ export const BlurMask = (props: AnimatedProps<BlurMaskProps>) => {
 
 BlurMask.defaultProps = {
   style: "normal",
-  respectCTM: false,
+  respectCTM: true,
 };
