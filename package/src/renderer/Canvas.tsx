@@ -11,8 +11,6 @@ import type {
   RefObject,
   ReactNode,
   ComponentProps,
-  Context,
-  ReactElement,
   MutableRefObject,
   ForwardedRef,
 } from "react";
@@ -23,6 +21,8 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { Skia } from "../skia";
 import type { FontMgr } from "../skia/FontMgr/FontMgr";
+import { useValue } from "../values/hooks/useValue";
+import type { SkiaReadonlyValue } from "../values/types";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
@@ -30,33 +30,12 @@ import { vec } from "./processors";
 import { Container } from "./nodes";
 import { DependencyManager } from "./DependencyManager";
 
-// useContextBridge() is taken from https://github.com/pmndrs/drei#usecontextbridge
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useContextBridge = (...contexts: Context<any>[]) => {
-  const values =
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    contexts.map((context) => useContext(context));
-  return useMemo(
-    () =>
-      ({ children }: { children: ReactNode }) =>
-        contexts.reduceRight(
-          (acc, Context, i) => (
-            <Context.Provider value={values[i]} children={acc} />
-          ),
-          children
-        ) as ReactElement,
-    [contexts, values]
-  );
-};
-
-interface CanvasContext {
+const CanvasContext = React.createContext<SkiaReadonlyValue<{
   width: number;
   height: number;
-}
+}> | null>(null);
 
-const CanvasContext = React.createContext<CanvasContext | null>(null);
-
-export const useCanvas = () => {
+export const useCanvasSize = () => {
   const canvas = useContext(CanvasContext);
   if (!canvas) {
     throw new Error("Canvas context is not available");
@@ -93,6 +72,7 @@ const defaultFontMgr = Skia.FontMgr.RefDefault();
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
   ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
+    const canvasCtx = useValue({ width: 0, height: 0 });
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const [tick, setTick] = useState(0);
@@ -103,7 +83,6 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       [redraw, ref]
     );
 
-    const canvasCtx = useRef({ width: 0, height: 0 });
     const root = useMemo(
       () => skiaReconciler.createContainer(container, 0, false, null),
       [container]
@@ -111,13 +90,13 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     // Render effect
     useEffect(() => {
       render(
-        <CanvasContext.Provider value={canvasCtx.current}>
+        <CanvasContext.Provider value={canvasCtx}>
           {children}
         </CanvasContext.Provider>,
         root,
         container
       );
-    }, [children, root, redraw, container]);
+    }, [children, root, redraw, container, canvasCtx]);
 
     // Draw callback
     const onDraw = useDrawCallback(
@@ -126,6 +105,12 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         const { width, height, timestamp } = info;
         if (onTouch) {
           onTouch(info.touches);
+        }
+        if (
+          width !== canvasCtx.current.width ||
+          height !== canvasCtx.current.height
+        ) {
+          canvasCtx.current = { width, height };
         }
         const paint = Skia.Paint();
         paint.setAntiAlias(true);
@@ -140,7 +125,6 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? defaultFontMgr,
         };
-        canvasCtx.current = ctx;
         container.draw(ctx);
       },
       [tick, onTouch]

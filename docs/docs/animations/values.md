@@ -89,6 +89,55 @@ const Demo = () => {
 };
 ```
 
+## Canvas Size
+
+The `useCanvasSize` hook is a value that updates every time the canvas size updates.
+
+
+:::caution
+
+`useCanvasSize` can only be used inside the Canvas element because it relies on context.
+
+:::
+
+```tsx twoslash
+import React from "react";
+import {
+  Canvas,
+  Fill,
+  Group,
+  Rect,
+  rect,
+  useCanvasSize,
+  useDerivedValue,
+} from "@shopify/react-native-skia";
+
+const MyComp = () => {
+  // 💚 useCanvasSize() can safely be used here
+  const canvas = useCanvasSize();
+  const rct = useDerivedValue(() => {
+    return rect(0, 0, canvas.current.width, canvas.current.height / 2);
+  }, [canvas]);
+  return (
+    <Group>
+      <Fill color="magenta" />
+      <Rect color="cyan" rect={rct} />
+    </Group>
+  );
+};
+
+const Example = () => {
+  // ❌ Using useCanvasSize() here would crash
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <MyComp />
+    </Canvas>
+  );
+};
+
+```
+
+
 ## Value Effect
 
 The `useValueEffect` hook allows you to execute change on value change.

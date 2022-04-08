@@ -58,6 +58,10 @@ const examples = [
     screen: "Picture",
     title: "🖼 Picture",
   },
+  {
+    screen: "UseCanvas",
+    title: "↕️ useCanvas()",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
