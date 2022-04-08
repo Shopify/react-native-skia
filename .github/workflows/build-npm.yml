@@ -1,10 +1,11 @@
-name: Build NPM Package
+name: Create a release
 on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
       WORKING_DIRECTORY: ./
+      INPUT_TOKEN: ${{ secrets.NPM_TOKEN }}
     concurrency:
       group: npm-${{ github.ref }}
       cancel-in-progress: true
