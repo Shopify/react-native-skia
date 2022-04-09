@@ -9,6 +9,7 @@ import {
   interpolate,
   Mask,
   Shadow,
+  Turbulence,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -76,6 +77,12 @@ export const Wallpaper = () => {
             </Mask>
           </Group>
         ))}
+      </Group>
+      <Group>
+        <Paint blendMode="softLight">
+          <Turbulence freqX={1} freqY={1} octaves={3} />
+        </Paint>
+        <Fill />
       </Group>
     </Canvas>
   );
