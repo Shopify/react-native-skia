@@ -129,6 +129,7 @@ def reactNativeArchitectures() {
 }
 
 android {
+
      packagingOptions {
         pickFirst "lib/**/libfbjni.so"
         pickFirst "lib/**/libjsi.so"
