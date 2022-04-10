@@ -129,6 +129,14 @@ def reactNativeArchitectures() {
 }
 
 android {
+     packagingOptions {
+        pickFirst "lib/**/libfbjni.so"
+        pickFirst "lib/**/libjsi.so"
+        pickFirst "lib/**/libreact_nativemodule_core.so"
+        pickFirst "lib/**/libturbomodulejsijni.so"
+
+    }
+    
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
