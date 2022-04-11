@@ -4,7 +4,6 @@ import {
   LinearGradient,
   Fill,
   vec,
-  Paint,
   Rect,
   interpolate,
   Mask,
