@@ -14,7 +14,7 @@ export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
   _props: AnimatedProps<P>;
   memoizable = false;
-  memoized = false;
+  memoized: DeclarationResult | null = null;
   parent?: Node;
   depMgr: DependencyManager;
 
@@ -45,10 +45,12 @@ export abstract class Node<P = unknown> {
         const ret = child.draw(currentCtx);
         if (ret) {
           returnedValues.push(ret);
+          if (child.memoizable) {
+            child.memoized = ret;
+          }
         }
-        if (child.memoizable) {
-          child.memoized = true;
-        }
+      } else {
+        returnedValues.push(child.memoized);
       }
     });
     return returnedValues;
