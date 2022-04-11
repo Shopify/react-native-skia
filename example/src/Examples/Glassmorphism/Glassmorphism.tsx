@@ -3,7 +3,6 @@ import {
   Canvas,
   Circle,
   LinearGradient,
-  Paint,
   vec,
   sub,
   Fill,

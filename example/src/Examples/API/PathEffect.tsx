@@ -12,7 +12,6 @@ import {
   PaintStyle,
   DiscretePathEffect,
   DashPathEffect,
-  usePaintRef,
   CornerPathEffect,
   rect,
   Path,
@@ -85,20 +84,12 @@ const Logo = () => {
 
 const rect1 = rect(0, 0, vWidth, vHeight);
 const SquaredLogo = () => {
-  const regularPaint = usePaintRef();
   return (
-    <>
-      <Paint
-        ref={regularPaint}
-        color="#61DAFB"
-        opacity={0.5}
-        style="stroke"
-        strokeWidth={15}
-      />
+    <Group color="#61DAFB" opacity={0.5} style="stroke" strokeWidth={15}>
       <Circle c={center} r={30} style="fill" />
       <Group>
         <Group transform={[...translate(sub(center, origin)), { scale }]}>
-          <Rect rect={rect1} paint={regularPaint} />
+          <Rect rect={rect1} />
           <Rect rect={rect1} />
         </Group>
         <Group
@@ -108,7 +99,7 @@ const SquaredLogo = () => {
             ...transformOrigin(vOrigin, [{ rotate: Math.PI / 3 }]),
           ]}
         >
-          <Rect rect={rect1} paint={regularPaint} />
+          <Rect rect={rect1} />
           <Rect rect={rect1} />
         </Group>
         <Group
@@ -118,11 +109,11 @@ const SquaredLogo = () => {
             ...transformOrigin(vOrigin, [{ rotate: -Math.PI / 3 }]),
           ]}
         >
-          <Rect rect={rect1} paint={regularPaint} />
+          <Rect rect={rect1} />
           <Rect rect={rect1} />
         </Group>
       </Group>
-    </>
+    </Group>
   );
 };
 

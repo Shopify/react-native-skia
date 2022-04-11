@@ -3,7 +3,6 @@ import {
   Canvas,
   Fill,
   Group,
-  Paint,
   useClockValue,
   useFont,
 } from "@shopify/react-native-skia";

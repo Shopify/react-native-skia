@@ -8,7 +8,6 @@ import {
   Circle,
   Fill,
   LinearGradient,
-  Paint,
   Path,
   useTouchHandler,
   Text as SkiaText,

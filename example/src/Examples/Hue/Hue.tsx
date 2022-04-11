@@ -4,7 +4,6 @@ import {
   Circle,
   vec,
   Fill,
-  Paint,
   Skia,
   ShaderLib,
   useValue,
@@ -12,7 +11,6 @@ import {
   BlurMask,
   canvas2Polar,
   polar2Canvas,
-  Group,
   Shader,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";

@@ -3,7 +3,6 @@ import { Dimensions } from "react-native";
 import {
   useImage,
   Canvas,
-  Paint,
   ImageShader,
   Skia,
   Shader,

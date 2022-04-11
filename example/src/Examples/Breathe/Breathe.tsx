@@ -10,7 +10,6 @@ import {
   Circle,
   Fill,
   Group,
-  Paint,
   polar2Canvas,
   Easing,
   mix,

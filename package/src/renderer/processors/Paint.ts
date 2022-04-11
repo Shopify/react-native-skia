@@ -23,6 +23,7 @@ export interface ChildrenProps {
 
 // TODO: rename to paint props?
 export interface CustomPaintProps extends ChildrenProps {
+  paint?: RefObject<SkPaint>;
   color?: Color;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;

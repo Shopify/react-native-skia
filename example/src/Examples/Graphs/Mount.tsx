@@ -2,7 +2,6 @@ import {
   Canvas,
   Fill,
   LinearGradient,
-  Paint,
   Path,
   runSpring,
   Spring,
