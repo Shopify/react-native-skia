@@ -17,7 +17,7 @@ The provided tile mode is used when the blur kernel goes outside the input image
 ## Simple Blur
 
 ```tsx twoslash
-import { Canvas, Paint, Blur, Image, useImage } from "@shopify/react-native-skia";
+import { Canvas, Blur, Image, useImage } from "@shopify/react-native-skia";
 
 const BlurImageFilter = () => {
   const image = useImage(require("./assets/oslo.jpg"));
@@ -26,9 +26,6 @@ const BlurImageFilter = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
-        <Blur blur={4} />
-      </Paint>
       <Image
         x={0}
         y={0}
@@ -36,7 +33,9 @@ const BlurImageFilter = () => {
         height={256}
         image={image}
         fit="cover"
-      />
+      >
+        <Blur blur={4} />
+      </Image>
     </Canvas>
   );
 };

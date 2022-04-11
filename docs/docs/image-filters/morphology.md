@@ -18,7 +18,7 @@ Its usefulness lies primarily in fattening or thinning effects.
 ## Example
 
 ```tsx twoslash
-import {Canvas, Text, Paint, Morphology} from "@shopify/react-native-skia";
+import {Canvas, Text, Morphology} from "@shopify/react-native-skia";
 
 export const MorphologyDemo = () => {
   return (
@@ -30,26 +30,24 @@ export const MorphologyDemo = () => {
         familyName="sans-serif"
         size={24}
       />
-      <Paint>
-        <Morphology radius={1} />
-      </Paint>
       <Text
         text="Hello World"
         x={32}
         y={64}
         familyName="sans-serif"
         size={24}
-      />
-      <Paint>
-        <Morphology radius={0.3} operator="erode" />
-      </Paint>
+      >
+        <Morphology radius={1} />
+      </Text>
       <Text
         text="Hello World"
         x={32}
         y={96}
         familyName="sans-serif"
         size={24}
-      />
+      >
+        <Morphology radius={0.3} operator="erode" />
+      </Text>
     </Canvas>
   );
 };

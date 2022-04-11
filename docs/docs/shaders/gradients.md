@@ -31,7 +31,6 @@ Returns a shader that generates a linear gradient between the two specified poin
 import React from "react";
 import {
   Canvas,
-  Paint,
   Rect,
   LinearGradient,
   Skia,
@@ -42,14 +41,13 @@ import {
 export const LinearGradientDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Rect x={0} y={0} width={256} height={256}>
         <LinearGradient
           start={vec(0, 0)}
           end={vec(256, 256)}
           colors={["blue", "yellow"]}
         />
-      </Paint>
-      <Rect x={0} y={0} width={256} height={256} />
+      </Rect>
     </Canvas>
   );
 };
@@ -71,7 +69,6 @@ Returns a shader that generates a radial gradient given the center and radius.
 import React from "react";
 import {
   Canvas,
-  Paint,
   Rect,
   RadialGradient,
   Skia,
@@ -82,14 +79,13 @@ import {
 export const RadialGradientDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Rect x={0} y={0} width={256} height={256}>
         <RadialGradient
           c={vec(128, 128)}
           r={128}
           colors={["blue", "yellow"]}
         />
-      </Paint>
-      <Rect x={0} y={0} width={256} height={256} />
+      </Rect>
     </Canvas>
   );
 };
@@ -113,7 +109,6 @@ Returns a shader that generates a conical gradient given two circles.
 import React from "react";
 import {
   Canvas,
-  Paint,
   Rect,
   TwoPointConicalGradient,
   Skia,
@@ -124,7 +119,7 @@ import {
 export const TwoPointConicalGradientDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Rect x={0} y={0} width={256} height={256}>
         <TwoPointConicalGradient
           start={vec(128, 128)}
           startR={128}
@@ -132,8 +127,7 @@ export const TwoPointConicalGradientDemo = () => {
           endR={16}
           colors={["blue", "yellow"]}
         />
-      </Paint>
-      <Rect x={0} y={0} width={256} height={256} />
+      </Rect>
     </Canvas>
   );
 };
@@ -156,7 +150,6 @@ Returns a shader that generates a sweep gradient given a center.
 import React from "react";
 import {
   Canvas,
-  Paint,
   Rect,
   SweepGradient,
   Skia,
@@ -167,13 +160,12 @@ import {
 export const SweepGradientDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Rect x={0} y={0} width={256} height={256}>
         <SweepGradient
           c={vec(128, 128)}
           colors={["cyan", "magenta", "yellow", "cyan"]}
         />
-      </Paint>
-      <Rect x={0} y={0} width={256} height={256} />
+      </Rect>
     </Canvas>
   );
 };

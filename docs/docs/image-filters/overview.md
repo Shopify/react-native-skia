@@ -13,7 +13,7 @@ Color Filters and Shaders and also be used as Image filters.
 In the example below, we first apply a color matrix to the content and a blur image filter.
 
 ```tsx twoslash
-import { Canvas, Paint, Blur, Image, ColorMatrix, useImage } from "@shopify/react-native-skia";
+import { Canvas, Blur, Image, ColorMatrix, useImage } from "@shopify/react-native-skia";
 
 const ComposeImageFilter = () => {
   const image = useImage(require("./assets/oslo.jpg"));
@@ -22,7 +22,14 @@ const ComposeImageFilter = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Image
+        x={0}
+        y={0}
+        width={256}
+        height={256}
+        image={image}
+        fit="cover"
+      >
         <Blur blur={2} mode="clamp">
           <ColorMatrix
             matrix={[
@@ -31,15 +38,7 @@ const ComposeImageFilter = () => {
             ]}
           />
         </Blur>
-      </Paint>
-      <Image
-        x={0}
-        y={0}
-        width={256}
-        height={256}
-        image={image}
-        fit="cover"
-      />
+      </Image>
     </Canvas>
   );
 };

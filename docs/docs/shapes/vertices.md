@@ -19,7 +19,7 @@ Draws vertices.
 ## Using texture mapping
 
 ```tsx twoslash
-import { Canvas, Paint, ImageShader, Vertices, Group, vec, useImage } from "@shopify/react-native-skia";
+import { Canvas, Group, ImageShader, Vertices, vec, useImage } from "@shopify/react-native-skia";
 
 const VerticesDemo = () => {
   const image = useImage(require("./assets/squares.png"));
@@ -32,18 +32,18 @@ const VerticesDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       {/* This is our texture */}
-      <Paint>
+      <Group>
         <ImageShader
           image={image}
           tx="repeat"
           ty="repeat"
         />
-      </Paint>
-      {/* Here we specified colors, the default blendMode is dstOver */}
-      <Vertices vertices={vertices} colors={colors} />
-      <Group transform={[{ translateX: 128 }]}>
-        {/* Here we didn't specify colors, the default blendMode is srcOver */}
-        <Vertices vertices={vertices} textures={textures} />
+        {/* Here we specified colors, the default blendMode is dstOver */}
+        <Vertices vertices={vertices} colors={colors} />
+        <Group transform={[{ translateX: 128 }]}>
+          {/* Here we didn't specify colors, the default blendMode is srcOver */}
+          <Vertices vertices={vertices} textures={textures} />
+        </Group>
       </Group>
     </Canvas>
   );
@@ -60,7 +60,7 @@ Then we use the indices property to define the two triangles we would like to dr
 * Second triangle: `0, 2, 3` (top-left, bottom-right, bottom-left).
 
 ```tsx twoslash
-import { Canvas, Paint, ImageShader, Vertices, vec, useImage } from "@shopify/react-native-skia";
+import { Canvas, ImageShader, Vertices, vec, useImage } from "@shopify/react-native-skia";
 
 const IndicesDemo = () => {
   const image = useImage(require("./assets/squares.png"));
@@ -74,14 +74,13 @@ const IndicesDemo = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Vertices vertices={vertices} colors={colors} indices={indices}>
         <ImageShader
           image={image}
           tx="repeat"
           ty="repeat"
         />
-      </Paint>
-      <Vertices vertices={vertices} colors={colors} indices={indices} />
+      </Vertices>
     </Canvas>
   );
 };

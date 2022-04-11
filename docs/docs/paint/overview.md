@@ -9,7 +9,7 @@ Anytime you draw something in Skia, you may want to specify what color it is, ho
 In React Native Skia, these attributes can be specified as properties or as children of a drawing component (`<Rect />`, or `<Circle />` for instance) or a `<Group />`.
 There is also a `<Paint />` component which can be assigned directly to a drawing or group via its reference.
 
-The following properties to the Paint component:
+The following painting attributes can be assigned as properties:
 * [color](properties.md#color)            
 * [blendMode](properties.md#blendMode)     
 * [style](properties.md#style)             
@@ -19,7 +19,7 @@ The following properties to the Paint component:
 * [strokeMiter](properties.md#strokeMiter) 
 * [opacity](properties.md#opacity)      
 
-A paint component can additionally receive the following components as children:
+The following painting attributes can be assigned as children:
 * [Shaders](/docs/shaders/overview) 
 * [Image Filters](/docs/image-filters/overview)
 * [Color Filters](/docs/color-filters)
@@ -101,6 +101,13 @@ export const PaintDemo = () => {
 };
 ```
 
+:::tip
+
+When using the Paint component, you always start from scratch.
+It doesn't inherit the properties of the paint available in the current context.
+
+:::
+
 ![Paint Assignment](assets/strokes.png)
 
 Finally, we can assign a ref to a Paint component for later use.
@@ -119,10 +126,3 @@ export const PaintDemo = () => {
   );
 };
 ```
-
-:::tip
-
-When using the Paint component, you always start from scratch.
-It doesn't inherit the properties of the paint available in the current context.
-
-:::

@@ -25,7 +25,6 @@ It will use cubic sampling.
 ```tsx twoslash
 import {
   Canvas,
-  Paint,
   Circle,
   ImageShader,
   Skia,
@@ -40,14 +39,13 @@ const ImageShaderDemo = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Circle cx={128} cy={128} r={128}>
         <ImageShader
           image={image}
           fit="cover"
           rect={{ x: 0, y: 0, width: 256, height: 256 }}
         />
-      </Paint>
-      <Circle cx={128} cy={128} r={128} />
+      </Circle>
     </Canvas>
   );
 };

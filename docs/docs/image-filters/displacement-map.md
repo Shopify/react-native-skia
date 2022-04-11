@@ -26,7 +26,7 @@ where `P(x,y)` is the child image, and `P'(x,y)` is the destination. `XC(x,y)` a
 We use a [Perlin Noise](/docs/shaders/perlin-noise) as a displacement map in the example below.
 
 ```tsx twoslash
-import { Canvas, Paint, Image, Turbulence, DisplacementMap, useImage } from "@shopify/react-native-skia";
+import { Canvas, Image, Turbulence, DisplacementMap, useImage } from "@shopify/react-native-skia";
 
 const Filter = () => {
   const image = useImage(require("./assets/oslo.jpg"));
@@ -35,11 +35,6 @@ const Filter = () => {
   }
   return (
     <Canvas style={{ width: 256, height: 256 }}>
-      <Paint>
-        <DisplacementMap channelX="g" channelY="a" scale={20}>
-          <Turbulence freqX={0.01} freqY={0.05} octaves={2} seed={2} />
-        </DisplacementMap>
-      </Paint>
       <Image
         image={image}
         x={0}
@@ -47,7 +42,11 @@ const Filter = () => {
         width={256}
         height={256}
         fit="cover"
-      />
+      >
+        <DisplacementMap channelX="g" channelY="a" scale={20}>
+          <Turbulence freqX={0.01} freqY={0.05} octaves={2} seed={2} />
+        </DisplacementMap>
+      </Image>
     </Canvas>
   );
 };

@@ -20,15 +20,14 @@ Creates a blur mask filter.
 ### Example
 
 ```tsx twoslash
-import {Canvas, Fill, Paint, Circle, BlurMask, vec} from "@shopify/react-native-skia";
+import {Canvas, Fill, Circle, BlurMask, vec} from "@shopify/react-native-skia";
 
 const MaskFilterDemo = () => {
   return (
     <Canvas style={{ flex: 1}}>
-      <Paint>
+      <Circle c={vec(128)} r={128} color="lightblue">
         <BlurMask blur={20} style="normal" />
-      </Paint>
-      <Circle c={vec(128)} r={128} color="lightblue" />
+      </Circle>
     </Canvas>
   );
 };
