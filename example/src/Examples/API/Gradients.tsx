@@ -6,7 +6,6 @@ import {
   Canvas,
   Rect,
   LinearGradient,
-  Paint,
   topLeft,
   bottomRight,
   center,

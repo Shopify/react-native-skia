@@ -2,7 +2,6 @@ import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
   Rect,
-  Paint,
   transformOrigin,
   sub,
   Canvas,
@@ -20,7 +19,6 @@ import {
   Line2DPathEffect,
   Group,
   processTransform2d,
-  usePaintRef,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
