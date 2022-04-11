@@ -14,6 +14,7 @@ export interface ChildrenProps {
   children?: ReactNode | ReactNode[];
 }
 
+// TODO: rename to paint props?
 export interface CustomPaintProps extends ChildrenProps {
   paint?: RefObject<SkPaint>;
   color?: Color;
@@ -72,34 +73,4 @@ export const processPaint = (
   if (opacity !== undefined) {
     paint.setAlphaf(opacity);
   }
-};
-
-export const selectPaint = (
-  currentPaint: SkPaint,
-  {
-    paint,
-    color: cl,
-    blendMode,
-    style: paintStyle,
-    strokeWidth,
-    strokeJoin,
-    strokeCap,
-    strokeMiter,
-    opacity,
-  }: CustomPaintProps
-) => {
-  const hasCustomPaint =
-    cl !== undefined ||
-    blendMode !== undefined ||
-    paintStyle !== undefined ||
-    strokeWidth !== undefined ||
-    strokeJoin !== undefined ||
-    opacity !== undefined ||
-    strokeCap !== undefined ||
-    strokeMiter !== undefined;
-  const parentPaint = paint?.current ?? currentPaint;
-  if (hasCustomPaint) {
-    return parentPaint.copy();
-  }
-  return parentPaint;
 };

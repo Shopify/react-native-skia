@@ -2,7 +2,7 @@ import type { DependencyList, ReactNode } from "react";
 import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
-import { processPaint, selectPaint } from "../processors";
+import { processPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia";
@@ -51,12 +51,13 @@ export class DrawingNode<P> extends Node<P> {
     if (this.skipProcessing) {
       this.onDraw(ctx, drawingProps, this);
     } else {
-      const selectedPaint = selectPaint(ctx.paint, drawingProps);
-      processPaint(selectedPaint, ctx.opacity, drawingProps);
+      // TODO: only copy if necessary
+      const paint = ctx.paint.copy();
+      processPaint(paint, ctx.opacity, drawingProps);
       // to draw only once:
       // onDraw({ ...ctx, paint: selectedPaint }, children);
       [
-        selectedPaint,
+        paint,
         ...this.children
           .map((child) => {
             //if (child.type === NodeType.Declaration) {
@@ -68,8 +69,8 @@ export class DrawingNode<P> extends Node<P> {
             return null;
           })
           .filter(isPaint),
-      ].forEach((paint) => {
-        this.onDraw({ ...ctx, paint }, drawingProps, this);
+      ].forEach((currentPaint) => {
+        this.onDraw({ ...ctx, paint: currentPaint }, drawingProps, this);
       });
     }
   }

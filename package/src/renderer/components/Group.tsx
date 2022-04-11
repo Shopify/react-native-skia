@@ -3,12 +3,7 @@ import type { RefObject } from "react";
 
 import type { SkPaint } from "../../skia";
 import { ClipOp } from "../../skia";
-import {
-  processTransform,
-  selectPaint,
-  processPaint,
-  processClip,
-} from "../processors";
+import { processTransform, processPaint, processClip } from "../processors";
 import type {
   CustomPaintProps,
   TransformProps,
@@ -29,7 +24,8 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 const onDraw = createDrawing<GroupProps>(
   (ctx, { layer, clip, invertClip, ...groupProps }, node) => {
     const { canvas, opacity } = ctx;
-    const paint = selectPaint(ctx.paint, groupProps);
+    // TODO: only copy if necessary?
+    const paint = ctx.paint.copy();
     processPaint(paint, opacity, groupProps);
     const hasTransform = !!groupProps.transform || !!groupProps.matrix;
     const hasClip = !!clip;
