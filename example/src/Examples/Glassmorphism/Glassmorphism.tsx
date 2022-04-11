@@ -39,14 +39,13 @@ export const Glassmorphism = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="black" />
-      <Paint>
+      <Circle c={c} r={radius}>
         <LinearGradient
           start={start}
           end={end}
           colors={["#FFF723", "#E70696"]}
         />
-      </Paint>
-      <Circle c={c} r={radius} />
+      </Circle>
       <BackdropFilter filter={<Blur blur={10} />} clip={rect}>
         <Fill color="rgba(0, 0, 0, 0.3)" />
       </BackdropFilter>

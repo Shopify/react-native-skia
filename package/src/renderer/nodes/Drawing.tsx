@@ -51,24 +51,12 @@ export class DrawingNode<P> extends Node<P> {
     if (this.skipProcessing) {
       this.onDraw(ctx, drawingProps, this);
     } else {
+      const declarations = this.visit(ctx);
       const paint = ctx.paint.copy();
-      processPaint(paint, ctx.opacity, drawingProps);
+      processPaint(paint, ctx.opacity, drawingProps, declarations);
       // to draw only once:
       // onDraw({ ...ctx, paint: selectedPaint }, children);
-      [
-        paint,
-        ...this.children
-          .map((child) => {
-            //if (child.type === NodeType.Declaration) {
-            const ret = child.draw(ctx);
-            if (ret) {
-              return ret;
-            }
-            //}
-            return null;
-          })
-          .filter(isPaint),
-      ].forEach((currentPaint) => {
+      [paint, ...declarations.filter(isPaint)].forEach((currentPaint) => {
         this.onDraw({ ...ctx, paint: currentPaint }, drawingProps, this);
       });
     }

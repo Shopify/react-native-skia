@@ -15,5 +15,4 @@ export * from "./Mask";
 export * from "./Paint";
 export * from "./Compose";
 export * from "./Blend";
-export * from "./Defs";
 export * from "./Drawing";

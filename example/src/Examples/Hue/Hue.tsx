@@ -59,17 +59,13 @@ export const Hue = () => {
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
       <Fill color={color} />
-      <Paint>
+      <Circle c={c} r={r}>
         <BlurMask blur={40} style="solid" />
         <Shader source={source} uniforms={{ c, r }} />
-      </Paint>
-      <Circle c={c} r={r} />
-      <Group>
-        <Paint>
-          <BlurMask blur={10} style="solid" />
-        </Paint>
-        <Circle r={20} color="black" cx={translateX} cy={translateY} />
-      </Group>
+      </Circle>
+      <Circle r={20} color="black" cx={translateX} cy={translateY}>
+        <BlurMask blur={10} style="solid" />
+      </Circle>
       <Circle r={15} color={color} cx={translateX} cy={translateY} />
     </Canvas>
   );

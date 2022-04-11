@@ -10,7 +10,8 @@ import type {
   AnimatedProps,
   ClipDef,
 } from "../processors";
-import { createDrawing } from "../nodes";
+import { createDrawing, DrawingNode } from "../nodes";
+import { isDeclarationNode } from "../nodes/Declaration";
 
 const isSkPaint = (obj: RefObject<SkPaint> | SkPaint): obj is SkPaint =>
   "__typename__" in obj && obj.__typename__ === "Paint";
@@ -25,7 +26,14 @@ const onDraw = createDrawing<GroupProps>(
   (ctx, { layer, clip, invertClip, ...groupProps }, node) => {
     const { canvas, opacity } = ctx;
     const paint = ctx.paint.copy();
-    processPaint(paint, opacity, groupProps);
+    const declarations = node.children
+      .filter(isDeclarationNode)
+      .map((child) => child.draw(ctx));
+
+    const drawings = node.children.filter(
+      (child) => child instanceof DrawingNode
+    );
+    processPaint(paint, opacity, groupProps, declarations);
     const hasTransform = !!groupProps.transform || !!groupProps.matrix;
     const hasClip = !!clip;
     const shouldSave = hasTransform || hasClip || !!layer;
@@ -47,11 +55,14 @@ const onDraw = createDrawing<GroupProps>(
         processClip(canvas, clip, op);
       }
     }
-    node.visit({
-      ...ctx,
-      paint,
-      opacity: groupProps.opacity ? groupProps.opacity * opacity : opacity,
-    });
+    node.visit(
+      {
+        ...ctx,
+        paint,
+        opacity: groupProps.opacity ? groupProps.opacity * opacity : opacity,
+      },
+      drawings
+    );
     if (shouldSave) {
       canvas.restore();
     }

@@ -12,7 +12,6 @@ import {
   PaintStyle,
   DiscretePathEffect,
   DashPathEffect,
-  Defs,
   usePaintRef,
   CornerPathEffect,
   rect,
@@ -89,15 +88,13 @@ const SquaredLogo = () => {
   const regularPaint = usePaintRef();
   return (
     <>
-      <Defs>
-        <Paint
-          ref={regularPaint}
-          color="#61DAFB"
-          opacity={0.5}
-          style="stroke"
-          strokeWidth={15}
-        />
-      </Defs>
+      <Paint
+        ref={regularPaint}
+        color="#61DAFB"
+        opacity={0.5}
+        style="stroke"
+        strokeWidth={15}
+      />
       <Circle c={center} r={30} style="fill" />
       <Group>
         <Group transform={[...translate(sub(center, origin)), { scale }]}>
