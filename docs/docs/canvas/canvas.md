@@ -14,17 +14,17 @@ Behind the scenes, it is using its own React renderer.
 | style?   | `ViewStyle` | View style |
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
 | onTouch?    | `TouchHandler` | Touch handler for the Canvas (see [touch handler](/docs/animations/touch-events#usetouchhandler)) |
-| onLayout? | `NativeEvent<LayoutEvent>` | Invoked on mount and on layout changes. (see [onLayout](https://reactnative.dev/docs/view#onlayout)) |
+| onLayout? | `NativeEvent<LayoutEvent>` | Invoked on mount and on layout changes (see [onLayout](https://reactnative.dev/docs/view#onlayout)) |
 
 ## Getting the Canvas size
 
 If the size of the Canvas is unknown, there are two ways to access it:
-  * In React components using the `onLayout` prop like you would on any regular React Native View. 
-  * As a Skia value using `useCanvasSize()` (see [useCanvasSize()](/docs/animations/values#canvas-size)).
+  * In React components, using the [`onLayout`](https://reactnative.dev/docs/view#onlayout) prop like you would on any regular React Native View. 
+  * As a Skia value, using [`useCanvasSize()`](/docs/animations/values#canvas-size).
 
 ## Getting a Canvas Snapshot
 
-You can save your drawings as an image, using `makeImageSnapshot`. This method will return an [Image instance](/docs/images#instance-methods). This instance can be used to do anything: drawing it via the `<Image>` component, or being saved or shared using binary or base64 encoding.
+You can save your drawings as an image, using `makeImageSnapshot`. This method will return an [Image instance](/docs/images#instance-methods). This instance can be used to draw it via the `<Image>` component, or be saved or shared using binary or base64 encoding.
 
 ### Example
 

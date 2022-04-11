@@ -23,7 +23,7 @@ It can apply the following operations to its children:
 
 ## Paint Properties
 
-Its children will inherit all paint properties applied to a group.
+Its children will inherit all paint attributes applied to a group. These attributes can be properties like `color` or `style` or children like `<Shader />`, or `<ImageFilter />` for instance ([see painting](/docs/paint/overview)).
 
 ```tsx twoslash
 import {Canvas, Circle, Group} from "@shopify/react-native-skia";
