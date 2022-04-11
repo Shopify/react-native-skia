@@ -19,10 +19,9 @@ export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
     useImperativeHandle(ref, () => paint, [paint]);
     const onDeclare = useMemo(
       () =>
-        createDeclaration<PaintProps>((paintProps, children, ctx) => {
-          processPaint(paint, ctx.opacity, paintProps, children);
-          return paint;
-        }),
+        createDeclaration<PaintProps>((paintProps, children, ctx) =>
+          processPaint(paint, ctx.opacity, paintProps, children)
+        ),
       [paint]
     );
     return <skDeclaration onDeclare={onDeclare} {...props} />;

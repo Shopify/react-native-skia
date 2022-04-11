@@ -4,6 +4,7 @@ import type {
   SkiaReadonlyValue,
 } from "@shopify/react-native-skia";
 import {
+  Group,
   useClockValue,
   add,
   useValue,
@@ -11,7 +12,6 @@ import {
   ImageShader,
   Patch,
   vec,
-  Paint,
   useImage,
   useDerivedValue,
 } from "@shopify/react-native-skia";
@@ -164,22 +164,22 @@ export const CoonsPatchMeshGradient = ({
   }
   return (
     <Canvas style={{ width, height }} onTouch={onTouch}>
-      <Paint>
+      <Group>
         <ImageShader image={image} tx="repeat" ty="repeat" />
-      </Paint>
-      {rects.map((r, i) => {
-        return (
-          <RectPatch
-            key={i}
-            r={r}
-            mesh={mesh}
-            debug={debug}
-            lines={lines}
-            colors={colors}
-            defaultMesh={defaultMesh}
-          />
-        );
-      })}
+        {rects.map((r, i) => {
+          return (
+            <RectPatch
+              key={i}
+              r={r}
+              mesh={mesh}
+              debug={debug}
+              lines={lines}
+              colors={colors}
+              defaultMesh={defaultMesh}
+            />
+          );
+        })}
+      </Group>
       {defaultMesh.map(({ pos }, index) => {
         const edge =
           pos.x === 0 || pos.y === 0 || pos.x === width || pos.y === height;

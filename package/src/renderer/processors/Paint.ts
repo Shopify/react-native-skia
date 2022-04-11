@@ -41,6 +41,7 @@ export const processPaint = (
   paint: SkPaint,
   currentOpacity: number,
   {
+    paint: paintRef,
     color,
     blendMode,
     style,
@@ -52,6 +53,9 @@ export const processPaint = (
   }: CustomPaintProps,
   children: DeclarationResult[]
 ) => {
+  if (paintRef && paintRef.current) {
+    return paintRef.current;
+  }
   if (color !== undefined) {
     const c = processColor(color, currentOpacity);
     paint.setShader(null);
@@ -100,4 +104,5 @@ export const processPaint = (
         .reduce<SkImageFilter | null>(Skia.ImageFilter.MakeCompose, null)
     );
   }
+  return paint;
 };

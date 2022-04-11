@@ -39,10 +39,9 @@ export abstract class Node<P = unknown> {
 
   visit(ctx: DrawingContext, children?: Node[]) {
     const returnedValues: Exclude<DeclarationResult, null>[] = [];
-    const currentCtx = ctx;
     (children ?? this.children).forEach((child) => {
       if (!child.memoized) {
-        const ret = child.draw(currentCtx);
+        const ret = child.draw(ctx);
         if (ret) {
           returnedValues.push(ret);
           if (child.memoizable) {

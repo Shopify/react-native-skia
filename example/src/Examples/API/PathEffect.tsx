@@ -20,6 +20,7 @@ import {
   Line2DPathEffect,
   Group,
   processTransform2d,
+  usePaintRef,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -85,11 +86,10 @@ const Logo = () => {
 const rect1 = rect(0, 0, vWidth, vHeight);
 const SquaredLogo = () => {
   return (
-    <Group color="#61DAFB" opacity={0.5} style="stroke" strokeWidth={15}>
+    <>
       <Circle c={center} r={30} style="fill" />
-      <Group>
+      <Group color="#61DAFB" opacity={1} style="stroke" strokeWidth={15}>
         <Group transform={[...translate(sub(center, origin)), { scale }]}>
-          <Rect rect={rect1} />
           <Rect rect={rect1} />
         </Group>
         <Group
@@ -100,7 +100,6 @@ const SquaredLogo = () => {
           ]}
         >
           <Rect rect={rect1} />
-          <Rect rect={rect1} />
         </Group>
         <Group
           transform={[
@@ -110,10 +109,9 @@ const SquaredLogo = () => {
           ]}
         >
           <Rect rect={rect1} />
-          <Rect rect={rect1} />
         </Group>
       </Group>
-    </Group>
+    </>
   );
 };
 
@@ -122,71 +120,74 @@ export const PathEffectDemo = () => {
     <ScrollView>
       <Title>Discrete</Title>
       <Canvas style={styles.container}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <DiscretePathEffect length={10} deviation={4} />
-        </Paint>
-        <Logo />
+          <Logo />
+        </Group>
       </Canvas>
 
       <Title>Dash</Title>
       <Canvas style={styles.container}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <DashPathEffect intervals={[10, 10]} />
-        </Paint>
-        <Logo />
+          <Logo />
+        </Group>
       </Canvas>
 
       <Title>Corner</Title>
       <Canvas style={styles.container}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Group color="#61DAFB" style="stroke" strokeWidth={15} opacity={0.5}>
+          <SquaredLogo />
+        </Group>
+        <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <CornerPathEffect r={200} />
-        </Paint>
-        <SquaredLogo />
+          <SquaredLogo />
+        </Group>
       </Canvas>
 
       <Title>Path1D</Title>
       <Canvas style={styles.container}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <Path1DPathEffect
             path="M -10 0 L 0 -10, 10 0, 0 10 Z"
             advance={20}
             phase={0}
             style="rotate"
           />
-        </Paint>
-        <Logo />
+          <Logo />
+        </Group>
       </Canvas>
 
       <Title>Path2D</Title>
       <Canvas style={styles.container}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <Path2DPathEffect
             path="M -10 0 L 0 -10, 10 0, 0 10 Z"
             matrix={processTransform2d([{ scale: 40 }])}
           />
-        </Paint>
-        <Logo />
+          <Logo />
+        </Group>
       </Canvas>
 
       <Title>Line2D</Title>
       <Canvas style={styles.container}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <Line2DPathEffect
             width={0}
             matrix={processTransform2d([{ scale: 8 }])}
           />
-        </Paint>
-        <Logo />
+          <Logo />
+        </Group>
       </Canvas>
 
       <Title>Compose</Title>
       <Canvas style={styles.container}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <DashPathEffect intervals={[10, 10]}>
             <DiscretePathEffect length={10} deviation={10} />
           </DashPathEffect>
-        </Paint>
-        <Logo />
+          <Logo />
+        </Group>
       </Canvas>
     </ScrollView>
   );
