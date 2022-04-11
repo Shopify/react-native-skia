@@ -7,7 +7,6 @@ import {
   usePaint,
   PaintStyle,
   usePaintRef,
-  Defs,
 } from "@shopify/react-native-skia";
 import type { SkCanvas } from "@shopify/react-native-skia";
 import React, { useMemo, useCallback, useState } from "react";
@@ -88,15 +87,13 @@ export const PerformanceDrawingTest: React.FC = () => {
       </View>
       {isDeclarative ? (
         <Canvas style={styles.container} debug mode="continuous">
-          <Defs>
-            <Paint ref={paint1Ref} color="#A2AE6A" style={"fill"} />
-            <Paint
-              ref={paint2Ref}
-              color="#4060A3"
-              style="stroke"
-              strokeWidth={2}
-            />
-          </Defs>
+          <Paint ref={paint1Ref} color="#A2AE6A" style={"fill"} />
+          <Paint
+            ref={paint2Ref}
+            color="#4060A3"
+            style="stroke"
+            strokeWidth={2}
+          />
           {rects.map((_, i) => (
             <React.Fragment key={i}>
               <Rect rect={rects[i]} paint={paint1Ref} />

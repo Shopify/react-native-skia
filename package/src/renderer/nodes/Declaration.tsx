@@ -28,6 +28,10 @@ export const useDeclaration = <P,>(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useCallback(cb, deps ?? []);
 
+export const isDeclarationNode = (
+  node: Node
+): node is DeclarationNode<unknown> => node instanceof DeclarationNode;
+
 export interface DeclarationProps<P> {
   onDeclare: DeclarationCallback<P>;
 }

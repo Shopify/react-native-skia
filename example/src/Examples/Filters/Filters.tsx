@@ -3,7 +3,6 @@ import { Dimensions } from "react-native";
 import {
   useImage,
   Canvas,
-  Paint,
   ImageShader,
   Skia,
   Shader,
@@ -38,7 +37,7 @@ export const Filters = () => {
   }
   return (
     <Canvas style={{ width, height }}>
-      <Paint>
+      <Fill>
         <Shader source={source} uniforms={uniforms}>
           <ImageShader
             image={image}
@@ -49,8 +48,7 @@ export const Filters = () => {
             height={height}
           />
         </Shader>
-      </Paint>
-      <Fill />
+      </Fill>
     </Canvas>
   );
 };

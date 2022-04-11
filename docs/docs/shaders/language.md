@@ -42,7 +42,7 @@ Shaders can be nested with one another.
 ### Simple Shader
 
 ```tsx twoslash
-import {Skia, Canvas, Paint, Shader, Fill} from "@shopify/react-native-skia";
+import {Skia, Canvas, Shader, Fill} from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
 vec4 main(vec2 pos) {
@@ -54,10 +54,9 @@ vec4 main(vec2 pos) {
 const SimpleShader = () => {
   return (
     <Canvas style={{ width: 256, height: 256 }}>
-      <Paint>
+      <Fill>
         <Shader source={source} />
-      </Paint>
-      <Fill />
+      </Fill>
     </Canvas>
   );
 };
@@ -72,7 +71,7 @@ The following uniform types are supported: `float`, `float2`, `float3`, `float4`
 The types can also be used as arrays, e.g. `uniform float3 colors[12]`. 
 
 ```tsx twoslash
-import {Canvas, Skia, Paint, Shader, Fill, vec} from "@shopify/react-native-skia";
+import {Canvas, Skia, Shader, Fill, vec} from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
 uniform vec2 c;
@@ -90,10 +89,9 @@ const UniformShader = () => {
   const blue = 1.0;
   return (
     <Canvas style={{ width: 256, height: 256 }}>
-      <Paint>
+      <Fill>
         <Shader source={source} uniforms={{ c, r, blue }} />
-      </Paint>
-      <Fill />
+      </Fill>
     </Canvas>
   );
 };
@@ -104,7 +102,7 @@ const UniformShader = () => {
 ### Nested Shaders
 
 ```tsx twoslash
-import {Canvas, Skia, ImageShader, Paint, Shader, Fill, useImage} from "@shopify/react-native-skia";
+import {Canvas, Skia, ImageShader, Shader, Fill, useImage} from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -121,7 +119,7 @@ const NestedShader = () => {
   }
   return (
     <Canvas style={{ width: 256, height: 256 }}>
-      <Paint>
+      <Fill>
         <Shader source={source}>
           <ImageShader
             image={image}
@@ -129,8 +127,7 @@ const NestedShader = () => {
             rect={{ x: 0, y: 0, width: 256, height: 256 }}
           />
         </Shader>
-      </Paint>
-      <Fill />
+      </Fill>
     </Canvas>
   );
 };

@@ -19,7 +19,6 @@ Returns a shader that combines the given shaders with a BlendMode.
 import React from "react";
 import {
   Canvas,
-  Paint,
   Rect,
   Turbulence,
   Skia,
@@ -33,7 +32,7 @@ import {
 export const BlendDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Rect x={0} y={0} width={256} height={256}>
         <Blend mode="difference">
           <RadialGradient
             r={128}
@@ -42,8 +41,7 @@ export const BlendDemo = () => {
           />
           <Turbulence freqX={0.05} freqY={0.05} octaves={4} />
         </Blend>
-      </Paint>
-      <Rect x={0} y={0} width={256} height={256} />
+      </Rect>
     </Canvas>
   );
 };
@@ -64,7 +62,6 @@ Returns a shader with a given color.
 import React from "react";
 import {
   Canvas,
-  Paint,
   Rect,
   Skia,
   Shader,
@@ -76,10 +73,9 @@ import {
 export const BlendDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Rect x={0} y={0} width={256} height={256}>
         <ColorShader color="blue" />
-      </Paint>
-      <Rect x={0} y={0} width={256} height={256} />
+      </Rect>
     </Canvas>
   );
 };

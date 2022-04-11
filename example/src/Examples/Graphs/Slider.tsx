@@ -1,5 +1,6 @@
 import type { SkPath } from "@shopify/react-native-skia";
 import {
+  Group,
   useDerivedValue,
   useValue,
   Line,
@@ -7,7 +8,6 @@ import {
   Circle,
   Fill,
   LinearGradient,
-  Paint,
   Path,
   useTouchHandler,
   Text as SkiaText,
@@ -55,31 +55,31 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
     <View style={{ height, marginBottom: 10 }}>
       <Canvas style={styles.graph} onTouch={touchHandler}>
         <Fill color="black" />
-        <Paint>
-          <LinearGradient
-            start={vec(0, height * 0.5)}
-            end={vec(width * 0.5, height * 0.5)}
-            colors={["black", "#DA4167"]}
-          />
-        </Paint>
         <Path
           path={path}
           strokeWidth={4}
           style="stroke"
           strokeJoin="round"
           strokeCap="round"
-        />
-        <Paint color="#fff" />
-        <Circle c={touchPos} r={10} />
-        <Circle color="#DA4167" c={touchPos} r={7.5} />
-        <SkiaText
-          familyName="Arial"
-          size={12}
-          x={textX}
-          y={textY}
-          text={label}
-        />
-        <Line p1={lineP1} p2={lineP2} />
+        >
+          <LinearGradient
+            start={vec(0, height * 0.5)}
+            end={vec(width * 0.5, height * 0.5)}
+            colors={["black", "#DA4167"]}
+          />
+        </Path>
+        <Group color="#fff">
+          <Circle c={touchPos} r={10} />
+          <Circle color="#DA4167" c={touchPos} r={7.5} />
+          <SkiaText
+            familyName="Arial"
+            size={12}
+            x={textX}
+            y={textY}
+            text={label}
+          />
+          <Line p1={lineP1} p2={lineP2} />
+        </Group>
       </Canvas>
       <Text>Touch and drag to move center point</Text>
     </View>

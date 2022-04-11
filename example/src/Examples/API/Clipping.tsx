@@ -76,6 +76,7 @@ export const Clipping = () => {
         <Rect x={x} y={0} width={200} height={200} color="green" />
         <Mask
           mode="alpha"
+          clip
           mask={
             <Group>
               <Circle cx={100} cy={100} r={120} color="#00000066" />

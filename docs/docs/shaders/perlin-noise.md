@@ -24,7 +24,6 @@ Returns a shader with Perlin Fractal Noise.
 import React from "react";
 import {
   Canvas,
-  Paint,
   Rect,
   FractalNoise,
   Skia,
@@ -36,11 +35,10 @@ import {
 export const FractalNoiseDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
-        <FractalNoise freqX={0.05} freqY={0.05} octaves={4} />
-      </Paint>
       <Fill color="white" />
-      <Rect x={0} y={0} width={256} height={256} />
+      <Rect x={0} y={0} width={256} height={256}>
+        <FractalNoise freqX={0.05} freqY={0.05} octaves={4} />
+      </Rect>
     </Canvas>
   );
 };
@@ -66,7 +64,6 @@ Returns a shader with Perlin Turbulence.
 import React from "react";
 import {
   Canvas,
-  Paint,
   Rect,
   Turbulence,
   Skia,
@@ -78,11 +75,10 @@ import {
 export const TurbulenceDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
-        <Turbulence freqX={0.05} freqY={0.05} octaves={4} />
-      </Paint>
       <Fill color="white" />
-      <Rect x={0} y={0} width={256} height={256} />
+      <Rect x={0} y={0} width={256} height={256}>
+        <Turbulence freqX={0.05} freqY={0.05} octaves={4} />
+      </Rect>
     </Canvas>
   );
 };

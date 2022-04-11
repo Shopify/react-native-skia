@@ -29,7 +29,7 @@ const sidebars = {
     {
       collapsed: true,
       type: "category",
-      label: "Paint",
+      label: "Painting",
       items: ["paint/overview", "paint/properties"],
     },
     {

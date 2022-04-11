@@ -2,7 +2,6 @@ import {
   Canvas,
   Fill,
   LinearGradient,
-  Paint,
   Path,
   runSpring,
   Spring,
@@ -43,20 +42,19 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
     <View style={{ height, marginBottom: 10 }} onTouchEnd={onPress}>
       <Canvas style={styles.graph}>
         <Fill color="black" />
-        <Paint>
-          <LinearGradient
-            start={vec(0, height * 0.5)}
-            end={vec(width * 0.5, height * 0.5)}
-            colors={["black", "#cccc66"]}
-          />
-        </Paint>
         <Path
           path={interpolatedPath}
           strokeWidth={4}
           style="stroke"
           strokeJoin="round"
           strokeCap="round"
-        />
+        >
+          <LinearGradient
+            start={vec(0, height * 0.5)}
+            end={vec(width * 0.5, height * 0.5)}
+            colors={["black", "#cccc66"]}
+          />
+        </Path>
       </Canvas>
       <Text>Touch graph to interpolate</Text>
     </View>

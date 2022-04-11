@@ -10,7 +10,6 @@ import {
   Circle,
   Fill,
   Group,
-  Paint,
   polar2Canvas,
   Easing,
   mix,
@@ -58,11 +57,9 @@ export const Breathe = () => {
 
   return (
     <Canvas style={styles.container} debug>
-      <Paint blendMode="screen">
-        <BlurMask style="solid" blur={40} />
-      </Paint>
       <Fill color="rgb(36,43,56)" />
-      <Group origin={center} transform={transform}>
+      <Group origin={center} transform={transform} blendMode="screen">
+        <BlurMask style="solid" blur={40} />
         {new Array(6).fill(0).map((_, index) => {
           return <Ring key={index} index={index} progress={progress} />;
         })}

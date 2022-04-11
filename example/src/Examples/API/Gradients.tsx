@@ -6,7 +6,6 @@ import {
   Canvas,
   Rect,
   LinearGradient,
-  Paint,
   topLeft,
   bottomRight,
   center,
@@ -39,23 +38,23 @@ export const Gradients = () => {
   return (
     <ScrollView>
       <Canvas style={styles.container}>
-        <Paint>
+        <Rect rect={r1}>
           <LinearGradient
             start={topLeft(r1)}
             end={bottomRight(r1)}
             colors={["#61DAFB", "#fb61da"]}
           />
-        </Paint>
-        <Rect rect={r1} />
-        <Paint>
+        </Rect>
+
+        <Rect rect={r2}>
           <RadialGradient
             c={center(r2)}
             r={SIZE / 2}
             colors={["#fb61da", "#61DAFB"]}
           />
-        </Paint>
-        <Rect rect={r2} />
-        <Paint>
+        </Rect>
+
+        <Rect rect={r3}>
           <TwoPointConicalGradient
             start={vec(R, SIZE)}
             startR={R}
@@ -63,38 +62,34 @@ export const Gradients = () => {
             endR={R}
             colors={["#61DAFB", "#fb61da"]}
           />
-        </Paint>
-        <Rect rect={r3} />
-        <Paint>
+        </Rect>
+
+        <Rect rect={r4}>
           <SweepGradient
             c={vec(SIZE + R, SIZE + R)}
             colors={["#61DAFB", "#fb61da", "#dafb61", "#61DAFB"]}
           />
-        </Paint>
-        <Rect rect={r4} />
-        <Paint>
+        </Rect>
+        <Rect rect={r5}>
           <Blend mode="difference">
             <ColorShader color="#61DAFB" />
             <Turbulence freqX={0.05} freqY={0.05} octaves={4} />
           </Blend>
-        </Paint>
-        <Rect rect={r5} />
-        <Paint>
+        </Rect>
+        <Rect rect={r6}>
           <BilinearGradient
             rect={r6}
             colors={["#dafb61", "#61DAFB", "#fb61da", "#61fbcf"]}
           />
-        </Paint>
-        <Rect rect={r6} />
-        <Paint>
+        </Rect>
+        <Rect rect={r7}>
           <LinearGradient
             start={topLeft(r7)}
             end={bottomRight(r7)}
             colors={["#dafb61", "#61DAFB", "#fb61da"]}
             positions={[0, 0.85, 1]}
           />
-        </Paint>
-        <Rect rect={r7} />
+        </Rect>
       </Canvas>
     </ScrollView>
   );

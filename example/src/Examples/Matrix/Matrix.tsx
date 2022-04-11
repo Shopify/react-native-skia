@@ -2,7 +2,7 @@ import {
   BlurMask,
   Canvas,
   Fill,
-  Paint,
+  Group,
   useClockValue,
   useFont,
 } from "@shopify/react-native-skia";
@@ -40,22 +40,22 @@ export const Matrix = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="black" />
-      <Paint>
+      <Group>
         <BlurMask blur={8} style="solid" />
-      </Paint>
-      {cols.map((_i, i) =>
-        rows.map((_j, j) => (
-          <Symbol
-            symbols={symbols}
-            font={font}
-            timestamp={clock}
-            key={`${i}-${j}`}
-            i={i}
-            j={j}
-            stream={streams[i]}
-          />
-        ))
-      )}
+        {cols.map((_i, i) =>
+          rows.map((_j, j) => (
+            <Symbol
+              symbols={symbols}
+              font={font}
+              timestamp={clock}
+              key={`${i}-${j}`}
+              i={i}
+              j={j}
+              stream={streams[i]}
+            />
+          ))
+        )}
+      </Group>
     </Canvas>
   );
 };

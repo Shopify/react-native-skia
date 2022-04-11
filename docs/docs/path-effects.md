@@ -20,17 +20,16 @@ Creates an effect that breaks a path into segments of a certain length and rando
 ### Example
 
 ```tsx twoslash
-import {Canvas, Paint, DiscretePathEffect, Path} from "@shopify/react-native-skia";
+import {Canvas, DiscretePathEffect, Path} from "@shopify/react-native-skia";
 
 const logo = "M256 128.015C256 111.057 234.762...";
 
 const Discrete = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint>
+      <Path path={logo} color="#61DAFB">
         <DiscretePathEffect length={10} deviation={2} />
-      </Paint>
-      <Path path={logo} color="#61DAFB" />
+      </Path>
     </Canvas>
   );
 };
@@ -54,17 +53,16 @@ Creates an effect that adds dashes to the path.
 ### Example
 
 ```tsx twoslash
-import {Canvas, Paint, DashPathEffect, Path} from "@shopify/react-native-skia";
+import {Canvas, DashPathEffect, Path} from "@shopify/react-native-skia";
 
 const logo = "M256 128.015C256 111.057 234.762...";
 
 const Discrete = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint style="stroke" strokeWidth={4}>
+      <Path path={logo} color="#61DAFB" style="stroke" strokeWidth={4}>
         <DashPathEffect intervals={[4, 4]} />
-      </Paint>
-      <Path path={logo} color="#61DAFB" />
+      </Path>
     </Canvas>
   );
 };
@@ -86,22 +84,21 @@ Creates a path effect that can turn sharp corners into rounded corners.
 ### Example
 
 ```tsx twoslash
-import {Canvas, Paint, CornerPathEffect, Rect} from "@shopify/react-native-skia";
+import {Canvas, CornerPathEffect, Rect} from "@shopify/react-native-skia";
 
 
 const Discrete = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-       <Paint>
-        <CornerPathEffect r={64} />
-      </Paint>
       <Rect
         x={64}
         y={16}
         width={128}
         height={256 - 16}
         color="#61DAFB"
-      />
+      >
+        <CornerPathEffect r={64} />
+      </Rect>
     </Canvas>
   );
 };
@@ -126,23 +123,22 @@ Dash by replicating the specified path.
 ### Example
 
 ```tsx twoslash
-import {Canvas, Paint, Path1DPathEffect, Path} from "@shopify/react-native-skia";
+import {Canvas, Path1DPathEffect, Path} from "@shopify/react-native-skia";
 
 const logo = "M256 128.015C256 111.057 234.762...";
 
 const Path1D = () => {
   return (
-      <Canvas style={{ flex: 1 }}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
-          <Path1DPathEffect
-            path="M -10 0 L 0 -10, 10 0, 0 10 Z"
-            advance={20}
-            phase={0}
-            style="rotate"
-          />
-        </Paint>
-        <Path path={logo} color="#61DAFB" />
-      </Canvas> 
+    <Canvas style={{ flex: 1 }}>
+      <Path path={logo} color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Path1DPathEffect
+          path="M -10 0 L 0 -10, 10 0, 0 10 Z"
+          advance={20}
+          phase={0}
+          style="rotate"
+        />
+      </Path>
+    </Canvas> 
   );
 };
 ```
@@ -165,21 +161,20 @@ Stamp the specified path to fill the shape, using the matrix to define the latti
 ### Example
 
 ```tsx twoslash
-import {Canvas, Paint, Path2DPathEffect, Path, processTransform2d} from "@shopify/react-native-skia";
+import {Canvas, Path2DPathEffect, Path, processTransform2d} from "@shopify/react-native-skia";
 
 const logo = "M256 128.015C256 111.057 234.762...";
 
 const Path2D = () => {
   return (
-      <Canvas style={{ flex: 1 }}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
-          <Path2DPathEffect
-            path="M -10 0 L 0 -10, 10 0, 0 10 Z"
-            matrix={processTransform2d([{ scale: 40 }])}
-          />
-        </Paint>
-        <Path path={logo} color="#61DAFB" />
-      </Canvas> 
+    <Canvas style={{ flex: 1 }}>
+      <Path path={logo} color="#61DAFB" style="stroke" strokeWidth={15}>
+        <Path2DPathEffect
+          path="M -10 0 L 0 -10, 10 0, 0 10 Z"
+          matrix={processTransform2d([{ scale: 40 }])}
+        />
+      </Path>
+    </Canvas> 
   );
 };
 ```
@@ -201,21 +196,20 @@ Stamp the specified path to fill the shape, using the matrix to define the latti
 ### Example
 
 ```tsx twoslash
-import {Canvas, Paint, Line2DPathEffect, Path, processTransform2d} from "@shopify/react-native-skia";
+import {Canvas, Line2DPathEffect, Path, processTransform2d} from "@shopify/react-native-skia";
 
 const logo = "M256 128.015C256 111.057 234.762...";
 
 const Line2D = () => {
   return (
-      <Canvas style={{ flex: 1 }}>
-        <Paint color="#61DAFB" style="stroke" strokeWidth={15}>
-          <Line2DPathEffect
-            width={0}
-            matrix={processTransform2d([{ scale: 8 }])}
-          />
-        </Paint>
-        <Path path={logo} color="#61DAFB" />
-      </Canvas> 
+    <Canvas style={{ flex: 1 }}>
+      <Path path={logo} color="#61DAFB"  style="stroke" strokeWidth={15}>
+        <Line2DPathEffect
+          width={0}
+          matrix={processTransform2d([{ scale: 8 }])}
+        />
+      </Path>
+    </Canvas> 
   );
 };
 ```

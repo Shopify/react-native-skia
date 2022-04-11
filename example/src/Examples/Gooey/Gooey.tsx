@@ -12,7 +12,6 @@ import {
   mixVector,
   Paint,
   usePaintRef,
-  Defs,
   Circle,
   Blur,
   ColorMatrix,
@@ -76,16 +75,14 @@ export const Gooey = () => {
 
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch}>
-      <Defs>
-        <Paint ref={paint}>
-          <ColorMatrix
-            matrix={[
-              1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
-            ]}
-          />
-          <Blur blur={20} />
-        </Paint>
-      </Defs>
+      <Paint ref={paint}>
+        <ColorMatrix
+          matrix={[
+            1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
+          ]}
+        />
+        <Blur blur={20} />
+      </Paint>
       <Fill color={BG} />
       <Group layer={paint}>
         {icons.map((_, i) => (

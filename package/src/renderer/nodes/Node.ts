@@ -1,4 +1,3 @@
-import { isPaint } from "../../skia";
 import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { DependencyManager } from "../DependencyManager";
 import type { DrawingContext } from "../DrawingContext";
@@ -15,7 +14,7 @@ export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
   _props: AnimatedProps<P>;
   memoizable = false;
-  memoized = false;
+  memoized: DeclarationResult | null = null;
   parent?: Node;
   depMgr: DependencyManager;
 
@@ -38,21 +37,19 @@ export abstract class Node<P = unknown> {
     return this._props;
   }
 
-  visit(ctx: DrawingContext) {
+  visit(ctx: DrawingContext, children?: Node[]) {
     const returnedValues: Exclude<DeclarationResult, null>[] = [];
-    let currentCtx = ctx;
-    this.children.forEach((child) => {
+    (children ?? this.children).forEach((child) => {
       if (!child.memoized) {
-        const ret = child.draw(currentCtx);
+        const ret = child.draw(ctx);
         if (ret) {
-          if (isPaint(ret)) {
-            currentCtx = { ...currentCtx, paint: ret };
-          }
           returnedValues.push(ret);
+          if (child.memoizable) {
+            child.memoized = ret;
+          }
         }
-        if (child.memoizable) {
-          child.memoized = true;
-        }
+      } else {
+        returnedValues.push(child.memoized);
       }
     });
     return returnedValues;

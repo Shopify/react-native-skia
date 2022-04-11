@@ -69,7 +69,7 @@ const bustBranchMemoization = (parent: Node) => {
   if (parent.memoizable) {
     let ancestor: Node | undefined = parent;
     while (ancestor) {
-      ancestor.memoized = false;
+      ancestor.memoized = null;
       ancestor = ancestor.parent;
     }
   }
