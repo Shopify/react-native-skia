@@ -9,7 +9,7 @@ import { Clipping } from "./Clipping";
 import { Transform } from "./Transform";
 import { ColorFilter } from "./ColorFilter";
 import { Gradients } from "./Gradients";
-import { PathExample } from "./Path2";
+import { PathExample } from "./Path";
 import { Images } from "./Images";
 import { SVG } from "./SVG";
 import { BlendModes } from "./BlendModes";
