@@ -12,13 +12,13 @@ It will use cubic sampling.
 
 | Name       | Type           |  Description                       |
 |:-----------|:---------------|:-----------------------------------|
-| image      | `SkImage`       | Image instance. |
+| image      | `SkImage`      | Image instance. |
 | tx?        | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
 | ty?        | `TileMode`     | Can be `clamp`, `repeat`, `mirror`, or `decal`. |
-| fm?        | `FilterMode`.  | Can be `linear` or `nearest`. |
+| fm?        | `FilterMode`   | Can be `linear` or `nearest`. |
 | mm?        | `MipmapMode`   | Can be `none`, `linear` or `nearest`. |
-| fit?       | `Fit`.         | Calculate the transformation matrix to fit the rectangle defined by `fitRect`. See [images](/docs/images). |
-| rect?      | SkRect`        | The destination rectangle to calculate the transformation matrix via the `fit` property. |
+| fit?       | `Fit`          | Calculate the transformation matrix to fit the rectangle defined by `fitRect`. See [images](/docs/images). |
+| rect?      | `SkRect`       | The destination rectangle to calculate the transformation matrix via the `fit` property. |
 | transform? | `Transforms2d` | see [transformations](/docs/group#transformations). |
 
 ### Example
