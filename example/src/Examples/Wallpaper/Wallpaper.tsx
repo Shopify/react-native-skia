@@ -4,6 +4,7 @@ import {
   LinearGradient,
   Fill,
   vec,
+  Paint,
   Rect,
   interpolate,
   Mask,
@@ -70,7 +71,6 @@ export const Wallpaper = () => {
           </Group>
         ))}
       </Group>
-
       <Fill blendMode={"softLight"}>
         <Turbulence freqX={1} freqY={1} octaves={3} />
       </Fill>
