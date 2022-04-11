@@ -51,7 +51,6 @@ export class DrawingNode<P> extends Node<P> {
     if (this.skipProcessing) {
       this.onDraw(ctx, drawingProps, this);
     } else {
-      // TODO: only copy if necessary
       const paint = ctx.paint.copy();
       processPaint(paint, ctx.opacity, drawingProps);
       // to draw only once:

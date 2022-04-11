@@ -24,7 +24,6 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 const onDraw = createDrawing<GroupProps>(
   (ctx, { layer, clip, invertClip, ...groupProps }, node) => {
     const { canvas, opacity } = ctx;
-    // TODO: only copy if necessary?
     const paint = ctx.paint.copy();
     processPaint(paint, opacity, groupProps);
     const hasTransform = !!groupProps.transform || !!groupProps.matrix;

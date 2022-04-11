@@ -6,8 +6,15 @@ import {
   StrokeJoin,
   StrokeCap,
   processColor,
+  isShader,
+  isMaskFilter,
+  isColorFilter,
+  isPathEffect,
+  isImageFilter,
+  Skia,
 } from "../../skia";
-import type { SkPaint, Color } from "../../skia";
+import type { SkPaint, Color, SkImageFilter } from "../../skia";
+import type { DeclarationResult } from "../nodes";
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export interface ChildrenProps {
@@ -42,7 +49,8 @@ export const processPaint = (
     strokeCap,
     strokeMiter,
     opacity,
-  }: CustomPaintProps
+  }: CustomPaintProps,
+  children: DeclarationResult[] = []
 ) => {
   if (color !== undefined) {
     const c = processColor(color, currentOpacity);
@@ -72,5 +80,24 @@ export const processPaint = (
   }
   if (opacity !== undefined) {
     paint.setAlphaf(opacity);
+  }
+  children.forEach((child) => {
+    if (isShader(child)) {
+      paint.setShader(child);
+    } else if (isMaskFilter(child)) {
+      paint.setMaskFilter(child);
+    } else if (isColorFilter(child)) {
+      paint.setColorFilter(child);
+    } else if (isPathEffect(child)) {
+      paint.setPathEffect(child);
+    }
+  });
+  const filters = children.filter(isImageFilter);
+  if (filters.length > 0) {
+    paint.setImageFilter(
+      filters
+        .reverse()
+        .reduce<SkImageFilter | null>(Skia.ImageFilter.MakeCompose, null)
+    );
   }
 };
