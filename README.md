@@ -1,3 +1,5 @@
+Hello World!
+
 # React Native Skia
 
 High-performance 2d Graphics for React Native using Skia
