@@ -11,7 +11,7 @@ import {
 } from "@shopify/react-native-skia";
 
 const size = 200;
-const n = 90;
+const n = 91;
 
 export const FreezeExample = () => {
   const clock = useClockValue();

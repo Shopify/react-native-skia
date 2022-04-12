@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import React from "react";
 
-import type { SkRect } from "../../../skia";
+import type { SkPaint, SkRect } from "../../../skia";
 import { Skia, TileMode, FilterMode } from "../../../skia";
 import { createDrawing } from "../../nodes";
 import type { SkEnum } from "../../processors";
@@ -17,7 +17,7 @@ interface ImageDrawingProps {
 
 const onDraw = createDrawing<ImageDrawingProps>(
   (ctx, { tx, ty, fm, rect }, node) => {
-    if (node.paint === undefined) {
+    if (node.memoized === null) {
       const recorder = Skia.PictureRecorder();
       const canvas = recorder.beginRecording(rect);
       node.visit({
@@ -33,10 +33,10 @@ const onDraw = createDrawing<ImageDrawingProps>(
           FilterMode[enumKey(fm)]
         )
       );
-      node.paint = shaderPaint;
+      node.memoized = shaderPaint;
     }
-    if (node.paint) {
-      ctx.canvas.drawRect(rect, node.paint);
+    if (node.memoized) {
+      ctx.canvas.drawRect(rect, node.memoized as SkPaint);
     }
   }
 );
