@@ -11,12 +11,12 @@ import {
 } from "@shopify/react-native-skia";
 
 const size = 200;
-const n = 3;
+const n = 90;
 
 export const FreezeExample = () => {
   const clock = useClockValue();
   const transform = useDerivedValue(
-    () => [{ rotate: (Math.PI * clock.current) / 4000 }],
+    () => [{ translateY: 100 }, { rotate: (Math.PI * clock.current) / 4000 }],
     [clock]
   );
   return (
