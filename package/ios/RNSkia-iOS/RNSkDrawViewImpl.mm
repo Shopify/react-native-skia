@@ -17,8 +17,8 @@ id<MTLCommandQueue> RNSkDrawViewImpl::_commandQueue = id<MTLCommandQueue>(CFReta
 
 sk_sp<GrDirectContext> RNSkDrawViewImpl::_skContext = nullptr;
 
-RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::RNSkPlatformContext> context):
-  _view(view), _context(context), RNSkia::RNSkDrawView(context) {
+RNSkDrawViewImpl::RNSkDrawViewImpl(std::shared_ptr<RNSkia::RNSkPlatformContext> context):
+  _context(context), RNSkia::RNSkDrawView(context) {
     
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -30,8 +30,6 @@ RNSkDrawViewImpl::RNSkDrawViewImpl(SkiaDrawView* view, std::shared_ptr<RNSkia::R
     _layer.opaque = false;
     _layer.contentsScale = _context->getPixelDensity();
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    _layer.frame = _view.bounds;
-    [_view.layer addSublayer:_layer];
     
     setNativeDrawFunc(std::bind(&RNSkDrawViewImpl::drawFrame, this, std::placeholders::_1));
 }
