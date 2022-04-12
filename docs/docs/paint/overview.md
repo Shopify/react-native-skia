@@ -5,8 +5,9 @@ sidebar_label: Overview
 slug: /paint/overview
 ---
 
-Anytime you draw something in Skia, you may want to specify what color it is, how it blends with the background, or what style to draw it in.
-In React Native Skia, these attributes can be specified as properties or as children of a drawing component (`<Rect />`, or `<Circle />` for instance) or a `<Group />`.
+Anytime you draw something in Skia, you want to specify what color it is, how it blends with the background, or what style to draw it in.
+We call these painting attributes.
+And in React Native Skia, these attributes can be specified as properties or as children of a drawing component (`<Rect />`, or `<Circle />` for instance) or a `<Group />`.
 There is also a `<Paint />` component which can be assigned directly to a drawing or group via its reference.
 
 The following painting attributes can be assigned as properties:
@@ -26,7 +27,7 @@ The following painting attributes can be assigned as children:
 * [Mask Filters](/docs/mask-filters)
 * [Path Effects](/docs/path-effects)
 
-The paint attributes are inherited by descendants.
+Descendants inherit the paint attributes.
 The first circle will be filled with red in the example below, and the second circle will have a light blue stroke.  
 
 ```tsx twoslash
