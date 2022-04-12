@@ -56,13 +56,14 @@
       if(_nativeId != 0 && _manager != nullptr) {
         _manager->setSkiaDrawView(_nativeId, nullptr);
       }
+      [_impl->getLayer() removeFromSuperlayer];
       _impl = nullptr;
     }
   } else {
     // Create implementation view when the parent view is set
     if(_impl == nullptr && _manager != nullptr) {
-      __weak decltype(self) weakSelf = self;
-      _impl = std::make_shared<RNSkDrawViewImpl>(weakSelf, _manager->getPlatformContext());
+      _impl = std::make_shared<RNSkDrawViewImpl>(_manager->getPlatformContext());
+      [self.layer addSublayer:_impl->getLayer()];
       if(_nativeId != 0) {
         _manager->setSkiaDrawView(_nativeId, _impl.get());
       }
