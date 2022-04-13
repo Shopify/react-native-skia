@@ -10,6 +10,7 @@ export * from "./pathEffects";
 export * from "../processors";
 export * from "./Picture";
 
+export * from "./Freeze";
 export * from "./Group";
 export * from "./Mask";
 export * from "./Paint";
