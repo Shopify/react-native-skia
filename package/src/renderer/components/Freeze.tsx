@@ -34,9 +34,7 @@ const onDraw = createDrawing<FreezeProps>((ctx, { tx, ty, fm, rect }, node) => {
     );
     node.memoized = shaderPaint;
   }
-  if (node.memoized) {
-    ctx.canvas.drawRect(rect, node.memoized as SkPaint);
-  }
+  ctx.canvas.drawRect(rect, node.memoized as SkPaint);
 });
 
 export const Freeze = (props: FreezeProps) => {
