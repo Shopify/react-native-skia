@@ -11,7 +11,7 @@ import {
 } from "@shopify/react-native-skia";
 
 const size = 200;
-const n = 3;
+const n = 99;
 
 export const FreezeExample = () => {
   const [color, setColor] = useState("black");
@@ -29,7 +29,7 @@ export const FreezeExample = () => {
   return (
     <Canvas style={{ flex: 1, margin: 50 }} debug>
       <Group origin={{ x: size / 2, y: size / 2 }} transform={transform}>
-        <Freeze rect={rect(0, 0, 200, 200)}>
+        <Freeze key={color} rect={rect(0, 0, 200, 200)}>
           <Checkerboard color={color} />
         </Freeze>
       </Group>
