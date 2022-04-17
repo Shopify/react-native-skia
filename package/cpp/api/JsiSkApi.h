@@ -56,7 +56,6 @@ namespace RNSkia
     JsiSkApi(jsi::Runtime &runtime, std::shared_ptr<RNSkPlatformContext> context)
         : JsiSkHostObject(context)
     {
-
       installFunction("Font", JsiSkFont::createCtor(context));
       installFunction("Paint", JsiSkPaint::createCtor(context));
       installFunction("RSXform", JsiSkRSXform::createCtor(context));

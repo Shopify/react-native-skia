@@ -1,5 +1,17 @@
 import { Platform, processColor as processColorRN } from "react-native";
 
+interface ColorApi {
+  parse: (color: string) => [number, number, number, number];
+}
+
+declare global {
+  var ColorApi: ColorApi;
+}
+
+export const ColorApi: ColorApi = {
+  parse: global.ColorApi.parse,
+};
+
 // This is the JSI color. Currently a number. This may change.
 export type SkColor = number;
 
@@ -15,7 +27,8 @@ export const rgbaColor = (r: number, g: number, b: number, af: number) => {
 };
 
 export const processColorAsInt = (color?: number | string): SkColor => {
-  let processedColor = processColorRN(color);
+  let processedColor =
+    typeof color === "string" ? rgbaColor(...ColorApi.parse(color)) : color;
   if (typeof processedColor !== "number") {
     throw new Error(`Couldn't process color: ${color}`);
   }

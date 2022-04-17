@@ -9,6 +9,7 @@
 #include <RNSkJsiViewApi.h>
 #include <RNSkDrawView.h>
 #include <RNSkValueApi.h>
+#include <RNSkColorApi.h>
 
 namespace RNSkia {
 using namespace facebook;
@@ -63,6 +64,11 @@ void RNSkManager::setSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
 void RNSkManager::installBindings() {
   // Create the API objects and install it on the global object in the
   // provided runtime.
+
+  auto colorApi = std::make_shared<RNSkColorApi>(_platformContext);
+  _jsRuntime->global().setProperty(
+          *_jsRuntime, "ColorApi",
+          jsi::Object::createFromHostObject(*_jsRuntime, std::move(colorApi)));
 
   auto skiaApi = std::make_shared<JsiSkApi>(*_jsRuntime, _platformContext);
   _jsRuntime->global().setProperty(
