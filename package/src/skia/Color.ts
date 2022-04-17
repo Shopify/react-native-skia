@@ -1,4 +1,4 @@
-import { Platform, processColor as processColorRN } from "react-native";
+import { Platform } from "react-native";
 
 interface ColorApi {
   parse: (color: string) => [number, number, number, number];

@@ -29,10 +29,10 @@ namespace RNSkia {
           auto text = arguments[0].asString(runtime).utf8(runtime);
           auto color = CSSColorParser::parse(text);
           auto jsiColor = jsi::Array(runtime, 4);
-          jsiColor.setValueAtIndex(runtime, 0, jsi::Value((int)color.r));
-          jsiColor.setValueAtIndex(runtime, 1, jsi::Value((int)color.g));
-          jsiColor.setValueAtIndex(runtime, 2, jsi::Value((int)color.b));
-          jsiColor.setValueAtIndex(runtime, 3, jsi::Value((int)color.a));
+          jsiColor.setValueAtIndex(runtime, 0, jsi::Value(static_cast<double>(color.r)));
+          jsiColor.setValueAtIndex(runtime, 1, jsi::Value(static_cast<double>(color.g)));
+          jsiColor.setValueAtIndex(runtime, 2, jsi::Value(static_cast<double>(color.b)));
+          jsiColor.setValueAtIndex(runtime, 3, jsi::Value(static_cast<double>(color.a)));
           return jsiColor;
         }
 
