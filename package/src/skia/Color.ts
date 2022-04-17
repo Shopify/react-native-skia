@@ -26,9 +26,14 @@ export const rgbaColor = (r: number, g: number, b: number, af: number) => {
   return ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
 };
 
+const parse = (cl: Color) =>
+  typeof cl === "string"
+    ? ColorApi.parse(cl)
+    : ([red(cl), green(cl), blue(cl), alphaf(cl)] as const);
+
 export const processColorAsInt = (color?: number | string): SkColor => {
   let processedColor =
-    typeof color === "string" ? rgbaColor(...ColorApi.parse(color)) : color;
+    typeof color === "string" ? rgbaColor(...parse(color)) : color;
   if (typeof processedColor !== "number") {
     throw new Error(`Couldn't process color: ${color}`);
   }
@@ -44,21 +49,12 @@ export const processColorAsInt = (color?: number | string): SkColor => {
   return processedColor;
 };
 
-const processColorAsArray = (cl: Color) => {
-  const icl = typeof cl === "string" ? processColorAsInt(cl) : cl;
-  const r = red(icl);
-  const g = green(icl);
-  const b = blue(icl);
-  const a = alphaf(icl);
-  return [r, g, b, a] as const;
-};
-
 export const processColor = (cl: Color, currentOpacity: number) => {
-  const [r, g, b, a] = processColorAsArray(cl);
+  const [r, g, b, a] = parse(cl);
   return rgbaColor(r, g, b, a * currentOpacity);
 };
 
 export const processColorAsUnitArray = (cl: Color, currentOpacity: number) => {
-  const [r, g, b, a] = processColorAsArray(cl);
+  const [r, g, b, a] = parse(cl);
   return [r / 255, g / 255, b / 255, a * currentOpacity] as const;
 };
