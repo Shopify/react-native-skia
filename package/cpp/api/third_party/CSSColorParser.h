@@ -40,7 +40,7 @@ namespace CSSColorParser {
                 : r(r_), g(g_), b(b_), a(a_ > 1 ? 1 : a_ < 0 ? 0 : a_) {
         }
         unsigned char r = 0, g = 0, b = 0;
-        float a = 1.0f;
+        float a = -1.0f;
     };
 
     struct NamedColor { const char *const name; const Color color; };
@@ -215,13 +215,13 @@ namespace CSSColorParser {
             if (str.length() == 4) {
                 int64_t iv = parseInt(str.substr(1), 16);  // TODO(deanm): Stricter parsing.
                 if (!(iv >= 0 && iv <= 0xfff)) {
-                    return {0,0,0,1};
+                    return {};
                 } else {
                     return {
-                            static_cast<uint8_t>(((iv & 0xf00) >> 4) | ((iv & 0xf00) >> 8)),
-                            static_cast<uint8_t>((iv & 0xf0) | ((iv & 0xf0) >> 4)),
-                            static_cast<uint8_t>((iv & 0xf) | ((iv & 0xf) << 4)),
-                            1
+                        static_cast<uint8_t>(((iv & 0xf00) >> 4) | ((iv & 0xf00) >> 8)),
+                        static_cast<uint8_t>((iv & 0xf0) | ((iv & 0xf0) >> 4)),
+                        static_cast<uint8_t>((iv & 0xf) | ((iv & 0xf) << 4)),
+                        1
                     };
                 }
             } else if (str.length() == 7) {
@@ -238,7 +238,7 @@ namespace CSSColorParser {
                 }
             }
 
-            return { 0, 0, 0, 1};
+            return {};
         }
 
         size_t op = str.find_first_of('('), ep = str.find_first_of(')');
@@ -251,12 +251,12 @@ namespace CSSColorParser {
             if (fname == "rgba" || fname == "rgb") {
                 if (fname == "rgba") {
                     if (params.size() != 4) {
-                        return { 0, 0, 0, 1};
+                        return { };
                     }
                     alpha = parse_css_float(params.back());
                 } else {
                     if (params.size() != 3) {
-                        return { 0, 0, 0, 1};
+                        return { };
                     }
                 }
 
@@ -270,12 +270,12 @@ namespace CSSColorParser {
             } else if (fname == "hsla" || fname == "hsl") {
                 if (fname == "hsla") {
                     if (params.size() != 4) {
-                        return { 0, 0, 0, 1};
+                        return { };
                     }
                     alpha = parse_css_float(params.back());
                 } else {
                     if (params.size() != 3) {
-                        return { 0, 0, 0, 1};
+                        return { };
                     }
                 }
 
@@ -301,7 +301,7 @@ namespace CSSColorParser {
             }
         }
 
-        return { 0, 0, 0, 1};
+        return { };
     }
 
 } // namespace CSSColorParser

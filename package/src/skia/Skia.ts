@@ -26,8 +26,7 @@ import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
-
-import { Platform } from "react-native";
+import { SkiaColor } from "./Color";
 
 /**
  * Declares the interface for the native Skia API
@@ -38,7 +37,7 @@ export interface Skia {
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
   Color: (color: Color) => SkColor;
-  parseColorString: (color: string) => SkColor;
+  parseColorString: (color: string) => SkColor | undefined;
   ContourMeasureIter: (
     path: SkPath,
     forceClosed: boolean,
@@ -118,22 +117,7 @@ export const Skia = {
   ColorFilter: SkiaApi.ColorFilter,
   ContourMeasureIter: SkiaApi.ContourMeasureIter,
   // Here are constructors for data types which are represented as typed arrays in CanvasKit
-  Color: (cl: Color) => {
-    if (typeof cl === "number") {
-      return cl;
-    }
-    let color = SkiaApi.parseColorString(cl);
-    // On android we need to move the alpha byte to the start of the structure
-    if (Platform.OS === "android") {
-      color = color >>> 0;
-      const a = (color >> 24) & 0xff;
-      const r = (color >> 16) & 0xff;
-      const g = (color >> 8) & 0xff;
-      const b = color & 0xff;
-      color = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
-    }
-    return color;
-  },
+  Color: SkiaColor,
   parseColorString: SkiaApi.parseColorString,
   RSXform: SkiaApi.RSXform,
   // For the following methods the factory symmetry is broken to be comptatible with CanvasKit

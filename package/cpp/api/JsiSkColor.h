@@ -38,6 +38,9 @@ namespace RNSkia {
             return JSI_HOST_FUNCTION_LAMBDA {
                 auto text = arguments[0].asString(runtime).utf8(runtime);
                 auto color = CSSColorParser::parse(text);
+                if (color.a == -1.0f) {
+                    return jsi::Value::undefined();
+                }
                 int a = round(color.a * 255);
                 return jsi::Value((a << 24) | (color.r << 16) | (color.g << 8) | color.b);
             };
