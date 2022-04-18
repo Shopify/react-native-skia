@@ -12,7 +12,6 @@ import type { SkRRect } from "./RRect";
 import type { RuntimeEffectFactory } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
 import type { SkColor } from "./Color";
-import { processColor } from "./Color";
 import type { SkMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
 import type { SkPoint } from "./Point";
@@ -36,6 +35,7 @@ export interface Skia {
   XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
+  Color: (color: string) => SkColor;
   ContourMeasureIter: (
     path: SkPath,
     forceClosed: boolean,
@@ -115,7 +115,7 @@ export const Skia = {
   ColorFilter: SkiaApi.ColorFilter,
   ContourMeasureIter: SkiaApi.ContourMeasureIter,
   // Here are constructors for data types which are represented as typed arrays in CanvasKit
-  Color: (color: Parameters<typeof processColor>[0]) => processColor(color, 1),
+  Color: SkiaApi.Color,
   RSXform: SkiaApi.RSXform,
   // For the following methods the factory symmetry is broken to be comptatible with CanvasKit
   MakeSurface: SkiaApi.Surface.Make,
