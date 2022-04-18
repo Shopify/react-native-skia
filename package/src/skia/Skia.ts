@@ -27,6 +27,8 @@ import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
 
+import { Platform } from "react-native";
+
 /**
  * Declares the interface for the native Skia API
  */
@@ -120,7 +122,17 @@ export const Skia = {
     if (typeof cl === "number") {
       return cl;
     }
-    return SkiaApi.parseColorString(cl);
+    let color = SkiaApi.parseColorString(cl);
+    // On android we need to move the alpha byte to the start of the structure
+    if (Platform.OS === "android") {
+      color = color >>> 0;
+      const a = (color >> 24) & 0xff;
+      const r = (color >> 16) & 0xff;
+      const g = (color >> 8) & 0xff;
+      const b = color & 0xff;
+      color = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
+    }
+    return color;
   },
   parseColorString: SkiaApi.parseColorString,
   RSXform: SkiaApi.RSXform,
