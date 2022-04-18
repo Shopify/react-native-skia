@@ -28,7 +28,7 @@ The following painting attributes can be assigned as children:
 * [Path Effects](/docs/path-effects)
 
 Descendants inherit the paint attributes.
-The first circle will be filled with red in the example below, and the second circle will have a light blue stroke.  
+In the example below, the first circle will be filled with a light blue color, and the second circle will have a light blue stroke.  
 
 ```tsx twoslash
 import {Canvas, Circle, Paint, Group} from "@shopify/react-native-skia";
