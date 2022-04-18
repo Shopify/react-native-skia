@@ -68,7 +68,7 @@ namespace RNSkia
       installFunction("ContourMeasureIter", JsiSkContourMeasureIter::createCtor(context));
       installFunction("MakeVertices", JsiSkVertices::createCtor(context));
       installFunction("PictureRecorder", JsiSkPictureRecorder::createCtor(context));
-      installFunction("Color", JsiSkColor::createCtor());
+      installFunction("parseColorString", JsiSkColor::createCtor());
 
       // Static members
       installReadonlyProperty("FontMgr",
