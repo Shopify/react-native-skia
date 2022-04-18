@@ -1,7 +1,6 @@
 #pragma once
 
 #include <JsiHostObject.h>
-#include <RNSkPlatformContext.h>
 #include <jsi/jsi.h>
 
 #include "colors/CSSColorParser.h"
@@ -15,8 +14,8 @@ namespace RNSkia {
          * Constructor
          * @param platformContext Platform context
          */
-        RNSkColorApi(std::shared_ptr<RNSkPlatformContext> platformContext)
-                : JsiHostObject(), _platformContext(platformContext) {
+        RNSkColorApi()
+                : JsiHostObject() {
         }
 
         /**
@@ -37,9 +36,5 @@ namespace RNSkia {
         }
 
         JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkColorApi, parse))
-
-    private:
-        // Platform context
-        std::shared_ptr<RNSkPlatformContext> _platformContext;
     };
 } // namespace RNSkia

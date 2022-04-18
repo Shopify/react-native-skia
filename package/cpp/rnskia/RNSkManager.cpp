@@ -65,7 +65,7 @@ void RNSkManager::installBindings() {
   // Create the API objects and install it on the global object in the
   // provided runtime.
 
-  auto colorApi = std::make_shared<RNSkColorApi>(_platformContext);
+  auto colorApi = std::make_shared<RNSkColorApi>();
   _jsRuntime->global().setProperty(
           *_jsRuntime, "ColorApi",
           jsi::Object::createFromHostObject(*_jsRuntime, std::move(colorApi)));
