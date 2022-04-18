@@ -1,3 +1,5 @@
+import { Platform, processColor } from "react-native";
+
 /*global SkiaApi*/
 import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
@@ -26,7 +28,31 @@ import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
-import { SkiaColor } from "./Color";
+
+/*
+ * Parse CSS colors
+ */
+const SkiaColor = (cl: Color) => {
+  if (typeof cl === "number") {
+    return cl;
+  }
+  let color = Skia.parseColorString(cl);
+  if (color === undefined) {
+    console.warn("Skia couldn't parse the following color " + cl);
+    // If the color is not recognized, we fallback to React Native
+    color = processColor(cl) as number;
+  }
+  // On android we need to move the alpha byte to the start of the structure
+  if (Platform.OS === "android") {
+    color = color >>> 0;
+    const a = (color >> 24) & 0xff;
+    const r = (color >> 16) & 0xff;
+    const g = (color >> 8) & 0xff;
+    const b = color & 0xff;
+    color = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
+  }
+  return color;
+};
 
 /**
  * Declares the interface for the native Skia API
