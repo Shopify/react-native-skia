@@ -131,11 +131,13 @@ android {
     }
 
     packagingOptions {
-        excludes = ["**/libc++_shared.so"]
-        pickFirst "lib/**/libfbjni.so"
-        pickFirst "lib/**/libjsi.so"
-        pickFirst "lib/**/libreact_nativemodule_core.so"
-        pickFirst "lib/**/libturbomodulejsijni.so"
+        excludes = [
+             "**/libc++_shared.so",
+             "**/libfbjni.so",
+             "**/libjsi.so",
+             "**/libreact_nativemodule_core.so",
+             "**/libturbomodulejsijni.so"
+        ]
     }
 
 
