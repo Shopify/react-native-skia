@@ -27,7 +27,11 @@ export const runTiming = (
   callback?: AnimationCallback
 ): SkiaAnimation => {
   const resolvedParameters = getResolvedParams(toOrParams, config);
-  const animation = createTiming(resolvedParameters, value, callback);
+  const resolvedCallback = (current: number) => {
+    callback && callback(current);
+    value.animation = undefined;
+  };
+  const animation = createTiming(resolvedParameters, value, resolvedCallback);
   value.animation = animation;
   return animation;
 };
