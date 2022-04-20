@@ -29,7 +29,6 @@ namespace RNSkia {
         /**
          * Creates the function for construction a new instance of the SkPoint
          * wrapper
-         * @param context platform context
          * @return A function for creating a new host object wrapper for the SkPoint
          * class
          */
