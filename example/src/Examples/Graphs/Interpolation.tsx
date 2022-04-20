@@ -33,7 +33,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
     <View style={{ height, marginBottom: 10 }} onTouchEnd={onPress}>
       <Canvas style={styles.graph}>
         <Fill color="black" />
-        <InterpolatedPath
+        <PathTransition
           path={currentPath}
           strokeWidth={4}
           style="stroke"
@@ -47,7 +47,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
   );
 };
 
-const InterpolatedPath = ({
+const PathTransition = ({
   path,
   ...props
 }: AnimatedProps<PathProps> & { path: PathDef }) => {
@@ -111,7 +111,7 @@ const InterpolatedPath = ({
   return <Path {...props} path={animatedPath} />;
 };
 
-InterpolatedPath.defaultProps = {
+PathTransition.defaultProps = {
   start: 0,
   end: 1,
 };
