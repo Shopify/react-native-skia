@@ -96,31 +96,19 @@ const TransitioningPath = ({
         );
         return;
       }
-      // Stop any ongoing animations
-      progress.animation = undefined;
       // Set current path to the current interpolated path to make
       // sure we can interrupt animations
-      currentPathRef.current = nextPathRef.current.interpolate(
-        currentPathRef.current,
-        progress.current
-      );
+      currentPathRef.current = animatedPath.current;
       // Set the next path to be the value in the updated path property
       nextPathRef.current = processedPath;
       // reset progress - this will cause the derived value to be updated and
       // the path to be repainted through its parent canvas.
       progress.current = 0;
       // Run animation
-      runTiming(
-        progress,
-        1,
-        { duration: 750, easing: Easing.inOut(Easing.cubic) },
-        () => {
-          // Update main path to the next path
-          currentPathRef.current = processedPath;
-          // Reset progress
-          progress.current = 0;
-        }
-      );
+      runTiming(progress, 1, {
+        duration: 750,
+        easing: Easing.inOut(Easing.cubic),
+      });
     }
   }, [animatedPath, path, progress]);
 
