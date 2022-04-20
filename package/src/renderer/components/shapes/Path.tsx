@@ -24,7 +24,7 @@ export interface PathProps extends CustomPaintProps {
 const onDraw = createDrawing<PathProps>(
   ({ canvas, paint }, { start, end, stroke, ...pathProps }) => {
     const hasStartOffset = start !== 0;
-    const hasEndOffset = start !== 1;
+    const hasEndOffset = end !== 1;
     const hasStrokeOptions = stroke !== undefined;
     const willMutatePath = hasStartOffset || hasEndOffset || hasStrokeOptions;
     const pristinePath = processPath(pathProps.path);
