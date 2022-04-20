@@ -95,7 +95,7 @@ const getPointAtPositionInPath = (
   const index = Math.max(0, Math.floor(x / (width / steps)));
   const fraction = (x / (width / steps)) % 1;
   const p1 = path.getPoint(index);
-  if (index < path.countPoints() - 1) {
+  if (index < path.length - 1) {
     const p2 = path.getPoint(index + 1);
     // Interpolate between p1 and p2
     return {

@@ -72,7 +72,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
   /**
    * Returns the number of points in this path. Initially zero.
    */
-  countPoints(): number;
+  length: number;
 
   /**
    * Adds contour created from array of n points, adding (count - 1) line segments.
@@ -429,7 +429,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
 
   /**
    * Returns the Point at index in Point array. Valid range for index is
-   * 0 to countPoints() - 1.
+   * 0 to length - 1.
    * @param index
    */
   getPoint(index: number): SkPoint;
@@ -524,7 +524,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param ending  path to interpolate with
    * @param weight  contribution of this path, and
    *                 one minus contribution of ending path
-   * @return        Path replaced by interpolated averages or undefined if 
+   * @return        Path replaced by interpolated averages or undefined if
    *                not interpolatable
    * */
   interpolate(end: SkPath, weight: number): SkPath;

@@ -32,12 +32,12 @@ using namespace facebook;
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
 public:
 
-    // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
-    JSI_PROPERTY_GET(__typename__) {
-      return jsi::String::createFromUtf8(runtime, "Path");
-    }
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "Path");
+  }
 
-    JSI_HOST_FUNCTION(addArc) {
+  JSI_HOST_FUNCTION(addArc) {
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]).get();
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
@@ -435,7 +435,7 @@ public:
     return jsi::Value(false);
   }
 
-  JSI_HOST_FUNCTION(countPoints) {
+  JSI_PROPERTY_GET(length) {
     auto points = getObject()->countPoints();
     return jsi::Value(points);
   }
