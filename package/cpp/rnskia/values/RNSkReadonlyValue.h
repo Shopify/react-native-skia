@@ -22,14 +22,15 @@ using namespace facebook;
  Implements a readonly Value that is updated every time the screen is redrawn. Its value will be the
  number of milliseconds since the animation value was started.
  */
-class RNSkReadonlyValue : public JsiSkHostObject
+class RNSkReadonlyValue : public JsiSkHostObject,
+                          public std::enable_shared_from_this<RNSkReadonlyValue>
 {
 public:
   RNSkReadonlyValue(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
     _propNameId(jsi::PropNameID::forUtf8(*platformContext->getJsRuntime(), "value")) {}
   
-  ~RNSkReadonlyValue() {
+  virtual ~RNSkReadonlyValue() {
     _invalidated = true;
   }
 

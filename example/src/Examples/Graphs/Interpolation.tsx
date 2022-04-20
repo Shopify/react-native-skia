@@ -29,6 +29,22 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
     setCurrentPath(createGraphPath(width, height, 60));
   }, [height, width]);
 
+  useEffect(() => {
+    const isRunning = { value: true };
+    const dispatchChange = () => {
+      setTimeout(() => {
+        setCurrentPath(createGraphPath(width, height, 60));
+        if (isRunning.value) {
+          dispatchChange();
+        }
+      }, Math.random() * 400 + 500);
+    };
+    dispatchChange();
+    return () => {
+      isRunning.value = false;
+    };
+  }, [height, width]);
+
   return (
     <View style={{ height, marginBottom: 10 }} onTouchEnd={onPress}>
       <Canvas style={styles.graph}>
