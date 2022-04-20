@@ -14,17 +14,8 @@ export const rgbaColor = (r: number, g: number, b: number, af: number) => {
   return ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
 };
 
-export const processColorAsInt = (cl: number | string): SkColor => {
-  const color = Skia.Color(cl);
-  if (typeof color !== "number") {
-    throw new Error(`Couldn't process color: ${cl}`);
-  }
-
-  return color;
-};
-
 const processColorAsArray = (cl: Color) => {
-  const icl = typeof cl === "string" ? processColorAsInt(cl) : cl;
+  const icl = typeof cl === "string" ? Skia.Color(cl) : cl;
   const r = red(icl);
   const g = green(icl);
   const b = blue(icl);
