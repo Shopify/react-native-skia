@@ -484,7 +484,10 @@ public:
             runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPath, __typename__))
+  JSI_EXPORT_PROPERTY_GETTERS(
+    JSI_EXPORT_PROP_GET(JsiSkPath, __typename__),
+    JSI_EXPORT_PROP_GET(JsiSkPath, length)
+  )
 
   JSI_EXPORT_FUNCTIONS(
     JSI_EXPORT_FUNC(JsiSkPath, addArc), JSI_EXPORT_FUNC(JsiSkPath, addOval),
@@ -516,7 +519,7 @@ public:
     JSI_EXPORT_FUNC(JsiSkPath, addCircle),
     JSI_EXPORT_FUNC(JsiSkPath, getLastPt), JSI_EXPORT_FUNC(JsiSkPath, close),
     JSI_EXPORT_FUNC(JsiSkPath, simplify),
-    JSI_EXPORT_FUNC(JsiSkPath, countPoints), JSI_EXPORT_FUNC(JsiSkPath, copy),
+    JSI_EXPORT_FUNC(JsiSkPath, copy),
     JSI_EXPORT_FUNC(JsiSkPath, fromText), JSI_EXPORT_FUNC(JsiSkPath, op),
     JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable), JSI_EXPORT_FUNC(JsiSkPath, interpolate)
   )
