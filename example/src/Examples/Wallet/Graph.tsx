@@ -6,9 +6,9 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Canvas, Path } from "@shopify/react-native-skia";
+import { Canvas, Path, Group } from "@shopify/react-native-skia";
 
-import { graphs, SIZE } from "./Model";
+import { graphs, PADDING, SIZE } from "./Model";
 import { Header } from "./Header";
 
 const { width } = Dimensions.get("window");
@@ -50,14 +50,16 @@ export const Graph = () => {
       <Header />
       <View>
         <Canvas style={{ width: SIZE, height: SIZE }}>
-          <Path
-            style="stroke"
-            color="lightblue"
-            path={graph.data.path}
-            strokeWidth={5}
-            strokeJoin="round"
-            strokeCap="round"
-          />
+          <Group transform={[{ translateY: PADDING }]}>
+            <Path
+              style="stroke"
+              color="lightblue"
+              path={graph.data.path}
+              strokeWidth={5}
+              strokeJoin="round"
+              strokeCap="round"
+            />
+          </Group>
         </Canvas>
       </View>
       <View style={styles.selection}>
