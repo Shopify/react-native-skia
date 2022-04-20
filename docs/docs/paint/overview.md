@@ -27,6 +27,34 @@ The following painting attributes can be assigned as children:
 * [Mask Filters](/docs/mask-filters)
 * [Path Effects](/docs/path-effects)
 
+## Fills and Strokes
+
+In Skia, a paint has a style property to indicate whether it is a fill or a stroke paint.
+When drawing something, you can pass Paint components as children to add strokes and fills.
+In the example below, the circle has one light blue fill and two stroke paints.
+
+```tsx twoslash
+import {Canvas, Circle, Paint} from "@shopify/react-native-skia";
+
+export const PaintDemo = () => {
+  const strokeWidth = 10;
+  const r = 128 - strokeWidth / 2;
+  return (
+    <Canvas style={{ flex: 1 }}>
+       <Circle cx={r + strokeWidth / 2} cy={r} r={r} color="red">
+        <Paint color="lightblue" />
+        <Paint color="#adbce6" style="stroke" strokeWidth={strokeWidth} />
+        <Paint color="#ade6d8" style="stroke" strokeWidth={strokeWidth / 2} />
+      </Circle>
+    </Canvas>
+  );
+};
+```
+
+![Paint Fill and strokes](assets/strokes.png)
+
+## Inheritance
+
 Descendants inherit the paint attributes.
 In the example below, the first circle will be filled with a light blue color, and the second circle will have a light blue stroke.  
 
@@ -81,35 +109,8 @@ export const PaintDemo = () => {
 
 <img src={require("/static/img/paint/complex-paint.png").default} width="256" height="256" />
 
-You can also use the Paint component as a child of a Shape.
-This is useful to draw a shape with many different fills and strokes.
 
-```tsx twoslash
-import {Canvas, Circle, Paint} from "@shopify/react-native-skia";
-
-export const PaintDemo = () => {
-  const strokeWidth = 10;
-  const r = 128 - strokeWidth / 2;
-  return (
-    <Canvas style={{ flex: 1 }}>
-       <Circle cx={r + strokeWidth / 2} cy={r} r={r} color="red">
-        <Paint color="lightblue" />
-        <Paint color="#adbce6" style="stroke" strokeWidth={strokeWidth} />
-        <Paint color="#ade6d8" style="stroke" strokeWidth={strokeWidth / 2} />
-      </Circle>
-    </Canvas>
-  );
-};
-```
-
-:::tip
-
-When using the Paint component, you always start from scratch.
-It doesn't inherit the properties of the paint available in the current context.
-
-:::
-
-![Paint Assignment](assets/strokes.png)
+## Manual Paint Assignment
 
 Finally, we can assign a ref to a Paint component for later use.
 
