@@ -11,7 +11,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPoint.h>
+#include <SkColor.h>
 
 #pragma clang diagnostic pop
 
@@ -27,10 +27,9 @@ namespace RNSkia {
         ~JsiSkColor() {}
 
         /**
-         * Creates the function for construction a new instance of the SkPoint
+         * Creates the function for construction a new instance of the SkColor
          * wrapper
-         * @param context platform context
-         * @return A function for creating a new host object wrapper for the SkPoint
+         * @return A function for creating a new host object wrapper for the SkColor
          * class
          */
         static const jsi::HostFunctionType
@@ -42,7 +41,8 @@ namespace RNSkia {
                     return jsi::Value::undefined();
                 }
                 int a = round(color.a * 255);
-                return jsi::Value((a << 24) | (color.r << 16) | (color.g << 8) | color.b);
+                // Because JS numbers are unsigned we need to do this conversion
+                return jsi::Value(static_cast<double>(SkColorSetARGB(a, color.r, color.g, color.b) >> 0));
             };
         }
     };
