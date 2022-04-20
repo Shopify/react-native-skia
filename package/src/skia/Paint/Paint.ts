@@ -1,7 +1,7 @@
 import type { SkImageFilter } from "../ImageFilter";
 import type { IMaskFilter } from "../MaskFilter";
 import type { SkColorFilter } from "../ColorFilter";
-import type { IShader } from "../Shader";
+import type { SkShader } from "../Shader";
 import type { SkColor } from "../Color";
 import type { IPathEffect } from "../PathEffect";
 import type { SkJSIInstance } from "../JsiInstance";
@@ -119,7 +119,7 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
    * Sets the current shader, replacing the existing one if there was one.
    * @param shader
    */
-  setShader(shader: IShader | null): void;
+  setShader(shader: SkShader | null): void;
 
   /**
    * Sets the geometry drawn at the beginning and end of strokes.
