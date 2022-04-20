@@ -38,7 +38,7 @@ const SkiaColor = (cl: Color) => {
   }
   const color = Skia.parseColorString(cl);
   if (color !== undefined) {
-    return color >>> 0;
+    return color;
   } else {
     // If the color is not recognized, we fallback to React Native
     let rnColor = processColor(cl);

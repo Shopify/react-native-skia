@@ -41,7 +41,7 @@ namespace RNSkia {
                     return jsi::Value::undefined();
                 }
                 int a = round(color.a * 255);
-                return jsi::Value(static_cast<double>(SkColorSetARGB(a, color.r, color.g, color.b)));
+                return jsi::Value(static_cast<double>(SkColorSetARGB(a, color.r, color.g, color.b) >> 0));
             };
         }
     };
