@@ -6,7 +6,7 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Canvas, Fill } from "@shopify/react-native-skia";
+import { Canvas, Path } from "@shopify/react-native-skia";
 
 import { graphs, SIZE } from "./Model";
 import { Header } from "./Header";
@@ -44,12 +44,20 @@ const styles = StyleSheet.create({
 });
 
 export const Graph = () => {
+  const graph = graphs[0];
   return (
     <View style={styles.container}>
       <Header />
       <View>
         <Canvas style={{ width: SIZE, height: SIZE }}>
-          <Fill color="lightblue" />
+          <Path
+            style="stroke"
+            color="lightblue"
+            path={graph.data.path}
+            strokeWidth={5}
+            strokeJoin="round"
+            strokeCap="round"
+          />
         </Canvas>
       </View>
       <View style={styles.selection}>

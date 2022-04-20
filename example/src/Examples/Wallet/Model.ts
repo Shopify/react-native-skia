@@ -54,12 +54,26 @@ const buildGraph = (datapoints: DataPoints, label: string) => {
   );
   const prices = formattedValues.map((value) => value[0]);
   const dates = formattedValues.map((value) => value[1]);
+  const minDate = Math.min(...dates);
+  const maxDate = Math.max(...dates);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const path = Skia.Path.Make();
+  formattedValues.forEach(([price, date], i) => {
+    const x = ((date - minDate) / (maxDate - minDate)) * SIZE;
+    const y = ((price - minPrice) / (maxPrice - minPrice)) * SIZE;
+    if (i === 0) {
+      path.moveTo(x, y);
+    } else {
+      path.lineTo(x, y);
+    }
+  });
   return {
     label,
-    minPrice: 0,
-    maxPrice: 0,
-    percentChange: 0,
-    path: Skia.Path.Make(),
+    minPrice,
+    maxPrice,
+    percentChange: datapoints.percent_change,
+    path,
   };
 };
 
