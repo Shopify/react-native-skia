@@ -36,13 +36,15 @@ const SkiaColor = (cl: Color) => {
   if (typeof cl === "number") {
     return cl;
   }
-  let color = Skia.parseColorString(cl);
-  if (color === undefined) {
+  const color = Skia.parseColorString(cl);
+  if (color !== undefined) {
+    return color;
+  } else {
     // If the color is not recognized, we fallback to React Native
-    color = processColor(cl) as number;
+    let rnColor = processColor(cl);
     // 1. Neither Skia or RN could parse the color
-    if (color === undefined) {
-      console.warn("Skia couldn't parse the following color " + cl);
+    if (typeof rnColor !== "number") {
+      throw new Error("Skia couldn't parse the following color " + cl);
       // 2. The color is recognized by RN but not by Skia
     } else {
       console.warn(
@@ -50,18 +52,18 @@ const SkiaColor = (cl: Color) => {
           cl +
           ". The color parsing was delegated to React Native. Please file on issue with that color."
       );
+      // On android we need to move the alpha byte to the start of the structure
+      if (Platform.OS === "android") {
+        rnColor = rnColor >>> 0;
+        const a = (rnColor >> 24) & 0xff;
+        const r = (rnColor >> 16) & 0xff;
+        const g = (rnColor >> 8) & 0xff;
+        const b = rnColor & 0xff;
+        rnColor = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
+      }
+      return rnColor;
     }
   }
-  // On android we need to move the alpha byte to the start of the structure
-  if (Platform.OS === "android") {
-    color = color >>> 0;
-    const a = (color >> 24) & 0xff;
-    const r = (color >> 16) & 0xff;
-    const g = (color >> 8) & 0xff;
-    const b = color & 0xff;
-    color = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
-  }
-  return color;
 };
 
 /**
