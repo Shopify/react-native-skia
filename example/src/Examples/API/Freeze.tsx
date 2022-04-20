@@ -1,13 +1,18 @@
+import type { ReactNode } from "react";
 import React, { useEffect, useState } from "react";
+import type { SkPaint, SkRect } from "@shopify/react-native-skia";
 import {
+  FilterMode,
   Canvas,
   Group,
   Rect,
   Text,
   useClockValue,
   useDerivedValue,
-  Freeze,
   rect,
+  createDrawing,
+  Skia,
+  TileMode,
 } from "@shopify/react-native-skia";
 
 const size = 200;
@@ -60,4 +65,33 @@ const Checkerboard = ({ color }: { color: string }) => {
       ))}
     </>
   );
+};
+
+interface FreezeProps {
+  rect: SkRect;
+  children?: ReactNode | ReactNode[];
+}
+
+const onDraw = createDrawing<FreezeProps>(
+  (ctx, { rect: boundingRect }, node) => {
+    if (node.memoized === null) {
+      const recorder = Skia.PictureRecorder();
+      const canvas = recorder.beginRecording(boundingRect);
+      node.visit({
+        ...ctx,
+        canvas,
+      });
+      const pic = recorder.finishRecordingAsPicture();
+      const shaderPaint = Skia.Paint();
+      shaderPaint.setShader(
+        pic.makeShader(TileMode.Decal, TileMode.Decal, FilterMode.Nearest)
+      );
+      node.memoized = shaderPaint;
+    }
+    ctx.canvas.drawRect(boundingRect, node.memoized as SkPaint);
+  }
+);
+
+export const Freeze = (props: FreezeProps) => {
+  return <skDrawing onDraw={onDraw} skipProcessing {...props} />;
 };
