@@ -19,6 +19,7 @@ import {
 
 import { graphs, PADDING, SIZE } from "./Model";
 import { Header } from "./Header";
+import { getYForX } from "./Math";
 
 const { width } = Dimensions.get("window");
 
@@ -54,9 +55,12 @@ const styles = StyleSheet.create({
 
 export const Graph = () => {
   const graph = graphs[0];
+  const { path } = graph.data;
   const cursor = useValue(vec(0, 0));
+  console.log({ cmds3: path.toCmds() });
   const onTouch = useTouchHandler({
     onActive: ({ x, y }) => {
+      //console.log(getYForX(path, x));
       cursor.current = { x, y };
     },
   });
@@ -69,17 +73,17 @@ export const Graph = () => {
             <Path
               style="stroke"
               color="lightblue"
-              path={graph.data.path}
+              path={path}
               strokeWidth={5}
               strokeJoin="round"
               strokeCap="round"
             />
           </Group>
           <Group>
-            <Circle c={cursor} r={10} color="white">
+            <Circle c={cursor} r={12} color="white">
               <Shadow dx={0} dy={0} color="rgba(0, 0, 0, 0.3)" blur={4} />
             </Circle>
-            <Circle c={cursor} r={6} color="lightblue" />
+            <Circle c={cursor} r={7} color="lightblue" />
           </Group>
         </Canvas>
       </View>

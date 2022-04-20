@@ -23,14 +23,23 @@
 #include <SkTextUtils.h>
 #include <SkTrimPathEffect.h>
 
+#include "src/core/SkPathPriv.h"
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
 
 using namespace facebook;
 
+
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
 public:
+    static const int MOVE = 0;
+    static const int LINE = 1;
+    static const int QUAD = 2;
+    static const int CONIC = 3;
+    static const int CUBIC = 4;
+    static const int CLOSE = 5;
 
     // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
     JSI_PROPERTY_GET(__typename__) {
@@ -484,6 +493,76 @@ public:
             runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
 
+  JSI_HOST_FUNCTION(toCmds) {
+    auto cmds = jsi::Array(runtime, getObject()->countVerbs());
+    int i = -1;
+    for (auto [verb, pts, w] : SkPathPriv::Iterate(*getObject())) {
+      i++;
+      switch (verb) {
+        case SkPathVerb::kMove: {
+          auto cmd = jsi::Array::createWithElements(runtime, {
+            jsi::Value(MOVE),
+            jsi::Value(static_cast<double>(pts[0].x())),
+            jsi::Value(static_cast<double>(pts[0].y()))
+          });
+          cmds.setValueAtIndex(runtime, i, cmd);
+          break;
+        }
+        case SkPathVerb::kLine: {
+          auto cmd = jsi::Array::createWithElements(runtime, {
+            jsi::Value(LINE),
+            jsi::Value(static_cast<double>(pts[1].x())),
+            jsi::Value(static_cast<double>(pts[1].y()))
+          });
+          cmds.setValueAtIndex(runtime, i, cmd);
+          break;
+        }
+        case SkPathVerb::kQuad: {
+          auto cmd = jsi::Array::createWithElements(runtime, {
+            jsi::Value(QUAD),
+            jsi::Value(static_cast<double>(pts[1].x())),
+            jsi::Value(static_cast<double>(pts[1].y())),
+            jsi::Value(static_cast<double>(pts[2].x())),
+            jsi::Value(static_cast<double>(pts[2].y())),
+          });
+          cmds.setValueAtIndex(runtime, i, cmd);
+          break;
+        }
+        case SkPathVerb::kConic: {
+            auto cmd = {
+                jsi::Value(CONIC),
+                jsi::Value(static_cast<double>(pts[1].x())),
+                jsi::Value(static_cast<double>(pts[1].y())),
+                jsi::Value(static_cast<double>(pts[2].x())),
+                jsi::Value(static_cast<double>(pts[2].y())),
+                jsi::Value(static_cast<double>(*w))
+            };
+            cmds.setValueAtIndex(runtime, i, jsi::Array::createWithElements(runtime, cmd));
+            break;
+        }
+        case SkPathVerb::kCubic: {
+          auto cmd = jsi::Array::createWithElements(runtime, {
+            jsi::Value(CUBIC),
+            jsi::Value(static_cast<double>(pts[1].x())),
+            jsi::Value(static_cast<double>(pts[1].y())),
+            jsi::Value(static_cast<double>(pts[2].x())),
+            jsi::Value(static_cast<double>(pts[2].y())),
+            jsi::Value(static_cast<double>(pts[3].x())),
+            jsi::Value(static_cast<double>(pts[3].y()))
+          });
+          cmds.setValueAtIndex(runtime, i, cmd);
+          break;
+        }
+        case SkPathVerb::kClose: {
+          auto cmd = jsi::Array::createWithElements(runtime, { jsi::Value(CLOSE) });
+          cmds.setValueAtIndex(runtime, i, cmd);
+          break;
+        }
+      }
+    }
+    return cmds;
+  }
+
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPath, __typename__))
 
   JSI_EXPORT_FUNCTIONS(
@@ -518,7 +597,9 @@ public:
     JSI_EXPORT_FUNC(JsiSkPath, simplify),
     JSI_EXPORT_FUNC(JsiSkPath, countPoints), JSI_EXPORT_FUNC(JsiSkPath, copy),
     JSI_EXPORT_FUNC(JsiSkPath, fromText), JSI_EXPORT_FUNC(JsiSkPath, op),
-    JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable), JSI_EXPORT_FUNC(JsiSkPath, interpolate)
+    JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable),
+    JSI_EXPORT_FUNC(JsiSkPath, interpolate),
+    JSI_EXPORT_FUNC(JsiSkPath, toCmds),
   )
 
   JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
