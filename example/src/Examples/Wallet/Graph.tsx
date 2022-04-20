@@ -6,7 +6,16 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Canvas, Path, Group } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Path,
+  Group,
+  useTouchHandler,
+  useValue,
+  vec,
+  Circle,
+  Shadow,
+} from "@shopify/react-native-skia";
 
 import { graphs, PADDING, SIZE } from "./Model";
 import { Header } from "./Header";
@@ -45,11 +54,17 @@ const styles = StyleSheet.create({
 
 export const Graph = () => {
   const graph = graphs[0];
+  const cursor = useValue(vec(0, 0));
+  const onTouch = useTouchHandler({
+    onActive: ({ x, y }) => {
+      cursor.current = { x, y };
+    },
+  });
   return (
     <View style={styles.container}>
       <Header />
       <View>
-        <Canvas style={{ width: SIZE, height: SIZE }}>
+        <Canvas style={{ width: SIZE, height: SIZE }} onTouch={onTouch}>
           <Group transform={[{ translateY: PADDING }]}>
             <Path
               style="stroke"
@@ -59,6 +74,12 @@ export const Graph = () => {
               strokeJoin="round"
               strokeCap="round"
             />
+          </Group>
+          <Group>
+            <Circle c={cursor} r={10} color="white">
+              <Shadow dx={0} dy={0} color="rgba(0, 0, 0, 0.3)" blur={4} />
+            </Circle>
+            <Circle c={cursor} r={6} color="lightblue" />
           </Group>
         </Canvas>
       </View>
