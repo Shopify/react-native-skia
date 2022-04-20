@@ -38,9 +38,19 @@ const SkiaColor = (cl: Color) => {
   }
   let color = Skia.parseColorString(cl);
   if (color === undefined) {
-    console.warn("Skia couldn't parse the following color " + cl);
     // If the color is not recognized, we fallback to React Native
     color = processColor(cl) as number;
+    // 1. Neither Skia or RN could parse the color
+    if (color === undefined) {
+      console.warn("Skia couldn't parse the following color " + cl);
+      // 2. The color is recognized by RN but not by Skia
+    } else {
+      console.warn(
+        "Skia couldn't parse the following color " +
+          cl +
+          ". The color parsing was delegated to React Native. Please file on issue with that color."
+      );
+    }
   }
   // On android we need to move the alpha byte to the start of the structure
   if (Platform.OS === "android") {
