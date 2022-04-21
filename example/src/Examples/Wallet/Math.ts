@@ -1,6 +1,13 @@
-import type { Vector, SkPath, PathCommand } from "@shopify/react-native-skia";
-import { vec, Skia, cartesian2Polar } from "@shopify/react-native-skia";
+import type { Vector, PathCommand } from "@shopify/react-native-skia";
+import {
+  PathVerb,
+  vec,
+  Skia,
+  cartesian2Polar,
+} from "@shopify/react-native-skia";
 import { exhaustiveCheck } from "@shopify/react-native-skia/src/renderer/typeddash";
+
+import type { Cubic } from "../Aurora/components/Cubic";
 
 const round = (value: number, precision = 0) => {
   const p = Math.pow(10, precision);
@@ -85,7 +92,6 @@ export const cubicBezierYForX = (
   d: Vector,
   precision = 2
 ) => {
-  "worklet";
   const pa = -a.x + 3 * b.x - 3 * c.x + d.x;
   const pb = 3 * a.x - 6 * b.x + 3 * c.x;
   const pc = -3 * a.x + 3 * b.x;
@@ -103,7 +109,6 @@ const cubicBezier = (
   c2: number,
   to: number
 ) => {
-  "worklet";
   const term = 1 - t;
   const a = 1 * term ** 3 * t ** 0 * from;
   const b = 3 * term ** 2 * t ** 1 * c1;
@@ -112,55 +117,31 @@ const cubicBezier = (
   return a + b + c + d;
 };
 
-interface Curve {
-  to: Vector;
+interface Cubic {
+  from: Vector;
   c1: Vector;
   c2: Vector;
+  to: Vector;
 }
 
-interface SelectedCurve {
-  from: Vector;
-  curve: Curve;
-}
-
-interface NullableSelectedCurve {
-  from: Vector;
-  curve: Curve | null;
-}
-const curveIsFound = (c: NullableSelectedCurve): c is SelectedCurve => {
-  return c.curve !== null;
-};
-
-export const selectCurve = (
-  cmds: PathCommand[],
-  x: number
-): SelectedCurve | null => {
-  const result: NullableSelectedCurve = {
-    from: vec(cmds[0][1], cmds[0][2]),
-    curve: null,
-  };
-  for (let i = 1; i < cmds.length; i++) {
+export const selectCurve = (cmds: PathCommand[], x: number): Cubic | null => {
+  for (let i = 0; i < cmds.length; i++) {
     const cmd = cmds[i];
-    const c = {
-      c1: vec(cmd[1], cmd[2]),
-      c2: vec(cmd[3], cmd[4]),
-      to: vec(cmd[4], cmd[5]),
-    };
-    const contains =
-      result.from.x > c.to.x
-        ? x >= c.to.x && x <= result.from.x
-        : x >= result.from.x && x <= c.to.x;
-    if (contains) {
-      result.curve = c;
-      break;
+
+    if (cmd[0] === PathVerb.Cubic) {
+      const to = vec(cmd[1], cmd[2]);
+      const from = vec(cmd[7], cmd[8]);
+      if (x >= from.x && x <= to.x) {
+        return {
+          from,
+          c1: vec(cmd[3], cmd[4]),
+          c2: vec(cmd[5], cmd[6]),
+          to,
+        };
+      }
     }
-    result.from = c.to;
   }
-  if (!curveIsFound(result)) {
-    return null;
-  }
-  console.log({ result, x });
-  return result;
+  return null;
 };
 
 export const getYForX = (cmds: PathCommand[], x: number, precision = 2) => {
@@ -168,14 +149,7 @@ export const getYForX = (cmds: PathCommand[], x: number, precision = 2) => {
   if (c === null) {
     return null;
   }
-  return cubicBezierYForX(
-    x,
-    c.from,
-    c.curve.c1,
-    c.curve.c2,
-    c.curve.to,
-    precision
-  );
+  return cubicBezierYForX(x, c.from, c.c1, c.c2, c.to, precision);
 };
 
 export const controlPoint = (

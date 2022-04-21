@@ -58,8 +58,6 @@ export const Graph = () => {
   const { path } = graph.data;
   const cmds = useMemo(() => path.toCmds(), [path]);
   const cursor = useValue(vec(0, 0));
-  console.log({ cmds });
-
   const onTouch = useTouchHandler({
     onActive: ({ x }) => {
       cursor.current = { x, y: getYForX(cmds, x)! + PADDING };

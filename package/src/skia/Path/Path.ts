@@ -39,12 +39,12 @@ export enum PathOp {
 }
 
 export enum PathVerb {
-  MOVE,
-  LINE,
-  QUAD,
-  CONIC,
-  CUBIC,
-  CLOSE,
+  Move,
+  Line,
+  Quad,
+  Conic,
+  Cubic,
+  Close,
 }
 
 export type PathCommand = number[];

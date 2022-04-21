@@ -29,20 +29,9 @@ namespace RNSkia {
 
 using namespace facebook;
 
-inline jsi::Value scalarToValue(float val)
-{
-    return jsi::Value(static_cast<double>(val));
-}
 
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
 public:
-    static const int MOVE = 0;
-    static const int LINE = 1;
-    static const int QUAD = 2;
-    static const int CONIC = 3;
-    static const int CUBIC = 4;
-    static const int CLOSE = 5;
-
     // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
     JSI_PROPERTY_GET(__typename__) {
       return jsi::String::createFromUtf8(runtime, "Path");
@@ -496,93 +485,32 @@ public:
   }
 
   JSI_HOST_FUNCTION(toCmds) {
-    auto path = getObject();
-    auto verbCount = path->countVerbs();
-    auto pointCount = path->countPoints();
-    std::vector<uint8_t> verbs(verbCount);
-
-    path->getVerbs(verbs.data(), verbCount);
-    auto cmds = jsi::Array(runtime, verbCount);
-    auto i = -1;
-    auto j = 0;
-    for(std::vector<uint8_t>::iterator it = std::begin(verbs); it != std::end(verbs); ++it) {
-      i++;
-      auto verb = static_cast<SkPathVerb>(*it);
-      switch (verb) {
-        case SkPathVerb::kMove: {
-          auto to = path->getPoint(j);
-          j++;
-          auto cmd = jsi::Array::createWithElements(runtime, {
-                  jsi::Value(MOVE),
-                  scalarToValue(to.x()),
-                  scalarToValue(to.y())
-          });
-          cmds.setValueAtIndex(runtime, i, cmd);
-          break;
-        }
-        case SkPathVerb::kLine: {
-          auto to = path->getPoint(j);
-          j++;
-          auto cmd = jsi::Array::createWithElements(runtime, {
-            jsi::Value(LINE),
-            scalarToValue(to.x()),
-            scalarToValue(to.y())
-          });
-          cmds.setValueAtIndex(runtime, i, cmd);
-          break;
-        }
-        case SkPathVerb::kQuad: {
-          auto c = path->getPoint(j);
-          j++;
-          auto to = path->getPoint(j);
-          j++;
-          auto cmd = jsi::Array::createWithElements(runtime, {
-            jsi::Value(QUAD),
-            scalarToValue(c.x()),
-            scalarToValue(c.y()),
-            scalarToValue(to.x()),
-            scalarToValue(to.y())
-          });
-          cmds.setValueAtIndex(runtime, i, cmd);
-          break;
-        }
-       case SkPathVerb::kConic: {
-//          auto cmd = {
-//                  jsi::Value(CONIC),
-//                  scalarToValue(pts[1].x()),
-//                  scalarToValue(pts[1].y()),
-//                  scalarToValue(pts[2].x()),
-//                  scalarToValue(pts[2].y()),
-//                  scalarToValue(*w)
-//          };
-//          cmds.setValueAtIndex(runtime, i, jsi::Array::createWithElements(runtime, cmd));
-          break;
-        }
-        case SkPathVerb::kCubic: {
-          auto c1 = path->getPoint(j);
-          j++;
-          auto c2 = path->getPoint(j);
-          j++;
-          auto to = path->getPoint(j);
-          j++;
-          auto cmd = jsi::Array::createWithElements(runtime, {
-            jsi::Value(CUBIC),
-            scalarToValue(c1.x()),
-            scalarToValue(c1.y()),
-            scalarToValue(c2.x()),
-            scalarToValue(c2.y()),
-            scalarToValue(to.x()),
-            scalarToValue(to.y()),
-          });
-          cmds.setValueAtIndex(runtime, i, cmd);
-          break;
-        }
-        case SkPathVerb::kClose: {
-          auto cmd = jsi::Array::createWithElements(runtime, { jsi::Value(CLOSE) });
-          cmds.setValueAtIndex(runtime, i, cmd);
-          break;
-        }
+    auto path = *getObject();
+    auto cmds = jsi::Array(runtime, path.countVerbs());
+    auto it = SkPath::Iter(path, false);
+    //                       { "Move", "Line", "Quad", "Conic", "Cubic", "Close", "Done" };
+    const int pointCount[] = {     1 ,     2 ,     3 ,      3 ,      4 ,      1 ,     0  };
+    const int cmdCount[] =   {     3 ,     5 ,     7 ,      8 ,      9 ,      3 ,     0  };
+    SkPoint points[4];
+    SkPath::Verb verb;
+    auto k = 0;
+    while (SkPath::kDone_Verb != (verb = it.next(points))) {
+      auto verbVal = static_cast<int>(verb);
+      auto cmd = jsi::Array(runtime, cmdCount[verbVal]);
+      auto j = 0;
+      cmd.setValueAtIndex(runtime, j, jsi::Value(verbVal));
+      j++;
+      for (int i = 0; i < pointCount[verbVal]; ++i) {
+        cmd.setValueAtIndex(runtime, j, jsi::Value(static_cast<double>(points[i].fX)));
+        j++;
+        cmd.setValueAtIndex(runtime, j, jsi::Value(static_cast<double>(points[i].fY)));
+        j++;
       }
+      if (SkPath::kConic_Verb == verb) {
+        cmd.setValueAtIndex(runtime, j, jsi::Value(static_cast<double>(it.conicWeight())));
+      }
+      cmds.setValueAtIndex(runtime, k, cmd);
+      k++;
     }
     return cmds;
   }
