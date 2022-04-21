@@ -15,6 +15,10 @@ import {
   vec,
   Circle,
   Shadow,
+  useDerivedValue,
+  Line,
+  LinearGradient,
+  DashPathEffect,
 } from "@shopify/react-native-skia";
 
 import { graphs, PADDING, SIZE } from "./Model";
@@ -57,10 +61,23 @@ export const Graph = () => {
   const graph = graphs[0];
   const { path } = graph.data;
   const cmds = useMemo(() => path.toCmds(), [path]);
-  const cursor = useValue(vec(0, 0));
+  const x = useValue(0);
+  const c = useDerivedValue(
+    () => ({
+      x: x.current,
+      y: getYForX(cmds, x.current)! + PADDING,
+    }),
+    [x, cmds]
+  );
+  const p1 = useDerivedValue(() => vec(x.current, 0), [x]);
+  const p2 = useDerivedValue(() => vec(x.current, SIZE), [x]);
+  const positions = useDerivedValue(
+    () => [0, x.current / SIZE, x.current / SIZE, 1],
+    [x]
+  );
   const onTouch = useTouchHandler({
-    onActive: ({ x }) => {
-      cursor.current = { x, y: getYForX(cmds, x)! + PADDING };
+    onActive: (pt) => {
+      x.current = pt.x;
     },
   });
   return (
@@ -76,13 +93,30 @@ export const Graph = () => {
               strokeWidth={5}
               strokeJoin="round"
               strokeCap="round"
-            />
+            >
+              <LinearGradient
+                start={vec(0, 0)}
+                end={vec(SIZE, 0)}
+                colors={["#72bcd4", "lightblue", "#e8f4f8", "#e8f4f8"]}
+                positions={positions}
+              />
+            </Path>
           </Group>
+          <Line
+            p1={p1}
+            p2={p2}
+            color="lightgray"
+            style="stroke"
+            strokeWidth={2}
+            strokeCap="round"
+          >
+            <DashPathEffect intervals={[6, 6]} />
+          </Line>
           <Group>
-            <Circle c={cursor} r={12} color="white">
+            <Circle c={c} r={12} color="white">
               <Shadow dx={0} dy={0} color="rgba(0, 0, 0, 0.3)" blur={4} />
             </Circle>
-            <Circle c={cursor} r={7} color="lightblue" />
+            <Circle c={c} r={7} color="lightblue" />
           </Group>
         </Canvas>
       </View>
