@@ -1,11 +1,9 @@
 import type {
   AnimatedProps,
-  PathDef,
   PathProps,
   SkPath,
 } from "@shopify/react-native-skia";
 import {
-  processPath,
   Easing,
   Canvas,
   Fill,
@@ -14,7 +12,7 @@ import {
   useDerivedValue,
   useValue,
 } from "@shopify/react-native-skia";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { createGraphPath } from "./createGraphPath";
@@ -80,8 +78,8 @@ const TransitioningPath = ({
     if (currentPathRef.current !== path) {
       // Process path - can be an SVG string
 
-      // Ensure paths have the same length
-      if (currentPathRef.current.countPoints() !== path.countPoints()) {
+      // Ensure paths are interpolatable
+      if (!path.isInterpolatable(currentPathRef.current)) {
         console.warn(
           "Paths must have the same length. Skipping interpolation."
         );
