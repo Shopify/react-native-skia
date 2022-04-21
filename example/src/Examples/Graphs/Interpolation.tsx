@@ -25,14 +25,14 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
     createGraphPath(width, height, 60)
   );
 
-  const onPress = useCallback(() => {
-    setCurrentPath(createGraphPath(width, height, 60));
-  }, [height, width]);
+  // const onPress = useCallback(() => {
+  //   setCurrentPath(createGraphPath(width, height, 60));
+  // }, [height, width]);
 
   useEffect(() => {
-    const h = setTimeout(() => {
+    const h = setInterval(() => {
       setCurrentPath(createGraphPath(width, height, 60));
-    });
+    }, Math.random() * 400 + 500);
     setCurrentPath(createGraphPath(width, height, 60));
     return () => {
       clearTimeout(h);
@@ -40,7 +40,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
   }, [height, width]);
 
   return (
-    <View style={{ height, marginBottom: 10 }} onTouchEnd={onPress}>
+    <View style={{ height, marginBottom: 10 }}>
       <Canvas style={styles.graph}>
         <Fill color="black" />
         <TransitioningPath
@@ -60,10 +60,10 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
 const TransitioningPath = ({
   path,
   ...props
-}: AnimatedProps<PathProps> & { path: PathDef }) => {
+}: AnimatedProps<PathProps> & { path: SkPath }) => {
   // Save current and next paths (initially the same)
-  const currentPathRef = useRef(processPath(path));
-  const nextPathRef = useRef(processPath(path));
+  const currentPathRef = useRef(path);
+  const nextPathRef = useRef(path);
 
   // Progress value drives the animation
   const progress = useValue(0);
@@ -79,12 +79,9 @@ const TransitioningPath = ({
   useEffect(() => {
     if (currentPathRef.current !== path) {
       // Process path - can be an SVG string
-      const processedPath = processPath(path);
 
       // Ensure paths have the same length
-      if (
-        currentPathRef.current.countPoints() !== processedPath.countPoints()
-      ) {
+      if (currentPathRef.current.countPoints() !== path.countPoints()) {
         console.warn(
           "Paths must have the same length. Skipping interpolation."
         );
@@ -94,7 +91,7 @@ const TransitioningPath = ({
       // sure we can interrupt animations
       currentPathRef.current = animatedPath.current;
       // Set the next path to be the value in the updated path property
-      nextPathRef.current = processedPath;
+      nextPathRef.current = path;
       // reset progress - this will cause the derived value to be updated and
       // the path to be repainted through its parent canvas.
       progress.current = 0;
