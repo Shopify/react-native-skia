@@ -30,18 +30,12 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
   }, [height, width]);
 
   useEffect(() => {
-    const isRunning = { value: true };
-    const dispatchChange = () => {
-      setTimeout(() => {
-        setCurrentPath(createGraphPath(width, height, 60));
-        if (isRunning.value) {
-          dispatchChange();
-        }
-      }, Math.random() * 400 + 500);
-    };
-    dispatchChange();
+    const h = setTimeout(() => {
+      setCurrentPath(createGraphPath(width, height, 60));
+    });
+    setCurrentPath(createGraphPath(width, height, 60));
     return () => {
-      isRunning.value = false;
+      clearTimeout(h);
     };
   }, [height, width]);
 
