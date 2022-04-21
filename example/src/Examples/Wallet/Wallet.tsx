@@ -13,6 +13,7 @@ import {
   Line,
   LinearGradient,
   DashPathEffect,
+  Skia,
 } from "@shopify/react-native-skia";
 
 import { graphs, PADDING, SIZE } from "./Model";
@@ -55,7 +56,7 @@ export const Wallet = () => {
           <Path
             style="stroke"
             color="lightblue"
-            path={path}
+            path={Skia.Path.MakeFromCmds(cmds)!}
             strokeWidth={5}
             strokeJoin="round"
             strokeCap="round"

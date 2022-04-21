@@ -21,6 +21,14 @@ namespace RNSkia {
 using namespace facebook;
 
 class JsiSkPathFactory : public JsiSkHostObject {
+
+  static const int MOVE = 0;
+  static const int LINE = 1;
+  static const int QUAD = 2;
+  static const int CONIC = 3;
+  static const int CUBIC = 4;
+  static const int CLOSE = 5;
+
 public:
   JSI_HOST_FUNCTION(Make) {
     return jsi::Object::createFromHostObject(
@@ -53,9 +61,68 @@ public:
         runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
 
+  JSI_HOST_FUNCTION(MakeFromCmds) {
+    SkPath path;
+    auto cmds = arguments[0].asObject(runtime).asArray(runtime);
+    auto cmdCount = cmds.size(runtime);
+    for (int i = 0; i < cmdCount; i++) {
+      auto cmd = cmds.getValueAtIndex(runtime, i).asObject(runtime).asArray(runtime);
+      auto verb = static_cast<int>(cmd.getValueAtIndex(runtime, 0).asNumber());
+      switch (verb) {
+        case MOVE: {
+          auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
+          auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
+          path.moveTo(x, y);
+          break;
+        }
+        case LINE: {
+          auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
+          auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
+          path.moveTo(x, y);
+          break;
+        }
+        case QUAD: {
+          auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
+          auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
+          auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
+          auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
+          path.quadTo(x1, y1, x2, y2);
+          break;
+        }
+        case CONIC: {
+          auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
+          auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
+          auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
+          auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
+          auto w = cmd.getValueAtIndex(runtime, 5).asNumber();
+          path.conicTo(x1, y1, x2, y2, w);
+          break;
+        }
+        case CUBIC: {
+          auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
+          auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
+          auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
+          auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
+          auto x3 = cmd.getValueAtIndex(runtime, 5).asNumber();
+          auto y3 = cmd.getValueAtIndex(runtime, 6).asNumber();
+          path.cubicTo(x1, y1, x2, y2, x3, y3);
+          break;
+        }
+        case CLOSE:
+          path.close();
+              break;
+        default:
+          return jsi::Value::null();
+      }
+    }
+    return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathFactory, Make),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromSVGString),
-                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromOp))
+                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromOp),
+                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromCmds))
 
   JsiSkPathFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
