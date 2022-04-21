@@ -72,6 +72,8 @@ const TransitioningPath = ({
 
   useEffect(() => {
     // Ensure paths are interpolatable
+    // There are libraries to help you make paths interpolatable.
+    // For instance: https://github.com/notoriousb1t/polymorph
     if (!path.isInterpolatable(currentPathRef.current)) {
       console.warn("Paths must have the same length. Skipping interpolation.");
       return;
