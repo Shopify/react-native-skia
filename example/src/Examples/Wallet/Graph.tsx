@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Text,
   View,
@@ -56,12 +56,13 @@ const styles = StyleSheet.create({
 export const Graph = () => {
   const graph = graphs[0];
   const { path } = graph.data;
+  const cmds = useMemo(() => path.toCmds(), [path]);
   const cursor = useValue(vec(0, 0));
-  console.log({ cmds3: path.toCmds() });
+  console.log({ cmds });
+
   const onTouch = useTouchHandler({
-    onActive: ({ x, y }) => {
-      //console.log(getYForX(path, x));
-      cursor.current = { x, y };
+    onActive: ({ x }) => {
+      cursor.current = { x, y: getYForX(cmds, x)! + PADDING };
     },
   });
   return (

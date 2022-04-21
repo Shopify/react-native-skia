@@ -23,8 +23,6 @@
 #include <SkTextUtils.h>
 #include <SkTrimPathEffect.h>
 
-#include "src/core/SkPathPriv.h"
-
 #pragma clang diagnostic pop
 
 namespace RNSkia {
@@ -498,62 +496,83 @@ public:
   }
 
   JSI_HOST_FUNCTION(toCmds) {
-    auto path = *getObject();
-    auto cmds = jsi::Array(runtime, path.countVerbs());
-    int i = -1;
-    for (auto [verb, pts, w] : SkPathPriv::Iterate(path)) {
+    auto path = getObject();
+    auto verbCount = path->countVerbs();
+    auto pointCount = path->countPoints();
+    std::vector<uint8_t> verbs(verbCount);
+
+    path->getVerbs(verbs.data(), verbCount);
+    auto cmds = jsi::Array(runtime, verbCount);
+    auto i = -1;
+    auto j = 0;
+    for(std::vector<uint8_t>::iterator it = std::begin(verbs); it != std::end(verbs); ++it) {
       i++;
+      auto verb = static_cast<SkPathVerb>(*it);
       switch (verb) {
         case SkPathVerb::kMove: {
+          auto to = path->getPoint(j);
+          j++;
           auto cmd = jsi::Array::createWithElements(runtime, {
-            jsi::Value(MOVE),
-            scalarToValue(pts[0].x()),
-            scalarToValue(pts[0].y())
+                  jsi::Value(MOVE),
+                  scalarToValue(to.x()),
+                  scalarToValue(to.y())
           });
           cmds.setValueAtIndex(runtime, i, cmd);
           break;
         }
         case SkPathVerb::kLine: {
+          auto to = path->getPoint(j);
+          j++;
           auto cmd = jsi::Array::createWithElements(runtime, {
             jsi::Value(LINE),
-            scalarToValue(pts[1].x()),
-            scalarToValue(pts[1].y())
+            scalarToValue(to.x()),
+            scalarToValue(to.y())
           });
           cmds.setValueAtIndex(runtime, i, cmd);
           break;
         }
         case SkPathVerb::kQuad: {
+          auto c = path->getPoint(j);
+          j++;
+          auto to = path->getPoint(j);
+          j++;
           auto cmd = jsi::Array::createWithElements(runtime, {
             jsi::Value(QUAD),
-            scalarToValue(pts[1].x()),
-            scalarToValue(pts[1].y()),
-            scalarToValue(pts[2].x()),
-            scalarToValue(pts[2].y())
+            scalarToValue(c.x()),
+            scalarToValue(c.y()),
+            scalarToValue(to.x()),
+            scalarToValue(to.y())
           });
           cmds.setValueAtIndex(runtime, i, cmd);
           break;
         }
-        case SkPathVerb::kConic: {
-            auto cmd = {
-                jsi::Value(CONIC),
-                scalarToValue(pts[1].x()),
-                scalarToValue(pts[1].y()),
-                scalarToValue(pts[2].x()),
-                scalarToValue(pts[2].y()),
-                scalarToValue(*w)
-            };
-            cmds.setValueAtIndex(runtime, i, jsi::Array::createWithElements(runtime, cmd));
-            break;
+       case SkPathVerb::kConic: {
+//          auto cmd = {
+//                  jsi::Value(CONIC),
+//                  scalarToValue(pts[1].x()),
+//                  scalarToValue(pts[1].y()),
+//                  scalarToValue(pts[2].x()),
+//                  scalarToValue(pts[2].y()),
+//                  scalarToValue(*w)
+//          };
+//          cmds.setValueAtIndex(runtime, i, jsi::Array::createWithElements(runtime, cmd));
+          break;
         }
         case SkPathVerb::kCubic: {
+          auto c1 = path->getPoint(j);
+          j++;
+          auto c2 = path->getPoint(j);
+          j++;
+          auto to = path->getPoint(j);
+          j++;
           auto cmd = jsi::Array::createWithElements(runtime, {
             jsi::Value(CUBIC),
-            scalarToValue(pts[1].x()),
-            scalarToValue(pts[1].y()),
-            scalarToValue(pts[2].x()),
-            scalarToValue(pts[2].y()),
-            scalarToValue(pts[3].x()),
-            scalarToValue(pts[3].y()),
+            scalarToValue(c1.x()),
+            scalarToValue(c1.y()),
+            scalarToValue(c2.x()),
+            scalarToValue(c2.y()),
+            scalarToValue(to.x()),
+            scalarToValue(to.y()),
           });
           cmds.setValueAtIndex(runtime, i, cmd);
           break;

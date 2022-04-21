@@ -1,4 +1,4 @@
-import type { Vector, SkPath } from "@shopify/react-native-skia";
+import type { Vector, SkPath, PathCommand } from "@shopify/react-native-skia";
 import { vec, Skia, cartesian2Polar } from "@shopify/react-native-skia";
 import { exhaustiveCheck } from "@shopify/react-native-skia/src/renderer/typeddash";
 
@@ -131,17 +131,20 @@ const curveIsFound = (c: NullableSelectedCurve): c is SelectedCurve => {
   return c.curve !== null;
 };
 
-export const selectCurve = (path: SkPath, x: number): SelectedCurve | null => {
-  const cmds = path.toCmds();
+export const selectCurve = (
+  cmds: PathCommand[],
+  x: number
+): SelectedCurve | null => {
   const result: NullableSelectedCurve = {
     from: vec(cmds[0][1], cmds[0][2]),
     curve: null,
   };
   for (let i = 1; i < cmds.length; i++) {
+    const cmd = cmds[i];
     const c = {
-      c1: vec(cmds[i][1], cmds[i][2]),
-      c2: vec(cmds[i][3], cmds[i][4]),
-      to: vec(cmds[i][4], cmds[i][5]),
+      c1: vec(cmd[1], cmd[2]),
+      c2: vec(cmd[3], cmd[4]),
+      to: vec(cmd[4], cmd[5]),
     };
     const contains =
       result.from.x > c.to.x
@@ -156,11 +159,12 @@ export const selectCurve = (path: SkPath, x: number): SelectedCurve | null => {
   if (!curveIsFound(result)) {
     return null;
   }
+  console.log({ result, x });
   return result;
 };
 
-export const getYForX = (path: SkPath, x: number, precision = 2) => {
-  const c = selectCurve(path, x);
+export const getYForX = (cmds: PathCommand[], x: number, precision = 2) => {
+  const c = selectCurve(cmds, x);
   if (c === null) {
     return null;
   }
