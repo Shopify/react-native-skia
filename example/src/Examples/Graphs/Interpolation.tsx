@@ -26,7 +26,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
   useEffect(() => {
     const h = setInterval(() => {
       setCurrentPath(createGraphPath(width, height, 60));
-    }, Math.random() * 400 + 500);
+    }, 1000);
     setCurrentPath(createGraphPath(width, height, 60));
     return () => {
       clearTimeout(h);
