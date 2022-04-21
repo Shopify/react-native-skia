@@ -23,10 +23,6 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
     createGraphPath(width, height, 60)
   );
 
-  // const onPress = useCallback(() => {
-  //   setCurrentPath(createGraphPath(width, height, 60));
-  // }, [height, width]);
-
   useEffect(() => {
     const h = setInterval(() => {
       setCurrentPath(createGraphPath(width, height, 60));
@@ -50,7 +46,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
           color="#cccc66"
         />
       </Canvas>
-      <Text>Touch graph to interpolate</Text>
+      <Text>Transitions between graphs</Text>
     </View>
   );
 };
@@ -75,30 +71,24 @@ const TransitioningPath = ({
   );
 
   useEffect(() => {
-    if (currentPathRef.current !== path) {
-      // Process path - can be an SVG string
-
-      // Ensure paths are interpolatable
-      if (!path.isInterpolatable(currentPathRef.current)) {
-        console.warn(
-          "Paths must have the same length. Skipping interpolation."
-        );
-        return;
-      }
-      // Set current path to the current interpolated path to make
-      // sure we can interrupt animations
-      currentPathRef.current = animatedPath.current;
-      // Set the next path to be the value in the updated path property
-      nextPathRef.current = path;
-      // reset progress - this will cause the derived value to be updated and
-      // the path to be repainted through its parent canvas.
-      progress.current = 0;
-      // Run animation
-      runTiming(progress, 1, {
-        duration: 750,
-        easing: Easing.inOut(Easing.cubic),
-      });
+    // Ensure paths are interpolatable
+    if (!path.isInterpolatable(currentPathRef.current)) {
+      console.warn("Paths must have the same length. Skipping interpolation.");
+      return;
     }
+    // Set current path to the current interpolated path to make
+    // sure we can interrupt animations
+    currentPathRef.current = animatedPath.current;
+    // Set the next path to be the value in the updated path property
+    nextPathRef.current = path;
+    // reset progress - this will cause the derived value to be updated and
+    // the path to be repainted through its parent canvas.
+    progress.current = 0;
+    // Run animation
+    runTiming(progress, 1, {
+      duration: 750,
+      easing: Easing.inOut(Easing.cubic),
+    });
   }, [animatedPath, path, progress]);
 
   return <Path {...props} path={animatedPath} />;
