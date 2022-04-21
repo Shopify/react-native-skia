@@ -56,6 +56,7 @@ export const Wallet = () => {
           <Path
             style="stroke"
             color="lightblue"
+            // We use MakeFromCmds to make sure that the roundtrip is correct
             path={Skia.Path.MakeFromCmds(cmds)!}
             strokeWidth={5}
             strokeJoin="round"
