@@ -67,7 +67,8 @@ export const Wallet = () => {
           </Path>
           <Path
             style="stroke"
-            path={path}
+            // Let's check that the roundtrip works
+            path={Skia.Path.MakeFromCmds(cmds)!}
             strokeWidth={3}
             strokeJoin="round"
             strokeCap="round"

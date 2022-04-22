@@ -498,19 +498,15 @@ public:
       auto verbVal = static_cast<int>(verb);
       auto cmd = jsi::Array(runtime, cmdCount[verbVal]);
       auto j = 0;
-      cmd.setValueAtIndex(runtime, j, jsi::Value(verbVal));
-      j++;
+      cmd.setValueAtIndex(runtime, j++, jsi::Value(verbVal));
       for (int i = 0; i < pointCount[verbVal]; ++i) {
-        cmd.setValueAtIndex(runtime, j, jsi::Value(static_cast<double>(points[i].fX)));
-        j++;
-        cmd.setValueAtIndex(runtime, j, jsi::Value(static_cast<double>(points[i].fY)));
-        j++;
+        cmd.setValueAtIndex(runtime, j++, jsi::Value(static_cast<double>(points[i].fX)));
+        cmd.setValueAtIndex(runtime, j++, jsi::Value(static_cast<double>(points[i].fY)));
       }
       if (SkPath::kConic_Verb == verb) {
         cmd.setValueAtIndex(runtime, j, jsi::Value(static_cast<double>(it.conicWeight())));
       }
-      cmds.setValueAtIndex(runtime, k, cmd);
-      k++;
+      cmds.setValueAtIndex(runtime, k++, cmd);
     }
     return cmds;
   }

@@ -13,6 +13,7 @@
 
 #include <SkPath.h>
 #include <SkPathOps.h>
+#include <RNSkLog.h>
 
 #pragma clang diagnostic pop
 
@@ -67,21 +68,37 @@ public:
     auto cmdCount = cmds.size(runtime);
     for (int i = 0; i < cmdCount; i++) {
       auto cmd = cmds.getValueAtIndex(runtime, i).asObject(runtime).asArray(runtime);
+      if (cmd.size(runtime) < 1) {
+        RNSkLogger::logToConsole("Invalid command found (got an empty array)");
+        return jsi::Value::null();
+      }
       auto verb = static_cast<int>(cmd.getValueAtIndex(runtime, 0).asNumber());
       switch (verb) {
         case MOVE: {
+          if (cmd.size(runtime) < 3) {
+            RNSkLogger::logToConsole( "Invalid move command found");
+            return jsi::Value::null();
+          }
           auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
           auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
           path.moveTo(x, y);
           break;
         }
         case LINE: {
+          if (cmd.size(runtime) < 3) {
+            RNSkLogger::logToConsole("Invalid line command found");
+            return jsi::Value::null();
+          }
           auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
           auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
           path.lineTo(x, y);
           break;
         }
         case QUAD: {
+          if (cmd.size(runtime) < 5) {
+            RNSkLogger::logToConsole("Invalid line command found");
+            return jsi::Value::null();
+          }
           auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
           auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
           auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
@@ -90,6 +107,10 @@ public:
           break;
         }
         case CONIC: {
+          if (cmd.size(runtime) < 6) {
+            RNSkLogger::logToConsole("Invalid line command found");
+            return jsi::Value::null();
+          }
           auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
           auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
           auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
@@ -99,6 +120,10 @@ public:
           break;
         }
         case CUBIC: {
+          if (cmd.size(runtime) < 7) {
+            RNSkLogger::logToConsole("Invalid line command found");
+            return jsi::Value::null();
+          }
           auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
           auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
           auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
@@ -108,11 +133,14 @@ public:
           path.cubicTo(x1, y1, x2, y2, x3, y3);
           break;
         }
-        case CLOSE:
+        case CLOSE: {
           path.close();
-              break;
-        default:
+          break;
+        }
+        default: {
+          RNSkLogger::logToConsole("Found an unknown command");
           return jsi::Value::null();
+        }
       }
     }
     return jsi::Object::createFromHostObject(
