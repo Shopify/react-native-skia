@@ -1,11 +1,9 @@
 import type {
   AnimatedProps,
-  PathDef,
   PathProps,
   SkPath,
 } from "@shopify/react-native-skia";
 import {
-  processPath,
   Easing,
   Canvas,
   Fill,
@@ -14,7 +12,7 @@ import {
   useDerivedValue,
   useValue,
 } from "@shopify/react-native-skia";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { createGraphPath } from "./createGraphPath";
@@ -25,28 +23,18 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
     createGraphPath(width, height, 60)
   );
 
-  const onPress = useCallback(() => {
-    setCurrentPath(createGraphPath(width, height, 60));
-  }, [height, width]);
-
   useEffect(() => {
-    const isRunning = { value: true };
-    const dispatchChange = () => {
-      setTimeout(() => {
-        setCurrentPath(createGraphPath(width, height, 60));
-        if (isRunning.value) {
-          dispatchChange();
-        }
-      }, Math.random() * 400 + 500);
-    };
-    dispatchChange();
+    const h = setInterval(() => {
+      setCurrentPath(createGraphPath(width, height, 60));
+    }, 1000);
+    setCurrentPath(createGraphPath(width, height, 60));
     return () => {
-      isRunning.value = false;
+      clearTimeout(h);
     };
   }, [height, width]);
 
   return (
-    <View style={{ height, marginBottom: 10 }} onTouchEnd={onPress}>
+    <View style={{ height, marginBottom: 10 }}>
       <Canvas style={styles.graph}>
         <Fill color="black" />
         <TransitioningPath
@@ -58,7 +46,7 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
           color="#cccc66"
         />
       </Canvas>
-      <Text>Touch graph to interpolate</Text>
+      <Text>Transitions between graphs</Text>
     </View>
   );
 };
@@ -66,10 +54,10 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
 const TransitioningPath = ({
   path,
   ...props
-}: AnimatedProps<PathProps> & { path: PathDef }) => {
+}: AnimatedProps<PathProps> & { path: SkPath }) => {
   // Save current and next paths (initially the same)
-  const currentPathRef = useRef(processPath(path));
-  const nextPathRef = useRef(processPath(path));
+  const currentPathRef = useRef(path);
+  const nextPathRef = useRef(path);
 
   // Progress value drives the animation
   const progress = useValue(0);
@@ -83,33 +71,26 @@ const TransitioningPath = ({
   );
 
   useEffect(() => {
-    if (currentPathRef.current !== path) {
-      // Process path - can be an SVG string
-      const processedPath = processPath(path);
-
-      // Ensure paths have the same length
-      if (
-        currentPathRef.current.countPoints() !== processedPath.countPoints()
-      ) {
-        console.warn(
-          "Paths must have the same length. Skipping interpolation."
-        );
-        return;
-      }
-      // Set current path to the current interpolated path to make
-      // sure we can interrupt animations
-      currentPathRef.current = animatedPath.current;
-      // Set the next path to be the value in the updated path property
-      nextPathRef.current = processedPath;
-      // reset progress - this will cause the derived value to be updated and
-      // the path to be repainted through its parent canvas.
-      progress.current = 0;
-      // Run animation
-      runTiming(progress, 1, {
-        duration: 750,
-        easing: Easing.inOut(Easing.cubic),
-      });
+    // Ensure paths are interpolatable
+    // There are libraries to help you make paths interpolatable.
+    // For instance: https://github.com/notoriousb1t/polymorph
+    if (!path.isInterpolatable(currentPathRef.current)) {
+      console.warn("Paths must have the same length. Skipping interpolation.");
+      return;
     }
+    // Set current path to the current interpolated path to make
+    // sure we can interrupt animations
+    currentPathRef.current = animatedPath.current;
+    // Set the next path to be the value in the updated path property
+    nextPathRef.current = path;
+    // reset progress - this will cause the derived value to be updated and
+    // the path to be repainted through its parent canvas.
+    progress.current = 0;
+    // Run animation
+    runTiming(progress, 1, {
+      duration: 750,
+      easing: Easing.inOut(Easing.cubic),
+    });
   }, [animatedPath, path, progress]);
 
   return <Path {...props} path={animatedPath} />;
