@@ -5,7 +5,7 @@ import data from "./data.json";
 import { curveLines } from "./Math";
 
 export const SIZE = Dimensions.get("window").width;
-export const PADDING = 8;
+export const PADDING = 16;
 
 interface Amount {
   amount: string;

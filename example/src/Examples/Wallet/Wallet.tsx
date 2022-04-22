@@ -30,6 +30,10 @@ export const Wallet = () => {
   const graph = graphs[0];
   const { path } = graph.data;
   const cmds = useMemo(() => path.toCmds(), [path]);
+  const closedPath = path.copy();
+  closedPath.lineTo(path.getLastPt().x, SIZE - PADDING);
+  closedPath.lineTo(0, SIZE - PADDING);
+  closedPath.close();
   const x = useValue(0);
   const c = useDerivedValue(
     () => ({
@@ -53,19 +57,25 @@ export const Wallet = () => {
     <View style={styles.container}>
       <Canvas style={{ width: SIZE, height: SIZE }} onTouch={onTouch}>
         <Group transform={[{ translateY: PADDING }]}>
+          <Path path={closedPath}>
+            <LinearGradient
+              start={vec(0, 0)}
+              end={vec(0, SIZE)}
+              positions={[0, 0.9]}
+              colors={["#E2F1FE", "rgba(226, 241, 254, 0)"]}
+            />
+          </Path>
           <Path
             style="stroke"
-            color="lightblue"
-            // We use MakeFromCmds to make sure that the roundtrip is correct
-            path={Skia.Path.MakeFromCmds(cmds)!}
-            strokeWidth={5}
+            path={path}
+            strokeWidth={3}
             strokeJoin="round"
             strokeCap="round"
           >
             <LinearGradient
               start={vec(0, 0)}
               end={vec(SIZE, 0)}
-              colors={["#72bcd4", "lightblue", "#e8f4f8", "#e8f4f8"]}
+              colors={["#0173F3", "#0173F3", "#E2F1FE", "#E2F1FE"]}
               positions={positions}
             />
           </Path>
@@ -84,7 +94,7 @@ export const Wallet = () => {
           <Circle c={c} r={12} color="white">
             <Shadow dx={0} dy={0} color="rgba(0, 0, 0, 0.3)" blur={4} />
           </Circle>
-          <Circle c={c} r={7} color="lightblue" />
+          <Circle c={c} r={7} color="#0173F3" />
         </Group>
       </Canvas>
     </View>

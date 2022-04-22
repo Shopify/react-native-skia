@@ -78,7 +78,7 @@ public:
         case LINE: {
           auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
           auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
-          path.moveTo(x, y);
+          path.lineTo(x, y);
           break;
         }
         case QUAD: {

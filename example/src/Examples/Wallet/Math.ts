@@ -21,7 +21,6 @@ const cuberoot = (x: number) => {
 };
 
 const solveCubic = (a: number, b: number, c: number, d: number) => {
-  "worklet";
   if (Math.abs(a) < 1e-8) {
     // Quadratic case, ax^2+bx+c=0
     a = b;
@@ -159,7 +158,6 @@ export const controlPoint = (
   reverse: boolean,
   smoothing: number
 ) => {
-  "worklet";
   const p = previous || current;
   const n = next || current;
   // Properties of the opposed-line
@@ -181,7 +179,6 @@ export const curveLines = (
   smoothing: number,
   strategy: "complex" | "bezier" | "simple"
 ) => {
-  "worklet";
   const path = Skia.Path.Make();
   path.moveTo(points[0].x, points[0].y);
   // build the d attributes by looping over the points
