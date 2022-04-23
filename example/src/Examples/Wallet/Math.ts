@@ -7,14 +7,13 @@ import {
 } from "@shopify/react-native-skia";
 import { exhaustiveCheck } from "@shopify/react-native-skia/src/renderer/typeddash";
 
-import type { Cubic } from "../Aurora/components/Cubic";
-
 const round = (value: number, precision = 0) => {
   const p = Math.pow(10, precision);
   return Math.round(value * p) / p;
 };
 
-// https://stackoverflow.com/questions/27176423/function-to-solve-cubic-equation-analytically
+// https://stackoverflow.com/questions/27176423
+// https://stackoverflow.com/questions/51879836
 const cuberoot = (x: number) => {
   const y = Math.pow(Math.abs(x), 1 / 3);
   return x < 0 ? -y : y;
@@ -148,7 +147,6 @@ export const getYForX = (cmds: PathCommand[], x: number, precision = 2) => {
   if (c === null) {
     return null;
   }
-  // this is probably faster: https://github.com/gre/bezier-easing/blob/master/src/index.js
   return cubicBezierYForX(x, c.from, c.c1, c.c2, c.to, precision);
 };
 
