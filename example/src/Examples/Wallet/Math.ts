@@ -128,8 +128,8 @@ export const selectCurve = (cmds: PathCommand[], x: number): Cubic | null => {
     const cmd = cmds[i];
 
     if (cmd[0] === PathVerb.Cubic) {
-      const to = vec(cmd[1], cmd[2]);
-      const from = vec(cmd[7], cmd[8]);
+      const to = vec(cmd[7], cmd[8]);
+      const from = vec(cmd[1], cmd[2]);
       if (x >= from.x && x <= to.x) {
         return {
           from,
@@ -148,6 +148,7 @@ export const getYForX = (cmds: PathCommand[], x: number, precision = 2) => {
   if (c === null) {
     return null;
   }
+  // this is probably faster: https://github.com/gre/bezier-easing/blob/master/src/index.js
   return cubicBezierYForX(x, c.from, c.c1, c.c2, c.to, precision);
 };
 

@@ -54,7 +54,7 @@ const buildGraph = (datapoints: DataPoints, label: string) => {
     (price) => [parseFloat(price[0]), price[1]] as [number, number]
   );
   const prices = formattedValues.map((value) => value[0]);
-  const dates = formattedValues.map((value) => value[1]);
+  const dates = formattedValues.map((value) => value[1]).reverse();
   const minDate = Math.min(...dates);
   const maxDate = Math.max(...dates);
   const minPrice = Math.min(...prices);
