@@ -142,16 +142,16 @@ Some SVGs contain inlined SVGs via the `<image>` or `<feImage>` elements. This i
 ### Symbols
 
 The `<symbol>` tag is not supported.
-There are ways to rewrite your SVG to not use this tag.
-For instance it can be replaced by a `<g>` tag.
+There are ways to rewrite your SVG without this tag.
+For instance, it can be replaced by a `<g>` tag.
 
 
 ## Gradient Templates
 
 The deprecated `xlink:href` attribute is not supported in gradients.
 You can use the `href` attribute instead.
-However we found that doesn't appear to be supported properly.
-We would recommend avoid using it.
+However, we found that it doesn't appear to be adequately supported.
+We would recommend avoiding using it.
 
 ### Fallbacks
 
