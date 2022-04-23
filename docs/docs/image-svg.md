@@ -114,6 +114,24 @@ Would need to be rewritten as:
 
 The `opacity` attribute also applies to both the `fill` and `stroke` attributes.
 
+### Non Supported Elements
+
+Below is the list of non-supported element. Often these SVGs can be rewritten to not use these elements.
+The following elements are not supported:
+  * `<altGlyph>` (deprecated)
+  * `<animate>`
+  * `<cursor>` (deprecated)
+  * `<feComponentTransfer>`
+  * `<feConvolveMatrix>`
+  * `<feTile>`
+  * `<feDropShadow>` 
+  * `<font>` (deprecated)
+  * `<foreignObject>`
+  * `<glyph>` (deprecated)
+  * `<script>`
+  * `<view>`
+
+
 ### Font Family
 
 When rendering your SVG with Skia, all fonts available in your app are also available to your SVG. However, the way you can set the `font-family` attribute is not flexible.
@@ -138,13 +156,6 @@ The single quote syntax won't work either.
 ### Inlined SVGs
 
 Some SVGs contain inlined SVGs via the `<image>` or `<feImage>` elements. This is not supported.
-
-### Symbols
-
-The `<symbol>` tag is not supported.
-There are ways to rewrite your SVG without this tag.
-For instance, it can be replaced by a `<g>` tag.
-
 
 ## Gradient Templates
 
