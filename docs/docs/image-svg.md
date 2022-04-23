@@ -139,6 +139,20 @@ The single quote syntax won't work either.
 
 Some SVGs contain inlined SVGs via the `<image>` or `<feImage>` elements. This is not supported.
 
+### Symbols
+
+The `<symbol>` tag is not supported.
+There are ways to rewrite your SVG to not use this tag.
+For instance it can be replaced by a `<g>` tag.
+
+
+## Gradient Templates
+
+The deprecated `xlink:href` attribute is not supported in gradients.
+You can use the `href` attribute instead.
+However we found that doesn't appear to be supported properly.
+We would recommend avoid using it.
+
 ### Fallbacks
 
 Some SVG with issues display nicely in the browser because they are very tolerant of errors. We found that the Skia SVG module is much less forgiving.
