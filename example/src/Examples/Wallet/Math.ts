@@ -127,8 +127,8 @@ export const selectCurve = (cmds: PathCommand[], x: number): Cubic | null => {
     const cmd = cmds[i];
 
     if (cmd[0] === PathVerb.Cubic) {
-      const to = vec(cmd[7], cmd[8]);
       const from = vec(cmd[1], cmd[2]);
+      const to = vec(cmd[7], cmd[8]);
       if (x >= from.x && x <= to.x) {
         return {
           from,
