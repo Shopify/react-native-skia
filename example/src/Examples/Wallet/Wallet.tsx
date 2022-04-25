@@ -21,6 +21,8 @@ import {
 import { graphs, PADDING, WIDTH, HEIGHT, COLORS, AJUSTED_SIZE } from "./Model";
 import { getYForX } from "./Math";
 import { Cursor } from "./components/Cursor";
+import { Selection } from "./components/Selection";
+import { List } from "./components/List";
 
 const tf = Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica")!;
 const titleFont = Skia.Font(tf, 64);
@@ -119,6 +121,8 @@ export const Wallet = () => {
           <Cursor c={c} start={start} end={end} />
         </Group>
       </Canvas>
+      <Selection />
+      <List />
     </View>
   );
 };
