@@ -15,16 +15,23 @@ import {
   clamp,
   Skia,
   Text,
+  interpolate,
 } from "@shopify/react-native-skia";
 
-import { graphs, PADDING, WIDTH, HEIGHT, COLORS } from "./Model";
+import { graphs, PADDING, WIDTH, HEIGHT, COLORS, AJUSTED_SIZE } from "./Model";
 import { getYForX } from "./Math";
 import { Cursor } from "./components/Cursor";
 
-const titleFont = Skia.Font(
-  Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica")!,
-  64
-);
+const tf = Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica")!;
+const titleFont = Skia.Font(tf, 64);
+const subtitleFont = Skia.Font(tf, 24);
+
+const currency = new Intl.NumberFormat("en-EN", {
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+  style: "currency",
+  currency: "USD",
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -35,7 +42,7 @@ const styles = StyleSheet.create({
 
 export const Wallet = () => {
   const graph = graphs[0];
-  const { path } = graph.data;
+  const { path, maxPrice, minPrice } = graph.data;
   const cmds = useMemo(() => path.toCmds(), [path]);
   const gestureActive = useValue(false);
   const offsetX = useValue(0);
@@ -47,8 +54,15 @@ export const Wallet = () => {
     };
     return result;
   }, [x, cmds]);
-  const text = "$5,021";
-  const titlePos = titleFont.measureText(text);
+  const text = useDerivedValue(() => {
+    return currency.format(
+      interpolate(c.current.y, [0, AJUSTED_SIZE], [maxPrice, minPrice])
+    );
+  }, [c]);
+  const subtitle = "+ $314,15";
+  const titleX =
+    WIDTH / 2 - titleFont.measureText(currency.format(maxPrice)).width / 2;
+  const subtitlePos = subtitleFont.measureText(subtitle);
   const translateY = HEIGHT + PADDING;
   const onTouch = useTouchHandler({
     onStart: (pos) => {
@@ -79,11 +93,18 @@ export const Wallet = () => {
         onTouch={onTouch}
       >
         <Text
-          x={WIDTH / 2 - titlePos.width / 2}
-          y={translateY - 100}
+          x={titleX}
+          y={translateY - 120}
           text={text}
           font={titleFont}
           color="white"
+        />
+        <Text
+          x={WIDTH / 2 - subtitlePos.width / 2}
+          y={translateY - 60}
+          text={subtitle}
+          font={subtitleFont}
+          color="#8E8E93"
         />
         <Group transform={[{ translateY }]}>
           <Path

@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { Skia } from "@shopify/react-native-skia";
+import { interpolate, Skia } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 import data from "./data.json";
@@ -8,6 +8,7 @@ import { curveLines } from "./Math";
 export const WIDTH = Dimensions.get("window").width;
 export const HEIGHT = WIDTH / 2;
 export const PADDING = 16;
+export const AJUSTED_SIZE = HEIGHT - PADDING * 2;
 export const COLORS = ["#F69D69", "#FFC37D", "#61E0A1", "#31CBD1"].map(
   Skia.Color
 );
@@ -64,7 +65,6 @@ const buildGraph = (datapoints: DataPoints, label: string) => {
   const maxDate = Math.max(...dates);
   const minPrice = Math.min(...prices);
   const maxPrice = Math.max(...prices);
-  const AJUSTED_SIZE = HEIGHT - PADDING * 2;
   const points = formattedValues.map(([price, date]) => {
     const x = ((date - minDate) / (maxDate - minDate)) * WIDTH;
     const y = ((price - minPrice) / (maxPrice - minPrice)) * AJUSTED_SIZE;
