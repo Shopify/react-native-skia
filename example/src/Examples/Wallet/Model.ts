@@ -103,7 +103,7 @@ export const graphs = [
     data: buildGraph(values.year, "This Year"),
   },
   {
-    label: "all",
+    label: "All",
     value: 4,
     data: buildGraph(values.all, "All time"),
   },

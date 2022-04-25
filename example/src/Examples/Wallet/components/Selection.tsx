@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 
-import { graphs } from "../Model";
+import { graphs, WIDTH } from "../Model";
 
 const styles = StyleSheet.create({
   root: {
@@ -12,26 +12,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#272636",
     borderRadius: 16,
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    padding: 16,
+  },
+  button: {
+    height: 64,
+    width: (WIDTH - 32) / graphs.length,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 16,
   },
   label: {
     fontFamily: "Helevtica",
     fontSize: 16,
     color: "white",
+    textAlign: "center",
   },
 });
 
-interface SelectionProps {}
-
-export const Selection = ({}: SelectionProps) => {
+export const Selection = () => {
   return (
     <View style={styles.root}>
       <View style={styles.container}>
         {graphs.map((graph, index) => (
-          <Text key={index} style={styles.label}>
-            {graph.label}
-          </Text>
+          <View key={index} style={styles.button}>
+            <Text style={styles.label}>{graph.label}</Text>
+          </View>
         ))}
       </View>
     </View>
