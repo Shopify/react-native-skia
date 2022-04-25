@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, View, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import type SkiaReadonlyValue from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   Canvas,
   Easing,
@@ -42,9 +42,9 @@ const styles = StyleSheet.create({
 });
 
 interface SelectionProps {
-  current: SkiaReadonlyValue<number>;
-  next: SkiaReadonlyValue<number>;
-  transition: SkiaReadonlyValue<number>;
+  current: SkiaValue<number>;
+  next: SkiaValue<number>;
+  transition: SkiaValue<number>;
 }
 
 export const Selection = ({ current, next, transition }: SelectionProps) => {

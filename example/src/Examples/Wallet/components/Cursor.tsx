@@ -4,7 +4,6 @@ import {
   dist,
   interpolateColors,
   Circle,
-  Shadow,
   Group,
   useDerivedValue,
 } from "@shopify/react-native-skia";
@@ -26,7 +25,7 @@ export const Cursor = ({ c, start, end }: CursorProps) => {
         COLORS.map((_, i) => i / COLORS.length),
         COLORS
       ),
-    [c]
+    [c, end, start]
   );
   return (
     <Group>

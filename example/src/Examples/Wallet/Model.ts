@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { interpolate, Skia } from "@shopify/react-native-skia";
+import { Skia } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 import data from "./data.json";

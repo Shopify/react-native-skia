@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { View, StyleSheet } from "react-native";
 import {
   Canvas,
@@ -16,8 +16,6 @@ import {
   Skia,
   Text,
   interpolate,
-  runTiming,
-  Easing,
 } from "@shopify/react-native-skia";
 
 import { graphs, PADDING, WIDTH, HEIGHT, COLORS, AJUSTED_SIZE } from "./Model";
