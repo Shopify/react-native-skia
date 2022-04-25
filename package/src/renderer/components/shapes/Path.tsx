@@ -4,9 +4,11 @@ import type {
   CustomPaintProps,
   AnimatedProps,
   PathDef,
+  SkEnum,
 } from "../../processors";
 import { createDrawing } from "../../nodes";
-import { processPath } from "../../processors";
+import { processPath, enumKey } from "../../processors";
+import { FillType } from "../../../skia";
 
 interface StrokeOpts {
   width?: number;
@@ -19,16 +21,20 @@ export interface PathProps extends CustomPaintProps {
   start: number;
   end: number;
   stroke?: StrokeOpts;
+  fillType?: SkEnum<typeof FillType>;
 }
 
 const onDraw = createDrawing<PathProps>(
-  ({ canvas, paint }, { start, end, stroke, ...pathProps }) => {
+  ({ canvas, paint }, { start, end, stroke, fillType, ...pathProps }) => {
     const hasStartOffset = start !== 0;
     const hasEndOffset = end !== 1;
     const hasStrokeOptions = stroke !== undefined;
     const willMutatePath = hasStartOffset || hasEndOffset || hasStrokeOptions;
     const pristinePath = processPath(pathProps.path);
     const path = willMutatePath ? pristinePath.copy() : pristinePath;
+    if (fillType) {
+      path.setFillType(FillType[enumKey(fillType)]);
+    }
     if (hasStrokeOptions) {
       path.stroke(stroke);
     }
