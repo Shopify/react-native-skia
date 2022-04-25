@@ -17,6 +17,7 @@ import {
   Text,
   interpolate,
   runTiming,
+  Easing,
 } from "@shopify/react-native-skia";
 
 import { graphs, PADDING, WIDTH, HEIGHT, COLORS, AJUSTED_SIZE } from "./Model";
@@ -46,14 +47,14 @@ const styles = StyleSheet.create({
 
 export const Wallet = () => {
   const transition = useValue(0);
-  const previous = useValue(0);
+  const next = useValue(0);
   const current = useValue(0);
   const graph = useDerivedValue(() => graphs[current.current], [current]);
   const path = useDerivedValue(() => {
-    const start = graphs[previous.current].data.path;
-    const end = graphs[current.current].data.path;
+    const start = graphs[current.current].data.path;
+    const end = graphs[next.current].data.path;
     return end.interpolate(start, transition.current);
-  }, [current, previous, transition]);
+  }, [current, next, transition]);
   const cmds = useDerivedValue(() => path.current.toCmds(), [path]);
   const gestureActive = useValue(false);
   const offsetX = useValue(0);
@@ -143,10 +144,12 @@ export const Wallet = () => {
       </Canvas>
       <Selection
         onPress={(index) => {
-          current.current = index;
+          current.current = next.current;
+          next.current = index;
           transition.current = 0;
-          runTiming(transition, 1, { duration: 1000 }, () => {
-            previous.current = index;
+          runTiming(transition, 1, {
+            duration: 750,
+            easing: Easing.inOut(Easing.cubic),
           });
         }}
       />
