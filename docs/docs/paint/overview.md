@@ -12,13 +12,14 @@ There is also a `<Paint />` component which can be assigned directly to a drawin
 
 The following painting attributes can be assigned as properties:
 * [color](properties.md#color)            
-* [blendMode](properties.md#blendMode)     
+* [blendMode](properties.md#blendmode)     
 * [style](properties.md#style)             
-* [strokeWidth](properties.md#strokeWidth) 
-* [strokeJoin](properties.md#strokeJoin)   
-* [strokeCap](properties.md#strokeCap)     
-* [strokeMiter](properties.md#strokeMiter) 
-* [opacity](properties.md#opacity)      
+* [strokeWidth](properties.md#strokewidth) 
+* [strokeJoin](properties.md#strokejoin)   
+* [strokeCap](properties.md#strokecap)     
+* [strokeMiter](properties.md#strokemiter) 
+* [opacity](properties.md#opacity)
+* [antiAlias](properties.md#antialias)            
 
 The following painting attributes can be assigned as children:
 * [Shaders](/docs/shaders/overview) 

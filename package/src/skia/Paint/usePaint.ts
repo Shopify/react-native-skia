@@ -1,7 +1,7 @@
 import type { DependencyList } from "react";
 import { useMemo } from "react";
 
-import { Skia } from "../Skia";
+import { SkiaPaint } from "../../renderer/processors/Paint";
 
 import type { SkPaint } from "./Paint";
 
@@ -13,8 +13,7 @@ export const usePaint = (
   deps?: DependencyList
 ) =>
   useMemo(() => {
-    const p = Skia.Paint();
-    p.setAntiAlias(true);
+    const p = SkiaPaint();
     if (initializer) {
       initializer(p);
     }
