@@ -1,8 +1,21 @@
 import React from "react";
 import { Text, View, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import type SkiaReadonlyValue from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Easing,
+  Group,
+  LinearGradient,
+  RoundedRect,
+  runTiming,
+  useDerivedValue,
+  vec,
+  mix,
+} from "@shopify/react-native-skia";
 
 import { graphs, WIDTH } from "../Model";
 
+const buttonWidth = (WIDTH - 32) / graphs.length;
 const styles = StyleSheet.create({
   root: {
     paddingHorizontal: 16,
@@ -15,7 +28,7 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 64,
-    width: (WIDTH - 32) / graphs.length,
+    width: buttonWidth,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,
@@ -29,15 +42,51 @@ const styles = StyleSheet.create({
 });
 
 interface SelectionProps {
-  onPress: (index: number) => void;
+  current: SkiaReadonlyValue<number>;
+  next: SkiaReadonlyValue<number>;
+  transition: SkiaReadonlyValue<number>;
 }
 
-export const Selection = ({ onPress }: SelectionProps) => {
+export const Selection = ({ current, next, transition }: SelectionProps) => {
+  const transform = useDerivedValue(
+    () => [
+      {
+        translateX: mix(
+          transition.current,
+          current.current * buttonWidth,
+          next.current * buttonWidth
+        ),
+      },
+    ],
+    [current, next, transition]
+  );
   return (
     <View style={styles.root}>
       <View style={styles.container}>
+        <Canvas style={StyleSheet.absoluteFill}>
+          <Group transform={transform}>
+            <RoundedRect x={0} y={0} height={64} width={buttonWidth} r={16}>
+              <LinearGradient
+                colors={["#31CBD1", "#61E0A1"]}
+                start={vec(0, 0)}
+                end={vec(buttonWidth, 64)}
+              />
+            </RoundedRect>
+          </Group>
+        </Canvas>
         {graphs.map((graph, index) => (
-          <TouchableWithoutFeedback key={index} onPress={() => onPress(index)}>
+          <TouchableWithoutFeedback
+            key={index}
+            onPress={() => {
+              current.current = next.current;
+              next.current = index;
+              transition.current = 0;
+              runTiming(transition, 1, {
+                duration: 750,
+                easing: Easing.inOut(Easing.cubic),
+              });
+            }}
+          >
             <View style={styles.button}>
               <Text style={styles.label}>{graph.label}</Text>
             </View>

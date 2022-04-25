@@ -142,17 +142,7 @@ export const Wallet = () => {
           <Cursor c={c} start={start} end={end} />
         </Group>
       </Canvas>
-      <Selection
-        onPress={(index) => {
-          current.current = next.current;
-          next.current = index;
-          transition.current = 0;
-          runTiming(transition, 1, {
-            duration: 750,
-            easing: Easing.inOut(Easing.cubic),
-          });
-        }}
-      />
+      <Selection current={current} next={next} transition={transition} />
       <List />
     </View>
   );
