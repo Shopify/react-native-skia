@@ -19,7 +19,7 @@ import { createGraphPath } from "./createGraphPath";
 import type { GraphProps } from "./types";
 
 export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
-  const [currentPath, setCurrentPath] = useState<SkPath>(() =>
+  const [currentPath, setCurrentPath] = useState(() =>
     createGraphPath(width, height, 60)
   );
 

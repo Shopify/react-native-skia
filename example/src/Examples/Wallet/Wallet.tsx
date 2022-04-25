@@ -16,9 +16,9 @@ import {
   Skia,
   Text,
   interpolate,
+  runTiming,
 } from "@shopify/react-native-skia";
 
-import type { GraphIndex } from "./Model";
 import { graphs, PADDING, WIDTH, HEIGHT, COLORS, AJUSTED_SIZE } from "./Model";
 import { getYForX } from "./Math";
 import { Cursor } from "./components/Cursor";
@@ -45,10 +45,16 @@ const styles = StyleSheet.create({
 });
 
 export const Wallet = () => {
+  const transition = useValue(0);
+  const previous = useValue(0);
   const current = useValue(0);
   const graph = useDerivedValue(() => graphs[current.current], [current]);
-  const path = useDerivedValue(() => graph.current.data.path, [graph]);
-  const cmds = useDerivedValue(() => graph.current.data.path.toCmds(), [graph]);
+  const path = useDerivedValue(() => {
+    const start = graphs[previous.current].data.path;
+    const end = graphs[current.current].data.path;
+    return end.interpolate(start, transition.current);
+  }, [current, previous, transition]);
+  const cmds = useDerivedValue(() => path.current.toCmds(), [path]);
   const gestureActive = useValue(false);
   const offsetX = useValue(0);
   const x = useValue(0);
@@ -135,7 +141,15 @@ export const Wallet = () => {
           <Cursor c={c} start={start} end={end} />
         </Group>
       </Canvas>
-      <Selection onPress={(index) => (current.current = index)} />
+      <Selection
+        onPress={(index) => {
+          current.current = index;
+          transition.current = 0;
+          runTiming(transition, 1, { duration: 1000 }, () => {
+            previous.current = index;
+          });
+        }}
+      />
       <List />
     </View>
   );

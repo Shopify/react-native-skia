@@ -37,8 +37,8 @@ export const Selection = ({ onPress }: SelectionProps) => {
     <View style={styles.root}>
       <View style={styles.container}>
         {graphs.map((graph, index) => (
-          <TouchableWithoutFeedback onPress={() => onPress(index)}>
-            <View key={index} style={styles.button}>
+          <TouchableWithoutFeedback key={index} onPress={() => onPress(index)}>
+            <View style={styles.button}>
               <Text style={styles.label}>{graph.label}</Text>
             </View>
           </TouchableWithoutFeedback>
