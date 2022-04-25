@@ -14,15 +14,17 @@ import {
   LinearGradient,
   DashPathEffect,
   Skia,
+  Fill,
 } from "@shopify/react-native-skia";
 
 import { graphs, PADDING, SIZE } from "./Model";
 import { getYForX } from "./Math";
+import { Cursor } from "./components/Cursor";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#2D3758",
   },
 });
 
@@ -35,19 +37,13 @@ export const Wallet = () => {
   closedPath.lineTo(0, SIZE - PADDING);
   closedPath.close();
   const x = useValue(0);
-  const c = useDerivedValue(
-    () => ({
+  const c = useDerivedValue(() => {
+    const result = {
       x: x.current,
       y: getYForX(cmds, x.current)! + PADDING,
-    }),
-    [x, cmds]
-  );
-  const p1 = useDerivedValue(() => vec(x.current, 0), [x]);
-  const p2 = useDerivedValue(() => vec(x.current, SIZE), [x]);
-  const positions = useDerivedValue(
-    () => [0, x.current / SIZE, x.current / SIZE, 1],
-    [x]
-  );
+    };
+    return result;
+  }, [x, cmds]);
   const onTouch = useTouchHandler({
     onActive: (pt) => {
       x.current = pt.x;
@@ -56,46 +52,30 @@ export const Wallet = () => {
   return (
     <View style={styles.container}>
       <Canvas style={{ width: SIZE, height: SIZE }} onTouch={onTouch}>
+        <Fill color="#405073" />
         <Group transform={[{ translateY: PADDING }]}>
           <Path path={closedPath}>
             <LinearGradient
               start={vec(0, 0)}
               end={vec(0, SIZE)}
               positions={[0, 0.9]}
-              colors={["#E2F1FE", "rgba(226, 241, 254, 0)"]}
+              colors={["rgba(183, 255, 255, 0.6)", "rgba(183, 255, 255, 0)"]}
             />
           </Path>
           <Path
             style="stroke"
-            // Let's check that the roundtrip works
-            path={Skia.Path.MakeFromCmds(cmds)!}
-            strokeWidth={3}
+            path={path}
+            strokeWidth={4}
             strokeJoin="round"
             strokeCap="round"
           >
             <LinearGradient
               start={vec(0, 0)}
               end={vec(SIZE, 0)}
-              colors={["#0173F3", "#0173F3", "#E2F1FE", "#E2F1FE"]}
-              positions={positions}
+              colors={["#3FFFF2"]}
             />
           </Path>
-        </Group>
-        <Line
-          p1={p1}
-          p2={p2}
-          color="lightgray"
-          style="stroke"
-          strokeWidth={2}
-          strokeCap="round"
-        >
-          <DashPathEffect intervals={[6, 6]} />
-        </Line>
-        <Group>
-          <Circle c={c} r={12} color="white">
-            <Shadow dx={0} dy={0} color="rgba(0, 0, 0, 0.3)" blur={4} />
-          </Circle>
-          <Circle c={c} r={7} color="#0173F3" />
+          <Cursor c={c} />
         </Group>
       </Canvas>
     </View>
