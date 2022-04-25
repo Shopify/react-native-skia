@@ -70,6 +70,7 @@ const buildGraph = (datapoints: DataPoints, label: string) => {
     const y = ((price - minPrice) / (maxPrice - minPrice)) * AJUSTED_SIZE;
     return { x, y };
   });
+  points.push({ x: WIDTH + 10, y: points[points.length - 1].y });
   const path = curveLines(points, 0.1, "complex");
   return {
     label,

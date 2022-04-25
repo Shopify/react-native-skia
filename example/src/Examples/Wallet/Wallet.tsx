@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, StyleSheet } from "react-native";
 import {
   Canvas,
   Path,
@@ -8,11 +8,23 @@ import {
   useValue,
   useDerivedValue,
   LinearGradient,
+  runDecay,
+  dist,
+  add,
+  vec,
+  clamp,
+  Skia,
+  Text,
 } from "@shopify/react-native-skia";
 
 import { graphs, PADDING, WIDTH, HEIGHT, COLORS } from "./Model";
 import { getYForX } from "./Math";
 import { Cursor } from "./components/Cursor";
+
+const titleFont = Skia.Font(
+  Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica")!,
+  64
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -25,25 +37,55 @@ export const Wallet = () => {
   const graph = graphs[0];
   const { path } = graph.data;
   const cmds = useMemo(() => path.toCmds(), [path]);
+  const gestureActive = useValue(false);
+  const offsetX = useValue(0);
   const x = useValue(0);
   const c = useDerivedValue(() => {
     const result = {
       x: x.current,
-      y: getYForX(cmds, x.current)!,
+      y: getYForX(cmds, x.current) ?? 0,
     };
     return result;
   }, [x, cmds]);
+  const text = "$5,021";
+  const titlePos = titleFont.measureText(text);
+  const translateY = HEIGHT + PADDING;
   const onTouch = useTouchHandler({
-    onActive: (pt) => {
-      x.current = pt.x;
+    onStart: (pos) => {
+      const normalizedCenter = add(c.current, vec(0, translateY));
+      if (dist(normalizedCenter, pos) < 50) {
+        gestureActive.current = true;
+        offsetX.current = x.current - pos.x;
+      }
+    },
+    onActive: (pos) => {
+      if (gestureActive.current) {
+        x.current = clamp(offsetX.current + pos.x, 0, WIDTH);
+      }
+    },
+    onEnd: ({ velocityX }) => {
+      if (gestureActive.current) {
+        gestureActive.current = false;
+        runDecay(x, { velocity: velocityX, clamp: [0, WIDTH] });
+      }
     },
   });
   const start = path.getPoint(0);
   const end = path.getLastPt();
   return (
     <View style={styles.container}>
-      <Canvas style={{ width: WIDTH, height: 2 * HEIGHT }} onTouch={onTouch}>
-        <Group transform={[{ translateY: HEIGHT + PADDING }]}>
+      <Canvas
+        style={{ width: WIDTH, height: 2 * HEIGHT + 30 }}
+        onTouch={onTouch}
+      >
+        <Text
+          x={WIDTH / 2 - titlePos.width / 2}
+          y={translateY - 100}
+          text={text}
+          font={titleFont}
+          color="white"
+        />
+        <Group transform={[{ translateY }]}>
           <Path
             style="stroke"
             path={path}
