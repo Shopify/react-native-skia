@@ -3,7 +3,7 @@ import React, { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 
 import type { SkPaint } from "../../skia";
 import type { CustomPaintProps, AnimatedProps } from "../processors";
-import { processPaint } from "../processors";
+import { SkiaPaint, processPaint } from "../processors";
 import { createDeclaration } from "../nodes";
 
 export const usePaintRef = () => useRef<SkPaint>(null);
