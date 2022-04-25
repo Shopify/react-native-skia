@@ -23,6 +23,7 @@ import { getYForX } from "./Math";
 import { Cursor } from "./components/Cursor";
 import { Selection } from "./components/Selection";
 import { List } from "./components/List";
+import { Header } from "./components/Header";
 
 const tf = Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica")!;
 const titleFont = Skia.Font(tf, 64);
@@ -90,6 +91,7 @@ export const Wallet = () => {
   const end = path.getLastPt();
   return (
     <View style={styles.container}>
+      <Header />
       <Canvas
         style={{ width: WIDTH, height: 2 * HEIGHT + 30 }}
         onTouch={onTouch}

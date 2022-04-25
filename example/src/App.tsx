@@ -29,7 +29,13 @@ const App = () => {
       <StatusBar hidden />
       <NavigationContainer>
         <Stack.Navigator>
-          <Stack.Screen name="Wallet" component={Wallet} />
+          <Stack.Screen
+            name="Wallet"
+            component={Wallet}
+            options={{
+              header: () => null,
+            }}
+          />
           <Stack.Screen
             name="Home"
             component={HomeScreen}
