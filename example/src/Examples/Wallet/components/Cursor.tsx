@@ -13,8 +13,8 @@ import React from "react";
 import { COLORS } from "../Model";
 
 interface CursorProps {
-  start: Vector;
-  end: Vector;
+  start: SkiaReadonlyValue<Vector>;
+  end: SkiaReadonlyValue<Vector>;
   c: SkiaReadonlyValue<Vector>;
 }
 
@@ -22,7 +22,7 @@ export const Cursor = ({ c, start, end }: CursorProps) => {
   const color = useDerivedValue(
     () =>
       interpolateColors(
-        dist(start, c.current) / dist(start, end),
+        dist(start.current, c.current) / dist(start.current, end.current),
         COLORS.map((_, i) => i / COLORS.length),
         COLORS
       ),

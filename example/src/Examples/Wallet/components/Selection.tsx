@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableWithoutFeedback } from "react-native";
 
 import { graphs, WIDTH } from "../Model";
 
@@ -28,14 +28,20 @@ const styles = StyleSheet.create({
   },
 });
 
-export const Selection = () => {
+interface SelectionProps {
+  onPress: (index: number) => void;
+}
+
+export const Selection = ({ onPress }: SelectionProps) => {
   return (
     <View style={styles.root}>
       <View style={styles.container}>
         {graphs.map((graph, index) => (
-          <View key={index} style={styles.button}>
-            <Text style={styles.label}>{graph.label}</Text>
-          </View>
+          <TouchableWithoutFeedback onPress={() => onPress(index)}>
+            <View key={index} style={styles.button}>
+              <Text style={styles.label}>{graph.label}</Text>
+            </View>
+          </TouchableWithoutFeedback>
         ))}
       </View>
     </View>

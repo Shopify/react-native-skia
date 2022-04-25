@@ -18,6 +18,7 @@ import {
   interpolate,
 } from "@shopify/react-native-skia";
 
+import type { GraphIndex } from "./Model";
 import { graphs, PADDING, WIDTH, HEIGHT, COLORS, AJUSTED_SIZE } from "./Model";
 import { getYForX } from "./Math";
 import { Cursor } from "./components/Cursor";
@@ -44,27 +45,38 @@ const styles = StyleSheet.create({
 });
 
 export const Wallet = () => {
-  const graph = graphs[0];
-  const { path, maxPrice, minPrice } = graph.data;
-  const cmds = useMemo(() => path.toCmds(), [path]);
+  const current = useValue(0);
+  const graph = useDerivedValue(() => graphs[current.current], [current]);
+  const path = useDerivedValue(() => graph.current.data.path, [graph]);
+  const cmds = useDerivedValue(() => graph.current.data.path.toCmds(), [graph]);
   const gestureActive = useValue(false);
   const offsetX = useValue(0);
   const x = useValue(0);
   const c = useDerivedValue(() => {
     const result = {
       x: x.current,
-      y: getYForX(cmds, x.current) ?? 0,
+      y: getYForX(cmds.current, x.current) ?? 0,
     };
     return result;
   }, [x, cmds]);
   const text = useDerivedValue(() => {
     return currency.format(
-      interpolate(c.current.y, [0, AJUSTED_SIZE], [maxPrice, minPrice])
+      interpolate(
+        c.current.y,
+        [0, AJUSTED_SIZE],
+        [graph.current.data.maxPrice, graph.current.data.minPrice]
+      )
     );
   }, [c]);
   const subtitle = "+ $314,15";
-  const titleX =
-    WIDTH / 2 - titleFont.measureText(currency.format(maxPrice)).width / 2;
+  const titleX = useDerivedValue(
+    () =>
+      WIDTH / 2 -
+      titleFont.measureText(currency.format(graph.current.data.maxPrice))
+        .width /
+        2,
+    [graph]
+  );
   const subtitlePos = subtitleFont.measureText(subtitle);
   const translateY = HEIGHT + PADDING;
   const onTouch = useTouchHandler({
@@ -87,8 +99,8 @@ export const Wallet = () => {
       }
     },
   });
-  const start = path.getPoint(0);
-  const end = path.getLastPt();
+  const start = useDerivedValue(() => path.current.getPoint(0), [path]);
+  const end = useDerivedValue(() => path.current.getLastPt(), [path]);
   return (
     <View style={styles.container}>
       <Header />
@@ -123,7 +135,7 @@ export const Wallet = () => {
           <Cursor c={c} start={start} end={end} />
         </Group>
       </Canvas>
-      <Selection />
+      <Selection onPress={(index) => (current.current = index)} />
       <List />
     </View>
   );
