@@ -15,7 +15,11 @@ export interface PaintProps extends Omit<CustomPaintProps, "paint"> {
 
 export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
   (props, ref) => {
-    const paint = useMemo(() => Skia.Paint(), []);
+    const paint = useMemo(() => {
+      const p = Skia.Paint();
+      p.setAntiAlias(true);
+      return p;
+    }, []);
     useImperativeHandle(ref, () => paint, [paint]);
     const onDeclare = useMemo(
       () =>

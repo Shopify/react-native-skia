@@ -125,15 +125,16 @@ interface Cubic {
 export const selectCurve = (cmds: PathCommand[], x: number): Cubic | null => {
   for (let i = 0; i < cmds.length; i++) {
     const cmd = cmds[i];
-
     if (cmd[0] === PathVerb.Cubic) {
       const from = vec(cmd[1], cmd[2]);
       const to = vec(cmd[7], cmd[8]);
+      const c1 = vec(cmd[3], cmd[4]);
+      const c2 = vec(cmd[5], cmd[6]);
       if (x >= from.x && x <= to.x) {
         return {
           from,
-          c1: vec(cmd[3], cmd[4]),
-          c2: vec(cmd[5], cmd[6]),
+          c1,
+          c2,
           to,
         };
       }

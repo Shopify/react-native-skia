@@ -1,30 +1,23 @@
 import React, { useMemo } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import {
   Canvas,
   Path,
   Group,
   useTouchHandler,
   useValue,
-  vec,
-  Circle,
-  Shadow,
   useDerivedValue,
-  Line,
   LinearGradient,
-  DashPathEffect,
-  Skia,
-  Fill,
 } from "@shopify/react-native-skia";
 
-import { graphs, PADDING, SIZE } from "./Model";
+import { graphs, PADDING, WIDTH, HEIGHT, COLORS } from "./Model";
 import { getYForX } from "./Math";
 import { Cursor } from "./components/Cursor";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#2D3758",
+    backgroundColor: "#1F1D2B",
   },
 });
 
@@ -32,15 +25,11 @@ export const Wallet = () => {
   const graph = graphs[0];
   const { path } = graph.data;
   const cmds = useMemo(() => path.toCmds(), [path]);
-  const closedPath = path.copy();
-  closedPath.lineTo(path.getLastPt().x, SIZE - PADDING);
-  closedPath.lineTo(0, SIZE - PADDING);
-  closedPath.close();
   const x = useValue(0);
   const c = useDerivedValue(() => {
     const result = {
       x: x.current,
-      y: getYForX(cmds, x.current)! + PADDING,
+      y: getYForX(cmds, x.current)!,
     };
     return result;
   }, [x, cmds]);
@@ -49,19 +38,12 @@ export const Wallet = () => {
       x.current = pt.x;
     },
   });
+  const start = path.getPoint(0);
+  const end = path.getLastPt();
   return (
     <View style={styles.container}>
-      <Canvas style={{ width: SIZE, height: SIZE }} onTouch={onTouch}>
-        <Fill color="#405073" />
-        <Group transform={[{ translateY: PADDING }]}>
-          <Path path={closedPath}>
-            <LinearGradient
-              start={vec(0, 0)}
-              end={vec(0, SIZE)}
-              positions={[0, 0.9]}
-              colors={["rgba(183, 255, 255, 0.6)", "rgba(183, 255, 255, 0)"]}
-            />
-          </Path>
+      <Canvas style={{ width: WIDTH, height: 2 * HEIGHT }} onTouch={onTouch}>
+        <Group transform={[{ translateY: HEIGHT + PADDING }]}>
           <Path
             style="stroke"
             path={path}
@@ -69,13 +51,9 @@ export const Wallet = () => {
             strokeJoin="round"
             strokeCap="round"
           >
-            <LinearGradient
-              start={vec(0, 0)}
-              end={vec(SIZE, 0)}
-              colors={["#3FFFF2"]}
-            />
+            <LinearGradient start={start} end={end} colors={COLORS} />
           </Path>
-          <Cursor c={c} />
+          <Cursor c={c} start={start} end={end} />
         </Group>
       </Canvas>
     </View>

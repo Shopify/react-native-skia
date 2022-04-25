@@ -1,42 +1,40 @@
 import type { SkiaReadonlyValue, Vector } from "@shopify/react-native-skia";
 import {
+  Paint,
+  dist,
+  interpolateColors,
   Circle,
   Shadow,
   Group,
-  DashPathEffect,
-  Line,
-  vec,
   useDerivedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 
-import { SIZE } from "../Model";
+import { COLORS } from "../Model";
 
 interface CursorProps {
+  start: Vector;
+  end: Vector;
   c: SkiaReadonlyValue<Vector>;
 }
 
-export const Cursor = ({ c }: CursorProps) => {
-  const p1 = useDerivedValue(() => vec(c.current.x, 0), [c]);
-  const p2 = useDerivedValue(() => vec(c.current.x, SIZE), [c]);
+export const Cursor = ({ c, start, end }: CursorProps) => {
+  const color = useDerivedValue(
+    () =>
+      interpolateColors(
+        dist(start, c.current) / dist(start, end),
+        COLORS.map((_, i) => i / COLORS.length),
+        COLORS
+      ),
+    [c]
+  );
   return (
-    <>
-      <Line
-        p1={p1}
-        p2={p2}
-        color="lightgray"
-        style="stroke"
-        strokeWidth={2}
-        strokeCap="round"
-      >
-        <DashPathEffect intervals={[6, 6]} />
-      </Line>
-      <Group>
-        <Circle c={c} r={12} color="white">
-          <Shadow dx={0} dy={0} color="rgba(0, 0, 0, 0.3)" blur={4} />
-        </Circle>
-        <Circle c={c} r={7} color="#3DFFF3" />
-      </Group>
-    </>
+    <Group>
+      <Circle c={c} r={27} color={color} opacity={0.15} />
+      <Circle c={c} r={18} color={color} opacity={0.15} />
+      <Circle c={c} r={9} color={color}>
+        <Paint style="stroke" strokeWidth={2} color="white" />
+      </Circle>
+    </Group>
   );
 };
