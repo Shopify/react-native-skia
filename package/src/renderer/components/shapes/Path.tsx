@@ -30,7 +30,8 @@ const onDraw = createDrawing<PathProps>(
     const hasEndOffset = end !== 1;
     const hasStrokeOptions = stroke !== undefined;
     const hasFillType = !!fillType;
-    const willMutatePath = hasStartOffset || hasEndOffset || hasStrokeOptions || hasFillType;
+    const willMutatePath =
+      hasStartOffset || hasEndOffset || hasStrokeOptions || hasFillType;
     const pristinePath = processPath(pathProps.path);
     const path = willMutatePath ? pristinePath.copy() : pristinePath;
     if (hasFillType) {
