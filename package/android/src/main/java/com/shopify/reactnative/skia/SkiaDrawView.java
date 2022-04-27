@@ -23,6 +23,7 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @DoNotStrip
     private boolean mIsRemoved = false;
 
+
     public SkiaDrawView(Context ctx) {
         super(ctx);
         RNSkiaModule skiaModule = ((ReactContext)ctx).getNativeModule(RNSkiaModule.class);
@@ -36,13 +37,12 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         // Texture view does not support setting the background color.
     }
 
-    @Override
-    protected void finalize() throws Throwable {
+    public void onRemoved() {
+        mIsRemoved = true;
         mHybridData.resetNative();
         if(mSurface != null) {
             mSurface.release();
         }
-        super.finalize();
     }
 
     @Override
@@ -100,7 +100,7 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         if(mIsRemoved) {
-            return true;
+            return false;
         }
         surfaceDestroyed();
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
