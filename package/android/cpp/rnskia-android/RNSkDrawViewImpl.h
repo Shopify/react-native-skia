@@ -36,7 +36,7 @@ namespace RNSkia {
     private:
         bool createSkiaSurface();
 
-        std::shared_ptr<SkiaOpenGLRenderer> _renderer = nullptr;
+        std::unique_ptr<SkiaOpenGLRenderer> _renderer = nullptr;
 
         int _nativeId;
         int _width = -1;
