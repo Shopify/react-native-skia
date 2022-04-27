@@ -39,12 +39,6 @@
   return self;
 }
 
-- (void)dealloc {
-  if(_manager != nullptr) {
-    _manager->unregisterSkiaDrawView(_nativeId);
-  }
-}
-
 #pragma mark Lifecycle
 
 - (void) willMoveToWindow:(UIWindow *)newWindow {
@@ -53,19 +47,21 @@
   if (newWindow == NULL) {
     // Remove implementation view when the parent view is not set
     if(_impl != nullptr) {
-      if(_nativeId != 0 && _manager != nullptr) {
-        _manager->setSkiaDrawView(_nativeId, nullptr);
-      }
       [_impl->getLayer() removeFromSuperlayer];
+      
+      if(_nativeId != 0 && _manager != nullptr) {
+        _manager->unregisterSkiaDrawView(_nativeId);
+      }
+      
       _impl = nullptr;
     }
   } else {
     // Create implementation view when the parent view is set
     if(_impl == nullptr && _manager != nullptr) {
       _impl = std::make_shared<RNSkDrawViewImpl>(_manager->getPlatformContext());
-      [self.layer addSublayer:_impl->getLayer()];
+      [self.layer addSublayer: _impl->getLayer()];
       if(_nativeId != 0) {
-        _manager->setSkiaDrawView(_nativeId, _impl.get());
+        _manager->setSkiaDrawView(_nativeId, _impl);
       }
       _impl->setDrawingMode(_drawingMode);
       _impl->setShowDebugOverlays(_debugMode);      
@@ -103,7 +99,7 @@
   _nativeId = nativeId;
   
   if(_impl != nullptr) {
-    _manager->registerSkiaDrawView(nativeId, _impl.get());
+    _manager->registerSkiaDrawView(nativeId, _impl);
   }
 }
 

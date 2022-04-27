@@ -48,10 +48,13 @@ public:
     }
     auto callback = std::make_shared<jsi::Function>(arguments[0].asObject(runtime).asFunction(runtime));
     
-    auto unsubscribe = addListener([self = shared_from_this(),
-                                    this,
+    auto unsubscribe = addListener([weakSelf = weak_from_this(),
                                     callback = std::move(callback)](jsi::Runtime& runtime){
-      callback->call(runtime, get_current(runtime));
+      auto self = weakSelf.lock();
+      if(self) {
+        auto selfReadonlyValue = std::dynamic_pointer_cast<RNSkReadonlyValue>(self);
+        callback->call(runtime, selfReadonlyValue->get_current(runtime));
+      }
     });
     
     return jsi::Function::createFromHostFunction(runtime,
@@ -74,8 +77,11 @@ public:
     std::lock_guard<std::mutex> lock(_mutex);
     auto listenerId = _listenerId++;
     _listeners.emplace(listenerId, cb);
-    return [self = shared_from_this(), this, listenerId]() {
-      removeListener(listenerId);
+    return [weakSelf = weak_from_this(), listenerId]() {
+      auto self = weakSelf.lock();
+      if(self) {
+        self->removeListener(listenerId);
+      }
     };
   }
   
