@@ -39,16 +39,10 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @Override
     protected void finalize() throws Throwable {
         mHybridData.resetNative();
+        if(mSurface != null) {
+            mSurface.release();
+        }
         super.finalize();
-    }
-
-
-    public void onRemoved() {
-        // We'll mark the view removed since we reset the native part.
-        // This means that none of the native methods should be called after
-        // this point.
-        mIsRemoved = true;
-        mHybridData.resetNative();
     }
 
     @Override
@@ -109,9 +103,11 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
             return true;
         }
         surfaceDestroyed();
-        mSurface.release();
-        mSurface = null;
-        return true;
+        // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
+        // Invoked when the specified SurfaceTexture is about to be destroyed. If returns true,
+        // no rendering should happen inside the surface texture after this method is invoked.
+        // If returns false, the client needs to call SurfaceTexture#release().
+        return false;
     }
 
     @Override

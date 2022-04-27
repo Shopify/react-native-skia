@@ -20,8 +20,6 @@
 
 #pragma clang diagnostic pop
 
-#define LOG_ALL_DRAWING 0
-
 class SkPicture;
 class SkRect;
 class SkImage;
@@ -35,7 +33,7 @@ using RNSkDrawCallback =
 
 enum RNSkDrawingMode { Default, Continuous };
 
-class RNSkDrawView {
+class RNSkDrawView: public std::enable_shared_from_this<RNSkDrawView> {
 public:
   /**
    * Constructor
@@ -45,7 +43,7 @@ public:
   /**
    Destructor
    */
-  ~RNSkDrawView();
+  virtual ~RNSkDrawView();
 
   /**
    * Repaints the Skia view using the underlying context and the drawcallback.
@@ -96,14 +94,6 @@ public:
   sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds);
 
 protected:
-  void setNativeDrawFunc(std::function<void(const sk_sp<SkPicture>)> drawFunc) {
-    if(!_gpuDrawingLock->try_lock_for(250ms)) {
-      RNSkLogger::logToConsole("Could not lock drawing when clearing drawing function - %i", _nativeId);
-    }
-    _nativeDrawFunc = drawFunc;
-    _gpuDrawingLock->unlock();
-  }
-  
   /**
    Returns the scaled width of the view
    */
@@ -115,14 +105,9 @@ protected:
   virtual int getHeight() { return -1; };
   
   /**
-   Returns true if the view is invalidated
+   Override to render picture to GPU
    */
-  volatile bool isInvalidated() { return _isInvalidated; }
-  
-  /**
-   Override to be notified on invalidation
-   */
-  virtual void onInvalidated() {}
+  virtual void drawPicture(const sk_sp<SkPicture> picture) = 0;
   
   /**
    * @return The platformcontext
@@ -210,12 +195,7 @@ private:
   /**
    Timing information for GPU rendering
    */
-  RNSkTimingInfo _gpuTimingInfo;
-  
-  /**
-   Measures vsync framerate
-   */
-  RNSkTimingInfo _vsyncTimingInfo;
+  RNSkTimingInfo _gpuTimingInfo;  
   
   /**
    Redraw queue counter
@@ -226,16 +206,6 @@ private:
    * Native id
    */
   size_t _nativeId;
-  
-  /**
-   Invalidation flag
-   */
-  std::atomic<bool> _isInvalidated = { false };
-  
-  /**
-   Native draw handler
-   */
-  std::function<void(const sk_sp<SkPicture>)> _nativeDrawFunc;  
   
 };
 

@@ -7,7 +7,6 @@
 #include "GLES2/gl2.h"
 
 #include <condition_variable>
-#include <mutex>
 #include <thread>
 #include <unordered_map>
 
@@ -25,16 +24,6 @@
 
 namespace RNSkia
 {
-    using DrawingContext = struct
-    {
-        EGLContext glContext;
-        EGLDisplay glDisplay;
-        EGLConfig glConfig;
-        sk_sp<GrDirectContext> skContext;
-    };
-
-    static std::unordered_map<std::thread::id, std::shared_ptr<DrawingContext>> threadContexts;
-
     enum RenderState : int {
         Initializing,
         Rendering,
@@ -45,9 +34,7 @@ namespace RNSkia
     class SkiaOpenGLRenderer
     {
     public:
-        SkiaOpenGLRenderer(ANativeWindow *nativeWindow, size_t renderId) :
-            _nativeWindow(nativeWindow),
-            _renderId(renderId) { }
+        SkiaOpenGLRenderer(ANativeWindow *surface, size_t renderId);
 
         /**
          * Initializes, renders and tears down the render pipeline depending on the state of the
@@ -70,14 +57,6 @@ namespace RNSkia
          * teardown.
          */
         void teardown();
-
-        /**
-         * Wait for teardown to finish. This means that we'll wait until the next
-         * render which will handle releasing all OpenGL and Skia resources used for
-         * this renderer. After tearing down the render will do nothing if the render
-         * method is called again.
-         */
-        void waitForTeardown();
 
     private:
         /**
@@ -117,31 +96,14 @@ namespace RNSkia
          */
         bool ensureSkiaSurface(int width, int height);
 
-        /**
-         * Finalizes and releases all resources used by this renderer
-         */
-        void finish();
-
-        /**
-         * Destroys the underlying OpenGL surface used for this renderer
-         */
-        void finishGL();
-
-        /**
-         * Destroys the underlying Skia surface used for this renderer
-         */
-        void finishSkiaSurface();
-
-        /**
-         * To be able to use static contexts (and avoid reloading the skia context for each
-         * new view, we track the OpenGL and Skia drawing context per thread.
-         * @return The drawing context for the current thread
-         */
-        static std::shared_ptr<DrawingContext> getThreadDrawingContext();
+        static EGLContext glContext;
+        static EGLDisplay glDisplay;
+        static EGLConfig glConfig;
+        static sk_sp<GrDirectContext> skContext;
 
         EGLSurface _glSurface = EGL_NO_SURFACE;
 
-        ANativeWindow *_nativeWindow = nullptr;
+        ANativeWindow *_surfaceTexture = nullptr;
         GrBackendRenderTarget _skRenderTarget;
         sk_sp<SkSurface> _skSurface;
 
@@ -149,9 +111,6 @@ namespace RNSkia
         int _prevHeight = 0;
 
         size_t _renderId;
-
-        std::mutex _lock;
-        std::condition_variable _cv;
 
         std::atomic<RenderState> _renderState = { RenderState::Initializing };
     };
