@@ -265,10 +265,13 @@ public:
       return;
     }
     auto info = getEnsuredCallbackInfo(nativeId);
-    info->view = view;
     if (view != nullptr && info->drawCallback != nullptr) {
+      info->view = view;
       info->view->setNativeId(nativeId);
       info->view->setDrawCallback(info->drawCallback);
+    } else if(view == nullptr && info->drawCallback != nullptr) {
+      info->view->setDrawCallback(nullptr);
+      info->view = view;
     }
   }
 
