@@ -24,6 +24,16 @@
 
 namespace RNSkia
 {
+    using DrawingContext = struct
+    {
+        EGLContext glContext;
+        EGLDisplay glDisplay;
+        EGLConfig glConfig;
+        sk_sp<GrDirectContext> skContext;
+    };
+
+    static std::unordered_map<std::thread::id, std::shared_ptr<DrawingContext>> threadContexts;
+
     enum RenderState : int {
         Initializing,
         Rendering,
@@ -96,10 +106,12 @@ namespace RNSkia
          */
         bool ensureSkiaSurface(int width, int height);
 
-        static EGLContext glContext;
-        static EGLDisplay glDisplay;
-        static EGLConfig glConfig;
-        static sk_sp<GrDirectContext> skContext;
+        /**
+         * To be able to use static contexts (and avoid reloading the skia context for each
+         * new view, we track the OpenGL and Skia drawing context per thread.
+         * @return The drawing context for the current thread
+         */
+        static std::shared_ptr<DrawingContext> getThreadDrawingContext();
 
         EGLSurface _glSurface = EGL_NO_SURFACE;
 
