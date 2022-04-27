@@ -22,7 +22,7 @@ namespace RNSkia {
         if (_renderer == nullptr)
         {
             // Create renderer!
-            _renderer = std::make_shared<SkiaOpenGLRenderer>(surface, getNativeId());
+            _renderer = std::make_unique<SkiaOpenGLRenderer>(surface, getNativeId());
 
             // Redraw
             requestRedraw();
