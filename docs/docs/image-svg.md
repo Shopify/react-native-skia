@@ -117,7 +117,6 @@ The `opacity` attribute also applies to both the `fill` and `stroke` attributes.
 ### Non Supported Elements
 
 Below is the list of non-supported element. Often these SVGs can be rewritten to not use these elements.
-The following elements are not supported:
   * `<altGlyph>` (deprecated)
   * `<animate>`
   * `<cursor>` (deprecated)
