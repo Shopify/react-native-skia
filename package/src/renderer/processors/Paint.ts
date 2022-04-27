@@ -17,6 +17,12 @@ import type { SkPaint, Color, SkImageFilter } from "../../skia";
 import type { DeclarationResult } from "../nodes";
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
+export const SkiaPaint = () => {
+  const paint = Skia.Paint();
+  paint.setAntiAlias(true);
+  return paint;
+};
+
 export interface ChildrenProps {
   children?: ReactNode | ReactNode[];
 }
@@ -32,6 +38,7 @@ export interface CustomPaintProps extends ChildrenProps {
   strokeCap?: SkEnum<typeof StrokeCap>;
   strokeMiter?: number;
   opacity?: number;
+  antiAlias?: boolean;
 }
 
 export const enumKey = <K extends string>(k: K) =>
@@ -50,6 +57,7 @@ export const processPaint = (
     strokeCap,
     strokeMiter,
     opacity,
+    antiAlias,
   }: CustomPaintProps,
   children: DeclarationResult[]
 ) => {
@@ -84,6 +92,9 @@ export const processPaint = (
   }
   if (opacity !== undefined) {
     paint.setAlphaf(opacity);
+  }
+  if (antiAlias !== undefined) {
+    paint.setAntiAlias(antiAlias);
   }
   children.forEach((child) => {
     if (isShader(child)) {

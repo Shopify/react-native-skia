@@ -29,6 +29,7 @@ import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { vec } from "./processors";
 import { Container } from "./nodes";
 import { DependencyManager } from "./DependencyManager";
+import { SkiaPaint } from "./processors/Paint";
 
 const CanvasContext = React.createContext<SkiaReadonlyValue<{
   width: number;
@@ -112,8 +113,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         ) {
           canvasCtx.current = { width, height };
         }
-        const paint = Skia.Paint();
-        paint.setAntiAlias(true);
+        const paint = SkiaPaint();
         const ctx = {
           width,
           height,
