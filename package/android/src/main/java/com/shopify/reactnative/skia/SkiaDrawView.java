@@ -18,11 +18,8 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @DoNotStrip
     private HybridData mHybridData;
 
-    private Surface mSurface;
-
     @DoNotStrip
-    private boolean mIsRemoved = false;
-
+    private Surface mSurface;
 
     public SkiaDrawView(Context ctx) {
         super(ctx);
@@ -37,19 +34,24 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         // Texture view does not support setting the background color.
     }
 
-    public void onRemoved() {
-        mIsRemoved = true;
-        mHybridData.resetNative();
+    public void releaseSurface() {
         if(mSurface != null) {
             mSurface.release();
+            mSurface = null;
         }
+        // This shouldn't need to be here... TODO: if here it releases underlying native views and finalize is called, but remounting a view crashes.
+        // If in finalize: Everything works but finalize is never called and underlying native views are never freed. FIX, you stupid man.
+        mHybridData.resetNative();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        releaseSurface();
+        super.finalize();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if(mIsRemoved) {
-            return false;
-        }
         int action = ev.getAction();
         int count = ev.getPointerCount();
         MotionEvent.PointerCoords r = new MotionEvent.PointerCoords();
@@ -82,26 +84,17 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        if(mIsRemoved) {
-            return;
-        }
         mSurface = new Surface(surface);
         surfaceAvailable(mSurface, width, height);
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        if(mIsRemoved) {
-            return;
-        }
         surfaceSizeChanged(width, height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        if(mIsRemoved) {
-            return false;
-        }
         surfaceDestroyed();
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         // Invoked when the specified SurfaceTexture is about to be destroyed. If returns true,

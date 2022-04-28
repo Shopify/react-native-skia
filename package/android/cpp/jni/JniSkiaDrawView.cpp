@@ -31,9 +31,6 @@ namespace RNSkia
     /**** DTOR ***/
     JniSkiaDrawView::~JniSkiaDrawView()
     {
-#if LOG_ALL_DRAWING
-        RNSkLogger::logToConsole("JniSkiaDrawView::~JniSkiaDrawView %i", getNativeId());
-#endif
     }
 
     /**** JNI ****/
@@ -105,5 +102,11 @@ namespace RNSkia
     void JniSkiaDrawView::surfaceDestroyed()
     {
         _drawView->surfaceDestroyed();
+    }
+
+    void JniSkiaDrawView::releaseSurface() {
+        jni::ThreadScope ts;
+        static auto method = javaPart_->getClass()->getMethod<void(void)>("releaseSurface");
+        method(javaPart_.get());
     }
 } // namespace RNSkia

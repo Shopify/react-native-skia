@@ -11,9 +11,9 @@
 #include <RNSkLog.h>
 
 namespace RNSkia {
-    RNSkDrawViewImpl::RNSkDrawViewImpl(std::shared_ptr <RNSkia::RNSkPlatformContext> context) :
-        RNSkia::RNSkDrawView(context) {
-    }
+    RNSkDrawViewImpl::RNSkDrawViewImpl(std::shared_ptr <RNSkia::RNSkPlatformContext> context, std::function<void()> releaseSurfaceCallback) :
+        RNSkia::RNSkDrawView(context),
+        _releaseSurfaceCallback(std::move(releaseSurfaceCallback)) {}
 
     void RNSkDrawViewImpl::surfaceAvailable(ANativeWindow* surface, int width, int height) {
         _width = width;
@@ -46,6 +46,7 @@ namespace RNSkia {
                     }
                     // Remove renderer
                     drawViewImpl->_renderer = nullptr;
+                    drawViewImpl->_releaseSurfaceCallback();
                 }
             });
         }

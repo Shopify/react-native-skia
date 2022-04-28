@@ -16,7 +16,8 @@
 namespace RNSkia {
     class RNSkDrawViewImpl : public RNSkia::RNSkDrawView {
     public:
-        RNSkDrawViewImpl(std::shared_ptr <RNSkia::RNSkPlatformContext> context);
+        RNSkDrawViewImpl(std::shared_ptr <RNSkia::RNSkPlatformContext> context,
+                         std::function<void()> releaseSurfaceCallback);
 
         void surfaceAvailable(ANativeWindow* surface, int, int);
         void surfaceDestroyed();
@@ -41,5 +42,7 @@ namespace RNSkia {
         int _nativeId;
         int _width = -1;
         int _height = -1;
+
+        std::function<void()> _releaseSurfaceCallback;
     };
 }

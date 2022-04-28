@@ -50,9 +50,9 @@ namespace RNSkia
 
         ~JniSkiaDrawView();
 
-        std::shared_ptr<RNSkDrawView> getDrawViewImpl() {
-            return _drawView;
-        }
+        std::shared_ptr<RNSkDrawView> getDrawViewImpl() { return _drawView; }
+
+        void releaseSurface();
 
     protected:
         void setMode(std::string mode);
@@ -69,7 +69,9 @@ namespace RNSkia
                 jni::alias_ref<JniSkiaDrawView::jhybridobject> jThis,
                 JavaSkiaManager skiaManager)
                 : javaPart_(jni::make_global(jThis)),
-                  _drawView(std::make_shared<RNSkDrawViewImpl>(skiaManager->cthis()->getPlatformContext())) {
+                  _drawView(std::make_shared<RNSkDrawViewImpl>(skiaManager->cthis()->getPlatformContext(), [this]() {
+                      releaseSurface();
+                  })) {
         }
     };
 
