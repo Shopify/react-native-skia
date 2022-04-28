@@ -105,7 +105,7 @@ public:
     sk_sp<SkImage> image;
     auto info = getEnsuredCallbackInfo(nativeId);
     if (info->view != nullptr) {
-      if(count > 1 && !arguments[1].isUndefined() && arguments[1].isNull()) {
+      if(count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()) {
         auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
         image = info->view->makeImageSnapshot(rect);
       } else {

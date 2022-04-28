@@ -44,7 +44,8 @@ const SkiaColor = (cl: Color) => {
     let rnColor = processColor(cl);
     // 1. Neither Skia or RN could parse the color
     if (typeof rnColor !== "number") {
-      throw new Error("Skia couldn't parse the following color " + cl);
+      console.warn("Skia couldn't parse the following color " + cl);
+      return BLACK;
       // 2. The color is recognized by RN but not by Skia
     } else {
       console.warn(
@@ -164,3 +165,5 @@ export const Skia = {
   MakeImage: SkiaApi.Image.MakeImage,
   MakeVertices: SkiaApi.MakeVertices,
 };
+
+const BLACK = Skia.parseColorString("black")!;
