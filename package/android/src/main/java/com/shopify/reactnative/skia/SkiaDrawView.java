@@ -19,6 +19,9 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     private HybridData mHybridData;
 
     @DoNotStrip
+    private boolean mViewRemoved;
+
+    @DoNotStrip
     private Surface mSurface;
 
     public SkiaDrawView(Context ctx) {
@@ -39,15 +42,16 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
             mSurface.release();
             mSurface = null;
         }
-        // This shouldn't need to be here... TODO: if here it releases underlying native views and finalize is called, but remounting a view crashes.
-        // If in finalize: Everything works but finalize is never called and underlying native views are never freed. FIX, you stupid man.
-        mHybridData.resetNative();
+        // We can only reset the native side when the view was removed from screen.
+        // releasing the surface can also be done when the view is hidden and then
+        // we should only release the surface - and keep the native part around.
+        if(mViewRemoved) {
+            mHybridData.resetNative();
+        }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        releaseSurface();
-        super.finalize();
+    void onViewRemoved() {
+        mViewRemoved = true;
     }
 
     @Override

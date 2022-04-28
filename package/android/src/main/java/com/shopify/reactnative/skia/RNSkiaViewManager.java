@@ -61,6 +61,7 @@ public class RNSkiaViewManager extends BaseViewManager<SkiaDrawView, LayoutShado
         Integer nativeId = mViewMapping.get(view);
         skiaModule.getSkiaManager().unregister(nativeId);
         mViewMapping.remove(view);
+        view.onViewRemoved();
     }
 
     @NonNull
