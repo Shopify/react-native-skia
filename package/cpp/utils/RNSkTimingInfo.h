@@ -1,5 +1,6 @@
 #pragma once
 
+#include <RNSkLog.h>
 #include <chrono>
 
 #define NUMBER_OF_DURATION_SAMPLES 10
@@ -12,7 +13,7 @@ using ms = duration<float, std::milli>;
 
 class RNSkTimingInfo {
 public:
-  RNSkTimingInfo() {
+  RNSkTimingInfo(const std::string &name): _name(std::move(name)) {
     reset();
   }
 
@@ -25,6 +26,7 @@ public:
     _prevFpsTimer = -1;
     _frameCount = 0;
     _lastFrameCount = -1;
+    _didSkip = false;
   }
   
   void beginTiming() {
@@ -35,6 +37,14 @@ public:
     time_point<steady_clock> stop = high_resolution_clock::now();
     addLastDuration(duration_cast<milliseconds>(stop - _start).count());
     tick(stop);
+    if(_didSkip) {
+      _didSkip = false;
+      RNSkLogger::logToConsole("%s: Skipped frame. Previous frame time: %lldms", _name.c_str(), _lastDuration);
+    }
+  }
+
+  void markSkipped() {
+    _didSkip = true;
   }
 
   long getAverage() { return static_cast<long>(_average); }
@@ -86,6 +96,8 @@ private:
   long _prevFpsTimer;
   double _frameCount;
   double _lastFrameCount;
+  double _didSkip;
+  std::string _name;
 };
 
 } // namespace RNSkia

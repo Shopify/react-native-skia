@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import React, { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 
 import type { SkPaint } from "../../skia";
-import { Skia } from "../../skia";
+import { SkiaPaint } from "../../skia";
 import type { CustomPaintProps, AnimatedProps } from "../processors";
 import { processPaint } from "../processors";
 import { createDeclaration } from "../nodes";
@@ -16,7 +16,7 @@ export interface PaintProps extends Omit<CustomPaintProps, "paint"> {
 export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
   (props, ref) => {
     const paint = useMemo(() => {
-      const p = Skia.Paint();
+      const p = SkiaPaint();
       p.setAntiAlias(true);
       return p;
     }, []);

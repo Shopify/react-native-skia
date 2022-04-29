@@ -43,7 +43,7 @@ public:
   /**
    * Destructor
    */
-  ~RNSkPlatformContext() {
+  virtual ~RNSkPlatformContext() {
     invalidate();
   }
   

@@ -19,19 +19,34 @@ sk_sp<GrDirectContext> RNSkDrawViewImpl::_skContext = nullptr;
 
 RNSkDrawViewImpl::RNSkDrawViewImpl(std::shared_ptr<RNSkia::RNSkPlatformContext> context):
   _context(context), RNSkia::RNSkDrawView(context) {
-    
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
-    _layer = [CAMetalLayer layer];
+  _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
     
-    _layer.framebufferOnly = NO;
-    _layer.device = _device;
-    _layer.opaque = false;
-    _layer.contentsScale = _context->getPixelDensity();
-    _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    
-    setNativeDrawFunc(std::bind(&RNSkDrawViewImpl::drawFrame, this, std::placeholders::_1));
+  _layer.framebufferOnly = NO;
+  _layer.device = _device;
+  _layer.opaque = false;
+  _layer.contentsScale = _context->getPixelDensity();
+  _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+}
+
+RNSkDrawViewImpl::~RNSkDrawViewImpl() {
+  if([[NSThread currentThread] isMainThread]) {
+    _layer = NULL;
+  } else {
+    __block auto tempLayer = _layer;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      // By using the tempLayer variable in the block we capture it and it will be
+      // released after the block has finished. This way the CAMetalLayer dealloc will
+      // only be called on the main thread. Problem: this destructor might be called from
+      // releasing the RNSkDrawViewImpl from a thread capture (after dtor has started),
+      // which would cause the CAMetalLayer dealloc to be called on another thread which
+      // causes a crash.
+      // https://github.com/Shopify/react-native-skia/issues/398
+      tempLayer = tempLayer;
+    });
+  }
 }
 
 void RNSkDrawViewImpl::setSize(int width, int height) {
@@ -44,7 +59,7 @@ void RNSkDrawViewImpl::setSize(int width, int height) {
   requestRedraw();
 }
 
-void RNSkDrawViewImpl::drawFrame(const sk_sp<SkPicture> picture) {
+void RNSkDrawViewImpl::drawPicture(const sk_sp<SkPicture> picture) {
   if(_width == -1 && _height == -1) {
     return;
   }

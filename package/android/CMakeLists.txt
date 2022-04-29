@@ -31,7 +31,8 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniSkiaManager.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniSkiaDrawView.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniPlatformContext.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/jni/SkiaOpenGLRenderer.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkDrawViewImpl.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLRenderer.cpp"
         
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
 
@@ -64,6 +65,7 @@ target_include_directories(
         cpp/api
         cpp/jsi
         cpp/jni/include
+        cpp/rnskia-android
         cpp/rnskia
         cpp/rnskia/values
         cpp/utils  

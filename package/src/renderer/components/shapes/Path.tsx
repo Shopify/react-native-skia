@@ -29,10 +29,12 @@ const onDraw = createDrawing<PathProps>(
     const hasStartOffset = start !== 0;
     const hasEndOffset = end !== 1;
     const hasStrokeOptions = stroke !== undefined;
-    const willMutatePath = hasStartOffset || hasEndOffset || hasStrokeOptions;
+    const hasFillType = !!fillType;
+    const willMutatePath =
+      hasStartOffset || hasEndOffset || hasStrokeOptions || hasFillType;
     const pristinePath = processPath(pathProps.path);
     const path = willMutatePath ? pristinePath.copy() : pristinePath;
-    if (fillType) {
+    if (hasFillType) {
       path.setFillType(FillType[enumKey(fillType)]);
     }
     if (hasStrokeOptions) {

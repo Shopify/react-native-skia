@@ -1,9 +1,9 @@
 #include "SkiaOpenGLRenderer.h"
 
 #include <RNSkLog.h>
+
 namespace RNSkia
 {
-
     /** Static members */
     std::shared_ptr<DrawingContext> SkiaOpenGLRenderer::getThreadDrawingContext()
     {
@@ -18,6 +18,11 @@ namespace RNSkia
             threadContexts.emplace(threadId, drawingContext);
         }
         return threadContexts.at(threadId);
+    }
+
+    SkiaOpenGLRenderer::SkiaOpenGLRenderer(ANativeWindow *surface, size_t renderId):
+        _surfaceTexture(surface),
+        _renderId(renderId) {
     }
 
     void SkiaOpenGLRenderer::run(const sk_sp<SkPicture> picture, int width, int height)
@@ -73,7 +78,16 @@ namespace RNSkia
         }
         case RenderState::Finishing:
         {
-            finish();
+            _renderState = RenderState::Done;
+
+            if (_glSurface != EGL_NO_SURFACE && getThreadDrawingContext()->glDisplay != EGL_NO_DISPLAY)
+            {
+                eglDestroySurface(getThreadDrawingContext()->glDisplay, _glSurface);
+            }
+
+            _skSurface = nullptr;
+            _surfaceTexture = nullptr;
+
             break;
         }
         case RenderState::Done:
@@ -107,56 +121,9 @@ namespace RNSkia
         return true;
     }
 
-    void SkiaOpenGLRenderer::finish()
-    {
-        std::lock_guard<std::mutex> lock(_lock);
-
-        if (_renderState != RenderState::Finishing)
-        {
-            _cv.notify_all();
-            return;
-        }
-
-        finishGL();
-        finishSkiaSurface();
-
-        _renderState = RenderState::Done;
-
-        _cv.notify_one();
-    }
-
-    void SkiaOpenGLRenderer::finishGL()
-    {
-        if (_glSurface != EGL_NO_SURFACE && getThreadDrawingContext()->glDisplay != EGL_NO_DISPLAY)
-        {
-            eglDestroySurface(getThreadDrawingContext()->glDisplay, _glSurface);
-        }
-    }
-
-    void SkiaOpenGLRenderer::finishSkiaSurface()
-    {
-        if (_skSurface != nullptr)
-        {
-            _skSurface = nullptr;
-        }
-
-        if (_nativeWindow != nullptr)
-        {
-            ANativeWindow_release(_nativeWindow);
-            _nativeWindow = nullptr;
-        }
-    }
-
     void SkiaOpenGLRenderer::teardown()
     {
         _renderState = RenderState::Finishing;
-    }
-
-    void SkiaOpenGLRenderer::waitForTeardown()
-    {
-        std::unique_lock<std::mutex> lock(_lock);
-        _cv.wait(lock, [this]
-                 { return (_renderState == RenderState::Done); });
     }
 
     bool SkiaOpenGLRenderer::initStaticGLContext()
@@ -212,7 +179,12 @@ namespace RNSkia
 
         EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
-        getThreadDrawingContext()->glContext = eglCreateContext(getThreadDrawingContext()->glDisplay, getThreadDrawingContext()->glConfig, NULL, contextAttribs);
+        getThreadDrawingContext()->glContext = eglCreateContext(
+                getThreadDrawingContext()->glDisplay,
+                getThreadDrawingContext()->glConfig,
+                NULL,
+                contextAttribs);
+
         if (getThreadDrawingContext()->glContext == EGL_NO_CONTEXT)
         {
             RNSkLogger::logToConsole(
@@ -244,14 +216,18 @@ namespace RNSkia
 
     bool SkiaOpenGLRenderer::initGLSurface()
     {
-        if (_nativeWindow == nullptr)
+        if (_surfaceTexture == nullptr)
         {
             return false;
         }
 
         if (_glSurface != EGL_NO_SURFACE)
         {
-            if (!eglMakeCurrent(getThreadDrawingContext()->glDisplay, _glSurface, _glSurface, getThreadDrawingContext()->glContext))
+            if (!eglMakeCurrent(
+                    getThreadDrawingContext()->glDisplay,
+                    _glSurface,
+                    _glSurface,
+                    getThreadDrawingContext()->glContext))
             {
                 RNSkLogger::logToConsole(
                     "eglMakeCurrent failed: %d\n", eglGetError());
@@ -262,7 +238,12 @@ namespace RNSkia
 
         // Create the opengl surface
         _glSurface =
-            eglCreateWindowSurface(getThreadDrawingContext()->glDisplay, getThreadDrawingContext()->glConfig, _nativeWindow, nullptr);
+            eglCreateWindowSurface(
+                    getThreadDrawingContext()->glDisplay,
+                    getThreadDrawingContext()->glConfig,
+                    _surfaceTexture,
+                    nullptr);
+
         if (_glSurface == EGL_NO_SURFACE)
         {
             RNSkLogger::logToConsole(
@@ -270,7 +251,11 @@ namespace RNSkia
             return false;
         }
 
-        if (!eglMakeCurrent(getThreadDrawingContext()->glDisplay, _glSurface, _glSurface, getThreadDrawingContext()->glContext))
+        if (!eglMakeCurrent(
+                getThreadDrawingContext()->glDisplay,
+                _glSurface,
+                _glSurface,
+                getThreadDrawingContext()->glContext))
         {
             RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
             return false;
