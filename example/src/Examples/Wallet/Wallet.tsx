@@ -72,7 +72,7 @@ export const Wallet = () => {
         [graph.current.data.maxPrice, graph.current.data.minPrice]
       )
     );
-  }, [c]);
+  }, [c, graph]);
   const subtitle = "+ $314,15";
   const titleX = useDerivedValue(
     () =>
@@ -104,8 +104,6 @@ export const Wallet = () => {
       }
     },
   });
-  const start = useDerivedValue(() => path.current.getPoint(0), [path]);
-  const end = useDerivedValue(() => path.current.getLastPt(), [path]);
   return (
     <View style={styles.container}>
       <Header />
@@ -135,9 +133,13 @@ export const Wallet = () => {
             strokeJoin="round"
             strokeCap="round"
           >
-            <LinearGradient start={start} end={end} colors={COLORS} />
+            <LinearGradient
+              start={vec(0, 0)}
+              end={vec(WIDTH, 0)}
+              colors={COLORS}
+            />
           </Path>
-          <Cursor c={c} start={start} end={end} />
+          <Cursor c={c} />
         </Group>
       </Canvas>
       <Selection current={current} next={next} transition={transition} />
