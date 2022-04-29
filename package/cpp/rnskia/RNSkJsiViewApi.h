@@ -20,7 +20,7 @@ using CallbackInfo = struct CallbackInfo {
     view = nullptr;
   }
   std::shared_ptr<jsi::Function> drawCallback;
-  RNSkDrawView *view;
+  std::shared_ptr<RNSkDrawView> view;
 };
 
 class RNSkJsiViewApi : public JsiHostObject {
@@ -226,7 +226,7 @@ public:
    * @param nativeId Id of view to register
    * @param view View to register
    */
-  void registerSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
+  void registerSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkDrawView> view) {
     auto info = getEnsuredCallbackInfo(nativeId);
     info->view = view;
     if (info->drawCallback != nullptr) {
@@ -260,15 +260,18 @@ public:
    a valid view is set, the setDrawCallback method is called on the
    view (if a valid callback exists).
    */
-  void setSkiaDrawView(size_t nativeId, RNSkDrawView *view) {
+  void setSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkDrawView> view) {
     if (_callbackInfos.find(nativeId) == _callbackInfos.end()) {
       return;
     }
     auto info = getEnsuredCallbackInfo(nativeId);
-    info->view = view;
     if (view != nullptr && info->drawCallback != nullptr) {
+      info->view = view;
       info->view->setNativeId(nativeId);
       info->view->setDrawCallback(info->drawCallback);
+    } else if(view == nullptr && info->drawCallback != nullptr) {
+      info->view->setDrawCallback(nullptr);
+      info->view = view;
     }
   }
 

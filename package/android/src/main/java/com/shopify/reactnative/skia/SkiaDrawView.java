@@ -18,10 +18,11 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @DoNotStrip
     private HybridData mHybridData;
 
-    private Surface mSurface;
+    @DoNotStrip
+    private boolean mViewRemoved;
 
     @DoNotStrip
-    private boolean mIsRemoved = false;
+    private Surface mSurface;
 
     public SkiaDrawView(Context ctx) {
         super(ctx);
@@ -36,26 +37,25 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         // Texture view does not support setting the background color.
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        mHybridData.resetNative();
-        super.finalize();
+    public void releaseSurface() {
+        if(mSurface != null) {
+            mSurface.release();
+            mSurface = null;
+        }
+        // We can only reset the native side when the view was removed from screen.
+        // releasing the surface can also be done when the view is hidden and then
+        // we should only release the surface - and keep the native part around.
+        if(mViewRemoved) {
+            mHybridData.resetNative();
+        }
     }
 
-
-    public void onRemoved() {
-        // We'll mark the view removed since we reset the native part.
-        // This means that none of the native methods should be called after
-        // this point.
-        mIsRemoved = true;
-        mHybridData.resetNative();
+    void onViewRemoved() {
+        mViewRemoved = true;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if(mIsRemoved) {
-            return false;
-        }
         int action = ev.getAction();
         int count = ev.getPointerCount();
         MotionEvent.PointerCoords r = new MotionEvent.PointerCoords();
@@ -88,30 +88,23 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        if(mIsRemoved) {
-            return;
-        }
         mSurface = new Surface(surface);
         surfaceAvailable(mSurface, width, height);
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        if(mIsRemoved) {
-            return;
-        }
         surfaceSizeChanged(width, height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        if(mIsRemoved) {
-            return true;
-        }
         surfaceDestroyed();
-        mSurface.release();
-        mSurface = null;
-        return true;
+        // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
+        // Invoked when the specified SurfaceTexture is about to be destroyed. If returns true,
+        // no rendering should happen inside the surface texture after this method is invoked.
+        // If returns false, the client needs to call SurfaceTexture#release().
+        return false;
     }
 
     @Override

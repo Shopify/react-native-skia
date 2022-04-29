@@ -7,7 +7,7 @@
 #include <memory>
 
 #include <JniPlatformContext.h>
-#include <JniPlatformContextWrapper.h>
+#include <RNSkPlatformContextImpl.h>
 
 #include <RNSkLog.h>
 
@@ -48,14 +48,14 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
         : _javaPart(jni::make_global(jThis)),
           _jsRuntime(runtime),
           _jsCallInvoker(jsCallInvoker),
-          _context(std::make_shared<JniPlatformContextWrapper>(platformContext, runtime, jsCallInvoker)) {
+          _context(std::make_shared<RNSkPlatformContextImpl>(platformContext, runtime, jsCallInvoker)) {
 
     }
 
     void registerSkiaView(int viewTag, JniSkiaDrawView *skiaView);
     void unregisterSkiaView(int viewTag);
 
-    std::shared_ptr<JniPlatformContextWrapper> getPlatformContext() { return _context; }
+    std::shared_ptr<RNSkPlatformContextImpl> getPlatformContext() { return _context; }
 
     void invalidate() {
         _context->stopDrawLoop();
@@ -73,7 +73,7 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
 
     jsi::Runtime *_jsRuntime;
     std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
-    std::shared_ptr<JniPlatformContextWrapper> _context;
+    std::shared_ptr<RNSkPlatformContextImpl> _context;
 
     void initializeRuntime();
 };

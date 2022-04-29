@@ -21,20 +21,18 @@
 class RNSkDrawViewImpl : public RNSkia::RNSkDrawView {
 public:
   RNSkDrawViewImpl(std::shared_ptr<RNSkia::RNSkPlatformContext> context);
+  ~RNSkDrawViewImpl();
+  
+  CALayer* getLayer() { return _layer; }
   
   void setSize(int width, int height);
-  
-  CALayer* getLayer() { return _layer; };
 
 protected:
   int getWidth() override { return _width * _context->getPixelDensity(); };
-  int getHeight() override { return _height * _context->getPixelDensity(); };
-  void onInvalidated() override {
-    setNativeDrawFunc(nullptr);
-  };
+  int getHeight() override { return _height * _context->getPixelDensity(); };  
   
 private:
-  void drawFrame(const sk_sp<SkPicture> picture);
+  void drawPicture(const sk_sp<SkPicture> picture) override;
   bool createSkiaSurface();
 
   int _nativeId;

@@ -72,8 +72,12 @@ public:
     _start += timeSinceStop;
     
     _state = RNSkClockState::Running;
-    auto dispatch = std::bind(&RNSkClockValue::notifyUpdate, this, std::placeholders::_1);
-    getContext()->beginDrawLoop(_identifier, dispatch);
+    getContext()->beginDrawLoop(_identifier, [weakSelf = weak_from_this()](bool invalidated){
+      auto self = weakSelf.lock();
+      if(self) {
+        std::dynamic_pointer_cast<RNSkClockValue>(self)->notifyUpdate(invalidated);
+      }
+    });
   }
   
   virtual void stopClock() {
@@ -103,12 +107,16 @@ protected:
     getContext()->runOnJavascriptThread(
       // To ensure that this shared_ptr instance is not deallocated before we are done
       // running the update lambda we pass a shared from this to the lambda scope.
-      [self = shared_from_this(), this]() {
-      if(_state == RNSkClockState::Running) {
-        auto now = std::chrono::high_resolution_clock::now();
-        auto deltaFromStart = std::chrono::duration_cast<std::chrono::milliseconds>(now - _start).count();
-        tick(_runtime, static_cast<double>(deltaFromStart));
-      }
+      [weakSelf = weak_from_this()]() {
+        auto self = weakSelf.lock();
+        if(self) {
+          auto selfClockValue = std::dynamic_pointer_cast<RNSkClockValue>(self);
+          if(selfClockValue->getState() == RNSkClockState::Running) {
+            auto now = std::chrono::high_resolution_clock::now();
+            auto deltaFromStart = std::chrono::duration_cast<std::chrono::milliseconds>(now - selfClockValue->_start).count();
+            selfClockValue->tick(selfClockValue->_runtime, static_cast<double>(deltaFromStart));
+          }
+        }
     });
   }
   

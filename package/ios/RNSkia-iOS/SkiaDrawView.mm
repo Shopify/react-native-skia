@@ -26,50 +26,56 @@
     _nativeId = 0;
     _debugMode = false;
     _drawingMode = RNSkia::RNSkDrawingMode::Default;
+    
     // Listen to notifications about module invalidation
+    __unsafe_unretained SkiaDrawView *weakSelf = self;
     auto nc = [NSNotificationCenter defaultCenter];
     [nc addObserverForName:RCTBridgeWillInvalidateModulesNotification
                     object:nil
                      queue:nil
                 usingBlock:^(NSNotification *notification){
       // Remove local variables
-      self->_manager = nullptr;                
+      if(weakSelf != nullptr) {
+        weakSelf->_manager = nullptr;
+      }
     }];
   }
   return self;
 }
 
-- (void)dealloc {
-  if(_manager != nullptr) {
-    _manager->unregisterSkiaDrawView(_nativeId);
-  }
-}
-
 #pragma mark Lifecycle
 
-- (void) willMoveToWindow:(UIWindow *)newWindow {
-  [super willMoveToWindow: newWindow];
-  
+- (void) willMoveToSuperview:(UIView *)newWindow {
   if (newWindow == NULL) {
     // Remove implementation view when the parent view is not set
     if(_impl != nullptr) {
+      [_impl->getLayer() removeFromSuperlayer];
+      
       if(_nativeId != 0 && _manager != nullptr) {
         _manager->setSkiaDrawView(_nativeId, nullptr);
       }
-      [_impl->getLayer() removeFromSuperlayer];
+      
       _impl = nullptr;
     }
   } else {
     // Create implementation view when the parent view is set
     if(_impl == nullptr && _manager != nullptr) {
       _impl = std::make_shared<RNSkDrawViewImpl>(_manager->getPlatformContext());
-      [self.layer addSublayer:_impl->getLayer()];
+      [self.layer addSublayer: _impl->getLayer()];
       if(_nativeId != 0) {
-        _manager->setSkiaDrawView(_nativeId, _impl.get());
+        _manager->setSkiaDrawView(_nativeId, _impl);
       }
       _impl->setDrawingMode(_drawingMode);
-      _impl->setShowDebugOverlays(_debugMode);      
+      _impl->setShowDebugOverlays(_debugMode);
     }
+  }
+}
+
+- (void) dealloc {
+  auto nc = [NSNotificationCenter defaultCenter];
+  [nc removeObserver:self name:RCTBridgeWillInvalidateModulesNotification object:nil];
+  if(_manager != nullptr && _nativeId != 0) {
+    _manager->unregisterSkiaDrawView(_nativeId);
   }
 }
 
@@ -103,7 +109,7 @@
   _nativeId = nativeId;
   
   if(_impl != nullptr) {
-    _manager->registerSkiaDrawView(nativeId, _impl.get());
+    _manager->registerSkiaDrawView(nativeId, _impl);
   }
 }
 
