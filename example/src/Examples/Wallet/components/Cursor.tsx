@@ -25,11 +25,15 @@ export const Cursor = ({ x, y }: CursorProps) => {
       ),
     [x]
   );
+  const transform = useDerivedValue(
+    () => [{ translateX: x.current }, { translateY: y.current }],
+    [x, y]
+  );
   return (
-    <Group>
-      <Circle cx={x} cy={y} r={27} color={color} opacity={0.15} />
-      <Circle cx={x} cy={y} r={18} color={color} opacity={0.15} />
-      <Circle cx={x} cy={y} r={9} color={color}>
+    <Group transform={transform}>
+      <Circle cx={0} cy={0} r={27} color={color} opacity={0.15} />
+      <Circle cx={0} cy={0} r={18} color={color} opacity={0.15} />
+      <Circle cx={0} cy={0} r={9} color={color}>
         <Paint style="stroke" strokeWidth={2} color="white" />
       </Circle>
     </Group>

@@ -44,10 +44,10 @@ export const Wallet = () => {
   }, [state, transition]);
   // x and y values of the cursor
   const x = useValue(0);
-  const y = useDerivedValue(() => {
-    const cmds = path.current.toCmds();
-    return getYForX(cmds, x.current) ?? 0;
-  }, [x, path]);
+  const y = useDerivedValue(
+    () => getYForX(path.current.toCmds(), x.current)!,
+    [x, path]
+  );
   const onTouch = useGraphTouchHandler(x, y);
   return (
     <View style={styles.container}>
