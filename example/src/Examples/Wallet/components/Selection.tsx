@@ -41,25 +41,29 @@ const styles = StyleSheet.create({
   },
 });
 
+interface GraphState {
+  next: number;
+  current: number;
+}
+
 interface SelectionProps {
-  current: SkiaValue<number>;
-  next: SkiaValue<number>;
+  state: SkiaValue<GraphState>;
   transition: SkiaValue<number>;
 }
 
-export const Selection = ({ current, next, transition }: SelectionProps) => {
-  const transform = useDerivedValue(
-    () => [
+export const Selection = ({ state, transition }: SelectionProps) => {
+  const transform = useDerivedValue(() => {
+    const { current, next } = state.current;
+    return [
       {
         translateX: mix(
           transition.current,
-          current.current * buttonWidth,
-          next.current * buttonWidth
+          current * buttonWidth,
+          next * buttonWidth
         ),
       },
-    ],
-    [current, next, transition]
-  );
+    ];
+  }, [state, transition]);
   return (
     <View style={styles.root}>
       <View style={styles.container}>
@@ -78,8 +82,8 @@ export const Selection = ({ current, next, transition }: SelectionProps) => {
           <TouchableWithoutFeedback
             key={index}
             onPress={() => {
-              current.current = next.current;
-              next.current = index;
+              state.current.current = state.current.next;
+              state.current.next = index;
               transition.current = 0;
               runTiming(transition, 1, {
                 duration: 750,

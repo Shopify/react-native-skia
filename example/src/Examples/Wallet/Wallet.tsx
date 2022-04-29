@@ -45,14 +45,16 @@ const styles = StyleSheet.create({
 
 export const Wallet = () => {
   const transition = useValue(0);
-  const next = useValue(0);
-  const current = useValue(0);
-  const graph = useDerivedValue(() => graphs[current.current], [current]);
+  const state = useValue({
+    next: 0,
+    current: 0,
+  });
   const path = useDerivedValue(() => {
-    const start = graphs[current.current].data.path;
-    const end = graphs[next.current].data.path;
+    const { current, next } = state.current;
+    const start = graphs[current].data.path;
+    const end = graphs[next].data.path;
     return end.interpolate(start, transition.current);
-  }, [current, next, transition]);
+  }, [state, transition]);
   const cmds = useDerivedValue(() => path.current.toCmds(), [path]);
   const gestureActive = useValue(false);
   const offsetX = useValue(0);
@@ -65,23 +67,23 @@ export const Wallet = () => {
     return result;
   }, [x, cmds]);
   const text = useDerivedValue(() => {
+    const graph = graphs[state.current.current];
     return currency.format(
       interpolate(
         c.current.y,
         [0, AJUSTED_SIZE],
-        [graph.current.data.maxPrice, graph.current.data.minPrice]
+        [graph.data.maxPrice, graph.data.minPrice]
       )
     );
-  }, [c, graph]);
+  }, [c, state]);
   const subtitle = "+ $314,15";
-  const titleX = useDerivedValue(
-    () =>
+  const titleX = useDerivedValue(() => {
+    const graph = graphs[state.current.current];
+    return (
       WIDTH / 2 -
-      titleFont.measureText(currency.format(graph.current.data.maxPrice))
-        .width /
-        2,
-    [graph]
-  );
+      titleFont.measureText(currency.format(graph.data.maxPrice)).width / 2
+    );
+  }, [state]);
   const subtitlePos = subtitleFont.measureText(subtitle);
   const translateY = HEIGHT + PADDING;
   const onTouch = useTouchHandler({
@@ -142,7 +144,7 @@ export const Wallet = () => {
           <Cursor c={c} />
         </Group>
       </Canvas>
-      <Selection current={current} next={next} transition={transition} />
+      <Selection state={state} transition={transition} />
       <List />
     </View>
   );
