@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   },
 });
 
-interface GraphState {
+export interface GraphState {
   next: number;
   current: number;
 }
