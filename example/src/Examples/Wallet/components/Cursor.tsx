@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue, Vector } from "@shopify/react-native-skia";
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   interpolateColors,
   Circle,
@@ -11,24 +11,25 @@ import React from "react";
 import { COLORS, WIDTH } from "../Model";
 
 interface CursorProps {
-  c: SkiaReadonlyValue<Vector>;
+  x: SkiaReadonlyValue<number>;
+  y: SkiaReadonlyValue<number>;
 }
 
-export const Cursor = ({ c }: CursorProps) => {
+export const Cursor = ({ x, y }: CursorProps) => {
   const color = useDerivedValue(
     () =>
       interpolateColors(
-        c.current.x / WIDTH,
+        x.current / WIDTH,
         COLORS.map((_, i) => i / COLORS.length),
         COLORS
       ),
-    [c]
+    [x]
   );
   return (
     <Group>
-      <Circle c={c} r={27} color={color} opacity={0.15} />
-      <Circle c={c} r={18} color={color} opacity={0.15} />
-      <Circle c={c} r={9} color={color}>
+      <Circle cx={x} cy={y} r={27} color={color} opacity={0.15} />
+      <Circle cx={x} cy={y} r={18} color={color} opacity={0.15} />
+      <Circle cx={x} cy={y} r={9} color={color}>
         <Paint style="stroke" strokeWidth={2} color="white" />
       </Circle>
     </Group>

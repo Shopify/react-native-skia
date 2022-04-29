@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue, Vector } from "@shopify/react-native-skia";
+import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   Text,
   interpolateColors,
@@ -23,22 +23,22 @@ const currency = new Intl.NumberFormat("en-EN", {
 });
 
 interface LabelProps {
-  c: SkiaReadonlyValue<Vector>;
+  y: SkiaReadonlyValue<number>;
   state: SkiaReadonlyValue<GraphState>;
 }
 
-export const Label = ({ state, c }: LabelProps) => {
+export const Label = ({ state, y }: LabelProps) => {
   const translateY = HEIGHT + PADDING;
   const text = useDerivedValue(() => {
     const graph = graphs[state.current.current];
     return currency.format(
       interpolateColors(
-        c.current.y,
+        y.current,
         [0, AJUSTED_SIZE],
         [graph.data.maxPrice, graph.data.minPrice]
       )
     );
-  }, [c, state]);
+  }, [y, state]);
   const subtitle = "+ $314,15";
   const titleX = useDerivedValue(() => {
     const graph = graphs[state.current.current];

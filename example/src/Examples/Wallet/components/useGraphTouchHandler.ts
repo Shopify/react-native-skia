@@ -1,8 +1,4 @@
-import type {
-  SkiaValue,
-  SkiaReadonlyValue,
-  Vector,
-} from "@shopify/react-native-skia";
+import type { SkiaValue, SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   runDecay,
   add,
@@ -19,13 +15,16 @@ const translateY = HEIGHT + PADDING;
 
 export const useGraphTouchHandler = (
   x: SkiaValue<number>,
-  c: SkiaReadonlyValue<Vector>
+  y: SkiaReadonlyValue<number>
 ) => {
   const gestureActive = useValue(false);
   const offsetX = useValue(0);
   const onTouch = useTouchHandler({
     onStart: (pos) => {
-      const normalizedCenter = add(c.current, vec(0, translateY));
+      const normalizedCenter = add(
+        vec(x.current, y.current),
+        vec(0, translateY)
+      );
       if (dist(normalizedCenter, pos) < 50) {
         gestureActive.current = true;
         offsetX.current = x.current - pos.x;
