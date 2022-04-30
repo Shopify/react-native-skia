@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   label: {
-    fontFamily: "Helevtica",
+    fontFamily: "Helvetica",
     fontSize: 16,
     color: "white",
     textAlign: "center",
