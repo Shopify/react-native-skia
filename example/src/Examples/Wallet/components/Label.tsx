@@ -1,5 +1,6 @@
 import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
+  interpolate,
   Text,
   interpolateColors,
   Skia,
@@ -32,7 +33,7 @@ export const Label = ({ state, y }: LabelProps) => {
   const text = useDerivedValue(() => {
     const graph = graphs[state.current.current];
     return currency.format(
-      interpolateColors(
+      interpolate(
         y.current,
         [0, AJUSTED_SIZE],
         [graph.data.maxPrice, graph.data.minPrice]
