@@ -7,8 +7,8 @@ import type { Vector, AnimatedProps, TransformProps } from "../../processors";
 import { createDeclaration } from "../../nodes/Declaration";
 import { localMatrix } from "../../processors";
 
-// We need to use any here because hasOwnProperty doesn't work on JSI instances
 const isVector = (obj: unknown): obj is Vector =>
+  // We have an issue to check property existence on JSI backed instances
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (obj as any).x !== undefined && (obj as any).y !== undefined;
 
