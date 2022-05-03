@@ -30,13 +30,6 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen
-            name="Wallet"
-            component={Wallet}
-            options={{
-              header: () => null,
-            }}
-          />
-          <Stack.Screen
             name="Home"
             component={HomeScreen}
             options={{
@@ -80,6 +73,13 @@ const App = () => {
           <Stack.Screen
             name="Wallpaper"
             component={Wallpaper}
+            options={{
+              header: () => null,
+            }}
+          />
+          <Stack.Screen
+            name="Wallet"
+            component={Wallet}
             options={{
               header: () => null,
             }}
