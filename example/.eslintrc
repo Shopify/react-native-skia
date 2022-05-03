@@ -14,7 +14,6 @@
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-empty-function": "off",
     "react/jsx-uses-react": "error",
-    "react/react-in-jsx-scope": "error",
-    "react-hooks/exhaustive-deps": ["error", { "additionalHooks": "(useDerivedValue)" }]
+    "react/react-in-jsx-scope": "error"
   }
 }

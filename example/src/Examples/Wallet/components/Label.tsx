@@ -2,7 +2,6 @@ import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
 import {
   interpolate,
   Text,
-  interpolateColors,
   Skia,
   useDerivedValue,
 } from "@shopify/react-native-skia";
