@@ -5,7 +5,7 @@ sidebar_label: Offset
 slug: /image-filters/offset
 ---
 
-This offset filter is identical to its [SVG counterpart](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feDisplacementMap). It allows offsetting the filtered image. 
+This offset filter is identical to its [SVG counterpart](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feOffset). It allows offsetting the filtered image. 
 
 | Name      | Type           |  Description                               |
 |:----------|:---------------|:-------------------------------------------|

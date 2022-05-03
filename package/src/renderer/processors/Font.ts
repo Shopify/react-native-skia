@@ -5,7 +5,7 @@ import type { FontMgr } from "../../skia/FontMgr/FontMgr";
 export type FontDef = { font: SkFont } | { familyName: string; size: number };
 
 export const isFont = (fontDef: FontDef): fontDef is { font: SkFont } =>
-  // We use any here for safety (JSI instances don't have hasProperty working properly);
+  // We have an issue to check property existence on JSI backed instances
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (fontDef as any).font !== undefined;
 

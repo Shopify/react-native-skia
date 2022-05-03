@@ -1,5 +1,3 @@
-// Here we use any because hasOwnProperty doesn't work on JSI instances not does the (key in obj) syntax
-// And using Object.keys for such use-case is incredibly slow
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkRect, SkRRect } from "../../skia";
 
@@ -47,10 +45,13 @@ export const center = (r: SkRect | SkRRect) =>
     ? vec(r.rect.x + r.rect.width / 2, r.rect.y + r.rect.height / 2)
     : vec(r.x + r.width / 2, r.y + r.height / 2);
 
+// We have an issue to check property existence on JSI backed instances
 const isRRectCtor = (def: RRectDef): def is RRectCtor =>
   (def as any).rect === undefined;
+// We have an issue to check property existence on JSI backed instances
 const isRectCtor = (def: RectDef): def is RectCtor =>
   (def as any).rect === undefined;
+// We have an issue to check property existence on JSI backed instances
 export const isRRect = (def: SkRect | SkRRect): def is SkRRect =>
   (def as any).rect !== undefined;
 
