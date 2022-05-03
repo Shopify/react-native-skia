@@ -14,7 +14,7 @@ It may have some other features in the future.
 
 | Name       | Type     |  Description                                       |
 |:-----------|:---------|:---------------------------------------------------|
-| rect       | `SKRect` or `SKRRect` | Rounded rectangle to draw             |
+| box        | `SkRect` or `SkRRect` | Rounded rectangle to draw             |
 | children?  | `BoxShadow` | Bounding rectangle of the drawing after scale   |
 
 The `Box` component accepts `BoxShadow` components as children.
