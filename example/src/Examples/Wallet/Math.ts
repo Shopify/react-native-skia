@@ -7,14 +7,13 @@ import {
 } from "@shopify/react-native-skia";
 import { exhaustiveCheck } from "@shopify/react-native-skia/src/renderer/typeddash";
 
-import type { Cubic } from "../Aurora/components/Cubic";
-
 const round = (value: number, precision = 0) => {
   const p = Math.pow(10, precision);
   return Math.round(value * p) / p;
 };
 
-// https://stackoverflow.com/questions/27176423/function-to-solve-cubic-equation-analytically
+// https://stackoverflow.com/questions/27176423
+// https://stackoverflow.com/questions/51879836
 const cuberoot = (x: number) => {
   const y = Math.pow(Math.abs(x), 1 / 3);
   return x < 0 ? -y : y;
@@ -126,15 +125,16 @@ interface Cubic {
 export const selectCurve = (cmds: PathCommand[], x: number): Cubic | null => {
   for (let i = 0; i < cmds.length; i++) {
     const cmd = cmds[i];
-
     if (cmd[0] === PathVerb.Cubic) {
-      const to = vec(cmd[1], cmd[2]);
-      const from = vec(cmd[7], cmd[8]);
+      const from = vec(cmd[1], cmd[2]);
+      const to = vec(cmd[7], cmd[8]);
+      const c1 = vec(cmd[3], cmd[4]);
+      const c2 = vec(cmd[5], cmd[6]);
       if (x >= from.x && x <= to.x) {
         return {
           from,
-          c1: vec(cmd[3], cmd[4]),
-          c2: vec(cmd[5], cmd[6]),
+          c1,
+          c2,
           to,
         };
       }

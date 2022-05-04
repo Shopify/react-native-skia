@@ -77,7 +77,13 @@ const App = () => {
               header: () => null,
             }}
           />
-          <Stack.Screen name="Wallet" component={Wallet} />
+          <Stack.Screen
+            name="Wallet"
+            component={Wallet}
+            options={{
+              header: () => null,
+            }}
+          />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
           <Stack.Screen name="Performance" component={PerformanceDrawingTest} />
