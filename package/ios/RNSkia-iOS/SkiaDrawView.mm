@@ -34,10 +34,9 @@
                     object:nil
                      queue:nil
                 usingBlock:^(NSNotification *notification){
-      // Remove local variables
-      if(weakSelf != nullptr) {
-        weakSelf->_manager = nullptr;
-      }
+      // Remove local variables when the bridge is teared down.
+      weakSelf->_impl = nullptr;
+      weakSelf->_manager = nullptr;
     }];
   }
   return self;
