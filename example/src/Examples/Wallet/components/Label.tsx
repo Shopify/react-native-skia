@@ -15,12 +15,11 @@ const tf = Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica")!;
 const titleFont = Skia.Font(tf, 64);
 const subtitleFont = Skia.Font(tf, 24);
 
-const currency = new Intl.NumberFormat("en-EN", {
-  maximumFractionDigits: 0,
-  minimumFractionDigits: 0,
-  style: "currency",
-  currency: "USD",
-});
+const format = (value: number) =>
+  "$ " +
+  Math.round(value)
+    .toString()
+    .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 
 interface LabelProps {
   y: SkiaReadonlyValue<number>;
@@ -31,7 +30,7 @@ export const Label = ({ state, y }: LabelProps) => {
   const translateY = HEIGHT + PADDING;
   const text = useDerivedValue(() => {
     const graph = graphs[state.current.current];
-    return currency.format(
+    return format(
       interpolate(
         y.current,
         [0, AJUSTED_SIZE],
@@ -43,8 +42,7 @@ export const Label = ({ state, y }: LabelProps) => {
   const titleX = useDerivedValue(() => {
     const graph = graphs[state.current.current];
     return (
-      WIDTH / 2 -
-      titleFont.measureText(currency.format(graph.data.maxPrice)).width / 2
+      WIDTH / 2 - titleFont.measureText(format(graph.data.maxPrice)).width / 2
     );
   }, [state]);
   const subtitlePos = subtitleFont.measureText(subtitle);
