@@ -42,8 +42,8 @@ export const getResolvedParams = (
 
   const resolvedConfig: Required<TimingConfig> = { ...DefaultTimingConfig };
   if (config) {
-    resolvedConfig.duration = config.duration;
-    resolvedConfig.easing = config.easing ?? ((t) => t);
+    resolvedConfig.duration = config.duration ?? DefaultTimingConfig.duration;
+    resolvedConfig.easing = config.easing ?? DefaultTimingConfig.easing;
   }
 
   return { ...resolvedParameters, ...resolvedConfig };
