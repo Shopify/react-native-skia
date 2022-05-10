@@ -28,9 +28,9 @@ namespace RNSkia {
         }
 
     protected:
-        int getWidth() override { return _width * getPlatformContext()->getPixelDensity(); };
+        int getWidth() override { return _width; };
 
-        int getHeight() override { return _height * getPlatformContext()->getPixelDensity(); };
+        int getHeight() override { return _height; };
 
         void drawPicture(const sk_sp <SkPicture> picture) override;
 

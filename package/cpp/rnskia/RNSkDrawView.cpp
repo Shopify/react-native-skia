@@ -89,8 +89,7 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
          auto runtime = context->getJsRuntime();
                            
          // Update info parameter
-         auto pixelDensity = self->_platformContext->getPixelDensity();
-         self->_infoObject->beginDrawOperation(width/pixelDensity, height/pixelDensity, timestamp);
+         self->_infoObject->beginDrawOperation(width, height, timestamp);
          
          // Set up arguments array
          std::vector<jsi::Value> args(2);
