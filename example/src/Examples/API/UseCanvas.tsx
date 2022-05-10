@@ -4,14 +4,14 @@ import {
   Group,
   Rect,
   rect,
-  useCanvasValue,
+  useCanvasSize,
   useDerivedValue,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef } from "react";
 import { View, Animated } from "react-native";
 
 const MyComp = () => {
-  const canvas = useCanvasValue();
+  const canvas = useCanvasSize();
   const rct = useDerivedValue(() => {
     return rect(0, 0, canvas.current.width, canvas.current.height / 2);
   }, [canvas]);
