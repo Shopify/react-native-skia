@@ -47,7 +47,7 @@ const MatrixColorFilter = () => {
 
 ![Matrix Color Filter](assets/color-filters/matrix.png)
 
-## Blend
+## BlendColor
 
 Creates a color filter with the given color and blend mode.
 
