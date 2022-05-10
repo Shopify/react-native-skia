@@ -124,7 +124,7 @@ const MyComp = () => {
     <Group>
       <Fill color="magenta" />
       <Rect color="cyan" rect={rct} />
-      {/* ❌ this won't update sine canvas is a skia value */}
+      {/* ❌ this won't update since canvas is a skia value */}
       <Rect x={0} y={0} width={canvas.current.width} height={canvas.current.height/2} color="red" />
     </Group>
   );
