@@ -20,7 +20,7 @@ Behind the scenes, it is using its own React renderer.
 
 If the size of the Canvas is unknown, there are two ways to access it:
   * In React components, using the [`onLayout`](https://reactnative.dev/docs/view#onlayout) prop like you would on any regular React Native View. 
-  * As a Skia value, using [`useCanvasSize()`](/docs/animations/values#canvas-size).
+  * As an animation value, using [`useCanvasSize()`](/docs/animations/values#canvas-size).
 
 ## Getting a Canvas Snapshot
 
