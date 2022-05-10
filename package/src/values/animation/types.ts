@@ -1,12 +1,12 @@
 export interface SpringConfig {
-  mass: number;
-  stiffness: number;
-  damping: number;
-  velocity: number;
+  mass?: number;
+  stiffness?: number;
+  damping?: number;
+  velocity?: number;
 }
 
 export interface TimingConfig {
-  duration: number;
+  duration?: number;
   easing?: (t: number) => number;
 }
 
