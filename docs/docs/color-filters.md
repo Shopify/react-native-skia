@@ -84,7 +84,7 @@ Creates a color filter that is linearly interpolated between two other color fil
 | children  | `ColorFilter` | The two filters to interpolate from.       |
 
 ```tsx twoslash
-import { Canvas,ColorMatrix, Image, useImage } from "@shopify/react-native-skia";
+import { Canvas,ColorMatrix, Image, useImage, Lerp } from "@shopify/react-native-skia";
 
 const MatrixColorFilter = () => {
   const image = useImage(require("./assets/oslo.jpg"));
