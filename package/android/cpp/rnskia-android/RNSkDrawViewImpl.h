@@ -28,9 +28,9 @@ namespace RNSkia {
         }
 
     protected:
-        int getWidth() override { return _width * getPlatformContext()->getPixelDensity(); };
+        float getScaledWidth() override { return _scaledWidth; };
 
-        int getHeight() override { return _height * getPlatformContext()->getPixelDensity(); };
+        float getScaledHeight() override { return _scaledHeight; };
 
         void drawPicture(const sk_sp <SkPicture> picture) override;
 
@@ -40,8 +40,8 @@ namespace RNSkia {
         std::unique_ptr<SkiaOpenGLRenderer> _renderer = nullptr;
 
         int _nativeId;
-        int _width = -1;
-        int _height = -1;
+        float _scaledWidth = -1;
+        float _scaledHeight = -1;
 
         std::function<void()> _releaseSurfaceCallback;
     };

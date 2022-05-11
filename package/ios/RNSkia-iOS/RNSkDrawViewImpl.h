@@ -28,16 +28,16 @@ public:
   void setSize(int width, int height);
 
 protected:
-  int getWidth() override { return _width * _context->getPixelDensity(); };
-  int getHeight() override { return _height * _context->getPixelDensity(); };  
+  float getScaledWidth() override { return _width * _context->getPixelDensity(); };
+  float getScaledHeight() override { return _height * _context->getPixelDensity(); };
   
 private:
   void drawPicture(const sk_sp<SkPicture> picture) override;
   bool createSkiaSurface();
 
   int _nativeId;
-  int _width = -1;
-  int _height = -1;
+  float _width = -1;
+  float _height = -1;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
