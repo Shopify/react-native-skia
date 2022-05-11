@@ -45,7 +45,7 @@ export const useCanvas = () => {
 };
 
 export const useCanvasSize = () => {
-  console.warn("useCanvasSize is deprecated, use useCanvas().size instead");
+  console.warn("useCanvasSize is deprecated, use the size member of useCanvas() instead.");
   return useCanvas().size;
 };
 
