@@ -157,7 +157,7 @@ void RNSkDrawView::drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
 
 sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
   // Assert width/height
-  auto surface = SkSurface::MakeRasterN32Premul(getWidth(), getHeight());
+  auto surface = SkSurface::MakeRasterN32Premul(getScaledWidth(), getScaledHeight());
   auto canvas = surface->getCanvas();
   auto jsiCanvas = std::make_shared<JsiSkCanvas>(_platformContext);
   jsiCanvas->setCanvas(canvas);
@@ -165,7 +165,7 @@ sk_sp<SkImage> RNSkDrawView::makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
   milliseconds ms = duration_cast<milliseconds>(
       system_clock::now().time_since_epoch());
   
-  drawInCanvas(jsiCanvas, getWidth(), getHeight(), ms.count() / 1000);
+  drawInCanvas(jsiCanvas, getScaledWidth(), getScaledHeight(), ms.count() / 1000);
   
   if(bounds != nullptr) {
     SkIRect b = SkIRect::MakeXYWH(bounds->x(), bounds->y(), bounds->width(), bounds->height());
@@ -188,7 +188,7 @@ void RNSkDrawView::performDraw() {
   // move the actual drawing onto the render thread later
   SkPictureRecorder recorder;
   SkRTreeFactory factory;
-  SkCanvas* canvas = recorder.beginRecording(getWidth(), getHeight(), &factory);
+  SkCanvas* canvas = recorder.beginRecording(getScaledWidth(), getScaledHeight(), &factory);
   _jsiCanvas->setCanvas(canvas);
   
   // Get current milliseconds
@@ -197,7 +197,7 @@ void RNSkDrawView::performDraw() {
   
   try {
     // Perform the javascript drawing
-    drawInCanvas(_jsiCanvas, getWidth(), getHeight(), ms.count() / 1000.0);
+    drawInCanvas(_jsiCanvas, getScaledWidth(), getScaledHeight(), ms.count() / 1000.0);
   } catch(...) {
     _jsTimingInfo.stopTiming();
     _jsDrawingLock->unlock();

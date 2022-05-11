@@ -97,12 +97,12 @@ protected:
   /**
    Returns the scaled width of the view
    */
-  virtual int getWidth() { return -1; };
+  virtual float getScaledWidth() = 0;
   
   /**
    Returns the scaled height of the view
    */
-  virtual int getHeight() { return -1; };
+  virtual float getScaledHeight() = 0;
   
   /**
    Override to render picture to GPU

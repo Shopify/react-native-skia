@@ -16,8 +16,8 @@ namespace RNSkia {
         _releaseSurfaceCallback(std::move(releaseSurfaceCallback)) {}
 
     void RNSkDrawViewImpl::surfaceAvailable(ANativeWindow* surface, int width, int height) {
-        _width = width;
-        _height = height;
+        _scaledWidth = width;
+        _scaledHeight = height;
 
         if (_renderer == nullptr)
         {
@@ -53,8 +53,8 @@ namespace RNSkia {
     }
 
     void RNSkDrawViewImpl::surfaceSizeChanged(int width, int height) {
-        _width = width;
-        _height = height;
+        _scaledWidth = width;
+        _scaledHeight = height;
 
         // Redraw after size change
         requestRedraw();
@@ -62,7 +62,7 @@ namespace RNSkia {
 
     void RNSkDrawViewImpl::drawPicture(const sk_sp <SkPicture> picture) {
         if(_renderer != nullptr) {
-            _renderer->run(picture, _width, _height);
+            _renderer->run(picture, _scaledWidth, _scaledHeight);
         }
     }
 }
