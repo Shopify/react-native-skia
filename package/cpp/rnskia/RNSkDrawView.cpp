@@ -67,17 +67,9 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
   _jsTimingInfo.reset();
   _gpuTimingInfo.reset();
   
-  // Set up debug font/paints
-  auto font = SkFont();
-  font.setSize(14);
-  auto paint = SkPaint();
-  paint.setColor(SkColors::kRed);
-  
   // Create draw drawCallback wrapper
   _drawCallback = std::make_shared<RNSkDrawCallback>(
       [weakSelf = weak_from_this(),
-       paint = std::move(paint),
-       font = std::move(font),
        callback = std::move(callback)](std::shared_ptr<JsiSkCanvas> canvas,
                                        int width,
                                        int height,
@@ -121,7 +113,12 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
           stream << "js: " << jsAvg << "ms gpu: " << gpuAvg << "ms " << " total: " << total << "ms";
           
           std::string debugString = stream.str();
-          
+
+          // Set up debug font/paints
+          auto font = SkFont();
+          font.setSize(14);
+          auto paint = SkPaint();
+          paint.setColor(SkColors::kRed);
           canvas->getCanvas()->drawSimpleText(
            debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
            18, font, paint);
