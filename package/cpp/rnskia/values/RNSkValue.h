@@ -76,11 +76,16 @@ public:
 
 private:
   void subscribe(std::shared_ptr<RNSkAnimation> animation) {
-    unsubscribe();
     if(animation != nullptr) {
       _animation = animation;
-      auto dispatch = std::bind(&RNSkValue::animationDidUpdate, this, std::placeholders::_1);
-      _unsubscribe = std::make_shared<std::function<void()>>(_animation->addListener(dispatch));
+      _unsubscribe = std::make_shared<std::function<void()>>(
+        _animation->addListener([weakSelf = weak_from_this()](jsi::Runtime &runtime) {
+        auto self = weakSelf.lock();
+        if(self) {
+          auto selfAsThis = std::dynamic_pointer_cast<RNSkValue>(self);
+          selfAsThis->animationDidUpdate(runtime);
+        }
+      }));
       // Start the animation
       _animation->startClock();
     }

@@ -32,8 +32,6 @@ public:
     _args[1] = jsi::Value::undefined();
   }
   
-  virtual ~RNSkAnimation() {}
-  
   JSI_HOST_FUNCTION(cancel) {
     stopClock();
     return jsi::Value::undefined();

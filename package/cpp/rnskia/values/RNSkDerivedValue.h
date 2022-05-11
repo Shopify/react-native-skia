@@ -39,6 +39,11 @@ public:
       jsi::detail::throwJSError(runtime, "Expected array of dependencies as second parameter");
     }
         
+    // Get callback for calculating result
+    _callback = std::make_shared<jsi::Function>(arguments[0].asObject(runtime).asFunction(runtime));
+  }
+  
+  void initializeDependencies(jsi::Runtime &runtime, const jsi::Value *arguments, size_t count) {
     // Save dependencies
     std::vector<std::shared_ptr<RNSkReadonlyValue>> dependencies;
         
@@ -59,14 +64,16 @@ public:
       dependencies.push_back(value);
     }
     
-    // Get callback for calculating result
-    _callback = std::make_shared<jsi::Function>(arguments[0].asObject(runtime).asFunction(runtime));
-
     // register change handler on dependencies
     _unsubscribers.reserve(_unsubscribers.size() + size);
     for(const auto &dep: dependencies) {
-      auto dispatcher = std::bind(&RNSkDerivedValue::dependencyUpdated, this, std::placeholders::_1);
-      _unsubscribers.push_back(dep->addListener(dispatcher));
+      _unsubscribers.push_back(dep->addListener([weakSelf = weak_from_this()](jsi::Runtime& runtime) {
+        auto self = weakSelf.lock();
+        if(self) {
+          auto selfAsThis = std::dynamic_pointer_cast<RNSkDerivedValue>(self);
+          selfAsThis->dependencyUpdated(runtime);
+        }
+      }));
     }
         
     // Set initial value

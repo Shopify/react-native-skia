@@ -26,7 +26,7 @@ class RNSkReadonlyValue : public JsiSkHostObject,
 public:
   RNSkReadonlyValue(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
-    _propNameId(jsi::PropNameID::forUtf8(*platformContext->getJsRuntime(), "value")) {}
+    _propNameId(jsi::PropNameID::forUtf8(*platformContext->getJsRuntime(), "value")) { }
   
   virtual ~RNSkReadonlyValue() { }
 
@@ -106,6 +106,7 @@ public:
   }
   
 protected:
+  
   /**
     Notifies listeners about changes
    @param runtime Current JS Runtime
