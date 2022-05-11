@@ -15,7 +15,7 @@ export interface LerpProps {
 
 const onDeclare = createDeclaration<LerpProps>(({ t }, children) => {
   const [src, dst] = children.filter(isColorFilter);
-  const cf = Skia.ColorFilter.MakeLerp(t, dst, src);
+  const cf = Skia.ColorFilter.MakeLerp(t, src, dst);
   return composeColorFilter(
     cf,
     children.filter((c) => c !== src && c !== dst)
