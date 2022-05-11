@@ -34,8 +34,12 @@ public:
   }
   
   JSI_HOST_FUNCTION(createDerivedValue) {
-    return jsi::Object::createFromHostObject(runtime,
-      std::make_shared<RNSkDerivedValue>(_platformContext, runtime, arguments, count));
+    // Creation and initialization is done in two steps to be able to use weak references when setting
+    // up dependencies - since weak_from_this needs our instance to be a shared_ptr before calling
+    // weak_from_this().
+    auto derivedValue = std::make_shared<RNSkDerivedValue>(_platformContext, runtime, arguments, count);
+    derivedValue->initializeDependencies(runtime, arguments, count);
+    return jsi::Object::createFromHostObject(runtime, derivedValue);
   }
   
   JSI_HOST_FUNCTION(createAnimation) {
