@@ -7,6 +7,15 @@ import {
   PaintStyle,
   useImage,
   TileMode,
+  Canvas,
+  Group,
+  BlendColor,
+  Circle,
+  Image,
+  Lerp,
+  ColorMatrix,
+  LinearToSRGBGamma,
+  SRGBToLinearGamma,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -95,12 +104,42 @@ export const ColorFilter = () => {
     },
     [image]
   );
+  const r = IMG_HEIGHT;
+  if (!image) {
+    return null;
+  }
+  const blackAndWhite = [
+    0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
+  ];
+  const purple = [
+    1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
+  ];
   return (
     <ScrollView>
       <Title>Color Matrix Filter</Title>
       <SkiaView style={styles.container} onDraw={onMatrixDraw} />
       <Title>Image Filter</Title>
       <SkiaView style={styles.container} onDraw={onImageFilterDraw} />
+      <Title>Other</Title>
+      <Canvas style={styles.container}>
+        <Group>
+          <SRGBToLinearGamma>
+            <BlendColor color="lightblue" mode="srcIn" />
+          </SRGBToLinearGamma>
+          <Circle cx={r} cy={r} r={r} />
+          <Circle cx={2 * r} cy={r} r={r} color="red" />
+        </Group>
+      </Canvas>
+      <Canvas style={styles.container}>
+        <Image x={0} y={0} width={256} height={256} image={image} fit="cover">
+          <LinearToSRGBGamma>
+            <Lerp t={0.5}>
+              <ColorMatrix matrix={purple} />
+              <ColorMatrix matrix={blackAndWhite} />
+            </Lerp>
+          </LinearToSRGBGamma>
+        </Image>
+      </Canvas>
     </ScrollView>
   );
 };
