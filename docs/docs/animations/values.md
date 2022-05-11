@@ -89,15 +89,15 @@ const Demo = () => {
 };
 ```
 
-## Canvas Size
+## Canvas
 
-The `useCanvasSize` hook is a value that updates every time the canvas size updates.
+The `useCanvas` hook returns a `size` value that updates every time the canvas size updates.
 On the first frame, the size is zero.
 
 
 :::caution
 
-`useCanvasSize` can only be used inside the Canvas element because it relies on context.
+`useCanvas` can only be used inside the Canvas element because it relies on context.
 
 :::
 
@@ -109,23 +109,23 @@ import {
   Group,
   Rect,
   rect,
-  useCanvasSize,
+  useCanvas,
   useDerivedValue,
 } from "@shopify/react-native-skia";
 
 const MyComp = () => {
   // 💚 useCanvasSize() can safely be used here
-  const canvas = useCanvasSize();
+  const {size} = useCanvas();
   // 💚 canvas is a regular skia value that can be used for animations
   const rct = useDerivedValue(() => {
-    return rect(0, 0, canvas.current.width, canvas.current.height / 2);
-  }, [canvas]);
+    return rect(0, 0, size.current.width, size.current.height / 2);
+  }, [size]);
   return (
     <Group>
       <Fill color="magenta" />
       <Rect color="cyan" rect={rct} />
       {/* ❌ this won't update since canvas is a skia value */}
-      <Rect x={0} y={0} width={canvas.current.width} height={canvas.current.height/2} color="red" />
+      <Rect x={0} y={0} width={size.current.width} height={size.current.height/2} color="red" />
     </Group>
   );
 };

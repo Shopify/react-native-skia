@@ -36,12 +36,17 @@ const CanvasContext = React.createContext<SkiaReadonlyValue<{
   height: number;
 }> | null>(null);
 
-export const useCanvasSize = () => {
-  const canvas = useContext(CanvasContext);
-  if (!canvas) {
+export const useCanvas = () => {
+  const size = useContext(CanvasContext);
+  if (!size) {
     throw new Error("Canvas context is not available");
   }
-  return canvas;
+  return { size };
+};
+
+export const useCanvasSize = () => {
+  console.warn("useCanvasSize is deprecated, use useCanvas().size instead");
+  return useCanvas().size;
 };
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
