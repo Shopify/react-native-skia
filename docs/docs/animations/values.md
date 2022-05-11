@@ -92,6 +92,7 @@ const Demo = () => {
 ## Canvas Size
 
 The `useCanvasSize` hook is a value that updates every time the canvas size updates.
+On the first frame, the size is zero.
 
 
 :::caution
@@ -115,6 +116,7 @@ import {
 const MyComp = () => {
   // 💚 useCanvasSize() can safely be used here
   const canvas = useCanvasSize();
+  // 💚 canvas is a regular skia value that can be used for animations
   const rct = useDerivedValue(() => {
     return rect(0, 0, canvas.current.width, canvas.current.height / 2);
   }, [canvas]);
@@ -122,6 +124,8 @@ const MyComp = () => {
     <Group>
       <Fill color="magenta" />
       <Rect color="cyan" rect={rct} />
+      {/* ❌ this won't update since canvas is a skia value */}
+      <Rect x={0} y={0} width={canvas.current.width} height={canvas.current.height/2} color="red" />
     </Group>
   );
 };
