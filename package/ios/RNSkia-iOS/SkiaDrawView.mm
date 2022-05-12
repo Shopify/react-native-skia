@@ -28,7 +28,10 @@
     _drawingMode = RNSkia::RNSkDrawingMode::Default;
     
     // Listen to notifications about module invalidation
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willInvalidateModules) name:RCTBridgeWillInvalidateModulesNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(willInvalidateModules)
+                                                 name:RCTBridgeWillInvalidateModulesNotification
+                                               object:nil];
   }
   return self;
 }
