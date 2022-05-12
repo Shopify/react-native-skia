@@ -38,7 +38,7 @@ const origin = { x: (vWidth * scale) / 2, y: (vHeight * scale) / 2 };
 const center = { x: SIZE / 2, y: SIZE / 2 };
 const basePaint = Skia.Paint();
 basePaint.setAntiAlias(true);
-basePaint.setColor(Skia.Color("#61DAFB"));
+basePaint.setColor(Skia.parseColorString("#61DAFB")!);
 
 const strokePaint = basePaint.copy();
 strokePaint.setStyle(PaintStyle.Stroke);
