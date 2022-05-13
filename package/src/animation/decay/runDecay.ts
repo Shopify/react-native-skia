@@ -1,5 +1,5 @@
-import { ValueApi } from "../../api";
-import type { SkiaValue } from "../../types";
+import { ValueApi } from "../../values/api";
+import type { SkiaValue } from "../../values/types";
 
 import { decay } from "./decay";
 import type { DecayConfig, DefaultDecayConfig, DecayState } from "./types";
