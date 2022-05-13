@@ -28,18 +28,17 @@
     _drawingMode = RNSkia::RNSkDrawingMode::Default;
     
     // Listen to notifications about module invalidation
-    __unsafe_unretained SkiaDrawView *weakSelf = self;
-    auto nc = [NSNotificationCenter defaultCenter];
-    [nc addObserverForName:RCTBridgeWillInvalidateModulesNotification
-                    object:nil
-                     queue:nil
-                usingBlock:^(NSNotification *notification){
-      // Remove local variables when the bridge is teared down.
-      weakSelf->_impl = nullptr;
-      weakSelf->_manager = nullptr;
-    }];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(willInvalidateModules)
+                                                 name:RCTBridgeWillInvalidateModulesNotification
+                                               object:nil];
   }
   return self;
+}
+
+- (void) willInvalidateModules {
+  _impl = nullptr;
+  _manager = nullptr;
 }
 
 #pragma mark Lifecycle
@@ -71,8 +70,6 @@
 }
 
 - (void) dealloc {
-  auto nc = [NSNotificationCenter defaultCenter];
-  [nc removeObserver:self name:RCTBridgeWillInvalidateModulesNotification object:nil];
   if(_manager != nullptr && _nativeId != 0) {
     _manager->unregisterSkiaDrawView(_nativeId);
   }
