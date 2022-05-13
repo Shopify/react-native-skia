@@ -1,6 +1,6 @@
-import { mix } from "../../../renderer";
-import type { Color } from "../../../skia";
-import { alphaf, blue, green, red, rgbaColor, Skia } from "../../../skia";
+import { mix } from "../../renderer";
+import type { Color } from "../../skia";
+import { alphaf, blue, green, red, rgbaColor, Skia } from "../../skia";
 
 import { interpolate } from "./interpolate";
 

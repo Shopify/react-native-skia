@@ -3,8 +3,8 @@ import type {
   RequiredAnimationParams,
   AnimationCallback,
 } from "../types";
-import type { AnimationState, SkiaValue } from "../../types";
-import { ValueApi } from "../../api";
+import type { AnimationState, SkiaValue } from "../../values/types";
+import { ValueApi } from "../../values/api";
 
 import { timing } from "./functions";
 

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import type { SkiaReadonlyValue, SkiaAnimation } from "../../types";
+import type { SkiaReadonlyValue, SkiaAnimation } from "../../values/types";
 import type {
   AnimationParams,
   TimingConfig,
   AnimationCallback,
 } from "../types";
-import { useValue } from "../../hooks/useValue";
+import { useValue } from "../../values/hooks/useValue";
 
 import { getResolvedParams } from "./functions";
 import { createTiming } from "./createTiming";

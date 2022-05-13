@@ -1,14 +1,12 @@
-import type { SkiaValue, SkiaAnimation } from "../../types";
+import type { SkiaValue, SkiaAnimation } from "../../values/types";
 import type {
   AnimationParams,
-  SpringConfig,
+  TimingConfig,
   AnimationCallback,
 } from "../types";
-import { runTiming } from "../timing/runTiming";
 
-import { Spring } from "./Spring";
-import { createSpringEasing } from "./functions/spring";
-
+import { getResolvedParams } from "./functions";
+import { createTiming } from "./createTiming";
 /**
  * Creates a new animation on an existing value that will be driven by
  * an animation value. The value will be run from / to the value in
@@ -18,20 +16,18 @@ import { createSpringEasing } from "./functions/spring";
  *
  * @param value The value to animate
  * @param toOrParams To value or Animation parameters
- * @param config Spring configuration
+ * @param config Spring or timing configuration
  * @returns an animation value that can be used to start/stop
  * the animation.
  */
-export const runSpring = (
+export const runTiming = (
   value: SkiaValue<number>,
   toOrParams: number | AnimationParams,
-  config?: SpringConfig,
+  config?: TimingConfig,
   callback?: AnimationCallback
 ): SkiaAnimation => {
-  return runTiming(
-    value,
-    toOrParams,
-    createSpringEasing(config ?? Spring.Config.Default),
-    callback
-  );
+  const resolvedParameters = getResolvedParams(toOrParams, config);
+  const animation = createTiming(resolvedParameters, value, callback);
+  value.animation = animation;
+  return animation;
 };
