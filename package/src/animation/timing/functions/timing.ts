@@ -1,4 +1,4 @@
-import type { AnimationState } from "../../../types";
+import type { AnimationState } from "../../../values/types";
 
 /**
  * Calculates and returns a timing value based on the

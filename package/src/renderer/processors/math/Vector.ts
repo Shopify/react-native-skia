@@ -1,4 +1,4 @@
-import { interpolate } from "../../../values/animation/functions/interpolate";
+import { interpolate } from "../../../animation/functions/interpolate";
 
 export interface Vector {
   x: number;
