@@ -7,6 +7,8 @@ import {
   Skia,
   TileMode,
   RuntimeShader,
+  usePaintRef,
+  Paint,
 } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
@@ -61,10 +63,13 @@ interface CRTProps {
 }
 
 export const CRT = ({ children }: CRTProps) => {
+  const paint = usePaintRef();
   return (
-    <Group>
-      <RuntimeShader source={source} childName="image" />
-      {children}
-    </Group>
+    <>
+      <Paint ref={paint}>
+        <RuntimeShader source={source} childName="image" />
+      </Paint>
+      <Group layer={paint}>{children}</Group>
+    </>
   );
 };

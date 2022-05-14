@@ -15,6 +15,7 @@ import {
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
+import SimplexNoise from "simplex-noise";
 
 import { CRT } from "./CRT";
 import { COLS, ROWS, SIZE, Symbol } from "./Symbol";
@@ -37,24 +38,25 @@ export const Severance = () => {
   }
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
-      <Group>
-        <Fill color={BG} />
-        {rows.map((_i, i) =>
-          cols.map((_j, j) => {
-            const x = i * SIZE.width;
-            const y = j * SIZE.height;
-            return (
-              <Symbol
-                key={`${i}-${j}`}
-                x={x}
-                y={y}
-                font={font}
-                pointer={pointer}
-              />
-            );
-          })
-        )}
-      </Group>
+      <CRT>
+        <Group>
+          <Fill color={BG} />
+          {rows.map((_i, i) =>
+            cols.map((_j, j) => {
+              return (
+                <Symbol
+                  key={`${i}-${j}`}
+                  i={i}
+                  j={j}
+                  font={font}
+                  pointer={pointer}
+                  clock={clock}
+                />
+              );
+            })
+          )}
+        </Group>
+      </CRT>
     </Canvas>
   );
 };
