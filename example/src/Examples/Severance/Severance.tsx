@@ -40,35 +40,37 @@ export const Severance = () => {
   }
   return (
     <Canvas style={{ flex: 1 }} debug>
-      <Group transform={transform}>
-        <Fill color={BG} />
-        {rows.map((_i, i) =>
-          cols.map((_j, j) => {
-            const x = i * SIZE.width;
-            const y = j * SIZE.height;
-            return (
-              <Rect
-                key={`${i}-${j}`}
-                x={x + 10}
-                y={y + 10}
-                width={SIZE.width - 20}
-                height={SIZE.height - 20}
-                color={FG}
-              />
-            );
-            // return (
-            //   <Text
-            //     key={`${i}-${j}`}
-            //     text="0"
-            //     x={x}
-            //     y={y}
-            //     font={font}
-            //     color={FG}
-            //   />
-            // );
-          })
-        )}
-      </Group>
+      <CRT>
+        <Group transform={transform}>
+          <Fill color={BG} />
+          {rows.map((_i, i) =>
+            cols.map((_j, j) => {
+              const x = i * SIZE.width;
+              const y = j * SIZE.height;
+              return (
+                <Rect
+                  key={`${i}-${j}`}
+                  x={x + 10}
+                  y={y + 10}
+                  width={SIZE.width - 20}
+                  height={SIZE.height - 20}
+                  color={FG}
+                />
+              );
+              // return (
+              //   <Text
+              //     key={`${i}-${j}`}
+              //     text="0"
+              //     x={x}
+              //     y={y}
+              //     font={font}
+              //     color={FG}
+              //   />
+              // );
+            })
+          )}
+        </Group>
+      </CRT>
     </Canvas>
   );
 };

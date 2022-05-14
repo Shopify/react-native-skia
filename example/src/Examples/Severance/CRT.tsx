@@ -1,9 +1,12 @@
-import type { SkPaint, SkRect } from "@shopify/react-native-skia";
 import {
+  Group,
+  SkPaint,
+  SkRect,
   createDrawing,
   FilterMode,
   Skia,
   TileMode,
+  RuntimeShader,
 } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
@@ -56,28 +59,15 @@ half4 main(float2 xy) {
 }
 `)!;
 
-const onDraw = createDrawing<CRTProps>((ctx, { rect: boundingRect }, node) => {
-  const recorder = Skia.PictureRecorder();
-  const canvas = recorder.beginRecording(boundingRect);
-  node.visit({
-    ...ctx,
-    canvas,
-  });
-  const pic = recorder.finishRecordingAsPicture();
-  const shaderPaint = Skia.Paint();
-  shaderPaint.setShader(
-    source.makeShaderWithChildren([], true, [
-      pic.makeShader(TileMode.Decal, TileMode.Decal, FilterMode.Nearest),
-    ])
-  );
-  ctx.canvas.drawPaint(shaderPaint);
-});
-
 interface CRTProps {
   children: ReactNode | ReactNode[];
-  rect: SkRect;
 }
 
-export const CRT = (props: CRTProps) => {
-  return <skDrawing onDraw={onDraw} skipProcessing {...props} />;
+export const CRT = ({ children }: CRTProps) => {
+  return (
+    <Group>
+      <RuntimeShader source={source} childName="image" />
+      {children}
+    </Group>
+  );
 };

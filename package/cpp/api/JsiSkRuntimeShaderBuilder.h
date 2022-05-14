@@ -32,7 +32,7 @@ namespace RNSkia {
         /**
           Returns the underlying object from a host object of this type
          */
-        static std::shared_ptr<SkRuntimeEffectBuilder> fromValue(jsi::Runtime &runtime,
+        static std::shared_ptr<SkRuntimeShaderBuilder> fromValue(jsi::Runtime &runtime,
                                                  const jsi::Value &obj) {
             const auto& object = obj.asObject(runtime);
             return object.asHostObject<JsiSkRuntimeShaderBuilder>(runtime)->getObject();
@@ -48,6 +48,7 @@ namespace RNSkia {
             return jsi::Object::createFromHostObject(
                     runtime, std::make_shared<JsiSkRuntimeShaderBuilder>(std::move(context), rt));
         }
+
         /**
          * Creates the function for construction a new instance of the SkRect
          * wrapper

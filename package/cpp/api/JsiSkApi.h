@@ -66,7 +66,7 @@ namespace RNSkia
       installFunction("XYWHRect", JsiSkRect::createCtor(context));
       installFunction("RRectXY", JsiSkRRect::createCtor(context));
       installFunction("Point", JsiSkPoint::createCtor(context));
-      installFunction("RuntimeBlendBuilder", JsiSkRuntimeShaderBuilder::createCtor(context));
+      installFunction("RuntimeShaderBuilder", JsiSkRuntimeShaderBuilder::createCtor(context));
       installFunction("ContourMeasureIter", JsiSkContourMeasureIter::createCtor(context));
       installFunction("MakeVertices", JsiSkVertices::createCtor(context));
       installFunction("PictureRecorder", JsiSkPictureRecorder::createCtor(context));
