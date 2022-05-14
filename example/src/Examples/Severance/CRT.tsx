@@ -15,6 +15,7 @@ import { Dimensions } from "react-native";
 const { width, height } = Dimensions.get("window");
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
+
 vec2 curveRemapUV(vec2 uv) {
   vec2 curvature = vec2(4.5); //zoom level of curvature (lower = curvier)
   // as we near the edge of our screen apply greater distortion using a cubic function
@@ -24,6 +25,7 @@ vec2 curveRemapUV(vec2 uv) {
   uv = uv * 0.5 + 0.5;
   return uv;
 }
+
 half4 main(float2 xy) {
   vec2 u_resolution = vec2(${width}, ${height});
   vec2 uv = xy/u_resolution;
