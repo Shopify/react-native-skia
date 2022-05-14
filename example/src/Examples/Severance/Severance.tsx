@@ -25,10 +25,7 @@ export const Severance = () => {
   const clock = useClockValue();
   const font = useFont(require("./SF-Mono-Medium.otf"), 32);
 
-  const transform = useDerivedValue(
-    () => [{ translateY: clock.current / 50 }],
-    [clock]
-  );
+  const transform = useDerivedValue(() => [{ translateY: 0 / 50 }], [clock]);
   if (font === null) {
     return null;
   }

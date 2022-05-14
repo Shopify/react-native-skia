@@ -16,47 +16,41 @@ const { width, height } = Dimensions.get("window");
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 
-vec2 curveRemapUV(vec2 uv) {
-  vec2 curvature = vec2(4.5); //zoom level of curvature (lower = curvier)
-  // as we near the edge of our screen apply greater distortion using a cubic function
-  uv = uv * 2.0 - 1.0;
-  vec2 offset = abs(uv.yx) / vec2(curvature.x, curvature.y);
-  uv = uv + uv * offset * offset;
-  uv = uv * 0.5 + 0.5;
-  return uv;
+vec2 curveRemapUV(vec2 uv)
+{
+    // as we near the edge of our screen apply greater distortion using a sinusoid.
+    float curvature = 4.0;
+    uv = uv * 2.0 - 1.0;
+    vec2 offset = abs(uv.yx) / curvature;
+    uv = uv + uv * offset * offset;
+    uv = uv * 0.5 + 0.5;
+    return uv;
+}
+
+vec4 scanLineIntensity(float x, float f, float opacity)
+{
+    float intensity = ((0.5 * sin(x * f)) + 0.5) * 0.9 + 0.1;
+    return vec4(vec3(pow(intensity, opacity)), 1.0);
 }
 
 half4 main(float2 xy) {
-  vec2 u_resolution = vec2(${width}, ${height});
-  vec2 uv = xy/u_resolution;
-  float PI = 3.141592653589793;
- // uv.y = u_resolution.y/2 - uv.y; //flip the incoming image texture
- 
-  vec2 remappedUV = curveRemapUV(uv);
-  vec4 baseColor = image.eval(remappedUV * u_resolution);
-  float line_count = 300.0;
-  float opacity = 0.65;
-  float y_lines = sin(remappedUV.y * line_count * PI * 2.0);
-  y_lines = (y_lines * 0.5 + 0.5) * 0.9 + 0.1;
-  float x_lines = sin(remappedUV.x * line_count * PI * 2.0);
-  x_lines = (x_lines * 0.5 + 0.5) * 0.9 + 0.1;
-  vec4 scan_line = vec4(vec3(pow(y_lines, opacity)), 1.0);
-  vec4 scan_line_x = vec4(vec3(pow(x_lines, opacity)), 1.0);
-  // boosting the brightness, altering the hue to be more blue
-  float avg = baseColor.r + baseColor.g + baseColor.b / 3.0;
-  if (avg > 0.5) {
-    baseColor *= vec4(vec3(0.4, 1.0, 1.2), 1.0) * 8.0;  
+  vec2 scanLineOpacity = vec2(0.25, 0.25);
+  vec2 resolution = vec2(${width}, ${height});
+  vec2 uv = xy/resolution;
+
+  vec2 remappedUV = curveRemapUV(vec2(uv.x, uv.y));
+  vec4 baseColor = image.eval(remappedUV * resolution);
+
+
+  baseColor *= scanLineIntensity(remappedUV.x, 900, scanLineOpacity.x);
+  baseColor *= scanLineIntensity(remappedUV.y, 900, scanLineOpacity.y);
+
+  baseColor *= vec4(vec3(1.5), 1.0);
+
+  if (remappedUV.x < 0.0 || remappedUV.y < 0.0 || remappedUV.x > 1.0 || remappedUV.y > 1.0){
+      return vec4(0.0, 0.0, 0.0, 1.0);
   } else {
-    baseColor *= vec4(vec3(0.2, 1.2, 1.5), 1.0) * 2.0;  
-  }
-  
-  baseColor *= scan_line;
-  baseColor *= scan_line_x;
-  
-  if (remappedUV.x < 0.0 || remappedUV.y < 0.0 || remappedUV.x > 1.0 || remappedUV.y > 1.0) {
-    return vec4(0.0, 0.0, 0.0, 1.0);
-  } else {
-    return baseColor;
+      return baseColor;
   }
 }
 `)!;
