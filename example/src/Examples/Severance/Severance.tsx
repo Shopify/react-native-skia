@@ -9,8 +9,10 @@ import {
   Shader,
   Skia,
   Text,
+  useClockValue,
   useFont,
   usePaintRef,
+  useDerivedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -27,40 +29,47 @@ const cols = new Array(Math.round(height / ROWS)).fill(0).map((_, i) => i);
 const F = 0.009;
 
 export const Severance = () => {
+  const clock = useClockValue();
   const font = useFont(require("./SF-Mono-Medium.otf"), 32);
+  const transform = useDerivedValue(
+    () => [{ translateY: clock.current / 50 }],
+    [clock]
+  );
   if (font === null) {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ flex: 1 }} debug>
       <CRT rect={rect(0, 0, width, height)}>
-        <Fill color={BG} />
-        {rows.map((_i, i) =>
-          cols.map((_j, j) => {
-            const x = i * SIZE.width;
-            const y = j * SIZE.height;
-            return (
-              <Rect
-                key={`${i}-${j}`}
-                x={x + 10}
-                y={y + 10}
-                width={SIZE.width - 20}
-                height={SIZE.height - 20}
-                color={FG}
-              />
-            );
-            // return (
-            //   <Text
-            //     key={`${i}-${j}`}
-            //     text="0"
-            //     x={x}
-            //     y={y}
-            //     font={font}
-            //     color={FG}
-            //   />
-            // );
-          })
-        )}
+        <Group transform={transform}>
+          <Fill color={BG} />
+          {rows.map((_i, i) =>
+            cols.map((_j, j) => {
+              const x = i * SIZE.width;
+              const y = j * SIZE.height;
+              return (
+                <Rect
+                  key={`${i}-${j}`}
+                  x={x + 10}
+                  y={y + 10}
+                  width={SIZE.width - 20}
+                  height={SIZE.height - 20}
+                  color={FG}
+                />
+              );
+              // return (
+              //   <Text
+              //     key={`${i}-${j}`}
+              //     text="0"
+              //     x={x}
+              //     y={y}
+              //     font={font}
+              //     color={FG}
+              //   />
+              // );
+            })
+          )}
+        </Group>
       </CRT>
     </Canvas>
   );

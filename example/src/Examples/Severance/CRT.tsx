@@ -57,23 +57,20 @@ half4 main(float2 xy) {
 `)!;
 
 const onDraw = createDrawing<CRTProps>((ctx, { rect: boundingRect }, node) => {
-  if (node.memoized === null) {
-    const recorder = Skia.PictureRecorder();
-    const canvas = recorder.beginRecording(boundingRect);
-    node.visit({
-      ...ctx,
-      canvas,
-    });
-    const pic = recorder.finishRecordingAsPicture();
-    const shaderPaint = Skia.Paint();
-    shaderPaint.setShader(
-      source.makeShaderWithChildren([], true, [
-        pic.makeShader(TileMode.Decal, TileMode.Decal, FilterMode.Nearest),
-      ])
-    );
-    node.memoized = shaderPaint;
-  }
-  ctx.canvas.drawRect(boundingRect, node.memoized as SkPaint);
+  const recorder = Skia.PictureRecorder();
+  const canvas = recorder.beginRecording(boundingRect);
+  node.visit({
+    ...ctx,
+    canvas,
+  });
+  const pic = recorder.finishRecordingAsPicture();
+  const shaderPaint = Skia.Paint();
+  shaderPaint.setShader(
+    source.makeShaderWithChildren([], true, [
+      pic.makeShader(TileMode.Decal, TileMode.Decal, FilterMode.Nearest),
+    ])
+  );
+  ctx.canvas.drawRect(boundingRect, shaderPaint);
 });
 
 interface CRTProps {
