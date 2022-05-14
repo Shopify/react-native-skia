@@ -11,7 +11,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkColorFilter.h>
+#include <SkImageFilter.h>
 
 #pragma clang diagnostic pop
 
@@ -195,20 +195,19 @@ public:
                     getContext(), SkImageFilters::Dilate(rx, ry, std::move(input), cropRect)));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeOffset),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
-                                       MakeColorFilter),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
-                                       MakeShader),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDisplacementMap),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeCompose),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeErode),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDilate),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlend),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadow),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
-                                       MakeDropShadowOnly))
+  JSI_EXPORT_FUNCTIONS(
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeOffset),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeColorFilter),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeShader),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDisplacementMap),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeCompose),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeErode),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDilate),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlend),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadow),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadowOnly),
+   )
 
   JsiSkImageFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

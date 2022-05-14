@@ -70,7 +70,7 @@ const onDraw = createDrawing<CRTProps>((ctx, { rect: boundingRect }, node) => {
       pic.makeShader(TileMode.Decal, TileMode.Decal, FilterMode.Nearest),
     ])
   );
-  ctx.canvas.drawRect(boundingRect, shaderPaint);
+  ctx.canvas.drawPaint(shaderPaint);
 });
 
 interface CRTProps {
