@@ -7,11 +7,12 @@
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageFilter.h"
+#include "JsiSkRuntimeShaderBuilder.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkColorFilter.h>
+#include <SkImageFilter.h>
 
 #pragma clang diagnostic pop
 
@@ -195,20 +196,35 @@ public:
                     getContext(), SkImageFilters::Dilate(rx, ry, std::move(input), cropRect)));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeOffset),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
-                                       MakeColorFilter),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
-                                       MakeShader),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDisplacementMap),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeCompose),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeErode),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDilate),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlend),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadow),
-                       JSI_EXPORT_FUNC(JsiSkImageFilterFactory,
-                                       MakeDropShadowOnly))
+    JSI_HOST_FUNCTION(MakeRuntimeShader) {
+      auto rtb = JsiSkRuntimeShaderBuilder::fromValue(runtime, arguments[0]);
+      auto childName = arguments[1].asString(runtime).utf8(runtime);
+
+      sk_sp<SkImageFilter> input;
+      if (!arguments[2].isNull() && !arguments[2].isUndefined()) {
+        input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
+      }
+      return jsi::Object::createFromHostObject(
+            runtime,
+            std::make_shared<JsiSkImageFilter>(
+                getContext(), SkImageFilters::RuntimeShader(*rtb, childName.c_str(), std::move(input)))
+      );
+    }
+
+  JSI_EXPORT_FUNCTIONS(
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeOffset),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeColorFilter),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeShader),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDisplacementMap),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeCompose),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeErode),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDilate),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlend),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadow),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadowOnly),
+        JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeRuntimeShader)
+   )
 
   JsiSkImageFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

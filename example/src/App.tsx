@@ -19,6 +19,7 @@ import {
   Wallpaper,
   Vertices,
   Wallet,
+  Severance,
 } from "./Examples";
 import { HomeScreen } from "./Home";
 
@@ -29,6 +30,13 @@ const App = () => {
       <StatusBar hidden />
       <NavigationContainer>
         <Stack.Navigator>
+          <Stack.Screen
+            name="Severance"
+            component={Severance}
+            options={{
+              header: () => null,
+            }}
+          />
           <Stack.Screen
             name="Home"
             component={HomeScreen}

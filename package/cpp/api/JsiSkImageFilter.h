@@ -5,13 +5,11 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkColorFilter.h>
 #include <SkImageFilters.h>
 
 #pragma clang diagnostic pop
