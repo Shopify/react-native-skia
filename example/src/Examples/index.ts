@@ -18,3 +18,4 @@ export * from "./Performance";
 export * from "./Wallpaper";
 export * from "./Vertices";
 export * from "./Wallet";
+export * from "./Severance";

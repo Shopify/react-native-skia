@@ -64,6 +64,11 @@ export const HomeScreen = () => {
         route="Wallpaper"
       />
       <HomeScreenButton
+        title="🔢 Severance"
+        description="Severance"
+        route="Severance"
+      />
+      <HomeScreenButton
         title="🎥 Animation"
         description="Animated with Skia"
         route="Animation"
