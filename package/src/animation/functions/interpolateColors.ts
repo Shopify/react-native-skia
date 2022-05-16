@@ -2,12 +2,7 @@ import { mix } from "../../renderer";
 import type { Color } from "../../skia";
 import { alphaf, blue, green, red, rgbaColor, Skia } from "../../skia";
 
-import { interpolate } from "./interpolate";
-
-const CLAMP = {
-  extrapolateLeft: "clamp",
-  extrapolateRight: "clamp",
-} as const;
+import { Extrapolate, interpolate } from "./interpolate";
 
 const interpolateColorsRGB = (
   value: number,
@@ -18,25 +13,25 @@ const interpolateColorsRGB = (
     value,
     inputRange,
     outputRange.map((c) => red(c)),
-    CLAMP
+    Extrapolate.CLAMP
   );
   const g = interpolate(
     value,
     inputRange,
     outputRange.map((c) => green(c)),
-    CLAMP
+    Extrapolate.CLAMP
   );
   const b = interpolate(
     value,
     inputRange,
     outputRange.map((c) => blue(c)),
-    CLAMP
+    Extrapolate.CLAMP
   );
   const a = interpolate(
     value,
     inputRange,
     outputRange.map((c) => alphaf(c)),
-    CLAMP
+    Extrapolate.CLAMP
   );
   return rgbaColor(r, g, b, a);
 };
