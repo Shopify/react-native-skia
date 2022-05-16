@@ -1,6 +1,6 @@
 import React from "react";
 import { Dimensions, StyleSheet } from "react-native";
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   useLoop,
@@ -23,7 +23,7 @@ const center = vec(width / 2, height / 2 - 64);
 
 interface RingProps {
   index: number;
-  progress: SkiaReadonlyValue<number>;
+  progress: SkiaValue<number>;
 }
 
 const Ring = ({ index, progress }: RingProps) => {

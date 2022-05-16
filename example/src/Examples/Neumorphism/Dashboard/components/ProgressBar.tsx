@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   BoxShadow,
   rect,
@@ -28,7 +28,7 @@ const fromCircle = (cx: number, cy: number, r: number) =>
   rrect(rect(cx - r, cy - r, 2 * r, 2 * r), r, r);
 
 interface ProgressBarProps {
-  progress: SkiaReadonlyValue<number>;
+  progress: SkiaValue<number>;
 }
 
 const colors = ["#2FB8FF", "#9EECD9"];

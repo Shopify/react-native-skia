@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import type { SkiaReadonlyValue } from "../types";
+import type { SkiaValue } from "../types";
 
 /**
  * Sets up an effect that will be run whenever the value changes
@@ -8,7 +8,7 @@ import type { SkiaReadonlyValue } from "../types";
  * @param cb Callback to run when value changes
  */
 export const useValueEffect = <T>(
-  value: SkiaReadonlyValue<T>,
+  value: SkiaValue<T>,
   cb: (v: T) => void
 ) => {
   useEffect(() => {

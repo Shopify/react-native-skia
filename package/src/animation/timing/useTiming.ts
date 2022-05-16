@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import type { SkiaReadonlyValue, SkiaAnimation } from "../../values/types";
+import type { SkiaValue, SkiaAnimation } from "../../values/types";
 import type {
   AnimationParams,
   TimingConfig,
@@ -22,7 +22,7 @@ export const useTiming = (
   toOrParams: number | AnimationParams,
   config?: TimingConfig,
   callback?: AnimationCallback
-): SkiaReadonlyValue<number> => {
+): SkiaValue<number> => {
   // Resolve parameters - keep a cached version to avoid
   // unnecesary re-renders.
   const prevCfgRef = useRef<ReturnType<typeof getResolvedParams>>();

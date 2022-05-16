@@ -1,9 +1,9 @@
-import type { PatchProps, SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { PatchProps, SkiaValue } from "@shopify/react-native-skia";
 import { useDerivedValue, Path, Skia } from "@shopify/react-native-skia";
 import React from "react";
 
 interface CurvesProps {
-  patch: SkiaReadonlyValue<PatchProps["patch"]>;
+  patch: SkiaValue<PatchProps["patch"]>;
 }
 
 export const Curves = ({ patch }: CurvesProps) => {

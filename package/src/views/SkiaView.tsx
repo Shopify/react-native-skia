@@ -2,7 +2,7 @@ import React from "react";
 import { requireNativeComponent } from "react-native";
 
 import type { SkRect } from "../skia";
-import type { SkiaReadonlyValue } from "../values";
+import type { SkiaValue } from "../values";
 
 import { SkiaViewApi } from "./api";
 import type { DrawMode, NativeSkiaViewProps, SkiaViewProps } from "./types";
@@ -75,7 +75,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
    * The view will redraw itself when any of the values change.
    * @param values Values to register
    */
-  public registerValues(values: SkiaReadonlyValue<unknown>[]) {
+  public registerValues(values: SkiaValue<unknown>[]) {
     assertDrawCallbacksEnabled();
     return SkiaViewApi.registerValuesInView(this._nativeId, values);
   }

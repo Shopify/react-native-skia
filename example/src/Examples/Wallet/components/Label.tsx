@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   interpolate,
   Text,
@@ -22,8 +22,8 @@ const format = (value: number) =>
     .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 
 interface LabelProps {
-  y: SkiaReadonlyValue<number>;
-  state: SkiaReadonlyValue<GraphState>;
+  y: SkiaValue<number>;
+  state: SkiaValue<GraphState>;
 }
 
 export const Label = ({ state, y }: LabelProps) => {

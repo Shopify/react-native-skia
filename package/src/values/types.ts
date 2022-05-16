@@ -1,4 +1,4 @@
-export interface SkiaReadonlyValue<T = number> {
+export interface SkiaValue<T = number> {
   /**
    * Gets the value hold by the Value object
    */
@@ -14,7 +14,7 @@ export interface SkiaReadonlyValue<T = number> {
   __typename__: "RNSkValue";
 }
 
-export interface SkiaValue<T = number> extends SkiaReadonlyValue<T> {
+export interface SkiaMutableValue<T = number> extends SkiaValue<T> {
   /**
    * Get/sets the value hold by the Value object
    */
@@ -25,7 +25,7 @@ export interface SkiaValue<T = number> extends SkiaReadonlyValue<T> {
   animation: SkiaAnimation | undefined;
 }
 
-export interface SkiaClockValue extends SkiaReadonlyValue<number> {
+export interface SkiaClockValue extends SkiaValue<number> {
   start: () => void;
   stop: () => void;
 }
@@ -44,15 +44,15 @@ export interface ISkiaValueApi {
    * Creates a new value that holds the initial value and that
    * can be changed.
    */
-  createValue: <T>(initialValue: T) => SkiaValue<T>;
+  createValue: <T>(initialValue: T) => SkiaMutableValue<T>;
   /**
    * Creates a derived value. This is a calculated value that returns the result of
    * a function that is called with the values of the dependencies.
    */
   createDerivedValue: <R>(
     cb: () => R,
-    values: Array<SkiaReadonlyValue<unknown>>
-  ) => SkiaReadonlyValue<R>;
+    values: Array<SkiaValue<unknown>>
+  ) => SkiaValue<R>;
   /**
    * Creates a clock value where the value is the number of milliseconds elapsed
    * since the clock was created

@@ -1,8 +1,5 @@
 import React from "react";
-import type {
-  CubicBezierHandle,
-  SkiaReadonlyValue,
-} from "@shopify/react-native-skia";
+import type { CubicBezierHandle, SkiaValue } from "@shopify/react-native-skia";
 import {
   Group,
   useClockValue,
@@ -42,7 +39,7 @@ const rectToColors = (
 ) => [colors[tl], colors[tr], colors[br], colors[bl]] as const;
 
 const useRectToPatch = (
-  mesh: SkiaReadonlyValue<CubicBezierHandle[]>,
+  mesh: SkiaValue<CubicBezierHandle[]>,
   indices: readonly number[]
 ) =>
   useDerivedValue(() => {

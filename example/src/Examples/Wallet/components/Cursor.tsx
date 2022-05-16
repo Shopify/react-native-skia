@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   interpolateColors,
   Circle,
@@ -11,8 +11,8 @@ import React from "react";
 import { COLORS, WIDTH } from "../Model";
 
 interface CursorProps {
-  x: SkiaReadonlyValue<number>;
-  y: SkiaReadonlyValue<number>;
+  x: SkiaValue<number>;
+  y: SkiaValue<number>;
 }
 
 export const Cursor = ({ x, y }: CursorProps) => {

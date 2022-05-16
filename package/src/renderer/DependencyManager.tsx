@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 
 import type { SkiaView } from "../views";
-import type { SkiaReadonlyValue } from "../values";
+import type { SkiaValue } from "../values";
 
 import { isValue } from "./processors";
 import type { Node } from "./nodes";
@@ -13,7 +13,7 @@ export class DependencyManager {
   ref: RefObject<SkiaView>;
   subscriptions: Map<
     Node,
-    { values: SkiaReadonlyValue<unknown>[]; unsubscribe: null | Unsubscribe }
+    { values: SkiaValue<unknown>[]; unsubscribe: null | Unsubscribe }
   > = new Map();
 
   constructor(ref: RefObject<SkiaView>) {

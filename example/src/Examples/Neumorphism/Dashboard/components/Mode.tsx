@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   BackdropBlur,
   rect,
@@ -15,7 +15,7 @@ import React from "react";
 const clip = rrect(rect(0, 596, 390, 844), 40, 40);
 
 interface ModeProps {
-  translateY: SkiaReadonlyValue<number>;
+  translateY: SkiaValue<number>;
 }
 
 export const Mode = ({ translateY }: ModeProps) => {

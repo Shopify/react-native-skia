@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   FitBox,
   rect,
@@ -21,7 +21,7 @@ interface ButtonProps {
   y: number;
   width: number;
   height: number;
-  pressed: SkiaReadonlyValue<number>;
+  pressed: SkiaValue<number>;
   children: ReactNode | ReactNode[];
 }
 
