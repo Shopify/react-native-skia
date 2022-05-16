@@ -11,7 +11,10 @@ import type { DecayConfig, DefaultDecayConfig, DecayState } from "./types";
  * @param config Configuration or default configuration
  * @returns Animation
  */
-export const runDecay = (value: SkiaMutableValue<number>, config?: DecayConfig) => {
+export const runDecay = (
+  value: SkiaMutableValue<number>,
+  config?: DecayConfig
+) => {
   const resolvedConfig: DefaultDecayConfig = {
     deceleration: 0.998,
     velocityFactor: 1,

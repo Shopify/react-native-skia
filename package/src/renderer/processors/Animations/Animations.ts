@@ -4,9 +4,7 @@ import { mapKeys } from "../../typeddash";
 
 export type FrameValue<T> = (ctx: DrawingContext) => T;
 
-export const isValue = (
-  value: unknown
-): value is SkiaValue<unknown> => {
+export const isValue = (value: unknown): value is SkiaValue<unknown> => {
   if (value === undefined || value === null) {
     return false;
   }
@@ -14,8 +12,7 @@ export const isValue = (
     if (
       typeof value === "object" &&
       "__typename__" in value &&
-      (value as unknown as SkiaValue<unknown>).__typename__ ===
-        "RNSkValue"
+      (value as unknown as SkiaValue<unknown>).__typename__ === "RNSkValue"
     ) {
       return true;
     }
