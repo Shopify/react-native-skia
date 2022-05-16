@@ -2,20 +2,12 @@ import {
   Canvas,
   Fill,
   Group,
-  Rect,
   useClockValue,
   useFont,
-  useDerivedValue,
-  Text,
   useTouchHandler,
   useValue,
-  vec,
-  mix,
-  dist,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { Dimensions } from "react-native";
-import SimplexNoise from "simplex-noise";
 
 import { CRT } from "./CRT";
 import { COLS, ROWS, SIZE, Symbol } from "./Symbol";

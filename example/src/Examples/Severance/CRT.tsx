@@ -1,11 +1,6 @@
 import {
   Group,
-  SkPaint,
-  SkRect,
-  createDrawing,
-  FilterMode,
   Skia,
-  TileMode,
   RuntimeShader,
   usePaintRef,
   Paint,

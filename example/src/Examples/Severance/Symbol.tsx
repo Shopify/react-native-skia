@@ -7,7 +7,6 @@ import type {
 import {
   interpolate,
   dist,
-  mix,
   useDerivedValue,
   vec,
   Group,

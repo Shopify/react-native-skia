@@ -8,8 +8,6 @@ import {
 } from "@shopify/react-native-skia";
 import React from "react";
 
-import { CRT } from "../Severance/CRT";
-
 import { COLS, ROWS, Symbol, SYMBOL } from "./Symbol";
 
 const cols = new Array(COLS).fill(0).map((_, i) => i);
