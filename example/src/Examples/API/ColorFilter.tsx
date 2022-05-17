@@ -29,7 +29,7 @@ const IMG_HEIGHT = IMG_WIDTH * aspectRatio;
 
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
-paint.setColor(Skia.parseColorString("#61DAFB")!);
+paint.setColor(Skia.Color("#61DAFB"));
 
 const strokePaint = paint.copy();
 strokePaint.setStyle(PaintStyle.Stroke);

@@ -23,7 +23,7 @@ const c2 = "#4A759B";
 
 const whitePaint = Skia.Paint();
 whitePaint.setAntiAlias(true);
-whitePaint.setColor(Skia.parseColorString("white")!);
+whitePaint.setColor(Skia.Color("white"));
 
 const strokePaint = Skia.Paint();
 whitePaint.setAntiAlias(true);

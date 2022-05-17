@@ -1,5 +1,6 @@
 import { mix } from "../../renderer";
-import { Color } from "../../skia";
+import type { Color } from "../../skia";
+import { Skia } from "../../skia";
 import type { SkColor } from "../../skia/Color";
 
 import { interpolate } from "./interpolate";
@@ -46,13 +47,13 @@ export const interpolateColors = (
   inputRange: number[],
   _outputRange: Color[]
 ) => {
-  const outputRange = _outputRange.map((cl) => Color(cl));
+  const outputRange = _outputRange.map((cl) => Skia.Color(cl));
   return interpolateColorsRGB(value, inputRange, outputRange);
 };
 
 export const mixColors = (value: number, x: Color, y: Color) => {
-  const c1 = Color(x);
-  const c2 = Color(y);
+  const c1 = Skia.Color(x);
+  const c2 = Skia.Color(y);
   return new Float32Array([
     mix(value, c1[0], c2[0]),
     mix(value, c1[1], c2[1]),

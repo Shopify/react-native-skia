@@ -1,6 +1,6 @@
 import React from "react";
-import type { SkRect } from "@shopify/react-native-skia";
-import { Shader, Skia, Color } from "@shopify/react-native-skia";
+import type { SkRect, Color } from "@shopify/react-native-skia";
+import { Shader, Skia } from "@shopify/react-native-skia";
 
 const source = Skia.RuntimeEffect.Make(`
 uniform vec4 position;
@@ -24,7 +24,7 @@ export const BilinearGradient = ({ rect, colors }: BilinearGradientProps) => {
       source={source}
       uniforms={{
         position: [rect.x, rect.y, rect.width, rect.height],
-        colors: colors.map(Color).map(([r, g, b, a]) => [r, g, b, a]),
+        colors: colors.map(Skia.Color).map(([r, g, b, a]) => [r, g, b, a]),
       }}
     />
   );

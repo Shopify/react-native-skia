@@ -13,7 +13,6 @@ import {
   canvas2Polar,
   polar2Canvas,
   Shader,
-  WHITE,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 

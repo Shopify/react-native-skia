@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { Color } from "@shopify/react-native-skia";
+import { Skia } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 import data from "./data.json";
@@ -9,7 +9,9 @@ export const WIDTH = Dimensions.get("window").width;
 export const HEIGHT = WIDTH / 2;
 export const PADDING = 16;
 export const AJUSTED_SIZE = HEIGHT - PADDING * 2;
-export const COLORS = ["#F69D69", "#FFC37D", "#61E0A1", "#31CBD1"].map(Color);
+export const COLORS = ["#F69D69", "#FFC37D", "#61E0A1", "#31CBD1"].map(
+  Skia.Color
+);
 
 interface Amount {
   amount: string;

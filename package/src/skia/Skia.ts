@@ -36,7 +36,7 @@ export const Skia = {
   Path: SkiaApi.Path,
   ColorFilter: SkiaApi.ColorFilter,
   ContourMeasureIter: SkiaApi.ContourMeasureIter,
-  parseColorString: SkiaApi.parseColorString,
+  Color: SkiaApi.Color,
   RSXform: SkiaApi.RSXform,
   // For the following methods the factory symmetry is broken to be comptatible with CanvasKit
   MakeSurface: SkiaApi.Surface.Make,

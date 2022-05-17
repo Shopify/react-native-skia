@@ -1,7 +1,8 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { BlendMode, Skia, Color } from "../../../skia";
+import type { Color } from "../../../skia";
+import { BlendMode, Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes";
 import type { SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
@@ -17,7 +18,7 @@ export interface BlendColorProps {
 const onDeclare = createDeclaration<BlendColorProps>(
   ({ mode, color }, children) => {
     const cf = Skia.ColorFilter.MakeBlend(
-      Color(color),
+      Skia.Color(color),
       BlendMode[enumKey(mode)]
     );
     return composeColorFilter(cf, children);

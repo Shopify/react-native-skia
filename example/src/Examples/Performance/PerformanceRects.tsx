@@ -29,11 +29,11 @@ export const PerformanceDrawingTest: React.FC = () => {
   const { width } = useWindowDimensions();
   const paint1 = usePaint((p) => {
     p.setAntiAlias(true);
-    p.setColor(Skia.parseColorString("#A2AE6A")!);
+    p.setColor(Skia.Color("#A2AE6A")!);
   });
   const paint2 = usePaint((p) => {
     p.setAntiAlias(true);
-    p.setColor(Skia.parseColorString("#4060A3")!);
+    p.setColor(Skia.Color("#4060A3")!);
     p.setStyle(PaintStyle.Stroke);
     p.setStrokeWidth(2);
   });
