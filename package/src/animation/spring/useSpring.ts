@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "../../types";
+import type { SkiaReadonlyValue } from "../../values/types";
 import type {
   SpringConfig,
   AnimationParams,

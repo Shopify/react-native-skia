@@ -1,4 +1,4 @@
-import type { AnimationState } from "../../types";
+import type { AnimationState } from "../../values/types";
 
 export interface DecayConfig {
   from?: number;
