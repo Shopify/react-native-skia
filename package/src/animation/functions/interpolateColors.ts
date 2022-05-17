@@ -1,5 +1,6 @@
 import { mix } from "../../renderer";
-import { alphaf, blue, Color, green, red, rgbaColor } from "../../skia";
+import { Color } from "../../skia";
+import type { SkColor } from "../../skia/Color";
 
 import { interpolate } from "./interpolate";
 
@@ -11,33 +12,33 @@ const CLAMP = {
 const interpolateColorsRGB = (
   value: number,
   inputRange: number[],
-  outputRange: number[]
+  outputRange: SkColor[]
 ) => {
   const r = interpolate(
     value,
     inputRange,
-    outputRange.map((c) => red(c)),
+    outputRange.map((c) => c[0]),
     CLAMP
   );
   const g = interpolate(
     value,
     inputRange,
-    outputRange.map((c) => green(c)),
+    outputRange.map((c) => c[1]),
     CLAMP
   );
   const b = interpolate(
     value,
     inputRange,
-    outputRange.map((c) => blue(c)),
+    outputRange.map((c) => c[2]),
     CLAMP
   );
   const a = interpolate(
     value,
     inputRange,
-    outputRange.map((c) => alphaf(c)),
+    outputRange.map((c) => c[3]),
     CLAMP
   );
-  return rgbaColor(r, g, b, a);
+  return new Float32Array([r, g, b, a]);
 };
 
 export const interpolateColors = (
@@ -49,13 +50,13 @@ export const interpolateColors = (
   return interpolateColorsRGB(value, inputRange, outputRange);
 };
 
-// This is fast. To be reconcilled with interpolateColors
-// it looks like interpolateColors may not be working as expected
-// these functions need to be tested more thoroughly on both platform
-export const mixColors = (value: number, x: number, y: number) => {
-  const r = mix(value, red(x), red(y));
-  const g = mix(value, green(x), green(y));
-  const b = mix(value, blue(x), blue(y));
-  const a = mix(value, alphaf(x), alphaf(y));
-  return rgbaColor(r, g, b, a);
+export const mixColors = (value: number, x: Color, y: Color) => {
+  const c1 = Color(x);
+  const c2 = Color(y);
+  return new Float32Array([
+    mix(value, c1[0], c2[0]),
+    mix(value, c1[1], c2[1]),
+    mix(value, c1[2], c2[2]),
+    mix(value, c1[3], c2[3]),
+  ]);
 };

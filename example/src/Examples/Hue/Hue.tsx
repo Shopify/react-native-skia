@@ -12,6 +12,7 @@ import {
   canvas2Polar,
   polar2Canvas,
   Shader,
+  WHITE,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -41,7 +42,7 @@ export const Hue = () => {
   const r = (width - 32) / 2;
   const translateX = useValue(c.x);
   const translateY = useValue(c.y);
-  const color = useValue(0xffffffff);
+  const color = useValue(WHITE);
   const onTouch = useTouchHandler({
     onActive: (pt) => {
       const { theta, radius } = canvas2Polar(pt, center);

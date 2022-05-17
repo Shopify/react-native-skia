@@ -26,6 +26,9 @@ export const Color = (cl: Color): SkColor => {
   }
 };
 
+export const rgbaColor = (r: number, g: number, b: number, a: number) =>
+  new Float32Array([r, g, b, a]);
+
 export const processColor = (cl: Color, currentOpacity: number) => {
   const color = Color(cl);
   color[ALPHA] *= currentOpacity;
