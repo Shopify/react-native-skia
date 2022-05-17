@@ -19,9 +19,7 @@ export const processGradientProps = ({
   flags,
   ...transform
 }: GradientProps) => ({
-  colors: colors.map((color) =>
-    typeof color === "string" ? Color(color) : color
-  ),
+  colors: colors.map((color) => Color(color)),
   positions: positions ?? null,
   mode: TileMode[enumKey(mode ?? "clamp")],
   flags,
