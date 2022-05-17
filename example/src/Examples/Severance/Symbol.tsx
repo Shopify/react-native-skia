@@ -19,8 +19,8 @@ import SimplexNoise from "simplex-noise";
 import { FG } from "./Theme";
 
 const { width, height } = Dimensions.get("window");
-export const COLS = 10;
-export const ROWS = 15;
+export const COLS = 5;
+export const ROWS = 10;
 export const SIZE = { width: width / COLS, height: height / ROWS };
 const DIGITS = new Array(10).fill(0).map((_, i) => `${i}`);
 const F = 0.0008;

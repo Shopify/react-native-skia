@@ -186,7 +186,7 @@ export interface ImageFilterFactory {
    */
   MakeRuntimeShader: (
     builder: SkRuntimeShaderBuilder,
-    childShaderName: string,
+    childShaderName: string | null,
     input: SkImageFilter | null
   ) => SkImageFilter;
 }

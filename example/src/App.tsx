@@ -31,13 +31,6 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen
-            name="Severance"
-            component={Severance}
-            options={{
-              header: () => null,
-            }}
-          />
-          <Stack.Screen
             name="Home"
             component={HomeScreen}
             options={{
@@ -59,6 +52,13 @@ const App = () => {
           <Stack.Screen
             name="Matrix"
             component={Matrix}
+            options={{
+              header: () => null,
+            }}
+          />
+          <Stack.Screen
+            name="Severance"
+            component={Severance}
             options={{
               header: () => null,
             }}

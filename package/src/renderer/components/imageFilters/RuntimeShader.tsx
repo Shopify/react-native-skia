@@ -9,17 +9,12 @@ import { getInput } from "./getInput";
 
 export interface RuntimeShaderProps {
   source: IRuntimeEffect;
-  childName: string;
 }
 
 const onDeclare = createDeclaration<RuntimeShaderProps>(
-  ({ source, childName }, children) => {
+  ({ source }, children) => {
     const rtb = Skia.RuntimeShaderBuilder(source);
-    return Skia.ImageFilter.MakeRuntimeShader(
-      rtb,
-      childName,
-      getInput(children)
-    );
+    return Skia.ImageFilter.MakeRuntimeShader(rtb, null, getInput(children));
   }
 );
 
