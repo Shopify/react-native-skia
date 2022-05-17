@@ -1,5 +1,5 @@
 import type { SkColor } from "../../../skia";
-import { BlendMode, Skia, TileMode } from "../../../skia";
+import { BLACK, BlendMode, Skia, TileMode } from "../../../skia";
 import type { SkImageFilter } from "../../../skia/ImageFilter/ImageFilter";
 
 export const MakeInnerShadow = (
@@ -12,11 +12,11 @@ export const MakeInnerShadow = (
   input: SkImageFilter | null
 ) => {
   const sourceGraphic = Skia.ImageFilter.MakeColorFilter(
-    Skia.ColorFilter.MakeBlend(0xff000000, BlendMode.Dst),
+    Skia.ColorFilter.MakeBlend(BLACK, BlendMode.Dst),
     null
   );
   const sourceAlpha = Skia.ImageFilter.MakeColorFilter(
-    Skia.ColorFilter.MakeBlend(0xff000000, BlendMode.SrcIn),
+    Skia.ColorFilter.MakeBlend(BLACK, BlendMode.SrcIn),
     null
   );
   const f1 = Skia.ImageFilter.MakeColorFilter(

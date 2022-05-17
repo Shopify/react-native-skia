@@ -10,6 +10,7 @@
 #include <JsiSkMaskFilter.h>
 #include <JsiSkPathEffect.h>
 #include <JsiSkShader.h>
+#include <JsiSkColor.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -38,7 +39,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(getColor) {
-    return static_cast<double>(getObject()->getColor());
+    return JsiSkColor::toValue(runtime, getObject()->getColor());
   }
 
   JSI_HOST_FUNCTION(getStrokeCap) {
@@ -58,7 +59,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(setColor) {
-    SkColor color = arguments[0].asNumber();
+    SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
     getObject()->setColor(color);
     return jsi::Value::undefined();
   }
@@ -90,11 +91,6 @@ public:
     case 1:
       getObject()->setStyle(SkPaint::kStroke_Style);
       break;
-      // This API is expected to be deprecated
-      // https://github.com/flutter/flutter/issues/5912
-      //                    case 2:
-      //                        getObject()->setStyle(SkPaint::kStrokeAndFill_Style);
-      //                        break;
     }
     return jsi::Value::undefined();
   }

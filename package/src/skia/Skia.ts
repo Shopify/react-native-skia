@@ -1,12 +1,12 @@
 /*global SkiaApi*/
 import "./NativeSetup";
-import { SkiaApi } from "./SkiaApi";
+import type { SkiaApi as SkSkiaApi } from "./SkiaApi";
 
 /**
  * Declares the SkiaApi as an available object in the global scope
  */
 declare global {
-  var SkiaApi: SkiaApi;
+  var SkiaApi: SkSkiaApi;
 }
 
 /**
