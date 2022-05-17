@@ -1,4 +1,5 @@
 import React from "react";
+import type { Color } from "@shopify/react-native-skia";
 import {
   Canvas,
   Circle,
@@ -42,7 +43,7 @@ export const Hue = () => {
   const r = (width - 32) / 2;
   const translateX = useValue(c.x);
   const translateY = useValue(c.y);
-  const color = useValue(WHITE);
+  const color = useValue<Color>(0xffffffff);
   const onTouch = useTouchHandler({
     onActive: (pt) => {
       const { theta, radius } = canvas2Polar(pt, center);

@@ -2,8 +2,8 @@ import { Skia } from "./Skia";
 
 // This is the JSI color
 export type SkColor = Float32Array;
-// Input colors can be string or number
-export type Color = string | Float32Array;
+// Input colors can be string, number or Float32Array
+export type Color = string | Float32Array | number;
 
 export const RED = 0;
 export const GREEN = 1;
@@ -13,7 +13,20 @@ export const ALPHA = 3;
 export const BLACK = new Float32Array([0, 0, 0, 1]);
 export const WHITE = new Float32Array([1, 1, 1, 1]);
 
+const alphaf = (c: number) => ((c >> 24) & 255) / 255;
+const red = (c: number) => (c >> 16) & 255;
+const green = (c: number) => (c >> 8) & 255;
+const blue = (c: number) => c & 255;
+
 export const Color = (cl: Color): SkColor => {
+  if (typeof cl === "number") {
+    return new Float32Array([
+      red(cl) / 255,
+      green(cl) / 255,
+      blue(cl) / 255,
+      alphaf(cl),
+    ]);
+  }
   if (cl instanceof Float32Array) {
     return cl;
   }

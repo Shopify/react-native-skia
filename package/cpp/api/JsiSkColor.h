@@ -49,6 +49,9 @@ namespace RNSkia {
                     .asObject(runtime)
                     .getArrayBuffer(runtime);
             auto bfrPtr = reinterpret_cast<float *>(buffer.data(runtime));
+            if (bfrPtr[0] > 1 || bfrPtr[1] > 1 || bfrPtr[2] > 1 || bfrPtr[3] > 1) {
+                return SK_ColorBLACK;
+            }
             return SkColorSetARGB(bfrPtr[3] * 255, bfrPtr[0] * 255, bfrPtr[1] * 255, bfrPtr[2] * 255);
         }
 
