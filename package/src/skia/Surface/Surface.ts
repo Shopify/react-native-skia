@@ -3,7 +3,7 @@ import type { SkCanvas } from "../Canvas";
 import type { SkJSIInstance } from "../JsiInstance";
 import type { SkRect } from "../Rect";
 
-export interface ISurface extends SkJSIInstance<"Surface"> {
+export interface SkSurface extends SkJSIInstance<"Surface"> {
   /** Returns Canvas that draws into the surface. Subsequent calls return the
      same Canvas. Canvas returned is managed and owned by Surface, and is
      deleted when Surface is deleted.

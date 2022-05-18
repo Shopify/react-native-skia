@@ -1,4 +1,4 @@
-import type { ISurface } from "./Surface";
+import type { SkSurface } from "./Surface";
 
 export interface SurfaceFactory {
   /**
@@ -8,5 +8,5 @@ export interface SurfaceFactory {
    * @param width - number of pixels of the width of the drawable area.
    * @param height - number of pixels of the height of the drawable area.
    */
-  Make: (width: number, height: number) => ISurface | null;
+  Make: (width: number, height: number) => SkSurface | null;
 }
