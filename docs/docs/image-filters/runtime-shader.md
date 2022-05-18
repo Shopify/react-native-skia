@@ -5,13 +5,20 @@ sidebar_label: Runtime Shader
 slug: /image-filters/runtime-shader
 ---
 
-The `RuntimeShader` image filter allows you to provide your own [Skia Shader](/docs/shaders/overview) as an image filter.
+The `RuntimeShader` image filter allows you to write your own [Skia Shader](/docs/shaders/overview) as an image filter.
+This component receive the currently filtered image as a shader uniform (or the implicit source image if no children are provided). 
+
 
 | Name      | Type              |  Description                     |
 |:----------|:------------------|:---------------------------------|
 | source    | `SkRuntimeEffect` | Shader to use as an image filter |
+| children? | `ImageFilter`   | Optional image filter to be applied first |
+
 
 ## Example
+
+The example below generates a circle with a green mint color.
+The circle is first draw with the lightblue color (`#add8e6`) and the runtime shader switches the blue and green channel: we get `#ade6d8`.
 
 ```tsx twoslash
 import {Canvas, Text, RuntimeShader, Skia, Group, Circle} from "@shopify/react-native-skia";

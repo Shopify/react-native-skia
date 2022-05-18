@@ -3,12 +3,12 @@ import React from "react";
 import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { IRuntimeEffect } from "../../../skia/RuntimeEffect/RuntimeEffect";
+import type { SkRuntimeEffect } from "../../../skia/RuntimeEffect/RuntimeEffect";
 
 import { getInput } from "./getInput";
 
 export interface RuntimeShaderProps {
-  source: IRuntimeEffect;
+  source: SkRuntimeEffect;
 }
 
 const onDeclare = createDeclaration<RuntimeShaderProps>(
