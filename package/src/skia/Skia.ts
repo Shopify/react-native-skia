@@ -12,8 +12,8 @@ import type { SkPaint } from "./Paint";
 import type { SkRect } from "./Rect";
 import type { SkRRect } from "./RRect";
 import type {
-  IRuntimeEffect,
   RuntimeEffectFactory,
+  SkRuntimeEffect,
   SkRuntimeShaderBuilder,
 } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
@@ -78,7 +78,7 @@ export interface Skia {
   Point: (x: number, y: number) => SkPoint;
   XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
-  RuntimeShaderBuilder: (rt: IRuntimeEffect) => SkRuntimeShaderBuilder;
+  RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
   Color: (color: Color) => SkColor;
   parseColorString: (color: string) => SkColor | undefined;
