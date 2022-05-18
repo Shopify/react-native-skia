@@ -18,7 +18,7 @@ This component receive the currently filtered image as a shader uniform (or the 
 ## Example
 
 The example below generates a circle with a green mint color.
-The circle is first draw with the lightblue color (`#add8e6`) and the runtime shader switches the blue and green channel: we get `#ade6d8`.
+The circle is first draw with the lightblue color `#add8e6` and the runtime shader switches the blue and green channel: we get mint green `#ade6d8`.
 
 ```tsx twoslash
 import {Canvas, Text, RuntimeShader, Skia, Group, Circle} from "@shopify/react-native-skia";
@@ -42,5 +42,6 @@ export const RuntimeShaderDemo = () => {
     </Canvas>
   );
 };
-
 ```
+
+<img alt="Runtime Shader" src={require("/static/img/image-filters/runtime-shader.png").default} width="256" height="256" />
