@@ -62,7 +62,7 @@ export const CRT = ({ children }: CRTProps) => {
   return (
     <>
       <Paint ref={paint}>
-        <RuntimeShader source={source} childName="image" />
+        <RuntimeShader source={source} />
       </Paint>
       <Group layer={paint}>{children}</Group>
     </>
