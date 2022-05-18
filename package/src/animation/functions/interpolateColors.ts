@@ -13,25 +13,25 @@ const interpolateColorsRGB = (
     value,
     inputRange,
     outputRange.map((c) => red(c)),
-    Extrapolate.CLAMP
+    "clamp"
   );
   const g = interpolate(
     value,
     inputRange,
     outputRange.map((c) => green(c)),
-    Extrapolate.CLAMP
+    "clamp"
   );
   const b = interpolate(
     value,
     inputRange,
     outputRange.map((c) => blue(c)),
-    Extrapolate.CLAMP
+    "clamp"
   );
   const a = interpolate(
     value,
     inputRange,
     outputRange.map((c) => alphaf(c)),
-    Extrapolate.CLAMP
+    "clamp"
   );
   return rgbaColor(r, g, b, a);
 };
