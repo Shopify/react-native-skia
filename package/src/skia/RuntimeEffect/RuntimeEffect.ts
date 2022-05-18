@@ -12,7 +12,7 @@ export interface SkSLUniform {
 
 export type SkRuntimeShaderBuilder = SkJSIInstance<"RuntimeShaderBuilder">;
 
-export interface IRuntimeEffect extends SkJSIInstance<"RuntimeEffect"> {
+export interface SkRuntimeEffect extends SkJSIInstance<"RuntimeEffect"> {
   /**
    * Returns a shader executed using the given uniform data.
    * @param uniforms
