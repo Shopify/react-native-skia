@@ -34,6 +34,9 @@ jobs:
       - name: Install Package
         run: cd package; yarn;
 
+      - name: Run Package Unit tests
+        run: cd package; yarn test;
+
       - name: Lint Package
         run: cd package; yarn lint;
 
@@ -48,10 +51,9 @@ jobs:
 
       - name: TypeScript Example
         run: cd example; yarn tsc;
-        
+
       - name: Install Docs
         run: cd docs; yarn;
 
       - name: TypeScript Example Docs
         run: cd docs; yarn build;
-
