@@ -34,14 +34,14 @@ jobs:
       - name: Install Package
         run: cd package; yarn;
 
-      - name: Run Package Unit tests
-        run: cd package; yarn test;
-
       - name: Lint Package
         run: cd package; yarn lint;
 
       - name: TypeScript Package
         run: cd package; yarn tsc;
+
+      - name: Run Package Unit tests
+        run: cd package; yarn test;
 
       - name: Install Example
         run: cd example; yarn;
