@@ -30,7 +30,7 @@ export interface SkiaClockValue extends SkiaReadonlyValue<number> {
   stop: () => void;
 }
 
-export interface SkiaAnimation {
+export interface SkiaAnimation extends SkiaClockValue {
   cancel: () => void;
 }
 
