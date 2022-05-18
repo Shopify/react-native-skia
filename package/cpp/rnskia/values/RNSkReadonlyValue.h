@@ -11,6 +11,7 @@
 
 #include <JsiSkHostObjects.h>
 #include <RNSkPlatformContext.h>
+#include <JsiSimpleValueWrapper.h>
 
 namespace RNSkia
 {
@@ -26,7 +27,8 @@ class RNSkReadonlyValue : public JsiSkHostObject,
 public:
   RNSkReadonlyValue(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
-    _propNameId(jsi::PropNameID::forUtf8(*platformContext->getJsRuntime(), "value")) { }
+      _valueHolder(std::make_unique<JsiSimpleValueWrapper>(*platformContext->getJsRuntime()))
+      { }
   
   virtual ~RNSkReadonlyValue() { }
 
@@ -86,23 +88,22 @@ public:
   }
   
   /**
-    Updates the underlying value and notifies all listeners about the change
+    Updates the underlying value and notifies all listeners about the change.
+    Listeners are only notified if the value was actually changed for numeric, boolean and string
+    values. For all other values listeners are notified without comparison.
    @param runtime Current JS Runtime
    @param value Next value
    */
   virtual void update(jsi::Runtime &runtime, const jsi::Value &value) {
-    if(_valueHolder == nullptr) {
-      _valueHolder = std::make_shared<jsi::Object>(runtime);
+    auto equal = _valueHolder->equals(runtime, value);
+    _valueHolder->setCurrent(runtime, value);
+    if(!equal) {
+      notifyListeners(runtime);
     }
-    _valueHolder->setProperty(runtime, _propNameId, value);
-    notifyListeners(runtime);
   }
   
   jsi::Value getCurrent(jsi::Runtime &runtime) {
-    if(_valueHolder == nullptr) {
-      return jsi::Value::undefined();
-    }
-    return _valueHolder->getProperty(runtime, _propNameId);
+    return _valueHolder->getCurrent(runtime);
   }
   
 protected:
@@ -132,8 +133,8 @@ protected:
   }
 
 private:
-  jsi::PropNameID _propNameId;
-  std::shared_ptr<jsi::Object> _valueHolder;
+  std::unique_ptr<JsiSimpleValueWrapper> _valueHolder;
+  
   long _listenerId = 0;
   std::unordered_map<long, std::function<void(jsi::Runtime&)>> _listeners;
   std::mutex _mutex;

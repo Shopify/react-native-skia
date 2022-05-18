@@ -2,7 +2,7 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { isShader } from "../../../skia";
-import type { IRuntimeEffect } from "../../../skia";
+import type { SkRuntimeEffect } from "../../../skia";
 import type { Vector, AnimatedProps, TransformProps } from "../../processors";
 import { createDeclaration } from "../../nodes/Declaration";
 import { localMatrix } from "../../processors";
@@ -28,7 +28,7 @@ const processValue = (value: UniformValue): number | readonly number[] => {
 };
 
 export interface ShaderProps extends TransformProps {
-  source: IRuntimeEffect;
+  source: SkRuntimeEffect;
   uniforms: Uniforms;
   opaque?: boolean;
   children?: ReactNode | ReactNode[];
