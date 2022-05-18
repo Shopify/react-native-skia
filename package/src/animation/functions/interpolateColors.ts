@@ -2,7 +2,7 @@ import { mix } from "../../renderer";
 import type { Color } from "../../skia";
 import { alphaf, blue, green, red, rgbaColor, Skia } from "../../skia";
 
-import { Extrapolate, interpolate } from "./interpolate";
+import { interpolate } from "./interpolate";
 
 const interpolateColorsRGB = (
   value: number,
