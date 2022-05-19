@@ -21,7 +21,7 @@ const CARD_HEIGHT = CARD_WIDTH * aspectRatio;
 
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
-paint.setColor(Skia.Color("#61DAFB")!);
+paint.setColor(Skia.Color("#61DAFB"));
 
 const strokePaint = paint.copy();
 strokePaint.setStyle(PaintStyle.Stroke);
