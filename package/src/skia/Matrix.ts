@@ -1,3 +1,4 @@
+import type { SkJSIInstance } from "./JsiInstance";
 export enum MatrixIndex {
   ScaleX = 0,
   SkewX = 1,
@@ -10,7 +11,7 @@ export enum MatrixIndex {
   persp2 = 8,
 }
 
-export interface SkMatrix {
+export interface SkMatrix extends SkJSIInstance<"Matrix"> {
   0: number;
   1: number;
   2: number;
@@ -20,4 +21,10 @@ export interface SkMatrix {
   6: number;
   7: number;
   8: number;
+
+  preConcat: (matrix: SkMatrix) => void;
+  preTranslate: (x: number, y: number) => void;
+  preScale: (x: number, y: number) => void;
+  preSkew: (x: number, y: number) => void;
+  preRotate: (theta: number) => void;
 }

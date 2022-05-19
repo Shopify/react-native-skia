@@ -25,9 +25,51 @@ public:
       : JsiSkWrappingSharedPtrHostObject<SkMatrix>(
             context, std::make_shared<SkMatrix>(std::move(m))) {}
 
+
+  JSI_HOST_FUNCTION(preConcat) {
+    auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
+    getObject()->preConcat(*m3);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(preTranslate) {
+    auto x = arguments[0].asNumber();
+    auto y = arguments[1].asNumber();
+    getObject()->preTranslate(x, y);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(preScale) {
+    auto x = arguments[0].asNumber();
+    auto y = arguments[1].asNumber();
+    getObject()->preScale(x, y);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(preSkew) {
+    auto x = arguments[0].asNumber();
+    auto y = arguments[1].asNumber();
+    getObject()->preSkew(x, y);
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(preRotate) {
+    auto a = arguments[0].asNumber();
+    getObject()->preRotate(a);
+    return jsi::Value::undefined();
+  }
+
+  JSI_EXPORT_FUNCTIONS(
+    JSI_EXPORT_FUNC(JsiSkMatrix, preConcat),
+    JSI_EXPORT_FUNC(JsiSkMatrix, preTranslate),
+    JSI_EXPORT_FUNC(JsiSkMatrix, preScale),
+    JSI_EXPORT_FUNC(JsiSkMatrix, preSkew),
+    JSI_EXPORT_FUNC(JsiSkMatrix, preRotate),
+  )
+
   /**
-Returns the underlying object from a host object of this type
-*/
+   * Returns the underlying object from a host object of this type
+   */
   static std::shared_ptr<SkMatrix> fromValue(jsi::Runtime &runtime,
                                              const jsi::Value &obj) {
     const auto& object = obj.asObject(runtime);
