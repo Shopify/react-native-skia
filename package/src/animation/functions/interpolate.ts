@@ -1,169 +1,182 @@
-// eslint-disable-next-line max-len
-// Taken from https://github.com/facebook/react-native/blob/0b9ea60b4fee8cacc36e7160e31b91fc114dbc0d/Libraries/Animated/src/nodes/AnimatedInterpolation.js
+/* eslint-disable max-len */
+export enum Extrapolate {
+  IDENTITY = "identity",
+  CLAMP = "clamp",
+  EXTEND = "extend",
+}
 
-type ExtrapolateType = "extend" | "identity" | "clamp";
+interface InterpolationNarrowedInput {
+  leftEdgeInput: number;
+  rightEdgeInput: number;
+  leftEdgeOutput: number;
+  rightEdgeOutput: number;
+}
 
-function interpolateFunction(
-  input: number,
-  inputRange: [number, number],
-  outputRange: [number, number],
-  options: {
-    easing: (input: number) => number;
-    extrapolateLeft: ExtrapolateType;
-    extrapolateRight: ExtrapolateType;
-  }
+export interface ExtrapolationConfig {
+  extrapolateLeft?: Extrapolate | string;
+  extrapolateRight?: Extrapolate | string;
+}
+
+interface RequiredExtrapolationConfig {
+  extrapolateLeft: Extrapolate;
+  extrapolateRight: Extrapolate;
+}
+
+export type ExtrapolationType =
+  | ExtrapolationConfig
+  | Extrapolate
+  | string
+  | undefined;
+
+function getVal(
+  type: Extrapolate,
+  coef: number,
+  val: number,
+  leftEdgeOutput: number,
+  rightEdgeOutput: number,
+  x: number
 ): number {
-  const { extrapolateLeft, extrapolateRight, easing } = options;
-
-  let result = input;
-  const [inputMin, inputMax] = inputRange;
-  const [outputMin, outputMax] = outputRange;
-
-  if (result < inputMin) {
-    if (extrapolateLeft === "identity") {
-      return result;
-    }
-
-    if (extrapolateLeft === "clamp") {
-      result = inputMin;
-    } else if (extrapolateLeft === "extend") {
-      // noop
-    }
+  switch (type) {
+    case Extrapolate.IDENTITY:
+      return x;
+    case Extrapolate.CLAMP:
+      if (coef * val < coef * leftEdgeOutput) {
+        return leftEdgeOutput;
+      }
+      return rightEdgeOutput;
+    case Extrapolate.EXTEND:
+    default:
+      return val;
   }
-
-  if (result > inputMax) {
-    if (extrapolateRight === "identity") {
-      return result;
-    }
-
-    if (extrapolateRight === "clamp") {
-      result = inputMax;
-    } else if (extrapolateRight === "extend") {
-      // noop
-    }
-  }
-
-  if (outputMin === outputMax) {
-    return outputMin;
-  }
-
-  // Input Range
-  result = (result - inputMin) / (inputMax - inputMin);
-
-  // Easing
-  result = easing(result);
-
-  // Output Range
-  result = result * (outputMax - outputMin) + outputMin;
-
-  return result;
 }
 
-function findRange(input: number, inputRange: readonly number[]) {
-  let i;
-  for (i = 1; i < inputRange.length - 1; ++i) {
-    if (inputRange[i] >= input) {
-      break;
-    }
-  }
-
-  return i - 1;
+function isExtrapolate(value: string): value is Extrapolate {
+  return (
+    value === Extrapolate.EXTEND ||
+    value === Extrapolate.CLAMP ||
+    value === Extrapolate.IDENTITY
+  );
 }
 
-function checkValidInputRange(arr: readonly number[]) {
-  for (let i = 1; i < arr.length; ++i) {
-    if (!(arr[i] > arr[i - 1])) {
+// validates extrapolations type
+// if type is correct, converts it to ExtrapolationConfig
+function validateType(type: ExtrapolationType): RequiredExtrapolationConfig {
+  // initialize extrapolationConfig with default extrapolation
+  const extrapolationConfig: RequiredExtrapolationConfig = {
+    extrapolateLeft: Extrapolate.EXTEND,
+    extrapolateRight: Extrapolate.EXTEND,
+  };
+
+  if (!type) {
+    return extrapolationConfig;
+  }
+
+  if (typeof type === "string") {
+    if (!isExtrapolate(type)) {
       throw new Error(
-        `inputRange must be strictly monotonically non-decreasing but got [${arr.join(
-          ","
-        )}]`
+        `No supported value for "interpolate" \nSupported values: ["extend", "clamp", "identity", Extrapolatation.CLAMP, Extrapolatation.EXTEND, Extrapolatation.IDENTITY]\n Valid example:
+        interpolate(value, [inputRange], [outputRange], "clamp")`
       );
     }
-  }
-}
-
-function checkInfiniteRange(name: string, arr: readonly number[]) {
-  if (arr.length < 2) {
-    throw new Error(name + " must have at least 2 elements");
+    extrapolationConfig.extrapolateLeft = type;
+    extrapolationConfig.extrapolateRight = type;
+    return extrapolationConfig;
   }
 
-  for (const index in arr) {
-    if (typeof arr[index] !== "number") {
-      throw new Error(`${name} must contain only numbers`);
-    }
-
-    if (arr[index] === -Infinity || arr[index] === Infinity) {
-      throw new Error(
-        `${name} must contain only finite numbers, but got [${arr.join(",")}]`
-      );
-    }
-  }
-}
-
-export function interpolate(
-  input: number,
-  inputRange: readonly number[],
-  outputRange: readonly number[],
-  options?: {
-    easing?: (input: number) => number;
-    extrapolateLeft?: ExtrapolateType;
-    extrapolateRight?: ExtrapolateType;
-  }
-): number {
-  if (typeof input === "undefined") {
-    throw new Error("input can not be undefined");
-  }
-
-  if (typeof inputRange === "undefined") {
-    throw new Error("inputRange can not be undefined");
-  }
-
-  if (typeof outputRange === "undefined") {
-    throw new Error("outputRange can not be undefined");
-  }
-
-  if (inputRange.length !== outputRange.length) {
+  // otherwise type is extrapolation config object
+  if (
+    (type.extrapolateLeft && !isExtrapolate(type.extrapolateLeft)) ||
+    (type.extrapolateRight && !isExtrapolate(type.extrapolateRight))
+  ) {
     throw new Error(
-      "inputRange (" +
-        inputRange.length +
-        ") and outputRange (" +
-        outputRange.length +
-        ") must have the same length"
+      `No supported value for "interpolate" \nSupported values: ["extend", "clamp", "identity", Extrapolatation.CLAMP, Extrapolatation.EXTEND, Extrapolatation.IDENTITY]\n Valid example:
+      interpolate(value, [inputRange], [outputRange], {
+        extrapolateLeft: Extrapolation.CLAMP,
+        extrapolateRight: Extrapolation.IDENTITY
+      }})`
     );
   }
 
-  checkInfiniteRange("inputRange", inputRange);
-  checkInfiniteRange("outputRange", outputRange);
+  Object.assign(extrapolationConfig, type);
+  return extrapolationConfig;
+}
 
-  checkValidInputRange(inputRange);
+function internalInterpolate(
+  x: number,
+  narrowedInput: InterpolationNarrowedInput,
+  extrapolationConfig: RequiredExtrapolationConfig
+) {
+  const { leftEdgeInput, rightEdgeInput, leftEdgeOutput, rightEdgeOutput } =
+    narrowedInput;
+  if (rightEdgeInput - leftEdgeInput === 0) {
+    return leftEdgeOutput;
+  }
+  const progress = (x - leftEdgeInput) / (rightEdgeInput - leftEdgeInput);
+  const val = leftEdgeOutput + progress * (rightEdgeOutput - leftEdgeOutput);
+  const coef = rightEdgeOutput >= leftEdgeOutput ? 1 : -1;
 
-  const easing = options?.easing ?? ((num: number): number => num);
-
-  let extrapolateLeft: ExtrapolateType = "extend";
-  if (options?.extrapolateLeft !== undefined) {
-    // eslint-disable-next-line prefer-destructuring
-    extrapolateLeft = options.extrapolateLeft;
+  if (coef * val < coef * leftEdgeOutput) {
+    return getVal(
+      extrapolationConfig.extrapolateLeft,
+      coef,
+      val,
+      leftEdgeOutput,
+      rightEdgeOutput,
+      x
+    );
+  } else if (coef * val > coef * rightEdgeOutput) {
+    return getVal(
+      extrapolationConfig.extrapolateRight,
+      coef,
+      val,
+      leftEdgeOutput,
+      rightEdgeOutput,
+      x
+    );
   }
 
-  let extrapolateRight: ExtrapolateType = "extend";
-  if (options?.extrapolateRight !== undefined) {
-    // eslint-disable-next-line prefer-destructuring
-    extrapolateRight = options.extrapolateRight;
+  return val;
+}
+
+// e.g. function interpolate(x, input, output, type = Extrapolatation.CLAMP)
+export function interpolate(
+  x: number,
+  input: readonly number[],
+  output: readonly number[],
+  type?: ExtrapolationType
+): number {
+  if (input.length < 2 || output.length < 2) {
+    throw Error(
+      "Interpolation input and output should contain at least two values."
+    );
   }
 
-  if (typeof input !== "number") {
-    throw new TypeError("Cannot interpolate an input which is not a number");
-  }
-
-  const range = findRange(input, inputRange);
-  return interpolateFunction(
-    input,
-    [inputRange[range], inputRange[range + 1]],
-    [outputRange[range], outputRange[range + 1]],
-    {
-      easing,
-      extrapolateLeft,
-      extrapolateRight,
+  const extrapolationConfig = validateType(type);
+  const { length } = input;
+  const narrowedInput: InterpolationNarrowedInput = {
+    leftEdgeInput: input[0],
+    rightEdgeInput: input[1],
+    leftEdgeOutput: output[0],
+    rightEdgeOutput: output[1],
+  };
+  if (length > 2) {
+    if (x > input[length - 1]) {
+      narrowedInput.leftEdgeInput = input[length - 2];
+      narrowedInput.rightEdgeInput = input[length - 1];
+      narrowedInput.leftEdgeOutput = output[length - 2];
+      narrowedInput.rightEdgeOutput = output[length - 1];
+    } else {
+      for (let i = 1; i < length; ++i) {
+        if (x <= input[i]) {
+          narrowedInput.leftEdgeInput = input[i - 1];
+          narrowedInput.rightEdgeInput = input[i];
+          narrowedInput.leftEdgeOutput = output[i - 1];
+          narrowedInput.rightEdgeOutput = output[i];
+          break;
+        }
+      }
     }
-  );
+  }
+
+  return internalInterpolate(x, narrowedInput, extrapolationConfig);
 }

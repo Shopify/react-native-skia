@@ -4,11 +4,6 @@ import { alphaf, blue, green, red, rgbaColor, Skia } from "../../skia";
 
 import { interpolate } from "./interpolate";
 
-const CLAMP = {
-  extrapolateLeft: "clamp",
-  extrapolateRight: "clamp",
-} as const;
-
 const interpolateColorsRGB = (
   value: number,
   inputRange: number[],
@@ -18,25 +13,25 @@ const interpolateColorsRGB = (
     value,
     inputRange,
     outputRange.map((c) => red(c)),
-    CLAMP
+    "clamp"
   );
   const g = interpolate(
     value,
     inputRange,
     outputRange.map((c) => green(c)),
-    CLAMP
+    "clamp"
   );
   const b = interpolate(
     value,
     inputRange,
     outputRange.map((c) => blue(c)),
-    CLAMP
+    "clamp"
   );
   const a = interpolate(
     value,
     inputRange,
     outputRange.map((c) => alphaf(c)),
-    CLAMP
+    "clamp"
   );
   return rgbaColor(r, g, b, a);
 };
