@@ -8,6 +8,9 @@ import {
   Group,
   DisplacementMap,
   Turbulence,
+  RuntimeShader,
+  Circle,
+  Skia,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -84,12 +87,29 @@ const MorphologyDemo = () => {
   );
 };
 
+const source = Skia.RuntimeEffect.Make(`
+uniform shader image;
+
+half4 main(float2 xy) {
+  vec4 color =  image.eval(xy);
+  if (xy.x < 128) {
+    return color;
+  }
+  return color.rbga;
+}
+`)!;
+
 export const ImageFilters = () => {
+  const r = 128;
   return (
     <Examples>
       <DisplacementMapDemo />
       <OffsetDemo />
       <MorphologyDemo />
+      <Group>
+        <RuntimeShader source={source} />
+        <Circle cx={r} cy={r} r={r} color="lightblue" />
+      </Group>
     </Examples>
   );
 };

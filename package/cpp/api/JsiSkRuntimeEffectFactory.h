@@ -7,7 +7,6 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkRuntimeEffect.h"
-#include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
 
 namespace RNSkia {
@@ -32,7 +31,9 @@ public:
         runtime, std::make_shared<JsiSkRuntimeEffect>(getContext(), std::move(effect)));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make))
+  JSI_EXPORT_FUNCTIONS(
+    JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make)
+  )
 
   JsiSkRuntimeEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

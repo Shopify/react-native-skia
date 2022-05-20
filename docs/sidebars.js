@@ -91,6 +91,7 @@ const sidebars = {
         "image-filters/displacement-map",
         "image-filters/offset",
         "image-filters/morphology",
+        "image-filters/runtime-shader",
       ],
     },
     {

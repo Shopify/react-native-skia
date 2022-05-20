@@ -3,6 +3,7 @@ import type { SkColorFilter } from "../ColorFilter/ColorFilter";
 import type { SkShader } from "../Shader/Shader";
 import type { SkRect } from "../Rect";
 import type { BlendMode } from "../Paint/BlendMode";
+import type { SkRuntimeShaderBuilder } from "../RuntimeEffect";
 
 import type { SkImageFilter, TileMode } from "./ImageFilter";
 
@@ -168,5 +169,24 @@ export interface ImageFilterFactory {
     background: SkImageFilter,
     foreground: SkImageFilter | null,
     cropRect?: SkRect
+  ) => SkImageFilter;
+  /**
+   *  Create a filter that fills the output with the per-pixel evaluation of the SkShader produced
+   *  by the SkRuntimeShaderBuilder. The shader is defined in the image filter's local coordinate
+   *  system, so it will automatically be affected by SkCanvas' transform.
+   *
+   *  @param builder         The builder used to produce the runtime shader, that will in turn
+   *                         fill the result image
+   *  @param childShaderName The name of the child shader defined in the builder that will be
+   *                         bound to the input param (or the source image if the input param
+   *                         is null).  If null the builder can have exactly one child shader,
+   *                         which automatically binds the input param.
+   *  @param input           The image filter that will be provided as input to the runtime
+   *                         shader. If null the implicit source image is used instead
+   */
+  MakeRuntimeShader: (
+    builder: SkRuntimeShaderBuilder,
+    childShaderName: string | null,
+    input: SkImageFilter | null
   ) => SkImageFilter;
 }
