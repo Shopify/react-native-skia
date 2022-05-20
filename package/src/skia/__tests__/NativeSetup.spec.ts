@@ -23,5 +23,9 @@ describe("NativeSetup", () => {
   it("Can create a CPU backed surface", () => {
     const surface = global.CanvasKit.MakeSurface(256, 256);
     expect(surface).toBeDefined();
+    if (!surface) {
+      return;
+    }
+    const canvas = surface.getCanvas();
   });
 });
