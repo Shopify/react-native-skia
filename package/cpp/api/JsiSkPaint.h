@@ -8,6 +8,7 @@
 #include <JsiSkHostObjects.h>
 #include <JsiSkImageFilter.h>
 #include <JsiSkMaskFilter.h>
+#include <JsiSkColorFilter.h>
 #include <JsiSkPathEffect.h>
 #include <JsiSkShader.h>
 #include <JsiSkColor.h>
