@@ -25,6 +25,7 @@ import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
+import type { SkRuntimeShaderBuilder } from "./RuntimeEffect/RuntimeEffect";
 
 /**
  * Declares the interface for the native Skia API
@@ -36,6 +37,7 @@ export interface SkiaApi {
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
   Color: (color: Color) => SkColor;
   parseColorString: (color: string) => SkColor | undefined;
+  RuntimeShaderBuilder: SkRuntimeShaderBuilder;
   ContourMeasureIter: (
     path: SkPath,
     forceClosed: boolean,
