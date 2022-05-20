@@ -9,6 +9,7 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
+    "module": "esnext",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "jsx": "react-native",

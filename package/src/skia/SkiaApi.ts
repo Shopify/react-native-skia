@@ -29,10 +29,6 @@ import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
-import type {
-  SkRuntimeShaderBuilder,
-  SkRuntimeEffect,
-} from "./RuntimeEffect/RuntimeEffect";
 
 /**
  * Declares the interface for the native Skia API
