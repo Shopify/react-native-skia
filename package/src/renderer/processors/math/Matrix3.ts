@@ -30,41 +30,44 @@ export type Transforms2d = readonly (
   | Pick<Transformations, "rotate">
 )[];
 
-export const processTransform2d = (transforms: Transforms2d) =>
-  transforms.reduce((acc, transform) => {
+export const processTransform2d = (transforms: Transforms2d) => {
+  const m = Skia.Matrix();
+  for (const transform of transforms) {
     const key = Object.keys(transform)[0] as Transform2dName;
     const value = (transform as Pick<Transformations, typeof key>)[key];
     if (key === "translateX") {
-      acc.preTranslate(value, 0);
-      return acc;
+      m.preTranslate(value, 0);
+      continue;
     }
     if (key === "translateY") {
-      acc.preTranslate(0, value);
-      return acc;
+      m.preTranslate(0, value);
+      continue;
     }
     if (key === "scale") {
-      acc.preScale(value, value);
-      return acc;
+      m.preScale(value, value);
+      continue;
     }
     if (key === "scaleX") {
-      acc.preScale(value, 0);
-      return acc;
+      m.preScale(value, 0);
+      continue;
     }
     if (key === "scaleY") {
-      acc.preScale(0, value);
-      return acc;
+      m.preScale(0, value);
+      continue;
     }
     if (key === "skewX") {
-      acc.preSkew(value, 0);
-      return acc;
+      m.preSkew(value, 0);
+      continue;
     }
     if (key === "skewY") {
-      acc.preSkew(0, value);
-      return acc;
+      m.preSkew(0, value);
+      continue;
     }
     if (key === "rotate" || key === "rotateZ") {
-      acc.preRotate((value * 180) / Math.PI);
-      return acc;
+      m.preRotate((value * 180) / Math.PI);
+      continue;
     }
-    return exhaustiveCheck(key);
-  }, Skia.Matrix());
+    exhaustiveCheck(key);
+  }
+  return m;
+};
