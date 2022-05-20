@@ -133,25 +133,37 @@ export const CoonsPatchMeshGradient = ({
       const isEdge =
         pt.pos.x === 0 ||
         pt.pos.y === 0 ||
-        pt.pos.x === width ||
-        pt.pos.y === height;
+        pt.pos.x === Math.fround(width) ||
+        pt.pos.y === Math.fround(height);
       if (isEdge) {
         return pt;
       }
       const noisePos = new SimplexNoise(`${i}-pos`);
       const noiseC1 = new SimplexNoise(`${i}-c1`);
       const noiseC2 = new SimplexNoise(`${i}-c2`);
-      const p = { ...pt };
-      p.pos = { ...pt.pos };
-      p.c1 = { ...pt.c1 };
-      p.c2 = { ...pt.c2 };
-      p.pos.x += A * noisePos.noise2D(clock.current / F, 0);
-      p.pos.y += A * noisePos.noise2D(0, clock.current / F);
-      p.c1.x += A * noiseC1.noise2D(clock.current / F, 0);
-      p.c1.y += A * noiseC1.noise2D(0, clock.current / F);
-      p.c2.x += A * noiseC2.noise2D(clock.current / F, 0);
-      p.c2.y += A * noiseC2.noise2D(0, clock.current / F);
-      return p;
+      return {
+        pos: add(
+          pt.pos,
+          vec(
+            A * noisePos.noise2D(clock.current / F, 0),
+            A * noisePos.noise2D(0, clock.current / F)
+          )
+        ),
+        c1: add(
+          pt.c1,
+          vec(
+            A * noiseC1.noise2D(clock.current / F, 0),
+            A * noiseC1.noise2D(0, clock.current / F)
+          )
+        ),
+        c2: add(
+          pt.c1,
+          vec(
+            A * noiseC2.noise2D(clock.current / F, 0),
+            A * noiseC2.noise2D(0, clock.current / F)
+          )
+        ),
+      };
     });
   }, [clock]);
 
