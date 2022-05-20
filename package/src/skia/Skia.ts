@@ -30,6 +30,7 @@ export const Skia = {
   Point: SkiaApi.Point,
   XYWHRect: SkiaApi.XYWHRect,
   RRectXY: SkiaApi.RRectXY,
+  RuntimeShaderBuilder: SkiaApi.RuntimeShaderBuilder,
   Paint: SkiaApi.Paint,
   PictureRecorder: SkiaApi.PictureRecorder,
   Picture: SkiaApi.Picture,

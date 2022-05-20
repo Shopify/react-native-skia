@@ -8,7 +8,11 @@ import type { MaskFilterFactory } from "./MaskFilter";
 import type { SkPaint } from "./Paint";
 import type { SkRect } from "./Rect";
 import type { SkRRect } from "./RRect";
-import type { RuntimeEffectFactory } from "./RuntimeEffect";
+import type {
+  RuntimeEffectFactory,
+  SkRuntimeEffect,
+  SkRuntimeShaderBuilder,
+} from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
 import type { SkMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
@@ -32,6 +36,7 @@ import type { Color, SkColor } from "./Color";
 export interface SkiaApi {
   Point: (x: number, y: number) => SkPoint;
   XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
+  RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
   Color: (color: Color) => SkColor;

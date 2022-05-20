@@ -35,6 +35,12 @@ namespace RNSkia
       : public JsiSkWrappingSkPtrHostObject<SkRuntimeEffect>
   {
   public:
+      
+    static sk_sp<SkRuntimeEffect> fromValue(jsi::Runtime &runtime, const jsi::Value &obj) {
+        const auto& object = obj.asObject(runtime);
+        return object.asHostObject<JsiSkRuntimeEffect>(runtime)->getObject();
+    }
+
     JSI_HOST_FUNCTION(makeShader)
     {
       auto uniforms = castUniforms(runtime, arguments[0]);
@@ -213,5 +219,6 @@ namespace RNSkia
       su.slot = (int)(u.offset / sizeof(float));
       return su;
     }
+
   };
 } // namespace RNSkia
