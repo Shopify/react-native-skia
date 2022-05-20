@@ -70,7 +70,7 @@ export const Wallpaper = () => {
           </Group>
         ))}
       </Group>
-      <Fill blendMode={"softLight"}>
+      <Fill blendMode="softLight">
         <Turbulence freqX={1} freqY={1} octaves={3} />
       </Fill>
     </Canvas>

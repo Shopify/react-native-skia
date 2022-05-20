@@ -124,7 +124,7 @@ public:
     auto dy = arguments[1].asNumber();
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
-    auto color = arguments[4].asNumber();
+    auto color = JsiSkColor::fromValue(runtime, arguments[4]);
     sk_sp<SkImageFilter> input;
     if (!arguments[5].isNull() && !arguments[5].isUndefined()) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
@@ -145,7 +145,7 @@ public:
     auto dy = arguments[1].asNumber();
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
-    auto color = arguments[4].asNumber();
+    auto color = JsiSkColor::fromValue(runtime, arguments[4]);
     sk_sp<SkImageFilter> input;
     if (!arguments[5].isNull() && !arguments[5].isUndefined()) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[5]);

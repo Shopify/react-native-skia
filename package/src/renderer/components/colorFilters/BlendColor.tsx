@@ -1,11 +1,11 @@
 import React from "react";
 import type { ReactNode } from "react";
 
+import type { Color } from "../../../skia";
 import { BlendMode, Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes";
 import type { SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
-import type { Color } from "../../../skia";
 
 import { composeColorFilter } from "./Compose";
 

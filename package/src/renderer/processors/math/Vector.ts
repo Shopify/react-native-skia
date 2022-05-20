@@ -1,11 +1,12 @@
 import { interpolate } from "../../../animation/functions/interpolate";
+import { Skia } from "../../../skia";
 
 export interface Vector {
   x: number;
   y: number;
 }
 
-export const vec = (x = 0, y?: number) => ({ x, y: y ?? x });
+export const vec = (x = 0, y?: number) => Skia.Point(x, y ?? x);
 export const neg = (a: Vector) => vec(-a.x, -a.y);
 export const add = (a: Vector, b: Vector) => vec(a.x + b.x, a.y + b.y);
 export const sub = (a: Vector, b: Vector) => vec(a.x - b.x, a.y - b.y);

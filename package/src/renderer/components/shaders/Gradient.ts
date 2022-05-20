@@ -1,4 +1,4 @@
-import { TileMode, Skia } from "../../../skia";
+import { Skia, TileMode } from "../../../skia";
 import type { SkEnum } from "../../processors/Paint";
 import type { TransformProps } from "../../processors/Transform";
 import { enumKey } from "../../processors/Paint";
@@ -19,9 +19,7 @@ export const processGradientProps = ({
   flags,
   ...transform
 }: GradientProps) => ({
-  colors: colors.map((color) =>
-    typeof color === "string" ? Skia.Color(color) : color
-  ),
+  colors: colors.map((color) => Skia.Color(color)),
   positions: positions ?? null,
   mode: TileMode[enumKey(mode ?? "clamp")],
   flags,
