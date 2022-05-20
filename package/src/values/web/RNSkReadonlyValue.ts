@@ -1,6 +1,6 @@
-import type { SkiaReadonlyValue } from "../types";
+import type { SkiaValue } from "../types";
 
-export class RNSkReadonlyValue<T> implements SkiaReadonlyValue<T> {
+export class RNSkReadonlyValue<T> implements SkiaValue<T> {
   constructor(value: T) {
     this._current = value;
   }
