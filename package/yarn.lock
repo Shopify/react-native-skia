@@ -3049,6 +3049,11 @@ caniuse-lite@^1.0.30001317:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001325.tgz#2b4ad19b77aa36f61f2eaf72e636d7481d55e606"
   integrity sha512-sB1bZHjseSjDtijV1Hb7PB2Zd58Kyx+n/9EotvZ4Qcz2K3d0lWB8dB4nb8wN/TsOGFq3UuAm0zQZNQ4SoR7TrQ==
 
+canvaskit-wasm@^0.34.0:
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.34.0.tgz#047d73a59168d32295834a817f1f871fe8cadeb2"
+  integrity sha512-THKk3f4AQsN0tEygu/yI/vvIChm6gNg/V80174V1x54Uk1RHADRqG5a/Iq425l8NY3lk1bon0/gpeE7yQKqFQQ==
+
 capture-exit@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/capture-exit/-/capture-exit-2.0.0.tgz#fb953bfaebeb781f62898239dabb426d08a509a4"

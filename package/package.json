@@ -79,6 +79,7 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
+    "canvaskit-wasm": "^0.34.0",
     "react-reconciler": "^0.26.2"
   },
   "eslintIgnore": [
