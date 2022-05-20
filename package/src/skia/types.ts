@@ -1,5 +1,3 @@
-import type { SVGFactory } from "react";
-
 import type { Color, SkColor } from "./Color";
 import type { ColorFilterFactory } from "./ColorFilter";
 import type { SkContourMeasureIter } from "./ContourMeasure";
@@ -25,6 +23,7 @@ import type {
 } from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
 import type { SurfaceFactory } from "./Surface";
+import type { SVGFactory } from "./SVG";
 import type { TextBlobFactory } from "./TextBlob";
 import type { SkTypeface, TypefaceFactory } from "./Typeface";
 import type { VertexMode, SkVertices } from "./Vertices";
