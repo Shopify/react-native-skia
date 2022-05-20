@@ -18,7 +18,11 @@ import type { SkPoint } from "./Point";
 import type { SkRect } from "./Rect";
 import type { SkRRect } from "./RRect";
 import type { SkRSXform } from "./RSXform";
-import type { RuntimeEffectFactory } from "./RuntimeEffect";
+import type {
+  RuntimeEffectFactory,
+  SkRuntimeEffect,
+  SkRuntimeShaderBuilder,
+} from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
 import type { SurfaceFactory } from "./Surface";
 import type { TextBlobFactory } from "./TextBlob";
@@ -32,6 +36,7 @@ export interface ISkiaApi {
   Point: (x: number, y: number) => SkPoint;
   XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
+  RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
   Color: (color: Color) => SkColor;
   parseColorString: (color: string) => SkColor | undefined;
