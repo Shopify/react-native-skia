@@ -1,14 +1,14 @@
-import type { ColorFilter } from "canvaskit-wasm";
+import type { CanvasKit, ColorFilter } from "canvaskit-wasm";
 
 import type { SkColorFilter } from "../../ColorFilter/ColorFilter";
 
-import { HostObject } from "./HostObject";
+import { HostObject } from "./Host";
 
 export class JsiSkColorFilter
   extends HostObject<ColorFilter, "ColorFilter">
   implements SkColorFilter
 {
-  constructor(ref: ColorFilter) {
-    super(ref, "ColorFilter");
+  constructor(CanvasKit: CanvasKit, ref: ColorFilter) {
+    super(CanvasKit, ref, "ColorFilter");
   }
 }

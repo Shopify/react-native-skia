@@ -26,3 +26,5 @@ export abstract class HostObject<T, N extends string>
 
 export const toValue = <T>(value: unknown): T =>
   (value as HostObject<T, string>).ref;
+
+export const ckEnum = (value: number) => ({ value });

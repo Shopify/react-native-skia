@@ -17,8 +17,6 @@ export class JsiSkSurface
   }
 
   getCanvas(): SkCanvas {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     return new JsiSkCanvas(this.CanvasKit, this.ref.getCanvas());
   }
 
