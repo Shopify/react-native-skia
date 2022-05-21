@@ -14,8 +14,6 @@ declare global {
 beforeAll(async () => {
   const CanvasKit = await CanvasKitInit();
   Skia = JsiSkApi(CanvasKit);
-  //  Skia = require("../web").Skia;
-  //console.log({ Skia });
 });
 
 describe("Draw a rectangle", () => {
@@ -33,5 +31,8 @@ describe("Draw a rectangle", () => {
     }
     const canvas = surface.getCanvas();
     canvas.drawRect(rct, paint);
+    surface.ref.flush();
+    const image = surface.makeImageSnapshot();
+    console.log({ image });
   });
 });

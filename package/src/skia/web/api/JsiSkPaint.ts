@@ -1,12 +1,4 @@
-import type {
-  CanvasKit,
-  ColorFilter,
-  ImageFilter,
-  MaskFilter,
-  Paint,
-  PathEffect,
-  Shader,
-} from "canvaskit-wasm";
+import type { CanvasKit, Paint } from "canvaskit-wasm";
 
 import type { SkColor } from "../../Color";
 import type { SkColorFilter } from "../../ColorFilter";
@@ -22,7 +14,7 @@ import type {
 import type { SkPathEffect } from "../../PathEffect";
 import type { SkShader } from "../../Shader";
 
-import { HostObject, toValue } from "./Host";
+import { HostObject, toNullableValue } from "./Host";
 
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   constructor(CanvasKit: CanvasKit, ref: Paint) {
@@ -70,23 +62,23 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setColorFilter(filter: SkColorFilter | null) {
-    this.ref.setColorFilter(toValue<ColorFilter>(filter));
+    this.ref.setColorFilter(toNullableValue(filter));
   }
 
   setImageFilter(filter: SkImageFilter | null) {
-    this.ref.setImageFilter(toValue<ImageFilter>(filter));
+    this.ref.setImageFilter(toNullableValue(filter));
   }
 
   setMaskFilter(filter: SkMaskFilter | null) {
-    this.ref.setMaskFilter(toValue<MaskFilter>(filter));
+    this.ref.setMaskFilter(toNullableValue(filter));
   }
 
   setPathEffect(effect: SkPathEffect | null) {
-    this.ref.setPathEffect(toValue<PathEffect>(effect));
+    this.ref.setPathEffect(toNullableValue(effect));
   }
 
   setShader(shader: SkShader | null) {
-    this.ref.setShader(toValue<Shader>(shader));
+    this.ref.setShader(toNullableValue(shader));
   }
 
   setStrokeCap(cap: StrokeCap) {

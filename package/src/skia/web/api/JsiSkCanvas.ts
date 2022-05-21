@@ -16,7 +16,13 @@ import type { SkImageFilter } from "../../ImageFilter";
 import type { SkMatrix } from "../../Matrix";
 import type { SkPicture } from "../../Picture";
 
-import { ckEnum, HostObject, toValue } from "./Host";
+import {
+  ckEnum,
+  HostObject,
+  toValue,
+  toUndefinedableValue,
+  toOptionalValue,
+} from "./Host";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -31,7 +37,7 @@ export class JsiSkCanvas
   }
 
   drawImage(image: SkImage, x: number, y: number, paint?: SkPaint) {
-    this.ref.drawImage(toValue<Image>(image), x, y, toValue<Paint>(paint));
+    this.ref.drawImage(toValue<Image>(image), x, y, toOptionalValue(paint));
   }
 
   drawImageRect(
@@ -58,7 +64,14 @@ export class JsiSkCanvas
     C: number,
     paint?: SkPaint | null
   ) {
-    this.ref.drawImageCubic(toValue(img), left, top, B, C, toValue(paint));
+    this.ref.drawImageCubic(
+      toValue(img),
+      left,
+      top,
+      B,
+      C,
+      toOptionalValue(paint)
+    );
   }
 
   drawImageOptions(
@@ -75,7 +88,7 @@ export class JsiSkCanvas
       top,
       ckEnum(fm),
       ckEnum(mm),
-      toValue(paint)
+      toOptionalValue(paint)
     );
   }
 
@@ -91,7 +104,7 @@ export class JsiSkCanvas
       toValue(center),
       toValue(dest),
       ckEnum(filter),
-      toValue(paint)
+      toOptionalValue(paint)
     );
   }
 
@@ -109,7 +122,7 @@ export class JsiSkCanvas
       toValue<Rect>(dest),
       B,
       C,
-      toValue(paint)
+      toOptionalValue(paint)
     );
   }
 
@@ -127,7 +140,7 @@ export class JsiSkCanvas
       toValue<Rect>(dest),
       ckEnum(fm),
       ckEnum(mm),
-      toValue(paint)
+      toOptionalValue(paint)
     );
   }
 
@@ -157,9 +170,9 @@ export class JsiSkCanvas
     this.ref.drawPatch(
       toValue(cubics),
       colors,
-      toValue(texs),
+      toOptionalValue(texs),
       mode ? ckEnum(mode) : null,
-      toValue(paint)
+      toUndefinedableValue(paint)
     );
   }
 
@@ -244,9 +257,9 @@ export class JsiSkCanvas
     flags?: SaveLayerFlag
   ) {
     return this.ref.saveLayer(
-      toValue(paint),
-      toValue(bounds),
-      toValue(backdrop),
+      toUndefinedableValue(paint),
+      toOptionalValue(bounds),
+      toOptionalValue(backdrop),
       flags
     );
   }

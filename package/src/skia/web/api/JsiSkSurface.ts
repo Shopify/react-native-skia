@@ -5,8 +5,9 @@ import type { SkSurface } from "../../Surface/Surface";
 import type { SkCanvas } from "../../Canvas";
 import type { SkImage } from "../../Image";
 
-import { HostObject } from "./Host";
+import { HostObject, toUndefinedableValue } from "./Host";
 import { JsiSkCanvas } from "./JsiSkCanvas";
+import { JsiSkImage } from "./JsiSkImage";
 
 export class JsiSkSurface
   extends HostObject<Surface, "Surface">
@@ -20,7 +21,8 @@ export class JsiSkSurface
     return new JsiSkCanvas(this.CanvasKit, this.ref.getCanvas());
   }
 
-  makeImageSnapshot(_bounds?: SkRect): SkImage {
-    throw new Error("Method not implemented");
+  makeImageSnapshot(bounds?: SkRect): SkImage {
+    const image = this.ref.makeImageSnapshot(toUndefinedableValue(bounds));
+    return new JsiSkImage(this.CanvasKit, image);
   }
 }
