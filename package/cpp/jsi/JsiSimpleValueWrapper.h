@@ -89,7 +89,7 @@ public:
       } else if(value.isString()) {
           auto current = getCurrent(runtime);
           if (current.isString()) {
-              return jsi::String::strictEquals(runtime, value.asString(runtime), getCurrent(runtime).asString(runtime));
+              return jsi::String::strictEquals(runtime, value.asString(runtime), current.asString(runtime));
           }
           return false;
       }
