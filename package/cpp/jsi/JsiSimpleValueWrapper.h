@@ -9,6 +9,7 @@ using namespace facebook;
 
 enum JsiWrapperValueType
 {
+    NonInitialized,
     Undefined,
     Null,
     Bool,
@@ -25,7 +26,7 @@ class JsiSimpleValueWrapper
 {
 public:
     JsiSimpleValueWrapper(jsi::Runtime& runtime) :
-      _type(JsiWrapperValueType::Undefined),
+      _type(JsiWrapperValueType::NonInitialized),
       _propNameId(jsi::PropNameID::forUtf8(runtime, "value"))
     {}
 
@@ -33,6 +34,8 @@ public:
     {
       switch (_type)
       {
+          case JsiWrapperValueType::NonInitialized:
+              return nullptr;
           case JsiWrapperValueType::Undefined:
             return jsi::Value::undefined();
           case JsiWrapperValueType::Null:
@@ -72,6 +75,9 @@ public:
     }
 
     bool equals(jsi::Runtime& runtime, const jsi::Value &value) {
+      if (_type == JsiWrapperValueType::NonInitialized) {
+          return false;
+      }
       if(value.isNumber()) {
         return _numberValue == value.asNumber();
       } else if(value.isBool()) {
