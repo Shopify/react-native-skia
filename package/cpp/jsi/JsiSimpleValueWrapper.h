@@ -78,16 +78,20 @@ public:
       if (_type == JsiWrapperValueType::NonInitialized) {
           return false;
       }
-      if(value.isNumber()) {
+      if(value.isNumber() && _type == JsiWrapperValueType::Number) {
         return _numberValue == value.asNumber();
-      } else if(value.isBool()) {
+      } else if(value.isBool() && _type == JsiWrapperValueType::Bool) {
         return _boolValue == value.getBool();
       } else if(value.isUndefined()) {
         return _type == JsiWrapperValueType::Undefined;
       } else if(value.isNull()) {
         return _type == JsiWrapperValueType::Null;
       } else if(value.isString()) {
-        return jsi::String::strictEquals(runtime, value.asString(runtime), getCurrent(runtime).asString(runtime));
+          auto current = getCurrent(runtime);
+          if (current.isString()) {
+              return jsi::String::strictEquals(runtime, value.asString(runtime), getCurrent(runtime).asString(runtime));
+          }
+          return false;
       }
       return false;
     }

@@ -13,7 +13,9 @@ import SimplexNoise from "simplex-noise";
 
 import "./cdt2d.d";
 
-const { width, height } = Dimensions.get("window");
+const dim = Dimensions.get("window");
+const width = Math.fround(dim.width);
+const height = Math.fround(dim.height);
 const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);
 const hSize = width / N;
