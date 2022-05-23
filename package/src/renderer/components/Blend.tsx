@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
 import React from "react";
 
-import { isImageFilter, Skia, BlendMode } from "../../skia";
+import { isImageFilter, Skia, BlendMode, isShader } from "../../skia";
 import { createDeclaration } from "../nodes";
 import type { AnimatedProps, SkEnum } from "../processors";
-import { isShader } from "../../skia/Shader/Shader";
 import { enumKey } from "../processors/Paint";
 
 interface BlendProps {

@@ -1,6 +1,5 @@
-import type { SkColor } from "../../../skia";
+import type { SkColor, SkImageFilter } from "../../../skia";
 import { BlendMode, Skia, TileMode } from "../../../skia";
-import type { SkImageFilter } from "../../../skia/ImageFilter/ImageFilter";
 
 const Black = Skia.Color("black");
 

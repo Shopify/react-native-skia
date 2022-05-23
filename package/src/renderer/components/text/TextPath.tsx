@@ -2,8 +2,7 @@ import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes";
-import type { SkPath } from "../../../skia/Path";
-import type { SkRSXform } from "../../../skia/RSXform";
+import type { SkPath, SkRSXform } from "../../../skia";
 import { Skia } from "../../../skia/Skia";
 import type { FontDef } from "../../processors/Font";
 import { processFont } from "../../processors/Font";

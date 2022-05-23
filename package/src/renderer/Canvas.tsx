@@ -19,11 +19,10 @@ import ReactReconciler from "react-reconciler";
 
 import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
-import { Skia } from "../skia";
-import type { FontMgr } from "../skia/FontMgr/FontMgr";
+import { Skia, SkiaPaint } from "../skia";
+import type { FontMgr } from "../skia";
 import { useValue } from "../values/hooks/useValue";
 import type { SkiaReadonlyValue } from "../values/types";
-import { SkiaPaint } from "../skia/Paint/Paint";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";

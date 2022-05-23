@@ -1,7 +1,6 @@
 import type { ViewProps } from "react-native";
 
-import type { SkImage, SkRect } from "../skia";
-import type { SkCanvas } from "../skia/Canvas";
+import type { SkImage, SkRect, SkCanvas } from "../skia/types";
 import type { SkiaReadonlyValue } from "../values";
 
 export type DrawMode = "continuous" | "default";

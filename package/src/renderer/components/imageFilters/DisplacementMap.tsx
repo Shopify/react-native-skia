@@ -1,11 +1,10 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
+import { Skia, ColorChannel } from "../../../skia";
 import { createDeclaration } from "../../nodes";
 import type { SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
-import { ColorChannel } from "../../../skia/ImageFilter/ImageFilterFactory";
 
 import { getInput } from "./getInput";
 
