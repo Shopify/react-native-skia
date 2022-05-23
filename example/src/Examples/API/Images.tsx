@@ -26,10 +26,22 @@ const rects = [
 ];
 
 export const Images = () => {
+  // Verifies that the error handler for images are working correctly.
+  useImage(new Uint8Array([0, 0, 0, 255]), (err) =>
+    console.log(
+      err,
+      "UseImage failed when trying to read image data from a UInt8Array"
+    )
+  );
+  useImage("https://reactjs.org/invalid.jpg", (err) =>
+    console.log(
+      err,
+      "UseImage failed when trying to read image data from an uri"
+    )
+  );
+
   const oslo = useImage(require("../../assets/oslo.jpg"));
-  if (oslo === null) {
-    return null;
-  }
+
   return (
     <ScrollView>
       {fits.map((fit, i) => (
@@ -47,14 +59,16 @@ export const Images = () => {
                     height={height}
                     color="lightblue"
                   />
-                  <Image
-                    image={oslo}
-                    x={x}
-                    y={y}
-                    width={width}
-                    height={height}
-                    fit={fit}
-                  />
+                  {oslo ? (
+                    <Image
+                      image={oslo}
+                      x={x}
+                      y={y}
+                      width={width}
+                      height={height}
+                      fit={fit}
+                    />
+                  ) : null}
                 </React.Fragment>
               );
             })}
