@@ -1,5 +1,5 @@
 import type { DrawingContext } from "../DrawingContext";
-import type { SkMatrix } from "../../skia/Matrix";
+import type { SkMatrix } from "../../skia/types";
 
 import { neg, processTransform2d } from "./math";
 import type { Transforms2d, Vector } from "./math";

@@ -1,6 +1,5 @@
-import type { SkFont } from "../../skia";
+import type { FontMgr, SkFont } from "../../skia";
 import { Skia } from "../../skia/Skia";
-import type { FontMgr } from "../../skia/FontMgr/FontMgr";
 
 export type FontDef = { font: SkFont } | { familyName: string; size: number };
 

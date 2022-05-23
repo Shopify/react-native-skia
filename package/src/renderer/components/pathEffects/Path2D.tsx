@@ -1,11 +1,10 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
+import { Skia, isPathEffect } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { isPathEffect } from "../../../skia/PathEffect";
-import type { SkMatrix } from "../../../skia/Matrix";
+import type { SkMatrix } from "../../../skia";
 import type { PathDef } from "../../processors/Paths";
 import { processPath } from "../../processors/Paths";
 

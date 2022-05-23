@@ -1,14 +1,12 @@
 import React from "react";
 
-import type { Color, SkRRect } from "../../../skia";
+import type { Color, SkRRect, SkJSIInstance, SkRect } from "../../../skia";
 import { ClipOp, BlurStyle, Skia, processColor } from "../../../skia";
 import { createDrawing } from "../../nodes";
 import type { AnimatedProps, CustomPaintProps } from "../../processors";
 import { add, vec, rrect } from "../../processors";
 import { rect, isRRect } from "../../processors/Rects";
 import { createDeclaration } from "../../nodes/Declaration";
-import type { SkJSIInstance } from "../../../skia/JsiInstance";
-import type { SkRect } from "../../../skia/Rect";
 
 const inflate = (box: SkRRect, dx: number, dy: number, tx = 0, ty = 0) =>
   rrect(
