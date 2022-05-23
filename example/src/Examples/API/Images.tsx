@@ -27,18 +27,20 @@ const rects = [
 
 export const Images = () => {
   // Verifies that the error handler for images are working correctly.
-  useImage(new Uint8Array([0, 0, 0, 255]), (err) =>
-    console.log(
-      err,
-      "UseImage failed when trying to read image data from a UInt8Array"
-    )
-  );
-  useImage("https://reactjs.org/invalid.jpg", (err) =>
-    console.log(
-      err,
-      "UseImage failed when trying to read image data from an uri"
-    )
-  );
+  useImage(new Uint8Array([0, 0, 0, 255]), (err) => {
+    if (err.message !== "Could not load data") {
+      throw new Error(
+        `Expected error message to be 'Could not load data' - got '${err.message}'`
+      );
+    }
+  });
+  useImage("https://reactjs.org/invalid.jpg", (err) => {
+    if (err.message !== "Could not load data") {
+      throw new Error(
+        `Expected error message to be 'Could not load data' - got '${err.message}'`
+      );
+    }
+  });
 
   const oslo = useImage(require("../../assets/oslo.jpg"));
 
