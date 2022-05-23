@@ -1,6 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { SurfaceFactory } from "../../Surface/SurfaceFactory";
+import type { SurfaceFactory } from "../../types";
 
 import { Host } from "./Host";
 import { JsiSkSurface } from "./JsiSkSurface";

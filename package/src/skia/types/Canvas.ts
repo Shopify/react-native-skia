@@ -221,9 +221,9 @@ export interface SkCanvas {
    * @param paint
    */
   drawPatch(
-    cubics: SkPoint[],
-    colors?: SkColor[] | null,
-    texs?: SkPoint[] | null,
+    cubics: readonly SkPoint[],
+    colors?: readonly SkColor[] | null,
+    texs?: readonly SkPoint[] | null,
     mode?: BlendMode | null,
     paint?: SkPaint
   ): void;

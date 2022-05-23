@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
-import type { CanvasKit } from "canvaskit-wasm";
+import type { CanvasKit, EmbindEnumEntity } from "canvaskit-wasm";
 
-import type { SkJSIInstance } from "../../JsiInstance";
+import type { SkJSIInstance } from "../../types";
 
 export abstract class Host {
   readonly CanvasKit: CanvasKit;
@@ -43,6 +43,8 @@ export const toNullableValue = <T>(value: NonNullish | null): T | null =>
 export const toValue = <T>(value: NonNullish): T =>
   (value as HostObject<T, string>).ref;
 
-export const ckEnum = (value: number) => ({ value });
-export const optEnum = (value: number | undefined) =>
+export const ckEnum = (value: number): EmbindEnumEntity => ({ value });
+export const optEnum = (
+  value: number | undefined
+): EmbindEnumEntity | undefined =>
   value === undefined ? undefined : { value };

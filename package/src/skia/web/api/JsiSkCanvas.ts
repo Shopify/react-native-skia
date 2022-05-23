@@ -1,20 +1,28 @@
 import type { Canvas, CanvasKit, Image, Paint, Rect } from "canvaskit-wasm";
 
-import type { SkRect } from "../../Rect";
-import type { BlendMode, SkPaint } from "../../Paint";
-import type { ClipOp, SaveLayerFlag, SkCanvas } from "../../Canvas";
-import type { FilterMode, MipmapMode, SkImage } from "../../Image";
-import type { SkVertices } from "../../Vertices/Vertices";
-import type { PointMode, SkPoint } from "../../Point";
-import type { SkColor } from "../../Color";
-import type { SkRRect } from "../../RRect";
-import type { SkPath } from "../../Path";
-import type { SkFont } from "../../Font";
-import type { SkTextBlob } from "../../TextBlob";
-import type { SkSVG } from "../../SVG";
-import type { SkImageFilter } from "../../ImageFilter";
-import type { SkMatrix } from "../../Matrix";
-import type { SkPicture } from "../../Picture";
+import type {
+  BlendMode,
+  ClipOp,
+  FilterMode,
+  MipmapMode,
+  PointMode,
+  SaveLayerFlag,
+  SkCanvas,
+  SkColor,
+  SkFont,
+  SkImage,
+  SkImageFilter,
+  SkMatrix,
+  SkPaint,
+  SkPath,
+  SkPicture,
+  SkPoint,
+  SkRect,
+  SkRRect,
+  SkSVG,
+  SkTextBlob,
+  SkVertices,
+} from "../../types";
 
 import {
   ckEnum,

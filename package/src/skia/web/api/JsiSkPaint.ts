@@ -1,18 +1,18 @@
 import type { CanvasKit, Paint } from "canvaskit-wasm";
 
-import type { SkColor } from "../../Color";
-import type { SkColorFilter } from "../../ColorFilter";
-import type { SkImageFilter } from "../../ImageFilter";
-import type { SkMaskFilter } from "../../MaskFilter";
 import type {
   BlendMode,
+  SkColor,
+  SkColorFilter,
+  SkImageFilter,
   SkPaint,
+  SkShader,
   StrokeCap,
   StrokeJoin,
   PaintStyle,
-} from "../../Paint";
-import type { SkPathEffect } from "../../PathEffect";
-import type { SkShader } from "../../Shader";
+  SkMaskFilter,
+  SkPathEffect,
+} from "../../types";
 
 import { HostObject, toNullableValue } from "./Host";
 

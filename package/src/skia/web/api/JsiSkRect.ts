@@ -1,6 +1,6 @@
 import type { CanvasKit, Rect } from "canvaskit-wasm";
 
-import type { SkRect } from "../../Rect";
+import type { SkRect } from "../../types";
 
 import { HostObject } from "./Host";
 

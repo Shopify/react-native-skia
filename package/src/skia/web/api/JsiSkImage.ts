@@ -1,12 +1,16 @@
 import type { CanvasKit, Image } from "canvaskit-wasm";
 
-import { ImageFormat } from "../../Image";
-import type { FilterMode, MipmapMode, SkImage } from "../../Image";
-import type { TileMode } from "../../ImageFilter";
-import type { SkMatrix } from "../../Matrix";
-import type { SkShader } from "../../Shader";
+import type {
+  ImageFormat,
+  FilterMode,
+  MipmapMode,
+  SkImage,
+  SkMatrix,
+  SkShader,
+  TileMode,
+} from "../../types";
 
-import { HostObject, optEnum } from "./Host";
+import { ckEnum, HostObject } from "./Host";
 
 export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   constructor(CanvasKit: CanvasKit, ref: Image) {
@@ -41,8 +45,15 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     throw new Error("Not implemented yet");
   }
 
-  encodeToBytes(_fmt?: ImageFormat, quality?: number): Uint8Array {
-    const result = this.ref.encodeToBytes(optEnum(ImageFormat.PNG), quality);
+  encodeToBytes(fmt?: ImageFormat, quality?: number): Uint8Array {
+    let result: Uint8Array | null;
+    if (fmt && quality) {
+      result = this.ref.encodeToBytes(ckEnum(fmt), quality);
+    } else if (fmt) {
+      result = this.ref.encodeToBytes(ckEnum(fmt));
+    } else {
+      result = this.ref.encodeToBytes();
+    }
     if (!result) {
       throw new Error("encodeToBytes failed");
     }

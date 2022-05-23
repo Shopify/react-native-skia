@@ -18,14 +18,14 @@ export interface CubicBezierHandle {
 }
 
 export interface PatchProps extends CustomPaintProps {
-  colors?: Color[];
-  patch: [
+  colors?: readonly Color[];
+  patch: readonly [
     CubicBezierHandle,
     CubicBezierHandle,
     CubicBezierHandle,
     CubicBezierHandle
   ];
-  texture?: [SkPoint, SkPoint, SkPoint, SkPoint];
+  texture?: readonly [SkPoint, SkPoint, SkPoint, SkPoint];
   blendMode?: SkEnum<typeof BlendMode>;
 }
 

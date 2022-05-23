@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 import type { CanvasKit } from "canvaskit-wasm";
 import CanvasKitInit from "canvaskit-wasm";
 
@@ -34,9 +37,9 @@ describe("Draw a rectangle", () => {
     surface.ref.flush();
     const image = surface.makeImageSnapshot();
     const png = image.encodeToBytes();
-    console.log({ png });
-    const fs = require("fs");
-    const h = fs.openSync("lightblue-rect.png", "w");
-    fs.writeFileSync(h, png);
+    const ref = fs.readFileSync(
+      path.resolve(__dirname, "snapshots/lightblue-rect.png")
+    );
+    expect(ref.equals(png)).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 import type { CanvasKit, ColorFilter } from "canvaskit-wasm";
 
-import type { SkColorFilter } from "../../ColorFilter/ColorFilter";
+import type { SkColorFilter } from "../../types";
 
 import { HostObject } from "./Host";
 

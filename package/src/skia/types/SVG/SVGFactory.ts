@@ -1,8 +1,8 @@
-import type { SkData } from "../Data/SkData";
+import type { Data } from "../Data";
 
 import type { SkSVG } from "./SVG";
 
 export interface SVGFactory {
-  MakeFromData(data: SkData): SkSVG | null;
+  MakeFromData(data: Data): SkSVG | null;
   MakeFromString(str: string): SkSVG | null;
 }

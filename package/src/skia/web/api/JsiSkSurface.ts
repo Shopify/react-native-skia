@@ -1,9 +1,6 @@
 import type { CanvasKit, Surface } from "canvaskit-wasm";
 
-import type { SkRect } from "../../Rect";
-import type { SkSurface } from "../../Surface/Surface";
-import type { SkCanvas } from "../../Canvas";
-import type { SkImage } from "../../Image";
+import type { SkCanvas, SkImage, SkRect, SkSurface } from "../../types";
 
 import { HostObject, toUndefinedableValue } from "./Host";
 import { JsiSkCanvas } from "./JsiSkCanvas";
