@@ -3,7 +3,7 @@ import React from "react";
 import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { SkRuntimeEffect } from "../../../skia/RuntimeEffect/RuntimeEffect";
+import type { SkRuntimeEffect } from "../../../skia";
 
 import { getInput } from "./getInput";
 

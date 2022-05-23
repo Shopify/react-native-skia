@@ -1,10 +1,9 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
+import { Skia, isPathEffect } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { isPathEffect } from "../../../skia/PathEffect";
 
 export interface DiscretePathEffectProps {
   length: number;
