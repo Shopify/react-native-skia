@@ -1,5 +1,4 @@
 /*global SkiaApi*/
-import "./NativeSetup";
 import type { SkiaApi as SkSkiaApi } from "./types";
 
 /**
