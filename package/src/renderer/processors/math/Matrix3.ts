@@ -48,11 +48,11 @@ export const processTransform2d = (transforms: Transforms2d) => {
       continue;
     }
     if (key === "scaleX") {
-      m.preScale(value, 0);
+      m.preScale(value, 1);
       continue;
     }
     if (key === "scaleY") {
-      m.preScale(0, value);
+      m.preScale(1, value);
       continue;
     }
     if (key === "skewX") {
