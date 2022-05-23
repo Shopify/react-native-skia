@@ -32,7 +32,7 @@ import type {
 /**
  * Declares the interface for the native Skia API
  */
-export interface SkiaApi {
+export interface Skia {
   Point: (x: number, y: number) => SkPoint;
   XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
   RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
