@@ -44,3 +44,5 @@ export const toValue = <T>(value: NonNullish): T =>
   (value as HostObject<T, string>).ref;
 
 export const ckEnum = (value: number) => ({ value });
+export const optEnum = (value: number | undefined) =>
+  value === undefined ? undefined : { value };

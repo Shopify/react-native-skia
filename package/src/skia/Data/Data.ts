@@ -2,17 +2,16 @@ import type { DependencyList } from "react";
 import { useEffect, useState } from "react";
 import { Image } from "react-native";
 
-import type { SkJSIInstance } from "../JsiInstance";
 import { Skia } from "../Skia";
 
-export type Data = SkJSIInstance<"Data">;
+import type { SkData } from "./SkData";
 
 type Require = number;
 export type DataSource = Require | string | Uint8Array;
 
 export const useDataCollection = <T>(
   sources: DataSource[],
-  factory: (data: Data[]) => T,
+  factory: (data: SkData[]) => T,
   deps: DependencyList = []
 ) => {
   const [data, setData] = useState<T | null>(null);
@@ -39,7 +38,7 @@ export const useDataCollection = <T>(
 
 export const useRawData = <T>(
   source: DataSource,
-  factory: (data: Data) => T
+  factory: (data: SkData) => T
 ) => {
   const [data, setData] = useState<T | null>(null);
   useEffect(() => {
@@ -56,6 +55,6 @@ export const useRawData = <T>(
   return data;
 };
 
-const identity = (data: Data) => data;
+const identity = (data: SkData) => data;
 
 export const useData = (source: DataSource) => useRawData(source, identity);

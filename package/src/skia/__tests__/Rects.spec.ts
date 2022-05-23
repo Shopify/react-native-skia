@@ -33,6 +33,10 @@ describe("Draw a rectangle", () => {
     canvas.drawRect(rct, paint);
     surface.ref.flush();
     const image = surface.makeImageSnapshot();
-    console.log({ image });
+    const png = image.encodeToBytes();
+    console.log({ png });
+    const fs = require("fs");
+    const h = fs.openSync("lightblue-rect.png", "w");
+    fs.writeFileSync(h, png);
   });
 });
