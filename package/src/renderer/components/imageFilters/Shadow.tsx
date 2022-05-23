@@ -1,10 +1,9 @@
 import React from "react";
 
-import { Skia } from "../../../skia";
+import { Skia, processColor } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { Color } from "../../../skia/Color";
-import { processColor } from "../../../skia/Color";
+import type { Color } from "../../../skia";
 
 import { getInput } from "./getInput";
 import { MakeInnerShadow } from "./InnerShadow";

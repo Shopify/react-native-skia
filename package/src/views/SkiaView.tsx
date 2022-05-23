@@ -1,7 +1,7 @@
 import React from "react";
 import { requireNativeComponent } from "react-native";
 
-import type { SkRect } from "../skia";
+import type { SkRect } from "../skia/types";
 import type { SkiaReadonlyValue } from "../values";
 
 import { SkiaViewApi } from "./api";

@@ -1,11 +1,9 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../skia";
+import { Skia, isImageFilter, isColorFilter } from "../../skia";
 import { createDeclaration } from "../nodes/Declaration";
 import type { AnimatedProps } from "../processors/Animations/Animations";
-import { isColorFilter } from "../../skia/ColorFilter/ColorFilter";
-import { isImageFilter } from "../../skia/ImageFilter/ImageFilter";
 
 export interface ComposeProps {
   children: ReactNode | ReactNode[];

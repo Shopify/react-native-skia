@@ -1,10 +1,9 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
+import { Skia, isColorFilter } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { isColorFilter } from "../../../skia/ColorFilter/ColorFilter";
 
 import { composeColorFilter } from "./Compose";
 

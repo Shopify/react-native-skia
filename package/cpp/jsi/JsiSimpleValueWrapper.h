@@ -9,6 +9,7 @@ using namespace facebook;
 
 enum JsiWrapperValueType
 {
+    NonInitialized,
     Undefined,
     Null,
     Bool,
@@ -25,7 +26,7 @@ class JsiSimpleValueWrapper
 {
 public:
     JsiSimpleValueWrapper(jsi::Runtime& runtime) :
-      _type(JsiWrapperValueType::Undefined),
+      _type(JsiWrapperValueType::NonInitialized),
       _propNameId(jsi::PropNameID::forUtf8(runtime, "value"))
     {}
 
@@ -33,6 +34,8 @@ public:
     {
       switch (_type)
       {
+          case JsiWrapperValueType::NonInitialized:
+              return nullptr;
           case JsiWrapperValueType::Undefined:
             return jsi::Value::undefined();
           case JsiWrapperValueType::Null:
@@ -72,16 +75,23 @@ public:
     }
 
     bool equals(jsi::Runtime& runtime, const jsi::Value &value) {
-      if(value.isNumber()) {
+      if (_type == JsiWrapperValueType::NonInitialized) {
+          return false;
+      }
+      if(value.isNumber() && _type == JsiWrapperValueType::Number) {
         return _numberValue == value.asNumber();
-      } else if(value.isBool()) {
+      } else if(value.isBool() && _type == JsiWrapperValueType::Bool) {
         return _boolValue == value.getBool();
       } else if(value.isUndefined()) {
         return _type == JsiWrapperValueType::Undefined;
       } else if(value.isNull()) {
         return _type == JsiWrapperValueType::Null;
       } else if(value.isString()) {
-        return jsi::String::strictEquals(runtime, value.asString(runtime), getCurrent(runtime).asString(runtime));
+          auto current = getCurrent(runtime);
+          if (current.isString()) {
+              return jsi::String::strictEquals(runtime, value.asString(runtime), current.asString(runtime));
+          }
+          return false;
       }
       return false;
     }
