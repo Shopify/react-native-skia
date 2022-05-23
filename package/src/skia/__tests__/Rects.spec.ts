@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 
-import type { CanvasKit } from "canvaskit-wasm";
 import CanvasKitInit from "canvaskit-wasm";
 
 import { JsiSkApi } from "../web";
@@ -9,10 +8,6 @@ import { JsiSkApi } from "../web";
 //import type { SkiaApi } from "../SkiaApi";
 
 let Skia: ReturnType<typeof JsiSkApi>;
-
-declare global {
-  var CanvasKit: CanvasKit;
-}
 
 beforeAll(async () => {
   const CanvasKit = await CanvasKitInit();
