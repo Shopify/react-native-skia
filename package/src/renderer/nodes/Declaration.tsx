@@ -2,10 +2,10 @@ import type { DependencyList } from "react";
 import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
-import type { SkJSIInstance } from "../../skia/JsiInstance";
 import type { AnimatedProps } from "../processors";
 import { isAnimated, materialize } from "../processors";
 import type { DependencyManager } from "../DependencyManager";
+import type { SkJSIInstance } from "../../skia";
 
 import { Node } from "./Node";
 

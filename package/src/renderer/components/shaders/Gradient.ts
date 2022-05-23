@@ -3,7 +3,7 @@ import type { SkEnum } from "../../processors/Paint";
 import type { TransformProps } from "../../processors/Transform";
 import { enumKey } from "../../processors/Paint";
 import { localMatrix } from "../../processors/Transform";
-import type { Color } from "../../../skia/Color";
+import type { Color } from "../../../skia";
 
 export interface GradientProps extends TransformProps {
   colors: Color[];

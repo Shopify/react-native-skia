@@ -1,6 +1,5 @@
 /*global SkiaApi*/
-import "./NativeSetup";
-import type { SkiaApi as SkSkiaApi } from "./SkiaApi";
+import type { SkiaApi as SkSkiaApi } from "./types";
 
 /**
  * Declares the SkiaApi as an available object in the global scope

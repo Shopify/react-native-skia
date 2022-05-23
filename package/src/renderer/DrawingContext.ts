@@ -1,8 +1,7 @@
 import type { RefObject } from "react";
 
 import type { DrawingInfo, SkiaView } from "../views";
-import type { SkCanvas, SkPaint } from "../skia";
-import type { FontMgr } from "../skia/FontMgr/FontMgr";
+import type { FontMgr, SkCanvas, SkPaint } from "../skia";
 
 import type { Vector } from "./processors/math/Vector";
 

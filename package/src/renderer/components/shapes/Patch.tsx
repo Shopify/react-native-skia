@@ -8,9 +8,8 @@ import type {
 } from "../../processors";
 import { enumKey } from "../../processors";
 import type { SkPoint, Color } from "../../../skia";
-import { BlendMode } from "../../../skia";
+import { BlendMode, processColor } from "../../../skia";
 import { createDrawing } from "../../nodes";
-import { processColor } from "../../../skia/Color";
 
 export interface CubicBezierHandle {
   pos: Vector;
