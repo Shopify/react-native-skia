@@ -1,16 +1,24 @@
 import React from "react";
 
 import type { Color, SkRRect, SkJSIInstance, SkRect } from "../../../skia";
-import { ClipOp, BlurStyle, processColor } from "../../../skia";
+import { ClipOp, BlurStyle } from "../../../skia";
 import { createDrawing } from "../../nodes";
 import type { AnimatedProps, CustomPaintProps } from "../../processors";
-import { add, vec, rrect } from "../../processors";
-import { rect, isRRect } from "../../processors/Rects";
+import { processColor, add, vec } from "../../processors";
+import { isRRect } from "../../processors/Rects";
 import { createDeclaration } from "../../nodes/Declaration";
+import type { Skia } from "../../../skia/types";
 
-const inflate = (box: SkRRect, dx: number, dy: number, tx = 0, ty = 0) =>
-  rrect(
-    rect(
+const inflate = (
+  Skia: Skia,
+  box: SkRRect,
+  dx: number,
+  dy: number,
+  tx = 0,
+  ty = 0
+) =>
+  Skia.RRectXY(
+    Skia.XYWHRect(
       box.rect.x - dx + tx,
       box.rect.y - dy + ty,
       box.rect.width + 2 * dx,
@@ -20,8 +28,14 @@ const inflate = (box: SkRRect, dx: number, dy: number, tx = 0, ty = 0) =>
     box.ry + dy
   );
 
-const deflate = (box: SkRRect, dx: number, dy: number, tx = 0, ty = 0) =>
-  inflate(box, -dx, -dy, tx, ty);
+const deflate = (
+  Skia: Skia,
+  box: SkRRect,
+  dx: number,
+  dy: number,
+  tx = 0,
+  ty = 0
+) => inflate(Skia, box, -dx, -dy, tx, ty);
 
 interface BoxShadowProps {
   dx?: number;
@@ -52,19 +66,19 @@ interface BoxProps extends CustomPaintProps {
 }
 
 const onDraw = createDrawing<BoxProps>((ctx, { box: defaultBox }, node) => {
-  const box = isRRect(defaultBox) ? defaultBox : rrect(defaultBox, 0, 0);
   const { canvas, paint, opacity, Skia } = ctx;
+  const box = isRRect(defaultBox) ? defaultBox : Skia.RRectXY(defaultBox, 0, 0);
   const shadows = node.visit(ctx).filter<BoxShadowDecl>(isBoxShadow);
   shadows
     .filter((shadow) => !shadow.inner)
     .map((shadow) => {
       const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
       const lPaint = Skia.Paint();
-      lPaint.setColor(processColor(color, opacity));
+      lPaint.setColor(processColor(Skia, color, opacity));
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
       );
-      canvas.drawRRect(inflate(box, spread, spread, dx, dy), lPaint);
+      canvas.drawRRect(inflate(Skia, box, spread, spread, dx, dy), lPaint);
     });
   canvas.drawRRect(box, paint);
 
@@ -76,12 +90,12 @@ const onDraw = createDrawing<BoxProps>((ctx, { box: defaultBox }, node) => {
       canvas.save();
       canvas.clipRRect(box, ClipOp.Intersect, false);
       const lPaint = Skia.Paint();
-      lPaint.setColor(processColor(color, opacity));
+      lPaint.setColor(processColor(Skia, color, opacity));
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
       );
-      const inner = deflate(box, spread, spread, dx, dy);
-      const outer = inflate(box, delta.x, delta.y);
+      const inner = deflate(Skia, box, spread, spread, dx, dy);
+      const outer = inflate(Skia, box, delta.x, delta.y);
       canvas.drawDRRect(outer, inner, lPaint);
       canvas.restore();
     });

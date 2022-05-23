@@ -1,9 +1,9 @@
 import React from "react";
 
 import type { CustomPaintProps, SkEnum, AnimatedProps } from "../../processors";
-import { enumKey } from "../../processors";
+import { processColor, enumKey } from "../../processors";
 import type { SkPoint } from "../../../skia";
-import { BlendMode, VertexMode, processColor } from "../../../skia";
+import { BlendMode, VertexMode } from "../../../skia";
 import { createDrawing } from "../../nodes";
 
 export interface VerticesProps extends CustomPaintProps {
@@ -28,7 +28,7 @@ const onDraw = createDrawing<VerticesProps>(
       vertexMode,
       vertices,
       textures,
-      colors ? colors.map((c) => processColor(c, opacity)) : undefined,
+      colors ? colors.map((c) => processColor(Skia, c, opacity)) : undefined,
       indices
     );
     canvas.drawVertices(vert, blend, paint);

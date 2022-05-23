@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { SkRect, SkImage } from "../../../skia/types";
+import type { SkRect, SkImage, Skia } from "../../../skia/types";
 import { TileMode, FilterMode, MipmapMode } from "../../../skia/types";
 import { createDeclaration } from "../../nodes";
 import type {
@@ -9,12 +9,13 @@ import type {
   AnimatedProps,
   RectCtor,
 } from "../../processors";
-import { localMatrix, enumKey, rect } from "../../processors";
+import { localMatrix, enumKey } from "../../processors";
 
 import type { Fit } from "./BoxFit";
 import { rect2rect, fitRects } from "./BoxFit";
 
 const getRect = (
+  Skia: Skia,
   props: Omit<ImageShaderProps, "tx" | "ty" | "fm" | "mm" | "fit" | "image">
 ): SkRect | undefined => {
   const { x, y, width, height } = props;
@@ -26,7 +27,7 @@ const getRect = (
     width !== undefined &&
     height !== undefined
   ) {
-    return rect(x, y, width, height);
+    return Skia.XYWHRect(x, y, width, height);
   } else {
     return undefined;
   }
@@ -48,7 +49,7 @@ const onDeclare = createDeclaration<ImageShaderProps>(
     _children,
     { Skia }
   ) => {
-    const rct = getRect(imageShaderProps);
+    const rct = getRect(Skia, imageShaderProps);
     if (rct) {
       const rects = fitRects(
         Skia,

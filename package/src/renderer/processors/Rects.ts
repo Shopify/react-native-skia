@@ -1,26 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SkRect, SkRRect } from "../../skia";
-import { Skia } from "../../skia";
+import type { Skia, SkRect, SkRRect } from "../../skia/types";
 
 import { vec } from "./math/Vector";
 import type { Radius } from "./Radius";
 import { processRadius } from "./Radius";
-
-export const point = (x: number, y: number) => Skia.Point(x, y);
-
-export const rect = (x: number, y: number, width: number, height: number) =>
-  Skia.XYWHRect(x, y, width, height);
-
-export const rrect = (r: SkRect, rx: number, ry: number) =>
-  Skia.RRectXY(r, rx, ry);
-
-export const bounds = (rects: SkRect[]) => {
-  const x = Math.min(...rects.map((r) => r.x));
-  const y = Math.min(...rects.map((r) => r.y));
-  const width = Math.max(...rects.map((r) => r.x + r.width));
-  const height = Math.max(...rects.map((r) => r.y + r.height));
-  return rect(x, y, width, height);
-};
 
 export const topLeft = (r: SkRect | SkRRect) =>
   isRRect(r) ? vec(r.rect.x, r.rect.y) : vec(r.x, r.y);
@@ -63,18 +46,22 @@ export interface RRectCtor extends RectCtor {
 export type RectDef = RectCtor | { rect: SkRect };
 export type RRectDef = RRectCtor | { rect: SkRRect };
 
-export const processRect = (def: RectDef) => {
+export const processRect = (Skia: Skia, def: RectDef) => {
   if (isRectCtor(def)) {
-    return rect(def.x, def.y, def.width, def.height);
+    return Skia.XYWHRect(def.x, def.y, def.width, def.height);
   } else {
     return def.rect;
   }
 };
 
-export const processRRect = (def: RRectDef) => {
+export const processRRect = (Skia: Skia, def: RRectDef) => {
   if (isRRectCtor(def)) {
     const r = processRadius(def.r);
-    return rrect(rect(def.x, def.y, def.width, def.height), r.x, r.y);
+    return Skia.RRectXY(
+      Skia.XYWHRect(def.x, def.y, def.width, def.height),
+      r.x,
+      r.y
+    );
   } else {
     return def.rect;
   }

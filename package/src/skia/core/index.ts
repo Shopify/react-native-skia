@@ -1,4 +1,3 @@
-export * from "./Color";
 export * from "./Data";
 export * from "./Font";
 export * from "./Typeface";
@@ -8,3 +7,4 @@ export * from "./SVG";
 export * from "./Shader";
 export * from "./Paint";
 export * from "./Path";
+export * from "./Rect";

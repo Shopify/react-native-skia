@@ -3,7 +3,7 @@ import React from "react";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import type { Color } from "../../../skia/types";
-import { processColor } from "../../../skia";
+import { processColor } from "../../processors";
 
 import { getInput } from "./getInput";
 import { MakeInnerShadow } from "./InnerShadow";
@@ -24,7 +24,7 @@ const onDeclare = createDeclaration<ShadowProps>(
     { opacity, Skia }
   ) => {
     const input = getInput(Skia, children);
-    const color = processColor(cl, opacity);
+    const color = processColor(Skia, cl, opacity);
     let factory;
     if (inner) {
       factory = MakeInnerShadow.bind(null, Skia, shadowOnly);

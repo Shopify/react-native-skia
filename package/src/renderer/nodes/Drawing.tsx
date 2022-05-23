@@ -53,6 +53,7 @@ export class DrawingNode<P> extends Node<P> {
     } else {
       const declarations = this.visit(ctx);
       const paint = processPaint(
+        ctx.Skia,
         ctx.paint.copy(),
         ctx.opacity,
         drawingProps,

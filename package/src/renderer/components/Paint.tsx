@@ -20,7 +20,7 @@ export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
     const onDeclare = useMemo(
       () =>
         createDeclaration<PaintProps>((paintProps, children, ctx) =>
-          processPaint(paint, ctx.opacity, paintProps, children)
+          processPaint(ctx.Skia, paint, ctx.opacity, paintProps, children)
         ),
       [paint]
     );

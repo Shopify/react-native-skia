@@ -24,8 +24,11 @@ interface ProcessedGlyphs {
 }
 
 const onDraw = createDrawing<GlyphsProps>(
-  ({ canvas, paint, fontMgr }, { glyphs: rawGlyphs, x, y, ...fontDef }) => {
-    const font = processFont(fontMgr, fontDef);
+  (
+    { canvas, paint, fontMgr, Skia },
+    { glyphs: rawGlyphs, x, y, ...fontDef }
+  ) => {
+    const font = processFont(Skia, fontMgr, fontDef);
     const { glyphs, positions } = rawGlyphs.reduce<ProcessedGlyphs>(
       (acc, glyph) => {
         const { id, pos } = glyph;

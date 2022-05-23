@@ -1,3 +1,4 @@
+import type { Component } from "react";
 import type { ViewProps } from "react-native";
 
 import type { SkImage, SkRect, SkCanvas } from "../skia/types";
@@ -93,3 +94,5 @@ export interface SkiaViewProps extends ViewProps {
    */
   onDraw?: RNSkiaDrawCallback;
 }
+
+export type SkiaViewApi = Component<SkiaViewProps>;

@@ -25,7 +25,7 @@ export type ImageProps = CustomPaintProps & BaseImageProps;
 
 const onDraw = createDrawing<ImageProps>(
   ({ canvas, paint, Skia }, { fit, image, ...rectProps }) => {
-    const rect = processRect(rectProps);
+    const rect = processRect(Skia, rectProps);
     const { src, dst } = fitRects(
       Skia,
       fit,

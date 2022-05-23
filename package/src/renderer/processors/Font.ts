@@ -1,5 +1,4 @@
-import type { FontMgr, SkFont } from "../../skia";
-import { Skia } from "../../skia/Skia";
+import type { FontMgr, SkFont, Skia } from "../../skia/types";
 
 export type FontDef = { font: SkFont } | { familyName: string; size: number };
 
@@ -8,7 +7,7 @@ export const isFont = (fontDef: FontDef): fontDef is { font: SkFont } =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (fontDef as any).font !== undefined;
 
-export const processFont = (fontMgr: FontMgr, fontDef: FontDef) => {
+export const processFont = (Skia: Skia, fontMgr: FontMgr, fontDef: FontDef) => {
   let selectedFont: SkFont;
   if (isFont(fontDef)) {
     selectedFont = fontDef.font;

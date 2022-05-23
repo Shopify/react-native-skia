@@ -21,7 +21,7 @@ const onDeclare = createDeclaration<Path1DPathEffectProps>(
   ({ path, advance, phase, style }, children, { Skia }) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakePath1D(
-      processPath(path),
+      processPath(Skia, path),
       advance,
       phase,
       Path1DEffectStyle[enumKey(style)]
