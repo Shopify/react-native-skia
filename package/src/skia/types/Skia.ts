@@ -39,7 +39,6 @@ export interface SkiaApi {
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
   Color: (color: Color) => SkColor;
-  parseColorString: (color: string) => SkColor | undefined;
   ContourMeasureIter: (
     path: SkPath,
     forceClosed: boolean,
