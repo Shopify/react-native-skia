@@ -9,8 +9,12 @@ import { useTypeface } from "./Typeface";
 /**
  * Returns a Skia Font object
  * */
-export const useFont = (font: DataSource, size?: number): SkFont | null => {
-  const typeface = useTypeface(font);
+export const useFont = (
+  font: DataSource,
+  size?: number,
+  onError?: (err: Error) => void
+): SkFont | null => {
+  const typeface = useTypeface(font, onError);
   return useMemo(() => {
     if (typeface === null) {
       return null;
