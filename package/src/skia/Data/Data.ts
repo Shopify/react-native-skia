@@ -1,5 +1,5 @@
 import type { DependencyList } from "react";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Image } from "react-native";
 
 import type { SkJSIInstance } from "../JsiInstance";
@@ -32,8 +32,7 @@ export const useDataCollection = <T>(
           : Skia.Data.fromURI(bytesOrURI)
       )
     ).then((d) => setData(factory(d)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [factory, sources, deps]);
   return data;
 };
 
@@ -42,15 +41,20 @@ export const useRawData = <T>(
   factory: (data: Data) => T
 ) => {
   const [data, setData] = useState<T | null>(null);
+  const prevSourceRef = useRef<DataSource>();
   useEffect(() => {
-    if (source instanceof Uint8Array) {
-      setData(factory(Skia.Data.fromBytes(source)));
-    } else {
-      const uri =
-        typeof source === "string"
-          ? source
-          : Image.resolveAssetSource(source).uri;
-      Skia.Data.fromURI(uri).then((d) => setData(factory(d)));
+    // Track to avoid re-fetching the same data
+    if (prevSourceRef.current !== source) {
+      prevSourceRef.current = source;
+      if (source instanceof Uint8Array) {
+        setData(factory(Skia.Data.fromBytes(source)));
+      } else {
+        const uri =
+          typeof source === "string"
+            ? source
+            : Image.resolveAssetSource(source).uri;
+        Skia.Data.fromURI(uri).then((d) => setData(factory(d)));
+      }
     }
   }, [factory, source]);
   return data;
