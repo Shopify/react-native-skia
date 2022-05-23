@@ -32,7 +32,8 @@ export const useDataCollection = <T>(
           : Skia.Data.fromURI(bytesOrURI)
       )
     ).then((d) => setData(factory(d)));
-  }, [factory, sources, deps]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
   return data;
 };
 
