@@ -21,7 +21,7 @@ namespace RNSkia {
             auto image = SkImage::MakeFromEncoded(data);
             if(image == nullptr) {
                 jsi::detail::throwJSError(runtime, "Invalid image data");
-              return jsi::Value::null();
+                return jsi::Value::null();
             }
             return jsi::Object::createFromHostObject(
                     runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
