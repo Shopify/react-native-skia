@@ -6,6 +6,7 @@ import React, {
   useContext,
   forwardRef,
   useRef,
+  createContext,
 } from "react";
 import type {
   RefObject,
@@ -30,17 +31,22 @@ import { vec } from "./processors";
 import { Container } from "./nodes";
 import { DependencyManager } from "./DependencyManager";
 
-const CanvasContext = React.createContext<SkiaReadonlyValue<{
-  width: number;
-  height: number;
-}> | null>(null);
+interface CanvasContext {
+  Skia: typeof Skia;
+  size: SkiaReadonlyValue<{
+    width: number;
+    height: number;
+  }>;
+}
+
+const CanvasContext = createContext<CanvasContext | null>(null);
 
 export const useCanvas = () => {
-  const size = useContext(CanvasContext);
-  if (!size) {
+  const ctx = useContext(CanvasContext);
+  if (!ctx) {
     throw new Error("Canvas context is not available");
   }
-  return { size };
+  return ctx;
 };
 
 export const useCanvasSize = () => {
@@ -79,7 +85,7 @@ const defaultFontMgr = Skia.FontMgr.RefDefault();
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
   ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
-    const canvasCtx = useValue({ width: 0, height: 0 });
+    const size = useValue({ width: 0, height: 0 });
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const [tick, setTick] = useState(0);
@@ -94,6 +100,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       () => skiaReconciler.createContainer(container, 0, false, null),
       [container]
     );
+    const canvasCtx = useMemo(() => ({ Skia, size }), [size]);
     // Render effect
     useEffect(() => {
       render(
@@ -103,7 +110,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         root,
         container
       );
-    }, [children, root, redraw, container, canvasCtx]);
+    }, [children, root, redraw, container, size, canvasCtx]);
 
     // Draw callback
     const onDraw = useDrawCallback(
@@ -113,14 +120,12 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         if (onTouch) {
           onTouch(info.touches);
         }
-        if (
-          width !== canvasCtx.current.width ||
-          height !== canvasCtx.current.height
-        ) {
-          canvasCtx.current = { width, height };
+        if (width !== size.current.width || height !== size.current.height) {
+          canvasCtx.size.current = { width, height };
         }
         const paint = SkiaPaint();
         const ctx = {
+          Skia,
           width,
           height,
           timestamp,

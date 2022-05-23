@@ -1,6 +1,5 @@
 import React from "react";
 
-import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
@@ -14,7 +13,11 @@ export interface TurbulenceProps {
 }
 
 const onDeclare = createDeclaration<TurbulenceProps>(
-  ({ freqX, freqY, octaves, seed, tileWidth, tileHeight }) => {
+  (
+    { freqX, freqY, octaves, seed, tileWidth, tileHeight },
+    _children,
+    { Skia }
+  ) => {
     return Skia.Shader.MakeTurbulence(
       freqX,
       freqY,

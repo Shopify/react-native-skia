@@ -22,7 +22,8 @@ export interface BackdropFilterProps extends GroupProps {
 const onDraw = createDrawing<BackdropFilterProps>((ctx, _, node) => {
   disableFilterMemoization(node.children);
   const toFilter = node.visit(ctx);
-  const filter = getInput(toFilter);
+  const { Skia } = ctx;
+  const filter = getInput(Skia, toFilter);
   if (!filter) {
     throw new Error("No image filter provided to the background");
   }

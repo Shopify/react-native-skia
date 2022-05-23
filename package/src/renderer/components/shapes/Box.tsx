@@ -1,7 +1,7 @@
 import React from "react";
 
 import type { Color, SkRRect, SkJSIInstance, SkRect } from "../../../skia";
-import { ClipOp, BlurStyle, Skia, processColor } from "../../../skia";
+import { ClipOp, BlurStyle, processColor } from "../../../skia";
 import { createDrawing } from "../../nodes";
 import type { AnimatedProps, CustomPaintProps } from "../../processors";
 import { add, vec, rrect } from "../../processors";
@@ -53,7 +53,7 @@ interface BoxProps extends CustomPaintProps {
 
 const onDraw = createDrawing<BoxProps>((ctx, { box: defaultBox }, node) => {
   const box = isRRect(defaultBox) ? defaultBox : rrect(defaultBox, 0, 0);
-  const { canvas, paint, opacity } = ctx;
+  const { canvas, paint, opacity, Skia } = ctx;
   const shadows = node.visit(ctx).filter<BoxShadowDecl>(isBoxShadow);
   shadows
     .filter((shadow) => !shadow.inner)

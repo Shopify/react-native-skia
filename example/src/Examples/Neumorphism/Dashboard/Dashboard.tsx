@@ -19,6 +19,7 @@ import {
   rect2rect,
   useDerivedValue,
   useLoop,
+  Skia,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -35,7 +36,7 @@ const width = 390;
 const height = 844;
 const src = rect(0, 0, width, height);
 const dst = rect(0, 0, window.width, window.height);
-const rects = fitRects("cover", src, dst);
+const rects = fitRects(Skia, "cover", src, dst);
 const transform = rect2rect(rects.src, rects.dst);
 
 export const Neumorphism = () => {

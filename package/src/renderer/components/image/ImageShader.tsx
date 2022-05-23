@@ -1,7 +1,7 @@
 import React from "react";
 
-import type { SkRect, SkImage } from "../../../skia";
-import { TileMode, FilterMode, MipmapMode } from "../../../skia";
+import type { SkRect, SkImage } from "../../../skia/types";
+import { TileMode, FilterMode, MipmapMode } from "../../../skia/types";
 import { createDeclaration } from "../../nodes";
 import type {
   TransformProps,
@@ -43,10 +43,15 @@ interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
 }
 
 const onDeclare = createDeclaration<ImageShaderProps>(
-  ({ tx, ty, fm, mm, fit, image, ...imageShaderProps }) => {
+  (
+    { tx, ty, fm, mm, fit, image, ...imageShaderProps },
+    _children,
+    { Skia }
+  ) => {
     const rct = getRect(imageShaderProps);
     if (rct) {
       const rects = fitRects(
+        Skia,
         fit,
         { x: 0, y: 0, width: image.width(), height: image.height() },
         rct

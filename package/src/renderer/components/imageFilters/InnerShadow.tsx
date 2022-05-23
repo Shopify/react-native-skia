@@ -1,9 +1,10 @@
-import type { SkColor, SkImageFilter } from "../../../skia";
-import { BlendMode, Skia, TileMode } from "../../../skia";
+import type { SkColor, SkImageFilter, Skia } from "../../../skia/types";
+import { BlendMode, TileMode } from "../../../skia/types";
 
-const Black = Skia.Color("black");
+const Black = Float32Array.of(1, 1, 1, 1);
 
 export const MakeInnerShadow = (
+  Skia: Skia,
   shadowOnly: boolean | undefined,
   dx: number,
   dy: number,

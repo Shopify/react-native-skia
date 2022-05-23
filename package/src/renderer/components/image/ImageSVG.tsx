@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { SkSVG } from "../../../skia";
+import type { SkSVG } from "../../../skia/types";
 import { createDrawing } from "../../nodes";
 import type { AnimatedProps, RectDef } from "../../processors";
 import { processRect } from "../../processors";

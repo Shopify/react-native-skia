@@ -1,6 +1,5 @@
 import { exhaustiveCheck } from "../../typeddash";
-import { Skia } from "../../../skia";
-import type { SkRect } from "../../../skia";
+import type { Skia, SkRect } from "../../../skia/types";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -28,6 +27,7 @@ export const rect2rect = (src: SkRect, dst: SkRect) => {
 };
 
 export const fitRects = (
+  Skia: Skia,
   fit: Fit,
   rect: SkRect,
   { x, y, width, height }: SkRect
@@ -37,13 +37,13 @@ export const fitRects = (
     { width: rect.width, height: rect.height },
     { width, height }
   );
-  const src = inscribe(sizes.src, {
+  const src = inscribe(Skia, sizes.src, {
     x: 0,
     y: 0,
     width: rect.width,
     height: rect.height,
   });
-  const dst = inscribe(sizes.dst, {
+  const dst = inscribe(Skia, sizes.dst, {
     x,
     y,
     width,
@@ -53,6 +53,7 @@ export const fitRects = (
 };
 
 const inscribe = (
+  Skia: Skia,
   { width, height }: Size,
   rect: { x: number; y: number; width: number; height: number }
 ) => {
