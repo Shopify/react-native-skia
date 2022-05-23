@@ -39,7 +39,8 @@ export const useDataCollection = <T>(
 
 export const useRawData = <T>(
   source: DataSource,
-  factory: (data: Data) => T
+  factory: (data: Data) => T,
+  onError?: (err: Error) => void
 ) => {
   const [data, setData] = useState<T | null>(null);
   const prevSourceRef = useRef<DataSource>();
@@ -47,20 +48,30 @@ export const useRawData = <T>(
     // Track to avoid re-fetching the same data
     if (prevSourceRef.current !== source) {
       prevSourceRef.current = source;
+      const factoryWrapper = (data2: Data) => {
+        const factoryResult = factory(data2);
+        if (factoryResult === null) {
+          onError && onError(new Error("Could not load data"));
+          setData(null);
+        } else {
+          setData(factoryResult);
+        }
+      };
       if (source instanceof Uint8Array) {
-        setData(factory(Skia.Data.fromBytes(source)));
+        factoryWrapper(Skia.Data.fromBytes(source));
       } else {
         const uri =
           typeof source === "string"
             ? source
             : Image.resolveAssetSource(source).uri;
-        Skia.Data.fromURI(uri).then((d) => setData(factory(d)));
+        Skia.Data.fromURI(uri).then((d) => factoryWrapper(d));
       }
     }
-  }, [factory, source]);
+  }, [factory, onError, source]);
   return data;
 };
 
 const identity = (data: Data) => data;
 
-export const useData = (source: DataSource) => useRawData(source, identity);
+export const useData = (source: DataSource, onError?: (err: Error) => void) =>
+  useRawData(source, identity, onError);
