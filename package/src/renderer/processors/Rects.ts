@@ -2,6 +2,7 @@
 import type { SkRect, SkRRect } from "../../skia";
 import { Skia } from "../../skia";
 
+import type { Vector } from "./math/Vector";
 import { vec } from "./math/Vector";
 import type { Radius } from "./Radius";
 import { processRadius } from "./Radius";
@@ -21,6 +22,9 @@ export const bounds = (rects: SkRect[]) => {
   const height = Math.max(...rects.map((r) => r.y + r.height));
   return rect(x, y, width, height);
 };
+
+export const isEdge = (pos: Vector, b: SkRect) =>
+  pos.x === b.x || pos.y === b.y || pos.x === b.width || pos.y === b.height;
 
 export const topLeft = (r: SkRect | SkRRect) =>
   isRRect(r) ? vec(r.rect.x, r.rect.y) : vec(r.x, r.y);
