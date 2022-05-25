@@ -2,5 +2,4 @@ import type { SkJSIInstance } from "../JsiInstance";
 
 export type Data = SkJSIInstance<"Data">;
 
-type Require = number;
-export type DataSource = Require | string | Uint8Array;
+export type DataSource = ReturnType<typeof require> | string | Uint8Array;

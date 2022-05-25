@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Skia, SkRect, SkRRect } from "../../skia/types";
 
+import type { Vector } from "./math/Vector";
 import { vec } from "./math/Vector";
 import type { Radius } from "./Radius";
 import { processRadius } from "./Radius";
+
+export const isEdge = (pos: Vector, b: SkRect) =>
+  pos.x === b.x || pos.y === b.y || pos.x === b.width || pos.y === b.height;
 
 export const topLeft = (r: SkRect | SkRRect) =>
   isRRect(r) ? vec(r.rect.x, r.rect.y) : vec(r.x, r.y);
