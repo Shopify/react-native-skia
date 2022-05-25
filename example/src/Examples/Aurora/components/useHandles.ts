@@ -1,5 +1,14 @@
-import type { SkiaValue, CubicBezierHandle } from "@shopify/react-native-skia";
-import { sub, useTouchHandler, useValue } from "@shopify/react-native-skia";
+import type {
+  SkiaValue,
+  CubicBezierHandle,
+  SkRect,
+} from "@shopify/react-native-skia";
+import {
+  isEdge,
+  sub,
+  useTouchHandler,
+  useValue,
+} from "@shopify/react-native-skia";
 
 import { inRadius, symmetric } from "./Math";
 
@@ -11,8 +20,7 @@ type TouchSelection = null | {
 export const useHandles = (
   mesh: SkiaValue<CubicBezierHandle[]>,
   defaultMesh: CubicBezierHandle[],
-  width: number,
-  height: number
+  window: SkRect
 ) => {
   const selection = useValue<TouchSelection>(null);
   return useTouchHandler({
@@ -34,9 +42,7 @@ export const useHandles = (
         }
       } else {
         defaultMesh.every(({ pos: p }, index) => {
-          const edge =
-            p.x === 0 || p.y === 0 || p.x === width || p.y === height;
-          if (!edge) {
+          if (!isEdge(p, window)) {
             const { pos, c1, c2 } = mesh.current[index];
             const c3 = symmetric(c1, pos);
             const c4 = symmetric(c2, pos);
