@@ -32,14 +32,13 @@ import type {
 /**
  * Declares the interface for the native Skia API
  */
-export interface SkiaApi {
+export interface Skia {
   Point: (x: number, y: number) => SkPoint;
   XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
   RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
   Color: (color: Color) => SkColor;
-  parseColorString: (color: string) => SkColor | undefined;
   ContourMeasureIter: (
     path: SkPath,
     forceClosed: boolean,
