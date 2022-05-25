@@ -1,7 +1,6 @@
 import { mix } from "../../renderer";
-import type { Color } from "../../skia";
+import type { Color, SkColor } from "../../skia";
 import { Skia } from "../../skia";
-import type { SkColor } from "../../skia/Color";
 
 import { interpolate } from "./interpolate";
 

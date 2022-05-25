@@ -1,5 +1,4 @@
-import type { SkCanvas, ClipOp } from "../../skia/Canvas";
-import type { SkRect, SkRRect } from "../../skia";
+import type { SkCanvas, ClipOp, SkRect, SkRRect } from "../../skia";
 
 import type { PathDef } from "./Paths";
 import { processPath, isPathDef } from "./Paths";

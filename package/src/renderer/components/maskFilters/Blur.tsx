@@ -1,7 +1,6 @@
 import React from "react";
 
-import { BlurStyle } from "../../../skia/MaskFilter";
-import { Skia } from "../../../skia";
+import { BlurStyle, Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { SkEnum } from "../../processors";
 import { enumKey } from "../../processors";

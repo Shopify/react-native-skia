@@ -1,10 +1,9 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
+import { Skia, Path1DEffectStyle, isPathEffect } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { Path1DEffectStyle, isPathEffect } from "../../../skia/PathEffect";
 import type { SkEnum } from "../../processors/Paint";
 import { enumKey } from "../../processors/Paint";
 import type { PathDef } from "../../processors/Paths";

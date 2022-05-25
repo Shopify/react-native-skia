@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
-  s.xcconfig = {
+  s.pod_target_xcconfig = {
     'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) SK_GL=1 SK_METAL=1',
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17'
   }

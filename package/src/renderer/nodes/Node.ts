@@ -1,4 +1,4 @@
-import type { SkJSIInstance } from "../../skia/JsiInstance";
+import type { SkJSIInstance } from "../../skia";
 import type { DependencyManager } from "../DependencyManager";
 import type { DrawingContext } from "../DrawingContext";
 import type { AnimatedProps } from "../processors";
