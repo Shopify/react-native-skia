@@ -10,7 +10,6 @@ import {
   useValue,
 } from "@shopify/react-native-skia";
 
-
 import { inRadius, symmetric } from "./Math";
 
 type TouchSelection = null | {
