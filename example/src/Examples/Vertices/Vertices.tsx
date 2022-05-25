@@ -7,6 +7,8 @@ import {
   useDerivedValue,
   Vertices,
   useImage,
+  Skia,
+  isEdge,
 } from "@shopify/react-native-skia";
 import cdt2d from "cdt2d";
 import SimplexNoise from "simplex-noise";
@@ -14,6 +16,7 @@ import SimplexNoise from "simplex-noise";
 import "./cdt2d.d";
 
 const { width, height } = Dimensions.get("window");
+const window = Skia.XYWHRect(0, 0, width, height);
 const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);
 const hSize = width / N;
@@ -34,15 +37,14 @@ export const Demo = () => {
   const clock = useClockValue();
   const vertices = useDerivedValue(
     () =>
-      defaultVertices.map(({ x, y }, i) => {
-        const isEdge = x === 0 || y === 0 || x === width || y === height;
-        if (isEdge) {
-          return { x, y };
+      defaultVertices.map((vertex, i) => {
+        if (isEdge(vertex, window)) {
+          return vertex;
         }
         const noise = new SimplexNoise(i);
         return {
-          x: x + AX * noise.noise2D(clock.current / F, 0),
-          y: y + AY * noise.noise2D(0, clock.current / F),
+          x: vertex.x + AX * noise.noise2D(clock.current / F, 0),
+          y: vertex.y + AY * noise.noise2D(0, clock.current / F),
         };
       }),
     [clock]

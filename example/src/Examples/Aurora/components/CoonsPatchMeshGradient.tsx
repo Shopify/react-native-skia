@@ -1,6 +1,8 @@
 import React from "react";
 import type { CubicBezierHandle, SkiaValue } from "@shopify/react-native-skia";
 import {
+  Skia,
+  isEdge,
   Group,
   useClockValue,
   add,
@@ -21,6 +23,7 @@ import { Curves } from "./Curves";
 import { useHandles } from "./useHandles";
 
 const { width, height } = Dimensions.get("window");
+const window = Skia.XYWHRect(0, 0, width, height);
 
 const rectToTexture = (
   vertices: CubicBezierHandle[],
@@ -127,12 +130,7 @@ export const CoonsPatchMeshGradient = ({
     .flat();
   const meshNoise = useDerivedValue(() => {
     return defaultMesh.map((pt, i) => {
-      const isEdge =
-        pt.pos.x === 0 ||
-        pt.pos.y === 0 ||
-        pt.pos.x === Math.fround(width) ||
-        pt.pos.y === Math.fround(height);
-      if (isEdge) {
+      if (isEdge(pt.pos, window)) {
         return pt;
       }
       const noisePos = new SimplexNoise(`${i}-pos`);
@@ -166,7 +164,7 @@ export const CoonsPatchMeshGradient = ({
 
   const meshGesture = useValue(defaultMesh);
 
-  const onTouch = useHandles(meshGesture, defaultMesh, width, height);
+  const onTouch = useHandles(meshGesture, defaultMesh, window);
   const mesh = play ? meshNoise : meshGesture;
   if (image === null) {
     return null;
@@ -190,9 +188,7 @@ export const CoonsPatchMeshGradient = ({
         })}
       </Group>
       {defaultMesh.map(({ pos }, index) => {
-        const edge =
-          pos.x === 0 || pos.y === 0 || pos.x === width || pos.y === height;
-        if (edge || !handles) {
+        if (isEdge(pos, window) || !handles) {
           return null;
         }
         return (
