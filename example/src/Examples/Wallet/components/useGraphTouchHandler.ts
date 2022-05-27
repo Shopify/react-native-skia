@@ -1,4 +1,4 @@
-import type { SkiaValue, SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaMutableValue, SkiaValue } from "@shopify/react-native-skia";
 import {
   runDecay,
   add,
@@ -14,8 +14,8 @@ import { HEIGHT, PADDING, WIDTH } from "../Model";
 const translateY = HEIGHT + PADDING;
 
 export const useGraphTouchHandler = (
-  x: SkiaValue<number>,
-  y: SkiaReadonlyValue<number>
+  x: SkiaMutableValue<number>,
+  y: SkiaValue<number>
 ) => {
   const gestureActive = useValue(false);
   const offsetX = useValue(0);

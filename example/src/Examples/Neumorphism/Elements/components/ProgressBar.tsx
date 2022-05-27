@@ -1,5 +1,5 @@
 import React from "react";
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   Shadow,
   Group,
@@ -23,7 +23,7 @@ interface ProgressBarProps {
   x: number;
   y: number;
   width: number;
-  progress: SkiaReadonlyValue<number>;
+  progress: SkiaValue<number>;
 }
 
 export const ProgressBar = ({ progress, x, y, width }: ProgressBarProps) => {

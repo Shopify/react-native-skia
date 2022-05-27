@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   BoxShadow,
   Box,
@@ -19,7 +19,7 @@ import { Knob } from "./Knob";
 interface SliderProps {
   x: number;
   y: number;
-  progress: SkiaReadonlyValue<number>;
+  progress: SkiaValue<number>;
 }
 
 export const Slider = ({ x, y, progress }: SliderProps) => {

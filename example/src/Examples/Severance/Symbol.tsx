@@ -1,7 +1,7 @@
 import type {
   SkFont,
   Vector,
-  SkiaReadonlyValue,
+  SkiaValue,
   SkiaClockValue,
 } from "@shopify/react-native-skia";
 import {
@@ -31,7 +31,7 @@ interface SymbolProps {
   i: number;
   j: number;
   font: SkFont;
-  pointer: SkiaReadonlyValue<Vector>;
+  pointer: SkiaValue<Vector>;
   clock: SkiaClockValue;
 }
 

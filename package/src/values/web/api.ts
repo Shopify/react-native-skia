@@ -1,7 +1,7 @@
 import type {
   ISkiaValueApi,
+  SkiaMutableValue,
   SkiaValue,
-  SkiaReadonlyValue,
   SkiaClockValue,
   AnimationState,
   SkiaAnimation,
@@ -13,13 +13,13 @@ import { RNSkDerivedValue } from "./RNSkDerivedValue";
 import { RNSkValue } from "./RNSkValue";
 
 export const ValueApi: ISkiaValueApi = {
-  createValue: function <T>(initialValue: T): SkiaValue<T> {
+  createValue: function <T>(initialValue: T): SkiaMutableValue<T> {
     return new RNSkValue(initialValue);
   },
   createDerivedValue: function <R>(
     cb: () => R,
-    values: SkiaReadonlyValue<unknown>[]
-  ): SkiaReadonlyValue<R> {
+    values: SkiaValue<unknown>[]
+  ): SkiaValue<R> {
     return new RNSkDerivedValue(cb, values);
   },
   createClockValue: function (): SkiaClockValue {

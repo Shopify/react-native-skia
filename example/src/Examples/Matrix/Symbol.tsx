@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import type { SkiaReadonlyValue, SkFont } from "@shopify/react-native-skia";
+import type { SkiaValue, SkFont } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   interpolateColors,
@@ -17,7 +17,7 @@ const pos = vec(0, 0);
 interface SymbolProps {
   i: number;
   j: number;
-  timestamp: SkiaReadonlyValue<number>;
+  timestamp: SkiaValue<number>;
   stream: number[];
   font: SkFont;
   symbols: number[];

@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "../../values/types";
+import type { SkiaValue } from "../../values/types";
 import type {
   SpringConfig,
   AnimationParams,
@@ -20,7 +20,7 @@ export const useSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig,
   callback?: AnimationCallback
-): SkiaReadonlyValue<number> =>
+): SkiaValue<number> =>
   useTiming(
     toOrParams,
     createSpringEasing(config ?? Spring.Config.Default),

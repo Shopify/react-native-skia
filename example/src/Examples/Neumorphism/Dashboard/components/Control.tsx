@@ -8,7 +8,7 @@ import {
   Text,
   Circle,
 } from "@shopify/react-native-skia";
-import type { SkiaReadonlyValue, SkFont } from "@shopify/react-native-skia";
+import type { SkiaValue, SkFont } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
 
@@ -19,7 +19,7 @@ const r = 25;
 interface ControlProps {
   x: number;
   y: number;
-  progress: SkiaReadonlyValue<number>;
+  progress: SkiaValue<number>;
   label: string;
   children: ReactNode;
   active: boolean;

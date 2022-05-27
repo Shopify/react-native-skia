@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, View, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import type { SkiaValue } from "@shopify/react-native-skia";
+import type { SkiaMutableValue } from "@shopify/react-native-skia";
 import {
   Canvas,
   Easing,
@@ -47,8 +47,8 @@ export interface GraphState {
 }
 
 interface SelectionProps {
-  state: SkiaValue<GraphState>;
-  transition: SkiaValue<number>;
+  state: SkiaMutableValue<GraphState>;
+  transition: SkiaMutableValue<number>;
 }
 
 export const Selection = ({ state, transition }: SelectionProps) => {

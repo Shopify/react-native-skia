@@ -1,11 +1,11 @@
-import type { SkiaReadonlyValue, Vector } from "@shopify/react-native-skia";
+import type { SkiaValue, Vector } from "@shopify/react-native-skia";
 import { Path, useDerivedValue } from "@shopify/react-native-skia";
 import React from "react";
 
 const f = ({ x, y }: Vector) => [x, y].join(",");
 
 interface TrianglesProps {
-  vertices: SkiaReadonlyValue<Vector[]>;
+  vertices: SkiaValue<Vector[]>;
   triangles: [number, number, number][];
 }
 
