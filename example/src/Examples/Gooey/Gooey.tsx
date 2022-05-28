@@ -19,7 +19,7 @@ import {
   Spring,
   createDerivedValue,
   rect,
-  useTouchControl,
+  useTouchHandler,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
@@ -60,7 +60,7 @@ const icons = [
 export const Gooey = () => {
   const paint = usePaintRef();
   const [toggled, setToggled] = useState(false);
-  const onTouch = useTouchControl(
+  const onTouch = useTouchHandler(
     { onEnd: () => setToggled((t) => !t) },
     rect(c.x - R, c.y - R, R * 2, R * 2)
   );
