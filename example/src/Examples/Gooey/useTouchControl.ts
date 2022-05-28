@@ -1,12 +1,13 @@
 import type {
   ExtendedTouchInfo,
+  SkiaValue,
   SkRect,
   TouchHandlers,
   TouchInfo,
 } from "@shopify/react-native-skia";
-import { useTouchHandler, inRect } from "@shopify/react-native-skia";
+import { isValue, useTouchHandler, inRect } from "@shopify/react-native-skia";
 
-type TouchControl = [TouchHandlers, SkRect];
+type TouchControl = [TouchHandlers, SkiaValue<SkRect> | SkRect];
 
 type On = {
   (name: "onStart", touch: TouchInfo, controls: TouchControl[]): void;
@@ -21,7 +22,7 @@ const on: On = (name, touch, controls) => {
   controls.forEach(([control, rect]) => {
     const handler = control[name];
     if (handler) {
-      if (inRect(touch, rect)) {
+      if (inRect(touch, isValue(rect) ? rect.current : rect)) {
         handler(touch as ExtendedTouchInfo);
       }
     }
