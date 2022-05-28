@@ -4,10 +4,26 @@ import type {
   SkRect,
   TouchHandlers,
   TouchInfo,
+  Vector,
 } from "@shopify/react-native-skia";
-import { isValue, useTouchHandler, inRect } from "@shopify/react-native-skia";
+import {
+  dist,
+  isValue,
+  useTouchHandler,
+  inRect,
+} from "@shopify/react-native-skia";
 
-type TouchControl = [TouchHandlers, SkiaValue<SkRect> | SkRect];
+interface Circle {
+  r: number;
+  c: Vector;
+}
+
+const isCircle = (area: Circle | SkRect): area is Circle =>
+  area.hasOwnProperty("r") && area.hasOwnProperty("c");
+
+type Region<T> = T | SkiaValue<T>;
+
+type TouchControl = [TouchHandlers, Region<SkRect> | Region<Circle>];
 
 type On = {
   (name: "onStart", touch: TouchInfo, controls: TouchControl[]): void;
@@ -19,10 +35,15 @@ type On = {
 };
 
 const on: On = (name, touch, controls) => {
-  controls.forEach(([control, rect]) => {
+  controls.forEach(([control, region]) => {
     const handler = control[name];
     if (handler) {
-      if (inRect(touch, isValue(rect) ? rect.current : rect)) {
+      const materialized = isValue(region) ? region.current : region;
+      if (
+        (isCircle(materialized) &&
+          dist(touch, materialized.c) <= materialized.r) ||
+        inRect(touch, materialized as SkRect)
+      ) {
         handler(touch as ExtendedTouchInfo);
       }
     }

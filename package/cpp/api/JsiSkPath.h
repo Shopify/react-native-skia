@@ -146,7 +146,6 @@ public:
         runtime, std::make_shared<JsiSkRect>(getContext(), std::move(result)));
   }
 
-  // TODO-API: Should this be a property?
   JSI_HOST_FUNCTION(getBounds) {
     auto result = getObject()->getBounds();
     return jsi::Object::createFromHostObject(
