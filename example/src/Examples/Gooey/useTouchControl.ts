@@ -28,7 +28,12 @@ const on: On = (name, touch, controls) => {
   });
 };
 
-export const useTouchControl = (controls: TouchControl[]) => {
+export const useTouchControl = (
+  handler: TouchControl[0],
+  rect: TouchControl[1]
+) => useTouchControls([[handler, rect]]);
+
+export const useTouchControls = (controls: TouchControl[]) => {
   return useTouchHandler({
     onStart: (touch) => {
       on("onStart", touch, controls);

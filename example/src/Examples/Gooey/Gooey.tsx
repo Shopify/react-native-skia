@@ -15,7 +15,6 @@ import {
   Circle,
   Blur,
   ColorMatrix,
-  useTouchHandler,
   useSpring,
   Spring,
   createDerivedValue,
@@ -61,12 +60,10 @@ const icons = [
 export const Gooey = () => {
   const paint = usePaintRef();
   const [toggled, setToggled] = useState(false);
-  const onTouch = useTouchControl([
-    [
-      { onEnd: () => setToggled((t) => !t) },
-      rect(c.x - 40, c.y - 40, 40 * 2, 40 * 2),
-    ],
-  ]);
+  const onTouch = useTouchControl(
+    { onEnd: () => setToggled((t) => !t) },
+    rect(c.x - 40, c.y - 40, 40 * 2, 40 * 2)
+  );
   const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
 
   const transforms = useMemo(
