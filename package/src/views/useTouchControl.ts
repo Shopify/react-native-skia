@@ -1,25 +1,20 @@
-import type {
-  ExtendedTouchInfo,
-  SkiaValue,
-  SkRect,
-  TouchHandlers,
-  TouchInfo,
-  Vector,
-} from "@shopify/react-native-skia";
-import {
-  dist,
-  isValue,
-  useTouchHandler,
-  inRect,
-} from "@shopify/react-native-skia";
+import { inRect } from "../renderer/processors/Rects";
+import { isValue } from "../renderer/processors/Animations";
+import { dist } from "../renderer/processors/math/Vector";
+import type { SkRect, SkPoint } from "../skia/types";
+import type { SkiaValue } from "../values";
+
+import type { ExtendedTouchInfo, TouchHandlers, TouchInfo } from "./types";
+import { useTouchHandler } from "./useTouchHandler";
 
 interface Circle {
   r: number;
-  c: Vector;
+  c: SkPoint;
 }
 
 const isCircle = (area: Circle | SkRect): area is Circle =>
-  area.hasOwnProperty("r") && area.hasOwnProperty("c");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (area as any).r !== undefined && (area as any).c !== undefined;
 
 type Region<T> = T | SkiaValue<T>;
 

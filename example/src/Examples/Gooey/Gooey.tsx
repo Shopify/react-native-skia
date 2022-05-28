@@ -19,13 +19,13 @@ import {
   Spring,
   createDerivedValue,
   rect,
+  useTouchControl,
 } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 
 import { Icon, R } from "./components/Icon";
 import { Hamburger } from "./components/Hamburger";
 import { BG, FG } from "./components/Theme";
-import { useTouchControl } from "./useTouchControl";
 
 const { width, height } = Dimensions.get("window");
 const c = vec(width / 2, height / 2 - 64);
@@ -62,7 +62,7 @@ export const Gooey = () => {
   const [toggled, setToggled] = useState(false);
   const onTouch = useTouchControl(
     { onEnd: () => setToggled((t) => !t) },
-    rect(c.x - 40, c.y - 40, 40 * 2, 40 * 2)
+    rect(c.x - R, c.y - R, R * 2, R * 2)
   );
   const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
 

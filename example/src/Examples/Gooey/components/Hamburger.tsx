@@ -3,7 +3,7 @@ import React from "react";
 
 import { FG } from "./Theme";
 
-const R = 50;
+export const R = 50;
 
 export const Hamburger = () => {
   return (
