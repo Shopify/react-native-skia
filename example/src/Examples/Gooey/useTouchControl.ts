@@ -1,50 +1,43 @@
 import type {
-  SkiaValue,
+  ExtendedTouchInfo,
   SkRect,
   TouchHandlers,
-  Vector,
+  TouchInfo,
 } from "@shopify/react-native-skia";
-import { useTouchHandler } from "@shopify/react-native-skia";
-
-const contains = (pt: Vector, rct: SkRect) =>
-  pt.x >= rct.x &&
-  pt.x <= rct.y &&
-  pt.y >= rct.x + rct.width &&
-  pt.y <= rct.y + rct.height;
+import { useTouchHandler, inRect } from "@shopify/react-native-skia";
 
 type TouchControl = [TouchHandlers, SkRect];
 
+type On = {
+  (name: "onStart", touch: TouchInfo, controls: TouchControl[]): void;
+  (
+    name: "onActive" | "onEnd",
+    touch: ExtendedTouchInfo,
+    controls: TouchControl[]
+  ): void;
+};
+
+const on: On = (name, touch, controls) => {
+  controls.forEach(([control, rect]) => {
+    const handler = control[name];
+    if (handler) {
+      if (inRect(touch, rect)) {
+        handler(touch as ExtendedTouchInfo);
+      }
+    }
+  });
+};
+
 export const useTouchControl = (controls: TouchControl[]) => {
   return useTouchHandler({
-    onStart: (...args) => {
-      controls.forEach(([control, rect]) => {
-        if (control.onStart) {
-          const [pt] = args;
-          if (contains(pt, rect)) {
-            control?.onStart(...args);
-          }
-        }
-      });
+    onStart: (touch) => {
+      on("onStart", touch, controls);
     },
-    onActive: (...args) => {
-      controls.forEach(([control, rect]) => {
-        if (control.onActive) {
-          const [pt] = args;
-          if (contains(pt, rect)) {
-            control?.onActive(...args);
-          }
-        }
-      });
+    onActive: (touch) => {
+      on("onActive", touch, controls);
     },
-    onEnd: (...args) => {
-      controls.forEach(([control, rect]) => {
-        if (control.onEnd) {
-          const [pt] = args;
-          if (contains(pt, rect)) {
-            control?.onEnd(...args);
-          }
-        }
-      });
+    onEnd: (touch) => {
+      on("onEnd", touch, controls);
     },
   });
 };

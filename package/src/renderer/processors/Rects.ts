@@ -7,6 +7,12 @@ import { vec } from "./math/Vector";
 import type { Radius } from "./Radius";
 import { processRadius } from "./Radius";
 
+export const inRect = (pt: Vector, rct: SkRect) =>
+  pt.x >= rct.x &&
+  pt.x <= rct.y &&
+  pt.y >= rct.x + rct.width &&
+  pt.y <= rct.y + rct.height;
+
 export const point = (x: number, y: number) => Skia.Point(x, y);
 
 export const rect = (x: number, y: number, width: number, height: number) =>
