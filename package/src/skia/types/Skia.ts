@@ -8,7 +8,11 @@ import type { MaskFilterFactory } from "./MaskFilter";
 import type { SkPaint } from "./Paint";
 import type { SkRect } from "./Rect";
 import type { SkRRect } from "./RRect";
-import type { RuntimeEffectFactory } from "./RuntimeEffect";
+import type {
+  RuntimeEffectFactory,
+  SkRuntimeEffect,
+  SkRuntimeShaderBuilder,
+} from "./RuntimeEffect";
 import type { ShaderFactory } from "./Shader";
 import type { SkMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
@@ -24,10 +28,6 @@ import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
-import type {
-  SkRuntimeShaderBuilder,
-  SkRuntimeEffect,
-} from "./RuntimeEffect/RuntimeEffect";
 
 /**
  * Declares the interface for the native Skia API
