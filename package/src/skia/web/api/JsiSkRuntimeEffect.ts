@@ -1,4 +1,4 @@
-import type { CanvasKit, Rect, RuntimeEffect } from "canvaskit-wasm";
+import type { CanvasKit, RuntimeEffect } from "canvaskit-wasm";
 
 import type { SkMatrix, SkShader } from "../../types";
 import type { SkRuntimeEffect } from "../../types/RuntimeEffect/RuntimeEffect";

@@ -34,8 +34,14 @@ import { JsiSkImageFilterFactory } from "./JsiImageFilterFactory";
 import { JsiSkShaderFactory } from "./JsiSkShaderFactory";
 import { JsiSkPathEffectFactory } from "./JsiSkPathEffectFactory";
 import { JsiSkVertices } from "./JsiSkVertices";
+import { JsiSkDataFactory } from "./JsiSkDataFactory";
+import { JsiSkImageFactory } from "./JsiSkImageFactory";
+import { JsiSkSVGFactory } from "./JsiSkSVGFactory";
+import { JsiSkTextBlobFactory } from "./JsiSkTextBlobFactory";
+import { JsiSkFontMgrFactory } from "./JsiSkFontMgrFactory";
+import { JsiSkFont } from "./JsiSkFont";
 
-export const JsiSkApi: Skia = (CanvasKit: CanvasKit) => ({
+export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
     new JsiSkPoint(CanvasKit, Float32Array.of(x, y)),
   RuntimeShaderBuilder: (_: SkRuntimeEffect): SkRuntimeShaderBuilder => {
@@ -60,19 +66,23 @@ export const JsiSkApi: Skia = (CanvasKit: CanvasKit) => ({
     new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder()),
   Picture: new JsiSkPictureFactory(CanvasKit),
   Path: new JsiSkPathFactory(CanvasKit),
-  Matrix: new JsiSkMatrix(
-    CanvasKit,
-    Float32Array.of(...CanvasKit.Matrix.identity())
-  ),
-  ColorFilterFactory: new JsiSkColorFilterFactory(CanvasKit),
+  Matrix: () =>
+    new JsiSkMatrix(CanvasKit, Float32Array.of(...CanvasKit.Matrix.identity())),
+  ColorFilter: new JsiSkColorFilterFactory(CanvasKit),
   Font: (typeface?: SkTypeface, size?: number) =>
-    new CanvasKit.Font(typeface === undefined ? null : toValue(typeface), size),
+    new JsiSkFont(
+      CanvasKit,
+      new CanvasKit.Font(
+        typeface === undefined ? null : toValue(typeface),
+        size
+      )
+    ),
   Typeface: new JsiSkTypefaceFactory(CanvasKit),
   MaskFilter: new JsiSkMaskFilterFactory(CanvasKit),
   RuntimeEffect: new JsiSkRuntimeEffectFactory(CanvasKit),
   ImageFilter: new JsiSkImageFilterFactory(CanvasKit),
-  ShaderFactory: new JsiSkShaderFactory(CanvasKit),
-  PathEffectFactory: new JsiSkPathEffectFactory(CanvasKit),
+  Shader: new JsiSkShaderFactory(CanvasKit),
+  PathEffect: new JsiSkPathEffectFactory(CanvasKit),
   MakeVertices: (
     mode: VertexMode,
     positions: SkPoint[],
@@ -92,6 +102,11 @@ export const JsiSkApi: Skia = (CanvasKit: CanvasKit) => ({
         isVolatile
       )
     ),
+  Data: new JsiSkDataFactory(CanvasKit),
+  Image: new JsiSkImageFactory(CanvasKit),
+  SVG: new JsiSkSVGFactory(CanvasKit),
+  TextBlob: new JsiSkTextBlobFactory(CanvasKit),
+  FontMgr: new JsiSkFontMgrFactory(CanvasKit),
   XYWHRect: (x: number, y: number, width: number, height: number) => {
     return new JsiSkRect(CanvasKit, CanvasKit.XYWHRect(x, y, width, height));
   },

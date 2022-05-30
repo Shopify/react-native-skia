@@ -110,7 +110,9 @@ export class JsiSkShaderFactory extends Host implements ShaderFactory {
         colors.map((color) => toValue(color)),
         pos,
         ckEnum(mode),
-        localMatrix === undefined ? undefined : toValue(localMatrix),
+        localMatrix === undefined || localMatrix === null
+          ? undefined
+          : toValue(localMatrix),
         flags,
         startAngleInDegrees,
         endAngleInDegrees

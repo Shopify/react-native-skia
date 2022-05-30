@@ -1,9 +1,11 @@
 import fs from "fs";
 import path from "path";
 
+import type { Surface } from "canvaskit-wasm";
 import CanvasKitInit from "canvaskit-wasm";
 
 import { JsiSkApi } from "../web";
+import { toValue } from "../web/api/Host";
 
 //import type { SkiaApi } from "../SkiaApi";
 
@@ -29,7 +31,7 @@ describe("Draw a rectangle", () => {
     }
     const canvas = surface.getCanvas();
     canvas.drawRect(rct, paint);
-    surface.ref.flush();
+    toValue<Surface>(surface).flush();
     const image = surface.makeImageSnapshot();
     const png = image.encodeToBytes();
     const ref = fs.readFileSync(

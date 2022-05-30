@@ -68,7 +68,6 @@ const onDeclare = createDeclaration<ShaderProps>(
     }
     return source.makeShaderWithChildren(
       processedUniforms,
-      opaque,
       children.filter(isShader),
       localMatrix(transform)
     );
