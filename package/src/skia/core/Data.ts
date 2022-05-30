@@ -43,7 +43,7 @@ export const useRawData = <T>(
     // Track to avoid re-fetching the same data
     if (prevSourceRef.current !== source) {
       prevSourceRef.current = source;
-      if (source !== null) {
+      if (source !== null && source !== undefined) {
         const factoryWrapper = (data2: Data) => {
           const factoryResult = factory(data2);
           if (factoryResult === null) {
