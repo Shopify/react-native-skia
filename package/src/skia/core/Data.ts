@@ -33,34 +33,38 @@ export const useDataCollection = <T>(
 };
 
 export const useRawData = <T>(
-  source: DataSource,
+  source: DataSource | null | undefined,
   factory: (data: Data) => T,
   onError?: (err: Error) => void
 ) => {
   const [data, setData] = useState<T | null>(null);
-  const prevSourceRef = useRef<DataSource>();
+  const prevSourceRef = useRef<DataSource | null | undefined>();
   useEffect(() => {
     // Track to avoid re-fetching the same data
     if (prevSourceRef.current !== source) {
       prevSourceRef.current = source;
-      const factoryWrapper = (data2: Data) => {
-        const factoryResult = factory(data2);
-        if (factoryResult === null) {
-          onError && onError(new Error("Could not load data"));
-          setData(null);
+      if (source !== null && source !== undefined) {
+        const factoryWrapper = (data2: Data) => {
+          const factoryResult = factory(data2);
+          if (factoryResult === null) {
+            onError && onError(new Error("Could not load data"));
+            setData(null);
+          } else {
+            setData(factoryResult);
+          }
+        };
+        if (source instanceof Uint8Array) {
+          factoryWrapper(Skia.Data.fromBytes(source));
         } else {
-          setData(factoryResult);
+          const uri =
+            typeof source === "string"
+              ? source
+              : Image.resolveAssetSource(source).uri;
+          Skia.Data.fromURI(uri).then((d) => factoryWrapper(d));
         }
-      };
-      if (source instanceof Uint8Array) {
-        factoryWrapper(Skia.Data.fromBytes(source));
-      } else {
-        const uri =
-          typeof source === "string"
-            ? source
-            : Image.resolveAssetSource(source).uri;
-        Skia.Data.fromURI(uri).then((d) => factoryWrapper(d));
       }
+    } else {
+      setData(null);
     }
   }, [factory, onError, source]);
   return data;
@@ -68,5 +72,7 @@ export const useRawData = <T>(
 
 const identity = (data: Data) => data;
 
-export const useData = (source: DataSource, onError?: (err: Error) => void) =>
-  useRawData(source, identity, onError);
+export const useData = (
+  source: DataSource | null | undefined,
+  onError?: (err: Error) => void
+) => useRawData(source, identity, onError);

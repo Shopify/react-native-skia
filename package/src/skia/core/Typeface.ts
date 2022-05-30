@@ -6,6 +6,6 @@ import { useRawData } from "./Data";
  * Returns a Skia Typeface object
  * */
 export const useTypeface = (
-  source: DataSource,
+  source: DataSource | null | undefined,
   onError?: (err: Error) => void
 ) => useRawData(source, Skia.Typeface.MakeFreeTypeFaceFromData, onError);
