@@ -3,7 +3,7 @@ import CanvasKitInit from "canvaskit-wasm";
 import { JsiSkApi } from "../web";
 import { BlendMode } from "../types";
 
-import { processResult } from "./snapshot";
+import { processResult, makeSurface } from "./snapshot";
 
 let Skia: ReturnType<typeof JsiSkApi>;
 const width = 256;
@@ -19,12 +19,10 @@ describe("Draw a rectangle", () => {
     expect(Skia).toBeDefined();
   });
   it("Draws a lightblue rectange", () => {
+    const { surface, canvas } = makeSurface(Skia);
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("lightblue"));
     const rct = Skia.XYWHRect(64, 64, 128, 128);
-    const surface = Skia.Surface.Make(width, height)!;
-    expect(surface).toBeDefined();
-    const canvas = surface.getCanvas();
     canvas.drawRect(rct, paint);
     processResult(surface, "snapshots/lightblue-rect.png");
   });
@@ -32,10 +30,8 @@ describe("Draw a rectangle", () => {
 
 describe("Test blend modes", () => {
   it("Test multiply blend mode", () => {
+    const { surface, canvas } = makeSurface(Skia);
     const r = 100;
-    const surface = Skia.Surface.Make(width, height)!;
-    expect(surface).toBeDefined();
-    const canvas = surface.getCanvas();
 
     const paint = Skia.Paint();
     paint.setAntiAlias(true);
@@ -59,10 +55,9 @@ describe("Test blend modes", () => {
 
 describe("Test Circle", () => {
   it("Draw a circle", () => {
+    const { surface, canvas } = makeSurface(Skia);
+
     const r = 128;
-    const surface = Skia.Surface.Make(width, height)!;
-    expect(surface).toBeDefined();
-    const canvas = surface.getCanvas();
 
     const paint = Skia.Paint();
     paint.setAntiAlias(true);

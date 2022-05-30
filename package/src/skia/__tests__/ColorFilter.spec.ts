@@ -16,25 +16,6 @@ beforeAll(async () => {
   Skia = JsiSkApi(CanvasKit);
 });
 
-const testColorFilter = (colorFilter: SkColorFilter, result: string) => {
-  const { canvas, surface, width, height } = makeSurface(Skia);
-  const image = Skia.Image.MakeImageFromEncoded(
-    Skia.Data.fromBytes(
-      fs.readFileSync(path.resolve(__dirname, "./zurich.jpg"))
-    )
-  )!;
-  const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
-  const paint = Skia.Paint();
-  paint.setColorFilter(colorFilter);
-  canvas.drawImageRect(
-    image,
-    imgRect,
-    Skia.XYWHRect(0, 0, width, height),
-    paint
-  );
-  processResult(surface, result);
-};
-
 describe("Color Filters", () => {
   it("Check that CanvasKit and CanvasKit are loaded", async () => {
     expect(Skia).toBeDefined();
@@ -66,3 +47,22 @@ describe("Color Filters", () => {
     );
   });
 });
+
+const testColorFilter = (colorFilter: SkColorFilter, result: string) => {
+  const { canvas, surface, width, height } = makeSurface(Skia);
+  const image = Skia.Image.MakeImageFromEncoded(
+    Skia.Data.fromBytes(
+      fs.readFileSync(path.resolve(__dirname, "./zurich.jpg"))
+    )
+  )!;
+  const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
+  const paint = Skia.Paint();
+  paint.setColorFilter(colorFilter);
+  canvas.drawImageRect(
+    image,
+    imgRect,
+    Skia.XYWHRect(0, 0, width, height),
+    paint
+  );
+  processResult(surface, result);
+};
