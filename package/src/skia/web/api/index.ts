@@ -1,13 +1,16 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
 import type {
+  SkColor,
   SkContourMeasureIter,
   Skia,
   SkPath,
+  SkPoint,
   SkRect,
   SkRuntimeEffect,
   SkRuntimeShaderBuilder,
   SkTypeface,
+  VertexMode,
 } from "../../types";
 
 import { JsiSkPoint } from "./JsiSkPoint";
@@ -17,7 +20,7 @@ import { Color } from "./JsiSkColor";
 import { JsiSkSurfaceFactory } from "./JsiSkSurfaceFactory";
 import { JsiSkRRect } from "./JsiSkRRect";
 import { JsiSkRSXform } from "./JsiSkRSXform";
-import { toValue, toUndefinedableValue, toNullableValue } from "./Host";
+import { toValue, ckEnum } from "./Host";
 import { JsiSkContourMeasureIter } from "./JsiSkContourMeasureIter";
 import { JsiSkPictureRecorder } from "./JsiSkPictureRecorder";
 import { JsiSkPictureFactory } from "./JsiSkPictureFactory";
@@ -28,6 +31,9 @@ import { JsiSkTypefaceFactory } from "./JsiSkTypefaceFactory";
 import { JsiSkMaskFilterFactory } from "./JsiSkMaskFilterFactory";
 import { JsiSkRuntimeEffectFactory } from "./JsiSkRuntimeEffectFactory";
 import { JsiSkImageFilterFactory } from "./JsiImageFilterFactory";
+import { JsiSkShaderFactory } from "./JsiSkShaderFactory";
+import { JsiSkPathEffectFactory } from "./JsiSkPathEffectFactory";
+import { JsiSkVertices } from "./JsiSkVertices";
 
 export const JsiSkApi: Skia = (CanvasKit: CanvasKit) => ({
   Point: (x: number, y: number) =>
@@ -65,6 +71,27 @@ export const JsiSkApi: Skia = (CanvasKit: CanvasKit) => ({
   MaskFilter: new JsiSkMaskFilterFactory(CanvasKit),
   RuntimeEffect: new JsiSkRuntimeEffectFactory(CanvasKit),
   ImageFilter: new JsiSkImageFilterFactory(CanvasKit),
+  ShaderFactory: new JsiSkShaderFactory(CanvasKit),
+  PathEffectFactory: new JsiSkPathEffectFactory(CanvasKit),
+  MakeVertices: (
+    mode: VertexMode,
+    positions: SkPoint[],
+    textureCoordinates?: SkPoint[] | null,
+    colors?: SkColor[],
+    indices?: number[] | null,
+    isVolatile?: boolean
+  ) =>
+    new JsiSkVertices(
+      CanvasKit,
+      CanvasKit.MakeVertices(
+        ckEnum(mode),
+        positions.map((pos) => toValue(pos)),
+        (textureCoordinates ?? []).map((t) => toValue(t)),
+        (colors ?? []).map((pos) => toValue(pos)),
+        indices,
+        isVolatile
+      )
+    ),
   XYWHRect: (x: number, y: number, width: number, height: number) => {
     return new JsiSkRect(CanvasKit, CanvasKit.XYWHRect(x, y, width, height));
   },

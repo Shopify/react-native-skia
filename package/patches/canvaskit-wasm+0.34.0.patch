@@ -1,5 +1,5 @@
 diff --git a/node_modules/canvaskit-wasm/types/index.d.ts b/node_modules/canvaskit-wasm/types/index.d.ts
-index 3abbcc3..c578760 100644
+index 3abbcc3..765e883 100644
 --- a/node_modules/canvaskit-wasm/types/index.d.ts
 +++ b/node_modules/canvaskit-wasm/types/index.d.ts
 @@ -1,5 +1,5 @@
@@ -48,3 +48,12 @@ index 3abbcc3..c578760 100644
  
      /**
       * Sets the geometry drawn at the beginning and end of strokes.
+@@ -3440,7 +3440,7 @@ export interface ShaderFactory {
+      * @param color
+      * @param space
+      */
+-    MakeColor(color: InputColor, space: ColorSpace): Shader;
++    MakeColor(color: InputColor, space?: ColorSpace): Shader;
+ 
+     /**
+      * Returns a shader with Perlin Fractal Noise.
