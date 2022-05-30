@@ -3,6 +3,12 @@ import type { CanvasKit, EmbindEnumEntity } from "canvaskit-wasm";
 
 import type { SkJSIInstance } from "../../types";
 
+export class NotImplementedOnRNWeb extends Error {
+  constructor() {
+    super("Not implemented on React Native Web");
+  }
+}
+
 export abstract class Host {
   readonly CanvasKit: CanvasKit;
 
