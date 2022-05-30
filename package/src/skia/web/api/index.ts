@@ -7,6 +7,7 @@ import type {
   SkRect,
   SkRuntimeEffect,
   SkRuntimeShaderBuilder,
+  SkTypeface,
 } from "../../types";
 
 import { JsiSkPoint } from "./JsiSkPoint";
@@ -16,9 +17,17 @@ import { Color } from "./JsiSkColor";
 import { JsiSkSurfaceFactory } from "./JsiSkSurfaceFactory";
 import { JsiSkRRect } from "./JsiSkRRect";
 import { JsiSkRSXform } from "./JsiSkRSXform";
-import { toValue } from "./Host";
+import { toValue, toUndefinedableValue, toNullableValue } from "./Host";
 import { JsiSkContourMeasureIter } from "./JsiSkContourMeasureIter";
 import { JsiSkPictureRecorder } from "./JsiSkPictureRecorder";
+import { JsiSkPictureFactory } from "./JsiSkPictureFactory";
+import { JsiSkPathFactory } from "./JsiSkPathFactory";
+import { JsiSkMatrix } from "./JsiSkMatrix";
+import { JsiSkColorFilterFactory } from "./JsiSkColorFilterFactory";
+import { JsiSkTypefaceFactory } from "./JsiSkTypefaceFactory";
+import { JsiSkMaskFilterFactory } from "./JsiSkMaskFilterFactory";
+import { JsiSkRuntimeEffectFactory } from "./JsiSkRuntimeEffectFactory";
+import { JsiSkImageFilterFactory } from "./JsiImageFilterFactory";
 
 export const JsiSkApi: Skia = (CanvasKit: CanvasKit) => ({
   Point: (x: number, y: number) =>
@@ -41,7 +50,21 @@ export const JsiSkApi: Skia = (CanvasKit: CanvasKit) => ({
       new CanvasKit.ContourMeasureIter(toValue(path), forceClosed, resScale)
     ),
   Paint: () => new JsiSkPaint(CanvasKit, new CanvasKit.Paint()),
-  PictureRecorder: () => new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder());
+  PictureRecorder: () =>
+    new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder()),
+  Picture: new JsiSkPictureFactory(CanvasKit),
+  Path: new JsiSkPathFactory(CanvasKit),
+  Matrix: new JsiSkMatrix(
+    CanvasKit,
+    Float32Array.of(...CanvasKit.Matrix.identity())
+  ),
+  ColorFilterFactory: new JsiSkColorFilterFactory(CanvasKit),
+  Font: (typeface?: SkTypeface, size?: number) =>
+    new CanvasKit.Font(typeface === undefined ? null : toValue(typeface), size),
+  Typeface: new JsiSkTypefaceFactory(CanvasKit),
+  MaskFilter: new JsiSkMaskFilterFactory(CanvasKit),
+  RuntimeEffect: new JsiSkRuntimeEffectFactory(CanvasKit),
+  ImageFilter: new JsiSkImageFilterFactory(CanvasKit),
   XYWHRect: (x: number, y: number, width: number, height: number) => {
     return new JsiSkRect(CanvasKit, CanvasKit.XYWHRect(x, y, width, height));
   },
