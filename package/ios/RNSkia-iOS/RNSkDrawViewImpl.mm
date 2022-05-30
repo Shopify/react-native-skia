@@ -3,6 +3,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#import <SkColorSpace.h>
 #import <SkSurface.h>
 #import <SkCanvas.h>
 
