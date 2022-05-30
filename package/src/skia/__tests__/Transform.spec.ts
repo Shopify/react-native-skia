@@ -51,7 +51,9 @@ const testTransform = (cb: (canvas: SkCanvas) => void, result: string) => {
     CARD_HEIGHT
   );
   const image = Skia.Image.MakeImageFromEncoded(
-    Skia.Data.fromBytes(fs.readFileSync(path.resolve(__dirname, "./card.png")))
+    Skia.Data.fromBytes(
+      fs.readFileSync(path.resolve(__dirname, "./assets/card.png"))
+    )
   )!;
   const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
   canvas.save();

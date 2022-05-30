@@ -52,7 +52,7 @@ const testColorFilter = (colorFilter: SkColorFilter, result: string) => {
   const { canvas, surface, width, height } = makeSurface(Skia);
   const image = Skia.Image.MakeImageFromEncoded(
     Skia.Data.fromBytes(
-      fs.readFileSync(path.resolve(__dirname, "./zurich.jpg"))
+      fs.readFileSync(path.resolve(__dirname, "./assets/zurich.jpg"))
     )
   )!;
   const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
