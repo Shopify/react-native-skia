@@ -6,5 +6,7 @@ import { useRawData } from "./Data";
 /**
  * Returns a Skia Image object
  * */
-export const useImage = (source: DataSource, onError?: (err: Error) => void) =>
-  useRawData(source, Skia.Image.MakeImageFromEncoded, onError);
+export const useImage = (
+  source: DataSource | null | undefined,
+  onError?: (err: Error) => void
+) => useRawData(source, Skia.Image.MakeImageFromEncoded, onError);

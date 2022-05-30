@@ -10,7 +10,7 @@ import { useTypeface } from "./Typeface";
  * Returns a Skia Font object
  * */
 export const useFont = (
-  font: DataSource,
+  font: DataSource | null | undefined,
   size?: number,
   onError?: (err: Error) => void
 ): SkFont | null => {
