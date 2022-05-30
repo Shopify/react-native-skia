@@ -15,6 +15,7 @@
 
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
+#include <SkColorSpace.h>
 #include <SkCanvas.h>
 #include <SkSurface.h>
 #include <SkPicture.h>

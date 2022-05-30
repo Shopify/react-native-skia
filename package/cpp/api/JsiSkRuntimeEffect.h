@@ -44,12 +44,11 @@ namespace RNSkia
     JSI_HOST_FUNCTION(makeShader)
     {
       auto uniforms = castUniforms(runtime, arguments[0]);
-      auto isOpaque = count >= 2 && arguments[1].isBool() ? arguments[1].getBool() : false;
-      auto matrix = count >= 3 && !arguments[2].isUndefined()  && !arguments[2].isNull()  ? JsiSkMatrix::fromValue(runtime, arguments[2]).get() : nullptr;
+      
+      auto matrix = count >= 2 && !arguments[1].isUndefined()  && !arguments[1].isNull()  ? JsiSkMatrix::fromValue(runtime, arguments[1]).get() : nullptr;
 
       // Create and return shader as host object
-      auto shader = getObject()->makeShader(std::move(uniforms), nullptr,
-                                            0, matrix, isOpaque);
+      auto shader = getObject()->makeShader(std::move(uniforms), nullptr, 0, matrix);
 
       return jsi::Object::createFromHostObject(
           runtime, std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
@@ -58,11 +57,10 @@ namespace RNSkia
     JSI_HOST_FUNCTION(makeShaderWithChildren)
     {
       auto uniforms = castUniforms(runtime, arguments[0]);
-      auto isOpaque = count >= 2 && arguments[1].isBool() ? arguments[1].getBool() : false;
-
+      
       // Children
       std::vector<sk_sp<SkShader>> children;
-      auto jsiChildren = arguments[2].asObject(runtime).asArray(runtime);
+      auto jsiChildren = arguments[1].asObject(runtime).asArray(runtime);
       auto jsiChildCount = jsiChildren.size(runtime);
       children.reserve(jsiChildCount);
       for (int i = 0; i < jsiChildCount; i++)
@@ -74,11 +72,11 @@ namespace RNSkia
         children.push_back(shader);
       }
 
-      auto matrix = count >= 4 && !arguments[3].isUndefined()  && !arguments[3].isNull() ? JsiSkMatrix::fromValue(runtime, arguments[3]).get() : nullptr;
+      auto matrix = count >= 3 && !arguments[2].isUndefined()  && !arguments[2].isNull() ? JsiSkMatrix::fromValue(runtime, arguments[2]).get() : nullptr;
 
       // Create and return shader as host object
       auto shader = getObject()->makeShader(std::move(uniforms), children.data(),
-                                            children.size(), matrix, isOpaque);
+                                            children.size(), matrix);
 
       return jsi::Object::createFromHostObject(
           runtime, std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
