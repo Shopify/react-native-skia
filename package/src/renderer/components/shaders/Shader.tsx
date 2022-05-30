@@ -30,12 +30,11 @@ const processValue = (value: UniformValue): number | readonly number[] => {
 export interface ShaderProps extends TransformProps {
   source: SkRuntimeEffect;
   uniforms: Uniforms;
-  opaque?: boolean;
   children?: ReactNode | ReactNode[];
 }
 
 const onDeclare = createDeclaration<ShaderProps>(
-  ({ uniforms, source, opaque, ...transform }, children) => {
+  ({ uniforms, source, ...transform }, children) => {
     const processedUniforms = new Array(source.getUniformCount())
       .fill(0)
       .flatMap((_, i) => {
@@ -68,7 +67,6 @@ const onDeclare = createDeclaration<ShaderProps>(
     }
     return source.makeShaderWithChildren(
       processedUniforms,
-      opaque,
       children.filter(isShader),
       localMatrix(transform)
     );
