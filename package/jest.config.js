@@ -5,4 +5,5 @@ module.exports = {
   // Ignore lib folder - contains build artifacts and should
   // not be probed for tests
   modulePathIgnorePatterns: ["<rootDir>/lib/typescript"],
+  testRegex: ".spec.ts$",
 };

@@ -1,32 +1,13 @@
-import fs from "fs";
-import path from "path";
-
-import type { Surface } from "canvaskit-wasm";
 import CanvasKitInit from "canvaskit-wasm";
 
 import { JsiSkApi } from "../web";
-import { toValue } from "../web/api/Host";
 import { BlendMode } from "../types";
 
-//import type { SkiaApi } from "../SkiaApi";
-import type { SkSurface } from "../types/Surface/Surface";
+import { processResult } from "./snapshot";
 
 let Skia: ReturnType<typeof JsiSkApi>;
 const width = 256;
 const height = 256;
-
-const processResult = (surface: SkSurface, relPath: string) => {
-  toValue<Surface>(surface).flush();
-  const image = surface.makeImageSnapshot();
-  const png = image.encodeToBytes();
-  const p = path.resolve(__dirname, relPath);
-  if (fs.existsSync(p)) {
-    const ref = fs.readFileSync(path.resolve(__dirname, relPath));
-    expect(ref.equals(png)).toBe(true);
-  } else {
-    fs.writeFileSync(p, png);
-  }
-};
 
 beforeAll(async () => {
   const CanvasKit = await CanvasKitInit();
