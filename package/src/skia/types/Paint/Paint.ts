@@ -1,8 +1,8 @@
 import type { SkImageFilter } from "../ImageFilter";
-import type { IMaskFilter } from "../MaskFilter";
+import type { SkMaskFilter } from "../MaskFilter";
 import type { SkColorFilter } from "../ColorFilter";
 import type { SkColor } from "../Color";
-import type { IPathEffect } from "../PathEffect";
+import type { SkPathEffect } from "../PathEffect";
 import type { SkJSIInstance } from "../JsiInstance";
 import type { SkShader } from "../Shader";
 
@@ -107,13 +107,13 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
    * Sets the current mask filter, replacing the existing one if there was one.
    * @param filter
    */
-  setMaskFilter(filter: IMaskFilter | null): void;
+  setMaskFilter(filter: SkMaskFilter | null): void;
 
   /**
    * Sets the current path effect, replacing the existing one if there was one.
    * @param effect
    */
-  setPathEffect(effect: IPathEffect | null): void;
+  setPathEffect(effect: SkPathEffect | null): void;
 
   /**
    * Sets the current shader, replacing the existing one if there was one.

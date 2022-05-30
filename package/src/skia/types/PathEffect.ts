@@ -2,11 +2,11 @@ import type { SkJSIInstance } from "./JsiInstance";
 import type { SkPath } from "./Path/Path";
 import type { SkMatrix } from "./Matrix";
 
-export type IPathEffect = SkJSIInstance<"PathEffect">;
+export type SkPathEffect = SkJSIInstance<"PathEffect">;
 
 export const isPathEffect = (
   obj: SkJSIInstance<string> | null
-): obj is IPathEffect => obj !== null && obj.__typename__ === "PathEffect";
+): obj is SkPathEffect => obj !== null && obj.__typename__ === "PathEffect";
 
 export enum Path1DEffectStyle {
   Translate,
@@ -19,7 +19,7 @@ export interface PathEffectFactory {
    * Returns a PathEffect that can turn sharp corners into rounded corners.
    * @param radius - if <=0, returns null
    */
-  MakeCorner(radius: number): IPathEffect | null;
+  MakeCorner(radius: number): SkPathEffect | null;
 
   /**
    * Returns a PathEffect that add dashes to the path.
@@ -30,7 +30,7 @@ export interface PathEffectFactory {
    *                    the "on" intervals, and the odd indices specifying the length of "off".
    * @param phase - offset length into the intervals array. Defaults to 0.
    */
-  MakeDash(intervals: number[], phase?: number): IPathEffect;
+  MakeDash(intervals: number[], phase?: number): SkPathEffect;
 
   /**
    * Returns a PathEffect that breaks path into segments of segLength length, and randomly move
@@ -39,7 +39,11 @@ export interface PathEffectFactory {
    * @param dev - limit of the movement of the endpoints.
    * @param seedAssist - modifies the randomness. See SkDiscretePathEffect.h for more.
    */
-  MakeDiscrete(segLength: number, dev: number, seedAssist: number): IPathEffect;
+  MakeDiscrete(
+    segLength: number,
+    dev: number,
+    seedAssist: number
+  ): SkPathEffect;
 
   /**
    *
@@ -47,7 +51,7 @@ export interface PathEffectFactory {
    * outer pathEffect (i.e. outer(inner(path))).
    *
    */
-  MakeCompose(outer: IPathEffect, inner: IPathEffect): IPathEffect;
+  MakeCompose(outer: SkPathEffect, inner: SkPathEffect): SkPathEffect;
 
   /**
    *
@@ -55,7 +59,7 @@ export interface PathEffectFactory {
    * in sequence (i.e. first(path) + second(path)).
    *
    */
-  MakeSum(outer: IPathEffect, inner: IPathEffect): IPathEffect;
+  MakeSum(outer: SkPathEffect, inner: SkPathEffect): SkPathEffect;
 
   /**
    * Returns a PathEffect that will fill the drawing path with a pattern made by applying
@@ -65,7 +69,7 @@ export interface PathEffectFactory {
    * @param width - must be >= 0
    * @param matrix
    */
-  MakeLine2D(width: number, matrix: SkMatrix): IPathEffect | null;
+  MakeLine2D(width: number, matrix: SkMatrix): SkPathEffect | null;
 
   /**
    * Returns a PathEffect which implements dashing by replicating the specified path.
@@ -80,7 +84,7 @@ export interface PathEffectFactory {
     advance: number,
     phase: number,
     style: Path1DEffectStyle
-  ): IPathEffect | null;
+  ): SkPathEffect | null;
 
   /**
    * Returns a PathEffect that will fill the drawing path with a pattern by repeating the
@@ -89,5 +93,5 @@ export interface PathEffectFactory {
    * @param matrix
    * @param path
    */
-  MakePath2D(matrix: SkMatrix, path: SkPath): IPathEffect | null;
+  MakePath2D(matrix: SkMatrix, path: SkPath): SkPathEffect | null;
 }

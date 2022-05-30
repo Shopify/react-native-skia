@@ -9,9 +9,9 @@ export enum BlurStyle {
 
 export const isMaskFilter = (
   obj: SkJSIInstance<string> | null
-): obj is IMaskFilter => obj !== null && obj.__typename__ === "MaskFilter";
+): obj is SkMaskFilter => obj !== null && obj.__typename__ === "MaskFilter";
 
-export type IMaskFilter = SkJSIInstance<"MaskFilter">;
+export type SkMaskFilter = SkJSIInstance<"MaskFilter">;
 
 /**
  * See SkMaskFilter.h for more details.
@@ -23,5 +23,5 @@ export interface MaskFilterFactory {
    * @param sigma - Standard deviation of the Gaussian blur to apply. Must be > 0.
    * @param respectCTM - if true the blur's sigma is modified by the CTM.
    */
-  MakeBlur(style: BlurStyle, sigma: number, respectCTM: boolean): IMaskFilter;
+  MakeBlur(style: BlurStyle, sigma: number, respectCTM: boolean): SkMaskFilter;
 }

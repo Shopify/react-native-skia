@@ -1,4 +1,4 @@
-import type { Data } from "../Data/Data";
+import type { Data } from "../Data";
 
 import type { SkTypeface } from "./Typeface";
 
