@@ -42,6 +42,10 @@ export const Images = () => {
     }
   });
 
+  // Verifies that we can use this hook with a null/undefined input parameter
+  useImage(null);
+  useImage(undefined);
+
   const oslo = useImage(require("../../assets/oslo.jpg"));
 
   return (
