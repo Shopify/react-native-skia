@@ -16,25 +16,18 @@ export interface SkRuntimeEffect extends SkJSIInstance<"RuntimeEffect"> {
   /**
    * Returns a shader executed using the given uniform data.
    * @param uniforms
-   * @param isOpaque
    * @param localMatrix
    */
-  makeShader(
-    uniforms: number[],
-    isOpaque?: boolean,
-    localMatrix?: SkMatrix
-  ): SkShader;
+  makeShader(uniforms: number[], localMatrix?: SkMatrix): SkShader;
 
   /**
    * Returns a shader executed using the given uniform data and the children as inputs.
    * @param uniforms
-   * @param isOpaque
    * @param children
    * @param localMatrix
    */
   makeShaderWithChildren(
     uniforms: number[],
-    isOpaque?: boolean,
     children?: SkShader[],
     localMatrix?: SkMatrix
   ): SkShader;
