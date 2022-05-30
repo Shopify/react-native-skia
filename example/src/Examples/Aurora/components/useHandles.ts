@@ -1,5 +1,5 @@
 import type {
-  SkiaValue,
+  SkiaMutableValue,
   CubicBezierHandle,
   SkRect,
 } from "@shopify/react-native-skia";
@@ -18,7 +18,7 @@ type TouchSelection = null | {
 };
 
 export const useHandles = (
-  mesh: SkiaValue<CubicBezierHandle[]>,
+  mesh: SkiaMutableValue<CubicBezierHandle[]>,
   defaultMesh: CubicBezierHandle[],
   window: SkRect
 ) => {

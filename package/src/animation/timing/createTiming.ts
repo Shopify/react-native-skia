@@ -3,7 +3,7 @@ import type {
   RequiredAnimationParams,
   AnimationCallback,
 } from "../types";
-import type { AnimationState, SkiaValue } from "../../values/types";
+import type { AnimationState, SkiaMutableValue } from "../../values/types";
 import { ValueApi } from "../../values/api";
 
 import { timing } from "./functions";
@@ -24,7 +24,7 @@ import { timing } from "./functions";
  */
 export const createTiming = (
   params: RequiredAnimationParams & Required<TimingConfig>,
-  value?: SkiaValue<number>,
+  value?: SkiaMutableValue<number>,
   callback?: AnimationCallback
 ) => {
   // Update from to be either the declared from value,

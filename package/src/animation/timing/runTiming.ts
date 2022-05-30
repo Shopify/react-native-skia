@@ -1,4 +1,4 @@
-import type { SkiaValue, SkiaAnimation } from "../../values/types";
+import type { SkiaMutableValue, SkiaAnimation } from "../../values/types";
 import type {
   AnimationParams,
   TimingConfig,
@@ -21,7 +21,7 @@ import { createTiming } from "./createTiming";
  * the animation.
  */
 export const runTiming = (
-  value: SkiaValue<number>,
+  value: SkiaMutableValue<number>,
   toOrParams: number | AnimationParams,
   config?: TimingConfig,
   callback?: AnimationCallback

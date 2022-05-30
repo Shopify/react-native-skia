@@ -1,4 +1,4 @@
-import type { SkiaValue, SkiaAnimation } from "../../values/types";
+import type { SkiaMutableValue, SkiaAnimation } from "../../values/types";
 import type {
   AnimationParams,
   SpringConfig,
@@ -23,7 +23,7 @@ import { createSpringEasing } from "./functions/spring";
  * the animation.
  */
 export const runSpring = (
-  value: SkiaValue<number>,
+  value: SkiaMutableValue<number>,
   toOrParams: number | AnimationParams,
   config?: SpringConfig,
   callback?: AnimationCallback

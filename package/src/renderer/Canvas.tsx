@@ -22,7 +22,7 @@ import type { TouchHandler } from "../views";
 import { Skia, SkiaPaint } from "../skia";
 import type { FontMgr } from "../skia";
 import { useValue } from "../values/hooks/useValue";
-import type { SkiaReadonlyValue } from "../values/types";
+import type { SkiaValue } from "../values/types";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
@@ -30,7 +30,7 @@ import { vec } from "./processors";
 import { Container } from "./nodes";
 import { DependencyManager } from "./DependencyManager";
 
-const CanvasContext = React.createContext<SkiaReadonlyValue<{
+const CanvasContext = React.createContext<SkiaValue<{
   width: number;
   height: number;
 }> | null>(null);

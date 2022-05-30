@@ -1,4 +1,4 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   mix,
   Group,
@@ -22,7 +22,7 @@ interface SwitchProps {
   x: number;
   y: number;
   width: number;
-  pressed: SkiaReadonlyValue<number>;
+  pressed: SkiaValue<number>;
 }
 
 export const Switch = ({ x, y, width, pressed }: SwitchProps) => {
