@@ -1,3 +1,16 @@
+diff --git a/node_modules/canvaskit-wasm/package.json b/node_modules/canvaskit-wasm/package.json
+index cc970b8..aac112d 100644
+--- a/node_modules/canvaskit-wasm/package.json
++++ b/node_modules/canvaskit-wasm/package.json
+@@ -2,7 +2,7 @@
+   "name": "canvaskit-wasm",
+   "version": "0.34.0",
+   "description": "A WASM version of Skia's Canvas API",
+-  "main": "bin/canvaskit.js",
++  "main": "bin/full/canvaskit.js",
+   "homepage": "https://github.com/google/skia/tree/main/modules/canvaskit",
+   "bugs": {
+     "url": "https://bugs.chromium.org/p/skia/issues/entry"
 diff --git a/node_modules/canvaskit-wasm/types/index.d.ts b/node_modules/canvaskit-wasm/types/index.d.ts
 index 3abbcc3..765e883 100644
 --- a/node_modules/canvaskit-wasm/types/index.d.ts
