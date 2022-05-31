@@ -67,7 +67,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   makeAsWinding() {
     const result = this.ref.makeAsWinding();
-    return result === null ? result : new JsiSkPath(this.CanvasKit, result);
+    return result === null ? result : this;
   }
 
   offset(dx: number, dy: number) {
@@ -141,7 +141,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
             cap: optEnum(opts.cap),
           }
     );
-    return result === null ? result : new JsiSkPath(this.CanvasKit, result);
+    return result === null ? result : this;
   }
 
   close() {
@@ -292,7 +292,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   trim(startT: number, stopT: number, isComplement: boolean) {
     const result = this.ref.trim(startT, stopT, isComplement);
-    return result === null ? result : new JsiSkPath(this.CanvasKit, result);
+    return result === null ? result : this;
   }
 
   transform(m3: SkMatrix) {

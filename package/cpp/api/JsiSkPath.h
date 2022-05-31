@@ -313,8 +313,8 @@ public:
   JSI_HOST_FUNCTION(makeAsWinding) {
     SkPath out;
     if (AsWinding(*getObject(), &out)) {
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPath>(getContext(), std::move(out)));
+        getObject()->swap(out);
+        return thisValue.getObject(runtime);
     }
     return jsi::Value::null();
   }
