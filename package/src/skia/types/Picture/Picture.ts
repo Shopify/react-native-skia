@@ -1,8 +1,8 @@
-import type { InputColorMatrix } from "../ColorFilter";
 import type { FilterMode } from "../Image";
 import type { TileMode } from "../ImageFilter";
 import type { SkRect } from "../Rect";
 import type { SkShader } from "../Shader";
+import type { SkMatrix } from "../Matrix";
 
 export interface SkPicture {
   /**
@@ -22,7 +22,7 @@ export interface SkPicture {
     tmx: TileMode,
     tmy: TileMode,
     mode: FilterMode,
-    localMatrix?: InputColorMatrix,
+    localMatrix?: SkMatrix,
     tileRect?: SkRect
   ): SkShader;
 

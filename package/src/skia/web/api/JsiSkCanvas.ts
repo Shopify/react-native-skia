@@ -1,4 +1,4 @@
-import type { Canvas, CanvasKit, Image, Paint, Rect } from "canvaskit-wasm";
+import type { CanvasKit, Canvas, Image, Paint, Rect } from "canvaskit-wasm";
 
 import type {
   BlendMode,

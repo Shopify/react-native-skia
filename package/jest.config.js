@@ -4,5 +4,5 @@ module.exports = {
   testEnvironment: "node",
   // Ignore lib folder - contains build artifacts and should
   // not be probed for tests
-  modulePathIgnorePatterns: ["<rootDir>/lib/typescript"],
+  modulePathIgnorePatterns: ["<rootDir>/lib/typescript", "setup.ts$"],
 };

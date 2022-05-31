@@ -1,5 +1,3 @@
-import type { CanvasKit } from "canvaskit-wasm";
-
 import type { SkColor, Color as InputColor } from "../../types";
 
 const alphaf = (c: number) => ((c >> 24) & 255) / 255;
@@ -7,7 +5,8 @@ const red = (c: number) => (c >> 16) & 255;
 const green = (c: number) => (c >> 8) & 255;
 const blue = (c: number) => c & 255;
 
-const colorMap = {
+// From https://raw.githubusercontent.com/deanm/css-color-parser-js/master/csscolorparser.js
+const CSSColorTable = {
   transparent: Float32Array.of(0, 0, 0, 0),
   aliceblue: Float32Array.of(240, 248, 255, 1),
   antiquewhite: Float32Array.of(250, 235, 215, 1),
@@ -159,11 +158,158 @@ const colorMap = {
   yellowgreen: Float32Array.of(154, 205, 50, 1),
 };
 
-export const Color = (CanvasKit: CanvasKit, color: InputColor): SkColor => {
+const clampCSSByte = (j: number) => {
+  // Clamp to integer 0 .. 255.
+  const i = Math.round(j); // Seems to be what Chrome does (vs truncation).
+  // eslint-disable-next-line no-nested-ternary
+  return i < 0 ? 0 : i > 255 ? 255 : i;
+};
+
+const clampCSSFloat = (f: number) => {
+  // eslint-disable-next-line no-nested-ternary
+  return f < 0 ? 0 : f > 1 ? 1 : f;
+};
+
+const parseCSSInt = (str: string) => {
+  // int or percentage.
+  if (str[str.length - 1] === "%") {
+    return clampCSSByte((parseFloat(str) / 100) * 255);
+  }
+  // eslint-disable-next-line radix
+  return clampCSSByte(parseInt(str));
+};
+
+const parseCSSFloat = (str: string | undefined) => {
+  if (str === undefined) {
+    return 1;
+  }
+  // float or percentage.
+  if (str[str.length - 1] === "%") {
+    return clampCSSFloat(parseFloat(str) / 100);
+  }
+  return clampCSSFloat(parseFloat(str));
+};
+
+const CSSHueToRGB = (m1: number, m2: number, h: number) => {
+  if (h < 0) {
+    h += 1;
+  } else if (h > 1) {
+    h -= 1;
+  }
+
+  if (h * 6 < 1) {
+    return m1 + (m2 - m1) * h * 6;
+  }
+  if (h * 2 < 1) {
+    return m2;
+  }
+  if (h * 3 < 2) {
+    return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+  }
+  return m1;
+};
+
+const parseCSSColor = (cssStr: string) => {
+  // Remove all whitespace, not compliant, but should just be more accepting.
+  var str = cssStr.replace(/ /g, "").toLowerCase();
+
+  // Color keywords (and transparent) lookup.
+  if (str in CSSColorTable) {
+    const cl = CSSColorTable[str as keyof typeof CSSColorTable];
+    if (cl) {
+      return Float32Array.of(...cl);
+    }
+    return null;
+  } // dup.
+
+  // #abc and #abc123 syntax.
+  if (str[0] === "#") {
+    if (str.length === 4) {
+      var iv = parseInt(str.substr(1), 16); // TODO(deanm): Stricter parsing.
+      if (!(iv >= 0 && iv <= 0xfff)) {
+        return null;
+      } // Covers NaN.
+      return [
+        ((iv & 0xf00) >> 4) | ((iv & 0xf00) >> 8),
+        (iv & 0xf0) | ((iv & 0xf0) >> 4),
+        (iv & 0xf) | ((iv & 0xf) << 4),
+        1,
+      ];
+    } else if (str.length === 7) {
+      var iv = parseInt(str.substr(1), 16); // TODO(deanm): Stricter parsing.
+      if (!(iv >= 0 && iv <= 0xffffff)) {
+        return null;
+      } // Covers NaN.
+      return [(iv & 0xff0000) >> 16, (iv & 0xff00) >> 8, iv & 0xff, 1];
+    }
+
+    return null;
+  }
+
+  var op = str.indexOf("("),
+    ep = str.indexOf(")");
+  if (op !== -1 && ep + 1 === str.length) {
+    var fname = str.substr(0, op);
+    var params = str.substr(op + 1, ep - (op + 1)).split(",");
+    var alpha = 1; // To allow case fallthrough.
+    switch (fname) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-expect-error
+      case "rgba":
+        if (params.length !== 4) {
+          return null;
+        }
+        alpha = parseCSSFloat(params.pop());
+      // Fall through.
+      case "rgb":
+        if (params.length !== 3) {
+          return null;
+        }
+        return [
+          parseCSSInt(params[0]),
+          parseCSSInt(params[1]),
+          parseCSSInt(params[2]),
+          alpha,
+        ];
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-expect-error
+      case "hsla":
+        if (params.length !== 4) {
+          return null;
+        }
+        alpha = parseCSSFloat(params.pop());
+      // Fall through.
+      case "hsl":
+        if (params.length !== 3) {
+          return null;
+        }
+        var h = (((parseFloat(params[0]) % 360) + 360) % 360) / 360; // 0 .. 1
+        // NOTE(deanm): According to the CSS spec s/l should only be
+        // percentages, but we don't bother and let float or percentage.
+        var s = parseCSSFloat(params[1]);
+        var l = parseCSSFloat(params[2]);
+        var m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s;
+        var m1 = l * 2 - m2;
+        return [
+          clampCSSByte(CSSHueToRGB(m1, m2, h + 1 / 3) * 255),
+          clampCSSByte(CSSHueToRGB(m1, m2, h) * 255),
+          clampCSSByte(CSSHueToRGB(m1, m2, h - 1 / 3) * 255),
+          alpha,
+        ];
+      default:
+        return null;
+    }
+  }
+
+  return null;
+};
+
+export const Color = (color: InputColor): SkColor => {
   if (color instanceof Float32Array) {
     return color;
   } else if (typeof color === "string") {
-    const rgba = CanvasKit.parseColorString(color, colorMap);
+    const r = parseCSSColor(color);
+    const rgba = r === null ? CSSColorTable.black : r;
     return Float32Array.of(
       rgba[0] / 255,
       rgba[1] / 255,

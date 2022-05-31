@@ -45,6 +45,7 @@ export enum PathVerb {
   Conic,
   Cubic,
   Close,
+  Done,
 }
 
 export type PathCommand = number[];
@@ -260,10 +261,8 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * only lines. If Path contains curves, computed bounds includes
    * the maximum extent of the quad, conic, or cubic; is slower than getBounds();
    * and unlike getBounds(), does not cache the result.
-   * @param outputArray - if provided, the bounding box will be copied into this array instead of
-   *                      allocating a new one.
    */
-  computeTightBounds(outputArray?: SkRect): SkRect;
+  computeTightBounds(): SkRect;
 
   /**
    * Appends arc to Path. Arc added is part of ellipse

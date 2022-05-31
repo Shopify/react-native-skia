@@ -14,7 +14,7 @@ import type {
   SkPathEffect,
 } from "../../types";
 
-import { HostObject, toNullableValue } from "./Host";
+import { HostObject, toNullableValue, ckEnum } from "./Host";
 
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   constructor(CanvasKit: CanvasKit, ref: Paint) {
@@ -54,7 +54,7 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setBlendMode(blendMode: BlendMode) {
-    this.ref.setBlendMode({ value: blendMode });
+    this.ref.setBlendMode(ckEnum(blendMode));
   }
 
   setColor(color: SkColor) {
@@ -82,11 +82,11 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setStrokeCap(cap: StrokeCap) {
-    this.ref.setStrokeCap({ value: cap });
+    this.ref.setStrokeCap(ckEnum(cap));
   }
 
   setStrokeJoin(join: StrokeJoin) {
-    this.ref.setStrokeJoin({ value: join });
+    this.ref.setStrokeJoin(ckEnum(join));
   }
 
   setStrokeMiter(limit: number) {

@@ -7,7 +7,6 @@ export interface SkSLUniform {
   rows: number;
   /** The index into the uniforms array that this uniform begins. */
   slot: number;
-  isInteger: boolean;
 }
 
 export type SkRuntimeShaderBuilder = SkJSIInstance<"RuntimeShaderBuilder">;

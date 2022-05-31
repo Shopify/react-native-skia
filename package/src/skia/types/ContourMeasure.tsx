@@ -8,15 +8,13 @@ export interface PosTan {
   ty: number;
 }
 
-export interface SkContourMeasure extends SkJSIInstance<"ContourMeasureIter"> {
+export interface SkContourMeasure extends SkJSIInstance<"ContourMeasure"> {
   /**
    * Returns the given position and tangent line for the distance on the given contour.
    * The return value is 4 floats in this order: posX, posY, vecX, vecY.
    * @param distance - will be pinned between 0 and length().
-   * @param output - if provided, the four floats of the PosTan will be copied into this array
-   *                 instead of allocating a new one.
    */
-  getPosTan(distance: number, output?: PosTan): PosTan;
+  getPosTan(distance: number): PosTan;
 
   /**
    * Returns an Path representing the segment of this contour.
