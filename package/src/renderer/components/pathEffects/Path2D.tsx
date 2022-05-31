@@ -1,10 +1,10 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia, isPathEffect } from "../../../skia";
+import { isPathEffect } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { SkMatrix } from "../../../skia";
+import type { SkMatrix } from "../../../skia/types";
 import type { PathDef } from "../../processors/Paths";
 import { processPath } from "../../processors/Paths";
 
@@ -15,7 +15,7 @@ export interface Path2DPathEffectProps {
 }
 
 const onDeclare = createDeclaration<Path2DPathEffectProps>(
-  ({ path, matrix }, children) => {
+  ({ path, matrix }, children, { Skia }) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakePath2D(matrix, processPath(path));
     if (child) {

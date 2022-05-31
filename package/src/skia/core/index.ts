@@ -1,4 +1,3 @@
-export * from "./Color";
 export * from "./Data";
 export * from "./Font";
 export * from "./Typeface";

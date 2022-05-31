@@ -1,10 +1,10 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia, isPathEffect } from "../../../skia";
+import { isPathEffect } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { SkMatrix } from "../../../skia";
+import type { SkMatrix } from "../../../skia/types";
 
 export interface Line2DPathEffectProps {
   children?: ReactNode | ReactNode[];
@@ -13,7 +13,7 @@ export interface Line2DPathEffectProps {
 }
 
 const onDeclare = createDeclaration<Line2DPathEffectProps>(
-  ({ width, matrix }, children) => {
+  ({ width, matrix }, children, { Skia }) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakeLine2D(width, matrix);
     if (child) {

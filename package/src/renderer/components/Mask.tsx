@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import React, { useMemo } from "react";
 
-import { BlendMode, Skia } from "../../skia";
+// TODO: remove
+import { Skia } from "../../skia/Skia";
+import { BlendMode } from "../../skia/types";
 
 import { Group } from "./Group";
 

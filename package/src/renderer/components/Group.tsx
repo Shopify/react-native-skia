@@ -1,8 +1,8 @@
 import React from "react";
 import type { RefObject } from "react";
 
-import type { SkPaint } from "../../skia";
-import { ClipOp } from "../../skia";
+import type { SkPaint } from "../../skia/types";
+import { ClipOp } from "../../skia/types";
 import { processTransform, processPaint, processClip } from "../processors";
 import type {
   CustomPaintProps,
@@ -33,6 +33,7 @@ const onDraw = createDrawing<GroupProps>(
       (child) => child instanceof DrawingNode
     );
     const paint = processPaint(
+      ctx.Skia,
       ctx.paint.copy(),
       opacity,
       groupProps,

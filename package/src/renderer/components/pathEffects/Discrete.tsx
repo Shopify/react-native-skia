@@ -1,7 +1,7 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia, isPathEffect } from "../../../skia";
+import { isPathEffect } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
@@ -13,7 +13,7 @@ export interface DiscretePathEffectProps {
 }
 
 const onDeclare = createDeclaration<DiscretePathEffectProps>(
-  ({ length, deviation, seed }, children) => {
+  ({ length, deviation, seed }, children, { Skia }) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakeDiscrete(length, deviation, seed);
     if (child) {

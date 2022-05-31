@@ -1,9 +1,9 @@
 import React from "react";
 
-import { Skia, processColor } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { Color } from "../../../skia";
+import type { Color } from "../../../skia/types";
+import { processColor } from "../../processors/Color";
 
 import { getInput } from "./getInput";
 import { MakeInnerShadow } from "./InnerShadow";
@@ -18,9 +18,13 @@ export interface ShadowProps {
 }
 
 const onDeclare = createDeclaration<ShadowProps>(
-  ({ dx, dy, blur, color: cl, shadowOnly, inner }, children, { opacity }) => {
+  (
+    { dx, dy, blur, color: cl, shadowOnly, inner },
+    children,
+    { opacity, Skia }
+  ) => {
     const input = getInput(children);
-    const color = processColor(cl, opacity);
+    const color = processColor(Skia, cl, opacity);
     let factory;
     if (inner) {
       factory = MakeInnerShadow.bind(null, shadowOnly);

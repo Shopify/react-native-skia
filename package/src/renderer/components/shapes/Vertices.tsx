@@ -2,9 +2,10 @@ import React from "react";
 
 import type { CustomPaintProps, SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
-import type { SkPoint } from "../../../skia";
-import { BlendMode, VertexMode, Skia, processColor } from "../../../skia";
+import type { SkPoint } from "../../../skia/types";
+import { BlendMode, VertexMode } from "../../../skia/types";
 import { createDrawing } from "../../nodes";
+import { processColor } from "../../processors/Color";
 
 export interface VerticesProps extends CustomPaintProps {
   colors?: string[];
@@ -17,7 +18,7 @@ export interface VerticesProps extends CustomPaintProps {
 
 const onDraw = createDrawing<VerticesProps>(
   (
-    { canvas, paint, opacity },
+    { canvas, paint, opacity, Skia },
     { colors, vertices, textures, blendMode, mode, indices }
   ) => {
     // If the colors are provided, the default blendMode is set to dstOver, if not, the default is set to srcOver
@@ -28,7 +29,7 @@ const onDraw = createDrawing<VerticesProps>(
       vertexMode,
       vertices,
       textures,
-      colors ? colors.map((c) => processColor(c, opacity)) : undefined,
+      colors ? colors.map((c) => processColor(Skia, c, opacity)) : undefined,
       indices
     );
     canvas.drawVertices(vert, blend, paint);

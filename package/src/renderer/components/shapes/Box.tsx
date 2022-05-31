@@ -1,12 +1,18 @@
 import React from "react";
 
-import type { Color, SkRRect, SkJSIInstance, SkRect } from "../../../skia";
-import { ClipOp, BlurStyle, processColor } from "../../../skia";
+import type {
+  Color,
+  SkRRect,
+  SkJSIInstance,
+  SkRect,
+  Skia,
+} from "../../../skia/types";
+import { ClipOp, BlurStyle } from "../../../skia/types";
 import { createDrawing } from "../../nodes";
 import type { AnimatedProps, CustomPaintProps } from "../../processors";
 import { isRRect } from "../../processors/Rects";
 import { createDeclaration } from "../../nodes/Declaration";
-import type { Skia } from "../../../skia/types";
+import { processColor } from "../../processors/Color";
 
 const inflate = (
   Skia: Skia,
@@ -73,7 +79,7 @@ const onDraw = createDrawing<BoxProps>((ctx, { box: defaultBox }, node) => {
     .map((shadow) => {
       const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
       const lPaint = Skia.Paint();
-      lPaint.setColor(processColor(color, opacity));
+      lPaint.setColor(processColor(Skia, color, opacity));
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
       );
@@ -89,7 +95,7 @@ const onDraw = createDrawing<BoxProps>((ctx, { box: defaultBox }, node) => {
       canvas.save();
       canvas.clipRRect(box, ClipOp.Intersect, false);
       const lPaint = Skia.Paint();
-      lPaint.setColor(processColor(color, opacity));
+      lPaint.setColor(processColor(Skia, color, opacity));
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
       );
