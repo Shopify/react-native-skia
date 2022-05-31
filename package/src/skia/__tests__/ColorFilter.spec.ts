@@ -3,7 +3,7 @@ import path from "path";
 
 import type { SkColorFilter } from "../types/ColorFilter/ColorFilter";
 
-import { setupSkia, processResult } from "./snapshot";
+import { setupSkia, processResult } from "./setup";
 
 describe("Color Filters", () => {
   it("Color Matrix 1", () => {

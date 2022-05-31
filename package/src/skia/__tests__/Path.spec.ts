@@ -3,7 +3,7 @@ import { FillType } from "../types";
 import type { SkPath } from "../types/Path/Path";
 import type { Skia } from "../types/Skia";
 
-import { processResult, setupSkia } from "./snapshot";
+import { processResult, setupSkia } from "./setup";
 
 const roundtrip = (Skia: Skia, path: SkPath) =>
   Skia.Path.MakeFromCmds(path.toCmds())!;

@@ -3,7 +3,7 @@ import path from "path";
 
 import type { SkCanvas } from "../types/Canvas";
 
-import { processResult, setupSkia } from "./snapshot";
+import { processResult, setupSkia } from "./setup";
 
 describe("Test transforms", () => {
   it("Test rotate", () => {

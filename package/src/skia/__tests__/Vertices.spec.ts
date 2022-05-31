@@ -1,6 +1,6 @@
 import { BlendMode, VertexMode } from "../types";
 
-import { processResult, setupSkia } from "./snapshot";
+import { processResult, setupSkia } from "./setup";
 
 describe("Vertices", () => {
   it("Draws billinear gradient", () => {

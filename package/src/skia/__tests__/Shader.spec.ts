@@ -1,6 +1,6 @@
 import { TileMode } from "../types";
 
-import { processResult, setupSkia } from "./snapshot";
+import { processResult, setupSkia } from "./setup";
 
 describe("Shader", () => {
   it("Simple shader", () => {

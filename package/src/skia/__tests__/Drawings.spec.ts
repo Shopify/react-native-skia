@@ -1,6 +1,6 @@
 import { BlendMode, PaintStyle, StrokeCap } from "../types";
 
-import { processResult, setupSkia } from "./snapshot";
+import { processResult, setupSkia } from "./setup";
 
 describe("Drawings", () => {
   it("Draws a lightblue rectange", () => {
