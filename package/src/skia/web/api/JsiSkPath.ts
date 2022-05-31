@@ -11,6 +11,7 @@ import type {
   SkRRect,
   StrokeOpts,
 } from "../../types";
+import { PathVerb } from "../../types";
 import type { SkFont } from "../../types/Font/Font";
 
 import {
@@ -313,21 +314,29 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     const cmds: PathCommand[] = [];
     let cmd = [];
     const flatCmds = this.ref.toCmds();
-    //                         { "Move", "Line", "Quad", "Conic", "Cubic", "Close", "Done" };
-    //const int pointCount[] = {     1 ,     2 ,     3 ,      3 ,      4 ,      1 ,     0  };
-    //const int cmdCount[] =   {     3 ,     5 ,     7 ,      8 ,      9 ,      3 ,     0  };
-    const cmdCount = [3, 5, 7, 8, 9, 3];
+    const CmdCount = {
+      [PathVerb.Move]: 3,
+      [PathVerb.Line]: 3,
+      [PathVerb.Quad]: 5,
+      [PathVerb.Conic]: 6,
+      [PathVerb.Cubic]: 7,
+      [PathVerb.Close]: 0,
+      [PathVerb.Done]: 0,
+    };
     for (let i = 0; i < flatCmds.length; i++) {
+      if (cmd.length === 0 && flatCmds[i] === PathVerb.Done) {
+        break;
+      }
       const c = flatCmds[i];
       cmd.push(c);
-      if (cmd.length > 0) {
-        const length = cmdCount[cmd[0]];
+      if (cmd.length > 1) {
+        const length = CmdCount[cmd[0] as PathVerb];
         if (cmd.length === length) {
           cmds.push(cmd);
           cmd = [];
         }
       }
     }
-    return cmds;
+    return cmds.concat(cmd);
   }
 }
