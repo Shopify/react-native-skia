@@ -1,7 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-// TODO: rename Data to SkData
-import type { Data as SkData } from "../../types";
+import type { SkData } from "../../types";
 
 import { HostObject } from "./Host";
 

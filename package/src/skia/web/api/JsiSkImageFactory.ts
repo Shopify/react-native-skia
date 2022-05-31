@@ -1,6 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { Data, ImageInfo } from "../../types";
+import type { SkData, ImageInfo } from "../../types";
 import type { ImageFactory } from "../../types/Image/ImageFactory";
 
 import { Host, toValue, ckEnum } from "./Host";
@@ -11,7 +11,7 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     super(CanvasKit);
   }
 
-  MakeImageFromEncoded(encoded: Data) {
+  MakeImageFromEncoded(encoded: SkData) {
     const image = this.CanvasKit.MakeImageFromEncoded(toValue(encoded));
     if (image === null) {
       return null;
@@ -19,7 +19,7 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return new JsiSkImage(this.CanvasKit, image);
   }
 
-  MakeImage(info: ImageInfo, data: Data, bytesPerRow: number) {
+  MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number) {
     // see toSkImageInfo() from canvaskit
     const image = this.CanvasKit.MakeImage(
       {

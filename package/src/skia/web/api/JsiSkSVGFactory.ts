@@ -1,6 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { Data, SkSVG } from "../../types";
+import type { SkData, SkSVG } from "../../types";
 import type { SVGFactory } from "../../types/SVG/SVGFactory";
 
 import { Host, NotImplementedOnRNWeb } from "./Host";
@@ -10,7 +10,7 @@ export class JsiSkSVGFactory extends Host implements SVGFactory {
     super(CanvasKit);
   }
 
-  MakeFromData(_data: Data): SkSVG | null {
+  MakeFromData(_data: SkData): SkSVG | null {
     throw new NotImplementedOnRNWeb();
   }
 
