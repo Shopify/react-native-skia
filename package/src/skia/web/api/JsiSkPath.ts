@@ -35,12 +35,12 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     sweepAngleInDegrees: number
   ) {
     this.ref.addArc(toValue(oval), startAngleInDegrees, sweepAngleInDegrees);
-    // TODO: fix in SkPath
     return this;
   }
 
   addOval(oval: SkRect, isCCW?: boolean, startIndex?: number) {
     this.ref.addOval(toValue(oval), isCCW, startIndex);
+    return this;
   }
 
   countPoints() {
@@ -52,23 +52,27 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
       points.map((p) => toValue(p)),
       close
     );
+    return this;
   }
 
   moveTo(x: number, y: number) {
     this.ref.moveTo(x, y);
+    return this;
   }
 
   lineTo(x: number, y: number) {
     this.ref.lineTo(x, y);
+    return this;
   }
 
   makeAsWinding() {
     const result = this.ref.makeAsWinding();
-    return result === null ? result : new JsiSkPath(this.CanvasKit, result);
+    return result === null ? result : this;
   }
 
   offset(dx: number, dy: number) {
     this.ref.offset(dx, dy);
+    return this;
   }
 
   rArcTo(
@@ -81,10 +85,12 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     dy: number
   ) {
     this.ref.rArcTo(rx, ry, xAxisRotateInDegrees, useSmallArc, isCCW, dx, dy);
+    return this;
   }
 
   rConicTo(dx1: number, dy1: number, dx2: number, dy2: number, w: number) {
     this.ref.rConicTo(dx1, dy1, dx2, dy2, w);
+    return this;
   }
 
   rCubicTo(
@@ -96,23 +102,21 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     y: number
   ) {
     this.ref.rCubicTo(cpx1, cpy1, cpx2, cpy2, x, y);
+    return this;
   }
 
   rMoveTo(x: number, y: number) {
     this.ref.rMoveTo(x, y);
-    // TODO: fix in SkPath
     return this;
   }
 
   rLineTo(x: number, y: number) {
     this.ref.rLineTo(x, y);
-    // TODO: fix in SkPath
     return this;
   }
 
   rQuadTo(x1: number, y1: number, x2: number, y2: number) {
     this.ref.rQuadTo(x1, y1, x2, y2);
-    // TODO: fix in SkPath
     return this;
   }
 
@@ -124,8 +128,8 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     this.ref.setIsVolatile(volatile);
   }
 
-  stroke(opts?: StrokeOpts): boolean {
-    return !!this.ref.stroke(
+  stroke(opts?: StrokeOpts) {
+    const result = this.ref.stroke(
       opts === undefined
         ? undefined
         : {
@@ -137,6 +141,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
             cap: optEnum(opts.cap),
           }
     );
+    return result === null ? result : this;
   }
 
   close() {
@@ -167,7 +172,6 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
       sweepAngleInDegrees,
       forceMoveTo
     );
-    // TODO: fix in SkPath
     return this;
   }
 
@@ -189,19 +193,16 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
       x,
       y
     );
-    // TODO: fix in SkPath
     return this;
   }
 
   arcToTangent(x1: number, y1: number, x2: number, y2: number, radius: number) {
     this.ref.arcToTangent(x1, y1, x2, y2, radius);
-    // TODO: fix in SkPath
     return this;
   }
 
   conicTo(x1: number, y1: number, x2: number, y2: number, w: number) {
     this.ref.conicTo(x1, y1, x2, y2, w);
-    // TODO: fix in SkPath
     return this;
   }
 
@@ -222,6 +223,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     y: number
   ) {
     this.ref.cubicTo(cpx1, cpy1, cpx2, cpy2, x, y);
+    return this;
   }
 
   dash(on: number, off: number, phase: number) {
@@ -250,7 +252,6 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   addRRect(rrect: SkRRect, isCCW?: boolean) {
     this.ref.addRRect(toValue(rrect), isCCW);
-    //TODO: fix in SkPath
     return this;
   }
 
@@ -290,7 +291,8 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   trim(startT: number, stopT: number, isComplement: boolean) {
-    return !!this.ref.trim(startT, stopT, isComplement);
+    const result = this.ref.trim(startT, stopT, isComplement);
+    return result === null ? result : this;
   }
 
   transform(m3: SkMatrix) {

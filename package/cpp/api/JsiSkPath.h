@@ -31,18 +31,19 @@ using namespace facebook;
 
 
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
-public:
-    // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
-    JSI_PROPERTY_GET(__typename__) {
-      return jsi::String::createFromUtf8(runtime, "Path");
-    }
 
-    JSI_HOST_FUNCTION(addArc) {
+public:
+  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "Path");
+  }
+
+  JSI_HOST_FUNCTION(addArc) {
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]).get();
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
     getObject()->addArc(*rect, start, sweep);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(addOval) {
@@ -52,8 +53,8 @@ public:
       direction = SkPathDirection::kCCW;
     }
     unsigned startIndex = count < 3 ? 0 : arguments[2].asNumber();
-    getObject()->addOval(*rect, direction, startIndex);
-    return jsi::Value::undefined();
+    auto result = getObject()->addOval(*rect, direction, startIndex);
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(addPoly) {
@@ -68,7 +69,7 @@ public:
       points.push_back(*point.get());
     }
     getObject()->addPoly(points.data(), (int)points.size(), close);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(addRect) {
@@ -88,7 +89,7 @@ public:
       direction = SkPathDirection::kCCW;
     }
     getObject()->addRRect(*rrect, direction);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(arcToOval) {
@@ -97,7 +98,7 @@ public:
     auto sweep = arguments[2].asNumber();
     auto forceMoveTo = arguments[3].getBool();
     getObject()->arcTo(*rect, start, sweep, forceMoveTo);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(arcToRotated) {
@@ -112,7 +113,7 @@ public:
     auto x = arguments[5].asNumber();
     auto y = arguments[6].asNumber();
     getObject()->arcTo(rx, ry, xAxisRotate, arcSize, sweep, x, y);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rArcTo) {
@@ -127,7 +128,7 @@ public:
     auto x = arguments[5].asNumber();
     auto y = arguments[6].asNumber();
     getObject()->rArcTo(rx, ry, xAxisRotate, arcSize, sweep, x, y);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(arcToTangent) {
@@ -137,7 +138,7 @@ public:
     auto y2 = arguments[3].asNumber();
     auto r = arguments[4].asNumber();
     getObject()->arcTo(x1, y1, x2, y2, r);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(computeTightBounds) {
@@ -160,7 +161,7 @@ public:
     auto y2 = arguments[3].asNumber();
     auto w = arguments[4].asNumber();
     getObject()->conicTo(x1, y1, x2, y2, w);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rConicTo) {
@@ -170,7 +171,7 @@ public:
     auto y2 = arguments[3].asNumber();
     auto w = arguments[4].asNumber();
     getObject()->rConicTo(x1, y1, x2, y2, w);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(contains) {
@@ -270,7 +271,7 @@ public:
     auto precision = jsiPrecision.isUndefined() ? 1 : jsiPrecision.asNumber();
     auto result = p.getFillPath(path, &path, nullptr, precision);
     getObject()->swap(path);
-    return jsi::Value(result);
+    return result ? thisValue.getObject(runtime) : jsi::Value::null();
   }
 
   JSI_HOST_FUNCTION(trim) {
@@ -284,15 +285,15 @@ public:
     if (!pe) {
       // SkDebugf("Invalid args to trim(): startT and stopT must be in
       // [0,1]\n");
-      return jsi::Value(false);
+      return jsi::Value::null();
     }
     SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
     if (pe->filterPath(&path, path, &rec, nullptr)) {
       getObject()->swap(path);
-      return jsi::Value(true);
+      return thisValue.getObject(runtime);
     }
     SkDebugf("Could not trim path\n");
-    return jsi::Value(false);
+    return jsi::Value::null();
   }
 
   JSI_HOST_FUNCTION(getPoint) {
@@ -312,8 +313,8 @@ public:
   JSI_HOST_FUNCTION(makeAsWinding) {
     SkPath out;
     if (AsWinding(*getObject(), &out)) {
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPath>(getContext(), std::move(out)));
+        getObject()->swap(out);
+        return thisValue.getObject(runtime);
     }
     return jsi::Value::null();
   }
@@ -324,34 +325,34 @@ public:
     SkScalar dx = arguments[0].asNumber();
     SkScalar dy = arguments[1].asNumber();
     getObject()->offset(dx, dy);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(moveTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->moveTo(x, y);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rMoveTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->rMoveTo(x, y);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
   JSI_HOST_FUNCTION(lineTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->lineTo(x, y);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rlineTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->rLineTo(x, y);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(cubicTo) {
@@ -362,7 +363,7 @@ public:
     auto x3 = arguments[4].asNumber();
     auto y3 = arguments[5].asNumber();
     getObject()->cubicTo(x1, y1, x2, y2, x3, y3);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rCubicTo) {
@@ -373,7 +374,7 @@ public:
     auto x3 = arguments[4].asNumber();
     auto y3 = arguments[5].asNumber();
     getObject()->rCubicTo(x1, y1, x2, y2, x3, y3);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(reset) {
@@ -401,7 +402,7 @@ public:
     auto x2 = arguments[2].asNumber();
     auto y2 = arguments[3].asNumber();
     getObject()->rQuadTo(x1, y1, x2, y2);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(addCircle) {
@@ -514,8 +515,10 @@ public:
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPath, __typename__))
 
   JSI_EXPORT_FUNCTIONS(
-    JSI_EXPORT_FUNC(JsiSkPath, addArc), JSI_EXPORT_FUNC(JsiSkPath, addOval),
-    JSI_EXPORT_FUNC(JsiSkPath, addPoly), JSI_EXPORT_FUNC(JsiSkPath, addRect),
+    JSI_EXPORT_FUNC(JsiSkPath, addArc),
+    JSI_EXPORT_FUNC(JsiSkPath, addOval),
+    JSI_EXPORT_FUNC(JsiSkPath, addPoly),
+    JSI_EXPORT_FUNC(JsiSkPath, addRect),
     JSI_EXPORT_FUNC(JsiSkPath, addRRect),
     JSI_EXPORT_FUNC(JsiSkPath, arcToOval),
     JSI_EXPORT_FUNC(JsiSkPath, arcToRotated),
@@ -523,28 +526,41 @@ public:
     JSI_EXPORT_FUNC(JsiSkPath, arcToTangent),
     JSI_EXPORT_FUNC(JsiSkPath, computeTightBounds),
     JSI_EXPORT_FUNC(JsiSkPath, getBounds),
-    JSI_EXPORT_FUNC(JsiSkPath, conicTo), JSI_EXPORT_FUNC(JsiSkPath, rConicTo),
-    JSI_EXPORT_FUNC(JsiSkPath, contains), JSI_EXPORT_FUNC(JsiSkPath, dash),
+    JSI_EXPORT_FUNC(JsiSkPath, conicTo),
+    JSI_EXPORT_FUNC(JsiSkPath, rConicTo),
+    JSI_EXPORT_FUNC(JsiSkPath, contains),
+    JSI_EXPORT_FUNC(JsiSkPath, dash),
     JSI_EXPORT_FUNC(JsiSkPath, equals),
     JSI_EXPORT_FUNC(JsiSkPath, getFillType),
     JSI_EXPORT_FUNC(JsiSkPath, setFillType),
     JSI_EXPORT_FUNC(JsiSkPath, setIsVolatile),
     JSI_EXPORT_FUNC(JsiSkPath, isVolatile),
-    JSI_EXPORT_FUNC(JsiSkPath, transform), JSI_EXPORT_FUNC(JsiSkPath, stroke),
-    JSI_EXPORT_FUNC(JsiSkPath, trim), JSI_EXPORT_FUNC(JsiSkPath, getPoint),
+    JSI_EXPORT_FUNC(JsiSkPath, transform),
+    JSI_EXPORT_FUNC(JsiSkPath, stroke),
+    JSI_EXPORT_FUNC(JsiSkPath, trim),
+    JSI_EXPORT_FUNC(JsiSkPath, getPoint),
     JSI_EXPORT_FUNC(JsiSkPath, toSVGString),
     JSI_EXPORT_FUNC(JsiSkPath, makeAsWinding),
-    JSI_EXPORT_FUNC(JsiSkPath, isEmpty), JSI_EXPORT_FUNC(JsiSkPath, offset),
-    JSI_EXPORT_FUNC(JsiSkPath, moveTo), JSI_EXPORT_FUNC(JsiSkPath, rMoveTo),
-    JSI_EXPORT_FUNC(JsiSkPath, lineTo), JSI_EXPORT_FUNC(JsiSkPath, rlineTo),
-    JSI_EXPORT_FUNC(JsiSkPath, cubicTo), JSI_EXPORT_FUNC(JsiSkPath, rCubicTo),
-    JSI_EXPORT_FUNC(JsiSkPath, reset), JSI_EXPORT_FUNC(JsiSkPath, rewind),
-    JSI_EXPORT_FUNC(JsiSkPath, quadTo), JSI_EXPORT_FUNC(JsiSkPath, rQuadTo),
+    JSI_EXPORT_FUNC(JsiSkPath, isEmpty),
+    JSI_EXPORT_FUNC(JsiSkPath, offset),
+    JSI_EXPORT_FUNC(JsiSkPath, moveTo),
+    JSI_EXPORT_FUNC(JsiSkPath, rMoveTo),
+    JSI_EXPORT_FUNC(JsiSkPath, lineTo),
+    JSI_EXPORT_FUNC(JsiSkPath, rlineTo),
+    JSI_EXPORT_FUNC(JsiSkPath, cubicTo),
+    JSI_EXPORT_FUNC(JsiSkPath, rCubicTo),
+    JSI_EXPORT_FUNC(JsiSkPath, reset),
+    JSI_EXPORT_FUNC(JsiSkPath, rewind),
+    JSI_EXPORT_FUNC(JsiSkPath, quadTo),
+    JSI_EXPORT_FUNC(JsiSkPath, rQuadTo),
     JSI_EXPORT_FUNC(JsiSkPath, addCircle),
-    JSI_EXPORT_FUNC(JsiSkPath, getLastPt), JSI_EXPORT_FUNC(JsiSkPath, close),
+    JSI_EXPORT_FUNC(JsiSkPath, getLastPt),
+    JSI_EXPORT_FUNC(JsiSkPath, close),
     JSI_EXPORT_FUNC(JsiSkPath, simplify),
-    JSI_EXPORT_FUNC(JsiSkPath, countPoints), JSI_EXPORT_FUNC(JsiSkPath, copy),
-    JSI_EXPORT_FUNC(JsiSkPath, fromText), JSI_EXPORT_FUNC(JsiSkPath, op),
+    JSI_EXPORT_FUNC(JsiSkPath, countPoints),
+    JSI_EXPORT_FUNC(JsiSkPath, copy),
+    JSI_EXPORT_FUNC(JsiSkPath, fromText),
+    JSI_EXPORT_FUNC(JsiSkPath, op),
     JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable),
     JSI_EXPORT_FUNC(JsiSkPath, interpolate),
     JSI_EXPORT_FUNC(JsiSkPath, toCmds),
@@ -552,7 +568,8 @@ public:
 
   JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
       : JsiSkWrappingSharedPtrHostObject<SkPath>(
-            std::move(context), std::make_shared<SkPath>(std::move(path))){}
+            std::move(context), std::make_shared<SkPath>(std::move(path))) {
+  }
 
   /**
     Returns the underlying object from a host object of this type

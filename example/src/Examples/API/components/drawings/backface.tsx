@@ -65,7 +65,7 @@ const Pattern = () => {
           center.y * 2 + delta * 2
         );
         const path = Skia.Path.Make();
-        path.addArc(rect, 0, 360);
+        path.addArc(rect, 0, 360).close();
         return (
           <Group key={i} origin={center} transform={[{ scale: 0.6 }]}>
             <Rect
