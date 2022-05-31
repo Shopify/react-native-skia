@@ -1,23 +1,10 @@
-import CanvasKitInit from "canvaskit-wasm";
-
 import { BlendMode, VertexMode } from "../types";
-import { JsiSkApi } from "../web";
 
-import { processResult, makeSurface } from "./snapshot";
-
-let Skia: ReturnType<typeof JsiSkApi>;
-
-beforeAll(async () => {
-  const CanvasKit = await CanvasKitInit();
-  Skia = JsiSkApi(CanvasKit);
-});
+import { processResult, setupSkia } from "./snapshot";
 
 describe("Vertices", () => {
-  it("Check that CanvasKit and CanvasKit are loaded", async () => {
-    expect(Skia).toBeDefined();
-  });
   it("Draws billinear gradient", () => {
-    const { surface, canvas, width } = makeSurface(Skia);
+    const { surface, canvas, width, Skia } = setupSkia();
     const vertices = [
       Skia.Point(0, 0),
       Skia.Point(width, 0),

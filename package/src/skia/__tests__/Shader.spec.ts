@@ -1,23 +1,10 @@
-import CanvasKitInit from "canvaskit-wasm";
-
 import { TileMode } from "../types";
-import { JsiSkApi } from "../web";
 
-import { processResult, makeSurface } from "./snapshot";
-
-let Skia: ReturnType<typeof JsiSkApi>;
-
-beforeAll(async () => {
-  const CanvasKit = await CanvasKitInit();
-  Skia = JsiSkApi(CanvasKit);
-});
+import { processResult, setupSkia } from "./snapshot";
 
 describe("Shader", () => {
-  it("Check that CanvasKit and CanvasKit are loaded", async () => {
-    expect(Skia).toBeDefined();
-  });
   it("Simple shader", () => {
-    const { surface, canvas } = makeSurface(Skia);
+    const { surface, canvas, Skia } = setupSkia();
     const paint = Skia.Paint();
     const source = Skia.RuntimeEffect.Make(`
 vec4 main(vec2 pos) {
@@ -30,7 +17,7 @@ vec4 main(vec2 pos) {
     processResult(surface, "snapshots/shader/shader1.png");
   });
   it("Shader with uniform", () => {
-    const { surface, canvas, width } = makeSurface(Skia);
+    const { surface, canvas, width, Skia } = setupSkia();
     const paint = Skia.Paint();
     const source = Skia.RuntimeEffect.Make(`
 uniform vec2 c;
@@ -48,7 +35,7 @@ vec4 main(vec2 pos) {
   });
 
   it("Sweep Gradient", () => {
-    const { surface, canvas, center } = makeSurface(Skia);
+    const { surface, canvas, center, Skia } = setupSkia();
     const paint = Skia.Paint();
     const colors = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"].map((c) =>
       Skia.Color(c)

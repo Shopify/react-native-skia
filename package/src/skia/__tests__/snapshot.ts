@@ -2,9 +2,19 @@ import fs from "fs";
 import path from "path";
 
 import type { Surface } from "canvaskit-wasm";
+import CanvasKitInit from "canvaskit-wasm";
 
-import type { Skia, SkSurface } from "../types";
+import { Skia } from "../types";
+import type { SkSurface } from "../types";
 import { toValue } from "../web/api/Host";
+import { JsiSkApi } from "../web";
+
+let Skia: ReturnType<typeof JsiSkApi>;
+
+beforeAll(async () => {
+  const CanvasKit = await CanvasKitInit();
+  Skia = JsiSkApi(CanvasKit);
+});
 
 export const processResult = (
   surface: SkSurface,
@@ -26,7 +36,8 @@ export const processResult = (
 const width = 256;
 const height = 256;
 
-export const makeSurface = (Skia: Skia) => {
+export const setupSkia = () => {
+  expect(Skia).toBeDefined();
   const surface = Skia.Surface.Make(width, height)!;
   expect(surface).toBeDefined();
   const canvas = surface.getCanvas();
@@ -37,5 +48,6 @@ export const makeSurface = (Skia: Skia) => {
     height,
     center: { x: width / 2, y: height / 2 },
     canvas,
+    Skia,
   };
 };

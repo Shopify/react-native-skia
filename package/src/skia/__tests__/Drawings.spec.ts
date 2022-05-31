@@ -1,23 +1,10 @@
-import CanvasKitInit from "canvaskit-wasm";
-
-import { JsiSkApi } from "../web";
 import { BlendMode, PaintStyle, StrokeCap } from "../types";
 
-import { processResult, makeSurface } from "./snapshot";
-
-let Skia: ReturnType<typeof JsiSkApi>;
-
-beforeAll(async () => {
-  const CanvasKit = await CanvasKitInit();
-  Skia = JsiSkApi(CanvasKit);
-});
+import { processResult, setupSkia } from "./snapshot";
 
 describe("Drawings", () => {
-  it("Check that CanvasKit and CanvasKit are loaded", async () => {
-    expect(Skia).toBeDefined();
-  });
   it("Draws a lightblue rectange", () => {
-    const { surface, canvas } = makeSurface(Skia);
+    const { surface, canvas, Skia } = setupSkia();
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("lightblue"));
     const rct = Skia.XYWHRect(64, 64, 128, 128);
@@ -26,7 +13,7 @@ describe("Drawings", () => {
   });
 
   it("Test multiply blend mode", () => {
-    const { surface, canvas, width, height } = makeSurface(Skia);
+    const { surface, canvas, width, height, Skia } = setupSkia();
     const r = 0.37 * width;
 
     const paint = Skia.Paint();
@@ -49,7 +36,7 @@ describe("Drawings", () => {
   });
 
   it("Draw a circle", () => {
-    const { surface, canvas } = makeSurface(Skia);
+    const { surface, canvas, Skia } = setupSkia();
 
     const r = 128;
 
@@ -63,7 +50,7 @@ describe("Drawings", () => {
   });
 
   it("Draw a stroke", () => {
-    const { surface, canvas } = makeSurface(Skia);
+    const { surface, canvas, Skia } = setupSkia();
 
     const paint = Skia.Paint();
     paint.setAntiAlias(true);
@@ -78,7 +65,7 @@ describe("Drawings", () => {
   });
 
   it("Draw a line", () => {
-    const { surface, canvas, width, height } = makeSurface(Skia);
+    const { surface, canvas, width, height, Skia } = setupSkia();
 
     const paint = Skia.Paint();
     paint.setAntiAlias(true);

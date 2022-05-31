@@ -1,24 +1,11 @@
 import fs from "fs";
 import path from "path";
 
-import CanvasKitInit from "canvaskit-wasm";
-
-import { JsiSkApi } from "../web";
 import type { SkCanvas } from "../types/Canvas";
 
-import { processResult, makeSurface } from "./snapshot";
-
-let Skia: ReturnType<typeof JsiSkApi>;
-
-beforeAll(async () => {
-  const CanvasKit = await CanvasKitInit();
-  Skia = JsiSkApi(CanvasKit);
-});
+import { processResult, setupSkia } from "./snapshot";
 
 describe("Test transforms", () => {
-  it("Check that CanvasKit and CanvasKit are loaded", async () => {
-    expect(Skia).toBeDefined();
-  });
   it("Test rotate", () => {
     testImageTransform((canvas) => {
       canvas.scale(0.75, 0.75);
@@ -39,7 +26,7 @@ describe("Test transforms", () => {
   });
 
   it("Test Rectangles", () => {
-    const { canvas, surface, width, height, center } = makeSurface(Skia);
+    const { canvas, surface, width, height, center, Skia } = setupSkia();
     const paints = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"].map((color) => {
       const paint = Skia.Paint();
       paint.setColor(Skia.Color(color));
@@ -70,7 +57,7 @@ describe("Test transforms", () => {
 });
 
 const testImageTransform = (cb: (canvas: SkCanvas) => void, result: string) => {
-  const { canvas, surface, center, width } = makeSurface(Skia);
+  const { canvas, surface, center, width, Skia } = setupSkia();
   const aspectRatio = 836 / 1324;
   const CARD_WIDTH = width - 64;
   const CARD_HEIGHT = CARD_WIDTH * aspectRatio;
