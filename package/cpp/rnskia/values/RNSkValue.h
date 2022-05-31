@@ -43,7 +43,7 @@ public:
     unsubscribe();
     
     // Verify input
-    if(value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
+    if(value.isObject() && value.asObject(runtime).isHostObject<RNSkAnimation>(runtime)) {
       auto animation = value.asObject(runtime).getHostObject<RNSkAnimation>(runtime);
       if(animation != nullptr) {
         // Now we have a value animation - let us connect and start
