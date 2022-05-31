@@ -1,16 +1,13 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
 import type {
-  SkColor,
   SkContourMeasureIter,
   Skia,
   SkPath,
-  SkPoint,
   SkRect,
   SkRuntimeEffect,
   SkRuntimeShaderBuilder,
   SkTypeface,
-  VertexMode,
 } from "../../types";
 
 import { JsiSkPoint } from "./JsiSkPoint";
@@ -20,7 +17,7 @@ import { Color } from "./JsiSkColor";
 import { JsiSkSurfaceFactory } from "./JsiSkSurfaceFactory";
 import { JsiSkRRect } from "./JsiSkRRect";
 import { JsiSkRSXform } from "./JsiSkRSXform";
-import { toValue, ckEnum } from "./Host";
+import { toValue } from "./Host";
 import { JsiSkContourMeasureIter } from "./JsiSkContourMeasureIter";
 import { JsiSkPictureRecorder } from "./JsiSkPictureRecorder";
 import { JsiSkPictureFactory } from "./JsiSkPictureFactory";
@@ -33,13 +30,13 @@ import { JsiSkRuntimeEffectFactory } from "./JsiSkRuntimeEffectFactory";
 import { JsiSkImageFilterFactory } from "./JsiImageFilterFactory";
 import { JsiSkShaderFactory } from "./JsiSkShaderFactory";
 import { JsiSkPathEffectFactory } from "./JsiSkPathEffectFactory";
-import { JsiSkVertices } from "./JsiSkVertices";
 import { JsiSkDataFactory } from "./JsiSkDataFactory";
 import { JsiSkImageFactory } from "./JsiSkImageFactory";
 import { JsiSkSVGFactory } from "./JsiSkSVGFactory";
 import { JsiSkTextBlobFactory } from "./JsiSkTextBlobFactory";
 import { JsiSkFontMgrFactory } from "./JsiSkFontMgrFactory";
 import { JsiSkFont } from "./JsiSkFont";
+import { MakeVertices } from "./JsiSkVerticesFactory";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
@@ -83,25 +80,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   ImageFilter: new JsiSkImageFilterFactory(CanvasKit),
   Shader: new JsiSkShaderFactory(CanvasKit),
   PathEffect: new JsiSkPathEffectFactory(CanvasKit),
-  MakeVertices: (
-    mode: VertexMode,
-    positions: SkPoint[],
-    textureCoordinates?: SkPoint[] | null,
-    colors?: SkColor[],
-    indices?: number[] | null,
-    isVolatile?: boolean
-  ) =>
-    new JsiSkVertices(
-      CanvasKit,
-      CanvasKit.MakeVertices(
-        ckEnum(mode),
-        positions.map((pos) => toValue(pos)),
-        (textureCoordinates ?? []).map((t) => toValue(t)),
-        (colors ?? []).map((pos) => toValue(pos)),
-        indices,
-        isVolatile
-      )
-    ),
+  MakeVertices: MakeVertices.bind(null, CanvasKit),
   Data: new JsiSkDataFactory(CanvasKit),
   Image: new JsiSkImageFactory(CanvasKit),
   SVG: new JsiSkSVGFactory(CanvasKit),

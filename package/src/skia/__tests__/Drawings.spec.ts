@@ -1,7 +1,7 @@
 import CanvasKitInit from "canvaskit-wasm";
 
 import { JsiSkApi } from "../web";
-import { BlendMode } from "../types";
+import { BlendMode, PaintStyle, StrokeCap } from "../types";
 
 import { processResult, makeSurface } from "./snapshot";
 
@@ -12,7 +12,7 @@ beforeAll(async () => {
   Skia = JsiSkApi(CanvasKit);
 });
 
-describe("Draw a rectangle", () => {
+describe("Drawings", () => {
   it("Check that CanvasKit and CanvasKit are loaded", async () => {
     expect(Skia).toBeDefined();
   });
@@ -24,9 +24,7 @@ describe("Draw a rectangle", () => {
     canvas.drawRect(rct, paint);
     processResult(surface, "snapshots/drawings/lightblue-rect.png");
   });
-});
 
-describe("Test blend modes", () => {
   it("Test multiply blend mode", () => {
     const { surface, canvas, width, height } = makeSurface(Skia);
     const r = 0.37 * width;
@@ -49,9 +47,7 @@ describe("Test blend modes", () => {
 
     processResult(surface, "snapshots/drawings/blend-modes.png");
   });
-});
 
-describe("Test Circle", () => {
   it("Draw a circle", () => {
     const { surface, canvas } = makeSurface(Skia);
 
@@ -64,5 +60,35 @@ describe("Test Circle", () => {
     canvas.drawCircle(r, r, r, paint);
 
     processResult(surface, "snapshots/drawings/cyan-circle.png");
+  });
+
+  it("Draw a stroke", () => {
+    const { surface, canvas } = makeSurface(Skia);
+
+    const paint = Skia.Paint();
+    paint.setAntiAlias(true);
+
+    paint.setColor(Skia.Color("cyan"));
+    paint.setStyle(PaintStyle.Stroke);
+    paint.setStrokeWidth(10);
+    const rect = Skia.XYWHRect(64, 64, 128, 128);
+    canvas.drawRect(rect, paint);
+
+    processResult(surface, "snapshots/drawings/stroke.png");
+  });
+
+  it("Draw a line", () => {
+    const { surface, canvas, width, height } = makeSurface(Skia);
+
+    const paint = Skia.Paint();
+    paint.setAntiAlias(true);
+
+    paint.setColor(Skia.Color("cyan"));
+    paint.setStyle(PaintStyle.Stroke);
+    paint.setStrokeWidth(10);
+    paint.setStrokeCap(StrokeCap.Round);
+    canvas.drawLine(32, 32, width - 32, height - 32, paint);
+
+    processResult(surface, "snapshots/drawings/line.png");
   });
 });
