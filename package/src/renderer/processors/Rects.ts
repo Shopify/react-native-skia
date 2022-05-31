@@ -12,8 +12,8 @@ class Rect extends Float32Array implements SkRect {
     super(4);
     this[0] = x;
     this[1] = y;
-    this[2] = w;
-    this[3] = h;
+    this[2] = x + w;
+    this[3] = y + h;
   }
 
   get x() {
