@@ -79,7 +79,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param isCCW - if the path should be drawn counter-clockwise or not
    * @param startIndex - index of initial point of ellipse
    */
-  addOval(oval: SkRect, isCCW?: boolean, startIndex?: number): void;
+  addOval(oval: SkRect, isCCW?: boolean, startIndex?: number): SkPath;
 
   /**
    * Returns the number of points in this path. Initially zero.
@@ -95,7 +95,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param points
    * @param close - if true, will add a line connecting last point to the first point.
    */
-  addPoly(points: SkPoint[], close: boolean): void;
+  addPoly(points: SkPoint[], close: boolean): SkPath;
 
   /** Adds beginning of contour at SkPoint (x, y).
 
@@ -105,7 +105,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
 
         example: https://fiddle.skia.org/c/@Path_moveTo
     */
-  moveTo(x: number, y: number): void;
+  moveTo(x: number, y: number): SkPath;
   /** Adds line from last point to (x, y). If SkPath is empty, or last SkPath::Verb is
         kClose_Verb, last point is set to (0, 0) before adding line.
 
@@ -118,7 +118,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
 
         example: https://fiddle.skia.org/c/@Path_lineTo
     */
-  lineTo(x: number, y: number): void;
+  lineTo(x: number, y: number): SkPath;
 
   /**
    * Returns a new path that covers the same area as the original path, but with the
@@ -133,7 +133,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param dx
    * @param dy
    */
-  offset(dx: number, dy: number): void;
+  offset(dx: number, dy: number): SkPath;
 
   /**
    * Relative version of arcToRotated.
@@ -153,7 +153,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
     isCCW: boolean,
     dx: number,
     dy: number
-  ): void;
+  ): SkPath;
 
   /**
    * Relative version of conicTo.
@@ -163,7 +163,13 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param dy2
    * @param w
    */
-  rConicTo(dx1: number, dy1: number, dx2: number, dy2: number, w: number): void;
+  rConicTo(
+    dx1: number,
+    dy1: number,
+    dx2: number,
+    dy2: number,
+    w: number
+  ): SkPath;
 
   /**
    * Relative version of cubicTo.
@@ -181,7 +187,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
     cpy2: number,
     x: number,
     y: number
-  ): void;
+  ): SkPath;
 
   /**
    * Relative version of moveTo.
@@ -226,8 +232,9 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * Turns this path into the filled equivalent of the stroked path. Returns false if the operation
    * fails (e.g. the path is a hairline).
    * @param opts - describe how stroked path should look.
+   * If such a transformation cannot be done, null is returned.
    */
-  stroke(opts?: StrokeOpts): boolean;
+  stroke(opts?: StrokeOpts): null | SkPath;
 
   /**
    * Appends CLOSE_VERB to Path. A closed contour connects the first and last point
@@ -370,7 +377,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
     cpy2: number,
     x: number,
     y: number
-  ): void;
+  ): SkPath;
 
   /**
    * Changes this path to be the dashed version of itself. This is the same effect as creating
@@ -506,7 +513,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param stopT  - a value in the range [0.0, 1.0]. 1.0 is the end of the path.
    * @param isComplement
    */
-  trim(startT: number, stopT: number, isComplement: boolean): boolean;
+  trim(startT: number, stopT: number, isComplement: boolean): null | SkPath;
 
   /**
    * Transforms the path by the specified matrix.
