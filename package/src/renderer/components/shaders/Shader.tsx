@@ -1,9 +1,8 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import type { Vector } from "../../../skia/types";
+import type { Vector, SkRuntimeEffect } from "../../../skia/types";
 import { isShader } from "../../../skia/types";
-import type { SkRuntimeEffect } from "../../../skia";
 import type { AnimatedProps, TransformProps } from "../../processors";
 import { createDeclaration } from "../../nodes/Declaration";
 import { localMatrix } from "../../processors";

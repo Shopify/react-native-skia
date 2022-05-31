@@ -23,11 +23,11 @@ const onDeclare = createDeclaration<ShadowProps>(
     children,
     { opacity, Skia }
   ) => {
-    const input = getInput(children);
+    const input = getInput(Skia, children);
     const color = processColor(Skia, cl, opacity);
     let factory;
     if (inner) {
-      factory = MakeInnerShadow.bind(null, shadowOnly);
+      factory = MakeInnerShadow.bind(null, Skia, shadowOnly);
     } else {
       factory = shadowOnly
         ? Skia.ImageFilter.MakeDropShadowOnly

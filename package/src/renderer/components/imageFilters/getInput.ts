@@ -1,7 +1,8 @@
 import type { DeclarationResult } from "../../nodes";
-import { isImageFilter, isColorFilter, isShader, Skia } from "../../../skia";
+import type { Skia } from "../../../skia/types";
+import { isImageFilter, isColorFilter, isShader } from "../../../skia/types";
 
-export const getInput = (children: DeclarationResult[]) => {
+export const getInput = (Skia: Skia, children: DeclarationResult[]) => {
   const [child] = children.filter((c) => c);
   if (!child) {
     return null;

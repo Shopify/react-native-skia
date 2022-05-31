@@ -8,3 +8,4 @@ export * from "./Font";
 export * from "./Paths";
 export * from "./Clips";
 export * from "./Radius";
+export * from "./Color";

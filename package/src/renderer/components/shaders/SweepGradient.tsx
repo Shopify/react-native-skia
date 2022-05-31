@@ -2,7 +2,7 @@ import React from "react";
 
 import type { AnimatedProps } from "../../processors";
 import { createDeclaration } from "../../nodes/Declaration";
-import type { Vector } from "../../../skia";
+import type { Vector } from "../../../skia/types";
 
 import type { GradientProps } from "./Gradient";
 import { processGradientProps } from "./Gradient";

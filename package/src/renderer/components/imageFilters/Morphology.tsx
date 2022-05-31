@@ -14,7 +14,7 @@ export interface MorphologyProps {
 
 const onDeclare = createDeclaration<MorphologyProps>(
   ({ radius, operator }, children, { Skia }) => {
-    const input = getInput(children);
+    const input = getInput(Skia, children);
     const r = processRadius(Skia, radius);
     const factory =
       operator === "dilate"

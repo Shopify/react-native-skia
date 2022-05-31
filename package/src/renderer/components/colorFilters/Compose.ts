@@ -1,8 +1,9 @@
-import type { SkColorFilter } from "../../../skia";
-import { isColorFilter, isImageFilter, Skia } from "../../../skia";
+import type { SkColorFilter, Skia } from "../../../skia/types";
+import { isColorFilter, isImageFilter } from "../../../skia/types";
 import type { DeclarationResult } from "../../nodes";
 
 export const composeColorFilter = (
+  Skia: Skia,
   cf: SkColorFilter,
   children: DeclarationResult[]
 ) => {

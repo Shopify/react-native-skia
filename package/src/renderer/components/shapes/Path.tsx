@@ -8,7 +8,7 @@ import type {
 } from "../../processors";
 import { createDrawing } from "../../nodes";
 import { processPath, enumKey } from "../../processors";
-import { FillType } from "../../../skia";
+import { FillType } from "../../../skia/types";
 
 interface StrokeOpts {
   width?: number;

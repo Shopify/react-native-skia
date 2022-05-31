@@ -1,4 +1,4 @@
-import type { Vector } from "../../../skia";
+import type { Vector } from "../../../skia/types";
 
 export interface PolarPoint {
   theta: number;

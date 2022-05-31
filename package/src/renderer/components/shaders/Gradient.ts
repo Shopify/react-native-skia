@@ -1,10 +1,9 @@
-import { TileMode } from "../../../skia";
+import { TileMode } from "../../../skia/types";
 import type { SkEnum } from "../../processors/Paint";
 import type { TransformProps } from "../../processors/Transform";
 import { enumKey } from "../../processors/Paint";
 import { localMatrix } from "../../processors/Transform";
-import type { Color } from "../../../skia";
-import type { Skia } from "../../../skia/types";
+import type { Color, Skia } from "../../../skia/types";
 
 export interface GradientProps extends TransformProps {
   colors: Color[];

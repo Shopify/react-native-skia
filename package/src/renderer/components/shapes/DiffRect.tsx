@@ -1,7 +1,7 @@
 import React from "react";
 
 import type { CustomPaintProps } from "../../processors";
-import type { SkRRect } from "../../../skia";
+import type { SkRRect } from "../../../skia/types";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import { createDrawing } from "../../nodes/Drawing";
 

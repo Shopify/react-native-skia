@@ -1,9 +1,8 @@
 import React from "react";
 
-import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { SkRuntimeEffect } from "../../../skia";
+import type { SkRuntimeEffect } from "../../../skia/types";
 
 import { getInput } from "./getInput";
 
@@ -12,9 +11,13 @@ export interface RuntimeShaderProps {
 }
 
 const onDeclare = createDeclaration<RuntimeShaderProps>(
-  ({ source }, children) => {
+  ({ source }, children, { Skia }) => {
     const rtb = Skia.RuntimeShaderBuilder(source);
-    return Skia.ImageFilter.MakeRuntimeShader(rtb, null, getInput(children));
+    return Skia.ImageFilter.MakeRuntimeShader(
+      rtb,
+      null,
+      getInput(Skia, children)
+    );
   }
 );
 

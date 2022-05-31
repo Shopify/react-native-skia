@@ -1,7 +1,7 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { TileMode } from "../../../skia";
+import { TileMode } from "../../../skia/types";
 import type { Radius, SkEnum } from "../../processors";
 import { enumKey } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
@@ -23,7 +23,7 @@ const onDeclare = createDeclaration<BlurProps>(
       sigma.x,
       sigma.y,
       TileMode[enumKey(mode)],
-      getInput(children)
+      getInput(Skia, children)
     );
   }
 );

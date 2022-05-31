@@ -1,8 +1,7 @@
 import React from "react";
 
-import type { SkRect, SkImage } from "../../../skia";
-import { TileMode, FilterMode, MipmapMode } from "../../../skia";
-import type { Skia } from "../../../skia/types";
+import type { SkRect, SkImage, Skia } from "../../../skia/types";
+import { TileMode, FilterMode, MipmapMode } from "../../../skia/types";
 import { createDeclaration } from "../../nodes";
 import type {
   TransformProps,
