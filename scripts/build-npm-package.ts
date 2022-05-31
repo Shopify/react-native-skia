@@ -75,6 +75,7 @@ pck.types = "lib/typescript/index.d.ts";
 pck.main = "lib/module/index.js";
 pck.module = "lib/module/index.js";
 pck["react-native"] = "lib/module/index.js";
+pck.scripts.postinstall = "node scripts/install-npm.js";
 console.log("Building version:", nextVersion);
 
 // Overwrite the package.json file
