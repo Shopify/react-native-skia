@@ -37,8 +37,16 @@ public:
  */
   static std::shared_ptr<SkPoint> fromValue(jsi::Runtime &runtime,
                                             const jsi::Value &obj) {
-    const auto& object = obj.asObject(runtime);
-    if (object.isHostObject(runtime)) {
+    const auto &object = obj.asObject(runtime);
+    if (object.hasProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))) {
+      jsi::ArrayBuffer buffer = object
+              .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+              .asObject(runtime)
+              .getArrayBuffer(runtime);
+      auto data = reinterpret_cast<float *>(buffer.data(runtime));
+      return std::make_shared<SkPoint>(SkPoint::Make(data[0], data[1]));
+
+    } else if (object.isHostObject(runtime)) {
       return object
               .asHostObject<JsiSkPoint>(runtime)
               ->getObject();

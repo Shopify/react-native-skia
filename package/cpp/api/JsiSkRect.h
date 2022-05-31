@@ -66,7 +66,14 @@ public:
   static std::shared_ptr<SkRect> fromValue(jsi::Runtime &runtime,
                                            const jsi::Value &obj) {
     const auto& object = obj.asObject(runtime);
-    if (object.isHostObject(runtime)) {
+    if (object.hasProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))) {
+      jsi::ArrayBuffer buffer = object
+              .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+              .asObject(runtime)
+              .getArrayBuffer(runtime);
+      auto data = reinterpret_cast<float *>(buffer.data(runtime));
+      return std::make_shared<SkRect>(SkRect::MakeLTRB(data[0], data[1], data[2], data[3]));
+    } else if (object.isHostObject(runtime)) {
       return object
               .asHostObject<JsiSkRect>(runtime)
               ->getObject();

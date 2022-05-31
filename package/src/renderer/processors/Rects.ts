@@ -7,10 +7,36 @@ import { vec } from "./math/Vector";
 import type { Radius } from "./Radius";
 import { processRadius } from "./Radius";
 
-export const point = (x: number, y: number) => Skia.Point(x, y);
+class Rect extends Float32Array implements SkRect {
+  constructor(x: number, y: number, w: number, h: number) {
+    super(4);
+    this[0] = x;
+    this[1] = y;
+    this[2] = w;
+    this[3] = h;
+  }
+
+  get x() {
+    return this[0];
+  }
+
+  get y() {
+    return this[1];
+  }
+
+  get width() {
+    return this[2] - this[0];
+  }
+
+  get height() {
+    return this[3] - this[1];
+  }
+}
+
+export const point = (x: number, y: number) => vec(x, y);
 
 export const rect = (x: number, y: number, width: number, height: number) =>
-  Skia.XYWHRect(x, y, width, height);
+  new Rect(x, y, width, height);
 
 export const rrect = (r: SkRect, rx: number, ry: number) =>
   Skia.RRectXY(r, rx, ry);
