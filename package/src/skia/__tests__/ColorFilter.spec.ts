@@ -26,7 +26,7 @@ describe("Color Filters", () => {
         -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015, 1.69,
         -0.703, 0, 0, 0, 0, 0, 1, 0,
       ]),
-      "snapshots/color-matrix1.png"
+      "snapshots/color-filter/matrix1.png"
     );
   });
   it("Color Matrix 2", () => {
@@ -35,7 +35,7 @@ describe("Color Filters", () => {
         0.393, 0.768, 0.188, 0, 0, 0.349, 0.685, 0.167, 0, 0, 0.272, 0.533,
         0.13, 0, 0, 0, 0, 0, 1, 0,
       ]),
-      "snapshots/color-matrix2.png"
+      "snapshots/color-filter/matrix2.png"
     );
   });
   it("Color Matrix 3", () => {
@@ -43,7 +43,7 @@ describe("Color Filters", () => {
       Skia.ColorFilter.MakeMatrix([
         1, 0, 0, 0, 0.262, 0, 1, 0, 0, 0.262, 0, 0, 1, 0, 0.262, 0, 0, 0, 1, 0,
       ]),
-      "snapshots/color-matrix3.png"
+      "snapshots/color-filter/matrix3.png"
     );
   });
 });

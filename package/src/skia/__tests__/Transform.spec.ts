@@ -20,26 +20,26 @@ describe("Test transforms", () => {
     expect(Skia).toBeDefined();
   });
   it("Test rotate", () => {
-    testTransform((canvas) => {
+    testImageTransform((canvas) => {
       canvas.scale(0.75, 0.75);
       canvas.rotate(-30, 0, 0);
-    }, "snapshots/transform-rotate.png");
+    }, "snapshots/transform/rotate.png");
   });
 
   it("Test skew", () => {
-    testTransform((canvas) => {
+    testImageTransform((canvas) => {
       canvas.skew(-Math.PI / 6, 0);
-    }, "snapshots/transform-skew.png");
+    }, "snapshots/transform/skew.png");
   });
 
   it("Test scale", () => {
-    testTransform((canvas) => {
+    testImageTransform((canvas) => {
       canvas.scale(2, 1);
-    }, "snapshots/transform-scale.png");
+    }, "snapshots/transform/scale.png");
   });
 });
 
-const testTransform = (cb: (canvas: SkCanvas) => void, result: string) => {
+const testImageTransform = (cb: (canvas: SkCanvas) => void, result: string) => {
   const { canvas, surface, center, width } = makeSurface(Skia);
   const aspectRatio = 836 / 1324;
   const CARD_WIDTH = width - 64;

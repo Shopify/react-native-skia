@@ -24,7 +24,7 @@ describe("Draw a rectangle", () => {
     paint.setColor(Skia.Color("lightblue"));
     const rct = Skia.XYWHRect(64, 64, 128, 128);
     canvas.drawRect(rct, paint);
-    processResult(surface, "snapshots/lightblue-rect.png");
+    processResult(surface, "snapshots/drawings/lightblue-rect.png");
   });
 });
 
@@ -49,7 +49,7 @@ describe("Test blend modes", () => {
     yellow.setColor(Skia.Color("yellow"));
     canvas.drawCircle(width / 2, height - r, r, yellow);
 
-    processResult(surface, "snapshots/blend-modes.png");
+    processResult(surface, "snapshots/drawings/blend-modes.png");
   });
 });
 
@@ -65,6 +65,6 @@ describe("Test Circle", () => {
     paint.setColor(Skia.Color("cyan"));
     canvas.drawCircle(r, r, r, paint);
 
-    processResult(surface, "snapshots/cyan-circle.png");
+    processResult(surface, "snapshots/drawings/cyan-circle.png");
   });
 });
