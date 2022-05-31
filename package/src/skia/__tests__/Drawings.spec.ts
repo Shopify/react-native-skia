@@ -6,8 +6,6 @@ import { BlendMode } from "../types";
 import { processResult, makeSurface } from "./snapshot";
 
 let Skia: ReturnType<typeof JsiSkApi>;
-const width = 256;
-const height = 256;
 
 beforeAll(async () => {
   const CanvasKit = await CanvasKitInit();
@@ -30,8 +28,8 @@ describe("Draw a rectangle", () => {
 
 describe("Test blend modes", () => {
   it("Test multiply blend mode", () => {
-    const { surface, canvas } = makeSurface(Skia);
-    const r = 100;
+    const { surface, canvas, width, height } = makeSurface(Skia);
+    const r = 0.37 * width;
 
     const paint = Skia.Paint();
     paint.setAntiAlias(true);

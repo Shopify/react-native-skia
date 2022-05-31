@@ -37,6 +37,36 @@ describe("Test transforms", () => {
       canvas.scale(2, 1);
     }, "snapshots/transform/scale.png");
   });
+
+  it("Test Rectangles", () => {
+    const { canvas, surface, width, height, center } = makeSurface(Skia);
+    const paints = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"].map((color) => {
+      const paint = Skia.Paint();
+      paint.setColor(Skia.Color(color));
+      return paint;
+    });
+    const rect = Skia.RRectXY(Skia.XYWHRect(0, 0, width, height), 32, 32);
+    canvas.save();
+    canvas.scale(0.5, 0.5);
+    canvas.drawRRect(rect, paints[0]);
+    canvas.restore();
+    canvas.save();
+    canvas.translate(center.x, 0);
+    canvas.scale(0.5, 0.5);
+    canvas.drawRRect(rect, paints[1]);
+    canvas.restore();
+    canvas.save();
+    canvas.translate(0, center.y);
+    canvas.scale(0.5, 0.5);
+    canvas.drawRRect(rect, paints[2]);
+    canvas.restore();
+    canvas.save();
+    canvas.translate(center.x, center.y);
+    canvas.scale(0.5, 0.5);
+    canvas.drawRRect(rect, paints[3]);
+    canvas.restore();
+    processResult(surface, "snapshots/transform/rectangles.png");
+  });
 });
 
 const testImageTransform = (cb: (canvas: SkCanvas) => void, result: string) => {
