@@ -32,7 +32,7 @@ export class JsiSkShaderFactory extends Host implements ShaderFactory {
       this.CanvasKit.Shader.MakeLinearGradient(
         toValue(start),
         toValue(end),
-        colors.map((color) => toValue(color)),
+        colors,
         pos,
         ckEnum(mode),
         localMatrix === undefined ? undefined : toValue(localMatrix),
@@ -55,7 +55,7 @@ export class JsiSkShaderFactory extends Host implements ShaderFactory {
       this.CanvasKit.Shader.MakeRadialGradient(
         toValue(center),
         radius,
-        colors.map((color) => toValue(color)),
+        colors,
         pos,
         ckEnum(mode),
         localMatrix === undefined ? undefined : toValue(localMatrix),
@@ -82,7 +82,7 @@ export class JsiSkShaderFactory extends Host implements ShaderFactory {
         startRadius,
         toValue(end),
         endRadius,
-        colors.map((color) => toValue(color)),
+        colors,
         pos,
         ckEnum(mode),
         localMatrix === undefined ? undefined : toValue(localMatrix),
@@ -107,7 +107,7 @@ export class JsiSkShaderFactory extends Host implements ShaderFactory {
       this.CanvasKit.Shader.MakeSweepGradient(
         cx,
         cy,
-        colors.map((color) => toValue(color)),
+        colors,
         pos,
         ckEnum(mode),
         localMatrix === undefined || localMatrix === null

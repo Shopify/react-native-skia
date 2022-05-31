@@ -1,5 +1,6 @@
 import CanvasKitInit from "canvaskit-wasm";
 
+import { TileMode } from "../types";
 import { JsiSkApi } from "../web";
 
 import { processResult, makeSurface } from "./snapshot";
@@ -44,5 +45,25 @@ vec4 main(vec2 pos) {
     paint.setShader(source.makeShader([2 * r, r, r, 1]));
     canvas.drawPaint(paint);
     processResult(surface, "snapshots/shader/shader2.png");
+  });
+
+  it("Sweep Gradient", () => {
+    const { surface, canvas, center } = makeSurface(Skia);
+    const paint = Skia.Paint();
+    const colors = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"].map((c) =>
+      Skia.Color(c)
+    );
+    paint.setShader(
+      Skia.Shader.MakeSweepGradient(
+        center.x,
+        center.y,
+        colors,
+        null,
+        TileMode.Clamp,
+        null
+      )
+    );
+    canvas.drawPaint(paint);
+    processResult(surface, "snapshots/shader/sweep-gradient.png");
   });
 });

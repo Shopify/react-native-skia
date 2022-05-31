@@ -2,7 +2,7 @@ import type { CanvasKit } from "canvaskit-wasm";
 
 import type { SkColor, SkPoint, VertexMode } from "../../types";
 
-import { ckEnum, toValue } from "./Host";
+import { ckEnum } from "./Host";
 import { JsiSkVertices } from "./JsiSkVertices";
 
 export const MakeVertices = (
@@ -18,11 +18,9 @@ export const MakeVertices = (
     CanvasKit,
     CanvasKit.MakeVertices(
       ckEnum(mode),
-      positions.map((pos) => [pos.x, pos.y]).flat(),
-      textureCoordinates
-        ? textureCoordinates.map((pos) => [pos.x, pos.y]).flat()
-        : null,
-      colors ? colors.map((pos) => toValue(pos)) : undefined,
+      positions.map(({ x, y }) => [x, y]).flat(),
+      (textureCoordinates || []).map(({ x, y }) => [x, y]).flat(),
+      colors,
       indices,
       isVolatile
     )
