@@ -11,7 +11,7 @@ export interface TransformProps {
 }
 
 export const processTransform = (
-  { canvas }: DrawingContext,
+  { canvas, Skia }: DrawingContext,
   { transform, origin, matrix }: TransformProps
 ) => {
   if (transform) {
@@ -19,6 +19,7 @@ export const processTransform = (
       canvas.concat(matrix);
     } else {
       const m3 = processTransform2d(
+        Skia.Matrix(),
         origin ? transformOrigin(origin, transform) : transform
       );
       canvas.concat(m3);
@@ -26,9 +27,13 @@ export const processTransform = (
   }
 };
 
-export const localMatrix = ({ transform, origin }: TransformProps) => {
+export const localMatrix = (
+  m: SkMatrix,
+  { transform, origin }: TransformProps
+) => {
   if (transform) {
     return processTransform2d(
+      m,
       origin ? transformOrigin(origin, transform) : transform
     );
   }

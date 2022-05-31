@@ -1,7 +1,6 @@
 import React from "react";
 
 import type { Vector, AnimatedProps } from "../../processors";
-import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 
 import type { GradientProps } from "./Gradient";
@@ -13,9 +12,9 @@ export interface RadialGradientProps extends GradientProps {
 }
 
 const onDeclare = createDeclaration<RadialGradientProps>(
-  ({ c, r, ...gradientProps }) => {
+  ({ c, r, ...gradientProps }, _, { Skia }) => {
     const { colors, positions, mode, localMatrix, flags } =
-      processGradientProps(gradientProps);
+      processGradientProps(Skia, gradientProps);
     return Skia.Shader.MakeRadialGradient(
       c,
       r,

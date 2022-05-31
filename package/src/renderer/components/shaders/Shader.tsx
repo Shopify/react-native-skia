@@ -34,7 +34,7 @@ export interface ShaderProps extends TransformProps {
 }
 
 const onDeclare = createDeclaration<ShaderProps>(
-  ({ uniforms, source, ...transform }, children) => {
+  ({ uniforms, source, ...transform }, children, { Skia }) => {
     const processedUniforms = new Array(source.getUniformCount())
       .fill(0)
       .flatMap((_, i) => {
@@ -68,7 +68,7 @@ const onDeclare = createDeclaration<ShaderProps>(
     return source.makeShaderWithChildren(
       processedUniforms,
       children.filter(isShader),
-      localMatrix(transform)
+      localMatrix(Skia.Matrix(), transform)
     );
   }
 );

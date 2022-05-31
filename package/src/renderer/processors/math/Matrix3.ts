@@ -1,5 +1,5 @@
 import { exhaustiveCheck } from "../../typeddash";
-import { Skia } from "../../../skia";
+import type { SkMatrix } from "../../../skia/types";
 
 type Transform2dName =
   | "translateX"
@@ -30,8 +30,7 @@ export type Transforms2d = readonly (
   | Pick<Transformations, "rotate">
 )[];
 
-export const processTransform2d = (transforms: Transforms2d) => {
-  const m = Skia.Matrix();
+export const processTransform2d = (m: SkMatrix, transforms: Transforms2d) => {
   for (const transform of transforms) {
     const key = Object.keys(transform)[0] as Transform2dName;
     const value = (transform as Pick<Transformations, typeof key>)[key];

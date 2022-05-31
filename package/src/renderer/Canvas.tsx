@@ -130,6 +130,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           ref,
           center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? defaultFontMgr,
+          Skia,
         };
         container.draw(ctx);
       },

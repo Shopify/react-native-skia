@@ -43,7 +43,7 @@ interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
 }
 
 const onDeclare = createDeclaration<ImageShaderProps>(
-  ({ tx, ty, fm, mm, fit, image, ...imageShaderProps }) => {
+  ({ tx, ty, fm, mm, fit, image, ...imageShaderProps }, _, { Skia }) => {
     const rct = getRect(imageShaderProps);
     if (rct) {
       const rects = fitRects(
@@ -62,7 +62,7 @@ const onDeclare = createDeclaration<ImageShaderProps>(
       TileMode[enumKey(ty)],
       FilterMode[enumKey(fm)],
       MipmapMode[enumKey(mm)],
-      localMatrix(imageShaderProps)
+      localMatrix(Skia.Matrix(), imageShaderProps)
     );
   }
 );
