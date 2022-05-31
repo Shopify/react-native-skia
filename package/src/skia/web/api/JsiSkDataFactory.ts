@@ -1,6 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { Data } from "../../types";
+import type { SkData } from "../../types";
 import type { DataFactory } from "../../types/Data/DataFactory";
 
 import { Host, NotImplementedOnRNWeb } from "./Host";
@@ -27,7 +27,7 @@ export class JsiSkDataFactory extends Host implements DataFactory {
    * Creates a new Data object from a base64 encoded string.
    * @param base64 A Base64 encoded string representing the data
    */
-  fromBase64(_base64: string): Data {
+  fromBase64(_base64: string): SkData {
     throw new NotImplementedOnRNWeb();
   }
 }

@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import type { Data } from "../Data";
+import type { SkData } from "../Data";
 
 import type { SkImage } from "./Image";
 
@@ -62,7 +62,7 @@ export interface ImageFactory {
    * @returns If the encoded format is not supported, or subset is outside of the bounds of the decoded
    *  image, nullptr is returned.
    */
-  MakeImageFromEncoded: (encoded: Data) => SkImage | null;
+  MakeImageFromEncoded: (encoded: SkData) => SkImage | null;
 
   /**
    * Returns an image with the given pixel data and format.
@@ -74,5 +74,5 @@ export interface ImageFactory {
    * @param data - bytes representing the pixel data.
    * @param bytesPerRow
    */
-  MakeImage(info: ImageInfo, data: Data, bytesPerRow: number): SkImage | null;
+  MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number): SkImage | null;
 }

@@ -1,7 +1,7 @@
-import type { Data } from "../Data";
+import type { SkData } from "../Data";
 
 import type { SkTypeface } from "./Typeface";
 
 export interface TypefaceFactory {
-  MakeFreeTypeFaceFromData(data: Data): SkTypeface | null;
+  MakeFreeTypeFaceFromData(data: SkData): SkTypeface | null;
 }

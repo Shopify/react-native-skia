@@ -3,11 +3,11 @@ import { useRef, useEffect, useState } from "react";
 import { Image } from "react-native";
 
 import { Skia } from "../Skia";
-import type { Data, DataSource } from "../types";
+import type { SkData, DataSource } from "../types";
 
 export const useDataCollection = <T>(
   sources: DataSource[],
-  factory: (data: Data[]) => T,
+  factory: (data: SkData[]) => T,
   deps: DependencyList = []
 ) => {
   const [data, setData] = useState<T | null>(null);
@@ -34,7 +34,7 @@ export const useDataCollection = <T>(
 
 export const useRawData = <T>(
   source: DataSource | null | undefined,
-  factory: (data: Data) => T,
+  factory: (data: SkData) => T,
   onError?: (err: Error) => void
 ) => {
   const [data, setData] = useState<T | null>(null);
@@ -44,7 +44,7 @@ export const useRawData = <T>(
     if (prevSourceRef.current !== source) {
       prevSourceRef.current = source;
       if (source !== null && source !== undefined) {
-        const factoryWrapper = (data2: Data) => {
+        const factoryWrapper = (data2: SkData) => {
           const factoryResult = factory(data2);
           if (factoryResult === null) {
             onError && onError(new Error("Could not load data"));
@@ -70,7 +70,7 @@ export const useRawData = <T>(
   return data;
 };
 
-const identity = (data: Data) => data;
+const identity = (data: SkData) => data;
 
 export const useData = (
   source: DataSource | null | undefined,
