@@ -12,7 +12,7 @@ index cc970b8..aac112d 100644
    "bugs": {
      "url": "https://bugs.chromium.org/p/skia/issues/entry"
 diff --git a/node_modules/canvaskit-wasm/types/index.d.ts b/node_modules/canvaskit-wasm/types/index.d.ts
-index 3abbcc3..04db373 100644
+index 3abbcc3..30dc4e3 100644
 --- a/node_modules/canvaskit-wasm/types/index.d.ts
 +++ b/node_modules/canvaskit-wasm/types/index.d.ts
 @@ -1,5 +1,5 @@
@@ -31,6 +31,24 @@ index 3abbcc3..04db373 100644
                   isVolatile?: boolean): Vertices;
  
      /**
+@@ -847,7 +847,7 @@ export interface Paragraph extends EmbindObject<Paragraph> {
+     getMaxIntrinsicWidth(): number;
+     getMaxWidth(): number;
+     getMinIntrinsicWidth(): number;
+-    getRectsForPlaceholders(): FlattenedRectangleArray;
++    getRectsForPlaceholders(): FlattenedRectangleArray[];
+ 
+     /**
+      * Returns bounding boxes that enclose all text in the range of glpyh indexes [start, end).
+@@ -857,7 +857,7 @@ export interface Paragraph extends EmbindObject<Paragraph> {
+      * @param wStyle
+      */
+     getRectsForRange(start: number, end: number, hStyle: RectHeightStyle,
+-                     wStyle: RectWidthStyle): FlattenedRectangleArray;
++                     wStyle: RectWidthStyle): FlattenedRectangleArray[];
+ 
+     /**
+      * Finds the first and last glyphs that define a word containing the glyph at index offset.
 @@ -1983,7 +1983,7 @@ export interface Paint extends EmbindObject<Paint> {
       * Sets the current color filter, replacing the existing one if there was one.
       * @param filter
