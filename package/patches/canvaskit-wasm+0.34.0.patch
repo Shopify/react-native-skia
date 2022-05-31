@@ -12,7 +12,7 @@ index cc970b8..aac112d 100644
    "bugs": {
      "url": "https://bugs.chromium.org/p/skia/issues/entry"
 diff --git a/node_modules/canvaskit-wasm/types/index.d.ts b/node_modules/canvaskit-wasm/types/index.d.ts
-index 3abbcc3..765e883 100644
+index 3abbcc3..04db373 100644
 --- a/node_modules/canvaskit-wasm/types/index.d.ts
 +++ b/node_modules/canvaskit-wasm/types/index.d.ts
 @@ -1,5 +1,5 @@
@@ -21,6 +21,15 @@ index 3abbcc3..765e883 100644
 +export default function CanvasKitInit(opts?: CanvasKitInitOptions): Promise<CanvasKit>;
  
  export interface CanvasKitInitOptions {
+     /**
+@@ -366,7 +366,7 @@ export interface CanvasKit {
+      */
+     MakeVertices(mode: VertexMode, positions: InputFlattenedPointArray,
+                  textureCoordinates?: InputFlattenedPointArray | null,
+-                 colors?: Float32Array | ColorIntArray | null, indices?: number[] | null,
++                 colors?: Float32Array[] | ColorIntArray[] | null, indices?: number[] | null,
+                  isVolatile?: boolean): Vertices;
+ 
      /**
 @@ -1983,7 +1983,7 @@ export interface Paint extends EmbindObject<Paint> {
       * Sets the current color filter, replacing the existing one if there was one.
