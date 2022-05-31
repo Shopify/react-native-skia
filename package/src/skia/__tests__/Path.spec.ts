@@ -9,7 +9,7 @@ const roundtrip = (Skia: Skia, path: SkPath) =>
   Skia.Path.MakeFromCmds(path.toCmds())!;
 
 describe("Path", () => {
-  it("Draw a path", () => {
+  it("React logo", () => {
     const { surface, canvas, Skia } = setupSkia();
     const svg1 =
       "M150.817 113.884C150.817 126.485 140.602 136.701 128 136.701C115.398 136.701 105.183 126.485 105.183 113.884C105.183 101.282 115.398 91.0663 128 91.0663C140.602 91.0663 150.817 101.282 150.817 113.884Z";

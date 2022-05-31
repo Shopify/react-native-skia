@@ -18,7 +18,7 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   MakeFromSVGString(str: string) {
     const path = this.CanvasKit.Path.MakeFromSVGString(str);
     if (path === null) {
-      return path;
+      return null;
     }
     return new JsiSkPath(this.CanvasKit, path);
   }
@@ -30,7 +30,7 @@ export class JsiSkPathFactory extends Host implements PathFactory {
       ckEnum(op)
     );
     if (path === null) {
-      return path;
+      return null;
     }
     return new JsiSkPath(this.CanvasKit, path);
   }
@@ -38,7 +38,7 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   MakeFromCmds(cmds: PathCommand[]) {
     const path = this.CanvasKit.Path.MakeFromCmds(cmds.flat());
     if (path === null) {
-      return path;
+      return null;
     }
     return new JsiSkPath(this.CanvasKit, path);
   }

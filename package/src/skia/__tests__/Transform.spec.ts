@@ -6,26 +6,26 @@ import type { SkCanvas } from "../types/Canvas";
 import { processResult, setupSkia } from "./setup";
 
 describe("Test transforms", () => {
-  it("Test rotate", () => {
+  it("Scale and rotate image", () => {
     testImageTransform((canvas) => {
       canvas.scale(0.75, 0.75);
       canvas.rotate(-30, 0, 0);
     }, "snapshots/transform/rotate.png");
   });
 
-  it("Test skew", () => {
+  it("Skew image", () => {
     testImageTransform((canvas) => {
       canvas.skew(-Math.PI / 6, 0);
     }, "snapshots/transform/skew.png");
   });
 
-  it("Test scale", () => {
+  it("Scale image", () => {
     testImageTransform((canvas) => {
       canvas.scale(2, 1);
     }, "snapshots/transform/scale.png");
   });
 
-  it("Test Rectangles", () => {
+  it("4 scaled and translated rounded rectangles", () => {
     const { canvas, surface, width, height, center, Skia } = setupSkia();
     const paints = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"].map((color) => {
       const paint = Skia.Paint();

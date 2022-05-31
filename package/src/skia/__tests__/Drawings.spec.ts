@@ -3,7 +3,7 @@ import { BlendMode, PaintStyle, StrokeCap } from "../types";
 import { processResult, setupSkia } from "./setup";
 
 describe("Drawings", () => {
-  it("Draws a lightblue rectange", () => {
+  it("Lightblue rectangle", () => {
     const { surface, canvas, Skia } = setupSkia();
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("lightblue"));
@@ -12,7 +12,7 @@ describe("Drawings", () => {
     processResult(surface, "snapshots/drawings/lightblue-rect.png");
   });
 
-  it("Test multiply blend mode", () => {
+  it("Multiply blend mode", () => {
     const { surface, canvas, width, height, Skia } = setupSkia();
     const r = 0.37 * width;
 
@@ -35,7 +35,7 @@ describe("Drawings", () => {
     processResult(surface, "snapshots/drawings/blend-modes.png");
   });
 
-  it("Draw a circle", () => {
+  it("Cyan Circle", () => {
     const { surface, canvas, Skia } = setupSkia();
 
     const r = 128;
@@ -49,7 +49,7 @@ describe("Drawings", () => {
     processResult(surface, "snapshots/drawings/cyan-circle.png");
   });
 
-  it("Draw a stroke", () => {
+  it("Rectangle Stroke", () => {
     const { surface, canvas, Skia } = setupSkia();
 
     const paint = Skia.Paint();
@@ -64,7 +64,7 @@ describe("Drawings", () => {
     processResult(surface, "snapshots/drawings/stroke.png");
   });
 
-  it("Draw a line", () => {
+  it("Cyan line with rounded stroke cap", () => {
     const { surface, canvas, width, height, Skia } = setupSkia();
 
     const paint = Skia.Paint();

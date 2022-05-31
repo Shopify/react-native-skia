@@ -3,7 +3,7 @@ import { BlendMode, VertexMode } from "../types";
 import { processResult, setupSkia } from "./setup";
 
 describe("Vertices", () => {
-  it("Draws billinear gradient", () => {
+  it("Billinear gradient", () => {
     const { surface, canvas, width, Skia } = setupSkia();
     const vertices = [
       Skia.Point(0, 0),

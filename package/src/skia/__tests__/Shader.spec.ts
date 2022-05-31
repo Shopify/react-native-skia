@@ -3,7 +3,7 @@ import { TileMode } from "../types";
 import { processResult, setupSkia } from "./setup";
 
 describe("Shader", () => {
-  it("Simple shader", () => {
+  it("Simple color interpolation", () => {
     const { surface, canvas, Skia } = setupSkia();
     const paint = Skia.Paint();
     const source = Skia.RuntimeEffect.Make(`
@@ -16,7 +16,7 @@ vec4 main(vec2 pos) {
     canvas.drawPaint(paint);
     processResult(surface, "snapshots/shader/shader1.png");
   });
-  it("Shader with uniform", () => {
+  it("Half circle to the right", () => {
     const { surface, canvas, width, Skia } = setupSkia();
     const paint = Skia.Paint();
     const source = Skia.RuntimeEffect.Make(`

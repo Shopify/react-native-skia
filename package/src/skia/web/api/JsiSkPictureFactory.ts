@@ -13,7 +13,7 @@ export class JsiSkPictureFactory extends Host implements PictureFactory {
   MakePicture(bytes: Uint8Array | ArrayBuffer) {
     const pic = this.CanvasKit.MakePicture(bytes);
     if (pic === null) {
-      return pic;
+      return null;
     }
     return new JsiSkPicture(this.CanvasKit, pic);
   }

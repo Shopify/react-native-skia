@@ -3,7 +3,7 @@ import { TileMode } from "../types";
 import { processResult, setupSkia } from "./setup";
 
 describe("ImageFilter", () => {
-  it("Image Filter", () => {
+  it("Blured lightblue circle", () => {
     const { surface, canvas, width, Skia } = setupSkia();
     const r = width / 2;
     const paint = Skia.Paint();

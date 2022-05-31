@@ -6,7 +6,7 @@ import type { SkColorFilter } from "../types/ColorFilter/ColorFilter";
 import { setupSkia, processResult } from "./setup";
 
 describe("Color Filters", () => {
-  it("Color Matrix 1", () => {
+  it("Duotone Color Matrix", () => {
     const ctx = setupSkia();
     const { Skia } = ctx;
     testColorFilter(
@@ -18,7 +18,7 @@ describe("Color Filters", () => {
       "snapshots/color-filter/matrix1.png"
     );
   });
-  it("Color Matrix 2", () => {
+  it("Sepia Color Matrix", () => {
     const ctx = setupSkia();
     const { Skia } = ctx;
     testColorFilter(
@@ -27,10 +27,10 @@ describe("Color Filters", () => {
         0.393, 0.768, 0.188, 0, 0, 0.349, 0.685, 0.167, 0, 0, 0.272, 0.533,
         0.13, 0, 0, 0, 0, 0, 1, 0,
       ]),
-      "snapshots/color-filter/matrix2.png"
+      "snapshots/color-filter/zurich-sepia.png"
     );
   });
-  it("Color Matrix 3", () => {
+  it("Exposure Color Matrix", () => {
     const ctx = setupSkia();
     const { Skia } = ctx;
     testColorFilter(
