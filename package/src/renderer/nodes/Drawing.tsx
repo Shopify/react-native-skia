@@ -5,7 +5,7 @@ import type { DrawingContext } from "../DrawingContext";
 import { processPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
-import { isPaint } from "../../skia";
+import { isPaint } from "../../skia/types";
 import type { DependencyManager } from "../DependencyManager";
 
 import { Node } from "./Node";

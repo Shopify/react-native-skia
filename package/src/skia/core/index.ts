@@ -8,3 +8,6 @@ export * from "./SVG";
 export * from "./Shader";
 export * from "./Paint";
 export * from "./Path";
+export * from "./Vector";
+export * from "./Rect";
+export * from "./RRect";

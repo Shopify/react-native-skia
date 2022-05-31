@@ -161,7 +161,7 @@ export const PathEffectDemo = () => {
         <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <Path2DPathEffect
             path="M -10 0 L 0 -10, 10 0, 0 10 Z"
-            matrix={processTransform2d([{ scale: 40 }])}
+            matrix={processTransform2d(Skia.Matrix(), [{ scale: 40 }])}
           />
           <Logo />
         </Group>
@@ -172,7 +172,7 @@ export const PathEffectDemo = () => {
         <Group color="#61DAFB" style="stroke" strokeWidth={15}>
           <Line2DPathEffect
             width={0}
-            matrix={processTransform2d([{ scale: 8 }])}
+            matrix={processTransform2d(Skia.Matrix(), [{ scale: 8 }])}
           />
           <Logo />
         </Group>

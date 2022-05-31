@@ -1,8 +1,8 @@
 import type { DrawingContext } from "../DrawingContext";
-import type { SkMatrix } from "../../skia/types";
+import type { SkMatrix, Vector } from "../../skia/types";
 
-import { neg, processTransform2d } from "./math";
-import type { Transforms2d, Vector } from "./math";
+import { processTransform2d } from "./math";
+import type { Transforms2d } from "./math";
 
 export interface TransformProps {
   transform?: Transforms2d;
@@ -40,10 +40,10 @@ export const localMatrix = (
   return undefined;
 };
 
-const translate = (a: Vector) => [{ translateX: a.x }, { translateY: a.y }];
-
 export const transformOrigin = (origin: Vector, transform: Transforms2d) => [
-  ...translate(origin),
+  { translateX: origin.x },
+  { translateY: origin.y },
   ...transform,
-  ...translate(neg(origin)),
+  { translateX: -origin.x },
+  { translateY: -origin.y },
 ];

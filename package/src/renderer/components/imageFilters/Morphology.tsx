@@ -1,6 +1,5 @@
 import React from "react";
 
-import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps, Radius } from "../../processors";
 import { processRadius } from "../../processors/Radius";
@@ -14,9 +13,9 @@ export interface MorphologyProps {
 }
 
 const onDeclare = createDeclaration<MorphologyProps>(
-  ({ radius, operator }, children) => {
+  ({ radius, operator }, children, { Skia }) => {
     const input = getInput(children);
-    const r = processRadius(radius);
+    const r = processRadius(Skia, radius);
     const factory =
       operator === "dilate"
         ? Skia.ImageFilter.MakeDilate

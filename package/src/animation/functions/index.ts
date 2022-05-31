@@ -1,2 +1,3 @@
-export { interpolate } from "./interpolate";
-export { interpolateColors, mixColors } from "./interpolateColors";
+export * from "./interpolate";
+export * from "./interpolateColors";
+export * from "./interpolateVector";

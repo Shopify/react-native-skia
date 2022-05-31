@@ -1,7 +1,8 @@
 import React from "react";
 
-import type { Vector, AnimatedProps } from "../../processors";
+import type { AnimatedProps } from "../../processors";
 import { createDeclaration } from "../../nodes/Declaration";
+import type { Vector } from "../../../skia";
 
 import type { GradientProps } from "./Gradient";
 import { processGradientProps } from "./Gradient";

@@ -1,9 +1,7 @@
 import type { RefObject } from "react";
 
 import type { DrawingInfo, SkiaView } from "../views";
-import type { FontMgr, SkCanvas, SkPaint, Skia } from "../skia/types";
-
-import type { Vector } from "./processors/math/Vector";
+import type { FontMgr, SkCanvas, SkPaint, Skia, Vector } from "../skia/types";
 
 export interface DrawingContext extends Omit<DrawingInfo, "touches"> {
   canvas: SkCanvas;

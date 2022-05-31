@@ -1,13 +1,8 @@
 import React from "react";
 
-import type {
-  CustomPaintProps,
-  SkEnum,
-  Vector,
-  AnimatedProps,
-} from "../../processors";
+import type { CustomPaintProps, SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
-import type { SkPoint, Color } from "../../../skia";
+import type { SkPoint, Color, Vector } from "../../../skia";
 import { BlendMode, processColor } from "../../../skia";
 import { createDrawing } from "../../nodes";
 
