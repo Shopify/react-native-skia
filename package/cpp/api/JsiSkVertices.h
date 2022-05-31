@@ -4,8 +4,6 @@
 #include <utility>
 #include <jsi/jsi.h>
 
-#include <jsi/jsi.h>
-
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push

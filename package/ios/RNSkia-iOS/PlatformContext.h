@@ -1,6 +1,6 @@
 #pragma once
 
-#import "RCTBridge.h"
+#import <React/RCTBridge.h>
 
 #include <functional>
 #include <memory>
