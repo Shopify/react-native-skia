@@ -20,7 +20,6 @@
     "android/cpp/**",
     "android/src/**",
     "libs/android/**",
-    "src/**",
     "index.js",
     "cpp/**/*.{h,cpp}",
     "ios",
