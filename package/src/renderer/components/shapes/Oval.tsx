@@ -10,10 +10,12 @@ import { createDrawing } from "../../nodes";
 
 export type OvalProps = RectDef & CustomPaintProps;
 
-const onDraw = createDrawing<OvalProps>(({ canvas, paint }, rectProps) => {
-  const rect = processRect(rectProps);
-  canvas.drawOval(rect, paint);
-});
+const onDraw = createDrawing<OvalProps>(
+  ({ canvas, paint, Skia }, rectProps) => {
+    const rect = processRect(Skia, rectProps);
+    canvas.drawOval(rect, paint);
+  }
+);
 
 export const Oval = (props: AnimatedProps<OvalProps>) => {
   return <skDrawing onDraw={onDraw} {...props} />;

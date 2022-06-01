@@ -1,6 +1,6 @@
 import React from "react";
 
-import { BlurStyle, Skia } from "../../../skia";
+import { BlurStyle } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { SkEnum } from "../../processors";
 import { enumKey } from "../../processors";
@@ -13,7 +13,7 @@ export interface BlurMaskProps {
 }
 
 const onDeclare = createDeclaration<BlurMaskProps>(
-  ({ style, blur, respectCTM }) => {
+  ({ style, blur, respectCTM }, _, { Skia }) => {
     return Skia.MaskFilter.MakeBlur(
       BlurStyle[enumKey(style)],
       blur,

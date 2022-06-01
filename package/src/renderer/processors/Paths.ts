@@ -1,9 +1,9 @@
-import type { SkPath } from "../../skia";
-import { Skia, isPath } from "../../skia";
+import type { SkPath, Skia } from "../../skia/types";
+import { isPath } from "../../skia/types";
 
 export type PathDef = string | SkPath;
 
-export const processPath = (rawPath: PathDef) => {
+export const processPath = (Skia: Skia, rawPath: PathDef) => {
   const path =
     typeof rawPath === "string"
       ? Skia.Path.MakeFromSVGString(rawPath)

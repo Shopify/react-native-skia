@@ -1,7 +1,6 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes";
 import type { AnimatedProps } from "../../processors";
 
@@ -13,9 +12,9 @@ interface ColorMatrixProps {
 }
 
 const onDeclare = createDeclaration<ColorMatrixProps>(
-  ({ matrix }, children) => {
+  ({ matrix }, children, { Skia }) => {
     const cf = Skia.ColorFilter.MakeMatrix(matrix);
-    return composeColorFilter(cf, children);
+    return composeColorFilter(Skia, cf, children);
   }
 );
 

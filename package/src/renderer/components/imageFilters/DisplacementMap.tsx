@@ -1,7 +1,7 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia, ColorChannel } from "../../../skia";
+import { ColorChannel } from "../../../skia/types";
 import { createDeclaration } from "../../nodes";
 import type { SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
@@ -16,12 +16,12 @@ export interface DisplacementMapProps {
 }
 
 const onDeclare = createDeclaration<DisplacementMapProps>(
-  ({ channelX, channelY, scale }, children) => {
+  ({ channelX, channelY, scale }, children, { Skia }) => {
     const [in1, in2] = children.filter((c) => !!c);
     const x = ColorChannel[enumKey(channelX)];
     const y = ColorChannel[enumKey(channelY)];
-    const map = getInput([in1]);
-    const input = in2 ? getInput([in2]) : null;
+    const map = getInput(Skia, [in1]);
+    const input = in2 ? getInput(Skia, [in2]) : null;
     if (!map) {
       throw new Error("No DisplacementMap provided");
     }

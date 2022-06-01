@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { SkPicture } from "../../skia";
+import type { SkPicture } from "../../skia/types";
 import { createDrawing } from "../nodes/Drawing";
 
 export interface PictureProps {

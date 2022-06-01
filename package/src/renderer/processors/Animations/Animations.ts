@@ -1,8 +1,5 @@
 import type { SkiaValue } from "../../../values";
-import type { DrawingContext } from "../../DrawingContext";
 import { mapKeys } from "../../typeddash";
-
-export type FrameValue<T> = (ctx: DrawingContext) => T;
 
 export const isValue = (value: unknown): value is SkiaValue<unknown> => {
   if (value === undefined || value === null) {

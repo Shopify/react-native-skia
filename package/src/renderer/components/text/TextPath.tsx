@@ -2,8 +2,7 @@ import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes";
-import type { SkPath, SkRSXform } from "../../../skia";
-import { Skia } from "../../../skia/Skia";
+import type { SkPath, SkRSXform } from "../../../skia/types";
 import type { FontDef } from "../../processors/Font";
 import { processFont } from "../../processors/Font";
 
@@ -16,7 +15,7 @@ export type TextPathProps = CustomPaintProps &
 
 const onDraw = createDrawing<TextPathProps>(
   (
-    { canvas, paint, fontMgr },
+    { canvas, paint, fontMgr, Skia },
     { text, initialOffset, path: pathDef, ...fontDef }
   ) => {
     const path =
@@ -26,7 +25,7 @@ const onDraw = createDrawing<TextPathProps>(
     if (path === null) {
       throw new Error("Invalid path: " + pathDef);
     }
-    const font = processFont(fontMgr, fontDef);
+    const font = processFont(Skia, fontMgr, fontDef);
     const ids = font.getGlyphIDs(text);
     const widths = font.getGlyphWidths(ids, paint);
     const rsx: SkRSXform[] = [];

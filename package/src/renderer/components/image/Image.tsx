@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { SkImage } from "../../../skia";
+import type { SkImage } from "../../../skia/types";
 import type {
   CustomPaintProps,
   RectDef,
@@ -24,8 +24,8 @@ export type BaseImageProps = RectDef &
 export type ImageProps = CustomPaintProps & BaseImageProps;
 
 const onDraw = createDrawing<ImageProps>(
-  ({ canvas, paint }, { fit, image, ...rectProps }) => {
-    const rect = processRect(rectProps);
+  ({ canvas, paint, Skia }, { fit, image, ...rectProps }) => {
+    const rect = processRect(Skia, rectProps);
     const { src, dst } = fitRects(
       fit,
       {

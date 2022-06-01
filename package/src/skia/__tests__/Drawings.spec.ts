@@ -1,6 +1,7 @@
+import { processResult } from "../../__tests__/setup";
 import { BlendMode, PaintStyle, StrokeCap } from "../types";
 
-import { processResult, setupSkia } from "./setup";
+import { setupSkia } from "./setup";
 
 describe("Drawings", () => {
   it("Lightblue rectangle", () => {

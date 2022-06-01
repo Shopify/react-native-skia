@@ -1,15 +1,11 @@
 import React from "react";
 
-import type {
-  CustomPaintProps,
-  SkEnum,
-  Vector,
-  AnimatedProps,
-} from "../../processors";
+import type { CustomPaintProps, SkEnum, AnimatedProps } from "../../processors";
 import { enumKey } from "../../processors";
-import type { SkPoint, Color } from "../../../skia";
-import { BlendMode, processColor } from "../../../skia";
+import type { SkPoint, Color, Vector } from "../../../skia/types";
+import { BlendMode } from "../../../skia/types";
 import { createDrawing } from "../../nodes";
+import { processColor } from "../../processors/Color";
 
 export interface CubicBezierHandle {
   pos: Vector;
@@ -30,7 +26,7 @@ export interface PatchProps extends CustomPaintProps {
 }
 
 const onDraw = createDrawing<PatchProps>(
-  ({ canvas, paint, opacity }, { colors, patch, texture, blendMode }) => {
+  ({ canvas, paint, opacity, Skia }, { colors, patch, texture, blendMode }) => {
     // If the colors are provided, the default blendMode is set to dstOver, if not, the default is set to srcOver
     const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
     const mode = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
@@ -54,7 +50,7 @@ const onDraw = createDrawing<PatchProps>(
         patch[3].c2,
         patch[0].c1,
       ],
-      colors ? colors.map((c) => processColor(c, opacity)) : undefined,
+      colors ? colors.map((c) => processColor(Skia, c, opacity)) : undefined,
       texture,
       mode,
       paint

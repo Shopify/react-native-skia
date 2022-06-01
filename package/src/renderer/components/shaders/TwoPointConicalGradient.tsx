@@ -1,8 +1,8 @@
 import React from "react";
 
-import type { Vector, AnimatedProps } from "../../processors";
-import { Skia } from "../../../skia";
+import type { AnimatedProps } from "../../processors";
 import { createDeclaration } from "../../nodes/Declaration";
+import type { Vector } from "../../../skia/types";
 
 import type { GradientProps } from "./Gradient";
 import { processGradientProps } from "./Gradient";
@@ -15,9 +15,9 @@ export interface TwoPointConicalGradientProps extends GradientProps {
 }
 
 const onDeclare = createDeclaration<TwoPointConicalGradientProps>(
-  ({ start, startR, end, endR, ...gradientProps }) => {
+  ({ start, startR, end, endR, ...gradientProps }, _, { Skia }) => {
     const { colors, positions, mode, localMatrix, flags } =
-      processGradientProps(gradientProps);
+      processGradientProps(Skia, gradientProps);
     return Skia.Shader.MakeTwoPointConicalGradient(
       start,
       startR,
