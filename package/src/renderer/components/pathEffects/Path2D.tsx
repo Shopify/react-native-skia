@@ -17,7 +17,7 @@ export interface Path2DPathEffectProps {
 const onDeclare = createDeclaration<Path2DPathEffectProps>(
   ({ path, matrix }, children, { Skia }) => {
     const [child] = children.filter(isPathEffect);
-    const pe = Skia.PathEffect.MakePath2D(matrix, processPath(path));
+    const pe = Skia.PathEffect.MakePath2D(matrix, processPath(Skia, path));
     if (child) {
       if (!pe) {
         return child;

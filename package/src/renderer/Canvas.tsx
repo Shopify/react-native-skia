@@ -3,7 +3,6 @@ import React, {
   useState,
   useCallback,
   useMemo,
-  useContext,
   forwardRef,
   useRef,
 } from "react";
@@ -19,36 +18,16 @@ import ReactReconciler from "react-reconciler";
 
 import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
-import { SkiaPaint } from "../skia/core";
-import { Skia } from "../skia/Skia";
 import type { FontMgr } from "../skia/types";
 import { useValue } from "../values/hooks/useValue";
-import type { SkiaValue } from "../values/types";
+import { Skia } from "../skia/Skia";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
 import { Container } from "./nodes";
 import { DependencyManager } from "./DependencyManager";
-
-const CanvasContext = React.createContext<SkiaValue<{
-  width: number;
-  height: number;
-}> | null>(null);
-
-export const useCanvas = () => {
-  const size = useContext(CanvasContext);
-  if (!size) {
-    throw new Error("Canvas context is not available");
-  }
-  return { size };
-};
-
-export const useCanvasSize = () => {
-  console.warn(
-    "useCanvasSize is deprecated, use the size member of useCanvas() instead."
-  );
-  return useCanvas().size;
-};
+import { SkiaPaint } from "./processors/Paint";
+import { CanvasProvider } from "./useCanvas";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -79,7 +58,8 @@ const defaultFontMgr = Skia.FontMgr.RefDefault();
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
   ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
-    const canvasCtx = useValue({ width: 0, height: 0 });
+    const size = useValue({ width: 0, height: 0 });
+    const canvasCtx = useMemo(() => ({ Skia, size }), [size]);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const [tick, setTick] = useState(0);
@@ -97,9 +77,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     // Render effect
     useEffect(() => {
       render(
-        <CanvasContext.Provider value={canvasCtx}>
-          {children}
-        </CanvasContext.Provider>,
+        <CanvasProvider value={canvasCtx}>{children}</CanvasProvider>,
         root,
         container
       );
@@ -114,12 +92,12 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           onTouch(info.touches);
         }
         if (
-          width !== canvasCtx.current.width ||
-          height !== canvasCtx.current.height
+          width !== canvasCtx.size.current.width ||
+          height !== canvasCtx.size.current.height
         ) {
-          canvasCtx.current = { width, height };
+          canvasCtx.size.current = { width, height };
         }
-        const paint = SkiaPaint();
+        const paint = SkiaPaint(Skia);
         const ctx = {
           width,
           height,

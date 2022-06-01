@@ -5,7 +5,6 @@ export * from "./Image";
 export * from "./Picture";
 export * from "./SVG";
 export * from "./Shader";
-export * from "./Paint";
 export * from "./Path";
 export * from "./Vector";
 export * from "./Rect";

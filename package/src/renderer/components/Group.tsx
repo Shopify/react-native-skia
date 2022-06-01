@@ -24,7 +24,7 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
 
 const onDraw = createDrawing<GroupProps>(
   (ctx, { layer, clip, invertClip, ...groupProps }, node) => {
-    const { canvas, opacity } = ctx;
+    const { canvas, opacity, Skia } = ctx;
     const declarations = node.children
       .filter(isDeclarationNode)
       .map((child) => child.draw(ctx));
@@ -57,7 +57,7 @@ const onDraw = createDrawing<GroupProps>(
       processTransform(ctx, groupProps);
       if (clip) {
         const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
-        processClip(canvas, clip, op);
+        processClip(Skia, canvas, clip, op);
       }
     }
     node.visit(

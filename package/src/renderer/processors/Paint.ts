@@ -16,7 +16,11 @@ import type { DeclarationResult } from "../nodes";
 
 import { processColor } from "./Color";
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
-
+export const SkiaPaint = (Skia: Skia) => {
+  const paint = Skia.Paint();
+  paint.setAntiAlias(true);
+  return paint;
+};
 export interface ChildrenProps {
   children?: ReactNode | ReactNode[];
 }

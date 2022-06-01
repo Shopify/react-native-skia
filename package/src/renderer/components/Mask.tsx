@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import React, { useMemo } from "react";
 
-// TODO: remove
-import { Skia } from "../../skia/Skia";
 import { BlendMode } from "../../skia/types";
+import { SkiaPaint } from "../processors";
+import { useCanvas } from "../useCanvas";
 
 import { Group } from "./Group";
 
@@ -15,19 +15,20 @@ interface MaskProps {
 }
 
 export const Mask = ({ children, mask, mode, clip }: MaskProps) => {
+  const { Skia } = useCanvas();
   const maskPaint = useMemo(() => {
-    const paint = Skia.Paint();
+    const paint = SkiaPaint(Skia);
     paint.setBlendMode(BlendMode.Src);
     if (mode === "luminance") {
       paint.setColorFilter(Skia.ColorFilter.MakeLumaColorFilter());
     }
     return paint;
-  }, [mode]);
+  }, [Skia, mode]);
   const clippingPaint = useMemo(() => {
-    const paint = Skia.Paint();
+    const paint = SkiaPaint(Skia);
     paint.setBlendMode(BlendMode.DstIn);
     return paint;
-  }, []);
+  }, [Skia]);
   return (
     <Group layer>
       <Group layer={maskPaint}>
