@@ -58,11 +58,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
       CanvasKit,
       new CanvasKit.ContourMeasureIter(toValue(path), forceClosed, resScale)
     ),
-  Paint: () => {
-    const paint = new JsiSkPaint(CanvasKit, new CanvasKit.Paint());
-    paint.setAntiAlias(true);
-    return paint;
-  },
+  Paint: () => new JsiSkPaint(CanvasKit, new CanvasKit.Paint()),
   PictureRecorder: () =>
     new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder()),
   Picture: new JsiSkPictureFactory(CanvasKit),
