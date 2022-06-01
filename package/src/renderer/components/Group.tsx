@@ -3,7 +3,11 @@ import type { RefObject } from "react";
 
 import type { SkPaint } from "../../skia/types";
 import { ClipOp } from "../../skia/types";
-import { processTransform, processPaint, processClip } from "../processors";
+import {
+  processCanvasTransform,
+  processPaint,
+  processClip,
+} from "../processors";
 import type {
   CustomPaintProps,
   TransformProps,
@@ -54,7 +58,7 @@ const onDraw = createDrawing<GroupProps>(
       } else {
         canvas.save();
       }
-      processTransform(ctx, groupProps);
+      processCanvasTransform(ctx, groupProps);
       if (clip) {
         const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
         processClip(Skia, canvas, clip, op);

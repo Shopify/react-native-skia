@@ -9,3 +9,4 @@ export * from "./Path";
 export * from "./Vector";
 export * from "./Rect";
 export * from "./RRect";
+export * from "./Matrix";
