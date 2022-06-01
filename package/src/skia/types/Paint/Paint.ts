@@ -25,11 +25,6 @@ export enum StrokeJoin {
   Round,
 }
 
-export const defaultSkiaPaint = (paint: SkPaint) => {
-  paint.setAntiAlias(true);
-  return paint;
-};
-
 export const isPaint = (obj: SkJSIInstance<string> | null): obj is SkPaint =>
   obj !== null && obj.__typename__ === "Paint";
 

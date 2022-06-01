@@ -18,7 +18,6 @@ import ReactReconciler from "react-reconciler";
 
 import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
-import { defaultSkiaPaint } from "../skia/types";
 import type { FontMgr } from "../skia/types";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
@@ -97,7 +96,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         ) {
           canvasCtx.size.current = { width, height };
         }
-        const paint = defaultSkiaPaint(Skia.Paint());
+        const paint = Skia.Paint();
         const ctx = {
           width,
           height,

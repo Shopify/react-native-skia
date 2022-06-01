@@ -6,7 +6,6 @@ import type { CustomPaintProps, AnimatedProps } from "../processors";
 import { processPaint } from "../processors";
 import { createDeclaration } from "../nodes";
 import { useCanvas } from "../useCanvas";
-import { defaultSkiaPaint } from "../../skia/types";
 
 export const usePaintRef = () => useRef<SkPaint>(null);
 
@@ -17,7 +16,7 @@ export interface PaintProps extends Omit<CustomPaintProps, "paint"> {
 export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
   (props, ref) => {
     const { Skia } = useCanvas();
-    const paint = useMemo(() => defaultSkiaPaint(Skia.Paint()), [Skia]);
+    const paint = useMemo(() => Skia.Paint(), [Skia]);
     useImperativeHandle(ref, () => paint, [paint]);
     const onDeclare = useMemo(
       () =>

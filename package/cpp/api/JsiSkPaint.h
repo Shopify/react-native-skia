@@ -215,9 +215,11 @@ Returns the underlying object from a host object of this type
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
+      auto paint = SkPaint();
+      paint.setAntiAlias(true);
       // Return the newly constructed object
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPaint>(std::move(context), SkPaint()));
+          runtime, std::make_shared<JsiSkPaint>(std::move(context), paint));
     };
   }
 };
