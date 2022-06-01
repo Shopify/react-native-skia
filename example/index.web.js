@@ -1,14 +1,16 @@
 import { AppRegistry } from "react-native";
-
-import App from "./src/App";
-import appInfo from "./app.json";
+import { canvasKitPromise } from "@shopify/react-native-skia";
 
 if (module.hot) {
   module.hot.accept();
 }
 
-AppRegistry.registerComponent(appInfo.name, () => App);
-AppRegistry.runApplication(appInfo.name, {
-  initialProps: {},
-  rootTag: document.getElementById("app-root"),
+canvasKitPromise.then(async () => {
+  const App = (await import("./src/App")).default;
+  const appInfo = (await import("./app.json")).default;
+  AppRegistry.registerComponent(appInfo.name, () => App);
+  AppRegistry.runApplication(appInfo.name, {
+    initialProps: {},
+    rootTag: document.getElementById("app-root"),
+  });
 });
