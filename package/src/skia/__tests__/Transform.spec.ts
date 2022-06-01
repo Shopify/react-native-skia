@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
 
+import { processResult } from "../../__tests__/setup";
 import type { SkCanvas } from "../types/Canvas";
 
-import { processResult, setupSkia } from "./setup";
+import { setupSkia } from "./setup";
 
 describe("Test transforms", () => {
   it("Scale and rotate image", () => {
