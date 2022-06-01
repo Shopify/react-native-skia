@@ -25,9 +25,10 @@ describe("Renderer", () => {
     processResult(surface, "snapshots/drawings/lightblue-rect.png");
   });
   it("Scaled light blue rectangle", () => {
-    const scaled = size / 2;
+    const scale = 2;
+    const scaled = size / scale;
     const surface = drawOnNode(
-      <Group transform={[{ scale: 2 }]} origin={center}>
+      <Group transform={[{ scale }]} origin={center}>
         <Rect
           x={(width - scaled) / 2}
           y={(width - scaled) / 2}

@@ -1,7 +1,9 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
-import type { SkRect } from "@shopify/react-native-skia";
 import {
+  bottomRight,
+  center,
+  topLeft,
   Skia,
   rect,
   Canvas,
@@ -31,10 +33,6 @@ const r4 = rect(SIZE, SIZE, SIZE, SIZE);
 const r5 = rect(0, 2 * SIZE, SIZE, SIZE);
 const r6 = rect(SIZE, 2 * SIZE, SIZE, SIZE);
 const r7 = rect(0, 3 * SIZE, SIZE, SIZE);
-
-const topLeft = (r: SkRect) => vec(r.x, r.y);
-const bottomRight = (r: SkRect) => vec(r.x + r.width, r.y + r.height);
-const center = (r: SkRect) => vec(r.x + r.width / 2, r.y + r.height / 2);
 
 export const Gradients = () => {
   return (

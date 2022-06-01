@@ -1,8 +1,8 @@
+import { isRRect } from "../../skia/types";
 import type { SkCanvas, ClipOp, SkRect, SkRRect, Skia } from "../../skia/types";
 
 import type { PathDef } from "./Paths";
 import { processPath, isPathDef } from "./Paths";
-import { isRRect } from "./Rects";
 
 export type ClipDef = SkRRect | SkRect | PathDef;
 

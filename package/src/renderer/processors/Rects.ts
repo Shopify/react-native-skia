@@ -13,9 +13,6 @@ const isRRectCtor = (def: RRectDef): def is RRectCtor =>
 // We have an issue to check property existence on JSI backed instances
 const isRectCtor = (def: RectDef): def is RectCtor =>
   (def as any).rect === undefined;
-// We have an issue to check property existence on JSI backed instances
-export const isRRect = (def: SkRect | SkRRect): def is SkRRect =>
-  (def as any).rect !== undefined;
 
 export interface RectCtor {
   x: number;
