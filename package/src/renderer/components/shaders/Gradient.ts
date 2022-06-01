@@ -1,9 +1,9 @@
-import { Skia, TileMode } from "../../../skia";
+import { TileMode } from "../../../skia/types";
 import type { SkEnum } from "../../processors/Paint";
 import type { TransformProps } from "../../processors/Transform";
 import { enumKey } from "../../processors/Paint";
 import { localMatrix } from "../../processors/Transform";
-import type { Color } from "../../../skia";
+import type { Color, Skia } from "../../../skia/types";
 
 export interface GradientProps extends TransformProps {
   colors: Color[];
@@ -12,16 +12,13 @@ export interface GradientProps extends TransformProps {
   flags?: number;
 }
 
-export const processGradientProps = ({
-  colors,
-  positions,
-  mode,
-  flags,
-  ...transform
-}: GradientProps) => ({
+export const processGradientProps = (
+  Skia: Skia,
+  { colors, positions, mode, flags, ...transform }: GradientProps
+) => ({
   colors: colors.map((color) => Skia.Color(color)),
   positions: positions ?? null,
   mode: TileMode[enumKey(mode ?? "clamp")],
   flags,
-  localMatrix: localMatrix(transform),
+  localMatrix: localMatrix(Skia.Matrix(), transform),
 });

@@ -2,7 +2,7 @@ import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes/Drawing";
-import type { SkTextBlob } from "../../../skia";
+import type { SkTextBlob } from "../../../skia/types";
 
 export interface TextBlobProps extends CustomPaintProps {
   blob: SkTextBlob;

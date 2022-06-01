@@ -1,6 +1,7 @@
+import { processResult } from "../../__tests__/setup";
 import { TileMode } from "../types";
 
-import { processResult, setupSkia } from "./setup";
+import { setupSkia } from "./setup";
 
 describe("Shader", () => {
   it("Simple color interpolation", () => {

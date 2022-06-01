@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
 
+import { processResult } from "../../__tests__/setup";
 import type { SkColorFilter } from "../types/ColorFilter/ColorFilter";
 
-import { setupSkia, processResult } from "./setup";
+import { setupSkia } from "./setup";
 
 describe("Color Filters", () => {
   it("Duotone Color Matrix", () => {

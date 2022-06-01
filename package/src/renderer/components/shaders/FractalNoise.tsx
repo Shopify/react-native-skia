@@ -1,6 +1,5 @@
 import React from "react";
 
-import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
@@ -14,7 +13,7 @@ export interface FractalNoiseProps {
 }
 
 const onDeclare = createDeclaration<FractalNoiseProps>(
-  ({ freqX, freqY, octaves, seed, tileWidth, tileHeight }) => {
+  ({ freqX, freqY, octaves, seed, tileWidth, tileHeight }, _, { Skia }) => {
     return Skia.Shader.MakeFractalNoise(
       freqX,
       freqY,

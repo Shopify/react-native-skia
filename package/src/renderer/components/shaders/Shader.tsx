@@ -1,9 +1,9 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { isShader } from "../../../skia";
-import type { SkRuntimeEffect } from "../../../skia";
-import type { Vector, AnimatedProps, TransformProps } from "../../processors";
+import type { Vector, SkRuntimeEffect } from "../../../skia/types";
+import { isShader } from "../../../skia/types";
+import type { AnimatedProps, TransformProps } from "../../processors";
 import { createDeclaration } from "../../nodes/Declaration";
 import { localMatrix } from "../../processors";
 
@@ -34,7 +34,7 @@ export interface ShaderProps extends TransformProps {
 }
 
 const onDeclare = createDeclaration<ShaderProps>(
-  ({ uniforms, source, ...transform }, children) => {
+  ({ uniforms, source, ...transform }, children, { Skia }) => {
     const processedUniforms = new Array(source.getUniformCount())
       .fill(0)
       .flatMap((_, i) => {
@@ -68,7 +68,7 @@ const onDeclare = createDeclaration<ShaderProps>(
     return source.makeShaderWithChildren(
       processedUniforms,
       children.filter(isShader),
-      localMatrix(transform)
+      localMatrix(Skia.Matrix(), transform)
     );
   }
 );

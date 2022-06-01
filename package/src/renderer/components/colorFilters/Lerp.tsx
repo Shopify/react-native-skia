@@ -1,7 +1,7 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia, isColorFilter } from "../../../skia";
+import { isColorFilter } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
@@ -12,10 +12,11 @@ export interface LerpProps {
   children: ReactNode | ReactNode[];
 }
 
-const onDeclare = createDeclaration<LerpProps>(({ t }, children) => {
+const onDeclare = createDeclaration<LerpProps>(({ t }, children, { Skia }) => {
   const [src, dst] = children.filter(isColorFilter);
   const cf = Skia.ColorFilter.MakeLerp(t, src, dst);
   return composeColorFilter(
+    Skia,
     cf,
     children.filter((c) => c !== src && c !== dst)
   );

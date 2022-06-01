@@ -1,7 +1,7 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia, Path1DEffectStyle, isPathEffect } from "../../../skia";
+import { Path1DEffectStyle, isPathEffect } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import type { SkEnum } from "../../processors/Paint";
@@ -18,10 +18,10 @@ export interface Path1DPathEffectProps {
 }
 
 const onDeclare = createDeclaration<Path1DPathEffectProps>(
-  ({ path, advance, phase, style }, children) => {
+  ({ path, advance, phase, style }, children, { Skia }) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakePath1D(
-      processPath(path),
+      processPath(Skia, path),
       advance,
       phase,
       Path1DEffectStyle[enumKey(style)]

@@ -1,11 +1,10 @@
-import type { Vector } from "./math";
-import { vec } from "./math";
+import type { Skia, Vector } from "../../skia/types";
 
 export type Radius = number | Vector;
 
-export const processRadius = (radius: Radius): Vector => {
+export const processRadius = (Skia: Skia, radius: Radius): Vector => {
   if (typeof radius === "number") {
-    return vec(radius, radius);
+    return Skia.Point(radius, radius);
   }
   return radius;
 };

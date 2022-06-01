@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { SkSVG } from "../../../skia";
+import type { SkSVG } from "../../../skia/types";
 import { createDrawing } from "../../nodes";
 import type { AnimatedProps, RectDef } from "../../processors";
 import { processRect } from "../../processors";
@@ -10,8 +10,8 @@ export type ImageSVGProps = RectDef & {
 };
 
 const onDraw = createDrawing<ImageSVGProps>(
-  ({ canvas }, { svg, ...rectProps }) => {
-    const { x, y, width, height } = processRect(rectProps);
+  ({ canvas, Skia }, { svg, ...rectProps }) => {
+    const { x, y, width, height } = processRect(Skia, rectProps);
     canvas.save();
     canvas.translate(x, y);
     canvas.drawSvg(svg, width, height);

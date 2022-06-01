@@ -5,7 +5,7 @@ import type { DrawingContext } from "../DrawingContext";
 import type { AnimatedProps } from "../processors";
 import { isAnimated, materialize } from "../processors";
 import type { DependencyManager } from "../DependencyManager";
-import type { SkJSIInstance } from "../../skia";
+import type { SkJSIInstance } from "../../skia/types";
 
 import { Node } from "./Node";
 

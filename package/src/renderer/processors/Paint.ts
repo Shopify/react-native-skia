@@ -5,16 +5,16 @@ import {
   PaintStyle,
   StrokeJoin,
   StrokeCap,
-  processColor,
   isShader,
   isMaskFilter,
   isColorFilter,
   isPathEffect,
   isImageFilter,
-  Skia,
-} from "../../skia";
-import type { SkPaint, Color, SkImageFilter } from "../../skia";
+} from "../../skia/types";
+import type { SkPaint, Color, SkImageFilter, Skia } from "../../skia/types";
 import type { DeclarationResult } from "../nodes";
+
+import { processColor } from "./Color";
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export interface ChildrenProps {
@@ -39,6 +39,7 @@ export const enumKey = <K extends string>(k: K) =>
   (k.charAt(0).toUpperCase() + k.slice(1)) as Capitalize<K>;
 
 export const processPaint = (
+  Skia: Skia,
   paint: SkPaint,
   currentOpacity: number,
   {
@@ -59,11 +60,11 @@ export const processPaint = (
     return paintRef.current;
   }
   if (color !== undefined) {
-    const c = processColor(color, currentOpacity);
+    const c = processColor(Skia, color, currentOpacity);
     paint.setShader(null);
     paint.setColor(c);
   } else {
-    const c = processColor(paint.getColor(), currentOpacity);
+    const c = processColor(Skia, paint.getColor(), currentOpacity);
     paint.setColor(c);
   }
   if (blendMode !== undefined) {
