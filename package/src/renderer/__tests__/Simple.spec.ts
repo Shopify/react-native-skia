@@ -1,8 +1,10 @@
-import { Mask } from "../components";
-import { DrawingNode } from "../nodes";
-import { useContextBridge } from "../useContextBridge";
-import { DependencyManager } from "../DependencyManager";
-import { useCanvas } from "../useCanvas";
+import {
+  Mask,
+  DrawingNode,
+  useContextBridge,
+  DependencyManager,
+  useCanvas,
+} from "../index";
 
 describe("Renderer", () => {
   it("Loads renderer without Skia", () => {
