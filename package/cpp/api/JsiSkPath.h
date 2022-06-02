@@ -410,7 +410,7 @@ public:
     auto y = arguments[1].asNumber();
     auto r = arguments[2].asNumber();
     getObject()->addCircle(x, y, r);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(getLastPt) {
