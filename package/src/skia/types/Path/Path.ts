@@ -464,18 +464,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    */
   isVolatile(): boolean;
 
-  /** Adds circle centered at (x, y) of size radius to SkPath, appending kMove_Verb,
-    four kConic_Verb, and kClose_Verb. Circle begins at: (x + radius, y), continuing
-    clockwise if dir is kCW_Direction, and counterclockwise if dir is kCCW_Direction.
-
-    Has no effect if radius is zero or negative.
-
-    @param x       center of circle
-    @param y       center of circle
-    @param radius  distance from center to edge        
-    @return        reference to SkPath
-  */
-  addCircle(x: number, y: number, r: number): SkPath;
+  addCircle(x: number, y: number, r: number): void;
 
   getLastPt(): { x: number; y: number };
 

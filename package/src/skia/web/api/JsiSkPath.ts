@@ -267,11 +267,8 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     return this.ref.isVolatile();
   }
 
-  addCircle(x: number, y: number, r: number) {
-    // We leave the comment below to remind us that this is not implemented in CanvasKit
-    // throw new NotImplementedOnRNWeb();
-    this.ref.addOval(this.CanvasKit.LTRBRect(x - r, y - r, x + r, y + r));
-    return this;
+  addCircle(_x: number, _y: number, _r: number) {
+    throw new NotImplementedOnRNWeb();
   }
 
   getLastPt() {
