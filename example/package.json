@@ -11,7 +11,8 @@
     "test": "jest",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "pod-install": "npx pod-install ios",
-    "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
+    "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@react-navigation/native": "^6.0.6",
@@ -50,7 +51,8 @@
     "url-loader": "^4.1.1",
     "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.8.1"
+    "webpack-dev-server": "^4.8.1",
+    "patch-package": "^6.4.7"
   },
   "resolutions": {
     "@types/react": "^17"
