@@ -1,6 +1,4 @@
-import path from "path";
-import fs from "fs";
-
+/*global atob*/
 import type { CanvasKit } from "canvaskit-wasm";
 
 import type { SkFontMgr } from "../../types";
@@ -17,8 +15,10 @@ export class JsiSkFontMgrFactory extends Host implements FontMgrFactory {
   RefDefault(): SkFontMgr {
     // We leave the comment below to remind us that this is not implemented in CanvasKit
     // throw new NotImplementedOnRNWeb();
-    return new JsiSkFontMgr(this.CanvasKit, [
-      fs.readFileSync(path.resolve(__dirname, "./fonts/Roboto-Medium.ttf")),
-    ]);
+    const font = require("./fonts/Roboto-Medium.ttf").default;
+    const decoded = atob(font.substring(font.indexOf(",") + 1));
+    const buffer = new Uint8Array(decoded.length);
+    buffer.set(decoded.split("").map((c) => c.charCodeAt(0)));
+    return new JsiSkFontMgr(this.CanvasKit, [new Uint8Array(buffer)]);
   }
 }
