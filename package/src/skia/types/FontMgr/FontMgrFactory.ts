@@ -1,9 +1,9 @@
-import type { FontMgr } from "./FontMgr";
+import type { SkFontMgr } from "./FontMgr";
 
 // Commented code below is the CanvasKit reference
 export interface FontMgrFactory {
   // FromData: (...data: Data[]) => FontMgr | null;
-  RefDefault: () => FontMgr;
+  RefDefault: () => SkFontMgr;
 }
 
 //const fontMgrFactory = (data: Data[]) => Skia.FontMgr.FromData(...data);
