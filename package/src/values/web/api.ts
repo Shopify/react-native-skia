@@ -23,11 +23,11 @@ export const ValueApi: ISkiaValueApi = {
     return new RNSkDerivedValue(cb, values);
   },
   createClockValue: function (): SkiaClockValue {
-    return new RNSkClockValue(requestAnimationFrame);
+    return new RNSkClockValue(requestAnimationFrame.bind(window));
   },
   createAnimation: function <S extends AnimationState = AnimationState>(
     cb: (t: number, state: S | undefined) => S
   ): SkiaAnimation {
-    return new RNSkAnimation(cb, requestAnimationFrame);
+    return new RNSkAnimation(cb, requestAnimationFrame.bind(window));
   },
 };
