@@ -13,6 +13,6 @@ describe("FontMgr", () => {
     expect(font).toBeDefined();
     canvas.drawColor(Skia.Color("white"));
     canvas.drawText("Hello World", 64, 64, paint, font);
-    processResult(surface, "snapshots/drawings/hello-world.png", true);
+    processResult(surface, "snapshots/drawings/hello-world.png");
   });
 });
