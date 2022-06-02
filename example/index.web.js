@@ -6,7 +6,7 @@ if (module.hot) {
 }
 
 console.log("*** Loading CanvasKit");
-CanvasKitInit({}).then(async (canvasKit) => {
+CanvasKitInit().then(async (canvasKit) => {
   console.log("*** CanvasKit loaded successfully");
   global.CanvasKit = canvasKit;
   const App = (await import("./src/App")).default;
