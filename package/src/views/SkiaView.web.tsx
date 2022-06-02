@@ -4,7 +4,6 @@ import { View } from "react-native";
 import type { Canvas, Surface } from "canvaskit-wasm";
 
 import type { SkRect } from "../skia";
-import { canvasKit } from "../skia/NativeSetup.web";
 import type { SkiaValue } from "../values";
 
 import type { DrawingInfo, DrawMode, RNSkiaDrawCallback } from "./types";
@@ -78,7 +77,9 @@ export class SkiaView extends React.Component<
 
   componentDidUpdate() {
     if (this.state.width > -1) {
-      this._surface = canvasKit.current!.MakeCanvasSurface(this.getKey());
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this._surface = global.CanvasKit.MakeCanvasSurface(this.getKey());
       this.redraw();
     }
   }
