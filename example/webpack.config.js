@@ -109,7 +109,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
+          from: "node_modules/canvaskit-wasm/bin/full/canvaskit.wasm",
         },
       ],
     }),
