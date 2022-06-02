@@ -2,7 +2,7 @@ import type { SkJSIInstance } from "../JsiInstance";
 import type { FontStyle } from "../Font/Font";
 import type { SkTypeface } from "../Typeface";
 
-export interface FontMgr extends SkJSIInstance<"FontMgr"> {
+export interface SkFontMgr extends SkJSIInstance<"FontMgr"> {
   /**
    * Return the number of font families loaded in this manager. Useful for debugging.
    */

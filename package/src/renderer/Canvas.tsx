@@ -18,7 +18,7 @@ import ReactReconciler from "react-reconciler";
 
 import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
-import type { FontMgr } from "../skia/types";
+import type { SkFontMgr } from "../skia/types";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
 
@@ -50,7 +50,7 @@ export interface CanvasProps extends ComponentProps<typeof SkiaView> {
   ref?: RefObject<SkiaView>;
   children: ReactNode;
   onTouch?: TouchHandler;
-  fontMgr?: FontMgr;
+  fontMgr?: SkFontMgr;
 }
 
 const defaultFontMgr = Skia.FontMgr.RefDefault();
