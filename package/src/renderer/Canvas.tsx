@@ -53,6 +53,8 @@ export interface CanvasProps extends ComponentProps<typeof SkiaView> {
   fontMgr?: FontMgr;
 }
 
+const defaultFontMgr = Skia.FontMgr.RefDefault();
+
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
   ({ children, style, debug, mode, onTouch, fontMgr }, forwardedRef) => {
     const size = useValue({ width: 0, height: 0 });
@@ -104,7 +106,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           opacity: 1,
           ref,
           center: Skia.Point(width / 2, height / 2),
-          fontMgr: fontMgr ?? Skia.FontMgr.RefDefault(),
+          fontMgr: fontMgr ?? defaultFontMgr,
           Skia,
         };
         container.draw(ctx);
