@@ -456,7 +456,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawColor) {
-    SkColor cl = arguments[0].asNumber();
+    SkColor cl = JsiSkColor::fromValue(runtime, arguments[0]);
     if (count == 1) {
       _canvas->drawColor(cl);
     } else {
@@ -467,7 +467,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(clear) {
-    SkColor cl = arguments[0].asNumber();
+    SkColor cl = JsiSkColor::fromValue(runtime, arguments[0]);
     _canvas->clear(cl);
     return jsi::Value::undefined();
   }
