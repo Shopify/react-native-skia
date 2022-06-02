@@ -1,5 +1,3 @@
-import { Buffer } from "buffer";
-
 import CanvasKitInit from "canvaskit-wasm";
 
 import { Skia } from "../types";
@@ -10,8 +8,6 @@ let Skia: ReturnType<typeof JsiSkApi>;
 beforeAll(async () => {
   const CanvasKit = await CanvasKitInit();
   Skia = JsiSkApi(CanvasKit);
-  // We use this for this for the FontMgr polyfill
-  global.atob = (str: string) => Buffer.from(str, "base64").toString("binary");
 });
 
 const width = 256;

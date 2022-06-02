@@ -13,12 +13,6 @@ export class JsiSkFontMgrFactory extends Host implements FontMgrFactory {
   }
 
   RefDefault(): SkFontMgr {
-    // We leave the comment below to remind us that this is not implemented in CanvasKit
-    // throw new NotImplementedOnRNWeb();
-    const font = require("./fonts/Roboto-Medium.ttf").default;
-    const decoded = atob(font.substring(font.indexOf(",") + 1));
-    const buffer = new Uint8Array(decoded.length);
-    buffer.set(decoded.split("").map((c) => c.charCodeAt(0)));
-    return new JsiSkFontMgr(this.CanvasKit, [new Uint8Array(buffer)]);
+    return new JsiSkFontMgr(this.CanvasKit);
   }
 }
