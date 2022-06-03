@@ -29,6 +29,8 @@ skiaReconciler.injectIntoDevTools({
   rendererPackageName: "react-native-skia",
 });
 
+export const getSkia = () => Skia;
+
 export const drawOnNode = (element: ReactNode) => {
   expect(Skia).toBeDefined();
   const surface = Skia.Surface.Make(width, height)!;
