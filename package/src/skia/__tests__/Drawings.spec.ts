@@ -79,4 +79,10 @@ describe("Drawings", () => {
 
     processResult(surface, "snapshots/drawings/line.png");
   });
+
+  it("Purple", () => {
+    const { surface, canvas, Skia } = setupSkia();
+    canvas.drawColor(Skia.Color("purple"));
+    processResult(surface, "snapshots/drawings/purple.png");
+  });
 });
