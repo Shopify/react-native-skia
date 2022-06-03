@@ -1,36 +1,13 @@
 import React from "react";
-import type { LayoutChangeEvent, ViewProps } from "react-native";
+import type { LayoutChangeEvent } from "react-native";
 import { View } from "react-native";
-import type { Canvas, Surface } from "canvaskit-wasm";
+import type { Surface } from "canvaskit-wasm";
 
-import type { SkCanvas, SkRect } from "../skia";
+import type { SkRect } from "../skia";
 import type { SkiaValue } from "../values";
+import { JsiSkCanvas } from "../skia/web/api/JsiSkCanvas";
 
-import type { DrawingInfo, DrawMode, RNSkiaDrawCallback } from "./types";
-
-export interface SkiaViewProps extends ViewProps {
-  /**
-   * Sets the drawing mode for the skia view. There are two drawing
-   * modes, "continuous" and "default", where the continuous mode will
-   * continuously redraw the view, and the default mode will only
-   * redraw when any of the regular react properties are changed like
-   * sizes and margins.
-   */
-  mode?: DrawMode;
-  /**
-   * When set to true the view will display information about the
-   * average time it takes to render.
-   */
-  debug?: boolean;
-  /**
-   * Draw callback. Will be called whenever the view is invalidated and
-   * needs to redraw. This is either caused by a change in a react
-   * property, a touch event, or a call to redraw. If the view is in
-   * continuous mode the callback will be called 60 frames per second
-   * by the native view.
-   */
-  onDraw?: RNSkiaDrawCallback;
-}
+import type { DrawingInfo, DrawMode, SkiaViewProps } from "./types";
 
 let NativeIdCounter = 1000;
 
@@ -40,14 +17,15 @@ export class SkiaView extends React.Component<
 > {
   constructor(props: SkiaViewProps) {
     super(props);
-    this._nativeId = NativeIdCounter++;
     this.state = { width: -1, height: -1 };
   }
 
-  private _nativeId: number;
+  private _nativeId = NativeIdCounter++;
   private _surface: Surface | null = null;
   private _unsubscriptions: Array<() => void> = [];
-  //private _mode: DrawMode = "default";
+  private _jsiCanvas: JsiSkCanvas | null = null;
+  private _canvasRef: React.RefObject<HTMLCanvasElement> = React.createRef();
+  private _mode: DrawMode = "default";
 
   private getKey() {
     return `rnskia-${this._nativeId}`;
@@ -63,21 +41,22 @@ export class SkiaView extends React.Component<
       width: evt.nativeEvent.layout.width,
       height: evt.nativeEvent.layout.height,
     });
-    this.redraw();
+    // Reset canvas / surface on layout change
+    if (this._canvasRef.current) {
+      this._surface = global.CanvasKit.MakeCanvasSurface(this.getKey());
+      if (this._surface) {
+        const canvas = this._surface.getCanvas();
+        this._jsiCanvas = new JsiSkCanvas(global.CanvasKit, canvas);
+        this.redraw();
+      }
+    }
   }
 
   componentWillUnmount() {
     this.unsubscribeAll();
   }
 
-  componentDidUpdate() {
-    if (this._surface === null && this.state.width > -1) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      this._surface = global.CanvasKit.MakeCanvasSurface(this.getKey());
-      this.redraw();
-    }
-  }
+  componentDidUpdate() {}
 
   /**
    * Creates a snapshot from the canvas in the surface
@@ -94,8 +73,8 @@ export class SkiaView extends React.Component<
    */
   public redraw() {
     if (
+      this._jsiCanvas &&
       this.props.onDraw &&
-      this._surface &&
       this.state.height !== -1 &&
       this.state.width !== -1
     ) {
@@ -103,13 +82,14 @@ export class SkiaView extends React.Component<
         height: this.state.height,
         width: this.state.width,
         timestamp: Date.now(),
-        touches: [],
+        touches: [], // TODO: Fix touch handling
       };
-      const draw = (canvas: Canvas) => {
-        this.props.onDraw &&
-          this.props.onDraw(canvas as unknown as SkCanvas, info);
-      };
-      this._surface.drawOnce(draw);
+      this._surface?.drawOnce(
+        () => this.props.onDraw && this.props.onDraw(this._jsiCanvas!, info)
+      );
+      if (this._mode === "continuous") {
+        requestAnimationFrame(() => this.redraw());
+      }
     }
   }
 
@@ -122,8 +102,9 @@ export class SkiaView extends React.Component<
    * properties are changed like size and margins.
    * @param mode Drawing mode to use.
    */
-  public setDrawMode(_mode: DrawMode) {
-    // this._mode = mode;
+  public setDrawMode(mode: DrawMode) {
+    this._mode = mode;
+    this.redraw();
   }
 
   /**
@@ -151,6 +132,7 @@ export class SkiaView extends React.Component<
         {this.state.width > -1 ? (
           <canvas
             id={this.getKey()}
+            ref={this._canvasRef}
             width={`${this.state.width}px`}
             height={`${this.state.height}px`}
           />
