@@ -3,7 +3,7 @@ import type { LayoutChangeEvent, ViewProps } from "react-native";
 import { View } from "react-native";
 import type { Canvas, Surface } from "canvaskit-wasm";
 
-import type { SkRect } from "../skia";
+import type { SkCanvas, SkRect } from "../skia";
 import type { SkiaValue } from "../values";
 
 import type { DrawingInfo, DrawMode, RNSkiaDrawCallback } from "./types";
@@ -41,12 +41,11 @@ export class SkiaView extends React.Component<
   constructor(props: SkiaViewProps) {
     super(props);
     this._nativeId = NativeIdCounter++;
-    this._surface = null;
     this.state = { width: -1, height: -1 };
   }
 
   private _nativeId: number;
-  private _surface: Surface | null;
+  private _surface: Surface | null = null;
   private _unsubscriptions: Array<() => void> = [];
   //private _mode: DrawMode = "default";
 
@@ -67,16 +66,14 @@ export class SkiaView extends React.Component<
     this.redraw();
   }
 
-  componentDidMount() {
-    this.redraw();
-  }
+  componentDidMount() {}
 
   componentWillUnmount() {
     this.unsubscribeAll();
   }
 
   componentDidUpdate() {
-    if (this.state.width > -1) {
+    if (this._surface === null && this.state.width > -1) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       this._surface = global.CanvasKit.MakeCanvasSurface(this.getKey());
@@ -111,9 +108,8 @@ export class SkiaView extends React.Component<
         touches: [],
       };
       const draw = (canvas: Canvas) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.props.onDraw!(canvas, info);
+        this.props.onDraw &&
+          this.props.onDraw(canvas as unknown as SkCanvas, info);
       };
       this._surface.drawOnce(draw);
     }
