@@ -189,7 +189,11 @@ export class JsiSkCanvas
   }
 
   drawPoints(mode: PointMode, points: SkPoint[], paint: SkPaint) {
-    this.ref.drawPoints(ckEnum(mode), toValue(points), toValue(paint));
+    this.ref.drawPoints(
+      ckEnum(mode),
+      points.map(({ x, y }) => [x, y]).flat(),
+      toValue(paint)
+    );
   }
 
   drawArc(
