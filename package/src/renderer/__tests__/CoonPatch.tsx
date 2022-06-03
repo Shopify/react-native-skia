@@ -6,11 +6,11 @@ import * as SkiaRenderer from "../index";
 
 import { drawOnNode, getSkia } from "./setup";
 
-describe("CoonPatch", () => {
+describe("CoonsPatch", () => {
   it("Renderer", () => {
     expect(SkiaRenderer).toBeDefined();
   });
-  it("Simple Coon Patch", () => {
+  it("Simple Coons Patch", () => {
     const vec = getSkia().Point;
     const colors = ["#61dafb", "#fb61da", "#61fbcf", "#dafb61"];
     const C = 64;
@@ -32,6 +32,6 @@ describe("CoonPatch", () => {
         patch={[topLeft, topRight, bottomRight, bottomLeft]}
       />
     );
-    processResult(surface, "snapshots/coon-patch/simple.png");
+    processResult(surface, "snapshots/coons-patch/simple.png");
   });
 });
