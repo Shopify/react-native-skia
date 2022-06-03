@@ -1,5 +1,9 @@
+import type { CanvasKit as CanvasKitType } from "canvaskit-wasm";
+
 import { JsiSkApi } from "./web";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+declare global {
+  var CanvasKit: CanvasKitType;
+}
+
 export const Skia = JsiSkApi(global.CanvasKit);
