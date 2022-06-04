@@ -1,3 +1,4 @@
+/* global HTMLCanvasElement */
 import React from "react";
 import type { LayoutChangeEvent } from "react-native";
 import { View } from "react-native";
