@@ -1,4 +1,9 @@
 import CanvasKitInit from "canvaskit-wasm";
+import type { CanvasKit as CanvasKitType } from "canvaskit-wasm";
+
+declare global {
+  var CanvasKit: CanvasKitType;
+}
 
 export const LoadSkia = async () => {
   const CanvasKit = await CanvasKitInit();
