@@ -8,7 +8,7 @@ import { skHostConfig } from "../HostConfig";
 import { Container } from "../nodes";
 import type { DrawingContext } from "../DrawingContext";
 
-let Skia: ReturnType<typeof JsiSkApi>;
+export let Skia: ReturnType<typeof JsiSkApi>;
 
 beforeAll(async () => {
   const CanvasKit = await CanvasKitInit();
@@ -28,8 +28,6 @@ skiaReconciler.injectIntoDevTools({
   version: "0.0.1",
   rendererPackageName: "react-native-skia",
 });
-
-export const getSkia = () => Skia;
 
 export const drawOnNode = (element: ReactNode) => {
   expect(Skia).toBeDefined();

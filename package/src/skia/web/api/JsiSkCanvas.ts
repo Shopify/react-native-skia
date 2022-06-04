@@ -176,7 +176,7 @@ export class JsiSkCanvas
     paint?: SkPaint
   ) {
     this.ref.drawPatch(
-      toValue(cubics),
+      cubics.map(({ x, y }) => [x, y]).flat(),
       colors,
       toOptionalValue(texs),
       mode ? ckEnum(mode) : null,
