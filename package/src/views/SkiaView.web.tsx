@@ -59,8 +59,7 @@ export class SkiaView extends React.Component<
    * @returns An Image object.
    */
   public makeImageSnapshot(_rect?: SkRect) {
-    // TODO!
-    return null;
+    return this._surface?.makeImageSnapshot(_rect);
   }
 
   /**

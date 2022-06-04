@@ -11,8 +11,7 @@
     "test": "jest",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "pod-install": "npx pod-install ios",
-    "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081",
-    "postinstall": "patch-package"
+    "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
   },
   "dependencies": {
     "@react-navigation/native": "^6.0.6",
