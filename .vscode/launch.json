@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Chrome",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}/example"
+        },
+        {
             "type": "node",
             "name": "Debug Package/Jest",
             "request": "launch",
@@ -15,11 +22,10 @@
             "cwd": "${workspaceFolder}/package",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "disableOptimisticBPs": true,
             "program": "${workspaceFolder}/package/node_modules/.bin/jest",
             "windows": {
                 "program": "${workspaceFolder}/node_modules/jest/bin/jest"
             }
-        }
+        },
     ]
 }
