@@ -1,12 +1,11 @@
 import {
   Shadow,
   vec,
-  Paint,
-  LinearGradient,
   Group,
   translate,
   Text,
   Circle,
+  LinearGradient,
 } from "@shopify/react-native-skia";
 import type { SkiaValue, SkFont } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
@@ -47,14 +46,12 @@ export const Control = ({
       />
       <Group transform={[{ translateX: 50 }]}>
         <Group>
-          <Paint>
-            <Shadow dx={4} dy={6} blur={20} color="rgba(0, 0,0,0.25)" />
-            <LinearGradient
-              start={vec(0, 0)}
-              end={vec(50, 50)}
-              colors={["#141515", "#2E3236"]}
-            />
-          </Paint>
+          <Shadow dx={4} dy={6} blur={20} color="rgba(0, 0,0,0.25)" />
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(50, 50)}
+            colors={["#141515", "#2E3236"]}
+          />
           <Circle cx={r} cy={r} r={r} />
         </Group>
         <Group>
@@ -70,13 +67,11 @@ export const Control = ({
         <Group transform={translate({ x: r / 2, y: r / 2 })}>
           <Group color="rgba(235, 235, 245, 0.6)">
             {active && (
-              <Paint>
-                <LinearGradient
-                  start={vec(0, 0)}
-                  end={vec(24, 24)}
-                  colors={["#2FB8FF", "#9EECD9"]}
-                />
-              </Paint>
+              <LinearGradient
+                start={vec(0, 0)}
+                end={vec(24, 24)}
+                colors={["#2FB8FF", "#9EECD9"]}
+              />
             )}
             {children}
           </Group>
