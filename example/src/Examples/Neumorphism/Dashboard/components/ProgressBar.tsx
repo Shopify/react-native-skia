@@ -7,7 +7,6 @@ import {
   LinearGradient,
   translate,
   Circle,
-  Paint,
   Skia,
   vec,
   Path,
@@ -46,13 +45,11 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
   return (
     <Group transform={translate({ x: 100, y: 223 })}>
       <Group>
-        <Paint>
-          <LinearGradient
-            start={vec(12, 12)}
-            end={vec(200, 200)}
-            colors={["#101113", "#2B2F33"]}
-          />
-        </Paint>
+        <LinearGradient
+          start={vec(12, 12)}
+          end={vec(200, 200)}
+          colors={["#101113", "#2B2F33"]}
+        />
         <Box box={fromCircle(12 + 85, 12 + 85, 85)}>
           <BoxShadow dx={18} dy={18} blur={65} color="#141415" />
           <BoxShadow dx={-18} dy={-18} blur={65} color="#485057" />
@@ -82,9 +79,7 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
         color="white"
       />
       <Group>
-        <Paint>
-          <SweepGradient c={vec(12 + r1, 12 + r1)} colors={colors} />
-        </Paint>
+        <SweepGradient c={vec(12 + r1, 12 + r1)} colors={colors} />
         <Path
           path={path}
           style="stroke"

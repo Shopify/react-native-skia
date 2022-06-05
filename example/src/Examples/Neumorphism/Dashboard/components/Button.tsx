@@ -3,7 +3,6 @@ import {
   Circle,
   Group,
   LinearGradient,
-  Paint,
   RadialGradient,
   translate,
   vec,
@@ -26,34 +25,28 @@ export const Button = ({ x, y, children }: ButtonProps) => {
   return (
     <Group transform={translate({ x, y })}>
       <Group>
-        <Paint>
-          <RadialGradient
-            c={vec(r2, r2)}
-            r={r2}
-            colors={["#5D6167", "#13151A"]}
-          />
-          <Blur blur={20} />
-        </Paint>
+        <RadialGradient
+          c={vec(r2, r2)}
+          r={r2}
+          colors={["#5D6167", "#13151A"]}
+        />
+        <Blur blur={20} />
         <Circle cx={r2} cy={r2} r={r2} />
       </Group>
       <Group>
-        <Paint>
-          <RadialGradient
-            c={vec(PADDING + r1, PADDING + r1)}
-            r={PADDING + r1}
-            colors={["#545659", "#232629"]}
-          />
-        </Paint>
+        <RadialGradient
+          c={vec(PADDING + r1, PADDING + r1)}
+          r={PADDING + r1}
+          colors={["#545659", "#232629"]}
+        />
         <Circle cx={6 + r1} cy={6 + r1} r={r1} opacity={0.5} />
       </Group>
       <Group>
-        <Paint>
-          <LinearGradient
-            start={vec(PADDING, PADDING)}
-            end={vec(12 + 3 * r1, 12 + 3 * r1)}
-            colors={["rgba(0, 0, 0, 0.45)", "white"]}
-          />
-        </Paint>
+        <LinearGradient
+          start={vec(PADDING, PADDING)}
+          end={vec(12 + 3 * r1, 12 + 3 * r1)}
+          colors={["rgba(0, 0, 0, 0.45)", "white"]}
+        />
         <Circle
           cx={PADDING + r1}
           cy={PADDING + r1}
