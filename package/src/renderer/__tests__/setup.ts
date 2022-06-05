@@ -8,7 +8,7 @@ import { skHostConfig } from "../HostConfig";
 import { Container } from "../nodes";
 import type { DrawingContext } from "../DrawingContext";
 
-let Skia: ReturnType<typeof JsiSkApi>;
+export let Skia: ReturnType<typeof JsiSkApi>;
 
 beforeAll(async () => {
   const CanvasKit = await CanvasKitInit();
