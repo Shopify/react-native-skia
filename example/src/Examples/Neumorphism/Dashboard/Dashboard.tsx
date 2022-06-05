@@ -20,8 +20,6 @@ import {
   useLoop,
 } from "@shopify/react-native-skia";
 
-import { Freeze } from "../../API/Freeze";
-
 import { Title } from "./components/Title";
 import { ProgressBar } from "./components/ProgressBar";
 // import { Snow } from "./components/icons/Snow";
@@ -32,9 +30,6 @@ import { ProgressBar } from "./components/ProgressBar";
 import { Mode } from "./components/Mode";
 import { Control } from "./components/Control";
 import { Snow } from "./components/icons/Snow";
-import { Wind } from "./components/icons/Wind";
-import { Sun } from "./components/icons/Sun";
-import { Power } from "./components/icons/Power";
 
 const window = Dimensions.get("window");
 const width = 390;
@@ -45,7 +40,6 @@ const rects = fitRects("cover", src, dst);
 const transform = rect2rect(rects.src, rects.dst);
 
 export const Neumorphism = () => {
-  const p0 = useValue(0.5);
   const translateY = useValue(0);
   const offsetY = useValue(0);
   const t = useLoop({ duration: 3000 });
