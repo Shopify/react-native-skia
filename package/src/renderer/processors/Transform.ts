@@ -12,18 +12,25 @@ export const processCanvasTransform = (
   { canvas, Skia }: DrawingContext,
   { transform, origin, matrix }: TransformProps
 ) => {
-  if (transform) {
-    if (matrix) {
-      canvas.concat(matrix);
-    } else {
-      const m3 = processTransform(
-        Skia.Matrix(),
-        origin ? transformOrigin(origin, transform) : transform
-      );
+  if (matrix) {
+    if (origin) {
+      const m3 = Skia.Matrix();
+      m3.preTranslate(origin.x, origin.y);
+      m3.preConcat(matrix);
+      m3.preTranslate(-origin.x, -origin.y);
       canvas.concat(m3);
+    } else {
+      canvas.concat(matrix);
     }
+  } else if (transform) {
+    const m3 = processTransform(
+      Skia.Matrix(),
+      origin ? transformOrigin(origin, transform) : transform
+    );
+    canvas.concat(m3);
   }
 };
+
 
 export const localMatrix = (
   m: SkMatrix,
