@@ -2,15 +2,12 @@
 import React from "react";
 import type { LayoutChangeEvent } from "react-native";
 import { View } from "react-native";
-import type { Surface } from "canvaskit-wasm";
 
-import type { SkRect } from "../skia";
+import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
-import { JsiSkCanvas } from "../skia/web/api/JsiSkCanvas";
+import { JsiSkSurface } from "../skia/web/api/JsiSkSurface";
 
 import type { DrawingInfo, DrawMode, SkiaViewProps } from "./types";
-
-let NativeIdCounter = 1000;
 
 export class SkiaView extends React.Component<
   SkiaViewProps,
@@ -21,16 +18,11 @@ export class SkiaView extends React.Component<
     this.state = { width: -1, height: -1 };
   }
 
-  private _nativeId = NativeIdCounter++;
-  private _surface: Surface | null = null;
+  private _surface: JsiSkSurface | null = null;
   private _unsubscriptions: Array<() => void> = [];
-  private _jsiCanvas: JsiSkCanvas | null = null;
+  private _canvas: SkCanvas | null = null;
   private _canvasRef: React.RefObject<HTMLCanvasElement> = React.createRef();
   private _mode: DrawMode = "default";
-
-  private getKey() {
-    return `rnskia-${this._nativeId}`;
-  }
 
   private unsubscribeAll() {
     this._unsubscriptions.forEach((u) => u());
@@ -44,10 +36,12 @@ export class SkiaView extends React.Component<
     });
     // Reset canvas / surface on layout change
     if (this._canvasRef.current) {
-      this._surface = global.CanvasKit.MakeCanvasSurface(this.getKey());
+      this._surface = new JsiSkSurface(
+        global.CanvasKit,
+        global.CanvasKit.MakeCanvasSurface(this._canvasRef.current)!
+      );
       if (this._surface) {
-        const canvas = this._surface.getCanvas();
-        this._jsiCanvas = new JsiSkCanvas(global.CanvasKit, canvas);
+        this._canvas = this._surface.getCanvas();
         this.redraw();
       }
     }
@@ -65,8 +59,7 @@ export class SkiaView extends React.Component<
    * @returns An Image object.
    */
   public makeImageSnapshot(_rect?: SkRect) {
-    // TODO!
-    return null;
+    return this._surface?.makeImageSnapshot(_rect);
   }
 
   /**
@@ -74,7 +67,7 @@ export class SkiaView extends React.Component<
    */
   public redraw() {
     if (
-      this._jsiCanvas &&
+      this._canvas &&
       this.props.onDraw &&
       this.state.height !== -1 &&
       this.state.width !== -1
@@ -85,8 +78,8 @@ export class SkiaView extends React.Component<
         timestamp: Date.now(),
         touches: [], // TODO: Fix touch handling
       };
-      this._surface?.drawOnce(
-        () => this.props.onDraw && this.props.onDraw(this._jsiCanvas!, info)
+      this._surface?.ref.drawOnce(
+        () => this.props.onDraw && this.props.onDraw(this._canvas!, info)
       );
       if (this._mode === "continuous") {
         requestAnimationFrame(() => this.redraw());
@@ -132,7 +125,6 @@ export class SkiaView extends React.Component<
       <View {...viewProps} onLayout={this.onLayout.bind(this)}>
         {this.state.width > -1 ? (
           <canvas
-            id={this.getKey()}
             ref={this._canvasRef}
             width={`${this.state.width}px`}
             height={`${this.state.height}px`}
