@@ -17,17 +17,16 @@ Library developers may take advantage of the imperative API to provide custom fe
 import {Canvas, Circle, Group} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
-  const width = 256;
-  const height = 256;
-  const r = 215;
+  const size = 256;
+  const r = size * 0.33;
   return (
     <Canvas style={{ flex: 1 }}>
       <Group blendMode="multiply">
         <Circle cx={r} cy={r} r={r} color="cyan" />
-        <Circle cx={width - r} cy={r} r={r} color="magenta" />
+        <Circle cx={size - r} cy={r} r={r} color="magenta" />
         <Circle
-          cx={width/2}
-          cy={height - r}
+          cx={size/2}
+          cy={size - r}
           r={r}
           color="yellow"
         />
@@ -55,7 +54,7 @@ paint.setBlendMode(BlendMode.Multiply);
 export const HelloWorld = () => {
   const width = 256;
   const height = 256;
-  const r = 215;
+  const r = 92;
   const onDraw = useDrawCallback((canvas) => {
     // Cyan Circle
     const cyan = paint.copy();
