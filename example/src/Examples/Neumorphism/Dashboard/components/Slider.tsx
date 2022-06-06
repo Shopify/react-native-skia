@@ -5,7 +5,6 @@ import {
   rect,
   rrect,
   RoundedRect,
-  Paint,
   Group,
   translate,
   LinearGradient,
@@ -47,13 +46,11 @@ export const Slider = ({ x, y, progress }: SliderProps) => {
         />
       </Box>
       <Group>
-        <Paint>
-          <LinearGradient
-            start={vec(0, 0)}
-            end={vec(0, 192)}
-            colors={["#2FB8FF", "#9EECD9"]}
-          />
-        </Paint>
+        <LinearGradient
+          start={vec(0, 0)}
+          end={vec(0, 192)}
+          colors={["#2FB8FF", "#9EECD9"]}
+        />
         <RoundedRect x={0} y={3.5} width={width} height={8} r={25} />
       </Group>
       <Group transform={transform}>

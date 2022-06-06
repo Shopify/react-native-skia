@@ -9,7 +9,6 @@ import {
   Fill,
   Group,
   LinearGradient,
-  Paint,
   rect,
   useFont,
   vec,
@@ -29,6 +28,8 @@ import { ProgressBar } from "./components/ProgressBar";
 // import { Sun } from "./components/icons/Sun";
 // import { Power } from "./components/icons/Power";
 import { Mode } from "./components/Mode";
+import { Control } from "./components/Control";
+import { Snow } from "./components/icons/Snow";
 
 const window = Dimensions.get("window");
 const width = 390;
@@ -63,19 +64,15 @@ export const Neumorphism = () => {
     <Canvas style={{ flex: 1 }} mode="continuous" onTouch={onTouch}>
       <Group transform={transform}>
         <Group>
-          <Paint>
-            <LinearGradient
-              start={vec(0, 0)}
-              end={vec(0, height)}
-              colors={["#2A2D32", "#212326", "#131313"]}
-            />
-          </Paint>
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(0, height)}
+            colors={["#2A2D32", "#212326", "#131313"]}
+          />
           <Fill />
         </Group>
         <Group>
-          <Paint>
-            <Blur blur={30} />
-          </Paint>
+          <Blur blur={30} />
           <Circle
             color="#56CCF2"
             opacity={0.2}
@@ -86,7 +83,7 @@ export const Neumorphism = () => {
         </Group>
         <Title title="Climate" />
         <ProgressBar progress={progress} />
-        {/* <Control
+        <Control
           x={0}
           y={464}
           label="Ac"
@@ -96,21 +93,6 @@ export const Neumorphism = () => {
         >
           <Snow />
         </Control>
-        <Control x={0} y={464 + 75} label="Fan" font={font} progress={p0}>
-          <Wind />
-        </Control>
-        <Control x={0} y={464 + 140} label="Heat" font={font} progress={p0}>
-          <Sun />
-        </Control>
-        <Control
-          x={0}
-          y={464 + 140 + 75}
-          label="Auto"
-          font={font}
-          progress={p0}
-        >
-          <Power />
-        </Control> */}
         <Mode translateY={translateY} />
       </Group>
     </Canvas>
