@@ -50,7 +50,7 @@ std::vector<SkColor> getColors(jsi::Runtime &runtime, const jsi::Value& value) {
     auto size = jsiColors.size(runtime);
     colors.reserve(size);
     for (int i = 0; i < size; i++) {
-      SkColor color = jsiColors.getValueAtIndex(runtime, i).asNumber();
+      SkColor color = JsiSkColor::fromValue(runtime, jsiColors.getValueAtIndex(runtime, i));
       colors.push_back(color);
     }
   }
@@ -191,7 +191,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeColor) {
-    auto color = arguments[0].asNumber();
+    auto color = JsiSkColor::fromValue(runtime, arguments[0]);
     sk_sp<SkShader> gradient = SkShaders::Color(color);
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));

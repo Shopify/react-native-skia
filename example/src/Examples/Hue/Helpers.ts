@@ -54,5 +54,5 @@ export const polar2Color = (
   const h = normalizeRad(theta) / TAU;
   const s = quadraticIn(radius / maxRadius);
   const { r, g, b } = hsv2rgb(h, s, 1);
-  return rgbaColor(r, g, b, 1);
+  return rgbaColor(r / 255, g / 255, b / 255, 1);
 };

@@ -43,7 +43,7 @@ public:
     unsubscribe();
     
     // Verify input
-    if(value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
+    if(value.isObject() && value.asObject(runtime).isHostObject<RNSkAnimation>(runtime)) {
       auto animation = value.asObject(runtime).getHostObject<RNSkAnimation>(runtime);
       if(animation != nullptr) {
         // Now we have a value animation - let us connect and start
@@ -76,11 +76,16 @@ public:
 
 private:
   void subscribe(std::shared_ptr<RNSkAnimation> animation) {
-    unsubscribe();
     if(animation != nullptr) {
       _animation = animation;
-      auto dispatch = std::bind(&RNSkValue::animationDidUpdate, this, std::placeholders::_1);
-      _unsubscribe = std::make_shared<std::function<void()>>(_animation->addListener(dispatch));
+      _unsubscribe = std::make_shared<std::function<void()>>(
+        _animation->addListener([weakSelf = weak_from_this()](jsi::Runtime &runtime) {
+        auto self = weakSelf.lock();
+        if(self) {
+          auto selfAsThis = std::dynamic_pointer_cast<RNSkValue>(self);
+          selfAsThis->animationDidUpdate(runtime);
+        }
+      }));
       // Start the animation
       _animation->startClock();
     }

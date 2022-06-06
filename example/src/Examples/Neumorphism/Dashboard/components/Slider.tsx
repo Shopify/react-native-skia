@@ -1,11 +1,10 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   BoxShadow,
   Box,
   rect,
   rrect,
   RoundedRect,
-  Paint,
   Group,
   translate,
   LinearGradient,
@@ -19,7 +18,7 @@ import { Knob } from "./Knob";
 interface SliderProps {
   x: number;
   y: number;
-  progress: SkiaReadonlyValue<number>;
+  progress: SkiaValue<number>;
 }
 
 export const Slider = ({ x, y, progress }: SliderProps) => {
@@ -47,13 +46,11 @@ export const Slider = ({ x, y, progress }: SliderProps) => {
         />
       </Box>
       <Group>
-        <Paint>
-          <LinearGradient
-            start={vec(0, 0)}
-            end={vec(0, 192)}
-            colors={["#2FB8FF", "#9EECD9"]}
-          />
-        </Paint>
+        <LinearGradient
+          start={vec(0, 0)}
+          end={vec(0, 192)}
+          colors={["#2FB8FF", "#9EECD9"]}
+        />
         <RoundedRect x={0} y={3.5} width={width} height={8} r={25} />
       </Group>
       <Group transform={transform}>

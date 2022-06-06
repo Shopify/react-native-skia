@@ -1,9 +1,8 @@
 import React from "react";
-import type {
-  CubicBezierHandle,
-  SkiaReadonlyValue,
-} from "@shopify/react-native-skia";
+import type { CubicBezierHandle, SkiaValue } from "@shopify/react-native-skia";
 import {
+  Skia,
+  isEdge,
   Group,
   useClockValue,
   add,
@@ -24,6 +23,7 @@ import { Curves } from "./Curves";
 import { useHandles } from "./useHandles";
 
 const { width, height } = Dimensions.get("window");
+const window = Skia.XYWHRect(0, 0, width, height);
 
 const rectToTexture = (
   vertices: CubicBezierHandle[],
@@ -42,7 +42,7 @@ const rectToColors = (
 ) => [colors[tl], colors[tr], colors[br], colors[bl]] as const;
 
 const useRectToPatch = (
-  mesh: SkiaReadonlyValue<CubicBezierHandle[]>,
+  mesh: SkiaValue<CubicBezierHandle[]>,
   indices: readonly number[]
 ) =>
   useDerivedValue(() => {
@@ -130,34 +130,41 @@ export const CoonsPatchMeshGradient = ({
     .flat();
   const meshNoise = useDerivedValue(() => {
     return defaultMesh.map((pt, i) => {
-      const isEdge =
-        pt.pos.x === 0 ||
-        pt.pos.y === 0 ||
-        pt.pos.x === width ||
-        pt.pos.y === height;
-      if (isEdge) {
+      if (isEdge(pt.pos, window)) {
         return pt;
       }
       const noisePos = new SimplexNoise(`${i}-pos`);
       const noiseC1 = new SimplexNoise(`${i}-c1`);
       const noiseC2 = new SimplexNoise(`${i}-c2`);
-      const p = { ...pt };
-      p.pos = { ...pt.pos };
-      p.c1 = { ...pt.c1 };
-      p.c2 = { ...pt.c2 };
-      p.pos.x += A * noisePos.noise2D(clock.current / F, 0);
-      p.pos.y += A * noisePos.noise2D(0, clock.current / F);
-      p.c1.x += A * noiseC1.noise2D(clock.current / F, 0);
-      p.c1.y += A * noiseC1.noise2D(0, clock.current / F);
-      p.c2.x += A * noiseC2.noise2D(clock.current / F, 0);
-      p.c2.y += A * noiseC2.noise2D(0, clock.current / F);
-      return p;
+      return {
+        pos: add(
+          pt.pos,
+          vec(
+            A * noisePos.noise2D(clock.current / F, 0),
+            A * noisePos.noise2D(0, clock.current / F)
+          )
+        ),
+        c1: add(
+          pt.c1,
+          vec(
+            A * noiseC1.noise2D(clock.current / F, 0),
+            A * noiseC1.noise2D(0, clock.current / F)
+          )
+        ),
+        c2: add(
+          pt.c1,
+          vec(
+            A * noiseC2.noise2D(clock.current / F, 0),
+            A * noiseC2.noise2D(0, clock.current / F)
+          )
+        ),
+      };
     });
   }, [clock]);
 
   const meshGesture = useValue(defaultMesh);
 
-  const onTouch = useHandles(meshGesture, defaultMesh, width, height);
+  const onTouch = useHandles(meshGesture, defaultMesh, window);
   const mesh = play ? meshNoise : meshGesture;
   if (image === null) {
     return null;
@@ -181,9 +188,7 @@ export const CoonsPatchMeshGradient = ({
         })}
       </Group>
       {defaultMesh.map(({ pos }, index) => {
-        const edge =
-          pos.x === 0 || pos.y === 0 || pos.x === width || pos.y === height;
-        if (edge || !handles) {
+        if (isEdge(pos, window) || !handles) {
           return null;
         }
         return (
@@ -199,7 +204,7 @@ interface RectPatchProps {
   debug?: boolean;
   lines?: boolean;
   colors: string[];
-  mesh: SkiaReadonlyValue<CubicBezierHandle[]>;
+  mesh: SkiaValue<CubicBezierHandle[]>;
   defaultMesh: CubicBezierHandle[];
 }
 

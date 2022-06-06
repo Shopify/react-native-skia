@@ -16,8 +16,8 @@ type TextProps = CustomPaintProps &
   };
 
 const onDraw = createDrawing<TextProps>(
-  ({ canvas, paint, fontMgr }, { text, x, y, ...fontDef }) => {
-    const font = processFont(fontMgr, fontDef);
+  ({ canvas, paint, fontMgr, Skia }, { text, x, y, ...fontDef }) => {
+    const font = processFont(Skia, fontMgr, fontDef);
     canvas.drawText(text, x, y, paint, font);
   }
 );

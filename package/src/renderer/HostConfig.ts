@@ -1,4 +1,4 @@
-/*global NodeJS, performance*/
+/*global NodeJS*/
 import type { HostConfig } from "react-reconciler";
 
 import type { Node, Container, DeclarationProps, DrawingProps } from "./nodes";
@@ -137,7 +137,7 @@ export const skHostConfig: SkiaHostConfig = {
   /**
    * This function is used by the reconciler in order to calculate current time for prioritising work.
    */
-  now: performance.now,
+  now: Date.now,
 
   supportsMutation: true,
   isPrimaryRenderer: false,

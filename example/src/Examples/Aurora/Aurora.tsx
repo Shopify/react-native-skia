@@ -8,8 +8,8 @@ export const Aurora = () => {
       rows={3}
       cols={3}
       colors={palette.otto}
-      handles
       lines
+      handles
     />
   );
 };

@@ -1,7 +1,8 @@
 import React from "react";
 
-import type { CustomPaintProps, Vector, AnimatedProps } from "../../processors";
+import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes/Drawing";
+import type { Vector } from "../../../skia/types";
 
 export interface LineProps extends CustomPaintProps {
   p1: Vector;

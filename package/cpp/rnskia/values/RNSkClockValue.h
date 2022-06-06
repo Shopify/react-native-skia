@@ -32,7 +32,6 @@ public:
                  size_t count) : RNSkReadonlyValue(platformContext),
         _runtime(runtime),
         _identifier(identifier) {
-    
     // Start by updating to zero (start value)
     update(_runtime, static_cast<double>(0));
   }
@@ -72,6 +71,7 @@ public:
     _start += timeSinceStop;
     
     _state = RNSkClockState::Running;
+    
     getContext()->beginDrawLoop(_identifier, [weakSelf = weak_from_this()](bool invalidated){
       auto self = weakSelf.lock();
       if(self) {
@@ -135,7 +135,7 @@ protected:
   size_t _identifier;
   std::chrono::time_point<std::chrono::steady_clock> _start;
   std::chrono::time_point<std::chrono::steady_clock> _stop;
-  std::atomic<RNSkClockState> _state;
+  std::atomic<RNSkClockState> _state = { RNSkClockState::NotStarted };
 };
 
 }

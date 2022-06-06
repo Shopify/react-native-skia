@@ -278,7 +278,7 @@ public:
       auto colorsSize = jsiColors.size(runtime);
       colors.reserve(colorsSize);
       for (int i = 0; i < colorsSize; i++) {
-        SkColor color = jsiColors.getValueAtIndex(runtime, i).asNumber();
+        SkColor color = JsiSkColor::fromValue(runtime, jsiColors.getValueAtIndex(runtime, i));
         colors.push_back(color);
       }
     }
@@ -456,7 +456,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawColor) {
-    SkColor cl = arguments[0].asNumber();
+    SkColor cl = JsiSkColor::fromValue(runtime, arguments[0]);
     if (count == 1) {
       _canvas->drawColor(cl);
     } else {
@@ -467,7 +467,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(clear) {
-    SkColor cl = arguments[0].asNumber();
+    SkColor cl = JsiSkColor::fromValue(runtime, arguments[0]);
     _canvas->clear(cl);
     return jsi::Value::undefined();
   }

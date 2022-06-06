@@ -1,10 +1,9 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
+import { isPathEffect } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { isPathEffect } from "../../../skia/PathEffect";
 
 export interface DashPathEffectProps {
   intervals: number[];
@@ -13,7 +12,7 @@ export interface DashPathEffectProps {
 }
 
 const onDeclare = createDeclaration<DashPathEffectProps>(
-  ({ intervals, phase }, children) => {
+  ({ intervals, phase }, children, { Skia }) => {
     const [child] = children.filter(isPathEffect);
     const pe = Skia.PathEffect.MakeDash(intervals, phase);
     if (child) {

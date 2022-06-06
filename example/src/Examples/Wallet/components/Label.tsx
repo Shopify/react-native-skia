@@ -1,8 +1,8 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
+  useFont,
   interpolate,
   Text,
-  Skia,
   useDerivedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -11,10 +11,6 @@ import { graphs, AJUSTED_SIZE, WIDTH, HEIGHT, PADDING } from "../Model";
 
 import type { GraphState } from "./Selection";
 
-const tf = Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica")!;
-const titleFont = Skia.Font(tf, 64);
-const subtitleFont = Skia.Font(tf, 24);
-
 const format = (value: number) =>
   "$ " +
   Math.round(value)
@@ -22,11 +18,13 @@ const format = (value: number) =>
     .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 
 interface LabelProps {
-  y: SkiaReadonlyValue<number>;
-  state: SkiaReadonlyValue<GraphState>;
+  y: SkiaValue<number>;
+  state: SkiaValue<GraphState>;
 }
 
 export const Label = ({ state, y }: LabelProps) => {
+  const titleFont = useFont("helvetica", 64)!;
+  const subtitleFont = useFont("helvetica", 24)!;
   const translateY = HEIGHT + PADDING;
   const text = useDerivedValue(() => {
     const graph = graphs[state.current.current];

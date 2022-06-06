@@ -2,11 +2,11 @@ import type { DependencyList, ReactNode } from "react";
 import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
-import { processPaint } from "../processors";
 import type { AnimatedProps } from "../processors/Animations/Animations";
 import { materialize } from "../processors/Animations/Animations";
-import { isPaint } from "../../skia";
+import { isPaint } from "../../skia/types";
 import type { DependencyManager } from "../DependencyManager";
+import { processPaint } from "../processors";
 
 import { Node } from "./Node";
 
@@ -53,6 +53,7 @@ export class DrawingNode<P> extends Node<P> {
     } else {
       const declarations = this.visit(ctx);
       const paint = processPaint(
+        ctx.Skia,
         ctx.paint.copy(),
         ctx.opacity,
         drawingProps,

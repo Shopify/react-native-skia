@@ -1,6 +1,5 @@
 import { exhaustiveCheck } from "../../typeddash";
-import { Skia } from "../../../skia";
-import type { SkRect } from "../../../skia";
+import type { SkRect } from "../../../skia/types";
 
 // https://api.flutter.dev/flutter/painting/BoxFit-class.html
 export type Fit =
@@ -58,12 +57,12 @@ const inscribe = (
 ) => {
   const halfWidthDelta = (rect.width - width) / 2.0;
   const halfHeightDelta = (rect.height - height) / 2.0;
-  return Skia.XYWHRect(
-    rect.x + halfWidthDelta,
-    rect.y + halfHeightDelta,
+  return {
+    x: rect.x + halfWidthDelta,
+    y: rect.y + halfHeightDelta,
     width,
-    height
-  );
+    height,
+  };
 };
 
 const applyBoxFit = (fit: Fit, input: Size, output: Size) => {

@@ -20,7 +20,7 @@ for (let x = 0; x < 256 * 4; x++) {
   }
 }
 const data = Skia.Data.fromBytes(pixels);
-const img = Skia.MakeImage(
+const img = Skia.Image.MakeImage(
   {
     width: 256,
     height: 256,

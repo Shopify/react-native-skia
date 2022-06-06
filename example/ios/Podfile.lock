@@ -571,7 +571,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 90f0bfd5d04e0b066c29216a110ffb9a6c34f23f
   React-logger: 8474fefa09d05f573a13c044cb0dfd751d4e52e3
   react-native-safe-area-context: f98b0b16d1546d208fc293b4661e3f81a895afd9
-  react-native-skia: 36624327c4ecaf4412a5907ff1e8412aa9b4eb76
+  react-native-skia: 57f0f077c9acde81e26caa35d7d8958439762d14
   React-perflogger: 15cb741d6c2379f4d3fc8f9e4d4e1110ef3020cb
   React-RCTActionSheet: ea9099db0597bd769430db1e2d011fd5fdb7fc5e
   React-RCTAnimation: 252df4749866f2654f37612f839522cac91c1165

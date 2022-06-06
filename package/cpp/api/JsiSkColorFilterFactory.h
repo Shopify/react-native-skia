@@ -2,6 +2,7 @@
 
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkColor.h"
 #include <jsi/jsi.h>
 #include <utility>
 
@@ -34,7 +35,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeBlend) {
-    auto color = arguments[0].asNumber();
+    auto color = JsiSkColor::fromValue(runtime, arguments[0]);
     SkBlendMode blend = (SkBlendMode)arguments[1].asNumber();
     // Return the newly constructed object
     return jsi::Object::createFromHostObject(

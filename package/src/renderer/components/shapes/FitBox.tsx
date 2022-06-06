@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 
 import type { Fit } from "../image";
 import { rect2rect, fitRects } from "../image";
-import type { SkRect } from "../../../skia";
+import type { SkRect } from "../../../skia/types";
 import { Group } from "../Group";
 
 interface FitProps {

@@ -4,8 +4,6 @@
 #include <utility>
 #include <jsi/jsi.h>
 
-#include <jsi/jsi.h>
-
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
@@ -97,7 +95,7 @@ namespace RNSkia {
                     auto colorsSize = jsiColors.size(runtime);
                     colors.reserve(colorsSize);
                     for (int i = 0; i < colorsSize; i++) {
-                        SkColor color = jsiColors.getValueAtIndex(runtime, i).asNumber();
+                        SkColor color = JsiSkColor::fromValue(runtime, jsiColors.getValueAtIndex(runtime, i));
                         colors.push_back(color);
                     }
                 }

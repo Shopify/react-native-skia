@@ -1,14 +1,14 @@
 import React from "react";
 import { StyleSheet, Dimensions, ScrollView } from "react-native";
 import {
+  bottomRight,
+  center,
+  topLeft,
   Skia,
   rect,
   Canvas,
   Rect,
   LinearGradient,
-  topLeft,
-  bottomRight,
-  center,
   RadialGradient,
   TwoPointConicalGradient,
   SweepGradient,

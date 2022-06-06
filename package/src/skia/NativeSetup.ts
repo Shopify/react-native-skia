@@ -1,6 +1,6 @@
-import { NativeModules } from "react-native";
+import { NativeModules, Platform } from "react-native";
 
-if (global.SkiaApi == null) {
+if (Platform.OS !== "web" && global.SkiaApi == null) {
   // Initialize RN Skia
   const SkiaModule = NativeModules.RNSkia;
   if (SkiaModule == null || typeof SkiaModule.install !== "function") {

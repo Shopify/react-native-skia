@@ -11,8 +11,8 @@ import { processRRect } from "../../processors";
 export type RoundedRectProps = RRectDef & CustomPaintProps;
 
 const onDraw = createDrawing<RoundedRectProps>(
-  ({ canvas, paint }, rectProps) => {
-    const rrect = processRRect(rectProps);
+  ({ canvas, paint, Skia }, rectProps) => {
+    const rrect = processRRect(Skia, rectProps);
     canvas.drawRRect(rrect, paint);
   }
 );

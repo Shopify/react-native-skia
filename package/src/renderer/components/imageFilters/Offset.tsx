@@ -1,7 +1,6 @@
 import React from "react";
 import type { ReactNode } from "react";
 
-import { Skia } from "../../../skia";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 
@@ -13,9 +12,11 @@ export interface OffsetProps {
   children?: ReactNode | ReactNode[];
 }
 
-const onDeclare = createDeclaration<OffsetProps>(({ x, y }, children) => {
-  return Skia.ImageFilter.MakeOffset(x, y, getInput(children));
-});
+const onDeclare = createDeclaration<OffsetProps>(
+  ({ x, y }, children, { Skia }) => {
+    return Skia.ImageFilter.MakeOffset(x, y, getInput(Skia, children));
+  }
+);
 
 export const Offset = (props: AnimatedProps<OffsetProps>) => {
   return <skDeclaration onDeclare={onDeclare} {...props} />;
