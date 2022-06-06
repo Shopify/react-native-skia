@@ -19,7 +19,7 @@ import {Canvas, Circle, Group} from "@shopify/react-native-skia";
 export const HelloWorld = () => {
   const width = 256;
   const height = 256;
-  const r = 215;
+  const r = 92;
   return (
     <Canvas style={{ flex: 1 }}>
       <Group blendMode="multiply">
@@ -55,7 +55,7 @@ paint.setBlendMode(BlendMode.Multiply);
 export const HelloWorld = () => {
   const width = 256;
   const height = 256;
-  const r = 215;
+  const r = 92;
   const onDraw = useDrawCallback((canvas) => {
     // Cyan Circle
     const cyan = paint.copy();
