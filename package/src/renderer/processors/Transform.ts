@@ -15,9 +15,9 @@ export const processCanvasTransform = (
   if (matrix) {
     if (origin) {
       const m3 = Skia.Matrix();
-      m3.preTranslate(origin.x, origin.y);
-      m3.preConcat(matrix);
-      m3.preTranslate(-origin.x, -origin.y);
+      m3.translate(origin.x, origin.y);
+      m3.concat(matrix);
+      m3.translate(-origin.x, -origin.y);
       canvas.concat(m3);
     } else {
       canvas.concat(matrix);
@@ -30,7 +30,6 @@ export const processCanvasTransform = (
     canvas.concat(m3);
   }
 };
-
 
 export const localMatrix = (
   m: SkMatrix,

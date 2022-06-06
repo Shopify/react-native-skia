@@ -26,45 +26,45 @@ public:
             context, std::make_shared<SkMatrix>(std::move(m))) {}
 
 
-  JSI_HOST_FUNCTION(preConcat) {
+  JSI_HOST_FUNCTION(concat) {
     auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
     getObject()->preConcat(*m3);
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(preTranslate) {
+  JSI_HOST_FUNCTION(translate) {
     auto x = arguments[0].asNumber();
     auto y = arguments[1].asNumber();
     getObject()->preTranslate(x, y);
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(preScale) {
+  JSI_HOST_FUNCTION(scale) {
     auto x = arguments[0].asNumber();
-    auto y = arguments[1].asNumber();
+    auto y = count > 1 ? arguments[1].asNumber() : 1;
     getObject()->preScale(x, y);
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(preSkew) {
+  JSI_HOST_FUNCTION(skew) {
     auto x = arguments[0].asNumber();
     auto y = arguments[1].asNumber();
     getObject()->preSkew(x, y);
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(preRotate) {
+  JSI_HOST_FUNCTION(rotate) {
     auto a = arguments[0].asNumber();
-    getObject()->preRotate(a);
+    getObject()->preRotate(SkRadiansToDegrees(a));
     return jsi::Value::undefined();
   }
 
   JSI_EXPORT_FUNCTIONS(
-    JSI_EXPORT_FUNC(JsiSkMatrix, preConcat),
-    JSI_EXPORT_FUNC(JsiSkMatrix, preTranslate),
-    JSI_EXPORT_FUNC(JsiSkMatrix, preScale),
-    JSI_EXPORT_FUNC(JsiSkMatrix, preSkew),
-    JSI_EXPORT_FUNC(JsiSkMatrix, preRotate),
+    JSI_EXPORT_FUNC(JsiSkMatrix, concat),
+    JSI_EXPORT_FUNC(JsiSkMatrix, translate),
+    JSI_EXPORT_FUNC(JsiSkMatrix, scale),
+    JSI_EXPORT_FUNC(JsiSkMatrix, skew),
+    JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
   )
 
   /**
