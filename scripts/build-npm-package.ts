@@ -72,9 +72,9 @@ const majorMinor = pck.version.split(".").slice(0, 2).join(".");
 const nextVersion = majorMinor + "." + process.env.GITHUB_RUN_NUMBER;
 pck.version = nextVersion;
 pck.types = "lib/typescript/index.d.ts";
-pck.main = "lib/module/index.js";
+pck.main = "lib/commonjs/index.js";
 pck.module = "lib/module/index.js";
-pck["react-native"] = "lib/module/index.js";
+pck["react-native"] = "./index.ts";
 pck.scripts.postinstall = "node scripts/install-npm.js";
 console.log("Building version:", nextVersion);
 
