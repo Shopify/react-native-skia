@@ -74,7 +74,7 @@ pck.version = nextVersion;
 pck.types = "lib/typescript/index.d.ts";
 pck.main = "lib/commonjs/index.js";
 pck.module = "lib/module/index.js";
-pck["react-native"] = "./index.ts";
+pck["react-native"] = "src/index.ts";
 pck.scripts.postinstall = "node scripts/install-npm.js";
 console.log("Building version:", nextVersion);
 
