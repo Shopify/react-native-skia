@@ -10,6 +10,7 @@ export type Routes = {
   ImageFilters: undefined;
   Gradients: undefined;
   SVG: undefined;
+  Touch: undefined;
   BlendModes: undefined;
   Data: undefined;
   Picture: undefined;
