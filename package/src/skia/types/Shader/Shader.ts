@@ -1,6 +1,6 @@
 import type { SkJSIInstance } from "../JsiInstance";
 import type { Vector } from "../Point";
-import type { SkRuntimeEffect } from "../RuntimeEffect";
+import type { SkRuntimeEffect, SkRuntimeShaderBuilder } from "../RuntimeEffect";
 
 export const isShader = (obj: SkJSIInstance<string> | null): obj is SkShader =>
   obj !== null && obj.__typename__ === "Shader";
@@ -15,14 +15,12 @@ export interface Uniforms {
   [name: string]: Uniform;
 }
 
-export const isVector = (obj: unknown): obj is Vector =>
+const isVector = (obj: unknown): obj is Vector =>
   // We have an issue to check property existence on JSI backed instances
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (obj as any).x !== undefined && (obj as any).y !== undefined;
 
-export const processValue = (
-  value: UniformValue
-): number | readonly number[] => {
+const processValue = (value: UniformValue): number | readonly number[] => {
   if (isVector(value)) {
     return [value.x, value.y];
   }
@@ -31,7 +29,8 @@ export const processValue = (
 
 export const processUniforms = (
   source: SkRuntimeEffect,
-  uniforms: Uniforms
+  uniforms: Uniforms,
+  builder?: SkRuntimeShaderBuilder
 ) => {
   const processed = new Array(source.getUniformCount())
     .fill(0)
@@ -41,10 +40,13 @@ export const processUniforms = (
       if (value === undefined) {
         throw new Error(`No value specified for uniform ${name}`);
       }
+      let result: number | readonly number[];
       if (Array.isArray(value)) {
-        return value.flatMap(processValue);
+        result = value.flatMap(processValue);
       }
-      return processValue(value as UniformValue);
+      result = processValue(value as UniformValue);
+      builder?.setUniform(name, typeof result === "number" ? [result] : result);
+      return result;
     });
   const names = Object.keys(uniforms);
   if (names.length > source.getUniformCount()) {
