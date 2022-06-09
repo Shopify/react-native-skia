@@ -13,15 +13,13 @@ import {
   Text,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { Dimensions } from "react-native";
 import SimplexNoise from "simplex-noise";
+import { useWindowDimensions } from "react-native";
 
 import { FG } from "./Theme";
 
-const { width, height } = Dimensions.get("window");
 export const COLS = 5;
 export const ROWS = 10;
-export const SIZE = { width: width / COLS, height: height / ROWS };
 const DIGITS = new Array(10).fill(0).map((_, i) => `${i}`);
 const F = 0.0008;
 const R = 125;
@@ -36,6 +34,8 @@ interface SymbolProps {
 }
 
 export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
+  const { width, height } = useWindowDimensions();
+  const SIZE = { width: width / COLS, height: height / ROWS };
   const x = i * SIZE.width;
   const y = j * SIZE.height;
   const noise = new SimplexNoise(`${i}-${j}`);
