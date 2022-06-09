@@ -29,6 +29,24 @@ namespace RNSkia {
                 : JsiSkWrappingSharedPtrHostObject<SkRuntimeShaderBuilder>(
                 std::move(context), std::make_shared<SkRuntimeShaderBuilder>(rt)){}
 
+        JSI_HOST_FUNCTION(setUniform) {
+            auto name = arguments[0].asString(runtime).utf8(runtime);
+            auto jsiValue = arguments[1].asObject(runtime).asArray(runtime);
+            auto size = jsiValue.size(runtime);
+            std::vector<SkScalar> value;
+            value.reserve(size);
+            for (int i = 0; i < size; i++) {
+                auto e = jsiValue.getValueAtIndex(runtime, i).asNumber();
+                value.push_back(e);
+            }
+            getObject()->uniform(name.c_str()).set(value.data(), size);
+            return jsi::Value::undefined();
+        }
+
+        JSI_EXPORT_FUNCTIONS(
+            JSI_EXPORT_FUNC(JsiSkRuntimeShaderBuilder, setUniform)
+        )
+
         /**
           Returns the underlying object from a host object of this type
          */
