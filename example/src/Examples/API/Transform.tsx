@@ -158,7 +158,6 @@ export const Transform = () => {
       <SkiaView style={style} onDraw={onMatrixDraw} />
       <Title>Matrix 2</Title>
       <SkiaView style={style} onDraw={onMatrixDraw2} />
-
     </ScrollView>
   );
 };
