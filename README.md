@@ -47,6 +47,14 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 
 And them the _Modules_ section. click on `shopify_react-native-skia` and select _NDK version_ with dropdown, and click on apply.
 
+#### Proguard
+
+If you're using Proguard, make sure to add the following rule:
+
+```
+-keep class com.shopify.reactnative.skia.** { *; }
+```
+
 #### TroubleShooting
 
 For error **_CMake 'X.X.X' was not found in SDK, PATH, or by cmake.dir property._**
