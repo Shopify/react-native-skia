@@ -9,7 +9,10 @@ export interface SkSLUniform {
   slot: number;
 }
 
-export type SkRuntimeShaderBuilder = SkJSIInstance<"RuntimeShaderBuilder">;
+export interface SkRuntimeShaderBuilder
+  extends SkJSIInstance<"RuntimeShaderBuilder"> {
+  setUniform(name: string, value: readonly number[]): void;
+}
 
 export interface SkRuntimeEffect extends SkJSIInstance<"RuntimeEffect"> {
   /**
