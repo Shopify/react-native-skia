@@ -19,6 +19,10 @@ const examples = [
     title: "✂️ & 🎭 Clipping & Masking",
   },
   {
+    screen: "Touch",
+    title: "🖱 Touch Handling",
+  },
+  {
     screen: "PathEffect",
     title: "⭐️ Path Effect",
   },

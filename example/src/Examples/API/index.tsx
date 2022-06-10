@@ -18,6 +18,7 @@ import { PictureExample } from "./Picture";
 import { ImageFilters } from "./ImageFilters";
 import { UseCanvas } from "./UseCanvas";
 import { FreezeExample } from "./Freeze";
+import { Touch } from "./Touch";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -99,6 +100,13 @@ export const API = () => {
         component={SVG}
         options={{
           title: "🖋 SVG",
+        }}
+      />
+      <Stack.Screen
+        name="Touch"
+        component={Touch}
+        options={{
+          title: "🖱 Touch Handling",
         }}
       />
       <Stack.Screen

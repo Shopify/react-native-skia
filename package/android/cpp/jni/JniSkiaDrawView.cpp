@@ -76,14 +76,15 @@ namespace RNSkia
         std::vector<RNSkia::RNSkTouchPoint> points;
         auto pin = touches.pin();
         auto scale = _drawView->getPixelDensity();
-        points.reserve(pin.size() / 4);
-        for (size_t i = 0; i < pin.size(); i += 4)
+        points.reserve(pin.size() / 5);
+        for (size_t i = 0; i < pin.size(); i += 5)
         {
             RNSkTouchPoint point;
             point.x = pin[i] / scale;
             point.y = pin[i + 1] / scale;
             point.force = pin[i + 2];
             point.type = (RNSkia::RNSkTouchType)pin[i + 3];
+            point.id = pin[i + 4];
             points.push_back(point);
         }
         _drawView->updateTouchState(std::move(points));

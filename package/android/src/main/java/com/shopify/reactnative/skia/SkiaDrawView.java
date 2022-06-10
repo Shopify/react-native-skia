@@ -59,7 +59,7 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
         int action = ev.getAction();
         int count = ev.getPointerCount();
         MotionEvent.PointerCoords r = new MotionEvent.PointerCoords();
-        double[] points = new double[count*4];
+        double[] points = new double[count*5];
         for (int i = 0; i < count; i++) {
             ev.getPointerCoords(i, r);
             points[i] = r.x;
@@ -81,6 +81,7 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
                     points[i+3] = 3;
                     break;
             }
+            points[i+4] = ev.getPointerId(i);
         }
         updateTouchPoints(points);
         return true;

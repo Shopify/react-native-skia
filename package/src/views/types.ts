@@ -22,6 +22,7 @@ export interface TouchInfo {
   y: number;
   force: number;
   type: TouchType;
+  id: number;
   timestamp: number;
 }
 

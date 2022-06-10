@@ -137,7 +137,8 @@
       RNSkia::RNSkTouchPoint nextTouch;
       nextTouch.x = position.x;
       nextTouch.y = position.y;
-      nextTouch.force = [touch force];
+      nextTouch.force = [touch force];    
+      nextTouch.id = [touch hash];
       auto phase = [touch phase];
       switch(phase) {
         case UITouchPhaseBegan:
