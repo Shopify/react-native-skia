@@ -9,14 +9,15 @@ import {
   useTouchHandler,
 } from "@shopify/react-native-skia";
 
-import { HEIGHT, PADDING, WIDTH } from "../Model";
-
-const translateY = HEIGHT + PADDING;
+import { PADDING } from "../Model";
 
 export const useGraphTouchHandler = (
   x: SkiaMutableValue<number>,
-  y: SkiaValue<number>
+  y: SkiaValue<number>,
+  width: number,
+  height: number
 ) => {
+  const translateY = height + PADDING;
   const gestureActive = useValue(false);
   const offsetX = useValue(0);
   const onTouch = useTouchHandler({
@@ -32,13 +33,13 @@ export const useGraphTouchHandler = (
     },
     onActive: (pos) => {
       if (gestureActive.current) {
-        x.current = clamp(offsetX.current + pos.x, 0, WIDTH);
+        x.current = clamp(offsetX.current + pos.x, 0, width);
       }
     },
     onEnd: ({ velocityX }) => {
       if (gestureActive.current) {
         gestureActive.current = false;
-        runDecay(x, { velocity: velocityX, clamp: [0, WIDTH] });
+        runDecay(x, { velocity: velocityX, clamp: [0, width] });
       }
     },
   });

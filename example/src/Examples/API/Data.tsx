@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import {
   AlphaType,
   Canvas,
@@ -7,9 +7,6 @@ import {
   Image,
   Skia,
 } from "@shopify/react-native-skia";
-
-const { width } = Dimensions.get("window");
-const SIZE = width;
 
 const pixels = new Uint8Array(256 * 256 * 4);
 pixels.fill(255);
@@ -32,16 +29,11 @@ const img = Skia.Image.MakeImage(
 )!;
 
 export const Data = () => {
+  const { width } = useWindowDimensions();
+  const SIZE = width;
   return (
-    <Canvas style={styles.container}>
+    <Canvas style={{ width: SIZE, height: SIZE }}>
       <Image image={img} x={0} y={0} width={256} height={256} fit="cover" />
     </Canvas>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: SIZE,
-    height: SIZE,
-  },
-});

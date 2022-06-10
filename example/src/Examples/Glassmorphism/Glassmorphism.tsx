@@ -12,15 +12,18 @@ import {
   Blur,
   useDerivedValue,
 } from "@shopify/react-native-skia";
-import React from "react";
-import { Dimensions } from "react-native";
-
-const { width, height } = Dimensions.get("window");
-const c = vec(width / 2, height / 2);
-const r = c.x - 32;
-const rect = { x: 0, y: c.y, width, height: c.y };
+import React, { useMemo } from "react";
+import { useWindowDimensions } from "react-native";
 
 export const Glassmorphism = () => {
+  const { width, height } = useWindowDimensions();
+  const c = vec(width / 2, height / 2);
+  const r = c.x - 32;
+  const rect = useMemo(
+    () => ({ x: 0, y: c.y, width, height: c.y }),
+    [c.y, width]
+  );
+
   const progress = useLoop({ duration: 2000 });
   const start = useDerivedValue(
     () => sub(c, vec(0, mix(progress.current, r, r / 2))),

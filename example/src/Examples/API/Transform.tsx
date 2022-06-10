@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, Dimensions, ScrollView } from "react-native";
+import React, { useMemo } from "react";
+import { ScrollView, useWindowDimensions } from "react-native";
 import {
   Skia,
   useDrawCallback,
@@ -11,13 +11,6 @@ import {
 import { Title } from "./components/Title";
 
 const card = require("../../assets/card.png");
-
-const { width } = Dimensions.get("window");
-const SIZE = width;
-const center = { x: SIZE / 2, y: SIZE / 2 };
-const aspectRatio = 836 / 1324;
-const CARD_WIDTH = width - 64;
-const CARD_HEIGHT = CARD_WIDTH * aspectRatio;
 
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
@@ -31,6 +24,13 @@ strokePaint.setStrokeWidth(2);
 // Once the Path API is available.
 export const Transform = () => {
   const image = useImage(card);
+
+  const { width } = useWindowDimensions();
+  const SIZE = width;
+  const center = useMemo(() => ({ x: SIZE / 2, y: SIZE / 2 }), [SIZE]);
+  const aspectRatio = 836 / 1324;
+  const CARD_WIDTH = width - 64;
+  const CARD_HEIGHT = CARD_WIDTH * aspectRatio;
 
   const onRotateDraw = useDrawCallback(
     (canvas) => {
@@ -54,7 +54,7 @@ export const Transform = () => {
         canvas.restore();
       }
     },
-    [image]
+    [CARD_HEIGHT, CARD_WIDTH, center.x, center.y, image]
   );
 
   const onSkewDraw = useDrawCallback(
@@ -78,7 +78,7 @@ export const Transform = () => {
         canvas.restore();
       }
     },
-    [image]
+    [CARD_HEIGHT, CARD_WIDTH, center.x, center.y, image]
   );
 
   const onMatrixDraw = useDrawCallback(
@@ -102,24 +102,19 @@ export const Transform = () => {
         canvas.restore();
       }
     },
-    [image]
+    [CARD_HEIGHT, CARD_WIDTH, center.x, center.y, image]
   );
+
+  const style = useMemo(() => ({ width: SIZE, height: SIZE }), [SIZE]);
 
   return (
     <ScrollView>
       <Title>Rotate & Scale</Title>
-      <SkiaView style={styles.container} onDraw={onRotateDraw} />
+      <SkiaView style={style} onDraw={onRotateDraw} />
       <Title>Skew</Title>
-      <SkiaView style={styles.container} onDraw={onSkewDraw} />
+      <SkiaView style={style} onDraw={onSkewDraw} />
       <Title>Matrix</Title>
-      <SkiaView style={styles.container} onDraw={onMatrixDraw} />
+      <SkiaView style={style} onDraw={onMatrixDraw} />
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: SIZE,
-    height: SIZE,
-  },
-});

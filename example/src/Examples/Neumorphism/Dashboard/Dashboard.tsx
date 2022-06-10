@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import {
   runSpring,
   mix,
@@ -31,15 +31,15 @@ import { Mode } from "./components/Mode";
 import { Control } from "./components/Control";
 import { Snow } from "./components/icons/Snow";
 
-const window = Dimensions.get("window");
 const width = 390;
 const height = 844;
 const src = rect(0, 0, width, height);
-const dst = rect(0, 0, window.width, window.height);
-const rects = fitRects("cover", src, dst);
-const transform = rect2rect(rects.src, rects.dst);
 
 export const Neumorphism = () => {
+  const window = useWindowDimensions();
+  const dst = rect(0, 0, window.width, window.height);
+  const rects = fitRects("cover", src, dst);
+  const transform = rect2rect(rects.src, rects.dst);
   const translateY = useValue(0);
   const offsetY = useValue(0);
   const t = useLoop({ duration: 3000 });

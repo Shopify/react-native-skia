@@ -1,12 +1,11 @@
 import { Fill, Group, Paint, rect } from "@shopify/react-native-skia";
 import React from "react";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 
 import { BilinearGradient } from "../../Aurora/components/BilinearGradient";
 
-const { width, height } = Dimensions.get("window");
-
 export const Background = () => {
+  const { width, height } = useWindowDimensions();
   return (
     <Group>
       <Paint>

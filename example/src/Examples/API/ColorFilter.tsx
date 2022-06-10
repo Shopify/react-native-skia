@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, Dimensions, ScrollView } from "react-native";
+import React, { useMemo } from "react";
+import { ScrollView, useWindowDimensions } from "react-native";
 import {
   Skia,
   useDrawCallback,
@@ -22,11 +22,6 @@ import { Title } from "./components/Title";
 
 const card = require("../../assets/zurich.jpg");
 
-const { width } = Dimensions.get("window");
-const aspectRatio = 3057 / 5435;
-const IMG_WIDTH = width / 2;
-const IMG_HEIGHT = IMG_WIDTH * aspectRatio;
-
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
 paint.setColor(Skia.Color("#61DAFB"));
@@ -35,9 +30,21 @@ const strokePaint = paint.copy();
 strokePaint.setStyle(PaintStyle.Stroke);
 strokePaint.setStrokeWidth(2);
 
+const blackAndWhite = [
+  0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
+];
+const purple = [
+  1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
+];
+
 // TODO: use examples from https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
 // Once the Path API is available.
 export const ColorFilter = () => {
+  const { width } = useWindowDimensions();
+  const aspectRatio = 3057 / 5435;
+  const IMG_WIDTH = width / 2;
+  const IMG_HEIGHT = IMG_WIDTH * aspectRatio;
+
   const image = useImage(card);
 
   const onMatrixDraw = useDrawCallback(
@@ -104,24 +111,25 @@ export const ColorFilter = () => {
     },
     [image]
   );
+
+  const style = useMemo(
+    () => ({ width: width, height: IMG_HEIGHT * 2 }),
+    [IMG_HEIGHT, width]
+  );
+
   const r = IMG_HEIGHT;
   if (!image) {
     return null;
   }
-  const blackAndWhite = [
-    0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
-  ];
-  const purple = [
-    1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
-  ];
+
   return (
     <ScrollView>
       <Title>Color Matrix Filter</Title>
-      <SkiaView style={styles.container} onDraw={onMatrixDraw} />
+      <SkiaView style={style} onDraw={onMatrixDraw} />
       <Title>Image Filter</Title>
-      <SkiaView style={styles.container} onDraw={onImageFilterDraw} />
+      <SkiaView style={style} onDraw={onImageFilterDraw} />
       <Title>Other</Title>
-      <Canvas style={styles.container}>
+      <Canvas style={style}>
         <Group>
           <SRGBToLinearGamma>
             <BlendColor color="lightblue" mode="srcIn" />
@@ -130,7 +138,7 @@ export const ColorFilter = () => {
           <Circle cx={2 * r} cy={r} r={r} color="red" />
         </Group>
       </Canvas>
-      <Canvas style={styles.container}>
+      <Canvas style={style}>
         <Image x={0} y={0} width={256} height={256} image={image} fit="cover">
           <LinearToSRGBGamma>
             <Lerp t={0.5}>
@@ -143,10 +151,3 @@ export const ColorFilter = () => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: width,
-    height: IMG_HEIGHT * 2,
-  },
-});
