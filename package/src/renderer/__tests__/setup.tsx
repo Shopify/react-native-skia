@@ -1,3 +1,4 @@
+import React from "react";
 import CanvasKitInit from "canvaskit-wasm";
 import type { ReactNode } from "react";
 import ReactReconciler from "react-reconciler";
@@ -7,6 +8,8 @@ import { DependencyManager } from "../DependencyManager";
 import { skHostConfig } from "../HostConfig";
 import { Container } from "../nodes";
 import type { DrawingContext } from "../DrawingContext";
+import { CanvasProvider } from "../useCanvas";
+import { ValueApi } from "../../values/web";
 
 export let Skia: ReturnType<typeof JsiSkApi>;
 
@@ -39,7 +42,16 @@ export const drawOnNode = (element: ReactNode) => {
   const container = new Container(new DependencyManager(ref), redraw);
   skiaReconciler.createContainer(container, 0, false, null);
   const root = skiaReconciler.createContainer(container, 0, false, null);
-  skiaReconciler.updateContainer(element, root, null, () => {});
+  skiaReconciler.updateContainer(
+    <CanvasProvider
+      value={{ Skia, size: ValueApi.createValue({ width, height }) }}
+    >
+      {element}
+    </CanvasProvider>,
+    root,
+    null,
+    () => {}
+  );
   const ctx: DrawingContext = {
     width,
     height,
