@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import {
   useImage,
   Canvas,
@@ -12,8 +12,6 @@ import {
   useLoop,
 } from "@shopify/react-native-skia";
 
-const { width, height } = Dimensions.get("window");
-
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 uniform float r;
@@ -24,6 +22,7 @@ half4 main(float2 xy) {
 }`)!;
 
 export const Filters = () => {
+  const { width, height } = useWindowDimensions();
   const progress = useLoop({ duration: 1500 });
 
   const uniforms = useDerivedValue(
