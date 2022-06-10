@@ -10,7 +10,7 @@ slug: /animations/touch-events
 The `useTouchHandler` hook handles touches in the `Canvas`.
 It is meant to be used with values to animate canvas elements.
 
-The useTouchHandler hook provdies you with callbacks for single touch events.
+The useTouchHandler hook provides you with callbacks for single touch events.
 To track multiple touches use the `useMultiTouchHandler` hook instead - it has
 the same API as the single touch hook.
 
