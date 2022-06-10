@@ -3,6 +3,8 @@
 High-performance 2d Graphics for React Native using Skia
 
 [![Tests](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml)
+[![npm version](https://img.shields.io/npm/v/@shopify/react-native-skia.svg?style=flat)](https://www.npmjs.com/package/@shopify/react-native-skia)
+[![issues](https://img.shields.io/github/issues/shopify/react-native-skia.svg?style=flat)](https://github.com/shopify/react-native-skia/issues)
 
 <img width="400" alt="skia" src="https://user-images.githubusercontent.com/306134/146549218-b7959ad9-0107-4c1c-b439-b96c780f5230.png">
 
@@ -44,6 +46,14 @@ If the NDK is not installed, you can install it via Android Studio by going to t
 And then the _SDK Location_ section. It will show you the NDK path, or the option to Download it if you don't have it installed.
 
 And them the _Modules_ section. click on `shopify_react-native-skia` and select _NDK version_ with dropdown, and click on apply.
+
+#### Proguard
+
+If you're using Proguard, make sure to add the following rule:
+
+```
+-keep class com.shopify.reactnative.skia.** { *; }
+```
 
 #### TroubleShooting
 
