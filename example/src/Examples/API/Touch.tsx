@@ -2,13 +2,12 @@ import React, { useCallback, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import type { SkColor, TouchInfo } from "@shopify/react-native-skia";
 import {
+  Group,
   useMultiTouchHandler,
   Fill,
   Canvas,
   Drawing,
   Skia,
-  PaintStyle,
-  usePaint,
   TouchType,
 } from "@shopify/react-native-skia";
 import type { DrawingContext } from "@shopify/react-native-skia/src/renderer/DrawingContext";
@@ -30,10 +29,6 @@ const Colors = [
 ] as const;
 
 export const Touch = () => {
-  const paint = usePaint((p) => {
-    p.setStyle(PaintStyle.Stroke);
-    p.setStrokeWidth(8);
-  });
   // Store current touches together with their color
   const currentTouches = useRef<Array<TouchInfo & { color: SkColor }>>([]);
 
@@ -63,27 +58,26 @@ export const Touch = () => {
     },
   });
 
-  const handleDraw = useCallback(
-    (ctx: DrawingContext) => {
-      // Draw an indicator for all of the active touches. Each touch
-      // event will request a new redraw of the view, so the ref will
-      // always contain the correct current touches.
-      currentTouches.current.forEach((t) => {
-        if (t.type === TouchType.Active || t.type === TouchType.Start) {
-          paint.setColor(t.color);
-          ctx.canvas.drawCircle(t.x, t.y, 40, paint);
-        }
-      });
-    },
-    [paint]
-  );
+  const handleDraw = useCallback(({ canvas, paint }: DrawingContext) => {
+    // Draw an indicator for all of the active touches. Each touch
+    // event will request a new redraw of the view, so the ref will
+    // always contain the correct current touches.
+    currentTouches.current.forEach((t) => {
+      if (t.type === TouchType.Active || t.type === TouchType.Start) {
+        paint.setColor(t.color);
+        canvas.drawCircle(t.x, t.y, 40, paint);
+      }
+    });
+  }, []);
 
   return (
     <View style={styles.container}>
       <Title>Touch handling</Title>
       <Canvas style={styles.container} onTouch={handleTouches}>
         <Fill color="white" />
-        <Drawing drawing={handleDraw} />
+        <Group style="stroke" strokeWidth={8}>
+          <Drawing drawing={handleDraw} />
+        </Group>
       </Canvas>
     </View>
   );
