@@ -13,18 +13,21 @@ import {
   useDerivedValue,
   runDecay,
 } from "@shopify/react-native-skia";
-import React from "react";
-import { Dimensions } from "react-native";
+import React, { useMemo } from "react";
+import { useWindowDimensions } from "react-native";
 
 import { Background } from "./components/Background";
 import { Ball } from "./components/Ball";
 
-const { width, height } = Dimensions.get("window");
-const CARD_WIDTH = width - 64;
-const CARD_HEIGHT = CARD_WIDTH * 0.61;
-const clip = rrect(rect(0, 0, CARD_WIDTH, CARD_HEIGHT), 20, 20);
-
 export const Glassmorphism = () => {
+  const { width, height } = useWindowDimensions();
+  const CARD_WIDTH = width - 64;
+  const CARD_HEIGHT = CARD_WIDTH * 0.61;
+  const clip = useMemo(
+    () => rrect(rect(0, 0, CARD_WIDTH, CARD_HEIGHT), 20, 20),
+    [CARD_HEIGHT, CARD_WIDTH]
+  );
+
   const x = useValue((width - CARD_WIDTH) / 2);
   const y = useValue((height - CARD_HEIGHT) / 2);
   const offsetX = useValue(0);

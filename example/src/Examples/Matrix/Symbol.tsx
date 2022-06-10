@@ -6,12 +6,9 @@ import {
   vec,
   Glyphs,
 } from "@shopify/react-native-skia";
-import { Dimensions } from "react-native";
 
-const { width, height } = Dimensions.get("window");
 export const COLS = 5;
 export const ROWS = 10;
-export const SYMBOL = { width: width / COLS, height: height / ROWS };
 const pos = vec(0, 0);
 
 interface SymbolProps {
@@ -21,6 +18,7 @@ interface SymbolProps {
   stream: number[];
   font: SkFont;
   symbols: number[];
+  symbol: { width: number; height: number };
 }
 
 export const Symbol = ({
@@ -30,11 +28,12 @@ export const Symbol = ({
   stream,
   font,
   symbols,
+  symbol,
 }: SymbolProps) => {
   const offset = useRef(Math.round(Math.random() * (symbols.length - 1)));
   const range = useRef(100 + Math.random() * 900);
-  const x = i * SYMBOL.width;
-  const y = j * SYMBOL.height;
+  const x = i * symbol.width;
+  const y = j * symbol.height;
 
   const glyphs = useDerivedValue(() => {
     const idx = offset.current + Math.floor(timestamp.current / range.current);
@@ -58,8 +57,8 @@ export const Symbol = ({
 
   return (
     <Glyphs
-      x={x + SYMBOL.width / 4}
-      y={y + SYMBOL.height}
+      x={x + symbol.width / 4}
+      y={y + symbol.height}
       font={font}
       glyphs={glyphs}
       opacity={opacity}
