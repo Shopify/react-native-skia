@@ -11,15 +11,15 @@ import {
   Turbulence,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 
-const { height, width: wWidth } = Dimensions.get("window");
 const length = 9;
 const STRIPES = new Array(length).fill(0).map((_, i) => i);
-const width = wWidth / length;
-const origin = vec(width / 2, height / 2);
 
 export const Wallpaper = () => {
+  const { height, width: wWidth } = useWindowDimensions();
+  const width = wWidth / length;
+  const origin = vec(width / 2, height / 2);
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill>

@@ -7,8 +7,9 @@ import {
   useFont,
 } from "@shopify/react-native-skia";
 import React from "react";
+import { useWindowDimensions } from "react-native";
 
-import { COLS, ROWS, Symbol, SYMBOL } from "./Symbol";
+import { COLS, ROWS, Symbol } from "./Symbol";
 
 const cols = new Array(COLS).fill(0).map((_, i) => i);
 const rows = new Array(ROWS).fill(0).map((_, i) => i);
@@ -32,7 +33,9 @@ const streams = cols.map(() =>
 
 export const Matrix = () => {
   const clock = useClockValue();
-  const font = useFont(require("./matrix-code-nfi.otf"), SYMBOL.height);
+  const { width, height } = useWindowDimensions();
+  const symbol = { width: width / COLS, height: height / ROWS };
+  const font = useFont(require("./matrix-code-nfi.otf"), symbol.height);
   if (font === null) {
     return null;
   }
@@ -52,6 +55,7 @@ export const Matrix = () => {
               i={i}
               j={j}
               stream={streams[i]}
+              symbol={symbol}
             />
           ))
         )}

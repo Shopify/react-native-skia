@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import {
   Canvas,
   Fill,
@@ -10,13 +10,13 @@ import {
 
 import { Switch } from "./components/Switch";
 
-const { width } = Dimensions.get("window");
 const PADDING = 32;
-const size = width - PADDING * 2;
 const x = PADDING;
 const y = 75;
 
 export const Neumorphism = () => {
+  const { width } = useWindowDimensions();
+  const size = width - PADDING * 2;
   const pressed = useValue(0);
   const onTouch = useTouchHandler({
     onStart: () => {

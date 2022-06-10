@@ -7,10 +7,12 @@ import {
 } from "@shopify/react-native-skia";
 import React from "react";
 
-import { graphs, AJUSTED_SIZE, WIDTH, HEIGHT, PADDING } from "../Model";
+import type { Graphs } from "../Model";
+import { PADDING } from "../Model";
 
 import type { GraphState } from "./Selection";
 
+const sfMono = require("../../Severance/SF-Mono-Medium.otf");
 const format = (value: number) =>
   "$ " +
   Math.round(value)
@@ -20,12 +22,17 @@ const format = (value: number) =>
 interface LabelProps {
   y: SkiaValue<number>;
   state: SkiaValue<GraphState>;
+  graphs: Graphs;
+  width: number;
+  height: number;
 }
 
-export const Label = ({ state, y }: LabelProps) => {
-  const titleFont = useFont("helvetica", 64)!;
-  const subtitleFont = useFont("helvetica", 24)!;
-  const translateY = HEIGHT + PADDING;
+export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
+  const titleFont = useFont(sfMono, 64);
+  const subtitleFont = useFont(sfMono, 24);
+  console.log({ titleFont });
+  const translateY = height + PADDING;
+  const AJUSTED_SIZE = height - PADDING * 2;
   const text = useDerivedValue(() => {
     const graph = graphs[state.current.current];
     return format(
@@ -38,11 +45,17 @@ export const Label = ({ state, y }: LabelProps) => {
   }, [y, state]);
   const subtitle = "+ $314,15";
   const titleX = useDerivedValue(() => {
+    if (!titleFont) {
+      return 0;
+    }
     const graph = graphs[state.current.current];
     return (
-      WIDTH / 2 - titleFont.measureText(format(graph.data.maxPrice)).width / 2
+      width / 2 - titleFont.measureText(format(graph.data.maxPrice)).width / 2
     );
-  }, [state]);
+  }, [state, titleFont]);
+  if (!titleFont || !subtitleFont) {
+    return null;
+  }
   const subtitlePos = subtitleFont.measureText(subtitle);
   return (
     <>
@@ -54,7 +67,7 @@ export const Label = ({ state, y }: LabelProps) => {
         color="white"
       />
       <Text
-        x={WIDTH / 2 - subtitlePos.width / 2}
+        x={width / 2 - subtitlePos.width / 2}
         y={translateY - 60}
         text={subtitle}
         font={subtitleFont}

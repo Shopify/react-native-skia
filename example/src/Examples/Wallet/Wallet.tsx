@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useMemo } from "react";
+import { View, StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
   Path,
@@ -10,7 +10,7 @@ import {
   vec,
 } from "@shopify/react-native-skia";
 
-import { graphs, PADDING, WIDTH, HEIGHT, COLORS } from "./Model";
+import { PADDING, COLORS, getGraph } from "./Model";
 import { getYForX } from "./Math";
 import { Cursor } from "./components/Cursor";
 import { Selection } from "./components/Selection";
@@ -19,7 +19,6 @@ import { Header } from "./components/Header";
 import { Label } from "./components/Label";
 import { useGraphTouchHandler } from "./components/useGraphTouchHandler";
 
-const translateY = HEIGHT + PADDING;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -28,6 +27,10 @@ const styles = StyleSheet.create({
 });
 
 export const Wallet = () => {
+  const { width } = useWindowDimensions();
+  const height = width / 2;
+  const translateY = height + PADDING;
+  const graphs = useMemo(() => getGraph(width, height), [width, height]);
   // animation value to transition from one graph to the next
   const transition = useValue(0);
   // indicices of the current and next graphs
@@ -48,15 +51,18 @@ export const Wallet = () => {
     () => getYForX(path.current.toCmds(), x.current)!,
     [x, path]
   );
-  const onTouch = useGraphTouchHandler(x, y);
+  const onTouch = useGraphTouchHandler(x, y, width, height);
   return (
     <View style={styles.container}>
       <Header />
-      <Canvas
-        style={{ width: WIDTH, height: 2 * HEIGHT + 30 }}
-        onTouch={onTouch}
-      >
-        <Label state={state} y={y} />
+      <Canvas style={{ width, height: 2 * height + 30 }} onTouch={onTouch}>
+        <Label
+          state={state}
+          y={y}
+          graphs={graphs}
+          width={width}
+          height={height}
+        />
         <Group transform={[{ translateY }]}>
           <Path
             style="stroke"
@@ -67,14 +73,14 @@ export const Wallet = () => {
           >
             <LinearGradient
               start={vec(0, 0)}
-              end={vec(WIDTH, 0)}
+              end={vec(width, 0)}
               colors={COLORS}
             />
           </Path>
-          <Cursor x={x} y={y} />
+          <Cursor x={x} y={y} width={width} />
         </Group>
       </Canvas>
-      <Selection state={state} transition={transition} />
+      <Selection state={state} transition={transition} graphs={graphs} />
       <List />
     </View>
   );
