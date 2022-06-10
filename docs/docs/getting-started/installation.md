@@ -35,6 +35,14 @@ If the NDK is not installed, you can install it via Android Studio by going to t
 
 And then the _SDK Location_ section. It will show you the NDK path, or the option to download it if you don't have it installed.
 
+### Proguard
+
+If you're using Proguard, make sure to add the following rule:
+
+```
+-keep class com.shopify.reactnative.skia.** { *; }
+```
+
 ## Playground
 
 We have an example project you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/example).
