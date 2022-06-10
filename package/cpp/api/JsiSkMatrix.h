@@ -98,8 +98,29 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
+      SkMatrix matrix;
+      if (count == 1) {
+        const auto& object = arguments[0].asObject(runtime);
+        const auto& array = object.asArray(runtime);
+        auto scaleX = array.getValueAtIndex(runtime, 0).asNumber();
+        auto skewX = array.getValueAtIndex(runtime, 1).asNumber();
+        auto transX = array.getValueAtIndex(runtime, 2).asNumber();
+        auto skewY = array.getValueAtIndex(runtime, 3).asNumber();
+        auto scaleY = array.getValueAtIndex(runtime, 4).asNumber();
+        auto transY = array.getValueAtIndex(runtime, 5).asNumber();
+        auto pers0 = array.getValueAtIndex(runtime, 6).asNumber();
+        auto pers1 = array.getValueAtIndex(runtime, 7).asNumber();
+        auto pers2 = array.getValueAtIndex(runtime, 8).asNumber();
+        matrix = SkMatrix::MakeAll(
+            scaleX, skewX, transX,
+            skewY,  scaleY, transY,
+            pers0,  pers1,  pers2
+        );
+      } else {
+        matrix = SkMatrix::I();
+      }
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkMatrix>(std::move(context), SkMatrix::I()));
+          runtime, std::make_shared<JsiSkMatrix>(std::move(context), matrix));
     };
   }
 };
