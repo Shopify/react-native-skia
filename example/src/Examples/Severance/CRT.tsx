@@ -4,14 +4,15 @@ import {
   RuntimeShader,
   usePaintRef,
   Paint,
+  vec,
 } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 
-const { width, height } = Dimensions.get("window");
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
+uniform vec2 resolution;
 
 vec2 curve(vec2 uv)
 {
@@ -33,7 +34,6 @@ vec4 scanLine(float x)
 }
 
 half4 main(float2 xy) {
-  vec2 resolution = vec2(${width}, ${height});
   vec2 uv = xy/resolution;
 
   vec2 curvedUV = curve(vec2(uv.x, uv.y));
@@ -59,10 +59,14 @@ interface CRTProps {
 
 export const CRT = ({ children }: CRTProps) => {
   const paint = usePaintRef();
+  const { width, height } = useWindowDimensions();
   return (
     <>
       <Paint ref={paint}>
-        <RuntimeShader source={source} />
+        <RuntimeShader
+          source={source}
+          uniforms={{ resolution: vec(width, height) }}
+        />
       </Paint>
       <Group layer={paint}>{children}</Group>
     </>
