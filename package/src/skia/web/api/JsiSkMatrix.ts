@@ -12,12 +12,12 @@ export class JsiSkMatrix
     super(CanvasKit, ref, "Matrix");
   }
 
-  preConcat(matrix: SkMatrix) {
+  concat(matrix: SkMatrix) {
     this.ref.set(this.CanvasKit.Matrix.multiply(this.ref, toValue(matrix)));
   }
 
-  preTranslate(x: number, y: number) {
-    this.preConcat(
+  translate(x: number, y: number) {
+    this.concat(
       new JsiSkMatrix(
         this.CanvasKit,
         Float32Array.of(...this.CanvasKit.Matrix.translated(x, y))
@@ -25,17 +25,17 @@ export class JsiSkMatrix
     );
   }
 
-  preScale(x: number, y: number) {
-    this.preConcat(
+  scale(x: number, y?: number) {
+    this.concat(
       new JsiSkMatrix(
         this.CanvasKit,
-        Float32Array.of(...this.CanvasKit.Matrix.scaled(x, y))
+        Float32Array.of(...this.CanvasKit.Matrix.scaled(x, y ?? x))
       )
     );
   }
 
-  preSkew(x: number, y: number) {
-    this.preConcat(
+  skew(x: number, y: number) {
+    this.concat(
       new JsiSkMatrix(
         this.CanvasKit,
         Float32Array.of(...this.CanvasKit.Matrix.skewed(x, y))
@@ -43,8 +43,8 @@ export class JsiSkMatrix
     );
   }
 
-  preRotate(value: number) {
-    this.preConcat(
+  rotate(value: number) {
+    this.concat(
       new JsiSkMatrix(
         this.CanvasKit,
         Float32Array.of(
