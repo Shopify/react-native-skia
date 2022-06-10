@@ -12,11 +12,11 @@ export enum MatrixIndex {
 }
 
 export interface SkMatrix extends SkJSIInstance<"Matrix"> {
-  preConcat: (matrix: SkMatrix) => void;
-  preTranslate: (x: number, y: number) => void;
-  preScale: (x: number, y: number) => void;
-  preSkew: (x: number, y: number) => void;
-  preRotate: (theta: number) => void;
+  concat: (matrix: SkMatrix) => void;
+  translate: (x: number, y: number) => void;
+  scale: (x: number, y?: number) => void;
+  skew: (x: number, y: number) => void;
+  rotate: (theta: number) => void;
 }
 
 type Transform2dName =
@@ -54,35 +54,35 @@ export const processTransform = (m: SkMatrix, transforms: Transforms2d) => {
     const key = Object.keys(transform)[0] as Transform2dName;
     const value = (transform as Pick<Transformations, typeof key>)[key];
     if (key === "translateX") {
-      m.preTranslate(value, 0);
+      m.translate(value, 0);
       continue;
     }
     if (key === "translateY") {
-      m.preTranslate(0, value);
+      m.translate(0, value);
       continue;
     }
     if (key === "scale") {
-      m.preScale(value, value);
+      m.scale(value, value);
       continue;
     }
     if (key === "scaleX") {
-      m.preScale(value, 1);
+      m.scale(value, 1);
       continue;
     }
     if (key === "scaleY") {
-      m.preScale(1, value);
+      m.scale(1, value);
       continue;
     }
     if (key === "skewX") {
-      m.preSkew(value, 0);
+      m.skew(value, 0);
       continue;
     }
     if (key === "skewY") {
-      m.preSkew(0, value);
+      m.skew(0, value);
       continue;
     }
     if (key === "rotate" || key === "rotateZ") {
-      m.preRotate((value * 180) / Math.PI);
+      m.rotate(value);
       continue;
     }
     exhaustiveCheck(key);
