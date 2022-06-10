@@ -18,6 +18,7 @@ namespace RNSkia {
 
 using namespace facebook;
 
+
 class JsiSkMatrix : public JsiSkWrappingSharedPtrHostObject<SkMatrix> {
 public:
 
@@ -25,6 +26,25 @@ public:
       : JsiSkWrappingSharedPtrHostObject<SkMatrix>(
             context, std::make_shared<SkMatrix>(std::move(m))) {}
 
+
+    static SkMatrix getMatrix(jsi::Runtime &runtime, const jsi::Value& value) {
+        const auto& object = value.asObject(runtime);
+        const auto& array = object.asArray(runtime);
+        auto scaleX = array.getValueAtIndex(runtime, 0).asNumber();
+        auto skewX = array.getValueAtIndex(runtime, 1).asNumber();
+        auto transX = array.getValueAtIndex(runtime, 2).asNumber();
+        auto skewY = array.getValueAtIndex(runtime, 3).asNumber();
+        auto scaleY = array.getValueAtIndex(runtime, 4).asNumber();
+        auto transY = array.getValueAtIndex(runtime, 5).asNumber();
+        auto pers0 = array.getValueAtIndex(runtime, 6).asNumber();
+        auto pers1 = array.getValueAtIndex(runtime, 7).asNumber();
+        auto pers2 = array.getValueAtIndex(runtime, 8).asNumber();
+        return SkMatrix::MakeAll(
+                scaleX, skewX, transX,
+                skewY,  scaleY, transY,
+                pers0,  pers1,  pers2
+        );
+    }
 
   JSI_HOST_FUNCTION(concat) {
     auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
@@ -78,20 +98,7 @@ public:
               .asHostObject<JsiSkMatrix>(runtime)
               ->getObject();
     } else {
-      const auto& array = object.asArray(runtime);
-      auto scaleX = array.getValueAtIndex(runtime, 0).asNumber();
-      auto skewX = array.getValueAtIndex(runtime, 1).asNumber();
-      auto transX = array.getValueAtIndex(runtime, 2).asNumber();
-      auto skewY = array.getValueAtIndex(runtime, 3).asNumber();
-      auto scaleY = array.getValueAtIndex(runtime, 4).asNumber();
-      auto transY = array.getValueAtIndex(runtime, 5).asNumber();
-      auto pers0 = array.getValueAtIndex(runtime, 6).asNumber();
-      auto pers1 = array.getValueAtIndex(runtime, 7).asNumber();
-      auto pers2 = array.getValueAtIndex(runtime, 8).asNumber();
-      return std::make_shared<SkMatrix>(SkMatrix::MakeAll(
-        scaleX, skewX, transX,
-        skewY,  scaleY, transY,
-        pers0,  pers1,  pers2));
+      return std::make_shared<SkMatrix>(JsiSkMatrix::getMatrix(runtime, obj));
     }
   }
 
@@ -100,22 +107,7 @@ public:
     return JSI_HOST_FUNCTION_LAMBDA {
       SkMatrix matrix;
       if (count == 1) {
-        const auto& object = arguments[0].asObject(runtime);
-        const auto& array = object.asArray(runtime);
-        auto scaleX = array.getValueAtIndex(runtime, 0).asNumber();
-        auto skewX = array.getValueAtIndex(runtime, 1).asNumber();
-        auto transX = array.getValueAtIndex(runtime, 2).asNumber();
-        auto skewY = array.getValueAtIndex(runtime, 3).asNumber();
-        auto scaleY = array.getValueAtIndex(runtime, 4).asNumber();
-        auto transY = array.getValueAtIndex(runtime, 5).asNumber();
-        auto pers0 = array.getValueAtIndex(runtime, 6).asNumber();
-        auto pers1 = array.getValueAtIndex(runtime, 7).asNumber();
-        auto pers2 = array.getValueAtIndex(runtime, 8).asNumber();
-        matrix = SkMatrix::MakeAll(
-            scaleX, skewX, transX,
-            skewY,  scaleY, transY,
-            pers0,  pers1,  pers2
-        );
+        matrix = JsiSkMatrix::getMatrix(runtime, arguments[0]);
       } else {
         matrix = SkMatrix::I();
       }
