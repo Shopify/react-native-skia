@@ -1,10 +1,9 @@
 import React from "react";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { Canvas, ImageSVG, useSVG } from "@shopify/react-native-skia";
 
-const { width, height } = Dimensions.get("window");
-
 export const SVG = () => {
+  const { width, height } = useWindowDimensions();
   const svg = useSVG(require("./tiger.svg"));
   return (
     <Canvas style={{ flex: 1 }}>

@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, Dimensions, ScrollView } from "react-native";
+import React, { useMemo } from "react";
+import { ScrollView, useWindowDimensions } from "react-native";
 import {
   bottomRight,
   center,
@@ -20,24 +20,25 @@ import {
 
 import { BilinearGradient } from "../Aurora/components/BilinearGradient";
 
-const { width } = Dimensions.get("window");
-const SIZE = width / 2;
-const R = SIZE / 2;
-
 const paint = Skia.Paint();
 paint.setAntiAlias(true);
-const r1 = rect(0, 0, SIZE, SIZE);
-const r2 = rect(SIZE, 0, SIZE, SIZE);
-const r3 = rect(0, SIZE, SIZE, SIZE);
-const r4 = rect(SIZE, SIZE, SIZE, SIZE);
-const r5 = rect(0, 2 * SIZE, SIZE, SIZE);
-const r6 = rect(SIZE, 2 * SIZE, SIZE, SIZE);
-const r7 = rect(0, 3 * SIZE, SIZE, SIZE);
 
 export const Gradients = () => {
+  const { width } = useWindowDimensions();
+  const SIZE = width / 2;
+  const R = SIZE / 2;
+
+  const r1 = useMemo(() => rect(0, 0, SIZE, SIZE), [SIZE]);
+  const r2 = useMemo(() => rect(SIZE, 0, SIZE, SIZE), [SIZE]);
+  const r3 = useMemo(() => rect(0, SIZE, SIZE, SIZE), [SIZE]);
+  const r4 = useMemo(() => rect(SIZE, SIZE, SIZE, SIZE), [SIZE]);
+  const r5 = useMemo(() => rect(0, 2 * SIZE, SIZE, SIZE), [SIZE]);
+  const r6 = useMemo(() => rect(SIZE, 2 * SIZE, SIZE, SIZE), [SIZE]);
+  const r7 = useMemo(() => rect(0, 3 * SIZE, SIZE, SIZE), [SIZE]);
+
   return (
     <ScrollView>
-      <Canvas style={styles.container}>
+      <Canvas style={{ width: SIZE * 2, height: SIZE * 4 }}>
         <Rect rect={r1}>
           <LinearGradient
             start={topLeft(r1)}
@@ -94,10 +95,3 @@ export const Gradients = () => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: SIZE * 2,
-    height: SIZE * 4,
-  },
-});

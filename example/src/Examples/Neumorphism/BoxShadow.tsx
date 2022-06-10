@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   FitBox,
   Path,
@@ -12,15 +12,17 @@ import {
   Shadow,
   BoxShadow,
 } from "@shopify/react-native-skia";
-import { Dimensions } from "react-native";
-
-const { width } = Dimensions.get("window");
-const r = 150;
-const c = vec(width / 2, r);
-
-const rct = rrect(rect(c.x - r, c.y - r, 2 * r, 2 * r), r, r);
+import { useWindowDimensions } from "react-native";
 
 export const Neumorphism = () => {
+  const { width } = useWindowDimensions();
+  const r = 150;
+
+  const rct = useMemo(() => {
+    const c = vec(width / 2, r);
+    return rrect(rect(c.x - r, c.y - r, 2 * r, 2 * r), r, r);
+  }, [width]);
+
   const dx = 10;
   const dy = 10;
   return (

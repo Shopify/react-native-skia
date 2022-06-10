@@ -1,5 +1,4 @@
 import React from "react";
-import { Dimensions } from "react-native";
 import {
   Skia,
   PaintStyle,
@@ -9,11 +8,9 @@ import {
   translate,
 } from "@shopify/react-native-skia";
 
-const { width } = Dimensions.get("window");
-
 const aspectRatio = 757 / 492;
 const center = { x: 492 / 2, y: 757 / 2 };
-export const CARD_WIDTH = width * 0.75;
+export const CARD_WIDTH = 300;
 export const CARD_HEIGHT = CARD_WIDTH * aspectRatio;
 const scale = 0.6;
 const strokeWidth = 10;

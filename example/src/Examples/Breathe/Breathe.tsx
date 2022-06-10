@@ -1,5 +1,5 @@
-import React from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import React, { useMemo } from "react";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
@@ -15,11 +15,8 @@ import {
   mix,
 } from "@shopify/react-native-skia";
 
-const { width, height } = Dimensions.get("window");
 const c1 = "#61bea2";
 const c2 = "#529ca0";
-const R = width / 4;
-const center = vec(width / 2, height / 2 - 64);
 
 interface RingProps {
   index: number;
@@ -27,6 +24,13 @@ interface RingProps {
 }
 
 const Ring = ({ index, progress }: RingProps) => {
+  const { width, height } = useWindowDimensions();
+  const R = width / 4;
+  const center = useMemo(
+    () => vec(width / 2, height / 2 - 64),
+    [height, width]
+  );
+
   const theta = (index * (2 * Math.PI)) / 6;
   const transform = useDerivedValue(() => {
     const { x, y } = polar2Canvas(
@@ -45,6 +49,12 @@ const Ring = ({ index, progress }: RingProps) => {
 };
 
 export const Breathe = () => {
+  const { width, height } = useWindowDimensions();
+  const center = useMemo(
+    () => vec(width / 2, height / 2 - 64),
+    [height, width]
+  );
+
   const progress = useLoop({
     duration: 3000,
     easing: Easing.inOut(Easing.ease),

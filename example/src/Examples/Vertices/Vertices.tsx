@@ -1,5 +1,5 @@
-import React from "react";
-import { Dimensions } from "react-native";
+import React, { useMemo } from "react";
+import { useWindowDimensions } from "react-native";
 import {
   Canvas,
   useClockValue,
@@ -15,26 +15,43 @@ import SimplexNoise from "simplex-noise";
 
 import "./cdt2d.d";
 
-const { width, height } = Dimensions.get("window");
-const window = Skia.XYWHRect(0, 0, width, height);
 const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);
-const hSize = width / N;
-const vSize = height / N;
-const AX = hSize * 0.45;
-const AY = vSize * 0.45;
+
 const F = 6000;
 const palette = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"];
-const defaultVertices = n
-  .map((col) => n.map((row) => vec(col * hSize, row * vSize)))
-  .flat();
-const triangles = cdt2d(defaultVertices.map(({ x, y }) => [x, y]));
-const indices = triangles.flat();
-const colors = indices.map((i) => palette[i % palette.length]);
 
 export const Demo = () => {
+  const { width, height } = useWindowDimensions();
+
+  const window = useMemo(
+    () => Skia.XYWHRect(0, 0, width, height),
+    [height, width]
+  );
+
+  const hSize = width / N;
+  const vSize = height / N;
+  const AX = hSize * 0.45;
+  const AY = vSize * 0.45;
+
+  const defaultVertices = useMemo(() => {
+    return n.map((col) => n.map((row) => vec(col * hSize, row * vSize))).flat();
+  }, [hSize, vSize]);
+
+  const triangles = useMemo(
+    () => cdt2d(defaultVertices.map(({ x, y }) => [x, y])),
+    [defaultVertices]
+  );
+
+  const indices = useMemo(() => triangles.flat(), [triangles]);
+  const colors = useMemo(
+    () => indices.map((i) => palette[i % palette.length]),
+    [indices]
+  );
+
   const oslo = useImage(require("../../assets/oslo.jpg"));
   const clock = useClockValue();
+
   const vertices = useDerivedValue(
     () =>
       defaultVertices.map((vertex, i) => {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { CubicBezierHandle, SkiaValue } from "@shopify/react-native-skia";
 import {
   Skia,
@@ -14,16 +14,13 @@ import {
   useImage,
   useDerivedValue,
 } from "@shopify/react-native-skia";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import SimplexNoise from "simplex-noise";
 
 import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";
 import { Curves } from "./Curves";
 import { useHandles } from "./useHandles";
-
-const { width, height } = Dimensions.get("window");
-const window = Skia.XYWHRect(0, 0, width, height);
 
 const rectToTexture = (
   vertices: CubicBezierHandle[],
@@ -96,6 +93,12 @@ export const CoonsPatchMeshGradient = ({
   handles,
   play,
 }: CoonsPatchMeshGradientProps) => {
+  const { width, height } = useWindowDimensions();
+  const window = useMemo(
+    () => Skia.XYWHRect(0, 0, width, height),
+    [height, width]
+  );
+
   const clock = useClockValue();
   const image = useImage(require("../../../assets/debug.png"));
   const dx = width / cols;

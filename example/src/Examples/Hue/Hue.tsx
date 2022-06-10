@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { Color } from "@shopify/react-native-skia";
 import {
   Canvas,
@@ -14,13 +14,10 @@ import {
   polar2Canvas,
   Shader,
 } from "@shopify/react-native-skia";
-import { Dimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 
 import { polar2Color } from "./Helpers";
 
-const { width, height } = Dimensions.get("window");
-const c = vec(width / 2, height / 2);
-const center = vec(width / 2, height / 2);
 const source = Skia.RuntimeEffect.Make(`
 uniform float2 c;
 uniform float r;
@@ -39,6 +36,10 @@ half4 main(vec2 uv) {
 }`)!;
 
 export const Hue = () => {
+  const { width, height } = useWindowDimensions();
+  const c = vec(width / 2, height / 2);
+  const center = useMemo(() => vec(width / 2, height / 2), [height, width]);
+
   const r = (width - 32) / 2;
   const translateX = useValue(c.x);
   const translateY = useValue(c.y);
