@@ -105,6 +105,47 @@ export const Transform = () => {
     [CARD_HEIGHT, CARD_WIDTH, center.x, center.y, image]
   );
 
+  const onMatrixDraw2 = useDrawCallback(
+    (canvas) => {
+      const rect = Skia.XYWHRect(
+        center.x - CARD_WIDTH / 2,
+        center.y - CARD_HEIGHT / 2,
+        CARD_WIDTH,
+        CARD_HEIGHT
+      );
+      if (image) {
+        const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
+        canvas.save();
+        const radians = -Math.PI / 2;
+        const scaleX = Math.cos(radians);
+        const skewX = Math.sin(radians);
+        const transX = 400;
+        const skewY = -Math.sin(radians);
+        const scaleY = Math.cos(radians);
+        const transY = 0;
+        const pers0 = 0;
+        const pers1 = 0;
+        const pers2 = 1;
+        canvas.concat(
+          Skia.Matrix([
+            scaleX,
+            skewX,
+            transX,
+            skewY,
+            scaleY,
+            transY,
+            pers0,
+            pers1,
+            pers2,
+          ])
+        );
+
+        canvas.drawImageRect(image, imgRect, rect, paint);
+        canvas.restore();
+      }
+    },
+    [image]
+  );
   const style = useMemo(() => ({ width: SIZE, height: SIZE }), [SIZE]);
 
   return (
@@ -115,6 +156,8 @@ export const Transform = () => {
       <SkiaView style={style} onDraw={onSkewDraw} />
       <Title>Matrix</Title>
       <SkiaView style={style} onDraw={onMatrixDraw} />
+      <Title>Matrix 2</Title>
+      <SkiaView style={style} onDraw={onMatrixDraw2} />
     </ScrollView>
   );
 };

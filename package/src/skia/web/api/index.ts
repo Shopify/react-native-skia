@@ -63,8 +63,13 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder()),
   Picture: new JsiSkPictureFactory(CanvasKit),
   Path: new JsiSkPathFactory(CanvasKit),
-  Matrix: () =>
-    new JsiSkMatrix(CanvasKit, Float32Array.of(...CanvasKit.Matrix.identity())),
+  Matrix: (matrix?: number[]) =>
+    new JsiSkMatrix(
+      CanvasKit,
+      matrix
+        ? Float32Array.of(...matrix)
+        : Float32Array.of(...CanvasKit.Matrix.identity())
+    ),
   ColorFilter: new JsiSkColorFilterFactory(CanvasKit),
   Font: (typeface?: SkTypeface, size?: number) =>
     new JsiSkFont(
