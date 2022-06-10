@@ -107,7 +107,11 @@ export const processPaint = (
     paint.setImageFilter(
       filters
         .reverse()
-        .reduce<SkImageFilter | null>(Skia.ImageFilter.MakeCompose, null)
+        .reduce<SkImageFilter | null>(
+          (...args: Parameters<typeof Skia.ImageFilter.MakeCompose>) =>
+            Skia.ImageFilter.MakeCompose(...args),
+          null
+        )
     );
   }
   return paint;
