@@ -8,18 +8,19 @@ import {
 } from "@shopify/react-native-skia";
 import React from "react";
 
-import { COLORS, WIDTH } from "../Model";
+import { COLORS } from "../Model";
 
 interface CursorProps {
   x: SkiaValue<number>;
   y: SkiaValue<number>;
+  width: number;
 }
 
-export const Cursor = ({ x, y }: CursorProps) => {
+export const Cursor = ({ x, y, width }: CursorProps) => {
   const color = useDerivedValue(
     () =>
       interpolateColors(
-        x.current / WIDTH,
+        x.current / width,
         COLORS.map((_, i) => i / COLORS.length),
         COLORS
       ),

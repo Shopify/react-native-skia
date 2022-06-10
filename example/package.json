@@ -5,8 +5,8 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start:native": "react-native start",
-    "start:web": "webpack serve --mode=development --config webpack.config.js",
+    "start": "react-native start",
+    "web": "webpack serve --mode=development --config webpack.config.js",
     "build:web": "rm -rf dist/ && webpack --mode=production --config webpack.config.js",
     "test": "jest",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",

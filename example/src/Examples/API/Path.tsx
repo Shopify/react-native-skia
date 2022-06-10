@@ -1,6 +1,11 @@
 /* eslint-disable max-len */
-import React from "react";
-import { StyleSheet, Dimensions, ScrollView, View } from "react-native";
+import React, { useMemo } from "react";
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import {
   Skia,
   PathOp,
@@ -20,9 +25,6 @@ import {
   CARD_WIDTH,
 } from "./components/drawings/backface";
 
-const { width } = Dimensions.get("window");
-const SIZE = width;
-
 const strokeWidth = 10;
 const r = 32;
 const d = 2 * r;
@@ -36,16 +38,29 @@ s.stroke({
   width: 10,
 });
 
-const rect1 = Skia.Path.Make();
-rect1.addRect(
-  rect(strokeWidth / 2, (example1Height - d) / 2, SIZE - strokeWidth, 70)
-);
-const circle = Skia.Path.Make();
-circle.addCircle(SIZE / 2, example1Height / 2 - d / 2, r);
-const result = Skia.Path.MakeFromOp(rect1, circle, PathOp.Difference)!;
-result.simplify();
-
 export const PathExample = () => {
+  const { width } = useWindowDimensions();
+  const SIZE = width;
+  const rect1 = useMemo(() => {
+    const retVal = Skia.Path.Make();
+    retVal.addRect(
+      rect(strokeWidth / 2, (example1Height - d) / 2, SIZE - strokeWidth, 70)
+    );
+    return retVal;
+  }, [SIZE]);
+
+  const circle = useMemo(() => {
+    const c = Skia.Path.Make();
+    c.addCircle(SIZE / 2, example1Height / 2 - d / 2, r);
+    return c;
+  }, [SIZE]);
+
+  const result = useMemo(() => {
+    const rr = Skia.Path.MakeFromOp(rect1, circle, PathOp.Difference)!;
+    rr.simplify();
+    return rr;
+  }, [circle, rect1]);
+
   const font = useFont(require("./Roboto-Regular.otf"), 32);
   if (!font) {
     return null;
@@ -53,7 +68,7 @@ export const PathExample = () => {
   return (
     <ScrollView>
       <Title>Path Operations</Title>
-      <Canvas style={styles.container}>
+      <Canvas style={{ ...styles.container, width: SIZE }}>
         <Group style="stroke" color="#fb61da" strokeWidth={2}>
           <Path
             path={result}
@@ -66,17 +81,17 @@ export const PathExample = () => {
         </Group>
       </Canvas>
       <Title>Paths</Title>
-      <View style={styles.cardContainer}>
+      <View style={{ ...styles.cardContainer, width: SIZE }}>
         <Canvas style={styles.card}>
           <Backface />
         </Canvas>
       </View>
       <Title>Stroke</Title>
-      <Canvas style={styles.stroke}>
+      <Canvas style={{ width: SIZE, height: SIZE }}>
         <Path path={s} color="black" style="stroke" strokeWidth={1} />
       </Canvas>
       <Title>Text Path</Title>
-      <Canvas style={styles.textPath}>
+      <Canvas style={{ width: SIZE, height: SIZE }}>
         <Group transform={[{ translateY: 25 }]}>
           <TextPath path={circle} font={font} text="Hello World!" />
         </Group>
@@ -93,23 +108,13 @@ export const PathExample = () => {
 
 const styles = StyleSheet.create({
   container: {
-    width: SIZE,
     height: example1Height,
   },
   cardContainer: {
-    width,
     padding: 16,
   },
   card: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-  },
-  stroke: {
-    width: SIZE,
-    height: SIZE,
-  },
-  textPath: {
-    width: SIZE,
-    height: SIZE,
   },
 });

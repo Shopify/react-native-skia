@@ -13,9 +13,9 @@ import {
   mix,
 } from "@shopify/react-native-skia";
 
-import { graphs, WIDTH } from "../Model";
+import type { Graphs } from "../Model";
 
-const buttonWidth = (WIDTH - 32) / graphs.length;
+const buttonWidth = 50;
 const styles = StyleSheet.create({
   root: {
     paddingHorizontal: 16,
@@ -49,9 +49,10 @@ export interface GraphState {
 interface SelectionProps {
   state: SkiaMutableValue<GraphState>;
   transition: SkiaMutableValue<number>;
+  graphs: Graphs;
 }
 
-export const Selection = ({ state, transition }: SelectionProps) => {
+export const Selection = ({ state, transition, graphs }: SelectionProps) => {
   const transform = useDerivedValue(() => {
     const { current, next } = state.current;
     return [

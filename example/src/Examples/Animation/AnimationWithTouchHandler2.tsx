@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import type {
   AnimationState,
   SkiaMutableValue,
@@ -15,18 +15,15 @@ import {
 
 import { AnimationDemo, Size, Padding } from "./Components";
 
-const { width } = Dimensions.get("window");
-
-const leftBoundary = Size;
-const rightBoundary = width - Size - Padding;
-
 interface PhysicsAnimationState extends AnimationState {
   velocity: number;
 }
 
 const runBouncing = (
   translate: SkiaMutableValue<number>,
-  initialVelocity: number
+  initialVelocity: number,
+  leftBoundary: number,
+  rightBoundary: number
 ) => {
   translate.animation = ValueApi.createAnimation<PhysicsAnimationState>(
     (now, state) => {
@@ -68,6 +65,11 @@ const runBouncing = (
 };
 
 export const AnimationWithTouchHandler = () => {
+  const { width } = useWindowDimensions();
+
+  const leftBoundary = Size;
+  const rightBoundary = width - Size - Padding;
+
   // Translate X value for the circle
   const translateX = useValue((width - Size - Padding) / 2);
   // Offset to let us pick up the circle from anywhere
@@ -84,7 +86,7 @@ export const AnimationWithTouchHandler = () => {
       );
     },
     onEnd: ({ velocityX }) => {
-      runBouncing(translateX, velocityX);
+      runBouncing(translateX, velocityX, leftBoundary, rightBoundary);
     },
   });
 
