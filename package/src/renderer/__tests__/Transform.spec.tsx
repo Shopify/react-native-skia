@@ -46,4 +46,14 @@ describe("Renderer", () => {
     );
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
+  it("Use gradient has the unit for rotation", () => {
+    const size = width;
+    const origin = Skia.Point(size / 2, size / 2);
+    const surface = drawOnNode(
+      <Group transform={[{ rotate: Math.PI }]} origin={origin}>
+        <Rect x={0} y={0} width={size / 4} height={size} color="lightblue" />
+      </Group>
+    );
+    processResult(surface, "snapshots/transform/rotate-radiants.png");
+  });
 });

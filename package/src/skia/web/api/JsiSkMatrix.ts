@@ -47,9 +47,7 @@ export class JsiSkMatrix
     this.concat(
       new JsiSkMatrix(
         this.CanvasKit,
-        Float32Array.of(
-          ...this.CanvasKit.Matrix.rotated((value * 180) / Math.PI)
-        )
+        Float32Array.of(...this.CanvasKit.Matrix.rotated(value))
       )
     );
   }
