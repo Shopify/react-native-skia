@@ -4,6 +4,7 @@ import type {
   SkPath,
 } from "@shopify/react-native-skia";
 import {
+  interpolatePaths,
   Easing,
   Canvas,
   Fill,
@@ -66,8 +67,12 @@ const TransitioningPath = ({
   // on the value of the progress.
   const animatedPath = useDerivedValue(
     () =>
-      nextPathRef.current.interpolate(currentPathRef.current, progress.current),
-    [progress, path]
+      interpolatePaths(
+        progress.current,
+        [0, 1],
+        [currentPathRef.current, nextPathRef.current]
+      ),
+    [progress]
   );
 
   useEffect(() => {
