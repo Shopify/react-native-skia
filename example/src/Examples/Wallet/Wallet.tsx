@@ -43,7 +43,7 @@ export const Wallet = () => {
     const { current, next } = state.current;
     const start = graphs[current].data.path;
     const end = graphs[next].data.path;
-    return end.interpolate(start, transition.current);
+    return end.interpolate(start, transition.current)!;
   }, [state, transition]);
   // x and y values of the cursor
   const x = useValue(0);
