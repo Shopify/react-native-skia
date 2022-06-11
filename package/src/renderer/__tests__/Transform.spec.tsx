@@ -53,7 +53,7 @@ describe("Renderer", () => {
       <Group transform={[{ rotate: Math.PI }]} origin={origin}>
         <Rect
           x={origin.x}
-          y={origin.y}
+          y={0}
           width={size / 4}
           height={size}
           color="lightblue"
