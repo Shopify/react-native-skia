@@ -4,7 +4,7 @@ import fs from "fs";
 import type { Surface } from "canvaskit-wasm";
 
 import type { SkSurface } from "../skia";
-import { toValue } from "../skia/web/api/Host";
+import { toValue } from "../skia/web/Host";
 
 export const processResult = (
   surface: SkSurface,
