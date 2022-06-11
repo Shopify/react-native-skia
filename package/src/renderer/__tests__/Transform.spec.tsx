@@ -51,7 +51,13 @@ describe("Renderer", () => {
     const origin = Skia.Point(size / 2, size / 2);
     const surface = drawOnNode(
       <Group transform={[{ rotate: Math.PI }]} origin={origin}>
-        <Rect x={0} y={0} width={size / 4} height={size} color="lightblue" />
+        <Rect
+          x={origin.x}
+          y={origin.y}
+          width={size / 4}
+          height={size}
+          color="lightblue"
+        />
       </Group>
     );
     processResult(surface, "snapshots/transform/rotate-radiants.png");
