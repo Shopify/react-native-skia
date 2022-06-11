@@ -49,12 +49,13 @@ describe("Renderer", () => {
   it("Use gradient has the unit for rotation", () => {
     const size = width;
     const origin = Skia.Point(size / 2, size / 2);
+    const w = size / 4;
     const surface = drawOnNode(
       <Group transform={[{ rotate: Math.PI }]} origin={origin}>
         <Rect
-          x={origin.x}
+          x={origin.x - w / 2}
           y={0}
-          width={size / 4}
+          width={w}
           height={size}
           color="lightblue"
         />
