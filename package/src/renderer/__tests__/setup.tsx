@@ -69,3 +69,45 @@ export const drawOnNode = (element: ReactNode) => {
   container.draw(ctx);
   return surface;
 };
+
+export const mountSurface = (element: ReactNode) => {
+  expect(Skia).toBeDefined();
+  const surface = Skia.Surface.Make(width, height)!;
+  expect(surface).toBeDefined();
+  const canvas = surface.getCanvas();
+  expect(canvas).toBeDefined();
+  expect(element).toBeDefined();
+  const container = new Container(new DependencyManager(ref), redraw);
+  skiaReconciler.createContainer(container, 0, false, null);
+  const root = skiaReconciler.createContainer(container, 0, false, null);
+  skiaReconciler.updateContainer(
+    <CanvasProvider
+      value={{ Skia, size: ValueApi.createValue({ width, height }) }}
+    >
+      {element}
+    </CanvasProvider>,
+    root,
+    null,
+    () => {}
+  );
+  const ctx: DrawingContext = {
+    width,
+    height,
+    timestamp: 0,
+    canvas,
+    paint: Skia.Paint(),
+    opacity: 1,
+    ref,
+    center: Skia.Point(width / 2, height / 2),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    fontMgr: null,
+    Skia,
+  };
+  return {
+    surface,
+    draw: () => {
+      container.draw(ctx);
+    },
+  };
+};
