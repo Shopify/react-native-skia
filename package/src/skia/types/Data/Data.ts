@@ -61,9 +61,9 @@ export const useRawData = <T>(
         } else {
           Skia.Data.fromURI(source).then((d) => factoryWrapper(d));
         }
+      } else {
+        setData(null);
       }
-    } else {
-      setData(null);
     }
   }, [Skia.Data, factory, onError, source]);
   return data;

@@ -30,11 +30,15 @@ describe("Test image loading and drawing", () => {
   it("Should load and draw and image via http", async () => {
     const { surface, draw } = mountSurface(<RemoteImage />);
     draw();
-    await wait(2000);
-    draw();
-    processResult(surface, "snapshots/drawings/lightblue.png");
-    await wait(2000);
-    draw();
+    // Image is not loaded yet: show red
     processResult(surface, "snapshots/drawings/red.png");
+    await wait(1500);
+    draw();
+    // Image is loaded: show lightblue
+    processResult(surface, "snapshots/drawings/lightblue.png");
+    await wait(1500);
+    draw();
+    // Image hasn't changed: show lightblue
+    processResult(surface, "snapshots/drawings/lightblue.png");
   });
 });
