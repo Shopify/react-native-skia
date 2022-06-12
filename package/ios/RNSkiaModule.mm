@@ -4,6 +4,7 @@
 
 @implementation RNSkiaModule {
   SkiaManager* skiaManager;
+  RCTBridge* appBridge;
 }
 
 RCT_EXPORT_MODULE(RNSkia)
@@ -34,8 +35,10 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install)
     // Already initialized, ignore call.
     return @true;
   }
-  RCTBridge* bridge = [RCTBridge currentBridge];
-  skiaManager = [[SkiaManager alloc] initWithBridge:bridge];
+  if (appBridge == nil) {
+    appBridge = [RCTBridge currentBridge];
+  }
+  skiaManager = [[SkiaManager alloc] initWithBridge:appBridge];
   return @true;
 }
 

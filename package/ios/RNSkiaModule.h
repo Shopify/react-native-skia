@@ -7,5 +7,6 @@
 @interface RNSkiaModule : NSObject <RCTBridgeModule>
 
 - (SkiaManager *)manager;
+- (RCTBridge *)appBridge;
 
 @end
