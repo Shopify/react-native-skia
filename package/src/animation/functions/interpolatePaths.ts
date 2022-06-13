@@ -30,5 +30,5 @@ export const interpolatePaths = (
     }
   }
   const t = (value - input[i]) / (input[i + 1] - input[i]);
-  return outputRange[i + 1].interpolate(outputRange[i], t);
+  return outputRange[i + 1].interpolate(outputRange[i], t)!;
 };
