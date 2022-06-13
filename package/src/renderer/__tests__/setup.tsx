@@ -33,6 +33,12 @@ skiaReconciler.injectIntoDevTools({
 });
 
 export const drawOnNode = (element: ReactNode) => {
+  const { surface, draw } = mountCanvas(element);
+  draw();
+  return surface;
+};
+
+export const mountCanvas = (element: ReactNode) => {
   expect(Skia).toBeDefined();
   const surface = Skia.Surface.Make(width, height)!;
   expect(surface).toBeDefined();
@@ -66,6 +72,5 @@ export const drawOnNode = (element: ReactNode) => {
     fontMgr: null,
     Skia,
   };
-  container.draw(ctx);
-  return surface;
+  return { draw: () => container.draw(ctx), surface };
 };
