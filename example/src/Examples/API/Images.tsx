@@ -36,6 +36,7 @@ export const Images = () => {
   useImage(undefined);
 
   const oslo = useImage(require("../../assets/oslo.jpg"));
+  const coffee = useImage("https://picsum.photos/id/1060/640/360");
 
   const { width: wWidth } = useWindowDimensions();
   const SIZE = wWidth / 3;
@@ -84,6 +85,25 @@ export const Images = () => {
           </Canvas>
         </React.Fragment>
       ))}
+      {coffee ? (
+        <Canvas
+          style={{
+            alignSelf: "center",
+            width: 320,
+            height: 180,
+            marginVertical: PAD,
+          }}
+        >
+          <Image
+            image={coffee}
+            x={0}
+            y={0}
+            width={320}
+            height={180}
+            fit="contain"
+          />
+        </Canvas>
+      ) : null}
     </ScrollView>
   );
 };
