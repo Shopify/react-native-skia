@@ -1,4 +1,3 @@
-import type { SkFont } from "../Font";
 import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
 import type { SkRRect } from "../RRect";
@@ -530,11 +529,6 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * Transforms the path by the specified matrix.
    */
   transform(m3: SkMatrix): void;
-
-  /**
-   * Converts the text to a path with the given font at location x / y.
-   */
-  fromText(text: string, x: number, y: number, font: SkFont): void;
 
   /**
    * Interpolates between Path with point array of equal size.
