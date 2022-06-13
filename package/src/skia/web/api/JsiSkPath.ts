@@ -12,7 +12,6 @@ import type {
   StrokeOpts,
 } from "../../types";
 import { PathVerb } from "../../types";
-import type { SkFont } from "../../types/Font/Font";
 
 import {
   ckEnum,
@@ -300,11 +299,6 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   transform(m3: SkMatrix) {
     this.ref.transform(toValue(m3));
-  }
-
-  // TODO: Move to Factory
-  fromText(_text: string, _x: number, _y: number, _font: SkFont) {
-    throw new NotImplementedOnRNWeb();
   }
 
   interpolate(_end: SkPath, _weight: number): SkPath {

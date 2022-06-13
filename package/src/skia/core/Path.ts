@@ -44,9 +44,10 @@ export const useSvgPath = (svgpath: string) =>
  * @returns
  */
 export const useTextPath = (text: string, x: number, y: number, font: SkFont) =>
-  usePath(
-    (p) => {
-      p.fromText(text, x, y, font);
-    },
-    [text, x, y, font]
-  );
+  useMemo(() => {
+    const p = Skia.Path.MakeFromText(text, x, y, font);
+    if (p === null) {
+      throw new Error("Text path creation failed.");
+    }
+    return p;
+  }, [text, x, y, font]);
