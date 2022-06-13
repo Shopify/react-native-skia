@@ -147,7 +147,7 @@ public:
             runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
   }
 
-  JSI_HOST_FUNCTION(MakefromText) {
+  JSI_HOST_FUNCTION(MakeFromText) {
     auto text = arguments[0].asString(runtime).utf8(runtime);
     auto x = arguments[1].asNumber();
     auto y = arguments[2].asNumber();
@@ -163,7 +163,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromSVGString),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromOp),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromCmds),
-                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakefromText))
+                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromText))
 
   JsiSkPathFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
