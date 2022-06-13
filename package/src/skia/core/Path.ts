@@ -15,6 +15,7 @@ export const usePath = (
   deps?: DependencyList
 ) =>
   useMemo(() => {
+    console.warn("usePath() is deprecated. Use Skia.Path.Make() instead.");
     const p = Skia.Path.Make();
     if (initializer) {
       initializer(p);
@@ -31,6 +32,9 @@ export const usePath = (
 // MakeFromSVGString
 export const useSvgPath = (svgpath: string) =>
   useMemo(() => {
+    console.warn(
+      "useSvgPath() is deprecated. Use Skia.Path.MakeFromSVGString() instead."
+    );
     const p = Skia.Path.MakeFromSVGString(svgpath);
     if (p === null) {
       throw new Error(`Invalid SVG path: ${svgpath}`);
@@ -45,6 +49,9 @@ export const useSvgPath = (svgpath: string) =>
  */
 export const useTextPath = (text: string, x: number, y: number, font: SkFont) =>
   useMemo(() => {
+    console.warn(
+      "useTextPath() is deprecated. Use Skia.Path.MakeFromText() instead."
+    );
     const p = Skia.Path.MakeFromText(text, x, y, font);
     if (p === null) {
       throw new Error("Text path creation failed.");
