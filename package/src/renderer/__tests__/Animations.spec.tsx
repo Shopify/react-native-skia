@@ -4,7 +4,7 @@ import { ValueApi } from "../../values/web";
 import { processResult } from "../../__tests__/setup";
 import { Rect } from "../components";
 import * as SkiaRenderer from "../index";
-import type { SkiaValue } from "../../../lib/typescript/src/values/types";
+import type { SkiaValue } from "../../values/types";
 
 import { width, mountCanvas } from "./setup";
 
