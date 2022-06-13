@@ -39,7 +39,7 @@ namespace RNSkia {
                 auto e = jsiValue.getValueAtIndex(runtime, i).asNumber();
                 value.push_back(e);
             }
-            getObject()->uniform(name.c_str()).set(value.data(), (int)size);
+            getObject()->uniform(name.c_str()).set(value.data(), static_cast<int>(size));
             return jsi::Value::undefined();
         }
 
