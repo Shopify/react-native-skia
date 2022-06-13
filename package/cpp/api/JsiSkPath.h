@@ -447,19 +447,6 @@ public:
         runtime, std::make_shared<JsiSkPath>(getContext(), SkPath(*path)));
   }
 
-  JSI_HOST_FUNCTION(fromText) {
-    auto text = arguments[0].asString(runtime).utf8(runtime);
-    auto x = arguments[1].asNumber();
-    auto y = arguments[2].asNumber();
-    auto font = JsiSkFont::fromValue(runtime, arguments[3]);
-    SkPath result;
-    SkTextUtils::GetPath(text.c_str(), strlen(text.c_str()),
-                         SkTextEncoding::kUTF8, x, y, *font, &result);
-
-    getObject()->swap(result);
-    return jsi::Value::undefined();
-  }
-
   JSI_HOST_FUNCTION(op) {
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
     int pathOp = arguments[1].asNumber();
@@ -480,7 +467,10 @@ public:
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
     auto weight = arguments[1].asNumber();
     SkPath result;
-    getObject()->interpolate(*path2, weight, &result);
+    auto succeed = getObject()->interpolate(*path2, weight, &result);
+    if (!succeed) {
+      return nullptr;
+    }
     return jsi::Object::createFromHostObject(
             runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
@@ -559,7 +549,6 @@ public:
     JSI_EXPORT_FUNC(JsiSkPath, simplify),
     JSI_EXPORT_FUNC(JsiSkPath, countPoints),
     JSI_EXPORT_FUNC(JsiSkPath, copy),
-    JSI_EXPORT_FUNC(JsiSkPath, fromText),
     JSI_EXPORT_FUNC(JsiSkPath, op),
     JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable),
     JSI_EXPORT_FUNC(JsiSkPath, interpolate),

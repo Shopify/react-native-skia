@@ -65,6 +65,7 @@ export const PathExample = () => {
   if (!font) {
     return null;
   }
+  const textPath = Skia.Path.MakeFromText("hello", 16, 16 + 32, font)!;
   return (
     <ScrollView>
       <Title>Path Operations</Title>
@@ -92,6 +93,7 @@ export const PathExample = () => {
       </Canvas>
       <Title>Text Path</Title>
       <Canvas style={{ width: SIZE, height: SIZE }}>
+        <Path path={textPath} color="black" style="stroke" strokeWidth={1} />
         <Group transform={[{ translateY: 25 }]}>
           <TextPath path={circle} font={font} text="Hello World!" />
         </Group>

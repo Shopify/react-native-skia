@@ -72,7 +72,7 @@ const TransitioningPath = ({
         [0, 1],
         [currentPathRef.current, nextPathRef.current]
       ),
-    [progress]
+    [progress, path]
   );
 
   useEffect(() => {

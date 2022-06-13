@@ -46,4 +46,21 @@ describe("Renderer", () => {
     );
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
+  it("Should rotate a rectangle to 180deg", () => {
+    const size = width;
+    const origin = Skia.Point(size / 2, size / 2);
+    const w = size / 4;
+    const surface = drawOnNode(
+      <Group transform={[{ rotate: Math.PI }]} origin={origin}>
+        <Rect
+          x={origin.x - w / 2}
+          y={0}
+          width={w}
+          height={size}
+          color="lightblue"
+        />
+      </Group>
+    );
+    processResult(surface, "snapshots/transform/rotate-radiants.png");
+  });
 });

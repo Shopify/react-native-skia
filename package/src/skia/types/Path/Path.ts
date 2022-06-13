@@ -1,4 +1,3 @@
-import type { SkFont } from "../Font";
 import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
 import type { SkRRect } from "../RRect";
@@ -532,11 +531,6 @@ export interface SkPath extends SkJSIInstance<"Path"> {
   transform(m3: SkMatrix): void;
 
   /**
-   * Converts the text to a path with the given font at location x / y.
-   */
-  fromText(text: string, x: number, y: number, font: SkFont): void;
-
-  /**
    * Interpolates between Path with point array of equal size.
    * Copy verb array and weights to result, and set result path to a weighted
    * average of this path array and ending path.
@@ -552,10 +546,10 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param ending  path to interpolate with
    * @param weight  contribution of this path, and
    *                 one minus contribution of ending path
-   * @return        Path replaced by interpolated averages or undefined if 
+   * @return        Path replaced by interpolated averages or null if 
    *                not interpolatable
    * */
-  interpolate(end: SkPath, weight: number): SkPath;
+  interpolate(end: SkPath, weight: number): SkPath | null;
 
   /** Returns true if Path contain equal verbs and equal weights.
    *     @param compare  path to compare

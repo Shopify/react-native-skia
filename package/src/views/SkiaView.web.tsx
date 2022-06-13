@@ -6,7 +6,7 @@ import { View } from "react-native";
 
 import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
-import { JsiSkSurface } from "../skia/web/api/JsiSkSurface";
+import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
 import type { DrawingInfo, DrawMode, SkiaViewProps, TouchInfo } from "./types";
 import { TouchType } from "./types";
