@@ -46,7 +46,7 @@ describe("Renderer", () => {
     );
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
-  it("Use gradient has the unit for rotation", () => {
+  it("Should rotate a rectangle to 180deg", () => {
     const size = width;
     const origin = Skia.Point(size / 2, size / 2);
     const w = size / 4;
