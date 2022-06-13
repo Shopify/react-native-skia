@@ -467,7 +467,10 @@ public:
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
     auto weight = arguments[1].asNumber();
     SkPath result;
-    getObject()->interpolate(*path2, weight, &result);
+    auto succeed = getObject()->interpolate(*path2, weight, &result);
+    if (!succeed) {
+      return nullptr;
+    }
     return jsi::Object::createFromHostObject(
             runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
