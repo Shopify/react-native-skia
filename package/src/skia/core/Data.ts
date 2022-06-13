@@ -62,9 +62,10 @@ export const useRawData = <T>(
               : Image.resolveAssetSource(source).uri;
           Skia.Data.fromURI(uri).then((d) => factoryWrapper(d));
         }
+      } else {
+        // new source is null or undefined -> remove cached data
+        setData(null);
       }
-    } else {
-      setData(null);
     }
   }, [factory, onError, source]);
   return data;

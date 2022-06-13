@@ -1,3 +1,5 @@
+import type { SkFont } from "../Font";
+
 import type { SkPath, PathOp, PathCommand } from "./Path";
 
 export interface PathFactory {
@@ -24,4 +26,9 @@ export interface PathFactory {
    * @param cmds
    */
   MakeFromCmds(cmds: PathCommand[]): SkPath | null;
+
+  /**
+   * Converts the text to a path with the given font at location x / y.
+   */
+  MakeFromText(text: string, x: number, y: number, font: SkFont): SkPath | null;
 }

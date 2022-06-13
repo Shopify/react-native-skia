@@ -147,10 +147,23 @@ public:
             runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
   }
 
+  JSI_HOST_FUNCTION(MakeFromText) {
+    auto text = arguments[0].asString(runtime).utf8(runtime);
+    auto x = arguments[1].asNumber();
+    auto y = arguments[2].asNumber();
+    auto font = JsiSkFont::fromValue(runtime, arguments[3]);
+    SkPath path;
+    SkTextUtils::GetPath(text.c_str(), strlen(text.c_str()),
+                         SkTextEncoding::kUTF8, x, y, *font, &path);
+    return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));;
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathFactory, Make),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromSVGString),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromOp),
-                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromCmds))
+                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromCmds),
+                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromText))
 
   JsiSkPathFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
