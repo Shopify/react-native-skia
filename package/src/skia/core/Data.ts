@@ -1,9 +1,15 @@
 import type { DependencyList } from "react";
 import { useRef, useEffect, useState } from "react";
-import { Image } from "react-native";
+import { Image, Platform } from "react-native";
 
 import { Skia } from "../Skia";
 import type { SkData, DataSource } from "../types";
+
+const resolveAsset = (source: ReturnType<typeof require>) => {
+  return Platform.OS === "web"
+    ? source.default
+    : Image.resolveAssetSource(source).uri;
+};
 
 export const useDataCollection = <T>(
   sources: DataSource[],
@@ -16,9 +22,7 @@ export const useDataCollection = <T>(
       if (source instanceof Uint8Array) {
         return source;
       }
-      return typeof source === "string"
-        ? source
-        : Image.resolveAssetSource(source).uri;
+      return typeof source === "string" ? source : resolveAsset(source);
     });
     Promise.all(
       bytesOrURIs.map((bytesOrURI) =>
@@ -57,9 +61,7 @@ export const useRawData = <T>(
           factoryWrapper(Skia.Data.fromBytes(source));
         } else {
           const uri =
-            typeof source === "string"
-              ? source
-              : Image.resolveAssetSource(source).uri;
+            typeof source === "string" ? source : resolveAsset(source);
           Skia.Data.fromURI(uri).then((d) => factoryWrapper(d));
         }
       } else {
