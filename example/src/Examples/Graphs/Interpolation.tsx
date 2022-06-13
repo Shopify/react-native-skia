@@ -66,7 +66,10 @@ const TransitioningPath = ({
   // on the value of the progress.
   const animatedPath = useDerivedValue(
     () =>
-      nextPathRef.current.interpolate(currentPathRef.current, progress.current),
+      nextPathRef.current.interpolate(
+        currentPathRef.current,
+        progress.current
+      )!,
     [progress, path]
   );
 
