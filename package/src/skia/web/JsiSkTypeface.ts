@@ -2,7 +2,7 @@ import type { CanvasKit, Typeface } from "canvaskit-wasm";
 
 import type { SkTypeface } from "../types";
 
-import { HostObject, NotImplementedOnRNWeb } from "./Host";
+import { HostObject } from "./Host";
 
 export class JsiSkTypeface
   extends HostObject<Typeface, "Typeface">
@@ -13,10 +13,16 @@ export class JsiSkTypeface
   }
 
   get bold(): boolean {
-    throw new NotImplementedOnRNWeb();
+    console.warn(
+      "Typeface.bold is deprecated and will be removed in a future release. The property will return false."
+    );
+    return false;
   }
 
   get italic(): boolean {
-    throw new NotImplementedOnRNWeb();
+    console.warn(
+      "Typeface.italic is deprecated and will be removed in a future release. The property will return false."
+    );
+    return false;
   }
 }
