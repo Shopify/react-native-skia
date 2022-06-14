@@ -14,7 +14,9 @@ export const Title = ({ title }: Title) => {
   if (!font) {
     return null;
   }
-  const pos = font.measureText(title);
+  const titleWidth = font
+    .getGlyphWidths(font.getGlyphIDs(title))
+    .reduce((a, b) => a + b, 0);
   const offsetX = 30 + BUTTON_SIZE;
   const space = 298 - offsetX;
   return (
@@ -24,8 +26,8 @@ export const Title = ({ title }: Title) => {
       </Button>
       <Text
         text={title}
-        x={offsetX + (space - pos.width) / 2}
-        y={BUTTON_SIZE - pos.height}
+        x={offsetX + (space - titleWidth) / 2}
+        y={BUTTON_SIZE - font.getSize()}
         font={font}
         color="white"
       />

@@ -10,7 +10,7 @@ import type {
   SkTypeface,
 } from "../types";
 
-import { HostObject, NotImplementedOnRNWeb, toValue, ckEnum } from "./Host";
+import { HostObject, toValue, ckEnum } from "./Host";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkTypeface } from "./JsiSkTypeface";
 
@@ -20,7 +20,11 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
   }
 
   measureText(_text: string, _paint?: SkPaint): SkRect {
-    throw new NotImplementedOnRNWeb();
+    console.warn(
+      `measureText() is deprecated an returns an empty rectangle on React Native Web.
+Clients should use "Font.getGlyphWidths" instead (the latter does no shaping)`
+    );
+    return new JsiSkRect(this.CanvasKit, this.CanvasKit.XYWHRect(0, 0, 0, 0));
   }
 
   getMetrics() {
@@ -42,7 +46,7 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
 
   // TODO: Fix return value in the C++ implementation, it return float32
   getGlyphWidths(glyphs: number[], paint?: SkPaint | null) {
-    return this.ref.getGlyphWidths(glyphs, paint ? toValue(paint) : null);
+    return [...this.ref.getGlyphWidths(glyphs, paint ? toValue(paint) : null)];
   }
 
   getGlyphIntercepts(

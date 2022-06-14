@@ -5,12 +5,14 @@
 #include <vector>
 
 #include <jsi/jsi.h>
-
 #include "JsiSkHostObjects.h"
+#include <RNSkLog.h>
+
 #include "JsiSkPaint.h"
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
 #include "JsiSkPoint.h"
+
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -37,6 +39,7 @@ namespace RNSkia
 
         JSI_HOST_FUNCTION(measureText)
         {
+            RNSkLogger::warnToJavascriptConsole(runtime, "measureText() is deprecated.  Clients should use 'Font.getGlyphWidths' instead (the latter does no shaping)");
             auto textVal = arguments[0].asString(runtime).utf8(runtime);
             auto text = textVal.c_str();
             SkRect rect;
