@@ -16,7 +16,6 @@ import {
   TextPath,
   useFont,
   FitBox,
-  center,
   useDerivedValue,
   interpolatePaths,
   useTiming,
@@ -68,8 +67,6 @@ path2.lineTo(0, 0);
 const path3 = Skia.Path.Make();
 path3.moveTo(50, 50);
 path3.lineTo(50, 50);
-const p3Cmds = path3.toCmds().flat();
-console.log({ cmds: path1.interpolate(path2, 0)!.toCmds().flat() });
 
 const strokeWidth = 10;
 const r = 32;
