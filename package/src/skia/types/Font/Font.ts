@@ -12,6 +12,15 @@ export interface FontMetrics {
 }
 
 export interface SkFont extends SkJSIInstance<"Font"> {
+  /**
+   * Retrieves the advanceX measurements for each glyph.
+   * If paint is not null, its stroking, PathEffect, and MaskFilter fields are respected.
+   * One width per glyph is returned in the returned array.
+   * @param glyphs
+   * @param paint
+   */
+  getGlyphWidths(glyphs: number[], paint?: SkPaint): number[];
+
   /** Returns the advance width of text.
       The advance is the normal distance to move before drawing additional text.
       Returns the bounding box of text if bounds is not nullptr. The paint
@@ -38,20 +47,6 @@ export interface SkFont extends SkJSIInstance<"Font"> {
    * @param numCodePoints - the number of code points in the string. Defaults to str.length.
    */
   getGlyphIDs(str: string, numCodePoints?: number): number[];
-
-  /**
-   * Retrieves the advanceX measurements for each glyph.
-   * If paint is not null, its stroking, PathEffect, and MaskFilter fields are respected.
-   * One width per glyph is returned in the returned array.
-   * @param glyphs
-   * @param paint
-   * @param output - if provided, the results will be copied into this array.
-   */
-  getGlyphWidths(
-    glyphs: number[],
-    paint?: SkPaint | null,
-    output?: Float32Array
-  ): Float32Array;
 
   /**
    * Computes any intersections of a thick "line" and a run of positionsed glyphs.
