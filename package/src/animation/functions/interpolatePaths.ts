@@ -26,7 +26,11 @@ export const interpolatePaths = (
       break;
     }
     if (i === input.length - 1) {
-      return outputRange[i];
+      if (value < input[0]) {
+        return outputRange[0];
+      } else {
+        return outputRange[i];
+      }
     }
   }
   const t = (value - input[i]) / (input[i + 1] - input[i]);

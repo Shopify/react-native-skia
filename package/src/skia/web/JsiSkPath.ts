@@ -310,7 +310,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
       }
       const cmd: PathCommand = [cmd1[i][0]];
       for (let j = 1; j < cmd1[i].length; j++) {
-        cmd.push(cmd1[i][j] + (cmd2[i][j] - cmd1[i][j]) * t);
+        cmd.push(cmd2[i][j] + (cmd1[i][j] - cmd2[i][j]) * t);
       }
       interpolated.push(cmd);
     }
