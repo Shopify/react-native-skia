@@ -6,6 +6,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
+#include <RNSkLog.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -21,8 +22,16 @@ using namespace facebook;
 
 class JsiSkTypeface : public JsiSkWrappingSkPtrHostObject<SkTypeface> {
 public:
-  JSI_PROPERTY_GET(bold) { return jsi::Value(getObject()->isBold()); }
-  JSI_PROPERTY_GET(italic) { return jsi::Value(getObject()->isItalic()); }
+  JSI_PROPERTY_GET(bold) {
+    RNSkLogger::warnToJavascriptConsole(runtime, "Typeface.bold is deprecated and will be removed in a future release.");
+    return jsi::Value(getObject()->isBold());
+  }
+  
+  JSI_PROPERTY_GET(italic) {
+    RNSkLogger::warnToJavascriptConsole(runtime, "Typeface.italic is deprecated and will be removed in a future release.");
+    return jsi::Value(getObject()->isItalic());
+  }
+  
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
   JSI_PROPERTY_GET(__typename__) {
     return jsi::String::createFromUtf8(runtime, "Typeface");
