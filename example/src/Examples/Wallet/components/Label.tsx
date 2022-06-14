@@ -30,7 +30,6 @@ interface LabelProps {
 export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
   const titleFont = useFont(sfMono, 64);
   const subtitleFont = useFont(sfMono, 24);
-  console.log({ titleFont });
   const translateY = height + PADDING;
   const AJUSTED_SIZE = height - PADDING * 2;
   const text = useDerivedValue(() => {
@@ -49,14 +48,18 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
       return 0;
     }
     const graph = graphs[state.current.current];
-    return (
-      width / 2 - titleFont.measureText(format(graph.data.maxPrice)).width / 2
-    );
+    const title = format(graph.data.maxPrice);
+    const titleWidth = titleFont
+      .getGlyphWidths(titleFont.getGlyphIDs(title))
+      .reduce((a, b) => a + b, 0);
+    return width / 2 - titleWidth / 2;
   }, [state, titleFont]);
   if (!titleFont || !subtitleFont) {
     return null;
   }
-  const subtitlePos = subtitleFont.measureText(subtitle);
+  const subtitleWidth = subtitleFont
+    .getGlyphWidths(subtitleFont.getGlyphIDs(subtitle))
+    .reduce((a, b) => a + b, 0);
   return (
     <>
       <Text
@@ -67,7 +70,7 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
         color="white"
       />
       <Text
-        x={width / 2 - subtitlePos.width / 2}
+        x={width / 2 - subtitleWidth / 2}
         y={translateY - 60}
         text={subtitle}
         font={subtitleFont}

@@ -34,12 +34,14 @@ export const Control = ({
   progress,
   active,
 }: ControlProps) => {
-  const pos = font.measureText(label);
+  const labelWidth = font
+    .getGlyphWidths(font.getGlyphIDs(label))
+    .reduce((a, b) => a + b, 0);
   return (
     <Group transform={translate({ x: x + 30, y: y + 30 })}>
       <Text
-        x={2 * r - pos.width - 16}
-        y={r + pos.height / 2}
+        x={2 * r - labelWidth - 16}
+        y={r + font.getSize() / 2}
         font={font}
         color="white"
         text={label}

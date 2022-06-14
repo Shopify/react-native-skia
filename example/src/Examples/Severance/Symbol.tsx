@@ -40,7 +40,7 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
   const y = j * SIZE.height;
   const noise = new SimplexNoise(`${i}-${j}`);
   const text = DIGITS[Math.round(Math.random() * 9)];
-  const [symbolWidth] = font.getGlyphIDs(text);
+  const [symbolWidth] = font.getGlyphWidths(font.getGlyphIDs(text));
   const origin = vec(x + SIZE.width / 2, y + SIZE.height / 2);
   const transform = useDerivedValue(
     () => [
@@ -58,14 +58,13 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
     ],
     [pointer]
   );
-  console.log({ symbolWidth, size: font.getSize() });
   const dx = useDerivedValue(() => {
     const d = A * noise.noise2D(x, clock.current * F);
-    return origin.x - 200 / 2 + d;
+    return origin.x - symbolWidth / 2 + d;
   }, [clock]);
   const dy = useDerivedValue(() => {
     const d = A * noise.noise2D(y, clock.current * F);
-    return origin.y + 100 / 2 + d;
+    return origin.y + font.getSize() / 2 + d;
   }, [clock]);
   return (
     <Group transform={transform} origin={origin}>
