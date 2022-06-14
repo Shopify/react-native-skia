@@ -2,7 +2,7 @@ import type { CanvasKit, Typeface } from "canvaskit-wasm";
 
 import type { SkTypeface } from "../types";
 
-import { HostObject, NotImplementedOnRNWeb } from "./Host";
+import { HostObject } from "./Host";
 
 export class JsiSkTypeface
   extends HostObject<Typeface, "Typeface">
@@ -10,13 +10,5 @@ export class JsiSkTypeface
 {
   constructor(CanvasKit: CanvasKit, ref: Typeface) {
     super(CanvasKit, ref, "Typeface");
-  }
-
-  get bold(): boolean {
-    throw new NotImplementedOnRNWeb();
-  }
-
-  get italic(): boolean {
-    throw new NotImplementedOnRNWeb();
   }
 }

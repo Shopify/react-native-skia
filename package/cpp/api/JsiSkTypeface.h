@@ -21,16 +21,12 @@ using namespace facebook;
 
 class JsiSkTypeface : public JsiSkWrappingSkPtrHostObject<SkTypeface> {
 public:
-  JSI_PROPERTY_GET(bold) { return jsi::Value(getObject()->isBold()); }
-  JSI_PROPERTY_GET(italic) { return jsi::Value(getObject()->isItalic()); }
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
   JSI_PROPERTY_GET(__typename__) {
     return jsi::String::createFromUtf8(runtime, "Typeface");
   }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkTypeface, bold),
-                              JSI_EXPORT_PROP_GET(JsiSkTypeface, italic),
-                              JSI_EXPORT_PROP_GET(JsiSkTypeface, __typename__))
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkTypeface, __typename__))
 
   JsiSkTypeface(std::shared_ptr<RNSkPlatformContext> context,
                 sk_sp<SkTypeface> typeface)
