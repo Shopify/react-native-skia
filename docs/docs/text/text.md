@@ -16,7 +16,7 @@ The fonts available in the canvas are described in [here](/docs/text/fonts).
 ### Example
 
 ```tsx twoslash
-import {Canvas, Text} from "@shopify/react-native-skia";
+import {Canvas, Text, useFont} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
   const font = useFont(require("./my-font.ttf"), 16);
