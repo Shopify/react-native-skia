@@ -13,8 +13,6 @@ export class JsiSkTypeface
   }
 
   get bold(): boolean {
-    // Do not remove the comment below. We use it to track missing APIs in CanvasKit
-    // throw new NotImplementedOnRNWeb();
     console.warn(
       "Typeface.bold is deprecated and will be removed in a future release. The property will return false."
     );
@@ -22,8 +20,6 @@ export class JsiSkTypeface
   }
 
   get italic(): boolean {
-    // Do not remove the comment below. We use it to track missing APIs in CanvasKit
-    // throw new NotImplementedOnRNWeb();
     console.warn(
       "Typeface.italic is deprecated and will be removed in a future release. The property will return false."
     );
