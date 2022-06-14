@@ -85,4 +85,12 @@ describe("Drawings", () => {
     canvas.drawColor(Skia.Color("purple"));
     processResult(surface, "snapshots/drawings/purple.png");
   });
+
+  it("Should accept object implementation of SkRect", () => {
+    const { surface, canvas, Skia } = setupSkia();
+    const paint = Skia.Paint();
+    paint.setColor(Skia.Color("lightblue"));
+    canvas.drawRect({ x: 64, y: 64, width: 128, height: 128 }, paint);
+    processResult(surface, "snapshots/drawings/lightblue-rect.png");
+  });
 });
