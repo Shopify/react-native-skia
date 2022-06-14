@@ -36,12 +36,7 @@ export const fitRects = (
     { width: rect.width, height: rect.height },
     { width, height }
   );
-  const src = inscribe(sizes.src, {
-    x: 0,
-    y: 0,
-    width: rect.width,
-    height: rect.height,
-  });
+  const src = inscribe(sizes.src, rect);
   const dst = inscribe(sizes.dst, {
     x,
     y,

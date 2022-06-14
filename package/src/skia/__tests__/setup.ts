@@ -10,10 +10,9 @@ beforeAll(async () => {
   Skia = JsiSkApi(CanvasKit);
 });
 
-const width = 256;
-const height = 256;
-
 export const setupSkia = () => {
+  const width = 256;
+  const height = 256;
   expect(Skia).toBeDefined();
   const surface = Skia.Surface.Make(width, height)!;
   expect(surface).toBeDefined();
