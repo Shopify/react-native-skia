@@ -13,13 +13,7 @@ import type {
   StrokeOpts,
 } from "../types";
 
-import {
-  ckEnum,
-  HostObject,
-  NotImplementedOnRNWeb,
-  optEnum,
-  toValue,
-} from "./Host";
+import { ckEnum, HostObject, optEnum, toValue } from "./Host";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 
@@ -301,12 +295,46 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     this.ref.transform(toValue(m3));
   }
 
-  interpolate(_end: SkPath, _weight: number): SkPath {
-    throw new NotImplementedOnRNWeb();
+  interpolate(end: SkPath, t: number) {
+    // Do not remove the comment below. We use it to track missing APIs in CanvasKit
+    // throw new NotImplementedOnRNWeb();
+    const cmd1 = this.toCmds();
+    const cmd2 = end.toCmds();
+    if (cmd1.length !== cmd2.length) {
+      return null;
+    }
+    const interpolated: PathCommand[] = [];
+    for (let i = 0; i < cmd1.length; i++) {
+      if (cmd1[i][0] !== cmd2[i][0]) {
+        return null;
+      }
+      const cmd: PathCommand = [cmd1[i][0]];
+      for (let j = 1; j < cmd1[i].length; j++) {
+        cmd.push(cmd2[i][j] + (cmd1[i][j] - cmd2[i][j]) * t);
+      }
+      interpolated.push(cmd);
+    }
+    const path = this.CanvasKit.Path.MakeFromCmds(interpolated.flat());
+    if (path === null) {
+      return null;
+    }
+    return new JsiSkPath(this.CanvasKit, path);
   }
 
-  isInterpolatable(_compare: SkPath): boolean {
-    throw new NotImplementedOnRNWeb();
+  isInterpolatable(path2: SkPath): boolean {
+    // Do not remove the comment below. We use it to track missing APIs in CanvasKit
+    // throw new NotImplementedOnRNWeb();
+    const cmd1 = this.toCmds();
+    const cmd2 = path2.toCmds();
+    if (cmd1.length !== cmd2.length) {
+      return false;
+    }
+    for (let i = 0; i < cmd1.length; i++) {
+      if (cmd1[i][0] !== cmd2[i][0]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   toCmds(): PathCommand[] {

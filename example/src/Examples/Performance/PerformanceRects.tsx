@@ -4,7 +4,6 @@ import {
   Rect,
   Skia,
   SkiaView,
-  usePaint,
   PaintStyle,
   usePaintRef,
 } from "@shopify/react-native-skia";
@@ -21,22 +20,22 @@ import {
 
 // Load font
 const Size = 15;
+const paint1 = Skia.Paint();
+paint1.setAntiAlias(true);
+paint1.setColor(Skia.Color("#A2AE6A"));
+
+const paint2 = Skia.Paint();
+paint2.setAntiAlias(true);
+paint2.setColor(Skia.Color("#4060A3"));
+paint2.setStyle(PaintStyle.Stroke);
+paint2.setStrokeWidth(2);
 
 export const PerformanceDrawingTest: React.FC = () => {
   const [isDeclarative, setIsDeclarative] = useState(false);
   const [numberOfBoxes, setNumberOfBoxes] = useState(300);
 
   const { width } = useWindowDimensions();
-  const paint1 = usePaint((p) => {
-    p.setAntiAlias(true);
-    p.setColor(Skia.Color("#A2AE6A"));
-  });
-  const paint2 = usePaint((p) => {
-    p.setAntiAlias(true);
-    p.setColor(Skia.Color("#4060A3"));
-    p.setStyle(PaintStyle.Stroke);
-    p.setStrokeWidth(2);
-  });
+
   const rects = useMemo(
     () =>
       new Array(numberOfBoxes)
@@ -59,7 +58,7 @@ export const PerformanceDrawingTest: React.FC = () => {
         canvas.drawRect(rects[i], paint2);
       }
     },
-    [paint1, paint2, rects]
+    [rects]
   );
   const paint1Ref = usePaintRef();
   const paint2Ref = usePaintRef();
