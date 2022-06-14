@@ -16,9 +16,7 @@ export const useFont = (
 ): SkFont | null => {
   const typeface = useTypeface(font, onError);
   return useMemo(() => {
-    if (typeface === null) {
-      return null;
-    } else if (typeface && size) {
+    if (typeface && size) {
       return Skia.Font(typeface, size);
     } else if (typeface && !size) {
       return Skia.Font(typeface);
