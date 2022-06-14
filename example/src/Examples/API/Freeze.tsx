@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import React, { useEffect, useState } from "react";
 import type { SkPaint, SkRect } from "@shopify/react-native-skia";
 import {
+  useFont,
   FilterMode,
   Canvas,
   Group,
@@ -19,6 +20,7 @@ const size = 200;
 const n = 99;
 
 export const FreezeExample = () => {
+  const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 32);
   const [color, setColor] = useState("black");
   const clock = useClockValue();
   const transform = useDerivedValue(
@@ -31,6 +33,9 @@ export const FreezeExample = () => {
     }, 10000);
     return () => clearInterval(h);
   }, []);
+  if (font === null) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1, margin: 50 }} debug>
       <Group origin={{ x: size / 2, y: size / 2 }} transform={transform}>
@@ -38,13 +43,7 @@ export const FreezeExample = () => {
           <Checkerboard color={color} />
         </Freeze>
       </Group>
-      <Text
-        x={20}
-        y={size + 100}
-        text={`n = ${n}`}
-        familyName="serif"
-        size={32}
-      />
+      {font && <Text x={20} y={size + 100} text={`n = ${n}`} font={font} />}
     </Canvas>
   );
 };
