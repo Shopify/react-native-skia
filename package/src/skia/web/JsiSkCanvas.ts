@@ -1,4 +1,4 @@
-import type { CanvasKit, Canvas, Image, Paint, Rect } from "canvaskit-wasm";
+import type { Canvas, Image, Paint, CanvasKit } from "canvaskit-wasm";
 
 import type {
   BlendMode,
@@ -31,6 +31,7 @@ import {
   toUndefinedableValue,
   toOptionalValue,
 } from "./Host";
+import { JsiSkRect } from "./JsiSkRect";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -41,7 +42,10 @@ export class JsiSkCanvas
   }
 
   drawRect(rect: SkRect, paint: SkPaint) {
-    this.ref.drawRect(toValue<Rect>(rect), toValue<Paint>(paint));
+    this.ref.drawRect(
+      JsiSkRect.fromValue(this.CanvasKit, rect).ref,
+      toValue<Paint>(paint)
+    );
   }
 
   drawImage(image: SkImage, x: number, y: number, paint?: SkPaint) {
@@ -57,8 +61,8 @@ export class JsiSkCanvas
   ) {
     this.ref.drawImageRect(
       toValue<Image>(img),
-      toValue<Rect>(src),
-      toValue<Rect>(dest),
+      JsiSkRect.fromValue(this.CanvasKit, src).ref,
+      JsiSkRect.fromValue(this.CanvasKit, dest).ref,
       toValue<Paint>(paint),
       fastSample
     );
@@ -126,8 +130,8 @@ export class JsiSkCanvas
   ) {
     this.ref.drawImageRectCubic(
       toValue<Image>(img),
-      toValue<Rect>(src),
-      toValue<Rect>(dest),
+      JsiSkRect.fromValue(this.CanvasKit, src).ref,
+      JsiSkRect.fromValue(this.CanvasKit, dest).ref,
       B,
       C,
       toOptionalValue(paint)
@@ -144,8 +148,8 @@ export class JsiSkCanvas
   ) {
     this.ref.drawImageRectOptions(
       toValue<Image>(img),
-      toValue<Rect>(src),
-      toValue<Rect>(dest),
+      JsiSkRect.fromValue(this.CanvasKit, src).ref,
+      JsiSkRect.fromValue(this.CanvasKit, dest).ref,
       ckEnum(fm),
       ckEnum(mm),
       toOptionalValue(paint)
