@@ -252,6 +252,7 @@ namespace RNSkia
         }
 
         JSI_EXPORT_FUNCTIONS(
+            JSI_EXPORT_FUNC(JsiSkFont, getSize),
             JSI_EXPORT_FUNC(JsiSkFont, measureText),
             JSI_EXPORT_FUNC(JsiSkFont, getMetrics),
             JSI_EXPORT_FUNC(JsiSkFont, getGlyphIDs),
