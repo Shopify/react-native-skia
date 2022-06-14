@@ -31,7 +31,8 @@ export const HelloWorld = () => {
       <Canvas style={{ flex: 1 }}>
         <Group transform={[{ translateY: 25 }]}>
           <TextPath
-          path={circle}
+            text="Hello World!"
+            path={circle}
             font={font}
           />
         </Group>
