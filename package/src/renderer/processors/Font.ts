@@ -16,6 +16,10 @@ export const processFont = (
   if (isFont(fontDef)) {
     selectedFont = fontDef.font;
   } else {
+    console.warn(
+      // eslint-disable-next-line max-len
+      "Using system fonts is deprecated. Please use the font property instead: https://shopify.github.io/react-native-skia/docs/text/fonts"
+    );
     const { familyName, size } = fontDef;
     const typeface = fontMgr.matchFamilyStyle(familyName);
     if (typeface === null) {

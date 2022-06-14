@@ -9,6 +9,7 @@ import {
   Path,
   Skia,
   Text,
+  useFont,
 } from "@shopify/react-native-skia";
 
 const r = 50;
@@ -62,6 +63,10 @@ const dst = Skia.Path.MakeFromSVGString(
 )!;
 
 export const BlendModes = () => {
+  const font = useFont(require("../../assets/SF-Pro-Display-Bold.otf"), 50);
+  if (font === null) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Group blendMode="multiply">
@@ -92,13 +97,7 @@ export const BlendModes = () => {
               <Group layer={paint}>
                 <Path path={src} color="lightblue" />
               </Group>
-              <Text
-                text={blendMode}
-                x={0}
-                y={0}
-                familyName="source-sans-pro-semi-bold"
-                size={50}
-              />
+              <Text text={blendMode} x={0} y={0} font={font} />
             </Group>
           );
         })}

@@ -12,22 +12,24 @@ The fonts available in the canvas are described in [here](/docs/text/fonts).
 |:------------|:-----------|:--------------------------------------------------------------|
 | text        | `string`   | Text to draw                                                  |
 | font        | `Font`     | Font to use (see [Fonts](/docs/text/fonts))                   |
-| familyName? | `string`   | Font family name to use  (see [Fonts](/docs/text/fonts))      |
-| size?       | `number`   | Font size if `familyName` is provided                         |
 
 ### Example
 
 ```tsx twoslash
-import {Canvas, Text} from "@shopify/react-native-skia";
+import {Canvas, Text, useFont} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
+  const font = useFont(require("./my-font.ttf"), 16);
+  if (font === null) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Text
         x={0}
         y={0}
         text="Hello World"
-        familyName="serif"
+        font={font}
         size={32}
       />
     </Canvas>

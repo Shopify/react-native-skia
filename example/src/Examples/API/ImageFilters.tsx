@@ -11,6 +11,7 @@ import {
   RuntimeShader,
   Circle,
   Skia,
+  useFont,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -54,34 +55,20 @@ const OffsetDemo = () => {
 };
 
 const MorphologyDemo = () => {
+  const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 24);
+  if (font === null) {
+    return null;
+  }
   return (
     <Group>
-      <Text
-        text="Hello World"
-        x={32}
-        y={32}
-        familyName="sans-serif"
-        size={24}
-      />
+      <Text text="Hello World" x={32} y={32} font={font} />
       <Group>
         <Morphology radius={1} />
-        <Text
-          text="Hello World"
-          x={32}
-          y={64}
-          familyName="sans-serif"
-          size={24}
-        />
+        <Text text="Hello World" x={32} y={64} font={font} />
       </Group>
       <Group>
         <Morphology radius={0.3} operator="erode" />
-        <Text
-          text="Hello World"
-          x={32}
-          y={96}
-          familyName="sans-serif"
-          size={24}
-        />
+        <Text text="Hello World" x={32} y={96} font={font} />
       </Group>
     </Group>
   );
