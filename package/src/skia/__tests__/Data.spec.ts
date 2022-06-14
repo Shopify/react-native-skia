@@ -1,3 +1,4 @@
+/*global btoa, atob*/
 import { Buffer } from "buffer";
 
 import type { JsiSkData } from "../web/JsiSkData";
