@@ -5,6 +5,8 @@
 #pragma once
 
 #include <string>
+#include <jsi/jsi.h>
+
 #ifdef ANDROID
 #include <android/log.h>
 #endif
@@ -14,6 +16,9 @@
 #endif
 
 namespace RNSkia {
+
+using namespace facebook;
+
 class RNSkLogger {
 public:
   /**
