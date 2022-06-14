@@ -1,5 +1,6 @@
 import type { SkPath } from "@shopify/react-native-skia";
 import {
+  useFont,
   Group,
   useDerivedValue,
   useValue,
@@ -20,6 +21,7 @@ import { createGraphPath } from "./createGraphPath";
 import type { GraphProps } from "./types";
 
 export const Slider: React.FC<GraphProps> = ({ height, width }) => {
+  const font = useFont(require("../../assets/SF-Pro-Display-Bold.otf"), 17);
   const path = useMemo(
     () => createGraphPath(width, height, 60, false),
     [height, width]
@@ -51,6 +53,9 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
     [touchPos]
   );
 
+  if (font === null) {
+    return null;
+  }
   return (
     <View style={{ height, marginBottom: 10 }}>
       <Canvas style={styles.graph} onTouch={touchHandler}>
@@ -71,13 +76,7 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
         <Group color="#fff">
           <Circle c={touchPos} r={10} />
           <Circle color="#DA4167" c={touchPos} r={7.5} />
-          <SkiaText
-            familyName="Arial"
-            size={12}
-            x={textX}
-            y={textY}
-            text={label}
-          />
+          <SkiaText font={font} x={textX} y={textY} text={label} />
           <Line p1={lineP1} p2={lineP2} />
         </Group>
       </Canvas>

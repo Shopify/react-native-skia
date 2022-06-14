@@ -14,11 +14,12 @@ import {
 import { AnimationDemo, Padding } from "./Components";
 
 const ExampleHeight = 60;
+const Font = require("../../assets/SF-Mono-Semibold.otf");
 
 export const AnimateTextOnPath = () => {
   const { width } = useWindowDimensions();
 
-  const font = useFont("helvetica", 14);
+  const font = useFont(Font, 12);
 
   // Create a progress going from 0..1 and back
   const progress = useLoop({

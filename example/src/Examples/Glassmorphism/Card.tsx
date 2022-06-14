@@ -12,6 +12,7 @@ import {
   Text,
   useDerivedValue,
   runDecay,
+  useFont,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 import { useWindowDimensions } from "react-native";
@@ -20,6 +21,12 @@ import { Background } from "./components/Background";
 import { Ball } from "./components/Ball";
 
 export const Glassmorphism = () => {
+  const titleFont = useFont(require("../../assets/SF-Mono-Semibold.otf"), 24);
+  const subtitleFont = useFont(
+    require("../../assets/SF-Mono-Semibold.otf"),
+    18
+  );
+  const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 12);
   const { width, height } = useWindowDimensions();
   const CARD_WIDTH = width - 64;
   const CARD_HEIGHT = CARD_WIDTH * 0.61;
@@ -50,6 +57,9 @@ export const Glassmorphism = () => {
     () => [{ translateY: x.current }, { translateX: y.current }],
     [x, y]
   );
+  if (titleFont === null || subtitleFont === null || font === null) {
+    return null;
+  }
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
       <Background />
@@ -71,43 +81,16 @@ export const Glassmorphism = () => {
           />
         </Paint>
         <Rect x={0} y={CARD_HEIGHT - 70} width={CARD_WIDTH} height={70} />
-        <Text
-          text="SUPERBANK"
-          x={20}
-          y={40}
-          familyName="source-sans-pro-semi-bold"
-          size={24}
-        />
-        <Text
-          x={20}
-          y={110}
-          text="1234 5678 1234 5678"
-          familyName="source-sans-pro-semi-bold"
-          size={24}
-        />
-        <Text
-          text="VALID THRU"
-          x={20}
-          y={145}
-          color="white"
-          familyName="sans-serif-medium"
-          size={10}
-        />
-        <Text
-          text="12/29"
-          x={20}
-          y={160}
-          color="white"
-          size={12}
-          familyName="sans-serif-medium"
-        />
+        <Text text="SUPERBANK" x={20} y={40} font={titleFont} />
+        <Text x={20} y={110} text="1234 5678 1234 5678" font={titleFont} />
+        <Text text="VALID THRU" x={20} y={145} color="white" font={font} />
+        <Text text="12/29" x={20} y={160} color="white" font={font} />
         <Text
           text="JOHN DOE"
           x={20}
           y={185}
           color="white"
-          size={18}
-          familyName="source-sans-pro-semi-bold"
+          font={subtitleFont}
         />
       </BackdropBlur>
     </Canvas>

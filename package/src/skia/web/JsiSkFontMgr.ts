@@ -9,14 +9,24 @@ export class JsiSkFontMgr
   implements SkFontMgr
 {
   constructor(CanvasKit: CanvasKit) {
+    console.warn(
+      // eslint-disable-next-line max-len
+      "Using system fonts is deprecated. Please use the font property instead: https://shopify.github.io/react-native-skia/docs/text/fonts"
+    );
     super(CanvasKit, null, "FontMgr");
   }
 
   countFamilies() {
+    console.warn(
+      "countFamilies() is deprecated. It returns 0 on React Native Web"
+    );
     return 0;
   }
 
   getFamilyName(_index: number) {
+    console.warn(
+      "getFamilyName() is deprecated. It returns an empty string on React Native Web"
+    );
     return "";
   }
 
@@ -24,8 +34,9 @@ export class JsiSkFontMgr
     _familyName: string,
     _fontStyle?: FontStyle
   ): SkTypeface | null {
-    // We leave the comment below to remind us that this is not implemented in CanvasKit
-    // throw new NotImplementedOnRNWeb();
+    console.warn(
+      "matchFamilyStyle() is deprecated. It returns null on React Native Web"
+    );
     return null;
   }
 }
