@@ -12,6 +12,7 @@ export const usePaint = (
   deps?: DependencyList
 ) =>
   useMemo(() => {
+    console.warn("usePaint() is deprecated. Use Skia.Paint() instead.");
     const p = Skia.Paint();
     if (initializer) {
       initializer(p);

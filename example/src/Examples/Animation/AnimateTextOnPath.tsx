@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
@@ -6,9 +6,9 @@ import {
   Fill,
   TextPath,
   useDerivedValue,
-  usePath,
   useLoop,
   useFont,
+  Skia,
 } from "@shopify/react-native-skia";
 
 import { AnimationDemo, Padding } from "./Components";
@@ -27,28 +27,27 @@ export const AnimateTextOnPath = () => {
   });
 
   // Create the start path
-  const path1 = usePath((p) => {
-    p.moveTo(Padding, ExampleHeight / 2);
-    p.quadTo(
+  const { path1, path2 } = useMemo(() => {
+    const p1 = Skia.Path.Make();
+    p1.moveTo(Padding, ExampleHeight / 2);
+    p1.quadTo(
       (width - Padding * 2) / 2,
       ExampleHeight,
       width - Padding * 2,
       ExampleHeight / 2
     );
-    p.simplify();
-  });
-
-  // Create the end path
-  const path2 = usePath((p) => {
-    p.moveTo(Padding, ExampleHeight / 2);
-    p.quadTo(
+    p1.simplify();
+    const p2 = Skia.Path.Make();
+    p2.moveTo(Padding, ExampleHeight / 2);
+    p2.quadTo(
       (width - Padding * 2) / 2,
       0,
       width - Padding * 2,
       ExampleHeight / 2
     );
-    p.simplify();
-  });
+    p2.simplify();
+    return { path1: p1, path2: p2 };
+  }, [width]);
 
   // Create a derived value that interpolates between
   // the start and end path
