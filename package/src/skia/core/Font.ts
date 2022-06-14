@@ -23,7 +23,7 @@ export const useFont = (
     } else if (typeface && !size) {
       return Skia.Font(typeface);
     } else {
-      return Skia.Font();
+      return null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeface]);
