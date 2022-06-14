@@ -5,6 +5,16 @@ import type { SkRect } from "../types";
 import { HostObject } from "./Host";
 
 export class JsiSkRect extends HostObject<Rect, "Rect"> implements SkRect {
+  static fromValue(CanvasKit: CanvasKit, rect: SkRect) {
+    if (rect instanceof JsiSkRect) {
+      return rect;
+    }
+    return new JsiSkRect(
+      CanvasKit,
+      CanvasKit.XYWHRect(rect.x, rect.y, rect.width, rect.height)
+    );
+  }
+
   constructor(CanvasKit: CanvasKit, ref: Rect) {
     super(CanvasKit, ref, "Rect");
   }
