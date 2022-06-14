@@ -6,7 +6,7 @@ import { Circle, FitBox, Rect } from "../components";
 import { drawOnNode, width, height, Skia } from "./setup";
 
 describe("FitBox", () => {
-  it("Scale the rectangle in half", () => {
+  it("Should scale the rectangle in half", () => {
     const surface = drawOnNode(
       <FitBox
         src={Skia.XYWHRect(0, 0, width, height)}
@@ -17,7 +17,7 @@ describe("FitBox", () => {
     );
     processResult(surface, "snapshots/drawings/lightblue-rect.png");
   });
-  it("Take the bottom right quarter of the circle and scale to the full canvas", () => {
+  it("Should take the bottom right quarter of the circle and scale to the full canvas", () => {
     const surface = drawOnNode(
       <FitBox
         src={Skia.XYWHRect(width / 2, height / 2, width / 2, height / 2)}
