@@ -1,5 +1,4 @@
 import React from "react";
-import CanvasKitInit from "canvaskit-wasm";
 import type { ReactNode } from "react";
 import ReactReconciler from "react-reconciler";
 
@@ -10,12 +9,13 @@ import { Container } from "../nodes";
 import type { DrawingContext } from "../DrawingContext";
 import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
+import { LoadSkia } from "../../web";
 
 export let Skia: ReturnType<typeof JsiSkApi>;
 
 beforeAll(async () => {
-  const CanvasKit = await CanvasKitInit();
-  Skia = JsiSkApi(CanvasKit);
+  await LoadSkia();
+  Skia = JsiSkApi(global.CanvasKit);
 });
 
 export const width = 256;
