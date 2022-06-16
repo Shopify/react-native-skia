@@ -172,7 +172,10 @@ export class JsiSkShaderFactory extends Host implements ShaderFactory {
   MakeColor(color: SkColor) {
     return new JsiSkShader(
       this.CanvasKit,
-      this.CanvasKit.Shader.MakeColor(toValue(color))
+      this.CanvasKit.Shader.MakeColor(
+        toValue(color),
+        this.CanvasKit.ColorSpace.SRGB
+      )
     );
   }
 }
