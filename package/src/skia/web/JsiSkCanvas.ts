@@ -250,7 +250,7 @@ export class JsiSkCanvas
   ) {
     this.ref.drawGlyphs(
       glyphs,
-      toValue(positions),
+      positions.map((p) => [p.x, p.y]).flat(),
       x,
       y,
       toValue(font),
