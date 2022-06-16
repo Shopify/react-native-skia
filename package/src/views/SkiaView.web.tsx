@@ -175,17 +175,15 @@ export class SkiaView extends React.Component<
     const { mode, debug = false, ...viewProps } = this.props;
     return (
       <View {...viewProps} onLayout={this.onLayout.bind(this)}>
-        {this.state.width > -1 ? (
-          <canvas
-            ref={this._canvasRef}
-            width={`${this.state.width}px`}
-            height={`${this.state.height}px`}
-            onPointerDown={this.handleTouchStart.bind(this)}
-            onPointerMove={this.handleTouchMove.bind(this)}
-            onPointerUp={this.handleTouchEnd.bind(this)}
-            onPointerCancel={this.handleTouchCancel.bind(this)}
-          />
-        ) : null}
+        <canvas
+          ref={this._canvasRef}
+          width={this.state.width}
+          height={this.state.height}
+          onPointerDown={this.handleTouchStart.bind(this)}
+          onPointerMove={this.handleTouchMove.bind(this)}
+          onPointerUp={this.handleTouchEnd.bind(this)}
+          onPointerCancel={this.handleTouchCancel.bind(this)}
+        />
       </View>
     );
   }
