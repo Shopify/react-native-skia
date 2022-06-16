@@ -9,10 +9,6 @@ export class JsiSkFontMgr
   implements SkFontMgr
 {
   constructor(CanvasKit: CanvasKit) {
-    console.warn(
-      // eslint-disable-next-line max-len
-      "Using system fonts is deprecated. Please use the font property instead: https://shopify.github.io/react-native-skia/docs/text/fonts"
-    );
     super(CanvasKit, null, "FontMgr");
   }
 
