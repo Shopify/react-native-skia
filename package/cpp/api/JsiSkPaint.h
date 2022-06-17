@@ -84,47 +84,20 @@ public:
   }
 
   JSI_HOST_FUNCTION(setStyle) {
-    int styleInt = arguments[0].asNumber();
-    switch (styleInt) {
-    case 0:
-      getObject()->setStyle(SkPaint::kFill_Style);
-      break;
-    case 1:
-      getObject()->setStyle(SkPaint::kStroke_Style);
-      break;
-    }
+    auto style = arguments[0].asNumber();
+    getObject()->setStyle(static_cast<SkPaint::Style>(style));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setStrokeCap) {
-    int cap = arguments[0].asNumber();
-    switch (cap) {
-    case 0:
-      getObject()->setStrokeCap(SkPaint::kButt_Cap);
-      break;
-    case 1:
-      getObject()->setStrokeCap(SkPaint::kRound_Cap);
-      break;
-    case 2:
-      getObject()->setStrokeCap(SkPaint::kSquare_Cap);
-      break;
-    }
+    auto cap = arguments[0].asNumber();
+    getObject()->setStrokeCap(static_cast<SkPaint::Cap>(cap));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setStrokeJoin) {
     int join = arguments[0].asNumber();
-    switch (join) {
-    case 0:
-      getObject()->setStrokeJoin(SkPaint::kBevel_Join);
-      break;
-    case 1:
-      getObject()->setStrokeJoin(SkPaint::kMiter_Join);
-      break;
-    case 2:
-      getObject()->setStrokeJoin(SkPaint::kRound_Join);
-      break;
-    }
+    getObject()->setStrokeJoin(static_cast<SkPaint::Join>(join));
     return jsi::Value::undefined();
   }
 
