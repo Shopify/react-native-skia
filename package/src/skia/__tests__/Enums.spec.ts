@@ -29,11 +29,7 @@ import { BlendMode } from "../types/Paint/BlendMode";
 
 import { setupSkia } from "./setup";
 
-const checkEnum = <T>(
-  skiaEnum: T,
-  canvasKitEnum: EmbindEnum,
-  expectedToFail = false
-) => {
+const checkEnum = <T>(skiaEnum: T, canvasKitEnum: EmbindEnum) => {
   Object.keys(canvasKitEnum.values).forEach((key) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -42,19 +38,8 @@ const checkEnum = <T>(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const selectedEnum = canvasKitEnum[namedKey];
-    if (selectedEnum === undefined && !expectedToFail) {
-      console.log({ skiaEnum, canvasKitEnum });
-      expect(selectedEnum).toBeDefined();
-      return;
-    } else if (selectedEnum === undefined && expectedToFail) {
-      return;
-    }
-    const result = selectedEnum.value;
-    if (expectedToFail) {
-      expect(expected).not.toBe(result);
-    } else {
-      expect(expected).toBe(result);
-    }
+    expect(selectedEnum).toBeDefined();
+    expect(expected).toBe(selectedEnum.value);
   });
 };
 
