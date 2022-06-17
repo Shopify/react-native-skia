@@ -8,6 +8,7 @@ import {
   useDerivedValue,
   LinearGradient,
   vec,
+  Fill,
 } from "@shopify/react-native-skia";
 
 import { PADDING, COLORS, getGraph } from "./Model";
@@ -27,8 +28,9 @@ const styles = StyleSheet.create({
 });
 
 export const Wallet = () => {
-  const { width } = useWindowDimensions();
-  const height = width / 2;
+  const window = useWindowDimensions();
+  const { width } = window;
+  const height = Math.min(window.width, window.height) / 2;
   const translateY = height + PADDING;
   const graphs = useMemo(() => getGraph(width, height), [width, height]);
   // animation value to transition from one graph to the next
