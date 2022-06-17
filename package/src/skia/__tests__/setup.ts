@@ -24,5 +24,6 @@ export const setupSkia = () => {
     center: { x: width / 2, y: height / 2 },
     canvas,
     Skia,
+    CanvasKit: global.CanvasKit,
   };
 };

@@ -4,8 +4,8 @@ import type { TileMode } from "../ImageFilter";
 import type { SkShader } from "../Shader";
 
 export enum FilterMode {
-  Linear,
   Nearest,
+  Linear,
 }
 
 export enum MipmapMode {
@@ -15,9 +15,9 @@ export enum MipmapMode {
 }
 
 export enum ImageFormat {
-  PNG,
-  JPEG,
-  WEBP,
+  JPEG = 3,
+  PNG = 4,
+  WEBP = 6,
 }
 
 export interface SkImage extends SkJSIInstance<"Image"> {

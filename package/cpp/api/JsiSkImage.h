@@ -65,9 +65,7 @@ namespace RNSkia
     JSI_HOST_FUNCTION(encodeToBytes)
     {
       // Get optional parameters
-      auto format = count >= 1 ? getFormatFromNumber(
-        static_cast<int>(arguments[0].asNumber())) : SkEncodedImageFormat::kPNG;
-      
+      auto format = count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber()) : SkEncodedImageFormat::kPNG;
       auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
       
       // Get data
@@ -89,8 +87,7 @@ namespace RNSkia
     JSI_HOST_FUNCTION(encodeToBase64)
     {
       // Get optional parameters
-      auto format = count >= 1 ? getFormatFromNumber(
-        static_cast<int>(arguments[0].asNumber())) : SkEncodedImageFormat::kPNG;
+      auto format = count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber()) : SkEncodedImageFormat::kPNG;
       
       auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
       
@@ -121,20 +118,6 @@ namespace RNSkia
       return obj.asObject(runtime)
           .asHostObject<JsiSkImage>(runtime)
           ->getObject();
-    }
-  private:
-    
-    SkEncodedImageFormat getFormatFromNumber(int value) {
-      switch(value) {
-        case 0: // PNG
-          return SkEncodedImageFormat::kPNG;
-        case 1: // JPEG
-          return SkEncodedImageFormat::kJPEG;
-        case 2: // WEBP
-          return SkEncodedImageFormat::kWEBP;
-        default:
-          return SkEncodedImageFormat::kPNG;
-      }
     }
   };
 
