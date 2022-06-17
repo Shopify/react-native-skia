@@ -41,8 +41,7 @@ const checkEnum = <T>(
     const expected = skiaEnum[namedKey];
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const selectedEnum = canvasKitEnum[namedKey] as any;
+    const selectedEnum = canvasKitEnum[namedKey];
     if (selectedEnum === undefined && !expectedToFail) {
       console.log({ skiaEnum, canvasKitEnum });
       expect(selectedEnum).toBeDefined();
