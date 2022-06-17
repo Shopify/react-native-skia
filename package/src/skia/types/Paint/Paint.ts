@@ -20,9 +20,9 @@ export enum StrokeCap {
 }
 
 export enum StrokeJoin {
-  Bevel,
   Miter,
   Round,
+  Bevel,
 }
 
 export const isPaint = (obj: SkJSIInstance<string> | null): obj is SkPaint =>

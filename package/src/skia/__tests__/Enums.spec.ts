@@ -63,7 +63,7 @@ describe("Enums", () => {
     const { CanvasKit } = setupSkia();
     checkEnum(PaintStyle, CanvasKit.PaintStyle);
     checkEnum(StrokeCap, CanvasKit.StrokeCap);
-    checkEnum(StrokeJoin, CanvasKit.StrokeJoin, true);
+    checkEnum(StrokeJoin, CanvasKit.StrokeJoin);
     checkEnum(BlendMode, CanvasKit.BlendMode);
   });
   it("Should match TileMode enums values with CanvasKit", () => {
@@ -86,9 +86,9 @@ describe("Enums", () => {
     const { CanvasKit } = setupSkia();
     checkEnum(ColorType, CanvasKit.ColorType);
     checkEnum(AlphaType, CanvasKit.AlphaType);
-    checkEnum(ImageFormat, CanvasKit.ImageFormat, true);
+    checkEnum(ImageFormat, CanvasKit.ImageFormat);
     checkEnum(MipmapMode, CanvasKit.MipmapMode);
-    checkEnum(FilterMode, CanvasKit.FilterMode, true);
+    checkEnum(FilterMode, CanvasKit.FilterMode);
   });
   it("Should match Path enums values with CanvasKit", () => {
     const { CanvasKit } = setupSkia();
