@@ -480,8 +480,8 @@ public:
     auto cmds = jsi::Array(runtime, path.countVerbs());
     auto it = SkPath::Iter(path, false);
     //                       { "Move", "Line", "Quad", "Conic", "Cubic", "Close", "Done" };
-    const int pointCount[] = {     1 ,     2 ,     3 ,      3 ,      4 ,      1 ,     0  };
-    const int cmdCount[] =   {     3 ,     5 ,     7 ,      8 ,      9 ,      3 ,     0  };
+    const int pointCount[] = {     1 ,     1 ,     2 ,      2 ,      3 ,      0 ,     0  };
+    const int cmdCount[] =   {     3 ,     3 ,     5 ,      6 ,      7 ,      1 ,     0  };
     SkPoint points[4];
     SkPath::Verb verb;
     auto k = 0;
@@ -491,8 +491,8 @@ public:
       auto j = 0;
       cmd.setValueAtIndex(runtime, j++, jsi::Value(verbVal));
       for (int i = 0; i < pointCount[verbVal]; ++i) {
-        cmd.setValueAtIndex(runtime, j++, jsi::Value(static_cast<double>(points[i].fX)));
-        cmd.setValueAtIndex(runtime, j++, jsi::Value(static_cast<double>(points[i].fY)));
+        cmd.setValueAtIndex(runtime, j++, jsi::Value(static_cast<double>(points[1 + i].fX)));
+        cmd.setValueAtIndex(runtime, j++, jsi::Value(static_cast<double>(points[1 + i].fY)));
       }
       if (SkPath::kConic_Verb == verb) {
         cmd.setValueAtIndex(runtime, j, jsi::Value(static_cast<double>(it.conicWeight())));
