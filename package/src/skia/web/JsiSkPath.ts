@@ -17,6 +17,16 @@ import { ckEnum, HostObject, optEnum, toValue } from "./Host";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 
+const CMD_COUNT = {
+  [PathVerb.Move]: 3,
+  [PathVerb.Line]: 3,
+  [PathVerb.Quad]: 5,
+  [PathVerb.Conic]: 6,
+  [PathVerb.Cubic]: 7,
+  [PathVerb.Close]: 1,
+  [PathVerb.Done]: 0,
+};
+
 export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   constructor(CanvasKit: CanvasKit, ref: Path) {
     super(CanvasKit, ref, "Path");
@@ -341,15 +351,6 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     const cmds: PathCommand[] = [];
     let cmd = [];
     const flatCmds = this.ref.toCmds();
-    const CmdCount = {
-      [PathVerb.Move]: 3,
-      [PathVerb.Line]: 3,
-      [PathVerb.Quad]: 5,
-      [PathVerb.Conic]: 6,
-      [PathVerb.Cubic]: 7,
-      [PathVerb.Close]: 0,
-      [PathVerb.Done]: 0,
-    };
     for (let i = 0; i < flatCmds.length; i++) {
       if (cmd.length === 0 && flatCmds[i] === PathVerb.Done) {
         break;
@@ -357,13 +358,16 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
       const c = flatCmds[i];
       cmd.push(c);
       if (cmd.length > 1) {
-        const length = CmdCount[cmd[0] as PathVerb];
+        const length = CMD_COUNT[cmd[0] as PathVerb];
         if (cmd.length === length) {
           cmds.push(cmd);
           cmd = [];
         }
       }
     }
-    return cmds.concat(cmd);
+    if (cmd.length > 0) {
+      cmds.push(cmd);
+    }
+    return cmds;
   }
 }

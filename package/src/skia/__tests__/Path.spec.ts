@@ -1,9 +1,8 @@
 /* eslint-disable max-len */
 import { interpolatePaths } from "../../animation/functions/interpolatePaths";
+import type { Skia, SkPath } from "../types";
+import { FillType, PathOp, PathVerb } from "../types";
 import { processResult } from "../../__tests__/setup";
-import { FillType } from "../types";
-import type { SkPath } from "../types/Path/Path";
-import type { Skia } from "../types/Skia";
 
 import { setupSkia } from "./setup";
 
@@ -47,7 +46,7 @@ describe("Path", () => {
     expect(path1.isInterpolatable(path2)).toBe(false);
   });
 
-  it("Should interpolate Path", () => {
+  it("Should interpolate one Path", () => {
     const { Skia } = setupSkia();
     const path1 = Skia.Path.Make();
     path1.moveTo(0, 0);
@@ -58,13 +57,18 @@ describe("Path", () => {
     const path3 = Skia.Path.Make();
     path3.moveTo(50, 50);
     path3.lineTo(50, 50);
-    const p3Cmds = path3.toCmds().flat();
-    expect(path1.interpolate(path2, 0)!.toCmds().flat()).toEqual(
-      path2.toCmds().flat()
-    );
-    expect(path1.interpolate(path2, 0.5)!.toCmds().flat()).toEqual(p3Cmds);
-    path2.lineTo(0, 100);
-    expect(path1.interpolate(path2, 1)).toBe(null);
+    expect(path1.isInterpolatable(path2)).toBe(true);
+    const interpolate0 = path1.interpolate(path2, 0)!;
+    const interpolate05 = path1.interpolate(path2, 0.5)!;
+    const interpolate1 = path1.interpolate(path2, 1)!;
+
+    expect(interpolate0).not.toBeNull();
+    expect(interpolate05).not.toBeNull();
+    expect(interpolate1).not.toBeNull();
+
+    expect(interpolate0.toCmds().flat()).toEqual(path2.toCmds().flat());
+    expect(interpolate05.toCmds().flat()).toEqual(path3.toCmds().flat());
+    expect(interpolate1.toCmds().flat()).toEqual(path1.toCmds().flat());
   });
 
   it("Should interpolate more than one Path", () => {
@@ -78,6 +82,8 @@ describe("Path", () => {
     const path3 = Skia.Path.Make();
     path3.moveTo(0, 0);
     path3.lineTo(200, 200);
+    expect(path1.isInterpolatable(path2)).toBe(true);
+    expect(path2.isInterpolatable(path3)).toBe(true);
     let path = interpolatePaths(0, [0, 0.5, 1], [path1, path2, path3]);
     expect(path.toCmds().flat()).toEqual(path1.toCmds().flat());
     path = interpolatePaths(0.5, [0, 0.5, 1], [path1, path2, path3]);
@@ -113,6 +119,65 @@ describe("Path", () => {
     path3.moveTo(0, 0);
     path3.lineTo(200, 200);
     const path = interpolatePaths(2, [0, 0.5, 1], [path1, path2, path3]);
-    expect(path.toCmds().flat()).toEqual(path3.toCmds().flat());
+    expect(path.toCmds()).toEqual(path3.toCmds());
   });
+
+  it("Should match construct a path from commands", () => {
+    const { Skia } = setupSkia();
+    const cmds = [
+      [PathVerb.Move, 205, 5],
+      [PathVerb.Line, 795, 5],
+      [PathVerb.Line, 595, 295],
+      [PathVerb.Line, 5, 295],
+      [PathVerb.Line, 205, 5],
+      [PathVerb.Close],
+    ];
+    const path = Skia.Path.MakeFromCmds(cmds)!;
+    expect(path).toBeTruthy();
+    const svgStr = path.toSVGString();
+    // We output it in terse form, which is different than Wikipedia's version
+    expect(svgStr).toEqual("M205 5L795 5L595 295L5 295L205 5Z");
+  });
+
+  it("Should serialize a path to commands", () => {
+    const { Skia } = setupSkia();
+    const path = Skia.Path.MakeFromSVGString(
+      "M 205,5 L 795,5 L 595,295 L 5,295 L 205,5 z"
+    )!;
+    const cmds = path.toCmds();
+    expect(cmds).toBeTruthy();
+    // 1 move, 4 lines, 1 close
+    // each element in cmds is an array, with index 0 being the verb, and the rest being args
+    expect(cmds.length).toBe(6);
+    expect(cmds).toEqual([
+      [PathVerb.Move, 205, 5],
+      [PathVerb.Line, 795, 5],
+      [PathVerb.Line, 595, 295],
+      [PathVerb.Line, 5, 295],
+      [PathVerb.Line, 205, 5],
+      [PathVerb.Close],
+    ]);
+  });
+});
+
+it("should create a path by combining two other paths", () => {
+  const { Skia } = setupSkia();
+  // Get the intersection of two overlapping squares and verify that it is the smaller square.
+  const pathOne = Skia.Path.Make();
+  pathOne.addRect(Skia.XYWHRect(0, 0, 100, 100));
+
+  const pathTwo = Skia.Path.Make();
+  pathTwo.addRect(Skia.XYWHRect(50, 50, 50, 50));
+
+  const path = Skia.Path.MakeFromOp(pathOne, pathTwo, PathOp.Intersect)!;
+  expect(path).not.toBeNull();
+  const cmds = path.toCmds();
+  expect(cmds).toBeTruthy();
+  expect(cmds).toEqual([
+    [PathVerb.Move, 50, 50],
+    [PathVerb.Line, 100, 50],
+    [PathVerb.Line, 100, 100],
+    [PathVerb.Line, 50, 100],
+    [PathVerb.Close],
+  ]);
 });
