@@ -319,7 +319,9 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
         return null;
       }
       const cmd: PathCommand = [cmd1[i][0]];
-      for (let j = 1; j < cmd1[i].length; j++) {
+      const length =
+        cmd1[i][0] === PathVerb.Conic ? cmd1[i].length - 1 : cmd1[i].length;
+      for (let j = 1; j < length; j++) {
         cmd.push(cmd2[i][j] + (cmd1[i][j] - cmd2[i][j]) * t);
       }
       interpolated.push(cmd);
@@ -342,9 +344,18 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     for (let i = 0; i < cmd1.length; i++) {
       if (cmd1[i][0] !== cmd2[i][0]) {
         return false;
+      } else if (cmd1[i][0] === PathVerb.Conic && cmd1[i][5] !== cmd2[i][5]) {
+        return false;
       }
     }
     return true;
+    /*
+
+    // need the same structure (verbs, conicweights) and same point-count
+    return fPathRef->fPoints.count() == compare.fPathRef->fPoints.count() &&
+           fPathRef->fVerbs == compare.fPathRef->fVerbs &&
+           fPathRef->fConicWeights == compare.fPathRef->fConicWeights;
+           */
   }
 
   toCmds(): PathCommand[] {

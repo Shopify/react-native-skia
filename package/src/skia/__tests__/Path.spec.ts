@@ -33,6 +33,69 @@ describe("Path", () => {
     processResult(surface, "snapshots/path/logo.png");
   });
 
+  it("Should test that path interpolation works as specified in the Skia test suite", () => {
+    // https://github.com/google/skia/blob/1f193df9b393d50da39570dab77a0bb5d28ec8ef/tests/PathTest.cpp
+    const { Skia } = setupSkia();
+    const p1 = Skia.Path.Make();
+    const p2 = Skia.Path.Make();
+    let p3: SkPath;
+    expect(p1.isInterpolatable(p2)).toBe(true);
+    p3 = p1.interpolate(p2, 0)!;
+    expect(p3).toBeTruthy();
+    expect(p1.toCmds()).toEqual(p3.toCmds());
+    p3 = p1.interpolate(p2, 1)!;
+    expect(p3).toBeTruthy();
+    expect(p2.toCmds()).toEqual(p3.toCmds());
+    p1.moveTo(0, 2);
+    p1.lineTo(0, 4);
+    expect(p1.isInterpolatable(p2)).toBe(false);
+    expect(p1.interpolate(p2, 1)).toBeNull();
+    p2.moveTo(6, 0);
+    p2.lineTo(8, 0);
+    expect(p1.isInterpolatable(p2)).toBe(true);
+    p3 = p1.interpolate(p2, 0)!;
+    expect(p3).toBeTruthy();
+    expect(p2.toCmds()).toEqual(p3.toCmds());
+    p3 = p1.interpolate(p2, 1)!;
+    expect(p3).toBeTruthy();
+    expect(p1.toCmds()).toEqual(p3.toCmds());
+    p3 = p1.interpolate(p2, 0.5)!;
+    expect(p3).toBeTruthy();
+    let bounds = p3.getBounds();
+    let rect = Skia.XYWHRect(3, 1, 1, 1);
+    expect([bounds.x, bounds.y, bounds.width, bounds.height]).toEqual([
+      rect.x,
+      rect.y,
+      rect.width,
+      rect.height,
+    ]);
+    p1.reset();
+    p1.moveTo(4, 4);
+    p1.conicTo(5, 4, 5, 5, 0);
+    p2.reset();
+    p2.moveTo(4, 2);
+    p2.conicTo(7, 2, 7, 5, 0);
+    expect(p1.isInterpolatable(p2)).toBe(true);
+    p3 = p1.interpolate(p2, 0.5)!;
+    expect(p3).toBeTruthy();
+    bounds = p3.getBounds();
+    rect = Skia.XYWHRect(4, 3, 2, 2);
+    expect([bounds.x, bounds.y, bounds.width, bounds.height]).toEqual([
+      rect.x,
+      rect.y,
+      rect.width,
+      rect.height,
+    ]);
+    p2.reset();
+    p2.moveTo(4, 2);
+    p2.conicTo(6, 3, 6, 5, 1);
+    expect(p1.isInterpolatable(p2)).toBe(false);
+    p2.reset();
+    p2.moveTo(4, 4);
+    p2.conicTo(5, 4, 5, 5, 0.5);
+    expect(p1.isInterpolatable(p2)).toBe(false);
+  });
+
   it("Should test that paths can be interpolated", () => {
     const { Skia } = setupSkia();
     const path1 = Skia.Path.Make();
