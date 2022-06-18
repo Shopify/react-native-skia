@@ -158,26 +158,42 @@ describe("Path", () => {
       [PathVerb.Close],
     ]);
   });
-});
 
-it("should create a path by combining two other paths", () => {
-  const { Skia } = setupSkia();
-  // Get the intersection of two overlapping squares and verify that it is the smaller square.
-  const pathOne = Skia.Path.Make();
-  pathOne.addRect(Skia.XYWHRect(0, 0, 100, 100));
+  it("should create a path by combining two other paths", () => {
+    const { Skia } = setupSkia();
+    // Get the intersection of two overlapping squares and verify that it is the smaller square.
+    const pathOne = Skia.Path.Make();
+    pathOne.addRect(Skia.XYWHRect(0, 0, 100, 100));
 
-  const pathTwo = Skia.Path.Make();
-  pathTwo.addRect(Skia.XYWHRect(50, 50, 50, 50));
+    const pathTwo = Skia.Path.Make();
+    pathTwo.addRect(Skia.XYWHRect(50, 50, 50, 50));
 
-  const path = Skia.Path.MakeFromOp(pathOne, pathTwo, PathOp.Intersect)!;
-  expect(path).not.toBeNull();
-  const cmds = path.toCmds();
-  expect(cmds).toBeTruthy();
-  expect(cmds).toEqual([
-    [PathVerb.Move, 50, 50],
-    [PathVerb.Line, 100, 50],
-    [PathVerb.Line, 100, 100],
-    [PathVerb.Line, 50, 100],
-    [PathVerb.Close],
-  ]);
+    const path = Skia.Path.MakeFromOp(pathOne, pathTwo, PathOp.Intersect)!;
+    expect(path).not.toBeNull();
+    const cmds = path.toCmds();
+    expect(cmds).toBeTruthy();
+    expect(cmds).toEqual([
+      [PathVerb.Move, 50, 50],
+      [PathVerb.Line, 100, 50],
+      [PathVerb.Line, 100, 100],
+      [PathVerb.Line, 50, 100],
+      [PathVerb.Close],
+    ]);
+  });
+
+  it("should create an SVG string from a path", () => {
+    const { Skia } = setupSkia();
+    const cmds = [
+      [PathVerb.Move, 205, 5],
+      [PathVerb.Line, 795, 5],
+      [PathVerb.Line, 595, 295],
+      [PathVerb.Line, 5, 295],
+      [PathVerb.Line, 205, 5],
+      [PathVerb.Close],
+    ];
+    const path = Skia.Path.MakeFromCmds(cmds)!;
+    expect(path).toBeTruthy();
+    // We output it in terse form, which is different than Wikipedia's version
+    expect(path.toSVGString()).toEqual("M205 5L795 5L595 295L5 295L205 5Z");
+  });
 });
