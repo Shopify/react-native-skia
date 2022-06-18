@@ -8,7 +8,6 @@ import {
   useDerivedValue,
   LinearGradient,
   vec,
-  Fill,
 } from "@shopify/react-native-skia";
 
 import { PADDING, COLORS, getGraph } from "./Model";
