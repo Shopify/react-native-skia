@@ -92,6 +92,11 @@ describe("Path", () => {
     expect(p1.isInterpolatable(p2)).toBe(true);
     p3 = p1.interpolate(p2, 0.5)!;
     expect(p3).toBeTruthy();
+    console.log(p3.toCmds());
+    expect(p3.toCmds()).toEqual([
+      [PathVerb.Move, 4, 3],
+      [PathVerb.Conic, 6, 3, 6, 5, 0],
+    ]);
     bounds = p3.getBounds();
     rect = Skia.XYWHRect(4, 3, 2, 2);
     expect([bounds.x, bounds.y, bounds.width, bounds.height]).toEqual([

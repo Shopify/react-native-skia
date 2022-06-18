@@ -17,14 +17,13 @@ import { ckEnum, HostObject, optEnum, toValue } from "./Host";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 
-const CMD_COUNT = {
+const CommandCount = {
   [PathVerb.Move]: 3,
   [PathVerb.Line]: 3,
   [PathVerb.Quad]: 5,
   [PathVerb.Conic]: 6,
   [PathVerb.Cubic]: 7,
   [PathVerb.Close]: 1,
-  [PathVerb.Done]: 0,
 };
 
 export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
@@ -324,6 +323,9 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
       for (let j = 1; j < length; j++) {
         cmd.push(cmd2[i][j] + (cmd1[i][j] - cmd2[i][j]) * t);
       }
+      if (cmd1[i][0] === PathVerb.Conic) {
+        cmd.push(cmd1[i][cmd1[i].length - 1]);
+      }
       interpolated.push(cmd);
     }
     const path = this.CanvasKit.Path.MakeFromCmds(interpolated.flat());
@@ -349,36 +351,32 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
       }
     }
     return true;
-    /*
-
-    // need the same structure (verbs, conicweights) and same point-count
-    return fPathRef->fPoints.count() == compare.fPathRef->fPoints.count() &&
-           fPathRef->fVerbs == compare.fPathRef->fVerbs &&
-           fPathRef->fConicWeights == compare.fPathRef->fConicWeights;
-           */
   }
 
-  toCmds(): PathCommand[] {
-    const cmds: PathCommand[] = [];
-    let cmd = [];
-    const flatCmds = this.ref.toCmds();
-    for (let i = 0; i < flatCmds.length; i++) {
-      if (cmd.length === 0 && flatCmds[i] === PathVerb.Done) {
-        break;
+  toCmds() {
+    const cmds = this.ref.toCmds();
+    const result = cmds.reduce<PathCommand[]>((acc, cmd, i) => {
+      if (i === 0) {
+        acc.push([]);
       }
-      const c = flatCmds[i];
-      cmd.push(c);
-      if (cmd.length > 1) {
-        const length = CMD_COUNT[cmd[0] as PathVerb];
-        if (cmd.length === length) {
-          cmds.push(cmd);
-          cmd = [];
+      const current = acc[acc.length - 1];
+      if (current.length === 0) {
+        current.push(cmd);
+        const length = CommandCount[current[0] as PathVerb];
+        if (current.length === length && i !== cmds.length - 1) {
+          acc.push([]);
+        }
+      } else {
+        const length = CommandCount[current[0] as PathVerb];
+        if (current.length < length) {
+          current.push(cmd);
+        }
+        if (current.length === length && i !== cmds.length - 1) {
+          acc.push([]);
         }
       }
-    }
-    if (cmd.length > 0) {
-      cmds.push(cmd);
-    }
-    return cmds;
+      return acc;
+    }, []);
+    return result;
   }
 }
