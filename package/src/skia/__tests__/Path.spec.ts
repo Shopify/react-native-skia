@@ -85,19 +85,16 @@ describe("Path", () => {
     ]);
     p1.reset();
     p1.moveTo(4, 4);
-    p1.conicTo(5, 4, 5, 5, 0);
+    p1.conicTo(5, 4, 5, 5, 0.2);
     p2.reset();
     p2.moveTo(4, 2);
-    p2.conicTo(7, 2, 7, 5, 0);
+    p2.conicTo(7, 2, 7, 5, 0.2);
     expect(p1.isInterpolatable(p2)).toBe(true);
     p3 = p1.interpolate(p2, 0.5)!;
     expect(p3).toBeTruthy();
-    console.log(p1.toCmds());
-    console.log(p2.toCmds());
-    console.log(p3.toCmds());
     expect(p3.toCmds()).toEqual([
       [PathVerb.Move, 4, 3],
-      [PathVerb.Conic, 6, 3, 6, 5, 0],
+      [PathVerb.Conic, 6, 3, 6, 5, Math.fround(0.2)],
     ]);
     bounds = p3.getBounds();
     rect = Skia.XYWHRect(4, 3, 2, 2);
