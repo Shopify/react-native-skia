@@ -26,6 +26,20 @@ const CommandCount = {
   [PathVerb.Close]: 1,
 };
 
+const areCmdsInterpolatable = (cmd1: PathCommand[], cmd2: PathCommand[]) => {
+  if (cmd1.length !== cmd2.length) {
+    return false;
+  }
+  for (let i = 0; i < cmd1.length; i++) {
+    if (cmd1[i][0] !== cmd2[i][0]) {
+      return false;
+    } else if (cmd1[i][0] === PathVerb.Conic && cmd1[i][5] !== cmd2[i][5]) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   constructor(CanvasKit: CanvasKit, ref: Path) {
     super(CanvasKit, ref, "Path");
@@ -309,25 +323,25 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     // throw new NotImplementedOnRNWeb();
     const cmd1 = this.toCmds();
     const cmd2 = end.toCmds();
-    if (cmd1.length !== cmd2.length) {
+    if (!areCmdsInterpolatable(cmd1, cmd2)) {
       return null;
     }
     const interpolated: PathCommand[] = [];
-    for (let i = 0; i < cmd1.length; i++) {
-      if (cmd1[i][0] !== cmd2[i][0]) {
-        return null;
-      }
-      const cmd: PathCommand = [cmd1[i][0]];
-      const length =
-        cmd1[i][0] === PathVerb.Conic ? cmd1[i].length - 1 : cmd1[i].length;
-      for (let j = 1; j < length; j++) {
-        cmd.push(cmd2[i][j] + (cmd1[i][j] - cmd2[i][j]) * t);
-      }
-      if (cmd1[i][0] === PathVerb.Conic) {
-        cmd.push(cmd1[i][cmd1[i].length - 1]);
-      }
-      interpolated.push(cmd);
-    }
+    cmd1.forEach((cmd, i) => {
+      const interpolatedCmd = [cmd[0]];
+      interpolated.push(interpolatedCmd);
+      cmd.forEach((c, j) => {
+        if (j === 0) {
+          return;
+        }
+        if (interpolatedCmd[0] === PathVerb.Conic && j === 5) {
+          interpolatedCmd.push(c);
+        } else {
+          const c2 = cmd2[i][j];
+          interpolatedCmd.push(c2 + (c - c2) * t);
+        }
+      });
+    });
     const path = this.CanvasKit.Path.MakeFromCmds(interpolated.flat());
     if (path === null) {
       return null;
@@ -340,17 +354,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     // throw new NotImplementedOnRNWeb();
     const cmd1 = this.toCmds();
     const cmd2 = path2.toCmds();
-    if (cmd1.length !== cmd2.length) {
-      return false;
-    }
-    for (let i = 0; i < cmd1.length; i++) {
-      if (cmd1[i][0] !== cmd2[i][0]) {
-        return false;
-      } else if (cmd1[i][0] === PathVerb.Conic && cmd1[i][5] !== cmd2[i][5]) {
-        return false;
-      }
-    }
-    return true;
+    return areCmdsInterpolatable(cmd1, cmd2);
   }
 
   toCmds() {

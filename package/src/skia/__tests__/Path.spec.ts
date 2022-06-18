@@ -92,6 +92,8 @@ describe("Path", () => {
     expect(p1.isInterpolatable(p2)).toBe(true);
     p3 = p1.interpolate(p2, 0.5)!;
     expect(p3).toBeTruthy();
+    console.log(p1.toCmds());
+    console.log(p2.toCmds());
     console.log(p3.toCmds());
     expect(p3.toCmds()).toEqual([
       [PathVerb.Move, 4, 3],
