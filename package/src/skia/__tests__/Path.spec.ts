@@ -33,6 +33,20 @@ describe("Path", () => {
     processResult(surface, "snapshots/path/logo.png");
   });
 
+  it("Should test that path are interpolatable as specificed in fiddle", () => {
+    // https://fiddle.skia.org/c/@Path_isInterpolatable
+    const { Skia } = setupSkia();
+    const path = Skia.Path.Make();
+    const path2 = Skia.Path.Make();
+    path.moveTo(20, 20);
+    path.lineTo(40, 40);
+    path.lineTo(20, 20);
+    path.lineTo(40, 40);
+    path.close();
+    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    expect(path.isInterpolatable(path2)).toBe(true);
+  });
+
   it("Should test that path interpolation works as specified in the Skia test suite", () => {
     // https://github.com/google/skia/blob/1f193df9b393d50da39570dab77a0bb5d28ec8ef/tests/PathTest.cpp
     const { Skia } = setupSkia();
