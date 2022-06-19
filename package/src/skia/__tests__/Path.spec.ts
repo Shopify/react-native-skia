@@ -3,6 +3,7 @@ import { interpolatePaths } from "../../animation/functions/interpolatePaths";
 import type { Skia, SkPath } from "../types";
 import { FillType, PathOp, PathVerb } from "../types";
 import { processResult } from "../../__tests__/setup";
+import { PaintStyle } from "../types/Paint/Paint";
 
 import { setupSkia } from "./setup";
 
@@ -276,5 +277,27 @@ describe("Path", () => {
     expect(path).toBeTruthy();
     // We output it in terse form, which is different than Wikipedia's version
     expect(path.toSVGString()).toEqual("M205 5L795 5L595 295L5 295L205 5Z");
+  });
+
+  it("should draw different interpolation states", () => {
+    const { Skia, surface, canvas } = setupSkia();
+    const paint = Skia.Paint();
+    paint.setAntiAlias(true);
+    paint.setStyle(PaintStyle.Stroke);
+    const path = Skia.Path.Make();
+    const path2 = Skia.Path.Make();
+    path.moveTo(20, 20);
+    path.lineTo(40, 40);
+    path.lineTo(20, 40);
+    path.lineTo(40, 20);
+    path.close();
+    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    for (let i = 0; i <= 1; i += 1 / 6) {
+      const interp = path.interpolate(path2, i)!;
+      expect(interp).toBeTruthy();
+      canvas.drawPath(interp, paint);
+      canvas.translate(30, 0);
+    }
+    processResult(surface, "snapshots/path/interpolate.png");
   });
 });
