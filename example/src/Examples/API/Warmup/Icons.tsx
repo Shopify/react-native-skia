@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import { Icon } from "./Icon";
 
-export const Warmup = () => {
+export const Icons = () => {
   return (
     <View
       style={{ flex: 1, margin: 16, flexDirection: "row", flexWrap: "wrap" }}

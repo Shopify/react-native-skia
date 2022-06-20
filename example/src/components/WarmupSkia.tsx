@@ -1,4 +1,5 @@
 import {
+  BlendMode,
   ClipOp,
   PaintStyle,
   Skia,
@@ -55,7 +56,11 @@ export const WarmupSkia = ({ children }: WarmupSkiaProps) => {
     p3.setStrokeWidth(10);
     const p4 = p3.copy();
     p4.setStrokeWidth(0.1); // hairline
-    const paints = [p1, p2, p3, p4];
+    const p5 = p3.copy();
+    p5.setColorFilter(
+      Skia.ColorFilter.MakeBlend(Skia.Color("lightblue"), BlendMode.SrcIn)
+    );
+    const paints = [p1, p2, p3, p4, p5];
 
     for (let i = 0; i < paths.length; i++) {
       canvas.save();
@@ -96,7 +101,7 @@ export const WarmupSkia = ({ children }: WarmupSkiaProps) => {
     setReady(true);
   });
   if (ready) {
-    return children;
+    return <>{children}</>;
   }
   return <SkiaView style={{ width, height }} onDraw={onDraw} />;
 };
