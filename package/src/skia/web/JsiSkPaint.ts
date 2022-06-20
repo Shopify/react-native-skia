@@ -1,6 +1,7 @@
 import type { CanvasKit, Paint } from "canvaskit-wasm";
 
 import type {
+  StrokeJoin,
   BlendMode,
   SkColor,
   SkColorFilter,
@@ -8,7 +9,6 @@ import type {
   SkPaint,
   SkShader,
   StrokeCap,
-  StrokeJoin,
   PaintStyle,
   SkMaskFilter,
   SkPathEffect,
