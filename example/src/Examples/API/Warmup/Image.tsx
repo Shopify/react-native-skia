@@ -17,6 +17,12 @@ import {
 const loadImage = (source: ReturnType<typeof require>) =>
   Skia.Data.fromURI(RNImage.resolveAssetSource(source).uri);
 
+export const loadImageWeb = (source: ReturnType<typeof require>) => {
+  return Skia.Image.MakeImageFromEncoded(
+    Skia.Data.fromBase64(source.substring(source.indexOf(",") + 1))
+  )!;
+};
+
 const images: { [name: string]: null | SKImageModel } = {
   zurich: null,
   zurich2: null,
