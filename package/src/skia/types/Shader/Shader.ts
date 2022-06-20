@@ -40,11 +40,9 @@ export const processUniforms = (
       if (value === undefined) {
         throw new Error(`No value specified for uniform ${name}`);
       }
-      let result: number | readonly number[];
-      if (Array.isArray(value)) {
-        result = value.flatMap(processValue);
-      }
-      result = processValue(value as UniformValue);
+      const result = Array.isArray(value)
+        ? value.flatMap(processValue)
+        : processValue(value as UniformValue);
       builder?.setUniform(name, typeof result === "number" ? [result] : result);
       return result;
     });
