@@ -22,11 +22,12 @@ import {
   Severance,
 } from "./Examples";
 import { HomeScreen } from "./Home";
+import { WarmupSkia } from "./components/WarmupSkia";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
   return (
-    <>
+    <WarmupSkia>
       <StatusBar hidden />
       <NavigationContainer>
         <Stack.Navigator>
@@ -97,7 +98,7 @@ const App = () => {
           <Stack.Screen name="Performance" component={PerformanceDrawingTest} />
         </Stack.Navigator>
       </NavigationContainer>
-    </>
+    </WarmupSkia>
   );
 };
 
