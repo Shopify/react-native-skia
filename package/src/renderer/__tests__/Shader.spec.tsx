@@ -37,6 +37,21 @@ half4 main(vec2 uv) {
   return hsv2rgb(vec3(theta/TAU, quadraticIn(mag/r), 1.0));
 }`;
 
+const spiral = `
+uniform float scale;
+uniform int2   center;
+uniform float4 colors[2];
+half4 main(float2 p) {
+    float2 pp = p - float2(center);
+    float radius = sqrt(dot(pp, pp));
+    radius = sqrt(radius);
+    float angle = atan(pp.y / pp.x);
+    float t = (angle + 3.1415926/2) / (3.1415926);
+    t += radius * scale;
+    t = fract(t);
+    return half4(mix(colors[0], colors[1], t));
+}`;
+
 describe("Test Shader component", () => {
   it("should flatten shader uniforms", () => {
     const source = Skia.RuntimeEffect.Make(bilinearInterpolation)!;
@@ -55,7 +70,7 @@ describe("Test Shader component", () => {
         <Fill />
       </Group>
     );
-    processResult(surface, "snapshots/shaders/bilinear-interpolation.png");
+    processResult(surface, "snapshots/shader/bilinear-interpolation.png");
   });
   it("should display a hue wheel", () => {
     const source = Skia.RuntimeEffect.Make(hue)!;
@@ -72,6 +87,27 @@ describe("Test Shader component", () => {
         <Fill />
       </Group>
     );
-    processResult(surface, "snapshots/shaders/hue.png");
+    processResult(surface, "snapshots/shader/hue.png");
+  });
+  it("should display a green and red spiral", () => {
+    const source = Skia.RuntimeEffect.Make(spiral)!;
+    expect(source).toBeTruthy();
+    const surface = drawOnNode(
+      <Group>
+        <Shader
+          source={source}
+          uniforms={{
+            scale: 0.3,
+            center: Skia.Point(width / 2, height / 2),
+            colors: [
+              [1, 0, 0, 1], // red
+              [0, 1, 0, 1], // green
+            ],
+          }}
+        />
+        <Fill />
+      </Group>
+    );
+    processResult(surface, "snapshots/runtime-effects/spiral.png");
   });
 });
