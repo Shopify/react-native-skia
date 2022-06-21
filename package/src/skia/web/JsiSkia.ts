@@ -27,7 +27,7 @@ import { JsiSkColorFilterFactory } from "./JsiSkColorFilterFactory";
 import { JsiSkTypefaceFactory } from "./JsiSkTypefaceFactory";
 import { JsiSkMaskFilterFactory } from "./JsiSkMaskFilterFactory";
 import { JsiSkRuntimeEffectFactory } from "./JsiSkRuntimeEffectFactory";
-import { JsiSkImageFilterFactory } from "./JsiImageFilterFactory";
+import { JsiSkImageFilterFactory } from "./JsiSkImageFilterFactory";
 import { JsiSkShaderFactory } from "./JsiSkShaderFactory";
 import { JsiSkPathEffectFactory } from "./JsiSkPathEffectFactory";
 import { JsiSkDataFactory } from "./JsiSkDataFactory";

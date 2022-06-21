@@ -53,6 +53,11 @@ namespace RNSkia {
     }
 
     void RNSkDrawViewImpl::surfaceSizeChanged(int width, int height) {
+        if(width == 0 && height == 0) {
+            // Setting width/height to zero is nothing we need to care about when
+            // it comes to invalidating the surface.
+            return;
+        }
         _scaledWidth = width;
         _scaledHeight = height;
 

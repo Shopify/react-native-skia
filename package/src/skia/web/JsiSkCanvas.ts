@@ -1,4 +1,4 @@
-import type { Canvas, Image, Paint, CanvasKit } from "canvaskit-wasm";
+import type { Canvas, Image, CanvasKit, Paint } from "canvaskit-wasm";
 
 import type {
   BlendMode,
@@ -250,7 +250,7 @@ export class JsiSkCanvas
   ) {
     this.ref.drawGlyphs(
       glyphs,
-      toValue(positions),
+      positions.map((p) => [p.x, p.y]).flat(),
       x,
       y,
       toValue(font),
