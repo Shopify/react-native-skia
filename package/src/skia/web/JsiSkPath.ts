@@ -17,6 +17,29 @@ import { ckEnum, HostObject, optEnum, toValue } from "./Host";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 
+const CommandCount = {
+  [PathVerb.Move]: 3,
+  [PathVerb.Line]: 3,
+  [PathVerb.Quad]: 5,
+  [PathVerb.Conic]: 6,
+  [PathVerb.Cubic]: 7,
+  [PathVerb.Close]: 1,
+};
+
+const areCmdsInterpolatable = (cmd1: PathCommand[], cmd2: PathCommand[]) => {
+  if (cmd1.length !== cmd2.length) {
+    return false;
+  }
+  for (let i = 0; i < cmd1.length; i++) {
+    if (cmd1[i][0] !== cmd2[i][0]) {
+      return false;
+    } else if (cmd1[i][0] === PathVerb.Conic && cmd1[i][5] !== cmd2[i][5]) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   constructor(CanvasKit: CanvasKit, ref: Path) {
     super(CanvasKit, ref, "Path");
@@ -300,20 +323,25 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     // throw new NotImplementedOnRNWeb();
     const cmd1 = this.toCmds();
     const cmd2 = end.toCmds();
-    if (cmd1.length !== cmd2.length) {
+    if (!areCmdsInterpolatable(cmd1, cmd2)) {
       return null;
     }
     const interpolated: PathCommand[] = [];
-    for (let i = 0; i < cmd1.length; i++) {
-      if (cmd1[i][0] !== cmd2[i][0]) {
-        return null;
-      }
-      const cmd: PathCommand = [cmd1[i][0]];
-      for (let j = 1; j < cmd1[i].length; j++) {
-        cmd.push(cmd2[i][j] + (cmd1[i][j] - cmd2[i][j]) * t);
-      }
-      interpolated.push(cmd);
-    }
+    cmd1.forEach((cmd, i) => {
+      const interpolatedCmd = [cmd[0]];
+      interpolated.push(interpolatedCmd);
+      cmd.forEach((c, j) => {
+        if (j === 0) {
+          return;
+        }
+        if (interpolatedCmd[0] === PathVerb.Conic && j === 5) {
+          interpolatedCmd.push(c);
+        } else {
+          const c2 = cmd2[i][j];
+          interpolatedCmd.push(c2 + (c - c2) * t);
+        }
+      });
+    });
     const path = this.CanvasKit.Path.MakeFromCmds(interpolated.flat());
     if (path === null) {
       return null;
@@ -326,44 +354,33 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     // throw new NotImplementedOnRNWeb();
     const cmd1 = this.toCmds();
     const cmd2 = path2.toCmds();
-    if (cmd1.length !== cmd2.length) {
-      return false;
-    }
-    for (let i = 0; i < cmd1.length; i++) {
-      if (cmd1[i][0] !== cmd2[i][0]) {
-        return false;
-      }
-    }
-    return true;
+    return areCmdsInterpolatable(cmd1, cmd2);
   }
 
-  toCmds(): PathCommand[] {
-    const cmds: PathCommand[] = [];
-    let cmd = [];
-    const flatCmds = this.ref.toCmds();
-    const CmdCount = {
-      [PathVerb.Move]: 3,
-      [PathVerb.Line]: 3,
-      [PathVerb.Quad]: 5,
-      [PathVerb.Conic]: 6,
-      [PathVerb.Cubic]: 7,
-      [PathVerb.Close]: 0,
-      [PathVerb.Done]: 0,
-    };
-    for (let i = 0; i < flatCmds.length; i++) {
-      if (cmd.length === 0 && flatCmds[i] === PathVerb.Done) {
-        break;
+  toCmds() {
+    const cmds = this.ref.toCmds();
+    const result = cmds.reduce<PathCommand[]>((acc, cmd, i) => {
+      if (i === 0) {
+        acc.push([]);
       }
-      const c = flatCmds[i];
-      cmd.push(c);
-      if (cmd.length > 1) {
-        const length = CmdCount[cmd[0] as PathVerb];
-        if (cmd.length === length) {
-          cmds.push(cmd);
-          cmd = [];
+      const current = acc[acc.length - 1];
+      if (current.length === 0) {
+        current.push(cmd);
+        const length = CommandCount[current[0] as PathVerb];
+        if (current.length === length && i !== cmds.length - 1) {
+          acc.push([]);
+        }
+      } else {
+        const length = CommandCount[current[0] as PathVerb];
+        if (current.length < length) {
+          current.push(cmd);
+        }
+        if (current.length === length && i !== cmds.length - 1) {
+          acc.push([]);
         }
       }
-    }
-    return cmds.concat(cmd);
+      return acc;
+    }, []);
+    return result;
   }
 }

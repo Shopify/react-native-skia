@@ -44,7 +44,6 @@ export enum PathVerb {
   Conic,
   Cubic,
   Close,
-  Done,
 }
 
 export type PathCommand = number[];

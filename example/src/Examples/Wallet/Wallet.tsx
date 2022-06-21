@@ -27,8 +27,9 @@ const styles = StyleSheet.create({
 });
 
 export const Wallet = () => {
-  const { width } = useWindowDimensions();
-  const height = width / 2;
+  const window = useWindowDimensions();
+  const { width } = window;
+  const height = Math.min(window.width, window.height) / 2;
   const translateY = height + PADDING;
   const graphs = useMemo(() => getGraph(width, height), [width, height]);
   // animation value to transition from one graph to the next
@@ -48,7 +49,7 @@ export const Wallet = () => {
   // x and y values of the cursor
   const x = useValue(0);
   const y = useDerivedValue(
-    () => getYForX(path.current.toCmds(), x.current)!,
+    () => getYForX(path.current.toCmds(), x.current),
     [x, path]
   );
   const onTouch = useGraphTouchHandler(x, y, width, height);

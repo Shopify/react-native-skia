@@ -123,13 +123,15 @@ interface Cubic {
 }
 
 export const selectCurve = (cmds: PathCommand[], x: number): Cubic | null => {
+  let from: Vector = vec(0, 0);
   for (let i = 0; i < cmds.length; i++) {
     const cmd = cmds[i];
-    if (cmd[0] === PathVerb.Cubic) {
-      const from = vec(cmd[1], cmd[2]);
-      const to = vec(cmd[7], cmd[8]);
-      const c1 = vec(cmd[3], cmd[4]);
-      const c2 = vec(cmd[5], cmd[6]);
+    if (cmd[0] === PathVerb.Move) {
+      from = vec(cmd[1], cmd[2]);
+    } else if (cmd[0] === PathVerb.Cubic) {
+      const c1 = vec(cmd[1], cmd[2]);
+      const c2 = vec(cmd[3], cmd[4]);
+      const to = vec(cmd[5], cmd[6]);
       if (x >= from.x && x <= to.x) {
         return {
           from,
@@ -138,6 +140,7 @@ export const selectCurve = (cmds: PathCommand[], x: number): Cubic | null => {
           to,
         };
       }
+      from = to;
     }
   }
   return null;
@@ -146,7 +149,7 @@ export const selectCurve = (cmds: PathCommand[], x: number): Cubic | null => {
 export const getYForX = (cmds: PathCommand[], x: number, precision = 2) => {
   const c = selectCurve(cmds, x);
   if (c === null) {
-    return null;
+    return cmds[1][6];
   }
   return cubicBezierYForX(x, c.from, c.c1, c.c2, c.to, precision);
 };
