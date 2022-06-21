@@ -1,3 +1,4 @@
+/*global btoa, atob*/
 import type { CanvasKit, Image } from "canvaskit-wasm";
 
 import type {
@@ -10,7 +11,8 @@ import type {
   TileMode,
 } from "../types";
 
-import { ckEnum, HostObject } from "./Host";
+import { ckEnum, HostObject, toValue } from "./Host";
+import { JsiSkShader } from "./JsiSkShader";
 
 export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   constructor(CanvasKit: CanvasKit, ref: Image) {
@@ -26,26 +28,44 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   }
 
   makeShaderOptions(
-    _tx: TileMode,
-    _ty: TileMode,
-    _fm: FilterMode,
-    _mm: MipmapMode,
-    _localMatrix?: SkMatrix
+    tx: TileMode,
+    ty: TileMode,
+    fm: FilterMode,
+    mm: MipmapMode,
+    localMatrix?: SkMatrix
   ): SkShader {
-    throw new Error("Not implemented yet");
+    return new JsiSkShader(
+      this.CanvasKit,
+      this.ref.makeShaderOptions(
+        ckEnum(tx),
+        ckEnum(ty),
+        ckEnum(fm),
+        ckEnum(mm),
+        localMatrix ? toValue(localMatrix) : undefined
+      )
+    );
   }
 
   makeShaderCubic(
-    _tx: TileMode,
-    _ty: TileMode,
-    _B: number,
-    _C: number,
-    _localMatrix?: SkMatrix
+    tx: TileMode,
+    ty: TileMode,
+    B: number,
+    C: number,
+    localMatrix?: SkMatrix
   ): SkShader {
-    throw new Error("Not implemented yet");
+    return new JsiSkShader(
+      this.CanvasKit,
+      this.ref.makeShaderCubic(
+        ckEnum(tx),
+        ckEnum(ty),
+        B,
+        C,
+        localMatrix ? toValue(localMatrix) : undefined
+      )
+    );
   }
 
-  encodeToBytes(fmt?: ImageFormat, quality?: number): Uint8Array {
+  encodeToBytes(fmt?: ImageFormat, quality?: number) {
     let result: Uint8Array | null;
     if (fmt && quality) {
       result = this.ref.encodeToBytes(ckEnum(fmt), quality);
@@ -60,7 +80,8 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return result;
   }
 
-  encodeToBase64(_fmt?: ImageFormat, _quality?: number): string {
-    throw new Error("Not implemented yet");
+  encodeToBase64(fmt?: ImageFormat, quality?: number) {
+    const bytes = this.encodeToBytes(fmt, quality);
+    return btoa(String.fromCharCode(...bytes));
   }
 }
