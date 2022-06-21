@@ -60,7 +60,6 @@ const fontLoaderConfiguration = {
 };
 
 module.exports = {
-  experiments: { asyncWebAssembly: true },
   entry: {
     app: path.join(__dirname, "index.web.js"),
   },
