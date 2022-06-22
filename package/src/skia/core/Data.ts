@@ -24,6 +24,7 @@ const factoryWrapper = <T>(
     return factoryResult;
   }
 };
+
 const loadDataCollection = <T>(
   sources: DataSource[],
   factory: (data: SkData) => T,
@@ -100,7 +101,8 @@ export const useDataCollection = <T>(
 ) =>
   useLoading(
     sources,
-    loadDataCollection.bind(null, sources, factory, onError),
+    loadDataCollection.bind(null, sources, factory, onError, deps),
+    onError,
     deps
   );
 
