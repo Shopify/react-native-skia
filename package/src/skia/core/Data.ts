@@ -29,29 +29,14 @@ const loadDataCollection = <T>(
   sources: DataSource[],
   factory: (data: SkData) => T,
   onError?: (err: Error) => void
-) => {
-  const bytesOrURIs = sources.map((source) => {
-    if (source instanceof Uint8Array) {
-      return source;
-    }
-    return typeof source === "string" ? source : resolveAsset(source);
-  });
-  return Promise.all(
-    bytesOrURIs.map((bytesOrURI) =>
-      bytesOrURI instanceof Uint8Array
-        ? factory(Skia.Data.fromBytes(bytesOrURI))
-        : Skia.Data.fromURI(bytesOrURI).then((data) =>
-            factoryWrapper(data, factory, onError)
-          )
-    )
-  );
-};
+): Promise<(T | null)[]> =>
+  Promise.all(sources.map((source) => loadData(source, factory, onError)));
 
 const loadData = <T>(
   source: DataSource,
   factory: (data: SkData) => T,
   onError?: (err: Error) => void
-) => {
+): Promise<T | null> => {
   if (source instanceof Uint8Array) {
     return new Promise((resolve) =>
       resolve(factoryWrapper(Skia.Data.fromBytes(source), factory, onError))
@@ -69,7 +54,6 @@ type Source = DataSource | null | undefined;
 const useLoading = <T>(
   source: Source,
   loader: () => Promise<T | null>,
-  onError?: (err: Error) => void,
   deps: DependencyList = []
 ) => {
   const [data, setData] = useState<T | null>(null);
@@ -77,14 +61,7 @@ const useLoading = <T>(
   useEffect(() => {
     if (prevSourceRef.current !== source) {
       prevSourceRef.current = source;
-      loader().then((result) => {
-        if (result === null) {
-          onError && onError(new Error("Could not load data"));
-          setData(null);
-        } else {
-          setData(result);
-        }
-      });
+      loader().then(setData);
     } else {
       setData(null);
     }
@@ -101,8 +78,7 @@ export const useDataCollection = <T>(
 ) =>
   useLoading(
     sources,
-    loadDataCollection.bind(null, sources, factory, onError, deps),
-    onError,
+    () => loadDataCollection(sources, factory, onError),
     deps
   );
 
@@ -111,7 +87,7 @@ export const useRawData = <T>(
   factory: (data: SkData) => T,
   onError?: (err: Error) => void,
   deps?: DependencyList
-) => useLoading(source, loadData.bind(null, source, factory, onError, deps));
+) => useLoading(source, () => loadData(source, factory, onError), deps);
 
 const identity = (data: SkData) => data;
 
