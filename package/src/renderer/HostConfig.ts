@@ -100,7 +100,7 @@ const appendNode = (parent: Node, child: Node) => {
 const removeNode = (parent: Node, child: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
-  parent.children.splice(index, 1);
+  removeNodeSafely(parent, index, 1);
   child.depMgr.unSubscribeNode(child);
   // unsubscribe to all children as well
   for (const c of child.children) {
@@ -108,11 +108,18 @@ const removeNode = (parent: Node, child: Node) => {
   }
 };
 
+const removeNodeSafely = (node: Node, start: number, count?: number) => {
+  const toDelete = node.children.splice(start, count);
+  toDelete.forEach((n) => {
+    n.parent = undefined;
+  });
+};
+
 const insertBefore = (parent: Node, child: Node, before: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   if (index !== -1) {
-    parent.children.splice(index, 1);
+    removeNodeSafely(parent, index, 1);
   }
   const beforeIndex = parent.children.indexOf(before);
   parent.children.splice(beforeIndex, 0, child);
@@ -278,7 +285,7 @@ export const skHostConfig: SkiaHostConfig = {
 
   clearContainer: (container) => {
     debug("clearContainer");
-    container.children.splice(0);
+    removeNodeSafely(container, 0);
   },
 
   preparePortalMount: () => {
