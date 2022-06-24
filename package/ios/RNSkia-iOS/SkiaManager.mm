@@ -34,7 +34,7 @@
     if (cxxBridge.runtime) {
       
       auto callInvoker = bridge.jsCallInvoker;
-      jsi::Runtime* jsRuntime = (jsi::Runtime*)cxxBridge.runtime;
+      facebook::jsi::Runtime* jsRuntime = (facebook::jsi::Runtime*)cxxBridge.runtime;
       
       // Create platform context
       _platformContext = std::make_shared<RNSkia::PlatformContext>(jsRuntime, callInvoker);
