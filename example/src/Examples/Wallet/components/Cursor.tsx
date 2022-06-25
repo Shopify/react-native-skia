@@ -3,7 +3,7 @@ import {
   interpolateColors,
   Circle,
   Group,
-  useDerivedValue,
+  useDerivedSkiaValue,
   Paint,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -17,7 +17,7 @@ interface CursorProps {
 }
 
 export const Cursor = ({ x, y, width }: CursorProps) => {
-  const color = useDerivedValue(
+  const color = useDerivedSkiaValue(
     () =>
       interpolateColors(
         x.current / width,
@@ -26,7 +26,7 @@ export const Cursor = ({ x, y, width }: CursorProps) => {
       ),
     [x]
   );
-  const transform = useDerivedValue(
+  const transform = useDerivedSkiaValue(
     () => [{ translateX: x.current }, { translateY: y.current }],
     [x, y]
   );

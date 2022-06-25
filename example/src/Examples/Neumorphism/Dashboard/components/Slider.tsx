@@ -9,7 +9,7 @@ import {
   translate,
   LinearGradient,
   vec,
-  useDerivedValue,
+  useDerivedSkiaValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -22,8 +22,8 @@ interface SliderProps {
 }
 
 export const Slider = ({ x, y, progress }: SliderProps) => {
-  const width = useDerivedValue(() => progress.current * 192, [progress]);
-  const transform = useDerivedValue(
+  const width = useDerivedSkiaValue(() => progress.current * 192, [progress]);
+  const transform = useDerivedSkiaValue(
     () => [{ translateX: progress.current * 192 }],
     [progress]
   );
