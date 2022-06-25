@@ -50,11 +50,14 @@ This value is a Skia Value that is derived from other Skia Values.
 It takes one or more existing values and a function that will calculate the new value based on the input. The function will be evaluated every time the input value changes.
 
 ```tsx twoslash
-import { useValue, useDerivedValue } from "@shopify/react-native-skia";
+import { useValue, useDerivedSkiaValue } from "@shopify/react-native-skia";
 
 const radius = useValue(100);
 const theta = useValue(Math.PI);
-const length = useDerivedValue(() => radius.current * theta.current, [radius, theta]);
+const length = useDerivedSkiaValue(
+  () => radius.current * theta.current,
+  [radius, theta]
+);
 console.log(length.current); // 314.1592653589793
 ```
 
@@ -68,19 +71,16 @@ import {
   useClockValue,
   Canvas,
   Circle,
-  useDerivedValue,
+  useDerivedSkiaValue,
 } from "@shopify/react-native-skia";
 
 const interval = 3000;
 
 const Demo = () => {
   const clock = useClockValue();
-  const opacity = useDerivedValue(
-    () => {
-      return (clock.current % interval) / interval;
-    },
-    [clock]
-  );
+  const opacity = useDerivedSkiaValue(() => {
+    return (clock.current % interval) / interval;
+  }, [clock]);
   return (
     <Canvas style={{ flex: 1 }}>
       <Circle r={100} cx={100} cy={100} color="black" opacity={opacity} />
@@ -93,7 +93,6 @@ const Demo = () => {
 
 The `useCanvas` hook returns a `size` value that updates every time the canvas size updates.
 On the first frame, the size is zero.
-
 
 :::caution
 
@@ -110,14 +109,14 @@ import {
   Rect,
   rect,
   useCanvas,
-  useDerivedValue,
+  useDerivedSkiaValue,
 } from "@shopify/react-native-skia";
 
 const MyComp = () => {
   // 💚 useCanvasSize() can safely be used here
-  const {size} = useCanvas();
+  const { size } = useCanvas();
   // 💚 canvas is a regular skia value that can be used for animations
-  const rct = useDerivedValue(() => {
+  const rct = useDerivedSkiaValue(() => {
     return rect(0, 0, size.current.width, size.current.height / 2);
   }, [size]);
   return (
@@ -125,7 +124,13 @@ const MyComp = () => {
       <Fill color="magenta" />
       <Rect color="cyan" rect={rct} />
       {/* ❌ this won't update since canvas is a skia value */}
-      <Rect x={0} y={0} width={size.current.width} height={size.current.height/2} color="red" />
+      <Rect
+        x={0}
+        y={0}
+        width={size.current.width}
+        height={size.current.height / 2}
+        color="red"
+      />
     </Group>
   );
 };
@@ -138,9 +143,7 @@ const Example = () => {
     </Canvas>
   );
 };
-
 ```
-
 
 ## Value Effect
 
@@ -149,7 +152,7 @@ In the example below we execute a callback on every frame (every time the clock 
 
 ```tsx twoslash
 import React, { useEffect } from "react";
-import {Animated} from "react-native";
+import { Animated } from "react-native";
 import {
   Canvas,
   Rect,
@@ -157,7 +160,7 @@ import {
   useClockValue,
   useValueEffect,
   useValue,
-  interpolate
+  interpolate,
 } from "@shopify/react-native-skia";
 
 export const Demo = () => {
