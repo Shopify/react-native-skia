@@ -44,17 +44,17 @@ const actualValue = progress.current; // actualValue is now {x: 100, y: 100}
 
 There are a few more value types in the library that will be described below.
 
-## Derived value
+## Computed value
 
-This value is a Skia Value that is derived from other Skia Values.
+This value is a Skia Value that is computed from other Skia Values.
 It takes one or more existing values and a function that will calculate the new value based on the input. The function will be evaluated every time the input value changes.
 
 ```tsx twoslash
-import { useValue, useDerivedValue } from "@shopify/react-native-skia";
+import { useValue, useComputedValue } from "@shopify/react-native-skia";
 
 const radius = useValue(100);
 const theta = useValue(Math.PI);
-const length = useDerivedValue(() => radius.current * theta.current, [radius, theta]);
+const length = useComputedValue(() => radius.current * theta.current, [radius, theta]);
 console.log(length.current); // 314.1592653589793
 ```
 
@@ -68,14 +68,14 @@ import {
   useClockValue,
   Canvas,
   Circle,
-  useDerivedValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 
 const interval = 3000;
 
 const Demo = () => {
   const clock = useClockValue();
-  const opacity = useDerivedValue(
+  const opacity = useComputedValue(
     () => {
       return (clock.current % interval) / interval;
     },
@@ -110,14 +110,14 @@ import {
   Rect,
   rect,
   useCanvas,
-  useDerivedValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 
 const MyComp = () => {
   // 💚 useCanvasSize() can safely be used here
   const {size} = useCanvas();
   // 💚 canvas is a regular skia value that can be used for animations
-  const rct = useDerivedValue(() => {
+  const rct = useComputedValue(() => {
     return rect(0, 0, size.current.width, size.current.height / 2);
   }, [size]);
   return (
