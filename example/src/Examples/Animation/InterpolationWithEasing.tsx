@@ -6,7 +6,7 @@ import {
   Easing,
   Fill,
   mix,
-  useDerivedValue,
+  useComputedValue,
   useLoop,
 } from "@shopify/react-native-skia";
 
@@ -20,12 +20,12 @@ export const InterpolationWithEasing = () => {
     easing: Easing.inOut(Easing.cubic),
   });
   // Animate position of circle
-  const position = useDerivedValue(
+  const position = useComputedValue(
     () => mix(progress.current, 10, width - (Size + Padding)),
     [progress]
   );
   // Animate radius of circle
-  const radius = useDerivedValue(() => 5 + progress.current * 55, [progress]);
+  const radius = useComputedValue(() => 5 + progress.current * 55, [progress]);
   return (
     <AnimationDemo title={"Interpolating value using an easing"}>
       <Canvas style={styles.canvas}>

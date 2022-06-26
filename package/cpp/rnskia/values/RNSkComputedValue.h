@@ -19,13 +19,13 @@ using namespace facebook;
   Creates a readonly value that depends on one or more other values. The derived value has a callback
   function that is used to calculate the new value when any of the dependencies change.
  */
-class RNSkDerivedValue : public RNSkReadonlyValue
+class RNSkComputedValue : public RNSkReadonlyValue
 {
 public:
-  RNSkDerivedValue(std::shared_ptr<RNSkPlatformContext> platformContext,
-                   jsi::Runtime &runtime,
-                   const jsi::Value *arguments,
-                   size_t count
+  RNSkComputedValue(std::shared_ptr<RNSkPlatformContext> platformContext,
+                    jsi::Runtime &runtime,
+                    const jsi::Value *arguments,
+                    size_t count
                    )
       : RNSkReadonlyValue(platformContext) {
     // Verify input
@@ -70,7 +70,7 @@ public:
       _unsubscribers.push_back(dep->addListener([weakSelf = weak_from_this()](jsi::Runtime& runtime) {
         auto self = weakSelf.lock();
         if(self) {
-          auto selfAsThis = std::dynamic_pointer_cast<RNSkDerivedValue>(self);
+          auto selfAsThis = std::dynamic_pointer_cast<RNSkComputedValue>(self);
           selfAsThis->dependencyUpdated(runtime);
         }
       }));
@@ -80,7 +80,7 @@ public:
     dependencyUpdated(runtime);
   }
   
-  virtual ~RNSkDerivedValue() {
+  virtual ~RNSkComputedValue() {
     // Unregister listeners
     for(const auto &unsubscribe: _unsubscribers) {
       unsubscribe();

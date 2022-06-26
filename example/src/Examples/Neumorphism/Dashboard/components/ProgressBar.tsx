@@ -13,7 +13,7 @@ import {
   SweepGradient,
   useFont,
   Text,
-  useDerivedValue,
+  useComputedValue,
   Box,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -34,7 +34,7 @@ const colors = ["#2FB8FF", "#9EECD9"];
 
 export const ProgressBar = ({ progress }: ProgressBarProps) => {
   const font = useFont(require("./SF-Mono-Semibold.otf"), 32);
-  const text = useDerivedValue(
+  const text = useComputedValue(
     () => `${Math.round(progress.current * 100)}°C`,
     [progress]
   );

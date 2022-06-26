@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import type { SkiaValue } from "@shopify/react-native-skia";
 import {
-  useDerivedValue,
+  useComputedValue,
   useLoop,
   BlurMask,
   vec,
@@ -32,7 +32,7 @@ const Ring = ({ index, progress }: RingProps) => {
   );
 
   const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useDerivedValue(() => {
+  const transform = useComputedValue(() => {
     const { x, y } = polar2Canvas(
       { theta, radius: progress.current * R },
       { x: 0, y: 0 }
@@ -60,7 +60,7 @@ export const Breathe = () => {
     easing: Easing.inOut(Easing.ease),
   });
 
-  const transform = useDerivedValue(
+  const transform = useComputedValue(
     () => [{ rotate: mix(progress.current, -Math.PI, 0) }],
     [progress]
   );

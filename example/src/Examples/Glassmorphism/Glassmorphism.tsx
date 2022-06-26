@@ -10,7 +10,7 @@ import {
   mix,
   BackdropFilter,
   Blur,
-  useDerivedValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 import { useWindowDimensions } from "react-native";
@@ -25,15 +25,15 @@ export const Glassmorphism = () => {
   );
 
   const progress = useLoop({ duration: 2000 });
-  const start = useDerivedValue(
+  const start = useComputedValue(
     () => sub(c, vec(0, mix(progress.current, r, r / 2))),
     [progress]
   );
-  const end = useDerivedValue(
+  const end = useComputedValue(
     () => add(c, vec(0, mix(progress.current, r, r / 2))),
     []
   );
-  const radius = useDerivedValue(
+  const radius = useComputedValue(
     () => mix(progress.current, r, r / 2),
     [progress]
   );
