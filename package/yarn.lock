@@ -2133,6 +2133,14 @@
   resolved "https://registry.yarnpkg.com/@react-native/polyfills/-/polyfills-2.0.0.tgz#4c40b74655c83982c8cf47530ee7dc13d957b6aa"
   integrity sha512-K0aGNn1TjalKj+65D7ycc1//H9roAQ51GJVk5ZJQFb2teECGmzd86bYDC0aYdbRf7gtovescq4Zt6FR0tgXiHQ==
 
+"@shopify/react-native-skia@^0.1.133":
+  version "0.1.133"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.133.tgz#9ed8e2fabdabdbd49ecb9ba2bf403a81bfec906d"
+  integrity sha512-H6s89wEkIWCQHfe3F8qjoEDsVErmkldWlsvLmg+YI60VcllEB8E00s8SUb+h4H//1oSvG/8T+YHLnJJ3qdc3sQ==
+  dependencies:
+    canvaskit-wasm "^0.34.0"
+    react-reconciler "^0.26.2"
+
 "@sideway/address@^4.1.0":
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/@sideway/address/-/address-4.1.2.tgz#811b84333a335739d3969cfc434736268170cad1"
@@ -2332,7 +2340,7 @@
     semver "^7.3.5"
     tsutils "^3.21.0"
 
-"@typescript-eslint/experimental-utils@4.33.0":
+"@typescript-eslint/experimental-utils@4.33.0", "@typescript-eslint/experimental-utils@^4.12.0":
   version "4.33.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/experimental-utils/-/experimental-utils-4.33.0.tgz#6f2a786a4209fa2222989e9380b5331b2810f7fd"
   integrity sha512-zeQjOoES5JFjTnAhI5QY7ZviczMzDptls15GFsI6jyUOq0kOf9+WonkhtlIhh0RgHRnqj5gdNxW5j1EvAyYg6Q==
@@ -3831,6 +3839,15 @@ eslint-plugin-react@^7.20.0:
     resolve "^2.0.0-next.3"
     semver "^6.3.0"
     string.prototype.matchall "^4.0.6"
+
+eslint-plugin-reanimated@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-reanimated/-/eslint-plugin-reanimated-1.2.5.tgz#cf45229c09d8a5f17d699f5c0d5423f176f0b2d5"
+  integrity sha512-2St6i4PkwgHrlDnZ0R5NEeqRwRF2yPdlbNsVnz3GYyzd+eABbnrwpYQ4RHzCnXG2GPjBsRX94YLzmXxjhNVr/A==
+  dependencies:
+    "@shopify/react-native-skia" "^0.1.133"
+    "@typescript-eslint/experimental-utils" "^4.12.0"
+    typescript "^4.1.3"
 
 eslint-scope@^5.1.1:
   version "5.1.1"
@@ -8055,6 +8072,11 @@ typescript@4.3.5:
   version "4.3.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.5.tgz#4d1c37cc16e893973c45a06886b7113234f119f4"
   integrity sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==
+
+typescript@^4.1.3:
+  version "4.7.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
+  integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
 
 typescript@^4.6.4:
   version "4.6.4"
