@@ -9,6 +9,10 @@ import {
   useComputedValue,
 } from "@shopify/react-native-skia";
 
+function foo() {
+  console.log("foo");
+}
+
 export const PerformanceDrawingTest = () => {
   const { width } = useWindowDimensions();
   const paint = useMemo(() => {
@@ -20,7 +24,6 @@ export const PerformanceDrawingTest = () => {
 
   const clock = useClockValue(); // Readonly Value
   const radius = useComputedValue(() => {
-    "worklet";
     const c = clock;
     const a = (c.current / 1000) % 1;
     return 1 * (1 - a) + 5 * a; // mix(a.current, 1, 10);

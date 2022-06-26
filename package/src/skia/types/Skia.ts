@@ -34,6 +34,9 @@ import type { Color, SkColor } from "./Color";
  */
 export interface Skia {
   Point: (x: number, y: number) => SkPoint;
+  /**
+   * @worklet
+   */
   XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
   RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;

@@ -184,7 +184,7 @@ export interface SkCanvas {
 
         @param rect   rectangle to draw
         @param paint  stroke or fill, blend, color, and so on, used to draw
-
+        @worklet
         example: https://fiddle.skia.org/c/@Canvas_drawRect
     */
   drawRect: (rect: SkRect, paint: SkPaint) => void;
