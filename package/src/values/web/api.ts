@@ -9,18 +9,18 @@ import type {
 
 import { RNSkAnimation } from "./RNSkAnimation";
 import { RNSkClockValue } from "./RNSkClockValue";
-import { RNSkDerivedValue } from "./RNSkDerivedValue";
+import { RNSkComputedValue } from "./RNSkComputedValue";
 import { RNSkValue } from "./RNSkValue";
 
 export const ValueApi: ISkiaValueApi = {
   createValue: function <T>(initialValue: T): SkiaMutableValue<T> {
     return new RNSkValue(initialValue);
   },
-  createDerivedValue: function <R>(
+  createComputedValue: function <R>(
     cb: () => R,
     values: SkiaValue<unknown>[]
   ): SkiaValue<R> {
-    return new RNSkDerivedValue(cb, values);
+    return new RNSkComputedValue(cb, values);
   },
   createClockValue: function (): SkiaClockValue {
     return new RNSkClockValue(requestAnimationFrame.bind(window));

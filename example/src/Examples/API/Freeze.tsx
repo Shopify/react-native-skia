@@ -9,7 +9,7 @@ import {
   Rect,
   Text,
   useClockValue,
-  useDerivedSkiaValue,
+  useComputedValue,
   rect,
   createDrawing,
   Skia,
@@ -23,7 +23,7 @@ export const FreezeExample = () => {
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 32);
   const [color, setColor] = useState("black");
   const clock = useClockValue();
-  const transform = useDerivedSkiaValue(
+  const transform = useComputedValue(
     () => [{ translateY: 100 }, { rotate: (Math.PI * clock.current) / 4000 }],
     [clock]
   );

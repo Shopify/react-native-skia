@@ -4,7 +4,7 @@ import {
   Canvas,
   useClockValue,
   vec,
-  useDerivedSkiaValue,
+  useComputedValue,
   Vertices,
   useImage,
   Skia,
@@ -52,7 +52,7 @@ export const Demo = () => {
   const oslo = useImage(require("../../assets/oslo.jpg"));
   const clock = useClockValue();
 
-  const vertices = useDerivedSkiaValue(
+  const vertices = useComputedValue(
     () =>
       defaultVertices.map((vertex, i) => {
         if (isEdge(vertex, window)) {

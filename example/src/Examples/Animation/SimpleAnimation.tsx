@@ -4,7 +4,7 @@ import {
   Canvas,
   Fill,
   Rect,
-  useDerivedSkiaValue,
+  useComputedValue,
   useClockValue,
 } from "@shopify/react-native-skia";
 
@@ -15,12 +15,12 @@ export const SimpleAnimation = () => {
   // Clock for driving the animation
   const clock = useClockValue();
   // Normalize the clock value to a value between 0 and 1
-  const normalized = useDerivedSkiaValue(
+  const normalized = useComputedValue(
     () => (clock.current / 1000) % 1.0,
     [clock]
   );
   // Create a rect as a derived value
-  const rect = useDerivedSkiaValue(
+  const rect = useComputedValue(
     () => ({ x: 0, y: 10, width: normalized.current * width, height: Size }),
     [normalized]
   );

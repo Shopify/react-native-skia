@@ -10,7 +10,7 @@ import {
   LinearGradient,
   Paint,
   Text,
-  useDerivedSkiaValue,
+  useComputedValue,
   runDecay,
   useFont,
 } from "@shopify/react-native-skia";
@@ -53,7 +53,7 @@ export const Glassmorphism = () => {
       runDecay(y, { velocity: velocityY });
     },
   });
-  const transform = useDerivedSkiaValue(
+  const transform = useComputedValue(
     () => [{ translateY: x.current }, { translateX: y.current }],
     [x, y]
   );

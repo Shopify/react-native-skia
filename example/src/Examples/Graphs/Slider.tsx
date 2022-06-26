@@ -2,7 +2,7 @@ import type { SkPath } from "@shopify/react-native-skia";
 import {
   useFont,
   Group,
-  useDerivedSkiaValue,
+  useComputedValue,
   useValue,
   Line,
   Canvas,
@@ -36,19 +36,19 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
       (touchPos.current = getPointAtPositionInPath(x, width, 60, path)),
   });
 
-  const label = useDerivedSkiaValue(
+  const label = useComputedValue(
     () =>
       "$ " + (touchPos.current ? (touchPos.current.y * -1).toFixed(2) : "-"),
     [touchPos]
   );
 
-  const textX = useDerivedSkiaValue(() => touchPos.current.x - 24, [touchPos]);
-  const textY = useDerivedSkiaValue(() => touchPos.current.y - 18, [touchPos]);
-  const lineP1 = useDerivedSkiaValue(
+  const textX = useComputedValue(() => touchPos.current.x - 24, [touchPos]);
+  const textY = useComputedValue(() => touchPos.current.y - 18, [touchPos]);
+  const lineP1 = useComputedValue(
     () => vec(touchPos.current.x, touchPos.current.y + 14),
     [touchPos]
   );
-  const lineP2 = useDerivedSkiaValue(
+  const lineP2 = useComputedValue(
     () => vec(touchPos.current.x, height),
     [touchPos]
   );

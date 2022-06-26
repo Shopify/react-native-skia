@@ -5,14 +5,14 @@ import {
   Rect,
   rect,
   useCanvas,
-  useDerivedSkiaValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef } from "react";
 import { View, Animated } from "react-native";
 
 const MyComp = () => {
   const { size } = useCanvas();
-  const rct = useDerivedSkiaValue(() => {
+  const rct = useComputedValue(() => {
     return rect(0, 0, size.current.width, size.current.height / 2);
   }, [size]);
   return (

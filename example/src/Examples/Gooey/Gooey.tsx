@@ -18,7 +18,7 @@ import {
   useTouchHandler,
   useSpring,
   Spring,
-  createDerivedValue,
+  createComputedValue,
 } from "@shopify/react-native-skia";
 import { useWindowDimensions } from "react-native";
 
@@ -74,7 +74,7 @@ export const Gooey = () => {
   const transforms = useMemo(
     () =>
       icons.map((icon) =>
-        createDerivedValue(
+        createComputedValue(
           () => translate(mixVector(progress.current, c, icon.dst)),
           [progress]
         )

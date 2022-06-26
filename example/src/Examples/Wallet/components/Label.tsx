@@ -3,7 +3,7 @@ import {
   useFont,
   interpolate,
   Text,
-  useDerivedSkiaValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -32,7 +32,7 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
   const subtitleFont = useFont(sfMono, 24);
   const translateY = height + PADDING;
   const AJUSTED_SIZE = height - PADDING * 2;
-  const text = useDerivedSkiaValue(() => {
+  const text = useComputedValue(() => {
     const graph = graphs[state.current.current];
     return format(
       interpolate(
@@ -43,7 +43,7 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
     );
   }, [y, state]);
   const subtitle = "+ $314,15";
-  const titleX = useDerivedSkiaValue(() => {
+  const titleX = useComputedValue(() => {
     if (!titleFont) {
       return 0;
     }

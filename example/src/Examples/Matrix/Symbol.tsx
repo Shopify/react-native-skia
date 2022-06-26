@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import type { SkiaValue, SkFont } from "@shopify/react-native-skia";
 import {
-  useDerivedSkiaValue,
+  useComputedValue,
   interpolateColors,
   vec,
   Glyphs,
@@ -36,17 +36,17 @@ export const Symbol = ({
   const x = i * symbol.width;
   const y = j * symbol.height;
 
-  const glyphs = useDerivedSkiaValue(() => {
+  const glyphs = useComputedValue(() => {
     const idx = offset.current + Math.floor(timestamp.current / range.current);
     return [{ id: symbols[idx % symbols.length], pos }];
   }, [timestamp]);
 
-  const opacity = useDerivedSkiaValue(() => {
+  const opacity = useComputedValue(() => {
     const idx = Math.round(timestamp.current / 100);
     return stream[(stream.length - j + idx) % stream.length];
   }, [timestamp]);
 
-  const color = useDerivedSkiaValue(
+  const color = useComputedValue(
     () =>
       interpolateColors(
         opacity.current,

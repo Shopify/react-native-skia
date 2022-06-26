@@ -8,7 +8,7 @@ import {
   LinearGradient,
   RoundedRect,
   runTiming,
-  useDerivedSkiaValue,
+  useComputedValue,
   vec,
   mix,
 } from "@shopify/react-native-skia";
@@ -53,7 +53,7 @@ interface SelectionProps {
 }
 
 export const Selection = ({ state, transition, graphs }: SelectionProps) => {
-  const transform = useDerivedSkiaValue(() => {
+  const transform = useComputedValue(() => {
     const { current, next } = state.current;
     return [
       {

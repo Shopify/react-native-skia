@@ -5,7 +5,7 @@ import {
   Easing,
   Fill,
   TextPath,
-  useDerivedSkiaValue,
+  useComputedValue,
   useLoop,
   useFont,
   Skia,
@@ -52,7 +52,7 @@ export const AnimateTextOnPath = () => {
 
   // Create a derived value that interpolates between
   // the start and end path
-  const path = useDerivedSkiaValue(
+  const path = useComputedValue(
     () => path1.interpolate(path2, progress.current)!,
     [progress]
   );

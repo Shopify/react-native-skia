@@ -16,7 +16,7 @@ import {
   TextPath,
   useFont,
   FitBox,
-  useDerivedSkiaValue,
+  useComputedValue,
   interpolatePaths,
   useTiming,
   Easing,
@@ -109,7 +109,7 @@ export const PathExample = () => {
   }, [circle, rect1]);
 
   const font = useFont(require("./Roboto-Regular.otf"), 32);
-  const path = useDerivedSkiaValue(
+  const path = useComputedValue(
     () =>
       interpolatePaths(
         progress.current,
