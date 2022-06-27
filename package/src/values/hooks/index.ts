@@ -1,4 +1,4 @@
 export * from "./useClockValue";
-export * from "./useDerivedValue";
+export * from "./useComputedValue";
 export * from "./useValue";
 export * from "./useValueEffect";

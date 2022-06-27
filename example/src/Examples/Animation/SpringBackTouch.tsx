@@ -7,7 +7,7 @@ import {
   Line,
   runSpring,
   Spring,
-  useDerivedValue,
+  useComputedValue,
   useTouchHandler,
   useValue,
 } from "@shopify/react-native-skia";
@@ -29,7 +29,7 @@ export const SpringBackTouchAnimation = () => {
   const offsetX = useValue(0);
   const offsetY = useValue(0);
 
-  const rectCenter = useDerivedValue(
+  const rectCenter = useComputedValue(
     () => ({ x: rectX.current + Size, y: rectY.current + Size }),
     [rectX, rectY]
   );

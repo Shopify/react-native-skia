@@ -7,7 +7,7 @@ import {
   Skia,
   Shader,
   mix,
-  useDerivedValue,
+  useComputedValue,
   Fill,
   useLoop,
 } from "@shopify/react-native-skia";
@@ -25,7 +25,7 @@ export const Filters = () => {
   const { width, height } = useWindowDimensions();
   const progress = useLoop({ duration: 1500 });
 
-  const uniforms = useDerivedValue(
+  const uniforms = useComputedValue(
     () => ({ r: mix(progress.current, 1, 100) }),
     [progress]
   );

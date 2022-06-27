@@ -1,5 +1,5 @@
 import type { PatchProps, SkiaValue } from "@shopify/react-native-skia";
-import { useDerivedValue, Path, Skia } from "@shopify/react-native-skia";
+import { useComputedValue, Path, Skia } from "@shopify/react-native-skia";
 import React from "react";
 
 interface CurvesProps {
@@ -7,7 +7,7 @@ interface CurvesProps {
 }
 
 export const Curves = ({ patch }: CurvesProps) => {
-  const path = useDerivedValue(() => {
+  const path = useComputedValue(() => {
     const [p1, p2, p3, p4] = patch.current;
     const d = Skia.Path.Make();
     d.moveTo(p1.pos.x, p1.pos.y)

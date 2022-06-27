@@ -4,7 +4,7 @@ import {
   Line,
   Paint,
   Circle,
-  useDerivedValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 
 import { symmetric } from "./Math";
@@ -16,17 +16,17 @@ interface CubicProps {
 }
 
 export const Cubic = ({ mesh, index, color }: CubicProps) => {
-  const c1 = useDerivedValue(() => mesh.current[index].c1, [mesh]);
-  const c1S = useDerivedValue(
+  const c1 = useComputedValue(() => mesh.current[index].c1, [mesh]);
+  const c1S = useComputedValue(
     () => symmetric(mesh.current[index].c1, mesh.current[index].pos),
     [mesh]
   );
-  const c2 = useDerivedValue(() => mesh.current[index].c2, [mesh]);
-  const c2S = useDerivedValue(
+  const c2 = useComputedValue(() => mesh.current[index].c2, [mesh]);
+  const c2S = useComputedValue(
     () => symmetric(mesh.current[index].c2, mesh.current[index].pos),
     [mesh]
   );
-  const pos = useDerivedValue(() => mesh.current[index].pos, [mesh]);
+  const pos = useComputedValue(() => mesh.current[index].pos, [mesh]);
   return (
     <>
       <Line strokeWidth={2} color="white" p1={c1} p2={c1S} />

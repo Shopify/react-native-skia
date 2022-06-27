@@ -10,7 +10,7 @@ import {
   Fill,
   Path,
   runTiming,
-  useDerivedValue,
+  useComputedValue,
   useValue,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
@@ -65,7 +65,7 @@ const TransitioningPath = ({
 
   // The animated path is derived from the current and next paths based
   // on the value of the progress.
-  const animatedPath = useDerivedValue(
+  const animatedPath = useComputedValue(
     () =>
       interpolatePaths(
         progress.current,

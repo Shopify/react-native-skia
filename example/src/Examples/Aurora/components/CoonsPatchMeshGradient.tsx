@@ -12,7 +12,7 @@ import {
   Patch,
   vec,
   useImage,
-  useDerivedValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 import { useWindowDimensions } from "react-native";
 import SimplexNoise from "simplex-noise";
@@ -42,7 +42,7 @@ const useRectToPatch = (
   mesh: SkiaValue<CubicBezierHandle[]>,
   indices: readonly number[]
 ) =>
-  useDerivedValue(() => {
+  useComputedValue(() => {
     const tl = mesh.current[indices[0]];
     const tr = mesh.current[indices[1]];
     const br = mesh.current[indices[2]];
@@ -131,7 +131,7 @@ export const CoonsPatchMeshGradient = ({
       })
     )
     .flat();
-  const meshNoise = useDerivedValue(() => {
+  const meshNoise = useComputedValue(() => {
     return defaultMesh.map((pt, i) => {
       if (isEdge(pt.pos, window)) {
         return pt;

@@ -8,7 +8,7 @@ import {
   rect,
   rrect,
   Circle,
-  useDerivedValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -26,11 +26,11 @@ interface SwitchProps {
 }
 
 export const Switch = ({ x, y, width, pressed }: SwitchProps) => {
-  const transform = useDerivedValue(
+  const transform = useComputedValue(
     () => [{ translateX: mix(pressed.current, 0, 24) }],
     [pressed]
   );
-  const r = useDerivedValue(() => mix(pressed.current, 0, 2), [pressed]);
+  const r = useComputedValue(() => mix(pressed.current, 0, 2), [pressed]);
   return (
     <FitBox src={rect(0, 0, 48, 24)} dst={rect(x, y, width, width * 2)}>
       <Box box={border} color={Theme.white1}>
