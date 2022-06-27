@@ -20,6 +20,5 @@
     "react/jsx-uses-react": "error",
     "react/react-in-jsx-scope": "error",
     "reanimated/js-function-in-worklet": 2
-
   }
 }
