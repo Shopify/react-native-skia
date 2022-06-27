@@ -9,7 +9,7 @@ import {
   FitBox,
   rect,
   RoundedRect,
-  useDerivedValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 
 import { Theme } from "./Theme";
@@ -27,7 +27,7 @@ interface ProgressBarProps {
 }
 
 export const ProgressBar = ({ progress, x, y, width }: ProgressBarProps) => {
-  const rct3 = useDerivedValue(
+  const rct3 = useComputedValue(
     () => rrect(rect(2, 2, mix(progress.current, 0, 116), 4), 12, 12),
     [progress]
   );

@@ -2,7 +2,7 @@ import type { DependencyList } from "react";
 
 import { RNSkReadonlyValue } from "./RNSkReadonlyValue";
 
-export class RNSkDerivedValue<T> extends RNSkReadonlyValue<T> {
+export class RNSkComputedValue<T> extends RNSkReadonlyValue<T> {
   constructor(callback: () => T, dependencies: DependencyList) {
     // Initialize dependencies - we can't call this yet, since
     // super if not called and it requires a start value to be set.

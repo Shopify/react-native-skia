@@ -5,7 +5,7 @@ import {
   rrect,
   Box,
   BoxShadow,
-  useDerivedValue,
+  useComputedValue,
   mix,
 } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
@@ -33,11 +33,11 @@ export const Button = ({
   pressed,
   children,
 }: ButtonProps) => {
-  const c1 = useDerivedValue(
+  const c1 = useComputedValue(
     () => `rgba(255, 255, 255, ${mix(pressed.current, 0, 0.7)})"`,
     [pressed]
   );
-  const c2 = useDerivedValue(
+  const c2 = useComputedValue(
     () => `rgba(174, 174, 192, ${mix(pressed.current, 0, 0.5)})"`,
     [pressed]
   );

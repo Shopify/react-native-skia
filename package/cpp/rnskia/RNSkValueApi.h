@@ -4,7 +4,7 @@
 #include <JsiHostObject.h>
 #include <RNSkPlatformContext.h>
 #include <RNSkValue.h>
-#include <RNSkDerivedValue.h>
+#include <RNSkComputedValue.h>
 #include <RNSkAnimation.h>
 #include <jsi/jsi.h>
 
@@ -33,13 +33,13 @@ public:
       std::make_shared<RNSkValue>(_platformContext, runtime, arguments, count));
   }
   
-  JSI_HOST_FUNCTION(createDerivedValue) {
+  JSI_HOST_FUNCTION(createComputedValue) {
     // Creation and initialization is done in two steps to be able to use weak references when setting
     // up dependencies - since weak_from_this needs our instance to be a shared_ptr before calling
     // weak_from_this().
-    auto derivedValue = std::make_shared<RNSkDerivedValue>(_platformContext, runtime, arguments, count);
-    derivedValue->initializeDependencies(runtime, arguments, count);
-    return jsi::Object::createFromHostObject(runtime, derivedValue);
+    auto computedValue = std::make_shared<RNSkComputedValue>(_platformContext, runtime, arguments, count);
+    computedValue->initializeDependencies(runtime, arguments, count);
+    return jsi::Object::createFromHostObject(runtime, computedValue);
   }
   
   JSI_HOST_FUNCTION(createAnimation) {
@@ -61,7 +61,7 @@ public:
   }
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValueApi, createValue),
-                       JSI_EXPORT_FUNC(RNSkValueApi, createDerivedValue),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createComputedValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createClockValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createAnimation))
 

@@ -46,10 +46,10 @@ export interface ISkiaValueApi {
    */
   createValue: <T>(initialValue: T) => SkiaMutableValue<T>;
   /**
-   * Creates a derived value. This is a calculated value that returns the result of
+   * Creates a computed value. This is a calculated value that returns the result of
    * a function that is called with the values of the dependencies.
    */
-  createDerivedValue: <R>(
+  createComputedValue: <R>(
     cb: () => R,
     values: Array<SkiaValue<unknown>>
   ) => SkiaValue<R>;
