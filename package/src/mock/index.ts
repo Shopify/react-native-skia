@@ -130,3 +130,27 @@ export const rrect = (r: SkRect, rx: number, ry: number) => ({
   rx,
   ry,
 });
+
+export const useTouchHandler = Noop;
+export const useComputedValue = Noop;
+export const useValue = Noop;
+export const useClockValue = Noop;
+export const useValueEffect = Noop;
+export const useTiming = Noop;
+export const runTiming = Noop;
+export const timing = Noop;
+export const useSpring = Noop;
+export const runSpring = Noop;
+export const spring = Noop;
+export const runDecay = Noop;
+export const decay = Noop;
+
+export const useSharedValueEffect = Noop;
+
+export const useData = Noop;
+export const useDataCollection = Noop;
+export const useFont = Noop;
+export const useImage = Noop;
+export const usePicture = Noop;
+export const useSVG = Noop;
+export const useTypeface = Noop;
