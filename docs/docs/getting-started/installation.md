@@ -43,6 +43,13 @@ If you're using Proguard, make sure to add the following rule:
 -keep class com.shopify.reactnative.skia.** { *; }
 ```
 
+### TroubleShooting
+
+For error **_CMake 'X.X.X' was not found in SDK, PATH, or by cmake.dir property._**
+
+open _Tools > SDK Manager_, switch to the _SDK Tools_ tab.
+Find `CMake` and click _Show Package Details_ and download compatiable version **'X.X.X'**, and apply to install.
+
 ## Playground
 
 We have an example project you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/example).
