@@ -5,7 +5,7 @@ import {
   Path,
   Group,
   useValue,
-  useDerivedValue,
+  useComputedValue,
   LinearGradient,
   vec,
 } from "@shopify/react-native-skia";
@@ -40,7 +40,7 @@ export const Wallet = () => {
     current: 0,
   });
   // path to display
-  const path = useDerivedValue(() => {
+  const path = useComputedValue(() => {
     const { current, next } = state.current;
     const start = graphs[current].data.path;
     const end = graphs[next].data.path;
@@ -48,7 +48,7 @@ export const Wallet = () => {
   }, [state, transition]);
   // x and y values of the cursor
   const x = useValue(0);
-  const y = useDerivedValue(
+  const y = useComputedValue(
     () => getYForX(path.current.toCmds(), x.current),
     [x, path]
   );

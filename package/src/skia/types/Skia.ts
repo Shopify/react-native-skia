@@ -48,7 +48,7 @@ export interface Skia {
   PictureRecorder: () => SkPictureRecorder;
   Picture: PictureFactory;
   Path: PathFactory;
-  Matrix: (matrix?: number[]) => SkMatrix;
+  Matrix: (matrix?: readonly number[]) => SkMatrix;
   ColorFilter: ColorFilterFactory;
   Font: (typeface?: SkTypeface, size?: number) => SkFont;
   Typeface: TypefaceFactory;

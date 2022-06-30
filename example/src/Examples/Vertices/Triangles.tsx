@@ -1,5 +1,5 @@
 import type { SkiaValue, Vector } from "@shopify/react-native-skia";
-import { Path, useDerivedValue } from "@shopify/react-native-skia";
+import { Path, useComputedValue } from "@shopify/react-native-skia";
 import React from "react";
 
 const f = ({ x, y }: Vector) => [x, y].join(",");
@@ -10,7 +10,7 @@ interface TrianglesProps {
 }
 
 export const Triangles = ({ vertices, triangles }: TrianglesProps) => {
-  const path = useDerivedValue(() => {
+  const path = useComputedValue(() => {
     return triangles
       .map(([a, b, c]) => {
         const v1 = vertices.current[a];

@@ -8,7 +8,7 @@ import {
   Group,
   useImage,
   Image,
-  useDerivedValue,
+  useComputedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -19,7 +19,7 @@ interface ModeProps {
 }
 
 export const Mode = ({ translateY }: ModeProps) => {
-  const transform = useDerivedValue(
+  const transform = useComputedValue(
     () => [{ translateY: translateY.current }],
     [translateY]
   );

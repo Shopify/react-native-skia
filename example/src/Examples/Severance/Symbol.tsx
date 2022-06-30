@@ -7,7 +7,7 @@ import type {
 import {
   interpolate,
   dist,
-  useDerivedValue,
+  useComputedValue,
   vec,
   Group,
   Text,
@@ -42,7 +42,7 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
   const text = DIGITS[Math.round(Math.random() * 9)];
   const [symbolWidth] = font.getGlyphWidths(font.getGlyphIDs(text));
   const origin = vec(x + SIZE.width / 2, y + SIZE.height / 2);
-  const transform = useDerivedValue(
+  const transform = useComputedValue(
     () => [
       {
         scale: interpolate(
@@ -58,11 +58,11 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
     ],
     [pointer]
   );
-  const dx = useDerivedValue(() => {
+  const dx = useComputedValue(() => {
     const d = A * noise.noise2D(x, clock.current * F);
     return origin.x - symbolWidth / 2 + d;
   }, [clock]);
-  const dy = useDerivedValue(() => {
+  const dy = useComputedValue(() => {
     const d = A * noise.noise2D(y, clock.current * F);
     return origin.y + font.getSize() / 2 + d;
   }, [clock]);
