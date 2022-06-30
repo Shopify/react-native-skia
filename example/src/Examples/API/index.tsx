@@ -19,6 +19,7 @@ import { ImageFilters } from "./ImageFilters";
 import { UseCanvas } from "./UseCanvas";
 import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
+import { Reanimated } from "./Reanimated";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -142,6 +143,13 @@ export const API = () => {
         component={UseCanvas}
         options={{
           title: "↕️ UseCanvas",
+        }}
+      />
+      <Stack.Screen
+        name="Reanimated"
+        component={Reanimated}
+        options={{
+          title: "🐎 Reanimated",
         }}
       />
     </Stack.Navigator>

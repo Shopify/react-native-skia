@@ -16,4 +16,5 @@ export type Routes = {
   Picture: undefined;
   Freeze: undefined;
   UseCanvas: undefined;
+  Reanimated: undefined;
 };
