@@ -53,4 +53,23 @@ cd package && yarn && cd ..
 cd example && yarn && yarn start
 ```
 
-To run the example project on iOS, you will need to run `pod install`, and on Android, you will also need Android NDK to be installed ([see here](#android)).
+To run the example project on iOS, you will need to run `pod install`, and on Android, you will also need Android NDK to be installed ([see here](#android)). 
+
+## Testing with Jest
+
+In order to load the mock provided by React Native Skia add following to your jest config:
+
+```json
+"setupFiles": ["./node_modules/@shopify/react-native-skia/jestSetup.js"]
+```
+
+Example:
+
+```json
+"jest": {
+  "preset": "react-native",
+  "setupFiles": ["./node_modules/@shopify/react-native-skia/jestSetup.js"]
+}
+```
+
+
