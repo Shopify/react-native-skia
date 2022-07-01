@@ -21,6 +21,7 @@
     "android/src/**",
     "libs/android/**",
     "index.js",
+    "jestSetup.js",
     "cpp/**/*.{h,cpp}",
     "ios",
     "libs/ios/libskia.xcframework",
