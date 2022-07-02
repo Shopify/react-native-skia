@@ -32,7 +32,6 @@
 #include <SkPicture.h>
 // skottie
 #include <modules/skottie/include/Skottie.h>
-#include "<SkTaskGroup.h>"
 #include <android/log.h>
 
 #pragma clang diagnostic pop
@@ -62,23 +61,28 @@ public:
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
     _canvas->drawRect(*rect, *paint);
+    __android_log_print(ANDROID_LOG_VERBOSE, "RNSkia", "draw rect: %f", rect->fLeft);
+
     return jsi::Value::undefined();
   }
 
+sk_sp<skottie::Animation> animation;
 // Coping from: https://github.com/google/skia/blob/main/platform_tools/android/apps/skottie/skottielib/src/main/cpp/native-lib.cpp
   JSI_HOST_FUNCTION(drawAnimation) {
     auto jsonStr = arguments[0].asString(runtime).utf8(runtime);
     auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
+    auto progress = arguments[2].asNumber();
 
-    sk_sp<skottie::Animation> animation = skottie::Animation::Builder()
-            .make(jsonStr.c_str(), jsonStr.size());
-    auto duration = animation->duration() * 1000;
-    __android_log_print(ANDROID_LOG_VERBOSE, "RNSkia", "Duration: %f, fps: %f", duration, animation->fps());
+    // TODO: move animation to its own Jsi object
+    if (animation == nullptr) {
+        animation = skottie::Animation::Builder()
+                .make(jsonStr.c_str(), jsonStr.size());
+    }
 
-    animation->seek(0);
+    auto duration = animation->duration();
+
+    animation->seekFrameTime(progress * duration);
     animation->render(_canvas, rect.get());
-
-    SkTaskGroup::En
 
     return jsi::Value::undefined();
   }
