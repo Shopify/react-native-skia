@@ -25,6 +25,8 @@ export enum SaveLayerFlag {
 }
 
 export interface SkCanvas {
+  drawAnimation(x: number, y: number): void;
+
   /**
    * Draws the given image with its top-left corner at (left, top) using the current clip,
    * the current matrix, and optionally-provided paint.

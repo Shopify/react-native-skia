@@ -1,4 +1,4 @@
-import type { Canvas, Image, CanvasKit, Paint } from "canvaskit-wasm";
+import type { CanvasKit, Canvas, Image, Paint } from "canvaskit-wasm";
 
 import type {
   BlendMode,
@@ -45,6 +45,23 @@ export class JsiSkCanvas
     this.ref.drawRect(
       JsiSkRect.fromValue(this.CanvasKit, rect).ref,
       toValue<Paint>(paint)
+    );
+  }
+
+  //  I really feel that this is the web implementation, and i have to
+  // implement the native functionality in JSI.
+  drawAnimation(x: number, y: number) {
+    fetch("https://storage.googleapis.com/skia-cdn/misc/lego_loader.json").then(
+      (resp) => {
+        resp.text().then((jsonStr) => {
+          const animation = this.CanvasKit.MakeAnimation(jsonStr);
+          const duration = animation.duration() * 1000;
+          const size = animation.size();
+          const bounds = this.CanvasKit.LTRBRect(0, 0, x, y);
+
+          animation.render(this.ref, bounds);
+        });
+      }
     );
   }
 

@@ -30,6 +30,10 @@
 #include <SkSurface.h>
 #include <SkTypeface.h>
 #include <SkPicture.h>
+// skottie
+#include <modules/skottie/include/Skottie.h>
+#include "<SkTaskGroup.h>"
+#include <android/log.h>
 
 #pragma clang diagnostic pop
 
@@ -58,6 +62,24 @@ public:
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
     _canvas->drawRect(*rect, *paint);
+    return jsi::Value::undefined();
+  }
+
+// Coping from: https://github.com/google/skia/blob/main/platform_tools/android/apps/skottie/skottielib/src/main/cpp/native-lib.cpp
+  JSI_HOST_FUNCTION(drawAnimation) {
+    auto jsonStr = arguments[0].asString(runtime).utf8(runtime);
+    auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
+
+    sk_sp<skottie::Animation> animation = skottie::Animation::Builder()
+            .make(jsonStr.c_str(), jsonStr.size());
+    auto duration = animation->duration() * 1000;
+    __android_log_print(ANDROID_LOG_VERBOSE, "RNSkia", "Duration: %f, fps: %f", duration, animation->fps());
+
+    animation->seek(0);
+    animation->render(_canvas, rect.get());
+
+    SkTaskGroup::En
+
     return jsi::Value::undefined();
   }
 
@@ -487,6 +509,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkCanvas, drawPaint),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawLine),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawRect),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, drawAnimation),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawImage),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawImageRect),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawImageCubic),

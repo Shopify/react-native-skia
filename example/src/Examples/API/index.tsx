@@ -20,6 +20,7 @@ import { UseCanvas } from "./UseCanvas";
 import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
 import { Reanimated } from "./Reanimated";
+import { SkottieAnimations } from "./SkottieAnimations";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -38,6 +39,13 @@ export const API = () => {
         component={Shapes}
         options={{
           title: "🔺 Shapes",
+        }}
+      />
+      <Stack.Screen
+        name="Skottie"
+        component={SkottieAnimations}
+        options={{
+          title: "▶️ Skottie (lottie animations)",
         }}
       />
       <Stack.Screen
