@@ -23,6 +23,8 @@ const iosFiles = [
   "libskia.xcframework",
   "libskshaper.xcframework",
   "libsvg.xcframework",
+  "libskottie.xcframework",
+  "libsksg.xcframework"
 ];
 
 const copyFiles = (from: string, to: string, files: string[]) => {

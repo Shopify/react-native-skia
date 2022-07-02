@@ -58,8 +58,6 @@ public:
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
     _canvas->drawRect(*rect, *paint);
-    __android_log_print(ANDROID_LOG_VERBOSE, "RNSkia", "draw rect: %f", rect->fLeft);
-
     return jsi::Value::undefined();
   }
 
