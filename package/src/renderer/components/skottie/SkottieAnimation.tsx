@@ -4,17 +4,19 @@ import type { AnimatedProps } from "../../processors";
 import type { RectProps } from "../shapes";
 import { processRect } from "../../processors";
 import { createDrawing } from "../../nodes/Drawing";
+import type { SkSkottieAnimation } from "../../../skia/types/SkottieAnimation";
 
 export type SkottieProps = RectProps & {
-  anim: string;
+  anim: SkSkottieAnimation;
   // value from 0 - 1 (or negative as well?)
   progress: number;
 };
 
 const onDraw = createDrawing<SkottieProps>(
-  ({ canvas, paint, Skia }, { anim, progress, ...rectProps }) => {
+  ({ canvas, Skia }, { anim, progress, ...rectProps }) => {
     const rect = processRect(Skia, rectProps);
-    canvas.drawAnimation(anim, rect, progress);
+    anim.seek(progress * anim.duration);
+    anim.render(canvas, rect);
   }
 );
 export const SkottieAnimation = (props: AnimatedProps<SkottieProps>) => {

@@ -41,6 +41,7 @@
 #include "JsiSkPictureFactory.h"
 #include "JsiSkRuntimeShaderBuilder.h"
 #include "JsiSkColor.h"
+#include "JsiSkSkottieAnimation.h"
 
 namespace RNSkia
 {
@@ -71,6 +72,7 @@ namespace RNSkia
       installFunction("MakeVertices", JsiSkVertices::createCtor(context));
       installFunction("PictureRecorder", JsiSkPictureRecorder::createCtor(context));
       installFunction("Color", JsiSkColor::createCtor());
+      installFunction("SkottieAnimation", JsiSkSkottieAnimation::createCtor(context));
 
       // Static members
       installReadonlyProperty("FontMgr",

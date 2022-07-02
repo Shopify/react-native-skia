@@ -48,23 +48,6 @@ export class JsiSkCanvas
     );
   }
 
-  //  I really feel that this is the web implementation, and i have to
-  // implement the native functionality in JSI.
-  drawAnimation(x: number, y: number) {
-    fetch("https://storage.googleapis.com/skia-cdn/misc/lego_loader.json").then(
-      (resp) => {
-        resp.text().then((jsonStr) => {
-          const animation = this.CanvasKit.MakeAnimation(jsonStr);
-          const duration = animation.duration() * 1000;
-          const size = animation.size();
-          const bounds = this.CanvasKit.LTRBRect(0, 0, x, y);
-
-          animation.render(this.ref, bounds);
-        });
-      }
-    );
-  }
-
   drawImage(image: SkImage, x: number, y: number, paint?: SkPaint) {
     this.ref.drawImage(toValue<Image>(image), x, y, toOptionalValue(paint));
   }

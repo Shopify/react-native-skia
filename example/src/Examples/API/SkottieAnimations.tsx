@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import {
   Canvas,
-  mix,
+  Skia,
   SkottieAnimation,
   useSharedValueEffect,
   useValue,
@@ -14,23 +14,28 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
-import _LottieAnim from "../../assets/techno_penguin.json";
+import _LottieAnim from "../../assets/material_wave_loading.json";
 
 const LottieAnim = JSON.stringify(_LottieAnim);
 
 export const SkottieAnimations = () => {
   const { width, height } = useWindowDimensions();
 
+  // TODO: build a hook that abstracts this logic
+  const skottieAnimation = useMemo(() => Skia.SkottieAnimation(LottieAnim), []);
+
   const progress = useValue(0);
   const animProgress = useSharedValue(0);
 
   useEffect(() => {
     animProgress.value = withRepeat(
-      withTiming(1, { duration: 2500, easing: Easing.linear }),
-      -1,
-      true
+      withTiming(1, {
+        duration: skottieAnimation.duration * 1000,
+        easing: Easing.linear,
+      }),
+      -1
     );
-  }, [animProgress]);
+  }, [animProgress, skottieAnimation.duration]);
 
   useSharedValueEffect(() => {
     progress.current = animProgress.value;
@@ -44,8 +49,8 @@ export const SkottieAnimations = () => {
           y={0}
           width={width}
           height={height}
-          anim={LottieAnim}
           progress={progress}
+          anim={skottieAnimation}
         />
       </Canvas>
     </ScrollView>
