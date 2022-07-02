@@ -15,7 +15,7 @@ export type SkottieProps = RectProps & {
 const onDraw = createDrawing<SkottieProps>(
   ({ canvas, Skia }, { anim, progress, ...rectProps }) => {
     const rect = processRect(Skia, rectProps);
-    anim.seek(progress * anim.duration);
+    anim.seek(progress);
     anim.render(canvas, rect);
   }
 );
