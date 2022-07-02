@@ -1,19 +1,19 @@
-/**
- * Mock implementation for test runners.
- *
- * Example:
- *
- * ```js
- * jest.mock('@shopify/react-native-skia', () => require('@shopify/react-native-skia/lib/commonjs/mock'));
- * ```
- */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Skia as SkiaApi, SkRect } from "../skia/types";
+import type * as SkiaExports from "../skia";
+import type * as ExternalExports from "../external";
+import type * as ValueExports from "../values";
+import * as AnimationExports from "../animation";
+import * as Values from "../values/web";
+import * as ValuesHooks from "../values/hooks";
+import * as BaseSkia from "../skia/types";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MockJSIInstance: any = {};
 const Noop = () => MockJSIInstance;
 
+// TODO: this could be replaced by a mock of CanvasKit:
+// e.g. const Skia = new JsiSkia(CanvasKit);
 export const Skia: SkiaApi = {
   Point: Noop,
   XYWHRect: Noop,
@@ -116,7 +116,7 @@ export const Skia: SkiaApi = {
   },
 };
 
-export const vec = (x: number, y: number) => ({ x, y });
+export const vec = (x?: number, y?: number) => ({ x: x ?? 0, y: y ?? x ?? 0 });
 
 export const rect = (x: number, y: number, width: number, height: number) => ({
   x,
@@ -131,26 +131,52 @@ export const rrect = (r: SkRect, rx: number, ry: number) => ({
   ry,
 });
 
-export const useTouchHandler = Noop;
-export const useComputedValue = Noop;
-export const useValue = Noop;
-export const useClockValue = Noop;
-export const useValueEffect = Noop;
-export const useTiming = Noop;
-export const runTiming = Noop;
-export const timing = Noop;
-export const useSpring = Noop;
-export const runSpring = Noop;
-export const spring = Noop;
-export const runDecay = Noop;
-export const decay = Noop;
+const Mock: typeof SkiaExports &
+  typeof ExternalExports &
+  typeof ValueExports &
+  typeof AnimationExports = {
+  // SkiaExports
+  // 1. Skia API. BaseSkia contains the enums, and functions like isPaint etc
+  Skia,
+  ...BaseSkia,
+  // 2. Hooks
+  useDataCollection: Noop,
+  useRawData: Noop,
+  useData: Noop,
+  useFont: Noop,
+  useTypeface: Noop,
+  useImage: Noop,
+  usePath: Noop,
+  useSVG: Noop,
+  useTextPath: Noop,
+  usePaint: Noop,
+  usePicture: Noop,
+  useSvgPath: Noop,
+  // 3. Point/Rect/Transform utilities
+  vec,
+  rect,
+  rrect,
+  point: vec,
+  add: Noop,
+  sub: Noop,
+  neg: Noop,
+  dist: Noop,
+  translate: Noop,
+  bounds: Noop,
+  topLeft: Noop,
+  topRight: Noop,
+  bottomLeft: Noop,
+  bottomRight: Noop,
+  center: Noop,
+  processTransform2d: Noop,
+  // ExternalExports
+  useSharedValueEffect: Noop,
+  // ValueExports
+  ...Values,
+  ...ValuesHooks,
+  // Animations
+  ...AnimationExports,
+};
 
-export const useSharedValueEffect = Noop;
-
-export const useData = Noop;
-export const useDataCollection = Noop;
-export const useFont = Noop;
-export const useImage = Noop;
-export const usePicture = Noop;
-export const useSVG = Noop;
-export const useTypeface = Noop;
+// eslint-disable-next-line import/no-default-export
+export default Mock;
