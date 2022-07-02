@@ -20,8 +20,10 @@ namespace RNSkia {
     public:
         //#region Properties
         JSI_PROPERTY_GET(duration) { return static_cast<double>(getObject()->duration()); }
+        JSI_PROPERTY_GET(fps) { return static_cast<double>(getObject()->fps()); }
 
-        JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkSkottieAnimation, duration))
+        JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkSkottieAnimation, duration),
+                                    JSI_EXPORT_PROP_GET(JsiSkSkottieAnimation, fps))
         //#endregion
 
 
