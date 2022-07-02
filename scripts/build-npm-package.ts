@@ -56,8 +56,8 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
   "libskia.xcframework",
   "libskshaper.xcframework",
   "libsvg.xcframework",
-  "libs/ios/libskottie.xcframework",
-  "libs/ios/libsksg.xcframework"
+  "libskottie.xcframework",
+  "libsksg.xcframework"
 ].forEach((lib) => {
   checkFileExists(
     `./package/libs/ios/${lib}`,
