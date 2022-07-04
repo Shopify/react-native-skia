@@ -1,10 +1,13 @@
 import type { SkPath } from "../../skia/types";
 
+import type { ExtrapolationType } from "./interpolate";
+
 /**
  * Maps an input value within a range to an output path within a path range.
  * @param value - The input value.
  * @param inputRange - The range of the input value.
  * @param outputRange - The range of the output path.
+ * @param options - Extrapolation options
  * @returns The output path.
  * @example <caption>Map a value between 0 and 1 to a path between two paths.</caption>
  * const path1 = new Path();
@@ -18,7 +21,8 @@ import type { SkPath } from "../../skia/types";
 export const interpolatePaths = (
   value: number,
   input: number[],
-  outputRange: SkPath[]
+  outputRange: SkPath[],
+  _type?: ExtrapolationType
 ) => {
   let i = 0;
   for (; i <= input.length - 1; i++) {
