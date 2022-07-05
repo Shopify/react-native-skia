@@ -1,7 +1,7 @@
 import "react-native";
 import React from "react";
 // Test renderer must be required after react-native.
-import renderer from "react-test-renderer";
+import { cleanup, render } from "@testing-library/react-native";
 
 import App from "./App";
 
@@ -22,7 +22,8 @@ jest.mock("@shopify/react-native-skia", () => {
   return require("../../package/src/mock").Mock;
 });
 
-it("renders correctly", (cb) => {
-  renderer.create(<App />);
-  setTimeout(cb, 0);
+it("renders correctly", () => {
+  render(<App />);
 });
+
+afterEach(cleanup);
