@@ -15,114 +15,25 @@ import * as decayFunctions from "../animation/decay";
 import * as interpolateFn from "../animation/functions/interpolate";
 import * as interpolatePathFn from "../animation/functions/interpolatePaths";
 import * as interpolateVectorFn from "../animation/functions/interpolateVector";
+import { ShaderLib } from "../renderer/components/shaders/ShaderLib";
+
+class Stub {
+  constructor() {
+    return new Proxy(() => {}, {
+      get: () => new Stub(),
+      apply: () => new Stub(),
+      set: () => true,
+    });
+  }
+}
 
 const Noop: () => any = () => {};
 
-export const Skia: SkiaApi = {
-  Point: Noop,
-  XYWHRect: Noop,
-  RuntimeShaderBuilder: Noop,
-  RRectXY: Noop,
-  RSXform: Noop,
-  Color: Noop,
-  ContourMeasureIter: Noop,
-  Paint: Noop,
-  PictureRecorder: Noop,
-  Picture: {
-    MakePicture: Noop,
-  },
-  Path: {
-    Make: Noop,
-    MakeFromSVGString: Noop,
-    MakeFromOp: Noop,
-    MakeFromCmds: Noop,
-    MakeFromText: Noop,
-  },
-  Matrix: Noop,
-  ColorFilter: {
-    MakeMatrix: Noop,
-    MakeBlend: Noop,
-    MakeCompose: Noop,
-    MakeLerp: Noop,
-    MakeLinearToSRGBGamma: Noop,
-    MakeSRGBToLinearGamma: Noop,
-    MakeLumaColorFilter: Noop,
-  },
-  Font: Noop,
-  Typeface: {
-    MakeFreeTypeFaceFromData: Noop,
-  },
-  MaskFilter: {
-    MakeBlur: Noop,
-  },
-  RuntimeEffect: {
-    Make: Noop,
-  },
-  ImageFilter: {
-    MakeOffset: Noop,
-    MakeDisplacementMap: Noop,
-    MakeShader: Noop,
-    MakeBlur: Noop,
-    MakeColorFilter: Noop,
-    MakeCompose: Noop,
-    MakeDropShadow: Noop,
-    MakeDropShadowOnly: Noop,
-    MakeErode: Noop,
-    MakeDilate: Noop,
-    MakeBlend: Noop,
-    MakeRuntimeShader: Noop,
-  },
-  Shader: {
-    MakeLinearGradient: Noop,
-    MakeRadialGradient: Noop,
-    MakeTwoPointConicalGradient: Noop,
-    MakeSweepGradient: Noop,
-    MakeTurbulence: Noop,
-    MakeFractalNoise: Noop,
-    MakeBlend: Noop,
-    MakeColor: Noop,
-  },
-  PathEffect: {
-    MakeCorner: Noop,
-    MakeDash: Noop,
-    MakeDiscrete: Noop,
-    MakeCompose: Noop,
-    MakeSum: Noop,
-    MakeLine2D: Noop,
-    MakePath1D: Noop,
-    MakePath2D: Noop,
-  },
-  MakeVertices: Noop,
-  Data: {
-    fromURI: Noop,
-    fromBytes: Noop,
-    fromBase64: Noop,
-  },
-  Image: {
-    MakeImageFromEncoded: Noop,
-    MakeImage: Noop,
-  },
-  SVG: {
-    MakeFromData: Noop,
-    MakeFromString: Noop,
-  },
-  FontMgr: {
-    RefDefault: Noop,
-  },
-  TextBlob: {
-    MakeFromText: Noop,
-    MakeFromGlyphs: Noop,
-    MakeFromRSXform: Noop,
-    MakeFromRSXformGlyphs: Noop,
-  },
-  Surface: {
-    Make: Noop,
-  },
-};
+export const Skia: SkiaApi = new Stub() as any;
 
 export const vec = (x?: number, y?: number) => ({ x: x ?? 0, y: y ?? x ?? 0 });
 
-const Mock: typeof SkiaExports &
+export const Mock: typeof SkiaExports &
   typeof ExternalExports &
   typeof ValueExports &
   typeof AnimationExports = {
@@ -189,7 +100,6 @@ const Mock: typeof SkiaExports &
     _outputRange: Color[]
   ) => Float32Array.of(0, 0, 0, 0),
   mixColors: (_v: number, _x: Color, _y: Color) => Float32Array.of(0, 0, 0, 0),
+  createDrawing: Noop,
+  ShaderLib,
 };
-
-// eslint-disable-next-line import/no-default-export
-export default Mock;

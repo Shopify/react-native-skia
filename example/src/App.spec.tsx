@@ -1,6 +1,3 @@
-/**
- * @format
- */
 import "react-native";
 import React from "react";
 // Test renderer must be required after react-native.
@@ -8,11 +5,24 @@ import renderer from "react-test-renderer";
 
 import App from "./App";
 
-// Here we cannot use the jestSetup file because we use the linked version of the package
-jest.mock("@shopify/react-native-skia", () =>
-  require("../../package/src/mock")
-);
+jest.mock("react-native-reanimated", () => {
+  const Reanimated = require("react-native-reanimated/mock");
 
-it("renders correctly", () => {
+  // The mock for `call` immediately calls the callback which is incorrect
+  // So we override it with a no-op
+  Reanimated.default.call = () => {};
+
+  return Reanimated;
+});
+
+// Silence the warning: Animated: `useNativeDriver` is not supported because the native animated module is missing
+jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
+
+jest.mock("@shopify/react-native-skia", () => {
+  return require("../../package/src/mock").Mock;
+});
+
+it("renders correctly", (cb) => {
   renderer.create(<App />);
+  setTimeout(cb, 0);
 });
