@@ -4,9 +4,9 @@
     "access": "public"
   },
   "title": "React Native Skia",
-  "version": "0.1.135",
+  "version": "0.1.100",
   "description": "High-performance React Native Graphics using Skia",
-  "main": "lib/module/index.js",
+  "main": "index.ts",
   "files": [
     "src",
     "lib",
@@ -95,8 +95,5 @@
       "module",
       "typescript"
     ]
-  },
-  "types": "lib/typescript/index.d.ts",
-  "module": "lib/module/index.js",
-  "react-native": "lib/module/index.js"
+  }
 }
