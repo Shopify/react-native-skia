@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Skia as SkiaApi, SkRect, Vector } from "../skia/types";
-import * as AnimationExports from "../animation";
+//import * as AnimationExports from "../animation";
 import * as Values from "../values/web";
 import * as ValuesHooks from "../values/hooks";
 import * as BaseSkia from "../skia/types";
@@ -116,63 +116,61 @@ export const Skia: SkiaApi = {
 
 export const vec = (x?: number, y?: number) => ({ x: x ?? 0, y: y ?? x ?? 0 });
 
-const Mock: typeof SkiaExports &
-  typeof ExternalExports &
-  typeof ValueExports &
-  typeof AnimationExports = {
-  // SkiaExports
-  // 1. Skia API. BaseSkia contains the enums, and functions like isPaint etc
-  Skia,
-  ...BaseSkia,
-  // 2. Hooks
-  useDataCollection: Noop,
-  useRawData: Noop,
-  useData: Noop,
-  useFont: Noop,
-  useTypeface: Noop,
-  useImage: Noop,
-  usePath: Noop,
-  useSVG: Noop,
-  useTextPath: Noop,
-  usePaint: Noop,
-  usePicture: Noop,
-  useSvgPath: Noop,
-  // 3. Point/Rect/Transform utilities
-  vec,
-  rect: (x: number, y: number, width: number, height: number) => ({
-    x,
-    y,
-    width,
-    height,
-  }),
-  rrect: (r: SkRect, rx: number, ry: number) => ({
-    rect: r,
-    rx,
-    ry,
-  }),
-  point: vec,
-  add: (a: Vector, b: Vector) => vec(a.x + b.x, a.y + b.y),
-  sub: (a: Vector, b: Vector) => vec(a.x - b.x, a.y - b.y),
-  neg: (a: Vector) => vec(-a.x, -a.y),
-  dist: (a: Vector, b: Vector) => Math.hypot(a.x - b.x, a.y - b.y),
-  translate: ({ x, y }: Vector) =>
-    [{ translateX: x }, { translateY: y }] as const,
+const Mock: typeof SkiaExports & typeof ExternalExports & typeof ValueExports =
+  {
+    // SkiaExports
+    // 1. Skia API. BaseSkia contains the enums, and functions like isPaint etc
+    Skia,
+    ...BaseSkia,
+    // 2. Hooks
+    useDataCollection: Noop,
+    useRawData: Noop,
+    useData: Noop,
+    useFont: Noop,
+    useTypeface: Noop,
+    useImage: Noop,
+    usePath: Noop,
+    useSVG: Noop,
+    useTextPath: Noop,
+    usePaint: Noop,
+    usePicture: Noop,
+    useSvgPath: Noop,
+    // 3. Point/Rect/Transform utilities
+    vec,
+    rect: (x: number, y: number, width: number, height: number) => ({
+      x,
+      y,
+      width,
+      height,
+    }),
+    rrect: (r: SkRect, rx: number, ry: number) => ({
+      rect: r,
+      rx,
+      ry,
+    }),
+    point: vec,
+    add: (a: Vector, b: Vector) => vec(a.x + b.x, a.y + b.y),
+    sub: (a: Vector, b: Vector) => vec(a.x - b.x, a.y - b.y),
+    neg: (a: Vector) => vec(-a.x, -a.y),
+    dist: (a: Vector, b: Vector) => Math.hypot(a.x - b.x, a.y - b.y),
+    translate: ({ x, y }: Vector) =>
+      [{ translateX: x }, { translateY: y }] as const,
 
-  bounds: Noop,
-  topLeft: Noop,
-  topRight: Noop,
-  bottomLeft: Noop,
-  bottomRight: Noop,
-  center: Noop,
-  processTransform2d: Noop,
-  // ExternalExports
-  useSharedValueEffect,
-  // ValueExports
-  ...Values,
-  ...ValuesHooks,
-  // Animations
-  ...AnimationExports,
-};
+    bounds: Noop,
+    topLeft: Noop,
+    topRight: Noop,
+    bottomLeft: Noop,
+    bottomRight: Noop,
+    center: Noop,
+    processTransform2d: Noop,
+    // ExternalExports
+    useSharedValueEffect,
+    // ValueExports
+    ...Values,
+    ...ValuesHooks,
+    // Animations
+    //  ...AnimationExports,
+  };
 
 // eslint-disable-next-line import/no-default-export
 export default Mock;
