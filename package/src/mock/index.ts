@@ -36,7 +36,11 @@ export const vec = (x?: number, y?: number) => ({ x: x ?? 0, y: y ?? x ?? 0 });
 export const Mock: typeof SkiaExports &
   typeof ExternalExports &
   typeof ValueExports &
-  typeof AnimationExports = {
+  typeof AnimationExports & {
+    createDrawing: () => any;
+    createDeclaration: () => any;
+    ShaderLib: typeof ShaderLib;
+  } = {
   // SkiaExports
   // 1. Skia API. BaseSkia contains the enums, and functions like isPaint etc
   Skia,
@@ -100,6 +104,7 @@ export const Mock: typeof SkiaExports &
     _outputRange: Color[]
   ) => Float32Array.of(0, 0, 0, 0),
   mixColors: (_v: number, _x: Color, _y: Color) => Float32Array.of(0, 0, 0, 0),
-  createDrawing: Noop,
   ShaderLib,
+  createDrawing: Noop,
+  createDeclaration: Noop,
 };
