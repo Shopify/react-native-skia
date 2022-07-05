@@ -1,19 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { Skia as SkiaApi, SkRect } from "../skia/types";
-import type * as SkiaExports from "../skia";
-import type * as ExternalExports from "../external";
-import type * as ValueExports from "../values";
+import type { Skia as SkiaApi, SkRect, Vector } from "../skia/types";
 import * as AnimationExports from "../animation";
 import * as Values from "../values/web";
 import * as ValuesHooks from "../values/hooks";
 import * as BaseSkia from "../skia/types";
+import type * as SkiaExports from "../skia";
+import type * as ExternalExports from "../external";
+import type * as ValueExports from "../values";
+import { useSharedValueEffect } from "../external/reanimated/useSharedValueEffect";
 
-const MockJSIInstance: any = {};
-const Noop = () => MockJSIInstance;
+const Noop: () => any = () => {};
 
-// TODO: this could be replaced by a mock of CanvasKit:
-// e.g. const Skia = new JsiSkia(CanvasKit);
 export const Skia: SkiaApi = {
   Point: Noop,
   XYWHRect: Noop,
@@ -118,19 +116,6 @@ export const Skia: SkiaApi = {
 
 export const vec = (x?: number, y?: number) => ({ x: x ?? 0, y: y ?? x ?? 0 });
 
-export const rect = (x: number, y: number, width: number, height: number) => ({
-  x,
-  y,
-  width,
-  height,
-});
-
-export const rrect = (r: SkRect, rx: number, ry: number) => ({
-  rect: r,
-  rx,
-  ry,
-});
-
 const Mock: typeof SkiaExports &
   typeof ExternalExports &
   typeof ValueExports &
@@ -154,14 +139,25 @@ const Mock: typeof SkiaExports &
   useSvgPath: Noop,
   // 3. Point/Rect/Transform utilities
   vec,
-  rect,
-  rrect,
+  rect: (x: number, y: number, width: number, height: number) => ({
+    x,
+    y,
+    width,
+    height,
+  }),
+  rrect: (r: SkRect, rx: number, ry: number) => ({
+    rect: r,
+    rx,
+    ry,
+  }),
   point: vec,
-  add: Noop,
-  sub: Noop,
-  neg: Noop,
-  dist: Noop,
-  translate: Noop,
+  add: (a: Vector, b: Vector) => vec(a.x + b.x, a.y + b.y),
+  sub: (a: Vector, b: Vector) => vec(a.x - b.x, a.y - b.y),
+  neg: (a: Vector) => vec(-a.x, -a.y),
+  dist: (a: Vector, b: Vector) => Math.hypot(a.x - b.x, a.y - b.y),
+  translate: ({ x, y }: Vector) =>
+    [{ translateX: x }, { translateY: y }] as const,
+
   bounds: Noop,
   topLeft: Noop,
   topRight: Noop,
@@ -170,7 +166,7 @@ const Mock: typeof SkiaExports &
   center: Noop,
   processTransform2d: Noop,
   // ExternalExports
-  useSharedValueEffect: Noop,
+  useSharedValueEffect,
   // ValueExports
   ...Values,
   ...ValuesHooks,
