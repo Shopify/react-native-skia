@@ -92,9 +92,9 @@ namespace RNSkia
             auto numGlyphIDs = str.length();
             std::vector<SkGlyphID> glyphs;
             glyphs.resize(numGlyphIDs);
-            getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
-                                      static_cast<SkGlyphID *>(glyphs.data()), numGlyphIDs);
             int glyphsSize = static_cast<int>(numGlyphIDs);
+            getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
+                                      static_cast<SkGlyphID *>(glyphs.data()), glyphsSize);
             std::vector<SkScalar> widthPtrs;
             widthPtrs.resize(numGlyphIDs);
             if (count > 1)
