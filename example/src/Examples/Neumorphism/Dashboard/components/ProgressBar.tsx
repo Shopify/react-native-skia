@@ -41,9 +41,7 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
   if (font === null) {
     return null;
   }
-  const textWidth = font
-    .getGlyphWidths(font.getGlyphIDs("00°C"))
-    .reduce((a, b) => a + b, 0);
+  const textWidth = font.getTextWidth("00°C");
   return (
     <Group transform={translate({ x: 100, y: 223 })}>
       <Group>
