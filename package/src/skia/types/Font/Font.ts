@@ -13,6 +13,13 @@ export interface FontMetrics {
 
 export interface SkFont extends SkJSIInstance<"Font"> {
   /**
+   * Retrieves the total width of the provided text
+   * @param text
+   * @param paint
+   */
+  getTextWidth(text: string, paint?: SkPaint): number;
+
+  /**
    * Retrieves the advanceX measurements for each glyph.
    * If paint is not null, its stroking, PathEffect, and MaskFilter fields are respected.
    * One width per glyph is returned in the returned array.
