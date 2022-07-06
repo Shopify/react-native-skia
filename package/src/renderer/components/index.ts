@@ -9,6 +9,7 @@ export * from "./imageFilters";
 export * from "./pathEffects";
 export * from "../processors";
 export * from "./Picture";
+export * from "./skottie";
 
 export * from "./Group";
 export * from "./Mask";

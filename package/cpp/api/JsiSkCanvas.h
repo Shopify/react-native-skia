@@ -534,6 +534,17 @@ public:
   void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
   SkCanvas *getCanvas() { return _canvas; }
 
+  /**
+   Returns the underlying object from a host object of this type
+  */
+  static SkCanvas *fromValue(jsi::Runtime &runtime,
+                                        const jsi::Value &obj)
+  {
+      return obj.asObject(runtime)
+                .asHostObject<JsiSkCanvas>(runtime)
+                ->getCanvas();
+  }
+
 private:
   SkCanvas *_canvas;
 };
