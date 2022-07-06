@@ -27,6 +27,12 @@ Clients should use "Font.getGlyphWidths" instead (the latter does no shaping)`
     return new JsiSkRect(this.CanvasKit, this.CanvasKit.XYWHRect(0, 0, 0, 0));
   }
 
+  getTextWidth(text: string, paint?: SkPaint | undefined) {
+    const ids = this.getGlyphIDs(text);
+    const widths = this.getGlyphWidths(ids, paint);
+    return widths.reduce((a, b) => a + b, 0);
+  }
+
   getMetrics() {
     const result = this.ref.getMetrics();
     return {

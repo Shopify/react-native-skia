@@ -14,9 +14,7 @@ export const Title = ({ title }: Title) => {
   if (!font) {
     return null;
   }
-  const titleWidth = font
-    .getGlyphWidths(font.getGlyphIDs(title))
-    .reduce((a, b) => a + b, 0);
+  const titleWidth = font.getTextWidth(title);
   const offsetX = 30 + BUTTON_SIZE;
   const space = 298 - offsetX;
   return (

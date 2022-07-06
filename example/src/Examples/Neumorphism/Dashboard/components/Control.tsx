@@ -34,9 +34,7 @@ export const Control = ({
   progress,
   active,
 }: ControlProps) => {
-  const labelWidth = font
-    .getGlyphWidths(font.getGlyphIDs(label))
-    .reduce((a, b) => a + b, 0);
+  const labelWidth = font.getTextWidth(label);
   return (
     <Group transform={translate({ x: x + 30, y: y + 30 })}>
       <Text
