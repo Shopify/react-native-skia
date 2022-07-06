@@ -4,7 +4,7 @@
     "access": "public"
   },
   "title": "React Native Skia",
-  "version": "0.0.0-development",
+  "version": "0.0.1-development",
   "description": "High-performance React Native Graphics using Skia",
   "main": "index.ts",
   "files": [
