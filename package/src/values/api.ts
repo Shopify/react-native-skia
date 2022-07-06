@@ -6,5 +6,3 @@ declare global {
 
 const { SkiaValueApi } = global;
 export const ValueApi = SkiaValueApi;
-
-export const { createValue, createComputedValue } = ValueApi;
