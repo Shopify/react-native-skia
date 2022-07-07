@@ -7,9 +7,8 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 const appDirectory = path.resolve(__dirname);
 const { presets, plugins } = require(`${appDirectory}/babel.config.js`);
+// This is only needed in the development repo to transpile the TypeScript files
 const compileNodeModules = [
-  // FIXME: Resolver for compiling @shopfiy/react-native-skia from typescript
-  // Is this only needed in development?
   "../../package",
 ].map((moduleName) => path.resolve(appDirectory, `node_modules/${moduleName}`));
 
