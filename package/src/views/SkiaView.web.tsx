@@ -36,23 +36,27 @@ export class SkiaView extends React.Component<
   }
 
   private onLayout(evt: LayoutChangeEvent) {
-    this.setState({
-      width: evt.nativeEvent.layout.width,
-      height: evt.nativeEvent.layout.height,
-    });
-    // Reset canvas / surface on layout change
-    if (this._canvasRef.current) {
-      // Create surface
-      this._surface = new JsiSkSurface(
-        global.CanvasKit,
-        global.CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current)!
-      );
-      // Get canvas and repaint
-      if (this._surface) {
-        this._canvas = this._surface.getCanvas();
-        this.requestRedraw();
+    this.setState(
+      {
+        width: evt.nativeEvent.layout.width,
+        height: evt.nativeEvent.layout.height,
+      },
+      () => {
+        // Reset canvas / surface on layout change
+        if (this._canvasRef.current) {
+          // Create surface
+          this._surface = new JsiSkSurface(
+            global.CanvasKit,
+            global.CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current)!
+          );
+          // Get canvas and repaint
+          if (this._surface) {
+            this._canvas = this._surface.getCanvas();
+            this.requestRedraw();
+          }
+        }
       }
-    }
+    );
   }
 
   componentDidMount() {
@@ -81,13 +85,13 @@ export class SkiaView extends React.Component<
    */
   private redraw() {
     if (this._mode === "continuous" || this._redrawRequests > 0) {
+      this._redrawRequests = 0;
       if (
         this._canvas &&
         this.props.onDraw &&
         this.state.height !== -1 &&
         this.state.width !== -1
       ) {
-        this._redrawRequests = 0;
         const touches = [...this._touches];
         this._touches = [];
         const info: DrawingInfo = {
