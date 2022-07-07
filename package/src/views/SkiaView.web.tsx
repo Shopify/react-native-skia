@@ -45,7 +45,7 @@ export class SkiaView extends React.Component<
       // Create surface
       this._surface = new JsiSkSurface(
         global.CanvasKit,
-        global.CanvasKit.MakeCanvasSurface(this._canvasRef.current)!
+        global.CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current)!
       );
       // Get canvas and repaint
       if (this._surface) {
