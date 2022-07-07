@@ -51,7 +51,6 @@ export class SkiaView extends React.Component<
       if (this._surface) {
         this._canvas = this._surface.getCanvas();
         this.requestRedraw();
-        this.redraw();
       }
     }
   }
@@ -82,13 +81,13 @@ export class SkiaView extends React.Component<
    */
   private redraw() {
     if (this._mode === "continuous" || this._redrawRequests > 0) {
-      this._redrawRequests = 0;
       if (
         this._canvas &&
         this.props.onDraw &&
         this.state.height !== -1 &&
         this.state.width !== -1
       ) {
+        this._redrawRequests = 0;
         const touches = [...this._touches];
         this._touches = [];
         const info: DrawingInfo = {
