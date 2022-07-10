@@ -62,7 +62,7 @@ const useLoading = <T>(
     if (prevSourceRef.current !== source) {
       prevSourceRef.current = source;
       loader().then(setData);
-    } else {
+    } else if (!source) {
       setData(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
