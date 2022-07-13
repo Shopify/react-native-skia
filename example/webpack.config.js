@@ -8,9 +8,9 @@ const CopyPlugin = require("copy-webpack-plugin");
 const appDirectory = path.resolve(__dirname);
 const { presets, plugins } = require(`${appDirectory}/babel.config.js`);
 // This is only needed in the development repo to transpile the TypeScript files
-const compileNodeModules = [
-  "../../package",
-].map((moduleName) => path.resolve(appDirectory, `node_modules/${moduleName}`));
+const compileNodeModules = ["../../package"].map((moduleName) =>
+  path.resolve(appDirectory, `node_modules/${moduleName}`)
+);
 
 const babelLoaderConfiguration = {
   test: /\.(ts|tsx)$/,
@@ -66,6 +66,9 @@ module.exports = {
     path: path.resolve(appDirectory, "dist"),
     publicPath: "/",
     filename: "rn-skia-example.bundle.js",
+  },
+  devServer: {
+    historyApiFallback: true,
   },
   resolve: {
     // FIXME: To fix missing modules in browser when using webassembly
