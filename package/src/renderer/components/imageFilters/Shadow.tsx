@@ -25,15 +25,29 @@ const onDeclare = createDeclaration<ShadowProps>(
   ) => {
     const input = getInput(Skia, children);
     const color = processColor(Skia, cl, opacity);
-    let factory;
     if (inner) {
-      factory = MakeInnerShadow.bind(null, Skia, shadowOnly);
+      return MakeInnerShadow(
+        Skia,
+        shadowOnly,
+        dx,
+        dy,
+        blur,
+        blur,
+        color,
+        input
+      );
+    } else if (shadowOnly) {
+      return Skia.ImageFilter.MakeDropShadowOnly(
+        dx,
+        dy,
+        blur,
+        blur,
+        color,
+        input
+      );
     } else {
-      factory = shadowOnly
-        ? Skia.ImageFilter.MakeDropShadowOnly
-        : Skia.ImageFilter.MakeDropShadow;
+      return Skia.ImageFilter.MakeDropShadow(dx, dy, blur, blur, color, input);
     }
-    return factory(dx, dy, blur, blur, color, input);
   }
 );
 
