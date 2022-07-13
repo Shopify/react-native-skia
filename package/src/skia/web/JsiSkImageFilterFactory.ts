@@ -1,11 +1,11 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
 import type {
+  SkImageFilter,
   ColorChannel,
   ImageFilterFactory,
   SkColor,
   SkColorFilter,
-  SkImageFilter,
   BlendMode,
   SkRect,
   SkRuntimeShaderBuilder,
@@ -24,22 +24,34 @@ export class JsiSkImageFilterFactory
     super(CanvasKit);
   }
 
-  MakeOffset(
-    _dx: number,
-    _dy: number,
-    _input: SkImageFilter | null
-  ): SkImageFilter {
-    throw new NotImplementedOnRNWeb();
+  MakeOffset(dx: number, dy: number, input: SkImageFilter | null) {
+    return new JsiSkImageFilter(
+      this.CanvasKit,
+      this.CanvasKit.ImageFilter.MakeOffset(
+        dx,
+        dy,
+        input === null ? null : toValue(input)
+      )
+    );
   }
 
   MakeDisplacementMap(
-    _channelX: ColorChannel,
-    _channelY: ColorChannel,
-    _scale: number,
-    _in1: SkImageFilter,
-    _input: SkImageFilter | null
-  ): SkImageFilter {
-    throw new NotImplementedOnRNWeb();
+    channelX: ColorChannel,
+    channelY: ColorChannel,
+    scale: number,
+    in1: SkImageFilter,
+    input: SkImageFilter | null
+  ) {
+    return new JsiSkImageFilter(
+      this.CanvasKit,
+      this.CanvasKit.ImageFilter.MakeDisplacementMap(
+        ckEnum(channelX),
+        ckEnum(channelY),
+        scale,
+        toValue(in1),
+        input === null ? null : toValue(input)
+      )
+    );
   }
 
   MakeShader(_shader: SkShader, _input: SkImageFilter | null): SkImageFilter {
@@ -84,54 +96,95 @@ export class JsiSkImageFilterFactory
   }
 
   MakeDropShadow(
-    _dx: number,
-    _dy: number,
-    _sigmaX: number,
-    _sigmaY: number,
-    _color: SkColor,
-    _input: SkImageFilter | null,
+    dx: number,
+    dy: number,
+    sigmaX: number,
+    sigmaY: number,
+    color: SkColor,
+    input: SkImageFilter | null,
     _cropRect?: SkRect
-  ): SkImageFilter {
-    throw new NotImplementedOnRNWeb();
+  ) {
+    return new JsiSkImageFilter(
+      this.CanvasKit,
+      this.CanvasKit.ImageFilter.MakeDropShadow(
+        dx,
+        dy,
+        sigmaX,
+        sigmaY,
+        color,
+        input === null ? null : toValue(input)
+      )
+    );
   }
 
   MakeDropShadowOnly(
-    _dx: number,
-    _dy: number,
-    _sigmaX: number,
-    _sigmaY: number,
-    _color: SkColor,
-    _input: SkImageFilter | null,
+    dx: number,
+    dy: number,
+    sigmaX: number,
+    sigmaY: number,
+    color: SkColor,
+    input: SkImageFilter | null,
     _cropRect?: SkRect
-  ): SkImageFilter {
-    throw new NotImplementedOnRNWeb();
+  ) {
+    return new JsiSkImageFilter(
+      this.CanvasKit,
+      this.CanvasKit.ImageFilter.MakeDropShadowOnly(
+        dx,
+        dy,
+        sigmaX,
+        sigmaY,
+        color,
+        input === null ? null : toValue(input)
+      )
+    );
   }
 
   MakeErode(
-    _rx: number,
-    _ry: number,
-    _input: SkImageFilter | null,
+    rx: number,
+    ry: number,
+    input: SkImageFilter | null,
     _cropRect?: SkRect
   ): SkImageFilter {
-    throw new NotImplementedOnRNWeb();
+    return new JsiSkImageFilter(
+      this.CanvasKit,
+      this.CanvasKit.ImageFilter.MakeErode(
+        rx,
+        ry,
+        input === null ? null : toValue(input)
+      )
+    );
   }
 
   MakeDilate(
-    _rx: number,
-    _ry: number,
-    _input: SkImageFilter | null,
+    rx: number,
+    ry: number,
+    input: SkImageFilter | null,
     _cropRect?: SkRect
-  ): SkImageFilter {
-    throw new NotImplementedOnRNWeb();
+  ) {
+    return new JsiSkImageFilter(
+      this.CanvasKit,
+      this.CanvasKit.ImageFilter.MakeDilate(
+        rx,
+        ry,
+        input === null ? null : toValue(input)
+      )
+    );
   }
 
   MakeBlend(
-    _mode: BlendMode,
-    _background: SkImageFilter,
-    _foreground: SkImageFilter | null,
+    mode: BlendMode,
+    background: SkImageFilter,
+    foreground: SkImageFilter | null,
     _cropRect?: SkRect
-  ): SkImageFilter {
-    throw new NotImplementedOnRNWeb();
+  ) {
+    return new JsiSkImageFilter(
+      this.CanvasKit,
+      this.CanvasKit.ImageFilter.MakeBlend(
+        ckEnum(mode),
+        background === null ? null : toValue(background),
+        foreground === null ? null : toValue(foreground)
+      )
+    );
   }
 
   MakeRuntimeShader(
