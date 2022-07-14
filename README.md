@@ -41,7 +41,7 @@ brew install ninja
 ```
 
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
-`ANDROID_NDK=/Users/username/Library/Android/sdk/ndk/<build_number>` for instance.
+`ANDROID_NDK=/Users/username/Library/Android/sdk/ndk/<version>` for instance.
 
 If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_
 
