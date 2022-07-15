@@ -5,12 +5,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
-const appDirectory = path.resolve(__dirname);
-const { presets, plugins } = require(`${appDirectory}/babel.config.js`);
-// This is only needed in the development repo to transpile the TypeScript files
-const compileNodeModules = ["../../package"].map((moduleName) =>
-  path.resolve(appDirectory, `node_modules/${moduleName}`)
-);
+const { presets, plugins } = require(`${__dirname}/babel.config.js`);
 
 const babelLoaderConfiguration = {
   test: /\.(ts|tsx)$/,
@@ -18,7 +13,8 @@ const babelLoaderConfiguration = {
   include: [
     path.resolve(__dirname, "index.web.js"), // Entry to your application
     path.resolve(__dirname, "src"),
-    ...compileNodeModules,
+    // This is only needed in the development repo to transpile the TypeScript files
+    path.resolve(__dirname, "../package"),
   ],
   use: {
     loader: "babel-loader",
@@ -63,7 +59,7 @@ module.exports = {
     app: path.join(__dirname, "index.web.js"),
   },
   output: {
-    path: path.resolve(appDirectory, "dist"),
+    path: path.resolve(__dirname, "dist"),
     publicPath: "/",
     filename: "rn-skia-example.bundle.js",
   },
