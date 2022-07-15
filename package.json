@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "## Getting started",
   "main": "index.js",
+  "bin": {
+    "setup-skia-web": "./scripts/copy-canvaskit-wasm.js"
+  },
   "directories": {
     "example": "example"
   },
