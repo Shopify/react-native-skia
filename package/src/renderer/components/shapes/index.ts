@@ -6,6 +6,7 @@ export * from "./Line";
 export * from "./Path";
 export * from "./Oval";
 export * from "./Points";
+export * from "./Polygon";
 export * from "./Patch";
 export * from "./Vertices";
 export * from "./Fill";
