@@ -11,7 +11,7 @@ import { Container } from "../nodes";
 import type { DrawingContext } from "../DrawingContext";
 import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
-import { LoadSkia } from "../../web";
+import { LoadSkia } from "../../web/LoadSkia";
 
 export let Skia: ReturnType<typeof JsiSkApi>;
 
