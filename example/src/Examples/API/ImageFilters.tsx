@@ -12,6 +12,7 @@ import {
   Circle,
   Skia,
   useFont,
+  WrappedText,
 } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -70,6 +71,7 @@ const MorphologyDemo = () => {
         <Morphology radius={0.3} operator="erode" />
         <Text text="Hello World" x={32} y={96} font={font} />
       </Group>
+      <WrappedText text="Hello World" x={32} y={128} font={font} />
     </Group>
   );
 };
