@@ -2,9 +2,8 @@
 
 /**
  * A script to automate the setup of `@shopify/react-native-skia` for web.
- * This script is aimed at being agnostic to web frameworks and tools,
- * the only requirement is that your project supports a 'static' folder (often named '/public').
- * In `@expo/webpack-config` this is `./web`.
+ * The only requirement is that your project supports a 'static' folder (often named '/public').
+ * In `@expo/webpack-config` this is `./web` (default for now).
  *
  * This script does the following:
  * 1. Resolve the public path relative to wherever the script is being run.
@@ -14,14 +13,14 @@
  *
  *
  * Usage:
- * $ `npx <script>`
- *
- * -> Copies the file to `<project>/public/static/js/canvaskit.wasm`
- *
- * Expo Webpack:
  * $ `npx <script> web`
  *
  * -> Copies the file to `<project>/web/static/js/canvaskit.wasm`
+ *
+ * Tooling that uses `/public`:
+ * $ `npx <script> public`
+ *
+ * -> Copies the file to `<project>/public/static/js/canvaskit.wasm`
  */
 const fs = require("fs");
 const path = require("path");
@@ -44,8 +43,8 @@ function getWasmFilePath() {
 }
 
 function getOutputFilePath() {
-  // Most tools use `public` but Expo Webpack uses `web`.
-  const publicFolder = path.resolve(args[0] || "public");
+  // Default to using `web` public path.
+  const publicFolder = path.resolve(args[0] || "web");
   const publicLocation = "./static/js/canvaskit.wasm";
   const output = path.join(publicFolder, publicLocation);
 
@@ -64,7 +63,7 @@ function copyFile(from, to) {
   fs.writeFileSync(to, data);
 }
 
-// Copy the WASM file to `<public>/static/js/canvaskit.wasm`
+// Copy the WASM file to `<static>/static/js/canvaskit.wasm`
 (() => {
   copyFile(getWasmFilePath(), getOutputFilePath());
 
