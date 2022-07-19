@@ -29,7 +29,7 @@ Run `pod install` on the `ios/` directory.
 
 Currently, you will need Android NDK to be installed.
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
-`ANDROID_NDK=/Users/username/Library/Android/sdk/ndk-bundle` for instance.
+`ANDROID_NDK=/Users/username/Library/Android/sdk/ndk/<version>` for instance.
 
 If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_
 
@@ -55,9 +55,8 @@ Find `CMake` and click _Show Package Details_ and download compatiable version *
 We have an example project you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/example).
 
 ```sh
-yarn
-cd package && yarn && cd ..
-cd example && yarn && yarn start
+yarn boostrap
+cd example && yarn start
 ```
 
 To run the example project on iOS, you will need to run `pod install`, and on Android, you will also need Android NDK to be installed ([see here](#android)). 
