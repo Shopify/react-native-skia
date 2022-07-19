@@ -4,6 +4,7 @@ import type { ComponentProps, ComponentType, LazyExoticComponent } from "react";
 import React, { useMemo, lazy, Suspense } from "react";
 import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
 import type { CanvasKit as CanvasKitType } from "canvaskit-wasm";
+import { Platform } from "react-native";
 
 declare global {
   var CanvasKit: CanvasKitType;
@@ -25,7 +26,13 @@ export const WithSkia = ({ getComponent, fallback }: WithSkiaProps) => {
   const Inner = useMemo(
     () =>
       lazy(async () => {
-        await LoadSkia();
+        if (Platform.OS === "web") {
+          await LoadSkia();
+        } else {
+          console.warn(
+            "<WithSkia /> is only necessary on web. Consider not using on native."
+          );
+        }
         return getComponent();
       }),
     [getComponent]
