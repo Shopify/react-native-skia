@@ -52,7 +52,7 @@ export class JsiSkMatrix
     );
   }
 
-  reset() {
+  identity() {
     this.ref.set(this.CanvasKit.Matrix.identity());
   }
 }

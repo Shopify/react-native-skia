@@ -79,8 +79,8 @@ public:
     return jsi::Value::undefined();
   }
   
-  JSI_HOST_FUNCTION(reset) {
-    getObject()->reset();
+  JSI_HOST_FUNCTION(identity) {
+    getObject()->setIdentity();
     return jsi::Value::undefined();
   }
 
@@ -89,8 +89,8 @@ public:
     JSI_EXPORT_FUNC(JsiSkMatrix, translate),
     JSI_EXPORT_FUNC(JsiSkMatrix, scale),
     JSI_EXPORT_FUNC(JsiSkMatrix, skew),
-    JSI_EXPORT_FUNC(JsiSkMatrix, reset),
     JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
+    JSI_EXPORT_FUNC(JsiSkMatrix, identity),
   )
 
   /**
