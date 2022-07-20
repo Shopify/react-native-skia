@@ -78,12 +78,18 @@ public:
     getObject()->preRotate(SkRadiansToDegrees(a));
     return jsi::Value::undefined();
   }
+  
+  JSI_HOST_FUNCTION(reset) {
+    getObject()->reset();
+    return jsi::Value::undefined();
+  }
 
   JSI_EXPORT_FUNCTIONS(
     JSI_EXPORT_FUNC(JsiSkMatrix, concat),
     JSI_EXPORT_FUNC(JsiSkMatrix, translate),
     JSI_EXPORT_FUNC(JsiSkMatrix, scale),
     JSI_EXPORT_FUNC(JsiSkMatrix, skew),
+    JSI_EXPORT_FUNC(JsiSkMatrix, reset),
     JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
   )
 

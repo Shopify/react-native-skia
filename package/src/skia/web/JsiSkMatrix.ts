@@ -51,4 +51,8 @@ export class JsiSkMatrix
       )
     );
   }
+
+  reset() {
+    this.ref.set(this.CanvasKit.Matrix.identity());
+  }
 }
