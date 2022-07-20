@@ -46,6 +46,10 @@ public:
         );
     }
 
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "Matrix");
+  }
+
   JSI_HOST_FUNCTION(concat) {
     auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
     getObject()->preConcat(*m3);
@@ -83,6 +87,8 @@ public:
     getObject()->setIdentity();
     return jsi::Value::undefined();
   }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkMatrix, __typename__))
 
   JSI_EXPORT_FUNCTIONS(
     JSI_EXPORT_FUNC(JsiSkMatrix, concat),
