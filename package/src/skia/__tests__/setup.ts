@@ -1,4 +1,4 @@
-import { LoadSkia } from "../../web";
+import { LoadSkia } from "../../web/LoadSkia";
 import { Skia } from "../types";
 import { JsiSkApi } from "../web";
 
