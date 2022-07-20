@@ -12,6 +12,9 @@ export enum MatrixIndex {
   persp2 = 8,
 }
 
+export const isMatrix = (obj: unknown): obj is SkMatrix =>
+  obj !== null && (obj as SkJSIInstance<string>).__typename__ === "Matrix";
+
 export interface SkMatrix extends SkJSIInstance<"Matrix"> {
   concat: (matrix: SkMatrix) => void;
   translate: (x: number, y: number) => void;
@@ -51,7 +54,10 @@ export interface TransformProp {
   transform?: Transforms2d;
 }
 
-export const processTransform = (m: SkMatrix, transforms: Transforms2d) => {
+export const processTransform = <T extends SkMatrix | SkCanvas>(
+  m: T,
+  transforms: Transforms2d
+) => {
   for (const transform of transforms) {
     const key = Object.keys(transform)[0] as Transform2dName;
     const value = (transform as Pick<Transformations, typeof key>)[key];
@@ -84,48 +90,11 @@ export const processTransform = (m: SkMatrix, transforms: Transforms2d) => {
       continue;
     }
     if (key === "rotate" || key === "rotateZ") {
-      m.rotate(value);
-      continue;
-    }
-    exhaustiveCheck(key);
-  }
-  return m;
-};
-
-export const concatTransform = (m: SkCanvas, transforms: Transforms2d) => {
-  for (const transform of transforms) {
-    const key = Object.keys(transform)[0] as Transform2dName;
-    const value = (transform as Pick<Transformations, typeof key>)[key];
-    if (key === "translateX") {
-      m.translate(value, 0);
-      continue;
-    }
-    if (key === "translateY") {
-      m.translate(0, value);
-      continue;
-    }
-    if (key === "scale") {
-      m.scale(value, value);
-      continue;
-    }
-    if (key === "scaleX") {
-      m.scale(value, 1);
-      continue;
-    }
-    if (key === "scaleY") {
-      m.scale(1, value);
-      continue;
-    }
-    if (key === "skewX") {
-      m.skew(value, 0);
-      continue;
-    }
-    if (key === "skewY") {
-      m.skew(0, value);
-      continue;
-    }
-    if (key === "rotate" || key === "rotateZ") {
-      m.rotate(toDegrees(value), 0, 0);
+      if (isMatrix(m)) {
+        m.rotate(value);
+      } else {
+        m.rotate(toDegrees(value), 0, 0);
+      }
       continue;
     }
     exhaustiveCheck(key);

@@ -1,7 +1,6 @@
 import type { SkMatrix, Vector, Transforms2d } from "../../skia/types";
 import { processTransform } from "../../skia/types";
 import type { SkCanvas } from "../../skia/types/Canvas";
-import { concatTransform } from "../../skia/types/Matrix";
 
 export interface TransformProps {
   transform?: Transforms2d;
@@ -22,7 +21,7 @@ export const processCanvasTransform = (
       canvas.concat(matrix);
     }
   } else if (transform) {
-    concatTransform(
+    processTransform(
       canvas,
       origin ? transformOrigin(origin, transform) : transform
     );
