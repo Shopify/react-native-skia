@@ -52,7 +52,7 @@ Find `CMake` and click _Show Package Details_ and download compatiable version *
 
 ## Web
 
-To use this library on the web, see [these instructions](/docs/getting-started/web-support).
+To use this library in the browser, see [these instructions](/docs/getting-started/web).
 
 ## Playground
 

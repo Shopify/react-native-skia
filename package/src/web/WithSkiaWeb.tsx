@@ -2,22 +2,22 @@ import type { ComponentProps, ComponentType } from "react";
 import React, { useMemo, lazy, Suspense } from "react";
 import { Platform } from "react-native";
 
-import { LoadSkia } from "./LoadSkia";
+import { LoadSkiaWeb } from "./LoadSkiaWeb";
 
 interface WithSkiaProps {
   fallback: ComponentProps<typeof Suspense>["fallback"];
   getComponent: () => Promise<{ default: ComponentType }>;
 }
 
-export const WithSkia = ({ getComponent, fallback }: WithSkiaProps) => {
+export const WithSkiaWeb = ({ getComponent, fallback }: WithSkiaProps) => {
   const Inner = useMemo(
     () =>
       lazy(async () => {
         if (Platform.OS === "web") {
-          await LoadSkia();
+          await LoadSkiaWeb();
         } else {
           console.warn(
-            "<WithSkia /> is only necessary on web. Consider not using on native."
+            "<WithSkiaWeb /> is only necessary on web. Consider not using on native."
           );
         }
         return getComponent();
