@@ -157,7 +157,12 @@ export const PerformanceDrawingTest: React.FC = () => {
           ))}
         </Canvas>
       ) : (
-        <SkiaView style={styles.container} onDraw={draw} debug />
+        <SkiaView
+          style={styles.container}
+          onDraw={draw}
+          mode="continuous"
+          debug
+        />
       )}
     </View>
   );

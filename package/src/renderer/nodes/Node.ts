@@ -3,7 +3,7 @@ import type { SkiaValue } from "../../values";
 import type { DependencyManager } from "../DependencyManager";
 import type { DrawingContext } from "../DrawingContext";
 import type { AnimatedProps } from "../processors";
-import { isValue } from "../processors";
+import { isIndexedAccess, isValue } from "../processors";
 import { mapKeys } from "../typeddash";
 
 export enum NodeType {
@@ -78,6 +78,19 @@ export abstract class Node<P = unknown> {
         });
         // Set initial value
         this._props[key] = (propvalue as SkiaValue<P[typeof key]>).current;
+      } else if (isIndexedAccess(propvalue)) {
+        const i = propvalue.index;
+        // Subscribe to changes
+        this._propSubscriptions.push({
+          key,
+          unsub: propvalue.value.addListener((v) => {
+            this._props[key] = v[i] as P[typeof key];
+            this.setDirty(key);
+          }),
+        });
+        // Set initial value
+        const v = propvalue.value.current[i];
+        this._props[key] = v as P[typeof key];
       }
     });
     return this._props;
