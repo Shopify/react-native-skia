@@ -36,29 +36,32 @@ export class SkiaView extends React.Component<
   }
 
   private onLayout(evt: LayoutChangeEvent) {
-    this.setState({
-      width: evt.nativeEvent.layout.width,
-      height: evt.nativeEvent.layout.height,
-    });
-    // Reset canvas / surface on layout change
-    if (this._canvasRef.current) {
-      // Create surface
-      this._surface = new JsiSkSurface(
-        global.CanvasKit,
-        global.CanvasKit.MakeCanvasSurface(this._canvasRef.current)!
-      );
-      // Get canvas and repaint
-      if (this._surface) {
-        this._canvas = this._surface.getCanvas();
-        this.requestRedraw();
-        this.redraw();
+    this.setState(
+      {
+        width: evt.nativeEvent.layout.width,
+        height: evt.nativeEvent.layout.height,
+      },
+      () => {
+        // Reset canvas / surface on layout change
+        if (this._canvasRef.current) {
+          // Create surface
+          this._surface = new JsiSkSurface(
+            global.CanvasKit,
+            global.CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current)!
+          );
+          // Get canvas and repaint
+          if (this._surface) {
+            this._canvas = this._surface.getCanvas();
+            this.redraw();
+          }
+        }
       }
-    }
+    );
   }
 
   componentDidMount() {
     // Start render loop
-    this.redraw();
+    this.tick();
   }
 
   componentWillUnmount() {
@@ -80,7 +83,7 @@ export class SkiaView extends React.Component<
   /**
    * Sends a redraw request to the native SkiaView.
    */
-  private redraw() {
+  private tick() {
     if (this._mode === "continuous" || this._redrawRequests > 0) {
       this._redrawRequests = 0;
       if (
@@ -103,11 +106,11 @@ export class SkiaView extends React.Component<
     }
     // Always request a new redraw as long as we're not unmounted
     if (!this._unmounted) {
-      requestAnimationFrame(this.redraw.bind(this));
+      requestAnimationFrame(this.tick.bind(this));
     }
   }
 
-  public requestRedraw() {
+  public redraw() {
     this._redrawRequests++;
   }
 
@@ -122,7 +125,7 @@ export class SkiaView extends React.Component<
    */
   public setDrawMode(mode: DrawMode) {
     this._mode = mode;
-    this.redraw();
+    this.tick();
   }
 
   /**
@@ -137,7 +140,7 @@ export class SkiaView extends React.Component<
     _values.forEach((v) => {
       this._unsubscriptions.push(
         v.addListener(() => {
-          this.requestRedraw();
+          this.redraw();
         })
       );
     });
@@ -152,7 +155,7 @@ export class SkiaView extends React.Component<
       type: touchType,
       timestamp: Date.now(),
     });
-    this.requestRedraw();
+    this.redraw();
   }
 
   handleTouchStart(evt: PointerEvent) {
