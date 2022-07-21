@@ -26,7 +26,7 @@ const Size = 15;
 
 export const PerformanceDrawingTest: React.FC = () => {
   const [isDeclarative, setIsDeclarative] = useState(true);
-  const [numberOfBoxes, setNumberOfBoxes] = useState(300);
+  const [numberOfBoxes, setNumberOfBoxes] = useState(600);
 
   const { width } = useWindowDimensions();
 
@@ -136,7 +136,12 @@ export const PerformanceDrawingTest: React.FC = () => {
         </View>
       </View>
       {isDeclarative ? (
-        <Canvas style={styles.container} debug mode="default" onTouch={onTouch}>
+        <Canvas
+          style={styles.container}
+          debug
+          mode="continuous"
+          onTouch={onTouch}
+        >
           <Paint ref={paint1Ref} color="#00ff00" style={"fill"} />
           <Paint
             ref={paint2Ref}
