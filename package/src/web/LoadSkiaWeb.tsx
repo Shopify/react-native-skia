@@ -13,3 +13,6 @@ export const LoadSkiaWeb = async () => {
   // to create the JsiSKApi in the Skia.web.ts file.
   global.CanvasKit = CanvasKit;
 };
+
+// We keep this function for backward compatibility
+export const LoadSkia = LoadSkiaWeb;
