@@ -82,6 +82,8 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       );
     }, [children, root, redraw, container, canvasCtx]);
 
+    const paint = useMemo(() => Skia.Paint(), []);
+
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
@@ -96,7 +98,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         ) {
           canvasCtx.size.current = { width, height };
         }
-        const paint = Skia.Paint();
+        paint.reset();
         const ctx = {
           width,
           height,
@@ -105,7 +107,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           paint,
           opacity: 1,
           ref,
-          center: Skia.Point(width / 2, height / 2),
+          center: [width / 2, height / 2],
           fontMgr: fontMgr ?? defaultFontMgr,
           Skia,
         };

@@ -38,7 +38,7 @@ const onDraw = createDrawing<GroupProps>(
     );
     const paint = processPaint(
       ctx.Skia,
-      ctx.paint.copy(),
+      ctx.paint,
       opacity,
       groupProps,
       declarations

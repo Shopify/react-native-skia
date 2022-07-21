@@ -3,12 +3,12 @@ import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
 import type { AnimatedProps } from "../processors/Animations/Animations";
-import { materialize } from "../processors/Animations/Animations";
-import { isPaint } from "../../skia/types";
+import { isPaint, SkPaint } from "../../skia/types";
 import type { DependencyManager } from "../DependencyManager";
 import { processPaint } from "../processors";
 
 import { Node } from "./Node";
+import { Skia } from "../../skia";
 
 type DrawingCallback<P> = (
   ctx: DrawingContext,
@@ -34,6 +34,7 @@ export type DrawingProps<T> = {
 export class DrawingNode<P> extends Node<P> {
   onDraw: DrawingCallback<P>;
   skipProcessing: boolean;
+  paint: SkPaint;
 
   constructor(
     depMgr: DependencyManager,
@@ -44,23 +45,23 @@ export class DrawingNode<P> extends Node<P> {
     super(depMgr, props);
     this.onDraw = onDraw;
     this.skipProcessing = skipProcessing;
+    this.paint = Skia.Paint();
   }
 
   draw(ctx: DrawingContext) {
-    const drawingProps = materialize(this.props);
     if (this.skipProcessing) {
-      this.onDraw(ctx, drawingProps, this);
+      this.onDraw(ctx, this.props as P, this);
     } else {
       const declarations = this.visit(ctx);
       const paint = processPaint(
         ctx.Skia,
-        ctx.paint.copy(),
+        this.paint.reset(ctx.paint),
         ctx.opacity,
-        drawingProps,
+        this.props as P,
         declarations
       );
       [paint, ...declarations.filter(isPaint)].forEach((currentPaint) => {
-        this.onDraw({ ...ctx, paint: currentPaint }, drawingProps, this);
+        this.onDraw({ ...ctx, paint: currentPaint }, this.props as P, this);
       });
     }
   }

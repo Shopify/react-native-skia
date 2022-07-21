@@ -20,7 +20,7 @@ export class DependencyManager {
     this.ref = ref;
   }
 
-  unSubscribeNode(node: Node) {
+  unsubscribeNode(node: Node) {
     const subscription = this.subscriptions.get(node);
     if (subscription && subscription.unsubscribe) {
       subscription.unsubscribe();
@@ -49,9 +49,10 @@ export class DependencyManager {
   }
 
   unsubscribe() {
-    this.subscriptions.forEach(({ unsubscribe }) => {
+    this.subscriptions.forEach(({ unsubscribe }, node) => {
       if (unsubscribe) {
         unsubscribe();
+        node.unmountNode();
       }
     });
     this.subscriptions.clear();

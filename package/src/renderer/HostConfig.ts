@@ -101,7 +101,7 @@ const removeNode = (parent: Node, child: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   parent.children.splice(index, 1);
-  child.depMgr.unSubscribeNode(child);
+  child.depMgr.unsubscribeNode(child);
   // unsubscribe to all children as well
   for (const c of child.children) {
     removeNode(child, c);
