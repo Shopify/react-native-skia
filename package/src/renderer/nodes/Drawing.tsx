@@ -3,12 +3,13 @@ import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
 import type { AnimatedProps } from "../processors/Animations/Animations";
-import { isPaint, SkPaint } from "../../skia/types";
+import type { SkPaint } from "../../skia/types";
+import { isPaint } from "../../skia/types";
 import type { DependencyManager } from "../DependencyManager";
 import { processPaint } from "../processors";
+import { Skia } from "../../skia";
 
 import { Node } from "./Node";
-import { Skia } from "../../skia";
 
 type DrawingCallback<P> = (
   ctx: DrawingContext,
@@ -55,7 +56,7 @@ export class DrawingNode<P> extends Node<P> {
       const declarations = this.visit(ctx);
       const paint = processPaint(
         ctx.Skia,
-        this.paint.reset(ctx.paint),
+        ctx.paint.copy(),
         ctx.opacity,
         this.props as P,
         declarations
