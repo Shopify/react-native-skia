@@ -23,7 +23,7 @@ $ yarn setup-skia-web
 
 Once you are done, you need to pick your strategy to [Load Skia](#loading-skia).
 
-If you are not using `react-native-reanimated`, webpack will output a warning because React Native Skia refers to Reanimated. We describe how to fix this warning [here](#manual-webpack-installation).
+If you are [loading CanvasKit from a CDN](#using-a-cdn), you don't need to run the `setup-skia-web` script. If you are not using `react-native-reanimated`, webpack will output a warning because React Native Skia refers to Reanimated. We describe how to fix this warning [here](#manual-webpack-installation).
 
 ## Remotion
 
@@ -32,7 +32,7 @@ To use React Native Skia with Remotion, please follow [the following installatio
 ## Manual Webpack Installation
 
 To run React Native Skia on Web, you need to do three things:
-* Make sure that the WebAssembly file is available from the build system. This can easily be done using the [webpack copy plugin](https://webpack.js.org/plugins/copy-webpack-plugin/).
+* Make sure that the WebAssembly file is available from the build system. This can easily be done using the [webpack copy plugin](https://webpack.js.org/plugins/copy-webpack-plugin/). Another option is to [load CanvasKit from a CDN](#using-a-cdn).
 * Configure the build system to resolve the following two node modules: `fs` and `path`. One way to do it is to use the [node polyfill plugin](https://www.npmjs.com/package/node-polyfill-webpack-plugin).
 * If you are not using the `react-native-reanimated`, Webpack will throw a warning since React Native Skia refers to that module.
 
@@ -93,7 +93,7 @@ export default function App() {
   return (
     <WithSkiaWeb
       getComponent={() => import("./MySkiaComponent")}
-      fallback={<Text>Loading Skia...</Text>} />
+      fallback={<Text>Loading Skia...</Text>} />}
   );
 }
 ```
@@ -110,8 +110,42 @@ The following is an example of an `index.web.js` file.
 // @ts-expect-error
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 
-// This is only needed on React Native Web
 LoadSkiaWeb().then(async () => {
+  const App = (await import("./src/App")).default;
+  AppRegistry.registerComponent("Example", () => App);
+});
+```
+
+## Using a CDN
+
+Another option is to load CanvasKit from a CDN.
+This is useful to load Skia Web without having to modify your build steps.
+It is imperative that you are using the exact same version of CanvasKit as the one used by React Native Skia.
+
+In the example below we load CanvasKit from a CDN using code-splitting.
+
+```tsx
+import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { version } from 'canvaskit-wasm/package.json';
+
+export default function App() {
+  return (
+    <WithSkiaWeb
+      opts={{ locateFile: (file) => `https://cdn.jsdelivr.net/npm/canvaskit-wasm@${version}/bin/full/${file}` }}
+      getComponent={() => import("./MySkiaComponent")}
+  );
+}
+```
+
+Below is the same example but using defered component registration.
+ 
+ ```tsx
+import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { version } from 'canvaskit-wasm/package.json';
+
+LoadSkiaWeb({
+  locateFile: (file) => `https://cdn.jsdelivr.net/npm/canvaskit-wasm@${version}/bin/full/${file}`
+}).then(async () => {
   const App = (await import("./src/App")).default;
   AppRegistry.registerComponent("Example", () => App);
 });
