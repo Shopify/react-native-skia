@@ -22,7 +22,8 @@ $ yarn setup-skia-web
 ```
 
 Once you are done, you need to pick your strategy to [Load Skia](#loading-skia).
-If you are not using `react-native-reanimated`, you can get rid of a related webpack warning [here](#manual-webpack-installation).
+
+If you are not using `react-native-reanimated`, webpack will output a warning because React Native Skia refers to Reanimated. We describe how to fix this warning [here](#manual-webpack-installation).
 
 ## Remotion
 
@@ -54,7 +55,7 @@ const newConfiguration = {
         },
       ],
     }),
-    // 2. Polyfill fs and path module
+    // 2. Polyfill fs and path module from node
     new NodePolyfillPlugin()
   ],
   externals: {
@@ -67,7 +68,7 @@ const newConfiguration = {
 }
 ```
 
-Last, you need to [load Skia](#unsupported-features).
+Last, you need to [load Skia](#loading-skia).
 
 ## Loading Skia
 
@@ -91,15 +92,15 @@ import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 export default function App() {
   return (
     <WithSkiaWeb
-      fallback={() => import("./MySkiaComponent")}
-      getComponent={<Text>Loading Skia...</Text>} />
+      getComponent={() => import("./MySkiaComponent")}
+      fallback={<Text>Loading Skia...</Text>} />
   );
 }
 ```
 
 ### Using Defered Component Registration
 
-We provide a `LoadSkia()` function you can use to load Skia before starting the React app.
+We provide a `LoadSkiaWeb()` function you can use to load Skia before starting the React app.
 This is the approach we use for Remotion, for instance.
 The following is an example of an `index.web.js` file.
 
