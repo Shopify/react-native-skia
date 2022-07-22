@@ -7,9 +7,12 @@ declare global {
   var CanvasKit: CanvasKitType;
 }
 
-export const LoadSkia = async () => {
+export const LoadSkiaWeb = async () => {
   const CanvasKit = await CanvasKitInit();
   // The CanvasKit API is stored on the global object and used
   // to create the JsiSKApi in the Skia.web.ts file.
   global.CanvasKit = CanvasKit;
 };
+
+// We keep this function for backward compatibility
+export const LoadSkia = LoadSkiaWeb;
