@@ -101,11 +101,12 @@ const removeNode = (parent: Node, child: Node) => {
   bustBranchMemoization(parent);
   const index = parent.children.indexOf(child);
   parent.children.splice(index, 1);
-  child.depMgr.unsubscribeNode(child);
+  console.log("HostConfig: removeNode");
   // unsubscribe to all children as well
   for (const c of child.children) {
-    removeNode(child, c);
+    c.removeNode();
   }
+  child.removeNode();
 };
 
 const insertBefore = (parent: Node, child: Node, before: Node) => {

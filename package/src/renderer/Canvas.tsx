@@ -41,8 +41,7 @@ skiaReconciler.injectIntoDevTools({
 const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
   skiaReconciler.updateContainer(element, root, null, () => {
     hostDebug("updateContainer");
-
-    container.depMgr.subscribe();
+    container.depMgr.update();
   });
 };
 
@@ -120,7 +119,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
 
     useEffect(() => {
       return () => {
-        container.depMgr.unsubscribe();
+        container.depMgr.remove();
       };
     }, [container]);
 
