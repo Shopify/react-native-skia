@@ -13,23 +13,28 @@ export enum NodeType {
 
 type DeclarationResult = SkJSIInstance<string> | null;
 
+let NodeID = 1000;
+
 export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
   _props: AnimatedProps<P>;
   _propSubscriptions: Array<{
-    unsub: () => void;
+    value: SkiaValue<unknown>;
+    listener: (v: unknown) => void;
     key: string | symbol | number;
+    unsub: (() => void) | undefined;
   }> = [];
   _dirty: Map<unknown, boolean> = new Map();
   memoizable = false;
   memoized: DeclarationResult | null = null;
   parent?: Node;
   depMgr: DependencyManager;
+  nodeId: number;
 
   constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
+    this.nodeId = NodeID++;
+    //console.log("Node: constructor", this.nodeId);
     this.depMgr = depMgr;
-    this.depMgr.unsubscribeNode(this);
-    this.depMgr.subscribeNode(this, props);
     this._props = this.subscribeToPropChanges(props);
   }
 
@@ -50,31 +55,27 @@ export abstract class Node<P = unknown> {
     );
   }
 
-  unmountNode() {
-    this.unsubscribeToPropChanges();
-  }
-
-  unsubscribeToPropChanges() {
-    if (this._propSubscriptions.length === 0) {
-      return;
-    }
-    this._propSubscriptions.forEach((p) => p.unsub());
+  removeNode() {
+    //console.log("Node: removeNode", this.nodeId);
+    this.depMgr.unsubscribeNode(this);
     this._propSubscriptions = [];
   }
 
   subscribeToPropChanges(props: AnimatedProps<P>) {
-    this.unsubscribeToPropChanges();
     this._props = { ...props };
+    this._propSubscriptions = [];
     mapKeys(this._props).forEach((key) => {
       const propvalue = this._props[key];
       if (isValue(propvalue)) {
         // Subscribe to changes
         this._propSubscriptions.push({
           key,
-          unsub: propvalue.addListener((v) => {
+          value: propvalue,
+          unsub: undefined,
+          listener: (v) => {
             this._props[key] = v as P[typeof key];
             this.setDirty(key);
-          }),
+          },
         });
         // Set initial value
         this._props[key] = (propvalue as SkiaValue<P[typeof key]>).current;
@@ -83,23 +84,44 @@ export abstract class Node<P = unknown> {
         // Subscribe to changes
         this._propSubscriptions.push({
           key,
-          unsub: propvalue.value.addListener((v) => {
-            this._props[key] = v[i] as P[typeof key];
+          value: propvalue.value,
+          unsub: undefined,
+          listener: (v) => {
+            this._props[key] = (v as P[typeof key][])[i];
             this.setDirty(key);
-          }),
+          },
         });
         // Set initial value
         const v = propvalue.value.current[i];
         this._props[key] = v as P[typeof key];
       }
     });
+
+    this._propSubscriptions.length > 0 &&
+      // console.log(
+      //   "Node: subscribeToPropChanges set",
+      //   this.nodeId,
+      //   this._propSubscriptions.map((p) => p.key).join(",")
+      // );
+
+      // Subscribe to properties
+      this.depMgr.subscribeNode(
+        this,
+        this._propSubscriptions.map((s) => ({
+          value: s.value,
+          listener: s.listener,
+          key: s.key,
+        }))
+      );
+
+    // returns props - this is just so that the ctor type logic is working :)
     return this._props;
   }
 
   set props(props: AnimatedProps<P>) {
+    //console.log("Node: props set", this.nodeId);
     this.depMgr.unsubscribeNode(this);
-    this.depMgr.subscribeNode(this, props);
-    this._props = this.subscribeToPropChanges(props);
+    this.subscribeToPropChanges(props);
   }
 
   get props() {
