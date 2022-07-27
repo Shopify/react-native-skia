@@ -4,6 +4,7 @@ import type { Color, Skia as SkiaApi, SkRect, Vector } from "../skia/types";
 import * as Values from "../values/web";
 import * as ValuesHooks from "../values/hooks";
 import * as BaseSkia from "../skia/types";
+import { Selector } from "../values";
 import type * as SkiaExports from "../skia";
 import type * as ExternalExports from "../external";
 import type * as ValueExports from "../values";
@@ -91,6 +92,7 @@ export const Mock: typeof SkiaExports &
   // ValueExports
   ...Values,
   ...ValuesHooks,
+  Selector,
   // Animations
   ...timingFunctions,
   ...springFunctions,

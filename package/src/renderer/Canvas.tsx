@@ -21,12 +21,14 @@ import type { TouchHandler } from "../views";
 import type { SkFontMgr } from "../skia/types";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
+import { vec } from "../skia";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
 import { Container } from "./nodes";
 import { DependencyManager } from "./DependencyManager";
 import { CanvasProvider } from "./useCanvas";
+import type { DrawingContext } from "./DrawingContext";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -39,8 +41,7 @@ skiaReconciler.injectIntoDevTools({
 const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
   skiaReconciler.updateContainer(element, root, null, () => {
     hostDebug("updateContainer");
-
-    container.depMgr.subscribe();
+    container.depMgr.update();
   });
 };
 
@@ -82,6 +83,8 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       );
     }, [children, root, redraw, container, canvasCtx]);
 
+    const paint = useMemo(() => Skia.Paint(), []);
+
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
@@ -96,8 +99,8 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         ) {
           canvasCtx.size.current = { width, height };
         }
-        const paint = Skia.Paint();
-        const ctx = {
+        paint.reset();
+        const ctx: DrawingContext = {
           width,
           height,
           timestamp,
@@ -105,7 +108,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           paint,
           opacity: 1,
           ref,
-          center: Skia.Point(width / 2, height / 2),
+          center: vec(width / 2, height / 2),
           fontMgr: fontMgr ?? defaultFontMgr,
           Skia,
         };
@@ -116,7 +119,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
 
     useEffect(() => {
       return () => {
-        container.depMgr.unsubscribe();
+        container.depMgr.remove();
       };
     }, [container]);
 
