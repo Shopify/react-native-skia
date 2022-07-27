@@ -98,7 +98,7 @@ export class SkiaView extends React.Component<
           height: this.state.height,
           width: this.state.width,
           timestamp: Date.now(),
-          touches: [touches],
+          touches: touches.map((t) => [t]),
         };
         this.props.onDraw && this.props.onDraw(this._canvas!, info);
         this._surface?.ref.flush();
@@ -158,20 +158,8 @@ export class SkiaView extends React.Component<
     this.redraw();
   }
 
-  handleTouchStart(evt: PointerEvent) {
-    this.handleTouchEvent(evt, TouchType.Start);
-  }
-
-  handleTouchMove(evt: PointerEvent) {
-    this.handleTouchEvent(evt, TouchType.Active);
-  }
-
-  handleTouchEnd(evt: PointerEvent) {
-    this.handleTouchEvent(evt, TouchType.Cancelled);
-  }
-
-  handleTouchCancel(evt: PointerEvent) {
-    this.handleTouchEvent(evt, TouchType.End);
+  createTouchHandler(touchType: TouchType) {
+    return (evt: PointerEvent) => this.handleTouchEvent(evt, touchType);
   }
 
   render() {
@@ -182,10 +170,12 @@ export class SkiaView extends React.Component<
           ref={this._canvasRef}
           width={this.state.width}
           height={this.state.height}
-          onPointerDown={this.handleTouchStart.bind(this)}
-          onPointerMove={this.handleTouchMove.bind(this)}
-          onPointerUp={this.handleTouchEnd.bind(this)}
-          onPointerCancel={this.handleTouchCancel.bind(this)}
+          onPointerDown={this.createTouchHandler(TouchType.Start)}
+          onPointerMove={this.createTouchHandler(TouchType.Active)}
+          onPointerUp={this.createTouchHandler(TouchType.End)}
+          onPointerCancel={this.createTouchHandler(TouchType.Cancelled)}
+          onPointerLeave={this.createTouchHandler(TouchType.End)}
+          onPointerOut={this.createTouchHandler(TouchType.End)}
         />
       </View>
     );
