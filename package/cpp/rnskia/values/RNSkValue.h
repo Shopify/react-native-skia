@@ -72,6 +72,7 @@ public:
   
   JSI_EXPORT_FUNCTIONS(
     JSI_EXPORT_FUNC(RNSkValue, addListener),
+    JSI_EXPORT_FUNC(RNSkReadonlyValue, __invalidate)
   )
 
 private:
