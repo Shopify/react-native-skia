@@ -9,7 +9,8 @@ import {
   Group,
   useTouchHandler,
   useValue,
-  useComputedArrayValue,
+  useComputedValue,
+  Selector,
 } from "@shopify/react-native-skia";
 import type { SkCanvas, DrawingInfo } from "@shopify/react-native-skia";
 import React, { useMemo, useCallback, useState, useRef } from "react";
@@ -22,13 +23,14 @@ import {
   Button,
 } from "react-native";
 
-const Size = 15;
+const Size = 25;
+const Increaser = 50;
 
 export const PerformanceDrawingTest: React.FC = () => {
   const [isDeclarative, setIsDeclarative] = useState(true);
-  const [numberOfBoxes, setNumberOfBoxes] = useState(300);
+  const [numberOfBoxes, setNumberOfBoxes] = useState(150);
 
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   const SizeWidth = Size;
   const SizeHeight = Size * 0.45;
@@ -49,7 +51,10 @@ export const PerformanceDrawingTest: React.FC = () => {
     return p;
   }, []);
 
-  const currentTouch = useValue<{ x: number; y: number }>({ x: 0, y: 0 });
+  const currentTouch = useValue<{ x: number; y: number }>({
+    x: width / 2,
+    y: height * 0.25,
+  });
   const onTouch = useTouchHandler({
     onActive: ({ x, y }) => {
       currentTouch.current = { x, y };
@@ -71,7 +76,7 @@ export const PerformanceDrawingTest: React.FC = () => {
     [numberOfBoxes, width, SizeWidth, SizeHeight]
   );
 
-  const rotationTransforms = useComputedArrayValue(() => {
+  const rotationTransforms = useComputedValue(() => {
     return rects.map((rect) => {
       const p1 = { x: rect.x, y: rect.y };
       const p2 = currentTouch.current;
@@ -80,7 +85,7 @@ export const PerformanceDrawingTest: React.FC = () => {
     });
   }, [currentTouch, rects]);
 
-  const currentTouch2 = useRef({ x: 0, y: 0 });
+  const currentTouch2 = useRef({ x: width / 2, y: height * 0.25 });
   const draw = useCallback(
     (canvas: SkCanvas, info: DrawingInfo) => {
       for (let i = 0; i < rects.length; i++) {
@@ -120,12 +125,15 @@ export const PerformanceDrawingTest: React.FC = () => {
         <View style={styles.panel}>
           <Button
             title="⬇️"
-            onPress={() => setNumberOfBoxes((n) => Math.max(0, n - 50))}
+            onPress={() => setNumberOfBoxes((n) => Math.max(0, n - Increaser))}
           />
           <Text>&nbsp;Size&nbsp;</Text>
           <Text>{numberOfBoxes}</Text>
           <Text>&nbsp;</Text>
-          <Button title="⬆️" onPress={() => setNumberOfBoxes((n) => n + 50)} />
+          <Button
+            title="⬆️"
+            onPress={() => setNumberOfBoxes((n) => n + Increaser)}
+          />
         </View>
         <View style={styles.panel}>
           <Text>Use Declarative model&nbsp;</Text>
@@ -145,14 +153,23 @@ export const PerformanceDrawingTest: React.FC = () => {
             strokeWidth={2}
           />
           {rects.map((_, i) => (
-            <Group key={i} transform={rotationTransforms(i)} origin={rects[i]}>
+            <Group
+              key={i}
+              transform={Selector(rotationTransforms, (v) => v[i])}
+              origin={rects[i]}
+            >
               <Rect rect={rects[i]} paint={paint1Ref} />
               <Rect rect={rects[i]} paint={paint2Ref} />
             </Group>
           ))}
         </Canvas>
       ) : (
-        <SkiaView style={styles.container} onDraw={draw} debug />
+        <SkiaView
+          style={styles.container}
+          onDraw={draw}
+          mode="continuous"
+          debug
+        />
       )}
     </View>
   );
