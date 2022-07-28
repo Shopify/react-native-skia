@@ -2388,11 +2388,6 @@
     "@typescript-eslint/types" "4.33.0"
     eslint-visitor-keys "^2.0.0"
 
-"@webgpu/types@^0.1.20":
-  version "0.1.20"
-  resolved "https://registry.yarnpkg.com/@webgpu/types/-/types-0.1.20.tgz#9263846b99052a35b9ad8b15adc60b9394d306b0"
-  integrity sha512-MFb5oyxX+A7PWQNjcY3kSCSG2FAHaBo7IJBWtxWFgsS20FtY3D9UY7lYqLZ6avS8fSkdSylIS4qiHzFlQUdXag==
-
 abab@^2.0.3, abab@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.5.tgz#c0b678fb32d60fc1219c784d6a826fe385aeb79a"
@@ -3049,12 +3044,9 @@ caniuse-lite@^1.0.30001274, caniuse-lite@^1.0.30001317:
   resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001363.tgz"
   integrity sha512-HpQhpzTGGPVMnCjIomjt+jvyUu8vNFo3TaDiZ/RcoTrlOq/5+tC8zHdsbgFB6MxmaY+jCpsH09aD80Bb4Ow3Sg==
 
-canvaskit-wasm@^0.35.0:
+"canvaskit-wasm@https://firebasestorage.googleapis.com/v0/b/react-native-ui-kits.appspot.com/o/canvaskit-wasm-0.35.0.tgz?alt=media&token=dff7c40b-7353-4a35-b115-a957d61bb5cc":
   version "0.35.0"
-  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.35.0.tgz#90afc625958367f4a27907fb8c03240045933a46"
-  integrity sha512-y/eTJ4xoIBkKzD37aQAvBL451LIp9YiB8Vs1e8J3Qwe7WcTHsAD00E5WocPzZo+0+XaSCkJ6cS/BxBDXTSnW1g==
-  dependencies:
-    "@webgpu/types" "^0.1.20"
+  resolved "https://firebasestorage.googleapis.com/v0/b/react-native-ui-kits.appspot.com/o/canvaskit-wasm-0.35.0.tgz?alt=media&token=dff7c40b-7353-4a35-b115-a957d61bb5cc#04eb33c3b96910a6a91ae2035be3f8dd0b5677b6"
 
 capture-exit@^2.0.0:
   version "2.0.0"
