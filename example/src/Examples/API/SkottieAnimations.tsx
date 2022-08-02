@@ -1,18 +1,12 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import {
   Canvas,
   Skia,
   SkottieAnimation,
-  useSharedValueEffect,
-  useValue,
-} from "@shopify/react-native-skia";
-import {
+  useTiming,
   Easing,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from "react-native-reanimated";
+} from "@shopify/react-native-skia";
 
 import _LottieAnim from "../../assets/material_wave_loading.json";
 
@@ -24,22 +18,10 @@ export const SkottieAnimations = () => {
   // TODO: build a hook that abstracts this logic
   const skottieAnimation = useMemo(() => Skia.SkottieAnimation(LottieAnim), []);
 
-  const progress = useValue(0);
-  const animProgress = useSharedValue(0);
-
-  useEffect(() => {
-    animProgress.value = withRepeat(
-      withTiming(1, {
-        duration: skottieAnimation.duration * 1000,
-        easing: Easing.linear,
-      }),
-      -1
-    );
-  }, [animProgress, skottieAnimation.duration]);
-
-  useSharedValueEffect(() => {
-    progress.current = animProgress.value;
-  }, animProgress);
+  const progress = useTiming(1, {
+    duration: skottieAnimation.duration * 1000,
+    easing: Easing.linear,
+  });
 
   return (
     <ScrollView>
