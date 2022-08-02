@@ -1,4 +1,4 @@
-import { mix } from "../../renderer";
+import { mix } from "../../renderer/processors/math";
 import type { Color, SkColor } from "../../skia";
 import { Skia } from "../../skia";
 

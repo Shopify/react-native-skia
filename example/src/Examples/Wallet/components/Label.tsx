@@ -49,17 +49,13 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
     }
     const graph = graphs[state.current.current];
     const title = format(graph.data.maxPrice);
-    const titleWidth = titleFont
-      .getGlyphWidths(titleFont.getGlyphIDs(title))
-      .reduce((a, b) => a + b, 0);
+    const titleWidth = titleFont.getTextWidth(title);
     return width / 2 - titleWidth / 2;
   }, [state, titleFont]);
   if (!titleFont || !subtitleFont) {
     return null;
   }
-  const subtitleWidth = subtitleFont
-    .getGlyphWidths(subtitleFont.getGlyphIDs(subtitle))
-    .reduce((a, b) => a + b, 0);
+  const subtitleWidth = subtitleFont.getTextWidth(subtitle);
   return (
     <>
       <Text

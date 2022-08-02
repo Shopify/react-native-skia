@@ -52,6 +52,9 @@ jobs:
       - name: TypeScript Example
         run: cd example; yarn tsc;
 
+      - name: Run Example Unit tests
+        run: cd package; yarn test;
+
       - name: Install Docs
         run: cd docs; yarn;
 
