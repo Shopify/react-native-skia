@@ -18,10 +18,17 @@ export const SkottieAnimations = () => {
   // TODO: build a hook that abstracts this logic
   const skottieAnimation = useMemo(() => Skia.SkottieAnimation(LottieAnim), []);
 
-  const progress = useTiming(1, {
-    duration: skottieAnimation.duration * 1000,
-    easing: Easing.linear,
-  });
+  const progress = useTiming(
+    {
+      from: 0,
+      to: 1,
+      loop: true,
+    },
+    {
+      duration: skottieAnimation.duration * 1000,
+      easing: Easing.linear,
+    }
+  );
 
   return (
     <ScrollView>
