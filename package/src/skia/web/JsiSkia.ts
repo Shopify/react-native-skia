@@ -95,4 +95,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     return new JsiSkRect(CanvasKit, CanvasKit.XYWHRect(x, y, width, height));
   },
   Surface: new JsiSkSurfaceFactory(CanvasKit),
+  SkottieAnimation: (_jsonString) => {
+    throw new Error("Not implemented yet on React Native Web");
+  },
 });
