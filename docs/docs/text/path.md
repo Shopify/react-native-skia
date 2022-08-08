@@ -17,10 +17,10 @@ The fonts available in the canvas are described in [here](/docs/text/fonts).
 ## Example
 
 ```tsx twoslash
-import {Canvas, Group, TextPath, Skia, useFont} from "@shopify/react-native-skia";
+import {Canvas, Group, TextPath, Skia, useFont, vec} from "@shopify/react-native-skia";
 
 const circle = Skia.Path.Make();
-circle.addCircle(128, 128, 128);
+circle.addCircle(128, 128, 64);
 
 export const HelloWorld = () => {
   const font = useFont(require("./my-font.ttf"), 24);
@@ -28,15 +28,14 @@ export const HelloWorld = () => {
     return null;
   }
   return (
-      <Canvas style={{ flex: 1 }}>
-        <Group transform={[{ translateY: 25 }]}>
-          <TextPath
-            text="Hello World!"
-            path={circle}
-            font={font}
-          />
-        </Group>
-      </Canvas>
+    <Canvas style={{ flex: 1 }}>
+      <Fill color="white" />
+      <Group transform={[{ rotate: Math.PI }]} origin={vec(r, r)}>
+        <TextPath font={font} path={path} text="Hello World!" />
+      </Group>
+    </Canvas>
   );
 };
 ```
+
+<img src={require("/static/img/text/text-path.png").default} width="256" height="256" />
