@@ -32,20 +32,19 @@ const loadDataCollection = <T>(
 ): Promise<(T | null)[]> =>
   Promise.all(sources.map((source) => loadData(source, factory, onError)));
 
-const loadData = <T>(
+const loadData = async <T>(
   source: DataSource,
   factory: (data: SkData) => T,
   onError?: (err: Error) => void
 ): Promise<T | null> => {
-  if (source instanceof Uint8Array) {
-    return new Promise((resolve) =>
-      resolve(factoryWrapper(Skia.Data.fromBytes(source), factory, onError))
-    );
+  if (source === null) {
+    return null;
+  } else if (source instanceof Uint8Array) {
+    return factoryWrapper(Skia.Data.fromBytes(source), factory, onError);
   } else {
     const uri = typeof source === "string" ? source : resolveAsset(source);
-    return Skia.Data.fromURI(uri).then((d) =>
-      factoryWrapper(d, factory, onError)
-    );
+    const d = await Skia.Data.fromURI(uri);
+    return factoryWrapper(d, factory, onError);
   }
 };
 

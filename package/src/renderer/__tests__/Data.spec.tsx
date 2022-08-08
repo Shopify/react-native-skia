@@ -14,6 +14,15 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface EmptyProps {}
 
+const CheckData = ({}: EmptyProps) => {
+  const { useFont } = require("../../skia/core/Font");
+  const font = useFont(null);
+  if (font === null) {
+    return <Fill color="green" />;
+  }
+  return <Fill color="red" />;
+};
+
 const CheckFont = ({}: EmptyProps) => {
   const { useFont } = require("../../skia/core/Font");
   const font = useFont(
@@ -49,6 +58,14 @@ const CheckDataCollection = ({}: EmptyProps) => {
 describe("Data Loading", () => {
   it("Loads renderer without Skia", async () => {
     expect(SkiaRenderer).toBeDefined();
+  });
+  it("Should accept null as an argument", async () => {
+    const { surface, draw } = mountCanvas(<CheckData />);
+    draw();
+    processResult(surface, "snapshots/font/green.png");
+    await wait(42);
+    draw();
+    processResult(surface, "snapshots/font/green.png");
   });
   it("Should load a font file", async () => {
     const { surface, draw } = mountCanvas(<CheckFont />);
