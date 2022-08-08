@@ -73,7 +73,7 @@ describe("Test different text examples", () => {
     const surface = drawOnNode(
       <>
         <Fill color="white" />
-        <Text text={"🙋🌎"} font={emojiFont} y={fontSize} x={0} />
+        <Text text="🙋🌎" font={emojiFont} y={fontSize} x={0} />
       </>
     );
     processResult(surface, docPath("text/text-emoji.png"), true);

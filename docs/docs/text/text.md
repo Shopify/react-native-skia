@@ -16,7 +16,7 @@ Please note that the y origin of the Text is the bottom of the text, not the top
 | x           | `number`   | Left position of the text (default is 0)                      |
 | y           | `number`   | Bottom position the text (default is 0, the )                 |
 
-### Example
+### Simple Text
 
 ```tsx twoslash
 import {Canvas, Text, useFont, Fill} from "@shopify/react-native-skia";
@@ -42,3 +42,26 @@ export const HelloWorld = () => {
 ```
 
 <img src={require("/static/img/text/hello-world.png").default} width="256" height="256" />
+
+
+### Emojis
+
+```tsx twoslash
+import {Canvas, Text, useFont, Fill} from "@shopify/react-native-skia";
+
+export const HelloWorld = () => {
+  const fontSize = 32;
+  const font = useFont(require("./NotoColorEmoji.ttf"), fontSize);
+  if (font === null) {
+    return null;
+  }
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Fill color="white" />
+      <Text text="🙋🌎" font={font} y={fontSize} x={0} />
+    </Canvas>
+  );
+};
+```
+
+<img src={require("/static/img/text/text-emoji.png").default} width="256" height="256" />
