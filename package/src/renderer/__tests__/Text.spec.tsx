@@ -1,6 +1,6 @@
 import React from "react";
 
-import { processResult } from "../../__tests__/setup";
+import { processResult, docPath } from "../../__tests__/setup";
 import { TextPath, Fill, Text, Glyphs, TextBlob } from "../components";
 
 import { drawOnNode, Skia, width, font, fontSize } from "./setup";
@@ -13,7 +13,7 @@ describe("Test different text examples", () => {
         <Text x={0} y={fontSize} font={font} text="Hello World" />
       </>
     );
-    processResult(surface, "snapshots/text/hello-world.png", true);
+    processResult(surface, docPath("text/hello-world.png"), true);
   });
 
   it("Should draw Hello World vertically", () => {
@@ -26,7 +26,7 @@ describe("Test different text examples", () => {
         <Glyphs font={font} glyphs={glyphs} />
       </>
     );
-    processResult(surface, "snapshots/text/hello-world-vertical.png", true);
+    processResult(surface, docPath("text/hello-world-vertical.png"), true);
   });
 
   it("Should render the text around a circle", () => {
@@ -39,7 +39,7 @@ describe("Test different text examples", () => {
         <TextPath font={font} path={path} text="Hello World!" />
       </>
     );
-    processResult(surface, "snapshots/text/text-path.png", true);
+    processResult(surface, docPath("text/text-path.png"), true);
   });
 
   it("Should render a text blob", () => {
@@ -50,6 +50,6 @@ describe("Test different text examples", () => {
         <TextBlob blob={blob} y={fontSize} x={0} />
       </>
     );
-    processResult(surface, "snapshots/text/text-blob.png", true);
+    processResult(surface, docPath("text/text-blob.png"), true);
   });
 });
