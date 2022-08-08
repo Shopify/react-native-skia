@@ -70,11 +70,10 @@ describe("Test different text examples", () => {
     const tf = Skia.Typeface.MakeFreeTypeFaceFromData(data)!;
     expect(tf).toBeTruthy();
     const emojiFont = Skia.Font(tf, fontSize);
-    const blob = Skia.TextBlob.MakeFromText("🙋🌎", emojiFont);
     const surface = drawOnNode(
       <>
         <Fill color="white" />
-        <TextBlob blob={blob} y={fontSize} x={0} />
+        <Text text={"🙋🌎"} font={emojiFont} y={fontSize} x={0} />
       </>
     );
     processResult(surface, docPath("text/text-emoji.png"), true);
