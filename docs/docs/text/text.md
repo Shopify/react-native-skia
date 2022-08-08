@@ -30,7 +30,6 @@ export const HelloWorld = () => {
         y={0}
         text="Hello World"
         font={font}
-        size={32}
       />
     </Canvas>
   );
