@@ -29,7 +29,7 @@ export const PerformanceDrawingTest: React.FC = () => {
     return () => clearTimeout(to);
   }, []);
 
-  if (!image) {
+  if (image === null) {
     return null;
   }
   return (
