@@ -46,6 +46,7 @@ describe("Test introductionary examples from our documentation", () => {
     );
     processResult(surface, "snapshots/drawings/transform-origin.png");
   });
+
   it("Should use radians for the skew transformation", () => {
     const r = width / 4;
     const surface = drawOnNode(
@@ -62,6 +63,7 @@ describe("Test introductionary examples from our documentation", () => {
     );
     processResult(surface, "snapshots/drawings/skew-transform.png");
   });
+
   it("Should use multiple paint definitions for one drawing command", () => {
     const r = width / 4;
     const strokeWidth = 50;
