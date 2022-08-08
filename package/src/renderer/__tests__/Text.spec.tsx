@@ -1,5 +1,5 @@
 import fs from "fs";
-import path from "path";
+import nodePath from "path";
 
 import React from "react";
 
@@ -61,7 +61,7 @@ describe("Test different text examples", () => {
   it("Should render text with Emojis", () => {
     const data = Skia.Data.fromBytes(
       fs.readFileSync(
-        path.resolve(
+        nodePath.resolve(
           __dirname,
           "../../skia/__tests__/assets/NotoColorEmoji.ttf"
         )
