@@ -63,7 +63,7 @@ describe("Data Loading", () => {
     const { surface, draw } = mountCanvas(<CheckData />);
     draw();
     processResult(surface, "snapshots/font/green.png");
-    await wait(500);
+    await wait(42);
     draw();
     processResult(surface, "snapshots/font/green.png");
   });
