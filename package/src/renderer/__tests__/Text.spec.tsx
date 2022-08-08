@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 import React from "react";
 
 import { processResult, docPath } from "../../__tests__/setup";
@@ -53,5 +56,27 @@ describe("Test different text examples", () => {
       </>
     );
     processResult(surface, docPath("text/text-blob.png"));
+  });
+
+  it("Should render text with Emojis", () => {
+    const data = Skia.Data.fromBytes(
+      fs.readFileSync(
+        path.resolve(
+          __dirname,
+          "../../skia/__tests__/assets/NotoColorEmoji.ttf"
+        )
+      )
+    );
+    const tf = Skia.Typeface.MakeFreeTypeFaceFromData(data)!;
+    expect(tf).toBeTruthy();
+    const emojiFont = Skia.Font(tf, fontSize);
+    const blob = Skia.TextBlob.MakeFromText("🙋🌎", emojiFont);
+    const surface = drawOnNode(
+      <>
+        <Fill color="white" />
+        <TextBlob blob={blob} y={fontSize} x={0} />
+      </>
+    );
+    processResult(surface, docPath("text/text-emoji.png"), true);
   });
 });
