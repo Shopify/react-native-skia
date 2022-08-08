@@ -20,11 +20,10 @@ import {Canvas, TextBlob, Skia} from "@shopify/react-native-skia";
 
 
 export const HelloWorld = () => {
-  const typeface = Skia.FontMgr.RefDefault().matchFamilyStyle("helvetica");
-  if (!typeface) {
-    throw new Error("Helvetica not found");
+  const font = useFont(require("./SF-Pro.ttf"), 24);
+  if (!font) {
+    return null;
   }
-  const font = Skia.Font(typeface, 30);
   const blob = Skia.TextBlob.MakeFromText("Hello World!", font);
   return (
       <Canvas style={{ flex: 1 }}>
