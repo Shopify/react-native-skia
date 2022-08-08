@@ -36,6 +36,19 @@ const CheckFont = ({}: EmptyProps) => {
   return <Fill color="green" />;
 };
 
+const CheckImage = ({}: EmptyProps) => {
+  const { useImage } = require("../../skia/core/Image");
+  const image = useImage(
+    nodeRequire(
+      path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
+    )
+  );
+  if (!image) {
+    return <Fill color="red" />;
+  }
+  return <Fill color="green" />;
+};
+
 const CheckDataCollection = ({}: EmptyProps) => {
   const { useDataCollection } = require("../../skia/core/Data");
   const font = useDataCollection(
@@ -67,8 +80,18 @@ describe("Data Loading", () => {
     draw();
     processResult(surface, "snapshots/font/green.png");
   });
+
   it("Should load a font file", async () => {
     const { surface, draw } = mountCanvas(<CheckFont />);
+    draw();
+    processResult(surface, "snapshots/font/red.png");
+    await wait(500);
+    draw();
+    processResult(surface, "snapshots/font/green.png");
+  });
+
+  it("Should load an image", async () => {
+    const { surface, draw } = mountCanvas(<CheckImage />);
     draw();
     processResult(surface, "snapshots/font/red.png");
     await wait(500);
