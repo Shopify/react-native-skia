@@ -1,19 +1,32 @@
 import React from "react";
 
 import { processResult } from "../../__tests__/setup";
-import { TextPath, Fill, Text } from "../components";
+import { TextPath, Fill, Text, Glyphs, TextBlob } from "../components";
 
 import { drawOnNode, Skia, width, font, fontSize } from "./setup";
 
 describe("Test different text examples", () => {
-  it("Should use display Hello World using the Roboto typeface", () => {
+  it("Should draw Hello World", () => {
     const surface = drawOnNode(
       <>
         <Fill color="white" />
         <Text x={0} y={fontSize} font={font} text="Hello World" />
       </>
     );
-    processResult(surface, "snapshots/text/hello-world.png");
+    processResult(surface, "snapshots/text/hello-world.png", true);
+  });
+
+  it("Should draw Hello World vertically", () => {
+    const glyphs = font
+      .getGlyphIDs("Hello World!")
+      .map((id, i) => ({ id, pos: Skia.Point(0, (i + 1) * fontSize) }));
+    const surface = drawOnNode(
+      <>
+        <Fill color="white" />
+        <Glyphs font={font} glyphs={glyphs} />
+      </>
+    );
+    processResult(surface, "snapshots/text/hello-world-vertical.png", true);
   });
 
   it("Should render the text around a circle", () => {
@@ -27,5 +40,16 @@ describe("Test different text examples", () => {
       </>
     );
     processResult(surface, "snapshots/text/text-path.png", true);
+  });
+
+  it("Should render a text blob", () => {
+    const blob = Skia.TextBlob.MakeFromText("Hello World!", font);
+    const surface = drawOnNode(
+      <>
+        <Fill color="white" />
+        <TextBlob blob={blob} y={fontSize} x={0} />
+      </>
+    );
+    processResult(surface, "snapshots/text/text-blob.png", true);
   });
 });

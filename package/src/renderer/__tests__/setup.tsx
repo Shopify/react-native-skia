@@ -17,7 +17,6 @@ import type { SkFont } from "../../skia";
 
 export let Skia: ReturnType<typeof JsiSkApi>;
 export let font: SkFont;
-export const fontSize = 92;
 
 jest.mock("react-native", () => ({
   Platform: { OS: "web" },
@@ -43,6 +42,7 @@ beforeAll(async () => {
 });
 
 const pixelDensity = 3;
+export const fontSize = 32 * pixelDensity;
 export const width = 256 * pixelDensity;
 export const height = 256 * pixelDensity;
 export const center = { x: width / 2, y: height / 2 };
