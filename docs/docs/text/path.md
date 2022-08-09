@@ -5,8 +5,7 @@ sidebar_label: Text Path
 slug: /text/path
 ---
 
-Draws text along an SVG path.
-The fonts available in the canvas are described in [here](/docs/text/fonts).
+Draws text along a path.
 
 | Name        | Type               |  Description                                                 |
 |:------------|:-------------------|:-------------------------------------------------------------|

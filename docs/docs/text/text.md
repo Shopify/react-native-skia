@@ -6,7 +6,6 @@ slug: /text/text
 ---
 
 The text component can be used to draw a simple text.
-The fonts available in the canvas are described in [here](/docs/text/fonts).
 Please note that the y origin of the Text is the bottom of the text, not the top.
 
 | Name        | Type       |  Description                                                  |
