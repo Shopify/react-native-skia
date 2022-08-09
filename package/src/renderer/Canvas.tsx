@@ -52,7 +52,10 @@ export interface CanvasProps extends ComponentProps<typeof SkiaView> {
 }
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
-  ({ children, style, debug, mode, onTouch }, forwardedRef) => {
+  (
+    { children, style, debug, mode, onTouch, onDraw: onDrawFromProps },
+    forwardedRef
+  ) => {
     const size = useValue({ width: 0, height: 0 });
     const canvasCtx = useMemo(() => ({ Skia, size }), [size]);
     const innerRef = useCanvasRef();
@@ -81,6 +84,9 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
+        if (typeof onDrawFromProps === "function") {
+          onDrawFromProps(canvas, info);
+        }
         // TODO: if tree is empty (count === 1) maybe we should not render?
         const { width, height, timestamp } = info;
         if (onTouch) {
