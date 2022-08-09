@@ -12,7 +12,7 @@ The fonts available in the canvas are described in [here](/docs/text/fonts).
 |:------------|:-------------------|:-------------------------------------------------------------|
 | path        | `Path` or `string` | Path to draw. Can be a string using the [SVG Path notation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#line_commands) or an object created with `Skia.Path.Make()` |
 | text        | `string`           | Text to draw                                                 |
-| font        | `Font`             | Font to use (see [Fonts](/docs/text/fonts))                  |
+| font        | `SkFont`             | Font to use                                                  |
 
 ## Example
 
