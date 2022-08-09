@@ -64,6 +64,10 @@ export class SkiaView extends React.Component<
     this.tick();
   }
 
+  componentDidUpdate() {
+    this.redraw();
+  }
+
   componentWillUnmount() {
     this.unsubscribeAll();
     this._surface = null;
