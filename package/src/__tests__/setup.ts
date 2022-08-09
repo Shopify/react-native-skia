@@ -12,7 +12,7 @@ export const docPath = (relPath: string) =>
 export const processResult = (
   surface: SkSurface,
   relPath: string,
-  overwrite = true
+  overwrite = false
 ) => {
   toValue<Surface>(surface).flush();
   const image = surface.makeImageSnapshot();
