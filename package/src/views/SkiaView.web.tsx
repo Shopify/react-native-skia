@@ -2,7 +2,7 @@
 import React from "react";
 import type { PointerEvent } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import { View } from "react-native";
+import { PixelRatio, View } from "react-native";
 
 import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
@@ -10,6 +10,8 @@ import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
 import type { DrawingInfo, DrawMode, SkiaViewProps, TouchInfo } from "./types";
 import { TouchType } from "./types";
+
+const pd = PixelRatio.get();
 
 export class SkiaView extends React.Component<
   SkiaViewProps,
@@ -45,6 +47,10 @@ export class SkiaView extends React.Component<
         // Reset canvas / surface on layout change
         if (this._canvasRef.current) {
           // Create surface
+          // https://www.khronos.org/webgl/wiki/HandlingHighDPI
+          const canvas = this._canvasRef.current;
+          canvas.width = this.state.width * pd;
+          canvas.height = this.state.height * pd;
           this._surface = new JsiSkSurface(
             global.CanvasKit,
             global.CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current)!
@@ -104,7 +110,13 @@ export class SkiaView extends React.Component<
           timestamp: Date.now(),
           touches: touches.map((t) => [t]),
         };
-        this.props.onDraw && this.props.onDraw(this._canvas!, info);
+        if (this.props.onDraw) {
+          const canvas = this._canvas!;
+          canvas.save();
+          canvas.scale(pd, pd);
+          this.props.onDraw(canvas, info);
+          canvas.restore();
+        }
         this._surface?.ref.flush();
       }
     }
