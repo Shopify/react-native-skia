@@ -106,7 +106,6 @@ export class SkiaView extends React.Component<
         this._surface?.ref.flush();
       }
     }
-    // Always request a new redraw as long as we're not unmounted
     this.requestId = requestAnimationFrame(this.tick.bind(this));
   }
 
