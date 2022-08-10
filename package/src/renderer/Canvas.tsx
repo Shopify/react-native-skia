@@ -111,9 +111,11 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
 
     useEffect(() => {
       return () => {
-        container.depMgr.unsubscribe();
+        skiaReconciler.updateContainer(null, root, null, () => {
+          container.depMgr.unsubscribe();
+        });
       };
-    }, [container]);
+    }, [container, root]);
 
     return (
       <SkiaView
