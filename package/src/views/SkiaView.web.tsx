@@ -13,13 +13,9 @@ import { TouchType } from "./types";
 
 const pd = PixelRatio.get();
 
-export class SkiaView extends React.Component<
-  SkiaViewProps,
-  { width: number; height: number }
-> {
+export class SkiaView extends React.Component<SkiaViewProps> {
   constructor(props: SkiaViewProps) {
     super(props);
-    this.state = { width: -1, height: -1 };
     this._mode = props.mode ?? "default";
   }
 
@@ -31,6 +27,8 @@ export class SkiaView extends React.Component<
   private _mode: DrawMode;
   private _redrawRequests = 0;
   private _unmounted = false;
+  private width = 0;
+  private height = 0;
 
   private unsubscribeAll() {
     this._unsubscriptions.forEach((u) => u());
@@ -38,31 +36,23 @@ export class SkiaView extends React.Component<
   }
 
   private onLayout(evt: LayoutChangeEvent) {
-    this.setState(
-      {
-        width: evt.nativeEvent.layout.width,
-        height: evt.nativeEvent.layout.height,
-      },
-      () => {
-        // Reset canvas / surface on layout change
-        if (this._canvasRef.current) {
-          // Create surface
-          // https://www.khronos.org/webgl/wiki/HandlingHighDPI
-          const canvas = this._canvasRef.current;
-          canvas.width = this.state.width * pd;
-          canvas.height = this.state.height * pd;
-          this._surface = new JsiSkSurface(
-            global.CanvasKit,
-            global.CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current)!
-          );
-          // Get canvas and repaint
-          if (this._surface) {
-            this._canvas = this._surface.getCanvas();
-            this.redraw();
-          }
-        }
+    const { CanvasKit } = global;
+    const { width, height } = evt.nativeEvent.layout;
+    this.width = width;
+    this.height = height;
+    // Reset canvas / surface on layout change
+    if (this._canvasRef.current) {
+      const canvas = this._canvasRef.current;
+      canvas.width = canvas.clientWidth * pd;
+      canvas.height = canvas.clientHeight * pd;
+      const surface = CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current);
+      if (!surface) {
+        throw new Error("Could not create surface");
       }
-    );
+      this._surface = new JsiSkSurface(CanvasKit, surface);
+      this._canvas = this._surface.getCanvas();
+      this.redraw();
+    }
   }
 
   componentDidMount() {
@@ -96,17 +86,12 @@ export class SkiaView extends React.Component<
   private tick() {
     if (this._mode === "continuous" || this._redrawRequests > 0) {
       this._redrawRequests = 0;
-      if (
-        this._canvas &&
-        this.props.onDraw &&
-        this.state.height !== -1 &&
-        this.state.width !== -1
-      ) {
+      if (this._canvas && this.props.onDraw) {
         const touches = [...this._touches];
         this._touches = [];
         const info: DrawingInfo = {
-          height: this.state.height,
-          width: this.state.width,
+          height: this.height,
+          width: this.width,
           timestamp: Date.now(),
           touches: touches.map((t) => [t]),
         };
@@ -184,8 +169,7 @@ export class SkiaView extends React.Component<
       <View {...viewProps} onLayout={this.onLayout.bind(this)}>
         <canvas
           ref={this._canvasRef}
-          width={this.state.width}
-          height={this.state.height}
+          style={{ display: "flex", flex: 1 }}
           onPointerDown={this.createTouchHandler(TouchType.Start)}
           onPointerMove={this.createTouchHandler(TouchType.Active)}
           onPointerUp={this.createTouchHandler(TouchType.End)}
