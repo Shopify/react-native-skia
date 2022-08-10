@@ -76,6 +76,7 @@
       "jsx",
       "json",
       "node"
-    ]
+    ],
+    "setupFiles": ["<rootDir>/jest.setupFiles.js"]
   }
 }
