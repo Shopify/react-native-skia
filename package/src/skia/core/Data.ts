@@ -63,9 +63,11 @@ const useLoading = <T>(
   useEffect(() => {
     if (prevSourceRef.current !== source) {
       prevSourceRef.current = source;
-      loader().then(setData);
-    } else {
-      setData(null);
+      if (source !== null && source !== undefined) {
+        loader().then(setData);
+      } else {
+        setData(null);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);

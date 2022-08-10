@@ -1,5 +1,10 @@
-import React, { useMemo } from "react";
-import { ScrollView, useWindowDimensions } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useImage, Canvas, Image, Rect } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -37,6 +42,22 @@ export const Images = () => {
 
   const oslo = useImage(require("../../assets/oslo.jpg"));
   const coffee = useImage("https://picsum.photos/id/1060/640/360");
+
+  // Verify that "useImage" works even when source change
+  const [asyncUrl, setAsyncUrl] = useState<string>();
+
+  // Verify that "useImage" works even when the source change after initial rendering
+  // It could be because the source is fetched remotely, or defined only after some interactions...
+  const asyncImage = useImage(asyncUrl);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAsyncUrl(
+        asyncUrl ? undefined : "https://picsum.photos/id/1050/640/360"
+      );
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [asyncUrl]);
 
   const { width: wWidth } = useWindowDimensions();
   const SIZE = wWidth / 3;
@@ -85,25 +106,64 @@ export const Images = () => {
           </Canvas>
         </React.Fragment>
       ))}
-      {coffee ? (
-        <Canvas
-          style={{
-            alignSelf: "center",
-            width: 320,
-            height: 180,
-            marginVertical: PAD,
-          }}
-        >
-          <Image
-            image={coffee}
-            x={0}
-            y={0}
-            width={320}
-            height={180}
-            fit="contain"
-          />
-        </Canvas>
-      ) : null}
+      <Title>Remote sources</Title>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-around",
+        }}
+      >
+        {coffee ? (
+          <Canvas
+            style={{
+              alignSelf: "center",
+              width: 320,
+              height: 180,
+              marginVertical: PAD,
+            }}
+          >
+            <Image
+              image={coffee}
+              x={0}
+              y={0}
+              width={320}
+              height={180}
+              fit="contain"
+            />
+          </Canvas>
+        ) : null}
+        {asyncImage ? (
+          <Canvas
+            style={{
+              alignSelf: "center",
+              width: 320,
+              height: 180,
+              marginVertical: PAD,
+            }}
+          >
+            <Image
+              image={asyncImage}
+              x={0}
+              y={0}
+              width={320}
+              height={180}
+              fit="contain"
+            />
+          </Canvas>
+        ) : (
+          <View
+            style={{
+              alignItems: "center",
+              justifyContent: "center",
+              width: 320,
+              height: 180,
+            }}
+          >
+            <ActivityIndicator />
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 };
