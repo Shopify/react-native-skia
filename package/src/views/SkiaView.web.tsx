@@ -26,9 +26,9 @@ export class SkiaView extends React.Component<SkiaViewProps> {
   private _canvasRef = React.createRef<HTMLCanvasElement>();
   private _mode: DrawMode;
   private _redrawRequests = 0;
-  private _unmounted = false;
   private width = 0;
   private height = 0;
+  private requestId = 0;
 
   private unsubscribeAll() {
     this._unsubscriptions.forEach((u) => u());
@@ -66,9 +66,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
 
   componentWillUnmount() {
     this.unsubscribeAll();
-    this._surface = null;
-    this._canvas = null;
-    this._unmounted = true;
+    cancelAnimationFrame(this.requestId);
   }
 
   /**
@@ -105,10 +103,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
         this._surface?.ref.flush();
       }
     }
-    // Always request a new redraw as long as we're not unmounted
-    if (!this._unmounted) {
-      requestAnimationFrame(this.tick.bind(this));
-    }
+    this.requestId = requestAnimationFrame(this.tick.bind(this));
   }
 
   public redraw() {
