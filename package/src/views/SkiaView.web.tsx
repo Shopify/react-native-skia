@@ -23,7 +23,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
   private _unsubscriptions: Array<() => void> = [];
   private _touches: Array<TouchInfo> = [];
   private _canvas: SkCanvas | null = null;
-  private _canvasRef: React.RefObject<HTMLCanvasElement> = React.createRef();
+  private _canvasRef = React.createRef<HTMLCanvasElement>();
   private _mode: DrawMode;
   private _redrawRequests = 0;
   private _unmounted = false;
