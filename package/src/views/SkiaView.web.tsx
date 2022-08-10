@@ -2,7 +2,7 @@
 import React from "react";
 import type { PointerEvent } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import { View } from "react-native";
+import { PixelRatio, View } from "react-native";
 
 import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
@@ -11,13 +11,11 @@ import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 import type { DrawingInfo, DrawMode, SkiaViewProps, TouchInfo } from "./types";
 import { TouchType } from "./types";
 
-export class SkiaView extends React.Component<
-  SkiaViewProps,
-  { width: number; height: number }
-> {
+const pd = PixelRatio.get();
+
+export class SkiaView extends React.Component<SkiaViewProps> {
   constructor(props: SkiaViewProps) {
     super(props);
-    this.state = { width: -1, height: -1 };
     this._mode = props.mode ?? "default";
   }
 
@@ -25,9 +23,11 @@ export class SkiaView extends React.Component<
   private _unsubscriptions: Array<() => void> = [];
   private _touches: Array<TouchInfo> = [];
   private _canvas: SkCanvas | null = null;
-  private _canvasRef: React.RefObject<HTMLCanvasElement> = React.createRef();
+  private _canvasRef = React.createRef<HTMLCanvasElement>();
   private _mode: DrawMode;
   private _redrawRequests = 0;
+  private width = 0;
+  private height = 0;
   private requestId = 0;
 
   private unsubscribeAll() {
@@ -36,27 +36,23 @@ export class SkiaView extends React.Component<
   }
 
   private onLayout(evt: LayoutChangeEvent) {
-    this.setState(
-      {
-        width: evt.nativeEvent.layout.width,
-        height: evt.nativeEvent.layout.height,
-      },
-      () => {
-        // Reset canvas / surface on layout change
-        if (this._canvasRef.current) {
-          // Create surface
-          this._surface = new JsiSkSurface(
-            global.CanvasKit,
-            global.CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current)!
-          );
-          // Get canvas and repaint
-          if (this._surface) {
-            this._canvas = this._surface.getCanvas();
-            this.redraw();
-          }
-        }
+    const { CanvasKit } = global;
+    const { width, height } = evt.nativeEvent.layout;
+    this.width = width;
+    this.height = height;
+    // Reset canvas / surface on layout change
+    if (this._canvasRef.current) {
+      const canvas = this._canvasRef.current;
+      canvas.width = canvas.clientWidth * pd;
+      canvas.height = canvas.clientHeight * pd;
+      const surface = CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current);
+      if (!surface) {
+        throw new Error("Could not create surface");
       }
-    );
+      this._surface = new JsiSkSurface(CanvasKit, surface);
+      this._canvas = this._surface.getCanvas();
+      this.redraw();
+    }
   }
 
   componentDidMount() {
@@ -88,21 +84,22 @@ export class SkiaView extends React.Component<
   private tick() {
     if (this._mode === "continuous" || this._redrawRequests > 0) {
       this._redrawRequests = 0;
-      if (
-        this._canvas &&
-        this.props.onDraw &&
-        this.state.height !== -1 &&
-        this.state.width !== -1
-      ) {
+      if (this._canvas && this.props.onDraw) {
         const touches = [...this._touches];
         this._touches = [];
         const info: DrawingInfo = {
-          height: this.state.height,
-          width: this.state.width,
+          height: this.height,
+          width: this.width,
           timestamp: Date.now(),
           touches: touches.map((t) => [t]),
         };
-        this.props.onDraw && this.props.onDraw(this._canvas!, info);
+        if (this.props.onDraw) {
+          const canvas = this._canvas!;
+          canvas.save();
+          canvas.scale(pd, pd);
+          this.props.onDraw(canvas, info);
+          canvas.restore();
+        }
         this._surface?.ref.flush();
       }
     }
@@ -167,8 +164,7 @@ export class SkiaView extends React.Component<
       <View {...viewProps} onLayout={this.onLayout.bind(this)}>
         <canvas
           ref={this._canvasRef}
-          width={this.state.width}
-          height={this.state.height}
+          style={{ display: "flex", flex: 1 }}
           onPointerDown={this.createTouchHandler(TouchType.Start)}
           onPointerMove={this.createTouchHandler(TouchType.Active)}
           onPointerUp={this.createTouchHandler(TouchType.End)}
