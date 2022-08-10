@@ -1,30 +1,28 @@
-/* global  HTMLDivElement, ExpoSnack */
+/* global  HTMLDivElement */
 import React, { useEffect, useRef } from "react";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { useColorMode } from "@docusaurus/theme-common";
 
-interface SnackApi {
-  append: (e: HTMLDivElement) => void;
-}
-
-declare global {
-  var ExpoSnack: SnackApi;
-}
+import { ExpoSnack } from "./ExpoSnackApi";
 
 interface SnackProps {
   id: string;
 }
 
 export const Snack = ({ id }: SnackProps) => {
+  const { colorMode } = useColorMode();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    ExpoSnack.remove(ref.current!);
     ExpoSnack.append(ref.current!);
-  }, []);
+  }, [colorMode]);
   return (
     <div
       ref={ref}
       data-snack-id={id}
       data-snack-platform="web"
       data-snack-preview="true"
-      data-snack-theme="automatic"
+      data-snack-theme={colorMode === "dark" ? "dark" : "light"}
       style={{
         overflow: "hidden",
         background: "#f9f9f9",
