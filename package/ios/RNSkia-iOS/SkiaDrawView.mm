@@ -139,6 +139,7 @@
       nextTouch.y = position.y;
       nextTouch.force = [touch force];    
       nextTouch.id = [touch hash];
+      nextTouch.isPencil = touch.type == 2 ? true : false; // Pencil vs Touch
       auto phase = [touch phase];
       switch(phase) {
         case UITouchPhaseBegan:
