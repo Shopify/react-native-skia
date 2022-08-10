@@ -5,6 +5,8 @@ sidebar_label: Web
 slug: /getting-started/web
 ---
 
+import {Snack} from '@site/src/components/Snack';
+
 React Native Skia runs in a web browser thanks to [CanvasKit](https://skia.org/docs/user/modules/canvaskit/), a WebAssembly build of Skia.
 The WebAssembly file is loaded asynchronously and has a size of 7.9MB.
 While this is a substantial file size, you have control over the user experience: you can decide when to load Skia and how the loading experience should be.
@@ -24,6 +26,14 @@ $ yarn setup-skia-web
 Once you are done, you need to pick your strategy to [Load Skia](#loading-skia).
 
 If you are [loading CanvasKit from a CDN](#using-a-cdn), you don't need to run the `setup-skia-web` script. If you are not using `react-native-reanimated`, webpack will output a warning because React Native Skia refers to Reanimated. We describe how to fix this warning [here](#manual-webpack-installation).
+
+### Snack
+
+To use React Native Skia on [snack](https://snack.expo.dev/), you will need to use [code-splitting](#using-code-splitting) method.
+
+
+<Snack id="@wcandillon/hello-snack" />
+
 
 ## Remotion
 
