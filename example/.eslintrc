@@ -23,7 +23,7 @@
   },
   "overrides": [
     {
-      "files": ["jest.setupFiles.js"],
+      "files": ["jest.*.{js,ts}"],
       "env": {
         "jest/globals": true
       }

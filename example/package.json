@@ -8,7 +8,7 @@
     "start": "react-native start",
     "web": "webpack serve --mode=development --config webpack.config.js",
     "build:web": "rm -rf dist/ && webpack --mode=production --config webpack.config.js",
-    "test": "jest",
+    "test": "node -r ts-node/register ./node_modules/jest/bin/jest.js",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
     "pod-install": "npx pod-install ios",
     "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
@@ -45,9 +45,11 @@
     "glob-to-regexp": "^0.4.1",
     "html-webpack-plugin": "^5.5.0",
     "jest": "^26.6.3",
+    "jest-environment-node": "^26.6.2",
     "jest-transform-stub": "^2.0.0",
     "metro-react-native-babel-preset": "^0.67.0",
     "react-test-renderer": "^17.0.2",
+    "ts-node": "^10.9.1",
     "typescript": "^4.6.2",
     "url-loader": "^4.1.1",
     "webpack": "^5.72.0",
@@ -59,6 +61,7 @@
   },
   "jest": {
     "preset": "react-native",
+    "testEnvironment": "./jest.environment.ts",
     "modulePathIgnorePatterns": [
       "<rootDir>/lib/typescript",
       "setup.(ts|tsx)$"
@@ -77,6 +80,8 @@
       "json",
       "node"
     ],
-    "setupFiles": ["<rootDir>/jest.setupFiles.js"]
+    "setupFiles": [
+      "<rootDir>/jest.setupFiles.ts"
+    ]
   }
 }
