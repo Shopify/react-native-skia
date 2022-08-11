@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.4.1)
 
+if(${BUILD_TYPE} STREQUAL "debug")
+    set (CMAKE_BUILD_TYPE Debug)
+    message("-- Building with Debug Symbols")
+endif()
+
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_GL -DSK_BUILD_FOR_ANDROID -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
@@ -44,7 +49,6 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/api/third_party/CSSColorParser.cpp"
         
 )
-
 
 target_include_directories(
         ${PACKAGE_NAME}
