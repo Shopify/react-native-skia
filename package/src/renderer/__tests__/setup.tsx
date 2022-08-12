@@ -100,9 +100,6 @@ export const mountCanvas = (element: ReactNode) => {
     draw: () => {
       container.draw(ctx);
     },
-    updateContainer: () => {
-      skiaReconciler.updateContainer(rootElement, root, null, () => {});
-    },
     surface,
   };
 };

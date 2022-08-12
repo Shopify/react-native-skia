@@ -1,6 +1,6 @@
 import path from "path";
 
-import React, { useRef } from "react";
+import React, { useEffect, useState } from "react";
 
 import { processResult } from "../../__tests__/setup";
 import { Fill, Image } from "../components";
@@ -57,10 +57,16 @@ const sources = [
 ];
 
 const CheckChangingImage = ({}: EmptyProps) => {
-  const ref = useRef(-1);
-  ref.current++;
+  const [idx, setIdx] = useState(0);
   const { useImage } = require("../../skia/core/Image");
-  const image = useImage(sources[ref.current % sources.length]);
+  const image = useImage(sources[idx]);
+  useEffect(() => {
+    if (image) {
+      setTimeout(() => {
+        setIdx(1);
+      }, 20);
+    }
+  }, [image]);
   if (!image) {
     return <Fill color="red" />;
   }
@@ -77,9 +83,7 @@ const CheckChangingImage = ({}: EmptyProps) => {
 };
 
 const CheckTogglingImage = ({}: EmptyProps) => {
-  console.log("Render");
-  const renders = useRef(-1);
-  renders.current++;
+  const [idx, setIdx] = useState(0);
   const { useImage } = require("../../skia/core/Image");
   const zurich = useImage(
     nodeRequire(
@@ -89,14 +93,18 @@ const CheckTogglingImage = ({}: EmptyProps) => {
   const oslo = useImage(
     nodeRequire(path.resolve(__dirname, "../../skia/__tests__/assets/oslo.jpg"))
   );
+  useEffect(() => {
+    if (oslo && zurich) {
+      setTimeout(() => {
+        setIdx(1);
+      }, 20);
+    }
+  }, [zurich, oslo]);
   const images = [zurich, oslo];
-  const idx = renders.current % sources.length;
   const image = images[idx];
-
   if (!zurich || !oslo) {
     return <Fill color="red" />;
   }
-  console.log({ images: images.map((img) => !!img), idx });
   return (
     <Image
       image={image}
@@ -171,28 +179,24 @@ describe("Data Loading", () => {
   it("Should allow for the source image to change", async () => {
     const { surface, draw } = mountCanvas(<CheckChangingImage />);
     draw();
-    await wait(500);
+    processResult(surface, "snapshots/data/red.png");
+    await wait(10);
     draw();
     processResult(surface, "snapshots/data/zurich.png");
-    await wait(500);
+    await wait(30);
     draw();
-    processResult(surface, "snapshots/data/zurich.png");
+    processResult(surface, "snapshots/data/oslo.png");
   });
 
   it("Should toggle the image to change", async () => {
-    const { surface, draw, updateContainer } = mountCanvas(
-      <CheckTogglingImage />
-    );
-    updateContainer();
+    const { surface, draw } = mountCanvas(<CheckTogglingImage />);
     draw();
-    // Nothing is loaded yet
     processResult(surface, "snapshots/data/red.png");
     await wait(10);
-    updateContainer();
     draw();
     processResult(surface, "snapshots/data/zurich.png");
-    // updateContainer();
-    // draw();
-    // processResult(surface, "snapshots/data/zurich2.png");
+    await wait(30);
+    draw();
+    processResult(surface, "snapshots/data/oslo.png");
   });
 });
