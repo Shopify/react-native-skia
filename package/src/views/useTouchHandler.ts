@@ -51,13 +51,15 @@ const useInternalTouchHandler = (
               x: distX / timeDiffseconds / PixelRatio.get(),
               y: distY / timeDiffseconds / PixelRatio.get(),
             };
+          } else {
+            prevVelocityRef.current[touch.id] = { x: 0, y: 0 };
           }
         }
 
         const extendedTouchInfo: ExtendedTouchInfo = {
           ...touch,
-          velocityX: prevVelocityRef.current[touch.id]?.x,
-          velocityY: prevVelocityRef.current[touch.id]?.y,
+          velocityX: prevVelocityRef.current[touch.id].x,
+          velocityY: prevVelocityRef.current[touch.id].y,
         };
 
         // Save previous touch
