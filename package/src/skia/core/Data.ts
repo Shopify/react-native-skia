@@ -61,7 +61,8 @@ const useLoading = <T>(source: Source, loader: () => Promise<T | null>) => {
     } else {
       loader().then(setData);
     }
-  }, [loader, source]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source]);
   return data;
 };
 
