@@ -69,6 +69,11 @@
     "react-native": ">=0.63.0-rc.0 <1.0.x",
     "react-native-reanimated": ">=2.0.0"
   },
+  "peerDependenciesMeta": {
+    "react-native-reanimated": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/jest": "^27.0.3",
     "@types/react-native": "^0.65.0",
