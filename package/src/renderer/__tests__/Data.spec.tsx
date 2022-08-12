@@ -76,6 +76,38 @@ const CheckChangingImage = ({}: EmptyProps) => {
   );
 };
 
+const CheckTogglingImage = ({}: EmptyProps) => {
+  const renders = useRef(-1);
+  renders.current++;
+  const { useImage } = require("../../skia/core/Image");
+  const zurich = useImage(
+    nodeRequire(
+      path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
+    )
+  );
+  const oslo = useImage(
+    nodeRequire(path.resolve(__dirname, "../../skia/__tests__/assets/oslo.jpg"))
+  );
+  const images = [zurich, oslo];
+  const idx = renders.current % sources.length;
+  const image = images[idx];
+
+  if (!zurich || !oslo) {
+    return <Fill color="red" />;
+  }
+  console.log({ images: images.map((img) => !!img), idx });
+  return (
+    <Image
+      image={image}
+      x={0}
+      y={0}
+      width={width}
+      height={height}
+      fit="cover"
+    />
+  );
+};
+
 const CheckDataCollection = ({}: EmptyProps) => {
   const { useDataCollection } = require("../../skia/core/Data");
   const font = useDataCollection(
@@ -137,11 +169,29 @@ describe("Data Loading", () => {
 
   it("Should allow for the source image to change", async () => {
     const { surface, draw } = mountCanvas(<CheckChangingImage />);
+    draw();
     await wait(500);
     draw();
     processResult(surface, "snapshots/data/zurich.png");
     await wait(500);
     draw();
-    processResult(surface, "snapshots/data/oslo.png");
+    processResult(surface, "snapshots/data/zurich.png");
+  });
+
+  it("Should toggle the image to change", async () => {
+    const { surface, draw, updateContainer } = mountCanvas(
+      <CheckTogglingImage />
+    );
+    updateContainer();
+    draw();
+    // Nothing is loaded yet
+    processResult(surface, "snapshots/data/red.png");
+    await wait(10);
+    updateContainer();
+    draw();
+    processResult(surface, "snapshots/data/zurich.png");
+    // updateContainer();
+    // draw();
+    // processResult(surface, "snapshots/data/zurich2.png");
   });
 });

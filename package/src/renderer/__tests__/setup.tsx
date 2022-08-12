@@ -74,16 +74,14 @@ export const mountCanvas = (element: ReactNode) => {
   const container = new Container(new DependencyManager(ref), redraw);
   skiaReconciler.createContainer(container, 0, false, null);
   const root = skiaReconciler.createContainer(container, 0, false, null);
-  skiaReconciler.updateContainer(
+  const rootElement = (
     <CanvasProvider
       value={{ Skia, size: ValueApi.createValue({ width, height }) }}
     >
       {element}
-    </CanvasProvider>,
-    root,
-    null,
-    () => {}
+    </CanvasProvider>
   );
+  skiaReconciler.updateContainer(rootElement, root, null, () => {});
   const ctx: DrawingContext = {
     width,
     height,
@@ -98,5 +96,13 @@ export const mountCanvas = (element: ReactNode) => {
     fontMgr: null,
     Skia,
   };
-  return { draw: () => container.draw(ctx), surface };
+  return {
+    draw: () => {
+      container.draw(ctx);
+    },
+    updateContainer: () => {
+      skiaReconciler.updateContainer(rootElement, root, null, () => {});
+    },
+    surface,
+  };
 };
