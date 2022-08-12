@@ -25,7 +25,12 @@ jest.mock("react-native", () => ({
   },
 }));
 
-export const nodeRequire = (uri: string) => fs.readFileSync(uri);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).fetch = jest.fn((uri: string) =>
+  Promise.resolve({
+    arrayBuffer: () => Promise.resolve(fs.readFileSync(uri)),
+  })
+);
 
 beforeAll(async () => {
   await LoadSkiaWeb();
@@ -98,6 +103,7 @@ export const mountCanvas = (element: ReactNode) => {
   };
   return {
     draw: () => {
+      skiaReconciler.updateContainer(rootElement, root, null, () => {});
       container.draw(ctx);
     },
     surface,

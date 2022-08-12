@@ -2,12 +2,12 @@ import path from "path";
 
 import React, { useEffect, useState } from "react";
 
+import type { SkData } from "../../skia";
 import { processResult } from "../../__tests__/setup";
 import { Fill, Image } from "../components";
 import * as SkiaRenderer from "../index";
-import type { SkData } from "../../skia/types/Data/Data";
 
-import { mountCanvas, nodeRequire, Skia, height, width } from "./setup";
+import { height, mountCanvas, Skia, width } from "./setup";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -26,9 +26,7 @@ const CheckData = ({}: EmptyProps) => {
 const CheckFont = ({}: EmptyProps) => {
   const { useFont } = require("../../skia/core/Font");
   const font = useFont(
-    nodeRequire(
-      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-    )
+    path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
   );
   if (!font) {
     return <Fill color="red" />;
@@ -39,9 +37,7 @@ const CheckFont = ({}: EmptyProps) => {
 const CheckImage = ({}: EmptyProps) => {
   const { useImage } = require("../../skia/core/Image");
   const image = useImage(
-    nodeRequire(
-      path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
-    )
+    path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
   );
   if (!image) {
     return <Fill color="red" />;
@@ -50,10 +46,8 @@ const CheckImage = ({}: EmptyProps) => {
 };
 
 const sources = [
-  nodeRequire(
-    path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
-  ),
-  nodeRequire(path.resolve(__dirname, "../../skia/__tests__/assets/oslo.jpg")),
+  path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg"),
+  path.resolve(__dirname, "../../skia/__tests__/assets/oslo.jpg"),
 ];
 
 const CheckChangingImage = ({}: EmptyProps) => {
@@ -86,12 +80,10 @@ const CheckTogglingImage = ({}: EmptyProps) => {
   const [idx, setIdx] = useState(0);
   const { useImage } = require("../../skia/core/Image");
   const zurich = useImage(
-    nodeRequire(
-      path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
-    )
+    path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
   );
   const oslo = useImage(
-    nodeRequire(path.resolve(__dirname, "../../skia/__tests__/assets/oslo.jpg"))
+    path.resolve(__dirname, "../../skia/__tests__/assets/oslo.jpg")
   );
   useEffect(() => {
     if (oslo && zurich) {
@@ -121,12 +113,8 @@ const CheckDataCollection = ({}: EmptyProps) => {
   const { useDataCollection } = require("../../skia/core/Data");
   const font = useDataCollection(
     [
-      nodeRequire(
-        path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-      ),
-      nodeRequire(
-        path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-      ),
+      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf"),
+      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf"),
     ],
     (data: SkData) => Skia.Typeface.MakeFreeTypeFaceFromData(data)
   );
