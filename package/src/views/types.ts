@@ -24,6 +24,7 @@ export interface TouchInfo {
   type: TouchType;
   id: number;
   timestamp: number;
+  isPencil: boolean;
 }
 
 export interface DrawingInfo {
