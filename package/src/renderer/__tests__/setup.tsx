@@ -18,7 +18,15 @@ import type { SkFont } from "../../skia";
 export let Skia: ReturnType<typeof JsiSkApi>;
 export let font: SkFont;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EmptyProps {}
+
 jest.mock("react-native", () => ({
+  PixelRatio: {
+    get(): number {
+      return 1;
+    },
+  },
   Platform: { OS: "web" },
   Image: {
     resolveAssetSource: jest.fn,
