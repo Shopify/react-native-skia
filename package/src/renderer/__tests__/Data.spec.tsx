@@ -1,13 +1,13 @@
 import path from "path";
 
-import React from "react";
+import React, { useRef } from "react";
 
 import { processResult } from "../../__tests__/setup";
-import { Fill } from "../components";
+import { Fill, Image } from "../components";
 import * as SkiaRenderer from "../index";
 import type { SkData } from "../../skia/types/Data/Data";
 
-import { mountCanvas, nodeRequire, Skia } from "./setup";
+import { mountCanvas, nodeRequire, Skia, height, width } from "./setup";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -47,6 +47,33 @@ const CheckImage = ({}: EmptyProps) => {
     return <Fill color="red" />;
   }
   return <Fill color="green" />;
+};
+
+const sources = [
+  nodeRequire(
+    path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
+  ),
+  nodeRequire(path.resolve(__dirname, "../../skia/__tests__/assets/oslo.jpg")),
+];
+
+const CheckChangingImage = ({}: EmptyProps) => {
+  const ref = useRef(-1);
+  ref.current++;
+  const { useImage } = require("../../skia/core/Image");
+  const image = useImage(sources[ref.current % sources.length]);
+  if (!image) {
+    return <Fill color="red" />;
+  }
+  return (
+    <Image
+      image={image}
+      x={0}
+      y={0}
+      width={width}
+      height={height}
+      fit="cover"
+    />
+  );
 };
 
 const CheckDataCollection = ({}: EmptyProps) => {
@@ -106,5 +133,15 @@ describe("Data Loading", () => {
     await wait(500);
     draw();
     processResult(surface, "snapshots/font/green.png");
+  });
+
+  it("Should allow for the source image to change", async () => {
+    const { surface, draw } = mountCanvas(<CheckChangingImage />);
+    await wait(500);
+    draw();
+    processResult(surface, "snapshots/data/zurich.png");
+    await wait(500);
+    draw();
+    processResult(surface, "snapshots/data/oslo.png");
   });
 });
