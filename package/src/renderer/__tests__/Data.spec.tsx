@@ -77,6 +77,7 @@ const CheckChangingImage = ({}: EmptyProps) => {
 };
 
 const CheckTogglingImage = ({}: EmptyProps) => {
+  console.log("Render");
   const renders = useRef(-1);
   renders.current++;
   const { useImage } = require("../../skia/core/Image");
