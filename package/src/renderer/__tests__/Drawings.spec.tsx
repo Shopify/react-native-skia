@@ -3,7 +3,7 @@ import React from "react";
 import { processResult } from "../../__tests__/setup";
 import { Blur, Circle, Fill, Group, Paint, RoundedRect } from "../components";
 
-import { drawOnNode, width, Skia, height } from "./setup";
+import { drawOnNode, width, height, importSkia } from "./setup";
 
 describe("Test introductionary examples from our documentation", () => {
   it("Should blend colors using multiplication", () => {
@@ -32,6 +32,7 @@ describe("Test introductionary examples from our documentation", () => {
   });
 
   it("Should render a transform with the correct origin", () => {
+    const { Skia } = importSkia();
     const r = width * 0.33;
     const surface = drawOnNode(
       <Group
@@ -48,6 +49,7 @@ describe("Test introductionary examples from our documentation", () => {
   });
 
   it("Should use radians for the skew transformation", () => {
+    const { Skia } = importSkia();
     const r = width / 4;
     const surface = drawOnNode(
       <>

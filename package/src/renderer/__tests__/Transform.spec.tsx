@@ -4,13 +4,14 @@ import { processResult } from "../../__tests__/setup";
 import { Group, Rect } from "../components";
 import * as SkiaRenderer from "../index";
 
-import { drawOnNode, width, Skia } from "./setup";
+import { drawOnNode, width, importSkia } from "./setup";
 
 describe("Renderer", () => {
   it("Loads renderer without Skia", () => {
     expect(SkiaRenderer).toBeDefined();
   });
   it("Scale with origin", () => {
+    const { Skia } = importSkia();
     const size = width;
     const origin = Skia.Point(size / 2, size / 2);
     const surface = drawOnNode(
@@ -21,6 +22,7 @@ describe("Renderer", () => {
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
   it("Scale with origin using a matrix", () => {
+    const { Skia } = importSkia();
     const size = width;
     const matrix = Skia.Matrix();
     const origin = Skia.Point(size / 2, size / 2);
@@ -35,6 +37,7 @@ describe("Renderer", () => {
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
   it("Scale with matrix and origin", () => {
+    const { Skia } = importSkia();
     const size = width;
     const matrix = Skia.Matrix();
     const origin = Skia.Point(size / 2, size / 2);
@@ -47,6 +50,7 @@ describe("Renderer", () => {
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
   it("Should rotate a rectangle to 180deg", () => {
+    const { Skia } = importSkia();
     const size = width;
     const origin = Skia.Point(size / 2, size / 2);
     const w = size / 4;
