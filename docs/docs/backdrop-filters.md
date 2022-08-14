@@ -46,7 +46,7 @@ const Filter = () => {
 };
 ```
 
-![BackdropBlur](assets/backdrop-filters/filter.png)
+<img src={require("/static/img/black-and-white-backdrop-filter.png").default} width="256" height="256" />
 
 ## Backdrop Blur
 
@@ -87,4 +87,4 @@ const Filter = () => {
 };
 ```
 
-![BackdropBlur](assets/backdrop-filters/blur.png)
+<img src={require("/static/img/blur-backdrop-filter.png").default} width="256" height="256" />

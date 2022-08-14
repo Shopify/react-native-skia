@@ -32,6 +32,7 @@ import {
   toOptionalValue,
 } from "./Host";
 import { JsiSkRect } from "./JsiSkRect";
+import { JsiSkRRect } from "./JsiSkRRect";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -313,11 +314,19 @@ export class JsiSkCanvas
   }
 
   clipRect(rect: SkRect, op: ClipOp, doAntiAlias: boolean) {
-    this.ref.clipRect(toValue(rect), ckEnum(op), doAntiAlias);
+    this.ref.clipRect(
+      JsiSkRect.fromValue(this.CanvasKit, rect).ref,
+      ckEnum(op),
+      doAntiAlias
+    );
   }
 
   clipRRect(rrect: SkRRect, op: ClipOp, doAntiAlias: boolean) {
-    this.ref.clipRRect(toValue(rrect), ckEnum(op), doAntiAlias);
+    this.ref.clipRRect(
+      JsiSkRRect.fromValue(this.CanvasKit, rrect).ref,
+      ckEnum(op),
+      doAntiAlias
+    );
   }
 
   concat(m: SkMatrix) {

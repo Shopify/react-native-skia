@@ -37,6 +37,13 @@ jest.mock("react-native", () => ({
 export const importSkiaCore = (): typeof SkiaCoreExports =>
   require("../../skia/core");
 
+export const loadImage = (uri: string) =>
+  Skia.Image.MakeImageFromEncoded(
+    Skia.Data.fromBytes(
+      fs.readFileSync(path.resolve(__dirname, `../../${uri}`))
+    )
+  );
+
 beforeAll(async () => {
   await LoadSkiaWeb();
   Skia = JsiSkApi(global.CanvasKit);
