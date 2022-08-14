@@ -47,6 +47,7 @@ export const loadImage = (uri: string) =>
 beforeAll(async () => {
   await LoadSkiaWeb();
   Skia = JsiSkApi(global.CanvasKit);
+  global.SkiaApi = Skia;
   const data = Skia.Data.fromBytes(
     fs.readFileSync(
       path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
@@ -81,7 +82,6 @@ export const drawOnNode = (element: ReactNode) => {
 };
 
 export const mountCanvas = (element: ReactNode) => {
-  global.SkiaApi = Skia;
   expect(Skia).toBeDefined();
   const surface = Skia.Surface.Make(width, height)!;
   expect(surface).toBeDefined();

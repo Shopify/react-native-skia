@@ -218,7 +218,10 @@ export class JsiSkCanvas
   }
 
   drawRRect(rrect: SkRRect, paint: SkPaint) {
-    this.ref.drawRRect(toValue(rrect), toValue(paint));
+    this.ref.drawRRect(
+      JsiSkRRect.fromValue(this.CanvasKit, rrect).ref,
+      toValue(paint)
+    );
   }
 
   drawDRRect(outer: SkRRect, inner: SkRRect, paint: SkPaint) {
