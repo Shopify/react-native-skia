@@ -22,7 +22,8 @@ export let font: SkFont;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).fetch = jest.fn((uri: string) =>
   Promise.resolve({
-    arrayBuffer: () => Promise.resolve(fs.readFileSync(uri)),
+    arrayBuffer: () =>
+      Promise.resolve(fs.readFileSync(path.resolve(__dirname, `../../${uri}`))),
   })
 );
 

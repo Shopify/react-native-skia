@@ -1,5 +1,3 @@
-import path from "path";
-
 import React from "react";
 
 import { processResult } from "../../__tests__/setup";
@@ -25,9 +23,7 @@ const CheckData = ({}: EmptyProps) => {
 
 const CheckFont = ({}: EmptyProps) => {
   const { useFont } = importSkiaCore();
-  const font = useFont(
-    path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-  );
+  const font = useFont("skia/__tests__/assets/Roboto-Medium.ttf");
   if (!font) {
     return <Fill color="red" />;
   }
@@ -36,9 +32,7 @@ const CheckFont = ({}: EmptyProps) => {
 
 const CheckImage = ({}: EmptyProps) => {
   const { useImage } = importSkiaCore();
-  const image = useImage(
-    path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
-  );
+  const image = useImage("skia/__tests__/assets/zurich.jpg");
   if (!image) {
     return <Fill color="red" />;
   }
@@ -49,8 +43,8 @@ const CheckDataCollection = ({}: EmptyProps) => {
   const { useDataCollection } = importSkiaCore();
   const font = useDataCollection(
     [
-      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf"),
-      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf"),
+      "skia/__tests__/assets/Roboto-Medium.ttf",
+      "skia/__tests__/assets/Roboto-Medium.ttf",
     ],
     (data: SkData) => Skia.Typeface.MakeFreeTypeFaceFromData(data)
   );
