@@ -19,14 +19,19 @@ import type * as SkiaCoreExports from "../../skia/core";
 export let Skia: ReturnType<typeof JsiSkApi>;
 export let font: SkFont;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).fetch = jest.fn((uri: string) =>
+  Promise.resolve({
+    arrayBuffer: () => Promise.resolve(fs.readFileSync(uri)),
+  })
+);
+
 jest.mock("react-native", () => ({
   Platform: { OS: "web" },
   Image: {
     resolveAssetSource: jest.fn,
   },
 }));
-
-export const nodeRequire = (uri: string) => fs.readFileSync(uri);
 
 export const importSkiaCore = (): typeof SkiaCoreExports =>
   require("../../skia/core");

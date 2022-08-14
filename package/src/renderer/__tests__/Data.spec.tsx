@@ -7,7 +7,7 @@ import { Fill } from "../components";
 import * as SkiaRenderer from "../index";
 import type { SkData } from "../../skia/types/Data/Data";
 
-import { importSkiaCore, mountCanvas, nodeRequire, Skia } from "./setup";
+import { importSkiaCore, mountCanvas, Skia } from "./setup";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -26,9 +26,7 @@ const CheckData = ({}: EmptyProps) => {
 const CheckFont = ({}: EmptyProps) => {
   const { useFont } = importSkiaCore();
   const font = useFont(
-    nodeRequire(
-      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-    )
+    path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
   );
   if (!font) {
     return <Fill color="red" />;
@@ -39,9 +37,7 @@ const CheckFont = ({}: EmptyProps) => {
 const CheckImage = ({}: EmptyProps) => {
   const { useImage } = importSkiaCore();
   const image = useImage(
-    nodeRequire(
-      path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
-    )
+    path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
   );
   if (!image) {
     return <Fill color="red" />;
@@ -53,12 +49,8 @@ const CheckDataCollection = ({}: EmptyProps) => {
   const { useDataCollection } = importSkiaCore();
   const font = useDataCollection(
     [
-      nodeRequire(
-        path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-      ),
-      nodeRequire(
-        path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-      ),
+      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf"),
+      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf"),
     ],
     (data: SkData) => Skia.Typeface.MakeFreeTypeFaceFromData(data)
   );
