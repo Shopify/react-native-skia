@@ -7,7 +7,7 @@ import { Fill } from "../components";
 import * as SkiaRenderer from "../index";
 import type { SkData } from "../../skia/types/Data/Data";
 
-import { mountCanvas, nodeRequire, Skia } from "./setup";
+import { importSkiaCore, mountCanvas, nodeRequire, Skia } from "./setup";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -15,7 +15,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 interface EmptyProps {}
 
 const CheckData = ({}: EmptyProps) => {
-  const { useFont } = require("../../skia/core/Font");
+  const { useFont } = importSkiaCore();
   const font = useFont(null);
   if (font === null) {
     return <Fill color="green" />;
@@ -24,7 +24,7 @@ const CheckData = ({}: EmptyProps) => {
 };
 
 const CheckFont = ({}: EmptyProps) => {
-  const { useFont } = require("../../skia/core/Font");
+  const { useFont } = importSkiaCore();
   const font = useFont(
     nodeRequire(
       path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
@@ -37,7 +37,7 @@ const CheckFont = ({}: EmptyProps) => {
 };
 
 const CheckImage = ({}: EmptyProps) => {
-  const { useImage } = require("../../skia/core/Image");
+  const { useImage } = importSkiaCore();
   const image = useImage(
     nodeRequire(
       path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
@@ -50,7 +50,7 @@ const CheckImage = ({}: EmptyProps) => {
 };
 
 const CheckDataCollection = ({}: EmptyProps) => {
-  const { useDataCollection } = require("../../skia/core/Data");
+  const { useDataCollection } = importSkiaCore();
   const font = useDataCollection(
     [
       nodeRequire(

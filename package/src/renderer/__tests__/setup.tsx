@@ -14,6 +14,7 @@ import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type { SkFont } from "../../skia";
+import type * as SkiaCoreExports from "../../skia/core";
 
 export let Skia: ReturnType<typeof JsiSkApi>;
 export let font: SkFont;
@@ -26,6 +27,9 @@ jest.mock("react-native", () => ({
 }));
 
 export const nodeRequire = (uri: string) => fs.readFileSync(uri);
+
+export const importSkiaCore = (): typeof SkiaCoreExports =>
+  require("../../skia/core");
 
 beforeAll(async () => {
   await LoadSkiaWeb();
