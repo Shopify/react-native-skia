@@ -103,7 +103,7 @@ When using `invertClip`, everything outside the clipping region will be shown, a
 ### Clip Rectangle
 
 ```tsx twoslash
-import {Canvas, Group, Image, useImage, Skia, rrect, rect} from "@shopify/react-native-skia";
+import {Canvas, Group, Image, useImage, Skia, rrect, rect, Fill} from "@shopify/react-native-skia";
 
 const size = 256;
 const padding = 32;
@@ -116,6 +116,7 @@ const Clip = () => {
   }
   return (
     <Canvas style={{ flex: 1 }}>
+      <Fill color="lightblue" />
       <Group clip={rct}>
         <Image
           image={image}
