@@ -4,13 +4,14 @@ import { BlendMode } from "../../../../skia/types";
 import { setupSkia } from "../../../../skia/__tests__/setup";
 import { docPath, processResult } from "../../../../__tests__/setup";
 import { Circle, Drawing, Group } from "../../../components";
-import { drawOnNode, width, height, Skia } from "../../setup";
+import { drawOnNode, width, height, importSkia } from "../../setup";
 
 const size = width;
 const r = size * 0.33;
 
 describe("Getting Started / Hello World", () => {
   it("Hello world with the imperative API", () => {
+    const { Skia } = importSkia();
     const { surface, canvas } = setupSkia(width, height);
 
     const paint = Skia.Paint();
@@ -48,6 +49,7 @@ describe("Getting Started / Hello World", () => {
     );
   });
   it("Hello world with the declarative and the imperative API", () => {
+    const { Skia } = importSkia();
     const surface = drawOnNode(
       <Group blendMode="multiply">
         <Drawing

@@ -13,10 +13,17 @@ import type { DrawingContext } from "../DrawingContext";
 import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
-import type { SkFont } from "../../skia";
+import type * as SkiaExports from "../../skia";
 
-export let Skia: ReturnType<typeof JsiSkApi>;
-export let font: SkFont;
+export let font: SkiaExports.SkFont;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).fetch = jest.fn((uri: string) =>
+  Promise.resolve({
+    arrayBuffer: () =>
+      Promise.resolve(fs.readFileSync(path.resolve(__dirname, `../../${uri}`))),
+  })
+);
 
 jest.mock("react-native", () => ({
   Platform: { OS: "web" },
@@ -25,11 +32,12 @@ jest.mock("react-native", () => ({
   },
 }));
 
-export const nodeRequire = (uri: string) => fs.readFileSync(uri);
+export const importSkia = (): typeof SkiaExports => require("../../skia");
 
 beforeAll(async () => {
   await LoadSkiaWeb();
-  Skia = JsiSkApi(global.CanvasKit);
+  const Skia = JsiSkApi(global.CanvasKit);
+  global.SkiaApi = Skia;
   const data = Skia.Data.fromBytes(
     fs.readFileSync(
       path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
@@ -64,7 +72,7 @@ export const drawOnNode = (element: ReactNode) => {
 };
 
 export const mountCanvas = (element: ReactNode) => {
-  global.SkiaApi = Skia;
+  const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
   const surface = Skia.Surface.Make(width, height)!;
   expect(surface).toBeDefined();
