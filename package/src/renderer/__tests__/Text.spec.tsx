@@ -6,10 +6,11 @@ import React from "react";
 import { processResult, docPath } from "../../__tests__/setup";
 import { TextPath, Fill, Text, Glyphs, TextBlob, Group } from "../components";
 
-import { drawOnNode, width, font, fontSize, importSkia } from "./setup";
+import { drawOnNode, width, fontSize, importSkia, loadFont } from "./setup";
 
 describe("Test different text examples", () => {
   it("Should draw Hello World", () => {
+    const font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf");
     const surface = drawOnNode(
       <>
         <Fill color="white" />
@@ -20,6 +21,7 @@ describe("Test different text examples", () => {
   });
 
   it("Should draw Hello World vertically", () => {
+    const font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf");
     const { Skia } = importSkia();
     const glyphs = font
       .getGlyphIDs("Hello World!")
@@ -34,6 +36,7 @@ describe("Test different text examples", () => {
   });
 
   it("Should render the text around a circle", () => {
+    const font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf");
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
     const r = width / 2;
@@ -50,6 +53,7 @@ describe("Test different text examples", () => {
   });
 
   it("Should render a text blob", () => {
+    const font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf");
     const { Skia } = importSkia();
     const blob = Skia.TextBlob.MakeFromText("Hello World!", font);
     const surface = drawOnNode(

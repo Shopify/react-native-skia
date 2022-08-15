@@ -15,8 +15,6 @@ import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
 
-export let font: SkiaExports.SkFont;
-
 export const resolveFile = (uri: string) =>
   fs.readFileSync(path.resolve(__dirname, `../../${uri}`));
 
@@ -43,19 +41,31 @@ jest.mock("react-native", () => ({
   requireNativeComponent: jest.fn,
 }));
 
+export const loadImage = (uri: string) => {
+  const Skia = global.SkiaApi;
+  const image = Skia.Image.MakeImageFromEncoded(
+    Skia.Data.fromBytes(resolveFile(uri))
+  );
+  expect(image).toBeTruthy();
+  return image!;
+};
+
+export const loadFont = (uri: string) => {
+  const Skia = global.SkiaApi;
+  const tf = Skia.Typeface.MakeFreeTypeFaceFromData(
+    Skia.Data.fromBytes(resolveFile(uri))
+  );
+  expect(tf).toBeTruthy();
+  const font = Skia.Font(tf!, fontSize);
+  return font;
+};
+
 export const importSkia = (): typeof SkiaExports => require("../..");
 
 beforeAll(async () => {
   await LoadSkiaWeb();
   const Skia = JsiSkApi(global.CanvasKit);
   global.SkiaApi = Skia;
-  const data = Skia.Data.fromBytes(
-    resolveFile("skia/__tests__/assets/Roboto-Medium.ttf")
-  );
-  const tf = Skia.Typeface.MakeFreeTypeFaceFromData(data)!;
-  expect(tf).toBeTruthy();
-  font = Skia.Font(tf, fontSize);
-  expect(font).toBeTruthy();
 });
 
 const pixelDensity = 3;
