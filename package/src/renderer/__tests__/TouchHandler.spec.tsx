@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 
 import { TouchType } from "../../views/types";
@@ -9,11 +8,11 @@ import { mountCanvas, importSkia } from "./setup";
 const SimpleActiveTouch = ({}: EmptyProps) => {
   const { useTouchHandler } = importSkia();
   const touchHandler = useTouchHandler({
-    onStart: ({ x, y }: any) => {
+    onStart: ({ x, y }) => {
       expect(x).toBe(10);
       expect(y).toBe(10);
     },
-    onActive: ({ x, y, velocityX, velocityY }: any) => {
+    onActive: ({ x, y, velocityX, velocityY }) => {
       expect(x).toBe(20);
       expect(y).toBe(20);
       expect(velocityX).toBe(10);
@@ -49,17 +48,17 @@ const SimpleActiveTouch = ({}: EmptyProps) => {
 const SimpleEndTouch = ({}: EmptyProps) => {
   const { useTouchHandler } = importSkia();
   const touchHandler = useTouchHandler({
-    onStart: ({ x, y }: any) => {
+    onStart: ({ x, y }) => {
       expect(x).toBe(10);
       expect(y).toBe(10);
     },
-    onActive: ({ x, y, velocityX, velocityY }: any) => {
+    onActive: ({ x, y, velocityX, velocityY }) => {
       expect(x).toBe(20);
       expect(y).toBe(20);
       expect(velocityX).toBe(10);
       expect(velocityY).toBe(10);
     },
-    onEnd: ({ x, y, velocityX, velocityY }: any) => {
+    onEnd: ({ x, y, velocityX, velocityY }) => {
       expect(x).toBe(30);
       expect(y).toBe(30);
       expect(velocityX).toBe(10);
