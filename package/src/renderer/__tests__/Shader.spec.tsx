@@ -4,7 +4,7 @@ import { processResult } from "../../__tests__/setup";
 import { Fill, Group, ShaderLib } from "../components";
 import { Shader } from "../components/shaders/Shader";
 
-import { drawOnNode, Skia, height, width } from "./setup";
+import { drawOnNode, height, width, importSkia } from "./setup";
 
 const bilinearInterpolation = `
 uniform vec4 position;
@@ -54,6 +54,7 @@ half4 main(float2 p) {
 
 describe("Test Shader component", () => {
   it("should flatten shader uniforms", () => {
+    const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(bilinearInterpolation)!;
     expect(source).toBeTruthy();
     const surface = drawOnNode(
@@ -73,6 +74,7 @@ describe("Test Shader component", () => {
     processResult(surface, "snapshots/shader/bilinear-interpolation.png");
   });
   it("should display a hue wheel", () => {
+    const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(hue)!;
     expect(source).toBeTruthy();
     const surface = drawOnNode(
@@ -90,6 +92,7 @@ describe("Test Shader component", () => {
     processResult(surface, "snapshots/shader/hue.png");
   });
   it("should display a green and red spiral", () => {
+    const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
     expect(source).toBeTruthy();
     const surface = drawOnNode(
