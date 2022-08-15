@@ -1,5 +1,3 @@
-import path from "path";
-
 import React from "react";
 
 import { processResult } from "../../__tests__/setup";
@@ -8,12 +6,12 @@ import * as SkiaRenderer from "../index";
 import type { SkData } from "../../skia/types/Data/Data";
 
 import type { EmptyProps } from "./setup";
-import { mountCanvas, nodeRequire, Skia } from "./setup";
+import { mountCanvas, importSkia } from "./setup";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const CheckData = ({}: EmptyProps) => {
-  const { useFont } = require("../../skia/core/Font");
+  const { useFont } = importSkia();
   const font = useFont(null);
   if (font === null) {
     return <Fill color="green" />;
@@ -22,12 +20,8 @@ const CheckData = ({}: EmptyProps) => {
 };
 
 const CheckFont = ({}: EmptyProps) => {
-  const { useFont } = require("../../skia/core/Font");
-  const font = useFont(
-    nodeRequire(
-      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-    )
-  );
+  const { useFont } = importSkia();
+  const font = useFont("skia/__tests__/assets/Roboto-Medium.ttf");
   if (!font) {
     return <Fill color="red" />;
   }
@@ -35,12 +29,8 @@ const CheckFont = ({}: EmptyProps) => {
 };
 
 const CheckImage = ({}: EmptyProps) => {
-  const { useImage } = require("../../skia/core/Image");
-  const image = useImage(
-    nodeRequire(
-      path.resolve(__dirname, "../../skia/__tests__/assets/zurich.jpg")
-    )
-  );
+  const { useImage } = importSkia();
+  const image = useImage("skia/__tests__/assets/zurich.jpg");
   if (!image) {
     return <Fill color="red" />;
   }
@@ -48,15 +38,11 @@ const CheckImage = ({}: EmptyProps) => {
 };
 
 const CheckDataCollection = ({}: EmptyProps) => {
-  const { useDataCollection } = require("../../skia/core/Data");
+  const { useDataCollection, Skia } = importSkia();
   const font = useDataCollection(
     [
-      nodeRequire(
-        path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-      ),
-      nodeRequire(
-        path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-      ),
+      "skia/__tests__/assets/Roboto-Medium.ttf",
+      "skia/__tests__/assets/Roboto-Medium.ttf",
     ],
     (data: SkData) => Skia.Typeface.MakeFreeTypeFaceFromData(data)
   );
