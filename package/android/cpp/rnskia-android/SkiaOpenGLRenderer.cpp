@@ -20,12 +20,12 @@ namespace RNSkia
         return threadContexts.at(threadId);
     }
 
-    SkiaOpenGLRenderer::SkiaOpenGLRenderer(ANativeWindow *surface, size_t renderId):
-        _surfaceTexture(surface),
-        _renderId(renderId) {
+    SkiaOpenGLRenderer::SkiaOpenGLRenderer(ANativeWindow *surface, size_t renderId) : _surfaceTexture(surface),
+                                                                                      _renderId(renderId)
+    {
     }
 
-    void SkiaOpenGLRenderer::run(const sk_sp<SkPicture> picture, int width, int height)
+    void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb, int width, int height)
     {
         switch (_renderState)
         {
@@ -51,7 +51,7 @@ namespace RNSkia
                 return;
             }
 
-            if (picture != nullptr)
+            if (cb != nullptr)
             {
                 // Reset Skia Context since it might be modified by another Skia View during
                 // rendering.
@@ -62,11 +62,10 @@ namespace RNSkia
                 glClear(GL_COLOR_BUFFER_BIT);
 
                 // Draw picture into surface
-                _skSurface->getCanvas()->drawPicture(picture);
+                cb(_skSurface->getCanvas());
 
                 // Flush
-                _skSurface->getCanvas()->flush();
-                getThreadDrawingContext()->skContext->flush();
+                _skSurface->flush();
 
                 if (!eglSwapBuffers(getThreadDrawingContext()->glDisplay, _glSurface))
                 {
@@ -180,10 +179,10 @@ namespace RNSkia
         EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
         getThreadDrawingContext()->glContext = eglCreateContext(
-                getThreadDrawingContext()->glDisplay,
-                getThreadDrawingContext()->glConfig,
-                NULL,
-                contextAttribs);
+            getThreadDrawingContext()->glDisplay,
+            getThreadDrawingContext()->glConfig,
+            NULL,
+            contextAttribs);
 
         if (getThreadDrawingContext()->glContext == EGL_NO_CONTEXT)
         {
@@ -239,10 +238,10 @@ namespace RNSkia
         // Create the opengl surface
         _glSurface =
             eglCreateWindowSurface(
-                    getThreadDrawingContext()->glDisplay,
-                    getThreadDrawingContext()->glConfig,
-                    _surfaceTexture,
-                    nullptr);
+                getThreadDrawingContext()->glDisplay,
+                getThreadDrawingContext()->glConfig,
+                _surfaceTexture,
+                nullptr);
 
         if (_glSurface == EGL_NO_SURFACE)
         {
