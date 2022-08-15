@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Image } from "react-native";
 
 import { Skia } from "../Skia";
@@ -48,14 +48,8 @@ const useLoading = <T>(
   loader: () => Promise<T | null>
 ) => {
   const [data, setData] = useState<T | null>(null);
-  const prevSourceRef = useRef<DataSourceFromHook>();
   useEffect(() => {
-    if (prevSourceRef.current !== source) {
-      prevSourceRef.current = source;
-      loader().then(setData);
-    } else {
-      setData(null);
-    }
+    loader().then(setData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
   return data;
