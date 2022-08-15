@@ -1,14 +1,15 @@
 import type { DependencyList } from "react";
 import { useRef, useEffect, useState } from "react";
-import { Image, Platform } from "react-native";
+import { Image } from "react-native";
 
 import { Skia } from "../Skia";
-import type { SkData, DataSource } from "../types";
+import { isRNModule } from "../types";
+import type { SkData, DataModule, DataSourceFromHook } from "../types";
 
-const resolveAsset = (source: ReturnType<typeof require>) => {
-  return Platform.OS === "web"
-    ? source.default
-    : Image.resolveAssetSource(source).uri;
+const resolveAsset = (source: DataModule) => {
+  return isRNModule(source)
+    ? Image.resolveAssetSource(source).uri
+    : source.default;
 };
 
 const factoryWrapper = <T>(
@@ -25,19 +26,12 @@ const factoryWrapper = <T>(
   }
 };
 
-const loadDataCollection = <T>(
-  sources: DataSource[],
-  factory: (data: SkData) => T,
-  onError?: (err: Error) => void
-): Promise<(T | null)[]> =>
-  Promise.all(sources.map((source) => loadData(source, factory, onError)));
-
 const loadData = <T>(
-  source: DataSource,
+  source: DataSourceFromHook,
   factory: (data: SkData) => T,
   onError?: (err: Error) => void
 ): Promise<T | null> => {
-  if (source === null) {
+  if (source === null || source === undefined) {
     return new Promise((resolve) => resolve(null));
   } else if (source instanceof Uint8Array) {
     return new Promise((resolve) =>
@@ -50,16 +44,13 @@ const loadData = <T>(
     );
   }
 };
-
-type Source = DataSource | null | undefined;
-
 const useLoading = <T>(
-  source: Source,
+  source: DataSourceFromHook,
   loader: () => Promise<T | null>,
   deps: DependencyList = []
 ) => {
   const [data, setData] = useState<T | null>(null);
-  const prevSourceRef = useRef<Source>();
+  const prevSourceRef = useRef<DataSourceFromHook>();
   useEffect(() => {
     if (prevSourceRef.current !== source) {
       prevSourceRef.current = source;
@@ -72,20 +63,8 @@ const useLoading = <T>(
   return data;
 };
 
-export const useDataCollection = <T>(
-  sources: DataSource[],
-  factory: (data: SkData) => T,
-  onError?: (err: Error) => void,
-  deps?: DependencyList
-) =>
-  useLoading(
-    sources,
-    () => loadDataCollection(sources, factory, onError),
-    deps
-  );
-
 export const useRawData = <T>(
-  source: DataSource | null | undefined,
+  source: DataSourceFromHook,
   factory: (data: SkData) => T,
   onError?: (err: Error) => void,
   deps?: DependencyList
@@ -94,7 +73,7 @@ export const useRawData = <T>(
 const identity = (data: SkData) => data;
 
 export const useData = (
-  source: DataSource | null | undefined,
+  source: DataSourceFromHook,
   onError?: (err: Error) => void,
   deps?: DependencyList
 ) => useRawData(source, identity, onError, deps);

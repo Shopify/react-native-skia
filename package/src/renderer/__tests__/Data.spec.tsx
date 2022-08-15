@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { processResult } from "../../__tests__/setup";
 import { Fill, Image } from "../components";
 import * as SkiaRenderer from "../index";
-import type { SkData } from "../../skia/types/Data/Data";
 
 import { importSkia, mountCanvas, width, height } from "./setup";
 
@@ -38,22 +37,6 @@ const CheckImage = ({}: EmptyProps) => {
   }
   return <Fill color="green" />;
 };
-
-const CheckDataCollection = ({}: EmptyProps) => {
-  const { useDataCollection, Skia } = importSkia();
-  const font = useDataCollection(
-    [
-      "skia/__tests__/assets/Roboto-Medium.ttf",
-      "skia/__tests__/assets/Roboto-Medium.ttf",
-    ],
-    (data: SkData) => Skia.Typeface.MakeFreeTypeFaceFromData(data)
-  );
-  if (!font) {
-    return <Fill color="red" />;
-  }
-  return <Fill color="green" />;
-};
-
 const CheckTogglingImage = ({}: EmptyProps) => {
   const [idx, setIdx] = useState(0);
   const { useImage } = importSkia();
@@ -114,14 +97,6 @@ describe("Data Loading", () => {
     processResult(surface, "snapshots/font/green.png");
   });
 
-  it("Should load many font files", async () => {
-    const { surface, draw } = mountCanvas(<CheckDataCollection />);
-    draw();
-    processResult(surface, "snapshots/font/red.png");
-    await wait(500);
-    draw();
-    processResult(surface, "snapshots/font/green.png");
-  });
   it("Should toggle the image to change", async () => {
     const { surface, draw } = mountCanvas(<CheckTogglingImage />);
     draw();
