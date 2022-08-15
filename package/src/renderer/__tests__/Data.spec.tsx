@@ -37,6 +37,7 @@ const CheckImage = ({}: EmptyProps) => {
   }
   return <Fill color="green" />;
 };
+
 const CheckTogglingImage = ({}: EmptyProps) => {
   const [idx, setIdx] = useState(0);
   const { useImage } = importSkia();
@@ -54,6 +55,37 @@ const CheckTogglingImage = ({}: EmptyProps) => {
   }
   const images = [zurich, oslo];
   const image = images[idx];
+  return (
+    <Image
+      image={image}
+      x={0}
+      y={0}
+      width={width}
+      height={height}
+      fit="cover"
+    />
+  );
+};
+
+const sources = [
+  "skia/__tests__/assets/zurich.jpg",
+  "skia/__tests__/assets/oslo.jpg",
+];
+
+const CheckChangingImage = ({}: EmptyProps) => {
+  const [idx, setIdx] = useState(0);
+  const { useImage } = importSkia();
+  const image = useImage(sources[idx]);
+  useEffect(() => {
+    if (image) {
+      setTimeout(() => {
+        setIdx(1);
+      }, 20);
+    }
+  }, [image]);
+  if (!image) {
+    return <Fill color="red" />;
+  }
   return (
     <Image
       image={image}
@@ -99,6 +131,18 @@ describe("Data Loading", () => {
 
   it("Should toggle the image to change", async () => {
     const { surface, draw } = mountCanvas(<CheckTogglingImage />);
+    draw();
+    processResult(surface, "snapshots/data/red.png");
+    await wait(10);
+    draw();
+    processResult(surface, "snapshots/data/zurich.png");
+    await wait(30);
+    draw();
+    processResult(surface, "snapshots/data/oslo.png");
+  });
+
+  it.failing("Should allow for the source image to change", async () => {
+    const { surface, draw } = mountCanvas(<CheckChangingImage />);
     draw();
     processResult(surface, "snapshots/data/red.png");
     await wait(10);
