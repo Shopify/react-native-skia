@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 
 import { Skia } from "../Skia";
-import type { DataSourceFromHook } from "../types";
+import type { DataSourceParam } from "../types";
 
 import { useTypeface } from "./Typeface";
 
@@ -10,7 +10,7 @@ import { useTypeface } from "./Typeface";
  * Returns a Skia Font object
  * */
 export const useFont = (
-  font: DataSourceFromHook,
+  font: DataSourceParam,
   size?: number,
   onError?: (err: Error) => void
 ) => {

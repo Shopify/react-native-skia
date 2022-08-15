@@ -3,7 +3,7 @@ import { Image } from "react-native";
 
 import { Skia } from "../Skia";
 import { isRNModule } from "../types";
-import type { SkData, DataModule, DataSourceFromHook } from "../types";
+import type { SkData, DataModule, DataSourceParam } from "../types";
 
 const resolveAsset = (source: DataModule) => {
   return isRNModule(source)
@@ -26,7 +26,7 @@ const factoryWrapper = <T>(
 };
 
 const loadData = <T>(
-  source: DataSourceFromHook,
+  source: DataSourceParam,
   factory: (data: SkData) => T,
   onError?: (err: Error) => void
 ): Promise<T | null> => {
@@ -44,7 +44,7 @@ const loadData = <T>(
   }
 };
 const useLoading = <T>(
-  source: DataSourceFromHook,
+  source: DataSourceParam,
   loader: () => Promise<T | null>
 ) => {
   const [data, setData] = useState<T | null>(null);
@@ -56,7 +56,7 @@ const useLoading = <T>(
 };
 
 export const useRawData = <T>(
-  source: DataSourceFromHook,
+  source: DataSourceParam,
   factory: (data: SkData) => T,
   onError?: (err: Error) => void
 ) => useLoading(source, () => loadData(source, factory, onError));
@@ -64,6 +64,6 @@ export const useRawData = <T>(
 const identity = (data: SkData) => data;
 
 export const useData = (
-  source: DataSourceFromHook,
+  source: DataSourceParam,
   onError?: (err: Error) => void
 ) => useRawData(source, identity, onError);

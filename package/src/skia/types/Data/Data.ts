@@ -9,7 +9,7 @@ type ESModule = {
 };
 export type DataModule = RNModule | ESModule;
 export type DataSource = DataModule | string | Uint8Array;
-export type DataSourceFromHook = DataSource | null | undefined;
+export type DataSourceParam = DataSource | null | undefined;
 
 export const isRNModule = (mod: DataModule): mod is RNModule =>
   typeof mod === "number";
