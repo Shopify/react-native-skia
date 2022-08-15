@@ -13,7 +13,7 @@ import type { DrawingContext } from "../DrawingContext";
 import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
-import type * as SkiaExports from "../../skia";
+import type * as SkiaExports from "../..";
 
 export let font: SkiaExports.SkFont;
 
@@ -38,9 +38,10 @@ jest.mock("react-native", () => ({
   Image: {
     resolveAssetSource: jest.fn,
   },
+  requireNativeComponent: () => ({}),
 }));
 
-export const importSkia = (): typeof SkiaExports => require("../../skia");
+export const importSkia = (): typeof SkiaExports => require("../..");
 
 beforeAll(async () => {
   await LoadSkiaWeb();

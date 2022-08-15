@@ -66,7 +66,6 @@ const useInternalTouchHandler = (
         } else if (touch.type === TouchType.Active) {
           handlers.onActive && handlers.onActive(extendedTouchInfo);
         } else {
-          handlers.onActive && handlers.onActive(extendedTouchInfo);
           handlers.onEnd && handlers.onEnd(extendedTouchInfo);
         }
       }

@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 
-import type { TouchInfo } from "../../views/types";
 import { TouchType } from "../../views/types";
 
 import type { EmptyProps } from "./setup";
-import { mountCanvas } from "./setup";
+import { mountCanvas, importSkia } from "./setup";
 
 const SimpleActiveTouch = ({}: EmptyProps) => {
-  const { useTouchHandler } = require("../../views/useTouchHandler");
+  const { useTouchHandler } = importSkia();
   const touchHandler = useTouchHandler({
     onStart: ({ x, y }: any) => {
       expect(x).toBe(10);
@@ -21,7 +20,7 @@ const SimpleActiveTouch = ({}: EmptyProps) => {
       expect(velocityY).toBe(10);
     },
   });
-  const history: TouchInfo[][] = [
+  const history = [
     [
       {
         x: 10,
@@ -48,7 +47,7 @@ const SimpleActiveTouch = ({}: EmptyProps) => {
 };
 
 const SimpleEndTouch = ({}: EmptyProps) => {
-  const { useTouchHandler } = require("../../views/useTouchHandler");
+  const { useTouchHandler } = importSkia();
   const touchHandler = useTouchHandler({
     onStart: ({ x, y }: any) => {
       expect(x).toBe(10);
@@ -67,7 +66,7 @@ const SimpleEndTouch = ({}: EmptyProps) => {
       expect(velocityY).toBe(10);
     },
   });
-  const history: TouchInfo[][] = [
+  const history = [
     [
       {
         x: 10,
@@ -108,11 +107,8 @@ describe("Test handling of touch information", () => {
     const { draw } = mountCanvas(<SimpleActiveTouch />);
     draw();
   });
-  it.failing(
-    "Shows that the velocity is not working properly onEnd event",
-    () => {
-      const { draw } = mountCanvas(<SimpleEndTouch />);
-      draw();
-    }
-  );
+  it("Calculates the velocity properly onEnd event", () => {
+    const { draw } = mountCanvas(<SimpleEndTouch />);
+    draw();
+  });
 });
