@@ -17,11 +17,13 @@ import type * as SkiaExports from "../..";
 
 export let font: SkiaExports.SkFont;
 
+export const resolveFile = (uri: string) =>
+  fs.readFileSync(path.resolve(__dirname, `../../${uri}`));
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).fetch = jest.fn((uri: string) =>
   Promise.resolve({
-    arrayBuffer: () =>
-      Promise.resolve(fs.readFileSync(path.resolve(__dirname, `../../${uri}`))),
+    arrayBuffer: () => Promise.resolve(resolveFile(uri)),
   })
 );
 
@@ -38,7 +40,7 @@ jest.mock("react-native", () => ({
   Image: {
     resolveAssetSource: jest.fn,
   },
-  requireNativeComponent: () => ({}),
+  requireNativeComponent: jest.fn,
 }));
 
 export const importSkia = (): typeof SkiaExports => require("../..");
@@ -48,9 +50,7 @@ beforeAll(async () => {
   const Skia = JsiSkApi(global.CanvasKit);
   global.SkiaApi = Skia;
   const data = Skia.Data.fromBytes(
-    fs.readFileSync(
-      path.resolve(__dirname, "../../skia/__tests__/assets/Roboto-Medium.ttf")
-    )
+    resolveFile("skia/__tests__/assets/Roboto-Medium.ttf")
   );
   const tf = Skia.Typeface.MakeFreeTypeFaceFromData(data)!;
   expect(tf).toBeTruthy();

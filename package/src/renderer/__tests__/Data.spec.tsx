@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { processResult } from "../../__tests__/setup";
-import { Fill } from "../components";
+import { Fill, Image } from "../components";
 import * as SkiaRenderer from "../index";
-import type { SkData } from "../../skia/types/Data/Data";
 
 import type { EmptyProps } from "./setup";
-import { mountCanvas, importSkia } from "./setup";
+import { importSkia, mountCanvas, width, height } from "./setup";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -37,19 +36,64 @@ const CheckImage = ({}: EmptyProps) => {
   return <Fill color="green" />;
 };
 
-const CheckDataCollection = ({}: EmptyProps) => {
-  const { useDataCollection, Skia } = importSkia();
-  const font = useDataCollection(
-    [
-      "skia/__tests__/assets/Roboto-Medium.ttf",
-      "skia/__tests__/assets/Roboto-Medium.ttf",
-    ],
-    (data: SkData) => Skia.Typeface.MakeFreeTypeFaceFromData(data)
-  );
-  if (!font) {
+const CheckTogglingImage = ({}: EmptyProps) => {
+  const [idx, setIdx] = useState(0);
+  const { useImage } = importSkia();
+  const zurich = useImage("skia/__tests__/assets/zurich.jpg");
+  const oslo = useImage("skia/__tests__/assets/oslo.jpg");
+  useEffect(() => {
+    if (oslo && zurich) {
+      setTimeout(() => {
+        setIdx(1);
+      }, 20);
+    }
+  }, [zurich, oslo]);
+  if (!zurich || !oslo) {
     return <Fill color="red" />;
   }
-  return <Fill color="green" />;
+  const images = [zurich, oslo];
+  const image = images[idx];
+  return (
+    <Image
+      image={image}
+      x={0}
+      y={0}
+      width={width}
+      height={height}
+      fit="cover"
+    />
+  );
+};
+
+const sources = [
+  "skia/__tests__/assets/zurich.jpg",
+  "skia/__tests__/assets/oslo.jpg",
+];
+
+const CheckChangingImage = ({}: EmptyProps) => {
+  const [idx, setIdx] = useState(0);
+  const { useImage } = importSkia();
+  const image = useImage(sources[idx]);
+  useEffect(() => {
+    if (image) {
+      setTimeout(() => {
+        setIdx(1);
+      }, 20);
+    }
+  }, [image]);
+  if (!image) {
+    return <Fill color="red" />;
+  }
+  return (
+    <Image
+      image={image}
+      x={0}
+      y={0}
+      width={width}
+      height={height}
+      fit="cover"
+    />
+  );
 };
 
 describe("Data Loading", () => {
@@ -83,12 +127,27 @@ describe("Data Loading", () => {
     processResult(surface, "snapshots/font/green.png");
   });
 
-  it("Should load many font files", async () => {
-    const { surface, draw } = mountCanvas(<CheckDataCollection />);
+  it("Should toggle the image to change", async () => {
+    const { surface, draw } = mountCanvas(<CheckTogglingImage />);
     draw();
-    processResult(surface, "snapshots/font/red.png");
-    await wait(500);
+    processResult(surface, "snapshots/data/red.png");
+    await wait(10);
     draw();
-    processResult(surface, "snapshots/font/green.png");
+    processResult(surface, "snapshots/data/zurich.png");
+    await wait(30);
+    draw();
+    processResult(surface, "snapshots/data/oslo.png");
+  });
+
+  it("Should allow for the source image to change", async () => {
+    const { surface, draw } = mountCanvas(<CheckChangingImage />);
+    draw();
+    processResult(surface, "snapshots/data/red.png");
+    await wait(10);
+    draw();
+    processResult(surface, "snapshots/data/zurich.png");
+    await wait(30);
+    draw();
+    processResult(surface, "snapshots/data/oslo.png");
   });
 });

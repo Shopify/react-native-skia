@@ -46,7 +46,6 @@ export const Mock: typeof SkiaExports &
   Skia,
   ...BaseSkia,
   // 2. Hooks
-  useDataCollection: Noop,
   useRawData: Noop,
   useData: Noop,
   useFont: Noop,
