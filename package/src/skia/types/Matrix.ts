@@ -9,7 +9,7 @@ export enum MatrixIndex {
   TransY = 5,
   Persp0 = 6,
   Persp1 = 7,
-  persp2 = 8,
+  Persp2 = 8,
 }
 
 export const isMatrix = (obj: unknown): obj is SkMatrix =>

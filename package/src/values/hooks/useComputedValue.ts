@@ -19,8 +19,3 @@ export const useComputedValue = <R>(cb: () => R, values: unknown[]) => {
   useEffect(() => () => value.__invalidate(), [value]);
   return value;
 };
-
-export const useDerivedValue = <R>(cb: () => R, values: unknown[]) => {
-  console.warn("useDerivedValue is deprecated. Use useComputedValue instead.");
-  return useComputedValue(cb, values);
-};

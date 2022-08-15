@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 
 import React from "react";
 import type { ReactNode } from "react";
@@ -12,25 +13,65 @@ import type { DrawingContext } from "../DrawingContext";
 import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
+import type * as SkiaExports from "../..";
 
-export let Skia: ReturnType<typeof JsiSkApi>;
+export const resolveFile = (uri: string) =>
+  fs.readFileSync(path.resolve(__dirname, `../../${uri}`));
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).fetch = jest.fn((uri: string) =>
+  Promise.resolve({
+    arrayBuffer: () => Promise.resolve(resolveFile(uri)),
+  })
+);
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EmptyProps {}
 
 jest.mock("react-native", () => ({
+  PixelRatio: {
+    get(): number {
+      return 1;
+    },
+  },
   Platform: { OS: "web" },
   Image: {
     resolveAssetSource: jest.fn,
   },
+  requireNativeComponent: jest.fn,
 }));
 
-export const nodeRequire = (uri: string) => fs.readFileSync(uri);
+export const loadImage = (uri: string) => {
+  const Skia = global.SkiaApi;
+  const image = Skia.Image.MakeImageFromEncoded(
+    Skia.Data.fromBytes(resolveFile(uri))
+  );
+  expect(image).toBeTruthy();
+  return image!;
+};
+
+export const loadFont = (uri: string) => {
+  const Skia = global.SkiaApi;
+  const tf = Skia.Typeface.MakeFreeTypeFaceFromData(
+    Skia.Data.fromBytes(resolveFile(uri))
+  );
+  expect(tf).toBeTruthy();
+  const font = Skia.Font(tf!, fontSize);
+  return font;
+};
+
+export const importSkia = (): typeof SkiaExports => require("../..");
 
 beforeAll(async () => {
   await LoadSkiaWeb();
-  Skia = JsiSkApi(global.CanvasKit);
+  const Skia = JsiSkApi(global.CanvasKit);
+  global.SkiaApi = Skia;
 });
 
-export const width = 256;
-export const height = 256;
+const pixelDensity = 3;
+export const fontSize = 32 * pixelDensity;
+export const width = 256 * pixelDensity;
+export const height = 256 * pixelDensity;
 export const center = { x: width / 2, y: height / 2 };
 const redraw = () => {};
 const ref = { current: null };
@@ -50,7 +91,7 @@ export const drawOnNode = (element: ReactNode) => {
 };
 
 export const mountCanvas = (element: ReactNode) => {
-  global.SkiaApi = Skia;
+  const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
   const surface = Skia.Surface.Make(width, height)!;
   expect(surface).toBeDefined();
