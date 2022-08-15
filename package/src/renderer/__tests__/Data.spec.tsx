@@ -5,12 +5,10 @@ import { Fill } from "../components";
 import * as SkiaRenderer from "../index";
 import type { SkData } from "../../skia/types/Data/Data";
 
-import { importSkia, mountCanvas } from "./setup";
+import type { EmptyProps } from "./setup";
+import { mountCanvas, importSkia } from "./setup";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface EmptyProps {}
 
 const CheckData = ({}: EmptyProps) => {
   const { useFont } = importSkia();

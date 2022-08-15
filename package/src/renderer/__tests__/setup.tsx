@@ -13,7 +13,7 @@ import type { DrawingContext } from "../DrawingContext";
 import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
-import type * as SkiaExports from "../../skia";
+import type * as SkiaExports from "../..";
 
 export let font: SkiaExports.SkFont;
 
@@ -25,14 +25,23 @@ export let font: SkiaExports.SkFont;
   })
 );
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EmptyProps {}
+
 jest.mock("react-native", () => ({
+  PixelRatio: {
+    get(): number {
+      return 1;
+    },
+  },
   Platform: { OS: "web" },
   Image: {
     resolveAssetSource: jest.fn,
   },
+  requireNativeComponent: () => ({}),
 }));
 
-export const importSkia = (): typeof SkiaExports => require("../../skia");
+export const importSkia = (): typeof SkiaExports => require("../..");
 
 beforeAll(async () => {
   await LoadSkiaWeb();
