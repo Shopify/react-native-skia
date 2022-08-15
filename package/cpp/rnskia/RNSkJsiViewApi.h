@@ -19,7 +19,7 @@ using CallbackInfo = struct CallbackInfo {
     drawCallback = nullptr;
     view = nullptr;
   }
-  std::shared_ptr<jsi::Function> drawCallback;
+  std::shared_ptr<FunctionWrapper> drawCallback;
   std::shared_ptr<RNSkDrawView> view;
 };
 
@@ -61,7 +61,7 @@ public:
     if (arguments[1].isUndefined()) {
       info->drawCallback = nullptr;
     } else {
-      info->drawCallback = std::make_shared<jsi::Function>(
+      info->drawCallback = std::make_shared<FunctionWrapper>(
           arguments[1].asObject(runtime).asFunction(runtime));
     }
 
