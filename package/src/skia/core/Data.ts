@@ -1,4 +1,3 @@
-import type { DependencyList } from "react";
 import { useRef, useEffect, useState } from "react";
 import { Image } from "react-native";
 
@@ -46,8 +45,7 @@ const loadData = <T>(
 };
 const useLoading = <T>(
   source: DataSourceFromHook,
-  loader: () => Promise<T | null>,
-  deps: DependencyList = []
+  loader: () => Promise<T | null>
 ) => {
   const [data, setData] = useState<T | null>(null);
   const prevSourceRef = useRef<DataSourceFromHook>();
@@ -59,21 +57,19 @@ const useLoading = <T>(
       setData(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [source]);
   return data;
 };
 
 export const useRawData = <T>(
   source: DataSourceFromHook,
   factory: (data: SkData) => T,
-  onError?: (err: Error) => void,
-  deps?: DependencyList
-) => useLoading(source, () => loadData(source, factory, onError), deps);
+  onError?: (err: Error) => void
+) => useLoading(source, () => loadData(source, factory, onError));
 
 const identity = (data: SkData) => data;
 
 export const useData = (
   source: DataSourceFromHook,
-  onError?: (err: Error) => void,
-  deps?: DependencyList
-) => useRawData(source, identity, onError, deps);
+  onError?: (err: Error) => void
+) => useRawData(source, identity, onError);

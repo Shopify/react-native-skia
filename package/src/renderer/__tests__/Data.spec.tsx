@@ -141,7 +141,7 @@ describe("Data Loading", () => {
     processResult(surface, "snapshots/data/oslo.png");
   });
 
-  it.failing("Should allow for the source image to change", async () => {
+  it("Should allow for the source image to change", async () => {
     const { surface, draw } = mountCanvas(<CheckChangingImage />);
     draw();
     processResult(surface, "snapshots/data/red.png");
