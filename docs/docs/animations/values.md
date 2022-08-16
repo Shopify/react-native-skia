@@ -147,9 +147,9 @@ const Example = () => {
 
 ## Selectors
 
-Sometimes we have components that renders multiple children as a function of an array. If we want to animate such a component with React Native Skia, we can use Skia Values for the array values and use these as properties for the components.
+When dealing with complex Skia values, the `Selector` function allows you to map that value to a form that can be understood by a Skia component. This is particularly useful when dealing with complex Skia values like arrays or objects.
 
-To access elements in the array correpsonding to the index of the component we can use the `Selector` function in React Native Skia. The selector is used to access items in arrays (or values by keys in objects) - making it much simpler to create computed values with Skia:
+In the example below, we access elements in the array corresponding to the index of the component using `Selector`.
 
 ```tsx twoslash
 import React from "react";
