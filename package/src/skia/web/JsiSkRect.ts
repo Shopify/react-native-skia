@@ -7,12 +7,9 @@ import { HostObject } from "./Host";
 export class JsiSkRect extends HostObject<Rect, "Rect"> implements SkRect {
   static fromValue(CanvasKit: CanvasKit, rect: SkRect) {
     if (rect instanceof JsiSkRect) {
-      return rect;
+      return rect.ref;
     }
-    return new JsiSkRect(
-      CanvasKit,
-      CanvasKit.XYWHRect(rect.x, rect.y, rect.width, rect.height)
-    );
+    return CanvasKit.XYWHRect(rect.x, rect.y, rect.width, rect.height);
   }
 
   constructor(CanvasKit: CanvasKit, ref: Rect) {
