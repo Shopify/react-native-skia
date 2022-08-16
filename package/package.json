@@ -37,7 +37,7 @@
   ],
   "scripts": {
     "tsc": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx  --max-warnings 0",
+    "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "test": "jest",
     "postinstall": "node scripts/install-npm.js",
     "build": "bob build"
