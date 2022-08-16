@@ -187,6 +187,32 @@ export const Demo = () => {
 };
 ```
 
+The same approach can be used for accessing properties of objects.
+
+```tsx twoslash
+import React from "react";
+import {
+  Canvas,
+  Path,
+  Skia,
+  Selector,
+  useValue,
+} from "@shopify/react-native-skia";
+
+const previous = Skia.Path.Make();
+const current = Skia.Path.Make();
+
+export const Demo = () => {
+  const state = useValue({ previous, current });
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Path path={Selector(state, (state) => state.previous)} />
+      <Path path={Selector(state, (state) => state.current)} />
+    </Canvas>
+  );
+};
+```
+
 ## Value Effect
 
 The `useValueEffect` hook allows you to execute change on value change.
