@@ -65,7 +65,7 @@ describe("RNSkComputedValue", () => {
     processResult(surface, "snapshots/animations/green.png");
   });
 
-  it("useComputedValue() should unsubscribe when stable", async () => {
+  it("useComputedValue() should respect its dependencies", async () => {
     const id1 = global.SkiaValueApi.createValue(0);
     const id2 = global.SkiaValueApi.createValue(1);
     const { surface, draw } = mountCanvas(

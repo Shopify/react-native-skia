@@ -106,7 +106,8 @@ export const mountCanvas = (element: ReactNode) => {
   const ref = {
     current: new SkiaView({}) as any,
   };
-  const container = new Container(new DependencyManager(ref), redraw);
+  const depMgr = new DependencyManager(ref);
+  const container = new Container(depMgr, redraw);
   skiaReconciler.createContainer(container, 0, false, null);
   const root = skiaReconciler.createContainer(container, 0, false, null);
   skiaReconciler.updateContainer(
@@ -132,5 +133,5 @@ export const mountCanvas = (element: ReactNode) => {
     center: Skia.Point(width / 2, height / 2),
     Skia,
   };
-  return { draw: () => container.draw(ctx), surface };
+  return { draw: () => container.draw(ctx), surface, depMgr };
 };
