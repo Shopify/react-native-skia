@@ -2,7 +2,6 @@ package com.shopify.reactnative.skia;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.MotionEvent;
@@ -56,35 +55,72 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        int action = ev.getAction();
-        int count = ev.getPointerCount();
+        // https://developer.android.com/training/gestures/multi
+        int action = ev.getActionMasked();
+
         MotionEvent.PointerCoords r = new MotionEvent.PointerCoords();
-        double[] points = new double[count*5];
-        for (int i = 0; i < count; i++) {
-            ev.getPointerCoords(i, r);
-            points[i] = r.x;
-            points[i+1] = r.y;
-            points[i+2] = ev.getPressure(i);
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    points[i+3] = 0;
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    points[i+3] = 1;
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_POINTER_UP:
-                    points[i+3] = 2;
-                    break;
-                case MotionEvent.ACTION_CANCEL:
-                    points[i+3] = 3;
-                    break;
+
+        double[] points;
+
+        // If this is a pointer_up/down event we need to handle it a bit specialized
+        switch (action) {
+            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_POINTER_UP: {
+                points = new double[5];
+                int pointerIndex = ev.getActionIndex();
+                ev.getPointerCoords(pointerIndex, r);
+                points[0] = r.x;
+                points[1] = r.y;
+                points[2] = ev.getPressure(pointerIndex);
+                points[3] = motionActionToType(action);
+                points[4] = ev.getPointerId(pointerIndex);
+
+                updateTouchPoints(points);
+
+                break;
             }
-            points[i+4] = ev.getPointerId(i);
+            default: {
+                // For the rest we can just handle it like expected
+                int count = ev.getPointerCount();
+                int pointerIndex = 0;
+                points = new double[5 * count];
+                for (int i = 0; i < count; i++) {
+                    ev.getPointerCoords(i, r);
+                    points[pointerIndex++] = r.x;
+                    points[pointerIndex++] = r.y;
+                    points[pointerIndex++] = ev.getPressure(i);
+                    points[pointerIndex++] = motionActionToType(action);
+                    points[pointerIndex++] = ev.getPointerId(i);
+                }
+
+                updateTouchPoints(points);
+
+                break;
+            }
         }
-        updateTouchPoints(points);
+
         return true;
+    }
+
+    private static int motionActionToType(int action) {
+        int actionType = 3;
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
+                actionType = 0;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                actionType = 1;
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP:
+                actionType = 2;
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                actionType = 3;
+                break;
+        }
+        return actionType;
     }
 
     @Override
