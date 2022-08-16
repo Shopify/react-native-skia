@@ -72,7 +72,7 @@ describe("useComputedValue", () => {
     expect(counter.value).toBe(2);
   });
 
-  it.failing("should clean up stable version", async () => {
+  it("should clean up stable version", async () => {
     counter.value = 0;
     const id1 = global.SkiaValueApi.createValue(0);
     const id2 = global.SkiaValueApi.createValue(1);
