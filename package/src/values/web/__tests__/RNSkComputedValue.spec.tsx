@@ -11,6 +11,10 @@ import type { SkiaValue } from "../../types";
 import { RNSkComputedValue } from "../RNSkComputedValue";
 import { RNSkValue } from "../RNSkValue";
 
+const sideEffects = {
+  id: 0,
+};
+
 interface TestComputedDepsProps {
   id1: SkiaValue<number>;
   id2: SkiaValue<number>;
@@ -20,6 +24,7 @@ const TestComputedDeps = ({ id1, id2 }: TestComputedDepsProps) => {
   const { useComputedValue } = importSkia();
   const [dep, setDep] = useState(id1);
   const color = useComputedValue(() => {
+    sideEffects.id++;
     return dep.current % 2 ? "green" : "red";
   }, [dep]);
   useEffect(() => {
@@ -76,5 +81,20 @@ describe("RNSkComputedValue", () => {
     await wait(250);
     draw();
     processResult(surface, "snapshots/animations/green.png");
+  });
+
+  it("useComputedValue() should unsubscribe when the dependencies have changed", async () => {
+    sideEffects.id = 0;
+    const id1 = global.SkiaValueApi.createValue(0);
+    const id2 = global.SkiaValueApi.createValue(1);
+    const { surface, draw } = mountCanvas(
+      <TestComputedDeps id1={id1} id2={id2} />
+    );
+    draw();
+    processResult(surface, "snapshots/animations/red.png");
+    await wait(250);
+    draw();
+    processResult(surface, "snapshots/animations/green.png");
+    expect(sideEffects.id).toBe(2);
   });
 });
