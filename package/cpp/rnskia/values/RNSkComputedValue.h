@@ -43,6 +43,16 @@ public:
     _callback = std::make_shared<jsi::Function>(arguments[0].asObject(runtime).asFunction(runtime));
   }
   
+  void invalidate() override {
+    RNSkReadonlyValue::invalidate();
+    
+    // Unregister listeners
+    for(const auto &unsubscribe: _unsubscribers) {
+      unsubscribe();
+    }
+    _unsubscribers.clear();
+  }
+  
   void initializeDependencies(jsi::Runtime &runtime, const jsi::Value *arguments, size_t count) {
     // Save dependencies
     std::vector<std::shared_ptr<RNSkReadonlyValue>> dependencies;
@@ -78,13 +88,6 @@ public:
         
     // Set initial value
     dependencyUpdated(runtime);
-  }
-  
-  virtual ~RNSkComputedValue() {
-    // Unregister listeners
-    for(const auto &unsubscribe: _unsubscribers) {
-      unsubscribe();
-    }
   }
   
 private:

@@ -16,6 +16,7 @@ import type {
 import { ckEnum, HostObject, optEnum, toValue } from "./Host";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
+import { JsiSkRRect } from "./JsiSkRRect";
 
 const CommandCount = {
   [PathVerb.Move]: 3,
@@ -50,12 +51,20 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     startAngleInDegrees: number,
     sweepAngleInDegrees: number
   ) {
-    this.ref.addArc(toValue(oval), startAngleInDegrees, sweepAngleInDegrees);
+    this.ref.addArc(
+      JsiSkRect.fromValue(this.CanvasKit, oval),
+      startAngleInDegrees,
+      sweepAngleInDegrees
+    );
     return this;
   }
 
   addOval(oval: SkRect, isCCW?: boolean, startIndex?: number) {
-    this.ref.addOval(toValue(oval), isCCW, startIndex);
+    this.ref.addOval(
+      JsiSkRect.fromValue(this.CanvasKit, oval),
+      isCCW,
+      startIndex
+    );
     return this;
   }
 
@@ -183,7 +192,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     forceMoveTo: boolean
   ) {
     this.ref.arcToOval(
-      toValue(oval),
+      JsiSkRect.fromValue(this.CanvasKit, oval),
       startAngleInDegrees,
       sweepAngleInDegrees,
       forceMoveTo
@@ -263,11 +272,11 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   addRect(rect: SkRect, isCCW?: boolean) {
-    this.ref.addRect(toValue(rect), isCCW);
+    this.ref.addRect(JsiSkRect.fromValue(this.CanvasKit, rect), isCCW);
   }
 
   addRRect(rrect: SkRRect, isCCW?: boolean) {
-    this.ref.addRRect(toValue(rrect), isCCW);
+    this.ref.addRRect(JsiSkRRect.fromValue(this.CanvasKit, rrect), isCCW);
     return this;
   }
 

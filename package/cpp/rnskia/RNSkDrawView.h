@@ -16,7 +16,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkRefCnt.h>
+#include <SkCanvas.h>
 
 #pragma clang diagnostic pop
 
@@ -32,6 +32,16 @@ using RNSkDrawCallback =
                        std::shared_ptr<RNSkPlatformContext>)>;
 
 enum RNSkDrawingMode { Default, Continuous };
+
+class FunctionWrapper {
+public:
+    FunctionWrapper(jsi::Function &&func): _func(std::move(func)) {}
+    jsi::Value call(jsi::Runtime& runtime, const jsi::Value* args, size_t count) {
+      return _func.call(runtime, args, count);
+    }
+private:
+    jsi::Function _func;
+};
 
 class RNSkDrawView: public std::enable_shared_from_this<RNSkDrawView> {
 public:
@@ -60,7 +70,7 @@ public:
   /**
    * Installs the draw callback for the view
    */
-  void setDrawCallback(std::shared_ptr<jsi::Function> callback);
+  void setDrawCallback(std::shared_ptr<FunctionWrapper> callback);
   
   /**
    Sets the native id of the view
@@ -105,9 +115,9 @@ protected:
   virtual float getScaledHeight() = 0;
   
   /**
-   Override to render picture to GPU
+   Override to render to a canvas
    */
-  virtual void drawPicture(const sk_sp<SkPicture> picture) = 0;
+  virtual void renderToSkiaCanvas(const std::function<void(SkCanvas*)>&) = 0;
   
   /**
    * @return The platformcontext
@@ -116,7 +126,13 @@ protected:
     return _platformContext;
   }
 
-private:  
+private:
+  /**
+   * Calls the JS draw callback. This is the JS function that does the actual drawing so this
+   * method must be called from the JS thread.
+   */
+  void callJsDrawCallback(int width, int height, double timestamp);
+
   /**
    Starts beginDrawCallback loop if the drawing mode is continuous
    */
@@ -143,7 +159,7 @@ private:
   /**
    * Stores the draw drawCallback
    */
-  std::shared_ptr<RNSkDrawCallback> _drawCallback;
+  std::shared_ptr<FunctionWrapper> _drawCallback;
 
   /**
    * Stores a pointer to the jsi wrapper for the canvas. The reason for

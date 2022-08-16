@@ -69,16 +69,16 @@ To run the example project on iOS, you will need to run `pod install`, and on An
 
 In order to load the mock provided by React Native Skia add following to your jest config:
 
-```json
-"setupFiles": ["./node_modules/@shopify/react-native-skia/jestSetup.js"]
+```js
+"setupFiles": [require.resolve("@shopify/react-native-skia/jestSetup.js")]
 ```
 
 Example:
 
-```json
-"jest": {
+```js
+module.exports = {
   "preset": "react-native",
-  "setupFiles": ["./node_modules/@shopify/react-native-skia/jestSetup.js"]
+  "setupFiles": [require.resolve("@shopify/react-native-skia/jestSetup.js")]
 }
 ```
 

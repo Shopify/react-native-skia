@@ -32,6 +32,7 @@ import {
   toOptionalValue,
 } from "./Host";
 import { JsiSkRect } from "./JsiSkRect";
+import { JsiSkRRect } from "./JsiSkRRect";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -43,7 +44,7 @@ export class JsiSkCanvas
 
   drawRect(rect: SkRect, paint: SkPaint) {
     this.ref.drawRect(
-      JsiSkRect.fromValue(this.CanvasKit, rect).ref,
+      JsiSkRect.fromValue(this.CanvasKit, rect),
       toValue<Paint>(paint)
     );
   }
@@ -61,8 +62,8 @@ export class JsiSkCanvas
   ) {
     this.ref.drawImageRect(
       toValue<Image>(img),
-      JsiSkRect.fromValue(this.CanvasKit, src).ref,
-      JsiSkRect.fromValue(this.CanvasKit, dest).ref,
+      JsiSkRect.fromValue(this.CanvasKit, src),
+      JsiSkRect.fromValue(this.CanvasKit, dest),
       toValue<Paint>(paint),
       fastSample
     );
@@ -130,8 +131,8 @@ export class JsiSkCanvas
   ) {
     this.ref.drawImageRectCubic(
       toValue<Image>(img),
-      JsiSkRect.fromValue(this.CanvasKit, src).ref,
-      JsiSkRect.fromValue(this.CanvasKit, dest).ref,
+      JsiSkRect.fromValue(this.CanvasKit, src),
+      JsiSkRect.fromValue(this.CanvasKit, dest),
       B,
       C,
       toOptionalValue(paint)
@@ -148,8 +149,8 @@ export class JsiSkCanvas
   ) {
     this.ref.drawImageRectOptions(
       toValue<Image>(img),
-      JsiSkRect.fromValue(this.CanvasKit, src).ref,
-      JsiSkRect.fromValue(this.CanvasKit, dest).ref,
+      JsiSkRect.fromValue(this.CanvasKit, src),
+      JsiSkRect.fromValue(this.CanvasKit, dest),
       ckEnum(fm),
       ckEnum(mm),
       toOptionalValue(paint)
@@ -217,7 +218,10 @@ export class JsiSkCanvas
   }
 
   drawRRect(rrect: SkRRect, paint: SkPaint) {
-    this.ref.drawRRect(toValue(rrect), toValue(paint));
+    this.ref.drawRRect(
+      JsiSkRRect.fromValue(this.CanvasKit, rrect),
+      toValue(paint)
+    );
   }
 
   drawDRRect(outer: SkRRect, inner: SkRRect, paint: SkPaint) {
@@ -313,11 +317,19 @@ export class JsiSkCanvas
   }
 
   clipRect(rect: SkRect, op: ClipOp, doAntiAlias: boolean) {
-    this.ref.clipRect(toValue(rect), ckEnum(op), doAntiAlias);
+    this.ref.clipRect(
+      JsiSkRect.fromValue(this.CanvasKit, rect),
+      ckEnum(op),
+      doAntiAlias
+    );
   }
 
   clipRRect(rrect: SkRRect, op: ClipOp, doAntiAlias: boolean) {
-    this.ref.clipRRect(toValue(rrect), ckEnum(op), doAntiAlias);
+    this.ref.clipRRect(
+      JsiSkRRect.fromValue(this.CanvasKit, rrect),
+      ckEnum(op),
+      doAntiAlias
+    );
   }
 
   concat(m: SkMatrix) {

@@ -46,18 +46,13 @@ export const Mock: typeof SkiaExports &
   Skia,
   ...BaseSkia,
   // 2. Hooks
-  useDataCollection: Noop,
   useRawData: Noop,
   useData: Noop,
   useFont: Noop,
   useTypeface: Noop,
   useImage: Noop,
-  usePath: Noop,
   useSVG: Noop,
-  useTextPath: Noop,
-  usePaint: Noop,
   usePicture: Noop,
-  useSvgPath: Noop,
   // 3. Point/Rect/Transform utilities
   vec,
   rect: (x: number, y: number, width: number, height: number) => ({
