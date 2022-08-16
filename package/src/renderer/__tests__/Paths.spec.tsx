@@ -6,7 +6,54 @@ import { Drawing, FitBox, Group, LinearGradient, Path } from "../components";
 
 import { drawOnNode, width, height, importSkia } from "./setup";
 
+const size = width;
+
 describe("Path Examples", () => {
+  it("Should draw an arc", () => {
+    const { Skia } = importSkia();
+    const path = Skia.Path.Make();
+    const arcRect = {
+      x: 0,
+      y: 0,
+      width: size,
+      height: size,
+    };
+    path.addArc(arcRect, 45, 270);
+    const surface = drawOnNode(<Path path={path} color="lightblue" />);
+    processResult(surface, "snapshots/paths/arc.png");
+  });
+
+  it("Should draw an oval", () => {
+    const { Skia } = importSkia();
+    const path = Skia.Path.Make();
+    const rct = {
+      x: 0,
+      y: 0,
+      width: size,
+      height: size,
+    };
+    path.addOval(rct);
+    const surface = drawOnNode(<Path path={path} color="lightblue" />);
+    processResult(surface, "snapshots/paths/oval.png");
+  });
+
+  it("Should draw an rounded rectangle", () => {
+    const { Skia } = importSkia();
+    const path = Skia.Path.Make();
+    path.addRRect({
+      rect: {
+        x: 0,
+        y: 0,
+        width: size,
+        height: size,
+      },
+      rx: size / 4,
+      ry: size / 4,
+    });
+    const surface = drawOnNode(<Path path={path} color="lightblue" />);
+    processResult(surface, "snapshots/paths/rrect.png");
+  });
+
   it("Should render the Skia logo with proper stroke joins and caps", () => {
     const { Skia } = importSkia();
     const path = Skia.Path.MakeFromSVGString(
