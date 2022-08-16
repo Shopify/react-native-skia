@@ -32,7 +32,7 @@ namespace RNSkia {
 
         float getScaledHeight() override { return _scaledHeight; };
 
-        void drawPicture(const sk_sp <SkPicture> picture) override;
+        void renderToSkiaCanvas(const std::function<void(SkCanvas*)>&) override;
 
     private:
         bool createSkiaSurface();
