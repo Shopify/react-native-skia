@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { ValueApi } from "../api";
 import { isValue } from "../../renderer/processors/Animations";
@@ -10,9 +10,12 @@ import { isValue } from "../../renderer/processors/Animations";
  * @param values Dependant values
  * @returns A readonly value
  */
-export const useComputedValue = <R>(cb: () => R, values: unknown[]) =>
-  useMemo(
+export const useComputedValue = <R>(cb: () => R, values: unknown[]) => {
+  const value = useMemo(
     () => ValueApi.createComputedValue<R>(cb, values.filter(isValue)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     values
   );
+  useEffect(() => () => value.__invalidate(), [value]);
+  return value;
+};
