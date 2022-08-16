@@ -133,5 +133,5 @@ export const mountCanvas = (element: ReactNode) => {
     center: Skia.Point(width / 2, height / 2),
     Skia,
   };
-  return { draw: () => container.draw(ctx), surface, depMgr };
+  return { draw: () => container.draw(ctx), surface };
 };
