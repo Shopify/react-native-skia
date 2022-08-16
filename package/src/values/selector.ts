@@ -1,6 +1,6 @@
 import type { SkiaValue } from "./types";
 
-export type SelectorType<TReturn, TInput = unknown> = {
+export type SkiaSelector<TReturn, TInput = unknown> = {
   value: SkiaValue<TInput>;
   selector: (v: TInput) => TReturn;
 };
@@ -16,7 +16,7 @@ export type SelectorType<TReturn, TInput = unknown> = {
 export const Selector = <TInput, TReturn>(
   value: SkiaValue<TInput>,
   selector: (v: TInput) => TReturn
-): SelectorType<TReturn, TInput> => {
+): SkiaSelector<TReturn, TInput> => {
   return {
     selector,
     value,
