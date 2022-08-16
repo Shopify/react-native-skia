@@ -32,7 +32,7 @@ protected:
   float getScaledHeight() override { return _height * _context->getPixelDensity(); };
   
 private:
-  void drawPicture(const sk_sp<SkPicture> picture) override;
+  void renderToSkiaCanvas(const std::function<void(SkCanvas*)>& cb) override;
   bool createSkiaSurface();
 
   int _nativeId;

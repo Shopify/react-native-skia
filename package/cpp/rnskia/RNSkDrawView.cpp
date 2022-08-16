@@ -54,7 +54,63 @@ void RNSkDrawView::setNativeId(size_t nativeId) {
   beginDrawingLoop();
 }
 
-void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
+void RNSkDrawView::callJsDrawCallback(int width, int height, double timestamp) {
+  if(_drawCallback == nullptr) {
+    return;
+  }
+
+  // Reset timing info
+  _jsTimingInfo.reset();
+  _gpuTimingInfo.reset();
+
+  auto runtime = getPlatformContext()->getJsRuntime();
+
+  // Update info parameter
+  _infoObject->beginDrawOperation(width, height, timestamp);
+
+  // Set up arguments array
+  std::vector<jsi::Value> args(2);
+  args[0] = jsi::Object::createFromHostObject(*runtime, _jsiCanvas);
+  args[1] = jsi::Object::createFromHostObject(*runtime, _infoObject);
+
+  // To be able to call the drawing function we'll wrap it once again
+  _drawCallback->call(*runtime,
+                      static_cast<const jsi::Value *>(args.data()),
+                      (size_t)2);
+
+  // Reset touches
+  _infoObject->endDrawOperation();
+
+  // Draw debug overlays
+  if (_showDebugOverlay) {
+
+    // Display average rendering timer
+    auto jsAvg = _jsTimingInfo.getAverage();
+    //auto jsFps = _jsTimingInfo.getFps();
+
+    auto gpuAvg = _gpuTimingInfo.getAverage();
+    //auto gpuFps = _gpuTimingInfo.getFps();
+
+    auto total = jsAvg + gpuAvg;
+
+    // Build string
+    std::ostringstream stream;
+    stream << "js: " << jsAvg << "ms gpu: " << gpuAvg << "ms " << " total: " << total << "ms";
+
+    std::string debugString = stream.str();
+
+    // Set up debug font/paints
+    auto font = SkFont();
+    font.setSize(14);
+    auto paint = SkPaint();
+    paint.setColor(SkColors::kRed);
+    _jsiCanvas->getCanvas()->drawSimpleText(
+            debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
+            18, font, paint);
+  }
+}
+
+void RNSkDrawView::setDrawCallback(std::shared_ptr<FunctionWrapper> callback) {
 
   if (callback == nullptr) {
     _drawCallback = nullptr;
@@ -62,69 +118,9 @@ void RNSkDrawView::setDrawCallback(std::shared_ptr<jsi::Function> callback) {
     endDrawingLoop();
     return;
   }
-  
-  // Reset timing info
-  _jsTimingInfo.reset();
-  _gpuTimingInfo.reset();
-  
-  // Create draw drawCallback wrapper
-  _drawCallback = std::make_shared<RNSkDrawCallback>(
-      [weakSelf = weak_from_this(),
-       callback = std::move(callback)](std::shared_ptr<JsiSkCanvas> canvas,
-                                       int width,
-                                       int height,
-                                       double timestamp,
-                                       std::shared_ptr<RNSkPlatformContext> context) {
 
-       auto self = weakSelf.lock();
-       if(self) {
-         auto runtime = context->getJsRuntime();
-                           
-         // Update info parameter
-         self->_infoObject->beginDrawOperation(width, height, timestamp);
-         
-         // Set up arguments array
-         std::vector<jsi::Value> args(2);
-         args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
-         args[1] = jsi::Object::createFromHostObject(*runtime, self->_infoObject);
-
-         // To be able to call the drawing function we'll wrap it once again
-         callback->call(*runtime,
-                        static_cast<const jsi::Value *>(args.data()),
-                        (size_t)2);
-         
-         // Reset touches
-         self->_infoObject->endDrawOperation();
-                           
-        // Draw debug overlays
-        if (self->_showDebugOverlay) {
-
-          // Display average rendering timer
-          auto jsAvg = self->_jsTimingInfo.getAverage();
-          //auto jsFps = _jsTimingInfo.getFps();
-          
-          auto gpuAvg = self->_gpuTimingInfo.getAverage();
-          //auto gpuFps = _gpuTimingInfo.getFps();
-          
-          auto total = jsAvg + gpuAvg;
-          
-          // Build string
-          std::ostringstream stream;
-          stream << "js: " << jsAvg << "ms gpu: " << gpuAvg << "ms " << " total: " << total << "ms";
-          
-          std::string debugString = stream.str();
-
-          // Set up debug font/paints
-          auto font = SkFont();
-          font.setSize(14);
-          auto paint = SkPaint();
-          paint.setColor(SkColors::kRed);
-          canvas->getCanvas()->drawSimpleText(
-           debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
-           18, font, paint);
-        }
-      }
-    });
+  // Save callback
+  _drawCallback = callback;
 
   // Request redraw
   requestRedraw();
@@ -144,7 +140,7 @@ void RNSkDrawView::drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
     skCanvas->scale(pd, pd);
     
     // Call draw function.
-    (*_drawCallback)(canvas, width / pd, height / pd, time, _platformContext);
+    callJsDrawCallback(width / pd, height / pd, time);
     
     // Restore and flush canvas
     skCanvas->restore();
@@ -203,6 +199,8 @@ void RNSkDrawView::performDraw() {
   
   // Finish drawing operations
   auto p = recorder.finishRecordingAsPicture();
+
+  _jsiCanvas->setCanvas(nullptr);
   
   // Calculate duration
   _jsTimingInfo.stopTiming();
@@ -217,7 +215,9 @@ void RNSkDrawView::performDraw() {
       if (self) {
         // Draw the picture recorded on the real GPU canvas
         self->_gpuTimingInfo.beginTiming();
-        self->drawPicture(p);
+        self->renderToSkiaCanvas([p = std::move(p)](SkCanvas* canvas) {
+          canvas->drawPicture(p);
+        });
         self->_gpuTimingInfo.stopTiming();
       }
       // Unlock GPU drawing
