@@ -100,15 +100,84 @@ const SimpleTransform = () => {
 Parts inside the region are shown, while those outside are hidden.
 When using `invertClip`, everything outside the clipping region will be shown, and parts inside the clipping region will be hidden.
 
-### Clip Path
+### Clip Rectangle
 
 ```tsx twoslash
-import {Canvas, Group, Image, useImage} from "@shopify/react-native-skia";
+import {Canvas, Group, Image, useImage, Skia, rrect, rect, Fill} from "@shopify/react-native-skia";
+
+const size = 256;
+const padding = 32;
 
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
-  const star =
-    "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z";
+  const rct = rect(padding, padding, size - padding * 2, size - padding * 2);
+  if (!image) {
+    return null;
+  }
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Fill color="lightblue" />
+      <Group clip={rct}>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={size}
+          height={size}
+          fit="cover"
+        />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+<img src={require("/static/img/group/clip-rect.png").default} width="256" height="256" />
+
+### Clip Rounded Rectangle
+
+```tsx twoslash
+import {Canvas, Group, Image, useImage, Skia, rrect, rect} from "@shopify/react-native-skia";
+
+const size = 256;
+const padding = 32;
+const r = 8;
+
+const Clip = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
+  const roundedRect = rrect(rect(padding, padding, size - padding * 2, size - padding * 2), r, r);
+  if (!image) {
+    return null;
+  }
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group clip={roundedRect}>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={size}
+          height={size}
+          fit="cover"
+        />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+<img src={require("/static/img/group/clip-rrect.png").default} width="256" height="256" />
+
+### Clip Path
+
+```tsx twoslash
+import {Canvas, Group, Image, useImage, Skia} from "@shopify/react-native-skia";
+
+const Clip = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
+  const star = Skia.Path.MakeFromSVGString(
+    "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
+  )!;
   if (!image) {
     return null;
   }
@@ -129,17 +198,19 @@ const Clip = () => {
 };
 ```
 
-![Clip Path](assets/group/clip.png)
+<img src={require("/static/img/group/clip-path.png").default} width="256" height="256" />
+
 
 ### Invert Clip
 
 ```tsx twoslash
-import {Canvas, Group, Image, useImage} from "@shopify/react-native-skia";
+import {Canvas, Group, Image, useImage, Skia} from "@shopify/react-native-skia";
 
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
-  const star =
-    "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z";
+  const star = Skia.Path.MakeFromSVGString(
+    "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
+  )!;
   if (!image) {
     return null;
   }
@@ -160,7 +231,7 @@ const Clip = () => {
 };
 ```
 
-![Invert Clip](assets/group/invert-clip.png)
+<img src={require("/static/img/group/invert-clip.png").default} width="256" height="256" />
 
 ## Layer Effects
 

@@ -73,6 +73,10 @@
   if(_manager != nullptr && _nativeId != 0) {
     _manager->unregisterSkiaDrawView(_nativeId);
   }
+  
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:RCTBridgeWillInvalidateModulesNotification object:nil];
+    
+  assert(_impl == nullptr);
 }
 
 #pragma mark Layout
