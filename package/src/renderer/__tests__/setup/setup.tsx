@@ -5,18 +5,18 @@ import React from "react";
 import type { ReactNode } from "react";
 import ReactReconciler from "react-reconciler";
 
-import { JsiSkApi } from "../../skia/web";
-import { DependencyManager } from "../DependencyManager";
-import { skHostConfig } from "../HostConfig";
-import { Container } from "../nodes";
-import type { DrawingContext } from "../DrawingContext";
-import { CanvasProvider } from "../useCanvas";
-import { ValueApi } from "../../values/web";
-import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
-import type * as SkiaExports from "../..";
+import { JsiSkApi } from "../../../skia/web";
+import { DependencyManager } from "../../DependencyManager";
+import { skHostConfig } from "../../HostConfig";
+import { Container } from "../../nodes";
+import type { DrawingContext } from "../../DrawingContext";
+import { CanvasProvider } from "../../useCanvas";
+import { ValueApi } from "../../../values/web";
+import { LoadSkiaWeb } from "../../../web/LoadSkiaWeb";
+import type * as SkiaExports from "../../..";
 
 export const resolveFile = (uri: string) =>
-  fs.readFileSync(path.resolve(__dirname, `../../${uri}`));
+  fs.readFileSync(path.resolve(__dirname, `../../../${uri}`));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).fetch = jest.fn((uri: string) =>
@@ -60,7 +60,7 @@ export const loadFont = (uri: string) => {
   return font;
 };
 
-export const importSkia = (): typeof SkiaExports => require("../..");
+export const importSkia = (): typeof SkiaExports => require("../../..");
 
 beforeAll(async () => {
   await LoadSkiaWeb();
