@@ -5,9 +5,7 @@ import { Fill, Image } from "../components";
 import * as SkiaRenderer from "../index";
 
 import type { EmptyProps } from "./setup";
-import { importSkia, mountCanvas, width, height } from "./setup";
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { importSkia, mountCanvas, width, height, wait } from "./setup";
 
 const CheckData = ({}: EmptyProps) => {
   const { useFont } = importSkia();
