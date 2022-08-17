@@ -3,6 +3,7 @@
 import type { Color, Skia as SkiaApi, SkRect, Vector } from "../skia/types";
 import * as Values from "../values/web";
 import * as ValuesHooks from "../values/hooks";
+import { Selector } from "../values/selector";
 import * as BaseSkia from "../skia/types";
 import { Selector } from "../values";
 import type * as SkiaExports from "../skia";
@@ -47,18 +48,13 @@ export const Mock: typeof SkiaExports &
   Skia,
   ...BaseSkia,
   // 2. Hooks
-  useDataCollection: Noop,
   useRawData: Noop,
   useData: Noop,
   useFont: Noop,
   useTypeface: Noop,
   useImage: Noop,
-  usePath: Noop,
   useSVG: Noop,
-  useTextPath: Noop,
-  usePaint: Noop,
   usePicture: Noop,
-  useSvgPath: Noop,
   // 3. Point/Rect/Transform utilities
   vec,
   rect: (x: number, y: number, width: number, height: number) => ({

@@ -38,12 +38,6 @@ export class DependencyManager {
     // console.log("DependencyMngr: unsubscribeNode", node.nodeId);
     const subscriptions = this.nodeSubscriptionInfos.get(node);
     if (subscriptions) {
-      // console.log(
-      //   "DependencyMngr: unsubscribeNode",
-      //   node.nodeId,
-      //   "-> subscriptions",
-      //   subscriptions.map((p) => p.key).join(", ")
-      // );
       subscriptions.forEach((si) => {
         // Remove from listeners in subscribed value
         this.valueSubscriptions.forEach((s) => {
@@ -53,12 +47,6 @@ export class DependencyManager {
         // Remove subscription if there are no listeneres left on the value
         const valueSubscription = this.valueSubscriptions.get(si.value);
         if (valueSubscription && valueSubscription.listeners.length === 0) {
-          // console.log(
-          //   "DependencyMngr: unsubscribeNode",
-          //   node.nodeId,
-          //   " -> this.valueSubscriptions.delete",
-          //   this.valueSubscriptions.size
-          // );
           // Unsubscribe
           if (!valueSubscription.unsubscribe) {
             throw new Error("Failed to unsubscribe to value subscription");
@@ -118,17 +106,10 @@ export class DependencyManager {
         valueSubscription.unsubscribe = si.value.addListener((v) => {
           valueSubscription!.listeners.forEach((listener) => listener(v));
         });
-        // console.log(
-        //   `DependencyMngr: subscribeNode ${node.nodeId} -> this.valueSubscriptions.set`
-        // );
         this.valueSubscriptions.set(si.value, valueSubscription);
       }
       // Add listener
       valueSubscription.listeners.push(si.listener);
-      // console.log(
-      //   `DependencyMngr: subscribeNode ${node.nodeId} -> number of value subscriptions:`,
-      //   valueSubscription.listeners.length
-      // );
     });
     // Save node's subscription info as well
     this.nodeSubscriptionInfos.set(node, subscriptionInfos);

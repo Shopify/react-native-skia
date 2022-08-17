@@ -1,4 +1,4 @@
-import type { SelectorType, SkiaValue } from "../../../values";
+import type { SkiaSelector, SkiaValue } from "../../../values";
 
 export const isValue = (value: unknown): value is SkiaValue<unknown> => {
   if (value === undefined || value === null) {
@@ -44,7 +44,8 @@ export const isAnimated = <T>(props: AnimatedProps<T>) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnimatedProp<T, P = any> = T | SkiaValue<T> | SelectorType<T, P>;
+export type AnimatedProp<T, P = any> = T | SkiaValue<T> | SkiaSelector<T, P>;
+
 export type AnimatedProps<T> = {
   [K in keyof T]: AnimatedProp<T[K]>;
 };

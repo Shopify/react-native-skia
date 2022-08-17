@@ -4,14 +4,14 @@ import { processResult } from "../../__tests__/setup";
 import { Patch } from "../components";
 import * as SkiaRenderer from "../index";
 
-import { drawOnNode, width, Skia } from "./setup";
+import { drawOnNode, width, importSkia } from "./setup";
 
 describe("CoonsPatch", () => {
   it("Renderer", () => {
     expect(SkiaRenderer).toBeDefined();
   });
   it("Simple Coons Patch", () => {
-    const vec = Skia.Point;
+    const { vec } = importSkia();
     const colors = ["#61dafb", "#fb61da", "#61fbcf", "#dafb61"];
     const C = 64;
     const topLeft = { pos: vec(0, 0), c1: vec(0, C), c2: vec(C, 0) };
