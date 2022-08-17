@@ -3,6 +3,7 @@ import React from "react";
 import { processResult } from "../../__tests__/setup";
 import { Fill, Group, ShaderLib } from "../components";
 import { Shader } from "../components/shaders/Shader";
+import { LinearGradient } from "../components/shaders/LinearGradient";
 
 import { drawOnNode, height, width, importSkia } from "./setup";
 
@@ -112,5 +113,21 @@ describe("Test Shader component", () => {
       </Group>
     );
     processResult(surface, "snapshots/runtime-effects/spiral.png");
+  });
+  it("should display a linear gradient", () => {
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(spiral)!;
+    expect(source).toBeTruthy();
+    const surface = drawOnNode(
+      <Group>
+        <LinearGradient
+          colors={["cyan", "magenta", "yellow"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: width, y: height }}
+        />
+        <Fill />
+      </Group>
+    );
+    processResult(surface, "snapshots/runtime-effects/linear-gradient.png");
   });
 });
