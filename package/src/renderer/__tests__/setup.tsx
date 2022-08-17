@@ -119,7 +119,7 @@ export const mountCanvas = (element: ReactNode) => {
     root,
     null,
     () => {
-      container.depMgr.subscribe();
+      //container.depMgr.update();
     }
   );
   const ctx: DrawingContext = {
