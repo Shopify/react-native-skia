@@ -3,7 +3,6 @@
 import type { Color, Skia as SkiaApi, SkRect, Vector } from "../skia/types";
 import * as Values from "../values/web";
 import * as ValuesHooks from "../values/hooks";
-import { Selector } from "../values/selector";
 import * as BaseSkia from "../skia/types";
 import { Selector } from "../values";
 import type * as SkiaExports from "../skia";
