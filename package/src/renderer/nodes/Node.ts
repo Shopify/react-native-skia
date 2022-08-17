@@ -13,8 +13,6 @@ export enum NodeType {
 
 type DeclarationResult = SkJSIInstance<string> | null;
 
-let NodeID = 1000;
-
 export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
   _props: AnimatedProps<P>;
@@ -29,11 +27,8 @@ export abstract class Node<P = unknown> {
   memoized: DeclarationResult | null = null;
   parent?: Node;
   depMgr: DependencyManager;
-  nodeId: number;
 
   constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
-    this.nodeId = NodeID++;
-    //console.log("Node: constructor", this.nodeId);
     this.depMgr = depMgr;
     this._props = this.subscribeToPropChanges(props);
   }
@@ -97,12 +92,6 @@ export abstract class Node<P = unknown> {
     });
 
     this._propSubscriptions.length > 0 &&
-      // console.log(
-      //   "Node: subscribeToPropChanges set",
-      //   this.nodeId,
-      //   this._propSubscriptions.map((p) => p.key).join(",")
-      // );
-
       // Subscribe to properties
       this.depMgr.subscribeNode(
         this,

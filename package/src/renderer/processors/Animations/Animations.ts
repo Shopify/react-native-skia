@@ -36,7 +36,7 @@ export const isSelector = <T, R>(
 
 export const isAnimated = <T>(props: AnimatedProps<T>) => {
   for (const value of Object.values(props)) {
-    if (isValue(value)) {
+    if (isValue(value) || isSelector(value)) {
       return true;
     }
   }

@@ -20,14 +20,12 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
-import { vec } from "../skia";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
 import { Container } from "./nodes";
 import { DependencyManager } from "./DependencyManager";
 import { CanvasProvider } from "./useCanvas";
-import type { DrawingContext } from "./DrawingContext";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -96,7 +94,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           canvasCtx.size.current = { width, height };
         }
         paint.reset();
-        const ctx: DrawingContext = {
+        const ctx = {
           width,
           height,
           timestamp,
@@ -104,7 +102,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           paint,
           opacity: 1,
           ref,
-          center: vec(width / 2, height / 2),
+          center: { x: width / 2, y: height / 2 },
           Skia,
         };
         container.draw(ctx);
