@@ -1,7 +1,7 @@
 import React from "react";
 
-import { processResult } from "../../__tests__/setup";
-import { Fill, Group, ShaderLib } from "../components";
+import { docPath, processResult } from "../../__tests__/setup";
+import { ColorShader, Fill, Group, ShaderLib } from "../components";
 import { Shader } from "../components/shaders/Shader";
 import { LinearGradient } from "../components/shaders/LinearGradient";
 
@@ -129,5 +129,16 @@ describe("Test Shader component", () => {
       </Group>
     );
     processResult(surface, "snapshots/runtime-effects/linear-gradient.png");
+  });
+  it("should display a color", () => {
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(spiral)!;
+    expect(source).toBeTruthy();
+    const surface = drawOnNode(
+      <Fill>
+        <ColorShader color="lightblue" />
+      </Fill>
+    );
+    processResult(surface, docPath("shaders/color.png"));
   });
 });

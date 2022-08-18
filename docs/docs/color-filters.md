@@ -45,7 +45,7 @@ const MatrixColorFilter = () => {
 };
 ```
 
-![Matrix Color Filter](assets/color-filters/matrix.png)
+<img src={require("/static/img/color-filters/color-matrix.png").default} width="256" height="256" />
 
 ## BlendColor
 

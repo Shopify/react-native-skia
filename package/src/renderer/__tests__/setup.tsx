@@ -73,10 +73,10 @@ beforeAll(async () => {
   global.SkiaValueApi = ValueApi;
 });
 
-const pixelDensity = 3;
-export const fontSize = 32 * pixelDensity;
-export const width = 256 * pixelDensity;
-export const height = 256 * pixelDensity;
+export const PIXEL_RATIO = 3;
+export const fontSize = 32 * PIXEL_RATIO;
+export const width = 256 * PIXEL_RATIO;
+export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
 const redraw = () => {};
 
