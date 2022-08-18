@@ -1,4 +1,4 @@
-import { width } from "../../renderer/__tests__/setup";
+import { width as size } from "../../renderer/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { TileMode } from "../types";
 import { BlendMode } from "../types/Paint/BlendMode";
@@ -20,7 +20,7 @@ vec4 main(vec2 pos) {
     processResult(surface, "snapshots/shader/shader1.png");
   });
   it("Half circle to the right", () => {
-    const { surface, canvas, width, Skia } = setupSkia();
+    const { surface, canvas, Skia, width } = setupSkia();
     const paint = Skia.Paint();
     const source = Skia.RuntimeEffect.Make(`
 uniform vec2 c;
@@ -58,8 +58,8 @@ vec4 main(vec2 pos) {
   });
 
   it("color blend shaders", () => {
-    const { surface, canvas, Skia } = setupSkia(width, width);
-    const r = width / 2;
+    const { surface, canvas, Skia } = setupSkia(size, size);
+    const r = size / 2;
     const c = Skia.Point(r, r);
     const paint = Skia.Paint();
     const g3 = Skia.Shader.MakeRadialGradient(
