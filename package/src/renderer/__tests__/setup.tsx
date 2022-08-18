@@ -54,13 +54,13 @@ export const loadImage = (uri: string) => {
   return image!;
 };
 
-export const loadFont = (uri: string) => {
+export const loadFont = (uri: string, ftSize?: number) => {
   const Skia = global.SkiaApi;
   const tf = Skia.Typeface.MakeFreeTypeFaceFromData(
     Skia.Data.fromBytes(resolveFile(uri))
   );
   expect(tf).toBeTruthy();
-  const font = Skia.Font(tf!, fontSize);
+  const font = Skia.Font(tf!, ftSize ?? fontSize);
   return font;
 };
 
