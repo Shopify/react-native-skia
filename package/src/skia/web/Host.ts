@@ -48,9 +48,6 @@ export const toOptionalValue = <T>(
 ): T | undefined | null =>
   value === undefined ? undefined : value === null ? null : toValue(value);
 
-export const toNullableValue = <T>(value: NonNullish | null): T | null =>
-  value === null ? null : toValue(value);
-
 const toValue = <T>(value: NonNullish): T =>
   (value as HostObject<T, string>).ref;
 
