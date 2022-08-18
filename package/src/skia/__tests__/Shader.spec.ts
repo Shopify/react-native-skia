@@ -1,5 +1,6 @@
 import { processResult } from "../../__tests__/setup";
 import { TileMode } from "../types";
+import { BlendMode } from "../types/Paint/BlendMode";
 
 import { setupSkia } from "./setup";
 
@@ -53,5 +54,63 @@ vec4 main(vec2 pos) {
     );
     canvas.drawPaint(paint);
     processResult(surface, "snapshots/shader/sweep-gradient.png");
+  });
+
+  /*
+      let surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorDodge">
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+        </Blend>
+      </Fill>
+    );
+    processResult(
+      surface,
+      "snapshots/runtime-effects/blend-color-dodge.png",
+      true
+    );
+    */
+  it("color blend shaders", () => {
+    const { surface, canvas, Skia, width } = setupSkia();
+    const r = width / 2;
+    const c = Skia.Point(r, r);
+    const paint = Skia.Paint();
+    const g1 = Skia.Shader.MakeRadialGradient(
+      c,
+      r,
+      ["yellow", "cyan"].map((cl) => Skia.Color(cl)),
+      null,
+      TileMode.Clamp
+    );
+    const g2 = Skia.Shader.MakeRadialGradient(
+      c,
+      r,
+      ["magenta", "yellow"].map((cl) => Skia.Color(cl)),
+      null,
+      TileMode.Clamp
+    );
+    const g3 = Skia.Shader.MakeRadialGradient(
+      c,
+      r,
+      ["magenta", "yellow"].map((cl) => Skia.Color(cl)),
+      null,
+      TileMode.Clamp
+    );
+
+    paint.setShader(
+      Skia.Shader.MakeBlend(
+        BlendMode.ColorDodge,
+        g1,
+        Skia.Shader.MakeBlend(BlendMode.ColorDodge, g2, g3)
+      )
+    );
+    canvas.drawPaint(paint);
+    processResult(
+      surface,
+      "snapshots/runtime-effects/blend-color-dodge.png",
+      true
+    );
   });
 });

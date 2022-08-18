@@ -169,7 +169,7 @@ describe("Test Shader component", () => {
       true
     );
   });
-  it("should blend using color dodge", () => {
+  it("should blend using multiply", () => {
     const { vec } = importSkia();
     const r = width / 2;
     const c = vec(r, r);
@@ -177,7 +177,7 @@ describe("Test Shader component", () => {
       <Fill>
         <Blend mode="colorDodge">
           <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
-          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["cyan", "magenta"]} />
           <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
         </Blend>
       </Fill>
@@ -190,15 +190,17 @@ describe("Test Shader component", () => {
     surface = drawOnNode(
       <Fill>
         <Blend mode="colorDodge">
-          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
           <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
-          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <Blend mode="colorDodge">
+            <RadialGradient r={r} c={c} colors={["cyan", "magenta"]} />
+            <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+          </Blend>
         </Blend>
       </Fill>
     );
     processResult(
       surface,
-      "snapshots/runtime-effects/blend-color-dodge2.png",
+      "snapshots/runtime-effects/blend-color-dodge.png",
       true
     );
   });
