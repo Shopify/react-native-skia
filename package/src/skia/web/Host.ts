@@ -17,7 +17,7 @@ export abstract class Host {
   }
 }
 
-export abstract class HostObject<T, N extends string>
+export abstract class BaseHostObject<T, N extends string>
   extends Host
   implements SkJSIInstance<N>
 {
@@ -31,6 +31,15 @@ export abstract class HostObject<T, N extends string>
   }
 }
 
+export abstract class HostObject<T, N extends string> extends BaseHostObject<
+  T,
+  N
+> {
+  static fromValue<T>(value: SkJSIInstance<string>) {
+    return (value as HostObject<T, string>).ref;
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type NonNullish = {};
 
@@ -39,14 +48,10 @@ export const toOptionalValue = <T>(
 ): T | undefined | null =>
   value === undefined ? undefined : value === null ? null : toValue(value);
 
-export const toUndefinedableValue = <T>(
-  value: NonNullish | undefined
-): T | undefined => (value === undefined ? undefined : toValue(value));
-
 export const toNullableValue = <T>(value: NonNullish | null): T | null =>
   value === null ? null : toValue(value);
 
-export const toValue = <T>(value: NonNullish): T =>
+const toValue = <T>(value: NonNullish): T =>
   (value as HostObject<T, string>).ref;
 
 export const ckEnum = (value: number): EmbindEnumEntity => ({ value });
