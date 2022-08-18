@@ -1,7 +1,7 @@
 import React from "react";
 
 import { processResult } from "../../__tests__/setup";
-import { Fill, Group, ShaderLib } from "../components";
+import { Blend, Fill, Group, RadialGradient, ShaderLib } from "../components";
 import { Shader } from "../components/shaders/Shader";
 
 import { drawOnNode, height, width, importSkia } from "./setup";
@@ -112,5 +112,34 @@ describe("Test Shader component", () => {
       </Group>
     );
     processResult(surface, "snapshots/runtime-effects/spiral.png");
+  });
+
+  it("should blend more than two children", () => {
+    const { Skia, vec } = importSkia();
+    const size = width / 2;
+    const source = Skia.RuntimeEffect.Make(spiral)!;
+    expect(source).toBeTruthy();
+    const surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorDodge">
+          <RadialGradient
+            r={size}
+            c={vec(size, size)}
+            colors={["blue", "yellow"]}
+          />
+          <RadialGradient
+            r={size}
+            c={vec(size, size)}
+            colors={["red", "green"]}
+          />
+          <RadialGradient
+            r={size}
+            c={vec(size, size)}
+            colors={["black", "black"]}
+          />
+        </Blend>
+      </Fill>
+    );
+    processResult(surface, "snapshots/runtime-effects/blend.png");
   });
 });
