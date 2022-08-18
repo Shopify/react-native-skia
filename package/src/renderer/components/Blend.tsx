@@ -28,16 +28,16 @@ const onDeclare = createDeclaration<BlendProps>(
     if (childrenAreImageFilters(children)) {
       return children.reverse().reduce<SkImageFilter | null>((inner, outer) => {
         if (inner === null) {
-          return inner;
+          return outer;
         }
-        return Skia.ImageFilter.MakeBlend(blend, outer, inner);
+        return Skia.ImageFilter.MakeBlend(blend, inner, outer);
       }, null);
     } else if (childrenAreShaders(children)) {
       return children.reverse().reduce<SkShader | null>((inner, outer) => {
         if (inner === null) {
-          return inner;
+          return outer;
         }
-        return Skia.Shader.MakeBlend(blend, outer, inner);
+        return Skia.Shader.MakeBlend(blend, inner, outer);
       }, null);
     }
     throw new Error("<Blend /> can only blend Shaders or ImageFilters");
