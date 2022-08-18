@@ -182,11 +182,7 @@ describe("Test Shader component", () => {
         </Blend>
       </Fill>
     );
-    processResult(
-      surface,
-      "snapshots/runtime-effects/blend-color-dodge.png",
-      true
-    );
+    processResult(surface, "snapshots/runtime-effects/blend-color-dodge.png");
     surface = drawOnNode(
       <Fill>
         <Blend mode="colorDodge">
@@ -198,10 +194,6 @@ describe("Test Shader component", () => {
         </Blend>
       </Fill>
     );
-    processResult(
-      surface,
-      "snapshots/runtime-effects/blend-color-dodge.png",
-      true
-    );
+    processResult(surface, "snapshots/runtime-effects/blend-color-dodge.png");
   });
 });
