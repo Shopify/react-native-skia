@@ -65,14 +65,16 @@ const MatrixColorFilter = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Group>
-        <BlendColor color="lightblue" mode="srcIn" />
-        <Circle cx={r} cy={r} r={r} />
-        <Circle cx={2 * r} cy={r} r={r} color="red" />
+        <BlendColor color="cyan" mode="multiply" />
+        <Circle cx={r} cy={r} r={r} color="yellow" />
+        <Circle cx={2 * r} cy={r} r={r} color="magenta" />
       </Group>
     </Canvas>
   );
 };
 ```
+
+<img src={require("/static/img/color-filters/color-blend.png").default} width="256" height="256" />
 
 ## Lerp
 

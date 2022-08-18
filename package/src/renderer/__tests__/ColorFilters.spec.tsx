@@ -1,12 +1,12 @@
 import React from "react";
 
 import { docPath, processResult } from "../../__tests__/setup";
-import { ColorMatrix, Image } from "../components";
+import { BlendColor, Circle, ColorMatrix, Group, Image } from "../components";
 
 import { drawOnNode, height, width, loadImage } from "./setup";
 
 describe("Color Filters", () => {
-  it("apply a color Matrix to an image", () => {
+  it("should apply a color matrix to an image", () => {
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const surface = drawOnNode(
       <Image
@@ -26,5 +26,18 @@ describe("Color Filters", () => {
       </Image>
     );
     processResult(surface, docPath("color-filters/color-matrix.png"));
+  });
+  it("should blend a color", () => {
+    const r = width / 2;
+    const surface = drawOnNode(
+      <>
+        <Group>
+          <BlendColor color="cyan" mode="multiply" />
+          <Circle cx={r} cy={r} r={r} color="yellow" />
+          <Circle cx={2 * r} cy={r} r={r} color="magenta" />
+        </Group>
+      </>
+    );
+    processResult(surface, docPath("color-filters/color-blend.png"), true);
   });
 });

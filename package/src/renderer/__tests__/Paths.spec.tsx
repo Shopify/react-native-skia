@@ -54,6 +54,26 @@ describe("Path Examples", () => {
     processResult(surface, "snapshots/paths/rrect.png");
   });
 
+  it("Should draw a polygon", () => {
+    const { Skia, vec } = importSkia();
+    const path = Skia.Path.Make();
+    const r = size / 4;
+    path.addPoly(
+      [
+        vec(r, r),
+        { x: size - r, y: r },
+        vec(size - r, size - r),
+        { x: r, y: size - r },
+      ],
+      true
+    );
+
+    const surface = drawOnNode(
+      <Path path={path} strokeWidth={4} style="stroke" color="lightblue" />
+    );
+    processResult(surface, "snapshots/paths/poly.png");
+  });
+
   it("Should render the Skia logo with proper stroke joins and caps", () => {
     const { Skia } = importSkia();
     const path = Skia.Path.MakeFromSVGString(
