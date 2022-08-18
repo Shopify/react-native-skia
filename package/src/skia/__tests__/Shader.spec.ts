@@ -62,20 +62,6 @@ vec4 main(vec2 pos) {
     const r = width / 2;
     const c = Skia.Point(r, r);
     const paint = Skia.Paint();
-    const g1 = Skia.Shader.MakeRadialGradient(
-      c,
-      r,
-      ["yellow", "cyan"].map((cl) => Skia.Color(cl)),
-      null,
-      TileMode.Clamp
-    );
-    const g2 = Skia.Shader.MakeRadialGradient(
-      c,
-      r,
-      ["magenta", "yellow"].map((cl) => Skia.Color(cl)),
-      null,
-      TileMode.Clamp
-    );
     const g3 = Skia.Shader.MakeRadialGradient(
       c,
       r,
@@ -83,14 +69,28 @@ vec4 main(vec2 pos) {
       null,
       TileMode.Clamp
     );
+    const g2 = Skia.Shader.MakeRadialGradient(
+      c,
+      r,
+      ["cyan", "magenta"].map((cl) => Skia.Color(cl)),
+      null,
+      TileMode.Clamp
+    );
+    const g1 = Skia.Shader.MakeRadialGradient(
+      c,
+      r,
+      ["yellow", "cyan"].map((cl) => Skia.Color(cl)),
+      null,
+      TileMode.Clamp
+    );
     paint.setShader(
       Skia.Shader.MakeBlend(
-        BlendMode.ColorDodge,
+        BlendMode.ColorBurn,
         g1,
-        Skia.Shader.MakeBlend(BlendMode.ColorDodge, g2, g3)
+        Skia.Shader.MakeBlend(BlendMode.ColorBurn, g2, g3)
       )
     );
     canvas.drawPaint(paint);
-    processResult(surface, "snapshots/runtime-effects/blend-color-dodge.png");
+    processResult(surface, "snapshots/runtime-effects/blend-color-burn3.png");
   });
 });
