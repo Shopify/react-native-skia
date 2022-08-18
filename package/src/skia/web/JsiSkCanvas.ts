@@ -24,7 +24,7 @@ import type {
   SkVertices,
 } from "../types";
 
-import { ckEnum, HostObject, toOptionalValue } from "./Host";
+import { ckEnum, HostObject } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
@@ -35,6 +35,8 @@ import { JsiSkFont } from "./JsiSkFont";
 import { JsiSkTextBlob } from "./JsiSkTextBlob";
 import { JsiSkPicture } from "./JsiSkPicture";
 import { JsiSkMatrix } from "./JsiSkMatrix";
+import { JsiSkImageFilter } from "./JsiSkImageFilter";
+import { JsiSkPoint } from "./JsiSkPoint";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -56,7 +58,7 @@ export class JsiSkCanvas
       JsiSkImage.fromValue(image),
       x,
       y,
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -90,7 +92,7 @@ export class JsiSkCanvas
       top,
       B,
       C,
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -108,7 +110,7 @@ export class JsiSkCanvas
       top,
       ckEnum(fm),
       ckEnum(mm),
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -124,7 +126,7 @@ export class JsiSkCanvas
       Array.from(JsiSkRect.fromValue(this.CanvasKit, center)),
       JsiSkRect.fromValue(this.CanvasKit, dest),
       ckEnum(filter),
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -142,7 +144,7 @@ export class JsiSkCanvas
       JsiSkRect.fromValue(this.CanvasKit, dest),
       B,
       C,
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -160,7 +162,7 @@ export class JsiSkCanvas
       JsiSkRect.fromValue(this.CanvasKit, dest),
       ckEnum(fm),
       ckEnum(mm),
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -194,7 +196,7 @@ export class JsiSkCanvas
     this.ref.drawPatch(
       cubics.map(({ x, y }) => [x, y]).flat(),
       colors,
-      toOptionalValue(texs),
+      texs ? texs.flatMap((p) => Array.from(JsiSkPoint.fromValue(p))) : texs,
       mode ? ckEnum(mode) : null,
       paint ? JsiSkPaint.fromValue(paint) : undefined
     );
@@ -307,8 +309,8 @@ export class JsiSkCanvas
   ) {
     return this.ref.saveLayer(
       paint ? JsiSkPaint.fromValue(paint) : undefined,
-      toOptionalValue(bounds),
-      toOptionalValue(backdrop),
+      bounds ? JsiSkRect.fromValue(this.CanvasKit, bounds) : bounds,
+      backdrop ? JsiSkImageFilter.fromValue(backdrop) : backdrop,
       flags
     );
   }

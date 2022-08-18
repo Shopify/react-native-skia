@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import type { CanvasKit, EmbindEnumEntity } from "canvaskit-wasm";
 
 import type { SkJSIInstance } from "../types";
@@ -39,17 +38,6 @@ export abstract class HostObject<T, N extends string> extends BaseHostObject<
     return (value as HostObject<T, string>).ref;
   }
 }
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type NonNullish = {};
-
-export const toOptionalValue = <T>(
-  value: NonNullish | undefined | null
-): T | undefined | null =>
-  value === undefined ? undefined : value === null ? null : toValue(value);
-
-const toValue = <T>(value: NonNullish): T =>
-  (value as HostObject<T, string>).ref;
 
 export const ckEnum = (value: number): EmbindEnumEntity => ({ value });
 export const optEnum = (
