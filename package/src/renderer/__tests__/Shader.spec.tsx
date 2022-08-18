@@ -136,22 +136,69 @@ describe("Test Shader component", () => {
     processResult(surface, "snapshots/runtime-effects/blend-multiply.png");
   });
 
-  it("should blend more than two shader children 2", () => {
+  it("should blend using color burn", () => {
     const { vec } = importSkia();
     const r = width / 2;
     const c = vec(r, r);
-    const surface = drawOnNode(
+    let surface = drawOnNode(
       <Fill>
-        <Blend mode="multiply">
-          <RadialGradient r={r} c={c} colors={["cyan", "yellow"]} />
+        <Blend mode="colorBurn">
           <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
-          <RadialGradient r={r} c={c} colors={["transparent", "cyan"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
         </Blend>
       </Fill>
     );
     processResult(
       surface,
-      "snapshots/runtime-effects/blend-multiply2.png",
+      "snapshots/runtime-effects/blend-color-burn.png",
+      true
+    );
+    surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorBurn">
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+        </Blend>
+      </Fill>
+    );
+    processResult(
+      surface,
+      "snapshots/runtime-effects/blend-color-burn2.png",
+      true
+    );
+  });
+  it("should blend using color dodge", () => {
+    const { vec } = importSkia();
+    const r = width / 2;
+    const c = vec(r, r);
+    let surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorDodge">
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+        </Blend>
+      </Fill>
+    );
+    processResult(
+      surface,
+      "snapshots/runtime-effects/blend-color-dodge.png",
+      true
+    );
+    surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorDodge">
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+        </Blend>
+      </Fill>
+    );
+    processResult(
+      surface,
+      "snapshots/runtime-effects/blend-color-dodge2.png",
       true
     );
   });
