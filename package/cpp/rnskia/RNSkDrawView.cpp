@@ -54,7 +54,7 @@ void RNSkDrawView::setNativeId(size_t nativeId) {
   beginDrawingLoop();
 }
 
-void RNSkDrawView::callJsDrawCallback(int width, int height, double timestamp) {
+void RNSkDrawView::callJsDrawCallback(std::shared_ptr<JsiSkCanvas> canvas, int width, int height, double timestamp) {
   if(_drawCallback == nullptr) {
     return;
   }
@@ -70,7 +70,7 @@ void RNSkDrawView::callJsDrawCallback(int width, int height, double timestamp) {
 
   // Set up arguments array
   std::vector<jsi::Value> args(2);
-  args[0] = jsi::Object::createFromHostObject(*runtime, _jsiCanvas);
+  args[0] = jsi::Object::createFromHostObject(*runtime, canvas);
   args[1] = jsi::Object::createFromHostObject(*runtime, _infoObject);
 
   // To be able to call the drawing function we'll wrap it once again
@@ -104,7 +104,7 @@ void RNSkDrawView::callJsDrawCallback(int width, int height, double timestamp) {
     font.setSize(14);
     auto paint = SkPaint();
     paint.setColor(SkColors::kRed);
-    _jsiCanvas->getCanvas()->drawSimpleText(
+    canvas->getCanvas()->drawSimpleText(
             debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
             18, font, paint);
   }
@@ -140,7 +140,7 @@ void RNSkDrawView::drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
     skCanvas->scale(pd, pd);
     
     // Call draw function.
-    callJsDrawCallback(width / pd, height / pd, time);
+    callJsDrawCallback(canvas, width / pd, height / pd, time);
     
     // Restore and flush canvas
     skCanvas->restore();
