@@ -1,9 +1,16 @@
 import React from "react";
 
 import { docPath, processResult } from "../../__tests__/setup";
-import { ColorShader, Fill, Group, ShaderLib } from "../components";
-import { Shader } from "../components/shaders/Shader";
-import { LinearGradient } from "../components/shaders/LinearGradient";
+import {
+  Blend,
+  Fill,
+  Group,
+  RadialGradient,
+  LinearGradient,
+  ShaderLib,
+  Shader,
+  ColorShader,
+} from "../components";
 
 import { drawOnNode, height, width, importSkia } from "./setup";
 
@@ -74,6 +81,7 @@ describe("Test Shader component", () => {
     );
     processResult(surface, "snapshots/shader/bilinear-interpolation.png");
   });
+
   it("should display a hue wheel", () => {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(hue)!;
@@ -92,6 +100,7 @@ describe("Test Shader component", () => {
     );
     processResult(surface, "snapshots/shader/hue.png");
   });
+
   it("should display a green and red spiral", () => {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
@@ -114,6 +123,7 @@ describe("Test Shader component", () => {
     );
     processResult(surface, "snapshots/runtime-effects/spiral.png");
   });
+
   it("should display a linear gradient", () => {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
@@ -130,6 +140,7 @@ describe("Test Shader component", () => {
     );
     processResult(surface, "snapshots/runtime-effects/linear-gradient.png");
   });
+
   it("should display a color", () => {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
@@ -140,5 +151,83 @@ describe("Test Shader component", () => {
       </Fill>
     );
     processResult(surface, docPath("shaders/color.png"));
+  });
+
+  it("should blend cyan/magenta/yellow to black (multiply)", () => {
+    const { vec } = importSkia();
+    const r = width / 2;
+    const c = vec(r, r);
+    const surface = drawOnNode(
+      <Fill>
+        <Blend mode="multiply">
+          <RadialGradient r={r} c={c} colors={["cyan", "magenta"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+        </Blend>
+      </Fill>
+    );
+    processResult(surface, "snapshots/runtime-effects/blend-multiply.png");
+  });
+
+  it("should blend using color burn", () => {
+    const { vec } = importSkia();
+    const r = width / 2;
+    const c = vec(r, r);
+    let surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorBurn">
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+        </Blend>
+      </Fill>
+    );
+    processResult(
+      surface,
+      "snapshots/runtime-effects/blend-color-burn.png",
+      true
+    );
+    surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorBurn">
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+        </Blend>
+      </Fill>
+    );
+    processResult(
+      surface,
+      "snapshots/runtime-effects/blend-color-burn2.png",
+      true
+    );
+  });
+
+  it("should blend using multiply", () => {
+    const { vec } = importSkia();
+    const r = width / 2;
+    const c = vec(r, r);
+    let surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorBurn">
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+          <RadialGradient r={r} c={c} colors={["cyan", "magenta"]} />
+          <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+        </Blend>
+      </Fill>
+    );
+    processResult(surface, "snapshots/runtime-effects/blend-color-burn3.png");
+    surface = drawOnNode(
+      <Fill>
+        <Blend mode="colorBurn">
+          <RadialGradient r={r} c={c} colors={["yellow", "cyan"]} />
+          <Blend mode="colorBurn">
+            <RadialGradient r={r} c={c} colors={["cyan", "magenta"]} />
+            <RadialGradient r={r} c={c} colors={["magenta", "yellow"]} />
+          </Blend>
+        </Blend>
+      </Fill>
+    );
+    processResult(surface, "snapshots/runtime-effects/blend-color-burn3.png");
   });
 });

@@ -23,7 +23,6 @@ import { JsiSkShader } from "./JsiSkShader";
 
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   constructor(CanvasKit: CanvasKit, ref: Paint) {
-    ref.setAntiAlias(true);
     super(CanvasKit, ref, "Paint");
   }
 
