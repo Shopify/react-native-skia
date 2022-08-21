@@ -113,7 +113,7 @@ import {
 } from "@shopify/react-native-skia";
 
 const MyComp = () => {
-  // 💚 useCanvasSize() can safely be used here
+  // 💚 useCanvas() can safely be used here
   const { size } = useCanvas();
   // 💚 canvas is a regular skia value that can be used for animations
   const rct = useComputedValue(() => {
@@ -136,7 +136,7 @@ const MyComp = () => {
 };
 
 const Example = () => {
-  // ❌ Using useCanvasSize() here would crash
+  // ❌ Using useCanvas() here would crash
   return (
     <Canvas style={{ flex: 1 }}>
       <MyComp />
