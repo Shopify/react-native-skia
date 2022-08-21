@@ -36,6 +36,6 @@ describe("CoonsPatch", () => {
         patch={[topLeft, topRight, bottomRight, bottomLeft]}
       />
     );
-    processResult(surface, "snapshots/coons-patch/simple.png", true);
+    processResult(surface, "snapshots/coons-patch/simple.png");
   });
 });
