@@ -1,7 +1,15 @@
 import React from "react";
 
 import { docPath, processResult } from "../../__tests__/setup";
-import { Fill, Image, Morphology, Offset, Text } from "../components";
+import {
+  Fill,
+  Image,
+  Morphology,
+  Offset,
+  RoundedRect,
+  Shadow,
+  Text,
+} from "../components";
 
 import {
   drawOnNode,
@@ -47,5 +55,44 @@ describe("Test Image Filters", () => {
       </>
     );
     processResult(surface, docPath("image-filters/offset.png"));
+  });
+  it("Should draw a dropshadow", () => {
+    const surface = drawOnNode(
+      <>
+        <Fill color="lightblue" />
+        <RoundedRect
+          x={96}
+          y={96}
+          width={576}
+          height={576}
+          r={96}
+          color="lightblue"
+        >
+          <Shadow dx={36} dy={36} blur={75} color="#93b8c4" />
+          <Shadow dx={-36} dy={-36} blur={75} color="#c7f8ff" />
+        </RoundedRect>
+      </>
+    );
+    processResult(surface, docPath("image-filters/dropshadow.png"));
+  });
+
+  it("Should draw a innershadow", () => {
+    const surface = drawOnNode(
+      <>
+        <Fill color="lightblue" />
+        <RoundedRect
+          x={96}
+          y={96}
+          width={576}
+          height={576}
+          r={96}
+          color="lightblue"
+        >
+          <Shadow dx={36} dy={36} blur={75} color="#93b8c4" inner />
+          <Shadow dx={-36} dy={-36} blur={75} color="#c7f8ff" inner />
+        </RoundedRect>
+      </>
+    );
+    processResult(surface, docPath("image-filters/innershadow.png"));
   });
 });
