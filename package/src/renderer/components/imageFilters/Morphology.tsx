@@ -18,8 +18,8 @@ const onDeclare = createDeclaration<MorphologyProps>(
     const r = processRadius(Skia, radius);
     const factory =
       operator === "dilate"
-        ? Skia.ImageFilter.MakeDilate
-        : Skia.ImageFilter.MakeErode;
+        ? Skia.ImageFilter.MakeDilate.bind(Skia.ImageFilter)
+        : Skia.ImageFilter.MakeErode.bind(Skia.ImageFilter);
     return factory(r.x, r.y, input);
   }
 );
