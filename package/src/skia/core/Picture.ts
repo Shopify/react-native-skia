@@ -21,5 +21,5 @@ export const usePicture = (
     cb(canvas);
     return recorder.finishRecordingAsPicture();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cb, rect, deps]);
+  }, deps);
 };
