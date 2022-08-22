@@ -18,7 +18,6 @@ import { HostObject, toNullableValue, ckEnum } from "./Host";
 
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   constructor(CanvasKit: CanvasKit, ref: Paint) {
-    ref.setAntiAlias(true);
     super(CanvasKit, ref, "Paint");
   }
 
