@@ -13,7 +13,7 @@ import type { SkCanvas, SkPicture, SkRect } from "../types";
 export const usePicture = (
   rect: SkRect,
   cb: (canvas: SkCanvas) => void,
-  deps?: DependencyList
+  deps: DependencyList = []
 ): SkPicture => {
   return useMemo(() => {
     const recorder = Skia.PictureRecorder();
