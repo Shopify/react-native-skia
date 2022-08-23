@@ -13,7 +13,7 @@ const CheckPicture = ({}: EmptyProps) => {
   useEffect(() => {
     setTimeout(() => {
       setColor("red");
-    }, 32);
+    }, 16);
   }, [Skia]);
   const picture = usePicture(
     Skia.XYWHRect(0, 0, r * 2, r * 2),
@@ -39,7 +39,7 @@ const CheckPicture2 = ({}: EmptyProps) => {
   useEffect(() => {
     setTimeout(() => {
       setColor("red");
-    }, 32);
+    }, 16);
   }, [Skia]);
   const picture = usePicture(Skia.XYWHRect(0, 0, r * 2, r * 2), (canvas) => {
     const paint = Skia.Paint();
@@ -59,7 +59,7 @@ describe("Picture", () => {
     const { surface, draw } = mountCanvas(<CheckPicture />);
     draw();
     processResult(surface, "snapshots/pictures/green.png");
-    await wait(100);
+    await wait(32);
     draw();
     processResult(surface, "snapshots/pictures/red.png");
   });
@@ -68,7 +68,7 @@ describe("Picture", () => {
     const { surface, draw } = mountCanvas(<CheckPicture2 />);
     draw();
     processResult(surface, "snapshots/pictures/green.png");
-    await wait(100);
+    await wait(32);
     draw();
     processResult(surface, "snapshots/pictures/green.png");
   });
