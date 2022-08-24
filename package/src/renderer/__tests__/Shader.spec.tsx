@@ -1,13 +1,15 @@
 import React from "react";
 
-import { processResult } from "../../__tests__/setup";
+import { docPath, processResult } from "../../__tests__/setup";
 import {
   Blend,
   Fill,
   Group,
   RadialGradient,
+  LinearGradient,
   ShaderLib,
   Shader,
+  ColorShader,
 } from "../components";
 
 import { drawOnNode, height, width, importSkia } from "./setup";
@@ -79,6 +81,7 @@ describe("Test Shader component", () => {
     );
     processResult(surface, "snapshots/shader/bilinear-interpolation.png");
   });
+
   it("should display a hue wheel", () => {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(hue)!;
@@ -97,6 +100,7 @@ describe("Test Shader component", () => {
     );
     processResult(surface, "snapshots/shader/hue.png");
   });
+
   it("should display a green and red spiral", () => {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
@@ -118,6 +122,35 @@ describe("Test Shader component", () => {
       </Group>
     );
     processResult(surface, "snapshots/runtime-effects/spiral.png");
+  });
+
+  it("should display a linear gradient", () => {
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(spiral)!;
+    expect(source).toBeTruthy();
+    const surface = drawOnNode(
+      <Group>
+        <LinearGradient
+          colors={["cyan", "magenta", "yellow"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: width, y: height }}
+        />
+        <Fill />
+      </Group>
+    );
+    processResult(surface, "snapshots/runtime-effects/linear-gradient.png");
+  });
+
+  it("should display a color", () => {
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(spiral)!;
+    expect(source).toBeTruthy();
+    const surface = drawOnNode(
+      <Fill>
+        <ColorShader color="lightblue" />
+      </Fill>
+    );
+    processResult(surface, docPath("shaders/color.png"));
   });
 
   it("should blend cyan/magenta/yellow to black (multiply)", () => {
@@ -169,6 +202,7 @@ describe("Test Shader component", () => {
       true
     );
   });
+
   it("should blend using multiply", () => {
     const { vec } = importSkia();
     const r = width / 2;

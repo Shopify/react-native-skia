@@ -13,10 +13,11 @@ import type {
   StrokeOpts,
 } from "../types";
 
-import { ckEnum, HostObject, optEnum, toValue } from "./Host";
+import { ckEnum, HostObject, optEnum } from "./Host";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
+import { JsiSkMatrix } from "./JsiSkMatrix";
 
 const CommandCount = {
   [PathVerb.Move]: 3,
@@ -74,7 +75,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   addPoly(points: SkPoint[], close: boolean) {
     this.ref.addPoly(
-      points.map((p) => toValue(p)),
+      points.map((p) => Array.from(JsiSkPoint.fromValue(p))).flat(),
       close
     );
     return this;
@@ -256,7 +257,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   equals(other: SkPath) {
-    return this.ref.equals(toValue(other));
+    return this.ref.equals(JsiSkPath.fromValue(other));
   }
 
   getBounds() {
@@ -307,7 +308,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   op(path: SkPath, op: PathOp) {
-    return this.ref.op(toValue(path), ckEnum(op));
+    return this.ref.op(JsiSkPath.fromValue(path), ckEnum(op));
   }
 
   simplify() {
@@ -324,7 +325,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   transform(m3: SkMatrix) {
-    this.ref.transform(toValue(m3));
+    this.ref.transform(JsiSkMatrix.fromValue(m3));
   }
 
   interpolate(end: SkPath, t: number) {

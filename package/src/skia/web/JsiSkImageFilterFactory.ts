@@ -13,8 +13,9 @@ import type {
   TileMode,
 } from "../types";
 
-import { Host, NotImplementedOnRNWeb, ckEnum, toValue } from "./Host";
+import { Host, NotImplementedOnRNWeb, ckEnum } from "./Host";
 import { JsiSkImageFilter } from "./JsiSkImageFilter";
+import { JsiSkColorFilter } from "./JsiSkColorFilter";
 
 export class JsiSkImageFilterFactory
   extends Host
@@ -58,7 +59,7 @@ export class JsiSkImageFilterFactory
         sigmaX,
         sigmaY,
         ckEnum(mode),
-        input === null ? null : toValue(input)
+        input === null ? null : JsiSkImageFilter.fromValue(input)
       )
     );
   }
@@ -67,8 +68,8 @@ export class JsiSkImageFilterFactory
     return new JsiSkImageFilter(
       this.CanvasKit,
       this.CanvasKit.ImageFilter.MakeColorFilter(
-        toValue(cf),
-        input === null ? null : toValue(input)
+        JsiSkColorFilter.fromValue(cf),
+        input === null ? null : JsiSkImageFilter.fromValue(input)
       )
     );
   }
@@ -77,8 +78,8 @@ export class JsiSkImageFilterFactory
     return new JsiSkImageFilter(
       this.CanvasKit,
       this.CanvasKit.ImageFilter.MakeCompose(
-        outer === null ? null : toValue(outer),
-        inner === null ? null : toValue(inner)
+        outer === null ? null : JsiSkImageFilter.fromValue(outer),
+        inner === null ? null : JsiSkImageFilter.fromValue(inner)
       )
     );
   }

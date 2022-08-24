@@ -54,13 +54,13 @@ export const loadImage = (uri: string) => {
   return image!;
 };
 
-export const loadFont = (uri: string) => {
+export const loadFont = (uri: string, ftSize?: number) => {
   const Skia = global.SkiaApi;
   const tf = Skia.Typeface.MakeFreeTypeFaceFromData(
     Skia.Data.fromBytes(resolveFile(uri))
   );
   expect(tf).toBeTruthy();
-  const font = Skia.Font(tf!, fontSize);
+  const font = Skia.Font(tf!, ftSize ?? fontSize);
   return font;
 };
 
@@ -73,10 +73,10 @@ beforeAll(async () => {
   global.SkiaValueApi = ValueApi;
 });
 
-const pixelDensity = 3;
-export const fontSize = 32 * pixelDensity;
-export const width = 256 * pixelDensity;
-export const height = 256 * pixelDensity;
+export const PIXEL_RATIO = 3;
+export const fontSize = 32 * PIXEL_RATIO;
+export const width = 256 * PIXEL_RATIO;
+export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
 const redraw = () => {};
 

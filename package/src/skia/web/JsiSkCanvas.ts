@@ -1,4 +1,4 @@
-import type { Canvas, Image, CanvasKit, Paint } from "canvaskit-wasm";
+import type { Canvas, CanvasKit } from "canvaskit-wasm";
 
 import type {
   BlendMode,
@@ -24,15 +24,19 @@ import type {
   SkVertices,
 } from "../types";
 
-import {
-  ckEnum,
-  HostObject,
-  toValue,
-  toUndefinedableValue,
-  toOptionalValue,
-} from "./Host";
+import { ckEnum, HostObject } from "./Host";
+import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
+import { JsiSkImage } from "./JsiSkImage";
+import { JsiSkVertices } from "./JsiSkVertices";
+import { JsiSkPath } from "./JsiSkPath";
+import { JsiSkFont } from "./JsiSkFont";
+import { JsiSkTextBlob } from "./JsiSkTextBlob";
+import { JsiSkPicture } from "./JsiSkPicture";
+import { JsiSkMatrix } from "./JsiSkMatrix";
+import { JsiSkImageFilter } from "./JsiSkImageFilter";
+import { JsiSkPoint } from "./JsiSkPoint";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -45,12 +49,17 @@ export class JsiSkCanvas
   drawRect(rect: SkRect, paint: SkPaint) {
     this.ref.drawRect(
       JsiSkRect.fromValue(this.CanvasKit, rect),
-      toValue<Paint>(paint)
+      JsiSkPaint.fromValue(paint)
     );
   }
 
   drawImage(image: SkImage, x: number, y: number, paint?: SkPaint) {
-    this.ref.drawImage(toValue<Image>(image), x, y, toOptionalValue(paint));
+    this.ref.drawImage(
+      JsiSkImage.fromValue(image),
+      x,
+      y,
+      paint ? JsiSkPaint.fromValue(paint) : paint
+    );
   }
 
   drawImageRect(
@@ -61,10 +70,10 @@ export class JsiSkCanvas
     fastSample?: boolean
   ) {
     this.ref.drawImageRect(
-      toValue<Image>(img),
+      JsiSkImage.fromValue(img),
       JsiSkRect.fromValue(this.CanvasKit, src),
       JsiSkRect.fromValue(this.CanvasKit, dest),
-      toValue<Paint>(paint),
+      JsiSkPaint.fromValue(paint),
       fastSample
     );
   }
@@ -78,12 +87,12 @@ export class JsiSkCanvas
     paint?: SkPaint | null
   ) {
     this.ref.drawImageCubic(
-      toValue(img),
+      JsiSkImage.fromValue(img),
       left,
       top,
       B,
       C,
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -96,12 +105,12 @@ export class JsiSkCanvas
     paint?: SkPaint | null
   ) {
     this.ref.drawImageOptions(
-      toValue(img),
+      JsiSkImage.fromValue(img),
       left,
       top,
       ckEnum(fm),
       ckEnum(mm),
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -113,11 +122,11 @@ export class JsiSkCanvas
     paint?: SkPaint | null
   ) {
     this.ref.drawImageNine(
-      toValue(img),
-      toValue(center),
-      toValue(dest),
+      JsiSkImage.fromValue(img),
+      Array.from(JsiSkRect.fromValue(this.CanvasKit, center)),
+      JsiSkRect.fromValue(this.CanvasKit, dest),
       ckEnum(filter),
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -130,12 +139,12 @@ export class JsiSkCanvas
     paint?: SkPaint | null
   ) {
     this.ref.drawImageRectCubic(
-      toValue<Image>(img),
+      JsiSkImage.fromValue(img),
       JsiSkRect.fromValue(this.CanvasKit, src),
       JsiSkRect.fromValue(this.CanvasKit, dest),
       B,
       C,
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
@@ -148,29 +157,33 @@ export class JsiSkCanvas
     paint?: SkPaint | null
   ) {
     this.ref.drawImageRectOptions(
-      toValue<Image>(img),
+      JsiSkImage.fromValue(img),
       JsiSkRect.fromValue(this.CanvasKit, src),
       JsiSkRect.fromValue(this.CanvasKit, dest),
       ckEnum(fm),
       ckEnum(mm),
-      toOptionalValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
 
   drawPaint(paint: SkPaint) {
-    this.ref.drawPaint(toValue(paint));
+    this.ref.drawPaint(JsiSkPaint.fromValue(paint));
   }
 
   drawLine(x0: number, y0: number, x1: number, y1: number, paint: SkPaint) {
-    this.ref.drawLine(x0, y0, x1, y1, toValue(paint));
+    this.ref.drawLine(x0, y0, x1, y1, JsiSkPaint.fromValue(paint));
   }
 
   drawCircle(cx: number, cy: number, radius: number, paint: SkPaint) {
-    this.ref.drawCircle(cx, cy, radius, toValue(paint));
+    this.ref.drawCircle(cx, cy, radius, JsiSkPaint.fromValue(paint));
   }
 
   drawVertices(verts: SkVertices, mode: BlendMode, paint: SkPaint) {
-    this.ref.drawVertices(toValue(verts), ckEnum(mode), toValue(paint));
+    this.ref.drawVertices(
+      JsiSkVertices.fromValue(verts),
+      ckEnum(mode),
+      JsiSkPaint.fromValue(paint)
+    );
   }
 
   drawPatch(
@@ -183,9 +196,9 @@ export class JsiSkCanvas
     this.ref.drawPatch(
       cubics.map(({ x, y }) => [x, y]).flat(),
       colors,
-      toOptionalValue(texs),
+      texs ? texs.flatMap((p) => Array.from(JsiSkPoint.fromValue(p))) : texs,
       mode ? ckEnum(mode) : null,
-      toUndefinedableValue(paint)
+      paint ? JsiSkPaint.fromValue(paint) : undefined
     );
   }
 
@@ -197,7 +210,7 @@ export class JsiSkCanvas
     this.ref.drawPoints(
       ckEnum(mode),
       points.map(({ x, y }) => [x, y]).flat(),
-      toValue(paint)
+      JsiSkPaint.fromValue(paint)
     );
   }
 
@@ -209,39 +222,57 @@ export class JsiSkCanvas
     paint: SkPaint
   ) {
     this.ref.drawArc(
-      toValue(oval),
+      JsiSkRect.fromValue(this.CanvasKit, oval),
       startAngle,
       sweepAngle,
       useCenter,
-      toValue(paint)
+      JsiSkPaint.fromValue(paint)
     );
   }
 
   drawRRect(rrect: SkRRect, paint: SkPaint) {
     this.ref.drawRRect(
       JsiSkRRect.fromValue(this.CanvasKit, rrect),
-      toValue(paint)
+      JsiSkPaint.fromValue(paint)
     );
   }
 
   drawDRRect(outer: SkRRect, inner: SkRRect, paint: SkPaint) {
-    this.ref.drawDRRect(toValue(outer), toValue(inner), toValue(paint));
+    this.ref.drawDRRect(
+      JsiSkRRect.fromValue(this.CanvasKit, outer),
+      JsiSkRRect.fromValue(this.CanvasKit, inner),
+      JsiSkPaint.fromValue(paint)
+    );
   }
 
   drawOval(oval: SkRect, paint: SkPaint) {
-    this.ref.drawOval(toValue(oval), toValue(paint));
+    this.ref.drawOval(
+      JsiSkRect.fromValue(this.CanvasKit, oval),
+      JsiSkPaint.fromValue(paint)
+    );
   }
 
   drawPath(path: SkPath, paint: SkPaint) {
-    this.ref.drawPath(toValue(path), toValue(paint));
+    this.ref.drawPath(JsiSkPath.fromValue(path), JsiSkPaint.fromValue(paint));
   }
 
   drawText(str: string, x: number, y: number, paint: SkPaint, font: SkFont) {
-    this.ref.drawText(str, x, y, toValue(paint), toValue(font));
+    this.ref.drawText(
+      str,
+      x,
+      y,
+      JsiSkPaint.fromValue(paint),
+      JsiSkFont.fromValue(font)
+    );
   }
 
   drawTextBlob(blob: SkTextBlob, x: number, y: number, paint: SkPaint) {
-    this.ref.drawTextBlob(toValue(blob), x, y, toValue(paint));
+    this.ref.drawTextBlob(
+      JsiSkTextBlob.fromValue(blob),
+      x,
+      y,
+      JsiSkPaint.fromValue(paint)
+    );
   }
 
   drawGlyphs(
@@ -257,8 +288,8 @@ export class JsiSkCanvas
       positions.map((p) => [p.x, p.y]).flat(),
       x,
       y,
-      toValue(font),
-      toValue(paint)
+      JsiSkFont.fromValue(font),
+      JsiSkPaint.fromValue(paint)
     );
   }
 
@@ -277,9 +308,9 @@ export class JsiSkCanvas
     flags?: SaveLayerFlag
   ) {
     return this.ref.saveLayer(
-      toUndefinedableValue(paint),
-      toOptionalValue(bounds),
-      toOptionalValue(backdrop),
+      paint ? JsiSkPaint.fromValue(paint) : undefined,
+      bounds ? JsiSkRect.fromValue(this.CanvasKit, bounds) : bounds,
+      backdrop ? JsiSkImageFilter.fromValue(backdrop) : backdrop,
       flags
     );
   }
@@ -313,7 +344,7 @@ export class JsiSkCanvas
   }
 
   clipPath(path: SkPath, op: ClipOp, doAntiAlias: boolean) {
-    this.ref.clipPath(toValue(path), ckEnum(op), doAntiAlias);
+    this.ref.clipPath(JsiSkPath.fromValue(path), ckEnum(op), doAntiAlias);
   }
 
   clipRect(rect: SkRect, op: ClipOp, doAntiAlias: boolean) {
@@ -333,10 +364,10 @@ export class JsiSkCanvas
   }
 
   concat(m: SkMatrix) {
-    this.ref.concat(toValue(m));
+    this.ref.concat(JsiSkMatrix.fromValue(m));
   }
 
   drawPicture(skp: SkPicture) {
-    this.ref.drawPicture(toValue(skp));
+    this.ref.drawPicture(JsiSkPicture.fromValue(skp));
   }
 }
