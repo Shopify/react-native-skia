@@ -1,9 +1,17 @@
 import React from "react";
 
-import { processResult } from "../../__tests__/setup";
-import { Blur, Circle, Fill, Group, Paint, RoundedRect } from "../components";
+import { docPath, processResult } from "../../__tests__/setup";
+import {
+  Blur,
+  Circle,
+  DiffRect,
+  Fill,
+  Group,
+  Paint,
+  RoundedRect,
+} from "../components";
 
-import { drawOnNode, width, height, importSkia } from "./setup";
+import { drawOnNode, width, height, importSkia, PIXEL_RATIO } from "./setup";
 
 describe("Test introductionary examples from our documentation", () => {
   it("Should blend colors using multiplication", () => {
@@ -79,5 +87,20 @@ describe("Test introductionary examples from our documentation", () => {
       </>
     );
     processResult(surface, "snapshots/drawings/multiple-paints.png");
+  });
+
+  it("Should draw DRect", () => {
+    const { rrect, rect } = importSkia();
+    const padding = 25 * PIXEL_RATIO;
+    const outer = rrect(rect(0, 0, width, width), padding, padding);
+    const inner = rrect(
+      rect(padding * 2, padding * 2, width - padding * 4, width - padding * 4),
+      padding * 2,
+      padding * 2
+    );
+    const surface = drawOnNode(
+      <DiffRect inner={inner} outer={outer} color="lightblue" />
+    );
+    processResult(surface, docPath("shapes/drect.png"));
   });
 });

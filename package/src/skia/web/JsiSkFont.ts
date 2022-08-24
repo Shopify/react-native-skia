@@ -9,7 +9,9 @@ import type {
   SkTypeface,
 } from "../types";
 
-import { HostObject, toValue, ckEnum } from "./Host";
+import { HostObject, ckEnum } from "./Host";
+import { JsiSkPaint } from "./JsiSkPaint";
+import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkTypeface } from "./JsiSkTypeface";
 
@@ -43,7 +45,12 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
 
   // TODO: Fix return value in the C++ implementation, it return float32
   getGlyphWidths(glyphs: number[], paint?: SkPaint | null) {
-    return [...this.ref.getGlyphWidths(glyphs, paint ? toValue(paint) : null)];
+    return [
+      ...this.ref.getGlyphWidths(
+        glyphs,
+        paint ? JsiSkPaint.fromValue(paint) : null
+      ),
+    ];
   }
 
   getGlyphIntercepts(
@@ -55,7 +62,7 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
     return [
       ...this.ref.getGlyphIntercepts(
         glyphs,
-        positions.map((p) => toValue(p)),
+        positions.map((p) => Array.from(JsiSkPoint.fromValue(p))).flat(),
         top,
         bottom
       ),
@@ -120,6 +127,6 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
   }
 
   setTypeface(face: SkTypeface | null) {
-    this.ref.setTypeface(face ? toValue(face) : null);
+    this.ref.setTypeface(face ? JsiSkTypeface.fromValue(face) : null);
   }
 }

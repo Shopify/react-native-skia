@@ -17,7 +17,6 @@ import { Color } from "./JsiSkColor";
 import { JsiSkSurfaceFactory } from "./JsiSkSurfaceFactory";
 import { JsiSkRRect } from "./JsiSkRRect";
 import { JsiSkRSXform } from "./JsiSkRSXform";
-import { toValue } from "./Host";
 import { JsiSkContourMeasureIter } from "./JsiSkContourMeasureIter";
 import { JsiSkPictureRecorder } from "./JsiSkPictureRecorder";
 import { JsiSkPictureFactory } from "./JsiSkPictureFactory";
@@ -36,6 +35,8 @@ import { JsiSkSVGFactory } from "./JsiSkSVGFactory";
 import { JsiSkTextBlobFactory } from "./JsiSkTextBlobFactory";
 import { JsiSkFont } from "./JsiSkFont";
 import { MakeVertices } from "./JsiSkVerticesFactory";
+import { JsiSkPath } from "./JsiSkPath";
+import { JsiSkTypeface } from "./JsiSkTypeface";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
@@ -44,7 +45,10 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     throw new Error("Not implemented on React Native Web");
   },
   RRectXY: (rect: SkRect, rx: number, ry: number) =>
-    new JsiSkRRect(CanvasKit, CanvasKit.RRectXY(toValue(rect), rx, ry)),
+    new JsiSkRRect(
+      CanvasKit,
+      CanvasKit.RRectXY(JsiSkRect.fromValue(CanvasKit, rect), rx, ry)
+    ),
   RSXform: (scos: number, ssin: number, tx: number, ty: number) =>
     new JsiSkRSXform(CanvasKit, Float32Array.of(scos, ssin, tx, ty)),
   Color,
@@ -55,7 +59,11 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   ): SkContourMeasureIter =>
     new JsiSkContourMeasureIter(
       CanvasKit,
-      new CanvasKit.ContourMeasureIter(toValue(path), forceClosed, resScale)
+      new CanvasKit.ContourMeasureIter(
+        JsiSkPath.fromValue(path),
+        forceClosed,
+        resScale
+      )
     ),
   Paint: () => {
     const paint = new JsiSkPaint(CanvasKit, new CanvasKit.Paint());
@@ -78,7 +86,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     new JsiSkFont(
       CanvasKit,
       new CanvasKit.Font(
-        typeface === undefined ? null : toValue(typeface),
+        typeface === undefined ? null : JsiSkTypeface.fromValue(typeface),
         size
       )
     ),
