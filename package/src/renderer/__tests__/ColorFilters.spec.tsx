@@ -38,6 +38,6 @@ describe("Color Filters", () => {
         </Group>
       </>
     );
-    processResult(surface, docPath("color-filters/color-blend.png"), true);
+    processResult(surface, docPath("color-filters/color-blend.png"));
   });
 });

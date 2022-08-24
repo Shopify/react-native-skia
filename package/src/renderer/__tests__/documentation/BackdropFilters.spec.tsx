@@ -19,7 +19,7 @@ const BLACK_AND_WHITE = [
 
 describe("Backdrop Filters", () => {
   it("A black and white color filter as backdrop color filter", () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg")!;
+    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     expect(image).toBeTruthy();
     const surface = drawOnNode(
       <Group>
@@ -40,7 +40,7 @@ describe("Backdrop Filters", () => {
     processResult(surface, docPath("black-and-white-backdrop-filter.png"));
   });
   it("Blur backdrop filter", () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg")!;
+    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     expect(image).toBeTruthy();
     const surface = drawOnNode(
       <Group>

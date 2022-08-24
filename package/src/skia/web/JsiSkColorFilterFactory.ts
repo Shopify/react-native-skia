@@ -8,7 +8,7 @@ import type {
   BlendMode,
 } from "../types";
 
-import { ckEnum, Host, NotImplementedOnRNWeb } from "./Host";
+import { ckEnum, Host } from "./Host";
 import { JsiSkColorFilter } from "./JsiSkColorFilter";
 
 export class JsiSkColorFilterFactory
@@ -69,6 +69,9 @@ export class JsiSkColorFilterFactory
   }
 
   MakeLumaColorFilter(): SkColorFilter {
-    throw new NotImplementedOnRNWeb();
+    return new JsiSkColorFilter(
+      this.CanvasKit,
+      this.CanvasKit.ColorFilter.MakeLuma()
+    );
   }
 }
