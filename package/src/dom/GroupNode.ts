@@ -17,11 +17,16 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
     this.children.push(child);
   }
 
-  render(ctx: DrawingContext) {
+  render(parentCtx: DrawingContext) {
     const paint = this.props.paint
-      ? this.props.paint.concat(ctx.Skia, ctx.paint, ctx.opacity)
-      : ctx.paint;
-    const childCtx = { ...ctx, paint };
-    this.children.forEach((child) => child.render(childCtx));
+      ? this.props.paint.concat(
+          parentCtx.Skia,
+          parentCtx.paint,
+          parentCtx.opacity
+        )
+      : parentCtx.paint;
+
+    const ctx = parentCtx.paint === paint ? parentCtx : { ...parentCtx, paint };
+    this.children.forEach((child) => child.render(ctx));
   }
 }

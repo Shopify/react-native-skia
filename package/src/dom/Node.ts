@@ -3,7 +3,9 @@ export enum NodeType {
   Group,
   Paint,
   Circle,
+  Fill,
   Shader,
+  ImageShader,
 }
 
 export interface DrawingContext {
@@ -23,4 +25,12 @@ export abstract class RenderNode<P> extends Node<P> {
   }
 
   abstract render(ctx: DrawingContext): void;
+}
+
+export abstract class DeclarationNode<P, T> extends Node<P> {
+  constructor(public type: NodeType, protected props: P) {
+    super(type, props);
+  }
+
+  abstract get(): T;
 }

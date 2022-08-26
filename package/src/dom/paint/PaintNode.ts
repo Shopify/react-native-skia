@@ -8,7 +8,9 @@ import type {
   SkPaint,
   Skia,
 } from "../../skia/types";
+import type { DeclarationNode } from "../Node";
 import { NodeType, Node } from "../Node";
+import type { SkShader } from "../../skia/types/Shader/Shader";
 
 export interface PaintNodeProps {
   color?: SkColor;
@@ -23,11 +25,15 @@ export interface PaintNodeProps {
 }
 
 export class PaintNode extends Node<PaintNodeProps> {
+  private shader?: DeclarationNode<unknown, SkShader>;
+
   constructor(props: PaintNodeProps) {
     super(NodeType.Paint, props);
   }
 
-  addShaderNode() {}
+  addShader(shader: DeclarationNode<unknown, SkShader>) {
+    this.shader = shader;
+  }
 
   concat(Skia: Skia, parentPaint: SkPaint, currentOpacity: number) {
     const {
@@ -77,6 +83,9 @@ export class PaintNode extends Node<PaintNodeProps> {
       paint.setAntiAlias(antiAlias);
     }
     // Children
+    if (this.shader !== undefined) {
+      paint.setShader(this.shader.get());
+    }
     return paint;
   }
 }
