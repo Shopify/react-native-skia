@@ -1,5 +1,11 @@
-import type { SkImage, SkShader, SkMatrix } from "../../../../skia/types";
-import { FilterMode, MipmapMode, TileMode } from "../../../../skia/types";
+import type {
+  SkImage,
+  SkShader,
+  SkMatrix,
+  FilterMode,
+  MipmapMode,
+  TileMode,
+} from "../../../../skia/types";
 import { DeclarationNode, NodeType } from "../../Node";
 
 export interface ImageShaderNodeProps {
@@ -20,11 +26,7 @@ export class ImageShaderNode extends DeclarationNode<
   }
 
   get() {
-    return this.props.image.makeShaderOptions(
-      TileMode.Decal,
-      TileMode.Decal,
-      FilterMode.Nearest,
-      MipmapMode.Nearest
-    );
+    const { image, tx, ty, fm, mm, localMatrix } = this.props;
+    return image.makeShaderOptions(tx, ty, fm, mm, localMatrix);
   }
 }

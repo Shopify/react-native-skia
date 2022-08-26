@@ -1,3 +1,4 @@
+import { fitRects, rect2rect } from "../../renderer";
 import {
   importSkia,
   width,
@@ -69,7 +70,7 @@ describe("Drawings", () => {
 
   it("Should display a nested shader", () => {
     const { surface, canvas } = setupSkia(width, height);
-    const { Skia } = importSkia();
+    const { Skia, processTransform2d } = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const runtimeEffect = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -81,12 +82,19 @@ half4 main(float2 xy) {
 }`)!;
     expect(runtimeEffect).toBeTruthy();
     const paint = new PaintNode({});
+    const rects = fitRects(
+      "cover",
+      { x: 0, y: 0, width: image.width(), height: image.height() },
+      Skia.XYWHRect(0, 0, width, height)
+    );
+    const localMatrix = processTransform2d(rect2rect(rects.src, rects.dst));
     const imageShader = new ImageShaderNode({
       image,
       tx: TileMode.Decal,
       ty: TileMode.Decal,
       fm: FilterMode.Nearest,
       mm: MipmapMode.Nearest,
+      localMatrix,
     });
     const filter = new ShaderNode({
       runtimeEffect,
