@@ -1,5 +1,5 @@
-import type { SkImage, SkShader, SkMatrix } from "../../../skia/types";
-import { FilterMode, MipmapMode, TileMode } from "../../../skia/types";
+import type { SkImage, SkShader, SkMatrix } from "../../../../skia/types";
+import { FilterMode, MipmapMode, TileMode } from "../../../../skia/types";
 import { DeclarationNode, NodeType } from "../../Node";
 
 export interface ImageShaderNodeProps {

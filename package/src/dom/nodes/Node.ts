@@ -1,4 +1,4 @@
-import type { SkCanvas, Skia, SkPaint } from "../skia/types";
+import type { SkCanvas, Skia, SkPaint } from "../../skia/types";
 export enum NodeType {
   Group,
   Paint,

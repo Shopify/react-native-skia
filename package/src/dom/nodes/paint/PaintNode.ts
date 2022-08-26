@@ -1,4 +1,4 @@
-import { processColor } from "../../renderer/processors/Color";
+import { processColor } from "../../../renderer/processors/Color";
 import type {
   PaintStyle,
   StrokeCap,
@@ -7,10 +7,10 @@ import type {
   SkColor,
   SkPaint,
   Skia,
-} from "../../skia/types";
+} from "../../../skia/types";
 import type { DeclarationNode } from "../Node";
 import { NodeType, Node } from "../Node";
-import type { SkShader } from "../../skia/types/Shader/Shader";
+import type { SkShader } from "../../../skia/types/Shader/Shader";
 
 export interface PaintNodeProps {
   color?: SkColor;

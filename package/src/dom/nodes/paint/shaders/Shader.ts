@@ -1,6 +1,6 @@
-import type { SkRuntimeEffect } from "../../../skia/types";
+import type { SkRuntimeEffect } from "../../../../skia/types";
 import { DeclarationNode, NodeType } from "../../Node";
-import type { SkShader } from "../../../skia/types/Shader/Shader";
+import type { SkShader } from "../../../../skia/types/Shader/Shader";
 
 export interface ShaderNodeProps {
   runtimeEffect: SkRuntimeEffect;

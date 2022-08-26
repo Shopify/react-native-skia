@@ -1,4 +1,4 @@
-import type { Vector } from "../../skia/types";
+import type { Vector } from "../../../skia/types";
 import type { DrawingContext } from "../Node";
 import { NodeType, RenderNode } from "../Node";
 

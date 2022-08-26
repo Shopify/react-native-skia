@@ -7,13 +7,14 @@ import {
 import { BlendMode, FilterMode, MipmapMode, TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { CircleNode } from "../drawings/CircleNode";
-import { FillNode } from "../drawings/FillNode";
-import { GroupNode } from "../GroupNode";
-import { PaintNode } from "../paint/PaintNode";
-import { ShaderNode } from "../paint/shaders/Shader";
-import { ImageShaderNode } from "../paint/shaders/ImageShaderNode";
-import { FilterMode } from "../../skia/types/Image/Image";
+import {
+  CircleNode,
+  FillNode,
+  GroupNode,
+  PaintNode,
+  ShaderNode,
+  ImageShaderNode,
+} from "../nodes";
 
 describe("Drawings", () => {
   it("Hello World", () => {
