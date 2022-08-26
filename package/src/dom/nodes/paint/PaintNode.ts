@@ -7,6 +7,7 @@ import type {
   SkColor,
   SkPaint,
   Skia,
+  SkMaskFilter,
 } from "../../../skia/types";
 import type { DeclarationNode } from "../Node";
 import { NodeType, Node } from "../Node";
@@ -27,14 +28,20 @@ export interface PaintNodeProps {
 export class PaintNode extends Node<PaintNodeProps> {
   private cache: SkPaint | null = null;
   private shader?: DeclarationNode<unknown, SkShader>;
+  private maskFilter?: DeclarationNode<unknown, SkMaskFilter>;
 
-  constructor(props: PaintNodeProps) {
+  constructor(props: PaintNodeProps = {}) {
     super(NodeType.Paint, props);
   }
 
   addShader(shader: DeclarationNode<unknown, SkShader>) {
     this.shader = shader;
     this.shader.setInvalidate(() => (this.cache = null));
+  }
+
+  addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>) {
+    this.maskFilter = maskFilter;
+    this.maskFilter.setInvalidate(() => (this.cache = null));
   }
 
   concat(Skia: Skia, parentPaint: SkPaint, currentOpacity: number) {
@@ -89,7 +96,10 @@ export class PaintNode extends Node<PaintNodeProps> {
     }
     // Children
     if (this.shader !== undefined) {
-      paint.setShader(this.shader.get());
+      paint.setShader(this.shader.get(Skia));
+    }
+    if (this.maskFilter !== undefined) {
+      paint.setMaskFilter(this.maskFilter.get(Skia));
     }
     this.cache = paint;
     return paint;

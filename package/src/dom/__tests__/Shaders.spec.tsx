@@ -8,13 +8,7 @@ import {
 import { FilterMode, MipmapMode, TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import {
-  FillNode,
-  GroupNode,
-  PaintNode,
-  ShaderNode,
-  ImageShaderNode,
-} from "../nodes";
+import { FillNode, GroupNode, ShaderNode, ImageShaderNode } from "../nodes";
 
 describe("Drawings", () => {
   it("Should display a simple shader", () => {
@@ -25,13 +19,13 @@ describe("Drawings", () => {
       return vec4(0.0, 1.0, 1.0, 1.0);
     }`)!;
     expect(runtimeEffect).toBeTruthy();
-    const paint = new PaintNode({});
+
+    const root = new GroupNode();
     const filter = new ShaderNode({
       runtimeEffect,
       uniforms: [],
     });
-    paint.addShader(filter);
-    const root = new GroupNode({ paint });
+    root.addShader(filter);
     const fill = new FillNode();
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
@@ -52,7 +46,6 @@ half4 main(float2 xy) {
   return image.eval(xy).rbga;
 }`)!;
     expect(runtimeEffect).toBeTruthy();
-    const paint = new PaintNode({});
     const rects = fitRects(
       "cover",
       { x: 0, y: 0, width: image.width(), height: image.height() },
@@ -72,8 +65,8 @@ half4 main(float2 xy) {
       uniforms: [50],
     });
     filter.addChild(imageShader);
-    paint.addShader(filter);
-    const root = new GroupNode({ paint });
+    const root = new GroupNode();
+    root.addShader(filter);
     const fill = new FillNode();
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
@@ -94,7 +87,6 @@ half4 main(float2 xy) {
   return image.eval(xy).rbga;
 }`)!;
     expect(runtimeEffect).toBeTruthy();
-    const paint = new PaintNode({});
     const rects = fitRects(
       "cover",
       { x: 0, y: 0, width: image.width(), height: image.height() },
@@ -114,8 +106,8 @@ half4 main(float2 xy) {
       uniforms: [50],
     });
     filter.addChild(imageShader);
-    paint.addShader(filter);
-    const root = new GroupNode({ paint });
+    const root = new GroupNode();
+    root.addShader(filter);
     const fill = new FillNode();
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };

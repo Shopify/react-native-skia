@@ -1,4 +1,4 @@
-import type { SkRuntimeEffect } from "../../../../skia/types";
+import type { Skia, SkRuntimeEffect } from "../../../../skia/types";
 import { DeclarationNode, NodeType } from "../../Node";
 import type { SkShader } from "../../../../skia/types/Shader/Shader";
 
@@ -18,14 +18,14 @@ export class ShaderNode extends DeclarationNode<ShaderNodeProps, SkShader> {
     this.children.push(shader);
   }
 
-  get() {
+  get(Skia: Skia) {
     const { runtimeEffect, uniforms } = this.props;
     if (this.children.length === 0) {
       return runtimeEffect.makeShader(uniforms);
     }
     return runtimeEffect.makeShaderWithChildren(
       uniforms,
-      this.children.map((child) => child.get())
+      this.children.map((child) => child.get(Skia))
     );
   }
 }

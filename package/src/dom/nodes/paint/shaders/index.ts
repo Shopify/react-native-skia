@@ -1,2 +1,2 @@
 export * from "./ImageShaderNode";
-export * from "./Shader";
+export * from "./ShaderNode";

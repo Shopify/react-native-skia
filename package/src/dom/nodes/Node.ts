@@ -6,6 +6,7 @@ export enum NodeType {
   Fill,
   Shader,
   ImageShader,
+  BlurMaskFilter,
 }
 
 export interface DrawingContext {
@@ -24,7 +25,7 @@ export abstract class Node<P> {
 }
 
 export abstract class RenderNode<P> extends Node<P> {
-  constructor(public type: NodeType, protected props: P) {
+  constructor(type: NodeType, props: P) {
     super(type, props);
   }
 
@@ -40,7 +41,7 @@ export abstract class DeclarationNode<P, T> extends Node<P> {
     super(type, props);
   }
 
-  abstract get(): T;
+  abstract get(Skia: Skia): T;
 
   setInvalidate(invalidate: Invalidate) {
     this.invalidate = invalidate;

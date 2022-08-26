@@ -2,7 +2,7 @@ import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { BlendMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { CircleNode, GroupNode, PaintNode } from "../nodes";
+import { CircleNode, GroupNode } from "../nodes";
 
 describe("Drawings", () => {
   it("Hello World", () => {
@@ -10,21 +10,17 @@ describe("Drawings", () => {
     const { Skia, vec } = importSkia();
     const r = width * 0.33;
     // Root
-    const paint = new PaintNode({ blendMode: BlendMode.Multiply });
-    const root = new GroupNode({ paint });
+    const root = new GroupNode({ paint: { blendMode: BlendMode.Multiply } });
     // C1
-    const cyan = new PaintNode({ color: Skia.Color("cyan") });
-    const c1 = new GroupNode({ paint: cyan });
+    const c1 = new GroupNode({ paint: { color: Skia.Color("cyan") } });
     c1.addChild(new CircleNode({ c: vec(r, r), r }));
     root.addChild(c1);
     // C2
-    const magenta = new PaintNode({ color: Skia.Color("magenta") });
-    const c2 = new GroupNode({ paint: magenta });
+    const c2 = new GroupNode({ paint: { color: Skia.Color("magenta") } });
     c2.addChild(new CircleNode({ c: vec(width - r, r), r }));
     root.addChild(c2);
     // C3
-    const yellow = new PaintNode({ color: Skia.Color("yellow") });
-    const c3 = new GroupNode({ paint: yellow });
+    const c3 = new GroupNode({ paint: { color: Skia.Color("yellow") } });
     c3.addChild(new CircleNode({ c: vec(width / 2, height - r), r }));
     root.addChild(c3);
 
