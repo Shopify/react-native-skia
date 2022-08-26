@@ -65,6 +65,11 @@ cd example && yarn start
 
 To run the example project on iOS, you will need to run `pod install`, and on Android, you will also need Android NDK to be installed ([see here](#android)). 
 
+## Debugging
+
+As the library uses JSI for synchronous native methods access, remote debugging is no longer possible. You can use [Flipper](https://fbflipper.com) for debugging your JS code, however, connecting the debugger to the JS context.
+There is also an [React Native VSCode extension](https://marketplace.visualstudio.com/items?itemName=msjsdiag.vscode-react-native#debugging-react-native-applications) that can provide a great debugging experience when using React Native Skia.
+
 ## Testing with Jest
 
 In order to load the mock provided by React Native Skia add following to your jest config:
