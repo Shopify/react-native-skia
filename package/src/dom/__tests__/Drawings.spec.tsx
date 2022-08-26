@@ -4,7 +4,7 @@ import {
   height,
   loadImage,
 } from "../../renderer/__tests__/setup";
-import { BlendMode } from "../../skia/types";
+import { BlendMode, FilterMode, MipmapMode, TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { CircleNode } from "../drawings/CircleNode";
@@ -13,6 +13,7 @@ import { GroupNode } from "../GroupNode";
 import { PaintNode } from "../paint/PaintNode";
 import { ShaderNode } from "../paint/shaders/Shader";
 import { ImageShaderNode } from "../paint/shaders/ImageShaderNode";
+import { FilterMode } from "../../skia/types/Image/Image";
 
 describe("Drawings", () => {
   it("Hello World", () => {
@@ -79,7 +80,13 @@ half4 main(float2 xy) {
 }`)!;
     expect(runtimeEffect).toBeTruthy();
     const paint = new PaintNode({});
-    const imageShader = new ImageShaderNode({ image });
+    const imageShader = new ImageShaderNode({
+      image,
+      tx: TileMode.Decal,
+      ty: TileMode.Decal,
+      fm: FilterMode.Nearest,
+      mm: MipmapMode.Nearest,
+    });
     const filter = new ShaderNode({
       runtimeEffect,
       uniforms: [50],
@@ -91,22 +98,6 @@ half4 main(float2 xy) {
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
-    processResult(surface, "snapshots/drawings/nested-shader.png", true);
+    processResult(surface, "snapshots/drawings/nested-shader.png");
   });
-
-  /*
-        // const runtimeEffect = Skia.RuntimeEffect.Make(`
-
-          <Fill>
-        <Shader source={source} uniforms={uniforms}>
-          <ImageShader
-            image={image}
-            fit="cover"
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-          />
-        </Shader>
-      </Fill>*/
 });
