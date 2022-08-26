@@ -25,6 +25,7 @@ export interface PaintNodeProps {
 }
 
 export class PaintNode extends Node<PaintNodeProps> {
+  private cache: SkPaint | null = null;
   private shader?: DeclarationNode<unknown, SkShader>;
 
   constructor(props: PaintNodeProps) {
@@ -33,6 +34,7 @@ export class PaintNode extends Node<PaintNodeProps> {
 
   addShader(shader: DeclarationNode<unknown, SkShader>) {
     this.shader = shader;
+    this.shader.setInvalidate(() => (this.cache = null));
   }
 
   concat(Skia: Skia, parentPaint: SkPaint, currentOpacity: number) {
@@ -47,6 +49,9 @@ export class PaintNode extends Node<PaintNodeProps> {
       opacity,
       antiAlias,
     } = this.props;
+    if (this.cache !== null) {
+      return this.cache;
+    }
     // TODO: this should/could be cached
     const paint = parentPaint.copy();
     // Props
@@ -86,6 +91,7 @@ export class PaintNode extends Node<PaintNodeProps> {
     if (this.shader !== undefined) {
       paint.setShader(this.shader.get());
     }
+    this.cache = paint;
     return paint;
   }
 }
