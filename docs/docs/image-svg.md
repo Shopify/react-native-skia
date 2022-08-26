@@ -55,7 +55,7 @@ const svg = Skia.SVG.MakeFromString(
   `<svg viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'>
     <circle cx='31' cy='325' r='120px' fill='#c02aaa'/>
   </svg>`
-)!;
+);
 
 export const SVG = () => {
   return (
