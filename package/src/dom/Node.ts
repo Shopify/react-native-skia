@@ -3,6 +3,7 @@ export enum NodeType {
   Group,
   Paint,
   Circle,
+  Shader,
 }
 
 export interface DrawingContext {

@@ -27,6 +27,8 @@ export class PaintNode extends Node<PaintNodeProps> {
     super(NodeType.Paint, props);
   }
 
+  addShaderNode() {}
+
   concat(Skia: Skia, parentPaint: SkPaint, currentOpacity: number) {
     const {
       color,
@@ -41,6 +43,7 @@ export class PaintNode extends Node<PaintNodeProps> {
     } = this.props;
     // TODO: this should/could be cached
     const paint = parentPaint.copy();
+    // Props
     if (color !== undefined) {
       const c = processColor(Skia, color, currentOpacity);
       paint.setShader(null);
@@ -73,6 +76,7 @@ export class PaintNode extends Node<PaintNodeProps> {
     if (antiAlias !== undefined) {
       paint.setAntiAlias(antiAlias);
     }
+    // Children
     return paint;
   }
 }
