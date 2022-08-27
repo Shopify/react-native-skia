@@ -1,13 +1,16 @@
 import type { SkCanvas, Skia, SkPaint } from "../../skia/types";
 export enum NodeType {
   Group,
+  Shader,
+  ImageShader,
+  BlurMaskFilter,
+
   Paint,
   Circle,
   Fill,
   Image,
-  Shader,
-  ImageShader,
-  BlurMaskFilter,
+  Points,
+  Path,
 }
 
 export interface DrawingContext {
