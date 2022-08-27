@@ -4,6 +4,7 @@ export enum NodeType {
   Paint,
   Circle,
   Fill,
+  Image,
   Shader,
   ImageShader,
   BlurMaskFilter,
