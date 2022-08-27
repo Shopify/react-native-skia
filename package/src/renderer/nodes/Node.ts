@@ -22,7 +22,6 @@ export abstract class Node<P = unknown> {
     key: string | symbol | number;
     unsub: (() => void) | undefined;
   }> = [];
-  _dirty: Map<unknown, boolean> = new Map();
   memoizable = false;
   memoized: DeclarationResult | null = null;
   parent?: Node;
@@ -35,23 +34,7 @@ export abstract class Node<P = unknown> {
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
-  resetDirtyFlags() {
-    this._dirty.clear();
-  }
-
-  setDirty(key: keyof P) {
-    this._dirty.set(key, true);
-  }
-
-  isDirty(...keys: Array<keyof P>) {
-    return keys.reduce(
-      (acc, key) => (acc || this._dirty.get(key)) ?? false,
-      false
-    );
-  }
-
   removeNode() {
-    //console.log("Node: removeNode", this.nodeId);
     this.depMgr.unsubscribeNode(this);
     this._propSubscriptions = [];
   }
@@ -69,7 +52,6 @@ export abstract class Node<P = unknown> {
           unsub: undefined,
           listener: (v) => {
             this._props[key] = v as P[typeof key];
-            this.setDirty(key);
           },
         });
         // Set initial value
@@ -82,7 +64,6 @@ export abstract class Node<P = unknown> {
           unsub: undefined,
           listener: (v) => {
             this._props[key] = propvalue.selector(v) as P[typeof key];
-            this.setDirty(key);
           },
         });
         // Set initial value
@@ -107,7 +88,6 @@ export abstract class Node<P = unknown> {
   }
 
   set props(props: AnimatedProps<P>) {
-    //console.log("Node: props set", this.nodeId);
     this.depMgr.unsubscribeNode(this);
     this.subscribeToPropChanges(props);
   }
@@ -123,7 +103,6 @@ export abstract class Node<P = unknown> {
         returnedValues.push(child.memoized);
       } else {
         const ret = child.draw(ctx);
-        child.resetDirtyFlags();
         if (ret) {
           returnedValues.push(ret);
           if (child.memoizable) {
@@ -132,7 +111,6 @@ export abstract class Node<P = unknown> {
         }
       }
     });
-    this.resetDirtyFlags();
     return returnedValues;
   }
 }
