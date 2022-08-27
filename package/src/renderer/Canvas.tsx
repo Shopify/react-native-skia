@@ -20,6 +20,7 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
+import type { SkiaValue } from "../values";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
@@ -59,9 +60,19 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     const [tick, setTick] = useState(0);
     const redraw = useCallback(() => setTick((t) => t + 1), []);
 
+    const registerValues = useCallback(
+      (values: Array<SkiaValue<unknown>>) => {
+        if (ref.current === null) {
+          throw new Error("Canvas ref is not set");
+        }
+        return ref.current.registerValues(values);
+      },
+      [ref]
+    );
+
     const container = useMemo(
-      () => new Container(new DependencyManager(ref), redraw),
-      [redraw, ref]
+      () => new Container(new DependencyManager(registerValues), redraw),
+      [redraw, registerValues]
     );
 
     const root = useMemo(

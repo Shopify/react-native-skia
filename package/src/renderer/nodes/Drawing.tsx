@@ -7,30 +7,39 @@ import { isPaint } from "../../skia/types";
 import type { DependencyManager } from "../DependencyManager";
 import { processPaint } from "../processors";
 
+import type { NodeProps } from "./Node";
 import { Node } from "./Node";
 
-type DrawingCallback<P> = (
+type DrawingCallback<P extends NodeProps<P>> = (
   ctx: DrawingContext,
   props: P,
   node: Node<P>
 ) => void;
 
-type OnDrawCallback<P> = (ctx: DrawingContext, props: P, node: Node<P>) => void;
+type OnDrawCallback<P extends NodeProps<P>> = (
+  ctx: DrawingContext,
+  props: P,
+  node: Node<P>
+) => void;
 
-export const createDrawing = <P,>(cb: OnDrawCallback<P>): DrawingCallback<P> =>
-  cb;
+export const createDrawing = <P extends NodeProps<P>>(
+  cb: OnDrawCallback<P>
+): DrawingCallback<P> => cb;
 
-export const useDrawing = <P,>(cb: OnDrawCallback<P>, deps?: DependencyList) =>
+export const useDrawing = <P extends NodeProps<P>>(
+  cb: OnDrawCallback<P>,
+  deps?: DependencyList
+) =>
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useCallback(cb, deps ?? []);
 
-export type DrawingProps<T> = {
-  onDraw: DrawingCallback<T>;
+export type DrawingProps<P extends NodeProps<P>> = {
+  onDraw: DrawingCallback<P>;
   skipProcessing?: boolean;
   children?: ReactNode | ReactNode[];
 };
 
-export class DrawingNode<P> extends Node<P> {
+export class DrawingNode<P extends NodeProps<P>> extends Node<P> {
   onDraw: DrawingCallback<P>;
   skipProcessing: boolean;
 

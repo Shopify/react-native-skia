@@ -1,16 +1,18 @@
-import type { RefObject } from "react";
-
-import type { SkiaView } from "../views";
 import type { SkiaValue } from "../values";
 
 import type { Node } from "./nodes";
+import type { AnimatedProps } from "./processors";
+import { isSelector, isValue } from "./processors";
+import { mapKeys } from "./typeddash";
 
 type Unsubscribe = () => void;
+
 type SubscriptionInfo = {
   value: SkiaValue<unknown>;
   key: string | symbol | number;
   listener: (s: unknown) => void;
 };
+
 type Subscription = {
   value: SkiaValue<unknown>;
   listeners: Array<(v: unknown) => void>;
@@ -18,13 +20,63 @@ type Subscription = {
 };
 
 export class DependencyManager {
-  ref: RefObject<SkiaView>;
+  registerValues: (values: Array<SkiaValue<unknown>>) => () => void;
   nodeSubscriptionInfos: Map<Node, SubscriptionInfo[]> = new Map();
   valueSubscriptions: Map<SkiaValue<unknown>, Subscription> = new Map();
   unregisterDependantValues: null | Unsubscribe = null;
 
-  constructor(ref: RefObject<SkiaView>) {
-    this.ref = ref;
+  constructor(
+    registerValues: (values: Array<SkiaValue<unknown>>) => () => void
+  ) {
+    this.registerValues = registerValues;
+  }
+
+  private createPropertySubscriptions<P extends Record<string, unknown>>(
+    props: AnimatedProps<P>,
+    onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
+  ) {
+    const nodePropSubscriptions: Array<{
+      value: SkiaValue<unknown>;
+      listener: (v: unknown) => void;
+      key: string | symbol | number;
+      unsub: (() => void) | undefined;
+    }> = [];
+
+    mapKeys(props).forEach((key) => {
+      const propvalue = props[key];
+
+      if (isValue(propvalue)) {
+        // Subscribe to changes
+        nodePropSubscriptions.push({
+          key,
+          value: propvalue,
+          unsub: undefined,
+          listener: (v) => onResolveProp(key, v as P[typeof key]),
+        });
+        // Set initial value
+        onResolveProp(key, (propvalue as SkiaValue<P[typeof key]>).current);
+      } else if (isSelector(propvalue)) {
+        // Subscribe to changes
+        nodePropSubscriptions.push({
+          key,
+          value: propvalue.value,
+          unsub: undefined,
+          listener: (v) =>
+            onResolveProp(key, propvalue.selector(v) as P[typeof key]),
+        });
+        // Set initial value
+        const v = propvalue.selector(propvalue.value.current) as P[typeof key];
+        onResolveProp(key, v as P[typeof key]);
+      } else {
+        onResolveProp(key, propvalue as unknown as P[typeof key]);
+      }
+    });
+
+    return nodePropSubscriptions.map((s) => ({
+      value: s.value,
+      listener: s.listener,
+      key: s.key,
+    }));
   }
 
   /**
@@ -76,9 +128,18 @@ export class DependencyManager {
    * change to the node and its listener. This method is typically called
    * when the node is mounted and when one or more props on the node changes.
    * @param node Node to subscribe to value changes for
-   * @param subscriptionInfos Subscription information
+   * @param props Node's properties
+   * @param onResolveProp Callback when a property value changes
    */
-  subscribeNode(node: Node, subscriptionInfos: SubscriptionInfo[]) {
+  subscribeNode<P extends Record<string, unknown>>(
+    node: Node,
+    props: AnimatedProps<P>,
+    onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
+  ) {
+    const subscriptionInfos = this.createPropertySubscriptions(
+      props,
+      onResolveProp
+    );
     if (subscriptionInfos.length === 0) {
       return;
     }
@@ -112,17 +173,13 @@ export class DependencyManager {
    * on values used in the current View automatically.
    */
   update() {
-    if (this.ref.current === null) {
-      throw new Error("Canvas ref is not set");
-    }
-
     // Remove any previous registrations
     if (this.unregisterDependantValues) {
       this.unregisterDependantValues();
     }
 
     // Register redraw requests on the SkiaView for each unique value
-    this.unregisterDependantValues = this.ref.current.registerValues(
+    this.unregisterDependantValues = this.registerValues(
       Array.from(this.valueSubscriptions.keys())
     );
   }

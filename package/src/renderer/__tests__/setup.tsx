@@ -106,7 +106,14 @@ export const mountCanvas = (element: ReactNode) => {
   const ref = {
     current: new SkiaView({}) as any,
   };
-  const depMgr = new DependencyManager(ref);
+  const registerValues = (values: Array<SkiaExports.SkiaValue<unknown>>) => {
+    if (ref.current === null) {
+      throw new Error("Canvas ref is not set");
+    }
+    return ref.current.registerValues(values);
+  };
+
+  const depMgr = new DependencyManager(registerValues);
   const container = new Container(depMgr, redraw);
   skiaReconciler.createContainer(container, 0, false, null);
   const root = skiaReconciler.createContainer(container, 0, false, null);

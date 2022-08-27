@@ -7,6 +7,7 @@ import { isAnimated } from "../processors";
 import type { DependencyManager } from "../DependencyManager";
 import type { SkJSIInstance } from "../../skia/types";
 
+import type { NodeProps } from "./Node";
 import { Node } from "./Node";
 
 export type DeclarationResult = SkJSIInstance<string> | null;
@@ -28,15 +29,15 @@ export const useDeclaration = <P,>(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useCallback(cb, deps ?? []);
 
-export const isDeclarationNode = (
+export const isDeclarationNode = <P extends NodeProps<P>>(
   node: Node
-): node is DeclarationNode<unknown> => node instanceof DeclarationNode;
+): node is DeclarationNode<P> => node instanceof DeclarationNode;
 
 export interface DeclarationProps<P> {
   onDeclare: DeclarationCallback<P>;
 }
 
-export class DeclarationNode<P> extends Node<P> {
+export class DeclarationNode<P extends NodeProps<P>> extends Node<P> {
   private onDeclare: DeclarationCallback<P>;
 
   constructor(
@@ -55,7 +56,7 @@ export class DeclarationNode<P> extends Node<P> {
   }
 
   get props() {
-    return this._props;
+    return this.resolvedProps as P;
   }
 
   draw(ctx: DrawingContext) {

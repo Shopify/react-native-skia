@@ -1,10 +1,7 @@
 import type { SkJSIInstance } from "../../skia/types";
-import type { SkiaValue } from "../../values";
 import type { DependencyManager } from "../DependencyManager";
 import type { DrawingContext } from "../DrawingContext";
 import type { AnimatedProps } from "../processors";
-import { isValue, isSelector } from "../processors";
-import { mapKeys } from "../typeddash";
 
 export enum NodeType {
   Declaration = "skDeclaration",
@@ -13,15 +10,13 @@ export enum NodeType {
 
 type DeclarationResult = SkJSIInstance<string> | null;
 
-export abstract class Node<P = unknown> {
+export type NodeProps<P extends Partial<Record<keyof P, unknown>>> = Partial<
+  Record<keyof P, unknown>
+>;
+
+export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
   readonly children: Node[] = [];
-  _props: AnimatedProps<P>;
-  _propSubscriptions: Array<{
-    value: SkiaValue<unknown>;
-    listener: (v: unknown) => void;
-    key: string | symbol | number;
-    unsub: (() => void) | undefined;
-  }> = [];
+  resolvedProps: Partial<P> = {};
   memoizable = false;
   memoized: DeclarationResult | null = null;
   parent?: Node;
@@ -29,62 +24,23 @@ export abstract class Node<P = unknown> {
 
   constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
     this.depMgr = depMgr;
-    this._props = this.subscribeToPropChanges(props);
+    this.subscribeToPropChanges(props);
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
   removeNode() {
     this.depMgr.unsubscribeNode(this);
-    this._propSubscriptions = [];
   }
 
   subscribeToPropChanges(props: AnimatedProps<P>) {
-    this._props = { ...props };
-    this._propSubscriptions = [];
-    mapKeys(this._props).forEach((key) => {
-      const propvalue = this._props[key];
-      if (isValue(propvalue)) {
-        // Subscribe to changes
-        this._propSubscriptions.push({
-          key,
-          value: propvalue,
-          unsub: undefined,
-          listener: (v) => {
-            this._props[key] = v as P[typeof key];
-          },
-        });
-        // Set initial value
-        this._props[key] = (propvalue as SkiaValue<P[typeof key]>).current;
-      } else if (isSelector(propvalue)) {
-        // Subscribe to changes
-        this._propSubscriptions.push({
-          key,
-          value: propvalue.value,
-          unsub: undefined,
-          listener: (v) => {
-            this._props[key] = propvalue.selector(v) as P[typeof key];
-          },
-        });
-        // Set initial value
-        const v = propvalue.selector(propvalue.value.current) as P[typeof key];
-        this._props[key] = v as P[typeof key];
+    this.depMgr.subscribeNode(
+      this,
+      props,
+      <K extends keyof P>(key: K, value: P[K]) => {
+        this.resolvedProps[key] = value;
       }
-    });
-
-    this._propSubscriptions.length > 0 &&
-      // Subscribe to properties
-      this.depMgr.subscribeNode(
-        this,
-        this._propSubscriptions.map((s) => ({
-          value: s.value,
-          listener: s.listener,
-          key: s.key,
-        }))
-      );
-
-    // returns props - this is just so that the ctor type logic is working :)
-    return this._props;
+    );
   }
 
   set props(props: AnimatedProps<P>) {
@@ -93,7 +49,7 @@ export abstract class Node<P = unknown> {
   }
 
   get props() {
-    return this._props;
+    return this.resolvedProps as unknown as P;
   }
 
   visit(ctx: DrawingContext, children?: Node[]) {
