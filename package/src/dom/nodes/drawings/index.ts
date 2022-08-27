@@ -7,3 +7,5 @@ export * from "./RectNode";
 export * from "./RRectNode";
 export * from "./OvalNode";
 export * from "./LineNode";
+export * from "./PatchNode";
+export * from "./VerticesNode";

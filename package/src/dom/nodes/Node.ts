@@ -15,6 +15,8 @@ export enum NodeType {
   RRect,
   Oval,
   Line,
+  Patch,
+  Vertices,
 }
 
 export interface DrawingContext {
