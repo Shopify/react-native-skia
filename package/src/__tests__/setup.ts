@@ -4,7 +4,7 @@ import fs from "fs";
 import type { Surface } from "canvaskit-wasm";
 
 import type { SkSurface } from "../skia";
-import { toValue } from "../skia/web/Host";
+import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
 export const docPath = (relPath: string) =>
   path.resolve(process.cwd(), `../docs/static/img/${relPath}`);
@@ -14,7 +14,8 @@ export const processResult = (
   relPath: string,
   overwrite = false
 ) => {
-  toValue<Surface>(surface).flush();
+  const ckSurface = JsiSkSurface.fromValue<Surface>(surface);
+  ckSurface.flush();
   const image = surface.makeImageSnapshot();
   const png = image.encodeToBytes();
   const p = path.resolve(__dirname, relPath);

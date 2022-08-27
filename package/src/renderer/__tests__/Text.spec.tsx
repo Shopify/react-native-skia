@@ -84,6 +84,6 @@ describe("Test different text examples", () => {
         <Text text="🙋🌎" font={emojiFont} y={fontSize} x={0} />
       </>
     );
-    processResult(surface, docPath("text/text-emoji.png"), true);
+    processResult(surface, docPath("text/text-emoji.png"));
   });
 });

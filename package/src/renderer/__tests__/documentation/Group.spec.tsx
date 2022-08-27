@@ -10,7 +10,7 @@ const r = 24;
 
 describe("Group", () => {
   it("Should use a rectangle as a clip", () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg")!;
+    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { rect } = importSkia();
     expect(image).toBeTruthy();
     const rct = rect(padding, padding, size - padding * 2, size - padding * 2);
@@ -32,7 +32,7 @@ describe("Group", () => {
     processResult(surface, docPath("group/clip-rect.png"));
   });
   it("Should use a rounded rectangle as a clip", () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg")!;
+    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { rect, rrect } = importSkia();
     expect(image).toBeTruthy();
     const rct = rrect(
@@ -55,7 +55,7 @@ describe("Group", () => {
     processResult(surface, docPath("group/clip-rrect.png"));
   });
   it("Should use a path as a clip", () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg")!;
+    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { processTransform2d, Skia } = importSkia();
     expect(image).toBeTruthy();
     const star = Skia.Path.MakeFromSVGString(
@@ -78,7 +78,7 @@ describe("Group", () => {
     processResult(surface, docPath("group/clip-path.png"));
   });
   it("Should invert a clip", () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg")!;
+    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { processTransform2d, Skia } = importSkia();
     expect(image).toBeTruthy();
     const star = Skia.Path.MakeFromSVGString(

@@ -13,10 +13,11 @@ import type {
   StrokeOpts,
 } from "../types";
 
-import { ckEnum, HostObject, optEnum, toValue } from "./Host";
+import { ckEnum, HostObject, optEnum } from "./Host";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
+import { JsiSkMatrix } from "./JsiSkMatrix";
 
 const CommandCount = {
   [PathVerb.Move]: 3,
@@ -25,20 +26,6 @@ const CommandCount = {
   [PathVerb.Conic]: 6,
   [PathVerb.Cubic]: 7,
   [PathVerb.Close]: 1,
-};
-
-const areCmdsInterpolatable = (cmd1: PathCommand[], cmd2: PathCommand[]) => {
-  if (cmd1.length !== cmd2.length) {
-    return false;
-  }
-  for (let i = 0; i < cmd1.length; i++) {
-    if (cmd1[i][0] !== cmd2[i][0]) {
-      return false;
-    } else if (cmd1[i][0] === PathVerb.Conic && cmd1[i][5] !== cmd2[i][5]) {
-      return false;
-    }
-  }
-  return true;
 };
 
 export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
@@ -74,7 +61,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   addPoly(points: SkPoint[], close: boolean) {
     this.ref.addPoly(
-      points.map((p) => toValue(p)),
+      points.map((p) => Array.from(JsiSkPoint.fromValue(p))).flat(),
       close
     );
     return this;
@@ -256,7 +243,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   equals(other: SkPath) {
-    return this.ref.equals(toValue(other));
+    return this.ref.equals(JsiSkPath.fromValue(other));
   }
 
   getBounds() {
@@ -293,9 +280,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   addCircle(x: number, y: number, r: number) {
-    // We leave the comment below to remind us that this is not implemented in CanvasKit
-    // throw new NotImplementedOnRNWeb();
-    this.ref.addOval(this.CanvasKit.LTRBRect(x - r, y - r, x + r, y + r));
+    this.ref.addCircle(x, y, r);
     return this;
   }
 
@@ -307,7 +292,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   op(path: SkPath, op: PathOp) {
-    return this.ref.op(toValue(path), ckEnum(op));
+    return this.ref.op(JsiSkPath.fromValue(path), ckEnum(op));
   }
 
   simplify() {
@@ -324,34 +309,15 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   transform(m3: SkMatrix) {
-    this.ref.transform(toValue(m3));
+    this.ref.transform(JsiSkMatrix.fromValue(m3));
   }
 
   interpolate(end: SkPath, t: number) {
-    // Do not remove the comment below. We use it to track missing APIs in CanvasKit
-    // throw new NotImplementedOnRNWeb();
-    const cmd1 = this.toCmds();
-    const cmd2 = end.toCmds();
-    if (!areCmdsInterpolatable(cmd1, cmd2)) {
-      return null;
-    }
-    const interpolated: PathCommand[] = [];
-    cmd1.forEach((cmd, i) => {
-      const interpolatedCmd = [cmd[0]];
-      interpolated.push(interpolatedCmd);
-      cmd.forEach((c, j) => {
-        if (j === 0) {
-          return;
-        }
-        if (interpolatedCmd[0] === PathVerb.Conic && j === 5) {
-          interpolatedCmd.push(c);
-        } else {
-          const c2 = cmd2[i][j];
-          interpolatedCmd.push(c2 + (c - c2) * t);
-        }
-      });
-    });
-    const path = this.CanvasKit.Path.MakeFromCmds(interpolated.flat());
+    const path = this.CanvasKit.Path.MakeFromPathInterpolation(
+      this.ref,
+      JsiSkPath.fromValue(end),
+      t
+    );
     if (path === null) {
       return null;
     }
@@ -359,11 +325,10 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   isInterpolatable(path2: SkPath): boolean {
-    // Do not remove the comment below. We use it to track missing APIs in CanvasKit
-    // throw new NotImplementedOnRNWeb();
-    const cmd1 = this.toCmds();
-    const cmd2 = path2.toCmds();
-    return areCmdsInterpolatable(cmd1, cmd2);
+    return this.CanvasKit.Path.CanInterpolate(
+      this.ref,
+      JsiSkPath.fromValue(path2)
+    );
   }
 
   toCmds() {

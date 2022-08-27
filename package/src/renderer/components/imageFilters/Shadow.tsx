@@ -30,8 +30,8 @@ const onDeclare = createDeclaration<ShadowProps>(
       factory = MakeInnerShadow.bind(null, Skia, shadowOnly);
     } else {
       factory = shadowOnly
-        ? Skia.ImageFilter.MakeDropShadowOnly
-        : Skia.ImageFilter.MakeDropShadow;
+        ? Skia.ImageFilter.MakeDropShadowOnly.bind(Skia.ImageFilter)
+        : Skia.ImageFilter.MakeDropShadow.bind(Skia.ImageFilter);
     }
     return factory(dx, dy, blur, blur, color, input);
   }

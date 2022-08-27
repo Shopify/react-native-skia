@@ -131,7 +131,7 @@ private:
    * Calls the JS draw callback. This is the JS function that does the actual drawing so this
    * method must be called from the JS thread.
    */
-  void callJsDrawCallback(int width, int height, double timestamp);
+  void callJsDrawCallback(std::shared_ptr<JsiSkCanvas> canvas, int width, int height, double timestamp);
 
   /**
    Starts beginDrawCallback loop if the drawing mode is continuous

@@ -93,4 +93,18 @@ describe("Drawings", () => {
     canvas.drawRect({ x: 64, y: 64, width: 128, height: 128 }, paint);
     processResult(surface, "snapshots/drawings/small-lightblue-rect.png");
   });
+
+  it("Should draw an arc", () => {
+    const { surface, canvas, Skia } = setupSkia();
+    const paint = Skia.Paint();
+    paint.setColor(Skia.Color("lightblue"));
+    canvas.drawArc(
+      { x: 64, y: 64, width: 128, height: 128 },
+      0,
+      180,
+      true,
+      paint
+    );
+    processResult(surface, "snapshots/drawings/arc.png");
+  });
 });
