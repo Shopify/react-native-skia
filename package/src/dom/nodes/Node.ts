@@ -11,6 +11,10 @@ export enum NodeType {
   Image,
   Points,
   Path,
+  Rect,
+  RRect,
+  Oval,
+  Line,
 }
 
 export interface DrawingContext {

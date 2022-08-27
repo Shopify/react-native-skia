@@ -2,3 +2,8 @@ export * from "./CircleNode";
 export * from "./FillNode";
 export * from "./ImageNode";
 export * from "./PointsNode";
+export * from "./PathNode";
+export * from "./RectNode";
+export * from "./RRectNode";
+export * from "./OvalNode";
+export * from "./LineNode";
