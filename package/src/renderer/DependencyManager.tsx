@@ -21,7 +21,7 @@ export class DependencyManager {
   ref: RefObject<SkiaView>;
   nodeSubscriptionInfos: Map<Node, SubscriptionInfo[]> = new Map();
   valueSubscriptions: Map<SkiaValue<unknown>, Subscription> = new Map();
-  unregisterRedrawRequests: null | Unsubscribe = null;
+  unregisterDependantValues: null | Unsubscribe = null;
 
   constructor(ref: RefObject<SkiaView>) {
     this.ref = ref;
@@ -35,7 +35,6 @@ export class DependencyManager {
    * @param node Node to unsubscribe value listeners from
    */
   unsubscribeNode(node: Node) {
-    // console.log("DependencyMngr: unsubscribeNode", node.nodeId);
     const subscriptions = this.nodeSubscriptionInfos.get(node);
     if (subscriptions) {
       subscriptions.forEach((si) => {
@@ -83,19 +82,11 @@ export class DependencyManager {
     if (subscriptionInfos.length === 0) {
       return;
     }
-    // console.log(
-    //   `DependencyMngr: subscribeNode ${node.nodeId} -> subscriptions:`,
-    //   subscriptionInfos.map((p) => p.key).join(", "),
-    //   "(" + subscriptionInfos.length + ")"
-    // );
     // Install all subscriptions
     subscriptionInfos.forEach((si) => {
       // Do we already have this one as a unique value?
       let valueSubscription = this.valueSubscriptions.get(si.value);
       if (!valueSubscription) {
-        // console.log(
-        //   `DependencyMngr: subscribeNode ${node.nodeId} -> no subscription found for value`
-        // );
         // Subscribe to the value
         valueSubscription = {
           value: si.value,
@@ -125,22 +116,13 @@ export class DependencyManager {
       throw new Error("Canvas ref is not set");
     }
 
-    // console.log(
-    //   "DependencyMngr: update -> Subscribed values:",
-    //   this.valueSubscriptions.size,
-    //   "/ Nodes:",
-    //   Array.from(this.nodeSubscriptionInfos)
-    //     .map((p) => p[0].nodeId)
-    //     .join(", ")
-    // );
-
     // Remove any previous registrations
-    if (this.unregisterRedrawRequests) {
-      this.unregisterRedrawRequests();
+    if (this.unregisterDependantValues) {
+      this.unregisterDependantValues();
     }
 
     // Register redraw requests on the SkiaView for each unique value
-    this.unregisterRedrawRequests = this.ref.current.registerValues(
+    this.unregisterDependantValues = this.ref.current.registerValues(
       Array.from(this.valueSubscriptions.keys())
     );
   }
@@ -151,12 +133,10 @@ export class DependencyManager {
    * the component is removed.
    */
   remove() {
-    // console.log("DependencyMngr: remove");
-
     // 1) Unregister redraw requests
-    if (this.unregisterRedrawRequests) {
-      this.unregisterRedrawRequests();
-      this.unregisterRedrawRequests = null;
+    if (this.unregisterDependantValues) {
+      this.unregisterDependantValues();
+      this.unregisterDependantValues = null;
     }
 
     // 2) Unregister nodes
