@@ -1,4 +1,10 @@
-import type { SkMatrix, SkRect, SkRRect, SkShader } from "../../skia/types";
+import type {
+  SkMatrix,
+  SkPath,
+  SkRect,
+  SkRRect,
+  SkShader,
+} from "../../skia/types";
 import { ClipOp } from "../../skia/types";
 import type { SkMaskFilter } from "../../skia/types/MaskFilter";
 
@@ -13,6 +19,7 @@ interface GroupNodeProps {
   clipRect?: SkRect;
   clipRRect?: SkRRect;
   invertClip?: boolean;
+  clipPath?: SkPath;
 }
 
 export class GroupNode extends RenderNode<GroupNodeProps> {
@@ -45,8 +52,9 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
   }
 
   render(parentCtx: DrawingContext) {
-    const { invertClip, matrix, clipRect, clipRRect } = this.props;
+    const { invertClip, matrix, clipRect, clipRRect, clipPath } = this.props;
     const { canvas } = parentCtx;
+
     const paint = this.paint
       ? this.paint.concat(parentCtx.Skia, parentCtx.paint, parentCtx.opacity)
       : parentCtx.paint;
@@ -63,14 +71,18 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
     if (matrix) {
       canvas.concat(matrix);
     }
-
     if (clipRect) {
       canvas.clipRect(clipRect, op, true);
     }
     if (clipRRect) {
       canvas.clipRRect(clipRRect, op, true);
     }
+    if (clipPath) {
+      canvas.clipPath(clipPath, op, true);
+    }
+
     this.children.forEach((child) => child.render(ctx));
+
     if (shouldSave) {
       canvas.restore();
     }
