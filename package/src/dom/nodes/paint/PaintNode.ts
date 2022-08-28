@@ -8,10 +8,13 @@ import type {
   SkPaint,
   Skia,
   SkMaskFilter,
+  SkColorFilter,
 } from "../../../skia/types";
 import type { DeclarationNode } from "../Node";
 import { NodeType, Node } from "../Node";
 import type { SkShader } from "../../../skia/types/Shader/Shader";
+import type { SkPathEffect } from "../../../skia/types/PathEffect";
+import type { SkImageFilter } from "../../../skia/types/ImageFilter/ImageFilter";
 
 export interface PaintNodeProps {
   color?: SkColor;
@@ -29,6 +32,9 @@ export class PaintNode extends Node<PaintNodeProps> {
   private cache: SkPaint | null = null;
   private shader?: DeclarationNode<unknown, SkShader>;
   private maskFilter?: DeclarationNode<unknown, SkMaskFilter>;
+  private colorFilter?: DeclarationNode<unknown, SkColorFilter>;
+  private imageFilter?: DeclarationNode<unknown, SkImageFilter>;
+  private pathEffect?: DeclarationNode<unknown, SkPathEffect>;
 
   constructor(props: PaintNodeProps = {}) {
     super(NodeType.Paint, props);
@@ -42,6 +48,21 @@ export class PaintNode extends Node<PaintNodeProps> {
   addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>) {
     this.maskFilter = maskFilter;
     this.maskFilter.setInvalidate(() => (this.cache = null));
+  }
+
+  addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>) {
+    this.colorFilter = colorFilter;
+    this.colorFilter.setInvalidate(() => (this.cache = null));
+  }
+
+  addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>) {
+    this.imageFilter = imageFilter;
+    this.imageFilter.setInvalidate(() => (this.cache = null));
+  }
+
+  addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>) {
+    this.pathEffect = pathEffect;
+    this.pathEffect.setInvalidate(() => (this.cache = null));
   }
 
   concat(Skia: Skia, parentPaint: SkPaint, currentOpacity: number) {
@@ -100,6 +121,15 @@ export class PaintNode extends Node<PaintNodeProps> {
     }
     if (this.maskFilter !== undefined) {
       paint.setMaskFilter(this.maskFilter.get(Skia));
+    }
+    if (this.pathEffect !== undefined) {
+      paint.setPathEffect(this.pathEffect.get(Skia));
+    }
+    if (this.imageFilter !== undefined) {
+      paint.setImageFilter(this.imageFilter.get(Skia));
+    }
+    if (this.colorFilter !== undefined) {
+      paint.setColorFilter(this.colorFilter.get(Skia));
     }
     this.cache = paint;
     return paint;

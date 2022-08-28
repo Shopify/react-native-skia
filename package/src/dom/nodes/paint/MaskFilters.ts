@@ -1,5 +1,5 @@
-import { DeclarationNode, NodeType } from "../../Node";
-import type { BlurStyle, Skia, SkMaskFilter } from "../../../../skia/types";
+import { DeclarationNode, NodeType } from "../Node";
+import type { BlurStyle, Skia, SkMaskFilter } from "../../../skia/types";
 
 export interface BlurMaskFilterNodeProps {
   style: BlurStyle;

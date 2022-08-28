@@ -1,5 +1,5 @@
 import type { Skia, SkRuntimeEffect } from "../../../../skia/types";
-import { DeclarationNode, NodeType } from "../../Node";
+import { NestedDeclarationNode, NodeType } from "../../Node";
 import type { SkShader } from "../../../../skia/types/Shader/Shader";
 
 export interface ShaderNodeProps {
@@ -7,15 +7,12 @@ export interface ShaderNodeProps {
   uniforms: number[];
 }
 
-export class ShaderNode extends DeclarationNode<ShaderNodeProps, SkShader> {
-  children: DeclarationNode<unknown, SkShader>[] = [];
-
+export class ShaderNode extends NestedDeclarationNode<
+  ShaderNodeProps,
+  SkShader
+> {
   constructor(props: ShaderNodeProps) {
     super(NodeType.Shader, props);
-  }
-
-  addChild(shader: DeclarationNode<unknown, SkShader>) {
-    this.children.push(shader);
   }
 
   get(Skia: Skia) {

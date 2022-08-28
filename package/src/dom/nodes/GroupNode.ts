@@ -1,12 +1,14 @@
 import type {
   SkMatrix,
   SkPath,
+  SkPathEffect,
   SkRect,
   SkRRect,
   SkShader,
 } from "../../skia/types";
 import { ClipOp } from "../../skia/types";
 import type { SkMaskFilter } from "../../skia/types/MaskFilter";
+import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 
 import type { DeclarationNode, DrawingContext } from "./Node";
 import { RenderNode, NodeType } from "./Node";
@@ -44,11 +46,25 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
     this.paint.addShader(shader);
   }
 
+  addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>) {
+    if (!this.paint) {
+      this.paint = new PaintNode();
+    }
+    this.paint.addColorFilter(colorFilter);
+  }
+
   addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>) {
     if (!this.paint) {
       this.paint = new PaintNode();
     }
     this.paint.addMaskFilter(maskFilter);
+  }
+
+  addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>) {
+    if (!this.paint) {
+      this.paint = new PaintNode();
+    }
+    this.paint.addPathEffect(pathEffect);
   }
 
   render(parentCtx: DrawingContext) {

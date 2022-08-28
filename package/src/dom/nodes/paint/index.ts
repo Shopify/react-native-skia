@@ -1,3 +1,5 @@
-export * from "./shaders";
-export * from "./maskFilters";
+export * from "./Shaders";
+export * from "./MaskFilters";
+export * from "./ColorFilters";
+export * from "./PathEffects";
 export * from "./PaintNode";
