@@ -7,6 +7,7 @@ export enum NodeType {
 
   BlurMaskFilter,
 
+  DiscretePathEffect,
   DashPathEffect,
   Path1DPathEffect,
   Path2DPathEffect,
@@ -16,6 +17,11 @@ export enum NodeType {
   Line2DPathEffect,
 
   MatrixColorFilter,
+  BlendColorFilter,
+  ComposeColorFilterNode,
+  LinearToSRGBGammaColorFilterNode,
+  SRGBToLinearGammaColorFilterNode,
+  LumaColorFilterColorFilterNode,
 
   Drawing,
   Paint,

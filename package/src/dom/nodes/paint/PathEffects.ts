@@ -18,7 +18,7 @@ export class DiscretePathEffectNode extends DeclarationNode<
   SkPathEffect
 > {
   constructor(props: DiscretePathEffectNodeProps) {
-    super(NodeType.DashPathEffect, props);
+    super(NodeType.DiscretePathEffect, props);
   }
 
   get(Skia: Skia) {
@@ -150,7 +150,7 @@ export class Path1DPathEffectNode extends DeclarationNode<
   null
 > {
   constructor(props: Path1DPathEffectNodeProps) {
-    super(NodeType.Line2DPathEffect, props);
+    super(NodeType.Path1DPathEffect, props);
   }
 
   get(Skia: Skia) {
