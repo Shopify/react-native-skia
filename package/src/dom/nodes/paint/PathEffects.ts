@@ -1,11 +1,11 @@
 import type {
-  Path1DEffectStyle,
   Skia,
+  Path1DEffectStyle,
   SkMatrix,
   SkPath,
   SkPathEffect,
 } from "../../../skia/types";
-import { DeclarationNode, NodeType } from "../Node";
+import { DeclarationNode, NestedDeclarationNode, NodeType } from "../Node";
 
 export interface DiscretePathEffectNodeProps {
   segLength: number;
@@ -85,41 +85,35 @@ export class CornerPathEffectNode extends DeclarationNode<
   }
 }
 
-export interface ComposePathEffectNodeProps {
-  outer: SkPathEffect;
-  inner: SkPathEffect;
-}
-
-export class ComposePathEffectNode extends DeclarationNode<
-  ComposePathEffectNodeProps,
+export class ComposePathEffectNode extends NestedDeclarationNode<
+  null,
   SkPathEffect
 > {
-  constructor(props: ComposePathEffectNodeProps) {
-    super(NodeType.ComposePathEffect, props);
+  constructor() {
+    super(NodeType.ComposePathEffect, null);
   }
 
   get(Skia: Skia) {
-    const { outer, inner } = this.props;
-    return Skia.PathEffect.MakeCompose(outer, inner);
+    return this.getRecursively(
+      Skia,
+      Skia.PathEffect.MakeCompose.bind(Skia.PathEffect)
+    );
   }
 }
 
-export interface SumPathEffectNodeProps {
-  outer: SkPathEffect;
-  inner: SkPathEffect;
-}
-
-export class SumPathEffectNode extends DeclarationNode<
-  SumPathEffectNodeProps,
+export class SumPathEffectNode extends NestedDeclarationNode<
+  null,
   SkPathEffect
 > {
-  constructor(props: SumPathEffectNodeProps) {
-    super(NodeType.SumPathEffect, props);
+  constructor() {
+    super(NodeType.SumPathEffect, null);
   }
 
   get(Skia: Skia) {
-    const { outer, inner } = this.props;
-    return Skia.PathEffect.MakeSum(outer, inner);
+    return this.getRecursively(
+      Skia,
+      Skia.PathEffect.MakeSum.bind(Skia.PathEffect)
+    );
   }
 }
 

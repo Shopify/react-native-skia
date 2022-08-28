@@ -99,4 +99,15 @@ export abstract class NestedDeclarationNode<
   addChild(shader: DeclarationNode<unknown, T>) {
     this.children.push(shader);
   }
+
+  protected getRecursively(Skia: Skia, compose: (a: T, b: T) => T) {
+    return this.children
+      .map((child) => child.get(Skia))
+      .reduce<T | null>((acc, p) => {
+        if (acc === null) {
+          return p;
+        }
+        return compose(acc, p);
+      }, null) as T;
+  }
 }
