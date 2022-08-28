@@ -23,6 +23,9 @@ export enum NodeType {
   SRGBToLinearGammaColorFilterNode,
   LumaColorFilterColorFilterNode,
 
+  OffsetImageFilter,
+  DisplacementMapImageFilter,
+
   Drawing,
   Paint,
   Circle,
