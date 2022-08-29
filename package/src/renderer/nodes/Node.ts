@@ -10,13 +10,10 @@ export enum NodeType {
 
 type DeclarationResult = SkJSIInstance<string> | null;
 
-export type NodeProps<P extends Partial<Record<keyof P, unknown>>> = Partial<
-  Record<keyof P, unknown>
->;
-
-export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
+export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
-  resolvedProps: Partial<P> = {};
+  // This cast is ok because we understand that the dependency manager will setup the initial props
+  resolvedProps: P = {} as P;
   memoizable = false;
   memoized: DeclarationResult | null = null;
   parent?: Node;
@@ -38,8 +35,8 @@ export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
     this.updatePropSubscriptions(props);
   }
 
-  get props() {
-    return this.resolvedProps as unknown as P;
+  get props(): P {
+    return this.resolvedProps;
   }
 
   visit(ctx: DrawingContext, children?: Node[]) {
