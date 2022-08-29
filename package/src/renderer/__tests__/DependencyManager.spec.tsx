@@ -1,12 +1,11 @@
 import { DependencyManager } from "../DependencyManager";
 import { Node } from "../nodes";
-import type { NodeProps } from "../nodes";
 import type { SkJSIInstance } from "../../skia";
 import type { DrawingContext } from "../DrawingContext";
 import { Selector } from "../../values";
 import { RNSkValue } from "../../values/web/RNSkValue";
 
-class TestNode<P extends NodeProps<P>> extends Node<P> {
+class TestNode<P> extends Node<P> {
   draw(_ctx: DrawingContext): void | (SkJSIInstance<string> | null) {}
 }
 
