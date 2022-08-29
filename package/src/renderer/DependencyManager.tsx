@@ -89,11 +89,6 @@ export class DependencyManager {
       return;
     }
 
-    console.log(
-      "subscribeNode",
-      propSubscriptions.map((p) => p.key).join(", ")
-    );
-
     // Install all mutators for the node
     propSubscriptions.forEach((ps) => {
       // Do we already have a state for this value?
