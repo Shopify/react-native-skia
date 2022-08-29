@@ -24,7 +24,7 @@ export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
 
   constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
     this.depMgr = depMgr;
-    this.subscribeToPropChanges(props);
+    this.updatePropSubscriptions(props);
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
@@ -33,7 +33,7 @@ export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
     this.depMgr.unsubscribeNode(this);
   }
 
-  subscribeToPropChanges(props: AnimatedProps<P>) {
+  updatePropSubscriptions(props: AnimatedProps<P>) {
     this.depMgr.subscribeNode(
       this,
       props,
@@ -45,7 +45,7 @@ export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
 
   set props(props: AnimatedProps<P>) {
     this.depMgr.unsubscribeNode(this);
-    this.subscribeToPropChanges(props);
+    this.updatePropSubscriptions(props);
   }
 
   get props() {
