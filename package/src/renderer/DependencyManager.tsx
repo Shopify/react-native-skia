@@ -152,8 +152,8 @@ export class DependencyManager {
   }
 }
 
-const initializePropertySubscriptions = <P extends Record<string, unknown>>(
-  node: Node,
+const initializePropertySubscriptions = <P,>(
+  node: Node<P>,
   props: AnimatedProps<P>
 ) => {
   const nodePropSubscriptions: Array<{
