@@ -168,28 +168,24 @@ const initializePropertySubscriptions = <P,>(
       // Subscribe to changes
       nodePropSubscriptions.push({
         value: propvalue,
-        mutator: (v) => ((node.resolvedProps as P)[key] = v as P[typeof key]),
+        mutator: (v) => (node.resolvedProps[key] = v as P[typeof key]),
       });
       // Set initial value
-      (node.resolvedProps as P)[key] = (
-        propvalue as SkiaValue<P[typeof key]>
-      ).current;
+      node.resolvedProps[key] = (propvalue as SkiaValue<P[typeof key]>).current;
     } else if (isSelector(propvalue)) {
       // Subscribe to changes
       nodePropSubscriptions.push({
         value: propvalue.value,
         mutator: (v) =>
-          ((node.resolvedProps as P)[key] = propvalue.selector(
-            v
-          ) as P[typeof key]),
+          (node.resolvedProps[key] = propvalue.selector(v) as P[typeof key]),
       });
       // Set initial value
-      (node.resolvedProps as P)[key] = propvalue.selector(
+      node.resolvedProps[key] = propvalue.selector(
         propvalue.value.current
-      ) as P[typeof key] as P[typeof key];
+      ) as P[typeof key];
     } else {
       // Set initial value
-      (node.resolvedProps as P)[key] = propvalue as P[typeof key];
+      node.resolvedProps[key] = propvalue as P[typeof key];
     }
   });
 
