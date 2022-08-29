@@ -59,6 +59,17 @@ describe("DependencyManager", () => {
     expect(nodeA.props.a).toBe(100);
     expect(nodeB.props.b).toBe(200);
   });
+  it("should update corresponding value/props correctly", () => {
+    const mgr = new DependencyManager(() => () => {});
+    const valueA = new RNSkValue(100);
+    const valueB = new RNSkValue(200);
+    const node = new TestNode(mgr, { a: valueA, b: valueB });
+    expect(node.props.a).toBe(100);
+    expect(node.props.b).toBe(200);
+    valueA.current = 300;
+    expect(node.props.a).toBe(300);
+    expect(node.props.b).toBe(200);
+  });
   it("should remove listeners on a node when node is removed", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
