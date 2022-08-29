@@ -3,7 +3,6 @@ import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
 import type { AnimatedProps } from "../processors/Animations/Animations";
-import { materialize } from "../processors/Animations/Animations";
 import { isPaint } from "../../skia/types";
 import type { DependencyManager } from "../DependencyManager";
 import { processPaint } from "../processors";
@@ -25,8 +24,8 @@ export const useDrawing = <P,>(cb: OnDrawCallback<P>, deps?: DependencyList) =>
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useCallback(cb, deps ?? []);
 
-export type DrawingProps<T> = {
-  onDraw: DrawingCallback<T>;
+export type DrawingProps<P> = {
+  onDraw: DrawingCallback<P>;
   skipProcessing?: boolean;
   children?: ReactNode | ReactNode[];
 };
@@ -47,20 +46,19 @@ export class DrawingNode<P> extends Node<P> {
   }
 
   draw(ctx: DrawingContext) {
-    const drawingProps = materialize(this.props);
     if (this.skipProcessing) {
-      this.onDraw(ctx, drawingProps, this);
+      this.onDraw(ctx, this.props, this);
     } else {
       const declarations = this.visit(ctx);
       const paint = processPaint(
         ctx.Skia,
         ctx.paint.copy(),
         ctx.opacity,
-        drawingProps,
+        this.props,
         declarations
       );
       [paint, ...declarations.filter(isPaint)].forEach((currentPaint) => {
-        this.onDraw({ ...ctx, paint: currentPaint }, drawingProps, this);
+        this.onDraw({ ...ctx, paint: currentPaint }, this.props, this);
       });
     }
   }

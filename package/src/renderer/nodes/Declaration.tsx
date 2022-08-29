@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 import type { DrawingContext } from "../DrawingContext";
 import type { AnimatedProps } from "../processors";
-import { isAnimated, materialize } from "../processors";
+import { isAnimated } from "../processors";
 import type { DependencyManager } from "../DependencyManager";
 import type { SkJSIInstance } from "../../skia/types";
 
@@ -28,9 +28,8 @@ export const useDeclaration = <P,>(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useCallback(cb, deps ?? []);
 
-export const isDeclarationNode = (
-  node: Node
-): node is DeclarationNode<unknown> => node instanceof DeclarationNode;
+export const isDeclarationNode = <P,>(node: Node): node is DeclarationNode<P> =>
+  node instanceof DeclarationNode;
 
 export interface DeclarationProps<P> {
   onDeclare: DeclarationCallback<P>;
@@ -54,14 +53,13 @@ export class DeclarationNode<P> extends Node<P> {
     super.props = props;
   }
 
-  get props() {
-    return this._props;
+  get props(): P {
+    return this.resolvedProps;
   }
 
   draw(ctx: DrawingContext) {
     const children = this.visit(ctx);
-    const props = materialize(this.props);
-    const obj = this.onDeclare(props, children, ctx);
+    const obj = this.onDeclare(this.props, children, ctx);
     return obj;
   }
 }

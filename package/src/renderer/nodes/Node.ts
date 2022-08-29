@@ -12,29 +12,31 @@ type DeclarationResult = SkJSIInstance<string> | null;
 
 export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
-  _props: AnimatedProps<P>;
+  // This cast is ok because we understand that the dependency manager will setup the initial props
+  resolvedProps: P = {} as P;
   memoizable = false;
   memoized: DeclarationResult | null = null;
   parent?: Node;
   depMgr: DependencyManager;
 
   constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
-    this._props = props;
     this.depMgr = depMgr;
-    this.depMgr.unSubscribeNode(this);
-    this.depMgr.subscribeNode(this, props);
+    this.updatePropSubscriptions(props);
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
-  set props(props: AnimatedProps<P>) {
-    this.depMgr.unSubscribeNode(this);
+  updatePropSubscriptions(props: AnimatedProps<P>) {
     this.depMgr.subscribeNode(this, props);
-    this._props = props;
   }
 
-  get props() {
-    return this._props;
+  set props(props: AnimatedProps<P>) {
+    this.depMgr.unsubscribeNode(this);
+    this.updatePropSubscriptions(props);
+  }
+
+  get props(): P {
+    return this.resolvedProps;
   }
 
   visit(ctx: DrawingContext, children?: Node[]) {
