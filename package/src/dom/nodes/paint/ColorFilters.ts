@@ -64,7 +64,7 @@ export class LinearToSRGBGammaColorFilterNode extends DeclarationNode<
   SkColorFilter
 > {
   constructor() {
-    super(DeclarationType.ColorFilter, NodeType.LinearToSRGBGammaColorFilterNode, null);
+    super(DeclarationType.ColorFilter, NodeType.LinearToSRGBGammaColorFilter, null);
   }
 
   get(Skia: Skia) {
@@ -77,7 +77,7 @@ export class SRGBToLinearGammaColorFilterNode extends DeclarationNode<
   SkColorFilter
 > {
   constructor() {
-    super(DeclarationType.ColorFilter, NodeType.SRGBToLinearGammaColorFilterNode, null);
+    super(DeclarationType.ColorFilter, NodeType.SRGBToLinearGammaColorFilter, null);
   }
 
   get(Skia: Skia) {
@@ -87,7 +87,7 @@ export class SRGBToLinearGammaColorFilterNode extends DeclarationNode<
 
 export class LumaColorFilterNode extends DeclarationNode<null, SkColorFilter> {
   constructor() {
-    super(DeclarationType.ColorFilter, NodeType.LumaColorFilterColorFilterNode, null);
+    super(DeclarationType.ColorFilter, NodeType.LumaColorFilterColorFilter, null);
   }
 
   get(Skia: Skia) {
