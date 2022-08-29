@@ -91,10 +91,10 @@ export class DependencyManager {
 
     // Install all mutators for the node
     propSubscriptions.forEach((ps) => {
-      // Do we already have a state for this value?
+      // Do we already have a state for this SkiaValue
       let subscriptionState = this.subscriptions.get(ps.value);
       if (!subscriptionState) {
-        // Create subscription for the value
+        // Let's create a new subscription state for the skia value
         subscriptionState = {
           nodes: new Map(),
           unsubscribe: null,
@@ -105,12 +105,14 @@ export class DependencyManager {
             mutators.forEach((m) => m(v))
           );
         });
-        // Save value/subscription
         this.subscriptions.set(ps.value, subscriptionState);
       }
+      // subscription mutators
       subscriptionState.nodes.set(
         node,
-        propSubscriptions.map((m) => m.mutator)
+        propSubscriptions
+          .filter((m) => m.value === ps.value)
+          .map((m) => m.mutator)
       );
     });
   }
