@@ -10,6 +10,19 @@ import {
 import { Circle, Group, Paint } from "../../../components";
 import { docPath, processResult } from "../../../../__tests__/setup";
 
+const TestPaintAssignment = () => {
+  const { usePaintRef } = importSkia();
+  const r = width / 2;
+  const paint = usePaintRef();
+  return (
+    <>
+      <Paint ref={paint} color="lightblue" />
+      {/* We can assign the ref to any shape. This will be handy in advanced use-case */}
+      <Circle paint={paint} cx={r} cy={r} r={r} />
+    </>
+  );
+};
+
 describe("Paint", () => {
   it("should draw the color fill and strokes properly", () => {
     const { vec } = importSkia();
@@ -39,5 +52,9 @@ describe("Paint", () => {
       </Group>
     );
     processResult(surface, docPath("paint/inheritance.png"), true);
+  });
+  it("should use paint assignement properly", () => {
+    const surface = drawOnNode(<TestPaintAssignment />);
+    processResult(surface, docPath("paint/assignement.png"), true);
   });
 });
