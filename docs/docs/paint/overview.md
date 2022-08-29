@@ -66,10 +66,13 @@ In the example below, the first circle will be filled with a light blue color, a
 ```tsx twoslash
 import {Canvas, Circle, Paint, Group} from "@shopify/react-native-skia";
 
+const width = 256;
+const height = 256;
+
 export const PaintDemo = () => {
-  const r = 128;
+  const r = width / 6;
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width, height }}>
       <Group color="lightblue">
         <Circle cx={r} cy={r} r={r} />
         <Group style="stroke" strokeWidth={10}>
@@ -81,17 +84,21 @@ export const PaintDemo = () => {
 };
 ```
 
-![Paint Inheritance](assets/inheritance.png)
+<img alt="Paint Inheritance" src={require("/static/img/paint/inheritance.png").default} width="256" height="256" />
+
 
 Complex painting attributes like a shader or an image filter can be passed as children to a group or a drawing.
 
 ```tsx twoslash
 import {Canvas, Circle, Group, LinearGradient, vec} from "@shopify/react-native-skia";
 
+const width = 256;
+const height = 256;
+
 export const PaintDemo = () => {
-  const r = 128;
+  const r = width/2;
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width, height }}>
       <Circle cx={r} cy={r} r={r}>
         <LinearGradient
           start={vec(0, 0)}

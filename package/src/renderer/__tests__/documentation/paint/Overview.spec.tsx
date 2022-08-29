@@ -7,7 +7,7 @@ import {
   height,
   importSkia,
 } from "../../setup";
-import { Circle, Paint } from "../../../components";
+import { Circle, Group, Paint } from "../../../components";
 import { docPath, processResult } from "../../../../__tests__/setup";
 
 describe("Paint", () => {
@@ -26,5 +26,18 @@ describe("Paint", () => {
       </>
     );
     processResult(surface, docPath("paint/stroke.png"));
+  });
+  it("should use paint inheritance properly", () => {
+    const r = width / 6;
+    const strokeWidth = 10 * PIXEL_RATIO;
+    const surface = drawOnNode(
+      <Group color="lightblue">
+        <Circle cx={r} cy={r} r={r} />
+        <Group style="stroke" strokeWidth={strokeWidth}>
+          <Circle cx={3 * r} cy={3 * r} r={r} />
+        </Group>
+      </Group>
+    );
+    processResult(surface, docPath("paint/inheritance.png"), true);
   });
 });
