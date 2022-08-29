@@ -23,9 +23,31 @@ describe("DependencyManager", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
-    expect(mgr.nodeSubscriptionInfos.has(node)).toBe(true);
+    expect(mgr.subscriptions.has(value)).toBe(true);
+    expect(mgr.subscriptions.get(value)!.mutators.has(node)).toBe(true);
     node.removeNode();
-    expect(mgr.nodeSubscriptionInfos.has(node)).toBe(false);
+    expect(mgr.subscriptions.has(value)).toBe(false);
+  });
+  it("should remove listeners for removed node only", () => {
+    const mgr = new DependencyManager(() => () => {});
+    const value = new RNSkValue(100);
+    const node1 = new TestNode(mgr, { a: value });
+    const node2 = new TestNode(mgr, { a: value });
+    expect(mgr.subscriptions.has(value)).toBe(true);
+    node1.removeNode();
+    expect(mgr.subscriptions.has(value)).toBe(true);
+    expect(mgr.subscriptions.get(value)?.mutators.has(node1)).toBe(false);
+    expect(mgr.subscriptions.get(value)?.mutators.has(node2)).toBe(true);
+    node2.removeNode();
+    expect(mgr.subscriptions.has(value)).toBe(false);
+  });
+  it("should remove value when last node is removed", () => {
+    const mgr = new DependencyManager(() => () => {});
+    const value = new RNSkValue(100);
+    const node = new TestNode(mgr, { a: value });
+    expect(mgr.subscriptions.has(value)).toBe(true);
+    node.removeNode();
+    expect(mgr.subscriptions.has(value)).toBe(false);
   });
   it("should resolve a value property to the value's current", () => {
     const value = new RNSkValue(100);

@@ -6,77 +6,22 @@ import { isSelector, isValue } from "./processors";
 import { mapKeys } from "./typeddash";
 
 type Unsubscribe = () => void;
+type Mutator = (value: unknown) => void;
 
-type SubscriptionInfo = {
-  value: SkiaValue<unknown>;
-  key: string | symbol | number;
-  listener: (s: unknown) => void;
-};
-
-type Subscription = {
-  value: SkiaValue<unknown>;
-  listeners: Array<(v: unknown) => void>;
+type SubscriptionState = {
+  mutators: Map<Node, Mutator[]>;
   unsubscribe: null | Unsubscribe;
 };
 
 export class DependencyManager {
   registerValues: (values: Array<SkiaValue<unknown>>) => () => void;
-  nodeSubscriptionInfos: Map<Node, SubscriptionInfo[]> = new Map();
-  valueSubscriptions: Map<SkiaValue<unknown>, Subscription> = new Map();
+  subscriptions: Map<SkiaValue<unknown>, SubscriptionState> = new Map();
   unregisterDependantValues: null | Unsubscribe = null;
 
   constructor(
     registerValues: (values: Array<SkiaValue<unknown>>) => () => void
   ) {
     this.registerValues = registerValues;
-  }
-
-  private createPropertySubscriptions<P extends Record<string, unknown>>(
-    props: AnimatedProps<P>,
-    onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
-  ) {
-    const nodePropSubscriptions: Array<{
-      value: SkiaValue<unknown>;
-      listener: (v: unknown) => void;
-      key: string | symbol | number;
-      unsub: (() => void) | undefined;
-    }> = [];
-
-    mapKeys(props).forEach((key) => {
-      const propvalue = props[key];
-
-      if (isValue(propvalue)) {
-        // Subscribe to changes
-        nodePropSubscriptions.push({
-          key,
-          value: propvalue,
-          unsub: undefined,
-          listener: (v) => onResolveProp(key, v as P[typeof key]),
-        });
-        // Set initial value
-        onResolveProp(key, (propvalue as SkiaValue<P[typeof key]>).current);
-      } else if (isSelector(propvalue)) {
-        // Subscribe to changes
-        nodePropSubscriptions.push({
-          key,
-          value: propvalue.value,
-          unsub: undefined,
-          listener: (v) =>
-            onResolveProp(key, propvalue.selector(v) as P[typeof key]),
-        });
-        // Set initial value
-        const v = propvalue.selector(propvalue.value.current) as P[typeof key];
-        onResolveProp(key, v as P[typeof key]);
-      } else {
-        onResolveProp(key, propvalue as unknown as P[typeof key]);
-      }
-    });
-
-    return nodePropSubscriptions.map((s) => ({
-      value: s.value,
-      listener: s.listener,
-      key: s.key,
-    }));
   }
 
   /**
@@ -87,37 +32,37 @@ export class DependencyManager {
    * @param node Node to unsubscribe value listeners from
    */
   unsubscribeNode(node: Node) {
-    const subscriptions = this.nodeSubscriptionInfos.get(node);
+    const subscriptions = Array.from(this.subscriptions.values()).filter((p) =>
+      p.mutators.has(node)
+    );
+    console.log("@@@", subscriptions.length);
+
     if (subscriptions) {
       subscriptions.forEach((si) => {
-        // Remove from listeners in subscribed value
-        this.valueSubscriptions.forEach((s) => {
-          s.listeners = s.listeners.filter((l) => l !== si.listener);
-        });
+        // Delete node from subscription
+        si.mutators.delete(node);
 
         // Remove subscription if there are no listeneres left on the value
-        const valueSubscription = this.valueSubscriptions.get(si.value);
-        if (valueSubscription && valueSubscription.listeners.length === 0) {
-          // Unsubscribe
-          if (!valueSubscription.unsubscribe) {
+        if (si.mutators.size === 0) {
+          // There are no more nodes subscribing to this value, we can call
+          // unsubscribe on it.
+          if (!si.unsubscribe) {
             throw new Error("Failed to unsubscribe to value subscription");
           }
-          valueSubscription.unsubscribe && valueSubscription.unsubscribe();
+          si.unsubscribe && si.unsubscribe();
 
-          // Remove from value subscriptions
-          if (!this.valueSubscriptions.delete(si.value)) {
-            throw new Error("Failed to delete value subscription info");
+          // Remove from subscription states as well
+          const element = Array.from(this.subscriptions.entries()).find(
+            ([_, sub]) => sub === si
+          );
+          if (!element) {
+            throw new Error("Failed to find value subscription");
+          }
+          if (!this.subscriptions.delete(element[0])) {
+            throw new Error("Failed to delete value subscription");
           }
         }
       });
-
-      // Remove node's subscription info
-      if (!this.nodeSubscriptionInfos.delete(node)) {
-        throw new Error("Failed to delete node subscription info");
-      }
-
-      // Remove node
-      node.removeNode();
     }
   }
 
@@ -136,35 +81,32 @@ export class DependencyManager {
     props: AnimatedProps<P>,
     onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
   ) {
-    const subscriptionInfos = this.createPropertySubscriptions(
-      props,
-      onResolveProp
-    );
-    if (subscriptionInfos.length === 0) {
+    // Get mutators from node's properties
+    const mutators = createPropertySubscriptions(props, onResolveProp);
+    if (mutators.length === 0) {
       return;
     }
     // Install all subscriptions
-    subscriptionInfos.forEach((si) => {
+    mutators.forEach((si) => {
       // Do we already have this one as a unique value?
-      let valueSubscription = this.valueSubscriptions.get(si.value);
-      if (!valueSubscription) {
+      let subscriptionState = this.subscriptions.get(si.value);
+      if (!subscriptionState) {
         // Subscribe to the value
-        valueSubscription = {
-          value: si.value,
-          listeners: [],
+        subscriptionState = {
+          mutators: new Map(),
           unsubscribe: null,
         };
         // Add single subscription to the new value
-        valueSubscription.unsubscribe = si.value.addListener((v) => {
-          valueSubscription!.listeners.forEach((listener) => listener(v));
+        subscriptionState.unsubscribe = si.value.addListener((v) => {
+          subscriptionState!.mutators.forEach((ni) => ni.forEach((m) => m(v)));
         });
-        this.valueSubscriptions.set(si.value, valueSubscription);
+        this.subscriptions.set(si.value, subscriptionState);
       }
-      // Add listener
-      valueSubscription.listeners.push(si.listener);
+      subscriptionState.mutators.set(
+        node,
+        mutators.map((m) => m.mutator)
+      );
     });
-    // Save node's subscription info as well
-    this.nodeSubscriptionInfos.set(node, subscriptionInfos);
   }
 
   /**
@@ -180,7 +122,7 @@ export class DependencyManager {
 
     // Register redraw requests on the SkiaView for each unique value
     this.unregisterDependantValues = this.registerValues(
-      Array.from(this.valueSubscriptions.keys())
+      Array.from(this.subscriptions.keys())
     );
   }
 
@@ -197,8 +139,51 @@ export class DependencyManager {
     }
 
     // 2) Unregister nodes
-    this.nodeSubscriptionInfos.forEach((_, node) => this.unsubscribeNode(node));
-    this.nodeSubscriptionInfos.clear();
-    this.valueSubscriptions.clear();
+    Array.from(this.subscriptions.values()).forEach((si) => {
+      Array.from(si.mutators.keys()).forEach((node) =>
+        this.unsubscribeNode(node)
+      );
+    });
+
+    // 3) Clear the rest of the subscriptions
+    this.subscriptions.clear();
   }
 }
+
+const createPropertySubscriptions = <P extends Record<string, unknown>>(
+  props: AnimatedProps<P>,
+  onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
+) => {
+  const nodePropSubscriptions: Array<{
+    value: SkiaValue<unknown>;
+    mutator: Mutator;
+  }> = [];
+
+  mapKeys(props).forEach((key) => {
+    const propvalue = props[key];
+
+    if (isValue(propvalue)) {
+      // Subscribe to changes
+      nodePropSubscriptions.push({
+        value: propvalue,
+        mutator: (v) => onResolveProp(key, v as P[typeof key]),
+      });
+      // Set initial value
+      onResolveProp(key, (propvalue as SkiaValue<P[typeof key]>).current);
+    } else if (isSelector(propvalue)) {
+      // Subscribe to changes
+      nodePropSubscriptions.push({
+        value: propvalue.value,
+        mutator: (v) =>
+          onResolveProp(key, propvalue.selector(v) as P[typeof key]),
+      });
+      // Set initial value
+      const v = propvalue.selector(propvalue.value.current) as P[typeof key];
+      onResolveProp(key, v as P[typeof key]);
+    } else {
+      onResolveProp(key, propvalue as unknown as P[typeof key]);
+    }
+  });
+
+  return nodePropSubscriptions;
+};
