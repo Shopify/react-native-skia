@@ -19,12 +19,52 @@ describe("DependencyManager", () => {
     expect(node.props.c).toEqual({ d: "world" });
     expect(Object.keys(node.props)).toEqual(["a", "b", "c"]);
   });
+  it("should update a node's property value when the dependant value change", () => {
+    const mgr = new DependencyManager(() => () => {});
+    const value = new RNSkValue(100);
+    const node = new TestNode(mgr, { a: value });
+    expect(node.props.a).toBe(100);
+    value.current = 200;
+    expect(node.props.a).toBe(200);
+  });
+  it("should not update a node's property value for a removed node", () => {
+    const mgr = new DependencyManager(() => () => {});
+    const value = new RNSkValue(100);
+    const node = new TestNode(mgr, { a: value });
+    expect(node.props.a).toBe(100);
+    node.removeNode();
+    value.current = 200;
+    expect(node.props.a).toBe(100);
+  });
+  it("should update all node props when the dependant value change", () => {
+    const mgr = new DependencyManager(() => () => {});
+    const value = new RNSkValue(100);
+    const nodeA = new TestNode(mgr, { a: value });
+    expect(nodeA.props.a).toBe(100);
+    const nodeB = new TestNode(mgr, { b: value });
+    expect(nodeB.props.b).toBe(100);
+    value.current = 200;
+    expect(nodeA.props.a).toBe(200);
+    expect(nodeB.props.b).toBe(200);
+  });
+  it("should only update the remaining node props when the dependant value change", () => {
+    const mgr = new DependencyManager(() => () => {});
+    const value = new RNSkValue(100);
+    const nodeA = new TestNode(mgr, { a: value });
+    expect(nodeA.props.a).toBe(100);
+    const nodeB = new TestNode(mgr, { b: value });
+    expect(nodeB.props.b).toBe(100);
+    nodeA.removeNode();
+    value.current = 200;
+    expect(nodeA.props.a).toBe(100);
+    expect(nodeB.props.b).toBe(200);
+  });
   it("should remove listeners on a node when node is removed", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
     expect(mgr.subscriptions.has(value)).toBe(true);
-    expect(mgr.subscriptions.get(value)!.mutators.has(node)).toBe(true);
+    expect(mgr.subscriptions.get(value)!.nodes.has(node)).toBe(true);
     node.removeNode();
     expect(mgr.subscriptions.has(value)).toBe(false);
   });
@@ -36,8 +76,8 @@ describe("DependencyManager", () => {
     expect(mgr.subscriptions.has(value)).toBe(true);
     node1.removeNode();
     expect(mgr.subscriptions.has(value)).toBe(true);
-    expect(mgr.subscriptions.get(value)?.mutators.has(node1)).toBe(false);
-    expect(mgr.subscriptions.get(value)?.mutators.has(node2)).toBe(true);
+    expect(mgr.subscriptions.get(value)?.nodes.has(node1)).toBe(false);
+    expect(mgr.subscriptions.get(value)?.nodes.has(node2)).toBe(true);
     node2.removeNode();
     expect(mgr.subscriptions.has(value)).toBe(false);
   });

@@ -9,7 +9,7 @@ type Unsubscribe = () => void;
 type Mutator = (value: unknown) => void;
 
 type SubscriptionState = {
-  mutators: Map<Node, Mutator[]>;
+  nodes: Map<Node, Mutator[]>;
   unsubscribe: null | Unsubscribe;
 };
 
@@ -33,16 +33,16 @@ export class DependencyManager {
    */
   unsubscribeNode(node: Node) {
     const subscriptions = Array.from(this.subscriptions.values()).filter((p) =>
-      p.mutators.has(node)
+      p.nodes.has(node)
     );
 
     if (subscriptions) {
       subscriptions.forEach((si) => {
         // Delete node from subscription
-        si.mutators.delete(node);
+        si.nodes.delete(node);
 
         // Remove subscription if there are no listeneres left on the value
-        if (si.mutators.size === 0) {
+        if (si.nodes.size === 0) {
           // There are no more nodes subscribing to this value, we can call
           // unsubscribe on it.
           if (!si.unsubscribe) {
@@ -81,28 +81,39 @@ export class DependencyManager {
     onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
   ) {
     // Get mutators from node's properties
-    const propSubscriptions = createPropertySubscriptions(props, onResolveProp);
+    const propSubscriptions = initializePropertySubscriptions(
+      props,
+      onResolveProp
+    );
     if (propSubscriptions.length === 0) {
       return;
     }
 
+    console.log(
+      "subscribeNode",
+      propSubscriptions.map((p) => p.key).join(", ")
+    );
+
     // Install all mutators for the node
-    propSubscriptions.forEach((si) => {
+    propSubscriptions.forEach((ps) => {
       // Do we already have a state for this value?
-      let subscriptionState = this.subscriptions.get(si.value);
+      let subscriptionState = this.subscriptions.get(ps.value);
       if (!subscriptionState) {
         // Create subscription for the value
         subscriptionState = {
-          mutators: new Map(),
+          nodes: new Map(),
           unsubscribe: null,
         };
         // Add single subscription to the new value
-        subscriptionState.unsubscribe = si.value.addListener((v) => {
-          subscriptionState!.mutators.forEach((ni) => ni.forEach((m) => m(v)));
+        subscriptionState.unsubscribe = ps.value.addListener((v) => {
+          subscriptionState!.nodes.forEach((mutators) =>
+            mutators.forEach((m) => m(v))
+          );
         });
-        this.subscriptions.set(si.value, subscriptionState);
+        // Save value/subscription
+        this.subscriptions.set(ps.value, subscriptionState);
       }
-      subscriptionState.mutators.set(
+      subscriptionState.nodes.set(
         node,
         propSubscriptions.map((m) => m.mutator)
       );
@@ -140,9 +151,7 @@ export class DependencyManager {
 
     // 2) Unregister nodes
     Array.from(this.subscriptions.values()).forEach((si) => {
-      Array.from(si.mutators.keys()).forEach((node) =>
-        this.unsubscribeNode(node)
-      );
+      Array.from(si.nodes.keys()).forEach((node) => this.unsubscribeNode(node));
     });
 
     // 3) Clear the rest of the subscriptions
@@ -150,13 +159,14 @@ export class DependencyManager {
   }
 }
 
-const createPropertySubscriptions = <P extends Record<string, unknown>>(
+const initializePropertySubscriptions = <P extends Record<string, unknown>>(
   props: AnimatedProps<P>,
   onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
 ) => {
   const nodePropSubscriptions: Array<{
     value: SkiaValue<unknown>;
     mutator: Mutator;
+    key: keyof P;
   }> = [];
 
   mapKeys(props).forEach((key) => {
@@ -165,6 +175,7 @@ const createPropertySubscriptions = <P extends Record<string, unknown>>(
     if (isValue(propvalue)) {
       // Subscribe to changes
       nodePropSubscriptions.push({
+        key,
         value: propvalue,
         mutator: (v) => onResolveProp(key, v as P[typeof key]),
       });
@@ -173,14 +184,20 @@ const createPropertySubscriptions = <P extends Record<string, unknown>>(
     } else if (isSelector(propvalue)) {
       // Subscribe to changes
       nodePropSubscriptions.push({
+        key,
         value: propvalue.value,
         mutator: (v) =>
           onResolveProp(key, propvalue.selector(v) as P[typeof key]),
       });
       // Set initial value
-      const v = propvalue.selector(propvalue.value.current) as P[typeof key];
-      onResolveProp(key, v as P[typeof key]);
+      onResolveProp(
+        key,
+        propvalue.selector(
+          propvalue.value.current
+        ) as P[typeof key] as P[typeof key]
+      );
     } else {
+      // Set initial value
       onResolveProp(key, propvalue as unknown as P[typeof key]);
     }
   });
