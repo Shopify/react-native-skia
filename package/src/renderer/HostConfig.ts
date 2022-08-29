@@ -104,7 +104,7 @@ const removeNode = (parent: Node, child: Node) => {
   child.depMgr.unsubscribeNode(child);
   // unsubscribe to all children as well
   for (const c of child.children) {
-    c.depMgr.unsubscribeNode(c);
+    removeNode(child, c);
   }
 };
 
