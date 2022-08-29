@@ -8,7 +8,7 @@ import type {
   SkRuntimeEffect,
   Skia,
 } from "../../../skia/types";
-import { DeclarationNode, NestedDeclarationNode, NodeType } from "../Node";
+import { DeclarationNode, DeclarationType, NestedDeclarationNode, NodeType } from "../Node";
 
 export interface ShaderNodeProps {
   runtimeEffect: SkRuntimeEffect;
@@ -20,7 +20,7 @@ export class ShaderNode extends NestedDeclarationNode<
   SkShader
 > {
   constructor(props: ShaderNodeProps) {
-    super(NodeType.Shader, props);
+    super(DeclarationType.Shader, NodeType.Shader, props);
   }
 
   get(Skia: Skia) {
@@ -49,7 +49,7 @@ export class ImageShaderNode extends DeclarationNode<
   SkShader
 > {
   constructor(props: ImageShaderNodeProps) {
-    super(NodeType.ImageShader, props);
+    super(DeclarationType.Shader, NodeType.ImageShader, props);
   }
 
   get() {

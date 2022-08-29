@@ -1,4 +1,4 @@
-import { DeclarationNode, NodeType } from "../Node";
+import { DeclarationNode, DeclarationType, NodeType } from "../Node";
 import type { BlurStyle, Skia, SkMaskFilter } from "../../../skia/types";
 
 export interface BlurMaskFilterNodeProps {
@@ -12,7 +12,7 @@ export class BlurMaskFilterNode extends DeclarationNode<
   SkMaskFilter
 > {
   constructor(props: BlurMaskFilterNodeProps) {
-    super(NodeType.BlurMaskFilter, props);
+    super(DeclarationType.MaskFilter, NodeType.BlurMaskFilter, props);
   }
 
   get(Skia: Skia) {

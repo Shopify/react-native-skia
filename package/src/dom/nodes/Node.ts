@@ -1,4 +1,12 @@
-import type { SkCanvas, Skia, SkPaint } from "../../skia/types";
+import type {
+  SkCanvas,
+  SkColorFilter,
+  Skia,
+  SkImageFilter,
+  SkPaint,
+  SkShader,
+} from "../../skia/types";
+
 export enum NodeType {
   Group,
 
@@ -41,6 +49,14 @@ export enum NodeType {
   Vertices,
 }
 
+export enum DeclarationType {
+  Shader,
+  ImageFilter,
+  ColorFilter,
+  PathEffect,
+  MaskFilter,
+}
+
 export interface DrawingContext {
   Skia: Skia;
   canvas: SkCanvas;
@@ -73,7 +89,11 @@ export abstract class DeclarationNode<
 > extends Node<P> {
   private invalidate: Invalidate | null = null;
 
-  constructor(type: NodeType, props: P) {
+  constructor(
+    public declarationType: DeclarationType,
+    type: NodeType,
+    props: P
+  ) {
     super(type, props);
   }
 
@@ -92,6 +112,18 @@ export abstract class DeclarationNode<
     this.props = props;
     this.invalidate();
   }
+
+  isImageFilter(): this is DeclarationNode<unknown, SkImageFilter> {
+    return this.declarationType === DeclarationType.ImageFilter;
+  }
+
+  isColorFilter(): this is DeclarationNode<unknown, SkColorFilter> {
+    return this.declarationType === DeclarationType.ColorFilter;
+  }
+
+  isShader(): this is DeclarationNode<unknown, SkShader> {
+    return this.declarationType === DeclarationType.Shader;
+  }
 }
 
 export abstract class NestedDeclarationNode<
@@ -101,8 +133,8 @@ export abstract class NestedDeclarationNode<
 > extends DeclarationNode<P, T, Nullable> {
   protected children: DeclarationNode<unknown, T>[] = [];
 
-  constructor(type: NodeType, props: P) {
-    super(type, props);
+  constructor(declarationType: DeclarationType, type: NodeType, props: P) {
+    super(declarationType, type, props);
   }
 
   addChild(child: DeclarationNode<unknown, T>) {

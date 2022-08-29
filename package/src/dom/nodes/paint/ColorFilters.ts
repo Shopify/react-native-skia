@@ -4,7 +4,7 @@ import type {
   SkColorFilter,
   Skia,
 } from "../../../skia/types";
-import { DeclarationNode, NodeType, NestedDeclarationNode } from "../Node";
+import { DeclarationNode, NodeType, NestedDeclarationNode, DeclarationType } from "../Node";
 
 export interface MatrixColorFilterNodeProps {
   colorMatrix: number[];
@@ -15,7 +15,7 @@ export class MatrixColorFilterNode extends DeclarationNode<
   SkColorFilter
 > {
   constructor(props: MatrixColorFilterNodeProps) {
-    super(NodeType.MatrixColorFilter, props);
+    super(DeclarationType.ColorFilter, NodeType.MatrixColorFilter, props);
   }
 
   get(Skia: Skia) {
@@ -34,7 +34,7 @@ export class BlendColorFilterNode extends DeclarationNode<
   SkColorFilter
 > {
   constructor(props: BlendColorFilterNodeProps) {
-    super(NodeType.BlendColorFilter, props);
+    super(DeclarationType.ColorFilter, NodeType.BlendColorFilter, props);
   }
 
   get(Skia: Skia) {
@@ -48,7 +48,7 @@ export class ComposeColorFilterNode extends NestedDeclarationNode<
   SkColorFilter
 > {
   constructor() {
-    super(NodeType.ComposeColorFilterNode, null);
+    super(DeclarationType.ColorFilter, NodeType.ComposeColorFilterNode, null);
   }
 
   get(Skia: Skia) {
@@ -64,7 +64,7 @@ export class LinearToSRGBGammaColorFilterNode extends DeclarationNode<
   SkColorFilter
 > {
   constructor() {
-    super(NodeType.LinearToSRGBGammaColorFilterNode, null);
+    super(DeclarationType.ColorFilter, NodeType.LinearToSRGBGammaColorFilterNode, null);
   }
 
   get(Skia: Skia) {
@@ -77,7 +77,7 @@ export class SRGBToLinearGammaColorFilterNode extends DeclarationNode<
   SkColorFilter
 > {
   constructor() {
-    super(NodeType.SRGBToLinearGammaColorFilterNode, null);
+    super(DeclarationType.ColorFilter, NodeType.SRGBToLinearGammaColorFilterNode, null);
   }
 
   get(Skia: Skia) {
@@ -87,7 +87,7 @@ export class SRGBToLinearGammaColorFilterNode extends DeclarationNode<
 
 export class LumaColorFilterNode extends DeclarationNode<null, SkColorFilter> {
   constructor() {
-    super(NodeType.LumaColorFilterColorFilterNode, null);
+    super(DeclarationType.ColorFilter, NodeType.LumaColorFilterColorFilterNode, null);
   }
 
   get(Skia: Skia) {
