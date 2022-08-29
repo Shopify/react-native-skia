@@ -20,6 +20,7 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
+import type { SkiaValue } from "../values";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
@@ -38,8 +39,7 @@ skiaReconciler.injectIntoDevTools({
 const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
   skiaReconciler.updateContainer(element, root, null, () => {
     hostDebug("updateContainer");
-
-    container.depMgr.subscribe();
+    container.depMgr.update();
   });
 };
 
@@ -60,9 +60,19 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     const [tick, setTick] = useState(0);
     const redraw = useCallback(() => setTick((t) => t + 1), []);
 
+    const registerValues = useCallback(
+      (values: Array<SkiaValue<unknown>>) => {
+        if (ref.current === null) {
+          throw new Error("Canvas ref is not set");
+        }
+        return ref.current.registerValues(values);
+      },
+      [ref]
+    );
+
     const container = useMemo(
-      () => new Container(new DependencyManager(ref), redraw),
-      [redraw, ref]
+      () => new Container(new DependencyManager(registerValues), redraw),
+      [redraw, registerValues]
     );
 
     const root = useMemo(
@@ -78,6 +88,8 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       );
     }, [children, root, redraw, container, canvasCtx]);
 
+    const paint = useMemo(() => Skia.Paint(), []);
+
     // Draw callback
     const onDraw = useDrawCallback(
       (canvas, info) => {
@@ -92,7 +104,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         ) {
           canvasCtx.size.current = { width, height };
         }
-        const paint = Skia.Paint();
+        paint.reset();
         const ctx = {
           width,
           height,
@@ -101,7 +113,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           paint,
           opacity: 1,
           ref,
-          center: Skia.Point(width / 2, height / 2),
+          center: { x: width / 2, y: height / 2 },
           Skia,
         };
         container.draw(ctx);
@@ -112,7 +124,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     useEffect(() => {
       return () => {
         skiaReconciler.updateContainer(null, root, null, () => {
-          container.depMgr.unsubscribe();
+          container.depMgr.remove();
         });
       };
     }, [container, root]);

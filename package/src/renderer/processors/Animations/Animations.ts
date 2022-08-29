@@ -1,5 +1,4 @@
 import type { SkiaSelector, SkiaValue } from "../../../values";
-import { mapKeys } from "../../typeddash";
 
 export const isValue = (value: unknown): value is SkiaValue<unknown> => {
   if (value === undefined || value === null) {
@@ -37,28 +36,16 @@ export const isSelector = <T, R>(
 
 export const isAnimated = <T>(props: AnimatedProps<T>) => {
   for (const value of Object.values(props)) {
-    if (isValue(value)) {
+    if (isValue(value) || isSelector(value)) {
       return true;
     }
   }
   return false;
 };
 
-export const materialize = <T>(props: AnimatedProps<T>) => {
-  const result = { ...props };
-  mapKeys(props).forEach((key) => {
-    const prop = props[key];
-    if (isValue(prop)) {
-      result[key] = (prop as SkiaValue<T[typeof key]>).current;
-    } else if (isSelector(prop)) {
-      result[key] = prop.selector(prop.value.current) as T[typeof key];
-    }
-  });
-  return result as T;
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnimatedProp<T, P = any> = T | SkiaValue<T> | SkiaSelector<T, P>;
+
 export type AnimatedProps<T> = {
   [K in keyof T]: AnimatedProp<T[K]>;
 };
