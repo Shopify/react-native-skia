@@ -35,14 +35,18 @@ When drawing something, you can pass Paint components as children to add strokes
 In the example below, the circle has one light blue fill and two stroke paints.
 
 ```tsx twoslash
-import {Canvas, Circle, Paint} from "@shopify/react-native-skia";
+import {Canvas, Circle, Paint, vec} from "@shopify/react-native-skia";
+
+const width = 256;
+const height = 256;
 
 export const PaintDemo = () => {
   const strokeWidth = 10;
-  const r = 128 - strokeWidth / 2;
+  const c = vec(width / 2, height / 2);
+  const r = (width - strokeWidth) / 2;
   return (
-    <Canvas style={{ flex: 1 }}>
-       <Circle cx={r + strokeWidth / 2} cy={r} r={r} color="red">
+    <Canvas style={{ width, height}}>
+       <Circle c={c} r={r} color="red">
         <Paint color="lightblue" />
         <Paint color="#adbce6" style="stroke" strokeWidth={strokeWidth} />
         <Paint color="#ade6d8" style="stroke" strokeWidth={strokeWidth / 2} />
@@ -52,7 +56,7 @@ export const PaintDemo = () => {
 };
 ```
 
-![Paint Fill and strokes](assets/strokes.png)
+<img alt="Paint Fill and strokes" src={require("/static/img/paint/stroke.png").default} width="256" height="256" />
 
 ## Inheritance
 
