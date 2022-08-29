@@ -77,14 +77,10 @@ export class DependencyManager {
    */
   subscribeNode<P extends Record<string, unknown>>(
     node: Node,
-    props: AnimatedProps<P>,
-    onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
+    props: AnimatedProps<P>
   ) {
     // Get mutators from node's properties
-    const propSubscriptions = initializePropertySubscriptions(
-      props,
-      onResolveProp
-    );
+    const propSubscriptions = initializePropertySubscriptions(node, props);
     if (propSubscriptions.length === 0) {
       return;
     }
@@ -157,8 +153,8 @@ export class DependencyManager {
 }
 
 const initializePropertySubscriptions = <P extends Record<string, unknown>>(
-  props: AnimatedProps<P>,
-  onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
+  node: Node,
+  props: AnimatedProps<P>
 ) => {
   const nodePropSubscriptions: Array<{
     value: SkiaValue<unknown>;
@@ -174,28 +170,29 @@ const initializePropertySubscriptions = <P extends Record<string, unknown>>(
       nodePropSubscriptions.push({
         key,
         value: propvalue,
-        mutator: (v) => onResolveProp(key, v as P[typeof key]),
+        mutator: (v) => ((node.resolvedProps as P)[key] = v as P[typeof key]),
       });
       // Set initial value
-      onResolveProp(key, (propvalue as SkiaValue<P[typeof key]>).current);
+      (node.resolvedProps as P)[key] = (
+        propvalue as SkiaValue<P[typeof key]>
+      ).current;
     } else if (isSelector(propvalue)) {
       // Subscribe to changes
       nodePropSubscriptions.push({
         key,
         value: propvalue.value,
         mutator: (v) =>
-          onResolveProp(key, propvalue.selector(v) as P[typeof key]),
+          ((node.resolvedProps as P)[key] = propvalue.selector(
+            v
+          ) as P[typeof key]),
       });
       // Set initial value
-      onResolveProp(
-        key,
-        propvalue.selector(
-          propvalue.value.current
-        ) as P[typeof key] as P[typeof key]
-      );
+      (node.resolvedProps as P)[key] = propvalue.selector(
+        propvalue.value.current
+      ) as P[typeof key] as P[typeof key];
     } else {
       // Set initial value
-      onResolveProp(key, propvalue as unknown as P[typeof key]);
+      (node.resolvedProps as P)[key] = propvalue as P[typeof key];
     }
   });
 

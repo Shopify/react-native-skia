@@ -29,18 +29,8 @@ export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
-  removeNode() {
-    this.depMgr.unsubscribeNode(this);
-  }
-
   updatePropSubscriptions(props: AnimatedProps<P>) {
-    this.depMgr.subscribeNode(
-      this,
-      props,
-      <K extends keyof P>(key: K, value: P[K]) => {
-        this.resolvedProps[key] = value;
-      }
-    );
+    this.depMgr.subscribeNode(this, props);
   }
 
   set props(props: AnimatedProps<P>) {

@@ -103,9 +103,9 @@ const removeNode = (parent: Node, child: Node) => {
   parent.children.splice(index, 1);
   // unsubscribe to all children as well
   for (const c of child.children) {
-    c.removeNode();
+    c.depMgr.unsubscribeNode(c);
   }
-  child.removeNode();
+  child.depMgr.unsubscribeNode(child);
 };
 
 const insertBefore = (parent: Node, child: Node, before: Node) => {
