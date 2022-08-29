@@ -35,7 +35,6 @@ export class DependencyManager {
     const subscriptions = Array.from(this.subscriptions.values()).filter((p) =>
       p.mutators.has(node)
     );
-    console.log("@@@", subscriptions.length);
 
     if (subscriptions) {
       subscriptions.forEach((si) => {
@@ -82,16 +81,17 @@ export class DependencyManager {
     onResolveProp: <K extends keyof P>(key: K, value: P[K]) => void
   ) {
     // Get mutators from node's properties
-    const mutators = createPropertySubscriptions(props, onResolveProp);
-    if (mutators.length === 0) {
+    const propSubscriptions = createPropertySubscriptions(props, onResolveProp);
+    if (propSubscriptions.length === 0) {
       return;
     }
-    // Install all subscriptions
-    mutators.forEach((si) => {
-      // Do we already have this one as a unique value?
+
+    // Install all mutators for the node
+    propSubscriptions.forEach((si) => {
+      // Do we already have a state for this value?
       let subscriptionState = this.subscriptions.get(si.value);
       if (!subscriptionState) {
-        // Subscribe to the value
+        // Create subscription for the value
         subscriptionState = {
           mutators: new Map(),
           unsubscribe: null,
@@ -104,7 +104,7 @@ export class DependencyManager {
       }
       subscriptionState.mutators.set(
         node,
-        mutators.map((m) => m.mutator)
+        propSubscriptions.map((m) => m.mutator)
       );
     });
   }
