@@ -159,7 +159,6 @@ const initializePropertySubscriptions = <P,>(
   const nodePropSubscriptions: Array<{
     value: SkiaValue<unknown>;
     mutator: Mutator;
-    key: keyof P;
   }> = [];
 
   mapKeys(props).forEach((key) => {
@@ -168,7 +167,6 @@ const initializePropertySubscriptions = <P,>(
     if (isValue(propvalue)) {
       // Subscribe to changes
       nodePropSubscriptions.push({
-        key,
         value: propvalue,
         mutator: (v) => ((node.resolvedProps as P)[key] = v as P[typeof key]),
       });
@@ -179,7 +177,6 @@ const initializePropertySubscriptions = <P,>(
     } else if (isSelector(propvalue)) {
       // Subscribe to changes
       nodePropSubscriptions.push({
-        key,
         value: propvalue.value,
         mutator: (v) =>
           ((node.resolvedProps as P)[key] = propvalue.selector(
