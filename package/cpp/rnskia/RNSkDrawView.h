@@ -48,15 +48,15 @@ public:
    Sets custom properties. Custom properties are properties that are set directly from Javascript without having
    to go through the async bridge.
    */
-  void setCustomProps(std::unordered_map<std::string, JsiValueWrapper> &props);
+  void setJsiProperties(std::unordered_map<std::string, JsiValueWrapper> &props);
   
   /**
    Calls a custom action.
    */
-  jsi::Value callCustomAction(jsi::Runtime& runtime,
-                              const std::string& name,
-                              const jsi::Value *arguments,
-                              size_t count);
+  jsi::Value callJsiMethod(jsi::Runtime& runtime,
+                           const std::string& name,
+                           const jsi::Value *arguments,
+                           size_t count);
 
   /**
    * Repaints the Skia view using the underlying context and the drawcallback.

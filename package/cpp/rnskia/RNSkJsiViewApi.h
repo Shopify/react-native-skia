@@ -30,23 +30,23 @@ public:
    be stored in a map alongside the id of the view and propagated to the view when
    needed.
    */
-  JSI_HOST_FUNCTION(setCustomProperty) {
+  JSI_HOST_FUNCTION(setJsiProperty) {
     if (count != 3) {
       _platformContext->raiseError(
-          std::string("setCustomProperty: Expected 3 arguments, got " +
+          std::string("setJsiProperty: Expected 3 arguments, got " +
                       std::to_string(count) + "."));
       return jsi::Value::undefined();
     }
 
     if (!arguments[0].isNumber()) {
       _platformContext->raiseError(
-          "setCustomProperty: First argument must be a number");
+          "setJsiProperty: First argument must be a number");
       return jsi::Value::undefined();
     }
     
     if (!arguments[1].isString()) {
       _platformContext->raiseError(
-          "setCustomProperty: Second argument must be the name of the property to set.");
+          "setJsiProperty: Second argument must be the name of the property to set.");
       
       return jsi::Value::undefined();
     }
@@ -58,7 +58,7 @@ public:
     if(info->view != nullptr) {
       // Update view!
       info->view->setNativeId(nativeId);
-      info->view->setCustomProps(info->props);
+      info->view->setJsiProperties(info->props);
     }
     
     return jsi::Value::undefined();
@@ -67,7 +67,7 @@ public:
   /**
    Calls a custom command / method on a view by the view id.
    */
-  JSI_HOST_FUNCTION(callCustomAction) {
+  JSI_HOST_FUNCTION(callJsiMethod) {
     if (count < 2) {
       _platformContext->raiseError(
           std::string("callCustomCommand: Expected at least 2 arguments, got " +
@@ -106,7 +106,7 @@ public:
     // Get arguments
     size_t paramsCount = count - 2;
     const jsi::Value* params = paramsCount > 0 ? &arguments[2] : nullptr;
-    return info->view->callCustomAction(runtime, action, params, paramsCount);
+    return info->view->callJsiMethod(runtime, action, params, paramsCount);
   }
   
   JSI_HOST_FUNCTION(registerValuesInView) {
@@ -155,8 +155,8 @@ public:
       });
     }
       
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setCustomProperty),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, callCustomAction),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView))
 
   /**
@@ -167,7 +167,7 @@ public:
       : JsiHostObject(), _platformContext(platformContext) {}
 
   /**
-   * Invalidates the Skai View Api object
+   * Invalidates the Skia View Api object
    */
   void invalidate() {
     unregisterAll();
@@ -194,7 +194,7 @@ public:
     auto info = getEnsuredViewInfo(nativeId);
     info->view = view;
     info->view->setNativeId(nativeId);
-    info->view->setCustomProps(info->props);
+    info->view->setJsiProperties(info->props);
   }
 
   /**
@@ -225,7 +225,7 @@ public:
     if (view != nullptr) {
       info->view = view;
       info->view->setNativeId(nativeId);
-      info->view->setCustomProps(info->props);      
+      info->view->setJsiProperties(info->props);
     } else if(view == nullptr) {
       info->view = view;
     }

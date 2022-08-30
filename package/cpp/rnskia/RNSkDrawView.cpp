@@ -49,7 +49,7 @@ RNSkDrawView::~RNSkDrawView() {
   endDrawingLoop();
 }
 
-void RNSkDrawView::setCustomProps(std::unordered_map<std::string, JsiValueWrapper> &props) {
+void RNSkDrawView::setJsiProperties(std::unordered_map<std::string, JsiValueWrapper> &props) {
   for(auto& prop: props) {
     if(prop.first == "drawCallback") {
       if(prop.second.isUndefinedOrNull()) {
@@ -75,10 +75,10 @@ void RNSkDrawView::setCustomProps(std::unordered_map<std::string, JsiValueWrappe
   }
 }
 
-jsi::Value RNSkDrawView::callCustomAction(jsi::Runtime& runtime,
-                                          const std::string& name,
-                                          const jsi::Value *arguments,
-                                          size_t count) {
+jsi::Value RNSkDrawView::callJsiMethod(jsi::Runtime& runtime,
+                                       const std::string& name,
+                                       const jsi::Value *arguments,
+                                       size_t count) {
   
   if (name == "invalidate") {
     // Post a redraw request

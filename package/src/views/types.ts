@@ -58,8 +58,8 @@ export interface ValueListener {
 }
 
 export interface ISkiaViewApi {
-  setCustomProperty: <T>(nativeId: number, name: string, value: T) => void;
-  callCustomAction: <T extends Array<unknown>>(
+  setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
+  callJsiMethod: <T extends Array<unknown>>(
     nativeId: number,
     name: string,
     ...args: T

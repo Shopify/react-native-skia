@@ -20,7 +20,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
     const { onDraw } = props;
     if (onDraw) {
       assertSkiaViewApi();
-      SkiaViewApi.setCustomProperty(this._nativeId, "drawCallback", onDraw);
+      SkiaViewApi.setJsiProperty(this._nativeId, "drawCallback", onDraw);
     }
   }
 
@@ -34,7 +34,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
     const { onDraw } = this.props;
     if (onDraw !== prevProps.onDraw) {
       assertSkiaViewApi();
-      SkiaViewApi.setCustomProperty(this._nativeId, "drawCallback", onDraw);
+      SkiaViewApi.setJsiProperty(this._nativeId, "drawCallback", onDraw);
     }
   }
 
@@ -45,7 +45,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
    */
   public makeImageSnapshot(rect?: SkRect) {
     assertSkiaViewApi();
-    return SkiaViewApi.callCustomAction(
+    return SkiaViewApi.callJsiMethod(
       this._nativeId,
       "makeImageSnapshot",
       rect
@@ -57,7 +57,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
    */
   public redraw() {
     assertSkiaViewApi();
-    SkiaViewApi.callCustomAction(this._nativeId, "invalidate");
+    SkiaViewApi.callJsiMethod(this._nativeId, "invalidate");
   }
 
   /**
@@ -87,8 +87,8 @@ export class SkiaView extends React.Component<SkiaViewProps> {
 const assertSkiaViewApi = () => {
   if (
     SkiaViewApi === null ||
-    SkiaViewApi.setCustomProperty === null ||
-    SkiaViewApi.callCustomAction === null ||
+    SkiaViewApi.setJsiProperty === null ||
+    SkiaViewApi.callJsiMethod === null ||
     SkiaViewApi.registerValuesInView === null
   ) {
     throw Error("Skia View Api was not found.");
