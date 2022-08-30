@@ -13,7 +13,7 @@ import type { SkImageFilter } from "../../skia/types/ImageFilter/ImageFilter";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 
 import type { DeclarationNode, DrawingContext } from "./Node";
-import { RenderNode, NodeType } from "./Node";
+import { NodeType, RenderNode } from "./Node";
 import type { PaintNodeProps } from "./paint/PaintNode";
 import { PaintNode } from "./paint/PaintNode";
 

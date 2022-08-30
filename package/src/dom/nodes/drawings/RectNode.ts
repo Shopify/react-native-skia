@@ -1,17 +1,17 @@
-import type { DrawingContext } from "../Node";
-import { NodeType, RenderNode } from "../Node";
+import type { DrawingContext, DrawingNodeProps } from "../Node";
+import { NodeType, DrawingNode } from "../Node";
 import type { SkRect } from "../../../skia/types/Rect";
 
-export interface RectNodeProps {
+export interface RectNodeProps extends DrawingNodeProps {
   rect: SkRect;
 }
 
-export class RectNode extends RenderNode<RectNodeProps> {
+export class RectNode extends DrawingNode<RectNodeProps> {
   constructor(props: RectNodeProps) {
     super(NodeType.Rect, props);
   }
 
-  render({ canvas, paint }: DrawingContext) {
+  draw({ canvas, paint }: DrawingContext) {
     const { rect } = this.props;
     canvas.drawRect(rect, paint);
   }

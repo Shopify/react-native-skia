@@ -87,6 +87,28 @@ export abstract class RenderNode<P> extends Node<P> {
   abstract render(ctx: DrawingContext): void;
 }
 
+export interface DrawingNodeProps {
+  paint?: SkPaint;
+}
+
+export abstract class DrawingNode<
+  P extends DrawingNodeProps = DrawingNodeProps
+> extends RenderNode<P> {
+  constructor(type: NodeType, props: P) {
+    super(type, props);
+  }
+
+  abstract draw(ctx: DrawingContext): void;
+
+  render(ctx: DrawingContext) {
+    if (this.props.paint) {
+      this.draw({ ...ctx, paint: this.props.paint });
+    } else {
+      this.draw(ctx);
+    }
+  }
+}
+
 export type Invalidate = () => void;
 
 export abstract class DeclarationNode<

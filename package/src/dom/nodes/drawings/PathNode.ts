@@ -1,17 +1,17 @@
 import type { SkPath } from "../../../skia/types";
-import type { DrawingContext } from "../Node";
-import { NodeType, RenderNode } from "../Node";
+import type { DrawingContext, DrawingNodeProps } from "../Node";
+import { NodeType, DrawingNode } from "../Node";
 
-export interface PathNodeProps {
+export interface PathNodeProps extends DrawingNodeProps {
   path: SkPath;
 }
 
-export class PathNode extends RenderNode<PathNodeProps> {
+export class PathNode extends DrawingNode<PathNodeProps> {
   constructor(props: PathNodeProps) {
     super(NodeType.Path, props);
   }
 
-  render({ canvas, paint }: DrawingContext) {
+  draw({ canvas, paint }: DrawingContext) {
     const { path } = this.props;
     canvas.drawPath(path, paint);
   }

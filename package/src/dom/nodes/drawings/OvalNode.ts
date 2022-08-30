@@ -1,17 +1,17 @@
-import type { DrawingContext } from "../Node";
-import { NodeType, RenderNode } from "../Node";
+import type { DrawingContext, DrawingNodeProps } from "../Node";
+import { NodeType, DrawingNode } from "../Node";
 import type { SkRect } from "../../../skia/types";
 
-export interface OvalNodeProps {
+export interface OvalNodeProps extends DrawingNodeProps {
   rect: SkRect;
 }
 
-export class OvalNode extends RenderNode<OvalNodeProps> {
+export class OvalNode extends DrawingNode<OvalNodeProps> {
   constructor(props: OvalNodeProps) {
     super(NodeType.Oval, props);
   }
 
-  render({ canvas, paint }: DrawingContext) {
+  draw({ canvas, paint }: DrawingContext) {
     const { rect } = this.props;
     canvas.drawOval(rect, paint);
   }

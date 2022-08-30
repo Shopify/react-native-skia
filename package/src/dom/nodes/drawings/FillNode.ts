@@ -1,12 +1,12 @@
-import type { DrawingContext } from "../Node";
-import { NodeType, RenderNode } from "../Node";
+import type { DrawingContext, DrawingNodeProps } from "../Node";
+import { NodeType, DrawingNode } from "../Node";
 
-export class FillNode extends RenderNode<null> {
-  constructor() {
-    super(NodeType.Fill, null);
+export class FillNode extends DrawingNode<DrawingNodeProps> {
+  constructor(props: DrawingNodeProps = {}) {
+    super(NodeType.Fill, props);
   }
 
-  render({ canvas, paint }: DrawingContext) {
+  draw({ canvas, paint }: DrawingContext) {
     canvas.drawPaint(paint);
   }
 }
