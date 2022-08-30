@@ -32,17 +32,17 @@ describe("Compose", () => {
       -0.703, 0, 0, 0, 0, 0, 1, 0,
     ];
     const cf = new MatrixColorFilterNode({ colorMatrix });
-    root.addColorFilter(cf);
 
     const blur = new BlurImageFilterNode({
       sigmaX: 10,
       sigmaY: 10,
       mode: TileMode.Decal,
     });
+    blur.addChild(cf);
     root.addImageFilter(blur);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
-    processResult(surface, docPath("image-filters/composing.png"), true);
+    processResult(surface, docPath("image-filters/composing.png"));
   });
 });
