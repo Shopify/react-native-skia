@@ -71,11 +71,17 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
     const { invertClip, matrix, clipRect, clipRRect, clipPath } = this.props;
     const { canvas } = parentCtx;
 
+    const opacity =
+      this.props.paint && this.props.paint.opacity
+        ? parentCtx.opacity * this.props.paint.opacity
+        : parentCtx.opacity;
+
     const paint = this.paint
-      ? this.paint.concat(parentCtx.Skia, parentCtx.paint, parentCtx.opacity)
+      ? this.paint.concat(parentCtx.Skia, parentCtx.paint, opacity)
       : parentCtx.paint;
 
-    const ctx = parentCtx.paint === paint ? parentCtx : { ...parentCtx, paint };
+    // TODO: can we only recreate a new context here if needed?
+    const ctx = { ...parentCtx, opacity, paint };
     const hasTransform = matrix !== undefined;
     const hasClip = clipRect !== undefined;
     const shouldSave = hasTransform || hasClip;
