@@ -268,7 +268,7 @@ const Clip = () => {
 };
 ```
 
-![Rasterize](assets/group/rasterize.png)
+<img alt="Rasterize" src={require("/static/img/group/rasterize.png").default} width="256" height="256" />
 
 
 ## Fitbox
