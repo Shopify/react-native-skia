@@ -1,6 +1,9 @@
 import type { BlendMode, SkVertices } from "../../../skia/types";
-import type { DrawingContext, DrawingNodeProps } from "../Node";
-import { NodeType, DrawingNode } from "../Node";
+import type { DrawingContext } from "../Node";
+import { NodeType } from "../Node";
+
+import type { DrawingNodeProps } from "./DrawingNode";
+import { DrawingNode } from "./DrawingNode";
 
 export interface VerticesNodeProps extends DrawingNodeProps {
   vertices: SkVertices;

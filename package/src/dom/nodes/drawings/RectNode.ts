@@ -1,6 +1,9 @@
-import type { DrawingContext, DrawingNodeProps } from "../Node";
-import { NodeType, DrawingNode } from "../Node";
+import type { DrawingContext } from "../Node";
+import { NodeType } from "../Node";
 import type { SkRect } from "../../../skia/types/Rect";
+
+import type { DrawingNodeProps } from "./DrawingNode";
+import { DrawingNode } from "./DrawingNode";
 
 export interface RectNodeProps extends DrawingNodeProps {
   rect: SkRect;

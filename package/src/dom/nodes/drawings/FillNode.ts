@@ -1,5 +1,8 @@
-import type { DrawingContext, DrawingNodeProps } from "../Node";
-import { NodeType, DrawingNode } from "../Node";
+import type { DrawingContext } from "../Node";
+import { NodeType } from "../Node";
+
+import type { DrawingNodeProps } from "./DrawingNode";
+import { DrawingNode } from "./DrawingNode";
 
 export class FillNode extends DrawingNode<DrawingNodeProps> {
   constructor(props: DrawingNodeProps = {}) {
