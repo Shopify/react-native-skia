@@ -268,7 +268,7 @@ const Clip = () => {
 };
 ```
 
-![Rasterize](assets/group/rasterize.png)
+<img alt="Rasterize" src={require("/static/img/group/rasterize.png").default} width="256" height="256" />
 
 
 ## Fitbox
@@ -301,12 +301,18 @@ const Hello = () => {
   return (
     <Canvas style={{ width: 256, height: 256 }}>
       <FitBox src={rect(0, 0, 664, 308)} dst={rect(0, 0, 256, 256)}>
-        <Path path="M 170.1 215.5 C 165 222.3..." />
+        <Path
+          path="M 170.1 215.5 C 165 222.3..."
+          strokeCap="round"
+          strokeJoin="round"
+          style="stroke"
+          strokeWidth={30}
+        />
       </FitBox>
     </Canvas>
   );
 }
 ```
 
-![Hello Skia](assets/fitbox/hello.png)
+<img src={require("/static/img/group/scale-path.png").default} width="256" height="256" />
 
