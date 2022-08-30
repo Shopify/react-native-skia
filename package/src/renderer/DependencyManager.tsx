@@ -1,28 +1,25 @@
 import type { SkiaValue } from "../values";
 
-import type { Node } from "./nodes";
 import type { AnimatedProps } from "./processors";
 import { isSelector, isValue } from "./processors";
 import { mapKeys } from "./typeddash";
 
 type Unsubscribe = () => void;
 type Mutator = (value: unknown) => void;
+type Props = unknown;
 
 type SubscriptionState = {
-  nodes: Map<Node, Mutator[]>;
+  nodes: Map<Props, Mutator[]>;
   unsubscribe: null | Unsubscribe;
 };
 
 export class DependencyManager {
-  registerValues: (values: Array<SkiaValue<unknown>>) => () => void;
   subscriptions: Map<SkiaValue<unknown>, SubscriptionState> = new Map();
   unregisterDependantValues: null | Unsubscribe = null;
 
   constructor(
-    registerValues: (values: Array<SkiaValue<unknown>>) => () => void
-  ) {
-    this.registerValues = registerValues;
-  }
+    public registerValues: (values: Array<SkiaValue<unknown>>) => () => void
+  ) {}
 
   /**
    * Call to unsubscribe all value listeners from the given node based
@@ -31,7 +28,7 @@ export class DependencyManager {
    * properties have changed.
    * @param node Node to unsubscribe value listeners from
    */
-  unsubscribeNode(node: Node) {
+  unsubscribeNode(node: Props) {
     const subscriptions = Array.from(this.subscriptions.values()).filter((p) =>
       p.nodes.has(node)
     );
@@ -75,12 +72,9 @@ export class DependencyManager {
    * @param props Node's properties
    * @param onResolveProp Callback when a property value changes
    */
-  subscribeNode<P extends Record<string, unknown>>(
-    node: Node,
-    props: AnimatedProps<P>
-  ) {
+  subscribeNode<P>(props: AnimatedProps<P>) {
     // Get mutators from node's properties
-    const propSubscriptions = initializePropertySubscriptions(node, props);
+    const propSubscriptions = initializePropertySubscriptions(props);
     if (propSubscriptions.length === 0) {
       return;
     }
@@ -105,7 +99,7 @@ export class DependencyManager {
       }
       // subscription mutators
       subscriptionState.nodes.set(
-        node,
+        props,
         propSubscriptions
           .filter((m) => m.value === ps.value)
           .map((m) => m.mutator)
@@ -152,10 +146,7 @@ export class DependencyManager {
   }
 }
 
-const initializePropertySubscriptions = <P,>(
-  node: Node<P>,
-  props: AnimatedProps<P>
-) => {
+const initializePropertySubscriptions = <P,>(props: AnimatedProps<P>) => {
   const nodePropSubscriptions: Array<{
     value: SkiaValue<unknown>;
     mutator: Mutator;
@@ -168,24 +159,20 @@ const initializePropertySubscriptions = <P,>(
       // Subscribe to changes
       nodePropSubscriptions.push({
         value: propvalue,
-        mutator: (v) => (node.resolvedProps[key] = v as P[typeof key]),
+        mutator: (v) => (props[key] = v as P[typeof key]),
       });
       // Set initial value
-      node.resolvedProps[key] = (propvalue as SkiaValue<P[typeof key]>).current;
+      props[key] = (propvalue as SkiaValue<P[typeof key]>).current;
     } else if (isSelector(propvalue)) {
       // Subscribe to changes
       nodePropSubscriptions.push({
         value: propvalue.value,
-        mutator: (v) =>
-          (node.resolvedProps[key] = propvalue.selector(v) as P[typeof key]),
+        mutator: (v) => (props[key] = propvalue.selector(v) as P[typeof key]),
       });
       // Set initial value
-      node.resolvedProps[key] = propvalue.selector(
-        propvalue.value.current
-      ) as P[typeof key];
+      props[key] = propvalue.selector(propvalue.value.current) as P[typeof key];
     } else {
-      // Set initial value
-      node.resolvedProps[key] = propvalue as P[typeof key];
+      props[key] = propvalue as P[typeof key];
     }
   });
 

@@ -21,18 +21,20 @@ export abstract class Node<P = unknown> {
 
   constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
     this.depMgr = depMgr;
-    this.updatePropSubscriptions(props);
+    this.updateSubscriptionNode(props);
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
-  updatePropSubscriptions(props: AnimatedProps<P>) {
-    this.depMgr.subscribeNode(this, props);
+  private updateSubscriptionNode(props: AnimatedProps<P>) {
+    // This cast is ok because we understand that the dependency manager will setup the initial props
+    this.resolvedProps = props as P;
+    this.depMgr.subscribeNode(props);
   }
 
   set props(props: AnimatedProps<P>) {
-    this.depMgr.unsubscribeNode(this);
-    this.updatePropSubscriptions(props);
+    this.depMgr.unsubscribeNode(this.props);
+    this.updateSubscriptionNode(props);
   }
 
   get props(): P {
