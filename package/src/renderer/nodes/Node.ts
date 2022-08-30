@@ -29,11 +29,11 @@ export abstract class Node<P = unknown> {
   private updateSubscriptionNode(props: AnimatedProps<P>) {
     // This cast is ok because we understand that the dependency manager will setup the initial props
     this.resolvedProps = props as P;
-    this.depMgr.subscribeNode(props);
+    this.depMgr.subscribeProps(props);
   }
 
   set props(props: AnimatedProps<P>) {
-    this.depMgr.unsubscribeNode(this.props);
+    this.depMgr.unsubscribeProps(this.props);
     this.updateSubscriptionNode(props);
   }
 

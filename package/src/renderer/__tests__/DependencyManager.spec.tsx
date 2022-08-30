@@ -31,7 +31,7 @@ describe("DependencyManager", () => {
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
     expect(node.props.a).toBe(100);
-    mgr.unsubscribeNode(node);
+    mgr.unsubscribeProps(node.props);
     value.current = 200;
     expect(node.props.a).toBe(100);
   });
@@ -53,7 +53,7 @@ describe("DependencyManager", () => {
     expect(nodeA.props.a).toBe(100);
     const nodeB = new TestNode(mgr, { b: value });
     expect(nodeB.props.b).toBe(100);
-    mgr.unsubscribeNode(nodeA);
+    mgr.unsubscribeProps(nodeA.props);
     value.current = 200;
     expect(nodeA.props.a).toBe(100);
     expect(nodeB.props.b).toBe(200);
@@ -75,7 +75,7 @@ describe("DependencyManager", () => {
     const node = new TestNode(mgr, { a: value });
     expect(mgr.subscriptions.has(value)).toBe(true);
     expect(mgr.subscriptions.get(value)!.nodes.has(node)).toBe(true);
-    mgr.unsubscribeNode(node);
+    mgr.unsubscribeProps(node.props);
     expect(mgr.subscriptions.has(value)).toBe(false);
   });
   it("should remove listeners for removed node only", () => {
@@ -84,11 +84,11 @@ describe("DependencyManager", () => {
     const node1 = new TestNode(mgr, { a: value });
     const node2 = new TestNode(mgr, { a: value });
     expect(mgr.subscriptions.has(value)).toBe(true);
-    mgr.unsubscribeNode(node1);
+    mgr.unsubscribeProps(node1.props);
     expect(mgr.subscriptions.has(value)).toBe(true);
     expect(mgr.subscriptions.get(value)?.nodes.has(node1)).toBe(false);
     expect(mgr.subscriptions.get(value)?.nodes.has(node2)).toBe(true);
-    mgr.unsubscribeNode(node2);
+    mgr.unsubscribeProps(node2.props);
     expect(mgr.subscriptions.has(value)).toBe(false);
   });
   it("should remove value when last node is removed", () => {
@@ -96,7 +96,7 @@ describe("DependencyManager", () => {
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
     expect(mgr.subscriptions.has(value)).toBe(true);
-    mgr.unsubscribeNode(node);
+    mgr.unsubscribeProps(node.props);
     expect(mgr.subscriptions.has(value)).toBe(false);
   });
   it("should resolve a value property to the value's current", () => {
@@ -148,7 +148,7 @@ describe("DependencyManager", () => {
     const mgr = new DependencyManager(mockRegister);
     const node = new TestNode(mgr, { a: value });
     expect(node.props.a).toBe(100);
-    mgr.unsubscribeNode(node);
+    mgr.unsubscribeProps(node.props);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     expect(value._listeners.length).toBe(0);

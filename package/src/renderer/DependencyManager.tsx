@@ -28,7 +28,7 @@ export class DependencyManager {
    * properties have changed.
    * @param node Node to unsubscribe value listeners from
    */
-  unsubscribeNode(node: Props) {
+  unsubscribeProps(node: Props) {
     const subscriptions = Array.from(this.subscriptions.values()).filter((p) =>
       p.nodes.has(node)
     );
@@ -72,7 +72,7 @@ export class DependencyManager {
    * @param props Node's properties
    * @param onResolveProp Callback when a property value changes
    */
-  subscribeNode<P>(props: AnimatedProps<P>) {
+  subscribeProps<P>(props: AnimatedProps<P>) {
     // Get mutators from node's properties
     const propSubscriptions = initializePropertySubscriptions(props);
     if (propSubscriptions.length === 0) {
@@ -138,7 +138,9 @@ export class DependencyManager {
 
     // 2) Unregister nodes
     Array.from(this.subscriptions.values()).forEach((si) => {
-      Array.from(si.nodes.keys()).forEach((node) => this.unsubscribeNode(node));
+      Array.from(si.nodes.keys()).forEach((node) =>
+        this.unsubscribeProps(node)
+      );
     });
 
     // 3) Clear the rest of the subscriptions
