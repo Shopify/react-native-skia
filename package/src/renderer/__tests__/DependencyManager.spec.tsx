@@ -74,7 +74,7 @@ describe("DependencyManager", () => {
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
     expect(mgr.subscriptions.has(value)).toBe(true);
-    expect(mgr.subscriptions.get(value)!.nodes.has(node)).toBe(true);
+    expect(mgr.subscriptions.get(value)!.nodes.has(node.props)).toBe(true);
     mgr.unsubscribeProps(node.props);
     expect(mgr.subscriptions.has(value)).toBe(false);
   });
@@ -86,8 +86,8 @@ describe("DependencyManager", () => {
     expect(mgr.subscriptions.has(value)).toBe(true);
     mgr.unsubscribeProps(node1.props);
     expect(mgr.subscriptions.has(value)).toBe(true);
-    expect(mgr.subscriptions.get(value)?.nodes.has(node1)).toBe(false);
-    expect(mgr.subscriptions.get(value)?.nodes.has(node2)).toBe(true);
+    expect(mgr.subscriptions.get(value)?.nodes.has(node1.props)).toBe(false);
+    expect(mgr.subscriptions.get(value)?.nodes.has(node2.props)).toBe(true);
     mgr.unsubscribeProps(node2.props);
     expect(mgr.subscriptions.has(value)).toBe(false);
   });
