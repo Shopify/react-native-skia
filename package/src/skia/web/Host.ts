@@ -21,7 +21,7 @@ export abstract class BaseHostObject<T, N extends string>
   implements SkJSIInstance<N>
 {
   readonly __typename__: N;
-  readonly ref: T;
+  ref: T;
 
   constructor(CanvasKit: CanvasKit, ref: T, typename: N) {
     super(CanvasKit);
