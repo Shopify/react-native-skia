@@ -10,13 +10,10 @@ export enum NodeType {
 
 type DeclarationResult = SkJSIInstance<string> | null;
 
-export type NodeProps<P extends Partial<Record<keyof P, unknown>>> = Partial<
-  Record<keyof P, unknown>
->;
-
-export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
+export abstract class Node<P = unknown> {
   readonly children: Node[] = [];
-  resolvedProps: Partial<P> = {};
+  // This cast is ok because we understand that the dependency manager will setup the initial props
+  resolvedProps: P = {} as P;
   memoizable = false;
   memoized: DeclarationResult | null = null;
   parent?: Node;
@@ -24,32 +21,22 @@ export abstract class Node<P extends NodeProps<P> = Record<string, unknown>> {
 
   constructor(depMgr: DependencyManager, props: AnimatedProps<P>) {
     this.depMgr = depMgr;
-    this.subscribeToPropChanges(props);
+    this.updatePropSubscriptions(props);
   }
 
   abstract draw(ctx: DrawingContext): void | DeclarationResult;
 
-  removeNode() {
-    this.depMgr.unsubscribeNode(this);
-  }
-
-  subscribeToPropChanges(props: AnimatedProps<P>) {
-    this.depMgr.subscribeNode(
-      this,
-      props,
-      <K extends keyof P>(key: K, value: P[K]) => {
-        this.resolvedProps[key] = value;
-      }
-    );
+  updatePropSubscriptions(props: AnimatedProps<P>) {
+    this.depMgr.subscribeNode(this, props);
   }
 
   set props(props: AnimatedProps<P>) {
     this.depMgr.unsubscribeNode(this);
-    this.subscribeToPropChanges(props);
+    this.updatePropSubscriptions(props);
   }
 
-  get props() {
-    return this.resolvedProps as unknown as P;
+  get props(): P {
+    return this.resolvedProps;
   }
 
   visit(ctx: DrawingContext, children?: Node[]) {
