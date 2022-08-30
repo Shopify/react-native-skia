@@ -10,6 +10,7 @@ import { ClipOp } from "../../skia/types";
 import type { SkMaskFilter } from "../../skia/types/MaskFilter";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 import type { SkImageFilter } from "../../skia/types/ImageFilter/ImageFilter";
+import { exhaustiveCheck } from "../../renderer/typeddash";
 
 import type { DeclarationNode, DrawingContext } from "./Node";
 import { RenderNode, NodeType } from "./Node";
@@ -40,39 +41,30 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
     this.children.push(child);
   }
 
-  addShader(shader: DeclarationNode<unknown, SkShader>) {
+  addEffect(
+    effect:
+      | DeclarationNode<unknown, SkShader>
+      | DeclarationNode<unknown, SkImageFilter>
+      | DeclarationNode<unknown, SkColorFilter>
+      | DeclarationNode<unknown, SkMaskFilter>
+      | DeclarationNode<unknown, SkPathEffect>
+  ) {
     if (!this.paint) {
       this.paint = new PaintNode();
     }
-    this.paint.addShader(shader);
-  }
-
-  addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>) {
-    if (!this.paint) {
-      this.paint = new PaintNode();
+    if (effect.isColorFilter()) {
+      this.paint.addColorFilter(effect);
+    } else if (effect.isMaskFilter()) {
+      this.paint.addMaskFilter(effect);
+    } else if (effect.isShader()) {
+      this.paint.addShader(effect);
+    } else if (effect.isImageFilter()) {
+      this.paint.addImageFilter(effect);
+    } else if (effect.isPathEffect()) {
+      this.paint.addPathEffect(effect);
+    } else {
+      exhaustiveCheck(effect);
     }
-    this.paint.addImageFilter(imageFilter);
-  }
-
-  addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>) {
-    if (!this.paint) {
-      this.paint = new PaintNode();
-    }
-    this.paint.addColorFilter(colorFilter);
-  }
-
-  addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>) {
-    if (!this.paint) {
-      this.paint = new PaintNode();
-    }
-    this.paint.addMaskFilter(maskFilter);
-  }
-
-  addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>) {
-    if (!this.paint) {
-      this.paint = new PaintNode();
-    }
-    this.paint.addPathEffect(pathEffect);
   }
 
   render(parentCtx: DrawingContext) {

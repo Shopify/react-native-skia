@@ -25,7 +25,7 @@ describe("Drawings", () => {
       runtimeEffect,
       uniforms: [],
     });
-    root.addShader(filter);
+    root.addEffect(filter);
     const fill = new FillNode();
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
@@ -66,7 +66,7 @@ half4 main(float2 xy) {
     });
     filter.addChild(imageShader);
     const root = new GroupNode();
-    root.addShader(filter);
+    root.addEffect(filter);
     const fill = new FillNode();
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
@@ -107,7 +107,7 @@ half4 main(float2 xy) {
     });
     filter.addChild(imageShader);
     const root = new GroupNode();
-    root.addShader(filter);
+    root.addEffect(filter);
     const fill = new FillNode();
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };

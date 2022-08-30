@@ -39,7 +39,7 @@ describe("Compose", () => {
       mode: TileMode.Decal,
     });
     blur.addChild(cf);
-    root.addImageFilter(blur);
+    root.addEffect(blur);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);

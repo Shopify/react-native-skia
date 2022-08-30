@@ -3,8 +3,10 @@ import type {
   SkColorFilter,
   Skia,
   SkImageFilter,
+  SkMaskFilter,
   SkPaint,
   SkShader,
+  SkPathEffect,
 } from "../../skia/types";
 
 export enum NodeType {
@@ -128,6 +130,14 @@ export abstract class DeclarationNode<
 
   isShader(): this is DeclarationNode<unknown, SkShader> {
     return this.declarationType === DeclarationType.Shader;
+  }
+
+  isMaskFilter(): this is DeclarationNode<unknown, SkMaskFilter> {
+    return this.declarationType === DeclarationType.MaskFilter;
+  }
+
+  isPathEffect(): this is DeclarationNode<unknown, SkPathEffect> {
+    return this.declarationType === DeclarationType.PathEffect;
   }
 }
 

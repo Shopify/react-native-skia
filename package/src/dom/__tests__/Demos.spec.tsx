@@ -17,7 +17,7 @@ describe("Drawings", () => {
     root.addChild(new FillNode());
 
     const rings = new GroupNode({ paint: { blendMode: BlendMode.Screen } });
-    rings.addMaskFilter(
+    rings.addEffect(
       new BlurMaskFilterNode({
         sigma: 10,
         style: BlurStyle.Solid,
