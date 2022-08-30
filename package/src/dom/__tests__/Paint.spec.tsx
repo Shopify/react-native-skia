@@ -28,7 +28,7 @@ describe("Paint", () => {
     processResult(surface, docPath("paint/assignement.png"));
   });
   it("should draw the color fill and strokes properly", () => {
-    const { surface } = setupSkia(width, height);
+    const { surface, canvas } = setupSkia(width, height);
     const { vec, Skia } = importSkia();
     const strokeWidth = 10 * PIXEL_RATIO;
     const c = vec(width / 2, height / 2);
@@ -54,6 +54,8 @@ describe("Paint", () => {
       })
     );
     root.addChild(circle);
-    processResult(surface, docPath("paint/stroke.png"), true);
+    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    root.render(ctx);
+    processResult(surface, docPath("paint/stroke.png"));
   });
 });
