@@ -8,6 +8,8 @@
 
 #include <jsi/jsi.h>
 
+#include <JsiValueWrapper.h>
+
 #include <RNSkInfoParameter.h>
 #include <RNSkPlatformContext.h>
 #include <RNSkTimingInfo.h>
@@ -27,21 +29,8 @@ class SkImage;
 namespace RNSkia {
 class JsiSkCanvas;
 using namespace facebook;
-using RNSkDrawCallback =
-    std::function<void(std::shared_ptr<JsiSkCanvas>, int, int, double,
-                       std::shared_ptr<RNSkPlatformContext>)>;
 
 enum RNSkDrawingMode { Default, Continuous };
-
-class FunctionWrapper {
-public:
-    FunctionWrapper(jsi::Function &&func): _func(std::move(func)) {}
-    jsi::Value call(jsi::Runtime& runtime, const jsi::Value* args, size_t count) {
-      return _func.call(runtime, args, count);
-    }
-private:
-    jsi::Function _func;
-};
 
 class RNSkDrawView: public std::enable_shared_from_this<RNSkDrawView> {
 public:
@@ -54,6 +43,20 @@ public:
    Destructor
    */
   virtual ~RNSkDrawView();
+  
+  /**
+   Sets custom properties. Custom properties are properties that are set directly from Javascript without having
+   to go through the async bridge.
+   */
+  void setCustomProps(std::unordered_map<std::string, JsiValueWrapper> &props);
+  
+  /**
+   Calls a custom action.
+   */
+  jsi::Value callCustomAction(jsi::Runtime& runtime,
+                              const std::string& name,
+                              const jsi::Value *arguments,
+                              size_t count);
 
   /**
    * Repaints the Skia view using the underlying context and the drawcallback.
@@ -66,11 +69,6 @@ public:
    Calls the drawing callback on the javascript thread
    */
   void performDraw();
-
-  /**
-   * Installs the draw callback for the view
-   */
-  void setDrawCallback(std::shared_ptr<FunctionWrapper> callback);
   
   /**
    Sets the native id of the view
@@ -159,7 +157,7 @@ private:
   /**
    * Stores the draw drawCallback
    */
-  std::shared_ptr<FunctionWrapper> _drawCallback;
+  std::shared_ptr<jsi::Function> _drawCallback;
 
   /**
    * Stores a pointer to the jsi wrapper for the canvas. The reason for

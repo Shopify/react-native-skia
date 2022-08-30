@@ -49,12 +49,69 @@ RNSkDrawView::~RNSkDrawView() {
   endDrawingLoop();
 }
 
+void RNSkDrawView::setCustomProps(std::unordered_map<std::string, JsiValueWrapper> &props) {
+  for(auto& prop: props) {
+    if(prop.first == "drawCallback") {
+      if(prop.second.isUndefinedOrNull()) {
+        // Clear drawcallback
+        _drawCallback = nullptr;
+        // We can just reset everything - this is a signal that we're done.
+        endDrawingLoop();
+        return;
+      } else if (prop.second.getType() != JsiWrapperValueType::Function) {
+        // We expect a function for the draw callback custom property
+        throw std::runtime_error("Expected a function for the drawCallback custom property.");
+      }
+
+      // Save callback
+      _drawCallback = prop.second.getAsFunction();
+
+      // Request redraw
+      requestRedraw();
+
+    } else {
+      throw std::runtime_error("Property " + prop.first + " not found.");
+    }
+  }
+}
+
+jsi::Value RNSkDrawView::callCustomAction(jsi::Runtime& runtime,
+                                          const std::string& name,
+                                          const jsi::Value *arguments,
+                                          size_t count) {
+  
+  if (name == "invalidate") {
+    // Post a redraw request
+    requestRedraw();
+  } else if (name == "makeImageSnapshot") {
+    // Create an image snapshot
+    sk_sp<SkImage> image;
+    if(count > 0 && !arguments[0].isUndefined() && !arguments[0].isNull()) {
+      auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
+      image = makeImageSnapshot(rect);
+    } else {
+      image = makeImageSnapshot(nullptr);
+    }
+    if(image == nullptr) {
+      jsi::detail::throwJSError(runtime, "Could not create image from current surface.");
+      return jsi::Value::undefined();
+    }
+    return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(getPlatformContext(), image));
+  } else {
+    throw std::runtime_error("Command " + name + " not found.");
+  }
+  return jsi::Value::undefined();
+}
+
 void RNSkDrawView::setNativeId(size_t nativeId) {
   _nativeId = nativeId;
   beginDrawingLoop();
 }
 
-void RNSkDrawView::callJsDrawCallback(std::shared_ptr<JsiSkCanvas> canvas, int width, int height, double timestamp) {
+void RNSkDrawView::callJsDrawCallback(std::shared_ptr<JsiSkCanvas> canvas,
+                                      int width,
+                                      int height,
+                                      double timestamp) {
   if(_drawCallback == nullptr) {
     return;
   }
@@ -108,22 +165,6 @@ void RNSkDrawView::callJsDrawCallback(std::shared_ptr<JsiSkCanvas> canvas, int w
             debugString.c_str(), debugString.size(), SkTextEncoding::kUTF8, 8,
             18, font, paint);
   }
-}
-
-void RNSkDrawView::setDrawCallback(std::shared_ptr<FunctionWrapper> callback) {
-
-  if (callback == nullptr) {
-    _drawCallback = nullptr;
-    // We can just reset everything - this is a signal that we're done.
-    endDrawingLoop();
-    return;
-  }
-
-  // Save callback
-  _drawCallback = callback;
-
-  // Request redraw
-  requestRedraw();
 }
 
 void RNSkDrawView::drawInCanvas(std::shared_ptr<JsiSkCanvas> canvas,
