@@ -9,6 +9,8 @@ import type {
   SkPathEffect,
 } from "../../skia/types";
 
+import type { PaintNode } from "./paint";
+
 export enum NodeType {
   Group,
 
@@ -94,11 +96,17 @@ export interface DrawingNodeProps {
 export abstract class DrawingNode<
   P extends DrawingNodeProps = DrawingNodeProps
 > extends RenderNode<P> {
+  paints: PaintNode[] = [];
+
   constructor(type: NodeType, props: P) {
     super(type, props);
   }
 
   abstract draw(ctx: DrawingContext): void;
+
+  addPaint(paintNode: PaintNode) {
+    this.paints.push(paintNode);
+  }
 
   render(ctx: DrawingContext) {
     if (this.props.paint) {
@@ -106,6 +114,10 @@ export abstract class DrawingNode<
     } else {
       this.draw(ctx);
     }
+    this.paints.forEach((paintNode) => {
+      const paint = paintNode.concat(ctx.Skia, ctx.paint, ctx.opacity);
+      this.draw({ ...ctx, paint });
+    });
   }
 }
 

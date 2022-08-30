@@ -1,7 +1,13 @@
-import { importSkia, width, height } from "../../renderer/__tests__/setup";
+import {
+  importSkia,
+  width,
+  height,
+  PIXEL_RATIO,
+} from "../../renderer/__tests__/setup";
+import { PaintStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { CircleNode, GroupNode } from "../nodes";
+import { CircleNode, GroupNode, PaintNode } from "../nodes";
 
 describe("Paint", () => {
   it("should assign a paint directly", () => {
@@ -20,5 +26,34 @@ describe("Paint", () => {
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("paint/assignement.png"));
+  });
+  it("should draw the color fill and strokes properly", () => {
+    const { surface } = setupSkia(width, height);
+    const { vec, Skia } = importSkia();
+    const strokeWidth = 10 * PIXEL_RATIO;
+    const c = vec(width / 2, height / 2);
+    const r = (width - strokeWidth) / 2;
+    const color = Skia.Color("red");
+
+    const root = new GroupNode({ paint: { color } });
+
+    const circle = new CircleNode({ c, r });
+    circle.addPaint(new PaintNode({ color: Skia.Color("lightblue") }));
+    circle.addPaint(
+      new PaintNode({
+        color: Skia.Color("#adbce6"),
+        style: PaintStyle.Stroke,
+        strokeWidth,
+      })
+    );
+    circle.addPaint(
+      new PaintNode({
+        color: Skia.Color("#ade6d8"),
+        style: PaintStyle.Stroke,
+        strokeWidth: strokeWidth / 2,
+      })
+    );
+    root.addChild(circle);
+    processResult(surface, docPath("paint/stroke.png"), true);
   });
 });
