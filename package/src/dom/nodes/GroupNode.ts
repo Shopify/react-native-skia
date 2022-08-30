@@ -9,6 +9,7 @@ import type {
 import { ClipOp } from "../../skia/types";
 import type { SkMaskFilter } from "../../skia/types/MaskFilter";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
+import type { SkImageFilter } from "../../skia/types/ImageFilter/ImageFilter";
 
 import type { DeclarationNode, DrawingContext } from "./Node";
 import { RenderNode, NodeType } from "./Node";
@@ -44,6 +45,13 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
       this.paint = new PaintNode();
     }
     this.paint.addShader(shader);
+  }
+
+  addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>) {
+    if (!this.paint) {
+      this.paint = new PaintNode();
+    }
+    this.paint.addImageFilter(imageFilter);
   }
 
   addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>) {
@@ -84,6 +92,7 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
     if (shouldSave) {
       canvas.save();
     }
+
     if (matrix) {
       canvas.concat(matrix);
     }

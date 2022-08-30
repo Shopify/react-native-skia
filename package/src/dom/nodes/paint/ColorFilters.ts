@@ -48,7 +48,7 @@ export class ComposeColorFilterNode extends NestedDeclarationNode<
   SkColorFilter
 > {
   constructor() {
-    super(DeclarationType.ColorFilter, NodeType.ComposeColorFilterNode, null);
+    super(DeclarationType.ColorFilter, NodeType.ComposeColorFilter, null);
   }
 
   get(Skia: Skia) {

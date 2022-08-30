@@ -1,7 +1,7 @@
-import { DeclarationNode, DeclarationType } from "../Node";
-import { NestedDeclarationNode, NodeType } from "../Node";
+import type { DeclarationNode } from "../Node";
+import { DeclarationType, NestedDeclarationNode, NodeType } from "../Node";
 import type { SkColorFilter } from "../../../skia/types/ColorFilter/ColorFilter";
-import { exhaustiveCheck } from '../../../renderer/typeddash';
+import { exhaustiveCheck } from "../../../renderer/typeddash";
 import type {
   BlendMode,
   ColorChannel,
@@ -30,12 +30,30 @@ abstract class ImageFilterDeclaration<
     if (child.isImageFilter()) {
       this.children.push(child);
     } else if (child.isColorFilter()) {
-      this.children.push(new ColorFilterImageFilterNode({ colorFilter: child}));
+      this.children.push(
+        new ColorFilterImageFilterNode({ colorFilter: child })
+      );
     } else if (child.isShader()) {
       this.children.push(new ShaderImageFilterNode({ shader: child }));
     } else {
       exhaustiveCheck(child);
     }
+  }
+
+  protected getMandatoryChild(Skia: Skia, index = 0, parent: string) {
+    const child = this.children[index];
+    if (!child) {
+      throw new Error("Missing child in " + parent);
+    }
+    return child.get(Skia);
+  }
+
+  protected getChild(Skia: Skia, index = 0) {
+    const child = this.children[index];
+    if (!child) {
+      return null;
+    }
+    return child.get(Skia);
   }
 }
 
@@ -81,8 +99,7 @@ export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFil
 
   get(Skia: Skia) {
     const { dx, dy } = this.props;
-    const compose = Skia.ImageFilter.MakeOffset.bind(Skia.ImageFilter, dx, dy);
-    return this.getRecursively(Skia, compose);
+    return Skia.ImageFilter.MakeOffset(dx, dy, this.getChild(Skia));
   }
 }
 
@@ -100,21 +117,20 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
 
   get(Skia: Skia) {
     const { channelX, channelY, scale } = this.props;
-    const compose = Skia.ImageFilter.MakeDisplacementMap.bind(
-      Skia.ImageFilter,
+    return Skia.ImageFilter.MakeDisplacementMap(
       channelX,
       channelY,
-      scale
+      scale,
+      this.getMandatoryChild(Skia, 0, "DisplacementMap"),
+      this.getChild(Skia, 1)
     );
-    return this.getRecursively(Skia, compose);
   }
 }
 
-
 export interface BlurImageFilterNodeProps {
-  sigmaX: number,
-  sigmaY: number,
-  mode: TileMode,
+  sigmaX: number;
+  sigmaY: number;
+  mode: TileMode;
 }
 
 export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterNodeProps> {
@@ -124,25 +140,19 @@ export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterN
 
   get(Skia: Skia) {
     const { sigmaX, sigmaY, mode } = this.props;
-    const compose = Skia.ImageFilter.MakeBlur.bind(
-      Skia.ImageFilter,
-      sigmaX,
-      sigmaY,
-      mode
-    );
-    return this.getRecursively(Skia, compose);
+    return Skia.ImageFilter.MakeBlur(sigmaX, sigmaY, mode, this.getChild(Skia));
   }
 }
 
 export interface DropShadowImageFilterNodeProps {
-  dx: number,
-  dy: number,
-  sigmaX: number,
-  sigmaY: number,
-  color: SkColor,
-  input: SkImageFilter | null,
-  cropRect?: SkRect,
-  only?: boolean,
+  dx: number;
+  dy: number;
+  sigmaX: number;
+  sigmaY: number;
+  color: SkColor;
+  input: SkImageFilter | null;
+  cropRect?: SkRect;
+  only?: boolean;
 }
 
 export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadowImageFilterNodeProps> {
@@ -152,25 +162,40 @@ export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadow
 
   get(Skia: Skia) {
     const { dx, dy, sigmaX, sigmaY, color, cropRect, only } = this.props;
-    return this.getRecursively(Skia, (input) => {
-      if (only) {
-        return Skia.ImageFilter.MakeDropShadowOnly(dx, dy, sigmaX, sigmaY, color, input, cropRect);
-      }
-      return Skia.ImageFilter.MakeDropShadow(dx, dy, sigmaX, sigmaY, color, input, cropRect);
-    });
+    const input = this.getChild(Skia);
+    if (only) {
+      return Skia.ImageFilter.MakeDropShadowOnly(
+        dx,
+        dy,
+        sigmaX,
+        sigmaY,
+        color,
+        input,
+        cropRect
+      );
+    }
+    return Skia.ImageFilter.MakeDropShadow(
+      dx,
+      dy,
+      sigmaX,
+      sigmaY,
+      color,
+      input,
+      cropRect
+    );
   }
 }
 
 export enum MorphologyOperator {
   Erode,
-  Dilate
+  Dilate,
 }
 
 export interface MorphologyImageFilterNodeProps {
-  rx: number,
-  ry: number,
-  cropRect?: SkRect
-  op: MorphologyOperator
+  rx: number;
+  ry: number;
+  cropRect?: SkRect;
+  op: MorphologyOperator;
 }
 
 export class MorphologyImageFilterNode extends ImageFilterDeclaration<MorphologyImageFilterNodeProps> {
@@ -180,18 +205,17 @@ export class MorphologyImageFilterNode extends ImageFilterDeclaration<Morphology
 
   get(Skia: Skia) {
     const { rx, ry, cropRect, op } = this.props;
-    return this.getRecursively(Skia, (input) => {
-      if (op === MorphologyOperator.Erode) {
-        return Skia.ImageFilter.MakeErode(rx, ry, input, cropRect);
-      }
-      return Skia.ImageFilter.MakeDilate(rx, ry, input, cropRect);
-    });
+    const input = this.getChild(Skia);
+    if (op === MorphologyOperator.Erode) {
+      return Skia.ImageFilter.MakeErode(rx, ry, input, cropRect);
+    }
+    return Skia.ImageFilter.MakeDilate(rx, ry, input, cropRect);
   }
 }
 
 export interface BlendImageFilterNodeProps {
-  mode: BlendMode,
-  cropRect?: SkRect
+  mode: BlendMode;
+  cropRect?: SkRect;
 }
 
 export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilterNodeProps> {
@@ -201,16 +225,15 @@ export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilte
 
   get(Skia: Skia) {
     const { mode, cropRect } = this.props;
-    return this.getRecursively(Skia, (a, b) => {
-        return Skia.ImageFilter.MakeBlend(mode, a, b, cropRect);
-      }
-    );
+    const a = this.getMandatoryChild(Skia, 0, "BlendMode");
+    const b = this.getChild(Skia, 1);
+    return Skia.ImageFilter.MakeBlend(mode, a, b, cropRect);
   }
 }
 
 export interface RuntimeShaderImageFilterNodeProps {
-  builder: SkRuntimeShaderBuilder,
-  childShaderName: string | null,
+  builder: SkRuntimeShaderBuilder;
+  childShaderName: string | null;
 }
 
 export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<RuntimeShaderImageFilterNodeProps> {
@@ -220,7 +243,7 @@ export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<Runtime
 
   get(Skia: Skia) {
     const { builder, childShaderName } = this.props;
-    const compose = Skia.ImageFilter.MakeRuntimeShader.bind(Skia.ImageFilter, builder, childShaderName);
-    return this.getRecursively(Skia, compose);
+    const input = this.getChild(Skia);
+    return Skia.ImageFilter.MakeRuntimeShader(builder, childShaderName, input);
   }
 }

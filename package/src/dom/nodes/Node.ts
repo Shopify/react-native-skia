@@ -26,7 +26,7 @@ export enum NodeType {
 
   MatrixColorFilter,
   BlendColorFilter,
-  ComposeColorFilterNode,
+  ComposeColorFilter,
   LinearToSRGBGammaColorFilter,
   SRGBToLinearGammaColorFilter,
   LumaColorFilterColorFilter,
