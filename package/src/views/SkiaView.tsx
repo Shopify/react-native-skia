@@ -1,7 +1,7 @@
 import React from "react";
 import { requireNativeComponent } from "react-native";
 
-import type { SkImage, SkRect } from "../skia/types";
+import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
 
 import { SkiaViewApi } from "./api";
@@ -45,11 +45,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
    */
   public makeImageSnapshot(rect?: SkRect) {
     assertSkiaViewApi();
-    return SkiaViewApi.callJsiMethod(
-      this._nativeId,
-      "makeImageSnapshot",
-      rect
-    ) as unknown as SkImage;
+    return SkiaViewApi.makeImageSnapshot(this._nativeId, rect);
   }
 
   /**
@@ -57,7 +53,7 @@ export class SkiaView extends React.Component<SkiaViewProps> {
    */
   public redraw() {
     assertSkiaViewApi();
-    SkiaViewApi.callJsiMethod(this._nativeId, "invalidate");
+    SkiaViewApi.requestRedraw(this._nativeId);
   }
 
   /**
@@ -89,7 +85,9 @@ const assertSkiaViewApi = () => {
     SkiaViewApi === null ||
     SkiaViewApi.setJsiProperty === null ||
     SkiaViewApi.callJsiMethod === null ||
-    SkiaViewApi.registerValuesInView === null
+    SkiaViewApi.registerValuesInView === null ||
+    SkiaViewApi.requestRedraw === null ||
+    SkiaViewApi.makeImageSnapshot === null
   ) {
     throw Error("Skia View Api was not found.");
   }

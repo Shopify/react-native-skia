@@ -80,26 +80,9 @@ jsi::Value RNSkDrawView::callJsiMethod(jsi::Runtime& runtime,
                                        const jsi::Value *arguments,
                                        size_t count) {
   
-  if (name == "invalidate") {
-    // Post a redraw request
-    requestRedraw();
-  } else if (name == "makeImageSnapshot") {
-    // Create an image snapshot
-    sk_sp<SkImage> image;
-    if(count > 0 && !arguments[0].isUndefined() && !arguments[0].isNull()) {
-      auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-      image = makeImageSnapshot(rect);
-    } else {
-      image = makeImageSnapshot(nullptr);
-    }
-    if(image == nullptr) {
-      jsi::detail::throwJSError(runtime, "Could not create image from current surface.");
-      return jsi::Value::undefined();
-    }
-    return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(getPlatformContext(), image));
-  } else {
-    throw std::runtime_error("Command " + name + " not found.");
-  }
+  // This subclass doesn't support any jsi methods at the moment, but
+  // new subclasses created in the future will.
+  throw std::runtime_error("RNSkDrawView does not support any JSI methods. Method " + name + "() not found.");
   return jsi::Value::undefined();
 }
 

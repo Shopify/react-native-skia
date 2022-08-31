@@ -109,6 +109,63 @@ public:
     return info->view->callJsiMethod(runtime, action, params, paramsCount);
   }
   
+  JSI_HOST_FUNCTION(requestRedraw) {
+    if (count < 2) {
+       _platformContext->raiseError(
+         std::string("requestRedraw: Expected 2 arguments, got " + std::to_string(count) + "."));
+
+       return jsi::Value::undefined();
+     }
+
+     if (!arguments[0].isNumber()) {
+       _platformContext->raiseError(
+           "requestRedraw: First argument must be a number");
+
+       return jsi::Value::undefined();
+     }
+
+     // find Skia View
+     int nativeId = arguments[0].asNumber();
+
+     auto info = getEnsuredViewInfo(nativeId);
+     if (info->view != nullptr) {
+       info->view->requestRedraw();
+     }
+     return jsi::Value::undefined();
+  }
+  
+  JSI_HOST_FUNCTION(makeImageSnapshot) {
+    if (count < 1) {
+      _platformContext->raiseError(std::string("makeImageSnapshot: Expected at least 1 argument, got " + std::to_string(count) + "."));
+      return jsi::Value::undefined();
+    }
+
+    if (!arguments[0].isNumber()) {
+      _platformContext->raiseError("makeImageSnapshot: First argument must be a number");
+      return jsi::Value::undefined();
+    }
+    
+    // find Skia view
+    int nativeId = arguments[0].asNumber();
+    sk_sp<SkImage> image;
+    auto info = getEnsuredViewInfo(nativeId);
+    if (info->view != nullptr) {
+      if(count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()) {
+        auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
+        image = info->view->makeImageSnapshot(rect);
+      } else {
+        image = info->view->makeImageSnapshot(nullptr);
+      }
+      if(image == nullptr) {
+        jsi::detail::throwJSError(runtime, "Could not create image from current surface.");
+        return jsi::Value::undefined();
+      }
+      return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(_platformContext, image));
+    }
+    jsi::detail::throwJSError(runtime, "No Skia View currently available.");
+    return jsi::Value::undefined();
+  }
+  
   JSI_HOST_FUNCTION(registerValuesInView) {
       // Check params
       if(!arguments[1].isObject() || !arguments[1].asObject(runtime).isArray(runtime)) {
@@ -157,7 +214,9 @@ public:
       
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView))
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
 
   /**
    * Constructor
