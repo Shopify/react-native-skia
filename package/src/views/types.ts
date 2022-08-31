@@ -69,7 +69,7 @@ export interface ISkiaViewApi {
     values: SkiaValue<unknown>[]
   ) => () => void;
   requestRedraw: (nativeId: number) => void;
-  makeImageSnapshot: (nativeId: number, rect?: SkRect) => Promise<SkImage>;
+  makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
 }
 
 export interface SkiaViewProps extends ViewProps {
