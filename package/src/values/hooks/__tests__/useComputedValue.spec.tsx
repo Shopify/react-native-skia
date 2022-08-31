@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import { Fill } from "../../../renderer/components";
 import {
   importSkia,
   mountCanvas,
@@ -17,7 +16,7 @@ interface TestComputedDepsProps {
 }
 
 const TestComputedDeps = ({ id1, id2 }: TestComputedDepsProps) => {
-  const { useComputedValue } = importSkia();
+  const { useComputedValue, Fill } = importSkia();
   const [dep, setDep] = useState(id1);
   const color = useComputedValue(() => {
     counter.value++;
@@ -36,7 +35,7 @@ interface TestComputedProps {
 }
 
 const TestComputed = ({ id }: TestComputedProps) => {
-  const { useComputedValue } = importSkia();
+  const { useComputedValue, Fill } = importSkia();
   const color = useComputedValue(() => {
     return id.current % 2 ? "green" : "red";
   }, [id]);
