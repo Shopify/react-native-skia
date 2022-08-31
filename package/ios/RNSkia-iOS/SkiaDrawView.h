@@ -8,13 +8,13 @@
 
 #import <RNSkManager.h>
 
-class RNSkDrawViewImpl;
+class RNSkiOSJsView;
 
 @interface SkiaDrawView : UIView
 
 - (instancetype)initWithManager: (RNSkia::RNSkManager*)manager;
 
-- (std::shared_ptr<RNSkDrawViewImpl>) impl;
+- (std::shared_ptr<RNSkiOSJsView>) impl;
 
 - (void) setDrawingMode:(std::string) mode;
 - (void) setDebugMode:(bool) debugMode;

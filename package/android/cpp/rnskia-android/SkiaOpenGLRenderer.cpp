@@ -20,8 +20,7 @@ namespace RNSkia
         return threadContexts.at(threadId);
     }
 
-    SkiaOpenGLRenderer::SkiaOpenGLRenderer(ANativeWindow *surface, size_t renderId) : _surfaceTexture(surface),
-                                                                                      _renderId(renderId)
+    SkiaOpenGLRenderer::SkiaOpenGLRenderer(ANativeWindow *surface) : _surfaceTexture(surface)
     {
     }
 

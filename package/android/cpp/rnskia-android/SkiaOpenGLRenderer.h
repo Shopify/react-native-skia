@@ -45,7 +45,7 @@ namespace RNSkia
     class SkiaOpenGLRenderer
     {
     public:
-        SkiaOpenGLRenderer(ANativeWindow *surface, size_t renderId);
+        SkiaOpenGLRenderer(ANativeWindow *surface);
 
         /**
          * Initializes, renders and tears down the render pipeline depending on the state of the
@@ -122,8 +122,6 @@ namespace RNSkia
 
         int _prevWidth = 0;
         int _prevHeight = 0;
-
-        size_t _renderId;
 
         std::atomic<RenderState> _renderState = { RenderState::Initializing };
     };

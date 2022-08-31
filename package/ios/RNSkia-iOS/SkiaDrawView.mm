@@ -5,11 +5,11 @@
 #include <utility>
 #include <vector>
 
-#import <RNSkDrawViewImpl.h>
+#import <RNSkiOSJsView.h>
 #import <RNSkManager.h>
 
 @implementation SkiaDrawView {
-  std::shared_ptr<RNSkDrawViewImpl> _impl;
+  std::shared_ptr<RNSkiOSJsView> _impl;
   RNSkia::RNSkManager* _manager;
   RNSkia::RNSkDrawingMode _drawingMode;
   bool _debugMode;
@@ -58,7 +58,7 @@
   } else {
     // Create implementation view when the parent view is set
     if(_impl == nullptr && _manager != nullptr) {
-      _impl = std::make_shared<RNSkDrawViewImpl>(_manager->getPlatformContext());
+      _impl = std::make_shared<RNSkiOSJsView>(_manager->getPlatformContext());
       [self.layer addSublayer: _impl->getLayer()];
       if(_nativeId != 0) {
         _manager->setSkiaDrawView(_nativeId, _impl);
@@ -115,7 +115,7 @@
 
 #pragma mark External API
 
-- (std::shared_ptr<RNSkDrawViewImpl>) impl {
+- (std::shared_ptr<RNSkiOSJsView>) impl {
   return _impl;
 }
 
@@ -135,10 +135,10 @@
 
 - (void) handleTouches:(NSSet<UITouch*>*) touches withEvent:(UIEvent*) event {
   if (event.type == UIEventTypeTouches) {
-    std::vector<RNSkia::RNSkTouchPoint> nextTouches;
+    std::vector<RNSkia::RNSkTouchInfo> nextTouches;
     for (UITouch *touch in touches) {
       auto position = [touch preciseLocationInView:self];
-      RNSkia::RNSkTouchPoint nextTouch;
+      RNSkia::RNSkTouchInfo nextTouch;
       nextTouch.x = position.x;
       nextTouch.y = position.y;
       nextTouch.force = [touch force];    
@@ -146,26 +146,26 @@
       auto phase = [touch phase];
       switch(phase) {
         case UITouchPhaseBegan:
-          nextTouch.type = RNSkia::RNSkTouchType::Start;
+          nextTouch.type = RNSkia::RNSkTouchInfo::TouchType::Start;
           break;
         case UITouchPhaseMoved:
-          nextTouch.type = RNSkia::RNSkTouchType::Active;
+          nextTouch.type = RNSkia::RNSkTouchInfo::TouchType::Active;
           break;
         case UITouchPhaseEnded:
-          nextTouch.type = RNSkia::RNSkTouchType::End;
+          nextTouch.type = RNSkia::RNSkTouchInfo::TouchType::End;
           break;
         case UITouchPhaseCancelled:
-          nextTouch.type = RNSkia::RNSkTouchType::Cancelled;
+          nextTouch.type = RNSkia::RNSkTouchInfo::TouchType::Cancelled;
           break;
         default:
-          nextTouch.type = RNSkia::RNSkTouchType::Active;
+          nextTouch.type = RNSkia::RNSkTouchInfo::TouchType::Active;
           break;
       }
       
       nextTouches.push_back(nextTouch);
     }
     if(_impl != nullptr) {
-      _impl->updateTouchState(std::move(nextTouches));
+      _impl->updateTouchState(nextTouches);
     }
   }
 }

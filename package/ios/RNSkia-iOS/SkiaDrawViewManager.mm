@@ -3,7 +3,6 @@
 
 #include <SkiaManager.h>
 #include <RNSkiaModule.h>
-#include <RNSkDrawViewImpl.h>
 #include <SkiaDrawView.h>
 
 @implementation SkiaDrawViewManager

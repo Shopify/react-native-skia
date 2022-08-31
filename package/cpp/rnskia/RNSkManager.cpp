@@ -7,7 +7,7 @@
 
 #include <JsiSkApi.h>
 #include <RNSkJsiViewApi.h>
-#include <RNSkDrawView.h>
+#include <RNSkView.h>
 #include <RNSkValueApi.h>
 
 namespace RNSkia {
@@ -45,7 +45,7 @@ void RNSkManager::invalidate() {
   _platformContext->invalidate();
 }
 
-void RNSkManager::registerSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkDrawView> view) {
+void RNSkManager::registerSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkView> view) {
   if (!_isInvalidated && _viewApi != nullptr)
     _viewApi->registerSkiaDrawView(nativeId, view);
 }
@@ -55,7 +55,7 @@ void RNSkManager::unregisterSkiaDrawView(size_t nativeId) {
     _viewApi->unregisterSkiaDrawView(nativeId);
 }
 
-void RNSkManager::setSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkDrawView> view) {
+void RNSkManager::setSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkView> view) {
   if (!_isInvalidated && _viewApi != nullptr)
     _viewApi->setSkiaDrawView(nativeId, view);
 }

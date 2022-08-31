@@ -73,21 +73,21 @@ namespace RNSkia
     void JniSkiaDrawView::updateTouchPoints(jni::JArrayDouble touches)
     {
         // Create touch points
-        std::vector<RNSkia::RNSkTouchPoint> points;
+        std::vector<RNSkia::RNSkTouchInfo> points;
         auto pin = touches.pin();
         auto scale = _drawView->getPixelDensity();
         points.reserve(pin.size() / 5);
         for (size_t i = 0; i < pin.size(); i += 5)
         {
-            RNSkTouchPoint point;
+            RNSkTouchInfo point;
             point.x = pin[i] / scale;
             point.y = pin[i + 1] / scale;
             point.force = pin[i + 2];
-            point.type = (RNSkia::RNSkTouchType)pin[i + 3];
+            point.type = (RNSkia::RNSkTouchInfo::TouchType)pin[i + 3];
             point.id = pin[i + 4];
             points.push_back(point);
         }
-        _drawView->updateTouchState(std::move(points));
+        _drawView->updateTouchState(points);
     }
 
     void JniSkiaDrawView::surfaceAvailable(jobject surface, int width, int height)

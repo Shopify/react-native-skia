@@ -8,7 +8,7 @@
 
 #include <JsiHostObject.h>
 #include <JsiValueWrapper.h>
-#include <RNSkDrawView.h>
+#include <RNSkView.h>
 #include <RNSkPlatformContext.h>
 #include <RNSkValue.h>
 #include <jsi/jsi.h>
@@ -20,7 +20,7 @@ using RNSkViewInfo = struct RNSkViewInfo {
   RNSkViewInfo() {
     view = nullptr;
   }
-  std::shared_ptr<RNSkDrawView> view;
+  std::shared_ptr<RNSkView> view;
   std::unordered_map<std::string, JsiValueWrapper> props;
 };
 
@@ -254,7 +254,7 @@ public:
    * @param nativeId Id of view to register
    * @param view View to register
    */
-  void registerSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkDrawView> view) {
+  void registerSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkView> view) {
     auto info = getEnsuredViewInfo(nativeId);
     std::lock_guard<std::mutex> lock(_mutex);
     info->view = view;
@@ -284,7 +284,7 @@ public:
    removed due to ex. a transition). The view can be set to a nullptr
    or a valid view, effectively toggling the view's availability.
    */
-  void setSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkDrawView> view) {
+  void setSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkView> view) {
     if (_viewInfos.find(nativeId) == _viewInfos.end()) {
       return;
     }
