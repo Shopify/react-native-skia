@@ -52,7 +52,7 @@ export const Path = (props: AnimatedProps<PathProps>) => {
     },
     props
   );
-  return <PathNode path={pathProp} />;
+  return <PathNode {...{ ...props, path: pathProp }} />;
 };
 
 Path.defaultProps = {
