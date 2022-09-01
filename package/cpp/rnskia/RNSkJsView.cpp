@@ -4,7 +4,7 @@ namespace RNSkia
 {
 
 RNSkJsRenderer::RNSkJsRenderer(std::function<void()> requestRedraw,
-                                               std::shared_ptr<RNSkPlatformContext> context) :
+                               std::shared_ptr<RNSkPlatformContext> context) :
   RNSkRenderer(requestRedraw),
   _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
   _platformContext(std::move(context)),

@@ -39,7 +39,7 @@ class RNSkJsRenderer:
   public std::enable_shared_from_this<RNSkJsRenderer> {
 public:
   RNSkJsRenderer(std::function<void()> requestRedraw,
-                         std::shared_ptr<RNSkPlatformContext> context);
+                 std::shared_ptr<RNSkPlatformContext> context);
   
   bool tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override;
   
@@ -78,11 +78,10 @@ public:
    * Constructor
    */
   RNSkJsView(std::shared_ptr<RNSkPlatformContext> context,
-                     std::shared_ptr<RNSkCanvasProvider> canvasProvider):
+             std::shared_ptr<RNSkCanvasProvider> canvasProvider):
     RNSkView(context,
              canvasProvider,
-             std::make_shared<RNSkJsRenderer>(std::bind(&RNSkJsView::requestRedraw, this),
-                                                      context)) {}
+             std::make_shared<RNSkJsRenderer>(std::bind(&RNSkJsView::requestRedraw, this), context)) {}
   
   void updateTouchState(std::vector<RNSkTouchInfo>& touches) override {
     std::static_pointer_cast<RNSkJsRenderer>(getRenderer())->getInfoObject()->updateTouches(touches);

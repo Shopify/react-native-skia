@@ -57,17 +57,17 @@ namespace RNSkia
     {
         if (mode.compare("continuous") == 0)
         {
-            _drawView->setDrawingMode(RNSkDrawingMode::Continuous);
+            _drawView->getDrawView()->setDrawingMode(RNSkDrawingMode::Continuous);
         }
         else
         {
-            _drawView->setDrawingMode(RNSkDrawingMode::Default);
+            _drawView->getDrawView()->setDrawingMode(RNSkDrawingMode::Default);
         }
     }
 
     void JniSkiaDrawView::setDebugMode(bool show)
     {
-        _drawView->setShowDebugOverlays(show);
+        _drawView->getDrawView()->setShowDebugOverlays(show);
     }
 
     void JniSkiaDrawView::updateTouchPoints(jni::JArrayDouble touches)
@@ -87,7 +87,7 @@ namespace RNSkia
             point.id = pin[i + 4];
             points.push_back(point);
         }
-        _drawView->updateTouchState(points);
+        _drawView->getDrawView()->updateTouchState(points);
     }
 
     void JniSkiaDrawView::surfaceAvailable(jobject surface, int width, int height)

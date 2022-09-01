@@ -14,7 +14,7 @@
 #include <JniSkiaManager.h>
 #include <JniSkiaDrawView.h>
 
-#include <RNSkAndroidJsView.h>
+#include <RNSkAndroidView.h>
 
 #include <SkSurface.h>
 #include <SkRefCnt.h>
@@ -50,7 +50,7 @@ namespace RNSkia
 
         ~JniSkiaDrawView();
 
-        std::shared_ptr<RNSkView> getDrawViewImpl() { return _drawView; }
+        std::shared_ptr<RNSkView> getDrawViewImpl() { return _drawView->getDrawView(); }
 
         void releaseSurface();
 
@@ -61,7 +61,7 @@ namespace RNSkia
     private:
         friend HybridBase;
 
-        std::shared_ptr<RNSkAndroidJsView> _drawView;
+        std::shared_ptr<RNSkBaseAndroidView> _drawView;
 
         jni::global_ref<JniSkiaDrawView::javaobject> javaPart_;
 
@@ -69,7 +69,7 @@ namespace RNSkia
                 jni::alias_ref<JniSkiaDrawView::jhybridobject> jThis,
                 JavaSkiaManager skiaManager)
                 : javaPart_(jni::make_global(jThis)),
-                  _drawView(std::make_shared<RNSkAndroidJsView>(skiaManager->cthis()->getPlatformContext(), [this]() {
+                  _drawView(std::make_shared<RNSkAndroidView<RNSkia::RNSkJsView>>(skiaManager->cthis()->getPlatformContext(), [this]() {
                       releaseSurface();
                   })) {
         }
