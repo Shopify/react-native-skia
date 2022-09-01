@@ -18,7 +18,7 @@ public class SkiaDrawViewManager extends BaseViewManager<SkiaDrawView, LayoutSha
     @NonNull
     @Override
     public String getName() {
-        return "ReactNativeSkiaView";
+        return "SkiaDrawView";
     }
 
     @Override

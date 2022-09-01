@@ -13,7 +13,7 @@
 
 @implementation SkiaDrawViewManager
 
-RCT_EXPORT_MODULE(ReactNativeSkiaView)
+RCT_EXPORT_MODULE(SkiaDrawView)
 
 - (SkiaManager*) skiaManager {
   auto bridge = [RCTBridge currentBridge];

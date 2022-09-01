@@ -9,9 +9,8 @@ import type { NativeSkiaViewProps, SkiaViewProps } from "./types";
 
 let SkiaViewNativeId = 1000;
 
-const NativeSkiaView = requireNativeComponent<NativeSkiaViewProps>(
-  "ReactNativeSkiaView"
-);
+const NativeSkiaView =
+  requireNativeComponent<NativeSkiaViewProps>("SkiaDrawView");
 
 export class SkiaView extends React.Component<SkiaViewProps> {
   constructor(props: SkiaViewProps) {
