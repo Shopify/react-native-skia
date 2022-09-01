@@ -20,9 +20,7 @@ namespace RNSkia
         return threadContexts.at(threadId);
     }
 
-    SkiaOpenGLRenderer::SkiaOpenGLRenderer(ANativeWindow *surface) : _surfaceTexture(surface)
-    {
-    }
+    SkiaOpenGLRenderer::SkiaOpenGLRenderer(ANativeWindow *surface) : _surfaceTexture(surface) {}
 
     void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb, int width, int height)
     {

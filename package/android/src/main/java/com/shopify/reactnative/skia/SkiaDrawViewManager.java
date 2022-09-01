@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 
 import java.util.HashMap;
 
-public class RNSkiaViewManager extends BaseViewManager<SkiaDrawView, LayoutShadowNode> {
+public class SkiaDrawViewManager extends BaseViewManager<SkiaDrawView, LayoutShadowNode> {
 
     final private HashMap<SkiaDrawView, Integer> mViewMapping = new HashMap();
 
