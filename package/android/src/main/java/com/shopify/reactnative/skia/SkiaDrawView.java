@@ -8,7 +8,5 @@ import com.facebook.react.bridge.ReactContext;
 public class SkiaDrawView extends SkiaBaseView {
     public SkiaDrawView(Context ctx) {
         super(ctx);
-        RNSkiaModule skiaModule = ((ReactContext)ctx).getNativeModule(RNSkiaModule.class);
-        mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
 }

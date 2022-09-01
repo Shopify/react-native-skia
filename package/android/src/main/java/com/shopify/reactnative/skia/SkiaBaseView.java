@@ -8,6 +8,7 @@ import android.view.TextureView;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
+import com.facebook.react.bridge.ReactContext;
 
 public abstract class SkiaBaseView extends TextureView implements TextureView.SurfaceTextureListener {
 
@@ -24,6 +25,8 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
         super(context);
         setSurfaceTextureListener(this);
         setOpaque(false);
+        RNSkiaModule skiaModule = ((ReactContext)context).getNativeModule(RNSkiaModule.class);
+        mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
 
     @Override
