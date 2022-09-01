@@ -5,20 +5,22 @@
 #include <utility>
 #include <vector>
 
-#import <RNSkiOSJsView.h>
 #import <RNSkManager.h>
 
 @implementation SkiaDrawView {
-  std::shared_ptr<RNSkiOSJsView> _impl;
+  std::shared_ptr<RNSkBaseiOSView> _impl;
   RNSkia::RNSkManager* _manager;
   RNSkia::RNSkDrawingMode _drawingMode;
+  std::function<std::shared_ptr<RNSkBaseiOSView>(std::shared_ptr<RNSkia::RNSkPlatformContext>)> _factory;
   bool _debugMode;
   size_t _nativeId;
 }
 
 #pragma mark Initialization and destruction
 
-- (instancetype) initWithManager: (RNSkia::RNSkManager*)manager;
+- (instancetype) initWithManager: (RNSkia::RNSkManager*)manager
+                         factory: (std::function<std::shared_ptr<RNSkBaseiOSView>(
+                                     std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory
 {
   self = [super init];
   if (self) {
@@ -26,6 +28,7 @@
     _nativeId = 0;
     _debugMode = false;
     _drawingMode = RNSkia::RNSkDrawingMode::Default;
+    _factory = factory;
     
     // Listen to notifications about module invalidation
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -58,13 +61,16 @@
   } else {
     // Create implementation view when the parent view is set
     if(_impl == nullptr && _manager != nullptr) {
-      _impl = std::make_shared<RNSkiOSJsView>(_manager->getPlatformContext());
+      _impl = _factory(_manager->getPlatformContext());
+      if(_impl == nullptr) {
+        throw std::runtime_error("Expected Skia view implementation, got nullptr.");
+      }
       [self.layer addSublayer: _impl->getLayer()];
       if(_nativeId != 0) {
-        _manager->setSkiaDrawView(_nativeId, _impl);
+        _manager->setSkiaDrawView(_nativeId, _impl->getDrawView());
       }
-      _impl->setDrawingMode(_drawingMode);
-      _impl->setShowDebugOverlays(_debugMode);
+      _impl->getDrawView()->setDrawingMode(_drawingMode);
+      _impl->getDrawView()->setShowDebugOverlays(_debugMode);
     }
   }
 }
@@ -94,14 +100,14 @@
   _drawingMode = mode.compare("continuous") == 0 ? RNSkia::RNSkDrawingMode::Continuous : RNSkia::RNSkDrawingMode::Default;
   
   if(_impl != nullptr) {
-    _impl->setDrawingMode(_drawingMode);
+    _impl->getDrawView()->setDrawingMode(_drawingMode);
   }
 }
 
 -(void) setDebugMode:(bool) debugMode {
   _debugMode = debugMode;
   if(_impl != nullptr) {
-    _impl->setShowDebugOverlays(debugMode);
+    _impl->getDrawView()->setShowDebugOverlays(debugMode);
   }
 }
 
@@ -109,13 +115,13 @@
   _nativeId = nativeId;
   
   if(_impl != nullptr) {
-    _manager->registerSkiaDrawView(nativeId, _impl);
+    _manager->registerSkiaDrawView(nativeId, _impl->getDrawView());
   }
 }
 
 #pragma mark External API
 
-- (std::shared_ptr<RNSkiOSJsView>) impl {
+- (std::shared_ptr<RNSkBaseiOSView>) impl {
   return _impl;
 }
 
@@ -165,7 +171,7 @@
       nextTouches.push_back(nextTouch);
     }
     if(_impl != nullptr) {
-      _impl->updateTouchState(nextTouches);
+      _impl->getDrawView()->updateTouchState(nextTouches);
     }
   }
 }

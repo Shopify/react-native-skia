@@ -1,9 +1,15 @@
 #include <SkiaDrawViewManager.h>
 #include <React/RCTBridge+Private.h>
 
+#include <RNSkPlatformContext.h>
+#include <RNSkJsView.h>
+#include <RNSkIOSView.h>
+
 #include <SkiaManager.h>
 #include <RNSkiaModule.h>
 #include <SkiaDrawView.h>
+
+
 
 @implementation SkiaDrawViewManager
 
@@ -35,7 +41,10 @@ RCT_EXPORT_MODULE(ReactNativeSkiaView)
 {
   auto skManager = [[self skiaManager] skManager];
   // Pass SkManager as a raw pointer to avoid circular dependenciesr
-  return [[SkiaDrawView alloc] initWithManager:skManager.get()];
+  return [[SkiaDrawView alloc] initWithManager: skManager.get()
+                                       factory: [](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
+    return std::make_shared<RNSkiOSView<RNSkia::RNSkJsView>>(context);
+  }];
 }
 
 @end
