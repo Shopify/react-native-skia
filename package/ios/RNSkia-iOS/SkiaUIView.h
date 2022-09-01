@@ -11,7 +11,7 @@
 
 class RNSkiOSJsView;
 
-@interface SkiaDrawView : UIView
+@interface SkiaUIView : UIView
 
 - (instancetype)initWithManager: (RNSkia::RNSkManager*)manager
                         factory: (std::function<std::shared_ptr<RNSkBaseiOSView>(

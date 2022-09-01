@@ -1,13 +1,13 @@
 #import <React/RCTBridge.h>
 
-#import <SkiaDrawView.h>
+#import <SkiaUIView.h>
 
 #include <utility>
 #include <vector>
 
 #import <RNSkManager.h>
 
-@implementation SkiaDrawView {
+@implementation SkiaUIView {
   std::shared_ptr<RNSkBaseiOSView> _impl;
   RNSkia::RNSkManager* _manager;
   RNSkia::RNSkDrawingMode _drawingMode;
