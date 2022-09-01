@@ -14,6 +14,7 @@ export enum NodeType {
 
   Shader = "skShader",
   ImageShader = "skImageShader",
+  LinearGradient = "skLinearGradient",
 
   BlurMaskFilter = "skBlurMaskFilter",
 

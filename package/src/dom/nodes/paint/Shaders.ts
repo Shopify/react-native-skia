@@ -1,3 +1,5 @@
+import type { SkColor } from "../../../skia/types/Color";
+import type { SkPoint } from "../../../../lib/typescript/src/skia/types/Point";
 import type {
   SkImage,
   SkShader,
@@ -8,7 +10,12 @@ import type {
   SkRuntimeEffect,
   Skia,
 } from "../../../skia/types";
-import { DeclarationNode, DeclarationType, NestedDeclarationNode, NodeType } from "../Node";
+import {
+  DeclarationNode,
+  DeclarationType,
+  NestedDeclarationNode,
+  NodeType,
+} from "../Node";
 
 export interface ShaderNodeProps {
   runtimeEffect: SkRuntimeEffect;
@@ -55,5 +62,41 @@ export class ImageShaderNode extends DeclarationNode<
   get() {
     const { image, tx, ty, fm, mm, localMatrix } = this.props;
     return image.makeShaderOptions(tx, ty, fm, mm, localMatrix);
+  }
+}
+
+export interface GradientNodeProps {
+  colors: SkColor[];
+  positions?: number[];
+  mode: TileMode;
+  flags?: number;
+  localMatrix?: SkMatrix;
+}
+
+export interface LinearGradientNodeProps extends GradientNodeProps {
+  start: SkPoint;
+  end: SkPoint;
+}
+
+export class LinearGradientNode extends DeclarationNode<
+  LinearGradientNodeProps,
+  SkShader
+> {
+  constructor(props: LinearGradientNodeProps) {
+    super(DeclarationType.Shader, NodeType.LinearGradient, props);
+  }
+
+  get(Skia: Skia) {
+    const { start, end, colors, positions, mode, flags, localMatrix } =
+      this.props;
+    return Skia.Shader.MakeLinearGradient(
+      start,
+      end,
+      colors,
+      positions ?? null,
+      mode,
+      localMatrix,
+      flags
+    );
   }
 }
