@@ -1,9 +1,8 @@
 import { fitRects, rect2rect } from "../../renderer";
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
-import { BlendMode, PaintStyle, TileMode } from "../../skia/types";
+import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { StrokeCap, StrokeJoin } from "../../skia/types/Paint/Paint";
 import { GroupNode } from "../nodes/GroupNode";
 import { CircleNode, PathNode } from "../nodes/drawings";
 import { LinearGradientNode } from "../nodes/paint";
@@ -15,18 +14,18 @@ describe("Drawings", () => {
     const r = width * 0.33;
     // Root
     const root = new GroupNode(Skia, {
-      paint: { blendMode: BlendMode.Multiply },
+      blendMode: "multiply",
     });
     // C1
-    const c1 = new GroupNode(Skia, { paint: { color: Skia.Color("cyan") } });
+    const c1 = new GroupNode(Skia, { color: Skia.Color("cyan") });
     c1.addChild(new CircleNode(Skia, { c: vec(r, r), r }));
     root.addChild(c1);
     // C2
-    const c2 = new GroupNode(Skia, { paint: { color: Skia.Color("magenta") } });
+    const c2 = new GroupNode(Skia, { color: Skia.Color("magenta") });
     c2.addChild(new CircleNode(Skia, { c: vec(width - r, r), r }));
     root.addChild(c2);
     // C3
-    const c3 = new GroupNode(Skia, { paint: { color: Skia.Color("yellow") } });
+    const c3 = new GroupNode(Skia, { color: Skia.Color("yellow") });
     c3.addChild(new CircleNode(Skia, { c: vec(width / 2, height - r), r }));
     root.addChild(c3);
 
@@ -56,12 +55,10 @@ describe("Drawings", () => {
     const matrix = processTransform2d(rect2rect(rects.src, rects.dst));
     const root = new GroupNode(Skia, {
       matrix,
-      paint: {
-        style: PaintStyle.Stroke,
-        strokeWidth: 116,
-        strokeJoin: StrokeJoin.Round,
-        strokeCap: StrokeCap.Round,
-      },
+      style: "stroke",
+      strokeWidth: 116,
+      strokeJoin: "round",
+      strokeCap: "round",
     });
     const colors = [
       "#3FCEBC",

@@ -1,21 +1,24 @@
 import { processColor } from "../../../renderer/processors/Color";
 import type {
   Skia,
-  PaintStyle,
-  StrokeCap,
-  StrokeJoin,
-  BlendMode,
   SkColor,
   SkPaint,
   SkMaskFilter,
   SkColorFilter,
 } from "../../../skia/types";
+import {
+  BlendMode,
+  PaintStyle,
+  StrokeJoin,
+  StrokeCap,
+} from "../../../skia/types";
 import type { SkShader } from "../../../skia/types/Shader/Shader";
 import type { SkPathEffect } from "../../../skia/types/PathEffect";
 import type { SkImageFilter } from "../../../skia/types/ImageFilter/ImageFilter";
-import type { DeclarationNode } from "../types";
-import { NodeType } from "../types";
+import type { DeclarationNode, PaintProps } from "../types";
 import { JsiNode } from "../Node";
+import { NodeType } from "../types";
+import { enumKey } from "../../../renderer/processors";
 
 export interface PaintNodeProps {
   color?: SkColor;
@@ -29,7 +32,7 @@ export interface PaintNodeProps {
   antiAlias?: boolean;
 }
 
-export class PaintNode extends JsiNode<PaintNodeProps> {
+export class PaintNode extends JsiNode<PaintProps> {
   private cache: SkPaint | null = null;
   private shader?: DeclarationNode<unknown, SkShader>;
   private maskFilter?: DeclarationNode<unknown, SkMaskFilter>;
@@ -37,7 +40,7 @@ export class PaintNode extends JsiNode<PaintNodeProps> {
   private imageFilter?: DeclarationNode<unknown, SkImageFilter>;
   private pathEffect?: DeclarationNode<unknown, SkPathEffect>;
 
-  constructor(Skia: Skia, props: PaintNodeProps = {}) {
+  constructor(Skia: Skia, props: PaintProps = {}) {
     super(Skia, NodeType.Paint, props);
   }
 
@@ -93,16 +96,16 @@ export class PaintNode extends JsiNode<PaintNodeProps> {
       paint.setColor(c);
     }
     if (blendMode !== undefined) {
-      paint.setBlendMode(blendMode);
+      paint.setBlendMode(BlendMode[enumKey(blendMode)]);
     }
     if (style !== undefined) {
-      paint.setStyle(style);
+      paint.setStyle(PaintStyle[enumKey(style)]);
     }
     if (strokeJoin !== undefined) {
-      paint.setStrokeJoin(strokeJoin);
+      paint.setStrokeJoin(StrokeJoin[enumKey(strokeJoin)]);
     }
     if (strokeCap !== undefined) {
-      paint.setStrokeCap(strokeCap);
+      paint.setStrokeCap(StrokeCap[enumKey(strokeCap)]);
     }
     if (strokeMiter !== undefined) {
       paint.setStrokeMiter(strokeMiter);

@@ -1,42 +1,108 @@
 import type {
-  Skia,
   SkMatrix,
-  SkPath,
   SkPathEffect,
   SkRect,
   SkRRect,
   SkShader,
+  Skia,
 } from "../../skia/types";
-import { ClipOp } from "../../skia/types";
+import { isRRect, processTransform, ClipOp } from "../../skia/types";
 import type { SkMaskFilter } from "../../skia/types/MaskFilter";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 import type { SkImageFilter } from "../../skia/types/ImageFilter/ImageFilter";
 import { exhaustiveCheck } from "../../renderer/typeddash";
+import type { SkPath } from "../../skia/types/Path/Path";
+import { isPathDef, processPath } from "../../renderer/processors";
 
-import type { PaintNodeProps } from "./paint/PaintNode";
 import { PaintNode } from "./paint/PaintNode";
 import { JsiRenderNode } from "./Node";
-import type { DeclarationNode, DrawingContext, RenderNode } from "./types";
+import type {
+  DeclarationNode,
+  DrawingContext,
+  GroupProps,
+  RenderNode,
+} from "./types";
 import { NodeType } from "./types";
 
-export interface GroupNodeProps {
+export class GroupNode extends JsiRenderNode<GroupProps> {
+  paint?: PaintNode;
   matrix?: SkMatrix;
-  paint?: PaintNodeProps;
   clipRect?: SkRect;
   clipRRect?: SkRRect;
-  invertClip?: boolean;
   clipPath?: SkPath;
-}
 
-export class GroupNode extends JsiRenderNode<GroupNodeProps> {
-  paint?: PaintNode;
   children: RenderNode<unknown>[] = [];
 
-  constructor(Skia: Skia, props: GroupNodeProps = {}) {
+  constructor(Skia: Skia, props: GroupProps = {}) {
     super(Skia, NodeType.Group, props);
-    if (props.paint) {
-      this.paint = new PaintNode(this.Skia, props.paint);
+    if (this.hasCustomPaint()) {
+      this.paint = new PaintNode(this.Skia, props);
     }
+    this.onPropChange();
+  }
+
+  private onPropChange() {
+    this.matrix = undefined;
+    this.clipPath = undefined;
+    this.clipRect = undefined;
+    this.clipRRect = undefined;
+    this.computeMatrix();
+    this.computeClip();
+  }
+
+  private computeClip() {
+    const { clip } = this.props;
+    if (clip) {
+      if (isPathDef(clip)) {
+        this.clipPath = processPath(this.Skia, clip);
+      } else if (isRRect(clip)) {
+        this.clipRRect = clip;
+      } else {
+        this.clipRect = clip;
+      }
+    }
+  }
+
+  private computeMatrix() {
+    const { transform, origin, matrix } = this.props;
+    if (matrix) {
+      this.matrix = matrix;
+    } else if (transform) {
+      const m = this.Skia.Matrix();
+      if (origin) {
+        m.translate(origin.x, origin.y);
+      }
+      processTransform(m, transform);
+      if (origin) {
+        m.translate(-origin.x, -origin.y);
+      }
+      this.matrix = m;
+    }
+  }
+
+  private hasCustomPaint() {
+    const {
+      color,
+      strokeWidth,
+      blendMode,
+      style,
+      strokeJoin,
+      strokeCap,
+      strokeMiter,
+      opacity,
+      antiAlias,
+    } = this.props;
+    return (
+      color !== undefined ||
+      strokeWidth !== undefined ||
+      blendMode !== undefined ||
+      style !== undefined ||
+      strokeJoin !== undefined ||
+      strokeCap !== undefined ||
+      strokeMiter !== undefined ||
+      opacity !== undefined ||
+      antiAlias !== undefined
+    );
   }
 
   addChild(child: RenderNode<unknown>) {
@@ -70,12 +136,12 @@ export class GroupNode extends JsiRenderNode<GroupNodeProps> {
   }
 
   render(parentCtx: DrawingContext) {
-    const { invertClip, matrix, clipRect, clipRRect, clipPath } = this.props;
+    const { invertClip } = this.props;
     const { canvas } = parentCtx;
 
     const opacity =
-      this.props.paint && this.props.paint.opacity
-        ? parentCtx.opacity * this.props.paint.opacity
+      this.props.paint && this.props.opacity
+        ? parentCtx.opacity * this.props.opacity
         : parentCtx.opacity;
 
     const paint = this.paint
@@ -84,8 +150,8 @@ export class GroupNode extends JsiRenderNode<GroupNodeProps> {
 
     // TODO: can we only recreate a new context here if needed?
     const ctx = { ...parentCtx, opacity, paint };
-    const hasTransform = matrix !== undefined;
-    const hasClip = clipRect !== undefined;
+    const hasTransform = this.matrix !== undefined;
+    const hasClip = this.clipRect !== undefined;
     const shouldSave = hasTransform || hasClip;
     const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
 
@@ -93,17 +159,17 @@ export class GroupNode extends JsiRenderNode<GroupNodeProps> {
       canvas.save();
     }
 
-    if (matrix) {
-      canvas.concat(matrix);
+    if (this.matrix) {
+      canvas.concat(this.matrix);
     }
-    if (clipRect) {
-      canvas.clipRect(clipRect, op, true);
+    if (this.clipRect) {
+      canvas.clipRect(this.clipRect, op, true);
     }
-    if (clipRRect) {
-      canvas.clipRRect(clipRRect, op, true);
+    if (this.clipRRect) {
+      canvas.clipRRect(this.clipRRect, op, true);
     }
-    if (clipPath) {
-      canvas.clipPath(clipPath, op, true);
+    if (this.clipPath) {
+      canvas.clipPath(this.clipPath, op, true);
     }
 
     this.children.forEach((child) => child.render(ctx));

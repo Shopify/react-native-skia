@@ -1,5 +1,5 @@
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
-import { BlendMode, BlurStyle } from "../../skia/types";
+import { BlurStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { CircleNode, FillNode } from "../nodes/drawings";
@@ -15,11 +15,11 @@ describe("Drawings", () => {
     const c2 = Skia.Color("#529ca0");
     const R = width / 4;
     const color = Skia.Color("rgb(36,43,56)");
-    const root = new GroupNode(Skia, { paint: { color } });
+    const root = new GroupNode(Skia, { color });
     root.addChild(new FillNode(Skia));
 
     const rings = new GroupNode(Skia, {
-      paint: { blendMode: BlendMode.Screen },
+      blendMode: "screen",
     });
     rings.addEffect(
       new BlurMaskFilterNode(Skia, {
@@ -35,7 +35,7 @@ describe("Drawings", () => {
       matrix.translate(x, y);
       const ring = new GroupNode(Skia, {
         matrix,
-        paint: { color: i % 2 ? c1 : c2 },
+        color: i % 2 ? c1 : c2,
       });
       ring.addChild(new CircleNode(Skia, { c, r: R }));
       rings.addChild(ring);

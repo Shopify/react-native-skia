@@ -41,3 +41,16 @@ export interface NestedDeclarationNode<
 > extends DeclarationNode<P, T, Nullable> {
   addChild(child: DeclarationNode<unknown, T>): void;
 }
+
+export interface GroupNode extends RenderNode<unknown> {
+  addChild(child: RenderNode<unknown>): void;
+
+  addEffect(
+    effect:
+      | DeclarationNode<unknown, SkShader>
+      | DeclarationNode<unknown, SkImageFilter>
+      | DeclarationNode<unknown, SkColorFilter>
+      | DeclarationNode<unknown, SkMaskFilter>
+      | DeclarationNode<unknown, SkPathEffect>
+  ): void;
+}

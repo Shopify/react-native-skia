@@ -4,7 +4,6 @@ import {
   height,
   PIXEL_RATIO,
 } from "../../renderer/__tests__/setup";
-import { PaintStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
 import { CircleNode } from "../nodes/drawings";
@@ -37,21 +36,21 @@ describe("Paint", () => {
     const r = (width - strokeWidth) / 2;
     const color = Skia.Color("red");
 
-    const root = new GroupNode(Skia, { paint: { color } });
+    const root = new GroupNode(Skia, { color });
 
     const circle = new CircleNode(Skia, { c, r });
     circle.addPaint(new PaintNode(Skia, { color: Skia.Color("lightblue") }));
     circle.addPaint(
       new PaintNode(Skia, {
         color: Skia.Color("#adbce6"),
-        style: PaintStyle.Stroke,
+        style: "stroke",
         strokeWidth,
       })
     );
     circle.addPaint(
       new PaintNode(Skia, {
         color: Skia.Color("#ade6d8"),
-        style: PaintStyle.Stroke,
+        style: "stroke",
         strokeWidth: strokeWidth / 2,
       })
     );
@@ -67,28 +66,24 @@ describe("Paint", () => {
     const strokeWidth = 30 * PIXEL_RATIO;
     const r = width / 2 - strokeWidth / 2;
     const c = vec(width / 2, height / 2);
-    const root = new GroupNode(Skia, { paint: { opacity: 0.5 } });
+    const root = new GroupNode(Skia, { opacity: 0.5 });
 
-    const c1 = new GroupNode(Skia, { paint: { color: Skia.Color("red") } });
+    const c1 = new GroupNode(Skia, { color: Skia.Color("red") });
     c1.addChild(new CircleNode(Skia, { c, r }));
     root.addChild(c1);
 
     const c2 = new GroupNode(Skia, {
-      paint: {
-        color: Skia.Color("lightblue"),
-        style: PaintStyle.Stroke,
-        strokeWidth,
-      },
+      color: Skia.Color("lightblue"),
+      style: "stroke",
+      strokeWidth,
     });
     c2.addChild(new CircleNode(Skia, { c, r }));
     root.addChild(c2);
 
     const c3 = new GroupNode(Skia, {
-      paint: {
-        color: Skia.Color("mint"),
-        style: PaintStyle.Stroke,
-        strokeWidth: strokeWidth / 2,
-      },
+      color: Skia.Color("mint"),
+      style: "stroke",
+      strokeWidth: strokeWidth / 2,
     });
     c3.addChild(new CircleNode(Skia, { c, r }));
     root.addChild(c3);
