@@ -2,6 +2,7 @@ import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { BlurStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
+import { JsiSkDOM } from "../nodes";
 import { CircleNode, FillNode } from "../nodes/drawings";
 import { GroupNode } from "../nodes/GroupNode";
 import { BlurMaskFilterNode } from "../nodes/paint";
@@ -10,15 +11,16 @@ describe("Drawings", () => {
   it("Hello World", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, vec, polar2Canvas } = importSkia();
+    const Sk = new JsiSkDOM(Skia);
     const c = vec(width / 2, height / 2);
     const c1 = Skia.Color("#61bea2");
     const c2 = Skia.Color("#529ca0");
     const R = width / 4;
     const color = Skia.Color("rgb(36,43,56)");
-    const root = new GroupNode(Skia, { color });
+    const root = Sk.Group({ color });
     root.addChild(new FillNode(Skia));
 
-    const rings = new GroupNode(Skia, {
+    const rings = Sk.Group({
       blendMode: "screen",
     });
     rings.addEffect(
@@ -33,7 +35,7 @@ describe("Drawings", () => {
       const matrix = Skia.Matrix();
       const { x, y } = polar2Canvas({ theta, radius: R }, { x: 0, y: 0 });
       matrix.translate(x, y);
-      const ring = new GroupNode(Skia, {
+      const ring = Sk.Group({
         matrix,
         color: i % 2 ? c1 : c2,
       });

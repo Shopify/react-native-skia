@@ -6,7 +6,7 @@ import { GroupNode } from "./GroupNode";
 export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}
 
-  Group(props: GroupProps) {
+  Group(props?: GroupProps) {
     return new GroupNode(this.Skia, props);
   }
 }

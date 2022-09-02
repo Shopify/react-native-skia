@@ -26,12 +26,12 @@ describe("Group", () => {
     );
 
     // Root
-    const root = new GroupNode(Skia, {
+    const root = Sk.Group({
       color: Skia.Color("lightblue"),
     });
     root.addChild(new FillNode(Skia));
 
-    const clipNode = new GroupNode(Skia, { clip: clipRect });
+    const clipNode = Sk.Group({ clip: clipRect });
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),
@@ -54,7 +54,7 @@ describe("Group", () => {
       r
     );
 
-    const root = new GroupNode(Skia, { clip: clipRRect });
+    const root = Sk.Group({ clip: clipRRect });
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),
@@ -76,7 +76,7 @@ describe("Group", () => {
     expect(clipPath).toBeTruthy();
     clipPath.transform(processTransform2d([{ scale: 3 }]));
 
-    const root = new GroupNode(Skia, { clip: clipPath });
+    const root = Sk.Group({ clip: clipPath });
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),
@@ -98,7 +98,7 @@ describe("Group", () => {
     expect(clipPath).toBeTruthy();
     clipPath.transform(processTransform2d([{ scale: 3 }]));
 
-    const root = new GroupNode(Skia, { clip: clipPath, invertClip: true });
+    const root = Sk.Group({ clip: clipPath, invertClip: true });
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),

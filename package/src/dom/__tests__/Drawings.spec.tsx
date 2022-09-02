@@ -13,19 +13,19 @@ describe("Drawings", () => {
     const { Skia, vec } = importSkia();
     const r = width * 0.33;
     // Root
-    const root = new GroupNode(Skia, {
+    const root = Sk.Group({
       blendMode: "multiply",
     });
     // C1
-    const c1 = new GroupNode(Skia, { color: Skia.Color("cyan") });
+    const c1 = Sk.Group({ color: Skia.Color("cyan") });
     c1.addChild(new CircleNode(Skia, { c: vec(r, r), r }));
     root.addChild(c1);
     // C2
-    const c2 = new GroupNode(Skia, { color: Skia.Color("magenta") });
+    const c2 = Sk.Group({ color: Skia.Color("magenta") });
     c2.addChild(new CircleNode(Skia, { c: vec(width - r, r), r }));
     root.addChild(c2);
     // C3
-    const c3 = new GroupNode(Skia, { color: Skia.Color("yellow") });
+    const c3 = Sk.Group({ color: Skia.Color("yellow") });
     c3.addChild(new CircleNode(Skia, { c: vec(width / 2, height - r), r }));
     root.addChild(c3);
 

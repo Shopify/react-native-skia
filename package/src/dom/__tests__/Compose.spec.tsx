@@ -7,9 +7,9 @@ import {
 import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
+import { JsiSkDOM } from "../nodes";
 import { fitRects } from "../nodes/datatypes";
 import { ImageNode } from "../nodes/drawings";
-import { GroupNode } from "../nodes/GroupNode";
 import { BlurImageFilterNode } from "../nodes/paint";
 import { MatrixColorFilterNode } from "../nodes/paint/ColorFilters";
 
@@ -18,13 +18,14 @@ describe("Compose", () => {
     const size = width;
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, rect } = importSkia();
+    const Sk = new JsiSkDOM(Skia);
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),
       rect(0, 0, size, size)
     );
-    const root = new GroupNode(Skia);
+    const root = Sk.Group();
 
     const img = new ImageNode(Skia, { image, src, dst });
     root.addChild(img);
