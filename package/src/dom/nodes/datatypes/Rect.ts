@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Skia, SkRect, SkRRect, Vector } from "../../../skia/types";
+import type { Radius } from "../../types";
 
-import type { Radius } from "./Radius";
 import { processRadius } from "./Radius";
 
 export const isEdge = (pos: Vector, b: SkRect) =>

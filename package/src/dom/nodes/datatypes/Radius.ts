@@ -1,6 +1,5 @@
 import type { Skia, Vector } from "../../../skia/types";
-
-export type Radius = number | Vector;
+import type { Radius } from "../../types";
 
 export const processRadius = (Skia: Skia, radius: Radius): Vector => {
   if (typeof radius === "number") {

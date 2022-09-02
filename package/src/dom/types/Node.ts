@@ -38,9 +38,10 @@ export interface DeclarationNode<P, T, Nullable extends null | never = never>
 export interface NestedDeclarationNode<
   P,
   T,
+  C = T,
   Nullable extends null | never = never
 > extends DeclarationNode<P, T, Nullable> {
-  addChild(child: DeclarationNode<unknown, T>): void;
+  addChild(child: DeclarationNode<unknown, C>): void;
 }
 
 export interface GroupNode<P> extends RenderNode<P> {

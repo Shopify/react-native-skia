@@ -4,17 +4,15 @@ import {
   height,
   loadImage,
 } from "../../renderer/__tests__/setup";
-import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { BlurImageFilterNode } from "../nodes/paint";
 import { MatrixColorFilterNode } from "../nodes/paint/ColorFilters";
 
 describe("Compose", () => {
   it("should compose image filters", () => {
     const size = width;
     const { surface, canvas } = setupSkia(width, height);
-    const { Skia, rect } = importSkia();
+    const { Skia, rect, vec } = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
 
     const root = Sk.Group();
@@ -31,11 +29,7 @@ describe("Compose", () => {
     ];
     const cf = new MatrixColorFilterNode(Skia, { colorMatrix });
 
-    const blur = new BlurImageFilterNode(Skia, {
-      sigmaX: 10,
-      sigmaY: 10,
-      mode: TileMode.Decal,
-    });
+    const blur = Sk.BlurImageFilter({ blur: vec(10, 10), mode: "decal" });
     blur.addChild(cf);
     root.addEffect(blur);
 

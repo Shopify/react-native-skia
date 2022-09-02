@@ -9,11 +9,12 @@ import type {
   SkRect,
   SkRuntimeShaderBuilder,
   SkShader,
-  TileMode,
 } from "../../../skia/types";
+import { TileMode } from "../../../skia/types";
 import { JsiNestedDeclarationNode } from "../Node";
-import type { DeclarationNode } from "../../types";
+import type { BlurImageFilterProps, DeclarationNode } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
+import { processRadius, enumKey } from "../datatypes";
 
 abstract class ImageFilterDeclaration<
   P,
@@ -130,23 +131,18 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
   }
 }
 
-export interface BlurImageFilterNodeProps {
-  sigmaX: number;
-  sigmaY: number;
-  mode: TileMode;
-}
-
-export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterNodeProps> {
-  constructor(Skia: Skia, props: BlurImageFilterNodeProps) {
+export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterProps> {
+  constructor(Skia: Skia, props: BlurImageFilterProps) {
     super(Skia, NodeType.BlurImageFilter, props);
   }
 
   get() {
-    const { sigmaX, sigmaY, mode } = this.props;
+    const { mode, blur } = this.props;
+    const sigma = processRadius(this.Skia, blur);
     return this.Skia.ImageFilter.MakeBlur(
-      sigmaX,
-      sigmaY,
-      mode,
+      sigma.x,
+      sigma.y,
+      TileMode[enumKey(mode)],
       this.getChild()
     );
   }

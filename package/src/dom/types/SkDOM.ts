@@ -1,47 +1,35 @@
-import type { ReactNode, RefObject } from "react";
+import type { RefObject } from "react";
 
 import type {
   BlendMode,
   Color,
   PaintStyle,
   SkImage,
+  SkImageFilter,
   SkMatrix,
   SkPaint,
-  SkPath,
-  SkRect,
-  SkRRect,
+  SkShader,
   StrokeCap,
   StrokeJoin,
   Transforms2d,
   Vector,
 } from "../../skia/types";
 import type { RectDef } from "../nodes/datatypes";
+import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 
-import type { DrawingNodeProps, GroupNode, DrawingNode } from "./Node";
-
-export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
-
-export type PathDef = string | SkPath;
-
-export type ClipDef = SkRRect | SkRect | PathDef;
-
-export type Fit =
-  | "cover"
-  | "contain"
-  | "fill"
-  | "fitHeight"
-  | "fitWidth"
-  | "none"
-  | "scaleDown";
+import type { ChildrenProps, ClipDef, Fit, SkEnum } from "./Common";
+import type { BlurImageFilterProps } from "./ImageFilters";
+import type {
+  DrawingNodeProps,
+  GroupNode,
+  DrawingNode,
+  NestedDeclarationNode,
+} from "./Node";
 
 export interface TransformProps {
   transform?: Transforms2d;
   origin?: Vector;
   matrix?: SkMatrix;
-}
-
-export interface ChildrenProps {
-  children?: ReactNode | ReactNode[];
 }
 
 export interface PaintProps extends ChildrenProps {
@@ -63,6 +51,8 @@ export interface GroupProps extends PaintProps, TransformProps {
   layer?: RefObject<SkPaint> | SkPaint | boolean;
 }
 
+// Drawings
+
 export type ImageProps = DrawingNodeProps &
   RectDef & {
     fit: Fit;
@@ -70,7 +60,16 @@ export type ImageProps = DrawingNodeProps &
   };
 
 export interface SkDOM {
-  Group: (props?: GroupProps) => GroupNode<GroupProps>;
-  Fill: (props?: DrawingNodeProps) => DrawingNode<DrawingNodeProps>;
-  Image: (props: ImageProps) => DrawingNode<ImageProps>;
+  Group(props?: GroupProps): GroupNode<GroupProps>;
+  // Drawings
+  Fill(props?: DrawingNodeProps): DrawingNode<DrawingNodeProps>;
+  Image(props: ImageProps): DrawingNode<ImageProps>;
+  // ImageFilters
+  BlurImageFilter(
+    props: BlurImageFilterProps
+  ): NestedDeclarationNode<
+    BlurImageFilterProps,
+    SkImageFilter,
+    SkImageFilter | SkColorFilter | SkShader
+  >;
 }
