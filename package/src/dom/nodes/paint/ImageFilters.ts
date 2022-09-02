@@ -12,8 +12,8 @@ import type {
   TileMode,
 } from "../../../skia/types";
 import { JsiNestedDeclarationNode } from "../Node";
-import type { DeclarationNode } from "../types";
-import { DeclarationType, NodeType } from "../types";
+import type { DeclarationNode } from "../../types";
+import { DeclarationType, NodeType } from "../../types";
 
 abstract class ImageFilterDeclaration<
   P,

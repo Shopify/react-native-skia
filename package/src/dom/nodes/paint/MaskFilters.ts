@@ -1,6 +1,6 @@
 import type { Skia, BlurStyle, SkMaskFilter } from "../../../skia/types";
 import { JsiDeclarationNode } from "../Node";
-import { DeclarationType, NodeType } from "../types";
+import { DeclarationType, NodeType } from "../../types";
 
 export interface BlurMaskFilterNodeProps {
   style: BlurStyle;

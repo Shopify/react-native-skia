@@ -11,7 +11,7 @@ import type {
   SkRuntimeEffect,
 } from "../../../skia/types";
 import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
-import { DeclarationType, NodeType } from "../types";
+import { DeclarationType, NodeType } from "../../types";
 
 export interface ShaderNodeProps {
   runtimeEffect: SkRuntimeEffect;

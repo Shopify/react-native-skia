@@ -6,9 +6,8 @@ import type {
   SkShader,
   SkPathEffect,
 } from "../../skia/types";
-
-import type { Node, DrawingContext, DeclarationNode, NodeType } from "./types";
-import { DeclarationType } from "./types";
+import type { Node, DrawingContext, DeclarationNode, NodeType } from "../types";
+import { DeclarationType } from "../types";
 
 export abstract class JsiNode<P> implements Node<P> {
   constructor(

@@ -15,9 +15,9 @@ import {
 import type { SkShader } from "../../../skia/types/Shader/Shader";
 import type { SkPathEffect } from "../../../skia/types/PathEffect";
 import type { SkImageFilter } from "../../../skia/types/ImageFilter/ImageFilter";
-import type { DeclarationNode, PaintProps } from "../types";
+import type { DeclarationNode, PaintProps } from "../../types";
 import { JsiNode } from "../Node";
-import { NodeType } from "../types";
+import { NodeType } from "../../types";
 import { enumKey } from "../../../renderer/processors";
 
 export interface PaintNodeProps {

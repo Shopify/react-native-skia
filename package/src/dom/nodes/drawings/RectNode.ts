@@ -1,7 +1,7 @@
 import type { Skia } from "../../../skia/types";
 import type { SkRect } from "../../../skia/types/Rect";
-import type { DrawingContext } from "../types";
-import { NodeType } from "../types";
+import type { DrawingContext } from "../../types";
+import { NodeType } from "../../types";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";

@@ -1,4 +1,4 @@
-import type { SkCanvas, SkPaint } from "../../../skia/types";
+import type { SkCanvas, SkPaint } from "../../skia/types";
 
 export interface DrawingContext {
   canvas: SkCanvas;

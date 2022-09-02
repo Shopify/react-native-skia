@@ -1,6 +1,6 @@
 import type { ReactNode, RefObject } from "react";
 
-import type { PathDef, SkEnum } from "../../../renderer";
+import type { PathDef, SkEnum } from "../../renderer";
 import type {
   BlendMode,
   Color,
@@ -13,7 +13,7 @@ import type {
   StrokeJoin,
   Transforms2d,
   Vector,
-} from "../../../skia/types";
+} from "../../skia/types";
 
 import type { GroupNode } from "./Node";
 

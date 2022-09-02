@@ -1,6 +1,6 @@
 import type { BlendMode, SkColor, Skia, SkPoint } from "../../../skia/types";
-import type { DrawingContext } from "../types";
-import { NodeType } from "../types";
+import type { DrawingContext } from "../../types";
+import { NodeType } from "../../types";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";

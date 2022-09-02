@@ -6,7 +6,7 @@ import type {
   SkPathEffect,
 } from "../../../skia/types";
 import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
-import { DeclarationType, NodeType } from "../types";
+import { DeclarationType, NodeType } from "../../types";
 export interface DiscretePathEffectNodeProps {
   segLength: number;
   dev: number;

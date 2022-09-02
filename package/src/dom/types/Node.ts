@@ -4,7 +4,7 @@ import type {
   SkMaskFilter,
   SkPathEffect,
   SkShader,
-} from "../../../skia/types";
+} from "../../skia/types";
 
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationType, NodeType } from "./NodeType";

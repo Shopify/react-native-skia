@@ -1,7 +1,7 @@
 import type { Skia, SkPaint } from "../../../skia/types";
 import { JsiRenderNode } from "../Node";
 import type { PaintNode } from "../paint";
-import type { DrawingContext, NodeType } from "../types";
+import type { DrawingContext, NodeType } from "../../types";
 
 export interface DrawingNodeProps {
   paint?: SkPaint;
