@@ -32,7 +32,7 @@ export const localMatrix = (
       origin ? transformOrigin(origin, transform) : transform
     );
   }
-  return undefined;
+  return m;
 };
 
 export const processGradientProps = (

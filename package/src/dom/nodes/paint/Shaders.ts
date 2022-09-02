@@ -67,7 +67,7 @@ export class ImageShaderNode extends JsiDeclarationNode<
       TileMode[enumKey(ty)],
       FilterMode[enumKey(fm)],
       MipmapMode[enumKey(mm)],
-      lm(this.Skia.Matrix(), imageShaderProps)
+      lm(this.props.matrix ?? this.Skia.Matrix(), imageShaderProps)
     );
   }
 }

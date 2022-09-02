@@ -73,7 +73,7 @@ half4 main(float2 xy) {
 
   it("Should have always the correct state", () => {
     const { surface, canvas } = setupSkia(width, height);
-    const { Skia } = importSkia();
+    const { Skia, processTransform2d } = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -89,7 +89,7 @@ half4 main(float2 xy) {
       { x: 0, y: 0, width: image.width(), height: image.height() },
       Skia.XYWHRect(0, 0, width, height)
     );
-    const transform = rect2rect(rects.src, rects.dst);
+    const matrix = processTransform2d(rect2rect(rects.src, rects.dst));
     const imageShader = Sk.ImageShader({
       image,
       fit: "none",
@@ -97,7 +97,7 @@ half4 main(float2 xy) {
       ty: "decal",
       fm: "nearest",
       mm: "nearest",
-      transform,
+      matrix,
     });
     const filter = Sk.Shader({
       source,
