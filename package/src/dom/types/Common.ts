@@ -22,3 +22,17 @@ export type Radius = number | Vector;
 export interface ChildrenProps {
   children?: ReactNode | ReactNode[];
 }
+
+export interface RectCtor {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface RRectCtor extends RectCtor {
+  r: Radius;
+}
+
+export type RectDef = RectCtor | { rect: SkRect };
+export type RRectDef = RRectCtor | { rect: SkRRect };

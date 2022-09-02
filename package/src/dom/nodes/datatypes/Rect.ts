@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Skia, SkRect, SkRRect, Vector } from "../../../skia/types";
-import type { Radius } from "../../types";
+import type { Skia, SkRect, Vector } from "../../../skia/types";
+import type { RectCtor, RectDef, RRectCtor, RRectDef } from "../../types";
 
 import { processRadius } from "./Radius";
 
@@ -13,20 +13,6 @@ const isRRectCtor = (def: RRectDef): def is RRectCtor =>
 // We have an issue to check property existence on JSI backed instances
 const isRectCtor = (def: RectDef): def is RectCtor =>
   (def as any).rect === undefined;
-
-export interface RectCtor {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export interface RRectCtor extends RectCtor {
-  r: Radius;
-}
-
-export type RectDef = RectCtor | { rect: SkRect };
-export type RRectDef = RRectCtor | { rect: SkRRect };
 
 export const processRect = (Skia: Skia, def: RectDef) => {
   if (isRectCtor(def)) {

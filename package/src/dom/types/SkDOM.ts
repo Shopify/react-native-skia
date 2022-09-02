@@ -4,7 +4,6 @@ import type {
   BlendMode,
   Color,
   PaintStyle,
-  SkImage,
   SkImageFilter,
   SkMatrix,
   SkPaint,
@@ -14,10 +13,9 @@ import type {
   Transforms2d,
   Vector,
 } from "../../skia/types";
-import type { RectDef } from "../nodes/datatypes";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 
-import type { ChildrenProps, ClipDef, Fit, SkEnum } from "./Common";
+import type { ChildrenProps, ClipDef, SkEnum } from "./Common";
 import type { BlurImageFilterProps } from "./ImageFilters";
 import type {
   DrawingNodeProps,
@@ -26,6 +24,7 @@ import type {
   NestedDeclarationNode,
 } from "./Node";
 import type { MatrixColorFilterProps } from "./ColorFilters";
+import type { ImageProps } from "./Drawings";
 
 export interface TransformProps {
   transform?: Transforms2d;
@@ -51,14 +50,6 @@ export interface GroupProps extends PaintProps, TransformProps {
   invertClip?: boolean;
   layer?: RefObject<SkPaint> | SkPaint | boolean;
 }
-
-// Drawings
-
-export type ImageProps = DrawingNodeProps &
-  RectDef & {
-    fit: Fit;
-    image: SkImage;
-  };
 
 export interface SkDOM {
   Group(props?: GroupProps): GroupNode<GroupProps>;
