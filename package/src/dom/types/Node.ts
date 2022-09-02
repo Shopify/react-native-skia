@@ -7,7 +7,7 @@ import type {
   SkShader,
 } from "../../skia/types";
 
-import type { PaintProps } from "./Common";
+import type { GroupProps, PaintProps } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationType, NodeType } from "./NodeType";
 
@@ -45,7 +45,7 @@ export interface NestedDeclarationNode<
   addChild(child: DeclarationNode<unknown, C>): void;
 }
 
-export interface GroupNode<P> extends RenderNode<P> {
+export interface GroupNode extends RenderNode<GroupProps> {
   addChild(child: RenderNode<unknown>): void;
 
   addEffect(
@@ -56,6 +56,14 @@ export interface GroupNode<P> extends RenderNode<P> {
       | DeclarationNode<unknown, SkMaskFilter>
       | DeclarationNode<unknown, SkPathEffect>
   ): void;
+}
+
+export interface PaintNode extends Node<PaintProps> {
+  addShader(shader: DeclarationNode<unknown, SkShader>): void;
+  addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>): void;
+  addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>): void;
+  addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>): void;
+  addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>): void;
 }
 
 export interface DrawingNodeProps {

@@ -8,12 +8,13 @@ import type {
   CircleProps,
   BlurMaskFilterProps,
   LinearGradientProps,
+  PaintProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 
 import { FillNode, ImageNode, CircleNode } from "./drawings";
 import { GroupNode } from "./GroupNode";
-import { BlurImageFilterNode, BlurMaskFilterNode } from "./paint";
+import { BlurImageFilterNode, BlurMaskFilterNode, PaintNode } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
 import { LinearGradientNode } from "./paint/Shaders";
 
@@ -22,6 +23,10 @@ export class JsiSkDOM implements SkDOM {
 
   Group(props?: GroupProps) {
     return new GroupNode(this.Skia, props);
+  }
+
+  Paint(props: PaintProps) {
+    return new PaintNode(this.Skia, props);
   }
 
   // Drawings

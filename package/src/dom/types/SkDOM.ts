@@ -1,7 +1,7 @@
 import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 
-import type { GroupProps } from "./Common";
+import type { GroupProps, PaintProps } from "./Common";
 import type { BlurImageFilterProps } from "./ImageFilters";
 import type {
   DrawingNodeProps,
@@ -9,6 +9,7 @@ import type {
   DrawingNode,
   NestedDeclarationNode,
   DeclarationNode,
+  PaintNode,
 } from "./Node";
 import type { MatrixColorFilterProps } from "./ColorFilters";
 import type { ImageProps, CircleProps } from "./Drawings";
@@ -16,7 +17,8 @@ import type { BlurMaskFilterProps } from "./MaskFilters";
 import type { LinearGradientProps } from "./Shaders";
 
 export interface SkDOM {
-  Group(props?: GroupProps): GroupNode<GroupProps>;
+  Group(props?: GroupProps): GroupNode;
+  Paint(props: PaintProps): PaintNode;
 
   // Drawings
   Fill(props?: DrawingNodeProps): DrawingNode<DrawingNodeProps>;

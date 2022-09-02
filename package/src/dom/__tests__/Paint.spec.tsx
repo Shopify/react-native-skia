@@ -6,7 +6,6 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { PaintNode } from "../nodes/paint";
 
 describe("Paint", () => {
   it("should assign a paint directly", () => {
@@ -37,16 +36,16 @@ describe("Paint", () => {
     const root = Sk.Group({ color });
 
     const circle = Sk.Circle({ c, r });
-    circle.addPaint(new PaintNode(Skia, { color: Skia.Color("lightblue") }));
+    circle.addPaint(Sk.Paint({ color: Skia.Color("lightblue") }));
     circle.addPaint(
-      new PaintNode(Skia, {
+      Sk.Paint({
         color: Skia.Color("#adbce6"),
         style: "stroke",
         strokeWidth,
       })
     );
     circle.addPaint(
-      new PaintNode(Skia, {
+      Sk.Paint({
         color: Skia.Color("#ade6d8"),
         style: "stroke",
         strokeWidth: strokeWidth / 2,
