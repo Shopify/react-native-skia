@@ -15,6 +15,11 @@ import type {
   CustomDrawingNodeProps,
   LineProps,
   OvalProps,
+  PatchProps,
+  PointsProps,
+  RectProps,
+  RoundedRectProps,
+  VerticesProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 
@@ -24,6 +29,11 @@ import {
   CircleNode,
   PathNode,
   LineNode,
+  PatchNode,
+  PointsNode,
+  RectNode,
+  RRectNode,
+  VerticesNode,
 } from "./drawings";
 import { GroupNode } from "./GroupNode";
 import { BlurImageFilterNode, BlurMaskFilterNode, PaintNode } from "./paint";
@@ -74,6 +84,26 @@ export class JsiSkDOM implements SkDOM {
 
   Oval(props: OvalProps) {
     return new OvalNode(this.Skia, props);
+  }
+
+  Patch(props: PatchProps) {
+    return new PatchNode(this.Skia, props);
+  }
+
+  Points(props: PointsProps) {
+    return new PointsNode(this.Skia, props);
+  }
+
+  Rect(props: RectProps) {
+    return new RectNode(this.Skia, props);
+  }
+
+  RRect(props: RoundedRectProps) {
+    return new RRectNode(this.Skia, props);
+  }
+
+  Vertices(props: VerticesProps) {
+    return new VerticesNode(this.Skia, props);
   }
 
   // BlurMaskFilters

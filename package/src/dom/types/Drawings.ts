@@ -1,6 +1,23 @@
-import type { FillType, SkImage, StrokeOpts, Vector } from "../../skia/types";
+import type {
+  FillType,
+  SkImage,
+  StrokeOpts,
+  Vector,
+  Color,
+  SkPoint,
+  BlendMode,
+  PointMode,
+  VertexMode,
+} from "../../skia/types";
 
-import type { CircleDef, Fit, PathDef, RectDef, SkEnum } from "./Common";
+import type {
+  CircleDef,
+  Fit,
+  PathDef,
+  RectDef,
+  RRectDef,
+  SkEnum,
+} from "./Common";
 import type { DrawingContext } from "./DrawingContext";
 import type { DrawingNodeProps } from "./Node";
 
@@ -30,3 +47,39 @@ export interface LineProps extends DrawingNodeProps {
 }
 
 export type OvalProps = RectDef & DrawingNodeProps;
+
+export type RectProps = RectDef & DrawingNodeProps;
+
+export type RoundedRectProps = RRectDef & DrawingNodeProps;
+
+export interface CubicBezierHandle {
+  pos: Vector;
+  c1: Vector;
+  c2: Vector;
+}
+
+export interface PatchProps extends DrawingNodeProps {
+  colors?: Color[];
+  patch: [
+    CubicBezierHandle,
+    CubicBezierHandle,
+    CubicBezierHandle,
+    CubicBezierHandle
+  ];
+  texture?: [SkPoint, SkPoint, SkPoint, SkPoint];
+  blendMode?: SkEnum<typeof BlendMode>;
+}
+
+export interface VerticesProps extends DrawingNodeProps {
+  colors?: string[];
+  vertices: SkPoint[];
+  textures?: SkPoint[];
+  mode: SkEnum<typeof VertexMode>;
+  blendMode?: SkEnum<typeof BlendMode>;
+  indices?: number[];
+}
+
+export interface PointsProps extends DrawingNodeProps {
+  points: SkPoint[];
+  mode: SkEnum<typeof PointMode>;
+}

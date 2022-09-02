@@ -1,6 +1,5 @@
 import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
-import { Oval } from "../../renderer/components/shapes/Oval";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type { BlurImageFilterProps } from "./ImageFilters";
@@ -20,6 +19,11 @@ import type {
   CustomDrawingNodeProps,
   LineProps,
   OvalProps,
+  PatchProps,
+  PointsProps,
+  RectProps,
+  RoundedRectProps,
+  VerticesProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -42,6 +46,11 @@ export interface SkDOM {
   ): DrawingNode<CustomDrawingNodeProps>;
   Line(props: LineProps): DrawingNode<LineProps>;
   Oval(props: OvalProps): DrawingNode<OvalProps>;
+  Patch(props: PatchProps): DrawingNode<PatchProps>;
+  Points(props: PointsProps): DrawingNode<PointsProps>;
+  Rect(props: RectProps): DrawingNode<RectProps>;
+  RRect(props: RoundedRectProps): DrawingNode<RoundedRectProps>;
+  Vertices(props: VerticesProps): DrawingNode<VerticesProps>;
 
   // BlurMaskFilters
   BlurMaskFilter(

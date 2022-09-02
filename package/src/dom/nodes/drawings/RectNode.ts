@@ -1,23 +1,27 @@
 import type { Skia } from "../../../skia/types";
 import type { SkRect } from "../../../skia/types/Rect";
-import type { DrawingContext, DrawingNodeProps } from "../../types";
+import type { DrawingContext, RectProps } from "../../types";
 import { NodeType } from "../../types";
+import { processRect } from "../datatypes";
 
 import { JsiDrawingNode } from "./DrawingNode";
 
-export interface RectNodeProps extends DrawingNodeProps {
-  rect: SkRect;
-}
+export class RectNode extends JsiDrawingNode<RectProps> {
+  rect?: SkRect;
 
-export class RectNode extends JsiDrawingNode<RectNodeProps> {
-  constructor(Skia: Skia, props: RectNodeProps) {
+  constructor(Skia: Skia, props: RectProps) {
     super(Skia, NodeType.Rect, props);
+    this.onPropChange();
   }
 
-  onPropChange() {}
+  onPropChange() {
+    this.rect = processRect(this.Skia, this.props);
+  }
 
   draw({ canvas, paint }: DrawingContext) {
-    const { rect } = this.props;
-    canvas.drawRect(rect, paint);
+    if (this.rect === undefined) {
+      throw new Error("OvalNode: rect is undefined");
+    }
+    canvas.drawRect(this.rect, paint);
   }
 }
