@@ -1,9 +1,7 @@
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
-import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { PathNode } from "../nodes/drawings";
-import { LinearGradientNode } from "../nodes/paint";
 import { fitRects, rect2rect } from "../nodes/datatypes";
 
 describe("Drawings", () => {
@@ -73,11 +71,11 @@ describe("Drawings", () => {
       "#41E08D",
     ].map((cl) => Skia.Color(cl));
     root.addEffect(
-      new LinearGradientNode(Skia, {
+      Sk.LinearGradient({
         start: path.getPoint(0),
         end: path.getLastPt(),
         colors,
-        mode: TileMode.Clamp,
+        mode: "clamp",
       })
     );
     const pathNode = new PathNode(Skia, { path, start: 0, end: 1 });

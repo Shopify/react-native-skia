@@ -7,3 +7,4 @@ export * from "./Drawings";
 export * from "./ImageFilters";
 export * from "./ColorFilters";
 export * from "./MaskFilters";
+export * from "./Shaders";

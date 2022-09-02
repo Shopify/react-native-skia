@@ -13,6 +13,7 @@ import type {
 import type { MatrixColorFilterProps } from "./ColorFilters";
 import type { ImageProps, CircleProps } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
+import type { LinearGradientProps } from "./Shaders";
 
 export interface SkDOM {
   Group(props?: GroupProps): GroupNode<GroupProps>;
@@ -40,4 +41,9 @@ export interface SkDOM {
   MatrixColorFilter(
     props: MatrixColorFilterProps
   ): NestedDeclarationNode<MatrixColorFilterProps, SkColorFilter>;
+
+  // Shaders
+  LinearGradient(
+    props: LinearGradientProps
+  ): DeclarationNode<LinearGradientProps, SkShader>;
 }
