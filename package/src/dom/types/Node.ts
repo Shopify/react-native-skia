@@ -2,6 +2,7 @@ import type {
   SkColorFilter,
   SkImageFilter,
   SkMaskFilter,
+  SkPaint,
   SkPathEffect,
   SkShader,
 } from "../../skia/types";
@@ -42,7 +43,7 @@ export interface NestedDeclarationNode<
   addChild(child: DeclarationNode<unknown, T>): void;
 }
 
-export interface GroupNode extends RenderNode<unknown> {
+export interface GroupNode<P> extends RenderNode<P> {
   addChild(child: RenderNode<unknown>): void;
 
   addEffect(
@@ -54,3 +55,9 @@ export interface GroupNode extends RenderNode<unknown> {
       | DeclarationNode<unknown, SkPathEffect>
   ): void;
 }
+
+export interface DrawingNodeProps {
+  paint?: SkPaint;
+}
+
+export type DrawingNode<P extends DrawingNodeProps> = RenderNode<P>;

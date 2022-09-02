@@ -1,9 +1,8 @@
 import type { BlendMode, SkColor, Skia, SkPoint } from "../../../skia/types";
-import type { DrawingContext } from "../../types";
+import type { DrawingContext, DrawingNodeProps } from "../../types";
 import { NodeType } from "../../types";
 
-import type { DrawingNodeProps } from "./DrawingNode";
-import { DrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "./DrawingNode";
 
 export interface PatchNodeProps extends DrawingNodeProps {
   cubics: SkPoint[];
@@ -12,7 +11,7 @@ export interface PatchNodeProps extends DrawingNodeProps {
   mode?: BlendMode;
 }
 
-export class PatchNode extends DrawingNode<PatchNodeProps> {
+export class PatchNode extends JsiDrawingNode<PatchNodeProps> {
   constructor(Skia: Skia, props: PatchNodeProps) {
     super(Skia, NodeType.Patch, props);
   }

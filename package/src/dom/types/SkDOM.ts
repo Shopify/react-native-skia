@@ -4,6 +4,7 @@ import type {
   BlendMode,
   Color,
   PaintStyle,
+  SkImage,
   SkMatrix,
   SkPaint,
   SkPath,
@@ -14,8 +15,9 @@ import type {
   Transforms2d,
   Vector,
 } from "../../skia/types";
+import type { RectDef } from "../nodes/datatypes";
 
-import type { GroupNode } from "./Node";
+import type { DrawingNodeProps, GroupNode, DrawingNode } from "./Node";
 
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
@@ -61,6 +63,14 @@ export interface GroupProps extends PaintProps, TransformProps {
   layer?: RefObject<SkPaint> | SkPaint | boolean;
 }
 
+export type ImageProps = DrawingNodeProps &
+  RectDef & {
+    fit: Fit;
+    image: SkImage;
+  };
+
 export interface SkDOM {
-  Group: (props?: GroupProps) => GroupNode;
+  Group: (props?: GroupProps) => GroupNode<GroupProps>;
+  Fill: (props?: DrawingNodeProps) => DrawingNode<DrawingNodeProps>;
+  Image: (props: ImageProps) => DrawingNode<ImageProps>;
 }

@@ -1,16 +1,15 @@
 import type { PointMode, Skia, SkPoint } from "../../../skia/types";
-import type { DrawingContext } from "../../types";
+import type { DrawingContext, DrawingNodeProps } from "../../types";
 import { NodeType } from "../../types";
 
-import type { DrawingNodeProps } from "./DrawingNode";
-import { DrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "./DrawingNode";
 
 export interface PointsNodeProps extends DrawingNodeProps {
   points: SkPoint[];
   mode: PointMode;
 }
 
-export class PointsNode extends DrawingNode<PointsNodeProps> {
+export class PointsNode extends JsiDrawingNode<PointsNodeProps> {
   constructor(Skia: Skia, props: PointsNodeProps) {
     super(Skia, NodeType.Points, props);
   }

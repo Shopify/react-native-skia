@@ -1,15 +1,14 @@
 import type { Skia, SkRRect } from "../../../skia/types";
-import type { DrawingContext } from "../../types";
+import type { DrawingContext, DrawingNodeProps } from "../../types";
 import { NodeType } from "../../types";
 
-import type { DrawingNodeProps } from "./DrawingNode";
-import { DrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "./DrawingNode";
 
 export interface RRectNodeProps extends DrawingNodeProps {
   rect: SkRRect;
 }
 
-export class RRectNode extends DrawingNode<RRectNodeProps> {
+export class RRectNode extends JsiDrawingNode<RRectNodeProps> {
   constructor(Skia: Skia, props: RRectNodeProps) {
     super(Skia, NodeType.RRect, props);
   }
