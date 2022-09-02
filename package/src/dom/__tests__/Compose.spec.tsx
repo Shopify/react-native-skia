@@ -6,7 +6,6 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { MatrixColorFilterNode } from "../nodes/paint/ColorFilters";
 
 describe("Compose", () => {
   it("should compose image filters", () => {
@@ -23,11 +22,11 @@ describe("Compose", () => {
     });
     root.addChild(img);
 
-    const colorMatrix = [
+    const matrix = [
       -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015, 1.69,
       -0.703, 0, 0, 0, 0, 0, 1, 0,
     ];
-    const cf = new MatrixColorFilterNode(Skia, { colorMatrix });
+    const cf = Sk.MatrixColorFilter({ matrix });
 
     const blur = Sk.BlurImageFilter({ blur: vec(10, 10), mode: "decal" });
     blur.addChild(cf);

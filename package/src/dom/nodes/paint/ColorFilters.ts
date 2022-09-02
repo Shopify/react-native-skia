@@ -5,23 +5,20 @@ import type {
   SkColorFilter,
 } from "../../../skia/types";
 import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
+import type { MatrixColorFilterProps } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
 
-export interface MatrixColorFilterNodeProps {
-  colorMatrix: number[];
-}
-
-export class MatrixColorFilterNode extends JsiDeclarationNode<
-  MatrixColorFilterNodeProps,
+export class MatrixColorFilterNode extends JsiNestedDeclarationNode<
+  MatrixColorFilterProps,
   SkColorFilter
 > {
-  constructor(Skia: Skia, props: MatrixColorFilterNodeProps) {
+  constructor(Skia: Skia, props: MatrixColorFilterProps) {
     super(Skia, DeclarationType.ColorFilter, NodeType.MatrixColorFilter, props);
   }
 
   get() {
-    const { colorMatrix } = this.props;
-    return this.Skia.ColorFilter.MakeMatrix(colorMatrix);
+    const { matrix } = this.props;
+    return this.Skia.ColorFilter.MakeMatrix(matrix);
   }
 }
 

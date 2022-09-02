@@ -25,6 +25,7 @@ import type {
   DrawingNode,
   NestedDeclarationNode,
 } from "./Node";
+import type { MatrixColorFilterProps } from "./ColorFilters";
 
 export interface TransformProps {
   transform?: Transforms2d;
@@ -72,4 +73,8 @@ export interface SkDOM {
     SkImageFilter,
     SkImageFilter | SkColorFilter | SkShader
   >;
+  // ColorFilters
+  MatrixColorFilter(
+    props: MatrixColorFilterProps
+  ): NestedDeclarationNode<MatrixColorFilterProps, SkColorFilter>;
 }
