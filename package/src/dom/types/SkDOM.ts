@@ -3,8 +3,10 @@ import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type {
+  BlendProps,
   BlurImageFilterProps,
   OffsetImageFilterProps,
+  RuntimeShaderImageFilterProps,
 } from "./ImageFilters";
 import type {
   DrawingNodeProps,
@@ -71,8 +73,12 @@ export interface SkDOM {
   ): DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
 
   // ImageFilters
+  BlendImageFilter(props: BlendProps): ImageFilterNode;
   BlurImageFilter(props: BlurImageFilterProps): ImageFilterNode;
   OffsetImageFilter(props: OffsetImageFilterProps): ImageFilterNode;
+  RuntimeShaderImageFilter(
+    props: RuntimeShaderImageFilterProps
+  ): ImageFilterNode;
 
   // ColorFilters
   MatrixColorFilter(

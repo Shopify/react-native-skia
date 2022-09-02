@@ -25,6 +25,10 @@ import type {
   OffsetImageFilterProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
+import type {
+  BlendProps,
+  RuntimeShaderImageFilterProps,
+} from "../types/ImageFilters";
 
 import {
   FillNode,
@@ -43,10 +47,12 @@ import {
 } from "./drawings";
 import { GroupNode } from "./GroupNode";
 import {
+  BlendImageFilterNode,
   BlurImageFilterNode,
   BlurMaskFilterNode,
   OffsetImageFilterNode,
   PaintNode,
+  RuntimeShaderImageFilterNode,
 } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
 import {
@@ -130,12 +136,20 @@ export class JsiSkDOM implements SkDOM {
   }
 
   // ImageFilters
+  BlendImageFilter(props: BlendProps) {
+    return new BlendImageFilterNode(this.Skia, props);
+  }
+
   BlurImageFilter(props: BlurImageFilterProps) {
     return new BlurImageFilterNode(this.Skia, props);
   }
 
   OffsetImageFilter(props: OffsetImageFilterProps) {
     return new OffsetImageFilterNode(this.Skia, props);
+  }
+
+  RuntimeShaderImageFilter(props: RuntimeShaderImageFilterProps) {
+    return new RuntimeShaderImageFilterNode(this.Skia, props);
   }
 
   // Color Filters

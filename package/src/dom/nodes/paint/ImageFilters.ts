@@ -1,21 +1,21 @@
 import type { SkColorFilter } from "../../../skia/types/ColorFilter/ColorFilter";
 import { exhaustiveCheck } from "../../../renderer/typeddash";
 import type {
-  Skia,
-  BlendMode,
   ColorChannel,
   SkColor,
   SkImageFilter,
   SkRect,
-  SkRuntimeShaderBuilder,
   SkShader,
+  Skia,
 } from "../../../skia/types";
-import { TileMode } from "../../../skia/types";
+import { processUniforms, TileMode } from "../../../skia/types";
 import { JsiNestedDeclarationNode } from "../Node";
 import type {
+  BlendProps,
   BlurImageFilterProps,
   DeclarationNode,
   OffsetImageFilterProps,
+  RuntimeShaderImageFilterProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
 import { processRadius, enumKey } from "../datatypes";
@@ -216,41 +216,31 @@ export class MorphologyImageFilterNode extends ImageFilterDeclaration<Morphology
   }
 }
 
-export interface BlendImageFilterNodeProps {
-  mode: BlendMode;
-  cropRect?: SkRect;
-}
-
-export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilterNodeProps> {
-  constructor(Skia: Skia, props: BlendImageFilterNodeProps) {
+export class BlendImageFilterNode extends ImageFilterDeclaration<BlendProps> {
+  constructor(Skia: Skia, props: BlendProps) {
     super(Skia, NodeType.BlendImageFilter, props);
   }
 
   get() {
-    const { mode, cropRect } = this.props;
+    const { mode } = this.props;
     const a = this.getMandatoryChild(0, "BlendMode");
     const b = this.getChild(1);
-    return this.Skia.ImageFilter.MakeBlend(mode, a, b, cropRect);
+    return this.Skia.ImageFilter.MakeBlend(mode, a, b);
   }
 }
 
-export interface RuntimeShaderImageFilterNodeProps {
-  builder: SkRuntimeShaderBuilder;
-  childShaderName: string | null;
-}
-
-export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<RuntimeShaderImageFilterNodeProps> {
-  constructor(Skia: Skia, props: RuntimeShaderImageFilterNodeProps) {
+export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<RuntimeShaderImageFilterProps> {
+  constructor(Skia: Skia, props: RuntimeShaderImageFilterProps) {
     super(Skia, NodeType.RuntimeShaderImageFilter, props);
   }
 
   get() {
-    const { builder, childShaderName } = this.props;
+    const { source, uniforms } = this.props;
+    const rtb = this.Skia.RuntimeShaderBuilder(source);
+    if (uniforms) {
+      processUniforms(source, uniforms, rtb);
+    }
     const input = this.getChild();
-    return this.Skia.ImageFilter.MakeRuntimeShader(
-      builder,
-      childShaderName,
-      input
-    );
+    return this.Skia.ImageFilter.MakeRuntimeShader(rtb, null, input);
   }
 }
