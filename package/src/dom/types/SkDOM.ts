@@ -1,7 +1,5 @@
 import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
-import { DropShadowImageFilterNode } from "../nodes/paint/ImageFilters";
-import { DisplacementMap } from "../../renderer/components/imageFilters/DisplacementMap";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type {
