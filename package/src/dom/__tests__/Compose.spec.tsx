@@ -7,7 +7,6 @@ import {
 import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { JsiSkDOM } from "../nodes";
 import { fitRects } from "../nodes/datatypes";
 import { ImageNode } from "../nodes/drawings";
 import { BlurImageFilterNode } from "../nodes/paint";
@@ -18,7 +17,6 @@ describe("Compose", () => {
     const size = width;
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, rect } = importSkia();
-    const Sk = new JsiSkDOM(Skia);
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { src, dst } = fitRects(
       "cover",

@@ -62,5 +62,5 @@ export interface GroupProps extends PaintProps, TransformProps {
 }
 
 export interface SkDOM {
-  Group: (props: GroupProps) => GroupNode;
+  Group: (props?: GroupProps) => GroupNode;
 }

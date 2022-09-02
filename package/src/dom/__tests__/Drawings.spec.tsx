@@ -2,7 +2,6 @@ import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { GroupNode } from "../nodes/GroupNode";
 import { CircleNode, PathNode } from "../nodes/drawings";
 import { LinearGradientNode } from "../nodes/paint";
 import { fitRects, rect2rect } from "../nodes/datatypes";
@@ -53,7 +52,7 @@ describe("Drawings", () => {
     );
     const rects = fitRects("contain", src, dst);
     const matrix = processTransform2d(rect2rect(rects.src, rects.dst));
-    const root = new GroupNode(Skia, {
+    const root = Sk.Group({
       matrix,
       style: "stroke",
       strokeWidth: 116,

@@ -7,7 +7,6 @@ import {
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
 import { FillNode, ImageNode } from "../nodes/drawings";
-import { GroupNode } from "../nodes/GroupNode";
 
 const size = width;
 const padding = 48;

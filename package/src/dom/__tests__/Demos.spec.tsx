@@ -2,16 +2,13 @@ import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { BlurStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { JsiSkDOM } from "../nodes";
 import { CircleNode, FillNode } from "../nodes/drawings";
-import { GroupNode } from "../nodes/GroupNode";
 import { BlurMaskFilterNode } from "../nodes/paint";
 
 describe("Drawings", () => {
   it("Hello World", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, vec, polar2Canvas } = importSkia();
-    const Sk = new JsiSkDOM(Skia);
     const c = vec(width / 2, height / 2);
     const c1 = Skia.Color("#61bea2");
     const c2 = Skia.Color("#529ca0");

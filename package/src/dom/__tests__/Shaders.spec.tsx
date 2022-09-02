@@ -9,7 +9,6 @@ import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
 import { FillNode } from "../nodes/drawings";
-import { GroupNode } from "../nodes/GroupNode";
 import { ImageShaderNode, ShaderNode } from "../nodes/paint";
 
 describe("Drawings", () => {
@@ -22,7 +21,7 @@ describe("Drawings", () => {
     }`)!;
     expect(runtimeEffect).toBeTruthy();
 
-    const root = new GroupNode(Skia);
+    const root = Sk.Group();
     const filter = new ShaderNode(Skia, {
       runtimeEffect,
       uniforms: [],
@@ -67,7 +66,7 @@ half4 main(float2 xy) {
       uniforms: [50],
     });
     filter.addChild(imageShader);
-    const root = new GroupNode(Skia);
+    const root = Sk.Group();
     root.addEffect(filter);
     const fill = new FillNode(Skia);
     root.addChild(fill);
@@ -108,7 +107,7 @@ half4 main(float2 xy) {
       uniforms: [50],
     });
     filter.addChild(imageShader);
-    const root = new GroupNode(Skia);
+    const root = Sk.Group();
     root.addEffect(filter);
     const fill = new FillNode(Skia);
     root.addChild(fill);
