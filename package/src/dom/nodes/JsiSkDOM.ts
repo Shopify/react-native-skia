@@ -26,7 +26,9 @@ import type {
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
-  BlendProps,
+  BlendImageFilterProps,
+  DisplacementMapImageFilterProps,
+  DropShadowImageFilterProps,
   RuntimeShaderImageFilterProps,
 } from "../types/ImageFilters";
 
@@ -50,6 +52,8 @@ import {
   BlendImageFilterNode,
   BlurImageFilterNode,
   BlurMaskFilterNode,
+  DisplacementMapImageFilterNode,
+  DropShadowImageFilterNode,
   OffsetImageFilterNode,
   PaintNode,
   RuntimeShaderImageFilterNode,
@@ -136,8 +140,16 @@ export class JsiSkDOM implements SkDOM {
   }
 
   // ImageFilters
-  BlendImageFilter(props: BlendProps) {
+  BlendImageFilter(props: BlendImageFilterProps) {
     return new BlendImageFilterNode(this.Skia, props);
+  }
+
+  DropShadowImageFilter(props: DropShadowImageFilterProps) {
+    return new DropShadowImageFilterNode(this.Skia, props);
+  }
+
+  DisplacementMap(props: DisplacementMapImageFilterProps) {
+    return new DisplacementMapImageFilterNode(this.Skia, props);
   }
 
   BlurImageFilter(props: BlurImageFilterProps) {

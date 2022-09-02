@@ -1,5 +1,7 @@
 import type {
   BlendMode,
+  Color,
+  ColorChannel,
   SkRuntimeEffect,
   TileMode,
   Uniforms,
@@ -17,11 +19,31 @@ export interface OffsetImageFilterProps extends ChildrenProps {
   y: number;
 }
 
-export interface RuntimeShaderImageFilterProps {
+export interface RuntimeShaderImageFilterProps extends ChildrenProps {
   source: SkRuntimeEffect;
   uniforms?: Uniforms;
 }
 
-export interface BlendProps {
+export interface BlendImageFilterProps extends ChildrenProps {
   mode: BlendMode;
+}
+
+export interface MorphologyImageFilterProps extends ChildrenProps {
+  operator: "erode" | "dilate";
+  radius: Radius;
+}
+
+export interface DropShadowImageFilterProps extends ChildrenProps {
+  dx: number;
+  dy: number;
+  blur: number;
+  color: Color;
+  inner?: boolean;
+  shadowOnly?: boolean;
+}
+
+export interface DisplacementMapImageFilterProps extends ChildrenProps {
+  channelX: SkEnum<typeof ColorChannel>;
+  channelY: SkEnum<typeof ColorChannel>;
+  scale: number;
 }

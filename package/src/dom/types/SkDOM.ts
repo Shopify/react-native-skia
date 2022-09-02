@@ -1,12 +1,16 @@
 import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
+import { DropShadowImageFilterNode } from "../nodes/paint/ImageFilters";
+import { DisplacementMap } from "../../renderer/components/imageFilters/DisplacementMap";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type {
-  BlendProps,
+  BlendImageFilterProps,
   BlurImageFilterProps,
+  DropShadowImageFilterProps,
   OffsetImageFilterProps,
   RuntimeShaderImageFilterProps,
+  DisplacementMapImageFilterProps,
 } from "./ImageFilters";
 import type {
   DrawingNodeProps,
@@ -73,9 +77,11 @@ export interface SkDOM {
   ): DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
 
   // ImageFilters
-  BlendImageFilter(props: BlendProps): ImageFilterNode;
+  BlendImageFilter(props: BlendImageFilterProps): ImageFilterNode;
   BlurImageFilter(props: BlurImageFilterProps): ImageFilterNode;
   OffsetImageFilter(props: OffsetImageFilterProps): ImageFilterNode;
+  DropShadowImageFilter(props: DropShadowImageFilterProps): ImageFilterNode;
+  DisplacementMap(props: DisplacementMapImageFilterProps): ImageFilterNode;
   RuntimeShaderImageFilter(
     props: RuntimeShaderImageFilterProps
   ): ImageFilterNode;

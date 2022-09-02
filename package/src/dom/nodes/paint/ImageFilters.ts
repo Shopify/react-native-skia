@@ -1,24 +1,20 @@
 import type { SkColorFilter } from "../../../skia/types/ColorFilter/ColorFilter";
 import { exhaustiveCheck } from "../../../renderer/typeddash";
-import type {
-  ColorChannel,
-  SkColor,
-  SkImageFilter,
-  SkRect,
-  SkShader,
-  Skia,
-} from "../../../skia/types";
-import { processUniforms, TileMode } from "../../../skia/types";
+import type { SkImageFilter, SkShader, Skia } from "../../../skia/types";
+import { ColorChannel, processUniforms, TileMode } from "../../../skia/types";
 import { JsiNestedDeclarationNode } from "../Node";
 import type {
-  BlendProps,
+  BlendImageFilterProps,
   BlurImageFilterProps,
   DeclarationNode,
+  DisplacementMapImageFilterProps,
+  DropShadowImageFilterProps,
+  MorphologyImageFilterProps,
   OffsetImageFilterProps,
   RuntimeShaderImageFilterProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { processRadius, enumKey } from "../datatypes";
+import { processRadius, enumKey, processColor } from "../datatypes";
 
 abstract class ImageFilterDeclaration<
   P,
@@ -106,23 +102,16 @@ export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFil
   }
 }
 
-export interface DisplacementMapImageFilterNodeProps {
-  channelX: ColorChannel;
-  channelY: ColorChannel;
-  scale: number;
-  in1: SkImageFilter;
-}
-
-export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<DisplacementMapImageFilterNodeProps> {
-  constructor(Skia: Skia, props: DisplacementMapImageFilterNodeProps) {
+export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<DisplacementMapImageFilterProps> {
+  constructor(Skia: Skia, props: DisplacementMapImageFilterProps) {
     super(Skia, NodeType.DisplacementMapImageFilter, props);
   }
 
   get() {
     const { channelX, channelY, scale } = this.props;
     return this.Skia.ImageFilter.MakeDisplacementMap(
-      channelX,
-      channelY,
+      ColorChannel[enumKey(channelX)],
+      ColorChannel[enumKey(channelY)],
       scale,
       this.getMandatoryChild(0, "DisplacementMap"),
       this.getChild(1)
@@ -147,44 +136,32 @@ export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterP
   }
 }
 
-export interface DropShadowImageFilterNodeProps {
-  dx: number;
-  dy: number;
-  sigmaX: number;
-  sigmaY: number;
-  color: SkColor;
-  input: SkImageFilter | null;
-  cropRect?: SkRect;
-  only?: boolean;
-}
-
-export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadowImageFilterNodeProps> {
-  constructor(Skia: Skia, props: DropShadowImageFilterNodeProps) {
+export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadowImageFilterProps> {
+  constructor(Skia: Skia, props: DropShadowImageFilterProps) {
     super(Skia, NodeType.BlurImageFilter, props);
   }
 
   get() {
-    const { dx, dy, sigmaX, sigmaY, color, cropRect, only } = this.props;
+    const { dx, dy, blur, shadowOnly, color: cl } = this.props;
+    const color = processColor(this.Skia, cl, 1);
     const input = this.getChild();
-    if (only) {
+    if (shadowOnly) {
       return this.Skia.ImageFilter.MakeDropShadowOnly(
         dx,
         dy,
-        sigmaX,
-        sigmaY,
+        blur,
+        blur,
         color,
-        input,
-        cropRect
+        input
       );
     }
     return this.Skia.ImageFilter.MakeDropShadow(
       dx,
       dy,
-      sigmaX,
-      sigmaY,
+      blur,
+      blur,
       color,
-      input,
-      cropRect
+      input
     );
   }
 }
@@ -194,30 +171,24 @@ export enum MorphologyOperator {
   Dilate,
 }
 
-export interface MorphologyImageFilterNodeProps {
-  rx: number;
-  ry: number;
-  cropRect?: SkRect;
-  op: MorphologyOperator;
-}
-
-export class MorphologyImageFilterNode extends ImageFilterDeclaration<MorphologyImageFilterNodeProps> {
-  constructor(Skia: Skia, props: MorphologyImageFilterNodeProps) {
+export class MorphologyImageFilterNode extends ImageFilterDeclaration<MorphologyImageFilterProps> {
+  constructor(Skia: Skia, props: MorphologyImageFilterProps) {
     super(Skia, NodeType.MorphologyImageFilter, props);
   }
 
   get() {
-    const { rx, ry, cropRect, op } = this.props;
+    const { operator } = this.props;
+    const r = processRadius(this.Skia, this.props.radius);
     const input = this.getChild();
-    if (op === MorphologyOperator.Erode) {
-      return this.Skia.ImageFilter.MakeErode(rx, ry, input, cropRect);
+    if (MorphologyOperator[enumKey(operator)] === MorphologyOperator.Erode) {
+      return this.Skia.ImageFilter.MakeErode(r.x, r.y, input);
     }
-    return this.Skia.ImageFilter.MakeDilate(rx, ry, input, cropRect);
+    return this.Skia.ImageFilter.MakeDilate(r.x, r.y, input);
   }
 }
 
-export class BlendImageFilterNode extends ImageFilterDeclaration<BlendProps> {
-  constructor(Skia: Skia, props: BlendProps) {
+export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilterProps> {
+  constructor(Skia: Skia, props: BlendImageFilterProps) {
     super(Skia, NodeType.BlendImageFilter, props);
   }
 
