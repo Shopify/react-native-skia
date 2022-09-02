@@ -1,28 +1,15 @@
 import { FillType } from "../../../skia/types";
-import type { SkPath, StrokeOpts, Skia } from "../../../skia/types";
-import type {
-  DrawingContext,
-  DrawingNodeProps,
-  PathDef,
-  SkEnum,
-} from "../../types";
+import type { SkPath, Skia } from "../../../skia/types";
+import type { DrawingContext, PathProps } from "../../types";
 import { NodeType } from "../../types";
 import { enumKey, processPath } from "../datatypes";
 
 import { JsiDrawingNode } from "./DrawingNode";
 
-export interface PathNodeProps extends DrawingNodeProps {
-  path: PathDef;
-  start: number;
-  end: number;
-  stroke?: StrokeOpts;
-  fillType?: SkEnum<typeof FillType>;
-}
-
-export class PathNode extends JsiDrawingNode<PathNodeProps> {
+export class PathNode extends JsiDrawingNode<PathProps> {
   private path: SkPath | null = null;
 
-  constructor(Skia: Skia, props: PathNodeProps) {
+  constructor(Skia: Skia, props: PathProps) {
     super(Skia, NodeType.Path, props);
     this.onPropChange();
   }

@@ -1,7 +1,6 @@
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { PathNode } from "../nodes/drawings";
 import { fitRects, rect2rect } from "../nodes/datatypes";
 
 describe("Drawings", () => {
@@ -78,7 +77,7 @@ describe("Drawings", () => {
         mode: "clamp",
       })
     );
-    const pathNode = new PathNode(Skia, { path, start: 0, end: 1 });
+    const pathNode = Sk.Path({ path, start: 0, end: 1 });
     root.addChild(pathNode);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
     root.render(ctx);

@@ -1,5 +1,6 @@
 import type { Skia } from "../../skia/types";
 import type {
+  PathProps,
   SkDOM,
   GroupProps,
   ImageProps,
@@ -12,7 +13,7 @@ import type {
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 
-import { FillNode, ImageNode, CircleNode } from "./drawings";
+import { FillNode, ImageNode, CircleNode, PathNode } from "./drawings";
 import { GroupNode } from "./GroupNode";
 import { BlurImageFilterNode, BlurMaskFilterNode, PaintNode } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
@@ -40,6 +41,9 @@ export class JsiSkDOM implements SkDOM {
 
   Circle(props: CircleProps) {
     return new CircleNode(this.Skia, props);
+  }
+  Path(props: PathProps) {
+    return new PathNode(this.Skia, props);
   }
 
   // BlurMaskFilters

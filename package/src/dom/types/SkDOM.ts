@@ -12,7 +12,7 @@ import type {
   PaintNode,
 } from "./Node";
 import type { MatrixColorFilterProps } from "./ColorFilters";
-import type { ImageProps, CircleProps } from "./Drawings";
+import type { ImageProps, CircleProps, PathProps } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type { LinearGradientProps } from "./Shaders";
 
@@ -24,6 +24,7 @@ export interface SkDOM {
   Fill(props?: DrawingNodeProps): DrawingNode<DrawingNodeProps>;
   Image(props: ImageProps): DrawingNode<ImageProps>;
   Circle(props: CircleProps): DrawingNode<CircleProps>;
+  Path(props: PathProps): DrawingNode<PathProps>;
 
   // BlurMaskFilters
   BlurMaskFilter(

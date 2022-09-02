@@ -1,6 +1,6 @@
-import type { SkImage } from "../../skia/types";
+import type { FillType, SkImage, StrokeOpts } from "../../skia/types";
 
-import type { CircleDef, Fit, RectDef } from "./Common";
+import type { CircleDef, Fit, PathDef, RectDef, SkEnum } from "./Common";
 import type { DrawingNodeProps } from "./Node";
 
 export type ImageProps = DrawingNodeProps &
@@ -10,3 +10,11 @@ export type ImageProps = DrawingNodeProps &
   };
 
 export type CircleProps = CircleDef & DrawingNodeProps;
+
+export interface PathProps extends DrawingNodeProps {
+  path: PathDef;
+  start: number;
+  end: number;
+  stroke?: StrokeOpts;
+  fillType?: SkEnum<typeof FillType>;
+}
