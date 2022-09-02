@@ -2,7 +2,6 @@ import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { BlurStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { CircleNode } from "../nodes/drawings";
 import { BlurMaskFilterNode } from "../nodes/paint";
 
 describe("Drawings", () => {
@@ -36,7 +35,7 @@ describe("Drawings", () => {
         matrix,
         color: i % 2 ? c1 : c2,
       });
-      ring.addChild(new CircleNode(Skia, { c, r: R }));
+      ring.addChild(Sk.Circle({ c, r: R }));
       rings.addChild(ring);
     }
     root.addChild(rings);

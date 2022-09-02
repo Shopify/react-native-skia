@@ -7,6 +7,7 @@ import type {
   SkShader,
 } from "../../skia/types";
 
+import type { PaintProps } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationType, NodeType } from "./NodeType";
 
@@ -61,4 +62,6 @@ export interface DrawingNodeProps {
   paint?: SkPaint;
 }
 
-export type DrawingNode<P extends DrawingNodeProps> = RenderNode<P>;
+export interface DrawingNode<P extends DrawingNodeProps> extends RenderNode<P> {
+  addPaint(paintNode: Node<PaintProps>): void;
+}

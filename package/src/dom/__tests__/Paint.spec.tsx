@@ -6,7 +6,6 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { CircleNode } from "../nodes/drawings";
 import { PaintNode } from "../nodes/paint";
 
 describe("Paint", () => {
@@ -20,7 +19,7 @@ describe("Paint", () => {
 
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("lightblue"));
-    const circle = new CircleNode(Skia, { c: vec(r, r), r, paint });
+    const circle = Sk.Circle({ c: vec(r, r), r, paint });
     root.addChild(circle);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
@@ -37,7 +36,7 @@ describe("Paint", () => {
 
     const root = Sk.Group({ color });
 
-    const circle = new CircleNode(Skia, { c, r });
+    const circle = Sk.Circle({ c, r });
     circle.addPaint(new PaintNode(Skia, { color: Skia.Color("lightblue") }));
     circle.addPaint(
       new PaintNode(Skia, {
@@ -68,7 +67,7 @@ describe("Paint", () => {
     const root = Sk.Group({ opacity: 0.5 });
 
     const c1 = Sk.Group({ color: Skia.Color("red") });
-    c1.addChild(new CircleNode(Skia, { c, r }));
+    c1.addChild(Sk.Circle({ c, r }));
     root.addChild(c1);
 
     const c2 = Sk.Group({
@@ -76,7 +75,7 @@ describe("Paint", () => {
       style: "stroke",
       strokeWidth,
     });
-    c2.addChild(new CircleNode(Skia, { c, r }));
+    c2.addChild(Sk.Circle({ c, r }));
     root.addChild(c2);
 
     const c3 = Sk.Group({
@@ -84,7 +83,7 @@ describe("Paint", () => {
       style: "stroke",
       strokeWidth: strokeWidth / 2,
     });
-    c3.addChild(new CircleNode(Skia, { c, r }));
+    c3.addChild(Sk.Circle({ c, r }));
     root.addChild(c3);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };

@@ -5,10 +5,11 @@ import type {
   ImageProps,
   BlurImageFilterProps,
   MatrixColorFilterProps,
+  CircleProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 
-import { FillNode, ImageNode } from "./drawings";
+import { FillNode, ImageNode, CircleNode } from "./drawings";
 import { GroupNode } from "./GroupNode";
 import { BlurImageFilterNode } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
@@ -27,6 +28,10 @@ export class JsiSkDOM implements SkDOM {
 
   Image(props: ImageProps) {
     return new ImageNode(this.Skia, props);
+  }
+
+  Circle(props: CircleProps) {
+    return new CircleNode(this.Skia, props);
   }
 
   // ImageFilters

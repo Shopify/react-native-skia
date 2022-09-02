@@ -2,7 +2,7 @@ import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { CircleNode, PathNode } from "../nodes/drawings";
+import { PathNode } from "../nodes/drawings";
 import { LinearGradientNode } from "../nodes/paint";
 import { fitRects, rect2rect } from "../nodes/datatypes";
 
@@ -17,15 +17,15 @@ describe("Drawings", () => {
     });
     // C1
     const c1 = Sk.Group({ color: Skia.Color("cyan") });
-    c1.addChild(new CircleNode(Skia, { c: vec(r, r), r }));
+    c1.addChild(Sk.Circle({ c: vec(r, r), r }));
     root.addChild(c1);
     // C2
     const c2 = Sk.Group({ color: Skia.Color("magenta") });
-    c2.addChild(new CircleNode(Skia, { c: vec(width - r, r), r }));
+    c2.addChild(Sk.Circle({ c: vec(width - r, r), r }));
     root.addChild(c2);
     // C3
     const c3 = Sk.Group({ color: Skia.Color("yellow") });
-    c3.addChild(new CircleNode(Skia, { c: vec(width / 2, height - r), r }));
+    c3.addChild(Sk.Circle({ c: vec(width / 2, height - r), r }));
     root.addChild(c3);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };

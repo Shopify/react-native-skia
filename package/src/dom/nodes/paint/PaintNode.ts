@@ -1,6 +1,5 @@
 import type {
   Skia,
-  SkColor,
   SkPaint,
   SkMaskFilter,
   SkColorFilter,
@@ -18,18 +17,6 @@ import type { DeclarationNode, PaintProps } from "../../types";
 import { JsiNode } from "../Node";
 import { NodeType } from "../../types";
 import { enumKey, processColor } from "../datatypes";
-
-export interface PaintNodeProps {
-  color?: SkColor;
-  strokeWidth?: number;
-  blendMode?: BlendMode;
-  style?: PaintStyle;
-  strokeJoin?: StrokeJoin;
-  strokeCap?: StrokeCap;
-  strokeMiter?: number;
-  opacity?: number;
-  antiAlias?: boolean;
-}
 
 export class PaintNode extends JsiNode<PaintProps> {
   private cache: SkPaint | null = null;
