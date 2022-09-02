@@ -1,6 +1,16 @@
-import type { Skia, SkMatrix, Transforms2d, Vector } from "../../../skia/types";
+import type {
+  Skia,
+  SkMatrix,
+  SkRect,
+  Transforms2d,
+  Vector,
+} from "../../../skia/types";
 import { processTransform, TileMode } from "../../../skia/types";
-import type { GradientProps, TransformProps } from "../../types";
+import type {
+  GradientProps,
+  ImageShaderProps,
+  TransformProps,
+} from "../../types";
 
 import { enumKey } from "./Enum";
 
@@ -35,3 +45,22 @@ export const processGradientProps = (
   flags,
   localMatrix: localMatrix(Skia.Matrix(), transform),
 });
+
+export const getRect = (
+  Skia: Skia,
+  props: Omit<ImageShaderProps, "tx" | "ty" | "fm" | "mm" | "fit" | "image">
+): SkRect | undefined => {
+  const { x, y, width, height } = props;
+  if (props.rect) {
+    return props.rect;
+  } else if (
+    x !== undefined &&
+    y !== undefined &&
+    width !== undefined &&
+    height !== undefined
+  ) {
+    return Skia.XYWHRect(x, y, width, height);
+  } else {
+    return undefined;
+  }
+};

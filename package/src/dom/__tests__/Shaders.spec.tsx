@@ -4,11 +4,9 @@ import {
   height,
   loadImage,
 } from "../../renderer/__tests__/setup";
-import { FilterMode, MipmapMode, TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
-import { ImageShaderNode } from "../nodes/paint";
 
 describe("Drawings", () => {
   it("Should display a simple shader", () => {
@@ -34,7 +32,7 @@ describe("Drawings", () => {
 
   it("Should display a nested shader", () => {
     const { surface, canvas } = setupSkia(width, height);
-    const { Skia, processTransform2d } = importSkia();
+    const { Skia } = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -50,14 +48,15 @@ half4 main(float2 xy) {
       { x: 0, y: 0, width: image.width(), height: image.height() },
       Skia.XYWHRect(0, 0, width, height)
     );
-    const localMatrix = processTransform2d(rect2rect(rects.src, rects.dst));
-    const imageShader = new ImageShaderNode(Skia, {
+    const transform = rect2rect(rects.src, rects.dst);
+    const imageShader = Sk.ImageShader({
       image,
-      tx: TileMode.Decal,
-      ty: TileMode.Decal,
-      fm: FilterMode.Nearest,
-      mm: MipmapMode.Nearest,
-      localMatrix,
+      fit: "none",
+      tx: "decal",
+      ty: "decal",
+      fm: "nearest",
+      mm: "nearest",
+      transform,
     });
     const filter = Sk.Shader({
       source,
@@ -74,7 +73,7 @@ half4 main(float2 xy) {
 
   it("Should have always the correct state", () => {
     const { surface, canvas } = setupSkia(width, height);
-    const { Skia, processTransform2d } = importSkia();
+    const { Skia } = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -90,14 +89,15 @@ half4 main(float2 xy) {
       { x: 0, y: 0, width: image.width(), height: image.height() },
       Skia.XYWHRect(0, 0, width, height)
     );
-    const localMatrix = processTransform2d(rect2rect(rects.src, rects.dst));
-    const imageShader = new ImageShaderNode(Skia, {
+    const transform = rect2rect(rects.src, rects.dst);
+    const imageShader = Sk.ImageShader({
       image,
-      tx: TileMode.Decal,
-      ty: TileMode.Decal,
-      fm: FilterMode.Nearest,
-      mm: MipmapMode.Nearest,
-      localMatrix,
+      fit: "none",
+      tx: "decal",
+      ty: "decal",
+      fm: "nearest",
+      mm: "nearest",
+      transform,
     });
     const filter = Sk.Shader({
       source,

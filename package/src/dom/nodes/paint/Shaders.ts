@@ -1,17 +1,25 @@
-import { processUniforms } from "../../../skia/types";
-import type {
-  SkImage,
-  SkShader,
-  SkMatrix,
+import {
+  processUniforms,
   FilterMode,
   MipmapMode,
   TileMode,
-  Skia,
 } from "../../../skia/types";
+import type { SkShader, Skia } from "../../../skia/types";
 import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
-import type { LinearGradientProps, ShaderProps } from "../../types";
+import type {
+  ImageShaderProps,
+  LinearGradientProps,
+  ShaderProps,
+} from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { localMatrix as lm, processGradientProps } from "../datatypes";
+import {
+  enumKey,
+  fitRects,
+  getRect,
+  localMatrix as lm,
+  processGradientProps,
+  rect2rect,
+} from "../datatypes";
 
 export class ShaderNode extends JsiNestedDeclarationNode<
   ShaderProps,
@@ -31,26 +39,36 @@ export class ShaderNode extends JsiNestedDeclarationNode<
   }
 }
 
-export interface ImageShaderNodeProps {
-  image: SkImage;
-  tx: TileMode;
-  ty: TileMode;
-  fm: FilterMode;
-  mm: MipmapMode;
-  localMatrix?: SkMatrix;
-}
-
 export class ImageShaderNode extends JsiDeclarationNode<
-  ImageShaderNodeProps,
+  ImageShaderProps,
   SkShader
 > {
-  constructor(Skia: Skia, props: ImageShaderNodeProps) {
+  constructor(Skia: Skia, props: ImageShaderProps) {
     super(Skia, DeclarationType.Shader, NodeType.ImageShader, props);
   }
 
   get() {
-    const { image, tx, ty, fm, mm, localMatrix } = this.props;
-    return image.makeShaderOptions(tx, ty, fm, mm, localMatrix);
+    const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = this.props;
+    const rct = getRect(this.Skia, imageShaderProps);
+    if (rct) {
+      const rects = fitRects(
+        fit,
+        { x: 0, y: 0, width: image.width(), height: image.height() },
+        rct
+      );
+      const m3 = rect2rect(rects.src, rects.dst);
+      imageShaderProps.transform = [
+        ...(imageShaderProps.transform ?? []),
+        ...m3,
+      ];
+    }
+    return image.makeShaderOptions(
+      TileMode[enumKey(tx)],
+      TileMode[enumKey(ty)],
+      FilterMode[enumKey(fm)],
+      MipmapMode[enumKey(mm)],
+      lm(this.Skia.Matrix(), imageShaderProps)
+    );
   }
 }
 
