@@ -1,6 +1,17 @@
-import type { Color, TileMode, Vector } from "../../skia/types";
+import type {
+  Color,
+  SkRuntimeEffect,
+  TileMode,
+  Uniforms,
+  Vector,
+} from "../../skia/types";
 
-import type { SkEnum, TransformProps } from "./Common";
+import type { SkEnum, TransformProps, ChildrenProps } from "./Common";
+
+export interface ShaderProps extends TransformProps, ChildrenProps {
+  source: SkRuntimeEffect;
+  uniforms: Uniforms;
+}
 
 export interface GradientProps extends TransformProps {
   colors: Color[];

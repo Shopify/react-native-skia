@@ -10,6 +10,7 @@ import type {
   BlurMaskFilterProps,
   LinearGradientProps,
   PaintProps,
+  ShaderProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 
@@ -17,7 +18,7 @@ import { FillNode, ImageNode, CircleNode, PathNode } from "./drawings";
 import { GroupNode } from "./GroupNode";
 import { BlurImageFilterNode, BlurMaskFilterNode, PaintNode } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
-import { LinearGradientNode } from "./paint/Shaders";
+import { LinearGradientNode, ShaderNode } from "./paint/Shaders";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}
@@ -62,6 +63,10 @@ export class JsiSkDOM implements SkDOM {
   }
 
   // Shaders
+  Shader(props: ShaderProps) {
+    return new ShaderNode(this.Skia, props);
+  }
+
   LinearGradient(props: LinearGradientProps) {
     return new LinearGradientNode(this.Skia, props);
   }

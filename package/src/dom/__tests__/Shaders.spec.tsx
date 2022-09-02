@@ -8,22 +8,22 @@ import { FilterMode, MipmapMode, TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
-import { ImageShaderNode, ShaderNode } from "../nodes/paint";
+import { ImageShaderNode } from "../nodes/paint";
 
 describe("Drawings", () => {
   it("Should display a simple shader", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia } = importSkia();
-    const runtimeEffect = Skia.RuntimeEffect.Make(`
+    const source = Skia.RuntimeEffect.Make(`
     half4 main(float2 xy) {   
       return vec4(0.0, 1.0, 1.0, 1.0);
     }`)!;
-    expect(runtimeEffect).toBeTruthy();
+    expect(source).toBeTruthy();
 
     const root = Sk.Group();
-    const filter = new ShaderNode(Skia, {
-      runtimeEffect,
-      uniforms: [],
+    const filter = Sk.Shader({
+      source,
+      uniforms: {},
     });
     root.addEffect(filter);
     root.addChild(Sk.Fill());
@@ -36,7 +36,7 @@ describe("Drawings", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, processTransform2d } = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    const runtimeEffect = Skia.RuntimeEffect.Make(`
+    const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 uniform float r;
 
@@ -44,7 +44,7 @@ half4 main(float2 xy) {
   xy.x += sin(xy.y / r) * 4;
   return image.eval(xy).rbga;
 }`)!;
-    expect(runtimeEffect).toBeTruthy();
+    expect(source).toBeTruthy();
     const rects = fitRects(
       "cover",
       { x: 0, y: 0, width: image.width(), height: image.height() },
@@ -59,9 +59,9 @@ half4 main(float2 xy) {
       mm: MipmapMode.Nearest,
       localMatrix,
     });
-    const filter = new ShaderNode(Skia, {
-      runtimeEffect,
-      uniforms: [50],
+    const filter = Sk.Shader({
+      source,
+      uniforms: { r: 50 },
     });
     filter.addChild(imageShader);
     const root = Sk.Group();
@@ -76,7 +76,7 @@ half4 main(float2 xy) {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, processTransform2d } = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    const runtimeEffect = Skia.RuntimeEffect.Make(`
+    const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 uniform float r;
 
@@ -84,7 +84,7 @@ half4 main(float2 xy) {
   xy.x += sin(xy.y / r) * 4;
   return image.eval(xy).rbga;
 }`)!;
-    expect(runtimeEffect).toBeTruthy();
+    expect(source).toBeTruthy();
     const rects = fitRects(
       "cover",
       { x: 0, y: 0, width: image.width(), height: image.height() },
@@ -99,9 +99,9 @@ half4 main(float2 xy) {
       mm: MipmapMode.Nearest,
       localMatrix,
     });
-    const filter = new ShaderNode(Skia, {
-      runtimeEffect,
-      uniforms: [50],
+    const filter = Sk.Shader({
+      source,
+      uniforms: { r: 50 },
     });
     filter.addChild(imageShader);
     const root = Sk.Group();
@@ -111,8 +111,8 @@ half4 main(float2 xy) {
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
     filter.setProps({
-      runtimeEffect,
-      uniforms: [25],
+      source,
+      uniforms: { r: 25 },
     });
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader2.png");

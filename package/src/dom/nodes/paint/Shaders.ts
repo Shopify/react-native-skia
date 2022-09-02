@@ -1,39 +1,32 @@
+import { processUniforms } from "../../../skia/types";
 import type {
-  Skia,
   SkImage,
   SkShader,
   SkMatrix,
   FilterMode,
   MipmapMode,
   TileMode,
-  SkRuntimeEffect,
+  Skia,
 } from "../../../skia/types";
 import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
-import type { LinearGradientProps } from "../../types";
+import type { LinearGradientProps, ShaderProps } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { processGradientProps } from "../datatypes";
-
-export interface ShaderNodeProps {
-  runtimeEffect: SkRuntimeEffect;
-  uniforms: number[];
-}
+import { localMatrix as lm, processGradientProps } from "../datatypes";
 
 export class ShaderNode extends JsiNestedDeclarationNode<
-  ShaderNodeProps,
+  ShaderProps,
   SkShader
 > {
-  constructor(Skia: Skia, props: ShaderNodeProps) {
+  constructor(Skia: Skia, props: ShaderProps) {
     super(Skia, DeclarationType.Shader, NodeType.Shader, props);
   }
 
   get() {
-    const { runtimeEffect, uniforms } = this.props;
-    if (this.children.length === 0) {
-      return runtimeEffect.makeShader(uniforms);
-    }
-    return runtimeEffect.makeShaderWithChildren(
-      uniforms,
-      this.children.map((child) => child.get())
+    const { source, uniforms, ...transform } = this.props;
+    return source.makeShaderWithChildren(
+      processUniforms(source, uniforms),
+      this.children.map((child) => child.get()),
+      lm(this.Skia.Matrix(), transform)
     );
   }
 }
