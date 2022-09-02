@@ -2,12 +2,10 @@ import React from "react";
 import type { ReactNode } from "react";
 
 import { TileMode } from "../../../skia/types";
-import type { Radius } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import { processRadius } from "../../processors/Radius";
 import { createDeclaration } from "../../nodes";
-import type { SkEnum } from "../../../dom/types";
-import { enumKey } from "../../../dom/nodes/datatypes";
+import type { Radius, SkEnum } from "../../../dom/types";
+import { enumKey, processRadius } from "../../../dom/nodes/datatypes";
 
 import { getInput } from "./getInput";
 

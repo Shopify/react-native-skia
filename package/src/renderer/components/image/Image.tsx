@@ -1,13 +1,10 @@
 import React from "react";
 
 import type { SkImage } from "../../../skia/types";
-import type {
-  CustomPaintProps,
-  RectDef,
-  AnimatedProps,
-} from "../../processors";
+import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes/Drawing";
-import { processRect } from "../../processors";
+import type { RectDef } from "../../../dom/types";
+import { processRect } from "../../../dom/nodes/datatypes";
 
 import type { Fit } from "./BoxFit";
 import { fitRects } from "./BoxFit";

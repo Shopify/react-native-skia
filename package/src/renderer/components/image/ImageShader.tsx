@@ -1,34 +1,15 @@
 import React from "react";
 
-import { enumKey } from "../../../dom/nodes/datatypes";
-import type { SkEnum } from "../../../dom/types";
-import type { SkRect, SkImage, Skia } from "../../../skia/types";
+import { enumKey, getRect } from "../../../dom/nodes/datatypes";
+import type { RectCtor, SkEnum } from "../../../dom/types";
+import type { SkRect, SkImage } from "../../../skia/types";
 import { TileMode, FilterMode, MipmapMode } from "../../../skia/types";
 import { createDeclaration } from "../../nodes";
-import type { TransformProps, AnimatedProps, RectCtor } from "../../processors";
+import type { TransformProps, AnimatedProps } from "../../processors";
 import { localMatrix } from "../../processors";
 
 import type { Fit } from "./BoxFit";
 import { rect2rect, fitRects } from "./BoxFit";
-
-const getRect = (
-  Skia: Skia,
-  props: Omit<ImageShaderProps, "tx" | "ty" | "fm" | "mm" | "fit" | "image">
-): SkRect | undefined => {
-  const { x, y, width, height } = props;
-  if (props.rect) {
-    return props.rect;
-  } else if (
-    x !== undefined &&
-    y !== undefined &&
-    width !== undefined &&
-    height !== undefined
-  ) {
-    return Skia.XYWHRect(x, y, width, height);
-  } else {
-    return undefined;
-  }
-};
 
 interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   tx: SkEnum<typeof TileMode>;

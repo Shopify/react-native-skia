@@ -1,8 +1,9 @@
 import React from "react";
 
+import { processRadius } from "../../../dom/nodes/datatypes";
+import type { Radius } from "../../../dom/types";
 import { createDeclaration } from "../../nodes/Declaration";
-import type { AnimatedProps, Radius } from "../../processors";
-import { processRadius } from "../../processors/Radius";
+import type { AnimatedProps } from "../../processors";
 
 import { getInput } from "./getInput";
 

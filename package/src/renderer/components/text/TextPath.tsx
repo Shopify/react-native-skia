@@ -2,15 +2,14 @@ import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes";
-import type { SkPath, SkRSXform } from "../../../skia/types";
-import type { FontDef } from "../../processors/Font";
+import type { SkPath, SkRSXform, SkFont } from "../../../skia/types";
 
-export type TextPathProps = CustomPaintProps &
-  FontDef & {
-    text: string;
-    path: SkPath | string;
-    initialOffset: number;
-  };
+export type TextPathProps = CustomPaintProps & {
+  font: SkFont;
+  text: string;
+  path: SkPath | string;
+  initialOffset: number;
+};
 
 const onDraw = createDrawing<TextPathProps>(
   (

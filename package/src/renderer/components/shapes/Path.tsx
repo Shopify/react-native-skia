@@ -1,15 +1,10 @@
 import React from "react";
 
-import type {
-  CustomPaintProps,
-  AnimatedProps,
-  PathDef,
-} from "../../processors";
+import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes";
-import { processPath } from "../../processors";
 import { FillType } from "../../../skia/types";
-import type { SkEnum } from "../../../dom/types";
-import { enumKey } from "../../../dom/nodes/datatypes";
+import type { PathDef, SkEnum } from "../../../dom/types";
+import { enumKey, processPath } from "../../../dom/nodes/datatypes";
 
 interface StrokeOpts {
   width?: number;

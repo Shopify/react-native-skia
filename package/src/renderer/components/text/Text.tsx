@@ -1,18 +1,15 @@
 import React from "react";
 
-import type {
-  CustomPaintProps,
-  AnimatedProps,
-  FontDef,
-} from "../../processors";
+import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes/Drawing";
+import type { SkFont } from "../../../skia/types";
 
-type TextProps = CustomPaintProps &
-  FontDef & {
-    text: string;
-    x: number;
-    y: number;
-  };
+type TextProps = CustomPaintProps & {
+  font: SkFont;
+  text: string;
+  x: number;
+  y: number;
+};
 
 const onDraw = createDrawing<TextProps>(
   ({ canvas, paint }, { text, x, y, ...fontDef }) => {

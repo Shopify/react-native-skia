@@ -1,12 +1,9 @@
 import React from "react";
 
-import type {
-  CustomPaintProps,
-  AnimatedProps,
-  CircleDef,
-} from "../../processors";
+import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes/Drawing";
-import { processCircle } from "../../processors";
+import { processCircle } from "../../../dom/nodes/datatypes";
+import type { CircleDef } from "../../../dom/types";
 
 export type CircleProps = CircleDef & CustomPaintProps;
 

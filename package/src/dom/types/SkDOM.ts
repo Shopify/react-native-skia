@@ -2,7 +2,10 @@ import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 
 import type { GroupProps, PaintProps } from "./Common";
-import type { BlurImageFilterProps } from "./ImageFilters";
+import type {
+  BlurImageFilterProps,
+  OffsetImageFilterProps,
+} from "./ImageFilters";
 import type {
   DrawingNodeProps,
   GroupNode,
@@ -34,6 +37,12 @@ import type {
   ShaderProps,
 } from "./Shaders";
 
+type ImageFilterNode = NestedDeclarationNode<
+  unknown,
+  SkImageFilter,
+  SkImageFilter | SkColorFilter | SkShader
+>;
+
 export interface SkDOM {
   Group(props?: GroupProps): GroupNode;
   Paint(props: PaintProps): PaintNode;
@@ -62,13 +71,8 @@ export interface SkDOM {
   ): DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
 
   // ImageFilters
-  BlurImageFilter(
-    props: BlurImageFilterProps
-  ): NestedDeclarationNode<
-    BlurImageFilterProps,
-    SkImageFilter,
-    SkImageFilter | SkColorFilter | SkShader
-  >;
+  BlurImageFilter(props: BlurImageFilterProps): ImageFilterNode;
+  OffsetImageFilter(props: OffsetImageFilterProps): ImageFilterNode;
 
   // ColorFilters
   MatrixColorFilter(

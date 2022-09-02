@@ -1,9 +1,10 @@
 import React from "react";
 
+import { processRect } from "../../../dom/nodes/datatypes";
+import type { RectDef } from "../../../dom/types";
 import type { SkSVG } from "../../../skia/types";
 import { createDrawing } from "../../nodes";
-import type { AnimatedProps, RectDef } from "../../processors";
-import { processRect } from "../../processors";
+import type { AnimatedProps } from "../../processors";
 
 export type ImageSVGProps = RectDef & {
   svg: SkSVG;

@@ -22,6 +22,7 @@ import type {
   VerticesProps,
   TextProps,
   DiffRectProps,
+  OffsetImageFilterProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 
@@ -41,7 +42,12 @@ import {
   CustomDrawingNode,
 } from "./drawings";
 import { GroupNode } from "./GroupNode";
-import { BlurImageFilterNode, BlurMaskFilterNode, PaintNode } from "./paint";
+import {
+  BlurImageFilterNode,
+  BlurMaskFilterNode,
+  OffsetImageFilterNode,
+  PaintNode,
+} from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
 import {
   LinearGradientNode,
@@ -126,6 +132,10 @@ export class JsiSkDOM implements SkDOM {
   // ImageFilters
   BlurImageFilter(props: BlurImageFilterProps) {
     return new BlurImageFilterNode(this.Skia, props);
+  }
+
+  OffsetImageFilter(props: OffsetImageFilterProps) {
+    return new OffsetImageFilterNode(this.Skia, props);
   }
 
   // Color Filters

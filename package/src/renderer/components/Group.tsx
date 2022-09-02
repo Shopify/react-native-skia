@@ -1,21 +1,18 @@
 import React from "react";
 import type { RefObject } from "react";
 
-import type { SkPaint } from "../../skia/types";
-import { ClipOp } from "../../skia/types";
-import {
-  processCanvasTransform,
-  processPaint,
-  processClip,
-} from "../processors";
+import type { SkCanvas, Skia, SkPaint } from "../../skia/types";
+import { isRRect, ClipOp } from "../../skia/types";
+import { processCanvasTransform, processPaint } from "../processors";
 import type {
   CustomPaintProps,
   TransformProps,
   AnimatedProps,
-  ClipDef,
 } from "../processors";
 import { createDrawing, DrawingNode } from "../nodes";
 import { isDeclarationNode } from "../nodes/Declaration";
+import type { ClipDef } from "../../dom/types";
+import { isPathDef, processPath } from "../../dom/nodes/datatypes";
 
 const isSkPaint = (obj: RefObject<SkPaint> | SkPaint): obj is SkPaint =>
   "__typename__" in obj && obj.__typename__ === "Paint";
@@ -25,6 +22,22 @@ export interface GroupProps extends CustomPaintProps, TransformProps {
   invertClip?: boolean;
   layer?: RefObject<SkPaint> | SkPaint | boolean;
 }
+
+const processClip = (
+  Skia: Skia,
+  canvas: SkCanvas,
+  def: ClipDef,
+  op: ClipOp
+) => {
+  if (isPathDef(def)) {
+    const path = processPath(Skia, def);
+    canvas.clipPath(path, op, true);
+  } else if (isRRect(def)) {
+    canvas.clipRRect(def, op, true);
+  } else {
+    canvas.clipRect(def, op, true);
+  }
+};
 
 const onDraw = createDrawing<GroupProps>(
   (ctx, { layer, clip, invertClip, ...groupProps }, node) => {

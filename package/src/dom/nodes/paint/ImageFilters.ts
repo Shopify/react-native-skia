@@ -12,7 +12,11 @@ import type {
 } from "../../../skia/types";
 import { TileMode } from "../../../skia/types";
 import { JsiNestedDeclarationNode } from "../Node";
-import type { BlurImageFilterProps, DeclarationNode } from "../../types";
+import type {
+  BlurImageFilterProps,
+  DeclarationNode,
+  OffsetImageFilterProps,
+} from "../../types";
 import { DeclarationType, NodeType } from "../../types";
 import { processRadius, enumKey } from "../datatypes";
 
@@ -91,19 +95,14 @@ export class ColorFilterImageFilterNode extends ImageFilterDeclaration<ColorFilt
   }
 }
 
-export interface OffsetImageFilterNodeProps {
-  dx: number;
-  dy: number;
-}
-
-export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFilterNodeProps> {
-  constructor(Skia: Skia, props: OffsetImageFilterNodeProps) {
+export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFilterProps> {
+  constructor(Skia: Skia, props: OffsetImageFilterProps) {
     super(Skia, NodeType.OffsetImageFilter, props);
   }
 
   get() {
-    const { dx, dy } = this.props;
-    return this.Skia.ImageFilter.MakeOffset(dx, dy, this.getChild());
+    const { x, y } = this.props;
+    return this.Skia.ImageFilter.MakeOffset(x, y, this.getChild());
   }
 }
 

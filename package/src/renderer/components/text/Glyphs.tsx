@@ -2,20 +2,19 @@ import React from "react";
 
 import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes/Drawing";
-import type { SkPoint } from "../../../skia/types";
-import type { FontDef } from "../../processors/Font";
+import type { SkFont, SkPoint } from "../../../skia/types";
 
 export interface Glyph {
   id: number;
   pos: SkPoint;
 }
 
-export type GlyphsProps = CustomPaintProps &
-  FontDef & {
-    x: number;
-    y: number;
-    glyphs: Glyph[];
-  };
+export type GlyphsProps = CustomPaintProps & {
+  font: SkFont;
+  x: number;
+  y: number;
+  glyphs: Glyph[];
+};
 
 interface ProcessedGlyphs {
   glyphs: number[];

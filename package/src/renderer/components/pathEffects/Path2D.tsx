@@ -5,8 +5,8 @@ import { isPathEffect } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import type { SkMatrix } from "../../../skia/types";
-import type { PathDef } from "../../processors/Paths";
-import { processPath } from "../../processors/Paths";
+import type { PathDef } from "../../../dom/types";
+import { processPath } from "../../../dom/nodes/datatypes";
 
 export interface Path2DPathEffectProps {
   children?: ReactNode | ReactNode[];
