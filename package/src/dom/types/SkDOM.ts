@@ -1,12 +1,12 @@
 import type { ReactNode, RefObject } from "react";
 
-import type { PathDef, SkEnum } from "../../renderer";
 import type {
   BlendMode,
   Color,
   PaintStyle,
   SkMatrix,
   SkPaint,
+  SkPath,
   SkRect,
   SkRRect,
   StrokeCap,
@@ -17,7 +17,20 @@ import type {
 
 import type { GroupNode } from "./Node";
 
+export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
+
+export type PathDef = string | SkPath;
+
 export type ClipDef = SkRRect | SkRect | PathDef;
+
+export type Fit =
+  | "cover"
+  | "contain"
+  | "fill"
+  | "fitHeight"
+  | "fitWidth"
+  | "none"
+  | "scaleDown";
 
 export interface TransformProps {
   transform?: Transforms2d;

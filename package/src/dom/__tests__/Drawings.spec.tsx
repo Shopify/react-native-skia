@@ -1,4 +1,3 @@
-import { fitRects, rect2rect } from "../../renderer";
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
@@ -6,6 +5,7 @@ import { processResult } from "../../__tests__/setup";
 import { GroupNode } from "../nodes/GroupNode";
 import { CircleNode, PathNode } from "../nodes/drawings";
 import { LinearGradientNode } from "../nodes/paint";
+import { fitRects, rect2rect } from "../nodes/datatypes";
 
 describe("Drawings", () => {
   it("Hello World", () => {

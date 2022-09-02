@@ -1,4 +1,3 @@
-import { fitRects } from "../../renderer";
 import {
   importSkia,
   width,
@@ -8,6 +7,7 @@ import {
 import { TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
+import { fitRects } from "../nodes/datatypes";
 import { ImageNode } from "../nodes/drawings";
 import { GroupNode } from "../nodes/GroupNode";
 import { BlurImageFilterNode } from "../nodes/paint";

@@ -1,4 +1,3 @@
-import { processColor } from "../../../renderer/processors/Color";
 import type {
   Skia,
   SkColor,
@@ -18,7 +17,7 @@ import type { SkImageFilter } from "../../../skia/types/ImageFilter/ImageFilter"
 import type { DeclarationNode, PaintProps } from "../../types";
 import { JsiNode } from "../Node";
 import { NodeType } from "../../types";
-import { enumKey } from "../../../renderer/processors";
+import { enumKey, processColor } from "../datatypes";
 
 export interface PaintNodeProps {
   color?: SkColor;

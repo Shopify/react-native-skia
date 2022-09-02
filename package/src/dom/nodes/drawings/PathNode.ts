@@ -1,9 +1,8 @@
-import type { PathDef, SkEnum } from "../../../renderer";
-import { enumKey, processPath } from "../../../renderer";
 import { FillType } from "../../../skia/types";
 import type { SkPath, StrokeOpts, Skia } from "../../../skia/types";
-import type { DrawingContext } from "../../types";
+import type { DrawingContext, PathDef, SkEnum } from "../../types";
 import { NodeType } from "../../types";
+import { enumKey, processPath } from "../datatypes";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";

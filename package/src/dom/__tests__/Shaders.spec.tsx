@@ -1,4 +1,3 @@
-import { fitRects, rect2rect } from "../../renderer";
 import {
   importSkia,
   width,
@@ -8,6 +7,7 @@ import {
 import { FilterMode, MipmapMode, TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
+import { fitRects, rect2rect } from "../nodes/datatypes";
 import { FillNode } from "../nodes/drawings";
 import { GroupNode } from "../nodes/GroupNode";
 import { ImageShaderNode, ShaderNode } from "../nodes/paint";

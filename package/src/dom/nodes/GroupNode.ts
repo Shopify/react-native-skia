@@ -12,7 +12,6 @@ import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 import type { SkImageFilter } from "../../skia/types/ImageFilter/ImageFilter";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import type { SkPath } from "../../skia/types/Path/Path";
-import { isPathDef, processPath } from "../../renderer/processors";
 import type {
   DeclarationNode,
   DrawingContext,
@@ -23,6 +22,7 @@ import { NodeType } from "../types";
 
 import { PaintNode } from "./paint/PaintNode";
 import { JsiRenderNode } from "./Node";
+import { isPathDef, processPath } from "./datatypes";
 
 export class GroupNode extends JsiRenderNode<GroupProps> {
   paint?: PaintNode;
