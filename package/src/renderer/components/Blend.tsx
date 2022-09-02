@@ -4,9 +4,10 @@ import React from "react";
 import type { SkImageFilter, SkShader } from "../../skia/types";
 import { isImageFilter, BlendMode, isShader } from "../../skia/types";
 import { createDeclaration } from "../nodes";
-import type { AnimatedProps, SkEnum } from "../processors";
-import { enumKey } from "../processors/Paint";
+import type { AnimatedProps } from "../processors";
 import type { DeclarationResult } from "../nodes/Declaration";
+import type { SkEnum } from "../../dom/types";
+import { enumKey } from "../../dom/nodes/datatypes";
 
 const childrenAreImageFilters = (
   children: DeclarationResult[]

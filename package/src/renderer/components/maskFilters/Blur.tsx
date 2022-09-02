@@ -1,10 +1,10 @@
 import React from "react";
 
+import type { SkEnum } from "../../../dom/types";
 import { BlurStyle } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
-import type { SkEnum } from "../../processors";
-import { enumKey } from "../../processors";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
+import { enumKey } from "../../../dom/nodes/datatypes";
 
 export interface BlurMaskProps {
   style: SkEnum<typeof BlurStyle>;

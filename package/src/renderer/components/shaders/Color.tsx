@@ -3,7 +3,7 @@ import React from "react";
 import { createDeclaration } from "../../nodes";
 import type { AnimatedProps } from "../../processors";
 import type { Color } from "../../../skia/types";
-import { processColor } from "../../processors/Color";
+import { processColor } from "../../../dom/nodes/datatypes";
 
 export interface ColorShaderProps {
   color: Color;

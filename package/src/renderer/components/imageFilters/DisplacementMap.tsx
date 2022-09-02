@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 
 import { ColorChannel } from "../../../skia/types";
 import { createDeclaration } from "../../nodes";
-import type { SkEnum, AnimatedProps } from "../../processors";
-import { enumKey } from "../../processors";
+import type { AnimatedProps } from "../../processors";
+import { enumKey } from "../../../dom/nodes/datatypes";
+import type { SkEnum } from "../../../dom/types";
 
 import { getInput } from "./getInput";
 

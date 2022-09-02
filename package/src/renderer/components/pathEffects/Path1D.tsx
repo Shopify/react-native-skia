@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 import { Path1DEffectStyle, isPathEffect } from "../../../skia/types";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
-import type { SkEnum } from "../../processors/Paint";
-import { enumKey } from "../../processors/Paint";
 import type { PathDef } from "../../processors/Paths";
 import { processPath } from "../../processors/Paths";
+import type { SkEnum } from "../../../dom/types";
+import { enumKey } from "../../../dom/nodes/datatypes";
 
 export interface Path1DPathEffectProps {
   path: PathDef;

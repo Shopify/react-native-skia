@@ -1,15 +1,12 @@
 import React from "react";
 
+import { enumKey } from "../../../dom/nodes/datatypes";
+import type { SkEnum } from "../../../dom/types";
 import type { SkRect, SkImage, Skia } from "../../../skia/types";
 import { TileMode, FilterMode, MipmapMode } from "../../../skia/types";
 import { createDeclaration } from "../../nodes";
-import type {
-  TransformProps,
-  SkEnum,
-  AnimatedProps,
-  RectCtor,
-} from "../../processors";
-import { localMatrix, enumKey } from "../../processors";
+import type { TransformProps, AnimatedProps, RectCtor } from "../../processors";
+import { localMatrix } from "../../processors";
 
 import type { Fit } from "./BoxFit";
 import { rect2rect, fitRects } from "./BoxFit";

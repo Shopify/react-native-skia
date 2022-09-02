@@ -3,7 +3,7 @@ import React from "react";
 import { createDeclaration } from "../../nodes/Declaration";
 import type { AnimatedProps } from "../../processors/Animations/Animations";
 import type { Color } from "../../../skia/types";
-import { processColor } from "../../processors/Color";
+import { processColor } from "../../../dom/nodes/datatypes";
 
 import { getInput } from "./getInput";
 import { MakeInnerShadow } from "./InnerShadow";
