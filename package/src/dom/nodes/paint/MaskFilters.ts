@@ -1,5 +1,6 @@
-import { DeclarationNode, DeclarationType, NodeType } from "../Node";
-import type { BlurStyle, Skia, SkMaskFilter } from "../../../skia/types";
+import type { Skia, BlurStyle, SkMaskFilter } from "../../../skia/types";
+import { JsiDeclarationNode } from "../Node";
+import { DeclarationType, NodeType } from "../types";
 
 export interface BlurMaskFilterNodeProps {
   style: BlurStyle;
@@ -7,16 +8,16 @@ export interface BlurMaskFilterNodeProps {
   respectCTM: boolean;
 }
 
-export class BlurMaskFilterNode extends DeclarationNode<
+export class BlurMaskFilterNode extends JsiDeclarationNode<
   BlurMaskFilterNodeProps,
   SkMaskFilter
 > {
-  constructor(props: BlurMaskFilterNodeProps) {
-    super(DeclarationType.MaskFilter, NodeType.BlurMaskFilter, props);
+  constructor(Skia: Skia, props: BlurMaskFilterNodeProps) {
+    super(Skia, DeclarationType.MaskFilter, NodeType.BlurMaskFilter, props);
   }
 
-  get(Skia: Skia) {
+  get() {
     const { style, sigma, respectCTM } = this.props;
-    return Skia.MaskFilter.MakeBlur(style, sigma, respectCTM);
+    return this.Skia.MaskFilter.MakeBlur(style, sigma, respectCTM);
   }
 }

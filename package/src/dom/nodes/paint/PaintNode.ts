@@ -1,20 +1,21 @@
 import { processColor } from "../../../renderer/processors/Color";
 import type {
+  Skia,
   PaintStyle,
   StrokeCap,
   StrokeJoin,
   BlendMode,
   SkColor,
   SkPaint,
-  Skia,
   SkMaskFilter,
   SkColorFilter,
 } from "../../../skia/types";
-import type { DeclarationNode } from "../Node";
-import { NodeType, Node } from "../Node";
 import type { SkShader } from "../../../skia/types/Shader/Shader";
 import type { SkPathEffect } from "../../../skia/types/PathEffect";
 import type { SkImageFilter } from "../../../skia/types/ImageFilter/ImageFilter";
+import type { DeclarationNode } from "../types";
+import { NodeType } from "../types";
+import { JsiNode } from "../Node";
 
 export interface PaintNodeProps {
   color?: SkColor;
@@ -28,7 +29,7 @@ export interface PaintNodeProps {
   antiAlias?: boolean;
 }
 
-export class PaintNode extends Node<PaintNodeProps> {
+export class PaintNode extends JsiNode<PaintNodeProps> {
   private cache: SkPaint | null = null;
   private shader?: DeclarationNode<unknown, SkShader>;
   private maskFilter?: DeclarationNode<unknown, SkMaskFilter>;
@@ -36,8 +37,8 @@ export class PaintNode extends Node<PaintNodeProps> {
   private imageFilter?: DeclarationNode<unknown, SkImageFilter>;
   private pathEffect?: DeclarationNode<unknown, SkPathEffect>;
 
-  constructor(props: PaintNodeProps = {}) {
-    super(NodeType.Paint, props);
+  constructor(Skia: Skia, props: PaintNodeProps = {}) {
+    super(Skia, NodeType.Paint, props);
   }
 
   addShader(shader: DeclarationNode<unknown, SkShader>) {
@@ -65,7 +66,7 @@ export class PaintNode extends Node<PaintNodeProps> {
     this.pathEffect.setInvalidate(() => (this.cache = null));
   }
 
-  concat(Skia: Skia, parentPaint: SkPaint, currentOpacity: number) {
+  concat(parentPaint: SkPaint, currentOpacity: number) {
     const {
       color,
       blendMode,
@@ -84,11 +85,11 @@ export class PaintNode extends Node<PaintNodeProps> {
     const paint = parentPaint.copy();
     // Props
     if (color !== undefined) {
-      const c = processColor(Skia, color, currentOpacity);
+      const c = processColor(this.Skia, color, currentOpacity);
       paint.setShader(null);
       paint.setColor(c);
     } else {
-      const c = processColor(Skia, paint.getColor(), currentOpacity);
+      const c = processColor(this.Skia, paint.getColor(), currentOpacity);
       paint.setColor(c);
     }
     if (blendMode !== undefined) {
@@ -117,19 +118,19 @@ export class PaintNode extends Node<PaintNodeProps> {
     }
     // Children
     if (this.shader !== undefined) {
-      paint.setShader(this.shader.get(Skia));
+      paint.setShader(this.shader.get());
     }
     if (this.maskFilter !== undefined) {
-      paint.setMaskFilter(this.maskFilter.get(Skia));
+      paint.setMaskFilter(this.maskFilter.get());
     }
     if (this.pathEffect !== undefined) {
-      paint.setPathEffect(this.pathEffect.get(Skia));
+      paint.setPathEffect(this.pathEffect.get());
     }
     if (this.imageFilter !== undefined) {
-      paint.setImageFilter(this.imageFilter.get(Skia));
+      paint.setImageFilter(this.imageFilter.get());
     }
     if (this.colorFilter !== undefined) {
-      paint.setColorFilter(this.colorFilter.get(Skia));
+      paint.setColorFilter(this.colorFilter.get());
     }
     this.cache = paint;
     return paint;

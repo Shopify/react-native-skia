@@ -1,5 +1,6 @@
-import type { DrawingContext } from "../Node";
-import { NodeType } from "../Node";
+import type { Skia } from "../../../skia/types";
+import type { DrawingContext } from "../types";
+import { NodeType } from "../types";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";
@@ -9,9 +10,11 @@ interface CustomDrawingNodeProps extends DrawingNodeProps {
 }
 
 export class CustomDrawingNode extends DrawingNode<CustomDrawingNodeProps> {
-  constructor(props: CustomDrawingNodeProps) {
-    super(NodeType.Drawing, props);
+  constructor(Skia: Skia, props: CustomDrawingNodeProps) {
+    super(Skia, NodeType.Drawing, props);
   }
+
+  onPropChange() {}
 
   draw(ctx: DrawingContext) {
     this.props.onDraw(ctx);

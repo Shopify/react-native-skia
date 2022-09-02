@@ -1,6 +1,7 @@
 import type { SkColor } from "../../../skia/types/Color";
 import type { SkPoint } from "../../../../lib/typescript/src/skia/types/Point";
 import type {
+  Skia,
   SkImage,
   SkShader,
   SkMatrix,
@@ -8,36 +9,31 @@ import type {
   MipmapMode,
   TileMode,
   SkRuntimeEffect,
-  Skia,
 } from "../../../skia/types";
-import {
-  DeclarationNode,
-  DeclarationType,
-  NestedDeclarationNode,
-  NodeType,
-} from "../Node";
+import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
+import { DeclarationType, NodeType } from "../types";
 
 export interface ShaderNodeProps {
   runtimeEffect: SkRuntimeEffect;
   uniforms: number[];
 }
 
-export class ShaderNode extends NestedDeclarationNode<
+export class ShaderNode extends JsiNestedDeclarationNode<
   ShaderNodeProps,
   SkShader
 > {
-  constructor(props: ShaderNodeProps) {
-    super(DeclarationType.Shader, NodeType.Shader, props);
+  constructor(Skia: Skia, props: ShaderNodeProps) {
+    super(Skia, DeclarationType.Shader, NodeType.Shader, props);
   }
 
-  get(Skia: Skia) {
+  get() {
     const { runtimeEffect, uniforms } = this.props;
     if (this.children.length === 0) {
       return runtimeEffect.makeShader(uniforms);
     }
     return runtimeEffect.makeShaderWithChildren(
       uniforms,
-      this.children.map((child) => child.get(Skia))
+      this.children.map((child) => child.get())
     );
   }
 }
@@ -51,12 +47,12 @@ export interface ImageShaderNodeProps {
   localMatrix?: SkMatrix;
 }
 
-export class ImageShaderNode extends DeclarationNode<
+export class ImageShaderNode extends JsiDeclarationNode<
   ImageShaderNodeProps,
   SkShader
 > {
-  constructor(props: ImageShaderNodeProps) {
-    super(DeclarationType.Shader, NodeType.ImageShader, props);
+  constructor(Skia: Skia, props: ImageShaderNodeProps) {
+    super(Skia, DeclarationType.Shader, NodeType.ImageShader, props);
   }
 
   get() {
@@ -78,18 +74,18 @@ export interface LinearGradientNodeProps extends GradientNodeProps {
   end: SkPoint;
 }
 
-export class LinearGradientNode extends DeclarationNode<
+export class LinearGradientNode extends JsiDeclarationNode<
   LinearGradientNodeProps,
   SkShader
 > {
-  constructor(props: LinearGradientNodeProps) {
-    super(DeclarationType.Shader, NodeType.LinearGradient, props);
+  constructor(Skia: Skia, props: LinearGradientNodeProps) {
+    super(Skia, DeclarationType.Shader, NodeType.LinearGradient, props);
   }
 
-  get(Skia: Skia) {
+  get() {
     const { start, end, colors, positions, mode, flags, localMatrix } =
       this.props;
-    return Skia.Shader.MakeLinearGradient(
+    return this.Skia.Shader.MakeLinearGradient(
       start,
       end,
       colors,

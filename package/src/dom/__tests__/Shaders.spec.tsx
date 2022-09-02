@@ -8,7 +8,9 @@ import {
 import { FilterMode, MipmapMode, TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { FillNode, GroupNode, ShaderNode, ImageShaderNode } from "../nodes";
+import { FillNode } from "../nodes/drawings";
+import { GroupNode } from "../nodes/GroupNode";
+import { ImageShaderNode, ShaderNode } from "../nodes/paint";
 
 describe("Drawings", () => {
   it("Should display a simple shader", () => {
@@ -20,13 +22,13 @@ describe("Drawings", () => {
     }`)!;
     expect(runtimeEffect).toBeTruthy();
 
-    const root = new GroupNode();
-    const filter = new ShaderNode({
+    const root = new GroupNode(Skia);
+    const filter = new ShaderNode(Skia, {
       runtimeEffect,
       uniforms: [],
     });
     root.addEffect(filter);
-    const fill = new FillNode();
+    const fill = new FillNode(Skia);
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
@@ -52,7 +54,7 @@ half4 main(float2 xy) {
       Skia.XYWHRect(0, 0, width, height)
     );
     const localMatrix = processTransform2d(rect2rect(rects.src, rects.dst));
-    const imageShader = new ImageShaderNode({
+    const imageShader = new ImageShaderNode(Skia, {
       image,
       tx: TileMode.Decal,
       ty: TileMode.Decal,
@@ -60,14 +62,14 @@ half4 main(float2 xy) {
       mm: MipmapMode.Nearest,
       localMatrix,
     });
-    const filter = new ShaderNode({
+    const filter = new ShaderNode(Skia, {
       runtimeEffect,
       uniforms: [50],
     });
     filter.addChild(imageShader);
-    const root = new GroupNode();
+    const root = new GroupNode(Skia);
     root.addEffect(filter);
-    const fill = new FillNode();
+    const fill = new FillNode(Skia);
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
@@ -93,7 +95,7 @@ half4 main(float2 xy) {
       Skia.XYWHRect(0, 0, width, height)
     );
     const localMatrix = processTransform2d(rect2rect(rects.src, rects.dst));
-    const imageShader = new ImageShaderNode({
+    const imageShader = new ImageShaderNode(Skia, {
       image,
       tx: TileMode.Decal,
       ty: TileMode.Decal,
@@ -101,14 +103,14 @@ half4 main(float2 xy) {
       mm: MipmapMode.Nearest,
       localMatrix,
     });
-    const filter = new ShaderNode({
+    const filter = new ShaderNode(Skia, {
       runtimeEffect,
       uniforms: [50],
     });
     filter.addChild(imageShader);
-    const root = new GroupNode();
+    const root = new GroupNode(Skia);
     root.addEffect(filter);
-    const fill = new FillNode();
+    const fill = new FillNode(Skia);
     root.addChild(fill);
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);

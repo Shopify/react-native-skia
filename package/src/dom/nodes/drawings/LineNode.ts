@@ -1,6 +1,6 @@
-import type { DrawingContext } from "../Node";
-import { NodeType } from "../Node";
-import type { SkPoint } from "../../../skia/types";
+import type { Skia, SkPoint } from "../../../skia/types";
+import type { DrawingContext } from "../types";
+import { NodeType } from "../types";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";
@@ -11,9 +11,11 @@ export interface LineNodeProps extends DrawingNodeProps {
 }
 
 export class LineNode extends DrawingNode<LineNodeProps> {
-  constructor(props: LineNodeProps) {
-    super(NodeType.Line, props);
+  constructor(Skia: Skia, props: LineNodeProps) {
+    super(Skia, NodeType.Line, props);
   }
+
+  onPropChange() {}
 
   draw({ canvas, paint }: DrawingContext) {
     const { start, end } = this.props;

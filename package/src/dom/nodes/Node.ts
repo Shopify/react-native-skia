@@ -1,88 +1,30 @@
 import type {
-  SkCanvas,
   SkColorFilter,
   Skia,
   SkImageFilter,
   SkMaskFilter,
-  SkPaint,
   SkShader,
   SkPathEffect,
 } from "../../skia/types";
 
-export enum NodeType {
-  Group = "skGroup",
+import { DeclarationType } from "./types";
+import type { Node, NodeType, DrawingContext, DeclarationNode } from "./types";
 
-  Shader = "skShader",
-  ImageShader = "skImageShader",
-  LinearGradient = "skLinearGradient",
-
-  BlurMaskFilter = "skBlurMaskFilter",
-
-  DiscretePathEffect = "skDiscretePathEffect",
-  DashPathEffect = "skDashPathEffect",
-  Path1DPathEffect = "skPath1DPathEffect",
-  Path2DPathEffect = "skPath2DPathEffect",
-  CornerPathEffect = "skCornerPathEffect",
-  ComposePathEffect = "skComposePathEffect",
-  SumPathEffect = "skSumPathEffect",
-  Line2DPathEffect = "skLine2DPathEffect",
-
-  MatrixColorFilter = "skMatrixColorFilter",
-  BlendColorFilter = "skBlendColorFilter",
-  ComposeColorFilter = "skComposeColorFilter",
-  LinearToSRGBGammaColorFilter = "skLinearToSRGBGammaColorFilter",
-  SRGBToLinearGammaColorFilter = "skSRGBToLinearGammaColorFilter",
-  LumaColorFilterColorFilter = "skLumaColorFilterColorFilter",
-
-  OffsetImageFilter = "skOffsetImageFilter",
-  DisplacementMapImageFilter = "skDisplacementMapImageFilter",
-  BlurImageFilter = "skBlurImageFilter",
-  DropShadowImageFilter = "skDropShadowImageFilter",
-  MorphologyImageFilter = "skMorphologyImageFilter",
-  BlendImageFilter = "skBlendImageFilter",
-  RuntimeShaderImageFilter = "skRuntimeShaderImageFilter",
-
-  Drawing = "skDrawing",
-  Paint = "skPaint",
-  Circle = "skCircle",
-  Fill = "skFill",
-  Image = "skImage",
-  Points = "skPoints",
-  Path = "skPath",
-  Rect = "skRect",
-  RRect = "skRRect",
-  Oval = "skOval",
-  Line = "skLine",
-  Patch = "skPatch",
-  Vertices = "skVertices",
-}
-
-export enum DeclarationType {
-  Shader,
-  ImageFilter,
-  ColorFilter,
-  PathEffect,
-  MaskFilter,
-}
-
-export interface DrawingContext {
-  Skia: Skia;
-  canvas: SkCanvas;
-  paint: SkPaint;
-  opacity: number;
-}
-
-export abstract class Node<P> {
-  constructor(public type: NodeType, protected props: P) {}
+export abstract class JsiNode<P> implements Node<P> {
+  constructor(
+    protected Skia: Skia,
+    public type: NodeType,
+    protected props: P
+  ) {}
 
   setProps(props: P) {
     this.props = props;
   }
 }
 
-export abstract class RenderNode<P> extends Node<P> {
-  constructor(type: NodeType, props: P) {
-    super(type, props);
+export abstract class JsiRenderNode<P> extends JsiNode<P> {
+  constructor(Skia: Skia, type: NodeType, props: P) {
+    super(Skia, type, props);
   }
 
   abstract render(ctx: DrawingContext): void;
@@ -90,22 +32,23 @@ export abstract class RenderNode<P> extends Node<P> {
 
 export type Invalidate = () => void;
 
-export abstract class DeclarationNode<
+export abstract class JsiDeclarationNode<
   P,
   T,
   Nullable extends null | never = never
-> extends Node<P> {
+> extends JsiNode<P> {
   private invalidate: Invalidate | null = null;
 
   constructor(
+    Skia: Skia,
     public declarationType: DeclarationType,
     type: NodeType,
     props: P
   ) {
-    super(type, props);
+    super(Skia, type, props);
   }
 
-  abstract get(Skia: Skia): T | Nullable;
+  abstract get(): T | Nullable;
 
   setInvalidate(invalidate: Invalidate) {
     this.invalidate = invalidate;
@@ -142,24 +85,29 @@ export abstract class DeclarationNode<
   }
 }
 
-export abstract class NestedDeclarationNode<
+export abstract class JsiNestedDeclarationNode<
   P,
   T,
   Nullable extends null | never = never
-> extends DeclarationNode<P, T, Nullable> {
+> extends JsiDeclarationNode<P, T, Nullable> {
   protected children: DeclarationNode<unknown, T>[] = [];
 
-  constructor(declarationType: DeclarationType, type: NodeType, props: P) {
-    super(declarationType, type, props);
+  constructor(
+    Skia: Skia,
+    declarationType: DeclarationType,
+    type: NodeType,
+    props: P
+  ) {
+    super(Skia, declarationType, type, props);
   }
 
   addChild(child: DeclarationNode<unknown, T>) {
     this.children.push(child);
   }
 
-  protected getRecursively(Skia: Skia, compose: (a: T, b: T) => T) {
+  protected getRecursively(compose: (a: T, b: T) => T) {
     return this.children
-      .map((child) => child.get(Skia))
+      .map((child) => child.get())
       .reduce<T | null>((acc, p) => {
         if (acc === null) {
           return p;

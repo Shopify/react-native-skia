@@ -7,7 +7,9 @@ import {
 import { PaintStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { CircleNode, GroupNode, PaintNode } from "../nodes";
+import { CircleNode } from "../nodes/drawings";
+import { GroupNode } from "../nodes/GroupNode";
+import { PaintNode } from "../nodes/paint";
 
 describe("Paint", () => {
   it("should assign a paint directly", () => {
@@ -16,11 +18,11 @@ describe("Paint", () => {
     const { Skia, vec } = importSkia();
     const r = size / 2;
 
-    const root = new GroupNode();
+    const root = new GroupNode(Skia);
 
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("lightblue"));
-    const circle = new CircleNode({ c: vec(r, r), r, paint });
+    const circle = new CircleNode(Skia, { c: vec(r, r), r, paint });
     root.addChild(circle);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
@@ -35,19 +37,19 @@ describe("Paint", () => {
     const r = (width - strokeWidth) / 2;
     const color = Skia.Color("red");
 
-    const root = new GroupNode({ paint: { color } });
+    const root = new GroupNode(Skia, { paint: { color } });
 
-    const circle = new CircleNode({ c, r });
-    circle.addPaint(new PaintNode({ color: Skia.Color("lightblue") }));
+    const circle = new CircleNode(Skia, { c, r });
+    circle.addPaint(new PaintNode(Skia, { color: Skia.Color("lightblue") }));
     circle.addPaint(
-      new PaintNode({
+      new PaintNode(Skia, {
         color: Skia.Color("#adbce6"),
         style: PaintStyle.Stroke,
         strokeWidth,
       })
     );
     circle.addPaint(
-      new PaintNode({
+      new PaintNode(Skia, {
         color: Skia.Color("#ade6d8"),
         style: PaintStyle.Stroke,
         strokeWidth: strokeWidth / 2,
@@ -65,30 +67,30 @@ describe("Paint", () => {
     const strokeWidth = 30 * PIXEL_RATIO;
     const r = width / 2 - strokeWidth / 2;
     const c = vec(width / 2, height / 2);
-    const root = new GroupNode({ paint: { opacity: 0.5 } });
+    const root = new GroupNode(Skia, { paint: { opacity: 0.5 } });
 
-    const c1 = new GroupNode({ paint: { color: Skia.Color("red") } });
-    c1.addChild(new CircleNode({ c, r }));
+    const c1 = new GroupNode(Skia, { paint: { color: Skia.Color("red") } });
+    c1.addChild(new CircleNode(Skia, { c, r }));
     root.addChild(c1);
 
-    const c2 = new GroupNode({
+    const c2 = new GroupNode(Skia, {
       paint: {
         color: Skia.Color("lightblue"),
         style: PaintStyle.Stroke,
         strokeWidth,
       },
     });
-    c2.addChild(new CircleNode({ c, r }));
+    c2.addChild(new CircleNode(Skia, { c, r }));
     root.addChild(c2);
 
-    const c3 = new GroupNode({
+    const c3 = new GroupNode(Skia, {
       paint: {
         color: Skia.Color("mint"),
         style: PaintStyle.Stroke,
         strokeWidth: strokeWidth / 2,
       },
     });
-    c3.addChild(new CircleNode({ c, r }));
+    c3.addChild(new CircleNode(Skia, { c, r }));
     root.addChild(c3);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };

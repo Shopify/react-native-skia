@@ -1,6 +1,6 @@
-import type { BlendMode, SkColor, SkPoint } from "../../../skia/types";
-import type { DrawingContext } from "../Node";
-import { NodeType } from "../Node";
+import type { BlendMode, SkColor, Skia, SkPoint } from "../../../skia/types";
+import type { DrawingContext } from "../types";
+import { NodeType } from "../types";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";
@@ -13,9 +13,11 @@ export interface PatchNodeProps extends DrawingNodeProps {
 }
 
 export class PatchNode extends DrawingNode<PatchNodeProps> {
-  constructor(props: PatchNodeProps) {
-    super(NodeType.Patch, props);
+  constructor(Skia: Skia, props: PatchNodeProps) {
+    super(Skia, NodeType.Patch, props);
   }
+
+  onPropChange(): void {}
 
   draw({ canvas, paint }: DrawingContext) {
     const { cubics, colors, tex, mode } = this.props;

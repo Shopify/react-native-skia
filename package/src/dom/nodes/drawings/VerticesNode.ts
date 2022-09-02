@@ -1,6 +1,6 @@
-import type { BlendMode, SkVertices } from "../../../skia/types";
-import type { DrawingContext } from "../Node";
-import { NodeType } from "../Node";
+import type { BlendMode, Skia, SkVertices } from "../../../skia/types";
+import type { DrawingContext } from "../types";
+import { NodeType } from "../types";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";
@@ -11,9 +11,11 @@ export interface VerticesNodeProps extends DrawingNodeProps {
 }
 
 export class VerticesNode extends DrawingNode<VerticesNodeProps> {
-  constructor(props: VerticesNodeProps) {
-    super(NodeType.Vertices, props);
+  constructor(Skia: Skia, props: VerticesNodeProps) {
+    super(Skia, NodeType.Vertices, props);
   }
+
+  onPropChange() {}
 
   draw({ canvas, paint }: DrawingContext) {
     const { vertices, mode } = this.props;

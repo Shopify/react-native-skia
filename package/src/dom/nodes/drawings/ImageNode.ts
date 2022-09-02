@@ -1,6 +1,6 @@
-import type { DrawingContext } from "../Node";
-import { NodeType } from "../Node";
-import type { SkImage, SkRect } from "../../../skia/types";
+import type { Skia, SkImage, SkRect } from "../../../skia/types";
+import type { DrawingContext } from "../types";
+import { NodeType } from "../types";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";
@@ -12,9 +12,11 @@ interface ImageNodeProps extends DrawingNodeProps {
 }
 
 export class ImageNode extends DrawingNode<ImageNodeProps> {
-  constructor(props: ImageNodeProps) {
-    super(NodeType.Image, props);
+  constructor(Skia: Skia, props: ImageNodeProps) {
+    super(Skia, NodeType.Image, props);
   }
+
+  onPropChange() {}
 
   draw({ canvas, paint }: DrawingContext) {
     const { image, src, dst } = this.props;

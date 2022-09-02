@@ -1,6 +1,7 @@
-import type { DrawingContext } from "../Node";
-import { NodeType } from "../Node";
+import type { Skia } from "../../../skia/types";
 import type { SkRect } from "../../../skia/types/Rect";
+import type { DrawingContext } from "../types";
+import { NodeType } from "../types";
 
 import type { DrawingNodeProps } from "./DrawingNode";
 import { DrawingNode } from "./DrawingNode";
@@ -10,9 +11,11 @@ export interface RectNodeProps extends DrawingNodeProps {
 }
 
 export class RectNode extends DrawingNode<RectNodeProps> {
-  constructor(props: RectNodeProps) {
-    super(NodeType.Rect, props);
+  constructor(Skia: Skia, props: RectNodeProps) {
+    super(Skia, NodeType.Rect, props);
   }
+
+  onPropChange() {}
 
   draw({ canvas, paint }: DrawingContext) {
     const { rect } = this.props;

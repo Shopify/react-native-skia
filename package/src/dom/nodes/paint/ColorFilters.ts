@@ -1,26 +1,27 @@
 import type {
+  Skia,
   BlendMode,
   SkColor,
   SkColorFilter,
-  Skia,
 } from "../../../skia/types";
-import { DeclarationNode, NodeType, NestedDeclarationNode, DeclarationType } from "../Node";
+import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
+import { DeclarationType, NodeType } from "../types";
 
 export interface MatrixColorFilterNodeProps {
   colorMatrix: number[];
 }
 
-export class MatrixColorFilterNode extends DeclarationNode<
+export class MatrixColorFilterNode extends JsiDeclarationNode<
   MatrixColorFilterNodeProps,
   SkColorFilter
 > {
-  constructor(props: MatrixColorFilterNodeProps) {
-    super(DeclarationType.ColorFilter, NodeType.MatrixColorFilter, props);
+  constructor(Skia: Skia, props: MatrixColorFilterNodeProps) {
+    super(Skia, DeclarationType.ColorFilter, NodeType.MatrixColorFilter, props);
   }
 
-  get(Skia: Skia) {
+  get() {
     const { colorMatrix } = this.props;
-    return Skia.ColorFilter.MakeMatrix(colorMatrix);
+    return this.Skia.ColorFilter.MakeMatrix(colorMatrix);
   }
 }
 
@@ -29,68 +30,85 @@ export interface BlendColorFilterNodeProps {
   mode: BlendMode;
 }
 
-export class BlendColorFilterNode extends DeclarationNode<
+export class BlendColorFilterNode extends JsiDeclarationNode<
   BlendColorFilterNodeProps,
   SkColorFilter
 > {
-  constructor(props: BlendColorFilterNodeProps) {
-    super(DeclarationType.ColorFilter, NodeType.BlendColorFilter, props);
+  constructor(Skia: Skia, props: BlendColorFilterNodeProps) {
+    super(Skia, DeclarationType.ColorFilter, NodeType.BlendColorFilter, props);
   }
 
-  get(Skia: Skia) {
+  get() {
     const { color, mode } = this.props;
-    return Skia.ColorFilter.MakeBlend(color, mode);
+    return this.Skia.ColorFilter.MakeBlend(color, mode);
   }
 }
 
-export class ComposeColorFilterNode extends NestedDeclarationNode<
+export class ComposeColorFilterNode extends JsiNestedDeclarationNode<
   null,
   SkColorFilter
 > {
-  constructor() {
-    super(DeclarationType.ColorFilter, NodeType.ComposeColorFilter, null);
+  constructor(Skia: Skia) {
+    super(Skia, DeclarationType.ColorFilter, NodeType.ComposeColorFilter, null);
   }
 
-  get(Skia: Skia) {
+  get() {
     return this.getRecursively(
-      Skia,
-      Skia.ColorFilter.MakeCompose.bind(Skia.ColorFilter)
+      this.Skia.ColorFilter.MakeCompose.bind(this.Skia.ColorFilter)
     );
   }
 }
 
-export class LinearToSRGBGammaColorFilterNode extends DeclarationNode<
+export class LinearToSRGBGammaColorFilterNode extends JsiDeclarationNode<
   null,
   SkColorFilter
 > {
-  constructor() {
-    super(DeclarationType.ColorFilter, NodeType.LinearToSRGBGammaColorFilter, null);
+  constructor(Skia: Skia) {
+    super(
+      Skia,
+      DeclarationType.ColorFilter,
+      NodeType.LinearToSRGBGammaColorFilter,
+      null
+    );
   }
 
-  get(Skia: Skia) {
-    return Skia.ColorFilter.MakeLinearToSRGBGamma();
+  get() {
+    return this.Skia.ColorFilter.MakeLinearToSRGBGamma();
   }
 }
 
-export class SRGBToLinearGammaColorFilterNode extends DeclarationNode<
+export class SRGBToLinearGammaColorFilterNode extends JsiDeclarationNode<
   null,
   SkColorFilter
 > {
-  constructor() {
-    super(DeclarationType.ColorFilter, NodeType.SRGBToLinearGammaColorFilter, null);
+  constructor(Skia: Skia) {
+    super(
+      Skia,
+      DeclarationType.ColorFilter,
+      NodeType.SRGBToLinearGammaColorFilter,
+      null
+    );
   }
 
-  get(Skia: Skia) {
-    return Skia.ColorFilter.MakeSRGBToLinearGamma();
+  get() {
+    return this.Skia.ColorFilter.MakeSRGBToLinearGamma();
   }
 }
 
-export class LumaColorFilterNode extends DeclarationNode<null, SkColorFilter> {
-  constructor() {
-    super(DeclarationType.ColorFilter, NodeType.LumaColorFilterColorFilter, null);
+export class LumaColorFilterNode extends JsiDeclarationNode<
+  null,
+  SkColorFilter
+> {
+  constructor(Skia: Skia) {
+    super(
+      Skia,
+      DeclarationType.ColorFilter,
+      NodeType.LumaColorFilterColorFilter,
+      null
+    );
   }
 
-  get(Skia: Skia) {
-    return Skia.ColorFilter.MakeLumaColorFilter();
+  get() {
+    return this.Skia.ColorFilter.MakeLumaColorFilter();
   }
 }

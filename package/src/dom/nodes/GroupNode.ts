@@ -1,4 +1,5 @@
 import type {
+  Skia,
   SkMatrix,
   SkPath,
   SkPathEffect,
@@ -12,12 +13,13 @@ import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 import type { SkImageFilter } from "../../skia/types/ImageFilter/ImageFilter";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 
-import type { DeclarationNode, DrawingContext } from "./Node";
-import { NodeType, RenderNode } from "./Node";
 import type { PaintNodeProps } from "./paint/PaintNode";
 import { PaintNode } from "./paint/PaintNode";
+import { JsiRenderNode } from "./Node";
+import type { DeclarationNode, DrawingContext, RenderNode } from "./types";
+import { NodeType } from "./types";
 
-interface GroupNodeProps {
+export interface GroupNodeProps {
   matrix?: SkMatrix;
   paint?: PaintNodeProps;
   clipRect?: SkRect;
@@ -26,14 +28,14 @@ interface GroupNodeProps {
   clipPath?: SkPath;
 }
 
-export class GroupNode extends RenderNode<GroupNodeProps> {
+export class GroupNode extends JsiRenderNode<GroupNodeProps> {
   paint?: PaintNode;
   children: RenderNode<unknown>[] = [];
 
-  constructor(props: GroupNodeProps = {}) {
-    super(NodeType.Group, props);
+  constructor(Skia: Skia, props: GroupNodeProps = {}) {
+    super(Skia, NodeType.Group, props);
     if (props.paint) {
-      this.paint = new PaintNode(props.paint);
+      this.paint = new PaintNode(this.Skia, props.paint);
     }
   }
 
@@ -50,7 +52,7 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
       | DeclarationNode<unknown, SkPathEffect>
   ) {
     if (!this.paint) {
-      this.paint = new PaintNode();
+      this.paint = new PaintNode(this.Skia);
     }
     if (effect.isColorFilter()) {
       this.paint.addColorFilter(effect);
@@ -77,7 +79,7 @@ export class GroupNode extends RenderNode<GroupNodeProps> {
         : parentCtx.opacity;
 
     const paint = this.paint
-      ? this.paint.concat(parentCtx.Skia, parentCtx.paint, opacity)
+      ? this.paint.concat(parentCtx.paint, opacity)
       : parentCtx.paint;
 
     // TODO: can we only recreate a new context here if needed?

@@ -2,7 +2,9 @@ import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { BlendMode, BlurStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { GroupNode, FillNode, CircleNode, BlurMaskFilterNode } from "../nodes";
+import { CircleNode, FillNode } from "../nodes/drawings";
+import { GroupNode } from "../nodes/GroupNode";
+import { BlurMaskFilterNode } from "../nodes/paint";
 
 describe("Drawings", () => {
   it("Hello World", () => {
@@ -13,12 +15,14 @@ describe("Drawings", () => {
     const c2 = Skia.Color("#529ca0");
     const R = width / 4;
     const color = Skia.Color("rgb(36,43,56)");
-    const root = new GroupNode({ paint: { color } });
-    root.addChild(new FillNode());
+    const root = new GroupNode(Skia, { paint: { color } });
+    root.addChild(new FillNode(Skia));
 
-    const rings = new GroupNode({ paint: { blendMode: BlendMode.Screen } });
+    const rings = new GroupNode(Skia, {
+      paint: { blendMode: BlendMode.Screen },
+    });
     rings.addEffect(
-      new BlurMaskFilterNode({
+      new BlurMaskFilterNode(Skia, {
         sigma: 10,
         style: BlurStyle.Solid,
         respectCTM: true,
@@ -29,8 +33,11 @@ describe("Drawings", () => {
       const matrix = Skia.Matrix();
       const { x, y } = polar2Canvas({ theta, radius: R }, { x: 0, y: 0 });
       matrix.translate(x, y);
-      const ring = new GroupNode({ matrix, paint: { color: i % 2 ? c1 : c2 } });
-      ring.addChild(new CircleNode({ c, r: R }));
+      const ring = new GroupNode(Skia, {
+        matrix,
+        paint: { color: i % 2 ? c1 : c2 },
+      });
+      ring.addChild(new CircleNode(Skia, { c, r: R }));
       rings.addChild(ring);
     }
     root.addChild(rings);

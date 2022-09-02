@@ -1,7 +1,7 @@
-import type { SkPaint } from "../../../skia/types";
-import type { DrawingContext, NodeType } from "../Node";
-import { RenderNode } from "../Node";
+import type { Skia, SkPaint } from "../../../skia/types";
+import { JsiRenderNode } from "../Node";
 import type { PaintNode } from "../paint";
+import type { DrawingContext, NodeType } from "../types";
 
 export interface DrawingNodeProps {
   paint?: SkPaint;
@@ -9,14 +9,20 @@ export interface DrawingNodeProps {
 
 export abstract class DrawingNode<
   P extends DrawingNodeProps = DrawingNodeProps
-> extends RenderNode<P> {
+> extends JsiRenderNode<P> {
   paints: PaintNode[] = [];
 
-  constructor(type: NodeType, props: P) {
-    super(type, props);
+  constructor(Skia: Skia, type: NodeType, props: P) {
+    super(Skia, type, props);
   }
 
   abstract draw(ctx: DrawingContext): void;
+  protected abstract onPropChange(): void;
+
+  setProps(props: P) {
+    super.setProps(props);
+    this.onPropChange();
+  }
 
   addPaint(paintNode: PaintNode) {
     this.paints.push(paintNode);
@@ -29,7 +35,7 @@ export abstract class DrawingNode<
       this.draw(ctx);
     }
     this.paints.forEach((paintNode) => {
-      const paint = paintNode.concat(ctx.Skia, ctx.paint, ctx.opacity);
+      const paint = paintNode.concat(ctx.paint, ctx.opacity);
       this.draw({ ...ctx, paint });
     });
   }

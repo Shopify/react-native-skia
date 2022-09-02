@@ -6,7 +6,8 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { ImageNode, FillNode, GroupNode } from "../nodes";
+import { FillNode, ImageNode } from "../nodes/drawings";
+import { GroupNode } from "../nodes/GroupNode";
 
 const size = width;
 const padding = 48;
@@ -25,16 +26,18 @@ describe("Group", () => {
     );
 
     // Root
-    const root = new GroupNode({ paint: { color: Skia.Color("lightblue") } });
-    root.addChild(new FillNode());
+    const root = new GroupNode(Skia, {
+      paint: { color: Skia.Color("lightblue") },
+    });
+    root.addChild(new FillNode(Skia));
 
-    const clipNode = new GroupNode({ clipRect });
+    const clipNode = new GroupNode(Skia, { clipRect });
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),
       rect(0, 0, size, size)
     );
-    clipNode.addChild(new ImageNode({ image, src, dst }));
+    clipNode.addChild(new ImageNode(Skia, { image, src, dst }));
     root.addChild(clipNode);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
@@ -51,13 +54,13 @@ describe("Group", () => {
       r
     );
 
-    const root = new GroupNode({ clipRRect });
+    const root = new GroupNode(Skia, { clipRRect });
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),
       rect(0, 0, size, size)
     );
-    root.addChild(new ImageNode({ image, src, dst }));
+    root.addChild(new ImageNode(Skia, { image, src, dst }));
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
@@ -73,13 +76,13 @@ describe("Group", () => {
     expect(clipPath).toBeTruthy();
     clipPath.transform(processTransform2d([{ scale: 3 }]));
 
-    const root = new GroupNode({ clipPath });
+    const root = new GroupNode(Skia, { clipPath });
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),
       rect(0, 0, size, size)
     );
-    root.addChild(new ImageNode({ image, src, dst }));
+    root.addChild(new ImageNode(Skia, { image, src, dst }));
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
@@ -95,13 +98,13 @@ describe("Group", () => {
     expect(clipPath).toBeTruthy();
     clipPath.transform(processTransform2d([{ scale: 3 }]));
 
-    const root = new GroupNode({ clipPath, invertClip: true });
+    const root = new GroupNode(Skia, { clipPath, invertClip: true });
     const { src, dst } = fitRects(
       "cover",
       rect(0, 0, image.width(), image.height()),
       rect(0, 0, size, size)
     );
-    root.addChild(new ImageNode({ image, src, dst }));
+    root.addChild(new ImageNode(Skia, { image, src, dst }));
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
