@@ -11,8 +11,8 @@ import { ClipOp, BlurStyle } from "../../../skia/types";
 import { createDrawing } from "../../nodes";
 import type { AnimatedProps, CustomPaintProps } from "../../processors";
 import { createDeclaration } from "../../nodes/Declaration";
-import { processColor } from "../../processors/Color";
 import { isRRect } from "../../../skia/types/RRect";
+import { processColor } from "../../../dom/nodes/datatypes";
 
 const inflate = (
   Skia: Skia,

@@ -4,11 +4,12 @@ import type {
   CustomPaintProps,
   AnimatedProps,
   PathDef,
-  SkEnum,
 } from "../../processors";
 import { createDrawing } from "../../nodes";
-import { processPath, enumKey } from "../../processors";
+import { processPath } from "../../processors";
 import { FillType } from "../../../skia/types";
+import type { SkEnum } from "../../../dom/types";
+import { enumKey } from "../../../dom/nodes/datatypes";
 
 interface StrokeOpts {
   width?: number;

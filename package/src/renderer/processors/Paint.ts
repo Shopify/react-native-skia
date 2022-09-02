@@ -1,5 +1,3 @@
-import type { ReactNode, RefObject } from "react";
-
 import {
   BlendMode,
   PaintStyle,
@@ -11,32 +9,12 @@ import {
   isPathEffect,
   isImageFilter,
 } from "../../skia/types";
-import type { SkPaint, Color, SkImageFilter, Skia } from "../../skia/types";
+import type { SkPaint, SkImageFilter, Skia } from "../../skia/types";
 import type { DeclarationResult } from "../nodes";
+import type { PaintProps } from "../../dom/types";
+import { enumKey, processColor } from "../../dom/nodes/datatypes";
 
-import { processColor } from "./Color";
-export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
-
-export interface ChildrenProps {
-  children?: ReactNode | ReactNode[];
-}
-
-// TODO: rename to paint props?
-export interface CustomPaintProps extends ChildrenProps {
-  paint?: RefObject<SkPaint>;
-  color?: Color;
-  strokeWidth?: number;
-  blendMode?: SkEnum<typeof BlendMode>;
-  style?: SkEnum<typeof PaintStyle>;
-  strokeJoin?: SkEnum<typeof StrokeJoin>;
-  strokeCap?: SkEnum<typeof StrokeCap>;
-  strokeMiter?: number;
-  opacity?: number;
-  antiAlias?: boolean;
-}
-
-export const enumKey = <K extends string>(k: K) =>
-  (k.charAt(0).toUpperCase() + k.slice(1)) as Capitalize<K>;
+export type CustomPaintProps = PaintProps;
 
 export const processPaint = (
   Skia: Skia,
@@ -53,7 +31,7 @@ export const processPaint = (
     strokeMiter,
     opacity,
     antiAlias,
-  }: CustomPaintProps,
+  }: PaintProps,
   children: DeclarationResult[]
 ) => {
   if (paintRef && paintRef.current) {

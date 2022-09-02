@@ -1,11 +1,11 @@
 import React from "react";
 
-import type { CustomPaintProps, SkEnum, AnimatedProps } from "../../processors";
-import { enumKey } from "../../processors";
+import type { CustomPaintProps, AnimatedProps } from "../../processors";
 import type { SkPoint, Color, Vector } from "../../../skia/types";
 import { BlendMode } from "../../../skia/types";
 import { createDrawing } from "../../nodes";
-import { processColor } from "../../processors/Color";
+import { enumKey, processColor } from "../../../dom/nodes/datatypes";
+import type { SkEnum } from "../../../dom/types";
 
 export interface CubicBezierHandle {
   pos: Vector;
