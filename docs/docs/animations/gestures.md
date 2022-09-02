@@ -40,3 +40,5 @@ const MyComponent = () => {
   );
 };
 ```
+
+See [Examples](https://github.com/Shopify/react-native-skia/blob/main/example/src/Examples/API/Touch.tsx) for a deep dive into the API.
