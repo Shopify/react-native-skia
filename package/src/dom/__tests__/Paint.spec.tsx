@@ -91,35 +91,4 @@ describe("Paint", () => {
     root.render(ctx);
     processResult(surface, docPath("paint/opacity.png"));
   });
-  /*
-
-const TestRasterization = () => {
-  const { usePaintRef, vec } = importSkia();
-  const paint = usePaintRef();
-  const c = vec(width / 2, height / 2);
-  const radius = c.x * 0.95;
-  return (
-    <>
-      <Paint ref={paint}>
-        <ColorMatrix
-          matrix={[
-            1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
-          ]}
-        >
-          <Blur blur={20 * PIXEL_RATIO} />
-        </ColorMatrix>
-      </Paint>
-      <Group layer={paint}>
-        <Circle cx={0} cy={c.y} r={radius} color="lightblue" />
-        <Circle cx={width} cy={c.y} r={radius} color="lightblue" />
-      </Group>
-    </>
-  );
-};
-
-  it("Should use saveLayer() properly", () => {
-    const surface = drawOnNode(<TestRasterization />);
-    processResult(surface, docPath("group/rasterize.png"));
-  });
-  */
 });

@@ -6,7 +6,6 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
-import { FillNode } from "../nodes/drawings";
 
 const size = width;
 const padding = 48;
@@ -27,7 +26,7 @@ describe("Group", () => {
     const root = Sk.Group({
       color: Skia.Color("lightblue"),
     });
-    root.addChild(new FillNode(Skia));
+    root.addChild(Sk.Fill());
     const clipNode = Sk.Group({ clip: clipRect });
     clipNode.addChild(
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })

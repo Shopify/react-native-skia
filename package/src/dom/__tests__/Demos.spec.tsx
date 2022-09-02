@@ -2,7 +2,7 @@ import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { BlurStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { CircleNode, FillNode } from "../nodes/drawings";
+import { CircleNode } from "../nodes/drawings";
 import { BlurMaskFilterNode } from "../nodes/paint";
 
 describe("Drawings", () => {
@@ -15,7 +15,7 @@ describe("Drawings", () => {
     const R = width / 4;
     const color = Skia.Color("rgb(36,43,56)");
     const root = Sk.Group({ color });
-    root.addChild(new FillNode(Skia));
+    root.addChild(Sk.Fill());
 
     const rings = Sk.Group({
       blendMode: "screen",

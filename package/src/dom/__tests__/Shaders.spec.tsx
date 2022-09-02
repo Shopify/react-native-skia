@@ -8,7 +8,6 @@ import { FilterMode, MipmapMode, TileMode } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
-import { FillNode } from "../nodes/drawings";
 import { ImageShaderNode, ShaderNode } from "../nodes/paint";
 
 describe("Drawings", () => {
@@ -27,8 +26,7 @@ describe("Drawings", () => {
       uniforms: [],
     });
     root.addEffect(filter);
-    const fill = new FillNode(Skia);
-    root.addChild(fill);
+    root.addChild(Sk.Fill());
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/cyan.png");
@@ -68,8 +66,7 @@ half4 main(float2 xy) {
     filter.addChild(imageShader);
     const root = Sk.Group();
     root.addEffect(filter);
-    const fill = new FillNode(Skia);
-    root.addChild(fill);
+    root.addChild(Sk.Fill());
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
@@ -109,8 +106,7 @@ half4 main(float2 xy) {
     filter.addChild(imageShader);
     const root = Sk.Group();
     root.addEffect(filter);
-    const fill = new FillNode(Skia);
-    root.addChild(fill);
+    root.addChild(Sk.Fill());
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
