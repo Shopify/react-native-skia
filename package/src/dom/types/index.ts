@@ -6,3 +6,4 @@ export * from "./Common";
 export * from "./Drawings";
 export * from "./ImageFilters";
 export * from "./ColorFilters";
+export * from "./MaskFilters";

@@ -1,8 +1,6 @@
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
-import { BlurStyle } from "../../skia/types";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import { BlurMaskFilterNode } from "../nodes/paint";
 
 describe("Drawings", () => {
   it("Hello World", () => {
@@ -20,9 +18,9 @@ describe("Drawings", () => {
       blendMode: "screen",
     });
     rings.addEffect(
-      new BlurMaskFilterNode(Skia, {
-        sigma: 10,
-        style: BlurStyle.Solid,
+      Sk.BlurMaskFilter({
+        blur: 10,
+        style: "solid",
         respectCTM: true,
       })
     );
