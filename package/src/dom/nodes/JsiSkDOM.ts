@@ -12,13 +12,24 @@ import type {
   PaintProps,
   ShaderProps,
   ImageShaderProps,
+  CustomDrawingNodeProps,
+  LineProps,
+  OvalProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 
-import { FillNode, ImageNode, CircleNode, PathNode } from "./drawings";
+import {
+  FillNode,
+  ImageNode,
+  CircleNode,
+  PathNode,
+  LineNode,
+} from "./drawings";
 import { GroupNode } from "./GroupNode";
 import { BlurImageFilterNode, BlurMaskFilterNode, PaintNode } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
+import { CustomDrawingNode } from "./drawings/CustomDrawingNode";
+import { OvalNode } from "./drawings/OvalNode";
 import {
   LinearGradientNode,
   ShaderNode,
@@ -48,8 +59,21 @@ export class JsiSkDOM implements SkDOM {
   Circle(props: CircleProps) {
     return new CircleNode(this.Skia, props);
   }
+
   Path(props: PathProps) {
     return new PathNode(this.Skia, props);
+  }
+
+  CustomDrawing(props: CustomDrawingNodeProps) {
+    return new CustomDrawingNode(this.Skia, props);
+  }
+
+  Line(props: LineProps) {
+    return new LineNode(this.Skia, props);
+  }
+
+  Oval(props: OvalProps) {
+    return new OvalNode(this.Skia, props);
   }
 
   // BlurMaskFilters
