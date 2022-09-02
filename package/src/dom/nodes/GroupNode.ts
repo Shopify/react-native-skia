@@ -35,9 +35,11 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
 
   constructor(Skia: Skia, props: GroupProps = {}) {
     super(Skia, NodeType.Group, props);
-    if (this.hasCustomPaint()) {
-      this.paint = new PaintNode(this.Skia, props);
-    }
+    this.onPropChange();
+  }
+
+  setProps(props: GroupProps): void {
+    super.setProps(props);
     this.onPropChange();
   }
 
@@ -46,6 +48,10 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
     this.clipPath = undefined;
     this.clipRect = undefined;
     this.clipRRect = undefined;
+    this.paint = undefined;
+    if (this.hasCustomPaint()) {
+      this.paint = new PaintNode(this.Skia, this.props);
+    }
     this.computeMatrix();
     this.computeClip();
   }
@@ -139,10 +145,9 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
     const { invertClip } = this.props;
     const { canvas } = parentCtx;
 
-    const opacity =
-      this.props.paint && this.props.opacity
-        ? parentCtx.opacity * this.props.opacity
-        : parentCtx.opacity;
+    const opacity = this.props.opacity
+      ? parentCtx.opacity * this.props.opacity
+      : parentCtx.opacity;
 
     const paint = this.paint
       ? this.paint.concat(parentCtx.paint, opacity)
