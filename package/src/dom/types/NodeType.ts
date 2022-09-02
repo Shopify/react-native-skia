@@ -44,6 +44,8 @@ export enum NodeType {
   Line = "skLine",
   Patch = "skPatch",
   Vertices = "skVertices",
+  DiffRect = "skDiffRect",
+  Text = "skText",
 }
 
 export enum DeclarationType {

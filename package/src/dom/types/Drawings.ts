@@ -8,6 +8,8 @@ import type {
   BlendMode,
   PointMode,
   VertexMode,
+  SkFont,
+  SkRRect,
 } from "../../skia/types";
 
 import type {
@@ -82,4 +84,16 @@ export interface VerticesProps extends DrawingNodeProps {
 export interface PointsProps extends DrawingNodeProps {
   points: SkPoint[];
   mode: SkEnum<typeof PointMode>;
+}
+
+export interface TextProps extends DrawingNodeProps {
+  font: SkFont;
+  text: string;
+  x: number;
+  y: number;
+}
+
+export interface DiffRectProps extends DrawingNodeProps {
+  inner: SkRRect;
+  outer: SkRRect;
 }

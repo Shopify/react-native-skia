@@ -20,6 +20,8 @@ import type {
   RectProps,
   RoundedRectProps,
   VerticesProps,
+  TextProps,
+  DiffRectProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 
@@ -34,17 +36,19 @@ import {
   RectNode,
   RRectNode,
   VerticesNode,
+  TextNode,
+  OvalNode,
+  CustomDrawingNode,
 } from "./drawings";
 import { GroupNode } from "./GroupNode";
 import { BlurImageFilterNode, BlurMaskFilterNode, PaintNode } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
-import { CustomDrawingNode } from "./drawings/CustomDrawingNode";
-import { OvalNode } from "./drawings/OvalNode";
 import {
   LinearGradientNode,
   ShaderNode,
   ImageShaderNode,
 } from "./paint/Shaders";
+import { DiffRectNode } from "./drawings/DiffRectNode";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}
@@ -104,6 +108,14 @@ export class JsiSkDOM implements SkDOM {
 
   Vertices(props: VerticesProps) {
     return new VerticesNode(this.Skia, props);
+  }
+
+  Text(props: TextProps) {
+    return new TextNode(this.Skia, props);
+  }
+
+  DiffRect(props: DiffRectProps) {
+    return new DiffRectNode(this.Skia, props);
   }
 
   // BlurMaskFilters
