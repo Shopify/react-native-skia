@@ -9,10 +9,11 @@ import type {
 
 import type { GroupProps, PaintProps } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
-import type { DeclarationType, NodeType } from "./NodeType";
+import type { DeclarationType, NodeKind, NodeType } from "./NodeType";
 
 export interface Node<P> {
   type: NodeType;
+  kind: NodeKind;
   setProps(props: P): void;
 }
 

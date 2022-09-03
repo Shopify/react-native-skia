@@ -14,8 +14,8 @@ import type { SkShader } from "../../../skia/types/Shader/Shader";
 import type { SkPathEffect } from "../../../skia/types/PathEffect";
 import type { SkImageFilter } from "../../../skia/types/ImageFilter/ImageFilter";
 import type { DeclarationNode, PaintProps } from "../../types";
+import { NodeKind, NodeType } from "../../types";
 import { JsiNode } from "../Node";
-import { NodeType } from "../../types";
 import { enumKey, processColor } from "../datatypes";
 
 export class PaintNode extends JsiNode<PaintProps> {
@@ -27,7 +27,7 @@ export class PaintNode extends JsiNode<PaintProps> {
   private pathEffect?: DeclarationNode<unknown, SkPathEffect>;
 
   constructor(Skia: Skia, props: PaintProps = {}) {
-    super(Skia, NodeType.Paint, props);
+    super(Skia, NodeKind.Paint, NodeType.Paint, props);
   }
 
   addShader(shader: DeclarationNode<unknown, SkShader>) {

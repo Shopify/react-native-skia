@@ -14,11 +14,12 @@ import type {
   RenderNode,
   NestedDeclarationNode,
 } from "../types";
-import { DeclarationType } from "../types";
+import { NodeKind, DeclarationType } from "../types";
 
 export abstract class JsiNode<P> implements Node<P> {
   constructor(
     protected Skia: Skia,
+    public kind: NodeKind,
     public type: NodeType,
     protected props: P
   ) {}
@@ -32,8 +33,8 @@ export abstract class JsiRenderNode<P>
   extends JsiNode<P>
   implements RenderNode<P>
 {
-  constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, type, props);
+  constructor(Skia: Skia, kind: NodeKind, type: NodeType, props: P) {
+    super(Skia, kind, type, props);
   }
 
   abstract render(ctx: DrawingContext): void;
@@ -54,9 +55,10 @@ export abstract class JsiDeclarationNode<
     Skia: Skia,
     public declarationType: DeclarationType,
     type: NodeType,
-    props: P
+    props: P,
+    kind: NodeKind = NodeKind.Declaration
   ) {
-    super(Skia, type, props);
+    super(Skia, kind, type, props);
   }
 
   abstract get(): T | Nullable;
@@ -113,7 +115,7 @@ export abstract class JsiNestedDeclarationNode<
     type: NodeType,
     props: P
   ) {
-    super(Skia, declarationType, type, props);
+    super(Skia, declarationType, type, props, NodeKind.NestedDeclaration);
   }
 
   addChild(child: DeclarationNode<unknown, C>) {

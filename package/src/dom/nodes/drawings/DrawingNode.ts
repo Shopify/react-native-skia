@@ -2,6 +2,7 @@ import type { Skia } from "../../../skia/types";
 import { JsiRenderNode } from "../Node";
 import type { PaintNode } from "../paint";
 import type { DrawingContext, DrawingNodeProps, NodeType } from "../../types";
+import { NodeKind } from "../../types";
 
 export abstract class JsiDrawingNode<
   P extends DrawingNodeProps
@@ -9,7 +10,7 @@ export abstract class JsiDrawingNode<
   paints: PaintNode[] = [];
 
   constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, type, props);
+    super(Skia, NodeKind.Drawing, type, props);
   }
 
   abstract draw(ctx: DrawingContext): void;

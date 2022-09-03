@@ -55,3 +55,11 @@ export enum DeclarationType {
   PathEffect,
   MaskFilter,
 }
+
+export enum NodeKind {
+  Paint,
+  Group,
+  Declaration,
+  NestedDeclaration,
+  Drawing,
+}

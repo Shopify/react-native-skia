@@ -3,7 +3,7 @@ import { isRRect, processTransform, ClipOp } from "../../skia/types";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import type { SkPath } from "../../skia/types/Path/Path";
 import type { DrawingContext, Effect, GroupProps, RenderNode } from "../types";
-import { NodeType } from "../types";
+import { NodeKind, NodeType } from "../types";
 
 import { PaintNode } from "./paint/PaintNode";
 import { JsiRenderNode } from "./Node";
@@ -19,7 +19,7 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
   children: RenderNode<unknown>[] = [];
 
   constructor(Skia: Skia, props: GroupProps = {}) {
-    super(Skia, NodeType.Group, props);
+    super(Skia, NodeKind.Group, NodeType.Group, props);
     this.onPropChange();
   }
 
