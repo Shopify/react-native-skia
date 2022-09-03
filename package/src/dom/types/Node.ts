@@ -73,7 +73,6 @@ export interface GroupNode extends RenderNode<GroupProps> {
   removeChild(child: RenderNode<unknown>): void;
 
   addEffect(effect: Effect): void;
-  insertEffectBefore(effect: Effect, before: Effect): void;
   removeEffect(effect: Effect): void;
 }
 

@@ -29,8 +29,10 @@ import type {
   BlendImageFilterProps,
   DisplacementMapImageFilterProps,
   DropShadowImageFilterProps,
+  MorphologyImageFilterProps,
   RuntimeShaderImageFilterProps,
 } from "../types/ImageFilters";
+import type { CornerPathEffectProps } from "../types/PathEffects";
 
 import {
   FillNode,
@@ -47,7 +49,7 @@ import {
   OvalNode,
   CustomDrawingNode,
 } from "./drawings";
-import { GroupNode } from "./GroupNode";
+import { JsiGroupNode } from "./GroupNode";
 import {
   BlendImageFilterNode,
   BlurImageFilterNode,
@@ -57,6 +59,7 @@ import {
   OffsetImageFilterNode,
   JsiPaintNode,
   RuntimeShaderImageFilterNode,
+  CornerPathEffectNode,
 } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
 import {
@@ -65,12 +68,13 @@ import {
   ImageShaderNode,
 } from "./paint/Shaders";
 import { DiffRectNode } from "./drawings/DiffRectNode";
+import { MorphologyImageFilterNode } from "./paint/ImageFilters";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}
 
   Group(props?: GroupProps) {
-    return new GroupNode(this.Skia, props);
+    return new JsiGroupNode(this.Skia, props);
   }
 
   Paint(props: PaintProps) {
@@ -148,7 +152,7 @@ export class JsiSkDOM implements SkDOM {
     return new DropShadowImageFilterNode(this.Skia, props);
   }
 
-  DisplacementMap(props: DisplacementMapImageFilterProps) {
+  DisplacementMapImageFilter(props: DisplacementMapImageFilterProps) {
     return new DisplacementMapImageFilterNode(this.Skia, props);
   }
 
@@ -158,6 +162,10 @@ export class JsiSkDOM implements SkDOM {
 
   OffsetImageFilter(props: OffsetImageFilterProps) {
     return new OffsetImageFilterNode(this.Skia, props);
+  }
+
+  MorphologyImageFilter(props: MorphologyImageFilterProps) {
+    return new MorphologyImageFilterNode(this.Skia, props);
   }
 
   RuntimeShaderImageFilter(props: RuntimeShaderImageFilterProps) {
@@ -180,5 +188,10 @@ export class JsiSkDOM implements SkDOM {
 
   LinearGradient(props: LinearGradientProps) {
     return new LinearGradientNode(this.Skia, props);
+  }
+
+  // Path Effects
+  CornerPathEffect(props: CornerPathEffectProps) {
+    return new CornerPathEffectNode(this.Skia, props);
   }
 }

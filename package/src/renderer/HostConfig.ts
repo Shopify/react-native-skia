@@ -1,29 +1,19 @@
 /*global NodeJS*/
 import type { HostConfig } from "react-reconciler";
 
-import type { GroupProps } from "../../lib/typescript/src/renderer/components/Group";
 import { NodeType } from "../dom/types";
-import type { CircleProps, Node } from "../dom/types";
+import type { Node } from "../dom/types";
+
+import "./HostComponents";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck, shallowEq } from "./typeddash";
-
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
   }
 };
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface IntrinsicElements {
-      skGroup: GroupProps;
-      skCircle: CircleProps;
-    }
-  }
-}
 
 type Instance = Node<unknown>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,12 +109,8 @@ const insertBefore = (
   child: Node<unknown>,
   before: Node<unknown>
 ) => {
-  if (parent.isGroup()) {
-    if (child.isDeclaration() && before.isDeclaration()) {
-      parent.insertEffectBefore(child, before);
-    } else if (child.isDrawing() && before.isDrawing()) {
-      parent.insertChildBefore(child, before);
-    }
+  if (parent.isGroup() && child.isDrawing() && before.isDrawing()) {
+    parent.insertChildBefore(child, before);
   } else if (
     parent.isNestedDeclaration() &&
     child.isDeclaration() &&
@@ -141,14 +127,74 @@ const insertBefore = (
 };
 
 const createNode = (container: Container, type: NodeType, props: Props) => {
+  const { Sk } = container;
   switch (type) {
     case NodeType.Group:
-      return container.Sk.Group(props);
+      return Sk.Group(props);
+    case NodeType.Paint:
+      return Sk.Paint(props);
+    // Drawings
+    case NodeType.Fill:
+      return Sk.Fill(props);
+    case NodeType.Image:
+      return Sk.Image(props);
     case NodeType.Circle:
-      return container.Sk.Circle(props);
+      return Sk.Circle(props);
+    case NodeType.Path:
+      return Sk.Path(props);
+    case NodeType.Drawing:
+      return Sk.CustomDrawing(props);
+    case NodeType.Line:
+      return Sk.Line(props);
+    case NodeType.Oval:
+      return Sk.Oval(props);
+    case NodeType.Patch:
+      return Sk.Patch(props);
+    case NodeType.Points:
+      return Sk.Points(props);
+    case NodeType.Rect:
+      return Sk.Rect(props);
+    case NodeType.RRect:
+      return Sk.RRect(props);
+    case NodeType.Vertices:
+      return Sk.Vertices(props);
+    case NodeType.Text:
+      return Sk.Text(props);
+    case NodeType.DiffRect:
+      return Sk.DiffRect(props);
+    // Mask Filter
+    case NodeType.BlurMaskFilter:
+      return Sk.BlurMaskFilter(props);
+    // Image Filter
+    case NodeType.BlendImageFilter:
+      return Sk.BlendImageFilter(props);
+    case NodeType.BlurImageFilter:
+      return Sk.BlurImageFilter(props);
+    case NodeType.OffsetImageFilter:
+      return Sk.OffsetImageFilter(props);
+    case NodeType.DropShadowImageFilter:
+      return Sk.DropShadowImageFilter(props);
+    case NodeType.DisplacementMapImageFilter:
+      return Sk.DisplacementMapImageFilter(props);
+    case NodeType.MorphologyImageFilter:
+      return Sk.MorphologyImageFilter(props);
+    case NodeType.RuntimeShaderImageFilter:
+      return Sk.RuntimeShaderImageFilter(props);
+    // Color Filter
+    case NodeType.MatrixColorFilter:
+      return Sk.MatrixColorFilter(props);
+    // Shader
+    case NodeType.Shader:
+      return Sk.Shader(props);
+    case NodeType.ImageShader:
+      return Sk.ImageShader(props);
+    case NodeType.LinearGradient:
+      return Sk.LinearGradient(props);
+    // Path Effect
+    case NodeType.CornerPathEffect:
+      return Sk.CornerPathEffect(props);
     default:
-      return container.Sk.Group();
-    //     return exhaustiveCheck(type);
+      return exhaustiveCheck(type);
   }
 };
 

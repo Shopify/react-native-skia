@@ -1,5 +1,6 @@
 import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
+import type { SkPathEffect } from "../../skia/types/PathEffect";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type {
@@ -9,6 +10,7 @@ import type {
   OffsetImageFilterProps,
   RuntimeShaderImageFilterProps,
   DisplacementMapImageFilterProps,
+  MorphologyImageFilterProps,
 } from "./ImageFilters";
 import type {
   DrawingNodeProps,
@@ -40,6 +42,7 @@ import type {
   LinearGradientProps,
   ShaderProps,
 } from "./Shaders";
+import type { CornerPathEffectProps } from "./PathEffects";
 
 type ImageFilterNode = NestedDeclarationNode<
   unknown,
@@ -79,7 +82,10 @@ export interface SkDOM {
   BlurImageFilter(props: BlurImageFilterProps): ImageFilterNode;
   OffsetImageFilter(props: OffsetImageFilterProps): ImageFilterNode;
   DropShadowImageFilter(props: DropShadowImageFilterProps): ImageFilterNode;
-  DisplacementMap(props: DisplacementMapImageFilterProps): ImageFilterNode;
+  MorphologyImageFilter(props: MorphologyImageFilterProps): ImageFilterNode;
+  DisplacementMapImageFilter(
+    props: DisplacementMapImageFilterProps
+  ): ImageFilterNode;
   RuntimeShaderImageFilter(
     props: RuntimeShaderImageFilterProps
   ): ImageFilterNode;
@@ -97,4 +103,9 @@ export interface SkDOM {
   LinearGradient(
     props: LinearGradientProps
   ): DeclarationNode<LinearGradientProps, SkShader>;
+
+  // Path Effects
+  CornerPathEffect(
+    props: CornerPathEffectProps
+  ): DeclarationNode<CornerPathEffectProps, SkPathEffect, null>;
 }

@@ -2,14 +2,23 @@ import type { SkMatrix, SkRect, SkRRect, Skia } from "../../skia/types";
 import { isRRect, processTransform, ClipOp } from "../../skia/types";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import type { SkPath } from "../../skia/types/Path/Path";
-import type { DrawingContext, Effect, GroupProps, RenderNode } from "../types";
+import type {
+  DrawingContext,
+  Effect,
+  GroupNode,
+  GroupProps,
+  RenderNode,
+} from "../types";
 import { NodeKind, NodeType } from "../types";
 
 import { JsiPaintNode } from "./paint/PaintNode";
 import { JsiRenderNode } from "./Node";
 import { isPathDef, processPath } from "./datatypes";
 
-export class GroupNode extends JsiRenderNode<GroupProps> {
+export class JsiGroupNode
+  extends JsiRenderNode<GroupProps>
+  implements GroupNode
+{
   paint?: JsiPaintNode;
   matrix?: SkMatrix;
   clipRect?: SkRect;
@@ -98,6 +107,17 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
 
   addChild(child: RenderNode<unknown>) {
     this.children.push(child);
+  }
+
+  insertChildBefore(
+    child: RenderNode<unknown>,
+    before: RenderNode<unknown>
+  ): void {
+    const index = this.children.indexOf(before);
+    if (index === -1) {
+      throw new Error("Before node not found");
+    }
+    this.children.splice(index, 0, child);
   }
 
   removeChild(child: RenderNode<unknown>) {

@@ -6,7 +6,10 @@ import type {
   SkPathEffect,
 } from "../../../skia/types";
 import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
+import type { DeclarationNode } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
+import type { CornerPathEffectProps } from "../../types/PathEffects";
+
 export interface DiscretePathEffectNodeProps {
   segLength: number;
   dev: number;
@@ -66,22 +69,18 @@ export class DashPathEffectNode extends JsiDeclarationNode<
   }
 }
 
-export interface CornerPathEffectNodeProps {
-  radius: number;
-}
-
 export class CornerPathEffectNode extends JsiDeclarationNode<
-  CornerPathEffectNodeProps,
+  CornerPathEffectProps,
   SkPathEffect,
   null
 > {
-  constructor(Skia: Skia, props: CornerPathEffectNodeProps) {
+  constructor(Skia: Skia, props: CornerPathEffectProps) {
     super(Skia, DeclarationType.PathEffect, NodeType.CornerPathEffect, props);
   }
 
   get() {
-    const { radius } = this.props;
-    return this.Skia.PathEffect.MakeCorner(radius);
+    const { r } = this.props;
+    return this.Skia.PathEffect.MakeCorner(r);
   }
 }
 
