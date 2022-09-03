@@ -55,7 +55,7 @@ import {
   DisplacementMapImageFilterNode,
   DropShadowImageFilterNode,
   OffsetImageFilterNode,
-  PaintNode,
+  JsiPaintNode,
   RuntimeShaderImageFilterNode,
 } from "./paint";
 import { MatrixColorFilterNode } from "./paint/ColorFilters";
@@ -74,7 +74,7 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Paint(props: PaintProps) {
-    return new PaintNode(this.Skia, props);
+    return new JsiPaintNode(this.Skia, props);
   }
 
   // Drawings

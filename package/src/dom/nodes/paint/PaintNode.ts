@@ -13,12 +13,12 @@ import {
 import type { SkShader } from "../../../skia/types/Shader/Shader";
 import type { SkPathEffect } from "../../../skia/types/PathEffect";
 import type { SkImageFilter } from "../../../skia/types/ImageFilter/ImageFilter";
-import type { DeclarationNode, PaintProps } from "../../types";
+import type { DeclarationNode, PaintNode, PaintProps } from "../../types";
 import { NodeKind, NodeType } from "../../types";
 import { JsiNode } from "../Node";
 import { enumKey, processColor } from "../datatypes";
 
-export class PaintNode extends JsiNode<PaintProps> {
+export class JsiPaintNode extends JsiNode<PaintProps> implements PaintNode {
   private cache: SkPaint | null = null;
   private shader?: DeclarationNode<unknown, SkShader>;
   private maskFilter?: DeclarationNode<unknown, SkMaskFilter>;

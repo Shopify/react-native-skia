@@ -1,13 +1,13 @@
 import type { Skia } from "../../../skia/types";
 import { JsiRenderNode } from "../Node";
-import type { PaintNode } from "../paint";
+import type { JsiPaintNode } from "../paint";
 import type { DrawingContext, DrawingNodeProps, NodeType } from "../../types";
 import { NodeKind } from "../../types";
 
 export abstract class JsiDrawingNode<
   P extends DrawingNodeProps
 > extends JsiRenderNode<P> {
-  paints: PaintNode[] = [];
+  paints: JsiPaintNode[] = [];
 
   constructor(Skia: Skia, type: NodeType, props: P) {
     super(Skia, NodeKind.Drawing, type, props);
@@ -21,8 +21,21 @@ export abstract class JsiDrawingNode<
     this.onPropChange();
   }
 
-  addPaint(paintNode: PaintNode) {
+  addPaint(paintNode: JsiPaintNode) {
     this.paints.push(paintNode);
+  }
+
+  addPaintBefore(child: JsiPaintNode, before: JsiPaintNode) {
+    const index = this.paints.indexOf(child);
+    if (index !== -1) {
+      this.paints.splice(index, 1);
+    }
+    const beforeIndex = this.paints.indexOf(before);
+    this.paints.splice(beforeIndex, 0, child);
+  }
+
+  removePaint(paintNode: JsiPaintNode) {
+    this.paints.splice(this.paints.indexOf(paintNode), 1);
   }
 
   render(ctx: DrawingContext) {

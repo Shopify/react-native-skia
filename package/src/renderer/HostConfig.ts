@@ -1,9 +1,11 @@
 /*global NodeJS*/
 import type { HostConfig } from "react-reconciler";
 
+import type { GroupProps } from "../../lib/typescript/src/renderer/components/Group";
+import { NodeType } from "../dom/types";
+import type { CircleProps, Node } from "../dom/types";
+
 import type { Container } from "./Container";
-import type { Node, DeclarationProps, DrawingProps } from "./nodes";
-import { DeclarationNode, DrawingNode, NodeType } from "./nodes";
 import { exhaustiveCheck, shallowEq } from "./typeddash";
 
 const DEBUG = false;
@@ -17,18 +19,16 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      skDeclaration: DeclarationProps<any>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      skDrawing: DrawingProps<any>;
+      skGroup: GroupProps;
+      skCircle: CircleProps;
     }
   }
 }
 
-type Instance = Node;
+type Instance = Node<unknown>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Props = any;
-type TextInstance = Node;
+type TextInstance = Node<unknown>;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
 type PublicInstance = Instance;
@@ -54,83 +54,101 @@ type SkiaHostConfig = HostConfig<
   NoTimeout
 >;
 
-const allChildrenAreMemoized = (node: Instance) => {
-  if (!node.memoizable) {
-    return false;
-  }
-  for (const child of node.children) {
-    if (!child.memoized) {
-      return false;
+const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
+  if (parent.isGroup()) {
+    if (child.isDeclaration()) {
+      parent.addEffect(child);
+    } else if (child.isDrawing()) {
+      parent.addChild(child);
     }
-  }
-  return true;
-};
-
-const bustBranchMemoization = (parent: Node) => {
-  if (parent.memoizable) {
-    let ancestor: Node | undefined = parent;
-    while (ancestor) {
-      ancestor.memoized = null;
-      ancestor = ancestor.parent;
+  } else if (parent.isNestedDeclaration() && child.isDeclaration()) {
+    parent.addChild(child);
+  } else if (parent.isDrawing() && child.isPaint()) {
+    parent.addPaint(child);
+  } else if (parent.isPaint() && child.isDeclaration()) {
+    if (child.isColorFilter()) {
+      parent.addColorFilter(child);
+    } else if (child.isMaskFilter()) {
+      parent.addMaskFilter(child);
+    } else if (child.isShader()) {
+      parent.addShader(child);
+    } else if (child.isImageFilter()) {
+      parent.addImageFilter(child);
+    } else if (child.isPathEffect()) {
+      parent.addPathEffect(child);
+    } else {
+      exhaustiveCheck(child);
     }
+  } else {
+    throw new Error(`Cannot append ${child.type} to ${parent.type}`);
   }
 };
 
-const bustBranchMemoizable = (parent: Node) => {
-  if (parent.memoizable) {
-    let ancestor: Node | undefined = parent;
-    while (ancestor) {
-      ancestor.memoizable = false;
-      ancestor = ancestor.parent;
+const removeNode = (parent: Node<unknown>, child: Node<unknown>) => {
+  if (parent.isGroup()) {
+    if (child.isDeclaration()) {
+      parent.removeEffect(child);
+    } else if (child.isDrawing()) {
+      parent.removeChild(child);
     }
+  } else if (parent.isNestedDeclaration() && child.isDeclaration()) {
+    parent.removeChild(child);
+  } else if (parent.isDrawing() && child.isPaint()) {
+    parent.removePaint(child);
+  } else if (parent.isPaint() && child.isDeclaration()) {
+    if (child.isColorFilter()) {
+      parent.removeColorFilter();
+    } else if (child.isMaskFilter()) {
+      parent.removeMaskFilter();
+    } else if (child.isShader()) {
+      parent.removeShader();
+    } else if (child.isImageFilter()) {
+      parent.removeImageFilter();
+    } else if (child.isPathEffect()) {
+      parent.removePathEffect();
+    } else {
+      exhaustiveCheck(child);
+    }
+  } else {
+    throw new Error(`Cannot remove ${child.type} from ${parent.type}`);
   }
 };
 
-const appendNode = (parent: Node, child: Node) => {
-  child.parent = parent;
-  bustBranchMemoization(parent);
-  if (!child.memoizable) {
-    bustBranchMemoizable(parent);
+const insertBefore = (
+  parent: Node<unknown>,
+  child: Node<unknown>,
+  before: Node<unknown>
+) => {
+  if (parent.isGroup()) {
+    if (child.isDeclaration() && before.isDeclaration()) {
+      parent.insertEffectBefore(child, before);
+    } else if (child.isDrawing() && before.isDrawing()) {
+      parent.insertChildBefore(child, before);
+    }
+  } else if (
+    parent.isNestedDeclaration() &&
+    child.isDeclaration() &&
+    before.isDeclaration()
+  ) {
+    parent.insertChildBefore(child, before);
+  } else if (parent.isDrawing() && child.isPaint() && before.isPaint()) {
+    parent.insertPaintBefore(child, before);
+  } else {
+    throw new Error(
+      `Cannot append ${child.type} to ${parent.type} before ${before.type}`
+    );
   }
-  if (!parent.memoizable) {
-    child.memoizable = false;
-  }
-  parent.children.push(child);
-};
-
-const removeNode = (parent: Node, child: Node) => {
-  bustBranchMemoization(parent);
-  const index = parent.children.indexOf(child);
-  parent.children.splice(index, 1);
-  child.depMgr.unsubscribeNode(child);
-  // unsubscribe to all children as well
-  for (const c of child.children) {
-    removeNode(child, c);
-  }
-};
-
-const insertBefore = (parent: Node, child: Node, before: Node) => {
-  bustBranchMemoization(parent);
-  const index = parent.children.indexOf(child);
-  if (index !== -1) {
-    parent.children.splice(index, 1);
-  }
-  const beforeIndex = parent.children.indexOf(before);
-  parent.children.splice(beforeIndex, 0, child);
 };
 
 const createNode = (container: Container, type: NodeType, props: Props) => {
   switch (type) {
-    case NodeType.Drawing:
-      const { onDraw, skipProcessing, ...p1 } = props;
-      return new DrawingNode(container.depMgr, onDraw, skipProcessing, p1);
-    case NodeType.Declaration:
-      const { onDeclare, ...p2 } = props;
-      return new DeclarationNode(container.depMgr, onDeclare, p2);
+    case NodeType.Group:
+      return container.Sk.Group(props);
+    case NodeType.Circle:
+      return container.Sk.Circle(props);
     default:
-      // TODO: here we need to throw a nice error message
-      // This is the error that will show up when the user uses nodes not supported by Skia (View, Audio, etc)
-      return exhaustiveCheck(type);
+      return container.Sk.Group();
+    //     return exhaustiveCheck(type);
   }
 };
 
@@ -152,7 +170,7 @@ export const skHostConfig: SkiaHostConfig = {
 
   appendChildToContainer(container, child) {
     debug("appendChildToContainer", container, child);
-    appendNode(container, child);
+    appendNode(container.root, child);
   },
 
   appendChild(parent, child) {
@@ -160,7 +178,7 @@ export const skHostConfig: SkiaHostConfig = {
     appendNode(parent, child);
   },
 
-  getRootHostContext: (_rootContainerInstance: Node) => {
+  getRootHostContext: (_rootContainerInstance: Container) => {
     debug("getRootHostContext");
     return null;
   },
@@ -193,7 +211,7 @@ export const skHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    return createNode(container, type, props) as Node;
+    return createNode(container, type, props);
   },
 
   appendInitialChild(parentInstance, child) {
@@ -237,7 +255,7 @@ export const skHostConfig: SkiaHostConfig = {
   },
 
   prepareUpdate: (
-    instance,
+    _instance,
     type,
     oldProps,
     newProps,
@@ -246,7 +264,7 @@ export const skHostConfig: SkiaHostConfig = {
   ) => {
     debug("prepareUpdate");
     const propsAreEqual = shallowEq(oldProps, newProps);
-    if (propsAreEqual && !instance.memoizable) {
+    if (propsAreEqual) {
       return null;
     }
     debug("update ", type);
@@ -262,21 +280,10 @@ export const skHostConfig: SkiaHostConfig = {
     _internalHandle
   ) {
     debug("commitUpdate: ", type);
-    if (shallowEq(prevProps, nextProps) && allChildrenAreMemoized(instance)) {
+    if (shallowEq(prevProps, nextProps)) {
       return;
     }
-    bustBranchMemoization(instance);
-    if (instance instanceof DrawingNode) {
-      const { onDraw, skipProcessing, ...props } = nextProps;
-      instance.props = props;
-    } else if (instance instanceof DeclarationNode) {
-      const { onDeclare, ...props } = nextProps;
-      instance.props = props;
-    } else {
-      throw new Error(
-        "Unsupported instance commitUpdate " + instance.constructor.name
-      );
-    }
+    instance.setProps(nextProps);
   },
 
   commitTextUpdate: (
@@ -289,7 +296,7 @@ export const skHostConfig: SkiaHostConfig = {
 
   clearContainer: (container) => {
     debug("clearContainer");
-    container.children.splice(0);
+    container.clear();
   },
 
   preparePortalMount: () => {
@@ -300,12 +307,12 @@ export const skHostConfig: SkiaHostConfig = {
     removeNode(parent, child);
   },
 
-  removeChildFromContainer: (parent, child) => {
-    removeNode(parent, child);
+  removeChildFromContainer: (container, child) => {
+    removeNode(container.root, child);
   },
 
-  insertInContainerBefore: (parent, child, before) => {
-    insertBefore(parent, child, before);
+  insertInContainerBefore: (container, child, before) => {
+    insertBefore(container.root, child, before);
   },
 
   insertBefore: (parent, child, before) => {

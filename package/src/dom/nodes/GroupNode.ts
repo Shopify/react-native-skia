@@ -5,12 +5,12 @@ import type { SkPath } from "../../skia/types/Path/Path";
 import type { DrawingContext, Effect, GroupProps, RenderNode } from "../types";
 import { NodeKind, NodeType } from "../types";
 
-import { PaintNode } from "./paint/PaintNode";
+import { JsiPaintNode } from "./paint/PaintNode";
 import { JsiRenderNode } from "./Node";
 import { isPathDef, processPath } from "./datatypes";
 
 export class GroupNode extends JsiRenderNode<GroupProps> {
-  paint?: PaintNode;
+  paint?: JsiPaintNode;
   matrix?: SkMatrix;
   clipRect?: SkRect;
   clipRRect?: SkRRect;
@@ -35,7 +35,7 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
     this.clipRRect = undefined;
     this.paint = undefined;
     if (this.hasCustomPaint()) {
-      this.paint = new PaintNode(this.Skia, this.props);
+      this.paint = new JsiPaintNode(this.Skia, this.props);
     }
     this.computeMatrix();
     this.computeClip();
@@ -106,7 +106,7 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
 
   addEffect(effect: Effect) {
     if (!this.paint) {
-      this.paint = new PaintNode(this.Skia);
+      this.paint = new JsiPaintNode(this.Skia);
     }
     if (effect.isColorFilter()) {
       this.paint.addColorFilter(effect);

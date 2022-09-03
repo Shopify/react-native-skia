@@ -17,6 +17,7 @@ import type {
   GroupNode,
   DrawingNode,
   DrawingNodeProps,
+  Effect,
 } from "../types";
 import { NodeKind, DeclarationType } from "../types";
 
@@ -40,7 +41,7 @@ export abstract class JsiNode<P> implements Node<P> {
     return this.kind === NodeKind.Group;
   }
 
-  isDeclaration(): this is DeclarationNode<P, unknown> {
+  isDeclaration(): this is Effect {
     return (
       this.kind === NodeKind.Declaration ||
       this.kind === NodeKind.NestedDeclaration
@@ -147,6 +148,18 @@ export abstract class JsiNestedDeclarationNode<
 
   addChild(child: DeclarationNode<unknown, C>) {
     this.children.push(child);
+  }
+
+  insertChildBefore(
+    child: DeclarationNode<unknown, C>,
+    before: DeclarationNode<unknown, C>
+  ) {
+    const index = this.children.indexOf(child);
+    if (index !== -1) {
+      this.children.splice(index, 1);
+    }
+    const beforeIndex = this.children.indexOf(before);
+    this.children.splice(beforeIndex, 0, child);
   }
 
   removeChild(child: DeclarationNode<unknown, C>) {

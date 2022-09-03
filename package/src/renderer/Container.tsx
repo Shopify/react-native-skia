@@ -1,16 +1,33 @@
+import type { DrawingContext, GroupNode, SkDOM } from "../dom/types";
+
 import type { DependencyManager } from "./DependencyManager";
-import type { DrawingContext } from "./DrawingContext";
-import { Node } from "./nodes";
 
-export class Container extends Node {
-  redraw: () => void;
+export class Container {
+  private _root: GroupNode | null;
 
-  constructor(depMgr: DependencyManager, redraw: () => void) {
-    super(depMgr, {});
-    this.redraw = redraw;
+  constructor(
+    public Sk: SkDOM,
+    public depMgr: DependencyManager,
+    public redraw: () => void
+  ) {
+    this._root = Sk.Group();
   }
 
   draw(ctx: DrawingContext) {
-    this.visit(ctx);
+    if (!this._root) {
+      throw new Error("Container has been cleared");
+    }
+    this._root.render(ctx);
+  }
+
+  get root() {
+    if (!this._root) {
+      throw new Error("Container has been cleared");
+    }
+    return this._root;
+  }
+
+  clear() {
+    this._root = null;
   }
 }

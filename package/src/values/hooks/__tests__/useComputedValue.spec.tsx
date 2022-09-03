@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 
 import { Fill } from "../../../renderer/components";
@@ -70,8 +71,11 @@ describe("useComputedValue", () => {
     draw();
     processResult(surface, "snapshots/animations/green.png");
     expect(counter.value).toBe(2);
-    expect(container.children.length).toBe(1);
-    const props = container.children[0].props as Record<string, unknown>;
+    expect((container.root as any).children.length).toBe(1);
+    const props = (container.root as any).children[0].props as Record<
+      string,
+      unknown
+    >;
     expect(props.onDraw).not.toBeDefined();
     expect(Object.keys(props).length).toBe(1);
   });
