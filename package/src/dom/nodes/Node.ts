@@ -17,8 +17,6 @@ import type {
 import { DeclarationType } from "../types";
 
 export abstract class JsiNode<P> implements Node<P> {
-  isDeclaration = false;
-  isNestedDeclaration = false;
   constructor(
     protected Skia: Skia,
     public type: NodeType,
@@ -52,7 +50,6 @@ export abstract class JsiDeclarationNode<
   implements DeclarationNode<P, T, Nullable>
 {
   private invalidate: Invalidate | null = null;
-  isDeclaration = true as const;
   constructor(
     Skia: Skia,
     public declarationType: DeclarationType,
@@ -109,7 +106,6 @@ export abstract class JsiNestedDeclarationNode<
   implements NestedDeclarationNode<P, T, C, Nullable>
 {
   protected children: DeclarationNode<unknown, C>[] = [];
-  isNestedDeclaration = true as const;
 
   constructor(
     Skia: Skia,

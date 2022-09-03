@@ -14,8 +14,6 @@ import type { DeclarationType, NodeType } from "./NodeType";
 export interface Node<P> {
   type: NodeType;
   setProps(props: P): void;
-  isDeclaration: boolean;
-  isNestedDeclaration: boolean;
 }
 
 export interface RenderNode<P> extends Node<P> {
@@ -26,8 +24,6 @@ export type Invalidate = () => void;
 
 export interface DeclarationNode<P, T, Nullable extends null | never = never>
   extends Node<P> {
-  isDeclaration: true;
-  isNestedDeclaration: boolean;
   declarationType: DeclarationType;
   get(): T | Nullable;
 
@@ -46,7 +42,6 @@ export interface NestedDeclarationNode<
   C = T,
   Nullable extends null | never = never
 > extends DeclarationNode<P, T, Nullable> {
-  isNestedDeclaration: true;
   addChild(child: DeclarationNode<unknown, C>): void;
   removeChild(child: DeclarationNode<unknown, C>): void;
 }
