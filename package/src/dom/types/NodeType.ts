@@ -12,16 +12,14 @@ export enum NodeType {
   Path1DPathEffect = "skPath1DPathEffect",
   Path2DPathEffect = "skPath2DPathEffect",
   CornerPathEffect = "skCornerPathEffect",
-  ComposePathEffect = "skComposePathEffect",
   SumPathEffect = "skSumPathEffect",
   Line2DPathEffect = "skLine2DPathEffect",
 
   MatrixColorFilter = "skMatrixColorFilter",
   BlendColorFilter = "skBlendColorFilter",
-  ComposeColorFilter = "skComposeColorFilter",
   LinearToSRGBGammaColorFilter = "skLinearToSRGBGammaColorFilter",
   SRGBToLinearGammaColorFilter = "skSRGBToLinearGammaColorFilter",
-  LumaColorFilterColorFilter = "skLumaColorFilterColorFilter",
+  LumaColorFilter = "skLumaColorFilter",
 
   OffsetImageFilter = "skOffsetImageFilter",
   DisplacementMapImageFilter = "skDisplacementMapImageFilter",

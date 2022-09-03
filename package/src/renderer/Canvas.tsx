@@ -21,6 +21,7 @@ import type { TouchHandler } from "../views";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
 import type { SkiaValue } from "../values";
+import { JsiSkDOM } from "../dom/nodes";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
@@ -70,10 +71,10 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       [ref]
     );
 
-    const container = useMemo(
-      () => new Container(new DependencyManager(registerValues), redraw),
-      [redraw, registerValues]
-    );
+    const container = useMemo(() => {
+      const Sk = new JsiSkDOM(Skia);
+      return new Container(Sk, new DependencyManager(registerValues), redraw);
+    }, [redraw, registerValues]);
 
     const root = useMemo(
       () => skiaReconciler.createContainer(container, 0, false, null),

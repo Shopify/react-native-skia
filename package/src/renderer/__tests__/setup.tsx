@@ -16,6 +16,7 @@ import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
 import { SkiaView } from "../../views/SkiaView.web";
+import { JsiSkDOM } from "../../dom/nodes";
 
 export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -71,6 +72,7 @@ beforeAll(async () => {
   const Skia = JsiSkApi(global.CanvasKit);
   global.SkiaApi = Skia;
   global.SkiaValueApi = ValueApi;
+  global.Sk = new JsiSkDOM(Skia);
 });
 
 export const PIXEL_RATIO = 3;
@@ -114,7 +116,7 @@ export const mountCanvas = (element: ReactNode) => {
   };
 
   const depMgr = new DependencyManager(registerValues);
-  const container = new Container(depMgr, redraw);
+  const container = new Container(Sk, depMgr, redraw);
   skiaReconciler.createContainer(container, 0, false, null);
   const root = skiaReconciler.createContainer(container, 0, false, null);
   skiaReconciler.updateContainer(

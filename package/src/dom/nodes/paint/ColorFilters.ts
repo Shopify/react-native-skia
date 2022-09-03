@@ -1,12 +1,13 @@
+import { BlendMode } from "../../../skia/types";
+import type { Skia, SkColorFilter } from "../../../skia/types";
+import { JsiNestedDeclarationNode } from "../Node";
 import type {
-  Skia,
-  BlendMode,
-  SkColor,
-  SkColorFilter,
-} from "../../../skia/types";
-import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
-import type { MatrixColorFilterProps } from "../../types";
+  BlendColorFilterProps,
+  MatrixColorFilterProps,
+} from "../../types";
 import { DeclarationType, NodeType } from "../../types";
+import { processColor } from "../datatypes";
+import { enumKey } from "../datatypes/Enum";
 
 export class MatrixColorFilterNode extends JsiNestedDeclarationNode<
   MatrixColorFilterProps,
@@ -17,46 +18,45 @@ export class MatrixColorFilterNode extends JsiNestedDeclarationNode<
   }
 
   get() {
+    // TODO: do composition
     const { matrix } = this.props;
     return this.Skia.ColorFilter.MakeMatrix(matrix);
   }
 }
 
-export interface BlendColorFilterNodeProps {
-  color: SkColor;
-  mode: BlendMode;
-}
-
-export class BlendColorFilterNode extends JsiDeclarationNode<
-  BlendColorFilterNodeProps,
+export class BlendColorFilterNode extends JsiNestedDeclarationNode<
+  BlendColorFilterProps,
   SkColorFilter
 > {
-  constructor(Skia: Skia, props: BlendColorFilterNodeProps) {
+  constructor(Skia: Skia, props: BlendColorFilterProps) {
     super(Skia, DeclarationType.ColorFilter, NodeType.BlendColorFilter, props);
   }
 
   get() {
-    const { color, mode } = this.props;
-    return this.Skia.ColorFilter.MakeBlend(color, mode);
+    // TODO: do composition
+    const { mode } = this.props;
+    const color = processColor(this.Skia, this.props.color, 1);
+    return this.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
   }
 }
 
-export class ComposeColorFilterNode extends JsiNestedDeclarationNode<
-  null,
-  SkColorFilter
-> {
-  constructor(Skia: Skia) {
-    super(Skia, DeclarationType.ColorFilter, NodeType.ComposeColorFilter, null);
-  }
+// export class ComposeColorFilterNode extends JsiNestedDeclarationNode<
+//   null,
+//   SkColorFilter
+// > {
+//   constructor(Skia: Skia) {
+//     super(Skia, DeclarationType.ColorFilter, NodeType.ComposeColorFilter, null);
+//   }
 
-  get() {
-    return this.getRecursively(
-      this.Skia.ColorFilter.MakeCompose.bind(this.Skia.ColorFilter)
-    );
-  }
-}
+//   get() {
+//     // TODO: do composition
+//     return this.getRecursively(
+//       this.Skia.ColorFilter.MakeCompose.bind(this.Skia.ColorFilter)
+//     );
+//   }
+// }
 
-export class LinearToSRGBGammaColorFilterNode extends JsiDeclarationNode<
+export class LinearToSRGBGammaColorFilterNode extends JsiNestedDeclarationNode<
   null,
   SkColorFilter
 > {
@@ -70,11 +70,12 @@ export class LinearToSRGBGammaColorFilterNode extends JsiDeclarationNode<
   }
 
   get() {
+    // TODO: do composition
     return this.Skia.ColorFilter.MakeLinearToSRGBGamma();
   }
 }
 
-export class SRGBToLinearGammaColorFilterNode extends JsiDeclarationNode<
+export class SRGBToLinearGammaColorFilterNode extends JsiNestedDeclarationNode<
   null,
   SkColorFilter
 > {
@@ -88,24 +89,21 @@ export class SRGBToLinearGammaColorFilterNode extends JsiDeclarationNode<
   }
 
   get() {
+    // TODO: do composition
     return this.Skia.ColorFilter.MakeSRGBToLinearGamma();
   }
 }
 
-export class LumaColorFilterNode extends JsiDeclarationNode<
+export class LumaColorFilterNode extends JsiNestedDeclarationNode<
   null,
   SkColorFilter
 > {
   constructor(Skia: Skia) {
-    super(
-      Skia,
-      DeclarationType.ColorFilter,
-      NodeType.LumaColorFilterColorFilter,
-      null
-    );
+    super(Skia, DeclarationType.ColorFilter, NodeType.LumaColorFilter, null);
   }
 
   get() {
+    // TODO: do composition
     return this.Skia.ColorFilter.MakeLumaColorFilter();
   }
 }

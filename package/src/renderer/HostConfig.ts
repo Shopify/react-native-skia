@@ -1,12 +1,10 @@
 /*global NodeJS*/
 import type { HostConfig } from "react-reconciler";
 
-import { NodeType } from "../dom/types";
-import type { Node } from "../dom/types";
-
-import "./HostComponents";
+import type { NodeType, Node } from "../dom/types";
 
 import type { Container } from "./Container";
+import { createNode } from "./HostComponents";
 import { exhaustiveCheck, shallowEq } from "./typeddash";
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -123,78 +121,6 @@ const insertBefore = (
     throw new Error(
       `Cannot append ${child.type} to ${parent.type} before ${before.type}`
     );
-  }
-};
-
-const createNode = (container: Container, type: NodeType, props: Props) => {
-  const { Sk } = container;
-  switch (type) {
-    case NodeType.Group:
-      return Sk.Group(props);
-    case NodeType.Paint:
-      return Sk.Paint(props);
-    // Drawings
-    case NodeType.Fill:
-      return Sk.Fill(props);
-    case NodeType.Image:
-      return Sk.Image(props);
-    case NodeType.Circle:
-      return Sk.Circle(props);
-    case NodeType.Path:
-      return Sk.Path(props);
-    case NodeType.Drawing:
-      return Sk.CustomDrawing(props);
-    case NodeType.Line:
-      return Sk.Line(props);
-    case NodeType.Oval:
-      return Sk.Oval(props);
-    case NodeType.Patch:
-      return Sk.Patch(props);
-    case NodeType.Points:
-      return Sk.Points(props);
-    case NodeType.Rect:
-      return Sk.Rect(props);
-    case NodeType.RRect:
-      return Sk.RRect(props);
-    case NodeType.Vertices:
-      return Sk.Vertices(props);
-    case NodeType.Text:
-      return Sk.Text(props);
-    case NodeType.DiffRect:
-      return Sk.DiffRect(props);
-    // Mask Filter
-    case NodeType.BlurMaskFilter:
-      return Sk.BlurMaskFilter(props);
-    // Image Filter
-    case NodeType.BlendImageFilter:
-      return Sk.BlendImageFilter(props);
-    case NodeType.BlurImageFilter:
-      return Sk.BlurImageFilter(props);
-    case NodeType.OffsetImageFilter:
-      return Sk.OffsetImageFilter(props);
-    case NodeType.DropShadowImageFilter:
-      return Sk.DropShadowImageFilter(props);
-    case NodeType.DisplacementMapImageFilter:
-      return Sk.DisplacementMapImageFilter(props);
-    case NodeType.MorphologyImageFilter:
-      return Sk.MorphologyImageFilter(props);
-    case NodeType.RuntimeShaderImageFilter:
-      return Sk.RuntimeShaderImageFilter(props);
-    // Color Filter
-    case NodeType.MatrixColorFilter:
-      return Sk.MatrixColorFilter(props);
-    // Shader
-    case NodeType.Shader:
-      return Sk.Shader(props);
-    case NodeType.ImageShader:
-      return Sk.ImageShader(props);
-    case NodeType.LinearGradient:
-      return Sk.LinearGradient(props);
-    // Path Effect
-    case NodeType.CornerPathEffect:
-      return Sk.CornerPathEffect(props);
-    default:
-      return exhaustiveCheck(type);
   }
 };
 

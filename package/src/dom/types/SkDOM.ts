@@ -20,7 +20,10 @@ import type {
   DeclarationNode,
   PaintNode,
 } from "./Node";
-import type { MatrixColorFilterProps } from "./ColorFilters";
+import type {
+  BlendColorFilterProps,
+  MatrixColorFilterProps,
+} from "./ColorFilters";
 import type {
   ImageProps,
   CircleProps,
@@ -42,12 +45,27 @@ import type {
   LinearGradientProps,
   ShaderProps,
 } from "./Shaders";
-import type { CornerPathEffectProps } from "./PathEffects";
+import type {
+  CornerPathEffectProps,
+  DashPathEffectProps,
+  DiscretePathEffectProps,
+  Line2DPathEffectProps,
+  Path1DPathEffectProps,
+  Path2DPathEffectProps,
+} from "./PathEffects";
 
-type ImageFilterNode = NestedDeclarationNode<
-  unknown,
+type ImageFilterNode<P> = NestedDeclarationNode<
+  P,
   SkImageFilter,
   SkImageFilter | SkColorFilter | SkShader
+>;
+
+type PathEffectNode<P> = NestedDeclarationNode<P, SkPathEffect>;
+type NullablePathEffectNode<P> = NestedDeclarationNode<
+  P,
+  SkPathEffect,
+  SkPathEffect,
+  null
 >;
 
 export interface SkDOM {
@@ -78,22 +96,38 @@ export interface SkDOM {
   ): DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
 
   // ImageFilters
-  BlendImageFilter(props: BlendImageFilterProps): ImageFilterNode;
-  BlurImageFilter(props: BlurImageFilterProps): ImageFilterNode;
-  OffsetImageFilter(props: OffsetImageFilterProps): ImageFilterNode;
-  DropShadowImageFilter(props: DropShadowImageFilterProps): ImageFilterNode;
-  MorphologyImageFilter(props: MorphologyImageFilterProps): ImageFilterNode;
+  BlendImageFilter(
+    props: BlendImageFilterProps
+  ): ImageFilterNode<BlendImageFilterProps>;
+  BlurImageFilter(
+    props: BlurImageFilterProps
+  ): ImageFilterNode<BlurImageFilterProps>;
+  OffsetImageFilter(
+    props: OffsetImageFilterProps
+  ): ImageFilterNode<OffsetImageFilterProps>;
+  DropShadowImageFilter(
+    props: DropShadowImageFilterProps
+  ): ImageFilterNode<DropShadowImageFilterProps>;
+  MorphologyImageFilter(
+    props: MorphologyImageFilterProps
+  ): ImageFilterNode<MorphologyImageFilterProps>;
   DisplacementMapImageFilter(
     props: DisplacementMapImageFilterProps
-  ): ImageFilterNode;
+  ): ImageFilterNode<DisplacementMapImageFilterProps>;
   RuntimeShaderImageFilter(
     props: RuntimeShaderImageFilterProps
-  ): ImageFilterNode;
+  ): ImageFilterNode<RuntimeShaderImageFilterProps>;
 
   // ColorFilters
   MatrixColorFilter(
     props: MatrixColorFilterProps
   ): NestedDeclarationNode<MatrixColorFilterProps, SkColorFilter>;
+  BlendColorFilter(
+    props: BlendColorFilterProps
+  ): NestedDeclarationNode<BlendColorFilterProps, SkColorFilter>;
+  LumaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
+  LinearToSRGBGammaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
+  SRGBToLinearGammaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
 
   // Shaders
   Shader(props: ShaderProps): NestedDeclarationNode<ShaderProps, SkShader>;
@@ -107,5 +141,21 @@ export interface SkDOM {
   // Path Effects
   CornerPathEffect(
     props: CornerPathEffectProps
-  ): DeclarationNode<CornerPathEffectProps, SkPathEffect, null>;
+  ): NullablePathEffectNode<CornerPathEffectProps>;
+  DiscretePathEffect(
+    props: DiscretePathEffectProps
+  ): PathEffectNode<DiscretePathEffectProps>;
+  DashPathEffect(
+    props: DashPathEffectProps
+  ): PathEffectNode<DashPathEffectProps>;
+  Path1DPathEffect(
+    props: Path1DPathEffectProps
+  ): NullablePathEffectNode<Path1DPathEffectProps>;
+  Path2DPathEffect(
+    props: Path2DPathEffectProps
+  ): NullablePathEffectNode<Path2DPathEffectProps>;
+  SumPathEffect(): NullablePathEffectNode<null>;
+  Line2DPathEffect(
+    props: Line2DPathEffectProps
+  ): NullablePathEffectNode<Line2DPathEffectProps>;
 }

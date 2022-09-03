@@ -23,6 +23,7 @@ import type {
   TextProps,
   DiffRectProps,
   OffsetImageFilterProps,
+  BlendColorFilterProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
@@ -32,7 +33,14 @@ import type {
   MorphologyImageFilterProps,
   RuntimeShaderImageFilterProps,
 } from "../types/ImageFilters";
-import type { CornerPathEffectProps } from "../types/PathEffects";
+import type {
+  CornerPathEffectProps,
+  DashPathEffectProps,
+  DiscretePathEffectProps,
+  Line2DPathEffectProps,
+  Path1DPathEffectProps,
+  Path2DPathEffectProps,
+} from "../types/PathEffects";
 
 import {
   FillNode,
@@ -60,8 +68,20 @@ import {
   JsiPaintNode,
   RuntimeShaderImageFilterNode,
   CornerPathEffectNode,
+  DiscretePathEffectNode,
+  DashPathEffectNode,
+  Path1DPathEffectNode,
+  Path2DPathEffectNode,
+  SumPathEffectNode,
+  Line2DPathEffectNode,
 } from "./paint";
-import { MatrixColorFilterNode } from "./paint/ColorFilters";
+import {
+  MatrixColorFilterNode,
+  LumaColorFilterNode,
+  LinearToSRGBGammaColorFilterNode,
+  SRGBToLinearGammaColorFilterNode,
+  BlendColorFilterNode,
+} from "./paint/ColorFilters";
 import {
   LinearGradientNode,
   ShaderNode,
@@ -177,6 +197,22 @@ export class JsiSkDOM implements SkDOM {
     return new MatrixColorFilterNode(this.Skia, props);
   }
 
+  BlendColorFilter(props: BlendColorFilterProps) {
+    return new BlendColorFilterNode(this.Skia, props);
+  }
+
+  LumaColorFilter() {
+    return new LumaColorFilterNode(this.Skia);
+  }
+
+  LinearToSRGBGammaColorFilter() {
+    return new LinearToSRGBGammaColorFilterNode(this.Skia);
+  }
+
+  SRGBToLinearGammaColorFilter() {
+    return new SRGBToLinearGammaColorFilterNode(this.Skia);
+  }
+
   // Shaders
   Shader(props: ShaderProps) {
     return new ShaderNode(this.Skia, props);
@@ -193,5 +229,29 @@ export class JsiSkDOM implements SkDOM {
   // Path Effects
   CornerPathEffect(props: CornerPathEffectProps) {
     return new CornerPathEffectNode(this.Skia, props);
+  }
+
+  DiscretePathEffect(props: DiscretePathEffectProps) {
+    return new DiscretePathEffectNode(this.Skia, props);
+  }
+
+  DashPathEffect(props: DashPathEffectProps) {
+    return new DashPathEffectNode(this.Skia, props);
+  }
+
+  Path1DPathEffect(props: Path1DPathEffectProps) {
+    return new Path1DPathEffectNode(this.Skia, props);
+  }
+
+  Path2DPathEffect(props: Path2DPathEffectProps) {
+    return new Path2DPathEffectNode(this.Skia, props);
+  }
+
+  SumPathEffect() {
+    return new SumPathEffectNode(this.Skia);
+  }
+
+  Line2DPathEffect(props: Line2DPathEffectProps) {
+    return new Line2DPathEffectNode(this.Skia, props);
   }
 }
