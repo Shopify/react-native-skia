@@ -1,7 +1,8 @@
 /*global NodeJS*/
 import type { HostConfig } from "react-reconciler";
 
-import type { Node, Container, DeclarationProps, DrawingProps } from "./nodes";
+import type { Container } from "./Container";
+import type { Node, DeclarationProps, DrawingProps } from "./nodes";
 import { DeclarationNode, DrawingNode, NodeType } from "./nodes";
 import { exhaustiveCheck, shallowEq } from "./typeddash";
 

@@ -9,7 +9,7 @@ import ReactReconciler from "react-reconciler";
 import { JsiSkApi } from "../../skia/web";
 import { DependencyManager } from "../DependencyManager";
 import { skHostConfig } from "../HostConfig";
-import { Container } from "../nodes";
+import { Container } from "../Container";
 import type { DrawingContext } from "../DrawingContext";
 import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";

@@ -24,7 +24,7 @@ import type { SkiaValue } from "../values";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
-import { Container } from "./nodes";
+import { Container } from "./Container";
 import { DependencyManager } from "./DependencyManager";
 import { CanvasProvider } from "./useCanvas";
 
