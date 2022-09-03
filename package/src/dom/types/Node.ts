@@ -15,6 +15,12 @@ export interface Node<P> {
   type: NodeType;
   kind: NodeKind;
   setProps(props: P): void;
+
+  isPaint(): this is PaintNode;
+  isGroup(): this is GroupNode;
+  isDeclaration(): this is DeclarationNode<P, unknown>;
+  isNestedDeclaration(): this is NestedDeclarationNode<P, unknown>;
+  isDrawing(): this is DrawingNode<DrawingNodeProps>;
 }
 
 export interface RenderNode<P> extends Node<P> {

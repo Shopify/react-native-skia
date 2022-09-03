@@ -13,6 +13,10 @@ import type {
   NodeType,
   RenderNode,
   NestedDeclarationNode,
+  PaintNode,
+  GroupNode,
+  DrawingNode,
+  DrawingNodeProps,
 } from "../types";
 import { NodeKind, DeclarationType } from "../types";
 
@@ -26,6 +30,28 @@ export abstract class JsiNode<P> implements Node<P> {
 
   setProps(props: P) {
     this.props = props;
+  }
+
+  isPaint(): this is PaintNode {
+    return this.kind === NodeKind.Paint;
+  }
+
+  isGroup(): this is GroupNode {
+    return this.kind === NodeKind.Group;
+  }
+  isDeclaration(): this is DeclarationNode<P, unknown> {
+    return (
+      this.kind === NodeKind.Declaration ||
+      this.kind === NodeKind.NestedDeclaration
+    );
+  }
+
+  isNestedDeclaration(): this is NestedDeclarationNode<P, unknown> {
+    return this.kind === NodeKind.NestedDeclaration;
+  }
+
+  isDrawing(): this is DrawingNode<DrawingNodeProps> {
+    return this.kind === NodeKind.Drawing;
   }
 }
 
