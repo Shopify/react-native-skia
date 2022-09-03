@@ -39,6 +39,7 @@ export abstract class JsiNode<P> implements Node<P> {
   isGroup(): this is GroupNode {
     return this.kind === NodeKind.Group;
   }
+
   isDeclaration(): this is DeclarationNode<P, unknown> {
     return (
       this.kind === NodeKind.Declaration ||
