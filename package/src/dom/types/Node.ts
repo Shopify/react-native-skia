@@ -63,10 +63,15 @@ export interface GroupNode extends RenderNode<GroupProps> {
 
 export interface PaintNode extends Node<PaintProps> {
   addShader(shader: DeclarationNode<unknown, SkShader>): void;
+  removeShader(): void;
   addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>): void;
+  removeMaskFilter(): void;
   addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>): void;
+  removeColorFilter(): void;
   addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>): void;
+  removeImageFilter(): void;
   addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>): void;
+  removePathEffect(): void;
 }
 
 export interface DrawingNodeProps {
