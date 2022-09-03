@@ -6,7 +6,14 @@ import type {
   SkShader,
   SkPathEffect,
 } from "../../skia/types";
-import type { Node, DrawingContext, DeclarationNode, NodeType } from "../types";
+import type {
+  Node,
+  DrawingContext,
+  DeclarationNode,
+  NodeType,
+  RenderNode,
+  NestedDeclarationNode,
+} from "../types";
 import { DeclarationType } from "../types";
 
 export abstract class JsiNode<P> implements Node<P> {
@@ -21,7 +28,10 @@ export abstract class JsiNode<P> implements Node<P> {
   }
 }
 
-export abstract class JsiRenderNode<P> extends JsiNode<P> {
+export abstract class JsiRenderNode<P>
+  extends JsiNode<P>
+  implements RenderNode<P>
+{
   constructor(Skia: Skia, type: NodeType, props: P) {
     super(Skia, type, props);
   }
@@ -32,10 +42,13 @@ export abstract class JsiRenderNode<P> extends JsiNode<P> {
 export type Invalidate = () => void;
 
 export abstract class JsiDeclarationNode<
-  P,
-  T,
-  Nullable extends null | never = never
-> extends JsiNode<P> {
+    P,
+    T,
+    Nullable extends null | never = never
+  >
+  extends JsiNode<P>
+  implements DeclarationNode<P, T, Nullable>
+{
   private invalidate: Invalidate | null = null;
 
   constructor(
@@ -85,11 +98,15 @@ export abstract class JsiDeclarationNode<
 }
 
 export abstract class JsiNestedDeclarationNode<
-  P,
-  T,
-  Nullable extends null | never = never
-> extends JsiDeclarationNode<P, T, Nullable> {
-  protected children: DeclarationNode<unknown, T>[] = [];
+    P,
+    T,
+    C = T,
+    Nullable extends null | never = never
+  >
+  extends JsiDeclarationNode<P, T, Nullable>
+  implements NestedDeclarationNode<P, T, C, Nullable>
+{
+  protected children: DeclarationNode<unknown, C>[] = [];
 
   constructor(
     Skia: Skia,
@@ -100,18 +117,22 @@ export abstract class JsiNestedDeclarationNode<
     super(Skia, declarationType, type, props);
   }
 
-  addChild(child: DeclarationNode<unknown, T>) {
+  addChild(child: DeclarationNode<unknown, C>) {
     this.children.push(child);
   }
 
-  protected getRecursively(compose: (a: T, b: T) => T) {
+  removeChild(child: DeclarationNode<unknown, C>) {
+    this.children.splice(this.children.indexOf(child), 1);
+  }
+
+  protected getRecursively(compose: (a: C, b: C) => C) {
     return this.children
       .map((child) => child.get())
-      .reduce<T | null>((acc, p) => {
+      .reduce<C | null>((acc, p) => {
         if (acc === null) {
           return p;
         }
         return compose(acc, p);
-      }, null) as T;
+      }, null) as C;
   }
 }

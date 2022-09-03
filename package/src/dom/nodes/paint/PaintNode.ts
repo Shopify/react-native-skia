@@ -35,9 +35,19 @@ export class PaintNode extends JsiNode<PaintProps> {
     this.shader.setInvalidate(() => (this.cache = null));
   }
 
+  removeShader() {
+    this.shader = undefined;
+    this.cache = null;
+  }
+
   addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>) {
     this.maskFilter = maskFilter;
     this.maskFilter.setInvalidate(() => (this.cache = null));
+  }
+
+  removeMaskFilter() {
+    this.maskFilter = undefined;
+    this.cache = null;
   }
 
   addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>) {
@@ -45,14 +55,29 @@ export class PaintNode extends JsiNode<PaintProps> {
     this.colorFilter.setInvalidate(() => (this.cache = null));
   }
 
+  removeColorFilter() {
+    this.colorFilter = undefined;
+    this.cache = null;
+  }
+
   addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>) {
     this.imageFilter = imageFilter;
     this.imageFilter.setInvalidate(() => (this.cache = null));
   }
 
+  removeImageFilter() {
+    this.imageFilter = undefined;
+    this.cache = null;
+  }
+
   addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>) {
     this.pathEffect = pathEffect;
     this.pathEffect.setInvalidate(() => (this.cache = null));
+  }
+
+  removePathEffect() {
+    this.pathEffect = undefined;
+    this.cache = null;
   }
 
   concat(parentPaint: SkPaint, currentOpacity: number) {

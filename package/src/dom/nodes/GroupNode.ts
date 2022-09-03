@@ -1,23 +1,8 @@
-import type {
-  SkMatrix,
-  SkPathEffect,
-  SkRect,
-  SkRRect,
-  SkShader,
-  Skia,
-} from "../../skia/types";
+import type { SkMatrix, SkRect, SkRRect, Skia } from "../../skia/types";
 import { isRRect, processTransform, ClipOp } from "../../skia/types";
-import type { SkMaskFilter } from "../../skia/types/MaskFilter";
-import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
-import type { SkImageFilter } from "../../skia/types/ImageFilter/ImageFilter";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import type { SkPath } from "../../skia/types/Path/Path";
-import type {
-  DeclarationNode,
-  DrawingContext,
-  GroupProps,
-  RenderNode,
-} from "../types";
+import type { DrawingContext, Effect, GroupProps, RenderNode } from "../types";
 import { NodeType } from "../types";
 
 import { PaintNode } from "./paint/PaintNode";
@@ -115,14 +100,11 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
     this.children.push(child);
   }
 
-  addEffect(
-    effect:
-      | DeclarationNode<unknown, SkShader>
-      | DeclarationNode<unknown, SkImageFilter>
-      | DeclarationNode<unknown, SkColorFilter>
-      | DeclarationNode<unknown, SkMaskFilter>
-      | DeclarationNode<unknown, SkPathEffect>
-  ) {
+  removeChild(child: RenderNode<unknown>) {
+    this.children.splice(this.children.indexOf(child), 1);
+  }
+
+  addEffect(effect: Effect) {
     if (!this.paint) {
       this.paint = new PaintNode(this.Skia);
     }
@@ -136,6 +118,25 @@ export class GroupNode extends JsiRenderNode<GroupProps> {
       this.paint.addImageFilter(effect);
     } else if (effect.isPathEffect()) {
       this.paint.addPathEffect(effect);
+    } else {
+      exhaustiveCheck(effect);
+    }
+  }
+
+  removeEffect(effect: Effect) {
+    if (!this.paint) {
+      throw new Error("No paint to remove effect from");
+    }
+    if (effect.isColorFilter()) {
+      this.paint.removeColorFilter();
+    } else if (effect.isMaskFilter()) {
+      this.paint.removeMaskFilter();
+    } else if (effect.isShader()) {
+      this.paint.removeShader();
+    } else if (effect.isImageFilter()) {
+      this.paint.removeImageFilter();
+    } else if (effect.isPathEffect()) {
+      this.paint.removePathEffect();
     } else {
       exhaustiveCheck(effect);
     }

@@ -43,19 +43,22 @@ export interface NestedDeclarationNode<
   Nullable extends null | never = never
 > extends DeclarationNode<P, T, Nullable> {
   addChild(child: DeclarationNode<unknown, C>): void;
+  removeChild(child: DeclarationNode<unknown, C>): void;
 }
+
+export type Effect =
+  | DeclarationNode<unknown, SkShader>
+  | DeclarationNode<unknown, SkImageFilter>
+  | DeclarationNode<unknown, SkColorFilter>
+  | DeclarationNode<unknown, SkMaskFilter>
+  | DeclarationNode<unknown, SkPathEffect>;
 
 export interface GroupNode extends RenderNode<GroupProps> {
   addChild(child: RenderNode<unknown>): void;
+  removeChild(child: RenderNode<unknown>): void;
 
-  addEffect(
-    effect:
-      | DeclarationNode<unknown, SkShader>
-      | DeclarationNode<unknown, SkImageFilter>
-      | DeclarationNode<unknown, SkColorFilter>
-      | DeclarationNode<unknown, SkMaskFilter>
-      | DeclarationNode<unknown, SkPathEffect>
-  ): void;
+  addEffect(effect: Effect): void;
+  removeEffect(effect: Effect): void;
 }
 
 export interface PaintNode extends Node<PaintProps> {

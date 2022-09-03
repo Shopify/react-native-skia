@@ -1,6 +1,10 @@
-import type { SkColorFilter } from "../../../skia/types/ColorFilter/ColorFilter";
 import { exhaustiveCheck } from "../../../renderer/typeddash";
-import type { SkImageFilter, SkShader, Skia } from "../../../skia/types";
+import type {
+  SkImageFilter,
+  SkShader,
+  Skia,
+  SkColorFilter,
+} from "../../../skia/types";
 import { ColorChannel, processUniforms, TileMode } from "../../../skia/types";
 import { JsiNestedDeclarationNode } from "../Node";
 import type {
@@ -19,10 +23,16 @@ import { processRadius, enumKey, processColor } from "../datatypes";
 abstract class ImageFilterDeclaration<
   P,
   Nullable extends null | never = never
-> extends JsiNestedDeclarationNode<P, SkImageFilter, Nullable> {
+> extends JsiNestedDeclarationNode<
+  P,
+  SkImageFilter,
+  SkImageFilter | SkShader | SkColorFilter,
+  Nullable
+> {
   constructor(Skia: Skia, type: NodeType, props: P) {
     super(Skia, DeclarationType.ImageFilter, type, props);
   }
+
   addChild(
     child:
       | DeclarationNode<unknown, SkImageFilter>
@@ -49,7 +59,7 @@ abstract class ImageFilterDeclaration<
     if (!child) {
       throw new Error("Missing child in " + parent);
     }
-    return child.get();
+    return child.get() as SkImageFilter;
   }
 
   protected getChild(index = 0) {
@@ -57,7 +67,7 @@ abstract class ImageFilterDeclaration<
     if (!child) {
       return null;
     }
-    return child.get();
+    return child.get() as SkImageFilter;
   }
 }
 
