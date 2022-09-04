@@ -11,4 +11,4 @@ export * from "./PatchNode";
 export * from "./VerticesNode";
 export * from "./CustomDrawingNode";
 export * from "./DrawingNode";
-export * from "./TextNode";
+export * from "./Text";

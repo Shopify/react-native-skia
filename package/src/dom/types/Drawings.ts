@@ -93,6 +93,13 @@ export interface TextProps extends DrawingNodeProps {
   y: number;
 }
 
+export interface TextPathProps extends DrawingNodeProps {
+  font: SkFont;
+  text: string;
+  path: PathDef;
+  initialOffset: number;
+}
+
 export interface DiffRectProps extends DrawingNodeProps {
   inner: SkRRect;
   outer: SkRRect;

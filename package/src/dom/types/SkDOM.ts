@@ -38,6 +38,7 @@ import type {
   VerticesProps,
   TextProps,
   DiffRectProps,
+  TextPathProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -88,6 +89,7 @@ export interface SkDOM {
   RRect(props: RoundedRectProps): DrawingNode<RoundedRectProps>;
   Vertices(props: VerticesProps): DrawingNode<VerticesProps>;
   Text(props: TextProps): DrawingNode<TextProps>;
+  TextPath(props: TextPathProps): DrawingNode<TextPathProps>;
   DiffRect(props: DiffRectProps): DrawingNode<DiffRectProps>;
 
   // BlurMaskFilters

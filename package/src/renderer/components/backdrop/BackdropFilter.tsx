@@ -5,8 +5,8 @@ import type { AnimatedProps } from "../../processors";
 import { createDrawing } from "../../nodes";
 import type { Node } from "../../nodes";
 import { getInput } from "../imageFilters/getInput";
-import type { GroupProps } from "../Group";
 import { Group } from "../Group";
+import type { GroupProps } from "../../../dom/types";
 
 const disableFilterMemoization = (children: Node[]) => {
   children.forEach((child) => {
