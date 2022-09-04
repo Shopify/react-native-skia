@@ -8,7 +8,6 @@ import type {
 import { NodeType } from "../../types";
 import { processPath } from "../datatypes";
 import type { GlyphsProps } from "../../types/Drawings";
-import { Glyphs } from "../../../renderer/components/text/Glyphs";
 
 import { JsiDrawingNode } from "./DrawingNode";
 

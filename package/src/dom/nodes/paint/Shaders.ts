@@ -10,6 +10,7 @@ import type {
   ImageShaderProps,
   LinearGradientProps,
   ShaderProps,
+  TwoPointConicalGradientProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
 import {
@@ -89,6 +90,37 @@ export class LinearGradientNode extends JsiDeclarationNode<
       end,
       colors,
       positions ?? null,
+      mode,
+      localMatrix,
+      flags
+    );
+  }
+}
+
+export class TwoPointConicalGradientNode extends JsiDeclarationNode<
+  TwoPointConicalGradientProps,
+  SkShader
+> {
+  constructor(Skia: Skia, props: TwoPointConicalGradientProps) {
+    super(
+      Skia,
+      DeclarationType.Shader,
+      NodeType.TwoPointConicalGradient,
+      props
+    );
+  }
+
+  get() {
+    const { startR, endR, start, end } = this.props;
+    const { colors, positions, mode, localMatrix, flags } =
+      processGradientProps(this.Skia, this.props);
+    return this.Skia.Shader.MakeTwoPointConicalGradient(
+      start,
+      startR,
+      end,
+      endR,
+      colors,
+      positions,
       mode,
       localMatrix,
       flags

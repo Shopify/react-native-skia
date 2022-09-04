@@ -39,6 +39,7 @@ import type {
   TextPathProps,
   TextBlobProps,
   GlyphsProps,
+  TwoPointConicalGradientProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type { MorphologyImageFilterProps } from "../dom/types/ImageFilters";
@@ -95,8 +96,9 @@ declare global {
 
       // Shaders
       skShader: SkiaProps<ShaderProps>;
-      ImageShader: SkiaProps<ImageShaderProps>;
-      LinearGradient: SkiaProps<LinearGradientProps>;
+      skImageShader: SkiaProps<ImageShaderProps>;
+      skLinearGradient: SkiaProps<LinearGradientProps>;
+      skTwoPointConicalGradient: SkiaProps<TwoPointConicalGradientProps>;
 
       // Path Effects
       skDiscretePathEffect: SkiaProps<DiscretePathEffectProps>;
@@ -193,6 +195,8 @@ const _createNode = (
       return Sk.ImageShader(props);
     case NodeType.LinearGradient:
       return Sk.LinearGradient(props);
+    case NodeType.TwoPointConicalGradient:
+      return Sk.TwoPointConicalGradient(props);
     // Path Effect
     case NodeType.CornerPathEffect:
       return Sk.CornerPathEffect(props);

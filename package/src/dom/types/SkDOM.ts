@@ -47,6 +47,7 @@ import type {
   ImageShaderProps,
   LinearGradientProps,
   ShaderProps,
+  TwoPointConicalGradientProps,
 } from "./Shaders";
 import type {
   CornerPathEffectProps,
@@ -143,6 +144,9 @@ export interface SkDOM {
   LinearGradient(
     props: LinearGradientProps
   ): DeclarationNode<LinearGradientProps, SkShader>;
+  TwoPointConicalGradient(
+    props: TwoPointConicalGradientProps
+  ): DeclarationNode<TwoPointConicalGradientProps, SkShader>;
 
   // Path Effects
   CornerPathEffect(

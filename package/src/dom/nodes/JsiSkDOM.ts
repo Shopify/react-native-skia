@@ -27,6 +27,7 @@ import type {
   TextPathProps,
   TextBlobProps,
   GlyphsProps,
+  TwoPointConicalGradientProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
@@ -92,6 +93,7 @@ import {
   LinearGradientNode,
   ShaderNode,
   ImageShaderNode,
+  TwoPointConicalGradientNode,
 } from "./paint/Shaders";
 import { DiffRectNode } from "./drawings/DiffRectNode";
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
@@ -242,6 +244,10 @@ export class JsiSkDOM implements SkDOM {
 
   LinearGradient(props: LinearGradientProps) {
     return new LinearGradientNode(this.Skia, props);
+  }
+
+  TwoPointConicalGradient(props: TwoPointConicalGradientProps) {
+    return new TwoPointConicalGradientNode(this.Skia, props);
   }
 
   // Path Effects
