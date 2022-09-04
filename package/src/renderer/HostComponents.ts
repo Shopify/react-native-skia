@@ -43,6 +43,7 @@ import type {
   TurbulenceProps,
   SweepGradientProps,
   RadialGradientProps,
+  ColorProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type { MorphologyImageFilterProps } from "../dom/types/ImageFilters";
@@ -100,7 +101,9 @@ declare global {
       // Shaders
       skShader: SkiaProps<ShaderProps>;
       skImageShader: SkiaProps<ImageShaderProps>;
+      skColorShader: SkiaProps<ColorProps>;
       skTurbulence: SkiaProps<TurbulenceProps>;
+      skFractalNoise: SkiaProps<TurbulenceProps>;
       skLinearGradient: SkiaProps<LinearGradientProps>;
       skRadialGradient: SkiaProps<RadialGradientProps>;
       skSweepGradient: SkiaProps<SweepGradientProps>;
@@ -199,8 +202,12 @@ const _createNode = (
       return Sk.Shader(props);
     case NodeType.ImageShader:
       return Sk.ImageShader(props);
+    case NodeType.ColorShader:
+      return Sk.ColorShader(props);
     case NodeType.Turbulence:
       return Sk.Turbulence(props);
+    case NodeType.FractalNoise:
+      return Sk.FractalNoise(props);
     case NodeType.LinearGradient:
       return Sk.LinearGradient(props);
     case NodeType.RadialGradient:

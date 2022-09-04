@@ -31,6 +31,8 @@ import type {
   TurbulenceProps,
   SweepGradientProps,
   RadialGradientProps,
+  FractalNoiseProps,
+  ColorProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
@@ -100,6 +102,8 @@ import {
   TurbulenceNode,
   SweepGradientNode,
   RadialGradientNode,
+  FractalNoiseNode,
+  ColorNode,
 } from "./paint/Shaders";
 import { DiffRectNode } from "./drawings/DiffRectNode";
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
@@ -248,12 +252,20 @@ export class JsiSkDOM implements SkDOM {
     return new ImageShaderNode(this.Skia, props);
   }
 
+  ColorShader(props: ColorProps) {
+    return new ColorNode(this.Skia, props);
+  }
+
   SweepGradient(props: SweepGradientProps) {
     return new SweepGradientNode(this.Skia, props);
   }
 
   Turbulence(props: TurbulenceProps) {
     return new TurbulenceNode(this.Skia, props);
+  }
+
+  FractalNoise(props: FractalNoiseProps) {
+    return new FractalNoiseNode(this.Skia, props);
   }
 
   LinearGradient(props: LinearGradientProps) {

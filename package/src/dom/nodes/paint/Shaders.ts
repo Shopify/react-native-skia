@@ -7,6 +7,8 @@ import {
 import type { SkShader, Skia } from "../../../skia/types";
 import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
 import type {
+  ColorProps,
+  FractalNoiseProps,
   ImageShaderProps,
   LinearGradientProps,
   RadialGradientProps,
@@ -16,7 +18,7 @@ import type {
   TwoPointConicalGradientProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { Turbulence } from "../../../renderer/components/shaders/Turbulence";
+import { processColor } from "../datatypes/Color";
 import {
   enumKey,
   fitRects,
@@ -77,6 +79,16 @@ export class ImageShaderNode extends JsiDeclarationNode<
   }
 }
 
+export class ColorNode extends JsiDeclarationNode<ColorProps, SkShader> {
+  constructor(Skia: Skia, props: ColorProps) {
+    super(Skia, DeclarationType.Shader, NodeType.Color, props);
+  }
+
+  get() {
+    const { color } = this.props;
+    return this.Skia.Shader.MakeColor(processColor(this.Skia, color, 1));
+  }
+}
 export class TurbulenceNode extends JsiDeclarationNode<
   TurbulenceProps,
   SkShader
@@ -88,6 +100,27 @@ export class TurbulenceNode extends JsiDeclarationNode<
   get() {
     const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = this.props;
     return this.Skia.Shader.MakeTurbulence(
+      freqX,
+      freqY,
+      octaves,
+      seed,
+      tileWidth,
+      tileHeight
+    );
+  }
+}
+
+export class FractalNoiseNode extends JsiDeclarationNode<
+  FractalNoiseProps,
+  SkShader
+> {
+  constructor(Skia: Skia, props: FractalNoiseProps) {
+    super(Skia, DeclarationType.Shader, NodeType.FractalNoise, props);
+  }
+
+  get() {
+    const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = this.props;
+    return this.Skia.Shader.MakeFractalNoise(
       freqX,
       freqY,
       octaves,

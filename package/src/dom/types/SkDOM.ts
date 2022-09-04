@@ -1,7 +1,6 @@
 import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 import type { SkPathEffect } from "../../skia/types/PathEffect";
-import { SweepGradient } from "../../renderer/components/shaders/SweepGradient";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type {
@@ -45,6 +44,7 @@ import type {
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
+  FractalNoiseProps,
   SweepGradientProps,
   ImageShaderProps,
   LinearGradientProps,
@@ -52,6 +52,7 @@ import type {
   TurbulenceProps,
   TwoPointConicalGradientProps,
   RadialGradientProps,
+  ColorProps,
 } from "./Shaders";
 import type {
   CornerPathEffectProps,
@@ -145,9 +146,13 @@ export interface SkDOM {
   ImageShader(
     props: ImageShaderProps
   ): DeclarationNode<ImageShaderProps, SkShader>;
+  ColorShader(props: ColorProps): DeclarationNode<ColorProps, SkShader>;
   Turbulence(
     props: TurbulenceProps
   ): DeclarationNode<TurbulenceProps, SkShader>;
+  FractalNoise(
+    props: FractalNoiseProps
+  ): DeclarationNode<FractalNoiseProps, SkShader>;
   LinearGradient(
     props: LinearGradientProps
   ): DeclarationNode<LinearGradientProps, SkShader>;
