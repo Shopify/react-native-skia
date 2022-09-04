@@ -46,6 +46,7 @@ export enum NodeType {
   Text = "skText",
   TextPath = "skTextPath",
   TextBlob = "skTextBlob",
+  Glyphs = "skGlyphs",
 }
 
 export enum DeclarationType {

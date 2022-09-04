@@ -26,6 +26,7 @@ import type {
   BlendColorFilterProps,
   TextPathProps,
   TextBlobProps,
+  GlyphsProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
@@ -60,6 +61,7 @@ import {
   CustomDrawingNode,
   TextPathNode,
   TextBlobNode,
+  GlyphsNode,
 } from "./drawings";
 import { JsiGroupNode } from "./GroupNode";
 import {
@@ -164,6 +166,10 @@ export class JsiSkDOM implements SkDOM {
 
   TextBlob(props: TextBlobProps) {
     return new TextBlobNode(this.Skia, props);
+  }
+
+  Glyphs(props: GlyphsProps) {
+    return new GlyphsNode(this.Skia, props);
   }
 
   DiffRect(props: DiffRectProps) {

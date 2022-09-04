@@ -1,4 +1,4 @@
-import type { SkRSXform, SkTextBlob, Skia } from "../../../skia/types";
+import type { SkRSXform, SkTextBlob, Skia, SkPoint } from "../../../skia/types";
 import type {
   DrawingContext,
   TextBlobProps,
@@ -7,6 +7,8 @@ import type {
 } from "../../types";
 import { NodeType } from "../../types";
 import { processPath } from "../datatypes";
+import type { GlyphsProps } from "../../types/Drawings";
+import { Glyphs } from "../../../renderer/components/text/Glyphs";
 
 import { JsiDrawingNode } from "./DrawingNode";
 
@@ -84,5 +86,40 @@ export class TextBlobNode extends JsiDrawingNode<TextBlobProps> {
   draw({ canvas, paint }: DrawingContext) {
     const { blob, x, y } = this.props;
     canvas.drawTextBlob(blob, x, y, paint);
+  }
+}
+
+interface ProcessedGlyphs {
+  glyphs: number[];
+  positions: SkPoint[];
+}
+
+export class GlyphsNode extends JsiDrawingNode<GlyphsProps> {
+  processedGlyphs?: ProcessedGlyphs;
+
+  constructor(Skia: Skia, props: GlyphsProps) {
+    super(Skia, NodeType.Glyphs, props);
+    this.onPropChange();
+  }
+
+  onPropChange() {
+    this.processedGlyphs = this.props.glyphs.reduce<ProcessedGlyphs>(
+      (acc, glyph) => {
+        const { id, pos } = glyph;
+        acc.glyphs.push(id);
+        acc.positions.push(pos);
+        return acc;
+      },
+      { glyphs: [], positions: [] }
+    );
+  }
+
+  draw({ canvas, paint }: DrawingContext) {
+    if (!this.processedGlyphs) {
+      throw new Error("GlyphsNode: processedGlyphs is null");
+    }
+    const { glyphs, positions } = this.processedGlyphs;
+    const { x, y, font } = this.props;
+    canvas.drawGlyphs(glyphs, positions, x, y, font, paint);
   }
 }

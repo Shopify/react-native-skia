@@ -111,3 +111,15 @@ export interface TextBlobProps extends DrawingNodeProps {
   x: number;
   y: number;
 }
+
+export interface Glyph {
+  id: number;
+  pos: SkPoint;
+}
+
+export interface GlyphsProps extends DrawingNodeProps {
+  font: SkFont;
+  x: number;
+  y: number;
+  glyphs: Glyph[];
+}

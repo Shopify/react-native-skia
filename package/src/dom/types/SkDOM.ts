@@ -40,6 +40,7 @@ import type {
   DiffRectProps,
   TextPathProps,
   TextBlobProps,
+  GlyphsProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -92,6 +93,7 @@ export interface SkDOM {
   Text(props: TextProps): DrawingNode<TextProps>;
   TextPath(props: TextPathProps): DrawingNode<TextPathProps>;
   TextBlob(props: TextBlobProps): DrawingNode<TextBlobProps>;
+  Glyphs(props: GlyphsProps): DrawingNode<GlyphsProps>;
   DiffRect(props: DiffRectProps): DrawingNode<DiffRectProps>;
 
   // BlurMaskFilters
