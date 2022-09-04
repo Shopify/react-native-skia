@@ -40,6 +40,7 @@ import type {
   TextBlobProps,
   GlyphsProps,
   TwoPointConicalGradientProps,
+  TurbulenceProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type { MorphologyImageFilterProps } from "../dom/types/ImageFilters";
@@ -97,6 +98,7 @@ declare global {
       // Shaders
       skShader: SkiaProps<ShaderProps>;
       skImageShader: SkiaProps<ImageShaderProps>;
+      skTurbulence: SkiaProps<TurbulenceProps>;
       skLinearGradient: SkiaProps<LinearGradientProps>;
       skTwoPointConicalGradient: SkiaProps<TwoPointConicalGradientProps>;
 
@@ -193,6 +195,8 @@ const _createNode = (
       return Sk.Shader(props);
     case NodeType.ImageShader:
       return Sk.ImageShader(props);
+    case NodeType.Turbulence:
+      return Sk.Turbulence(props);
     case NodeType.LinearGradient:
       return Sk.LinearGradient(props);
     case NodeType.TwoPointConicalGradient:

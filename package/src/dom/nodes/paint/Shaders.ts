@@ -10,9 +10,11 @@ import type {
   ImageShaderProps,
   LinearGradientProps,
   ShaderProps,
+  TurbulenceProps,
   TwoPointConicalGradientProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
+import { Turbulence } from "../../../renderer/components/shaders/Turbulence";
 import {
   enumKey,
   fitRects,
@@ -69,6 +71,27 @@ export class ImageShaderNode extends JsiDeclarationNode<
       FilterMode[enumKey(fm)],
       MipmapMode[enumKey(mm)],
       lm(this.props.matrix ?? this.Skia.Matrix(), imageShaderProps)
+    );
+  }
+}
+
+export class TurbulenceNode extends JsiDeclarationNode<
+  TurbulenceProps,
+  SkShader
+> {
+  constructor(Skia: Skia, props: TurbulenceProps) {
+    super(Skia, DeclarationType.Shader, NodeType.Turbulence, props);
+  }
+
+  get() {
+    const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = this.props;
+    return this.Skia.Shader.MakeTurbulence(
+      freqX,
+      freqY,
+      octaves,
+      seed,
+      tileWidth,
+      tileHeight
     );
   }
 }

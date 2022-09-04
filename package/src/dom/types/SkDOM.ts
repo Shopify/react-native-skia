@@ -47,6 +47,7 @@ import type {
   ImageShaderProps,
   LinearGradientProps,
   ShaderProps,
+  TurbulenceProps,
   TwoPointConicalGradientProps,
 } from "./Shaders";
 import type {
@@ -141,6 +142,9 @@ export interface SkDOM {
   ImageShader(
     props: ImageShaderProps
   ): DeclarationNode<ImageShaderProps, SkShader>;
+  Turbulence(
+    props: TurbulenceProps
+  ): DeclarationNode<TurbulenceProps, SkShader>;
   LinearGradient(
     props: LinearGradientProps
   ): DeclarationNode<LinearGradientProps, SkShader>;

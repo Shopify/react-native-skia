@@ -33,6 +33,15 @@ export interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   image: SkImage;
 }
 
+export interface TurbulenceProps {
+  freqX: number;
+  freqY: number;
+  octaves: number;
+  seed: number;
+  tileWidth: number;
+  tileHeight: number;
+}
+
 export interface GradientProps extends TransformProps {
   colors: Color[];
   positions?: number[];
