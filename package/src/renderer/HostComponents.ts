@@ -41,6 +41,7 @@ import type {
   GlyphsProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
+import type { MorphologyImageFilterProps } from "../dom/types/ImageFilters";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
@@ -83,6 +84,7 @@ declare global {
       skDropShadowImageFilter: SkiaProps<DropShadowImageFilterProps>;
       skDisplacementMap: SkiaProps<DisplacementMapImageFilterProps>;
       skRuntimeShaderImageFilter: SkiaProps<RuntimeShaderImageFilterProps>;
+      skMorphology: SkiaProps<MorphologyImageFilterProps>;
 
       // ColorFilters
       skMatrixColorFilter: SkiaProps<MatrixColorFilterProps>;
