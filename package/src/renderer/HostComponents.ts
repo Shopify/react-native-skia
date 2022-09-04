@@ -27,58 +27,61 @@ import type {
   LinearGradientProps,
   GroupProps,
   PatchProps,
+  Node,
+  SkDOM,
 } from "../dom/types";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
+import type { SkiaProps } from "./processors";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      skGroup: GroupProps;
-      skPaint: PaintProps;
+      skGroup: SkiaProps<GroupProps>;
+      skPaint: SkiaProps<PaintProps>;
 
       // Drawings
-      skFill: DrawingNodeProps;
-      skImage: ImageProps;
-      skCircle: CircleProps;
-      skPath: PathProps;
+      skFill: SkiaProps<DrawingNodeProps>;
+      skImage: SkiaProps<ImageProps>;
+      skCircle: SkiaProps<CircleProps>;
+      skPath: SkiaProps<PathProps>;
       // TODO: rename to CustomDrawingProps
-      skDrawing: CustomDrawingNodeProps;
-      skLine: LineProps;
-      skOval: OvalProps;
-      skPatch: PatchProps;
-      skPoints: PointsProps;
-      skRect: RectProps;
-      skRRect: RoundedRectProps;
-      skVertices: VerticesProps;
-      skText: TextProps;
-      skDiffRect: DiffRectProps;
+      skDrawing: SkiaProps<CustomDrawingNodeProps>;
+      skLine: SkiaProps<LineProps>;
+      skOval: SkiaProps<OvalProps>;
+      skPatch: SkiaProps<PatchProps>;
+      skPoints: SkiaProps<PointsProps>;
+      skRect: SkiaProps<RectProps>;
+      skRRect: SkiaProps<RoundedRectProps>;
+      skVertices: SkiaProps<VerticesProps>;
+      skText: SkiaProps<TextProps>;
+      skDiffRect: SkiaProps<DiffRectProps>;
 
       // BlurMaskFilters
-      skBlurMaskFilter: BlurMaskFilterProps;
+      skBlurMaskFilter: SkiaProps<BlurMaskFilterProps>;
 
       // ImageFilters
-      skBlendImageFilter: BlendImageFilterProps;
-      skBlurImageFilter: BlurImageFilterProps;
-      skOffsetImageFilter: OffsetImageFilterProps;
-      skDropShadowImageFilter: DropShadowImageFilterProps;
-      skDisplacementMap: DisplacementMapImageFilterProps;
-      skRuntimeShaderImageFilter: RuntimeShaderImageFilterProps;
+      skBlendImageFilter: SkiaProps<BlendImageFilterProps>;
+      skBlurImageFilter: SkiaProps<BlurImageFilterProps>;
+      skOffsetImageFilter: SkiaProps<OffsetImageFilterProps>;
+      skDropShadowImageFilter: SkiaProps<DropShadowImageFilterProps>;
+      skDisplacementMap: SkiaProps<DisplacementMapImageFilterProps>;
+      skRuntimeShaderImageFilter: SkiaProps<RuntimeShaderImageFilterProps>;
 
       // ColorFilters
-      skMatrixColorFilter: MatrixColorFilterProps;
+      skMatrixColorFilter: SkiaProps<MatrixColorFilterProps>;
 
       // Shaders
-      skShader: ShaderProps;
-      ImageShader: ImageShaderProps;
-      LinearGradient: LinearGradientProps;
+      skShader: SkiaProps<ShaderProps>;
+      ImageShader: SkiaProps<ImageShaderProps>;
+      LinearGradient: SkiaProps<LinearGradientProps>;
     }
   }
 }
 
-export const createNode = (
+const _createNode = (
   container: Container,
   type: NodeType,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -174,3 +177,44 @@ export const createNode = (
       return exhaustiveCheck(type);
   }
 };
+
+const wrapPresentation = (
+  Sk: SkDOM,
+  node: Node<unknown>,
+  props: GroupProps
+) => {
+  if (node.isDrawing()) {
+    // TODO: fix this
+    // Right now we always wrap because we don't know if there are paint children or not
+    // if (
+    //   props.transform !== undefined &&
+    //   props.origin !== undefined &&
+    //   props.matrix !== undefined &&
+    //   props.strokeCap !== undefined &&
+    //   props.strokeJoin !== undefined &&
+    //   props.strokeMiter !== undefined &&
+    //   props.strokeWidth !== undefined &&
+    //   props.style !== undefined &&
+    //   props.antiAlias !== undefined &&
+    //   props.blendMode !== undefined &&
+    //   props.clip !== undefined &&
+    //   props.color !== undefined &&
+    //   props.invertClip !== undefined &&
+    //   props.layer !== undefined &&
+    //   props.opacity !== undefined
+    // ) {
+    const group = Sk.Group(props);
+    group.addChild(node);
+    return group;
+    // }
+    // return node;
+  }
+  return node;
+};
+
+export const createNode = (
+  container: Container,
+  type: NodeType,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  props: any
+) => wrapPresentation(container.Sk, _createNode(container, type, props), props);

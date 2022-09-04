@@ -21,7 +21,6 @@ export const processPaint = (
   paint: SkPaint,
   currentOpacity: number,
   {
-    paint: paintRef,
     color,
     blendMode,
     style,
@@ -34,9 +33,6 @@ export const processPaint = (
   }: PaintProps,
   children: DeclarationResult[]
 ) => {
-  if (paintRef && paintRef.current) {
-    return paintRef.current;
-  }
   if (color !== undefined) {
     const c = processColor(Skia, color, currentOpacity);
     paint.setShader(null);

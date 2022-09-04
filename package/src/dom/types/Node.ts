@@ -94,6 +94,7 @@ export interface PaintNode extends Node<PaintProps> {
 }
 
 export interface DrawingNodeProps {
+  // TODO: to remove (handled by Group)
   paint?: SkPaint;
 }
 

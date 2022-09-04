@@ -70,7 +70,8 @@ export interface TransformProps {
 }
 
 export interface PaintProps extends ChildrenProps {
-  paint?: RefObject<SkPaint>;
+  // TODO: this prop is clashing with DrawingProps
+  //paint?: RefObject<SkPaint>;
   color?: Color;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;

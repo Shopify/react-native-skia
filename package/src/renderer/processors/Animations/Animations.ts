@@ -1,3 +1,4 @@
+import type { GroupProps } from "../../../dom/types";
 import type { SkiaSelector, SkiaValue } from "../../../values";
 
 export const isValue = (value: unknown): value is SkiaValue<unknown> => {
@@ -49,3 +50,5 @@ export type AnimatedProp<T, P = any> = T | SkiaValue<T> | SkiaSelector<T, P>;
 export type AnimatedProps<T> = {
   [K in keyof T]: AnimatedProp<T[K]>;
 };
+
+export type SkiaProps<P> = AnimatedProps<P & GroupProps>;
