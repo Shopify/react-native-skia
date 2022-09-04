@@ -25,6 +25,7 @@ import type {
   OffsetImageFilterProps,
   BlendColorFilterProps,
   TextPathProps,
+  TextBlobProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
@@ -58,6 +59,7 @@ import {
   OvalNode,
   CustomDrawingNode,
   TextPathNode,
+  TextBlobNode,
 } from "./drawings";
 import { JsiGroupNode } from "./GroupNode";
 import {
@@ -158,6 +160,10 @@ export class JsiSkDOM implements SkDOM {
 
   TextPath(props: TextPathProps) {
     return new TextPathNode(this.Skia, props);
+  }
+
+  TextBlob(props: TextBlobProps) {
+    return new TextBlobNode(this.Skia, props);
   }
 
   DiffRect(props: DiffRectProps) {

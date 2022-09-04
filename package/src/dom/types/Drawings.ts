@@ -10,6 +10,7 @@ import type {
   VertexMode,
   SkFont,
   SkRRect,
+  SkTextBlob,
 } from "../../skia/types";
 
 import type {
@@ -86,6 +87,11 @@ export interface PointsProps extends DrawingNodeProps {
   mode: SkEnum<typeof PointMode>;
 }
 
+export interface DiffRectProps extends DrawingNodeProps {
+  inner: SkRRect;
+  outer: SkRRect;
+}
+
 export interface TextProps extends DrawingNodeProps {
   font: SkFont;
   text: string;
@@ -100,7 +106,8 @@ export interface TextPathProps extends DrawingNodeProps {
   initialOffset: number;
 }
 
-export interface DiffRectProps extends DrawingNodeProps {
-  inner: SkRRect;
-  outer: SkRRect;
+export interface TextBlobProps extends DrawingNodeProps {
+  blob: SkTextBlob;
+  x: number;
+  y: number;
 }

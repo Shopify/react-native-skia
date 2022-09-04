@@ -37,6 +37,7 @@ import type {
   Path1DPathEffectProps,
   Path2DPathEffectProps,
   TextPathProps,
+  TextBlobProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 
@@ -67,6 +68,7 @@ declare global {
       skVertices: SkiaProps<VerticesProps>;
       skText: SkiaProps<TextProps>;
       skTextPath: SkiaProps<TextPathProps>;
+      skTextBlob: SkiaProps<TextBlobProps>;
       skDiffRect: SkiaProps<DiffRectProps>;
 
       // BlurMaskFilters
@@ -145,6 +147,8 @@ const _createNode = (
       return Sk.Text(props);
     case NodeType.TextPath:
       return Sk.TextPath(props);
+    case NodeType.TextBlob:
+      return Sk.TextBlob(props);
     case NodeType.DiffRect:
       return Sk.DiffRect(props);
     // Mask Filter

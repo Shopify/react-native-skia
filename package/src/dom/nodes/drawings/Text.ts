@@ -1,5 +1,10 @@
 import type { SkRSXform, SkTextBlob, Skia } from "../../../skia/types";
-import type { DrawingContext, TextPathProps, TextProps } from "../../types";
+import type {
+  DrawingContext,
+  TextBlobProps,
+  TextPathProps,
+  TextProps,
+} from "../../types";
 import { NodeType } from "../../types";
 import { processPath } from "../datatypes";
 
@@ -66,5 +71,18 @@ export class TextPathNode extends JsiDrawingNode<TextPathProps> {
       throw new Error("TextPathNode: blob is null");
     }
     canvas.drawTextBlob(this.blob, 0, 0, paint);
+  }
+}
+
+export class TextBlobNode extends JsiDrawingNode<TextBlobProps> {
+  constructor(Skia: Skia, props: TextBlobProps) {
+    super(Skia, NodeType.TextBlob, props);
+  }
+
+  onPropChange() {}
+
+  draw({ canvas, paint }: DrawingContext) {
+    const { blob, x, y } = this.props;
+    canvas.drawTextBlob(blob, x, y, paint);
   }
 }
