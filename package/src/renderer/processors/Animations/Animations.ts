@@ -51,4 +51,8 @@ export type AnimatedProps<T> = {
   [K in keyof T]: AnimatedProp<T[K]>;
 };
 
-export type SkiaProps<P> = AnimatedProps<P & GroupProps>;
+// TODO: switch to AnimatedProps<GroupProps> and remove duplicate properties.
+// For instance matrix in color filter becomes colorMatrix
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type SkiaProps<P = {}> = AnimatedProps<P> &
+  AnimatedProps<Omit<GroupProps, keyof P>>;
