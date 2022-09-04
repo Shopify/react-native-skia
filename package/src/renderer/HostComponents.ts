@@ -41,6 +41,7 @@ import type {
   GlyphsProps,
   TwoPointConicalGradientProps,
   TurbulenceProps,
+  SweepGradientProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type { MorphologyImageFilterProps } from "../dom/types/ImageFilters";
@@ -100,6 +101,7 @@ declare global {
       skImageShader: SkiaProps<ImageShaderProps>;
       skTurbulence: SkiaProps<TurbulenceProps>;
       skLinearGradient: SkiaProps<LinearGradientProps>;
+      skSweepGradient: SkiaProps<SweepGradientProps>;
       skTwoPointConicalGradient: SkiaProps<TwoPointConicalGradientProps>;
 
       // Path Effects
@@ -199,6 +201,8 @@ const _createNode = (
       return Sk.Turbulence(props);
     case NodeType.LinearGradient:
       return Sk.LinearGradient(props);
+    case NodeType.SweepGradient:
+      return Sk.SweepGradient(props);
     case NodeType.TwoPointConicalGradient:
       return Sk.TwoPointConicalGradient(props);
     // Path Effect

@@ -54,6 +54,12 @@ export interface LinearGradientProps extends GradientProps {
   end: Vector;
 }
 
+export interface SweepGradientProps extends GradientProps {
+  c: Vector;
+  start?: number;
+  end?: number;
+}
+
 export interface TwoPointConicalGradientProps extends GradientProps {
   start: Vector;
   startR: number;

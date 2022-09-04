@@ -10,6 +10,7 @@ import type {
   ImageShaderProps,
   LinearGradientProps,
   ShaderProps,
+  SweepGradientProps,
   TurbulenceProps,
   TwoPointConicalGradientProps,
 } from "../../types";
@@ -116,6 +117,32 @@ export class LinearGradientNode extends JsiDeclarationNode<
       mode,
       localMatrix,
       flags
+    );
+  }
+}
+
+export class SweepGradientNode extends JsiDeclarationNode<
+  SweepGradientProps,
+  SkShader
+> {
+  constructor(Skia: Skia, props: SweepGradientProps) {
+    super(Skia, DeclarationType.Shader, NodeType.SweepGradient, props);
+  }
+
+  get() {
+    const { c, start, end } = this.props;
+    const { colors, positions, mode, localMatrix, flags } =
+      processGradientProps(this.Skia, this.props);
+    return this.Skia.Shader.MakeSweepGradient(
+      c.x,
+      c.y,
+      colors,
+      positions,
+      mode,
+      localMatrix,
+      flags,
+      start,
+      end
     );
   }
 }

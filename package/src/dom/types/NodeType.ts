@@ -5,6 +5,7 @@ export enum NodeType {
   ImageShader = "skImageShader",
   Turbulence = "skTurbulence",
   LinearGradient = "skLinearGradient",
+  SweepGradient = "skSweepGradient",
   TwoPointConicalGradient = "skTwoPointConicalGradient",
 
   BlurMaskFilter = "skBlurMaskFilter",

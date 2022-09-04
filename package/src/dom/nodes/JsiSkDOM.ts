@@ -29,6 +29,7 @@ import type {
   GlyphsProps,
   TwoPointConicalGradientProps,
   TurbulenceProps,
+  SweepGradientProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
@@ -96,6 +97,7 @@ import {
   ImageShaderNode,
   TwoPointConicalGradientNode,
   TurbulenceNode,
+  SweepGradientNode,
 } from "./paint/Shaders";
 import { DiffRectNode } from "./drawings/DiffRectNode";
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
@@ -242,6 +244,10 @@ export class JsiSkDOM implements SkDOM {
 
   ImageShader(props: ImageShaderProps) {
     return new ImageShaderNode(this.Skia, props);
+  }
+
+  SweepGradient(props: SweepGradientProps) {
+    return new SweepGradientNode(this.Skia, props);
   }
 
   Turbulence(props: TurbulenceProps) {

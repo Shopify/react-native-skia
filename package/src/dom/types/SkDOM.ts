@@ -1,6 +1,7 @@
 import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 import type { SkPathEffect } from "../../skia/types/PathEffect";
+import { SweepGradient } from "../../renderer/components/shaders/SweepGradient";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type {
@@ -44,6 +45,7 @@ import type {
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
+  SweepGradientProps,
   ImageShaderProps,
   LinearGradientProps,
   ShaderProps,
@@ -148,6 +150,9 @@ export interface SkDOM {
   LinearGradient(
     props: LinearGradientProps
   ): DeclarationNode<LinearGradientProps, SkShader>;
+  SweepGradient(
+    props: SweepGradientProps
+  ): DeclarationNode<SweepGradientProps, SkShader>;
   TwoPointConicalGradient(
     props: TwoPointConicalGradientProps
   ): DeclarationNode<TwoPointConicalGradientProps, SkShader>;
