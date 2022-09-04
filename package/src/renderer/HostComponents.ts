@@ -30,7 +30,14 @@ import type {
   Node,
   SkDOM,
   BlendColorFilterProps,
+  DashPathEffectProps,
+  DiscretePathEffectProps,
+  CornerPathEffectProps,
+  Line2DPathEffectProps,
+  Path1DPathEffectProps,
+  Path2DPathEffectProps,
 } from "../dom/types";
+import type { ChildrenProps } from "../dom/types/Common";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
@@ -82,6 +89,15 @@ declare global {
       skShader: SkiaProps<ShaderProps>;
       ImageShader: SkiaProps<ImageShaderProps>;
       LinearGradient: SkiaProps<LinearGradientProps>;
+
+      // Path Effects
+      skDiscretePathEffect: SkiaProps<DiscretePathEffectProps>;
+      skDashPathEffect: SkiaProps<DashPathEffectProps>;
+      skPath1DPathEffect: SkiaProps<Path1DPathEffectProps>;
+      skPath2DPathEffect: SkiaProps<Path2DPathEffectProps>;
+      skCornerPathEffect: SkiaProps<CornerPathEffectProps>;
+      skSumPathEffect: ChildrenProps;
+      skLine2DPathEffect: SkiaProps<Line2DPathEffectProps>;
     }
   }
 }
