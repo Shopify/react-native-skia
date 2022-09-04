@@ -29,6 +29,7 @@ import type {
   PatchProps,
   Node,
   SkDOM,
+  BlendColorFilterProps,
 } from "../dom/types";
 
 import type { Container } from "./Container";
@@ -72,6 +73,10 @@ declare global {
 
       // ColorFilters
       skMatrixColorFilter: SkiaProps<MatrixColorFilterProps>;
+      skBlendColorFilter: SkiaProps<BlendColorFilterProps>;
+      skLinearToSRGBGammaColorFilter: SkiaProps<void>;
+      skSRGBToLinearGammaColorFilter: SkiaProps<void>;
+      skLumaColorFilter: SkiaProps<void>;
 
       // Shaders
       skShader: SkiaProps<ShaderProps>;
