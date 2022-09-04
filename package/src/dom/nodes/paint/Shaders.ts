@@ -81,7 +81,7 @@ export class ImageShaderNode extends JsiDeclarationNode<
 
 export class ColorNode extends JsiDeclarationNode<ColorProps, SkShader> {
   constructor(Skia: Skia, props: ColorProps) {
-    super(Skia, DeclarationType.Shader, NodeType.Color, props);
+    super(Skia, DeclarationType.Shader, NodeType.ColorShader, props);
   }
 
   get() {
