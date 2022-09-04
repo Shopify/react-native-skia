@@ -9,6 +9,7 @@ import { JsiDeclarationNode, JsiNestedDeclarationNode } from "../Node";
 import type {
   ImageShaderProps,
   LinearGradientProps,
+  RadialGradientProps,
   ShaderProps,
   SweepGradientProps,
   TurbulenceProps,
@@ -114,6 +115,30 @@ export class LinearGradientNode extends JsiDeclarationNode<
       end,
       colors,
       positions ?? null,
+      mode,
+      localMatrix,
+      flags
+    );
+  }
+}
+
+export class RadialGradientNode extends JsiDeclarationNode<
+  RadialGradientProps,
+  SkShader
+> {
+  constructor(Skia: Skia, props: RadialGradientProps) {
+    super(Skia, DeclarationType.Shader, NodeType.RadialGradient, props);
+  }
+
+  get() {
+    const { c, r } = this.props;
+    const { colors, positions, mode, localMatrix, flags } =
+      processGradientProps(this.Skia, this.props);
+    return this.Skia.Shader.MakeRadialGradient(
+      c,
+      r,
+      colors,
+      positions,
       mode,
       localMatrix,
       flags

@@ -30,6 +30,7 @@ import type {
   TwoPointConicalGradientProps,
   TurbulenceProps,
   SweepGradientProps,
+  RadialGradientProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
@@ -98,6 +99,7 @@ import {
   TwoPointConicalGradientNode,
   TurbulenceNode,
   SweepGradientNode,
+  RadialGradientNode,
 } from "./paint/Shaders";
 import { DiffRectNode } from "./drawings/DiffRectNode";
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
@@ -256,6 +258,10 @@ export class JsiSkDOM implements SkDOM {
 
   LinearGradient(props: LinearGradientProps) {
     return new LinearGradientNode(this.Skia, props);
+  }
+
+  RadialGradient(props: RadialGradientProps) {
+    return new RadialGradientNode(this.Skia, props);
   }
 
   TwoPointConicalGradient(props: TwoPointConicalGradientProps) {

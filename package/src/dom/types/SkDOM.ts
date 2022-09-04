@@ -51,6 +51,7 @@ import type {
   ShaderProps,
   TurbulenceProps,
   TwoPointConicalGradientProps,
+  RadialGradientProps,
 } from "./Shaders";
 import type {
   CornerPathEffectProps,
@@ -150,6 +151,9 @@ export interface SkDOM {
   LinearGradient(
     props: LinearGradientProps
   ): DeclarationNode<LinearGradientProps, SkShader>;
+  RadialGradient(
+    props: RadialGradientProps
+  ): DeclarationNode<RadialGradientProps, SkShader>;
   SweepGradient(
     props: SweepGradientProps
   ): DeclarationNode<SweepGradientProps, SkShader>;
