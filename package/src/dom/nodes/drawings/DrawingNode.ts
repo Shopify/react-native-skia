@@ -32,6 +32,10 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
     this.onPropChange();
   }
 
+  getPaints() {
+    return this.paints;
+  }
+
   addPaint(paintNode: JsiPaintNode) {
     this.paints.push(paintNode);
   }

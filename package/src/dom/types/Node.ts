@@ -110,10 +110,8 @@ export interface DrawingNodeProps {
 }
 
 export interface DrawingNode<P extends DrawingNodeProps> extends RenderNode<P> {
-  addPaint(paintNode: Node<PaintProps>): void;
-  removePaint(paintNode: Node<PaintProps>): void;
-  insertPaintBefore(
-    paintNode: Node<PaintProps>,
-    before: Node<PaintProps>
-  ): void;
+  getPaints(): PaintNode[];
+  addPaint(paintNode: PaintNode): void;
+  removePaint(paintNode: PaintNode): void;
+  insertPaintBefore(paintNode: PaintNode, before: PaintNode): void;
 }
