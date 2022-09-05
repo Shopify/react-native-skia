@@ -104,8 +104,7 @@ export interface PaintNode extends Node<PaintProps> {
   getPathEffect(): DeclarationNode<unknown, SkPathEffect> | undefined;
 }
 
-export interface DrawingNodeProps {
-  // TODO: to remove (handled by Group)
+export interface DrawingNodeProps extends PaintProps {
   paint?: SkPaint;
 }
 

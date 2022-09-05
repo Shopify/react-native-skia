@@ -1,4 +1,4 @@
-import { LerpColorFilterProps, NodeType } from "../dom/types";
+import { NodeType } from "../dom/types";
 import type {
   CircleProps,
   DrawingNodeProps,
@@ -27,8 +27,6 @@ import type {
   LinearGradientProps,
   GroupProps,
   PatchProps,
-  Node,
-  SkDOM,
   BlendColorFilterProps,
   DashPathEffectProps,
   DiscretePathEffectProps,
@@ -46,6 +44,7 @@ import type {
   ColorProps,
   PictureProps,
   ImageSVGProps,
+  LerpColorFilterProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type { MorphologyImageFilterProps } from "../dom/types/ImageFilters";
@@ -126,7 +125,7 @@ declare global {
   }
 }
 
-const _createNode = (
+export const createNode = (
   container: Container,
   type: NodeType,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -246,44 +245,3 @@ const _createNode = (
       return exhaustiveCheck(type);
   }
 };
-
-const wrapPresentation = (
-  Sk: SkDOM,
-  node: Node<unknown>,
-  props: GroupProps
-) => {
-  if (node.isDrawing()) {
-    // TODO: fix this
-    // Right now we always wrap because we don't know if there are paint children or not
-    // if (
-    //   props.transform !== undefined &&
-    //   props.origin !== undefined &&
-    //   props.matrix !== undefined &&
-    //   props.strokeCap !== undefined &&
-    //   props.strokeJoin !== undefined &&
-    //   props.strokeMiter !== undefined &&
-    //   props.strokeWidth !== undefined &&
-    //   props.style !== undefined &&
-    //   props.antiAlias !== undefined &&
-    //   props.blendMode !== undefined &&
-    //   props.clip !== undefined &&
-    //   props.color !== undefined &&
-    //   props.invertClip !== undefined &&
-    //   props.layer !== undefined &&
-    //   props.opacity !== undefined
-    // ) {
-    const group = Sk.Group(props);
-    group.addChild(node);
-    return group;
-    // }
-    // return node;
-  }
-  return node;
-};
-
-export const createNode = (
-  container: Container,
-  type: NodeType,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  props: any
-) => wrapPresentation(container.Sk, _createNode(container, type, props), props);

@@ -1,6 +1,6 @@
 import type { Skia } from "../../../skia/types";
 import { JsiRenderNode } from "../Node";
-import type { JsiPaintNode } from "../paint";
+import { JsiPaintNode } from "../paint";
 import type {
   DrawingContext,
   DrawingNodeProps,
@@ -17,6 +17,10 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
 
   constructor(Skia: Skia, type: NodeType, props: P) {
     super(Skia, NodeKind.Drawing, type, props);
+    if (!props.paint) {
+      // TODO: only do this is custom paint props are present
+      this.paints.push(new JsiPaintNode(Skia));
+    }
   }
 
   abstract draw(ctx: DrawingContext): void;
@@ -56,9 +60,10 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
   render(ctx: DrawingContext) {
     if (this.props.paint) {
       this.draw({ ...ctx, paint: this.props.paint });
-    } else {
-      this.draw(ctx);
     }
+    // if (this.paints.length === 0) {
+    //   this.draw(ctx);
+    // }
     this.paints.forEach((paintNode) => {
       const paint = paintNode.concat(ctx.paint, ctx.opacity);
       this.draw({ ...ctx, paint });
