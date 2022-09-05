@@ -1,4 +1,12 @@
-import type { SkMatrix, SkRect, SkRRect, Skia } from "../../skia/types";
+import type { RefObject } from "react";
+
+import type {
+  SkMatrix,
+  SkRect,
+  SkRRect,
+  Skia,
+  SkPaint,
+} from "../../skia/types";
 import { isRRect, processTransform, ClipOp } from "../../skia/types";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import type { SkPath } from "../../skia/types/Path/Path";
@@ -8,6 +16,9 @@ import { NodeKind, NodeType } from "../types";
 import { JsiPaintNode } from "./paint/PaintNode";
 import { JsiNode } from "./Node";
 import { isPathDef, processPath } from "./datatypes";
+
+const isSkPaint = (obj: RefObject<SkPaint> | SkPaint): obj is SkPaint =>
+  "__typename__" in obj && obj.__typename__ === "Paint";
 
 export class JsiGroupNode<P extends GroupProps>
   extends JsiNode<P>
@@ -172,7 +183,7 @@ export class JsiGroupNode<P extends GroupProps>
   }
 
   render(parentCtx: DrawingContext) {
-    const { invertClip } = this.props;
+    const { invertClip, layer } = this.props;
     const { canvas } = parentCtx;
 
     const opacity = this.props.opacity
@@ -187,11 +198,21 @@ export class JsiGroupNode<P extends GroupProps>
     const ctx = { ...parentCtx, opacity, paint };
     const hasTransform = this.matrix !== undefined;
     const hasClip = this.clipRect !== undefined;
-    const shouldSave = hasTransform || hasClip;
+    const shouldSave = hasTransform || hasClip || !!layer;
     const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
 
     if (shouldSave) {
-      canvas.save();
+      if (layer) {
+        if (typeof layer === "boolean") {
+          canvas.saveLayer();
+        } else if (isSkPaint(layer)) {
+          canvas.saveLayer(layer);
+        } else {
+          canvas.saveLayer(layer.current ?? undefined);
+        }
+      } else {
+        canvas.save();
+      }
     }
 
     if (this.matrix) {

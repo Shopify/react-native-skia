@@ -126,7 +126,7 @@ export class JsiPaintNode extends JsiNode<PaintProps> implements PaintNode {
       return this.cache;
     }
     // TODO: this should/could be cached
-    const paint = parentPaint.copy();
+    const paint = this.props.paint ? this.props.paint : parentPaint.copy();
     // Props
     if (color !== undefined) {
       const c = processColor(this.Skia, color, currentOpacity);
