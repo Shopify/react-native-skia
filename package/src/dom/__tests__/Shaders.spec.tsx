@@ -7,8 +7,7 @@ import {
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
-import type { JsiGroupNode } from "../nodes/GroupNode";
-import type { GroupProps } from "../types";
+import type { GroupNode } from "../nodes/GroupNode";
 
 describe("Drawings", () => {
   it("Should display a simple shader", () => {
@@ -25,7 +24,7 @@ describe("Drawings", () => {
       source,
       uniforms: {},
     });
-    root.addEffect(filter);
+    root.addChild(filter);
     root.addChild(Sk.Fill());
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
@@ -66,7 +65,7 @@ half4 main(float2 xy) {
     });
     filter.addChild(imageShader);
     const root = Sk.Group();
-    root.addEffect(filter);
+    root.addChild(filter);
     root.addChild(Sk.Fill());
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
@@ -107,13 +106,13 @@ half4 main(float2 xy) {
     });
     filter.addChild(imageShader);
     const root = Sk.Group();
-    root.addEffect(filter);
+    root.addChild(filter);
     root.addChild(Sk.Fill());
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
     filter.setProp("uniforms", { r: 25 });
-    const jsiRoot = root as JsiGroupNode<GroupProps>;
+    const jsiRoot = root as GroupNode;
     expect(jsiRoot.paint).toBeDefined();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((jsiRoot.paint! as any).cache).toBe(null);

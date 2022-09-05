@@ -1,6 +1,6 @@
 import { BlendMode } from "../../../skia/types";
 import type { Skia, SkColorFilter } from "../../../skia/types";
-import { JsiNestedDeclarationNode } from "../Node";
+import { JsiDeclarationNode } from "../Node";
 import type {
   BlendColorFilterProps,
   MatrixColorFilterProps,
@@ -10,7 +10,7 @@ import { processColor } from "../datatypes";
 import { enumKey } from "../datatypes/Enum";
 import type { LerpColorFilterProps } from "../../types/ColorFilters";
 
-export class MatrixColorFilterNode extends JsiNestedDeclarationNode<
+export class MatrixColorFilterNode extends JsiDeclarationNode<
   MatrixColorFilterProps,
   SkColorFilter
 > {
@@ -25,7 +25,7 @@ export class MatrixColorFilterNode extends JsiNestedDeclarationNode<
   }
 }
 
-export class BlendColorFilterNode extends JsiNestedDeclarationNode<
+export class BlendColorFilterNode extends JsiDeclarationNode<
   BlendColorFilterProps,
   SkColorFilter
 > {
@@ -57,7 +57,7 @@ export class BlendColorFilterNode extends JsiNestedDeclarationNode<
 //   }
 // }
 
-export class LinearToSRGBGammaColorFilterNode extends JsiNestedDeclarationNode<
+export class LinearToSRGBGammaColorFilterNode extends JsiDeclarationNode<
   null,
   SkColorFilter
 > {
@@ -76,7 +76,7 @@ export class LinearToSRGBGammaColorFilterNode extends JsiNestedDeclarationNode<
   }
 }
 
-export class SRGBToLinearGammaColorFilterNode extends JsiNestedDeclarationNode<
+export class SRGBToLinearGammaColorFilterNode extends JsiDeclarationNode<
   null,
   SkColorFilter
 > {
@@ -95,7 +95,7 @@ export class SRGBToLinearGammaColorFilterNode extends JsiNestedDeclarationNode<
   }
 }
 
-export class LumaColorFilterNode extends JsiNestedDeclarationNode<
+export class LumaColorFilterNode extends JsiDeclarationNode<
   null,
   SkColorFilter
 > {
@@ -109,7 +109,7 @@ export class LumaColorFilterNode extends JsiNestedDeclarationNode<
   }
 }
 
-export class LerpColorFilterNode extends JsiNestedDeclarationNode<
+export class LerpColorFilterNode extends JsiDeclarationNode<
   LerpColorFilterProps,
   SkColorFilter
 > {
@@ -119,10 +119,10 @@ export class LerpColorFilterNode extends JsiNestedDeclarationNode<
 
   get() {
     const { t } = this.props;
-    return this.Skia.ColorFilter.MakeLerp(
-      t,
-      this.children[0].get(),
-      this.children[1].get()
-    );
+    const [first, second] = this.children() as JsiDeclarationNode<
+      unknown,
+      SkColorFilter
+    >[];
+    return this.Skia.ColorFilter.MakeLerp(t, first.get(), second.get());
   }
 }

@@ -69,7 +69,7 @@ describe("Drawings", () => {
       "#9EE671",
       "#41E08D",
     ].map((cl) => Skia.Color(cl));
-    root.addEffect(
+    root.addChild(
       Sk.LinearGradient({
         start: path.getPoint(0),
         end: path.getLastPt(),

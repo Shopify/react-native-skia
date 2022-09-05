@@ -1,4 +1,5 @@
-import type { DrawingContext, GroupNode, SkDOM } from "../dom/types";
+import type { GroupNode } from "../dom/nodes/GroupNode";
+import type { DrawingContext, SkDOM } from "../dom/types";
 
 import type { DependencyManager } from "./DependencyManager";
 

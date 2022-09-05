@@ -2,33 +2,27 @@ import type {
   SkColorFilter,
   SkImageFilter,
   SkMaskFilter,
+  SkPaint,
   SkPathEffect,
   SkShader,
 } from "../../skia/types";
 
-import type { GroupProps, PaintProps } from "./Common";
+import type { GroupProps } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
-import type { DeclarationType, NodeKind, NodeType } from "./NodeType";
-
-export type Effect =
-  | DeclarationNode<unknown, SkShader>
-  | DeclarationNode<unknown, SkImageFilter>
-  | DeclarationNode<unknown, SkColorFilter>
-  | DeclarationNode<unknown, SkMaskFilter>
-  | DeclarationNode<unknown, SkPathEffect>;
+import type { DeclarationType, NodeType } from "./NodeType";
 
 export interface Node<P> {
   type: NodeType;
-  kind: NodeKind;
+
   setProps(props: P): void;
   setProp<K extends keyof P>(name: K, v: P[K]): void;
   getProps(): P;
 
-  isPaint(): this is PaintNode;
-  isDeclaration(): this is Effect;
-  isNestedDeclaration(): this is NestedDeclarationNode<P, unknown>;
-  isGroup(): this is GroupNode;
-  isDrawing(): this is DrawingNode;
+  children(): Node<unknown>[];
+  descendant(): Node<unknown>[];
+  addChild(child: Node<unknown>): void;
+  removeChild(child: Node<unknown>): Node<unknown>[];
+  insertChildBefore(child: Node<unknown>, before: Node<unknown>): void;
 }
 
 export type Invalidate = () => void;
@@ -40,6 +34,7 @@ export interface DeclarationNode<P, T, Nullable extends null | never = never>
 
   setInvalidate(invalidate: Invalidate): void;
 
+  isPaint(): this is DeclarationNode<unknown, SkPaint>;
   isImageFilter(): this is DeclarationNode<unknown, SkImageFilter>;
   isColorFilter(): this is DeclarationNode<unknown, SkColorFilter>;
   isShader(): this is DeclarationNode<unknown, SkShader>;
@@ -47,61 +42,12 @@ export interface DeclarationNode<P, T, Nullable extends null | never = never>
   isPathEffect(): this is DeclarationNode<unknown, SkPathEffect>;
 }
 
-export interface NestedDeclarationNode<
+export type LeafDeclarationNode<
   P,
   T,
-  C = T,
   Nullable extends null | never = never
-> extends DeclarationNode<P, T, Nullable> {
-  getChildren(): DeclarationNode<unknown, C>[];
-  addChild(child: DeclarationNode<unknown, C>): void;
-  insertChildBefore(
-    child: DeclarationNode<unknown, C>,
-    before: DeclarationNode<unknown, C>
-  ): void;
-  removeChild(child: DeclarationNode<unknown, C>): void;
-}
+> = DeclarationNode<P, T, Nullable>;
 
-export interface GroupNode<P extends GroupProps = GroupProps> extends Node<P> {
-  getChildren(): GroupNode[];
-  addChild(child: GroupNode): void;
-  insertChildBefore(child: GroupNode, before: GroupNode): void;
-  removeChild(child: GroupNode): void;
-
-  addEffect(effect: Effect): void;
-  removeEffect(effect: Effect): void;
-
-  getPaint(): PaintNode | undefined;
-
+export interface RenderNode<P extends GroupProps> extends Node<P> {
   render(ctx: DrawingContext): void;
-}
-
-export interface PaintNode extends Node<PaintProps> {
-  addShader(shader: DeclarationNode<unknown, SkShader>): void;
-  removeShader(): void;
-  getShader(): DeclarationNode<unknown, SkShader> | undefined;
-
-  addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>): void;
-  removeMaskFilter(): void;
-  getMaskFilter(): DeclarationNode<unknown, SkMaskFilter> | undefined;
-
-  addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>): void;
-  removeColorFilter(): void;
-  getColorFilter(): DeclarationNode<unknown, SkColorFilter> | undefined;
-
-  addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>): void;
-  removeImageFilter(): void;
-  getImageFilter(): DeclarationNode<unknown, SkImageFilter> | undefined;
-
-  addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>): void;
-  removePathEffect(): void;
-  getPathEffect(): DeclarationNode<unknown, SkPathEffect> | undefined;
-}
-
-export interface DrawingNode<P extends GroupProps = GroupProps>
-  extends GroupNode<P> {
-  getPaints(): PaintNode[];
-  addPaint(paintNode: PaintNode): void;
-  removePaint(paintNode: PaintNode): void;
-  insertPaintBefore(paintNode: PaintNode, before: PaintNode): void;
 }

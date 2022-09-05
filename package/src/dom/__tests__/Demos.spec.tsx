@@ -12,7 +12,6 @@ describe("Drawings", () => {
     const R = width / 4;
     const color = Skia.Color("rgb(36,43,56)");
     const root = Sk.Group({ color });
-    expect(root.isGroup()).toBe(true);
     root.addChild(Sk.Fill());
 
     const rings = Sk.Group({
@@ -23,10 +22,8 @@ describe("Drawings", () => {
       style: "solid",
       respectCTM: true,
     });
-    expect(blur.isDeclaration()).toBe(true);
-    expect(blur.isNestedDeclaration()).toBe(false);
     expect(blur.isMaskFilter()).toBe(true);
-    rings.addEffect(blur);
+    rings.addChild(blur);
     for (let i = 0; i < 6; i++) {
       const theta = (i * (2 * Math.PI)) / 6;
       const matrix = Skia.Matrix();

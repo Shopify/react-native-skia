@@ -1,6 +1,9 @@
 import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
 import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 import type { SkPathEffect } from "../../skia/types/PathEffect";
+import type { GroupNode } from "../nodes/GroupNode";
+import type { JsiDrawingNode } from "../nodes/drawings";
+import type { JsiPaintNode } from "../nodes/Node";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type {
@@ -12,13 +15,7 @@ import type {
   DisplacementMapImageFilterProps,
   MorphologyImageFilterProps,
 } from "./ImageFilters";
-import type {
-  GroupNode,
-  DrawingNode,
-  NestedDeclarationNode,
-  DeclarationNode,
-  PaintNode,
-} from "./Node";
+import type { DeclarationNode } from "./Node";
 import type {
   BlendColorFilterProps,
   MatrixColorFilterProps,
@@ -66,27 +63,22 @@ import type {
   Path2DPathEffectProps,
 } from "./PathEffects";
 
-type ImageFilterNode<P> = NestedDeclarationNode<
-  P,
-  SkImageFilter,
-  SkImageFilter | SkColorFilter | SkShader
->;
+type ImageFilterNode<P> = DeclarationNode<P, SkImageFilter>;
 
-type PathEffectNode<P> = NestedDeclarationNode<P, SkPathEffect>;
-type NullablePathEffectNode<P> = NestedDeclarationNode<
-  P,
-  SkPathEffect,
-  SkPathEffect,
-  null
->;
+type PathEffectNode<P> = DeclarationNode<P, SkPathEffect>;
+type NullablePathEffectNode<P> = DeclarationNode<P, SkPathEffect, null>;
+
+// TODO: don't use a concrete type here
+type DrawingNode<P> = JsiDrawingNode<P>;
 
 export interface SkDOM {
   Group(props?: GroupProps): GroupNode;
-  Paint(props: PaintProps): PaintNode;
+  // TODO: don't use a concrete type here
+  Paint(props: PaintProps): JsiPaintNode;
 
   // Drawings
-  Fill(props?: DrawingNodeProps): DrawingNode<DrawingNodeProps>;
-  Image(props: ImageProps): DrawingNode<ImageProps>;
+  Fill(props?: DrawingNodeProps): JsiDrawingNode<DrawingNodeProps>;
+  Image(props: ImageProps): JsiDrawingNode<ImageProps>;
   Circle(props: CircleProps): DrawingNode<CircleProps>;
   Path(props: PathProps): DrawingNode<PathProps>;
   CustomDrawing(
@@ -138,19 +130,19 @@ export interface SkDOM {
   // ColorFilters
   MatrixColorFilter(
     props: MatrixColorFilterProps
-  ): NestedDeclarationNode<MatrixColorFilterProps, SkColorFilter>;
+  ): DeclarationNode<MatrixColorFilterProps, SkColorFilter>;
   BlendColorFilter(
     props: BlendColorFilterProps
-  ): NestedDeclarationNode<BlendColorFilterProps, SkColorFilter>;
-  LumaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
-  LinearToSRGBGammaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
-  SRGBToLinearGammaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
+  ): DeclarationNode<BlendColorFilterProps, SkColorFilter>;
+  LumaColorFilter(): DeclarationNode<null, SkColorFilter>;
+  LinearToSRGBGammaColorFilter(): DeclarationNode<null, SkColorFilter>;
+  SRGBToLinearGammaColorFilter(): DeclarationNode<null, SkColorFilter>;
   LerpColorFilter(
     props: LerpColorFilterProps
-  ): NestedDeclarationNode<LerpColorFilterProps, SkColorFilter>;
+  ): DeclarationNode<LerpColorFilterProps, SkColorFilter>;
 
   // Shaders
-  Shader(props: ShaderProps): NestedDeclarationNode<ShaderProps, SkShader>;
+  Shader(props: ShaderProps): DeclarationNode<ShaderProps, SkShader>;
   ImageShader(
     props: ImageShaderProps
   ): DeclarationNode<ImageShaderProps, SkShader>;

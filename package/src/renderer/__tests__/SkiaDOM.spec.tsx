@@ -2,7 +2,6 @@ import React from "react";
 
 import { NodeType } from "../../dom/types";
 import { Circle, Group, Paint } from "../components";
-import type { DrawingNode, GroupNode, DrawingNodeProps } from "../../dom/types";
 
 import { width, height, mountCanvas } from "./setup";
 
@@ -17,11 +16,11 @@ describe("Test introductionary examples from our documentation", () => {
       </Group>
     );
     const { root } = container;
-    expect(root.getChildren().length).toBe(1);
-    const child = root.getChildren()[0]!;
+    expect(root.children().length).toBe(1);
+    const child = root.children()[0]!;
     expect(child).toBeDefined();
     expect(child.type).toBe(NodeType.Group);
-    expect((child as GroupNode).getChildren().length).toBe(3);
+    expect(child.children().length).toBe(3);
   });
   it("Accept multiple paint definiton", () => {
     const r = width * 0.33;
@@ -34,13 +33,16 @@ describe("Test introductionary examples from our documentation", () => {
       </Circle>
     );
     const { root } = container;
-    expect(root.getChildren().length).toBe(1);
-    const child = root.getChildren()[0]!;
+    expect(root.children().length).toBe(1);
+    const child = root.children()[0]!;
     expect(child).toBeDefined();
     expect(child.type).toBe(NodeType.Circle);
-    const circle = child as DrawingNode<DrawingNodeProps>;
+    const circle = child;
     expect(circle).toBeDefined();
     expect(circle.type).toBe(NodeType.Circle);
-    expect(circle.getPaints().length).toBe(3);
+    expect(circle.children().length).toBe(3);
+    expect(circle.children()[0].type).toBe(NodeType.Paint);
+    expect(circle.children()[1].type).toBe(NodeType.Paint);
+    expect(circle.children()[2].type).toBe(NodeType.Paint);
   });
 });

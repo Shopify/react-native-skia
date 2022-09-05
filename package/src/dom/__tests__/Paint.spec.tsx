@@ -36,15 +36,15 @@ describe("Paint", () => {
     const root = Sk.Group({ color });
 
     const circle = Sk.Circle({ c, r });
-    circle.addPaint(Sk.Paint({ color: Skia.Color("lightblue") }));
-    circle.addPaint(
+    circle.addChild(Sk.Paint({ color: Skia.Color("lightblue") }));
+    circle.addChild(
       Sk.Paint({
         color: Skia.Color("#adbce6"),
         style: "stroke",
         strokeWidth,
       })
     );
-    circle.addPaint(
+    circle.addChild(
       Sk.Paint({
         color: Skia.Color("#ade6d8"),
         style: "stroke",

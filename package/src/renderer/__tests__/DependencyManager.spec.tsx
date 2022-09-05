@@ -2,13 +2,14 @@ import { DependencyManager } from "../DependencyManager";
 import { Selector } from "../../values";
 import { RNSkValue } from "../../values/web/RNSkValue";
 import type { Node } from "../../dom/types";
-import { NodeKind, NodeType } from "../../dom/types/NodeType";
+import { NodeType } from "../../dom/types/NodeType";
 
 class TestNode<P> implements Node<P> {
   type = NodeType.Circle;
-  kind = NodeKind.Drawing;
+  _children: Node<unknown>[] = [];
 
   constructor(public mgr: DependencyManager, public props: P) {}
+
   setProps(props: P) {
     this.props = props;
   }
@@ -21,20 +22,39 @@ class TestNode<P> implements Node<P> {
     return this.props;
   }
 
-  isPaint() {
-    return false;
+  children() {
+    return this._children;
   }
-  isGroup() {
-    return false;
+
+  descendant() {
+    const result: Node<unknown>[] = [];
+    for (const child of this._children) {
+      result.push(child);
+      result.push(...child.descendant());
+    }
+    return result;
   }
-  isDeclaration() {
-    return false;
+
+  addChild(child: Node<unknown>) {
+    this._children.push(child);
   }
-  isNestedDeclaration() {
-    return false;
+
+  removeChild(child: Node<unknown>) {
+    const index = this._children.indexOf(child);
+    if (index !== -1) {
+      const [node] = this._children.splice(index, 1);
+      return [node, ...node.descendant()];
+    }
+    return [];
   }
-  isDrawing() {
-    return false;
+
+  insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
+    const index = this._children.indexOf(child);
+    if (index !== -1) {
+      this._children.splice(index, 1);
+    }
+    const beforeIndex = this._children.indexOf(before);
+    this._children.splice(beforeIndex, 0, child);
   }
 }
 

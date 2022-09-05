@@ -30,7 +30,7 @@ describe("Compose", () => {
 
     const blur = Sk.BlurImageFilter({ blur: vec(10, 10), mode: "decal" });
     blur.addChild(cf);
-    root.addEffect(blur);
+    root.addChild(blur);
 
     const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);

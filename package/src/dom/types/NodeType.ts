@@ -59,17 +59,10 @@ export enum NodeType {
 }
 
 export enum DeclarationType {
+  Paint,
   Shader,
   ImageFilter,
   ColorFilter,
   PathEffect,
   MaskFilter,
-}
-
-export enum NodeKind {
-  Paint,
-  Group,
-  Declaration,
-  NestedDeclaration,
-  Drawing,
 }

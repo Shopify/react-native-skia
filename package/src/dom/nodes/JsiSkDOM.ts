@@ -75,7 +75,6 @@ import {
   PictureNode,
   ImageSVGNode,
 } from "./drawings";
-import { JsiGroupNode } from "./GroupNode";
 import {
   BlendImageFilterNode,
   BlurImageFilterNode,
@@ -83,7 +82,6 @@ import {
   DisplacementMapImageFilterNode,
   DropShadowImageFilterNode,
   OffsetImageFilterNode,
-  JsiPaintNode,
   RuntimeShaderImageFilterNode,
   CornerPathEffectNode,
   DiscretePathEffectNode,
@@ -113,12 +111,14 @@ import {
   ColorNode,
 } from "./paint/Shaders";
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
+import { GroupNode } from "./GroupNode";
+import { JsiPaintNode } from "./Node";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}
 
   Group(props?: GroupProps) {
-    return new JsiGroupNode(this.Skia, props ?? {});
+    return new GroupNode(this.Skia, props ?? {});
   }
 
   Paint(props: PaintProps) {

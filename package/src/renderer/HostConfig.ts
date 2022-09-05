@@ -5,7 +5,8 @@ import type { NodeType, Node } from "../dom/types";
 
 import type { Container } from "./Container";
 import { createNode } from "./HostComponents";
-import { exhaustiveCheck, shallowEq } from "./typeddash";
+import { shallowEq } from "./typeddash";
+
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
@@ -43,65 +44,11 @@ type SkiaHostConfig = HostConfig<
 >;
 
 const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
-  //console.log(`appendNode ${parent.type} ${child.type}`);
-  if (parent.isDrawing() && child.isPaint()) {
-    parent.addPaint(child);
-  } else if (parent.isGroup()) {
-    if (child.isDeclaration()) {
-      parent.addEffect(child);
-    } else if (child.isGroup() || child.isDrawing()) {
-      parent.addChild(child);
-    }
-  } else if (parent.isNestedDeclaration() && child.isDeclaration()) {
-    parent.addChild(child);
-  } else if (parent.isPaint() && child.isDeclaration()) {
-    if (child.isColorFilter()) {
-      parent.addColorFilter(child);
-    } else if (child.isMaskFilter()) {
-      parent.addMaskFilter(child);
-    } else if (child.isShader()) {
-      parent.addShader(child);
-    } else if (child.isImageFilter()) {
-      parent.addImageFilter(child);
-    } else if (child.isPathEffect()) {
-      parent.addPathEffect(child);
-    } else {
-      exhaustiveCheck(child);
-    }
-  } else {
-    throw new Error(`Cannot append ${child.type} to ${parent.type}`);
-  }
+  parent.addChild(child);
 };
-// TODO: handle node unsubscription
+
 const removeNode = (parent: Node<unknown>, child: Node<unknown>) => {
-  if (parent.isDrawing() && child.isPaint()) {
-    parent.removePaint(child);
-  }
-  if (parent.isGroup()) {
-    if (child.isDeclaration()) {
-      parent.removeEffect(child);
-    } else if (child.isDrawing()) {
-      parent.removeChild(child);
-    }
-  } else if (parent.isNestedDeclaration() && child.isDeclaration()) {
-    parent.removeChild(child);
-  } else if (parent.isPaint() && child.isDeclaration()) {
-    if (child.isColorFilter()) {
-      parent.removeColorFilter();
-    } else if (child.isMaskFilter()) {
-      parent.removeMaskFilter();
-    } else if (child.isShader()) {
-      parent.removeShader();
-    } else if (child.isImageFilter()) {
-      parent.removeImageFilter();
-    } else if (child.isPathEffect()) {
-      parent.removePathEffect();
-    } else {
-      exhaustiveCheck(child);
-    }
-  } else {
-    throw new Error(`Cannot remove ${child.type} from ${parent.type}`);
-  }
+  return parent.removeChild(child);
 };
 
 const insertBefore = (
@@ -109,21 +56,7 @@ const insertBefore = (
   child: Node<unknown>,
   before: Node<unknown>
 ) => {
-  if (parent.isDrawing() && child.isPaint() && before.isPaint()) {
-    parent.insertPaintBefore(child, before);
-  } else if (parent.isGroup() && child.isDrawing() && before.isDrawing()) {
-    parent.insertChildBefore(child, before);
-  } else if (
-    parent.isNestedDeclaration() &&
-    child.isDeclaration() &&
-    before.isDeclaration()
-  ) {
-    parent.insertChildBefore(child, before);
-  } else {
-    throw new Error(
-      `Cannot append ${child.type} to ${parent.type} before ${before.type}`
-    );
-  }
+  parent.insertChildBefore(child, before);
 };
 
 export const skHostConfig: SkiaHostConfig = {
@@ -284,10 +217,12 @@ export const skHostConfig: SkiaHostConfig = {
   },
 
   removeChild: (parent, child) => {
+    // TODO: unsubscribe
     removeNode(parent, child);
   },
 
   removeChildFromContainer: (container, child) => {
+    // TODO: unsubscribe
     removeNode(container.root, child);
   },
 

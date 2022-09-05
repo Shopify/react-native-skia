@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+
 import type {
   SkColorFilter,
   Skia,
@@ -5,56 +7,88 @@ import type {
   SkMaskFilter,
   SkShader,
   SkPathEffect,
+  SkMatrix,
+  SkRect,
+  SkRRect,
+  SkPath,
+  SkPaint,
+} from "../../skia/types";
+import {
+  PaintStyle,
+  StrokeJoin,
+  StrokeCap,
+  BlendMode,
+  ClipOp,
+  processTransform,
+  isRRect,
 } from "../../skia/types";
 import type {
   Node,
   DeclarationNode,
-  NodeType,
-  NestedDeclarationNode,
-  PaintNode,
-  GroupNode,
-  DrawingNode,
-  Effect,
+  LeafDeclarationNode,
+  RenderNode,
+  GroupProps,
+  DrawingContext,
+  PaintProps,
 } from "../types";
-import { NodeKind, DeclarationType } from "../types";
+import { DeclarationType, NodeType } from "../types";
+
+import { enumKey, isPathDef, processColor, processPath } from "./datatypes";
 
 export abstract class JsiNode<P> implements Node<P> {
+  protected _children: Node<unknown>[] = [];
+
   constructor(
     protected Skia: Skia,
-    public kind: NodeKind,
     public type: NodeType,
     protected props: P
   ) {}
 
-  abstract setProps(props: P): void;
+  setProps(props: P) {
+    this.props = props;
+  }
 
-  abstract setProp<K extends keyof P>(name: K, v: P[K]): void;
+  setProp<K extends keyof P>(name: K, v: P[K]) {
+    this.props[name] = v;
+  }
 
   getProps() {
     return this.props;
   }
 
-  isPaint(): this is PaintNode {
-    return this.kind === NodeKind.Paint;
+  children() {
+    return this._children;
   }
 
-  isGroup(): this is GroupNode {
-    return this.kind === NodeKind.Group || this.kind === NodeKind.Drawing;
+  descendant() {
+    const result: Node<unknown>[] = [];
+    for (const child of this._children) {
+      result.push(child);
+      result.push(...child.descendant());
+    }
+    return result;
   }
 
-  isDeclaration(): this is Effect {
-    return (
-      this.kind === NodeKind.Declaration ||
-      this.kind === NodeKind.NestedDeclaration
-    );
+  addChild(child: Node<unknown>) {
+    this._children.push(child);
   }
 
-  isNestedDeclaration(): this is NestedDeclarationNode<P, unknown> {
-    return this.kind === NodeKind.NestedDeclaration;
+  removeChild(child: Node<unknown>) {
+    const index = this._children.indexOf(child);
+    if (index !== -1) {
+      const [node] = this._children.splice(index, 1);
+      return [node, ...node.descendant()];
+    }
+    return [];
   }
 
-  isDrawing(): this is DrawingNode {
-    return this.kind === NodeKind.Drawing;
+  insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
+    const index = this._children.indexOf(child);
+    if (index !== -1) {
+      this._children.splice(index, 1);
+    }
+    const beforeIndex = this._children.indexOf(before);
+    this._children.splice(beforeIndex, 0, child);
   }
 }
 
@@ -73,13 +107,32 @@ export abstract class JsiDeclarationNode<
     Skia: Skia,
     public declarationType: DeclarationType,
     type: NodeType,
-    props: P,
-    kind: NodeKind = NodeKind.Declaration
+    props: P
   ) {
-    super(Skia, kind, type, props);
+    super(Skia, type, props);
   }
 
   abstract get(): T | Nullable;
+
+  // TODO: add checks and option if the child can be null
+  getChild<C>(index: number) {
+    const child = this._children[index] as JsiDeclarationNode<unknown, C>;
+    return child.get();
+  }
+
+  addChild(child: Node<unknown>): void {
+    if (!(child instanceof JsiDeclarationNode)) {
+      throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
+    }
+    super.addChild(child);
+  }
+
+  insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
+    if (!(child instanceof JsiDeclarationNode)) {
+      throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
+    }
+    super.insertChildBefore(child, before);
+  }
 
   setInvalidate(invalidate: Invalidate) {
     this.invalidate = invalidate;
@@ -91,7 +144,7 @@ export abstract class JsiDeclarationNode<
         "Setting props on a declaration not attached to a drawing"
       );
     }
-    this.props = props;
+    super.setProps(props);
     this.invalidate();
   }
 
@@ -101,8 +154,12 @@ export abstract class JsiDeclarationNode<
         "Setting props on a declaration not attached to a drawing"
       );
     }
-    this.props[name] = v;
+    super.setProp(name, v);
     this.invalidate();
+  }
+
+  isPaint(): this is DeclarationNode<unknown, SkPaint> {
+    return this.declarationType === DeclarationType.Paint;
   }
 
   isImageFilter(): this is DeclarationNode<unknown, SkImageFilter> {
@@ -126,58 +183,318 @@ export abstract class JsiDeclarationNode<
   }
 }
 
-export abstract class JsiNestedDeclarationNode<
+export abstract class JsiLeafDeclarationNode<
     P,
     T,
-    C = T,
     Nullable extends null | never = never
   >
   extends JsiDeclarationNode<P, T, Nullable>
-  implements NestedDeclarationNode<P, T, C, Nullable>
+  implements LeafDeclarationNode<P, T, Nullable>
 {
-  protected children: DeclarationNode<unknown, C>[] = [];
-
-  constructor(
-    Skia: Skia,
-    declarationType: DeclarationType,
-    type: NodeType,
-    props: P
-  ) {
-    super(Skia, declarationType, type, props, NodeKind.NestedDeclaration);
+  addChild(_child: Node<unknown>): void {
+    throw new Error(`Cannot add child to ${this.type}`);
   }
 
-  getChildren() {
-    return this.children;
+  removeChild(_child: Node<unknown>): Node<unknown>[] {
+    throw new Error(`Cannot remove child from ${this.type}`);
   }
 
-  addChild(child: DeclarationNode<unknown, C>) {
-    this.children.push(child);
+  insertChildBefore(_child: Node<unknown>, _before: Node<unknown>): void {
+    throw new Error(`Cannot insert child into ${this.type}`);
+  }
+}
+
+const isSkPaint = (obj: RefObject<SkPaint> | SkPaint): obj is SkPaint =>
+  "__typename__" in obj && obj.__typename__ === "Paint";
+
+export abstract class JsiRenderNode<P extends GroupProps>
+  extends JsiNode<P>
+  implements RenderNode<P>
+{
+  paint?: JsiPaintNode;
+  matrix?: SkMatrix;
+  clipRect?: SkRect;
+  clipRRect?: SkRRect;
+  clipPath?: SkPath;
+
+  constructor(Skia: Skia, type: NodeType, props: P) {
+    super(Skia, type, props);
+    this.onPropChange();
   }
 
-  insertChildBefore(
-    child: DeclarationNode<unknown, C>,
-    before: DeclarationNode<unknown, C>
-  ) {
-    const index = this.children.indexOf(child);
-    if (index !== -1) {
-      this.children.splice(index, 1);
+  setProps(props: P) {
+    super.setProps(props);
+    this.onPropChange();
+  }
+
+  protected onPropChange() {
+    this.matrix = undefined;
+    this.clipPath = undefined;
+    this.clipRect = undefined;
+    this.clipRRect = undefined;
+    this.paint = undefined;
+    if (this.hasCustomPaint()) {
+      this.paint = new JsiPaintNode(this.Skia, this.props);
     }
-    const beforeIndex = this.children.indexOf(before);
-    this.children.splice(beforeIndex, 0, child);
+    this.computeMatrix();
+    this.computeClip();
   }
 
-  removeChild(child: DeclarationNode<unknown, C>) {
-    this.children.splice(this.children.indexOf(child), 1);
+  private computeClip() {
+    const { clip } = this.props;
+    if (clip) {
+      if (isPathDef(clip)) {
+        this.clipPath = processPath(this.Skia, clip);
+      } else if (isRRect(clip)) {
+        this.clipRRect = clip;
+      } else {
+        this.clipRect = clip;
+      }
+    }
   }
 
-  protected getRecursively(compose: (a: C, b: C) => C) {
-    return this.children
-      .map((child) => child.get())
-      .reduce<C | null>((acc, p) => {
-        if (acc === null) {
-          return p;
+  private computeMatrix() {
+    const { transform, origin, matrix } = this.props;
+    if (matrix) {
+      this.matrix = matrix;
+    } else if (transform) {
+      const m = this.Skia.Matrix();
+      if (origin) {
+        m.translate(origin.x, origin.y);
+      }
+      processTransform(m, transform);
+      if (origin) {
+        m.translate(-origin.x, -origin.y);
+      }
+      this.matrix = m;
+    }
+  }
+
+  private hasCustomPaint() {
+    const {
+      color,
+      strokeWidth,
+      blendMode,
+      style,
+      strokeJoin,
+      strokeCap,
+      strokeMiter,
+      opacity,
+      antiAlias,
+    } = this.props;
+    return (
+      color !== undefined ||
+      strokeWidth !== undefined ||
+      blendMode !== undefined ||
+      style !== undefined ||
+      strokeJoin !== undefined ||
+      strokeCap !== undefined ||
+      strokeMiter !== undefined ||
+      opacity !== undefined ||
+      antiAlias !== undefined
+    );
+  }
+
+  render(parentCtx: DrawingContext) {
+    const { invertClip, layer } = this.props;
+    const { canvas } = parentCtx;
+
+    const opacity = this.props.opacity
+      ? parentCtx.opacity * this.props.opacity
+      : parentCtx.opacity;
+
+    const paint = this.paint
+      ? this.paint.concat(parentCtx.paint, opacity)
+      : parentCtx.paint;
+
+    // TODO: can we only recreate a new context here if needed?
+    const ctx = { ...parentCtx, opacity, paint };
+    const hasTransform = this.matrix !== undefined;
+    const hasClip = this.clipRect !== undefined;
+    const shouldSave = hasTransform || hasClip || !!layer;
+    const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
+
+    if (shouldSave) {
+      if (layer) {
+        if (typeof layer === "boolean") {
+          canvas.saveLayer();
+        } else if (isSkPaint(layer)) {
+          canvas.saveLayer(layer);
+        } else {
+          canvas.saveLayer(layer.current ?? undefined);
         }
-        return compose(acc, p);
-      }, null) as C;
+      } else {
+        canvas.save();
+      }
+    }
+
+    if (this.matrix) {
+      canvas.concat(this.matrix);
+    }
+    if (this.clipRect) {
+      canvas.clipRect(this.clipRect, op, true);
+    }
+    if (this.clipRRect) {
+      canvas.clipRRect(this.clipRRect, op, true);
+    }
+    if (this.clipPath) {
+      canvas.clipPath(this.clipPath, op, true);
+    }
+
+    this.renderNode(ctx);
+
+    if (shouldSave) {
+      canvas.restore();
+    }
+  }
+
+  abstract renderNode(ctx: DrawingContext): void;
+}
+
+interface PaintChildren {
+  shader: SkShader | null;
+  colorFilter: SkColorFilter | null;
+  imageFilter: SkImageFilter | null;
+  maskFilter: SkMaskFilter | null;
+  pathEffect: SkPathEffect | null;
+}
+
+export class JsiPaintNode
+  extends JsiDeclarationNode<PaintProps, SkPaint>
+  implements DeclarationNode<PaintProps, SkPaint>
+{
+  private cache: SkPaint | null = null;
+
+  constructor(Skia: Skia, props: PaintProps = {}) {
+    super(Skia, DeclarationType.Paint, NodeType.Paint, props);
+  }
+
+  setProps(props: PaintProps) {
+    super.setProps(props);
+    this.cache = null;
+  }
+
+  setProp<K extends keyof PaintProps>(name: K, v: PaintProps[K]) {
+    super.setProp(name, v);
+    this.cache = null;
+  }
+
+  addChild(child: Node<unknown>): void {
+    if (!(child instanceof JsiDeclarationNode)) {
+      throw new Error(`Cannot add ${child.type} to ${this.type}`);
+    }
+    child.setInvalidate(() => (this.cache = null));
+    super.addChild(child);
+  }
+
+  insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
+    if (!(child instanceof JsiDeclarationNode)) {
+      throw new Error(`Cannot add ${child.type} to ${this.type}`);
+    }
+    child.setInvalidate(() => (this.cache = null));
+    super.insertChildBefore(child, before);
+  }
+
+  removeChild(child: Node<unknown>) {
+    this.cache = null;
+    return super.removeChild(child);
+  }
+
+  concat(parentPaint: SkPaint, currentOpacity: number) {
+    const {
+      color,
+      blendMode,
+      style,
+      strokeJoin,
+      strokeMiter,
+      strokeCap,
+      strokeWidth,
+      opacity,
+      antiAlias,
+    } = this.props;
+    if (this.cache !== null) {
+      return this.cache;
+    }
+    // TODO: this should/could be cached
+    const paint = this.props.paint ? this.props.paint : parentPaint.copy();
+    // Props
+    if (color !== undefined) {
+      const c = processColor(this.Skia, color, currentOpacity);
+      paint.setShader(null);
+      paint.setColor(c);
+    } else {
+      const c = processColor(this.Skia, paint.getColor(), currentOpacity);
+      paint.setColor(c);
+    }
+    if (blendMode !== undefined) {
+      paint.setBlendMode(BlendMode[enumKey(blendMode)]);
+    }
+    if (style !== undefined) {
+      paint.setStyle(PaintStyle[enumKey(style)]);
+    }
+    if (strokeJoin !== undefined) {
+      paint.setStrokeJoin(StrokeJoin[enumKey(strokeJoin)]);
+    }
+    if (strokeCap !== undefined) {
+      paint.setStrokeCap(StrokeCap[enumKey(strokeCap)]);
+    }
+    if (strokeMiter !== undefined) {
+      paint.setStrokeMiter(strokeMiter);
+    }
+    if (strokeWidth !== undefined) {
+      paint.setStrokeWidth(strokeWidth);
+    }
+    if (opacity !== undefined) {
+      paint.setAlphaf(opacity);
+    }
+    if (antiAlias !== undefined) {
+      paint.setAntiAlias(antiAlias);
+    }
+    const { shader, colorFilter, imageFilter, maskFilter, pathEffect } =
+      this.children().reduce<PaintChildren>(
+        (r, child) => {
+          if (child instanceof JsiDeclarationNode) {
+            if (child.isShader()) {
+              r.shader = child.get();
+            } else if (child.isColorFilter()) {
+              r.colorFilter = child.get();
+            } else if (child.isImageFilter()) {
+              r.imageFilter = child.get();
+            } else if (child.isPathEffect()) {
+              r.pathEffect = child.get();
+            }
+          }
+          return r;
+        },
+        {
+          shader: null,
+          colorFilter: null,
+          imageFilter: null,
+          maskFilter: null,
+          pathEffect: null,
+        }
+      );
+    // Children
+    if (shader !== null) {
+      paint.setShader(shader);
+    }
+    if (maskFilter !== null) {
+      paint.setMaskFilter(maskFilter);
+    }
+    if (pathEffect !== null) {
+      paint.setPathEffect(pathEffect);
+    }
+    if (imageFilter !== null) {
+      paint.setImageFilter(imageFilter);
+    }
+    if (colorFilter !== null) {
+      paint.setColorFilter(colorFilter);
+    }
+    this.cache = paint;
+    return paint;
+  }
+
+  get() {
+    return this.concat(this.Skia.Paint(), 1);
   }
 }

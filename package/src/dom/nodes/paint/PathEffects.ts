@@ -1,6 +1,6 @@
 import { Path1DEffectStyle } from "../../../skia/types";
 import type { Skia, SkPathEffect } from "../../../skia/types";
-import { JsiNestedDeclarationNode } from "../Node";
+import { JsiDeclarationNode } from "../Node";
 import type {
   CornerPathEffectProps,
   DashPathEffectProps,
@@ -13,7 +13,7 @@ import { DeclarationType, NodeType } from "../../types";
 import { enumKey } from "../datatypes/Enum";
 import { processPath } from "../datatypes";
 
-export class DiscretePathEffectNode extends JsiNestedDeclarationNode<
+export class DiscretePathEffectNode extends JsiDeclarationNode<
   DiscretePathEffectProps,
   SkPathEffect
 > {
@@ -28,9 +28,8 @@ export class DiscretePathEffectNode extends JsiNestedDeclarationNode<
   }
 }
 
-export class Path2DPathEffectNode extends JsiNestedDeclarationNode<
+export class Path2DPathEffectNode extends JsiDeclarationNode<
   Path2DPathEffectProps,
-  SkPathEffect,
   SkPathEffect,
   null
 > {
@@ -46,7 +45,7 @@ export class Path2DPathEffectNode extends JsiNestedDeclarationNode<
   }
 }
 
-export class DashPathEffectNode extends JsiNestedDeclarationNode<
+export class DashPathEffectNode extends JsiDeclarationNode<
   DashPathEffectProps,
   SkPathEffect
 > {
@@ -61,9 +60,8 @@ export class DashPathEffectNode extends JsiNestedDeclarationNode<
   }
 }
 
-export class CornerPathEffectNode extends JsiNestedDeclarationNode<
+export class CornerPathEffectNode extends JsiDeclarationNode<
   CornerPathEffectProps,
-  SkPathEffect,
   SkPathEffect,
   null
 > {
@@ -94,25 +92,22 @@ export class CornerPathEffectNode extends JsiNestedDeclarationNode<
 //   }
 // }
 
-export class SumPathEffectNode extends JsiNestedDeclarationNode<
-  null,
-  SkPathEffect
-> {
+export class SumPathEffectNode extends JsiDeclarationNode<null, SkPathEffect> {
   constructor(Skia: Skia) {
     super(Skia, DeclarationType.PathEffect, NodeType.SumPathEffect, null);
   }
 
   get() {
     // TODO: compose children
-    return this.getRecursively(
-      this.Skia.PathEffect.MakeSum.bind(this.Skia.PathEffect)
+    return this.Skia.PathEffect.MakeSum(
+      this.getChild<SkPathEffect>(0),
+      this.getChild<SkPathEffect>(1)
     );
   }
 }
 
-export class Line2DPathEffectNode extends JsiNestedDeclarationNode<
+export class Line2DPathEffectNode extends JsiDeclarationNode<
   Line2DPathEffectProps,
-  SkPathEffect,
   SkPathEffect,
   null
 > {
@@ -127,9 +122,8 @@ export class Line2DPathEffectNode extends JsiNestedDeclarationNode<
   }
 }
 
-export class Path1DPathEffectNode extends JsiNestedDeclarationNode<
+export class Path1DPathEffectNode extends JsiDeclarationNode<
   Path1DPathEffectProps,
-  SkPathEffect,
   SkPathEffect,
   null
 > {

@@ -13,7 +13,6 @@ import type {
   SkTextBlob,
   SkPicture,
   SkSVG,
-  SkPaint,
 } from "../../skia/types";
 
 import type {
@@ -27,9 +26,7 @@ import type {
 } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
 
-export interface DrawingNodeProps extends GroupProps {
-  paint?: SkPaint;
-}
+export type DrawingNodeProps = GroupProps;
 
 export type ImageProps = DrawingNodeProps &
   RectDef & {
