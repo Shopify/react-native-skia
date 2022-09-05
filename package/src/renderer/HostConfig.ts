@@ -44,7 +44,9 @@ type SkiaHostConfig = HostConfig<
 
 const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
   //console.log(`appendNode ${parent.type} ${child.type}`);
-  if (parent.isGroup()) {
+  if (parent.isDrawing() && child.isPaint()) {
+    parent.addPaint(child);
+  } else if (parent.isGroup()) {
     if (child.isDeclaration()) {
       parent.addEffect(child);
     } else if (child.isGroup() || child.isDrawing()) {
@@ -52,8 +54,6 @@ const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
     }
   } else if (parent.isNestedDeclaration() && child.isDeclaration()) {
     parent.addChild(child);
-  } else if (parent.isDrawing() && child.isPaint()) {
-    parent.addPaint(child);
   } else if (parent.isPaint() && child.isDeclaration()) {
     if (child.isColorFilter()) {
       parent.addColorFilter(child);
@@ -74,6 +74,9 @@ const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
 };
 
 const removeNode = (parent: Node<unknown>, child: Node<unknown>) => {
+  if (parent.isDrawing() && child.isPaint()) {
+    parent.removePaint(child);
+  }
   if (parent.isGroup()) {
     if (child.isDeclaration()) {
       parent.removeEffect(child);
@@ -82,8 +85,6 @@ const removeNode = (parent: Node<unknown>, child: Node<unknown>) => {
     }
   } else if (parent.isNestedDeclaration() && child.isDeclaration()) {
     parent.removeChild(child);
-  } else if (parent.isDrawing() && child.isPaint()) {
-    parent.removePaint(child);
   } else if (parent.isPaint() && child.isDeclaration()) {
     if (child.isColorFilter()) {
       parent.removeColorFilter();
@@ -108,7 +109,9 @@ const insertBefore = (
   child: Node<unknown>,
   before: Node<unknown>
 ) => {
-  if (parent.isGroup() && child.isDrawing() && before.isDrawing()) {
+  if (parent.isDrawing() && child.isPaint() && before.isPaint()) {
+    parent.insertPaintBefore(child, before);
+  } else if (parent.isGroup() && child.isDrawing() && before.isDrawing()) {
     parent.insertChildBefore(child, before);
   } else if (
     parent.isNestedDeclaration() &&
@@ -116,8 +119,6 @@ const insertBefore = (
     before.isDeclaration()
   ) {
     parent.insertChildBefore(child, before);
-  } else if (parent.isDrawing() && child.isPaint() && before.isPaint()) {
-    parent.insertPaintBefore(child, before);
   } else {
     throw new Error(
       `Cannot append ${child.type} to ${parent.type} before ${before.type}`

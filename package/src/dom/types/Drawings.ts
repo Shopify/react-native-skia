@@ -13,18 +13,23 @@ import type {
   SkTextBlob,
   SkPicture,
   SkSVG,
+  SkPaint,
 } from "../../skia/types";
 
 import type {
   CircleDef,
   Fit,
+  GroupProps,
   PathDef,
   RectDef,
   RRectDef,
   SkEnum,
 } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
-import type { DrawingNodeProps } from "./Node";
+
+export interface DrawingNodeProps extends GroupProps {
+  paint?: SkPaint;
+}
 
 export type ImageProps = DrawingNodeProps &
   RectDef & {

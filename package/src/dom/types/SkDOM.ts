@@ -13,7 +13,6 @@ import type {
   MorphologyImageFilterProps,
 } from "./ImageFilters";
 import type {
-  DrawingNodeProps,
   GroupNode,
   DrawingNode,
   NestedDeclarationNode,
@@ -44,6 +43,7 @@ import type {
   GlyphsProps,
   PictureProps,
   ImageSVGProps,
+  DrawingNodeProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {

@@ -8,15 +8,12 @@ import type {
 } from "../../skia/types";
 import type {
   Node,
-  DrawingContext,
   DeclarationNode,
   NodeType,
-  RenderNode,
   NestedDeclarationNode,
   PaintNode,
   GroupNode,
   DrawingNode,
-  DrawingNodeProps,
   Effect,
 } from "../types";
 import { NodeKind, DeclarationType } from "../types";
@@ -46,7 +43,7 @@ export abstract class JsiNode<P> implements Node<P> {
   }
 
   isGroup(): this is GroupNode {
-    return this.kind === NodeKind.Group;
+    return this.kind === NodeKind.Group || this.kind === NodeKind.Drawing;
   }
 
   isDeclaration(): this is Effect {
@@ -60,20 +57,9 @@ export abstract class JsiNode<P> implements Node<P> {
     return this.kind === NodeKind.NestedDeclaration;
   }
 
-  isDrawing(): this is DrawingNode<DrawingNodeProps> {
+  isDrawing(): this is DrawingNode {
     return this.kind === NodeKind.Drawing;
   }
-}
-
-export abstract class JsiRenderNode<P>
-  extends JsiNode<P>
-  implements RenderNode<P>
-{
-  constructor(Skia: Skia, kind: NodeKind, type: NodeType, props: P) {
-    super(Skia, kind, type, props);
-  }
-
-  abstract render(ctx: DrawingContext): void;
 }
 
 export type Invalidate = () => void;

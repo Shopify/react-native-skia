@@ -1,30 +1,28 @@
 import type { Skia } from "../../../skia/types";
-import { JsiRenderNode } from "../Node";
+import { ClipOp } from "../../../skia/types";
 import { JsiPaintNode } from "../paint";
 import type {
   DrawingContext,
+  DrawingNode,
   DrawingNodeProps,
   NodeType,
-  RenderNode,
 } from "../../types";
 import { NodeKind } from "../../types";
+import { JsiGroupNode } from "../GroupNode";
 
 export abstract class JsiDrawingNode<P extends DrawingNodeProps>
-  extends JsiRenderNode<P>
-  implements RenderNode<P>
+  extends JsiGroupNode<P>
+  implements DrawingNode<P>
 {
   paints: JsiPaintNode[] = [];
 
   constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, NodeKind.Drawing, type, props);
+    super(Skia, props, NodeKind.Drawing, type);
     if (!props.paint) {
       // TODO: only do this is custom paint props are present
       this.paints.push(new JsiPaintNode(Skia));
     }
   }
-
-  abstract draw(ctx: DrawingContext): void;
-  protected abstract onPropChange(): void;
 
   setProps(props: P) {
     super.setProps(props);
@@ -32,7 +30,7 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
   }
 
   setProp<K extends keyof P>(name: K, v: P[K]) {
-    super.setProp(name, v);
+    this.props[name] = v;
     this.onPropChange();
   }
 
@@ -57,7 +55,9 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
     this.paints.splice(this.paints.indexOf(paintNode), 1);
   }
 
-  render(ctx: DrawingContext) {
+  abstract draw(ctx: DrawingContext): void;
+
+  drawPaints(ctx: DrawingContext) {
     if (this.props.paint) {
       this.draw({ ...ctx, paint: this.props.paint });
     }
@@ -68,5 +68,48 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
       const paint = paintNode.concat(ctx.paint, ctx.opacity);
       this.draw({ ...ctx, paint });
     });
+  }
+
+  render(parentCtx: DrawingContext) {
+    const { invertClip } = this.props;
+    const { canvas } = parentCtx;
+
+    const opacity = this.props.opacity
+      ? parentCtx.opacity * this.props.opacity
+      : parentCtx.opacity;
+
+    const paint = this.paint
+      ? this.paint.concat(parentCtx.paint, opacity)
+      : parentCtx.paint;
+
+    // TODO: can we only recreate a new context here if needed?
+    const ctx = { ...parentCtx, opacity, paint };
+    const hasTransform = this.matrix !== undefined;
+    const hasClip = this.clipRect !== undefined;
+    const shouldSave = hasTransform || hasClip;
+    const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
+
+    if (shouldSave) {
+      canvas.save();
+    }
+
+    if (this.matrix) {
+      canvas.concat(this.matrix);
+    }
+    if (this.clipRect) {
+      canvas.clipRect(this.clipRect, op, true);
+    }
+    if (this.clipRRect) {
+      canvas.clipRRect(this.clipRRect, op, true);
+    }
+    if (this.clipPath) {
+      canvas.clipPath(this.clipPath, op, true);
+    }
+
+    this.drawPaints(ctx);
+
+    if (shouldSave) {
+      canvas.restore();
+    }
   }
 }

@@ -36,8 +36,8 @@ import type {
   PictureProps,
   ImageSVGProps,
   LerpColorFilterProps,
+  DrawingNodeProps,
 } from "../types";
-import type { DrawingNodeProps } from "../types/Node";
 import type {
   BlendImageFilterProps,
   DisplacementMapImageFilterProps,
@@ -118,7 +118,7 @@ export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}
 
   Group(props?: GroupProps) {
-    return new JsiGroupNode(this.Skia, props);
+    return new JsiGroupNode(this.Skia, props ?? {});
   }
 
   Paint(props: PaintProps) {

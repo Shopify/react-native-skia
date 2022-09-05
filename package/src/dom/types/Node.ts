@@ -2,7 +2,6 @@ import type {
   SkColorFilter,
   SkImageFilter,
   SkMaskFilter,
-  SkPaint,
   SkPathEffect,
   SkShader,
 } from "../../skia/types";
@@ -10,6 +9,13 @@ import type {
 import type { GroupProps, PaintProps } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationType, NodeKind, NodeType } from "./NodeType";
+
+export type Effect =
+  | DeclarationNode<unknown, SkShader>
+  | DeclarationNode<unknown, SkImageFilter>
+  | DeclarationNode<unknown, SkColorFilter>
+  | DeclarationNode<unknown, SkMaskFilter>
+  | DeclarationNode<unknown, SkPathEffect>;
 
 export interface Node<P> {
   type: NodeType;
@@ -19,14 +25,10 @@ export interface Node<P> {
   getProps(): P;
 
   isPaint(): this is PaintNode;
-  isGroup(): this is GroupNode;
   isDeclaration(): this is Effect;
   isNestedDeclaration(): this is NestedDeclarationNode<P, unknown>;
-  isDrawing(): this is DrawingNode<DrawingNodeProps>;
-}
-
-export interface RenderNode<P> extends Node<P> {
-  render(ctx: DrawingContext): void;
+  isGroup(): this is GroupNode;
+  isDrawing(): this is DrawingNode;
 }
 
 export type Invalidate = () => void;
@@ -60,26 +62,18 @@ export interface NestedDeclarationNode<
   removeChild(child: DeclarationNode<unknown, C>): void;
 }
 
-export type Effect =
-  | DeclarationNode<unknown, SkShader>
-  | DeclarationNode<unknown, SkImageFilter>
-  | DeclarationNode<unknown, SkColorFilter>
-  | DeclarationNode<unknown, SkMaskFilter>
-  | DeclarationNode<unknown, SkPathEffect>;
-
-export interface GroupNode extends RenderNode<GroupProps> {
-  getChildren(): RenderNode<unknown>[];
-  addChild(child: RenderNode<unknown>): void;
-  insertChildBefore(
-    child: RenderNode<unknown>,
-    before: RenderNode<unknown>
-  ): void;
-  removeChild(child: RenderNode<unknown>): void;
+export interface GroupNode<P extends GroupProps = GroupProps> extends Node<P> {
+  getChildren(): GroupNode[];
+  addChild(child: GroupNode): void;
+  insertChildBefore(child: GroupNode, before: GroupNode): void;
+  removeChild(child: GroupNode): void;
 
   addEffect(effect: Effect): void;
   removeEffect(effect: Effect): void;
 
   getPaint(): PaintNode | undefined;
+
+  render(ctx: DrawingContext): void;
 }
 
 export interface PaintNode extends Node<PaintProps> {
@@ -104,11 +98,8 @@ export interface PaintNode extends Node<PaintProps> {
   getPathEffect(): DeclarationNode<unknown, SkPathEffect> | undefined;
 }
 
-export interface DrawingNodeProps extends PaintProps {
-  paint?: SkPaint;
-}
-
-export interface DrawingNode<P extends DrawingNodeProps> extends RenderNode<P> {
+export interface DrawingNode<P extends GroupProps = GroupProps>
+  extends GroupNode<P> {
   getPaints(): PaintNode[];
   addPaint(paintNode: PaintNode): void;
   removePaint(paintNode: PaintNode): void;

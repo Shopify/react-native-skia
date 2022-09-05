@@ -2,22 +2,16 @@ import type { SkMatrix, SkRect, SkRRect, Skia } from "../../skia/types";
 import { isRRect, processTransform, ClipOp } from "../../skia/types";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import type { SkPath } from "../../skia/types/Path/Path";
-import type {
-  DrawingContext,
-  Effect,
-  GroupNode,
-  GroupProps,
-  RenderNode,
-} from "../types";
+import type { DrawingContext, Effect, GroupNode, GroupProps } from "../types";
 import { NodeKind, NodeType } from "../types";
 
 import { JsiPaintNode } from "./paint/PaintNode";
-import { JsiRenderNode } from "./Node";
+import { JsiNode } from "./Node";
 import { isPathDef, processPath } from "./datatypes";
 
-export class JsiGroupNode
-  extends JsiRenderNode<GroupProps>
-  implements GroupNode
+export class JsiGroupNode<P extends GroupProps>
+  extends JsiNode<P>
+  implements GroupNode<P>
 {
   paint?: JsiPaintNode;
   matrix?: SkMatrix;
@@ -25,19 +19,24 @@ export class JsiGroupNode
   clipRRect?: SkRRect;
   clipPath?: SkPath;
 
-  children: RenderNode<unknown>[] = [];
+  children: GroupNode[] = [];
 
-  constructor(Skia: Skia, props: GroupProps = {}) {
-    super(Skia, NodeKind.Group, NodeType.Group, props);
+  constructor(
+    Skia: Skia,
+    props: P,
+    kind: NodeKind = NodeKind.Group,
+    type: NodeType = NodeType.Group
+  ) {
+    super(Skia, kind, type, props);
     this.onPropChange();
   }
 
-  setProps(props: GroupProps): void {
+  setProps(props: P): void {
     super.setProps(props);
     this.onPropChange();
   }
 
-  private onPropChange() {
+  protected onPropChange() {
     this.matrix = undefined;
     this.clipPath = undefined;
     this.clipRect = undefined;
@@ -109,14 +108,11 @@ export class JsiGroupNode
     return this.children;
   }
 
-  addChild(child: RenderNode<unknown>) {
+  addChild(child: GroupNode) {
     this.children.push(child);
   }
 
-  insertChildBefore(
-    child: RenderNode<unknown>,
-    before: RenderNode<unknown>
-  ): void {
+  insertChildBefore(child: GroupNode, before: GroupNode): void {
     const index = this.children.indexOf(before);
     if (index === -1) {
       throw new Error("Before node not found");
@@ -124,7 +120,7 @@ export class JsiGroupNode
     this.children.splice(index, 0, child);
   }
 
-  removeChild(child: RenderNode<unknown>) {
+  removeChild(child: GroupNode) {
     this.children.splice(this.children.indexOf(child), 1);
   }
 
