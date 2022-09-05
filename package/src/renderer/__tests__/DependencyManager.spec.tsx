@@ -51,6 +51,7 @@ describe("DependencyManager", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     expect(node.props.a).toBe(100);
     value.current = 200;
     expect(node.props.a).toBe(200);
@@ -59,6 +60,7 @@ describe("DependencyManager", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     expect(node.props.a).toBe(100);
     mgr.unsubscribeNode(node);
     value.current = 200;
@@ -68,8 +70,10 @@ describe("DependencyManager", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
     const nodeA = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(nodeA, nodeA.props);
     expect(nodeA.props.a).toBe(100);
     const nodeB = new TestNode(mgr, { b: value });
+    mgr.subscribeNode(nodeB, nodeB.props);
     expect(nodeB.props.b).toBe(100);
     value.current = 200;
     expect(nodeA.props.a).toBe(200);
@@ -79,8 +83,10 @@ describe("DependencyManager", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
     const nodeA = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(nodeA, nodeA.props);
     expect(nodeA.props.a).toBe(100);
     const nodeB = new TestNode(mgr, { b: value });
+    mgr.subscribeNode(nodeB, nodeB.props);
     expect(nodeB.props.b).toBe(100);
     mgr.unsubscribeNode(nodeA);
     value.current = 200;
@@ -92,6 +98,7 @@ describe("DependencyManager", () => {
     const valueA = new RNSkValue(100);
     const valueB = new RNSkValue(200);
     const node = new TestNode(mgr, { a: valueA, b: valueB });
+    mgr.subscribeNode(node, node.props);
     expect(node.props.a).toBe(100);
     expect(node.props.b).toBe(200);
     valueA.current = 300;
@@ -102,6 +109,7 @@ describe("DependencyManager", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     expect(mgr.subscriptions.has(value)).toBe(true);
     expect(mgr.subscriptions.get(value)!.nodes.has(node)).toBe(true);
     mgr.unsubscribeNode(node);
@@ -112,6 +120,8 @@ describe("DependencyManager", () => {
     const value = new RNSkValue(100);
     const node1 = new TestNode(mgr, { a: value });
     const node2 = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node1, node1.props);
+    mgr.subscribeNode(node2, node2.props);
     expect(mgr.subscriptions.has(value)).toBe(true);
     mgr.unsubscribeNode(node1);
     expect(mgr.subscriptions.has(value)).toBe(true);
@@ -124,6 +134,7 @@ describe("DependencyManager", () => {
     const mgr = new DependencyManager(() => () => {});
     const value = new RNSkValue(100);
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     expect(mgr.subscriptions.has(value)).toBe(true);
     mgr.unsubscribeNode(node);
     expect(mgr.subscriptions.has(value)).toBe(false);
@@ -132,12 +143,14 @@ describe("DependencyManager", () => {
     const value = new RNSkValue(100);
     const mgr = new DependencyManager(() => () => {});
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     expect(node.props.a).toBe(100);
   });
   it("should resolve a selector property to the selectors value", () => {
     const value = new RNSkValue([100]);
     const mgr = new DependencyManager(() => () => {});
     const node = new TestNode(mgr, { a: Selector(value, (v) => v[0]) });
+    mgr.subscribeNode(node, node.props);
     expect(node.props.a).toBe(100);
   });
   it("should register a listener on SkiaValues", () => {
@@ -145,6 +158,7 @@ describe("DependencyManager", () => {
     const mockRegister = jest.fn();
     const mgr = new DependencyManager(mockRegister);
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     mgr.update();
     expect(node.props.a).toBe(100);
     expect(mockRegister).toBeCalled();
@@ -155,6 +169,7 @@ describe("DependencyManager", () => {
     const mockRegister = jest.fn(() => mockUnregister);
     const mgr = new DependencyManager(mockRegister);
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     mgr.update();
     mgr.update();
     expect(node.props.a).toBe(100);
@@ -166,6 +181,7 @@ describe("DependencyManager", () => {
     const mockRegister = jest.fn();
     const mgr = new DependencyManager(mockRegister);
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     expect(node.props.a).toBe(100);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -176,6 +192,7 @@ describe("DependencyManager", () => {
     const mockRegister = jest.fn();
     const mgr = new DependencyManager(mockRegister);
     const node = new TestNode(mgr, { a: value });
+    mgr.subscribeNode(node, node.props);
     expect(node.props.a).toBe(100);
     mgr.unsubscribeNode(node);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
