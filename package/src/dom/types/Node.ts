@@ -16,6 +16,7 @@ export interface Node<P> {
   kind: NodeKind;
   setProps(props: P): void;
   setProp<K extends keyof P>(name: K, v: P[K]): void;
+  getProps(): P;
 
   isPaint(): this is PaintNode;
   isGroup(): this is GroupNode;
@@ -50,6 +51,7 @@ export interface NestedDeclarationNode<
   C = T,
   Nullable extends null | never = never
 > extends DeclarationNode<P, T, Nullable> {
+  getChildren(): DeclarationNode<unknown, C>[];
   addChild(child: DeclarationNode<unknown, C>): void;
   insertChildBefore(
     child: DeclarationNode<unknown, C>,
@@ -66,6 +68,7 @@ export type Effect =
   | DeclarationNode<unknown, SkPathEffect>;
 
 export interface GroupNode extends RenderNode<GroupProps> {
+  getChildren(): RenderNode<unknown>[];
   addChild(child: RenderNode<unknown>): void;
   insertChildBefore(
     child: RenderNode<unknown>,
@@ -75,23 +78,30 @@ export interface GroupNode extends RenderNode<GroupProps> {
 
   addEffect(effect: Effect): void;
   removeEffect(effect: Effect): void;
+
+  getPaint(): PaintNode | undefined;
 }
 
 export interface PaintNode extends Node<PaintProps> {
   addShader(shader: DeclarationNode<unknown, SkShader>): void;
   removeShader(): void;
+  getShader(): DeclarationNode<unknown, SkShader> | undefined;
 
   addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>): void;
   removeMaskFilter(): void;
+  getMaskFilter(): DeclarationNode<unknown, SkMaskFilter> | undefined;
 
   addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>): void;
   removeColorFilter(): void;
+  getColorFilter(): DeclarationNode<unknown, SkColorFilter> | undefined;
 
   addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>): void;
   removeImageFilter(): void;
+  getImageFilter(): DeclarationNode<unknown, SkImageFilter> | undefined;
 
   addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>): void;
   removePathEffect(): void;
+  getPathEffect(): DeclarationNode<unknown, SkPathEffect> | undefined;
 }
 
 export interface DrawingNodeProps {

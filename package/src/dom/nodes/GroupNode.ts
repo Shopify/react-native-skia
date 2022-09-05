@@ -105,6 +105,10 @@ export class JsiGroupNode
     );
   }
 
+  getChildren() {
+    return this.children;
+  }
+
   addChild(child: RenderNode<unknown>) {
     this.children.push(child);
   }
@@ -160,6 +164,10 @@ export class JsiGroupNode
     } else {
       exhaustiveCheck(effect);
     }
+  }
+
+  getPaint() {
+    return this.paint;
   }
 
   render(parentCtx: DrawingContext) {

@@ -17,6 +17,10 @@ class TestNode<P> implements Node<P> {
     this.props[name] = v;
   }
 
+  getProps() {
+    return this.props;
+  }
+
   isPaint() {
     return false;
   }

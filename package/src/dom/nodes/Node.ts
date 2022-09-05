@@ -37,6 +37,10 @@ export abstract class JsiNode<P> implements Node<P> {
     this.props[name] = v;
   }
 
+  getProps() {
+    return this.props;
+  }
+
   isPaint(): this is PaintNode {
     return this.kind === NodeKind.Paint;
   }
@@ -158,6 +162,10 @@ export abstract class JsiNestedDeclarationNode<
     props: P
   ) {
     super(Skia, declarationType, type, props, NodeKind.NestedDeclaration);
+  }
+
+  getChildren() {
+    return this.children;
   }
 
   addChild(child: DeclarationNode<unknown, C>) {

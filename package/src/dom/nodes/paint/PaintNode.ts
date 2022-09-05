@@ -40,6 +40,10 @@ export class JsiPaintNode extends JsiNode<PaintProps> implements PaintNode {
     this.cache = null;
   }
 
+  getShader() {
+    return this.shader;
+  }
+
   addMaskFilter(maskFilter: DeclarationNode<unknown, SkMaskFilter>) {
     this.maskFilter = maskFilter;
     this.maskFilter.setInvalidate(() => (this.cache = null));
@@ -48,6 +52,10 @@ export class JsiPaintNode extends JsiNode<PaintProps> implements PaintNode {
   removeMaskFilter() {
     this.maskFilter = undefined;
     this.cache = null;
+  }
+
+  getMaskFilter() {
+    return this.maskFilter;
   }
 
   addColorFilter(colorFilter: DeclarationNode<unknown, SkColorFilter>) {
@@ -60,6 +68,10 @@ export class JsiPaintNode extends JsiNode<PaintProps> implements PaintNode {
     this.cache = null;
   }
 
+  getColorFilter() {
+    return this.colorFilter;
+  }
+
   addImageFilter(imageFilter: DeclarationNode<unknown, SkImageFilter>) {
     this.imageFilter = imageFilter;
     this.imageFilter.setInvalidate(() => (this.cache = null));
@@ -70,6 +82,10 @@ export class JsiPaintNode extends JsiNode<PaintProps> implements PaintNode {
     this.cache = null;
   }
 
+  getImageFilter() {
+    return this.imageFilter;
+  }
+
   addPathEffect(pathEffect: DeclarationNode<unknown, SkPathEffect>) {
     this.pathEffect = pathEffect;
     this.pathEffect.setInvalidate(() => (this.cache = null));
@@ -78,6 +94,10 @@ export class JsiPaintNode extends JsiNode<PaintProps> implements PaintNode {
   removePathEffect() {
     this.pathEffect = undefined;
     this.cache = null;
+  }
+
+  getPathEffect() {
+    return this.pathEffect;
   }
 
   concat(parentPaint: SkPaint, currentOpacity: number) {

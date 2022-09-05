@@ -46,7 +46,7 @@ const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
   if (parent.isGroup()) {
     if (child.isDeclaration()) {
       parent.addEffect(child);
-    } else if (child.isDrawing()) {
+    } else if (child.isGroup() || child.isDrawing()) {
       parent.addChild(child);
     }
   } else if (parent.isNestedDeclaration() && child.isDeclaration()) {

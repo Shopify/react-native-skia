@@ -144,7 +144,6 @@ export const mountCanvas = (element: ReactNode) => {
   };
   return {
     draw: () => {
-      //console.log(debugGroup(container.root));
       container.draw(ctx);
     },
     surface,

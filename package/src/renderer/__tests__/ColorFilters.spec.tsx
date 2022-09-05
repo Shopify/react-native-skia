@@ -25,7 +25,7 @@ describe("Color Filters", () => {
         />
       </Image>
     );
-    processResult(surface, docPath("color-filters/color-matrix2.png"), true);
+    processResult(surface, docPath("color-filters/color-matrix2.png"));
   });
   it("should blend a color", () => {
     const r = width / 2;
@@ -38,6 +38,6 @@ describe("Color Filters", () => {
         </Group>
       </>
     );
-    processResult(surface, docPath("color-filters/color-blend2.png"), true);
+    processResult(surface, docPath("color-filters/color-blend.png"));
   });
 });

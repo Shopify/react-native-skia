@@ -99,6 +99,7 @@ import {
   LinearToSRGBGammaColorFilterNode,
   SRGBToLinearGammaColorFilterNode,
   BlendColorFilterNode,
+  LerpColorFilterNode,
 } from "./paint/ColorFilters";
 import {
   LinearGradientNode,
@@ -112,7 +113,6 @@ import {
   ColorNode,
 } from "./paint/Shaders";
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
-import { LerpColorFilterNode } from './paint/ColorFilters';
 
 export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}

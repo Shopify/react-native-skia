@@ -39,9 +39,7 @@ export const FreezeExample = () => {
   return (
     <Canvas style={{ flex: 1, margin: 50 }} debug>
       <Group origin={{ x: size / 2, y: size / 2 }} transform={transform}>
-        <Freeze key={color} rect={rect(0, 0, 200, 200)}>
-          <Checkerboard color={color} />
-        </Freeze>
+        <Checkerboard color={color} />
       </Group>
       {font && <Text x={20} y={size + 100} text={`n = ${n}`} font={font} />}
     </Canvas>
@@ -64,33 +62,4 @@ const Checkerboard = ({ color }: { color: string }) => {
       ))}
     </>
   );
-};
-
-interface FreezeProps {
-  rect: SkRect;
-  children?: ReactNode | ReactNode[];
-}
-
-const onDraw = createDrawing<FreezeProps>(
-  (ctx, { rect: boundingRect }, node) => {
-    if (node.memoized === null) {
-      const recorder = Skia.PictureRecorder();
-      const canvas = recorder.beginRecording(boundingRect);
-      node.visit({
-        ...ctx,
-        canvas,
-      });
-      const pic = recorder.finishRecordingAsPicture();
-      const shaderPaint = Skia.Paint();
-      shaderPaint.setShader(
-        pic.makeShader(TileMode.Decal, TileMode.Decal, FilterMode.Nearest)
-      );
-      node.memoized = shaderPaint;
-    }
-    ctx.canvas.drawRect(boundingRect, node.memoized as SkPaint);
-  }
-);
-
-export const Freeze = (props: FreezeProps) => {
-  return <skDrawing onDraw={onDraw} skipProcessing {...props} />;
 };
