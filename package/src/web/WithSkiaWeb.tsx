@@ -1,4 +1,4 @@
-import type { ClassicElement, ComponentProps, ComponentType } from "react";
+import type { ComponentProps, ComponentType } from "react";
 import React, { useMemo, lazy, Suspense } from "react";
 import { Platform } from "react-native";
 
@@ -16,8 +16,9 @@ export const WithSkiaWeb = ({
   opts,
 }: WithSkiaProps) => {
   const Inner = useMemo(
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    (): ClassicElement<{}> =>
+    // TODO: investigate
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (): any =>
       lazy(async () => {
         if (Platform.OS === "web") {
           await LoadSkiaWeb(opts);
