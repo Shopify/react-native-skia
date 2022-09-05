@@ -26,6 +26,7 @@ export enum NodeType {
   LinearToSRGBGammaColorFilter = "skLinearToSRGBGammaColorFilter",
   SRGBToLinearGammaColorFilter = "skSRGBToLinearGammaColorFilter",
   LumaColorFilter = "skLumaColorFilter",
+  LerpColorFilter = "skLerpColorFilter",
 
   OffsetImageFilter = "skOffsetImageFilter",
   DisplacementMapImageFilter = "skDisplacementMapImageFilter",
@@ -53,6 +54,8 @@ export enum NodeType {
   TextPath = "skTextPath",
   TextBlob = "skTextBlob",
   Glyphs = "skGlyphs",
+  Picture = "skPicture",
+  ImageSVG = "skImageSVG",
 }
 
 export enum DeclarationType {

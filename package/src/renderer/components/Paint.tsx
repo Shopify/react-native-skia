@@ -1,30 +1,12 @@
-import type { ReactNode } from "react";
-import React, { useRef, useMemo, forwardRef, useImperativeHandle } from "react";
+import React, { useRef, forwardRef } from "react";
 
 import type { SkPaint } from "../../skia/types";
-import type { CustomPaintProps, AnimatedProps } from "../processors";
-import { processPaint } from "../processors";
-import { createDeclaration } from "../nodes";
-import { useCanvas } from "../useCanvas";
+import type { SkiaProps } from "../processors";
+import type { PaintProps } from "../../dom/types";
 
 export const usePaintRef = () => useRef<SkPaint>(null);
 
-export interface PaintProps extends Omit<CustomPaintProps, "paint"> {
-  children?: ReactNode | ReactNode[];
-}
-
-export const Paint = forwardRef<SkPaint, AnimatedProps<PaintProps>>(
-  (props, ref) => {
-    const { Skia } = useCanvas();
-    const paint = useMemo(() => Skia.Paint(), [Skia]);
-    useImperativeHandle(ref, () => paint, [paint]);
-    const onDeclare = useMemo(
-      () =>
-        createDeclaration<PaintProps>((paintProps, children, ctx) =>
-          processPaint(ctx.Skia, paint, ctx.opacity, paintProps, children)
-        ),
-      [paint]
-    );
-    return <skDeclaration onDeclare={onDeclare} {...props} />;
-  }
-);
+export const Paint = forwardRef<SkPaint, SkiaProps<PaintProps>>((props) => {
+  // TODO: add ref
+  return <skPaint {...props} />;
+});

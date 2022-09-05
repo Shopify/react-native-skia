@@ -11,6 +11,8 @@ import type {
   SkFont,
   SkRRect,
   SkTextBlob,
+  SkPicture,
+  SkSVG,
 } from "../../skia/types";
 
 import type {
@@ -41,7 +43,7 @@ export interface PathProps extends DrawingNodeProps {
 }
 
 export interface CustomDrawingNodeProps extends DrawingNodeProps {
-  onDraw: (ctx: DrawingContext) => void;
+  drawing: (ctx: DrawingContext) => void;
 }
 
 export interface LineProps extends DrawingNodeProps {
@@ -80,6 +82,14 @@ export interface VerticesProps extends DrawingNodeProps {
   mode: SkEnum<typeof VertexMode>;
   blendMode?: SkEnum<typeof BlendMode>;
   indices?: number[];
+}
+
+export type ImageSVGProps = RectDef & {
+  svg: SkSVG;
+} & DrawingNodeProps;
+
+export interface PictureProps extends DrawingNodeProps {
+  picture: SkPicture;
 }
 
 export interface PointsProps extends DrawingNodeProps {

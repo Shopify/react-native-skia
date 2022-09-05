@@ -1,4 +1,4 @@
-import { NodeType } from "../dom/types";
+import { LerpColorFilterProps, NodeType } from "../dom/types";
 import type {
   CircleProps,
   DrawingNodeProps,
@@ -44,6 +44,8 @@ import type {
   SweepGradientProps,
   RadialGradientProps,
   ColorProps,
+  PictureProps,
+  ImageSVGProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type { MorphologyImageFilterProps } from "../dom/types/ImageFilters";
@@ -78,6 +80,8 @@ declare global {
       skTextBlob: SkiaProps<TextBlobProps>;
       skGlyphs: SkiaProps<GlyphsProps>;
       skDiffRect: SkiaProps<DiffRectProps>;
+      skPicture: SkiaProps<PictureProps>;
+      skImageSVG: SkiaProps<ImageSVGProps>;
 
       // BlurMaskFilters
       skBlurMaskFilter: SkiaProps<BlurMaskFilterProps>;
@@ -97,6 +101,7 @@ declare global {
       skLinearToSRGBGammaColorFilter: SkiaProps<void>;
       skSRGBToLinearGammaColorFilter: SkiaProps<void>;
       skLumaColorFilter: SkiaProps<void>;
+      skLerpColorFilter: SkiaProps<LerpColorFilterProps>;
 
       // Shaders
       skShader: SkiaProps<ShaderProps>;
@@ -168,6 +173,10 @@ const _createNode = (
       return Sk.Glyphs(props);
     case NodeType.DiffRect:
       return Sk.DiffRect(props);
+    case NodeType.Picture:
+      return Sk.Picture(props);
+    case NodeType.ImageSVG:
+      return Sk.ImageSVG(props);
     // Mask Filter
     case NodeType.BlurMaskFilter:
       return Sk.BlurMaskFilter(props);
@@ -191,6 +200,8 @@ const _createNode = (
       return Sk.MatrixColorFilter(props);
     case NodeType.BlendColorFilter:
       return Sk.BlendColorFilter(props);
+    case NodeType.LerpColorFilter:
+      return Sk.LerpColorFilter(props);
     case NodeType.LumaColorFilter:
       return Sk.LumaColorFilter();
     case NodeType.LinearToSRGBGammaColorFilter:

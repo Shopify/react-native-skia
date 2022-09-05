@@ -1,26 +1,24 @@
-import React from "react";
 import type { ReactNode } from "react";
 
-import { isImageFilter, isColorFilter } from "../../skia/types";
-import { createDeclaration } from "../nodes/Declaration";
-import type { AnimatedProps } from "../processors/Animations/Animations";
+import type { SkiaProps } from "../processors/Animations/Animations";
 
 export interface ComposeProps {
   children: ReactNode | ReactNode[];
 }
 
-const onDeclare = createDeclaration((_, children, { Skia }) => {
-  const [inner, outer] = children;
-  if (isColorFilter(outer) && isColorFilter(inner)) {
-    return Skia.ColorFilter.MakeCompose(outer, inner);
-  } else if (isImageFilter(outer) && isImageFilter(inner)) {
-    return Skia.ImageFilter.MakeCompose(outer, inner);
-  }
-  throw new Error(
-    "ComposeFilter can only compose ColorFilters and ImageFilters"
-  );
-});
+// const onDeclare = createDeclaration((_, children, { Skia }) => {
+//   const [inner, outer] = children;
+//   if (isColorFilter(outer) && isColorFilter(inner)) {
+//     return Skia.ColorFilter.MakeCompose(outer, inner);
+//   } else if (isImageFilter(outer) && isImageFilter(inner)) {
+//     return Skia.ImageFilter.MakeCompose(outer, inner);
+//   }
+//   throw new Error(
+//     "ComposeFilter can only compose ColorFilters and ImageFilters"
+//   );
+// });
 
-export const Compose = (props: AnimatedProps<ComposeProps>) => {
-  return <skDeclaration onDeclare={onDeclare} {...props} />;
+// TODO: implement
+export const Compose = (_props: SkiaProps<ComposeProps>) => {
+  throw new Error("Not implemented yet");
 };

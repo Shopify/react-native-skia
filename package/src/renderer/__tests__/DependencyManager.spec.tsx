@@ -1,12 +1,37 @@
 import { DependencyManager } from "../DependencyManager";
-import { Node } from "../nodes";
-import type { SkJSIInstance } from "../../skia";
-import type { DrawingContext } from "../DrawingContext";
 import { Selector } from "../../values";
 import { RNSkValue } from "../../values/web/RNSkValue";
+import type { Node } from "../../dom/types";
+import { NodeKind, NodeType } from "../../dom/types/NodeType";
 
-class TestNode<P> extends Node<P> {
-  draw(_ctx: DrawingContext): void | (SkJSIInstance<string> | null) {}
+class TestNode<P> implements Node<P> {
+  type = NodeType.Circle;
+  kind = NodeKind.Drawing;
+
+  constructor(public mgr: DependencyManager, public props: P) {}
+  setProps(props: P) {
+    this.props = props;
+  }
+
+  setProp<K extends keyof P>(name: K, v: P[K]) {
+    this.props[name] = v;
+  }
+
+  isPaint() {
+    return false;
+  }
+  isGroup() {
+    return false;
+  }
+  isDeclaration() {
+    return false;
+  }
+  isNestedDeclaration() {
+    return false;
+  }
+  isDrawing() {
+    return false;
+  }
 }
 
 describe("DependencyManager", () => {

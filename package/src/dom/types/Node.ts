@@ -15,6 +15,7 @@ export interface Node<P> {
   type: NodeType;
   kind: NodeKind;
   setProps(props: P): void;
+  setProp<K extends keyof P>(name: K, v: P[K]): void;
 
   isPaint(): this is PaintNode;
   isGroup(): this is GroupNode;

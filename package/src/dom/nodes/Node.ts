@@ -33,6 +33,10 @@ export abstract class JsiNode<P> implements Node<P> {
     this.props = props;
   }
 
+  setProp<K extends keyof P>(name: K, v: P[K]) {
+    this.props[name] = v;
+  }
+
   isPaint(): this is PaintNode {
     return this.kind === NodeKind.Paint;
   }
@@ -101,7 +105,17 @@ export abstract class JsiDeclarationNode<
         "Setting props on a declaration not attached to a drawing"
       );
     }
-    this.props = props;
+    super.setProps(props);
+    this.invalidate();
+  }
+
+  setProp<K extends keyof P>(name: K, v: P[K]) {
+    if (!this.invalidate) {
+      throw new Error(
+        "Setting props on a declaration not attached to a drawing"
+      );
+    }
+    super.setProp(name, v);
     this.invalidate();
   }
 

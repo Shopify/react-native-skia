@@ -12,3 +12,6 @@ export * from "./VerticesNode";
 export * from "./CustomDrawingNode";
 export * from "./DrawingNode";
 export * from "./Text";
+export * from "./PictureNode";
+export * from "./DiffRectNode";
+export * from "./ImageSVG";

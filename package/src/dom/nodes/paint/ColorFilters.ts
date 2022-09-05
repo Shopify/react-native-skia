@@ -8,6 +8,7 @@ import type {
 import { DeclarationType, NodeType } from "../../types";
 import { processColor } from "../datatypes";
 import { enumKey } from "../datatypes/Enum";
+import { LerpColorFilterProps } from '../../types/ColorFilters';
 
 export class MatrixColorFilterNode extends JsiNestedDeclarationNode<
   MatrixColorFilterProps,
@@ -105,5 +106,20 @@ export class LumaColorFilterNode extends JsiNestedDeclarationNode<
   get() {
     // TODO: do composition
     return this.Skia.ColorFilter.MakeLumaColorFilter();
+  }
+}
+
+
+export class LerpColorFilterNode extends JsiNestedDeclarationNode<
+  LerpColorFilterProps,
+  SkColorFilter
+> {
+  constructor(Skia: Skia, props: LerpColorFilterProps) {
+    super(Skia, DeclarationType.ColorFilter, NodeType.LerpColorFilter, props);
+  }
+
+  get() {
+    const { t } = this.props;
+    return this.Skia.ColorFilter.MakeLerp(t, this.children[0].get(), this.children[1].get());
   }
 }

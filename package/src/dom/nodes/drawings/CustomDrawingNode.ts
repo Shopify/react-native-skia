@@ -12,6 +12,6 @@ export class CustomDrawingNode extends JsiDrawingNode<CustomDrawingNodeProps> {
   onPropChange() {}
 
   draw(ctx: DrawingContext) {
-    this.props.onDraw(ctx);
+    this.props.drawing(ctx);
   }
 }

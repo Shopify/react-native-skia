@@ -27,6 +27,11 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
     this.onPropChange();
   }
 
+  setProp<K extends keyof P>(name: K, v: P[K]) {
+    super.setProp(name, v);
+    this.onPropChange();
+  }
+
   addPaint(paintNode: JsiPaintNode) {
     this.paints.push(paintNode);
   }

@@ -33,6 +33,9 @@ import type {
   RadialGradientProps,
   FractalNoiseProps,
   ColorProps,
+  PictureProps,
+  ImageSVGProps,
+  LerpColorFilterProps,
 } from "../types";
 import type { DrawingNodeProps } from "../types/Node";
 import type {
@@ -68,6 +71,9 @@ import {
   TextPathNode,
   TextBlobNode,
   GlyphsNode,
+  DiffRectNode,
+  PictureNode,
+  ImageSVGNode,
 } from "./drawings";
 import { JsiGroupNode } from "./GroupNode";
 import {
@@ -105,8 +111,8 @@ import {
   FractalNoiseNode,
   ColorNode,
 } from "./paint/Shaders";
-import { DiffRectNode } from "./drawings/DiffRectNode";
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
+import { LerpColorFilterNode } from './paint/ColorFilters';
 
 export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}
@@ -188,6 +194,14 @@ export class JsiSkDOM implements SkDOM {
     return new DiffRectNode(this.Skia, props);
   }
 
+  Picture(props: PictureProps) {
+    return new PictureNode(this.Skia, props);
+  }
+
+  ImageSVG(props: ImageSVGProps) {
+    return new ImageSVGNode(this.Skia, props);
+  }
+
   // BlurMaskFilters
   BlurMaskFilter(props: BlurMaskFilterProps) {
     return new BlurMaskFilterNode(this.Skia, props);
@@ -241,6 +255,10 @@ export class JsiSkDOM implements SkDOM {
 
   SRGBToLinearGammaColorFilter() {
     return new SRGBToLinearGammaColorFilterNode(this.Skia);
+  }
+
+  LerpColorFilter(props: LerpColorFilterProps) {
+    return new LerpColorFilterNode(this.Skia, props);
   }
 
   // Shaders

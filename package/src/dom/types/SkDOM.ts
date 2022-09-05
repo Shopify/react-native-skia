@@ -23,6 +23,7 @@ import type {
 import type {
   BlendColorFilterProps,
   MatrixColorFilterProps,
+  LerpColorFilterProps,
 } from "./ColorFilters";
 import type {
   ImageProps,
@@ -41,6 +42,8 @@ import type {
   TextPathProps,
   TextBlobProps,
   GlyphsProps,
+  PictureProps,
+  ImageSVGProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -101,6 +104,8 @@ export interface SkDOM {
   TextBlob(props: TextBlobProps): DrawingNode<TextBlobProps>;
   Glyphs(props: GlyphsProps): DrawingNode<GlyphsProps>;
   DiffRect(props: DiffRectProps): DrawingNode<DiffRectProps>;
+  Picture(props: PictureProps): DrawingNode<PictureProps>;
+  ImageSVG(props: ImageSVGProps): DrawingNode<ImageSVGProps>;
 
   // BlurMaskFilters
   BlurMaskFilter(
@@ -140,6 +145,9 @@ export interface SkDOM {
   LumaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
   LinearToSRGBGammaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
   SRGBToLinearGammaColorFilter(): NestedDeclarationNode<null, SkColorFilter>;
+  LerpColorFilter(
+    props: LerpColorFilterProps
+  ): NestedDeclarationNode<LerpColorFilterProps, SkColorFilter>;
 
   // Shaders
   Shader(props: ShaderProps): NestedDeclarationNode<ShaderProps, SkShader>;
