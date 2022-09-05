@@ -1,3 +1,5 @@
+import type { SkDOM } from "./SkDOM";
+
 export * from "./DrawingContext";
 export * from "./Node";
 export * from "./NodeType";
@@ -9,3 +11,7 @@ export * from "./ColorFilters";
 export * from "./MaskFilters";
 export * from "./PathEffects";
 export * from "./Shaders";
+
+declare global {
+  var Sk: SkDOM;
+}

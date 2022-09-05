@@ -1,19 +1,12 @@
-import { JsiSkDOM } from "../../dom/nodes";
-import type { SkDOM } from "../../dom/types";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import { Skia } from "../types";
 import { JsiSkApi } from "../web";
 
 let Skia: ReturnType<typeof JsiSkApi>;
 
-declare global {
-  var Sk: SkDOM;
-}
-
 beforeAll(async () => {
   await LoadSkiaWeb();
   Skia = JsiSkApi(global.CanvasKit);
-  global.Sk = new JsiSkDOM(Skia);
 });
 
 export const setupSkia = (width = 256, height = 256) => {

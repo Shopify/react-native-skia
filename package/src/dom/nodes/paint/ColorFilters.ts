@@ -8,7 +8,7 @@ import type {
 import { DeclarationType, NodeType } from "../../types";
 import { processColor } from "../datatypes";
 import { enumKey } from "../datatypes/Enum";
-import { LerpColorFilterProps } from '../../types/ColorFilters';
+import type { LerpColorFilterProps } from "../../types/ColorFilters";
 
 export class MatrixColorFilterNode extends JsiNestedDeclarationNode<
   MatrixColorFilterProps,
@@ -109,7 +109,6 @@ export class LumaColorFilterNode extends JsiNestedDeclarationNode<
   }
 }
 
-
 export class LerpColorFilterNode extends JsiNestedDeclarationNode<
   LerpColorFilterProps,
   SkColorFilter
@@ -120,6 +119,10 @@ export class LerpColorFilterNode extends JsiNestedDeclarationNode<
 
   get() {
     const { t } = this.props;
-    return this.Skia.ColorFilter.MakeLerp(t, this.children[0].get(), this.children[1].get());
+    return this.Skia.ColorFilter.MakeLerp(
+      t,
+      this.children[0].get(),
+      this.children[1].get()
+    );
   }
 }

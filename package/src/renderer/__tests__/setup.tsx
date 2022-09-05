@@ -142,5 +142,14 @@ export const mountCanvas = (element: ReactNode) => {
     center: Skia.Point(width / 2, height / 2),
     Skia,
   };
-  return { draw: () => container.draw(ctx), surface, container };
+  return {
+    draw: () => {
+      //console.log(debugGroup(container.root));
+      container.draw(ctx);
+    },
+    surface,
+    container,
+  };
 };
+
+//const debugGroup = (node: GroupNode) => `<skGroup>${node.}</skGroup>`;
