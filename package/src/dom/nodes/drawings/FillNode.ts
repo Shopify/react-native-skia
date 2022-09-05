@@ -9,8 +9,6 @@ export class FillNode extends JsiDrawingNode<DrawingNodeProps> {
     super(Skia, NodeType.Fill, props);
   }
 
-  onPropChange(): void {}
-
   draw({ canvas, paint }: DrawingContext) {
     canvas.drawPaint(paint);
   }

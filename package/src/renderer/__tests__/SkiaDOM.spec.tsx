@@ -41,6 +41,6 @@ describe("Test introductionary examples from our documentation", () => {
     const circle = child as DrawingNode<DrawingNodeProps>;
     expect(circle).toBeDefined();
     expect(circle.type).toBe(NodeType.Circle);
-    expect(circle.getPaints().length).toBe(4);
+    expect(circle.getPaints().length).toBe(3);
   });
 });

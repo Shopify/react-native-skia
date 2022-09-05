@@ -1,6 +1,6 @@
 import type { Skia } from "../../../skia/types";
 import { ClipOp } from "../../../skia/types";
-import { JsiPaintNode } from "../paint";
+import type { JsiPaintNode } from "../paint";
 import type {
   DrawingContext,
   DrawingNode,
@@ -18,10 +18,7 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
 
   constructor(Skia: Skia, type: NodeType, props: P) {
     super(Skia, props, NodeKind.Drawing, type);
-    if (!props.paint) {
-      // TODO: only do this is custom paint props are present
-      this.paints.push(new JsiPaintNode(Skia));
-    }
+    this.onPropChange();
   }
 
   setProps(props: P) {
@@ -60,10 +57,9 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
   drawPaints(ctx: DrawingContext) {
     if (this.props.paint) {
       this.draw({ ...ctx, paint: this.props.paint });
+    } else {
+      this.draw(ctx);
     }
-    // if (this.paints.length === 0) {
-    //   this.draw(ctx);
-    // }
     this.paints.forEach((paintNode) => {
       const paint = paintNode.concat(ctx.paint, ctx.opacity);
       this.draw({ ...ctx, paint });

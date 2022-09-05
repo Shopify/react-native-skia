@@ -7,6 +7,8 @@ import {
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
+import type { JsiGroupNode } from "../nodes/GroupNode";
+import type { GroupProps } from "../types";
 
 describe("Drawings", () => {
   it("Should display a simple shader", () => {
@@ -111,7 +113,56 @@ half4 main(float2 xy) {
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
     filter.setProp("uniforms", { r: 25 });
+    const jsiRoot = root as JsiGroupNode<GroupProps>;
+    expect(jsiRoot.paint).toBeDefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((jsiRoot.paint! as any).cache).toBe(null);
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader2.png");
   });
+
+  //   it("Should have always the correct state 2", () => {
+  //     const { surface, canvas } = setupSkia(width, height);
+  //     const { Skia, processTransform2d } = importSkia();
+  //     const image = loadImage("skia/__tests__/assets/oslo.jpg");
+  //     const source = Skia.RuntimeEffect.Make(`
+  // uniform shader image;
+  // uniform float r;
+
+  // half4 main(float2 xy) {
+  //   xy.x += sin(xy.y / r) * 4;
+  //   return image.eval(xy).rbga;
+  // }`)!;
+  //     expect(source).toBeTruthy();
+  //     const rects = fitRects(
+  //       "cover",
+  //       { x: 0, y: 0, width: image.width(), height: image.height() },
+  //       Skia.XYWHRect(0, 0, width, height)
+  //     );
+  //     const matrix = processTransform2d(rect2rect(rects.src, rects.dst));
+  //     const imageShader = Sk.ImageShader({
+  //       image,
+  //       fit: "none",
+  //       tx: "decal",
+  //       ty: "decal",
+  //       fm: "nearest",
+  //       mm: "nearest",
+  //       matrix,
+  //     });
+  //     const filter = Sk.Shader({
+  //       source,
+  //       uniforms: { r: 50 },
+  //     });
+  //     filter.addChild(imageShader);
+  //     const root = Sk.Group();
+  //     const fill = Sk.Fill();
+  //     fill.addEffect(filter);
+  //     root.addChild(fill);
+  //     const ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
+  //     root.render(ctx);
+  //     processResult(surface, "snapshots/drawings/nested-shader.png");
+  //     filter.setProp("uniforms", { r: 25 });
+  //     root.render(ctx);
+  //     processResult(surface, "snapshots/drawings/nested-shader2.png");
+  //   });
 });
