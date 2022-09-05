@@ -37,16 +37,10 @@ describe("Test introductionary examples from our documentation", () => {
     expect(root.getChildren().length).toBe(1);
     const child = root.getChildren()[0]!;
     expect(child).toBeDefined();
-    expect(child.type).toBe(NodeType.Group);
-    const group = child as GroupNode;
-    // expect(group.getPaint()).not.toBeDefined();
-    expect(group.getChildren().length).toBe(1);
-    const circle = (
-      child as GroupNode
-    ).getChildren()[0]! as DrawingNode<DrawingNodeProps>;
+    expect(child.type).toBe(NodeType.Circle);
+    const circle = child as DrawingNode<DrawingNodeProps>;
     expect(circle).toBeDefined();
     expect(circle.type).toBe(NodeType.Circle);
-    expect(circle.getPaints().length).toBe(3);
-    // expect((child as GroupNode).getChildren().length).toBe(3);
+    expect(circle.getPaints().length).toBe(4);
   });
 });

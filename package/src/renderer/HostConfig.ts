@@ -43,7 +43,7 @@ type SkiaHostConfig = HostConfig<
 >;
 
 const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
-  console.log(`appendNode ${parent.type} ${child.type}`);
+  //console.log(`appendNode ${parent.type} ${child.type}`);
   if (parent.isGroup()) {
     if (child.isDeclaration()) {
       parent.addEffect(child);

@@ -107,13 +107,10 @@ half4 main(float2 xy) {
     const root = Sk.Group();
     root.addEffect(filter);
     root.addChild(Sk.Fill());
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
-    filter.setProps({
-      source,
-      uniforms: { r: 25 },
-    });
+    filter.setProp("uniforms", { r: 25 });
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader2.png");
   });
