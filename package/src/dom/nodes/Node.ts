@@ -26,13 +26,9 @@ export abstract class JsiNode<P> implements Node<P> {
     protected props: P
   ) {}
 
-  setProps(props: P) {
-    this.props = props;
-  }
+  abstract setProps(props: P): void;
 
-  setProp<K extends keyof P>(name: K, v: P[K]) {
-    this.props[name] = v;
-  }
+  abstract setProp<K extends keyof P>(name: K, v: P[K]): void;
 
   getProps() {
     return this.props;
@@ -95,7 +91,7 @@ export abstract class JsiDeclarationNode<
         "Setting props on a declaration not attached to a drawing"
       );
     }
-    super.setProps(props);
+    this.props = props;
     this.invalidate();
   }
 
@@ -105,7 +101,7 @@ export abstract class JsiDeclarationNode<
         "Setting props on a declaration not attached to a drawing"
       );
     }
-    super.setProp(name, v);
+    this.props[name] = v;
     this.invalidate();
   }
 

@@ -21,7 +21,7 @@ type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
 type PublicInstance = Instance;
 type HostContext = null;
-type UpdatePayload = true;
+type UpdatePayload = Container;
 type ChildSet = unknown;
 type TimeoutHandle = NodeJS.Timeout;
 type NoTimeout = -1;
@@ -72,7 +72,7 @@ const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
     throw new Error(`Cannot append ${child.type} to ${parent.type}`);
   }
 };
-
+// TODO: handle node unsubscription
 const removeNode = (parent: Node<unknown>, child: Node<unknown>) => {
   if (parent.isDrawing() && child.isPaint()) {
     parent.removePaint(child);
@@ -179,13 +179,16 @@ export const skHostConfig: SkiaHostConfig = {
 
   createInstance(
     type,
-    props,
+    pristineProps,
     container,
     _hostContext,
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    return createNode(container, type, props);
+    const props = { ...pristineProps };
+    const node = createNode(container, type, props);
+    container.depMgr.subscribeNode(node, props);
+    return node;
   },
 
   appendInitialChild(parentInstance, child) {
@@ -233,7 +236,7 @@ export const skHostConfig: SkiaHostConfig = {
     type,
     oldProps,
     newProps,
-    _rootContainerInstance,
+    rootContainerInstance,
     _hostContext
   ) => {
     debug("prepareUpdate");
@@ -242,12 +245,12 @@ export const skHostConfig: SkiaHostConfig = {
       return null;
     }
     debug("update ", type);
-    return true;
+    return rootContainerInstance;
   },
 
   commitUpdate(
     instance,
-    _updatePayload,
+    updatePayload,
     type,
     prevProps,
     nextProps,
@@ -257,7 +260,10 @@ export const skHostConfig: SkiaHostConfig = {
     if (shallowEq(prevProps, nextProps)) {
       return;
     }
-    instance.setProps(nextProps);
+    const props = { ...nextProps };
+    updatePayload.depMgr.unsubscribeNode(instance);
+    instance.setProps(props);
+    updatePayload.depMgr.subscribeNode(instance, props);
   },
 
   commitTextUpdate: (

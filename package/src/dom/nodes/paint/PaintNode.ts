@@ -30,6 +30,16 @@ export class JsiPaintNode extends JsiNode<PaintProps> implements PaintNode {
     super(Skia, NodeKind.Paint, NodeType.Paint, props);
   }
 
+  setProps(props: PaintProps) {
+    this.props = props;
+    this.cache = null;
+  }
+
+  setProp<K extends keyof PaintProps>(name: K, v: PaintProps[K]) {
+    this.props[name] = v;
+    this.cache = null;
+  }
+
   addShader(shader: DeclarationNode<unknown, SkShader>) {
     this.shader = shader;
     this.shader.setInvalidate(() => (this.cache = null));

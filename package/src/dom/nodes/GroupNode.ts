@@ -32,7 +32,12 @@ export class JsiGroupNode<P extends GroupProps>
   }
 
   setProps(props: P): void {
-    super.setProps(props);
+    this.props = props;
+    this.onPropChange();
+  }
+
+  setProp<K extends keyof P>(name: K, v: P[K]) {
+    this.props[name] = v;
     this.onPropChange();
   }
 

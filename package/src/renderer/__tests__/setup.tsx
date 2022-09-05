@@ -150,5 +150,3 @@ export const mountCanvas = (element: ReactNode) => {
     container,
   };
 };
-
-//const debugGroup = (node: GroupNode) => `<skGroup>${node.}</skGroup>`;
