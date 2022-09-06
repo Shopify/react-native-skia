@@ -4,7 +4,7 @@ import type { MorphologyImageFilterProps } from "../../../dom/types";
 import type { SkiaProps } from "../../processors";
 
 export const Morphology = (props: SkiaProps<MorphologyImageFilterProps>) => {
-  return <skMorphology {...props} />;
+  return <skMorphologyImageFilter {...props} />;
 };
 
 Morphology.defaultProps = {

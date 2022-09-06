@@ -218,7 +218,15 @@ export abstract class JsiRenderNode<P extends GroupProps>
   private computeMatrix() {
     const { transform, origin, matrix } = this.props;
     if (matrix) {
-      this.matrix = matrix;
+      if (origin) {
+        const m = this.Skia.Matrix();
+        m.translate(origin.x, origin.y);
+        m.concat(matrix);
+        m.translate(-origin.x, -origin.y);
+        this.matrix = m;
+      } else {
+        this.matrix = matrix;
+      }
     } else if (transform) {
       const m = this.Skia.Matrix();
       if (origin) {

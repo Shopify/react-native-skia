@@ -95,7 +95,7 @@ declare global {
       skDropShadowImageFilter: SkiaProps<DropShadowImageFilterProps>;
       skDisplacementMap: SkiaProps<DisplacementMapImageFilterProps>;
       skRuntimeShaderImageFilter: SkiaProps<RuntimeShaderImageFilterProps>;
-      skMorphology: SkiaProps<MorphologyImageFilterProps>;
+      skMorphologyImageFilter: SkiaProps<MorphologyImageFilterProps>;
 
       // ColorFilters
       skMatrixColorFilter: SkiaProps<MatrixColorFilterProps>;

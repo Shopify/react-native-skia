@@ -7,6 +7,7 @@ import type {
   RenderNode,
 } from "../types";
 
+import { JsiDeclarationNode } from "./Node";
 import { PaintNode } from "./PaintNode";
 import { isSkPaint, JsiRenderNode } from "./RenderNode";
 
@@ -32,7 +33,7 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
   }
 
   addChild(child: Node<unknown>): void {
-    if (!(child instanceof PaintNode)) {
+    if (!(child instanceof JsiDeclarationNode)) {
       throw new Error(`Cannot add ${child.type} to ${this.type}`);
     }
     super.addChild(child);
@@ -40,7 +41,7 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
-    if (!(child instanceof PaintNode)) {
+    if (!(child instanceof JsiDeclarationNode)) {
       throw new Error(`Cannot add ${child.type} to ${this.type}`);
     }
     super.insertChildBefore(child, before);
