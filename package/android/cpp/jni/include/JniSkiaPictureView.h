@@ -69,8 +69,8 @@ namespace RNSkia {
                                  makeNativeMethod("updateTouchPoints",
                                                   JniSkiaPictureView::updateTouchPoints),
                                  makeNativeMethod("initHybrid", JniSkiaPictureView::initHybrid),
-                                 makeNativeMethod("registerView", JniSkiaDrawView::registerView),
-                                 makeNativeMethod("unregisterView", JniSkiaDrawView::unregisterView)
+                                 makeNativeMethod("registerView", JniSkiaPictureView::registerView),
+                                 makeNativeMethod("unregisterView", JniSkiaPictureView::unregisterView)
                          });
         }
 
