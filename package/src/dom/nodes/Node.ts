@@ -367,6 +367,10 @@ export class JsiPaintNode
 
   constructor(Skia: Skia, props: PaintProps = {}) {
     super(Skia, DeclarationType.Paint, NodeType.Paint, props);
+    this.setInvalidate(() => {
+      // TODO: this should do nothing in PaintNode: double check
+      //console.log("invalidate paint");
+    });
   }
 
   setProps(props: PaintProps) {
