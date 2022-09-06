@@ -2,8 +2,7 @@ import type { Skia } from "../../../skia/types";
 import type { DrawingContext, ImageSVGProps } from "../../types";
 import { NodeType } from "../../types";
 import { processRect } from "../datatypes";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class ImageSVGNode extends JsiDrawingNode<ImageSVGProps> {
   constructor(Skia: Skia, props: ImageSVGProps) {

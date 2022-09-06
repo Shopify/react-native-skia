@@ -2,8 +2,7 @@ import type { Skia, Vector } from "../../../skia/types";
 import type { CircleProps, DrawingContext } from "../../types";
 import { NodeType } from "../../types";
 import { processCircle } from "../datatypes";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class CircleNode extends JsiDrawingNode<CircleProps> {
   c?: Vector;

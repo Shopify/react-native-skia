@@ -3,8 +3,7 @@ import type { SkPath, Skia } from "../../../skia/types";
 import type { DrawingContext, PathProps } from "../../types";
 import { NodeType } from "../../types";
 import { enumKey, processPath } from "../datatypes";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class PathNode extends JsiDrawingNode<PathProps> {
   private path: SkPath | null = null;

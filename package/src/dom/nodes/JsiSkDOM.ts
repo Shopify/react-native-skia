@@ -112,7 +112,7 @@ import {
 } from "./paint/Shaders";
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
 import { GroupNode } from "./GroupNode";
-import { JsiPaintNode } from "./Node";
+import { PaintNode } from "./PaintNode";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private Skia: Skia) {}
@@ -122,7 +122,7 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Paint(props: PaintProps) {
-    return new JsiPaintNode(this.Skia, props);
+    return new PaintNode(this.Skia, props);
   }
 
   // Drawings

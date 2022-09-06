@@ -3,8 +3,7 @@ import type { SkRect } from "../../../skia/types/Rect";
 import type { DrawingContext, RectProps } from "../../types";
 import { NodeType } from "../../types";
 import { processRect } from "../datatypes";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class RectNode extends JsiDrawingNode<RectProps> {
   rect?: SkRect;

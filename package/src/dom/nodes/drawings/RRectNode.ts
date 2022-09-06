@@ -2,8 +2,7 @@ import type { Skia, SkRRect } from "../../../skia/types";
 import type { DrawingContext, RoundedRectProps } from "../../types";
 import { NodeType } from "../../types";
 import { processRRect } from "../datatypes";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class RRectNode extends JsiDrawingNode<RoundedRectProps> {
   rect?: SkRRect;

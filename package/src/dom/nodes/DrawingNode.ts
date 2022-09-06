@@ -1,12 +1,14 @@
-import type { Skia } from "../../../skia/types";
+import type { Skia } from "../../skia/types";
 import type {
   DrawingContext,
   DrawingNodeProps,
   Node,
   NodeType,
   RenderNode,
-} from "../../types";
-import { JsiPaintNode, JsiRenderNode } from "../Node";
+} from "../types";
+
+import { PaintNode } from "./PaintNode";
+import { JsiRenderNode } from "./RenderNode";
 
 export abstract class JsiDrawingNode<P extends DrawingNodeProps>
   extends JsiRenderNode<P>
@@ -17,14 +19,14 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
   }
 
   addChild(child: Node<unknown>): void {
-    if (!(child instanceof JsiPaintNode)) {
+    if (!(child instanceof PaintNode)) {
       throw new Error(`Cannot add ${child.type} to ${this.type}`);
     }
     super.addChild(child);
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
-    if (!(child instanceof JsiPaintNode)) {
+    if (!(child instanceof PaintNode)) {
       throw new Error(`Cannot add ${child.type} to ${this.type}`);
     }
     super.insertChildBefore(child, before);
@@ -37,7 +39,7 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
       this.draw(ctx);
     }
     this.children().map((child) => {
-      if (child instanceof JsiPaintNode) {
+      if (child instanceof PaintNode) {
         const paint = child.get();
         this.draw({ ...ctx, paint });
       }

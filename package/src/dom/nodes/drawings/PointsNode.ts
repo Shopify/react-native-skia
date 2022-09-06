@@ -3,8 +3,7 @@ import { PointMode } from "../../../skia/types";
 import type { DrawingContext, PointsProps } from "../../types";
 import { NodeType } from "../../types";
 import { enumKey } from "../datatypes";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class PointsNode extends JsiDrawingNode<PointsProps> {
   constructor(Skia: Skia, props: PointsProps) {

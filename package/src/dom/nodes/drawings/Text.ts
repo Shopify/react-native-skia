@@ -8,8 +8,7 @@ import type {
 import { NodeType } from "../../types";
 import { processPath } from "../datatypes";
 import type { GlyphsProps } from "../../types/Drawings";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class TextNode extends JsiDrawingNode<TextProps> {
   constructor(Skia: Skia, props: TextProps) {

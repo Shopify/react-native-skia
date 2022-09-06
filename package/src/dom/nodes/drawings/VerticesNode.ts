@@ -3,8 +3,7 @@ import { VertexMode, BlendMode } from "../../../skia/types";
 import type { DrawingContext, VerticesProps } from "../../types";
 import { NodeType } from "../../types";
 import { enumKey, processColor } from "../datatypes";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class VerticesNode extends JsiDrawingNode<VerticesProps> {
   vertices?: SkVertices;

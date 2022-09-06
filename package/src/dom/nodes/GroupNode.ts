@@ -3,7 +3,7 @@ import type { DrawingContext, GroupProps } from "../types";
 import { NodeType } from "../types";
 import type { RenderNode } from "../types/Node";
 
-import { JsiRenderNode } from "./Node";
+import { JsiRenderNode } from "./RenderNode";
 
 export class GroupNode
   extends JsiRenderNode<GroupProps>

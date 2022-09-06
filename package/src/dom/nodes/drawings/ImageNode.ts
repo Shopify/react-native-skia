@@ -2,8 +2,7 @@ import type { Skia, SkRect } from "../../../skia/types";
 import type { DrawingContext, ImageProps } from "../../types";
 import { NodeType } from "../../types";
 import { fitRects, processRect } from "../datatypes";
-
-import { JsiDrawingNode } from "./DrawingNode";
+import { JsiDrawingNode } from "../DrawingNode";
 
 export class ImageNode extends JsiDrawingNode<ImageProps> {
   src?: SkRect;
