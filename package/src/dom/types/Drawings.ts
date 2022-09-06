@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+
 import type {
   FillType,
   SkImage,
@@ -26,9 +28,10 @@ import type {
   SkEnum,
 } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
+import type { DeclarationNode } from "./Node";
 
 export interface DrawingNodeProps extends GroupProps {
-  paint?: SkPaint;
+  paint?: SkPaint | RefObject<DeclarationNode<unknown, SkPaint>>;
 }
 
 export type ImageProps = DrawingNodeProps &

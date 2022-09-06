@@ -23,6 +23,7 @@ import type {
   DrawingContext,
   NodeType,
   Node,
+  DeclarationNode,
 } from "../types";
 import { DeclarationType } from "../types";
 
@@ -31,8 +32,9 @@ import { JsiNode, JsiDeclarationNode } from "./Node";
 import type { PaintContext } from "./PaintContext";
 import { enumKey } from "./datatypes/Enum";
 
-const isSkPaint = (obj: RefObject<SkPaint> | SkPaint): obj is SkPaint =>
-  "__typename__" in obj && obj.__typename__ === "Paint";
+export const isSkPaint = (
+  obj: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint
+): obj is SkPaint => "__typename__" in obj && obj.__typename__ === "Paint";
 
 const concatPaint = (
   parent: SkPaint,
@@ -310,7 +312,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
         } else if (isSkPaint(layer)) {
           canvas.saveLayer(layer);
         } else {
-          canvas.saveLayer(layer.current ?? undefined);
+          canvas.saveLayer(layer.current ? layer.current.get() : undefined);
         }
       } else {
         canvas.save();

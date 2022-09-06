@@ -12,14 +12,13 @@ import { docPath, processResult } from "../../../../__tests__/setup";
 
 const TestPaintAssignment = () => {
   const { usePaintRef } = importSkia();
-  // const r = width / 2;
+  const r = width / 2;
   const paint = usePaintRef();
-  // TODO: implement/fix
   return (
     <>
       <Paint ref={paint} color="lightblue" />
       {/* We can assign the ref to any shape. This will be handy in advanced use-case */}
-      {/* <Circle paint={paint} cx={r} cy={r} r={r} /> */}
+      <Circle paint={paint} cx={r} cy={r} r={r} />
     </>
   );
 };

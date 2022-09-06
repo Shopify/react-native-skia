@@ -1,17 +1,13 @@
-import React, { useRef, forwardRef, useMemo, useImperativeHandle } from "react";
+import React, { useRef, forwardRef } from "react";
 
-import type { SkPaint } from "../../skia/types";
 import type { SkiaProps } from "../processors";
-import type { PaintProps } from "../../dom/types";
-import { useCanvas } from "../useCanvas";
+import type { DrawingNodeProps } from "../../dom/types";
+import type { PaintNode } from "../../dom/nodes/PaintNode";
 
-export const usePaintRef = () => useRef<SkPaint>(null);
+export const usePaintRef = () => useRef<PaintNode>(null);
 
-export const Paint = forwardRef<SkPaint, SkiaProps<PaintProps>>(
+export const Paint = forwardRef<PaintNode, SkiaProps<DrawingNodeProps>>(
   (props, ref) => {
-    const { Skia } = useCanvas();
-    const paint = useMemo(() => Skia.Paint(), [Skia]);
-    useImperativeHandle(ref, () => paint, [paint]);
-    return <skPaint paint={paint} {...props} />;
+    return <skPaint ref={ref} {...props} />;
   }
 );

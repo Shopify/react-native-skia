@@ -15,6 +15,8 @@ import type {
   Vector,
 } from "../../skia/types";
 
+import type { DeclarationNode } from "./Node";
+
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export type PathDef = string | SkPath;
@@ -70,9 +72,6 @@ export interface TransformProps {
 }
 
 export interface PaintProps extends ChildrenProps {
-  // TODO: check because DrawingProps is also paint?: SkPaint
-  // We should propably remove this
-  paint?: SkPaint;
   color?: Color;
   strokeWidth?: number;
   blendMode?: SkEnum<typeof BlendMode>;
@@ -87,5 +86,5 @@ export interface PaintProps extends ChildrenProps {
 export interface GroupProps extends PaintProps, TransformProps {
   clip?: ClipDef;
   invertClip?: boolean;
-  layer?: RefObject<SkPaint> | SkPaint | boolean;
+  layer?: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint | boolean;
 }
