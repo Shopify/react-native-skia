@@ -24,7 +24,7 @@ export interface PaintContext {
 
   shader?: SkShader;
   colorFilter?: SkColorFilter;
-  imageFilter?: SkImageFilter;
+  imageFilter?: SkImageFilter[];
   maskFilter?: SkMaskFilter;
   pathEffect?: SkPathEffect;
 }

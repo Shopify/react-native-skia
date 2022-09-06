@@ -1,12 +1,13 @@
 import type { RefObject } from "react";
 
 import type {
-  Skia,
   SkMatrix,
   SkRect,
   SkRRect,
   SkPath,
   SkPaint,
+  SkImageFilter,
+  Skia,
 } from "../../skia/types";
 import {
   StrokeCap,
@@ -37,6 +38,7 @@ export const isSkPaint = (
 ): obj is SkPaint => "__typename__" in obj && obj.__typename__ === "Paint";
 
 const concatPaint = (
+  Skia: Skia,
   parent: SkPaint,
   {
     color,
@@ -82,7 +84,13 @@ const concatPaint = (
     paint.setColorFilter(colorFilter);
   }
   if (imageFilter !== undefined) {
-    paint.setImageFilter(imageFilter);
+    const composition = imageFilter.reduce<SkImageFilter | null>((c, i) => {
+      if (c === null) {
+        return i;
+      }
+      return Skia.ImageFilter.MakeCompose(i, c);
+    }, null);
+    paint.setImageFilter(composition);
   }
   if (maskFilter !== undefined) {
     paint.setMaskFilter(maskFilter);
@@ -186,10 +194,13 @@ export abstract class JsiRenderNode<P extends GroupProps>
         }
       });
     } else if (child.declarationType === DeclarationType.ImageFilter) {
-      this.paint.imageFilter = child.get();
+      if (this.paint.imageFilter === undefined) {
+        this.paint.imageFilter = [];
+      }
+      this.paint.imageFilter.push(child.get());
       child.setInvalidate(() => {
         if (this.paint) {
-          this.paint.imageFilter = child.get();
+          this.paint.imageFilter = undefined;
         }
       });
     } else if (child.declarationType === DeclarationType.ColorFilter) {
@@ -303,7 +314,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
       : parentCtx.opacity;
 
     const paint = this.paint
-      ? concatPaint(parentCtx.paint, this.paint, parentCtx.opacity)
+      ? concatPaint(this.Skia, parentCtx.paint, this.paint, parentCtx.opacity)
       : parentCtx.paint;
 
     // TODO: can we only recreate a new context here if needed?

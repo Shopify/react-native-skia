@@ -1,5 +1,10 @@
-import type { SkImageFilter, Skia } from "../../../skia/types";
-import { ColorChannel, processUniforms, TileMode } from "../../../skia/types";
+import type { SkImageFilter, Skia, SkColor } from "../../../skia/types";
+import {
+  BlendMode,
+  ColorChannel,
+  processUniforms,
+  TileMode,
+} from "../../../skia/types";
 import type {
   BlendImageFilterProps,
   BlurImageFilterProps,
@@ -12,6 +17,42 @@ import type {
 import { DeclarationType, NodeType } from "../../types";
 import { processRadius, enumKey, processColor } from "../datatypes";
 import { JsiDeclarationNode } from "../Node";
+
+const Black = Float32Array.of(0, 0, 0, 1);
+
+const MakeInnerShadow = (
+  Skia: Skia,
+  shadowOnly: boolean | undefined,
+  dx: number,
+  dy: number,
+  sigmaX: number,
+  sigmaY: number,
+  color: SkColor,
+  input: SkImageFilter | null
+) => {
+  const sourceGraphic = Skia.ImageFilter.MakeColorFilter(
+    Skia.ColorFilter.MakeBlend(Black, BlendMode.Dst),
+    null
+  );
+  const sourceAlpha = Skia.ImageFilter.MakeColorFilter(
+    Skia.ColorFilter.MakeBlend(Black, BlendMode.SrcIn),
+    null
+  );
+  const f1 = Skia.ImageFilter.MakeColorFilter(
+    Skia.ColorFilter.MakeBlend(color, BlendMode.SrcOut),
+    null
+  );
+  const f2 = Skia.ImageFilter.MakeOffset(dx, dy, f1);
+  const f3 = Skia.ImageFilter.MakeBlur(sigmaX, sigmaY, TileMode.Decal, f2);
+  const f4 = Skia.ImageFilter.MakeBlend(BlendMode.SrcIn, sourceAlpha, f3);
+  if (shadowOnly) {
+    return f4;
+  }
+  return Skia.ImageFilter.MakeCompose(
+    input,
+    Skia.ImageFilter.MakeBlend(BlendMode.SrcOver, sourceGraphic, f4)
+  );
+};
 
 abstract class ImageFilterDeclaration<
   P,
@@ -102,27 +143,18 @@ export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadow
   }
 
   get() {
-    const { dx, dy, blur, shadowOnly, color: cl } = this.props;
+    const { dx, dy, blur, shadowOnly, color: cl, inner } = this.props;
     const color = processColor(this.Skia, cl, 1);
     const input = this.getOptionalChildInstance(0);
-    if (shadowOnly) {
-      return this.Skia.ImageFilter.MakeDropShadowOnly(
-        dx,
-        dy,
-        blur,
-        blur,
-        color,
-        input
-      );
+    let factory;
+    if (inner) {
+      factory = MakeInnerShadow.bind(null, this.Skia, shadowOnly);
+    } else {
+      factory = shadowOnly
+        ? this.Skia.ImageFilter.MakeDropShadowOnly.bind(this.Skia.ImageFilter)
+        : this.Skia.ImageFilter.MakeDropShadow.bind(this.Skia.ImageFilter);
     }
-    return this.Skia.ImageFilter.MakeDropShadow(
-      dx,
-      dy,
-      blur,
-      blur,
-      color,
-      input
-    );
+    return factory(dx, dy, blur, blur, color, input);
   }
 }
 
