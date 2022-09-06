@@ -12,7 +12,6 @@ export class PaintNode
 {
   constructor(Skia: Skia, props: PaintProps = {}) {
     super(Skia, DeclarationType.Paint, NodeType.Paint, props);
-    this.setInvalidate(() => {});
   }
 
   get() {

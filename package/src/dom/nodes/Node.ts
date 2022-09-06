@@ -82,7 +82,8 @@ export abstract class JsiDeclarationNode<
   extends JsiNode<P>
   implements DeclarationNode<P, T, Nullable>
 {
-  private invalidate: Invalidate | null = null;
+  private invalidate: Invalidate = () => {};
+
   constructor(
     Skia: Skia,
     public declarationType: DeclarationType,
@@ -113,21 +114,11 @@ export abstract class JsiDeclarationNode<
   }
 
   setProps(props: P) {
-    if (!this.invalidate) {
-      throw new Error(
-        "Setting props on a declaration not attached to a drawing"
-      );
-    }
     super.setProps(props);
     this.invalidate();
   }
 
   setProp<K extends keyof P>(name: K, v: P[K]) {
-    if (!this.invalidate) {
-      throw new Error(
-        "Setting props on a declaration not attached to a drawing"
-      );
-    }
     super.setProp(name, v);
     this.invalidate();
   }
