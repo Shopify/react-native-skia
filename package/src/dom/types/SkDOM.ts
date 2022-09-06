@@ -7,7 +7,7 @@ import type {
   SkPaint,
 } from "../../skia/types";
 
-import type { GroupProps, PaintProps } from "./Common";
+import type { ChildrenProps, GroupProps, PaintProps } from "./Common";
 import type {
   BlendImageFilterProps,
   BlurImageFilterProps,
@@ -194,4 +194,6 @@ export interface SkDOM {
   Blend(
     props: BlendProps
   ): DeclarationNode<BlendProps, SkShader | SkImageFilter>;
+
+  BackdropFilter(props: ChildrenProps): RenderNode<ChildrenProps>;
 }

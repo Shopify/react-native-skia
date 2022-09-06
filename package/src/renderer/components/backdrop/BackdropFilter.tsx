@@ -1,12 +1,23 @@
 import type { ReactNode } from "react";
+import React from "react";
 
-import type { AnimatedProps } from "../../processors";
 import type { GroupProps } from "../../../dom/types";
+import type { SkiaProps } from "../../processors/Animations/Animations";
+import { Group } from "../Group";
 
 export interface BackdropFilterProps extends GroupProps {
   filter: ReactNode | ReactNode[];
 }
 
-export const BackdropFilter = ({}: AnimatedProps<BackdropFilterProps>) => {
-  throw new Error("Not implemented yet");
+export const BackdropFilter = ({
+  filter,
+  children: groupChildren,
+  ...props
+}: SkiaProps<BackdropFilterProps>) => {
+  return (
+    <Group {...props}>
+      <skBackdropFilter>{filter}</skBackdropFilter>
+      {groupChildren}
+    </Group>
+  );
 };

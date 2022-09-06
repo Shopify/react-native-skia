@@ -130,6 +130,7 @@ declare global {
 
       // Mixed declarations
       skBlend: SkiaProps<BlendProps>;
+      skBackdropFilter: SkiaProps<ChildrenProps>;
     }
   }
 }
@@ -253,6 +254,8 @@ export const createNode = (
     // Mixed
     case NodeType.Blend:
       return Sk.Blend(props);
+    case NodeType.BackdropFilter:
+      return Sk.BackdropFilter(props);
     default:
       return exhaustiveCheck(type);
   }

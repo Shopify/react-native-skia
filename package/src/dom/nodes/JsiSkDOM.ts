@@ -54,6 +54,7 @@ import type {
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../types/PathEffects";
+import type { ChildrenProps } from "../../../lib/typescript/src/renderer/processors/Paint";
 
 import {
   FillNode,
@@ -75,6 +76,7 @@ import {
   DiffRectNode,
   PictureNode,
   ImageSVGNode,
+  BackdropFilterNode,
 } from "./drawings";
 import {
   BlendImageFilterNode,
@@ -331,5 +333,9 @@ export class JsiSkDOM implements SkDOM {
 
   Blend(props: BlendProps) {
     return new BlendNode(this.Skia, props);
+  }
+
+  BackdropFilter(props: ChildrenProps) {
+    return new BackdropFilterNode(this.Skia, props);
   }
 }

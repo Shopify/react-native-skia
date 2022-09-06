@@ -37,6 +37,7 @@ export enum NodeType {
   RuntimeShaderImageFilter = "skRuntimeShaderImageFilter",
 
   Blend = "skBlend",
+  BackdropFilter = "skBackdropFilter",
 
   Drawing = "skDrawing",
   Paint = "skPaint",

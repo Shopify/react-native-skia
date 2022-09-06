@@ -14,3 +14,4 @@ export * from "./Text";
 export * from "./PictureNode";
 export * from "./DiffRectNode";
 export * from "./ImageSVG";
+export * from "./BackdropFilterNode";
