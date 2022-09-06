@@ -115,9 +115,26 @@ describe("Drawings", () => {
       { translateX: -c.x },
       { translateY: -c.y },
     ]);
+    for (let i = 0; i < 6; i++) {
+      const theta = (i * (2 * Math.PI)) / 6;
+      const matrix = Skia.Matrix();
+      const scale = 0.5;
+      const { x, y } = polar2Canvas({ theta, radius: 0.5 * R }, { x: 0, y: 0 });
+      matrix.translate(x, y);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ring = rings.children()[i + 1] as any;
+      ring.setProp("matrix", undefined);
+      ring.setProp("transform", [
+        { translateX: c.x },
+        { translateY: c.y },
+        { translateX: x },
+        { translateY: y },
+        { scale },
+        { translateX: -c.x },
+        { translateY: -c.y },
+      ]);
+    }
     root.render(ctx);
     processResult(surface, "snapshots/demos/breathe2.png");
   });
 });
-
-// TODO: add test where each circle is not around a group
