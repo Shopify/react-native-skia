@@ -16,7 +16,7 @@ export class GroupNode
   renderNode(ctx: DrawingContext): void {
     this.children().map((child) => {
       if (child instanceof JsiRenderNode) {
-        child.renderNode(ctx);
+        child.render(ctx);
       }
     });
   }
