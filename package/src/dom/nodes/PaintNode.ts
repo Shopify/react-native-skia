@@ -1,7 +1,9 @@
 import type { SkPaint, Skia } from "../../skia/types";
-import type { DeclarationNode, Node, PaintProps } from "../types";
+import { StrokeCap, StrokeJoin, PaintStyle, BlendMode } from "../../skia/types";
+import type { DeclarationNode, PaintProps } from "../types";
 import { DeclarationType, NodeType } from "../types";
 
+import { enumKey } from "./datatypes";
 import { JsiDeclarationNode } from "./Node";
 
 export class PaintNode
@@ -10,44 +12,66 @@ export class PaintNode
 {
   constructor(Skia: Skia, props: PaintProps = {}) {
     super(Skia, DeclarationType.Paint, NodeType.Paint, props);
-    this.setInvalidate(() => {
-      // TODO: this should do nothing in PaintNode: double check
-      //console.log("invalidate paint");
-    });
-  }
-
-  setProps(props: PaintProps) {
-    super.setProps(props);
-  }
-
-  setProp<K extends keyof PaintProps>(name: K, v: PaintProps[K]) {
-    super.setProp(name, v);
-  }
-
-  addChild(child: Node<unknown>): void {
-    if (!(child instanceof JsiDeclarationNode)) {
-      throw new Error(`Cannot add ${child.type} to ${this.type}`);
-    }
-    // child.setInvalidate(() => (this.cache = null));
-    super.addChild(child);
-  }
-
-  insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
-    if (!(child instanceof JsiDeclarationNode)) {
-      throw new Error(`Cannot add ${child.type} to ${this.type}`);
-    }
-    // child.setInvalidate(() => (this.cache = null));
-    super.insertChildBefore(child, before);
-  }
-
-  removeChild(child: Node<unknown>) {
-    // this.cache = null;
-    return super.removeChild(child);
+    this.setInvalidate(() => {});
   }
 
   get() {
-    // TODO: IMPLEMENT
-    return this.Skia.Paint();
-    // return this.concat(this.Skia.Paint(), 1);
+    const {
+      color,
+      strokeWidth,
+      blendMode,
+      style,
+      strokeJoin,
+      strokeCap,
+      strokeMiter,
+      opacity,
+      antiAlias,
+    } = this.props;
+    const paint = this.Skia.Paint();
+    if (color !== undefined) {
+      paint.setColor(this.Skia.Color(color));
+    }
+    if (strokeWidth !== undefined) {
+      paint.setStrokeWidth(strokeWidth);
+    }
+    if (blendMode !== undefined) {
+      paint.setBlendMode(BlendMode[enumKey(blendMode)]);
+    }
+    if (style !== undefined) {
+      paint.setStyle(PaintStyle[enumKey(style)]);
+    }
+    if (strokeJoin !== undefined) {
+      paint.setStrokeJoin(StrokeJoin[enumKey(strokeJoin)]);
+    }
+    if (strokeCap !== undefined) {
+      paint.setStrokeCap(StrokeCap[enumKey(strokeCap)]);
+    }
+    if (strokeMiter !== undefined) {
+      paint.setStrokeMiter(strokeMiter);
+    }
+    if (opacity !== undefined) {
+      paint.setAlphaf(opacity);
+    }
+    if (antiAlias !== undefined) {
+      paint.setAntiAlias(antiAlias);
+    }
+    this._children.forEach((child) => {
+      if (child instanceof JsiDeclarationNode) {
+        if (child.isShader()) {
+          paint.setShader(child.get());
+        } else if (child.isColorFilter()) {
+          paint.setColorFilter(child.get());
+        } else if (child.isImageFilter()) {
+          paint.setImageFilter(child.get());
+        } else if (child.isMaskFilter()) {
+          paint.setMaskFilter(child.get());
+        } else if (child.isPathEffect()) {
+          paint.setPathEffect(child.get());
+        } else {
+          throw new Error(`Unknown paint child ${child.type}`);
+        }
+      }
+    });
+    return paint;
   }
 }

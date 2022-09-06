@@ -71,6 +71,7 @@ export interface TransformProps {
 
 export interface PaintProps extends ChildrenProps {
   // TODO: check because DrawingProps is also paint?: SkPaint
+  // We should propably remove this
   paint?: SkPaint;
   color?: Color;
   strokeWidth?: number;
