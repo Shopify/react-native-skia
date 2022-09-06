@@ -1,5 +1,5 @@
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
-import { printAsXML, setupSkia } from "../../skia/__tests__/setup";
+import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import type { CircleProps } from "../types/Drawings";
 
@@ -27,7 +27,7 @@ describe("Drawings", () => {
     circle.setProp("color", c2);
     ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
-    processResult(surface, "snapshots/render-nodes/simple2.png", true);
+    processResult(surface, "snapshots/render-nodes/simple2.png");
   });
 });
 
