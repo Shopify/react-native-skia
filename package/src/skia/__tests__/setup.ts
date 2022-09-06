@@ -48,21 +48,29 @@ const asValue = (value: unknown) => {
   return value;
 };
 
+export const printAsXML = (node: Node<unknown>) => {
+  console.log(asXML(node));
+};
+
 // Print nodes as XML tree
 export const asXML = (node: Node<unknown>, indent = 0): string => {
   // TODO: remove cast
   const hasChildren = node.children().length > 0;
   const props = node.getProps() as object;
   const space = new Array(indent).fill(" ").join("");
+  const keys = mapKeys(props).filter((key) => props[key] !== undefined);
   if (hasChildren) {
-    return `${space}<${node.type} ${mapKeys(props)
+    return `${space}<${node.type}${keys.length > 0 ? " " : ""}${keys
       .map((name) => `${name}="${asValue(props[name])}"`)
       .join(" ")}>
-${node.children().map((child) => asXML(child, indent + 2)).join(`
+${node
+  .children()
+
+  .map((child) => asXML(child, indent + 2)).join(`
 `)}
 ${space}</${node.type}>`;
   } else {
-    return `${space}<${node.type} ${mapKeys(props)
+    return `${space}<${node.type} ${keys
       .map((name) => `${name}="${asValue(props[name])}"`)
       .join(" ")} />`;
   }
