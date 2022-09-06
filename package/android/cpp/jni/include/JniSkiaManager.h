@@ -8,19 +8,18 @@
 
 #include <JniPlatformContext.h>
 #include <RNSkAndroidPlatformContext.h>
-
-#include <RNSkLog.h>
+#include <JniSkiaBaseView.h>
 
 namespace RNSkia {
+
 class RNSkManager;
+
 using namespace facebook;
 
 using JSCallInvokerHolder =
     jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;
 
 using JavaPlatformContext = jni::alias_ref<JniPlatformContext::javaobject>;
-
-class JniSkiaDrawView;
 
 class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
    public:
@@ -52,10 +51,8 @@ class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
 
     }
 
-    void registerSkiaView(int viewTag, JniSkiaDrawView *skiaView);
-    void unregisterSkiaView(int viewTag);
-
     std::shared_ptr<RNSkAndroidPlatformContext> getPlatformContext() { return _context; }
+    std::shared_ptr<RNSkManager> getSkiaManager() { return _skManager; }
 
     void invalidate() {
         _context->stopDrawLoop();

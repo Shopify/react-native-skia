@@ -1,5 +1,6 @@
 package com.shopify.reactnative.skia;
 
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.BaseViewManager;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -8,12 +9,14 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class SkiaDrawViewManager extends BaseViewManager<SkiaDrawView, LayoutShadowNode> {
+import java.util.HashMap;
+
+public class SkiaPictureViewManager extends BaseViewManager<SkiaPictureView, LayoutShadowNode> {
 
     @NonNull
     @Override
     public String getName() {
-        return "SkiaDrawView";
+        return "SkiaPictureView";
     }
 
     @Override
@@ -27,35 +30,35 @@ public class SkiaDrawViewManager extends BaseViewManager<SkiaDrawView, LayoutSha
     }
 
     @Override
-    public void updateExtraData(SkiaDrawView root, Object extraData) {
+    public void updateExtraData(SkiaPictureView root, Object extraData) {
     }
 
     @Override
-    public void setNativeId(@NonNull SkiaDrawView view, @Nullable String nativeId) {
+    public void setNativeId(@NonNull SkiaPictureView view, @Nullable String nativeId) {
         super.setNativeId(view, nativeId);
         int nativeIdResolved = Integer.parseInt(nativeId);
         view.registerView(nativeIdResolved);
     }
 
     @ReactProp(name = "mode")
-    public void setMode(SkiaDrawView view, String mode) {
+    public void setMode(SkiaPictureView view, String mode) {
         view.setMode(mode);
     }
 
     @ReactProp(name = "debug")
-    public void setDebug(SkiaDrawView view, boolean show) {
+    public void setDebug(SkiaPictureView view, boolean show) {
         view.setDebugMode(show);
     }
 
     @Override
-    public void onDropViewInstance(@NonNull SkiaDrawView view) {
+    public void onDropViewInstance(@NonNull SkiaPictureView view) {
         super.onDropViewInstance(view);
         view.unregisterView();
     }
 
     @NonNull
     @Override
-    protected SkiaDrawView createViewInstance(@NonNull ThemedReactContext reactContext) {
-        return new SkiaDrawView(reactContext);
+    protected SkiaPictureView createViewInstance(@NonNull ThemedReactContext reactContext) {
+        return new SkiaPictureView(reactContext);
     }
 }

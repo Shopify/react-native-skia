@@ -164,8 +164,7 @@ public:
                                    const std::string& name,
                                    const jsi::Value *arguments,
                                    size_t count) {
-    throw std::runtime_error("The base Skia View does not support any commands. Command " + name + " not found.");    
-    return jsi::Value::undefined();
+    throw std::runtime_error("The base Skia View does not support any commands. Command " + name + " not found.");
   };
 
   /**

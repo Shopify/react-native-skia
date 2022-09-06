@@ -8,13 +8,18 @@ import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
-import type { DrawingInfo, DrawMode, SkiaViewProps, TouchInfo } from "./types";
+import type {
+  DrawingInfo,
+  DrawMode,
+  SkiaDrawViewProps,
+  TouchInfo,
+} from "./types";
 import { TouchType } from "./types";
 
 const pd = PixelRatio.get();
 
-export class SkiaView extends React.Component<SkiaViewProps> {
-  constructor(props: SkiaViewProps) {
+export class SkiaView extends React.Component<SkiaDrawViewProps> {
+  constructor(props: SkiaDrawViewProps) {
     super(props);
     this._mode = props.mode ?? "default";
   }

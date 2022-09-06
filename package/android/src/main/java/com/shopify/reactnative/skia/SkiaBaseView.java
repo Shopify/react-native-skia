@@ -8,15 +8,11 @@ import android.view.TextureView;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
-import com.facebook.react.bridge.ReactContext;
 
 public abstract class SkiaBaseView extends TextureView implements TextureView.SurfaceTextureListener {
 
     @DoNotStrip
     protected HybridData mHybridData;
-
-    @DoNotStrip
-    private boolean mViewRemoved;
 
     @DoNotStrip
     private Surface mSurface;
@@ -25,8 +21,6 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
         super(context);
         setSurfaceTextureListener(this);
         setOpaque(false);
-        RNSkiaModule skiaModule = ((ReactContext)context).getNativeModule(RNSkiaModule.class);
-        mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
 
     @Override
@@ -34,26 +28,11 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
         // Texture view does not support setting the background color.
     }
 
+    @DoNotStrip
     public void releaseSurface() {
         if (mSurface != null) {
             mSurface.release();
             mSurface = null;
-        }
-        // We can only reset the native side when the view was removed from screen.
-        // releasing the surface can also be done when the view is hidden and then
-        // we should only release the surface - and keep the native part around.
-        if (mViewRemoved) {
-            mHybridData.resetNative();
-        }
-    }
-
-    void onViewRemoved() {
-        mViewRemoved = true;
-        // We can only reset the native side when the view was removed from screen.
-        // releasing the surface can also be done when the view is hidden and then
-        // we should only release the surface - and keep the native part around.
-        if (mSurface == null) {
-            mHybridData.resetNative();
         }
     }
 
@@ -153,8 +132,6 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
         // Nothing special to do here
     }
 
-    protected native HybridData initHybrid(SkiaManager skiaManager);
-
     private native void surfaceAvailable(Object surface, int width, int height);
 
     private native void surfaceSizeChanged(int width, int height);
@@ -168,4 +145,8 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
     public native void setDebugMode(boolean show);
 
     public native void updateTouchPoints(double[] points);
+
+    public native void registerView(int nativeId);
+
+    public native void unregisterView();
 }

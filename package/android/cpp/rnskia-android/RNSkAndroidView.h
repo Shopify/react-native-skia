@@ -6,45 +6,91 @@
 
 namespace RNSkia {
 
-class RNSkBaseAndroidView {
-public:
-    virtual void surfaceAvailable(ANativeWindow* surface, int width, int height) = 0;
-    virtual void surfaceDestroyed() = 0;
-    virtual void surfaceSizeChanged(int width, int height) = 0;
-    virtual float getPixelDensity() = 0;
-    virtual std::shared_ptr<RNSkia::RNSkView> getDrawView() = 0;
-};
+    class RNSkBaseAndroidView {
+    public:
+        virtual void surfaceAvailable(ANativeWindow *surface, int width, int height) = 0;
 
-template <class T>
-class RNSkAndroidView : public T, public RNSkBaseAndroidView {
-public:
-    RNSkAndroidView(
-      std::shared_ptr<RNSkia::RNSkPlatformContext> context,
-      std::function<void()> releaseSurfaceCallback):
-      T(context,
-        std::make_shared<RNSkOpenGLCanvasProvider>(
-                std::bind(&RNSkia::RNSkView::requestRedraw, this),
-                releaseSurfaceCallback,
-                context)
-        ) {}
+        virtual void surfaceDestroyed() = 0;
 
-    void surfaceAvailable(ANativeWindow* surface, int width, int height) override {
-      std::static_pointer_cast<RNSkOpenGLCanvasProvider>(this->getCanvasProvider())->surfaceAvailable(surface, width, height);
-    }
-    void surfaceDestroyed() override {
-      std::static_pointer_cast<RNSkOpenGLCanvasProvider>(this->getCanvasProvider())->surfaceDestroyed();
-    }
+        virtual void surfaceSizeChanged(int width, int height) = 0;
 
-    void surfaceSizeChanged(int width, int height) override {
-      std::static_pointer_cast<RNSkOpenGLCanvasProvider>(this->getCanvasProvider())->surfaceSizeChanged(width, height);
-    }
+        virtual float getPixelDensity() = 0;
 
-    float getPixelDensity() override {
-      return this->getPlatformContext()->getPixelDensity();
-    }
+        virtual void updateTouchPoints(jni::JArrayDouble touches) = 0;
 
-    std::shared_ptr<RNSkia::RNSkView> getDrawView() override {
-      return this->shared_from_this();
-    }
-};
+        virtual void setMode(std::string mode) = 0;
+
+        virtual void setShowDebugInfo(bool show) = 0;
+
+        virtual std::shared_ptr<RNSkView> getSkiaView() = 0;
+    };
+
+    template<typename T>
+    class RNSkAndroidView
+            : public T, public RNSkBaseAndroidView {
+    public:
+        RNSkAndroidView(
+                std::shared_ptr<RNSkia::RNSkPlatformContext> context,
+                std::function<void()> releaseSurfaceCallback) :
+                T(context,
+                  std::make_shared<RNSkOpenGLCanvasProvider>(
+                          std::bind(&RNSkia::RNSkView::requestRedraw, this),
+                          releaseSurfaceCallback,
+                          context)
+                ) {}
+
+        void surfaceAvailable(ANativeWindow *surface, int width, int height) override {
+          std::static_pointer_cast<RNSkOpenGLCanvasProvider>(
+                  T::getCanvasProvider())->surfaceAvailable(surface, width, height);
+        }
+
+        void surfaceDestroyed() override {
+          std::static_pointer_cast<RNSkOpenGLCanvasProvider>(
+                  T::getCanvasProvider())->surfaceDestroyed();
+        }
+
+        void surfaceSizeChanged(int width, int height) override {
+          std::static_pointer_cast<RNSkOpenGLCanvasProvider>(
+                  T::getCanvasProvider())->surfaceSizeChanged(width, height);
+        }
+
+        float getPixelDensity() override {
+          return T::getPlatformContext()->getPixelDensity();
+        }
+
+        void setMode(std::string mode) override {
+          if (mode.compare("continuous") == 0) {
+            T::setDrawingMode(RNSkDrawingMode::Continuous);
+          } else {
+            T::setDrawingMode(RNSkDrawingMode::Default);
+          }
+        }
+
+        void setShowDebugInfo(bool show) override {
+          T::setShowDebugOverlays(show);
+        }
+
+        void updateTouchPoints(jni::JArrayDouble touches) override {
+          // Create touch points
+          std::vector<RNSkia::RNSkTouchInfo> points;
+          auto pin = touches.pin();
+          auto scale = getPixelDensity();
+          points.reserve(pin.size() / 5);
+          for (size_t i = 0; i < pin.size(); i += 5) {
+            RNSkTouchInfo point;
+            point.x = pin[i] / scale;
+            point.y = pin[i + 1] / scale;
+            point.force = pin[i + 2];
+            point.type = (RNSkia::RNSkTouchInfo::TouchType) pin[i + 3];
+            point.id = pin[i + 4];
+            points.push_back(point);
+          }
+          T::updateTouchState(points);
+        }
+
+        std::shared_ptr<RNSkView> getSkiaView() override {
+          return T::shared_from_this();
+        }
+
+    };
 }

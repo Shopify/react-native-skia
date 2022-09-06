@@ -63,6 +63,10 @@ const examples = [
     title: "🖼 Picture",
   },
   {
+    screen: "PictureView",
+    title: "🖼 Picture View",
+  },
+  {
     screen: "Freeze",
     title: "❄️ Freeze",
   },
