@@ -6,14 +6,25 @@ import { enumKey, processPath } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 
 export class PathNode extends JsiDrawingNode<PathProps> {
-  private path: SkPath | null = null;
+  private path?: SkPath;
 
   constructor(Skia: Skia, props: PathProps) {
     super(Skia, NodeType.Path, props);
     this.onPropChange();
   }
 
+  setProps(props: PathProps) {
+    super.setProps(props);
+    this.onPropChange();
+  }
+
+  setProp<K extends keyof PathProps>(name: K, value: PathProps[K]) {
+    super.setProp(name, value);
+    this.onPropChange();
+  }
+
   onPropChange() {
+    super.onPropChange();
     const { start, end, fillType, stroke, ...pathProps } = this.props;
     const hasStartOffset = start !== 0;
     const hasEndOffset = end !== 1;
@@ -36,7 +47,7 @@ export class PathNode extends JsiDrawingNode<PathProps> {
   }
 
   draw({ canvas, paint }: DrawingContext) {
-    if (this.path === null) {
+    if (!this.path) {
       throw new Error("Path not initialized");
     }
     canvas.drawPath(this.path, paint);
