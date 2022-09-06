@@ -166,35 +166,35 @@ export abstract class JsiRenderNode<P extends GroupProps>
       this.paint.shader = child.get();
       child.setInvalidate(() => {
         if (this.paint) {
-          this.paint.shader = undefined;
+          this.paint.shader = child.get();
         }
       });
     } else if (child.declarationType === DeclarationType.PathEffect) {
       this.paint.pathEffect = child.get();
       child.setInvalidate(() => {
         if (this.paint) {
-          this.paint.pathEffect = undefined;
+          this.paint.pathEffect = child.get();
         }
       });
     } else if (child.declarationType === DeclarationType.MaskFilter) {
       this.paint.maskFilter = child.get();
       child.setInvalidate(() => {
         if (this.paint) {
-          this.paint.maskFilter = undefined;
+          this.paint.maskFilter = child.get();
         }
       });
     } else if (child.declarationType === DeclarationType.ImageFilter) {
       this.paint.imageFilter = child.get();
       child.setInvalidate(() => {
         if (this.paint) {
-          this.paint.imageFilter = undefined;
+          this.paint.imageFilter = child.get();
         }
       });
     } else if (child.declarationType === DeclarationType.ColorFilter) {
       this.paint.colorFilter = child.get();
       child.setInvalidate(() => {
         if (this.paint) {
-          this.paint.colorFilter = undefined;
+          this.paint.colorFilter = child.get();
         }
       });
     }
