@@ -70,7 +70,7 @@ export interface TransformProps {
 }
 
 export interface PaintProps extends ChildrenProps {
-  // TODO: this prop is clashing with DrawingProps
+  // TODO: check because DrawingProps as also paint?
   paint?: SkPaint;
   color?: Color;
   strokeWidth?: number;
