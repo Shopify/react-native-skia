@@ -126,6 +126,11 @@ export abstract class JsiRenderNode<P extends GroupProps>
     this.onPropChange();
   }
 
+  setProp<K extends keyof P>(key: K, value: P[K]) {
+    super.setProp(key, value);
+    this.onPropChange();
+  }
+
   protected onPropChange() {
     this.matrix = undefined;
     this.clipPath = undefined;
