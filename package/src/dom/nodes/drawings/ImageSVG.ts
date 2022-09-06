@@ -4,12 +4,14 @@ import { NodeType } from "../../types";
 import { processRect } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 
-export class ImageSVGNode extends JsiDrawingNode<ImageSVGProps> {
+export class ImageSVGNode extends JsiDrawingNode<ImageSVGProps, null> {
   constructor(Skia: Skia, props: ImageSVGProps) {
     super(Skia, NodeType.ImageSVG, props);
   }
 
-  onPropChange() {}
+  deriveProps() {
+    return null;
+  }
 
   draw({ canvas }: DrawingContext) {
     const { svg } = this.props;

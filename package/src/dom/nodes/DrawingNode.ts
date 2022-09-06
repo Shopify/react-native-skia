@@ -10,12 +10,25 @@ import type {
 import { PaintNode } from "./PaintNode";
 import { JsiRenderNode } from "./RenderNode";
 
-export abstract class JsiDrawingNode<P extends DrawingNodeProps>
+export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
   extends JsiRenderNode<P>
   implements RenderNode<P>
 {
+  protected derived?: C;
+
   constructor(Skia: Skia, type: NodeType, props: P) {
     super(Skia, type, props);
+    this.derived = this.deriveProps();
+  }
+
+  setProps(props: P) {
+    super.setProps(props);
+    this.derived = this.deriveProps();
+  }
+
+  setProp<K extends keyof P>(name: K, value: P[K]) {
+    super.setProp(name, value);
+    this.derived = this.deriveProps();
   }
 
   addChild(child: Node<unknown>): void {
@@ -23,6 +36,7 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
       throw new Error(`Cannot add ${child.type} to ${this.type}`);
     }
     super.addChild(child);
+    this.derived = this.deriveProps();
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
@@ -30,6 +44,7 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
       throw new Error(`Cannot add ${child.type} to ${this.type}`);
     }
     super.insertChildBefore(child, before);
+    this.derived = this.deriveProps();
   }
 
   renderNode(ctx: DrawingContext): void {
@@ -46,5 +61,6 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps>
     });
   }
 
-  abstract draw(ctx: DrawingContext): void;
+  protected abstract draw(ctx: DrawingContext): void;
+  protected abstract deriveProps(): C;
 }

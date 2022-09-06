@@ -4,22 +4,21 @@ import { NodeType } from "../../types";
 import { processRRect } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 
-export class RRectNode extends JsiDrawingNode<RoundedRectProps> {
+export class RRectNode extends JsiDrawingNode<RoundedRectProps, SkRRect> {
   rect?: SkRRect;
 
   constructor(Skia: Skia, props: RoundedRectProps) {
     super(Skia, NodeType.RRect, props);
-    this.onPropChange();
   }
 
-  onPropChange() {
-    this.rect = processRRect(this.Skia, this.props);
+  protected deriveProps() {
+    return processRRect(this.Skia, this.props);
   }
 
   draw({ canvas, paint }: DrawingContext) {
-    if (this.rect === undefined) {
+    if (this.derived === undefined) {
       throw new Error("RRectNode: rect is undefined");
     }
-    canvas.drawRRect(this.rect, paint);
+    canvas.drawRRect(this.derived, paint);
   }
 }

@@ -10,12 +10,14 @@ import { processPath } from "../datatypes";
 import type { GlyphsProps } from "../../types/Drawings";
 import { JsiDrawingNode } from "../DrawingNode";
 
-export class TextNode extends JsiDrawingNode<TextProps> {
+export class TextNode extends JsiDrawingNode<TextProps, null> {
   constructor(Skia: Skia, props: TextProps) {
     super(Skia, NodeType.Text, props);
   }
 
-  onPropChange() {}
+  protected deriveProps() {
+    return null;
+  }
 
   draw({ canvas, paint }: DrawingContext) {
     const { text, x, y, font } = this.props;
@@ -23,15 +25,12 @@ export class TextNode extends JsiDrawingNode<TextProps> {
   }
 }
 
-export class TextPathNode extends JsiDrawingNode<TextPathProps> {
-  blob?: SkTextBlob;
-
+export class TextPathNode extends JsiDrawingNode<TextPathProps, SkTextBlob> {
   constructor(Skia: Skia, props: TextPathProps) {
     super(Skia, NodeType.TextPath, props);
-    this.onPropChange();
   }
 
-  onPropChange() {
+  deriveProps() {
     const path = processPath(this.Skia, this.props.path);
     const { font, initialOffset } = this.props;
     let { text } = this.props;
@@ -63,23 +62,25 @@ export class TextPathNode extends JsiDrawingNode<TextPathProps> {
       rsx.push(this.Skia.RSXform(tx, ty, adjustedX, adjustedY));
       dist += width / 2;
     }
-    this.blob = this.Skia.TextBlob.MakeFromRSXform(text, rsx, font);
+    return this.Skia.TextBlob.MakeFromRSXform(text, rsx, font);
   }
 
   draw({ canvas, paint }: DrawingContext) {
-    if (!this.blob) {
+    if (!this.derived) {
       throw new Error("TextPathNode: blob is null");
     }
-    canvas.drawTextBlob(this.blob, 0, 0, paint);
+    canvas.drawTextBlob(this.derived, 0, 0, paint);
   }
 }
 
-export class TextBlobNode extends JsiDrawingNode<TextBlobProps> {
+export class TextBlobNode extends JsiDrawingNode<TextBlobProps, null> {
   constructor(Skia: Skia, props: TextBlobProps) {
     super(Skia, NodeType.TextBlob, props);
   }
 
-  onPropChange() {}
+  protected deriveProps() {
+    return null;
+  }
 
   draw({ canvas, paint }: DrawingContext) {
     const { blob, x, y } = this.props;
@@ -92,16 +93,13 @@ interface ProcessedGlyphs {
   positions: SkPoint[];
 }
 
-export class GlyphsNode extends JsiDrawingNode<GlyphsProps> {
-  processedGlyphs?: ProcessedGlyphs;
-
+export class GlyphsNode extends JsiDrawingNode<GlyphsProps, ProcessedGlyphs> {
   constructor(Skia: Skia, props: GlyphsProps) {
     super(Skia, NodeType.Glyphs, props);
-    this.onPropChange();
   }
 
-  onPropChange() {
-    this.processedGlyphs = this.props.glyphs.reduce<ProcessedGlyphs>(
+  deriveProps() {
+    return this.props.glyphs.reduce<ProcessedGlyphs>(
       (acc, glyph) => {
         const { id, pos } = glyph;
         acc.glyphs.push(id);
@@ -113,10 +111,10 @@ export class GlyphsNode extends JsiDrawingNode<GlyphsProps> {
   }
 
   draw({ canvas, paint }: DrawingContext) {
-    if (!this.processedGlyphs) {
+    if (!this.derived) {
       throw new Error("GlyphsNode: processedGlyphs is null");
     }
-    const { glyphs, positions } = this.processedGlyphs;
+    const { glyphs, positions } = this.derived;
     const { x, y, font } = this.props;
     canvas.drawGlyphs(glyphs, positions, x, y, font, paint);
   }

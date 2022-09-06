@@ -5,12 +5,14 @@ import { NodeType } from "../../types";
 import { enumKey, processColor } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 
-export class PatchNode extends JsiDrawingNode<PatchProps> {
+export class PatchNode extends JsiDrawingNode<PatchProps, null> {
   constructor(Skia: Skia, props: PatchProps) {
     super(Skia, NodeType.Patch, props);
   }
 
-  onPropChange(): void {}
+  deriveProps() {
+    return null;
+  }
 
   draw({ canvas, paint, opacity }: DrawingContext) {
     const { colors, blendMode, patch, texture } = this.props;

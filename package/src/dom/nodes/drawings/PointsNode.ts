@@ -5,12 +5,14 @@ import { NodeType } from "../../types";
 import { enumKey } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 
-export class PointsNode extends JsiDrawingNode<PointsProps> {
+export class PointsNode extends JsiDrawingNode<PointsProps, null> {
   constructor(Skia: Skia, props: PointsProps) {
     super(Skia, NodeType.Points, props);
   }
 
-  onPropChange() {}
+  deriveProps() {
+    return null;
+  }
 
   draw({ canvas, paint }: DrawingContext) {
     const { points, mode } = this.props;

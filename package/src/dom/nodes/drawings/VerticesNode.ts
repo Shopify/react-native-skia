@@ -5,18 +5,15 @@ import { NodeType } from "../../types";
 import { enumKey, processColor } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 
-export class VerticesNode extends JsiDrawingNode<VerticesProps> {
-  vertices?: SkVertices;
-
+export class VerticesNode extends JsiDrawingNode<VerticesProps, SkVertices> {
   constructor(Skia: Skia, props: VerticesProps) {
     super(Skia, NodeType.Vertices, props);
-    this.onPropChange();
   }
 
-  onPropChange() {
+  protected deriveProps() {
     const { mode, vertices, textures, colors, indices } = this.props;
     const vertexMode = mode ? VertexMode[enumKey(mode)] : VertexMode.Triangles;
-    this.vertices = this.Skia.MakeVertices(
+    return this.Skia.MakeVertices(
       vertexMode,
       vertices,
       textures,
@@ -29,9 +26,9 @@ export class VerticesNode extends JsiDrawingNode<VerticesProps> {
     const { colors, blendMode } = this.props;
     const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
     const blend = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
-    if (this.vertices === undefined) {
+    if (this.derived === undefined) {
       throw new Error("VerticesNode: vertices is undefined");
     }
-    canvas.drawVertices(this.vertices, blend, paint);
+    canvas.drawVertices(this.derived, blend, paint);
   }
 }

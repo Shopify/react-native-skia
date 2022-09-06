@@ -5,22 +5,19 @@ import { NodeType } from "../../types";
 import { processRect } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 
-export class RectNode extends JsiDrawingNode<RectProps> {
-  rect?: SkRect;
-
+export class RectNode extends JsiDrawingNode<RectProps, SkRect> {
   constructor(Skia: Skia, props: RectProps) {
     super(Skia, NodeType.Rect, props);
-    this.onPropChange();
   }
 
-  onPropChange() {
-    this.rect = processRect(this.Skia, this.props);
+  deriveProps() {
+    return processRect(this.Skia, this.props);
   }
 
   draw({ canvas, paint }: DrawingContext) {
-    if (this.rect === undefined) {
+    if (this.derived === undefined) {
       throw new Error("OvalNode: rect is undefined");
     }
-    canvas.drawRect(this.rect, paint);
+    canvas.drawRect(this.derived, paint);
   }
 }

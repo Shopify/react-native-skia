@@ -3,12 +3,14 @@ import type { DiffRectProps, DrawingContext } from "../../types";
 import { NodeType } from "../../types";
 import { JsiDrawingNode } from "../DrawingNode";
 
-export class DiffRectNode extends JsiDrawingNode<DiffRectProps> {
+export class DiffRectNode extends JsiDrawingNode<DiffRectProps, null> {
   constructor(Skia: Skia, props: DiffRectProps) {
     super(Skia, NodeType.DiffRect, props);
   }
 
-  onPropChange() {}
+  deriveProps() {
+    return null;
+  }
 
   draw({ canvas, paint }: DrawingContext) {
     const { outer, inner } = this.props;
