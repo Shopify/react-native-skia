@@ -1,9 +1,11 @@
-import type { SkImageFilter, SkMaskFilter, SkShader } from "../../skia/types";
-import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
-import type { SkPathEffect } from "../../skia/types/PathEffect";
-import type { GroupNode } from "../nodes/GroupNode";
-import type { JsiDrawingNode } from "../nodes/drawings";
-import type { JsiPaintNode } from "../nodes/Node";
+import type {
+  SkImageFilter,
+  SkMaskFilter,
+  SkShader,
+  SkColorFilter,
+  SkPathEffect,
+  SkPaint,
+} from "../../skia/types";
 
 import type { GroupProps, PaintProps } from "./Common";
 import type {
@@ -15,7 +17,7 @@ import type {
   DisplacementMapImageFilterProps,
   MorphologyImageFilterProps,
 } from "./ImageFilters";
-import type { DeclarationNode } from "./Node";
+import type { DeclarationNode, RenderNode } from "./Node";
 import type {
   BlendColorFilterProps,
   MatrixColorFilterProps,
@@ -69,16 +71,16 @@ type PathEffectNode<P> = DeclarationNode<P, SkPathEffect>;
 type NullablePathEffectNode<P> = DeclarationNode<P, SkPathEffect, null>;
 
 // TODO: don't use a concrete type here
-type DrawingNode<P> = JsiDrawingNode<P>;
+type DrawingNode<P extends GroupProps> = RenderNode<P>;
 
 export interface SkDOM {
-  Group(props?: GroupProps): GroupNode;
+  Group(props?: GroupProps): RenderNode<GroupProps>;
   // TODO: don't use a concrete type here
-  Paint(props: PaintProps): JsiPaintNode;
+  Paint(props: PaintProps): DeclarationNode<PaintProps, SkPaint>;
 
   // Drawings
-  Fill(props?: DrawingNodeProps): JsiDrawingNode<DrawingNodeProps>;
-  Image(props: ImageProps): JsiDrawingNode<ImageProps>;
+  Fill(props?: DrawingNodeProps): DrawingNode<DrawingNodeProps>;
+  Image(props: ImageProps): DrawingNode<ImageProps>;
   Circle(props: CircleProps): DrawingNode<CircleProps>;
   Path(props: PathProps): DrawingNode<PathProps>;
   CustomDrawing(

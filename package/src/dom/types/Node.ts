@@ -11,6 +11,7 @@ import type { GroupProps } from "./Common";
 import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationType, NodeType } from "./NodeType";
 
+// TODO: does P extends object? Or Record<string, unknown>? Or something else?
 export interface Node<P> {
   type: NodeType;
 

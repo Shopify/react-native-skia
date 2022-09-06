@@ -1,10 +1,14 @@
-import type { GroupNode } from "../dom/nodes/GroupNode";
-import type { DrawingContext, SkDOM } from "../dom/types";
+import type {
+  GroupProps,
+  DrawingContext,
+  RenderNode,
+  SkDOM,
+} from "../dom/types";
 
 import type { DependencyManager } from "./DependencyManager";
 
 export class Container {
-  private _root: GroupNode;
+  private _root: RenderNode<GroupProps>;
 
   constructor(
     public Sk: SkDOM,
