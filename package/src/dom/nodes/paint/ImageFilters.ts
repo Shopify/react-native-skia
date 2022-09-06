@@ -1,14 +1,8 @@
-import type {
-  SkImageFilter,
-  SkShader,
-  Skia,
-  SkColorFilter,
-} from "../../../skia/types";
+import type { SkImageFilter, Skia } from "../../../skia/types";
 import { ColorChannel, processUniforms, TileMode } from "../../../skia/types";
 import type {
   BlendImageFilterProps,
   BlurImageFilterProps,
-  DeclarationNode,
   DisplacementMapImageFilterProps,
   DropShadowImageFilterProps,
   MorphologyImageFilterProps,
@@ -26,35 +20,30 @@ abstract class ImageFilterDeclaration<
   constructor(Skia: Skia, type: NodeType, props: P) {
     super(Skia, DeclarationType.ImageFilter, type, props);
   }
-}
 
-export interface ShaderImageFilterNodeProps {
-  shader: DeclarationNode<unknown, SkShader>;
-}
-
-export class ShaderImageFilterNode extends ImageFilterDeclaration<ShaderImageFilterNodeProps> {
-  constructor(Skia: Skia, props: ShaderImageFilterNodeProps) {
-    super(Skia, NodeType.OffsetImageFilter, props);
+  getOptionalChildInstance(index: number) {
+    const child = this._children[index];
+    if (!child) {
+      return null;
+    }
+    return this.getMandatoryChildInstance(index);
   }
 
-  get() {
-    const { shader } = this.props;
-    return this.Skia.ImageFilter.MakeShader(shader.get(), null);
-  }
-}
-
-export interface ColorFilterImageFilterNodeProps {
-  colorFilter: DeclarationNode<unknown, SkColorFilter>;
-}
-
-export class ColorFilterImageFilterNode extends ImageFilterDeclaration<ColorFilterImageFilterNodeProps> {
-  constructor(Skia: Skia, props: ColorFilterImageFilterNodeProps) {
-    super(Skia, NodeType.OffsetImageFilter, props);
-  }
-
-  get() {
-    const { colorFilter } = this.props;
-    return this.Skia.ImageFilter.MakeColorFilter(colorFilter.get(), null);
+  getMandatoryChildInstance(index: number) {
+    const child = this._children[index];
+    if (child instanceof JsiDeclarationNode) {
+      if (child.isImageFilter()) {
+        return child.get();
+      } else if (child.isShader()) {
+        return this.Skia.ImageFilter.MakeShader(child.get(), null);
+      } else if (child.declarationType === DeclarationType.ColorFilter) {
+        return this.Skia.ImageFilter.MakeColorFilter(child.get(), null);
+      } else {
+        throw new Error(`Found invalid child ${child.type} in ${this.type}`);
+      }
+    } else {
+      throw new Error(`Found invalid child ${child.type} in ${this.type}`);
+    }
   }
 }
 
@@ -65,7 +54,11 @@ export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFil
 
   get() {
     const { x, y } = this.props;
-    return this.Skia.ImageFilter.MakeOffset(x, y, this.getChild(0));
+    return this.Skia.ImageFilter.MakeOffset(
+      x,
+      y,
+      this.getOptionalChildInstance(0)
+    );
   }
 }
 
@@ -80,8 +73,8 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
       ColorChannel[enumKey(channelX)],
       ColorChannel[enumKey(channelY)],
       scale,
-      this.getChild(0),
-      this.getChild(1)
+      this.getMandatoryChildInstance(0),
+      this.getOptionalChildInstance(1)
     );
   }
 }
@@ -98,7 +91,7 @@ export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterP
       sigma.x,
       sigma.y,
       TileMode[enumKey(mode)],
-      this.getChild(0)
+      this.getOptionalChildInstance(0)
     );
   }
 }
@@ -111,7 +104,7 @@ export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadow
   get() {
     const { dx, dy, blur, shadowOnly, color: cl } = this.props;
     const color = processColor(this.Skia, cl, 1);
-    const input = this.getChild<SkImageFilter>(0);
+    const input = this.getOptionalChildInstance(0);
     if (shadowOnly) {
       return this.Skia.ImageFilter.MakeDropShadowOnly(
         dx,
@@ -146,7 +139,7 @@ export class MorphologyImageFilterNode extends ImageFilterDeclaration<Morphology
   get() {
     const { operator } = this.props;
     const r = processRadius(this.Skia, this.props.radius);
-    const input = this.getChild<SkImageFilter>(0);
+    const input = this.getOptionalChildInstance(0);
     if (MorphologyOperator[enumKey(operator)] === MorphologyOperator.Erode) {
       return this.Skia.ImageFilter.MakeErode(r.x, r.y, input);
     }
@@ -161,8 +154,8 @@ export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilte
 
   get() {
     const { mode } = this.props;
-    const a = this.getChild<SkImageFilter>(0);
-    const b = this.getChild<SkImageFilter>(1);
+    const a = this.getMandatoryChildInstance(0);
+    const b = this.getMandatoryChildInstance(1);
     return this.Skia.ImageFilter.MakeBlend(mode, a, b);
   }
 }
@@ -178,7 +171,7 @@ export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<Runtime
     if (uniforms) {
       processUniforms(source, uniforms, rtb);
     }
-    const input = this.getChild<SkImageFilter>(0);
+    const input = this.getOptionalChildInstance(0);
     return this.Skia.ImageFilter.MakeRuntimeShader(rtb, null, input);
   }
 }

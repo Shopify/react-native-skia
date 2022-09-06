@@ -13,12 +13,39 @@ import { DeclarationType, NodeType } from "../../types";
 import { enumKey } from "../datatypes/Enum";
 import { processPath } from "../datatypes";
 
-export class DiscretePathEffectNode extends JsiDeclarationNode<
-  DiscretePathEffectProps,
-  SkPathEffect
-> {
+abstract class PathEffectDeclaration<
+  P,
+  Nullable extends null | never = never
+> extends JsiDeclarationNode<P, SkPathEffect, Nullable> {
+  constructor(Skia: Skia, type: NodeType, props: P) {
+    super(Skia, DeclarationType.PathEffect, type, props);
+  }
+
+  getOptionalChildInstance(index: number) {
+    const child = this._children[index];
+    if (!child) {
+      return null;
+    }
+    return this.getMandatoryChildInstance(index);
+  }
+
+  getMandatoryChildInstance(index: number) {
+    const child = this._children[index];
+    if (child instanceof JsiDeclarationNode) {
+      if (child.isPathEffect()) {
+        return child.get();
+      } else {
+        throw new Error(`Found invalid child ${child.type} in ${this.type}`);
+      }
+    } else {
+      throw new Error(`Found invalid child ${child.type} in ${this.type}`);
+    }
+  }
+}
+
+export class DiscretePathEffectNode extends PathEffectDeclaration<DiscretePathEffectProps> {
   constructor(Skia: Skia, props: DiscretePathEffectProps) {
-    super(Skia, DeclarationType.PathEffect, NodeType.DiscretePathEffect, props);
+    super(Skia, NodeType.DiscretePathEffect, props);
   }
 
   get() {
@@ -28,13 +55,12 @@ export class DiscretePathEffectNode extends JsiDeclarationNode<
   }
 }
 
-export class Path2DPathEffectNode extends JsiDeclarationNode<
+export class Path2DPathEffectNode extends PathEffectDeclaration<
   Path2DPathEffectProps,
-  SkPathEffect,
   null
 > {
   constructor(Skia: Skia, props: Path2DPathEffectProps) {
-    super(Skia, DeclarationType.PathEffect, NodeType.Path2DPathEffect, props);
+    super(Skia, NodeType.Path2DPathEffect, props);
   }
 
   get() {
@@ -45,12 +71,9 @@ export class Path2DPathEffectNode extends JsiDeclarationNode<
   }
 }
 
-export class DashPathEffectNode extends JsiDeclarationNode<
-  DashPathEffectProps,
-  SkPathEffect
-> {
+export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProps> {
   constructor(Skia: Skia, props: DashPathEffectProps) {
-    super(Skia, DeclarationType.PathEffect, NodeType.DashPathEffect, props);
+    super(Skia, NodeType.DashPathEffect, props);
   }
 
   get() {
@@ -60,13 +83,12 @@ export class DashPathEffectNode extends JsiDeclarationNode<
   }
 }
 
-export class CornerPathEffectNode extends JsiDeclarationNode<
+export class CornerPathEffectNode extends PathEffectDeclaration<
   CornerPathEffectProps,
-  SkPathEffect,
   null
 > {
   constructor(Skia: Skia, props: CornerPathEffectProps) {
-    super(Skia, DeclarationType.PathEffect, NodeType.CornerPathEffect, props);
+    super(Skia, NodeType.CornerPathEffect, props);
   }
 
   get() {
@@ -92,27 +114,26 @@ export class CornerPathEffectNode extends JsiDeclarationNode<
 //   }
 // }
 
-export class SumPathEffectNode extends JsiDeclarationNode<null, SkPathEffect> {
+export class SumPathEffectNode extends PathEffectDeclaration<null> {
   constructor(Skia: Skia) {
-    super(Skia, DeclarationType.PathEffect, NodeType.SumPathEffect, null);
+    super(Skia, NodeType.SumPathEffect, null);
   }
 
   get() {
     // TODO: compose children
     return this.Skia.PathEffect.MakeSum(
-      this.getChild<SkPathEffect>(0),
-      this.getChild<SkPathEffect>(1)
+      this.getMandatoryChildInstance(0),
+      this.getMandatoryChildInstance(1)
     );
   }
 }
 
-export class Line2DPathEffectNode extends JsiDeclarationNode<
+export class Line2DPathEffectNode extends PathEffectDeclaration<
   Line2DPathEffectProps,
-  SkPathEffect,
   null
 > {
   constructor(Skia: Skia, props: Line2DPathEffectProps) {
-    super(Skia, DeclarationType.PathEffect, NodeType.Line2DPathEffect, props);
+    super(Skia, NodeType.Line2DPathEffect, props);
   }
 
   get() {
@@ -122,13 +143,12 @@ export class Line2DPathEffectNode extends JsiDeclarationNode<
   }
 }
 
-export class Path1DPathEffectNode extends JsiDeclarationNode<
+export class Path1DPathEffectNode extends PathEffectDeclaration<
   Path1DPathEffectProps,
-  SkPathEffect,
   null
 > {
   constructor(Skia: Skia, props: Path1DPathEffectProps) {
-    super(Skia, DeclarationType.PathEffect, NodeType.Path1DPathEffect, props);
+    super(Skia, NodeType.Path1DPathEffect, props);
   }
 
   get() {

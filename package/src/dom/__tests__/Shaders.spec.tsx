@@ -114,8 +114,6 @@ half4 main(float2 xy) {
     filter.setProp("uniforms", { r: 25 });
     const jsiRoot = root as GroupNode;
     expect(jsiRoot.paint).toBeDefined();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((jsiRoot.paint! as any).cache).toBe(null);
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader2.png");
   });

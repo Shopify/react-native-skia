@@ -94,12 +94,6 @@ export abstract class JsiDeclarationNode<
 
   abstract get(): T | Nullable;
 
-  // TODO: add checks and option if the child can be null
-  getChild<C>(index: number) {
-    const child = this._children[index] as JsiDeclarationNode<unknown, C>;
-    return child.get();
-  }
-
   addChild(child: Node<unknown>): void {
     if (!(child instanceof JsiDeclarationNode)) {
       throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
