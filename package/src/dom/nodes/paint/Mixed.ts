@@ -56,23 +56,23 @@ export class BlendNode extends JsiDeclarationNode<
     const { Skia } = this;
     const blend = BlendMode[enumKey(this.props.mode)];
     if (this.declarationType === DeclarationType.ImageFilter) {
-      return (
-        this._children as ImageFilterDeclaration<unknown>[]
-      ).reduce<SkImageFilter | null>((inner, outer) => {
-        if (inner === null) {
-          return outer.get();
-        }
-        return Skia.ImageFilter.MakeBlend(blend, outer.get(), inner);
-      }, null) as SkImageFilter;
+      return (this._children as ImageFilterDeclaration<unknown>[])
+        .reverse()
+        .reduce<SkImageFilter | null>((inner, outer) => {
+          if (inner === null) {
+            return outer.get();
+          }
+          return Skia.ImageFilter.MakeBlend(blend, outer.get(), inner);
+        }, null) as SkImageFilter;
     } else {
-      return (
-        this._children as ShaderDeclaration<unknown>[]
-      ).reduce<SkShader | null>((inner, outer) => {
-        if (inner === null) {
-          return outer.get();
-        }
-        return Skia.Shader.MakeBlend(blend, outer.get(), inner);
-      }, null) as SkShader;
+      return (this._children as ShaderDeclaration<unknown>[])
+        .reverse()
+        .reduce<SkShader | null>((inner, outer) => {
+          if (inner === null) {
+            return outer.get();
+          }
+          return Skia.Shader.MakeBlend(blend, outer.get(), inner);
+        }, null) as SkShader;
     }
   }
 }
