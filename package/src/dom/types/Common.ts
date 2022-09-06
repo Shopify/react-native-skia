@@ -70,7 +70,7 @@ export interface TransformProps {
 }
 
 export interface PaintProps extends ChildrenProps {
-  // TODO: check because DrawingProps as also paint?
+  // TODO: check because DrawingProps is also paint?: SkPaint
   paint?: SkPaint;
   color?: Color;
   strokeWidth?: number;
