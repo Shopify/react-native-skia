@@ -16,6 +16,7 @@ import type {
   RuntimeShaderImageFilterProps,
   DisplacementMapImageFilterProps,
   MorphologyImageFilterProps,
+  BlendProps,
 } from "./ImageFilters";
 import type { DeclarationNode, RenderNode } from "./Node";
 import type {
@@ -188,4 +189,9 @@ export interface SkDOM {
   Line2DPathEffect(
     props: Line2DPathEffectProps
   ): NullablePathEffectNode<Line2DPathEffectProps>;
+
+  // Mixed
+  Blend(
+    props: BlendProps
+  ): DeclarationNode<BlendProps, SkShader | SkImageFilter>;
 }

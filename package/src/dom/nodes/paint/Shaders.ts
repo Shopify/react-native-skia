@@ -5,7 +5,7 @@ import {
   TileMode,
 } from "../../../skia/types";
 import type { SkShader, Skia } from "../../../skia/types";
-import { JsiLeafDeclarationNode, JsiDeclarationNode } from "../Node";
+import { JsiDeclarationNode } from "../Node";
 import type {
   ColorProps,
   FractalNoiseProps,
@@ -28,9 +28,18 @@ import {
   rect2rect,
 } from "../datatypes";
 
-export class ShaderNode extends JsiDeclarationNode<ShaderProps, SkShader> {
+export abstract class ShaderDeclaration<P> extends JsiDeclarationNode<
+  P,
+  SkShader
+> {
+  constructor(Skia: Skia, type: NodeType, props: P) {
+    super(Skia, DeclarationType.Shader, type, props);
+  }
+}
+
+export class ShaderNode extends ShaderDeclaration<ShaderProps> {
   constructor(Skia: Skia, props: ShaderProps) {
-    super(Skia, DeclarationType.Shader, NodeType.Shader, props);
+    super(Skia, NodeType.Shader, props);
   }
 
   get() {
@@ -45,12 +54,9 @@ export class ShaderNode extends JsiDeclarationNode<ShaderProps, SkShader> {
   }
 }
 
-export class ImageShaderNode extends JsiLeafDeclarationNode<
-  ImageShaderProps,
-  SkShader
-> {
+export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
   constructor(Skia: Skia, props: ImageShaderProps) {
-    super(Skia, DeclarationType.Shader, NodeType.ImageShader, props);
+    super(Skia, NodeType.ImageShader, props);
   }
 
   get() {
@@ -78,9 +84,9 @@ export class ImageShaderNode extends JsiLeafDeclarationNode<
   }
 }
 
-export class ColorNode extends JsiLeafDeclarationNode<ColorProps, SkShader> {
+export class ColorNode extends ShaderDeclaration<ColorProps> {
   constructor(Skia: Skia, props: ColorProps) {
-    super(Skia, DeclarationType.Shader, NodeType.ColorShader, props);
+    super(Skia, NodeType.ColorShader, props);
   }
 
   get() {
@@ -88,12 +94,10 @@ export class ColorNode extends JsiLeafDeclarationNode<ColorProps, SkShader> {
     return this.Skia.Shader.MakeColor(processColor(this.Skia, color, 1));
   }
 }
-export class TurbulenceNode extends JsiLeafDeclarationNode<
-  TurbulenceProps,
-  SkShader
-> {
+
+export class TurbulenceNode extends ShaderDeclaration<TurbulenceProps> {
   constructor(Skia: Skia, props: TurbulenceProps) {
-    super(Skia, DeclarationType.Shader, NodeType.Turbulence, props);
+    super(Skia, NodeType.Turbulence, props);
   }
 
   get() {
@@ -109,12 +113,9 @@ export class TurbulenceNode extends JsiLeafDeclarationNode<
   }
 }
 
-export class FractalNoiseNode extends JsiLeafDeclarationNode<
-  FractalNoiseProps,
-  SkShader
-> {
+export class FractalNoiseNode extends ShaderDeclaration<FractalNoiseProps> {
   constructor(Skia: Skia, props: FractalNoiseProps) {
-    super(Skia, DeclarationType.Shader, NodeType.FractalNoise, props);
+    super(Skia, NodeType.FractalNoise, props);
   }
 
   get() {
@@ -130,12 +131,9 @@ export class FractalNoiseNode extends JsiLeafDeclarationNode<
   }
 }
 
-export class LinearGradientNode extends JsiLeafDeclarationNode<
-  LinearGradientProps,
-  SkShader
-> {
+export class LinearGradientNode extends ShaderDeclaration<LinearGradientProps> {
   constructor(Skia: Skia, props: LinearGradientProps) {
-    super(Skia, DeclarationType.Shader, NodeType.LinearGradient, props);
+    super(Skia, NodeType.LinearGradient, props);
   }
 
   get() {
@@ -154,12 +152,9 @@ export class LinearGradientNode extends JsiLeafDeclarationNode<
   }
 }
 
-export class RadialGradientNode extends JsiLeafDeclarationNode<
-  RadialGradientProps,
-  SkShader
-> {
+export class RadialGradientNode extends ShaderDeclaration<RadialGradientProps> {
   constructor(Skia: Skia, props: RadialGradientProps) {
-    super(Skia, DeclarationType.Shader, NodeType.RadialGradient, props);
+    super(Skia, NodeType.RadialGradient, props);
   }
 
   get() {
@@ -178,12 +173,9 @@ export class RadialGradientNode extends JsiLeafDeclarationNode<
   }
 }
 
-export class SweepGradientNode extends JsiLeafDeclarationNode<
-  SweepGradientProps,
-  SkShader
-> {
+export class SweepGradientNode extends ShaderDeclaration<SweepGradientProps> {
   constructor(Skia: Skia, props: SweepGradientProps) {
-    super(Skia, DeclarationType.Shader, NodeType.SweepGradient, props);
+    super(Skia, NodeType.SweepGradient, props);
   }
 
   get() {
@@ -204,17 +196,9 @@ export class SweepGradientNode extends JsiLeafDeclarationNode<
   }
 }
 
-export class TwoPointConicalGradientNode extends JsiLeafDeclarationNode<
-  TwoPointConicalGradientProps,
-  SkShader
-> {
+export class TwoPointConicalGradientNode extends ShaderDeclaration<TwoPointConicalGradientProps> {
   constructor(Skia: Skia, props: TwoPointConicalGradientProps) {
-    super(
-      Skia,
-      DeclarationType.Shader,
-      NodeType.TwoPointConicalGradient,
-      props
-    );
+    super(Skia, NodeType.TwoPointConicalGradient, props);
   }
 
   get() {

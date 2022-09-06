@@ -47,3 +47,7 @@ export interface DisplacementMapImageFilterProps extends ChildrenProps {
   channelY: SkEnum<typeof ColorChannel>;
   scale: number;
 }
+
+export interface BlendProps extends ChildrenProps {
+  mode: SkEnum<typeof BlendMode>;
+}

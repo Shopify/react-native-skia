@@ -49,7 +49,10 @@ import type {
   LerpColorFilterProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
-import type { MorphologyImageFilterProps } from "../dom/types/ImageFilters";
+import type {
+  BlendProps,
+  MorphologyImageFilterProps,
+} from "../dom/types/ImageFilters";
 import type { PaintNode } from "../dom/nodes/PaintNode";
 
 import type { Container } from "./Container";
@@ -124,6 +127,9 @@ declare global {
       skCornerPathEffect: SkiaProps<CornerPathEffectProps>;
       skSumPathEffect: ChildrenProps;
       skLine2DPathEffect: SkiaProps<Line2DPathEffectProps>;
+
+      // Mixed declarations
+      skBlend: SkiaProps<BlendProps>;
     }
   }
 }
@@ -244,6 +250,9 @@ export const createNode = (
       return Sk.SumPathEffect();
     case NodeType.Line2DPathEffect:
       return Sk.Line2DPathEffect(props);
+    // Mixed
+    case NodeType.Blend:
+      return Sk.Blend(props);
     default:
       return exhaustiveCheck(type);
   }

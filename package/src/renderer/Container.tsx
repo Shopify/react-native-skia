@@ -15,7 +15,7 @@ export class Container {
     public depMgr: DependencyManager,
     public redraw: () => void
   ) {
-    this._root = Sk.Group();
+    this._root = this.Sk.Group();
   }
 
   draw(ctx: DrawingContext) {
@@ -28,6 +28,6 @@ export class Container {
 
   clear() {
     // TODO: unscribe all
-    this._root = Sk.Group();
+    this._root = this.Sk.Group();
   }
 }

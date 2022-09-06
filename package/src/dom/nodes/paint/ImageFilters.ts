@@ -54,7 +54,7 @@ const MakeInnerShadow = (
   );
 };
 
-abstract class ImageFilterDeclaration<
+export abstract class ImageFilterDeclaration<
   P,
   Nullable extends null | never = never
 > extends JsiDeclarationNode<P, SkImageFilter, Nullable> {

@@ -40,6 +40,7 @@ import type {
 } from "../types";
 import type {
   BlendImageFilterProps,
+  BlendProps,
   DisplacementMapImageFilterProps,
   DropShadowImageFilterProps,
   MorphologyImageFilterProps,
@@ -90,6 +91,7 @@ import {
   Path2DPathEffectNode,
   SumPathEffectNode,
   Line2DPathEffectNode,
+  BlendNode,
 } from "./paint";
 import {
   MatrixColorFilterNode,
@@ -325,5 +327,9 @@ export class JsiSkDOM implements SkDOM {
 
   Line2DPathEffect(props: Line2DPathEffectProps) {
     return new Line2DPathEffectNode(this.Skia, props);
+  }
+
+  Blend(props: BlendProps) {
+    return new BlendNode(this.Skia, props);
   }
 }
