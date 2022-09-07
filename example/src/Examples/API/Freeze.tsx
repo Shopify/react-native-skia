@@ -10,7 +10,7 @@ import {
 } from "@shopify/react-native-skia";
 
 const size = 200;
-const n = 99;
+const n = 49;
 
 export const FreezeExample = () => {
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 32);
@@ -24,11 +24,11 @@ export const FreezeExample = () => {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1, margin: 50 }} debug>
+    <Canvas style={{ flex: 1, margin: 50 }}>
       <Group origin={{ x: size / 2, y: size / 2 }} transform={transform}>
         <Checkerboard color="black" />
       </Group>
-      {font && <Text x={20} y={size + 100} text={`n = ${n}`} font={font} />}
+      {font && <Text x={20} y={size + 100} text={`n = ${n * n}`} font={font} />}
     </Canvas>
   );
 };
