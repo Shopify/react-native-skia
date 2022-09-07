@@ -31,6 +31,18 @@ import { JsiNode, JsiDeclarationNode } from "./Node";
 import type { PaintContext } from "./PaintContext";
 import { enumKey } from "./datatypes/Enum";
 
+const paintProps = [
+  "color",
+  "strokeWidth",
+  "blendMode",
+  "strokeCap",
+  "strokeJoin",
+  "strokeMiter",
+  "style",
+  "antiAlias",
+  "opacity",
+];
+
 interface PaintCache {
   parent: SkPaint;
   child: SkPaint;
@@ -54,11 +66,15 @@ export abstract class JsiRenderNode<P extends GroupProps>
   setProps(props: P) {
     super.setProps(props);
     this.onPropChange();
+    this.paintCache = null;
   }
 
   setProp<K extends keyof P>(key: K, value: P[K]) {
     super.setProp(key, value);
     this.onPropChange();
+    if (paintProps.includes(key as string)) {
+      this.paintCache = null;
+    }
   }
 
   protected onPropChange() {
@@ -66,7 +82,6 @@ export abstract class JsiRenderNode<P extends GroupProps>
     this.clipPath = undefined;
     this.clipRect = undefined;
     this.clipRRect = undefined;
-    this.paintCache = null;
     this.computeMatrix();
     this.computeClip();
   }
