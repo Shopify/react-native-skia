@@ -7,6 +7,8 @@ import {
   ColorMatrix,
   Group,
   Image,
+  Lerp,
+  LinearToSRGBGamma,
   SRGBToLinearGamma,
 } from "../components";
 
@@ -59,5 +61,34 @@ describe("Color Filters", () => {
       </Group>
     );
     processResult(surface, docPath("color-filters/composition.png"));
+  });
+  it("should use linear interpolation between two color matrices", () => {
+    const image = loadImage("skia/__tests__/assets/oslo.jpg");
+    const blackAndWhite = [
+      0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
+    ];
+    const purple = [
+      1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
+    ];
+    const surface = drawOnNode(
+      <>
+        <Image
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          image={image}
+          fit="cover"
+        >
+          <LinearToSRGBGamma>
+            <Lerp t={0.5}>
+              <ColorMatrix matrix={purple} />
+              <ColorMatrix matrix={blackAndWhite} />
+            </Lerp>
+          </LinearToSRGBGamma>
+        </Image>
+      </>
+    );
+    processResult(surface, docPath("color-filters/lerp.png"));
   });
 });
