@@ -8,6 +8,7 @@ import type {
   SkPaint,
   SkImageFilter,
   Skia,
+  SkPathEffect,
 } from "../../skia/types";
 import {
   StrokeCap,
@@ -27,6 +28,7 @@ import type {
   DeclarationNode,
 } from "../types";
 import { DeclarationType } from "../types";
+import type { SkColorFilter } from "../../skia/types/ColorFilter/ColorFilter";
 
 import { isPathDef, processPath } from "./datatypes";
 import { JsiNode, JsiDeclarationNode } from "./Node";
@@ -81,7 +83,13 @@ const concatPaint = (
     paint.setBlendMode(blendMode);
   }
   if (colorFilter !== undefined) {
-    paint.setColorFilter(colorFilter);
+    const composition = colorFilter.reduce<SkColorFilter | null>((c, i) => {
+      if (c === null) {
+        return i;
+      }
+      return Skia.ColorFilter.MakeCompose(i, c);
+    }, null);
+    paint.setColorFilter(composition);
   }
   if (imageFilter !== undefined) {
     const composition = imageFilter.reduce<SkImageFilter | null>((c, i) => {
@@ -96,7 +104,13 @@ const concatPaint = (
     paint.setMaskFilter(maskFilter);
   }
   if (pathEffect !== undefined) {
-    paint.setPathEffect(pathEffect);
+    const composition = pathEffect.reduce<SkPathEffect | null>((c, i) => {
+      if (c === null) {
+        return i;
+      }
+      return Skia.PathEffect.MakeCompose(i, c);
+    }, null);
+    paint.setPathEffect(composition);
   }
   if (alpha !== undefined) {
     paint.setAlphaf(alpha * opacity);
@@ -180,7 +194,10 @@ export abstract class JsiRenderNode<P extends GroupProps>
         }
       });
     } else if (child.declarationType === DeclarationType.PathEffect) {
-      this.paint.pathEffect = child.get();
+      if (this.paint.pathEffect === undefined) {
+        this.paint.pathEffect = [];
+      }
+      this.paint.pathEffect.push(child.get());
       child.setInvalidate(() => {
         if (this.paint) {
           this.paint.pathEffect = child.get();
@@ -204,7 +221,10 @@ export abstract class JsiRenderNode<P extends GroupProps>
         }
       });
     } else if (child.declarationType === DeclarationType.ColorFilter) {
-      this.paint.colorFilter = child.get();
+      if (this.paint.colorFilter === undefined) {
+        this.paint.colorFilter = [];
+      }
+      this.paint.colorFilter.push(child.get());
       child.setInvalidate(() => {
         if (this.paint) {
           this.paint.colorFilter = child.get();
