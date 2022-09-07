@@ -16,9 +16,11 @@ import type {
   SkPicture,
   SkSVG,
   SkPaint,
+  SkRect,
 } from "../../skia/types";
 
 import type {
+  ChildrenProps,
   CircleDef,
   Fit,
   GroupProps,
@@ -140,4 +142,17 @@ export interface GlyphsProps extends DrawingNodeProps {
   x: number;
   y: number;
   glyphs: Glyph[];
+}
+
+export interface BoxProps extends ChildrenProps {
+  box: SkRRect | SkRect;
+}
+
+export interface BoxShadowProps {
+  dx?: number;
+  dy?: number;
+  spread?: number;
+  blur: number;
+  color?: Color;
+  inner?: boolean;
 }

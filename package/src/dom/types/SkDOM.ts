@@ -44,6 +44,8 @@ import type {
   PictureProps,
   ImageSVGProps,
   DrawingNodeProps,
+  BoxProps,
+  BoxShadowProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -194,6 +196,9 @@ export interface SkDOM {
   Blend(
     props: BlendProps
   ): DeclarationNode<BlendProps, SkShader | SkImageFilter>;
-
   BackdropFilter(props: ChildrenProps): RenderNode<ChildrenProps>;
+  Box(props: BoxProps): RenderNode<BoxProps>;
+  BoxShadow(
+    props: BoxShadowProps
+  ): DeclarationNode<BoxShadowProps, BoxShadowProps>;
 }

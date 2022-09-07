@@ -6,5 +6,5 @@ import type { DisplacementMapImageFilterProps } from "../../../dom/types";
 export const DisplacementMap = (
   props: SkiaProps<DisplacementMapImageFilterProps>
 ) => {
-  return <skDisplacementMap {...props} />;
+  return <skDisplacementMapImageFilter {...props} />;
 };

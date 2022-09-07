@@ -1,6 +1,5 @@
-export enum NodeType {
-  Group = "skGroup",
-
+export const enum NodeType {
+  // Shaders
   Shader = "skShader",
   ImageShader = "skImageShader",
   ColorShader = "skColorShader",
@@ -11,8 +10,10 @@ export enum NodeType {
   SweepGradient = "skSweepGradient",
   TwoPointConicalGradient = "skTwoPointConicalGradient",
 
+  // Mask Filters
   BlurMaskFilter = "skBlurMaskFilter",
 
+  // Path Effects
   DiscretePathEffect = "skDiscretePathEffect",
   DashPathEffect = "skDashPathEffect",
   Path1DPathEffect = "skPath1DPathEffect",
@@ -21,6 +22,7 @@ export enum NodeType {
   SumPathEffect = "skSumPathEffect",
   Line2DPathEffect = "skLine2DPathEffect",
 
+  // Color Filters
   MatrixColorFilter = "skMatrixColorFilter",
   BlendColorFilter = "skBlendColorFilter",
   LinearToSRGBGammaColorFilter = "skLinearToSRGBGammaColorFilter",
@@ -28,6 +30,7 @@ export enum NodeType {
   LumaColorFilter = "skLumaColorFilter",
   LerpColorFilter = "skLerpColorFilter",
 
+  // Image Filters
   OffsetImageFilter = "skOffsetImageFilter",
   DisplacementMapImageFilter = "skDisplacementMapImageFilter",
   BlurImageFilter = "skBlurImageFilter",
@@ -36,9 +39,14 @@ export enum NodeType {
   BlendImageFilter = "skBlendImageFilter",
   RuntimeShaderImageFilter = "skRuntimeShaderImageFilter",
 
+  // Mixed
   Blend = "skBlend",
   BackdropFilter = "skBackdropFilter",
+  Box = "skBox",
+  BoxShadow = "skBoxShadow",
 
+  // Drawings
+  Group = "skGroup",
   Drawing = "skDrawing",
   Paint = "skPaint",
   Circle = "skCircle",
@@ -61,7 +69,7 @@ export enum NodeType {
   ImageSVG = "skImageSVG",
 }
 
-export enum DeclarationType {
+export const enum DeclarationType {
   Paint,
   Shader,
   ImageFilter,

@@ -1,10 +1,15 @@
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
+import type { NodeType } from "../types";
 import type { CircleProps } from "../types/Drawings";
 
 describe("Drawings", () => {
   it("Hello World", () => {
+    // If there is a mismatch between the NodeType values and the intrasic element names,
+    // an static error will be thrown here.
+    const foo: JSX.IntrinsicElements[`${NodeType}`] = {};
+    expect(foo).toBeDefined();
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, vec } = importSkia();
     const c = vec(width / 2, height / 2);

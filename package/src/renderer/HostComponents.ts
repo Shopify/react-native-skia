@@ -47,6 +47,8 @@ import type {
   PictureProps,
   ImageSVGProps,
   LerpColorFilterProps,
+  BoxProps,
+  BoxShadowProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type {
@@ -96,7 +98,7 @@ declare global {
       skBlurImageFilter: SkiaProps<BlurImageFilterProps>;
       skOffsetImageFilter: SkiaProps<OffsetImageFilterProps>;
       skDropShadowImageFilter: SkiaProps<DropShadowImageFilterProps>;
-      skDisplacementMap: SkiaProps<DisplacementMapImageFilterProps>;
+      skDisplacementMapImageFilter: SkiaProps<DisplacementMapImageFilterProps>;
       skRuntimeShaderImageFilter: SkiaProps<RuntimeShaderImageFilterProps>;
       skMorphologyImageFilter: SkiaProps<MorphologyImageFilterProps>;
 
@@ -128,9 +130,11 @@ declare global {
       skSumPathEffect: ChildrenProps;
       skLine2DPathEffect: SkiaProps<Line2DPathEffectProps>;
 
-      // Mixed declarations
+      // Mixed declarations/drawings
       skBlend: SkiaProps<BlendProps>;
       skBackdropFilter: SkiaProps<ChildrenProps>;
+      skBox: SkiaProps<BoxProps>;
+      skBoxShadow: SkiaProps<BoxShadowProps>;
     }
   }
 }
@@ -256,6 +260,10 @@ export const createNode = (
       return Sk.Blend(props);
     case NodeType.BackdropFilter:
       return Sk.BackdropFilter(props);
+    case NodeType.Box:
+      return Sk.Box(props);
+    case NodeType.BoxShadow:
+      return Sk.BoxShadow(props);
     default:
       return exhaustiveCheck(type);
   }

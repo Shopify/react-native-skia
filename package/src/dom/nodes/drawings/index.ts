@@ -15,3 +15,4 @@ export * from "./PictureNode";
 export * from "./DiffRectNode";
 export * from "./ImageSVG";
 export * from "./BackdropFilterNode";
+export * from "./Box";

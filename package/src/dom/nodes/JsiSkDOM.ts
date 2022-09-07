@@ -37,6 +37,9 @@ import type {
   ImageSVGProps,
   LerpColorFilterProps,
   DrawingNodeProps,
+  BoxProps,
+  BoxShadowProps,
+  ChildrenProps,
 } from "../types";
 import type {
   BlendImageFilterProps,
@@ -54,7 +57,6 @@ import type {
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../types/PathEffects";
-import type { ChildrenProps } from "../../../lib/typescript/src/renderer/processors/Paint";
 
 import {
   FillNode,
@@ -77,6 +79,8 @@ import {
   PictureNode,
   ImageSVGNode,
   BackdropFilterNode,
+  BoxNode,
+  BoxShadowNode,
 } from "./drawings";
 import {
   BlendImageFilterNode,
@@ -337,5 +341,13 @@ export class JsiSkDOM implements SkDOM {
 
   BackdropFilter(props: ChildrenProps) {
     return new BackdropFilterNode(this.Skia, props);
+  }
+
+  Box(props: BoxProps) {
+    return new BoxNode(this.Skia, props);
+  }
+
+  BoxShadow(props: BoxShadowProps) {
+    return new BoxShadowNode(this.Skia, props);
   }
 }
