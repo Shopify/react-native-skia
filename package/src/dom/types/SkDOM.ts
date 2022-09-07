@@ -73,12 +73,10 @@ type ImageFilterNode<P> = DeclarationNode<P, SkImageFilter>;
 type PathEffectNode<P> = DeclarationNode<P, SkPathEffect>;
 type NullablePathEffectNode<P> = DeclarationNode<P, SkPathEffect, null>;
 
-// TODO: don't use a concrete type here
 type DrawingNode<P extends GroupProps> = RenderNode<P>;
 
 export interface SkDOM {
   Group(props?: GroupProps): RenderNode<GroupProps>;
-  // TODO: don't use a concrete type here
   Paint(props: PaintProps): DeclarationNode<PaintProps, SkPaint>;
 
   // Drawings

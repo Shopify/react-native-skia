@@ -41,5 +41,3 @@ describe("Drawings", () => {
     processResult(surface, "snapshots/render-nodes/simple2.png");
   });
 });
-
-// TODO: add test where each circle is not around a group

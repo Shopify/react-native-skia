@@ -47,9 +47,12 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
     const { source, uniforms, ...transform } = this.props;
     return source.makeShaderWithChildren(
       processUniforms(source, uniforms),
-      // TODO: fix it by creating the ShaderDeclaration subclass (e.g ImageFilterDeclaration)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.children().map((child) => (child as any).get()),
+      this.children()
+        .filter(
+          (child): child is JsiDeclarationNode<unknown, SkShader> =>
+            child instanceof JsiDeclarationNode && child.isShader()
+        )
+        .map((child) => child.get()),
       lm(this.Skia.Matrix(), transform)
     );
   }

@@ -73,7 +73,6 @@ declare global {
       skImage: SkiaProps<ImageProps>;
       skCircle: SkiaProps<CircleProps>;
       skPath: SkiaProps<PathProps>;
-      // TODO: rename to CustomDrawingProps
       skDrawing: SkiaProps<CustomDrawingNodeProps>;
       skLine: SkiaProps<LineProps>;
       skOval: SkiaProps<OvalProps>;
