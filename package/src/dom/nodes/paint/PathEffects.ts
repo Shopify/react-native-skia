@@ -22,6 +22,14 @@ abstract class PathEffectDeclaration<
     super(ctx, DeclarationType.PathEffect, type, props);
   }
 
+  compose(effect: SkPathEffect) {
+    const child = this._children[0];
+    if (child instanceof JsiDeclarationNode && child.isPathEffect()) {
+      return this.Skia.PathEffect.MakeCompose(effect, child.get());
+    }
+    return effect;
+  }
+
   getOptionalChildInstance(index: number) {
     const child = this._children[index];
     if (!child) {
@@ -50,9 +58,9 @@ export class DiscretePathEffectNode extends PathEffectDeclaration<DiscretePathEf
   }
 
   get() {
-    // TODO: compose children
     const { length, deviation, seed } = this.props;
-    return this.Skia.PathEffect.MakeDiscrete(length, deviation, seed);
+    const pe = this.Skia.PathEffect.MakeDiscrete(length, deviation, seed);
+    return this.compose(pe);
   }
 }
 
@@ -65,10 +73,13 @@ export class Path2DPathEffectNode extends PathEffectDeclaration<
   }
 
   get() {
-    // TODO: compose children
     const { matrix } = this.props;
     const path = processPath(this.Skia, this.props.path);
-    return this.Skia.PathEffect.MakePath2D(matrix, path);
+    const pe = this.Skia.PathEffect.MakePath2D(matrix, path);
+    if (pe === null) {
+      return null;
+    }
+    return this.compose(pe);
   }
 }
 
@@ -79,8 +90,8 @@ export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProp
 
   get() {
     const { intervals, phase } = this.props;
-    // TODO: compose children
-    return this.Skia.PathEffect.MakeDash(intervals, phase);
+    const pe = this.Skia.PathEffect.MakeDash(intervals, phase);
+    return this.compose(pe);
   }
 }
 
@@ -94,26 +105,13 @@ export class CornerPathEffectNode extends PathEffectDeclaration<
 
   get() {
     const { r } = this.props;
-    // TODO: compose children
-    return this.Skia.PathEffect.MakeCorner(r);
+    const pe = this.Skia.PathEffect.MakeCorner(r);
+    if (pe === null) {
+      return null;
+    }
+    return this.compose(pe);
   }
 }
-
-// export class ComposePathEffectNode extends JsiNestedDeclarationNode<
-//   null,
-//   SkPathEffect
-// > {
-//   constructor(Skia: Skia) {
-//     super(ctx, DeclarationType.PathEffect, NodeType.ComposePathEffect, null);
-//   }
-
-//   get() {
-//     // TODO: compose children
-//     return this.getRecursively(
-//       this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect)
-//     );
-//   }
-// }
 
 export class SumPathEffectNode extends PathEffectDeclaration<null> {
   constructor(ctx: NodeContext) {
@@ -121,7 +119,6 @@ export class SumPathEffectNode extends PathEffectDeclaration<null> {
   }
 
   get() {
-    // TODO: compose children
     return this.Skia.PathEffect.MakeSum(
       this.getMandatoryChildInstance(0),
       this.getMandatoryChildInstance(1)
@@ -139,8 +136,11 @@ export class Line2DPathEffectNode extends PathEffectDeclaration<
 
   get() {
     const { width, matrix } = this.props;
-    // TODO: compose children
-    return this.Skia.PathEffect.MakeLine2D(width, matrix);
+    const pe = this.Skia.PathEffect.MakeLine2D(width, matrix);
+    if (pe === null) {
+      return null;
+    }
+    return this.compose(pe);
   }
 }
 
@@ -155,12 +155,15 @@ export class Path1DPathEffectNode extends PathEffectDeclaration<
   get() {
     const { advance, phase, style } = this.props;
     const path = processPath(this.Skia, this.props.path);
-    // TODO: compose children
-    return this.Skia.PathEffect.MakePath1D(
+    const pe = this.Skia.PathEffect.MakePath1D(
       path,
       advance,
       phase,
       Path1DEffectStyle[enumKey(style)]
     );
+    if (pe === null) {
+      return null;
+    }
+    return this.compose(pe);
   }
 }

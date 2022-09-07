@@ -100,8 +100,6 @@ export abstract class JsiRenderNode<P extends GroupProps>
     super.insertChildBefore(child, before);
   }
 
-  // TODO: handle node removal. This is tricky.
-
   private computeClip() {
     const { clip } = this.props;
     if (clip) {

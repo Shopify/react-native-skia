@@ -125,7 +125,6 @@ export const skHostConfig: SkiaHostConfig = {
     const props = { ...pristineProps };
     const node = createNode(container, type, materialize(props));
     container.depMgr.subscribeNode(node, props);
-    (node as any)._depMgr = container.depMgr;
     return node;
   },
 
