@@ -24,6 +24,10 @@ export class DependencyManager {
     this.registerValues = registerValues;
   }
 
+  unsubscribeNodes(nodes: Node<unknown>[]) {
+    nodes.forEach((n) => this.unsubscribeNode(n));
+  }
+
   /**
    * Call to unsubscribe all value listeners from the given node based
    * on the current list of subscriptions for the node. This function

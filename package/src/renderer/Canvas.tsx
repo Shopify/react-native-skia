@@ -59,7 +59,9 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const [tick, setTick] = useState(0);
-    const redraw = useCallback(() => setTick((t) => t + 1), []);
+    const redraw = useCallback(() => {
+      setTick((t) => t + 1);
+    }, []);
 
     const registerValues = useCallback(
       (values: Array<SkiaValue<unknown>>) => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*global NodeJS*/
 import type { HostConfig } from "react-reconciler";
 
@@ -18,7 +19,7 @@ export const debug = (...args: Parameters<typeof console.log>) => {
 };
 
 type Instance = Node<unknown>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 type Props = any;
 type TextInstance = Node<unknown>;
 type SuspenseInstance = Instance;
@@ -124,6 +125,7 @@ export const skHostConfig: SkiaHostConfig = {
     const props = { ...pristineProps };
     const node = createNode(container, type, materialize(props));
     container.depMgr.subscribeNode(node, props);
+    (node as any)._depMgr = container.depMgr;
     return node;
   },
 
@@ -151,10 +153,6 @@ export const skHostConfig: SkiaHostConfig = {
   prepareForCommit(_containerInfo) {
     debug("prepareForCommit");
     return null;
-  },
-
-  finalizeContainerChildren: () => {
-    debug("finalizeContainerChildren");
   },
 
   resetAfterCommit(container) {
@@ -212,7 +210,10 @@ export const skHostConfig: SkiaHostConfig = {
 
   clearContainer: (container) => {
     debug("clearContainer");
-    container.clear();
+    container.root.children().forEach((child) => {
+      const nodes = container.root.removeChild(child);
+      container.depMgr.unsubscribeNodes(nodes);
+    });
   },
 
   preparePortalMount: () => {
@@ -220,13 +221,13 @@ export const skHostConfig: SkiaHostConfig = {
   },
 
   removeChild: (parent, child) => {
-    // TODO: unsubscribe
-    removeNode(parent, child);
+    const nodes = removeNode(parent, child);
+    (parent as any)._depMgr.unsubscribeNodes(nodes);
   },
 
   removeChildFromContainer: (container, child) => {
-    // TODO: unsubscribe
-    removeNode(container.root, child);
+    const nodes = removeNode(container.root, child);
+    container.depMgr.unsubscribeNodes(nodes);
   },
 
   insertInContainerBefore: (container, child, before) => {
@@ -248,6 +249,6 @@ const materialize = <P>(props: AnimatedProps<P>) => {
       result[key] = prop.selector(prop.value.current) as P[typeof key];
     }
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   return result as any;
 };

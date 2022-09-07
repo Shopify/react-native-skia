@@ -25,9 +25,4 @@ export class Container {
   get root() {
     return this._root;
   }
-
-  clear() {
-    // TODO: unscribe all
-    this._root = this.Sk.Group();
-  }
 }
