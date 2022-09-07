@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   useFont,
   Canvas,
@@ -14,25 +14,19 @@ const n = 99;
 
 export const FreezeExample = () => {
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 32);
-  const [color, setColor] = useState("black");
   const clock = useClockValue();
   const transform = useComputedValue(
     () => [{ translateY: 100 }, { rotate: (Math.PI * clock.current) / 4000 }],
     [clock]
   );
-  useEffect(() => {
-    const h = setInterval(() => {
-      setColor("#" + (Math.random().toString(16) + "00000").slice(2, 8));
-    }, 10000);
-    return () => clearInterval(h);
-  }, []);
+
   if (font === null) {
     return null;
   }
   return (
     <Canvas style={{ flex: 1, margin: 50 }} debug>
       <Group origin={{ x: size / 2, y: size / 2 }} transform={transform}>
-        <Checkerboard color={color} />
+        <Checkerboard color="black" />
       </Group>
       {font && <Text x={20} y={size + 100} text={`n = ${n}`} font={font} />}
     </Canvas>
