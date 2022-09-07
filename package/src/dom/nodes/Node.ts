@@ -29,6 +29,9 @@ export abstract class JsiNode<P> implements Node<P> {
   }
 
   setProp<K extends keyof P>(name: K, v: P[K]) {
+    if (name === "children") {
+      return;
+    }
     this.props[name] = v;
   }
 

@@ -1,7 +1,14 @@
 import React from "react";
 
 import { docPath, processResult } from "../../__tests__/setup";
-import { BlendColor, Circle, ColorMatrix, Group, Image } from "../components";
+import {
+  BlendColor,
+  Circle,
+  ColorMatrix,
+  Group,
+  Image,
+  SRGBToLinearGamma,
+} from "../components";
 
 import { drawOnNode, height, width, loadImage } from "./setup";
 
@@ -39,5 +46,18 @@ describe("Color Filters", () => {
       </>
     );
     processResult(surface, docPath("color-filters/color-blend.png"));
+  });
+  it("should use composition", () => {
+    const r = width / 2;
+    const surface = drawOnNode(
+      <Group>
+        <SRGBToLinearGamma>
+          <BlendColor color="lightblue" mode="srcIn" />
+        </SRGBToLinearGamma>
+        <Circle cx={r} cy={r} r={r} />
+        <Circle cx={2 * r} cy={r} r={r} color="red" />
+      </Group>
+    );
+    processResult(surface, docPath("color-filters/composition.png"));
   });
 });
