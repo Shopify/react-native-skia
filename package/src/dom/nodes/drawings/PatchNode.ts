@@ -1,13 +1,13 @@
-import type { Skia } from "../../../skia/types";
 import { BlendMode } from "../../../skia/types";
 import type { DrawingContext, PatchProps } from "../../types";
 import { NodeType } from "../../types";
 import { enumKey, processColor } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class PatchNode extends JsiDrawingNode<PatchProps, null> {
-  constructor(Skia: Skia, props: PatchProps) {
-    super(Skia, NodeType.Patch, props);
+  constructor(ctx: NodeContext, props: PatchProps) {
+    super(ctx, NodeType.Patch, props);
   }
 
   deriveProps() {

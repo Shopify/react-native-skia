@@ -1,7 +1,8 @@
 import type { BlendProps } from "../../types/ImageFilters";
-import type { SkShader, SkImageFilter, Skia } from "../../../skia/types";
+import type { SkShader, SkImageFilter } from "../../../skia/types";
 import { BlendMode } from "../../../skia/types";
 import { DeclarationType, NodeType } from "../../types/NodeType";
+import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import type { Node } from "../../types";
 import { enumKey } from "../datatypes";
@@ -13,8 +14,8 @@ export class BlendNode extends JsiDeclarationNode<
   BlendProps,
   SkShader | SkImageFilter
 > {
-  constructor(Skia: Skia, props: BlendProps) {
-    super(Skia, DeclarationType.ImageFilter, NodeType.Blend, props);
+  constructor(ctx: NodeContext, props: BlendProps) {
+    super(ctx, DeclarationType.ImageFilter, NodeType.Blend, props);
   }
 
   private checkChild(

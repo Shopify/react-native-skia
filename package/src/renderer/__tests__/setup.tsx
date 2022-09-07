@@ -6,7 +6,6 @@ import React from "react";
 import type { ReactNode } from "react";
 import ReactReconciler from "react-reconciler";
 
-import { JsiSkApi } from "../../skia/web";
 import { DependencyManager } from "../DependencyManager";
 import { skHostConfig } from "../HostConfig";
 import { Container } from "../Container";
@@ -16,6 +15,7 @@ import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
 import { SkiaView } from "../../views/SkiaView.web";
+import { JsiSkApi } from "../../skia/web/JsiSkia";
 import { JsiSkDOM } from "../../dom/nodes";
 
 export const wait = (ms: number) =>
@@ -66,13 +66,17 @@ export const loadFont = (uri: string, ftSize?: number) => {
 };
 
 export const importSkia = (): typeof SkiaExports => require("../..");
+export const getSkDOM = () => {
+  const { Skia } = importSkia();
+  const depMgr = new DependencyManager(() => () => {});
+  return new JsiSkDOM({ Skia, depMgr });
+};
 
 beforeAll(async () => {
   await LoadSkiaWeb();
   const Skia = JsiSkApi(global.CanvasKit);
   global.SkiaApi = Skia;
   global.SkiaValueApi = ValueApi;
-  global.Sk = new JsiSkDOM(Skia);
 });
 
 export const PIXEL_RATIO = 3;
@@ -116,7 +120,7 @@ export const mountCanvas = (element: ReactNode) => {
   };
 
   const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Sk, depMgr, redraw);
+  const container = new Container(Skia, depMgr, redraw);
   skiaReconciler.createContainer(container, 0, false, null);
   const root = skiaReconciler.createContainer(container, 0, false, null);
   skiaReconciler.updateContainer(

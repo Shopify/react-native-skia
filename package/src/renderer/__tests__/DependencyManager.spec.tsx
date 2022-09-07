@@ -6,7 +6,7 @@ import { NodeType } from "../../dom/types/NodeType";
 
 class TestNode<P> implements Node<P> {
   type = NodeType.Circle;
-  _children: Node<unknown>[] = [];
+  _children: TestNode<unknown>[] = [];
 
   constructor(public mgr: DependencyManager, public props: P) {}
 
@@ -26,35 +26,31 @@ class TestNode<P> implements Node<P> {
     return this._children;
   }
 
-  descendant() {
-    const result: Node<unknown>[] = [];
-    for (const child of this._children) {
-      result.push(child);
-      result.push(...child.descendant());
-    }
-    return result;
+  addChild(child: Node<unknown>) {
+    this._children.push(child as TestNode<unknown>);
   }
 
-  addChild(child: Node<unknown>) {
-    this._children.push(child);
+  dispose() {
+    this.mgr.unsubscribeNode(this);
+    this._children.forEach((child) => child.dispose());
   }
 
   removeChild(child: Node<unknown>) {
-    const index = this._children.indexOf(child);
+    const index = this._children.indexOf(child as TestNode<unknown>);
     if (index !== -1) {
       const [node] = this._children.splice(index, 1);
-      return [node, ...node.descendant()];
+      node.dispose();
     }
     return [];
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
-    const index = this._children.indexOf(child);
+    const index = this._children.indexOf(child as TestNode<unknown>);
     if (index !== -1) {
       this._children.splice(index, 1);
     }
-    const beforeIndex = this._children.indexOf(before);
-    this._children.splice(beforeIndex, 0, child);
+    const beforeIndex = this._children.indexOf(before as TestNode<unknown>);
+    this._children.splice(beforeIndex, 0, child as TestNode<unknown>);
   }
 }
 

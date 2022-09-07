@@ -1,17 +1,18 @@
-import type { SkPaint, Skia } from "../../skia/types";
+import type { SkPaint } from "../../skia/types";
 import { StrokeCap, StrokeJoin, PaintStyle, BlendMode } from "../../skia/types";
 import type { DeclarationNode, PaintProps } from "../types";
 import { DeclarationType, NodeType } from "../types";
 
 import { enumKey } from "./datatypes";
+import type { NodeContext } from "./Node";
 import { JsiDeclarationNode } from "./Node";
 
 export class PaintNode
   extends JsiDeclarationNode<PaintProps, SkPaint>
   implements DeclarationNode<PaintProps, SkPaint>
 {
-  constructor(Skia: Skia, props: PaintProps = {}) {
-    super(Skia, DeclarationType.Paint, NodeType.Paint, props);
+  constructor(ctx: NodeContext, props: PaintProps = {}) {
+    super(ctx, DeclarationType.Paint, NodeType.Paint, props);
   }
 
   get() {

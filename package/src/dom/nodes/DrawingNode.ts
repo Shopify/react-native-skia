@@ -1,4 +1,3 @@
-import type { Skia } from "../../skia/types";
 import type {
   DrawingContext,
   DrawingNodeProps,
@@ -7,6 +6,7 @@ import type {
   RenderNode,
 } from "../types";
 
+import type { NodeContext } from "./Node";
 import { JsiDeclarationNode } from "./Node";
 import { PaintNode } from "./PaintNode";
 import { isSkPaint, JsiRenderNode } from "./RenderNode";
@@ -17,8 +17,8 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
 {
   protected derived?: C;
 
-  constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, type, props);
+  constructor(ctx: NodeContext, type: NodeType, props: P) {
+    super(ctx, type, props);
     this.derived = this.deriveProps();
   }
 

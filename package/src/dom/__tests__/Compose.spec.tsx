@@ -3,6 +3,7 @@ import {
   width,
   height,
   loadImage,
+  getSkDOM,
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
@@ -12,6 +13,7 @@ describe("Compose", () => {
     const size = width;
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, rect, vec } = importSkia();
+    const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
 
     const root = Sk.Group();

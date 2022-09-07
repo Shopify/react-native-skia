@@ -1,13 +1,14 @@
-import type { SkVertices, Skia } from "../../../skia/types";
+import type { SkVertices } from "../../../skia/types";
 import { VertexMode, BlendMode } from "../../../skia/types";
 import type { DrawingContext, VerticesProps } from "../../types";
 import { NodeType } from "../../types";
 import { enumKey, processColor } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class VerticesNode extends JsiDrawingNode<VerticesProps, SkVertices> {
-  constructor(Skia: Skia, props: VerticesProps) {
-    super(Skia, NodeType.Vertices, props);
+  constructor(ctx: NodeContext, props: VerticesProps) {
+    super(ctx, NodeType.Vertices, props);
   }
 
   protected deriveProps() {

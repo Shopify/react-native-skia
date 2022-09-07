@@ -1,12 +1,12 @@
-import type { Skia } from "../../../skia/types";
 import type { DrawingContext, ImageSVGProps } from "../../types";
 import { NodeType } from "../../types";
 import { processRect } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class ImageSVGNode extends JsiDrawingNode<ImageSVGProps, null> {
-  constructor(Skia: Skia, props: ImageSVGProps) {
-    super(Skia, NodeType.ImageSVG, props);
+  constructor(ctx: NodeContext, props: ImageSVGProps) {
+    super(ctx, NodeType.ImageSVG, props);
   }
 
   deriveProps() {

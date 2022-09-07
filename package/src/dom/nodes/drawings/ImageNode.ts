@@ -1,15 +1,16 @@
-import type { Skia, SkRect } from "../../../skia/types";
+import type { SkRect } from "../../../skia/types";
 import type { DrawingContext, ImageProps } from "../../types";
 import { NodeType } from "../../types";
 import { fitRects, processRect } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class ImageNode extends JsiDrawingNode<
   ImageProps,
   { src: SkRect; dst: SkRect }
 > {
-  constructor(Skia: Skia, props: ImageProps) {
-    super(Skia, NodeType.Image, props);
+  constructor(ctx: NodeContext, props: ImageProps) {
+    super(ctx, NodeType.Image, props);
   }
 
   deriveProps() {

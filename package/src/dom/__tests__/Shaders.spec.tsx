@@ -3,6 +3,7 @@ import {
   width,
   height,
   loadImage,
+  getSkDOM,
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
@@ -12,6 +13,7 @@ describe("Drawings", () => {
   it("Should display a simple shader", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia } = importSkia();
+    const Sk = getSkDOM();
     const source = Skia.RuntimeEffect.Make(`
     half4 main(float2 xy) {   
       return vec4(0.0, 1.0, 1.0, 1.0);
@@ -33,6 +35,7 @@ describe("Drawings", () => {
   it("Should display a nested shader", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia } = importSkia();
+    const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -74,6 +77,7 @@ half4 main(float2 xy) {
   it("Should have always the correct state", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, processTransform2d } = importSkia();
+    const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const source = Skia.RuntimeEffect.Make(`
 uniform shader image;

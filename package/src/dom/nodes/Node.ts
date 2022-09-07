@@ -9,15 +9,22 @@ import type {
 } from "../../skia/types";
 import type { Node, DeclarationNode, NodeType } from "../types";
 import { DeclarationType } from "../types";
+import type { DependencyManager } from "../../renderer/DependencyManager";
+
+export interface NodeContext {
+  Skia: Skia;
+  depMgr: DependencyManager;
+}
 
 export abstract class JsiNode<P> implements Node<P> {
-  protected _children: Node<unknown>[] = [];
+  protected _children: JsiNode<unknown>[] = [];
+  protected Skia: Skia;
+  protected depMgr: DependencyManager;
 
-  constructor(
-    protected Skia: Skia,
-    public type: NodeType,
-    protected props: P
-  ) {}
+  constructor(ctx: NodeContext, public type: NodeType, protected props: P) {
+    this.Skia = ctx.Skia;
+    this.depMgr = ctx.depMgr;
+  }
 
   setProps(props: P) {
     this.props = props;
@@ -35,35 +42,30 @@ export abstract class JsiNode<P> implements Node<P> {
     return this._children;
   }
 
-  descendant() {
-    const result: Node<unknown>[] = [];
-    for (const child of this._children) {
-      result.push(child);
-      result.push(...child.descendant());
-    }
-    return result;
+  addChild(child: Node<unknown>) {
+    this._children.push(child as JsiNode<unknown>);
   }
 
-  addChild(child: Node<unknown>) {
-    this._children.push(child);
+  dispose() {
+    this.depMgr.unsubscribeNode(this);
+    this._children.forEach((child) => child.dispose());
   }
 
   removeChild(child: Node<unknown>) {
-    const index = this._children.indexOf(child);
+    const index = this._children.indexOf(child as JsiNode<unknown>);
     if (index !== -1) {
       const [node] = this._children.splice(index, 1);
-      return [node, ...node.descendant()];
+      node.dispose();
     }
-    return [];
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
-    const index = this._children.indexOf(child);
+    const index = this._children.indexOf(child as JsiNode<unknown>);
     if (index !== -1) {
       this._children.splice(index, 1);
     }
-    const beforeIndex = this._children.indexOf(before);
-    this._children.splice(beforeIndex, 0, child);
+    const beforeIndex = this._children.indexOf(before as JsiNode<unknown>);
+    this._children.splice(beforeIndex, 0, child as JsiNode<unknown>);
   }
 }
 
@@ -80,12 +82,12 @@ export abstract class JsiDeclarationNode<
   private invalidate: Invalidate = () => {};
 
   constructor(
-    Skia: Skia,
+    ctx: NodeContext,
     public declarationType: DeclarationType,
     type: NodeType,
     props: P
   ) {
-    super(Skia, type, props);
+    super(ctx, type, props);
   }
 
   abstract get(): T | Nullable;
@@ -95,6 +97,7 @@ export abstract class JsiDeclarationNode<
       throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
     }
     super.addChild(child);
+    this.invalidate();
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
@@ -102,6 +105,12 @@ export abstract class JsiDeclarationNode<
       throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
     }
     super.insertChildBefore(child, before);
+    this.invalidate();
+  }
+
+  dispose() {
+    this.invalidate();
+    super.dispose();
   }
 
   setInvalidate(invalidate: Invalidate) {

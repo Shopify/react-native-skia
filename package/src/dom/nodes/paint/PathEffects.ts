@@ -1,5 +1,6 @@
 import { Path1DEffectStyle } from "../../../skia/types";
-import type { Skia, SkPathEffect } from "../../../skia/types";
+import type { SkPathEffect } from "../../../skia/types";
+import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import type {
   CornerPathEffectProps,
@@ -17,8 +18,8 @@ abstract class PathEffectDeclaration<
   P,
   Nullable extends null | never = never
 > extends JsiDeclarationNode<P, SkPathEffect, Nullable> {
-  constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, DeclarationType.PathEffect, type, props);
+  constructor(ctx: NodeContext, type: NodeType, props: P) {
+    super(ctx, DeclarationType.PathEffect, type, props);
   }
 
   getOptionalChildInstance(index: number) {
@@ -44,8 +45,8 @@ abstract class PathEffectDeclaration<
 }
 
 export class DiscretePathEffectNode extends PathEffectDeclaration<DiscretePathEffectProps> {
-  constructor(Skia: Skia, props: DiscretePathEffectProps) {
-    super(Skia, NodeType.DiscretePathEffect, props);
+  constructor(ctx: NodeContext, props: DiscretePathEffectProps) {
+    super(ctx, NodeType.DiscretePathEffect, props);
   }
 
   get() {
@@ -59,8 +60,8 @@ export class Path2DPathEffectNode extends PathEffectDeclaration<
   Path2DPathEffectProps,
   null
 > {
-  constructor(Skia: Skia, props: Path2DPathEffectProps) {
-    super(Skia, NodeType.Path2DPathEffect, props);
+  constructor(ctx: NodeContext, props: Path2DPathEffectProps) {
+    super(ctx, NodeType.Path2DPathEffect, props);
   }
 
   get() {
@@ -72,8 +73,8 @@ export class Path2DPathEffectNode extends PathEffectDeclaration<
 }
 
 export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProps> {
-  constructor(Skia: Skia, props: DashPathEffectProps) {
-    super(Skia, NodeType.DashPathEffect, props);
+  constructor(ctx: NodeContext, props: DashPathEffectProps) {
+    super(ctx, NodeType.DashPathEffect, props);
   }
 
   get() {
@@ -87,8 +88,8 @@ export class CornerPathEffectNode extends PathEffectDeclaration<
   CornerPathEffectProps,
   null
 > {
-  constructor(Skia: Skia, props: CornerPathEffectProps) {
-    super(Skia, NodeType.CornerPathEffect, props);
+  constructor(ctx: NodeContext, props: CornerPathEffectProps) {
+    super(ctx, NodeType.CornerPathEffect, props);
   }
 
   get() {
@@ -103,7 +104,7 @@ export class CornerPathEffectNode extends PathEffectDeclaration<
 //   SkPathEffect
 // > {
 //   constructor(Skia: Skia) {
-//     super(Skia, DeclarationType.PathEffect, NodeType.ComposePathEffect, null);
+//     super(ctx, DeclarationType.PathEffect, NodeType.ComposePathEffect, null);
 //   }
 
 //   get() {
@@ -115,8 +116,8 @@ export class CornerPathEffectNode extends PathEffectDeclaration<
 // }
 
 export class SumPathEffectNode extends PathEffectDeclaration<null> {
-  constructor(Skia: Skia) {
-    super(Skia, NodeType.SumPathEffect, null);
+  constructor(ctx: NodeContext) {
+    super(ctx, NodeType.SumPathEffect, null);
   }
 
   get() {
@@ -132,8 +133,8 @@ export class Line2DPathEffectNode extends PathEffectDeclaration<
   Line2DPathEffectProps,
   null
 > {
-  constructor(Skia: Skia, props: Line2DPathEffectProps) {
-    super(Skia, NodeType.Line2DPathEffect, props);
+  constructor(ctx: NodeContext, props: Line2DPathEffectProps) {
+    super(ctx, NodeType.Line2DPathEffect, props);
   }
 
   get() {
@@ -147,8 +148,8 @@ export class Path1DPathEffectNode extends PathEffectDeclaration<
   Path1DPathEffectProps,
   null
 > {
-  constructor(Skia: Skia, props: Path1DPathEffectProps) {
-    super(Skia, NodeType.Path1DPathEffect, props);
+  constructor(ctx: NodeContext, props: Path1DPathEffectProps) {
+    super(ctx, NodeType.Path1DPathEffect, props);
   }
 
   get() {

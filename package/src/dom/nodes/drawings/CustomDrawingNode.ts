@@ -1,14 +1,14 @@
-import type { Skia } from "../../../skia/types";
 import type { CustomDrawingNodeProps, DrawingContext } from "../../types";
 import { NodeType } from "../../types";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class CustomDrawingNode extends JsiDrawingNode<
   CustomDrawingNodeProps,
   null
 > {
-  constructor(Skia: Skia, props: CustomDrawingNodeProps) {
-    super(Skia, NodeType.Drawing, props);
+  constructor(ctx: NodeContext, props: CustomDrawingNodeProps) {
+    super(ctx, NodeType.Drawing, props);
   }
 
   deriveProps() {

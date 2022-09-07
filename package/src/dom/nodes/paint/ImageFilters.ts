@@ -1,4 +1,4 @@
-import type { SkImageFilter, Skia, SkColor } from "../../../skia/types";
+import type { SkImageFilter, SkColor, Skia } from "../../../skia/types";
 import {
   BlendMode,
   ColorChannel,
@@ -16,6 +16,7 @@ import type {
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
 import { processRadius, enumKey, processColor } from "../datatypes";
+import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 
 const Black = Float32Array.of(0, 0, 0, 1);
@@ -58,8 +59,8 @@ export abstract class ImageFilterDeclaration<
   P,
   Nullable extends null | never = never
 > extends JsiDeclarationNode<P, SkImageFilter, Nullable> {
-  constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, DeclarationType.ImageFilter, type, props);
+  constructor(ctx: NodeContext, type: NodeType, props: P) {
+    super(ctx, DeclarationType.ImageFilter, type, props);
   }
 
   getOptionalChildInstance(index: number) {
@@ -89,8 +90,8 @@ export abstract class ImageFilterDeclaration<
 }
 
 export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFilterProps> {
-  constructor(Skia: Skia, props: OffsetImageFilterProps) {
-    super(Skia, NodeType.OffsetImageFilter, props);
+  constructor(ctx: NodeContext, props: OffsetImageFilterProps) {
+    super(ctx, NodeType.OffsetImageFilter, props);
   }
 
   get() {
@@ -104,8 +105,8 @@ export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFil
 }
 
 export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<DisplacementMapImageFilterProps> {
-  constructor(Skia: Skia, props: DisplacementMapImageFilterProps) {
-    super(Skia, NodeType.DisplacementMapImageFilter, props);
+  constructor(ctx: NodeContext, props: DisplacementMapImageFilterProps) {
+    super(ctx, NodeType.DisplacementMapImageFilter, props);
   }
 
   get() {
@@ -121,8 +122,8 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
 }
 
 export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterProps> {
-  constructor(Skia: Skia, props: BlurImageFilterProps) {
-    super(Skia, NodeType.BlurImageFilter, props);
+  constructor(ctx: NodeContext, props: BlurImageFilterProps) {
+    super(ctx, NodeType.BlurImageFilter, props);
   }
 
   get() {
@@ -138,8 +139,8 @@ export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterP
 }
 
 export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadowImageFilterProps> {
-  constructor(Skia: Skia, props: DropShadowImageFilterProps) {
-    super(Skia, NodeType.BlurImageFilter, props);
+  constructor(ctx: NodeContext, props: DropShadowImageFilterProps) {
+    super(ctx, NodeType.BlurImageFilter, props);
   }
 
   get() {
@@ -164,8 +165,8 @@ export enum MorphologyOperator {
 }
 
 export class MorphologyImageFilterNode extends ImageFilterDeclaration<MorphologyImageFilterProps> {
-  constructor(Skia: Skia, props: MorphologyImageFilterProps) {
-    super(Skia, NodeType.MorphologyImageFilter, props);
+  constructor(ctx: NodeContext, props: MorphologyImageFilterProps) {
+    super(ctx, NodeType.MorphologyImageFilter, props);
   }
 
   get() {
@@ -180,8 +181,8 @@ export class MorphologyImageFilterNode extends ImageFilterDeclaration<Morphology
 }
 
 export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilterProps> {
-  constructor(Skia: Skia, props: BlendImageFilterProps) {
-    super(Skia, NodeType.BlendImageFilter, props);
+  constructor(ctx: NodeContext, props: BlendImageFilterProps) {
+    super(ctx, NodeType.BlendImageFilter, props);
   }
 
   get() {
@@ -193,8 +194,8 @@ export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilte
 }
 
 export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<RuntimeShaderImageFilterProps> {
-  constructor(Skia: Skia, props: RuntimeShaderImageFilterProps) {
-    super(Skia, NodeType.RuntimeShaderImageFilter, props);
+  constructor(ctx: NodeContext, props: RuntimeShaderImageFilterProps) {
+    super(ctx, NodeType.RuntimeShaderImageFilter, props);
   }
 
   get() {

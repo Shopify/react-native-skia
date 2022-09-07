@@ -1,4 +1,9 @@
-import { importSkia, width, height } from "../../renderer/__tests__/setup";
+import {
+  importSkia,
+  width,
+  height,
+  getSkDOM,
+} from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import type { NodeType } from "../types";
@@ -12,6 +17,7 @@ describe("Drawings", () => {
     expect(foo).toBeDefined();
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, vec } = importSkia();
+    const Sk = getSkDOM();
     const c = vec(width / 2, height / 2);
     const c1 = Skia.Color("#61bea2");
     const c2 = Skia.Color("#529ca0");

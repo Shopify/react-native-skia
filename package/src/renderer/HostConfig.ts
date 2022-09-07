@@ -211,8 +211,7 @@ export const skHostConfig: SkiaHostConfig = {
   clearContainer: (container) => {
     debug("clearContainer");
     container.root.children().forEach((child) => {
-      const nodes = container.root.removeChild(child);
-      container.depMgr.unsubscribeNodes(nodes);
+      container.root.removeChild(child);
     });
   },
 
@@ -221,13 +220,11 @@ export const skHostConfig: SkiaHostConfig = {
   },
 
   removeChild: (parent, child) => {
-    const nodes = removeNode(parent, child);
-    (parent as any)._depMgr.unsubscribeNodes(nodes);
+    removeNode(parent, child);
   },
 
   removeChildFromContainer: (container, child) => {
-    const nodes = removeNode(container.root, child);
-    container.depMgr.unsubscribeNodes(nodes);
+    removeNode(container.root, child);
   },
 
   insertInContainerBefore: (container, child, before) => {

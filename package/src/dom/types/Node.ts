@@ -20,9 +20,8 @@ export interface Node<P> {
   getProps(): P;
 
   children(): Node<unknown>[];
-  descendant(): Node<unknown>[];
   addChild(child: Node<unknown>): void;
-  removeChild(child: Node<unknown>): Node<unknown>[];
+  removeChild(child: Node<unknown>): void;
   insertChildBefore(child: Node<unknown>, before: Node<unknown>): void;
 }
 

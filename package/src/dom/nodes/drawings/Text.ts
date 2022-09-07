@@ -1,4 +1,4 @@
-import type { SkRSXform, SkTextBlob, Skia, SkPoint } from "../../../skia/types";
+import type { SkRSXform, SkTextBlob, SkPoint } from "../../../skia/types";
 import type {
   DrawingContext,
   TextBlobProps,
@@ -9,10 +9,11 @@ import { NodeType } from "../../types";
 import { processPath } from "../datatypes";
 import type { GlyphsProps } from "../../types/Drawings";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class TextNode extends JsiDrawingNode<TextProps, null> {
-  constructor(Skia: Skia, props: TextProps) {
-    super(Skia, NodeType.Text, props);
+  constructor(ctx: NodeContext, props: TextProps) {
+    super(ctx, NodeType.Text, props);
   }
 
   protected deriveProps() {
@@ -26,8 +27,8 @@ export class TextNode extends JsiDrawingNode<TextProps, null> {
 }
 
 export class TextPathNode extends JsiDrawingNode<TextPathProps, SkTextBlob> {
-  constructor(Skia: Skia, props: TextPathProps) {
-    super(Skia, NodeType.TextPath, props);
+  constructor(ctx: NodeContext, props: TextPathProps) {
+    super(ctx, NodeType.TextPath, props);
   }
 
   deriveProps() {
@@ -74,8 +75,8 @@ export class TextPathNode extends JsiDrawingNode<TextPathProps, SkTextBlob> {
 }
 
 export class TextBlobNode extends JsiDrawingNode<TextBlobProps, null> {
-  constructor(Skia: Skia, props: TextBlobProps) {
-    super(Skia, NodeType.TextBlob, props);
+  constructor(ctx: NodeContext, props: TextBlobProps) {
+    super(ctx, NodeType.TextBlob, props);
   }
 
   protected deriveProps() {
@@ -94,8 +95,8 @@ interface ProcessedGlyphs {
 }
 
 export class GlyphsNode extends JsiDrawingNode<GlyphsProps, ProcessedGlyphs> {
-  constructor(Skia: Skia, props: GlyphsProps) {
-    super(Skia, NodeType.Glyphs, props);
+  constructor(ctx: NodeContext, props: GlyphsProps) {
+    super(ctx, NodeType.Glyphs, props);
   }
 
   deriveProps() {

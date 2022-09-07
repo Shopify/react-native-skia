@@ -6,7 +6,6 @@ import type {
   SkRRect,
   SkPath,
   SkPaint,
-  Skia,
 } from "../../skia/types";
 import {
   StrokeCap,
@@ -27,6 +26,7 @@ import type {
 } from "../types";
 
 import { isPathDef, processPath } from "./datatypes";
+import type { NodeContext } from "./Node";
 import { JsiNode, JsiDeclarationNode } from "./Node";
 import type { PaintContext } from "./PaintContext";
 import { enumKey } from "./datatypes/Enum";
@@ -58,8 +58,8 @@ export abstract class JsiRenderNode<P extends GroupProps>
   clipRRect?: SkRRect;
   clipPath?: SkPath;
 
-  constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, type, props);
+  constructor(ctx: NodeContext, type: NodeType, props: P) {
+    super(ctx, type, props);
     this.onPropChange();
   }
 
@@ -87,17 +87,17 @@ export abstract class JsiRenderNode<P extends GroupProps>
   }
 
   addChild(child: Node<unknown>) {
-    super.addChild(child);
     if (child instanceof JsiDeclarationNode) {
       child.setInvalidate(() => (this.paintCache = null));
     }
+    super.addChild(child);
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
-    super.insertChildBefore(child, before);
     if (child instanceof JsiDeclarationNode) {
       child.setInvalidate(() => (this.paintCache = null));
     }
+    super.insertChildBefore(child, before);
   }
 
   // TODO: handle node removal. This is tricky.

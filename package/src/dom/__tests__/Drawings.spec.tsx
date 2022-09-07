@@ -1,4 +1,9 @@
-import { importSkia, width, height } from "../../renderer/__tests__/setup";
+import {
+  importSkia,
+  width,
+  height,
+  getSkDOM,
+} from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
@@ -7,6 +12,8 @@ describe("Drawings", () => {
   it("Hello World", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, vec } = importSkia();
+    const Sk = getSkDOM();
+
     const r = width * 0.33;
     // Root
     const root = Sk.Group({
@@ -33,6 +40,7 @@ describe("Drawings", () => {
   it("Should draw a path", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, processTransform2d } = importSkia();
+    const Sk = getSkDOM();
     const size = width;
     const path = Skia.Path.MakeFromSVGString(
       // eslint-disable-next-line max-len

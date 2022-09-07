@@ -1,5 +1,6 @@
-import type { Skia, SkMaskFilter } from "../../../skia/types";
+import type { SkMaskFilter } from "../../../skia/types";
 import { BlurStyle } from "../../../skia/types";
+import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import type { BlurMaskFilterProps } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
@@ -9,8 +10,8 @@ export class BlurMaskFilterNode extends JsiDeclarationNode<
   BlurMaskFilterProps,
   SkMaskFilter
 > {
-  constructor(Skia: Skia, props: BlurMaskFilterProps) {
-    super(Skia, DeclarationType.MaskFilter, NodeType.BlurMaskFilter, props);
+  constructor(ctx: NodeContext, props: BlurMaskFilterProps) {
+    super(ctx, DeclarationType.MaskFilter, NodeType.BlurMaskFilter, props);
   }
 
   get() {

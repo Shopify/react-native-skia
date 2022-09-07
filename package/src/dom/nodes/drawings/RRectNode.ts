@@ -1,14 +1,15 @@
-import type { Skia, SkRRect } from "../../../skia/types";
+import type { SkRRect } from "../../../skia/types";
 import type { DrawingContext, RoundedRectProps } from "../../types";
 import { NodeType } from "../../types";
 import { processRRect } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class RRectNode extends JsiDrawingNode<RoundedRectProps, SkRRect> {
   rect?: SkRRect;
 
-  constructor(Skia: Skia, props: RoundedRectProps) {
-    super(Skia, NodeType.RRect, props);
+  constructor(ctx: NodeContext, props: RoundedRectProps) {
+    super(ctx, NodeType.RRect, props);
   }
 
   protected deriveProps() {

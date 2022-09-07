@@ -3,6 +3,7 @@ import {
   width,
   height,
   PIXEL_RATIO,
+  getSkDOM,
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
@@ -12,6 +13,8 @@ describe("Paint", () => {
     const size = width;
     const { surface, canvas } = setupSkia(width, height);
     const { Skia, vec } = importSkia();
+    const Sk = getSkDOM();
+
     const r = size / 2;
 
     const root = Sk.Group();
@@ -28,6 +31,8 @@ describe("Paint", () => {
   it("should draw the color fill and strokes properly", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { vec, Skia } = importSkia();
+    const Sk = getSkDOM();
+
     const strokeWidth = 10 * PIXEL_RATIO;
     const c = vec(width / 2, height / 2);
     const r = (width - strokeWidth) / 2;
@@ -60,6 +65,8 @@ describe("Paint", () => {
   it("should use the opacity property properly", () => {
     const { surface, canvas } = setupSkia(width, height);
     const { vec, Skia } = importSkia();
+    const Sk = getSkDOM();
+
     const strokeWidth = 30 * PIXEL_RATIO;
     const r = width / 2 - strokeWidth / 2;
     const c = vec(width / 2, height / 2);

@@ -1,8 +1,9 @@
-import type { Skia, SkRRect } from "../../../skia/types";
+import type { SkRRect, Skia } from "../../../skia/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
 import type { DrawingContext } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
 import type { BoxShadowProps, BoxProps } from "../../types/Drawings";
+import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import { processColor } from "../datatypes";
 import { JsiRenderNode } from "../RenderNode";
@@ -39,8 +40,8 @@ export class BoxShadowNode extends JsiDeclarationNode<
   BoxShadowProps,
   BoxShadowProps
 > {
-  constructor(Skia: Skia, props: BoxShadowProps) {
-    super(Skia, DeclarationType.Unknown, NodeType.Box, props);
+  constructor(ctx: NodeContext, props: BoxShadowProps) {
+    super(ctx, DeclarationType.Unknown, NodeType.Box, props);
   }
 
   get() {
@@ -49,8 +50,8 @@ export class BoxShadowNode extends JsiDeclarationNode<
 }
 
 export class BoxNode extends JsiRenderNode<BoxProps> {
-  constructor(Skia: Skia, props: BoxProps) {
-    super(Skia, NodeType.Box, props);
+  constructor(ctx: NodeContext, props: BoxProps) {
+    super(ctx, NodeType.Box, props);
   }
 
   renderNode({ canvas, paint, opacity }: DrawingContext) {

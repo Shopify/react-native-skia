@@ -1,5 +1,6 @@
 import { BlendMode } from "../../../skia/types";
-import type { Skia, SkColorFilter } from "../../../skia/types";
+import type { SkColorFilter } from "../../../skia/types";
+import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import type {
   BlendColorFilterProps,
@@ -14,8 +15,8 @@ export abstract class ColorFilterDeclaration<
   P,
   Nullable extends null | never = never
 > extends JsiDeclarationNode<P, SkColorFilter, Nullable> {
-  constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, DeclarationType.ColorFilter, type, props);
+  constructor(ctx: NodeContext, type: NodeType, props: P) {
+    super(ctx, DeclarationType.ColorFilter, type, props);
   }
 
   compose(filter: SkColorFilter) {
@@ -28,8 +29,8 @@ export abstract class ColorFilterDeclaration<
 }
 
 export class MatrixColorFilterNode extends ColorFilterDeclaration<MatrixColorFilterProps> {
-  constructor(Skia: Skia, props: MatrixColorFilterProps) {
-    super(Skia, NodeType.MatrixColorFilter, props);
+  constructor(ctx: NodeContext, props: MatrixColorFilterProps) {
+    super(ctx, NodeType.MatrixColorFilter, props);
   }
 
   get() {
@@ -40,8 +41,8 @@ export class MatrixColorFilterNode extends ColorFilterDeclaration<MatrixColorFil
 }
 
 export class BlendColorFilterNode extends ColorFilterDeclaration<BlendColorFilterProps> {
-  constructor(Skia: Skia, props: BlendColorFilterProps) {
-    super(Skia, NodeType.BlendColorFilter, props);
+  constructor(ctx: NodeContext, props: BlendColorFilterProps) {
+    super(ctx, NodeType.BlendColorFilter, props);
   }
 
   get() {
@@ -53,8 +54,8 @@ export class BlendColorFilterNode extends ColorFilterDeclaration<BlendColorFilte
 }
 
 export class LinearToSRGBGammaColorFilterNode extends ColorFilterDeclaration<null> {
-  constructor(Skia: Skia) {
-    super(Skia, NodeType.LinearToSRGBGammaColorFilter, null);
+  constructor(ctx: NodeContext) {
+    super(ctx, NodeType.LinearToSRGBGammaColorFilter, null);
   }
 
   get() {
@@ -64,8 +65,8 @@ export class LinearToSRGBGammaColorFilterNode extends ColorFilterDeclaration<nul
 }
 
 export class SRGBToLinearGammaColorFilterNode extends ColorFilterDeclaration<null> {
-  constructor(Skia: Skia) {
-    super(Skia, NodeType.SRGBToLinearGammaColorFilter, null);
+  constructor(ctx: NodeContext) {
+    super(ctx, NodeType.SRGBToLinearGammaColorFilter, null);
   }
 
   get() {
@@ -75,8 +76,8 @@ export class SRGBToLinearGammaColorFilterNode extends ColorFilterDeclaration<nul
 }
 
 export class LumaColorFilterNode extends ColorFilterDeclaration<null> {
-  constructor(Skia: Skia) {
-    super(Skia, NodeType.LumaColorFilter, null);
+  constructor(ctx: NodeContext) {
+    super(ctx, NodeType.LumaColorFilter, null);
   }
 
   get() {
@@ -86,8 +87,8 @@ export class LumaColorFilterNode extends ColorFilterDeclaration<null> {
 }
 
 export class LerpColorFilterNode extends ColorFilterDeclaration<LerpColorFilterProps> {
-  constructor(Skia: Skia, props: LerpColorFilterProps) {
-    super(Skia, NodeType.LerpColorFilter, props);
+  constructor(ctx: NodeContext, props: LerpColorFilterProps) {
+    super(ctx, NodeType.LerpColorFilter, props);
   }
 
   get() {

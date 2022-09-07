@@ -1,4 +1,3 @@
-import type { Skia } from "../../skia/types";
 import type {
   PathProps,
   SkDOM,
@@ -121,233 +120,234 @@ import {
 import { MorphologyImageFilterNode } from "./paint/ImageFilters";
 import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
+import type { NodeContext } from "./Node";
 
 export class JsiSkDOM implements SkDOM {
-  constructor(private Skia: Skia) {}
+  constructor(private ctx: NodeContext) {}
 
   Group(props?: GroupProps) {
-    return new GroupNode(this.Skia, props ?? {});
+    return new GroupNode(this.ctx, props ?? {});
   }
 
   Paint(props: PaintProps) {
-    return new PaintNode(this.Skia, props);
+    return new PaintNode(this.ctx, props);
   }
 
   // Drawings
   Fill(props?: DrawingNodeProps) {
-    return new FillNode(this.Skia, props);
+    return new FillNode(this.ctx, props);
   }
 
   Image(props: ImageProps) {
-    return new ImageNode(this.Skia, props);
+    return new ImageNode(this.ctx, props);
   }
 
   Circle(props: CircleProps) {
-    return new CircleNode(this.Skia, props);
+    return new CircleNode(this.ctx, props);
   }
 
   Path(props: PathProps) {
-    return new PathNode(this.Skia, props);
+    return new PathNode(this.ctx, props);
   }
 
   CustomDrawing(props: CustomDrawingNodeProps) {
-    return new CustomDrawingNode(this.Skia, props);
+    return new CustomDrawingNode(this.ctx, props);
   }
 
   Line(props: LineProps) {
-    return new LineNode(this.Skia, props);
+    return new LineNode(this.ctx, props);
   }
 
   Oval(props: OvalProps) {
-    return new OvalNode(this.Skia, props);
+    return new OvalNode(this.ctx, props);
   }
 
   Patch(props: PatchProps) {
-    return new PatchNode(this.Skia, props);
+    return new PatchNode(this.ctx, props);
   }
 
   Points(props: PointsProps) {
-    return new PointsNode(this.Skia, props);
+    return new PointsNode(this.ctx, props);
   }
 
   Rect(props: RectProps) {
-    return new RectNode(this.Skia, props);
+    return new RectNode(this.ctx, props);
   }
 
   RRect(props: RoundedRectProps) {
-    return new RRectNode(this.Skia, props);
+    return new RRectNode(this.ctx, props);
   }
 
   Vertices(props: VerticesProps) {
-    return new VerticesNode(this.Skia, props);
+    return new VerticesNode(this.ctx, props);
   }
 
   Text(props: TextProps) {
-    return new TextNode(this.Skia, props);
+    return new TextNode(this.ctx, props);
   }
 
   TextPath(props: TextPathProps) {
-    return new TextPathNode(this.Skia, props);
+    return new TextPathNode(this.ctx, props);
   }
 
   TextBlob(props: TextBlobProps) {
-    return new TextBlobNode(this.Skia, props);
+    return new TextBlobNode(this.ctx, props);
   }
 
   Glyphs(props: GlyphsProps) {
-    return new GlyphsNode(this.Skia, props);
+    return new GlyphsNode(this.ctx, props);
   }
 
   DiffRect(props: DiffRectProps) {
-    return new DiffRectNode(this.Skia, props);
+    return new DiffRectNode(this.ctx, props);
   }
 
   Picture(props: PictureProps) {
-    return new PictureNode(this.Skia, props);
+    return new PictureNode(this.ctx, props);
   }
 
   ImageSVG(props: ImageSVGProps) {
-    return new ImageSVGNode(this.Skia, props);
+    return new ImageSVGNode(this.ctx, props);
   }
 
   // BlurMaskFilters
   BlurMaskFilter(props: BlurMaskFilterProps) {
-    return new BlurMaskFilterNode(this.Skia, props);
+    return new BlurMaskFilterNode(this.ctx, props);
   }
 
   // ImageFilters
   BlendImageFilter(props: BlendImageFilterProps) {
-    return new BlendImageFilterNode(this.Skia, props);
+    return new BlendImageFilterNode(this.ctx, props);
   }
 
   DropShadowImageFilter(props: DropShadowImageFilterProps) {
-    return new DropShadowImageFilterNode(this.Skia, props);
+    return new DropShadowImageFilterNode(this.ctx, props);
   }
 
   DisplacementMapImageFilter(props: DisplacementMapImageFilterProps) {
-    return new DisplacementMapImageFilterNode(this.Skia, props);
+    return new DisplacementMapImageFilterNode(this.ctx, props);
   }
 
   BlurImageFilter(props: BlurImageFilterProps) {
-    return new BlurImageFilterNode(this.Skia, props);
+    return new BlurImageFilterNode(this.ctx, props);
   }
 
   OffsetImageFilter(props: OffsetImageFilterProps) {
-    return new OffsetImageFilterNode(this.Skia, props);
+    return new OffsetImageFilterNode(this.ctx, props);
   }
 
   MorphologyImageFilter(props: MorphologyImageFilterProps) {
-    return new MorphologyImageFilterNode(this.Skia, props);
+    return new MorphologyImageFilterNode(this.ctx, props);
   }
 
   RuntimeShaderImageFilter(props: RuntimeShaderImageFilterProps) {
-    return new RuntimeShaderImageFilterNode(this.Skia, props);
+    return new RuntimeShaderImageFilterNode(this.ctx, props);
   }
 
   // Color Filters
   MatrixColorFilter(props: MatrixColorFilterProps) {
-    return new MatrixColorFilterNode(this.Skia, props);
+    return new MatrixColorFilterNode(this.ctx, props);
   }
 
   BlendColorFilter(props: BlendColorFilterProps) {
-    return new BlendColorFilterNode(this.Skia, props);
+    return new BlendColorFilterNode(this.ctx, props);
   }
 
   LumaColorFilter() {
-    return new LumaColorFilterNode(this.Skia);
+    return new LumaColorFilterNode(this.ctx);
   }
 
   LinearToSRGBGammaColorFilter() {
-    return new LinearToSRGBGammaColorFilterNode(this.Skia);
+    return new LinearToSRGBGammaColorFilterNode(this.ctx);
   }
 
   SRGBToLinearGammaColorFilter() {
-    return new SRGBToLinearGammaColorFilterNode(this.Skia);
+    return new SRGBToLinearGammaColorFilterNode(this.ctx);
   }
 
   LerpColorFilter(props: LerpColorFilterProps) {
-    return new LerpColorFilterNode(this.Skia, props);
+    return new LerpColorFilterNode(this.ctx, props);
   }
 
   // Shaders
   Shader(props: ShaderProps) {
-    return new ShaderNode(this.Skia, props);
+    return new ShaderNode(this.ctx, props);
   }
 
   ImageShader(props: ImageShaderProps) {
-    return new ImageShaderNode(this.Skia, props);
+    return new ImageShaderNode(this.ctx, props);
   }
 
   ColorShader(props: ColorProps) {
-    return new ColorNode(this.Skia, props);
+    return new ColorNode(this.ctx, props);
   }
 
   SweepGradient(props: SweepGradientProps) {
-    return new SweepGradientNode(this.Skia, props);
+    return new SweepGradientNode(this.ctx, props);
   }
 
   Turbulence(props: TurbulenceProps) {
-    return new TurbulenceNode(this.Skia, props);
+    return new TurbulenceNode(this.ctx, props);
   }
 
   FractalNoise(props: FractalNoiseProps) {
-    return new FractalNoiseNode(this.Skia, props);
+    return new FractalNoiseNode(this.ctx, props);
   }
 
   LinearGradient(props: LinearGradientProps) {
-    return new LinearGradientNode(this.Skia, props);
+    return new LinearGradientNode(this.ctx, props);
   }
 
   RadialGradient(props: RadialGradientProps) {
-    return new RadialGradientNode(this.Skia, props);
+    return new RadialGradientNode(this.ctx, props);
   }
 
   TwoPointConicalGradient(props: TwoPointConicalGradientProps) {
-    return new TwoPointConicalGradientNode(this.Skia, props);
+    return new TwoPointConicalGradientNode(this.ctx, props);
   }
 
   // Path Effects
   CornerPathEffect(props: CornerPathEffectProps) {
-    return new CornerPathEffectNode(this.Skia, props);
+    return new CornerPathEffectNode(this.ctx, props);
   }
 
   DiscretePathEffect(props: DiscretePathEffectProps) {
-    return new DiscretePathEffectNode(this.Skia, props);
+    return new DiscretePathEffectNode(this.ctx, props);
   }
 
   DashPathEffect(props: DashPathEffectProps) {
-    return new DashPathEffectNode(this.Skia, props);
+    return new DashPathEffectNode(this.ctx, props);
   }
 
   Path1DPathEffect(props: Path1DPathEffectProps) {
-    return new Path1DPathEffectNode(this.Skia, props);
+    return new Path1DPathEffectNode(this.ctx, props);
   }
 
   Path2DPathEffect(props: Path2DPathEffectProps) {
-    return new Path2DPathEffectNode(this.Skia, props);
+    return new Path2DPathEffectNode(this.ctx, props);
   }
 
   SumPathEffect() {
-    return new SumPathEffectNode(this.Skia);
+    return new SumPathEffectNode(this.ctx);
   }
 
   Line2DPathEffect(props: Line2DPathEffectProps) {
-    return new Line2DPathEffectNode(this.Skia, props);
+    return new Line2DPathEffectNode(this.ctx, props);
   }
 
   Blend(props: BlendProps) {
-    return new BlendNode(this.Skia, props);
+    return new BlendNode(this.ctx, props);
   }
 
   BackdropFilter(props: ChildrenProps) {
-    return new BackdropFilterNode(this.Skia, props);
+    return new BackdropFilterNode(this.ctx, props);
   }
 
   Box(props: BoxProps) {
-    return new BoxNode(this.Skia, props);
+    return new BoxNode(this.ctx, props);
   }
 
   BoxShadow(props: BoxShadowProps) {
-    return new BoxShadowNode(this.Skia, props);
+    return new BoxShadowNode(this.ctx, props);
   }
 }

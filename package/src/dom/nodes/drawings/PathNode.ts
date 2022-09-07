@@ -1,13 +1,14 @@
 import { FillType } from "../../../skia/types";
-import type { SkPath, Skia } from "../../../skia/types";
+import type { SkPath } from "../../../skia/types";
 import type { DrawingContext, PathProps } from "../../types";
 import { NodeType } from "../../types";
 import { enumKey, processPath } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class PathNode extends JsiDrawingNode<PathProps, SkPath> {
-  constructor(Skia: Skia, props: PathProps) {
-    super(Skia, NodeType.Path, props);
+  constructor(ctx: NodeContext, props: PathProps) {
+    super(ctx, NodeType.Path, props);
   }
 
   protected deriveProps() {

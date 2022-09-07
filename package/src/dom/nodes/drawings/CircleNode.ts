@@ -1,12 +1,13 @@
-import type { Skia, SkPoint } from "../../../skia/types";
+import type { SkPoint } from "../../../skia/types";
 import type { CircleProps, DrawingContext } from "../../types";
 import { NodeType } from "../../types";
 import { processCircle } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class CircleNode extends JsiDrawingNode<CircleProps, SkPoint> {
-  constructor(Skia: Skia, props: CircleProps) {
-    super(Skia, NodeType.Circle, props);
+  constructor(ctx: NodeContext, props: CircleProps) {
+    super(ctx, NodeType.Circle, props);
   }
 
   protected deriveProps() {

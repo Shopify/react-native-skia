@@ -1,11 +1,11 @@
-import type { Skia } from "../../../skia/types";
 import type { DrawingContext, PictureProps } from "../../types";
 import { NodeType } from "../../types";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class PictureNode extends JsiDrawingNode<PictureProps, null> {
-  constructor(Skia: Skia, props: PictureProps) {
-    super(Skia, NodeType.Picture, props);
+  constructor(ctx: NodeContext, props: PictureProps) {
+    super(ctx, NodeType.Picture, props);
   }
 
   deriveProps() {

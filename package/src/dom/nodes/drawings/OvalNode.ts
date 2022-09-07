@@ -1,12 +1,13 @@
-import type { Skia, SkRect } from "../../../skia/types";
+import type { SkRect } from "../../../skia/types";
 import type { DrawingContext, OvalProps } from "../../types";
 import { NodeType } from "../../types";
 import { processRect } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
+import type { NodeContext } from "../Node";
 
 export class OvalNode extends JsiDrawingNode<OvalProps, SkRect> {
-  constructor(Skia: Skia, props: OvalProps) {
-    super(Skia, NodeType.Oval, props);
+  constructor(ctx: NodeContext, props: OvalProps) {
+    super(ctx, NodeType.Oval, props);
   }
 
   deriveProps() {

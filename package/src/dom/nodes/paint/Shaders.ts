@@ -4,7 +4,8 @@ import {
   MipmapMode,
   TileMode,
 } from "../../../skia/types";
-import type { SkShader, Skia } from "../../../skia/types";
+import type { SkShader } from "../../../skia/types";
+import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import type {
   ColorProps,
@@ -32,14 +33,14 @@ export abstract class ShaderDeclaration<P> extends JsiDeclarationNode<
   P,
   SkShader
 > {
-  constructor(Skia: Skia, type: NodeType, props: P) {
-    super(Skia, DeclarationType.Shader, type, props);
+  constructor(ctx: NodeContext, type: NodeType, props: P) {
+    super(ctx, DeclarationType.Shader, type, props);
   }
 }
 
 export class ShaderNode extends ShaderDeclaration<ShaderProps> {
-  constructor(Skia: Skia, props: ShaderProps) {
-    super(Skia, NodeType.Shader, props);
+  constructor(ctx: NodeContext, props: ShaderProps) {
+    super(ctx, NodeType.Shader, props);
   }
 
   get() {
@@ -55,8 +56,8 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
 }
 
 export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
-  constructor(Skia: Skia, props: ImageShaderProps) {
-    super(Skia, NodeType.ImageShader, props);
+  constructor(ctx: NodeContext, props: ImageShaderProps) {
+    super(ctx, NodeType.ImageShader, props);
   }
 
   get() {
@@ -85,8 +86,8 @@ export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
 }
 
 export class ColorNode extends ShaderDeclaration<ColorProps> {
-  constructor(Skia: Skia, props: ColorProps) {
-    super(Skia, NodeType.ColorShader, props);
+  constructor(ctx: NodeContext, props: ColorProps) {
+    super(ctx, NodeType.ColorShader, props);
   }
 
   get() {
@@ -96,8 +97,8 @@ export class ColorNode extends ShaderDeclaration<ColorProps> {
 }
 
 export class TurbulenceNode extends ShaderDeclaration<TurbulenceProps> {
-  constructor(Skia: Skia, props: TurbulenceProps) {
-    super(Skia, NodeType.Turbulence, props);
+  constructor(ctx: NodeContext, props: TurbulenceProps) {
+    super(ctx, NodeType.Turbulence, props);
   }
 
   get() {
@@ -114,8 +115,8 @@ export class TurbulenceNode extends ShaderDeclaration<TurbulenceProps> {
 }
 
 export class FractalNoiseNode extends ShaderDeclaration<FractalNoiseProps> {
-  constructor(Skia: Skia, props: FractalNoiseProps) {
-    super(Skia, NodeType.FractalNoise, props);
+  constructor(ctx: NodeContext, props: FractalNoiseProps) {
+    super(ctx, NodeType.FractalNoise, props);
   }
 
   get() {
@@ -132,8 +133,8 @@ export class FractalNoiseNode extends ShaderDeclaration<FractalNoiseProps> {
 }
 
 export class LinearGradientNode extends ShaderDeclaration<LinearGradientProps> {
-  constructor(Skia: Skia, props: LinearGradientProps) {
-    super(Skia, NodeType.LinearGradient, props);
+  constructor(ctx: NodeContext, props: LinearGradientProps) {
+    super(ctx, NodeType.LinearGradient, props);
   }
 
   get() {
@@ -153,8 +154,8 @@ export class LinearGradientNode extends ShaderDeclaration<LinearGradientProps> {
 }
 
 export class RadialGradientNode extends ShaderDeclaration<RadialGradientProps> {
-  constructor(Skia: Skia, props: RadialGradientProps) {
-    super(Skia, NodeType.RadialGradient, props);
+  constructor(ctx: NodeContext, props: RadialGradientProps) {
+    super(ctx, NodeType.RadialGradient, props);
   }
 
   get() {
@@ -174,8 +175,8 @@ export class RadialGradientNode extends ShaderDeclaration<RadialGradientProps> {
 }
 
 export class SweepGradientNode extends ShaderDeclaration<SweepGradientProps> {
-  constructor(Skia: Skia, props: SweepGradientProps) {
-    super(Skia, NodeType.SweepGradient, props);
+  constructor(ctx: NodeContext, props: SweepGradientProps) {
+    super(ctx, NodeType.SweepGradient, props);
   }
 
   get() {
@@ -197,8 +198,8 @@ export class SweepGradientNode extends ShaderDeclaration<SweepGradientProps> {
 }
 
 export class TwoPointConicalGradientNode extends ShaderDeclaration<TwoPointConicalGradientProps> {
-  constructor(Skia: Skia, props: TwoPointConicalGradientProps) {
-    super(Skia, NodeType.TwoPointConicalGradient, props);
+  constructor(ctx: NodeContext, props: TwoPointConicalGradientProps) {
+    super(ctx, NodeType.TwoPointConicalGradient, props);
   }
 
   get() {
