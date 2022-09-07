@@ -160,7 +160,6 @@ export abstract class JsiRenderNode<P extends GroupProps>
     this.clipPath = undefined;
     this.clipRect = undefined;
     this.clipRRect = undefined;
-    this.paint = undefined;
     this.computeMatrix();
     this.computeClip();
     this.computePaintContext();

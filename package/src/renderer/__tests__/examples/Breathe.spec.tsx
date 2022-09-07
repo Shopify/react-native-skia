@@ -10,7 +10,7 @@ import {
   mix,
   polar2Canvas,
 } from "../../components";
-import { drawOnNode, height, importSkia, width } from "../setup";
+import { height, importSkia, width, mountCanvas } from "../setup";
 
 const c1 = "#61bea2";
 const c2 = "#529ca0";
@@ -43,12 +43,14 @@ const Ring = ({ index, progress }: RingProps) => {
   );
 };
 
-export const Breathe = () => {
-  const { useComputedValue, vec, useValue } = importSkia();
+interface BreatheProps {
+  progress: SkiaValue<number>;
+}
+
+export const Breathe = ({ progress }: BreatheProps) => {
+  const { useComputedValue, vec } = importSkia();
 
   const center = vec(width / 2, height / 2 - 64);
-
-  const progress = useValue(0.5);
 
   const transform = useComputedValue(
     () => [{ rotate: mix(progress.current, -Math.PI, 0) }],
@@ -70,7 +72,12 @@ export const Breathe = () => {
 
 describe("Breathe", () => {
   it("should render the breathe example properly", () => {
-    const surface = drawOnNode(<Breathe />);
+    const progress = global.SkiaValueApi.createValue(0.5);
+    const { surface, draw } = mountCanvas(<Breathe progress={progress} />);
+    draw();
     processResult(surface, "snapshots/demos/apple-breathe.png");
+    progress.current = 1;
+    draw();
+    processResult(surface, "snapshots/demos/apple-breathe1.png");
   });
 });
