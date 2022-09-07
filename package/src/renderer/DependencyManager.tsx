@@ -75,10 +75,7 @@ export class DependencyManager {
    * @param props Node's properties
    * @param onResolveProp Callback when a property value changes
    */
-  subscribeNode<P extends Record<string, unknown>>(
-    node: Node<unknown>,
-    props: AnimatedProps<P>
-  ) {
+  subscribeNode<P>(node: Node<unknown>, props: AnimatedProps<P>) {
     // Get mutators from node's properties
     const propSubscriptions = initializePropertySubscriptions(node, props);
     if (propSubscriptions.length === 0) {

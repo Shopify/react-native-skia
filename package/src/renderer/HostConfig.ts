@@ -121,8 +121,8 @@ export const skHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    const props = materialize(pristineProps);
-    const node = createNode(container, type, props);
+    const props = { ...pristineProps };
+    const node = createNode(container, type, materialize(props));
     container.depMgr.subscribeNode(node, props);
     return node;
   },
@@ -196,9 +196,9 @@ export const skHostConfig: SkiaHostConfig = {
     if (shallowEq(prevProps, nextProps)) {
       return;
     }
-    const props = materialize(nextProps);
+    const props = { ...nextProps };
     updatePayload.depMgr.unsubscribeNode(instance);
-    instance.setProps(props);
+    instance.setProps(materialize(props));
     updatePayload.depMgr.subscribeNode(instance, props);
   },
 
@@ -248,5 +248,6 @@ const materialize = <P>(props: AnimatedProps<P>) => {
       result[key] = prop.selector(prop.value.current) as P[typeof key];
     }
   });
-  return result as P;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return result as any;
 };
