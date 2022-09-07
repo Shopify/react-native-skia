@@ -132,7 +132,11 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         mSurface = new Surface(surface);
-        surfaceAvailable(mSurface, width, height);
+        try {
+          surfaceAvailable(mSurface, width, height);
+        } catch (Exception e) {
+          Log.e("SkiaDrawView", "Error while calling JNI method surfaceAvailable: " + e.getMessage());
+        }
     }
 
     @Override
@@ -142,7 +146,11 @@ public class SkiaDrawView extends TextureView implements TextureView.SurfaceText
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        surfaceDestroyed();
+        try {
+          surfaceDestroyed();
+        } catch (Exception e) {
+          Log.e("SkiaDrawView", "Error while calling JNI method surfaceDestroyed: " + e.getMessage());
+        }
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         // Invoked when the specified SurfaceTexture is about to be destroyed. If returns true,
         // no rendering should happen inside the surface texture after this method is invoked.
