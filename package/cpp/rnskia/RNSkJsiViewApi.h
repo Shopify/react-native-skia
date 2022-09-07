@@ -243,7 +243,7 @@ public:
     // Unregister all views
     auto tempList = _viewInfos;
     for (const auto& info : tempList) {
-      unregisterSkiaDrawView(info.first);
+      unregisterSkiaView(info.first);
     }
     std::lock_guard<std::mutex> lock(_mutex);
     _viewInfos.clear();
@@ -254,7 +254,7 @@ public:
    * @param nativeId Id of view to register
    * @param view View to register
    */
-  void registerSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkView> view) {
+  void registerSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
     auto info = getEnsuredViewInfo(nativeId);
     std::lock_guard<std::mutex> lock(_mutex);
     info->view = view;
@@ -267,7 +267,7 @@ public:
    * Unregisters a Skia draw view
    * @param nativeId View id
    */
-  void unregisterSkiaDrawView(size_t nativeId) {
+  void unregisterSkiaView(size_t nativeId) {
     if (_viewInfos.count(nativeId) == 0) {
       return;
     }
@@ -284,7 +284,7 @@ public:
    removed due to ex. a transition). The view can be set to a nullptr
    or a valid view, effectively toggling the view's availability.
    */
-  void setSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkView> view) {
+  void setSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
     if (_viewInfos.find(nativeId) == _viewInfos.end()) {
       return;
     }

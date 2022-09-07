@@ -53,7 +53,7 @@
       [_impl->getLayer() removeFromSuperlayer];
       
       if(_nativeId != 0 && _manager != nullptr) {
-        _manager->setSkiaDrawView(_nativeId, nullptr);
+        _manager->setSkiaView(_nativeId, nullptr);
       }
       
       _impl = nullptr;
@@ -67,7 +67,7 @@
       }
       [self.layer addSublayer: _impl->getLayer()];
       if(_nativeId != 0) {
-        _manager->setSkiaDrawView(_nativeId, _impl->getDrawView());
+        _manager->setSkiaView(_nativeId, _impl->getDrawView());
       }
       _impl->getDrawView()->setDrawingMode(_drawingMode);
       _impl->getDrawView()->setShowDebugOverlays(_debugMode);
@@ -77,7 +77,7 @@
 
 - (void) dealloc {
   if(_manager != nullptr && _nativeId != 0) {
-    _manager->unregisterSkiaDrawView(_nativeId);
+    _manager->unregisterSkiaView(_nativeId);
   }
   
   [[NSNotificationCenter defaultCenter] removeObserver:self name:RCTBridgeWillInvalidateModulesNotification object:nil];
@@ -115,7 +115,7 @@
   _nativeId = nativeId;
   
   if(_impl != nullptr) {
-    _manager->registerSkiaDrawView(nativeId, _impl->getDrawView());
+    _manager->registerSkiaView(nativeId, _impl->getDrawView());
   }
 }
 

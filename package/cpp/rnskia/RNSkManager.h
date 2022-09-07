@@ -41,20 +41,20 @@ public:
    * @param nativeId Native view id
    * @param view View to register
    */
-  void registerSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkView> view);
+  void registerSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view);
 
   /**
    * Unregisters the RNSkView from the list of registered views
    * @param nativeId Native view Id
    */
-  void unregisterSkiaDrawView(size_t nativeId);
+  void unregisterSkiaView(size_t nativeId);
   
   /**
    Sets the view pointed to by nativeId to the provided value.
    Used when we want to remove a view without unregistering it
    - this happens typically on iOS.
    */
-  void setSkiaDrawView(size_t nativeId, std::shared_ptr<RNSkView> view);
+  void setSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view);
 
   /**
    * @return The platform context
