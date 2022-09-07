@@ -43,12 +43,6 @@ export interface DeclarationNode<P, T, Nullable extends null | never = never>
   isPathEffect(): this is DeclarationNode<unknown, SkPathEffect>;
 }
 
-export type LeafDeclarationNode<
-  P,
-  T,
-  Nullable extends null | never = never
-> = DeclarationNode<P, T, Nullable>;
-
 export interface RenderNode<P extends GroupProps> extends Node<P> {
   render(ctx: DrawingContext): void;
 }

@@ -1,10 +1,9 @@
 import type { Skia } from "../../../skia/types";
 import { isColorFilter } from "../../../skia/types";
-import type { DrawingContext } from "../../types";
+import type { ChildrenProps, DrawingContext } from "../../types";
 import { NodeType } from "../../types";
 import { JsiDrawingNode } from "../DrawingNode";
 import { JsiDeclarationNode } from "../Node";
-import type { ChildrenProps } from "../../../../lib/typescript/src/renderer/processors/Paint";
 
 export class BackdropFilterNode extends JsiDrawingNode<ChildrenProps, null> {
   constructor(Skia: Skia, props: ChildrenProps) {

@@ -7,12 +7,7 @@ import type {
   SkPathEffect,
   SkPaint,
 } from "../../skia/types";
-import type {
-  Node,
-  DeclarationNode,
-  LeafDeclarationNode,
-  NodeType,
-} from "../types";
+import type { Node, DeclarationNode, NodeType } from "../types";
 import { DeclarationType } from "../types";
 
 export abstract class JsiNode<P> implements Node<P> {
@@ -145,26 +140,5 @@ export abstract class JsiDeclarationNode<
 
   isPathEffect(): this is DeclarationNode<unknown, SkPathEffect> {
     return this.declarationType === DeclarationType.PathEffect;
-  }
-}
-
-export abstract class JsiLeafDeclarationNode<
-    P,
-    T,
-    Nullable extends null | never = never
-  >
-  extends JsiDeclarationNode<P, T, Nullable>
-  implements LeafDeclarationNode<P, T, Nullable>
-{
-  addChild(_child: Node<unknown>): void {
-    throw new Error(`Cannot add child to ${this.type}`);
-  }
-
-  removeChild(_child: Node<unknown>): Node<unknown>[] {
-    throw new Error(`Cannot remove child from ${this.type}`);
-  }
-
-  insertChildBefore(_child: Node<unknown>, _before: Node<unknown>): void {
-    throw new Error(`Cannot insert child into ${this.type}`);
   }
 }
