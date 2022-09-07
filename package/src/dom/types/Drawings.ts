@@ -20,7 +20,6 @@ import type {
 } from "../../skia/types";
 
 import type {
-  ChildrenProps,
   CircleDef,
   Fit,
   GroupProps,
@@ -81,7 +80,7 @@ export interface PatchProps extends DrawingNodeProps {
     CubicBezierHandle,
     CubicBezierHandle
   ];
-  texture?: [SkPoint, SkPoint, SkPoint, SkPoint];
+  texture?: readonly [SkPoint, SkPoint, SkPoint, SkPoint];
   blendMode?: SkEnum<typeof BlendMode>;
 }
 
@@ -144,7 +143,7 @@ export interface GlyphsProps extends DrawingNodeProps {
   glyphs: Glyph[];
 }
 
-export interface BoxProps extends ChildrenProps {
+export interface BoxProps extends DrawingNodeProps {
   box: SkRRect | SkRect;
 }
 

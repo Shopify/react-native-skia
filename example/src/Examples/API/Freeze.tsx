@@ -1,19 +1,12 @@
-import type { ReactNode } from "react";
 import React, { useEffect, useState } from "react";
-import type { SkPaint, SkRect } from "@shopify/react-native-skia";
 import {
   useFont,
-  FilterMode,
   Canvas,
   Group,
   Rect,
   Text,
   useClockValue,
   useComputedValue,
-  rect,
-  createDrawing,
-  Skia,
-  TileMode,
 } from "@shopify/react-native-skia";
 
 const size = 200;

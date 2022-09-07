@@ -105,9 +105,9 @@ declare global {
       // ColorFilters
       skMatrixColorFilter: SkiaProps<MatrixColorFilterProps>;
       skBlendColorFilter: SkiaProps<BlendColorFilterProps>;
-      skLinearToSRGBGammaColorFilter: SkiaProps<void>;
-      skSRGBToLinearGammaColorFilter: SkiaProps<void>;
-      skLumaColorFilter: SkiaProps<void>;
+      skLinearToSRGBGammaColorFilter: SkiaProps<ChildrenProps>;
+      skSRGBToLinearGammaColorFilter: SkiaProps<ChildrenProps>;
+      skLumaColorFilter: SkiaProps<ChildrenProps>;
       skLerpColorFilter: SkiaProps<LerpColorFilterProps>;
 
       // Shaders
