@@ -163,6 +163,9 @@ const initializePropertySubscriptions = <P,>(
   }> = [];
 
   mapKeys(props).forEach((key) => {
+    if (key === "children") {
+      return;
+    }
     const propvalue = props[key];
 
     if (isValue(propvalue)) {
