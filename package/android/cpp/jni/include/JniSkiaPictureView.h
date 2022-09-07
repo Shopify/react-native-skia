@@ -19,45 +19,22 @@ namespace RNSkia {
     using namespace facebook;
     using namespace jni;
 
-    using JavaSkiaManager = jni::alias_ref<JniSkiaManager::javaobject>;
-
     class JniSkiaPictureView
-            : public jni::HybridClass<JniSkiaPictureView>, public SkiaViewProvider {
+            : public HybridClass<JniSkiaPictureView>, public JniSkiaBaseView {
     public:
         static auto constexpr kJavaDescriptor = "Lcom/shopify/reactnative/skia/SkiaPictureView;";
 
-        static jni::local_ref<jhybriddata> initHybrid(jni::alias_ref<jhybridobject> jThis,
-                                                      JavaSkiaManager skiaManager) {
+        std::shared_ptr<RNSkBaseAndroidView> getAndroidSkiaView() override { return _skiaView; }
+
+        static jni::local_ref<jhybriddata>
+        initHybrid(jni::alias_ref<jhybridobject> jThis,
+                   jni::alias_ref<JniSkiaManager::javaobject> skiaManager) {
           return makeCxxInstance(jThis, skiaManager);
-        }
-
-        void updateTouchPoints(jni::JArrayDouble touches) {
-          _skiaView->updateTouchPoints(touches);
-        }
-
-        void surfaceAvailable(jobject surface, int width, int height) {
-          _skiaView->surfaceAvailable(
-                  ANativeWindow_fromSurface(Environment::current(), surface), width, height);
-        }
-
-        void surfaceSizeChanged(int width, int height) {
-          _skiaView->surfaceSizeChanged(width, height);
-        }
-
-        void surfaceDestroyed() {
-          _skiaView->surfaceDestroyed();
-        }
-
-        void setMode(std::string mode) {
-          _skiaView->setMode(mode);
-        }
-
-        void setDebugMode(bool show) {
-          _skiaView->setShowDebugInfo(show);
         }
 
         static void registerNatives() {
           registerHybrid({
+                                 makeNativeMethod("initHybrid", JniSkiaPictureView::initHybrid),
                                  makeNativeMethod("surfaceAvailable",
                                                   JniSkiaPictureView::surfaceAvailable),
                                  makeNativeMethod("surfaceDestroyed",
@@ -68,19 +45,10 @@ namespace RNSkia {
                                  makeNativeMethod("setDebugMode", JniSkiaPictureView::setDebugMode),
                                  makeNativeMethod("updateTouchPoints",
                                                   JniSkiaPictureView::updateTouchPoints),
-                                 makeNativeMethod("initHybrid", JniSkiaPictureView::initHybrid),
                                  makeNativeMethod("registerView", JniSkiaPictureView::registerView),
-                                 makeNativeMethod("unregisterView", JniSkiaPictureView::unregisterView)
+                                 makeNativeMethod("unregisterView",
+                                                  JniSkiaPictureView::unregisterView)
                          });
-        }
-
-        void registerView(int nativeId) {
-          _manager->getSkiaManager()->registerSkiaDrawView(nativeId, _skiaView->getSkiaView());
-        }
-
-        void unregisterView() {
-          _manager->getSkiaManager()->unregisterSkiaDrawView(
-                  _skiaView->getSkiaView()->getNativeId());
         }
 
     protected:
@@ -90,22 +58,51 @@ namespace RNSkia {
           method(javaPart_.get());
         };
 
+        void updateTouchPoints(jni::JArrayDouble touches) override {
+          JniSkiaBaseView::updateTouchPoints(touches);
+        }
+
+        void surfaceAvailable(jobject surface, int width, int height) override {
+          JniSkiaBaseView::surfaceAvailable(surface, width, height);
+        }
+
+        void surfaceSizeChanged(int width, int height) override {
+          JniSkiaBaseView::surfaceSizeChanged(width, height);
+        }
+
+        void surfaceDestroyed() override { JniSkiaBaseView::surfaceDestroyed(); }
+
+        void setMode(std::string mode) override {
+          JniSkiaBaseView::setMode(mode);
+        }
+
+        void setDebugMode(bool show) override {
+          JniSkiaBaseView::setDebugMode(show);
+        }
+
+        void registerView(int nativeId) override {
+          JniSkiaBaseView::registerView(nativeId);
+        }
+
+        void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+
+
     private:
         friend HybridBase;
-        jni::global_ref<JniSkiaPictureView::javaobject> javaPart_;
 
-        explicit JniSkiaPictureView(jni::alias_ref<JniSkiaPictureView::jhybridobject> jThis,
-                                    JavaSkiaManager skiaManager) :
-                javaPart_(jni::make_global(jThis)),
-                _manager(skiaManager->cthis()),
-                _skiaView(std::make_shared<RNSkAndroidView<RNSkia::RNSkPictureView>>(
-                        skiaManager->cthis()->getPlatformContext(),
-                        std::bind(&JniSkiaPictureView::releaseSurface, this))) {
+        explicit JniSkiaPictureView(jni::alias_ref<jhybridobject> jThis,
+                                    jni::alias_ref<JniSkiaManager::javaobject> skiaManager) :
+                JniSkiaBaseView(skiaManager),
+                _skiaView(std::make_shared<RNSkAndroidView < RNSkia::RNSkPictureView>>
+
+        (
+        skiaManager->cthis()->getPlatformContext(),
+        std::bind(&JniSkiaPictureView::releaseSurface,
+        this))) {
         }
 
         std::shared_ptr<RNSkBaseAndroidView> _skiaView;
-        std::shared_ptr<JniSkiaManager> _manager;
-
+        jni::global_ref<javaobject> javaPart_;
     };
 
 } // namespace RNSkia

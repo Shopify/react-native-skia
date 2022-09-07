@@ -8,7 +8,8 @@
 
 #include <JniPlatformContext.h>
 #include <RNSkAndroidPlatformContext.h>
-#include <JniSkiaBaseView.h>
+#include <RNSkManager.h>
+#include <RNSkLog.h>
 
 namespace RNSkia {
 

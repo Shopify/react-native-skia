@@ -6,13 +6,9 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 
-import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
 
 public abstract class SkiaBaseView extends TextureView implements TextureView.SurfaceTextureListener {
-
-    @DoNotStrip
-    protected HybridData mHybridData;
 
     @DoNotStrip
     private Surface mSurface;
@@ -132,21 +128,19 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
         // Nothing special to do here
     }
 
-    private native void surfaceAvailable(Object surface, int width, int height);
+    protected abstract void surfaceAvailable(Object surface, int width, int height);
 
-    private native void surfaceSizeChanged(int width, int height);
+    protected abstract void surfaceSizeChanged(int width, int height);
 
-    private native void surfaceDestroyed();
+    protected abstract void surfaceDestroyed();
 
-    private native void setBgColor(int color);
+    protected abstract void setMode(String mode);
 
-    public native void setMode(String mode);
+    protected abstract void setDebugMode(boolean show);
 
-    public native void setDebugMode(boolean show);
+    protected abstract void updateTouchPoints(double[] points);
 
-    public native void updateTouchPoints(double[] points);
+    protected abstract void registerView(int nativeId);
 
-    public native void registerView(int nativeId);
-
-    public native void unregisterView();
+    protected abstract void unregisterView();
 }

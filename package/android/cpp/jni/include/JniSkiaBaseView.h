@@ -6,7 +6,7 @@
 #include <jni.h>
 #include <jsi/jsi.h>
 
-#include <RNSkView.h>
+#include <JniSkiaManager.h>
 
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
@@ -15,77 +15,53 @@ namespace RNSkia {
     using namespace facebook;
     using namespace jni;
 
-    class SkiaViewProvider {
+    class JniSkiaBaseView {
     public:
-        virtual std::shared_ptr<RNSkView> getSkiaView() { return nullptr; }
-    };
+        JniSkiaBaseView(jni::alias_ref<JniSkiaManager::javaobject> skiaManager) :
+                _manager(skiaManager->cthis()) {}
 
-    class JniSkiaBaseView : public jni::HybridClass<JniSkiaBaseView>, public SkiaViewProvider {
-    public:
-        static auto constexpr kJavaDescriptor = "Lcom/shopify/reactnative/skia/SkiaBaseView;";
+        std::shared_ptr<JniSkiaManager> getSkiaManager() { return _manager; };
 
-        static jni::local_ref<jhybriddata> initHybrid(jni::alias_ref<jhybridobject> jThis) {
-          return makeCxxInstance(jThis);
+        virtual std::shared_ptr<RNSkBaseAndroidView> getAndroidSkiaView() { return nullptr; }
+
+    protected:
+        virtual void updateTouchPoints(jni::JArrayDouble touches) {
+          getAndroidSkiaView()->updateTouchPoints(touches);
         }
 
-        void updateTouchPoints(jni::JArrayDouble touches) {
-          throw std::runtime_error("Could not call updateTouchPoints on base Skia View instance");
-        }
-
-        void surfaceAvailable(jobject surface, int width, int height) {
-          throw std::runtime_error("Could not call surfaceAvailable on base Skia View instance");
+        virtual void surfaceAvailable(jobject surface, int width, int height) {
+          getAndroidSkiaView()->surfaceAvailable(
+                  ANativeWindow_fromSurface(Environment::current(), surface), width, height);
         }
 
         virtual void surfaceSizeChanged(int width, int height) {
-          throw std::runtime_error("Could not call surfaceSizeChanged on base Skia View instance");
+          getAndroidSkiaView()->surfaceSizeChanged(width, height);
         }
 
         virtual void surfaceDestroyed() {
-          throw std::runtime_error("Could not call surfaceDestroyed on base Skia View instance");
+          getAndroidSkiaView()->surfaceDestroyed();
         }
 
         virtual void setMode(std::string mode) {
-          throw std::runtime_error("Could not call setMode on base Skia View instance");
+          getAndroidSkiaView()->setMode(mode);
         }
 
-        virtual void setShowDebugInfo(bool show) {
-          throw std::runtime_error("Could not call setShowDebugInfo on base Skia View instance");
+        virtual void setDebugMode(bool show) {
+          getAndroidSkiaView()->setShowDebugInfo(show);
         }
 
-        static void registerNatives() {
-          registerHybrid({
-                                 makeNativeMethod("surfaceAvailable",
-                                                  JniSkiaBaseView::surfaceAvailable),
-                                 makeNativeMethod("surfaceDestroyed",
-                                                  JniSkiaBaseView::surfaceDestroyed),
-                                 makeNativeMethod("surfaceSizeChanged",
-                                                  JniSkiaBaseView::surfaceSizeChanged),
-                                 makeNativeMethod("setMode", JniSkiaBaseView::setMode),
-                                 makeNativeMethod("setDebugMode", JniSkiaBaseView::setShowDebugInfo),
-                                 makeNativeMethod("updateTouchPoints",
-                                                  JniSkiaBaseView::updateTouchPoints),
-                                 makeNativeMethod("initHybrid", JniSkiaBaseView::initHybrid),
-                                 makeNativeMethod("register", JniSkiaBaseView::registerView),
-                                 makeNativeMethod("unregister", JniSkiaBaseView::unregisterView)
-                         });
+        virtual void registerView(int nativeId) {
+          getSkiaManager()->getSkiaManager()->registerSkiaView(nativeId,
+                                                               getAndroidSkiaView()->getSkiaView());
         }
 
-        void registerView(int nativeId) {
-          throw std::runtime_error("Could not call registerView on base Skia View instance");
+        virtual void unregisterView() {
+          getSkiaManager()->getSkiaManager()->unregisterSkiaView(
+                  getAndroidSkiaView()->getSkiaView()->getNativeId());
         }
-
-        void unregisterView() {
-          throw std::runtime_error("Could not call unregisterView on base Skia View instance");
-        }
-
-    protected:
 
     private:
-        friend HybridBase;
-        jni::global_ref<JniSkiaBaseView::javaobject> javaPart_;
-
-        explicit JniSkiaBaseView(jni::alias_ref<JniSkiaBaseView::jhybridobject> jThis) :
-                javaPart_(jni::make_global(jThis)) {}
+        std::shared_ptr<JniSkiaManager> _manager;
     };
 
 } // namespace RNSkia
