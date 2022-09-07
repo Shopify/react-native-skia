@@ -76,4 +76,5 @@ export const enum DeclarationType {
   ColorFilter,
   PathEffect,
   MaskFilter,
+  Unknown,
 }

@@ -2,10 +2,10 @@ import type { Skia, SkRRect } from "../../../skia/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
 import type { DrawingContext } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { JsiDrawingNode } from "../DrawingNode";
 import type { BoxShadowProps, BoxProps } from "../../types/Drawings";
 import { JsiDeclarationNode } from "../Node";
 import { processColor } from "../datatypes";
+import { JsiRenderNode } from "../RenderNode";
 
 const inflate = (
   Skia: Skia,
@@ -40,7 +40,7 @@ export class BoxShadowNode extends JsiDeclarationNode<
   BoxShadowProps
 > {
   constructor(Skia: Skia, props: BoxShadowProps) {
-    super(Skia, DeclarationType.ImageFilter, NodeType.Box, props);
+    super(Skia, DeclarationType.Unknown, NodeType.Box, props);
   }
 
   get() {
@@ -48,16 +48,12 @@ export class BoxShadowNode extends JsiDeclarationNode<
   }
 }
 
-export class BoxNode extends JsiDrawingNode<BoxProps, null> {
+export class BoxNode extends JsiRenderNode<BoxProps> {
   constructor(Skia: Skia, props: BoxProps) {
     super(Skia, NodeType.Box, props);
   }
 
-  protected deriveProps() {
-    return null;
-  }
-
-  draw({ canvas, paint, opacity }: DrawingContext) {
+  renderNode({ canvas, paint, opacity }: DrawingContext) {
     const { box: defaultBox } = this.props;
     const box = isRRect(defaultBox)
       ? defaultBox
@@ -84,6 +80,7 @@ export class BoxNode extends JsiDrawingNode<BoxProps, null> {
           lPaint
         );
       });
+
     canvas.drawRRect(box, paint);
 
     shadows
