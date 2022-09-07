@@ -31,86 +31,16 @@ import { JsiNode, JsiDeclarationNode } from "./Node";
 import type { PaintContext } from "./PaintContext";
 import { enumKey } from "./datatypes/Enum";
 
-export const isSkPaint = (
-  obj: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint
-): obj is SkPaint => "__typename__" in obj && obj.__typename__ === "Paint";
-
-const concatPaint = (
-  parent: SkPaint,
-  {
-    color,
-    strokeWidth,
-    shader,
-    antiAlias,
-    blendMode,
-    colorFilter,
-    imageFilter,
-    maskFilter,
-    pathEffect,
-    opacity: alpha,
-    strokeCap,
-    strokeJoin,
-    strokeMiter,
-    style,
-  }: PaintContext,
-  opacity: number
-) => {
-  const paint = parent.copy();
-  if (color !== undefined) {
-    paint.setShader(null);
-    color[3] *= opacity;
-    paint.setColor(color);
-  } else {
-    const cl = paint.getColor();
-    cl[3] *= opacity;
-    paint.setColor(cl);
-  }
-  if (strokeWidth !== undefined) {
-    paint.setStrokeWidth(strokeWidth);
-  }
-  if (shader !== undefined) {
-    paint.setShader(shader);
-  }
-  if (antiAlias !== undefined) {
-    paint.setAntiAlias(antiAlias);
-  }
-  if (blendMode !== undefined) {
-    paint.setBlendMode(blendMode);
-  }
-  if (colorFilter !== undefined) {
-    paint.setColorFilter(colorFilter);
-  }
-  if (imageFilter !== undefined) {
-    paint.setImageFilter(imageFilter);
-  }
-  if (maskFilter !== undefined) {
-    paint.setMaskFilter(maskFilter);
-  }
-  if (pathEffect !== undefined) {
-    paint.setPathEffect(pathEffect);
-  }
-  if (alpha !== undefined) {
-    paint.setAlphaf(alpha * opacity);
-  }
-  if (strokeCap !== undefined) {
-    paint.setStrokeCap(strokeCap);
-  }
-  if (strokeJoin !== undefined) {
-    paint.setStrokeJoin(strokeJoin);
-  }
-  if (strokeMiter !== undefined) {
-    paint.setStrokeMiter(strokeMiter);
-  }
-  if (style !== undefined) {
-    paint.setStyle(style);
-  }
-  return paint;
-};
+interface PaintCache {
+  parent: SkPaint;
+  child: SkPaint;
+}
 
 export abstract class JsiRenderNode<P extends GroupProps>
   extends JsiNode<P>
   implements RenderNode<P>
 {
+  paintCache: PaintCache | null = null;
   matrix?: SkMatrix;
   clipRect?: SkRect;
   clipRRect?: SkRRect;
@@ -136,17 +66,26 @@ export abstract class JsiRenderNode<P extends GroupProps>
     this.clipPath = undefined;
     this.clipRect = undefined;
     this.clipRRect = undefined;
+    this.paintCache = null;
     this.computeMatrix();
     this.computeClip();
   }
 
   addChild(child: Node<unknown>) {
     super.addChild(child);
+    if (child instanceof JsiDeclarationNode) {
+      child.setInvalidate(() => (this.paintCache = null));
+    }
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
     super.insertChildBefore(child, before);
+    if (child instanceof JsiDeclarationNode) {
+      child.setInvalidate(() => (this.paintCache = null));
+    }
   }
+
+  // TODO: handle node removal. This is tricky.
 
   private computeClip() {
     const { clip } = this.props;
@@ -281,11 +220,17 @@ export abstract class JsiRenderNode<P extends GroupProps>
       ? parentCtx.opacity * this.props.opacity
       : parentCtx.opacity;
 
-    const paintCtx = this.getPaintCtx();
-    const paint = paintCtx
-      ? concatPaint(parentCtx.paint, paintCtx, parentCtx.opacity)
-      : parentCtx.paint;
-
+    if (
+      this.paintCache === null ||
+      this.paintCache.parent !== parentCtx.paint
+    ) {
+      const paintCtx = this.getPaintCtx();
+      const child = paintCtx
+        ? concatPaint(parentCtx.paint, paintCtx, parentCtx.opacity)
+        : parentCtx.paint;
+      this.paintCache = { parent: parentCtx.paint, child };
+    }
+    const paint = this.paintCache.child;
     // TODO: can we only recreate a new context here if needed?
     const ctx = { ...parentCtx, opacity, paint };
     const hasTransform = this.matrix !== undefined;
@@ -329,3 +274,79 @@ export abstract class JsiRenderNode<P extends GroupProps>
 
   abstract renderNode(ctx: DrawingContext): void;
 }
+
+export const isSkPaint = (
+  obj: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint
+): obj is SkPaint => "__typename__" in obj && obj.__typename__ === "Paint";
+
+const concatPaint = (
+  parent: SkPaint,
+  {
+    color,
+    strokeWidth,
+    shader,
+    antiAlias,
+    blendMode,
+    colorFilter,
+    imageFilter,
+    maskFilter,
+    pathEffect,
+    opacity: alpha,
+    strokeCap,
+    strokeJoin,
+    strokeMiter,
+    style,
+  }: PaintContext,
+  opacity: number
+) => {
+  const paint = parent.copy();
+  if (color !== undefined) {
+    paint.setShader(null);
+    color[3] *= opacity;
+    paint.setColor(color);
+  } else {
+    const cl = paint.getColor();
+    cl[3] *= opacity;
+    paint.setColor(cl);
+  }
+  if (strokeWidth !== undefined) {
+    paint.setStrokeWidth(strokeWidth);
+  }
+  if (shader !== undefined) {
+    paint.setShader(shader);
+  }
+  if (antiAlias !== undefined) {
+    paint.setAntiAlias(antiAlias);
+  }
+  if (blendMode !== undefined) {
+    paint.setBlendMode(blendMode);
+  }
+  if (colorFilter !== undefined) {
+    paint.setColorFilter(colorFilter);
+  }
+  if (imageFilter !== undefined) {
+    paint.setImageFilter(imageFilter);
+  }
+  if (maskFilter !== undefined) {
+    paint.setMaskFilter(maskFilter);
+  }
+  if (pathEffect !== undefined) {
+    paint.setPathEffect(pathEffect);
+  }
+  if (alpha !== undefined) {
+    paint.setAlphaf(alpha * opacity);
+  }
+  if (strokeCap !== undefined) {
+    paint.setStrokeCap(strokeCap);
+  }
+  if (strokeJoin !== undefined) {
+    paint.setStrokeJoin(strokeJoin);
+  }
+  if (strokeMiter !== undefined) {
+    paint.setStrokeMiter(strokeMiter);
+  }
+  if (style !== undefined) {
+    paint.setStyle(style);
+  }
+  return paint;
+};
