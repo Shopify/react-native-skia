@@ -23,8 +23,8 @@ export interface PaintContext {
   antiAlias?: boolean;
 
   shader?: SkShader;
-  colorFilter?: SkColorFilter[];
-  imageFilter?: SkImageFilter[];
+  colorFilter?: SkColorFilter;
+  imageFilter?: SkImageFilter;
   maskFilter?: SkMaskFilter;
-  pathEffect?: SkPathEffect[];
+  pathEffect?: SkPathEffect;
 }
