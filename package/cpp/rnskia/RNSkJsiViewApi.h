@@ -44,16 +44,16 @@ public:
           "setJsiProperty: First argument must be a number");
       return jsi::Value::undefined();
     }
-    
+
     if (!arguments[1].isString()) {
       _platformContext->raiseError(
           "setJsiProperty: Second argument must be the name of the property to set.");
-      
+
       return jsi::Value::undefined();
     }
-    auto nativeId = arguments[0].asNumber();    
+    auto nativeId = arguments[0].asNumber();
     auto info = getEnsuredViewInfo(nativeId);
-    
+
     std::lock_guard<std::mutex> lock(_mutex);
     info->props.emplace(arguments[1].asString(runtime).utf8(runtime), JsiValueWrapper(runtime, arguments[2]));
 
@@ -64,10 +64,10 @@ public:
       info->view->setJsiProperties(info->props);
       info->props.clear();
     }
-    
+
     return jsi::Value::undefined();
   }
-  
+
   /**
    Calls a custom command / method on a view by the view id.
    */
@@ -76,34 +76,34 @@ public:
       _platformContext->raiseError(
           std::string("callCustomCommand: Expected at least 2 arguments, got " +
                       std::to_string(count) + "."));
-      
+
       return jsi::Value::undefined();
     }
 
     if (!arguments[0].isNumber()) {
       _platformContext->raiseError(
           "callCustomCommand: First argument must be a number");
-      
+
       return jsi::Value::undefined();
     }
-    
+
     if (!arguments[1].isString()) {
       _platformContext->raiseError(
           "callCustomCommand: Second argument must be the name of the action to call.");
-      
+
       return jsi::Value::undefined();
     }
-    
+
     auto nativeId = arguments[0].asNumber();
     auto action = arguments[1].asString(runtime).utf8(runtime);
-    
+
     auto info = getEnsuredViewInfo(nativeId);
-    
+
     if(info->view == nullptr) {
-      jsi::detail::throwJSError(runtime,
+      throw jsi::JSError(runtime,
           std::string("callCustomCommand: Could not call action " + action +
                       " on view - view not ready.").c_str());
-      
+
       return jsi::Value::undefined();
     }
 
@@ -112,7 +112,7 @@ public:
     const jsi::Value* params = paramsCount > 0 ? &arguments[2] : nullptr;
     return info->view->callJsiMethod(runtime, action, params, paramsCount);
   }
-  
+
   JSI_HOST_FUNCTION(requestRedraw) {
     if (count < 2) {
        _platformContext->raiseError(
@@ -137,7 +137,7 @@ public:
      }
      return jsi::Value::undefined();
   }
-  
+
   JSI_HOST_FUNCTION(makeImageSnapshot) {
     if (count < 1) {
       _platformContext->raiseError(std::string("makeImageSnapshot: Expected at least 1 argument, got " + std::to_string(count) + "."));
@@ -148,7 +148,7 @@ public:
       _platformContext->raiseError("makeImageSnapshot: First argument must be a number");
       return jsi::Value::undefined();
     }
-    
+
     // find Skia view
     int nativeId = arguments[0].asNumber();
     sk_sp<SkImage> image;
@@ -161,25 +161,25 @@ public:
         image = info->view->makeImageSnapshot(nullptr);
       }
       if(image == nullptr) {
-        jsi::detail::throwJSError(runtime, "Could not create image from current surface.");
+        throw jsi::JSError(runtime, "Could not create image from current surface.");
         return jsi::Value::undefined();
       }
       return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkImage>(_platformContext, image));
     }
-    jsi::detail::throwJSError(runtime, "No Skia View currently available.");
+    throw jsi::JSError(runtime, "No Skia View currently available.");
     return jsi::Value::undefined();
   }
-  
+
   JSI_HOST_FUNCTION(registerValuesInView) {
       // Check params
       if(!arguments[1].isObject() || !arguments[1].asObject(runtime).isArray(runtime)) {
-        jsi::detail::throwJSError(runtime, "Expected array of Values as second parameter");
+        throw jsi::JSError(runtime, "Expected array of Values as second parameter");
         return jsi::Value::undefined();
       }
-      
+
       // Get identifier of native SkiaView
       int nativeId = arguments[0].asNumber();
-      
+
       // Get values that should be added as dependencies
       auto values = arguments[1].asObject(runtime).asArray(runtime);
       std::vector<std::function<void()>> unsubscribers;
@@ -187,7 +187,7 @@ public:
       unsubscribers.reserve(size);
       for(size_t i=0; i<size; ++i) {
         auto value = values.getValueAtIndex(runtime, i).asObject(runtime).asHostObject<RNSkReadonlyValue>(runtime);
-        
+
         if(value != nullptr) {
           // Add change listener
           unsubscribers.push_back(value->addListener([weakSelf = weak_from_this(), nativeId](jsi::Runtime&){
@@ -201,7 +201,7 @@ public:
           }));
         }
       }
-      
+
       // Return unsubscribe method that unsubscribes to all values
       // that we subscribed to.
       return jsi::Function::createFromHostFunction(runtime,
@@ -215,7 +215,7 @@ public:
         return jsi::Value::undefined();
       });
     }
-      
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView),
@@ -272,12 +272,12 @@ public:
       return;
     }
     auto info = getEnsuredViewInfo(nativeId);
-    
+
     std::lock_guard<std::mutex> lock(_mutex);
     info->view = nullptr;
     _viewInfos.erase(nativeId);
   }
-  
+
   /**
    Sets a skia draw view for the given id. This function can be used
    to mark that an underlying SkiaView is not available (it could be
@@ -314,7 +314,7 @@ private:
     }
     return &_viewInfos.at(nativeId);
   }
-  
+
   std::unordered_map<size_t, RNSkViewInfo> _viewInfos;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::mutex _mutex;
