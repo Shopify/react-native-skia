@@ -29,4 +29,18 @@ describe("Box", () => {
     );
     processResult(surface, docPath("box/shadows.png"), true);
   });
+  it("should draw a box with red stroke", () => {
+    const size = width / 2;
+    const surface = drawOnNode(
+      <>
+        <Box
+          box={{ width: size, height: size, x: 1, y: 1 }}
+          color="red"
+          style="stroke"
+          strokeWidth={2}
+        />
+      </>
+    );
+    processResult(surface, docPath("box/box-stroke.png"), true);
+  });
 });
