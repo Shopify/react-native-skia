@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fbjni/fbjni.h>
+
 #include <RNSkJsView.h>
 
 #include <SkiaOpenGLRenderer.h>
@@ -12,7 +14,6 @@ class RNSkOpenGLCanvasProvider :
         public std::enable_shared_from_this<RNSkOpenGLCanvasProvider> {
 public:
     RNSkOpenGLCanvasProvider(std::function<void()> requestRedraw,
-                             std::function<void()> releaseSurfaceCallback,
                              std::shared_ptr <RNSkia::RNSkPlatformContext> context);
 
     ~RNSkOpenGLCanvasProvider();
@@ -23,7 +24,7 @@ public:
 
     void renderToCanvas(const std::function<void(SkCanvas * )> &cb) override;
 
-    void surfaceAvailable(ANativeWindow *surface, int width, int height);
+    void surfaceAvailable(jobject surface, int width, int height);
 
     void surfaceDestroyed();
 
@@ -31,7 +32,6 @@ public:
 
 private:
     std::unique_ptr <SkiaOpenGLRenderer> _renderer = nullptr;
-    std::function<void()> _releaseSurfaceCallback;
     std::shared_ptr <RNSkPlatformContext> _context;
     float _width = -1;
     float _height = -1;

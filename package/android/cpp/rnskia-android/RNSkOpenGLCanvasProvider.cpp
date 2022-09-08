@@ -12,10 +12,8 @@ namespace RNSkia {
 
   RNSkOpenGLCanvasProvider::RNSkOpenGLCanvasProvider(
           std::function<void()> requestRedraw,
-          std::function<void()> releaseSurfaceCallback,
           std::shared_ptr<RNSkia::RNSkPlatformContext> context):
           RNSkCanvasProvider(requestRedraw),
-          _releaseSurfaceCallback(releaseSurfaceCallback),
           _context(context) {}
 
   RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() {}
@@ -34,7 +32,7 @@ namespace RNSkia {
     }
   }
 
-  void RNSkOpenGLCanvasProvider::surfaceAvailable(ANativeWindow* surface, int width, int height) {
+  void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width, int height) {
     _width = width;
     _height = height;
 
@@ -50,12 +48,19 @@ namespace RNSkia {
   void RNSkOpenGLCanvasProvider::surfaceDestroyed()  {
     if (_renderer != nullptr)
     {
-      // Start teardown
+      // teardown
       _renderer->teardown();
 
       // Teardown renderer on the render thread since OpenGL demands
       // same thread access for OpenGL contexts.
-      _context->runOnRenderThread([weakSelf = weak_from_this()]() {
+      std::condition_variable cv;
+      std::mutex m;
+      std::unique_lock<std::mutex> lock(m);
+
+      _context->runOnRenderThread([&cv, &m, weakSelf = weak_from_this()]() {
+          // Lock
+          std::unique_lock<std::mutex> lock(m);
+
           auto self = weakSelf.lock();
           if(self) {
             if(self->_renderer != nullptr) {
@@ -63,9 +68,11 @@ namespace RNSkia {
             }
             // Remove renderer
             self->_renderer = nullptr;
-            self->_releaseSurfaceCallback();
           }
+          cv.notify_one();
       });
+
+      cv.wait(lock);
     }
   }
 
