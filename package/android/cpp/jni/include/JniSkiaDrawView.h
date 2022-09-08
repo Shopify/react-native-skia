@@ -81,7 +81,6 @@ namespace RNSkia {
           JniSkiaBaseView::unregisterView();
         }
 
-
     private:
         friend HybridBase;
 

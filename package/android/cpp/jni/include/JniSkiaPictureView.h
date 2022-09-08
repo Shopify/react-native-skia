@@ -80,9 +80,7 @@ namespace RNSkia {
 
         void unregisterView() override {
           JniSkiaBaseView::unregisterView();
-          _skiaView = nullptr;
         }
-
 
     private:
         friend HybridBase;
