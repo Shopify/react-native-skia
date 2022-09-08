@@ -3,7 +3,6 @@
 
 #include <memory>
 
-#include <RNSkLog.h>
 #include <RNSkPlatformContext.h>
 
 #include <JsiValueWrapper.h>
@@ -181,7 +180,6 @@ public:
    */
   virtual void setNativeId(size_t nativeId) {
     _nativeId = nativeId;
-    RNSkLogger::logToConsole("setNativeId %l", nativeId);
     beginDrawingLoop();
   }
   
@@ -262,7 +260,6 @@ private:
     Draw loop callback
    */
   void drawLoopCallback(bool invalidated) {
-    RNSkLogger::logToConsole("drawLoopCallback %l", _nativeId);
     if(_redrawRequestCounter > 0 || _drawingMode == RNSkDrawingMode::Continuous) {
         _redrawRequestCounter = 0;
         
