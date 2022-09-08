@@ -16,6 +16,12 @@ public class SkiaPictureView extends SkiaBaseView {
         mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        mHybridData.resetNative();
+    }
+
     private native HybridData initHybrid(SkiaManager skiaManager);
 
     protected native void surfaceAvailable(Object surface, int width, int height);

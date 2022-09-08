@@ -32,10 +32,6 @@ namespace RNSkia {
           return makeCxxInstance(jThis, skiaManager);
         }
 
-        ~JniSkiaDrawView() {
-          RNSkLogger::logToConsole("release");
-        }
-
         static void registerNatives() {
           registerHybrid({
                                  makeNativeMethod("initHybrid", JniSkiaDrawView::initHybrid),
@@ -55,13 +51,6 @@ namespace RNSkia {
         }
 
     protected:
-        void releaseSurface() {
-          jni::ThreadScope ts;
-          auto cls = javaPart_->getClass();
-          static auto method = cls->getMethod<void(void)>("releaseSurface");
-          method(javaPart_.get());
-        };
-
         void updateTouchPoints(jni::JArrayDouble touches) override {
           JniSkiaBaseView::updateTouchPoints(touches);
         }
@@ -88,17 +77,19 @@ namespace RNSkia {
           JniSkiaBaseView::registerView(nativeId);
         }
 
-        void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+        void unregisterView() override {
+          JniSkiaBaseView::unregisterView();
+        }
 
 
     private:
         friend HybridBase;
+
         explicit JniSkiaDrawView(jni::alias_ref<jhybridobject> jThis,
                                  jni::alias_ref<JniSkiaManager::javaobject> skiaManager) :
                 JniSkiaBaseView(skiaManager),
                 _skiaView(std::make_shared<RNSkAndroidView<RNSkia::RNSkJsView>>(
-                        skiaManager->cthis()->getPlatformContext(),
-                        std::bind(&JniSkiaDrawView::releaseSurface, this))) {
+                        skiaManager->cthis()->getPlatformContext())) {
         }
 
         std::shared_ptr<RNSkBaseAndroidView> _skiaView;

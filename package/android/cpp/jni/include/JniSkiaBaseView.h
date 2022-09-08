@@ -8,9 +8,6 @@
 
 #include <JniSkiaManager.h>
 
-#include <android/native_window.h>
-#include <android/native_window_jni.h>
-
 namespace RNSkia {
     using namespace facebook;
     using namespace jni;
@@ -20,9 +17,11 @@ namespace RNSkia {
         JniSkiaBaseView(jni::alias_ref<JniSkiaManager::javaobject> skiaManager) :
                 _manager(skiaManager->cthis()) {}
 
-        std::shared_ptr<JniSkiaManager> getSkiaManager() { return _manager; };
+        ~JniSkiaBaseView() {}
 
-        virtual std::shared_ptr<RNSkBaseAndroidView> getAndroidSkiaView() { return nullptr; }
+        std::shared_ptr<RNSkManager> getSkiaManager() { return _manager->getSkiaManager(); };
+
+        virtual std::shared_ptr<RNSkBaseAndroidView> getAndroidSkiaView() = 0;
 
     protected:
         virtual void updateTouchPoints(jni::JArrayDouble touches) {
@@ -30,8 +29,7 @@ namespace RNSkia {
         }
 
         virtual void surfaceAvailable(jobject surface, int width, int height) {
-          getAndroidSkiaView()->surfaceAvailable(
-                  ANativeWindow_fromSurface(Environment::current(), surface), width, height);
+          getAndroidSkiaView()->surfaceAvailable(surface, width, height);
         }
 
         virtual void surfaceSizeChanged(int width, int height) {
@@ -51,17 +49,17 @@ namespace RNSkia {
         }
 
         virtual void registerView(int nativeId) {
-          getSkiaManager()->getSkiaManager()->registerSkiaView(nativeId,
-                                                               getAndroidSkiaView()->getSkiaView());
+          getSkiaManager()->registerSkiaView(nativeId,
+                                             getAndroidSkiaView()->getSkiaView());
         }
 
         virtual void unregisterView() {
-          getSkiaManager()->getSkiaManager()->unregisterSkiaView(
+          getSkiaManager()->unregisterSkiaView(
                   getAndroidSkiaView()->getSkiaView()->getNativeId());
         }
 
     private:
-        std::shared_ptr<JniSkiaManager> _manager;
+        JniSkiaManager *_manager;
     };
 
 } // namespace RNSkia

@@ -52,12 +52,6 @@ namespace RNSkia {
         }
 
     protected:
-        void releaseSurface() {
-          jni::ThreadScope ts;
-          static auto method = javaPart_->getClass()->getMethod<void(void)>("releaseSurface");
-          method(javaPart_.get());
-        };
-
         void updateTouchPoints(jni::JArrayDouble touches) override {
           JniSkiaBaseView::updateTouchPoints(touches);
         }
@@ -84,7 +78,10 @@ namespace RNSkia {
           JniSkiaBaseView::registerView(nativeId);
         }
 
-        void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+        void unregisterView() override {
+          JniSkiaBaseView::unregisterView();
+          _skiaView = nullptr;
+        }
 
 
     private:
@@ -93,12 +90,8 @@ namespace RNSkia {
         explicit JniSkiaPictureView(jni::alias_ref<jhybridobject> jThis,
                                     jni::alias_ref<JniSkiaManager::javaobject> skiaManager) :
                 JniSkiaBaseView(skiaManager),
-                _skiaView(std::make_shared<RNSkAndroidView < RNSkia::RNSkPictureView>>
-
-        (
-        skiaManager->cthis()->getPlatformContext(),
-        std::bind(&JniSkiaPictureView::releaseSurface,
-        this))) {
+                _skiaView(std::make_shared<RNSkAndroidView<RNSkia::RNSkPictureView>>(
+                        skiaManager->cthis()->getPlatformContext())) {
         }
 
         std::shared_ptr<RNSkBaseAndroidView> _skiaView;

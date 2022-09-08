@@ -24,14 +24,6 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
         // Texture view does not support setting the background color.
     }
 
-    @DoNotStrip
-    public void releaseSurface() {
-        if (mSurface != null) {
-            mSurface.release();
-            mSurface = null;
-        }
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         // https://developer.android.com/training/gestures/multi
@@ -115,12 +107,17 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        // Notify the native side
         surfaceDestroyed();
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         // Invoked when the specified SurfaceTexture is about to be destroyed. If returns true,
         // no rendering should happen inside the surface texture after this method is invoked.
-        // When returning false, the client needs to call SurfaceTexture#release().
-        return false;
+        // We've measured this and it seems like we need to call release and return true - and
+        // then handle the issue with this being ripped out underneath the native layer in the C++
+        // code.
+        mSurface.release();
+        // Return true - we promise that no more rendering will be done now.
+        return true;
     }
 
     @Override
