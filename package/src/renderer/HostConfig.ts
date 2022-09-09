@@ -265,7 +265,17 @@ export const skHostConfig: SkiaHostConfig = {
       return;
     }
     bustBranchMemoization(instance);
-    instance.props = nextProps;
+    if (instance instanceof DrawingNode) {
+      const { onDraw, skipProcessing, ...props } = nextProps;
+      instance.props = props;
+    } else if (instance instanceof DeclarationNode) {
+      const { onDeclare, ...props } = nextProps;
+      instance.props = props;
+    } else {
+      throw new Error(
+        "Unsupported instance commitUpdate " + instance.constructor.name
+      );
+    }
   },
 
   commitTextUpdate: (
