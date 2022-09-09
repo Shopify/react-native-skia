@@ -49,8 +49,7 @@ normalPath.close();
 
 const goodPath = Skia.Path.Make();
 goodPath.moveTo(21, 45);
-goodPath.rLineTo(24, 24);
-//goodPath.cubicTo(21, 36.78, 24.26, 29.42, 29.41, 24.47);
+goodPath.cubicTo(21, 36.78, 24.26, 29.42, 29.41, 24.47);
 goodPath.cubicTo(33.61, 20.43, 38.05, 18, 45, 18);
 goodPath.cubicTo(58.25, 18, 69, 30.09, 69, 45);
 goodPath.cubicTo(69, 59.91, 58.25, 72, 45, 72);
