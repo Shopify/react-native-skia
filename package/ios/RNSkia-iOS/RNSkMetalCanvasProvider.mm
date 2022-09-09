@@ -1,4 +1,5 @@
 #import <RNSkMetalCanvasProvider.h>
+#import <RNSkLog.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
