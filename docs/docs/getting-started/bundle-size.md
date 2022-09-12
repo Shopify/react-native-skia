@@ -1,5 +1,5 @@
 ---
-id: size
+id: bundle-size
 title: Bundle Size
 sidebar_label: Bundle Size
 slug: /getting-started/bundle-size
@@ -7,8 +7,8 @@ slug: /getting-started/bundle-size
 
 Below is the app size increase to be expected when adding React Native Skia to your project.
 
-| iOS  | Android | Web   |
-| ---- | ------- | ----- |
+| iOS  | Android | Web    |
+| ---- | ------- | ------ |
 | 6 MB | 4 MB    | 7,2 MB |
 
 React Native Skia includes both prebuilt library files and C++ files that are compiled and linked with your app when being built - adding to the size of your app.
@@ -21,7 +21,7 @@ Below is an explanation of how these numbers were found - using a bare-bones Rea
 
 ## Android
 
-*On _Android_ you should use [App Bundles](https://developer.android.com/guide/app-bundle) to ensure that only the required files are downloaded to your user’s devices.*
+_On *Android* you should use [App Bundles](https://developer.android.com/guide/app-bundle) to ensure that only the required files are downloaded to your user’s devices._
 
 When building an APK in release mode, you will see an increase of 41.3 MB after adding React Native Skia.
 This is because the library is built for different target architectures.
