@@ -51,8 +51,14 @@ const useLoading = <T>(
   const [data, setData] = useState<T | null>(null);
   useEffect(() => {
     mounted.current = true;
-    loader().then((value) => { if (mounted.current) setData(value); });
-    return () => { mounted.current = false; };
+    loader().then((value) => {
+      if (mounted.current) {
+        setData(value);
+      }
+    });
+    return () => {
+      mounted.current = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
   return data;
