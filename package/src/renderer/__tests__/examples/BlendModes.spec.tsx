@@ -39,7 +39,7 @@ describe("Test blend modes", () => {
         </Shader>
       </Rect>
     );
-    processResult(surface, "snapshots/demos/product.png");
+    processResult(surface, "snapshots/demos/product2.png");
   });
 });
 
@@ -118,7 +118,6 @@ half4 blend_hue(half4 src, half4 dst) {
 
 vec4 main(vec2 xy) {
   vec4 dst = image.eval(xy);
-  vec4 res = blend_hue(src, dst);
-  return res * dst.a;
+  return blend_hue(src, dst) * dst.a;
 }
 `;
