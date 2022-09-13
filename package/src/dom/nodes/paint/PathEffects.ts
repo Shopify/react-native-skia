@@ -7,6 +7,7 @@ import type {
   DashPathEffectProps,
   DiscretePathEffectProps,
   Line2DPathEffectProps,
+  Node,
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../../types";
@@ -22,14 +23,36 @@ abstract class PathEffectDeclaration<
     super(ctx, DeclarationType.PathEffect, type, props);
   }
 
-  compose(effect: SkPathEffect) {
-    const child = this._children[0];
-    if (child instanceof JsiDeclarationNode && child.isPathEffect()) {
-      return this.Skia.PathEffect.MakeCompose(effect, child.materialize());
+  addChild(child: Node<unknown>) {
+    if (!(child instanceof PathEffectDeclaration)) {
+      throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
     }
-    return effect;
+    super.addChild(child);
   }
 
+  insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
+    if (!(child instanceof PathEffectDeclaration)) {
+      throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
+    }
+    super.insertChildBefore(child, before);
+  }
+
+  compose(pe: SkPathEffect) {
+    const children = this._children as PathEffectDeclaration<unknown>[];
+    if (this._children.length === 0) {
+      return pe;
+    } else {
+      return this.Skia.PathEffect.MakeCompose(
+        pe,
+        children.reduce<SkPathEffect | null>((acc, child) => {
+          if (acc === null) {
+            return child.materialize();
+          }
+          return this.Skia.PathEffect.MakeCompose(acc, child.materialize());
+        }, null) as SkPathEffect
+      );
+    }
+  }
   getOptionalChildInstance(index: number) {
     const child = this._children[index];
     if (!child) {
