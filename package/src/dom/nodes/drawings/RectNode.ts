@@ -16,7 +16,7 @@ export class RectNode extends JsiDrawingNode<RectProps, SkRect> {
 
   draw({ canvas, paint }: DrawingContext) {
     if (this.derived === undefined) {
-      throw new Error("OvalNode: rect is undefined");
+      throw new Error("RectNode: rect is undefined");
     }
     canvas.drawRect(this.derived, paint);
   }

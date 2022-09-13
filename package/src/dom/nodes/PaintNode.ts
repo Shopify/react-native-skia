@@ -15,7 +15,7 @@ export class PaintNode
     super(ctx, DeclarationType.Paint, NodeType.Paint, props);
   }
 
-  get() {
+  materialize() {
     const {
       color,
       strokeWidth,
@@ -58,15 +58,15 @@ export class PaintNode
     this._children.forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
         if (child.isShader()) {
-          paint.setShader(child.get());
+          paint.setShader(child.materialize());
         } else if (child.isColorFilter()) {
-          paint.setColorFilter(child.get());
+          paint.setColorFilter(child.materialize());
         } else if (child.isImageFilter()) {
-          paint.setImageFilter(child.get());
+          paint.setImageFilter(child.materialize());
         } else if (child.isMaskFilter()) {
-          paint.setMaskFilter(child.get());
+          paint.setMaskFilter(child.materialize());
         } else if (child.isPathEffect()) {
-          paint.setPathEffect(child.get());
+          paint.setPathEffect(child.materialize());
         } else {
           throw new Error(`Unknown paint child ${child.type}`);
         }

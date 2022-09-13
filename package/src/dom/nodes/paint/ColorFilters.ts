@@ -22,7 +22,7 @@ export abstract class ColorFilterDeclaration<
   compose(filter: SkColorFilter) {
     const child = this._children[0];
     if (child instanceof JsiDeclarationNode && child.isColorFilter()) {
-      return this.Skia.ColorFilter.MakeCompose(filter, child.get());
+      return this.Skia.ColorFilter.MakeCompose(filter, child.materialize());
     }
     return filter;
   }
@@ -33,7 +33,7 @@ export class MatrixColorFilterNode extends ColorFilterDeclaration<MatrixColorFil
     super(ctx, NodeType.MatrixColorFilter, props);
   }
 
-  get() {
+  materialize() {
     const { matrix } = this.props;
     const cf = this.Skia.ColorFilter.MakeMatrix(matrix);
     return this.compose(cf);
@@ -45,7 +45,7 @@ export class BlendColorFilterNode extends ColorFilterDeclaration<BlendColorFilte
     super(ctx, NodeType.BlendColorFilter, props);
   }
 
-  get() {
+  materialize() {
     const { mode } = this.props;
     const color = processColor(this.Skia, this.props.color, 1);
     const cf = this.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
@@ -58,7 +58,7 @@ export class LinearToSRGBGammaColorFilterNode extends ColorFilterDeclaration<nul
     super(ctx, NodeType.LinearToSRGBGammaColorFilter, null);
   }
 
-  get() {
+  materialize() {
     const cf = this.Skia.ColorFilter.MakeLinearToSRGBGamma();
     return this.compose(cf);
   }
@@ -69,7 +69,7 @@ export class SRGBToLinearGammaColorFilterNode extends ColorFilterDeclaration<nul
     super(ctx, NodeType.SRGBToLinearGammaColorFilter, null);
   }
 
-  get() {
+  materialize() {
     const cf = this.Skia.ColorFilter.MakeSRGBToLinearGamma();
     return this.compose(cf);
   }
@@ -80,7 +80,7 @@ export class LumaColorFilterNode extends ColorFilterDeclaration<null> {
     super(ctx, NodeType.LumaColorFilter, null);
   }
 
-  get() {
+  materialize() {
     const cf = this.Skia.ColorFilter.MakeLumaColorFilter();
     return this.compose(cf);
   }
@@ -91,12 +91,16 @@ export class LerpColorFilterNode extends ColorFilterDeclaration<LerpColorFilterP
     super(ctx, NodeType.LerpColorFilter, props);
   }
 
-  get() {
+  materialize() {
     const { t } = this.props;
     const [first, second] = this.children() as JsiDeclarationNode<
       unknown,
       SkColorFilter
     >[];
-    return this.Skia.ColorFilter.MakeLerp(t, first.get(), second.get());
+    return this.Skia.ColorFilter.MakeLerp(
+      t,
+      first.materialize(),
+      second.materialize()
+    );
   }
 }

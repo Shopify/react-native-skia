@@ -53,7 +53,7 @@ export class BlendNode extends JsiDeclarationNode<
     super.insertChildBefore(child, before);
   }
 
-  get() {
+  materialize() {
     const { Skia } = this;
     const blend = BlendMode[enumKey(this.props.mode)];
     if (this.declarationType === DeclarationType.ImageFilter) {
@@ -61,18 +61,18 @@ export class BlendNode extends JsiDeclarationNode<
         .reverse()
         .reduce<SkImageFilter | null>((inner, outer) => {
           if (inner === null) {
-            return outer.get();
+            return outer.materialize();
           }
-          return Skia.ImageFilter.MakeBlend(blend, outer.get(), inner);
+          return Skia.ImageFilter.MakeBlend(blend, outer.materialize(), inner);
         }, null) as SkImageFilter;
     } else {
       return (this._children as ShaderDeclaration<unknown>[])
         .reverse()
         .reduce<SkShader | null>((inner, outer) => {
           if (inner === null) {
-            return outer.get();
+            return outer.materialize();
           }
-          return Skia.Shader.MakeBlend(blend, outer.get(), inner);
+          return Skia.Shader.MakeBlend(blend, outer.materialize(), inner);
         }, null) as SkShader;
     }
   }

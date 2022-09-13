@@ -14,7 +14,7 @@ export class BlurMaskFilterNode extends JsiDeclarationNode<
     super(ctx, DeclarationType.MaskFilter, NodeType.BlurMaskFilter, props);
   }
 
-  get() {
+  materialize() {
     const { style, blur, respectCTM } = this.props;
     return this.Skia.MaskFilter.MakeBlur(
       BlurStyle[enumKey(style)],

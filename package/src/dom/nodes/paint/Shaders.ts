@@ -43,7 +43,7 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
     super(ctx, NodeType.Shader, props);
   }
 
-  get() {
+  materialize() {
     const { source, uniforms, ...transform } = this.props;
     return source.makeShaderWithChildren(
       processUniforms(source, uniforms),
@@ -52,7 +52,7 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
           (child): child is JsiDeclarationNode<unknown, SkShader> =>
             child instanceof JsiDeclarationNode && child.isShader()
         )
-        .map((child) => child.get()),
+        .map((child) => child.materialize()),
       lm(this.Skia.Matrix(), transform)
     );
   }
@@ -63,7 +63,7 @@ export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
     super(ctx, NodeType.ImageShader, props);
   }
 
-  get() {
+  materialize() {
     const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = this.props;
     const rct = getRect(this.Skia, imageShaderProps);
     if (rct) {
@@ -93,7 +93,7 @@ export class ColorNode extends ShaderDeclaration<ColorProps> {
     super(ctx, NodeType.ColorShader, props);
   }
 
-  get() {
+  materialize() {
     const { color } = this.props;
     return this.Skia.Shader.MakeColor(processColor(this.Skia, color, 1));
   }
@@ -104,7 +104,7 @@ export class TurbulenceNode extends ShaderDeclaration<TurbulenceProps> {
     super(ctx, NodeType.Turbulence, props);
   }
 
-  get() {
+  materialize() {
     const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = this.props;
     return this.Skia.Shader.MakeTurbulence(
       freqX,
@@ -122,7 +122,7 @@ export class FractalNoiseNode extends ShaderDeclaration<FractalNoiseProps> {
     super(ctx, NodeType.FractalNoise, props);
   }
 
-  get() {
+  materialize() {
     const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = this.props;
     return this.Skia.Shader.MakeFractalNoise(
       freqX,
@@ -140,7 +140,7 @@ export class LinearGradientNode extends ShaderDeclaration<LinearGradientProps> {
     super(ctx, NodeType.LinearGradient, props);
   }
 
-  get() {
+  materialize() {
     const { start, end } = this.props;
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(this.Skia, this.props);
@@ -161,7 +161,7 @@ export class RadialGradientNode extends ShaderDeclaration<RadialGradientProps> {
     super(ctx, NodeType.RadialGradient, props);
   }
 
-  get() {
+  materialize() {
     const { c, r } = this.props;
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(this.Skia, this.props);
@@ -182,7 +182,7 @@ export class SweepGradientNode extends ShaderDeclaration<SweepGradientProps> {
     super(ctx, NodeType.SweepGradient, props);
   }
 
-  get() {
+  materialize() {
     const { c, start, end } = this.props;
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(this.Skia, this.props);
@@ -205,7 +205,7 @@ export class TwoPointConicalGradientNode extends ShaderDeclaration<TwoPointConic
     super(ctx, NodeType.TwoPointConicalGradient, props);
   }
 
-  get() {
+  materialize() {
     const { startR, endR, start, end } = this.props;
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(this.Skia, this.props);

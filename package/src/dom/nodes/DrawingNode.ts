@@ -28,8 +28,11 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
   }
 
   setProp<K extends keyof P>(name: K, value: P[K]) {
-    super.setProp(name, value);
-    this.derived = this.deriveProps();
+    const hasChanged = super.setProp(name, value);
+    if (hasChanged) {
+      this.derived = this.deriveProps();
+    }
+    return hasChanged;
   }
 
   addChild(child: Node<unknown>): void {
@@ -52,13 +55,13 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
     if (this.props.paint && isSkPaint(this.props.paint)) {
       this.draw({ ...ctx, paint: this.props.paint });
     } else if (this.props.paint && this.props.paint.current != null) {
-      this.draw({ ...ctx, paint: this.props.paint.current.get() });
+      this.draw({ ...ctx, paint: this.props.paint.current.materialize() });
     } else {
       this.draw(ctx);
     }
     this.children().map((child) => {
       if (child instanceof PaintNode) {
-        const paint = child.get();
+        const paint = child.materialize();
         this.draw({ ...ctx, paint });
       }
     });

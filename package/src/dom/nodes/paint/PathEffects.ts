@@ -25,7 +25,7 @@ abstract class PathEffectDeclaration<
   compose(effect: SkPathEffect) {
     const child = this._children[0];
     if (child instanceof JsiDeclarationNode && child.isPathEffect()) {
-      return this.Skia.PathEffect.MakeCompose(effect, child.get());
+      return this.Skia.PathEffect.MakeCompose(effect, child.materialize());
     }
     return effect;
   }
@@ -42,7 +42,7 @@ abstract class PathEffectDeclaration<
     const child = this._children[index];
     if (child instanceof JsiDeclarationNode) {
       if (child.isPathEffect()) {
-        return child.get();
+        return child.materialize();
       } else {
         throw new Error(`Found invalid child ${child.type} in ${this.type}`);
       }
@@ -57,7 +57,7 @@ export class DiscretePathEffectNode extends PathEffectDeclaration<DiscretePathEf
     super(ctx, NodeType.DiscretePathEffect, props);
   }
 
-  get() {
+  materialize() {
     const { length, deviation, seed } = this.props;
     const pe = this.Skia.PathEffect.MakeDiscrete(length, deviation, seed);
     return this.compose(pe);
@@ -72,7 +72,7 @@ export class Path2DPathEffectNode extends PathEffectDeclaration<
     super(ctx, NodeType.Path2DPathEffect, props);
   }
 
-  get() {
+  materialize() {
     const { matrix } = this.props;
     const path = processPath(this.Skia, this.props.path);
     const pe = this.Skia.PathEffect.MakePath2D(matrix, path);
@@ -88,7 +88,7 @@ export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProp
     super(ctx, NodeType.DashPathEffect, props);
   }
 
-  get() {
+  materialize() {
     const { intervals, phase } = this.props;
     const pe = this.Skia.PathEffect.MakeDash(intervals, phase);
     return this.compose(pe);
@@ -103,7 +103,7 @@ export class CornerPathEffectNode extends PathEffectDeclaration<
     super(ctx, NodeType.CornerPathEffect, props);
   }
 
-  get() {
+  materialize() {
     const { r } = this.props;
     const pe = this.Skia.PathEffect.MakeCorner(r);
     if (pe === null) {
@@ -118,7 +118,7 @@ export class SumPathEffectNode extends PathEffectDeclaration<null> {
     super(ctx, NodeType.SumPathEffect, null);
   }
 
-  get() {
+  materialize() {
     return this.Skia.PathEffect.MakeSum(
       this.getMandatoryChildInstance(0),
       this.getMandatoryChildInstance(1)
@@ -134,7 +134,7 @@ export class Line2DPathEffectNode extends PathEffectDeclaration<
     super(ctx, NodeType.Line2DPathEffect, props);
   }
 
-  get() {
+  materialize() {
     const { width, matrix } = this.props;
     const pe = this.Skia.PathEffect.MakeLine2D(width, matrix);
     if (pe === null) {
@@ -152,7 +152,7 @@ export class Path1DPathEffectNode extends PathEffectDeclaration<
     super(ctx, NodeType.Path1DPathEffect, props);
   }
 
-  get() {
+  materialize() {
     const { advance, phase, style } = this.props;
     const path = processPath(this.Skia, this.props.path);
     const pe = this.Skia.PathEffect.MakePath1D(

@@ -70,11 +70,14 @@ export abstract class JsiRenderNode<P extends GroupProps>
   }
 
   setProp<K extends keyof P>(key: K, value: P[K]) {
-    super.setProp(key, value);
-    this.onPropChange();
-    if (paintProps.includes(key as string)) {
-      this.paintCache = null;
+    const hasChanged = super.setProp(key, value);
+    if (hasChanged) {
+      this.onPropChange();
+      if (paintProps.includes(key as string)) {
+        this.paintCache = null;
+      }
     }
+    return hasChanged;
   }
 
   protected onPropChange() {
@@ -195,29 +198,29 @@ export abstract class JsiRenderNode<P extends GroupProps>
       if (child instanceof JsiDeclarationNode) {
         if (child.isColorFilter()) {
           ctx = ctx || {};
-          const cf = child.get();
+          const cf = child.materialize();
           ctx.colorFilter = ctx.colorFilter
             ? this.Skia.ColorFilter.MakeCompose(cf, ctx.colorFilter)
             : cf;
         } else if (child.isShader()) {
           ctx = ctx || {};
-          const shader = child.get();
+          const shader = child.materialize();
           ctx.shader = shader;
         } else if (child.isPathEffect()) {
           ctx = ctx || {};
-          const pe = child.get();
+          const pe = child.materialize();
           ctx.pathEffect = ctx.pathEffect
             ? this.Skia.PathEffect.MakeCompose(pe, ctx.pathEffect)
             : pe;
         } else if (child.isImageFilter()) {
           ctx = ctx || {};
-          const filter = child.get();
+          const filter = child.materialize();
           ctx.imageFilter = ctx.imageFilter
             ? this.Skia.ImageFilter.MakeCompose(filter, ctx.imageFilter)
             : filter;
         } else if (child.isMaskFilter()) {
           ctx = ctx || {};
-          const filter = child.get();
+          const filter = child.materialize();
           ctx.maskFilter = filter;
         }
       }
@@ -258,7 +261,9 @@ export abstract class JsiRenderNode<P extends GroupProps>
         } else if (isSkPaint(layer)) {
           canvas.saveLayer(layer);
         } else {
-          canvas.saveLayer(layer.current ? layer.current.get() : undefined);
+          canvas.saveLayer(
+            layer.current ? layer.current.materialize() : undefined
+          );
         }
       } else {
         canvas.save();

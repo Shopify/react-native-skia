@@ -16,6 +16,7 @@ class TestNode<P> implements Node<P> {
 
   setProp<K extends keyof P>(name: K, v: P[K]) {
     this.props[name] = v;
+    return false;
   }
 
   getProps() {

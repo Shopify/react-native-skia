@@ -31,7 +31,9 @@ export abstract class JsiNode<P> implements Node<P> {
   }
 
   setProp<K extends keyof P>(name: K, v: P[K]) {
+    const hasChanged = this.props[name] !== v;
     this.props[name] = v;
+    return hasChanged;
   }
 
   getProps() {
@@ -90,7 +92,7 @@ export abstract class JsiDeclarationNode<
     super(ctx, type, props);
   }
 
-  abstract get(): T | Nullable;
+  abstract materialize(): T | Nullable;
 
   addChild(child: Node<unknown>): void {
     if (!(child instanceof JsiDeclarationNode)) {
@@ -123,8 +125,9 @@ export abstract class JsiDeclarationNode<
   }
 
   setProp<K extends keyof P>(name: K, v: P[K]) {
-    super.setProp(name, v);
+    const hasChanged = super.setProp(name, v);
     this.invalidate();
+    return hasChanged;
   }
 
   isPaint(): this is DeclarationNode<unknown, SkPaint> {

@@ -15,7 +15,7 @@ export interface Node<P> {
   type: NodeType;
 
   setProps(props: P): void;
-  setProp<K extends keyof P>(name: K, v: P[K]): void;
+  setProp<K extends keyof P>(name: K, v: P[K]): boolean;
   getProps(): P;
 
   children(): Node<unknown>[];
@@ -29,7 +29,7 @@ export type Invalidate = () => void;
 export interface DeclarationNode<P, T, Nullable extends null | never = never>
   extends Node<P> {
   declarationType: DeclarationType;
-  get(): T | Nullable;
+  materialize(): T | Nullable;
 
   setInvalidate(invalidate: Invalidate): void;
 

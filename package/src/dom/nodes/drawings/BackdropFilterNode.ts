@@ -16,7 +16,8 @@ export class BackdropFilterNode extends JsiDrawingNode<ChildrenProps, null> {
 
   draw({ canvas }: DrawingContext) {
     const child = this._children[0];
-    const filter = child instanceof JsiDeclarationNode ? child.get() : null;
+    const filter =
+      child instanceof JsiDeclarationNode ? child.materialize() : null;
     canvas.saveLayer(
       undefined,
       null,

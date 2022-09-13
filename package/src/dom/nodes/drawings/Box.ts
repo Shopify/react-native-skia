@@ -44,7 +44,7 @@ export class BoxShadowNode extends JsiDeclarationNode<
     super(ctx, DeclarationType.Unknown, NodeType.Box, props);
   }
 
-  get() {
+  materialize() {
     return this.props;
   }
 }
@@ -62,7 +62,7 @@ export class BoxNode extends JsiRenderNode<BoxProps> {
     const shadows = this._children
       .map((node) => {
         if (node instanceof BoxShadowNode) {
-          return node.get();
+          return node.materialize();
         }
         return null;
       })
