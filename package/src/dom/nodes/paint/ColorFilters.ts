@@ -5,6 +5,7 @@ import { JsiDeclarationNode } from "../Node";
 import type {
   BlendColorFilterProps,
   MatrixColorFilterProps,
+  Node,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
 import { processColor } from "../datatypes";
@@ -19,12 +20,35 @@ export abstract class ColorFilterDeclaration<
     super(ctx, DeclarationType.ColorFilter, type, props);
   }
 
-  compose(filter: SkColorFilter) {
-    const child = this._children[0];
-    if (child instanceof JsiDeclarationNode && child.isColorFilter()) {
-      return this.Skia.ColorFilter.MakeCompose(filter, child.materialize());
+  addChild(child: Node<unknown>) {
+    if (!(child instanceof ColorFilterDeclaration)) {
+      throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
     }
-    return filter;
+    super.addChild(child);
+  }
+
+  insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
+    if (!(child instanceof ColorFilterDeclaration)) {
+      throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
+    }
+    super.insertChildBefore(child, before);
+  }
+
+  compose(filter: SkColorFilter) {
+    const children = this._children as ColorFilterDeclaration<unknown>[];
+    if (this._children.length === 0) {
+      return filter;
+    } else {
+      return this.Skia.ColorFilter.MakeCompose(
+        filter,
+        children.reduce<SkColorFilter | null>((acc, child) => {
+          if (acc === null) {
+            return child.materialize();
+          }
+          return this.Skia.ColorFilter.MakeCompose(acc, child.materialize());
+        }, null) as SkColorFilter
+      );
+    }
   }
 }
 
