@@ -1,18 +1,9 @@
-import type {
-  Skia,
-  SkMatrix,
-  SkRect,
-  Transforms2d,
-  Vector,
-} from "../../../skia/types";
-import { processTransform, TileMode } from "../../../skia/types";
-import type {
-  GradientProps,
-  ImageShaderProps,
-  TransformProps,
-} from "../../types";
+import type { Skia, SkRect, Transforms2d, Vector } from "../../../skia/types";
+import { TileMode } from "../../../skia/types";
+import type { GradientProps, ImageShaderProps } from "../../types";
 
 import { enumKey } from "./Enum";
+import { processTransformProps } from "./Transform";
 
 export const transformOrigin = (origin: Vector, transform: Transforms2d) => [
   { translateX: origin.x },
@@ -22,29 +13,20 @@ export const transformOrigin = (origin: Vector, transform: Transforms2d) => [
   { translateY: -origin.y },
 ];
 
-export const localMatrix = (
-  m: SkMatrix,
-  { transform, origin }: TransformProps
-) => {
-  if (transform) {
-    return processTransform(
-      m,
-      origin ? transformOrigin(origin, transform) : transform
-    );
-  }
-  return m;
-};
-
 export const processGradientProps = (
   Skia: Skia,
   { colors, positions, mode, flags, ...transform }: GradientProps
-) => ({
-  colors: colors.map((color) => Skia.Color(color)),
-  positions: positions ?? null,
-  mode: TileMode[enumKey(mode ?? "clamp")],
-  flags,
-  localMatrix: localMatrix(Skia.Matrix(), transform),
-});
+) => {
+  const localMatrix = Skia.Matrix();
+  processTransformProps(localMatrix, transform);
+  return {
+    colors: colors.map((color) => Skia.Color(color)),
+    positions: positions ?? null,
+    mode: TileMode[enumKey(mode ?? "clamp")],
+    flags,
+    localMatrix,
+  };
+};
 
 export const getRect = (
   Skia: Skia,

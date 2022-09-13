@@ -13,7 +13,6 @@ import {
   PaintStyle,
   BlendMode,
   ClipOp,
-  processTransform,
   isRRect,
 } from "../../skia/types";
 import type {
@@ -25,7 +24,7 @@ import type {
   DeclarationNode,
 } from "../types";
 
-import { isPathDef, processPath } from "./datatypes";
+import { isPathDef, processPath, processTransformProps } from "./datatypes";
 import type { NodeContext } from "./Node";
 import { JsiNode, JsiDeclarationNode } from "./Node";
 import type { PaintContext } from "./PaintContext";
@@ -53,13 +52,14 @@ export abstract class JsiRenderNode<P extends GroupProps>
   implements RenderNode<P>
 {
   paintCache: PaintCache | null = null;
-  matrix?: SkMatrix;
+  matrix: SkMatrix;
   clipRect?: SkRect;
   clipRRect?: SkRRect;
   clipPath?: SkPath;
 
   constructor(ctx: NodeContext, type: NodeType, props: P) {
     super(ctx, type, props);
+    this.matrix = this.Skia.Matrix();
     this.onPropChange();
   }
 
@@ -81,7 +81,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
   }
 
   protected onPropChange() {
-    this.matrix = undefined;
+    this.matrix.identity();
     this.clipPath = undefined;
     this.clipRect = undefined;
     this.clipRRect = undefined;
@@ -117,28 +117,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
   }
 
   private computeMatrix() {
-    const { transform, origin, matrix } = this.props;
-    if (matrix) {
-      if (origin) {
-        const m = this.Skia.Matrix();
-        m.translate(origin.x, origin.y);
-        m.concat(matrix);
-        m.translate(-origin.x, -origin.y);
-        this.matrix = m;
-      } else {
-        this.matrix = matrix;
-      }
-    } else if (transform) {
-      const m = this.Skia.Matrix();
-      if (origin) {
-        m.translate(origin.x, origin.y);
-      }
-      processTransform(m, transform);
-      if (origin) {
-        m.translate(-origin.x, -origin.y);
-      }
-      this.matrix = m;
-    }
+    processTransformProps(this.matrix, this.props);
   }
 
   private getPaintCtx() {
@@ -229,7 +208,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
   }
 
   render(parentCtx: DrawingContext) {
-    const { invertClip, layer } = this.props;
+    const { invertClip, layer, matrix, transform } = this.props;
     const { canvas } = parentCtx;
 
     const opacity = this.props.opacity
@@ -249,7 +228,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
     const paint = this.paintCache.child;
     // TODO: can we only recreate a new context here if needed?
     const ctx = { ...parentCtx, opacity, paint };
-    const hasTransform = this.matrix !== undefined;
+    const hasTransform = matrix !== undefined || transform !== undefined;
     const hasClip = this.clipRect !== undefined;
     const shouldSave = hasTransform || hasClip || !!layer;
     const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;

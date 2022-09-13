@@ -24,8 +24,8 @@ import {
   enumKey,
   fitRects,
   getRect,
-  localMatrix as lm,
   processGradientProps,
+  processTransformProps,
   rect2rect,
 } from "../datatypes";
 
@@ -45,6 +45,8 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
 
   materialize() {
     const { source, uniforms, ...transform } = this.props;
+    const m3 = this.Skia.Matrix();
+    processTransformProps(m3, transform);
     return source.makeShaderWithChildren(
       processUniforms(source, uniforms),
       this.children()
@@ -53,7 +55,7 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
             child instanceof JsiDeclarationNode && child.isShader()
         )
         .map((child) => child.materialize()),
-      lm(this.Skia.Matrix(), transform)
+      m3
     );
   }
 }
@@ -78,12 +80,14 @@ export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
         ...m3,
       ];
     }
+    const lm = this.Skia.Matrix();
+    processTransformProps(lm, imageShaderProps);
     return image.makeShaderOptions(
       TileMode[enumKey(tx)],
       TileMode[enumKey(ty)],
       FilterMode[enumKey(fm)],
       MipmapMode[enumKey(mm)],
-      lm(this.props.matrix ?? this.Skia.Matrix(), imageShaderProps)
+      lm
     );
   }
 }

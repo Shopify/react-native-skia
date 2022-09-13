@@ -6,3 +6,4 @@ export * from "./Rect";
 export * from "./Radius";
 export * from "./Circle";
 export * from "./Gradient";
+export * from "./Transform";
