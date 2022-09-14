@@ -141,9 +141,10 @@ export const API = () => {
       />
       <Stack.Screen
         name="Freeze"
+        name="Checker"
         component={FreezeExample}
         options={{
-          title: "❄️ Freeze",
+          title: "🏁 Checker",
         }}
       />
       <Stack.Screen
