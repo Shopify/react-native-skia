@@ -126,7 +126,9 @@ export abstract class JsiDeclarationNode<
 
   setProp<K extends keyof P>(name: K, v: P[K]) {
     const hasChanged = super.setProp(name, v);
-    this.invalidate();
+    if (hasChanged) {
+      this.invalidate();
+    }
     return hasChanged;
   }
 
