@@ -114,7 +114,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(requestRedraw) {
-    if (count < 1) {
+    if (count != 1) {
        _platformContext->raiseError(
          std::string("requestRedraw: Expected 1 arguments, got " + std::to_string(count) + "."));
 
