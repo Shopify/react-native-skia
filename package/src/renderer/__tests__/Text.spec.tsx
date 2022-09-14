@@ -108,6 +108,7 @@ describe("Test different text examples", () => {
     expect(tf).toBeTruthy();
     const font = Skia.Font(tf, fontSize);
     const text = "欢迎";
+    const padding = 16;
     const surface = drawOnNode(
       <>
         <Text
@@ -116,8 +117,18 @@ describe("Test different text examples", () => {
           y={height / 2}
           x={(width - font.getTextWidth(text)) / 2}
         />
+
+        <Text
+          text={text}
+          font={font}
+          y={height / 2 + fontSize + padding}
+          x={(width - font.getTextWidth(text)) / 2}
+          style={"stroke"}
+          color={"black"}
+          strokeWidth={1}
+        />
       </>
     );
-    processResult(surface, docPath("text/welcome.png"), true);
+    processResult(surface, docPath("text/welcome.png"));
   });
 });
