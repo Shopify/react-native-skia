@@ -12,7 +12,7 @@ import type { SkMatrix } from "./Matrix";
 import type { SkImageFilter } from "./ImageFilter";
 import type { SkVertices } from "./Vertices";
 import type { SkTextBlob } from "./TextBlob";
-import type { SkPicture } from "./Picture";
+import type { SkPicture } from "./Picture/Picture";
 
 export enum ClipOp {
   Difference,

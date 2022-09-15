@@ -71,3 +71,8 @@ export interface ISkiaValueApi {
     cb: (t: number, state: S | undefined) => S
   ) => SkiaAnimation;
 }
+
+export type SkiaSelector<TReturn, TInput = unknown> = {
+  value: SkiaValue<TInput>;
+  selector: (v: TInput) => TReturn;
+};

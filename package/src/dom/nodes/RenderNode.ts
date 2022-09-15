@@ -21,7 +21,7 @@ import type {
   DrawingContext,
   NodeType,
   Node,
-  DeclarationNode,
+  PaintNodeInstance,
 } from "../types";
 
 import { isPathDef, processPath, processTransformProps } from "./datatypes";
@@ -273,7 +273,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
 }
 
 export const isSkPaint = (
-  obj: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint
+  obj: RefObject<PaintNodeInstance> | SkPaint
 ): obj is SkPaint => "__typename__" in obj && obj.__typename__ === "Paint";
 
 const concatPaint = (

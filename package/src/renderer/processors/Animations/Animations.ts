@@ -1,4 +1,4 @@
-import type { SkiaSelector, SkiaValue } from "../../../values";
+import type { SkiaSelector, SkiaValue } from "../../../values/types";
 
 export const isValue = (value: unknown): value is SkiaValue<unknown> => {
   if (value === undefined || value === null) {

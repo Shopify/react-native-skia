@@ -15,8 +15,6 @@ import type {
   Vector,
 } from "../../skia/types";
 
-import type { DeclarationNode } from "./Node";
-
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export type PathDef = string | SkPath;
@@ -83,8 +81,12 @@ export interface PaintProps extends ChildrenProps {
   antiAlias?: boolean;
 }
 
+export interface PaintNodeInstance {
+  materialize(): SkPaint;
+}
+
 export interface GroupProps extends PaintProps, TransformProps {
   clip?: ClipDef;
   invertClip?: boolean;
-  layer?: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint | boolean;
+  layer?: RefObject<PaintNodeInstance> | SkPaint | boolean;
 }

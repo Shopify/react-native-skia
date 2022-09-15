@@ -1,9 +1,4 @@
-import type { SkiaValue } from "./types";
-
-export type SkiaSelector<TReturn, TInput = unknown> = {
-  value: SkiaValue<TInput>;
-  selector: (v: TInput) => TReturn;
-};
+import type { SkiaValue, SkiaSelector } from "./types";
 
 /**
  * Wraps a Skia Value with a selector function. The selector function can access the
