@@ -1,12 +1,12 @@
 import { press, takeScreenshot } from "react-native-owl";
 
 jest.mock("@shopify/react-native-skia", () => {
-  return require("../../package/src/mock").Mock;
+  return require("../../../package/src/mock").Mock;
 });
 
-import { TestBattery } from "./Tests/TestBattery";
-import type { TestHierarchy, Tests } from "./Tests/types";
-import { isTest } from "./Tests/types";
+import { TestBattery } from "./TestBattery";
+import type { TestHierarchy, Tests } from "./types";
+import { isTest } from "./types";
 
 describe("RN Skia Tests", () => {
   beforeAll(async () => {
@@ -29,7 +29,7 @@ function mapTests(
   keys.forEach((key, index) => {
     const maybeTest = t[key];
     if (isTest(maybeTest)) {
-      return it(key, async () => {
+      it(key, async () => {
         if (index === 0 && parentKey !== "") {
           // Navigate to parent
           await press(parentKey);
@@ -46,7 +46,8 @@ function mapTests(
           await press("Back");
         }
       });
+    } else {
+      describe(key, () => mapTests(maybeTest, key, [...path, key]));
     }
-    describe(key, () => mapTests(maybeTest, key, [...path, key]));
   });
 }
