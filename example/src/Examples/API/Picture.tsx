@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet } from "react-native";
 import {
   createPicture,
@@ -21,13 +21,15 @@ const picture = createPicture(
     canvas.drawCircle(50, 50, 50, circlePaint);
   }
 );
-const serialized = picture.serialize();
-const copyOfPicture = serialized ? Skia.Picture.MakePicture(serialized) : null;
 
 export const PictureExample = () => {
   // Serialize the picture
-
+  const serialized = useMemo(() => picture.serialize(), []);
   // Create a copy from serialized data
+  const copyOfPicture = useMemo(
+    () => (serialized ? Skia.Picture.MakePicture(serialized) : null),
+    [serialized]
+  );
 
   return (
     <Canvas style={styles.container}>
