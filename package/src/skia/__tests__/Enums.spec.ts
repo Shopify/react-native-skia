@@ -32,6 +32,8 @@ import { setupSkia } from "./setup";
 
 const checkEnum = <T>(skiaEnum: T, canvasKitEnum: EmbindEnum) => {
   mapKeys(canvasKitEnum.values).forEach((key) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     const namedKey = skiaEnum[key as keyof T] as keyof T;
     const expected = skiaEnum[namedKey];
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
