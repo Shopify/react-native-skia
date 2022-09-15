@@ -22,6 +22,8 @@ namespace RNSkia {
 
         virtual void setShowDebugInfo(bool show) = 0;
 
+        virtual void viewDidUnmount() = 0;
+
         virtual std::shared_ptr<RNSkView> getSkiaView() = 0;
     };
 
@@ -66,6 +68,10 @@ namespace RNSkia {
 
         void setShowDebugInfo(bool show) override {
           T::setShowDebugOverlays(show);
+        }
+
+        void viewDidUnmount() override {
+          T::endDrawingLoop();
         }
 
         void updateTouchPoints(jni::JArrayDouble touches) override {

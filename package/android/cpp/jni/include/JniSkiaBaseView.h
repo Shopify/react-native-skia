@@ -57,7 +57,7 @@ namespace RNSkia {
           getSkiaManager()->setSkiaView(_skiaView->getSkiaView()->getNativeId(), nullptr);
           getSkiaManager()->unregisterSkiaView(
                   _skiaView->getSkiaView()->getNativeId());
-          _skiaView = nullptr;
+          _skiaView->viewDidUnmount();
         }
 
     private:

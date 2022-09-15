@@ -228,6 +228,18 @@ protected:
   std::shared_ptr<RNSkCanvasProvider> getCanvasProvider() { return _canvasProvider; }
   std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
 
+  /**
+   Ends an ongoing beginDrawCallback loop for this view. This method is made protected if
+   the drawing loop should be stopped before reaching the destructor (like we do for Android
+   views)
+   */
+  void endDrawingLoop() {
+    if(_drawingLoopId != 0) {
+      _drawingLoopId = 0;
+      _platformContext->endDrawLoop(_nativeId);
+    }
+  }
+
 private:
   /**
    Starts beginDrawCallback loop if the drawing mode is continuous
@@ -246,16 +258,6 @@ private:
     });
   }
 
-  /**
-   Ends an ongoing beginDrawCallback loop for this view
-   */
-  void endDrawingLoop() {
-    if(_drawingLoopId != 0) {
-      _drawingLoopId = 0;
-      _platformContext->endDrawLoop(_nativeId);
-    }
-  }
-  
   /**
     Draw loop callback
    */
