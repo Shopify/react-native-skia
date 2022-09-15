@@ -78,6 +78,12 @@ export const HomeScreen = () => {
         description="Drawing Performance Test"
         route="Performance"
       />
+      <HomeScreenButton
+        title="🔧 E2E Tests"
+        description="Run integration tests"
+        route="Tests"
+        testId="Tests"
+      />
     </ScrollView>
   );
 };

@@ -11,6 +11,8 @@
     "test": "jest",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "pod-install": "npx pod-install ios",
+    "e2e:build:ios": "owl build -p ios",
+    "e2e:test:ios": "owl test -p ios",
     "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
   },
   "dependencies": {
@@ -47,6 +49,7 @@
     "jest": "^26.6.3",
     "jest-transform-stub": "^2.0.0",
     "metro-react-native-babel-preset": "^0.67.0",
+    "react-native-owl": "^1.1.0",
     "react-test-renderer": "^17.0.2",
     "typescript": "^4.6.2",
     "url-loader": "^4.1.1",

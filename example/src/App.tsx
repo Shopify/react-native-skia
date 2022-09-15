@@ -21,7 +21,9 @@ import {
   Wallet,
   Severance,
 } from "./Examples";
+import { TestListScreen } from "./Tests";
 import { HomeScreen } from "./Home";
+import { TestScreen } from "./Tests/TestScreen";
 
 const linking = {
   config: {
@@ -64,6 +66,15 @@ const App = () => {
               headerTitleAlign: "center",
             }}
           />
+          <Stack.Screen
+            name="Tests"
+            component={TestListScreen}
+            options={{
+              title: "🔧 Tests",
+              headerTitleAlign: "center",
+            }}
+          />
+          <Stack.Screen name="Test" component={TestScreen} />
           <Stack.Screen
             name="Vertices"
             component={Vertices}
