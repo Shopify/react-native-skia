@@ -1,17 +1,14 @@
-import type { DependencyList } from "react";
-
 import { RNSkReadonlyValue } from "./RNSkReadonlyValue";
 
 export class RNSkComputedValue<T> extends RNSkReadonlyValue<T> {
-  constructor(callback: () => T, dependencies: DependencyList) {
+  constructor(callback: () => T, dependencies: object[]) {
     // Initialize dependencies - we can't call this yet, since
     // super if not called and it requires a start value to be set.
     const unsubscribers: Array<() => void> = [];
     const notifyUpdateRef: { current: (() => void) | undefined } = {
       current: undefined,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dependencies.forEach((dep: any) => {
+    dependencies.forEach((dep) => {
       if ("__typename__" in dep && "addListener" in dep) {
         unsubscribers.push(
           (dep as RNSkReadonlyValue<unknown>).addListener(() =>
