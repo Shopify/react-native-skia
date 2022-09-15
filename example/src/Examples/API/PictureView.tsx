@@ -9,11 +9,11 @@ export const PictureViewExample = () => {
     (canvas) => {
       const paint = Skia.Paint();
       paint.setColor(Skia.Color("pink"));
-      canvas.drawRect({ x: 0, y: 0, width: 200, height: 200 }, paint);
+      canvas.drawRect({ x: 0, y: 0, width: 100, height: 100 }, paint);
 
       const circlePaint = Skia.Paint();
       circlePaint.setColor(Skia.Color("orange"));
-      canvas.drawCircle(100, 100, 100, circlePaint);
+      canvas.drawCircle(50, 50, 50, circlePaint);
     }
   );
 
