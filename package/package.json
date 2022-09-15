@@ -40,7 +40,8 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "test": "jest",
     "postinstall": "node scripts/install-npm.js",
-    "build": "bob build"
+    "build": "bob build",
+    "check-cycles": "madge src/index.ts -c --ts-config tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -90,6 +91,7 @@
   },
   "dependencies": {
     "canvaskit-wasm": "^0.36.0",
+    "madge": "^5.0.1",
     "react-reconciler": "^0.26.2"
   },
   "eslintIgnore": [

@@ -1,6 +1,6 @@
 import type { SkJSIInstance } from "./JsiInstance";
 import type { SkPath } from "./Path/Path";
-import type { SkMatrix } from "./Matrix";
+import type { SkMatrix } from "./Matrix/Matrix";
 
 export type SkPathEffect = SkJSIInstance<"PathEffect">;
 

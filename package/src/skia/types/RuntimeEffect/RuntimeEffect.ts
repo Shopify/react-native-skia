@@ -1,6 +1,6 @@
-import type { SkShader } from "../Shader";
+import type { SkShader } from "../Shader/Shader";
 import type { SkJSIInstance } from "../JsiInstance";
-import type { SkMatrix } from "../Matrix";
+import type { SkMatrix } from "../Matrix/Matrix";
 
 export interface SkSLUniform {
   columns: number;

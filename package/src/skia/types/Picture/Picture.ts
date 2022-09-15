@@ -1,8 +1,8 @@
 import type { FilterMode } from "../Image";
 import type { TileMode } from "../ImageFilter";
 import type { SkRect } from "../Rect";
-import type { SkShader } from "../Shader";
-import type { SkMatrix } from "../Matrix";
+import type { SkShader } from "../Shader/Shader";
+import type { SkMatrix } from "../Matrix/Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 
 export interface SkPicture extends SkJSIInstance<"Picture"> {

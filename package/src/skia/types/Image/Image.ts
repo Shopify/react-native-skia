@@ -1,7 +1,7 @@
-import type { SkMatrix } from "../Matrix";
+import type { SkMatrix } from "../Matrix/Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
-import type { TileMode } from "../ImageFilter";
-import type { SkShader } from "../Shader";
+import type { TileMode } from "../ImageFilter/ImageFilter";
+import type { SkShader } from "../Shader/Shader";
 
 export enum FilterMode {
   Nearest,

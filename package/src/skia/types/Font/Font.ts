@@ -1,5 +1,5 @@
 import type { SkJSIInstance } from "../JsiInstance";
-import type { SkPaint } from "../Paint";
+import type { SkPaint } from "../Paint/Paint";
 import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
 import type { SkTypeface } from "../Typeface";

@@ -1,8 +1,8 @@
 import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
 import type { SkRRect } from "../RRect";
-import type { StrokeJoin, StrokeCap } from "../Paint";
-import type { SkMatrix } from "../Matrix";
+import type { StrokeJoin, StrokeCap } from "../Paint/Stroke";
+import type { SkMatrix } from "../Matrix/Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 
 /**

@@ -1,28 +1,17 @@
-import type { SkImageFilter } from "../ImageFilter";
+import type { SkImageFilter } from "../ImageFilter/ImageFilter";
 import type { SkMaskFilter } from "../MaskFilter";
-import type { SkColorFilter } from "../ColorFilter";
+import type { SkColorFilter } from "../ColorFilter/ColorFilter";
 import type { SkColor } from "../Color";
 import type { SkPathEffect } from "../PathEffect";
 import type { SkJSIInstance } from "../JsiInstance";
-import type { SkShader } from "../Shader";
+import type { SkShader } from "../Shader/Shader";
 
 import type { BlendMode } from "./BlendMode";
+import type { StrokeCap, StrokeJoin } from "./Stroke";
 
 export enum PaintStyle {
   Fill,
   Stroke,
-}
-
-export enum StrokeCap {
-  Butt,
-  Round,
-  Square,
-}
-
-export enum StrokeJoin {
-  Miter,
-  Round,
-  Bevel,
 }
 
 export const isPaint = (obj: SkJSIInstance<string> | null): obj is SkPaint =>

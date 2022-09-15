@@ -1,6 +1,6 @@
-import type { TileMode } from "../ImageFilter";
+import type { TileMode } from "../ImageFilter/ImageFilter";
 import type { SkPoint } from "../Point";
-import type { SkMatrix } from "../Matrix";
+import type { SkMatrix } from "../Matrix/Matrix";
 import type { SkColor } from "../Color";
 import type { BlendMode } from "../Paint/BlendMode";
 
