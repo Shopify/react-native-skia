@@ -24,8 +24,6 @@ namespace RNSkia {
     public:
         static auto constexpr kJavaDescriptor = "Lcom/shopify/reactnative/skia/SkiaDrawView;";
 
-        std::shared_ptr<RNSkBaseAndroidView> getAndroidSkiaView() override { return _skiaView; }
-
         static jni::local_ref<jhybriddata>
         initHybrid(jni::alias_ref<jhybridobject> jThis,
                    jni::alias_ref<JniSkiaManager::javaobject> skiaManager) {
@@ -86,12 +84,11 @@ namespace RNSkia {
 
         explicit JniSkiaDrawView(jni::alias_ref<jhybridobject> jThis,
                                  jni::alias_ref<JniSkiaManager::javaobject> skiaManager) :
-                JniSkiaBaseView(skiaManager),
-                _skiaView(std::make_shared<RNSkAndroidView<RNSkia::RNSkJsView>>(
-                        skiaManager->cthis()->getPlatformContext())) {
+                JniSkiaBaseView(skiaManager,
+                                std::make_shared<RNSkAndroidView<RNSkia::RNSkJsView>>(
+                                        skiaManager->cthis()->getPlatformContext())) {
         }
 
-        std::shared_ptr<RNSkBaseAndroidView> _skiaView;
         jni::global_ref<javaobject> javaPart_;
     };
 
