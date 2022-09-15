@@ -53,7 +53,7 @@ export const Mock: typeof SkiaExports &
   useTypeface: Noop,
   useImage: Noop,
   useSVG: Noop,
-  usePicture: Noop,
+  createPicture: Noop,
   // 3. Point/Rect/Transform utilities
   vec,
   rect: (x: number, y: number, width: number, height: number) => ({
