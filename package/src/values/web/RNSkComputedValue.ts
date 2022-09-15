@@ -10,7 +10,8 @@ export class RNSkComputedValue<T> extends RNSkReadonlyValue<T> {
     const notifyUpdateRef: { current: (() => void) | undefined } = {
       current: undefined,
     };
-    dependencies.forEach((dep) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dependencies.forEach((dep: any) => {
       if ("__typename__" in dep && "addListener" in dep) {
         unsubscribers.push(
           (dep as RNSkReadonlyValue<unknown>).addListener(() =>
