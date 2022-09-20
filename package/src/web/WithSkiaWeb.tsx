@@ -1,12 +1,12 @@
-import type { ComponentProps, ComponentType } from "react";
+import type { ReactNode, ComponentType } from "react";
 import React, { useMemo, lazy, Suspense } from "react";
 import { Platform } from "react-native";
 
 import { LoadSkiaWeb } from "./LoadSkiaWeb";
 
 interface WithSkiaProps {
-  fallback?: ComponentProps<typeof Suspense>["fallback"];
-  getComponent: () => Promise<{ default: ComponentType }>;
+  fallback?: ReactNode;
+  getComponent: () => Promise<{ default: ComponentType<unknown> }>;
   opts?: Parameters<typeof LoadSkiaWeb>[0];
 }
 
@@ -26,7 +26,7 @@ export const WithSkiaWeb = ({
           );
         }
         return getComponent();
-      }),
+      }) as ComponentType<unknown>,
     [getComponent, opts]
   );
   return (
