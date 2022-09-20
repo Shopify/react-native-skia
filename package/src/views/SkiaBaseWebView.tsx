@@ -13,7 +13,7 @@ import { TouchType } from "./types";
 
 const pd = PixelRatio.get();
 
-export class SkiaBaseWebView<
+export abstract class SkiaBaseWebView<
   TProps extends SkiaBaseViewProps
 > extends React.Component<TProps> {
   constructor(props: TProps) {
