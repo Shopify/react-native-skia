@@ -84,7 +84,10 @@ export abstract class SkiaBaseWebView<
   /**
    * Override to render
    */
-  protected renderInCanvas(_canvas: SkCanvas, _touches: TouchInfo[]) {}
+  protected abstract renderInCanvas(
+    canvas: SkCanvas,
+    touches: TouchInfo[]
+  ): void;
 
   /**
    * Sends a redraw request to the native SkiaView.
