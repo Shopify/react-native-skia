@@ -2058,10 +2058,10 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/react-native@0.66.2":
-  version "0.66.2"
-  resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.66.2.tgz#54e7ff048e659a434de7cb91778a8ec88d88e288"
-  integrity sha512-mcId+yp2BKXNDFwyblnNS2GNl4XBC56rPBaGXRTD2/Nbc4PzpKxEbfeJneZxLmlYCNf3vWMfOCKllRTSW8OFLw==
+"@types/react-native@0.68.0":
+  version "0.68.0"
+  resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.68.0.tgz#d51c34057251302d2f2ba97de8ff8a840e0fddd8"
+  integrity sha512-E+m91xtoX+GRh2MpbIYOanbtXlX76woVgRs6zU7PsJ4ZPFzdsRkpKNTqMZyKgyt7eraZDnJvwFXGXDIW+8NRjA==
   dependencies:
     "@types/react" "*"
 
