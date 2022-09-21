@@ -19,6 +19,7 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
                        JSI_EXPORT_FUNC(JsiDomNode, setProps),
+                       JSI_EXPORT_FUNC(JsiDomNode, isNative),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
   
 protected:

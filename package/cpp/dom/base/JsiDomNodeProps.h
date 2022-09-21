@@ -11,7 +11,7 @@ public:
   void setProp(jsi::Runtime &runtime,
                const std::string& name,
                const jsi::Value& value) {
-    _values.emplace(name, JsiPropValue(runtime, value));
+    _values.emplace(name, JsiPropValue(runtime).setCurrent(runtime, value));
   }
   
   void tryReadNumericProperty(jsi::Runtime &runtime, const std::string& name, bool isOptional = true) {
@@ -64,12 +64,17 @@ private:
     }
     
     // Check type
-    auto value = JsiPropValue(runtime, propValue);
-    if(value.getType() != type && !(isOptional && isUndefinedOrNull)) {
-      throw jsi::JSError(runtime, "Expected type " + JsiPropValue::getTypeAsString(type) +
-                         " for property " + name + ". Got " + JsiPropValue::getTypeAsString(value.getType()));
-    }
+    auto value = (JsiPropValue(runtime).setCurrent(runtime, propValue));
     
+    // We need to check if this is a value in the value system - if so we need to handle it a bit different
+    if(!value.isAnimatedValue()) {
+      if(value.getType() != type && !(isOptional && isUndefinedOrNull)) {
+        throw jsi::JSError(runtime, "Expected \"" + JsiPropValue::getTypeAsString(type) +
+                           "\", got \"" + JsiPropValue::getTypeAsString(value.getType()) +
+                           "\" for property \"" + name + "\".");
+      }
+    }
+
     // Check that we have a valid type
     _values.emplace(name, value);
   }

@@ -60,6 +60,10 @@ public:
     return jsi::Value::undefined();
   }
     
+  JSI_HOST_FUNCTION(isNative) {
+    return true;
+  }
+    
   JSI_PROPERTY_GET(children) {
     auto array = jsi::Array(runtime, _children.size());
     
@@ -82,6 +86,7 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, addChild),
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
+                       JSI_EXPORT_FUNC(JsiDomNode, isNative),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
     
 protected:
@@ -95,6 +100,9 @@ protected:
   virtual void onPropsRead(jsi::Runtime& runtime) {};
     
   void setProps(jsi::Runtime &runtime, jsi::Object&& props) {
+    // FIXME: Add support for reading properties and materialize through some
+    // kind of a dependency manager. We'd like this to be done outside of the
+    // node system
     _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
     onPropsRead(runtime);
   };
