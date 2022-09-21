@@ -1,7 +1,7 @@
+
 #pragma once
 
 #include "JsiDomNode.h"
-
 
 namespace RNSkia {
 
@@ -11,13 +11,18 @@ public:
                         jsi::Runtime& runtime,
                         const jsi::Value *arguments,
                         size_t count):
-  JsiDomNode(context, runtime, arguments, count) {}
-    
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiDomNode, children))
+  JsiDomNode(context, runtime, arguments, count) {}
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDomNode, setProp),
+                       JSI_EXPORT_FUNC(JsiDomNode, getProp),
+                       JSI_EXPORT_FUNC(JsiDomNode, addChild),
+                       JSI_EXPORT_FUNC(JsiDomNode, removeChild),
+                       JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
+                       JSI_EXPORT_FUNC(JsiDomNode, setProps),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
-
+  
+protected:
+  
 };
 
 }

@@ -3,7 +3,7 @@
 #include "JsiHostObject.h"
 #include "jsi.h"
 
-#include "nodes/JsiDomRect.h"
+#include "nodes/JsiRectNode.h"
 
 namespace RNSkia
 {
@@ -16,7 +16,7 @@ namespace RNSkia
     JsiDomApi(std::shared_ptr<RNSkPlatformContext> context)
         : JsiHostObject()
     {
-      installFunction("RectNode", JsiDomRect::createCtor(context));
+      installFunction("RectNode", JsiRectNode::createCtor(context));
     }
   };
 

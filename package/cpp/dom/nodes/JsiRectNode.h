@@ -1,19 +1,21 @@
 #pragma once
 
-#include "JsiDomRenderNode.h"
+#include "JsiDomDrawingNode.h"
 #include "jsi.h"
 
 #include "JsiSkRect.h"
 
 namespace RNSkia {
 
-class JsiRectNode: public JsiDomRenderNode {
+class JsiRectNode: public JsiDomDrawingNode {
 public:
   JsiRectNode(std::shared_ptr<RNSkPlatformContext> context,
-             jsi::Runtime& runtime,
-             const jsi::Value *arguments,
-             size_t count):
-  JsiDomRenderNode(context, runtime, arguments, count) {}
+              jsi::Runtime& runtime,
+              const jsi::Value *arguments,
+              size_t count):
+  JsiDomDrawingNode(context, runtime, arguments, count) {
+    setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
+  }
   
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
@@ -23,24 +25,52 @@ public:
     };
   }
   
-protected:
-  void setProp(jsi::Runtime &runtime, const std::string key, const jsi::Value &value) override {
-    JsiDomRenderNode::setProp(runtime, key, value);
-    // FIXME: Handle processing of rect props
-    if(key == "rect") {
-      _rect = JsiSkRect::fromValue(runtime, value);
+  static SkRect processRect(std::shared_ptr<JsiDomNodeProps> props) {
+    SkRect rect;
+    if (props->hasValue("rect")) {
+      auto rectProp = props->getValue("rect");
+      if(rectProp.getType() == JsiPropValue::PropType::HostObject) {
+        rect = *std::dynamic_pointer_cast<JsiSkRect>(rectProp.getAsHostObject())->getObject();
+      } else {
+        rect = SkRect::MakeXYWH(rectProp.getValue("x").getAsNumber(),
+                                rectProp.getValue("y").getAsNumber(),
+                                rectProp.getValue("width").getAsNumber(),
+                                rectProp.getValue("height").getAsNumber());
+      }
+    } else {
+        rect = SkRect::MakeXYWH(props->getValue("x").getAsNumber(),
+                                props->getValue("y").getAsNumber(),
+                                props->getValue("width").getAsNumber(),
+                                props->getValue("height").getAsNumber());
     }
+    return rect;
   }
   
-  void render(std::shared_ptr<JsiDrawingContext> context) override {
-    context->getCanvas()->drawRect(*_rect.get(), *context->getPaint());
+protected:
+  void onPropsRead(jsi::Runtime &runtime) override {
+    JsiDomDrawingNode::onPropsRead(runtime);
+    try {
+      getProperties()->tryReadObjectProperty(runtime, "rect");
+    } catch(...) {
+      getProperties()->tryReadHostObjectProperty(runtime, "rect");
+    }
+    getProperties()->tryReadNumericProperty(runtime, "x");
+    getProperties()->tryReadNumericProperty(runtime, "y");
+    getProperties()->tryReadNumericProperty(runtime, "width");
+    getProperties()->tryReadNumericProperty(runtime, "height");
+    
+    _rect = processRect(getProperties());
+  }
+  
+  void draw(std::shared_ptr<JsiBaseDrawingContext> context) override {
+    context->getCanvas()->drawRect(_rect, *context->getPaint());
   }
   
   // FIXME: Add to enum and sync with JS somehow?
   const char* getType() override { return "skRect"; }
-  
+
 private:
-  std::shared_ptr<SkRect> _rect;
+  SkRect _rect;
 };
 
 }
