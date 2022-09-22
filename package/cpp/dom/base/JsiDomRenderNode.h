@@ -58,7 +58,6 @@ protected:
         context->getCanvas()->translate(-origin.getValue("x").getAsNumber(),
                                         -origin.getValue("y").getAsNumber());
       }
-      
     }
   };
   

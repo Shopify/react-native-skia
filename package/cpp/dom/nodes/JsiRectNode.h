@@ -29,7 +29,7 @@ public:
     SkRect rect;
     if (props->hasValue("rect")) {
       auto rectProp = props->getValue("rect");
-      if(rectProp.getType() == JsiPropValue::PropType::HostObject) {
+      if(rectProp.getType() == JsiValue::PropType::HostObject) {
         rect = *std::dynamic_pointer_cast<JsiSkRect>(rectProp.getAsHostObject())->getObject();
       } else {
         rect = SkRect::MakeXYWH(rectProp.getValue("x").getAsNumber(),
@@ -58,11 +58,13 @@ protected:
     getProperties()->tryReadNumericProperty(runtime, "y");
     getProperties()->tryReadNumericProperty(runtime, "width");
     getProperties()->tryReadNumericProperty(runtime, "height");
-    
-    _rect = processRect(getProperties());
   }
   
   void draw(std::shared_ptr<JsiBaseDrawingContext> context) override {
+    if(getProperties()->getIsDirty()) {
+      _rect = processRect(getProperties());
+      getProperties()->markClean();
+    }
     context->getCanvas()->drawRect(_rect, *context->getPaint());
   }
   
