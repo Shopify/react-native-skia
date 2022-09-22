@@ -40,12 +40,14 @@ protected:
   
   virtual void render(std::shared_ptr<JsiBaseDrawingContext> context) {
     auto props = getProperties();
+    // FIXME: Maybe we don't need to calculate this on every render?
     if(props->hasValue("matrix")) {
       auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue("matrix").getAsHostObject())->getObject();
       
       context->getCanvas()->save();
       
-      if(props->hasValue("origin")) {
+      auto hasOrigin = props->hasValue("origin");
+      if(hasOrigin) {
         auto origin = props->getValue("origin");
         context->getCanvas()->translate(origin.getValue("x").getAsNumber(),
                                         origin.getValue("y").getAsNumber());
@@ -53,7 +55,7 @@ protected:
       
       context->getCanvas()->concat(*matrix);
       
-      if(props->hasValue("origin")) {
+      if(hasOrigin) {
         auto origin = props->getValue("origin");
         context->getCanvas()->translate(-origin.getValue("x").getAsNumber(),
                                         -origin.getValue("y").getAsNumber());

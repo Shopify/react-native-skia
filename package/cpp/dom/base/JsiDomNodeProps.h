@@ -5,6 +5,12 @@
 
 namespace RNSkia {
 
+/**
+ This class manages marshalling from JS values over JSI to C++ values and is typically called when a new node is
+ created or an existing node is updated from the reconciler. This class will then convert all pure JS values to C++ values
+ so that they can be read from any thread, and it will also subscribe to any animated values to recieve updated values
+ that will be usd in the next render frame.
+ */
 class JsiDomNodeProps: public std::enable_shared_from_this<JsiDomNodeProps> {
 public:
   JsiDomNodeProps(jsi::Runtime& runtime, jsi::Object&& props): _props(std::move(props)) {}
