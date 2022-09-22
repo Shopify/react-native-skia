@@ -59,11 +59,6 @@ Pod::Spec.new do |s|
     ss.source_files = "cpp/api/**/*.{h,cpp}"
   end
 
-  s.subspec 'Dom' do |ss|
-    ss.header_mappings_dir = 'cpp/dom'
-    ss.source_files = "cpp/dom/**/*.{h,cpp}"
-  end
-
   s.subspec 'RNSkia' do |ss|
     ss.header_mappings_dir = 'cpp/rnskia'
     ss.source_files = "cpp/rnskia/**/*.{h,cpp}"
