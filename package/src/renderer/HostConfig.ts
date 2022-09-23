@@ -123,8 +123,16 @@ export const skHostConfig: SkiaHostConfig = {
   ) {
     debug("createInstance", type);
     const props = { ...pristineProps };
+    // FIXME: How to avoid doing materialize when node.isNative() === true?
+    // For now I'm just skipping materializing the node
     const node = createNode(container, type, materialize(props));
-    container.depMgr.subscribeNode(node, props);
+    if (node.isNative() && props) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      node.setProps(props);
+    } else {
+      container.depMgr.subscribeNode(node, props);
+    }
     return node;
   },
 
@@ -194,9 +202,14 @@ export const skHostConfig: SkiaHostConfig = {
       return;
     }
     const props = { ...nextProps };
-    updatePayload.depMgr.unsubscribeNode(instance);
-    instance.setProps(materialize(props));
-    updatePayload.depMgr.subscribeNode(instance, props);
+    // Native nodes handles materializing props internally
+    if (instance.isNative()) {
+      instance.setProps(props);
+    } else {
+      updatePayload.depMgr.unsubscribeNode(instance);
+      instance.setProps(materialize(props));
+      updatePayload.depMgr.subscribeNode(instance, props);
+    }
   },
 
   commitTextUpdate: (

@@ -56,12 +56,21 @@ import type {
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
 import type { PaintNode } from "../dom/nodes/PaintNode";
+import type { SkRect } from "../skia";
+import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
+import type { JsiRenderNode } from "../dom/nodes/RenderNode";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
 
 declare global {
+  var SkiaDomApi: {
+    // FIXME: We need a better type for this
+    RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
+    GroupNode: (props: GroupProps) => JsiRenderNode<GroupProps>;
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
