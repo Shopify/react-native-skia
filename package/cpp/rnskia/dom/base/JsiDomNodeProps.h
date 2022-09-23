@@ -153,9 +153,9 @@ private:
     // We need to check if this is an animated value - they should be handled differently
     if(isAnimatedValue(prop)) {
       // Add initial resolved value to props
-      prop = std::make_shared<JsiValue>(runtime);
-      prop->setCurrent(runtime, getAnimatedValue(prop)->getCurrent(runtime));
-      _values.emplace(name, prop);
+      auto current = std::make_shared<JsiValue>(runtime);
+      current->setCurrent(runtime, getAnimatedValue(prop)->getCurrent(runtime));
+      _values.emplace(name, current);
       
       // Add subscription to animated value
       auto unsubscribe = getAnimatedValue(prop)->addListener(
