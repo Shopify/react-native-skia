@@ -42,34 +42,33 @@ public:
       return;
     }
     
-    if(props->getIsDirty() && props->hasValue(PropNameTransform)) {
-      
-      _transformMatrix.setIdentity();
-      assert(_transformMatrix.isIdentity());
-      SkPoint origin;
-      
-      auto hasOrigin = props->hasValue(PropNameOrigin);
-      if(hasOrigin) {
-        origin = props->processPoint(props->getValue(PropNameOrigin));
-        _transformMatrix.preTranslate(origin.x(), origin.y());
-      }
-      
-      processTransformProp(_transformMatrix, props->getValue(PropNameTransform));
-      
-      if(hasOrigin) {
-        _transformMatrix.preTranslate(-origin.x(), -origin.y());
-      }
-    }
-    
     bool shouldSave = props->hasValue(PropNameMatrix) || props->hasValue(PropNameTransform);
     
+    if(props->getIsDirty() && props->hasValue(PropNameTransform)) {
+      _transformMatrix.setIdentity();
+      processTransformProp(_transformMatrix, props->getValue(PropNameTransform));
+    }
+    
+    auto hasOrigin = props->hasValue(PropNameOrigin);
     if(shouldSave) {
       auto matrix = props->hasValue(PropNameMatrix) ?
         *std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue(PropNameMatrix)->getAsHostObject())->getObject() :
         _transformMatrix;
       
       context->getCanvas()->save();
+      
+      SkPoint origin;
+      
+      if(hasOrigin) {
+        origin = props->processPoint(props->getValue(PropNameOrigin));
+        context->getCanvas()->translate(origin.x(), origin.y());
+      }
+      
       context->getCanvas()->concat(matrix);
+      
+      if(hasOrigin) {
+        context->getCanvas()->translate(-origin.x(), -origin.y());
+      }
     }
       
     renderNode(context);

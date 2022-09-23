@@ -102,7 +102,7 @@ protected:
   void setProps(jsi::Runtime &runtime, jsi::Object&& props) {
     if (_props != nullptr) {
       _props->unsubscribe();
-    }    
+    }
     _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
     onPropsRead(runtime);
   };
