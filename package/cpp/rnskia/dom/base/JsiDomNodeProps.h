@@ -177,10 +177,9 @@ private:
       // Add initial resolved value to props
       jsi::Value current = value->getCurrent(runtime);
       auto result = selector(runtime, jsi::Value::null(), &current, 1);
-      
-      auto nextCurrent = std::make_shared<JsiValue>(runtime);
-      nextCurrent->setCurrent(runtime, result);
-      _values.emplace(name, nextCurrent);
+      auto initial = std::make_shared<JsiValue>(runtime);
+      initial->setCurrent(runtime, result);
+      _values.emplace(name, initial);
       
       // Add subscription to animated value in selector
       auto unsubscribe = value->addListener(

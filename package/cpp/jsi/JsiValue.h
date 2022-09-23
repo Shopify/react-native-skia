@@ -8,6 +8,8 @@ namespace RNJsi {
 
 using namespace facebook;
 
+static std::string empty = "";
+
 /**
  This is a class that deep copies the values from JS to C++. It does not convert back
  to JS values. This is used when reading values from JS that will never be sent back to
@@ -31,6 +33,11 @@ public:
   
   void setCurrent(jsi::Runtime &runtime, const jsi::Value &value)
   {
+    _stringValue = empty;
+    _hostObject = nullptr;
+    _hostFunction = nullptr;
+    _props.clear();
+    _array.clear();
     _keysCache.clear();
     
     if (value.isNumber()) {
@@ -314,7 +321,7 @@ private:
   PropType _type = PropType::Undefined;
   bool _boolValue;
   double _numberValue;
-  std::string _stringValue;
+  std::string _stringValue = empty;
   std::shared_ptr<jsi::HostObject> _hostObject;
   jsi::HostFunctionType _hostFunction;
   std::unordered_map<std::string, std::shared_ptr<JsiValue>> _props;

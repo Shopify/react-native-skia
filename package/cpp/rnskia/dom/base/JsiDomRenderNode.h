@@ -6,6 +6,10 @@
 
 namespace RNSkia {
 
+static std::string PropNameMatrix = "matrix";
+static std::string PropNameTransform = "transform";
+static std::string PropNameOrigin = "origin";
+
 class JsiDomRenderNode: public JsiDomNode {
 public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
@@ -33,34 +37,39 @@ public:
   void render(std::shared_ptr<JsiBaseDrawingContext> context) {
     auto props = getProperties();
     if(props == nullptr) {
-      // A node might not have properties - then we should just render the node
+      // A node might have an empty set of properties - then we can just render the node directly
       renderNode(context);
       return;
     }
     
-    if(props->getIsDirty() && props->hasValue("transform")) {
-      _transformMatrix = std::make_shared<SkMatrix>();
+    if(props->getIsDirty() && props->hasValue(PropNameTransform)) {
+      
+      _transformMatrix.setIdentity();
+      assert(_transformMatrix.isIdentity());
       SkPoint origin;
-      auto hasOrigin = props->hasValue("origin");
+      
+      auto hasOrigin = props->hasValue(PropNameOrigin);
       if(hasOrigin) {
-        origin = props->processPoint(props->getValue("origin"));
-        _transformMatrix->preTranslate(origin.x(), origin.y());
+        origin = props->processPoint(props->getValue(PropNameOrigin));
+        _transformMatrix.preTranslate(origin.x(), origin.y());
       }
-      processTransformProp(*_transformMatrix, props->getValue("transform"));
+      
+      processTransformProp(_transformMatrix, props->getValue(PropNameTransform));
+      
       if(hasOrigin) {
-        _transformMatrix->preTranslate(-origin.x(), -origin.y());
+        _transformMatrix.preTranslate(-origin.x(), -origin.y());
       }
     }
     
-    bool shouldSave = props->hasValue("matrix") || props->hasValue("transform");
+    bool shouldSave = props->hasValue(PropNameMatrix) || props->hasValue(PropNameTransform);
     
     if(shouldSave) {
-      auto matrix = props->hasValue("matrix") ?
-        std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue("matrix")->getAsHostObject())->getObject() :
+      auto matrix = props->hasValue(PropNameMatrix) ?
+        *std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue(PropNameMatrix)->getAsHostObject())->getObject() :
         _transformMatrix;
       
       context->getCanvas()->save();
-      context->getCanvas()->concat(*matrix);
+      context->getCanvas()->concat(matrix);
     }
       
     renderNode(context);
@@ -74,6 +83,11 @@ public:
   
   static void processTransformProp(SkMatrix& m, std::shared_ptr<JsiValue> prop) {
     for(auto &el: prop->getAsArray()) {
+      auto keys = el->getKeys();
+      if(keys.size() == 0) {
+        throw std::runtime_error("Empty value in transform. Expected translateX, translateY, scale, "
+                                 "scaleX, scaleY, skewX, skewY, rotate or rotateZ.");
+      }
       auto key = el->getKeys().at(0);
       auto value = el->getValue(key)->getAsNumber();
       if (key == "translateX") {
@@ -91,7 +105,7 @@ public:
       } else if (key == "skewY") {
         m.preScale(value, 0);
       } else if (key == "rotate" || key == "rotateZ") {
-        m.preRotate(value * (180.0f / M_PI));
+        m.preRotate(SkRadiansToDegrees(value));
       } else {
         throw std::runtime_error("Unknown key in transform. Expected translateX, translateY, scale, "
                                  "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " + key + ".");
@@ -102,19 +116,19 @@ public:
 protected:
   void onPropsRead(jsi::Runtime &runtime) override {
     
-    getProperties()->tryReadHostObjectProperty(runtime, "matrix");
-    getProperties()->tryReadArrayProperty(runtime, "transform");
+    getProperties()->tryReadHostObjectProperty(runtime, PropNameMatrix);
+    getProperties()->tryReadArrayProperty(runtime, PropNameTransform);
     try {
-      getProperties()->tryReadObjectProperty(runtime, "origin");
+      getProperties()->tryReadObjectProperty(runtime, PropNameOrigin);
     } catch(...) {
-      getProperties()->tryReadHostObjectProperty(runtime, "origin");
+      getProperties()->tryReadHostObjectProperty(runtime, PropNameOrigin);
     }
   }
   
   virtual void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
   
 private:
-  std::shared_ptr<SkMatrix> _transformMatrix;
+  SkMatrix _transformMatrix;
 };
 
 }
