@@ -126,7 +126,9 @@ export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
 
   Group(props?: GroupProps) {
-    return new GroupNode(this.ctx, props ?? {});
+    return global.SkiaDomApi && global.SkiaDomApi.GroupNode
+      ? global.SkiaDomApi.GroupNode(props ?? {})
+      : new GroupNode(this.ctx, props ?? {});
   }
 
   Paint(props: PaintProps) {
@@ -171,7 +173,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Rect(props: RectProps) {
-    return global.SkiaDomApi.RectNode(props); // new RectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.RectNode
+      ? global.SkiaDomApi.RectNode(props)
+      : new RectNode(this.ctx, props);
   }
 
   RRect(props: RoundedRectProps) {
