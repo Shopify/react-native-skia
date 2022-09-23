@@ -24,7 +24,7 @@ protected:
       _childContext = processContext(context, getProperties());
     }
     
-    draw(std::make_shared<JsiDrawingContext>(context->getCanvas(), _childContext->getPaint(), _childContext->getOpacity()));
+    draw(std::make_shared<JsiDrawingContext>(context->getCanvas(), _childContext->getPaint(), _childContext->getOpacity()));    
   }
   
   void onPropsRead(jsi::Runtime& runtime) override {
@@ -45,7 +45,7 @@ private:
       double opacity = 1.0f;
       
       if (props->hasValue("color")) {
-        auto colorValue = props->getValue("color").getAsString();
+        auto colorValue = props->getValue("color")->getAsString();
         auto parsedColor = CSSColorParser::parse(colorValue);
         if(parsedColor.a == -1.0f) {
           paint->setColor(SK_ColorBLACK);
@@ -54,7 +54,7 @@ private:
         }
       }
       if (props->hasValue("style")) {
-        auto styleValue = props->getValue("style").getAsString();
+        auto styleValue = props->getValue("style")->getAsString();
         if (styleValue == "stroke") {
           paint->setStyle(SkPaint::Style::kStroke_Style);
         } else if (styleValue == "fill") {
@@ -62,11 +62,11 @@ private:
         }
         
         if(props->hasValue("strokeWidth")) {
-          paint->setStrokeWidth(props->getValue("strokeWidth").getAsNumber());
+          paint->setStrokeWidth(props->getValue("strokeWidth")->getAsNumber());
         }
         
         if(props->hasValue("opacity")) {
-          opacity = opacity * props->getValue("opacity").getAsNumber();
+          opacity = opacity * props->getValue("opacity")->getAsNumber();
         }
       }
       

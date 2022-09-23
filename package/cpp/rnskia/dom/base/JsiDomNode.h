@@ -35,7 +35,7 @@ public:
   }
   
   JSI_HOST_FUNCTION(dispose) {
-    // We don't need to implement anything here since we have a deterministic destructor.
+    dispose();
     return jsi::Value::undefined();
   }
   
@@ -100,6 +100,9 @@ protected:
   virtual void onPropsRead(jsi::Runtime& runtime) {};
     
   void setProps(jsi::Runtime &runtime, jsi::Object&& props) {
+    if (_props != nullptr) {
+      _props->unsubscribe();
+    }    
     _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
     onPropsRead(runtime);
   };
@@ -129,7 +132,14 @@ protected:
       _children.end());
     
     // We don't need to call dispose since the dtor handles disposing
-    // child->dispose();
+    child->dispose();
+  }
+    
+  void dispose() {
+    if (_props != nullptr) {
+      _props->unsubscribe();
+      _props = nullptr;
+    }
   }
   
 private:

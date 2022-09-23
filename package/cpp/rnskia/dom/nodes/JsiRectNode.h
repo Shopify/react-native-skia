@@ -23,24 +23,11 @@ public:
   }
   
   static SkRect processRect(std::shared_ptr<JsiDomNodeProps> props) {
-    SkRect rect;
     if (props->hasValue("rect")) {
-      auto rectProp = props->getValue("rect");
-      if(rectProp.getType() == JsiValue::PropType::HostObject) {
-        rect = *std::dynamic_pointer_cast<JsiSkRect>(rectProp.getAsHostObject())->getObject();
-      } else {
-        rect = SkRect::MakeXYWH(rectProp.getValue("x").getAsNumber(),
-                                rectProp.getValue("y").getAsNumber(),
-                                rectProp.getValue("width").getAsNumber(),
-                                rectProp.getValue("height").getAsNumber());
-      }
+      return props->processRect(props->getValue("rect"));
     } else {
-        rect = SkRect::MakeXYWH(props->getValue("x").getAsNumber(),
-                                props->getValue("y").getAsNumber(),
-                                props->getValue("width").getAsNumber(),
-                                props->getValue("height").getAsNumber());
+      return props->processRect();      
     }
-    return rect;
   }
   
 protected:
@@ -59,8 +46,7 @@ protected:
   
   void draw(std::shared_ptr<JsiBaseDrawingContext> context) override {
     if(getProperties()->getIsDirty()) {
-      _rect = processRect(getProperties());
-      getProperties()->markClean();
+      _rect = processRect(getProperties());      
     }
     context->getCanvas()->drawRect(_rect, *context->getPaint());
   }

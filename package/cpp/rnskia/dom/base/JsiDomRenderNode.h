@@ -38,30 +38,29 @@ public:
       return;
     }
     
-    // FIXME: Add support for transform prop
-    bool shouldSave = props->hasValue("matrix");
-    
-    // FIXME: Maybe we don't need to calculate this on every render?
-    if(shouldSave) {
-      context->getCanvas()->save();
-      
-      auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue("matrix").getAsHostObject())->getObject();
-      
+    if(props->getIsDirty() && props->hasValue("transform")) {
+      _transformMatrix = std::make_shared<SkMatrix>();
+      SkPoint origin;
       auto hasOrigin = props->hasValue("origin");
-      
       if(hasOrigin) {
-        auto origin = props->getValue("origin");
-        context->getCanvas()->translate(origin.getValue("x").getAsNumber(),
-                                        origin.getValue("y").getAsNumber());
+        origin = props->processPoint(props->getValue("origin"));
+        _transformMatrix->preTranslate(origin.x(), origin.y());
       }
+      processTransformProp(*_transformMatrix, props->getValue("transform"));
+      if(hasOrigin) {
+        _transformMatrix->preTranslate(-origin.x(), -origin.y());
+      }
+    }
+    
+    bool shouldSave = props->hasValue("matrix") || props->hasValue("transform");
+    
+    if(shouldSave) {
+      auto matrix = props->hasValue("matrix") ?
+        std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue("matrix")->getAsHostObject())->getObject() :
+        _transformMatrix;
       
+      context->getCanvas()->save();
       context->getCanvas()->concat(*matrix);
-      
-      if(hasOrigin) {
-        auto origin = props->getValue("origin");
-        context->getCanvas()->translate(-origin.getValue("x").getAsNumber(),
-                                        -origin.getValue("y").getAsNumber());
-      }
     }
       
     renderNode(context);
@@ -69,17 +68,53 @@ public:
     if(shouldSave) {
       context->getCanvas()->restore();
     }
+    
+    props->markClean();
   };
+  
+  static void processTransformProp(SkMatrix& m, std::shared_ptr<JsiValue> prop) {
+    for(auto &el: prop->getAsArray()) {
+      auto key = el->getKeys().at(0);
+      auto value = el->getValue(key)->getAsNumber();
+      if (key == "translateX") {
+        m.preTranslate(value, 0);
+      } else if (key == "translateY") {
+        m.preTranslate(0, value);
+      } else if (key == "scale") {
+        m.preScale(value, value);
+      } else if (key == "scaleX") {
+        m.preScale(value, 1);
+      } else if (key == "scaleY") {
+        m.preScale(1, value);
+      } else if (key == "skewX") {
+        m.preScale(value, 0);
+      } else if (key == "skewY") {
+        m.preScale(value, 0);
+      } else if (key == "rotate" || key == "rotateZ") {
+        m.preRotate(value * (180.0f / M_PI));
+      } else {
+        throw std::runtime_error("Unknown key in transform. Expected translateX, translateY, scale, "
+                                 "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " + key + ".");
+      }
+    }
+  }
   
 protected:
   void onPropsRead(jsi::Runtime &runtime) override {
     
     getProperties()->tryReadHostObjectProperty(runtime, "matrix");
-    getProperties()->tryReadObjectProperty(runtime, "origin");
+    getProperties()->tryReadArrayProperty(runtime, "transform");
+    try {
+      getProperties()->tryReadObjectProperty(runtime, "origin");
+    } catch(...) {
+      getProperties()->tryReadHostObjectProperty(runtime, "origin");
+    }
   }
   
   virtual void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
   
+private:
+  std::shared_ptr<SkMatrix> _transformMatrix;
 };
 
 }

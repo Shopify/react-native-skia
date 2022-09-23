@@ -29,8 +29,10 @@ public:
   
   JsiValue(jsi::Runtime& runtime): _type(PropType::Undefined) {}
   
-  virtual JsiValue& setCurrent(jsi::Runtime &runtime, const jsi::Value &value)
+  void setCurrent(jsi::Runtime &runtime, const jsi::Value &value)
   {
+    _keysCache.clear();
+    
     if (value.isNumber()) {
       _type = PropType::Number;
       _numberValue = value.asNumber();
@@ -45,12 +47,10 @@ public:
     } else if (value.isNull()) {
       _type = PropType::Null;
     } else if (value.isObject()) {
-      setObject(runtime, value.asObject(runtime));
+      setObject(runtime, value);
     } else {
       throw std::runtime_error("Could not store jsi::Value of provided type");
-    }
-    
-    return *this;
+    }    
   }
   
   PropType getType() const { return _type; }
@@ -59,61 +59,78 @@ public:
     return isUndefined() || isNull();
   }
   
-  virtual bool isUndefined() const {
+  bool isUndefined() const {
     return _type == PropType::Undefined;
   }
   
-  virtual bool isNull() const {
+  bool isNull() const {
     return _type == PropType::Null;
   }
   
-  virtual bool getAsBool() const {
+  bool getAsBool() const {
     assert(_type == PropType::Bool);
     return _boolValue;
   }
   
-  virtual double getAsNumber() const {
+  double getAsNumber() const {
     assert(_type == PropType::Number);
     return _numberValue;
   }
   
-  virtual const std::string& getAsString() const {
+  const std::string& getAsString() const {
     assert(_type == PropType::String);
     return _stringValue;
   }
   
-  virtual const std::vector<JsiValue>& getAsArray() const {
+  const std::vector<std::shared_ptr<JsiValue>>& getAsArray() const {
     assert(_type == PropType::Array);
     return _array;
   }
   
-  virtual const JsiValue& getValue(const std::string& name) const {
+  std::shared_ptr<JsiValue> getValue(const std::string& name) const {
     assert(_type == PropType::Object);
     assert(hasValue(name));
     return _props.at(name);
   }
   
-  virtual bool hasValue(const std::string& name) const {
+  bool hasValue(const std::string& name) const {
     assert(_type == PropType::Object);
     return _props.count(name) > 0;
   }
   
-  virtual const std::shared_ptr<jsi::HostObject> getAsHostObject() const {
+  std::vector<std::string> getKeys() {
+    assert(_type == PropType::Object);
+    if(_keysCache.size() == 0) {
+      _keysCache.reserve(_props.size());
+      for(auto &kv : _props) {
+        _keysCache.push_back(kv.first);
+      }
+    }
+    return _keysCache;
+  }
+  
+  const std::shared_ptr<jsi::HostObject> getAsHostObject() const {
     assert(_type == PropType::HostObject);
     return _hostObject;
   }
   
-  virtual const jsi::HostFunctionType getAsHostFunction() const {
+  const jsi::HostFunctionType getAsHostFunction() const {
     assert(_type == PropType::HostFunction);
     return _hostFunction;
   }
   
-  virtual bool equals(jsi::Runtime &runtime, const jsi::Value& other) const {
-    return equals(JsiValue(runtime).setCurrent(runtime, other));
+  const jsi::HostFunctionType getAsFunction() const {
+    return getAsHostFunction();
   }
   
-  virtual bool equals(const JsiValue& other) const {
-    if (other.getType() != getType()) {
+  bool equals(jsi::Runtime &runtime, const jsi::Value& other) const {
+    auto p = std::make_shared<JsiValue>(runtime);
+    p->setCurrent(runtime, other);
+    return equals(p);
+  }
+  
+  bool equals(std::shared_ptr<JsiValue> other) const {
+    if (other->getType() != getType()) {
       return false;
     }
     
@@ -121,9 +138,9 @@ public:
       case PropType::Null:
       case PropType::Undefined:
         return true;
-      case PropType::Number: return _numberValue == other.getAsNumber();
-      case PropType::Bool: return _boolValue == other.getAsBool();
-      case PropType::String: return _stringValue == other.getAsString();
+      case PropType::Number: return _numberValue == other->getAsNumber();
+      case PropType::Bool: return _boolValue == other->getAsBool();
+      case PropType::String: return _stringValue == other->getAsString();
       case PropType::Object:
       case PropType::Array:
       case PropType::HostObject:
@@ -132,7 +149,7 @@ public:
     }
   }
   
-  virtual jsi::Value getAsJsiValue(jsi::Runtime& runtime) {
+  jsi::Value getAsJsiValue(jsi::Runtime& runtime) {
     switch(_type) {
       case PropType::Undefined: return jsi::Value::undefined();
       case PropType::Null: return jsi::Value::null();
@@ -161,14 +178,15 @@ public:
   }
   
 protected:
-  const std::unordered_map<std::string, JsiValue>& getProps() const {
+  const std::unordered_map<std::string, std::shared_ptr<JsiValue>>& getProps() const {
     return _props;
   }
  
 private:
-  void setObject(jsi::Runtime& runtime, const jsi::Object& obj) {
+  void setObject(jsi::Runtime& runtime, const jsi::Value& value) {
+    auto obj = value.asObject(runtime);
     if (obj.isFunction(runtime)) {
-      setFunction(runtime, obj);
+      setFunction(runtime, value);
     } else if (obj.isArray(runtime)) {
       setArray(runtime, obj);
     } else if (obj.isHostObject(runtime)) {
@@ -183,7 +201,9 @@ private:
       for(size_t i=0; i < size; ++i) {
         auto key = keys.getValueAtIndex(runtime, i).asString(runtime).utf8(runtime);
         try {
-          _props.emplace(key, JsiValue(runtime).setCurrent(runtime, obj.getProperty(runtime, key.c_str())));
+          auto p = std::make_shared<JsiValue>(runtime);
+          _props.emplace(key, p);
+          p->setCurrent(runtime, obj.getProperty(runtime, key.c_str()));
         } catch(jsi::JSError e) {
           throw jsi::JSError(runtime, "Could not set property for key " + key + ":\n" + e.getMessage(), e.getStack());
         }
@@ -195,18 +215,18 @@ private:
     assert(_type == PropType::Object);
     auto obj = jsi::Object(runtime);
     for(auto& p: _props) {
-      obj.setProperty(runtime, p.first.c_str(), p.second.getAsJsiValue(runtime));
+      obj.setProperty(runtime, p.first.c_str(), p.second->getAsJsiValue(runtime));
     }
     return obj;
   }
   
-  bool compareObjects(const JsiValue& other) const {
+  bool compareObjects(std::shared_ptr<JsiValue> other) const {
     if(_type == PropType::Object) {
-      if (_props.size() != other.getProps().size()) {
+      if (_props.size() != other->getProps().size()) {
         return false;
       }
       for(auto& p: _props) {
-        auto t = p.second.equals(other.getValue(p.first));
+        auto t = p.second->equals(other->getValue(p.first));
         if(!t) {
           return false;
         }
@@ -214,16 +234,16 @@ private:
       return true;
       
     } else if (_type == PropType::HostObject) {
-      return getAsHostObject() == other.getAsHostObject();
+      return getAsHostObject() == other->getAsHostObject();
     } else if (_type == PropType::HostFunction) {
       return false;
     } else if (_type == PropType::Array) {
-      auto otherArr = other.getAsArray();
+      auto otherArr = other->getAsArray();
       if (_array.size() != otherArr.size()) {
         return false;
       }
       for(size_t i=0; i<_array.size(); ++i) {
-        if (!_array[i].equals(otherArr[i])) {
+        if (!_array[i]->equals(otherArr[i])) {
           return false;
         }
       }
@@ -233,12 +253,25 @@ private:
     return false;
   }
   
-  void setFunction(jsi::Runtime& runtime, const jsi::Object& obj) {
-    if (obj.asFunction(runtime).isHostFunction(runtime)) {
+  void setFunction(jsi::Runtime& runtime, const jsi::Value& value) {
+    auto func = value.asObject(runtime).asFunction(runtime);
+    if (func.isHostFunction(runtime)) {
       _type = PropType::HostFunction;
-      _hostFunction = obj.asFunction(runtime).getHostFunction(runtime);
+      _hostFunction = func.getHostFunction(runtime);
     } else {
-      throw jsi::JSError(runtime, "Regular JavaScript functions cannot be used as properties.");
+      _type = PropType::HostFunction;
+      auto obj = std::make_shared<jsi::Object>(value.asObject(runtime));
+      _hostFunction = [obj](jsi::Runtime & runtime,
+                              const jsi::Value &thisValue,
+                              const jsi::Value *arguments,
+                              size_t count) -> jsi::Value {
+        auto func = obj->asFunction(runtime);
+        if(thisValue.isNull() || thisValue.isUndefined()) {
+          return func.call(runtime, arguments, count);
+        } else {
+          return func.callWithThis(runtime, thisValue.asObject(runtime), arguments, count);
+        }
+      };
     }
   }
   
@@ -253,7 +286,9 @@ private:
     size_t size = arr.size(runtime);
     _array.reserve(size);
     for(size_t i=0; i<size; ++i) {
-      _array[i] = JsiValue(runtime).setCurrent(runtime, arr.getValueAtIndex(runtime, i));
+      auto p = std::make_shared<JsiValue>(runtime);
+      p->setCurrent(runtime, arr.getValueAtIndex(runtime, i));
+      _array.push_back(p);
     }
   }
   
@@ -261,7 +296,7 @@ private:
     assert(_type == PropType::Array);
     jsi::Array arr = jsi::Array(runtime, _array.size());
     for(size_t i=0; i<_array.size(); ++i) {
-      arr.setValueAtIndex(runtime, i, _array[i].getAsJsiValue(runtime));
+      arr.setValueAtIndex(runtime, i, _array[i]->getAsJsiValue(runtime));
     }
     return arr;
   }
@@ -282,8 +317,9 @@ private:
   std::string _stringValue;
   std::shared_ptr<jsi::HostObject> _hostObject;
   jsi::HostFunctionType _hostFunction;
-  std::unordered_map<std::string, JsiValue> _props;
-  std::vector<JsiValue> _array;
+  std::unordered_map<std::string, std::shared_ptr<JsiValue>> _props;
+  std::vector<std::shared_ptr<JsiValue>> _array;
+  std::vector<std::string> _keysCache;
 };
 
 }
