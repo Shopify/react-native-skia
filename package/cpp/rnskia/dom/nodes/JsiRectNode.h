@@ -1,7 +1,6 @@
 #pragma once
 
 #include "JsiDomDrawingNode.h"
-#include "jsi.h"
 
 #include "JsiSkRect.h"
 
@@ -13,9 +12,7 @@ public:
               jsi::Runtime& runtime,
               const jsi::Value *arguments,
               size_t count):
-  JsiDomDrawingNode(context, runtime, arguments, count) {
-    setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
-  }
+  JsiDomDrawingNode(context, runtime, arguments, count) {}
   
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {

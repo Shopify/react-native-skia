@@ -2,7 +2,6 @@
 
 #include "JsiHostObject.h"
 #include "JsiDomNodeProps.h"
-#include "jsi.h"
 
 #include <vector>
 #include <unordered_map>
@@ -36,7 +35,7 @@ public:
   }
   
   JSI_HOST_FUNCTION(dispose) {
-    dispose();
+    // We don't need to implement anything here since we have a deterministic destructor.
     return jsi::Value::undefined();
   }
   
@@ -52,6 +51,7 @@ public:
     removeChild(child);
     return jsi::Value::undefined();
   }
+    
   JSI_HOST_FUNCTION(insertChildBefore) {
     // child: Node<unknown>, before: Node<unknown>
     auto child = getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 0);
@@ -64,7 +64,7 @@ public:
     return true;
   }
     
-  JSI_PROPERTY_GET(children) {
+  JSI_HOST_FUNCTION(children) {
     auto array = jsi::Array(runtime, _children.size());
     
     size_t index = 0;
@@ -78,8 +78,7 @@ public:
     return jsi::String::createFromUtf8(runtime, getType());
   }
   
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiDomNode, children),
-                              JSI_EXPORT_PROP_GET(JsiDomNode, type))
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiDomNode, type))
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDomNode, setProp),
                        JSI_EXPORT_FUNC(JsiDomNode, setProps),
@@ -87,6 +86,7 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
                        JSI_EXPORT_FUNC(JsiDomNode, isNative),
+                       JSI_EXPORT_FUNC(JsiDomNode, children),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
     
 protected:
@@ -100,9 +100,6 @@ protected:
   virtual void onPropsRead(jsi::Runtime& runtime) {};
     
   void setProps(jsi::Runtime &runtime, jsi::Object&& props) {
-    // FIXME: Add support for reading properties and materialize through some
-    // kind of a dependency manager. We'd like this to be done outside of the
-    // node system
     _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
     onPropsRead(runtime);
   };
@@ -111,7 +108,9 @@ protected:
     return _platformContext;
   }
   
-  const std::vector<std::shared_ptr<JsiDomNode>>& getChildren() { return _children; }
+  const std::vector<std::shared_ptr<JsiDomNode>>& getChildren() {
+    return _children;    
+  }
     
   std::shared_ptr<JsiDomNodeProps> getProperties() { return _props; }
   
@@ -129,11 +128,8 @@ protected:
       _children.begin(), _children.end(), [child](const auto &node) { return node == child; }),
       _children.end());
     
-    child->dispose();
-  }
-  
-  void dispose() {
-    // this.depMgr.unsubscribeNode(this);
+    // We don't need to call dispose since the dtor handles disposing
+    // child->dispose();
   }
   
 private:

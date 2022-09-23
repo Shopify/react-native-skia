@@ -1,9 +1,9 @@
 #pragma once
 
 #include "JsiHostObject.h"
-#include "jsi.h"
 
 #include "nodes/JsiRectNode.h"
+#include "nodes/JsiGroupNode.h"
 
 namespace RNSkia
 {
@@ -17,6 +17,7 @@ namespace RNSkia
         : JsiHostObject()
     {
       installFunction("RectNode", JsiRectNode::createCtor(context));
+      installFunction("GroupNode", JsiGroupNode::createCtor(context));
     }
   };
 

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "JsiDomRenderNode.h"
-#include "CSSColorParser.h"
+#include "third_party/CSSColorParser.h"
 
 namespace RNSkia {
 
@@ -16,14 +16,15 @@ public:
   JsiDomRenderNode(context, runtime, arguments, count) {}
   
 protected:
-  void render(std::shared_ptr<JsiBaseDrawingContext> context) override {
-    JsiDomRenderNode::render(context);
+  virtual void draw(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
+  
+  void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) override {
     if(_isDirty) {
       _isDirty = false;
       _childContext = processContext(context, getProperties());
     }
+    
     draw(std::make_shared<JsiDrawingContext>(context->getCanvas(), _childContext->getPaint(), _childContext->getOpacity()));
-    didRender(context);
   }
   
   void onPropsRead(jsi::Runtime& runtime) override {

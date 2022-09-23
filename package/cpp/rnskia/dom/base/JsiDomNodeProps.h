@@ -121,6 +121,13 @@ private:
     return std::dynamic_pointer_cast<RNSkReadonlyValue>(value.getAsHostObject());
   }
   
+  bool isSelector(const JsiValue& value) {
+    // FIXME: Implement support for selectors. This is rather simple, we just add
+    // a listener on the selector's callback and then we'll do the javascript
+    // resolving in the callback (which will always be on the Javascript thread)!
+    return false;
+  }
+  
   std::unordered_map<std::string, JsiValue> _values;
   jsi::Object _props;
   std::vector<std::function<void()>> _unsubscriptions;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "JsiDomDeclarationNode.h"
-#include "jsi.h"
 
 #include "JsiSkRect.h"
 

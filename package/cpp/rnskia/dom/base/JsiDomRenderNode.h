@@ -27,26 +27,28 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, setProps),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose),
                        JSI_EXPORT_FUNC(JsiDomNode, isNative),
+                       JSI_EXPORT_FUNC(JsiDomNode, children),
                        JSI_EXPORT_FUNC(JsiDomRenderNode, render))
   
-protected:
-  virtual void draw(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
-  
-  void onPropsRead(jsi::Runtime &runtime) override {
-    
-    getProperties()->tryReadHostObjectProperty(runtime, "matrix");
-    getProperties()->tryReadObjectProperty(runtime, "origin");
-  }
-  
-  virtual void render(std::shared_ptr<JsiBaseDrawingContext> context) {
+  void render(std::shared_ptr<JsiBaseDrawingContext> context) {
     auto props = getProperties();
+    if(props == nullptr) {
+      // A node might not have properties - then we should just render the node
+      renderNode(context);
+      return;
+    }
+    
+    // FIXME: Add support for transform prop
+    bool shouldSave = props->hasValue("matrix");
+    
     // FIXME: Maybe we don't need to calculate this on every render?
-    if(props->hasValue("matrix")) {
-      auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue("matrix").getAsHostObject())->getObject();
-      
+    if(shouldSave) {
       context->getCanvas()->save();
       
+      auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue("matrix").getAsHostObject())->getObject();
+      
       auto hasOrigin = props->hasValue("origin");
+      
       if(hasOrigin) {
         auto origin = props->getValue("origin");
         context->getCanvas()->translate(origin.getValue("x").getAsNumber(),
@@ -61,13 +63,23 @@ protected:
                                         -origin.getValue("y").getAsNumber());
       }
     }
-  };
-  
-  void didRender(std::shared_ptr<JsiBaseDrawingContext> context) {
-    if(getProperties()->hasValue("matrix")) {
+      
+    renderNode(context);
+      
+    if(shouldSave) {
       context->getCanvas()->restore();
     }
+  };
+  
+protected:
+  void onPropsRead(jsi::Runtime &runtime) override {
+    
+    getProperties()->tryReadHostObjectProperty(runtime, "matrix");
+    getProperties()->tryReadObjectProperty(runtime, "origin");
   }
+  
+  virtual void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
+  
 };
 
 }

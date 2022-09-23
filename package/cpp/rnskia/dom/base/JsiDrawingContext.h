@@ -2,8 +2,6 @@
 
 #include "JsiHostObject.h"
 
-#include "jsi.h"
-
 #include <JsiSkCanvas.h>
 #include <JsiSkPaint.h>
 
