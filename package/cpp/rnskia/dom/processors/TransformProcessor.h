@@ -4,15 +4,15 @@
 
 namespace RNSkia {
 
-static std::string PropNameTranslateX = "translateX";
-static std::string PropNameTranslateY = "translateY";
-static std::string PropNameScale = "scale";
-static std::string PropNameScaleX = "scaleX";
-static std::string PropNameScaleY = "scaleY";
-static std::string PropNameSkewX = "skewX";
-static std::string PropNameSkewY = "skewY";
-static std::string PropNameRotate = "rotate";
-static std::string PropNameRotateZ = "rotateZ";
+static const char* PropNameTranslateX = "translateX";
+static const char* PropNameTranslateY = "translateY";
+static const char* PropNameScale = "scale";
+static const char* PropNameScaleX = "scaleX";
+static const char* PropNameScaleY = "scaleY";
+static const char* PropNameSkewX = "skewX";
+static const char* PropNameSkewY = "skewY";
+static const char* PropNameRotate = "rotate";
+static const char* PropNameRotateZ = "rotateZ";
 
 class TransformProcessor {
 public:

@@ -4,9 +4,9 @@
 
 namespace RNSkia {
 
-static std::string PropNameColor = "color";
-static std::string PropNameStyle = "style";
-static std::string PropNameStrokeWidth = "strokeWidth";
+static const char* PropNameColor = "color";
+static const char* PropNameStyle = "style";
+static const char* PropNameStrokeWidth = "strokeWidth";
 
 class PaintProcessor {
 public:

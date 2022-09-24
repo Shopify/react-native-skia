@@ -3,6 +3,8 @@
 #include "JsiValue.h"
 
 #include <vector>
+#include <map>
+#include <set>
 
 namespace RNSkia {
 
@@ -39,23 +41,6 @@ public:
   }
   
   /**
-   Sets a property from the JS side. This will read the property and convert it to a native value that
-   can be read outside of the JS context.
-   */
-  void setProp(jsi::Runtime &runtime,
-               const std::string &name,
-               const jsi::Value &value) {
-    if (_values.count(name) > 0) {
-      _values.at(name)->setCurrent(runtime, value);
-    } else {
-      auto p = std::make_shared<JsiValue>(runtime);
-      p->setCurrent(runtime, value);
-      _values.emplace(name, p);
-    }
-    requestPropChange(name);
-  }
-  
-  /**
    Tries to read a property as a numeric value. This will try to read the property, verify type and optionality and finally
    convert the JS value into a native value that can be read outside the JS Context.
    @param runtime JS Runtime
@@ -63,7 +48,7 @@ public:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void tryReadNumericProperty(jsi::Runtime &runtime,
-                              const std::string &name,
+                              const char* name,
                               bool isOptional = true) {
     readProperty(runtime, name, JsiValue::PropType::Number, isOptional);
   }
@@ -76,7 +61,7 @@ public:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void tryReadStringProperty(jsi::Runtime &runtime,
-                             const std::string &name,
+                             const char* name,
                              bool isOptional = true) {
     readProperty(runtime, name, JsiValue::PropType::String, isOptional);
   }
@@ -89,7 +74,7 @@ public:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void tryReadHostObjectProperty(jsi::Runtime &runtime,
-                                 const std::string &name,
+                                 const char* name,
                                  bool isOptional = true) {
     readProperty(runtime, name, JsiValue::PropType::HostObject, isOptional);
   }
@@ -101,7 +86,8 @@ public:
    @param name Name of property to read
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
-  void tryReadObjectProperty(jsi::Runtime &runtime, const std::string &name,
+  void tryReadObjectProperty(jsi::Runtime &runtime,
+                             const char* name,
                              bool isOptional = true) {
     readProperty(runtime, name, JsiValue::PropType::Object, isOptional);
   }
@@ -113,7 +99,8 @@ public:
    @param name Name of property to read
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
-  void tryReadArrayProperty(jsi::Runtime &runtime, const std::string &name,
+  void tryReadArrayProperty(jsi::Runtime &runtime,
+                            const char* name,
                             bool isOptional = true) {
     readProperty(runtime, name, JsiValue::PropType::Array, isOptional);
   }
@@ -122,24 +109,17 @@ public:
    Returns true if there is a value for the given property name. This can be used to test if a property
    is undefined or null from the JS context. Can be called outside the JS Context
    */
-  bool hasValue(const std::string &name) {
-    if (_values.count(name) == 0) {
-      return false;
-    }
-    auto value = _values.at(name);
-    if (value->isUndefinedOrNull()) {
-      return false;
-    }
-    return true;
+  bool hasValue(const char* name) {
+    return (_propWithValues.find(name) != _propWithValues.end());
   }
   
   /**
    Returns a property value as a native value that can be read outside the JS Context. The property
    needs to be set - use the hasValue function to test before calling this function.
    */
-  std::shared_ptr<JsiValue> getValue(const std::string &name) {
+  std::shared_ptr<JsiValue> getValue(const char* name) {
     if (!hasValue(name)) {
-      throw std::runtime_error("Could not find property " + name + ".");
+      throw std::runtime_error("Could not find property " + std::string(name) + ".");
     }
     return _values.at(name);
   }
@@ -156,7 +136,7 @@ public:
    Returns true if a specific property has changed. This function will also clear the flag
    if it exists for the property we asked for.
    */
-  bool readPropChangesAndClearFlag(const std::string& name) {
+  bool readPropChangesAndClearFlag(const char* name) {
     auto c = _changedPropNames.count(name) > 0;
     if (c) {
       _changedPropNames.erase(name);
@@ -173,6 +153,33 @@ public:
   
 private:
   /**
+   Sets a property from the JS side. This will read the property and convert it to a native value that
+   can be read outside of the JS context.
+   */
+  void setProp(jsi::Runtime &runtime,
+               const char* name,
+               const jsi::Value &value) {
+    if (hasValue(name)) {
+      // Prop has already been set, let's just update it.
+      _values.at(name)->setCurrent(runtime, value);
+      if (!_values.at(name)->isUndefinedOrNull()) {
+        _propWithValues.emplace(name);
+      } else {
+        _propWithValues.erase(name);
+      }
+      
+    } else {
+      // Prop was not previously set
+      _values.emplace(name, std::make_shared<JsiValue>(runtime, value));
+      if (!_values.at(name)->isUndefinedOrNull()) {
+        _propWithValues.emplace(name);
+      }
+    }
+    // Call prop changed
+    requestPropChange(name);
+  }
+  
+  /**
    Tries to read a property as given type. This will try to read the property, verify type and optionality and finally
    convert the JS value into a native value that can be read outside the JS Context.
    
@@ -185,41 +192,35 @@ private:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void readProperty(jsi::Runtime &runtime,
-                    const std::string &name,
+                    const char* name,
                     JsiValue::PropType type,
                     bool isOptional = true) {
     // get the prop value from the props object
-    auto propValue = _props.getProperty(runtime, name.c_str());
+    auto propValue = _props.getProperty(runtime, name);
     
     // Check optional value allowed?
     auto isUndefinedOrNull = propValue.isUndefined() || propValue.isNull();
     
     if (!isOptional && isUndefinedOrNull) {
-      throw jsi::JSError(runtime, "Property " + name + " is not optional.");
+      throw jsi::JSError(runtime, "Property " + std::string(name) + " is not optional.");
     }
     
     // Check type
-    auto prop = std::make_shared<JsiValue>(runtime);
-    prop->setCurrent(runtime, propValue);
+    auto prop = std::make_shared<JsiValue>(runtime, propValue);
     
     // We need to check if this is an animated value - they should be handled differently
     if (isAnimatedValue(prop)) {
       // Add initial resolved value to props
-      auto current = std::make_shared<JsiValue>(runtime);
-      current->setCurrent(runtime, getAnimatedValue(prop)->getCurrent(runtime));
-      
-      // Save and mark as changed
-      _values.emplace(name, current);
-      requestPropChange(name);
+      auto animatedValue = getAnimatedValue(prop);
+      setProp(runtime, name, animatedValue->getCurrent(runtime));
       
       // Add subscription to animated value
-      auto unsubscribe = getAnimatedValue(prop)->addListener([weakSelf = weak_from_this(),
-                                                              prop,
-                                                              name] (jsi::Runtime &runtime) {
+      auto unsubscribe = animatedValue->addListener([weakSelf = weak_from_this(),
+                                                     animatedValue,
+                                                     name] (jsi::Runtime &runtime) {
       auto self = weakSelf.lock();
         if (self) {
-          self->_values.at(name)->setCurrent(runtime, self->getAnimatedValue(prop)->getCurrent(runtime));
-          self->requestPropChange(name);
+          self->setProp(runtime, name, animatedValue->getCurrent(runtime));
         }
       });
       
@@ -231,13 +232,7 @@ private:
       
       // Add initial resolved value to props
       jsi::Value current = value->getCurrent(runtime);
-      auto result = selector(runtime, jsi::Value::null(), &current, 1);
-      auto initial = std::make_shared<JsiValue>(runtime);
-      initial->setCurrent(runtime, result);
-      
-      // Save and mark as changed
-      _values.emplace(name, initial);
-      requestPropChange(name);
+      setProp(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
       
       // Add subscription to animated value in selector
       auto unsubscribe = value->addListener([weakSelf = weak_from_this(), prop, name, selector = std::move(
@@ -245,9 +240,7 @@ private:
          auto self = weakSelf.lock();
          if (self) {
            jsi::Value current = value->getCurrent(runtime);
-           auto result = selector(runtime, jsi::Value::null(), &current, 1);
-           self->_values.at(name)->setCurrent(runtime, result);
-           self->requestPropChange(name);
+           self->setProp(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
          }
       });
       
@@ -262,9 +255,8 @@ private:
                            "\" for property \"" + name + "\".");
       }
       
-      // Add value to props
-      _values.emplace(name, prop);
-      requestPropChange(name);
+      // Set prop
+      setProp(runtime, name, propValue);
     }
   }
   
@@ -303,17 +295,18 @@ private:
   /**
    Increments the property change counter for the props object.
    */
-  void requestPropChange(const std::string& name) {
+  void requestPropChange(const char* name) {
     _propChanges++;
-    _changedPropNames.emplace(name, 0);
+    _changedPropNames.emplace(name);
   }
   
-  std::unordered_map<std::string, std::shared_ptr<JsiValue>> _values;
+  std::map<const char*, std::shared_ptr<JsiValue>> _values;
   jsi::Object _props;
   std::vector<std::function<void()>> _unsubscriptions;
   
   std::atomic<size_t> _propChanges = { 0 };
-  std::unordered_map<std::string, int> _changedPropNames;
+  std::set<const char*> _changedPropNames;
+  std::set<const char*> _propWithValues;
 };
 
 }

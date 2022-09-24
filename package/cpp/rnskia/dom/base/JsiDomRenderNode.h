@@ -9,9 +9,9 @@
 
 namespace RNSkia {
 
-static std::string PropNameMatrix = "matrix";
-static std::string PropNameTransform = "transform";
-static std::string PropNameOrigin = "origin";
+static char* PropNameMatrix = "matrix";
+static char* PropNameTransform = "transform";
+static char* PropNameOrigin = "origin";
 
 class JsiDomRenderNode : public JsiDomNode {
 public:

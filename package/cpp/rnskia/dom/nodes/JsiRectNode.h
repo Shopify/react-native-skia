@@ -6,8 +6,8 @@
 
 namespace RNSkia {
 
-static std::string PropNameRect = "rect";
-static const char *RectNodeName = "skRect";
+static const char* PropNameRect = "rect";
+static const char* RectNodeName = "skRect";
 
 class JsiRectNode : public JsiDomDrawingNode {
 public:

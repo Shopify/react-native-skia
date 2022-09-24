@@ -5,7 +5,7 @@
 
 namespace RNSkia {
 
-static std::string PropNameOpacity = "opacity";
+static char* PropNameOpacity = "opacity";
 
 class ContextProcessor {
 public:

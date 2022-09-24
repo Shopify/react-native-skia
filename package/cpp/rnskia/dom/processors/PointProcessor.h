@@ -5,8 +5,8 @@
 
 namespace RNSkia {
 
-static std::string PropNameX = "x";
-static std::string PropNameY = "y";
+static const char* PropNameX = "x";
+static const char* PropNameY = "y";
 
 class PointProcessor {
 public:

@@ -30,6 +30,9 @@ public:
   };
   
   JsiValue(jsi::Runtime& runtime): _type(PropType::Undefined) {}
+  JsiValue(jsi::Runtime& runtime, const jsi::Value& value): JsiValue(runtime) {
+    setCurrent(runtime, value);
+  }
   
   void setCurrent(jsi::Runtime &runtime, const jsi::Value &value)
   {

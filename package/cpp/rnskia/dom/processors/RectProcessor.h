@@ -6,8 +6,8 @@
 
 namespace RNSkia {
 
-static std::string PropNameWidth = "width";
-static std::string PropNameHeight = "height";
+static const char* PropNameWidth = "width";
+static const char* PropNameHeight = "height";
 
 class RectProcessor {
 public:
