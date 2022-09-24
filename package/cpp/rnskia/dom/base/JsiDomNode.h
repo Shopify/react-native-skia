@@ -140,7 +140,7 @@ protected:
    from animation values or other mechanisms.
    */
   virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) {
-    _propChanges = 0;
+    props->resetPropChangeCounter();
   };
   
   /**
@@ -152,12 +152,7 @@ protected:
     if (_props != nullptr) {
       _props->unsubscribe();
     }
-    _props = std::make_shared<JsiDomNodeProps>(runtime,
-                                               std::move(props),
-                                               std::bind(&JsiDomNode::requestPropChange,
-                                                         this,
-                                                         std::placeholders::_1));
-    
+    _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));    
     onPropsSet(runtime, _props);
   };
   
@@ -213,39 +208,10 @@ protected:
     }
   }
   
-  /**
-   Returns true if there are any property changes in the node.
-   */
-  bool getHasPropChanges() {
-    return _propChanges > 0;
-  }
-  
-  /**
-   Returns true if a specific property has changed. This function will also clear the flag
-   if it exists for the property we asked for.
-   */
-  bool readPropChangesAndClearFlag(const std::string& name) {
-    auto c = _changedPropNames.count(name) > 0;
-    if (c) {
-      _changedPropNames.erase(name);
-    }
-    return c;
-  }
-  
 private:
   
-  /**
-   Increments the property change counter for the props object.
-   */
-  void requestPropChange(const std::string& name) {
-    _propChanges++;
-    _changedPropNames.emplace(name, 0);
-  }
-  
   std::vector<std::shared_ptr<JsiDomNode>> _children;
-  std::shared_ptr<JsiDomNodeProps> _props;
-  std::atomic<size_t> _propChanges = { 0 };
-  std::unordered_map<std::string, int> _changedPropNames;
+  std::shared_ptr<JsiDomNodeProps> _props;  
 };
 
 }

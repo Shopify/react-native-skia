@@ -14,6 +14,7 @@ public:
    either the same parent context or a new child context when props have changed that affects the context.
    */
   static std::shared_ptr<JsiBaseDrawingContext> processContext(std::shared_ptr<JsiBaseDrawingContext> context,
+                                                               std::shared_ptr<SkPaint> paintCache,
                                                                std::shared_ptr<JsiDomNodeProps> props) {
     
     double opacity = context->getOpacity();
@@ -22,7 +23,7 @@ public:
       opacity *= context->getOpacity();
     }
         
-    auto paint = PaintProcessor::processPaint(context->getPaint(), props, opacity);
+    auto paint = PaintProcessor::processPaint(context->getPaint(), paintCache, props, opacity);
     
     return std::make_shared<JsiDrawingContext>(context, paint, opacity);
   }

@@ -19,11 +19,7 @@ public:
    Constructor. Pass the runtime and the JS object representing the properties, and a function that will be
    called when any property was changed from within this class as a result of a Skia value change.
    */
-  JsiDomNodeProps(jsi::Runtime &runtime,
-                  jsi::Object &&props,
-                  std::function<void(const std::string&)> onChangeCallback) :
-  _props(std::move(props)),
-  _onChangeCallback(onChangeCallback) {}
+  JsiDomNodeProps(jsi::Runtime &runtime, jsi::Object &&props) : _props(std::move(props)) {}
   
   /**
    Destructor
@@ -56,7 +52,7 @@ public:
       p->setCurrent(runtime, value);
       _values.emplace(name, p);
     }
-    _onChangeCallback(name);
+    requestPropChange(name);
   }
   
   /**
@@ -146,7 +142,34 @@ public:
       throw std::runtime_error("Could not find property " + name + ".");
     }
     return _values.at(name);
-  }    
+  }
+  
+  
+  /**
+   Returns true if there are any property changes in the node.
+   */
+  bool getHasPropChanges() {
+    return _propChanges > 0;
+  }
+  
+  /**
+   Returns true if a specific property has changed. This function will also clear the flag
+   if it exists for the property we asked for.
+   */
+  bool readPropChangesAndClearFlag(const std::string& name) {
+    auto c = _changedPropNames.count(name) > 0;
+    if (c) {
+      _changedPropNames.erase(name);
+    }
+    return c;
+  }
+  
+  /**
+   Resets the property change counter
+   */
+  void resetPropChangeCounter() {
+    _propChanges = 0;
+  }
   
 private:
   /**
@@ -187,7 +210,7 @@ private:
       
       // Save and mark as changed
       _values.emplace(name, current);
-      _onChangeCallback(name);
+      requestPropChange(name);
       
       // Add subscription to animated value
       auto unsubscribe = getAnimatedValue(prop)->addListener([weakSelf = weak_from_this(),
@@ -196,7 +219,7 @@ private:
       auto self = weakSelf.lock();
         if (self) {
           self->_values.at(name)->setCurrent(runtime, self->getAnimatedValue(prop)->getCurrent(runtime));
-          self->_onChangeCallback(name);
+          self->requestPropChange(name);
         }
       });
       
@@ -214,7 +237,7 @@ private:
       
       // Save and mark as changed
       _values.emplace(name, initial);
-      _onChangeCallback(name);
+      requestPropChange(name);
       
       // Add subscription to animated value in selector
       auto unsubscribe = value->addListener([weakSelf = weak_from_this(), prop, name, selector = std::move(
@@ -224,7 +247,7 @@ private:
            jsi::Value current = value->getCurrent(runtime);
            auto result = selector(runtime, jsi::Value::null(), &current, 1);
            self->_values.at(name)->setCurrent(runtime, result);
-           self->_onChangeCallback(name);
+           self->requestPropChange(name);
          }
       });
       
@@ -241,7 +264,7 @@ private:
       
       // Add value to props
       _values.emplace(name, prop);
-      _onChangeCallback(name);
+      requestPropChange(name);
     }
   }
   
@@ -276,10 +299,21 @@ private:
     return false;
   }
   
+  
+  /**
+   Increments the property change counter for the props object.
+   */
+  void requestPropChange(const std::string& name) {
+    _propChanges++;
+    _changedPropNames.emplace(name, 0);
+  }
+  
   std::unordered_map<std::string, std::shared_ptr<JsiValue>> _values;
   jsi::Object _props;
   std::vector<std::function<void()>> _unsubscriptions;
-  std::function<void(const std::string&)> _onChangeCallback;
+  
+  std::atomic<size_t> _propChanges = { 0 };
+  std::unordered_map<std::string, int> _changedPropNames;
 };
 
 }

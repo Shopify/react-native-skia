@@ -46,12 +46,16 @@ public:
     }
     
     // Make sure we update any properties that were changed
-    if (getHasPropChanges()) {
+    if (props->getHasPropChanges()) {
       onPropsChanged(getProperties());
     }
     
     // Update drawing context
-    auto childContext = ContextProcessor::processContext(context, props);
+    if(_paintCache == nullptr) {
+      _paintCache = std::make_shared<SkPaint>(*context->getPaint());
+    }
+    std::shared_ptr<JsiBaseDrawingContext> childContext =
+      ContextProcessor::processContext(context, _paintCache, props);
     
     // Handle matrix/transforms
     bool shouldSave = props->hasValue(PropNameMatrix) || props->hasValue(PropNameTransform);
@@ -92,12 +96,12 @@ protected:
   virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomNode::onPropsChanged(props);
     
-    if (props->hasValue(PropNameTransform) && readPropChangesAndClearFlag(PropNameTransform)) {
+    if (props->hasValue(PropNameTransform) && props->readPropChangesAndClearFlag(PropNameTransform)) {
       _transformMatrix.setIdentity();
       TransformProcessor::processTransform(_transformMatrix, props->getValue(PropNameTransform));
     }
     
-    if (props->hasValue(PropNameOrigin) && readPropChangesAndClearFlag(PropNameOrigin)) {
+    if (props->hasValue(PropNameOrigin) && props->readPropChangesAndClearFlag(PropNameOrigin)) {
       _origin = PointProcessor::processPoint(props->getValue(PropNameOrigin));
     }
   }
@@ -123,6 +127,7 @@ protected:
 private:
   SkMatrix _transformMatrix;
   SkPoint _origin;
+  std::shared_ptr<SkPaint> _paintCache;
 };
 
 }
