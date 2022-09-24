@@ -176,14 +176,14 @@ protected:
   /**
    Adds a child node to the array of children for this node
    */
-  void addChild(std::shared_ptr<JsiDomNode> child) {
+  virtual void addChild(std::shared_ptr<JsiDomNode> child) {
     _children.push_back(child);
   }
   
   /**
    Inserts a child node before a given child node in the children array for this node
    */
-  void
+  virtual void
   insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) {
     auto position = std::find(_children.begin(), _children.end(), before);
     _children.insert(position, child);

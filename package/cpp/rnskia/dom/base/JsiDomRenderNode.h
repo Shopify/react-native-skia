@@ -5,6 +5,7 @@
 #include "JsiDrawingContext.h"
 #include "TransformProcessor.h"
 #include "PointProcessor.h"
+#include "ContextProcessor.h"
 
 namespace RNSkia {
 
@@ -36,6 +37,7 @@ public:
                        JSI_EXPORT_FUNC(JsiDomRenderNode, render))
   
   void render(std::shared_ptr<JsiBaseDrawingContext> context) {
+    
     auto props = getProperties();
     if (props == nullptr) {
       // A node might have an empty set of properties - then we can just render the node directly
@@ -48,6 +50,10 @@ public:
       onPropsChanged(getProperties());
     }
     
+    // Update drawing context
+    auto childContext = ContextProcessor::processContext(context, props);
+    
+    // Handle matrix/transforms
     bool shouldSave = props->hasValue(PropNameMatrix) || props->hasValue(PropNameTransform);
     auto hasOrigin = props->hasValue(PropNameOrigin);
 
@@ -69,7 +75,8 @@ public:
       }
     }
     
-    renderNode(context);
+    // Render the node
+    renderNode(childContext);
     
     if (shouldSave) {
       context->getCanvas()->restore();
@@ -77,6 +84,11 @@ public:
   };
   
 protected:
+  /**
+   Override to implement rendering where the current state of the drawing context is correctly set.
+   */
+  virtual void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
+  
   virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomNode::onPropsChanged(props);
     
@@ -91,6 +103,8 @@ protected:
   }
   
   virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+    JsiDomNode::onPropsSet(runtime, props);
+    
     props->tryReadHostObjectProperty(runtime, PropNameMatrix);
     props->tryReadArrayProperty(runtime, PropNameTransform);
     try {
@@ -98,9 +112,13 @@ protected:
     } catch (...) {
       props->tryReadHostObjectProperty(runtime, PropNameOrigin);
     }
+    
+    props->tryReadStringProperty(runtime, PropNameColor);
+    props->tryReadStringProperty(runtime, PropNameStyle);
+    props->tryReadNumericProperty(runtime, PropNameStrokeWidth);
+    props->tryReadNumericProperty(runtime, PropNameOpacity);
+    
   }
-  
-  virtual void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
   
 private:
   SkMatrix _transformMatrix;

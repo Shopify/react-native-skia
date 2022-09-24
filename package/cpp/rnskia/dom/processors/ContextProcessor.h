@@ -24,7 +24,7 @@ public:
         
     auto paint = PaintProcessor::processPaint(context->getPaint(), props, opacity);
     
-    return std::make_shared<JsiDrawingContext>(context->getCanvas(), paint, opacity);
+    return std::make_shared<JsiDrawingContext>(context, paint, opacity);
   }
 };
 

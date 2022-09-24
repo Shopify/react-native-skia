@@ -30,10 +30,17 @@ class JsiDrawingContext : public JsiBaseDrawingContext {
 public:
   JsiDrawingContext() : JsiBaseDrawingContext() {}
   
-  JsiDrawingContext(SkCanvas *canvas, std::shared_ptr<SkPaint> paint, float opacity) {
-    _canvas = canvas;
+  JsiDrawingContext(std::shared_ptr<JsiBaseDrawingContext> parent,
+                    std::shared_ptr<SkPaint> paint,
+                    float opacity) {
+    assert(paint != nullptr);
+    assert(parent != nullptr);
+    assert(parent->getCanvas() != nullptr);
+    
+    _canvas = parent->getCanvas();
     _paint = paint;
     _opacity = opacity;
+    
   }
   
   SkCanvas *getCanvas() override { return _canvas; }
