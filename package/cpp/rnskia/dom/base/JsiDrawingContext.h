@@ -15,38 +15,44 @@
 
 namespace RNSkia {
 
-class JsiBaseDrawingContext: public JsiHostObject {
+class JsiBaseDrawingContext : public JsiHostObject {
 public:
-  JsiBaseDrawingContext(): JsiHostObject() {}
-  virtual SkCanvas* getCanvas() = 0;
+  JsiBaseDrawingContext() : JsiHostObject() {}
+  
+  virtual SkCanvas *getCanvas() = 0;
+  
   virtual std::shared_ptr<SkPaint> getPaint() = 0;
+  
   virtual double getOpacity() = 0;
 };
 
-class JsiDrawingContext: public JsiBaseDrawingContext {
+class JsiDrawingContext : public JsiBaseDrawingContext {
 public:
-  JsiDrawingContext(): JsiBaseDrawingContext() {}
-  JsiDrawingContext(SkCanvas* canvas, std::shared_ptr<SkPaint> paint, float opacity) {
+  JsiDrawingContext() : JsiBaseDrawingContext() {}
+  
+  JsiDrawingContext(SkCanvas *canvas, std::shared_ptr<SkPaint> paint, float opacity) {
     _canvas = canvas;
     _paint = paint;
     _opacity = opacity;
   }
   
-  SkCanvas* getCanvas() override { return _canvas; }
+  SkCanvas *getCanvas() override { return _canvas; }
+  
   std::shared_ptr<SkPaint> getPaint() override { return _paint; }
+  
   double getOpacity() override { return _opacity; }
   
 protected:
-  SkCanvas* _canvas = nullptr;
+  SkCanvas *_canvas = nullptr;
   std::shared_ptr<SkPaint> _paint = nullptr;
   double _opacity = 1.0;
 };
 
-class JsiDrawingContextWrapper: public JsiDrawingContext {
+class JsiDrawingContextWrapper : public JsiDrawingContext {
 public:
-  JsiDrawingContextWrapper(jsi::Runtime& runtime,
+  JsiDrawingContextWrapper(jsi::Runtime &runtime,
                            const jsi::Value *arguments,
-                           size_t count): JsiDrawingContext() {
+                           size_t count) : JsiDrawingContext() {
     
     auto context = getArgumentAsObject(runtime, arguments, count, 0);
     // FIXME: Add guards and error handlinga

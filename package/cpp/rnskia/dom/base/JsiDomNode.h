@@ -11,34 +11,42 @@
 
 namespace RNSkia {
 
-class JsiDomNode:
-  public JsiHostObject,
-  public std::enable_shared_from_this<JsiDomNode> {
+/**
+ Implements an abstract base class for nodes in the Skia Reconciler. This node coresponds to the native implementation
+ of the Node.ts class in Javascript.
+ */
+class JsiDomNode :
+public JsiHostObject,
+public std::enable_shared_from_this<JsiDomNode> {
 public:
-  JsiDomNode(std::shared_ptr<RNSkPlatformContext> context,
-             jsi::Runtime& runtime,
+  /**
+   Contructor. Takes as parameters the values comming from the JS world that initialized the class.
+   */
+  JsiDomNode(std::shared_ptr<RNSkPlatformContext>,
+             jsi::Runtime &runtime,
              const jsi::Value *arguments,
-             size_t count):
-  JsiHostObject(),
-  _platformContext(context) {}
+             size_t count) :
+  JsiHostObject() {}
   
+  /**
+   JS-function for setting the properties from the JS reconciler on the node.
+   */
   JSI_HOST_FUNCTION(setProps) {
     setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
     return jsi::Value::undefined();
   }
-    
-  JSI_HOST_FUNCTION(setProp) {
-    auto key = getArgumentAsString(runtime, arguments, count, 0).utf8(runtime);
-    const jsi::Value& value = getArgument(runtime, arguments, count, 1);
-    setProp(runtime, key, value);
-    return jsi::Value::undefined();
-  }
   
+  /**
+   JS Function to be called when the node is no longer part of the reconciler tree. Use for cleaning up.
+   */
   JSI_HOST_FUNCTION(dispose) {
     dispose();
     return jsi::Value::undefined();
   }
   
+  /**
+   JS Function for adding a child node to this node.
+   */
   JSI_HOST_FUNCTION(addChild) {
     // child: Node<unknown>
     auto newChild = getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 0);
@@ -46,95 +54,158 @@ public:
     return jsi::Value::undefined();
   }
   
+  /*
+   JS Function for removing a child node from this node
+   */
   JSI_HOST_FUNCTION(removeChild) {
     auto child = getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 0);
     removeChild(child);
     return jsi::Value::undefined();
   }
-    
+  
+  /**
+   JS Function for insering a child node to a specific location in the children array on this node
+   */
   JSI_HOST_FUNCTION(insertChildBefore) {
     // child: Node<unknown>, before: Node<unknown>
     auto child = getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 0);
     auto before = getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 1);
-    insertChildBefore(child, before);    
+    insertChildBefore(child, before);
     return jsi::Value::undefined();
   }
-    
+  
+  /**
+   JS Function returning true for native nodes.
+   */
   JSI_HOST_FUNCTION(isNative) {
     return true;
   }
-    
+  
+  /**
+   JS Function for getting child nodes for this node
+   */
   JSI_HOST_FUNCTION(children) {
     auto array = jsi::Array(runtime, _children.size());
     
     size_t index = 0;
-    for(auto child: _children) {
+    for (auto child: _children) {
       array.setValueAtIndex(runtime, index++, child->asHostObject(runtime));
     }
     return array;
   }
-    
+  
+  /**
+   JS Property for getting the type of node
+   */
   JSI_PROPERTY_GET(type) {
     return jsi::String::createFromUtf8(runtime, getType());
   }
   
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiDomNode, type))
   
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDomNode, setProp),
-                       JSI_EXPORT_FUNC(JsiDomNode, setProps),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDomNode, setProps),
                        JSI_EXPORT_FUNC(JsiDomNode, addChild),
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
                        JSI_EXPORT_FUNC(JsiDomNode, isNative),
                        JSI_EXPORT_FUNC(JsiDomNode, children),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
-    
+  
 protected:
   
+  /**
+   Returns this node as a host object that can be returned to the JS side.
+  */
   jsi::Object asHostObject(jsi::Runtime &runtime) {
     return jsi::Object::createFromHostObject(runtime, shared_from_this());
   }
-    
-  virtual const char* getType() = 0;
-    
-  virtual void onPropsRead(jsi::Runtime& runtime) {};
-    
-  void setProps(jsi::Runtime &runtime, jsi::Object&& props) {
+  
+  /**
+   Returns the type of node. Must be overridden in implementations of this abstract class.
+  */
+  virtual const char *getType() = 0;
+  
+  /**
+   Called when properties are set from the JS reconciler on the node. To optimize reading properties
+   each node needs to explicitly tell the props object which objects it expects and what types they are.
+   See the JsiDomNodeProps class for details.
+  */
+  virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) {
+    // We don't need to do anything in the base class since we don't have any
+    // properties that we want to read.
+  };
+  
+  /**
+   Called when one or more properties have changed from the native side due to updates
+   from animation values or other mechanisms.
+   */
+  virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) {
+    _propChanges = 0;
+  };
+  
+  /**
+   Native implementation of the set properties method. This is called from the reconciler when
+   properties are set due to changes in React. This method will always call the onPropsSet method
+   as a signal that things have changed.
+   */
+  void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
     if (_props != nullptr) {
       _props->unsubscribe();
     }
-    _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
-    onPropsRead(runtime);
+    _props = std::make_shared<JsiDomNodeProps>(runtime,
+                                               std::move(props),
+                                               std::bind(&JsiDomNode::requestPropChange,
+                                                         this,
+                                                         std::placeholders::_1));
+    
+    onPropsSet(runtime, _props);
   };
   
-  std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
-    return _platformContext;
+  /**
+   Returns all child JsiDomNodes for this node.
+   */
+  const std::vector<std::shared_ptr<JsiDomNode>> &getChildren() {
+    return _children;
   }
   
-  const std::vector<std::shared_ptr<JsiDomNode>>& getChildren() {
-    return _children;    
-  }
-    
+  /**
+   Returns all properties for this node
+   */
   std::shared_ptr<JsiDomNodeProps> getProperties() { return _props; }
   
+  /**
+   Adds a child node to the array of children for this node
+   */
   void addChild(std::shared_ptr<JsiDomNode> child) {
     _children.push_back(child);
   }
   
-  void insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) {
+  /**
+   Inserts a child node before a given child node in the children array for this node
+   */
+  void
+  insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) {
     auto position = std::find(_children.begin(), _children.end(), before);
     _children.insert(position, child);
   }
   
+  /**
+   Removes a child. Removing a child will remove the child from the array of children and call dispose on the child node.
+   */
   void removeChild(std::shared_ptr<JsiDomNode> child) {
-    _children.erase(std::remove_if(
-      _children.begin(), _children.end(), [child](const auto &node) { return node == child; }),
-      _children.end());
+    _children.erase(std::remove_if(_children.begin(), _children.end(),
+                                   [child](const auto &node) { return node == child; }),
+                    _children.end());
     
     // We don't need to call dispose since the dtor handles disposing
     child->dispose();
   }
-    
+  
+  /**
+   Clean up resources in use by the node. We have to explicitly call dispose when the node is removed from the
+   reconciler tree, since due to garbage collection we can't be sure that the destructor is called when the node is
+   removed - JS might hold a reference that will later be GC'ed.
+   */
   void dispose() {
     if (_props != nullptr) {
       _props->unsubscribe();
@@ -142,14 +213,39 @@ protected:
     }
   }
   
-private:
-  void setProp(jsi::Runtime &runtime, const std::string key, const jsi::Value& value) {
-    _props->setProp(runtime, key, value);    
-  };
+  /**
+   Returns true if there are any property changes in the node.
+   */
+  bool getHasPropChanges() {
+    return _propChanges > 0;
+  }
   
-  std::shared_ptr<RNSkPlatformContext> _platformContext;
+  /**
+   Returns true if a specific property has changed. This function will also clear the flag
+   if it exists for the property we asked for.
+   */
+  bool readPropChangesAndClearFlag(const std::string& name) {
+    auto c = _changedPropNames.count(name) > 0;
+    if (c) {
+      _changedPropNames.erase(name);
+    }
+    return c;
+  }
+  
+private:
+  
+  /**
+   Increments the property change counter for the props object.
+   */
+  void requestPropChange(const std::string& name) {
+    _propChanges++;
+    _changedPropNames.emplace(name, 0);
+  }
+  
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::shared_ptr<JsiDomNodeProps> _props;
+  std::atomic<size_t> _propChanges = { 0 };
+  std::unordered_map<std::string, int> _changedPropNames;
 };
 
 }

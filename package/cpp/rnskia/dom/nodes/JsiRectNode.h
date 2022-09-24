@@ -1,17 +1,20 @@
 #pragma once
 
 #include "JsiDomDrawingNode.h"
-
+#include "RectProcessor.h"
 #include "JsiSkRect.h"
 
 namespace RNSkia {
 
-class JsiRectNode: public JsiDomDrawingNode {
+static std::string PropNameRect = "rect";
+static const char *RectNodeName = "skRect";
+
+class JsiRectNode : public JsiDomDrawingNode {
 public:
   JsiRectNode(std::shared_ptr<RNSkPlatformContext> context,
-              jsi::Runtime& runtime,
+              jsi::Runtime &runtime,
               const jsi::Value *arguments,
-              size_t count):
+              size_t count) :
   JsiDomDrawingNode(context, runtime, arguments, count) {}
   
   static const jsi::HostFunctionType
@@ -21,39 +24,37 @@ public:
       return jsi::Object::createFromHostObject(runtime, std::move(rectNode));
     };
   }
-  
-  static SkRect processRect(std::shared_ptr<JsiDomNodeProps> props) {
-    if (props->hasValue("rect")) {
-      return props->processRect(props->getValue("rect"));
+    
+protected:
+  void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
+    JsiDomDrawingNode::onPropsChanged(props);
+    
+    if (props->hasValue(PropNameRect)) {
+      _rect = RectProcessor::processRect(props->getValue(PropNameRect));
     } else {
-      return props->processRect();      
-    }
+      _rect = RectProcessor::processRect(props);
+    }    
   }
   
-protected:
-  void onPropsRead(jsi::Runtime &runtime) override {
-    JsiDomDrawingNode::onPropsRead(runtime);
+  void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+    JsiDomDrawingNode::onPropsSet(runtime, props);
     try {
-      getProperties()->tryReadObjectProperty(runtime, "rect");
-    } catch(...) {
-      getProperties()->tryReadHostObjectProperty(runtime, "rect");
+      props->tryReadObjectProperty(runtime, PropNameRect);
+    } catch (...) {
+      props->tryReadHostObjectProperty(runtime, PropNameRect);
     }
-    getProperties()->tryReadNumericProperty(runtime, "x");
-    getProperties()->tryReadNumericProperty(runtime, "y");
-    getProperties()->tryReadNumericProperty(runtime, "width");
-    getProperties()->tryReadNumericProperty(runtime, "height");
+    props->tryReadNumericProperty(runtime, PropNameX);
+    props->tryReadNumericProperty(runtime, PropNameY);
+    props->tryReadNumericProperty(runtime, PropNameWidth);
+    props->tryReadNumericProperty(runtime, PropNameHeight);
   }
   
   void draw(std::shared_ptr<JsiBaseDrawingContext> context) override {
-    if(getProperties()->getIsDirty()) {
-      _rect = processRect(getProperties());      
-    }
     context->getCanvas()->drawRect(_rect, *context->getPaint());
   }
   
-  // FIXME: Add to enum and sync with JS somehow?
-  const char* getType() override { return "skRect"; }
-
+  const char *getType() override { return RectNodeName; }
+  
 private:
   SkRect _rect;
 };

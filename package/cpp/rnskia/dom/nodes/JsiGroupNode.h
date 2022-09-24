@@ -5,12 +5,14 @@
 
 namespace RNSkia {
 
-class JsiGroupNode: public JsiDomRenderNode {
+static const char *GroupNodeName = "skGroup";
+
+class JsiGroupNode : public JsiDomRenderNode {
 public:
   JsiGroupNode(std::shared_ptr<RNSkPlatformContext> context,
-              jsi::Runtime& runtime,
-              const jsi::Value *arguments,
-              size_t count):
+               jsi::Runtime &runtime,
+               const jsi::Value *arguments,
+               size_t count) :
   JsiDomRenderNode(context, runtime, arguments, count) {}
   
   static const jsi::HostFunctionType
@@ -22,22 +24,18 @@ public:
   }
   
 protected:
-  void onPropsRead(jsi::Runtime &runtime) override {
-    JsiDomRenderNode::onPropsRead(runtime);
-  }
-  
   void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) override {
-    for(auto& node: getChildren()) {
+    for (auto &node: getChildren()) {
       auto renderNode = std::dynamic_pointer_cast<JsiDomRenderNode>(node);
-      if(renderNode != nullptr) {
+      if (renderNode != nullptr) {
         renderNode->render(context);
       }
     }
   }
   
   // FIXME: Add to enum and sync with JS somehow?
-  const char* getType() override { return "skGroup"; }
-
+  const char *getType() override { return GroupNodeName; }
+  
 private:
   SkRect _rect;
 };
