@@ -16,7 +16,9 @@ enum JsiWrapperValueType
     String,
     Object,
     Function,
-    Array
+    Array,
+    HostObject,
+    Unknown
 };
 
 /**
@@ -60,6 +62,10 @@ public:
       } else if (_objectValue->isArray(runtime)) {
         _type = JsiWrapperValueType::Array;
         _arrayValue = std::make_shared<jsi::Array>(_objectValue->asArray(runtime));
+        _objectValue = nullptr;
+      } else if (_objectValue->isHostObject(runtime)) {
+        _type = JsiWrapperValueType::HostObject;
+        _hostObjectValue = _objectValue->asHostObject(runtime);
         _objectValue = nullptr;
       }
     } else {
@@ -122,6 +128,11 @@ public:
     return _objectValue;
   }
   
+  std::shared_ptr<jsi::HostObject> getAsHostObject() {
+    assert(_type == JsiWrapperValueType::HostObject);
+    return _hostObjectValue;
+  }
+  
   JsiWrapperValueType getType() { return _type; }
   
   bool equals(jsi::Runtime& runtime, const jsi::Value &value) {
@@ -153,6 +164,7 @@ private:
   std::shared_ptr<jsi::Object> _objectValue;
   std::shared_ptr<jsi::Function> _functionValue;
   std::shared_ptr<jsi::Array> _arrayValue;
+  std::shared_ptr<jsi::HostObject> _hostObjectValue;
 
   JsiWrapperValueType _type;
 };
