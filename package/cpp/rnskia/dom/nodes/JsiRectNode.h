@@ -29,10 +29,10 @@ protected:
   void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomDrawingNode::onPropsChanged(props);
     
-    if (props->hasValue(PropNameRect)) {
-      _rect = RectProcessor::processRect(props->getValue(PropNameRect));
+    if (_hasRectProp) {
+      _rectProcessor.processRect(props->getValue(PropNameRect));
     } else {
-      _rect = RectProcessor::processRect(props);
+      _rectProcessor.processRect(props);
     }    
   }
   
@@ -47,16 +47,24 @@ protected:
     props->tryReadNumericProperty(runtime, PropNameY);
     props->tryReadNumericProperty(runtime, PropNameWidth);
     props->tryReadNumericProperty(runtime, PropNameHeight);
+    
+    _hasRectProp = props->hasValue(PropNameRect);
+    if(_hasRectProp) {
+      _rectProcessor.updateProps(props->getValue(PropNameRect));
+    } else {
+      _rectProcessor.updateProps(props);
+    }
   }
   
   void draw(std::shared_ptr<JsiBaseDrawingContext> context) override {
-    context->getCanvas()->drawRect(_rect, *context->getPaint());
+    context->getCanvas()->drawRect(_rectProcessor.getRect(), *context->getPaint());
   }
   
   const char *getType() override { return RectNodeName; }
   
 private:
-  SkRect _rect;
+  RectProcessor _rectProcessor;
+  bool _hasRectProp;
 };
 
 }

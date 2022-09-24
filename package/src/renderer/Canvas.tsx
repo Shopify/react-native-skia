@@ -16,7 +16,7 @@ import type {
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
-import { SkiaView, useDrawCallback } from "../views";
+import { SkiaDomView } from "../views";
 import type { TouchHandler } from "../views";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
@@ -43,21 +43,21 @@ const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
   });
 };
 
-export const useCanvasRef = () => useRef<SkiaView>(null);
+export const useCanvasRef = () => useRef<SkiaDomView>(null);
 
-export interface CanvasProps extends ComponentProps<typeof SkiaView> {
-  ref?: RefObject<SkiaView>;
+export interface CanvasProps extends ComponentProps<typeof SkiaDomView> {
+  ref?: RefObject<SkiaDomView>;
   children: ReactNode;
   onTouch?: TouchHandler;
 }
 
-export const Canvas = forwardRef<SkiaView, CanvasProps>(
+export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
   ({ children, style, debug, mode, onTouch }, forwardedRef) => {
     const size = useValue({ width: 0, height: 0 });
     const canvasCtx = useMemo(() => ({ Skia, size }), [size]);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
-    const [tick, setTick] = useState(0);
+    const [_, setTick] = useState(0);
     const redraw = useCallback(() => {
       setTick((t) => t + 1);
     }, []);
@@ -89,39 +89,6 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
       );
     }, [children, root, redraw, container, canvasCtx]);
 
-    const paint = useMemo(() => Skia.Paint(), []);
-
-    // Draw callback
-    const onDraw = useDrawCallback(
-      (canvas, info) => {
-        // TODO: if tree is empty (count === 1) maybe we should not render?
-        const { width, height, timestamp } = info;
-        if (onTouch) {
-          onTouch(info.touches);
-        }
-        if (
-          width !== canvasCtx.size.current.width ||
-          height !== canvasCtx.size.current.height
-        ) {
-          canvasCtx.size.current = { width, height };
-        }
-        paint.reset();
-        const ctx = {
-          width,
-          height,
-          timestamp,
-          canvas,
-          paint,
-          opacity: 1,
-          ref,
-          center: { x: width / 2, y: height / 2 },
-          Skia,
-        };
-        container.draw(ctx);
-      },
-      [tick, onTouch]
-    );
-
     useEffect(() => {
       return () => {
         skiaReconciler.updateContainer(null, root, null, () => {
@@ -129,12 +96,12 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
         });
       };
     }, [container, root]);
-
     return (
-      <SkiaView
+      <SkiaDomView
         ref={ref}
         style={style}
-        onDraw={onDraw}
+        root={container.root}
+        onTouch={onTouch}
         mode={mode}
         debug={debug}
       />

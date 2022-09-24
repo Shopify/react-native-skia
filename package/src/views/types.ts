@@ -1,5 +1,6 @@
 import type { ViewProps } from "react-native";
 
+import type { GroupNode } from "../dom/nodes/GroupNode";
 import type { SkCanvas, SkImage, SkPicture, SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
 
@@ -101,4 +102,9 @@ export interface SkiaDrawViewProps extends SkiaBaseViewProps {
 
 export interface SkiaPictureViewProps extends SkiaBaseViewProps {
   picture?: SkPicture;
+}
+
+export interface SkiaDomViewProps extends SkiaBaseViewProps {
+  root?: GroupNode;
+  onTouch?: TouchHandler;
 }

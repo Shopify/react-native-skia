@@ -43,6 +43,7 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkJsView.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDomView.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDispatchQueue.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/api/third_party/CSSColorParser.cpp"

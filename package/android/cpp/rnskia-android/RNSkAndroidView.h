@@ -1,6 +1,5 @@
 #pragma once
 
-#include <RNSkJsView.h>
 #include <RNSkOpenGLCanvasProvider.h>
 #include <android/native_window.h>
 

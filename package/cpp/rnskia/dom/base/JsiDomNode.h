@@ -147,10 +147,13 @@ protected:
    as a signal that things have changed.
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
-    if (_props != nullptr) {
-      _props->unsubscribe();
+    {
+      if (_props != nullptr) {
+        _props->unsubscribe();
+      }
+      std::lock_guard<std::mutex> lock(_propsLock);
+      _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
     }
-    _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));    
     onPropsSet(runtime, _props);
   };
   
@@ -164,7 +167,10 @@ protected:
   /**
    Returns all properties for this node
    */
-  std::shared_ptr<JsiDomNodeProps> getProperties() { return _props; }
+  std::shared_ptr<JsiDomNodeProps> getProperties() {
+    std::lock_guard<std::mutex> lock(_propsLock);
+    return _props;
+  }
   
   /**
    Adds a child node to the array of children for this node
@@ -200,6 +206,7 @@ protected:
    removed - JS might hold a reference that will later be GC'ed.
    */
   void dispose() {
+    std::lock_guard<std::mutex> lock(_propsLock);
     if (_props != nullptr) {
       _props->unsubscribe();
       _props = nullptr;
@@ -209,7 +216,8 @@ protected:
 private:
   
   std::vector<std::shared_ptr<JsiDomNode>> _children;
-  std::shared_ptr<JsiDomNodeProps> _props;  
+  std::shared_ptr<JsiDomNodeProps> _props;
+  std::mutex _propsLock;
 };
 
 }

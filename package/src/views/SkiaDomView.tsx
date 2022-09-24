@@ -5,25 +5,25 @@ import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
 
 import { SkiaViewApi } from "./api";
-import type { NativeSkiaViewProps, SkiaDrawViewProps } from "./types";
+import type { NativeSkiaViewProps, SkiaDomViewProps } from "./types";
 
 let SkiaViewNativeId = 1000;
 
-const NativeSkiaView =
-  requireNativeComponent<NativeSkiaViewProps>("SkiaDrawView");
+const NativeSkiaDomView =
+  requireNativeComponent<NativeSkiaViewProps>("SkiaDomView");
 
-export class SkiaView extends React.Component<SkiaDrawViewProps> {
-  constructor(props: SkiaDrawViewProps) {
+export class SkiaDomView extends React.Component<SkiaDomViewProps> {
+  constructor(props: SkiaDomViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId++;
-    const { onDraw, root } = props;
+    const { root, onTouch } = props;
     if (root) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "root", root);
     }
-    if (onDraw) {
+    if (onTouch) {
       assertSkiaViewApi();
-      SkiaViewApi.setJsiProperty(this._nativeId, "drawCallback", onDraw);
+      SkiaViewApi.setJsiProperty(this._nativeId, "onTouch", onTouch);
     }
   }
 
@@ -33,17 +33,15 @@ export class SkiaView extends React.Component<SkiaDrawViewProps> {
     return this._nativeId;
   }
 
-  componentDidUpdate(prevProps: SkiaDrawViewProps) {
-    const { onDraw, root } = this.props;
-    if (onDraw !== prevProps.onDraw) {
-      assertSkiaViewApi();
-      SkiaViewApi.setJsiProperty(this._nativeId, "drawCallback", onDraw);
-    }
+  componentDidUpdate(prevProps: SkiaDomViewProps) {
+    const { root, onTouch } = this.props;
     if (root !== prevProps.root) {
-      if (root) {
-        assertSkiaViewApi();
-        SkiaViewApi.setJsiProperty(this._nativeId, "root", root);
-      }
+      assertSkiaViewApi();
+      SkiaViewApi.setJsiProperty(this._nativeId, "root", root);
+    }
+    if (onTouch) {
+      assertSkiaViewApi();
+      SkiaViewApi.setJsiProperty(this._nativeId, "onTouch", onTouch);
     }
   }
 
@@ -78,7 +76,7 @@ export class SkiaView extends React.Component<SkiaDrawViewProps> {
   render() {
     const { mode, debug = false, ...viewProps } = this.props;
     return (
-      <NativeSkiaView
+      <NativeSkiaDomView
         collapsable={false}
         nativeID={`${this._nativeId}`}
         mode={mode}
