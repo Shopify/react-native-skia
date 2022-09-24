@@ -139,9 +139,7 @@ protected:
    Called when one or more properties have changed from the native side due to updates
    from animation values or other mechanisms.
    */
-  virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) {
-    props->resetPropChangeCounter();
-  };
+  virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) {};
   
   /**
    Native implementation of the set properties method. This is called from the reconciler when

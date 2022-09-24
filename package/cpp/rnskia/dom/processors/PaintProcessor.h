@@ -22,7 +22,7 @@ public:
         props->hasValue(PropNameStyle) ||
         props->hasValue(PropNameStrokeWidth) ) {
       
-      if (props->hasValue(PropNameColor) && props->readPropChangesAndClearFlag(PropNameColor)) {
+      if (props->hasValue(PropNameColor) && props->getHasPropChanges(PropNameColor)) {
         auto colorValue = props->getValue(PropNameColor)->getAsString();
         auto parsedColor = CSSColorParser::parse(colorValue);
         if (parsedColor.a == -1.0f) {
@@ -39,7 +39,7 @@ public:
       paintCache->setAlpha(255.0f * opacity);
       
       // Style
-      if (props->hasValue(PropNameStyle) && props->readPropChangesAndClearFlag(PropNameStyle)) {
+      if (props->hasValue(PropNameStyle) && props->getHasPropChanges(PropNameStyle)) {
         auto styleValue = props->getValue(PropNameStyle)->getAsString();
         if (styleValue == "stroke") {
           paintCache->setStyle(SkPaint::Style::kStroke_Style);
@@ -49,7 +49,7 @@ public:
       }
 
       // Stroke width
-      if (props->hasValue(PropNameStrokeWidth) && props->readPropChangesAndClearFlag(PropNameStrokeWidth)) {
+      if (props->hasValue(PropNameStrokeWidth) && props->getHasPropChanges(PropNameStrokeWidth)) {
         paintCache->setStrokeWidth(props->getValue(PropNameStrokeWidth)->getAsNumber());
       }
       

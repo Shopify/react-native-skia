@@ -9,9 +9,9 @@
 
 namespace RNSkia {
 
-static char* PropNameMatrix = "matrix";
-static char* PropNameTransform = "transform";
-static char* PropNameOrigin = "origin";
+static const char* PropNameMatrix = "matrix";
+static const char* PropNameTransform = "transform";
+static const char* PropNameOrigin = "origin";
 
 class JsiDomRenderNode : public JsiDomNode {
 public:
@@ -45,7 +45,8 @@ public:
       return;
     }
     
-    // Make sure we update any properties that were changed
+    // Make sure we update any properties that were changed in sub classes so that
+    // they can update any derived values
     if (props->getHasPropChanges()) {
       onPropsChanged(getProperties());
     }
@@ -58,23 +59,20 @@ public:
       ContextProcessor::processContext(context, _paintCache, props);
     
     // Handle matrix/transforms
-    bool shouldSave = props->hasValue(PropNameMatrix) || props->hasValue(PropNameTransform);
-    auto hasOrigin = props->hasValue(PropNameOrigin);
-
-    if (shouldSave) {
-      auto matrix = props->hasValue(PropNameMatrix) ?
+    if (_shouldSaveCanvas) {
+      auto matrix = _hasMatrix ?
       *std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue(PropNameMatrix)->getAsHostObject())->getObject() :
       _transformMatrix;
       
       context->getCanvas()->save();
       
-      if (hasOrigin) {
+      if (_hasOrigin) {
         context->getCanvas()->translate(_origin.x(), _origin.y());
       }
       
       context->getCanvas()->concat(matrix);
       
-      if (hasOrigin) {
+      if (_hasOrigin) {
         context->getCanvas()->translate(-_origin.x(), -_origin.y());
       }
     }
@@ -82,9 +80,11 @@ public:
     // Render the node
     renderNode(childContext);
     
-    if (shouldSave) {
+    if (_shouldSaveCanvas) {
       context->getCanvas()->restore();
-    }    
+    }
+    
+    props->resetPropChanges();
   };
   
 protected:
@@ -96,12 +96,12 @@ protected:
   virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomNode::onPropsChanged(props);
     
-    if (props->hasValue(PropNameTransform) && props->readPropChangesAndClearFlag(PropNameTransform)) {
+    if (_hasTransform && props->getHasPropChanges(PropNameTransform)) {
       _transformMatrix.setIdentity();
       TransformProcessor::processTransform(_transformMatrix, props->getValue(PropNameTransform));
     }
     
-    if (props->hasValue(PropNameOrigin) && props->readPropChangesAndClearFlag(PropNameOrigin)) {
+    if (_hasOrigin && props->getHasPropChanges(PropNameOrigin)) {
       _origin = PointProcessor::processPoint(props->getValue(PropNameOrigin));
     }
   }
@@ -122,12 +122,21 @@ protected:
     props->tryReadNumericProperty(runtime, PropNameStrokeWidth);
     props->tryReadNumericProperty(runtime, PropNameOpacity);
     
+    _hasMatrix = props->hasValue(PropNameMatrix);
+    _hasTransform = props->hasValue(PropNameTransform);
+    _shouldSaveCanvas = _hasMatrix || _hasTransform;
+    
+    _hasOrigin = props->hasValue(PropNameOrigin);
   }
   
 private:
   SkMatrix _transformMatrix;
   SkPoint _origin;
   std::shared_ptr<SkPaint> _paintCache;
+  bool _shouldSaveCanvas;
+  bool _hasTransform;
+  bool _hasMatrix;
+  bool _hasOrigin;
 };
 
 }
