@@ -122,8 +122,9 @@ export const skHostConfig: SkiaHostConfig = {
   ) {
     debug("createInstance", type);
     const props = { ...pristineProps };
-    // FIXME: How to avoid doing materialize when node.isNative() === true?
-    // For now I'm just skipping materializing the node
+    // Native nodes doesn't care about the props passed on the constructor,
+    // so we can safely materialize and pass them here so that the JS based
+    // nodes can use them.
     const node = createNode(container, type, materialize(props));
     if (node.isNative() && props) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
