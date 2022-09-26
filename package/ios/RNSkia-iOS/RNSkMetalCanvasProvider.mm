@@ -21,7 +21,6 @@ RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(std::function<void()> requestRe
                         std::shared_ptr<RNSkia::RNSkPlatformContext> context):
 RNSkCanvasProvider(requestRedraw),
   _context(context) {
-  assert([[NSThread currentThread] isMainThread]);
   if (!_device) {
     _device = MTLCreateSystemDefaultDevice();
   }
