@@ -9,6 +9,9 @@
 
 namespace RNSkia {
 
+static PropId PropNameSelector = JsiPropId::get("selector");
+static PropId PropNameValue = JsiPropId::get("value");
+
 /**
  This class manages marshalling from JS values over JSI to C++ values and is typically called when a new node is
  created or an existing node is updated from the reconciler. This class will then convert all pure JS values to C++ values
@@ -49,9 +52,9 @@ public:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void tryReadNumericProperty(jsi::Runtime &runtime,
-                              const char* name,
+                              PropId name,
                               bool isOptional = true) {
-    readProperty(runtime, name, JsiValue::PropType::Number, isOptional);
+    readProperty(runtime, name, PropType::Number, isOptional);
   }
   
   /**
@@ -62,9 +65,9 @@ public:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void tryReadStringProperty(jsi::Runtime &runtime,
-                             const char* name,
+                             PropId name,
                              bool isOptional = true) {
-    readProperty(runtime, name, JsiValue::PropType::String, isOptional);
+    readProperty(runtime, name, PropType::String, isOptional);
   }
   
   /**
@@ -75,9 +78,9 @@ public:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void tryReadHostObjectProperty(jsi::Runtime &runtime,
-                                 const char* name,
+                                 PropId name,
                                  bool isOptional = true) {
-    readProperty(runtime, name, JsiValue::PropType::HostObject, isOptional);
+    readProperty(runtime, name, PropType::HostObject, isOptional);
   }
   
   /**
@@ -88,9 +91,9 @@ public:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void tryReadObjectProperty(jsi::Runtime &runtime,
-                             const char* name,
+                             PropId name,
                              bool isOptional = true) {
-    readProperty(runtime, name, JsiValue::PropType::Object, isOptional);
+    readProperty(runtime, name, PropType::Object, isOptional);
   }
   
   /**
@@ -101,16 +104,23 @@ public:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void tryReadArrayProperty(jsi::Runtime &runtime,
-                            const char* name,
+                            PropId name,
                             bool isOptional = true) {
-    readProperty(runtime, name, JsiValue::PropType::Array, isOptional);
+    readProperty(runtime, name, PropType::Array, isOptional);
+  }
+  
+  /**
+   Props are always regular objects - so we can easily return Object has our type.
+   */
+  PropType getType() {
+    return PropType::Object;
   }
   
   /**
    Returns true if there is a value for the given property name. This can be used to test if a property
    is undefined or null from the JS context. Can be called outside the JS Context
    */
-  bool hasValue(const char* name) {
+  bool hasValue(PropId name) {
     std::lock_guard<std::mutex> lock(_propsWithValuesMutex);
     return (_propsWithValues.find(name) != _propsWithValues.end());
   }
@@ -120,11 +130,17 @@ public:
    needs to be set using one the readProperty methods and have a non-null value.
    Test with the hasValue function to test before calling this function.
    */
-  std::shared_ptr<JsiValue> getValue(const char* name) {
+  std::shared_ptr<JsiValue> getValue(PropId name) {
     std::lock_guard<std::mutex> lock(_valuesMutex);
     return _values.at(name);
   }
   
+  /**
+   Simple getKeys implementation
+   */
+  std::vector<PropId> getKeys() {
+    return _propNames;
+  }
   
   /**
    Returns true if there are any property changes in the node.
@@ -137,7 +153,7 @@ public:
    Returns true if a specific property has changed. This function will also clear the flag
    if it exists for the property we asked for.
    */
-  bool getHasPropChanges(const char* name) {
+  bool getHasPropChanges(PropId name) {
     std::lock_guard<std::mutex> lock(_changedPropNamesMutex);
     return _changedPropNames.count(name) > 0;
   }
@@ -157,16 +173,19 @@ private:
    can be read outside of the JS context.
    */
   void setProp(jsi::Runtime &runtime,
-               const char* name,
+               PropId name,
                const jsi::Value &value) {
     if (hasValue(name)) {
       
       // Prop has already been set, let's just update it.
-      std::lock_guard<std::mutex> lock(_valuesMutex);
-      _values.at(name)->setCurrent(runtime, value);
+      auto prop = getValue(name);
+      {
+        std::lock_guard<std::mutex> lock(_valuesMutex);
+        prop->setCurrent(runtime, value);
+      }
     
       std::lock_guard<std::mutex> lock2(_propsWithValuesMutex);
-      if (!_values.at(name)->isUndefinedOrNull()) {
+      if (!prop->isUndefinedOrNull()) {
         _propsWithValues.emplace(name);
       } else {
         _propsWithValues.erase(name);
@@ -174,13 +193,18 @@ private:
       
     } else {
       // Prop was not previously set
+      auto newProp = std::make_shared<JsiValue>(runtime, value);
       std::lock_guard<std::mutex> lock(_valuesMutex);
-      _values.emplace(name, std::make_shared<JsiValue>(runtime, value));
+      _values.emplace(name, newProp);
       
-      if (!_values.at(name)->isUndefinedOrNull()) {
+      if (!newProp->isUndefinedOrNull()) {
         std::lock_guard<std::mutex> lock(_propsWithValuesMutex);
         _propsWithValues.emplace(name);
       }
+      
+      // Add to prop names so that we cache it
+      std::lock_guard<std::mutex> lock2(_propNamesMutex);
+      _propNames.push_back(name);
     }
     // Call prop changed
     requestPropChange(name);
@@ -199,8 +223,8 @@ private:
    @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
   void readProperty(jsi::Runtime &runtime,
-                    const char* name,
-                    JsiValue::PropType type,
+                    PropId name,
+                    PropType type,
                     bool isOptional = true) {
     // get the prop value from the props object
     auto propValue = _props.getProperty(runtime, name);
@@ -234,8 +258,8 @@ private:
       _unsubscriptions.push_back(unsubscribe);
       
     } else if (isSelector(prop)) {
-      auto value = std::dynamic_pointer_cast<RNSkReadonlyValue>(prop->getValue("value")->getAsHostObject());
-      auto selector = prop->getValue("selector")->getAsFunction();
+      auto value = std::dynamic_pointer_cast<RNSkReadonlyValue>(prop->getValue(PropNameValue)->getAsHostObject());
+      auto selector = prop->getValue(PropNameSelector)->getAsFunction();
       
       // Add initial resolved value to props
       jsi::Value current = value->getCurrent(runtime);
@@ -271,7 +295,7 @@ private:
    Returns true if the given value is a HostObject and it inherits from RNSkReadonlyValue.
    */
   bool isAnimatedValue(std::shared_ptr<JsiValue> value) {
-    return value->getType() == JsiValue::PropType::HostObject &&
+    return value->getType() == PropType::HostObject &&
     std::dynamic_pointer_cast<RNSkReadonlyValue>(value->getAsHostObject()) != nullptr;
   }
   
@@ -290,8 +314,8 @@ private:
     // Handling selectors is rather easy, we just add
     // a listener on the selector's callback and then we'll do the javascript
     // resolving in the callback (which will always be on the Javascript thread)!
-    if (value->getType() == JsiValue::PropType::Object) {
-      if (value->hasValue("selector") && value->hasValue("value")) {
+    if (value->getType() == PropType::Object) {
+      if (value->hasValue(PropNameSelector) && value->hasValue(PropNameValue)) {
         return true;
       }
     }
@@ -302,22 +326,26 @@ private:
   /**
    Increments the property change counter for the props object.
    */
-  void requestPropChange(const char* name) {
+  void requestPropChange(PropId name) {
     std::lock_guard<std::mutex> lock(_changedPropNamesMutex);
     _propChanges++;
     _changedPropNames.emplace(name);
   }
   
-  std::map<const char*, std::shared_ptr<JsiValue>> _values;
+  std::map<PropId, std::shared_ptr<JsiValue>> _values;
   jsi::Object _props;
   std::vector<std::function<void()>> _unsubscriptions;
   
   std::atomic<size_t> _propChanges = { 0 };
-  std::set<const char*> _changedPropNames;
-  std::set<const char*> _propsWithValues;
+  
+  std::set<PropId> _changedPropNames;
+  std::set<PropId> _propsWithValues;
+  std::vector<PropId> _propNames;
+  
   std::mutex _valuesMutex;
   std::mutex _changedPropNamesMutex;
   std::mutex _propsWithValuesMutex;
+  std::mutex _propNamesMutex;
 };
 
 }

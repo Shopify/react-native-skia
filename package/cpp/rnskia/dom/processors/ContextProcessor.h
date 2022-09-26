@@ -5,7 +5,7 @@
 
 namespace RNSkia {
 
-static const char* PropNameOpacity = "opacity";
+static PropId PropNameOpacity = JsiPropId::get("opacity");
 
 class ContextProcessor {
 public:

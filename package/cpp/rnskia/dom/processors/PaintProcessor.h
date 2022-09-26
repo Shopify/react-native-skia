@@ -4,9 +4,9 @@
 
 namespace RNSkia {
 
-static const char* PropNameColor = "color";
-static const char* PropNameStyle = "style";
-static const char* PropNameStrokeWidth = "strokeWidth";
+static PropId PropNameColor = JsiPropId::get("color");
+static PropId PropNameStyle = JsiPropId::get("style");
+static PropId PropNameStrokeWidth = JsiPropId::get("strokeWidth");
 
 class PaintProcessor {
 public:

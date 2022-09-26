@@ -19,7 +19,8 @@ public:
                    jsi::Runtime &runtime,
                    const jsi::Value *arguments,
                    size_t count) :
-  JsiDomNode(context, runtime, arguments, count) {}
+  JsiDomNode(context, runtime, arguments, count),
+  _originProcessor(std::make_unique<PointProcessor>(PropNameOrigin)) {}
   
   JSI_HOST_FUNCTION(render) {
     // Get drawing context
@@ -66,14 +67,14 @@ public:
       
       context->getCanvas()->save();
       
-      if (_hasOrigin) {
-        context->getCanvas()->translate(_origin.x(), _origin.y());
+      if (_originProcessor->hasValue()) {
+        context->getCanvas()->translate(_originProcessor->getPoint().x(), _originProcessor->getPoint().y());
       }
       
       context->getCanvas()->concat(matrix);
       
-      if (_hasOrigin) {
-        context->getCanvas()->translate(-_origin.x(), -_origin.y());
+      if (_originProcessor->hasValue()) {
+        context->getCanvas()->translate(-_originProcessor->getPoint().x(), -_originProcessor->getPoint().y());
       }
     }
     
@@ -101,9 +102,7 @@ protected:
       TransformProcessor::processTransform(_transformMatrix, props->getValue(PropNameTransform));
     }
     
-    if (_hasOrigin && props->getHasPropChanges(PropNameOrigin)) {
-      _origin = PointProcessor::processPoint(props->getValue(PropNameOrigin));
-    }
+    _originProcessor->process(props);
   }
   
   virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
@@ -126,17 +125,16 @@ protected:
     _hasTransform = props->hasValue(PropNameTransform);
     _shouldSaveCanvas = _hasMatrix || _hasTransform;
     
-    _hasOrigin = props->hasValue(PropNameOrigin);
+    _originProcessor->onPropsSet(props);
   }
   
 private:
   SkMatrix _transformMatrix;
-  SkPoint _origin;
+  std::unique_ptr<PointProcessor> _originProcessor;
   std::shared_ptr<SkPaint> _paintCache;
   bool _shouldSaveCanvas;
   bool _hasTransform;
   bool _hasMatrix;
-  bool _hasOrigin;
 };
 
 }

@@ -15,7 +15,8 @@ public:
               jsi::Runtime &runtime,
               const jsi::Value *arguments,
               size_t count) :
-  JsiDomDrawingNode(context, runtime, arguments, count) {}
+  JsiDomDrawingNode(context, runtime, arguments, count),
+  _rectProcessor(std::make_unique<RectProcessor>(PropNameRect)) {}
   
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
@@ -29,11 +30,7 @@ protected:
   void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomDrawingNode::onPropsChanged(props);
     
-    if (_hasRectProp) {
-      _rectProcessor.processRect(props->getValue(PropNameRect));
-    } else {
-      _rectProcessor.processRect(props);
-    }    
+    _rectProcessor->processRect(props);
   }
   
   void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
@@ -48,23 +45,17 @@ protected:
     props->tryReadNumericProperty(runtime, PropNameWidth);
     props->tryReadNumericProperty(runtime, PropNameHeight);
     
-    _hasRectProp = props->hasValue(PropNameRect);
-    if(_hasRectProp) {
-      _rectProcessor.updateProps(props->getValue(PropNameRect));
-    } else {
-      _rectProcessor.updateProps(props);
-    }
+    _rectProcessor->onPropsSet(props);
   }
   
   void draw(std::shared_ptr<JsiBaseDrawingContext> context) override {
-    context->getCanvas()->drawRect(_rectProcessor.getRect(), *context->getPaint());
+    context->getCanvas()->drawRect(_rectProcessor->getRect(), *context->getPaint());
   }
   
   const char *getType() override { return RectNodeName; }
   
 private:
-  RectProcessor _rectProcessor;
-  bool _hasRectProp;
+  std::unique_ptr<RectProcessor> _rectProcessor;
 };
 
 }

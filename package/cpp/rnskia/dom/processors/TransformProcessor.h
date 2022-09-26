@@ -4,15 +4,15 @@
 
 namespace RNSkia {
 
-static const char* PropNameTranslateX = "translateX";
-static const char* PropNameTranslateY = "translateY";
-static const char* PropNameScale = "scale";
-static const char* PropNameScaleX = "scaleX";
-static const char* PropNameScaleY = "scaleY";
-static const char* PropNameSkewX = "skewX";
-static const char* PropNameSkewY = "skewY";
-static const char* PropNameRotate = "rotate";
-static const char* PropNameRotateZ = "rotateZ";
+static PropId PropNameTranslateX = JsiPropId::get("translateX");
+static PropId PropNameTranslateY = JsiPropId::get("translateY");
+static PropId PropNameScale = JsiPropId::get("scale");
+static PropId PropNameScaleX = JsiPropId::get("scaleX");
+static PropId PropNameScaleY = JsiPropId::get("scaleY");
+static PropId PropNameSkewX = JsiPropId::get("skewX");
+static PropId PropNameSkewY = JsiPropId::get("skewY");
+static PropId PropNameRotate = JsiPropId::get("rotate");
+static PropId PropNameRotateZ = JsiPropId::get("rotateZ");
 
 class TransformProcessor {
 public:
@@ -48,7 +48,7 @@ public:
         m.preRotate(SkRadiansToDegrees(value));
       } else {
         throw std::runtime_error("Unknown key in transform. Expected translateX, translateY, scale, "
-                                 "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " + key + ".");
+                                 "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " + std::string(key) + ".");
       }
     }
   }

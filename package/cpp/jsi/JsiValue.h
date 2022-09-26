@@ -1,7 +1,6 @@
 #pragma once
 
 #include <jsi/jsi.h>
-
 #include <unordered_map>
 
 namespace RNJsi {
@@ -10,6 +9,46 @@ using namespace facebook;
 
 static std::string empty = "";
 
+enum struct PropType {
+  Undefined,
+  Null,
+  Bool,
+  Number,
+  String,
+  Object,
+  HostObject,
+  HostFunction,
+  Array
+};
+
+using PropId = const char*;
+
+class JsiPropId {
+public:
+  static const char* get(const std::string& name) {
+    return _get(name);
+  };
+  
+  static const char* get(const std::string&& name) {
+    return _get(std::move(name));
+  };
+private:
+  static const char* _get(const std::string& name) {
+    if (_impls().count(name) == 0) {
+      // Alloc string
+      char* impl = new char[name.size() + 1];
+      strncpy(impl, name.c_str(), name.size() + 1);
+      _impls().emplace(name, impl);
+    }
+    return _impls().at(name);
+  }
+  
+  static std::unordered_map<std::string, PropId>& _impls() {
+    static std::unordered_map<std::string, PropId> impls;
+    return impls;
+  };
+};
+
 /**
  This is a class that deep copies the values from JS to C++. It does not convert back
  to JS values. This is used when reading values from JS that will never be sent back to
@@ -17,18 +56,6 @@ static std::string empty = "";
  */
 class JsiValue {
 public:
-  enum PropType {
-    Undefined,
-    Null,
-    Bool,
-    Number,
-    String,
-    Object,
-    HostObject,
-    HostFunction,
-    Array
-  };
-  
   JsiValue(jsi::Runtime& runtime): _type(PropType::Undefined) {}
   JsiValue(jsi::Runtime& runtime, const jsi::Value& value): JsiValue(runtime) {
     setCurrent(runtime, value);
@@ -63,7 +90,7 @@ public:
     }    
   }
   
-  PropType getType() const { return _type; }
+  PropType getType() { return _type; }
   
   bool isUndefinedOrNull() const {
     return isUndefined() || isNull();
@@ -97,29 +124,23 @@ public:
     return _array;
   }
   
-  std::shared_ptr<JsiValue> getValue(const std::string& name) const {
+  std::shared_ptr<JsiValue> getValue(PropId name) {
     assert(_type == PropType::Object);
     assert(hasValue(name));
     return _props.at(name);
   }
   
-  bool hasValue(const std::string& name) const {
+  bool hasValue(PropId name) {
     assert(_type == PropType::Object);
     return _props.count(name) > 0;
   }
   
-  std::vector<std::string> getKeys() {
+  std::vector<PropId> getKeys() {
     assert(_type == PropType::Object);
-    if(_keysCache.size() == 0) {
-      _keysCache.reserve(_props.size());
-      for(auto &kv : _props) {
-        _keysCache.push_back(kv.first);
-      }
-    }
     return _keysCache;
   }
   
-  const std::shared_ptr<jsi::HostObject> getAsHostObject() const {
+  std::shared_ptr<jsi::HostObject> getAsHostObject() {
     assert(_type == PropType::HostObject);
     return _hostObject;
   }
@@ -133,13 +154,12 @@ public:
     return getAsHostFunction();
   }
   
-  bool equals(jsi::Runtime &runtime, const jsi::Value& other) const {
-    auto p = std::make_shared<JsiValue>(runtime);
-    p->setCurrent(runtime, other);
+  bool equals(jsi::Runtime &runtime, const jsi::Value& other) {
+    auto p = std::make_shared<JsiValue>(runtime, other);
     return equals(p);
   }
   
-  bool equals(std::shared_ptr<JsiValue> other) const {
+  bool equals(std::shared_ptr<JsiValue> other) {
     if (other->getType() != getType()) {
       return false;
     }
@@ -188,7 +208,7 @@ public:
   }
   
 protected:
-  const std::unordered_map<std::string, std::shared_ptr<JsiValue>>& getProps() const {
+  const std::unordered_map<PropId, std::shared_ptr<JsiValue>>& getProps() const {
     return _props;
   }
  
@@ -206,16 +226,19 @@ private:
       // Read object keys
       auto keys = obj.getPropertyNames(runtime);
       size_t size = keys.size(runtime);
+      _keysCache.clear();
+      _keysCache.reserve(size);
+      _props.clear();
       _props.reserve(size);
       
       for(size_t i=0; i < size; ++i) {
-        auto key = keys.getValueAtIndex(runtime, i).asString(runtime).utf8(runtime);
+        auto key = JsiPropId::get(keys.getValueAtIndex(runtime, i).asString(runtime).utf8(runtime));
         try {
-          auto p = std::make_shared<JsiValue>(runtime);
+          auto p = std::make_shared<JsiValue>(runtime, obj.getProperty(runtime, key));
           _props.emplace(key, p);
-          p->setCurrent(runtime, obj.getProperty(runtime, key.c_str()));
+          _keysCache.push_back(key);
         } catch(jsi::JSError e) {
-          throw jsi::JSError(runtime, "Could not set property for key " + key + ":\n" + e.getMessage(), e.getStack());
+          throw jsi::JSError(runtime, "Could not set property for key " + std::string(key) + ":\n" + e.getMessage(), e.getStack());
         }
       }
     }
@@ -225,12 +248,12 @@ private:
     assert(_type == PropType::Object);
     auto obj = jsi::Object(runtime);
     for(auto& p: _props) {
-      obj.setProperty(runtime, p.first.c_str(), p.second->getAsJsiValue(runtime));
+      obj.setProperty(runtime, p.first, p.second->getAsJsiValue(runtime));
     }
     return obj;
   }
   
-  bool compareObjects(std::shared_ptr<JsiValue> other) const {
+  bool compareObjects(std::shared_ptr<JsiValue> other) {
     if(_type == PropType::Object) {
       if (_props.size() != other->getProps().size()) {
         return false;
@@ -296,8 +319,7 @@ private:
     size_t size = arr.size(runtime);
     _array.reserve(size);
     for(size_t i=0; i<size; ++i) {
-      auto p = std::make_shared<JsiValue>(runtime);
-      p->setCurrent(runtime, arr.getValueAtIndex(runtime, i));
+      auto p = std::make_shared<JsiValue>(runtime, arr.getValueAtIndex(runtime, i));
       _array.push_back(p);
     }
   }
@@ -327,9 +349,9 @@ private:
   std::string _stringValue = empty;
   std::shared_ptr<jsi::HostObject> _hostObject;
   jsi::HostFunctionType _hostFunction;
-  std::unordered_map<std::string, std::shared_ptr<JsiValue>> _props;
   std::vector<std::shared_ptr<JsiValue>> _array;
-  std::vector<std::string> _keysCache;
+  std::unordered_map<PropId, std::shared_ptr<JsiValue>> _props;
+  std::vector<PropId> _keysCache;
 };
 
 }
