@@ -93,13 +93,15 @@ void RNSkDomRenderer::callOnTouch() {
   
   if (_touchCallbackLock->try_lock()) {
     
-    std::lock_guard<std::mutex> lock(_touchMutex);
-    _touchesCache.clear();
-    _touchesCache.reserve(_currentTouches.size());
-    for (size_t i = 0; i < _currentTouches.size(); ++i) {
-      _touchesCache.push_back(_currentTouches.at(i));
+    {
+      std::lock_guard<std::mutex> lock(_touchMutex);
+      _touchesCache.clear();
+      _touchesCache.reserve(_currentTouches.size());
+      for (size_t i = 0; i < _currentTouches.size(); ++i) {
+        _touchesCache.push_back(_currentTouches.at(i));
+      }
+      _currentTouches.clear();
     }
-    _currentTouches.clear();
     
     // We have an onDraw method - use it to render since we don't have a DOM-node yet.
     _platformContext->runOnJavascriptThread([weakSelf = weak_from_this()](){
@@ -107,11 +109,13 @@ void RNSkDomRenderer::callOnTouch() {
       if(self) {
         jsi::Runtime& runtime = *self->_platformContext->getJsRuntime();
         // Set up touches
-        auto ops = jsi::Array(runtime, self->_touchesCache.size());
-        for (size_t i = 0; i < self->_touchesCache.size(); i++) {
+        auto size = self->_touchesCache.size();
+        auto ops = jsi::Array(runtime, size);
+        for (size_t i = 0; i < size; i++) {
           auto cur = self->_touchesCache.at(i);
-          auto touches = jsi::Array(runtime, cur.size());
-          for (size_t n = 0; n < cur.size(); n++) {
+          auto curSize = cur.size();
+          auto touches = jsi::Array(runtime, curSize);
+          for (size_t n = 0; n < curSize; n++) {
             auto touchObj = jsi::Object(runtime);
             auto t = cur.at(n);
             touchObj.setProperty(runtime, "x", t.x);
@@ -126,8 +130,8 @@ void RNSkDomRenderer::callOnTouch() {
         }
         // Call on touch callback
         self->_touchCallback->call(runtime, ops, 1);
-        self->_touchCallbackLock->unlock();
       }
+      self->_touchCallbackLock->unlock();
     });
   } else {
     // We'll try next time - schedule a new redraw
