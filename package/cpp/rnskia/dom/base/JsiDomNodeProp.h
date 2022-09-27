@@ -75,9 +75,9 @@ private:
 /**
  Property class for reading either an object or a host object.
  */
-class JsiObjectOrHostObjectDomNodeProp : public JsiDomNodeProp {
+class JsiObjectDomNodeProp : public JsiDomNodeProp {
 public:
-  JsiObjectOrHostObjectDomNodeProp(PropId name):
+  JsiObjectDomNodeProp(PropId name):
   JsiDomNodeProp(name, PropType::Object) {}
   
   virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
@@ -118,7 +118,6 @@ public:
       el->onPropsChanged(props);
     }
     
-    // FIXME: Make sure all props have changed?
     if(props->getHasPropChanges()) {
       updateDerivedValue(props);
     }

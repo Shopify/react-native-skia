@@ -24,7 +24,7 @@ public JsiDerivedDomNodeProp<SkRect> {
 public:
   JsiDomNodeRectProp(PropId name):
   JsiDerivedDomNodeProp() {
-    _prop = addChildProp(std::make_shared<JsiObjectOrHostObjectDomNodeProp>(name));
+    _prop = addChildProp(std::make_shared<JsiObjectDomNodeProp>(name));
   }
   
   void updateDerivedValue(std::shared_ptr<JsiDomNodeProps> props) override {
@@ -63,7 +63,7 @@ private:
   std::shared_ptr<JsiValue> _y;
   std::shared_ptr<JsiValue> _width;
   std::shared_ptr<JsiValue> _height;
-  std::shared_ptr<JsiObjectOrHostObjectDomNodeProp> _prop;
+  std::shared_ptr<JsiObjectDomNodeProp> _prop;
 };
 
 /**

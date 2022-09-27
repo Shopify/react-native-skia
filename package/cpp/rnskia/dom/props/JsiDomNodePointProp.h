@@ -19,7 +19,7 @@ class JsiDomNodePointProp:
 public JsiDerivedDomNodeProp<SkPoint> {
 public:
   JsiDomNodePointProp(PropId name): JsiDerivedDomNodeProp<SkPoint>() {
-    _prop = addChildProp(std::make_shared<JsiObjectOrHostObjectDomNodeProp>(name));
+    _prop = addChildProp(std::make_shared<JsiObjectDomNodeProp>(name));
   }
   
   void updateDerivedValue(std::shared_ptr<JsiDomNodeProps> props) override {
@@ -57,7 +57,7 @@ public:
   }
   
 private:
-  std::shared_ptr<JsiObjectOrHostObjectDomNodeProp> _prop;
+  std::shared_ptr<JsiObjectDomNodeProp> _prop;
   std::shared_ptr<JsiValue> _x;
   std::shared_ptr<JsiValue> _y;
 };
