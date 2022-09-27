@@ -286,7 +286,7 @@ private:
       std::lock_guard<std::mutex> lock2(_propsWithValuesMutex);
       if (!prop->isUndefinedOrNull()) {
         _propsWithValues.emplace(name);
-      } else {
+      } else if (_propsWithValues.count(name) > 0) {
         _propsWithValues.erase(name);
       }
       

@@ -63,6 +63,8 @@ public:
   
   void setCurrent(jsi::Runtime &runtime, const jsi::Value &value)
   {
+    std::lock_guard<std::mutex> lock(_setCurrentLock);
+    
     _stringValue = empty;
     _hostObject = nullptr;
     _hostFunction = nullptr;
@@ -119,38 +121,43 @@ public:
     return _stringValue;
   }
   
-  const std::vector<std::shared_ptr<JsiValue>>& getAsArray() const {
+  const std::vector<std::shared_ptr<JsiValue>>& getAsArray() {
+    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::Array);
     return _array;
   }
   
   std::shared_ptr<JsiValue> getValue(PropId name) {
+    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::Object);
-    assert(hasValue(name));
     return _props.at(name);
   }
   
   bool hasValue(PropId name) {
+    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::Object);
     return _props.count(name) > 0;
   }
   
   std::vector<PropId> getKeys() {
+    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::Object);
     return _keysCache;
   }
   
   std::shared_ptr<jsi::HostObject> getAsHostObject() {
+    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::HostObject);
     return _hostObject;
   }
   
-  const jsi::HostFunctionType getAsHostFunction() const {
+  const jsi::HostFunctionType getAsHostFunction() {
+    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::HostFunction);
     return _hostFunction;
   }
   
-  const jsi::HostFunctionType getAsFunction() const {
+  const jsi::HostFunctionType getAsFunction() {
     return getAsHostFunction();
   }
   
@@ -352,6 +359,7 @@ private:
   std::vector<std::shared_ptr<JsiValue>> _array;
   std::unordered_map<PropId, std::shared_ptr<JsiValue>> _props;
   std::vector<PropId> _keysCache;
+  std::mutex _setCurrentLock;
 };
 
 }
