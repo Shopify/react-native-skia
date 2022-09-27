@@ -1,7 +1,7 @@
 #pragma once
 
 #include "JsiDomDrawingNode.h"
-#include "JsiDomNodeRectProp.h"
+#include "RectProp.h"
 
 namespace RNSkia {
 

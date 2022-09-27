@@ -15,10 +15,10 @@ namespace RNSkia {
 static PropId PropNameX = JsiPropId::get("x");
 static PropId PropNameY = JsiPropId::get("y");
 
-class JsiDomNodePointProp:
+class PointProp:
 public JsiDerivedDomNodeProp<SkPoint> {
 public:
-  JsiDomNodePointProp(PropId name): JsiDerivedDomNodeProp<SkPoint>() {
+  PointProp(PropId name): JsiDerivedDomNodeProp<SkPoint>() {
     _prop = addChildProp(std::make_shared<JsiObjectDomNodeProp>(name));
   }
   

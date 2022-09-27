@@ -19,10 +19,10 @@ static PropId PropNameHeight = JsiPropId::get("height");
  Reads a rect from a given propety in the node. The name of the property is provided on the constructor.
  The property can either be a Javascript property or a host object representing an SkRect.
  */
-class JsiDomNodeRectProp:
+class RectProp:
 public JsiDerivedDomNodeProp<SkRect> {
 public:
-  JsiDomNodeRectProp(PropId name):
+  RectProp(PropId name):
   JsiDerivedDomNodeProp() {
     _prop = addChildProp(std::make_shared<JsiObjectDomNodeProp>(name));
   }
@@ -104,7 +104,7 @@ class JsiDomNodeRectProps:
 public:
   JsiDomNodeRectProps(PropId name):
     JsiDerivedDomNodeProp<SkRect>() {
-    _rectProp = addChildProp<JsiDomNodeRectProp>(std::make_shared<JsiDomNodeRectProp>(name));
+    _rectProp = addChildProp<RectProp>(std::make_shared<RectProp>(name));
     _rectPropFromProps = addChildProp<JsiDomNodeRectPropFromProps>(std::make_shared<JsiDomNodeRectPropFromProps>());
   }
     
@@ -119,7 +119,7 @@ public:
   }
 
 private:
-  std::shared_ptr<JsiDomNodeRectProp> _rectProp;
+  std::shared_ptr<RectProp> _rectProp;
   std::shared_ptr<JsiDomNodeRectPropFromProps> _rectPropFromProps;
 };
 }

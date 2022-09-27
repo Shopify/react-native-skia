@@ -3,14 +3,13 @@
 
 #include "JsiDomNode.h"
 #include "JsiDrawingContext.h"
-#include "TransformProcessor.h"
 #include "ContextProcessor.h"
-#include "JsiDomNodePointProp.h"
+#include "PointProp.h"
+#include "MatrixProp.h"
+#include "TransformProp.h"
 
 namespace RNSkia {
 
-static const char* PropNameMatrix = "matrix";
-static const char* PropNameTransform = "transform";
 static const char* PropNameOrigin = "origin";
 
 class JsiDomRenderNode : public JsiDomNode {
@@ -20,8 +19,9 @@ public:
                    const jsi::Value *arguments,
                    size_t count) :
   JsiDomNode(context, runtime, arguments, count),
-    _matrixProp(std::make_unique<JsiDomNodeProp>(PropNameMatrix, PropType::HostObject)),
-    _originProp(std::make_unique<JsiDomNodePointProp>(PropNameOrigin)) {}
+    _matrixProp(std::make_unique<MatrixProp>(PropNameMatrix)),
+    _transformProp(std::make_unique<TransformProp>(PropNameTransform)),
+    _originProp(std::make_unique<PointProp>(PropNameOrigin)) {}
   
   JSI_HOST_FUNCTION(render) {
     // Get drawing context
@@ -61,10 +61,8 @@ public:
       ContextProcessor::processContext(context, _paintCache, props);
     
     // Handle matrix/transforms
-    if (_shouldSaveCanvas) {
-      auto matrix = _hasMatrix ?
-      *std::dynamic_pointer_cast<JsiSkMatrix>(props->getValue(PropNameMatrix)->getAsHostObject())->getObject() :
-      _transformMatrix;
+    if (_matrixProp->hasValue() || _transformProp->hasValue()) {
+      auto matrix = _matrixProp->hasValue() ? _matrixProp->getDerivedValue() : _transformProp->getDerivedValue();
       
       context->getCanvas()->save();
       
@@ -72,7 +70,7 @@ public:
         context->getCanvas()->translate(_originProp->getDerivedValue().x(), _originProp->getDerivedValue().y());
       }
       
-      context->getCanvas()->concat(matrix);
+      context->getCanvas()->concat(*matrix);
       
       if (_originProp->hasValue()) {
         context->getCanvas()->translate(-_originProp->getDerivedValue().x(), -_originProp->getDerivedValue().y());
@@ -82,7 +80,7 @@ public:
     // Render the node
     renderNode(childContext);
     
-    if (_shouldSaveCanvas) {
+    if (_matrixProp->hasValue() || _transformProp->hasValue()) {
       context->getCanvas()->restore();
     }
     
@@ -98,41 +96,30 @@ protected:
   virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomNode::onPropsChanged(props);
     
-    if (_hasTransform && props->getHasPropChanges(PropNameTransform)) {
-      _transformMatrix.setIdentity();
-      TransformProcessor::processTransform(_transformMatrix, props->getValue(PropNameTransform));
-    }
-    
     _matrixProp->onPropsChanged(props);
     _originProp->onPropsChanged(props);
+    _transformProp->onPropsChanged(props);
   }
   
   virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomNode::onPropsSet(runtime, props);
     
-    props->tryReadHostObjectProperty(runtime, PropNameMatrix);
-    props->tryReadArrayProperty(runtime, PropNameTransform);
+    _matrixProp->onPropsSet(runtime, props);
+    _originProp->onPropsSet(runtime, props);
+    _transformProp->onPropsSet(runtime, props);
+    
     props->tryReadStringProperty(runtime, PropNameColor);
     props->tryReadStringProperty(runtime, PropNameStyle);
     props->tryReadNumericProperty(runtime, PropNameStrokeWidth);
     props->tryReadNumericProperty(runtime, PropNameOpacity);
-    
-    _hasMatrix = props->hasValue(PropNameMatrix);
-    _hasTransform = props->hasValue(PropNameTransform);
-    _shouldSaveCanvas = _hasMatrix || _hasTransform;
-  
-    _matrixProp->onPropsSet(runtime, props);
-    _originProp->onPropsSet(runtime, props);
   }
   
 private:
-  SkMatrix _transformMatrix;
-  std::unique_ptr<JsiDomNodePointProp> _originProp;
-  std::unique_ptr<JsiDomNodeProp> _matrixProp;
+  std::unique_ptr<PointProp> _originProp;
+  std::unique_ptr<MatrixProp> _matrixProp;
+  std::unique_ptr<TransformProp> _transformProp;
   std::shared_ptr<SkPaint> _paintCache;
   bool _shouldSaveCanvas;
-  bool _hasTransform;
-  bool _hasMatrix;
 };
 
 }
