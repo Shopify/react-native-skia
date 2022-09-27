@@ -49,12 +49,10 @@ public:
    convert the JS value into a native value that can be read outside the JS Context.
    @param runtime JS Runtime
    @param name Name of property to read
-   @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
-  void tryReadNumericProperty(jsi::Runtime &runtime,
-                              PropId name,
-                              bool isOptional = true) {
-    readProperty(runtime, name, PropType::Number, isOptional);
+  std::shared_ptr<JsiValue> tryReadNumericProperty(jsi::Runtime &runtime,
+                                                   PropId name) {
+    return tryReadProperty(runtime, name, PropType::Number);
   }
   
   /**
@@ -62,12 +60,10 @@ public:
    convert the JS value into a native value that can be read outside the JS Context.
    @param runtime JS Runtime
    @param name Name of property to read
-   @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
-  void tryReadStringProperty(jsi::Runtime &runtime,
-                             PropId name,
-                             bool isOptional = true) {
-    readProperty(runtime, name, PropType::String, isOptional);
+  std::shared_ptr<JsiValue> tryReadStringProperty(jsi::Runtime &runtime,
+                                                  PropId name) {
+    return tryReadProperty(runtime, name, PropType::String);
   }
   
   /**
@@ -75,12 +71,10 @@ public:
    convert the JS value into a native value that can be read outside the JS Context.
    @param runtime JS Runtime
    @param name Name of property to read
-   @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
-  void tryReadHostObjectProperty(jsi::Runtime &runtime,
-                                 PropId name,
-                                 bool isOptional = true) {
-    readProperty(runtime, name, PropType::HostObject, isOptional);
+  std::shared_ptr<JsiValue> tryReadHostObjectProperty(jsi::Runtime &runtime,
+                                                      PropId name) {
+    return tryReadProperty(runtime, name, PropType::HostObject);
   }
   
   /**
@@ -88,25 +82,130 @@ public:
    convert the JS value into a native value that can be read outside the JS Context.
    @param runtime JS Runtime
    @param name Name of property to read
-   @param isOptional If the property can be null or undefined (not set) (default is optional)
    */
-  void tryReadObjectProperty(jsi::Runtime &runtime,
-                             PropId name,
-                             bool isOptional = true) {
-    readProperty(runtime, name, PropType::Object, isOptional);
+  std::shared_ptr<JsiValue> tryReadObjectProperty(jsi::Runtime &runtime,
+                                                  PropId name) {
+    return tryReadProperty(runtime, name, PropType::Object);
   }
   
   /**
    Tries to read a property as an array. This will try to read the property, verify type and optionality and finally
    convert the JS value into a native value that can be read outside the JS Context.
    @param runtime JS Runtime
-   @param name Name of property to read
-   @param isOptional If the property can be null or undefined (not set) (default is optional)
+   @param name Name of property to read   
    */
-  void tryReadArrayProperty(jsi::Runtime &runtime,
-                            PropId name,
-                            bool isOptional = true) {
-    readProperty(runtime, name, PropType::Array, isOptional);
+  std::shared_ptr<JsiValue> tryReadArrayProperty(jsi::Runtime &runtime,
+                                                 PropId name) {
+    return tryReadProperty(runtime, name, PropType::Array);
+  }
+    
+  /**
+   Tries to read a property as given type. This will try to read the property, verify type and optionality and finally
+   convert the JS value into a native value that can be read outside the JS Context.
+   
+   If the property is a regular value it will be converted.
+   If the property is a Skia value a listener will be installed listening for changes to the property
+   If the property is a Skia Selector a listener will be installed on the value of the selector listening for changes to the property
+   
+   @param runtime JS Runtime
+   @param name Name of property to read
+   @param type Property type
+   */
+  std::shared_ptr<JsiValue> tryReadProperty(jsi::Runtime &runtime,
+                                            PropId name,
+                                            PropType type) {
+    // get the prop value from the props object
+    auto propValue = _props.getProperty(runtime, name);
+    
+    // Check undefined or null
+    auto isUndefinedOrNull = propValue.isUndefined() || propValue.isNull();
+    
+    // Check type
+    auto prop = std::make_shared<JsiValue>(runtime, propValue);
+    
+    // We need to check if this is an animated value - they should be handled differently
+    if (isAnimatedValue(prop)) {
+      // Add initial resolved value to props
+      auto animatedValue = getAnimatedValue(prop);
+      setProp(runtime, name, animatedValue->getCurrent(runtime));
+      
+      // Add subscription to animated value
+      auto unsubscribe = animatedValue->addListener([weakSelf = weak_from_this(),
+                                                     animatedValue,
+                                                     name] (jsi::Runtime &runtime) {
+      auto self = weakSelf.lock();
+        if (self) {
+          self->setProp(runtime, name, animatedValue->getCurrent(runtime));
+        }
+      });
+      
+      _unsubscriptions.push_back(unsubscribe);
+      
+    } else if (isSelector(prop)) {
+      auto value = std::dynamic_pointer_cast<RNSkReadonlyValue>(prop->getValue(PropNameValue)->getAsHostObject());
+      auto selector = prop->getValue(PropNameSelector)->getAsFunction();
+      
+      // Add initial resolved value to props
+      jsi::Value current = value->getCurrent(runtime);
+      setProp(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
+      
+      // Add subscription to animated value in selector
+      auto unsubscribe = value->addListener([weakSelf = weak_from_this(), prop, name, selector = std::move(
+        selector), value = std::move(value)](jsi::Runtime &runtime) {
+         auto self = weakSelf.lock();
+         if (self) {
+           jsi::Value current = value->getCurrent(runtime);
+           self->setProp(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
+         }
+      });
+      
+      _unsubscriptions.push_back(unsubscribe);
+      
+    } else {
+      // Regular value, just ensure that the type is correct:
+      if (prop->getType() != type && !isUndefinedOrNull) {
+        throw jsi::JSError(runtime, "Expected \"" + JsiValue::getTypeAsString(type) +
+                           "\", got \"" +
+                           JsiValue::getTypeAsString(prop->getType()) +
+                           "\" for property \"" + name + "\".");
+      }
+      
+      // Set prop
+      setProp(runtime, name, propValue);
+    }
+    
+    return _values.at(name);
+  }
+  
+  /**
+   Returns true if the given value is a HostObject and it inherits from RNSkReadonlyValue.
+   */
+  bool isAnimatedValue(std::shared_ptr<JsiValue> value) {
+    return value->getType() == PropType::HostObject &&
+    std::dynamic_pointer_cast<RNSkReadonlyValue>(value->getAsHostObject()) != nullptr;
+  }
+  
+  /**
+   Returns the RNSkReadonlyValue pointer for a value that is an Animated value
+   */
+  std::shared_ptr<RNSkReadonlyValue> getAnimatedValue(std::shared_ptr<JsiValue> value) {
+    return std::dynamic_pointer_cast<RNSkReadonlyValue>(value->getAsHostObject());
+  }
+  
+  /**
+   Returns true if the value is a selector. A Selector is a JS object that has two properties, the selector and the the value.
+   The selector is a function that is used to transform the value - which is an animated skia value.
+   */
+  bool isSelector(std::shared_ptr<JsiValue> value) {
+    // Handling selectors is rather easy, we just add
+    // a listener on the selector's callback and then we'll do the javascript
+    // resolving in the callback (which will always be on the Javascript thread)!
+    if (value->getType() == PropType::Object) {
+      if (value->hasValue(PropNameSelector) && value->hasValue(PropNameValue)) {
+        return true;
+      }
+    }
+    return false;
   }
   
   /**
@@ -209,120 +308,7 @@ private:
     // Call prop changed
     requestPropChange(name);
   }
-  
-  /**
-   Tries to read a property as given type. This will try to read the property, verify type and optionality and finally
-   convert the JS value into a native value that can be read outside the JS Context.
-   
-   If the property is a regular value it will be converted.
-   If the property is a Skia value a listener will be installed listening for changes to the property
-   If the property is a Skia Selector a listener will be installed on the value of the selector listening for changes to the property
-   
-   @param runtime JS Runtime
-   @param name Name of property to read
-   @param isOptional If the property can be null or undefined (not set) (default is optional)
-   */
-  void readProperty(jsi::Runtime &runtime,
-                    PropId name,
-                    PropType type,
-                    bool isOptional = true) {
-    // get the prop value from the props object
-    auto propValue = _props.getProperty(runtime, name);
     
-    // Check optional value allowed?
-    auto isUndefinedOrNull = propValue.isUndefined() || propValue.isNull();
-    
-    if (!isOptional && isUndefinedOrNull) {
-      throw jsi::JSError(runtime, "Property " + std::string(name) + " is not optional.");
-    }
-    
-    // Check type
-    auto prop = std::make_shared<JsiValue>(runtime, propValue);
-    
-    // We need to check if this is an animated value - they should be handled differently
-    if (isAnimatedValue(prop)) {
-      // Add initial resolved value to props
-      auto animatedValue = getAnimatedValue(prop);
-      setProp(runtime, name, animatedValue->getCurrent(runtime));
-      
-      // Add subscription to animated value
-      auto unsubscribe = animatedValue->addListener([weakSelf = weak_from_this(),
-                                                     animatedValue,
-                                                     name] (jsi::Runtime &runtime) {
-      auto self = weakSelf.lock();
-        if (self) {
-          self->setProp(runtime, name, animatedValue->getCurrent(runtime));
-        }
-      });
-      
-      _unsubscriptions.push_back(unsubscribe);
-      
-    } else if (isSelector(prop)) {
-      auto value = std::dynamic_pointer_cast<RNSkReadonlyValue>(prop->getValue(PropNameValue)->getAsHostObject());
-      auto selector = prop->getValue(PropNameSelector)->getAsFunction();
-      
-      // Add initial resolved value to props
-      jsi::Value current = value->getCurrent(runtime);
-      setProp(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
-      
-      // Add subscription to animated value in selector
-      auto unsubscribe = value->addListener([weakSelf = weak_from_this(), prop, name, selector = std::move(
-        selector), value = std::move(value)](jsi::Runtime &runtime) {
-         auto self = weakSelf.lock();
-         if (self) {
-           jsi::Value current = value->getCurrent(runtime);
-           self->setProp(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
-         }
-      });
-      
-      _unsubscriptions.push_back(unsubscribe);
-      
-    } else {
-      // Regular value, just ensure that the type is correct:
-      if (prop->getType() != type && !(isOptional && isUndefinedOrNull)) {
-        throw jsi::JSError(runtime, "Expected \"" + JsiValue::getTypeAsString(type) +
-                           "\", got \"" +
-                           JsiValue::getTypeAsString(prop->getType()) +
-                           "\" for property \"" + name + "\".");
-      }
-      
-      // Set prop
-      setProp(runtime, name, propValue);
-    }
-  }
-  
-  /**
-   Returns true if the given value is a HostObject and it inherits from RNSkReadonlyValue.
-   */
-  bool isAnimatedValue(std::shared_ptr<JsiValue> value) {
-    return value->getType() == PropType::HostObject &&
-    std::dynamic_pointer_cast<RNSkReadonlyValue>(value->getAsHostObject()) != nullptr;
-  }
-  
-  /**
-   Returns the RNSkReadonlyValue pointer for a value that is an Animated value
-   */
-  std::shared_ptr<RNSkReadonlyValue> getAnimatedValue(std::shared_ptr<JsiValue> value) {
-    return std::dynamic_pointer_cast<RNSkReadonlyValue>(value->getAsHostObject());
-  }
-  
-  /**
-   Returns true if the value is a selector. A Selector is a JS object that has two properties, the selector and the the value.
-   The selector is a function that is used to transform the value - which is an animated skia value.
-   */
-  bool isSelector(std::shared_ptr<JsiValue> value) {
-    // Handling selectors is rather easy, we just add
-    // a listener on the selector's callback and then we'll do the javascript
-    // resolving in the callback (which will always be on the Javascript thread)!
-    if (value->getType() == PropType::Object) {
-      if (value->hasValue(PropNameSelector) && value->hasValue(PropNameValue)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  
-  
   /**
    Increments the property change counter for the props object.
    */

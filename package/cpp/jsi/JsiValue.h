@@ -10,15 +10,15 @@ using namespace facebook;
 static std::string empty = "";
 
 enum struct PropType {
-  Undefined,
-  Null,
-  Bool,
-  Number,
-  String,
-  Object,
-  HostObject,
-  HostFunction,
-  Array
+  Undefined = 1,
+  Null = 2,
+  Bool = 4,
+  Number = 8,
+  String = 16,
+  Object = 32,
+  HostObject = 64,
+  HostFunction = 128,
+  Array = 256
 };
 
 using PropId = const char*;

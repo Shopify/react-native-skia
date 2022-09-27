@@ -4,8 +4,8 @@
 #include "JsiDomNode.h"
 #include "JsiDrawingContext.h"
 #include "TransformProcessor.h"
-#include "PointProcessor.h"
 #include "ContextProcessor.h"
+#include "JsiDomNodePointProp.h"
 
 namespace RNSkia {
 
@@ -20,7 +20,7 @@ public:
                    const jsi::Value *arguments,
                    size_t count) :
   JsiDomNode(context, runtime, arguments, count),
-  _originProcessor(std::make_unique<PointProcessor>(PropNameOrigin)) {}
+  _originProp(std::make_unique<JsiDomNodePointProp>(PropNameOrigin)) {}
   
   JSI_HOST_FUNCTION(render) {
     // Get drawing context
@@ -67,14 +67,14 @@ public:
       
       context->getCanvas()->save();
       
-      if (_originProcessor->hasValue()) {
-        context->getCanvas()->translate(_originProcessor->getPoint().x(), _originProcessor->getPoint().y());
+      if (_originProp->hasValue()) {
+        context->getCanvas()->translate(_originProp->getDerivedValue().x(), _originProp->getDerivedValue().y());
       }
       
       context->getCanvas()->concat(matrix);
       
-      if (_originProcessor->hasValue()) {
-        context->getCanvas()->translate(-_originProcessor->getPoint().x(), -_originProcessor->getPoint().y());
+      if (_originProp->hasValue()) {
+        context->getCanvas()->translate(-_originProp->getDerivedValue().x(), -_originProp->getDerivedValue().y());
       }
     }
     
@@ -102,7 +102,7 @@ protected:
       TransformProcessor::processTransform(_transformMatrix, props->getValue(PropNameTransform));
     }
     
-    _originProcessor->process(props);
+    _originProp->onPropsChanged(props);
   }
   
   virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
@@ -110,12 +110,6 @@ protected:
     
     props->tryReadHostObjectProperty(runtime, PropNameMatrix);
     props->tryReadArrayProperty(runtime, PropNameTransform);
-    try {
-      props->tryReadObjectProperty(runtime, PropNameOrigin);
-    } catch (...) {
-      props->tryReadHostObjectProperty(runtime, PropNameOrigin);
-    }
-    
     props->tryReadStringProperty(runtime, PropNameColor);
     props->tryReadStringProperty(runtime, PropNameStyle);
     props->tryReadNumericProperty(runtime, PropNameStrokeWidth);
@@ -124,13 +118,13 @@ protected:
     _hasMatrix = props->hasValue(PropNameMatrix);
     _hasTransform = props->hasValue(PropNameTransform);
     _shouldSaveCanvas = _hasMatrix || _hasTransform;
-    
-    _originProcessor->onPropsSet(props);
+  
+    _originProp->onPropsSet(runtime, props);
   }
   
 private:
   SkMatrix _transformMatrix;
-  std::unique_ptr<PointProcessor> _originProcessor;
+  std::unique_ptr<JsiDomNodePointProp> _originProp;
   std::shared_ptr<SkPaint> _paintCache;
   bool _shouldSaveCanvas;
   bool _hasTransform;
