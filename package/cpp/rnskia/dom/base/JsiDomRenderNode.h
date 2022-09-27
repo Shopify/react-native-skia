@@ -20,7 +20,8 @@ public:
                    const jsi::Value *arguments,
                    size_t count) :
   JsiDomNode(context, runtime, arguments, count),
-  _originProp(std::make_unique<JsiDomNodePointProp>(PropNameOrigin)) {}
+    _matrixProp(std::make_unique<JsiDomNodeProp>(PropNameMatrix, PropType::HostObject)),
+    _originProp(std::make_unique<JsiDomNodePointProp>(PropNameOrigin)) {}
   
   JSI_HOST_FUNCTION(render) {
     // Get drawing context
@@ -102,6 +103,7 @@ protected:
       TransformProcessor::processTransform(_transformMatrix, props->getValue(PropNameTransform));
     }
     
+    _matrixProp->onPropsChanged(props);
     _originProp->onPropsChanged(props);
   }
   
@@ -119,12 +121,14 @@ protected:
     _hasTransform = props->hasValue(PropNameTransform);
     _shouldSaveCanvas = _hasMatrix || _hasTransform;
   
+    _matrixProp->onPropsSet(runtime, props);
     _originProp->onPropsSet(runtime, props);
   }
   
 private:
   SkMatrix _transformMatrix;
   std::unique_ptr<JsiDomNodePointProp> _originProp;
+  std::unique_ptr<JsiDomNodeProp> _matrixProp;
   std::shared_ptr<SkPaint> _paintCache;
   bool _shouldSaveCanvas;
   bool _hasTransform;

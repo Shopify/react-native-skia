@@ -25,7 +25,7 @@ public:
   void updateDerivedValue(std::shared_ptr<JsiDomNodeProps> props) override {
     if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
       // Check for JsiSkRect and JsiSkPoint
-      if(_prop->getPropValue()->getType() == PropType::HostObject) {
+      if (_prop->getPropValue()->getType() == PropType::HostObject) {
         // Try reading as point
         auto pointPtr = std::dynamic_pointer_cast<JsiSkPoint>(_prop->getPropValue()->getAsHostObject());
         if (pointPtr != nullptr) {
@@ -38,6 +38,8 @@ public:
           }
           setDerivedValue(SkPoint::Make(rectPtr->getObject()->x(), rectPtr->getObject()->y()));
         }
+      } else if (_prop->getPropValue()->getType() == PropType::Object) {
+        setDerivedValue(SkPoint::Make(_x->getAsNumber(), _y->getAsNumber()));
       }
     }    
   }
