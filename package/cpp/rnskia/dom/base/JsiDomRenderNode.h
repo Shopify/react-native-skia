@@ -53,6 +53,9 @@ public:
     // Since the paint props uses parent paint, we need to set it before we call onPropsChanged
     _paintProp->setParentPaint(context->getPaint());
     
+    // Make sure we commit any waiting transactions in the props object
+    props->commitTransactions();
+    
     // Make sure we update any properties that were changed in sub classes so that
     // they can update any derived values
     if (props->getHasPropChanges()) {
