@@ -78,10 +78,10 @@ private:
 /**
  Reads rect properties from a node's properties
  */
-class JsiDomNodeRRectPropFromProps:
+class RRectPropFromProps:
 public JsiDerivedDomNodeProp<SkRRect> {
 public:
-  JsiDomNodeRRectPropFromProps():
+  RRectPropFromProps():
   JsiDerivedDomNodeProp<SkRRect>() {
     _x = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameX, PropType::Number));
     _y = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameY, PropType::Number));
@@ -111,13 +111,13 @@ private:
 /**
  Reads rect props from either a given property or from the property object itself.
  */
-class JsiDomNodeRRectProps:
+class RRectProps:
   public JsiDerivedDomNodeProp<SkRRect> {
 public:
-  JsiDomNodeRRectProps(PropId name):
+  RRectProps(PropId name):
     JsiDerivedDomNodeProp<SkRRect>() {
     _rectProp = addChildProp<RRectProp>(std::make_shared<RRectProp>(name));
-    _rectPropFromProps = addChildProp<JsiDomNodeRRectPropFromProps>(std::make_shared<JsiDomNodeRRectPropFromProps>());
+    _rectPropFromProps = addChildProp<RRectPropFromProps>(std::make_shared<RRectPropFromProps>());
   }
     
   void updateDerivedValue(JsiDomNodeProps* props) override {
@@ -132,7 +132,7 @@ public:
 
 private:
   std::shared_ptr<RRectProp> _rectProp;
-  std::shared_ptr<JsiDomNodeRRectPropFromProps> _rectPropFromProps;
+  std::shared_ptr<RRectPropFromProps> _rectPropFromProps;
 };
 }
 

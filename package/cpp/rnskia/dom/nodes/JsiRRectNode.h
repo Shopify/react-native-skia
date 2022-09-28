@@ -16,7 +16,7 @@ public:
               const jsi::Value *arguments,
               size_t count) :
   JsiDomDrawingNode(context, runtime, arguments, count),
-  _rrectProp(std::make_unique<JsiDomNodeRRectProps>(PropNameRect)) {}
+  _rrectProp(std::make_unique<RRectProps>(PropNameRect)) {}
   
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
@@ -48,7 +48,7 @@ protected:
   const char *getType() override { return RRectNodeName; }
   
 private:
-  std::unique_ptr<JsiDomNodeRRectProps> _rrectProp;
+  std::unique_ptr<RRectProps> _rrectProp;
 };
 
 }
