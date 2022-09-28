@@ -3,6 +3,7 @@
 #include "JsiHostObject.h"
 
 #include "nodes/JsiRectNode.h"
+#include "nodes/JsiRRectNode.h"
 #include "nodes/JsiGroupNode.h"
 
 namespace RNSkia
@@ -17,6 +18,7 @@ namespace RNSkia
         : JsiHostObject()
     {
       installFunction("RectNode", JsiRectNode::createCtor(context));
+      installFunction("RRectNode", JsiRRectNode::createCtor(context));
       installFunction("GroupNode", JsiGroupNode::createCtor(context));
     }
   };

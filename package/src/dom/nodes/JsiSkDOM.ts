@@ -179,7 +179,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   RRect(props: RoundedRectProps) {
-    return new RRectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.RRectNode
+      ? global.SkiaDomApi.RRectNode(props)
+      : new RRectNode(this.ctx, props);
   }
 
   Vertices(props: VerticesProps) {

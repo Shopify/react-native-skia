@@ -56,7 +56,7 @@ import type {
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
 import type { PaintNode } from "../dom/nodes/PaintNode";
-import type { SkRect } from "../skia";
+import type { SkRect, SkRRect } from "../skia";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
 import type { JsiRenderNode } from "../dom/nodes/RenderNode";
 
@@ -68,6 +68,9 @@ declare global {
   var SkiaDomApi: {
     // FIXME: We need a better type for this
     RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
+    RRectNode: (
+      props: RoundedRectProps
+    ) => JsiDrawingNode<RoundedRectProps, SkRRect>;
     GroupNode: (props: GroupProps) => JsiRenderNode<GroupProps>;
   };
 
