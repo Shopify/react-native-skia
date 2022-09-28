@@ -7,6 +7,12 @@
 
 namespace RNSkia {
 
+enum struct BoolValue {
+  NotSet,
+  True,
+  False,
+};
+
 /**
  Base class for Dom Node Properties
  */
@@ -18,13 +24,13 @@ public:
    @param runtime Javascript Runtime
    @param props Properties object
    */
-  virtual void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) = 0;
+  virtual void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) = 0;
   
   /**
    Called when any of the property values have changed from the native side by Skia values being updated.
    @param props Properties object
    */
-  virtual void updatePropValues(std::shared_ptr<JsiDomNodeProps> props) = 0;
+  virtual void updatePropValues(JsiDomNodeProps* props) = 0;
   
   /**
    Use to check if the value represented by this property has a usable (non-null/undefined) value or not.
@@ -47,20 +53,23 @@ public:
    Returns true if the property is set and is not undefined or null
    */
   bool hasValue() override {
-    return _prop != nullptr && !_prop->isUndefinedOrNull();
+    if (_cachedHasValue == BoolValue::NotSet) {
+      _cachedHasValue = _prop != nullptr && !_prop->isUndefinedOrNull() ? BoolValue::True : BoolValue::False;
+    }
+    return _cachedHasValue == BoolValue::True;
   }
   
   /**
    Called when properties was read from the React props. This is where we read props and validate properties
    */
-  virtual void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  virtual void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     _prop = props->tryReadProperty(runtime, _name, _type);
   }
   
   /**
    Called when properties changed from the native side (and also after the first initialization in setProps).
    */
-  virtual void updatePropValues(std::shared_ptr<JsiDomNodeProps> props) override {}
+  virtual void updatePropValues(JsiDomNodeProps* props) override {}
   
   /**
    Return value if set
@@ -81,7 +90,9 @@ protected:
   void setValue(std::shared_ptr<JsiValue> prop) {
     _prop = prop;
   }
+  
 private:
+  BoolValue _cachedHasValue = BoolValue::NotSet;
   PropId _name;
   PropType _type;
   std::shared_ptr<JsiValue> _prop;
@@ -95,7 +106,7 @@ public:
   JsiObjectDomNodeProp(PropId name):
   JsiDomNodeProp(name, PropType::Object) {}
   
-  virtual void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  virtual void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     try {
       JsiDomNodeProp::setProps(runtime, props);
     } catch (...) {
@@ -115,20 +126,20 @@ public:
   /**
    Override to calculate the derived value from child properties
    */
-  virtual void updateDerivedValue(std::shared_ptr<JsiDomNodeProps> props) = 0;
+  virtual void updateDerivedValue(JsiDomNodeProps* props) = 0;
   
   /**
   Returns the derived value
    */
   const T& getDerivedValue() { return _derivedValue; }
   
-  void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     for(auto &el: _childProps) {
       el->setProps(runtime, props);
     }
   }
   
-  void updatePropValues(std::shared_ptr<JsiDomNodeProps> props) override {
+  void updatePropValues(JsiDomNodeProps* props) override {
     for(auto &el: _childProps) {
       el->updatePropValues(props);
     }
@@ -142,13 +153,17 @@ public:
    Returns true if is optional and one of the child props has a value, or all props if optional is false.
    */
   bool hasValue() override {
-    // Only one needs to be set
-    for (auto &el: _childProps) {
-      if (el->hasValue()) {
-        return true;
+    if (_cachedHasValue == BoolValue::NotSet) {
+      _cachedHasValue = BoolValue::False;
+      // Only one needs to be set
+      for (auto &el: _childProps) {
+        if (el->hasValue()) {
+          _cachedHasValue = BoolValue::True;
+          break;
+        }
       }
     }
-    return false;
+    return _cachedHasValue == BoolValue::True;
   };
   
   /**
@@ -168,6 +183,7 @@ protected:
   
 private:
   T _derivedValue;
+  BoolValue _cachedHasValue = BoolValue::NotSet;
   std::vector<std::shared_ptr<JsiBaseDomNodeProp>> _childProps;
 };
 

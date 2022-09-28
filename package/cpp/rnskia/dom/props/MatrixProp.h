@@ -14,7 +14,7 @@ public:
     _prop = addChildProp(std::make_shared<JsiObjectDomNodeProp>(name));
   }
   
-  void updateDerivedValue(std::shared_ptr<JsiDomNodeProps> props) override {
+  void updateDerivedValue(JsiDomNodeProps* props) override {
     if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
       // Try reading as SkMatrix
       auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(_prop->getPropValue()->getAsHostObject());

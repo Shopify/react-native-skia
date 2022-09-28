@@ -101,7 +101,7 @@ protected:
    */
   virtual void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
   
-  virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
+  virtual void onPropsChanged(JsiDomNodeProps* props) override {
     JsiDomNode::onPropsChanged(props);
     
     _paintProp->updatePropValues(props);
@@ -111,7 +111,7 @@ protected:
     _opacityProp->updatePropValues(props);
   }
   
-  virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     JsiDomNode::onPropsSet(runtime, props);
     
     _paintProp->setProps(runtime, props);

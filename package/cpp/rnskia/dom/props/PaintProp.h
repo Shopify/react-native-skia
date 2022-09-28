@@ -43,7 +43,11 @@ public:
     }
   }
   
-  bool hasChanged(std::shared_ptr<JsiDomNodeProps> props) {
+  bool hasChanged(JsiDomNodeProps* props) {
+    if (!props->getHasPropChanges()) {
+      return false;
+    }
+    
     return props->getHasPropChanges(PropNameColor) ||
       props->getHasPropChanges(PropNameStyle) ||
       props->getHasPropChanges(PropNameStrokeWidth) ||
@@ -54,7 +58,7 @@ public:
       props->getHasPropChanges(PropNameAntiAlias);
   }
   
-  void updateDerivedValue(std::shared_ptr<JsiDomNodeProps> props) override {
+  void updateDerivedValue(JsiDomNodeProps* props) override {
     // We only get here if something has changed - start with COLOR
     if (_color->hasValue() && (_parentPaintWasReset || props->getHasPropChanges(PropNameColor))) {
       ensureDerivedValue();

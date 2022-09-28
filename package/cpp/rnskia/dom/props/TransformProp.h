@@ -24,7 +24,7 @@ public:
     _prop = addChildProp(std::make_shared<JsiDomNodeProp>(name, PropType::Array));
   }
   
-  void updateDerivedValue(std::shared_ptr<JsiDomNodeProps> props) override {
+  void updateDerivedValue(JsiDomNodeProps* props) override {
     if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
       if (_prop->getPropValue()->getType() == PropType::Array) {
         auto m = std::make_shared<SkMatrix>(SkMatrix());

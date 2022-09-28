@@ -24,11 +24,11 @@ protected:
     draw(context);
   }
   
-  virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     JsiDomRenderNode::onPropsSet(runtime, props);    
   }
   
-  virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
+  virtual void onPropsChanged(JsiDomNodeProps* props) override {
     JsiDomRenderNode::onPropsChanged(props);    
   }
 };

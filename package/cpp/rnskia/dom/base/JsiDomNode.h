@@ -130,7 +130,7 @@ protected:
    each node needs to explicitly tell the props object which objects it expects and what types they are.
    See the JsiDomNodeProps class for details.
   */
-  virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) {
+  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) {
     // We don't need to do anything in the base class since we don't have any
     // properties that we want to read.
   };
@@ -139,7 +139,7 @@ protected:
    Called when one or more properties have changed from the native side due to updates
    from animation values or other mechanisms.
    */
-  virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) {};
+  virtual void onPropsChanged(JsiDomNodeProps* props) {};
   
   /**
    Native implementation of the set properties method. This is called from the reconciler when
@@ -151,10 +151,9 @@ protected:
       if (_props != nullptr) {
         _props->unsubscribe();
       }
-      std::lock_guard<std::mutex> lock(_propsLock);
       _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
     }
-    onPropsSet(runtime, _props);
+    onPropsSet(runtime, _props.get());
   };
   
   /**
@@ -167,9 +166,8 @@ protected:
   /**
    Returns all properties for this node
    */
-  std::shared_ptr<JsiDomNodeProps> getProperties() {
-    std::lock_guard<std::mutex> lock(_propsLock);
-    return _props;
+  JsiDomNodeProps* getProperties() {
+    return _props.get();
   }
   
   /**
@@ -206,7 +204,6 @@ protected:
    removed - JS might hold a reference that will later be GC'ed.
    */
   void dispose() {
-    std::lock_guard<std::mutex> lock(_propsLock);
     if (_props != nullptr) {
       _props->unsubscribe();
       _props = nullptr;
@@ -217,7 +214,6 @@ private:
   
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::shared_ptr<JsiDomNodeProps> _props;
-  std::mutex _propsLock;
 };
 
 }

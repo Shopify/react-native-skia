@@ -25,7 +25,7 @@ public:
   }
     
 protected:
-  void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
+  void onPropsChanged(JsiDomNodeProps* props) override {
     JsiDomDrawingNode::onPropsChanged(props);
     _rectProp->updatePropValues(props);
     if(!_rectProp->hasValue()) {
@@ -34,7 +34,7 @@ protected:
     }
   }
   
-  void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     JsiDomDrawingNode::onPropsSet(runtime, props);
     _rectProp->setProps(runtime, props);
   }

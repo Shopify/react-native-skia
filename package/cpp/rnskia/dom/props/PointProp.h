@@ -22,7 +22,7 @@ public:
     _prop = addChildProp(std::make_shared<JsiObjectDomNodeProp>(name));
   }
   
-  void updateDerivedValue(std::shared_ptr<JsiDomNodeProps> props) override {
+  void updateDerivedValue(JsiDomNodeProps* props) override {
     if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
       // Check for JsiSkRect and JsiSkPoint
       if (_prop->getPropValue()->getType() == PropType::HostObject) {
@@ -44,7 +44,7 @@ public:
     }    
   }
   
-  void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     JsiDerivedDomNodeProp::setProps(runtime, props);
     
     if (_prop->hasValue()) {
