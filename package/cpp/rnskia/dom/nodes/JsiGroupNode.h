@@ -18,17 +18,17 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-      auto rectNode = std::make_shared<JsiGroupNode>(context, runtime, arguments, count);
-      return jsi::Object::createFromHostObject(runtime, std::move(rectNode));
+      auto node = std::make_shared<JsiGroupNode>(context, runtime, arguments, count);
+      return jsi::Object::createFromHostObject(runtime, std::move(node));
     };
   }
   
 protected:
   void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) override {
-    for (auto &node: getChildren()) {
-      auto renderNode = std::dynamic_pointer_cast<JsiDomRenderNode>(node);
-      if (renderNode != nullptr) {
-        renderNode->render(context);
+    for (auto &child: getChildren()) {
+      auto node = std::dynamic_pointer_cast<JsiDomRenderNode>(child);
+      if (node != nullptr) {
+        node->render(context);
       }
     }
   }

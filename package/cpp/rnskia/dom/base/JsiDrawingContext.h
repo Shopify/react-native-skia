@@ -20,6 +20,7 @@ public:
   JsiBaseDrawingContext() : JsiHostObject() {}
   
   virtual SkCanvas *getCanvas() = 0;
+  virtual void setCanvas(SkCanvas* canvas) = 0;
   
   virtual std::shared_ptr<SkPaint> getPaint() = 0;
   
@@ -52,10 +53,19 @@ public:
   }
   
   SkCanvas *getCanvas() override { return _canvas; }
+  void setCanvas(SkCanvas* canvas) override {
+    _canvas = canvas;
+  }
   
   std::shared_ptr<SkPaint> getPaint() override { return _paint; }
+  void setPaint(std::shared_ptr<SkPaint> paint) {
+    _paint = paint;
+  }
   
   double getOpacity() override { return _opacity; }
+  void setOpacity(double opacity) {
+    _opacity = opacity;
+  }
   
 protected:
   SkCanvas *_canvas = nullptr;

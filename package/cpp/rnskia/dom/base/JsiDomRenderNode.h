@@ -3,14 +3,15 @@
 
 #include "JsiDomNode.h"
 #include "JsiDrawingContext.h"
-#include "ContextProcessor.h"
 #include "PointProp.h"
 #include "MatrixProp.h"
 #include "TransformProp.h"
+#include "PaintProp.h"
 
 namespace RNSkia {
 
 static const char* PropNameOrigin = "origin";
+static PropId PropNameOpacity = JsiPropId::get("opacity");
 
 class JsiDomRenderNode : public JsiDomNode {
 public:
@@ -19,6 +20,8 @@ public:
                    const jsi::Value *arguments,
                    size_t count) :
   JsiDomNode(context, runtime, arguments, count),
+    _paintProp(std::make_unique<PaintProp>()),
+    _opacityProp(std::make_unique<JsiDomNodeProp>(PropNameOpacity, PropType::Number)),
     _matrixProp(std::make_unique<MatrixProp>(PropNameMatrix)),
     _transformProp(std::make_unique<TransformProp>(PropNameTransform)),
     _originProp(std::make_unique<PointProp>(PropNameOrigin)) {}
@@ -47,43 +50,48 @@ public:
       return;
     }
     
+    // Since the paint props uses parent paint, we need to set it before we call onPropsChanged
+    _paintProp->setParentPaint(context->getPaint());
+    
     // Make sure we update any properties that were changed in sub classes so that
     // they can update any derived values
     if (props->getHasPropChanges()) {
-      onPropsChanged(getProperties());
+      onPropsChanged(props);
     }
-    
-    // Update drawing context
-    if(_paintCache == nullptr) {
-      _paintCache = std::make_shared<SkPaint>(*context->getPaint());
-    }
-    std::shared_ptr<JsiBaseDrawingContext> childContext =
-      ContextProcessor::processContext(context, _paintCache, props);
     
     // Handle matrix/transforms
     if (_matrixProp->hasValue() || _transformProp->hasValue()) {
-      auto matrix = _matrixProp->hasValue() ? _matrixProp->getDerivedValue() : _transformProp->getDerivedValue();
+      auto matrix = _matrixProp->hasValue() ?
+        _matrixProp->getDerivedValue() : _transformProp->getDerivedValue();
       
+      // Save canvas state
       context->getCanvas()->save();
       
       if (_originProp->hasValue()) {
-        context->getCanvas()->translate(_originProp->getDerivedValue().x(), _originProp->getDerivedValue().y());
+        // Handle origin
+        context->getCanvas()->translate(_originProp->getDerivedValue().x(),
+                                        _originProp->getDerivedValue().y());
       }
       
+      // Concat canvas' matrix with our matrix
       context->getCanvas()->concat(*matrix);
       
       if (_originProp->hasValue()) {
-        context->getCanvas()->translate(-_originProp->getDerivedValue().x(), -_originProp->getDerivedValue().y());
+        // Handle origin
+        context->getCanvas()->translate(-_originProp->getDerivedValue().x(),
+                                        -_originProp->getDerivedValue().y());
       }
     }
     
     // Render the node
-    renderNode(childContext);
+    renderNode(resolveContext(context));
     
+    // Restore if needed
     if (_matrixProp->hasValue() || _transformProp->hasValue()) {
       context->getCanvas()->restore();
     }
     
+    // Reset all changes in props
     props->resetPropChanges();
   };
   
@@ -96,30 +104,73 @@ protected:
   virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomNode::onPropsChanged(props);
     
-    _matrixProp->onPropsChanged(props);
-    _originProp->onPropsChanged(props);
-    _transformProp->onPropsChanged(props);
+    _paintProp->updatePropValues(props);
+    _matrixProp->updatePropValues(props);
+    _originProp->updatePropValues(props);
+    _transformProp->updatePropValues(props);
+    _opacityProp->updatePropValues(props);
   }
   
   virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomNode::onPropsSet(runtime, props);
     
-    _matrixProp->onPropsSet(runtime, props);
-    _originProp->onPropsSet(runtime, props);
-    _transformProp->onPropsSet(runtime, props);
+    _paintProp->setProps(runtime, props);
+    _matrixProp->setProps(runtime, props);
+    _originProp->setProps(runtime, props);
+    _transformProp->setProps(runtime, props);
+    _opacityProp->setProps(runtime, props);
     
-    props->tryReadStringProperty(runtime, PropNameColor);
-    props->tryReadStringProperty(runtime, PropNameStyle);
-    props->tryReadNumericProperty(runtime, PropNameStrokeWidth);
     props->tryReadNumericProperty(runtime, PropNameOpacity);
   }
   
 private:
+  std::shared_ptr<JsiBaseDrawingContext> resolveContext(std::shared_ptr<JsiBaseDrawingContext> context) {
+    auto props = getProperties();
+    // We only need to update the cached context if the paint property or opacity property has changed
+    if (_paintProp->hasChanged(props) ||
+        props->getHasPropChanges(PropNameOpacity) ||
+        _prevOpacity != context->getOpacity()) {
+      
+      // Paint - start by getting paint from parent context
+      auto paint = context->getPaint();
+      
+      // If our child paint has a value we can use it.
+      if (_paintProp->getDerivedValue() != nullptr) {
+        paint = _paintProp->getDerivedValue();
+      }
+      
+      // Opacity
+      _prevOpacity = context->getOpacity();
+      if (_opacityProp->hasValue()) {
+        _prevOpacity *= _opacityProp->getPropValue()->getAsNumber();
+        // TODO: Is this enough to override the opacity correctly?
+        paint->setAlpha(255 * _prevOpacity);
+      }
+      
+      // Create the cached drawing context if it is not set
+      if (_cachedContext == nullptr) {
+        _cachedContext = std::make_shared<JsiDrawingContext>(context, paint, _prevOpacity);
+      } else {
+        _cachedContext->setPaint(paint);
+        _cachedContext->setOpacity(_prevOpacity);
+      }
+    }
+    
+    // Update canvas - it might change on each frame
+    if (_cachedContext != nullptr) {
+      _cachedContext->setCanvas(context->getCanvas());
+    }
+    
+    return _cachedContext != nullptr ? _cachedContext : context;
+  }
+  
+  double _prevOpacity;
   std::unique_ptr<PointProp> _originProp;
   std::unique_ptr<MatrixProp> _matrixProp;
   std::unique_ptr<TransformProp> _transformProp;
-  std::shared_ptr<SkPaint> _paintCache;
-  bool _shouldSaveCanvas;
+  std::unique_ptr<PaintProp> _paintProp;
+  std::unique_ptr<JsiDomNodeProp> _opacityProp;
+  std::shared_ptr<JsiDrawingContext> _cachedContext;
 };
 
 }

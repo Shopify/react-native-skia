@@ -19,23 +19,24 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-      auto rectNode = std::make_shared<JsiRectNode>(context, runtime, arguments, count);
-      return jsi::Object::createFromHostObject(runtime, std::move(rectNode));
+      auto node = std::make_shared<JsiRectNode>(context, runtime, arguments, count);
+      return jsi::Object::createFromHostObject(runtime, std::move(node));
     };
   }
     
 protected:
   void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomDrawingNode::onPropsChanged(props);
-    _rectProp->onPropsChanged(props);
+    _rectProp->updatePropValues(props);
     if(!_rectProp->hasValue()) {
-      throw std::runtime_error("Expected Rect node to have a rect property.");
+      throw std::runtime_error("Expected Rect node to have a rect property or \
+                               x, y, width and height properties.");
     }
   }
   
   void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
     JsiDomDrawingNode::onPropsSet(runtime, props);
-    _rectProp->onPropsSet(runtime, props);
+    _rectProp->setProps(runtime, props);
   }
   
   void draw(std::shared_ptr<JsiBaseDrawingContext> context) override {

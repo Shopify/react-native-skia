@@ -21,10 +21,6 @@ protected:
   virtual void draw(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
   
   void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) override {
-    // TODO: Update drawing context based on paint prop which can be a few
-    // different things.
-    
-    // For now just call draw
     draw(context);
   }
   

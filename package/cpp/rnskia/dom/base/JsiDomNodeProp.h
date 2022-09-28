@@ -12,8 +12,23 @@ namespace RNSkia {
  */
 class JsiBaseDomNodeProp{
 public:
-  virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) = 0;
-  virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) = 0;
+  /**
+   Called when any of the property values have changed by React updating properties. This is where we'll try to read property
+   values and store the property objects.
+   @param runtime Javascript Runtime
+   @param props Properties object
+   */
+  virtual void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) = 0;
+  
+  /**
+   Called when any of the property values have changed from the native side by Skia values being updated.
+   @param props Properties object
+   */
+  virtual void updatePropValues(std::shared_ptr<JsiDomNodeProps> props) = 0;
+  
+  /**
+   Use to check if the value represented by this property has a usable (non-null/undefined) value or not.
+   */
   virtual bool hasValue() = 0;
 };
 
@@ -38,14 +53,14 @@ public:
   /**
    Called when properties was read from the React props. This is where we read props and validate properties
    */
-  virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  virtual void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
     _prop = props->tryReadProperty(runtime, _name, _type);
   }
   
   /**
-   Called when properties changed from the native side (and also after the first initialization in onPropsSet).
+   Called when properties changed from the native side (and also after the first initialization in setProps).
    */
-  virtual void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {}
+  virtual void updatePropValues(std::shared_ptr<JsiDomNodeProps> props) override {}
   
   /**
    Return value if set
@@ -80,9 +95,9 @@ public:
   JsiObjectDomNodeProp(PropId name):
   JsiDomNodeProp(name, PropType::Object) {}
   
-  virtual void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  virtual void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
     try {
-      JsiDomNodeProp::onPropsSet(runtime, props);
+      JsiDomNodeProp::setProps(runtime, props);
     } catch (...) {
       setValue(props->tryReadHostObjectProperty(runtime, getName()));
     }
@@ -107,15 +122,15 @@ public:
    */
   const T& getDerivedValue() { return _derivedValue; }
   
-  void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+  void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
     for(auto &el: _childProps) {
-      el->onPropsSet(runtime, props);
+      el->setProps(runtime, props);
     }
   }
   
-  void onPropsChanged(std::shared_ptr<JsiDomNodeProps> props) override {
+  void updatePropValues(std::shared_ptr<JsiDomNodeProps> props) override {
     for(auto &el: _childProps) {
-      el->onPropsChanged(props);
+      el->updatePropValues(props);
     }
     
     if(props->getHasPropChanges()) {

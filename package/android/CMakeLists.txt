@@ -78,7 +78,7 @@ target_include_directories(
         cpp/rnskia/dom
         cpp/rnskia/dom/base
         cpp/rnskia/dom/nodes
-        cpp/rnskia/dom/processors
+        cpp/rnskia/dom/props
         cpp/utils  
 
         ${libfbjni_include_DIRS}

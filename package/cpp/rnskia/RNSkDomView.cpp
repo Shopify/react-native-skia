@@ -61,8 +61,11 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
   canvas->save();
   canvas->scale(pd, pd);
   
-  auto paint = std::make_shared<SkPaint>();
-  auto drawingContext = std::make_shared<JsiDrawingContext>(canvas, paint, 1.0f);
+  if (_rootPaint == nullptr) {
+    _rootPaint = std::make_shared<SkPaint>();
+  }
+  
+  auto drawingContext = std::make_shared<JsiDrawingContext>(canvas, _rootPaint, 1.0f);
   _root->render(drawingContext);
   
   renderDebugOverlays(canvas);

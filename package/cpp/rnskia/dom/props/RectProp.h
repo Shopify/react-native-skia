@@ -46,8 +46,8 @@ public:
     }
   }
   
-  void onPropsSet(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
-    JsiDerivedDomNodeProp::onPropsSet(runtime, props);
+  void setProps(jsi::Runtime &runtime, std::shared_ptr<JsiDomNodeProps> props) override {
+    JsiDerivedDomNodeProp::setProps(runtime, props);
     
     if (_prop->hasValue() && _prop->getPropValue()->getType() == PropType::Object) {
       // Save props for fast access
