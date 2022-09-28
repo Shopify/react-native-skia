@@ -24,7 +24,7 @@ public:
   }
   
 protected:
-  void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) override {
+  void renderNode(JsiBaseDrawingContext* context) override {
     for (auto &child: getChildren()) {
       auto node = std::static_pointer_cast<JsiDomRenderNode>(child);
       if (node != nullptr) {

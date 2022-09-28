@@ -39,7 +39,7 @@ protected:
     _rectProp->setProps(runtime, props);
   }
   
-  void draw(std::shared_ptr<JsiBaseDrawingContext> context) override {
+  void draw(JsiBaseDrawingContext* context) override {
     context->getCanvas()->drawRect(_rectProp->getDerivedValue(), *context->getPaint());
   }
   

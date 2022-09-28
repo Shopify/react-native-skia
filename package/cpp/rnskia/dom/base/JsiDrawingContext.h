@@ -39,7 +39,7 @@ public:
     _opacity = opacity;
   }
   
-  JsiDrawingContext(std::shared_ptr<JsiBaseDrawingContext> parent,
+  JsiDrawingContext(JsiBaseDrawingContext* parent,
                     std::shared_ptr<SkPaint> paint,
                     float opacity) {
     assert(paint != nullptr);

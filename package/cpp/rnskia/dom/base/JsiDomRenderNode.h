@@ -28,7 +28,7 @@ public:
   
   JSI_HOST_FUNCTION(render) {
     // Get drawing context
-    render(std::make_shared<JsiDrawingContextWrapper>(runtime, arguments, count));
+    render(std::make_shared<JsiDrawingContextWrapper>(runtime, arguments, count).get());
     return jsi::Value::undefined();
   }
   
@@ -41,7 +41,7 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, children),
                        JSI_EXPORT_FUNC(JsiDomRenderNode, render))
   
-  void render(std::shared_ptr<JsiBaseDrawingContext> context) {
+  void render(JsiBaseDrawingContext* context) {
     
     auto props = getProperties();
     if (props == nullptr) {
@@ -60,7 +60,7 @@ public:
     }
     
     // Handle matrix/transforms
-    if (_matrixProp->hasValue() || _transformProp->hasValue()) {
+    if (_hasMatrixOrTransformProp) {
       auto matrix = _matrixProp->hasValue() ?
         _matrixProp->getDerivedValue() : _transformProp->getDerivedValue();
       
@@ -87,7 +87,7 @@ public:
     renderNode(resolveContext(context));
     
     // Restore if needed
-    if (_matrixProp->hasValue() || _transformProp->hasValue()) {
+    if (_hasMatrixOrTransformProp) {
       context->getCanvas()->restore();
     }
     
@@ -99,7 +99,7 @@ protected:
   /**
    Override to implement rendering where the current state of the drawing context is correctly set.
    */
-  virtual void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
+  virtual void renderNode(JsiBaseDrawingContext* context) = 0;
   
   virtual void onPropsChanged(JsiDomNodeProps* props) override {
     JsiDomNode::onPropsChanged(props);
@@ -121,10 +121,12 @@ protected:
     _opacityProp->setProps(runtime, props);
     
     props->tryReadNumericProperty(runtime, PropNameOpacity);
+    
+    _hasMatrixOrTransformProp = _matrixProp->hasValue() || _transformProp->hasValue();
   }
   
 private:
-  std::shared_ptr<JsiBaseDrawingContext> resolveContext(std::shared_ptr<JsiBaseDrawingContext> context) {
+  JsiBaseDrawingContext* resolveContext(JsiBaseDrawingContext* context) {
     auto props = getProperties();
     // We only need to update the cached context if the paint property or opacity property has changed
     if (_paintProp->hasChanged(props) ||
@@ -161,10 +163,11 @@ private:
       _cachedContext->setCanvas(context->getCanvas());
     }
     
-    return _cachedContext != nullptr ? _cachedContext : context;
+    return _cachedContext != nullptr ? _cachedContext.get() : context;
   }
   
   double _prevOpacity;
+  bool _hasMatrixOrTransformProp;
   std::unique_ptr<PointProp> _originProp;
   std::unique_ptr<MatrixProp> _matrixProp;
   std::unique_ptr<TransformProp> _transformProp;

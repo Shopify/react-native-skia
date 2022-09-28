@@ -18,9 +18,9 @@ protected:
   /**
    Override to implement drawing.
    */
-  virtual void draw(std::shared_ptr<JsiBaseDrawingContext> context) = 0;
+  virtual void draw(JsiBaseDrawingContext* context) = 0;
   
-  void renderNode(std::shared_ptr<JsiBaseDrawingContext> context) override {
+  void renderNode(JsiBaseDrawingContext* context) override {
     draw(context);
   }
   
