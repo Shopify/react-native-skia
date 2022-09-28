@@ -45,6 +45,29 @@ public:
   }
   
   /**
+   Will commit all waiting changes in the list of swappable prop values
+   */
+  void commitTransactions() {
+    std::lock_guard<std::mutex> lock(_lock);
+    
+    for (auto el: _transactions) {
+      auto propValueSource = el.second;
+      auto propValueDest = getPropValue(el.first);
+      
+      // Swap inner values
+      propValueDest->swap(propValueSource.get());
+      
+      // Update with values set
+      if (!propValueDest->isUndefinedOrNull()) {
+        _propsWithValues.emplace(el.first);
+      } else if (_propsWithValues.count(el.first) > 0) {
+        _propsWithValues.erase(el.first);
+      }
+    }
+    _transactions.clear();
+  }
+  
+  /**
    Tries to read a property as a numeric value. This will try to read the property, verify type and optionality and finally
    convert the JS value into a native value that can be read outside the JS Context.
    @param runtime JS Runtime
@@ -115,19 +138,19 @@ public:
                                             PropId name,
                                             PropType type) {
     // get the prop value from the props object
-    auto propValue = _props.getProperty(runtime, name);
+    auto jsPropValue = _props.getProperty(runtime, name);
     
     // Check undefined or null
-    auto isUndefinedOrNull = propValue.isUndefined() || propValue.isNull();
+    auto isUndefinedOrNull = jsPropValue.isUndefined() || jsPropValue.isNull();
     
     // Check type
-    auto prop = std::make_shared<JsiValue>(runtime, propValue);
+    auto nativePropValue = std::make_shared<JsiValue>(runtime, jsPropValue);
     
     // We need to check if this is an animated value - they should be handled differently
-    if (isAnimatedValue(prop)) {
+    if (isAnimatedValue(nativePropValue)) {
       // Add initial resolved value to props
-      auto animatedValue = getAnimatedValue(prop);
-      setProp(runtime, name, animatedValue->getCurrent(runtime));
+      auto animatedValue = getAnimatedValue(nativePropValue);
+      initializePropValue(runtime, name, animatedValue->getCurrent(runtime));
       
       // Add subscription to animated value
       auto unsubscribe = animatedValue->addListener([weakSelf = weak_from_this(),
@@ -135,27 +158,31 @@ public:
                                                      name] (jsi::Runtime &runtime) {
       auto self = weakSelf.lock();
         if (self) {
-          self->setProp(runtime, name, animatedValue->getCurrent(runtime));
+          // This code is executed on the Javascript thread, so we need to use the
+          // transaction system to update the property
+          self->addPropValueTransaction(runtime, name, animatedValue->getCurrent(runtime));
         }
       });
       
       _unsubscriptions.push_back(unsubscribe);
       
-    } else if (isSelector(prop)) {
-      auto value = std::dynamic_pointer_cast<RNSkReadonlyValue>(prop->getValue(PropNameValue)->getAsHostObject());
-      auto selector = prop->getValue(PropNameSelector)->getAsFunction();
+    } else if (isSelector(nativePropValue)) {
+      auto value = std::dynamic_pointer_cast<RNSkReadonlyValue>(nativePropValue->getValue(PropNameValue)->getAsHostObject());
+      auto selector = nativePropValue->getValue(PropNameSelector)->getAsFunction();
       
       // Add initial resolved value to props
       jsi::Value current = value->getCurrent(runtime);
-      setProp(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
+      initializePropValue(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
       
       // Add subscription to animated value in selector
-      auto unsubscribe = value->addListener([weakSelf = weak_from_this(), prop, name, selector = std::move(
+      auto unsubscribe = value->addListener([weakSelf = weak_from_this(), nativePropValue, name, selector = std::move(
         selector), value = std::move(value)](jsi::Runtime &runtime) {
          auto self = weakSelf.lock();
          if (self) {
            jsi::Value current = value->getCurrent(runtime);
-           self->setProp(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
+           // This code is executed on the Javascript thread, so we need to use the
+           // transaction system to update the property
+           self->addPropValueTransaction(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
          }
       });
       
@@ -163,17 +190,18 @@ public:
       
     } else {
       // Regular value, just ensure that the type is correct:
-      if (prop->getType() != type && !isUndefinedOrNull) {
+      if (nativePropValue->getType() != type && !isUndefinedOrNull) {
         throw jsi::JSError(runtime, "Expected \"" + JsiValue::getTypeAsString(type) +
                            "\", got \"" +
-                           JsiValue::getTypeAsString(prop->getType()) +
+                           JsiValue::getTypeAsString(nativePropValue->getType()) +
                            "\" for property \"" + name + "\".");
       }
       
       // Set prop
-      setProp(runtime, name, propValue);
+      initializePropValue(runtime, name, jsPropValue);
     }
     
+    // Return the property value
     return _values.at(name);
   }
   
@@ -214,39 +242,11 @@ public:
   PropType getType() {
     return PropType::Object;
   }
-  
-  /**
-   Returns true if there is a value for the given property name. This can be used to test if a property
-   is undefined or null from the JS context. Can be called outside the JS Context
-   */
-  bool hasValue(PropId name) {
-    std::lock_guard<std::mutex> lock(_lock);
-    return (_propsWithValues.find(name) != _propsWithValues.end());
-  }
-  
-  /**
-   Returns a property value as a native value that can be read outside the JS Context. The property
-   needs to be set using one the readProperty methods and have a non-null value.
-   Test with the hasValue function to test before calling this function.
-   */
-  std::shared_ptr<JsiValue> getValue(PropId name) {
-    std::lock_guard<std::mutex> lock(_lock);
-    return _values.at(name);
-  }
-  
-  /**
-   Simple getKeys implementation
-   */
-  std::vector<PropId> getKeys() {
-    std::lock_guard<std::mutex> lock(_lock);
-    return _propNames;
-  }
-  
+    
   /**
    Returns true if there are any property changes in the node.
    */
   bool getHasPropChanges() {
-    std::lock_guard<std::mutex> lock(_lock);
     return _propChanges > 0;
   }
   
@@ -255,7 +255,6 @@ public:
    if it exists for the property we asked for.
    */
   bool getHasPropChanges(PropId name) {
-    std::lock_guard<std::mutex> lock(_lock);
     return _changedPropNames.count(name) > 0;
   }
   
@@ -263,12 +262,36 @@ public:
    Resets the property change counter
    */
   void resetPropChanges() {
-    std::lock_guard<std::mutex> lock(_lock);
     _propChanges = 0;
     _changedPropNames.clear();
   }
   
 private:
+  /**
+   Returns true if there is a value for the given property name. This can be used to test if a property
+   is undefined or null from the JS context. Can be called outside the JS Context
+   */
+  bool hasPropValue(PropId name) {
+    return (_propsWithValues.find(name) != _propsWithValues.end());
+  }
+  
+  /**
+   Returns a property value as a native value that can be read outside the JS Context. The property
+   needs to be set using one the readProperty methods and have a non-null value.
+   Test with the hasValue function to test before calling this function.
+   */
+  std::shared_ptr<JsiValue> getPropValue(PropId name) {
+    return _values.at(name);
+  }
+  
+  void addPropValueTransaction(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
+    if (hasPropValue(name)) {
+      std::lock_guard<std::mutex> lock(_lock);
+      _transactions.emplace(name, std::make_shared<JsiValue>(runtime, value));
+      requestPropChange(name);
+    }
+  }
+  
   /**
    Sets a property from the JS side. This will read the property and convert it to a native value that
    can be read outside of the JS context.
@@ -276,33 +299,16 @@ private:
    @param name Property name (stable id)
    @param value Javascript value to set
    */
-  void setProp(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
+  void initializePropValue(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
     
-    if (hasValue(name)) {
-      // Prop has already been set, let's just update it.
-      auto prop = getValue(name);
-      
-      std::lock_guard<std::mutex> lock(_lock);
-      prop->setCurrent(runtime, value);
+    // Prop was not previously set
+    auto newProp = std::make_shared<JsiValue>(runtime, value);
+    _values.emplace(name, newProp);
     
-      if (!prop->isUndefinedOrNull()) {
-        _propsWithValues.emplace(name);
-      } else if (_propsWithValues.count(name) > 0) {
-        _propsWithValues.erase(name);
-      }
-      
-    } else {
-      // Prop was not previously set
-      auto newProp = std::make_shared<JsiValue>(runtime, value);
-      _values.emplace(name, newProp);
-      
-      if (!newProp->isUndefinedOrNull()) {
-        _propsWithValues.emplace(name);
-      }
-      
-      // Add to prop names so that we cache it
-      _propNames.push_back(name);
+    if (!newProp->isUndefinedOrNull()) {
+      _propsWithValues.emplace(name);
     }
+  
     // Call prop changed
     requestPropChange(name);
   }
@@ -323,7 +329,7 @@ private:
   
   std::set<PropId> _changedPropNames;
   std::set<PropId> _propsWithValues;
-  std::vector<PropId> _propNames;
+  std::map<PropId, std::shared_ptr<JsiValue>> _transactions;
   
   std::mutex _lock;
 };

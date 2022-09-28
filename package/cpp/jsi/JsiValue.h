@@ -63,8 +63,6 @@ public:
   
   void setCurrent(jsi::Runtime &runtime, const jsi::Value &value)
   {
-    std::lock_guard<std::mutex> lock(_setCurrentLock);
-    
     _stringValue = empty;
     _hostObject = nullptr;
     _hostFunction = nullptr;
@@ -122,37 +120,31 @@ public:
   }
   
   const std::vector<std::shared_ptr<JsiValue>>& getAsArray() {
-    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::Array);
     return _array;
   }
   
   std::shared_ptr<JsiValue> getValue(PropId name) {
-    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::Object);
     return _props.at(name);
   }
   
   bool hasValue(PropId name) {
-    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::Object);
     return _props.count(name) > 0;
   }
   
   std::vector<PropId> getKeys() {
-    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::Object);
     return _keysCache;
   }
   
   std::shared_ptr<jsi::HostObject> getAsHostObject() {
-    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::HostObject);
     return _hostObject;
   }
   
   const jsi::HostFunctionType getAsHostFunction() {
-    std::lock_guard<std::mutex> lock(_setCurrentLock);
     assert(_type == PropType::HostFunction);
     return _hostFunction;
   }
@@ -184,6 +176,18 @@ public:
       case PropType::HostFunction:
         return compareObjects(other);
     }
+  }
+  
+  void swap(JsiValue* other) {
+    _type = other->getType();
+    _boolValue = other->boolValue();
+    _numberValue = other->numberValue();
+    _stringValue = other->stringValue();
+    _props = other->props();
+    _keysCache = other->keysCache();
+    _array = other->array();
+    _hostObject = other->hostObject();
+    _hostFunction = other->hostFunction();
   }
   
   jsi::Value getAsJsiValue(jsi::Runtime& runtime) {
@@ -218,6 +222,15 @@ protected:
   const std::unordered_map<PropId, std::shared_ptr<JsiValue>>& getProps() const {
     return _props;
   }
+  
+  bool boolValue() { return _boolValue; }
+  double numberValue() { return _numberValue; }
+  std::string stringValue() { return _stringValue; }
+  std::shared_ptr<jsi::HostObject> hostObject() { return _hostObject; }
+  jsi::HostFunctionType hostFunction() { return _hostFunction; }
+  std::vector<std::shared_ptr<JsiValue>> array() { return _array; };
+  std::unordered_map<PropId, std::shared_ptr<JsiValue>> props() { return _props; };
+  std::vector<PropId> keysCache() { return _keysCache; }
  
 private:
   void setObject(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -359,7 +372,6 @@ private:
   std::vector<std::shared_ptr<JsiValue>> _array;
   std::unordered_map<PropId, std::shared_ptr<JsiValue>> _props;
   std::vector<PropId> _keysCache;
-  std::mutex _setCurrentLock;
 };
 
 }

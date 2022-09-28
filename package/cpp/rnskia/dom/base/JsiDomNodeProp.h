@@ -54,7 +54,8 @@ public:
    */
   bool hasValue() override {
     if (_cachedHasValue == BoolValue::NotSet) {
-      _cachedHasValue = _prop != nullptr && !_prop->isUndefinedOrNull() ? BoolValue::True : BoolValue::False;
+      _cachedHasValue = _prop != nullptr &&
+      !_prop->isUndefinedOrNull() ? BoolValue::True : BoolValue::False;
     }
     return _cachedHasValue == BoolValue::True;
   }
