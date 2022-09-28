@@ -220,7 +220,7 @@ public:
    is undefined or null from the JS context. Can be called outside the JS Context
    */
   bool hasValue(PropId name) {
-    std::lock_guard<std::mutex> lock(_propsWithValuesMutex);
+    std::lock_guard<std::mutex> lock(_lock);
     return (_propsWithValues.find(name) != _propsWithValues.end());
   }
   
@@ -230,7 +230,7 @@ public:
    Test with the hasValue function to test before calling this function.
    */
   std::shared_ptr<JsiValue> getValue(PropId name) {
-    std::lock_guard<std::mutex> lock(_valuesMutex);
+    std::lock_guard<std::mutex> lock(_lock);
     return _values.at(name);
   }
   
@@ -238,6 +238,7 @@ public:
    Simple getKeys implementation
    */
   std::vector<PropId> getKeys() {
+    std::lock_guard<std::mutex> lock(_lock);
     return _propNames;
   }
   
@@ -245,6 +246,7 @@ public:
    Returns true if there are any property changes in the node.
    */
   bool getHasPropChanges() {
+    std::lock_guard<std::mutex> lock(_lock);
     return _propChanges > 0;
   }
   
@@ -253,7 +255,7 @@ public:
    if it exists for the property we asked for.
    */
   bool getHasPropChanges(PropId name) {
-    std::lock_guard<std::mutex> lock(_changedPropNamesMutex);
+    std::lock_guard<std::mutex> lock(_lock);
     return _changedPropNames.count(name) > 0;
   }
   
@@ -261,8 +263,8 @@ public:
    Resets the property change counter
    */
   void resetPropChanges() {
+    std::lock_guard<std::mutex> lock(_lock);
     _propChanges = 0;
-    std::lock_guard<std::mutex> lock(_changedPropNamesMutex);
     _changedPropNames.clear();
   }
   
@@ -270,20 +272,19 @@ private:
   /**
    Sets a property from the JS side. This will read the property and convert it to a native value that
    can be read outside of the JS context.
+   @param runtime Javascript runtime
+   @param name Property name (stable id)
+   @param value Javascript value to set
    */
-  void setProp(jsi::Runtime &runtime,
-               PropId name,
-               const jsi::Value &value) {
+  void setProp(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
+    
     if (hasValue(name)) {
-      
       // Prop has already been set, let's just update it.
       auto prop = getValue(name);
-      {
-        std::lock_guard<std::mutex> lock(_valuesMutex);
-        prop->setCurrent(runtime, value);
-      }
+      
+      std::lock_guard<std::mutex> lock(_lock);
+      prop->setCurrent(runtime, value);
     
-      std::lock_guard<std::mutex> lock2(_propsWithValuesMutex);
       if (!prop->isUndefinedOrNull()) {
         _propsWithValues.emplace(name);
       } else if (_propsWithValues.count(name) > 0) {
@@ -293,16 +294,13 @@ private:
     } else {
       // Prop was not previously set
       auto newProp = std::make_shared<JsiValue>(runtime, value);
-      std::lock_guard<std::mutex> lock(_valuesMutex);
       _values.emplace(name, newProp);
       
       if (!newProp->isUndefinedOrNull()) {
-        std::lock_guard<std::mutex> lock(_propsWithValuesMutex);
         _propsWithValues.emplace(name);
       }
       
       // Add to prop names so that we cache it
-      std::lock_guard<std::mutex> lock2(_propNamesMutex);
       _propNames.push_back(name);
     }
     // Call prop changed
@@ -313,7 +311,6 @@ private:
    Increments the property change counter for the props object.
    */
   void requestPropChange(PropId name) {
-    std::lock_guard<std::mutex> lock(_changedPropNamesMutex);
     _propChanges++;
     _changedPropNames.emplace(name);
   }
@@ -328,10 +325,7 @@ private:
   std::set<PropId> _propsWithValues;
   std::vector<PropId> _propNames;
   
-  std::mutex _valuesMutex;
-  std::mutex _changedPropNamesMutex;
-  std::mutex _propsWithValuesMutex;
-  std::mutex _propNamesMutex;
+  std::mutex _lock;
 };
 
 }
