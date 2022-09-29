@@ -81,14 +81,6 @@ protected:
     JsiDomNode::insertChildBefore(child, before);
   }
   
-  virtual void onPropsChanged(JsiDomNodeProps* props) override {
-    JsiDomNode::onPropsChanged(props);
-  }
-  
-  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
-    JsiDomNode::onPropsSet(runtime, props);
-  }
-  
 private:
   std::function<void()> _invalidateCallback;
 };
