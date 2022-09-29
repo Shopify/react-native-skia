@@ -51,20 +51,20 @@ public:
     std::lock_guard<std::mutex> lock(_lock);
     
     for (auto el: _transactions) {
-      auto propValueSource = el.second;
-      auto propValueDest = getPropValue(el.first);
-      
-      // Swap inner values
-      propValueDest->swap(propValueSource.get());
-      
-      // Update with values set
-      if (!propValueDest->isUndefinedOrNull()) {
-        _propsWithValues.emplace(el.first);
-      } else if (_propsWithValues.count(el.first) > 0) {
-        _propsWithValues.erase(el.first);
+      if (_changedPropNames.count(el.first) > 0) {
+        auto propValueSource = el.second;
+        auto propValueDest = getPropValue(el.first);
+        
+        // Swap inner values
+        propValueDest->swap(propValueSource.get());
+        
+        if (!propValueDest->isUndefinedOrNull()) {
+          _propsWithValues.emplace(el.first);
+        } else if (_propsWithValues.count(el.first) > 0) {
+          _propsWithValues.erase(el.first);
+        }
       }
     }
-    _transactions.clear();
   }
   
   /**
@@ -287,7 +287,11 @@ private:
   void addPropValueTransaction(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
     if (hasPropValue(name)) {
       std::lock_guard<std::mutex> lock(_lock);
-      _transactions.emplace(name, std::make_shared<JsiValue>(runtime, value));
+      if (_transactions.count(name) == 0) {
+        _transactions.emplace(name, std::make_shared<JsiValue>(runtime, value));
+      } else {
+        _transactions.at(name)->setCurrent(runtime, value);
+      }
       requestPropChange(name);
     }
   }
