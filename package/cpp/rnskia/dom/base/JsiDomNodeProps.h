@@ -247,7 +247,7 @@ public:
    Returns true if there are any property changes in the node.
    */
   bool getHasPropChanges() {
-    return _propChanges > 0;
+    return _changedPropNames.size() > 0;
   }
   
   /**
@@ -262,7 +262,6 @@ public:
    Resets the property change counter
    */
   void resetPropChanges() {
-    _propChanges = 0;
     _changedPropNames.clear();
   }
   
@@ -321,15 +320,12 @@ private:
    Increments the property change counter for the props object.
    */
   void requestPropChange(PropId name) {
-    _propChanges++;
     _changedPropNames.emplace(name);
   }
   
   std::map<PropId, std::shared_ptr<JsiValue>> _values;
   jsi::Object _props;
   std::vector<std::function<void()>> _unsubscriptions;
-  
-  std::atomic<size_t> _propChanges = { 0 };
   
   std::set<PropId> _changedPropNames;
   std::set<PropId> _propsWithValues;
