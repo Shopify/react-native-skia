@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiDomNodeProp.h"
+#include "JsiProp.h"
 
 
 #pragma clang diagnostic push
@@ -22,17 +22,17 @@ static PropId PropNameStrokeMiter = JsiPropId::get("strokeMiter");
 static PropId PropNameAntiAlias = JsiPropId::get("antiAlias");
 
 class PaintProp:
-public JsiDerivedDomNodeProp<std::shared_ptr<SkPaint>> {
+public JsiDerivedProp<std::shared_ptr<SkPaint>> {
 public:
-  PaintProp(): JsiDerivedDomNodeProp<std::shared_ptr<SkPaint>>() {
-    _color = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameColor, PropType::String));
-    _style = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStyle, PropType::String));
-    _strokeWidth = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeWidth, PropType::Number));
-    _blendMode = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameBlendMode, PropType::String));
-    _strokeJoin = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeJoin, PropType::String));
-    _strokeCap = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeCap, PropType::String));
-    _strokeMiter = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeMiter, PropType::Number));
-    _antiAlias = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameAntiAlias, PropType::Number));
+  PaintProp(): JsiDerivedProp<std::shared_ptr<SkPaint>>() {
+    _color = addChildProp(std::make_shared<JsiProp>(PropNameColor, PropType::String));
+    _style = addChildProp(std::make_shared<JsiProp>(PropNameStyle, PropType::String));
+    _strokeWidth = addChildProp(std::make_shared<JsiProp>(PropNameStrokeWidth, PropType::Number));
+    _blendMode = addChildProp(std::make_shared<JsiProp>(PropNameBlendMode, PropType::String));
+    _strokeJoin = addChildProp(std::make_shared<JsiProp>(PropNameStrokeJoin, PropType::String));
+    _strokeCap = addChildProp(std::make_shared<JsiProp>(PropNameStrokeCap, PropType::String));
+    _strokeMiter = addChildProp(std::make_shared<JsiProp>(PropNameStrokeMiter, PropType::Number));
+    _antiAlias = addChildProp(std::make_shared<JsiProp>(PropNameAntiAlias, PropType::Number));
   }
   
   void setParentPaint(std::shared_ptr<SkPaint> paint) {
@@ -223,14 +223,14 @@ private:
   
   bool _parentPaintWasReset = true;
   std::shared_ptr<SkPaint> _parentPaint;
-  std::shared_ptr<JsiDomNodeProp> _color;
-  std::shared_ptr<JsiDomNodeProp> _style;
-  std::shared_ptr<JsiDomNodeProp> _strokeWidth;
-  std::shared_ptr<JsiDomNodeProp> _blendMode;
-  std::shared_ptr<JsiDomNodeProp> _strokeJoin;
-  std::shared_ptr<JsiDomNodeProp> _strokeCap;
-  std::shared_ptr<JsiDomNodeProp> _strokeMiter;
-  std::shared_ptr<JsiDomNodeProp> _antiAlias;
+  std::shared_ptr<JsiProp> _color;
+  std::shared_ptr<JsiProp> _style;
+  std::shared_ptr<JsiProp> _strokeWidth;
+  std::shared_ptr<JsiProp> _blendMode;
+  std::shared_ptr<JsiProp> _strokeJoin;
+  std::shared_ptr<JsiProp> _strokeCap;
+  std::shared_ptr<JsiProp> _strokeMiter;
+  std::shared_ptr<JsiProp> _antiAlias;
 };
 
 }

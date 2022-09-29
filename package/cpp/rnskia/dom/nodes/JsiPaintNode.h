@@ -14,7 +14,7 @@ public:
                size_t count) :
   JsiDomDeclarationNode(context, runtime, arguments, count),
   _paintProp(std::make_unique<PaintProp>()),
-  _opacityProp(std::make_unique<JsiDomNodeProp>(PropNameOpacity, PropType::Number)) {}
+  _opacityProp(std::make_unique<JsiProp>(PropNameOpacity, PropType::Number)) {}
   
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr <RNSkPlatformContext> context) {
@@ -65,7 +65,7 @@ protected:
 private:
   std::shared_ptr <SkRect> _rect;
   std::unique_ptr<PaintProp> _paintProp;
-  std::unique_ptr<JsiDomNodeProp> _opacityProp;
+  std::unique_ptr<JsiProp> _opacityProp;
 };
 
 }

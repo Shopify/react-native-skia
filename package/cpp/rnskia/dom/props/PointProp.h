@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiDomNodeProp.h"
+#include "JsiProp.h"
 
 
 #pragma clang diagnostic push
@@ -16,10 +16,10 @@ static PropId PropNameX = JsiPropId::get("x");
 static PropId PropNameY = JsiPropId::get("y");
 
 class PointProp:
-public JsiDerivedDomNodeProp<SkPoint> {
+public JsiDerivedProp<SkPoint> {
 public:
-  PointProp(PropId name): JsiDerivedDomNodeProp<SkPoint>() {
-    _prop = addChildProp(std::make_shared<JsiObjectDomNodeProp>(name));
+  PointProp(PropId name): JsiDerivedProp<SkPoint>() {
+    _prop = addChildProp(std::make_shared<JsiObjectProp>(name));
   }
   
   void updateDerivedValue(JsiDomNodeProps* props) override {
@@ -45,7 +45,7 @@ public:
   }
   
   void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
-    JsiDerivedDomNodeProp::setProps(runtime, props);
+    JsiDerivedProp::setProps(runtime, props);
     
     if (_prop->hasValue()) {
       if (_prop->getPropValue()->getType() == PropType::Object) {
@@ -57,7 +57,7 @@ public:
   }
   
 private:
-  std::shared_ptr<JsiObjectDomNodeProp> _prop;
+  std::shared_ptr<JsiObjectProp> _prop;
   std::shared_ptr<JsiValue> _x;
   std::shared_ptr<JsiValue> _y;
 };

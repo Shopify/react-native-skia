@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiDomNodeProp.h"
+#include "JsiProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -20,11 +20,11 @@ static PropId PropNameHeight = JsiPropId::get("height");
  The property can either be a Javascript property or a host object representing an SkRect.
  */
 class RectProp:
-public JsiDerivedDomNodeProp<SkRect> {
+public JsiDerivedProp<SkRect> {
 public:
   RectProp(PropId name):
-  JsiDerivedDomNodeProp() {
-    _prop = addChildProp(std::make_shared<JsiObjectDomNodeProp>(name));
+  JsiDerivedProp() {
+    _prop = addChildProp(std::make_shared<JsiObjectProp>(name));
   }
   
   void updateDerivedValue(JsiDomNodeProps* props) override {
@@ -46,7 +46,7 @@ public:
   }
   
   void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
-    JsiDerivedDomNodeProp::setProps(runtime, props);
+    JsiDerivedProp::setProps(runtime, props);
     
     if (_prop->hasValue() && _prop->getPropValue()->getType() == PropType::Object) {
       // Save props for fast access
@@ -62,21 +62,21 @@ private:
   std::shared_ptr<JsiValue> _y;
   std::shared_ptr<JsiValue> _width;
   std::shared_ptr<JsiValue> _height;
-  std::shared_ptr<JsiObjectDomNodeProp> _prop;
+  std::shared_ptr<JsiObjectProp> _prop;
 };
 
 /**
  Reads rect properties from a node's properties
  */
 class RectPropFromProps:
-public JsiDerivedDomNodeProp<SkRect> {
+public JsiDerivedProp<SkRect> {
 public:
   RectPropFromProps():
-  JsiDerivedDomNodeProp<SkRect>() {
-    _x = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameX, PropType::Number));
-    _y = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameY, PropType::Number));
-    _width = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameWidth, PropType::Number));
-    _height = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameHeight, PropType::Number));
+  JsiDerivedProp<SkRect>() {
+    _x = addChildProp(std::make_shared<JsiProp>(PropNameX, PropType::Number));
+    _y = addChildProp(std::make_shared<JsiProp>(PropNameY, PropType::Number));
+    _width = addChildProp(std::make_shared<JsiProp>(PropNameWidth, PropType::Number));
+    _height = addChildProp(std::make_shared<JsiProp>(PropNameHeight, PropType::Number));
   }
   
   void updateDerivedValue(JsiDomNodeProps* props) {
@@ -89,20 +89,20 @@ public:
   }
   
 private:
-  std::shared_ptr<JsiDomNodeProp> _x;
-  std::shared_ptr<JsiDomNodeProp> _y;
-  std::shared_ptr<JsiDomNodeProp> _width;
-  std::shared_ptr<JsiDomNodeProp> _height;
+  std::shared_ptr<JsiProp> _x;
+  std::shared_ptr<JsiProp> _y;
+  std::shared_ptr<JsiProp> _width;
+  std::shared_ptr<JsiProp> _height;
 };
 
 /**
  Reads rect props from either a given property or from the property object itself.
  */
 class RectProps:
-  public JsiDerivedDomNodeProp<SkRect> {
+  public JsiDerivedProp<SkRect> {
 public:
   RectProps(PropId name):
-    JsiDerivedDomNodeProp<SkRect>() {
+    JsiDerivedProp<SkRect>() {
     _rectProp = addChildProp<RectProp>(std::make_shared<RectProp>(name));
     _rectPropFromProps = addChildProp<RectPropFromProps>(std::make_shared<RectPropFromProps>());
   }

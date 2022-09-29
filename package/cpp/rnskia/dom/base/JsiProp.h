@@ -16,7 +16,7 @@ enum struct BoolValue {
 /**
  Base class for Dom Node Properties
  */
-class JsiBaseDomNodeProp{
+class JsiBaseProp {
 public:
   /**
    Called when any of the property values have changed by React updating properties. This is where we'll try to read property
@@ -41,12 +41,12 @@ public:
 /**
  Simple class for reading a property by name from the Dom Node properties object.
  */
-class JsiDomNodeProp: public JsiBaseDomNodeProp {
+class JsiProp: public JsiBaseProp {
 public:
   /**
    Constructs a new optional dom node properrty
    */
-  JsiDomNodeProp(PropId name, PropType type):
+  JsiProp(PropId name, PropType type):
   _name(name), _type(type) {}
   
   /**
@@ -102,14 +102,14 @@ private:
 /**
  Property class for reading either an object or a host object.
  */
-class JsiObjectDomNodeProp : public JsiDomNodeProp {
+class JsiObjectProp : public JsiProp {
 public:
-  JsiObjectDomNodeProp(PropId name):
-  JsiDomNodeProp(name, PropType::Object) {}
+  JsiObjectProp(PropId name):
+  JsiProp(name, PropType::Object) {}
   
   virtual void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     try {
-      JsiDomNodeProp::setProps(runtime, props);
+      JsiProp::setProps(runtime, props);
     } catch (...) {
       setValue(props->tryReadHostObjectProperty(runtime, getName()));
     }
@@ -120,9 +120,9 @@ public:
  Class for composing multiple properties into a derived property value
  */
 template <typename T>
-class JsiDerivedDomNodeProp: public JsiBaseDomNodeProp {
+class JsiDerivedProp: public JsiBaseProp {
 public:
-  JsiDerivedDomNodeProp() {}
+  JsiDerivedProp() {}
   
   /**
    Override to calculate the derived value from child properties
@@ -170,7 +170,7 @@ public:
   /**
    Adds a property to the derived property child props.
    */
-  template <typename P = JsiBaseDomNodeProp>
+  template <typename P = JsiBaseProp>
   std::shared_ptr<P> addChildProp(std::shared_ptr<P> prop) {
     _childProps.push_back(prop);
     return prop;
@@ -185,7 +185,7 @@ protected:
 private:
   T _derivedValue;
   BoolValue _cachedHasValue = BoolValue::NotSet;
-  std::vector<std::shared_ptr<JsiBaseDomNodeProp>> _childProps;
+  std::vector<std::shared_ptr<JsiBaseProp>> _childProps;
 };
 
 }

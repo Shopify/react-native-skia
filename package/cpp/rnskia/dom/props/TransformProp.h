@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiDomNodeProp.h"
+#include "JsiProp.h"
 #include "JsiSkMatrix.h"
 
 namespace RNSkia {
@@ -18,10 +18,10 @@ static PropId PropNameRotate = JsiPropId::get("rotate");
 static PropId PropNameRotateZ = JsiPropId::get("rotateZ");
 
 class TransformProp:
-public JsiDerivedDomNodeProp<std::shared_ptr<SkMatrix>> {
+public JsiDerivedProp<std::shared_ptr<SkMatrix>> {
 public:
-  TransformProp(PropId name): JsiDerivedDomNodeProp<std::shared_ptr<SkMatrix>>() {
-    _prop = addChildProp(std::make_shared<JsiDomNodeProp>(name, PropType::Array));
+  TransformProp(PropId name): JsiDerivedProp<std::shared_ptr<SkMatrix>>() {
+    _prop = addChildProp(std::make_shared<JsiProp>(name, PropType::Array));
   }
   
   void updateDerivedValue(JsiDomNodeProps* props) override {
@@ -66,7 +66,7 @@ public:
   }
   
 private:
-  std::shared_ptr<JsiDomNodeProp> _prop;
+  std::shared_ptr<JsiProp> _prop;
 };
 
 }

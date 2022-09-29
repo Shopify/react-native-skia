@@ -22,7 +22,7 @@ public:
                    size_t count) :
   JsiDomNode(context, runtime, arguments, count),
     _paintProp(std::make_unique<PaintProp>()),
-    _opacityProp(std::make_unique<JsiDomNodeProp>(PropNameOpacity, PropType::Number)),
+    _opacityProp(std::make_unique<JsiProp>(PropNameOpacity, PropType::Number)),
     _matrixProp(std::make_unique<MatrixProp>(PropNameMatrix)),
     _transformProp(std::make_unique<TransformProp>(PropNameTransform)),
     _originProp(std::make_unique<PointProp>(PropNameOrigin)) {}
@@ -221,7 +221,7 @@ private:
   std::unique_ptr<MatrixProp> _matrixProp;
   std::unique_ptr<TransformProp> _transformProp;
   std::unique_ptr<PaintProp> _paintProp;
-  std::unique_ptr<JsiDomNodeProp> _opacityProp;
+  std::unique_ptr<JsiProp> _opacityProp;
   std::shared_ptr<JsiDrawingContext> _cachedContext;
 };
 
