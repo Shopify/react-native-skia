@@ -92,20 +92,20 @@ public:
     // Blend mode
     if (_blendMode->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameBlendMode))) {
       ensureDerivedValue();
-      auto blendValue = (int)_strokeJoin->getPropValue()->getAsNumber();
-      getDerivedValue()->setBlendMode((SkBlendMode)blendValue);
+      auto blendModeValue = _strokeJoin->getPropValue()->getAsString();
+      getDerivedValue()->setBlendMode(getBlendModeFromValue(blendModeValue));
     }
     // Stroke Join
     if (_strokeJoin->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameStrokeJoin))) {
       ensureDerivedValue();
-      auto joinValue = (int)_strokeJoin->getPropValue()->getAsNumber();
-      getDerivedValue()->setStrokeJoin((SkPaint::Join)joinValue);
+      auto joinValue = _strokeJoin->getPropValue()->getAsString();
+      getDerivedValue()->setStrokeJoin(getJoinFromValue(joinValue));
     }
     // Stroke Cap
     if (_strokeCap->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameStrokeCap))) {
       ensureDerivedValue();
-      auto capValue = (int)_strokeCap->getPropValue()->getAsNumber();
-      getDerivedValue()->setStrokeCap((SkPaint::Cap)capValue);
+      auto capValue = _strokeCap->getPropValue()->getAsString();
+      getDerivedValue()->setStrokeCap(getCapFromValue(capValue));
     }
     // Stroke Miter
     if (_strokeMiter->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameStrokeMiter))) {
@@ -134,6 +134,93 @@ public:
     setDerivedValue(std::make_shared<SkPaint>(*_parentPaint));
   }
 private:
+  
+  SkPaint::Join getJoinFromValue(const std::string& value) {
+    if (value == "miter") {
+      return SkPaint::Join::kMiter_Join;
+    } else if (value == "round") {
+      return SkPaint::Join::kRound_Join;
+    } else if (value == "bevel") {
+      return SkPaint::Join::kBevel_Join;
+    }
+    throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke join.");
+  }
+  
+  SkPaint::Cap getCapFromValue(const std::string& value) {
+    if (value == "round") {
+      return SkPaint::Cap::kRound_Cap;
+    } else if (value == "butt") {
+      return SkPaint::Cap::kButt_Cap;
+    } else if (value == "square") {
+      return SkPaint::Cap::kSquare_Cap;
+    }
+    throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke cap.");
+  }
+  
+  SkBlendMode getBlendModeFromValue(const std::string& value) {
+    if (value == "clear") {
+      return SkBlendMode::kClear;
+    } else if (value == "src") {
+      return SkBlendMode::kSrc;
+    } else if (value == "dst") {
+      return SkBlendMode::kDst;
+    } else if (value == "srcOver") {
+      return SkBlendMode::kSrcOver;
+    } else if (value == "dstOver") {
+      return SkBlendMode::kDstOver;
+    } else if (value == "srcIn") {
+      return SkBlendMode::kSrcIn;
+    } else if (value == "kDstIn") {
+      return SkBlendMode::kDstIn;
+    } else if (value == "srcOut") {
+      return SkBlendMode::kSrcOut;
+    } else if (value == "dtsOut") {
+      return SkBlendMode::kDstOut;
+    } else if (value == "srcATop") {
+      return SkBlendMode::kSrcATop;
+    } else if (value == "dstATop") {
+      return SkBlendMode::kDstATop;
+    } else if (value == "xor") {
+      return SkBlendMode::kXor;
+    } else if (value == "plus") {
+      return SkBlendMode::kPlus;
+    } else if (value == "modulate") {
+      return SkBlendMode::kModulate;
+    } else if (value == "screen") {
+      return SkBlendMode::kScreen;
+    } else if (value == "overlay") {
+      return SkBlendMode::kOverlay;
+    } else if (value == "darken") {
+      return SkBlendMode::kDarken;
+    } else if (value == "lighten") {
+      return SkBlendMode::kLighten;
+    } else if (value == "colorDodge") {
+      return SkBlendMode::kColorDodge;
+    } else if (value == "colorBurn") {
+      return SkBlendMode::kColorBurn;
+    } else if (value == "hardLight") {
+      return SkBlendMode::kHardLight;
+    } else if (value == "softLight") {
+      return SkBlendMode::kSoftLight;
+    } else if (value == "difference") {
+      return SkBlendMode::kDifference;
+    } else if (value == "exclusion") {
+      return SkBlendMode::kExclusion;
+    } else if (value == "multiply") {
+      return SkBlendMode::kMultiply;
+    } else if (value == "hue") {
+      return SkBlendMode::kHue;
+    } else if (value == "saturation") {
+      return SkBlendMode::kSaturation;
+    } else if (value == "color") {
+      return SkBlendMode::kColor;
+    } else if (value == "luminosity") {
+      return SkBlendMode::kLuminosity;
+    }
+      
+    throw std::runtime_error("Property value \"" + value + "\" is not a legal blend mode.");
+  }
+  
   bool _parentPaintWasReset = true;
   std::shared_ptr<SkPaint> _parentPaint;
   std::shared_ptr<JsiDomNodeProp> _color;
