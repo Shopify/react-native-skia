@@ -23,6 +23,8 @@ public:
     };
   }
   
+  const char *getType() override { return GroupNodeName; }
+  
 protected:
   void renderNode(JsiBaseDrawingContext* context) override {
     for (auto &child: getChildren()) {
@@ -32,9 +34,6 @@ protected:
       }
     }
   }
-  
-  // FIXME: Add to enum and sync with JS somehow?
-  const char *getType() override { return GroupNodeName; }
   
 private:
   SkRect _rect;

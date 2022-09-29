@@ -1,38 +1,71 @@
 #pragma once
 
 #include "JsiDomDeclarationNode.h"
-
+#include "PaintProp.h"
 #include "JsiSkRect.h"
 
 namespace RNSkia {
 
-class JsiPaintNode : public JsiDomDeclarationNode {
+class JsiPaintNode : public JsiDomDeclarationNode<std::shared_ptr<SkPaint>> {
 public:
   JsiPaintNode(std::shared_ptr <RNSkPlatformContext> context,
                jsi::Runtime &runtime,
                const jsi::Value *arguments,
                size_t count) :
-  JsiDomDeclarationNode(context, runtime, arguments, count) {}
+  JsiDomDeclarationNode(context, runtime, arguments, count),
+  _paintProp(std::make_unique<PaintProp>()),
+  _opacityProp(std::make_unique<JsiDomNodeProp>(PropNameOpacity, PropType::Number)) {}
   
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr <RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA{
-      auto rectNode = std::make_shared<JsiRectNode>(context, runtime, arguments, count);
-      return jsi::Object::createFromHostObject(runtime, std::move(rectNode));
+      auto node = std::make_shared<JsiPaintNode>(context, runtime, arguments, count);
+      return jsi::Object::createFromHostObject(runtime, std::move(node));
     };
+  }  
+  
+  std::shared_ptr<SkPaint> materialize(JsiBaseDrawingContext* context) override {
+    // Since the paint props uses parent paint, we need to set it before we call onPropsChanged
+    _paintProp->setParentPaint(context->getPaint());
+    
+    auto props = getProperties();
+    if (props != nullptr) {
+      
+      // Make sure we commit any waiting transactions in the props object
+      props->commitTransactions();
+      
+      // Make sure we update any properties that were changed in sub classes so that
+      // they can update any derived values
+      if (props->getHasPropChanges()) {
+        onPropsChanged(props);
+        props->resetPropChanges();
+      }
+    }
+    
+    return _paintProp->getDerivedValue();
   }
   
 protected:
-  void
-  setProp(jsi::Runtime &runtime, const std::string key, const jsi::Value &value) override {
-    JsiDomDeclarationNode::setProp(runtime, key, value);
+  const char *getDeclarationType() override { return "skPaint"; }
+  
+  virtual void onPropsChanged(JsiDomNodeProps* props) override {
+    JsiDomNode::onPropsChanged(props);
+    
+    _paintProp->updatePropValues(props);
+    _opacityProp->updatePropValues(props);
   }
   
-  // FIXME: Add to enum and sync with JS somehow?
-  const char *getType() override { return "skPaint"; }
+  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+    JsiDomNode::onPropsSet(runtime, props);
+    
+    _paintProp->setProps(runtime, props);
+    _opacityProp->setProps(runtime, props);
+  }
   
 private:
   std::shared_ptr <SkRect> _rect;
+  std::unique_ptr<PaintProp> _paintProp;
+  std::unique_ptr<JsiDomNodeProp> _opacityProp;
 };
 
 }

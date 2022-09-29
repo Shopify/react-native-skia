@@ -1,6 +1,6 @@
 import type { ForwardedRef } from "react";
 
-import { NodeType } from "../dom/types";
+import { DeclarationNode, NodeType, RenderNode } from "../dom/types";
 import type {
   CircleProps,
   DrawingNodeProps,
@@ -56,9 +56,8 @@ import type {
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
 import type { PaintNode } from "../dom/nodes/PaintNode";
-import type { SkRect, SkRRect } from "../skia";
+import type { SkPaint, SkRect, SkRRect } from "../skia";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
-import type { JsiRenderNode } from "../dom/nodes/RenderNode";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
@@ -71,7 +70,8 @@ declare global {
     RRectNode: (
       props: RoundedRectProps
     ) => JsiDrawingNode<RoundedRectProps, SkRRect>;
-    GroupNode: (props: GroupProps) => JsiRenderNode<GroupProps>;
+    GroupNode: (props: GroupProps) => RenderNode<GroupProps>;
+    PaintNode: (props: PaintProps) => DeclarationNode<PaintProps, SkPaint>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

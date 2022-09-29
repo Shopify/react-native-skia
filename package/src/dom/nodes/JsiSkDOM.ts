@@ -132,7 +132,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Paint(props: PaintProps) {
-    return new PaintNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.PaintNode
+      ? global.SkiaDomApi.PaintNode(props ?? {})
+      : new PaintNode(this.ctx, props);
   }
 
   // Drawings

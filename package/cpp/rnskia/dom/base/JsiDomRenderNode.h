@@ -2,6 +2,7 @@
 #pragma once
 
 #include "JsiDomNode.h"
+#include "JsiDomDeclarationNode.h"
 #include "JsiDrawingContext.h"
 #include "PointProp.h"
 #include "MatrixProp.h"
@@ -104,6 +105,14 @@ protected:
    */
   virtual void renderNode(JsiBaseDrawingContext* context) = 0;
   
+  /**
+   Invalidates caches. Can be used by child nodes to invalidate when child changes affect parent
+   */
+  virtual void invalidate() {
+    // TODO: Invalidate the paint cache like in JS - this is a callback
+    // from children in the node
+  }
+  
   virtual void onPropsChanged(JsiDomNodeProps* props) override {
     JsiDomNode::onPropsChanged(props);
     
@@ -126,6 +135,43 @@ protected:
     props->tryReadNumericProperty(runtime, PropNameOpacity);
     
     _hasMatrixOrTransformProp = _matrixProp->hasValue() || _transformProp->hasValue();
+  }
+  
+  /**
+   Adds invalidate callback to the declaration node
+   */
+  virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
+    auto declaration = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
+    if (declaration != nullptr) {
+      // set invalidate callback
+      declaration->setInvalidateCallback(std::bind(&JsiDomRenderNode::invalidate, this));
+    }
+    JsiDomNode::addChild(child);
+  }
+  
+  /**
+   Adds invalidate callback to the declaration node
+   */
+  virtual void
+  insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
+    auto declaration = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
+    if (declaration != nullptr) {
+      // set invalidate callback
+      declaration->setInvalidateCallback(std::bind(&JsiDomRenderNode::invalidate, this));
+    }
+    JsiDomNode::insertChildBefore(child, before);
+  }
+  
+  /**
+   Erase invalidate callback on child removal
+   */
+  void removeChild(std::shared_ptr<JsiDomNode> child) override {
+    auto declaration = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
+    if (declaration != nullptr) {
+      // set invalidate callback
+      declaration->setInvalidateCallback(nullptr);
+    }    
+    JsiDomNode::removeChild(child);
   }
   
 private:

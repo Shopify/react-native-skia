@@ -30,7 +30,7 @@ public:
     _strokeWidth = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeWidth, PropType::Number));
     _blendMode = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameBlendMode, PropType::String));
     _strokeJoin = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeJoin, PropType::String));
-    _strokeCap = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeCap, PropType::Number));
+    _strokeCap = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeCap, PropType::String));
     _strokeMiter = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameStrokeMiter, PropType::Number));
     _antiAlias = addChildProp(std::make_shared<JsiDomNodeProp>(PropNameAntiAlias, PropType::Number));
   }

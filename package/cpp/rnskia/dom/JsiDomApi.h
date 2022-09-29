@@ -6,6 +6,8 @@
 #include "nodes/JsiRRectNode.h"
 #include "nodes/JsiGroupNode.h"
 
+#include "nodes/JsiPaintNode.h"
+
 namespace RNSkia
 {
 
@@ -20,6 +22,7 @@ namespace RNSkia
       installFunction("RectNode", JsiRectNode::createCtor(context));
       installFunction("RRectNode", JsiRRectNode::createCtor(context));
       installFunction("GroupNode", JsiGroupNode::createCtor(context));
+      installFunction("PaintNode", JsiPaintNode::createCtor(context));
     }
   };
 

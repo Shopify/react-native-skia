@@ -25,6 +25,8 @@ public:
       return jsi::Object::createFromHostObject(runtime, std::move(node));
     };
   }
+  
+  const char *getType() override { return RRectNodeName; }
     
 protected:
   void onPropsChanged(JsiDomNodeProps* props) override {
@@ -44,8 +46,6 @@ protected:
   void draw(JsiBaseDrawingContext* context) override {
     context->getCanvas()->drawRRect(_rrectProp->getDerivedValue(), *context->getPaint());
   }
-  
-  const char *getType() override { return RRectNodeName; }
   
 private:
   std::unique_ptr<RRectProps> _rrectProp;

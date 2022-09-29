@@ -111,6 +111,11 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, children),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
   
+  /**
+   Returns the type of node. Must be overridden in implementations of this abstract class.
+  */
+  virtual const char *getType() = 0;
+  
 protected:
   
   /**
@@ -119,11 +124,6 @@ protected:
   jsi::Object asHostObject(jsi::Runtime &runtime) {
     return jsi::Object::createFromHostObject(runtime, shared_from_this());
   }
-  
-  /**
-   Returns the type of node. Must be overridden in implementations of this abstract class.
-  */
-  virtual const char *getType() = 0;
   
   /**
    Called when properties are set from the JS reconciler on the node. To optimize reading properties
@@ -189,7 +189,7 @@ protected:
   /**
    Removes a child. Removing a child will remove the child from the array of children and call dispose on the child node.
    */
-  void removeChild(std::shared_ptr<JsiDomNode> child) {
+  virtual void removeChild(std::shared_ptr<JsiDomNode> child) {
     _children.erase(std::remove_if(_children.begin(), _children.end(),
                                    [child](const auto &node) { return node == child; }),
                     _children.end());

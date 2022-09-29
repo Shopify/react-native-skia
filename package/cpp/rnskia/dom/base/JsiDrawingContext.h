@@ -31,6 +31,12 @@ class JsiDrawingContext : public JsiBaseDrawingContext {
 public:
   JsiDrawingContext() : JsiBaseDrawingContext() {}
   
+  JsiDrawingContext(JsiBaseDrawingContext* parent) : JsiBaseDrawingContext() {
+    _canvas = parent->getCanvas();
+    _paint = parent->getPaint();
+    _opacity = parent->getOpacity();
+  }
+  
   JsiDrawingContext(SkCanvas* canvas,
                     std::shared_ptr<SkPaint> paint,
                     double opacity) : JsiBaseDrawingContext() {
