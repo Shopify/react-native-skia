@@ -147,12 +147,11 @@ protected:
    as a signal that things have changed.
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
-    {
-      if (_props != nullptr) {
-        _props->unsubscribe();
-      }
-      _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
+    std::lock_guard<std::mutex> lock(_lock);
+    if (_props != nullptr) {
+      _props->unsubscribe();
     }
+    _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
     onPropsSet(runtime, _props.get());
   };
   
@@ -167,6 +166,7 @@ protected:
    Returns all properties for this node
    */
   JsiDomNodeProps* getProperties() {
+    std::lock_guard<std::mutex> lock(_lock);
     return _props.get();
   }
   
@@ -211,9 +211,9 @@ protected:
   }
   
 private:
-  
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::shared_ptr<JsiDomNodeProps> _props;
+  std::mutex _lock;
 };
 
 }
