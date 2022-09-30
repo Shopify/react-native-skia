@@ -9,11 +9,8 @@ class JsiGroupNode :
 public JsiDomRenderNode,
 public JsiDomNodeCtor<JsiGroupNode> {
 public:
-  JsiGroupNode(std::shared_ptr<RNSkPlatformContext> context,
-               jsi::Runtime &runtime,
-               const jsi::Value *arguments,
-               size_t count) :
-  JsiDomRenderNode(context, runtime, arguments, count, "skGroup") {}
+  JsiGroupNode(std::shared_ptr<RNSkPlatformContext> context) :
+    JsiDomRenderNode(context, "skGroup") {}
   
 protected:
   void renderNode(JsiBaseDrawingContext* context) override {

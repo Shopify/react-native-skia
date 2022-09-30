@@ -8,12 +8,8 @@ namespace RNSkia {
 
 class JsiBaseDomDeclarationNode: public JsiDomNode {
 public:
-  JsiBaseDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context,
-                        jsi::Runtime &runtime,
-                        const jsi::Value *arguments,
-                        size_t count,
-                        const char* type) :
-  JsiDomNode(context, runtime, arguments, count, type) {}
+  JsiBaseDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context, const char* type) :
+  JsiDomNode(context, type) {}
   
   virtual void setInvalidateCallback(std::function<void()> cb) = 0;
 };
@@ -21,12 +17,8 @@ public:
 template <typename T>
 class JsiDomDeclarationNode : public JsiBaseDomDeclarationNode {
 public:
-  JsiDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context,
-                        jsi::Runtime &runtime,
-                        const jsi::Value *arguments,
-                        size_t count,
-                        const char* type) :
-  JsiBaseDomDeclarationNode(context, runtime, arguments, count, type) {}
+  JsiDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context, const char* type) :
+  JsiBaseDomDeclarationNode(context, type) {}
   
   JSI_PROPERTY_GET(declarationType) {
     return jsi::String::createFromUtf8(runtime, std::string(getType()));

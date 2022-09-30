@@ -10,11 +10,8 @@ namespace RNSkia {
 class JsiDomDrawingNode : public JsiDomRenderNode {
 public:
   JsiDomDrawingNode(std::shared_ptr<RNSkPlatformContext> context,
-                    jsi::Runtime &runtime,
-                    const jsi::Value *arguments,
-                    size_t count,
                     const char* type) :
-  JsiDomRenderNode(context, runtime, arguments, count, type) {}
+  JsiDomRenderNode(context, type) {}
   
 protected:
   /**

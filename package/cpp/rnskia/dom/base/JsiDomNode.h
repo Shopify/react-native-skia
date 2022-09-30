@@ -2,6 +2,7 @@
 
 #include "JsiHostObject.h"
 #include "JsiDomNodeProps.h"
+#include "JsiProp.h"
 
 #include <vector>
 #include <unordered_map>
@@ -20,7 +21,7 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr <RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA{
-      auto node = std::make_shared<TNode>(context, runtime, arguments, count);
+      auto node = std::make_shared<TNode>(context);      
       return jsi::Object::createFromHostObject(runtime, std::move(node));
     };
   }
@@ -37,11 +38,7 @@ public:
   /**
    Contructor. Takes as parameters the values comming from the JS world that initialized the class.
    */
-  JsiDomNode(std::shared_ptr<RNSkPlatformContext>,
-             jsi::Runtime &runtime,
-             const jsi::Value *arguments,
-             size_t count,
-             const char* type) :
+  JsiDomNode(std::shared_ptr<RNSkPlatformContext>, const char* type) :
   _type(type),
   JsiHostObject() {}
   
@@ -150,13 +147,20 @@ protected:
   virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) {
     // We don't need to do anything in the base class since we don't have any
     // properties that we want to read.
+    for (auto &p: _activeProps) {
+      p->setProps(runtime, props);
+    }
   };
   
   /**
    Called when one or more properties have changed from the native side due to updates
    from animation values or other mechanisms.
    */
-  virtual void onPropsChanged(JsiDomNodeProps* props) {};
+  virtual void onPropsChanged(JsiDomNodeProps* props) {
+    for (auto &p: _activeProps) {
+      p->updatePropValues(props);
+    }
+  };
   
   /**
    Native implementation of the set properties method. This is called from the reconciler when
@@ -185,6 +189,15 @@ protected:
   JsiDomNodeProps* getProperties() {
     std::lock_guard<std::mutex> lock(_lock);
     return _props.get();
+  }
+  
+  /**
+   Adds a property to the node. A property is an active value that the node uses.
+   */
+  template <typename T>
+  std::shared_ptr<T> addProperty(std::shared_ptr<T> prop) {
+    _activeProps.push_back(prop);
+    return prop;
   }
   
   /**
@@ -230,6 +243,7 @@ protected:
 private:
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::shared_ptr<JsiDomNodeProps> _props;
+  std::vector<std::shared_ptr<JsiBaseProp>> _activeProps;
   std::mutex _lock;
   const char* _type;
 };

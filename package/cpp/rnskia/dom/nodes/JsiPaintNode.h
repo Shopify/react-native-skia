@@ -10,13 +10,11 @@ class JsiPaintNode :
 public JsiDomDeclarationNode<std::shared_ptr<SkPaint>>,
 public JsiDomNodeCtor<JsiPaintNode> {
 public:
-  JsiPaintNode(std::shared_ptr <RNSkPlatformContext> context,
-               jsi::Runtime &runtime,
-               const jsi::Value *arguments,
-               size_t count) :
-  JsiDomDeclarationNode(context, runtime, arguments, count, "skPaint"),
-  _paintProp(std::make_unique<PaintProp>()),
-  _opacityProp(std::make_unique<JsiProp>(PropNameOpacity, PropType::Number)) {}
+  JsiPaintNode(std::shared_ptr <RNSkPlatformContext> context) :
+    JsiDomDeclarationNode(context, "skPaint") {
+    _paintProp = addProperty(std::make_shared<PaintProp>());
+    _opacityProp = addProperty(std::make_shared<JsiProp>(PropNameOpacity, PropType::Number));
+  }
   
   std::shared_ptr<SkPaint> materialize(JsiBaseDrawingContext* context) override {
     // Since the paint props uses parent paint, we need to set it before we call onPropsChanged
@@ -37,27 +35,12 @@ public:
     }
     
     return _paintProp->getDerivedValue();
-  }
-  
-protected:
-  virtual void onPropsChanged(JsiDomNodeProps* props) override {
-    JsiDomNode::onPropsChanged(props);
-    
-    _paintProp->updatePropValues(props);
-    _opacityProp->updatePropValues(props);
-  }
-  
-  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
-    JsiDomNode::onPropsSet(runtime, props);
-    
-    _paintProp->setProps(runtime, props);
-    _opacityProp->setProps(runtime, props);
-  }
+  }  
   
 private:
   std::shared_ptr <SkRect> _rect;
-  std::unique_ptr<PaintProp> _paintProp;
-  std::unique_ptr<JsiProp> _opacityProp;
+  std::shared_ptr<PaintProp> _paintProp;
+  std::shared_ptr<JsiProp> _opacityProp;
 };
 
 }

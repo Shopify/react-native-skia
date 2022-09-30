@@ -17,11 +17,8 @@ static PropId PropNameOpacity = JsiPropId::get("opacity");
 class JsiDomRenderNode : public JsiDomNode {
 public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
-                   jsi::Runtime &runtime,
-                   const jsi::Value *arguments,
-                   size_t count,
                    const char* type) :
-  JsiDomNode(context, runtime, arguments, count, type),
+  JsiDomNode(context, type),
     _paintProp(std::make_unique<PaintProp>()),
     _opacityProp(std::make_unique<JsiProp>(PropNameOpacity, PropType::Number)),
     _matrixProp(std::make_unique<MatrixProp>(PropNameMatrix)),
@@ -218,6 +215,7 @@ private:
   
   double _prevOpacity;
   bool _hasMatrixOrTransformProp;
+  std::vector<JsiBaseProp> _props;
   std::unique_ptr<PointProp> _originProp;
   std::unique_ptr<MatrixProp> _matrixProp;
   std::unique_ptr<TransformProp> _transformProp;
