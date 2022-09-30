@@ -11,8 +11,9 @@ public:
   JsiBaseDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context,
                         jsi::Runtime &runtime,
                         const jsi::Value *arguments,
-                        size_t count) :
-  JsiDomNode(context, runtime, arguments, count) {}
+                        size_t count,
+                        const char* type) :
+  JsiDomNode(context, runtime, arguments, count, type) {}
   
   virtual void setInvalidateCallback(std::function<void()> cb) = 0;
 };
@@ -23,11 +24,12 @@ public:
   JsiDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context,
                         jsi::Runtime &runtime,
                         const jsi::Value *arguments,
-                        size_t count) :
-  JsiBaseDomDeclarationNode(context, runtime, arguments, count) {}
+                        size_t count,
+                        const char* type) :
+  JsiBaseDomDeclarationNode(context, runtime, arguments, count, type) {}
   
   JSI_PROPERTY_GET(declarationType) {
-    return jsi::String::createFromUtf8(runtime, getDeclarationType());
+    return jsi::String::createFromUtf8(runtime, std::string(getType()));
   }
   
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiDomDeclarationNode, declarationType),
@@ -52,10 +54,7 @@ public:
    Called when rendering the tree to create all derived values from all nodes.
    */
   virtual T materialize(JsiBaseDrawingContext* context) = 0;
-  
-  virtual const char* getDeclarationType() = 0;
-  const char* getType() override { return getDeclarationType(); }
-  
+    
 protected:
   
   /**

@@ -5,26 +5,14 @@
 
 namespace RNSkia {
 
-static const char* RectNodeName = "skRect";
-
-class JsiRectNode : public JsiDomDrawingNode {
+class JsiRectNode : public JsiDomDrawingNode, public JsiDomNodeCtor<JsiRectNode> {
 public:
   JsiRectNode(std::shared_ptr<RNSkPlatformContext> context,
               jsi::Runtime &runtime,
               const jsi::Value *arguments,
               size_t count) :
-  JsiDomDrawingNode(context, runtime, arguments, count),
+  JsiDomDrawingNode(context, runtime, arguments, count, "skRect"),
   _rectProp(std::make_unique<RectProps>(PropNameRect)) {}
-  
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-      auto node = std::make_shared<JsiRectNode>(context, runtime, arguments, count);
-      return jsi::Object::createFromHostObject(runtime, std::move(node));
-    };
-  }
-  
-  const char *getType() override { return RectNodeName; }
     
 protected:
   void onPropsChanged(JsiDomNodeProps* props) override {

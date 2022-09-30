@@ -12,8 +12,9 @@ public:
   JsiDomDrawingNode(std::shared_ptr<RNSkPlatformContext> context,
                     jsi::Runtime &runtime,
                     const jsi::Value *arguments,
-                    size_t count) :
-  JsiDomRenderNode(context, runtime, arguments, count) {}
+                    size_t count,
+                    const char* type) :
+  JsiDomRenderNode(context, runtime, arguments, count, type) {}
   
 protected:
   /**

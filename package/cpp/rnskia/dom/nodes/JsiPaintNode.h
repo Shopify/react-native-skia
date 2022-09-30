@@ -6,23 +6,17 @@
 
 namespace RNSkia {
 
-class JsiPaintNode : public JsiDomDeclarationNode<std::shared_ptr<SkPaint>> {
+class JsiPaintNode :
+public JsiDomDeclarationNode<std::shared_ptr<SkPaint>>,
+public JsiDomNodeCtor<JsiPaintNode> {
 public:
   JsiPaintNode(std::shared_ptr <RNSkPlatformContext> context,
                jsi::Runtime &runtime,
                const jsi::Value *arguments,
                size_t count) :
-  JsiDomDeclarationNode(context, runtime, arguments, count),
+  JsiDomDeclarationNode(context, runtime, arguments, count, "skPaint"),
   _paintProp(std::make_unique<PaintProp>()),
   _opacityProp(std::make_unique<JsiProp>(PropNameOpacity, PropType::Number)) {}
-  
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr <RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA{
-      auto node = std::make_shared<JsiPaintNode>(context, runtime, arguments, count);
-      return jsi::Object::createFromHostObject(runtime, std::move(node));
-    };
-  }  
   
   std::shared_ptr<SkPaint> materialize(JsiBaseDrawingContext* context) override {
     // Since the paint props uses parent paint, we need to set it before we call onPropsChanged
@@ -46,8 +40,6 @@ public:
   }
   
 protected:
-  const char *getDeclarationType() override { return "skPaint"; }
-  
   virtual void onPropsChanged(JsiDomNodeProps* props) override {
     JsiDomNode::onPropsChanged(props);
     

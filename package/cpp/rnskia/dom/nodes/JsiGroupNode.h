@@ -5,25 +5,15 @@
 
 namespace RNSkia {
 
-static const char *GroupNodeName = "skGroup";
-
-class JsiGroupNode : public JsiDomRenderNode {
+class JsiGroupNode :
+public JsiDomRenderNode,
+public JsiDomNodeCtor<JsiGroupNode> {
 public:
   JsiGroupNode(std::shared_ptr<RNSkPlatformContext> context,
                jsi::Runtime &runtime,
                const jsi::Value *arguments,
                size_t count) :
-  JsiDomRenderNode(context, runtime, arguments, count) {}
-  
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-      auto node = std::make_shared<JsiGroupNode>(context, runtime, arguments, count);
-      return jsi::Object::createFromHostObject(runtime, std::move(node));
-    };
-  }
-  
-  const char *getType() override { return GroupNodeName; }
+  JsiDomRenderNode(context, runtime, arguments, count, "skGroup") {}
   
 protected:
   void renderNode(JsiBaseDrawingContext* context) override {

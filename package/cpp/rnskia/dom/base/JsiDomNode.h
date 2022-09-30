@@ -11,6 +11,21 @@
 
 namespace RNSkia {
 
+template <class TNode>
+class JsiDomNodeCtor {
+public:
+  /**
+   Constructor to add to the Api object
+   */
+  static const jsi::HostFunctionType
+  createCtor(std::shared_ptr <RNSkPlatformContext> context) {
+    return JSI_HOST_FUNCTION_LAMBDA{
+      auto node = std::make_shared<TNode>(context, runtime, arguments, count);
+      return jsi::Object::createFromHostObject(runtime, std::move(node));
+    };
+  }
+};
+
 /**
  Implements an abstract base class for nodes in the Skia Reconciler. This node coresponds to the native implementation
  of the Node.ts class in Javascript.
@@ -25,7 +40,9 @@ public:
   JsiDomNode(std::shared_ptr<RNSkPlatformContext>,
              jsi::Runtime &runtime,
              const jsi::Value *arguments,
-             size_t count) :
+             size_t count,
+             const char* type) :
+  _type(type),
   JsiHostObject() {}
   
   /**
@@ -112,9 +129,9 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
   
   /**
-   Returns the type of node. Must be overridden in implementations of this abstract class.
+   Returns the type of node.
   */
-  virtual const char *getType() = 0;
+  const char *getType() { return _type; };
   
 protected:
   
@@ -214,6 +231,7 @@ private:
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::shared_ptr<JsiDomNodeProps> _props;
   std::mutex _lock;
+  const char* _type;
 };
 
 }

@@ -5,36 +5,24 @@
 
 namespace RNSkia {
 
-static const char* RRectNodeName = "skRRect";
-
 static PropId PropNameRadius = "r";
 
-class JsiRRectNode : public JsiDomDrawingNode {
+class JsiRRectNode : public JsiDomDrawingNode, public JsiDomNodeCtor<JsiRRectNode> {
 public:
   JsiRRectNode(std::shared_ptr<RNSkPlatformContext> context,
               jsi::Runtime &runtime,
               const jsi::Value *arguments,
               size_t count) :
-  JsiDomDrawingNode(context, runtime, arguments, count),
+  JsiDomDrawingNode(context, runtime, arguments, count, "skRRect"),
   _rrectProp(std::make_unique<RRectProps>(PropNameRect)) {}
-  
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-      auto node = std::make_shared<JsiRRectNode>(context, runtime, arguments, count);
-      return jsi::Object::createFromHostObject(runtime, std::move(node));
-    };
-  }
-  
-  const char *getType() override { return RRectNodeName; }
     
 protected:
   void onPropsChanged(JsiDomNodeProps* props) override {
     JsiDomDrawingNode::onPropsChanged(props);
     _rrectProp->updatePropValues(props);
     if(!_rrectProp->hasValue()) {
-      throw std::runtime_error("Expected Rect node to have a rect property or \
-                               x, y, width and height properties.");
+      throw std::runtime_error("Expected Rounded Rect node to have a rrect property or \
+                               x, y, width, height and radius properties.");
     }
   }
   

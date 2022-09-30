@@ -19,8 +19,9 @@ public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
                    jsi::Runtime &runtime,
                    const jsi::Value *arguments,
-                   size_t count) :
-  JsiDomNode(context, runtime, arguments, count),
+                   size_t count,
+                   const char* type) :
+  JsiDomNode(context, runtime, arguments, count, type),
     _paintProp(std::make_unique<PaintProp>()),
     _opacityProp(std::make_unique<JsiProp>(PropNameOpacity, PropType::Number)),
     _matrixProp(std::make_unique<MatrixProp>(PropNameMatrix)),
