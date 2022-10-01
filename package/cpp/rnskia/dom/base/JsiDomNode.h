@@ -21,7 +21,8 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr <RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA{
-      auto node = std::make_shared<TNode>(context);      
+      auto node = std::make_shared<TNode>(context);
+      node->initializeNode(runtime, thisValue, arguments, count);
       return jsi::Object::createFromHostObject(runtime, std::move(node));
     };
   }
@@ -38,9 +39,18 @@ public:
   /**
    Contructor. Takes as parameters the values comming from the JS world that initialized the class.
    */
-  JsiDomNode(std::shared_ptr<RNSkPlatformContext>, const char* type) :
+  JsiDomNode(std::shared_ptr<RNSkPlatformContext> context, const char* type) :
   _type(type),
+  _context(context),
   JsiHostObject() {}
+  
+  /**
+   Called when creating the node, resolves properties from the node constructor. These
+   properties are materialized, ie. no animated values or anything.
+   */
+  JSI_HOST_FUNCTION(initializeNode) {
+    return setProps(runtime, thisValue, arguments, count);
+  }
   
   /**
    JS-function for setting the properties from the JS reconciler on the node.
@@ -89,13 +99,6 @@ public:
   }
   
   /**
-   JS Function returning true for native nodes.
-   */
-  JSI_HOST_FUNCTION(isNative) {
-    return true;
-  }
-  
-  /**
    JS Function for getting child nodes for this node
    */
   JSI_HOST_FUNCTION(children) {
@@ -121,7 +124,6 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, addChild),
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
-                       JSI_EXPORT_FUNC(JsiDomNode, isNative),
                        JSI_EXPORT_FUNC(JsiDomNode, children),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
   
@@ -130,7 +132,26 @@ public:
   */
   const char *getType() { return _type; };
   
+  /**
+   Returns all properties for this node
+   */
+  JsiDomNodeProps* getProperties() {
+    std::lock_guard<std::mutex> lock(_lock);
+    return _props.get();
+  }
+  
+  void setDisposeCallback(std::function<void()> disposeCallback) {
+    _disposeCallback = disposeCallback;
+  }
+  
 protected:
+  
+  /**
+   Returns the platform context
+   */
+  std::shared_ptr<RNSkPlatformContext> getContext() {
+    return _context;
+  }
   
   /**
    Returns this node as a host object that can be returned to the JS side.
@@ -169,9 +190,6 @@ protected:
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
     std::lock_guard<std::mutex> lock(_lock);
-    if (_props != nullptr) {
-      _props->unsubscribe();
-    }
     _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
     onPropsSet(runtime, _props.get());
   };
@@ -181,14 +199,6 @@ protected:
    */
   const std::vector<std::shared_ptr<JsiDomNode>> &getChildren() {
     return _children;
-  }
-  
-  /**
-   Returns all properties for this node
-   */
-  JsiDomNodeProps* getProperties() {
-    std::lock_guard<std::mutex> lock(_lock);
-    return _props.get();
   }
   
   /**
@@ -234,18 +244,20 @@ protected:
    removed - JS might hold a reference that will later be GC'ed.
    */
   void dispose() {
-    if (_props != nullptr) {
-      _props->unsubscribe();
-      _props = nullptr;
+    if (_disposeCallback != nullptr) {
+      _disposeCallback();
+      _disposeCallback = nullptr;
     }
   }
   
 private:
+  std::shared_ptr<RNSkPlatformContext> _context;
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::shared_ptr<JsiDomNodeProps> _props;
   std::vector<std::shared_ptr<JsiBaseProp>> _activeProps;
   std::mutex _lock;
   const char* _type;
+  std::function<void()> _disposeCallback;
 };
 
 }

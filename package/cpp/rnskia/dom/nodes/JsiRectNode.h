@@ -15,8 +15,8 @@ public:
 protected:
   void draw(JsiBaseDrawingContext* context) override {
     if(!_rectProp->hasValue()) {
-      throw std::runtime_error("Expected Rect node to have a rect property or \
-                               x, y, width and height properties.");
+      getContext()->raiseError(std::runtime_error("Expected Rect node to have a rect property or \
+                                                  x, y, width and height properties."));
     }
     context->getCanvas()->drawRect(_rectProp->getDerivedValue(), *context->getPaint());
   }

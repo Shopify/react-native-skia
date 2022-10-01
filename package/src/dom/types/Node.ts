@@ -14,8 +14,6 @@ import type { DeclarationType, NodeType } from "./NodeType";
 export interface Node<P> {
   type: NodeType;
 
-  isNative(): boolean;
-
   setProps(props: P): void;
   setProp<K extends keyof P>(name: K, v: P[K]): boolean;
   getProps(): P;

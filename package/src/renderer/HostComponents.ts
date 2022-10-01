@@ -62,9 +62,15 @@ import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
+import { DependencyManager } from "./DependencyManager";
+import { SkiaValue } from "../values";
 
 declare global {
   var SkiaDomApi: {
+    DependencyManager: (
+      registerValues: (values: Array<SkiaValue<unknown>>) => () => void
+    ) => DependencyManager;
+
     // FIXME: We need a better type for this
     RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
     RRectNode: (

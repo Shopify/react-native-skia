@@ -122,17 +122,8 @@ export const skHostConfig: SkiaHostConfig = {
   ) {
     debug("createInstance", type);
     const props = { ...pristineProps };
-    // Native nodes doesn't care about the props passed on the constructor,
-    // so we can safely materialize and pass them here so that the JS based
-    // nodes can use them.
     const node = createNode(container, type, materialize(props));
-    if (node.isNative() && props) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      node.setProps(props);
-    } else {
-      container.depMgr.subscribeNode(node, props);
-    }
+    container.depMgr.subscribeNode(node, props);
     return node;
   },
 
@@ -202,14 +193,9 @@ export const skHostConfig: SkiaHostConfig = {
       return;
     }
     const props = { ...nextProps };
-    // Native nodes handles materializing props internally
-    if (instance.isNative()) {
-      instance.setProps(props);
-    } else {
-      updatePayload.depMgr.unsubscribeNode(instance);
-      instance.setProps(materialize(props));
-      updatePayload.depMgr.subscribeNode(instance, props);
-    }
+    updatePayload.depMgr.unsubscribeNode(instance);
+    instance.setProps(materialize(props));
+    updatePayload.depMgr.subscribeNode(instance, props);
   },
 
   commitTextUpdate: (

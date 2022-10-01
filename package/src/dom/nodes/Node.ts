@@ -26,10 +26,6 @@ export abstract class JsiNode<P> implements Node<P> {
     this.depMgr = ctx.depMgr;
   }
 
-  isNative() {
-    return false;
-  }
-
   setProps(props: P) {
     this.props = props;
   }

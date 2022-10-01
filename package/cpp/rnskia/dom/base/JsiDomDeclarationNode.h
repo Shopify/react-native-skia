@@ -32,7 +32,6 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
                        JSI_EXPORT_FUNC(JsiDomNode, setProps),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose),
-                       JSI_EXPORT_FUNC(JsiDomNode, isNative),
                        JSI_EXPORT_FUNC(JsiDomNode, children))
 
   /**
@@ -74,8 +73,9 @@ protected:
    */
   virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
     if ( std::dynamic_pointer_cast<JsiDomDeclarationNode>(child) == nullptr) {
-      throw std::runtime_error("Cannot add a child of type \"" + std::string(child->getType()) +
-                               "\" to a \"" + std::string(getType()) + "\".");
+      getContext()->raiseError(std::runtime_error("Cannot add a child of type \"" +
+                                                  std::string(child->getType()) +
+                                                  "\" to a \"" + std::string(getType()) + "\"."));
     }
     JsiDomNode::addChild(child);
   }
@@ -86,8 +86,9 @@ protected:
   virtual void
   insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
     if (std::dynamic_pointer_cast<JsiDomDeclarationNode>(child) == nullptr) {
-      throw std::runtime_error("Cannot add a child of type \"" + std::string(child->getType()) +
-                               "\" to a \"" + std::string(getType()) + "\".");
+      getContext()->raiseError(std::runtime_error("Cannot add a child of type \"" +
+                                                  std::string(child->getType()) +
+                                                  "\" to a \"" + std::string(getType()) + "\"."));
     }
     JsiDomNode::insertChildBefore(child, before);
   }

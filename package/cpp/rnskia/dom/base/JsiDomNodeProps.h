@@ -26,22 +26,12 @@ public:
    called when any property was changed from within this class as a result of a Skia value change.
    */
   JsiDomNodeProps(jsi::Runtime &runtime, jsi::Object &&props) : _props(std::move(props)) {}
-  
-  /**
-   Destructor
+    
+  /*
+   Returns property names for active props (those used by the current node)
    */
-  ~JsiDomNodeProps() {
-    unsubscribe();
-  }
-  
-  /**
-   Unsubcribes to all Skia value change listeners.
-   */
-  void unsubscribe() {
-    for (auto &unsubscribe: _unsubscriptions) {
-      unsubscribe();
-    }
-    _unsubscriptions.clear();
+  std::vector<const char*> getKeys() {
+    return _propNames;
   }
   
   /**
@@ -64,6 +54,21 @@ public:
           _propsWithValues.erase(el.first);
         }
       }
+    }
+  }
+  
+  /**
+   Adds a property change operation to pending transactions that can be commited at a later stage
+   */
+  void addPropValueChangeTransaction(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
+    if (hasPropValue(name)) {
+      std::lock_guard<std::mutex> lock(_lock);
+      if (_transactions.count(name) == 0) {
+        _transactions.emplace(name, std::make_shared<JsiValue>(runtime, value));
+      } else {
+        _transactions.at(name)->setCurrent(runtime, value);
+      }
+      requestPropChange(name);
     }
   }
   
@@ -146,96 +151,21 @@ public:
     // Check type
     auto nativePropValue = std::make_shared<JsiValue>(runtime, jsPropValue);
     
-    // We need to check if this is an animated value - they should be handled differently
-    if (isAnimatedValue(nativePropValue)) {
-      // Add initial resolved value to props
-      auto animatedValue = getAnimatedValue(nativePropValue);
-      initializePropValue(runtime, name, animatedValue->getCurrent(runtime));
-      
-      // Add subscription to animated value
-      auto unsubscribe = animatedValue->addListener([weakSelf = weak_from_this(),
-                                                     animatedValue,
-                                                     name] (jsi::Runtime &runtime) {
-      auto self = weakSelf.lock();
-        if (self) {
-          // This code is executed on the Javascript thread, so we need to use the
-          // transaction system to update the property
-          self->addPropValueTransaction(runtime, name, animatedValue->getCurrent(runtime));
-        }
-      });
-      
-      _unsubscriptions.push_back(unsubscribe);
-      
-    } else if (isSelector(nativePropValue)) {
-      auto value = std::dynamic_pointer_cast<RNSkReadonlyValue>(nativePropValue->getValue(PropNameValue)->getAsHostObject());
-      auto selector = nativePropValue->getValue(PropNameSelector)->getAsFunction();
-      
-      // Add initial resolved value to props
-      jsi::Value current = value->getCurrent(runtime);
-      initializePropValue(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
-      
-      // Add subscription to animated value in selector
-      auto unsubscribe = value->addListener([weakSelf = weak_from_this(), nativePropValue, name, selector = std::move(
-        selector), value = std::move(value)](jsi::Runtime &runtime) {
-         auto self = weakSelf.lock();
-         if (self) {
-           jsi::Value current = value->getCurrent(runtime);
-           // This code is executed on the Javascript thread, so we need to use the
-           // transaction system to update the property
-           self->addPropValueTransaction(runtime, name, selector(runtime, jsi::Value::null(), &current, 1));
-         }
-      });
-      
-      _unsubscriptions.push_back(unsubscribe);
-      
-    } else {
-      // Regular value, just ensure that the type is correct:
-      if (nativePropValue->getType() != type && !isUndefinedOrNull) {
-        throw jsi::JSError(runtime, "Expected \"" + JsiValue::getTypeAsString(type) +
-                           "\", got \"" +
-                           JsiValue::getTypeAsString(nativePropValue->getType()) +
-                           "\" for property \"" + name + "\".");
-      }
-      
-      // Set prop
-      initializePropValue(runtime, name, jsPropValue);
+    // Ensure that the type is correct:
+    if (nativePropValue->getType() != type && !isUndefinedOrNull) {
+      throw jsi::JSError(runtime, "Expected \"" + JsiValue::getTypeAsString(type) +
+                         "\", got \"" +
+                         JsiValue::getTypeAsString(nativePropValue->getType()) +
+                         "\" for property \"" + name + "\".");
     }
+    
+    // Set prop
+    initializePropValue(runtime, name, jsPropValue);
     
     // Return the property value
     return _values.at(name);
   }
-  
-  /**
-   Returns true if the given value is a HostObject and it inherits from RNSkReadonlyValue.
-   */
-  bool isAnimatedValue(std::shared_ptr<JsiValue> value) {
-    return value->getType() == PropType::HostObject &&
-    std::dynamic_pointer_cast<RNSkReadonlyValue>(value->getAsHostObject()) != nullptr;
-  }
-  
-  /**
-   Returns the RNSkReadonlyValue pointer for a value that is an Animated value
-   */
-  std::shared_ptr<RNSkReadonlyValue> getAnimatedValue(std::shared_ptr<JsiValue> value) {
-    return std::dynamic_pointer_cast<RNSkReadonlyValue>(value->getAsHostObject());
-  }
-  
-  /**
-   Returns true if the value is a selector. A Selector is a JS object that has two properties, the selector and the the value.
-   The selector is a function that is used to transform the value - which is an animated skia value.
-   */
-  bool isSelector(std::shared_ptr<JsiValue> value) {
-    // Handling selectors is rather easy, we just add
-    // a listener on the selector's callback and then we'll do the javascript
-    // resolving in the callback (which will always be on the Javascript thread)!
-    if (value->getType() == PropType::Object) {
-      if (value->hasValue(PropNameSelector) && value->hasValue(PropNameValue)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  
+    
   /**
    Props are always regular objects - so we can easily return Object has our type.
    */
@@ -283,18 +213,6 @@ private:
     return _values.at(name);
   }
   
-  void addPropValueTransaction(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
-    if (hasPropValue(name)) {
-      std::lock_guard<std::mutex> lock(_lock);
-      if (_transactions.count(name) == 0) {
-        _transactions.emplace(name, std::make_shared<JsiValue>(runtime, value));
-      } else {
-        _transactions.at(name)->setCurrent(runtime, value);
-      }
-      requestPropChange(name);
-    }
-  }
-  
   /**
    Sets a property from the JS side. This will read the property and convert it to a native value that
    can be read outside of the JS context.
@@ -307,6 +225,7 @@ private:
     // Prop was not previously set
     auto newProp = std::make_shared<JsiValue>(runtime, value);
     _values.emplace(name, newProp);
+    _propNames.push_back(name);
     
     if (!newProp->isUndefinedOrNull()) {
       _propsWithValues.emplace(name);
@@ -325,11 +244,11 @@ private:
   
   std::map<PropId, std::shared_ptr<JsiValue>> _values;
   jsi::Object _props;
-  std::vector<std::function<void()>> _unsubscriptions;
   
   std::set<PropId> _changedPropNames;
   std::set<PropId> _propsWithValues;
   std::map<PropId, std::shared_ptr<JsiValue>> _transactions;
+  std::vector<const char*> _propNames;
   
   std::mutex _lock;
 };

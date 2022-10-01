@@ -45,6 +45,13 @@ const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
 
 export const useCanvasRef = () => useRef<SkiaDomView>(null);
 
+const createDependencyManager = (
+  registerValues: (values: Array<SkiaValue<unknown>>) => () => void
+) =>
+  SkiaDomApi.DependencyManager
+    ? SkiaDomApi.DependencyManager(registerValues)
+    : new DependencyManager(registerValues);
+
 export interface CanvasProps extends ComponentProps<typeof SkiaDomView> {
   ref?: RefObject<SkiaDomView>;
   children: ReactNode;
@@ -73,7 +80,11 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
     );
 
     const container = useMemo(() => {
-      return new Container(Skia, new DependencyManager(registerValues), redraw);
+      return new Container(
+        Skia,
+        createDependencyManager(registerValues),
+        redraw
+      );
     }, [redraw, registerValues]);
 
     const root = useMemo(

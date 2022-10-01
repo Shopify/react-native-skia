@@ -10,10 +10,6 @@ class TestNode<P> implements Node<P> {
 
   constructor(public mgr: DependencyManager, public props: P) {}
 
-  isNative() {
-    return false;
-  }
-
   setProps(props: P) {
     this.props = props;
   }

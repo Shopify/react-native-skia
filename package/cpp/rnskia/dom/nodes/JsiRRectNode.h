@@ -15,8 +15,8 @@ public:
 protected:  
   void draw(JsiBaseDrawingContext* context) override {
     if(!_rrectProp->hasValue()) {
-      throw std::runtime_error("Expected Rounded Rect node to have a rrect property or \
-                               x, y, width, height and radius properties.");
+      getContext()->raiseError(std::runtime_error("Expected Rounded Rect node to have a rrect property or \
+                                                  x, y, width, height and radius properties."));
     }
     context->getCanvas()->drawRRect(_rrectProp->getDerivedValue(), *context->getPaint());
   }
