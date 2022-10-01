@@ -79,6 +79,7 @@ declare global {
     GroupNode: (props: GroupProps) => RenderNode<GroupProps>;
     PaintNode: (props: PaintProps) => DeclarationNode<PaintProps, SkPaint>;
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;
+    CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

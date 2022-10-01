@@ -67,7 +67,6 @@ private:
   std::shared_ptr<JsiDomRenderNode> _root;
   std::shared_ptr<JsiDrawingContext> _drawingContext;
   
-  RNSkTimingInfo _jsTimingInfo;
   RNSkTimingInfo _renderTimingInfo;
     
   std::mutex _touchMutex;

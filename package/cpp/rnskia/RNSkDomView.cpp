@@ -10,7 +10,6 @@ RNSkDomRenderer::RNSkDomRenderer(std::function<void()> requestRedraw,
   _platformContext(std::move(context)),
   _renderLock(std::make_shared<std::timed_mutex>()),
   _touchCallbackLock(std::make_shared<std::timed_mutex>()),
-  _jsTimingInfo("SKIA/JS"),
   _renderTimingInfo("SKIA/RENDER") {
 }
 
@@ -31,9 +30,6 @@ bool RNSkDomRenderer::tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvid
     _renderLock->unlock();
     return true;
   } else {
-#ifdef DEBUG
-    _jsTimingInfo.markSkipped();
-#endif
     return false;
   }
 };
@@ -148,13 +144,11 @@ void RNSkDomRenderer::renderDebugOverlays(SkCanvas* canvas) {
   if (!getShowDebugOverlays()) {
     return;
   }
-  auto jsAvg = _jsTimingInfo.getAverage();
   auto renderAvg = _renderTimingInfo.getAverage();
-  auto total = jsAvg + renderAvg;
-
+  
   // Build string
   std::ostringstream stream;
-  stream << "js: " << jsAvg << "ms render: " << renderAvg << "ms " << " total: " << total << "ms";
+  stream << "render: " << renderAvg << "ms";
 
   std::string debugString = stream.str();
 

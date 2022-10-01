@@ -92,7 +92,7 @@ public:
     // Blend mode
     if (_blendMode->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameBlendMode))) {
       ensureDerivedValue();
-      auto blendModeValue = _strokeJoin->getPropValue()->getAsString();
+      auto blendModeValue = _blendMode->getPropValue()->getAsString();
       getDerivedValue()->setBlendMode(getBlendModeFromValue(blendModeValue));
     }
     // Stroke Join

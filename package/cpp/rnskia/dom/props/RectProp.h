@@ -11,7 +11,7 @@
 
 namespace RNSkia {
 
-static const char* PropNameRect = "rect";
+static PropId PropNameRect = JsiPropId::get("rect");
 static PropId PropNameWidth = JsiPropId::get("width");
 static PropId PropNameHeight = JsiPropId::get("height");
 

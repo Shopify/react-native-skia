@@ -149,7 +149,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Circle(props: CircleProps) {
-    return new CircleNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.CircleNode
+      ? global.SkiaDomApi.CircleNode(props ?? {})
+      : new CircleNode(this.ctx, props);
   }
 
   Path(props: PathProps) {
