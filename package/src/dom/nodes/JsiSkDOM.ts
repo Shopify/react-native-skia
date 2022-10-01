@@ -139,7 +139,9 @@ export class JsiSkDOM implements SkDOM {
 
   // Drawings
   Fill(props?: DrawingNodeProps) {
-    return new FillNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.FillNode
+      ? global.SkiaDomApi.FillNode(props ?? {})
+      : new FillNode(this.ctx, props);
   }
 
   Image(props: ImageProps) {

@@ -78,6 +78,7 @@ declare global {
     ) => JsiDrawingNode<RoundedRectProps, SkRRect>;
     GroupNode: (props: GroupProps) => RenderNode<GroupProps>;
     PaintNode: (props: PaintProps) => DeclarationNode<PaintProps, SkPaint>;
+    FillNode: (props: PaintProps) => RenderNode<PaintProps>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace
