@@ -45,9 +45,29 @@ public:
   /**
    Called when rendering the tree to create all derived values from all nodes.
    */
-  virtual T materialize(JsiBaseDrawingContext* context) = 0;
+  virtual T materializeNode(JsiBaseDrawingContext* context) {
+    auto props = getProperties();
+    if (props != nullptr) {
+      
+      // Make sure we commit any waiting transactions in the props object
+      props->commitTransactions();
+      
+      // Make sure we update any properties that were changed in sub classes so that
+      // they can update any derived values
+      if (props->getHasPropChanges()) {
+        onPropsChanged(props);
+        props->resetPropChanges();
+      }
+    }
+    
+    return materialize(context);
+  }
     
 protected:
+  /**
+   Override to implement materialization
+   */
+  virtual T materialize(JsiBaseDrawingContext* context) = 0;
   
   /**
    Validates that only declaration nodes can be children

@@ -21,6 +21,16 @@ protected:
   
   void renderNode(JsiBaseDrawingContext* context) override {
     // TODO: Handle paint property and swap with context if necessary
+    // like in the JS implementation:
+    /*
+     if (this.props.paint && isSkPaint(this.props.paint)) {
+           this.draw({ ...ctx, paint: this.props.paint });
+         } else if (this.props.paint && this.props.paint.current != null) {
+           this.draw({ ...ctx, paint: this.props.paint.current.materialize() });
+         } else {
+           this.draw(ctx);
+         }
+     */
     
     
     // Handle paint node as children
@@ -28,10 +38,11 @@ protected:
     for (auto &child: getChildren()) {
       auto paintNode = std::dynamic_pointer_cast<JsiPaintNode>(child);
       if (paintNode != nullptr) {
-        paint = paintNode->materialize(context);
+        paint = paintNode->materializeNode(context);
       }
     }
     
+    // Ensure cached context
     if (_context == nullptr) {
       _context = std::make_shared<JsiDrawingContext>(context);
     }
