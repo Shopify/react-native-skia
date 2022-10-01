@@ -241,10 +241,10 @@ protected:
    @param count Number of arguments in arguments list
    @param index Index of parameter to return
    */
-  const jsi::Value& getArgument(jsi::Runtime& runtime,
-                         const jsi::Value *arguments,
-                         size_t count,
-                         size_t index) {
+  static const jsi::Value& getArgument(jsi::Runtime& runtime,
+                                       const jsi::Value *arguments,
+                                       size_t count,
+                                       size_t index) {
     if(index >= count) {
       throw jsi::JSError(runtime, "Argument index out of bounds.");
     }
@@ -255,7 +255,7 @@ protected:
   /**
    Returns argument as number or throws
    */
-  double getArgumentAsNumber(jsi::Runtime& runtime,
+  static double getArgumentAsNumber(jsi::Runtime& runtime,
                                   const jsi::Value *arguments,
                                   size_t count,
                                   size_t index) {
@@ -269,7 +269,7 @@ protected:
   /**
    Returns argument as bool or throws
    */
-  bool getArgumentAsBool(jsi::Runtime& runtime,
+  static bool getArgumentAsBool(jsi::Runtime& runtime,
                            const jsi::Value *arguments,
                            size_t count,
                            size_t index) {
@@ -283,7 +283,7 @@ protected:
   /**
    Returns argument as string or throws
    */
-  jsi::String getArgumentAsString(jsi::Runtime& runtime,
+  static jsi::String getArgumentAsString(jsi::Runtime& runtime,
                                  const jsi::Value *arguments,
                                  size_t count,
                                  size_t index) {
@@ -297,7 +297,7 @@ protected:
   /**
    Returns argument as object or throws
    */
-  jsi::Object getArgumentAsObject(jsi::Runtime& runtime,
+  static jsi::Object getArgumentAsObject(jsi::Runtime& runtime,
                                   const jsi::Value *arguments,
                                   size_t count,
                                   size_t index) {
@@ -312,7 +312,7 @@ protected:
    Returns argument as host object or throws
    */
   template <typename T = HostObject>
-  std::shared_ptr<T> getArgumentAsHostObject(jsi::Runtime& runtime,
+  static std::shared_ptr<T> getArgumentAsHostObject(jsi::Runtime& runtime,
                                              const jsi::Value *arguments,
                                              size_t count,
                                              size_t index) {
@@ -326,7 +326,7 @@ protected:
   /**
    Returns argument as array or throws
    */
-  jsi::Array getArgumentAsArray(jsi::Runtime& runtime,
+  static jsi::Array getArgumentAsArray(jsi::Runtime& runtime,
                                 const jsi::Value *arguments,
                                 size_t count,
                                 size_t index) {
@@ -340,7 +340,7 @@ protected:
   /**
    Returns argument as function or throws
    */
-  jsi::Object getArgumentAsFunction(jsi::Runtime& runtime,
+  static jsi::Object getArgumentAsFunction(jsi::Runtime& runtime,
                                     const jsi::Value *arguments,
                                     size_t count,
                                     size_t index) {
