@@ -18,6 +18,10 @@ public:
   _registerValuesCallback(std::move(registerValuesCallback)),
   JsiHostObject() {}
   
+  ~JsiDependencyManager() {
+    unsubscribeAll();
+  }
+  
   /**
    Call to unsubscribe all value listeners from the given node based on the current list of subscriptions for
    the node. This function is typically called when the node is unmounted or when one or more
@@ -118,7 +122,7 @@ public:
     }
     
     // Copy to args
-    auto array = jsi::Array::createWithElements(runtime);
+    auto array = jsi::Array(runtime, uniqueValues.size());
     size_t i = 0;
     for (auto &el: uniqueValues) {
       array.setValueAtIndex(runtime, i++, jsi::Object::createFromHostObject(runtime, el));
@@ -148,19 +152,8 @@ public:
       _unregisterValues = nullptr;
     }
     
-    // 2) Unregister nodes
-    std::vector<std::shared_ptr<JsiDomNode>> tmp;
-    tmp.reserve(_subscriptions.size());
-    for (auto &subInfo: _subscriptions) {
-      tmp.push_back(subInfo.first);
-    }
-    for (auto &node: tmp) {
-      unsubscribeNode(node);
-    }
-        
-    // 3) Clear the rest of the subscriptions
-    _subscriptions.clear();
-        
+    unsubscribeAll();
+    
     return jsi::Value::undefined();
   }
   
@@ -184,6 +177,24 @@ public:
   }
 private:
   /**
+   Removes all subscriptions
+   */
+  void unsubscribeAll() {
+    // 2) Unregister nodes
+    std::vector<std::shared_ptr<JsiDomNode>> tmp;
+    tmp.reserve(_subscriptions.size());
+    for (auto &subInfo: _subscriptions) {
+      tmp.push_back(subInfo.first);
+    }
+    for (auto &node: tmp) {
+      unsubscribeNode(node);
+    }
+        
+    // 3) Clear the rest of the subscriptions
+    _subscriptions.clear();
+  }
+  
+  /**
    Unsubscribes from a given node
    */
   void unsubscribeNode (std::shared_ptr<JsiDomNode> node) {
@@ -192,8 +203,13 @@ private:
       for (auto &p: subscriptions) {
         p.second();
       }
+      
       // Remove node's subscriptions
       _subscriptions.erase(node);
+      
+      // Remove node's callback to avoid keeping
+      // cyclic dependencies between dep manager and the node
+      node->setDisposeCallback(nullptr);
     }
   }
   /**

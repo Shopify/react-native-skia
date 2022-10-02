@@ -61,6 +61,13 @@ public:
   }
   
   /**
+   Empty setProp implementation
+   */
+  JSI_HOST_FUNCTION(setProp) {
+    return jsi::Value::undefined();
+  }
+  
+  /**
    JS Function to be called when the node is no longer part of the reconciler tree. Use for cleaning up.
    */
   JSI_HOST_FUNCTION(dispose) {
@@ -121,6 +128,7 @@ public:
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiDomNode, type))
   
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDomNode, setProps),
+                       JSI_EXPORT_FUNC(JsiDomNode, setProp),
                        JSI_EXPORT_FUNC(JsiDomNode, addChild),
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),

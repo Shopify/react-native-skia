@@ -56,7 +56,7 @@ import type {
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
 import type { PaintNode } from "../dom/nodes/PaintNode";
-import type { SkPaint, SkRect, SkRRect } from "../skia";
+import type { SkMaskFilter, SkPaint, SkRect, SkRRect } from "../skia";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
 
 import type { Container } from "./Container";
@@ -80,6 +80,9 @@ declare global {
     PaintNode: (props: PaintProps) => DeclarationNode<PaintProps, SkPaint>;
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;
     CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
+    BlurMaskFilterNode: (
+      props: BlurMaskFilterProps
+    ) => DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

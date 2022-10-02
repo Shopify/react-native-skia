@@ -224,7 +224,9 @@ export class JsiSkDOM implements SkDOM {
 
   // BlurMaskFilters
   BlurMaskFilter(props: BlurMaskFilterProps) {
-    return new BlurMaskFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.BlurMaskFilterNode
+      ? global.SkiaDomApi.BlurMaskFilterNode(props)
+      : new BlurMaskFilterNode(this.ctx, props);
   }
 
   // ImageFilters

@@ -9,6 +9,8 @@
 #include "TransformProp.h"
 #include "PaintProp.h"
 
+#include "JsiBlurMaskNode.h"
+
 namespace RNSkia {
 
 static const char* PropNameOrigin = "origin";
@@ -35,6 +37,7 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
                        JSI_EXPORT_FUNC(JsiDomNode, setProps),
+                       JSI_EXPORT_FUNC(JsiDomNode, setProp),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose),
                        JSI_EXPORT_FUNC(JsiDomNode, children),
                        JSI_EXPORT_FUNC(JsiDomRenderNode, render))
@@ -53,6 +56,14 @@ public:
     
     // Make sure we commit any waiting transactions in the props object
     props->commitTransactions();
+    
+    for (auto &child: getChildren()) {
+      // Check for masks etc - should this be done here..?
+      auto blurMaskFilter = std::dynamic_pointer_cast<JsiBlurMaskNode>(child);
+      if (blurMaskFilter != nullptr) {
+        blurMaskFilter->materializeNode(context);
+      }
+    }
     
     // Make sure we update any properties that were changed in sub classes so that
     // they can update any derived values

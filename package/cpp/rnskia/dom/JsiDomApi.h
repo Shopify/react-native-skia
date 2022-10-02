@@ -10,6 +10,8 @@
 #include "nodes/JsiGroupNode.h"
 #include "nodes/JsiFillNode.h"
 
+#include "nodes/JsiBlurMaskNode.h"
+
 #include "nodes/JsiPaintNode.h"
 
 namespace RNSkia
@@ -32,6 +34,8 @@ namespace RNSkia
       installFunction("GroupNode", JsiGroupNode::createCtor(context));
       
       installFunction("PaintNode", JsiPaintNode::createCtor(context));
+      
+      installFunction("BlurMaskFilterNode", JsiBlurMaskNode::createCtor(context));
       
       installFunction("FillNode", JsiFillNode::createCtor(context));
     }

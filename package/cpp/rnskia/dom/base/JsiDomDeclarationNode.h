@@ -31,6 +31,7 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
                        JSI_EXPORT_FUNC(JsiDomNode, setProps),
+                       JSI_EXPORT_FUNC(JsiDomNode, setProp),
                        JSI_EXPORT_FUNC(JsiDomNode, dispose),
                        JSI_EXPORT_FUNC(JsiDomNode, children))
 
@@ -55,11 +56,14 @@ public:
       // they can update any derived values
       if (props->getHasPropChanges()) {
         onPropsChanged(props);
-        props->resetPropChanges();
       }
     }
     
-    return materialize(context);
+    T r = materialize(context);
+    
+    props->resetPropChanges();
+    
+    return r;
   }
     
 protected:
