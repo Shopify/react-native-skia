@@ -13,7 +13,7 @@ public:
   }
     
 protected:  
-  void draw(JsiBaseDrawingContext* context) override {
+  void draw(JsiDrawingContext* context) override {
     if(!_rrectProp->hasValue()) {
       getContext()->raiseError(std::runtime_error("Expected Rounded Rect node to have a rrect property or \
                                                   x, y, width, height and radius properties."));

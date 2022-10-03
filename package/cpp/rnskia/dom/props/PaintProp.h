@@ -117,7 +117,8 @@ public:
       getDerivedValue()->setAntiAlias(_antiAlias->getPropValue()->getAsNumber());
     }
     
-    // TODO: Add shaders and filters
+    // TODO: Add shaders and filters - maybe not for the paint prop, only
+    // when we have a paint node?
 
     // Reset parent paint flag - will only be set next time the parent paint is changed
     // meaning that we can keep our cache for a while.

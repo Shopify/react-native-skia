@@ -13,7 +13,7 @@ public:
   }
     
 protected:
-  void draw(JsiBaseDrawingContext* context) override {
+  void draw(JsiDrawingContext* context) override {
     if(!_rectProp->hasValue()) {
       getContext()->raiseError(std::runtime_error("Expected Rect node to have a rect property or \
                                                   x, y, width and height properties."));

@@ -17,9 +17,9 @@ protected:
   /**
    Override to implement drawing.
    */
-  virtual void draw(JsiBaseDrawingContext* context) = 0;
+  virtual void draw(JsiDrawingContext* context) = 0;
   
-  void renderNode(JsiBaseDrawingContext* context) override {
+  void renderNode(JsiDrawingContext* context) override {
     // TODO: Handle paint property and swap with context if necessary
     // like in the JS implementation:
     /*
@@ -32,23 +32,12 @@ protected:
          }
      */
     
-    
-    // Handle paint node as children
-    auto paint = context->getPaint();
-    for (auto &child: getChildren()) {
-      auto paintNode = std::dynamic_pointer_cast<JsiPaintNode>(child);
-      if (paintNode != nullptr) {
-        paint = paintNode->materializeNode(context);
-      }
-    }
-    
     // Ensure cached context
     if (_context == nullptr) {
       _context = std::make_shared<JsiDrawingContext>(context);
     }
     
     _context->setCanvas(context->getCanvas());
-    _context->setPaint(paint);
     _context->setOpacity(context->getOpacity());
     
     draw(_context.get());

@@ -183,7 +183,7 @@ protected:
   
   /**
    Called when one or more properties have changed from the native side due to updates
-   from animation values or other mechanisms.
+   from Skia values.
    */
   virtual void onPropsChanged(JsiDomNodeProps* props) {
     for (auto &p: _activeProps) {

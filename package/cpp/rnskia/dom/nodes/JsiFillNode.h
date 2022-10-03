@@ -11,7 +11,7 @@ public:
   JsiDomDrawingNode(context, "skFill") {}
     
 protected:
-  void draw(JsiBaseDrawingContext* context) override {
+  void draw(JsiDrawingContext* context) override {
     context->getCanvas()->drawPaint(*context->getPaint());
   }
   

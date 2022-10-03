@@ -6,19 +6,10 @@
 
 namespace RNSkia {
 
-class JsiBaseDomDeclarationNode: public JsiDomNode {
-public:
-  JsiBaseDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context, const char* type) :
-  JsiDomNode(context, type) {}
-  
-  virtual void setInvalidateCallback(std::function<void()> cb) = 0;
-};
-
-template <typename T>
-class JsiDomDeclarationNode : public JsiBaseDomDeclarationNode {
+class JsiDomDeclarationNode: public JsiDomNode {
 public:
   JsiDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context, const char* type) :
-  JsiBaseDomDeclarationNode(context, type) {}
+  JsiDomNode(context, type) {}
   
   JSI_PROPERTY_GET(declarationType) {
     return jsi::String::createFromUtf8(runtime, std::string(getType()));
@@ -36,16 +27,9 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, children))
 
   /**
-   Sets the callback for invalidating parent node
-   */
-  void setInvalidateCallback(std::function<void()> invalidateCallback) override {
-    _invalidateCallback = invalidateCallback;
-  }
-  
-  /**
    Called when rendering the tree to create all derived values from all nodes.
    */
-  virtual T materializeNode(JsiBaseDrawingContext* context) {
+  virtual void materializeNode(JsiDrawingContext* context) {
     auto props = getProperties();
     if (props != nullptr) {
       
@@ -59,18 +43,16 @@ public:
       }
     }
     
-    T r = materialize(context);
+    materialize(context);
     
-    props->resetPropChanges();
-    
-    return r;
+    props->resetPropChanges();    
   }
     
 protected:
   /**
    Override to implement materialization
    */
-  virtual T materialize(JsiBaseDrawingContext* context) = 0;
+  virtual void materialize(JsiDrawingContext* context) = 0;
   
   /**
    Validates that only declaration nodes can be children
@@ -95,10 +77,7 @@ protected:
                                                   "\" to a \"" + std::string(getType()) + "\"."));
     }
     JsiDomNode::insertChildBefore(child, before);
-  }
-  
-private:
-  std::function<void()> _invalidateCallback;
+  }  
 };
 
 }

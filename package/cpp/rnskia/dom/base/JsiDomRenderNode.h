@@ -9,7 +9,7 @@
 #include "TransformProp.h"
 #include "PaintProp.h"
 
-#include "JsiBlurMaskNode.h"
+#include "JsiDomDeclarationNode.h"
 
 namespace RNSkia {
 
@@ -19,17 +19,17 @@ static PropId PropNameOpacity = JsiPropId::get("opacity");
 class JsiDomRenderNode : public JsiDomNode {
 public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
-                   const char* type) :
-  JsiDomNode(context, type),
-    _paintProp(std::make_unique<PaintProp>()),
-    _opacityProp(std::make_unique<JsiProp>(PropNameOpacity, PropType::Number)),
-    _matrixProp(std::make_unique<MatrixProp>(PropNameMatrix)),
-    _transformProp(std::make_unique<TransformProp>(PropNameTransform)),
-    _originProp(std::make_unique<PointProp>(PropNameOrigin)) {}
+                   const char* type) : JsiDomNode(context, type) {
+    _paintProp = addProperty(std::make_shared<PaintProp>());
+    _opacityProp = addProperty(std::make_shared<JsiProp>(PropNameOpacity, PropType::Number));
+    _matrixProp = addProperty(std::make_shared<MatrixProp>(PropNameMatrix));
+    _transformProp = addProperty(std::make_shared<TransformProp>(PropNameTransform));
+    _originProp = addProperty(std::make_shared<PointProp>(PropNameOrigin));
+  }
   
   JSI_HOST_FUNCTION(render) {
     // Get drawing context
-    render(std::make_shared<JsiDrawingContextWrapper>(runtime, arguments, count).get());
+    render(std::make_shared<JsiDrawingContext>(runtime, arguments, count).get());
     return jsi::Value::undefined();
   }
   
@@ -42,7 +42,7 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, children),
                        JSI_EXPORT_FUNC(JsiDomRenderNode, render))
   
-  void render(JsiBaseDrawingContext* context) {
+  void render(JsiDrawingContext* context) {
     
     auto props = getProperties();
     if (props == nullptr) {
@@ -56,14 +56,6 @@ public:
     
     // Make sure we commit any waiting transactions in the props object
     props->commitTransactions();
-    
-    for (auto &child: getChildren()) {
-      // Check for masks etc - should this be done here..?
-      auto blurMaskFilter = std::dynamic_pointer_cast<JsiBlurMaskNode>(child);
-      if (blurMaskFilter != nullptr) {
-        blurMaskFilter->materializeNode(context);
-      }
-    }
     
     // Make sure we update any properties that were changed in sub classes so that
     // they can update any derived values
@@ -96,7 +88,7 @@ public:
     }
     
     // Render the node
-    renderNode(resolveContext(context));
+    renderNode(materializeContext(context));
     
     // Restore if needed
     if (_hasMatrixOrTransformProp) {
@@ -111,82 +103,38 @@ protected:
   /**
    Override to implement rendering where the current state of the drawing context is correctly set.
    */
-  virtual void renderNode(JsiBaseDrawingContext* context) = 0;
+  virtual void renderNode(JsiDrawingContext* context) = 0;
   
   /**
-   Invalidates caches. Can be used by child nodes to invalidate when child changes affect parent
+   Update flags when props are set
    */
-  virtual void invalidate() {
-    // TODO: Invalidate the paint cache like in JS - this is a callback
-    // from children in the node
-  }
-  
-  virtual void onPropsChanged(JsiDomNodeProps* props) override {
-    JsiDomNode::onPropsChanged(props);
-    
-    _paintProp->updatePropValues(props);
-    _matrixProp->updatePropValues(props);
-    _originProp->updatePropValues(props);
-    _transformProp->updatePropValues(props);
-    _opacityProp->updatePropValues(props);
-  }
-  
-  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+  void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
     JsiDomNode::onPropsSet(runtime, props);
-    
-    _paintProp->setProps(runtime, props);
-    _matrixProp->setProps(runtime, props);
-    _originProp->setProps(runtime, props);
-    _transformProp->setProps(runtime, props);
-    _opacityProp->setProps(runtime, props);
-    
-    props->tryReadNumericProperty(runtime, PropNameOpacity);
-    
     _hasMatrixOrTransformProp = _matrixProp->hasValue() || _transformProp->hasValue();
   }
   
-  /**
-   Adds invalidate callback to the declaration node
-   */
-  virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
-    auto declaration = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
-    if (declaration != nullptr) {
-      // set invalidate callback
-      declaration->setInvalidateCallback(std::bind(&JsiDomRenderNode::invalidate, this));
-    }
-    JsiDomNode::addChild(child);
-  }
-  
-  /**
-   Adds invalidate callback to the declaration node
-   */
-  virtual void
-  insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
-    auto declaration = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
-    if (declaration != nullptr) {
-      // set invalidate callback
-      declaration->setInvalidateCallback(std::bind(&JsiDomRenderNode::invalidate, this));
-    }
-    JsiDomNode::insertChildBefore(child, before);
-  }
-  
-  /**
-   Erase invalidate callback on child removal
-   */
-  void removeChild(std::shared_ptr<JsiDomNode> child) override {
-    auto declaration = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
-    if (declaration != nullptr) {
-      // set invalidate callback
-      declaration->setInvalidateCallback(nullptr);
-    }    
-    JsiDomNode::removeChild(child);
-  }
-  
 private:
-  JsiBaseDrawingContext* resolveContext(JsiBaseDrawingContext* context) {
+  /**
+   Returns true if any of the child nodes have changes
+   */
+  bool getChildDeclarationNodesHasPropertyChanged() {
+    for (auto &child: getChildren()) {
+      auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
+      if (declarationNode != nullptr) {
+        if (declarationNode->getProperties()->getHasPropChanges()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  JsiDrawingContext* materializeContext(JsiDrawingContext* context) {
     auto props = getProperties();
     // We only need to update the cached context if the paint property or opacity property has changed
     if (_paintProp->hasChanged(props) ||
+        getChildDeclarationNodesHasPropertyChanged() ||
+        context->hasChanged() ||
         props->getHasPropChanges(PropNameOpacity) ||
         _prevOpacity != context->getOpacity()) {
       
@@ -213,6 +161,14 @@ private:
         _cachedContext->setPaint(paint);
         _cachedContext->setOpacity(_prevOpacity);
       }
+      
+      // Enumerate children and let them modify the drawing context
+      for (auto &child: getChildren()) {
+        auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
+        if (declarationNode != nullptr) {
+          declarationNode->materializeNode(_cachedContext.get());
+        }
+      }
     }
     
     // Update canvas - it might change on each frame
@@ -226,11 +182,11 @@ private:
   double _prevOpacity;
   bool _hasMatrixOrTransformProp;
   std::vector<JsiBaseProp> _props;
-  std::unique_ptr<PointProp> _originProp;
-  std::unique_ptr<MatrixProp> _matrixProp;
-  std::unique_ptr<TransformProp> _transformProp;
-  std::unique_ptr<PaintProp> _paintProp;
-  std::unique_ptr<JsiProp> _opacityProp;
+  std::shared_ptr<PointProp> _originProp;
+  std::shared_ptr<MatrixProp> _matrixProp;
+  std::shared_ptr<TransformProp> _transformProp;
+  std::shared_ptr<PaintProp> _paintProp;
+  std::shared_ptr<JsiProp> _opacityProp;
   std::shared_ptr<JsiDrawingContext> _cachedContext;
 };
 

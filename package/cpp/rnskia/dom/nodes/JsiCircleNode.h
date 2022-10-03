@@ -14,15 +14,15 @@ public:
   }
     
 protected:
-  void draw(JsiBaseDrawingContext* context) override {
+  void draw(JsiDrawingContext* context) override {
     if (!_prop->hasValue() || !_r->hasValue()) {
       getContext()->raiseError(std::runtime_error("Expected circle node to have a cx, cy or c \
                                                   and r properties."));
     }
-    
+    auto paint = *context->getPaint();
     context->getCanvas()->drawCircle(_prop->getDerivedValue(),
                                      _r->getPropValue()->getAsNumber(),
-                                     *context->getPaint());    
+                                     paint);
   }
   
 private:
