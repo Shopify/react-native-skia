@@ -1,8 +1,8 @@
 #pragma once
 
 #include "JsiHostObject.h"
-#include "JsiDomNodeProps.h"
-#include "JsiProp.h"
+#include "NodePropsContainer.h"
+#include "NodeProp.h"
 
 #include <vector>
 #include <unordered_map>
@@ -143,7 +143,7 @@ public:
   /**
    Returns all properties for this node
    */
-  JsiDomNodeProps* getProperties() {
+  NodePropsContainer* getProperties() {
     std::lock_guard<std::mutex> lock(_lock);
     return _props.get();
   }
@@ -171,9 +171,9 @@ protected:
   /**
    Called when properties are set from the JS reconciler on the node. To optimize reading properties
    each node needs to explicitly tell the props object which objects it expects and what types they are.
-   See the JsiDomNodeProps class for details.
+   See the NodePropsContainer class for details.
   */
-  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) {
+  virtual void onPropsSet(jsi::Runtime &runtime, NodePropsContainer* props) {
     // We don't need to do anything in the base class since we don't have any
     // properties that we want to read.
     for (auto &p: _activeProps) {
@@ -185,7 +185,7 @@ protected:
    Called when one or more properties have changed from the native side due to updates
    from Skia values.
    */
-  virtual void onPropsChanged(JsiDomNodeProps* props) {
+  virtual void onPropsChanged(NodePropsContainer* props) {
     for (auto &p: _activeProps) {
       p->updatePropValues(props);
     }
@@ -198,7 +198,7 @@ protected:
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
     std::lock_guard<std::mutex> lock(_lock);
-    _props = std::make_shared<JsiDomNodeProps>(runtime, std::move(props));
+    _props = std::make_shared<NodePropsContainer>(runtime, std::move(props));
     onPropsSet(runtime, _props.get());
   };
   
@@ -261,8 +261,8 @@ protected:
 private:
   std::shared_ptr<RNSkPlatformContext> _context;
   std::vector<std::shared_ptr<JsiDomNode>> _children;
-  std::shared_ptr<JsiDomNodeProps> _props;
-  std::vector<std::shared_ptr<JsiBaseProp>> _activeProps;
+  std::shared_ptr<NodePropsContainer> _props;
+  std::vector<std::shared_ptr<BaseNodeProp>> _activeProps;
   std::mutex _lock;
   const char* _type;
   std::function<void()> _disposeCallback;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiProp.h"
+#include "NodeProp.h"
 #include "JsiSkRRect.h"
 
 #pragma clang diagnostic push
@@ -29,7 +29,7 @@ public:
     _prop = addChildProp(std::make_shared<JsiObjectProp>(name));
   }
   
-  void updateDerivedValue(JsiDomNodeProps* props) override {
+  void updateDerivedValue(NodePropsContainer* props) override {
     if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
       // Check for JsiSkRRect
       if(_prop->getPropValue()->getType() == PropType::HostObject) {
@@ -42,7 +42,7 @@ public:
         setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(rrect->rect().x(), rrect->rect().y(),
                                                              rrect->rect().width(), rrect->rect().height()),
                                             rrect->getSimpleRadii().x(), rrect->getSimpleRadii().y()));
-      } else {
+      } else if (_rx != nullptr){
         // Update cache from js object value
         setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(_x->getAsNumber(), _y->getAsNumber(),
                                                              _width->getAsNumber(), _height->getAsNumber()),
@@ -51,17 +51,24 @@ public:
     }
   }
   
-  void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+  void setProps(jsi::Runtime &runtime, NodePropsContainer* props) override {
     JsiDerivedProp::setProps(runtime, props);
     
     if (_prop->hasValue() && _prop->getPropValue()->getType() == PropType::Object) {
-      // Save props for fast access
-      _x = _prop->getPropValue()->getValue(PropNameX);
-      _y = _prop->getPropValue()->getValue(PropNameY);
-      _width = _prop->getPropValue()->getValue(PropNameWidth);
-      _height = _prop->getPropValue()->getValue(PropNameHeight);
-      _rx = _prop->getPropValue()->getValue(PropNameRx);
-      _ry = _prop->getPropValue()->getValue(PropNameRy);
+      auto p = _prop->getPropValue();
+      if (p->hasValue(PropNameX) &&
+          p->hasValue(PropNameY) &&
+          p->hasValue(PropNameWidth) &&
+          p->hasValue(PropNameHeight) &&
+          p->hasValue(PropNameRx) &&
+          p->hasValue(PropNameRy)) {
+        _x = _prop->getPropValue()->getValue(PropNameX);
+        _y = _prop->getPropValue()->getValue(PropNameY);
+        _width = _prop->getPropValue()->getValue(PropNameWidth);
+        _height = _prop->getPropValue()->getValue(PropNameHeight);
+        _rx = _prop->getPropValue()->getValue(PropNameRx);
+        _ry = _prop->getPropValue()->getValue(PropNameRy);
+      }
     }
   }
   
@@ -83,14 +90,14 @@ public JsiDerivedProp<SkRRect> {
 public:
   RRectPropFromProps():
   JsiDerivedProp<SkRRect>() {
-    _x = addChildProp(std::make_shared<JsiProp>(PropNameX, PropType::Number));
-    _y = addChildProp(std::make_shared<JsiProp>(PropNameY, PropType::Number));
-    _width = addChildProp(std::make_shared<JsiProp>(PropNameWidth, PropType::Number));
-    _height = addChildProp(std::make_shared<JsiProp>(PropNameHeight, PropType::Number));
-    _r = addChildProp(std::make_shared<JsiProp>(PropNameR, PropType::Number));
+    _x = addChildProp(std::make_shared<NodeProp>(PropNameX, PropType::Number));
+    _y = addChildProp(std::make_shared<NodeProp>(PropNameY, PropType::Number));
+    _width = addChildProp(std::make_shared<NodeProp>(PropNameWidth, PropType::Number));
+    _height = addChildProp(std::make_shared<NodeProp>(PropNameHeight, PropType::Number));
+    _r = addChildProp(std::make_shared<NodeProp>(PropNameR, PropType::Number));
   }
   
-  void updateDerivedValue(JsiDomNodeProps* props) {
+  void updateDerivedValue(NodePropsContainer* props) {
     if(_x->hasValue() && _y->hasValue() && _width->hasValue() && _height->hasValue() && _r->hasValue()) {
       setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(_x->getPropValue()->getAsNumber(),
                                                            _y->getPropValue()->getAsNumber(),
@@ -101,11 +108,11 @@ public:
   }
   
 private:
-  std::shared_ptr<JsiProp> _x;
-  std::shared_ptr<JsiProp> _y;
-  std::shared_ptr<JsiProp> _width;
-  std::shared_ptr<JsiProp> _height;
-  std::shared_ptr<JsiProp> _r;
+  std::shared_ptr<NodeProp> _x;
+  std::shared_ptr<NodeProp> _y;
+  std::shared_ptr<NodeProp> _width;
+  std::shared_ptr<NodeProp> _height;
+  std::shared_ptr<NodeProp> _r;
 };
 
 /**
@@ -120,7 +127,7 @@ public:
     _rectPropFromProps = addChildProp<RRectPropFromProps>(std::make_shared<RRectPropFromProps>());
   }
     
-  void updateDerivedValue(JsiDomNodeProps* props) override {
+  void updateDerivedValue(NodePropsContainer* props) override {
     if (_rectProp->hasValue()) {
       setDerivedValue(_rectProp->getDerivedValue());
     } else if (_rectPropFromProps->hasValue()) {

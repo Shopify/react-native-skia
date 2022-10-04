@@ -2,7 +2,7 @@
 
 #include "JsiDomDeclarationNode.h"
 
-#include "JsiProp.h"
+#include "NodeProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -20,9 +20,9 @@ class JsiBlurMaskNode : public JsiDomDeclarationNode, public JsiDomNodeCtor<JsiB
 public:
   JsiBlurMaskNode(std::shared_ptr<RNSkPlatformContext> context) :
   JsiDomDeclarationNode(context, "skBlurMaskFilter") {
-    _style = addProperty(std::make_shared<JsiProp>(PropNameStyle, PropType::String));
-    _respectCTM = addProperty(std::make_shared<JsiProp>(PropNameRespectCTM, PropType::Bool));
-    _blur = addProperty(std::make_shared<JsiProp>(PropNameBlur, PropType::Number));
+    _style = addProperty(std::make_shared<NodeProp>(PropNameStyle, PropType::String));
+    _respectCTM = addProperty(std::make_shared<NodeProp>(PropNameRespectCTM, PropType::Bool));
+    _blur = addProperty(std::make_shared<NodeProp>(PropNameBlur, PropType::Number));
   }
     
 protected:
@@ -64,9 +64,9 @@ private:
   
   sk_sp<SkMaskFilter> _filter;
   
-  std::shared_ptr<JsiProp> _style;
-  std::shared_ptr<JsiProp> _respectCTM;
-  std::shared_ptr<JsiProp> _blur;
+  std::shared_ptr<NodeProp> _style;
+  std::shared_ptr<NodeProp> _respectCTM;
+  std::shared_ptr<NodeProp> _blur;
 };
 
 }

@@ -10,7 +10,7 @@ public:
   JsiCircleNode(std::shared_ptr<RNSkPlatformContext> context) :
   JsiDomDrawingNode(context, "skCircle") {
     _prop = addProperty(std::make_shared<CircleProp>());
-    _r = addProperty(std::make_shared<JsiProp>(PropNameR, PropType::Number));
+    _r = addProperty(std::make_shared<NodeProp>(PropNameR, PropType::Number));
   }
     
 protected:
@@ -27,7 +27,7 @@ protected:
   
 private:
   std::shared_ptr<CircleProp> _prop;
-  std::shared_ptr<JsiProp> _r;
+  std::shared_ptr<NodeProp> _r;
 };
 
 }

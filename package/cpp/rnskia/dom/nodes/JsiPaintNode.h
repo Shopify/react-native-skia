@@ -13,7 +13,7 @@ public:
   JsiPaintNode(std::shared_ptr <RNSkPlatformContext> context) :
     JsiDomDeclarationNode(context, "skPaint") {
     _paintProp = addProperty(std::make_shared<PaintProp>());
-    _opacityProp = addProperty(std::make_shared<JsiProp>(PropNameOpacity, PropType::Number));
+    _opacityProp = addProperty(std::make_shared<NodeProp>(PropNameOpacity, PropType::Number));
   }
   
   void materializeNode(JsiDrawingContext* context) override {
@@ -32,7 +32,7 @@ protected:
 private:
   std::shared_ptr <SkRect> _rect;
   std::shared_ptr<PaintProp> _paintProp;
-  std::shared_ptr<JsiProp> _opacityProp;
+  std::shared_ptr<NodeProp> _opacityProp;
 };
 
 }

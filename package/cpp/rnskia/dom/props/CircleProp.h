@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiProp.h"
+#include "NodeProp.h"
 #include "PointProp.h"
 
 #pragma clang diagnostic push
@@ -21,11 +21,11 @@ public JsiDerivedProp<SkPoint> {
 public:
   CircleProp(): JsiDerivedProp<SkPoint>() {
     _c = addChildProp(std::make_shared<PointProp>(PropNameC));
-    _cx = addChildProp(std::make_shared<JsiProp>(PropNameCx, PropType::Number));
-    _cy = addChildProp(std::make_shared<JsiProp>(PropNameCy, PropType::Number));
+    _cx = addChildProp(std::make_shared<NodeProp>(PropNameCx, PropType::Number));
+    _cy = addChildProp(std::make_shared<NodeProp>(PropNameCy, PropType::Number));
   }
   
-  void updateDerivedValue(JsiDomNodeProps* props) override {
+  void updateDerivedValue(NodePropsContainer* props) override {
     if (_c->hasValue()) {
       setDerivedValue(_c->getDerivedValue());
     } else if (_cx->hasValue() && _cy->hasValue()) {
@@ -36,8 +36,8 @@ public:
   
 private:
   std::shared_ptr<PointProp> _c;
-  std::shared_ptr<JsiProp> _cx;
-  std::shared_ptr<JsiProp> _cy;
+  std::shared_ptr<NodeProp> _cx;
+  std::shared_ptr<NodeProp> _cy;
 };
 
 }

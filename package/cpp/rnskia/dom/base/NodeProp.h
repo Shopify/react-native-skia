@@ -1,7 +1,7 @@
 #pragma once
 
 #include "JsiValue.h"
-#include "JsiDomNodeProps.h"
+#include "NodePropsContainer.h"
 
 #include <initializer_list>
 
@@ -16,7 +16,7 @@ enum struct BoolValue {
 /**
  Base class for Dom Node Properties
  */
-class JsiBaseProp {
+class BaseNodeProp {
 public:
   /**
    Called when any of the property values have changed by React updating properties. This is where we'll try to read property
@@ -24,13 +24,13 @@ public:
    @param runtime Javascript Runtime
    @param props Properties object
    */
-  virtual void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) = 0;
+  virtual void setProps(jsi::Runtime &runtime, NodePropsContainer* props) = 0;
   
   /**
    Called when any of the property values have changed from the native side by Skia values being updated.
    @param props Properties object
    */
-  virtual void updatePropValues(JsiDomNodeProps* props) = 0;
+  virtual void updatePropValues(NodePropsContainer* props) = 0;
   
   /**
    Use to check if the value represented by this property has a usable (non-null/undefined) value or not.
@@ -41,12 +41,12 @@ public:
 /**
  Simple class for reading a property by name from the Dom Node properties object.
  */
-class JsiProp: public JsiBaseProp {
+class NodeProp: public BaseNodeProp {
 public:
   /**
    Constructs a new optional dom node properrty
    */
-  JsiProp(PropId name, PropType type):
+  NodeProp(PropId name, PropType type):
   _name(name), _type(type) {}
   
   /**
@@ -63,14 +63,14 @@ public:
   /**
    Called when properties was read from the React props. This is where we read props and validate properties
    */
-  virtual void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+  virtual void setProps(jsi::Runtime &runtime, NodePropsContainer* props) override {
     _prop = props->tryReadProperty(runtime, _name, _type);
   }
   
   /**
    Called when properties changed from the native side (and also after the first initialization in setProps).
    */
-  virtual void updatePropValues(JsiDomNodeProps* props) override {}
+  virtual void updatePropValues(NodePropsContainer* props) override {}
   
   /**
    Return value if set
@@ -102,14 +102,14 @@ private:
 /**
  Property class for reading either an object or a host object.
  */
-class JsiObjectProp : public JsiProp {
+class JsiObjectProp : public NodeProp {
 public:
   JsiObjectProp(PropId name):
-  JsiProp(name, PropType::Object) {}
+          NodeProp(name, PropType::Object) {}
   
-  virtual void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+  virtual void setProps(jsi::Runtime &runtime, NodePropsContainer* props) override {
     try {
-      JsiProp::setProps(runtime, props);
+      NodeProp::setProps(runtime, props);
     } catch (...) {
       setValue(props->tryReadHostObjectProperty(runtime, getName()));
     }
@@ -119,28 +119,22 @@ public:
 /**
  Class for composing multiple properties into a derived property value
  */
-template <typename T>
-class JsiDerivedProp: public JsiBaseProp {
+class JsiBaseDerivedProp: public BaseNodeProp {
 public:
-  JsiDerivedProp() {}
+  JsiBaseDerivedProp(): BaseNodeProp() {}
   
   /**
    Override to calculate the derived value from child properties
    */
-  virtual void updateDerivedValue(JsiDomNodeProps* props) = 0;
+  virtual void updateDerivedValue(NodePropsContainer* props) = 0;
   
-  /**
-  Returns the derived value
-   */
-  const T& getDerivedValue() { return _derivedValue; }
-  
-  void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+  void setProps(jsi::Runtime &runtime, NodePropsContainer* props) override {
     for(auto &el: _childProps) {
-      el->setProps(runtime, props);
+      el->setProps(runtime, props);      
     }
   }
   
-  void updatePropValues(JsiDomNodeProps* props) override {
+  void updatePropValues(NodePropsContainer* props) override {
     for(auto &el: _childProps) {
       el->updatePropValues(props);
     }
@@ -170,11 +164,34 @@ public:
   /**
    Adds a property to the derived property child props.
    */
-  template <typename P = JsiBaseProp>
+  template <typename P = BaseNodeProp>
   std::shared_ptr<P> addChildProp(std::shared_ptr<P> prop) {
     _childProps.push_back(prop);
     return prop;
   }
+  
+private:
+  BoolValue _cachedHasValue = BoolValue::NotSet;
+  std::vector<std::shared_ptr<BaseNodeProp>> _childProps;
+};
+
+/**
+ Class for composing multiple properties into a derived property value
+ */
+template <typename T>
+class JsiDerivedProp: public JsiBaseDerivedProp {
+public:
+  JsiDerivedProp(): JsiBaseDerivedProp() {}
+  
+  /**
+   Override to calculate the derived value from child properties
+   */
+  virtual void updateDerivedValue(NodePropsContainer* props) = 0;
+  
+  /**
+  Returns the derived value
+   */
+  const T& getDerivedValue() { return _derivedValue; }
   
 protected:
   
@@ -184,8 +201,6 @@ protected:
   
 private:
   T _derivedValue;
-  BoolValue _cachedHasValue = BoolValue::NotSet;
-  std::vector<std::shared_ptr<JsiBaseProp>> _childProps;
 };
 
 }

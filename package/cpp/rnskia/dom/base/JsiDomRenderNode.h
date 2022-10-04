@@ -8,39 +8,31 @@
 #include "MatrixProp.h"
 #include "TransformProp.h"
 #include "PaintProp.h"
+#include "RectProp.h"
+#include "RRectProp.h"
+#include "ClipProp.h"
 
 #include "JsiDomDeclarationNode.h"
 
 namespace RNSkia {
 
-static const char* PropNameOrigin = "origin";
+static PropId PropNameOrigin = JsiPropId::get("origin");
 static PropId PropNameOpacity = JsiPropId::get("opacity");
+static PropId PropNameClip = JsiPropId::get("clip");
+static PropId PropNameInvertClip = JsiPropId::get("invertClip");
 
 class JsiDomRenderNode : public JsiDomNode {
 public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
                    const char* type) : JsiDomNode(context, type) {
     _paintProp = addProperty(std::make_shared<PaintProp>());
-    _opacityProp = addProperty(std::make_shared<JsiProp>(PropNameOpacity, PropType::Number));
+    _opacityProp = addProperty(std::make_shared<NodeProp>(PropNameOpacity, PropType::Number));
     _matrixProp = addProperty(std::make_shared<MatrixProp>(PropNameMatrix));
     _transformProp = addProperty(std::make_shared<TransformProp>(PropNameTransform));
     _originProp = addProperty(std::make_shared<PointProp>(PropNameOrigin));
+    _clipProp = addProperty(std::make_shared<ClipProp>(PropNameClip));
+    _invertClip = addProperty(std::make_shared<NodeProp>(PropNameInvertClip, PropType::Bool));
   }
-  
-  JSI_HOST_FUNCTION(render) {
-    // Get drawing context
-    render(std::make_shared<JsiDrawingContext>(runtime, arguments, count).get());
-    return jsi::Value::undefined();
-  }
-  
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDomNode, addChild),
-                       JSI_EXPORT_FUNC(JsiDomNode, removeChild),
-                       JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
-                       JSI_EXPORT_FUNC(JsiDomNode, setProps),
-                       JSI_EXPORT_FUNC(JsiDomNode, setProp),
-                       JSI_EXPORT_FUNC(JsiDomNode, dispose),
-                       JSI_EXPORT_FUNC(JsiDomNode, children),
-                       JSI_EXPORT_FUNC(JsiDomRenderNode, render))
   
   void render(JsiDrawingContext* context) {
     
@@ -55,7 +47,7 @@ public:
     _paintProp->setParentPaint(context->getPaint());
     
     // Make sure we commit any waiting transactions in the props object
-    props->commitTransactions();
+    props->commitDeferredPropertyChanges();
     
     // Make sure we update any properties that were changed in sub classes so that
     // they can update any derived values
@@ -79,6 +71,14 @@ public:
       
       // Concat canvas' matrix with our matrix
       context->getCanvas()->concat(*matrix);
+      
+      // Clipping
+      if (_clipProp->hasValue()) {
+        auto op = _invertClip->hasValue() && _invertClip->getPropValue()->getAsBool() ?
+          SkClipOp::kDifference : SkClipOp::kIntersect;
+        
+        _clipProp->clip(context->getCanvas(), op);
+      }
       
       if (_originProp->hasValue()) {
         // Handle origin
@@ -108,7 +108,7 @@ protected:
   /**
    Update flags when props are set
    */
-  void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+  void onPropsSet(jsi::Runtime &runtime, NodePropsContainer* props) override {
     JsiDomNode::onPropsSet(runtime, props);
     _hasMatrixOrTransformProp = _matrixProp->hasValue() || _transformProp->hasValue();
   }
@@ -181,12 +181,15 @@ private:
   
   double _prevOpacity;
   bool _hasMatrixOrTransformProp;
-  std::vector<JsiBaseProp> _props;
+  std::vector<BaseNodeProp> _props;
   std::shared_ptr<PointProp> _originProp;
   std::shared_ptr<MatrixProp> _matrixProp;
   std::shared_ptr<TransformProp> _transformProp;
   std::shared_ptr<PaintProp> _paintProp;
-  std::shared_ptr<JsiProp> _opacityProp;
+  std::shared_ptr<NodeProp> _opacityProp;
+  std::shared_ptr<NodeProp> _invertClip;
+  std::shared_ptr<ClipProp> _clipProp;
+  
   std::shared_ptr<JsiDrawingContext> _cachedContext;
 };
 

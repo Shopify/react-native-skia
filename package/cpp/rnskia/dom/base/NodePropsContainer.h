@@ -9,23 +9,19 @@
 
 namespace RNSkia {
 
-static PropId PropNameSelector = JsiPropId::get("selector");
-static PropId PropNameValue = JsiPropId::get("value");
-
 /**
  This class manages marshalling from JS values over JSI to C++ values and is typically called when a new node is
  created or an existing node is updated from the reconciler. This class will then convert all pure JS values to C++ values
  so that they can be read from any thread, and it will also subscribe to any animated values to recieve updated values
  that will be usd in the next render frame.
  */
-class JsiDomNodeProps :
-public std::enable_shared_from_this<JsiDomNodeProps> {
+class NodePropsContainer {
 public:
   /**
    Constructor. Pass the runtime and the JS object representing the properties, and a function that will be
    called when any property was changed from within this class as a result of a Skia value change.
    */
-  JsiDomNodeProps(jsi::Runtime &runtime, jsi::Object &&props) : _props(std::move(props)) {}
+  NodePropsContainer(jsi::Runtime &runtime, jsi::Object &&props) : _props(std::move(props)) {}
     
   /*
    Returns property names for active props (those used by the current node)
@@ -37,7 +33,7 @@ public:
   /**
    Will commit all waiting changes in the list of swappable prop values
    */
-  void commitTransactions() {
+  void commitDeferredPropertyChanges() {
     std::lock_guard<std::mutex> lock(_lock);
     
     for (auto el: _transactions) {
@@ -60,7 +56,7 @@ public:
   /**
    Adds a property change operation to pending transactions that can be commited at a later stage
    */
-  void addPropValueChangeTransaction(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
+  void addDeferredPropertyChange(jsi::Runtime &runtime, PropId name, const jsi::Value &value) {
     if (hasPropValue(name)) {
       std::lock_guard<std::mutex> lock(_lock);
       if (_transactions.count(name) == 0) {
@@ -150,14 +146,6 @@ public:
     
     // Check type
     auto nativePropValue = std::make_shared<JsiValue>(runtime, jsPropValue);
-    
-    // Ensure that the type is correct:
-    if (nativePropValue->getType() != type && !isUndefinedOrNull) {
-      throw jsi::JSError(runtime, "Expected \"" + JsiValue::getTypeAsString(type) +
-                         "\", got \"" +
-                         JsiValue::getTypeAsString(nativePropValue->getType()) +
-                         "\" for property \"" + name + "\".");
-    }
     
     // Set prop
     initializePropValue(runtime, name, jsPropValue);

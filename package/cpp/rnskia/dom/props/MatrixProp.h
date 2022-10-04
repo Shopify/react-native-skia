@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiProp.h"
+#include "NodeProp.h"
 #include "JsiSkMatrix.h"
 
 namespace RNSkia {
@@ -14,7 +14,7 @@ public:
     _prop = addChildProp(std::make_shared<JsiObjectProp>(name));
   }
   
-  void updateDerivedValue(JsiDomNodeProps* props) override {
+  void updateDerivedValue(NodePropsContainer* props) override {
     if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
       // Try reading as SkMatrix
       auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(_prop->getPropValue()->getAsHostObject());

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiProp.h"
+#include "NodeProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -24,14 +24,14 @@ class PaintProp:
 public JsiDerivedProp<std::shared_ptr<SkPaint>> {
 public:
   PaintProp(): JsiDerivedProp<std::shared_ptr<SkPaint>>() {
-    _color = addChildProp(std::make_shared<JsiProp>(PropNameColor, PropType::String));
-    _style = addChildProp(std::make_shared<JsiProp>(PropNameStyle, PropType::String));
-    _strokeWidth = addChildProp(std::make_shared<JsiProp>(PropNameStrokeWidth, PropType::Number));
-    _blendMode = addChildProp(std::make_shared<JsiProp>(PropNameBlendMode, PropType::String));
-    _strokeJoin = addChildProp(std::make_shared<JsiProp>(PropNameStrokeJoin, PropType::String));
-    _strokeCap = addChildProp(std::make_shared<JsiProp>(PropNameStrokeCap, PropType::String));
-    _strokeMiter = addChildProp(std::make_shared<JsiProp>(PropNameStrokeMiter, PropType::Number));
-    _antiAlias = addChildProp(std::make_shared<JsiProp>(PropNameAntiAlias, PropType::Number));
+    _color = addChildProp(std::make_shared<NodeProp>(PropNameColor, PropType::String));
+    _style = addChildProp(std::make_shared<NodeProp>(PropNameStyle, PropType::String));
+    _strokeWidth = addChildProp(std::make_shared<NodeProp>(PropNameStrokeWidth, PropType::Number));
+    _blendMode = addChildProp(std::make_shared<NodeProp>(PropNameBlendMode, PropType::String));
+    _strokeJoin = addChildProp(std::make_shared<NodeProp>(PropNameStrokeJoin, PropType::String));
+    _strokeCap = addChildProp(std::make_shared<NodeProp>(PropNameStrokeCap, PropType::String));
+    _strokeMiter = addChildProp(std::make_shared<NodeProp>(PropNameStrokeMiter, PropType::Number));
+    _antiAlias = addChildProp(std::make_shared<NodeProp>(PropNameAntiAlias, PropType::Number));
   }
   
   void setParentPaint(std::shared_ptr<SkPaint> paint) {
@@ -42,7 +42,7 @@ public:
     }
   }
   
-  bool hasChanged(JsiDomNodeProps* props) {
+  bool hasChanged(NodePropsContainer* props) {
     if (!props->getHasPropChanges()) {
       return false;
     }
@@ -57,7 +57,7 @@ public:
       props->getHasPropChanges(PropNameAntiAlias);
   }
   
-  void updateDerivedValue(JsiDomNodeProps* props) override {
+  void updateDerivedValue(NodePropsContainer* props) override {
     // We only get here if something has changed - start with COLOR
     if (_color->hasValue() && (_parentPaintWasReset || props->getHasPropChanges(PropNameColor))) {
       ensureDerivedValue();
@@ -223,14 +223,14 @@ private:
   
   bool _parentPaintWasReset = true;
   std::shared_ptr<SkPaint> _parentPaint;
-  std::shared_ptr<JsiProp> _color;
-  std::shared_ptr<JsiProp> _style;
-  std::shared_ptr<JsiProp> _strokeWidth;
-  std::shared_ptr<JsiProp> _blendMode;
-  std::shared_ptr<JsiProp> _strokeJoin;
-  std::shared_ptr<JsiProp> _strokeCap;
-  std::shared_ptr<JsiProp> _strokeMiter;
-  std::shared_ptr<JsiProp> _antiAlias;
+  std::shared_ptr<NodeProp> _color;
+  std::shared_ptr<NodeProp> _style;
+  std::shared_ptr<NodeProp> _strokeWidth;
+  std::shared_ptr<NodeProp> _blendMode;
+  std::shared_ptr<NodeProp> _strokeJoin;
+  std::shared_ptr<NodeProp> _strokeCap;
+  std::shared_ptr<NodeProp> _strokeMiter;
+  std::shared_ptr<NodeProp> _antiAlias;
 };
 
 }

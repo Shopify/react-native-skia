@@ -43,11 +43,11 @@ protected:
     draw(_context.get());
   }
   
-  virtual void onPropsSet(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+  virtual void onPropsSet(jsi::Runtime &runtime, NodePropsContainer* props) override {
     JsiDomRenderNode::onPropsSet(runtime, props);    
   }
   
-  virtual void onPropsChanged(JsiDomNodeProps* props) override {
+  virtual void onPropsChanged(NodePropsContainer* props) override {
     JsiDomRenderNode::onPropsChanged(props);    
   }
   

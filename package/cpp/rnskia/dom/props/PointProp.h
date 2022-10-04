@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiProp.h"
+#include "NodeProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -21,7 +21,7 @@ public:
     _prop = addChildProp(std::make_shared<JsiObjectProp>(name));
   }
   
-  void updateDerivedValue(JsiDomNodeProps* props) override {
+  void updateDerivedValue(NodePropsContainer* props) override {
     if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
       // Check for JsiSkRect and JsiSkPoint
       if (_prop->getPropValue()->getType() == PropType::HostObject) {
@@ -43,7 +43,7 @@ public:
     }    
   }
   
-  void setProps(jsi::Runtime &runtime, JsiDomNodeProps* props) override {
+  void setProps(jsi::Runtime &runtime, NodePropsContainer* props) override {
     JsiDerivedProp::setProps(runtime, props);
     
     if (_prop->hasValue()) {

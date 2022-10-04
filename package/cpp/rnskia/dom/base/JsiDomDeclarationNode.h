@@ -34,7 +34,7 @@ public:
     if (props != nullptr) {
       
       // Make sure we commit any waiting transactions in the props object
-      props->commitTransactions();
+      props->commitDeferredPropertyChanges();
       
       // Make sure we update any properties that were changed in sub classes so that
       // they can update any derived values

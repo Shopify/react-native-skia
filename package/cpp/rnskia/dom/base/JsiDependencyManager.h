@@ -10,6 +10,9 @@
 
 namespace RNSkia {
 
+static PropId PropNameSelector = JsiPropId::get("selector");
+static PropId PropNameValue = JsiPropId::get("value");
+
 class JsiDependencyManager: public JsiHostObject,
 public std::enable_shared_from_this<JsiDependencyManager> {
 public:
@@ -58,7 +61,7 @@ public:
         auto animatedValue = getAnimatedValue(nativeValue);
         auto unsubscribe = animatedValue->addListener([key, animatedValue, node](jsi::Runtime &runtime) {
           auto nextJsValue = animatedValue->getCurrent(runtime);
-          node->getProperties()->addPropValueChangeTransaction(runtime, key, nextJsValue);
+          node->getProperties()->addDeferredPropertyChange(runtime, key, nextJsValue);
         });
         
         // Save unsubscribe methods
@@ -75,7 +78,7 @@ public:
            jsi::Value current = animatedValue->getCurrent(runtime);
            // This code is executed on the Javascript thread, so we need to use the
            // transaction system to update the property
-           node->getProperties()->addPropValueChangeTransaction(runtime, key, selector(runtime, jsi::Value::null(), &current, 1));           
+           node->getProperties()->addDeferredPropertyChange(runtime, key, selector(runtime, jsi::Value::null(), &current, 1));           
         });
         
         // Save unsubscribe methods
