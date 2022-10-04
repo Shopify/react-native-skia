@@ -13,7 +13,7 @@ import {
 } from "../../components";
 import { height, importSkia, width, mountCanvas } from "../setup";
 
-const PADDING = 200;
+const PADDING = 25;
 
 const defaultPath = [
   {
