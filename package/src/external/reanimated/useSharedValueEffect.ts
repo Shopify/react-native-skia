@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/consistent-type-imports */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useEffect, useMemo } from "react";
 
-// @ts-ignore
-let Reanimated: typeof import("react-native-reanimated") | undefined;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Reanimated: any;
 
 try {
   Reanimated = require("react-native-reanimated");
