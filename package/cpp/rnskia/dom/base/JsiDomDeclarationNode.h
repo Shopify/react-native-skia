@@ -38,7 +38,8 @@ public:
     
     // Now we are ready to materialize
     materialize(context);
-    
+
+    // end the "visit" of the declaration node
     if (container != nullptr) {
       container->endVisit();
     }

@@ -13,27 +13,19 @@ public:
   BaseDerivedProp(): BaseNodeProp() {}
   
   /**
-   True if the property has changed since we last visited it
-   */
-  bool isChanged() override {
-    // Only one needs to be set
-    for (auto &prop: _properties) {
-      if (prop->isChanged()) {
-        return true;
-      }
-    }
-    return false;
-  }
-  
-  /**
    Starts the process of updating and reading props
    */
   void beginVisit(JsiDrawingContext *context) override {
+    auto changed = false;
     for (auto &prop: _properties) {
       prop->beginVisit(context);
+      if (prop->isChanged()) {
+        changed = true;
+      }
     }
     
-    if (isChanged()) {
+    // We only need to update the derived value when any of the derived properties have changed.
+    if (changed) {
       updateDerivedValue();
     }
   }
@@ -45,7 +37,14 @@ public:
     for (auto &prop: _properties) {
       prop->endVisit();
     }
+    
+    _isChanged = false;
   }
+  
+  /**
+   Returns the changed state of the prop
+   */
+  bool isChanged() override { return _isChanged; }
   
   /**
    Delegate read value to child nodes
@@ -72,8 +71,14 @@ public:
     return prop;
   }
   
+protected:
+  void setIsChanged(bool isChanged) {
+    _isChanged = isChanged;
+  }
+  
 private:
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
+  std::atomic<bool> _isChanged = { false };
 };
 
 /**
@@ -102,6 +107,7 @@ protected:
    Set derived value from sub classes
    */
   void setDerivedValue(std::shared_ptr<T> value) {
+    setIsChanged(_derivedValue != value);
     _derivedValue = value;
   }
   
@@ -109,6 +115,7 @@ protected:
    Set derived value from sub classes
    */
   void setDerivedValue(const T&& value) {
+    setIsChanged(true);
     _derivedValue = std::make_shared<T>(std::move(value));
   }
     

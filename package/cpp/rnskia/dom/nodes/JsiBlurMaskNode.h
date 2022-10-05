@@ -25,7 +25,7 @@ protected:
   void materialize(JsiDrawingContext* context) override {
     if (_blur->isChanged() || _respectCTM->isChanged() || _style->isChanged()) {
       if (!_blur->hasValue()) {
-        getContext()->raiseError(std::runtime_error("Expected blur mask to have a blur property."));
+        throw std::runtime_error("Expected <BlurMask> component to have a valid blur property.");
       }
       
       bool respectCTM = _respectCTM->hasValue() ? _respectCTM->getValue()->getAsBool() : true;
@@ -34,11 +34,9 @@ protected:
         style = getBlurStyleFromValue(_style->getValue()->getAsString());
       }
       
-      _filter = SkMaskFilter::MakeBlur(style, _blur->getValue()->getAsNumber(), respectCTM);
-      context->notifyChanged();
+      auto filter = SkMaskFilter::MakeBlur(style, _blur->getValue()->getAsNumber(), respectCTM);
+      context->getPaint()->setMaskFilter(filter);      
     }
-    
-    context->getPaint()->setMaskFilter(_filter);    
   }
   
   void defineProperties(NodePropsContainer* container) override {
@@ -65,8 +63,6 @@ private:
                                                 "a valid blur style."));
     return SkBlurStyle::kNormal_SkBlurStyle;
   }
-  
-  sk_sp<SkMaskFilter> _filter;
   
   std::shared_ptr<NodeProp> _style;
   std::shared_ptr<NodeProp> _respectCTM;

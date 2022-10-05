@@ -25,43 +25,45 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (_transformProp->hasValue()) {
-      if (_transformProp->getValue()->getType() == PropType::Array) {
-        auto m = std::make_shared<SkMatrix>(SkMatrix());
-        for (auto &el: _transformProp->getValue()->getAsArray()) {
-          auto keys = el->getKeys();
-          if (keys.size() == 0) {
-            throw std::runtime_error("Empty value in transform. Expected translateX, translateY, scale, "
-                                     "scaleX, scaleY, skewX, skewY, rotate or rotateZ.");
-          }
-          auto key = el->getKeys().at(0);
-          auto value = el->getValue(key)->getAsNumber();
-          if (key == PropNameTranslateX) {
-            m->preTranslate(value, 0);
-          } else if (key == PropNameTranslateY) {
-            m->preTranslate(0, value);
-          } else if (key == PropNameScale) {
-            m->preScale(value, value);
-          } else if (key == PropNameScaleX) {
-            m->preScale(value, 1);
-          } else if (key == PropNameScaleY) {
-            m->preScale(1, value);
-          } else if (key == PropNameSkewX) {
-            m->preScale(value, 0);
-          } else if (key == PropNameSkewY) {
-            m->preScale(value, 0);
-          } else if (key == PropNameRotate || key == PropNameRotateZ) {
-            m->preRotate(SkRadiansToDegrees(value));
-          } else {
-            throw std::runtime_error("Unknown key in transform. Expected translateX, translateY, scale, "
-                                     "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " + std::string(key) + ".");
-          }
+    if (!_transformProp->hasValue()) {
+      setDerivedValue(nullptr);
+      return;
+    }
+    if (_transformProp->getValue()->getType() == PropType::Array) {
+      auto m = std::make_shared<SkMatrix>(SkMatrix());
+      for (auto &el: _transformProp->getValue()->getAsArray()) {
+        auto keys = el->getKeys();
+        if (keys.size() == 0) {
+          throw std::runtime_error("Empty value in transform. Expected translateX, translateY, scale, "
+                                   "scaleX, scaleY, skewX, skewY, rotate or rotateZ.");
         }
-        setDerivedValue(m);
-      } else {
-        throw std::runtime_error("Expected array for transform property, got " +
-                                 JsiValue::getTypeAsString(_transformProp->getValue()->getType()));
+        auto key = el->getKeys().at(0);
+        auto value = el->getValue(key)->getAsNumber();
+        if (key == PropNameTranslateX) {
+          m->preTranslate(value, 0);
+        } else if (key == PropNameTranslateY) {
+          m->preTranslate(0, value);
+        } else if (key == PropNameScale) {
+          m->preScale(value, value);
+        } else if (key == PropNameScaleX) {
+          m->preScale(value, 1);
+        } else if (key == PropNameScaleY) {
+          m->preScale(1, value);
+        } else if (key == PropNameSkewX) {
+          m->preScale(value, 0);
+        } else if (key == PropNameSkewY) {
+          m->preScale(value, 0);
+        } else if (key == PropNameRotate || key == PropNameRotateZ) {
+          m->preRotate(SkRadiansToDegrees(value));
+        } else {
+          throw std::runtime_error("Unknown key in transform. Expected translateX, translateY, scale, "
+                                   "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " + std::string(key) + ".");
+        }
       }
+      setDerivedValue(m);
+    } else {
+      throw std::runtime_error("Expected array for transform property, got " +
+                               JsiValue::getTypeAsString(_transformProp->getValue()->getType()));
     }
   }
   

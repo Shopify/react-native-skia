@@ -68,9 +68,13 @@ public:
    Called when the React / JS side sets properties on a node
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
+    // RNSkLogger::logToConsole("Begin set properties");
+ 
+    // Clear property mapping
     _mappedProperties.clear();
-    // Loop through all defined props by name and update the
-    // underlying NodeProp object
+    
+    // Use specialized reader function to be able to intercept calls that
+    // reads specific named values from the js property object.
     auto read = [&](jsi::Runtime &runtime, PropId name, std::shared_ptr<NodeProp> prop) {
       if (_mappedProperties.count(name) == 0) {
         std::vector<std::shared_ptr<NodeProp>> tmp;
@@ -78,11 +82,21 @@ public:
       }
       _mappedProperties.at(name).push_back(prop);
       return props.getProperty(runtime, name);
+      
+      //auto v = props.getProperty(runtime, name);
+     // auto j = JsiValue(runtime, v);
+      
+      /// RNSkLogger::logToConsole("Read prop %s: %s (%s)", name, j.asString().c_str(), j.getTypeAsString(j.getType()).c_str());
+     // return v;
     };
     
     for (auto &prop: _properties) {
       prop->readValueFromJs(runtime, read);
     }
+    
+    //RNSkLogger::logToConsole("End set properties");
+    //RNSkLogger::logToConsole("------------------");
+    //RNSkLogger::logToConsole("");
   }
     
   /**

@@ -21,7 +21,7 @@ public:
   virtual void readValueFromJs (jsi::Runtime &runtime, const ReadPropFunc& read) override {
     // Always use the next field since this method is called on the JS thread and
     // we don't want to rip out the underlying value object.
-    _nextValue = std::make_shared<JsiValue>(runtime, read(runtime, _name, shared_from_this()));
+    _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, shared_from_this()));
     _isChanged = true;
     onValueRead();
   }
@@ -30,6 +30,7 @@ public:
    Property value has changed - let's save this as a change to be commited later
    */
   void updateValue(jsi::Runtime &runtime, const jsi::Value& value) {
+    std::lock_guard<std::mutex> lock(_swapValuesMutex);
     _nextValue = std::make_shared<JsiValue>(runtime, value);
     _isChanged = true;
   }
@@ -52,6 +53,7 @@ public:
    Starts the process of updating and reading props
    */
   void beginVisit(JsiDrawingContext *context) override {
+    std::lock_guard<std::mutex> lock(_swapValuesMutex);
     // Swap values
     if (_nextValue != nullptr) {
       _value = _nextValue;
@@ -84,6 +86,7 @@ private:
   std::atomic<bool> _isChanged = { false };
   std::shared_ptr<JsiValue> _value;
   std::shared_ptr<JsiValue> _nextValue;
+  std::mutex _swapValuesMutex;
 };
 
 }

@@ -153,6 +153,22 @@ public:
     return getAsHostFunction();
   }
   
+  std::string asString() {
+    switch(_type) {
+      case PropType::Null:
+        return "(null)";
+      case PropType::Undefined:
+        return "(undefined)";
+      case PropType::Number: return std::to_string(_numberValue);
+      case PropType::Bool: return std::to_string(_boolValue);
+      case PropType::String: return _stringValue;
+      case PropType::Object: return "[Object]";
+      case PropType::Array: return "[Array]";
+      case PropType::HostObject: return "[HostObject]";
+      case PropType::HostFunction: return "[HostFunction]";
+    }
+  }
+  
   bool equals(jsi::Runtime &runtime, const jsi::Value& other) {
     auto p = std::make_shared<JsiValue>(runtime, other);
     return equals(p);

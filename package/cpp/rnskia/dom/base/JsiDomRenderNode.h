@@ -27,6 +27,7 @@ public:
                    const char* type) : JsiDomNode(context, type) {}
   
   void render(JsiDrawingContext* context) {
+    // RNSkLogger::logToConsole("Begin render node %s", getType());
     
     auto container = getPropsContainer();
     if (container == nullptr) {
@@ -85,6 +86,8 @@ public:
         
     // Mark container as done
     container->endVisit();
+    
+    // RNSkLogger::logToConsole("End rendering node %s", getType());
   };
   
 protected:
@@ -110,29 +113,9 @@ protected:
   }
   
 private:
-  /**
-   Returns true if any of the child nodes have changes
-   */
-  bool getChildDeclarationNodesHasPropertyChanged() {
-    for (auto &child: getChildren()) {
-      auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
-      if (declarationNode != nullptr) {
-        if (declarationNode->getPropsContainer()->getHasPropChanges()) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-  
   JsiDrawingContext* materializeContext(JsiDrawingContext* context) {
-    // auto container = getPropsContainer();
     // We only need to update the cached context if the paint property or opacity property has changed
-    if (_paintProp->isChanged() ||
-        getChildDeclarationNodesHasPropertyChanged() ||
-        context->hasChanged() ||
-        // container->getHasPropChanges(PropNameOpacity) ||
-        _opacity != context->getOpacity()) {
+    if (_paintProp->isChanged() || _opacity != context->getOpacity()) {
       
       // Paint - start by getting paint from parent context
       auto paint = context->getPaint();
@@ -157,13 +140,13 @@ private:
         _cachedContext->setPaint(paint);
         _cachedContext->setOpacity(_opacity);
       }
-      
-      // Enumerate children and let them modify the drawing context
-      for (auto &child: getChildren()) {
-        auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
-        if (declarationNode != nullptr) {
-          declarationNode->materializeNode(_cachedContext.get());
-        }
+    }
+    
+    // Enumerate children and let them modify the drawing context
+    for (auto &child: getChildren()) {
+      auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
+      if (declarationNode != nullptr) {
+        declarationNode->materializeNode(_cachedContext.get());
       }
     }
     

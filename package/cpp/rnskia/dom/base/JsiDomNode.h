@@ -5,8 +5,6 @@
 #include "NodeProp.h"
 
 #include <vector>
-#include <unordered_map>
-#include <memory>
 
 #include "RNSkPlatformContext.h"
 
@@ -40,9 +38,9 @@ public:
    Contructor. Takes as parameters the values comming from the JS world that initialized the class.
    */
   JsiDomNode(std::shared_ptr<RNSkPlatformContext> context, const char* type) :
-  _type(type),
-  _context(context),
-  JsiHostObject() {}
+    _type(type),
+    _context(context),
+    JsiHostObject() {}
   
   /**
    Called when creating the node, resolves properties from the node constructor. These
@@ -144,7 +142,6 @@ public:
    Returns the container for node properties
    */
   NodePropsContainer* getPropsContainer() {
-    std::lock_guard<std::mutex> lock(_lock);
     return _propsContainer.get();
   }
   
@@ -180,8 +177,6 @@ protected:
    as a signal that things have changed.
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
-    std::lock_guard<std::mutex> lock(_lock);
-    
     if (_propsContainer == nullptr) {
       
       // Initialize properties container
@@ -246,7 +241,6 @@ private:
   std::shared_ptr<RNSkPlatformContext> _context;
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::shared_ptr<NodePropsContainer> _propsContainer;
-  std::mutex _lock;
   const char* _type;
   std::function<void()> _disposeCallback;
 };

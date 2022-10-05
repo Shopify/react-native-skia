@@ -37,9 +37,13 @@ public:
           }
         }
       } else if (_pointProp->getValue()->getType() == PropType::Object) {
-        setDerivedValue(SkPoint::Make(_x->getAsNumber(), _y->getAsNumber()));
+        if (_x != nullptr && _y != nullptr) {
+          setDerivedValue(SkPoint::Make(_x->getAsNumber(), _y->getAsNumber()));
+        }
       }
-    }    
+    } else {
+      setDerivedValue(nullptr);
+    }
   }
   
   void onValueRead() override {

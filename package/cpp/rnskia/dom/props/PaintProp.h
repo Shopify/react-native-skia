@@ -112,10 +112,6 @@ public:
       setDerivedValue(nullptr);
     }
     
-    if(context->hasChanged()) {
-      setDerivedValue(nullptr);
-    }
-    
     DerivedProp::beginVisit(context);
   }
   

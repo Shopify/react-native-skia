@@ -32,19 +32,8 @@ protected:
          }
      */
     
-    // Ensure cached context
-    if (_context == nullptr) {
-      _context = std::make_shared<JsiDrawingContext>(context);
-    }
-    
-    _context->setCanvas(context->getCanvas());
-    _context->setOpacity(context->getOpacity());
-    
-    draw(_context.get());
-  }  
-  
-private:
-  std::shared_ptr<JsiDrawingContext> _context;
+    draw(context);
+  }
 };
 
 }

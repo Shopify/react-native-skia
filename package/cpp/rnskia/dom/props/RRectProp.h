@@ -133,7 +133,7 @@ public:
     } else if (_rectPropFromProps->hasValue()) {
       setDerivedValue(_rectPropFromProps->getDerivedValue());
     } else {
-      throw std::runtime_error("Either the rect property or x/y/width/height must be set.");
+      setDerivedValue(nullptr);
     }
   }
 

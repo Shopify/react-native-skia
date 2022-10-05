@@ -38,8 +38,10 @@ public:
         }
       } else {
         // Update cache from js object value
-        setDerivedValue(SkRect::MakeXYWH(_x->getAsNumber(), _y->getAsNumber(),
-                                         _width->getAsNumber(), _height->getAsNumber()));
+        if (_x != nullptr && _y != nullptr && _width != nullptr && _height != nullptr) {
+          setDerivedValue(SkRect::MakeXYWH(_x->getAsNumber(), _y->getAsNumber(),
+                                           _width->getAsNumber(), _height->getAsNumber()));
+        }
       }
     }
   }
@@ -118,7 +120,7 @@ public:
     } else if (_rectPropFromProps->hasValue()) {
       setDerivedValue(_rectPropFromProps->getDerivedValue());
     } else {
-      throw std::runtime_error("Either the rect property or x/y/width/height must be set.");
+      setDerivedValue(nullptr);
     }
   }
 

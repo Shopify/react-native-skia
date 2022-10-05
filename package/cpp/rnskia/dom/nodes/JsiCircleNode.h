@@ -13,13 +13,12 @@ public:
 protected:
   void draw(JsiDrawingContext* context) override {
     if (!_circleProp->hasValue() || !_r->hasValue()) {
-      getContext()->raiseError(std::runtime_error("Expected circle node to have a cx, cy or c \
-                                                  and r properties."));
+      throw std::runtime_error("Expected circle node to have a cx, cy or c \
+                               and r properties.");
+      return;
     }
-    auto paint = *context->getPaint();
-    context->getCanvas()->drawCircle(*_circleProp->getDerivedValue(),
-                                     _r->getValue()->getAsNumber(),
-                                     paint);
+    context->getCanvas()->drawCircle(*_circleProp->getDerivedValue(), _r->getValue()->getAsNumber(),
+                                     *context->getPaint());
   }
   
   void defineProperties(NodePropsContainer* container) override {

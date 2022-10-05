@@ -58,14 +58,20 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
   canvas->scale(pd, pd);
   
   if (_drawingContext == nullptr) {
-    _drawingContext = std::make_shared<JsiDrawingContext>();
-    _drawingContext->setPaint(std::make_shared<SkPaint>());
-    _drawingContext->setOpacity(1.0f);
+    _drawingContext = std::make_shared<JsiDrawingContext>(std::make_shared<SkPaint>(), 1.0f);
   }
   
+  // Update canvas before drawing
   _drawingContext->setCanvas(canvas);
-  _drawingContext->resetChanges();
-  _root->render(_drawingContext.get());
+  
+  // Ask the root node to render to the provided canvas
+  try {
+    _root->render(_drawingContext.get());
+  } catch (std::runtime_error err) {
+    _platformContext->raiseError(err);
+  } catch (...) {
+    _platformContext->raiseError(std::runtime_error("Error rendering the Skia view."));
+  }
   
   renderDebugOverlays(canvas);
   
