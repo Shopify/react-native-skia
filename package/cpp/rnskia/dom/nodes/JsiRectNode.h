@@ -8,9 +8,7 @@ namespace RNSkia {
 class JsiRectNode : public JsiDomDrawingNode, public JsiDomNodeCtor<JsiRectNode> {
 public:
   JsiRectNode(std::shared_ptr<RNSkPlatformContext> context) :
-  JsiDomDrawingNode(context, "skRect") {
-    _rectProp = addProperty(std::make_shared<RectProps>(PropNameRect));
-  }
+  JsiDomDrawingNode(context, "skRect") {}
     
 protected:
   void draw(JsiDrawingContext* context) override {
@@ -18,7 +16,13 @@ protected:
       getContext()->raiseError(std::runtime_error("Expected Rect node to have a rect property or \
                                                   x, y, width and height properties."));
     }
-    context->getCanvas()->drawRect(_rectProp->getDerivedValue(), *context->getPaint());
+    context->getCanvas()->drawRect(*_rectProp->getDerivedValue(), *context->getPaint());
+  }
+  
+  void defineProperties(NodePropsContainer* container) override {
+    JsiDomDrawingNode::defineProperties(container);
+    
+    _rectProp = container->defineProperty(std::make_shared<RectProps>(PropNameRect));
   }
   
 private:

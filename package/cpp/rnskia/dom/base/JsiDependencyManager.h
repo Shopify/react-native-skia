@@ -7,6 +7,7 @@
 #include "JsiDomNode.h"
 
 #include <map>
+#include <set>
 
 namespace RNSkia {
 
@@ -51,17 +52,20 @@ public:
       std::pair<std::shared_ptr<RNSkReadonlyValue>, std::function<void()>>> unsubscribers;
     
     // Enumerate registered keys for the given node to only handle known properties
-    auto keys = node->getProperties()->getKeys();
-    for (const auto &key: keys) {
+    for (const auto &propMapping: node->getPropsContainer()->getMappedProperties()) {
+      auto key = propMapping.first;
       auto jsValue = nextProps.getProperty(runtime, key);
       JsiValue nativeValue(runtime, jsValue);
       
       if (isAnimatedValue(nativeValue)) {
         // Handle Skia Animation Values
         auto animatedValue = getAnimatedValue(nativeValue);
-        auto unsubscribe = animatedValue->addListener([key, animatedValue, node](jsi::Runtime &runtime) {
+        auto unsubscribe = animatedValue->addListener([animatedValue, propMapping]
+                                                      (jsi::Runtime &runtime) {
           auto nextJsValue = animatedValue->getCurrent(runtime);
-          node->getProperties()->addDeferredPropertyChange(runtime, key, nextJsValue);
+          for (auto &prop: propMapping.second) {
+            prop->updateValue(runtime, nextJsValue);
+          }
         });
         
         // Save unsubscribe methods
@@ -73,17 +77,21 @@ public:
         
         auto selector = nativeValue.getValue(PropNameSelector)->getAsFunction();
         // Add subscription to animated value in selector
-        auto unsubscribe = animatedValue->addListener([nativeValue, node, key, selector = std::move(
-          selector), animatedValue](jsi::Runtime &runtime) {
+        auto unsubscribe = animatedValue->addListener([nativeValue, propMapping,
+                                                       selector = std::move(selector),
+                                                       animatedValue]
+                                                      (jsi::Runtime &runtime) {
            jsi::Value current = animatedValue->getCurrent(runtime);
            // This code is executed on the Javascript thread, so we need to use the
            // transaction system to update the property
-           node->getProperties()->addDeferredPropertyChange(runtime, key, selector(runtime, jsi::Value::null(), &current, 1));           
+           for (auto &prop: propMapping.second) {
+             prop->updateValue(runtime, selector(runtime, jsi::Value::null(), &current, 1));
+           }
         });
         
         // Save unsubscribe methods
-        unsubscribers.push_back(std::make_pair(animatedValue, unsubscribe));
-      }
+        unsubscribers.push_back(std::make_pair(animatedValue, unsubscribe));       
+      }    
     }
     
     // Now let's store the subscription info

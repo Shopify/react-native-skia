@@ -41,15 +41,7 @@ protected:
     _context->setOpacity(context->getOpacity());
     
     draw(_context.get());
-  }
-  
-  virtual void onPropsSet(jsi::Runtime &runtime, NodePropsContainer* props) override {
-    JsiDomRenderNode::onPropsSet(runtime, props);    
-  }
-  
-  virtual void onPropsChanged(NodePropsContainer* props) override {
-    JsiDomRenderNode::onPropsChanged(props);    
-  }
+  }  
   
 private:
   std::shared_ptr<JsiDrawingContext> _context;

@@ -24,66 +24,54 @@ static PropId PropNameInvertClip = JsiPropId::get("invertClip");
 class JsiDomRenderNode : public JsiDomNode {
 public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
-                   const char* type) : JsiDomNode(context, type) {
-    _paintProp = addProperty(std::make_shared<PaintProp>());
-    _opacityProp = addProperty(std::make_shared<NodeProp>(PropNameOpacity, PropType::Number));
-    _matrixProp = addProperty(std::make_shared<MatrixProp>(PropNameMatrix));
-    _transformProp = addProperty(std::make_shared<TransformProp>(PropNameTransform));
-    _originProp = addProperty(std::make_shared<PointProp>(PropNameOrigin));
-    _clipProp = addProperty(std::make_shared<ClipProp>(PropNameClip));
-    _invertClip = addProperty(std::make_shared<NodeProp>(PropNameInvertClip, PropType::Bool));
-  }
+                   const char* type) : JsiDomNode(context, type) {}
   
   void render(JsiDrawingContext* context) {
     
-    auto props = getProperties();
-    if (props == nullptr) {
+    auto container = getPropsContainer();
+    if (container == nullptr) {
       // A node might have an empty set of properties - then we can just render the node directly
       renderNode(context);
       return;
     }
     
-    // Since the paint props uses parent paint, we need to set it before we call onPropsChanged
-    _paintProp->setParentPaint(context->getPaint());
+    // by visiting nodes we ensure that all updates and changes has been
+    // read and handled.
+    container->beginVisit(context);
     
-    // Make sure we commit any waiting transactions in the props object
-    props->commitDeferredPropertyChanges();
-    
-    // Make sure we update any properties that were changed in sub classes so that
-    // they can update any derived values
-    if (props->getHasPropChanges()) {
-      onPropsChanged(props);
-    }
+    auto shouldTransform = _matrixProp->hasValue() || _transformProp->hasValue();
+    auto shouldSave = shouldTransform || _clipProp->hasValue();
     
     // Handle matrix/transforms
-    if (_hasMatrixOrTransformProp) {
-      auto matrix = _matrixProp->hasValue() ?
-        _matrixProp->getDerivedValue() : _transformProp->getDerivedValue();
-      
+    if (shouldSave) {
       // Save canvas state
       context->getCanvas()->save();
       
       if (_originProp->hasValue()) {
         // Handle origin
-        context->getCanvas()->translate(_originProp->getDerivedValue().x(),
-                                        _originProp->getDerivedValue().y());
+        context->getCanvas()->translate(_originProp->getDerivedValue()->x(),
+                                        _originProp->getDerivedValue()->y());
       }
       
-      // Concat canvas' matrix with our matrix
-      context->getCanvas()->concat(*matrix);
+      if (shouldTransform) {
+        auto matrix = _matrixProp->hasValue() ?
+        _matrixProp->getDerivedValue() : _transformProp->getDerivedValue();
+        
+        
+        // Concat canvas' matrix with our matrix
+        context->getCanvas()->concat(*matrix);
+      }
       
       // Clipping
       if (_clipProp->hasValue()) {
-        auto op = _invertClip->hasValue() && _invertClip->getPropValue()->getAsBool() ?
-          SkClipOp::kDifference : SkClipOp::kIntersect;
-        
-        _clipProp->clip(context->getCanvas(), op);
+        auto invert = _invertClip->hasValue() && _invertClip->getValue()->getAsBool();        
+        _clipProp->clip(context->getCanvas(), invert);
       }
       
       if (_originProp->hasValue()) {
         // Handle origin
-        context->getCanvas()->translate(-_originProp->getDerivedValue().x(),
-                                        -_originProp->getDerivedValue().y());
+        context->getCanvas()->translate(-_originProp->getDerivedValue()->x(),
+                                        -_originProp->getDerivedValue()->y());
       }
     }
     
@@ -91,26 +79,34 @@ public:
     renderNode(materializeContext(context));
     
     // Restore if needed
-    if (_hasMatrixOrTransformProp) {
+    if (shouldSave) {
       context->getCanvas()->restore();
     }
-    
-    // Reset all changes in props
-    props->resetPropChanges();
+        
+    // Mark container as done
+    container->endVisit();
   };
   
 protected:
+  
   /**
    Override to implement rendering where the current state of the drawing context is correctly set.
    */
   virtual void renderNode(JsiDrawingContext* context) = 0;
   
   /**
-   Update flags when props are set
+   Define common properties for all render nodes
    */
-  void onPropsSet(jsi::Runtime &runtime, NodePropsContainer* props) override {
-    JsiDomNode::onPropsSet(runtime, props);
-    _hasMatrixOrTransformProp = _matrixProp->hasValue() || _transformProp->hasValue();
+  virtual void defineProperties(NodePropsContainer* container) override {
+    JsiDomNode::defineProperties(container);
+    
+    _paintProp = container->defineProperty(std::make_shared<PaintProp>());
+    _opacityProp = container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
+    _matrixProp = container->defineProperty(std::make_shared<MatrixProp>(PropNameMatrix));
+    _transformProp = container->defineProperty(std::make_shared<TransformProp>(PropNameTransform));
+    _originProp = container->defineProperty(std::make_shared<PointProp>(PropNameOrigin));
+    _clipProp = container->defineProperty(std::make_shared<ClipProp>(PropNameClip));
+    _invertClip = container->defineProperty(std::make_shared<NodeProp>(PropNameInvertClip));
   }
   
 private:
@@ -121,7 +117,7 @@ private:
     for (auto &child: getChildren()) {
       auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
       if (declarationNode != nullptr) {
-        if (declarationNode->getProperties()->getHasPropChanges()) {
+        if (declarationNode->getPropsContainer()->getHasPropChanges()) {
           return true;
         }
       }
@@ -130,13 +126,13 @@ private:
   }
   
   JsiDrawingContext* materializeContext(JsiDrawingContext* context) {
-    auto props = getProperties();
+    // auto container = getPropsContainer();
     // We only need to update the cached context if the paint property or opacity property has changed
-    if (_paintProp->hasChanged(props) ||
+    if (_paintProp->isChanged() ||
         getChildDeclarationNodesHasPropertyChanged() ||
         context->hasChanged() ||
-        props->getHasPropChanges(PropNameOpacity) ||
-        _prevOpacity != context->getOpacity()) {
+        // container->getHasPropChanges(PropNameOpacity) ||
+        _opacity != context->getOpacity()) {
       
       // Paint - start by getting paint from parent context
       auto paint = context->getPaint();
@@ -147,19 +143,19 @@ private:
       }
       
       // Opacity
-      _prevOpacity = context->getOpacity();
+      _opacity = context->getOpacity();
       if (_opacityProp->hasValue()) {
-        _prevOpacity *= _opacityProp->getPropValue()->getAsNumber();
+        _opacity *= _opacityProp->getValue()->getAsNumber();
         // TODO: Is this enough to override the opacity correctly?
-        paint->setAlpha(255 * _prevOpacity);
+        paint->setAlpha(255 * _opacity);
       }
       
       // Create the cached drawing context if it is not set
       if (_cachedContext == nullptr) {
-        _cachedContext = std::make_shared<JsiDrawingContext>(context, paint, _prevOpacity);
+        _cachedContext = std::make_shared<JsiDrawingContext>(context, paint, _opacity);
       } else {
         _cachedContext->setPaint(paint);
-        _cachedContext->setOpacity(_prevOpacity);
+        _cachedContext->setOpacity(_opacity);
       }
       
       // Enumerate children and let them modify the drawing context
@@ -179,8 +175,8 @@ private:
     return _cachedContext != nullptr ? _cachedContext.get() : context;
   }
   
-  double _prevOpacity;
-  bool _hasMatrixOrTransformProp;
+  double _opacity;
+  
   std::vector<BaseNodeProp> _props;
   std::shared_ptr<PointProp> _originProp;
   std::shared_ptr<MatrixProp> _matrixProp;

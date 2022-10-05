@@ -2,7 +2,6 @@
 
 #include "JsiDomDeclarationNode.h"
 #include "PaintProp.h"
-#include "JsiSkRect.h"
 
 namespace RNSkia {
 
@@ -11,14 +10,9 @@ public JsiDomDeclarationNode,
 public JsiDomNodeCtor<JsiPaintNode> {
 public:
   JsiPaintNode(std::shared_ptr <RNSkPlatformContext> context) :
-    JsiDomDeclarationNode(context, "skPaint") {
-    _paintProp = addProperty(std::make_shared<PaintProp>());
-    _opacityProp = addProperty(std::make_shared<NodeProp>(PropNameOpacity, PropType::Number));
-  }
+    JsiDomDeclarationNode(context, "skPaint") {}
   
   void materializeNode(JsiDrawingContext* context) override {
-    // Since the paint props uses parent paint, we need to set it before we call onPropsChanged
-    _paintProp->setParentPaint(context->getPaint());
     JsiDomDeclarationNode::materializeNode(context);
   }
   
@@ -29,8 +23,14 @@ protected:
     }
   }
   
+  void defineProperties(NodePropsContainer* container) override {
+    JsiDomDeclarationNode::defineProperties(container);
+    
+    _paintProp = container->defineProperty(std::make_shared<PaintProp>());
+    _opacityProp = container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
+  }
+  
 private:
-  std::shared_ptr <SkRect> _rect;
   std::shared_ptr<PaintProp> _paintProp;
   std::shared_ptr<NodeProp> _opacityProp;
 };

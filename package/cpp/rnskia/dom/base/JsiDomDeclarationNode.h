@@ -30,22 +30,18 @@ public:
    Called when rendering the tree to create all derived values from all nodes.
    */
   virtual void materializeNode(JsiDrawingContext* context) {
-    auto props = getProperties();
-    if (props != nullptr) {
-      
+    auto container = getPropsContainer();
+    if (container != nullptr) {
       // Make sure we commit any waiting transactions in the props object
-      props->commitDeferredPropertyChanges();
-      
-      // Make sure we update any properties that were changed in sub classes so that
-      // they can update any derived values
-      if (props->getHasPropChanges()) {
-        onPropsChanged(props);
-      }
+      container->beginVisit(context);
     }
     
+    // Now we are ready to materialize
     materialize(context);
     
-    props->resetPropChanges();    
+    if (container != nullptr) {
+      container->endVisit();
+    }
   }
     
 protected:

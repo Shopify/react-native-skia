@@ -17,20 +17,20 @@ static PropId PropNameCy = JsiPropId::get("cy");
 static PropId PropNameC = JsiPropId::get("c");
 
 class CircleProp:
-public JsiDerivedProp<SkPoint> {
+public DerivedProp<SkPoint> {
 public:
-  CircleProp(): JsiDerivedProp<SkPoint>() {
-    _c = addChildProp(std::make_shared<PointProp>(PropNameC));
-    _cx = addChildProp(std::make_shared<NodeProp>(PropNameCx, PropType::Number));
-    _cy = addChildProp(std::make_shared<NodeProp>(PropNameCy, PropType::Number));
+  CircleProp(): DerivedProp<SkPoint>() {
+    _c = addProperty(std::make_shared<PointProp>(PropNameC));
+    _cx = addProperty(std::make_shared<NodeProp>(PropNameCx));
+    _cy = addProperty(std::make_shared<NodeProp>(PropNameCy));
   }
   
-  void updateDerivedValue(NodePropsContainer* props) override {
+  void updateDerivedValue() override {
     if (_c->hasValue()) {
       setDerivedValue(_c->getDerivedValue());
     } else if (_cx->hasValue() && _cy->hasValue()) {
-      setDerivedValue(SkPoint::Make(_cx->getPropValue()->getAsNumber(),
-                                    _cy->getPropValue()->getAsNumber()));
+      setDerivedValue(SkPoint::Make(_cx->getValue()->getAsNumber(),
+                                    _cy->getValue()->getAsNumber()));
     }
   }
   

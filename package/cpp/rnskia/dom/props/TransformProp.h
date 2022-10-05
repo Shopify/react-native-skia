@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NodeProp.h"
+#include "DerivedNodeProp.h"
 #include "JsiSkMatrix.h"
 
 namespace RNSkia {
@@ -18,17 +18,17 @@ static PropId PropNameRotate = JsiPropId::get("rotate");
 static PropId PropNameRotateZ = JsiPropId::get("rotateZ");
 
 class TransformProp:
-public JsiDerivedProp<std::shared_ptr<SkMatrix>> {
+public DerivedProp<SkMatrix> {
 public:
-  TransformProp(PropId name): JsiDerivedProp<std::shared_ptr<SkMatrix>>() {
-    _prop = addChildProp(std::make_shared<NodeProp>(name, PropType::Array));
+  TransformProp(PropId name): DerivedProp<SkMatrix>() {
+    _transformProp = addProperty(std::make_shared<NodeProp>(name));
   }
   
-  void updateDerivedValue(NodePropsContainer* props) override {
-    if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
-      if (_prop->getPropValue()->getType() == PropType::Array) {
+  void updateDerivedValue() override {
+    if (_transformProp->hasValue()) {
+      if (_transformProp->getValue()->getType() == PropType::Array) {
         auto m = std::make_shared<SkMatrix>(SkMatrix());
-        for (auto &el: _prop->getPropValue()->getAsArray()) {
+        for (auto &el: _transformProp->getValue()->getAsArray()) {
           auto keys = el->getKeys();
           if (keys.size() == 0) {
             throw std::runtime_error("Empty value in transform. Expected translateX, translateY, scale, "
@@ -60,13 +60,13 @@ public:
         setDerivedValue(m);
       } else {
         throw std::runtime_error("Expected array for transform property, got " +
-                                 JsiValue::getTypeAsString(_prop->getPropValue()->getType()));
+                                 JsiValue::getTypeAsString(_transformProp->getValue()->getType()));
       }
     }
   }
   
 private:
-  std::shared_ptr<NodeProp> _prop;
+  std::shared_ptr<NodeProp> _transformProp;
 };
 
 }

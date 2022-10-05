@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NodeProp.h"
+#include "DerivedNodeProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -15,48 +15,47 @@ static PropId PropNameX = JsiPropId::get("x");
 static PropId PropNameY = JsiPropId::get("y");
 
 class PointProp:
-public JsiDerivedProp<SkPoint> {
+public DerivedProp<SkPoint> {
 public:
-  PointProp(PropId name): JsiDerivedProp<SkPoint>() {
-    _prop = addChildProp(std::make_shared<JsiObjectProp>(name));
+  PointProp(PropId name): DerivedProp<SkPoint>() {
+    _pointProp = addProperty(std::make_shared<NodeProp>(name));
   }
   
-  void updateDerivedValue(NodePropsContainer* props) override {
-    if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
+  void updateDerivedValue() override {
+    if (_pointProp->hasValue()) {
       // Check for JsiSkRect and JsiSkPoint
-      if (_prop->getPropValue()->getType() == PropType::HostObject) {
+      if (_pointProp->getValue()->getType() == PropType::HostObject) {
         // Try reading as point
-        auto pointPtr = std::dynamic_pointer_cast<JsiSkPoint>(_prop->getPropValue()->getAsHostObject());
-        if (pointPtr != nullptr) {
-          setDerivedValue(SkPoint::Make(pointPtr->getObject()->x(), pointPtr->getObject()->y()));
+        auto ptr = std::dynamic_pointer_cast<JsiSkPoint>(_pointProp->getValue()->getAsHostObject());
+        if (ptr != nullptr) {
+          setDerivedValue(SkPoint::Make(ptr->getObject()->x(), ptr->getObject()->y()));
         } else {
           // Try reading as rect
-          auto rectPtr = std::dynamic_pointer_cast<JsiSkRect>(_prop->getPropValue()->getAsHostObject());
-          if (rectPtr == nullptr) {
-            throw std::runtime_error("Could not read point from unknown host object type.");
+          auto ptr = std::dynamic_pointer_cast<JsiSkRect>(_pointProp->getValue()->getAsHostObject());
+          if (ptr != nullptr) {
+            setDerivedValue(SkPoint::Make(ptr->getObject()->x(), ptr->getObject()->y()));
           }
-          setDerivedValue(SkPoint::Make(rectPtr->getObject()->x(), rectPtr->getObject()->y()));
         }
-      } else if (_prop->getPropValue()->getType() == PropType::Object) {
+      } else if (_pointProp->getValue()->getType() == PropType::Object) {
         setDerivedValue(SkPoint::Make(_x->getAsNumber(), _y->getAsNumber()));
       }
     }    
   }
   
-  void setProps(jsi::Runtime &runtime, NodePropsContainer* props) override {
-    JsiDerivedProp::setProps(runtime, props);
+  void onValueRead() override {
+    DerivedProp::onValueRead();
     
-    if (_prop->hasValue()) {
-      if (_prop->getPropValue()->getType() == PropType::Object) {
+    if (_pointProp->hasValue()) {
+      if (_pointProp->getValue()->getType() == PropType::Object) {
         // Save props for fast access
-        _x = _prop->getPropValue()->getValue(PropNameX);
-        _y = _prop->getPropValue()->getValue(PropNameY);
+        _x = _pointProp->getValue()->getValue(PropNameX);
+        _y = _pointProp->getValue()->getValue(PropNameY);
       }
     }
   }
   
 private:
-  std::shared_ptr<JsiObjectProp> _prop;
+  std::shared_ptr<NodeProp> _pointProp;
   std::shared_ptr<JsiValue> _x;
   std::shared_ptr<JsiValue> _y;
 };

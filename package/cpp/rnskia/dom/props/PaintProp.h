@@ -21,47 +21,24 @@ static PropId PropNameStrokeMiter = JsiPropId::get("strokeMiter");
 static PropId PropNameAntiAlias = JsiPropId::get("antiAlias");
 
 class PaintProp:
-public JsiDerivedProp<std::shared_ptr<SkPaint>> {
+public DerivedProp<SkPaint> {
 public:
-  PaintProp(): JsiDerivedProp<std::shared_ptr<SkPaint>>() {
-    _color = addChildProp(std::make_shared<NodeProp>(PropNameColor, PropType::String));
-    _style = addChildProp(std::make_shared<NodeProp>(PropNameStyle, PropType::String));
-    _strokeWidth = addChildProp(std::make_shared<NodeProp>(PropNameStrokeWidth, PropType::Number));
-    _blendMode = addChildProp(std::make_shared<NodeProp>(PropNameBlendMode, PropType::String));
-    _strokeJoin = addChildProp(std::make_shared<NodeProp>(PropNameStrokeJoin, PropType::String));
-    _strokeCap = addChildProp(std::make_shared<NodeProp>(PropNameStrokeCap, PropType::String));
-    _strokeMiter = addChildProp(std::make_shared<NodeProp>(PropNameStrokeMiter, PropType::Number));
-    _antiAlias = addChildProp(std::make_shared<NodeProp>(PropNameAntiAlias, PropType::Number));
+  PaintProp(): DerivedProp<SkPaint>() {
+    _color = addProperty(std::make_shared<NodeProp>(PropNameColor));
+    _style = addProperty(std::make_shared<NodeProp>(PropNameStyle));
+    _strokeWidth = addProperty(std::make_shared<NodeProp>(PropNameStrokeWidth));
+    _blendMode = addProperty(std::make_shared<NodeProp>(PropNameBlendMode));
+    _strokeJoin = addProperty(std::make_shared<NodeProp>(PropNameStrokeJoin));
+    _strokeCap = addProperty(std::make_shared<NodeProp>(PropNameStrokeCap));
+    _strokeMiter = addProperty(std::make_shared<NodeProp>(PropNameStrokeMiter));
+    _antiAlias = addProperty(std::make_shared<NodeProp>(PropNameAntiAlias));
   }
   
-  void setParentPaint(std::shared_ptr<SkPaint> paint) {
-    if (_parentPaint != paint) {
-      _parentPaint = paint;
-      _parentPaintWasReset = true;
-      setDerivedValue(nullptr);
-    }
-  }
-  
-  bool hasChanged(NodePropsContainer* props) {
-    if (!props->getHasPropChanges()) {
-      return false;
-    }
-    
-    return props->getHasPropChanges(PropNameColor) ||
-      props->getHasPropChanges(PropNameStyle) ||
-      props->getHasPropChanges(PropNameStrokeWidth) ||
-      props->getHasPropChanges(PropNameBlendMode) ||
-      props->getHasPropChanges(PropNameStrokeJoin) ||
-      props->getHasPropChanges(PropNameStrokeCap) ||
-      props->getHasPropChanges(PropNameStrokeMiter) ||
-      props->getHasPropChanges(PropNameAntiAlias);
-  }
-  
-  void updateDerivedValue(NodePropsContainer* props) override {
+  void updateDerivedValue() override {
     // We only get here if something has changed - start with COLOR
-    if (_color->hasValue() && (_parentPaintWasReset || props->getHasPropChanges(PropNameColor))) {
+    if (_color->hasValue()) {
       ensureDerivedValue();
-      auto parsedColor = CSSColorParser::parse(_color->getPropValue()->getAsString());
+      auto parsedColor = CSSColorParser::parse(_color->getValue()->getAsString());
       if (parsedColor.a == -1.0f) {
         getDerivedValue()->setColor(SK_ColorBLACK);
       } else {
@@ -72,9 +49,9 @@ public:
       }
     }
     // Style
-    if (_style->hasValue() && (_parentPaintWasReset || props->getHasPropChanges(PropNameStyle))) {
+    if (_style->hasValue()) {
       ensureDerivedValue();
-      auto styleValue = _style->getPropValue()->getAsString();
+      auto styleValue = _style->getValue()->getAsString();
       if (styleValue == "stroke") {
         getDerivedValue()->setStyle(SkPaint::Style::kStroke_Style);
       } else if (styleValue == "fill") {
@@ -84,45 +61,38 @@ public:
       }
     }
     // Stroke Width
-    if (_strokeWidth->hasValue() && (_parentPaintWasReset || props->getHasPropChanges(PropNameStrokeWidth))) {
+    if (_strokeWidth->hasValue()) {
       ensureDerivedValue();
-      getDerivedValue()->setStrokeWidth(_strokeWidth->getPropValue()->getAsNumber());
+      getDerivedValue()->setStrokeWidth(_strokeWidth->getValue()->getAsNumber());
     }
     // Blend mode
-    if (_blendMode->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameBlendMode))) {
+    if (_blendMode->hasValue()) {
       ensureDerivedValue();
-      auto blendModeValue = _blendMode->getPropValue()->getAsString();
+      auto blendModeValue = _blendMode->getValue()->getAsString();
       getDerivedValue()->setBlendMode(getBlendModeFromValue(blendModeValue));
     }
     // Stroke Join
-    if (_strokeJoin->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameStrokeJoin))) {
+    if (_strokeJoin->hasValue()) {
       ensureDerivedValue();
-      auto joinValue = _strokeJoin->getPropValue()->getAsString();
+      auto joinValue = _strokeJoin->getValue()->getAsString();
       getDerivedValue()->setStrokeJoin(getJoinFromValue(joinValue));
     }
     // Stroke Cap
-    if (_strokeCap->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameStrokeCap))) {
+    if (_strokeCap->hasValue()) {
       ensureDerivedValue();
-      auto capValue = _strokeCap->getPropValue()->getAsString();
+      auto capValue = _strokeCap->getValue()->getAsString();
       getDerivedValue()->setStrokeCap(getCapFromValue(capValue));
     }
     // Stroke Miter
-    if (_strokeMiter->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameStrokeMiter))) {
+    if (_strokeMiter->hasValue()) {
       ensureDerivedValue();
-      getDerivedValue()->setStrokeMiter(_strokeMiter->getPropValue()->getAsNumber());
+      getDerivedValue()->setStrokeMiter(_strokeMiter->getValue()->getAsNumber());
     }
     // AntiAlias
-    if (_antiAlias->hasValue() &&  (_parentPaintWasReset || props->getHasPropChanges(PropNameAntiAlias))) {
+    if (_antiAlias->hasValue()) {
       ensureDerivedValue();
-      getDerivedValue()->setAntiAlias(_antiAlias->getPropValue()->getAsNumber());
+      getDerivedValue()->setAntiAlias(_antiAlias->getValue()->getAsNumber());
     }
-    
-    // TODO: Add shaders and filters - maybe not for the paint prop, only
-    // when we have a paint node?
-
-    // Reset parent paint flag - will only be set next time the parent paint is changed
-    // meaning that we can keep our cache for a while.
-    _parentPaintWasReset = false;
   }
 
   void ensureDerivedValue() {
@@ -132,6 +102,28 @@ public:
     }
     // Now lets create a new paint object
     setDerivedValue(std::make_shared<SkPaint>(*_parentPaint));
+  }
+  
+  void beginVisit(JsiDrawingContext* context) override {
+    auto parentPaint = context->getPaint();
+    if (_parentPaint != parentPaint) {
+      _parentPaint = parentPaint;
+      _parentPaintWasReset = true;
+      setDerivedValue(nullptr);
+    }
+    
+    if(context->hasChanged()) {
+      setDerivedValue(nullptr);
+    }
+    
+    DerivedProp::beginVisit(context);
+  }
+  
+  void endVisit() override {
+    DerivedProp::endVisit();
+    // Reset parent paint flag - will only be set next time the parent paint is changed
+    // meaning that we can keep our cache for a while.
+    _parentPaintWasReset = false;
   }
 private:
   

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "NodeProp.h"
+
 #include "PathProp.h"
 #include "RectProp.h"
 #include "RRectProp.h"
@@ -13,33 +15,38 @@
 
 namespace RNSkia {
 
-class ClipProp: public JsiBaseDerivedProp {
+class ClipProp: public BaseDerivedProp {
 public:
-  ClipProp(PropId name): JsiBaseDerivedProp(), _name(name) {
-    _pathProp = addChildProp(std::make_shared<PathProp>(name));
-    _rectProp = addChildProp(std::make_shared<RectProp>(name));
-    _rrectProp = addChildProp(std::make_shared<RRectProp>(name));
+  ClipProp(PropId name): BaseDerivedProp(), _name(name) {
+    _pathProp = addProperty(std::make_shared<PathProp>(name));
+    _rectProp = addProperty(std::make_shared<RectProp>(name));
+    _rrectProp = addProperty(std::make_shared<RRectProp>(name));
   }
   
-  void updateDerivedValue(NodePropsContainer* props) override {
-    if (props->getHasPropChanges(_name)) {
-      if (_pathProp->hasValue()) {
-        _rect = nullptr;
-        _rrect = nullptr;
-        _path = _pathProp->getDerivedValue();
-      } else if (_rectProp->hasValue()) {
-        _rect = std::make_shared<SkRect>(_rectProp->getDerivedValue());
-        _rrect = nullptr;
-        _path = nullptr;
-      } else if (_rrectProp->hasValue()) {
-        _rect = nullptr;
-        _rrect = std::make_shared<SkRRect>(_rrectProp->getDerivedValue());
-        _path = nullptr;
-      }
+  void updateDerivedValue() override {
+    if (_pathProp->hasValue()) {
+      _rect = nullptr;
+      _rrect = nullptr;
+      _path = _pathProp->getDerivedValue();
+    } else if (_rrectProp->hasValue()) {
+      _rect = nullptr;
+      _rrect = _rrectProp->getDerivedValue();
+      _path = nullptr;
+    } else if (_rectProp->hasValue()) {
+      _rect = _rectProp->getDerivedValue();
+      _rrect = nullptr;
+      _path = nullptr;
     }
   }
   
-  void clip(SkCanvas* canvas, SkClipOp op) {
+  bool hasValue() override {
+    return _pathProp->hasValue() ||
+      _rectProp->hasValue() ||
+      _rrectProp->hasValue();
+  }
+  
+  void clip(SkCanvas* canvas, bool invert) {
+    auto op = invert ? SkClipOp::kDifference : SkClipOp::kIntersect;
     if (_rect != nullptr) {
       canvas->clipRect(*_rect, op, true);
     } else if (_rrect != nullptr) {

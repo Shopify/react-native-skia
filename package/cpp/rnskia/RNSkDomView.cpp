@@ -64,6 +64,7 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
   }
   
   _drawingContext->setCanvas(canvas);
+  _drawingContext->resetChanges();
   _root->render(_drawingContext.get());
   
   renderDebugOverlays(canvas);

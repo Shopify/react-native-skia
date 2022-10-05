@@ -64,9 +64,8 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
     const canvasCtx = useMemo(() => ({ Skia, size }), [size]);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
-    const [_, setTick] = useState(0);
     const redraw = useCallback(() => {
-      setTick((t) => t + 1);
+      innerRef.current?.redraw();
     }, []);
 
     const registerValues = useCallback(
@@ -91,6 +90,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       () => skiaReconciler.createContainer(container, 0, false, null),
       [container]
     );
+
     // Render effect
     useEffect(() => {
       render(
@@ -107,6 +107,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
         });
       };
     }, [container, root]);
+
     return (
       <SkiaDomView
         ref={ref}

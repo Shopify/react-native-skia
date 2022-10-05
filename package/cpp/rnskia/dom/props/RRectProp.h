@@ -22,26 +22,25 @@ static PropId PropNameR = JsiPropId::get("r");
  The property can either be a Javascript property or a host object representing an SkRect.
  */
 class RRectProp:
-public JsiDerivedProp<SkRRect> {
+public DerivedProp<SkRRect> {
 public:
   RRectProp(PropId name):
-  JsiDerivedProp() {
-    _prop = addChildProp(std::make_shared<JsiObjectProp>(name));
+  DerivedProp() {
+    _prop = addProperty(std::make_shared<NodeProp>(name));
   }
   
-  void updateDerivedValue(NodePropsContainer* props) override {
-    if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
+  void updateDerivedValue() override {
+    if (_prop->hasValue()) {
       // Check for JsiSkRRect
-      if(_prop->getPropValue()->getType() == PropType::HostObject) {
+      if(_prop->getValue()->getType() == PropType::HostObject) {
         // Try reading as rect
-        auto rectPtr = std::dynamic_pointer_cast<JsiSkRRect>(_prop->getPropValue()->getAsHostObject());
-        if (rectPtr == nullptr) {
-          throw std::runtime_error("Could not read rounded rect from unknown host object type.");
+        auto rectPtr = std::dynamic_pointer_cast<JsiSkRRect>(_prop->getValue()->getAsHostObject());
+        if (rectPtr != nullptr) {
+          auto rrect = rectPtr->getObject();
+          setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(rrect->rect().x(), rrect->rect().y(),
+                                                               rrect->rect().width(), rrect->rect().height()),
+                                              rrect->getSimpleRadii().x(), rrect->getSimpleRadii().y()));
         }
-        auto rrect = rectPtr->getObject();
-        setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(rrect->rect().x(), rrect->rect().y(),
-                                                             rrect->rect().width(), rrect->rect().height()),
-                                            rrect->getSimpleRadii().x(), rrect->getSimpleRadii().y()));
       } else if (_rx != nullptr){
         // Update cache from js object value
         setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(_x->getAsNumber(), _y->getAsNumber(),
@@ -51,23 +50,23 @@ public:
     }
   }
   
-  void setProps(jsi::Runtime &runtime, NodePropsContainer* props) override {
-    JsiDerivedProp::setProps(runtime, props);
+  void onValueRead() override {
+    DerivedProp::onValueRead();
     
-    if (_prop->hasValue() && _prop->getPropValue()->getType() == PropType::Object) {
-      auto p = _prop->getPropValue();
+    if (_prop->hasValue() && _prop->getValue()->getType() == PropType::Object) {
+      auto p = _prop->getValue();
       if (p->hasValue(PropNameX) &&
           p->hasValue(PropNameY) &&
           p->hasValue(PropNameWidth) &&
           p->hasValue(PropNameHeight) &&
           p->hasValue(PropNameRx) &&
           p->hasValue(PropNameRy)) {
-        _x = _prop->getPropValue()->getValue(PropNameX);
-        _y = _prop->getPropValue()->getValue(PropNameY);
-        _width = _prop->getPropValue()->getValue(PropNameWidth);
-        _height = _prop->getPropValue()->getValue(PropNameHeight);
-        _rx = _prop->getPropValue()->getValue(PropNameRx);
-        _ry = _prop->getPropValue()->getValue(PropNameRy);
+        _x = _prop->getValue()->getValue(PropNameX);
+        _y = _prop->getValue()->getValue(PropNameY);
+        _width = _prop->getValue()->getValue(PropNameWidth);
+        _height = _prop->getValue()->getValue(PropNameHeight);
+        _rx = _prop->getValue()->getValue(PropNameRx);
+        _ry = _prop->getValue()->getValue(PropNameRy);
       }
     }
   }
@@ -79,31 +78,32 @@ private:
   std::shared_ptr<JsiValue> _height;
   std::shared_ptr<JsiValue> _rx;
   std::shared_ptr<JsiValue> _ry;
-  std::shared_ptr<JsiObjectProp> _prop;
+  std::shared_ptr<NodeProp> _prop;
 };
 
 /**
  Reads rect properties from a node's properties
  */
 class RRectPropFromProps:
-public JsiDerivedProp<SkRRect> {
+public DerivedProp<SkRRect> {
 public:
   RRectPropFromProps():
-  JsiDerivedProp<SkRRect>() {
-    _x = addChildProp(std::make_shared<NodeProp>(PropNameX, PropType::Number));
-    _y = addChildProp(std::make_shared<NodeProp>(PropNameY, PropType::Number));
-    _width = addChildProp(std::make_shared<NodeProp>(PropNameWidth, PropType::Number));
-    _height = addChildProp(std::make_shared<NodeProp>(PropNameHeight, PropType::Number));
-    _r = addChildProp(std::make_shared<NodeProp>(PropNameR, PropType::Number));
+  DerivedProp<SkRRect>() {
+    _x = addProperty(std::make_shared<NodeProp>(PropNameX));
+    _y = addProperty(std::make_shared<NodeProp>(PropNameY));
+    _width = addProperty(std::make_shared<NodeProp>(PropNameWidth));
+    _height = addProperty(std::make_shared<NodeProp>(PropNameHeight));
+    _r = addProperty(std::make_shared<NodeProp>(PropNameR));
   }
   
-  void updateDerivedValue(NodePropsContainer* props) {
+  void updateDerivedValue() override {
     if(_x->hasValue() && _y->hasValue() && _width->hasValue() && _height->hasValue() && _r->hasValue()) {
-      setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(_x->getPropValue()->getAsNumber(),
-                                                           _y->getPropValue()->getAsNumber(),
-                                                           _width->getPropValue()->getAsNumber(),
-                                                           _height->getPropValue()->getAsNumber()),
-                                          _r->getPropValue()->getAsNumber(), _r->getPropValue()->getAsNumber()));
+      setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(_x->getValue()->getAsNumber(),
+                                                           _y->getValue()->getAsNumber(),
+                                                           _width->getValue()->getAsNumber(),
+                                                           _height->getValue()->getAsNumber()),
+                                          _r->getValue()->getAsNumber(),
+                                          _r->getValue()->getAsNumber()));
     }
   }
   
@@ -119,15 +119,15 @@ private:
  Reads rect props from either a given property or from the property object itself.
  */
 class RRectProps:
-  public JsiDerivedProp<SkRRect> {
+  public DerivedProp<SkRRect> {
 public:
   RRectProps(PropId name):
-    JsiDerivedProp<SkRRect>() {
-    _rectProp = addChildProp<RRectProp>(std::make_shared<RRectProp>(name));
-    _rectPropFromProps = addChildProp<RRectPropFromProps>(std::make_shared<RRectPropFromProps>());
+    DerivedProp<SkRRect>() {
+    _rectProp = addProperty<RRectProp>(std::make_shared<RRectProp>(name));
+    _rectPropFromProps = addProperty<RRectPropFromProps>(std::make_shared<RRectPropFromProps>());
   }
     
-  void updateDerivedValue(NodePropsContainer* props) override {
+  void updateDerivedValue() override {
     if (_rectProp->hasValue()) {
       setDerivedValue(_rectProp->getDerivedValue());
     } else if (_rectPropFromProps->hasValue()) {

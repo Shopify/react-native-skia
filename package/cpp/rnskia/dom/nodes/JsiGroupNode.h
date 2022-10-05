@@ -14,17 +14,13 @@ public:
   
 protected:
   void renderNode(JsiDrawingContext* context) override {
-    context->resetChanges();
     for (auto &child: getChildren()) {
       auto node = std::dynamic_pointer_cast<JsiDomRenderNode>(child);
       if (node != nullptr) {
         node->render(context);
       }
     }
-  }
-  
-private:
-  SkRect _rect;
+  }  
 };
 
 }

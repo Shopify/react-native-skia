@@ -61,7 +61,7 @@ public:
   }
   
   /**
-   Empty setProp implementation
+   Empty setProp implementation - compatibility with JS node
    */
   JSI_HOST_FUNCTION(setProp) {
     return jsi::Value::undefined();
@@ -136,30 +136,36 @@ public:
                        JSI_EXPORT_FUNC(JsiDomNode, dispose))
   
   /**
-   Returns the type of node.
+   Returns the node type.
   */
   const char *getType() { return _type; };
   
   /**
-   Returns all properties for this node
+   Returns the container for node properties
    */
-  NodePropsContainer* getProperties() {
+  NodePropsContainer* getPropsContainer() {
     std::lock_guard<std::mutex> lock(_lock);
-    return _props.get();
+    return _propsContainer.get();
   }
   
+  /**
+   Callback that will be called when the node is disposed - typically registered from the dependency
+   manager so that nodes can be removed and unsubscribed from when removed from the reconciler tree.
+   */
   void setDisposeCallback(std::function<void()> disposeCallback) {
     _disposeCallback = disposeCallback;
   }
   
 protected:
+  /**
+   Override to define properties in node implementations
+   */
+  virtual void defineProperties(NodePropsContainer* container) {};
   
   /**
    Returns the platform context
    */
-  std::shared_ptr<RNSkPlatformContext> getContext() {
-    return _context;
-  }
+  std::shared_ptr<RNSkPlatformContext> getContext() { return _context; }
   
   /**
    Returns this node as a host object that can be returned to the JS side.
@@ -169,37 +175,24 @@ protected:
   }
   
   /**
-   Called when properties are set from the JS reconciler on the node. To optimize reading properties
-   each node needs to explicitly tell the props object which objects it expects and what types they are.
-   See the NodePropsContainer class for details.
-  */
-  virtual void onPropsSet(jsi::Runtime &runtime, NodePropsContainer* props) {
-    // We don't need to do anything in the base class since we don't have any
-    // properties that we want to read.
-    for (auto &p: _activeProps) {
-      p->setProps(runtime, props);
-    }
-  };
-  
-  /**
-   Called when one or more properties have changed from the native side due to updates
-   from Skia values.
-   */
-  virtual void onPropsChanged(NodePropsContainer* props) {
-    for (auto &p: _activeProps) {
-      p->updatePropValues(props);
-    }
-  };
-  
-  /**
    Native implementation of the set properties method. This is called from the reconciler when
    properties are set due to changes in React. This method will always call the onPropsSet method
    as a signal that things have changed.
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
     std::lock_guard<std::mutex> lock(_lock);
-    _props = std::make_shared<NodePropsContainer>(runtime, std::move(props));
-    onPropsSet(runtime, _props.get());
+    
+    if (_propsContainer == nullptr) {
+      
+      // Initialize properties container
+      _propsContainer = std::make_shared<NodePropsContainer>();
+      
+      // Ask sub classes to define their properties
+      defineProperties(_propsContainer.get());      
+      
+    }
+    // Update properties container
+    _propsContainer->setProps(runtime, std::move(props));
   };
   
   /**
@@ -207,15 +200,6 @@ protected:
    */
   const std::vector<std::shared_ptr<JsiDomNode>> &getChildren() {
     return _children;
-  }
-  
-  /**
-   Adds a property to the node. A property is an active value that the node uses.
-   */
-  template <typename T>
-  std::shared_ptr<T> addProperty(std::shared_ptr<T> prop) {
-    _activeProps.push_back(prop);
-    return prop;
   }
   
   /**
@@ -261,8 +245,7 @@ protected:
 private:
   std::shared_ptr<RNSkPlatformContext> _context;
   std::vector<std::shared_ptr<JsiDomNode>> _children;
-  std::shared_ptr<NodePropsContainer> _props;
-  std::vector<std::shared_ptr<BaseNodeProp>> _activeProps;
+  std::shared_ptr<NodePropsContainer> _propsContainer;
   std::mutex _lock;
   const char* _type;
   std::function<void()> _disposeCallback;

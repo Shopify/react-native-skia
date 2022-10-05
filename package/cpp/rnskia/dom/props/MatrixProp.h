@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NodeProp.h"
+#include "DerivedNodeProp.h"
 #include "JsiSkMatrix.h"
 
 namespace RNSkia {
@@ -8,16 +8,17 @@ namespace RNSkia {
 static PropId PropNameMatrix = JsiPropId::get("matrix");
 
 class MatrixProp:
-public JsiDerivedProp<std::shared_ptr<SkMatrix>> {
+public DerivedProp<SkMatrix> {
 public:
-  MatrixProp(PropId name): JsiDerivedProp<std::shared_ptr<SkMatrix>>() {
-    _prop = addChildProp(std::make_shared<JsiObjectProp>(name));
+  MatrixProp(PropId name): DerivedProp<SkMatrix>() {
+    _matrixProp = addProperty(std::make_shared<NodeProp>(name));
   }
   
-  void updateDerivedValue(NodePropsContainer* props) override {
-    if (_prop->hasValue() && props->getHasPropChanges(_prop->getName())) {
+  void updateDerivedValue() override {
+    if (_matrixProp->hasValue() &&
+        _matrixProp->getValue()->getType() == PropType::HostObject) {
       // Try reading as SkMatrix
-      auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(_prop->getPropValue()->getAsHostObject());
+      auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(_matrixProp->getValue()->getAsHostObject());
       if (matrix != nullptr) {
         setDerivedValue(matrix->getObject());
       }
@@ -25,7 +26,7 @@ public:
   }
   
 private:
-  std::shared_ptr<JsiObjectProp> _prop;
+  std::shared_ptr<NodeProp> _matrixProp;
 };
 
 }

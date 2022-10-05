@@ -12,27 +12,25 @@
 namespace RNSkia {
 
 class PathProp:
-public JsiDerivedProp<std::shared_ptr<SkPath>> {
+public DerivedProp<SkPath> {
 public:
-  PathProp(PropId name): JsiDerivedProp<std::shared_ptr<SkPath>>() {
-    _objectProp = addChildProp(std::make_shared<NodeProp>(name, PropType::HostObject));
-    _stringProp = addChildProp(std::make_shared<NodeProp>(name, PropType::String));
+  PathProp(PropId name): DerivedProp<SkPath>() {
+    _pathProp = addProperty(std::make_shared<NodeProp>(name));
   }
   
-  void updateDerivedValue(NodePropsContainer* props) override {
-    if (props->getHasPropChanges(_objectProp->getName())) {
-      if (_objectProp->hasValue()) {
-        // Check for JsiSkPath
-        if (_objectProp->getPropValue()->getType() == PropType::HostObject) {
-          // Try reading as Path
-          auto ptr = std::dynamic_pointer_cast<JsiSkPath>(_objectProp->getPropValue()->getAsHostObject());
-          if (ptr != nullptr) {
-            setDerivedValue(ptr->getObject());
-          }
+  void updateDerivedValue() override {
+    if (!_pathProp->hasValue()) {
+      setDerivedValue(nullptr);
+    } else {
+      if (_pathProp->getValue()->getType() == PropType::HostObject) {
+        // Try reading as Path
+        auto ptr = std::dynamic_pointer_cast<JsiSkPath>(_pathProp->getValue()->getAsHostObject());
+        if (ptr != nullptr) {
+          setDerivedValue(ptr->getObject());
         }
-      } else if (_stringProp->hasValue()) {
+      } else if (_pathProp->getValue()->getType() == PropType::String) {
         // Read as string
-        auto pathString = _stringProp->getPropValue()->getAsString();
+        auto pathString = _pathProp->getValue()->getAsString();
         SkPath result;
         
         if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {
@@ -45,8 +43,7 @@ public:
   }
   
 private:
-  std::shared_ptr<NodeProp> _objectProp;
-  std::shared_ptr<NodeProp> _stringProp;
+  std::shared_ptr<NodeProp> _pathProp;
 };
 
 }
