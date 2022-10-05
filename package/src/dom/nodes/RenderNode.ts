@@ -229,7 +229,10 @@ export abstract class JsiRenderNode<P extends GroupProps>
     // TODO: can we only recreate a new context here if needed?
     const ctx = { ...parentCtx, opacity, paint };
     const hasTransform = matrix !== undefined || transform !== undefined;
-    const hasClip = this.clipRect !== undefined;
+    const hasClip =
+      this.clipRect !== undefined ||
+      this.clipPath !== undefined ||
+      this.clipRRect !== undefined;
     const shouldSave = hasTransform || hasClip || !!layer;
     const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
 
@@ -254,11 +257,9 @@ export abstract class JsiRenderNode<P extends GroupProps>
     }
     if (this.clipRect) {
       canvas.clipRect(this.clipRect, op, true);
-    }
-    if (this.clipRRect) {
+    } else if (this.clipRRect) {
       canvas.clipRRect(this.clipRRect, op, true);
-    }
-    if (this.clipPath) {
+    } else if (this.clipPath) {
       canvas.clipPath(this.clipPath, op, true);
     }
 
