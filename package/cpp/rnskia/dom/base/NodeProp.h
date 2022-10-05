@@ -31,7 +31,11 @@ public:
    */
   void updateValue(jsi::Runtime &runtime, const jsi::Value& value) {
     std::lock_guard<std::mutex> lock(_swapValuesMutex);
-    _nextValue = std::make_shared<JsiValue>(runtime, value);
+    if (_nextValue == nullptr) {
+      _nextValue = std::make_shared<JsiValue>(runtime, value);
+    } else {
+      _nextValue->setCurrent(runtime, value);
+    }
     _isChanged = true;
   }
   
@@ -56,8 +60,9 @@ public:
     std::lock_guard<std::mutex> lock(_swapValuesMutex);
     // Swap values
     if (_nextValue != nullptr) {
+      auto tmp = _value;
       _value = _nextValue;
-      _nextValue = nullptr;
+      _nextValue = tmp;
     }
   }
   
