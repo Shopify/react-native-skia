@@ -211,9 +211,10 @@ export abstract class JsiRenderNode<P extends GroupProps>
     const { invertClip, layer, matrix, transform } = this.props;
     const { canvas } = parentCtx;
 
-    const opacity = this.props.opacity
-      ? parentCtx.opacity * this.props.opacity
-      : parentCtx.opacity;
+    const opacity =
+      this.props.opacity !== undefined
+        ? parentCtx.opacity * this.props.opacity
+        : parentCtx.opacity;
 
     if (
       this.paintCache === null ||
