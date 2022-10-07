@@ -11,7 +11,7 @@ public:
   JsiDomDrawingNode(context, "skRRect") {}
     
 protected:  
-  void draw(JsiDrawingContext* context) override {
+  void draw(DrawingContext* context) override {
     if(!_rrectProp->hasValue()) {
       throw std::runtime_error("Expected Rounded Rect node to have a rrect property or \
                                x, y, width, height and radius properties.");

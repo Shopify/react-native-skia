@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JsiDrawingContext.h"
+#include "DrawingContext.h"
 #include "JsiValue.h"
 
 namespace RNSkia {
@@ -27,7 +27,7 @@ public:
   /**
    Starts the process of updating and reading props
    */
-  virtual void beginVisit(JsiDrawingContext *context) = 0;
+  virtual void beginVisit(DrawingContext *context) = 0;
   
   /*
    Ends the visit cycle

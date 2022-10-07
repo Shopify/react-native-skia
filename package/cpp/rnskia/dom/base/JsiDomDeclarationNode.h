@@ -2,7 +2,7 @@
 #pragma once
 
 #include "JsiDomNode.h"
-#include "JsiDrawingContext.h"
+#include "DrawingContext.h"
 
 namespace RNSkia {
 
@@ -29,7 +29,7 @@ public:
   /**
    Called when rendering the tree to create all derived values from all nodes.
    */
-  virtual void materializeNode(JsiDrawingContext* context) {
+  virtual void materializeNode(DrawingContext* context) {
     auto container = getPropsContainer();
     if (container != nullptr) {
       // Make sure we commit any waiting transactions in the props object
@@ -49,7 +49,7 @@ protected:
   /**
    Override to implement materialization
    */
-  virtual void materialize(JsiDrawingContext* context) = 0;
+  virtual void materialize(DrawingContext* context) = 0;
   
   /**
    Validates that only declaration nodes can be children

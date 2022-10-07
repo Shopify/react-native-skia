@@ -14,12 +14,18 @@ public:
   JsiDomRenderNode(context, type) {}
   
 protected:
+  
+  void defineProperties(NodePropsContainer* container) override {
+    JsiDomRenderNode::defineProperties(container);
+    _paintProp = container->defineProperty(std::make_shared<PaintProp>());
+  }
+  
   /**
    Override to implement drawing.
    */
-  virtual void draw(JsiDrawingContext* context) = 0;
+  virtual void draw(DrawingContext* context) = 0;
   
-  void renderNode(JsiDrawingContext* context) override {
+  void renderNode(DrawingContext* context) override {
     // TODO: Handle paint property and swap with context if necessary
     // like in the JS implementation:
     /*
@@ -34,6 +40,8 @@ protected:
     
     draw(context);
   }
+private:
+  std::shared_ptr<PaintProp> _paintProp;
 };
 
 }

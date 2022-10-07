@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DerivedNodeProp.h"
+#include "JsiSkPoint.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

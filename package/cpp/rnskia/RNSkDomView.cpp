@@ -1,5 +1,12 @@
 #include "RNSkDomView.h"
-#include "JsiDrawingContext.h"
+#include "DrawingContext.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include <SkFont.h>
+
+#pragma clang diagnostic pop
 
 namespace RNSkia
 {
@@ -58,16 +65,19 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
   canvas->scale(pd, pd);
   
   if (_drawingContext == nullptr) {
-    _drawingContext = std::make_shared<JsiDrawingContext>(std::make_shared<SkPaint>(), 1.0f);
+    _drawingContext = std::make_shared<DrawingContext>(std::make_shared<SkPaint>(), 1.0f);
   }
   
   // Update canvas before drawing
   _drawingContext->setCanvas(canvas);
   
-  // Ask the root node to render to the provided canvas
   try {
+    // Ask the root node to render to the provided canvas
     _root->render(_drawingContext.get());
+
   } catch (std::runtime_error err) {
+    _platformContext->raiseError(err);
+  } catch (jsi::JSError err) {
     _platformContext->raiseError(err);
   } catch (...) {
     _platformContext->raiseError(std::runtime_error("Error rendering the Skia view."));

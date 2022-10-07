@@ -56,7 +56,7 @@ public:
   /**
    Starts the process of updating and reading props
    */
-  void beginVisit(JsiDrawingContext *context) override {
+  void beginVisit(DrawingContext *context) override {
     std::lock_guard<std::mutex> lock(_swapValuesMutex);
     // Swap values
     if (_nextValue != nullptr) {

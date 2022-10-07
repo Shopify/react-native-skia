@@ -10,7 +10,7 @@ public:
   JsiFillNode(std::shared_ptr<RNSkPlatformContext> context) :
   JsiDomDrawingNode(context, "skFill") {}    
 protected:
-  void draw(JsiDrawingContext* context) override {
+  void draw(DrawingContext* context) override {
     context->getCanvas()->drawPaint(*context->getPaint());
   }
 };

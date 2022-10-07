@@ -22,7 +22,7 @@ public:
   JsiDomDeclarationNode(context, "skBlurMaskFilter") {}
     
 protected:
-  void materialize(JsiDrawingContext* context) override {
+  void materialize(DrawingContext* context) override {
     if (_blur->isChanged() || _respectCTM->isChanged() || _style->isChanged()) {
       if (!_blur->hasValue()) {
         throw std::runtime_error("Expected <BlurMask> component to have a valid blur property.");
@@ -31,11 +31,14 @@ protected:
       bool respectCTM = _respectCTM->hasValue() ? _respectCTM->getValue()->getAsBool() : true;
       SkBlurStyle style = SkBlurStyle::kNormal_SkBlurStyle;
       if (_style->hasValue()) {
-        style = getBlurStyleFromValue(_style->getValue()->getAsString());
+        style = getBlurStyleFromString(_style->getValue()->getAsString());
       }
       
       auto filter = SkMaskFilter::MakeBlur(style, _blur->getValue()->getAsNumber(), respectCTM);
-      context->getPaint()->setMaskFilter(filter);      
+      
+      // Invalidate the context (ie. inform children that this context is no longer valid)
+      context->invalidate();
+      context->getMutablePaint()->setMaskFilter(filter);
     }
   }
   
@@ -49,7 +52,7 @@ protected:
   
 private:
   
-  SkBlurStyle getBlurStyleFromValue(const std::string& value) {
+  SkBlurStyle getBlurStyleFromString(const std::string& value) {
     if (value == "normal") {
       return SkBlurStyle::kNormal_SkBlurStyle;
     } else if (value == "solid") {

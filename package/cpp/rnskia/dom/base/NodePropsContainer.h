@@ -2,7 +2,7 @@
 
 #include "NodeProp.h"
 #include "JsiValue.h"
-#include "JsiDrawingContext.h"
+#include "DrawingContext.h"
 
 #include <map>
 
@@ -49,7 +49,7 @@ public:
   /**
    Updates any props that has changes waiting, updates props that have derived values
    */
-  void beginVisit(JsiDrawingContext* context) {
+  void beginVisit(DrawingContext* context) {
     for (auto &prop: _properties) {
       prop->beginVisit(context);
     }

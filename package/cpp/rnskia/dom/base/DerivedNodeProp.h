@@ -15,7 +15,7 @@ public:
   /**
    Starts the process of updating and reading props
    */
-  void beginVisit(JsiDrawingContext *context) override {
+  void beginVisit(DrawingContext *context) override {
     auto changed = false;
     for (auto &prop: _properties) {
       prop->beginVisit(context);
@@ -60,7 +60,7 @@ public:
   /**
    Override to calculate the derived value from child properties
    */
-  virtual void updateDerivedValue() = 0;
+  virtual void updateDerivedValue() {}
   
   /**
    Adds a property to the derived property child props.
@@ -69,6 +69,18 @@ public:
   std::shared_ptr<P> addProperty(std::shared_ptr<P> prop) {
     _properties.push_back(prop);
     return prop;
+  }
+  
+  /**
+   Returns true if one or more of the child props has values
+   */
+  virtual bool hasValue() override {
+    for (auto &prop: _properties) {
+      if (prop->hasValue()) {
+        return true;
+      }
+    }
+    return false;
   }
   
 protected:

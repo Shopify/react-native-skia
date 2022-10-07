@@ -1,6 +1,8 @@
 #pragma once
 
 #include "NodeProp.h"
+#include "CSSColorParser.h"
+#include "JsiSkPaint.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -19,11 +21,40 @@ static PropId PropNameStrokeJoin = JsiPropId::get("strokeJoin");
 static PropId PropNameStrokeCap = JsiPropId::get("strokeCap");
 static PropId PropNameStrokeMiter = JsiPropId::get("strokeMiter");
 static PropId PropNameAntiAlias = JsiPropId::get("antiAlias");
+static PropId PropNamePaint = JsiPropId::get("paint");
 
-class PaintProp:
-public DerivedProp<SkPaint> {
+class PaintProp: public BaseDerivedProp {
 public:
-  PaintProp(): DerivedProp<SkPaint>() {
+  PaintProp(): BaseDerivedProp() {
+    _paintProp = addProperty(std::make_shared<NodeProp>(PropNamePaint));
+  }
+  
+  void beginVisit(DrawingContext *context) override {
+    if (_paintProp->hasValue() && (_paintProp->isChanged() || context->isInvalid())) {
+      if (_paintProp->getValue()->getType() == PropType::HostObject) {
+        // Read paint property as Host Object - JsiSkPaint
+        auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(_paintProp->getValue()->getAsHostObject());
+        if (ptr != nullptr) {
+          // Update the local paint for the current context
+          context->setMutablePaint(ptr->getObject());
+        } else {
+          throw std::runtime_error("Expected SkPaint object, got unknown object when reading paint property.");
+        }
+      } else if (_paintProp->getValue()->getType() == PropType::Object) {
+        // TODO: We have a paint object - let us check for the current property!        
+      } else {
+        throw std::runtime_error("Expected paint object, got unknown object when reading paint property.");
+      }
+    }
+  }
+private:
+  std::shared_ptr<NodeProp> _paintProp;
+};
+
+class PaintProps:
+public BaseDerivedProp {
+public:
+  PaintProps(): BaseDerivedProp() {
     _color = addProperty(std::make_shared<NodeProp>(PropNameColor));
     _style = addProperty(std::make_shared<NodeProp>(PropNameStyle));
     _strokeWidth = addProperty(std::make_shared<NodeProp>(PropNameStrokeWidth));
@@ -34,96 +65,65 @@ public:
     _antiAlias = addProperty(std::make_shared<NodeProp>(PropNameAntiAlias));
   }
   
-  void updateDerivedValue() override {
+  void beginVisit(DrawingContext* context) override {
+    BaseDerivedProp::beginVisit(context);
+    
+    // Now we can start updating the context
     // We only get here if something has changed - start with COLOR
-    if (_color->hasValue()) {
-      ensureDerivedValue();
+    if (_color->hasValue() && (_color->isChanged() || context->isInvalid())) {
       auto parsedColor = CSSColorParser::parse(_color->getValue()->getAsString());
       if (parsedColor.a == -1.0f) {
-        getDerivedValue()->setColor(SK_ColorBLACK);
+        context->getMutablePaint()->setColor(SK_ColorBLACK);
       } else {
-        getDerivedValue()->setColor(SkColorSetARGB(parsedColor.a * 255,
+        context->getMutablePaint()->setColor(SkColorSetARGB(parsedColor.a * 255,
                                                    parsedColor.r,
                                                    parsedColor.g,
                                                    parsedColor.b));
       }
     }
     // Style
-    if (_style->hasValue()) {
-      ensureDerivedValue();
+    if (_style->hasValue() && (_style->isChanged() || context->isInvalid())) {
       auto styleValue = _style->getValue()->getAsString();
       if (styleValue == "stroke") {
-        getDerivedValue()->setStyle(SkPaint::Style::kStroke_Style);
+        context->getMutablePaint()->setStyle(SkPaint::Style::kStroke_Style);
       } else if (styleValue == "fill") {
-        getDerivedValue()->setStyle(SkPaint::Style::kFill_Style);
+        context->getMutablePaint()->setStyle(SkPaint::Style::kFill_Style);
       } else {
         throw std::runtime_error(styleValue + " is not a valud value for the style property.");
       }
     }
     // Stroke Width
-    if (_strokeWidth->hasValue()) {
-      ensureDerivedValue();
-      getDerivedValue()->setStrokeWidth(_strokeWidth->getValue()->getAsNumber());
+    if (_strokeWidth->hasValue() && (_strokeWidth->isChanged() || context->isInvalid())) {
+      context->getMutablePaint()->setStrokeWidth(_strokeWidth->getValue()->getAsNumber());
     }
     // Blend mode
-    if (_blendMode->hasValue()) {
-      ensureDerivedValue();
+    if (_blendMode->hasValue() && (_blendMode->isChanged() || context->isInvalid())) {
       auto blendModeValue = _blendMode->getValue()->getAsString();
-      getDerivedValue()->setBlendMode(getBlendModeFromValue(blendModeValue));
+      context->getMutablePaint()->setBlendMode(getBlendModeFromString(blendModeValue));
     }
     // Stroke Join
-    if (_strokeJoin->hasValue()) {
-      ensureDerivedValue();
+    if (_strokeJoin->hasValue() && (_strokeJoin->isChanged() || context->isInvalid())) {
       auto joinValue = _strokeJoin->getValue()->getAsString();
-      getDerivedValue()->setStrokeJoin(getJoinFromValue(joinValue));
+      context->getMutablePaint()->setStrokeJoin(getJoinFromString(joinValue));
     }
     // Stroke Cap
-    if (_strokeCap->hasValue()) {
-      ensureDerivedValue();
+    if (_strokeCap->hasValue() && (_strokeCap->isChanged() || context->isInvalid())) {
       auto capValue = _strokeCap->getValue()->getAsString();
-      getDerivedValue()->setStrokeCap(getCapFromValue(capValue));
+      context->getMutablePaint()->setStrokeCap(getCapFromString(capValue));
     }
     // Stroke Miter
-    if (_strokeMiter->hasValue()) {
-      ensureDerivedValue();
-      getDerivedValue()->setStrokeMiter(_strokeMiter->getValue()->getAsNumber());
+    if (_strokeMiter->hasValue() && (_strokeMiter->isChanged() || context->isInvalid())) {
+      context->getMutablePaint()->setStrokeMiter(_strokeMiter->getValue()->getAsNumber());
     }
     // AntiAlias
-    if (_antiAlias->hasValue()) {
-      ensureDerivedValue();
-      getDerivedValue()->setAntiAlias(_antiAlias->getValue()->getAsNumber());
+    if (_antiAlias->hasValue() && (_antiAlias->isChanged() || context->isInvalid())) {
+      context->getMutablePaint()->setAntiAlias(_antiAlias->getValue()->getAsNumber());
     }
   }
 
-  void ensureDerivedValue() {
-    // We can bail out if we already have a value and parent paint didn't change
-    if (getDerivedValue() != nullptr) {
-      return;
-    }
-    // Now lets create a new paint object
-    setDerivedValue(std::make_shared<SkPaint>(*_parentPaint));
-  }
-  
-  void beginVisit(JsiDrawingContext* context) override {
-    auto parentPaint = context->getPaint();
-    if (_parentPaint != parentPaint) {
-      _parentPaint = parentPaint;
-      _parentPaintWasReset = true;
-      setDerivedValue(nullptr);
-    }
-    
-    DerivedProp::beginVisit(context);
-  }
-  
-  void endVisit() override {
-    DerivedProp::endVisit();
-    // Reset parent paint flag - will only be set next time the parent paint is changed
-    // meaning that we can keep our cache for a while.
-    _parentPaintWasReset = false;
-  }
 private:
   
-  SkPaint::Join getJoinFromValue(const std::string& value) {
+  SkPaint::Join getJoinFromString(const std::string& value) {
     if (value == "miter") {
       return SkPaint::Join::kMiter_Join;
     } else if (value == "round") {
@@ -134,7 +134,7 @@ private:
     throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke join.");
   }
   
-  SkPaint::Cap getCapFromValue(const std::string& value) {
+  SkPaint::Cap getCapFromString(const std::string& value) {
     if (value == "round") {
       return SkPaint::Cap::kRound_Cap;
     } else if (value == "butt") {
@@ -145,7 +145,7 @@ private:
     throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke cap.");
   }
   
-  SkBlendMode getBlendModeFromValue(const std::string& value) {
+  SkBlendMode getBlendModeFromString(const std::string& value) {
     if (value == "clear") {
       return SkBlendMode::kClear;
     } else if (value == "src") {
@@ -209,7 +209,6 @@ private:
     throw std::runtime_error("Property value \"" + value + "\" is not a legal blend mode.");
   }
   
-  bool _parentPaintWasReset = true;
   std::shared_ptr<SkPaint> _parentPaint;
   std::shared_ptr<NodeProp> _color;
   std::shared_ptr<NodeProp> _style;

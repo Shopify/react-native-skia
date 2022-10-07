@@ -11,13 +11,14 @@ public:
   JsiDomDrawingNode(context, "skCircle") {}
     
 protected:
-  void draw(JsiDrawingContext* context) override {
+  void draw(DrawingContext* context) override {
     if (!_circleProp->hasValue() || !_r->hasValue()) {
       throw std::runtime_error("Expected circle node to have a cx, cy or c \
                                and r properties.");
       return;
     }
-    context->getCanvas()->drawCircle(*_circleProp->getDerivedValue(), _r->getValue()->getAsNumber(),
+    context->getCanvas()->drawCircle(*_circleProp->getDerivedValue(),
+                                     _r->getValue()->getAsNumber(),
                                      *context->getPaint());
   }
   

@@ -13,13 +13,13 @@ public:
     JsiDomRenderNode(context, "skGroup") {}
   
 protected:
-  void renderNode(JsiDrawingContext* context) override {
+  void renderNode(DrawingContext* context) override {
     for (auto &child: getChildren()) {
       auto node = std::dynamic_pointer_cast<JsiDomRenderNode>(child);
       if (node != nullptr) {
         node->render(context);
       }
-    }
+    }    
   }  
 };
 
