@@ -55,6 +55,8 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskia.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskshaper.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libsvg.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskottie.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libsksg.a
 
       - name: Upload artifacts - Android arm64
         uses: actions/upload-artifact@v2
@@ -64,6 +66,8 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskia.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskshaper.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libsvg.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskottie.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libsksg.a
 
       - name: Upload artifacts - Android x86
         uses: actions/upload-artifact@v2
@@ -73,6 +77,8 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskia.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskshaper.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libsvg.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskottie.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libsksg.a
 
       - name: Upload artifacts - Android x64
         uses: actions/upload-artifact@v2
@@ -82,6 +88,8 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskia.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskshaper.a
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libsvg.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskottie.a
+            ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libsksg.a
 
       - name: Upload artifacts - iOS xcframeworks
         uses: actions/upload-artifact@v2
@@ -91,3 +99,5 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskia.xcframework
             ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskshaper.xcframework
             ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libsvg.xcframework
+            ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskottie.xcframework
+            ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libsksg.xcframework
