@@ -6,7 +6,6 @@ export type TestProps = {
 export type SingleTest = {
   component: React.FC<TestProps>;
   description?: string;
-  onMounted?: () => Promise<void>;
 };
 export type Tests = { [key: string]: SingleTest };
 export type TestHierarchy = { [key: string]: Tests | TestHierarchy };

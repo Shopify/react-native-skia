@@ -37,9 +37,6 @@ function mapTests(
         // Navigate to the test:
         await press(key);
         const screen = await takeScreenshot(path.join("_") + "_" + key);
-        if (maybeTest.onMounted) {
-          await maybeTest.onMounted();
-        }
         await expect(screen).toMatchBaseline();
 
         if (index === keys.length - 1) {
