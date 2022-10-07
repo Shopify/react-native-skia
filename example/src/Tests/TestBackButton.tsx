@@ -1,6 +1,7 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useCallback } from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
+
 import type { StackParamList } from "../types";
 
 type Props = NativeStackScreenProps<StackParamList, "Test" | "Tests">;

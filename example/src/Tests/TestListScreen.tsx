@@ -8,10 +8,11 @@ import {
   ScrollView,
 } from "react-native";
 
+import type { StackParamList } from "../types";
+
 import { TestBattery } from "./TestBattery";
 import { getByPath, isTest } from "./types";
 import { TestPath } from "./TestPath";
-import type { StackParamList } from "../types";
 
 type Props = NativeStackScreenProps<StackParamList, "Tests">;
 
