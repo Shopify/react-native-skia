@@ -21,7 +21,9 @@ static PropId PropNameStrokeJoin = JsiPropId::get("strokeJoin");
 static PropId PropNameStrokeCap = JsiPropId::get("strokeCap");
 static PropId PropNameStrokeMiter = JsiPropId::get("strokeMiter");
 static PropId PropNameAntiAlias = JsiPropId::get("antiAlias");
+
 static PropId PropNamePaint = JsiPropId::get("paint");
+static PropId PropNameCurrent = JsiPropId::get("current");
 
 class PaintProp: public BaseDerivedProp {
 public:
@@ -41,12 +43,25 @@ public:
           throw std::runtime_error("Expected SkPaint object, got unknown object when reading paint property.");
         }
       } else if (_paintProp->getValue()->getType() == PropType::Object) {
-        // TODO: We have a paint object - let us check for the current property!        
+        // We have a JS object - is it a ref?
+        auto ref = _paintProp->getValue()->getValue(PropNameCurrent);
+        if (ref->getType() == PropType::HostObject) {
+          auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(ref->getAsHostObject());
+          if (ptr != nullptr) {
+            // Update the local paint for the current context
+            context->setMutablePaint(ptr->getObject());
+          } else {
+            throw std::runtime_error("Expected reference to a SkPaint object, got unknown object when reading paint property.");
+          }
+        } else {
+          throw std::runtime_error("Expected reference to a paint object, got unknown object when reading paint property.");
+        }
       } else {
         throw std::runtime_error("Expected paint object, got unknown object when reading paint property.");
       }
     }
   }
+  
 private:
   std::shared_ptr<NodeProp> _paintProp;
 };
@@ -75,10 +90,10 @@ public:
       if (parsedColor.a == -1.0f) {
         context->getMutablePaint()->setColor(SK_ColorBLACK);
       } else {
-        context->getMutablePaint()->setColor(SkColorSetARGB(parsedColor.a * 255,
-                                                   parsedColor.r,
-                                                   parsedColor.g,
-                                                   parsedColor.b));
+        context->getMutablePaint()->setColor(SkColorSetARGB(parsedColor.a * 255,                                                   
+                                                            parsedColor.r,
+                                                            parsedColor.g,
+                                                            parsedColor.b));
       }
     }
     // Style

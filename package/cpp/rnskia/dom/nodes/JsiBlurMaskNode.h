@@ -36,9 +36,8 @@ protected:
       
       auto filter = SkMaskFilter::MakeBlur(style, _blur->getValue()->getAsNumber(), respectCTM);
       
-      // Invalidate the context (ie. inform children that this context is no longer valid)
-      context->invalidate();
-      context->getMutablePaint()->setMaskFilter(filter);
+      // Set the mask filter
+      context->getMutablePaint()->setMaskFilter(filter);      
     }
   }
   

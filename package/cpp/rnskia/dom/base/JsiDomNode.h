@@ -230,7 +230,7 @@ protected:
    reconciler tree, since due to garbage collection we can't be sure that the destructor is called when the node is
    removed - JS might hold a reference that will later be GC'ed.
    */
-  void dispose() {
+  virtual void dispose() {
     if (_disposeCallback != nullptr) {
       _disposeCallback();
       _disposeCallback = nullptr;

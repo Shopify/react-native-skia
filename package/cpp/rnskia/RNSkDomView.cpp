@@ -67,14 +67,13 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
   if (_drawingContext == nullptr) {
     _drawingContext = std::make_shared<DrawingContext>(std::make_shared<SkPaint>(), 1.0f);
   }
-  
+
   // Update canvas before drawing
   _drawingContext->setCanvas(canvas);
   
   try {
     // Ask the root node to render to the provided canvas
-    _root->render(_drawingContext.get());
-
+    _root->render(_drawingContext.get());    
   } catch (std::runtime_error err) {
     _platformContext->raiseError(err);
   } catch (jsi::JSError err) {
@@ -84,7 +83,7 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
   }
   
   renderDebugOverlays(canvas);
-  
+    
   canvas->restore();
   canvas->flush();
   

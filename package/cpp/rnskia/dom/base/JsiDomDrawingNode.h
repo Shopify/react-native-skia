@@ -26,8 +26,9 @@ protected:
   virtual void draw(DrawingContext* context) = 0;
   
   void renderNode(DrawingContext* context) override {
-    // TODO: Handle paint property and swap with context if necessary
-    // like in the JS implementation:
+    // Handle paint property and swap with context if necessary
+    // like in the JS implementation - this is done automatically by
+    // the paint prop itself.
     /*
      if (this.props.paint && isSkPaint(this.props.paint)) {
            this.draw({ ...ctx, paint: this.props.paint });
@@ -37,7 +38,7 @@ protected:
            this.draw(ctx);
          }
      */
-    
+    JsiDomRenderNode::renderNode(context);
     draw(context);
   }
 private:

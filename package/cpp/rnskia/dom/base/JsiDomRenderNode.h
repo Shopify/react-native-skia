@@ -27,21 +27,26 @@ public:
                    const char* type) : JsiDomNode(context, type) {}
   
   void render(DrawingContext* context) {
-    // RNSkLogger::logToConsole("Begin render node %s", getType());
+    // RNSkLogger::logToConsole("Render node %s", getType());
+    
+    // Ensure we have a local context
     if (_localContext == nullptr) {
-      _localContext = context->createChildContext();
+      _localContext = context->inheritContext(getType());
     }
     
+    // The props container is the storage for JS values that are passed as
+    // properties for nodes.
     auto container = getPropsContainer();
-    if (container == nullptr) {
-      // A node might have an empty set of properties - then we can just render the node directly
-      renderNode(_localContext.get());
-      return;
-    }
     
     // by visiting nodes we ensure that all updates and changes has been
-    // read and handled.
+    // read and handled for properties. This is also (with the symmetric endVisit)
+    // how we handle changed properties to avoid updating unecessarily.
     container->beginVisit(_localContext.get());
+    
+    // Opacity (paint prop resolves in beginVisit in the PaintProp class)
+    if (_opacityProp->hasValue() && (_opacityProp->isChanged() || _localContext->isInvalid())) {
+      _localContext->setOpacity(_opacityProp->getValue()->getAsNumber());
+    }
     
     auto shouldTransform = _matrixProp->hasValue() || _transformProp->hasValue();
     auto shouldSave = shouldTransform || _clipProp->hasValue();
@@ -61,7 +66,6 @@ public:
         auto matrix = _matrixProp->hasValue() ?
         _matrixProp->getDerivedValue() : _transformProp->getDerivedValue();
         
-        
         // Concat canvas' matrix with our matrix
         _localContext->getCanvas()->concat(*matrix);
       }
@@ -79,9 +83,6 @@ public:
       }
     }
     
-    // Update context
-    materializeContext(_localContext.get());
-    
     // Render the node
     renderNode(_localContext.get());
     
@@ -98,10 +99,34 @@ public:
   
 protected:
   
+  void dispose() override {
+    JsiDomNode::dispose();
+    
+    if (_localContext != nullptr) {
+      _localContext->dispose();
+      _localContext = nullptr;
+    }
+  }
+  
   /**
    Override to implement rendering where the current state of the drawing context is correctly set.
    */
-  virtual void renderNode(DrawingContext* context) = 0;
+  virtual void renderNode(DrawingContext* context) {
+    // Render and materialize children
+    for (auto &child: getChildren()) {
+      // Try node as render node
+      auto renderNode = std::dynamic_pointer_cast<JsiDomRenderNode>(child);
+      if (renderNode != nullptr) {
+        renderNode->render(context);
+      }
+      
+      // Try node as declaration node
+      auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
+      if (declarationNode != nullptr) {
+        declarationNode->materializeNode(context);
+      }
+    }
+  };
   
   /**
    Define common properties for all render nodes
@@ -119,20 +144,6 @@ protected:
   }
   
 private:
-  void materializeContext(DrawingContext* context) {
-    if (_opacityProp->hasValue() && (_opacityProp->isChanged() || context->isInvalid())) {
-      context->setOpacity(_opacityProp->getValue()->getAsNumber());
-    }
-    
-    // Enumerate children and let them add to the drawing context
-    for (auto &child: getChildren()) {
-      auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
-      if (declarationNode != nullptr) {
-        declarationNode->materializeNode(context);
-      }
-    }
-  }
-  
   std::vector<BaseNodeProp> _props;
   std::shared_ptr<PointProp> _originProp;
   std::shared_ptr<MatrixProp> _matrixProp;
