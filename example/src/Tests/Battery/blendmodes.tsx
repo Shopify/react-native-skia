@@ -57,36 +57,34 @@ const dst = Skia.Path.MakeFromSVGString(
 )!;
 
 export const BlendModes: Tests = {
-  ["BlendModes"]: {
-    component: ({ width }) => {
-      const COLS = 6;
-      const SIZE = width / COLS;
-      return (
-        <Group layer>
-          <Group>
-            {blendModes.map((blendMode, i) => {
-              const paint = Skia.Paint();
-              paint.setBlendMode(BlendMode[enumKey(blendMode)]);
-              return (
-                <Group
-                  transform={[
-                    { translateX: SIZE * (i % COLS) },
-                    { translateY: SIZE * Math.floor(i / COLS) },
-                    { scale: 0.2 },
-                  ]}
-                  key={blendMode}
-                  layer
-                >
-                  <Path path={dst} color="pink" />
-                  <Group layer={paint}>
-                    <Path path={src} color="lightBlue" />
-                  </Group>
+  component: ({ width }) => {
+    const COLS = 6;
+    const SIZE = width / COLS;
+    return (
+      <Group layer>
+        <Group>
+          {blendModes.map((blendMode, i) => {
+            const paint = Skia.Paint();
+            paint.setBlendMode(BlendMode[enumKey(blendMode)]);
+            return (
+              <Group
+                transform={[
+                  { translateX: SIZE * (i % COLS) },
+                  { translateY: SIZE * Math.floor(i / COLS) },
+                  { scale: 0.2 },
+                ]}
+                key={blendMode}
+                layer
+              >
+                <Path path={dst} color="pink" />
+                <Group layer={paint}>
+                  <Path path={src} color="lightBlue" />
                 </Group>
-              );
-            })}
-          </Group>
+              </Group>
+            );
+          })}
         </Group>
-      );
-    },
+      </Group>
+    );
   },
 };
