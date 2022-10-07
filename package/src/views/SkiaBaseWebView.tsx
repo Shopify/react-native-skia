@@ -8,7 +8,7 @@ import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
-import type { DrawMode, SkiaBaseViewProps, TouchInfo } from "./types";
+import { DrawMode, SkiaBaseViewProps, TouchInfo, TouchTool } from "./types";
 import { TouchType } from "./types";
 
 const pd = PixelRatio.get();
@@ -149,8 +149,22 @@ export abstract class SkiaBaseWebView<
       force: evt.pressure,
       type: touchType,
       timestamp: Date.now(),
+      tool: this.pointerTypeToTool(evt.pointerType),
     });
     this.redraw();
+  }
+
+  private pointerTypeToTool(type: string): TouchTool {
+    switch (type) {
+      case "mouse":
+        return TouchTool.Mouse;
+      case "touch":
+        return TouchTool.Finger;
+      case "pen":
+        return TouchTool.Stylus;
+      default:
+        return TouchTool.Unknown;
+    }
   }
 
   createTouchHandler(touchType: TouchType) {
