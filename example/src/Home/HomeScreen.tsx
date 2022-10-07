@@ -6,6 +6,12 @@ import { HomeScreenButton } from "./HomeScreenButton";
 export const HomeScreen = () => {
   return (
     <ScrollView>
+      <HomeScreenButton
+        title="🔧 E2E Tests"
+        description="Run integration tests"
+        route="Tests"
+        testId="Tests"
+      />
       <HomeScreenButton title="API" description="API examples" route="API" />
       <HomeScreenButton
         title="🧘 Breathe"
@@ -77,12 +83,6 @@ export const HomeScreen = () => {
         title="🏎 Performance"
         description="Drawing Performance Test"
         route="Performance"
-      />
-      <HomeScreenButton
-        title="🔧 E2E Tests"
-        description="Run integration tests"
-        route="Tests"
-        testId="Tests"
       />
     </ScrollView>
   );

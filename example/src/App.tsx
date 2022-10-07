@@ -22,8 +22,9 @@ import {
   Severance,
 } from "./Examples";
 import { TestListScreen } from "./Tests";
-import { HomeScreen } from "./Home";
 import { TestScreen } from "./Tests/TestScreen";
+import { HomeScreen } from "./Home";
+import type { StackParamList } from "./types";
 
 const linking = {
   config: {
@@ -45,13 +46,15 @@ const linking = {
       Graphs: "graphs",
       Animation: "animation",
       Performance: "performance",
+      Tests: "test",
+      TestList: "tests",
     },
   },
   prefixes: ["rnskia://"],
 };
 
 const App = () => {
-  const Stack = createNativeStackNavigator();
+  const Stack = createNativeStackNavigator<StackParamList>();
 
   return (
     <>

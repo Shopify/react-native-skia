@@ -9,9 +9,9 @@ import {
 } from "react-native";
 
 import { TestBattery } from "./TestBattery";
-import type { StackParamList } from "./types";
 import { getByPath, isTest } from "./types";
 import { TestPath } from "./TestPath";
+import type { StackParamList } from "../types";
 
 type Props = NativeStackScreenProps<StackParamList, "Tests">;
 
@@ -26,7 +26,7 @@ export const TestListScreen: React.FC<Props> = ({ route, navigation }) => {
   }, [navigation, route.params.title]);
 
   const handlePress = useCallback(
-    (key) => {
+    (key: string) => {
       const selected = current[key];
       if (isTest(selected)) {
         // Navigate to test itself

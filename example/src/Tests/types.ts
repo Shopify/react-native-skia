@@ -11,17 +11,6 @@ export type SingleTest = {
 export type Tests = { [key: string]: SingleTest };
 export type TestHierarchy = { [key: string]: Tests | TestHierarchy };
 
-export type StackParamList = {
-  Tests: {
-    title?: string;
-    path?: string[];
-  };
-  Test: {
-    title?: string;
-    path?: string[];
-  };
-};
-
 export const isTest = (
   test: Tests | SingleTest | TestHierarchy
 ): test is SingleTest => "component" in test;

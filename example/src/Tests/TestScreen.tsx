@@ -2,10 +2,10 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Canvas } from "@shopify/react-native-skia";
 import React, { useLayoutEffect, useMemo } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
+import type { StackParamList } from "../types";
 
 import { TestBackButton } from "./TestBackButton";
 import { TestBattery } from "./TestBattery";
-import type { StackParamList } from "./types";
 import { isTest, getByPath } from "./types";
 
 const Size = Dimensions.get("window").width;
