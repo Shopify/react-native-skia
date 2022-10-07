@@ -13,9 +13,11 @@
     "pod-install": "npx pod-install ios",
     "e2e:build:ios": "owl build -p ios",
     "e2e:test:ios": "owl test -p ios",
+    "e2e:ios": "yarn e2e:build:ios && yarn e2e:test:ios",
     "e2e:update:ios": "owl test -u -p ios",
     "e2e:build:android": "owl build -p android",
     "e2e:test:android": "owl test -p android",
+    "e2e:android": "yarn e2e:build:android && yarn e2e:test:android",
     "e2e:update:android": "owl test -u -p android",
     "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
   },

@@ -34,7 +34,8 @@
     "clang-format-android": "find package/android/src/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
     "clang-format-common": "find package/cpp/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
     "workflow-copy-libs": "yarn ts-node ./scripts/workflow-copy-libs.ts",
-    "bootstrap": "yarn && cd ./package && yarn && cd .. && cd ./example && yarn && cd .."
+    "bootstrap": "yarn && cd ./package && yarn && cd .. && cd ./example && yarn && cd ..",
+    "e2e:test": "cd ./example && yarn e2e:ios && yarn e2e:android && cd .."
   },
   "license": "MIT",
   "licenseFilename": "LICENSE.md",
