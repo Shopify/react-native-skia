@@ -1,10 +1,10 @@
-import { Shapes, BlendModes } from "./Battery";
+import { Shapes, Paint } from "./Battery";
 import type { SingleTest, TestHierarchy } from "./types";
 import { isTest } from "./types";
 
 export const TestBattery: TestHierarchy = {
   Shapes,
-  BlendModes,
+  Paint,
 };
 
 type ReturnValue = { path: string[]; test: SingleTest };
