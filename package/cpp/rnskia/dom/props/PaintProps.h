@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NodeProp.h"
-#include "CSSColorParser.h"
+#include "third_party/CSSColorParser.h"
 #include "JsiSkPaint.h"
 
 #pragma clang diagnostic push
