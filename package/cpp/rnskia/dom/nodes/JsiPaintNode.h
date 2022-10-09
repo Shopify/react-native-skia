@@ -19,18 +19,21 @@ public:
 protected:
   void materialize(DrawingContext* context) override {
     /* Paint props are materializing itself */
+    
+    if (_opacityProp->hasValue() && (_opacityProp->isChanged() || context->isInvalid())) {
+      context->setOpacity(_opacityProp->getValue()->getAsNumber());
+    }
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiDomDeclarationNode::defineProperties(container);
     
-    _paintProp = container->defineProperty(std::make_shared<PaintProps>());
+    container->defineProperty(std::make_shared<PaintProps>());
     _opacityProp = container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
   }
   
 private:
-  std::shared_ptr<PaintProps> _paintProp;
-  std::shared_ptr<NodeProp> _opacityProp;
+  NodeProp* _opacityProp;
 };
 
 }

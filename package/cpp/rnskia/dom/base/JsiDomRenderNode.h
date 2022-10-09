@@ -26,7 +26,7 @@ public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
                    const char* type) : JsiDomNode(context, type) {}
   
-  void render(DrawingContext* context) {
+  void render(DrawingContext* context) {    
     // RNSkLogger::logToConsole("Render node %s", getType());
     
     // Ensure we have a local context
@@ -97,21 +97,29 @@ public:
     // RNSkLogger::logToConsole("End rendering node %s", getType());
   };
   
-protected:
-  
+  /**
+   Signal from the JS side that the node is removed from the dom.
+   */
   void dispose() override {
     JsiDomNode::dispose();
     
+    // Clear local drawing context
     if (_localContext != nullptr) {
       _localContext->dispose();
       _localContext = nullptr;
     }
   }
   
+protected:
+  
   /**
    Override to implement rendering where the current state of the drawing context is correctly set.
    */
   virtual void renderNode(DrawingContext* context) {
+    if (context == nullptr) {
+      return;
+    }
+    
     // Render and materialize children
     for (auto &child: getChildren()) {
       // Try node as render node
@@ -134,7 +142,8 @@ protected:
   virtual void defineProperties(NodePropsContainer* container) override {
     JsiDomNode::defineProperties(container);
     
-    _paintProp = container->defineProperty(std::make_shared<PaintProps>());
+    container->defineProperty(std::make_shared<PaintProps>());
+    
     _opacityProp = container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
     _matrixProp = container->defineProperty(std::make_shared<MatrixProp>(PropNameMatrix));
     _transformProp = container->defineProperty(std::make_shared<TransformProp>(PropNameTransform));
@@ -144,17 +153,14 @@ protected:
   }
   
 private:
-  std::vector<BaseNodeProp> _props;
-  std::shared_ptr<PointProp> _originProp;
-  std::shared_ptr<MatrixProp> _matrixProp;
-  std::shared_ptr<TransformProp> _transformProp;
-  std::shared_ptr<PaintProps> _paintProp;
-  std::shared_ptr<NodeProp> _opacityProp;
-  std::shared_ptr<NodeProp> _invertClip;
-  std::shared_ptr<ClipProp> _clipProp;
+  PointProp* _originProp;
+  MatrixProp* _matrixProp;
+  TransformProp* _transformProp;
+  NodeProp* _opacityProp;
+  NodeProp* _invertClip;
+  ClipProp* _clipProp;
   
   std::shared_ptr<DrawingContext> _localContext;
-
 };
 
 }

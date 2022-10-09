@@ -29,8 +29,8 @@ protected:
   }
   
 private:
-  std::shared_ptr<CircleProp> _circleProp;
-  std::shared_ptr<NodeProp> _r;
+  CircleProp* _circleProp;
+  NodeProp* _r;
 };
 
 }

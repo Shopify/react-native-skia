@@ -66,9 +66,9 @@ private:
     return SkBlurStyle::kNormal_SkBlurStyle;
   }
   
-  std::shared_ptr<NodeProp> _style;
-  std::shared_ptr<NodeProp> _respectCTM;
-  std::shared_ptr<NodeProp> _blur;
+  NodeProp* _style;
+  NodeProp* _respectCTM;
+  NodeProp* _blur;
 };
 
 }

@@ -40,8 +40,10 @@ class RNSkDomRenderer:
   public RNSkRenderer,
   public std::enable_shared_from_this<RNSkDomRenderer> {
 public:
-    RNSkDomRenderer(std::function<void()> requestRedraw,
-                    std::shared_ptr<RNSkPlatformContext> context);
+  RNSkDomRenderer(std::function<void()> requestRedraw,
+                  std::shared_ptr<RNSkPlatformContext> context);
+
+  ~RNSkDomRenderer();
   
   bool tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override;
   
@@ -72,6 +74,7 @@ private:
   std::mutex _touchMutex;
   std::vector<std::vector<RNSkTouchInfo>> _currentTouches;
   std::vector<std::vector<RNSkTouchInfo>> _touchesCache;
+  std::mutex _rootLock;
 };
 
 class RNSkDomView: public RNSkView {
@@ -110,8 +113,12 @@ public:
 
       } else if (prop.first == "root") {
         // Save root
-        std::static_pointer_cast<RNSkDomRenderer>(getRenderer())->setRoot(
-          std::dynamic_pointer_cast<JsiDomRenderNode>(prop.second.getAsHostObject()));
+        if (prop.second.isUndefined() || prop.second.isNull()) {
+          std::static_pointer_cast<RNSkDomRenderer>(getRenderer())->setRoot(nullptr);
+        } else {
+          std::static_pointer_cast<RNSkDomRenderer>(getRenderer())->setRoot(
+            std::dynamic_pointer_cast<JsiDomRenderNode>(prop.second.getAsHostObject()));
+        }
         
         // Request redraw
         requestRedraw();

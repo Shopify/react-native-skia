@@ -5,6 +5,7 @@
 #include "DrawingContext.h"
 
 #include <map>
+#include <utility>
 
 namespace RNSkia {
 
@@ -19,6 +20,8 @@ public:
    called when any property was changed from within this class as a result of a Skia value change.
    */
   NodePropsContainer() {}
+  
+  ~NodePropsContainer() {}
   
   /**
    Returns true if there are any changes in the props container in the current being/end visit
@@ -35,15 +38,8 @@ public:
   /**
    Returns a list of mappings betwen property names and property objects
    */
-  const std::map<PropId, std::vector<std::shared_ptr<NodeProp>>>& getMappedProperties() {
+  const std::map<PropId, std::vector<NodeProp*>>& getMappedProperties() {
     return _mappedProperties;
-  }
-  
-  /**
-   Returns the list of properties registered / defined in the container
-   */
-  std::vector<std::shared_ptr<BaseNodeProp>>& getProperties() {
-    return _properties;
   }
   
   /**
@@ -65,52 +61,48 @@ public:
   }
   
   /**
+   Clears all props and data from the container
+   */
+  void dispose() {
+    _properties.clear();
+    _mappedProperties.clear();
+  }
+  
+  /**
    Called when the React / JS side sets properties on a node
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
-    // RNSkLogger::logToConsole("Begin set properties");
- 
     // Clear property mapping
     _mappedProperties.clear();
     
     // Use specialized reader function to be able to intercept calls that
     // reads specific named values from the js property object.
-    auto read = [&](jsi::Runtime &runtime, PropId name, std::shared_ptr<NodeProp> prop) {
+    auto read = [&](jsi::Runtime &runtime, PropId name, NodeProp* prop) {
       if (_mappedProperties.count(name) == 0) {
-        std::vector<std::shared_ptr<NodeProp>> tmp;
+        std::vector<NodeProp*> tmp;
         _mappedProperties[name] = std::move(tmp);
       }
       _mappedProperties.at(name).push_back(prop);
       return props.getProperty(runtime, name);
-      
-      //auto v = props.getProperty(runtime, name);
-     // auto j = JsiValue(runtime, v);
-      
-      /// RNSkLogger::logToConsole("Read prop %s: %s (%s)", name, j.asString().c_str(), j.getTypeAsString(j.getType()).c_str());
-     // return v;
     };
     
     for (auto &prop: _properties) {
       prop->readValueFromJs(runtime, read);
     }
-    
-    //RNSkLogger::logToConsole("End set properties");
-    //RNSkLogger::logToConsole("------------------");
-    //RNSkLogger::logToConsole("");
   }
     
   /**
    Defines a property that will be updated with the container changes.
    */
-  template <typename T = NodeProp>
-  std::shared_ptr<T> defineProperty(std::shared_ptr<T> property) {
-    _properties.push_back(property);
-    return property;
+  template <typename T = BaseNodeProp>
+  T* defineProperty(std::shared_ptr<T> prop) {
+    _properties.push_back(prop);
+    return prop.get();
   }    
   
 private:
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
-  std::map<PropId, std::vector<std::shared_ptr<NodeProp>>> _mappedProperties;
+  std::map<PropId, std::vector<NodeProp*>> _mappedProperties;
 };
 
 }

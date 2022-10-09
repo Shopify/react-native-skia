@@ -194,6 +194,7 @@ protected:
    Returns all child JsiDomNodes for this node.
    */
   const std::vector<std::shared_ptr<JsiDomNode>> &getChildren() {
+    std::lock_guard<std::mutex> lock(_childrenLock);
     return _children;
   }
   
@@ -201,6 +202,7 @@ protected:
    Adds a child node to the array of children for this node
    */
   virtual void addChild(std::shared_ptr<JsiDomNode> child) {
+    std::lock_guard<std::mutex> lock(_childrenLock);
     _children.push_back(child);
   }
   
@@ -210,6 +212,7 @@ protected:
   virtual void
   insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) {
     auto position = std::find(_children.begin(), _children.end(), before);
+    std::lock_guard<std::mutex> lock(_childrenLock);
     _children.insert(position, child);
   }
   
@@ -217,6 +220,8 @@ protected:
    Removes a child. Removing a child will remove the child from the array of children and call dispose on the child node.
    */
   virtual void removeChild(std::shared_ptr<JsiDomNode> child) {
+    std::lock_guard<std::mutex> lock(_childrenLock);
+    // Delete child itself
     _children.erase(std::remove_if(_children.begin(), _children.end(),
                                    [child](const auto &node) { return node == child; }),
                     _children.end());
@@ -224,25 +229,52 @@ protected:
     // We don't need to call dispose since the dtor handles disposing
     child->dispose();
   }
-  
+    
   /**
-   Clean up resources in use by the node. We have to explicitly call dispose when the node is removed from the
-   reconciler tree, since due to garbage collection we can't be sure that the destructor is called when the node is
-   removed - JS might hold a reference that will later be GC'ed.
+   Called when a node has been removed from the dom tree and needs to be cleaned up.
    */
   virtual void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    
+    _isDisposed = true;
+    
+    // Callback signaling that we're done
     if (_disposeCallback != nullptr) {
       _disposeCallback();
       _disposeCallback = nullptr;
     }
+    
+    // Clear props
+    if (_propsContainer != nullptr) {
+      _propsContainer->dispose();
+    }
+    
+    // Remove children
+    std::vector<std::shared_ptr<JsiDomNode>> tmp;
+    {
+      std::lock_guard<std::mutex> lock(_childrenLock);
+      tmp.reserve(_children.size());
+      for (auto &child: _children) {
+        tmp.push_back(child);
+      }
+      _children.clear();
+    }
+    for (auto &child: tmp) {
+      child->dispose();
+    }
   }
   
 private:
+  
   std::shared_ptr<RNSkPlatformContext> _context;
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::shared_ptr<NodePropsContainer> _propsContainer;
   const char* _type;
   std::function<void()> _disposeCallback;
+  std::mutex _childrenLock;
+  std::atomic<bool> _isDisposed = { false };
 };
 
 }

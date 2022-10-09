@@ -17,28 +17,23 @@ public:
   /**
    Creates a root drawing context with paint and opacity
    */
-  DrawingContext(std::shared_ptr<SkPaint> paint, double opacity) {
+  DrawingContext(std::shared_ptr<SkPaint> paint, double opacity): DrawingContext("root") {
     _paint = paint;
     _opacity = opacity;
-    _source = "root";
-  }
-  
-  ~DrawingContext() {
-    // RNSkLogger::logToConsole("DrawingContext::dtor - " + std::string(_source));
   }
   
   /**
    Initilalizes a new draw context.
    */
-  DrawingContext(std::shared_ptr<DrawingContext> parent) {
+  DrawingContext(DrawingContext* parent, const char* source): DrawingContext(source) {
     _parent = parent;
   }
   
   /**
-   Factory for creating a child context
+   Factory for creating a child context that inherits from this context
    */
   std::shared_ptr<DrawingContext> inheritContext(const char* source) {
-    auto result = std::make_shared<DrawingContext>(shared_from_this());
+    auto result = std::make_shared<DrawingContext>(this, source);
     result->_source = source;
     _children.push_back(result);
     return result;
@@ -46,7 +41,7 @@ public:
   
   void print_debug_description() {
     std::string v = "";
-    std::shared_ptr<DrawingContext> cur = _parent;
+    DrawingContext* cur = _parent;
     while (cur != nullptr) {
       v += "  ";
       cur = cur->_parent;
@@ -88,6 +83,9 @@ public:
     _paint = nullptr;
   }
   
+  /**
+   Dispose and remove the drawing context from its parent.
+   */
   void dispose() {
     if (_parent != nullptr) {
       auto position = std::find(_parent->_children.begin(),
@@ -97,7 +95,9 @@ public:
       if (position != _parent->_children.end()) {
         _parent->_children.erase(position);
       }
-      _parent = nullptr;      
+      // TODO: This is called from the JS thread so we need somehow to avoid rendering
+      // after setting this to null, and we also need to protect this section.
+      _parent = nullptr;
     }
   }
   
@@ -140,14 +140,13 @@ public:
    To be able to mutate and change the paint in a context we need to mutate the underlying paint
    object - otherwise we'll just use the parent paint object (to avoid having to create multiple paint
    objects for nodes that does not change the paint).
-   
-   Calling this accessor implies that the paint is about to be mutatet and will therefore invalidate
-   any child contexts to pick up changes from this context as the parent context.
    */
   std::shared_ptr<SkPaint> getMutablePaint() {
     if (_paint == nullptr) {
       _paint = std::make_shared<SkPaint>(*_parent->getPaint());
     }
+    // Calling this accessor implies that the paint is about to be mutatet and will therefore invalidate
+    // any child contexts to pick up changes from this context as the parent context.
     invalidateChildren();
     return _paint;
   }
@@ -183,6 +182,9 @@ public:
   }
   
 private:
+  DrawingContext(const char* source) {
+    _source = source;    
+  }
   
   void invalidateChildren() {
     for (auto &child: _children) {
@@ -196,7 +198,7 @@ private:
   SkCanvas *_canvas = nullptr;
   const char* _source;
   
-  std::shared_ptr<DrawingContext> _parent;
+  DrawingContext* _parent = nullptr;
   std::vector<std::shared_ptr<DrawingContext>> _children;
 };
 

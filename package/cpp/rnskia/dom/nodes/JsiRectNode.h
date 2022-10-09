@@ -27,7 +27,7 @@ protected:
   }
   
 private:
-  std::shared_ptr<RectProps> _rectProp;
+  RectProps* _rectProp;
 };
 
 }

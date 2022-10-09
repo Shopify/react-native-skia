@@ -30,6 +30,7 @@ public:
    Called when rendering the tree to create all derived values from all nodes.
    */
   virtual void materializeNode(DrawingContext* context) {
+    
     auto container = getPropsContainer();
     if (container != nullptr) {
       // Make sure we commit any waiting transactions in the props object

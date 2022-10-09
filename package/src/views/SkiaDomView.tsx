@@ -73,6 +73,14 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
     return SkiaViewApi.registerValuesInView(this._nativeId, values);
   }
 
+  /**
+   * Clear up the dom node when unmounting to release resources.
+   */
+  componentWillUnmount(): void {
+    assertSkiaViewApi();
+    SkiaViewApi.setJsiProperty(this._nativeId, "root", null);
+  }
+
   render() {
     const { mode, debug = false, ...viewProps } = this.props;
     return (

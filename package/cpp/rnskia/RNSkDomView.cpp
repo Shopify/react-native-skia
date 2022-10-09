@@ -20,6 +20,13 @@ RNSkDomRenderer::RNSkDomRenderer(std::function<void()> requestRedraw,
   _renderTimingInfo("SKIA/RENDER") {
 }
 
+RNSkDomRenderer::~RNSkDomRenderer() {
+  if (_root != nullptr) {
+    _root->dispose();
+    _root = nullptr;
+  }
+}
+
 bool RNSkDomRenderer::tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
   // If we have touches we need to call the touch callback as well
   if(_currentTouches.size() > 0) {
@@ -49,6 +56,11 @@ void RNSkDomRenderer::renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvas
 };
 
 void RNSkDomRenderer::setRoot(std::shared_ptr<JsiDomRenderNode> node) {
+  std::lock_guard<std::mutex> lock(_rootLock);
+  if (_root != nullptr) {
+    _root->dispose();
+    _root = nullptr;
+  }
   _root = node;
 }
 
@@ -73,7 +85,10 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
   
   try {
     // Ask the root node to render to the provided canvas
-    _root->render(_drawingContext.get());    
+    std::lock_guard<std::mutex> lock(_rootLock);
+    if (_root != nullptr) {
+      _root->render(_drawingContext.get());
+    }
   } catch (std::runtime_error err) {
     _platformContext->raiseError(err);
   } catch (jsi::JSError err) {

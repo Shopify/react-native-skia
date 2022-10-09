@@ -35,7 +35,7 @@ public:
   JSI_HOST_FUNCTION(unsubscribeNode) {
     // (node: Node<unknown>)
     auto node = getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 0);
-    unsubscribeNode(node);
+    unsubscribeNode(node.get());
     return jsi::Value::undefined();
   }
   
@@ -95,10 +95,10 @@ public:
     }
     
     // Now let's store the subscription info
-    _subscriptions.emplace(node, unsubscribers);
+    _subscriptions.emplace(node.get(), unsubscribers);
     
     // Set callback for unsubscribing
-    node->setDisposeCallback([node, weakSelf = weak_from_this()]() {
+    node->setDisposeCallback([node = node.get(), weakSelf = weak_from_this()]() {
       auto self = weakSelf.lock();
       if (self) {
         self->unsubscribeNode(node);
@@ -191,8 +191,8 @@ private:
    Removes all subscriptions
    */
   void unsubscribeAll() {
-    // 2) Unregister nodes
-    std::vector<std::shared_ptr<JsiDomNode>> tmp;
+    // Unregister all nodes
+    std::vector<JsiDomNode*> tmp;
     tmp.reserve(_subscriptions.size());
     for (auto &subInfo: _subscriptions) {
       tmp.push_back(subInfo.first);
@@ -201,14 +201,14 @@ private:
       unsubscribeNode(node);
     }
         
-    // 3) Clear the rest of the subscriptions
+    // Clear all subscriptions
     _subscriptions.clear();
   }
   
   /**
    Unsubscribes from a given node
    */
-  void unsubscribeNode (std::shared_ptr<JsiDomNode> node) {
+  void unsubscribeNode (JsiDomNode* node) {
     if (_subscriptions.count(node) > 0) {
       auto subscriptions = _subscriptions.at(node);
       for (auto &p: subscriptions) {
@@ -256,7 +256,7 @@ private:
   
   jsi::Object _registerValuesCallback;
   std::shared_ptr<jsi::Object> _unregisterValues;
-  std::map<std::shared_ptr<JsiDomNode>, std::vector<
+  std::map<JsiDomNode*, std::vector<
     std::pair<std::shared_ptr<RNSkReadonlyValue>, std::function<void()>>>> _subscriptions;
 };
 }
