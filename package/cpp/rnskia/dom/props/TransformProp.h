@@ -68,7 +68,7 @@ public:
   }
   
 private:
-  std::shared_ptr<NodeProp> _transformProp;
+  NodeProp* _transformProp;
 };
 
 }

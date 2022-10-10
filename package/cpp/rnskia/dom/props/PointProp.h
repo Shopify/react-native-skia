@@ -60,7 +60,7 @@ public:
   }
   
 private:
-  std::shared_ptr<NodeProp> _pointProp;
+  NodeProp* _pointProp;
   std::shared_ptr<JsiValue> _x;
   std::shared_ptr<JsiValue> _y;
 };

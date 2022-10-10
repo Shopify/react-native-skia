@@ -63,7 +63,7 @@ public:
   }
   
 private:
-  std::shared_ptr<NodeProp> _paintProp;
+  NodeProp* _paintProp;
 };
 
 class PaintProps:
@@ -224,15 +224,14 @@ private:
     throw std::runtime_error("Property value \"" + value + "\" is not a legal blend mode.");
   }
   
-  std::shared_ptr<SkPaint> _parentPaint;
-  std::shared_ptr<NodeProp> _color;
-  std::shared_ptr<NodeProp> _style;
-  std::shared_ptr<NodeProp> _strokeWidth;
-  std::shared_ptr<NodeProp> _blendMode;
-  std::shared_ptr<NodeProp> _strokeJoin;
-  std::shared_ptr<NodeProp> _strokeCap;
-  std::shared_ptr<NodeProp> _strokeMiter;
-  std::shared_ptr<NodeProp> _antiAlias;
+  NodeProp* _color;
+  NodeProp* _style;
+  NodeProp* _strokeWidth;
+  NodeProp* _blendMode;
+  NodeProp* _strokeJoin;
+  NodeProp* _strokeCap;
+  NodeProp* _strokeMiter;
+  NodeProp* _antiAlias;
 };
 
 }

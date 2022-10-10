@@ -26,7 +26,7 @@ public:
   }
   
 private:
-  std::shared_ptr<NodeProp> _matrixProp;
+  NodeProp* _matrixProp;
 };
 
 }

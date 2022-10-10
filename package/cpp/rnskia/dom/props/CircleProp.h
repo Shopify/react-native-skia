@@ -35,9 +35,9 @@ public:
   }
   
 private:
-  std::shared_ptr<PointProp> _c;
-  std::shared_ptr<NodeProp> _cx;
-  std::shared_ptr<NodeProp> _cy;
+  PointProp* _c;
+  NodeProp* _cx;
+  NodeProp* _cy;
 };
 
 }

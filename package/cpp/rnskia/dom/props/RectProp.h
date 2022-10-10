@@ -69,7 +69,7 @@ private:
   std::shared_ptr<JsiValue> _y;
   std::shared_ptr<JsiValue> _width;
   std::shared_ptr<JsiValue> _height;
-  std::shared_ptr<NodeProp> _prop;
+  NodeProp* _prop;
 };
 
 /**
@@ -96,10 +96,10 @@ public:
   }
   
 private:
-  std::shared_ptr<NodeProp> _x;
-  std::shared_ptr<NodeProp> _y;
-  std::shared_ptr<NodeProp> _width;
-  std::shared_ptr<NodeProp> _height;
+  NodeProp* _x;
+  NodeProp* _y;
+  NodeProp* _width;
+  NodeProp* _height;
 };
 
 /**
@@ -125,7 +125,7 @@ public:
   }
 
 private:
-  std::shared_ptr<RectProp> _rectProp;
-  std::shared_ptr<RectPropFromProps> _rectPropFromProps;
+  RectProp* _rectProp;
+  RectPropFromProps* _rectPropFromProps;
 };
 }

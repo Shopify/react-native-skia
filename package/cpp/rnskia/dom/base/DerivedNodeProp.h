@@ -66,9 +66,9 @@ public:
    Adds a property to the derived property child props.
    */
   template <typename P = BaseNodeProp>
-  std::shared_ptr<P> addProperty(std::shared_ptr<P> prop) {
+  P* addProperty(std::shared_ptr<P> prop) {
     _properties.push_back(prop);
-    return prop;
+    return prop.get();
   }
   
   /**

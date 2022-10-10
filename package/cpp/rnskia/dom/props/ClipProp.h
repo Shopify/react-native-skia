@@ -17,7 +17,7 @@ namespace RNSkia {
 
 class ClipProp: public BaseDerivedProp {
 public:
-  ClipProp(PropId name): BaseDerivedProp(), _name(name) {
+  ClipProp(PropId name): BaseDerivedProp() {
     _pathProp = addProperty(std::make_shared<PathProp>(name));
     _rectProp = addProperty(std::make_shared<RectProp>(name));
     _rrectProp = addProperty(std::make_shared<RRectProp>(name));
@@ -58,11 +58,9 @@ public:
 
   
 private:
-  std::shared_ptr<PathProp> _pathProp;
-  std::shared_ptr<RectProp> _rectProp;
-  std::shared_ptr<RRectProp> _rrectProp;
-  
-  PropId _name;
+  PathProp* _pathProp;
+  RectProp* _rectProp;
+  RRectProp* _rrectProp;
   
   std::shared_ptr<SkPath> _path;
   std::shared_ptr<SkRect> _rect;

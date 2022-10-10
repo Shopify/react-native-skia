@@ -47,7 +47,7 @@ public:
   }
   
 private:
-  std::shared_ptr<NodeProp> _pathProp;
+  NodeProp* _pathProp;
 };
 
 }
