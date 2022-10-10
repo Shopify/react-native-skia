@@ -155,7 +155,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Path(props: PathProps) {
-    return new PathNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.PathNode
+      ? global.SkiaDomApi.PathNode(props ?? {})
+      : new PathNode(this.ctx, props);
   }
 
   CustomDrawing(props: CustomDrawingNodeProps) {

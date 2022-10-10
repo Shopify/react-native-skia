@@ -9,6 +9,7 @@
 #include "nodes/JsiCircleNode.h"
 #include "nodes/JsiGroupNode.h"
 #include "nodes/JsiFillNode.h"
+#include "nodes/JsiPathNode.h"
 
 #include "nodes/JsiBlurMaskNode.h"
 
@@ -30,6 +31,7 @@ namespace RNSkia
       installFunction("RectNode", JsiRectNode::createCtor(context));
       installFunction("RRectNode", JsiRRectNode::createCtor(context));
       installFunction("CircleNode", JsiCircleNode::createCtor(context));
+      installFunction("PathNode", JsiPathNode::createCtor(context));
 
       installFunction("GroupNode", JsiGroupNode::createCtor(context));
       

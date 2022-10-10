@@ -80,6 +80,7 @@ declare global {
     PaintNode: (props: PaintProps) => DeclarationNode<PaintProps, SkPaint>;
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;
     CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
+    PathNode: (props: PathProps) => RenderNode<PathProps>;
     BlurMaskFilterNode: (
       props: BlurMaskFilterProps
     ) => DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
