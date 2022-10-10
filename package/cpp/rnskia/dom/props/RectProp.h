@@ -37,38 +37,28 @@ public:
                                            rectPtr->getObject()->width(), rectPtr->getObject()->height()));
         }
       } else {
-        // Update cache from js object value
-        if (_x != nullptr && _y != nullptr && _width != nullptr && _height != nullptr) {
-          setDerivedValue(SkRect::MakeXYWH(_x->getAsNumber(), _y->getAsNumber(),
-                                           _width->getAsNumber(), _height->getAsNumber()));
+        auto p = _prop->getValue();
+        if (p->hasValue(PropNameX) &&
+            p->hasValue(PropNameY) &&
+            p->hasValue(PropNameWidth) &&
+            p->hasValue(PropNameHeight)) {
+          // Save props for fast access
+          auto x = _prop->getValue()->getValue(PropNameX);
+          auto y = _prop->getValue()->getValue(PropNameY);
+          auto width = _prop->getValue()->getValue(PropNameWidth);
+          auto height = _prop->getValue()->getValue(PropNameHeight);
+          
+          // Update cache from js object value
+          if (x != nullptr && y != nullptr && width != nullptr && height != nullptr) {
+            setDerivedValue(SkRect::MakeXYWH(x->getAsNumber(), y->getAsNumber(),
+                                             width->getAsNumber(), height->getAsNumber()));
+          }
         }
       }
     }
   }
   
-  void onValueRead() override {
-    DerivedProp::onValueRead();
-    
-    if (_prop->hasValue() && _prop->getValue()->getType() == PropType::Object) {
-      auto p = _prop->getValue();
-      if (p->hasValue(PropNameX) &&
-          p->hasValue(PropNameY) &&
-          p->hasValue(PropNameWidth) &&
-          p->hasValue(PropNameHeight)) {
-        // Save props for fast access
-        _x = _prop->getValue()->getValue(PropNameX);
-        _y = _prop->getValue()->getValue(PropNameY);
-        _width = _prop->getValue()->getValue(PropNameWidth);
-        _height = _prop->getValue()->getValue(PropNameHeight);
-      }
-    }
-  }
-  
 private:
-  std::shared_ptr<JsiValue> _x;
-  std::shared_ptr<JsiValue> _y;
-  std::shared_ptr<JsiValue> _width;
-  std::shared_ptr<JsiValue> _height;
   NodeProp* _prop;
 };
 

@@ -26,7 +26,7 @@ public:
   /**
    Returns true if there are any changes in the props container in the current being/end visit
    */
-  bool getHasPropChanges() {
+  bool isChanged() {
     for (auto &prop: _properties) {
       if (prop->isChanged()) {
         return true;

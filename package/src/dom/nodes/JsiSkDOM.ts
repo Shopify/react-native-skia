@@ -165,7 +165,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Line(props: LineProps) {
-    return new LineNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.LineNode
+      ? global.SkiaDomApi.LineNode(props ?? {})
+      : new LineNode(this.ctx, props);
   }
 
   Oval(props: OvalProps) {

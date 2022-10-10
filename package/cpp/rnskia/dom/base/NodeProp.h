@@ -22,8 +22,7 @@ public:
     // Always use the next field since this method is called on the JS thread and
     // we don't want to rip out the underlying value object.
     _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
-    _isChanged = true;
-    onValueRead();
+    _isChanged = true;    
   }
   
   /**

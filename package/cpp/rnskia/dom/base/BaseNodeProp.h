@@ -39,13 +39,7 @@ public:
   /**
    Override to read the value represented by this property from the Javascript property object
    */
-  virtual void readValueFromJs (jsi::Runtime &runtime, const ReadPropFunc& read) = 0;
-  
-  /**
-   Called when value was read
-   */
-  virtual void onValueRead() {}
-  
+  virtual void readValueFromJs (jsi::Runtime &runtime, const ReadPropFunc& read) = 0;  
 };
 
 }

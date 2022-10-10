@@ -25,8 +25,7 @@ public:
     }
   }
   
-private:
-  SkPaint::Cap getCapFromString(const std::string& value) {
+  static SkPaint::Cap getCapFromString(const std::string& value) {
     if (value == "round") {
       return SkPaint::Cap::kRound_Cap;
     } else if (value == "butt") {
@@ -36,7 +35,7 @@ private:
     }
     throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke cap.");
   }
-  
+private:
   NodeProp* _strokeCap;
 };
 
@@ -54,8 +53,7 @@ public:
     }
   }
   
-private:
-  SkPaint::Join getJoinFromString(const std::string& value) {
+  static SkPaint::Join getJoinFromString(const std::string& value) {
     if (value == "miter") {
       return SkPaint::Join::kMiter_Join;
     } else if (value == "round") {
@@ -66,6 +64,7 @@ private:
     throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke join.");
   }
   
+private:
   NodeProp* _strokeJoin;
 };
 

@@ -52,9 +52,7 @@ public:
   virtual void readValueFromJs (jsi::Runtime &runtime, const ReadPropFunc& read) override {
     for (auto &prop: _properties) {
       prop->readValueFromJs(runtime, read);
-    }
-    
-    onValueRead();
+    }    
   }
   
   /**

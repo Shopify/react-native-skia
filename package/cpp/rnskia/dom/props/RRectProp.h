@@ -41,43 +41,35 @@ public:
                                                                rrect->rect().width(), rrect->rect().height()),
                                               rrect->getSimpleRadii().x(), rrect->getSimpleRadii().y()));
         }
-      } else if (_rx != nullptr){
-        // Update cache from js object value
-        setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(_x->getAsNumber(), _y->getAsNumber(),
-                                                             _width->getAsNumber(), _height->getAsNumber()),
-                                            _rx->getAsNumber(), _ry->getAsNumber()));
-      }
-    }
-  }
-  
-  void onValueRead() override {
-    DerivedProp::onValueRead();
-    
-    if (_prop->hasValue() && _prop->getValue()->getType() == PropType::Object) {
-      auto p = _prop->getValue();
-      if (p->hasValue(PropNameX) &&
-          p->hasValue(PropNameY) &&
-          p->hasValue(PropNameWidth) &&
-          p->hasValue(PropNameHeight) &&
-          p->hasValue(PropNameRx) &&
-          p->hasValue(PropNameRy)) {
-        _x = _prop->getValue()->getValue(PropNameX);
-        _y = _prop->getValue()->getValue(PropNameY);
-        _width = _prop->getValue()->getValue(PropNameWidth);
-        _height = _prop->getValue()->getValue(PropNameHeight);
-        _rx = _prop->getValue()->getValue(PropNameRx);
-        _ry = _prop->getValue()->getValue(PropNameRy);
+      } else {
+        if (_prop->hasValue() && _prop->getValue()->getType() == PropType::Object) {
+          auto p = _prop->getValue();
+          if (p->hasValue(PropNameX) &&
+              p->hasValue(PropNameY) &&
+              p->hasValue(PropNameWidth) &&
+              p->hasValue(PropNameHeight) &&
+              p->hasValue(PropNameRx) &&
+              p->hasValue(PropNameRy)) {
+            auto x = _prop->getValue()->getValue(PropNameX);
+            auto y = _prop->getValue()->getValue(PropNameY);
+            auto width = _prop->getValue()->getValue(PropNameWidth);
+            auto height = _prop->getValue()->getValue(PropNameHeight);
+            auto rx = _prop->getValue()->getValue(PropNameRx);
+            auto ry = _prop->getValue()->getValue(PropNameRy);
+            
+            // Update cache from js object value
+            setDerivedValue(SkRRect::MakeRectXY(SkRect::MakeXYWH(x->getAsNumber(),
+                                                                 y->getAsNumber(),
+                                                                 width->getAsNumber(),
+                                                                 height->getAsNumber()),
+                                                rx->getAsNumber(), ry->getAsNumber()));
+          }
+        }
       }
     }
   }
   
 private:
-  std::shared_ptr<JsiValue> _x;
-  std::shared_ptr<JsiValue> _y;
-  std::shared_ptr<JsiValue> _width;
-  std::shared_ptr<JsiValue> _height;
-  std::shared_ptr<JsiValue> _rx;
-  std::shared_ptr<JsiValue> _ry;
   NodeProp* _prop;
 };
 

@@ -38,8 +38,10 @@ public:
           }
         }
       } else if (_pointProp->getValue()->getType() == PropType::Object) {
-        if (_x != nullptr && _y != nullptr) {
-          setDerivedValue(SkPoint::Make(_x->getAsNumber(), _y->getAsNumber()));
+        auto x = _pointProp->getValue()->getValue(PropNameX);
+        auto y = _pointProp->getValue()->getValue(PropNameY);
+        if (x != nullptr && y != nullptr) {
+          setDerivedValue(SkPoint::Make(x->getAsNumber(), y->getAsNumber()));
         }
       }
     } else {
@@ -47,22 +49,8 @@ public:
     }
   }
   
-  void onValueRead() override {
-    DerivedProp::onValueRead();
-    
-    if (_pointProp->hasValue()) {
-      if (_pointProp->getValue()->getType() == PropType::Object) {
-        // Save props for fast access
-        _x = _pointProp->getValue()->getValue(PropNameX);
-        _y = _pointProp->getValue()->getValue(PropNameY);
-      }
-    }
-  }
-  
 private:
   NodeProp* _pointProp;
-  std::shared_ptr<JsiValue> _x;
-  std::shared_ptr<JsiValue> _y;
 };
 
 }
