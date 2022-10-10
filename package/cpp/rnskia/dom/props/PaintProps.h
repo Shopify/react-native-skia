@@ -1,6 +1,8 @@
 #pragma once
 
 #include "NodeProp.h"
+#include "StrokeProps.h"
+
 #include "third_party/CSSColorParser.h"
 #include "JsiSkPaint.h"
 
@@ -74,8 +76,8 @@ public:
     _style = addProperty(std::make_shared<NodeProp>(PropNameStyle));
     _strokeWidth = addProperty(std::make_shared<NodeProp>(PropNameStrokeWidth));
     _blendMode = addProperty(std::make_shared<NodeProp>(PropNameBlendMode));
-    _strokeJoin = addProperty(std::make_shared<NodeProp>(PropNameStrokeJoin));
-    _strokeCap = addProperty(std::make_shared<NodeProp>(PropNameStrokeCap));
+    _strokeJoin = addProperty(std::make_shared<StrokeJoinProp>(PropNameStrokeJoin));
+    _strokeCap = addProperty(std::make_shared<StrokeCapProp>(PropNameStrokeCap));
     _strokeMiter = addProperty(std::make_shared<NodeProp>(PropNameStrokeMiter));
     _antiAlias = addProperty(std::make_shared<NodeProp>(PropNameAntiAlias));
   }
@@ -118,13 +120,11 @@ public:
     }
     // Stroke Join
     if (_strokeJoin->hasValue() && (_strokeJoin->isChanged() || context->isInvalid())) {
-      auto joinValue = _strokeJoin->getValue()->getAsString();
-      context->getMutablePaint()->setStrokeJoin(getJoinFromString(joinValue));
+      context->getMutablePaint()->setStrokeJoin(*_strokeJoin->getDerivedValue());
     }
     // Stroke Cap
     if (_strokeCap->hasValue() && (_strokeCap->isChanged() || context->isInvalid())) {
-      auto capValue = _strokeCap->getValue()->getAsString();
-      context->getMutablePaint()->setStrokeCap(getCapFromString(capValue));
+      context->getMutablePaint()->setStrokeCap(*_strokeCap->getDerivedValue());
     }
     // Stroke Miter
     if (_strokeMiter->hasValue() && (_strokeMiter->isChanged() || context->isInvalid())) {
@@ -228,8 +228,8 @@ private:
   NodeProp* _style;
   NodeProp* _strokeWidth;
   NodeProp* _blendMode;
-  NodeProp* _strokeJoin;
-  NodeProp* _strokeCap;
+  StrokeJoinProp* _strokeJoin;
+  StrokeCapProp* _strokeCap;
   NodeProp* _strokeMiter;
   NodeProp* _antiAlias;
 };

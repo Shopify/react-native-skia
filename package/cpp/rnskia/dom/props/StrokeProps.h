@@ -1,0 +1,72 @@
+#pragma once
+
+#include "DerivedNodeProp.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include <SkPaint.h>
+
+#pragma clang diagnostic pop
+
+namespace RNSkia {
+
+class StrokeCapProp:
+public DerivedProp<SkPaint::Cap> {
+public:
+  StrokeCapProp(PropId name): DerivedProp<SkPaint::Cap>() {
+    _strokeCap = addProperty(std::make_shared<NodeProp>(name));
+  }
+  
+  void updateDerivedValue() override {
+    if (_strokeCap->hasValue() && (_strokeCap->isChanged())) {
+      auto capValue = _strokeCap->getValue()->getAsString();
+      setDerivedValue(getCapFromString(capValue));
+    }
+  }
+  
+private:
+  SkPaint::Cap getCapFromString(const std::string& value) {
+    if (value == "round") {
+      return SkPaint::Cap::kRound_Cap;
+    } else if (value == "butt") {
+      return SkPaint::Cap::kButt_Cap;
+    } else if (value == "square") {
+      return SkPaint::Cap::kSquare_Cap;
+    }
+    throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke cap.");
+  }
+  
+  NodeProp* _strokeCap;
+};
+
+class StrokeJoinProp:
+public DerivedProp<SkPaint::Join> {
+public:
+  StrokeJoinProp(PropId name): DerivedProp<SkPaint::Join>() {
+    _strokeJoin = addProperty(std::make_shared<NodeProp>(name));
+  }
+  
+  void updateDerivedValue() override {
+    if (_strokeJoin->hasValue() && (_strokeJoin->isChanged())) {
+      auto joinValue = _strokeJoin->getValue()->getAsString();
+      setDerivedValue(getJoinFromString(joinValue));
+    }
+  }
+  
+private:
+  SkPaint::Join getJoinFromString(const std::string& value) {
+    if (value == "miter") {
+      return SkPaint::Join::kMiter_Join;
+    } else if (value == "round") {
+      return SkPaint::Join::kRound_Join;
+    } else if (value == "bevel") {
+      return SkPaint::Join::kBevel_Join;
+    }
+    throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke join.");
+  }
+  
+  NodeProp* _strokeJoin;
+};
+
+}
