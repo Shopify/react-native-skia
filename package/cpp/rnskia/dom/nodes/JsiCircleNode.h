@@ -12,13 +12,13 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if (!_circleProp->hasValue() || !_r->hasValue()) {
+    if (!_circleProp->isSet() || !_r->isSet()) {
       throw std::runtime_error("Expected circle node to have a cx, cy or c \
                                and r properties.");
       return;
     }
     context->getCanvas()->drawCircle(*_circleProp->getDerivedValue(),
-                                     _r->getValue()->getAsNumber(),
+                                     _r->value()->getAsNumber(),
                                      *context->getPaint());
   }
   

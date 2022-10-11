@@ -44,26 +44,26 @@ public:
     container->beginVisit(_localContext.get());
     
     // Opacity (paint prop resolves in beginVisit in the PaintProp class)
-    if (_opacityProp->hasValue() && (_opacityProp->isChanged() || _localContext->isInvalid())) {
-      _localContext->setOpacity(_opacityProp->getValue()->getAsNumber());
+    if (_opacityProp->isSet() && (_opacityProp->isChanged() || _localContext->isInvalid())) {
+      _localContext->setOpacity(_opacityProp->value()->getAsNumber());
     }
     
-    auto shouldTransform = _matrixProp->hasValue() || _transformProp->hasValue();
-    auto shouldSave = shouldTransform || _clipProp->hasValue();
+    auto shouldTransform = _matrixProp->isSet() || _transformProp->isSet();
+    auto shouldSave = shouldTransform || _clipProp->isSet();
     
     // Handle matrix/transforms
     if (shouldSave) {
       // Save canvas state
       _localContext->getCanvas()->save();
       
-      if (_originProp->hasValue()) {
+      if (_originProp->isSet()) {
         // Handle origin
         _localContext->getCanvas()->translate(_originProp->getDerivedValue()->x(),
                                               _originProp->getDerivedValue()->y());
       }
       
       if (shouldTransform) {
-        auto matrix = _matrixProp->hasValue() ?
+        auto matrix = _matrixProp->isSet() ?
         _matrixProp->getDerivedValue() : _transformProp->getDerivedValue();
         
         // Concat canvas' matrix with our matrix
@@ -71,12 +71,12 @@ public:
       }
       
       // Clipping
-      if (_clipProp->hasValue()) {
-        auto invert = _invertClip->hasValue() && _invertClip->getValue()->getAsBool();        
+      if (_clipProp->isSet()) {
+        auto invert = _invertClip->isSet() && _invertClip->value()->getAsBool();        
         _clipProp->clip(_localContext->getCanvas(), invert);
       }
       
-      if (_originProp->hasValue()) {
+      if (_originProp->isSet()) {
         // Handle origin
         _localContext->getCanvas()->translate(-_originProp->getDerivedValue()->x(),
                                               -_originProp->getDerivedValue()->y());

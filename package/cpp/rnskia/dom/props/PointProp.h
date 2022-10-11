@@ -23,23 +23,23 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (_pointProp->hasValue()) {
+    if (_pointProp->isSet()) {
       // Check for JsiSkRect and JsiSkPoint
-      if (_pointProp->getValue()->getType() == PropType::HostObject) {
+      if (_pointProp->value()->getType() == PropType::HostObject) {
         // Try reading as point
-        auto ptr = std::dynamic_pointer_cast<JsiSkPoint>(_pointProp->getValue()->getAsHostObject());
+        auto ptr = std::dynamic_pointer_cast<JsiSkPoint>(_pointProp->value()->getAsHostObject());
         if (ptr != nullptr) {
           setDerivedValue(SkPoint::Make(ptr->getObject()->x(), ptr->getObject()->y()));
         } else {
           // Try reading as rect
-          auto ptr = std::dynamic_pointer_cast<JsiSkRect>(_pointProp->getValue()->getAsHostObject());
+          auto ptr = std::dynamic_pointer_cast<JsiSkRect>(_pointProp->value()->getAsHostObject());
           if (ptr != nullptr) {
             setDerivedValue(SkPoint::Make(ptr->getObject()->x(), ptr->getObject()->y()));
           }
         }
-      } else if (_pointProp->getValue()->getType() == PropType::Object) {
-        auto x = _pointProp->getValue()->getValue(PropNameX);
-        auto y = _pointProp->getValue()->getValue(PropNameY);
+      } else if (_pointProp->value()->getType() == PropType::Object) {
+        auto x = _pointProp->value()->getValue(PropNameX);
+        auto y = _pointProp->value()->getValue(PropNameY);
         if (x != nullptr && y != nullptr) {
           setDerivedValue(SkPoint::Make(x->getAsNumber(), y->getAsNumber()));
         }

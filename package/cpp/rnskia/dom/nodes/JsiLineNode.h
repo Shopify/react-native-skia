@@ -15,7 +15,7 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if (!_p1Prop->hasValue() || !_p2Prop->hasValue()) {
+    if (!_p1Prop->isSet() || !_p2Prop->isSet()) {
       throw std::runtime_error("Expected line node to have two points, v1 and v2, in its properties.");
       return;
     }

@@ -12,7 +12,7 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if(!_rectProp->hasValue()) {
+    if(!_rectProp->isSet()) {
       throw std::runtime_error("Expected Rect node to have a rect property or \
                                x, y, width and height properties.");
       return;

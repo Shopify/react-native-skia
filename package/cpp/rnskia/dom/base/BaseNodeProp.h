@@ -19,7 +19,7 @@ public:
   /**
    Use to check if the value represented by this property has a usable (non-null/undefined) value or not.
    */
-  virtual bool hasValue() = 0;
+  virtual bool isSet() = 0;
   
   /**
    True if the property has changed since we last visited it

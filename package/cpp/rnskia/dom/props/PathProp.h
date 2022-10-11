@@ -20,20 +20,20 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (!_pathProp->hasValue()) {
+    if (!_pathProp->isSet()) {
       setDerivedValue(nullptr);
       return;
     }
     
-    if (_pathProp->getValue()->getType() == PropType::HostObject) {
+    if (_pathProp->value()->getType() == PropType::HostObject) {
       // Try reading as Path
-      auto ptr = std::dynamic_pointer_cast<JsiSkPath>(_pathProp->getValue()->getAsHostObject());
+      auto ptr = std::dynamic_pointer_cast<JsiSkPath>(_pathProp->value()->getAsHostObject());
       if (ptr != nullptr) {
         setDerivedValue(ptr->getObject());
       }
-    } else if (_pathProp->getValue()->getType() == PropType::String) {
+    } else if (_pathProp->value()->getType() == PropType::String) {
       // Read as string
-      auto pathString = _pathProp->getValue()->getAsString();
+      auto pathString = _pathProp->value()->getAsString();
       SkPath result;
       
       if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {

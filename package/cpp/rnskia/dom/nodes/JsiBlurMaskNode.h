@@ -24,17 +24,17 @@ public:
 protected:
   void materialize(DrawingContext* context) override {
     if (_blur->isChanged() || _respectCTM->isChanged() || _style->isChanged()) {
-      if (!_blur->hasValue()) {
+      if (!_blur->isSet()) {
         throw std::runtime_error("Expected <BlurMask> component to have a valid blur property.");
       }
       
-      bool respectCTM = _respectCTM->hasValue() ? _respectCTM->getValue()->getAsBool() : true;
+      bool respectCTM = _respectCTM->isSet() ? _respectCTM->value()->getAsBool() : true;
       SkBlurStyle style = SkBlurStyle::kNormal_SkBlurStyle;
-      if (_style->hasValue()) {
-        style = getBlurStyleFromString(_style->getValue()->getAsString());
+      if (_style->isSet()) {
+        style = getBlurStyleFromString(_style->value()->getAsString());
       }
       
-      auto filter = SkMaskFilter::MakeBlur(style, _blur->getValue()->getAsNumber(), respectCTM);
+      auto filter = SkMaskFilter::MakeBlur(style, _blur->value()->getAsNumber(), respectCTM);
       
       // Set the mask filter
       context->getMutablePaint()->setMaskFilter(filter);      

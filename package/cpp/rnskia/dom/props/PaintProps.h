@@ -35,19 +35,19 @@ public:
   }
   
   void beginVisit(DrawingContext *context) override {
-    if (_paintProp->hasValue() && (_paintProp->isChanged() || context->isInvalid())) {
-      if (_paintProp->getValue()->getType() == PropType::HostObject) {
+    if (_paintProp->isSet() && (_paintProp->isChanged() || context->isInvalid())) {
+      if (_paintProp->value()->getType() == PropType::HostObject) {
         // Read paint property as Host Object - JsiSkPaint
-        auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(_paintProp->getValue()->getAsHostObject());
+        auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(_paintProp->value()->getAsHostObject());
         if (ptr != nullptr) {
           // Update the local paint for the current context
           context->setMutablePaint(ptr->getObject());
         } else {
           throw std::runtime_error("Expected SkPaint object, got unknown object when reading paint property.");
         }
-      } else if (_paintProp->getValue()->getType() == PropType::Object) {
+      } else if (_paintProp->value()->getType() == PropType::Object) {
         // We have a JS object - is it a ref?
-        auto ref = _paintProp->getValue()->getValue(PropNameCurrent);
+        auto ref = _paintProp->value()->getValue(PropNameCurrent);
         if (ref->getType() == PropType::HostObject) {
           auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(ref->getAsHostObject());
           if (ptr != nullptr) {
@@ -88,8 +88,8 @@ public:
     
     // Now we can start updating the context
     // We only get here if something has changed - start with COLOR
-    if (_color->hasValue() && (_color->isChanged() || context->isInvalid())) {
-      auto parsedColor = CSSColorParser::parse(_color->getValue()->getAsString());
+    if (_color->isSet() && (_color->isChanged() || context->isInvalid())) {
+      auto parsedColor = CSSColorParser::parse(_color->value()->getAsString());
       if (parsedColor.a == -1.0f) {
         context->getMutablePaint()->setColor(SK_ColorBLACK);
       } else {
@@ -100,8 +100,8 @@ public:
       }
     }
     // Style
-    if (_style->hasValue() && (_style->isChanged() || context->isInvalid())) {
-      auto styleValue = _style->getValue()->getAsString();
+    if (_style->isSet() && (_style->isChanged() || context->isInvalid())) {
+      auto styleValue = _style->value()->getAsString();
       if (styleValue == "stroke") {
         context->getMutablePaint()->setStyle(SkPaint::Style::kStroke_Style);
       } else if (styleValue == "fill") {
@@ -111,28 +111,28 @@ public:
       }
     }
     // Stroke Width
-    if (_strokeWidth->hasValue() && (_strokeWidth->isChanged() || context->isInvalid())) {
-      context->getMutablePaint()->setStrokeWidth(_strokeWidth->getValue()->getAsNumber());
+    if (_strokeWidth->isSet() && (_strokeWidth->isChanged() || context->isInvalid())) {
+      context->getMutablePaint()->setStrokeWidth(_strokeWidth->value()->getAsNumber());
     }
     // Blend mode
-    if (_blendMode->hasValue() && (_blendMode->isChanged() || context->isInvalid())) {
+    if (_blendMode->isSet() && (_blendMode->isChanged() || context->isInvalid())) {
       context->getMutablePaint()->setBlendMode(*_blendMode->getDerivedValue());
     }
     // Stroke Join
-    if (_strokeJoin->hasValue() && (_strokeJoin->isChanged() || context->isInvalid())) {
+    if (_strokeJoin->isSet() && (_strokeJoin->isChanged() || context->isInvalid())) {
       context->getMutablePaint()->setStrokeJoin(*_strokeJoin->getDerivedValue());
     }
     // Stroke Cap
-    if (_strokeCap->hasValue() && (_strokeCap->isChanged() || context->isInvalid())) {
+    if (_strokeCap->isSet() && (_strokeCap->isChanged() || context->isInvalid())) {
       context->getMutablePaint()->setStrokeCap(*_strokeCap->getDerivedValue());
     }
     // Stroke Miter
-    if (_strokeMiter->hasValue() && (_strokeMiter->isChanged() || context->isInvalid())) {
-      context->getMutablePaint()->setStrokeMiter(_strokeMiter->getValue()->getAsNumber());
+    if (_strokeMiter->isSet() && (_strokeMiter->isChanged() || context->isInvalid())) {
+      context->getMutablePaint()->setStrokeMiter(_strokeMiter->value()->getAsNumber());
     }
     // AntiAlias
-    if (_antiAlias->hasValue() && (_antiAlias->isChanged() || context->isInvalid())) {
-      context->getMutablePaint()->setAntiAlias(_antiAlias->getValue()->getAsNumber());
+    if (_antiAlias->isSet() && (_antiAlias->isChanged() || context->isInvalid())) {
+      context->getMutablePaint()->setAntiAlias(_antiAlias->value()->getAsNumber());
     }
   }
 

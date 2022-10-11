@@ -26,10 +26,10 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (_cx->hasValue() && _cy->hasValue()) {
-      setDerivedValue(SkPoint::Make(_cx->getValue()->getAsNumber(),
-                                    _cy->getValue()->getAsNumber()));
-    } else if (_c->hasValue()) {
+    if (_cx->isSet() && _cy->isSet()) {
+      setDerivedValue(SkPoint::Make(_cx->value()->getAsNumber(),
+                                    _cy->value()->getAsNumber()));
+    } else if (_c->isSet()) {
       setDerivedValue(_c->getDerivedValue());
     } 
   }

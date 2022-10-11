@@ -19,8 +19,8 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (_strokeCap->hasValue() && (_strokeCap->isChanged())) {
-      auto capValue = _strokeCap->getValue()->getAsString();
+    if (_strokeCap->isSet() && (_strokeCap->isChanged())) {
+      auto capValue = _strokeCap->value()->getAsString();
       setDerivedValue(getCapFromString(capValue));
     }
   }
@@ -47,8 +47,8 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (_strokeJoin->hasValue() && (_strokeJoin->isChanged())) {
-      auto joinValue = _strokeJoin->getValue()->getAsString();
+    if (_strokeJoin->isSet() && (_strokeJoin->isChanged())) {
+      auto joinValue = _strokeJoin->value()->getAsString();
       setDerivedValue(getJoinFromString(joinValue));
     }
   }

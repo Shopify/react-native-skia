@@ -24,25 +24,25 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (_pathProp->hasValue()) {
+    if (_pathProp->isSet()) {
       _rect = nullptr;
       _rrect = nullptr;
       _path = _pathProp->getDerivedValue();
-    } else if (_rrectProp->hasValue()) {
+    } else if (_rrectProp->isSet()) {
       _rect = nullptr;
       _rrect = _rrectProp->getDerivedValue();
       _path = nullptr;
-    } else if (_rectProp->hasValue()) {
+    } else if (_rectProp->isSet()) {
       _rect = _rectProp->getDerivedValue();
       _rrect = nullptr;
       _path = nullptr;
     }
   }
   
-  bool hasValue() override {
-    return _pathProp->hasValue() ||
-      _rectProp->hasValue() ||
-      _rrectProp->hasValue();
+  bool isSet() override {
+    return _pathProp->isSet() ||
+      _rectProp->isSet() ||
+      _rrectProp->isSet();
   }
   
   void clip(SkCanvas* canvas, bool invert) {

@@ -72,9 +72,9 @@ public:
   /**
    Returns true if one or more of the child props has values
    */
-  virtual bool hasValue() override {
+  virtual bool isSet() override {
     for (auto &prop: _properties) {
-      if (prop->hasValue()) {
+      if (prop->isSet()) {
         return true;
       }
     }
@@ -107,7 +107,7 @@ public:
   /**
    Returns true if is optional and one of the child props has a value, or all props if optional is false.
    */
-  bool hasValue() override {
+  bool isSet() override {
     return _derivedValue != nullptr;
   };
   

@@ -25,13 +25,13 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (!_transformProp->hasValue()) {
+    if (!_transformProp->isSet()) {
       setDerivedValue(nullptr);
       return;
     }
-    if (_transformProp->getValue()->getType() == PropType::Array) {
+    if (_transformProp->value()->getType() == PropType::Array) {
       auto m = std::make_shared<SkMatrix>(SkMatrix());
-      for (auto &el: _transformProp->getValue()->getAsArray()) {
+      for (auto &el: _transformProp->value()->getAsArray()) {
         auto keys = el->getKeys();
         if (keys.size() == 0) {
           throw std::runtime_error("Empty value in transform. Expected translateX, translateY, scale, "
@@ -63,7 +63,7 @@ public:
       setDerivedValue(m);
     } else {
       throw std::runtime_error("Expected array for transform property, got " +
-                               JsiValue::getTypeAsString(_transformProp->getValue()->getType()));
+                               JsiValue::getTypeAsString(_transformProp->value()->getType()));
     }
   }
   

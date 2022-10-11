@@ -28,7 +28,7 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if (!_pathProp->hasValue()) {
+    if (!_pathProp->isSet()) {
       throw std::runtime_error("Expected Path node to have a path property.");
       return;
     }
@@ -36,44 +36,44 @@ protected:
     if (getPropsContainer()->isChanged()) {
       // Can we use the path directly, or do we need to copy to
       // mutate / modify the path?
-      auto hasStartOffset = _startProp->hasValue() && _startProp->getValue()->getAsNumber() != 0.0;
-      auto hasEndOffset = _endProp->hasValue() && _endProp->getValue()->getAsNumber() != 1.0;
-      auto hasFillStyle = _fillTypeProp->hasValue();
-      auto hasStrokeOptions = _strokeOptsProp->hasValue() &&
-        _strokeOptsProp->getValue()->getType() == PropType::Object;
+      auto hasStartOffset = _startProp->isSet() && _startProp->value()->getAsNumber() != 0.0;
+      auto hasEndOffset = _endProp->isSet() && _endProp->value()->getAsNumber() != 1.0;
+      auto hasFillStyle = _fillTypeProp->isSet();
+      auto hasStrokeOptions = _strokeOptsProp->isSet() &&
+        _strokeOptsProp->value()->getType() == PropType::Object;
       
       auto willMutatePath = hasStartOffset || hasEndOffset || hasFillStyle || hasStrokeOptions;
       
       if (willMutatePath) {
         // We'll trim the path
         SkPath filteredPath(*_pathProp->getDerivedValue());
-        auto pe = SkTrimPathEffect::Make(_startProp->getValue()->getAsNumber(),
-                                         _endProp->getValue()->getAsNumber(),
+        auto pe = SkTrimPathEffect::Make(_startProp->value()->getAsNumber(),
+                                         _endProp->value()->getAsNumber(),
                                          SkTrimPathEffect::Mode::kNormal);
         
         if (pe != nullptr) {
           SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
           if (!pe->filterPath(_pathProp->getDerivedValue().get(), filteredPath, &rec, nullptr)) {
             throw std::runtime_error("Failed trimming path with parameters start: " +
-                                     std::to_string(_startProp->getValue()->getAsNumber()) +
-                                     ", end: " + std::to_string(_endProp->getValue()->getAsNumber()));
+                                     std::to_string(_startProp->value()->getAsNumber()) +
+                                     ", end: " + std::to_string(_endProp->value()->getAsNumber()));
           }
           _path = std::make_shared<SkPath>(filteredPath);
         } else {
           throw std::runtime_error("Failed trimming path with parameters start: " +
-                                   std::to_string(_startProp->getValue()->getAsNumber()) +
-                                   ", end: " + std::to_string(_endProp->getValue()->getAsNumber()));
+                                   std::to_string(_startProp->value()->getAsNumber()) +
+                                   ", end: " + std::to_string(_endProp->value()->getAsNumber()));
         }
         
         // Set fill style
-        if (_fillTypeProp->hasValue()) {
-          auto fillType = _fillTypeProp->getValue()->getAsString();
+        if (_fillTypeProp->isSet()) {
+          auto fillType = _fillTypeProp->value()->getAsString();
           _path->setFillType(getFillTypeFromStringValue(fillType));
         }
         
         // do we have a special paint here?
-        if (_strokeOptsProp->hasValue()) {
-          auto opts = _strokeOptsProp->getValue();
+        if (_strokeOptsProp->isSet()) {
+          auto opts = _strokeOptsProp->value();
           SkPaint strokePaint;
           
           if (opts->hasValue(PropNameStrokeCap)) {

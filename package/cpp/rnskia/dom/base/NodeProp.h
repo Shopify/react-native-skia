@@ -41,7 +41,7 @@ public:
   /**
    Returns true if the property is set and is not undefined or null
    */
-  bool hasValue() override {
+  bool isSet() override {
     return _value != nullptr && !_value->isUndefinedOrNull();
   }
   
@@ -75,8 +75,8 @@ public:
   /**
    Return value if set
    */
-  virtual std::shared_ptr<JsiValue> getValue() {
-    assert(hasValue());
+  virtual std::shared_ptr<JsiValue> value() {
+    assert(isSet());
     return _value;
   }
   

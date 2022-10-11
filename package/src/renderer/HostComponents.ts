@@ -82,6 +82,7 @@ declare global {
     CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
     PathNode: (props: PathProps) => RenderNode<PathProps>;
     LineNode: (props: LineProps) => RenderNode<LineProps>;
+    ImageNode: (props: ImageProps) => RenderNode<ImageProps>;
     BlurMaskFilterNode: (
       props: BlurMaskFilterProps
     ) => DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;

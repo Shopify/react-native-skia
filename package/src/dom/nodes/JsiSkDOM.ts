@@ -145,7 +145,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Image(props: ImageProps) {
-    return new ImageNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.ImageNode
+      ? global.SkiaDomApi.ImageNode(props ?? {})
+      : new ImageNode(this.ctx, props);
   }
 
   Circle(props: CircleProps) {

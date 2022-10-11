@@ -15,10 +15,10 @@ public:
   }
   
   void updateDerivedValue() override {
-    if (_matrixProp->hasValue() &&
-        _matrixProp->getValue()->getType() == PropType::HostObject) {
+    if (_matrixProp->isSet() &&
+        _matrixProp->value()->getType() == PropType::HostObject) {
       // Try reading as SkMatrix
-      auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(_matrixProp->getValue()->getAsHostObject());
+      auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(_matrixProp->value()->getAsHostObject());
       if (matrix != nullptr) {
         setDerivedValue(matrix->getObject());
       }
