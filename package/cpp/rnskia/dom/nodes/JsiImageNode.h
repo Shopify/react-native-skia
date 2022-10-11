@@ -1,12 +1,9 @@
 #pragma once
 
 #include "JsiDomDrawingNode.h"
-#include "FitProp.h"
+#include "ImageProps.h"
 
 namespace RNSkia {
-
-static PropId PropNameImage = JsiPropId::get("image");
-static PropId PropNameFit = JsiPropId:: get("fit");
 
 class JsiImageNode : public JsiDomDrawingNode, public JsiDomNodeCtor<JsiImageNode> {
 public:
@@ -15,21 +12,27 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if (!_imageProp->isSet()) {
+    if (!_imageProps->isSet()) {
       throw std::runtime_error("Image property missing for Image node");
     }
-    // TODO: Draw!
+    auto image = _imageProps->getImage();
+    auto rects = _imageProps->getDerivedValue();
+    
+    context->getCanvas()->drawImageRect(image,
+                                        rects->src,
+                                        rects->dst,
+                                        SkSamplingOptions(),
+                                        context->getPaint().get(),
+                                        SkCanvas::kStrict_SrcRectConstraint);
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _imageProp = container->defineProperty(std::make_shared<NodeProp>(PropNameImage));
-    _fitProp = container->defineProperty(std::make_shared<FitProp>(PropNameFit));
+    _imageProps = container->defineProperty(std::make_shared<ImageProps>());
   }
   
 private:
-  NodeProp* _imageProp;
-  FitProp* _fitProp;
+  ImageProps* _imageProps;
 };
 
 }

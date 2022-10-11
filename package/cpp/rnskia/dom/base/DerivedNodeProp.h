@@ -133,4 +133,46 @@ private:
   std::shared_ptr<T> _derivedValue;
 };
 
+/**
+ Class for composing multiple properties into a derived property value
+ */
+template <typename T>
+class DerivedSkProp: public BaseDerivedProp {
+public:
+  DerivedSkProp(): BaseDerivedProp() {}
+  
+  /**
+  Returns the derived value
+   */
+  sk_sp<T> getDerivedValue() { return _derivedValue; }
+  
+  /**
+   Returns true if is optional and one of the child props has a value, or all props if optional is false.
+   */
+  bool isSet() override {
+    return _derivedValue != nullptr;
+  };
+  
+protected:
+  
+  /**
+   Set derived value from sub classes
+   */
+  void setDerivedValue(sk_sp<T> value) {
+    setIsChanged(_derivedValue != value);
+    _derivedValue = value;
+  }
+  
+  /**
+   Set derived value from sub classes
+   */
+  void setDerivedValue(const T&& value) {
+    setIsChanged(true);
+    _derivedValue = sk_make_sp<T>(std::move(value));
+  }
+    
+private:
+  sk_sp<T> _derivedValue;
+};
+
 }
