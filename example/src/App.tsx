@@ -2,6 +2,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
+import type { HeaderBackButtonProps } from "@react-navigation/elements";
+import { HeaderBackButton } from "@react-navigation/elements";
 
 import {
   AnimationExample,
@@ -53,6 +55,10 @@ const linking = {
   prefixes: ["rnskia://"],
 };
 
+const HeaderLeft = (props: HeaderBackButtonProps) => (
+  <HeaderBackButton {...props} testID="back" />
+);
+
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
 
@@ -67,6 +73,7 @@ const App = () => {
             options={{
               title: "🎨 Skia",
               headerTitleAlign: "center",
+              headerLeft: HeaderLeft,
             }}
           />
           <Stack.Screen
