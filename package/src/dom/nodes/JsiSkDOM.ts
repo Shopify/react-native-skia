@@ -173,7 +173,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Oval(props: OvalProps) {
-    return new OvalNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.OvalNode
+      ? global.SkiaDomApi.OvalNode(props ?? {})
+      : new OvalNode(this.ctx, props);
   }
 
   Patch(props: PatchProps) {
@@ -181,7 +183,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Points(props: PointsProps) {
-    return new PointsNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.PointsNode
+      ? global.SkiaDomApi.PointsNode(props ?? {})
+      : new PointsNode(this.ctx, props);
   }
 
   Rect(props: RectProps) {

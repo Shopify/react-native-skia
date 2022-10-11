@@ -3,7 +3,6 @@
 #include "JsiDomDrawingNode.h"
 #include "PathProp.h"
 
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 

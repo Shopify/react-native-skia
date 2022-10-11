@@ -170,7 +170,7 @@ protected:
     setIsChanged(true);
     _derivedValue = sk_make_sp<T>(std::move(value));
   }
-    
+      
 private:
   sk_sp<T> _derivedValue;
 };
