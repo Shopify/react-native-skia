@@ -85,6 +85,7 @@ declare global {
     ImageNode: (props: ImageProps) => RenderNode<ImageProps>;
     OvalNode: (props: OvalProps) => RenderNode<OvalProps>;
     PointsNode: (props: PointsProps) => RenderNode<PointsProps>;
+    DiffRectNode: (props: DiffRectProps) => RenderNode<DiffRectProps>;
     BlurMaskFilterNode: (
       props: BlurMaskFilterProps
     ) => DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;

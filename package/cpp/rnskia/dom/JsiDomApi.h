@@ -14,6 +14,7 @@
 #include "nodes/JsiImageNode.h"
 #include "nodes/JsiOvalNode.h"
 #include "nodes/JsiPointsNode.h"
+#include "nodes/JsiDiffRectNode.h"
 
 #include "nodes/JsiBlurMaskNode.h"
 
@@ -40,6 +41,7 @@ namespace RNSkia
       installFunction("ImageNode", JsiImageNode::createCtor(context));
       installFunction("OvalNode", JsiOvalNode::createCtor(context));
       installFunction("PointsNode", JsiPointsNode::createCtor(context));
+      installFunction("DiffRectNode", JsiDiffRectNode::createCtor(context));
 
       installFunction("GroupNode", JsiGroupNode::createCtor(context));
       

@@ -221,7 +221,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   DiffRect(props: DiffRectProps) {
-    return new DiffRectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.DiffRectNode
+      ? global.SkiaDomApi.DiffRectNode(props)
+      : new DiffRectNode(this.ctx, props);
   }
 
   Picture(props: PictureProps) {
