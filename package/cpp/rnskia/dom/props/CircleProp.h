@@ -26,6 +26,8 @@ public:
   }
   
   void updateDerivedValue() override {
+    // Read in this order since point with x:0/y:0 is default for
+    // the c property.
     if (_cx->isSet() && _cy->isSet()) {
       setDerivedValue(SkPoint::Make(_cx->value()->getAsNumber(),
                                     _cy->value()->getAsNumber()));

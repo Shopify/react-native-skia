@@ -22,7 +22,9 @@ public:
     // Always use the next field since this method is called on the JS thread and
     // we don't want to rip out the underlying value object.
     _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
-    _isChanged = true;    
+    _isChanged = true;
+    // Reset to avoid async update of the underlying value
+    _hasNextValue = false;
   }
   
   /**
@@ -35,6 +37,10 @@ public:
     } else {
       _nextValue->setCurrent(runtime, value);
     }
+    // Set both flags - hasNextValue is only reset when we
+    // swap and read next value, while _isChanged is reset
+    // on every render / visit cycle.
+    _hasNextValue = true;
     _isChanged = true;
   }
   
@@ -57,11 +63,12 @@ public:
    */
   void beginVisit(DrawingContext *context) override {
     std::lock_guard<std::mutex> lock(_swapValuesMutex);
-    // Swap values
-    if (_nextValue != nullptr) {
+    // Swap values - only when there are changes!
+    if (_hasNextValue && _nextValue != nullptr) {
       auto tmp = _value;
       _value = _nextValue;
       _nextValue = tmp;
+      _hasNextValue = false;
     }
   }
   
@@ -91,6 +98,7 @@ private:
   std::shared_ptr<JsiValue> _value;
   std::shared_ptr<JsiValue> _nextValue;
   std::mutex _swapValuesMutex;
+  std::atomic<bool> _hasNextValue = { false };
 };
 
 }

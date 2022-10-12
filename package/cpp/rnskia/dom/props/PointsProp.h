@@ -57,11 +57,12 @@ public:
       points.reserve(pointsArray.size());
       for (size_t i=0; i < pointsArray.size(); ++i) {
         auto p = pointsArray[i];
-        auto ptr = std::dynamic_pointer_cast<JsiSkPoint>(p->getAsHostObject());
-        if (ptr == nullptr) {
+        auto point = PointProp::processValue(p);
+        if (point != EmptyPoint) {
+          points.push_back(point);
+        } else {
           throw std::runtime_error("Expected array of points for points property.");
         }
-        points.push_back(*ptr->getObject().get());
       }
       setDerivedValue(std::move(points));
     } else {
