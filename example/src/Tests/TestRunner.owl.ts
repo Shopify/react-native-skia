@@ -1,23 +1,29 @@
 import { press, takeScreenshot } from "react-native-owl";
 
-describe("Skia API Examples", () => {
-  beforeAll(async () => {
-    await press("API");
-  });
+const mapKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
 
-  it("Shapes", async () => {
-    await press("Shapes");
-    const screen = await takeScreenshot("API_Shapes");
-    expect(screen).toMatchBaseline();
-  });
+const tests = {
+  Tests: ["HelloWorld"],
+  API: ["Shapes", "Images", "PathEffect", "Transform"],
+};
 
-  it("Images", async () => {
-    await press("Images");
-    const screen = await takeScreenshot("API_Images");
-    expect(screen).toMatchBaseline();
-  });
+mapKeys(tests).forEach((id) => {
+  const examples = tests[id];
+  describe(`${id}`, () => {
+    beforeAll(async () => {
+      await press(id);
+    });
 
-  afterAll(async () => {
-    await press("back");
+    examples.forEach((example: string) => {
+      it(`should render ${example}`, async () => {
+        await press(example);
+        const screen = await takeScreenshot(`${id}_${example}`);
+        expect(screen).toMatchBaseline();
+      });
+    });
+
+    afterAll(async () => {
+      await press("back");
+    });
   });
 });

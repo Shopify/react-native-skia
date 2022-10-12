@@ -7,76 +7,8 @@ import type { Routes } from "./Routes";
 
 export const examples = [
   {
-    screen: "Shapes",
-    title: "🔺 Shapes",
-  },
-  {
-    screen: "Images",
-    title: "🏞 Images",
-  },
-  {
-    screen: "Clipping",
-    title: "✂️ & 🎭 Clipping & Masking",
-  },
-  {
-    screen: "Touch",
-    title: "🖱 Touch Handling",
-  },
-  {
-    screen: "PathEffect",
-    title: "⭐️ Path Effect",
-  },
-  {
-    screen: "Transform",
-    title: "🔄 Transformations",
-  },
-  {
-    screen: "ColorFilter",
-    title: "🌃 Color Filters",
-  },
-  {
-    screen: "ImageFilters",
-    title: "💧 Image Filters",
-  },
-  {
-    screen: "Gradients",
-    title: "🌈 Gradients",
-  },
-  {
-    screen: "Path",
-    title: "🥾 Paths",
-  },
-  {
-    screen: "SVG",
-    title: "🖋 SVG",
-  },
-  {
-    screen: "BlendModes",
-    title: "🎨 Blend Modes",
-  },
-  {
-    screen: "Data",
-    title: "📊 Data",
-  },
-  {
-    screen: "PictureView",
-    title: "🖼 Picture View",
-  },
-  {
-    screen: "Picture",
-    title: "🖼 Picture",
-  },
-  {
-    screen: "Checker",
-    title: "🏁 Checker",
-  },
-  {
-    screen: "UseCanvas",
-    title: "↕️ useCanvas()",
-  },
-  {
-    screen: "Reanimated",
-    title: "🐎 Reanimated",
+    screen: "HelloWorld",
+    title: "🟢 Hello World",
   },
 ] as const;
 
