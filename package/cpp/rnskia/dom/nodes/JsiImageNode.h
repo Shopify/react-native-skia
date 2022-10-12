@@ -12,9 +12,8 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if (!_imageProps->isSet()) {
-      throw std::runtime_error("Image property missing for Image node");
-    }
+    requirePropertyToBeSet(_imageProps);
+    
     auto image = _imageProps->getImage();
     auto rects = _imageProps->getDerivedValue();
     

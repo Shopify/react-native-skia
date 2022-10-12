@@ -27,10 +27,7 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if (!_pathProp->isSet()) {
-      throw std::runtime_error("Expected Path node to have a path property.");
-      return;
-    }
+    requirePropertyToBeSet(_pathProp);
     
     if (getPropsContainer()->isChanged()) {
       // Can we use the path directly, or do we need to copy to

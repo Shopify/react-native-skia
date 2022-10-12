@@ -69,6 +69,20 @@ public:
     return prop.get();
   }
   
+  /*
+   Return name of properties in derived prop as a comma separated list
+   */
+  std::string getName() override {
+    std::string v = "";
+    for (size_t i = 0; i<_properties.size(); ++i) {
+      if (i < _properties.size()-1) {
+        v += ", ";
+      }
+      v += _properties[i]->getName();
+    }
+    return v;
+  }
+  
   /**
    Returns true if one or more of the child props has values
    */

@@ -22,9 +22,9 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if (!_pointsProp->isSet() || !_pointModeProp->isSet()) {
-      throw std::runtime_error("Both points and mode must be set for Points node.");
-    }
+    requirePropertyToBeSet(_pointsProp);
+    requirePropertyToBeSet(_pointModeProp);
+    
     auto mode = _pointModeProp->getDerivedValue();
     auto points = _pointsProp->getDerivedValue();
     

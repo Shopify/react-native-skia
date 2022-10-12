@@ -39,7 +39,12 @@ public:
   /**
    Override to read the value represented by this property from the Javascript property object
    */
-  virtual void readValueFromJs (jsi::Runtime &runtime, const ReadPropFunc& read) = 0;  
+  virtual void readValueFromJs (jsi::Runtime &runtime, const ReadPropFunc& read) = 0;
+  
+  /**
+   Returns the name (or names) in a property
+   */
+  virtual std::string getName() = 0;
 };
 
 }

@@ -18,8 +18,7 @@ public:
   
 protected:
   void materialize(DrawingContext* context) override {
-    /* Paint props are materializing itself */
-    
+    /* Paint props are materializing itself */    
     if (_opacityProp->isSet() && (_opacityProp->isChanged() || context->isInvalid())) {
       context->setOpacity(_opacityProp->value()->getAsNumber());
     }

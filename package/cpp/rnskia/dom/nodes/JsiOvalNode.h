@@ -12,11 +12,8 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    if(!_rectProp->isSet()) {
-      throw std::runtime_error("Expected Oval node to have a rect property or \
-                               x, y, width and height properties.");
-      return;
-    }
+    requirePropertyToBeSet(_rectProp);
+    
     context->getCanvas()->drawOval(*_rectProp->getDerivedValue(), *context->getPaint());
   }
   

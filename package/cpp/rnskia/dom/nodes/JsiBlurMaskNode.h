@@ -24,9 +24,8 @@ public:
 protected:
   void materialize(DrawingContext* context) override {
     if (_blur->isChanged() || _respectCTM->isChanged() || _style->isChanged()) {
-      if (!_blur->isSet()) {
-        throw std::runtime_error("Expected <BlurMask> component to have a valid blur property.");
-      }
+      
+      requirePropertyToBeSet(_blur);
       
       bool respectCTM = _respectCTM->isSet() ? _respectCTM->value()->getAsBool() : true;
       SkBlurStyle style = SkBlurStyle::kNormal_SkBlurStyle;

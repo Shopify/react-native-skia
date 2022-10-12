@@ -90,7 +90,7 @@ public:
   /**
    Returns the name of the property
    */
-  PropId getName() { return _name; }
+  std::string getName() override { return std::string(_name); }
   
 private:
   PropId _name;

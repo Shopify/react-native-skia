@@ -266,6 +266,16 @@ protected:
     }
   }
   
+  /**
+   Throws an error with the name of the prop and node if the property is not set
+   */
+  void requirePropertyToBeSet(BaseNodeProp* prop) {
+    if (!prop->isSet()) {
+      throw std::runtime_error("Property \"" + std::string(prop->getName()) + "\"" +
+                               " is missing in the " + getType() + " component.");
+    }
+  }
+  
 private:
   
   std::shared_ptr<RNSkPlatformContext> _context;

@@ -12,11 +12,8 @@ public:
     
 protected:  
   void draw(DrawingContext* context) override {
-    if(!_rrectProp->isSet()) {
-      throw std::runtime_error("Expected Rounded Rect node to have a rrect property or \
-                               x, y, width, height and radius properties.");
-      return;
-    }
+    requirePropertyToBeSet(_rrectProp);
+    
     context->getCanvas()->drawRRect(*_rrectProp->getDerivedValue(), *context->getPaint());
   }
   
