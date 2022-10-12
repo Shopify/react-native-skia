@@ -20,6 +20,7 @@ static PropId PropNameOrigin = JsiPropId::get("origin");
 static PropId PropNameOpacity = JsiPropId::get("opacity");
 static PropId PropNameClip = JsiPropId::get("clip");
 static PropId PropNameInvertClip = JsiPropId::get("invertClip");
+static PropId PropNameLayer = JsiPropId::get("layer");
 
 class JsiDomRenderNode : public JsiDomNode {
 public:
@@ -49,12 +50,31 @@ public:
     }
     
     auto shouldTransform = _matrixProp->isSet() || _transformProp->isSet();
-    auto shouldSave = shouldTransform || _clipProp->isSet();
+    auto shouldSave = shouldTransform || _clipProp->isSet() || _layerProp->isSet();
     
     // Handle matrix/transforms
     if (shouldSave) {
       // Save canvas state
-      _localContext->getCanvas()->save();
+      if (_layerProp->isSet()) {
+        if (_layerProp->value()->getType() == PropType::Bool) {
+          // Just layer with empty bounds
+          _localContext->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(nullptr, nullptr, nullptr, 0));
+        } else if (_layerProp->value()->getType() == PropType::HostObject) {
+          // Check for type, can be either paint or declaration node
+          auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(_layerProp->value()->getAsHostObject());
+          if (ptr != nullptr) {
+            _localContext->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(nullptr,
+                                                                         ptr->getObject().get(),
+                                                                         nullptr,
+                                                                         0));
+          } else {
+            // TODO: Have not found an example of using a declaration node!?
+            throw std::runtime_error("Could not read the layer property of the node.");
+          }
+        }
+      } else {
+        _localContext->getCanvas()->save();
+      }
       
       if (_originProp->isSet()) {
         // Handle origin
@@ -150,6 +170,7 @@ protected:
     _originProp = container->defineProperty(std::make_shared<PointProp>(PropNameOrigin));
     _clipProp = container->defineProperty(std::make_shared<ClipProp>(PropNameClip));
     _invertClip = container->defineProperty(std::make_shared<NodeProp>(PropNameInvertClip));
+    _layerProp = container->defineProperty(std::make_shared<NodeProp>(PropNameLayer));
   }
   
 private:
@@ -159,6 +180,7 @@ private:
   NodeProp* _opacityProp;
   NodeProp* _invertClip;
   ClipProp* _clipProp;
+  NodeProp* _layerProp;
   
   std::shared_ptr<DrawingContext> _localContext;
 };
