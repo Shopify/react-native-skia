@@ -12,23 +12,23 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    requirePropertyToBeSet(_circleProp);
-    requirePropertyToBeSet(_r);
-    
     context->getCanvas()->drawCircle(*_circleProp->getDerivedValue(),
-                                     _r->value()->getAsNumber(),
+                                     _radiusProp->value()->getAsNumber(),
                                      *context->getPaint());
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiDomDrawingNode::defineProperties(container);
     _circleProp = container->defineProperty(std::make_shared<CircleProp>());
-    _r = container->defineProperty(std::make_shared<NodeProp>(PropNameR));
+    _radiusProp = container->defineProperty(std::make_shared<NodeProp>(PropNameR));
+    
+    _circleProp->require();
+    _radiusProp->require();
   }
   
 private:
   CircleProp* _circleProp;
-  NodeProp* _r;
+  NodeProp* _radiusProp;
 };
 
 }

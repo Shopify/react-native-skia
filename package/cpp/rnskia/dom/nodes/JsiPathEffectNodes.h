@@ -13,66 +13,32 @@
 
 namespace RNSkia {
 
-class JsiBasePathEffectNode: public JsiDomDeclarationNode {
+class JsiBasePathEffectNode:
+public JsiDomDeclarationNode<JsiBasePathEffectNode, sk_sp<SkPathEffect>> {
 public:
   JsiBasePathEffectNode(std::shared_ptr<RNSkPlatformContext> context,
                         const char* type) :
-  JsiDomDeclarationNode(context, type) {}
+  JsiDomDeclarationNode<JsiBasePathEffectNode, sk_sp<SkPathEffect>>(context, type) {}
   
-  /**
-   Returns the path effect
-   */
-  sk_sp<SkPathEffect> getPathEffect() {
-    return _effect;
-  }
+  sk_sp<SkPathEffect> getPathEffect() { return getCurrent(); }
   
 protected:
-  /**
-   Validates that only path effect nodes can be children
-   */
-  virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
-    if ( std::dynamic_pointer_cast<JsiBasePathEffectNode>(child) == nullptr) {
-      getContext()->raiseError(std::runtime_error("Cannot add a child of type \"" +
-                                                  std::string(child->getType()) +
-                                                  "\" to a \"" + std::string(getType()) + "\"."));
-    }
-    JsiDomNode::addChild(child);
-  }
-  
-  /**
-   Validates that only path effect nodes can be children
-   */
-  virtual void
-  insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
-    if (std::dynamic_pointer_cast<JsiBasePathEffectNode>(child) == nullptr) {
-      getContext()->raiseError(std::runtime_error("Cannot add a child of type \"" +
-                                                  std::string(child->getType()) +
-                                                  "\" to a \"" + std::string(getType()) + "\"."));
-    }
-    JsiDomNode::insertChildBefore(child, before);
+  void setPathEffect(DrawingContext* context, sk_sp<SkPathEffect> f) {
+    set(context, f);
   }
   
   /**
    Sets or composes the path effect
    */
-  void setPathEffect(DrawingContext* context, sk_sp<SkPathEffect> pathEffect) {
-    _effect = pathEffect;
+  void set(DrawingContext* context, sk_sp<SkPathEffect> pathEffect) override {
     auto paint = context->getMutablePaint();
-    if (paint->getPathEffect() != nullptr) {
+    if (paint->getPathEffect() != nullptr && paint->getPathEffect() != getCurrent().get()) {
       paint->setPathEffect(SkPathEffect::MakeCompose(paint->refPathEffect(), pathEffect));
     } else {
       paint->setPathEffect(pathEffect);
     }
+    setCurrent(pathEffect);
   }
-  
-  /*
-   Clears the cached path effect - does not clear the path effect in paint
-   */
-  void clearCachedPathEffect() {
-    _effect = nullptr;
-  }
-private:
-  sk_sp<SkPathEffect> _effect;
 };
 
 class JsiDashPathEffectNode : public JsiBasePathEffectNode,
@@ -83,9 +49,7 @@ public:
     
 protected:
   void materialize(DrawingContext* context) override {
-    if (_intervals->isChanged() || _phase->isChanged()) {
-      
-      requirePropertyToBeSet(_intervals);      
+    if (isChanged(context)) {
       
       // Phase
       auto phase = _phase->isSet() ? _phase->value()->getAsNumber() : 0;
@@ -107,10 +71,12 @@ protected:
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiDomDeclarationNode::defineProperties(container);
+    JsiBaseDomDeclarationNode::defineProperties(container);
     
     _intervals = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("intervals")));
     _phase = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("phase")));
+    
+    _intervals->require();
   }
   
 private:
@@ -126,13 +92,7 @@ public:
     
 protected:
   void materialize(DrawingContext* context) override {
-    if (_lengthProp->isChanged() ||
-        _deviationProp->isChanged() ||
-        _seedProp->isChanged()) {
-      
-      requirePropertyToBeSet(_lengthProp);
-      requirePropertyToBeSet(_deviationProp);
-      requirePropertyToBeSet(_seedProp);
+    if (isChanged(context)) {
       
       // Create effect
       auto pathEffect = SkDiscretePathEffect::Make(_lengthProp->value()->getAsNumber(),
@@ -144,11 +104,15 @@ protected:
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiDomDeclarationNode::defineProperties(container);
+    JsiBaseDomDeclarationNode::defineProperties(container);
     
     _lengthProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("length")));
     _deviationProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("deviation")));
     _seedProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("seed")));
+    
+    _lengthProp->require();
+    _deviationProp->require();
+    _seedProp->require();
   }
   
 private:
@@ -165,9 +129,7 @@ public:
     
 protected:
   void materialize(DrawingContext* context) override {
-    if (_rProp->isChanged()) {
-      
-      requirePropertyToBeSet(_rProp);
+    if (isChanged(context)) {
       
       // Create effect
       auto pathEffect = SkCornerPathEffect::Make(_rProp->value()->getAsNumber());
@@ -177,9 +139,10 @@ protected:
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiDomDeclarationNode::defineProperties(container);
+    JsiBaseDomDeclarationNode::defineProperties(container);
     
     _rProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("r")));
+    _rProp->require();
   }
   
 private:
@@ -194,15 +157,7 @@ public:
     
 protected:
   void materialize(DrawingContext* context) override {
-    if (_phaseProp->isChanged() ||
-        _advanceProp->isChanged() ||
-        _pathProp->isChanged() ||
-        _styleProp->isChanged()) {
-      
-      requirePropertyToBeSet(_phaseProp);
-      requirePropertyToBeSet(_advanceProp);
-      requirePropertyToBeSet(_pathProp);
-      requirePropertyToBeSet(_styleProp);
+    if (isChanged(context)) {
       
       // Create effect
       auto pathEffect = SkPath1DPathEffect::Make(*_pathProp->getDerivedValue(),
@@ -215,12 +170,17 @@ protected:
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiDomDeclarationNode::defineProperties(container);
+    JsiBaseDomDeclarationNode::defineProperties(container);
     
     _phaseProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("phase")));
     _advanceProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("advance")));
     _pathProp = container->defineProperty(std::make_shared<PathProp>(JsiPropId::get("path")));
     _styleProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("style")));
+    
+    _phaseProp->require();
+    _advanceProp->require();
+    _pathProp->require();
+    _styleProp->require();
   }
   
 private:
@@ -250,10 +210,7 @@ public:
     
 protected:
   void materialize(DrawingContext* context) override {
-    if (_matrixProp->isChanged() || _pathProp->isChanged()) {
-      
-      requirePropertyToBeSet(_matrixProp);
-      requirePropertyToBeSet(_pathProp);
+    if (isChanged(context)) {
       
       // Create effect
       auto pathEffect = SkPath2DPathEffect::Make(*_matrixProp->getDerivedValue(),
@@ -264,10 +221,13 @@ protected:
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiDomDeclarationNode::defineProperties(container);
+    JsiBaseDomDeclarationNode::defineProperties(container);
     
     _matrixProp = container->defineProperty(std::make_shared<MatrixProp>(JsiPropId::get("matrix")));
     _pathProp = container->defineProperty(std::make_shared<PathProp>(JsiPropId::get("path")));
+    
+    _matrixProp->require();
+    _pathProp->require();
   }
   
 private:
@@ -283,10 +243,7 @@ public:
     
 protected:
   void materialize(DrawingContext* context) override {
-    if (_matrixProp->isChanged() || _widthProp->isChanged()) {
-      
-      requirePropertyToBeSet(_matrixProp);
-      requirePropertyToBeSet(_widthProp);
+    if (isChanged(context)) {
       
       // Create effect
       auto pathEffect = SkLine2DPathEffect::Make(_widthProp->value()->getAsNumber(),
@@ -297,10 +254,13 @@ protected:
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiDomDeclarationNode::defineProperties(container);
+    JsiBaseDomDeclarationNode::defineProperties(container);
     
     _matrixProp = container->defineProperty(std::make_shared<MatrixProp>(JsiPropId::get("matrix")));
     _widthProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("width")));
+    
+    _matrixProp->require();
+    _widthProp->require();
   }
   
 private:
@@ -315,36 +275,12 @@ public:
   JsiBasePathEffectNode(context, "skSumPathEffect") {}
     
 protected:
-  void addChild(std::shared_ptr<JsiDomNode> child) override {
-    JsiBasePathEffectNode::addChild(child);
-    clearCachedPathEffect();
-  }
-  
-  /**
-   Validates that only path effect nodes can be children
-   */
-  void
-  insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
-    JsiBasePathEffectNode::insertChildBefore(child, before);
-    clearCachedPathEffect();
-  }
-  
-  void removeChild(std::shared_ptr<JsiDomNode> child) override {
-    JsiDomNode::removeChild(child);
-    clearCachedPathEffect();
-  }
-  
   void materialize(DrawingContext* context) override {
-    if (getPathEffect() == nullptr) {
-      auto first = std::dynamic_pointer_cast<JsiBasePathEffectNode>(getChildren()[0]);
-      auto second = std::dynamic_pointer_cast<JsiBasePathEffectNode>(getChildren()[1]);
-      
-      if (first == nullptr || second == nullptr) {
-        throw std::runtime_error("Sum path effect needs two child nodes.");
-      }
-      
-      setPathEffect(context, SkPathEffect::MakeSum(first->getPathEffect(),
-                                                   second->getPathEffect()));
+    if (isChanged(context)) {
+      auto inner = requireChild(0);
+      auto outer = requireChild(1);
+      setPathEffect(context, SkPathEffect::MakeSum(inner->getPathEffect(),
+                                                   outer->getPathEffect()));
     }
   }
 };

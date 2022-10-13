@@ -144,6 +144,12 @@ public:
     return _hostObject;
   }
   
+  template <typename T>
+  std::shared_ptr<T> getAs() {
+    assert(_type == PropType::HostObject);
+    return std::dynamic_pointer_cast<T>(_hostObject);
+  }
+  
   const jsi::HostFunctionType getAsHostFunction() {
     assert(_type == PropType::HostFunction);
     return _hostFunction;

@@ -3,6 +3,7 @@
 #include "NodeProp.h"
 #include "StrokeProps.h"
 #include "BlendModeProp.h"
+#include "ColorProp.h"
 
 #include "third_party/CSSColorParser.h"
 #include "JsiSkPaint.h"
@@ -16,22 +17,10 @@
 
 namespace RNSkia {
 
-static PropId PropNameColor = JsiPropId::get("color");
-static PropId PropNameStyle = JsiPropId::get("style");
-static PropId PropNameStrokeWidth = JsiPropId::get("strokeWidth");
-static PropId PropNameBlendMode = JsiPropId::get("blendMode");
-static PropId PropNameStrokeJoin = JsiPropId::get("strokeJoin");
-static PropId PropNameStrokeCap = JsiPropId::get("strokeCap");
-static PropId PropNameStrokeMiter = JsiPropId::get("strokeMiter");
-static PropId PropNameAntiAlias = JsiPropId::get("antiAlias");
-
-static PropId PropNamePaint = JsiPropId::get("paint");
-static PropId PropNameCurrent = JsiPropId::get("current");
-
 class PaintProp: public BaseDerivedProp {
 public:
   PaintProp(): BaseDerivedProp() {
-    _paintProp = addProperty(std::make_shared<NodeProp>(PropNamePaint));
+    _paintProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("paint")));
   }
   
   void beginVisit(DrawingContext *context) override {
@@ -47,7 +36,7 @@ public:
         }
       } else if (_paintProp->value()->getType() == PropType::Object) {
         // We have a JS object - is it a ref?
-        auto ref = _paintProp->value()->getValue(PropNameCurrent);
+        auto ref = _paintProp->value()->getValue(JsiPropId::get("current"));
         if (ref->getType() == PropType::HostObject) {
           auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(ref->getAsHostObject());
           if (ptr != nullptr) {
@@ -73,14 +62,14 @@ class PaintProps:
 public BaseDerivedProp {
 public:
   PaintProps(): BaseDerivedProp() {
-    _color = addProperty(std::make_shared<NodeProp>(PropNameColor));
-    _style = addProperty(std::make_shared<NodeProp>(PropNameStyle));
-    _strokeWidth = addProperty(std::make_shared<NodeProp>(PropNameStrokeWidth));
-    _blendMode = addProperty(std::make_shared<BlendModeProp>(PropNameBlendMode));
-    _strokeJoin = addProperty(std::make_shared<StrokeJoinProp>(PropNameStrokeJoin));
-    _strokeCap = addProperty(std::make_shared<StrokeCapProp>(PropNameStrokeCap));
-    _strokeMiter = addProperty(std::make_shared<NodeProp>(PropNameStrokeMiter));
-    _antiAlias = addProperty(std::make_shared<NodeProp>(PropNameAntiAlias));
+    _color = addProperty(std::make_shared<ColorProp>(JsiPropId::get("color")));
+    _style = addProperty(std::make_shared<NodeProp>(JsiPropId::get("style")));
+    _strokeWidth = addProperty(std::make_shared<NodeProp>(JsiPropId::get("strokeWidth")));
+    _blendMode = addProperty(std::make_shared<BlendModeProp>(JsiPropId::get("blendMode")));
+    _strokeJoin = addProperty(std::make_shared<StrokeJoinProp>(JsiPropId::get("strokeJoin")));
+    _strokeCap = addProperty(std::make_shared<StrokeCapProp>(JsiPropId::get("strokeCap")));
+    _strokeMiter = addProperty(std::make_shared<NodeProp>(JsiPropId::get("strokeMiter")));
+    _antiAlias = addProperty(std::make_shared<NodeProp>(JsiPropId::get("antiAlias")));
   }
   
   void beginVisit(DrawingContext* context) override {
@@ -89,15 +78,7 @@ public:
     // Now we can start updating the context
     // We only get here if something has changed - start with COLOR
     if (_color->isSet() && (_color->isChanged() || context->isInvalid())) {
-      auto parsedColor = CSSColorParser::parse(_color->value()->getAsString());
-      if (parsedColor.a == -1.0f) {
-        context->getMutablePaint()->setColor(SK_ColorBLACK);
-      } else {
-        context->getMutablePaint()->setColor(SkColorSetARGB(parsedColor.a * 255,                                                   
-                                                            parsedColor.r,
-                                                            parsedColor.g,
-                                                            parsedColor.b));
-      }
+      context->getMutablePaint()->setColor(*_color->getDerivedValue());
     }
     // Style
     if (_style->isSet() && (_style->isChanged() || context->isInvalid())) {
@@ -137,7 +118,7 @@ public:
   }
 
 private:
-  NodeProp* _color;
+  ColorProp* _color;
   NodeProp* _style;
   NodeProp* _strokeWidth;
   BlendModeProp* _blendMode;

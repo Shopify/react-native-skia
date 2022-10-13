@@ -1,6 +1,7 @@
 #pragma once
 
-#define SKIA_DOM_DEBUG 1
+/* Enable output of dom trees and paint contexts */
+#define SKIA_DOM_DEBUG 0
 
 #include "JsiHostObject.h"
 
@@ -21,6 +22,7 @@
 #include "nodes/JsiBlurMaskNode.h"
 
 #include "nodes/JsiPathEffectNodes.h"
+#include "nodes/JsiImageFilterNodes.h"
 
 #include "nodes/JsiPaintNode.h"
 
@@ -37,6 +39,7 @@ namespace RNSkia
     {
       installFunction("DependencyManager", JsiDependencyManager::createCtor(context));
       
+      // Shapes
       installFunction("RectNode", JsiRectNode::createCtor(context));
       installFunction("RRectNode", JsiRRectNode::createCtor(context));
       installFunction("CircleNode", JsiCircleNode::createCtor(context));
@@ -61,6 +64,15 @@ namespace RNSkia
       installFunction("Path2DPathEffectNode", JsiPath2DPathEffectNode::createCtor(context));
       installFunction("Line2DPathEffectNode", JsiLine2DPathEffectNode::createCtor(context));
       installFunction("SumPathEffectNode", JsiSumPathEffectNode::createCtor(context));
+      
+      // Image filters
+      installFunction("DashPathEffectNode", JsiBlendImageFilterNode::createCtor(context));
+      installFunction("DropShadowImageFilterNode", JsiDropShadowImageFilterNode::createCtor(context));
+      installFunction("DisplacementMapImageFilterNode", JsiDisplacementMapImageFilterNode::createCtor(context));
+      installFunction("BlurImageFilterNode", JsiBlurImageFilterNode::createCtor(context));
+      installFunction("OffsetImageFilterNode", JsiOffsetImageFilterNode::createCtor(context));
+      installFunction("MorphologyImageFilterNode", JsiMorphologyImageFilterNode::createCtor(context));
+      installFunction("RuntimeShaderImageFilterNode", JsiRuntimeShaderImageFilterNode::createCtor(context));
       
       installFunction("FillNode", JsiFillNode::createCtor(context));
     }

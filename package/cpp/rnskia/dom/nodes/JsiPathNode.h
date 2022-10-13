@@ -27,8 +27,6 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    requirePropertyToBeSet(_pathProp);
-    
     if (getPropsContainer()->isChanged()) {
       // Can we use the path directly, or do we need to copy to
       // mutate / modify the path?
@@ -72,14 +70,14 @@ protected:
           auto opts = _strokeOptsProp->value();
           SkPaint strokePaint;
           
-          if (opts->hasValue(PropNameStrokeCap)) {
+          if (opts->hasValue(JsiPropId::get("strokeCap"))) {
             strokePaint.setStrokeCap(StrokeCapProp::getCapFromString(
-              opts->getValue(PropNameStrokeCap)->getAsString()));
+              opts->getValue(JsiPropId::get("strokeCap"))->getAsString()));
           }
           
-          if (opts->hasValue(PropNameStrokeJoin)) {
+          if (opts->hasValue(JsiPropId::get("strokeJoin"))) {
             strokePaint.setStrokeJoin(StrokeJoinProp::getJoinFromString(
-              opts->getValue(PropNameStrokeJoin)->getAsString()));
+              opts->getValue(JsiPropId::get("strokeJoin"))->getAsString()));
           }
                    
           if (opts->hasValue(PropNameWidth)) {
@@ -120,6 +118,8 @@ protected:
     _endProp = container->defineProperty(std::make_shared<NodeProp>(PropNameEnd));
     _fillTypeProp = container->defineProperty(std::make_shared<NodeProp>(PropNameFillType));
     _strokeOptsProp = container->defineProperty(std::make_shared<NodeProp>(PropNameStroke));
+    
+    _pathProp->require();
   }
   
 private:

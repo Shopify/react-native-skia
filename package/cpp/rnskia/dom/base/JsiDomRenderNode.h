@@ -12,8 +12,6 @@
 #include "RRectProp.h"
 #include "ClipProp.h"
 
-#include "JsiDomDeclarationNode.h"
-
 namespace RNSkia {
 
 static PropId PropNameOrigin = JsiPropId::get("origin");
@@ -46,7 +44,7 @@ public:
     // by visiting nodes we ensure that all updates and changes has been
     // read and handled for properties. This is also (with the symmetric endVisit)
     // how we handle changed properties to avoid updating unecessarily.
-    container->beginVisit(_localContext.get());
+    container->beginVisit(_localContext.get(), getType());
     
     // Opacity (paint prop resolves in beginVisit in the PaintProp class)
     if (_opacityProp->isSet() && (_opacityProp->isChanged() || _localContext->isInvalid())) {
@@ -157,12 +155,43 @@ protected:
       }
       
       // Try node as declaration node
-      auto declarationNode = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
+      auto declarationNode = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
       if (declarationNode != nullptr) {
         declarationNode->materializeNode(context);
       }
     }
   };
+  
+  /**
+   Removes a child
+   */
+  virtual void removeChild(std::shared_ptr<JsiDomNode> child) override {
+    JsiDomNode::removeChild(child);
+    if (_localContext != nullptr) {
+      _localContext->invalidate();
+    }
+  }
+  
+  /**
+   Validates that only declaration nodes can be children
+   */
+  virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
+    JsiDomNode::addChild(child);
+    if (_localContext != nullptr) {
+      _localContext->invalidate();
+    }
+  }
+  
+  /**
+   Validates that only declaration nodes can be children
+   */
+  virtual void
+  insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
+    JsiDomNode::insertChildBefore(child, before);
+    if (_localContext != nullptr) {
+      _localContext->invalidate();
+    }
+  }
   
   /**
    Define common properties for all render nodes

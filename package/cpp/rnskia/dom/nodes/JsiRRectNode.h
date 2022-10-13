@@ -12,8 +12,6 @@ public:
     
 protected:  
   void draw(DrawingContext* context) override {
-    requirePropertyToBeSet(_rrectProp);
-    
     context->getCanvas()->drawRRect(*_rrectProp->getDerivedValue(), *context->getPaint());
   }
   
@@ -21,6 +19,7 @@ protected:
     JsiDomDrawingNode::defineProperties(container);
     
     _rrectProp = container->defineProperty(std::make_shared<RRectProps>(PropNameRect));
+    _rrectProp->require();
   }
   
 private:

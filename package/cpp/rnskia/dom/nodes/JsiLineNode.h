@@ -15,9 +15,6 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    requirePropertyToBeSet(_p1Prop);
-    requirePropertyToBeSet(_p2Prop);
-    
     context->getCanvas()->drawLine(_p1Prop->getDerivedValue()->x(),
                                    _p1Prop->getDerivedValue()->y(),
                                    _p2Prop->getDerivedValue()->x(),
@@ -29,6 +26,9 @@ protected:
     JsiDomDrawingNode::defineProperties(container);
     _p1Prop = container->defineProperty(std::make_shared<PointProp>(PropNamePoint1));
     _p2Prop = container->defineProperty(std::make_shared<PointProp>(PropNamePoint2));
+    
+    _p1Prop->require();
+    _p2Prop->require();
   }
   
 private:

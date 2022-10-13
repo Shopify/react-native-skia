@@ -287,16 +287,6 @@ protected:
     }
   }
   
-  /**
-   Throws an error with the name of the prop and node if the property is not set
-   */
-  void requirePropertyToBeSet(BaseNodeProp* prop) {
-    if (!prop->isSet()) {
-      throw std::runtime_error("Property \"" + std::string(prop->getName()) + "\"" +
-                               " is missing in the " + getType() + " component.");
-    }
-  }
-  
 #ifdef SKIA_DOM_DEBUG
   void setLevel(size_t level) {
     _level = level;
@@ -306,6 +296,7 @@ protected:
     return std::string((_level + indentation) * 3, ' ');
   }
 #endif
+  
 private:
   const char* _type;
   std::shared_ptr<RNSkPlatformContext> _context;

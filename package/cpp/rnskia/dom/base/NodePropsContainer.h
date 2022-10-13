@@ -45,9 +45,13 @@ public:
   /**
    Updates any props that has changes waiting, updates props that have derived values
    */
-  void beginVisit(DrawingContext* context) {
+  void beginVisit(DrawingContext* context, PropId componentType) {
     for (auto &prop: _properties) {
       prop->beginVisit(context);
+      if (!prop->isSet() && prop->isRequired()) {
+        throw std::runtime_error("Missing required property \"" + std::string(prop->getName()) + "\"" +
+                                 " is missing in the " + componentType + " component.");
+      }
     }
   }
   

@@ -14,19 +14,18 @@ public:
   JsiDomDrawingNode(context, "skDiffRect") {}
 protected:
   void draw(DrawingContext* context) override {
-    requirePropertyToBeSet(_innerRectProp);
-    requirePropertyToBeSet(_outerRectProp);
-    
-    auto inner = _innerRectProp->getDerivedValue();
-    auto outer = _outerRectProp->getDerivedValue();
-    
-    context->getCanvas()->drawDRRect(*outer, *inner, *context->getPaint());
+    context->getCanvas()->drawDRRect(*_outerRectProp->getDerivedValue(),
+                                     *_innerRectProp->getDerivedValue(),
+                                     *context->getPaint());
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiDomDrawingNode::defineProperties(container);
     _innerRectProp = container->defineProperty(std::make_shared<RRectProp>(PropNameInner));
     _outerRectProp = container->defineProperty(std::make_shared<RRectProp>(PropNameOuter));
+    
+    _innerRectProp->require();
+    _outerRectProp->require();
   }
 private:
   RRectProp* _innerRectProp;

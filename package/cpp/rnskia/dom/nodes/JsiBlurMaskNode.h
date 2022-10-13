@@ -13,19 +13,14 @@
 
 namespace RNSkia {
 
-static PropId PropNameRespectCTM = JsiPropId::get("respectCTM");
-static PropId PropNameBlur = JsiPropId::get("blur");
-
-class JsiBlurMaskNode : public JsiDomDeclarationNode, public JsiDomNodeCtor<JsiBlurMaskNode> {
+class JsiBlurMaskNode : public JsiBaseDomDeclarationNode, public JsiDomNodeCtor<JsiBlurMaskNode> {
 public:
   JsiBlurMaskNode(std::shared_ptr<RNSkPlatformContext> context) :
-  JsiDomDeclarationNode(context, "skBlurMaskFilter") {}
+  JsiBaseDomDeclarationNode(context, "skBlurMaskFilter") {}
     
 protected:
   void materialize(DrawingContext* context) override {
-    if (_blur->isChanged() || _respectCTM->isChanged() || _style->isChanged()) {
-      
-      requirePropertyToBeSet(_blur);
+    if (context->isInvalid() || getPropsContainer()->isChanged()) {
       
       bool respectCTM = _respectCTM->isSet() ? _respectCTM->value()->getAsBool() : true;
       SkBlurStyle style = SkBlurStyle::kNormal_SkBlurStyle;
@@ -41,11 +36,13 @@ protected:
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiDomDeclarationNode::defineProperties(container);
+    JsiBaseDomDeclarationNode::defineProperties(container);
     
-    _style = container->defineProperty(std::make_shared<NodeProp>(PropNameStyle));
-    _respectCTM = container->defineProperty(std::make_shared<NodeProp>(PropNameRespectCTM));
-    _blur = container->defineProperty(std::make_shared<NodeProp>(PropNameBlur));
+    _style = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("style")));
+    _respectCTM = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("respectCTM")));
+    _blur = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("blur")));
+    
+    _blur->require();
   }
   
 private:

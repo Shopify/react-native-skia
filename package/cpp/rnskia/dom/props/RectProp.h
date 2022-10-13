@@ -56,7 +56,7 @@ public:
         }
       }
     }
-  }
+  }  
   
 private:
   NodeProp* _prop;

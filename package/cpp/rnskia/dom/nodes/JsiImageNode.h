@@ -12,12 +12,8 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    requirePropertyToBeSet(_imageProps);
-    
-    auto image = _imageProps->getImage();
     auto rects = _imageProps->getDerivedValue();
-    
-    context->getCanvas()->drawImageRect(image,
+    context->getCanvas()->drawImageRect(_imageProps->getImage(),
                                         rects->src,
                                         rects->dst,
                                         SkSamplingOptions(),
@@ -28,6 +24,7 @@ protected:
   void defineProperties(NodePropsContainer* container) override {
     JsiDomDrawingNode::defineProperties(container);
     _imageProps = container->defineProperty(std::make_shared<ImageProps>());
+    _imageProps->require();
   }
   
 private:

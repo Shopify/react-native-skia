@@ -243,31 +243,45 @@ export class JsiSkDOM implements SkDOM {
 
   // ImageFilters
   BlendImageFilter(props: BlendImageFilterProps) {
-    return new BlendImageFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.BlendImageFilterNode
+      ? global.SkiaDomApi.BlendImageFilterNode(props)
+      : new BlendImageFilterNode(this.ctx, props);
   }
 
   DropShadowImageFilter(props: DropShadowImageFilterProps) {
-    return new DropShadowImageFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.DropShadowImageFilterNode
+      ? global.SkiaDomApi.DropShadowImageFilterNode(props)
+      : new DropShadowImageFilterNode(this.ctx, props);
   }
 
   DisplacementMapImageFilter(props: DisplacementMapImageFilterProps) {
-    return new DisplacementMapImageFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.DisplacementMapImageFilterNode
+      ? global.SkiaDomApi.DisplacementMapImageFilterNode(props)
+      : new DisplacementMapImageFilterNode(this.ctx, props);
   }
 
   BlurImageFilter(props: BlurImageFilterProps) {
-    return new BlurImageFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.BlurImageFilterNode
+      ? global.SkiaDomApi.BlurImageFilterNode(props)
+      : new BlurImageFilterNode(this.ctx, props);
   }
 
   OffsetImageFilter(props: OffsetImageFilterProps) {
-    return new OffsetImageFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.OffsetImageFilterNode
+      ? global.SkiaDomApi.OffsetImageFilterNode(props)
+      : new OffsetImageFilterNode(this.ctx, props);
   }
 
   MorphologyImageFilter(props: MorphologyImageFilterProps) {
-    return new MorphologyImageFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.MorphologyImageFilterNode
+      ? global.SkiaDomApi.MorphologyImageFilterNode(props)
+      : new MorphologyImageFilterNode(this.ctx, props);
   }
 
   RuntimeShaderImageFilter(props: RuntimeShaderImageFilterProps) {
-    return new RuntimeShaderImageFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.RuntimeShaderImageFilterNode
+      ? global.SkiaDomApi.RuntimeShaderImageFilterNode(props)
+      : new RuntimeShaderImageFilterNode(this.ctx, props);
   }
 
   // Color Filters

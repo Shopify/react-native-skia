@@ -57,6 +57,7 @@ import type {
 } from "../dom/types/ImageFilters";
 import type { PaintNode } from "../dom/nodes/PaintNode";
 import type {
+  SkImageFilter,
   SkMaskFilter,
   SkPaint,
   SkPathEffect,
@@ -92,9 +93,12 @@ declare global {
     OvalNode: (props: OvalProps) => RenderNode<OvalProps>;
     PointsNode: (props: PointsProps) => RenderNode<PointsProps>;
     DiffRectNode: (props: DiffRectProps) => RenderNode<DiffRectProps>;
+    // Mask filters
     BlurMaskFilterNode: (
       props: BlurMaskFilterProps
     ) => DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
+
+    // Path effects
     DashPathEffectNode: (
       props: DashPathEffectProps
     ) => DeclarationNode<DashPathEffectProps, SkPathEffect>;
@@ -114,6 +118,29 @@ declare global {
       props: Line2DPathEffectProps
     ) => DeclarationNode<Line2DPathEffectProps, SkPathEffect>;
     SumPathEffectNode: () => DeclarationNode<null, SkPathEffect>;
+
+    // Image filters
+    BlendImageFilterNode: (
+      props: BlendImageFilterProps
+    ) => DeclarationNode<BlendImageFilterProps, SkImageFilter>;
+    DropShadowImageFilterNode: (
+      props: DropShadowImageFilterProps
+    ) => DeclarationNode<DropShadowImageFilterProps, SkImageFilter>;
+    DisplacementMapImageFilterNode: (
+      props: DisplacementMapImageFilterProps
+    ) => DeclarationNode<DisplacementMapImageFilterProps, SkImageFilter>;
+    BlurImageFilterNode: (
+      props: BlurImageFilterProps
+    ) => DeclarationNode<BlurImageFilterProps, SkImageFilter>;
+    OffsetImageFilterNode: (
+      props: OffsetImageFilterProps
+    ) => DeclarationNode<OffsetImageFilterProps, SkImageFilter>;
+    MorphologyImageFilterNode: (
+      props: MorphologyImageFilterProps
+    ) => DeclarationNode<MorphologyImageFilterProps, SkImageFilter>;
+    RuntimeShaderImageFilterNode: (
+      props: RuntimeShaderImageFilterProps
+    ) => DeclarationNode<RuntimeShaderImageFilterProps, SkImageFilter>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

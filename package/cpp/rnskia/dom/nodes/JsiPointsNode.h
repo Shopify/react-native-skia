@@ -22,9 +22,6 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    requirePropertyToBeSet(_pointsProp);
-    requirePropertyToBeSet(_pointModeProp);
-    
     auto mode = _pointModeProp->getDerivedValue();
     auto points = _pointsProp->getDerivedValue();
     
@@ -35,6 +32,9 @@ protected:
     JsiDomDrawingNode::defineProperties(container);
     _pointModeProp = container->defineProperty(std::make_shared<PointModeProp>(PropNamePointsMode));
     _pointsProp = container->defineProperty(std::make_shared<PointsProp>(PropNamePoints));
+    
+    _pointsProp->require();
+    _pointModeProp->require();
   }
   
 private:

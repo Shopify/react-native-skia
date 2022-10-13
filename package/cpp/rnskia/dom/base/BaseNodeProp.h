@@ -45,6 +45,30 @@ public:
    Returns the name (or names) in a property
    */
   virtual std::string getName() = 0;
+  
+  /**
+   Sets the property as required
+   */
+  void require() {
+    _isRequired = true;
+  }
+  
+  /**
+   Sets the property as optional
+   */
+  void optional() {
+    _isRequired = false;
+  }
+  
+  /**
+   Returns true for required props
+   */
+  bool isRequired() {
+    return _isRequired;
+  }
+  
+private:
+  bool _isRequired = false;
 };
 
 }
