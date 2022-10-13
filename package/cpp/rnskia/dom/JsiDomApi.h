@@ -1,5 +1,7 @@
 #pragma once
 
+#define SKIA_DOM_DEBUG 1
+
 #include "JsiHostObject.h"
 
 #include "base/JsiDependencyManager.h"
@@ -17,6 +19,8 @@
 #include "nodes/JsiDiffRectNode.h"
 
 #include "nodes/JsiBlurMaskNode.h"
+
+#include "nodes/JsiPathEffectNodes.h"
 
 #include "nodes/JsiPaintNode.h"
 
@@ -48,6 +52,15 @@ namespace RNSkia
       installFunction("PaintNode", JsiPaintNode::createCtor(context));
       
       installFunction("BlurMaskFilterNode", JsiBlurMaskNode::createCtor(context));
+      
+      // Path effects
+      installFunction("DashPathEffectNode", JsiDashPathEffectNode::createCtor(context));
+      installFunction("DiscretePathEffectNode", JsiDiscretePathEffectNode::createCtor(context));
+      installFunction("CornerPathEffectNode", JsiCornerPathEffectNode::createCtor(context));
+      installFunction("Path1DPathEffectNode", JsiPath1DPathEffectNode::createCtor(context));
+      installFunction("Path2DPathEffectNode", JsiPath2DPathEffectNode::createCtor(context));
+      installFunction("Line2DPathEffectNode", JsiLine2DPathEffectNode::createCtor(context));
+      installFunction("SumPathEffectNode", JsiSumPathEffectNode::createCtor(context));
       
       installFunction("FillNode", JsiFillNode::createCtor(context));
     }

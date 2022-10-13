@@ -11,11 +11,7 @@ public JsiDomNodeCtor<JsiPaintNode> {
 public:
   JsiPaintNode(std::shared_ptr <RNSkPlatformContext> context) :
     JsiDomDeclarationNode(context, "skPaint") {}
-  
-  void materializeNode(DrawingContext* context) override {
-    JsiDomDeclarationNode::materializeNode(context);
-  }
-  
+
 protected:
   void materialize(DrawingContext* context) override {
     /* Paint props are materializing itself */    

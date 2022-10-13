@@ -56,7 +56,13 @@ import type {
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
 import type { PaintNode } from "../dom/nodes/PaintNode";
-import type { SkMaskFilter, SkPaint, SkRect, SkRRect } from "../skia";
+import type {
+  SkMaskFilter,
+  SkPaint,
+  SkPathEffect,
+  SkRect,
+  SkRRect,
+} from "../skia";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
 
 import type { Container } from "./Container";
@@ -89,6 +95,25 @@ declare global {
     BlurMaskFilterNode: (
       props: BlurMaskFilterProps
     ) => DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
+    DashPathEffectNode: (
+      props: DashPathEffectProps
+    ) => DeclarationNode<DashPathEffectProps, SkPathEffect>;
+    DiscretePathEffectNode: (
+      props: DiscretePathEffectProps
+    ) => DeclarationNode<DiscretePathEffectProps, SkPathEffect>;
+    CornerPathEffectNode: (
+      props: CornerPathEffectProps
+    ) => DeclarationNode<CornerPathEffectProps, SkPathEffect>;
+    Path1DPathEffectNode: (
+      props: Path1DPathEffectProps
+    ) => DeclarationNode<Path1DPathEffectProps, SkPathEffect>;
+    Path2DPathEffectNode: (
+      props: Path2DPathEffectProps
+    ) => DeclarationNode<Path2DPathEffectProps, SkPathEffect>;
+    Line2DPathEffectNode: (
+      props: Line2DPathEffectProps
+    ) => DeclarationNode<Line2DPathEffectProps, SkPathEffect>;
+    SumPathEffectNode: () => DeclarationNode<null, SkPathEffect>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

@@ -37,6 +37,14 @@ public:
       container->beginVisit(context);
     }
     
+    // Materialize children
+    for (auto &child: getChildren()) {
+      auto decl = std::dynamic_pointer_cast<JsiDomDeclarationNode>(child);
+      if (decl != nullptr) {
+        decl->materializeNode(context);
+      }
+    }
+    
     // Now we are ready to materialize
     materialize(context);
 

@@ -27,8 +27,12 @@ public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
                    const char* type) : JsiDomNode(context, type) {}
   
-  void render(DrawingContext* context) {    
-    // RNSkLogger::logToConsole("Render node %s", getType());
+  void render(DrawingContext* context) {
+#if SKIA_DOM_DEBUG
+    RNSkLogger::logToConsole("%sRendering node %s",
+                             getLevelIndentation().c_str(),
+                             getType());
+#endif
     
     // Ensure we have a local context
     if (_localContext == nullptr) {
@@ -114,7 +118,11 @@ public:
     // Mark container as done
     container->endVisit();
     
-    // RNSkLogger::logToConsole("End rendering node %s", getType());
+#if SKIA_DOM_DEBUG
+    RNSkLogger::logToConsole("%sEnd rendering node %s",
+                             getLevelIndentation().c_str(),
+                             getType());
+#endif
   };
   
   /**

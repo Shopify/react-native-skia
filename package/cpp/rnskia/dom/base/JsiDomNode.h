@@ -54,7 +54,11 @@ public:
    JS-function for setting the properties from the JS reconciler on the node.
    */
   JSI_HOST_FUNCTION(setProps) {
-    setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
+    if (count == 1) {
+      setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
+    } else {
+      setEmptyProps();
+    }
     return jsi::Value::undefined();
   }
   
@@ -191,6 +195,17 @@ protected:
   };
   
   /**
+   Sets empty props
+   */
+  void setEmptyProps() {
+    if (_propsContainer == nullptr) {
+      
+      // Initialize properties container
+      _propsContainer = std::make_shared<NodePropsContainer>();
+    }
+  }
+  
+  /**
    Returns all child JsiDomNodes for this node.
    */
   const std::vector<std::shared_ptr<JsiDomNode>> &getChildren() {
@@ -204,6 +219,9 @@ protected:
   virtual void addChild(std::shared_ptr<JsiDomNode> child) {
     std::lock_guard<std::mutex> lock(_childrenLock);
     _children.push_back(child);
+#ifdef SKIA_DOM_DEBUG
+    child->setLevel(_level + 1);
+#endif
   }
   
   /**
@@ -214,6 +232,9 @@ protected:
     auto position = std::find(_children.begin(), _children.end(), before);
     std::lock_guard<std::mutex> lock(_childrenLock);
     _children.insert(position, child);
+#ifdef SKIA_DOM_DEBUG
+    child->setLevel(_level + 1);
+#endif
   }
   
   /**
@@ -276,15 +297,31 @@ protected:
     }
   }
   
-private:
+#ifdef SKIA_DOM_DEBUG
+  void setLevel(size_t level) {
+    _level = level;
+  }
   
-  std::shared_ptr<RNSkPlatformContext> _context;
-  std::vector<std::shared_ptr<JsiDomNode>> _children;
-  std::shared_ptr<NodePropsContainer> _propsContainer;
+  std::string getLevelIndentation(size_t indentation = 0) {
+    return std::string((_level + indentation) * 3, ' ');
+  }
+#endif
+private:
   const char* _type;
+  std::shared_ptr<RNSkPlatformContext> _context;
+  
+  std::shared_ptr<NodePropsContainer> _propsContainer;
+    
   std::function<void()> _disposeCallback;
+  
+  std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::mutex _childrenLock;
+  
   std::atomic<bool> _isDisposed = { false };
+  
+#ifdef SKIA_DOM_DEBUG
+  size_t _level = 0;
+#endif
 };
 
 }

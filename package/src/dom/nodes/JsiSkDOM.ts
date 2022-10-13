@@ -334,31 +334,45 @@ export class JsiSkDOM implements SkDOM {
 
   // Path Effects
   CornerPathEffect(props: CornerPathEffectProps) {
-    return new CornerPathEffectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.CornerPathEffectNode
+      ? global.SkiaDomApi.CornerPathEffectNode(props)
+      : new CornerPathEffectNode(this.ctx, props);
   }
 
   DiscretePathEffect(props: DiscretePathEffectProps) {
-    return new DiscretePathEffectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.DiscretePathEffectNode
+      ? global.SkiaDomApi.DiscretePathEffectNode(props)
+      : new DiscretePathEffectNode(this.ctx, props);
   }
 
   DashPathEffect(props: DashPathEffectProps) {
-    return new DashPathEffectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.DashPathEffectNode
+      ? global.SkiaDomApi.DashPathEffectNode(props)
+      : new DashPathEffectNode(this.ctx, props);
   }
 
   Path1DPathEffect(props: Path1DPathEffectProps) {
-    return new Path1DPathEffectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.Path1DPathEffectNode
+      ? global.SkiaDomApi.Path1DPathEffectNode(props)
+      : new Path1DPathEffectNode(this.ctx, props);
   }
 
   Path2DPathEffect(props: Path2DPathEffectProps) {
-    return new Path2DPathEffectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.Path2DPathEffectNode
+      ? global.SkiaDomApi.Path2DPathEffectNode(props)
+      : new Path2DPathEffectNode(this.ctx, props);
   }
 
   SumPathEffect() {
-    return new SumPathEffectNode(this.ctx);
+    return global.SkiaDomApi && global.SkiaDomApi.SumPathEffectNode
+      ? global.SkiaDomApi.SumPathEffectNode()
+      : new SumPathEffectNode(this.ctx);
   }
 
   Line2DPathEffect(props: Line2DPathEffectProps) {
-    return new Line2DPathEffectNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.Line2DPathEffectNode
+      ? global.SkiaDomApi.Line2DPathEffectNode(props)
+      : new Line2DPathEffectNode(this.ctx, props);
   }
 
   Blend(props: BlendProps) {

@@ -39,6 +39,9 @@ protected:
          }
      */
     JsiDomRenderNode::renderNode(context);
+#if SKIA_DOM_DEBUG
+    RNSkLogger::logToConsole("%s%s", getLevelIndentation(2).c_str(), context->getDebugDescription().c_str());
+#endif
     draw(context);
   }
 };

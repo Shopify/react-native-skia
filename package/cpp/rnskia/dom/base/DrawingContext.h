@@ -39,14 +39,9 @@ public:
     return result;
   }
   
-  void print_debug_description() {
-    std::string v = "";
-    DrawingContext* cur = _parent;
-    while (cur != nullptr) {
-      v += "  ";
-      cur = cur->_parent;
-    }
-    v = v + "ctx for " + std::string(_source) + ":";
+  std::string getDebugDescription() {
+#if SKIA_DOM_DEBUG
+    std::string v = "ctx for " + std::string(_source) + ":";
     
     if (!isInvalid()) {
       auto clr = _paint->getColor();
@@ -67,13 +62,21 @@ public:
       if (blendMode != SkBlendMode::kSrc) {
         v += " blendMode:" + std::to_string((size_t)blendMode);        
       }
+      
+      v += " opacity:" + std::to_string(_opacity);
+      if (_paint->getPathEffect() != nullptr) {
+        v += " [PathEffect]";
+      }
     } else {
-      v += " empty (inherits from parent)";
+      v = v + "[inherited] " + (_parent != nullptr ? _parent->getDebugDescription() : "");
     }
     
     v = v + "\n";
     
-    RNSkLogger::logToConsole(v);    
+    return v;
+#else
+    return "";
+#endif
   }
   
   /**
@@ -145,8 +148,10 @@ public:
     if (_paint == nullptr) {
       _paint = std::make_shared<SkPaint>(*_parent->getPaint());
     }
-    // Calling this accessor implies that the paint is about to be mutatet and will therefore invalidate
-    // any child contexts to pick up changes from this context as the parent context.
+    // Calling the getMutablePaint accessor implies that the paint
+    // is about to be mutatet and will therefore invalidate
+    // any child contexts to pick up changes from this context as
+    // the parent context.
     invalidateChildren();
     return _paint;
   }
@@ -193,7 +198,7 @@ private:
   }
   
   std::shared_ptr<SkPaint> _paint;
-  double _opacity;
+  double _opacity = 1.0f;
   
   SkCanvas *_canvas = nullptr;
   const char* _source;
