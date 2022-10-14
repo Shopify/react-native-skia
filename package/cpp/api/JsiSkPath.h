@@ -22,6 +22,9 @@
 #include <SkStrokeRec.h>
 #include <SkTextUtils.h>
 #include <SkTrimPathEffect.h>
+#include <SkString.h>
+
+#include "JsiSkMatrix.h"
 
 #pragma clang diagnostic pop
 

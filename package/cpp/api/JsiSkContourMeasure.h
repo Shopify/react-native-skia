@@ -12,6 +12,8 @@
 
 #include <SkContourMeasure.h>
 
+#include "JsiSkPath.h"
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {

@@ -12,6 +12,8 @@
 
 #include <SkRRect.h>
 
+#include "JsiSkRect.h"
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
