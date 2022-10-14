@@ -57,6 +57,7 @@ import type {
 } from "../dom/types/ImageFilters";
 import type { PaintNode } from "../dom/nodes/PaintNode";
 import type {
+  SkColorFilter,
   SkImageFilter,
   SkMaskFilter,
   SkPaint,
@@ -141,6 +142,26 @@ declare global {
     RuntimeShaderImageFilterNode: (
       props: RuntimeShaderImageFilterProps
     ) => DeclarationNode<RuntimeShaderImageFilterProps, SkImageFilter>;
+
+    // Color filters
+    MatrixColorFilterNode: (
+      props: MatrixColorFilterProps
+    ) => DeclarationNode<MatrixColorFilterProps, SkColorFilter>;
+    BlendColorFilterNode: (
+      props: BlendColorFilterProps
+    ) => DeclarationNode<BlendColorFilterProps, SkColorFilter>;
+    LinearToSRGBGammaColorFilterNode: () => DeclarationNode<
+      null,
+      SkColorFilter
+    >;
+    SRGBToLinearGammaColorFilterNode: () => DeclarationNode<
+      null,
+      SkColorFilter
+    >;
+    LumaColorFilterNode: () => DeclarationNode<null, SkColorFilter>;
+    LerpColorNode: (
+      props: LerpColorFilterProps
+    ) => DeclarationNode<LerpColorFilterProps, SkColorFilter>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

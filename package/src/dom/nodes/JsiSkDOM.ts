@@ -286,27 +286,41 @@ export class JsiSkDOM implements SkDOM {
 
   // Color Filters
   MatrixColorFilter(props: MatrixColorFilterProps) {
-    return new MatrixColorFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.MatrixColorFilterNode
+      ? global.SkiaDomApi.MatrixColorFilterNode(props)
+      : new MatrixColorFilterNode(this.ctx, props);
   }
 
   BlendColorFilter(props: BlendColorFilterProps) {
-    return new BlendColorFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.BlendColorFilterNode
+      ? global.SkiaDomApi.BlendColorFilterNode(props)
+      : new BlendColorFilterNode(this.ctx, props);
   }
 
   LumaColorFilter() {
-    return new LumaColorFilterNode(this.ctx);
+    return global.SkiaDomApi && global.SkiaDomApi.LumaColorFilterNode
+      ? global.SkiaDomApi.LumaColorFilterNode()
+      : new LumaColorFilterNode(this.ctx);
   }
 
   LinearToSRGBGammaColorFilter() {
-    return new LinearToSRGBGammaColorFilterNode(this.ctx);
+    return global.SkiaDomApi &&
+      global.SkiaDomApi.LinearToSRGBGammaColorFilterNode
+      ? global.SkiaDomApi.LinearToSRGBGammaColorFilterNode()
+      : new LinearToSRGBGammaColorFilterNode(this.ctx);
   }
 
   SRGBToLinearGammaColorFilter() {
-    return new SRGBToLinearGammaColorFilterNode(this.ctx);
+    return global.SkiaDomApi &&
+      global.SkiaDomApi.SRGBToLinearGammaColorFilterNode
+      ? global.SkiaDomApi.SRGBToLinearGammaColorFilterNode()
+      : new SRGBToLinearGammaColorFilterNode(this.ctx);
   }
 
   LerpColorFilter(props: LerpColorFilterProps) {
-    return new LerpColorFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.LerpColorNode
+      ? global.SkiaDomApi.LerpColorNode(props)
+      : new LerpColorFilterNode(this.ctx, props);
   }
 
   // Shaders

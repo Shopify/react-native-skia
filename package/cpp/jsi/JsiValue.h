@@ -105,53 +105,73 @@ public:
   }
   
   bool getAsBool() const {
-    assert(_type == PropType::Bool);
+    if (_type != PropType::Bool) {
+      throw std::runtime_error("Expected type bool, got " + getTypeAsString(_type));
+    }
     return _boolValue;
   }
   
   double getAsNumber() const {
-    assert(_type == PropType::Number);
+    if (_type != PropType::Number) {
+      throw std::runtime_error("Expected type number, got " + getTypeAsString(_type));
+    }
     return _numberValue;
   }
   
   const std::string& getAsString() const {
-    assert(_type == PropType::String);
+    if (_type != PropType::String) {
+      throw std::runtime_error("Expected type string, got " + getTypeAsString(_type));
+    }
     return _stringValue;
   }
   
   const std::vector<std::shared_ptr<JsiValue>>& getAsArray() {
-    assert(_type == PropType::Array);
+    if (_type != PropType::Array) {
+      throw std::runtime_error("Expected type array, got " + getTypeAsString(_type));
+    }
     return _array;
   }
   
   std::shared_ptr<JsiValue> getValue(PropId name) {
-    assert(_type == PropType::Object);
+    if (_type != PropType::Object) {
+      throw std::runtime_error("Expected type object, got " + getTypeAsString(_type));
+    }
     return _props.at(name);
   }
   
   bool hasValue(PropId name) {
-    assert(_type == PropType::Object);
+    if (_type != PropType::Object) {
+      throw std::runtime_error("Expected type object, got " + getTypeAsString(_type));
+    }
     return _props.count(name) > 0;
   }
   
   std::vector<PropId> getKeys() {
-    assert(_type == PropType::Object);
+    if (_type != PropType::Object) {
+      throw std::runtime_error("Expected type object, got " + getTypeAsString(_type));
+    }
     return _keysCache;
   }
   
   std::shared_ptr<jsi::HostObject> getAsHostObject() {
-    assert(_type == PropType::HostObject);
+    if (_type != PropType::HostObject) {
+      throw std::runtime_error("Expected type host object, got " + getTypeAsString(_type));
+    }
     return _hostObject;
   }
   
   template <typename T>
   std::shared_ptr<T> getAs() {
-    assert(_type == PropType::HostObject);
+    if (_type != PropType::HostObject) {
+      throw std::runtime_error("Expected type host object, got " + getTypeAsString(_type));
+    }
     return std::dynamic_pointer_cast<T>(_hostObject);
   }
   
   const jsi::HostFunctionType getAsHostFunction() {
-    assert(_type == PropType::HostFunction);
+    if (_type != PropType::HostFunction) {
+      throw std::runtime_error("Expected type host function, got " + getTypeAsString(_type));
+    }
     return _hostFunction;
   }
   

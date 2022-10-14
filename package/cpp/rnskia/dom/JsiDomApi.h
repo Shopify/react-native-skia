@@ -23,6 +23,7 @@
 
 #include "nodes/JsiPathEffectNodes.h"
 #include "nodes/JsiImageFilterNodes.h"
+#include "nodes/JsiColorFilterNodes.h"
 
 #include "nodes/JsiPaintNode.h"
 
@@ -73,6 +74,15 @@ namespace RNSkia
       installFunction("OffsetImageFilterNode", JsiOffsetImageFilterNode::createCtor(context));
       installFunction("MorphologyImageFilterNode", JsiMorphologyImageFilterNode::createCtor(context));
       installFunction("RuntimeShaderImageFilterNode", JsiRuntimeShaderImageFilterNode::createCtor(context));
+      
+      // Color Filters
+      installFunction("MatrixColorFilterNode", JsiMatrixColorFilterNode::createCtor(context));
+      installFunction("BlendColorFilterNode", JsiBlendColorFilterNode::createCtor(context));
+      installFunction("LinearToSRGBGammaColorFilterNode", JsiLinearToSRGBGammaColorFilterNode::createCtor(context));
+      installFunction("SRGBToLinearGammaColorFilterNode", JsiSRGBToLinearGammaColorFilterNode::createCtor(context));
+      installFunction("LumaColorFilterNode", JsiLumaColorFilterNode::createCtor(context));
+      installFunction("LerpColorFilterNode", JsiLerpColorFilterNode::createCtor(context));
+      
       
       installFunction("FillNode", JsiFillNode::createCtor(context));
     }
