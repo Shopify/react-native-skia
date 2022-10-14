@@ -15,7 +15,6 @@
 
 #pragma clang diagnostic pop
 
-
 namespace RNSkia {
 
 using namespace facebook;

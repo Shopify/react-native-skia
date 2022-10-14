@@ -3,9 +3,9 @@
 #include <jsi/jsi.h>
 
 #include <functional>
-#include <unordered_map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #define STR_CAT_NX(A, B) A##B
 #define STR_CAT(A, B) STR_CAT_NX(A, B)
@@ -44,7 +44,7 @@
  */
 #define JSI_EXPORT_FUNC(CLASS, FUNCTION)                                       \
   {                                                                            \
-#FUNCTION, (jsi::Value(JsiHostObject::*)(                                      \
+#FUNCTION, (jsi::Value(JsiHostObject::*)(                                  \
                    jsi::Runtime & runtime, const jsi::Value &thisValue,        \
                    const jsi::Value *arguments, size_t)) &                     \
                    CLASS::FUNCTION                                             \
@@ -64,7 +64,7 @@
  */
 #define JSI_EXPORT_PROP_GET(CLASS, FUNCTION)                                   \
   {                                                                            \
-#FUNCTION, (jsi::Value(JsiHostObject::*)(jsi::Runtime & runtime)) &            \
+#FUNCTION, (jsi::Value(JsiHostObject::*)(jsi::Runtime & runtime)) &        \
                    CLASS::STR_CAT(STR_GET, FUNCTION)                           \
   }
 
@@ -73,16 +73,16 @@
  */
 #define JSI_EXPORT_PROPERTY_GETTERS(...)                                       \
   const JsiPropertyGettersMap &getExportedPropertyGettersMap() override {      \
-  static JsiPropertyGettersMap map = {__VA_ARGS__};                            \
-  return map;                                                                  \
-}
+    static JsiPropertyGettersMap map = {__VA_ARGS__};                          \
+    return map;                                                                \
+  }
 
 /**
  * Creates a JSI export setter declaration
  */
 #define JSI_EXPORT_PROP_SET(CLASS, FUNCTION)                                   \
   {                                                                            \
-#FUNCTION,                                                                     \
+#FUNCTION,                                                                 \
         (void(JsiHostObject::*)(jsi::Runtime & runtime, const jsi::Value &)) & \
             CLASS::STR_CAT(STR_SET, FUNCTION)                                  \
   }
@@ -107,14 +107,18 @@ using JsPropertyType = struct {
 
 class JsiHostObject;
 
-using JsiFunctionMap = std::unordered_map<std::string,
-  jsi::Value (JsiHostObject::*)(jsi::Runtime &, const jsi::Value &, const jsi::Value *, size_t)>;
+using JsiFunctionMap =
+    std::unordered_map<std::string, jsi::Value (JsiHostObject::*)(
+                                        jsi::Runtime &, const jsi::Value &,
+                                        const jsi::Value *, size_t)>;
 
-using JsiPropertyGettersMap = std::unordered_map<std::string,
-  jsi::Value (JsiHostObject::*)(jsi::Runtime &)>;
+using JsiPropertyGettersMap =
+    std::unordered_map<std::string,
+                       jsi::Value (JsiHostObject::*)(jsi::Runtime &)>;
 
-using JsiPropertySettersMap = std::unordered_map<std::string,
-  void (JsiHostObject::*)(jsi::Runtime &, const jsi::Value &)>;
+using JsiPropertySettersMap =
+    std::unordered_map<std::string, void (JsiHostObject::*)(
+                                        jsi::Runtime &, const jsi::Value &)>;
 
 using JsiHostFunctionCache =
     std::unordered_map<std::string, std::unique_ptr<jsi::Function>>;

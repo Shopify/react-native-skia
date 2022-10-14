@@ -33,7 +33,7 @@ JsiHostObject::~JsiHostObject() {
 
 void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,
                         const jsi::Value &value) {
-  
+
   auto nameVal = name.utf8(rt);
   auto nameStr = nameVal.c_str();
 
@@ -56,7 +56,7 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
                               const jsi::PropNameID &name) {
   auto nameVal = name.utf8(runtime);
   auto nameStr = nameVal.c_str();
-  
+
   // Check the static getters map
   const JsiPropertyGettersMap &getters = getExportedPropertyGettersMap();
   auto getter = getters.find(nameStr);
@@ -115,16 +115,17 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 std::vector<jsi::PropNameID>
 JsiHostObject::getPropertyNames(jsi::Runtime &runtime) {
   // statically exported functions
-  const auto& funcs = getExportedFunctionMap();
+  const auto &funcs = getExportedFunctionMap();
 
   // Statically exported property getters
-  const auto& getters = getExportedPropertyGettersMap();
+  const auto &getters = getExportedPropertyGettersMap();
 
   // Statically exported property setters
-  const auto& setters = getExportedPropertySettersMap();
+  const auto &setters = getExportedPropertySettersMap();
 
   std::vector<jsi::PropNameID> propNames;
-  propNames.reserve(funcs.size() + getters.size() + setters.size() + _funcMap.size() + _propMap.size());
+  propNames.reserve(funcs.size() + getters.size() + setters.size() +
+                    _funcMap.size() + _propMap.size());
 
   for (auto it = funcs.cbegin(); it != funcs.cend(); ++it) {
     propNames.push_back(jsi::PropNameID::forAscii(runtime, it->first));
