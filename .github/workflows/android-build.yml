@@ -5,7 +5,7 @@ on:
     paths:
       - 'package/android/**'
       - 'package/cpp/**'
-      - 'Example/package.json'
+      - 'example/package.json'
 
 jobs:
   build:

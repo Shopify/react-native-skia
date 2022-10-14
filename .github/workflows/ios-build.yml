@@ -4,7 +4,7 @@ on:
     paths:
       - 'package/ios/**'
       - 'package/cpp/**'
-      - 'Example/package.json'
+      - 'example/package.json'
 
 jobs:
   build:
