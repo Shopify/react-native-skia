@@ -13,9 +13,7 @@ using ms = duration<float, std::milli>;
 
 class RNSkTimingInfo {
 public:
-  RNSkTimingInfo(const std::string &name): _name(std::move(name)) {
-    reset();
-  }
+  RNSkTimingInfo(const std::string &name) : _name(std::move(name)) { reset(); }
 
   ~RNSkTimingInfo() {}
 
@@ -28,24 +26,21 @@ public:
     _lastFrameCount = -1;
     _didSkip = false;
   }
-  
-  void beginTiming() {
-    _start = high_resolution_clock::now();
-  }
-  
+
+  void beginTiming() { _start = high_resolution_clock::now(); }
+
   void stopTiming() {
     time_point<steady_clock> stop = high_resolution_clock::now();
     addLastDuration(duration_cast<milliseconds>(stop - _start).count());
     tick(stop);
-    if(_didSkip) {
+    if (_didSkip) {
       _didSkip = false;
-      RNSkLogger::logToConsole("%s: Skipped frame. Previous frame time: %lldms", _name.c_str(), _lastDuration);
+      RNSkLogger::logToConsole("%s: Skipped frame. Previous frame time: %lldms",
+                               _name.c_str(), _lastDuration);
     }
   }
 
-  void markSkipped() {
-    _didSkip = true;
-  }
+  void markSkipped() { _didSkip = true; }
 
   long getAverage() { return static_cast<long>(_average); }
   long getFps() { return _lastFrameCount; }
@@ -72,20 +67,19 @@ public:
   }
 
 private:
-  
   void tick(time_point<steady_clock> now) {
     auto ms = duration_cast<milliseconds>(now.time_since_epoch()).count();
-    
-    if(_prevFpsTimer == -1) {
+
+    if (_prevFpsTimer == -1) {
       _prevFpsTimer = ms;
-    } else if(ms - _prevFpsTimer >= 1000) {
+    } else if (ms - _prevFpsTimer >= 1000) {
       _lastFrameCount = _frameCount;
       _prevFpsTimer = ms;
       _frameCount = 0;
     }
     _frameCount++;
   }
-  
+
   double _lastTimeStamp;
   long _lastDurations[NUMBER_OF_DURATION_SAMPLES];
   int _lastDurationIndex;

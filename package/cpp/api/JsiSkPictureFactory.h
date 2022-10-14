@@ -2,15 +2,15 @@
 #pragma once
 
 #include "JsiSkColorFilter.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkData.h"
+#include "JsiSkHostObjects.h"
 #include "JsiSkPicture.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPicture.h>
 #include <SkData.h>
+#include <SkPicture.h>
 
 #pragma clang diagnostic pop
 
@@ -21,21 +21,21 @@ using namespace facebook;
 class JsiSkPictureFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakePicture) {
-    if(!arguments[0].isObject()) {
+    if (!arguments[0].isObject()) {
       throw jsi::JSError(runtime, "Expected arraybuffer as first parameter");
     }
     auto array = arguments[0].asObject(runtime);
-    jsi::ArrayBuffer buffer = array
-            .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+    jsi::ArrayBuffer buffer =
+        array.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
             .asObject(runtime)
             .getArrayBuffer(runtime);
 
-    sk_sp<SkData> data = SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
+    sk_sp<SkData> data =
+        SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
     auto picture = SkPicture::MakeFromData(data.get());
-    if(picture != nullptr) {
+    if (picture != nullptr) {
       return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiSkPicture>(getContext(), picture));
+          runtime, std::make_shared<JsiSkPicture>(getContext(), picture));
     } else {
       return jsi::Value::undefined();
     }
