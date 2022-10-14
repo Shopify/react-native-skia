@@ -19,10 +19,10 @@
 #include <SkPath.h>
 #include <SkPathOps.h>
 #include <SkPathTypes.h>
+#include <SkString.h>
 #include <SkStrokeRec.h>
 #include <SkTextUtils.h>
 #include <SkTrimPathEffect.h>
-#include <SkString.h>
 
 #include "JsiSkMatrix.h"
 
