@@ -2,10 +2,13 @@
 
 #include "JsiDomDeclarationNode.h"
 #include "JsiSkRuntimeEffect.h"
+#include "JsiShaderNodes.h"
+#include "JsiColorFilterNodes.h"
 
 #include "NodeProp.h"
 #include "RadiusProp.h"
 #include "UniformsProp.h"
+#include "TileModeProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -24,6 +27,21 @@ public:
   JsiDomDeclarationNode<JsiBaseImageFilterNode, sk_sp<SkImageFilter>>(context, type) {}
   
 protected:
+  sk_sp<SkImageFilter> resolve(std::shared_ptr<JsiDomNode> child) override {
+    auto imageFilterPtr = std::dynamic_pointer_cast<JsiBaseImageFilterNode>(child);
+    if (imageFilterPtr) {
+      return imageFilterPtr->getCurrent();
+    }
+    auto shaderPtr = std::dynamic_pointer_cast<JsiBaseShaderNode>(child);
+    if (shaderPtr) {
+      return SkImageFilters::Shader(shaderPtr->getCurrent());
+    }
+    auto colorFilterPtr = std::dynamic_pointer_cast<JsiBaseColorFilterNode>(child);
+    if (colorFilterPtr) {
+      return SkImageFilters::ColorFilter(colorFilterPtr->getCurrent(), nullptr);
+    }
+    return nullptr;
+  }
   
   void setImageFilter(DrawingContext* context, sk_sp<SkImageFilter> f) {
     set(context, f);
@@ -57,8 +75,8 @@ protected:
         throw std::runtime_error("Blend image filter needs two child nodes.");
       }
       
-      auto background = requireChild(0)->getCurrent();
-      auto foreground = requireChild(1)->getCurrent();
+      auto background = requireChild(0);
+      auto foreground = requireChild(1);
       
       SkBlendMode blendMode = *_blendModeProp->getDerivedValue();
       setImageFilter(context, SkImageFilters::Blend(blendMode, background, foreground));
@@ -101,13 +119,13 @@ protected:
         auto f3 = SkImageFilters::Blur(blur, blur, SkTileMode::kDecal, f2);
         auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, srcAlpha, f3);
         
-        setImageFilter(context, SkImageFilters::Compose(input ? input->getCurrent() : nullptr,
+        setImageFilter(context, SkImageFilters::Compose(input ? input : nullptr,
                                                         SkImageFilters::Blend(SkBlendMode::kSrcOver, srcGraphic, f4)));
         
       } else {
         setImageFilter(context, shadowOnly ?
-                       SkImageFilters::DropShadowOnly(dx, dy, blur, blur, *color, input ? input->getCurrent() : nullptr) :
-                       SkImageFilters::DropShadow(dx, dy, blur, blur, *color, input ? input->getCurrent() : nullptr));
+                       SkImageFilters::DropShadowOnly(dx, dy, blur, blur, *color, input ? input : nullptr) :
+                       SkImageFilters::DropShadow(dx, dy, blur, blur, *color, input ? input : nullptr));
       }
     }
   }
@@ -157,8 +175,8 @@ protected:
       setImageFilter(context, SkImageFilters::DisplacementMap(channelX,
                                                               channelY,
                                                               scale,
-                                                              displacement->getCurrent(),
-                                                              color ? color->getCurrent() : nullptr));
+                                                              displacement,
+                                                              color ? color : nullptr));
     }
   }
   
@@ -202,41 +220,26 @@ public:
 protected:
   void materialize(DrawingContext* context) override {
     if (isChanged(context)) {
-      SkTileMode mode = getTileModeFromStringValue(_tileModeProp->value()->getAsString());
       auto input = optionalChild(0);
       setImageFilter(context, SkImageFilters::Blur(_radiusProp->getDerivedValue()->x(),
                                                    _radiusProp->getDerivedValue()->y(),
-                                                   mode,
-                                                   input ? input->getCurrent() : nullptr));
+                                                   *_tileModeProp->getDerivedValue(),
+                                                   input ? input : nullptr));
     }
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
     _radiusProp = container->defineProperty(std::make_shared<RadiusProp>(JsiPropId::get("radius")));
-    _tileModeProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("tileMode")));
+    _tileModeProp = container->defineProperty(std::make_shared<TileModeProp>(JsiPropId::get("tileMode")));
     
     _radiusProp->require();
     _tileModeProp->require();
   }
   
 private:
-  
-  SkTileMode getTileModeFromStringValue(const std::string& value) {
-    if (value == "clamp") {
-      return SkTileMode::kClamp;
-    } else if (value == "repeat") {
-      return SkTileMode::kRepeat;
-    } else if (value == "mirror") {
-      return SkTileMode::kMirror;
-    } else if (value == "decal") {
-      return SkTileMode::kDecal;
-    }
-    throw std::runtime_error("Value \"" + value + "\" is not a valid tile mode.");
-  }
-  
   RadiusProp* _radiusProp;
-  NodeProp* _tileModeProp;
+  TileModeProp* _tileModeProp;
 };
 
 class JsiOffsetImageFilterNode : public JsiBaseImageFilterNode,
@@ -252,7 +255,7 @@ protected:
       if (getPropsContainer()->isChanged()) {
         setImageFilter(context, SkImageFilters::Offset(_xProp->value()->getAsNumber(),
                                                        _yProp->value()->getAsNumber(),
-                                                       input ? input->getCurrent() : nullptr));
+                                                       input ? input : nullptr));
       }
     }
   }
@@ -292,11 +295,11 @@ protected:
       if (op == Type::Dilate) {
         setImageFilter(context, SkImageFilters::Dilate(radius->x(),
                                                        radius->y(),
-                                                       input ? input->getCurrent() : nullptr));
+                                                       input ? input : nullptr));
       } else {
         setImageFilter(context, SkImageFilters::Erode(radius->x(),
                                                       radius->y(),
-                                                      input ? input->getCurrent() : nullptr));
+                                                      input ? input : nullptr));
       }
     }
   }
@@ -344,7 +347,7 @@ protected:
         _uniformsProp->processUniforms(rtb, runtimeEffectPtr->getObject());
       }
       
-      setImageFilter(context, SkImageFilters::RuntimeShader(rtb, nullptr, input ? input->getCurrent() : nullptr));
+      setImageFilter(context, SkImageFilters::RuntimeShader(rtb, nullptr, input ? input : nullptr));
     }
   }
   

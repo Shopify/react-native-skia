@@ -24,6 +24,7 @@
 #include "nodes/JsiPathEffectNodes.h"
 #include "nodes/JsiImageFilterNodes.h"
 #include "nodes/JsiColorFilterNodes.h"
+#include "nodes/JsiShaderNodes.h"
 
 #include "nodes/JsiPaintNode.h"
 
@@ -50,6 +51,8 @@ namespace RNSkia
       installFunction("OvalNode", JsiOvalNode::createCtor(context));
       installFunction("PointsNode", JsiPointsNode::createCtor(context));
       installFunction("DiffRectNode", JsiDiffRectNode::createCtor(context));
+      
+      installFunction("FillNode", JsiFillNode::createCtor(context));
 
       installFunction("GroupNode", JsiGroupNode::createCtor(context));
       
@@ -83,8 +86,17 @@ namespace RNSkia
       installFunction("LumaColorFilterNode", JsiLumaColorFilterNode::createCtor(context));
       installFunction("LerpColorFilterNode", JsiLerpColorFilterNode::createCtor(context));
       
-      
-      installFunction("FillNode", JsiFillNode::createCtor(context));
+      // Shaders
+      installFunction("ShaderNode", JsiShaderNode::createCtor(context));
+      installFunction("ImageShaderNode", JsiImageShaderNode::createCtor(context));
+      installFunction("ColorShaderNode", JsiColorShaderNode::createCtor(context));
+      installFunction("TurbulenceNode", JsiTurbulenceNode::createCtor(context));
+      installFunction("FractalNoiseNode", JsiFractalNoiseNode::createCtor(context));
+      installFunction("LinearGradientNode", JsiLinearGradientNode::createCtor(context));
+      installFunction("LinearGradientNode", JsiRadialGradientNode::createCtor(context));
+      installFunction("SweepGradientNode", JsiSweepGradientNode::createCtor(context));
+      installFunction("TwoPointConicalGradientNode", JsiTwoPointConicalGradientNode::createCtor(context));
+            
     }
   };
 

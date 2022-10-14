@@ -72,12 +72,6 @@ public:
   sk_sp<SkImage> getImage() { return _imageProp->getDerivedValue(); }
   std::shared_ptr<SkRect> getRect() { return _rectProp->getDerivedValue(); }
   
-private:
-  
-  SkSize size(double width, double height) {
-    return SkSize::Make(width, height);
-  }
-  
   SkRect rect2rect (SkRect src, SkRect dst)  {
     auto scaleX = dst.width() / src.width();
     auto scaleY = dst.height() / src.height();
@@ -85,6 +79,12 @@ private:
     auto translateY = dst.y() - src.y() * scaleY;
     return SkRect::MakeXYWH(translateX, translateY, scaleX, scaleY);
   };
+  
+private:
+  
+  SkSize size(double width, double height) {
+    return SkSize::Make(width, height);
+  }
   
   FitRects fitRects(const std::string& fit, SkRect rect, SkRect rect2) {
     auto sizes = applyBoxFit(fit,

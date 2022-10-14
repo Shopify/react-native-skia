@@ -318,46 +318,64 @@ export class JsiSkDOM implements SkDOM {
   }
 
   LerpColorFilter(props: LerpColorFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.LerpColorNode
-      ? global.SkiaDomApi.LerpColorNode(props)
+    return global.SkiaDomApi && global.SkiaDomApi.LerpColorFilterNode
+      ? global.SkiaDomApi.LerpColorFilterNode(props)
       : new LerpColorFilterNode(this.ctx, props);
   }
 
   // Shaders
   Shader(props: ShaderProps) {
-    return new ShaderNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.ShaderNode
+      ? global.SkiaDomApi.ShaderNode(props)
+      : new ShaderNode(this.ctx, props);
   }
 
   ImageShader(props: ImageShaderProps) {
-    return new ImageShaderNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.ImageShaderNode
+      ? global.SkiaDomApi.ImageShaderNode(props)
+      : new ImageShaderNode(this.ctx, props);
   }
 
   ColorShader(props: ColorProps) {
-    return new ColorNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.ColorShaderNode
+      ? global.SkiaDomApi.ColorShaderNode(props)
+      : new ColorNode(this.ctx, props);
   }
 
   SweepGradient(props: SweepGradientProps) {
-    return new SweepGradientNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.SweepGradientNode
+      ? global.SkiaDomApi.SweepGradientNode(props)
+      : new SweepGradientNode(this.ctx, props);
   }
 
   Turbulence(props: TurbulenceProps) {
-    return new TurbulenceNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.TurbulenceNode
+      ? global.SkiaDomApi.TurbulenceNode(props)
+      : new TurbulenceNode(this.ctx, props);
   }
 
   FractalNoise(props: FractalNoiseProps) {
-    return new FractalNoiseNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.FractalNoiseNode
+      ? global.SkiaDomApi.FractalNoiseNode(props)
+      : new FractalNoiseNode(this.ctx, props);
   }
 
   LinearGradient(props: LinearGradientProps) {
-    return new LinearGradientNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.LinearGradientNode
+      ? global.SkiaDomApi.LinearGradientNode(props)
+      : new LinearGradientNode(this.ctx, props);
   }
 
   RadialGradient(props: RadialGradientProps) {
-    return new RadialGradientNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.RadiialGradientNode
+      ? global.SkiaDomApi.RadiialGradientNode(props)
+      : new RadialGradientNode(this.ctx, props);
   }
 
   TwoPointConicalGradient(props: TwoPointConicalGradientProps) {
-    return new TwoPointConicalGradientNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.TwoPointConicalGradientNode
+      ? global.SkiaDomApi.TwoPointConicalGradientNode(props)
+      : new TwoPointConicalGradientNode(this.ctx, props);
   }
 
   // Path Effects

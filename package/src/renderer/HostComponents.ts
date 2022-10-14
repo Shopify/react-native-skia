@@ -1,6 +1,11 @@
 import type { ForwardedRef } from "react";
 
-import { DeclarationNode, NodeType, RenderNode } from "../dom/types";
+import {
+  DeclarationNode,
+  FractalNoiseProps,
+  NodeType,
+  RenderNode,
+} from "../dom/types";
 import type {
   CircleProps,
   DrawingNodeProps,
@@ -64,6 +69,7 @@ import type {
   SkPathEffect,
   SkRect,
   SkRRect,
+  SkShader,
 } from "../skia";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
 
@@ -159,9 +165,36 @@ declare global {
       SkColorFilter
     >;
     LumaColorFilterNode: () => DeclarationNode<null, SkColorFilter>;
-    LerpColorNode: (
+    LerpColorFilterNode: (
       props: LerpColorFilterProps
     ) => DeclarationNode<LerpColorFilterProps, SkColorFilter>;
+
+    // Shaders
+    ShaderNode: (props: ShaderProps) => DeclarationNode<ShaderProps, SkShader>;
+    ImageShaderNode: (
+      props: ImageShaderProps
+    ) => DeclarationNode<ImageShaderProps, SkShader>;
+    ColorShaderNode: (
+      props: ColorProps
+    ) => DeclarationNode<ColorProps, SkShader>;
+    TurbulenceNode: (
+      props: TurbulenceProps
+    ) => DeclarationNode<TurbulenceProps, SkShader>;
+    FractalNoiseNode: (
+      props: FractalNoiseProps
+    ) => DeclarationNode<FractalNoiseProps, SkShader>;
+    LinearGradientNode: (
+      props: LinearGradientProps
+    ) => DeclarationNode<LinearGradientProps, SkShader>;
+    RadiialGradientNode: (
+      props: RadialGradientProps
+    ) => DeclarationNode<RadialGradientProps, SkShader>;
+    SweepGradientNode: (
+      props: SweepGradientProps
+    ) => DeclarationNode<SweepGradientProps, SkShader>;
+    TwoPointConicalGradientNode: (
+      props: TwoPointConicalGradientProps
+    ) => DeclarationNode<TwoPointConicalGradientProps, SkShader>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -216,7 +249,7 @@ declare global {
       skImageShader: SkiaProps<ImageShaderProps>;
       skColorShader: SkiaProps<ColorProps>;
       skTurbulence: SkiaProps<TurbulenceProps>;
-      skFractalNoise: SkiaProps<TurbulenceProps>;
+      skFractalNoise: SkiaProps<FractalNoiseProps>;
       skLinearGradient: SkiaProps<LinearGradientProps>;
       skRadialGradient: SkiaProps<RadialGradientProps>;
       skSweepGradient: SkiaProps<SweepGradientProps>;

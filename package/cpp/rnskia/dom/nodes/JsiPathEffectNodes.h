@@ -25,6 +25,14 @@ protected:
     set(context, f);
   }
   
+  sk_sp<SkPathEffect> resolve(std::shared_ptr<JsiDomNode> child) override {
+    auto ptr = std::dynamic_pointer_cast<JsiBasePathEffectNode>(child);
+    if (ptr) {
+      return ptr->getCurrent();
+    }
+    return nullptr;
+  }
+  
   /**
    Sets or composes the path effect
    */
@@ -277,8 +285,7 @@ protected:
     if (isChanged(context)) {
       auto inner = requireChild(0);
       auto outer = requireChild(1);
-      setPathEffect(context, SkPathEffect::MakeSum(inner->getCurrent(),
-                                                   outer->getCurrent()));
+      setPathEffect(context, SkPathEffect::MakeSum(inner, outer));
     }
   }
 };

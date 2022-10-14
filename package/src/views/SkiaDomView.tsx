@@ -5,9 +5,8 @@ import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
 
 import { SkiaViewApi } from "./api";
+import { SkiaViewNativeId } from "./SkiaView";
 import type { NativeSkiaViewProps, SkiaDomViewProps } from "./types";
-
-let SkiaViewNativeId = 1000;
 
 const NativeSkiaDomView =
   requireNativeComponent<NativeSkiaViewProps>("SkiaDomView");
@@ -15,7 +14,7 @@ const NativeSkiaDomView =
 export class SkiaDomView extends React.Component<SkiaDomViewProps> {
   constructor(props: SkiaDomViewProps) {
     super(props);
-    this._nativeId = SkiaViewNativeId++;
+    this._nativeId = SkiaViewNativeId.current++;
     const { root, onTouch } = props;
     if (root) {
       assertSkiaViewApi();

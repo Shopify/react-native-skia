@@ -32,4 +32,39 @@ private:
   NodeProp* _colorProp;
 };
 
+class ColorsProp:
+public DerivedProp<std::vector<SkColor>> {
+public:
+  ColorsProp(PropId name): DerivedProp<std::vector<SkColor>>() {
+    _colorsProp = addProperty(std::make_shared<NodeProp>(name));
+  }
+  
+  void updateDerivedValue() override {
+    if (_colorsProp->isSet()) {
+      auto colors = _colorsProp->value()->getAsArray();
+      std::vector<SkColor> derivedColors;
+      derivedColors.reserve(colors.size());
+      
+      for (size_t i = 0; i < colors.size(); ++i) {
+        auto colorValue = colors[i]->getAsString();
+        auto parsedColor = CSSColorParser::parse(colorValue);
+        if (parsedColor.a == -1.0f) {
+          derivedColors[i] = SK_ColorBLACK;
+        } else {
+          derivedColors[i] = SkColorSetARGB(parsedColor.a * 255,
+                                            parsedColor.r,
+                                            parsedColor.g,
+                                            parsedColor.b);
+        }
+      }
+      setDerivedValue(std::move(derivedColors));
+    } else {
+      setDerivedValue(nullptr);
+    }
+  }
+  
+private:
+  NodeProp* _colorsProp;
+};
+
 }

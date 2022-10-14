@@ -7,7 +7,7 @@ import type { SkiaValue } from "../values";
 import { SkiaViewApi } from "./api";
 import type { NativeSkiaViewProps, SkiaDrawViewProps } from "./types";
 
-let SkiaViewNativeId = 1000;
+export const SkiaViewNativeId = { current: 1000 };
 
 const NativeSkiaView =
   requireNativeComponent<NativeSkiaViewProps>("SkiaDrawView");
@@ -15,12 +15,8 @@ const NativeSkiaView =
 export class SkiaView extends React.Component<SkiaDrawViewProps> {
   constructor(props: SkiaDrawViewProps) {
     super(props);
-    this._nativeId = SkiaViewNativeId++;
-    const { onDraw, root } = props;
-    if (root) {
-      assertSkiaViewApi();
-      SkiaViewApi.setJsiProperty(this._nativeId, "root", root);
-    }
+    this._nativeId = SkiaViewNativeId.current++;
+    const { onDraw } = props;
     if (onDraw) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "drawCallback", onDraw);
@@ -34,16 +30,10 @@ export class SkiaView extends React.Component<SkiaDrawViewProps> {
   }
 
   componentDidUpdate(prevProps: SkiaDrawViewProps) {
-    const { onDraw, root } = this.props;
+    const { onDraw } = this.props;
     if (onDraw !== prevProps.onDraw) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "drawCallback", onDraw);
-    }
-    if (root !== prevProps.root) {
-      if (root) {
-        assertSkiaViewApi();
-        SkiaViewApi.setJsiProperty(this._nativeId, "root", root);
-      }
     }
   }
 

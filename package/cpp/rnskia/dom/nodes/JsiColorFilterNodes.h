@@ -23,6 +23,13 @@ public:
   JsiDomDeclarationNode<JsiBaseColorFilterNode, sk_sp<SkColorFilter>>(context, type) {}
   
 protected:
+  sk_sp<SkColorFilter> resolve(std::shared_ptr<JsiDomNode> child) override {
+    auto ptr = std::dynamic_pointer_cast<JsiBaseColorFilterNode>(child);
+    if (ptr) {
+      return ptr->getCurrent();
+    }
+    return nullptr;
+  }
   
   void setColorFilter(DrawingContext* context, sk_sp<SkColorFilter> f) {
     set(context, f);
@@ -155,8 +162,8 @@ protected:
   void materialize(DrawingContext* context) override {
     if (isChanged(context)) {
       setColorFilter(context, SkColorFilters::Lerp(_tProp->value()->getAsNumber(),
-                                                   requireChild(0)->getCurrent(),
-                                                   requireChild(1)->getCurrent()));
+                                                   requireChild(0),
+                                                   requireChild(1)));
     }
   }
   

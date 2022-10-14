@@ -124,7 +124,7 @@ protected:
   /**
    Returns a required child image filter by index
    */
-  std::shared_ptr<T> requireChild(size_t index) {
+  ST requireChild(size_t index) {
     auto filter = optionalChild(index);
     if (filter == nullptr) {
       throw std::runtime_error("Expected child node at index " + std::to_string(index) + " in node " + getType());
@@ -135,20 +135,21 @@ protected:
   /**
    Returns an optional child image filter by index
    */
-  std::shared_ptr<T> optionalChild(size_t index) {
+  ST optionalChild(size_t index) {
     if (index >= getChildren().size()) {
       return nullptr;
     }
     
-    // TODO: Support all types here!! ImageFilters, ColorFilters
+    auto child = getChildren()[index];
+    // Support all types here!! ImageFilters, ColorFilters
     // package/src/dom/nodes/paint/ImageFilters.ts#80
-    auto ptr = std::dynamic_pointer_cast<T>(getChildren()[index]);
-    if (ptr == nullptr) {
-      return nullptr;
-    }
-    
-    return ptr;
+    return resolve(child);
   }
+ 
+  /**
+   Returns child as inner type or nullptr
+   */
+  virtual ST resolve(std::shared_ptr<JsiDomNode> child) = 0;
   
   /**
    Sets or composes the image filter
@@ -161,22 +162,12 @@ protected:
   }
   
   virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
-    if ( std::dynamic_pointer_cast<T>(child) == nullptr) {
-      getContext()->raiseError(std::runtime_error("Cannot add a child of type \"" +
-                                                  std::string(child->getType()) +
-                                                  "\" to a \"" + std::string(getType()) + "\"."));
-    }
     JsiBaseDomDeclarationNode::addChild(child);
     clearCurrent();
   }
   
   virtual void
   insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
-    if (std::dynamic_pointer_cast<T>(child) == nullptr) {
-      getContext()->raiseError(std::runtime_error("Cannot add a child of type \"" +
-                                                  std::string(child->getType()) +
-                                                  "\" to a \"" + std::string(getType()) + "\"."));
-    }
     JsiBaseDomDeclarationNode::insertChildBefore(child, before);
     clearCurrent();
   }
