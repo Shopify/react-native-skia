@@ -5,6 +5,10 @@
 
 namespace RNSkia {
 
+// TODO: implement feature: A paint node has its own paint not inherited,
+//       and when found the drawing node should render an extra time for
+//       each paint node in its children.
+
 class JsiPaintNode :
 public JsiBaseDomDeclarationNode,
 public JsiDomNodeCtor<JsiPaintNode> {

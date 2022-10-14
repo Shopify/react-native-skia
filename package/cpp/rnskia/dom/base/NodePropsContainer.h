@@ -45,9 +45,9 @@ public:
   /**
    Updates any props that has changes waiting, updates props that have derived values
    */
-  void beginVisit(DrawingContext* context, PropId componentType) {
+  void updatePendingValues(DrawingContext* context, PropId componentType) {
     for (auto &prop: _properties) {
-      prop->beginVisit(context);
+      prop->updatePendingValues(context);
       if (!prop->isSet() && prop->isRequired()) {
         throw std::runtime_error("Missing required property \"" + std::string(prop->getName()) + "\"" +
                                  " is missing in the " + componentType + " component.");
@@ -58,9 +58,9 @@ public:
   /**
    We're done, mark any changes as committed in all props
    */
-  void endVisit() {
+  void markAsResolved() {
     for (auto &prop: _properties) {
-      prop->endVisit();
+      prop->markAsResolved();
     }
   }
   

@@ -42,11 +42,11 @@ public:
     auto container = getPropsContainer();
     
     // by visiting nodes we ensure that all updates and changes has been
-    // read and handled for properties. This is also (with the symmetric endVisit)
+    // read and handled for properties. This is also (with the symmetric marksAsResolved)
     // how we handle changed properties to avoid updating unecessarily.
-    container->beginVisit(_localContext.get(), getType());
+    container->updatePendingValues(_localContext.get(), getType());
     
-    // Opacity (paint prop resolves in beginVisit in the PaintProp class)
+    // Opacity (paint prop resolves in updatePendingValues in the PaintProp class)
     if (_opacityProp->isSet() && (_opacityProp->isChanged() || _localContext->isInvalid())) {
       _localContext->setOpacity(_opacityProp->value()->getAsNumber());
     }
@@ -114,7 +114,7 @@ public:
     }
         
     // Mark container as done
-    container->endVisit();
+    container->markAsResolved();
     
 #if SKIA_DOM_DEBUG
     RNSkLogger::logToConsole("%sEnd rendering node %s",

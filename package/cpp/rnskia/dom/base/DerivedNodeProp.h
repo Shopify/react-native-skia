@@ -15,10 +15,10 @@ public:
   /**
    Starts the process of updating and reading props
    */
-  void beginVisit(DrawingContext *context) override {
+  void updatePendingValues(DrawingContext *context) override {
     auto changed = false;
     for (auto &prop: _properties) {
-      prop->beginVisit(context);
+      prop->updatePendingValues(context);
       if (prop->isChanged()) {
         changed = true;
       }
@@ -31,11 +31,11 @@ public:
   }
   
   /*
-   Ends the visit cycle
+   Marks properties as no longer changed
    */
-  void endVisit() override {
+  void markAsResolved() override {
     for (auto &prop: _properties) {
-      prop->endVisit();
+      prop->markAsResolved();
     }
     
     _isChanged = false;

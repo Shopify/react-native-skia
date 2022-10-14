@@ -34,7 +34,7 @@ public:
     auto container = getPropsContainer();
     if (container != nullptr) {
       // Make sure we commit any waiting transactions in the props object
-      container->beginVisit(context, getType());
+      container->updatePendingValues(context, getType());
     }
     
     // Materialize children
@@ -50,7 +50,7 @@ public:
 
     // end the "visit" of the declaration node
     if (container != nullptr) {
-      container->endVisit();
+      container->markAsResolved();
     }
   }
     

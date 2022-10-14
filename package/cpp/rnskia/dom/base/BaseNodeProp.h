@@ -27,14 +27,14 @@ public:
   virtual bool isChanged() = 0;
   
   /**
-   Starts the process of updating and reading props
+   Updates any pending values that has happened from other threads, sets flags for changed.
    */
-  virtual void beginVisit(DrawingContext *context) = 0;
+  virtual void updatePendingValues(DrawingContext *context) = 0;
   
   /*
-   Ends the visit cycle
+   Marks property flags for changed as resolved
    */
-  virtual void endVisit() = 0;
+  virtual void markAsResolved() = 0;
   
   /**
    Override to read the value represented by this property from the Javascript property object

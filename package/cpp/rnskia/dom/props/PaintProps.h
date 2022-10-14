@@ -23,7 +23,7 @@ public:
     _paintProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("paint")));
   }
   
-  void beginVisit(DrawingContext *context) override {
+  void updatePendingValues(DrawingContext *context) override {
     if (_paintProp->isSet() && (_paintProp->isChanged() || context->isInvalid())) {
       if (_paintProp->value()->getType() == PropType::HostObject) {
         // Read paint property as Host Object - JsiSkPaint
@@ -72,8 +72,8 @@ public:
     _antiAlias = addProperty(std::make_shared<NodeProp>(JsiPropId::get("antiAlias")));
   }
   
-  void beginVisit(DrawingContext* context) override {
-    BaseDerivedProp::beginVisit(context);
+  void updatePendingValues(DrawingContext* context) override {
+    BaseDerivedProp::updatePendingValues(context);
     
     // Now we can start updating the context
     // We only get here if something has changed - start with COLOR
