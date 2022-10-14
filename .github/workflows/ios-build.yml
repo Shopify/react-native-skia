@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: example/node_modules
-          key: ${{ runner.os }}-node-modules-example-${{ hashFiles(format('{0}/yarn.lock', matrix.working-directory)) }}
+          key: ${{ runner.os }}-node-modules-example-${{ hashFiles('example/yarn.lock') }}
           restore-keys: ${{ runner.os }}-node-modules-example-
 
       - name: Install app node_modules
