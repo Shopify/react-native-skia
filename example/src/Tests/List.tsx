@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
 
 export const List = () => {
   const { navigate } =
-    useNavigation<NativeStackNavigationProp<Routes, "List">>();
+    useNavigation<NativeStackNavigationProp<Routes, "TestList">>();
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {examples.map((thumbnail) => (
