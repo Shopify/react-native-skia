@@ -1,0 +1,76 @@
+name: Test iOS build
+on:
+  pull_request:
+    paths:
+      - 'package/ios/**'
+      - 'package/cpp/**'
+      - 'Example/package.json'
+
+jobs:
+  build:
+    runs-on: macos-12
+    concurrency:
+      group: ios-example-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Restore Skia node_modules from cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-skia-${{ hashFiles('yarn.lock') }}
+          restore-keys: ${{ runner.os }}-node-modules-skia-
+
+      - name: Install root node dependencies
+        run: yarn
+
+      - name: Download Skia Binary Artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: "build-skia.yml"
+          repo: shopify/react-native-skia
+          path: artifacts
+
+      - name: Copy Artifacts to libs folder
+        run: yarn workflow-copy-libs
+
+      - name: Copy Skia Headers
+        run: yarn copy-skia-headers
+
+      - name: Restore app node_modules from cache
+        uses: actions/cache@v3
+        with:
+          path: example/node_modules
+          key: ${{ runner.os }}-node-modules-example-${{ hashFiles(format('{0}/yarn.lock', matrix.working-directory)) }}
+          restore-keys: ${{ runner.os }}-node-modules-example-
+
+      - name: Install app node_modules
+        working-directory: example
+        run: yarn install --frozen-lockfile
+
+      - name: Restore Pods from cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            example/ios/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+          key: ${{ runner.os }}-pods-example-${{ hashFiles('example/ios/Podfile.lock') }}
+
+      - name: Install Pods
+        working-directory: example/ios
+        run: pod install
+
+      - name: Restore build artifacts from cache
+        uses: actions/cache@v3
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-ios-derived-data-example-${{ hashFiles('example/ios/Podfile.lock') }}
+
+      - name: Build app
+        working-directory: example
+        run: npx react-native run-ios --configuration Release --simulator 'iPhone 14 Pro'
