@@ -23,8 +23,6 @@ public:
                         const char* type) :
   JsiDomDeclarationNode<JsiBaseImageFilterNode, sk_sp<SkImageFilter>>(context, type) {}
   
-  sk_sp<SkImageFilter> getImageFilter() { return getCurrent(); }
-  
 protected:
   
   void setImageFilter(DrawingContext* context, sk_sp<SkImageFilter> f) {
@@ -59,8 +57,8 @@ protected:
         throw std::runtime_error("Blend image filter needs two child nodes.");
       }
       
-      auto background = requireChild(0)->getImageFilter();
-      auto foreground = requireChild(1)->getImageFilter();
+      auto background = requireChild(0)->getCurrent();
+      auto foreground = requireChild(1)->getCurrent();
       
       SkBlendMode blendMode = *_blendModeProp->getDerivedValue();
       setImageFilter(context, SkImageFilters::Blend(blendMode, background, foreground));
@@ -103,13 +101,13 @@ protected:
         auto f3 = SkImageFilters::Blur(blur, blur, SkTileMode::kDecal, f2);
         auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, srcAlpha, f3);
         
-        setImageFilter(context, SkImageFilters::Compose(input ? input->getImageFilter() : nullptr,                                
+        setImageFilter(context, SkImageFilters::Compose(input ? input->getCurrent() : nullptr,
                                                         SkImageFilters::Blend(SkBlendMode::kSrcOver, srcGraphic, f4)));
         
       } else {
         setImageFilter(context, shadowOnly ?
-                       SkImageFilters::DropShadowOnly(dx, dy, blur, blur, *color, input ? input->getImageFilter() : nullptr) :
-                       SkImageFilters::DropShadow(dx, dy, blur, blur, *color, input ? input->getImageFilter() : nullptr));
+                       SkImageFilters::DropShadowOnly(dx, dy, blur, blur, *color, input ? input->getCurrent() : nullptr) :
+                       SkImageFilters::DropShadow(dx, dy, blur, blur, *color, input ? input->getCurrent() : nullptr));
       }
     }
   }
@@ -159,8 +157,8 @@ protected:
       setImageFilter(context, SkImageFilters::DisplacementMap(channelX,
                                                               channelY,
                                                               scale,
-                                                              displacement->getImageFilter(),
-                                                              color ? color->getImageFilter() : nullptr));
+                                                              displacement->getCurrent(),
+                                                              color ? color->getCurrent() : nullptr));
     }
   }
   
@@ -209,7 +207,7 @@ protected:
       setImageFilter(context, SkImageFilters::Blur(_radiusProp->getDerivedValue()->x(),
                                                    _radiusProp->getDerivedValue()->y(),
                                                    mode,
-                                                   input ? input->getImageFilter() : nullptr));
+                                                   input ? input->getCurrent() : nullptr));
     }
   }
   
@@ -254,7 +252,7 @@ protected:
       if (getPropsContainer()->isChanged()) {
         setImageFilter(context, SkImageFilters::Offset(_xProp->value()->getAsNumber(),
                                                        _yProp->value()->getAsNumber(),
-                                                       input ? input->getImageFilter() : nullptr));
+                                                       input ? input->getCurrent() : nullptr));
       }
     }
   }
@@ -294,11 +292,11 @@ protected:
       if (op == Type::Dilate) {
         setImageFilter(context, SkImageFilters::Dilate(radius->x(),
                                                        radius->y(),
-                                                       input ? input->getImageFilter() : nullptr));
+                                                       input ? input->getCurrent() : nullptr));
       } else {
         setImageFilter(context, SkImageFilters::Erode(radius->x(),
                                                       radius->y(),
-                                                      input ? input->getImageFilter() : nullptr));
+                                                      input ? input->getCurrent() : nullptr));
       }
     }
   }
@@ -346,7 +344,7 @@ protected:
         _uniformsProp->processUniforms(rtb, runtimeEffectPtr->getObject());
       }
       
-      setImageFilter(context, SkImageFilters::RuntimeShader(rtb, nullptr, input ? input->getImageFilter() : nullptr));
+      setImageFilter(context, SkImageFilters::RuntimeShader(rtb, nullptr, input ? input->getCurrent() : nullptr));
     }
   }
   

@@ -18,9 +18,7 @@ public JsiDomDeclarationNode<JsiBasePathEffectNode, sk_sp<SkPathEffect>> {
 public:
   JsiBasePathEffectNode(std::shared_ptr<RNSkPlatformContext> context,
                         const char* type) :
-  JsiDomDeclarationNode<JsiBasePathEffectNode, sk_sp<SkPathEffect>>(context, type) {}
-  
-  sk_sp<SkPathEffect> getPathEffect() { return getCurrent(); }
+  JsiDomDeclarationNode<JsiBasePathEffectNode, sk_sp<SkPathEffect>>(context, type) {}  
   
 protected:
   void setPathEffect(DrawingContext* context, sk_sp<SkPathEffect> f) {
@@ -279,8 +277,8 @@ protected:
     if (isChanged(context)) {
       auto inner = requireChild(0);
       auto outer = requireChild(1);
-      setPathEffect(context, SkPathEffect::MakeSum(inner->getPathEffect(),
-                                                   outer->getPathEffect()));
+      setPathEffect(context, SkPathEffect::MakeSum(inner->getCurrent(),
+                                                   outer->getCurrent()));
     }
   }
 };
