@@ -18,11 +18,19 @@ const sources = [
 
 const destinations = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
 
-const androidFiles = ["libskia.a", "libskshaper.a", "libsvg.a"];
+const androidFiles = [
+  "libskia.a",
+  "libskshaper.a",
+  "libsvg.a",
+  "libskottie.a",
+  "libsksg.a",
+];
 const iosFiles = [
   "libskia.xcframework",
   "libskshaper.xcframework",
   "libsvg.xcframework",
+  "libskottie.xcframework",
+  "libsksg.xcframework",
 ];
 
 const copyFiles = (from: string, to: string, files: string[]) => {
