@@ -5,6 +5,9 @@ on:
       - 'package/ios/**'
       - 'package/cpp/**'
       - 'example/package.json'
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -18,12 +21,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Restore Skia node_modules from cache
-        uses: actions/cache@v3
+      - uses: actions/setup-node@v3
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-skia-${{ hashFiles('yarn.lock') }}
-          restore-keys: ${{ runner.os }}-node-modules-skia-
+          node-version: 16
+          cache: 'yarn'
 
       - name: Install root node dependencies
         run: yarn
@@ -40,13 +41,6 @@ jobs:
 
       - name: Copy Skia Headers
         run: yarn copy-skia-headers
-
-      - name: Restore app node_modules from cache
-        uses: actions/cache@v3
-        with:
-          path: example/node_modules
-          key: ${{ runner.os }}-node-modules-example-${{ hashFiles('example/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-node-modules-example-
 
       - name: Install app node_modules
         working-directory: example
