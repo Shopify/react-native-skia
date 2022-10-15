@@ -42,7 +42,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSVGFactory, MakeFromData),
                        JSI_EXPORT_FUNC(JsiSkSVGFactory, MakeFromString))
 
-  JsiSkSVGFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkSVGFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

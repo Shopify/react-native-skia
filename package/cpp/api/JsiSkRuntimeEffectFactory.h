@@ -33,7 +33,8 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make))
 
-  JsiSkRuntimeEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkRuntimeEffectFactory(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

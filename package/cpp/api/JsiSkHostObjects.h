@@ -20,8 +20,8 @@ public:
    * Default constructor
    * @param context Platform context
    */
-  JsiSkHostObject(std::shared_ptr<RNSkPlatformContext> context)
-      : _context(context){};
+  explicit JsiSkHostObject(std::shared_ptr<RNSkPlatformContext> context)
+      : _context(context) {}
 
 protected:
   /**

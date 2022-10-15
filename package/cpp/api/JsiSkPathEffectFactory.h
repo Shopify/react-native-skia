@@ -36,7 +36,7 @@ public:
 
   JSI_HOST_FUNCTION(MakeDash) {
     auto jsiIntervals = arguments[0].asObject(runtime).asArray(runtime);
-    auto size = (int)jsiIntervals.size(runtime);
+    auto size = static_cast<int>(jsiIntervals.size(runtime));
     std::vector<SkScalar> intervals;
     intervals.reserve(size);
     for (int i = 0; i < size; i++) {
@@ -121,7 +121,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakePath1D),
                        JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakePath2D), )
 
-  JsiSkPathEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkPathEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

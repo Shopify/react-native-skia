@@ -211,7 +211,7 @@ private:
       su.isInteger = true;
       break;
     }
-    su.slot = (int)(u.offset / sizeof(float));
+    su.slot = static_cast<int>(u.offset / sizeof(float));
     return su;
   }
 };
