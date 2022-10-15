@@ -34,10 +34,10 @@ public:
         touchObj.setProperty(runtime, "x", t.x);
         touchObj.setProperty(runtime, "y", t.y);
         touchObj.setProperty(runtime, "force", t.force);
-        touchObj.setProperty(runtime, "type", (double)t.type);
+        touchObj.setProperty(runtime, "type", static_cast<double>(t.type));
         touchObj.setProperty(runtime, "timestamp",
-                             (double)t.timestamp / 1000.0);
-        touchObj.setProperty(runtime, "id", (double)t.id);
+                             static_cast<double>(t.timestamp / 1000.0));
+        touchObj.setProperty(runtime, "id", static_cast<double>(t.id));
         touches.setValueAtIndex(runtime, n, touchObj);
       }
       ops.setValueAtIndex(runtime, i, touches);

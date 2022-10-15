@@ -1,7 +1,7 @@
-
 #pragma once
 
 #include <array>
+#include <memory>
 
 #include <JsiHostObject.h>
 #include <RNSkClockValue.h>
