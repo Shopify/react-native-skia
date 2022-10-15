@@ -7,7 +7,7 @@ import type { SkiaValue } from "../values";
 import { SkiaViewApi } from "./api";
 import type { NativeSkiaViewProps, SkiaDrawViewProps } from "./types";
 
-let SkiaViewNativeId = 1000;
+export const SkiaViewNativeId = { current: 1000 };
 
 const NativeSkiaView =
   requireNativeComponent<NativeSkiaViewProps>("SkiaDrawView");
@@ -15,7 +15,7 @@ const NativeSkiaView =
 export class SkiaView extends React.Component<SkiaDrawViewProps> {
   constructor(props: SkiaDrawViewProps) {
     super(props);
-    this._nativeId = SkiaViewNativeId++;
+    this._nativeId = SkiaViewNativeId.current++;
     const { onDraw } = props;
     if (onDraw) {
       assertSkiaViewApi();

@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import type { Routes } from "./Routes";
 
-const examples = [
+export const examples = [
   {
     screen: "Shapes",
     title: "🔺 Shapes",
@@ -106,6 +106,7 @@ export const List = () => {
           onPress={() => {
             navigate(thumbnail.screen);
           }}
+          testID={thumbnail.screen}
         >
           <View style={styles.thumbnail}>
             <Text style={styles.title}>{thumbnail.title}</Text>

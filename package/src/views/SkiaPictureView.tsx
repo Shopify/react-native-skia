@@ -5,9 +5,8 @@ import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
 
 import { SkiaViewApi } from "./api";
+import { SkiaViewNativeId } from "./SkiaView";
 import type { NativeSkiaViewProps, SkiaPictureViewProps } from "./types";
-
-let SkiaViewNativeId = 1000;
 
 const NativeSkiaPictureView =
   requireNativeComponent<NativeSkiaViewProps>("SkiaPictureView");
@@ -15,7 +14,7 @@ const NativeSkiaPictureView =
 export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   constructor(props: SkiaPictureViewProps) {
     super(props);
-    this._nativeId = SkiaViewNativeId++;
+    this._nativeId = SkiaViewNativeId.current++;
     const { picture } = props;
     if (picture) {
       assertSkiaViewApi();

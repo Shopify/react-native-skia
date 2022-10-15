@@ -6,10 +6,10 @@
 #include "RNSkPlatformContext.h"
 
 namespace facebook {
-  namespace react {
-    class CallInvoker;
-  }
+namespace react {
+class CallInvoker;
 }
+} // namespace facebook
 
 namespace RNSkia {
 class RNSkView;
@@ -30,7 +30,7 @@ public:
               std::shared_ptr<RNSkPlatformContext> platformContext);
 
   ~RNSkManager();
-  
+
   /**
    Invalidates the Skia Manager
    */
@@ -48,7 +48,7 @@ public:
    * @param nativeId Native view Id
    */
   void unregisterSkiaView(size_t nativeId);
-  
+
   /**
    Sets the view pointed to by nativeId to the provided value.
    Used when we want to remove a view without unregistering it

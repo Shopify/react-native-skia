@@ -6,8 +6,8 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkRuntimeEffect.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkRuntimeEffect.h"
 
 namespace RNSkia {
 
@@ -21,19 +21,17 @@ public:
     auto effect = result.effect;
     auto errorText = result.errorText;
     if (!effect) {
-      throw jsi::JSError(
-          runtime,
-          std::string("Error in sksl:\n" + std::string(errorText.c_str()))
-              .c_str());
+      throw jsi::JSError(runtime, std::string("Error in sksl:\n" +
+                                              std::string(errorText.c_str()))
+                                      .c_str());
       return jsi::Value::null();
     }
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRuntimeEffect>(getContext(), std::move(effect)));
+        runtime,
+        std::make_shared<JsiSkRuntimeEffect>(getContext(), std::move(effect)));
   }
 
-  JSI_EXPORT_FUNCTIONS(
-    JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make)
-  )
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make))
 
   JsiSkRuntimeEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
