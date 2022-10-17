@@ -7,6 +7,8 @@ namespace RNSkia {
 
 class NodeProp;
 
+using namespace RNJsi;
+
 using ReadPropFunc = std::function<jsi::Value(jsi::Runtime&, PropId, NodeProp* prop)>;
 
 /**

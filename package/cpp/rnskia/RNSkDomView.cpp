@@ -1,6 +1,8 @@
 #include "RNSkDomView.h"
 #include "DrawingContext.h"
 
+#include <chrono>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -108,8 +110,8 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
 void RNSkDomRenderer::updateTouches(std::vector<RNSkTouchInfo>& touches) {
   std::lock_guard<std::mutex> lock(_touchMutex);
   // Add timestamp
-  auto ms = std::chrono::duration_cast<milliseconds>(
-      system_clock::now().time_since_epoch()).count();
+  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+    std::chrono::system_clock::now().time_since_epoch()).count();
   
   for(size_t i=0; i<touches.size(); i++) {
     touches.at(i).timestamp = ms;
