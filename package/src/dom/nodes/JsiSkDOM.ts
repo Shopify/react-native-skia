@@ -233,7 +233,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   ImageSVG(props: ImageSVGProps) {
-    return new ImageSVGNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.ImageSVGNode
+      ? global.SkiaDomApi.ImageSVGNode(props)
+      : new ImageSVGNode(this.ctx, props);
   }
 
   // BlurMaskFilters
