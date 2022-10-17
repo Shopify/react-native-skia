@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
@@ -49,8 +50,8 @@ public:
   JSI_HOST_FUNCTION(makeShaderCubic) {
     auto tmx = (SkTileMode)arguments[0].asNumber();
     auto tmy = (SkTileMode)arguments[1].asNumber();
-    auto B = (float)arguments[2].asNumber();
-    auto C = (float)arguments[3].asNumber();
+    auto B = SkDoubleToScalar(arguments[2].asNumber());
+    auto C = SkDoubleToScalar(arguments[3].asNumber());
     auto m = count > 4 && !arguments[4].isUndefined()
                  ? JsiSkMatrix::fromValue(runtime, arguments[4]).get()
                  : nullptr;
@@ -98,7 +99,8 @@ public:
     auto data = getObject()->encodeToData(format, quality);
     auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
     auto buffer = std::string(len, 0);
-    SkBase64::Encode(data->bytes(), data->size(), (void *)&buffer[0]);
+    SkBase64::Encode(data->bytes(), data->size(),
+                     reinterpret_cast<void *>(&buffer[0]));
     return jsi::String::createFromAscii(runtime, buffer);
   }
 

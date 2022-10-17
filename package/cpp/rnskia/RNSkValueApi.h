@@ -1,5 +1,6 @@
-
 #pragma once
+
+#include <memory>
 
 #include <JsiHostObject.h>
 #include <RNSkAnimation.h>
@@ -17,7 +18,7 @@ public:
    * Constructor
    * @param platformContext Platform context
    */
-  RNSkValueApi(std::shared_ptr<RNSkPlatformContext> platformContext)
+  explicit RNSkValueApi(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiHostObject(), _platformContext(platformContext) {
     _valueIdentifier = 50000;
   }

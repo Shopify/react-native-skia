@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #define STR_CAT_NX(A, B) A##B
 #define STR_CAT(A, B) STR_CAT_NX(A, B)
@@ -141,7 +142,7 @@ protected:
   virtual const JsiFunctionMap &getExportedFunctionMap() {
     static const JsiFunctionMap empty;
     return empty;
-  };
+  }
 
   /**
    Override to get property getters map of name/functions
@@ -149,7 +150,7 @@ protected:
   virtual const JsiPropertyGettersMap &getExportedPropertyGettersMap() {
     static const JsiPropertyGettersMap empty;
     return empty;
-  };
+  }
 
   /**
    Override to get property setters map of name/functions
@@ -157,7 +158,7 @@ protected:
   virtual const JsiPropertySettersMap &getExportedPropertySettersMap() {
     static const JsiPropertySettersMap empty;
     return empty;
-  };
+  }
 
   /**
    * Overridden jsi::HostObject set property method

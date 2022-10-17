@@ -1,5 +1,6 @@
-
 #pragma once
+
+#include <memory>
 
 #include "JsiSkCanvas.h"
 #include "JsiSkHostObjects.h"
@@ -21,9 +22,9 @@ using namespace facebook;
 class JsiSkPictureRecorder
     : public JsiSkWrappingSharedPtrHostObject<SkPictureRecorder> {
 public:
-  JsiSkPictureRecorder(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkPictureRecorder(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrHostObject<SkPictureRecorder>(
-            context, std::make_shared<SkPictureRecorder>()){};
+            context, std::make_shared<SkPictureRecorder>()) {}
 
   JSI_HOST_FUNCTION(beginRecording) {
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);

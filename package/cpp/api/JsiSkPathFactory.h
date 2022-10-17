@@ -158,7 +158,6 @@ public:
                          SkTextEncoding::kUTF8, x, y, *font, &path);
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
-    ;
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathFactory, Make),
@@ -167,7 +166,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromCmds),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromText))
 
-  JsiSkPathFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkPathFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

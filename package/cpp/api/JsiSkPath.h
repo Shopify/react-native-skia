@@ -70,7 +70,7 @@ public:
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
       points.push_back(*point.get());
     }
-    getObject()->addPoly(points.data(), (int)points.size(), close);
+    getObject()->addPoly(points.data(), static_cast<int>(points.size()), close);
     return thisValue.getObject(runtime);
   }
 

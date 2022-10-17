@@ -2,6 +2,8 @@
 
 #include <RNSkLog.h>
 #include <chrono>
+#include <string>
+#include <utility>
 
 #define NUMBER_OF_DURATION_SAMPLES 10
 
@@ -13,7 +15,9 @@ using ms = duration<float, std::milli>;
 
 class RNSkTimingInfo {
 public:
-  RNSkTimingInfo(const std::string &name) : _name(std::move(name)) { reset(); }
+  explicit RNSkTimingInfo(const std::string &name) : _name(std::move(name)) {
+    reset();
+  }
 
   ~RNSkTimingInfo() {}
 

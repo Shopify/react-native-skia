@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <JsiHostObject.h>
@@ -237,7 +238,7 @@ public:
    * Constructor
    * @param platformContext Platform context
    */
-  RNSkJsiViewApi(std::shared_ptr<RNSkPlatformContext> platformContext)
+  explicit RNSkJsiViewApi(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiHostObject(), _platformContext(platformContext) {}
 
   /**

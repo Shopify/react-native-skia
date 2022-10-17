@@ -2,6 +2,9 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <RNSkPlatformContext.h>
 
@@ -24,7 +27,7 @@ using namespace facebook;
 
 class RNSkCanvasProvider {
 public:
-  RNSkCanvasProvider(std::function<void()> requestRedraw)
+  explicit RNSkCanvasProvider(std::function<void()> requestRedraw)
       : _requestRedraw(requestRedraw) {}
 
   /**
@@ -48,7 +51,7 @@ protected:
 
 class RNSkRenderer {
 public:
-  RNSkRenderer(std::function<void()> requestRedraw)
+  explicit RNSkRenderer(std::function<void()> requestRedraw)
       : _requestRedraw(requestRedraw) {}
 
   /**
@@ -162,7 +165,7 @@ public:
       std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) {
     throw std::runtime_error(
         "The base Skia View does not support any custom properties.");
-  };
+  }
 
   /**
    Calls a custom action.
@@ -173,7 +176,7 @@ public:
     throw std::runtime_error(
         "The base Skia View does not support any commands. Command " + name +
         " not found.");
-  };
+  }
 
   /**
    * Repaints the Skia view using the underlying context and the drawcallback.

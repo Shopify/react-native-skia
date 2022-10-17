@@ -1,5 +1,6 @@
-
 #pragma once
+
+#include <memory>
 
 #include <jsi/jsi.h>
 
@@ -17,7 +18,7 @@ private:
   enum ValueType { NonInitialized, Undefined, Null, Bool, Number, JsiValue };
 
 public:
-  JsiSimpleValueWrapper(jsi::Runtime &runtime)
+  explicit JsiSimpleValueWrapper(jsi::Runtime &runtime)
       : _type(ValueType::NonInitialized),
         _propNameId(jsi::PropNameID::forUtf8(runtime, "value")) {}
 

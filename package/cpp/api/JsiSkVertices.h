@@ -3,6 +3,7 @@
 #include <jsi/jsi.h>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "JsiSkHostObjects.h"
 

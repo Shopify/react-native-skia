@@ -219,7 +219,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeBlend),
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeColor))
 
-  JsiSkShaderFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkShaderFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

@@ -9,7 +9,7 @@ uint8_t clamp_css_byte(T i) { // Clamp to integer 0 .. 255.
 }
 
 template <typename T> float clamp_css_float(T f) { // Clamp to float 0.0 .. 1.0.
-  return f < 0 ? 0 : f > 1 ? 1 : float(f);
+  return f < 0 ? 0 : f > 1 ? 1 : static_cast<float>(f);
 }
 
 float parseFloat(const std::string &str) {

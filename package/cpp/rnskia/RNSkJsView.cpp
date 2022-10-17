@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "RNSkJsView.h"
 
 namespace RNSkia {
@@ -30,7 +32,7 @@ bool RNSkJsRenderer::tryRender(
 #endif
     return false;
   }
-};
+}
 
 void RNSkJsRenderer::renderImmediate(
     std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
@@ -44,7 +46,7 @@ void RNSkJsRenderer::renderImmediate(
     drawInJsiCanvas(std::move(jsiCanvas), canvasProvider->getScaledWidth(),
                     canvasProvider->getScaledHeight(), ms.count() / 1000);
   });
-};
+}
 
 void RNSkJsRenderer::setDrawCallback(
     std::shared_ptr<jsi::Function> drawCallback) {
@@ -150,7 +152,7 @@ void RNSkJsRenderer::callJsDrawCallback(std::shared_ptr<JsiSkCanvas> jsiCanvas,
 
   // To be able to call the drawing function we'll wrap it once again
   _drawCallback->call(*runtime, static_cast<const jsi::Value *>(args.data()),
-                      (size_t)2);
+                      static_cast<size_t>(2));
 
   // Reset touches
   _infoObject->endDrawOperation();
@@ -205,4 +207,4 @@ void RNSkJsRenderer::drawInJsiCanvas(std::shared_ptr<JsiSkCanvas> jsiCanvas,
   }
 }
 
-} // Namespace RNSkia
+} // namespace RNSkia

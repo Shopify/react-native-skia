@@ -15,7 +15,7 @@ using namespace std::chrono;
 
 class RNSkMeasureTime {
 public:
-  RNSkMeasureTime(const std::string &name)
+  explicit RNSkMeasureTime(const std::string &name)
       : _name(name), _start(high_resolution_clock::now()) {}
 
   ~RNSkMeasureTime() {

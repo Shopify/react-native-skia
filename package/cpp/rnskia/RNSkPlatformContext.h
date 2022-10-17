@@ -63,7 +63,7 @@ public:
    */
   bool isOnJavascriptThread() {
     return _jsThreadId == std::this_thread::get_id();
-  };
+  }
 
   /**
    * Schedules the function to be run on the javascript thread async
@@ -121,7 +121,7 @@ public:
   /**
    * @return Current scale factor for pixels
    */
-  float getPixelDensity() { return _pixelDensity; };
+  float getPixelDensity() { return _pixelDensity; }
 
   /**
    * Starts (if not started) a loop that will call back on display sync

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <chrono>
 #include <functional>
+#include <memory>
 
 namespace RNSkia {
 using namespace facebook;

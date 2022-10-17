@@ -6,6 +6,7 @@
 #include <functional>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
 #include <jsi/jsi.h>
 
@@ -25,7 +26,8 @@ class RNSkReadonlyValue
     : public JsiSkHostObject,
       public std::enable_shared_from_this<RNSkReadonlyValue> {
 public:
-  RNSkReadonlyValue(std::shared_ptr<RNSkPlatformContext> platformContext)
+  explicit RNSkReadonlyValue(
+      std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
         _valueHolder(std::make_unique<JsiSimpleValueWrapper>(
             *platformContext->getJsRuntime())) {}

@@ -4,6 +4,7 @@
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
 #include <jsi/jsi.h>
+#include <memory>
 #include <utility>
 
 #pragma clang diagnostic push
@@ -94,7 +95,7 @@ public:
       JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeLinearToSRGBGamma),
       JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeLumaColorFilter))
 
-  JsiSkColorFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkColorFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 } // namespace RNSkia
