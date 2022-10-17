@@ -227,7 +227,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Picture(props: PictureProps) {
-    return new PictureNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.PictureNode
+      ? global.SkiaDomApi.PictureNode(props)
+      : new PictureNode(this.ctx, props);
   }
 
   ImageSVG(props: ImageSVGProps) {

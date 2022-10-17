@@ -19,6 +19,7 @@
 #include "nodes/JsiPointsNode.h"
 #include "nodes/JsiDiffRectNode.h"
 
+#include "nodes/JsiPictureNode.h"
 #include "nodes/JsiBlurMaskNode.h"
 
 #include "nodes/JsiPathEffectNodes.h"
@@ -59,6 +60,8 @@ namespace RNSkia
       installFunction("PaintNode", JsiPaintNode::createCtor(context));
       
       installFunction("BlurMaskFilterNode", JsiBlurMaskNode::createCtor(context));
+      
+      installFunction("PictureNode", JsiPictureNode::createCtor(context));
       
       // Path effects
       installFunction("DashPathEffectNode", JsiDashPathEffectNode::createCtor(context));
