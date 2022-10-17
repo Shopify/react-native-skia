@@ -367,8 +367,8 @@ export class JsiSkDOM implements SkDOM {
   }
 
   RadialGradient(props: RadialGradientProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.RadiialGradientNode
-      ? global.SkiaDomApi.RadiialGradientNode(props)
+    return global.SkiaDomApi && global.SkiaDomApi.RadialGradientNode
+      ? global.SkiaDomApi.RadialGradientNode(props)
       : new RadialGradientNode(this.ctx, props);
   }
 

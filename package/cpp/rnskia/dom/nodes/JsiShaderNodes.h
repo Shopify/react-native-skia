@@ -297,21 +297,28 @@ protected:
       SkColor* colors = _colorsProp->getDerivedValue()->data();
       SkPoint pts[] = { *_startProp->getDerivedValue(), *_endProp->getDerivedValue()};
       
-      auto pos = _positions->value()->getAsArray();
       std::vector<SkScalar> posV;
-      posV.reserve(pos.size());
-      for (size_t i=0; i < pos.size(); ++i) {
-        posV.push_back(pos[i]->getAsNumber());
+      if (_positions->isSet()) {
+        auto pos = _positions->value()->getAsArray();
+        posV.reserve(pos.size());
+        for (size_t i=0; i < pos.size(); ++i) {
+          posV.push_back(pos[i]->getAsNumber());
+        }
+      }
+      
+      auto flags = 0;
+      if (_flagsProp->isSet()) {
+        flags = _flagsProp->value()->getAsNumber();
       }
       
       SkTileMode mode = _modeProp->isSet() ? *_modeProp->getDerivedValue() : SkTileMode::kClamp;
       
       setShader(context, SkGradientShader::MakeLinear(pts,
                                                       colors,
-                                                      posV.data(),
+                                                      _positions->isSet() ? posV.data() : nullptr,
                                                       static_cast<int>(posV.size()),
                                                       mode,
-                                                      _flagsProp->value()->getAsNumber(),
+                                                      flags,
                                                       _transformsProps->getDerivedValue().get()));
     }
   }
@@ -319,7 +326,7 @@ protected:
   void defineProperties(NodePropsContainer* container) override {
     JsiBaseGradientNode::defineProperties(container);
     _startProp = container->defineProperty(std::make_shared<PointProp>(JsiPropId::get("start")));
-    _endProp = container->defineProperty(std::make_shared<PointProp>(JsiPropId::get("stop")));
+    _endProp = container->defineProperty(std::make_shared<PointProp>(JsiPropId::get("end")));
     
     _startProp->require();
     _endProp->require();
@@ -342,11 +349,18 @@ protected:
       auto c = _centerProp->getDerivedValue();
       auto r = _radiusProp->value()->getAsNumber();
       
-      auto pos = _positions->value()->getAsArray();
       std::vector<SkScalar> posV;
-      posV.reserve(pos.size());
-      for (size_t i=0; i < pos.size(); ++i) {
-        posV.push_back(pos[i]->getAsNumber());
+      if (_positions->isSet()) {
+        auto pos = _positions->value()->getAsArray();
+        posV.reserve(pos.size());
+        for (size_t i=0; i < pos.size(); ++i) {
+          posV.push_back(pos[i]->getAsNumber());
+        }
+      }
+      
+      auto flags = 0;
+      if (_flagsProp->isSet()) {
+        flags = _flagsProp->value()->getAsNumber();
       }
       
       SkTileMode mode = _modeProp->isSet() ? *_modeProp->getDerivedValue() : SkTileMode::kClamp;
@@ -354,16 +368,16 @@ protected:
       setShader(context, SkGradientShader::MakeRadial(*c,
                                                       r,
                                                       colors,
-                                                      posV.data(),
+                                                      _positions->isSet() ? posV.data() : nullptr,
                                                       static_cast<int>(posV.size()),
                                                       mode,
-                                                      _flagsProp->value()->getAsNumber(),
+                                                      flags,
                                                       _transformsProps->getDerivedValue().get()));
     }
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiBaseGradientNode::defineProperties(container);
     _centerProp = container->defineProperty(std::make_shared<PointProp>(JsiPropId::get("c")));
     _radiusProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("r")));
     

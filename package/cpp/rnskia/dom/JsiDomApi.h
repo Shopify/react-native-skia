@@ -93,7 +93,7 @@ namespace RNSkia
       installFunction("TurbulenceNode", JsiTurbulenceNode::createCtor(context));
       installFunction("FractalNoiseNode", JsiFractalNoiseNode::createCtor(context));
       installFunction("LinearGradientNode", JsiLinearGradientNode::createCtor(context));
-      installFunction("LinearGradientNode", JsiRadialGradientNode::createCtor(context));
+      installFunction("RadialGradientNode", JsiRadialGradientNode::createCtor(context));
       installFunction("SweepGradientNode", JsiSweepGradientNode::createCtor(context));
       installFunction("TwoPointConicalGradientNode", JsiTwoPointConicalGradientNode::createCtor(context));
             

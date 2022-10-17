@@ -186,7 +186,7 @@ declare global {
     LinearGradientNode: (
       props: LinearGradientProps
     ) => DeclarationNode<LinearGradientProps, SkShader>;
-    RadiialGradientNode: (
+    RadialGradientNode: (
       props: RadialGradientProps
     ) => DeclarationNode<RadialGradientProps, SkShader>;
     SweepGradientNode: (

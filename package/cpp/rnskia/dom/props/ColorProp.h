@@ -49,12 +49,12 @@ public:
         auto colorValue = colors[i]->getAsString();
         auto parsedColor = CSSColorParser::parse(colorValue);
         if (parsedColor.a == -1.0f) {
-          derivedColors[i] = SK_ColorBLACK;
+          derivedColors.push_back(SK_ColorBLACK);
         } else {
-          derivedColors[i] = SkColorSetARGB(parsedColor.a * 255,
-                                            parsedColor.r,
-                                            parsedColor.g,
-                                            parsedColor.b);
+          derivedColors.push_back(SkColorSetARGB(parsedColor.a * 255,
+                                                 parsedColor.r,
+                                                 parsedColor.g,
+                                                 parsedColor.b));
         }
       }
       setDerivedValue(std::move(derivedColors));
