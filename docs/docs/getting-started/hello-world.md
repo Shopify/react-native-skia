@@ -81,29 +81,37 @@ export const HelloWorld = () => {
 
 ## Custom Drawings
 
-The imperative API provides a `Drawing` component that allows you to use the imperative API within the declarative API.
+The declarative API has a [Picture](/docs/picture) component that allows you to include a drawing built with the imperative API.
+It is useful for some use-cases where you want to animate a drawing that has a dynamic number of component.
 
 ### Example
 
 ```tsx twoslash
-import {Canvas, Circle, Group, Drawing, Skia} from "@shopify/react-native-skia";
+import {Canvas, Circle, Group, createPicture, Skia, BlendMode, Picture} from "@shopify/react-native-skia";
+
+const width = 256;
+const height = 256;
+const r = width * 0.33;
+
+const picture = createPicture(
+  Skia.XYWHRect(0, 0, width, height),
+  (canvas) => {
+    const paint = Skia.Paint();
+    paint.setBlendMode(BlendMode.Multiply);
+    paint.setColor(Skia.Color("cyan"));
+    canvas.drawCircle(r, r, r, paint);
+    paint.setColor(Skia.Color("magenta"));
+    canvas.drawCircle(width - r, r, r, paint);
+    paint.setColor(Skia.Color("yellow"));
+    canvas.drawCircle(width / 2, width - r, r, paint);
+  }
+);
 
 export const HelloWorld = () => {
-  const size = 256;
-  const r = size * 0.33;
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ width, height }}>
       <Group blendMode="multiply">
-        <Drawing
-          drawing={({ canvas, paint }) => {
-            paint.setColor(Skia.Color("cyan"));
-            canvas.drawCircle(r, r, r, paint);
-            paint.setColor(Skia.Color("magenta"));
-            canvas.drawCircle(size - r, r, r, paint);
-            paint.setColor(Skia.Color("yellow"));
-            canvas.drawCircle(size / 2, size - r, r, paint);
-          }}
-        />
+        <Picture picture={picture} />
       </Group>
     </Canvas>
   );

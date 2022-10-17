@@ -3,7 +3,7 @@ import React from "react";
 import { BlendMode } from "../../../../skia/types";
 import { setupSkia } from "../../../../skia/__tests__/setup";
 import { docPath, processResult } from "../../../../__tests__/setup";
-import { Circle, Drawing, Group } from "../../../components";
+import { Circle, Group, Picture } from "../../../components";
 import { drawOnNode, width, height, importSkia } from "../../setup";
 
 const size = width;
@@ -49,19 +49,23 @@ describe("Getting Started / Hello World", () => {
     );
   });
   it("Hello world with the declarative and the imperative API", () => {
-    const { Skia } = importSkia();
+    const { Skia, createPicture } = importSkia();
+    const picture = createPicture(
+      Skia.XYWHRect(0, 0, width, height),
+      (canvas) => {
+        const paint = Skia.Paint();
+        paint.setBlendMode(BlendMode.Multiply);
+        paint.setColor(Skia.Color("cyan"));
+        canvas.drawCircle(r, r, r, paint);
+        paint.setColor(Skia.Color("magenta"));
+        canvas.drawCircle(size - r, r, r, paint);
+        paint.setColor(Skia.Color("yellow"));
+        canvas.drawCircle(size / 2, size - r, r, paint);
+      }
+    );
     const surface = drawOnNode(
       <Group blendMode="multiply">
-        <Drawing
-          drawing={({ canvas, paint }) => {
-            paint.setColor(Skia.Color("cyan"));
-            canvas.drawCircle(r, r, r, paint);
-            paint.setColor(Skia.Color("magenta"));
-            canvas.drawCircle(size - r, r, r, paint);
-            paint.setColor(Skia.Color("yellow"));
-            canvas.drawCircle(size / 2, size - r, r, paint);
-          }}
-        />
+        <Picture picture={picture} />
       </Group>
     );
     processResult(

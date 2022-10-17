@@ -119,6 +119,11 @@ const sidebars = {
       id: "path-effects",
     },
     {
+      type: "doc",
+      label: "Picture",
+      id: "picture",
+    },
+    {
       collapsed: true,
       type: "category",
       label: "Animations",

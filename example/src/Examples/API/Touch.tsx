@@ -1,16 +1,15 @@
-import React, { useCallback, useRef } from "react";
-import { StyleSheet, View } from "react-native";
-import type {
-  DrawingContext,
-  SkColor,
-  TouchInfo,
-} from "@shopify/react-native-skia";
+import React from "react";
+import { useWindowDimensions, View } from "react-native";
+import type { SkColor, TouchInfo } from "@shopify/react-native-skia";
 import {
-  Group,
+  createPicture,
+  PaintStyle,
+  useValue,
+  Picture,
+  useComputedValue,
   useMultiTouchHandler,
   Fill,
   Canvas,
-  Drawing,
   Skia,
   TouchType,
 } from "@shopify/react-native-skia";
@@ -31,9 +30,14 @@ const Colors = [
   "#5819D7",
 ] as const;
 
+const paint = Skia.Paint();
+paint.setStyle(PaintStyle.Stroke);
+paint.setStrokeWidth(8);
+
 export const Touch = () => {
+  const { width, height } = useWindowDimensions();
   // Store current touches together with their color
-  const currentTouches = useRef<Array<TouchInfo & { color: SkColor }>>([]);
+  const currentTouches = useValue<Array<TouchInfo & { color: SkColor }>>([]);
 
   const handleTouches = useMultiTouchHandler({
     onStart: (t) => {
@@ -42,6 +46,7 @@ export const Touch = () => {
         Colors[Math.round(Math.random() * (Colors.length - 1))]
       );
       currentTouches.current.push({ ...t, color });
+      currentTouches.current = [...currentTouches.current];
     },
     onActive: (t) => {
       // Updated the touch with the new position
@@ -51,6 +56,7 @@ export const Touch = () => {
           ...currentTouches.current[index],
           ...t,
         };
+        currentTouches.current = [...currentTouches.current];
       }
     },
     onEnd: (t) => {
@@ -58,36 +64,30 @@ export const Touch = () => {
       currentTouches.current = currentTouches.current.filter(
         (p) => p.id !== t.id
       );
+      currentTouches.current = [...currentTouches.current];
     },
   });
 
-  const handleDraw = useCallback(({ canvas, paint }: DrawingContext) => {
-    // Draw an indicator for all of the active touches. Each touch
-    // event will request a new redraw of the view, so the ref will
-    // always contain the correct current touches.
-    currentTouches.current.forEach((t) => {
-      if (t.type === TouchType.Active || t.type === TouchType.Start) {
-        paint.setColor(t.color);
-        canvas.drawCircle(t.x, t.y, 40, paint);
-      }
-    });
-  }, []);
+  const picture = useComputedValue(
+    () =>
+      createPicture(Skia.XYWHRect(0, 0, width, height), (canvas) => {
+        currentTouches.current.forEach((t) => {
+          if (t.type === TouchType.Active || t.type === TouchType.Start) {
+            paint.setColor(t.color);
+            canvas.drawCircle(t.x, t.y, 40, paint);
+          }
+        });
+      }),
+    [currentTouches]
+  );
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       <Title>Touch handling</Title>
-      <Canvas style={styles.container} onTouch={handleTouches}>
+      <Canvas style={{ width, height }} onTouch={handleTouches}>
         <Fill color="white" />
-        <Group style="stroke" strokeWidth={8}>
-          <Drawing drawing={handleDraw} />
-        </Group>
+        <Picture picture={picture} />
       </Canvas>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

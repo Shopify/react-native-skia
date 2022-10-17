@@ -1,8 +1,7 @@
 import React from "react";
 
-import type { JsiSkPaint } from "../../skia/web/JsiSkPaint";
 import { processResult } from "../../__tests__/setup";
-import { Drawing, FitBox, Group, LinearGradient, Path } from "../components";
+import { FitBox, Group, LinearGradient, Path } from "../components";
 
 import { drawOnNode, width, height, importSkia } from "./setup";
 
@@ -110,17 +109,6 @@ describe("Path Examples", () => {
             ]}
           />
           <Path path={path} style="stroke" strokeWidth={116} />
-          <Drawing
-            drawing={(ctx) => {
-              const paint = ctx.paint as JsiSkPaint;
-              expect(paint.ref.getStrokeCap()).toBe(
-                paint.CanvasKit.StrokeCap.Round
-              );
-              expect(paint.ref.getStrokeJoin()).toBe(
-                paint.CanvasKit.StrokeJoin.Round
-              );
-            }}
-          />
         </Group>
       </FitBox>
     );
