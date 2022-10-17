@@ -1,6 +1,6 @@
 name: Test iOS build
 on:
-  pull_request:
+#  pull_request:
 #    paths:
 #      - 'package/ios/**'
 #      - 'package/cpp/**'
