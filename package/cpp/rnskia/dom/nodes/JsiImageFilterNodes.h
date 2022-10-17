@@ -221,24 +221,24 @@ protected:
   void materialize(DrawingContext* context) override {
     if (isChanged(context)) {
       auto input = optionalChild(0);
-      setImageFilter(context, SkImageFilters::Blur(_radiusProp->getDerivedValue()->x(),
-                                                   _radiusProp->getDerivedValue()->y(),
-                                                   *_tileModeProp->getDerivedValue(),
+      setImageFilter(context, SkImageFilters::Blur(_blurProp->getDerivedValue()->x(),
+                                                   _blurProp->getDerivedValue()->y(),
+                                                   _tileModeProp->isSet() ?
+                                                     *_tileModeProp->getDerivedValue() : SkTileMode::kDecal,
                                                    input ? input : nullptr));
     }
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _radiusProp = container->defineProperty(std::make_shared<RadiusProp>(JsiPropId::get("radius")));
-    _tileModeProp = container->defineProperty(std::make_shared<TileModeProp>(JsiPropId::get("tileMode")));
+    _blurProp = container->defineProperty(std::make_shared<RadiusProp>(JsiPropId::get("blur")));
+    _tileModeProp = container->defineProperty(std::make_shared<TileModeProp>(JsiPropId::get("mode")));
     
-    _radiusProp->require();
-    _tileModeProp->require();
+    _blurProp->require();
   }
   
 private:
-  RadiusProp* _radiusProp;
+  RadiusProp* _blurProp;
   TileModeProp* _tileModeProp;
 };
 
