@@ -13,7 +13,7 @@
 namespace RNSkia
 {
 
-    using namespace facebook;
+    namespace jsi = facebook::jsi;
 
     using TSelf = jni::local_ref<JniPlatformContext::jhybriddata>;
 

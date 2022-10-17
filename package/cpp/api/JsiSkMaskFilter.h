@@ -16,7 +16,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkMaskFilter : public JsiSkWrappingSkPtrHostObject<SkMaskFilter> {
 public:

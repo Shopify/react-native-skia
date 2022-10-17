@@ -15,7 +15,7 @@ namespace RNSkia {
 
 class RNSkManager;
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 using JSCallInvokerHolder =
     jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;

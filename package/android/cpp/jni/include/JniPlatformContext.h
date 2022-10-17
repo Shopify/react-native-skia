@@ -16,7 +16,8 @@ class SkStreamAsset;
 namespace RNSkia
 {
 
-    using namespace facebook;
+    namespace jsi = facebook::jsi;
+    namespace jni = facebook::jni;
 
     using JSCallInvokerHolder =
         jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;

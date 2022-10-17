@@ -5,7 +5,7 @@
 #include <string>
 
 namespace RNJsi {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 enum JsiWrapperValueType {
   NonInitialized,

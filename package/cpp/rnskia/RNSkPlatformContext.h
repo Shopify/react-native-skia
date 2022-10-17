@@ -24,7 +24,8 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
+namespace react = facebook::react;
 
 class RNSkPlatformContext {
 public:

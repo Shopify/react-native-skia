@@ -34,7 +34,7 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkCanvas : public JsiSkHostObject {
 public:

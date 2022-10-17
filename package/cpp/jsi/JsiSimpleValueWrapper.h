@@ -5,7 +5,7 @@
 #include <jsi/jsi.h>
 
 namespace RNJsi {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 /**
  Implements a simple wrapper class for JSI primitives like numbers and boolean

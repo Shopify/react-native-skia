@@ -12,7 +12,8 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
+namespace react = facebook::react;
 
 class JsiSkDataFactory : public JsiSkHostObject {
 public:

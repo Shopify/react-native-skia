@@ -9,7 +9,7 @@
 #include <JniSkiaManager.h>
 
 namespace RNSkia {
-    using namespace facebook;
+    namespace jsi = facebook::jsi;
     using namespace jni;
 
     class JniSkiaBaseView {

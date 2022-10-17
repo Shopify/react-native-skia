@@ -36,8 +36,9 @@ bool RNSkJsRenderer::tryRender(
 
 void RNSkJsRenderer::renderImmediate(
     std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-  milliseconds ms =
-      duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+  std::chrono::milliseconds ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(
+          std::chrono::system_clock::now().time_since_epoch());
   canvasProvider->renderToCanvas([&](SkCanvas *canvas) {
     // Create jsi canvas
     auto jsiCanvas = std::make_shared<JsiSkCanvas>(_platformContext);
@@ -73,8 +74,9 @@ void RNSkJsRenderer::performDraw(
   _jsiCanvas->setCanvas(canvas);
 
   // Get current milliseconds
-  milliseconds ms =
-      duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+  std::chrono::milliseconds ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(
+          std::chrono::system_clock::now().time_since_epoch());
 
   try {
     // Perform the javascript drawing

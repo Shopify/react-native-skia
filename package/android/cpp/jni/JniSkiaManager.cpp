@@ -10,7 +10,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 // JNI binding
 void JniSkiaManager::registerNatives() {

@@ -11,7 +11,7 @@
 #include <memory>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 /**
  Implements a readonly Value that is updated every time the screen is redrawn.
  Its value will be the number of milliseconds since the animation value was

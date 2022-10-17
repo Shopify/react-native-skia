@@ -10,7 +10,7 @@
 #include <jsi/jsi.h>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 /**
  Implements a Value that can be both read and written to. It inherits from the
  ReadonlyValue with functionailty for subscribing to changes.

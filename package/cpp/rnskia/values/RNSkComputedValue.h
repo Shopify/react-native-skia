@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 /**
   Creates a readonly value that depends on one or more other values. The derived

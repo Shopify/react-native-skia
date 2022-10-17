@@ -16,7 +16,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkImageInfo : public JsiSkWrappingSharedPtrHostObject<SkImageInfo> {
 public:

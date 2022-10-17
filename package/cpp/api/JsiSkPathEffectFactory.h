@@ -23,7 +23,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkPathEffectFactory : public JsiSkHostObject {
 public:
