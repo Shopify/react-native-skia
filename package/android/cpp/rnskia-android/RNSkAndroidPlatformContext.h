@@ -9,7 +9,7 @@
 #include <RNSkPlatformContext.h>
 
 namespace RNSkia {
-    using namespace facebook;
+    namespace jsi = facebook::jsi;
 
     class RNSkAndroidPlatformContext: public RNSkPlatformContext {
     public:

@@ -7,12 +7,13 @@
 
 #include <JsiSkApi.h>
 #include <RNSkJsiViewApi.h>
-#include <RNSkView.h>
 #include <RNSkValueApi.h>
+#include <RNSkView.h>
+
 #include <JsiDomApi.h>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 RNSkManager::RNSkManager(
     jsi::Runtime *jsRuntime,
@@ -36,17 +37,18 @@ RNSkManager::~RNSkManager() {
 }
 
 void RNSkManager::invalidate() {
-  if(_isInvalidated) {
+  if (_isInvalidated) {
     return;
   }
   _isInvalidated = true;
-  
+
   // Invalidate members
   _viewApi->invalidate();
   _platformContext->invalidate();
 }
 
-void RNSkManager::registerSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
+void RNSkManager::registerSkiaView(size_t nativeId,
+                                   std::shared_ptr<RNSkView> view) {
   if (!_isInvalidated && _viewApi != nullptr)
     _viewApi->registerSkiaView(nativeId, view);
 }

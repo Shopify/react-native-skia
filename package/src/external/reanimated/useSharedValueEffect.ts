@@ -1,16 +1,10 @@
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable @typescript-eslint/consistent-type-imports */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useEffect, useMemo } from "react";
 
-// @ts-ignore
-let Reanimated: typeof import("react-native-reanimated") | undefined;
-let Core: // @ts-ignore
-typeof import("react-native-reanimated/lib/reanimated2/core") | undefined;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Reanimated: any;
 
 try {
   Reanimated = require("react-native-reanimated");
-  Core = require("react-native-reanimated/lib/reanimated2/core");
 } catch (e) {
   // Ignore
 }
@@ -36,29 +30,15 @@ export const useSharedValueEffect = <T = number>(
   ...values: SharedValueTypeWrapper<T>[]
 ) => {
   const input = useSharedValueWrapper(0);
-  const { runOnJS, startMapper, stopMapper } = useMemo(() => {
-    if (Reanimated && Core) {
-      const { runOnJS } = Reanimated;
-      const { startMapper, stopMapper } = Core;
-      return { runOnJS, startMapper, stopMapper };
-    } else {
+
+  useEffect(() => {
+    if (!Reanimated) {
       console.warn(
         "Reanimated was not found and the useSharedValueEffect hook will have no effect."
       );
-      return {
-        runOnJS: undefined,
-        startMapper: undefined,
-        stopMapper: undefined,
-      };
-    }
-  }, []);
+    } else {
+      const { runOnJS, startMapper, stopMapper } = Reanimated;
 
-  useEffect(() => {
-    if (
-      startMapper !== undefined &&
-      runOnJS !== undefined &&
-      stopMapper !== undefined
-    ) {
       // Start a mapper in Reanimated
       const mapperId = startMapper(
         () => {
@@ -77,5 +57,5 @@ export const useSharedValueEffect = <T = number>(
     }
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, runOnJS, startMapper, stopMapper, value, ...values]);
+  }, [input, value, ...values]);
 };
