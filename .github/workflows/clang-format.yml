@@ -11,7 +11,7 @@ jobs:
             exclude: ''
           - check: 'package/cpp'
             exclude: '' 
-          - check: 'package/android/src'
+          - check: 'package/android/cpp'
             exclude: '' 
     steps:
     - uses: actions/checkout@v3
