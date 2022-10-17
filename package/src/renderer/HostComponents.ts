@@ -98,6 +98,7 @@ declare global {
     LineNode: (props: LineProps) => RenderNode<LineProps>;
     ImageNode: (props: ImageProps) => RenderNode<ImageProps>;
     OvalNode: (props: OvalProps) => RenderNode<OvalProps>;
+    PatchNode: (props: PatchProps) => RenderNode<PatchProps>;
     PointsNode: (props: PointsProps) => RenderNode<PointsProps>;
     DiffRectNode: (props: DiffRectProps) => RenderNode<DiffRectProps>;
     // Mask filters

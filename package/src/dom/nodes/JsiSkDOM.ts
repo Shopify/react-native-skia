@@ -179,7 +179,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Patch(props: PatchProps) {
-    return new PatchNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.PatchNode
+      ? global.SkiaDomApi.PatchNode(props ?? {})
+      : new PatchNode(this.ctx, props);
   }
 
   Points(props: PointsProps) {
