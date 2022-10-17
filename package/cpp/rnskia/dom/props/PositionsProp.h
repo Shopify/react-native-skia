@@ -5,11 +5,10 @@
 
 namespace RNSkia {
 
-
-class PositionProp:
+class PositionsProp:
 public DerivedProp<std::vector<SkScalar>> {
 public:
-  PositionProp(PropId name): DerivedProp<std::vector<SkScalar>>() {
+  PositionsProp(PropId name): DerivedProp<std::vector<SkScalar>>() {
     _positionProp = addProperty(std::make_shared<NodeProp>(name));
   }
   
@@ -20,7 +19,7 @@ public:
       derivedPositions.reserve(positions.size());
       
       for (size_t i = 0; i < positions.size(); ++i) {
-        
+        derivedPositions.push_back(positions[i]->getAsNumber());
       }
       setDerivedValue(std::move(derivedPositions));
     } else {

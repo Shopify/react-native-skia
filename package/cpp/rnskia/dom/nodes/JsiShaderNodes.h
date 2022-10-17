@@ -8,7 +8,7 @@
 #include "UniformsProp.h"
 #include "TransformsProps.h"
 #include "TileModeProp.h"
-
+#include "PositionsProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -270,7 +270,7 @@ public:
     _transformsProps = container->defineProperty(std::make_shared<TransformsProps>());
     
     _colorsProp = container->defineProperty(std::make_shared<ColorsProp>(JsiPropId::get("colors")));
-    _positions = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("positions")));
+    _positionsProp = container->defineProperty(std::make_shared<PositionsProp>(JsiPropId::get("positions")));
     _modeProp = container->defineProperty(std::make_shared<TileModeProp>(JsiPropId::get("mode")));
     _flagsProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("flags")));
     
@@ -280,7 +280,7 @@ public:
 protected:
   TransformsProps* _transformsProps;
   ColorsProp* _colorsProp;
-  NodeProp* _positions;
+  PositionsProp* _positionsProp;
   TileModeProp* _modeProp;
   NodeProp* _flagsProp;
 };
@@ -297,15 +297,6 @@ protected:
       SkColor* colors = _colorsProp->getDerivedValue()->data();
       SkPoint pts[] = { *_startProp->getDerivedValue(), *_endProp->getDerivedValue()};
       
-      std::vector<SkScalar> posV;
-      if (_positions->isSet()) {
-        auto pos = _positions->value()->getAsArray();
-        posV.reserve(pos.size());
-        for (size_t i=0; i < pos.size(); ++i) {
-          posV.push_back(pos[i]->getAsNumber());
-        }
-      }
-      
       auto flags = 0;
       if (_flagsProp->isSet()) {
         flags = _flagsProp->value()->getAsNumber();
@@ -315,8 +306,8 @@ protected:
       
       setShader(context, SkGradientShader::MakeLinear(pts,
                                                       colors,
-                                                      _positions->isSet() ? posV.data() : nullptr,
-                                                      static_cast<int>(posV.size()),
+                                                      _positionsProp->isSet() ? _positionsProp->getDerivedValue()->data() : nullptr,
+                                                      _positionsProp->isSet() ?                                                       static_cast<int>(_positionsProp->getDerivedValue()->size()) : 0,
                                                       mode,
                                                       flags,
                                                       _transformsProps->getDerivedValue().get()));
@@ -348,16 +339,6 @@ protected:
       SkColor* colors = _colorsProp->getDerivedValue()->data();
       auto c = _centerProp->getDerivedValue();
       auto r = _radiusProp->value()->getAsNumber();
-      
-      std::vector<SkScalar> posV;
-      if (_positions->isSet()) {
-        auto pos = _positions->value()->getAsArray();
-        posV.reserve(pos.size());
-        for (size_t i=0; i < pos.size(); ++i) {
-          posV.push_back(pos[i]->getAsNumber());
-        }
-      }
-      
       auto flags = 0;
       if (_flagsProp->isSet()) {
         flags = _flagsProp->value()->getAsNumber();
@@ -368,8 +349,8 @@ protected:
       setShader(context, SkGradientShader::MakeRadial(*c,
                                                       r,
                                                       colors,
-                                                      _positions->isSet() ? posV.data() : nullptr,
-                                                      static_cast<int>(posV.size()),
+                                                      _positionsProp->isSet() ? _positionsProp->getDerivedValue()->data() : nullptr,
+                                                      _positionsProp->isSet() ?                                                       static_cast<int>(_positionsProp->getDerivedValue()->size()) : 0,
                                                       mode,
                                                       flags,
                                                       _transformsProps->getDerivedValue().get()));
