@@ -13,11 +13,9 @@
 
 namespace RNSkia {
 
-using namespace facebook;
-using namespace RNJsi;
-using namespace std::chrono;
+namespace jsi = facebook::jsi;
 
-class RNSkInfoObject : public JsiHostObject {
+class RNSkInfoObject : public RNJsi::JsiHostObject {
 public:
   JSI_PROPERTY_GET(width) { return _width; }
   JSI_PROPERTY_GET(height) { return _height; }
@@ -71,8 +69,8 @@ public:
   void updateTouches(std::vector<RNSkTouchInfo> &touches) {
     std::lock_guard<std::mutex> lock(_mutex);
     // Add timestamp
-    auto ms = std::chrono::duration_cast<milliseconds>(
-                  system_clock::now().time_since_epoch())
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                  std::chrono::system_clock::now().time_since_epoch())
                   .count();
 
     for (size_t i = 0; i < touches.size(); i++) {

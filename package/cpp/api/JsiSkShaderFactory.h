@@ -20,7 +20,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 int getFlag(const jsi::Value *values, int i, size_t size) {
   if (i >= size || values[i].isUndefined()) {

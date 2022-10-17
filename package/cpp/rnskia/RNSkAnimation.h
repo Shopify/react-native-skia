@@ -9,7 +9,7 @@
 #include <jsi/jsi.h>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 /**
  Implements an animation that can be used to drive other values

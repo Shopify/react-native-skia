@@ -14,7 +14,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkColorFilter : public JsiSkWrappingSkPtrHostObject<SkColorFilter> {
 public:

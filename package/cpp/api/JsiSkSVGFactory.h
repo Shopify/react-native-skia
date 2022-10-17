@@ -19,7 +19,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkSVGFactory : public JsiSkHostObject {
 public:

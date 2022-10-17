@@ -18,9 +18,9 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
-class JsiSkColor : public JsiHostObject {
+class JsiSkColor : public RNJsi::JsiHostObject {
 public:
   JsiSkColor() : JsiHostObject() {}
 

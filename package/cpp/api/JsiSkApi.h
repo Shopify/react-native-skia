@@ -45,7 +45,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkApi : public JsiSkHostObject {
 public:

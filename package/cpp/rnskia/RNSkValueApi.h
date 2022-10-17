@@ -10,9 +10,10 @@
 #include <jsi/jsi.h>
 
 namespace RNSkia {
-using namespace facebook;
 
-class RNSkValueApi : public JsiHostObject {
+namespace jsi = facebook::jsi;
+
+class RNSkValueApi : public RNJsi::JsiHostObject {
 public:
   /**
    * Constructor

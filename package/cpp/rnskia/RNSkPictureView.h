@@ -33,7 +33,7 @@ class SkImage;
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class RNSkPictureRenderer
     : public RNSkRenderer,
@@ -100,7 +100,7 @@ public:
                 std::bind(&RNSkPictureView::requestRedraw, this), context)) {}
 
   void setJsiProperties(
-      std::unordered_map<std::string, JsiValueWrapper> &props) override {
+      std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) override {
     for (auto &prop : props) {
       if (prop.first == "picture") {
         if (prop.second.isUndefinedOrNull()) {
@@ -108,7 +108,8 @@ public:
           std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
               ->setPicture(nullptr);
           return;
-        } else if (prop.second.getType() != JsiWrapperValueType::HostObject) {
+        } else if (prop.second.getType() !=
+                   RNJsi::JsiWrapperValueType::HostObject) {
           // We expect a function for the picture custom property
           throw std::runtime_error(
               "Expected an object for the picture custom property.");

@@ -16,7 +16,7 @@
 #include <fbjni/detail/Hybrid.h>
 
 namespace RNSkia {
-    using namespace facebook;
+    namespace jsi = facebook::jsi;
     using namespace jni;
 
     class JniSkiaPictureView

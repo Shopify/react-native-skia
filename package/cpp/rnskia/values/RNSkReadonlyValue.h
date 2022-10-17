@@ -15,7 +15,7 @@
 #include <RNSkPlatformContext.h>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 /**
  Implements a readonly Value that is updated every time the screen is redrawn.
@@ -29,7 +29,7 @@ public:
   explicit RNSkReadonlyValue(
       std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
-        _valueHolder(std::make_unique<JsiSimpleValueWrapper>(
+        _valueHolder(std::make_unique<RNJsi::JsiSimpleValueWrapper>(
             *platformContext->getJsRuntime())) {}
 
   virtual ~RNSkReadonlyValue() { invalidate(); }
@@ -153,7 +153,7 @@ protected:
   }
 
 private:
-  std::unique_ptr<JsiSimpleValueWrapper> _valueHolder;
+  std::unique_ptr<RNJsi::JsiSimpleValueWrapper> _valueHolder;
 
   long _listenerId = 0;
   std::unordered_map<long, std::function<void(jsi::Runtime &)>> _listeners;

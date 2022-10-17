@@ -8,13 +8,12 @@
 
 namespace RNSkia {
 
-using namespace facebook;
-using namespace RNJsi;
+namespace jsi = facebook::jsi;
 
 /**
  * Base class for jsi host objects
  */
-class JsiSkHostObject : public JsiHostObject {
+class JsiSkHostObject : public RNJsi::JsiHostObject {
 public:
   /**
    * Default constructor

@@ -20,7 +20,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 struct RuntimeEffectUniform {
   int columns;

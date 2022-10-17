@@ -26,7 +26,7 @@ class CallInvoker;
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 static void handleNotification(CFNotificationCenterRef center, void *observer,
                                CFStringRef name, const void *object,

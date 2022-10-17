@@ -18,7 +18,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkContourMeasure
     : public JsiSkWrappingSkPtrHostObject<SkContourMeasure> {

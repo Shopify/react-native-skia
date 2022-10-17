@@ -18,7 +18,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkImageFilterFactory : public JsiSkHostObject {
 public:

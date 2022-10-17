@@ -14,7 +14,9 @@ class CallInvoker;
 namespace RNSkia {
 class RNSkView;
 class RNSkJsiViewApi;
-using namespace facebook;
+
+namespace jsi = facebook::jsi;
+namespace react = facebook::react;
 
 class RNSkManager {
 public:

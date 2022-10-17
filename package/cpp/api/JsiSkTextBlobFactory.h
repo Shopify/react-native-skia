@@ -20,7 +20,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkTextBlobFactory : public JsiSkHostObject {
 public:
