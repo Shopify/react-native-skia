@@ -201,7 +201,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Vertices(props: VerticesProps) {
-    return new VerticesNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.VerticesNode
+      ? global.SkiaDomApi.VerticesNode(props)
+      : new VerticesNode(this.ctx, props);
   }
 
   Text(props: TextProps) {

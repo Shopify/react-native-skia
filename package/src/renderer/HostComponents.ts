@@ -197,6 +197,7 @@ declare global {
     ) => DeclarationNode<TwoPointConicalGradientProps, SkShader>;
     PictureNode: (props: PictureProps) => RenderNode<PictureProps>;
     ImageSVGNode: (props: ImageSVGProps) => RenderNode<ImageSVGProps>;
+    VerticesNode: (props: VerticesProps) => RenderNode<VerticesProps>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

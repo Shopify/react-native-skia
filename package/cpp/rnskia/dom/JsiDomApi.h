@@ -22,6 +22,7 @@
 #include "nodes/JsiPictureNode.h"
 #include "nodes/JsiImageSvgNode.h"
 #include "nodes/JsiBlurMaskNode.h"
+#include "nodes/JsiVerticesNode.h"
 
 #include "nodes/JsiPathEffectNodes.h"
 #include "nodes/JsiImageFilterNodes.h"
@@ -64,6 +65,8 @@ namespace RNSkia
       
       installFunction("PictureNode", JsiPictureNode::createCtor(context));
       installFunction("ImageSVGNode", JsiImageSvgNode::createCtor(context));
+      
+      installFunction("VerticesNode", JsiVerticesNode::createCtor(context));
       
       // Path effects
       installFunction("DashPathEffectNode", JsiDashPathEffectNode::createCtor(context));

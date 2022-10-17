@@ -325,7 +325,12 @@ protected:
                                              size_t index) {
     auto value = getArgumentAsObject(runtime, arguments, count, index);
     if(!value.isHostObject(runtime)) {
-      throw jsi::JSError(runtime, "Expected type host object for parameter at index " + std::to_string(index));
+      auto typeProp = value.getProperty(runtime, "type");
+      if (typeProp.isString()) {
+        throw jsi::JSError(runtime, "Expected host object, got \"" + typeProp.asString(runtime).utf8(runtime) + "\" for parameter at index " + std::to_string(index));
+      } else {
+        throw jsi::JSError(runtime, "Expected type host object for parameter at index " + std::to_string(index));
+      }
     }
     return value.asHostObject<T>(runtime);
   }

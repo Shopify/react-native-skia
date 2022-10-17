@@ -8,7 +8,7 @@
 #include "UniformsProp.h"
 #include "TransformsProps.h"
 #include "TileModeProp.h"
-#include "PositionsProp.h"
+#include "NumbersProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -270,7 +270,7 @@ public:
     _transformsProps = container->defineProperty(std::make_shared<TransformsProps>());
     
     _colorsProp = container->defineProperty(std::make_shared<ColorsProp>(JsiPropId::get("colors")));
-    _positionsProp = container->defineProperty(std::make_shared<PositionsProp>(JsiPropId::get("positions")));
+    _positionsProp = container->defineProperty(std::make_shared<NumbersProp>(JsiPropId::get("positions")));
     _modeProp = container->defineProperty(std::make_shared<TileModeProp>(JsiPropId::get("mode")));
     _flagsProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("flags")));
     
@@ -280,7 +280,7 @@ public:
 protected:
   TransformsProps* _transformsProps;
   ColorsProp* _colorsProp;
-  PositionsProp* _positionsProp;
+  NumbersProp* _positionsProp;
   TileModeProp* _modeProp;
   NodeProp* _flagsProp;
 };
