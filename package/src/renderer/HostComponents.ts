@@ -78,6 +78,7 @@ import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
 import { DependencyManager } from "./DependencyManager";
 import { SkiaValue } from "../values";
+import { BackdropFilterProps } from "./components";
 
 declare global {
   var SkiaDomApi: {
@@ -95,6 +96,9 @@ declare global {
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;
     CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
     PathNode: (props: PathProps) => RenderNode<PathProps>;
+    CustomDrawingNode: (
+      props: CustomDrawingNodeProps
+    ) => RenderNode<CustomDrawingNodeProps>;
     LineNode: (props: LineProps) => RenderNode<LineProps>;
     ImageNode: (props: ImageProps) => RenderNode<ImageProps>;
     OvalNode: (props: OvalProps) => RenderNode<OvalProps>;
@@ -199,6 +203,16 @@ declare global {
     PictureNode: (props: PictureProps) => RenderNode<PictureProps>;
     ImageSVGNode: (props: ImageSVGProps) => RenderNode<ImageSVGProps>;
     VerticesNode: (props: VerticesProps) => RenderNode<VerticesProps>;
+    TextNode: (prop: TextProps) => RenderNode<TextProps>;
+    TextPathNode: (prop: TextPathProps) => RenderNode<TextPathProps>;
+    TextBlobNode: (prop: TextBlobProps) => RenderNode<TextBlobProps>;
+    GlyphsNode: (prop: GlyphsProps) => RenderNode<GlyphsProps>;
+    BlendNode: (prop: BlendProps) => DeclarationNode<BlendProps, SkImageFilter>;
+    BackdropFilterNode: (prop: ChildrenProps) => RenderNode<ChildrenProps>;
+    BoxNode: (prop: BoxProps) => RenderNode<BoxProps>;
+    BoxShadowNode: (
+      prop: BoxShadowProps
+    ) => DeclarationNode<BoxShadowProps, BoxShadowProps>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

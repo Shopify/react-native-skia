@@ -32,6 +32,18 @@
 
 #include "nodes/JsiPaintNode.h"
 
+#include "nodes/JsiBackdropFilterNode.h"
+#include "nodes/JsiBlendNode.h"
+#include "nodes/JsiBoxNode.h"
+#include "nodes/JsiBoxShadowNode.h"
+
+#include "nodes/JsiCustomDrawingNode.h"
+
+#include "nodes/JsiGlyphsNode.h"
+#include "nodes/JsiTextNode.h"
+#include "nodes/JsiTextPathNode.h"
+#include "nodes/JsiTextBlobNode.h"
+
 namespace RNSkia
 {
 
@@ -107,6 +119,17 @@ namespace RNSkia
       installFunction("SweepGradientNode", JsiSweepGradientNode::createCtor(context));
       installFunction("TwoPointConicalGradientNode", JsiTwoPointConicalGradientNode::createCtor(context));
             
+      installFunction("BackdropFilterNode", JsiBackdropFilterNode::createCtor(context));
+      installFunction("BlendNode", JsiBlendNode::createCtor(context));
+      installFunction("BoxNode", JsiBoxNode::createCtor(context));
+      installFunction("BoxShadowNode", JsiBoxShadowNode::createCtor(context));
+      
+      installFunction("CustomDrawingNode", JsiCustomDrawingNode::createCtor(context));
+      
+      installFunction("GlyphsNode", JsiGlyphsNode::createCtor(context));
+      installFunction("TextNode", JsiTextNode::createCtor(context));
+      installFunction("TextPathNode", JsiTextPathNode::createCtor(context));
+      installFunction("TextBlobNode", JsiTextBlobNode::createCtor(context));
     }
   };
 

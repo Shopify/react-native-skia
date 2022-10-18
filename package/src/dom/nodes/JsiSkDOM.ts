@@ -163,7 +163,9 @@ export class JsiSkDOM implements SkDOM {
   }
 
   CustomDrawing(props: CustomDrawingNodeProps) {
-    return new CustomDrawingNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.CustomDrawingNode
+      ? global.SkiaDomApi.CustomDrawingNode(props ?? {})
+      : new CustomDrawingNode(this.ctx, props);
   }
 
   Line(props: LineProps) {
@@ -209,19 +211,27 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Text(props: TextProps) {
-    return new TextNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.TextNode
+      ? global.SkiaDomApi.TextNode(props)
+      : new TextNode(this.ctx, props);
   }
 
   TextPath(props: TextPathProps) {
-    return new TextPathNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.TextPathNode
+      ? global.SkiaDomApi.TextPathNode(props)
+      : new TextPathNode(this.ctx, props);
   }
 
   TextBlob(props: TextBlobProps) {
-    return new TextBlobNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.TextBlobNode
+      ? global.SkiaDomApi.TextBlobNode(props)
+      : new TextBlobNode(this.ctx, props);
   }
 
   Glyphs(props: GlyphsProps) {
-    return new GlyphsNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.GlyphsNode
+      ? global.SkiaDomApi.GlyphsNode(props)
+      : new GlyphsNode(this.ctx, props);
   }
 
   DiffRect(props: DiffRectProps) {
@@ -430,18 +440,26 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Blend(props: BlendProps) {
-    return new BlendNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.BlendNode
+      ? global.SkiaDomApi.BlendNode(props)
+      : new BlendNode(this.ctx, props);
   }
 
   BackdropFilter(props: ChildrenProps) {
-    return new BackdropFilterNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.BackdropFilterNode
+      ? global.SkiaDomApi.BackdropFilterNode(props)
+      : new BackdropFilterNode(this.ctx, props);
   }
 
   Box(props: BoxProps) {
-    return new BoxNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.BoxNode
+      ? global.SkiaDomApi.BoxNode(props)
+      : new BoxNode(this.ctx, props);
   }
 
   BoxShadow(props: BoxShadowProps) {
-    return new BoxShadowNode(this.ctx, props);
+    return global.SkiaDomApi && global.SkiaDomApi.BoxShadowNode
+      ? global.SkiaDomApi.BoxShadowNode(props)
+      : new BoxShadowNode(this.ctx, props);
   }
 }
