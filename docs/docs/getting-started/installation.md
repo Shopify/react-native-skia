@@ -13,7 +13,7 @@ Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flu
 yarn add @shopify/react-native-skia
 ```
 
-Or using npm: 1
+Or using npm:
 
 ```sh
 npm install @shopify/react-native-skia
