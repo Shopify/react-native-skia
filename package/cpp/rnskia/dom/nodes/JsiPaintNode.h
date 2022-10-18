@@ -17,13 +17,41 @@ public:
     JsiBaseDomDeclarationNode(context, "skPaint") {}
 
 protected:
-  void materialize(DrawingContext* context) override {
-    /* Paint props are materializing itself */
+  /**
+   Called when rendering the tree to create all derived values from all nodes.
+   */
+  virtual void materializeNode(DrawingContext* context) override {
     
-    if (_opacityProp->isSet() && (_opacityProp->isChanged() || context->isInvalid())) {
-      context->setOpacity(_opacityProp->value()->getAsNumber());
+    auto container = getPropsContainer();
+    if (container != nullptr) {
+      // Make sure we commit any waiting transactions in the props object
+      container->updatePendingValues(context, getType());
+    }
+    
+    // A paint node should have its own local paint
+    if (_localContext == nullptr) {
+      _localContext = context->inheritContext("PaintNode");
+    }
+    
+    if (_localContext->isInvalid()) {
+      _localContext->setMutablePaint(std::make_shared<SkPaint>());
+    }
+    
+    // Materialize children who will now only change the paint node's paint
+    for (auto &child: getChildren()) {
+      auto decl = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
+      if (decl != nullptr) {
+        decl->materializeNode(_localContext.get());
+      }
+    }
+
+    // end the "visit" of the declaration node
+    if (container != nullptr) {
+      container->markAsResolved();
     }
   }
+  
+  void materialize(DrawingContext* context) override {}
   
   void defineProperties(NodePropsContainer* container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
@@ -34,6 +62,7 @@ protected:
   
 private:
   NodeProp* _opacityProp;
+  std::shared_ptr<DrawingContext> _localContext;
 };
 
 }

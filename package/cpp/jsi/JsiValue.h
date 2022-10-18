@@ -168,6 +168,14 @@ public:
     return std::dynamic_pointer_cast<T>(_hostObject);
   }
   
+  template <typename T>
+  std::shared_ptr<T> tryGetAs() {
+    if (_type != PropType::HostObject) {
+      return nullptr;
+    }
+    return std::dynamic_pointer_cast<T>(_hostObject);
+  }
+  
   const jsi::HostFunctionType getAsHostFunction() {
     if (_type != PropType::HostFunction) {
       throw std::runtime_error("Expected type host function, got " + getTypeAsString(_type));

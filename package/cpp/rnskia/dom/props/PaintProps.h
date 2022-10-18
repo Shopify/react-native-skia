@@ -17,40 +17,43 @@
 
 namespace RNSkia {
 
-class PaintProp: public BaseDerivedProp {
+static PropId PropNameCurrent = JsiPropId::get("current");
+
+class PaintProp: public DerivedProp<SkPaint> {
 public:
-  PaintProp(): BaseDerivedProp() {
-    _paintProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("paint")));
+  PaintProp(PropId name): DerivedProp<SkPaint>() {
+    _paintProp = addProperty(std::make_shared<NodeProp>(name));
   }
   
-  void updatePendingValues(DrawingContext *context) override {
-    if (_paintProp->isSet() && (_paintProp->isChanged() || context->isInvalid())) {
+  PaintProp(): PaintProp(JsiPropId::get("paint")) {}
+  
+  void updateDerivedValue() override {
+    if (_paintProp->isSet()) {
       if (_paintProp->value()->getType() == PropType::HostObject) {
         // Read paint property as Host Object - JsiSkPaint
-        auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(_paintProp->value()->getAsHostObject());
+        auto ptr = _paintProp->value()->getAs<JsiSkPaint>();
         if (ptr != nullptr) {
-          // Update the local paint for the current context
-          context->setMutablePaint(ptr->getObject());
+          setDerivedValue(ptr->getObject());
         } else {
           throw std::runtime_error("Expected SkPaint object, got unknown object when reading paint property.");
         }
       } else if (_paintProp->value()->getType() == PropType::Object) {
         // We have a JS object - is it a ref?
-        auto ref = _paintProp->value()->getValue(JsiPropId::get("current"));
+        auto ref = _paintProp->value()->getValue(PropNameCurrent);
         if (ref->getType() == PropType::HostObject) {
-          auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(ref->getAsHostObject());
+          auto ptr = ref->getAs<JsiSkPaint>();
           if (ptr != nullptr) {
             // Update the local paint for the current context
-            context->setMutablePaint(ptr->getObject());
+            setDerivedValue(ptr->getObject());
           } else {
             throw std::runtime_error("Expected reference to a SkPaint object, got unknown object when reading paint property.");
           }
-        } else {
-          throw std::runtime_error("Expected reference to a paint object, got unknown object when reading paint property.");
         }
       } else {
         throw std::runtime_error("Expected paint object, got unknown object when reading paint property.");
       }
+    } else {
+      setDerivedValue(nullptr);
     }
   }
   

@@ -11,6 +11,7 @@
 #include "RectProp.h"
 #include "RRectProp.h"
 #include "ClipProp.h"
+#include "LayerProp.h"
 
 namespace RNSkia {
 
@@ -58,21 +59,13 @@ public:
     if (shouldSave) {
       // Save canvas state
       if (_layerProp->isSet()) {
-        if (_layerProp->value()->getType() == PropType::Bool) {
-          // Just layer with empty bounds
+        if (_layerProp->isBool()) {
           _localContext->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(nullptr, nullptr, nullptr, 0));
-        } else if (_layerProp->value()->getType() == PropType::HostObject) {
-          // Check for type, can be either paint or declaration node
-          auto ptr = std::dynamic_pointer_cast<JsiSkPaint>(_layerProp->value()->getAsHostObject());
-          if (ptr != nullptr) {
-            _localContext->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(nullptr,
-                                                                         ptr->getObject().get(),
-                                                                         nullptr,
-                                                                         0));
-          } else {
-            // TODO: Have not found an example of using a declaration node!?
-            throw std::runtime_error("Could not read the layer property of the node.");
-          }
+        } else {
+          _localContext->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(nullptr,
+                                                                       _layerProp->getDerivedValue().get(),
+                                                                       nullptr,
+                                                                       0));
         }
       } else {
         _localContext->getCanvas()->save();
@@ -207,7 +200,7 @@ protected:
     _originProp = container->defineProperty(std::make_shared<PointProp>(PropNameOrigin));
     _clipProp = container->defineProperty(std::make_shared<ClipProp>(PropNameClip));
     _invertClip = container->defineProperty(std::make_shared<NodeProp>(PropNameInvertClip));
-    _layerProp = container->defineProperty(std::make_shared<NodeProp>(PropNameLayer));
+    _layerProp = container->defineProperty(std::make_shared<LayerProp>(PropNameLayer));
   }
   
 private:
@@ -217,7 +210,7 @@ private:
   NodeProp* _opacityProp;
   NodeProp* _invertClip;
   ClipProp* _clipProp;
-  NodeProp* _layerProp;
+  LayerProp* _layerProp;
   
   std::shared_ptr<DrawingContext> _localContext;
 };
