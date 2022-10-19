@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, { useRef, forwardRef } from "react";
 
 import type { SkiaProps } from "../processors";
