@@ -41,11 +41,6 @@ public:
       _localContext = context->inheritContext(getType());
     }
     
-    // Opacity (paint prop resolves in updatePendingValues in the PaintProp class)
-    if (_opacityProp->isSet() && (_opacityProp->isChanged() || _localContext->isInvalid())) {
-      _localContext->setOpacity(_opacityProp->value()->getAsNumber());
-    }
-    
     auto shouldTransform = _matrixProp->isSet() || _transformProp->isSet();
     auto shouldSave = shouldTransform || _clipProp->isSet() || _layerProp->isSet();
     
@@ -178,7 +173,6 @@ protected:
     
     _paintProps = container->defineProperty(std::make_shared<PaintProps>());
     
-    _opacityProp = container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
     _matrixProp = container->defineProperty(std::make_shared<MatrixProp>(PropNameMatrix));
     _transformProp = container->defineProperty(std::make_shared<TransformProp>(PropNameTransform));
     _originProp = container->defineProperty(std::make_shared<PointProp>(PropNameOrigin));
@@ -204,7 +198,6 @@ private:
   PointProp* _originProp;
   MatrixProp* _matrixProp;
   TransformProp* _transformProp;
-  NodeProp* _opacityProp;
   NodeProp* _invertClip;
   ClipProp* _clipProp;
   LayerProp* _layerProp;

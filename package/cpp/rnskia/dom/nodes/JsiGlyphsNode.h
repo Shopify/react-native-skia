@@ -18,6 +18,7 @@ protected:
     auto y = _yProp->value()->getAsNumber();
     auto font = _fontProp->getDerivedValue();
     auto glyphInfo = _glyphsProp->getDerivedValue();
+
     context->getCanvas()->drawGlyphs(static_cast<int>(glyphInfo->glyphIds.size()),
                                      glyphInfo->glyphIds.data(),
                                      glyphInfo->positions.data(),

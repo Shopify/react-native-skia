@@ -73,6 +73,7 @@ public:
     _strokeCap = addProperty(std::make_shared<StrokeCapProp>(JsiPropId::get("strokeCap")));
     _strokeMiter = addProperty(std::make_shared<NodeProp>(JsiPropId::get("strokeMiter")));
     _antiAlias = addProperty(std::make_shared<NodeProp>(JsiPropId::get("antiAlias")));
+    _opacity = addProperty(std::make_shared<NodeProp>(JsiPropId::get("opacity")));
   }
   
   void materialize(DrawingContext* context) {
@@ -81,6 +82,12 @@ public:
     if (_color->isSet() && (_color->isChanged() || context->isInvalid())) {
       context->getMutablePaint()->setColor(*_color->getDerivedValue());
     }
+    
+    // Opacity
+    if (_opacity->isSet() && (_opacity->isChanged() || context->isInvalid())) {
+      context->setOpacity(_opacity->value()->getAsNumber());
+    }
+    
     // Style
     if (_style->isSet() && (_style->isChanged() || context->isInvalid())) {
       auto styleValue = _style->value()->getAsString();
@@ -127,6 +134,7 @@ private:
   StrokeCapProp* _strokeCap;
   NodeProp* _strokeMiter;
   NodeProp* _antiAlias;
+  NodeProp* _opacity;
 };
 
 }
