@@ -1,5 +1,3 @@
-import type { ForwardedRef } from "react";
-
 import { NodeType } from "../dom/types";
 import type {
   CircleProps,

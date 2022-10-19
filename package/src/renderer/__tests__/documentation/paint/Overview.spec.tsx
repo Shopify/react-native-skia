@@ -11,12 +11,11 @@ import { Circle, Group, Paint } from "../../../components";
 import { docPath, processResult } from "../../../../__tests__/setup";
 
 const TestPaintAssignment = () => {
+  const { Skia } = importSkia();
   const r = width / 2;
-  return (
-    <Group color="lightblue">
-      <Circle paint={<Paint color="lightblue" />} cx={r} cy={r} r={r} />
-    </Group>
-  );
+  const paint = Skia.Paint();
+  paint.setColor(Skia.Color("lightblue"));
+  return <Circle paint={paint} cx={r} cy={r} r={r} />;
 };
 
 describe("Paint", () => {

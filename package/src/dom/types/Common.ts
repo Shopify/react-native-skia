@@ -15,8 +15,6 @@ import type {
   Vector,
 } from "../../skia/types";
 
-import type { DeclarationNode } from "./Node";
-
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
 export type PathDef = string | SkPath;
