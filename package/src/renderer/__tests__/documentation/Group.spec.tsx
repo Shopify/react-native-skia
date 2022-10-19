@@ -26,21 +26,23 @@ const padding = 48;
 const r = 24;
 
 const TestRasterization = () => {
-  const { usePaintRef, vec } = importSkia();
-  const paint = usePaintRef();
+  const { vec } = importSkia();
   const c = vec(width / 2, height / 2);
   const radius = c.x * 0.95;
   return (
     <>
-      <Paint ref={paint}>
-        <Blur blur={20 * PIXEL_RATIO} />
-        <ColorMatrix
-          matrix={[
-            1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
-          ]}
-        />
-      </Paint>
-      <Group layer={paint}>
+      <Group
+        layer={
+          <Paint>
+            <Blur blur={20 * PIXEL_RATIO} />
+            <ColorMatrix
+              matrix={[
+                1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
+              ]}
+            />
+          </Paint>
+        }
+      >
         <Circle cx={0} cy={c.y} r={radius} color="lightblue" />
         <Circle cx={width} cy={c.y} r={radius} color="lightblue" />
       </Group>
