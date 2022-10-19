@@ -16,26 +16,31 @@ public:
   JsiPaintNode(std::shared_ptr <RNSkPlatformContext> context) :
     JsiBaseDomDeclarationNode(context, "skPaint") {}
 
-protected:
   /**
-   Called when rendering the tree to create all derived values from all nodes.
+   Returns a pointer to the local paint context in the paint node. This is a special case for declaration nodes
+   since the Paint node has a bit different semantic than other declaration nodes.
    */
-  virtual void materializeNode(DrawingContext* context) override {
-    
-    auto container = getPropsContainer();
-    if (container != nullptr) {
-      // Make sure we commit any waiting transactions in the props object
-      container->updatePendingValues(context, getType());
-    }
-    
+  DrawingContext* getDrawingContext() {
+    return _localContext.get();
+  }
+  
+  /**
+   We need to override the materialize node call to avoid letting children materialize before we have
+   created our child context.
+   */
+  void materializeNode(DrawingContext* context) override {
     // A paint node should have its own local paint
     if (_localContext == nullptr) {
       _localContext = context->inheritContext("PaintNode");
     }
     
+    // ...and it should be a totally new paint, not inheriting from parent paint.
     if (_localContext->isInvalid()) {
       _localContext->setMutablePaint(std::make_shared<SkPaint>());
     }
+    
+    // Let's materialize paint props
+    _paintProps->materialize(_localContext.get());
     
     // Materialize children who will now only change the paint node's paint
     for (auto &child: getChildren()) {
@@ -44,24 +49,23 @@ protected:
         decl->materializeNode(_localContext.get());
       }
     }
-
-    // end the "visit" of the declaration node
-    if (container != nullptr) {
-      container->markAsResolved();
-    }
   }
+  
+protected:
   
   void materialize(DrawingContext* context) override {}
   
   void defineProperties(NodePropsContainer* container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
     
-    container->defineProperty(std::make_shared<PaintProps>());
+    _paintProps = container->defineProperty(std::make_shared<PaintProps>());
     _opacityProp = container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
   }
   
 private:
   NodeProp* _opacityProp;
+  PaintProps* _paintProps;
+  
   std::shared_ptr<DrawingContext> _localContext;
 };
 

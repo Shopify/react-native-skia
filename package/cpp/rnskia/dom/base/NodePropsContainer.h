@@ -19,7 +19,7 @@ public:
    Constructor. Pass the runtime and the JS object representing the properties, and a function that will be
    called when any property was changed from within this class as a result of a Skia value change.
    */
-  NodePropsContainer() {}
+  NodePropsContainer(PropId componentType): _type(componentType) {}
   
   ~NodePropsContainer() {}
   
@@ -45,12 +45,12 @@ public:
   /**
    Updates any props that has changes waiting, updates props that have derived values
    */
-  void updatePendingValues(DrawingContext* context, PropId componentType) {
+  void updatePendingValues() {
     for (auto &prop: _properties) {
-      prop->updatePendingValues(context);
+      prop->updatePendingValues();
       if (!prop->isSet() && prop->isRequired()) {
-        throw std::runtime_error("Missing required property \"" + std::string(prop->getName()) + "\"" +
-                                 " is missing in the " + componentType + " component.");
+        throw std::runtime_error("Missing one or more required properties " + std::string(prop->getName()) +
+                                 " in the " + _type + " component.");
       }
     }
   }
@@ -107,6 +107,7 @@ public:
 private:
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
   std::map<PropId, std::vector<NodeProp*>> _mappedProperties;
+  PropId _type;
 };
 
 }

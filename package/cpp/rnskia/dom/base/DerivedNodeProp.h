@@ -15,10 +15,10 @@ public:
   /**
    Starts the process of updating and reading props
    */
-  void updatePendingValues(DrawingContext *context) override {
+  void updatePendingValues() override {
     auto changed = false;
     for (auto &prop: _properties) {
-      prop->updatePendingValues(context);
+      prop->updatePendingValues();
       if (prop->isChanged()) {
         changed = true;
       }
@@ -75,10 +75,7 @@ public:
   std::string getName() override {
     std::string v = "";
     for (size_t i = 0; i<_properties.size(); ++i) {
-      if (i < _properties.size()-1) {
-        v += ", ";
-      }
-      v += _properties[i]->getName();
+      v += _properties[i]->getName() + (i < _properties.size()-1 ? ", " : "");      
     }
     return v;
   }

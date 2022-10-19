@@ -40,7 +40,6 @@ public:
   }
   
   std::string getDebugDescription() {
-#if SKIA_DOM_DEBUG
     std::string v = "ctx for " + std::string(_source) + ":";
     
     if (!isInvalid()) {
@@ -74,9 +73,6 @@ public:
     v = v + "\n";
     
     return v;
-#else
-    return "";
-#endif
   }
   
   /**

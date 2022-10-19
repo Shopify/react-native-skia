@@ -39,8 +39,7 @@ bool RNSkDomRenderer::tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvid
   if(_renderLock->try_lock()) {
     // If we have a Dom Node we can render directly on the main thread
     if(_root != nullptr) {
-      // Set up drawing context
-      canvasProvider->renderToCanvas(std::bind(&RNSkDomRenderer::renderCanvas, this, std::placeholders::_1));
+      canvasProvider->renderToCanvas(std::bind(&RNSkDomRenderer::renderCanvas, this, std::placeholders::_1));      
     }
     
     _renderLock->unlock();

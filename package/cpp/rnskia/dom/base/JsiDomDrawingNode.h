@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "JsiDomRenderNode.h"
@@ -26,23 +24,19 @@ protected:
   virtual void draw(DrawingContext* context) = 0;
   
   void renderNode(DrawingContext* context) override {
-    // Handle paint property and swap with context if necessary
-    // like in the JS implementation - this is done automatically by
-    // the paint prop itself.
-    /*
-     if (this.props.paint && isSkPaint(this.props.paint)) {
-           this.draw({ ...ctx, paint: this.props.paint });
-         } else if (this.props.paint && this.props.paint.current != null) {
-           this.draw({ ...ctx, paint: this.props.paint.current.materialize() });
-         } else {
-           this.draw(ctx);
-         }
-     */
-    JsiDomRenderNode::renderNode(context);
 #if SKIA_DOM_DEBUG
     RNSkLogger::logToConsole("%s%s", getLevelIndentation(2).c_str(), context->getDebugDescription().c_str());
 #endif
+    // TODO: Check paint property - maybe we should draw using another paint??
     draw(context);
+    
+    // Draw once more for each child paint node
+    for (auto &child: getChildren()) {
+      auto ptr = std::dynamic_pointer_cast<JsiPaintNode>(child);
+      if (ptr != nullptr) {
+        draw(ptr->getDrawingContext());
+      }
+    }
   }
 };
 

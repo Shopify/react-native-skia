@@ -50,7 +50,7 @@ public:
           }
         }
       } else {
-        throw std::runtime_error("Expected paint object, got unknown object when reading paint property.");
+        setDerivedValue(nullptr);
       }
     } else {
       setDerivedValue(nullptr);
@@ -75,9 +75,7 @@ public:
     _antiAlias = addProperty(std::make_shared<NodeProp>(JsiPropId::get("antiAlias")));
   }
   
-  void updatePendingValues(DrawingContext* context) override {
-    BaseDerivedProp::updatePendingValues(context);
-    
+  void materialize(DrawingContext* context) {
     // Now we can start updating the context
     // We only get here if something has changed - start with COLOR
     if (_color->isSet() && (_color->isChanged() || context->isInvalid())) {

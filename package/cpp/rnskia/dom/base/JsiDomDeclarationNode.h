@@ -30,13 +30,6 @@ public:
    Called when rendering the tree to create all derived values from all nodes.
    */
   virtual void materializeNode(DrawingContext* context) {
-    
-    auto container = getPropsContainer();
-    if (container != nullptr) {
-      // Make sure we commit any waiting transactions in the props object
-      container->updatePendingValues(context, getType());
-    }
-    
     // Materialize children
     for (auto &child: getChildren()) {
       auto decl = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
@@ -47,11 +40,6 @@ public:
     
     // Now we are ready to materialize
     materialize(context);
-
-    // end the "visit" of the declaration node
-    if (container != nullptr) {
-      container->markAsResolved();
-    }
   }
     
 protected:

@@ -31,7 +31,7 @@ public:
   /**
    Updates any pending values that has happened from other threads, sets flags for changed.
    */
-  virtual void updatePendingValues(DrawingContext *context) = 0;
+  virtual void updatePendingValues() = 0;
   
   /*
    Marks property flags for changed as resolved

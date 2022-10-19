@@ -61,7 +61,7 @@ public:
   /**
    Starts the process of updating and reading props
    */
-  void updatePendingValues(DrawingContext *context) override {
+  void updatePendingValues() override {
     std::lock_guard<std::mutex> lock(_swapValuesMutex);
     // Swap values - only when there are changes!
     if (_hasNextValue && _nextValue != nullptr) {

@@ -33,19 +33,13 @@ public:
                              getType());
 #endif
     
-    // Ensure we have a local context
+    // Ensure property changes has been registered
+    updatePendingProperties();
+    
+    // Ensure we have a local drawing context inheriting from the parent context
     if (_localContext == nullptr) {
       _localContext = context->inheritContext(getType());
     }
-    
-    // The props container is the storage for JS values that are passed as
-    // properties for nodes.
-    auto container = getPropsContainer();
-    
-    // by visiting nodes we ensure that all updates and changes has been
-    // read and handled for properties. This is also (with the symmetric marksAsResolved)
-    // how we handle changed properties to avoid updating unecessarily.
-    container->updatePendingValues(_localContext.get(), getType());
     
     // Opacity (paint prop resolves in updatePendingValues in the PaintProp class)
     if (_opacityProp->isSet() && (_opacityProp->isChanged() || _localContext->isInvalid())) {
@@ -98,6 +92,15 @@ public:
       }
     }
     
+    // Let any local paint props decorate the context
+    _paintProps->materialize(_localContext.get());
+    
+    // Now let's make sure the local context is resolved correctly - ie. that
+    // all children of type declaration (except paint) is given the opportunity to
+    // decorate the context.
+    materializeDeclarations();
+    
+    
     // Render the node
     renderNode(_localContext.get());
     
@@ -105,9 +108,9 @@ public:
     if (shouldSave) {
       _localContext->getCanvas()->restore();
     }
-        
-    // Mark container as done
-    container->markAsResolved();
+    
+    // Resolve changes
+    markPropertiesAsResolved();
     
 #if SKIA_DOM_DEBUG
     RNSkLogger::logToConsole("%sEnd rendering node %s",
@@ -134,26 +137,7 @@ protected:
   /**
    Override to implement rendering where the current state of the drawing context is correctly set.
    */
-  virtual void renderNode(DrawingContext* context) {
-    if (context == nullptr) {
-      return;
-    }
-    
-    // Render and materialize children
-    for (auto &child: getChildren()) {
-      // Try node as render node
-      auto renderNode = std::dynamic_pointer_cast<JsiDomRenderNode>(child);
-      if (renderNode != nullptr) {
-        renderNode->render(context);
-      }
-      
-      // Try node as declaration node
-      auto declarationNode = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
-      if (declarationNode != nullptr) {
-        declarationNode->materializeNode(context);
-      }
-    }
-  };
+  virtual void renderNode(DrawingContext* context) = 0;
   
   /**
    Removes a child
@@ -192,7 +176,7 @@ protected:
   virtual void defineProperties(NodePropsContainer* container) override {
     JsiDomNode::defineProperties(container);
     
-    container->defineProperty(std::make_shared<PaintProps>());
+    _paintProps = container->defineProperty(std::make_shared<PaintProps>());
     
     _opacityProp = container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
     _matrixProp = container->defineProperty(std::make_shared<MatrixProp>(PropNameMatrix));
@@ -204,6 +188,19 @@ protected:
   }
   
 private:
+  
+  /**
+   Loops through all declaration nodes and gives each one of them the opportunity to decorate the context
+   */
+  void materializeDeclarations() {
+    for (auto &child: getChildren()) {
+      auto ptr = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
+      if (ptr != nullptr) {
+        ptr->materializeNode(_localContext.get());
+      }
+    }
+  }
+  
   PointProp* _originProp;
   MatrixProp* _matrixProp;
   TransformProp* _transformProp;
@@ -211,6 +208,7 @@ private:
   NodeProp* _invertClip;
   ClipProp* _clipProp;
   LayerProp* _layerProp;
+  PaintProps* _paintProps;
   
   std::shared_ptr<DrawingContext> _localContext;
 };
