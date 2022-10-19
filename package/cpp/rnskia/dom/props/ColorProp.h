@@ -28,7 +28,7 @@ public:
       auto g = color->getValue(JsiPropId::get("1"));
       auto b = color->getValue(JsiPropId::get("2"));
       auto a = color->getValue(JsiPropId::get("3"));
-      return SkColorSetARGB(a->getAsNumber() * 255, r->getAsNumber(), g->getAsNumber(), b->getAsNumber());
+      return SkColorSetARGB(a->getAsNumber() * 255.0f, r->getAsNumber() * 255.0f, g->getAsNumber() * 255.0f, b->getAsNumber() * 255.0f);
       
     } else {
       auto parsedColor = CSSColorParser::parse(color->getAsString());
@@ -38,7 +38,6 @@ public:
         return SkColorSetARGB(parsedColor.a * 255, parsedColor.r, parsedColor.g, parsedColor.b);
       }
     }
-    return SK_ColorBLACK;
   }
   
 private:
@@ -59,7 +58,7 @@ public:
       derivedColors.reserve(colors.size());
       
       for (size_t i = 0; i < colors.size(); ++i) {
-        derivedColors.push_back(ColorProp::parseColorValue(colors[i].get()));        
+        derivedColors.push_back(ColorProp::parseColorValue(colors[i].get()));
       }
       setDerivedValue(std::move(derivedColors));
     } else {

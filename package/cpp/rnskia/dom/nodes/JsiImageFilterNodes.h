@@ -335,33 +335,30 @@ public:
 protected:
   void materialize(DrawingContext* context) override {
     if (isChanged(context)) {
-      auto runtimeEffectPtr = _runtimeEffectProp->value()->getAs<JsiSkRuntimeEffect>();
-      if (runtimeEffectPtr == nullptr) {
+      auto source = _sourceProp->value()->getAs<JsiSkRuntimeEffect>();
+      if (source == nullptr) {
         throw std::runtime_error("Expected runtime effect when reading source property of RuntimeEffectImageFilter.");
       }
       
-      auto rtb = SkRuntimeShaderBuilder(runtimeEffectPtr->getObject());
+      auto builder = SkRuntimeShaderBuilder(source->getObject());
       auto input = optionalChild(0);
-      
-      if (_uniformsProp->isSet()) {
-        _uniformsProp->processUniforms(rtb, runtimeEffectPtr->getObject());
-      }
-      
-      setImageFilter(context, SkImageFilters::RuntimeShader(rtb, nullptr, input ? input : nullptr));
+      _uniformsProp->processUniforms(builder);
+            
+      setImageFilter(context, SkImageFilters::RuntimeShader(builder, nullptr, input ? input : nullptr));
     }
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _runtimeEffectProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("source")));
-    _uniformsProp = container->defineProperty(std::make_shared<UniformsProp>(JsiPropId::get("uniforms")));
+    _sourceProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("source")));
+    _uniformsProp = container->defineProperty(std::make_shared<SimpleUniformsProp>(JsiPropId::get("uniforms"), _sourceProp));
     
-    _runtimeEffectProp->require();
+    _sourceProp->require();
   }
   
 private:
-  NodeProp* _runtimeEffectProp;
-  UniformsProp* _uniformsProp;
+  NodeProp* _sourceProp;
+  SimpleUniformsProp* _uniformsProp;
 };
 
 }

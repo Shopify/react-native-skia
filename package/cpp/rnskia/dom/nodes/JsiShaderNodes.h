@@ -55,16 +55,32 @@ public:
 protected:
   void materialize(DrawingContext* context) override {
     if (isChanged(context)) {
-      auto m3 = _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
-      auto source = _sourceProp->value()->getAs<JsiSkRuntimeEffect>()->getObject();
-      // TODO: Implement rest
+      auto source = _sourceProp->value()->getAs<JsiSkRuntimeEffect>();
+      if (source == nullptr) {
+        throw std::runtime_error("Expected runtime effect when reading source property of RuntimeEffectImageFilter.");
+      }
+      auto uniforms = _uniformsProp->isSet() ? _uniformsProp->getDerivedValue() : nullptr;
+      auto localMatrix = _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
+      
+      // get all children that are shader nodes
+      std::vector<sk_sp<SkShader>> children;
+      children.reserve(getChildren().size());
+      for (auto &child: getChildren()) {
+        auto ptr = std::dynamic_pointer_cast<JsiBaseShaderNode>(child);
+        if (ptr != nullptr) {
+          children.push_back(ptr->getCurrent());
+        }
+      }
+      
+      // Update shader
+      setShader(context, source->getObject()->makeShader(uniforms, children.data(), children.size()));
     }
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
     _sourceProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("source")));
-    _uniformsProp = container->defineProperty(std::make_shared<UniformsProp>(JsiPropId::get("uniforms")));
+    _uniformsProp = container->defineProperty(std::make_shared<UniformsProp>(JsiPropId::get("uniforms"), _sourceProp));
     _transformProp = container->defineProperty(std::make_shared<TransformProp>(JsiPropId::get("transform")));
     
     _sourceProp->require();
