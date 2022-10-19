@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JsiDomDrawingNode.h"
+#include "TextBlobProp.h"
 
 namespace RNSkia {
 
@@ -11,13 +12,16 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    // TODO: Implement
+    auto blob = _textBlobProp->getDerivedValue();
+    context->getCanvas()->drawTextBlob(blob, 0, 0, *context->getPaint());
   }
   
   void defineProperties(NodePropsContainer* container) override {
     JsiDomDrawingNode::defineProperties(container);
+    _textBlobProp = container->defineProperty(std::make_shared<TextPathBlobProp>());
   }
 private:
+  TextPathBlobProp* _textBlobProp;
 };
 
 }
