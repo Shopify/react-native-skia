@@ -16,7 +16,7 @@ class TileModeProp:
 public DerivedProp<SkTileMode> {
 public:
   TileModeProp(PropId name): DerivedProp<SkTileMode>() {
-    _tileModeProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("tileMode")));
+    _tileModeProp = addProperty(std::make_shared<NodeProp>(name));
   }
   
   void updateDerivedValue() override {
