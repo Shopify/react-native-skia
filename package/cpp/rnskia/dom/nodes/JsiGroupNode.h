@@ -14,9 +14,9 @@ public:
   
   void renderNode(DrawingContext* context) override {
     for (auto &child: getChildren()) {
-      auto ptr = std::dynamic_pointer_cast<JsiDomRenderNode>(child);
-      if (ptr != nullptr) {
-        ptr->render(context);
+      auto renderNode = std::dynamic_pointer_cast<JsiDomRenderNode>(child);
+      if (renderNode != nullptr) {
+        renderNode->render(context);
       }
     }
   }

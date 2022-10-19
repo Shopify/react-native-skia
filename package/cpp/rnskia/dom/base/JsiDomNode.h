@@ -54,10 +54,12 @@ public:
    JS-function for setting the properties from the JS reconciler on the node.
    */
   JSI_HOST_FUNCTION(setProps) {
-    if (count != 1) {
-      throw jsi::JSError(runtime, "setProps expects 1 parameter");
+    if (count == 1) {
+      // Initialize properties container
+      setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
+    } else {
+      setEmptyProps();
     }
-    setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
     return jsi::Value::undefined();
   }
   
@@ -163,12 +165,6 @@ public:
    we can calculate wether updates are required or not.
    */
   void updatePendingProperties() {
-    // Update children
-    for (auto &child: _children) {
-      child->updatePendingProperties();
-    }
-    
-    // Update self
     if (_propsContainer != nullptr) {
       _propsContainer->updatePendingValues();
     }
@@ -176,7 +172,7 @@ public:
   
   /**
    When pending properties has been updated and all rendering is done, we call this function
-   to mark any changes as processed.
+   to mark any changes as processed. This call also resolves all child nodes
    */
   void markPropertiesAsResolved() {
     // Mark self as resolved
@@ -226,6 +222,20 @@ protected:
     // Update properties container
     _propsContainer->setProps(runtime, std::move(props));
   };
+  
+  /**
+   Called for components that has no properties
+   */
+  void setEmptyProps() {
+    if (_propsContainer == nullptr) {
+      
+      // Initialize properties container
+      _propsContainer = std::make_shared<NodePropsContainer>(getType());
+      
+      // Ask sub classes to define their properties
+      defineProperties(_propsContainer.get());    
+    }
+  }
   
   /**
    Returns all child JsiDomNodes for this node.

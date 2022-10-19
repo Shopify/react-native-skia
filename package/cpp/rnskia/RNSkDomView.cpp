@@ -89,6 +89,7 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
     std::lock_guard<std::mutex> lock(_rootLock);
     if (_root != nullptr) {
       _root->render(_drawingContext.get());
+      _root->markPropertiesAsResolved();
     }
   } catch (std::runtime_error err) {
     _platformContext->raiseError(err);

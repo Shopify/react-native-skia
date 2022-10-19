@@ -29,6 +29,9 @@ public:
    created our child context.
    */
   void materializeNode(DrawingContext* context) override {
+    // Update props
+    updatePendingProperties();
+    
     // A paint node should have its own local paint
     if (_localContext == nullptr) {
       _localContext = context->inheritContext("PaintNode");
