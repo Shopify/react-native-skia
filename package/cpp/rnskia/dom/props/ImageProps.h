@@ -60,12 +60,12 @@ public:
     }
     
     auto image = _imageProp->getDerivedValue();
-    auto rect = _rectProp->getDerivedValue();
+    auto imageRect = SkRect::MakeXYWH(0, 0, image->width(), image->height());
+    
+    auto rect = _rectProp->getDerivedValue() ? *_rectProp->getDerivedValue() : imageRect;
     auto fit = _fitProp->isSet() ? _fitProp->value()->getAsString() : "none";
     
-    setDerivedValue(fitRects(fit,
-                             SkRect::MakeXYWH(0, 0, image->width(), image->height()),
-                             *rect));
+    setDerivedValue(fitRects(fit, imageRect, rect));
         
   }
   

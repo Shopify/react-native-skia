@@ -14,18 +14,31 @@ public:
   
   void updateDerivedValue() override {
     if (_colorProp->isSet()) {
-      auto parsedColor = CSSColorParser::parse(_colorProp->value()->getAsString());
-      if (parsedColor.a == -1.0f) {
-        setDerivedValue(std::make_shared<SkColor>(SK_ColorBLACK));
-      } else {
-        setDerivedValue(SkColorSetARGB(parsedColor.a * 255,                       
-                                       parsedColor.r,
-                                       parsedColor.g,
-                                       parsedColor.b));
-      }
+      // Color might be a number, a string or a Float32Array of rgba values
+      setDerivedValue(std::make_shared<SkColor>(parseColorValue(_colorProp->value().get())));
     } else {
       setDerivedValue(nullptr);
     }
+  }
+  
+  static SkColor parseColorValue(JsiValue* color) {
+    if (color->getType() == PropType::Object) {
+      // Float array
+      auto r = color->getValue(JsiPropId::get("0"));
+      auto g = color->getValue(JsiPropId::get("1"));
+      auto b = color->getValue(JsiPropId::get("2"));
+      auto a = color->getValue(JsiPropId::get("3"));
+      return SkColorSetARGB(a->getAsNumber() * 255, r->getAsNumber(), g->getAsNumber(), b->getAsNumber());
+      
+    } else {
+      auto parsedColor = CSSColorParser::parse(color->getAsString());
+      if (parsedColor.a == -1.0f) {
+        return SK_ColorBLACK;
+      } else {
+        return SkColorSetARGB(parsedColor.a * 255, parsedColor.r, parsedColor.g, parsedColor.b);
+      }
+    }
+    return SK_ColorBLACK;
   }
   
 private:
@@ -46,16 +59,7 @@ public:
       derivedColors.reserve(colors.size());
       
       for (size_t i = 0; i < colors.size(); ++i) {
-        auto colorValue = colors[i]->getAsString();
-        auto parsedColor = CSSColorParser::parse(colorValue);
-        if (parsedColor.a == -1.0f) {
-          derivedColors.push_back(SK_ColorBLACK);
-        } else {
-          derivedColors.push_back(SkColorSetARGB(parsedColor.a * 255,
-                                                 parsedColor.r,
-                                                 parsedColor.g,
-                                                 parsedColor.b));
-        }
+        derivedColors.push_back(ColorProp::parseColorValue(colors[i].get()));        
       }
       setDerivedValue(std::move(derivedColors));
     } else {

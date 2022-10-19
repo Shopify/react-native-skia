@@ -119,6 +119,10 @@ public:
   }
   
   const std::string& getAsString() const {
+    if (_type == PropType::Number) {
+      return std::move(std::to_string(_numberValue));
+    }
+    
     if (_type != PropType::String) {
       throw std::runtime_error("Expected type string, got " + getTypeAsString(_type));
     }
@@ -256,15 +260,15 @@ public:
   
   static std::string getTypeAsString(PropType type) {
     switch(type) {
-      case PropType::Undefined: return "Undefined";
-      case PropType::Null: return "Null";
-      case PropType::Number: return "Number";
-      case PropType::Bool: return "Boolean";
-      case PropType::String: return "String";
-      case PropType::Object: return "Object";
-      case PropType::Array: return "Array";
-      case PropType::HostObject: return "HostObject";
-      case PropType::HostFunction: return "HostFunction";
+      case PropType::Undefined: return "undefined";
+      case PropType::Null: return "null";
+      case PropType::Number: return "number";
+      case PropType::Bool: return "boolean";
+      case PropType::String: return "string";
+      case PropType::Object: return "object";
+      case PropType::Array: return "array";
+      case PropType::HostObject: return "hostobject";
+      case PropType::HostFunction: return "hostfunction";
     }
   }
   

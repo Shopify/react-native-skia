@@ -307,7 +307,7 @@ protected:
       setShader(context, SkGradientShader::MakeLinear(pts,
                                                       colors,
                                                       _positionsProp->isSet() ? _positionsProp->getDerivedValue()->data() : nullptr,
-                                                      _positionsProp->isSet() ?                                                       static_cast<int>(_positionsProp->getDerivedValue()->size()) : 0,
+                                                      static_cast<int>(_colorsProp->getDerivedValue()->size()),
                                                       mode,
                                                       flags,
                                                       _transformsProps->getDerivedValue().get()));
@@ -350,7 +350,7 @@ protected:
                                                       r,
                                                       colors,
                                                       _positionsProp->isSet() ? _positionsProp->getDerivedValue()->data() : nullptr,
-                                                      _positionsProp->isSet() ?                                                       static_cast<int>(_positionsProp->getDerivedValue()->size()) : 0,
+                                                      static_cast<int>(_colorsProp->getDerivedValue()->size()),
                                                       mode,
                                                       flags,
                                                       _transformsProps->getDerivedValue().get()));
@@ -379,7 +379,7 @@ public:
 protected:
   void materialize(DrawingContext* context) override {
     if (isChanged(context)) {
-      
+      // TODO: implement
     }
   }
   
@@ -400,7 +400,7 @@ public:
 protected:
   void materialize(DrawingContext* context) override {
     if (isChanged(context)) {
-      
+      // TODO: implement
     }
   }
   

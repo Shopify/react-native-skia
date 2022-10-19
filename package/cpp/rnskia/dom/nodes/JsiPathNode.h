@@ -53,10 +53,12 @@ protected:
                                      ", end: " + std::to_string(_endProp->value()->getAsNumber()));
           }
           _path = std::make_shared<SkPath>(filteredPath);
-        } else {
+        } else if (hasStartOffset || hasEndOffset) {
           throw std::runtime_error("Failed trimming path with parameters start: " +
                                    std::to_string(_startProp->value()->getAsNumber()) +
                                    ", end: " + std::to_string(_endProp->value()->getAsNumber()));
+        } else {
+          _path = std::make_shared<SkPath>(*_pathProp->getDerivedValue());
         }
         
         // Set fill style
