@@ -278,6 +278,25 @@ public:
   }
   
 protected:
+  void materialize(DrawingContext* context) override {
+    if(isChanged(context)) {
+      _colors = _colorsProp->getDerivedValue()->data();
+      _colorCount = static_cast<int>(_colorsProp->getDerivedValue()->size());
+      _flags = _flagsProp->isSet() ? _flagsProp->value()->getAsNumber() : 0;
+      _mode = _modeProp->isSet() ? *_modeProp->getDerivedValue() : SkTileMode::kClamp;
+      _positions = _positionsProp->isSet() ? _positionsProp->getDerivedValue()->data() : nullptr;
+      _matrix = _transformsProps->isSet() ? _transformsProps->getDerivedValue().get() : nullptr;
+    }
+  }
+  
+  SkColor* _colors;
+  SkTileMode _mode;
+  double _flags;
+  SkScalar* _positions;
+  SkMatrix* _matrix;
+  int _colorCount;
+  
+private:
   TransformsProps* _transformsProps;
   ColorsProp* _colorsProp;
   NumbersProp* _positionsProp;
@@ -292,25 +311,17 @@ public:
   JsiBaseGradientNode(context, "skLinearGradient") {}
 protected:
   void materialize(DrawingContext* context) override {
+    JsiBaseGradientNode::materialize(context);
+    
     if (isChanged(context)) {
-      
-      SkColor* colors = _colorsProp->getDerivedValue()->data();
       SkPoint pts[] = { *_startProp->getDerivedValue(), *_endProp->getDerivedValue()};
-      
-      auto flags = 0;
-      if (_flagsProp->isSet()) {
-        flags = _flagsProp->value()->getAsNumber();
-      }
-      
-      SkTileMode mode = _modeProp->isSet() ? *_modeProp->getDerivedValue() : SkTileMode::kClamp;
-      
       setShader(context, SkGradientShader::MakeLinear(pts,
-                                                      colors,
-                                                      _positionsProp->isSet() ? _positionsProp->getDerivedValue()->data() : nullptr,
-                                                      static_cast<int>(_colorsProp->getDerivedValue()->size()),
-                                                      mode,
-                                                      flags,
-                                                      _transformsProps->getDerivedValue().get()));
+                                                      _colors,
+                                                      _positions,
+                                                      _colorCount,
+                                                      _mode,
+                                                      _flags,
+                                                      _matrix));
     }
   }
   
@@ -335,25 +346,19 @@ public:
     
 protected:
   void materialize(DrawingContext* context) override {
+    JsiBaseGradientNode::materialize(context);
+    
     if (isChanged(context)) {
-      SkColor* colors = _colorsProp->getDerivedValue()->data();
       auto c = _centerProp->getDerivedValue();
       auto r = _radiusProp->value()->getAsNumber();
-      auto flags = 0;
-      if (_flagsProp->isSet()) {
-        flags = _flagsProp->value()->getAsNumber();
-      }
-      
-      SkTileMode mode = _modeProp->isSet() ? *_modeProp->getDerivedValue() : SkTileMode::kClamp;
-      
       setShader(context, SkGradientShader::MakeRadial(*c,
                                                       r,
-                                                      colors,
-                                                      _positionsProp->isSet() ? _positionsProp->getDerivedValue()->data() : nullptr,
-                                                      static_cast<int>(_colorsProp->getDerivedValue()->size()),
-                                                      mode,
-                                                      flags,
-                                                      _transformsProps->getDerivedValue().get()));
+                                                      _colors,
+                                                      _positions,
+                                                      _colorCount,
+                                                      _mode,
+                                                      _flags,
+                                                      _matrix));
     }
   }
   
@@ -370,46 +375,84 @@ private:
   NodeProp* _radiusProp;
 };
 
-class JsiSweepGradientNode : public JsiBaseShaderNode,
+class JsiSweepGradientNode : public JsiBaseGradientNode,
 public JsiDomNodeCtor<JsiSweepGradientNode> {
 public:
   JsiSweepGradientNode(std::shared_ptr<RNSkPlatformContext> context):
-  JsiBaseShaderNode(context, "skSweepGradient") {}
+  JsiBaseGradientNode(context, "skSweepGradient") {}
     
 protected:
   void materialize(DrawingContext* context) override {
+    JsiBaseGradientNode::materialize(context);
+    
     if (isChanged(context)) {
-      // TODO: implement
+      auto start = _startProp->isSet() ? _startProp->value()->getAsNumber() : 0;
+      auto end = _endProp->isSet() ? _endProp->value()->getAsNumber() : 360;
+      auto c = _centerProp->getDerivedValue();
+      
+      setShader(context, SkGradientShader::MakeSweep(c->x(),
+                                                     c->y(),
+                                                     _colors,
+                                                     _positions,
+                                                     _colorCount,
+                                                     _mode,
+                                                     start,
+                                                     end,
+                                                     _flags,
+                                                     _matrix));
     }
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
-    
+    JsiBaseGradientNode::defineProperties(container);
+    _startProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("start")));
+    _endProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("end")));
+    _centerProp = container->defineProperty(std::make_shared<PointProp>(JsiPropId::get("c")));
   }
 private:
-  
+  PointProp* _centerProp;
+  NodeProp* _startProp;
+  NodeProp* _endProp;
 };
 
-class JsiTwoPointConicalGradientNode : public JsiBaseShaderNode,
+class JsiTwoPointConicalGradientNode : public JsiBaseGradientNode,
 public JsiDomNodeCtor<JsiTwoPointConicalGradientNode> {
 public:
   JsiTwoPointConicalGradientNode(std::shared_ptr<RNSkPlatformContext> context):
-  JsiBaseShaderNode(context, "skTwoPointConicalGradient") {}
+  JsiBaseGradientNode(context, "skTwoPointConicalGradient") {}
     
 protected:
   void materialize(DrawingContext* context) override {
+    JsiBaseGradientNode::materialize(context);
+    
     if (isChanged(context)) {
-      // TODO: implement
+      auto start = _startProp->getDerivedValue();
+      auto end = _endProp->getDerivedValue();
+      auto startR = _startRProp->value()->getAsNumber();
+      auto endR = _endRProp->value()->getAsNumber();
+      
+      setShader(context, SkGradientShader::MakeTwoPointConical(*start, startR, *end, endR,
+                                                               _colors,
+                                                               _positions,
+                                                               _colorCount,
+                                                               _mode,
+                                                               _flags,
+                                                               _matrix));
     }
   }
   
   void defineProperties(NodePropsContainer* container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
-    
+    JsiBaseGradientNode::defineProperties(container);
+    _startProp = container->defineProperty(std::make_shared<PointProp>(JsiPropId::get("start")));
+    _startRProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("startR")));
+    _endProp = container->defineProperty(std::make_shared<PointProp>(JsiPropId::get("end")));
+    _endRProp = container->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("endR")));
   }
 private:
-  
+  PointProp* _startProp;
+  NodeProp* _startRProp;
+  PointProp* _endProp;
+  NodeProp* _endRProp;
 };
 
 }
