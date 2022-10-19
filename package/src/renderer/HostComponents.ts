@@ -55,7 +55,6 @@ import type {
   BlendProps,
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
-import type { PaintNode } from "../dom/nodes/PaintNode";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
@@ -67,7 +66,7 @@ declare global {
     interface IntrinsicElements {
       skGroup: SkiaProps<GroupProps>;
       skLayer: SkiaProps<ChildrenProps>;
-      skPaint: SkiaProps<PaintProps> & { ref: ForwardedRef<PaintNode> };
+      skPaint: SkiaProps<PaintProps>;
 
       // Drawings
       skFill: SkiaProps<DrawingNodeProps>;

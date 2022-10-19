@@ -1,4 +1,4 @@
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode } from "react";
 
 import type {
   BlendMode,
@@ -86,5 +86,5 @@ export interface PaintProps extends ChildrenProps {
 export interface GroupProps extends PaintProps, TransformProps {
   clip?: ClipDef;
   invertClip?: boolean;
-  layer?: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint | boolean;
+  layer?: SkPaint | boolean;
 }
