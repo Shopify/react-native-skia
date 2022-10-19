@@ -17,5 +17,5 @@ export const Group = ({ layer, ...props }: SkiaProps<PublicGroupProps>) => {
       </skLayer>
     );
   }
-  return <skGroup {...props} />;
+  return <skGroup layer={layer as GroupProps["layer"]} {...props} />;
 };

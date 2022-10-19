@@ -2,7 +2,6 @@ import {
   Group,
   Skia,
   RuntimeShader,
-  usePaintRef,
   Paint,
   vec,
 } from "@shopify/react-native-skia";
@@ -58,17 +57,19 @@ interface CRTProps {
 }
 
 export const CRT = ({ children }: CRTProps) => {
-  const paint = usePaintRef();
   const { width, height } = useWindowDimensions();
   return (
-    <>
-      <Paint ref={paint}>
-        <RuntimeShader
-          source={source}
-          uniforms={{ resolution: vec(width, height) }}
-        />
-      </Paint>
-      <Group layer={paint}>{children}</Group>
-    </>
+    <Group
+      layer={
+        <Paint>
+          <RuntimeShader
+            source={source}
+            uniforms={{ resolution: vec(width, height) }}
+          />
+        </Paint>
+      }
+    >
+      {children}
+    </Group>
   );
 };
