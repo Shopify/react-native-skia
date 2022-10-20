@@ -17,7 +17,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class RNSkLogger {
 public:
@@ -45,7 +45,7 @@ public:
     va_start(args, fmt);
 
     static char buffer[512];
-    vsnprintf(buffer, 512, fmt, args);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
 #ifdef ANDROID
     __android_log_write(ANDROID_LOG_INFO, "RNSkia", buffer);
 #endif

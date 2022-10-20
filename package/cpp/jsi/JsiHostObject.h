@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #define STR_CAT_NX(A, B) A##B
 #define STR_CAT(A, B) STR_CAT_NX(A, B)
@@ -54,8 +55,8 @@
  * Creates a JSI export functions statement
  */
 #define JSI_EXPORT_FUNCTIONS(...)                                              \
-  const JsiFunctionMap &getExportedFunctionMap() override {                    \
-    static JsiFunctionMap map = {__VA_ARGS__};                                 \
+  const RNJsi::JsiFunctionMap &getExportedFunctionMap() override {             \
+    static RNJsi::JsiFunctionMap map = {__VA_ARGS__};                          \
     return map;                                                                \
   }
 
@@ -72,8 +73,9 @@
  * Creates a JSI export getters statement
  */
 #define JSI_EXPORT_PROPERTY_GETTERS(...)                                       \
-  const JsiPropertyGettersMap &getExportedPropertyGettersMap() override {      \
-    static JsiPropertyGettersMap map = {__VA_ARGS__};                          \
+  const RNJsi::JsiPropertyGettersMap &getExportedPropertyGettersMap()          \
+      override {                                                               \
+    static RNJsi::JsiPropertyGettersMap map = {__VA_ARGS__};                   \
     return map;                                                                \
   }
 
@@ -91,14 +93,15 @@
  * Creates a JSI export setters statement
  */
 #define JSI_EXPORT_PROPERTY_SETTERS(...)                                       \
-  const JsiPropertySettersMap &getExportedPropertySettersMap() override {      \
-    static JsiPropertySettersMap map = {__VA_ARGS__};                          \
+  const RNJsi::JsiPropertySettersMap &getExportedPropertySettersMap()          \
+      override {                                                               \
+    static RNJsi::JsiPropertySettersMap map = {__VA_ARGS__};                   \
     return map;                                                                \
   }
 
 namespace RNJsi {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 using JsPropertyType = struct {
   std::function<jsi::Value(jsi::Runtime &)> get;
@@ -138,10 +141,10 @@ protected:
   /**
    Override to return map of name/functions
    */
-  virtual const JsiFunctionMap &getExportedFunctionMap() {
-    static const JsiFunctionMap empty;
+  virtual const RNJsi::JsiFunctionMap &getExportedFunctionMap() {
+    static const RNJsi::JsiFunctionMap empty;
     return empty;
-  };
+  }
 
   /**
    Override to get property getters map of name/functions
@@ -149,7 +152,7 @@ protected:
   virtual const JsiPropertyGettersMap &getExportedPropertyGettersMap() {
     static const JsiPropertyGettersMap empty;
     return empty;
-  };
+  }
 
   /**
    Override to get property setters map of name/functions
@@ -157,7 +160,7 @@ protected:
   virtual const JsiPropertySettersMap &getExportedPropertySettersMap() {
     static const JsiPropertySettersMap empty;
     return empty;
-  };
+  }
 
   /**
    * Overridden jsi::HostObject set property method

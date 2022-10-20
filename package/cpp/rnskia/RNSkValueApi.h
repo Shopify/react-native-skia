@@ -1,5 +1,6 @@
-
 #pragma once
+
+#include <memory>
 
 #include <JsiHostObject.h>
 #include <RNSkAnimation.h>
@@ -9,15 +10,16 @@
 #include <jsi/jsi.h>
 
 namespace RNSkia {
-using namespace facebook;
 
-class RNSkValueApi : public JsiHostObject {
+namespace jsi = facebook::jsi;
+
+class RNSkValueApi : public RNJsi::JsiHostObject {
 public:
   /**
    * Constructor
    * @param platformContext Platform context
    */
-  RNSkValueApi(std::shared_ptr<RNSkPlatformContext> platformContext)
+  explicit RNSkValueApi(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiHostObject(), _platformContext(platformContext) {
     _valueIdentifier = 50000;
   }

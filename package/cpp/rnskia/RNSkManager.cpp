@@ -11,7 +11,7 @@
 #include <RNSkView.h>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 RNSkManager::RNSkManager(
     jsi::Runtime *jsRuntime,

@@ -34,7 +34,7 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkCanvas : public JsiSkHostObject {
 public:
@@ -531,7 +531,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, concat),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPicture))
 
-  JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 
   JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context, SkCanvas *canvas)

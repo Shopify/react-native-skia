@@ -20,7 +20,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 int getFlag(const jsi::Value *values, int i, size_t size) {
   if (i >= size || values[i].isUndefined()) {
@@ -219,7 +219,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeBlend),
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeColor))
 
-  JsiSkShaderFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkShaderFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

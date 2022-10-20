@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "RNSkPlatformContext.h"
 
 #include "JsiSkHostObjects.h"
@@ -43,7 +45,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkApi : public JsiSkHostObject {
 public:
@@ -98,6 +100,6 @@ public:
                             std::make_shared<JsiSkSurfaceFactory>(context));
     installReadonlyProperty("Picture",
                             std::make_shared<JsiSkPictureFactory>(context));
-  };
+  }
 };
 } // namespace RNSkia

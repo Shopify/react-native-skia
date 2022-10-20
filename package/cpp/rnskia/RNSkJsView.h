@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <jsi/jsi.h>
@@ -32,7 +33,7 @@ class SkImage;
 
 namespace RNSkia {
 class JsiSkCanvas;
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class RNSkJsRenderer : public RNSkRenderer,
                        public std::enable_shared_from_this<RNSkJsRenderer> {
@@ -87,7 +88,7 @@ public:
   }
 
   void setJsiProperties(
-      std::unordered_map<std::string, JsiValueWrapper> &props) override {
+      std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) override {
     for (auto &prop : props) {
       if (prop.first == "drawCallback") {
         if (prop.second.isUndefinedOrNull()) {
@@ -95,7 +96,8 @@ public:
           std::static_pointer_cast<RNSkJsRenderer>(getRenderer())
               ->setDrawCallback(nullptr);
           return;
-        } else if (prop.second.getType() != JsiWrapperValueType::Function) {
+        } else if (prop.second.getType() !=
+                   RNJsi::JsiWrapperValueType::Function) {
           // We expect a function for the draw callback custom property
           throw std::runtime_error(
               "Expected a function for the drawCallback custom property.");

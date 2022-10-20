@@ -1,10 +1,11 @@
-
 #pragma once
 
 #include <jsi/jsi.h>
+#include <memory>
+#include <string>
 
 namespace RNJsi {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 enum JsiWrapperValueType {
   NonInitialized,
@@ -27,7 +28,7 @@ enum JsiWrapperValueType {
  */
 class JsiValueWrapper {
 public:
-  JsiValueWrapper(jsi::Runtime &runtime)
+  explicit JsiValueWrapper(jsi::Runtime &runtime)
       : _type(JsiWrapperValueType::NonInitialized) {}
 
   JsiValueWrapper(jsi::Runtime &runtime, const jsi::Value &value)

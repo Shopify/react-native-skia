@@ -19,7 +19,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkSurfaceFactory : public JsiSkHostObject {
 public:
@@ -37,7 +37,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurfaceFactory, Make))
 
-  JsiSkSurfaceFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkSurfaceFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

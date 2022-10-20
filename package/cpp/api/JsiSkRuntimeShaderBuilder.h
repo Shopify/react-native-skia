@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include <jsi/jsi.h>
 
@@ -17,7 +18,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkRuntimeShaderBuilder
     : public JsiSkWrappingSharedPtrHostObject<SkRuntimeShaderBuilder> {

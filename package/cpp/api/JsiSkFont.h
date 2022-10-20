@@ -24,7 +24,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkFont : public JsiSkWrappingSharedPtrHostObject<SkFont> {
 public:

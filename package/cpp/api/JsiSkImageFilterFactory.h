@@ -18,7 +18,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkImageFilterFactory : public JsiSkHostObject {
 public:
@@ -233,7 +233,7 @@ public:
       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadowOnly),
       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeRuntimeShader))
 
-  JsiSkImageFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkImageFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

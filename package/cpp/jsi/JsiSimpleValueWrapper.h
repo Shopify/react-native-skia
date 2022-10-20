@@ -1,10 +1,11 @@
-
 #pragma once
+
+#include <memory>
 
 #include <jsi/jsi.h>
 
 namespace RNJsi {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 /**
  Implements a simple wrapper class for JSI primitives like numbers and boolean
@@ -17,7 +18,7 @@ private:
   enum ValueType { NonInitialized, Undefined, Null, Bool, Number, JsiValue };
 
 public:
-  JsiSimpleValueWrapper(jsi::Runtime &runtime)
+  explicit JsiSimpleValueWrapper(jsi::Runtime &runtime)
       : _type(ValueType::NonInitialized),
         _propNameId(jsi::PropNameID::forUtf8(runtime, "value")) {}
 

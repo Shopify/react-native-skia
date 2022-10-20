@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <JsiHostObject.h>
@@ -14,15 +15,15 @@
 #include <jsi/jsi.h>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 using RNSkViewInfo = struct RNSkViewInfo {
   RNSkViewInfo() { view = nullptr; }
   std::shared_ptr<RNSkView> view;
-  std::unordered_map<std::string, JsiValueWrapper> props;
+  std::unordered_map<std::string, RNJsi::JsiValueWrapper> props;
 };
 
-class RNSkJsiViewApi : public JsiHostObject,
+class RNSkJsiViewApi : public RNJsi::JsiHostObject,
                        public std::enable_shared_from_this<RNSkJsiViewApi> {
 public:
   /**
@@ -55,7 +56,7 @@ public:
 
     std::lock_guard<std::mutex> lock(_mutex);
     info->props.emplace(arguments[1].asString(runtime).utf8(runtime),
-                        JsiValueWrapper(runtime, arguments[2]));
+                        RNJsi::JsiValueWrapper(runtime, arguments[2]));
 
     // Now let's see if we have a view that we can update
     if (info->view != nullptr) {
@@ -237,7 +238,7 @@ public:
    * Constructor
    * @param platformContext Platform context
    */
-  RNSkJsiViewApi(std::shared_ptr<RNSkPlatformContext> platformContext)
+  explicit RNSkJsiViewApi(std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiHostObject(), _platformContext(platformContext) {}
 
   /**

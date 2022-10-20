@@ -17,7 +17,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkData : public JsiSkWrappingSkPtrHostObject<SkData> {
 public:

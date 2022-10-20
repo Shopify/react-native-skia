@@ -86,9 +86,10 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
   const JsiFunctionMap &funcs = getExportedFunctionMap();
   auto func = funcs.find(nameStr);
   if (func != funcs.end()) {
-    auto dispatcher = std::bind(func->second, (JsiHostObject *)this,
-                                std::placeholders::_1, std::placeholders::_2,
-                                std::placeholders::_3, std::placeholders::_4);
+    auto dispatcher =
+        std::bind(func->second, reinterpret_cast<JsiHostObject *>(this),
+                  std::placeholders::_1, std::placeholders::_2,
+                  std::placeholders::_3, std::placeholders::_4);
 
     // Add to cache
     currentCache->emplace(nameStr, std::make_unique<jsi::Function>(

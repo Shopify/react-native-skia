@@ -12,7 +12,8 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
+namespace react = facebook::react;
 
 class JsiSkDataFactory : public JsiSkHostObject {
 public:
@@ -91,7 +92,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkDataFactory, fromBytes),
                        JSI_EXPORT_FUNC(JsiSkDataFactory, fromBase64))
 
-  JsiSkDataFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkDataFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

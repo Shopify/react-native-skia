@@ -1,5 +1,6 @@
-
 #pragma once
+
+#include <memory>
 
 #include "JsiSkHostObjects.h"
 #include <JsiSkData.h>
@@ -14,13 +15,13 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkPicture : public JsiSkWrappingSkPtrHostObject<SkPicture> {
 public:
   JsiSkPicture(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkPicture> picture)
-      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture){};
+      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture) {}
 
   JSI_PROPERTY_GET(__typename__) {
     return jsi::String::createFromUtf8(runtime, "Picture");

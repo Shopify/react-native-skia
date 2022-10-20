@@ -17,7 +17,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkMaskFilterFactory : public JsiSkHostObject {
 public:
@@ -34,7 +34,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMaskFilterFactory, MakeBlur))
 
-  JsiSkMaskFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkMaskFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

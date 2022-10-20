@@ -18,7 +18,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkContourMeasure
     : public JsiSkWrappingSkPtrHostObject<SkContourMeasure> {
@@ -30,7 +30,7 @@ public:
     if (contourMeasure == nullptr) {
       throw jsi::JSError(*context->getJsRuntime(), "Contour measure is null");
     }
-  };
+  }
 
   JSI_HOST_FUNCTION(getPosTan) {
     auto dist = arguments[0].asNumber();

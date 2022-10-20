@@ -11,7 +11,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkTypefaceFactory : public JsiSkHostObject {
 public:
@@ -28,7 +28,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypefaceFactory,
                                        MakeFreeTypeFaceFromData))
 
-  JsiSkTypefaceFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkTypefaceFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

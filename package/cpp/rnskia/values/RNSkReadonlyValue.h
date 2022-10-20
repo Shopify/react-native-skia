@@ -6,6 +6,7 @@
 #include <functional>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
 #include <jsi/jsi.h>
 
@@ -14,7 +15,7 @@
 #include <RNSkPlatformContext.h>
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 /**
  Implements a readonly Value that is updated every time the screen is redrawn.
@@ -25,9 +26,10 @@ class RNSkReadonlyValue
     : public JsiSkHostObject,
       public std::enable_shared_from_this<RNSkReadonlyValue> {
 public:
-  RNSkReadonlyValue(std::shared_ptr<RNSkPlatformContext> platformContext)
+  explicit RNSkReadonlyValue(
+      std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
-        _valueHolder(std::make_unique<JsiSimpleValueWrapper>(
+        _valueHolder(std::make_unique<RNJsi::JsiSimpleValueWrapper>(
             *platformContext->getJsRuntime())) {}
 
   virtual ~RNSkReadonlyValue() { invalidate(); }
@@ -151,7 +153,7 @@ protected:
   }
 
 private:
-  std::unique_ptr<JsiSimpleValueWrapper> _valueHolder;
+  std::unique_ptr<RNJsi::JsiSimpleValueWrapper> _valueHolder;
 
   long _listenerId = 0;
   std::unordered_map<long, std::function<void(jsi::Runtime &)>> _listeners;

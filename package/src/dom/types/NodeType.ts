@@ -1,5 +1,6 @@
 export const enum NodeType {
   // Shaders
+  Layer = "skLayer",
   Shader = "skShader",
   ImageShader = "skImageShader",
   ColorShader = "skColorShader",

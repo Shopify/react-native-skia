@@ -1,5 +1,6 @@
-
 #pragma once
+
+#include <memory>
 
 #include "JsiSkColorFilter.h"
 #include "JsiSkData.h"
@@ -16,7 +17,7 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiSkPictureFactory : public JsiSkHostObject {
 public:
@@ -43,7 +44,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPictureFactory, MakePicture))
 
-  JsiSkPictureFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkPictureFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {}
 };
 
