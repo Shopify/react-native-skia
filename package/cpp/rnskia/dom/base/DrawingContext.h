@@ -1,5 +1,7 @@
 #pragma once
 
+#include "JsiHostObject.h"
+
 #include <vector>
 
 #pragma clang diagnostic push
@@ -12,7 +14,8 @@
 
 namespace RNSkia {
 
-class DrawingContext: public std::enable_shared_from_this<DrawingContext> {
+class DrawingContext:
+public std::enable_shared_from_this<DrawingContext> {
 public:
   /**
    Creates a root drawing context with paint and opacity
@@ -182,6 +185,37 @@ public:
     getMutablePaint()->setAlpha(_opacity * 255);
   }
   
+  float getScaledWidth() {
+    if (_parent != nullptr) {
+      return _parent->getScaledWidth();
+    }
+    return _scaledWidth;
+  }
+  
+  float getScaledHeight() {
+    if (_parent != nullptr) {
+      return _parent->getScaledHeight();
+    }
+    return _scaledHeight;    
+  }
+  
+  void setScaledWidth(float v) { _scaledWidth = v; }
+  void setScaledHeight(float v) { _scaledHeight = v; }
+  
+  void setRequestRedraw(std::function<void()>&& requestRedraw) {
+    if (_parent != nullptr) {
+      _parent->setRequestRedraw(std::move(requestRedraw));
+    } else {
+      _requestRedraw = std::move(requestRedraw);
+    }
+  }
+  
+  const std::function<void()>& getRequestRedraw() {
+    if (_parent != nullptr) {
+      return _parent->getRequestRedraw();
+    }
+    return _requestRedraw;
+  }
 private:
   DrawingContext(const char* source) {
     _source = source;    
@@ -201,6 +235,11 @@ private:
   
   DrawingContext* _parent = nullptr;
   std::vector<std::shared_ptr<DrawingContext>> _children;
+  
+  float _scaledWidth = -1;
+  float _scaledHeight = -1;
+  
+  std::function<void()> _requestRedraw;
 };
 
 }

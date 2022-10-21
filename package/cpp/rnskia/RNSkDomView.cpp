@@ -39,7 +39,7 @@ bool RNSkDomRenderer::tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvid
   if(_renderLock->try_lock()) {
     // If we have a Dom Node we can render directly on the main thread
     if(_root != nullptr) {
-      canvasProvider->renderToCanvas(std::bind(&RNSkDomRenderer::renderCanvas, this, std::placeholders::_1));      
+      canvasProvider->renderToCanvas(std::bind(&RNSkDomRenderer::renderCanvas, this, std::placeholders::_1, canvasProvider->getScaledWidth(), canvasProvider->getScaledHeight()));
     }
     
     _renderLock->unlock();
@@ -52,7 +52,7 @@ bool RNSkDomRenderer::tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvid
 void RNSkDomRenderer::renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
   auto prevDebugOverlay = getShowDebugOverlays();
   setShowDebugOverlays(false);
-  canvasProvider->renderToCanvas(std::bind(&RNSkDomRenderer::renderCanvas, this, std::placeholders::_1));
+  canvasProvider->renderToCanvas(std::bind(&RNSkDomRenderer::renderCanvas, this, std::placeholders::_1, canvasProvider->getScaledWidth(), canvasProvider->getScaledHeight()));
   setShowDebugOverlays(prevDebugOverlay);
 };
 
@@ -69,7 +69,7 @@ void RNSkDomRenderer::setOnTouchCallback(std::shared_ptr<jsi::Function> onTouchC
   _touchCallback = onTouchCallback;
 }
   
-void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
+void RNSkDomRenderer::renderCanvas(SkCanvas* canvas, float scaledWidth, float scaledHeight) {
   _renderTimingInfo.beginTiming();
   
   auto pd = _platformContext->getPixelDensity();
@@ -78,8 +78,19 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas) {
   canvas->scale(pd, pd);
   
   if (_drawingContext == nullptr) {
-    _drawingContext = std::make_shared<DrawingContext>(std::make_shared<SkPaint>(), 1.0f);
+    _drawingContext = std::make_shared<DrawingContext>(
+      std::make_shared<SkPaint>(), 1.0f);
+    
+    _drawingContext->setRequestRedraw([weakSelf = weak_from_this()](){
+      auto self = weakSelf.lock();
+      if (self) {
+        self->_requestRedraw();
+      }
+    });
   }
+  
+  _drawingContext->setScaledWidth(scaledWidth);
+  _drawingContext->setScaledHeight(scaledHeight);
 
   // Update canvas before drawing
   _drawingContext->setCanvas(canvas);

@@ -57,7 +57,7 @@ public:
     
 private:
   void callOnTouch();
-  void renderCanvas(SkCanvas* canvas);
+  void renderCanvas(SkCanvas* canvas, float scaledWidth, float scaledHeight);
   void renderDebugOverlays(SkCanvas* canvas);
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;

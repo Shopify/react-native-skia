@@ -182,10 +182,17 @@ public:
   JsiSkPaint(std::shared_ptr<RNSkPlatformContext> context, SkPaint paint)
       : JsiSkWrappingSharedPtrHostObject<SkPaint>(
             std::move(context), std::make_shared<SkPaint>(std::move(paint))) {}
+    
+  /**
+   Copy from another paint
+   */
+  void fromPaint(const SkPaint &paint) {
+    setObject(std::make_shared<SkPaint>(std::move(paint)));
+  }
 
   /**
-Returns the underlying object from a host object of this type
-*/
+   Returns the underlying object from a host object of this type
+ */
   static std::shared_ptr<SkPaint> fromValue(jsi::Runtime &runtime,
                                             const jsi::Value &obj) {
     return obj.asObject(runtime).asHostObject<JsiSkPaint>(runtime)->getObject();
