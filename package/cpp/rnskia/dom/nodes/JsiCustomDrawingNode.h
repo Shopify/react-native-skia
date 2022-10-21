@@ -19,7 +19,7 @@ protected:
       
       // Only repaint the picture IF we did not get to the draw function
       // from a redrawRequest after creating the picture!
-      if (!_inRedrawCycle) {
+      if (!_inRedrawCycle || _drawingProp->isChanged()) {
         
         float scaledWidth = context->getScaledWidth();
         float scaledHeight = context->getScaledHeight();
