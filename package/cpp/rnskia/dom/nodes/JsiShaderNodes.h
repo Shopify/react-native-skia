@@ -73,7 +73,7 @@ protected:
       }
       
       // Update shader
-      setShader(context, source->getObject()->makeShader(uniforms, children.data(), children.size()));
+      setShader(context, source->getObject()->makeShader(uniforms, children.data(), children.size(), localMatrix.get()));
     }
   }
   
@@ -108,10 +108,8 @@ protected:
       if (rect != nullptr && lm != nullptr) {
         auto rc = _imageProps->getDerivedValue();
         auto m3 = _imageProps->rect2rect(rc->src, rc->dst);
-        lm->set(0, m3.x());
-        lm->set(1, m3.y());
-        lm->set(2, m3.width());
-        lm->set(3, m3.height());
+        lm->preTranslate(m3.x(), m3.y());
+        lm->preScale(m3.width(), m3.height());
       }
       
       setShader(context, image->makeShader(*_txProp->getDerivedValue(),
