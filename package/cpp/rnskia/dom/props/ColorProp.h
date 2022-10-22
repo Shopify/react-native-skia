@@ -30,6 +30,8 @@ public:
       auto a = color->getValue(JsiPropId::get("3"));
       return SkColorSetARGB(a->getAsNumber() * 255.0f, r->getAsNumber() * 255.0f, g->getAsNumber() * 255.0f, b->getAsNumber() * 255.0f);
       
+    } else if (color->getType() == PropType::Number) {
+      return static_cast<SkColor>(color->getAsNumber());
     } else {
       auto parsedColor = CSSColorParser::parse(color->getAsString());
       if (parsedColor.a == -1.0f) {
