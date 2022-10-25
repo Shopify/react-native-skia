@@ -23,35 +23,29 @@ public:
   virtual void readValueFromJs (jsi::Runtime &runtime, const ReadPropFunc& read) override {
     // Always use the next field since this method is called on the JS thread and
     // we don't want to rip out the underlying value object.
-    _valueA = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
-    _valueB = std::make_shared<JsiValue>(runtime);
-    _timestampA = std::chrono::duration_cast<std::chrono::milliseconds>
-      (std::chrono::system_clock::now().time_since_epoch()).count();
-    _timestampB = 0;
+    _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
     _isChanged = true;
+    _hasNewValue = false;
   }
   
   /**
    Property value has changed - let's save this as a change to be commited later
    */
   void updateValue(jsi::Runtime &runtime, const jsi::Value& value) {
-    if (_timestampA > _timestampB) {
-      _valueB->setCurrent(runtime, value);
-      _timestampB = std::chrono::duration_cast<std::chrono::milliseconds>
-        (std::chrono::system_clock::now().time_since_epoch()).count();
+    std::lock_guard<std::mutex> lock(_swapMutex);
+    if (_buffer == nullptr) {
+      _buffer = std::make_shared<JsiValue>(runtime, value);
     } else {
-      _valueA->setCurrent(runtime, value);
-      _timestampA = std::chrono::duration_cast<std::chrono::milliseconds>
-        (std::chrono::system_clock::now().time_since_epoch()).count();
+      _buffer->setCurrent(runtime, value);
     }
-    _isChanged = true;
+    _hasNewValue = true;
   }
   
   /**
    Returns true if the property is set and is not undefined or null
    */
   bool isSet() override {
-    return getCurrentValue() != nullptr && !getCurrentValue()->isUndefinedOrNull();
+    return _value != nullptr && !_value->isUndefinedOrNull();
   }
   
   /**
@@ -64,25 +58,39 @@ public:
   /**
    Starts the process of updating and reading props
    */
-  void updatePendingValues() override {
-    // We don't need to do anything here - since
-    // pending changes is taken care of by the timestamp
-    // and double buffered values.
+  void updatePendingChanges() override {
+    // If the value has changed we should swap the
+    // buffers
+    if (_hasNewValue && _buffer != nullptr) {
+      {
+        // Swap buffers
+        std::lock_guard<std::mutex> lock(_swapMutex);
+        auto tmp = _value;
+        _value = _buffer;
+        _buffer = tmp;
+        
+        // turn off pending changes flag
+        _hasNewValue = false;
+      }
+      
+      // Mark as changed.
+      _isChanged = true;
+    }
   }
   
   /*
    Ends the visit cycle
    */
   void markAsResolved() override {
-    _isChanged = false;
+    _isChanged = false;    
   }
   
   /**
-   Return value if set
+   Returns pointer to the value contained by the property if the property is set.
    */
-  virtual std::shared_ptr<JsiValue> value() {
+  JsiValue* value() {
     assert(isSet());
-    return getCurrentValue() == _valueA.get() ? _valueA : _valueB;
+    return _value.get();
   }
   
   /**
@@ -91,24 +99,13 @@ public:
   std::string getName() override { return std::string(_name); }
   
 private:
-  
-  JsiValue* getCurrentValue() {
-    if (_timestampA > _timestampB) {
-      return _valueA.get();
-    } else {
-      return _valueB.get();
-    }
-  }
-  
   PropId _name;
+  
+  std::shared_ptr<JsiValue> _value;
+  std::shared_ptr<JsiValue> _buffer;
   std::atomic<bool> _isChanged = { false };
-  
-  std::shared_ptr<JsiValue> _valueA;
-  std::atomic<uint64_t> _timestampA;
-  
-  std::shared_ptr<JsiValue> _valueB;
-  std::atomic<uint64_t> _timestampB;
-  
+  std::atomic<bool> _hasNewValue = { false };
+  std::mutex _swapMutex;
 };
 
 }

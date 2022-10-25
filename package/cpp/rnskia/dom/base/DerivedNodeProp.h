@@ -15,10 +15,10 @@ public:
   /**
    Starts the process of updating and reading props
    */
-  void updatePendingValues() override {
+  void updatePendingChanges() override {
     auto changed = false;
     for (auto &prop: _properties) {
-      prop->updatePendingValues();
+      prop->updatePendingChanges();
       if (prop->isChanged()) {
         changed = true;
       }
@@ -44,7 +44,9 @@ public:
   /**
    Returns the changed state of the prop
    */
-  bool isChanged() override { return _isChanged; }
+  bool isChanged() override {
+    return _isChanged;
+  }
   
   /**
    Delegate read value to child nodes
@@ -58,7 +60,7 @@ public:
   /**
    Override to calculate the derived value from child properties
    */
-  virtual void updateDerivedValue() {}
+  virtual void updateDerivedValue() = 0;
   
   /**
    Adds a property to the derived property child props.
