@@ -12,22 +12,17 @@
 
 #pragma clang diagnostic pop
 
-// These static class members are used by all Skia Views
 id<MTLDevice> RNSkMetalCanvasProvider::_device = nullptr;
-id<MTLCommandQueue> RNSkMetalCanvasProvider::_commandQueue = nullptr;
-sk_sp<GrDirectContext> RNSkMetalCanvasProvider::_skContext = nullptr;
 
 RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(std::function<void()> requestRedraw,
                         std::shared_ptr<RNSkia::RNSkPlatformContext> context):
 RNSkCanvasProvider(requestRedraw),
   _context(context) {
-  if (!_device) {
+  if (_device == nullptr) {
     _device = MTLCreateSystemDefaultDevice();
   }
-  if (!_commandQueue) {
-    _commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
-  }
-
+  _commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
+    
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
@@ -38,24 +33,12 @@ RNSkCanvasProvider(requestRedraw),
   _layer.opaque = false;
   _layer.contentsScale = _context->getPixelDensity();
   _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    
+  _skContext = GrDirectContext::MakeMetal((__bridge void*)_device, (__bridge void*)_commandQueue);
 }
 
 RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {
-  if([[NSThread currentThread] isMainThread]) {
-    _layer = NULL;
-  } else {
-    __block auto tempLayer = _layer;
-    dispatch_async(dispatch_get_main_queue(), ^{
-      // By using the tempLayer variable in the block we capture it and it will be
-      // released after the block has finished. This way the CAMetalLayer dealloc will
-      // only be called on the main thread. Problem: this destructor might be called from
-      // releasing the RNSkDrawViewImpl from a thread capture (after dtor has started),
-      // which would cause the CAMetalLayer dealloc to be called on another thread which
-      // causes a crash.
-      // https://github.com/Shopify/react-native-skia/issues/398
-      tempLayer = tempLayer;
-    });
-  }
+  
 }
 
 /**
@@ -76,11 +59,8 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
     return;
   }
   
-  if(_skContext == nullptr) {
-    GrContextOptions grContextOptions;
-    _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
-                                            (__bridge void*)_commandQueue,
-                                            grContextOptions);
+  if (_skContext == nullptr) {
+    return;
   }
   
   // Wrap in auto release pool since we want the system to clean up after rendering
@@ -88,35 +68,30 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
   // fast in the simulator without this.
   @autoreleasepool
   {
-    id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
-    if(currentDrawable == nullptr) {
-      return;
-    }
-    
-    GrMtlTextureInfo fbInfo;
-    fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
-    
-    GrBackendRenderTarget backendRT(_layer.drawableSize.width,
-                                    _layer.drawableSize.height,
-                                    1,
-                                    fbInfo);
-
-    auto skSurface = SkSurface::MakeFromBackendRenderTarget(_skContext.get(),
-                                                            backendRT,
-                                                            kTopLeft_GrSurfaceOrigin,
-                                                            kBGRA_8888_SkColorType,
-                                                            nullptr,
-                                                            nullptr);
+    GrMTLHandle drawableHandle;
+    auto skSurface = SkSurface::MakeFromCAMetalLayer(_skContext.get(),
+                                                     (__bridge GrMTLHandle)_layer,
+                                                     kTopLeft_GrSurfaceOrigin,
+                                                     1,
+                                                     kBGRA_8888_SkColorType,
+                                                     nullptr,
+                                                     nullptr,
+                                                     &drawableHandle);
     
     if(skSurface == nullptr || skSurface->getCanvas() == nullptr) {
       RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
       return;
     }
     
-    skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
-    cb(skSurface->getCanvas());
+    SkCanvas *canvas = skSurface->getCanvas();
+    canvas->clear(SK_AlphaTRANSPARENT);
+    cb(canvas);
     
+    skSurface->flushAndSubmit();
+    
+    id<CAMetalDrawable> currentDrawable = (__bridge id<CAMetalDrawable>)drawableHandle;
     id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
+    commandBuffer.label = @"PresentSkia";
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
   }

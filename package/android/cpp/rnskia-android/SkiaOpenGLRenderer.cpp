@@ -72,7 +72,7 @@ namespace RNSkia
                 cb(_skSurface->getCanvas());
 
                 // Flush
-                _skSurface->flush();
+                _skSurface->flushAndSubmit();
 
                 if (!eglSwapBuffers(getThreadDrawingContext()->glDisplay, _glSurface))
                 {

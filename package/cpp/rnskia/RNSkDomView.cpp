@@ -39,7 +39,10 @@ bool RNSkDomRenderer::tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvid
   if(_renderLock->try_lock()) {
     // If we have a Dom Node we can render directly on the main thread
     if(_root != nullptr) {
-      canvasProvider->renderToCanvas(std::bind(&RNSkDomRenderer::renderCanvas, this, std::placeholders::_1, canvasProvider->getScaledWidth(), canvasProvider->getScaledHeight()));
+      canvasProvider->renderToCanvas(std::bind(&RNSkDomRenderer::renderCanvas,
+                                               this, std::placeholders::_1,
+                                               canvasProvider->getScaledWidth(),
+                                               canvasProvider->getScaledHeight()));
     }
     
     _renderLock->unlock();
@@ -112,8 +115,7 @@ void RNSkDomRenderer::renderCanvas(SkCanvas* canvas, float scaledWidth, float sc
   
   renderDebugOverlays(canvas);
     
-  canvas->restore();
-  canvas->flush();
+  canvas->restore();  
   
   _renderTimingInfo.stopTiming();
 }
@@ -189,10 +191,11 @@ void RNSkDomRenderer::renderDebugOverlays(SkCanvas* canvas) {
     return;
   }
   auto renderAvg = _renderTimingInfo.getAverage();
+  auto fps = _renderTimingInfo.getFps();
   
   // Build string
   std::ostringstream stream;
-  stream << "render: " << renderAvg << "ms";
+  stream << "render: " << renderAvg << "ms" << " fps: " << fps;
 
   std::string debugString = stream.str();
 

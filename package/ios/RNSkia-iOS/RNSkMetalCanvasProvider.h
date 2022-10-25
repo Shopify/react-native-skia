@@ -31,7 +31,7 @@ private:
   CAMetalLayer *_layer;
 #pragma clang diagnostic pop
 
-  static id<MTLCommandQueue> _commandQueue;
   static id<MTLDevice> _device;
-  static sk_sp<GrDirectContext> _skContext;
+  id<MTLCommandQueue> _commandQueue;
+  sk_sp<GrDirectContext> _skContext;
 };
