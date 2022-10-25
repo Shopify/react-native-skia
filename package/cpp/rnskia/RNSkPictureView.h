@@ -76,10 +76,6 @@ private:
       canvas->scale(pd, pd);
 
       canvas->drawPicture(_picture->getObject());
-
-      // Restore and flush canvas
-      canvas->restore();
-      canvas->flush();
     });
   }
 
