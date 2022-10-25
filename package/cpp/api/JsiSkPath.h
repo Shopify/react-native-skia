@@ -14,6 +14,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include <SkPathEffect.h>
 #include <SkDashPathEffect.h>
 #include <SkParsePath.h>
 #include <SkPath.h>
