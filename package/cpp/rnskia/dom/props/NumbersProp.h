@@ -36,12 +36,12 @@ class Numbers16Prop:
 public DerivedProp<std::vector<u_int16_t>> {
 public:
   Numbers16Prop(PropId name): DerivedProp<std::vector<u_int16_t>>() {
-    _positionProp = addProperty(std::make_shared<NodeProp>(name));
+    _prop = addProperty(std::make_shared<NodeProp>(name));
   }
   
   void updateDerivedValue() override {
-    if (_positionProp->isSet()) {
-      auto positions = _positionProp->value()->getAsArray();
+    if (_prop->isSet()) {
+      auto positions = _prop->value()->getAsArray();
       std::vector<u_int16_t> derivedPositions;
       derivedPositions.reserve(positions.size());
       
@@ -55,7 +55,7 @@ public:
   }
   
 private:
-  NodeProp* _positionProp;
+  NodeProp* _prop;
 };
 
 }

@@ -25,7 +25,7 @@ public:
     _colorsProp = addProperty(std::make_shared<ColorsProp>(JsiPropId::get("colors")));
     _verticesProp = addProperty(std::make_shared<PointsProp>(JsiPropId::get("vertices")));
     _texturesProp = addProperty(std::make_shared<PointsProp>(JsiPropId::get("textures")));
-    _indiciesProp = addProperty(std::make_shared<Numbers16Prop>(JsiPropId::get("indicies")));
+    _indicesProp = addProperty(std::make_shared<Numbers16Prop>(JsiPropId::get("indices")));
     
     _vertexModeProp->require();
     _verticesProp->require();
@@ -40,15 +40,15 @@ public:
     std::vector<SkColor> *colors = _colorsProp->getDerivedValue().get();
     auto vertices = _verticesProp->getDerivedValue();
     auto textures = _texturesProp->getDerivedValue();
-    auto indicies = _indiciesProp->getDerivedValue();
+    auto indices = _indicesProp->getDerivedValue();
     
     setDerivedValue(SkVertices::MakeCopy(*vertextMode,
                                          static_cast<int>(vertices->size()),
                                          _verticesProp->isSet() ? vertices->data() : nullptr,
                                          _texturesProp->isSet() ? textures->data() : nullptr,
                                          _colorsProp->isSet() ? colors->data() : nullptr,
-                                         _indiciesProp->isSet() ? static_cast<int>(indicies->size()) : 0,
-                                         _indiciesProp->isSet() ? indicies->data() : nullptr));
+                                         _indicesProp->isSet() ? static_cast<int>(indices->size()) : 0,
+                                         _indicesProp->isSet() ? indices->data() : nullptr));
             
   }
   
@@ -57,7 +57,7 @@ private:
   ColorsProp* _colorsProp;
   PointsProp* _verticesProp;
   PointsProp* _texturesProp;
-  Numbers16Prop* _indiciesProp;
+  Numbers16Prop* _indicesProp;
 };
 
 }
