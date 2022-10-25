@@ -90,7 +90,7 @@ public:
     }    
   }
   
-  PropType getType() { return _type; }
+  PropType getType() const { return _type; }
   
   bool isUndefinedOrNull() const {
     return isUndefined() || isNull();
@@ -136,11 +136,11 @@ public:
     return _array;
   }
   
-  std::shared_ptr<JsiValue> getValue(PropId name) {
+  JsiValue* getValue(PropId name) {
     if (_type != PropType::Object) {
       throw std::runtime_error("Expected type object, got " + getTypeAsString(_type));
     }
-    return _props.at(name);
+    return _props.at(name).get();
   }
   
   bool hasValue(PropId name) {
@@ -209,10 +209,10 @@ public:
   
   bool equals(jsi::Runtime &runtime, const jsi::Value& other) {
     auto p = std::make_shared<JsiValue>(runtime, other);
-    return equals(p);
+    return equals(p.get());
   }
   
-  bool equals(std::shared_ptr<JsiValue> other) {
+  bool equals(JsiValue* other) {
     if (other->getType() != getType()) {
       return false;
     }
@@ -232,16 +232,16 @@ public:
     }
   }
   
-  void swap(JsiValue* other) {
-    _type = other->getType();
-    _boolValue = other->boolValue();
-    _numberValue = other->numberValue();
-    _stringValue = other->stringValue();
-    _props = other->props();
-    _keysCache = other->keysCache();
-    _array = other->array();
-    _hostObject = other->hostObject();
-    _hostFunction = other->hostFunction();
+  void swap(const JsiValue& other) {
+    _type = other.getType();
+    _boolValue = other.boolValue();
+    _numberValue = other.numberValue();
+    _stringValue = other.stringValue();
+    _props = other.props();
+    _keysCache = other.keysCache();
+    _array = other.array();
+    _hostObject = other.hostObject();
+    _hostFunction = other.hostFunction();
   }
   
   jsi::Value getAsJsiValue(jsi::Runtime& runtime) {
@@ -277,14 +277,14 @@ protected:
     return _props;
   }
   
-  bool boolValue() { return _boolValue; }
-  double numberValue() { return _numberValue; }
-  std::string stringValue() { return _stringValue; }
-  std::shared_ptr<jsi::HostObject> hostObject() { return _hostObject; }
-  jsi::HostFunctionType hostFunction() { return _hostFunction; }
-  std::vector<std::shared_ptr<JsiValue>> array() { return _array; };
-  std::unordered_map<PropId, std::shared_ptr<JsiValue>> props() { return _props; };
-  std::vector<PropId> keysCache() { return _keysCache; }
+  bool boolValue() const { return _boolValue; }
+  double numberValue() const { return _numberValue; }
+  std::string stringValue() const { return _stringValue; }
+  std::shared_ptr<jsi::HostObject> hostObject() const { return _hostObject; }
+  jsi::HostFunctionType hostFunction() const { return _hostFunction; }
+  std::vector<std::shared_ptr<JsiValue>> array() const { return _array; };
+  std::unordered_map<PropId, std::shared_ptr<JsiValue>> props() const { return _props; };
+  const std::vector<PropId>& keysCache() const { return _keysCache; }
  
 private:
   void setObject(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -327,7 +327,7 @@ private:
     return obj;
   }
   
-  bool compareObjects(std::shared_ptr<JsiValue> other) {
+  bool compareObjects(JsiValue* other) {
     if(_type == PropType::Object) {
       if (_props.size() != other->getProps().size()) {
         return false;
@@ -350,7 +350,7 @@ private:
         return false;
       }
       for(size_t i=0; i<_array.size(); ++i) {
-        if (!_array[i]->equals(otherArr[i])) {
+        if (!_array[i]->equals(otherArr[i].get())) {
           return false;
         }
       }
