@@ -12,9 +12,9 @@ public:
     
 protected:
   void draw(DrawingContext* context) override {
-    context->getCanvas()->drawCircle(*_circleProp->getDerivedValue(),
-                                     _radiusProp->value()->getAsNumber(),
-                                     *context->getPaint());
+    auto circle = _circleProp->getDerivedValue();
+    auto r = _radiusProp->value()->getAsNumber();
+    context->getCanvas()->drawCircle(*circle, r, *context->getPaint());
   }
   
   void defineProperties(NodePropsContainer* container) override {

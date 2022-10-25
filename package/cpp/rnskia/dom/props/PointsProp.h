@@ -57,7 +57,7 @@ public:
       points.reserve(pointsArray.size());
       for (size_t i=0; i < pointsArray.size(); ++i) {
         auto p = pointsArray[i];
-        auto point = PointProp::processValue(p);
+        auto point = PointProp::processValue(p.get());
         if (point != EmptyPoint) {
           points.push_back(point);
         } else {

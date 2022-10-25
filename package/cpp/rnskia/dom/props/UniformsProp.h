@@ -149,6 +149,8 @@ public:
     }
   }
   
+  void updateDerivedValue() override {}
+  
 private:
   void setValue(SkScalar val, const RuntimeEffectUniform& reu, sk_sp<SkData> uniforms) {
     for (std::size_t j = 0; j < reu.columns * reu.rows; ++j) {

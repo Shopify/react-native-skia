@@ -27,9 +27,10 @@ public:
   void updateDerivedValue() override {
     if (!_transformProp->isSet()) {
       setDerivedValue(nullptr);
-      return;
-    }
-    if (_transformProp->value()->getType() == PropType::Array) {
+    } else if (_transformProp->value()->getType() != PropType::Array) {
+      throw std::runtime_error("Expected array for transform property, got " +
+                               JsiValue::getTypeAsString(_transformProp->value()->getType()));
+    } else {
       auto m = std::make_shared<SkMatrix>(SkMatrix());
       for (auto &el: _transformProp->value()->getAsArray()) {
         auto keys = el->getKeys();
@@ -61,9 +62,6 @@ public:
         }
       }
       setDerivedValue(m);
-    } else {
-      throw std::runtime_error("Expected array for transform property, got " +
-                               JsiValue::getTypeAsString(_transformProp->value()->getType()));
     }
   }
   

@@ -32,7 +32,7 @@ public:
     }
   }
   
-  static SkPoint processValue(std::shared_ptr<JsiValue> value) {
+  static SkPoint processValue(JsiValue* value) {
     if (value->getType() == PropType::HostObject) {
       // Try reading as point
       auto ptr = std::dynamic_pointer_cast<JsiSkPoint>(value->getAsHostObject());

@@ -15,7 +15,7 @@ public:
   void updateDerivedValue() override {
     if (_colorProp->isSet()) {
       // Color might be a number, a string or a Float32Array of rgba values
-      setDerivedValue(std::make_shared<SkColor>(parseColorValue(_colorProp->value().get())));
+      setDerivedValue(std::make_shared<SkColor>(parseColorValue(_colorProp->value())));
     } else {
       setDerivedValue(nullptr);
     }

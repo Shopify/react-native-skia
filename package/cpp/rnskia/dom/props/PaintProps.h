@@ -124,6 +124,8 @@ public:
       context->getMutablePaint()->setAntiAlias(_antiAlias->value()->getAsNumber());
     }
   }
+  
+  void updateDerivedValue() override {}
 
 private:
   ColorProp* _color;
