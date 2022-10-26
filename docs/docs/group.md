@@ -240,21 +240,22 @@ You can use it to apply effects.
 This is particularly useful to build effects that need to be applied to a group of elements and not one in particular.
 
 ```tsx twoslash
-import {Canvas, Group, Circle, Blur, Paint, ColorMatrix, usePaintRef} from "@shopify/react-native-skia";
+import {Canvas, Group, Circle, Blur, Paint, ColorMatrix} from "@shopify/react-native-skia";
 
 const Clip = () => {
-  const paint = usePaintRef();
   return (
     <Canvas style={{ flex: 1 }}>
-      <Paint ref={paint}>
-        <Blur blur={20} />
-        <ColorMatrix
-          matrix={[
-            1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
-          ]}
-        />
-      </Paint>
-      <Group color="lightblue" layer={paint}>
+      <Group
+        color="lightblue"
+        layer={<Paint>
+          <Blur blur={20} />
+          <ColorMatrix
+            matrix={[
+              1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
+            ]}
+          />
+        </Paint>}
+      >
         <Circle cx={0} cy={128} r={128 * 0.95} />
         <Circle
           cx={256}

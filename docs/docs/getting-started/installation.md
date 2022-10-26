@@ -67,7 +67,7 @@ To use this library in the browser, see [these instructions](/docs/getting-start
 We have an example project you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/example).
 
 ```sh
-yarn boostrap
+yarn bootstrap
 cd example && yarn start
 ```
 

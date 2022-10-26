@@ -219,6 +219,7 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       skGroup: SkiaProps<GroupProps>;
+      skLayer: SkiaProps<ChildrenProps>;
       skPaint: SkiaProps<PaintProps> & { ref: ForwardedRef<PaintNode> };
 
       // Drawings
@@ -299,6 +300,8 @@ export const createNode = (
 ) => {
   const { Sk } = container;
   switch (type) {
+    case NodeType.Layer:
+      return Sk.Layer(props);
     case NodeType.Group:
       return Sk.Group(props);
     case NodeType.Paint:

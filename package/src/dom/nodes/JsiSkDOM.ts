@@ -121,9 +121,14 @@ import { MorphologyImageFilterNode } from "./paint/ImageFilters";
 import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
 import type { NodeContext } from "./Node";
+import { LayerNode } from "./LayerNode";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
+
+  Layer(props?: ChildrenProps) {
+    return new LayerNode(this.ctx, props ?? {});
+  }
 
   Group(props?: GroupProps) {
     return global.SkiaDomApi && global.SkiaDomApi.GroupNode

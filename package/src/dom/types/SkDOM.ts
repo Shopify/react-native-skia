@@ -76,6 +76,7 @@ type NullablePathEffectNode<P> = DeclarationNode<P, SkPathEffect, null>;
 type DrawingNode<P extends GroupProps> = RenderNode<P>;
 
 export interface SkDOM {
+  Layer(props?: ChildrenProps): RenderNode<ChildrenProps>;
   Group(props?: GroupProps): RenderNode<GroupProps>;
   Paint(props: PaintProps): DeclarationNode<PaintProps, SkPaint>;
 
