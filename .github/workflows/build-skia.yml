@@ -110,4 +110,3 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskottie.xcframework
             ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libsksg.xcframework
             ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskparagraph.xcframework
-            ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskunicode.xcframework

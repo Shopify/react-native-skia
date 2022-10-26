@@ -34,7 +34,6 @@ const iosFiles = [
   "libskottie.xcframework",
   "libsksg.xcframework",
   "libskparagraph.xcframework",
-  "libskunicode.xcframework",
 ];
 
 const copyFiles = (from: string, to: string, files: string[]) => {
