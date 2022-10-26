@@ -25,13 +25,46 @@ public:
       return;
     }
     
-    auto propObject = _uniformsProp->value();
+    // Get the effect
     auto source = _sourceProp->value()->getAs<JsiSkRuntimeEffect>()->getObject();
     
-    auto uniformsCount = source->uniforms().size();
+    // Flatten uniforms from property
+    auto uniformValues = flattenUniforms(source.get(), _uniformsProp->value());
     
-    // Create SkData for uniforms
+    // Cast uniforms according to the declaration in the shader
+    auto uniformsData = castUniforms(source.get(), uniformValues);
+    
+    // Save derived value
+    setDerivedValue(uniformsData);
+  }
+  
+private:
+  sk_sp<SkData> castUniforms(SkRuntimeEffect* source, const std::vector<SkScalar> & values) {
+    // Create memory for uniforms
     auto uniformsData = SkData::MakeUninitialized(source->uniformSize());
+    
+    // Loop through all uniforms in the effect and load data from the flattened array of values
+    const auto &u = source->uniforms();
+    for (std::size_t i = 0; i < u.size(); i++) {
+      auto it = source->uniforms().begin() + i;
+      RuntimeEffectUniform reu = JsiSkRuntimeEffect::fromUniform(*it);
+      for (std::size_t j = 0; j < reu.columns * reu.rows; ++j) {
+        const std::size_t offset = reu.slot + j;
+        float fValue = values.at(offset);
+        int iValue = static_cast<int>(fValue);
+        auto value = reu.isInteger ? iValue : fValue;
+        memcpy(SkTAddOffset<void>(uniformsData->writable_data(),
+                                  offset * sizeof(value)),
+               &value, sizeof(value));
+      }
+    }
+    
+    return uniformsData;
+  }
+  
+  std::vector<SkScalar> flattenUniforms(SkRuntimeEffect* source, JsiValue *propObject) {
+    auto uniformsCount = source->uniforms().size();
+    std::vector<SkScalar> uniformValues;
     
     for (size_t i = 0; i < uniformsCount; ++i) {
       auto it = source->uniforms().begin() + i;
@@ -47,44 +80,30 @@ public:
       // A uniform value can be a single number, a vector or an array of numbers
       // Or an array of the above
       if (value->getType() == PropType::Number) {
-        // Set numeric uniform - TODO: Do we need to handle sizes in any way here...?
-        SkScalar v = value->getAsNumber();
-        memcpy(SkTAddOffset<void>(uniformsData->writable_data(), it->offset), &v, it->sizeInBytes());
+        // Set numeric uniform
+        uniformValues.push_back(value->getAsNumber());
       } else if (value->getType() == PropType::Array) {
         // Array
         auto arrayValue = value->getAsArray();
-        std::vector<SkScalar> set;
-        set.reserve(arrayValue.size());
         for (size_t n = 0; n < arrayValue.size(); ++n) {
-          set.push_back(arrayValue[n]->getAsNumber());
+          auto a = arrayValue[n];
+          if (a->getType() == PropType::Number) {
+            uniformValues.push_back(a->getAsNumber());
+          } else {
+            for (size_t j = 0; j < a->getAsArray().size(); ++j) {
+              uniformValues.push_back(a->getAsArray()[j]->getAsNumber());
+            }
+          }
         }
-        memcpy(SkTAddOffset<void>(uniformsData->writable_data(), it->offset), set.data(),
-               static_cast<int>(set.size()) * it->sizeInBytes());
-        
       } else if (value->getType() == PropType::HostObject ||
                  value->getType() == PropType::Object) {
         // Vector (JsiSkPoint / JsiSkRect)
         auto pointValue = PointProp::processValue(value);
-        std::vector<SkScalar> set = { pointValue.x(), pointValue.y() };
-        
-        memcpy(SkTAddOffset<void>(uniformsData->writable_data(), it->offset), set.data(),
-               static_cast<int>(set.size()) * it->sizeInBytes());
+        uniformValues.push_back(pointValue.x());
+        uniformValues.push_back(pointValue.y());
       }
     }
-    setDerivedValue(uniformsData);
-  }
-  
-private:
-  void setValue(SkScalar val, const RuntimeEffectUniform& reu, sk_sp<SkData> uniforms) {
-    for (std::size_t j = 0; j < reu.columns * reu.rows; ++j) {
-      const std::size_t offset = reu.slot + j;
-      float fValue = val;
-      int iValue = static_cast<int>(fValue);
-      auto value = reu.isInteger ? iValue : fValue;
-      memcpy(SkTAddOffset<void>(uniforms->writable_data(),
-                                offset * sizeof(value)),
-             &value, sizeof(value));
-    }
+    return uniformValues;
   }
   
   NodeProp* _uniformsProp;
@@ -123,15 +142,21 @@ public:
       // A uniform value can be a single number, a vector or an array of numbers
       // Or an array of the above
       if (value->getType() == PropType::Number) {
-        // Set numeric uniform - TODO: Do we need to handle sizes in any way here...?
+        // Set numeric uniform
         rtb.uniform(name) = value->getAsNumber();
       } else if (value->getType() == PropType::Array) {
         // Array
         auto arrayValue = value->getAsArray();
         std::vector<SkScalar> set;
-        set.reserve(arrayValue.size());
         for (size_t n = 0; n < arrayValue.size(); ++n) {
-          set.push_back(arrayValue[n]->getAsNumber());
+          auto a = arrayValue[n];
+          if (a->getType() == PropType::Number) {
+            set.push_back(a->getAsNumber());
+          } else {
+            for (size_t j = 0; j < a->getAsArray().size(); ++j) {
+              set.push_back(a->getAsArray()[j]->getAsNumber());
+            }
+          }
         }
         rtb.uniform(name) = set.data();
         
@@ -152,18 +177,6 @@ public:
   void updateDerivedValue() override {}
   
 private:
-  void setValue(SkScalar val, const RuntimeEffectUniform& reu, sk_sp<SkData> uniforms) {
-    for (std::size_t j = 0; j < reu.columns * reu.rows; ++j) {
-      const std::size_t offset = reu.slot + j;
-      float fValue = val;
-      int iValue = static_cast<int>(fValue);
-      auto value = reu.isInteger ? iValue : fValue;
-      memcpy(SkTAddOffset<void>(uniforms->writable_data(),
-                                offset * sizeof(value)),
-             &value, sizeof(value));
-    }
-  }
-  
   NodeProp* _uniformsProp;
   NodeProp* _sourceProp;
 };

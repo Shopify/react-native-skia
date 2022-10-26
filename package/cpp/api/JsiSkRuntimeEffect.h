@@ -131,41 +131,7 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkRuntimeEffect>(std::move(context),
                                                       std::move(rt)) {}
 
-private:
-  sk_sp<SkData> castUniforms(jsi::Runtime &runtime, const jsi::Value &value) {
-    auto jsiUniforms = value.asObject(runtime).asArray(runtime);
-    auto jsiUniformsSize = jsiUniforms.size(runtime);
-
-    // verify size of input uniforms
-    if (jsiUniformsSize * sizeof(float) != getObject()->uniformSize()) {
-      std::string msg =
-          "Uniforms size differs from effect's uniform size. Received " +
-          std::to_string(jsiUniformsSize) + " expected " +
-          std::to_string(getObject()->uniformSize() / sizeof(float));
-      throw jsi::JSError(runtime, msg.c_str());
-    }
-
-    auto uniforms = SkData::MakeUninitialized(getObject()->uniformSize());
-
-    // Convert to skia uniforms
-    const auto &u = getObject()->uniforms();
-    for (std::size_t i = 0; i < u.size(); i++) {
-      auto it = getObject()->uniforms().begin() + i;
-      RuntimeEffectUniform reu = fromUniform(*it);
-      for (std::size_t j = 0; j < reu.columns * reu.rows; ++j) {
-        const std::size_t offset = reu.slot + j;
-        float fValue = jsiUniforms.getValueAtIndex(runtime, offset).asNumber();
-        int iValue = static_cast<int>(fValue);
-        auto value = reu.isInteger ? iValue : fValue;
-        memcpy(SkTAddOffset<void>(uniforms->writable_data(),
-                                  offset * sizeof(value)),
-               &value, sizeof(value));
-      }
-    }
-    return uniforms;
-  }
-
-  RuntimeEffectUniform fromUniform(const SkRuntimeEffect::Uniform &u) {
+  static RuntimeEffectUniform fromUniform(const SkRuntimeEffect::Uniform &u) {
     RuntimeEffectUniform su;
     su.rows = u.count; // arrayLength
     su.columns = 1;
@@ -213,6 +179,40 @@ private:
     }
     su.slot = static_cast<int>(u.offset / sizeof(float));
     return su;
+  }
+  
+private:
+  sk_sp<SkData> castUniforms(jsi::Runtime &runtime, const jsi::Value &value) {
+    auto jsiUniforms = value.asObject(runtime).asArray(runtime);
+    auto jsiUniformsSize = jsiUniforms.size(runtime);
+
+    // verify size of input uniforms
+    if (jsiUniformsSize * sizeof(float) != getObject()->uniformSize()) {
+      std::string msg =
+          "Uniforms size differs from effect's uniform size. Received " +
+          std::to_string(jsiUniformsSize) + " expected " +
+          std::to_string(getObject()->uniformSize() / sizeof(float));
+      throw jsi::JSError(runtime, msg.c_str());
+    }
+
+    auto uniforms = SkData::MakeUninitialized(getObject()->uniformSize());
+
+    // Convert to skia uniforms
+    const auto &u = getObject()->uniforms();
+    for (std::size_t i = 0; i < u.size(); i++) {
+      auto it = getObject()->uniforms().begin() + i;
+      RuntimeEffectUniform reu = fromUniform(*it);
+      for (std::size_t j = 0; j < reu.columns * reu.rows; ++j) {
+        const std::size_t offset = reu.slot + j;
+        float fValue = jsiUniforms.getValueAtIndex(runtime, offset).asNumber();
+        int iValue = static_cast<int>(fValue);
+        auto value = reu.isInteger ? iValue : fValue;
+        memcpy(SkTAddOffset<void>(uniforms->writable_data(),
+                                  offset * sizeof(value)),
+               &value, sizeof(value));
+      }
+    }
+    return uniforms;
   }
 };
 } // namespace RNSkia
