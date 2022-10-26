@@ -1,6 +1,6 @@
 import type { ViewProps } from "react-native";
 
-import { GroupProps, RenderNode } from "../dom/types";
+import type { GroupProps, RenderNode } from "../dom/types";
 import type { SkCanvas, SkImage, SkPicture, SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
 

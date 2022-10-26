@@ -65,7 +65,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const redraw = useCallback(() => {
       innerRef.current?.redraw();
-    }, []);
+    }, [innerRef]);
 
     const registerValues = useCallback(
       (values: Array<SkiaValue<unknown>>) => {

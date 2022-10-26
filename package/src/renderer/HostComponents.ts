@@ -1,12 +1,10 @@
 import type { ForwardedRef } from "react";
 
-import {
+import { NodeType } from "../dom/types";
+import type {
   DeclarationNode,
   FractalNoiseProps,
-  NodeType,
   RenderNode,
-} from "../dom/types";
-import type {
   CircleProps,
   DrawingNodeProps,
   ImageProps,
@@ -72,12 +70,12 @@ import type {
   SkShader,
 } from "../skia";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
+import type { SkiaValue } from "../values";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
-import { DependencyManager } from "./DependencyManager";
-import { SkiaValue } from "../values";
+import type { DependencyManager } from "./DependencyManager";
 
 declare global {
   var SkiaDomApi: {
