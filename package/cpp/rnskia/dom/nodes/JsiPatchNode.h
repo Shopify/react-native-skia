@@ -6,12 +6,14 @@
 #include "JsiDomDrawingNode.h"
 #include "PointsProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiPatchNode : public JsiDomDrawingNode,
                      public JsiDomNodeCtor<JsiPatchNode> {
 public:
-  JsiPatchNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiPatchNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skPatch") {}
 
 protected:

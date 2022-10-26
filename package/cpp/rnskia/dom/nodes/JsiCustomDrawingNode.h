@@ -6,12 +6,15 @@
 #include "JsiSkCanvas.h"
 #include "JsiSkPaint.h"
 
+#include <utility>
+#include <memory>
+
 namespace RNSkia {
 
 class JsiCustomDrawingNode : public JsiDomDrawingNode,
                              public JsiDomNodeCtor<JsiCustomDrawingNode> {
 public:
-  JsiCustomDrawingNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiCustomDrawingNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skCustomDrawing") {}
 
 protected:

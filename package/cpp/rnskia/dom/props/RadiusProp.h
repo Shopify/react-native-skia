@@ -3,6 +3,8 @@
 #include "NodeProp.h"
 #include "PointProp.h"
 
+#include <memory>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -14,7 +16,7 @@ namespace RNSkia {
 
 class RadiusProp : public DerivedProp<SkPoint> {
 public:
-  RadiusProp(PropId name) : DerivedProp<SkPoint>() {
+  explicit RadiusProp(PropId name) : DerivedProp<SkPoint>() {
     _pointProp = addProperty(std::make_shared<PointProp>(name));
     _radiusProp = addProperty(std::make_shared<NodeProp>(name));
   }

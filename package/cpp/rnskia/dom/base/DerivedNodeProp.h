@@ -3,6 +3,11 @@
 #include "BaseNodeProp.h"
 #include "JsiValue.h"
 
+#include <string>
+#include <vector>
+#include <memory>
+#include <utility>
+
 namespace RNSkia {
 
 /**
@@ -50,7 +55,7 @@ public:
   /**
    Delegate read value to child nodes
    */
-  virtual void readValueFromJs(jsi::Runtime &runtime,
+  void readValueFromJs(jsi::Runtime &runtime,
                                const ReadPropFunc &read) override {
     for (auto &prop : _properties) {
       prop->readValueFromJs(runtime, read);
@@ -84,7 +89,7 @@ public:
   /**
    Returns true if one or more of the child props has values
    */
-  virtual bool isSet() override {
+  bool isSet() override {
     for (auto &prop : _properties) {
       if (prop->isSet()) {
         return true;

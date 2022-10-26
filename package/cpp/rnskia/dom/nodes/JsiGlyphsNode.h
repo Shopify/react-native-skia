@@ -5,12 +5,14 @@
 #include "FontProp.h"
 #include "GlyphsProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiGlyphsNode : public JsiDomDrawingNode,
                       public JsiDomNodeCtor<JsiGlyphsNode> {
 public:
-  JsiGlyphsNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiGlyphsNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skGlyphs") {}
 
 protected:

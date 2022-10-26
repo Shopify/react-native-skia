@@ -4,12 +4,14 @@
 #include "RectProp.h"
 #include "SvgProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiImageSvgNode : public JsiDomDrawingNode,
                         public JsiDomNodeCtor<JsiImageSvgNode> {
 public:
-  JsiImageSvgNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiImageSvgNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skImageSvg") {}
 
 protected:

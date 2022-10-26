@@ -2,6 +2,9 @@
 
 #include "JsiSkRRect.h"
 #include "NodeProp.h"
+#include "RectProp.h"
+
+#include <memory>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -24,7 +27,7 @@ static PropId PropNameR = JsiPropId::get("r");
  */
 class RRectProp : public DerivedProp<SkRRect> {
 public:
-  RRectProp(PropId name) : DerivedProp() {
+  explicit RRectProp(PropId name) : DerivedProp() {
     _prop = addProperty(std::make_shared<NodeProp>(name));
   }
 
@@ -108,7 +111,7 @@ private:
  */
 class RRectProps : public DerivedProp<SkRRect> {
 public:
-  RRectProps(PropId name) : DerivedProp<SkRRect>() {
+  explicit RRectProps(PropId name) : DerivedProp<SkRRect>() {
     _rectProp = addProperty<RRectProp>(std::make_shared<RRectProp>(name));
     _rectPropFromProps =
         addProperty<RRectPropFromProps>(std::make_shared<RRectPropFromProps>());

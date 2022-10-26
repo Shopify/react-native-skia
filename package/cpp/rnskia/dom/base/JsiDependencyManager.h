@@ -8,6 +8,10 @@
 
 #include <map>
 #include <set>
+#include <string>
+#include <utility>
+#include <memory>
+#include <vector>
 
 namespace RNSkia {
 

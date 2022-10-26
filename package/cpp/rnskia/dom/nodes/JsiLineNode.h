@@ -3,6 +3,8 @@
 #include "JsiDomDrawingNode.h"
 #include "PointProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 static PropId PropNamePoint1 = JsiPropId::get("p1");
@@ -11,7 +13,7 @@ static PropId PropNamePoint2 = JsiPropId::get("p2");
 class JsiLineNode : public JsiDomDrawingNode,
                     public JsiDomNodeCtor<JsiLineNode> {
 public:
-  JsiLineNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiLineNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skLine") {}
 
 protected:

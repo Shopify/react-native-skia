@@ -3,12 +3,14 @@
 #include "BoxShadowProps.h"
 #include "JsiDomDeclarationNode.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiBoxShadowNode : public JsiBaseDomDeclarationNode,
                          public JsiDomNodeCtor<JsiBoxShadowNode> {
 public:
-  JsiBoxShadowNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiBoxShadowNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseDomDeclarationNode(context, "skBoxShadow") {}
 
   BoxShadowProps *getBoxShadowProps() { return _boxShadowProps; }

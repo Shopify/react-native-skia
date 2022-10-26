@@ -4,11 +4,13 @@
 
 #include "JsiSkSVG.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class SvgProp : public DerivedSkProp<SkSVGDOM> {
 public:
-  SvgProp(PropId name) : DerivedSkProp<SkSVGDOM>() {
+  explicit SvgProp(PropId name) : DerivedSkProp<SkSVGDOM>() {
     _imageSvgProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

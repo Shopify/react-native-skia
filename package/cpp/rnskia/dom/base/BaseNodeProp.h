@@ -3,11 +3,13 @@
 #include "DrawingContext.h"
 #include "JsiValue.h"
 
+#include <string>
+
 namespace RNSkia {
 
 class NodeProp;
 
-using namespace RNJsi;
+using namespace RNJsi; // NOLINT
 
 using ReadPropFunc =
     std::function<jsi::Value(jsi::Runtime &, PropId, NodeProp *prop)>;

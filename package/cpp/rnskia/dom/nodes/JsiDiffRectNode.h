@@ -3,6 +3,8 @@
 #include "JsiDomDrawingNode.h"
 #include "RRectProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 static PropId PropNameInner = JsiPropId::get("inner");
@@ -11,7 +13,7 @@ static PropId PropNameOuter = JsiPropId::get("outer");
 class JsiDiffRectNode : public JsiDomDrawingNode,
                         public JsiDomNodeCtor<JsiDiffRectNode> {
 public:
-  JsiDiffRectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiDiffRectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skDiffRect") {}
 
 protected:

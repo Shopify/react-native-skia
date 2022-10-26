@@ -3,12 +3,14 @@
 #include "JsiDomDrawingNode.h"
 #include "TextBlobProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiTextPathNode : public JsiDomDrawingNode,
                         public JsiDomNodeCtor<JsiTextPathNode> {
 public:
-  JsiTextPathNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiTextPathNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skTextPath") {}
 
 protected:

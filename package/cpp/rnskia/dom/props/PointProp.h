@@ -3,6 +3,9 @@
 #include "DerivedNodeProp.h"
 #include "JsiSkPoint.h"
 
+#include <memory>
+#include <utility>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -18,7 +21,7 @@ static SkPoint EmptyPoint = SkPoint::Make(-1, -1);
 
 class PointProp : public DerivedProp<SkPoint> {
 public:
-  PointProp(PropId name) : DerivedProp<SkPoint>() {
+  explicit PointProp(PropId name) : DerivedProp<SkPoint>() {
     _pointProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

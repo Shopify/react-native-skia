@@ -2,6 +2,11 @@
 
 #include "DerivedNodeProp.h"
 
+#include <utility>
+#include <memory>
+#include <vector>
+#include <string>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -13,7 +18,7 @@ namespace RNSkia {
 
 class BlendModeProp : public DerivedProp<SkBlendMode> {
 public:
-  BlendModeProp(PropId name) : DerivedProp<SkBlendMode>() {
+  explicit BlendModeProp(PropId name) : DerivedProp<SkBlendMode>() {
     _blendMode = addProperty(std::make_shared<NodeProp>(name));
   }
 

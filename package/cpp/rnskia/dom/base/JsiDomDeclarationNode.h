@@ -4,6 +4,9 @@
 #include "DrawingContext.h"
 #include "JsiDomNode.h"
 
+#include <string>
+#include <memory>
+
 namespace RNSkia {
 
 class JsiBaseDomDeclarationNode : public JsiDomNode {
@@ -56,7 +59,7 @@ protected:
   /**
    Validates that only declaration nodes can be children
    */
-  virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
+  void addChild(std::shared_ptr<JsiDomNode> child) override {
     if (std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child) ==
         nullptr) {
       getContext()->raiseError(std::runtime_error(
@@ -69,7 +72,7 @@ protected:
   /**
    Validates that only declaration nodes can be children
    */
-  virtual void insertChildBefore(std::shared_ptr<JsiDomNode> child,
+  void insertChildBefore(std::shared_ptr<JsiDomNode> child,
                                  std::shared_ptr<JsiDomNode> before) override {
     if (std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child) ==
         nullptr) {
@@ -150,12 +153,12 @@ protected:
     clearCurrent();
   }
 
-  virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
+  void addChild(std::shared_ptr<JsiDomNode> child) override {
     JsiBaseDomDeclarationNode::addChild(child);
     clearCurrent();
   }
 
-  virtual void insertChildBefore(std::shared_ptr<JsiDomNode> child,
+  void insertChildBefore(std::shared_ptr<JsiDomNode> child,
                                  std::shared_ptr<JsiDomNode> before) override {
     JsiBaseDomDeclarationNode::insertChildBefore(child, before);
     clearCurrent();

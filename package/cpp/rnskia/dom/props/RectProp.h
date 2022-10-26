@@ -1,6 +1,9 @@
 #pragma once
 
 #include "NodeProp.h"
+#include "PointProp.h"
+
+#include <memory>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -22,7 +25,7 @@ static PropId PropNameHeight = JsiPropId::get("height");
  */
 class RectProp : public DerivedProp<SkRect> {
 public:
-  RectProp(PropId name) : DerivedProp() {
+  explicit RectProp(PropId name) : DerivedProp() {
     _prop = addProperty(std::make_shared<NodeProp>(name));
   }
 
@@ -96,7 +99,7 @@ private:
  */
 class RectProps : public DerivedProp<SkRect> {
 public:
-  RectProps(PropId name) : DerivedProp<SkRect>() {
+  explicit RectProps(PropId name) : DerivedProp<SkRect>() {
     _rectProp = addProperty(std::make_shared<RectProp>(name));
     _rectPropFromProps = addProperty(std::make_shared<RectPropFromProps>());
   }

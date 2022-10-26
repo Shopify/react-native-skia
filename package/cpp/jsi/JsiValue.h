@@ -1,13 +1,16 @@
 #pragma once
 
 #include <jsi/jsi.h>
+
 #include <unordered_map>
+#include <utility>
+#include <string>
+#include <memory>
+#include <vector>
 
 namespace RNJsi {
 
-using namespace facebook;
-
-static std::string empty = "";
+namespace jsi = facebook::jsi;
 
 enum struct PropType {
   Undefined = 1,
@@ -25,11 +28,11 @@ using PropId = const char *;
 
 class JsiPropId {
 public:
-  static const char *get(const std::string &name) { return _get(name); };
+  static const char *get(const std::string &name) { return _get(name); }
 
   static const char *get(const std::string &&name) {
     return _get(std::move(name));
-  };
+  }
 
 private:
   static const char *_get(const std::string &name) {
@@ -45,7 +48,7 @@ private:
   static std::unordered_map<std::string, PropId> &_impls() {
     static std::unordered_map<std::string, PropId> impls;
     return impls;
-  };
+  }
 };
 
 /**
@@ -55,13 +58,13 @@ private:
  */
 class JsiValue {
 public:
-  JsiValue(jsi::Runtime &runtime) : _type(PropType::Undefined) {}
+  explicit JsiValue(jsi::Runtime &runtime) : _type(PropType::Undefined) {}
   JsiValue(jsi::Runtime &runtime, const jsi::Value &value) : JsiValue(runtime) {
     setCurrent(runtime, value);
   }
 
   void setCurrent(jsi::Runtime &runtime, const jsi::Value &value) {
-    _stringValue = empty;
+    _stringValue = "";
     _hostObject = nullptr;
     _hostFunction = nullptr;
     _props.clear();
@@ -309,10 +312,10 @@ protected:
   std::string stringValue() const { return _stringValue; }
   std::shared_ptr<jsi::HostObject> hostObject() const { return _hostObject; }
   jsi::HostFunctionType hostFunction() const { return _hostFunction; }
-  std::vector<std::shared_ptr<JsiValue>> array() const { return _array; };
+  std::vector<std::shared_ptr<JsiValue>> array() const { return _array; }
   std::unordered_map<PropId, std::shared_ptr<JsiValue>> props() const {
     return _props;
-  };
+  }
   const std::vector<PropId> &keysCache() const { return _keysCache; }
 
 private:
@@ -457,7 +460,7 @@ private:
   PropType _type = PropType::Undefined;
   bool _boolValue;
   double _numberValue;
-  std::string _stringValue = empty;
+  std::string _stringValue = "";
   std::shared_ptr<jsi::HostObject> _hostObject;
   jsi::HostFunctionType _hostFunction;
   std::vector<std::shared_ptr<JsiValue>> _array;

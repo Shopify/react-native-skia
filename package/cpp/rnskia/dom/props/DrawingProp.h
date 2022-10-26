@@ -4,6 +4,8 @@
 
 #include "JsiSkFont.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 using NotifyNeedRenderCallback =

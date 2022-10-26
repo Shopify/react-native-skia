@@ -2,6 +2,7 @@
 #include "DrawingContext.h"
 
 #include <chrono>
+#include <utility>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -47,7 +48,7 @@ bool RNSkDomRenderer::tryRender(
   } else {
     return false;
   }
-};
+}
 
 void RNSkDomRenderer::renderImmediate(
     std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
@@ -57,7 +58,7 @@ void RNSkDomRenderer::renderImmediate(
       &RNSkDomRenderer::renderCanvas, this, std::placeholders::_1,
       canvasProvider->getScaledWidth(), canvasProvider->getScaledHeight()));
   setShowDebugOverlays(prevDebugOverlay);
-};
+}
 
 void RNSkDomRenderer::setRoot(std::shared_ptr<JsiDomRenderNode> node) {
   std::lock_guard<std::mutex> lock(_rootLock);
@@ -173,10 +174,10 @@ void RNSkDomRenderer::callOnTouch() {
             touchObj.setProperty(runtime, "x", t.x);
             touchObj.setProperty(runtime, "y", t.y);
             touchObj.setProperty(runtime, "force", t.force);
-            touchObj.setProperty(runtime, "type", (double)t.type);
+            touchObj.setProperty(runtime, "type", static_cast<double>(t.type));
             touchObj.setProperty(runtime, "timestamp",
-                                 (double)t.timestamp / 1000.0);
-            touchObj.setProperty(runtime, "id", (double)t.id);
+                                 static_cast<double>(t.timestamp) / 1000.0);
+            touchObj.setProperty(runtime, "id", static_cast<double>(t.id));
             touches.setValueAtIndex(runtime, n, touchObj);
           }
           ops.setValueAtIndex(runtime, i, touches);
@@ -215,4 +216,4 @@ void RNSkDomRenderer::renderDebugOverlays(SkCanvas *canvas) {
                          SkTextEncoding::kUTF8, 8, 18, font, paint);
 }
 
-} // Namespace RNSkia
+} // namespace RNSkia

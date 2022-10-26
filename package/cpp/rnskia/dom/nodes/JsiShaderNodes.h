@@ -10,6 +10,10 @@
 #include "TransformsProps.h"
 #include "UniformsProp.h"
 
+#include <vector>
+#include <string>
+#include <memory>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -50,7 +54,7 @@ protected:
 class JsiShaderNode : public JsiBaseShaderNode,
                       public JsiDomNodeCtor<JsiShaderNode> {
 public:
-  JsiShaderNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiShaderNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseShaderNode(context, "skShader") {}
 
 protected:
@@ -104,7 +108,7 @@ private:
 class JsiImageShaderNode : public JsiBaseShaderNode,
                            public JsiDomNodeCtor<JsiImageShaderNode> {
 public:
-  JsiImageShaderNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiImageShaderNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseShaderNode(context, "skImageShader") {}
 
 protected:
@@ -201,7 +205,7 @@ private:
 class JsiColorShaderNode : public JsiBaseShaderNode,
                            public JsiDomNodeCtor<JsiColorShaderNode> {
 public:
-  JsiColorShaderNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiColorShaderNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseShaderNode(context, "skColorShader") {}
 
 protected:
@@ -267,11 +271,11 @@ protected:
 class JsiTurbulenceNode : public JsiBasePerlinNoiseNode,
                           public JsiDomNodeCtor<JsiTurbulenceNode> {
 public:
-  JsiTurbulenceNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiTurbulenceNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePerlinNoiseNode(context, "skTurbulence") {}
 
 protected:
-  virtual void materialize(DrawingContext *context) override {
+  void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
       SkISize size = SkISize::Make(_tileWidthProp->value()->getAsNumber(),
                                    _tileHeightProp->value()->getAsNumber());
@@ -288,7 +292,7 @@ protected:
 class JsiFractalNoiseNode : public JsiBasePerlinNoiseNode,
                             public JsiDomNodeCtor<JsiFractalNoiseNode> {
 public:
-  JsiFractalNoiseNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiFractalNoiseNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePerlinNoiseNode(context, "skFractalNoise") {}
 
 protected:
@@ -363,7 +367,7 @@ private:
 class JsiLinearGradientNode : public JsiBaseGradientNode,
                               public JsiDomNodeCtor<JsiLinearGradientNode> {
 public:
-  JsiLinearGradientNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiLinearGradientNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skLinearGradient") {}
 
 protected:
@@ -398,7 +402,7 @@ private:
 class JsiRadialGradientNode : public JsiBaseGradientNode,
                               public JsiDomNodeCtor<JsiRadialGradientNode> {
 public:
-  JsiRadialGradientNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiRadialGradientNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skRadialGradient") {}
 
 protected:
@@ -433,7 +437,7 @@ private:
 class JsiSweepGradientNode : public JsiBaseGradientNode,
                              public JsiDomNodeCtor<JsiSweepGradientNode> {
 public:
-  JsiSweepGradientNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSweepGradientNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skSweepGradient") {}
 
 protected:
@@ -471,7 +475,7 @@ class JsiTwoPointConicalGradientNode
     : public JsiBaseGradientNode,
       public JsiDomNodeCtor<JsiTwoPointConicalGradientNode> {
 public:
-  JsiTwoPointConicalGradientNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiTwoPointConicalGradientNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skTwoPointConicalGradient") {}
 
 protected:

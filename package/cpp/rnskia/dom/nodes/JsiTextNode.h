@@ -4,12 +4,14 @@
 
 #include "FontProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiTextNode : public JsiDomDrawingNode,
                     public JsiDomNodeCtor<JsiTextNode> {
 public:
-  JsiTextNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiTextNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skText") {}
 
 protected:

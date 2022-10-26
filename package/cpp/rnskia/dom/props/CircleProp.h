@@ -3,6 +3,8 @@
 #include "NodeProp.h"
 #include "PointProp.h"
 
+#include <memory>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 

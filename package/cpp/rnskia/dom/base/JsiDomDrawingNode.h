@@ -3,6 +3,8 @@
 #include "JsiDomRenderNode.h"
 #include "JsiPaintNode.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiDomDrawingNode : public JsiDomRenderNode {

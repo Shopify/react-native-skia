@@ -2,6 +2,9 @@
 
 #include "DerivedNodeProp.h"
 
+#include <memory>
+#include <string>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -13,7 +16,7 @@ namespace RNSkia {
 
 class StrokeCapProp : public DerivedProp<SkPaint::Cap> {
 public:
-  StrokeCapProp(PropId name) : DerivedProp<SkPaint::Cap>() {
+  explicit StrokeCapProp(PropId name) : DerivedProp<SkPaint::Cap>() {
     _strokeCap = addProperty(std::make_shared<NodeProp>(name));
   }
 
@@ -42,7 +45,7 @@ private:
 
 class StrokeJoinProp : public DerivedProp<SkPaint::Join> {
 public:
-  StrokeJoinProp(PropId name) : DerivedProp<SkPaint::Join>() {
+  explicit StrokeJoinProp(PropId name) : DerivedProp<SkPaint::Join>() {
     _strokeJoin = addProperty(std::make_shared<NodeProp>(name));
   }
 

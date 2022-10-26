@@ -3,12 +3,14 @@
 #include "CircleProp.h"
 #include "JsiDomDrawingNode.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiBackdropFilterNode : public JsiDomDrawingNode,
                               public JsiDomNodeCtor<JsiBackdropFilterNode> {
 public:
-  JsiBackdropFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiBackdropFilterNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skBackdropFilter") {}
 
 protected:

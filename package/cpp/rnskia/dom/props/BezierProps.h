@@ -4,11 +4,15 @@
 
 #include "JsiSkPicture.h"
 
+#include <utility>
+#include <memory>
+#include <vector>
+
 namespace RNSkia {
 
 class BezierProp : public DerivedProp<std::vector<SkPoint>> {
 public:
-  BezierProp(PropId name) : DerivedProp<std::vector<SkPoint>>() {
+  explicit BezierProp(PropId name) : DerivedProp<std::vector<SkPoint>>() {
     _bezierProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

@@ -5,6 +5,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <jsi/jsi.h>
 
@@ -32,7 +33,7 @@ class SkImage;
 
 namespace RNSkia {
 class JsiSkCanvas;
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class RNSkDomRenderer : public RNSkRenderer,
                         public std::enable_shared_from_this<RNSkDomRenderer> {

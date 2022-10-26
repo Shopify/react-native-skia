@@ -4,11 +4,14 @@
 
 #include "JsiSkPicture.h"
 
+#include <string>
+#include <memory>
+
 namespace RNSkia {
 
 class PictureProp : public DerivedSkProp<SkPicture> {
 public:
-  PictureProp(PropId name) : DerivedSkProp<SkPicture>() {
+  explicit PictureProp(PropId name) : DerivedSkProp<SkPicture>() {
     _pictureProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

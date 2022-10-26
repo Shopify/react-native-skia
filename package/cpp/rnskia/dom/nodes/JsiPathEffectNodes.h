@@ -4,6 +4,10 @@
 
 #include "NodeProp.h"
 
+#include <vector>
+#include <string>
+#include <memory>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -53,7 +57,7 @@ protected:
 class JsiDashPathEffectNode : public JsiBasePathEffectNode,
                               public JsiDomNodeCtor<JsiDashPathEffectNode> {
 public:
-  JsiDashPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiDashPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePathEffectNode(context, "skDashPathEffect") {}
 
 protected:
@@ -72,7 +76,7 @@ protected:
 
       // Create effect
       auto pathEffect = SkDashPathEffect::Make(intervals.data(),
-                                               (int)intervals.size(), phase);
+                                               static_cast<int>(intervals.size()), phase);
 
       setPathEffect(context, pathEffect);
     }
@@ -98,7 +102,7 @@ class JsiDiscretePathEffectNode
     : public JsiBasePathEffectNode,
       public JsiDomNodeCtor<JsiDiscretePathEffectNode> {
 public:
-  JsiDiscretePathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiDiscretePathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePathEffectNode(context, "skDiscretePathEffect") {}
 
 protected:
@@ -139,7 +143,7 @@ private:
 class JsiCornerPathEffectNode : public JsiBasePathEffectNode,
                                 public JsiDomNodeCtor<JsiCornerPathEffectNode> {
 public:
-  JsiCornerPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiCornerPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePathEffectNode(context, "skCornerPathEffect") {}
 
 protected:
@@ -169,7 +173,7 @@ private:
 class JsiPath1DPathEffectNode : public JsiBasePathEffectNode,
                                 public JsiDomNodeCtor<JsiPath1DPathEffectNode> {
 public:
-  JsiPath1DPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiPath1DPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePathEffectNode(context, "skPath1DPathEffect") {}
 
 protected:
@@ -226,7 +230,7 @@ private:
 class JsiPath2DPathEffectNode : public JsiBasePathEffectNode,
                                 public JsiDomNodeCtor<JsiPath2DPathEffectNode> {
 public:
-  JsiPath2DPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiPath2DPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePathEffectNode(context, "skPath2DPathEffect") {}
 
 protected:
@@ -261,7 +265,7 @@ private:
 class JsiLine2DPathEffectNode : public JsiBasePathEffectNode,
                                 public JsiDomNodeCtor<JsiLine2DPathEffectNode> {
 public:
-  JsiLine2DPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiLine2DPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePathEffectNode(context, "skLine2DPathEffect") {}
 
 protected:
@@ -296,7 +300,7 @@ private:
 class JsiSumPathEffectNode : public JsiBasePathEffectNode,
                              public JsiDomNodeCtor<JsiSumPathEffectNode> {
 public:
-  JsiSumPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSumPathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePathEffectNode(context, "skSumPathEffect") {}
 
 protected:

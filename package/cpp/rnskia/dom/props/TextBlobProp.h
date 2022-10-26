@@ -4,11 +4,15 @@
 
 #include "JsiSkTextBlob.h"
 
+#include <memory>
+#include <string>
+#include <vector>
+
 namespace RNSkia {
 
 class TextBlobProp : public DerivedSkProp<SkTextBlob> {
 public:
-  TextBlobProp(PropId name) : DerivedSkProp<SkTextBlob>() {
+  explicit TextBlobProp(PropId name) : DerivedSkProp<SkTextBlob>() {
     _textBlobProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

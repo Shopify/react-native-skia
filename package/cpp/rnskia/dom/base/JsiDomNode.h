@@ -5,6 +5,9 @@
 #include "NodePropsContainer.h"
 
 #include <vector>
+#include <utility>
+#include <string>
+#include <memory>
 
 #include "RNSkPlatformContext.h"
 
@@ -144,9 +147,9 @@ public:
   /**
    Returns the node type.
   */
-  const char *getType() { return _type; };
+  const char *getType() { return _type; }
 
-  size_t getNodeId() { return _nodeId; };
+  size_t getNodeId() { return _nodeId; }
 
   /**
    Returns the container for node properties
@@ -196,7 +199,7 @@ protected:
   /**
    Override to define properties in node implementations
    */
-  virtual void defineProperties(NodePropsContainer *container){};
+  virtual void defineProperties(NodePropsContainer *container) {}
 
   /**
    Returns the platform context
@@ -226,7 +229,7 @@ protected:
     }
     // Update properties container
     _propsContainer->setProps(runtime, std::move(props));
-  };
+  }
 
   /**
    Called for components that has no properties

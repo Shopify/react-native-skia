@@ -3,6 +3,9 @@
 #include "DerivedNodeProp.h"
 #include "JsiSkMatrix.h"
 
+#include <memory>
+#include <string>
+
 namespace RNSkia {
 
 static PropId PropNameTransform = JsiPropId::get("transform");
@@ -19,7 +22,7 @@ static PropId PropNameRotateZ = JsiPropId::get("rotateZ");
 
 class TransformProp : public DerivedProp<SkMatrix> {
 public:
-  TransformProp(PropId name) : DerivedProp<SkMatrix>() {
+  explicit TransformProp(PropId name) : DerivedProp<SkMatrix>() {
     _transformProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

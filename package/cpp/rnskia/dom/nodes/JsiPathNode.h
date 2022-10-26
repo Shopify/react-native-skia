@@ -3,6 +3,9 @@
 #include "JsiDomDrawingNode.h"
 #include "PathProp.h"
 
+#include <memory>
+#include <string>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -23,7 +26,7 @@ static PropId PropNamePrecision = JsiPropId::get("precision");
 class JsiPathNode : public JsiDomDrawingNode,
                     public JsiDomNodeCtor<JsiPathNode> {
 public:
-  JsiPathNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiPathNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skPath") {}
 
 protected:

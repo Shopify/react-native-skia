@@ -4,6 +4,9 @@
 
 #include "NodeProp.h"
 
+#include <memory>
+#include <string>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -16,7 +19,7 @@ namespace RNSkia {
 class JsiBlurMaskNode : public JsiBaseDomDeclarationNode,
                         public JsiDomNodeCtor<JsiBlurMaskNode> {
 public:
-  JsiBlurMaskNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiBlurMaskNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseDomDeclarationNode(context, "skBlurMaskFilter") {}
 
 protected:

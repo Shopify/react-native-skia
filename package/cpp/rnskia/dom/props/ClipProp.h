@@ -6,6 +6,8 @@
 #include "RRectProp.h"
 #include "RectProp.h"
 
+#include <memory>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -17,7 +19,7 @@ namespace RNSkia {
 
 class ClipProp : public BaseDerivedProp {
 public:
-  ClipProp(PropId name) : BaseDerivedProp() {
+  explicit ClipProp(PropId name) : BaseDerivedProp() {
     _pathProp = addProperty(std::make_shared<PathProp>(name));
     _rectProp = addProperty(std::make_shared<RectProp>(name));
     _rrectProp = addProperty(std::make_shared<RRectProp>(name));

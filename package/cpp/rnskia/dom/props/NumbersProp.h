@@ -1,13 +1,17 @@
 #pragma once
 
 #include "DerivedNodeProp.h"
-#include "third_party/CSSColorParser.h"
+
+#include <utility>
+#include <string>
+#include <memory>
+#include <vector>
 
 namespace RNSkia {
 
 class NumbersProp : public DerivedProp<std::vector<SkScalar>> {
 public:
-  NumbersProp(PropId name) : DerivedProp<std::vector<SkScalar>>() {
+  explicit NumbersProp(PropId name) : DerivedProp<std::vector<SkScalar>>() {
     _positionProp = addProperty(std::make_shared<NodeProp>(name));
   }
 
@@ -32,7 +36,7 @@ private:
 
 class Numbers16Prop : public DerivedProp<std::vector<u_int16_t>> {
 public:
-  Numbers16Prop(PropId name) : DerivedProp<std::vector<u_int16_t>>() {
+  explicit Numbers16Prop(PropId name) : DerivedProp<std::vector<u_int16_t>>() {
     _prop = addProperty(std::make_shared<NodeProp>(name));
   }
 

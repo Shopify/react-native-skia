@@ -3,11 +3,14 @@
 #include "JsiBoxShadowNode.h"
 #include "JsiDomRenderNode.h"
 
+#include <memory>
+#include <vector>
+
 namespace RNSkia {
 
 class JsiBoxNode : public JsiDomRenderNode, public JsiDomNodeCtor<JsiBoxNode> {
 public:
-  JsiBoxNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiBoxNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomRenderNode(context, "skBox") {}
 
 protected:

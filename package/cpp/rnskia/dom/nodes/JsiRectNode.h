@@ -3,12 +3,14 @@
 #include "JsiDomDrawingNode.h"
 #include "RectProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiRectNode : public JsiDomDrawingNode,
                     public JsiDomNodeCtor<JsiRectNode> {
 public:
-  JsiRectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiRectNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skRect") {}
 
 protected:

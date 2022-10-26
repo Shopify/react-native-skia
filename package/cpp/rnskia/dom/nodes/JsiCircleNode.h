@@ -3,12 +3,14 @@
 #include "CircleProp.h"
 #include "JsiDomDrawingNode.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiCircleNode : public JsiDomDrawingNode,
                       public JsiDomNodeCtor<JsiCircleNode> {
 public:
-  JsiCircleNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiCircleNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skCircle") {}
 
 protected:

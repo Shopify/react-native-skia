@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <fbjni/fbjni.h>
 #include <jni.h>
@@ -16,10 +17,11 @@
 #include <fbjni/detail/Hybrid.h>
 
 namespace RNSkia {
-using namespace facebook;
-using namespace jni;
 
-class JniSkiaDomView : public HybridClass<JniSkiaDomView>,
+namespace jsi = facebook::jsi;
+namespace jni = facebook::jni;
+
+class JniSkiaDomView : public jni::HybridClass<JniSkiaDomView>,
                        public JniSkiaBaseView {
 public:
   static auto constexpr kJavaDescriptor =

@@ -6,6 +6,8 @@
 #include "ColorProp.h"
 #include "NodeProp.h"
 
+#include <memory>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -55,7 +57,7 @@ class JsiMatrixColorFilterNode
     : public JsiBaseColorFilterNode,
       public JsiDomNodeCtor<JsiMatrixColorFilterNode> {
 public:
-  JsiMatrixColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiMatrixColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseColorFilterNode(context, "skMatrixColorFilter") {}
 
 protected:
@@ -86,7 +88,7 @@ private:
 class JsiBlendColorFilterNode : public JsiBaseColorFilterNode,
                                 public JsiDomNodeCtor<JsiBlendColorFilterNode> {
 public:
-  JsiBlendColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiBlendColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseColorFilterNode(context, "skBlendColorFilter") {}
 
 protected:
@@ -118,7 +120,7 @@ class JsiLinearToSRGBGammaColorFilterNode
     : public JsiBaseColorFilterNode,
       public JsiDomNodeCtor<JsiLinearToSRGBGammaColorFilterNode> {
 public:
-  JsiLinearToSRGBGammaColorFilterNode(
+  explicit JsiLinearToSRGBGammaColorFilterNode(
       std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseColorFilterNode(context, "skLinearToSRGBGammaColorFilter") {}
 
@@ -134,7 +136,7 @@ class JsiSRGBToLinearGammaColorFilterNode
     : public JsiBaseColorFilterNode,
       public JsiDomNodeCtor<JsiSRGBToLinearGammaColorFilterNode> {
 public:
-  JsiSRGBToLinearGammaColorFilterNode(
+  explicit JsiSRGBToLinearGammaColorFilterNode(
       std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseColorFilterNode(context, "skSRGBToLinearGammaColorFilter") {}
 
@@ -149,7 +151,7 @@ protected:
 class JsiLumaColorFilterNode : public JsiBaseColorFilterNode,
                                public JsiDomNodeCtor<JsiLumaColorFilterNode> {
 public:
-  JsiLumaColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiLumaColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseColorFilterNode(context, "skLumaColorFilter") {}
 
 protected:
@@ -163,7 +165,7 @@ protected:
 class JsiLerpColorFilterNode : public JsiBaseColorFilterNode,
                                public JsiDomNodeCtor<JsiLerpColorFilterNode> {
 public:
-  JsiLerpColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiLerpColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseColorFilterNode(context, "skLerpColorFilter") {}
 
 protected:

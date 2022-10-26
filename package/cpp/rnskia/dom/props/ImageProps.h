@@ -5,6 +5,8 @@
 #include "JsiSkImage.h"
 
 #include <algorithm>
+#include <string>
+#include <memory>
 
 namespace RNSkia {
 
@@ -23,7 +25,7 @@ static PropId PropNameFit = JsiPropId::get("fit");
 
 class ImageProp : public DerivedSkProp<SkImage> {
 public:
-  ImageProp(PropId name) : DerivedSkProp<SkImage>() {
+  explicit ImageProp(PropId name) : DerivedSkProp<SkImage>() {
     _imageProp = addProperty(std::make_shared<NodeProp>(name));
   }
 
@@ -79,7 +81,7 @@ public:
     auto translateX = dst.x() - src.x() * scaleX;
     auto translateY = dst.y() - src.y() * scaleY;
     return SkRect::MakeXYWH(translateX, translateY, scaleX, scaleY);
-  };
+  }
 
 private:
   SkSize size(double width, double height) {
@@ -94,7 +96,7 @@ private:
     auto dst = inscribe(sizes.dst, rect2);
 
     return {.src = src, .dst = dst};
-  };
+  }
 
   SkRect inscribe(SkSize size, SkRect rect) {
     auto halfWidthDelta = (rect.width() - size.width()) / 2.0;

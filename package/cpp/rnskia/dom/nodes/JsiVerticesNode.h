@@ -5,12 +5,14 @@
 #include "BlendModeProp.h"
 #include "VerticesProps.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiVerticesNode : public JsiDomDrawingNode,
                         public JsiDomNodeCtor<JsiVerticesNode> {
 public:
-  JsiVerticesNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiVerticesNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skVertices") {}
 
 protected:

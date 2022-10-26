@@ -3,12 +3,14 @@
 #include "JsiDomDrawingNode.h"
 #include "RectProp.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiOvalNode : public JsiDomDrawingNode,
                     public JsiDomNodeCtor<JsiOvalNode> {
 public:
-  JsiOvalNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiOvalNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skOval") {}
 
 protected:

@@ -2,12 +2,15 @@
 
 #include "JsiDomDeclarationNode.h"
 
+#include <memory>
+#include <string>
+
 namespace RNSkia {
 
 class JsiBlendNode : public JsiBaseDomDeclarationNode,
                      public JsiDomNodeCtor<JsiBlendNode> {
 public:
-  JsiBlendNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiBlendNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseDomDeclarationNode(context, "skBlend") {}
 
 protected:
@@ -76,7 +79,7 @@ protected:
   /**
    Validates that only declaration nodes can be children
    */
-  virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
+  void addChild(std::shared_ptr<JsiDomNode> child) override {
     JsiBaseDomDeclarationNode::addChild(child);
     // Verify declaration of either shader or image filter
     verifyChild(child);
@@ -85,7 +88,7 @@ protected:
   /**
    Validates that only declaration nodes can be children
    */
-  virtual void insertChildBefore(std::shared_ptr<JsiDomNode> child,
+  void insertChildBefore(std::shared_ptr<JsiDomNode> child,
                                  std::shared_ptr<JsiDomNode> before) override {
     JsiBaseDomDeclarationNode::insertChildBefore(child, before);
     // Verify declaration of either shader or image filter

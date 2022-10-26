@@ -2,6 +2,9 @@
 
 #include "NodeProp.h"
 
+#include <utility>
+#include <memory>
+
 namespace RNSkia {
 
 class BoxShadowProps : public DerivedProp<SkPaint> {

@@ -8,6 +8,8 @@
 #include "JsiSkPaint.h"
 #include "third_party/CSSColorParser.h"
 
+#include <memory>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -21,7 +23,7 @@ static PropId PropNameCurrent = JsiPropId::get("current");
 
 class PaintProp : public DerivedProp<SkPaint> {
 public:
-  PaintProp(PropId name) : DerivedProp<SkPaint>() {
+  explicit PaintProp(PropId name) : DerivedProp<SkPaint>() {
     _paintProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

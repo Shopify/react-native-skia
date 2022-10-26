@@ -4,6 +4,8 @@
 #include "JsiValue.h"
 
 #include <chrono>
+#include <memory>
+#include <string>
 
 namespace RNSkia {
 
@@ -17,13 +19,13 @@ public:
   /**
    Constructs a new optional dom node properrty
    */
-  NodeProp(PropId name) : _name(name), BaseNodeProp() {}
+  explicit NodeProp(PropId name) : _name(name), BaseNodeProp() {}
 
   /**
    Reads JS value and swaps out with a new value
    */
-  virtual void readValueFromJs(jsi::Runtime &runtime,
-                               const ReadPropFunc &read) override {
+  void readValueFromJs(jsi::Runtime &runtime,
+                       const ReadPropFunc &read) override {
     // Always use the next field since this method is called on the JS thread
     // and we don't want to rip out the underlying value object.
     _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));

@@ -2,6 +2,9 @@
 
 #include "DerivedNodeProp.h"
 
+#include <memory>
+#include <string>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -13,7 +16,7 @@ namespace RNSkia {
 
 class VertexModeProp : public DerivedProp<SkVertices::VertexMode> {
 public:
-  VertexModeProp(PropId name) : DerivedProp<SkVertices::VertexMode>() {
+  explicit VertexModeProp(PropId name) : DerivedProp<SkVertices::VertexMode>() {
     _vertexModeProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

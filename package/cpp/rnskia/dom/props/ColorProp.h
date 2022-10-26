@@ -3,11 +3,15 @@
 #include "DerivedNodeProp.h"
 #include "third_party/CSSColorParser.h"
 
+#include <utility>
+#include <memory>
+#include <vector>
+
 namespace RNSkia {
 
 class ColorProp : public DerivedProp<SkColor> {
 public:
-  ColorProp(PropId name) : DerivedProp<SkColor>() {
+  explicit ColorProp(PropId name) : DerivedProp<SkColor>() {
     _colorProp = addProperty(std::make_shared<NodeProp>(name));
   }
 
@@ -51,7 +55,7 @@ private:
 
 class ColorsProp : public DerivedProp<std::vector<SkColor>> {
 public:
-  ColorsProp(PropId name) : DerivedProp<std::vector<SkColor>>() {
+  explicit ColorsProp(PropId name) : DerivedProp<std::vector<SkColor>>() {
     _colorsProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

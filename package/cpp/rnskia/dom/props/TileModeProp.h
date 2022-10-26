@@ -7,13 +7,16 @@
 
 #include <SkTileMode.h>
 
+#include <memory>
+#include <string>
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
 
 class TileModeProp : public DerivedProp<SkTileMode> {
 public:
-  TileModeProp(PropId name) : DerivedProp<SkTileMode>() {
+  explicit TileModeProp(PropId name) : DerivedProp<SkTileMode>() {
     _tileModeProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

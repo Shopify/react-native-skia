@@ -3,6 +3,11 @@
 #include "DerivedNodeProp.h"
 #include "JsiSkPoint.h"
 
+#include <string>
+#include <memory>
+#include <vector>
+#include <utility>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -14,7 +19,7 @@ namespace RNSkia {
 
 class PointModeProp : public DerivedProp<SkCanvas::PointMode> {
 public:
-  PointModeProp(PropId name) : DerivedProp<SkCanvas::PointMode>() {
+  explicit PointModeProp(PropId name) : DerivedProp<SkCanvas::PointMode>() {
     _pointModeProp = addProperty(std::make_shared<NodeProp>(name));
   }
 
@@ -46,7 +51,7 @@ private:
 
 class PointsProp : public DerivedProp<std::vector<SkPoint>> {
 public:
-  PointsProp(PropId name) : DerivedProp<std::vector<SkPoint>>() {
+  explicit PointsProp(PropId name) : DerivedProp<std::vector<SkPoint>>() {
     _pointsProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

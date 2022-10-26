@@ -7,6 +7,9 @@
 #include "PointsProp.h"
 #include "VertexModeProp.h"
 
+#include <memory>
+#include <vector>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 

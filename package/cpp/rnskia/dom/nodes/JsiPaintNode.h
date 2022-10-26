@@ -3,6 +3,8 @@
 #include "JsiDomDeclarationNode.h"
 #include "PaintProps.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 // TODO: implement feature: A paint node has its own paint not inherited,
@@ -12,7 +14,7 @@ namespace RNSkia {
 class JsiPaintNode : public JsiBaseDomDeclarationNode,
                      public JsiDomNodeCtor<JsiPaintNode> {
 public:
-  JsiPaintNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiPaintNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseDomDeclarationNode(context, "skPaint") {}
 
   /**

@@ -3,6 +3,10 @@
 #include "DerivedNodeProp.h"
 #include "JsiSkRuntimeEffect.h"
 
+#include <memory>
+#include <vector>
+#include <string>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 

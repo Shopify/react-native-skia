@@ -5,6 +5,9 @@
 #include "PointProp.h"
 #include "TransformProp.h"
 
+#include <utility>
+#include <memory>
+
 namespace RNSkia {
 
 class TransformsProps : public DerivedProp<SkMatrix> {

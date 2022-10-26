@@ -4,11 +4,13 @@
 
 #include "JsiSkFont.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class FontProp : public DerivedProp<SkFont> {
 public:
-  FontProp(PropId name) : DerivedProp<SkFont>() {
+  explicit FontProp(PropId name) : DerivedProp<SkFont>() {
     _fontProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

@@ -3,12 +3,14 @@
 #include "ImageProps.h"
 #include "JsiDomDrawingNode.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class JsiImageNode : public JsiDomDrawingNode,
                      public JsiDomNodeCtor<JsiImageNode> {
 public:
-  JsiImageNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiImageNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skImage") {}
 
 protected:

@@ -3,6 +3,10 @@
 #include "DerivedNodeProp.h"
 #include "PointProp.h"
 
+#include <utility>
+#include <memory>
+#include <vector>
+
 namespace RNSkia {
 
 static PropId PropNamePos = JsiPropId::get("pos");
@@ -15,7 +19,7 @@ struct GlyphInfo {
 
 class GlyphsProp : public DerivedProp<GlyphInfo> {
 public:
-  GlyphsProp(PropId name) : DerivedProp<GlyphInfo>() {
+  explicit GlyphsProp(PropId name) : DerivedProp<GlyphInfo>() {
     _glyphsProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

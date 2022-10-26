@@ -3,6 +3,8 @@
 /* Enable output of dom trees and paint contexts */
 #define SKIA_DOM_DEBUG 0
 
+#include <memory>
+
 #include "JsiHostObject.h"
 
 #include "base/JsiDependencyManager.h"
@@ -46,11 +48,11 @@
 
 namespace RNSkia {
 
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 class JsiDomApi : public JsiHostObject {
 public:
-  JsiDomApi(std::shared_ptr<RNSkPlatformContext> context) : JsiHostObject() {
+  explicit JsiDomApi(std::shared_ptr<RNSkPlatformContext> context) : JsiHostObject() {
     installFunction("DependencyManager",
                     JsiDependencyManager::createCtor(context));
 

@@ -4,11 +4,13 @@
 
 #include "PaintProps.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 class LayerProp : public DerivedProp<SkPaint> {
 public:
-  LayerProp(PropId name) : DerivedProp<SkPaint>() {
+  explicit LayerProp(PropId name) : DerivedProp<SkPaint>() {
     _layerPaintProp = addProperty(std::make_shared<PaintProp>(name));
     _layerBoolProp = addProperty(std::make_shared<NodeProp>(name));
   }

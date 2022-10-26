@@ -13,6 +13,7 @@
 #include "RectProp.h"
 #include "TransformProp.h"
 
+#include <memory>
 namespace RNSkia {
 
 static PropId PropNameOrigin = JsiPropId::get("origin");
@@ -114,7 +115,7 @@ public:
                              getLevelIndentation(_localContext.get()).c_str(),
                              getType(), getNodeId());
 #endif
-  };
+  }
 
   /**
    Signal from the JS side that the node is removed from the dom.
@@ -139,7 +140,7 @@ protected:
   /**
    Removes a child
    */
-  virtual void removeChild(std::shared_ptr<JsiDomNode> child) override {
+  void removeChild(std::shared_ptr<JsiDomNode> child) override {
     JsiDomNode::removeChild(child);
     if (_localContext != nullptr) {
       _localContext->invalidate();
@@ -149,7 +150,7 @@ protected:
   /**
    Validates that only declaration nodes can be children
    */
-  virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
+  void addChild(std::shared_ptr<JsiDomNode> child) override {
     JsiDomNode::addChild(child);
     if (_localContext != nullptr) {
       _localContext->invalidate();
@@ -159,7 +160,7 @@ protected:
   /**
    Validates that only declaration nodes can be children
    */
-  virtual void insertChildBefore(std::shared_ptr<JsiDomNode> child,
+  void insertChildBefore(std::shared_ptr<JsiDomNode> child,
                                  std::shared_ptr<JsiDomNode> before) override {
     JsiDomNode::insertChildBefore(child, before);
     if (_localContext != nullptr) {
@@ -170,7 +171,7 @@ protected:
   /**
    Define common properties for all render nodes
    */
-  virtual void defineProperties(NodePropsContainer *container) override {
+  void defineProperties(NodePropsContainer *container) override {
     JsiDomNode::defineProperties(container);
 
     _paintProps = container->defineProperty(std::make_shared<PaintProps>());

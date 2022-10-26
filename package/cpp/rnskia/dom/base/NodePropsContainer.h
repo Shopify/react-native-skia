@@ -6,6 +6,9 @@
 
 #include <map>
 #include <utility>
+#include <string>
+#include <memory>
+#include <vector>
 
 namespace RNSkia {
 
@@ -21,9 +24,7 @@ public:
    and a function that will be called when any property was changed from within
    this class as a result of a Skia value change.
    */
-  NodePropsContainer(PropId componentType) : _type(componentType) {}
-
-  ~NodePropsContainer() {}
+  explicit NodePropsContainer(PropId componentType) : _type(componentType) {}
 
   /**
    Returns true if there are any changes in the props container in the current

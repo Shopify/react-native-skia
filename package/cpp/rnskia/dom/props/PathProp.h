@@ -1,7 +1,9 @@
 #pragma once
 
 #include "JsiSkPath.h"
-#include "NodeProp.h"
+#include "DerivedNodeProp.h"
+
+#include <memory>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -14,7 +16,7 @@ namespace RNSkia {
 
 class PathProp : public DerivedProp<SkPath> {
 public:
-  PathProp(PropId name) : DerivedProp<SkPath>() {
+  explicit PathProp(PropId name) : DerivedProp<SkPath>() {
     _pathProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

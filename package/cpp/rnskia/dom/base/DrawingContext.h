@@ -3,6 +3,9 @@
 #include "JsiHostObject.h"
 
 #include <vector>
+#include <string>
+#include <utility>
+#include <memory>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -70,7 +73,7 @@ public:
       }
       auto blendMode = _paint->getBlendMode_or(SkBlendMode::kSrc);
       if (blendMode != SkBlendMode::kSrc) {
-        v += " blendMode:" + std::to_string((size_t)blendMode);
+        v += " blendMode:" + std::to_string(static_cast<size_t>(blendMode));
       }
 
       v += " opacity:" + std::to_string(_opacity);
@@ -221,7 +224,7 @@ public:
   }
 
 private:
-  DrawingContext(const char *source) { _source = source; }
+  explicit DrawingContext(const char *source) { _source = source; }
 
   void invalidateChildren() {
     for (auto &child : _children) {

@@ -3,13 +3,15 @@
 #include "DerivedNodeProp.h"
 #include "JsiSkMatrix.h"
 
+#include <memory>
+
 namespace RNSkia {
 
 static PropId PropNameMatrix = JsiPropId::get("matrix");
 
 class MatrixProp : public DerivedProp<SkMatrix> {
 public:
-  MatrixProp(PropId name) : DerivedProp<SkMatrix>() {
+  explicit MatrixProp(PropId name) : DerivedProp<SkMatrix>() {
     _matrixProp = addProperty(std::make_shared<NodeProp>(name));
   }
 

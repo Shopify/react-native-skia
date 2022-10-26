@@ -3,6 +3,8 @@
 #include "JsiDomDrawingNode.h"
 #include "PointsProp.h"
 
+#include <memory>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -18,7 +20,7 @@ static PropId PropNamePointsMode = JsiPropId::get("mode");
 class JsiPointsNode : public JsiDomDrawingNode,
                       public JsiDomNodeCtor<JsiPointsNode> {
 public:
-  JsiPointsNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiPointsNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiDomDrawingNode(context, "skPoints") {}
 
 protected:
