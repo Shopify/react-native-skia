@@ -19,6 +19,12 @@ export const commonArgs = [
   ["skia_enable_flutter_defines", true],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
+  // Required for the paragraph module
+  ["skia_enable_skshaper", true],
+  ["skia_use_icu", true],
+  ["skia_use_system_icu", false],
+  ["skia_use_harfbuzz", true],
+  ["skia_use_system_harfbuzz", false]
 ];
 
 // Get paths to iPhone SDKs
@@ -90,6 +96,8 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
+      "libskparagraph.a",
+      "libskunicode.a",
     ],
   },
   ios: {
@@ -155,6 +163,8 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
+      "libskparagraph.a",
+      "libskunicode.a",
     ],
   },
 };
