@@ -80,6 +80,7 @@ public:
     // Now we can start updating the context
     // We only get here if something has changed - start with COLOR
     if (_color->isSet() && (_color->isChanged() || context->isInvalid())) {
+      context->getMutablePaint()->setShader(nullptr);
       context->getMutablePaint()->setColor(*_color->getDerivedValue());
     }
     
