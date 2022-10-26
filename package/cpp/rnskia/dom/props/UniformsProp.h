@@ -12,38 +12,40 @@
 
 namespace RNSkia {
 
-class UniformsProp:
-public DerivedSkProp<SkData> {
+class UniformsProp : public DerivedSkProp<SkData> {
 public:
-  UniformsProp(PropId name, NodeProp* sourceProp): DerivedSkProp<SkData>() {
+  UniformsProp(PropId name, NodeProp *sourceProp) : DerivedSkProp<SkData>() {
     _uniformsProp = addProperty(std::make_shared<NodeProp>(name));
     _sourceProp = sourceProp;
   }
-  
+
   void updateDerivedValue() override {
     if (!_uniformsProp->isSet()) {
       return;
     }
-    
+
     // Get the effect
-    auto source = _sourceProp->value()->getAs<JsiSkRuntimeEffect>()->getObject();
-    
+    auto source =
+        _sourceProp->value()->getAs<JsiSkRuntimeEffect>()->getObject();
+
     // Flatten uniforms from property
     auto uniformValues = flattenUniforms(source.get(), _uniformsProp->value());
-    
+
     // Cast uniforms according to the declaration in the shader
     auto uniformsData = castUniforms(source.get(), uniformValues);
-    
+
     // Save derived value
     setDerivedValue(uniformsData);
   }
-  
+
 private:
-  sk_sp<SkData> castUniforms(SkRuntimeEffect* source, const std::vector<SkScalar> & values) {
+  sk_sp<SkData> castUniforms(SkRuntimeEffect *source,
+                             const std::vector<SkScalar> &values) {
     // Create memory for uniforms
     auto uniformsData = SkData::MakeUninitialized(source->uniformSize());
-    
-    // Loop through all uniforms in the effect and load data from the flattened array of values
+
+    // Loop through all uniforms in the effect and load data from the flattened
+    // array of values
     const auto &u = source->uniforms();
     for (std::size_t i = 0; i < u.size(); i++) {
       auto it = source->uniforms().begin() + i;
@@ -58,25 +60,28 @@ private:
                &value, sizeof(value));
       }
     }
-    
+
     return uniformsData;
   }
-  
-  std::vector<SkScalar> flattenUniforms(SkRuntimeEffect* source, JsiValue *propObject) {
+
+  std::vector<SkScalar> flattenUniforms(SkRuntimeEffect *source,
+                                        JsiValue *propObject) {
     auto uniformsCount = source->uniforms().size();
     std::vector<SkScalar> uniformValues;
-    
+
     for (size_t i = 0; i < uniformsCount; ++i) {
       auto it = source->uniforms().begin() + i;
       auto name = JsiPropId::get(it->name.c_str());
-      
+
       if (!propObject->hasValue(name)) {
-        throw std::runtime_error("The runtime effect has the uniform value \"" + std::string(name) +
-                                 "\" declared, but it is missing from the uniforms property of the Runtime effect.");
+        throw std::runtime_error("The runtime effect has the uniform value \"" +
+                                 std::string(name) +
+                                 "\" declared, but it is missing from the "
+                                 "uniforms property of the Runtime effect.");
       }
-      
+
       auto value = propObject->getValue(name);
-      
+
       // A uniform value can be a single number, a vector or an array of numbers
       // Or an array of the above
       if (value->getType() == PropType::Number) {
@@ -105,40 +110,42 @@ private:
     }
     return uniformValues;
   }
-  
-  NodeProp* _uniformsProp;
-  NodeProp* _sourceProp;
+
+  NodeProp *_uniformsProp;
+  NodeProp *_sourceProp;
 };
 
-class SimpleUniformsProp:
-public BaseDerivedProp {
+class SimpleUniformsProp : public BaseDerivedProp {
 public:
-  SimpleUniformsProp(PropId name, NodeProp* sourceProp): BaseDerivedProp() {
+  SimpleUniformsProp(PropId name, NodeProp *sourceProp) : BaseDerivedProp() {
     _uniformsProp = addProperty(std::make_shared<NodeProp>(name));
     _sourceProp = sourceProp;
   }
-  
-  void processUniforms(SkRuntimeShaderBuilder& rtb) {
+
+  void processUniforms(SkRuntimeShaderBuilder &rtb) {
     if (!_uniformsProp->isSet()) {
       return;
     }
-    
+
     auto propObject = _uniformsProp->value();
-    auto source = _sourceProp->value()->getAs<JsiSkRuntimeEffect>()->getObject();
-    
+    auto source =
+        _sourceProp->value()->getAs<JsiSkRuntimeEffect>()->getObject();
+
     auto uniformsCount = source->uniforms().size();
-    
+
     for (size_t i = 0; i < uniformsCount; ++i) {
       auto it = source->uniforms().begin() + i;
       auto name = JsiPropId::get(it->name.c_str());
-      
+
       if (!propObject->hasValue(name)) {
-        throw std::runtime_error("The runtime effect has the uniform value \"" + std::string(name) +
-                                 "\" declared, but it is missing from the uniforms property of the Runtime effect.");
+        throw std::runtime_error("The runtime effect has the uniform value \"" +
+                                 std::string(name) +
+                                 "\" declared, but it is missing from the "
+                                 "uniforms property of the Runtime effect.");
       }
-      
+
       auto value = propObject->getValue(name);
-      
+
       // A uniform value can be a single number, a vector or an array of numbers
       // Or an array of the above
       if (value->getType() == PropType::Number) {
@@ -159,27 +166,27 @@ public:
           }
         }
         rtb.uniform(name) = set.data();
-        
+
       } else if (value->getType() == PropType::HostObject ||
                  value->getType() == PropType::Object) {
         // Vector (JsiSkPoint / JsiSkRect)
         auto pointValue = PointProp::processValue(value);
-        std::vector<SkScalar> set = { pointValue.x(), pointValue.y() };
-        
+        std::vector<SkScalar> set = {pointValue.x(), pointValue.y()};
+
         rtb.uniform(name) = set.data();
       } else {
         throw std::runtime_error("Unexpected type for uniform prop \"" +
-                                 std::string(name) + "\". Got " + value->getTypeAsString(value->getType()));
+                                 std::string(name) + "\". Got " +
+                                 value->getTypeAsString(value->getType()));
       }
     }
   }
-  
+
   void updateDerivedValue() override {}
-  
+
 private:
-  NodeProp* _uniformsProp;
-  NodeProp* _sourceProp;
+  NodeProp *_uniformsProp;
+  NodeProp *_sourceProp;
 };
 
-
-}
+} // namespace RNSkia

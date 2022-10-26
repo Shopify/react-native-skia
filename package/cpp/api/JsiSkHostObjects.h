@@ -53,7 +53,7 @@ public:
    */
   T &getObject() { return _object; }
   const T &getObject() const { return _object; }
-  
+
 protected:
   void setObject(T &object) { _object = object; }
   void setObject(const T &object) { _object = object; }

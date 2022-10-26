@@ -16,13 +16,12 @@ static PropId PropNameX = JsiPropId::get("x");
 static PropId PropNameY = JsiPropId::get("y");
 static SkPoint EmptyPoint = SkPoint::Make(-1, -1);
 
-class PointProp:
-public DerivedProp<SkPoint> {
+class PointProp : public DerivedProp<SkPoint> {
 public:
-  PointProp(PropId name): DerivedProp<SkPoint>() {
+  PointProp(PropId name) : DerivedProp<SkPoint>() {
     _pointProp = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     auto point = processProperty(_pointProp);
     if (EmptyPoint != point) {
@@ -31,16 +30,18 @@ public:
       setDerivedValue(nullptr);
     }
   }
-  
-  static SkPoint processValue(JsiValue* value) {
+
+  static SkPoint processValue(JsiValue *value) {
     if (value->getType() == PropType::HostObject) {
       // Try reading as point
-      auto ptr = std::dynamic_pointer_cast<JsiSkPoint>(value->getAsHostObject());
+      auto ptr =
+          std::dynamic_pointer_cast<JsiSkPoint>(value->getAsHostObject());
       if (ptr != nullptr) {
         return SkPoint::Make(ptr->getObject()->x(), ptr->getObject()->y());
       } else {
         // Try reading as rect
-        auto ptr = std::dynamic_pointer_cast<JsiSkRect>(value->getAsHostObject());
+        auto ptr =
+            std::dynamic_pointer_cast<JsiSkRect>(value->getAsHostObject());
         if (ptr != nullptr) {
           return SkPoint::Make(ptr->getObject()->x(), ptr->getObject()->y());
         }
@@ -54,17 +55,17 @@ public:
     }
     return EmptyPoint;
   }
-  
-  static SkPoint processProperty(NodeProp* prop) {
+
+  static SkPoint processProperty(NodeProp *prop) {
     if (prop->isSet()) {
       // Check for JsiSkRect and JsiSkPoint
       return processValue(prop->value());
     }
     return EmptyPoint;
   }
-  
+
 private:
-  NodeProp* _pointProp;
+  NodeProp *_pointProp;
 };
 
-}
+} // namespace RNSkia

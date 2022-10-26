@@ -2,7 +2,6 @@
 
 #include "DerivedNodeProp.h"
 
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -12,23 +11,23 @@
 
 namespace RNSkia {
 
-class TileModeProp:
-public DerivedProp<SkTileMode> {
+class TileModeProp : public DerivedProp<SkTileMode> {
 public:
-  TileModeProp(PropId name): DerivedProp<SkTileMode>() {
+  TileModeProp(PropId name) : DerivedProp<SkTileMode>() {
     _tileModeProp = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_tileModeProp->isSet()) {
-      setDerivedValue(getTileModeFromStringValue(_tileModeProp->value()->getAsString()));
+      setDerivedValue(
+          getTileModeFromStringValue(_tileModeProp->value()->getAsString()));
     } else {
       setDerivedValue(nullptr);
     }
   }
-  
+
 private:
-  SkTileMode getTileModeFromStringValue(const std::string& value) {
+  SkTileMode getTileModeFromStringValue(const std::string &value) {
     if (value == "clamp") {
       return SkTileMode::kClamp;
     } else if (value == "repeat") {
@@ -38,10 +37,11 @@ private:
     } else if (value == "decal") {
       return SkTileMode::kDecal;
     }
-    throw std::runtime_error("Value \"" + value + "\" is not a valid tile mode.");
+    throw std::runtime_error("Value \"" + value +
+                             "\" is not a valid tile mode.");
   }
-  
-  NodeProp* _tileModeProp;
+
+  NodeProp *_tileModeProp;
 };
 
-}
+} // namespace RNSkia

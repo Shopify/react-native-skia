@@ -1,7 +1,7 @@
 #pragma once
 
-#include "NodeProp.h"
 #include "JsiSkPath.h"
+#include "NodeProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -12,22 +12,22 @@
 
 namespace RNSkia {
 
-class PathProp:
-public DerivedProp<SkPath> {
+class PathProp : public DerivedProp<SkPath> {
 public:
-  PathProp(PropId name): DerivedProp<SkPath>() {
+  PathProp(PropId name) : DerivedProp<SkPath>() {
     _pathProp = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (!_pathProp->isSet()) {
       setDerivedValue(nullptr);
       return;
     }
-    
+
     if (_pathProp->value()->getType() == PropType::HostObject) {
       // Try reading as Path
-      auto ptr = std::dynamic_pointer_cast<JsiSkPath>(_pathProp->value()->getAsHostObject());
+      auto ptr = std::dynamic_pointer_cast<JsiSkPath>(
+          _pathProp->value()->getAsHostObject());
       if (ptr != nullptr) {
         setDerivedValue(ptr->getObject());
       }
@@ -35,7 +35,7 @@ public:
       // Read as string
       auto pathString = _pathProp->value()->getAsString();
       SkPath result;
-      
+
       if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {
         setDerivedValue(std::make_shared<SkPath>(result));
       } else {
@@ -43,11 +43,11 @@ public:
       }
     } else {
       setDerivedValue(nullptr);
-    }    
+    }
   }
-  
+
 private:
-  NodeProp* _pathProp;
+  NodeProp *_pathProp;
 };
 
-}
+} // namespace RNSkia

@@ -1,117 +1,120 @@
 #pragma once
 
-#include "JsiDomDrawingNode.h"
 #include "DrawingProp.h"
+#include "JsiDomDrawingNode.h"
 
-#include "JsiSkPaint.h"
 #include "JsiSkCanvas.h"
+#include "JsiSkPaint.h"
 
 namespace RNSkia {
 
-class JsiCustomDrawingNode : public JsiDomDrawingNode, public JsiDomNodeCtor<JsiCustomDrawingNode> {
+class JsiCustomDrawingNode : public JsiDomDrawingNode,
+                             public JsiDomNodeCtor<JsiCustomDrawingNode> {
 public:
-  JsiCustomDrawingNode(std::shared_ptr<RNSkPlatformContext> context) :
-  JsiDomDrawingNode(context, "skCustomDrawing") {}
-    
+  JsiCustomDrawingNode(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiDomDrawingNode(context, "skCustomDrawing") {}
+
 protected:
-  void draw(DrawingContext* context) override {
+  void draw(DrawingContext *context) override {
     if (_drawing != nullptr) {
-      
+
       // Only repaint the picture IF we did not get to the draw function
       // from a redrawRequest after creating the picture!
       if (!_inRedrawCycle || _drawingProp->isChanged()) {
-        
+
         float scaledWidth = context->getScaledWidth();
         float scaledHeight = context->getScaledHeight();
         auto paint = context->getPaint();
         auto opacity = context->getOpacity();
         auto platformContext = getContext();
         auto requestRedraw = context->getRequestRedraw();
-        
+
         // Create/set the paint/canvas wrappers
         if (_jsiPaint == nullptr) {
           _jsiPaint = std::make_shared<JsiSkPaint>(getContext(), *paint);
         } else {
           _jsiPaint->fromPaint(*paint);
         }
-        
+
         if (_jsiCanvas == nullptr) {
           _jsiCanvas = std::make_shared<JsiSkCanvas>(getContext());
         }
-        
+
         // Run rendering on the javascript thread
         getContext()->runOnJavascriptThread([this, platformContext, opacity,
-                                             requestRedraw, scaledWidth, scaledHeight]() {
+                                             requestRedraw, scaledWidth,
+                                             scaledHeight]() {
           // Get the runtime
           auto runtime = platformContext->getJsRuntime();
-          
+
           // Create the picture recorder
           SkPictureRecorder recorder;
           SkRTreeFactory factory;
           SkCanvas *canvas =
-          recorder.beginRecording(scaledWidth, scaledHeight, &factory);
-          
-          auto jsiCanvas = std::make_shared<JsiSkCanvas>(platformContext, canvas);
-          
+              recorder.beginRecording(scaledWidth, scaledHeight, &factory);
+
+          auto jsiCanvas =
+              std::make_shared<JsiSkCanvas>(platformContext, canvas);
+
           // Create context wrapper
           auto jsiCtx = jsi::Object(*runtime);
-          jsiCtx.setProperty(*runtime, "paint",
-                             jsi::Object::createFromHostObject(*runtime,
-                                                               this->_jsiPaint));
-          
+          jsiCtx.setProperty(
+              *runtime, "paint",
+              jsi::Object::createFromHostObject(*runtime, this->_jsiPaint));
+
           jsiCtx.setProperty(*runtime, "opacity", opacity);
-          jsiCtx.setProperty(*runtime, "canvas",
-                             jsi::Object::createFromHostObject(*runtime, jsiCanvas));
-          
+          jsiCtx.setProperty(
+              *runtime, "canvas",
+              jsi::Object::createFromHostObject(*runtime, jsiCanvas));
+
           std::array<jsi::Value, 1> args;
           args[0] = std::move(jsiCtx);
-          
+
           // Draw
-          _drawing(*runtime,
-                   jsi::Value::undefined(),
-                   static_cast<const jsi::Value*>(args.data()),
-                   1);
-          
+          _drawing(*runtime, jsi::Value::undefined(),
+                   static_cast<const jsi::Value *>(args.data()), 1);
+
           auto picture = recorder.finishRecordingAsPicture();
           this->_drawingProp->setPicture(picture);
-          
+
           // Ask view to redraw itself
           _inRedrawCycle = true;
           requestRedraw();
         });
       }
     }
-    
+
     if (_drawingProp->isSet()) {
       context->getCanvas()->drawPicture(_drawingProp->getDerivedValue());
       _inRedrawCycle = false;
     }
   }
-  
-  void defineProperties(NodePropsContainer* container) override {
+
+  void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    
-    NotifyNeedRenderCallback cb = std::bind(&JsiCustomDrawingNode::notifyPictureNeeded,
-                                            this, std::placeholders::_1);
-    
+
+    NotifyNeedRenderCallback cb =
+        std::bind(&JsiCustomDrawingNode::notifyPictureNeeded, this,
+                  std::placeholders::_1);
+
     _drawingProp = container->defineProperty(
-      std::make_shared<DrawingProp>(JsiPropId::get("drawing"), cb));
+        std::make_shared<DrawingProp>(JsiPropId::get("drawing"), cb));
   }
+
 private:
-  
   void notifyPictureNeeded(jsi::HostFunctionType drawing) {
     _drawing = drawing;
   }
-  
+
   jsi::HostFunctionType _drawing;
-  
-  DrawingProp* _drawingProp;
-  
+
+  DrawingProp *_drawingProp;
+
   std::array<jsi::Value, 1> _argsCache;
   std::shared_ptr<JsiSkPaint> _jsiPaint;
   std::shared_ptr<JsiSkCanvas> _jsiCanvas;
-  
-  std::atomic<bool> _inRedrawCycle = { false };
+
+  std::atomic<bool> _inRedrawCycle = {false};
 };
 
-}
+} // namespace RNSkia

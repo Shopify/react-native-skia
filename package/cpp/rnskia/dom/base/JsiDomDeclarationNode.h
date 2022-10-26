@@ -1,23 +1,25 @@
 
 #pragma once
 
-#include "JsiDomNode.h"
 #include "DrawingContext.h"
+#include "JsiDomNode.h"
 
 namespace RNSkia {
 
-class JsiBaseDomDeclarationNode: public JsiDomNode {
+class JsiBaseDomDeclarationNode : public JsiDomNode {
 public:
-  JsiBaseDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context, const char* type) :
-  JsiDomNode(context, type) {}
-  
+  JsiBaseDomDeclarationNode(std::shared_ptr<RNSkPlatformContext> context,
+                            const char *type)
+      : JsiDomNode(context, type) {}
+
   JSI_PROPERTY_GET(declarationType) {
     return jsi::String::createFromUtf8(runtime, std::string(getType()));
   }
-  
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiBaseDomDeclarationNode, declarationType),
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiBaseDomDeclarationNode,
+                                                  declarationType),
                               JSI_EXPORT_PROP_GET(JsiDomNode, type))
-  
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDomNode, addChild),
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),
@@ -29,100 +31,96 @@ public:
   /**
    Called when rendering the tree to create all derived values from all nodes.
    */
-  virtual void materializeNode(DrawingContext* context) {
+  virtual void materializeNode(DrawingContext *context) {
     // Update any pending props
     updatePendingProperties();
-    
+
     // Materialize children
-    for (auto &child: getChildren()) {
+    for (auto &child : getChildren()) {
       auto decl = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
       if (decl != nullptr) {
         decl->materializeNode(context);
       }
     }
-    
+
     // Now we are ready to materialize
-    materialize(context);    
+    materialize(context);
   }
-    
+
 protected:
   /**
    Override to implement materialization
    */
-  virtual void materialize(DrawingContext* context) = 0;
-  
+  virtual void materialize(DrawingContext *context) = 0;
+
   /**
    Validates that only declaration nodes can be children
    */
   virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
-    if ( std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child) == nullptr) {
-      getContext()->raiseError(std::runtime_error("Cannot add a child of type \"" +
-                                                  std::string(child->getType()) +
-                                                  "\" to a \"" + std::string(getType()) + "\"."));
+    if (std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child) ==
+        nullptr) {
+      getContext()->raiseError(std::runtime_error(
+          "Cannot add a child of type \"" + std::string(child->getType()) +
+          "\" to a \"" + std::string(getType()) + "\"."));
     }
     JsiDomNode::addChild(child);
   }
-  
+
   /**
    Validates that only declaration nodes can be children
    */
-  virtual void
-  insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
-    if (std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child) == nullptr) {
-      getContext()->raiseError(std::runtime_error("Cannot add a child of type \"" +
-                                                  std::string(child->getType()) +
-                                                  "\" to a \"" + std::string(getType()) + "\"."));
+  virtual void insertChildBefore(std::shared_ptr<JsiDomNode> child,
+                                 std::shared_ptr<JsiDomNode> before) override {
+    if (std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child) ==
+        nullptr) {
+      getContext()->raiseError(std::runtime_error(
+          "Cannot add a child of type \"" + std::string(child->getType()) +
+          "\" to a \"" + std::string(getType()) + "\"."));
     }
     JsiDomNode::insertChildBefore(child, before);
-  }  
+  }
 };
 
 template <typename T, typename ST>
-class JsiDomDeclarationNode: public JsiBaseDomDeclarationNode {
+class JsiDomDeclarationNode : public JsiBaseDomDeclarationNode {
 public:
-  JsiDomDeclarationNode(std::shared_ptr <RNSkPlatformContext> context, const char* type) :
-  JsiBaseDomDeclarationNode(context, type) {}
-  
-  bool isChanged(DrawingContext* context) {
-    return getCurrent() == nullptr ||
-      context->isInvalid() ||
-      getPropsContainer()->isChanged();
+  JsiDomDeclarationNode(std::shared_ptr<RNSkPlatformContext> context,
+                        const char *type)
+      : JsiBaseDomDeclarationNode(context, type) {}
+
+  bool isChanged(DrawingContext *context) {
+    return getCurrent() == nullptr || context->isInvalid() ||
+           getPropsContainer()->isChanged();
   }
-  
+
   /**
    Returns the inner element
    */
-  ST getCurrent() {
-    return _current;
-  }
-  
+  ST getCurrent() { return _current; }
+
   /**
    Clears the current
    */
-  void clearCurrent() {
-    _current = nullptr;
-  }
-  
+  void clearCurrent() { _current = nullptr; }
+
 protected:
-  
   /**
    Sets the current value
    */
-  void setCurrent(ST c) {
-    _current = c;
-  }
-  
+  void setCurrent(ST c) { _current = c; }
+
   /**
    Returns a required child image filter by index
    */
   ST requireChild(size_t index) {
     auto filter = optionalChild(index);
     if (filter == nullptr) {
-      throw std::runtime_error("Expected child node at index " + std::to_string(index) + " in node " + getType());
+      throw std::runtime_error("Expected child node at index " +
+                               std::to_string(index) + " in node " + getType());
     }
     return filter;
   }
-  
+
   /**
    Returns an optional child image filter by index
    */
@@ -130,41 +128,41 @@ protected:
     if (index >= getChildren().size()) {
       return nullptr;
     }
-    
+
     auto child = getChildren()[index];
     // Support all types here!! ImageFilters, ColorFilters
     // package/src/dom/nodes/paint/ImageFilters.ts#80
     return resolve(child);
   }
- 
+
   /**
    Returns child as inner type or nullptr
    */
   virtual ST resolve(std::shared_ptr<JsiDomNode> child) = 0;
-  
+
   /**
    Sets or composes the image filter
    */
-  virtual void set(DrawingContext* context, ST imageFilter) = 0;
-  
+  virtual void set(DrawingContext *context, ST imageFilter) = 0;
+
   void removeChild(std::shared_ptr<JsiDomNode> child) override {
     JsiBaseDomDeclarationNode::removeChild(child);
     clearCurrent();
   }
-  
+
   virtual void addChild(std::shared_ptr<JsiDomNode> child) override {
     JsiBaseDomDeclarationNode::addChild(child);
     clearCurrent();
   }
-  
-  virtual void
-  insertChildBefore(std::shared_ptr<JsiDomNode> child, std::shared_ptr<JsiDomNode> before) override {
+
+  virtual void insertChildBefore(std::shared_ptr<JsiDomNode> child,
+                                 std::shared_ptr<JsiDomNode> before) override {
     JsiBaseDomDeclarationNode::insertChildBefore(child, before);
     clearCurrent();
   }
-  
+
 private:
   ST _current;
 };
 
-}
+} // namespace RNSkia

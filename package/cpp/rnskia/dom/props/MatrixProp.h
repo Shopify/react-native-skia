@@ -7,13 +7,12 @@ namespace RNSkia {
 
 static PropId PropNameMatrix = JsiPropId::get("matrix");
 
-class MatrixProp:
-public DerivedProp<SkMatrix> {
+class MatrixProp : public DerivedProp<SkMatrix> {
 public:
-  MatrixProp(PropId name): DerivedProp<SkMatrix>() {
+  MatrixProp(PropId name) : DerivedProp<SkMatrix>() {
     _matrixProp = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_matrixProp->isSet() &&
         _matrixProp->value()->getType() == PropType::HostObject) {
@@ -24,9 +23,9 @@ public:
       }
     }
   }
-  
+
 private:
-  NodeProp* _matrixProp;
+  NodeProp *_matrixProp;
 };
 
-}
+} // namespace RNSkia

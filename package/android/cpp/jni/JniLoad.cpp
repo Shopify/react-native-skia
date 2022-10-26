@@ -1,8 +1,8 @@
 #include "JniPlatformContext.h"
+#include "JniSkiaDomView.h"
 #include "JniSkiaDrawView.h"
 #include "JniSkiaManager.h"
 #include "JniSkiaPictureView.h"
-#include "JniSkiaDomView.h"
 #include <fbjni/fbjni.h>
 #include <jni.h>
 

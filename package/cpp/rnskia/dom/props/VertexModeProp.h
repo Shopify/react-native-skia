@@ -11,22 +11,22 @@
 
 namespace RNSkia {
 
-class VertexModeProp:
-public DerivedProp<SkVertices::VertexMode> {
+class VertexModeProp : public DerivedProp<SkVertices::VertexMode> {
 public:
-  VertexModeProp(PropId name): DerivedProp<SkVertices::VertexMode>() {
+  VertexModeProp(PropId name) : DerivedProp<SkVertices::VertexMode>() {
     _vertexModeProp = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_vertexModeProp->isSet() && (_vertexModeProp->isChanged())) {
       auto vertexModeValue = _vertexModeProp->value()->getAsString();
       setDerivedValue(getVertexModeFromStringValue(vertexModeValue));
     }
   }
-  
+
 private:
-  SkVertices::VertexMode getVertexModeFromStringValue(const std::string& value) {
+  SkVertices::VertexMode
+  getVertexModeFromStringValue(const std::string &value) {
     if (value == "triangles") {
       return SkVertices::VertexMode::kTriangles_VertexMode;
     } else if (value == "triangleStrip") {
@@ -34,10 +34,11 @@ private:
     } else if (value == "triangleFan") {
       return SkVertices::VertexMode::kTriangleFan_VertexMode;
     }
-    throw std::runtime_error("Property value \"" + value + "\" is not a legal blend mode.");
+    throw std::runtime_error("Property value \"" + value +
+                             "\" is not a legal blend mode.");
   }
-  
-  NodeProp* _vertexModeProp;
+
+  NodeProp *_vertexModeProp;
 };
 
-}
+} // namespace RNSkia

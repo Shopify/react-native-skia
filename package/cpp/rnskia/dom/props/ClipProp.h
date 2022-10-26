@@ -3,8 +3,8 @@
 #include "NodeProp.h"
 
 #include "PathProp.h"
-#include "RectProp.h"
 #include "RRectProp.h"
+#include "RectProp.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -15,14 +15,14 @@
 
 namespace RNSkia {
 
-class ClipProp: public BaseDerivedProp {
+class ClipProp : public BaseDerivedProp {
 public:
-  ClipProp(PropId name): BaseDerivedProp() {
+  ClipProp(PropId name) : BaseDerivedProp() {
     _pathProp = addProperty(std::make_shared<PathProp>(name));
     _rectProp = addProperty(std::make_shared<RectProp>(name));
     _rrectProp = addProperty(std::make_shared<RRectProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_pathProp->isSet()) {
       _rect = nullptr;
@@ -38,14 +38,12 @@ public:
       _path = nullptr;
     }
   }
-  
+
   bool isSet() override {
-    return _pathProp->isSet() ||
-      _rectProp->isSet() ||
-      _rrectProp->isSet();
+    return _pathProp->isSet() || _rectProp->isSet() || _rrectProp->isSet();
   }
-  
-  void clip(SkCanvas* canvas, bool invert) {
+
+  void clip(SkCanvas *canvas, bool invert) {
     auto op = invert ? SkClipOp::kDifference : SkClipOp::kIntersect;
     if (_rect != nullptr) {
       canvas->clipRect(*_rect, op, true);
@@ -56,16 +54,14 @@ public:
     }
   }
 
-  
 private:
-  PathProp* _pathProp;
-  RectProp* _rectProp;
-  RRectProp* _rrectProp;
-  
+  PathProp *_pathProp;
+  RectProp *_rectProp;
+  RRectProp *_rrectProp;
+
   std::shared_ptr<SkPath> _path;
   std::shared_ptr<SkRect> _rect;
   std::shared_ptr<SkRRect> _rrect;
 };
 
-}
-
+} // namespace RNSkia

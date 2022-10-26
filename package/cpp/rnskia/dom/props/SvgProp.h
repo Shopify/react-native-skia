@@ -6,28 +6,30 @@
 
 namespace RNSkia {
 
-class SvgProp:
-public DerivedSkProp<SkSVGDOM> {
+class SvgProp : public DerivedSkProp<SkSVGDOM> {
 public:
-  SvgProp(PropId name): DerivedSkProp<SkSVGDOM>() {
+  SvgProp(PropId name) : DerivedSkProp<SkSVGDOM>() {
     _imageSvgProp = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_imageSvgProp->value()->getType() != PropType::HostObject) {
-      throw std::runtime_error("Expected SkSvgDom object for the svg property.");
+      throw std::runtime_error(
+          "Expected SkSvgDom object for the svg property.");
     }
-    
-    auto ptr = std::dynamic_pointer_cast<JsiSkSVG>(_imageSvgProp->value()->getAsHostObject());
+
+    auto ptr = std::dynamic_pointer_cast<JsiSkSVG>(
+        _imageSvgProp->value()->getAsHostObject());
     if (ptr == nullptr) {
-      throw std::runtime_error("Expected SkSvgDom object for the svg property.");
+      throw std::runtime_error(
+          "Expected SkSvgDom object for the svg property.");
     }
-    
+
     setDerivedValue(ptr->getObject());
   }
-  
+
 private:
-  NodeProp* _imageSvgProp;
+  NodeProp *_imageSvgProp;
 };
 
-}
+} // namespace RNSkia

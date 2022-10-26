@@ -182,7 +182,7 @@ public:
   JsiSkPaint(std::shared_ptr<RNSkPlatformContext> context, SkPaint paint)
       : JsiSkWrappingSharedPtrHostObject<SkPaint>(
             std::move(context), std::make_shared<SkPaint>(std::move(paint))) {}
-    
+
   /**
    Copy from another paint
    */

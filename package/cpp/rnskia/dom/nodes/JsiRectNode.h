@@ -5,25 +5,28 @@
 
 namespace RNSkia {
 
-class JsiRectNode : public JsiDomDrawingNode, public JsiDomNodeCtor<JsiRectNode> {
+class JsiRectNode : public JsiDomDrawingNode,
+                    public JsiDomNodeCtor<JsiRectNode> {
 public:
-  JsiRectNode(std::shared_ptr<RNSkPlatformContext> context) :
-  JsiDomDrawingNode(context, "skRect") {}
-    
+  JsiRectNode(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiDomDrawingNode(context, "skRect") {}
+
 protected:
-  void draw(DrawingContext* context) override {
-    context->getCanvas()->drawRect(*_rectProp->getDerivedValue(), *context->getPaint());
+  void draw(DrawingContext *context) override {
+    context->getCanvas()->drawRect(*_rectProp->getDerivedValue(),
+                                   *context->getPaint());
   }
-  
-  void defineProperties(NodePropsContainer* container) override {
+
+  void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    
-    _rectProp = container->defineProperty(std::make_shared<RectProps>(PropNameRect));
+
+    _rectProp =
+        container->defineProperty(std::make_shared<RectProps>(PropNameRect));
     _rectProp->require();
   }
-  
+
 private:
-  RectProps* _rectProp;
+  RectProps *_rectProp;
 };
 
-}
+} // namespace RNSkia

@@ -180,7 +180,7 @@ public:
     su.slot = static_cast<int>(u.offset / sizeof(float));
     return su;
   }
-  
+
 private:
   sk_sp<SkData> castUniforms(jsi::Runtime &runtime, const jsi::Value &value) {
     auto jsiUniforms = value.asObject(runtime).asArray(runtime);

@@ -17,26 +17,28 @@ static PropId PropNameSkewY = JsiPropId::get("skewY");
 static PropId PropNameRotate = JsiPropId::get("rotate");
 static PropId PropNameRotateZ = JsiPropId::get("rotateZ");
 
-class TransformProp:
-public DerivedProp<SkMatrix> {
+class TransformProp : public DerivedProp<SkMatrix> {
 public:
-  TransformProp(PropId name): DerivedProp<SkMatrix>() {
+  TransformProp(PropId name) : DerivedProp<SkMatrix>() {
     _transformProp = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (!_transformProp->isSet()) {
       setDerivedValue(nullptr);
     } else if (_transformProp->value()->getType() != PropType::Array) {
-      throw std::runtime_error("Expected array for transform property, got " +
-                               JsiValue::getTypeAsString(_transformProp->value()->getType()));
+      throw std::runtime_error(
+          "Expected array for transform property, got " +
+          JsiValue::getTypeAsString(_transformProp->value()->getType()));
     } else {
       auto m = std::make_shared<SkMatrix>(SkMatrix());
-      for (auto &el: _transformProp->value()->getAsArray()) {
+      for (auto &el : _transformProp->value()->getAsArray()) {
         auto keys = el->getKeys();
         if (keys.size() == 0) {
-          throw std::runtime_error("Empty value in transform. Expected translateX, translateY, scale, "
-                                   "scaleX, scaleY, skewX, skewY, rotate or rotateZ.");
+          throw std::runtime_error(
+              "Empty value in transform. Expected translateX, translateY, "
+              "scale, "
+              "scaleX, scaleY, skewX, skewY, rotate or rotateZ.");
         }
         auto key = el->getKeys().at(0);
         auto value = el->getValue(key)->getAsNumber();
@@ -57,17 +59,19 @@ public:
         } else if (key == PropNameRotate || key == PropNameRotateZ) {
           m->preRotate(SkRadiansToDegrees(value));
         } else {
-          throw std::runtime_error("Unknown key in transform. Expected translateX, translateY, scale, "
-                                   "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " + std::string(key) + ".");
+          throw std::runtime_error(
+              "Unknown key in transform. Expected translateX, translateY, "
+              "scale, "
+              "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " +
+              std::string(key) + ".");
         }
       }
       setDerivedValue(m);
     }
   }
-  
+
 private:
-  NodeProp* _transformProp;
+  NodeProp *_transformProp;
 };
 
-}
-
+} // namespace RNSkia

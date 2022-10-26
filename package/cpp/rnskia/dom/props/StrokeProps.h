@@ -11,21 +11,20 @@
 
 namespace RNSkia {
 
-class StrokeCapProp:
-public DerivedProp<SkPaint::Cap> {
+class StrokeCapProp : public DerivedProp<SkPaint::Cap> {
 public:
-  StrokeCapProp(PropId name): DerivedProp<SkPaint::Cap>() {
+  StrokeCapProp(PropId name) : DerivedProp<SkPaint::Cap>() {
     _strokeCap = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_strokeCap->isSet() && (_strokeCap->isChanged())) {
       auto capValue = _strokeCap->value()->getAsString();
       setDerivedValue(getCapFromString(capValue));
     }
   }
-  
-  static SkPaint::Cap getCapFromString(const std::string& value) {
+
+  static SkPaint::Cap getCapFromString(const std::string &value) {
     if (value == "round") {
       return SkPaint::Cap::kRound_Cap;
     } else if (value == "butt") {
@@ -33,27 +32,28 @@ public:
     } else if (value == "square") {
       return SkPaint::Cap::kSquare_Cap;
     }
-    throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke cap.");
+    throw std::runtime_error("Property value \"" + value +
+                             "\" is not a legal stroke cap.");
   }
+
 private:
-  NodeProp* _strokeCap;
+  NodeProp *_strokeCap;
 };
 
-class StrokeJoinProp:
-public DerivedProp<SkPaint::Join> {
+class StrokeJoinProp : public DerivedProp<SkPaint::Join> {
 public:
-  StrokeJoinProp(PropId name): DerivedProp<SkPaint::Join>() {
+  StrokeJoinProp(PropId name) : DerivedProp<SkPaint::Join>() {
     _strokeJoin = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_strokeJoin->isSet() && (_strokeJoin->isChanged())) {
       auto joinValue = _strokeJoin->value()->getAsString();
       setDerivedValue(getJoinFromString(joinValue));
     }
   }
-  
-  static SkPaint::Join getJoinFromString(const std::string& value) {
+
+  static SkPaint::Join getJoinFromString(const std::string &value) {
     if (value == "miter") {
       return SkPaint::Join::kMiter_Join;
     } else if (value == "round") {
@@ -61,11 +61,12 @@ public:
     } else if (value == "bevel") {
       return SkPaint::Join::kBevel_Join;
     }
-    throw std::runtime_error("Property value \"" + value + "\" is not a legal stroke join.");
+    throw std::runtime_error("Property value \"" + value +
+                             "\" is not a legal stroke join.");
   }
-  
+
 private:
-  NodeProp* _strokeJoin;
+  NodeProp *_strokeJoin;
 };
 
-}
+} // namespace RNSkia

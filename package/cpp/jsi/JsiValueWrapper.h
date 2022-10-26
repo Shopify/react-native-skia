@@ -28,12 +28,11 @@ enum JsiWrapperValueType {
  */
 class JsiValueWrapper {
 public:
-  explicit JsiValueWrapper(jsi::Runtime& runtime) :
-  _type(JsiWrapperValueType::Undefined)
-  {}
-  
-  JsiValueWrapper(jsi::Runtime& runtime, const jsi::Value &value) :
-  JsiValueWrapper(runtime) {
+  explicit JsiValueWrapper(jsi::Runtime &runtime)
+      : _type(JsiWrapperValueType::Undefined) {}
+
+  JsiValueWrapper(jsi::Runtime &runtime, const jsi::Value &value)
+      : JsiValueWrapper(runtime) {
     setCurrent(runtime, value);
   }
 
@@ -78,26 +77,19 @@ public:
     }
     _valueHolder->setProperty(runtime, "current", value);
   }
-  
-  jsi::Value getCurrent(jsi::Runtime &runtime)
-  {
-    if(_valueHolder == nullptr) {
+
+  jsi::Value getCurrent(jsi::Runtime &runtime) {
+    if (_valueHolder == nullptr) {
       return jsi::Value::undefined();
     }
     return _valueHolder->getProperty(runtime, "current");
   }
 
-  bool isUndefinedOrNull() {
-    return isUndefined()|| isNull();
-  }
-  
-  bool isUndefined() {
-    return _type == JsiWrapperValueType::Undefined;
-  }
-  
-  bool isNull() {
-    return _type == JsiWrapperValueType::Null;
-  }
+  bool isUndefinedOrNull() { return isUndefined() || isNull(); }
+
+  bool isUndefined() { return _type == JsiWrapperValueType::Undefined; }
+
+  bool isNull() { return _type == JsiWrapperValueType::Null; }
 
   bool getAsBool() {
     assert(_type == JsiWrapperValueType::Bool);
@@ -135,26 +127,26 @@ public:
   }
 
   JsiWrapperValueType getType() { return _type; }
-  
-  bool equals(jsi::Runtime& runtime, const jsi::Value &value) {
-    if(value.isNumber() && _type == JsiWrapperValueType::Number) {
+
+  bool equals(jsi::Runtime &runtime, const jsi::Value &value) {
+    if (value.isNumber() && _type == JsiWrapperValueType::Number) {
       return _numberValue == value.asNumber();
-    } else if(value.isBool() && _type == JsiWrapperValueType::Bool) {
+    } else if (value.isBool() && _type == JsiWrapperValueType::Bool) {
       return _boolValue == value.getBool();
-    } else if(value.isUndefined()) {
+    } else if (value.isUndefined()) {
       return _type == JsiWrapperValueType::Undefined;
-    } else if(value.isNull()) {
+    } else if (value.isNull()) {
       return _type == JsiWrapperValueType::Null;
-    } else if(value.isString()) {
-        auto current = getCurrent(runtime);
-        if (current.isString()) {
-            return jsi::String::strictEquals(runtime, value.asString(runtime), current.asString(runtime));
-        }
-        return false;
+    } else if (value.isString()) {
+      auto current = getCurrent(runtime);
+      if (current.isString()) {
+        return jsi::String::strictEquals(runtime, value.asString(runtime),
+                                         current.asString(runtime));
+      }
+      return false;
     }
     return false;
   }
-  
 
 private:
   std::shared_ptr<jsi::Object> _valueHolder;

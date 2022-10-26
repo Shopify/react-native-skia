@@ -11,22 +11,21 @@
 
 namespace RNSkia {
 
-class BlendModeProp:
-public DerivedProp<SkBlendMode> {
+class BlendModeProp : public DerivedProp<SkBlendMode> {
 public:
-  BlendModeProp(PropId name): DerivedProp<SkBlendMode>() {
+  BlendModeProp(PropId name) : DerivedProp<SkBlendMode>() {
     _blendMode = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_blendMode->isSet() && (_blendMode->isChanged())) {
       auto blendModeValue = _blendMode->value()->getAsString();
       setDerivedValue(getBlendModeFromString(blendModeValue));
     }
   }
-  
+
 private:
-  SkBlendMode getBlendModeFromString(const std::string& value) {
+  SkBlendMode getBlendModeFromString(const std::string &value) {
     if (value == "clear") {
       return SkBlendMode::kClear;
     } else if (value == "src") {
@@ -86,11 +85,12 @@ private:
     } else if (value == "luminosity") {
       return SkBlendMode::kLuminosity;
     }
-    
-    throw std::runtime_error("Property value \"" + value + "\" is not a legal blend mode.");
+
+    throw std::runtime_error("Property value \"" + value +
+                             "\" is not a legal blend mode.");
   }
-  
-  NodeProp* _blendMode;
+
+  NodeProp *_blendMode;
 };
 
-}
+} // namespace RNSkia

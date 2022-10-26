@@ -6,7 +6,8 @@
 
 namespace RNSkia {
 /** Static members */
-std::shared_ptr<OpenGLDrawingContext> SkiaOpenGLRenderer::getThreadDrawingContext() {
+std::shared_ptr<OpenGLDrawingContext>
+SkiaOpenGLRenderer::getThreadDrawingContext() {
   auto threadId = std::this_thread::get_id();
   if (threadContexts.count(threadId) == 0) {
     auto drawingContext = std::make_shared<OpenGLDrawingContext>();

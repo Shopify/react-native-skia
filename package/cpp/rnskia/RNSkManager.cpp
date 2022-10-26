@@ -78,12 +78,12 @@ void RNSkManager::installBindings() {
 
   auto skiaValueApi = std::make_shared<RNSkValueApi>(_platformContext);
   _jsRuntime->global().setProperty(
-    *_jsRuntime, "SkiaValueApi",
-    jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaValueApi)));
-  
+      *_jsRuntime, "SkiaValueApi",
+      jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaValueApi)));
+
   auto skiaDomApi = std::make_shared<JsiDomApi>(_platformContext);
   _jsRuntime->global().setProperty(
-    *_jsRuntime, "SkiaDomApi",
-    jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaDomApi)));
+      *_jsRuntime, "SkiaDomApi",
+      jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaDomApi)));
 }
 } // namespace RNSkia

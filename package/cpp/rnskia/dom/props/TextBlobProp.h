@@ -6,78 +6,76 @@
 
 namespace RNSkia {
 
-class TextBlobProp:
-public DerivedSkProp<SkTextBlob> {
+class TextBlobProp : public DerivedSkProp<SkTextBlob> {
 public:
-  TextBlobProp(PropId name): DerivedSkProp<SkTextBlob>() {
+  TextBlobProp(PropId name) : DerivedSkProp<SkTextBlob>() {
     _textBlobProp = addProperty(std::make_shared<NodeProp>(name));
   }
-  
+
   void updateDerivedValue() override {
     if (_textBlobProp->value()->getType() != PropType::HostObject) {
       throw std::runtime_error("Expected SkTextBlob object for the " +
                                std::string(getName()) + " property.");
     }
-    
+
     auto ptr = _textBlobProp->value()->getAs<JsiSkTextBlob>();
     if (ptr == nullptr) {
       throw std::runtime_error("Expected SkTextBlob object for the " +
                                std::string(getName()) + " property.");
     }
-    
+
     setDerivedValue(ptr->getObject());
   }
-  
+
 private:
-  NodeProp* _textBlobProp;
+  NodeProp *_textBlobProp;
 };
 
-
-class TextPathBlobProp:
-public DerivedSkProp<SkTextBlob> {
+class TextPathBlobProp : public DerivedSkProp<SkTextBlob> {
 public:
-  TextPathBlobProp(): DerivedSkProp<SkTextBlob>() {
+  TextPathBlobProp() : DerivedSkProp<SkTextBlob>() {
     _fontProp = addProperty(std::make_shared<FontProp>(JsiPropId::get("font")));
     _textProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("text")));
     _pathProp = addProperty(std::make_shared<PathProp>(JsiPropId::get("path")));
-    _offsetProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("initialOffset")));
-    
+    _offsetProp = addProperty(
+        std::make_shared<NodeProp>(JsiPropId::get("initialOffset")));
+
     _fontProp->require();
     _textProp->require();
     _pathProp->require();
     _offsetProp->require();
   }
-  
+
   void updateDerivedValue() override {
     auto font = _fontProp->getDerivedValue();
     auto text = _textProp->value()->getAsString();
     auto path = _pathProp->getDerivedValue();
     auto offset = _offsetProp->value()->getAsNumber();
-    
+
     // Get glyphs
-    auto numGlyphIds = font->countText(text.c_str(), text.length(),
-                                       SkTextEncoding::kUTF8);
-    
+    auto numGlyphIds =
+        font->countText(text.c_str(), text.length(), SkTextEncoding::kUTF8);
+
     std::vector<SkGlyphID> glyphIds;
     glyphIds.reserve(numGlyphIds);
-    auto ids = font->textToGlyphs(text.c_str(), text.length(), SkTextEncoding::kUTF8,
-                                  static_cast<SkGlyphID *>(glyphIds.data()),
-                                  numGlyphIds);
-    
+    auto ids = font->textToGlyphs(
+        text.c_str(), text.length(), SkTextEncoding::kUTF8,
+        static_cast<SkGlyphID *>(glyphIds.data()), numGlyphIds);
+
     // Get glyph widths
     int glyphsSize = static_cast<int>(ids);
     std::vector<SkScalar> widthPtrs;
     widthPtrs.resize(glyphsSize);
     font->getWidthsBounds(glyphIds.data(), numGlyphIds,
-                          static_cast<SkScalar *>(widthPtrs.data()),
-                          nullptr, nullptr); // TODO: Should we use paint somehow here?
-    
+                          static_cast<SkScalar *>(widthPtrs.data()), nullptr,
+                          nullptr); // TODO: Should we use paint somehow here?
+
     std::vector<SkRSXform> rsx;
     SkContourMeasureIter meas(*path, false, 1);
-    
+
     auto cont = meas.next();
     auto dist = offset;
-    
+
     for (size_t i = 0; i < text.length() && cont != nullptr; ++i) {
       auto width = widthPtrs[i];
       dist += width / 2;
@@ -97,31 +95,30 @@ public:
       SkPoint pos;
       SkVector tan;
       if (!cont->getPosTan(dist, &pos, &tan)) {
-        throw std::runtime_error("Could not calculate distance when resolving text path");
+        throw std::runtime_error(
+            "Could not calculate distance when resolving text path");
       }
       auto px = pos.x();
       auto py = pos.y();
       auto tx = tan.x();
       auto ty = tan.y();
-      
+
       auto adjustedX = px - (width / 2) * tx;
       auto adjustedY = py - (width / 2) * ty;
-      
+
       rsx.push_back(SkRSXform::Make(tx, ty, adjustedX, adjustedY));
       dist += width / 2;
     }
-    
-    setDerivedValue(SkTextBlob::MakeFromRSXform(text.c_str(),
-                                                text.length(),
-                                                rsx.data(),
-                                                *font));
+
+    setDerivedValue(SkTextBlob::MakeFromRSXform(text.c_str(), text.length(),
+                                                rsx.data(), *font));
   }
-    
+
 private:
-  FontProp* _fontProp;
-  NodeProp* _textProp;
-  PathProp* _pathProp;
-  NodeProp* _offsetProp;
+  FontProp *_fontProp;
+  NodeProp *_textProp;
+  PathProp *_pathProp;
+  NodeProp *_offsetProp;
 };
 
-}
+} // namespace RNSkia

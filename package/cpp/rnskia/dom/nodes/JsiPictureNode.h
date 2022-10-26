@@ -5,25 +5,26 @@
 
 namespace RNSkia {
 
-class JsiPictureNode : public JsiDomDrawingNode, public JsiDomNodeCtor<JsiPictureNode> {
+class JsiPictureNode : public JsiDomDrawingNode,
+                       public JsiDomNodeCtor<JsiPictureNode> {
 public:
-  JsiPictureNode(std::shared_ptr<RNSkPlatformContext> context) :
-  JsiDomDrawingNode(context, "skPicture") {}
-    
+  JsiPictureNode(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiDomDrawingNode(context, "skPicture") {}
+
 protected:
-  void draw(DrawingContext* context) override {
+  void draw(DrawingContext *context) override {
     context->getCanvas()->drawPicture(_pictureProp->getDerivedValue());
   }
-  
-  void defineProperties(NodePropsContainer* container) override {
+
+  void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _pictureProp = container->defineProperty(std::make_shared<PictureProp>(JsiPropId::get("picture")));
+    _pictureProp = container->defineProperty(
+        std::make_shared<PictureProp>(JsiPropId::get("picture")));
     _pictureProp->require();
   }
-  
+
 private:
-  PictureProp* _pictureProp;
+  PictureProp *_pictureProp;
 };
 
-}
-
+} // namespace RNSkia
