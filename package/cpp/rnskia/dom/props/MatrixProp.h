@@ -18,7 +18,7 @@ public:
     if (_matrixProp->isSet() &&
         _matrixProp->value()->getType() == PropType::HostObject) {
       // Try reading as SkMatrix
-      auto matrix = std::dynamic_pointer_cast<JsiSkMatrix>(_matrixProp->value()->getAsHostObject());
+      auto matrix = _matrixProp->value()->getAs<JsiSkMatrix>();
       if (matrix != nullptr) {
         setDerivedValue(matrix->getObject());
       }
