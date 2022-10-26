@@ -64,7 +64,7 @@ void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
       cb(_skSurface->getCanvas());
 
       // Flush
-      _skSurface->flush();
+      _skSurface->flushAndSubmit();
 
       if (!eglSwapBuffers(getThreadDrawingContext()->glDisplay, _glSurface)) {
         RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
@@ -109,9 +109,6 @@ bool SkiaOpenGLRenderer::ensureInitialised() {
   if (!initStaticSkiaContext()) {
     return false;
   }
-
-  // Flush
-  _skSurface->flushAndSubmit();
 
   return true;
 }
