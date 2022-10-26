@@ -20,7 +20,6 @@ export const commonArgs = [
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
   // Required for the paragraph module
-  ["skia_enable_skshaper", true],
   ["skia_use_icu", true],
   ["skia_use_system_icu", false],
   ["skia_use_harfbuzz", true],
