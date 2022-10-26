@@ -28,9 +28,10 @@ public:
   
   void render(DrawingContext* context) {
 #if SKIA_DOM_DEBUG
-    RNSkLogger::logToConsole("%sRendering node %s",
-                             getLevelIndentation().c_str(),
-                             getType());
+    RNSkLogger::logToConsole("%sRendering node %s-%lu",
+                             getLevelIndentation(context).c_str(),
+                             getType(),
+                             getNodeId());
 #endif
     
     // Ensure property changes has been registered
@@ -54,7 +55,7 @@ public:
           _localContext->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(nullptr,
                                                                        _layerProp->getDerivedValue().get(),
                                                                        nullptr,
-                                                                       0));
+                                                                       0));          
         }
       } else {
         _localContext->getCanvas()->save();
@@ -108,9 +109,10 @@ public:
     markPropertiesAsResolved();
     
 #if SKIA_DOM_DEBUG
-    RNSkLogger::logToConsole("%sEnd rendering node %s",
-                             getLevelIndentation().c_str(),
-                             getType());
+    RNSkLogger::logToConsole("%sEnd rendering node %s-%lu",
+                             getLevelIndentation(_localContext.get()).c_str(),
+                             getType(),
+                             getNodeId());
 #endif
   };
   

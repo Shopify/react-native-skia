@@ -13,13 +13,20 @@ public:
     _layerBoolProp = addProperty(std::make_shared<NodeProp>(name));
   }
   
+  /**
+   Returns true if is optional and one of the child props has a value, or all props if optional is false.
+   */
+  bool isSet() override {
+    return DerivedProp<SkPaint>::isSet() || _isBool;
+  };
+  
   void updateDerivedValue() override {
     if (_layerBoolProp->isSet() && _layerBoolProp->value()->getType() == PropType::Bool) {
       _isBool = true;
       setDerivedValue(nullptr);
       return;
     }
-    
+
     if (_layerPaintProp->isSet()) {
       // We have a paint object for the layer property
       setDerivedValue(_layerPaintProp->getDerivedValue());
@@ -29,7 +36,7 @@ public:
       setDerivedValue(nullptr);
     }
   }
-  
+
   bool isBool() { return _isBool; }
     
 private:

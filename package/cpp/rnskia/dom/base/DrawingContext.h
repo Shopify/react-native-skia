@@ -42,6 +42,13 @@ public:
     return result;
   }
   
+  size_t getLevel() {
+    if (_parent != nullptr) {
+      return _parent->getLevel() + 1;
+    }
+    return 0;
+  }
+  
   std::string getDebugDescription() {
     std::string v = "ctx for " + std::string(_source) + ":";
     
@@ -145,7 +152,8 @@ public:
    */
   std::shared_ptr<SkPaint> getMutablePaint() {
     if (_paint == nullptr) {
-      _paint = std::make_shared<SkPaint>(*_parent->getPaint());
+      auto parentPaint = _parent->getPaint();
+      _paint = std::make_shared<SkPaint>(*parentPaint);
     }
     // Calling the getMutablePaint accessor implies that the paint
     // is about to be mutatet and will therefore invalidate

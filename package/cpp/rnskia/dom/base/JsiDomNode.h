@@ -26,6 +26,8 @@ public:
   }
 };
 
+static std::atomic<size_t> NodeIdent = 1000;
+
 /**
  Implements an abstract base class for nodes in the Skia Reconciler. This node coresponds to the native implementation
  of the Node.ts class in Javascript.
@@ -40,6 +42,7 @@ public:
   JsiDomNode(std::shared_ptr<RNSkPlatformContext> context, const char* type) :
     _type(type),
     _context(context),
+    _nodeId(NodeIdent++),
     JsiHostObject() {}
   
   /**
@@ -142,6 +145,8 @@ public:
    Returns the node type.
   */
   const char *getType() { return _type; };
+  
+  size_t getNodeId() { return _nodeId; };
   
   /**
    Returns the container for node properties
@@ -251,9 +256,6 @@ protected:
   virtual void addChild(std::shared_ptr<JsiDomNode> child) {
     std::lock_guard<std::mutex> lock(_childrenLock);
     _children.push_back(child);
-#ifdef SKIA_DOM_DEBUG
-    child->setLevel(_level + 1);
-#endif
   }
   
   /**
@@ -264,9 +266,6 @@ protected:
     auto position = std::find(_children.begin(), _children.end(), before);
     std::lock_guard<std::mutex> lock(_childrenLock);
     _children.insert(position, child);
-#ifdef SKIA_DOM_DEBUG
-    child->setLevel(_level + 1);
-#endif
   }
   
   /**
@@ -320,12 +319,8 @@ protected:
   }
   
 #ifdef SKIA_DOM_DEBUG
-  void setLevel(size_t level) {
-    _level = level;
-  }
-  
-  std::string getLevelIndentation(size_t indentation = 0) {
-    return std::string((_level + indentation) * 3, ' ');
+  std::string getLevelIndentation(DrawingContext* ctx, size_t indentation = 0) {
+    return std::string((ctx->getLevel() + indentation), ' ');
   }
 #endif
   
@@ -342,9 +337,7 @@ private:
   
   std::atomic<bool> _isDisposed = { false };
   
-#ifdef SKIA_DOM_DEBUG
-  size_t _level = 0;
-#endif
+  size_t _nodeId;
 };
 
 }

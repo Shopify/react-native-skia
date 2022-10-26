@@ -25,9 +25,8 @@ protected:
   
   void renderNode(DrawingContext* context) override {
 #if SKIA_DOM_DEBUG
-    RNSkLogger::logToConsole("%s%s", getLevelIndentation(2).c_str(), context->getDebugDescription().c_str());
+    RNSkLogger::logToConsole("%s%s", getLevelIndentation(context, 1).c_str(), context->getDebugDescription().c_str());
 #endif
-    // TODO: Check paint property - maybe we should draw using another paint??
     draw(context);
     
     // Draw once more for each child paint node
