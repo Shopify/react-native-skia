@@ -1,5 +1,5 @@
 import React from "react";
-import { requireNativeComponent } from "react-native";
+import { requireNativeComponent, Platform } from "react-native";
 
 import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
@@ -9,7 +9,9 @@ import { SkiaViewNativeId } from "./SkiaView";
 import type { NativeSkiaViewProps, SkiaDomViewProps } from "./types";
 
 const NativeSkiaDomView =
-  requireNativeComponent<NativeSkiaViewProps>("SkiaDomView");
+  Platform.OS !== "web"
+    ? requireNativeComponent<NativeSkiaViewProps>("SkiaDomView")
+    : null;
 
 export class SkiaDomView extends React.Component<SkiaDomViewProps> {
   constructor(props: SkiaDomViewProps) {
