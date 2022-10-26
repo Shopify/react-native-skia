@@ -78,7 +78,6 @@ import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
 import { DependencyManager } from "./DependencyManager";
 import { SkiaValue } from "../values";
-import { BackdropFilterProps } from "./components";
 
 declare global {
   var SkiaDomApi: {
