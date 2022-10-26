@@ -62,7 +62,9 @@ public:
         auto animatedValue = getAnimatedValue(nativeValue);
         auto unsubscribe = animatedValue->addListener([animatedValue, propMapping]
                                                       (jsi::Runtime &runtime) {
+          // Get value from animation value
           auto nextJsValue = animatedValue->getCurrent(runtime);
+          // Update all props that listens to this animation value
           for (auto &prop: propMapping.second) {
             prop->updateValue(runtime, nextJsValue);
           }
@@ -81,12 +83,14 @@ public:
                                                        selector = std::move(selector),
                                                        animatedValue]
                                                       (jsi::Runtime &runtime) {
-           jsi::Value current = animatedValue->getCurrent(runtime);
-           // This code is executed on the Javascript thread, so we need to use the
-           // transaction system to update the property
-           for (auto &prop: propMapping.second) {
-             prop->updateValue(runtime, selector(runtime, jsi::Value::null(), &current, 1));
-           }
+          // Get value from animation value
+          jsi::Value jsValue = animatedValue->getCurrent(runtime);
+          // Call selector to transform new value
+          auto selectedJsValue = selector(runtime, jsi::Value::null(), &jsValue, 1);
+          // Update all props that listens to this animation value
+          for (auto &prop: propMapping.second) {
+            prop->updateValue(runtime, selectedJsValue);
+          }
         });
         
         // Save unsubscribe methods
