@@ -5,8 +5,8 @@
 #include "PointProp.h"
 #include "TransformProp.h"
 
-#include <utility>
 #include <memory>
+#include <utility>
 
 namespace RNSkia {
 

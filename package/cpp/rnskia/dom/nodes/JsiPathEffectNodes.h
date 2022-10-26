@@ -4,9 +4,9 @@
 
 #include "NodeProp.h"
 
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -75,8 +75,8 @@ protected:
       }
 
       // Create effect
-      auto pathEffect = SkDashPathEffect::Make(intervals.data(),
-                                               static_cast<int>(intervals.size()), phase);
+      auto pathEffect = SkDashPathEffect::Make(
+          intervals.data(), static_cast<int>(intervals.size()), phase);
 
       setPathEffect(context, pathEffect);
     }
@@ -102,7 +102,8 @@ class JsiDiscretePathEffectNode
     : public JsiBasePathEffectNode,
       public JsiDomNodeCtor<JsiDiscretePathEffectNode> {
 public:
-  explicit JsiDiscretePathEffectNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiDiscretePathEffectNode(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePathEffectNode(context, "skDiscretePathEffect") {}
 
 protected:

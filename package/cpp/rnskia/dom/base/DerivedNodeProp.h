@@ -3,10 +3,10 @@
 #include "BaseNodeProp.h"
 #include "JsiValue.h"
 
-#include <string>
-#include <vector>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 namespace RNSkia {
 
@@ -56,7 +56,7 @@ public:
    Delegate read value to child nodes
    */
   void readValueFromJs(jsi::Runtime &runtime,
-                               const ReadPropFunc &read) override {
+                       const ReadPropFunc &read) override {
     for (auto &prop : _properties) {
       prop->readValueFromJs(runtime, read);
     }

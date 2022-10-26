@@ -89,7 +89,7 @@ protected:
    Validates that only declaration nodes can be children
    */
   void insertChildBefore(std::shared_ptr<JsiDomNode> child,
-                                 std::shared_ptr<JsiDomNode> before) override {
+                         std::shared_ptr<JsiDomNode> before) override {
     JsiBaseDomDeclarationNode::insertChildBefore(child, before);
     // Verify declaration of either shader or image filter
     verifyChild(child);

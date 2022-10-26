@@ -4,8 +4,8 @@
 #include "DrawingContext.h"
 #include "JsiDomNode.h"
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace RNSkia {
 
@@ -73,7 +73,7 @@ protected:
    Validates that only declaration nodes can be children
    */
   void insertChildBefore(std::shared_ptr<JsiDomNode> child,
-                                 std::shared_ptr<JsiDomNode> before) override {
+                         std::shared_ptr<JsiDomNode> before) override {
     if (std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child) ==
         nullptr) {
       getContext()->raiseError(std::runtime_error(
@@ -159,7 +159,7 @@ protected:
   }
 
   void insertChildBefore(std::shared_ptr<JsiDomNode> child,
-                                 std::shared_ptr<JsiDomNode> before) override {
+                         std::shared_ptr<JsiDomNode> before) override {
     JsiBaseDomDeclarationNode::insertChildBefore(child, before);
     clearCurrent();
   }

@@ -10,9 +10,9 @@
 #include "TransformsProps.h"
 #include "UniformsProp.h"
 
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -475,7 +475,8 @@ class JsiTwoPointConicalGradientNode
     : public JsiBaseGradientNode,
       public JsiDomNodeCtor<JsiTwoPointConicalGradientNode> {
 public:
-  explicit JsiTwoPointConicalGradientNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiTwoPointConicalGradientNode(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skTwoPointConicalGradient") {}
 
 protected:

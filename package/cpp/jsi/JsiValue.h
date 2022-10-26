@@ -2,10 +2,10 @@
 
 #include <jsi/jsi.h>
 
+#include <memory>
+#include <string>
 #include <unordered_map>
 #include <utility>
-#include <string>
-#include <memory>
 #include <vector>
 
 namespace RNJsi {

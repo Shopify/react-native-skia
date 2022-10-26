@@ -2,8 +2,8 @@
 
 #include "NodeProp.h"
 
-#include <utility>
 #include <memory>
+#include <utility>
 
 namespace RNSkia {
 

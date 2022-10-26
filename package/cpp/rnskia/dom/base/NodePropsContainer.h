@@ -5,9 +5,9 @@
 #include "NodeProp.h"
 
 #include <map>
-#include <utility>
-#include <string>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace RNSkia {

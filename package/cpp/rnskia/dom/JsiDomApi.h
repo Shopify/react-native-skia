@@ -52,7 +52,8 @@ namespace jsi = facebook::jsi;
 
 class JsiDomApi : public JsiHostObject {
 public:
-  explicit JsiDomApi(std::shared_ptr<RNSkPlatformContext> context) : JsiHostObject() {
+  explicit JsiDomApi(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiHostObject() {
     installFunction("DependencyManager",
                     JsiDependencyManager::createCtor(context));
 

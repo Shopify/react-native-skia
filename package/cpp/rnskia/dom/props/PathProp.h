@@ -1,7 +1,7 @@
 #pragma once
 
-#include "JsiSkPath.h"
 #include "DerivedNodeProp.h"
+#include "JsiSkPath.h"
 
 #include <memory>
 

@@ -161,7 +161,7 @@ protected:
    Validates that only declaration nodes can be children
    */
   void insertChildBefore(std::shared_ptr<JsiDomNode> child,
-                                 std::shared_ptr<JsiDomNode> before) override {
+                         std::shared_ptr<JsiDomNode> before) override {
     JsiDomNode::insertChildBefore(child, before);
     if (_localContext != nullptr) {
       _localContext->invalidate();

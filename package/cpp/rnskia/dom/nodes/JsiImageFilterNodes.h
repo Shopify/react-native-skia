@@ -107,7 +107,8 @@ class JsiDropShadowImageFilterNode
     : public JsiBaseImageFilterNode,
       public JsiDomNodeCtor<JsiDropShadowImageFilterNode> {
 public:
-  explicit JsiDropShadowImageFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiDropShadowImageFilterNode(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseImageFilterNode(context, "skDropShadowImageFilter") {}
 
 protected:
@@ -282,7 +283,8 @@ class JsiOffsetImageFilterNode
     : public JsiBaseImageFilterNode,
       public JsiDomNodeCtor<JsiOffsetImageFilterNode> {
 public:
-  explicit JsiOffsetImageFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiOffsetImageFilterNode(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseImageFilterNode(context, "skOffsetImageFilter") {}
 
 protected:
@@ -320,7 +322,8 @@ class JsiMorphologyImageFilterNode
 public:
   enum Type { Dilate, Erode };
 
-  explicit JsiMorphologyImageFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiMorphologyImageFilterNode(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseImageFilterNode(context, "skMorphologyImageFilter") {}
 
 protected:
@@ -371,7 +374,8 @@ class JsiRuntimeShaderImageFilterNode
     : public JsiBaseImageFilterNode,
       public JsiDomNodeCtor<JsiRuntimeShaderImageFilterNode> {
 public:
-  explicit JsiRuntimeShaderImageFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiRuntimeShaderImageFilterNode(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseImageFilterNode(context, "skRuntimeShaderImageFilter") {}
 
 protected:

@@ -57,7 +57,8 @@ class JsiMatrixColorFilterNode
     : public JsiBaseColorFilterNode,
       public JsiDomNodeCtor<JsiMatrixColorFilterNode> {
 public:
-  explicit JsiMatrixColorFilterNode(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiMatrixColorFilterNode(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseColorFilterNode(context, "skMatrixColorFilter") {}
 
 protected:

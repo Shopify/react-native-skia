@@ -6,8 +6,8 @@
 #include "JsiSkCanvas.h"
 #include "JsiSkPaint.h"
 
-#include <utility>
 #include <memory>
+#include <utility>
 
 namespace RNSkia {
 
