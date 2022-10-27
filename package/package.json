@@ -67,8 +67,8 @@
   "licenseFilename": "LICENSE.md",
   "readmeFilename": "README.md",
   "peerDependencies": {
-    "react": ">=16.8.1",
-    "react-native": ">=0.63.0-rc.0 <1.0.x",
+    "react": ">=18.0",
+    "react-native": ">=0.64",
     "react-native-reanimated": ">=2.0.0"
   },
   "peerDependenciesMeta": {
@@ -79,7 +79,7 @@
   "devDependencies": {
     "@types/jest": "^28.1.6",
     "@types/react-native": "0.66.2",
-    "@types/react-reconciler": "0.26.4",
+    "@types/react-reconciler": "^0.26.7",
     "eslint": "8.21.0",
     "eslint-config-react-native-wcandillon": "3.9.0",
     "eslint-plugin-reanimated": "2.0.0",
@@ -92,7 +92,7 @@
   },
   "dependencies": {
     "canvaskit-wasm": "0.36.1",
-    "react-reconciler": "0.26.2"
+    "react-reconciler": "^0.27.0"
   },
   "eslintIgnore": [
     "node_modules/",
