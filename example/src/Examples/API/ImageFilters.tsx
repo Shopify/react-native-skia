@@ -2,7 +2,7 @@ import {
   Fill,
   Image,
   Offset,
-  Text,
+  SimpleText,
   useImage,
   Morphology,
   Group,
@@ -61,14 +61,14 @@ const MorphologyDemo = () => {
   }
   return (
     <Group>
-      <Text text="Hello World" x={32} y={32} font={font} />
+      <SimpleText text="Hello World" x={32} y={32} font={font} />
       <Group>
         <Morphology radius={1} />
-        <Text text="Hello World" x={32} y={64} font={font} />
+        <SimpleText text="Hello World" x={32} y={64} font={font} />
       </Group>
       <Group>
         <Morphology radius={0.3} operator="erode" />
-        <Text text="Hello World" x={32} y={96} font={font} />
+        <SimpleText text="Hello World" x={32} y={96} font={font} />
       </Group>
     </Group>
   );

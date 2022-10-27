@@ -3,7 +3,7 @@ import {
   vec,
   Group,
   translate,
-  Text,
+  SimpleText,
   Circle,
   LinearGradient,
 } from "@shopify/react-native-skia";
@@ -37,7 +37,7 @@ export const Control = ({
   const labelWidth = font.getTextWidth(label);
   return (
     <Group transform={translate({ x: x + 30, y: y + 30 })}>
-      <Text
+      <SimpleText
         x={2 * r - labelWidth - 16}
         y={r + font.getSize() / 2}
         font={font}

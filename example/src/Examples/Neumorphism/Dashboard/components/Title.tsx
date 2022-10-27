@@ -1,4 +1,4 @@
-import { Group, Text, useFont } from "@shopify/react-native-skia";
+import { Group, SimpleText, useFont } from "@shopify/react-native-skia";
 import React from "react";
 
 import { Button, BUTTON_SIZE } from "./Button";
@@ -22,7 +22,7 @@ export const Title = ({ title }: Title) => {
       <Button x={30} y={0}>
         <ChervronLeft />
       </Button>
-      <Text
+      <SimpleText
         text={title}
         x={offsetX + (space - titleWidth) / 2}
         y={BUTTON_SIZE - font.getSize()}

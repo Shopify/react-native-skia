@@ -1,7 +1,7 @@
 ---
 id: text
-title: Text
-sidebar_label: Text
+title: Simple Text
+sidebar_label: Simple Text
 slug: /text/text
 ---
 
@@ -18,7 +18,7 @@ Please note that the y origin of the Text is the bottom of the text, not the top
 ### Simple Text
 
 ```tsx twoslash
-import {Canvas, Text, useFont, Fill} from "@shopify/react-native-skia";
+import {Canvas, SimpleText, useFont, Fill} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
   const fontSize = 32;
@@ -29,7 +29,7 @@ export const HelloWorld = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="white" />
-      <Text
+      <SimpleText
         x={0}
         y={fontSize}
         text="Hello World"
@@ -46,7 +46,7 @@ export const HelloWorld = () => {
 ### Emojis
 
 ```tsx twoslash
-import {Canvas, Text, useFont, Fill} from "@shopify/react-native-skia";
+import {Canvas, SimpleText, useFont, Fill} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
   const fontSize = 32;
@@ -57,7 +57,7 @@ export const HelloWorld = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="white" />
-      <Text text="🙋🌎" font={font} y={fontSize} x={0} />
+      <SimpleText text="🙋🌎" font={font} y={fontSize} x={0} />
     </Canvas>
   );
 };

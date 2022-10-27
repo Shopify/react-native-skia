@@ -12,7 +12,7 @@ import {
   Path,
   SweepGradient,
   useFont,
-  Text,
+  SimpleText,
   useComputedValue,
   Box,
 } from "@shopify/react-native-skia";
@@ -71,7 +71,7 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
           inner
         />
       </Box>
-      <Text
+      <SimpleText
         x={c.x - textWidth / 2}
         y={c.y + font.getSize() / 2}
         font={font}

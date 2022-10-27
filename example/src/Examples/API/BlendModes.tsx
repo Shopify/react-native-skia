@@ -7,7 +7,7 @@ import {
   Group,
   Path,
   Skia,
-  Text,
+  SimpleText,
   useFont,
   enumKey,
 } from "@shopify/react-native-skia";
@@ -97,7 +97,7 @@ export const BlendModes = () => {
               <Group layer={paint}>
                 <Path path={src} color="lightblue" />
               </Group>
-              <Text text={blendMode} x={0} y={0} font={font} />
+              <SimpleText text={blendMode} x={0} y={0} font={font} />
             </Group>
           );
         })}

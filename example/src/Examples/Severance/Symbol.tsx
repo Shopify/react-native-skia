@@ -10,7 +10,7 @@ import {
   useComputedValue,
   vec,
   Group,
-  Text,
+  SimpleText,
 } from "@shopify/react-native-skia";
 import React from "react";
 import SimplexNoise from "simplex-noise";
@@ -68,7 +68,7 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
   }, [clock]);
   return (
     <Group transform={transform} origin={origin}>
-      <Text text={text} x={dx} y={dy} font={font} color={FG} />
+      <SimpleText text={text} x={dx} y={dy} font={font} color={FG} />
     </Group>
   );
 };

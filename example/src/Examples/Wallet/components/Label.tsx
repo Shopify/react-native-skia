@@ -2,7 +2,7 @@ import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   useFont,
   interpolate,
-  Text,
+  SimpleText,
   useComputedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -58,14 +58,14 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
   const subtitleWidth = subtitleFont.getTextWidth(subtitle);
   return (
     <>
-      <Text
+      <SimpleText
         x={titleX}
         y={translateY - 120}
         text={text}
         font={titleFont}
         color="white"
       />
-      <Text
+      <SimpleText
         x={width / 2 - subtitleWidth / 2}
         y={translateY - 60}
         text={subtitle}

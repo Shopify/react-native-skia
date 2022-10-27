@@ -4,7 +4,7 @@ import {
   Canvas,
   Group,
   Rect,
-  Text,
+  SimpleText,
   useClockValue,
   useComputedValue,
 } from "@shopify/react-native-skia";
@@ -28,7 +28,9 @@ export const FreezeExample = () => {
       <Group origin={{ x: size / 2, y: size / 2 }} transform={transform}>
         <Checkerboard color="black" />
       </Group>
-      {font && <Text x={20} y={size + 100} text={`n = ${n * n}`} font={font} />}
+      {font && (
+        <SimpleText x={20} y={size + 100} text={`n = ${n * n}`} font={font} />
+      )}
     </Canvas>
   );
 };

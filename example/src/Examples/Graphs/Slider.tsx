@@ -11,7 +11,7 @@ import {
   LinearGradient,
   Path,
   useTouchHandler,
-  Text as SkiaText,
+  SimpleText as SkiaText,
   vec,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";

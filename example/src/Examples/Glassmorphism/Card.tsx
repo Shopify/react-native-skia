@@ -9,7 +9,7 @@ import {
   Rect,
   LinearGradient,
   Paint,
-  Text,
+  SimpleText,
   useComputedValue,
   runDecay,
   useFont,
@@ -81,11 +81,22 @@ export const Glassmorphism = () => {
           />
         </Paint>
         <Rect x={0} y={CARD_HEIGHT - 70} width={CARD_WIDTH} height={70} />
-        <Text text="SUPERBANK" x={20} y={40} font={titleFont} />
-        <Text x={20} y={110} text="1234 5678 1234 5678" font={titleFont} />
-        <Text text="VALID THRU" x={20} y={145} color="white" font={font} />
-        <Text text="12/29" x={20} y={160} color="white" font={font} />
-        <Text
+        <SimpleText text="SUPERBANK" x={20} y={40} font={titleFont} />
+        <SimpleText
+          x={20}
+          y={110}
+          text="1234 5678 1234 5678"
+          font={titleFont}
+        />
+        <SimpleText
+          text="VALID THRU"
+          x={20}
+          y={145}
+          color="white"
+          font={font}
+        />
+        <SimpleText text="12/29" x={20} y={160} color="white" font={font} />
+        <SimpleText
           text="JOHN DOE"
           x={20}
           y={185}
