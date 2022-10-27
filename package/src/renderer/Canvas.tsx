@@ -77,7 +77,17 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     }, [redraw, registerValues]);
 
     const root = useMemo(
-      () => skiaReconciler.createContainer(container, 0, false, null),
+      () =>
+        skiaReconciler.createContainer(
+          container,
+          0,
+          null,
+          true,
+          null,
+          "",
+          console.error,
+          null
+        ),
       [container]
     );
     // Render effect
