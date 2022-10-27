@@ -96,7 +96,7 @@ export const configurations: Configuration = {
       "libskottie.a",
       "libsksg.a",
       "libskparagraph.a",
-      "libskunicode.a",
+      "libskshaper.a",
     ],
   },
   ios: {
@@ -163,7 +163,7 @@ export const configurations: Configuration = {
       "libskottie.a",
       "libsksg.a",
       "libskparagraph.a",
-      "libskunicode.a",
+      "libskshaper.a",
     ],
   },
 };

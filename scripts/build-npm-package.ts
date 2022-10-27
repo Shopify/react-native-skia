@@ -48,7 +48,7 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
     "libskottie.a",
     "libsksg.a",
     "libskparagraph.a",
-    "libskunicode.a",
+    "libskshaper.a",
   ].forEach((target) => {
     const path = `./package/libs/android/${cpu}/${target}`;
     checkFileExists(
@@ -67,7 +67,7 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
   "libskottie.xcframework",
   "libsksg.xcframework",
   "libskparagraph.xcframework",
-  "libskunicode.xcframework",
+  "libskshaper.xcframework",
 ].forEach((lib) => {
   checkFileExists(
     `./package/libs/ios/${lib}`,

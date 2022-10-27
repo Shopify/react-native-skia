@@ -47,9 +47,6 @@ console.log("Building xcframeworks...");
 
 configurations.ios.outputNames.forEach((out) => {
   const libName = out.split(".")[0];
-  if (libName === "libskunicode") {
-    return;
-  }
   console.log(`Building ${libName}.xcframework`);
   executeCmdSync(`rm -rf ./package/libs/ios/${libName}.xcframework`);
   executeCmdSync(
