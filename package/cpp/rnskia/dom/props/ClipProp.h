@@ -45,16 +45,9 @@ public:
     return _pathProp->isSet() || _rectProp->isSet() || _rrectProp->isSet();
   }
 
-  void clip(SkCanvas *canvas, bool invert) {
-    auto op = invert ? SkClipOp::kDifference : SkClipOp::kIntersect;
-    if (_rect != nullptr) {
-      canvas->clipRect(*_rect, op, true);
-    } else if (_rrect != nullptr) {
-      canvas->clipRRect(*_rrect, op, true);
-    } else if (_path != nullptr) {
-      canvas->clipPath(*_path, op, true);
-    }
-  }
+  SkPath *getPath() { return _path.get(); }
+  SkRect *getRect() { return _rect.get(); }
+  SkRRect *getRRect() { return _rrect.get(); }
 
 private:
   PathProp *_pathProp;

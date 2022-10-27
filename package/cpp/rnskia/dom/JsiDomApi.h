@@ -46,6 +46,8 @@
 #include "nodes/JsiTextNode.h"
 #include "nodes/JsiTextPathNode.h"
 
+#include "nodes/JsiLayerNode.h"
+
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
@@ -157,6 +159,8 @@ public:
     installFunction("TextNode", JsiTextNode::createCtor(context));
     installFunction("TextPathNode", JsiTextPathNode::createCtor(context));
     installFunction("TextBlobNode", JsiTextBlobNode::createCtor(context));
+
+    installFunction("LayerNode", JsiLayerNode::createCtor(context));
   }
 };
 

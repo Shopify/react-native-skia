@@ -325,9 +325,16 @@ protected:
     }
   }
 
-#ifdef SKIA_DOM_DEBUG
+#if SKIA_DOM_DEBUG
   std::string getLevelIndentation(DrawingContext *ctx, size_t indentation = 0) {
     return std::string((ctx->getLevel() + indentation), ' ');
+  }
+
+  void printDebugInfo(DrawingContext *context, const std::string &message,
+                      size_t indentation = 0) {
+    RNSkLogger::logToConsole("%s%s %lu: %s",
+                             getLevelIndentation(context, indentation).c_str(),
+                             getType(), getNodeId(), message.c_str());
   }
 #endif
 

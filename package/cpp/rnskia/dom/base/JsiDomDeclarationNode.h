@@ -35,10 +35,14 @@ public:
    Called when rendering the tree to create all derived values from all nodes.
    */
   virtual void materializeNode(DrawingContext *context) {
+#if SKIA_DOM_DEBUG
+    printDebugInfo(context, "Begin Materialize");
+#endif
     // Update any pending props
     updatePendingProperties();
 
-    // Materialize children
+    // Materialize children first so that any inner nodes get the opportunity
+    // to calculate their state before this node continues.
     for (auto &child : getChildren()) {
       auto decl = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
       if (decl != nullptr) {
@@ -46,8 +50,12 @@ public:
       }
     }
 
-    // Now we are ready to materialize
+    // materialize
     materialize(context);
+
+#if SKIA_DOM_DEBUG
+    printDebugInfo(context, "End Materialize");
+#endif
   }
 
 protected:

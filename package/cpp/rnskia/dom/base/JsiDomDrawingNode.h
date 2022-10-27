@@ -26,8 +26,11 @@ protected:
 
   void renderNode(DrawingContext *context) override {
 #if SKIA_DOM_DEBUG
-    RNSkLogger::logToConsole("%s%s", getLevelIndentation(context, 1).c_str(),
-                             context->getDebugDescription().c_str());
+    printDebugInfo(context, "Begin Draw", 1);
+#endif
+
+#if SKIA_DOM_DEBUG
+    printDebugInfo(context, context->getDebugDescription(), 2);
 #endif
     draw(context);
 
@@ -38,6 +41,9 @@ protected:
         draw(ptr->getDrawingContext());
       }
     }
+#if SKIA_DOM_DEBUG
+    printDebugInfo(context, "End Draw", 1);
+#endif
   }
 };
 

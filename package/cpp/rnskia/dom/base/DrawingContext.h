@@ -41,7 +41,6 @@ public:
    */
   std::shared_ptr<DrawingContext> inheritContext(const char *source) {
     auto result = std::make_shared<DrawingContext>(this, source);
-    result->_source = source;
     _children.push_back(result);
     return result;
   }

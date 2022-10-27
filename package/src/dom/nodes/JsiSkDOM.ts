@@ -127,7 +127,9 @@ export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
 
   Layer(props?: ChildrenProps) {
-    return new LayerNode(this.ctx, props ?? {});
+    return global.SkiaDomApi && global.SkiaDomApi.LayerNode
+      ? global.SkiaDomApi.LayerNode(props ?? {})
+      : new LayerNode(this.ctx, props ?? {});
   }
 
   Group(props?: GroupProps) {

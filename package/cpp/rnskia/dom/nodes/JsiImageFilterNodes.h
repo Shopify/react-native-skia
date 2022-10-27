@@ -391,8 +391,8 @@ protected:
       auto input = optionalChild(0);
       _uniformsProp->processUniforms(builder);
 
-      setImageFilter(context, SkImageFilters::RuntimeShader(
-                                  builder, nullptr, input ? input : nullptr));
+      setImageFilter(context,
+                     SkImageFilters::RuntimeShader(builder, nullptr, input));
     }
   }
 

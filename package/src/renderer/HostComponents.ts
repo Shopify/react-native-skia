@@ -210,6 +210,7 @@ declare global {
     BoxShadowNode: (
       prop: BoxShadowProps
     ) => DeclarationNode<BoxShadowProps, BoxShadowProps>;
+    LayerNode: (prop: ChildrenProps) => RenderNode<ChildrenProps>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace

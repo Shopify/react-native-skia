@@ -55,6 +55,10 @@ public:
     }
   }
 
+  std::shared_ptr<const SkPaint> getPaint() {
+    return _localContext->getPaint();
+  }
+
 protected:
   void materialize(DrawingContext *context) override {}
 

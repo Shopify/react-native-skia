@@ -14,6 +14,8 @@
 #include "TransformProp.h"
 
 #include <memory>
+#include <string>
+
 namespace RNSkia {
 
 static PropId PropNameOrigin = JsiPropId::get("origin");
@@ -30,9 +32,7 @@ public:
 
   void render(DrawingContext *context) {
 #if SKIA_DOM_DEBUG
-    RNSkLogger::logToConsole("%sRendering node %s-%lu",
-                             getLevelIndentation(context).c_str(), getType(),
-                             getNodeId());
+    printDebugInfo(context, "Begin Render");
 #endif
 
     // Ensure property changes has been registered
@@ -52,17 +52,29 @@ public:
       // Save canvas state
       if (_layerProp->isSet()) {
         if (_layerProp->isBool()) {
+#if SKIA_DOM_DEBUG
+          printDebugInfo(context, "canvas->saveLayer()");
+#endif
           _localContext->getCanvas()->saveLayer(
               SkCanvas::SaveLayerRec(nullptr, nullptr, nullptr, 0));
         } else {
+#if SKIA_DOM_DEBUG
+          printDebugInfo(context, "canvas->saveLayer(paint)");
+#endif
           _localContext->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(
               nullptr, _layerProp->getDerivedValue().get(), nullptr, 0));
         }
       } else {
+#if SKIA_DOM_DEBUG
+        printDebugInfo(context, "canvas->save()");
+#endif
         _localContext->getCanvas()->save();
       }
 
       if (_originProp->isSet()) {
+#if SKIA_DOM_DEBUG
+        printDebugInfo(context, "canvas->translate(origin)");
+#endif
         // Handle origin
         _localContext->getCanvas()->translate(
             _originProp->getDerivedValue()->x(),
@@ -70,6 +82,13 @@ public:
       }
 
       if (shouldTransform) {
+#if SKIA_DOM_DEBUG
+        printDebugInfo(
+            context,
+            "canvas->concat(" +
+                std::string(_matrixProp->isSet() ? "matrix" : "transform") +
+                std::string(")"));
+#endif
         auto matrix = _matrixProp->isSet() ? _matrixProp->getDerivedValue()
                                            : _transformProp->getDerivedValue();
 
@@ -80,10 +99,13 @@ public:
       // Clipping
       if (_clipProp->isSet()) {
         auto invert = _invertClip->isSet() && _invertClip->value()->getAsBool();
-        _clipProp->clip(_localContext->getCanvas(), invert);
+        clip(context, _localContext->getCanvas(), invert);
       }
 
       if (_originProp->isSet()) {
+#if SKIA_DOM_DEBUG
+        printDebugInfo(context, "canvas->translate(-origin)");
+#endif
         // Handle origin
         _localContext->getCanvas()->translate(
             -_originProp->getDerivedValue()->x(),
@@ -104,6 +126,9 @@ public:
 
     // Restore if needed
     if (shouldSave) {
+#if SKIA_DOM_DEBUG
+      printDebugInfo(context, "canvas->restore()");
+#endif
       _localContext->getCanvas()->restore();
     }
 
@@ -111,9 +136,7 @@ public:
     markPropertiesAsResolved();
 
 #if SKIA_DOM_DEBUG
-    RNSkLogger::logToConsole("%sEnd rendering node %s-%lu",
-                             getLevelIndentation(_localContext.get()).c_str(),
-                             getType(), getNodeId());
+    printDebugInfo(context, "End Render");
 #endif
   }
 
@@ -191,6 +214,29 @@ protected:
   }
 
 private:
+  /**
+   Clips the canvas depending on the clip property
+   */
+  void clip(DrawingContext *context, SkCanvas *canvas, bool invert) {
+    auto op = invert ? SkClipOp::kDifference : SkClipOp::kIntersect;
+    if (_clipProp->getRect() != nullptr) {
+#if SKIA_DOM_DEBUG
+      printDebugInfo(context, "canvas->clipRect()");
+#endif
+      canvas->clipRect(*_clipProp->getRect(), op, true);
+    } else if (_clipProp->getRRect() != nullptr) {
+#if SKIA_DOM_DEBUG
+      printDebugInfo(context, "canvas->clipRRect()");
+#endif
+      canvas->clipRRect(*_clipProp->getRRect(), op, true);
+    } else if (_clipProp->getPath() != nullptr) {
+#if SKIA_DOM_DEBUG
+      printDebugInfo(context, "canvas->clipPath()");
+#endif
+      canvas->clipPath(*_clipProp->getPath(), op, true);
+    }
+  }
+
   /**
    Loops through all declaration nodes and gives each one of them the
    opportunity to decorate the context

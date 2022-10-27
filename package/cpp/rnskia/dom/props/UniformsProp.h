@@ -169,7 +169,7 @@ public:
             }
           }
         }
-        rtb.uniform(name) = set.data();
+        rtb.uniform(name).set(set.data(), static_cast<int>(set.size()));
 
       } else if (value->getType() == PropType::HostObject ||
                  value->getType() == PropType::Object) {
@@ -177,7 +177,7 @@ public:
         auto pointValue = PointProp::processValue(value);
         std::vector<SkScalar> set = {pointValue.x(), pointValue.y()};
 
-        rtb.uniform(name) = set.data();
+        rtb.uniform(name).set(set.data(), static_cast<int>(set.size()));
       } else {
         throw std::runtime_error("Unexpected type for uniform prop \"" +
                                  std::string(name) + "\". Got " +
