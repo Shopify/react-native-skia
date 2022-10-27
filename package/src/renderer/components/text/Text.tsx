@@ -1,13 +1,13 @@
 import React from "react";
 
 import type { SkiaProps } from "../../processors";
-import type { TextProps } from "../../../dom/types";
+import type { SimpleTextProps } from "../../../dom/types";
 
-export const Text = (props: SkiaProps<TextProps>) => {
-  return <skText {...props} />;
+export const SimpleText = (props: SkiaProps<SimpleTextProps>) => {
+  return <skSimpleText {...props} />;
 };
 
-Text.defaultProps = {
+SimpleText.defaultProps = {
   x: 0,
   y: 0,
 };

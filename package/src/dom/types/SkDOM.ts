@@ -36,7 +36,7 @@ import type {
   RectProps,
   RoundedRectProps,
   VerticesProps,
-  TextProps,
+  SimpleTextProps,
   DiffRectProps,
   TextPathProps,
   TextBlobProps,
@@ -95,7 +95,7 @@ export interface SkDOM {
   Rect(props: RectProps): DrawingNode<RectProps>;
   RRect(props: RoundedRectProps): DrawingNode<RoundedRectProps>;
   Vertices(props: VerticesProps): DrawingNode<VerticesProps>;
-  Text(props: TextProps): DrawingNode<TextProps>;
+  SimpleText(props: SimpleTextProps): DrawingNode<SimpleTextProps>;
   TextPath(props: TextPathProps): DrawingNode<TextPathProps>;
   TextBlob(props: TextBlobProps): DrawingNode<TextBlobProps>;
   Glyphs(props: GlyphsProps): DrawingNode<GlyphsProps>;

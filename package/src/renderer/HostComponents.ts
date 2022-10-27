@@ -14,7 +14,7 @@ import type {
   PointsProps,
   RectProps,
   RoundedRectProps,
-  TextProps,
+  SimpleTextProps,
   VerticesProps,
   BlurMaskFilterProps,
   BlendImageFilterProps,
@@ -82,7 +82,7 @@ declare global {
       skRect: SkiaProps<RectProps>;
       skRRect: SkiaProps<RoundedRectProps>;
       skVertices: SkiaProps<VerticesProps>;
-      skText: SkiaProps<TextProps>;
+      skSimpleText: SkiaProps<SimpleTextProps>;
       skTextPath: SkiaProps<TextPathProps>;
       skTextBlob: SkiaProps<TextBlobProps>;
       skGlyphs: SkiaProps<GlyphsProps>;
@@ -178,8 +178,8 @@ export const createNode = (
       return Sk.RRect(props);
     case NodeType.Vertices:
       return Sk.Vertices(props);
-    case NodeType.Text:
-      return Sk.Text(props);
+    case NodeType.SimpleText:
+      return Sk.SimpleText(props);
     case NodeType.TextPath:
       return Sk.TextPath(props);
     case NodeType.TextBlob:

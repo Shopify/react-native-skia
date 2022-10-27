@@ -4,7 +4,14 @@ import nodePath from "path";
 import React from "react";
 
 import { processResult, docPath } from "../../__tests__/setup";
-import { TextPath, Fill, Text, Glyphs, TextBlob, Group } from "../components";
+import {
+  TextPath,
+  Fill,
+  SimpleText,
+  Glyphs,
+  TextBlob,
+  Group,
+} from "../components";
 
 import {
   drawOnNode,
@@ -21,7 +28,7 @@ describe("Test different text examples", () => {
     const surface = drawOnNode(
       <>
         <Fill color="white" />
-        <Text x={0} y={fontSize} font={font} text="Hello World" />
+        <SimpleText x={0} y={fontSize} font={font} text="Hello World" />
       </>
     );
     processResult(surface, docPath("text/hello-world.png"));
@@ -88,7 +95,7 @@ describe("Test different text examples", () => {
     const surface = drawOnNode(
       <>
         <Fill color="white" />
-        <Text text="🙋🌎" font={emojiFont} y={fontSize} x={0} />
+        <SimpleText text="🙋🌎" font={emojiFont} y={fontSize} x={0} />
       </>
     );
     processResult(surface, docPath("text/text-emoji.png"));
@@ -111,14 +118,14 @@ describe("Test different text examples", () => {
     const padding = 16;
     const surface = drawOnNode(
       <>
-        <Text
+        <SimpleText
           text={text}
           font={font}
           y={height / 2}
           x={(width - font.getTextWidth(text)) / 2}
         />
 
-        <Text
+        <SimpleText
           text={text}
           font={font}
           y={height / 2 + fontSize + padding}

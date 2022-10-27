@@ -8,7 +8,7 @@ import {
   Offset,
   RoundedRect,
   Shadow,
-  Text,
+  SimpleText,
 } from "../components";
 
 import {
@@ -26,13 +26,13 @@ describe("Test Image Filters", () => {
     const surface = drawOnNode(
       <>
         <Fill color="white" />
-        <Text text="Hello World" x={96} y={96} font={font} />
-        <Text text="Hello World" x={96} y={192} font={font}>
+        <SimpleText text="Hello World" x={96} y={96} font={font} />
+        <SimpleText text="Hello World" x={96} y={192} font={font}>
           <Morphology radius={3} />
-        </Text>
-        <Text text="Hello World" x={96} y={288} font={font}>
+        </SimpleText>
+        <SimpleText text="Hello World" x={96} y={288} font={font}>
           <Morphology radius={1} operator="erode" />
-        </Text>
+        </SimpleText>
       </>
     );
     processResult(surface, docPath("image-filters/morphology.png"));

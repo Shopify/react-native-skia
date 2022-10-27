@@ -62,7 +62,7 @@ export const enum NodeType {
   Patch = "skPatch",
   Vertices = "skVertices",
   DiffRect = "skDiffRect",
-  Text = "skText",
+  SimpleText = "skSimpleText",
   TextPath = "skTextPath",
   TextBlob = "skTextBlob",
   Glyphs = "skGlyphs",

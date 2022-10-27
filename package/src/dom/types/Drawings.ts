@@ -111,7 +111,7 @@ export interface DiffRectProps extends DrawingNodeProps {
   outer: SkRRect;
 }
 
-export interface TextProps extends DrawingNodeProps {
+export interface SimpleTextProps extends DrawingNodeProps {
   font: SkFont;
   text: string;
   x: number;

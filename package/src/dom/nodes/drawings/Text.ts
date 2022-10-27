@@ -3,7 +3,7 @@ import type {
   DrawingContext,
   TextBlobProps,
   TextPathProps,
-  TextProps,
+  SimpleTextProps,
 } from "../../types";
 import { NodeType } from "../../types";
 import { processPath } from "../datatypes";
@@ -11,9 +11,9 @@ import type { GlyphsProps } from "../../types/Drawings";
 import { JsiDrawingNode } from "../DrawingNode";
 import type { NodeContext } from "../Node";
 
-export class TextNode extends JsiDrawingNode<TextProps, null> {
-  constructor(ctx: NodeContext, props: TextProps) {
-    super(ctx, NodeType.Text, props);
+export class SimpleTextNode extends JsiDrawingNode<SimpleTextProps, null> {
+  constructor(ctx: NodeContext, props: SimpleTextProps) {
+    super(ctx, NodeType.SimpleText, props);
   }
 
   protected deriveProps() {

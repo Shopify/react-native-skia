@@ -19,7 +19,7 @@ import type {
   RectProps,
   RoundedRectProps,
   VerticesProps,
-  TextProps,
+  SimpleTextProps,
   DiffRectProps,
   OffsetImageFilterProps,
   BlendColorFilterProps,
@@ -68,7 +68,7 @@ import {
   RectNode,
   RRectNode,
   VerticesNode,
-  TextNode,
+  SimpleTextNode,
   OvalNode,
   CustomDrawingNode,
   TextPathNode,
@@ -187,8 +187,8 @@ export class JsiSkDOM implements SkDOM {
     return new VerticesNode(this.ctx, props);
   }
 
-  Text(props: TextProps) {
-    return new TextNode(this.ctx, props);
+  SimpleText(props: SimpleTextProps) {
+    return new SimpleTextNode(this.ctx, props);
   }
 
   TextPath(props: TextPathProps) {
