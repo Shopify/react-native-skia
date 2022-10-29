@@ -4,6 +4,7 @@ import React, {
   useMemo,
   forwardRef,
   useRef,
+  useState,
 } from "react";
 import type {
   RefObject,
@@ -26,6 +27,7 @@ import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { Container } from "./Container";
 import { DependencyManager } from "./DependencyManager";
 import { CanvasProvider } from "./useCanvas";
+import { Platform } from "react-native";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -47,8 +49,8 @@ export const useCanvasRef = () => useRef<SkiaDomView>(null);
 const createDependencyManager = (
   registerValues: (values: Array<SkiaValue<unknown>>) => () => void
 ) =>
-  SkiaDomApi.DependencyManager
-    ? SkiaDomApi.DependencyManager(registerValues)
+  global.SkiaDomApi && global.SkiaDomApi.DependencyManager
+    ? global.SkiaDomApi.DependencyManager(registerValues)
     : new DependencyManager(registerValues);
 
 export interface CanvasProps extends ComponentProps<typeof SkiaDomView> {
@@ -63,8 +65,11 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
     const canvasCtx = useMemo(() => ({ Skia, size }), [size]);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
+    const [, setTick] = useState(0);
     const redraw = useCallback(() => {
-      innerRef.current?.redraw();
+      Platform.OS === "web"
+        ? setTick((tick) => tick + 1)
+        : innerRef.current?.redraw();
     }, [innerRef]);
 
     const registerValues = useCallback(
