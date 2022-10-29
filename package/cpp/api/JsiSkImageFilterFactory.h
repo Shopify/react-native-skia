@@ -204,7 +204,7 @@ public:
   JSI_HOST_FUNCTION(MakeRuntimeShader) {
     auto rtb = JsiSkRuntimeShaderBuilder::fromValue(runtime, arguments[0]);
 
-    const char *childName = nullptr;
+    const char *childName = "";
     if (!arguments[1].isNull() && !arguments[1].isUndefined()) {
       childName = arguments[1].asString(runtime).utf8(runtime).c_str();
     }
