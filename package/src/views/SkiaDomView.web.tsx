@@ -1,7 +1,6 @@
-import React from "react";
 import { PixelRatio } from "react-native";
-import { Skia } from "../skia";
 
+import { Skia } from "../skia";
 import type { SkCanvas } from "../skia/types";
 
 import { SkiaBaseWebView } from "./SkiaBaseWebView";

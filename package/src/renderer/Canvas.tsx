@@ -15,6 +15,7 @@ import type {
 } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
+import { Platform } from "react-native";
 
 import { SkiaDomView } from "../views";
 import type { TouchHandler } from "../views";
@@ -27,7 +28,6 @@ import { debug as hostDebug, skHostConfig } from "./HostConfig";
 import { Container } from "./Container";
 import { DependencyManager } from "./DependencyManager";
 import { CanvasProvider } from "./useCanvas";
-import { Platform } from "react-native";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
