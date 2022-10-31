@@ -91,6 +91,7 @@
     "typescript": "4.8.3"
   },
   "dependencies": {
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
     "canvaskit-wasm": "0.36.1",
     "react-reconciler": "^0.27.0"
   },
@@ -103,7 +104,12 @@
     "output": "lib",
     "targets": [
       "commonjs",
-      "module",
+      [
+        "module",
+        {
+          "configFile": "./.babelrc"
+        }
+      ],
       "typescript"
     ]
   }
