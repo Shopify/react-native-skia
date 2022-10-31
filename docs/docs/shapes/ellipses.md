@@ -13,7 +13,7 @@ Draws a circle.
 |:-----|:---------|:-----------------|
 | cx   | `number` | Start point.     |
 | cy   | `number` | End point.       |
-| r    | `number` | End point.       |
+| r    | `number` | Radius.          |
 
 ```tsx twoslash
 import {Canvas, Circle} from "@shopify/react-native-skia";
