@@ -1,7 +1,9 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
+import type { HeaderBackButtonProps } from "@react-navigation/elements";
+import { HeaderBackButton } from "@react-navigation/elements";
 
 import {
   AnimationExample,
@@ -21,7 +23,9 @@ import {
   Wallet,
   Severance,
 } from "./Examples";
+import { Tests } from "./Tests";
 import { HomeScreen } from "./Home";
+import type { StackParamList } from "./types";
 
 const linking = {
   config: {
@@ -43,25 +47,47 @@ const linking = {
       Graphs: "graphs",
       Animation: "animation",
       Performance: "performance",
+      Tests: "test",
+      TestList: "tests",
     },
   },
   prefixes: ["rnskia://"],
 };
 
-const App = () => {
-  const Stack = createNativeStackNavigator();
+const HeaderLeft = (props: HeaderBackButtonProps) => {
+  const navigation = useNavigation();
+  return (
+    <HeaderBackButton
+      {...props}
+      onPress={() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
+      }}
+      testID="back"
+    />
+  );
+};
 
+const App = () => {
+  const Stack = createNativeStackNavigator<StackParamList>();
   return (
     <>
       <StatusBar hidden />
       <NavigationContainer linking={linking}>
-        <Stack.Navigator>
+        <Stack.Navigator screenOptions={{ headerLeft: HeaderLeft }}>
           <Stack.Screen
             name="Home"
             component={HomeScreen}
             options={{
               title: "🎨 Skia",
-              headerTitleAlign: "center",
+            }}
+          />
+          <Stack.Screen
+            name="Tests"
+            component={Tests}
+            options={{
+              title: "🔧 Tests",
             }}
           />
           <Stack.Screen
