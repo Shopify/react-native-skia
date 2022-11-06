@@ -8,8 +8,8 @@ import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
-import { DrawMode, SkiaBaseViewProps, TouchInfo, TouchTool } from "./types";
-import { TouchType } from "./types";
+import type { DrawMode, SkiaBaseViewProps, TouchInfo } from "./types";
+import { TouchTool, TouchType } from "./types";
 
 const pd = PixelRatio.get();
 
