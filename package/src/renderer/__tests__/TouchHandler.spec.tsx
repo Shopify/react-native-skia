@@ -1,6 +1,6 @@
 import React from "react";
 
-import { TouchType } from "../../views/types";
+import { TouchType, TouchTool } from "../../views/types";
 
 import type { EmptyProps } from "./setup";
 import { mountCanvas, importSkia } from "./setup";
@@ -28,6 +28,7 @@ const SimpleActiveTouch = ({}: EmptyProps) => {
         type: TouchType.Start,
         id: 2,
         timestamp: 0,
+        tool: TouchTool.Finger,
       },
     ],
     [
@@ -38,6 +39,7 @@ const SimpleActiveTouch = ({}: EmptyProps) => {
         type: TouchType.Active,
         id: 2,
         timestamp: 1,
+        tool: TouchTool.Finger,
       },
     ],
   ];
@@ -74,6 +76,7 @@ const SimpleEndTouch = ({}: EmptyProps) => {
         type: TouchType.Start,
         id: 2,
         timestamp: 0,
+        tool: TouchTool.Finger,
       },
     ],
     [
@@ -84,6 +87,7 @@ const SimpleEndTouch = ({}: EmptyProps) => {
         type: TouchType.Active,
         id: 2,
         timestamp: 1,
+        tool: TouchTool.Finger,
       },
     ],
     [
@@ -94,6 +98,7 @@ const SimpleEndTouch = ({}: EmptyProps) => {
         type: TouchType.End,
         id: 2,
         timestamp: 2,
+        tool: TouchTool.Finger,
       },
     ],
   ];
