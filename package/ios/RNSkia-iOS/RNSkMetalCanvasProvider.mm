@@ -12,29 +12,36 @@
 
 #pragma clang diagnostic pop
 
-id<MTLDevice> RNSkMetalCanvasProvider::_device = nullptr;
+/** Static members */
+std::shared_ptr<MetalRenderContext>
+RNSkMetalCanvasProvider::getMetalRenderContext() {
+  auto threadId = std::this_thread::get_id();
+  if (renderContexts.count(threadId) == 0) {
+    auto drawingContext = std::make_shared<MetalRenderContext>();
+    drawingContext->commandQueue = nullptr;
+    drawingContext->skContext = nullptr;
+    renderContexts.emplace(threadId, drawingContext);
+  }
+  return renderContexts.at(threadId);
+}
 
 RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(std::function<void()> requestRedraw,
                         std::shared_ptr<RNSkia::RNSkPlatformContext> context):
 RNSkCanvasProvider(requestRedraw),
   _context(context) {
-  if (_device == nullptr) {
-    _device = MTLCreateSystemDefaultDevice();
-  }
-  _commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
-    
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
   #pragma clang diagnostic pop
     
+  auto device = MTLCreateSystemDefaultDevice();
+    
   _layer.framebufferOnly = NO;
-  _layer.device = _device;
+  _layer.device = device;
   _layer.opaque = false;
   _layer.contentsScale = _context->getPixelDensity();
   _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    
-  _skContext = GrDirectContext::MakeMetal((__bridge void*)_device, (__bridge void*)_commandQueue);
+      
 }
 
 RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {
@@ -59,8 +66,13 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
     return;
   }
   
-  if (_skContext == nullptr) {
-    return;
+  // Get render context for current thread
+  auto renderContext = getMetalRenderContext();
+  
+  if (renderContext->skContext == nullptr) {
+    auto device = MTLCreateSystemDefaultDevice();
+    renderContext->commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
+    renderContext->skContext = GrDirectContext::MakeMetal((__bridge void*)device, (__bridge void*)renderContext->commandQueue);
   }
   
   // Wrap in auto release pool since we want the system to clean up after rendering
@@ -69,7 +81,7 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
   @autoreleasepool
   {
     GrMTLHandle drawableHandle;
-    auto skSurface = SkSurface::MakeFromCAMetalLayer(_skContext.get(),
+    auto skSurface = SkSurface::MakeFromCAMetalLayer(renderContext->skContext.get(),
                                                      (__bridge GrMTLHandle)_layer,
                                                      kTopLeft_GrSurfaceOrigin,
                                                      1,
@@ -85,12 +97,11 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
     
     SkCanvas *canvas = skSurface->getCanvas();
     canvas->clear(SK_AlphaTRANSPARENT);
-    cb(canvas);
-    
+    cb(canvas);    
     skSurface->flushAndSubmit();
     
     id<CAMetalDrawable> currentDrawable = (__bridge id<CAMetalDrawable>)drawableHandle;
-    id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
+    id<MTLCommandBuffer> commandBuffer([renderContext->commandQueue commandBuffer]);
     commandBuffer.label = @"PresentSkia";
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
