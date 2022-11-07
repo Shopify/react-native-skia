@@ -11,8 +11,7 @@ using MetalRenderContext = struct {
   sk_sp<GrDirectContext> skContext;
 };
 
-static std::unordered_map<std::thread::id,
-                          std::shared_ptr<MetalRenderContext>>
+static std::unordered_map<std::thread::id, std::shared_ptr<MetalRenderContext>>
     renderContexts;
 
 class RNSkMetalCanvasProvider : public RNSkia::RNSkCanvasProvider {
@@ -38,7 +37,7 @@ private:
    * @return The drawing context for the current thread
    */
   static std::shared_ptr<MetalRenderContext> getMetalRenderContext();
-  
+
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
   float _width = -1;
   float _height = -1;
