@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { processResult } from "../../__tests__/setup";
 import { Fill, Image } from "../components";
@@ -35,16 +35,21 @@ const CheckImage = ({}: EmptyProps) => {
 };
 
 const CheckTogglingImage = ({}: EmptyProps) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const h = useRef<any>(0);
   const [idx, setIdx] = useState(0);
   const { useImage } = importSkia();
   const zurich = useImage("skia/__tests__/assets/zurich.jpg");
   const oslo = useImage("skia/__tests__/assets/oslo.jpg");
   useEffect(() => {
     if (oslo && zurich) {
-      setTimeout(() => {
+      h.current = setTimeout(() => {
         setIdx(1);
       }, 20);
     }
+    return () => {
+      clearTimeout(h.current);
+    };
   }, [zurich, oslo]);
   if (!zurich || !oslo) {
     return <Fill color="red" />;
@@ -69,15 +74,20 @@ const sources = [
 ];
 
 const CheckChangingImage = ({}: EmptyProps) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const h = useRef<any>(0);
   const [idx, setIdx] = useState(0);
   const { useImage } = importSkia();
   const image = useImage(sources[idx]);
   useEffect(() => {
     if (image) {
-      setTimeout(() => {
+      h.current = setTimeout(() => {
         setIdx(1);
       }, 20);
     }
+    return () => {
+      clearTimeout(h.current);
+    };
   }, [image]);
   if (!image) {
     return <Fill color="red" />;

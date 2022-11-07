@@ -121,8 +121,16 @@ export const mountCanvas = (element: ReactNode) => {
 
   const depMgr = new DependencyManager(registerValues);
   const container = new Container(Skia, depMgr, redraw);
-  skiaReconciler.createContainer(container, 0, false, null);
-  const root = skiaReconciler.createContainer(container, 0, false, null);
+  const root = skiaReconciler.createContainer(
+    container,
+    0,
+    null,
+    true,
+    null,
+    "",
+    console.error,
+    null
+  );
   skiaReconciler.updateContainer(
     <CanvasProvider
       value={{ Skia, size: ValueApi.createValue({ width, height }) }}
