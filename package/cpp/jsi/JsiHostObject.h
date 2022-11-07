@@ -3,6 +3,7 @@
 #include <jsi/jsi.h>
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -122,12 +123,6 @@ using JsiPropertyGettersMap =
 using JsiPropertySettersMap =
     std::unordered_map<std::string, void (JsiHostObject::*)(
                                         jsi::Runtime &, const jsi::Value &)>;
-
-using JsiHostFunctionCache =
-    std::unordered_map<std::string, std::unique_ptr<jsi::Function>>;
-
-using JsiRuntimeCache =
-    std::unordered_map<jsi::Runtime *, JsiHostFunctionCache>;
 
 /**
  * Base class for jsi host objects
@@ -367,6 +362,7 @@ protected:
 private:
   std::unordered_map<std::string, jsi::HostFunctionType> _funcMap;
   std::unordered_map<std::string, JsPropertyType> _propMap;
-  JsiRuntimeCache _cache;
+
+  std::map<std::string, jsi::Function> _hostFunctionCache;
 };
 } // namespace RNJsi
