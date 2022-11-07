@@ -96,13 +96,11 @@ public:
     _paint = nullptr;
     _isInvalid = true;
   }
-  
+
   /**
    Call to reset invalidate flag after render cycle
    */
-  void markAsValidated() {
-    _isInvalid = false;
-  }
+  void markAsValidated() { _isInvalid = false; }
 
   /**
    Dispose and remove the drawing context from its parent.
@@ -175,9 +173,7 @@ public:
   /**
    Sets the paint in the current sub context
    */
-  void setMutablePaint(std::shared_ptr<SkPaint> paint) {
-    _paint = paint;
-  }
+  void setMutablePaint(std::shared_ptr<SkPaint> paint) { _paint = paint; }
 
   /**
    Getd the opacity value
@@ -242,7 +238,7 @@ private:
       child->invalidate();
     }
   }
-  
+
   bool _isInvalid = true;
 
   std::shared_ptr<SkPaint> _paint;
