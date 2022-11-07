@@ -61,11 +61,6 @@ public:
   void require() { _isRequired = true; }
 
   /**
-   Sets the property as optional
-   */
-  void optional() { _isRequired = false; }
-
-  /**
    Returns true for required props
    */
   bool isRequired() { return _isRequired; }

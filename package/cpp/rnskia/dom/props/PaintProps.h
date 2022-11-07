@@ -93,10 +93,13 @@ public:
     if (_color->isSet() && (_color->isChanged() || context->isInvalid())) {
       context->getMutablePaint()->setShader(nullptr);
       context->getMutablePaint()->setColor(*_color->getDerivedValue());
+      context->getMutablePaint()->setAlphaf(context->getOpacity());
     }
 
     // Opacity
     if (_opacity->isSet() && (_opacity->isChanged() || context->isInvalid())) {
+      auto opacity = _opacity->value()->getAsNumber();
+      printf("Opacity is set: %f", opacity);
       context->setOpacity(_opacity->value()->getAsNumber());
     }
 

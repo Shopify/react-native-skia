@@ -134,6 +134,7 @@ public:
 
     // Resolve changes
     markPropertiesAsResolved();
+    _localContext->markAsValidated();
 
 #if SKIA_DOM_DEBUG
     printDebugInfo(context, "End Render");

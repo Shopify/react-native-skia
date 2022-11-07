@@ -55,7 +55,7 @@ public:
   std::string getDebugDescription() {
     std::string v = "ctx for " + std::string(_source) + ":";
 
-    if (!isInvalid()) {
+    if (_paint != nullptr) {
       auto clr = _paint->getColor();
       auto a = SkColorGetA(clr);
       auto r = SkColorGetR(clr);
@@ -92,7 +92,17 @@ public:
   /**
    Invalidate cache
    */
-  void invalidate() { _paint = nullptr; }
+  void invalidate() {
+    _paint = nullptr;
+    _isInvalid = true;
+  }
+  
+  /**
+   Call to reset invalidate flag after render cycle
+   */
+  void markAsValidated() {
+    _isInvalid = false;
+  }
 
   /**
    Dispose and remove the drawing context from its parent.
@@ -115,7 +125,7 @@ public:
   /**
    Returns true if the current cache is changed
    */
-  bool isInvalid() { return _paint == nullptr; }
+  bool isInvalid() { return _isInvalid; }
 
   /**
    Get/Sets the canvas object
@@ -165,7 +175,9 @@ public:
   /**
    Sets the paint in the current sub context
    */
-  void setMutablePaint(std::shared_ptr<SkPaint> paint) { _paint = paint; }
+  void setMutablePaint(std::shared_ptr<SkPaint> paint) {
+    _paint = paint;
+  }
 
   /**
    Getd the opacity value
@@ -187,7 +199,7 @@ public:
       _opacity = opacity;
     }
     // TODO: Is this enough to set opacity?
-    getMutablePaint()->setAlpha(_opacity * 255);
+    getMutablePaint()->setAlphaf(_opacity);
   }
 
   float getScaledWidth() {
@@ -230,6 +242,8 @@ private:
       child->invalidate();
     }
   }
+  
+  bool _isInvalid = true;
 
   std::shared_ptr<SkPaint> _paint;
   double _opacity = 1.0f;
