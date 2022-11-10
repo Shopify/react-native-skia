@@ -22,134 +22,56 @@ public:
   /**
    Creates a root drawing context with paint and opacity
    */
-  DrawingContext(std::shared_ptr<SkPaint> paint, double opacity)
-      : DrawingContext("root") {
-    _paint = paint;
-    _opacity = opacity;
-  }
+  DrawingContext(std::shared_ptr<SkPaint> paint, double opacity);
 
   /**
    Initilalizes a new draw context.
    */
-  DrawingContext(DrawingContext *parent, const char *source)
-      : DrawingContext(source) {
-    _parent = parent;
-  }
+  DrawingContext(DrawingContext *parent, const char *source);
 
   /**
    Factory for creating a child context that inherits from this context
    */
-  std::shared_ptr<DrawingContext> inheritContext(const char *source) {
-    auto result = std::make_shared<DrawingContext>(this, source);
-    _children.push_back(result);
-    return result;
-  }
+  std::shared_ptr<DrawingContext> inheritContext(const char *source);
 
-  size_t getLevel() {
-    if (_parent != nullptr) {
-      return _parent->getLevel() + 1;
-    }
-    return 0;
-  }
+  size_t getLevel();
 
-  std::string getDebugDescription() {
-    std::string v = "ctx for " + std::string(_source) + ":";
-
-    if (_paint != nullptr) {
-      auto clr = _paint->getColor();
-      auto a = SkColorGetA(clr);
-      auto r = SkColorGetR(clr);
-      auto g = SkColorGetG(clr);
-      auto b = SkColorGetB(clr);
-
-      if (r > 0 || g > 0 || b > 0) {
-        v += " color:rgba(" + std::to_string(r) + ", " + std::to_string(g) +
-             ", " + std::to_string(b) + ", " + std::to_string(a) + ")";
-      }
-
-      if (_paint->getMaskFilter() != nullptr) {
-        v += " maskFilter:set";
-      }
-      auto blendMode = _paint->getBlendMode_or(SkBlendMode::kSrc);
-      if (blendMode != SkBlendMode::kSrc) {
-        v += " blendMode:" + std::to_string(static_cast<size_t>(blendMode));
-      }
-
-      v += " opacity:" + std::to_string(_opacity);
-      if (_paint->getPathEffect() != nullptr) {
-        v += " [PathEffect]";
-      }
-    } else {
-      v = v + "[inherited] " +
-          (_parent != nullptr ? _parent->getDebugDescription() : "");
-    }
-
-    v = v + "\n";
-
-    return v;
-  }
+  std::string getDebugDescription();
 
   /**
    Invalidate cache
    */
-  void invalidate() {
-    _paint = nullptr;
-    _isInvalid = true;
-  }
+  void invalidate();
 
   /**
    Call to reset invalidate flag after render cycle
    */
-  void markAsValidated() { _isInvalid = false; }
+  void markAsValidated();
 
   /**
    Dispose and remove the drawing context from its parent.
    */
-  void dispose() {
-    if (_parent != nullptr) {
-      auto position = std::find(_parent->_children.begin(),
-                                _parent->_children.end(), shared_from_this());
-
-      if (position != _parent->_children.end()) {
-        _parent->_children.erase(position);
-      }
-      // TODO: This is called from the JS thread so we need somehow to avoid
-      // rendering after setting this to null, and we also need to protect this
-      // section.
-      _parent = nullptr;
-    }
-  }
+  void dispose();
 
   /**
    Returns true if the current cache is changed
    */
-  bool isInvalid() { return _isInvalid; }
+  bool isInvalid();
 
   /**
    Get/Sets the canvas object
    */
-  SkCanvas *getCanvas() {
-    if (_parent != nullptr) {
-      return _parent->getCanvas();
-    }
-
-    return _canvas;
-  }
+  SkCanvas *getCanvas();
 
   /**
    Sets the canvas
    */
-  void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
+  void setCanvas(SkCanvas *canvas);
 
   /**
    Gets the paint object
    */
-  std::shared_ptr<const SkPaint> getPaint() {
-    if (_paint != nullptr) {
-      return _paint;
-    }
-    return _parent->getPaint();
-  }
+  std::shared_ptr<const SkPaint> getPaint();
 
   /**
    To be able to mutate and change the paint in a context we need to mutate the
@@ -157,87 +79,37 @@ public:
    (to avoid having to create multiple paint objects for nodes that does not
    change the paint).
    */
-  std::shared_ptr<SkPaint> getMutablePaint() {
-    if (_paint == nullptr) {
-      auto parentPaint = _parent->getPaint();
-      _paint = std::make_shared<SkPaint>(*parentPaint);
-    }
-    // Calling the getMutablePaint accessor implies that the paint
-    // is about to be mutatet and will therefore invalidate
-    // any child contexts to pick up changes from this context as
-    // the parent context.
-    invalidateChildren();
-    return _paint;
-  }
+  std::shared_ptr<SkPaint> getMutablePaint();
 
   /**
    Sets the paint in the current sub context
    */
-  void setMutablePaint(std::shared_ptr<SkPaint> paint) { _paint = paint; }
+  void setMutablePaint(std::shared_ptr<SkPaint> paint);
 
   /**
    Getd the opacity value
    */
-  double getOpacity() {
-    if (_paint == nullptr) {
-      return _parent->getOpacity();
-    }
-    return _opacity;
-  }
+  double getOpacity();
 
   /**
    Sets the opacity value
    */
-  void setOpacity(double opacity) {
-    if (_parent != nullptr) {
-      _opacity = _parent->getOpacity() * opacity;
-    } else {
-      _opacity = opacity;
-    }
-    // TODO: Is this enough to set opacity?
-    getMutablePaint()->setAlphaf(_opacity);
-  }
+  void setOpacity(double opacity);
 
-  float getScaledWidth() {
-    if (_parent != nullptr) {
-      return _parent->getScaledWidth();
-    }
-    return _scaledWidth;
-  }
+  float getScaledWidth();
 
-  float getScaledHeight() {
-    if (_parent != nullptr) {
-      return _parent->getScaledHeight();
-    }
-    return _scaledHeight;
-  }
+  float getScaledHeight();
 
-  void setScaledWidth(float v) { _scaledWidth = v; }
-  void setScaledHeight(float v) { _scaledHeight = v; }
+  void setScaledWidth(float v);
+  void setScaledHeight(float v);
 
-  void setRequestRedraw(std::function<void()> &&requestRedraw) {
-    if (_parent != nullptr) {
-      _parent->setRequestRedraw(std::move(requestRedraw));
-    } else {
-      _requestRedraw = std::move(requestRedraw);
-    }
-  }
-
-  const std::function<void()> &getRequestRedraw() {
-    if (_parent != nullptr) {
-      return _parent->getRequestRedraw();
-    }
-    return _requestRedraw;
-  }
+  void setRequestRedraw(std::function<void()> &&requestRedraw);
+  const std::function<void()> &getRequestRedraw();
 
 private:
-  explicit DrawingContext(const char *source) { _source = source; }
+  explicit DrawingContext(const char *source);
 
-  void invalidateChildren() {
-    for (auto &child : _children) {
-      child->invalidate();
-    }
-  }
+  void invalidateChildren();
 
   bool _isInvalid = true;
 
