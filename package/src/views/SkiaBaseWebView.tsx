@@ -46,8 +46,8 @@ export abstract class SkiaBaseWebView<
     // Reset canvas / surface on layout change
     if (this._canvasRef.current) {
       const canvas = this._canvasRef.current;
-      canvas.width = canvas.clientWidth * pd;
-      canvas.height = canvas.clientHeight * pd;
+      canvas.width = width * pd;
+      canvas.height = height * pd;
       const surface = CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current);
       if (!surface) {
         throw new Error("Could not create surface");
