@@ -17,12 +17,12 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (_textBlobProp->value()->getType() != PropType::HostObject) {
+    if (_textBlobProp->value().getType() != PropType::HostObject) {
       throw std::runtime_error("Expected SkTextBlob object for the " +
                                std::string(getName()) + " property.");
     }
 
-    auto ptr = _textBlobProp->value()->getAs<JsiSkTextBlob>();
+    auto ptr = _textBlobProp->value().getAs<JsiSkTextBlob>();
     if (ptr == nullptr) {
       throw std::runtime_error("Expected SkTextBlob object for the " +
                                std::string(getName()) + " property.");
@@ -52,9 +52,9 @@ public:
 
   void updateDerivedValue() override {
     auto font = _fontProp->getDerivedValue();
-    auto text = _textProp->value()->getAsString();
+    auto text = _textProp->value().getAsString();
     auto path = _pathProp->getDerivedValue();
-    auto offset = _offsetProp->value()->getAsNumber();
+    auto offset = _offsetProp->value().getAsNumber();
 
     // Get glyphs
     auto numGlyphIds =

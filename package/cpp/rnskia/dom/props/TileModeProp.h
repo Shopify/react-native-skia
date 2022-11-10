@@ -23,7 +23,7 @@ public:
   void updateDerivedValue() override {
     if (_tileModeProp->isSet()) {
       setDerivedValue(
-          getTileModeFromStringValue(_tileModeProp->value()->getAsString()));
+          getTileModeFromStringValue(_tileModeProp->value().getAsString()));
     } else {
       setDerivedValue(nullptr);
     }

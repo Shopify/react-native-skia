@@ -32,9 +32,9 @@ public:
   void updateDerivedValue() override {
     if (_prop->isSet()) {
       // Check for JsiSkRect
-      if (_prop->value()->getType() == PropType::HostObject) {
+      if (_prop->value().getType() == PropType::HostObject) {
         auto rectPtr = std::dynamic_pointer_cast<JsiSkRect>(
-            _prop->value()->getAsHostObject());
+            _prop->value().getAsHostObject());
         if (rectPtr != nullptr) {
           setDerivedValue(SkRect::MakeXYWH(
               rectPtr->getObject()->x(), rectPtr->getObject()->y(),
@@ -42,21 +42,18 @@ public:
         }
       } else {
         auto p = _prop->value();
-        if (p->hasValue(PropNameX) && p->hasValue(PropNameY) &&
-            p->hasValue(PropNameWidth) && p->hasValue(PropNameHeight)) {
+        if (p.hasValue(PropNameX) && p.hasValue(PropNameY) &&
+            p.hasValue(PropNameWidth) && p.hasValue(PropNameHeight)) {
           // Save props for fast access
-          auto x = _prop->value()->getValue(PropNameX);
-          auto y = _prop->value()->getValue(PropNameY);
-          auto width = _prop->value()->getValue(PropNameWidth);
-          auto height = _prop->value()->getValue(PropNameHeight);
+          auto x = p.getValue(PropNameX);
+          auto y = p.getValue(PropNameY);
+          auto width = p.getValue(PropNameWidth);
+          auto height = p.getValue(PropNameHeight);
 
           // Update cache from js object value
-          if (x != nullptr && y != nullptr && width != nullptr &&
-              height != nullptr) {
-            setDerivedValue(SkRect::MakeXYWH(x->getAsNumber(), y->getAsNumber(),
-                                             width->getAsNumber(),
-                                             height->getAsNumber()));
-          }
+          setDerivedValue(SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
+                                           width.getAsNumber(),
+                                           height.getAsNumber()));
         }
       }
     }
@@ -81,8 +78,8 @@ public:
   void updateDerivedValue() override {
     if (_x->isSet() && _y->isSet() && _width->isSet() && _height->isSet()) {
       setDerivedValue(SkRect::MakeXYWH(
-          _x->value()->getAsNumber(), _y->value()->getAsNumber(),
-          _width->value()->getAsNumber(), _height->value()->getAsNumber()));
+          _x->value().getAsNumber(), _y->value().getAsNumber(),
+          _width->value().getAsNumber(), _height->value().getAsNumber()));
     }
   }
 

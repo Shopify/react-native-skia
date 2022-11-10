@@ -115,14 +115,14 @@ protected:
   void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
       auto color = _colorProp->getDerivedValue();
-      auto dx = _dxProp->value()->getAsNumber();
-      auto dy = _dxProp->value()->getAsNumber();
-      auto blur = _blurProp->value()->getAsNumber();
+      auto dx = _dxProp->value().getAsNumber();
+      auto dy = _dxProp->value().getAsNumber();
+      auto blur = _blurProp->value().getAsNumber();
       auto input = optionalChild(0);
 
-      auto inner = _innerProp->isSet() && _innerProp->value()->getAsBool();
+      auto inner = _innerProp->isSet() && _innerProp->value().getAsBool();
       auto shadowOnly =
-          _shadowOnlyProp->isSet() && _shadowOnlyProp->value()->getAsBool();
+          _shadowOnlyProp->isSet() && _shadowOnlyProp->value().getAsBool();
 
       if (inner) {
         auto srcGraphic = SkImageFilters::ColorFilter(
@@ -196,10 +196,10 @@ protected:
     if (isChanged(context)) {
 
       auto channelX =
-          getColorChannelFromStringValue(_channelXProp->value()->getAsString());
+          getColorChannelFromStringValue(_channelXProp->value().getAsString());
       auto channelY =
-          getColorChannelFromStringValue(_channelYProp->value()->getAsString());
-      auto scale = _scaleProp->value()->getAsNumber();
+          getColorChannelFromStringValue(_channelYProp->value().getAsString());
+      auto scale = _scaleProp->value().getAsNumber();
 
       auto displacement = requireChild(0);
       auto color = optionalChild(1);
@@ -293,8 +293,8 @@ protected:
       auto input = optionalChild(0);
       if (getPropsContainer()->isChanged()) {
         setImageFilter(context,
-                       SkImageFilters::Offset(_xProp->value()->getAsNumber(),
-                                              _yProp->value()->getAsNumber(),
+                       SkImageFilters::Offset(_xProp->value().getAsNumber(),
+                                              _yProp->value().getAsNumber(),
                                               input ? input : nullptr));
       }
     }
@@ -329,7 +329,7 @@ public:
 protected:
   void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
-      auto op = getTypeFromStringValue(_operatorProp->value()->getAsString());
+      auto op = getTypeFromStringValue(_operatorProp->value().getAsString());
       auto radius = _radiusProp->getDerivedValue();
       auto input = optionalChild(0);
 
@@ -381,7 +381,7 @@ public:
 protected:
   void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
-      auto source = _sourceProp->value()->getAs<JsiSkRuntimeEffect>();
+      auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>();
       if (source == nullptr) {
         throw std::runtime_error("Expected runtime effect when reading source "
                                  "property of RuntimeEffectImageFilter.");

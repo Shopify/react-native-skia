@@ -90,9 +90,9 @@ public:
    Returns pointer to the value contained by the property if the property is
    set.
    */
-  JsiValue *value() {
+  const JsiValue &value() {
     assert(isSet());
-    return _value.get();
+    return *_value;
   }
 
   /**

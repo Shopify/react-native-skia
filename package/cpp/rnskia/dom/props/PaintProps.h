@@ -31,20 +31,20 @@ public:
 
   void updateDerivedValue() override {
     if (_paintProp->isSet()) {
-      if (_paintProp->value()->getType() == PropType::HostObject) {
+      if (_paintProp->value().getType() == PropType::HostObject) {
         // Read paint property as Host Object - JsiSkPaint
-        auto ptr = _paintProp->value()->getAs<JsiSkPaint>();
+        auto ptr = _paintProp->value().getAs<JsiSkPaint>();
         if (ptr != nullptr) {
           setDerivedValue(ptr->getObject());
         } else {
           throw std::runtime_error("Expected SkPaint object, got unknown "
                                    "object when reading paint property.");
         }
-      } else if (_paintProp->value()->getType() == PropType::Object) {
+      } else if (_paintProp->value().getType() == PropType::Object) {
         // We have a JS object - is it a ref?
-        auto ref = _paintProp->value()->getValue(PropNameCurrent);
-        if (ref->getType() == PropType::HostObject) {
-          auto ptr = ref->getAs<JsiSkPaint>();
+        auto ref = _paintProp->value().getValue(PropNameCurrent);
+        if (ref.getType() == PropType::HostObject) {
+          auto ptr = ref.getAs<JsiSkPaint>();
           if (ptr != nullptr) {
             // Update the local paint for the current context
             setDerivedValue(ptr->getObject());
@@ -98,14 +98,12 @@ public:
 
     // Opacity
     if (_opacity->isSet() && (_opacity->isChanged() || context->isInvalid())) {
-      auto opacity = _opacity->value()->getAsNumber();
-      printf("Opacity is set: %f", opacity);
-      context->setOpacity(_opacity->value()->getAsNumber());
+      context->setOpacity(_opacity->value().getAsNumber());
     }
 
     // Style
     if (_style->isSet() && (_style->isChanged() || context->isInvalid())) {
-      auto styleValue = _style->value()->getAsString();
+      auto styleValue = _style->value().getAsString();
       if (styleValue == "stroke") {
         context->getMutablePaint()->setStyle(SkPaint::Style::kStroke_Style);
       } else if (styleValue == "fill") {
@@ -119,7 +117,7 @@ public:
     if (_strokeWidth->isSet() &&
         (_strokeWidth->isChanged() || context->isInvalid())) {
       context->getMutablePaint()->setStrokeWidth(
-          _strokeWidth->value()->getAsNumber());
+          _strokeWidth->value().getAsNumber());
     }
     // Blend mode
     if (_blendMode->isSet() &&
@@ -141,13 +139,13 @@ public:
     if (_strokeMiter->isSet() &&
         (_strokeMiter->isChanged() || context->isInvalid())) {
       context->getMutablePaint()->setStrokeMiter(
-          _strokeMiter->value()->getAsNumber());
+          _strokeMiter->value().getAsNumber());
     }
     // AntiAlias
     if (_antiAlias->isSet() &&
         (_antiAlias->isChanged() || context->isInvalid())) {
       context->getMutablePaint()->setAntiAlias(
-          _antiAlias->value()->getAsNumber());
+          _antiAlias->value().getAsNumber());
     }
   }
 

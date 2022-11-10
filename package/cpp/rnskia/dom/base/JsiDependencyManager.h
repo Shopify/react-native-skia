@@ -87,9 +87,9 @@ public:
       } else if (isSelector(nativeValue)) {
         // Handle Skia Animation Value Selectors
         auto animatedValue = std::dynamic_pointer_cast<RNSkReadonlyValue>(
-            nativeValue.getValue(PropNameValue)->getAsHostObject());
+            nativeValue.getValue(PropNameValue).getAsHostObject());
 
-        auto selector = nativeValue.getValue(PropNameSelector)->getAsFunction();
+        auto selector = nativeValue.getValue(PropNameSelector).getAsFunction();
         // Add subscription to animated value in selector
         auto unsubscribe = animatedValue->addListener(
             [nativeValue, propMapping, selector = std::move(selector),

@@ -17,8 +17,8 @@ public:
 
 protected:
   void draw(DrawingContext *context) override {
-    auto x = _xProp->value()->getAsNumber();
-    auto y = _yProp->value()->getAsNumber();
+    auto x = _xProp->value().getAsNumber();
+    auto y = _yProp->value().getAsNumber();
     auto font = _fontProp->getDerivedValue();
     auto glyphInfo = _glyphsProp->getDerivedValue();
 

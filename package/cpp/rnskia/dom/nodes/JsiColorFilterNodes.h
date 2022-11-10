@@ -64,11 +64,11 @@ public:
 protected:
   void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
-      auto array = _matrixProp->value()->getAsArray();
+      auto array = _matrixProp->value().getAsArray();
       float matrix[20];
       for (int i = 0; i < 20; i++) {
         if (array.size() > i) {
-          matrix[i] = array[i]->getAsNumber();
+          matrix[i] = array[i].getAsNumber();
         }
       }
       setColorFilter(context, SkColorFilters::Matrix(matrix));
@@ -173,7 +173,7 @@ protected:
   void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
       setColorFilter(context,
-                     SkColorFilters::Lerp(_tProp->value()->getAsNumber(),
+                     SkColorFilters::Lerp(_tProp->value().getAsNumber(),
                                           requireChild(0), requireChild(1)));
     }
   }

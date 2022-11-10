@@ -26,7 +26,7 @@ public:
   void updateDerivedValue() override {
     SkColor color =
         _colorProp->isSet() ? *_colorProp->getDerivedValue() : SK_ColorBLACK;
-    SkScalar blur = _blurProp->value()->getAsNumber();
+    SkScalar blur = _blurProp->value().getAsNumber();
 
     auto paint = SkPaint();
     paint.setColor(color);
@@ -37,16 +37,16 @@ public:
   }
 
   bool isInner() {
-    return _innerProp->isSet() ? _innerProp->value()->getAsBool() : false;
+    return _innerProp->isSet() ? _innerProp->value().getAsBool() : false;
   }
   SkScalar getDx() {
-    return _dxProp->isSet() ? _dxProp->value()->getAsNumber() : 0;
+    return _dxProp->isSet() ? _dxProp->value().getAsNumber() : 0;
   }
   SkScalar getDy() {
-    return _dyProp->isSet() ? _dyProp->value()->getAsNumber() : 0;
+    return _dyProp->isSet() ? _dyProp->value().getAsNumber() : 0;
   }
   SkScalar getSpread() {
-    return _spreadProp->isSet() ? _spreadProp->value()->getAsNumber() : 0;
+    return _spreadProp->isSet() ? _spreadProp->value().getAsNumber() : 0;
   }
 
 private:

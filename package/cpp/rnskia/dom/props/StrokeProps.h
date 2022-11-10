@@ -22,7 +22,7 @@ public:
 
   void updateDerivedValue() override {
     if (_strokeCap->isSet() && (_strokeCap->isChanged())) {
-      auto capValue = _strokeCap->value()->getAsString();
+      auto capValue = _strokeCap->value().getAsString();
       setDerivedValue(getCapFromString(capValue));
     }
   }
@@ -51,7 +51,7 @@ public:
 
   void updateDerivedValue() override {
     if (_strokeJoin->isSet() && (_strokeJoin->isChanged())) {
-      auto joinValue = _strokeJoin->value()->getAsString();
+      auto joinValue = _strokeJoin->value().getAsString();
       setDerivedValue(getJoinFromString(joinValue));
     }
   }

@@ -25,21 +25,20 @@ public:
     }
   }
 
-  static SkColor parseColorValue(JsiValue *color) {
-    if (color->getType() == PropType::Object) {
+  static SkColor parseColorValue(const JsiValue &color) {
+    if (color.getType() == PropType::Object) {
       // Float array
-      auto r = color->getValue(JsiPropId::get("0"));
-      auto g = color->getValue(JsiPropId::get("1"));
-      auto b = color->getValue(JsiPropId::get("2"));
-      auto a = color->getValue(JsiPropId::get("3"));
-      return SkColorSetARGB(
-          a->getAsNumber() * 255.0f, r->getAsNumber() * 255.0f,
-          g->getAsNumber() * 255.0f, b->getAsNumber() * 255.0f);
+      auto r = color.getValue(JsiPropId::get("0"));
+      auto g = color.getValue(JsiPropId::get("1"));
+      auto b = color.getValue(JsiPropId::get("2"));
+      auto a = color.getValue(JsiPropId::get("3"));
+      return SkColorSetARGB(a.getAsNumber() * 255.0f, r.getAsNumber() * 255.0f,
+                            g.getAsNumber() * 255.0f, b.getAsNumber() * 255.0f);
 
-    } else if (color->getType() == PropType::Number) {
-      return static_cast<SkColor>(color->getAsNumber());
+    } else if (color.getType() == PropType::Number) {
+      return static_cast<SkColor>(color.getAsNumber());
     } else {
-      auto parsedColor = CSSColorParser::parse(color->getAsString());
+      auto parsedColor = CSSColorParser::parse(color.getAsString());
       if (parsedColor.a == -1.0f) {
         return SK_ColorBLACK;
       } else {
@@ -61,12 +60,12 @@ public:
 
   void updateDerivedValue() override {
     if (_colorsProp->isSet()) {
-      auto colors = _colorsProp->value()->getAsArray();
+      auto colors = _colorsProp->value().getAsArray();
       std::vector<SkColor> derivedColors;
       derivedColors.reserve(colors.size());
 
       for (size_t i = 0; i < colors.size(); ++i) {
-        derivedColors.push_back(ColorProp::parseColorValue(colors[i].get()));
+        derivedColors.push_back(ColorProp::parseColorValue(colors[i]));
       }
       setDerivedValue(std::move(derivedColors));
     } else {

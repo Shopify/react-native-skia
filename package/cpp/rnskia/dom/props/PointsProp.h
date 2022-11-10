@@ -26,7 +26,7 @@ public:
   void updateDerivedValue() override {
     if (_pointModeProp->isSet()) {
       setDerivedValue(
-          getPointModeFromStringValue(_pointModeProp->value()->getAsString()));
+          getPointModeFromStringValue(_pointModeProp->value().getAsString()));
     } else {
       setDerivedValue(nullptr);
     }
@@ -57,12 +57,12 @@ public:
 
   void updateDerivedValue() override {
     if (_pointsProp->isSet()) {
-      auto pointsArray = _pointsProp->value()->getAsArray();
+      auto pointsArray = _pointsProp->value().getAsArray();
       std::vector<SkPoint> points;
       points.reserve(pointsArray.size());
       for (size_t i = 0; i < pointsArray.size(); ++i) {
         auto p = pointsArray[i];
-        auto point = PointProp::processValue(p.get());
+        auto point = PointProp::processValue(p);
         if (point != EmptyPoint) {
           points.push_back(point);
         } else {

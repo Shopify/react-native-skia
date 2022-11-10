@@ -17,9 +17,9 @@ public:
 
   void updateDerivedValue() override {
     if (_matrixProp->isSet() &&
-        _matrixProp->value()->getType() == PropType::HostObject) {
+        _matrixProp->value().getType() == PropType::HostObject) {
       // Try reading as SkMatrix
-      auto matrix = _matrixProp->value()->getAs<JsiSkMatrix>();
+      auto matrix = _matrixProp->value().getAs<JsiSkMatrix>();
       if (matrix != nullptr) {
         setDerivedValue(matrix->getObject());
       }

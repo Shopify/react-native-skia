@@ -16,13 +16,13 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (_pictureProp->value()->getType() != PropType::HostObject) {
+    if (_pictureProp->value().getType() != PropType::HostObject) {
       throw std::runtime_error("Expected SkPicture object for the " +
                                std::string(getName()) + " property.");
     }
 
     auto ptr = std::dynamic_pointer_cast<JsiSkPicture>(
-        _pictureProp->value()->getAsHostObject());
+        _pictureProp->value().getAsHostObject());
     if (ptr == nullptr) {
       throw std::runtime_error("Expected SkPicture object for the " +
                                std::string(getName()) + " property.");

@@ -29,22 +29,22 @@ public:
   void updateDerivedValue() override {
     if (!_transformProp->isSet()) {
       setDerivedValue(nullptr);
-    } else if (_transformProp->value()->getType() != PropType::Array) {
+    } else if (_transformProp->value().getType() != PropType::Array) {
       throw std::runtime_error(
           "Expected array for transform property, got " +
-          JsiValue::getTypeAsString(_transformProp->value()->getType()));
+          JsiValue::getTypeAsString(_transformProp->value().getType()));
     } else {
       auto m = std::make_shared<SkMatrix>(SkMatrix());
-      for (auto &el : _transformProp->value()->getAsArray()) {
-        auto keys = el->getKeys();
+      for (auto &el : _transformProp->value().getAsArray()) {
+        auto keys = el.getKeys();
         if (keys.size() == 0) {
           throw std::runtime_error(
               "Empty value in transform. Expected translateX, translateY, "
               "scale, "
               "scaleX, scaleY, skewX, skewY, rotate or rotateZ.");
         }
-        auto key = el->getKeys().at(0);
-        auto value = el->getValue(key)->getAsNumber();
+        auto key = el.getKeys().at(0);
+        auto value = el.getValue(key).getAsNumber();
         if (key == PropNameTranslateX) {
           m->preTranslate(value, 0);
         } else if (key == PropNameTranslateY) {

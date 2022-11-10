@@ -24,7 +24,7 @@ public:
 
   void updateDerivedValue() override {
     if (_blendMode->isSet() && (_blendMode->isChanged())) {
-      auto blendModeValue = _blendMode->value()->getAsString();
+      auto blendModeValue = _blendMode->value().getAsString();
       setDerivedValue(getBlendModeFromString(blendModeValue));
     }
   }

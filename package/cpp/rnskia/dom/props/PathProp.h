@@ -26,16 +26,16 @@ public:
       return;
     }
 
-    if (_pathProp->value()->getType() == PropType::HostObject) {
+    if (_pathProp->value().getType() == PropType::HostObject) {
       // Try reading as Path
       auto ptr = std::dynamic_pointer_cast<JsiSkPath>(
-          _pathProp->value()->getAsHostObject());
+          _pathProp->value().getAsHostObject());
       if (ptr != nullptr) {
         setDerivedValue(ptr->getObject());
       }
-    } else if (_pathProp->value()->getType() == PropType::String) {
+    } else if (_pathProp->value().getType() == PropType::String) {
       // Read as string
-      auto pathString = _pathProp->value()->getAsString();
+      auto pathString = _pathProp->value().getAsString();
       SkPath result;
 
       if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {

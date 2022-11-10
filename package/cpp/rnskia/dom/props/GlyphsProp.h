@@ -24,7 +24,7 @@ public:
   }
 
   void updateDerivedValue() override {
-    auto arr = _glyphsProp->value()->getAsArray();
+    auto arr = _glyphsProp->value().getAsArray();
 
     GlyphInfo glyphInfo;
 
@@ -36,9 +36,9 @@ public:
 
     for (size_t i = 0; i < arr.size(); ++i) {
       auto obj = arr[i];
-      auto pos = PointProp::processValue(obj->getValue(PropNamePos));
+      auto pos = PointProp::processValue(obj.getValue(PropNamePos));
       auto identifier =
-          static_cast<SkGlyphID>(obj->getValue(PropNameId)->getAsNumber());
+          static_cast<SkGlyphID>(obj.getValue(PropNameId).getAsNumber());
       glyphInfo.positions.push_back(pos);
       glyphInfo.glyphIds.push_back(identifier);
     }

@@ -16,9 +16,9 @@ public:
 
 protected:
   void draw(DrawingContext *context) override {
-    auto text = _textProp->value()->getAsString().c_str();
-    auto x = _xProp->value()->getAsNumber();
-    auto y = _yProp->value()->getAsNumber();
+    auto text = _textProp->value().getAsString().c_str();
+    auto x = _xProp->value().getAsNumber();
+    auto y = _yProp->value().getAsNumber();
     auto font = _fontProp->getDerivedValue();
 
     context->getCanvas()->drawSimpleText(text, strlen(text),

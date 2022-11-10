@@ -16,7 +16,7 @@ public:
 protected:
   void draw(DrawingContext *context) override {
     auto circle = _circleProp->getDerivedValue();
-    auto r = _radiusProp->value()->getAsNumber();
+    auto r = _radiusProp->value().getAsNumber();
     context->getCanvas()->drawCircle(*circle, r, *context->getPaint());
   }
 

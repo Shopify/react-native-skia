@@ -22,7 +22,7 @@ public:
 
   void updateDerivedValue() override {
     if (_vertexModeProp->isSet() && (_vertexModeProp->isChanged())) {
-      auto vertexModeValue = _vertexModeProp->value()->getAsString();
+      auto vertexModeValue = _vertexModeProp->value().getAsString();
       setDerivedValue(getVertexModeFromStringValue(vertexModeValue));
     }
   }

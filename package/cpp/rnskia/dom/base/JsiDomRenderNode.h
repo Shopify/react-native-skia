@@ -98,7 +98,7 @@ public:
 
       // Clipping
       if (_clipProp->isSet()) {
-        auto invert = _invertClip->isSet() && _invertClip->value()->getAsBool();
+        auto invert = _invertClip->isSet() && _invertClip->value().getAsBool();
         clip(context, _localContext->getCanvas(), invert);
       }
 

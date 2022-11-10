@@ -41,6 +41,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLRenderer.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiValue.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkJsView.cpp"

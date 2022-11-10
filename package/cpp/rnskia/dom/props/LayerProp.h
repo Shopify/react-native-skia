@@ -23,7 +23,7 @@ public:
 
   void updateDerivedValue() override {
     if (_layerBoolProp->isSet() &&
-        _layerBoolProp->value()->getType() == PropType::Bool) {
+        _layerBoolProp->value().getType() == PropType::Bool) {
       _isBool = true;
       setDerivedValue(nullptr);
       return;

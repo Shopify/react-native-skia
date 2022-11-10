@@ -10,7 +10,6 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSimpleValueWrapper.h>
 #include <JsiSkHostObjects.h>
 #include <JsiValueWrapper.h>
 #include <RNSkPlatformContext.h>

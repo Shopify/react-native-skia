@@ -60,7 +60,7 @@ public:
 protected:
   void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
-      auto source = _sourceProp->value()->getAs<JsiSkRuntimeEffect>();
+      auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>();
       if (source == nullptr) {
         throw std::runtime_error("Expected runtime effect when reading source "
                                  "property of RuntimeEffectImageFilter.");
@@ -132,9 +132,9 @@ protected:
           image->makeShader(
               *_txProp->getDerivedValue(), *_tyProp->getDerivedValue(),
               SkSamplingOptions(getFilterModeFromString(
-                                    _filterModeProp->value()->getAsString()),
+                                    _filterModeProp->value().getAsString()),
                                 getMipmapModeFromString(
-                                    _mipmapModeProp->value()->getAsString())),
+                                    _mipmapModeProp->value().getAsString())),
               lm));
     }
   }
@@ -277,14 +277,14 @@ public:
 protected:
   void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
-      SkISize size = SkISize::Make(_tileWidthProp->value()->getAsNumber(),
-                                   _tileHeightProp->value()->getAsNumber());
+      SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
+                                   _tileHeightProp->value().getAsNumber());
 
       setShader(context, SkPerlinNoiseShader::MakeTurbulence(
-                             _freqXProp->value()->getAsNumber(),
-                             _freqYProp->value()->getAsNumber(),
-                             _octavesProp->value()->getAsNumber(),
-                             _seedProp->value()->getAsNumber(), &size));
+                             _freqXProp->value().getAsNumber(),
+                             _freqYProp->value().getAsNumber(),
+                             _octavesProp->value().getAsNumber(),
+                             _seedProp->value().getAsNumber(), &size));
     }
   }
 };
@@ -298,14 +298,14 @@ public:
 protected:
   void materialize(DrawingContext *context) override {
     if (isChanged(context)) {
-      SkISize size = SkISize::Make(_tileWidthProp->value()->getAsNumber(),
-                                   _tileHeightProp->value()->getAsNumber());
+      SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
+                                   _tileHeightProp->value().getAsNumber());
 
       setShader(context, SkPerlinNoiseShader::MakeFractalNoise(
-                             _freqXProp->value()->getAsNumber(),
-                             _freqYProp->value()->getAsNumber(),
-                             _octavesProp->value()->getAsNumber(),
-                             _seedProp->value()->getAsNumber(), &size));
+                             _freqXProp->value().getAsNumber(),
+                             _freqYProp->value().getAsNumber(),
+                             _octavesProp->value().getAsNumber(),
+                             _seedProp->value().getAsNumber(), &size));
     }
   }
 };
@@ -337,7 +337,7 @@ protected:
     if (isChanged(context)) {
       _colors = _colorsProp->getDerivedValue()->data();
       _colorCount = static_cast<int>(_colorsProp->getDerivedValue()->size());
-      _flags = _flagsProp->isSet() ? _flagsProp->value()->getAsNumber() : 0;
+      _flags = _flagsProp->isSet() ? _flagsProp->value().getAsNumber() : 0;
       _mode = _modeProp->isSet() ? *_modeProp->getDerivedValue()
                                  : SkTileMode::kClamp;
       _positions = _positionsProp->isSet()
@@ -411,7 +411,7 @@ protected:
 
     if (isChanged(context)) {
       auto c = _centerProp->getDerivedValue();
-      auto r = _radiusProp->value()->getAsNumber();
+      auto r = _radiusProp->value().getAsNumber();
       setShader(context, SkGradientShader::MakeRadial(*c, r, _colors,
                                                       _positions, _colorCount,
                                                       _mode, _flags, _matrix));
@@ -445,8 +445,8 @@ protected:
     JsiBaseGradientNode::materialize(context);
 
     if (isChanged(context)) {
-      auto start = _startProp->isSet() ? _startProp->value()->getAsNumber() : 0;
-      auto end = _endProp->isSet() ? _endProp->value()->getAsNumber() : 360;
+      auto start = _startProp->isSet() ? _startProp->value().getAsNumber() : 0;
+      auto end = _endProp->isSet() ? _endProp->value().getAsNumber() : 360;
       auto c = _centerProp->getDerivedValue();
 
       setShader(context, SkGradientShader::MakeSweep(
@@ -486,8 +486,8 @@ protected:
     if (isChanged(context)) {
       auto start = _startProp->getDerivedValue();
       auto end = _endProp->getDerivedValue();
-      auto startR = _startRProp->value()->getAsNumber();
-      auto endR = _endRProp->value()->getAsNumber();
+      auto startR = _startRProp->value().getAsNumber();
+      auto endR = _endRProp->value().getAsNumber();
 
       setShader(context, SkGradientShader::MakeTwoPointConical(
                              *start, startR, *end, endR, _colors, _positions,

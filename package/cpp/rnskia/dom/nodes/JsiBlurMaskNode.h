@@ -27,13 +27,13 @@ protected:
     if (context->isInvalid() || getPropsContainer()->isChanged()) {
 
       bool respectCTM =
-          _respectCTM->isSet() ? _respectCTM->value()->getAsBool() : true;
+          _respectCTM->isSet() ? _respectCTM->value().getAsBool() : true;
       SkBlurStyle style = SkBlurStyle::kNormal_SkBlurStyle;
       if (_style->isSet()) {
-        style = getBlurStyleFromString(_style->value()->getAsString());
+        style = getBlurStyleFromString(_style->value().getAsString());
       }
 
-      auto filter = SkMaskFilter::MakeBlur(style, _blur->value()->getAsNumber(),
+      auto filter = SkMaskFilter::MakeBlur(style, _blur->value().getAsNumber(),
                                            respectCTM);
 
       // Set the mask filter

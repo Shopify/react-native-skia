@@ -15,13 +15,13 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (_imageSvgProp->value()->getType() != PropType::HostObject) {
+    if (_imageSvgProp->value().getType() != PropType::HostObject) {
       throw std::runtime_error(
           "Expected SkSvgDom object for the svg property.");
     }
 
     auto ptr = std::dynamic_pointer_cast<JsiSkSVG>(
-        _imageSvgProp->value()->getAsHostObject());
+        _imageSvgProp->value().getAsHostObject());
     if (ptr == nullptr) {
       throw std::runtime_error(
           "Expected SkSvgDom object for the svg property.");

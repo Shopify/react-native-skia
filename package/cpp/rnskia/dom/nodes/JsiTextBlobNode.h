@@ -17,8 +17,8 @@ public:
 protected:
   void draw(DrawingContext *context) override {
     auto blob = _textBlobProp->getDerivedValue();
-    auto x = _xProp->value()->getAsNumber();
-    auto y = _yProp->value()->getAsNumber();
+    auto x = _xProp->value().getAsNumber();
+    auto y = _yProp->value().getAsNumber();
 
     context->getCanvas()->drawTextBlob(blob, x, y, *context->getPaint());
   }

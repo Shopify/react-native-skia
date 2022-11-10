@@ -35,13 +35,13 @@ protected:
       // Can we use the path directly, or do we need to copy to
       // mutate / modify the path?
       auto hasStartOffset =
-          _startProp->isSet() && _startProp->value()->getAsNumber() != 0.0;
+          _startProp->isSet() && _startProp->value().getAsNumber() != 0.0;
       auto hasEndOffset =
-          _endProp->isSet() && _endProp->value()->getAsNumber() != 1.0;
+          _endProp->isSet() && _endProp->value().getAsNumber() != 1.0;
       auto hasFillStyle = _fillTypeProp->isSet();
       auto hasStrokeOptions =
           _strokeOptsProp->isSet() &&
-          _strokeOptsProp->value()->getType() == PropType::Object;
+          _strokeOptsProp->value().getType() == PropType::Object;
 
       auto willMutatePath =
           hasStartOffset || hasEndOffset || hasFillStyle || hasStrokeOptions;
@@ -49,8 +49,8 @@ protected:
       if (willMutatePath) {
         // We'll trim the path
         SkPath filteredPath(*_pathProp->getDerivedValue());
-        auto pe = SkTrimPathEffect::Make(_startProp->value()->getAsNumber(),
-                                         _endProp->value()->getAsNumber(),
+        auto pe = SkTrimPathEffect::Make(_startProp->value().getAsNumber(),
+                                         _endProp->value().getAsNumber(),
                                          SkTrimPathEffect::Mode::kNormal);
 
         if (pe != nullptr) {
@@ -59,22 +59,22 @@ protected:
                               &rec, nullptr)) {
             throw std::runtime_error(
                 "Failed trimming path with parameters start: " +
-                std::to_string(_startProp->value()->getAsNumber()) +
-                ", end: " + std::to_string(_endProp->value()->getAsNumber()));
+                std::to_string(_startProp->value().getAsNumber()) +
+                ", end: " + std::to_string(_endProp->value().getAsNumber()));
           }
           _path = std::make_shared<SkPath>(filteredPath);
         } else if (hasStartOffset || hasEndOffset) {
           throw std::runtime_error(
               "Failed trimming path with parameters start: " +
-              std::to_string(_startProp->value()->getAsNumber()) +
-              ", end: " + std::to_string(_endProp->value()->getAsNumber()));
+              std::to_string(_startProp->value().getAsNumber()) +
+              ", end: " + std::to_string(_endProp->value().getAsNumber()));
         } else {
           _path = std::make_shared<SkPath>(*_pathProp->getDerivedValue());
         }
 
         // Set fill style
         if (_fillTypeProp->isSet()) {
-          auto fillType = _fillTypeProp->value()->getAsString();
+          auto fillType = _fillTypeProp->value().getAsString();
           _path->setFillType(getFillTypeFromStringValue(fillType));
         }
 
@@ -83,29 +83,29 @@ protected:
           auto opts = _strokeOptsProp->value();
           SkPaint strokePaint;
 
-          if (opts->hasValue(JsiPropId::get("strokeCap"))) {
+          if (opts.hasValue(JsiPropId::get("strokeCap"))) {
             strokePaint.setStrokeCap(StrokeCapProp::getCapFromString(
-                opts->getValue(JsiPropId::get("strokeCap"))->getAsString()));
+                opts.getValue(JsiPropId::get("strokeCap")).getAsString()));
           }
 
-          if (opts->hasValue(JsiPropId::get("strokeJoin"))) {
+          if (opts.hasValue(JsiPropId::get("strokeJoin"))) {
             strokePaint.setStrokeJoin(StrokeJoinProp::getJoinFromString(
-                opts->getValue(JsiPropId::get("strokeJoin"))->getAsString()));
+                opts.getValue(JsiPropId::get("strokeJoin")).getAsString()));
           }
 
-          if (opts->hasValue(PropNameWidth)) {
+          if (opts.hasValue(PropNameWidth)) {
             strokePaint.setStrokeWidth(
-                opts->getValue(PropNameWidth)->getAsNumber());
+                opts.getValue(PropNameWidth).getAsNumber());
           }
 
-          if (opts->hasValue(PropNameMiterLimit)) {
+          if (opts.hasValue(PropNameMiterLimit)) {
             strokePaint.setStrokeMiter(
-                opts->getValue(PropNameMiterLimit)->getAsNumber());
+                opts.getValue(PropNameMiterLimit).getAsNumber());
           }
 
           double precision = 1.0;
-          if (opts->hasValue(PropNamePrecision)) {
-            precision = opts->getValue(PropNamePrecision)->getAsNumber();
+          if (opts.hasValue(PropNamePrecision)) {
+            precision = opts.getValue(PropNamePrecision).getAsNumber();
           }
 
           if (!strokePaint.getFillPath(*_path.get(), _path.get(), nullptr,

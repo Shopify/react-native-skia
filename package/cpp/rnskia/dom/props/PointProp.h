@@ -34,27 +34,25 @@ public:
     }
   }
 
-  static SkPoint processValue(JsiValue *value) {
-    if (value->getType() == PropType::HostObject) {
+  static SkPoint processValue(const JsiValue &value) {
+    if (value.getType() == PropType::HostObject) {
       // Try reading as point
-      auto ptr =
-          std::dynamic_pointer_cast<JsiSkPoint>(value->getAsHostObject());
+      auto ptr = std::dynamic_pointer_cast<JsiSkPoint>(value.getAsHostObject());
       if (ptr != nullptr) {
         return SkPoint::Make(ptr->getObject()->x(), ptr->getObject()->y());
       } else {
         // Try reading as rect
         auto ptr =
-            std::dynamic_pointer_cast<JsiSkRect>(value->getAsHostObject());
+            std::dynamic_pointer_cast<JsiSkRect>(value.getAsHostObject());
         if (ptr != nullptr) {
           return SkPoint::Make(ptr->getObject()->x(), ptr->getObject()->y());
         }
       }
-    } else if (value->getType() == PropType::Object) {
-      auto x = value->getValue(PropNameX);
-      auto y = value->getValue(PropNameY);
-      if (x != nullptr && y != nullptr) {
-        return SkPoint::Make(x->getAsNumber(), y->getAsNumber());
-      }
+    } else if (value.getType() == PropType::Object &&
+               value.hasValue(PropNameX) && value.hasValue(PropNameY)) {
+      auto x = value.getValue(PropNameX);
+      auto y = value.getValue(PropNameY);
+      return SkPoint::Make(x.getAsNumber(), y.getAsNumber());
     }
     return EmptyPoint;
   }

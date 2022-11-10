@@ -65,13 +65,13 @@ protected:
     if (isChanged(context)) {
 
       // Phase
-      auto phase = _phase->isSet() ? _phase->value()->getAsNumber() : 0;
+      auto phase = _phase->isSet() ? _phase->value().getAsNumber() : 0;
 
       // Copy intervals
       std::vector<SkScalar> intervals;
-      auto intervalsArray = _intervals->value()->getAsArray();
+      auto intervalsArray = _intervals->value().getAsArray();
       for (size_t i = 0; i < intervalsArray.size(); ++i) {
-        intervals.push_back(intervalsArray[i]->getAsNumber());
+        intervals.push_back(intervalsArray[i].getAsNumber());
       }
 
       // Create effect
@@ -112,9 +112,9 @@ protected:
 
       // Create effect
       auto pathEffect =
-          SkDiscretePathEffect::Make(_lengthProp->value()->getAsNumber(),
-                                     _deviationProp->value()->getAsNumber(),
-                                     _seedProp->value()->getAsNumber());
+          SkDiscretePathEffect::Make(_lengthProp->value().getAsNumber(),
+                                     _deviationProp->value().getAsNumber(),
+                                     _seedProp->value().getAsNumber());
 
       setPathEffect(context, pathEffect);
     }
@@ -152,8 +152,7 @@ protected:
     if (isChanged(context)) {
 
       // Create effect
-      auto pathEffect =
-          SkCornerPathEffect::Make(_rProp->value()->getAsNumber());
+      auto pathEffect = SkCornerPathEffect::Make(_rProp->value().getAsNumber());
 
       setPathEffect(context, pathEffect);
     }
@@ -183,9 +182,9 @@ protected:
 
       // Create effect
       auto pathEffect = SkPath1DPathEffect::Make(
-          *_pathProp->getDerivedValue(), _advanceProp->value()->getAsNumber(),
-          _phaseProp->value()->getAsNumber(),
-          getStyleFromStringValue(_styleProp->value()->getAsString()));
+          *_pathProp->getDerivedValue(), _advanceProp->value().getAsNumber(),
+          _phaseProp->value().getAsNumber(),
+          getStyleFromStringValue(_styleProp->value().getAsString()));
 
       setPathEffect(context, pathEffect);
     }
@@ -275,7 +274,7 @@ protected:
 
       // Create effect
       auto pathEffect = SkLine2DPathEffect::Make(
-          _widthProp->value()->getAsNumber(), *_matrixProp->getDerivedValue());
+          _widthProp->value().getAsNumber(), *_matrixProp->getDerivedValue());
 
       setPathEffect(context, pathEffect);
     }

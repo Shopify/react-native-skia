@@ -28,8 +28,8 @@ public:
     }
 
     if (_radiusProp->isSet()) {
-      setDerivedValue(SkPoint::Make(_radiusProp->value()->getAsNumber(),
-                                    _radiusProp->value()->getAsNumber()));
+      setDerivedValue(SkPoint::Make(_radiusProp->value().getAsNumber(),
+                                    _radiusProp->value().getAsNumber()));
     } else {
       setDerivedValue(nullptr);
     }

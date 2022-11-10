@@ -19,7 +19,7 @@ public:
   }
 
   void updateDerivedValue() override {
-    auto drawingFunc = _drawingProp->value()->getAsFunction();
+    auto drawingFunc = _drawingProp->value().getAsFunction();
     _notifyPictureNeeded(drawingFunc);
   }
 
