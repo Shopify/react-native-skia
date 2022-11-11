@@ -114,7 +114,7 @@ public:
     }
 
     // Let any local paint props decorate the context
-    _paintProps->materialize(_localContext.get());
+    _paintProps->decorate(_localContext.get());
 
     // Now let's make sure the local context is resolved correctly - ie. that
     // all children of type declaration (except paint) is given the opportunity
@@ -246,7 +246,7 @@ private:
     for (auto &child : getChildren()) {
       auto ptr = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
       if (ptr != nullptr) {
-        ptr->materializeNode(_localContext.get());
+        ptr->decorateContext(_localContext.get());
       }
     }
   }

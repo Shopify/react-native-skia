@@ -23,7 +23,7 @@ public:
       : JsiBaseDomDeclarationNode(context, "skBlurMaskFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (context->isChanged() || getPropsContainer()->isChanged()) {
 
       bool respectCTM =

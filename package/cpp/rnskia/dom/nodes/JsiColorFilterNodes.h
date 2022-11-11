@@ -62,7 +62,7 @@ public:
       : JsiBaseColorFilterNode(context, "skMatrixColorFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto array = _matrixProp->value().getAsArray();
       float matrix[20];
@@ -93,7 +93,7 @@ public:
       : JsiBaseColorFilterNode(context, "skBlendColorFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       setColorFilter(context,
                      SkColorFilters::Blend(*_colorProp->getDerivedValue(),
@@ -126,7 +126,7 @@ public:
       : JsiBaseColorFilterNode(context, "skLinearToSRGBGammaColorFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       setColorFilter(context, SkColorFilters::LinearToSRGBGamma());
     }
@@ -142,7 +142,7 @@ public:
       : JsiBaseColorFilterNode(context, "skSRGBToLinearGammaColorFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       setColorFilter(context, SkColorFilters::SRGBToLinearGamma());
     }
@@ -156,7 +156,7 @@ public:
       : JsiBaseColorFilterNode(context, "skLumaColorFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       setColorFilter(context, SkLumaColorFilter::Make());
     }
@@ -170,7 +170,7 @@ public:
       : JsiBaseColorFilterNode(context, "skLerpColorFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       setColorFilter(context,
                      SkColorFilters::Lerp(_tProp->value().getAsNumber(),

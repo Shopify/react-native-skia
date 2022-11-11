@@ -25,10 +25,10 @@ public:
   DrawingContext *getDrawingContext() { return _localContext.get(); }
 
   /**
-   We need to override the materialize node call to avoid letting children
-   materialize before we have created our child context.
+   We need to override the decorate node call to avoid letting children
+   decorate before we have created our child context.
    */
-  void materializeNode(DrawingContext *context) override {
+  void decorateContext(DrawingContext *context) override {
     // Update props
     updatePendingProperties();
 
@@ -43,14 +43,14 @@ public:
       _localContext->setMutablePaint(std::make_shared<SkPaint>());
     }
 
-    // Let's materialize paint props
-    _paintProps->materialize(_localContext.get());
+    // Let's decorate paint props
+    _paintProps->decorate(_localContext.get());
 
     // Materialize children who will now only change the paint node's paint
     for (auto &child : getChildren()) {
       auto decl = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
       if (decl != nullptr) {
-        decl->materializeNode(_localContext.get());
+        decl->decorateContext(_localContext.get());
       }
     }
   }
@@ -60,7 +60,7 @@ public:
   }
 
 protected:
-  void materialize(DrawingContext *context) override {}
+  void decorate(DrawingContext *context) override {}
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);

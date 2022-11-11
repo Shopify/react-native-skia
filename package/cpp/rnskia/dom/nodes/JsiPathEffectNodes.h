@@ -61,7 +61,7 @@ public:
       : JsiBasePathEffectNode(context, "skDashPathEffect") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
 
       // Phase
@@ -107,7 +107,7 @@ public:
       : JsiBasePathEffectNode(context, "skDiscretePathEffect") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
 
       // Create effect
@@ -148,7 +148,7 @@ public:
       : JsiBasePathEffectNode(context, "skCornerPathEffect") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
 
       // Create effect
@@ -177,7 +177,7 @@ public:
       : JsiBasePathEffectNode(context, "skPath1DPathEffect") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
 
       // Create effect
@@ -234,7 +234,7 @@ public:
       : JsiBasePathEffectNode(context, "skPath2DPathEffect") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
 
       // Create effect
@@ -269,7 +269,7 @@ public:
       : JsiBasePathEffectNode(context, "skLine2DPathEffect") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
 
       // Create effect
@@ -304,7 +304,7 @@ public:
       : JsiBasePathEffectNode(context, "skSumPathEffect") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto inner = requireChild(0);
       auto outer = requireChild(1);

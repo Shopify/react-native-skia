@@ -75,7 +75,7 @@ public:
       : JsiBaseImageFilterNode(context, "skBlendImageFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
 
     if (isChanged(context)) {
 
@@ -112,7 +112,7 @@ public:
       : JsiBaseImageFilterNode(context, "skDropShadowImageFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto color = _colorProp->getDerivedValue();
       auto dx = _dxProp->value().getAsNumber();
@@ -192,7 +192,7 @@ public:
       : JsiBaseImageFilterNode(context, "skDisplacementMapImageFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
 
       auto channelX =
@@ -251,7 +251,7 @@ public:
       : JsiBaseImageFilterNode(context, "skBlurImageFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto input = optionalChild(0);
       setImageFilter(
@@ -288,7 +288,7 @@ public:
       : JsiBaseImageFilterNode(context, "skOffsetImageFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto input = optionalChild(0);
       if (getPropsContainer()->isChanged()) {
@@ -327,7 +327,7 @@ public:
       : JsiBaseImageFilterNode(context, "skMorphologyImageFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto op = getTypeFromStringValue(_operatorProp->value().getAsString());
       auto radius = _radiusProp->getDerivedValue();
@@ -379,7 +379,7 @@ public:
       : JsiBaseImageFilterNode(context, "skRuntimeShaderImageFilter") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>();
       if (source == nullptr) {

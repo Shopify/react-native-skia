@@ -58,7 +58,7 @@ public:
       : JsiBaseShaderNode(context, "skShader") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>();
       if (source == nullptr) {
@@ -112,7 +112,7 @@ public:
       : JsiBaseShaderNode(context, "skImageShader") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       auto image = _imageProps->getImage();
       auto rect = _imageProps->getRect();
@@ -209,7 +209,7 @@ public:
       : JsiBaseShaderNode(context, "skColorShader") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       if (_colorProp->isSet()) {
         setShader(context, SkShaders::Color(*_colorProp->getDerivedValue()));
@@ -275,7 +275,7 @@ public:
       : JsiBasePerlinNoiseNode(context, "skTurbulence") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
                                    _tileHeightProp->value().getAsNumber());
@@ -296,7 +296,7 @@ public:
       : JsiBasePerlinNoiseNode(context, "skFractalNoise") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
                                    _tileHeightProp->value().getAsNumber());
@@ -333,7 +333,7 @@ public:
   }
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       _colors = _colorsProp->getDerivedValue()->data();
       _colorCount = static_cast<int>(_colorsProp->getDerivedValue()->size());
@@ -371,8 +371,8 @@ public:
       : JsiBaseGradientNode(context, "skLinearGradient") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
-    JsiBaseGradientNode::materialize(context);
+  void decorate(DrawingContext *context) override {
+    JsiBaseGradientNode::decorate(context);
 
     if (isChanged(context)) {
       SkPoint pts[] = {*_startProp->getDerivedValue(),
@@ -406,8 +406,8 @@ public:
       : JsiBaseGradientNode(context, "skRadialGradient") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
-    JsiBaseGradientNode::materialize(context);
+  void decorate(DrawingContext *context) override {
+    JsiBaseGradientNode::decorate(context);
 
     if (isChanged(context)) {
       auto c = _centerProp->getDerivedValue();
@@ -441,8 +441,8 @@ public:
       : JsiBaseGradientNode(context, "skSweepGradient") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
-    JsiBaseGradientNode::materialize(context);
+  void decorate(DrawingContext *context) override {
+    JsiBaseGradientNode::decorate(context);
 
     if (isChanged(context)) {
       auto start = _startProp->isSet() ? _startProp->value().getAsNumber() : 0;
@@ -480,8 +480,8 @@ public:
       : JsiBaseGradientNode(context, "skTwoPointConicalGradient") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
-    JsiBaseGradientNode::materialize(context);
+  void decorate(DrawingContext *context) override {
+    JsiBaseGradientNode::decorate(context);
 
     if (isChanged(context)) {
       auto start = _startProp->getDerivedValue();

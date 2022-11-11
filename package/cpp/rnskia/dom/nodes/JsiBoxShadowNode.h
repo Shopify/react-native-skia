@@ -16,7 +16,7 @@ public:
   BoxShadowProps *getBoxShadowProps() { return _boxShadowProps; }
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     // Do nothing, we are just a container for properties
   }
 

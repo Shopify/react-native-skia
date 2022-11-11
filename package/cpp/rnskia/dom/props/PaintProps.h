@@ -87,7 +87,7 @@ public:
         addProperty(std::make_shared<NodeProp>(JsiPropId::get("opacity")));
   }
 
-  void materialize(DrawingContext *context) {
+  void decorate(DrawingContext *context) {
     // Now we can start updating the context
     // We only get here if something has changed - start with COLOR
     if (_color->isSet() && (_color->isChanged() || context->isChanged())) {

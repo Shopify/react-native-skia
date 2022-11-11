@@ -14,7 +14,7 @@ public:
       : JsiBaseDomDeclarationNode(context, "skBlend") {}
 
 protected:
-  void materialize(DrawingContext *context) override {
+  void decorate(DrawingContext *context) override {
     if (context->isChanged() || getPropsContainer()->isChanged()) {
       auto children = getChildren();
       auto childSize = children.size();

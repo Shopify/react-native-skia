@@ -34,7 +34,7 @@ public:
   /**
    Called when rendering the tree to create all derived values from all nodes.
    */
-  virtual void materializeNode(DrawingContext *context) {
+  virtual void decorateContext(DrawingContext *context) {
 #if SKIA_DOM_DEBUG
     printDebugInfo(context, "Begin Materialize");
 #endif
@@ -46,12 +46,12 @@ public:
     for (auto &child : getChildren()) {
       auto decl = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
       if (decl != nullptr) {
-        decl->materializeNode(context);
+        decl->decorateContext(context);
       }
     }
 
-    // materialize
-    materialize(context);
+    // decorate drawing context
+    decorate(context);
 
 #if SKIA_DOM_DEBUG
     printDebugInfo(context, "End Materialize");
@@ -62,7 +62,7 @@ protected:
   /**
    Override to implement materialization
    */
-  virtual void materialize(DrawingContext *context) = 0;
+  virtual void decorate(DrawingContext *context) = 0;
 
   /**
    Validates that only declaration nodes can be children
