@@ -17,7 +17,7 @@ export const cartesian2Canvas = (v: Vector, center: Vector) => ({
 
 export const cartesian2Polar = (v: Vector) => ({
   theta: Math.atan2(v.y, v.x),
-  radius: Math.sqrt(v.x ** 2 + v.y ** 2),
+  radius: Math.sqrt(Math.pow(v.x, 2) + Math.pow(v.y, 2)),
 });
 
 export const polar2Cartesian = (p: PolarPoint) => ({
