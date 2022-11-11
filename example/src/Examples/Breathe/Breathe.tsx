@@ -39,7 +39,7 @@ const Ring = ({ index, progress }: RingProps) => {
     );
     const scale = mix(progress.current, 0.3, 1);
     return [{ translateX: x }, { translateY: y }, { scale }];
-  }, [progress]);
+  }, [progress, R]);
 
   return (
     <Circle

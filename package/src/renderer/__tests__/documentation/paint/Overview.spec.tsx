@@ -12,9 +12,9 @@ import { docPath, processResult } from "../../../../__tests__/setup";
 
 const TestPaintAssignment = () => {
   const { Skia } = importSkia();
-  const r = width / 2;
   const paint = Skia.Paint();
   paint.setColor(Skia.Color("lightblue"));
+  const r = width / 2;
   return <Circle paint={paint} cx={r} cy={r} r={r} />;
 };
 
