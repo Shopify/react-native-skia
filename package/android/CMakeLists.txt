@@ -68,6 +68,7 @@ target_include_directories(
         cpp/skia/include/utils/
         cpp/skia/include/pathops/
         cpp/skia/modules/
+        cpp/skia/modules/skparagraph/include/
         cpp/skia/include/
         cpp/skia
 
