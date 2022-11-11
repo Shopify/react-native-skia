@@ -24,7 +24,7 @@ public:
 
 protected:
   void materialize(DrawingContext *context) override {
-    if (context->isInvalid() || getPropsContainer()->isChanged()) {
+    if (context->isChanged() || getPropsContainer()->isChanged()) {
 
       bool respectCTM =
           _respectCTM->isSet() ? _respectCTM->value().getAsBool() : true;

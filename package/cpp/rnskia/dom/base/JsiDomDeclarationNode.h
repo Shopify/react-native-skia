@@ -100,7 +100,7 @@ public:
       : JsiBaseDomDeclarationNode(context, type) {}
 
   bool isChanged(DrawingContext *context) {
-    return getCurrent() == nullptr || context->isInvalid() ||
+    return getCurrent() == nullptr || context->isChanged() ||
            getPropsContainer()->isChanged();
   }
 

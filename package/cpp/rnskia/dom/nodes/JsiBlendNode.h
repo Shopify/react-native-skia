@@ -15,7 +15,7 @@ public:
 
 protected:
   void materialize(DrawingContext *context) override {
-    if (context->isInvalid() || getPropsContainer()->isChanged()) {
+    if (context->isChanged() || getPropsContainer()->isChanged()) {
       auto children = getChildren();
       auto childSize = children.size();
 

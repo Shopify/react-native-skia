@@ -167,7 +167,7 @@ protected:
   void removeChild(std::shared_ptr<JsiDomNode> child) override {
     JsiDomNode::removeChild(child);
     if (_localContext != nullptr) {
-      _localContext->invalidate();
+      _localContext->markAsChanged();
     }
   }
 
@@ -177,7 +177,7 @@ protected:
   void addChild(std::shared_ptr<JsiDomNode> child) override {
     JsiDomNode::addChild(child);
     if (_localContext != nullptr) {
-      _localContext->invalidate();
+      _localContext->markAsChanged();
     }
   }
 
@@ -188,7 +188,7 @@ protected:
                          std::shared_ptr<JsiDomNode> before) override {
     JsiDomNode::insertChildBefore(child, before);
     if (_localContext != nullptr) {
-      _localContext->invalidate();
+      _localContext->markAsChanged();
     }
   }
 

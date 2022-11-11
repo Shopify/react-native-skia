@@ -90,19 +90,19 @@ public:
   void materialize(DrawingContext *context) {
     // Now we can start updating the context
     // We only get here if something has changed - start with COLOR
-    if (_color->isSet() && (_color->isChanged() || context->isInvalid())) {
+    if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
       context->getMutablePaint()->setShader(nullptr);
       context->getMutablePaint()->setColor(*_color->getDerivedValue());
       context->getMutablePaint()->setAlphaf(context->getOpacity());
     }
 
     // Opacity
-    if (_opacity->isSet() && (_opacity->isChanged() || context->isInvalid())) {
+    if (_opacity->isSet() && (_opacity->isChanged() || context->isChanged())) {
       context->setOpacity(_opacity->value().getAsNumber());
     }
 
     // Style
-    if (_style->isSet() && (_style->isChanged() || context->isInvalid())) {
+    if (_style->isSet() && (_style->isChanged() || context->isChanged())) {
       auto styleValue = _style->value().getAsString();
       if (styleValue == "stroke") {
         context->getMutablePaint()->setStyle(SkPaint::Style::kStroke_Style);
@@ -115,35 +115,35 @@ public:
     }
     // Stroke Width
     if (_strokeWidth->isSet() &&
-        (_strokeWidth->isChanged() || context->isInvalid())) {
+        (_strokeWidth->isChanged() || context->isChanged())) {
       context->getMutablePaint()->setStrokeWidth(
           _strokeWidth->value().getAsNumber());
     }
     // Blend mode
     if (_blendMode->isSet() &&
-        (_blendMode->isChanged() || context->isInvalid())) {
+        (_blendMode->isChanged() || context->isChanged())) {
       context->getMutablePaint()->setBlendMode(*_blendMode->getDerivedValue());
     }
     // Stroke Join
     if (_strokeJoin->isSet() &&
-        (_strokeJoin->isChanged() || context->isInvalid())) {
+        (_strokeJoin->isChanged() || context->isChanged())) {
       context->getMutablePaint()->setStrokeJoin(
           *_strokeJoin->getDerivedValue());
     }
     // Stroke Cap
     if (_strokeCap->isSet() &&
-        (_strokeCap->isChanged() || context->isInvalid())) {
+        (_strokeCap->isChanged() || context->isChanged())) {
       context->getMutablePaint()->setStrokeCap(*_strokeCap->getDerivedValue());
     }
     // Stroke Miter
     if (_strokeMiter->isSet() &&
-        (_strokeMiter->isChanged() || context->isInvalid())) {
+        (_strokeMiter->isChanged() || context->isChanged())) {
       context->getMutablePaint()->setStrokeMiter(
           _strokeMiter->value().getAsNumber());
     }
     // AntiAlias
     if (_antiAlias->isSet() &&
-        (_antiAlias->isChanged() || context->isInvalid())) {
+        (_antiAlias->isChanged() || context->isChanged())) {
       context->getMutablePaint()->setAntiAlias(
           _antiAlias->value().getAsNumber());
     }

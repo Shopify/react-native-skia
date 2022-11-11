@@ -39,7 +39,7 @@ public:
 
     // ...and it should be a totally new paint, not inheriting from parent
     // paint.
-    if (_localContext->isInvalid()) {
+    if (_localContext->isChanged()) {
       _localContext->setMutablePaint(std::make_shared<SkPaint>());
     }
 

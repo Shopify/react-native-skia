@@ -67,15 +67,15 @@ std::string DrawingContext::getDebugDescription() {
 /**
  Invalidate cache
  */
-void DrawingContext::invalidate() {
+void DrawingContext::markAsChanged() {
   _paint = nullptr;
-  _isInvalid = true;
+  _isChanged = true;
 }
 
 /**
  Call to reset invalidate flag after render cycle
  */
-void DrawingContext::markAsValidated() { _isInvalid = false; }
+void DrawingContext::markAsValidated() { _isChanged = false; }
 
 /**
  Dispose and remove the drawing context from its parent.
@@ -98,7 +98,7 @@ void DrawingContext::dispose() {
 /**
  Returns true if the current cache is changed
  */
-bool DrawingContext::isInvalid() { return _isInvalid; }
+bool DrawingContext::isChanged() { return _isChanged; }
 
 /**
  Get/Sets the canvas object
@@ -141,7 +141,7 @@ std::shared_ptr<SkPaint> DrawingContext::getMutablePaint() {
   // is about to be mutatet and will therefore invalidate
   // any child contexts to pick up changes from this context as
   // the parent context.
-  invalidateChildren();
+  markChildrenAsChanged();
   return _paint;
 }
 
@@ -209,9 +209,9 @@ const std::function<void()> &DrawingContext::getRequestRedraw() {
 
 DrawingContext::DrawingContext(const char *source) { _source = source; }
 
-void DrawingContext::invalidateChildren() {
+void DrawingContext::markChildrenAsChanged() {
   for (auto &child : _children) {
-    child->invalidate();
+    child->markAsChanged();
   }
 }
 

@@ -39,9 +39,9 @@ public:
   std::string getDebugDescription();
 
   /**
-   Invalidate cache
+   Mark the drawing context and any child contexts as changed
    */
-  void invalidate();
+  void markAsChanged();
 
   /**
    Call to reset invalidate flag after render cycle
@@ -56,7 +56,7 @@ public:
   /**
    Returns true if the current cache is changed
    */
-  bool isInvalid();
+  bool isChanged();
 
   /**
    Get/Sets the canvas object
@@ -109,9 +109,9 @@ public:
 private:
   explicit DrawingContext(const char *source);
 
-  void invalidateChildren();
+  void markChildrenAsChanged();
 
-  bool _isInvalid = true;
+  bool _isChanged = true;
 
   std::shared_ptr<SkPaint> _paint;
   double _opacity = 1.0f;
