@@ -242,14 +242,24 @@ const parseCSSColor = (cssStr: string) => {
       } // Covers NaN.
       return [(iv & 0xff0000) >> 16, (iv & 0xff00) >> 8, iv & 0xff, 1];
     } else if (str.length === 9) {
-      var iv = parseInt(str.substr(1, 6), 16); // TODO(deanm): Stricter parsing.
-      const opacity = parseInt(str.substr(7), 16);
+      var iv = parseInt(str.substr(1), 16); // TODO(deanm): Stricter parsing.
+      if (!(iv >= 0 && iv <= 0xffffffff)) {
+        return null; // Covers NaN.
+      }
       return [
+        ((iv & 0xff000000) >> 24) & 0xff,
         (iv & 0xff0000) >> 16,
         (iv & 0xff00) >> 8,
-        iv & 0xff,
-        opacity / 255,
+        (iv & 0xff) / 255,
       ];
+      /*
+            if (!(iv >= 0 && iv <= 0xffffffff))
+        return {}; // Covers NaN.
+      return {static_cast<uint8_t>(((iv & 0xff000000) >> 24) & 0xff),
+              static_cast<uint8_t>((iv & 0x00ff0000) >> 16),
+              static_cast<uint8_t>((iv & 0x0000ff00) >> 8),
+              static_cast<uint8_t>((iv & 0x000000ff)) / 255.0f};
+              */
     }
 
     return null;
