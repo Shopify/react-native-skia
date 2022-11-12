@@ -127,23 +127,20 @@ export const PaintDemo = () => {
 Finally, we can assign a ref to a Paint component for later use.
 
 ```tsx twoslash
-import {Canvas, Circle, Paint, usePaintRef} from "@shopify/react-native-skia";
-
+import {Canvas, Circle, Paint, Skia} from "@shopify/react-native-skia";
 const width = 256;
 const height = 256;
 const r = width / 2;
+const paint = Skia.Paint();
+paint.setColor(Skia.Color("lightblue"));
 
 export const PaintDemo = () => {
-  const paint = usePaintRef();
   return (
     <Canvas style={{ flex: 1 }}>
-        <Paint ref={paint} color="lightblue" />
-        {/* We can assign the ref to any shape. This will be handy in advanced use-case */}
-        <Circle paint={paint} cx={r} cy={r} r={r} />
+      <Circle paint={paint} cx={r} cy={r} r={r} />
     </Canvas>
   );
 };
 ```
 
 <img src={require("/static/img/paint/assignement.png").default} width="256" height="256" />
-

@@ -1,5 +1,3 @@
-import type { RefObject } from "react";
-
 import type {
   SkMatrix,
   SkRect,
@@ -21,7 +19,6 @@ import type {
   DrawingContext,
   NodeType,
   Node,
-  DeclarationNode,
 } from "../types";
 
 import { isPathDef, processPath, processTransformProps } from "./datatypes";
@@ -211,9 +208,10 @@ export abstract class JsiRenderNode<P extends GroupProps>
     const { invertClip, layer, matrix, transform } = this.props;
     const { canvas } = parentCtx;
 
-    const opacity = this.props.opacity
-      ? parentCtx.opacity * this.props.opacity
-      : parentCtx.opacity;
+    const opacity =
+      this.props.opacity !== undefined
+        ? parentCtx.opacity * this.props.opacity
+        : parentCtx.opacity;
 
     if (
       this.paintCache === null ||
@@ -229,20 +227,18 @@ export abstract class JsiRenderNode<P extends GroupProps>
     // TODO: can we only recreate a new context here if needed?
     const ctx = { ...parentCtx, opacity, paint };
     const hasTransform = matrix !== undefined || transform !== undefined;
-    const hasClip = this.clipRect !== undefined;
+    const hasClip =
+      this.clipRect !== undefined ||
+      this.clipPath !== undefined ||
+      this.clipRRect !== undefined;
     const shouldSave = hasTransform || hasClip || !!layer;
     const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
-
     if (shouldSave) {
       if (layer) {
         if (typeof layer === "boolean") {
           canvas.saveLayer();
-        } else if (isSkPaint(layer)) {
-          canvas.saveLayer(layer);
         } else {
-          canvas.saveLayer(
-            layer.current ? layer.current.materialize() : undefined
-          );
+          canvas.saveLayer(layer);
         }
       } else {
         canvas.save();
@@ -254,11 +250,9 @@ export abstract class JsiRenderNode<P extends GroupProps>
     }
     if (this.clipRect) {
       canvas.clipRect(this.clipRect, op, true);
-    }
-    if (this.clipRRect) {
+    } else if (this.clipRRect) {
       canvas.clipRRect(this.clipRRect, op, true);
-    }
-    if (this.clipPath) {
+    } else if (this.clipPath) {
       canvas.clipPath(this.clipPath, op, true);
     }
 
@@ -271,10 +265,6 @@ export abstract class JsiRenderNode<P extends GroupProps>
 
   abstract renderNode(ctx: DrawingContext): void;
 }
-
-export const isSkPaint = (
-  obj: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint
-): obj is SkPaint => "__typename__" in obj && obj.__typename__ === "Paint";
 
 const concatPaint = (
   parent: SkPaint,

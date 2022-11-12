@@ -6,12 +6,14 @@ type Props = {
   title: string;
   description: string;
   route: string;
+  testId?: string;
 };
 
 export const HomeScreenButton: React.FC<Props> = ({
   title,
   description,
   route,
+  testId,
 }) => {
   const navigation = useNavigation();
   const gotoRoute = useCallback(() => {
@@ -23,7 +25,11 @@ export const HomeScreenButton: React.FC<Props> = ({
     );
   }, [route, navigation]);
   return (
-    <TouchableOpacity onPress={gotoRoute} style={styles.container}>
+    <TouchableOpacity
+      onPress={gotoRoute}
+      style={styles.container}
+      testID={testId}
+    >
       <View>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>

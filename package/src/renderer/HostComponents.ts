@@ -1,5 +1,3 @@
-import type { ForwardedRef } from "react";
-
 import { NodeType } from "../dom/types";
 import type {
   CircleProps,
@@ -55,7 +53,6 @@ import type {
   BlendProps,
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
-import type { PaintNode } from "../dom/nodes/PaintNode";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
@@ -66,7 +63,8 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       skGroup: SkiaProps<GroupProps>;
-      skPaint: SkiaProps<PaintProps> & { ref: ForwardedRef<PaintNode> };
+      skLayer: SkiaProps<ChildrenProps>;
+      skPaint: SkiaProps<PaintProps>;
 
       // Drawings
       skFill: SkiaProps<DrawingNodeProps>;
@@ -146,6 +144,8 @@ export const createNode = (
 ) => {
   const { Sk } = container;
   switch (type) {
+    case NodeType.Layer:
+      return Sk.Layer(props);
     case NodeType.Group:
       return Sk.Group(props);
     case NodeType.Paint:

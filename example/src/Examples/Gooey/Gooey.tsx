@@ -11,7 +11,6 @@ import {
   rotate,
   mixVector,
   Paint,
-  usePaintRef,
   Circle,
   Blur,
   ColorMatrix,
@@ -66,7 +65,6 @@ export const Gooey = () => {
     [c]
   );
 
-  const paint = usePaintRef();
   const [toggled, setToggled] = useState(false);
   const onTouch = useTouchHandler({ onEnd: () => setToggled((t) => !t) });
   const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
@@ -84,16 +82,19 @@ export const Gooey = () => {
 
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch}>
-      <Paint ref={paint}>
-        <ColorMatrix
-          matrix={[
-            1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
-          ]}
-        />
-        <Blur blur={20} />
-      </Paint>
       <Fill color={BG} />
-      <Group layer={paint}>
+      <Group
+        layer={
+          <Paint>
+            <ColorMatrix
+              matrix={[
+                1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
+              ]}
+            />
+            <Blur blur={20} />
+          </Paint>
+        }
+      >
         {icons.map((_, i) => (
           <Group key={i} transform={transforms[i]}>
             <Circle r={R} color={FG} />
