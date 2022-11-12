@@ -252,14 +252,6 @@ const parseCSSColor = (cssStr: string) => {
         (iv & 0xff00) >> 8,
         (iv & 0xff) / 255,
       ];
-      /*
-            if (!(iv >= 0 && iv <= 0xffffffff))
-        return {}; // Covers NaN.
-      return {static_cast<uint8_t>(((iv & 0xff000000) >> 24) & 0xff),
-              static_cast<uint8_t>((iv & 0x00ff0000) >> 16),
-              static_cast<uint8_t>((iv & 0x0000ff00) >> 8),
-              static_cast<uint8_t>((iv & 0x000000ff)) / 255.0f};
-              */
     }
 
     return null;
