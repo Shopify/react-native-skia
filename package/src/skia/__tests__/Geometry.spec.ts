@@ -12,4 +12,22 @@ describe("Geometry", () => {
     expect(result.width).toBe(140);
     expect(result.height).toBe(60);
   });
+
+  test("parse #hex without opacity", () => {
+    const { Skia } = importSkia();
+
+    const color = Skia.Color("#808080");
+    expect(color[0]).toBeCloseTo(0.5);
+    expect(color[1]).toBeCloseTo(0.5);
+    expect(color[2]).toBeCloseTo(0.5);
+  });
+  test("parse #hex with opacity", () => {
+    const { Skia } = importSkia();
+
+    const color = Skia.Color("#80808080");
+    expect(color[0]).toBeCloseTo(0.5);
+    expect(color[1]).toBeCloseTo(0.5);
+    expect(color[2]).toBeCloseTo(0.5);
+    expect(color[3]).toBeCloseTo(0.5);
+  });
 });
