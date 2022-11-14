@@ -1,4 +1,4 @@
-import type { SkiaValue } from "@shopify/react-native-skia";
+import type { SkiaValue, SkSize } from "@shopify/react-native-skia";
 import {
   useValue,
   Canvas,
@@ -12,7 +12,7 @@ import React, { useEffect, useRef } from "react";
 import { View, Animated } from "react-native";
 
 interface MyCompProps {
-  size: SkiaValue<{ width: number; height: number }>;
+  size: SkiaValue<SkSize>;
 }
 
 const MyComp = ({ size }: MyCompProps) => {

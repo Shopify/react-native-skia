@@ -21,6 +21,7 @@ import type { TouchHandler } from "../views";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
 import type { SkiaValue, SkiaMutableValue } from "../values";
+import type { SkSize } from "../skia/types";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
@@ -49,7 +50,7 @@ export interface CanvasProps extends ComponentProps<typeof SkiaView> {
   ref?: RefObject<SkiaView>;
   children: ReactNode;
   onTouch?: TouchHandler;
-  onSize?: SkiaMutableValue<{ width: number; height: number }>;
+  onSize?: SkiaMutableValue<SkSize>;
 }
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
