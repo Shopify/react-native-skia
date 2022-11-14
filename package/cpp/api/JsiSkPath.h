@@ -17,6 +17,7 @@
 #include <SkDashPathEffect.h>
 #include <SkParsePath.h>
 #include <SkPath.h>
+#include <SkPathEffect.h>
 #include <SkPathOps.h>
 #include <SkPathTypes.h>
 #include <SkString.h>

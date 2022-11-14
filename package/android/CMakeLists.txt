@@ -14,6 +14,8 @@ set (PACKAGE_NAME "reactskia")
 set (SKIA_LIB "skia")
 set (SKIA_SVG_LIB "svg")
 set (SKIA_SKSHAPER_LIB "skshaper")
+set (SKIA_SKPARAGRAPH_LIB "skparagraph")
+set (SKIA_SKUNICODE_LIB "skunicode")
 
 set(build_DIR ${CMAKE_SOURCE_DIR}/build)
 file(GLOB LIBRN_DIR "${PREBUILT_DIR}/${ANDROID_ABI}")
@@ -66,6 +68,7 @@ target_include_directories(
         cpp/skia/include/utils/
         cpp/skia/include/pathops/
         cpp/skia/modules/
+        cpp/skia/modules/skparagraph/include/
         cpp/skia/include/
         cpp/skia
 
@@ -90,6 +93,12 @@ set_property(TARGET svg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsvg.a")
 
 add_library(skshaper STATIC IMPORTED)
 set_property(TARGET skshaper PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskshaper.a")
+
+add_library(skparagraph STATIC IMPORTED)
+set_property(TARGET skparagraph PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskparagraph.a")
+
+add_library(skunicode STATIC IMPORTED)
+set_property(TARGET skunicode PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode.a")
 
 
 find_library(
@@ -147,6 +156,8 @@ target_link_libraries(
         ${TURBOMODULES_LIB}
         ${SKIA_SVG_LIB}
         ${SKIA_SKSHAPER_LIB}
+        ${SKIA_SKPARAGRAPH_LIB}
+        ${SKIA_SKUNICODE_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
