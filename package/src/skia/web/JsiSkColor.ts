@@ -241,6 +241,17 @@ const parseCSSColor = (cssStr: string) => {
         return null;
       } // Covers NaN.
       return [(iv & 0xff0000) >> 16, (iv & 0xff00) >> 8, iv & 0xff, 1];
+    } else if (str.length === 9) {
+      var iv = parseInt(str.substr(1), 16); // TODO(deanm): Stricter parsing.
+      if (!(iv >= 0 && iv <= 0xffffffff)) {
+        return null; // Covers NaN.
+      }
+      return [
+        ((iv & 0xff000000) >> 24) & 0xff,
+        (iv & 0xff0000) >> 16,
+        (iv & 0xff00) >> 8,
+        (iv & 0xff) / 255,
+      ];
     }
 
     return null;
