@@ -1,5 +1,3 @@
-import type { RefObject } from "react";
-
 import type {
   SkMatrix,
   SkRect,
@@ -21,7 +19,6 @@ import type {
   DrawingContext,
   NodeType,
   Node,
-  DeclarationNode,
 } from "../types";
 
 import { isPathDef, processPath, processTransformProps } from "./datatypes";
@@ -236,17 +233,12 @@ export abstract class JsiRenderNode<P extends GroupProps>
       this.clipRRect !== undefined;
     const shouldSave = hasTransform || hasClip || !!layer;
     const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
-
     if (shouldSave) {
       if (layer) {
         if (typeof layer === "boolean") {
           canvas.saveLayer();
-        } else if (isSkPaint(layer)) {
-          canvas.saveLayer(layer);
         } else {
-          canvas.saveLayer(
-            layer.current ? layer.current.materialize() : undefined
-          );
+          canvas.saveLayer(layer);
         }
       } else {
         canvas.save();
@@ -273,10 +265,6 @@ export abstract class JsiRenderNode<P extends GroupProps>
 
   abstract renderNode(ctx: DrawingContext): void;
 }
-
-export const isSkPaint = (
-  obj: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint
-): obj is SkPaint => "__typename__" in obj && obj.__typename__ === "Paint";
 
 const concatPaint = (
   parent: SkPaint,
