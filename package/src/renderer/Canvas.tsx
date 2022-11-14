@@ -20,7 +20,8 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
-import type { SkiaValue } from "../values";
+import type { SkiaValue, SkiaMutableValue } from "../values";
+import type { SkSize } from "../skia/types";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
@@ -49,10 +50,11 @@ export interface CanvasProps extends ComponentProps<typeof SkiaView> {
   ref?: RefObject<SkiaView>;
   children: ReactNode;
   onTouch?: TouchHandler;
+  onSize?: SkiaMutableValue<SkSize>;
 }
 
 export const Canvas = forwardRef<SkiaView, CanvasProps>(
-  ({ children, style, debug, mode, onTouch }, forwardedRef) => {
+  ({ children, style, debug, mode, onTouch, onSize }, forwardedRef) => {
     const size = useValue({ width: 0, height: 0 });
     const canvasCtx = useMemo(() => ({ Skia, size }), [size]);
     const innerRef = useCanvasRef();
@@ -114,6 +116,9 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           height !== canvasCtx.size.current.height
         ) {
           canvasCtx.size.current = { width, height };
+          if (onSize) {
+            onSize.current = { width, height };
+          }
         }
         paint.reset();
         const ctx = {
