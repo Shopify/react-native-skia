@@ -23,3 +23,13 @@ export const useCanvas = () => {
   }
   return ctx;
 };
+
+// This private function will be removed once we remove the useCanvas hook and
+// implement the Mask component as a node (will be faster too)
+export const useSkiaPrivate = () => {
+  const ctx = useContext(CanvasContext);
+  if (!ctx) {
+    throw new Error("Canvas context is not available");
+  }
+  return ctx.Skia;
+};

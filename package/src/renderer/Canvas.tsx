@@ -20,8 +20,7 @@ import { SkiaView, useDrawCallback } from "../views";
 import type { TouchHandler } from "../views";
 import { useValue } from "../values/hooks/useValue";
 import { Skia } from "../skia/Skia";
-import type { SkiaValue } from "../values";
-import type { SkiaMutableValue } from "../../lib/typescript/src/values/types";
+import type { SkiaValue, SkiaMutableValue } from "../values";
 
 import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
