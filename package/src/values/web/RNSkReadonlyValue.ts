@@ -13,8 +13,10 @@ export class RNSkReadonlyValue<T> implements SkiaValue<T> {
   }
 
   protected update(nextValue: T): void {
-    this._current = nextValue;
-    this.notifyListeners();
+    if (this._current !== nextValue) {
+      this._current = nextValue;
+      this.notifyListeners();
+    }
   }
 
   public readonly __typename__ = "RNSkValue";
