@@ -1,17 +1,22 @@
+import type { SkiaValue } from "@shopify/react-native-skia";
 import {
+  useValue,
+  Vector,
   Canvas,
   Fill,
   Group,
   Rect,
   rect,
-  useCanvas,
   useComputedValue,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef } from "react";
 import { View, Animated } from "react-native";
 
-const MyComp = () => {
-  const { size } = useCanvas();
+interface MyCompProps {
+  size: SkiaValue<{ width: number; height: number }>;
+}
+
+const MyComp = ({ size }: MyCompProps) => {
   const rct = useComputedValue(() => {
     return rect(0, 0, size.current.width, size.current.height / 2);
   }, [size]);
@@ -24,6 +29,7 @@ const MyComp = () => {
 };
 
 export const UseCanvas = () => {
+  const size = useValue({ width: 0, height: 0 });
   const height = useRef(new Animated.Value(0));
   useEffect(() => {
     Animated.loop(
@@ -36,8 +42,8 @@ export const UseCanvas = () => {
   }, []);
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={{ flex: 1 }}>
-        <MyComp />
+      <Canvas style={{ flex: 1 }} onSize={size}>
+        <MyComp size={size} />
       </Canvas>
       <Animated.View style={{ height: height.current }} />
     </View>
