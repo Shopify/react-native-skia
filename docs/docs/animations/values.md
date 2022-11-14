@@ -91,7 +91,7 @@ const Demo = () => {
 
 ## Canvas Size
 
-The `onSize` property will assign a `size` to a Skia value.
+The `onSize` property will update the provided Skia Value with the current canvas size when the Canvas is resized.
 
 ```tsx twoslash
 import React from "react";
