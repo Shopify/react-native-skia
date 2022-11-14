@@ -16,7 +16,7 @@ A Picture renders a previously recorded list of drawing operations on the canvas
 ```tsx twoslash
 import React, { useMemo } from "react";
 import {
-  usePicture,
+  createPicture,
   Canvas,
   Picture,
   Skia,
@@ -25,7 +25,7 @@ import {
 
 export const PictureExample = () => {
   // Create picture
-  const picture = usePicture(
+  const picture = useMemo(() => createPicture(
     { x: 0, y: 0, width: 100, height: 100 },
     (canvas) => {
       const paint = Skia.Paint();
@@ -36,7 +36,7 @@ export const PictureExample = () => {
       circlePaint.setColor(Skia.Color("orange"));
       canvas.drawCircle(50, 50, 50, circlePaint);
     }
-  );
+  ), []);
 
   // Serialize the picture
   const serialized = useMemo(() => picture.serialize(), [picture]);
