@@ -172,9 +172,13 @@ public:
    marked as changed so that we can calculate wether updates are required or
    not.
    */
-  void updatePendingProperties() {
+  void commitPendingChanges() {
     if (_propsContainer != nullptr) {
       _propsContainer->updatePendingValues();
+    }
+
+    for (auto &child : _children) {
+      child->commitPendingChanges();
     }
   }
 
@@ -183,7 +187,7 @@ public:
    this function to mark any changes as processed. This call also resolves all
    child nodes
    */
-  void markPropertiesAsResolved() {
+  virtual void resetPendingChanges() {
     // Mark self as resolved
     if (_propsContainer != nullptr) {
       _propsContainer->markAsResolved();
@@ -191,7 +195,7 @@ public:
 
     // Resolve children
     for (auto &child : _children) {
-      child->markPropertiesAsResolved();
+      child->resetPendingChanges();
     }
   }
 

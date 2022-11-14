@@ -75,7 +75,7 @@ void DrawingContext::markAsChanged() {
 /**
  Call to reset invalidate flag after render cycle
  */
-void DrawingContext::markAsValidated() { _isChanged = false; }
+void DrawingContext::resetChangedFlag() { _isChanged = false; }
 
 /**
  Dispose and remove the drawing context from its parent.

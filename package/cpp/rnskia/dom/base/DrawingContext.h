@@ -46,7 +46,7 @@ public:
   /**
    Call to reset invalidate flag after render cycle
    */
-  void markAsValidated();
+  void resetChangedFlag();
 
   /**
    Dispose and remove the drawing context from its parent.

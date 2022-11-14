@@ -105,8 +105,9 @@ void RNSkDomRenderer::renderCanvas(SkCanvas *canvas, float scaledWidth,
     // Ask the root node to render to the provided canvas
     std::lock_guard<std::mutex> lock(_rootLock);
     if (_root != nullptr) {
+      _root->commitPendingChanges();
       _root->render(_drawingContext.get());
-      _root->markPropertiesAsResolved();
+      _root->resetPendingChanges();
     }
   } catch (std::runtime_error err) {
     _platformContext->raiseError(err);
@@ -144,7 +145,6 @@ void RNSkDomRenderer::callOnTouch() {
   }
 
   if (_touchCallbackLock->try_lock()) {
-
     {
       std::lock_guard<std::mutex> lock(_touchMutex);
       _touchesCache.clear();
@@ -187,9 +187,6 @@ void RNSkDomRenderer::callOnTouch() {
       }
       self->_touchCallbackLock->unlock();
     });
-  } else {
-    // We'll try next time - schedule a new redraw
-    _requestRedraw();
   }
 }
 

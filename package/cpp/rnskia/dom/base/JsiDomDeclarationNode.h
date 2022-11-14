@@ -38,9 +38,6 @@ public:
 #if SKIA_DOM_DEBUG
     printDebugInfo(context, "Begin Materialize");
 #endif
-    // Update any pending props
-    updatePendingProperties();
-
     // Materialize children first so that any inner nodes get the opportunity
     // to calculate their state before this node continues.
     for (auto &child : getChildren()) {

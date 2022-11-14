@@ -29,9 +29,6 @@ public:
    decorate before we have created our child context.
    */
   void decorateContext(DrawingContext *context) override {
-    // Update props
-    updatePendingProperties();
-
     // A paint node should have its own local paint
     if (_localContext == nullptr) {
       _localContext = context->inheritContext("PaintNode");

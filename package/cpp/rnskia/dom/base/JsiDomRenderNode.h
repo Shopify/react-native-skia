@@ -35,9 +35,6 @@ public:
     printDebugInfo(context, "Begin Render");
 #endif
 
-    // Ensure property changes has been registered
-    updatePendingProperties();
-
     // Ensure we have a local drawing context inheriting from the parent context
     if (_localContext == nullptr) {
       _localContext = context->inheritContext(getType());
@@ -132,13 +129,18 @@ public:
       _localContext->getCanvas()->restore();
     }
 
-    // Resolve changes
-    markPropertiesAsResolved();
-    _localContext->markAsValidated();
-
 #if SKIA_DOM_DEBUG
     printDebugInfo(context, "End Render");
 #endif
+  }
+
+  /**
+   Override reset (last thing that happens in the render cycle) to also reset
+   the changed flag on the local drawing context if necessary.
+   */
+  void resetPendingChanges() override {
+    JsiDomNode::resetPendingChanges();
+    _localContext->resetChangedFlag();
   }
 
   /**
