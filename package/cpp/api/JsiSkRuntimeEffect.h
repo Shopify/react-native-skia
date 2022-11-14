@@ -99,7 +99,7 @@ public:
       throw jsi::JSError(runtime, "invalid uniform index");
     }
     auto it = getObject()->uniforms().begin() + i;
-    return jsi::String::createFromAscii(runtime, std::string(it->name));
+    return jsi::String::createFromAscii(runtime, it->name.c_str());
   }
 
   JSI_HOST_FUNCTION(getUniform) {
