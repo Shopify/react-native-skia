@@ -42,11 +42,11 @@ public:
     }
     auto posTan = jsi::Array(runtime, 2);
     auto pos = jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkPoint>(getContext(), position));
+        runtime, std::make_shared<JsiSkPoint>(getContext(), position));
     auto tan = jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkPoint>(getContext(), tangent));
+        runtime, std::make_shared<JsiSkPoint>(getContext(), tangent));
     posTan.setValueAtIndex(runtime, 0, pos);
-    posTan.setValueAtIndex(runtime, 1,  tan);
+    posTan.setValueAtIndex(runtime, 1, tan);
     return posTan;
   }
 
