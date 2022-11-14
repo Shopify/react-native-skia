@@ -40,11 +40,13 @@ public:
     if (!result) {
       throw jsi::JSError(runtime, "getSegment() failed");
     }
-    auto posTan = jsi::Object(runtime);
-    posTan.setProperty(runtime, "px", position.x());
-    posTan.setProperty(runtime, "py", position.y());
-    posTan.setProperty(runtime, "tx", tangent.x());
-    posTan.setProperty(runtime, "ty", tangent.y());
+    auto posTan = jsi::Array(runtime, 2);
+    auto pos = jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkPoint>(getContext(), position));
+    auto tan = jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkPoint>(getContext(), tangent));
+    posTan.setValueAtIndex(runtime, 0, pos);
+    posTan.setValueAtIndex(runtime, 1, tan);
     return posTan;
   }
 

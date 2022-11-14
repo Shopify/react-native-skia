@@ -9,7 +9,7 @@ import type {
 import type { NodeContext } from "./Node";
 import { JsiDeclarationNode } from "./Node";
 import { PaintNode } from "./PaintNode";
-import { isSkPaint, JsiRenderNode } from "./RenderNode";
+import { JsiRenderNode } from "./RenderNode";
 
 export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
   extends JsiRenderNode<P>
@@ -52,10 +52,8 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
   }
 
   renderNode(ctx: DrawingContext): void {
-    if (this.props.paint && isSkPaint(this.props.paint)) {
+    if (this.props.paint) {
       this.draw({ ...ctx, paint: this.props.paint });
-    } else if (this.props.paint && this.props.paint.current != null) {
-      this.draw({ ...ctx, paint: this.props.paint.current.materialize() });
     } else {
       this.draw(ctx);
     }
