@@ -1,7 +1,6 @@
 import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   useValue,
-  Vector,
   Canvas,
   Fill,
   Group,
