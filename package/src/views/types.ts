@@ -5,8 +5,8 @@ import type {
   SkCanvas,
   SkImage,
   SkPicture,
-  SkPoint,
   SkRect,
+  SkSize,
 } from "../skia/types";
 import type { SkiaMutableValue, SkiaValue } from "../values";
 
@@ -97,7 +97,7 @@ export interface SkiaBaseViewProps extends ViewProps {
    * Pass an animated value to the onSize property to get updates when
    * the Skia view is resized.
    */
-  onSize?: SkiaMutableValue<SkPoint>;
+  onSize?: SkiaMutableValue<SkSize>;
 }
 
 export interface SkiaDrawViewProps extends SkiaBaseViewProps {
