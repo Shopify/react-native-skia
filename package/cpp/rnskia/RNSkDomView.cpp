@@ -145,6 +145,7 @@ void RNSkDomRenderer::callOnTouch() {
   }
 
   if (_touchCallbackLock->try_lock()) {
+
     {
       std::lock_guard<std::mutex> lock(_touchMutex);
       _touchesCache.clear();
@@ -187,6 +188,9 @@ void RNSkDomRenderer::callOnTouch() {
       }
       self->_touchCallbackLock->unlock();
     });
+  } else {
+    // We'll try next time - schedule a new redraw
+    _requestRedraw();
   }
 }
 
