@@ -12,7 +12,7 @@ export const bounds = (rects: SkRect[]) => {
   const y = Math.min(...rects.map((r) => r.y));
   const width = Math.max(...rects.map((r) => r.x + r.width));
   const height = Math.max(...rects.map((r) => r.y + r.height));
-  return rect(x, y, width, height);
+  return rect(x, y, width - x, height - y);
 };
 
 export const topLeft = (r: SkRect | SkRRect) =>

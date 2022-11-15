@@ -57,10 +57,10 @@ export class TextPathNode extends JsiDrawingNode<TextPathProps, SkTextBlob> {
       }
       // Gives us the (x, y) coordinates as well as the cos/sin of the tangent
       // line at that position.
-      const { px, py, tx, ty } = cont.getPosTan(dist);
-      const adjustedX = px - (width / 2) * tx;
-      const adjustedY = py - (width / 2) * ty;
-      rsx.push(this.Skia.RSXform(tx, ty, adjustedX, adjustedY));
+      const [p, t] = cont.getPosTan(dist);
+      const adjustedX = p.x - (width / 2) * t.x;
+      const adjustedY = p.y - (width / 2) * t.y;
+      rsx.push(this.Skia.RSXform(t.x, t.y, adjustedX, adjustedY));
       dist += width / 2;
     }
     return this.Skia.TextBlob.MakeFromRSXform(text, rsx, font);

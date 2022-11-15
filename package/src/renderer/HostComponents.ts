@@ -1,5 +1,3 @@
-import type { ForwardedRef } from "react";
-
 import { NodeType } from "../dom/types";
 import type {
   DeclarationNode,
@@ -58,7 +56,7 @@ import type {
   BlendProps,
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
-import type { PaintNode } from "../dom/nodes/PaintNode";
+
 import type {
   SkColorFilter,
   SkImageFilter,
@@ -218,7 +216,7 @@ declare global {
     interface IntrinsicElements {
       skGroup: SkiaProps<GroupProps>;
       skLayer: SkiaProps<ChildrenProps>;
-      skPaint: SkiaProps<PaintProps> & { ref: ForwardedRef<PaintNode> };
+      skPaint: SkiaProps<PaintProps>;
 
       // Drawings
       skFill: SkiaProps<DrawingNodeProps>;

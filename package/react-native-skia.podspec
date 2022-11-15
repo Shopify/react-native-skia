@@ -31,7 +31,9 @@ Pod::Spec.new do |s|
   s.ios.vendored_frameworks = [
     'libs/ios/libskia.xcframework', 
     'libs/ios/libsvg.xcframework', 
-    'libs/ios/libskshaper.xcframework'
+    'libs/ios/libskshaper.xcframework',
+    'libs/ios/libskparagraph.xcframework',
+    'libs/ios/libskunicode.xcframework',
   ]
 
   # All iOS cpp/h files

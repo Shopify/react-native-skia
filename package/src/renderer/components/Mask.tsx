@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import React, { useMemo } from "react";
 
 import { BlendMode } from "../../skia/types";
-import { useCanvas } from "../useCanvas";
+import { useSkiaPrivate } from "../useCanvas";
 
 import { Group } from "./Group";
 
@@ -14,7 +14,7 @@ interface MaskProps {
 }
 
 export const Mask = ({ children, mask, mode, clip }: MaskProps) => {
-  const { Skia } = useCanvas();
+  const Skia = useSkiaPrivate();
   const maskPaint = useMemo(() => {
     const paint = Skia.Paint();
     paint.setBlendMode(BlendMode.Src);

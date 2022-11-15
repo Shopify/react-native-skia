@@ -3,7 +3,6 @@ import { executeCmdSync } from "./utils";
 const NdkDir: string = process.env.ANDROID_NDK ?? "";
 
 export const commonArgs = [
-  ["skia_use_icu", false],
   ["skia_use_piex", true],
   ["skia_use_sfntly", false],
   ["skia_use_system_expat", false],
@@ -19,20 +18,12 @@ export const commonArgs = [
   ["skia_enable_flutter_defines", true],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
+  ["skia_enable_paragraph", true],
+  ["skia_use_icu", true],
+  ["skia_use_system_icu", false],
+  ["skia_use_harfbuzz", true],
+  ["skia_use_system_harfbuzz", false],
 ];
-
-// Get paths to iPhone SDKs
-export const iPhoneosSdk = executeCmdSync(
-  "xcrun --sdk iphoneos --show-sdk-path"
-)
-  .toString()
-  .trim();
-
-export const iPhoneSimulatorSdk = executeCmdSync(
-  "xcrun --sdk iphonesimulator --show-sdk-path"
-)
-  .toString()
-  .trim();
 
 export type PlatformName = "ios" | "android";
 
@@ -90,55 +81,43 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
+      "libskparagraph.a",
+      "libskunicode.a",
     ],
   },
   ios: {
     targets: {
-      // This one can probably be removed now?
-      // arm: {
-      //   cpu: "arm",
-      //   args: [
-      //     ["ios_min_target", '"10.0"'],
-      //     [
-      //       "extra_cflags",
-      //       '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios"]',
-      //     ],
-      //   ],
-      // },
       "arm64-iphoneos": {
         cpu: "arm64",
         args: [
-          ["ios_min_target", '"11.0"'],
-          ["xcode_sysroot", `"${iPhoneosSdk}"`],
-          ["extra_ldflags", `["--sysroot='${iPhoneosSdk}'"]`],
+          ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios", "-fembed-bitcode"]'],
           [
-            "extra_cflags",
-            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios", "-fembed-bitcode"]',
+            "extra_asmflags",
+            '["-target", "arm64-apple-ios", "-fembed-bitcode"]',
+          ],
+          [
+            "extra_ldflags",
+            '["-target", "arm64-apple-ios", "-fembed-bitcode"]',
           ],
         ],
       },
       "arm64-iphonesimulator": {
         cpu: "arm64",
         args: [
-          ["ios_min_target", '"11.0"'],
-          ["xcode_sysroot", `"${iPhoneSimulatorSdk}"`],
-          ["extra_ldflags", `["--sysroot='${iPhoneSimulatorSdk}'"]`],
-          [
-            "extra_cflags",
-            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios-simulator"]',
-          ],
+          ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
         ],
       },
       x64: {
         cpu: "x64",
         args: [
-          ["ios_min_target", '"11.0"'],
-          ["xcode_sysroot", `"${iPhoneSimulatorSdk}"`],
-          ["extra_ldflags", `["--sysroot='${iPhoneSimulatorSdk}'"]`],
-          [
-            "extra_cflags",
-            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios-simulator"]',
-          ],
+          ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
         ],
       },
     },
@@ -155,6 +134,8 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
+      "libskparagraph.a",
+      "libskunicode.a",
     ],
   },
 };
