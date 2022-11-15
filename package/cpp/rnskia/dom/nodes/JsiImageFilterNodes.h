@@ -392,7 +392,7 @@ protected:
       _uniformsProp->processUniforms(builder);
 
       setImageFilter(context,
-                     SkImageFilters::RuntimeShader(builder, nullptr, input));
+                     SkImageFilters::RuntimeShader(builder, "", input));
     }
   }
 
