@@ -95,13 +95,18 @@ public:
 
   void setJsiProperties(
       std::unordered_map<std::string, JsiValueWrapper> &props) override {
+
+    RNSkView::setJsiProperties(props);
+
     for (auto &prop : props) {
       if (prop.first == "onTouch") {
         if (prop.second.isUndefinedOrNull()) {
           // Clear touchCallback
           std::static_pointer_cast<RNSkDomRenderer>(getRenderer())
               ->setOnTouchCallback(nullptr);
-          return;
+          requestRedraw();
+          continue;
+
         } else if (prop.second.getType() != JsiWrapperValueType::Function) {
           // We expect a function for the draw callback custom property
           throw std::runtime_error(
@@ -128,9 +133,6 @@ public:
 
         // Request redraw
         requestRedraw();
-
-      } else {
-        RNSkView::setJsiProperties(props);
       }
     }
   }

@@ -1,8 +1,14 @@
 import type { ViewProps } from "react-native";
 
 import type { GroupProps, RenderNode } from "../dom/types";
-import type { SkCanvas, SkImage, SkPicture, SkRect } from "../skia/types";
-import type { SkiaValue } from "../values";
+import type {
+  SkCanvas,
+  SkImage,
+  SkPicture,
+  SkPoint,
+  SkRect,
+} from "../skia/types";
+import type { SkiaMutableValue, SkiaValue } from "../values";
 
 export type DrawMode = "continuous" | "default";
 
@@ -87,6 +93,11 @@ export interface SkiaBaseViewProps extends ViewProps {
    * average time it takes to render.
    */
   debug?: boolean;
+  /**
+   * Pass an animated value to the onSize property to get updates when
+   * the Skia view is resized.
+   */
+  onSize?: SkiaMutableValue<SkPoint>;
 }
 
 export interface SkiaDrawViewProps extends SkiaBaseViewProps {

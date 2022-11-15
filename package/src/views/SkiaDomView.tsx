@@ -19,7 +19,7 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
   constructor(props: SkiaDomViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId.current++;
-    const { root, onTouch } = props;
+    const { root, onTouch, onSize } = props;
     if (root) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "root", root);
@@ -27,6 +27,10 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
     if (onTouch) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onTouch", onTouch);
+    }
+    if (onSize) {
+      assertSkiaViewApi();
+      SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
   }
 
@@ -37,14 +41,18 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
   }
 
   componentDidUpdate(prevProps: SkiaDomViewProps) {
-    const { root, onTouch } = this.props;
+    const { root, onTouch, onSize } = this.props;
     if (root !== prevProps.root) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "root", root);
     }
-    if (onTouch) {
+    if (onTouch !== prevProps.onTouch) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onTouch", onTouch);
+    }
+    if (onSize !== prevProps.onSize) {
+      assertSkiaViewApi();
+      SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
   }
 

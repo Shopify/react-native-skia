@@ -17,6 +17,10 @@ export class SkiaDomView extends SkiaBaseWebView<SkiaDomViewProps> {
     if (this.props.onTouch) {
       this.props.onTouch([touches]);
     }
+    if (this.props.onSize) {
+      const { width, height } = this.getSize();
+      this.props.onSize.current = { x: width, y: height };
+    }
     if (this.props.root) {
       const paint = Skia.Paint();
       const ctx = {

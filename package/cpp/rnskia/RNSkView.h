@@ -6,11 +6,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include <RNSkPlatformContext.h>
-
 #include <JsiValueWrapper.h>
+#include <RNSkPlatformContext.h>
+#include <RNSkValue.h>
 
 #include <JsiSkImage.h>
+#include <JsiSkPoint.h>
 #include <JsiSkRect.h>
 
 #pragma clang diagnostic push
@@ -155,7 +156,13 @@ public:
   /**
    Destructor
    */
-  virtual ~RNSkView() { endDrawingLoop(); }
+  virtual ~RNSkView() {
+    endDrawingLoop();
+    if (_onSizeUnsubscribe != nullptr) {
+      _onSizeUnsubscribe();
+      _onSizeUnsubscribe = nullptr;
+    }
+  }
 
   /**
    Sets custom properties. Custom properties are properties that are set
@@ -163,8 +170,37 @@ public:
    */
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) {
-    throw std::runtime_error(
-        "The base Skia View does not support any custom properties.");
+
+    for (auto &prop : props) {
+      if (prop.first == "onSize") {
+        // Start by removing any subscribers to the current onSize
+        if (_onSizeUnsubscribe != nullptr) {
+          _onSizeUnsubscribe();
+          _onSizeUnsubscribe = nullptr;
+        }
+        if (prop.second.isUndefinedOrNull()) {
+          // Clear touchCallback
+          _onSize = nullptr;
+        } else if (prop.second.getType() !=
+                   RNJsi::JsiWrapperValueType::HostObject) {
+          // We expect a function for the draw callback custom property
+          throw std::runtime_error(
+              "Expected a Skia mutable value for the onSize property.");
+        }
+        // Save onSize
+        _onSize =
+            std::dynamic_pointer_cast<RNSkValue>(prop.second.getAsHostObject());
+
+        // Add listener
+        _onSizeUnsubscribe =
+            _onSize->addListener([weakSelf = weak_from_this()](jsi::Runtime &) {
+              auto self = weakSelf.lock();
+              if (self) {
+                self->requestRedraw();
+              }
+            });
+      }
+    }
   }
 
   /**
@@ -272,6 +308,56 @@ private:
         });
   }
 
+  void updateOnSize() {
+    if (_onSize != nullptr) {
+      auto width = _canvasProvider->getScaledWidth() /
+                   _platformContext->getPixelDensity();
+      auto height = _canvasProvider->getScaledHeight() /
+                    _platformContext->getPixelDensity();
+
+      _platformContext->runOnJavascriptThread(
+          [width, height, weakSelf = weak_from_this()]() {
+            auto self = weakSelf.lock();
+            if (self) {
+              auto runtime = self->_platformContext->getJsRuntime();
+              auto onSize = self->_onSize->getCurrent(*runtime);
+              if (!onSize.isObject()) {
+                throw jsi::JSError(
+                    *runtime,
+                    "Expected onSize property to be a mutable Skia value.");
+                return;
+              }
+              auto onSizeObj = onSize.asObject(*runtime);
+
+              // Is this a host SkPoint object?
+              if (onSizeObj.isHostObject(*runtime)) {
+                auto point = std::dynamic_pointer_cast<JsiSkPoint>(
+                    onSizeObj.asHostObject(*runtime));
+                auto w = point->getObject()->x();
+                auto h = point->getObject()->y();
+                if (w != width || h != height) {
+                  auto nextSize =
+                      std::make_shared<SkPoint>(SkPoint::Make(width, height));
+                  point->setObject(nextSize);
+                  self->_onSize->set_current(*runtime, onSize);
+                }
+
+              } else {
+                auto w = onSizeObj.getProperty(*runtime, "x").asNumber();
+                auto h = onSizeObj.getProperty(*runtime, "y").asNumber();
+
+                if (w != width || h != height) {
+                  // Update
+                  onSizeObj.setProperty(*runtime, "x", width);
+                  onSizeObj.setProperty(*runtime, "y", height);
+                  self->_onSize->set_current(*runtime, onSize);
+                }
+              }
+            }
+          });
+    }
+  }
+
   /**
     Draw loop callback
    */
@@ -279,6 +365,9 @@ private:
     if (_redrawRequestCounter > 0 ||
         _drawingMode == RNSkDrawingMode::Continuous) {
       _redrawRequestCounter = 0;
+
+      // Update size if needed
+      updateOnSize();
 
       if (!_renderer->tryRender(_canvasProvider)) {
         // The renderer could not render cause it was busy, just schedule
@@ -292,6 +381,8 @@ private:
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
   std::shared_ptr<RNSkRenderer> _renderer;
 
+  std::shared_ptr<RNSkValue> _onSize;
+  std::function<void()> _onSizeUnsubscribe;
   RNSkDrawingMode _drawingMode;
   size_t _nativeId;
 
