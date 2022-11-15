@@ -329,10 +329,17 @@ private:
               }
               auto onSizeObj = onSize.asObject(*runtime);
 
-              // Is this a host SkPoint object?
+              // Is this a host SkSize object?
               if (onSizeObj.isHostObject(*runtime)) {
                 auto point = std::dynamic_pointer_cast<JsiSkPoint>(
                     onSizeObj.asHostObject(*runtime));
+                if(point == nullptr) {
+                  throw jsi::JSError(
+                      *runtime,
+                      "Expected onSize property to be a mutable Skia value of type SkSize.");
+                  return;
+                }
+                
                 auto w = point->getObject()->x();
                 auto h = point->getObject()->y();
                 if (w != width || h != height) {
@@ -343,13 +350,23 @@ private:
                 }
 
               } else {
-                auto w = onSizeObj.getProperty(*runtime, "x").asNumber();
-                auto h = onSizeObj.getProperty(*runtime, "y").asNumber();
-
+                auto wVal = onSizeObj.getProperty(*runtime, "width");
+                auto hVal = onSizeObj.getProperty(*runtime, "height");
+                
+                if (!wVal.isNumber() || !hVal.isNumber()) {
+                  throw jsi::JSError(
+                      *runtime,
+                      "Expected onSize property to be a mutable Skia value of type SkSize.");
+                  return;
+                }
+                
+                auto w = wVal.asNumber();
+                auto h = hVal.asNumber();
+                
                 if (w != width || h != height) {
                   // Update
-                  onSizeObj.setProperty(*runtime, "x", width);
-                  onSizeObj.setProperty(*runtime, "y", height);
+                  onSizeObj.setProperty(*runtime, "width", width);
+                  onSizeObj.setProperty(*runtime, "height", height);
                   self->_onSize->set_current(*runtime, onSize);
                 }
               }

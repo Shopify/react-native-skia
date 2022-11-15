@@ -74,7 +74,7 @@ private:
 
     for (size_t i = 0; i < uniformsCount; ++i) {
       auto it = source->uniforms().begin() + i;
-      auto name = JsiPropId::get(it->name.c_str());
+      auto name = JsiPropId::get(std::string(it->name));
 
       if (!propObject.hasValue(name)) {
         throw std::runtime_error("The runtime effect has the uniform value \"" +
@@ -137,7 +137,7 @@ public:
 
     for (size_t i = 0; i < uniformsCount; ++i) {
       auto it = source->uniforms().begin() + i;
-      auto name = JsiPropId::get(it->name.c_str());
+      auto name = JsiPropId::get(std::string(it->name));
 
       if (!propObject.hasValue(name)) {
         throw std::runtime_error("The runtime effect has the uniform value \"" +
