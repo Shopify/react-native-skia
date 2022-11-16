@@ -2,6 +2,7 @@ import React from "react";
 
 import { processResult } from "../../__tests__/setup";
 import { Fill, Group, RoundedRect } from "../components";
+import { ColorShader } from "../components/shaders/Color";
 
 import { drawOnNode, width, importSkia } from "./setup";
 
@@ -44,10 +45,25 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    processResult(
-      surface,
-      "snapshots/drawings/opacity-multiplication2.png",
-      true
+    processResult(surface, "snapshots/drawings/opacity-multiplication2.png");
+  });
+  it("Should multiply the opacity to 0.25 using a Shader", () => {
+    const { rect, rrect } = importSkia();
+    const r = width * 0.5;
+    const surface = drawOnNode(
+      <Group opacity={0.5}>
+        <Fill color="lightblue" />
+        <Group opacity={0.5}>
+          <RoundedRect rect={rrect(rect(0, 0, r, r), r, r)} opacity={0.2}>
+            <ColorShader color="black" />
+          </RoundedRect>
+          <RoundedRect
+            rect={rrect(rect(0, 0, r / 2, r / 2), r, r)}
+            color="white"
+          />
+        </Group>
+      </Group>
     );
+    processResult(surface, "snapshots/drawings/opacity-multiplication2.png");
   });
 });
