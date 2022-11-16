@@ -54,7 +54,6 @@ public:
   T &getObject() { return _object; }
   const T &getObject() const { return _object; }
 
-
   /**
    Updates the inner object with a new version of the object.
    */
