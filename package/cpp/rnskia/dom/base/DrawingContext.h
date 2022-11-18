@@ -17,8 +17,6 @@
 
 namespace RNSkia {
 
-size_t DrawingContextId = 1000;
-
 class DrawingContext : public std::enable_shared_from_this<DrawingContext> {
 public:
   /**
@@ -133,8 +131,6 @@ private:
   float _scaledHeight = -1;
 
   std::function<void()> _requestRedraw;
-
-  size_t _drawingContextId = DrawingContextId++;
 };
 
 } // namespace RNSkia
