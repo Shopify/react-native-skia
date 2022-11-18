@@ -28,8 +28,7 @@ size_t DrawingContext::getLevel() {
 }
 
 std::string DrawingContext::getDebugDescription() {
-  std::string v = "ctx for " +
-                  std::string(_source) + ":";
+  std::string v = "ctx for " + std::string(_source) + ":";
 
   if (_paint != nullptr) {
     auto clr = _paint->getColor();

@@ -42,7 +42,7 @@ public:
       } else {
         _buffer->setCurrent(runtime, read(runtime, _name, this));
       }
-      _hasNewValue = *_buffer.get() != *_value.get();      
+      _hasNewValue = *_buffer.get() != *_value.get();
     }
   }
 
