@@ -1,10 +1,10 @@
 name: Test iOS build
 on:
-#  pull_request:
-#    paths:
-#      - 'package/ios/**'
-#      - 'package/cpp/**'
-#      - 'example/package.json'
+  pull_request:
+    paths:
+      - 'package/ios/**'
+      - 'package/cpp/**'
+      - 'example/package.json'
   push:
     branches:
       - main
