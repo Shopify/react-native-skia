@@ -89,13 +89,7 @@ public:
 
   void decorate(DrawingContext *context) {
     // Now we can start updating the context
-    // We only get here if something has changed - start with COLOR
-    if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setShader(nullptr);
-      context->getMutablePaint()->setColor(*_color->getDerivedValue());
-      context->getMutablePaint()->setAlphaf(context->getOpacity());
-    }
-
+    
     // Opacity
     if (_opacity->isChanged() || context->isChanged()) {
       if (_opacity->isSet()) {
@@ -103,6 +97,13 @@ public:
       } else {
         context->clearOpacity();
       }
+    }
+    
+    // COLOR
+    if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
+      context->getMutablePaint()->setShader(nullptr);
+      context->getMutablePaint()->setColor(*_color->getDerivedValue());
+      context->getMutablePaint()->setAlphaf(context->getOpacity());
     }
 
     // Style
