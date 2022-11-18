@@ -1,11 +1,6 @@
 project(RNSkia)
 cmake_minimum_required(VERSION 3.4.1)
 
-if(${BUILD_TYPE} STREQUAL "debug")
-    set (CMAKE_BUILD_TYPE Debug)
-    message("-- Building with Debug Symbols")
-endif()
-
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_GL -DSK_BUILD_FOR_ANDROID -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
@@ -21,6 +16,11 @@ set(build_DIR ${CMAKE_SOURCE_DIR}/build)
 file(GLOB LIBRN_DIR "${PREBUILT_DIR}/${ANDROID_ABI}")
 file(GLOB libfbjni_link_DIRS "${build_DIR}/fbjni*.aar/jni/${ANDROID_ABI}")
 file(GLOB libfbjni_include_DIRS "${build_DIR}/fbjni-*-headers.jar/")
+
+message("-- ABI     : " ${ANDROID_ABI})
+message("-- PREBUILT: " ${PREBUILT_DIR})
+message("-- BUILD   : " ${build_DIR})
+message("-- LIBRN   : " ${LIBRN_DIR})
 
 link_directories(../libs/android/${ANDROID_ABI}/)
 
@@ -93,6 +93,7 @@ target_include_directories(
 
 # Import prebuilt SKIA libraries
 set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
+
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
 
@@ -114,12 +115,8 @@ find_library(
         log
 )
 
-find_library(
-         JSI_LIB
-         jsi
-         PATHS ${LIBRN_DIR}
-         NO_CMAKE_FIND_ROOT_PATH
- )
+message("-- LOG     : " ${LOG_LIB})
+
  if(${REACT_NATIVE_VERSION} LESS 66)
          # JSI lib didn't exist on RN 0.65 and before. Simply omit it.
          set (JSI_LIB "")
@@ -133,12 +130,16 @@ find_library(
          )
  endif()
 
+ message("-- JSI     : " ${JSI_LIB})
+
 find_library(
         REACT_LIB
         react_nativemodule_core
         PATHS ${LIBRN_DIR}
         NO_CMAKE_FIND_ROOT_PATH
 )
+
+message("-- REACT   : " ${REACT_LIB})
 
 find_library(
         FBJNI_LIBRARY 
@@ -147,12 +148,16 @@ find_library(
         NO_CMAKE_FIND_ROOT_PATH
 )
 
+message("-- FBJNI   : " ${FBJNI_LIBRARY})
+
 find_library(
         TURBOMODULES_LIB
         turbomodulejsijni
         PATHS ${LIBRN_DIR}
         NO_CMAKE_FIND_ROOT_PATH
 )
+
+message("-- TURBO   : " ${TURBOMODULES_LIB})
 
 # Link
 target_link_libraries(

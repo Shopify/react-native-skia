@@ -293,7 +293,7 @@ const concatPaint = (
     paint.setColor(color);
   } else {
     const cl = paint.getColor();
-    cl[3] *= opacity;
+    cl[3] = opacity;
     paint.setColor(cl);
   }
   if (strokeWidth !== undefined) {
