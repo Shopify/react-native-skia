@@ -97,8 +97,12 @@ public:
     }
 
     // Opacity
-    if (_opacity->isSet() && (_opacity->isChanged() || context->isChanged())) {
-      context->setOpacity(_opacity->value().getAsNumber());
+    if (_opacity->isChanged() || context->isChanged()) {
+      if (_opacity->isSet()) {
+        context->setOpacity(_opacity->value().getAsNumber());
+      } else {
+        context->clearOpacity();
+      }
     }
 
     // Style

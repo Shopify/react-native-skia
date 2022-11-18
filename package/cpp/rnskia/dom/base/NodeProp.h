@@ -26,23 +26,44 @@ public:
    */
   void readValueFromJs(jsi::Runtime &runtime,
                        const ReadPropFunc &read) override {
-    // Always use the next field since this method is called on the JS thread
-    // and we don't want to rip out the underlying value object.
-    _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
-    _isChanged = true;
-    _hasNewValue = false;
+    // If the value is a nullptr this is the first call to the
+    // readValueFromJS Function (which comes from the reconciler
+    // setting a new property value on the property
+    if (_value == nullptr) {
+      _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
+      _isChanged = true;
+      _hasNewValue = false;
+    } else {
+      // Otherwise we'll just update the buffer and commit it later.
+      std::lock_guard<std::mutex> lock(_swapMutex);
+      if (_buffer == nullptr) {
+        _buffer =
+            std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
+      } else {
+        _buffer->setCurrent(runtime, read(runtime, _name, this));
+      }
+      _hasNewValue = *_buffer.get() != *_value.get();
+      if (_hasNewValue) {
+        auto a = 1000;
+        _hasNewValue = *_buffer.get() != *_value.get();
+      }
+    }
   }
 
   /**
    Property value has changed - let's save this as a change to be commited later
    */
   void updateValue(jsi::Runtime &runtime, const jsi::Value &value) {
+    // Always use the next field since this method is called on the JS thread
+    // and we don't want to rip out the underlying value object.
     std::lock_guard<std::mutex> lock(_swapMutex);
     if (_buffer == nullptr) {
       _buffer = std::make_shared<JsiValue>(runtime, value);
     } else {
       _buffer->setCurrent(runtime, value);
     }
+    // This is almost always a change - meaning a swap is
+    // cheaper than comparing for equality.
     _hasNewValue = true;
   }
 

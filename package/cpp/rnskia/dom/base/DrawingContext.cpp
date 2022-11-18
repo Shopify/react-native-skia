@@ -28,7 +28,8 @@ size_t DrawingContext::getLevel() {
 }
 
 std::string DrawingContext::getDebugDescription() {
-  std::string v = "ctx for " + std::string(_source) + ":";
+  std::string v = "ctx [" + std::to_string(_drawingContextId) + "] for " +
+                  std::string(_source) + ":";
 
   if (_paint != nullptr) {
     auto clr = _paint->getColor();
@@ -68,6 +69,7 @@ std::string DrawingContext::getDebugDescription() {
  Invalidate cache
  */
 void DrawingContext::markAsChanged() {
+  markChildrenAsChanged();
   _paint = nullptr;
   _isChanged = true;
 }
@@ -136,6 +138,7 @@ std::shared_ptr<SkPaint> DrawingContext::getMutablePaint() {
   if (_paint == nullptr) {
     auto parentPaint = _parent->getPaint();
     _paint = std::make_shared<SkPaint>(*parentPaint);
+    _opacity = _parent->getOpacity();
   }
   // Calling the getMutablePaint accessor implies that the paint
   // is about to be mutatet and will therefore invalidate
@@ -166,13 +169,20 @@ double DrawingContext::getOpacity() {
  Sets the opacity value
  */
 void DrawingContext::setOpacity(double opacity) {
-  if (_parent != nullptr) {
-    _opacity = _parent->getOpacity() * opacity;
-  } else {
-    _opacity = opacity;
-  }
-  // TODO: Is this enough to set opacity?
   getMutablePaint()->setAlphaf(_opacity);
+  _opacity = opacity;
+}
+
+/**
+ Clears the opacity value
+ */
+void DrawingContext::clearOpacity() {
+  if (_parent != nullptr) {
+    _opacity = _parent->getOpacity();
+  } else {
+    _opacity = 1.0;
+  }
+  markChildrenAsChanged();
 }
 
 float DrawingContext::getScaledWidth() {
