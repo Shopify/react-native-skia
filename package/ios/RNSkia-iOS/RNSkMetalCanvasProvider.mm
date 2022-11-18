@@ -4,9 +4,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#import <SkColorSpace.h>
-#import <SkSurface.h>
-#import <SkCanvas.h>
+#import "SkColorSpace.h"
+#import "SkSurface.h"
+#import "SkCanvas.h"
 
 #import <include/gpu/GrDirectContext.h>
 
@@ -32,7 +32,7 @@ RNSkCanvasProvider(requestRedraw),
   #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
   #pragma clang diagnostic pop
-    
+
   _layer.framebufferOnly = NO;
   _layer.device = _device;
   _layer.opaque = false;
@@ -75,14 +75,14 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
   if(_width == -1 && _height == -1) {
     return;
   }
-  
+
   if(_skContext == nullptr) {
     GrContextOptions grContextOptions;
     _skContext = GrDirectContext::MakeMetal((__bridge void*)_device,
                                             (__bridge void*)_commandQueue,
                                             grContextOptions);
   }
-  
+
   // Wrap in auto release pool since we want the system to clean up after rendering
   // and not wait until later - we've seen some example of memory usage growing very
   // fast in the simulator without this.
@@ -92,10 +92,10 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
     if(currentDrawable == nullptr) {
       return;
     }
-    
+
     GrMtlTextureInfo fbInfo;
     fbInfo.fTexture.retain((__bridge void*)currentDrawable.texture);
-    
+
     GrBackendRenderTarget backendRT(_layer.drawableSize.width,
                                     _layer.drawableSize.height,
                                     1,
@@ -107,15 +107,15 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
                                                             kBGRA_8888_SkColorType,
                                                             nullptr,
                                                             nullptr);
-    
+
     if(skSurface == nullptr || skSurface->getCanvas() == nullptr) {
       RNSkia::RNSkLogger::logToConsole("Skia surface could not be created from parameters.");
       return;
     }
-    
+
     skSurface->getCanvas()->clear(SK_AlphaTRANSPARENT);
     cb(skSurface->getCanvas());
-    
+
     id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
@@ -128,7 +128,7 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _layer.frame = CGRectMake(0, 0, width, height);
   _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
                                    height* _context->getPixelDensity());
-  
+
   _requestRedraw();
 }
 

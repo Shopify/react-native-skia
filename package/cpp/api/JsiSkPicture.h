@@ -9,7 +9,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPicture.h>
+#include "SkPicture.h"
 
 #pragma clang diagnostic pop
 
