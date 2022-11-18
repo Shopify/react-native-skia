@@ -132,11 +132,7 @@ export const mountCanvas = (element: ReactNode) => {
     null
   );
   skiaReconciler.updateContainer(
-    <CanvasProvider
-      value={{ Skia, size: ValueApi.createValue({ width, height }) }}
-    >
-      {element}
-    </CanvasProvider>,
+    <CanvasProvider value={{ Skia }}>{element}</CanvasProvider>,
     root,
     null,
     () => {

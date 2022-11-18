@@ -24,10 +24,6 @@ export class DependencyManager {
     this.registerValues = registerValues;
   }
 
-  unsubscribeNodes(nodes: Node<unknown>[]) {
-    nodes.forEach((n) => this.unsubscribeNode(n));
-  }
-
   /**
    * Call to unsubscribe all value listeners from the given node based
    * on the current list of subscriptions for the node. This function
@@ -77,7 +73,6 @@ export class DependencyManager {
    * when the node is mounted and when one or more props on the node changes.
    * @param node Node to subscribe to value changes for
    * @param props Node's properties
-   * @param onResolveProp Callback when a property value changes
    */
   subscribeNode<P>(node: Node<unknown>, props: AnimatedProps<P>) {
     // Get mutators from node's properties

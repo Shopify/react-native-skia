@@ -43,10 +43,14 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLRenderer.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiValue.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkJsView.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDomView.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDispatchQueue.cpp"
+
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia/dom/base/DrawingContext.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/api/third_party/CSSColorParser.cpp"
         
@@ -78,6 +82,10 @@ target_include_directories(
         cpp/rnskia-android
         cpp/rnskia
         cpp/rnskia/values
+        cpp/rnskia/dom
+        cpp/rnskia/dom/base
+        cpp/rnskia/dom/nodes
+        cpp/rnskia/dom/props
         cpp/utils  
 
         ${libfbjni_include_DIRS}
