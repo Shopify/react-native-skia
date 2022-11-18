@@ -12,7 +12,7 @@ Checkout the full documentation [here](https://shopify.github.io/react-native-sk
 
 React Native Skia brings the Skia Graphics Library to React Native. Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and Firefox OS, and many other products.
 
-_This is a beta release. Use with caution._
+_This is a beta release._
 
 ## Getting Started
 
