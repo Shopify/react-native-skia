@@ -60,7 +60,7 @@ jobs:
       - name: Get NPM Package version
         id: get_npm_package_version
         run: echo "::set-output name=npm_package_version::$(yarn get-version-npm| tail -2)"
-        
+
       - name: Publish to NPM
         uses: JS-DevTools/npm-publish@v1
         with:
@@ -70,17 +70,17 @@ jobs:
       - name: Create Github Release
         uses: ncipollo/release-action@v1
         with:
-          tag: "v${{steps.get_npm_package_version.outputs.npm_package_version}}-alpha"
-          name: "Release ${{steps.get_npm_package_version.outputs.npm_package_version}} alpha"
+          tag: "v${{steps.get_npm_package_version.outputs.npm_package_version}}-beta"
+          name: "Release ${{steps.get_npm_package_version.outputs.npm_package_version}} beta"
           artifacts: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
           artifactContentType: application/gzip
           generateReleaseNotes: true
           replacesArtifacts: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Install & Build Docs
         run: cd package; yarn; cd ../docs; yarn; yarn build;
-          
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
