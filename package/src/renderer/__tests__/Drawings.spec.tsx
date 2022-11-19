@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { docPath, processResult } from "../../__tests__/setup";
 import {
@@ -11,7 +11,31 @@ import {
   RoundedRect,
 } from "../components";
 
-import { drawOnNode, width, height, importSkia, PIXEL_RATIO } from "./setup";
+import {
+  drawOnNode,
+  width,
+  height,
+  importSkia,
+  PIXEL_RATIO,
+  mountCanvas,
+  wait,
+} from "./setup";
+
+const CheckEmptyCanvas = () => {
+  const { Skia } = importSkia();
+  const [color, setColor] = useState("green");
+  useEffect(() => {
+    setTimeout(() => {
+      setColor("transparent");
+    }, 16);
+  }, [Skia]);
+
+  return (
+    <Group>
+      <Fill color={color} />
+    </Group>
+  );
+};
 
 describe("Test introductionary examples from our documentation", () => {
   it("Should blend colors using multiplication", () => {
@@ -102,5 +126,14 @@ describe("Test introductionary examples from our documentation", () => {
       <DiffRect inner={inner} outer={outer} color="lightblue" />
     );
     processResult(surface, docPath("shapes/drect.png"));
+  });
+
+  it("should clear the canvas even if it's empty", async () => {
+    const { surface, draw } = mountCanvas(<CheckEmptyCanvas />);
+    draw();
+    processResult(surface, "snapshots/green.png");
+    await wait(32);
+    draw();
+    processResult(surface, "snapshots/transparent.png");
   });
 });
