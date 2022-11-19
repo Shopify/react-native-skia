@@ -58,6 +58,10 @@ export abstract class SkiaBaseWebView<
     }
   }
 
+  protected getSize() {
+    return { width: this.width, height: this.height };
+  }
+
   componentDidMount() {
     // Start render loop
     this.tick();
