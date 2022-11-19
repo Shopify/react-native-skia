@@ -100,7 +100,6 @@ export abstract class SkiaBaseWebView<
         this._touches = [];
         this._canvas!.clear(CanvasKit.TRANSPARENT);
         this.renderInCanvas(this._canvas!, touches);
-        console.log("FLUSH");
         this._surface?.ref.flush();
       }
     }
