@@ -54,6 +54,12 @@ public:
   T &getObject() { return _object; }
   const T &getObject() const { return _object; }
 
+  /**
+   Updates the inner object with a new version of the object.
+   */
+  void setObject(T &object) { _object = object; }
+  void setObject(const T &object) { _object = object; }
+
 private:
   /**
    * Wrapped object

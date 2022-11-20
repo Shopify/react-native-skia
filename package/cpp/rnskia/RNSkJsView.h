@@ -89,13 +89,18 @@ public:
 
   void setJsiProperties(
       std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) override {
+
+    RNSkView::setJsiProperties(props);
+
     for (auto &prop : props) {
       if (prop.first == "drawCallback") {
         if (prop.second.isUndefinedOrNull()) {
           // Clear drawcallback
           std::static_pointer_cast<RNSkJsRenderer>(getRenderer())
               ->setDrawCallback(nullptr);
-          return;
+          requestRedraw();
+          continue;
+
         } else if (prop.second.getType() !=
                    RNJsi::JsiWrapperValueType::Function) {
           // We expect a function for the draw callback custom property
@@ -109,9 +114,6 @@ public:
 
         // Request redraw
         requestRedraw();
-
-      } else {
-        RNSkView::setJsiProperties(props);
       }
     }
   }

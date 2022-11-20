@@ -202,10 +202,6 @@ void RNSkJsRenderer::drawInJsiCanvas(std::shared_ptr<JsiSkCanvas> jsiCanvas,
 
     // Call draw function.
     callJsDrawCallback(jsiCanvas, width / pd, height / pd, time);
-
-    // Restore and flush canvas
-    skCanvas->restore();
-    skCanvas->flush();
   }
 }
 

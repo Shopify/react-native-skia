@@ -76,10 +76,6 @@ private:
       canvas->scale(pd, pd);
 
       canvas->drawPicture(_picture->getObject());
-
-      // Restore and flush canvas
-      canvas->restore();
-      canvas->flush();
     });
   }
 
@@ -101,13 +97,17 @@ public:
 
   void setJsiProperties(
       std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) override {
+
+    RNSkView::setJsiProperties(props);
+
     for (auto &prop : props) {
       if (prop.first == "picture") {
         if (prop.second.isUndefinedOrNull()) {
           // Clear picture
           std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
               ->setPicture(nullptr);
-          return;
+          requestRedraw();
+          continue;
         } else if (prop.second.getType() !=
                    RNJsi::JsiWrapperValueType::HostObject) {
           // We expect a function for the picture custom property
@@ -121,9 +121,6 @@ public:
 
         // Request redraw
         requestRedraw();
-
-      } else {
-        RNSkView::setJsiProperties(props);
       }
     }
   }

@@ -26,14 +26,15 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-using DrawingContext = struct {
+using OpenGLDrawingContext = struct {
   EGLContext glContext;
   EGLDisplay glDisplay;
   EGLConfig glConfig;
   sk_sp<GrDirectContext> skContext;
 };
 
-static std::unordered_map<std::thread::id, std::shared_ptr<DrawingContext>>
+static std::unordered_map<std::thread::id,
+                          std::shared_ptr<OpenGLDrawingContext>>
     threadContexts;
 
 enum RenderState : int {
@@ -113,7 +114,7 @@ private:
    * each new view, we track the OpenGL and Skia drawing context per thread.
    * @return The drawing context for the current thread
    */
-  static std::shared_ptr<DrawingContext> getThreadDrawingContext();
+  static std::shared_ptr<OpenGLDrawingContext> getThreadDrawingContext();
 
   EGLSurface _glSurface = EGL_NO_SURFACE;
 
