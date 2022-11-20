@@ -58,6 +58,10 @@ export abstract class SkiaBaseWebView<
     }
   }
 
+  protected getSize() {
+    return { width: this.width, height: this.height };
+  }
+
   componentDidMount() {
     // Start render loop
     this.tick();
@@ -98,6 +102,7 @@ export abstract class SkiaBaseWebView<
       if (this._canvas) {
         const touches = [...this._touches];
         this._touches = [];
+        this._canvas!.clear(CanvasKit.TRANSPARENT);
         this.renderInCanvas(this._canvas!, touches);
         this._surface?.ref.flush();
       }

@@ -10,8 +10,8 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSimpleValueWrapper.h>
 #include <JsiSkHostObjects.h>
+#include <JsiValueWrapper.h>
 #include <RNSkPlatformContext.h>
 
 namespace RNSkia {
@@ -29,7 +29,7 @@ public:
   explicit RNSkReadonlyValue(
       std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
-        _valueHolder(std::make_unique<RNJsi::JsiSimpleValueWrapper>(
+        _valueHolder(std::make_shared<RNJsi::JsiValueWrapper>(
             *platformContext->getJsRuntime())) {}
 
   virtual ~RNSkReadonlyValue() { invalidate(); }
@@ -108,8 +108,8 @@ public:
    */
   virtual void update(jsi::Runtime &runtime, const jsi::Value &value) {
     auto equal = _valueHolder->equals(runtime, value);
-    _valueHolder->setCurrent(runtime, value);
     if (!equal) {
+      _valueHolder->setCurrent(runtime, value);
       notifyListeners(runtime);
     }
   }
@@ -123,9 +123,18 @@ public:
     _listeners.clear();
   }
 
+  /**
+   Returns the current value as a jsi::Value
+   */
   jsi::Value getCurrent(jsi::Runtime &runtime) {
     return _valueHolder->getCurrent(runtime);
   }
+
+  /**
+   Returns the underlying current value wrapper. This can be used to query the
+   holder for data type and get pointers to elements in the holder.
+   */
+  std::shared_ptr<RNJsi::JsiValueWrapper> getCurrent() { return _valueHolder; }
 
 protected:
   /**
@@ -153,7 +162,7 @@ protected:
   }
 
 private:
-  std::unique_ptr<RNJsi::JsiSimpleValueWrapper> _valueHolder;
+  std::shared_ptr<RNJsi::JsiValueWrapper> _valueHolder;
 
   long _listenerId = 0;
   std::unordered_map<long, std::function<void(jsi::Runtime &)>> _listeners;

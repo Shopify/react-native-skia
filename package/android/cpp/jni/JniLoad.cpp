@@ -1,4 +1,5 @@
 #include "JniPlatformContext.h"
+#include "JniSkiaDomView.h"
 #include "JniSkiaDrawView.h"
 #include "JniSkiaManager.h"
 #include "JniSkiaPictureView.h"
@@ -10,6 +11,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     RNSkia::JniSkiaManager::registerNatives();
     RNSkia::JniSkiaDrawView::registerNatives();
     RNSkia::JniSkiaPictureView::registerNatives();
+    RNSkia::JniSkiaDomView::registerNatives();
     RNSkia::JniPlatformContext::registerNatives();
   });
 }

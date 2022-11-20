@@ -48,26 +48,14 @@ logger.warn("react-native-skia: node_modules/ found at: ${nodeModules}")
 
 def sourceBuild = false
 def defaultDir = null
-def androidSourcesDir = null
-def androidSourcesName = 'React Native sources'
-
-def buildType = "debug"
-tasks.all({ task ->
-    if (task.name == "buildCMakeRelease") {
-        buildType = "release"
-    }
-})
 
 if (rootProject.ext.has('reactNativeAndroidRoot')) {
   defaultDir = rootProject.ext.get('reactNativeAndroidRoot')
-  androidSourcesDir = defaultDir.parentFile.toString()
 } else if (findProject(':ReactAndroid') != null) {
     sourceBuild = true
     defaultDir = project(':ReactAndroid').projectDir
-    androidSourcesDir = defaultDir.parentFile.toString()
 } else {
   defaultDir = file("$nodeModules/react-native/android")
-  androidSourcesDir = defaultDir.parentFile.toString()
 }
 
 if (!defaultDir.exists()) {
@@ -81,14 +69,24 @@ def prebuiltDir = sourceBuild
     : "$buildDir/react-native-0*/jni"
 
 
+def buildType = "debug"
+if (gradle.startParameter.taskRequests.args[0].toString().contains("Release")) {
+    buildType = "release"
+} else if (gradle.startParameter.taskRequests.args[0].toString().contains("Debug")) {
+    buildType = "debug"
+}
+
 def reactProperties = new Properties()
 file("$nodeModules/react-native/ReactAndroid/gradle.properties").withInputStream { reactProperties.load(it) }
-def REACT_NATIVE_VERSION = reactProperties.getProperty("VERSION_NAME").split("\\.")[1].toInteger()
+def FULL_RN_VERSION = reactProperties.getProperty("VERSION_NAME")
+def REACT_NATIVE_VERSION = FULL_RN_VERSION.split("\\.")[1].toInteger()
 
-logger.warn("react-native-skia: React Native version: ${REACT_NATIVE_VERSION}")
-logger.warn("react-native-skia: Is Source build: ${sourceBuild}")
-logger.warn("react-native-skia: Prebuilt dir: ${prebuiltDir}")
-logger.warn("react-native-skia: Build type: ${buildType}")
+logger.warn("react-native-skia: RN Version: ${REACT_NATIVE_VERSION} / ${FULL_RN_VERSION}")
+logger.warn("react-native-skia: isSourceBuild: ${sourceBuild}")
+logger.warn("react-native-skia: PrebuiltDir: ${prebuiltDir}")
+logger.warn("react-native-skia: buildType: ${buildType}")
+logger.warn("react-native-skia: buildDir: ${buildDir}")
+logger.warn("react-native-skia: node_modules: ${nodeModules}")
 
 buildscript {
     // The Android Gradle plugin is only required when opening the android folder stand-alone.
@@ -123,8 +121,7 @@ android {
                 arguments '-DANDROID_STL=c++_shared',
                           "-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION}",
                           "-DNODE_MODULES_DIR=${nodeModules}",
-                          "-DPREBUILT_DIR=${prebuiltDir}",
-                          "-DBUILD_TYPE=${buildType}"
+                          "-DPREBUILT_DIR=${prebuiltDir}"
 
             }
         }
@@ -189,13 +186,12 @@ dependencies {
     //noinspection GradleDynamicVersion
     extractJNI("com.facebook.fbjni:fbjni:0.2.2")
 
-    if(REACT_NATIVE_VERSION < 69) {
-        def rnAAR = fileTree("${nodeModules}/react-native/android").matching({ it.include "**/**/*.aar" }).singleFile
-        extractJNI(files(rnAAR))
-    } else {
-        // React Native >= 0.69
+    if (!sourceBuild) {
         def rnAarMatcher = "**/react-native/**/*${buildType}.aar"
-        def rnAAR = fileTree("${nodeModules}/react-native/android").matching({ it.include rnAarMatcher }).singleFile
+        if (REACT_NATIVE_VERSION < 69) {
+            rnAarMatcher = "**/**/*.aar"
+        }
+        def rnAAR = fileTree("${nodeModules}/react-native/android").matching({ it.include rnAarMatcher }).singleFile        
         extractJNI(files(rnAAR))
     }
 }

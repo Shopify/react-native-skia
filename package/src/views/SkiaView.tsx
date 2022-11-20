@@ -16,10 +16,14 @@ export class SkiaView extends React.Component<SkiaDrawViewProps> {
   constructor(props: SkiaDrawViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId.current++;
-    const { onDraw } = props;
+    const { onDraw, onSize } = props;
     if (onDraw) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "drawCallback", onDraw);
+    }
+    if (onSize) {
+      assertSkiaViewApi();
+      SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
   }
 
@@ -30,10 +34,14 @@ export class SkiaView extends React.Component<SkiaDrawViewProps> {
   }
 
   componentDidUpdate(prevProps: SkiaDrawViewProps) {
-    const { onDraw } = this.props;
+    const { onDraw, onSize } = this.props;
     if (onDraw !== prevProps.onDraw) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "drawCallback", onDraw);
+    }
+    if (onSize !== prevProps.onSize) {
+      assertSkiaViewApi();
+      SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
   }
 
@@ -66,7 +74,7 @@ export class SkiaView extends React.Component<SkiaDrawViewProps> {
   }
 
   render() {
-    const { mode, debug = false, ...viewProps } = this.props;
+    const { mode, debug = false, onSize, ...viewProps } = this.props;
     return (
       <NativeSkiaView
         collapsable={false}

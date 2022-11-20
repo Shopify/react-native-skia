@@ -1,4 +1,4 @@
-import type { CanvasProps, SkiaView } from "@shopify/react-native-skia";
+import type { CanvasProps, SkiaDomView } from "@shopify/react-native-skia";
 import {
   useTouchHandler,
   ImageFormat,
@@ -8,7 +8,7 @@ import React, { useCallback, useRef } from "react";
 import { Alert, Share } from "react-native";
 
 export const ExportableCanvas = ({ children, style }: CanvasProps) => {
-  const ref = useRef<SkiaView>(null);
+  const ref = useRef<SkiaDomView>(null);
   const onTouch = useTouchHandler({
     onEnd: () => {
       handleShare();

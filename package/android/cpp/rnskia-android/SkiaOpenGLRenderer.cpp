@@ -6,10 +6,11 @@
 
 namespace RNSkia {
 /** Static members */
-std::shared_ptr<DrawingContext> SkiaOpenGLRenderer::getThreadDrawingContext() {
+std::shared_ptr<OpenGLDrawingContext>
+SkiaOpenGLRenderer::getThreadDrawingContext() {
   auto threadId = std::this_thread::get_id();
   if (threadContexts.count(threadId) == 0) {
-    auto drawingContext = std::make_shared<DrawingContext>();
+    auto drawingContext = std::make_shared<OpenGLDrawingContext>();
     drawingContext->glContext = EGL_NO_CONTEXT;
     drawingContext->glDisplay = EGL_NO_DISPLAY;
     drawingContext->glConfig = 0;
@@ -64,7 +65,7 @@ void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
       cb(_skSurface->getCanvas());
 
       // Flush
-      _skSurface->flush();
+      _skSurface->flushAndSubmit();
 
       if (!eglSwapBuffers(getThreadDrawingContext()->glDisplay, _glSurface)) {
         RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
