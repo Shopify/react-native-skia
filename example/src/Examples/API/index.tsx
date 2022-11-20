@@ -21,6 +21,7 @@ import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
 import { Reanimated } from "./Reanimated";
 import { PictureViewExample } from "./PictureView";
+import { OnLayoutDemo } from "./OnLayout";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -158,6 +159,13 @@ export const API = () => {
         component={Reanimated}
         options={{
           title: "🐎 Reanimated",
+        }}
+      />
+      <Stack.Screen
+        name="OnLayout"
+        component={OnLayoutDemo}
+        options={{
+          title: "🎛️ OnLayout",
         }}
       />
     </Stack.Navigator>
