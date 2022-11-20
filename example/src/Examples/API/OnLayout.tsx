@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { LayoutRectangle, Text } from "react-native";
+import type { LayoutRectangle } from "react-native";
+import { Text } from "react-native";
 import { Canvas, Fill } from "@shopify/react-native-skia";
 
 export const OnLayoutDemo = () => {
