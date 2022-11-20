@@ -150,8 +150,7 @@ public:
     // AntiAlias
     if (_antiAlias->isSet() &&
         (_antiAlias->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setAntiAlias(
-          _antiAlias->value().getAsBool());
+      context->getMutablePaint()->setAntiAlias(_antiAlias->value().getAsBool());
     }
   }
 
