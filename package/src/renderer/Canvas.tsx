@@ -59,7 +59,10 @@ export interface CanvasProps extends ComponentProps<typeof SkiaDomView> {
 }
 
 export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
-  ({ children, style, debug, mode, onTouch, onSize }, forwardedRef) => {
+  (
+    { children, style, debug, mode, onTouch, onSize, ...props },
+    forwardedRef
+  ) => {
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const [, setTick] = useState(0);
@@ -128,6 +131,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
         onSize={onSize}
         mode={mode}
         debug={debug}
+        {...props}
       />
     );
   }
