@@ -29,6 +29,7 @@ public:
     SkScalar blur = _blurProp->value().getAsNumber();
 
     auto paint = SkPaint();
+    paint.setAntiAlias(true);
     paint.setColor(color);
     auto filter = SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, blur, true);
     paint.setMaskFilter(filter);
