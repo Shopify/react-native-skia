@@ -249,6 +249,7 @@ export class RemoteSurface {
     if (this.client) {
       this.client.close();
     }
+    this.server.close();
   }
 
   draw(node: ReactNode): Promise<SkImage> {
