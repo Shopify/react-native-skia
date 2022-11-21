@@ -13,7 +13,7 @@ export const Tests = () => {
   useEffect(() => {
     if (client === null) {
       const makeConnection = () => {
-        console.log("Making connection");
+        console.log("waiting for connection...");
         const ws = new WebSocket(url);
         ws.onopen = () => {
           setClient(ws);
@@ -35,11 +35,30 @@ export const Tests = () => {
       };
     }
     client.onmessage = (e) => {
-      client.send("Hello from React Native!");
+      const drawing: SerializedNode = JSON.parse(e.data);
+      const node = parseNode(drawing);
+      console.log(node);
     };
     return () => {
       client.close();
     };
   }, [client]);
   return <Text>💚 Waiting for the server to send tests</Text>;
+};
+
+interface SerializedProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+interface SerializedNode {
+  type: string;
+  props: SerializedProps;
+  children: SerializedNode[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const parseNode = (serializedNode: SerializedNode): any => {
+  const { type, props, children } = serializedNode;
+  return React.createElement(type, props, children.map(parseNode));
 };

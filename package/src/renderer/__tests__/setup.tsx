@@ -16,6 +16,7 @@ import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
 import { SkiaView } from "../../views/SkiaView.web";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
+import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
 
 export const wait = (ms: number) =>
@@ -156,5 +157,70 @@ export const mountCanvas = (element: ReactNode) => {
     },
     surface,
     container,
+  };
+};
+
+export const serialize = (element: ReactNode) => {
+  const Skia = global.SkiaApi;
+  expect(Skia).toBeDefined();
+  const surface = Skia.Surface.Make(width, height)!;
+  expect(surface).toBeDefined();
+  const canvas = surface.getCanvas();
+  expect(canvas).toBeDefined();
+  expect(element).toBeDefined();
+
+  const ref = {
+    current: new SkiaView({}) as any,
+  };
+  const registerValues = (values: Array<SkiaExports.SkiaValue<unknown>>) => {
+    if (ref.current === null) {
+      throw new Error("Canvas ref is not set");
+    }
+    return ref.current.registerValues(values);
+  };
+
+  const depMgr = new DependencyManager(registerValues);
+  const container = new Container(Skia, depMgr, redraw);
+  const root = skiaReconciler.createContainer(
+    container,
+    0,
+    null,
+    true,
+    null,
+    "",
+    console.error,
+    null
+  );
+  skiaReconciler.updateContainer(
+    <CanvasProvider value={{ Skia }}>{element}</CanvasProvider>,
+    root,
+    null,
+    () => {
+      container.depMgr.update();
+    }
+  );
+  console.log(JSON.stringify(element, null, 2));
+  return JSON.stringify(serializeNode(container.root));
+};
+
+interface SerializedProps {
+  [key: string]: any;
+}
+
+interface SerializedNode {
+  type: string;
+  props: SerializedProps;
+  children: SerializedNode[];
+}
+
+const serializeNode = (node: Node<any>): SerializedNode => {
+  const props: SerializedProps = {};
+  Object.keys(node.getProps()).forEach((key, value) => {
+    props[key] = value;
+  });
+  return {
+    type: node.type,
+    props,
+    children: node.children().map(serializeNode),
   };
 };

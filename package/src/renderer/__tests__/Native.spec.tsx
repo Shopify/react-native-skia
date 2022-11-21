@@ -2,10 +2,9 @@ import React from "react";
 import type { Server, WebSocket } from "ws";
 import { WebSocketServer } from "ws";
 
-import { processResult } from "../../__tests__/setup";
 import { Circle, Group } from "../components";
 
-import { drawOnNode, width, height, wait } from "./setup";
+import { serialize, width, height, wait } from "./setup";
 
 let server: Server;
 let hl: WebSocket;
@@ -27,20 +26,21 @@ afterAll(() => {
 });
 
 describe("e2e Test", () => {
-  it("Should blend colors using multiplication", () => {
-    hl.send("start");
-    hl.on("message", (data) => {
-      console.log({ data });
-    });
-    wait(3000);
+  it("Should blend colors using multiplication", async () => {
     const r = width * 0.33;
-    const surface = drawOnNode(
+    const surface = serialize(
       <Group blendMode="multiply">
         <Circle cx={r} cy={r} r={r} color="cyan" />
         <Circle cx={width - r} cy={r} r={r} color="magenta" />
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
       </Group>
     );
-    processResult(surface, "snapshots/drawings/blend-mode-multiply.png");
+    hl.send(surface);
+    hl.on("message", (data) => {
+      console.log(data);
+      console.log({ data });
+    });
+    await wait(30000);
+    hl.close();
   });
 });
