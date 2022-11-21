@@ -114,13 +114,12 @@ public:
     _subscriptions.emplace(node.get(), unsubscribers);
 
     // Set callback for unsubscribing
-    node->setDisposeCallback(
-        [node = node.get(), weakSelf = weak_from_this()]() {
-          auto self = weakSelf.lock();
-          if (self) {
-            self->unsubscribeNode(node);
-          }
-        });
+    node->setDisposeCallback([node, weakSelf = weak_from_this()]() {
+      auto self = weakSelf.lock();
+      if (self) {
+        self->unsubscribeNode(node.get());
+      }
+    });
 
     return jsi::Value::undefined();
   }

@@ -62,7 +62,7 @@ float RNSkMetalCanvasProvider::getScaledHeight() { return _height * _context->ge
  Render to a canvas
  */
 void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)>& cb) {
-  if(_width == -1 && _height == -1) {
+  if (_width <= 0 || _height <= 0) {
     return;
   }
   
