@@ -149,6 +149,9 @@ public:
   */
   const char *getType() { return _type; }
 
+  /**
+   Returns the identifier for the node
+   */
   size_t getNodeId() { return _nodeId; }
 
   /**
@@ -173,10 +176,22 @@ public:
    not.
    */
   void commitPendingChanges() {
+    // Update properties container
     if (_propsContainer != nullptr) {
       _propsContainer->updatePendingValues();
     }
 
+    // Run all pending node operations
+    {
+      std::lock_guard<std::mutex> lock(_childrenLock);
+      for (auto &op : _queuedNodeOps) {
+        op();
+      }
+
+      _queuedNodeOps.clear();
+    }
+
+    // Update children
     for (auto &child : _children) {
       child->commitPendingChanges();
     }
@@ -191,6 +206,34 @@ public:
     // Mark self as resolved
     if (_propsContainer != nullptr) {
       _propsContainer->markAsResolved();
+    }
+
+    // Now let's dispose if needed
+    if (_isDisposed) {
+      // Callback signaling that we're done
+      if (_disposeCallback != nullptr) {
+        _disposeCallback();
+        _disposeCallback = nullptr;
+      }
+
+      // Clear props
+      if (_propsContainer != nullptr) {
+        _propsContainer->dispose();
+      }
+
+      // Remove children
+      std::vector<std::shared_ptr<JsiDomNode>> tmp;
+      {
+        std::lock_guard<std::mutex> lock(_childrenLock);
+        tmp.reserve(_children.size());
+        for (auto &child : _children) {
+          tmp.push_back(child);
+        }
+        _children.clear();
+      }
+      for (auto &child : tmp) {
+        child->dispose();
+      }
     }
 
     // Resolve children
@@ -262,7 +305,7 @@ protected:
    */
   virtual void addChild(std::shared_ptr<JsiDomNode> child) {
     std::lock_guard<std::mutex> lock(_childrenLock);
-    _children.push_back(child);
+    _queuedNodeOps.push_back([child, this]() { _children.push_back(child); });
   }
 
   /**
@@ -271,9 +314,11 @@ protected:
    */
   virtual void insertChildBefore(std::shared_ptr<JsiDomNode> child,
                                  std::shared_ptr<JsiDomNode> before) {
-    auto position = std::find(_children.begin(), _children.end(), before);
     std::lock_guard<std::mutex> lock(_childrenLock);
-    _children.insert(position, child);
+    _queuedNodeOps.push_back([child, before, this]() {
+      auto position = std::find(_children.begin(), _children.end(), before);
+      _children.insert(position, child);
+    });
   }
 
   /**
@@ -282,14 +327,15 @@ protected:
    */
   virtual void removeChild(std::shared_ptr<JsiDomNode> child) {
     std::lock_guard<std::mutex> lock(_childrenLock);
-    // Delete child itself
-    _children.erase(
-        std::remove_if(_children.begin(), _children.end(),
-                       [child](const auto &node) { return node == child; }),
-        _children.end());
+    _queuedNodeOps.push_back([child, this]() {
+      // Delete child itself
+      _children.erase(
+          std::remove_if(_children.begin(), _children.end(),
+                         [child](const auto &node) { return node == child; }),
+          _children.end());
 
-    // We don't need to call dispose since the dtor handles disposing
-    child->dispose();
+      child->dispose();
+    });
   }
 
   /**
@@ -302,31 +348,6 @@ protected:
     }
 
     _isDisposed = true;
-
-    // Callback signaling that we're done
-    if (_disposeCallback != nullptr) {
-      _disposeCallback();
-      _disposeCallback = nullptr;
-    }
-
-    // Clear props
-    if (_propsContainer != nullptr) {
-      _propsContainer->dispose();
-    }
-
-    // Remove children
-    std::vector<std::shared_ptr<JsiDomNode>> tmp;
-    {
-      std::lock_guard<std::mutex> lock(_childrenLock);
-      tmp.reserve(_children.size());
-      for (auto &child : _children) {
-        tmp.push_back(child);
-      }
-      _children.clear();
-    }
-    for (auto &child : tmp) {
-      child->dispose();
-    }
   }
 
 #if SKIA_DOM_DEBUG
@@ -356,6 +377,8 @@ private:
   std::atomic<bool> _isDisposed = {false};
 
   size_t _nodeId;
+
+  std::vector<std::function<void()>> _queuedNodeOps;
 };
 
 } // namespace RNSkia
