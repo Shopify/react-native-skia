@@ -23,12 +23,12 @@ import { JsiSkDOM } from "../../dom/nodes";
 import type { SkImage } from "../../../lib/typescript/src/skia/types/Image/Image";
 
 jest.setTimeout(30 * 1000);
-const E2E_TESTS = !!process.env.E2E;
+const E2E = !!process.env.E2E;
 
 export let surface: TestingSurface;
 
 beforeAll(async () => {
-  surface = E2E_TESTS ? new RemoteSurface() : new LocalSurface();
+  surface = E2E ? new RemoteSurface() : new LocalSurface();
   await surface.init();
 });
 
@@ -97,7 +97,7 @@ beforeAll(async () => {
   global.SkiaValueApi = ValueApi;
 });
 
-export const PIXEL_RATIO = E2E_TESTS ? 1 : 3;
+export const PIXEL_RATIO = E2E ? 1 : 3;
 export const fontSize = 32 * PIXEL_RATIO;
 export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
