@@ -1,22 +1,45 @@
-import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React, { useEffect } from "react";
+import { Platform, Text } from "react-native";
 
-import { List } from "./List";
-import { HelloWorld } from "./HelloWorld";
-import type { Routes } from "./Routes";
+export const ANDROID_WS_HOST = "10.0.2.2";
+export const IOS_WS_HOST = "localhost";
+const url = `ws://${
+  Platform.OS === "android" ? ANDROID_WS_HOST : IOS_WS_HOST
+}:4242`;
 
-const Stack = createNativeStackNavigator<Routes>();
 export const Tests = () => {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="TestList" component={List} />
-      <Stack.Screen
-        name="HelloWorld"
-        component={HelloWorld}
-        options={{
-          title: "🟢 Hello World",
-        }}
-      />
-    </Stack.Navigator>
-  );
+  const [client, setClient] = React.useState<WebSocket | null>(null);
+
+  useEffect(() => {
+    if (client === null) {
+      const makeConnection = () => {
+        console.log("Making connection");
+        const ws = new WebSocket(url);
+        ws.onopen = () => {
+          setClient(ws);
+        };
+        ws.onclose = () => {
+          setClient(null);
+        };
+        ws.onerror = () => {
+          it = setTimeout(() => {
+            ws.close();
+            makeConnection();
+          }, 3000);
+        };
+      };
+      makeConnection();
+      let it: ReturnType<typeof setTimeout>;
+      return () => {
+        clearTimeout(it);
+      };
+    }
+    client.onmessage = (e) => {
+      client.send("Hello from React Native!");
+    };
+    return () => {
+      client.close();
+    };
+  }, [client]);
+  return <Text>💚 Waiting for the server to send tests</Text>;
 };
