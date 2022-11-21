@@ -1,5 +1,5 @@
 import type { SkiaDomView } from "@shopify/react-native-skia";
-import { ImageFormat, Canvas } from "@shopify/react-native-skia";
+import { Canvas } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { Platform, Text, View } from "react-native";
 
@@ -49,12 +49,18 @@ export const Tests = () => {
   }, [client]);
   useEffect(() => {
     if (drawing) {
-      const image = ref.current?.makeImageSnapshot();
-      if (image && client) {
-        const data = image.encodeToBytes(ImageFormat.PNG, 100);
-        client.send(data);
-      }
+      const it = setTimeout(() => {
+        const image = ref.current?.makeImageSnapshot();
+        if (image && client) {
+          const data = image.encodeToBytes();
+          client.send(data);
+        }
+      }, 500);
+      return () => {
+        clearTimeout(it);
+      };
     }
+    return;
   }, [client, drawing]);
   return (
     <View style={{ flex: 1 }}>

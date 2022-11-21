@@ -48,7 +48,7 @@ export const checkImage = (
       baseline.width,
       baseline.height
     );
-    expect(diffPixelsCount).toBe(0);
+    expect(diffPixelsCount).toBeLessThan(2);
   } else {
     fs.writeFileSync(p, png);
   }

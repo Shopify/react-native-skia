@@ -20,20 +20,25 @@ import { SkiaView } from "../../views/SkiaView.web";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
-import type { SkImage } from "../../../lib/typescript/src/skia/types/Image/Image";
+import type { SkImage } from "../../skia/types";
 
 jest.setTimeout(30 * 1000);
-const E2E = !!process.env.E2E;
+const E2E = process.env.E2E === "true";
 
 export let surface: TestingSurface;
 
 beforeAll(async () => {
-  surface = E2E ? new RemoteSurface() : new LocalSurface();
-  await surface.init();
+  if (surface === undefined) {
+    surface = E2E ? new RemoteSurface() : new LocalSurface();
+    await surface.init();
+  }
 });
 
 afterAll(() => {
   surface.dispose();
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  surface = undefined;
 });
 
 export const wait = (ms: number) =>
@@ -97,7 +102,7 @@ beforeAll(async () => {
   global.SkiaValueApi = ValueApi;
 });
 
-export const PIXEL_RATIO = E2E ? 1 : 3;
+export const PIXEL_RATIO = 3;
 export const fontSize = 32 * PIXEL_RATIO;
 export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
@@ -246,9 +251,13 @@ interface TestingSurface {
   init(): Promise<void>;
   draw(node: ReactNode): Promise<SkImage>;
   dispose(): void;
+  width: number;
+  height: number;
 }
 
 class LocalSurface implements TestingSurface {
+  readonly width = 256 * PIXEL_RATIO;
+  readonly height = 256 * PIXEL_RATIO;
   init() {
     return new Promise<void>((resolve) => {
       resolve();
@@ -265,9 +274,11 @@ class LocalSurface implements TestingSurface {
 }
 
 class RemoteSurface implements TestingSurface {
+  readonly width = 256;
+  readonly height = 256;
+
   private server: Server;
   private client: WebSocket | null = null;
-
   constructor() {
     this.server = new WebSocketServer({ port: 4242 });
   }
