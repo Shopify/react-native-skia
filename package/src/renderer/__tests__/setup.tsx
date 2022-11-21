@@ -22,6 +22,20 @@ import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
 import type { SkImage } from "../../../lib/typescript/src/skia/types/Image/Image";
 
+jest.setTimeout(30 * 1000);
+const E2E_TESTS = !!process.env.E2E;
+
+export let surface: TestingSurface;
+
+beforeAll(async () => {
+  surface = E2E_TESTS ? new RemoteSurface() : new LocalSurface();
+  await surface.init();
+});
+
+afterAll(() => {
+  surface.dispose();
+});
+
 export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -83,7 +97,7 @@ beforeAll(async () => {
   global.SkiaValueApi = ValueApi;
 });
 
-export const PIXEL_RATIO = 3;
+export const PIXEL_RATIO = E2E_TESTS ? 1 : 3;
 export const fontSize = 32 * PIXEL_RATIO;
 export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
@@ -99,17 +113,17 @@ skiaReconciler.injectIntoDevTools({
 });
 
 export const drawOnNode = (element: ReactNode) => {
-  const { surface, draw } = mountCanvas(element);
+  const { surface: ckSurface, draw } = mountCanvas(element);
   draw();
-  return surface;
+  return ckSurface;
 };
 
 export const mountCanvas = (element: ReactNode) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
-  const surface = Skia.Surface.Make(width, height)!;
-  expect(surface).toBeDefined();
-  const canvas = surface.getCanvas();
+  const ckSurface = Skia.Surface.Make(width, height)!;
+  expect(ckSurface).toBeDefined();
+  const canvas = ckSurface.getCanvas();
   expect(canvas).toBeDefined();
   expect(element).toBeDefined();
 
@@ -158,7 +172,7 @@ export const mountCanvas = (element: ReactNode) => {
     draw: () => {
       container.draw(ctx);
     },
-    surface,
+    surface: ckSurface,
     container,
   };
 };
@@ -166,9 +180,9 @@ export const mountCanvas = (element: ReactNode) => {
 export const serialize = (element: ReactNode) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
-  const surface = Skia.Surface.Make(width, height)!;
-  expect(surface).toBeDefined();
-  const canvas = surface.getCanvas();
+  const ckSurface = Skia.Surface.Make(width, height)!;
+  expect(ckSurface).toBeDefined();
+  const canvas = ckSurface.getCanvas();
   expect(canvas).toBeDefined();
   expect(element).toBeDefined();
 
@@ -228,7 +242,29 @@ const serializeNode = (node: Node<any>): SerializedNode => {
   };
 };
 
-export class RemoteSurface {
+interface TestingSurface {
+  init(): Promise<void>;
+  draw(node: ReactNode): Promise<SkImage>;
+  dispose(): void;
+}
+
+class LocalSurface implements TestingSurface {
+  init() {
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
+  }
+
+  dispose(): void {}
+
+  draw(node: ReactNode): Promise<SkImage> {
+    const { surface: ckSurface, draw } = mountCanvas(node);
+    draw();
+    return Promise.resolve(ckSurface.makeImageSnapshot());
+  }
+}
+
+class RemoteSurface implements TestingSurface {
   private server: Server;
   private client: WebSocket | null = null;
 
@@ -237,10 +273,10 @@ export class RemoteSurface {
   }
 
   init() {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       this.server.on("connection", (client) => {
         this.client = client;
-        resolve(true);
+        resolve();
       });
     });
   }
