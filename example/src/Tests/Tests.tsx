@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
-import { Platform, Text } from "react-native";
+import type { SkiaDomView } from "@shopify/react-native-skia";
+import { ImageFormat, Canvas } from "@shopify/react-native-skia";
+import React, { useEffect, useRef, useState } from "react";
+import { Platform, Text, View } from "react-native";
 
 export const ANDROID_WS_HOST = "10.0.2.2";
 export const IOS_WS_HOST = "localhost";
@@ -8,8 +10,10 @@ const url = `ws://${
 }:4242`;
 
 export const Tests = () => {
-  const [client, setClient] = React.useState<WebSocket | null>(null);
-
+  const ref = useRef<SkiaDomView>(null);
+  const [client, setClient] = useState<WebSocket | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [drawing, setDrawing] = useState<any>(null);
   useEffect(() => {
     if (client === null) {
       const makeConnection = () => {
@@ -35,15 +39,31 @@ export const Tests = () => {
       };
     }
     client.onmessage = (e) => {
-      const drawing: SerializedNode = JSON.parse(e.data);
-      const node = parseNode(drawing);
-      console.log(node);
+      const tree: SerializedNode = JSON.parse(e.data);
+      const node = parseNode(tree);
+      setDrawing(node);
     };
     return () => {
       client.close();
     };
   }, [client]);
-  return <Text>💚 Waiting for the server to send tests</Text>;
+  useEffect(() => {
+    if (drawing) {
+      const image = ref.current?.makeImageSnapshot();
+      if (image && client) {
+        const data = image.encodeToBytes(ImageFormat.PNG, 100);
+        client.send(data);
+      }
+    }
+  }, [client, drawing]);
+  return (
+    <View style={{ flex: 1 }}>
+      <Text>💚 Waiting for the server to send tests</Text>
+      <Canvas style={{ width: 256, height: 256 }} ref={ref}>
+        {drawing}
+      </Canvas>
+    </View>
+  );
 };
 
 interface SerializedProps {
@@ -60,5 +80,9 @@ interface SerializedNode {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parseNode = (serializedNode: SerializedNode): any => {
   const { type, props, children } = serializedNode;
-  return React.createElement(type, props, children.map(parseNode));
+  return React.createElement(
+    type,
+    { ...props, key: `${Math.random()}` },
+    children.map(parseNode)
+  );
 };

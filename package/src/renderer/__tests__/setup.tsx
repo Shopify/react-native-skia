@@ -5,6 +5,8 @@ import path from "path";
 import React from "react";
 import type { ReactNode } from "react";
 import ReactReconciler from "react-reconciler";
+import type { Server, WebSocket } from "ws";
+import { WebSocketServer } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
 import { skHostConfig } from "../HostConfig";
@@ -18,6 +20,7 @@ import { SkiaView } from "../../views/SkiaView.web";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
+import type { SkImage } from "../../../lib/typescript/src/skia/types/Image/Image";
 
 export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -199,7 +202,6 @@ export const serialize = (element: ReactNode) => {
       container.depMgr.update();
     }
   );
-  console.log(JSON.stringify(element, null, 2));
   return JSON.stringify(serializeNode(container.root));
 };
 
@@ -215,8 +217,9 @@ interface SerializedNode {
 
 const serializeNode = (node: Node<any>): SerializedNode => {
   const props: SerializedProps = {};
-  Object.keys(node.getProps()).forEach((key, value) => {
-    props[key] = value;
+  const ogProps = node.getProps();
+  Object.keys(ogProps).forEach((key) => {
+    props[key] = ogProps[key];
   });
   return {
     type: node.type,
@@ -224,3 +227,45 @@ const serializeNode = (node: Node<any>): SerializedNode => {
     children: node.children().map(serializeNode),
   };
 };
+
+export class RemoteSurface {
+  private server: Server;
+  private client: WebSocket | null = null;
+
+  constructor() {
+    this.server = new WebSocketServer({ port: 4242 });
+  }
+
+  init() {
+    return new Promise((resolve) => {
+      this.server.on("connection", (client) => {
+        this.client = client;
+        resolve(true);
+      });
+    });
+  }
+
+  dispose() {
+    if (this.client) {
+      this.client.close();
+    }
+  }
+
+  draw(node: ReactNode): Promise<SkImage> {
+    if (this.client === null) {
+      throw new Error("Client is not connected. Did you call init?");
+    }
+    this.client.send(serialize(node));
+    return new Promise((resolve) => {
+      this.client!.on("message", (raw: Buffer) => {
+        const Skia = global.SkiaApi;
+        const data = Skia.Data.fromBytes(new Uint8Array(raw));
+        const image = Skia.Image.MakeImageFromEncoded(data);
+        if (image === null) {
+          throw new Error("Unable to decode image");
+        }
+        resolve(image);
+      });
+    });
+  }
+}

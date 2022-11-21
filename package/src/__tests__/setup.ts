@@ -3,7 +3,7 @@ import fs from "fs";
 
 import type { Surface } from "canvaskit-wasm";
 
-import type { SkSurface } from "../skia";
+import type { SkSurface, SkImage } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
 export const docPath = (relPath: string) =>
@@ -26,4 +26,19 @@ export const processResult = (
     fs.writeFileSync(p, png);
   }
   ckSurface.getCanvas().clear(Float32Array.of(0, 0, 0, 0));
+};
+
+export const checkImage = (
+  image: SkImage,
+  relPath: string,
+  overwrite = false
+) => {
+  const png = image.encodeToBytes();
+  const p = path.resolve(__dirname, relPath);
+  if (fs.existsSync(p) && !overwrite) {
+    const ref = fs.readFileSync(p);
+    expect(ref.equals(png)).toBe(true);
+  } else {
+    fs.writeFileSync(p, png);
+  }
 };
