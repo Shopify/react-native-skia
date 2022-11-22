@@ -54,8 +54,7 @@ export const checkImage = (
       toTest.data,
       diffImage.data,
       baseline.width,
-      baseline.height,
-      { threshold: 0.1 }
+      baseline.height
     );
     if (!mute) {
       if (diffPixelsCount !== 0) {

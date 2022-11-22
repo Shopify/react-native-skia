@@ -38,14 +38,20 @@ export const Tests = () => {
         clearTimeout(it);
       };
     }
-    client.onmessage = (e) => {
-      const tree: SerializedNode = JSON.parse(e.data);
-      const node = parseNode(tree);
-      setDrawing(node);
-    };
-    return () => {
-      client.close();
-    };
+    return;
+  }, [client]);
+  useEffect(() => {
+    if (client !== null) {
+      client.onmessage = (e) => {
+        const tree: SerializedNode = JSON.parse(e.data);
+        const node = parseNode(tree);
+        setDrawing(node);
+      };
+      return () => {
+        client.close();
+      };
+    }
+    return;
   }, [client]);
   useEffect(() => {
     if (drawing) {
@@ -118,7 +124,6 @@ const parseProp = (value: any) => {
       const data = Skia.Data.fromBytes(raw);
       return Skia.Image.MakeImageFromEncoded(data);
     } else if (value.__typename__ === "Font") {
-      console.log({ value });
       const raw = new Uint8Array(value.typeface);
       const data = Skia.Data.fromBytes(raw);
       const typeface = Skia.Typeface.MakeFreeTypeFaceFromData(data)!;
