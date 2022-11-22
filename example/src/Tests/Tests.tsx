@@ -17,7 +17,6 @@ export const Tests = () => {
   useEffect(() => {
     if (client === null) {
       const makeConnection = () => {
-        console.log("waiting for connection...");
         const ws = new WebSocket(url);
         ws.onopen = () => {
           setClient(ws);
@@ -29,7 +28,7 @@ export const Tests = () => {
           it = setTimeout(() => {
             ws.close();
             makeConnection();
-          }, 3000);
+          }, 500);
         };
       };
       makeConnection();

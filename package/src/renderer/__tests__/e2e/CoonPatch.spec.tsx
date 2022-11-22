@@ -1,10 +1,9 @@
 import React from "react";
 
-import { checkImage } from "../../__tests__/setup";
-import { Patch } from "../components";
-import * as SkiaRenderer from "../index";
-
-import { surface } from "./setup";
+import { surface } from "../setup";
+import { Patch } from "../../components";
+import * as SkiaRenderer from "../../index";
+import { checkImage } from "../../../__tests__/setup";
 
 describe("CoonsPatch", () => {
   it("Renderer", () => {
