@@ -248,10 +248,25 @@ const serializeSkOjects = (obj: any): any => {
         width: obj.width,
         height: obj.height,
       };
+    } else if (obj.__typename__ === "RRect") {
+      return {
+        __typename__: "RRect",
+        x: obj.rect.x,
+        y: obj.rect.y,
+        width: obj.rect.width,
+        height: obj.rect.height,
+        rx: obj.rx,
+        ry: obj.ry,
+      };
     } else if (isPath(obj)) {
       return {
         __typename__: "Path",
         cmds: obj.toCmds(),
+      };
+    } else if (obj.__typename__ === "Image") {
+      return {
+        __typename__: "Image",
+        bytes: Array.from((obj as SkImage).encodeToBytes()),
       };
     }
   }

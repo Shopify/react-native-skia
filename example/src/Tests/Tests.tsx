@@ -105,8 +105,19 @@ const parseProp = (value: any) => {
       return Skia.Point(value.x, value.y);
     } else if (value.__typename__ === "Rect") {
       return Skia.XYWHRect(value.x, value.y, value.width, value.height);
+    } else if (value.__typename__ === "RRect") {
+      return Skia.RRectXY(
+        Skia.XYWHRect(value.x, value.y, value.width, value.height),
+        value.rx,
+        value.ry
+      );
     } else if (value.__typename__ === "Path") {
       return Skia.Path.MakeFromCmds(value.cmds);
+    } else if (value.__typename__ === "Image") {
+      const raw = new Uint8Array(value.bytes);
+      const data = Skia.Data.fromBytes(raw);
+      console.log({ data, l: raw.length });
+      return Skia.Image.MakeImageFromEncoded(data);
     }
   }
   return value;
