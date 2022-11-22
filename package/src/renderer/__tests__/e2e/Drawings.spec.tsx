@@ -5,7 +5,6 @@ import {
   Blur,
   Circle,
   FitBox,
-  //FitBox,
   Group,
   LinearGradient,
   Path,
