@@ -21,6 +21,7 @@ import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
 import type { SkImage } from "../../skia/types";
+import { isPath } from "../../skia/types";
 
 jest.setTimeout(30 * 1000);
 const E2E = process.env.E2E === "true";
@@ -221,7 +222,8 @@ export const serialize = (element: ReactNode) => {
       container.depMgr.update();
     }
   );
-  return JSON.stringify(serializeNode(container.root));
+  const serialized = serializeNode(container.root);
+  return JSON.stringify(serialized);
 };
 
 interface SerializedProps {
@@ -238,6 +240,19 @@ const serializeSkOjects = (obj: any): any => {
   if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
+    } else if (obj.__typename__ === "Rect") {
+      return {
+        __typename__: "Rect",
+        x: obj.x,
+        y: obj.y,
+        width: obj.width,
+        height: obj.height,
+      };
+    } else if (isPath(obj)) {
+      return {
+        __typename__: "Path",
+        cmds: obj.toCmds(),
+      };
     }
   }
   return obj;
@@ -246,9 +261,11 @@ const serializeSkOjects = (obj: any): any => {
 const serializeNode = (node: Node<any>): SerializedNode => {
   const props: SerializedProps = {};
   const ogProps = node.getProps();
-  Object.keys(ogProps).forEach((key) => {
-    props[key] = serializeSkOjects(ogProps[key]);
-  });
+  Object.keys(ogProps)
+    .filter((key) => key !== "children")
+    .forEach((key) => {
+      props[key] = serializeSkOjects(ogProps[key]);
+    });
   return {
     type: node.type,
     props,

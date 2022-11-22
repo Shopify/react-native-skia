@@ -103,6 +103,10 @@ const parseProp = (value: any) => {
   if (value && typeof value === "object" && "__typename__" in value) {
     if (value.__typename__ === "Point") {
       return Skia.Point(value.x, value.y);
+    } else if (value.__typename__ === "Rect") {
+      return Skia.XYWHRect(value.x, value.y, value.width, value.height);
+    } else if (value.__typename__ === "Path") {
+      return Skia.Path.MakeFromCmds(value.cmds);
     }
   }
   return value;
