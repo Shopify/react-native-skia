@@ -234,11 +234,20 @@ interface SerializedNode {
   children: SerializedNode[];
 }
 
+const serializeSkOjects = (obj: any): any => {
+  if (obj && typeof obj === "object" && "__typename__" in obj) {
+    if (obj.__typename__ === "Point") {
+      return { __typename__: "Point", x: obj.x, y: obj.y };
+    }
+  }
+  return obj;
+};
+
 const serializeNode = (node: Node<any>): SerializedNode => {
   const props: SerializedProps = {};
   const ogProps = node.getProps();
   Object.keys(ogProps).forEach((key) => {
-    props[key] = ogProps[key];
+    props[key] = serializeSkOjects(ogProps[key]);
   });
   return {
     type: node.type,

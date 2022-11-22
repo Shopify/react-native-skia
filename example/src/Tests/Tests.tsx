@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkiaDomView } from "@shopify/react-native-skia";
-import { Canvas } from "@shopify/react-native-skia";
+import { Skia, Canvas } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { Platform, Text, View } from "react-native";
 
@@ -12,7 +13,7 @@ const url = `ws://${
 export const Tests = () => {
   const ref = useRef<SkiaDomView>(null);
   const [client, setClient] = useState<WebSocket | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const [drawing, setDrawing] = useState<any>(null);
   useEffect(() => {
     if (client === null) {
@@ -72,7 +73,6 @@ export const Tests = () => {
 };
 
 interface SerializedProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -82,12 +82,28 @@ interface SerializedNode {
   children: SerializedNode[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parseNode = (serializedNode: SerializedNode): any => {
   const { type, props, children } = serializedNode;
   return React.createElement(
     type,
-    { ...props, key: `${Math.random()}` },
+    { ...parseProps(props), key: `${Math.random()}` },
     children.map(parseNode)
   );
+};
+
+const parseProps = (props: SerializedProps) => {
+  const newProps: SerializedProps = {};
+  Object.keys(props).forEach((key) => {
+    newProps[key] = parseProp(props[key]);
+  });
+  return newProps;
+};
+
+const parseProp = (value: any) => {
+  if (value && typeof value === "object" && "__typename__" in value) {
+    if (value.__typename__ === "Point") {
+      return Skia.Point(value.x, value.y);
+    }
+  }
+  return value;
 };
