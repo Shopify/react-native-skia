@@ -10,6 +10,7 @@ import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
 export const E2E = process.env.E2E === "true";
 export const itFailsE2e = E2E ? it.failing : it;
+export const itRunsE2eOnly = E2E ? it : it.skip;
 
 export const docPath = (relPath: string) =>
   path.resolve(process.cwd(), `../docs/static/img/${relPath}`);
@@ -37,7 +38,8 @@ export const checkImage = (
   image: SkImage,
   relPath: string,
   overwrite = false,
-  mute = false
+  mute = false,
+  threshold = 0.1
 ) => {
   const png = image.encodeToBytes();
   const p = path.resolve(__dirname, relPath);
@@ -54,7 +56,8 @@ export const checkImage = (
       toTest.data,
       diffImage.data,
       baseline.width,
-      baseline.height
+      baseline.height,
+      { threshold }
     );
     if (!mute) {
       if (diffPixelsCount !== 0) {

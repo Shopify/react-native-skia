@@ -1,6 +1,6 @@
 import React from "react";
 
-import { docPath, checkImage, itFailsE2e } from "../../../__tests__/setup";
+import { docPath, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import { surface, loadFontWithAsset, loadImage } from "../setup";
 import {
   Fill,
@@ -13,24 +13,41 @@ import {
 } from "../../components";
 
 describe("Test Image Filters", () => {
-  // This test fails on e2e because of the scaling, not because of a regression
-  itFailsE2e("Should change the text morphology", async () => {
+  itRunsE2eOnly("Should display the text the same way everywhere", async () => {
     const { width, fontSize } = surface;
     const { font, assets } = loadFontWithAsset(
       "skia/__tests__/assets/Roboto-Medium.ttf",
       fontSize
     );
     const x = width / 8;
-    const y = width / 4;
     const image = await surface.draw(
       <>
         <Fill color="white" />
         <Text text="Hello World" x={x} y={x} font={font} />
-        <Text text="Hello World" x={x} y={y} font={font}>
-          <Morphology radius={1} />
+      </>,
+      assets
+    );
+    checkImage(image, docPath("image-filters/regular-text.png"));
+  });
+  itRunsE2eOnly("Should change the text morphology", async () => {
+    const { width, fontSize } = surface;
+    const { font, assets } = loadFontWithAsset(
+      "skia/__tests__/assets/Roboto-Medium.ttf",
+      fontSize
+    );
+    const x = width / 8;
+    const y = x;
+    const y1 = 2 * y;
+    const y2 = 3 * y;
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Text text="Hello World" x={x} y={y} font={font} />
+        <Text text="Hello World" x={x} y={y1} font={font}>
+          <Morphology radius={2} />
         </Text>
-        <Text text="Hello World" x={x} y={width / 2.66666} font={font}>
-          <Morphology radius={1 / 3} operator="erode" />
+        <Text text="Hello World" x={x} y={y2} font={font}>
+          <Morphology radius={1} operator="erode" />
         </Text>
       </>,
       assets
