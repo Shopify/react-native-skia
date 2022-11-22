@@ -45,15 +45,23 @@ export const checkImage = (
     const ref = fs.readFileSync(p);
     const baseline = PNG.sync.read(ref);
     const toTest = PNG.sync.read(Buffer.from(image.encodeToBytes()));
+    const diffImage = new PNG({
+      width: baseline.width,
+      height: baseline.height,
+    });
     const diffPixelsCount = pixelmatch(
       baseline.data,
       toTest.data,
-      null,
+      diffImage.data,
       baseline.width,
       baseline.height,
       { includeAA: true, threshold: E2E ? 0.3 : 0 }
     );
     if (!mute) {
+      if (diffPixelsCount !== 0) {
+        fs.writeFileSync(`${p}-result.png`, PNG.sync.write(toTest));
+        fs.writeFileSync(`${p}-diff.png`, PNG.sync.write(diffImage));
+      }
       expect(diffPixelsCount).toBe(0);
     }
     return diffPixelsCount;

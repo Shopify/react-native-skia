@@ -75,7 +75,7 @@ describe("Color Filters", () => {
       const purple = [
         1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
       ];
-      const img = await surface.draw(
+      let img = await surface.draw(
         <>
           <Image
             x={0}
@@ -89,6 +89,26 @@ describe("Color Filters", () => {
               <Lerp t={0.5}>
                 <ColorMatrix matrix={purple} />
                 <ColorMatrix matrix={blackAndWhite} />
+              </Lerp>
+            </LinearToSRGBGamma>
+          </Image>
+        </>
+      );
+      checkImage(img, docPath("color-filters/lerp.png"));
+      img = await surface.draw(
+        <>
+          <Image
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            image={image}
+            fit="cover"
+          >
+            <LinearToSRGBGamma>
+              <Lerp t={0.5}>
+                <ColorMatrix matrix={blackAndWhite} />
+                <ColorMatrix matrix={purple} />
               </Lerp>
             </LinearToSRGBGamma>
           </Image>
