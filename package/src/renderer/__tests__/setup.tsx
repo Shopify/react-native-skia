@@ -274,13 +274,15 @@ const serializeSkOjects = (obj: any): any => {
 };
 
 const serializeNode = (node: Node<any>): SerializedNode => {
-  const props: SerializedProps = {};
+  const props: any = {};
   const ogProps = node.getProps();
-  Object.keys(ogProps)
-    .filter((key) => key !== "children")
-    .forEach((key) => {
-      props[key] = serializeSkOjects(ogProps[key]);
-    });
+  if (ogProps) {
+    Object.keys(ogProps)
+      .filter((key) => key !== "children")
+      .forEach((key) => {
+        props[key] = serializeSkOjects(ogProps[key]);
+      });
+  }
   return {
     type: node.type,
     props,
