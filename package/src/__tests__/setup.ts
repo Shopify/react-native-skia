@@ -59,8 +59,8 @@ export const checkImage = (
     );
     if (!mute) {
       if (diffPixelsCount !== 0) {
-        fs.writeFileSync(`${p}-result.png`, PNG.sync.write(toTest));
-        fs.writeFileSync(`${p}-diff.png`, PNG.sync.write(diffImage));
+        fs.writeFileSync(`${p}-result-test.png`, PNG.sync.write(toTest));
+        fs.writeFileSync(`${p}-diff-test.png`, PNG.sync.write(diffImage));
       }
       expect(diffPixelsCount).toBe(0);
     }
