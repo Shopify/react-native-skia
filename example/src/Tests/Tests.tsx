@@ -116,7 +116,6 @@ const parseProp = (value: any) => {
     } else if (value.__typename__ === "Image") {
       const raw = new Uint8Array(value.bytes);
       const data = Skia.Data.fromBytes(raw);
-      console.log({ data, l: raw.length });
       return Skia.Image.MakeImageFromEncoded(data);
     }
   }
