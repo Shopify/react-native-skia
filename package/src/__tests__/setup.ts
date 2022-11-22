@@ -33,7 +33,8 @@ export const processResult = (
 export const checkImage = (
   image: SkImage,
   relPath: string,
-  overwrite = false
+  overwrite = false,
+  mute = false
 ) => {
   const png = image.encodeToBytes();
   const p = path.resolve(__dirname, relPath);
@@ -46,10 +47,15 @@ export const checkImage = (
       toTest.data,
       null,
       baseline.width,
-      baseline.height
+      baseline.height,
+      { includeAA: true, threshold: 0.3 }
     );
-    expect(diffPixelsCount).toBeLessThan(2);
+    if (!mute) {
+      expect(diffPixelsCount).toBe(0);
+    }
+    return diffPixelsCount;
   } else {
     fs.writeFileSync(p, png);
   }
+  return 0;
 };
