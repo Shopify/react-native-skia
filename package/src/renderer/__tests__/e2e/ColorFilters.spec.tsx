@@ -50,7 +50,7 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/color-blend.png"));
   });
-  it("should use composition", async () => {
+  it[FAILS_ON_E2E]("should use composition", async () => {
     const { width } = surface;
     const r = width / 2;
     const img = await surface.draw(

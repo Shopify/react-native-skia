@@ -73,8 +73,8 @@ describe("Test Image Filters", () => {
           r={padding}
           color="lightblue"
         >
-          <Shadow dx={36} dy={36} blur={75} color="#93b8c4" />
-          <Shadow dx={-36} dy={-36} blur={75} color="#c7f8ff" />
+          <Shadow dx={36 / 3} dy={36 / 3} blur={75 / 3} color="#93b8c4" />
+          <Shadow dx={-36 / 3} dy={-36 / 3} blur={75 / 3} color="#c7f8ff" />
         </RoundedRect>
       </>
     );
@@ -83,19 +83,27 @@ describe("Test Image Filters", () => {
   // This test should fail because it is not scaled properly but
   // it passes because of the low tolerance in the canvas result
   it("Should draw a innershadow", async () => {
+    const { width } = surface;
+    const padding = width / 8;
     const img = await surface.draw(
       <>
         <Fill color="lightblue" />
         <RoundedRect
-          x={96}
-          y={96}
-          width={576}
-          height={576}
-          r={96}
+          x={padding}
+          y={padding}
+          width={width - 2 * padding}
+          height={width - 2 * padding}
+          r={padding}
           color="lightblue"
         >
-          <Shadow dx={36} dy={36} blur={75} color="#93b8c4" inner />
-          <Shadow dx={-36} dy={-36} blur={75} color="#c7f8ff" inner />
+          <Shadow dx={36 / 3} dy={36 / 3} blur={75 / 3} color="#93b8c4" inner />
+          <Shadow
+            dx={-36 / 3}
+            dy={-36 / 3}
+            blur={75 / 3}
+            color="#c7f8ff"
+            inner
+          />
         </RoundedRect>
       </>
     );

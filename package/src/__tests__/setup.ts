@@ -55,7 +55,7 @@ export const checkImage = (
       diffImage.data,
       baseline.width,
       baseline.height,
-      { threshold: E2E ? 0.3 : 0 }
+      { threshold: 0.1 }
     );
     if (!mute) {
       if (diffPixelsCount !== 0) {

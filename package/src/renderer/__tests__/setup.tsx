@@ -20,6 +20,7 @@ import { SkiaView } from "../../views/SkiaView.web";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
+import { Group } from "../components";
 import type { SkFont, SkImage } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
@@ -323,9 +324,9 @@ interface TestingSurface {
 }
 
 class LocalSurface implements TestingSurface {
-  readonly width = 256 * PIXEL_RATIO;
-  readonly height = 256 * PIXEL_RATIO;
-  readonly fontSize = 32 * PIXEL_RATIO;
+  readonly width = 256;
+  readonly height = 256;
+  readonly fontSize = 32;
 
   init() {
     return new Promise<void>((resolve) => {
@@ -336,7 +337,9 @@ class LocalSurface implements TestingSurface {
   dispose(): void {}
 
   draw(node: ReactNode): Promise<SkImage> {
-    const { surface: ckSurface, draw } = mountCanvas(node);
+    const { surface: ckSurface, draw } = mountCanvas(
+      <Group transform={[{ scale: PIXEL_RATIO }]}>{node}</Group>
+    );
     draw();
     return Promise.resolve(ckSurface.makeImageSnapshot());
   }

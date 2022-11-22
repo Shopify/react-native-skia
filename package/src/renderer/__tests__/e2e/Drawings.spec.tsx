@@ -12,9 +12,7 @@ import {
 } from "../../components";
 import { importSkia, surface } from "../setup";
 
-const blur = 30;
-
-describe("Test e2e server", () => {
+describe("Drawings", () => {
   it("Should blend colors using multiplication", async () => {
     const { width, height } = surface;
     const r = width * 0.33;
@@ -33,7 +31,7 @@ describe("Test e2e server", () => {
     const r = width * 0.33;
     const image = await surface.draw(
       <Group blendMode="multiply">
-        <Blur blur={blur} />
+        <Blur blur={10} />
         <Circle cx={r} cy={r} r={r} color="cyan" />
         <Circle cx={width - r} cy={r} r={r} color="magenta" />
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
@@ -47,7 +45,7 @@ describe("Test e2e server", () => {
     const r = width * 0.33;
     const image = await surface.draw(
       <Group blendMode="multiply">
-        <Blur blur={blur + 3} />
+        <Blur blur={20} />
         <Circle cx={r} cy={r} r={r} color="cyan" />
         <Circle cx={width - r} cy={r} r={r} color="magenta" />
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
