@@ -151,7 +151,6 @@ describe("Opacity", () => {
     checkImage(img, "snapshots/drawings/opacity-image.png");
   });
   it[FAILS_ON_E2E]("Should apply opacity to an image shader (1)", async () => {
-    const {} = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
     const img = await surface.draw(

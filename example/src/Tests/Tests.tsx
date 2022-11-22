@@ -117,6 +117,12 @@ const parseProp = (value: any) => {
       const raw = new Uint8Array(value.bytes);
       const data = Skia.Data.fromBytes(raw);
       return Skia.Image.MakeImageFromEncoded(data);
+    } else if (value.__typename__ === "Font") {
+      console.log({ value });
+      const raw = new Uint8Array(value.typeface);
+      const data = Skia.Data.fromBytes(raw);
+      const typeface = Skia.Typeface.MakeFreeTypeFaceFromData(data)!;
+      return Skia.Font(typeface, value.size);
     }
   }
   return value;

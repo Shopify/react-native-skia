@@ -20,7 +20,7 @@ import { SkiaView } from "../../views/SkiaView.web";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
-import type { SkImage } from "../../skia/types";
+import type { SkFont, SkImage } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 
@@ -77,6 +77,20 @@ export const loadImage = (uri: string) => {
   );
   expect(image).toBeTruthy();
   return image!;
+};
+
+export const loadFontWithAsset = (uri: string, ftSize?: number) => {
+  const Skia = global.SkiaApi;
+  const typeface = resolveFile(uri);
+  const tf = Skia.Typeface.MakeFreeTypeFaceFromData(
+    Skia.Data.fromBytes(resolveFile(uri))
+  );
+  expect(tf).toBeTruthy();
+  const size = ftSize ?? fontSize;
+  const font = Skia.Font(tf!, size);
+  const assets = new Map<SkFont, number[]>();
+  assets.set(font, Array.from(new Uint8Array(typeface)));
+  return { font, assets };
 };
 
 export const loadFont = (uri: string, ftSize?: number) => {
@@ -183,7 +197,7 @@ export const mountCanvas = (element: ReactNode) => {
   };
 };
 
-export const serialize = (element: ReactNode) => {
+export const serialize = (element: ReactNode, assets: Assets) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
   const ckSurface = Skia.Surface.Make(width, height)!;
@@ -222,7 +236,7 @@ export const serialize = (element: ReactNode) => {
       container.depMgr.update();
     }
   );
-  const serialized = serializeNode(container.root);
+  const serialized = serializeNode(container.root, assets);
   return JSON.stringify(serialized);
 };
 
@@ -236,7 +250,7 @@ interface SerializedNode {
   children: SerializedNode[];
 }
 
-const serializeSkOjects = (obj: any): any => {
+const serializeSkOjects = (obj: any, assets: Assets): any => {
   if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
@@ -268,39 +282,51 @@ const serializeSkOjects = (obj: any): any => {
         __typename__: "Image",
         bytes: Array.from((obj as SkImage).encodeToBytes()),
       };
+    } else if (obj.__typename__ === "Font") {
+      const font: SkFont = obj;
+      return {
+        __typename__: "Font",
+        size: font.getSize(),
+        typeface: assets.get(font)!,
+      };
     }
   }
   return obj;
 };
 
-const serializeNode = (node: Node<any>): SerializedNode => {
+const serializeNode = (node: Node<any>, assets: Assets): SerializedNode => {
   const props: any = {};
   const ogProps = node.getProps();
   if (ogProps) {
     Object.keys(ogProps)
       .filter((key) => key !== "children")
       .forEach((key) => {
-        props[key] = serializeSkOjects(ogProps[key]);
+        props[key] = serializeSkOjects(ogProps[key], assets);
       });
   }
   return {
     type: node.type,
     props,
-    children: node.children().map(serializeNode),
+    children: node.children().map((child) => serializeNode(child, assets)),
   };
 };
 
+type Assets = Map<SkFont, number[]>;
+
 interface TestingSurface {
   init(): Promise<void>;
-  draw(node: ReactNode): Promise<SkImage>;
+  draw(node: ReactNode, assets?: Assets): Promise<SkImage>;
   dispose(): void;
   width: number;
   height: number;
+  fontSize: number;
 }
 
 class LocalSurface implements TestingSurface {
   readonly width = 256 * PIXEL_RATIO;
   readonly height = 256 * PIXEL_RATIO;
+  readonly fontSize = 32 * PIXEL_RATIO;
+
   init() {
     return new Promise<void>((resolve) => {
       resolve();
@@ -319,6 +345,7 @@ class LocalSurface implements TestingSurface {
 class RemoteSurface implements TestingSurface {
   readonly width = 256;
   readonly height = 256;
+  readonly fontSize = 32;
 
   private server: Server;
   private client: WebSocket | null = null;
@@ -342,13 +369,13 @@ class RemoteSurface implements TestingSurface {
     this.server.close();
   }
 
-  draw(node: ReactNode): Promise<SkImage> {
+  draw(node: ReactNode, assets: Assets = new Map()): Promise<SkImage> {
     if (this.client === null) {
       throw new Error("Client is not connected. Did you call init?");
     }
-    this.client.send(serialize(node));
     return new Promise((resolve) => {
-      this.client!.on("message", (raw: Buffer) => {
+      const client = this.client!;
+      client!.once("message", (raw: Buffer) => {
         const Skia = global.SkiaApi;
         const data = Skia.Data.fromBytes(new Uint8Array(raw));
         const image = Skia.Image.MakeImageFromEncoded(data);
@@ -357,6 +384,7 @@ class RemoteSurface implements TestingSurface {
         }
         resolve(image);
       });
+      client!.send(serialize(node, assets));
     });
   }
 }
