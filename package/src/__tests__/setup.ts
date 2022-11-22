@@ -9,6 +9,7 @@ import type { SkSurface, SkImage } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
 export const E2E = process.env.E2E === "true";
+export const FAILS_ON_E2E = E2E ? "failing" : "skip";
 
 export const docPath = (relPath: string) =>
   path.resolve(process.cwd(), `../docs/static/img/${relPath}`);

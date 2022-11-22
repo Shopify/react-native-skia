@@ -125,9 +125,6 @@ describe("Test Shader component", () => {
   });
 
   it("should display a linear gradient", () => {
-    const { Skia } = importSkia();
-    const source = Skia.RuntimeEffect.Make(spiral)!;
-    expect(source).toBeTruthy();
     const surface = drawOnNode(
       <Group>
         <LinearGradient
@@ -142,9 +139,6 @@ describe("Test Shader component", () => {
   });
 
   it("should display a color", () => {
-    const { Skia } = importSkia();
-    const source = Skia.RuntimeEffect.Make(spiral)!;
-    expect(source).toBeTruthy();
     const surface = drawOnNode(
       <Fill>
         <ColorShader color="lightblue" />
