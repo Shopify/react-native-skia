@@ -1,6 +1,6 @@
 import React from "react";
 
-import { docPath, checkImage, FAILS_ON_E2E } from "../../../__tests__/setup";
+import { docPath, checkImage, itFailsE2e } from "../../../__tests__/setup";
 import { surface, loadFontWithAsset, loadImage } from "../setup";
 import {
   Fill,
@@ -14,7 +14,7 @@ import {
 
 describe("Test Image Filters", () => {
   // This test fails on e2e because of the scaling, not because of a regression
-  it[FAILS_ON_E2E]("Should change the text morphology", async () => {
+  itFailsE2e("Should change the text morphology", async () => {
     const { width, fontSize } = surface;
     const { font, assets } = loadFontWithAsset(
       "skia/__tests__/assets/Roboto-Medium.ttf",
@@ -27,10 +27,10 @@ describe("Test Image Filters", () => {
         <Fill color="white" />
         <Text text="Hello World" x={x} y={x} font={font} />
         <Text text="Hello World" x={x} y={y} font={font}>
-          <Morphology radius={3} />
+          <Morphology radius={1} />
         </Text>
         <Text text="Hello World" x={x} y={width / 2.66666} font={font}>
-          <Morphology radius={1} operator="erode" />
+          <Morphology radius={1 / 3} operator="erode" />
         </Text>
       </>,
       assets

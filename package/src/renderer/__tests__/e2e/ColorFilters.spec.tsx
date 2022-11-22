@@ -11,7 +11,7 @@ import {
   LinearToSRGBGamma,
   SRGBToLinearGamma,
 } from "../../components";
-import { docPath, checkImage, FAILS_ON_E2E } from "../../../__tests__/setup";
+import { docPath, checkImage, itFailsE2e } from "../../../__tests__/setup";
 
 describe("Color Filters", () => {
   it("should apply a color matrix to an image", async () => {
@@ -50,7 +50,7 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/color-blend.png"));
   });
-  it[FAILS_ON_E2E]("should use composition", async () => {
+  itFailsE2e("should use composition", async () => {
     const { width } = surface;
     const r = width / 2;
     const img = await surface.draw(
@@ -64,7 +64,7 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/composition.png"));
   });
-  it[FAILS_ON_E2E](
+  itFailsE2e(
     "should use linear interpolation between two color matrices",
     async () => {
       const { width, height } = surface;

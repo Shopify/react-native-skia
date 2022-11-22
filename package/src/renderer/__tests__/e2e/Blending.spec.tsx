@@ -1,7 +1,7 @@
 import React from "react";
 
 import { importSkia, surface } from "../setup";
-import { docPath, checkImage, FAILS_ON_E2E } from "../../../__tests__/setup";
+import { docPath, checkImage, itFailsE2e } from "../../../__tests__/setup";
 import {
   Blend,
   ColorShader,
@@ -53,7 +53,7 @@ describe("Test Blending", () => {
     checkImage(image, "snapshots/runtime-effects/blend-multiply.png");
   });
 
-  it[FAILS_ON_E2E]("should blend using color burn", async () => {
+  itFailsE2e("should blend using color burn", async () => {
     const { vec } = importSkia();
     const { width } = surface;
     const r = width / 2;
@@ -80,7 +80,7 @@ describe("Test Blending", () => {
     checkImage(image, "snapshots/runtime-effects/blend-color-burn2.png");
   });
 
-  it[FAILS_ON_E2E]("should blend using multiply", async () => {
+  itFailsE2e("should blend using multiply", async () => {
     const { vec } = importSkia();
     const { width } = surface;
     const r = width / 2;

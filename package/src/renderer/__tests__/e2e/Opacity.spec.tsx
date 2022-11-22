@@ -8,7 +8,7 @@ import {
   width as wWidth,
 } from "../setup";
 import {
-  FAILS_ON_E2E,
+  itFailsE2e,
   processResult,
   checkImage,
 } from "../../../__tests__/setup";
@@ -87,30 +87,27 @@ describe("Opacity", () => {
     );
     checkImage(image, "snapshots/drawings/opacity-multiplication2.png");
   });
-  it[FAILS_ON_E2E](
-    "Should multiply the opacity to 0.25 using a Shader",
-    async () => {
-      const { rect, rrect } = importSkia();
-      const { width } = surface;
-      const r = width * 0.5;
-      const image = await surface.draw(
+  itFailsE2e("Should multiply the opacity to 0.25 using a Shader", async () => {
+    const { rect, rrect } = importSkia();
+    const { width } = surface;
+    const r = width * 0.5;
+    const image = await surface.draw(
+      <Group opacity={0.5}>
+        <Fill color="lightblue" />
         <Group opacity={0.5}>
-          <Fill color="lightblue" />
-          <Group opacity={0.5}>
-            <RoundedRect rect={rrect(rect(0, 0, r, r), r, r)} opacity={0.2}>
-              <ColorShader color="black" />
-            </RoundedRect>
-            <RoundedRect
-              rect={rrect(rect(0, 0, r / 2, r / 2), r, r)}
-              color="white"
-            />
-          </Group>
+          <RoundedRect rect={rrect(rect(0, 0, r, r), r, r)} opacity={0.2}>
+            <ColorShader color="black" />
+          </RoundedRect>
+          <RoundedRect
+            rect={rrect(rect(0, 0, r / 2, r / 2), r, r)}
+            color="white"
+          />
         </Group>
-      );
-      checkImage(image, "snapshots/drawings/opacity-multiplication2.png");
-    }
-  );
-  it[FAILS_ON_E2E]("Should apply opacity to an image (1)", async () => {
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/opacity-multiplication2.png");
+  });
+  itFailsE2e("Should apply opacity to an image (1)", async () => {
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
     const img = await surface.draw(
@@ -130,7 +127,7 @@ describe("Opacity", () => {
     );
     checkImage(img, "snapshots/drawings/opacity-image.png");
   });
-  it[FAILS_ON_E2E]("Should apply opacity to an image (2)", async () => {
+  itFailsE2e("Should apply opacity to an image (2)", async () => {
     const {} = importSkia();
     const { width, height } = surface;
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
@@ -150,7 +147,7 @@ describe("Opacity", () => {
     );
     checkImage(img, "snapshots/drawings/opacity-image.png");
   });
-  it[FAILS_ON_E2E]("Should apply opacity to an image shader (1)", async () => {
+  itFailsE2e("Should apply opacity to an image shader (1)", async () => {
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
     const img = await surface.draw(
@@ -170,7 +167,7 @@ describe("Opacity", () => {
     );
     checkImage(img, "snapshots/drawings/opacity-image.png");
   });
-  it[FAILS_ON_E2E]("Should apply opacity to an image shader (2)", async () => {
+  itFailsE2e("Should apply opacity to an image shader (2)", async () => {
     const {} = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
