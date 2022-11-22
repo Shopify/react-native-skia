@@ -22,9 +22,9 @@ import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
 import type { SkImage } from "../../skia/types";
 import { isPath } from "../../skia/types";
+import { E2E } from "../../__tests__/setup";
 
 jest.setTimeout(30 * 1000);
-const E2E = process.env.E2E === "true";
 
 export let surface: TestingSurface;
 

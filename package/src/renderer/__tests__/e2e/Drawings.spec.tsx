@@ -120,6 +120,6 @@ describe("Test e2e server", () => {
         </Group>
       </FitBox>
     );
-    checkImage(image, "snapshots/paths/skia2.png");
+    checkImage(image, "snapshots/paths/skia.png");
   });
 });
