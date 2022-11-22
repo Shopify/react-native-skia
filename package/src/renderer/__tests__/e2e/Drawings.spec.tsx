@@ -29,6 +29,6 @@ describe("Test e2e server", () => {
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
       </Group>
     );
-    checkImage(image, "snapshots/drawings/blur2.png");
+    checkImage(image, "snapshots/drawings/blur.png");
   });
 });
