@@ -105,6 +105,9 @@ public:
       paint->setShader(nullptr);
       paint->setColor(*_color->getDerivedValue());
       paint->setAlphaf(context->getOpacity() * paint->getColor4f().fA);
+    } else if (context->isChanged()) {
+      auto paint = context->getMutablePaint();
+      paint->setAlphaf(context->getOpacity() * paint->getColor4f().fA);
     }
 
     // Style
