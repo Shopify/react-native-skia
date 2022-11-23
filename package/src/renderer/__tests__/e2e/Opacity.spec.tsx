@@ -7,11 +7,7 @@ import {
   surface,
   width as wWidth,
 } from "../setup";
-import {
-  itFailsE2e,
-  processResult,
-  checkImage,
-} from "../../../__tests__/setup";
+import { processResult, checkImage } from "../../../__tests__/setup";
 import {
   ColorShader,
   Fill,
@@ -21,6 +17,7 @@ import {
   RoundedRect,
 } from "../../components";
 import { setupSkia } from "../../../skia/__tests__/setup";
+import { fitRects } from "../../../dom/nodes/datatypes/Fitting";
 
 describe("Opacity", () => {
   it("Should multiply the opacity to 0", async () => {
@@ -87,7 +84,37 @@ describe("Opacity", () => {
     );
     checkImage(image, "snapshots/drawings/opacity-multiplication2.png");
   });
-  itFailsE2e("Should multiply the opacity to 0.25 using a Shader", async () => {
+  it("Should build a reference result for shader opacity", () => {
+    const { surface: ckSurface, Skia, canvas } = setupSkia(wWidth, wHeight);
+    canvas.drawColor(Skia.Color("white"));
+    const paint = Skia.Paint();
+    paint.setShader(Skia.Shader.MakeColor(Skia.Color("lightblue")));
+    paint.setAlphaf(0.5);
+    canvas.drawPaint(paint);
+    processResult(ckSurface, "snapshots/drawings/shader-opacity-reference.png");
+  });
+  it("Should set shader opacity (1)", async () => {
+    let image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group opacity={0.5}>
+          <ColorShader color="lightblue" />
+          <Fill />
+        </Group>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/shader-opacity-reference.png");
+    image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Fill opacity={0.5}>
+          <ColorShader color="lightblue" />
+        </Fill>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/shader-opacity-reference.png");
+  });
+  it("Should multiply the opacity to 0.25 using a Shader", async () => {
     const { rect, rrect } = importSkia();
     const { width } = surface;
     const r = width * 0.5;
@@ -107,7 +134,32 @@ describe("Opacity", () => {
     );
     checkImage(image, "snapshots/drawings/opacity-multiplication2.png");
   });
-  itFailsE2e("Should apply opacity to an image (1)", async () => {
+  it("Build reference result", () => {
+    const image = loadImage("skia/__tests__/assets/oslo.jpg");
+    const {
+      surface: ckSurface,
+      Skia,
+      canvas,
+      width,
+      height,
+    } = setupSkia(wWidth, wHeight);
+    canvas.drawColor(Skia.Color("lightblue"));
+    const paint = Skia.Paint();
+    paint.setAlphaf(0.5);
+    const { src, dst } = fitRects(
+      "cover",
+      {
+        x: 0,
+        y: 0,
+        width: image.width(),
+        height: image.height(),
+      },
+      { x: 0, y: 0, width, height }
+    );
+    canvas.drawImageRect(image, src, dst, paint);
+    processResult(ckSurface, "snapshots/drawings/opacity-image.png");
+  });
+  it("Should apply opacity to an image (1)", async () => {
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
     const img = await surface.draw(
@@ -127,7 +179,7 @@ describe("Opacity", () => {
     );
     checkImage(img, "snapshots/drawings/opacity-image.png");
   });
-  itFailsE2e("Should apply opacity to an image (2)", async () => {
+  it("Should apply opacity to an image (2)", async () => {
     const {} = importSkia();
     const { width, height } = surface;
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
@@ -147,7 +199,7 @@ describe("Opacity", () => {
     );
     checkImage(img, "snapshots/drawings/opacity-image.png");
   });
-  itFailsE2e("Should apply opacity to an image shader (1)", async () => {
+  it("Should apply opacity to an image shader (1)", async () => {
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
     const img = await surface.draw(
@@ -165,9 +217,9 @@ describe("Opacity", () => {
         </Fill>
       </Group>
     );
-    checkImage(img, "snapshots/drawings/opacity-image.png");
+    checkImage(img, "snapshots/drawings/opacity-image.png", false, false, 0.2);
   });
-  itFailsE2e("Should apply opacity to an image shader (2)", async () => {
+  it("Should apply opacity to an image shader (2)", async () => {
     const {} = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
@@ -188,6 +240,6 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    checkImage(img, "snapshots/drawings/opacity-image.png");
+    checkImage(img, "snapshots/drawings/opacity-image.png", false, false, 0.2);
   });
 });
