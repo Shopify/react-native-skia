@@ -48,11 +48,11 @@ protected:
           } else {
             innerShader = outer;
           }
-        } else if(maybeImageFilter) {
+        } else if (maybeImageFilter) {
           sk_sp<SkImageFilter> outer = maybeImageFilter->getCurrent();
           if (outer != nullptr) {
-            innerImageFilter = SkImageFilters::Blend(
-                blendMode, outer, innerImageFilter, nullptr);
+            innerImageFilter = SkImageFilters::Blend(blendMode, outer,
+                                                     innerImageFilter, nullptr);
           } else {
             innerImageFilter = outer;
           }
