@@ -1,17 +1,33 @@
 import React from "react";
 
-import { setupSkia } from "../../skia/__tests__/setup";
-import { processResult } from "../../__tests__/setup";
-import { Fill, Group, RoundedRect, ColorShader, Image } from "../components";
-import { ImageShader } from "../components/image/ImageShader";
-
-import { drawOnNode, width, importSkia, loadImage, height } from "./setup";
+import {
+  height as wHeight,
+  importSkia,
+  loadImage,
+  surface,
+  width as wWidth,
+} from "../setup";
+import {
+  itFailsE2e,
+  processResult,
+  checkImage,
+} from "../../../__tests__/setup";
+import {
+  ColorShader,
+  Fill,
+  Group,
+  Image,
+  ImageShader,
+  RoundedRect,
+} from "../../components";
+import { setupSkia } from "../../../skia/__tests__/setup";
 
 describe("Opacity", () => {
-  it("Should multiply the opacity to 0", () => {
+  it("Should multiply the opacity to 0", async () => {
     const { rect, rrect } = importSkia();
+    const { width } = surface;
     const r = width * 0.5;
-    const surface = drawOnNode(
+    const image = await surface.draw(
       <Group>
         <Fill color="lightblue" />
         <Group opacity={0}>
@@ -26,13 +42,13 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    processResult(surface, "snapshots/drawings/opacity-multiplication.png");
+    checkImage(image, "snapshots/drawings/opacity-multiplication.png");
   });
   it("Should build a reference result for the opacity", () => {
-    const { surface, canvas, Skia } = setupSkia(width, height);
+    const { surface: ckSurface, canvas, Skia } = setupSkia(wWidth, wHeight);
     const { rect, rrect } = importSkia();
     const p1 = Skia.Paint();
-    const r = width * 0.5;
+    const r = wWidth * 0.5;
 
     p1.setColor(Skia.Color("lightblue"));
     p1.setAlphaf(0.5);
@@ -48,12 +64,13 @@ describe("Opacity", () => {
     p3.setAlphaf(0.5 * 0.5);
     canvas.drawRRect(rrect(rect(0, 0, r / 2, r / 2), r, r), p3);
 
-    processResult(surface, "snapshots/drawings/opacity-multiplication2.png");
+    processResult(ckSurface, "snapshots/drawings/opacity-multiplication2.png");
   });
-  it("Should multiply the opacity to 0.25", () => {
+  it("Should multiply the opacity to 0.25", async () => {
     const { rect, rrect } = importSkia();
+    const { width } = surface;
     const r = width * 0.5;
-    const surface = drawOnNode(
+    const image = await surface.draw(
       <Group opacity={0.5}>
         <Fill color="lightblue" />
         <Group opacity={0.5}>
@@ -68,12 +85,13 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    processResult(surface, "snapshots/drawings/opacity-multiplication2.png");
+    checkImage(image, "snapshots/drawings/opacity-multiplication2.png");
   });
-  it("Should multiply the opacity to 0.25 using a Shader", () => {
+  itFailsE2e("Should multiply the opacity to 0.25 using a Shader", async () => {
     const { rect, rrect } = importSkia();
+    const { width } = surface;
     const r = width * 0.5;
-    const surface = drawOnNode(
+    const image = await surface.draw(
       <Group opacity={0.5}>
         <Fill color="lightblue" />
         <Group opacity={0.5}>
@@ -87,12 +105,12 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    processResult(surface, "snapshots/drawings/opacity-multiplication2.png");
+    checkImage(image, "snapshots/drawings/opacity-multiplication2.png");
   });
-  it("Should apply opacity to an image (1)", () => {
-    const {} = importSkia();
+  itFailsE2e("Should apply opacity to an image (1)", async () => {
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    const surface = drawOnNode(
+    const { width, height } = surface;
+    const img = await surface.draw(
       <Group>
         <Fill color="lightblue" />
         <Group opacity={0.5}>
@@ -107,12 +125,13 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    processResult(surface, "snapshots/drawings/opacity-image.png");
+    checkImage(img, "snapshots/drawings/opacity-image.png");
   });
-  it("Should apply opacity to an image (2)", () => {
+  itFailsE2e("Should apply opacity to an image (2)", async () => {
     const {} = importSkia();
+    const { width, height } = surface;
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    const surface = drawOnNode(
+    const img = await surface.draw(
       <Group>
         <Fill color="lightblue" />
         <Image
@@ -126,12 +145,12 @@ describe("Opacity", () => {
         />
       </Group>
     );
-    processResult(surface, "snapshots/drawings/opacity-image.png");
+    checkImage(img, "snapshots/drawings/opacity-image.png");
   });
-  it("Should apply opacity to an image shader (1)", () => {
-    const {} = importSkia();
+  itFailsE2e("Should apply opacity to an image shader (1)", async () => {
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    const surface = drawOnNode(
+    const { width, height } = surface;
+    const img = await surface.draw(
       <Group>
         <Fill color="lightblue" />
         <Fill opacity={0.5}>
@@ -146,12 +165,13 @@ describe("Opacity", () => {
         </Fill>
       </Group>
     );
-    processResult(surface, "snapshots/drawings/opacity-image.png");
+    checkImage(img, "snapshots/drawings/opacity-image.png");
   });
-  it("Should apply opacity to an image shader (2)", () => {
+  itFailsE2e("Should apply opacity to an image shader (2)", async () => {
     const {} = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    const surface = drawOnNode(
+    const { width, height } = surface;
+    const img = await surface.draw(
       <Group>
         <Fill color="lightblue" />
         <Group opacity={0.5}>
@@ -168,6 +188,6 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    processResult(surface, "snapshots/drawings/opacity-image.png");
+    checkImage(img, "snapshots/drawings/opacity-image.png");
   });
 });
