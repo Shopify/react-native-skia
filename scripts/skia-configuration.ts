@@ -7,8 +7,29 @@ const NdkDir: string = process.env.ANDROID_NDK ?? "";
 // 1) CMakeLists.txt
 // 2) react-native-skia.podspec
 // 3) package.json - add the following files to the files array:
-//    - "libs/ios/libskparagraph.xcframework",
-//    - "libs/ios/libskunicode.xcframework",
+//    "libs/ios/libskparagraph.xcframework",
+//    "libs/ios/libskunicode.xcframework",
+// 4) build-skia.yml:
+//    Line 60:
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskparagraph.a
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskunicode.a
+//    Line 72:
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskparagraph.a
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskunicode.a
+//    Line 84:
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskparagraph.a
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskunicode.a
+//   Line 96:
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskparagraph.a
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskunicode.a
+//   Line 108:
+//      ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskparagraph.xcframework
+//      ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskunicode.xcframework
+// 5) build-npm-package.ts:
+//    Line 47-48, uncomment
+//    Line 66-67, uncomment
+// 6) Workflow-copy-libs.ts:
+//    27-28 and 36-37, uncomment
 export const BUILD_WITH_PARAGRAPH = false;
 const ParagraphArgs = BUILD_WITH_PARAGRAPH
   ? [
