@@ -7,11 +7,7 @@ import {
   surface,
   width as wWidth,
 } from "../setup";
-import {
-  itFailsE2e,
-  processResult,
-  checkImage,
-} from "../../../__tests__/setup";
+import { processResult, checkImage } from "../../../__tests__/setup";
 import {
   ColorShader,
   Fill,
@@ -221,9 +217,9 @@ describe("Opacity", () => {
         </Fill>
       </Group>
     );
-    checkImage(img, "snapshots/drawings/opacity-image.png");
+    checkImage(img, "snapshots/drawings/opacity-image.png", false, false, 0.2);
   });
-  itFailsE2e("Should apply opacity to an image shader (2)", async () => {
+  it("Should apply opacity to an image shader (2)", async () => {
     const {} = importSkia();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
@@ -244,6 +240,6 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    checkImage(img, "snapshots/drawings/opacity-image.png");
+    checkImage(img, "snapshots/drawings/opacity-image.png", false, false, 0.2);
   });
 });
