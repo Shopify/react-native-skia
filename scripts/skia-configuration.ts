@@ -2,6 +2,31 @@ import { executeCmdSync } from "./utils";
 
 const NdkDir: string = process.env.ANDROID_NDK ?? "";
 
+// To build with the paragraph API's, you need to set this to true, and
+// you need to update the following files with some uncommenting:
+// 1) CMakeLists.txt
+// 2) react-native-skia.podspec
+// 3) package.json - add the following files to the files array:
+//    - "libs/ios/libskparagraph.xcframework",
+//    - "libs/ios/libskunicode.xcframework",
+export const BUILD_WITH_PARAGRAPH = false;
+const ParagraphArgs = BUILD_WITH_PARAGRAPH
+  ? [
+      ["skia_enable_paragraph", true],
+      ["skia_use_icu", true],
+      ["skia_use_system_icu", false],
+      ["skia_use_harfbuzz", true],
+      ["skia_use_system_harfbuzz", false],
+    ]
+  : [
+      ["skia_use_harfbuzz", false],
+      ["skia_use_icu", false],
+    ];
+
+const ParagraphOutputs = BUILD_WITH_PARAGRAPH
+  ? ["libskparagraph.a", "libskunicode.a"]
+  : [];
+
 export const commonArgs = [
   ["skia_use_piex", true],
   ["skia_use_sfntly", false],
@@ -18,11 +43,7 @@ export const commonArgs = [
   ["skia_enable_flutter_defines", true],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
-  ["skia_enable_paragraph", true],
-  ["skia_use_icu", true],
-  ["skia_use_system_icu", false],
-  ["skia_use_harfbuzz", true],
-  ["skia_use_system_harfbuzz", false],
+  ...ParagraphArgs,
 ];
 
 export type PlatformName = "ios" | "android";
@@ -82,8 +103,7 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
-      "libskparagraph.a",
-      "libskunicode.a",
+      ...ParagraphOutputs,
     ],
   },
   ios: {
@@ -135,8 +155,7 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
-      "libskparagraph.a",
-      "libskunicode.a",
+      ...ParagraphOutputs,
     ],
   },
 };
