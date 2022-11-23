@@ -44,7 +44,7 @@ protected:
     if (paint->getColorFilter() != nullptr &&
         paint->getColorFilter() != getCurrent().get()) {
       paint->setColorFilter(
-          SkColorFilters::Compose(paint->refColorFilter(), ColorFilter));
+          SkColorFilters::Compose(ColorFilter, paint->refColorFilter()));
     } else {
       paint->setColorFilter(ColorFilter);
     }

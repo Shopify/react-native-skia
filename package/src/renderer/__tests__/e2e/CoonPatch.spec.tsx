@@ -1,19 +1,19 @@
 import React from "react";
 
-import { processResult } from "../../__tests__/setup";
-import { Patch } from "../components";
-import * as SkiaRenderer from "../index";
-
-import { drawOnNode, width } from "./setup";
+import { surface } from "../setup";
+import { Patch } from "../../components";
+import * as SkiaRenderer from "../../index";
+import { checkImage } from "../../../__tests__/setup";
 
 describe("CoonsPatch", () => {
   it("Renderer", () => {
     expect(SkiaRenderer).toBeDefined();
   });
-  it("Simple Coons Patch", () => {
+  it("Simple Coons Patch", async () => {
     const vec = (x: number, y: number) => ({ x, y });
     const colors = ["#61dafb", "#fb61da", "#61fbcf", "#dafb61"];
-    const C = 64;
+    const { width } = surface;
+    const C = width / 4;
     const topLeft = { pos: vec(0, 0), c1: vec(0, C), c2: vec(C, 0) };
     const topRight = {
       pos: vec(width, 0),
@@ -30,12 +30,12 @@ describe("CoonsPatch", () => {
       c1: vec(0, width - 2 * C),
       c2: vec(-2 * C, width),
     };
-    const surface = drawOnNode(
+    const img = await surface.draw(
       <Patch
         colors={colors}
         patch={[topLeft, topRight, bottomRight, bottomLeft]}
       />
     );
-    processResult(surface, "snapshots/coons-patch/simple.png");
+    checkImage(img, "snapshots/coons-patch/simple.png");
   });
 });
