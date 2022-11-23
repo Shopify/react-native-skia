@@ -41,14 +41,14 @@ protected:
         auto maybeImageFilter =
             std::dynamic_pointer_cast<JsiBaseImageFilterNode>(child);
 
-        if (asShader) {
+        if (maybeShader) {
           sk_sp<SkShader> outer = maybeShader->getCurrent();
           if (innerShader != nullptr) {
             innerShader = SkShaders::Blend(blendMode, outer, innerShader);
           } else {
             innerShader = outer;
           }
-        } else {
+        } else if(maybeImageFilter) {
           sk_sp<SkImageFilter> outer = maybeImageFilter->getCurrent();
           if (outer != nullptr) {
             innerImageFilter = SkImageFilters::Blend(
