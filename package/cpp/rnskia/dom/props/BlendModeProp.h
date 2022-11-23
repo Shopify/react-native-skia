@@ -43,11 +43,11 @@ private:
       return SkBlendMode::kDstOver;
     } else if (value == "srcIn") {
       return SkBlendMode::kSrcIn;
-    } else if (value == "kDstIn") {
+    } else if (value == "dstIn") {
       return SkBlendMode::kDstIn;
     } else if (value == "srcOut") {
       return SkBlendMode::kSrcOut;
-    } else if (value == "dtsOut") {
+    } else if (value == "dstOut") {
       return SkBlendMode::kDstOut;
     } else if (value == "srcATop") {
       return SkBlendMode::kSrcATop;
