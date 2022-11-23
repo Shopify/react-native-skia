@@ -93,7 +93,7 @@ public:
     // Opacity
     if (_opacity->isChanged() || context->isChanged()) {
       if (_opacity->isSet()) {
-        context->setOpacity(_opacity->value().getAsNumber());
+        context->setOpacity(context->getOpacity() * _opacity->value().getAsNumber());
       } else {
         context->clearOpacity();
       }
@@ -107,7 +107,7 @@ public:
       paint->setAlphaf(context->getOpacity() * paint->getColor4f().fA);
     } else if (context->isChanged()) {
       auto paint = context->getMutablePaint();
-      paint->setAlphaf(context->getOpacity() * paint->getColor4f().fA);
+      paint->setAlphaf(context->getOpacity());
     }
 
     // Style
