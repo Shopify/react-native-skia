@@ -26,7 +26,6 @@ import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
 import { Container } from "./Container";
 import { DependencyManager } from "./DependencyManager";
-import { CanvasProvider } from "./useCanvas";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -107,11 +106,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
 
     // Render effect
     useEffect(() => {
-      render(
-        <CanvasProvider value={{ Skia }}>{children}</CanvasProvider>,
-        root,
-        container
-      );
+      render(children, root, container);
     }, [children, root, redraw, container]);
 
     useEffect(() => {
