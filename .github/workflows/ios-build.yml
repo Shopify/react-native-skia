@@ -73,11 +73,11 @@ jobs:
         working-directory: example
         run: E2E=true yarn ios --configuration Release --simulator 'iPhone 14 Pro'
 
-      - name: Take screenshot
-        run: xcrun simctl io booted screenshot screenshot.png
-
       - name: Sleep for 30 seconds
         run: sleep 30
+
+      - name: Take screenshot
+        run: xcrun simctl io booted screenshot screenshot.png
         
       - uses: actions/upload-artifact@v2
         with:
