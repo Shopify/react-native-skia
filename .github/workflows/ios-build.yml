@@ -75,6 +75,11 @@ jobs:
 
       - name: Take screenshot
         run: xcrun simctl io booted screenshot screenshot.png
+
+      - name: Sleep for 30 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '30s'
         
       - uses: actions/upload-artifact@v2
         with:
