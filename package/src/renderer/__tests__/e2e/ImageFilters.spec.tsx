@@ -44,10 +44,10 @@ describe("Test Image Filters", () => {
         <Fill color="white" />
         <Text text="Hello World" x={x} y={y} font={font} />
         <Text text="Hello World" x={x} y={y1} font={font}>
-          <Morphology radius={2} />
+          <Morphology radius={1} />
         </Text>
         <Text text="Hello World" x={x} y={y2} font={font}>
-          <Morphology radius={1} operator="erode" />
+          <Morphology radius={0.3} operator="erode" />
         </Text>
       </>,
       assets
