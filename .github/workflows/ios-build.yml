@@ -46,6 +46,10 @@ jobs:
         working-directory: example
         run: yarn install --frozen-lockfile
 
+      - name: Install Package
+        working-directory: package
+        run: yarn install --frozen-lockfile
+
       - name: Restore Pods from cache
         uses: actions/cache@v3
         with:
