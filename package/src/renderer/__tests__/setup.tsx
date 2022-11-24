@@ -12,7 +12,6 @@ import { DependencyManager } from "../DependencyManager";
 import { skHostConfig } from "../HostConfig";
 import { Container } from "../Container";
 import type { DrawingContext } from "../DrawingContext";
-import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
@@ -170,14 +169,9 @@ export const mountCanvas = (element: ReactNode) => {
     console.error,
     null
   );
-  skiaReconciler.updateContainer(
-    <CanvasProvider value={{ Skia }}>{element}</CanvasProvider>,
-    root,
-    null,
-    () => {
-      container.depMgr.update();
-    }
-  );
+  skiaReconciler.updateContainer(element, root, null, () => {
+    container.depMgr.update();
+  });
   const ctx: DrawingContext = {
     width,
     height,
@@ -229,14 +223,9 @@ export const serialize = (element: ReactNode, assets: Assets) => {
     console.error,
     null
   );
-  skiaReconciler.updateContainer(
-    <CanvasProvider value={{ Skia }}>{element}</CanvasProvider>,
-    root,
-    null,
-    () => {
-      container.depMgr.update();
-    }
-  );
+  skiaReconciler.updateContainer(element, root, null, () => {
+    container.depMgr.update();
+  });
   const serialized = serializeNode(container.root, assets);
   return JSON.stringify(serialized);
 };

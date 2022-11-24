@@ -1,13 +1,14 @@
 import React from "react";
 
-import { docPath, processResult } from "../../../__tests__/setup";
+import { docPath, checkImage } from "../../../__tests__/setup";
 import { Group, Mask, Circle, Rect } from "../../components";
-import { drawOnNode, width } from "../setup";
+import { surface } from "../setup";
 
 describe("Mask Documentation Examples", () => {
-  it("Should draw an alpha mask", () => {
+  it("Should draw an alpha mask", async () => {
+    const { width } = surface;
     const r = width / 2;
-    const surface = drawOnNode(
+    const image = await surface.draw(
       <>
         <Mask
           mask={
@@ -21,11 +22,12 @@ describe("Mask Documentation Examples", () => {
         </Mask>
       </>
     );
-    processResult(surface, docPath("mask/alpha-mask.png"));
+    checkImage(image, docPath("mask/alpha-mask.png"));
   });
-  it("Should draw an luminance mask", () => {
+  it("Should draw an luminance mask", async () => {
+    const { width } = surface;
     const r = width / 2;
-    const surface = drawOnNode(
+    const image = await surface.draw(
       <>
         <Mask
           mode="luminance"
@@ -40,6 +42,6 @@ describe("Mask Documentation Examples", () => {
         </Mask>
       </>
     );
-    processResult(surface, docPath("mask/luminance-mask.png"));
+    checkImage(image, docPath("mask/luminance-mask.png"));
   });
 });
