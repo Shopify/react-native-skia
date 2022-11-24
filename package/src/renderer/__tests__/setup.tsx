@@ -122,7 +122,6 @@ export const fontSize = 32 * PIXEL_RATIO;
 export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
-const redraw = () => {};
 
 const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -158,7 +157,7 @@ export const mountCanvas = (element: ReactNode) => {
   };
 
   const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr, redraw);
+  const container = new Container(Skia, depMgr);
   const root = skiaReconciler.createContainer(
     container,
     0,
@@ -212,7 +211,7 @@ export const serialize = (element: ReactNode, assets: Assets) => {
   };
 
   const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr, redraw);
+  const container = new Container(Skia, depMgr);
   const root = skiaReconciler.createContainer(
     container,
     0,
