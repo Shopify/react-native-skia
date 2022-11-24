@@ -11,6 +11,7 @@ import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 export const E2E = process.env.E2E === "true";
 export const itFailsE2e = E2E ? it.failing : it;
 export const itRunsE2eOnly = E2E ? it : it.skip;
+export const itRunsNodeOnly = E2E ? it.skip : it;
 
 export const docPath = (relPath: string) =>
   path.resolve(process.cwd(), `../docs/static/img/${relPath}`);
