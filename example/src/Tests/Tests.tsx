@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkiaDomView } from "@shopify/react-native-skia";
-import { Canvas } from "@shopify/react-native-skia";
+import { Skia, Canvas } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 
@@ -12,13 +12,23 @@ export const Tests = () => {
   const ref = useRef<SkiaDomView>(null);
   const client = useClient();
   const [drawing, setDrawing] = useState<any>(null);
-
   useEffect(() => {
     if (client !== null) {
       client.onmessage = (e) => {
-        const tree: SerializedNode = JSON.parse(e.data);
-        const node = parseNode(tree);
-        setDrawing(node);
+        const tree: any = JSON.parse(e.data);
+        if (tree.code) {
+          client.send(
+            JSON.stringify(
+              // eslint-disable-next-line no-eval
+              eval(`(function Main(){${tree.code}})`).call({
+                path: Skia.Path.Make(),
+              })
+            )
+          );
+        } else {
+          const node = parseNode(tree);
+          setDrawing(node as SerializedNode);
+        }
       };
       return () => {
         client.close();
