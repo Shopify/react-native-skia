@@ -69,27 +69,36 @@ const HeaderLeft = (props: HeaderBackButtonProps) => {
   );
 };
 
+const E2E = process.env.E2E === "true";
+
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
+  const Home = (
+    <Stack.Screen
+      name="Home"
+      key="Home"
+      component={HomeScreen}
+      options={{
+        title: "🎨 Skia",
+      }}
+    />
+  );
+  const E2ETests = (
+    <Stack.Screen
+      key="Tests"
+      name="Tests"
+      component={Tests}
+      options={{
+        title: "🔧 Tests",
+      }}
+    />
+  );
   return (
     <>
       <StatusBar hidden />
       <NavigationContainer linking={linking}>
         <Stack.Navigator screenOptions={{ headerLeft: HeaderLeft }}>
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{
-              title: "🎨 Skia",
-            }}
-          />
-          <Stack.Screen
-            name="Tests"
-            component={Tests}
-            options={{
-              title: "🔧 Tests",
-            }}
-          />
+          {E2E ? [E2ETests, Home] : [Home, E2ETests]}
           <Stack.Screen
             name="Vertices"
             component={Vertices}

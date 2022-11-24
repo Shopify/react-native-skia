@@ -67,4 +67,8 @@ jobs:
 
       - name: Build app
         working-directory: example
-        run: npx react-native run-ios --configuration Release --simulator 'iPhone 14 Pro'
+        run: E2E=true npx react-native run-ios --simulator 'iPhone 14 Pro'
+
+      - name: Run e2e tests
+        working-directory: example
+        run: yarn e2e
