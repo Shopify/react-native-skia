@@ -53,7 +53,7 @@ describe("Test Blending", () => {
     checkImage(image, "snapshots/runtime-effects/blend-multiply.png");
   });
 
-  itFailsE2e("should blend using color burn", async () => {
+  it("should blend using color burn", async () => {
     const { vec } = importSkia();
     const { width } = surface;
     const r = width / 2;
