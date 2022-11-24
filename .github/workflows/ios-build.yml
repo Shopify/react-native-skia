@@ -77,8 +77,7 @@ jobs:
         run: xcrun simctl io booted screenshot screenshot.png
 
       - name: Sleep for 30 seconds
-        run: sleep 30s
-        shell: bash
+        run: sleep 30
         
       - uses: actions/upload-artifact@v2
         with:
