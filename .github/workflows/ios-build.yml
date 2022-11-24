@@ -73,14 +73,14 @@ jobs:
         working-directory: example
         run: E2E=true yarn ios --configuration Release --simulator 'iPhone 14 Pro'
 
-#     - name: Take screenshot
-#        run: xcrun simctl io booted screenshot screenshot.png
+     - name: Take screenshot
+        run: xcrun simctl io booted screenshot screenshot.png
         
-#      - uses: actions/upload-artifact@v2
-#        with:
-#          path: screenshot.png
-#          name: Download-screenshots
+      - uses: actions/upload-artifact@v2
+        with:
+          path: screenshot.png
+          name: Download-screenshots
 
-      - name: Run e2e tests
-        working-directory: package
-        run: yarn e2e
+#      - name: Run e2e tests
+#        working-directory: package
+#        run: yarn e2e
