@@ -70,5 +70,5 @@ jobs:
         run: E2E=true yarn ios --simulator 'iPhone 14 Pro'
 
       - name: Run e2e tests
-        working-directory: example
+        working-directory: package
         run: yarn e2e
