@@ -374,14 +374,19 @@ class RemoteSurface implements TestingSurface {
     }
   }
 
-  eval(code: string): Promise<string> {
+  eval(code: string, ctx: { [key: string]: any }): Promise<string> {
     this.assertInit();
     return new Promise((resolve) => {
       const client = this.client!;
       client!.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
-      client!.send(JSON.stringify({ code }));
+
+      const newCtx: { [key: string]: any } = {};
+      Object.keys(ctx).forEach((key) => {
+        newCtx[key] = serializeSkOjects(ctx[key], new Map());
+      });
+      client!.send(JSON.stringify({ code, ctx: newCtx }));
     });
   }
 
