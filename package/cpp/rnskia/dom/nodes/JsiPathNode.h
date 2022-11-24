@@ -36,30 +36,25 @@ protected:
       // mutate / modify the path?
       auto start = _startProp->value().getAsNumber();
       auto end = _endProp->value().getAsNumber();
-      auto hasStartOffset =
-          _startProp->isSet() && start != 0.0;
-      auto hasEndOffset =
-          _endProp->isSet() && end != 1.0;
+      auto hasStartOffset = _startProp->isSet() && start != 0.0;
+      auto hasEndOffset = _endProp->isSet() && end != 1.0;
       auto hasFillStyle = _fillTypeProp->isSet();
       auto hasStrokeOptions =
           _strokeOptsProp->isSet() &&
           _strokeOptsProp->value().getType() == PropType::Object;
 
-      auto willMutatePath =
-          hasStartOffset == true || hasEndOffset == true || hasFillStyle == true || hasStrokeOptions == true;
+      auto willMutatePath = hasStartOffset == true || hasEndOffset == true ||
+                            hasFillStyle == true || hasStrokeOptions == true;
 
       if (willMutatePath) {
         // We'll trim the path
         SkPath filteredPath(*_pathProp->getDerivedValue());
-        auto pe = SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
+        auto pe =
+            SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
 
         if (pe != nullptr) {
-            //
-          //  bool filterPath(SkPath *dst, const SkPath &src, SkStrokeRec *,
-            //                const SkRect *cullR) const;
           SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
-          if (!pe->filterPath(&filteredPath, filteredPath,
-                              &rec, nullptr)) {
+          if (!pe->filterPath(&filteredPath, filteredPath, &rec, nullptr)) {
             throw std::runtime_error(
                 "Failed trimming path with parameters start: " +
                 std::to_string(_startProp->value().getAsNumber()) +
