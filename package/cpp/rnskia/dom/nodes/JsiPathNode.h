@@ -34,34 +34,38 @@ protected:
     if (getPropsContainer()->isChanged()) {
       // Can we use the path directly, or do we need to copy to
       // mutate / modify the path?
+      auto start = _startProp->value().getAsNumber();
+      auto end = _endProp->value().getAsNumber();
       auto hasStartOffset =
-          _startProp->isSet() && _startProp->value().getAsNumber() != 0.0;
+          _startProp->isSet() && start != 0.0;
       auto hasEndOffset =
-          _endProp->isSet() && _endProp->value().getAsNumber() != 1.0;
+          _endProp->isSet() && end != 1.0;
       auto hasFillStyle = _fillTypeProp->isSet();
       auto hasStrokeOptions =
           _strokeOptsProp->isSet() &&
           _strokeOptsProp->value().getType() == PropType::Object;
 
       auto willMutatePath =
-          hasStartOffset || hasEndOffset || hasFillStyle || hasStrokeOptions;
+          hasStartOffset == true || hasEndOffset == true || hasFillStyle == true || hasStrokeOptions == true;
 
       if (willMutatePath) {
         // We'll trim the path
         SkPath filteredPath(*_pathProp->getDerivedValue());
-        auto pe = SkTrimPathEffect::Make(_startProp->value().getAsNumber(),
-                                         _endProp->value().getAsNumber(),
-                                         SkTrimPathEffect::Mode::kNormal);
+        auto pe = SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
 
         if (pe != nullptr) {
+            //
+          //  bool filterPath(SkPath *dst, const SkPath &src, SkStrokeRec *,
+            //                const SkRect *cullR) const;
           SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
-          if (!pe->filterPath(_pathProp->getDerivedValue().get(), filteredPath,
+          if (!pe->filterPath(&filteredPath, filteredPath,
                               &rec, nullptr)) {
             throw std::runtime_error(
                 "Failed trimming path with parameters start: " +
                 std::to_string(_startProp->value().getAsNumber()) +
                 ", end: " + std::to_string(_endProp->value().getAsNumber()));
           }
+          filteredPath.swap(filteredPath);
           _path = std::make_shared<SkPath>(filteredPath);
         } else if (hasStartOffset || hasEndOffset) {
           throw std::runtime_error(
@@ -69,7 +73,7 @@ protected:
               std::to_string(_startProp->value().getAsNumber()) +
               ", end: " + std::to_string(_endProp->value().getAsNumber()));
         } else {
-          _path = std::make_shared<SkPath>(*_pathProp->getDerivedValue());
+          _path = std::make_shared<SkPath>(filteredPath);
         }
 
         // Set fill style
