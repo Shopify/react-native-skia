@@ -188,8 +188,9 @@ public:
     }
   }
 
-  virtual void startDrawLoop() = 0;
-  virtual void stopDrawLoop() = 0;
+  // default implementation does nothing, so it can be called from virtual destructor.
+  virtual void startDrawLoop() {}
+  virtual void stopDrawLoop() {}
 
 private:
   float _pixelDensity;
