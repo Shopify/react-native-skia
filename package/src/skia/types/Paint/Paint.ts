@@ -45,11 +45,7 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
    * (sRGB gamut, and encoded with the sRGB transfer function).
    */
   getColor(): SkColor;
-  /**
-   * Return null if no color is set.
-   * If no color is set, getColor() returns 0x000000ff.
-   */
-  getAssignedColor(): SkColor | null;
+
   /**
    * Returns the geometry drawn at the beginning and end of strokes.
    */

@@ -24,8 +24,6 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkPaint : public JsiSkWrappingSharedPtrHostObject<SkPaint> {
-private:
-  bool hasColor = false;
 
 public:
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
@@ -50,13 +48,6 @@ public:
     return JsiSkColor::toValue(runtime, getObject()->getColor());
   }
 
-  JSI_HOST_FUNCTION(getAssignedColor) {
-    if (hasColor) {
-      return JsiSkColor::toValue(runtime, getObject()->getColor());
-    }
-    return jsi::Value::null();
-  }
-
   JSI_HOST_FUNCTION(getStrokeCap) {
     return static_cast<double>(getObject()->getStrokeCap());
   }
@@ -76,7 +67,6 @@ public:
   JSI_HOST_FUNCTION(setColor) {
     SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
     getObject()->setColor(color);
-    hasColor = true;
     return jsi::Value::undefined();
   }
 
@@ -221,7 +211,6 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPaint, copy),
                        JSI_EXPORT_FUNC(JsiSkPaint, reset),
                        JSI_EXPORT_FUNC(JsiSkPaint, getColor),
-                       JSI_EXPORT_FUNC(JsiSkPaint, getAssignedColor),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeCap),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeJoin),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeMiter),

@@ -24,7 +24,6 @@ import { JsiSkShader } from "./JsiSkShader";
 // We would like to extend CanvasKit with a couple of getters (getAlphaf, getShader, ...)
 // We polyfill this behavior on web by keeping track of refs.
 interface Refs {
-  hasColor: boolean;
   shader: SkShader | null;
   pathEffect: SkPathEffect | null;
   maskFilter: SkMaskFilter | null;
@@ -42,7 +41,6 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
       ? { ...from.refs }
       : {
           shader: null,
-          hasColor: false,
           pathEffect: null,
           maskFilter: null,
           imageFilter: null,
@@ -56,13 +54,6 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
 
   reset() {
     this.ref = new this.CanvasKit.Paint();
-  }
-
-  getAssignedColor() {
-    if (this.refs.hasColor) {
-      return this.getColor();
-    }
-    return null;
   }
 
   getColor() {
@@ -103,7 +94,6 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
 
   setColor(color: SkColor) {
     this.ref.setColor(color);
-    this.refs.hasColor = true;
   }
 
   setColorFilter(filter: SkColorFilter | null) {
