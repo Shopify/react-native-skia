@@ -154,6 +154,15 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(getShader) {
+    auto shader = sk_sp(getObject()->getShader());
+    if (shader == nullptr) {
+      return jsi::Value::null();
+    }
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+  }
+
   JSI_HOST_FUNCTION(setPathEffect) {
     auto pathEffect = arguments[0].isNull() || arguments[0].isUndefined()
                           ? nullptr
@@ -169,6 +178,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeJoin),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeMiter),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeWidth),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getAlphaf),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getShader),
                        JSI_EXPORT_FUNC(JsiSkPaint, setPathEffect),
                        JSI_EXPORT_FUNC(JsiSkPaint, setShader),
                        JSI_EXPORT_FUNC(JsiSkPaint, setColorFilter),
@@ -182,8 +193,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPaint, setStrokeWidth),
                        JSI_EXPORT_FUNC(JsiSkPaint, setStyle),
                        JSI_EXPORT_FUNC(JsiSkPaint, setColor),
-                       JSI_EXPORT_FUNC(JsiSkPaint, setAlphaf),
-                       JSI_EXPORT_FUNC(JsiSkPaint, getAlphaf));
+                       JSI_EXPORT_FUNC(JsiSkPaint, setAlphaf));
 
   JsiSkPaint(std::shared_ptr<RNSkPlatformContext> context, SkPaint paint)
       : JsiSkWrappingSharedPtrHostObject<SkPaint>(
