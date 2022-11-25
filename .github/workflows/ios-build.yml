@@ -73,21 +73,27 @@ jobs:
         working-directory: example
         run: E2E=true yarn ios --configuration Release --simulator 'iPhone 14 Pro'
 
-      - name: Sleep for 30 seconds
-        run: sleep 30
+      - name: Sleep for 10 seconds
+        run: sleep 10
+        
+      - name: Record simulator
+        run: xcrun simctl io booted recordVideo simulator.mov &
         
       - name: Launch
-        run: xcrun simctl launch "iPhone 14 Pro" org.shopify.reactnative.skia.example
+        run: xcrun simctl launch booted org.shopify.reactnative.skia.example
 
-      - name: Sleep for 30 seconds
-        run: sleep 30
+      - name: Sleep for 60 seconds
+        run: sleep 60
+        
+      - name: Stop video recording
+        run: kill -s SIGINT $!
 
-      - name: Take screenshot
-        run: xcrun simctl io booted screenshot screenshot.png
+#      - name: Take screenshot
+#        run: xcrun simctl io booted screenshot screenshot.png
         
       - uses: actions/upload-artifact@v2
         with:
-          path: screenshot.png
+          path: simulator.mov
           name: Download-screenshots
 
 #      - name: Run e2e tests
