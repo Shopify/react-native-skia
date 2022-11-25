@@ -4,7 +4,6 @@ import React, {
   useMemo,
   forwardRef,
   useRef,
-  useState,
 } from "react";
 import type {
   RefObject,
@@ -15,7 +14,6 @@ import type {
 } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
-import { Platform } from "react-native";
 
 import { SkiaDomView } from "../views";
 import type { TouchHandler } from "../views";
@@ -64,11 +62,8 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
   ) => {
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
-    const [, setTick] = useState(0);
     const redraw = useCallback(() => {
-      Platform.OS === "web"
-        ? setTick((tick) => tick + 1)
-        : innerRef.current?.redraw();
+      innerRef.current?.redraw();
     }, [innerRef]);
 
     const registerValues = useCallback(
