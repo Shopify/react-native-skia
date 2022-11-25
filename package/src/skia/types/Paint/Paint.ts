@@ -132,6 +132,11 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
    */
   setShader(shader: SkShader | null): void;
 
+  /** Returns optional colors used when filling a path, such as a gradient.
+   * @return  SkShader if previously set, null otherwise
+   */
+  getShader(): SkShader | null;
+
   /**
    * Sets the geometry drawn at the beginning and end of strokes.
    * @param cap

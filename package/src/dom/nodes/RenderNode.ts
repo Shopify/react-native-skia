@@ -210,8 +210,8 @@ export abstract class JsiRenderNode<P extends GroupProps>
 
     const opacity =
       this.props.opacity !== undefined
-        ? parentCtx.opacity * this.props.opacity
-        : parentCtx.opacity;
+        ? parentCtx.paint.getAlphaf() * this.props.opacity
+        : parentCtx.paint.getAlphaf();
 
     if (
       this.paintCache === null ||
@@ -219,7 +219,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
     ) {
       const paintCtx = this.getPaintCtx();
       const child = paintCtx
-        ? concatPaint(parentCtx.paint, paintCtx, parentCtx.opacity)
+        ? concatPaint(parentCtx.paint, paintCtx, parentCtx.paint.getAlphaf())
         : parentCtx.paint;
       this.paintCache = { parent: parentCtx.paint, child };
     }

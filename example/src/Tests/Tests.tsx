@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkiaDomView } from "@shopify/react-native-skia";
-import { Skia, Canvas } from "@shopify/react-native-skia";
+import { Canvas } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 

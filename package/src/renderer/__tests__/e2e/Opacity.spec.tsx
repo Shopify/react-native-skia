@@ -20,16 +20,19 @@ import { setupSkia } from "../../../skia/__tests__/setup";
 import { fitRects } from "../../../dom/nodes/datatypes/Fitting";
 
 describe("Opacity", () => {
-  it.only("Should keep track of the unpremultiplied opacity correctly", async () => {
+  it("Should keep track of the unpremultiplied opacity correctly", async () => {
     const { Skia } = importSkia();
     const result = await surface.eval(
       `
-this.paint.setColor(Float32Array.from([1, 0, 0, 0]));
-return this.paint.getAlphaf();
+const { Skia } = this;
+const paint = Skia.Paint();
+paint.setAlphaf(0.25);
+paint.setColor(Skia.Color("rgba(100, 200, 300, 0.5)"));
+return paint.getAlphaf();
 `,
-      { paint: Skia.Paint() }
+      { Skia }
     );
-    expect(result).toBe(1);
+    expect(result).toBeCloseTo(0.5);
   });
   it("Should multiply the opacity to 0", async () => {
     const { rect, rrect } = importSkia();

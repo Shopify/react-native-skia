@@ -22,7 +22,7 @@ import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
 import { Group } from "../components";
 import type { SkFont, SkImage } from "../../skia/types";
-import { isPaint, isPath } from "../../skia/types";
+import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 
 jest.setTimeout(30 * 1000);
@@ -242,6 +242,9 @@ interface SerializedNode {
 }
 
 const serializeSkOjects = (obj: any, assets: Assets): any => {
+  if (obj === global.SkiaApi) {
+    return { __typename__: "Skia" };
+  }
   if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
@@ -262,10 +265,6 @@ const serializeSkOjects = (obj: any, assets: Assets): any => {
         height: obj.rect.height,
         rx: obj.rx,
         ry: obj.ry,
-      };
-    } else if (isPaint(obj)) {
-      return {
-        __typename__: "Paint",
       };
     } else if (isPath(obj)) {
       return {

@@ -24,7 +24,7 @@ import { JsiSkShader } from "./JsiSkShader";
 // We would like to extend CanvasKit with a couple of getters (getAlphaf, getShader, ...)
 // We polyfill this behavior on web by keeping track of refs.
 interface Refs {
-  alphaf: number;
+  shader: SkShader | null;
 }
 
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
@@ -33,7 +33,7 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   constructor(CanvasKit: CanvasKit, from?: JsiSkPaint) {
     const ref = from ? from.ref.copy() : new CanvasKit.Paint();
     super(CanvasKit, ref, "Paint");
-    this.refs = from ? { ...from.refs } : { alphaf: 1 };
+    this.refs = from ? { ...from.refs } : { shader: null };
   }
 
   copy() {
@@ -65,12 +65,11 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setAlphaf(alpha: number) {
-    this.refs.alphaf = alpha;
     this.ref.setAlphaf(alpha);
   }
 
   getAlphaf() {
-    return this.refs.alphaf;
+    return this.getColor()[3];
   }
 
   setAntiAlias(aa: boolean) {
@@ -102,7 +101,12 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setShader(shader: SkShader | null) {
+    this.refs.shader = shader;
     this.ref.setShader(shader ? JsiSkShader.fromValue(shader) : null);
+  }
+
+  getShader() {
+    return this.refs.shader;
   }
 
   setStrokeCap(cap: StrokeCap) {
