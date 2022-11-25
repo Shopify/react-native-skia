@@ -173,29 +173,29 @@ export abstract class JsiRenderNode<P extends GroupProps>
     this._children.forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
         if (child.isColorFilter()) {
-          ctx = ctx || { opacity: 1 };
+          ctx = ctx || {};
           const cf = child.materialize();
           ctx.colorFilter = ctx.colorFilter
             ? this.Skia.ColorFilter.MakeCompose(cf, ctx.colorFilter)
             : cf;
         } else if (child.isShader()) {
-          ctx = ctx || { opacity: 1 };
+          ctx = ctx || {};
           const shader = child.materialize();
           ctx.shader = shader;
         } else if (child.isPathEffect()) {
-          ctx = ctx || { opacity: 1 };
+          ctx = ctx || {};
           const pe = child.materialize();
           ctx.pathEffect = ctx.pathEffect
             ? this.Skia.PathEffect.MakeCompose(pe, ctx.pathEffect)
             : pe;
         } else if (child.isImageFilter()) {
-          ctx = ctx || { opacity: 1 };
+          ctx = ctx || {};
           const filter = child.materialize();
           ctx.imageFilter = ctx.imageFilter
             ? this.Skia.ImageFilter.MakeCompose(filter, ctx.imageFilter)
             : filter;
         } else if (child.isMaskFilter()) {
-          ctx = ctx || { opacity: 1 };
+          ctx = ctx || {};
           const filter = child.materialize();
           ctx.maskFilter = filter;
         }
@@ -329,6 +329,6 @@ const concatPaint = (
   if (style !== undefined) {
     paint.setStyle(style);
   }
-  paint.setAlphaf(paint.getAlphaf() * opacity);
+  paint.setAlphaf(paint.getAlphaf() * (opacity ?? 1));
   return paint;
 };

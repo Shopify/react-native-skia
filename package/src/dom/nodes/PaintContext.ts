@@ -19,7 +19,7 @@ export interface PaintContext {
   strokeJoin?: StrokeJoin;
   strokeCap?: StrokeCap;
   strokeMiter?: number;
-  opacity: number;
+  opacity?: number;
   antiAlias?: boolean;
 
   shader?: SkShader;
