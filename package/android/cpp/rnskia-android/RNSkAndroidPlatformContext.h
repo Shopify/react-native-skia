@@ -24,6 +24,10 @@ public:
         [this]() { notifyDrawLoop(false); });
   }
 
+  ~RNSkAndroidPlatformContext() {
+    stopDrawLoop();
+  }
+
   void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override {
