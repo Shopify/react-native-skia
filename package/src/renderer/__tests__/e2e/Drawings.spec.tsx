@@ -77,6 +77,18 @@ describe("Drawings", () => {
     checkImage(image, "snapshots/drawings/transform-origin.png");
   });
 
+  it("Should do rect marshalling properly", async () => {
+    const { Skia } = importSkia();
+    const result = await surface.eval(
+      `
+this.path.addRect({ x: 0, y: 0, width: 100, height: 100 });
+return this.path.getBounds().width;
+`,
+      { path: Skia.Path.Make() }
+    );
+    expect(result).toBe(100);
+  });
+
   it("Should render the Skia logo with proper stroke joins and caps", async () => {
     const { Skia } = importSkia();
     const { width, height } = surface;

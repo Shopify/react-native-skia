@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from "fs";
 import path from "path";
@@ -122,7 +123,6 @@ export const fontSize = 32 * PIXEL_RATIO;
 export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
-const redraw = () => {};
 
 const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -158,7 +158,7 @@ export const mountCanvas = (element: ReactNode) => {
   };
 
   const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr, redraw);
+  const container = new Container(Skia, depMgr);
   const root = skiaReconciler.createContainer(
     container,
     0,
@@ -212,7 +212,7 @@ export const serialize = (element: ReactNode, assets: Assets) => {
   };
 
   const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr, redraw);
+  const container = new Container(Skia, depMgr);
   const root = skiaReconciler.createContainer(
     container,
     0,
@@ -305,6 +305,7 @@ type Assets = Map<SkFont, number[]>;
 
 interface TestingSurface {
   init(): Promise<void>;
+  eval(code: string, ctx: {}): Promise<string>;
   draw(node: ReactNode, assets?: Assets): Promise<SkImage>;
   dispose(): void;
   width: number;
@@ -324,6 +325,11 @@ class LocalSurface implements TestingSurface {
   }
 
   dispose(): void {}
+
+  eval(code: string, ctx: {}): Promise<string> {
+    // eslint-disable-next-line no-eval
+    return Promise.resolve(eval(`(function Main(){${code}})`).call(ctx));
+  }
 
   draw(node: ReactNode): Promise<SkImage> {
     const { surface: ckSurface, draw } = mountCanvas(
@@ -361,10 +367,30 @@ class RemoteSurface implements TestingSurface {
     this.server.close();
   }
 
-  draw(node: ReactNode, assets: Assets = new Map()): Promise<SkImage> {
+  private assertInit() {
     if (this.client === null) {
       throw new Error("Client is not connected. Did you call init?");
     }
+  }
+
+  eval(code: string, ctx: { [key: string]: any }): Promise<string> {
+    this.assertInit();
+    return new Promise((resolve) => {
+      const client = this.client!;
+      client!.once("message", (raw: Buffer) => {
+        resolve(JSON.parse(raw.toString()));
+      });
+
+      const newCtx: { [key: string]: any } = {};
+      Object.keys(ctx).forEach((key) => {
+        newCtx[key] = serializeSkOjects(ctx[key], new Map());
+      });
+      client!.send(JSON.stringify({ code, ctx: newCtx }));
+    });
+  }
+
+  draw(node: ReactNode, assets: Assets = new Map()): Promise<SkImage> {
+    this.assertInit();
     return new Promise((resolve) => {
       const client = this.client!;
       client!.once("message", (raw: Buffer) => {
