@@ -35,9 +35,9 @@ protected:
       // Can we use the path directly, or do we need to copy to
       // mutate / modify the path?
       auto hasStartOffset =
-             _startProp->isSet() && _startProp->value().getAsNumber() != 0.0;
+          _startProp->isSet() && _startProp->value().getAsNumber() != 0.0;
       auto hasEndOffset =
-             _endProp->isSet() && _endProp->value().getAsNumber() != 1.0;
+          _endProp->isSet() && _endProp->value().getAsNumber() != 1.0;
       auto hasFillStyle = _fillTypeProp->isSet();
       auto hasStrokeOptions =
           _strokeOptsProp->isSet() &&
@@ -49,7 +49,8 @@ protected:
       if (willMutatePath) {
         // We'll trim the path
         SkPath filteredPath(*_pathProp->getDerivedValue());
-        auto start = _startProp->isSet() ? _startProp->value().getAsNumber() : 0.0;
+        auto start =
+            _startProp->isSet() ? _startProp->value().getAsNumber() : 0.0;
         auto end = _endProp->isSet() ? _endProp->value().getAsNumber() : 1.0;
         auto pe =
             SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
