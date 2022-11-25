@@ -75,6 +75,12 @@ jobs:
 
       - name: Sleep for 30 seconds
         run: sleep 30
+        
+      - name: Launch
+        run: xcrun simctl launch "iPhone 14 Pro" org.shopify.reactnative.skia.example
+
+      - name: Sleep for 30 seconds
+        run: sleep 30
 
       - name: Take screenshot
         run: xcrun simctl io booted screenshot screenshot.png
