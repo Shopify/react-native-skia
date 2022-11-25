@@ -21,37 +21,26 @@ import { fitRects } from "../../../dom/nodes/datatypes/Fitting";
 
 describe("Opacity", () => {
   it("Should keep track of the unpremultiplied opacity correctly", async () => {
-    const { Skia } = importSkia();
-    let result = await surface.eval(
-      `
-const { Skia } = this;
+    let result = await surface.eval(`
 const paint = Skia.Paint();
 paint.setAlphaf(0.25);
 paint.setColor(Skia.Color("rgba(100, 200, 300, 0.5)"));
 return paint.getAlphaf();
-`,
-      { Skia }
-    );
+`);
     expect(result).toBeCloseTo(0.5);
-    result = await surface.eval(
-      `
-const { Skia } = this;
+    result = await surface.eval(`
 const paint = Skia.Paint();
 paint.setColor(Skia.Color("rgba(100, 200, 300, 0.5)"));
 paint.setAlphaf(0.25);
 return paint.getColor()[3];
-`,
-      { Skia }
-    );
+`);
     expect(result).toBeCloseTo(0.25);
 
     result = await surface.eval(
       `
-const { Skia } = this;
 const paint = Skia.Paint();
 return Array.from(paint.getColor());
-`,
-      { Skia }
+`
     );
     expect(result).toEqual([0, 0, 0, 1]);
   });

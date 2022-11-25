@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable no-eval */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from "fs";
 import path from "path";
@@ -241,9 +241,6 @@ interface SerializedNode {
 }
 
 const serializeSkOjects = (obj: any, assets: Assets): any => {
-  if (obj === global.SkiaApi) {
-    return { __typename__: "Skia" };
-  }
   if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
@@ -308,7 +305,7 @@ type Assets = Map<SkFont, number[]>;
 
 interface TestingSurface {
   init(): Promise<void>;
-  eval(code: string, ctx: {}): Promise<string>;
+  eval(code: string): Promise<string>;
   draw(node: ReactNode, assets?: Assets): Promise<SkImage>;
   dispose(): void;
   width: number;
@@ -329,9 +326,12 @@ class LocalSurface implements TestingSurface {
 
   dispose(): void {}
 
-  eval(code: string, ctx: {}): Promise<string> {
-    // eslint-disable-next-line no-eval
-    return Promise.resolve(eval(`(function Main(){${code}})`).call(ctx));
+  eval(code: string): Promise<string> {
+    return Promise.resolve(
+      eval(`(function Main(){const {Skia} = this; ${code}})`).call({
+        Skia: global.SkiaApi,
+      })
+    );
   }
 
   draw(node: ReactNode): Promise<SkImage> {
@@ -376,19 +376,14 @@ class RemoteSurface implements TestingSurface {
     }
   }
 
-  eval(code: string, ctx: { [key: string]: any }): Promise<string> {
+  eval(code: string): Promise<string> {
     this.assertInit();
     return new Promise((resolve) => {
       const client = this.client!;
       client!.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
-
-      const newCtx: { [key: string]: any } = {};
-      Object.keys(ctx).forEach((key) => {
-        newCtx[key] = serializeSkOjects(ctx[key], new Map());
-      });
-      client!.send(JSON.stringify({ code, ctx: newCtx }));
+      client!.send(JSON.stringify({ code, ctx: { __typename__: "Skia" } }));
     });
   }
 

@@ -21,7 +21,7 @@ export const parseNode = (serializedNode: SerializedNode): any => {
   );
 };
 
-export const parseProps = (props: SerializedProps) => {
+const parseProps = (props: SerializedProps) => {
   const newProps: SerializedProps = {};
   Object.keys(props).forEach((key) => {
     newProps[key] = parseProp(props[key]);
@@ -41,8 +41,6 @@ const parseProp = (value: any) => {
         value.rx,
         value.ry
       );
-    } else if (value.__typename__ === "Skia") {
-      return Skia;
     } else if (value.__typename__ === "Path") {
       return Skia.Path.MakeFromCmds(value.cmds);
     } else if (value.__typename__ === "Image") {
