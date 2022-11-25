@@ -75,6 +75,11 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(getAlphaf) {
+    float alphaf = getObject()->getAlphaf();
+    return jsi::Value(SkScalarToDouble(alphaf));
+  }
+
   JSI_HOST_FUNCTION(setAntiAlias) {
     bool antiAliased = arguments[0].getBool();
     getObject()->setAntiAlias(antiAliased);
@@ -177,7 +182,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPaint, setStrokeWidth),
                        JSI_EXPORT_FUNC(JsiSkPaint, setStyle),
                        JSI_EXPORT_FUNC(JsiSkPaint, setColor),
-                       JSI_EXPORT_FUNC(JsiSkPaint, setAlphaf))
+                       JSI_EXPORT_FUNC(JsiSkPaint, setAlphaf),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getAlphaf));
 
   JsiSkPaint(std::shared_ptr<RNSkPlatformContext> context, SkPaint paint)
       : JsiSkWrappingSharedPtrHostObject<SkPaint>(

@@ -41,6 +41,8 @@ const parseProp = (value: any) => {
         value.rx,
         value.ry
       );
+    } else if (value.__typename__ === "Paint") {
+      return Skia.Paint();
     } else if (value.__typename__ === "Path") {
       return Skia.Path.MakeFromCmds(value.cmds);
     } else if (value.__typename__ === "Image") {

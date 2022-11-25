@@ -66,7 +66,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
       )
     ),
   Paint: () => {
-    const paint = new JsiSkPaint(CanvasKit, new CanvasKit.Paint());
+    const paint = new JsiSkPaint(CanvasKit);
     paint.setAntiAlias(true);
     return paint;
   },

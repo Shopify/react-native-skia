@@ -21,13 +21,23 @@ import { JsiSkMaskFilter } from "./JsiSkMaskFilter";
 import { JsiSkPathEffect } from "./JsiSkPathEffect";
 import { JsiSkShader } from "./JsiSkShader";
 
+// We would like to extend CanvasKit with a couple of getters (getAlphaf, getShader, ...)
+// We polyfill this behavior on web by keeping track of refs.
+interface Refs {
+  alphaf: number;
+}
+
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
-  constructor(CanvasKit: CanvasKit, ref: Paint) {
+  refs: Refs;
+
+  constructor(CanvasKit: CanvasKit, from?: JsiSkPaint) {
+    const ref = from ? from.ref.copy() : new CanvasKit.Paint();
     super(CanvasKit, ref, "Paint");
+    this.refs = from ? { ...from.refs } : { alphaf: 1 };
   }
 
   copy() {
-    return new JsiSkPaint(this.CanvasKit, this.ref.copy());
+    return new JsiSkPaint(this.CanvasKit, this);
   }
 
   reset() {
@@ -55,7 +65,12 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setAlphaf(alpha: number) {
+    this.refs.alphaf = alpha;
     this.ref.setAlphaf(alpha);
+  }
+
+  getAlphaf() {
+    return this.refs.alphaf;
   }
 
   setAntiAlias(aa: boolean) {

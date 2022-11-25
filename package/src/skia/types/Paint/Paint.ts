@@ -73,6 +73,11 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
   setAlphaf(alpha: number): void;
 
   /**
+   * Retrieves alpha from the color used when stroking and filling.
+   */
+  getAlphaf(): number;
+
+  /**
    * Requests, but does not require, that edge pixels draw opaque or with
    * partial transparency.
    * @param aa

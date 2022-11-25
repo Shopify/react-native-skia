@@ -20,6 +20,17 @@ import { setupSkia } from "../../../skia/__tests__/setup";
 import { fitRects } from "../../../dom/nodes/datatypes/Fitting";
 
 describe("Opacity", () => {
+  it.only("Should keep track of the unpremultiplied opacity correctly", async () => {
+    const { Skia } = importSkia();
+    const result = await surface.eval(
+      `
+this.paint.setColor(Float32Array.from([1, 0, 0, 0]));
+return this.paint.getAlphaf();
+`,
+      { paint: Skia.Paint() }
+    );
+    expect(result).toBe(1);
+  });
   it("Should multiply the opacity to 0", async () => {
     const { rect, rrect } = importSkia();
     const { width } = surface;
