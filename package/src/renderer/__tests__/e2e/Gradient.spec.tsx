@@ -1,6 +1,6 @@
 import React from "react";
 
-import { surface, height } from "../setup";
+import { surface } from "../setup";
 import { Fill } from "../../components";
 import { checkImage } from "../../../__tests__/setup";
 import { LinearGradient } from "../../components/shaders/LinearGradient";
@@ -9,7 +9,7 @@ describe("Gradient", () => {
   it("should display a simple linear gradient", async () => {
     const vec = (x: number, y: number) => ({ x, y });
     const colors = ["#61dafb", "#fb61da", "#61fbcf", "#dafb61"];
-    const { width } = surface;
+    const { width, height } = surface;
     const start = vec(0, 0);
     const end = vec(width, height);
 
@@ -23,7 +23,7 @@ describe("Gradient", () => {
   it("should display a simple linear gradient with opacity", async () => {
     const vec = (x: number, y: number) => ({ x, y });
     const colors = ["#61dafb", "#fb61da", "#61fbcf", "#dafb61"];
-    const { width } = surface;
+    const { width, height } = surface;
     const start = vec(0, 0);
     const end = vec(width, height);
 
