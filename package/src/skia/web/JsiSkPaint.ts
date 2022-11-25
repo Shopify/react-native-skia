@@ -24,7 +24,12 @@ import { JsiSkShader } from "./JsiSkShader";
 // We would like to extend CanvasKit with a couple of getters (getAlphaf, getShader, ...)
 // We polyfill this behavior on web by keeping track of refs.
 interface Refs {
+  hasColor: boolean;
   shader: SkShader | null;
+  pathEffect: SkPathEffect | null;
+  maskFilter: SkMaskFilter | null;
+  imageFilter: SkImageFilter | null;
+  colorFilter: SkColorFilter | null;
 }
 
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
@@ -33,7 +38,16 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   constructor(CanvasKit: CanvasKit, from?: JsiSkPaint) {
     const ref = from ? from.ref.copy() : new CanvasKit.Paint();
     super(CanvasKit, ref, "Paint");
-    this.refs = from ? { ...from.refs } : { shader: null };
+    this.refs = from
+      ? { ...from.refs }
+      : {
+          shader: null,
+          hasColor: false,
+          pathEffect: null,
+          maskFilter: null,
+          imageFilter: null,
+          colorFilter: null,
+        };
   }
 
   copy() {
@@ -42,6 +56,13 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
 
   reset() {
     this.ref = new this.CanvasKit.Paint();
+  }
+
+  getAssignedColor() {
+    if (this.refs.hasColor) {
+      return this.getColor();
+    }
+    return null;
   }
 
   getColor() {
@@ -82,22 +103,43 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
 
   setColor(color: SkColor) {
     this.ref.setColor(color);
+    this.refs.hasColor = true;
   }
 
   setColorFilter(filter: SkColorFilter | null) {
+    this.refs.colorFilter = filter;
     this.ref.setColorFilter(filter ? JsiSkColorFilter.fromValue(filter) : null);
   }
 
+  getColorFilter() {
+    return this.refs.colorFilter;
+  }
+
   setImageFilter(filter: SkImageFilter | null) {
+    this.refs.imageFilter = filter;
     this.ref.setImageFilter(filter ? JsiSkImageFilter.fromValue(filter) : null);
   }
 
+  getImageFilter() {
+    return this.refs.imageFilter;
+  }
+
   setMaskFilter(filter: SkMaskFilter | null) {
+    this.refs.maskFilter = filter;
     this.ref.setMaskFilter(filter ? JsiSkMaskFilter.fromValue(filter) : null);
   }
 
+  getMaskFilter() {
+    return this.refs.maskFilter;
+  }
+
   setPathEffect(effect: SkPathEffect | null) {
+    this.refs.pathEffect = effect;
     this.ref.setPathEffect(effect ? JsiSkPathEffect.fromValue(effect) : null);
+  }
+
+  getPathEffect() {
+    return this.refs.pathEffect;
   }
 
   setShader(shader: SkShader | null) {

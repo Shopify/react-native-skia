@@ -45,7 +45,11 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
    * (sRGB gamut, and encoded with the sRGB transfer function).
    */
   getColor(): SkColor;
-
+  /**
+   * Return null if no color is set.
+   * If no color is set, getColor() returns 0x000000ff.
+   */
+  getAssignedColor(): SkColor | null;
   /**
    * Returns the geometry drawn at the beginning and end of strokes.
    */
@@ -108,11 +112,21 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
    */
   setColorFilter(filter: SkColorFilter | null): void;
 
+  /** Returns SkColorFilter if set, or nullptr.
+   * @return  SkColorFilter if previously set, nullptr otherwise
+   */
+  getColorFilter(): SkColorFilter | null;
+
   /**
    * Sets the current image filter, replacing the existing one if there was one.
    * @param filter
    */
   setImageFilter(filter: SkImageFilter | null): void;
+
+  /** Returns SkImageFilter if set, or nullptr.
+   * @return  SkImageFilter if previously set, nullptr otherwise
+   */
+  getImageFilter(): SkImageFilter | null;
 
   /**
    * Sets the current mask filter, replacing the existing one if there was one.
@@ -120,11 +134,21 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
    */
   setMaskFilter(filter: SkMaskFilter | null): void;
 
+  /** Returns SkMaskFilter if set, or nullptr.
+   * @return  SkMaskFilter if previously set, nullptr otherwise
+   */
+  getMaskFilter(): SkMaskFilter | null;
+
   /**
    * Sets the current path effect, replacing the existing one if there was one.
    * @param effect
    */
   setPathEffect(effect: SkPathEffect | null): void;
+
+  /** Returns SkPathEffect if set, or nullptr.
+   *  @return  SkPathEffect if previously set, nullptr otherwise
+   */
+  getPathEffect(): SkPathEffect | null;
 
   /**
    * Sets the current shader, replacing the existing one if there was one.

@@ -24,6 +24,9 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkPaint : public JsiSkWrappingSharedPtrHostObject<SkPaint> {
+private:
+  bool hasColor = false;
+
 public:
   // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
   JSI_PROPERTY_GET(__typename__) {
@@ -47,6 +50,13 @@ public:
     return JsiSkColor::toValue(runtime, getObject()->getColor());
   }
 
+  JSI_HOST_FUNCTION(getAssignedColor) {
+    if (hasColor) {
+      return JsiSkColor::toValue(runtime, getObject()->getColor());
+    }
+    return jsi::Value::null();
+  }
+
   JSI_HOST_FUNCTION(getStrokeCap) {
     return static_cast<double>(getObject()->getStrokeCap());
   }
@@ -66,6 +76,7 @@ public:
   JSI_HOST_FUNCTION(setColor) {
     SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
     getObject()->setColor(color);
+    hasColor = true;
     return jsi::Value::undefined();
   }
 
@@ -130,6 +141,15 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(getMaskFilter) {
+    auto maskFilter = sk_sp(getObject()->getMaskFilter());
+    if (maskFilter == nullptr) {
+      return jsi::Value::null();
+    }
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkMaskFilter>(getContext(), maskFilter));
+  }
+
   JSI_HOST_FUNCTION(setImageFilter) {
     auto imageFilter = arguments[0].isNull() || arguments[0].isUndefined()
                            ? nullptr
@@ -138,12 +158,30 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(getImageFilter) {
+    auto imageFilter = sk_sp(getObject()->getImageFilter());
+    if (imageFilter == nullptr) {
+      return jsi::Value::null();
+    }
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkImageFilter>(getContext(), imageFilter));
+  }
+
   JSI_HOST_FUNCTION(setColorFilter) {
     auto colorFilter = arguments[0].isNull() || arguments[0].isUndefined()
                            ? nullptr
                            : JsiSkColorFilter::fromValue(runtime, arguments[0]);
     getObject()->setColorFilter(std::move(colorFilter));
     return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(getColorFilter) {
+    auto cf = sk_sp(getObject()->getColorFilter());
+    if (cf == nullptr) {
+      return jsi::Value::null();
+    }
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkColorFilter>(getContext(), cf));
   }
 
   JSI_HOST_FUNCTION(setShader) {
@@ -171,15 +209,29 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(getPathEffect) {
+    auto pe = sk_sp(getObject()->getPathEffect());
+    if (pe == nullptr) {
+      return jsi::Value::null();
+    }
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkPathEffect>(getContext(), pe));
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPaint, copy),
                        JSI_EXPORT_FUNC(JsiSkPaint, reset),
                        JSI_EXPORT_FUNC(JsiSkPaint, getColor),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getAssignedColor),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeCap),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeJoin),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeMiter),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeWidth),
                        JSI_EXPORT_FUNC(JsiSkPaint, getAlphaf),
                        JSI_EXPORT_FUNC(JsiSkPaint, getShader),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getColorFilter),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getImageFilter),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getMaskFilter),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getPathEffect),
                        JSI_EXPORT_FUNC(JsiSkPaint, setPathEffect),
                        JSI_EXPORT_FUNC(JsiSkPaint, setShader),
                        JSI_EXPORT_FUNC(JsiSkPaint, setColorFilter),
