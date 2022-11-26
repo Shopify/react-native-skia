@@ -111,3 +111,9 @@ jobs:
 
       - name: Run e2e tests
         run: yarn e2e:ci
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: package/src/__tests__/snapshots/
+          name: Download-screenshots
+
