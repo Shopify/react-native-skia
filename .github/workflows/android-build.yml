@@ -60,6 +60,10 @@ jobs:
       - name: SDKs - accept licenses
         run: y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
+      - name: Install Package
+        working-directory: package
+        run: yarn install
+
       - name: Install example app node dependencies
         working-directory: example
         run: yarn
