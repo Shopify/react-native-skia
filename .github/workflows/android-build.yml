@@ -106,7 +106,7 @@ jobs:
         run: yarn android-reverse-tcp
 
       - name: Run e2e tests
-        working-directory: package
+        working-directory: example
         run: yarn start &
 
       - name: Run e2e tests
