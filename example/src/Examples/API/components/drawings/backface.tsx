@@ -55,12 +55,12 @@ const Pattern = () => {
     <>
       {new Array(4).fill(0).map((_, i) => {
         const delta = i * strokeWidth;
-        const rect = Skia.XYWHRect(
-          -delta,
-          -delta,
-          center.x * 2 + delta * 2,
-          center.y * 2 + delta * 2
-        );
+        const rect = {
+          x: -delta,
+          y: -delta,
+          width: center.x * 2 + delta * 2,
+          height: center.y * 2 + delta * 2,
+        };
         const path = Skia.Path.Make();
         path.addArc(rect, 0, 360).close();
         return (
