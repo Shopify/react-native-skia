@@ -97,10 +97,6 @@ jobs:
         run: adb wait-for-any-device
         timeout-minutes: 3
 
-      - name: Build app
-        working-directory: example/android
-        run: ./gradlew assembleDebug --console=plain -PreactNativeArchitectures=arm64-v8a
-
       - name: Reverse
         working-directory: example
         run: yarn android-reverse-tcp
@@ -108,6 +104,10 @@ jobs:
       - name: Run e2e tests
         working-directory: example
         run: yarn start &
+
+      - name: Build app
+        working-directory: example/android
+        run: ./gradlew assembleDebug --console=plain -PreactNativeArchitectures=arm64-v8a
 
       - name: Run e2e tests
         working-directory: package
