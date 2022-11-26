@@ -56,9 +56,9 @@ jobs:
 
       - name: Copy Skia Headers
         run: yarn copy-skia-headers
-
-      - name: Accept licenses
-        run: /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
+              
+      - name: SDKs - accept licenses
+        run: y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Install example app node dependencies
         working-directory: example
