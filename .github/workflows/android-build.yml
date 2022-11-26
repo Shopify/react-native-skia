@@ -110,5 +110,4 @@ jobs:
         run: E2E=true yarn android
 
       - name: Run e2e tests
-        working-directory: package
-        run: yarn e2e
+        run: yarn e2e:ci

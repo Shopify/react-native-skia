@@ -12,7 +12,6 @@ import { DependencyManager } from "../DependencyManager";
 import { skHostConfig } from "../HostConfig";
 import { Container } from "../Container";
 import type { DrawingContext } from "../DrawingContext";
-import { CanvasProvider } from "../useCanvas";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
@@ -25,7 +24,7 @@ import type { SkFont, SkImage } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 
-jest.setTimeout(30 * 1000);
+jest.setTimeout(180 * 1000);
 
 export let surface: TestingSurface;
 
@@ -123,7 +122,6 @@ export const fontSize = 32 * PIXEL_RATIO;
 export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
-const redraw = () => {};
 
 const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -159,7 +157,7 @@ export const mountCanvas = (element: ReactNode) => {
   };
 
   const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr, redraw);
+  const container = new Container(Skia, depMgr);
   const root = skiaReconciler.createContainer(
     container,
     0,
@@ -170,14 +168,9 @@ export const mountCanvas = (element: ReactNode) => {
     console.error,
     null
   );
-  skiaReconciler.updateContainer(
-    <CanvasProvider value={{ Skia }}>{element}</CanvasProvider>,
-    root,
-    null,
-    () => {
-      container.depMgr.update();
-    }
-  );
+  skiaReconciler.updateContainer(element, root, null, () => {
+    container.depMgr.update();
+  });
   const ctx: DrawingContext = {
     width,
     height,
@@ -218,7 +211,7 @@ export const serialize = (element: ReactNode, assets: Assets) => {
   };
 
   const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr, redraw);
+  const container = new Container(Skia, depMgr);
   const root = skiaReconciler.createContainer(
     container,
     0,
@@ -229,14 +222,9 @@ export const serialize = (element: ReactNode, assets: Assets) => {
     console.error,
     null
   );
-  skiaReconciler.updateContainer(
-    <CanvasProvider value={{ Skia }}>{element}</CanvasProvider>,
-    root,
-    null,
-    () => {
-      container.depMgr.update();
-    }
-  );
+  skiaReconciler.updateContainer(element, root, null, () => {
+    container.depMgr.update();
+  });
   const serialized = serializeNode(container.root, assets);
   return JSON.stringify(serialized);
 };
@@ -316,6 +304,7 @@ type Assets = Map<SkFont, number[]>;
 
 interface TestingSurface {
   init(): Promise<void>;
+  eval(code: string): Promise<string>;
   draw(node: ReactNode, assets?: Assets): Promise<SkImage>;
   dispose(): void;
   width: number;
@@ -335,6 +324,15 @@ class LocalSurface implements TestingSurface {
   }
 
   dispose(): void {}
+
+  eval(code: string): Promise<string> {
+    return Promise.resolve(
+      // eslint-disable-next-line no-eval
+      eval(`(function Main(){const {Ski} = this;${code}})`).call({
+        Skia: global.SkiaApi,
+      })
+    );
+  }
 
   draw(node: ReactNode): Promise<SkImage> {
     const { surface: ckSurface, draw } = mountCanvas(
@@ -372,10 +370,25 @@ class RemoteSurface implements TestingSurface {
     this.server.close();
   }
 
-  draw(node: ReactNode, assets: Assets = new Map()): Promise<SkImage> {
+  private assertInit() {
     if (this.client === null) {
       throw new Error("Client is not connected. Did you call init?");
     }
+  }
+
+  eval(code: string): Promise<string> {
+    this.assertInit();
+    return new Promise((resolve) => {
+      const client = this.client!;
+      client!.once("message", (raw: Buffer) => {
+        resolve(JSON.parse(raw.toString()));
+      });
+      client!.send(JSON.stringify({ code }));
+    });
+  }
+
+  draw(node: ReactNode, assets: Assets = new Map()): Promise<SkImage> {
+    this.assertInit();
     return new Promise((resolve) => {
       const client = this.client!;
       client!.once("message", (raw: Buffer) => {
