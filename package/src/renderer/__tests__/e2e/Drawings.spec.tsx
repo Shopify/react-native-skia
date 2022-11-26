@@ -78,13 +78,12 @@ describe("Drawings", () => {
   });
 
   it("Should do rect marshalling properly", async () => {
-    const { Skia } = importSkia();
     const result = await surface.eval(
       `
-this.path.addRect({ x: 0, y: 0, width: 100, height: 100 });
-return this.path.getBounds().width;
-`,
-      { path: Skia.Path.Make() }
+const path = Skia.Path.Make();
+path.addRect({ x: 0, y: 0, width: 100, height: 100 });
+return path.getBounds().width;
+`
     );
     expect(result).toBe(100);
   });

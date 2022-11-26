@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from "fs";
 import path from "path";
@@ -329,7 +328,7 @@ class LocalSurface implements TestingSurface {
   eval(code: string): Promise<string> {
     return Promise.resolve(
       // eslint-disable-next-line no-eval
-      eval(`(function Main(){const {Ski} = this;${code}})`).call({
+      eval(`(function Main(){const {Skia} = this;${code}})`).call({
         Skia: global.SkiaApi,
       })
     );

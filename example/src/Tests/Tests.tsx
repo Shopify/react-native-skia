@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkiaDomView } from "@shopify/react-native-skia";
-import { Canvas, Group } from "@shopify/react-native-skia";
+import { Canvas, Group, Skia } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View, PixelRatio } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
-import { parseProps, parseNode } from "./deserialize";
+import { parseNode } from "./deserialize";
 import { useClient } from "./useClient";
 
 const scale = 3 / PixelRatio.get();
@@ -23,7 +23,9 @@ export const Tests = () => {
           client.send(
             JSON.stringify(
               // eslint-disable-next-line no-eval
-              eval(`(function Main(){${tree.code}})`).call(parseProps(tree.ctx))
+              eval(`(function Main(){const {Skia} = this;${tree.code}})`).call({
+                Skia,
+              })
             )
           );
         } else {
