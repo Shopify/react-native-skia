@@ -1,6 +1,6 @@
 import React from "react";
 
-import { docPath, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+import { docPath, checkImage, itRunsNodeOnly } from "../../../__tests__/setup";
 import { surface, loadFontWithAsset, loadImage } from "../setup";
 import {
   Fill,
@@ -13,23 +13,26 @@ import {
 } from "../../components";
 
 describe("Test Image Filters", () => {
-  itRunsE2eOnly("Should display the text the same way everywhere", async () => {
-    const { width, fontSize } = surface;
-    const { font, assets } = loadFontWithAsset(
-      "skia/__tests__/assets/Roboto-Medium.ttf",
-      fontSize
-    );
-    const x = width / 8;
-    const image = await surface.draw(
-      <>
-        <Fill color="white" />
-        <Text text="Hello World" x={x} y={x} font={font} />
-      </>,
-      assets
-    );
-    checkImage(image, docPath("image-filters/regular-text.png"));
-  });
-  itRunsE2eOnly("Should change the text morphology", async () => {
+  itRunsNodeOnly(
+    "Should display the text the same way everywhere",
+    async () => {
+      const { width, fontSize } = surface;
+      const { font, assets } = loadFontWithAsset(
+        "skia/__tests__/assets/Roboto-Medium.ttf",
+        fontSize
+      );
+      const x = width / 8;
+      const image = await surface.draw(
+        <>
+          <Fill color="white" />
+          <Text text="Hello World" x={x} y={x} font={font} />
+        </>,
+        assets
+      );
+      checkImage(image, docPath("image-filters/regular-text.png"));
+    }
+  );
+  itRunsNodeOnly("Should change the text morphology", async () => {
     const { width, fontSize } = surface;
     const { font, assets } = loadFontWithAsset(
       "skia/__tests__/assets/Roboto-Medium.ttf",
