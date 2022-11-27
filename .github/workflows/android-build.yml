@@ -113,6 +113,7 @@ jobs:
         run: yarn e2e:ci
 
       - uses: actions/upload-artifact@v2
+        if: failure()
         with:
           path: package/src/__tests__/snapshots/
           name: Download-screenshots
