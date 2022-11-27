@@ -18,10 +18,10 @@
 
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
-#include <SkCanvas.h>
-#include <SkColorSpace.h>
-#include <SkPicture.h>
-#include <SkSurface.h>
+#include "SkCanvas.h"
+#include "SkColorSpace.h"
+#include "SkPicture.h"
+#include "SkSurface.h"
 
 #pragma clang diagnostic pop
 
