@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkImageFilters.h>
+#include "SkImageFilters.h"
 
 #pragma clang diagnostic pop
 

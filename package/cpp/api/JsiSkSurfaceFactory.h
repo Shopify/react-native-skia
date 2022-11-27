@@ -12,8 +12,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkImage.h>
-#include <SkSurface.h>
+#include "SkImage.h"
+#include "SkSurface.h"
 
 #pragma clang diagnostic pop
 

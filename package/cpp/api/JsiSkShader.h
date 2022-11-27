@@ -10,8 +10,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkGradientShader.h>
-#include <SkShader.h>
+#include "SkGradientShader.h"
+#include "SkShader.h"
 
 #pragma clang diagnostic pop
 

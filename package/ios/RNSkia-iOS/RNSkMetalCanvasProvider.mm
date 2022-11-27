@@ -4,9 +4,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#import <SkColorSpace.h>
-#import <SkSurface.h>
-#import <SkCanvas.h>
+#import "SkColorSpace.h"
+#import "SkSurface.h"
+#import "SkCanvas.h"
 
 #import <include/gpu/GrDirectContext.h>
 
@@ -33,9 +33,9 @@ RNSkCanvasProvider(requestRedraw),
   #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
   #pragma clang diagnostic pop
-    
+
   auto device = MTLCreateSystemDefaultDevice();
-    
+
   _layer.framebufferOnly = NO;
   _layer.device = device;
   _layer.opaque = false;
@@ -74,12 +74,13 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
     renderContext->commandQueue = id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
     renderContext->skContext = GrDirectContext::MakeMetal((__bridge void*)device, (__bridge void*)renderContext->commandQueue);
   }
-  
+
   // Wrap in auto release pool since we want the system to clean up after rendering
   // and not wait until later - we've seen some example of memory usage growing very
   // fast in the simulator without this.
   @autoreleasepool
   {
+
     GrMTLHandle drawableHandle;
     auto skSurface = SkSurface::MakeFromCAMetalLayer(renderContext->skContext.get(),
                                                      (__bridge GrMTLHandle)_layer,
@@ -114,7 +115,7 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _layer.frame = CGRectMake(0, 0, width, height);
   _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
                                    height* _context->getPixelDensity());
-  
+
   _requestRedraw();
 }
 
