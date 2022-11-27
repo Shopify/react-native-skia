@@ -42,7 +42,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(addArc) {
-    auto rect = JsiSkRect::fromValue(runtime, arguments[0]).get();
+    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
     getObject()->addArc(*rect, start, sweep);
@@ -50,7 +50,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(addOval) {
-    auto rect = JsiSkRect::fromValue(runtime, arguments[0]).get();
+    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto direction = SkPathDirection::kCW;
     if (count >= 2 && arguments[1].getBool()) {
       direction = SkPathDirection::kCCW;
@@ -76,7 +76,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(addRect) {
-    auto rect = JsiSkRect::fromValue(runtime, arguments[0]).get();
+    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto direction = SkPathDirection::kCW;
     if (count >= 2 && arguments[1].getBool()) {
       direction = SkPathDirection::kCCW;
@@ -86,7 +86,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(addRRect) {
-    auto rrect = JsiSkRRect::fromValue(runtime, arguments[0]).get();
+    auto rrect = JsiSkRRect::fromValue(runtime, arguments[0]);
     auto direction = SkPathDirection::kCW;
     if (count >= 2 && arguments[1].getBool()) {
       direction = SkPathDirection::kCCW;
@@ -96,7 +96,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(arcToOval) {
-    auto rect = JsiSkRect::fromValue(runtime, arguments[0]).get();
+    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
     auto forceMoveTo = arguments[3].getBool();

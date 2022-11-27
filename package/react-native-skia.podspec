@@ -23,7 +23,8 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.pod_target_xcconfig = {
     'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) SK_GL=1 SK_METAL=1',
-    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17'
+    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
+    'DEFINES_MODULE' => 'YES'
   }
 
   s.frameworks = 'GLKit', 'MetalKit'
@@ -32,8 +33,8 @@ Pod::Spec.new do |s|
     'libs/ios/libskia.xcframework', 
     'libs/ios/libsvg.xcframework', 
     'libs/ios/libskshaper.xcframework',
-    'libs/ios/libskparagraph.xcframework',
-    'libs/ios/libskunicode.xcframework',
+    #'libs/ios/libskparagraph.xcframework',
+    #'libs/ios/libskunicode.xcframework',
   ]
 
   # All iOS cpp/h files

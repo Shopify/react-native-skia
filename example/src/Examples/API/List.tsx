@@ -78,6 +78,10 @@ export const examples = [
     screen: "Reanimated",
     title: "🐎 Reanimated",
   },
+  {
+    screen: "OnLayout",
+    title: "🎛️ OnLayout",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

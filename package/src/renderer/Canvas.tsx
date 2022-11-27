@@ -4,7 +4,6 @@ import React, {
   useMemo,
   forwardRef,
   useRef,
-  useState,
 } from "react";
 import type {
   RefObject,
@@ -15,7 +14,6 @@ import type {
 } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
-import { Platform } from "react-native";
 
 import { SkiaDomView } from "../views";
 import type { TouchHandler } from "../views";
@@ -26,7 +24,6 @@ import { debug as hostDebug, skHostConfig } from "./HostConfig";
 // import { debugTree } from "./nodes";
 import { Container } from "./Container";
 import { DependencyManager } from "./DependencyManager";
-import { CanvasProvider } from "./useCanvas";
 
 export const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -59,14 +56,14 @@ export interface CanvasProps extends ComponentProps<typeof SkiaDomView> {
 }
 
 export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
-  ({ children, style, debug, mode, onTouch, onSize }, forwardedRef) => {
+  (
+    { children, style, debug, mode, onTouch, onSize, ...props },
+    forwardedRef
+  ) => {
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
-    const [, setTick] = useState(0);
     const redraw = useCallback(() => {
-      Platform.OS === "web"
-        ? setTick((tick) => tick + 1)
-        : innerRef.current?.redraw();
+      innerRef.current?.redraw();
     }, [innerRef]);
 
     const registerValues = useCallback(
@@ -104,11 +101,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
 
     // Render effect
     useEffect(() => {
-      render(
-        <CanvasProvider value={{ Skia }}>{children}</CanvasProvider>,
-        root,
-        container
-      );
+      render(children, root, container);
     }, [children, root, redraw, container]);
 
     useEffect(() => {
@@ -128,6 +121,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
         onSize={onSize}
         mode={mode}
         debug={debug}
+        {...props}
       />
     );
   }

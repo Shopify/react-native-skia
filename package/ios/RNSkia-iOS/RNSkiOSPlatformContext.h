@@ -48,6 +48,7 @@ public:
   ~RNSkiOSPlatformContext() {
     CFNotificationCenterRemoveEveryObserver(
         CFNotificationCenterGetLocalCenter(), this);
+    stopDrawLoop();
   }
 
   void startDrawLoop() override;
