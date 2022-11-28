@@ -32,7 +32,7 @@ public:
 
   void render(DrawingContext *context) {
 #if SKIA_DOM_DEBUG
-    printDebugInfo(context, "Begin Render");
+    printDebugInfo("Begin Render");
 #endif
 
     // Ensure we have a local drawing context inheriting from the parent context
@@ -50,27 +50,27 @@ public:
       if (_layerProp->isSet()) {
         if (_layerProp->isBool()) {
 #if SKIA_DOM_DEBUG
-          printDebugInfo(context, "canvas->saveLayer()");
+          printDebugInfo("canvas->saveLayer()");
 #endif
           _localContext->getCanvas()->saveLayer(
               SkCanvas::SaveLayerRec(nullptr, nullptr, nullptr, 0));
         } else {
 #if SKIA_DOM_DEBUG
-          printDebugInfo(context, "canvas->saveLayer(paint)");
+          printDebugInfo("canvas->saveLayer(paint)");
 #endif
           _localContext->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(
               nullptr, _layerProp->getDerivedValue().get(), nullptr, 0));
         }
       } else {
 #if SKIA_DOM_DEBUG
-        printDebugInfo(context, "canvas->save()");
+        printDebugInfo("canvas->save()");
 #endif
         _localContext->getCanvas()->save();
       }
 
       if (_originProp->isSet()) {
 #if SKIA_DOM_DEBUG
-        printDebugInfo(context, "canvas->translate(origin)");
+        printDebugInfo("canvas->translate(origin)");
 #endif
         // Handle origin
         _localContext->getCanvas()->translate(
@@ -81,10 +81,9 @@ public:
       if (shouldTransform) {
 #if SKIA_DOM_DEBUG
         printDebugInfo(
-            context,
             "canvas->concat(" +
-                std::string(_matrixProp->isSet() ? "matrix" : "transform") +
-                std::string(")"));
+            std::string(_matrixProp->isSet() ? "matrix" : "transform") +
+            std::string(")"));
 #endif
         auto matrix = _matrixProp->isSet() ? _matrixProp->getDerivedValue()
                                            : _transformProp->getDerivedValue();
@@ -101,7 +100,7 @@ public:
 
       if (_originProp->isSet()) {
 #if SKIA_DOM_DEBUG
-        printDebugInfo(context, "canvas->translate(-origin)");
+        printDebugInfo("canvas->translate(-origin)");
 #endif
         // Handle origin
         _localContext->getCanvas()->translate(
@@ -124,13 +123,13 @@ public:
     // Restore if needed
     if (shouldSave) {
 #if SKIA_DOM_DEBUG
-      printDebugInfo(context, "canvas->restore()");
+      printDebugInfo("canvas->restore()");
 #endif
       _localContext->getCanvas()->restore();
     }
 
 #if SKIA_DOM_DEBUG
-    printDebugInfo(context, "End Render");
+    printDebugInfo("End Render");
 #endif
   }
 
@@ -158,41 +157,19 @@ public:
 
 protected:
   /**
+   Invalidates and marks then context as changed.
+   */
+  virtual void invalidateContext() override {
+    if (_localContext != nullptr) {
+      _localContext->markAsChanged();
+    }
+  }
+
+  /**
    Override to implement rendering where the current state of the drawing
    context is correctly set.
    */
   virtual void renderNode(DrawingContext *context) = 0;
-
-  /**
-   Removes a child
-   */
-  void removeChild(std::shared_ptr<JsiDomNode> child) override {
-    JsiDomNode::removeChild(child);
-    if (_localContext != nullptr) {
-      _localContext->markAsChanged();
-    }
-  }
-
-  /**
-   Validates that only declaration nodes can be children
-   */
-  void addChild(std::shared_ptr<JsiDomNode> child) override {
-    JsiDomNode::addChild(child);
-    if (_localContext != nullptr) {
-      _localContext->markAsChanged();
-    }
-  }
-
-  /**
-   Validates that only declaration nodes can be children
-   */
-  void insertChildBefore(std::shared_ptr<JsiDomNode> child,
-                         std::shared_ptr<JsiDomNode> before) override {
-    JsiDomNode::insertChildBefore(child, before);
-    if (_localContext != nullptr) {
-      _localContext->markAsChanged();
-    }
-  }
 
   /**
    Define common properties for all render nodes
@@ -224,17 +201,17 @@ private:
     auto op = invert ? SkClipOp::kDifference : SkClipOp::kIntersect;
     if (_clipProp->getRect() != nullptr) {
 #if SKIA_DOM_DEBUG
-      printDebugInfo(context, "canvas->clipRect()");
+      printDebugInfo("canvas->clipRect()");
 #endif
       canvas->clipRect(*_clipProp->getRect(), op, true);
     } else if (_clipProp->getRRect() != nullptr) {
 #if SKIA_DOM_DEBUG
-      printDebugInfo(context, "canvas->clipRRect()");
+      printDebugInfo("canvas->clipRRect()");
 #endif
       canvas->clipRRect(*_clipProp->getRRect(), op, true);
     } else if (_clipProp->getPath() != nullptr) {
 #if SKIA_DOM_DEBUG
-      printDebugInfo(context, "canvas->clipPath()");
+      printDebugInfo("canvas->clipPath()");
 #endif
       canvas->clipPath(*_clipProp->getPath(), op, true);
     }

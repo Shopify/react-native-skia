@@ -20,13 +20,6 @@ DrawingContext::inheritContext(const char *source) {
   return result;
 }
 
-size_t DrawingContext::getLevel() {
-  if (_parent != nullptr) {
-    return _parent->getLevel() + 1;
-  }
-  return 0;
-}
-
 std::string DrawingContext::getDebugDescription() {
   std::string v = "ctx for " + std::string(_source) + ":";
 
@@ -51,9 +44,27 @@ std::string DrawingContext::getDebugDescription() {
     }
 
     v += " opacity:" + std::to_string(_opacity);
+
     if (_paint->getPathEffect() != nullptr) {
       v += " [PathEffect]";
     }
+
+    if (_paint->getShader() != nullptr) {
+      v += " [Shader]";
+    }
+
+    if (_paint->getImageFilter() != nullptr) {
+      v += " [ImageFilter]";
+    }
+
+    if (_paint->getMaskFilter() != nullptr) {
+      v += " [MaskFilter]";
+    }
+
+    if (_paint->getColorFilter() != nullptr) {
+      v += " [ColorFilter]";
+    }
+
   } else {
     v = v + "[inherited] " +
         (_parent != nullptr ? _parent->getDebugDescription() : "");

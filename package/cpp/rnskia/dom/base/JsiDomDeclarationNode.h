@@ -36,7 +36,7 @@ public:
    */
   virtual void decorateContext(DrawingContext *context) {
 #if SKIA_DOM_DEBUG
-    printDebugInfo(context, "Begin Materialize");
+    printDebugInfo("Begin Materialize " + std::string(getType()));
 #endif
     // Materialize children first so that any inner nodes get the opportunity
     // to calculate their state before this node continues.
@@ -51,11 +51,21 @@ public:
     decorate(context);
 
 #if SKIA_DOM_DEBUG
-    printDebugInfo(context, "End Materialize");
+    printDebugInfo("End / Commit Materialize " + std::string(getType()));
 #endif
   }
 
 protected:
+  /**
+   Invalidates and marks then context as changed. The implementation in the
+   declaration node is to pass the call upwards to the parent node
+   */
+  virtual void invalidateContext() override {
+    if (getParent() != nullptr) {
+      getParent()->invalidateContext();
+    }
+  }
+
   /**
    Override to implement materialization
    */
