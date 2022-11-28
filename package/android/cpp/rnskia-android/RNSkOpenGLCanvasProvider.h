@@ -6,7 +6,7 @@
 
 #include <RNSkJsView.h>
 
-#include <SkiaOpenGLRenderer.h>
+#include "SkiaOpenGLRenderer.h"
 #include <android/native_window.h>
 
 namespace RNSkia {

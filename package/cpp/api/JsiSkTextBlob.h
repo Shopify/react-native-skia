@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkTextBlob.h>
+#include "SkTextBlob.h"
 
 #pragma clang diagnostic pop
 

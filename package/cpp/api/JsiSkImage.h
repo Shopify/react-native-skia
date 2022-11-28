@@ -11,9 +11,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkBase64.h>
-#include <SkImage.h>
-#include <SkStream.h>
+#include "SkBase64.h"
+#include "SkImage.h"
+#include "SkStream.h"
 #include <include/codec/SkCodec.h>
 
 #pragma clang diagnostic pop
