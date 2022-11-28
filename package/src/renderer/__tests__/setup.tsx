@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from "fs";
 import path from "path";
@@ -305,7 +304,7 @@ type Assets = Map<SkFont, number[]>;
 
 interface TestingSurface {
   init(): Promise<void>;
-  eval(code: string, ctx: {}): Promise<string>;
+  eval(code: string): Promise<string>;
   draw(node: ReactNode, assets?: Assets): Promise<SkImage>;
   dispose(): void;
   width: number;
@@ -326,9 +325,13 @@ class LocalSurface implements TestingSurface {
 
   dispose(): void {}
 
-  eval(code: string, ctx: {}): Promise<string> {
-    // eslint-disable-next-line no-eval
-    return Promise.resolve(eval(`(function Main(){${code}})`).call(ctx));
+  eval(code: string): Promise<string> {
+    return Promise.resolve(
+      // eslint-disable-next-line no-eval
+      eval(`(function Main(){const {Skia} = this;${code}})`).call({
+        Skia: global.SkiaApi,
+      })
+    );
   }
 
   draw(node: ReactNode): Promise<SkImage> {
@@ -373,19 +376,14 @@ class RemoteSurface implements TestingSurface {
     }
   }
 
-  eval(code: string, ctx: { [key: string]: any }): Promise<string> {
+  eval(code: string): Promise<string> {
     this.assertInit();
     return new Promise((resolve) => {
       const client = this.client!;
       client!.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
-
-      const newCtx: { [key: string]: any } = {};
-      Object.keys(ctx).forEach((key) => {
-        newCtx[key] = serializeSkOjects(ctx[key], new Map());
-      });
-      client!.send(JSON.stringify({ code, ctx: newCtx }));
+      client!.send(JSON.stringify({ code }));
     });
   }
 

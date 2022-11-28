@@ -16,12 +16,12 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "include/gpu/GrDirectContext.h"
-#include "include/gpu/gl/GrGLInterface.h"
 #include "SkCanvas.h"
 #include "SkColorSpace.h"
 #include "SkPicture.h"
 #include "SkSurface.h"
+#include "include/gpu/GrDirectContext.h"
+#include "include/gpu/gl/GrGLInterface.h"
 
 #pragma clang diagnostic pop
 
