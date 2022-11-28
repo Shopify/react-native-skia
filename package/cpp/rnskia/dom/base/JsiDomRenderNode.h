@@ -159,7 +159,7 @@ protected:
   /**
    Invalidates and marks then context as changed.
    */
-  virtual void invalidateContext() override {
+  void invalidateContext() override {
     if (_localContext != nullptr) {
       _localContext->markAsChanged();
     }

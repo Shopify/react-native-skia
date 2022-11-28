@@ -60,7 +60,7 @@ protected:
    Invalidates and marks then context as changed. The implementation in the
    declaration node is to pass the call upwards to the parent node
    */
-  virtual void invalidateContext() override {
+  void invalidateContext() override {
     if (getParent() != nullptr) {
       getParent()->invalidateContext();
     }
