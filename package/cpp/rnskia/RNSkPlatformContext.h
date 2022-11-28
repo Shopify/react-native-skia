@@ -188,7 +188,8 @@ public:
     }
   }
 
-  // default implementation does nothing, so it can be called from virtual destructor.
+  // default implementation does nothing, so it can be called from virtual
+  // destructor.
   virtual void startDrawLoop() {}
   virtual void stopDrawLoop() {}
 
