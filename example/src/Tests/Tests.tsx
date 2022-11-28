@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkiaDomView } from "@shopify/react-native-skia";
-import { Canvas } from "@shopify/react-native-skia";
+import { Group, Canvas, Skia } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { PixelRatio, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
-import { parseProps, parseNode } from "./deserialize";
+import { parseNode } from "./deserialize";
 import { useClient } from "./useClient";
+
+const scale = 3 / PixelRatio.get();
+const size = 256 * scale;
 
 export const Tests = () => {
   const ref = useRef<SkiaDomView>(null);
@@ -20,7 +23,9 @@ export const Tests = () => {
           client.send(
             JSON.stringify(
               // eslint-disable-next-line no-eval
-              eval(`(function Main(){${tree.code}})`).call(parseProps(tree.ctx))
+              eval(`(function Main(){const {Skia} = this;${tree.code}})`).call({
+                Skia,
+              })
             )
           );
         } else {
@@ -52,8 +57,8 @@ export const Tests = () => {
   return (
     <View style={{ flex: 1 }}>
       <Text>💚 Waiting for the server to send tests</Text>
-      <Canvas style={{ width: 256, height: 256 }} ref={ref}>
-        {drawing}
+      <Canvas style={{ width: size, height: size }} ref={ref}>
+        <Group transform={[{ scale }]}>{drawing}</Group>
       </Canvas>
     </View>
   );

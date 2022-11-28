@@ -24,9 +24,7 @@ public:
         [this]() { notifyDrawLoop(false); });
   }
 
-  ~RNSkAndroidPlatformContext() {
-    stopDrawLoop();
-  }
+  ~RNSkAndroidPlatformContext() { stopDrawLoop(); }
 
   void performStreamOperation(
       const std::string &sourceUri,
