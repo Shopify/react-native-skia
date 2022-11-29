@@ -95,6 +95,7 @@ export class BoxNode extends JsiRenderNode<BoxProps> {
         const lPaint = this.Skia.Paint();
         lPaint.setColor(this.Skia.Color(color));
         lPaint.setAlphaf(paint.getAlphaf() * opacity);
+
         lPaint.setMaskFilter(
           this.Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
         );

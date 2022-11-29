@@ -30,6 +30,11 @@ export const isPaint = (obj: SkJSIInstance<string> | null): obj is SkPaint =>
 
 export interface SkPaint extends SkJSIInstance<"Paint"> {
   /**
+   * Retrieves alpha from the color used when stroking and filling.
+   */
+  getAlphaf(): number;
+
+  /**
    * Returns a copy of this paint.
    */
   copy(): SkPaint;
