@@ -34,7 +34,7 @@ export interface DrawingNodeProps extends GroupProps {
 
 export type ImageProps = DrawingNodeProps &
   RectDef & {
-    fit: Fit;
+    fit?: Fit;
     image: SkImage;
   };
 
