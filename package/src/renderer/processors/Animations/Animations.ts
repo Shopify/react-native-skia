@@ -54,10 +54,16 @@ export type AnimatedProps<T, O extends keyof T | never = never> = {
     : AnimatedProp<T[K]>;
 };
 
-// TODO: switch to AnimatedProps<GroupProps> and remove duplicate properties.
-// For instance matrix in color filter becomes colorMatrix
-
 export type SkiaProps<
   P = object,
   O extends keyof P | never = never
 > = AnimatedProps<P, O>;
+
+type WithOptional<T extends object, N extends keyof T> = Omit<T, N> & {
+  [K in N]?: T[K];
+};
+
+export type SkiaDefaultProps<
+  T extends object,
+  N extends keyof T
+> = WithOptional<SkiaProps<T>, N>;
