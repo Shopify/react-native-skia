@@ -141,7 +141,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
       opacity !== undefined ||
       antiAlias !== undefined
     ) {
-      ctx = {};
+      ctx = { opacity: 1 };
       if (color !== undefined) {
         ctx.color = this.Skia.Color(color);
       }
@@ -210,16 +210,19 @@ export abstract class JsiRenderNode<P extends GroupProps>
 
     const opacity =
       this.props.opacity !== undefined
-        ? parentCtx.opacity * this.props.opacity
-        : parentCtx.opacity;
+        ? parentCtx.paint.getAlphaf() * this.props.opacity
+        : parentCtx.paint.getAlphaf();
 
     if (
       this.paintCache === null ||
       this.paintCache.parent !== parentCtx.paint
     ) {
       const paintCtx = this.getPaintCtx();
+      if (paintCtx) {
+        paintCtx.opacity = opacity;
+      }
       const child = paintCtx
-        ? concatPaint(parentCtx.paint, paintCtx, parentCtx.opacity)
+        ? concatPaint(parentCtx.paint, paintCtx)
         : parentCtx.paint;
       this.paintCache = { parent: parentCtx.paint, child };
     }
@@ -278,23 +281,17 @@ const concatPaint = (
     imageFilter,
     maskFilter,
     pathEffect,
-    opacity: alpha,
+    opacity,
     strokeCap,
     strokeJoin,
     strokeMiter,
     style,
-  }: PaintContext,
-  opacity: number
+  }: PaintContext
 ) => {
   const paint = parent.copy();
   if (color !== undefined) {
     paint.setShader(null);
-    color[3] *= opacity;
     paint.setColor(color);
-  } else {
-    const cl = paint.getColor();
-    cl[3] = opacity;
-    paint.setColor(cl);
   }
   if (strokeWidth !== undefined) {
     paint.setStrokeWidth(strokeWidth);
@@ -320,9 +317,6 @@ const concatPaint = (
   if (pathEffect !== undefined) {
     paint.setPathEffect(pathEffect);
   }
-  if (alpha !== undefined) {
-    paint.setAlphaf(alpha * opacity);
-  }
   if (strokeCap !== undefined) {
     paint.setStrokeCap(strokeCap);
   }
@@ -335,5 +329,6 @@ const concatPaint = (
   if (style !== undefined) {
     paint.setStyle(style);
   }
+  paint.setAlphaf(paint.getAlphaf() * (opacity ?? 1));
   return paint;
 };

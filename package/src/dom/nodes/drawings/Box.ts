@@ -54,7 +54,7 @@ export class BoxNode extends JsiRenderNode<BoxProps> {
     super(ctx, NodeType.Box, props);
   }
 
-  renderNode({ canvas, paint, opacity }: DrawingContext) {
+  renderNode({ canvas, paint }: DrawingContext) {
     const { box: defaultBox } = this.props;
     const box = isRRect(defaultBox)
       ? defaultBox
@@ -72,7 +72,7 @@ export class BoxNode extends JsiRenderNode<BoxProps> {
       .map((shadow) => {
         const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
         const lPaint = this.Skia.Paint();
-        lPaint.setColor(processColor(this.Skia, color, opacity));
+        lPaint.setColor(processColor(this.Skia, color, paint.getAlphaf()));
         lPaint.setMaskFilter(
           this.Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
         );
@@ -92,7 +92,7 @@ export class BoxNode extends JsiRenderNode<BoxProps> {
         canvas.save();
         canvas.clipRRect(box, ClipOp.Intersect, false);
         const lPaint = this.Skia.Paint();
-        lPaint.setColor(processColor(this.Skia, color, opacity));
+        lPaint.setColor(processColor(this.Skia, color, paint.getAlphaf()));
         lPaint.setMaskFilter(
           this.Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
         );
