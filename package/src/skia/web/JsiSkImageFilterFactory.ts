@@ -61,7 +61,7 @@ export class JsiSkImageFilterFactory
   MakeBlur(
     sigmaX: number,
     sigmaY: number,
-    mode: TileMode,
+    _mode: TileMode,
     input: SkImageFilter | null
   ) {
     return new JsiSkImageFilter(
@@ -69,7 +69,7 @@ export class JsiSkImageFilterFactory
       this.CanvasKit.ImageFilter.MakeBlur(
         sigmaX,
         sigmaY,
-        ckEnum(mode),
+        this.CanvasKit.TileMode.Decal,
         input === null ? null : JsiSkImageFilter.fromValue(input)
       )
     );

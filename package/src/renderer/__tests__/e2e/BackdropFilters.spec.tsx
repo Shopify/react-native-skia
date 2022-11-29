@@ -50,6 +50,7 @@ describe("Backdrop Filters", () => {
     expect(image).toBeTruthy();
     const img = await surface.draw(
       <Group>
+        <Fill color="white" />
         <Image
           image={image}
           x={0}
@@ -75,6 +76,7 @@ describe("Backdrop Filters", () => {
     expect(image).toBeTruthy();
     const img = await surface.draw(
       <Group>
+        <Fill color="white" />
         <Image
           image={image}
           x={0}
@@ -84,7 +86,7 @@ describe("Backdrop Filters", () => {
           fit="cover"
         />
         <BackdropFilter
-          filter={<Blur blur={4 / 3} mode="decal" />}
+          filter={<Blur blur={4 / 3} />}
           clip={{ x: 0, y: size / 2, width: size, height: size / 2 }}
         >
           <Fill color="rgba(0, 0, 0, 0.2)" />
