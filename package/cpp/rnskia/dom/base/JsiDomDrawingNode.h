@@ -26,11 +26,11 @@ protected:
 
   void renderNode(DrawingContext *context) override {
 #if SKIA_DOM_DEBUG
-    printDebugInfo(context, "Begin Draw", 1);
+    printDebugInfo("Begin Draw", 1);
 #endif
 
 #if SKIA_DOM_DEBUG
-    printDebugInfo(context, context->getDebugDescription(), 2);
+    printDebugInfo(context->getDebugDescription(), 2);
 #endif
     draw(context);
 
@@ -42,7 +42,7 @@ protected:
       }
     }
 #if SKIA_DOM_DEBUG
-    printDebugInfo(context, "End Draw", 1);
+    printDebugInfo("End Draw", 1);
 #endif
   }
 };
