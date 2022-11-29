@@ -294,6 +294,9 @@ protected:
     }
     // Update properties container
     _propsContainer->setProps(runtime, std::move(props));
+    
+    // Invalidate context
+    invalidateContext();
   }
 
   /**
