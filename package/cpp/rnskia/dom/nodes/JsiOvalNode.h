@@ -15,7 +15,6 @@ public:
 
 protected:
   void draw(DrawingContext *context) override {
-    RNSkLogger::logToConsole(context->getDebugDescription());
     context->getCanvas()->drawOval(*_rectProp->getDerivedValue(),
                                    *context->getPaint());
   }
