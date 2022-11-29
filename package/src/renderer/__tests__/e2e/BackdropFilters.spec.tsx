@@ -63,37 +63,11 @@ describe("Backdrop Filters", () => {
           blur={4 / 3}
           clip={{ x: 0, y: size / 2, width: size, height: size / 2 }}
         >
-          <Fill color="rgba(0, 0, 0, 0.2)" />
+          <Fill color="rgba(0, 0, 0, 0.5)" />
         </BackdropBlur>
       </Group>
     );
     checkImage(img, docPath("blur-backdrop-filter.png"));
-  });
-  it("Blur backdrop filter with decal", async () => {
-    const { width } = surface;
-    const size = width;
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    expect(image).toBeTruthy();
-    const img = await surface.draw(
-      <Group>
-        <Fill color="white" />
-        <Image
-          image={image}
-          x={0}
-          y={0}
-          width={width}
-          height={width}
-          fit="cover"
-        />
-        <BackdropFilter
-          filter={<Blur blur={4 / 3} />}
-          clip={{ x: 0, y: size / 2, width: size, height: size / 2 }}
-        >
-          <Fill color="rgba(0, 0, 0, 0.2)" />
-        </BackdropFilter>
-      </Group>
-    );
-    checkImage(img, docPath("blur-backdrop-filter-decal.png"));
   });
   it("should display the Aurora Example", async () => {
     const { width, height } = surface;
