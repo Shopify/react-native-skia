@@ -19,7 +19,6 @@ import type {
   TwoPointConicalGradientProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { processColor } from "../datatypes/Color";
 import {
   enumKey,
   fitRects,
@@ -99,7 +98,7 @@ export class ColorNode extends ShaderDeclaration<ColorProps> {
 
   materialize() {
     const { color } = this.props;
-    return this.Skia.Shader.MakeColor(processColor(this.Skia, color, 1));
+    return this.Skia.Shader.MakeColor(this.Skia.Color(color));
   }
 }
 
