@@ -45,10 +45,11 @@ export class PatchNode extends JsiDrawingNode<
     };
   }
 
-  draw({ canvas, paint, opacity }: DrawingContext) {
+  draw({ canvas, paint }: DrawingContext) {
     if (!this.derived) {
       throw new Error("PatchNode: derived props not set");
     }
+    const opacity = paint.getAlphaf();
     const { texture } = this.props;
     const { colors, points, mode } = this.derived;
     canvas.drawPatch(

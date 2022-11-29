@@ -177,7 +177,6 @@ export const mountCanvas = (element: ReactNode) => {
     timestamp: 0,
     canvas,
     paint: Skia.Paint(),
-    opacity: 1,
     ref,
     center: Skia.Point(width / 2, height / 2),
     Skia,
