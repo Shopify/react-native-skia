@@ -34,8 +34,9 @@ public:
    */
   std::shared_ptr<DrawingContext> inheritContext(const char *source);
 
-  size_t getLevel();
-
+  /**
+   Returns the debug description for the context
+   */
   std::string getDebugDescription();
 
   /**

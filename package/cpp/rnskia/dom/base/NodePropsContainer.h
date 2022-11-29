@@ -110,6 +110,16 @@ public:
     return prop.get();
   }
 
+  /**
+   Defines a property that will be updated with the container changes.
+   */
+  template <class _Tp, class... _Args,
+            class = std::_EnableIf<!std::is_array<_Tp>::value>>
+  _Tp *defineProperty(_Args &&...__args) {
+    return defineProperty(
+        std::make_shared<_Tp>(std::forward<_Args>(__args)...));
+  }
+
 private:
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
   std::map<PropId, std::vector<NodeProp *>> _mappedProperties;
