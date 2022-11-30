@@ -169,12 +169,6 @@ public:
   }
 
   /**
-   Invalidates and marks then context as changed. The default behaviour is an
-   empty implementation
-   */
-  virtual void invalidateContext() = 0;
-
-  /**
    Updates any pending property changes in all nodes and child nodes. This
    function will swap any pending property changes in this and children with any
    waiting values that has been set by the javascript thread. Props will also be
@@ -192,11 +186,6 @@ public:
       std::lock_guard<std::mutex> lock(_childrenLock);
       for (auto &op : _queuedNodeOps) {
         op();
-      }
-
-      // If there are any ops here we should invalidate the cached context
-      if (_queuedNodeOps.size() > 0) {
-        invalidateContext();
       }
 
       _queuedNodeOps.clear();
@@ -220,11 +209,7 @@ public:
     }
 
     // Now let's dispose if needed
-    if (_isDisposing && !_isDisposed) {
-      _isDisposed = true;
-
-      this->setParent(nullptr);
-
+    if (_isDisposed) {
       // Callback signaling that we're done
       if (_disposeCallback != nullptr) {
         _disposeCallback();
@@ -281,9 +266,6 @@ protected:
    always call the onPropsSet method as a signal that things have changed.
    */
   void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
-#if SKIA_DOM_DEBUG
-    printDebugInfo("JS:setProps(nodeId: " + std::to_string(_nodeId) + ")");
-#endif
     if (_propsContainer == nullptr) {
 
       // Initialize properties container
@@ -294,18 +276,12 @@ protected:
     }
     // Update properties container
     _propsContainer->setProps(runtime, std::move(props));
-
-    // Invalidate context
-    invalidateContext();
   }
 
   /**
    Called for components that has no properties
    */
   void setEmptyProps() {
-#if SKIA_DOM_DEBUG
-    printDebugInfo("JS:setEmptyProps(nodeId: " + std::to_string(_nodeId) + ")");
-#endif
     if (_propsContainer == nullptr) {
 
       // Initialize properties container
@@ -328,15 +304,8 @@ protected:
    Adds a child node to the array of children for this node
    */
   virtual void addChild(std::shared_ptr<JsiDomNode> child) {
-#if SKIA_DOM_DEBUG
-    printDebugInfo("JS:addChild(childId: " + std::to_string(child->_nodeId) +
-                   ")");
-#endif
     std::lock_guard<std::mutex> lock(_childrenLock);
-    _queuedNodeOps.push_back([child, this]() {
-      _children.push_back(child);
-      child->setParent(this);
-    });
+    _queuedNodeOps.push_back([child, this]() { _children.push_back(child); });
   }
 
   /**
@@ -345,16 +314,10 @@ protected:
    */
   virtual void insertChildBefore(std::shared_ptr<JsiDomNode> child,
                                  std::shared_ptr<JsiDomNode> before) {
-#if SKIA_DOM_DEBUG
-    printDebugInfo(
-        "JS:insertChildBefore(childId: " + std::to_string(child->_nodeId) +
-        ", beforeId: " + std::to_string(before->_nodeId) + ")");
-#endif
     std::lock_guard<std::mutex> lock(_childrenLock);
     _queuedNodeOps.push_back([child, before, this]() {
       auto position = std::find(_children.begin(), _children.end(), before);
       _children.insert(position, child);
-      child->setParent(this);
     });
   }
 
@@ -363,10 +326,6 @@ protected:
    children and call dispose on the child node.
    */
   virtual void removeChild(std::shared_ptr<JsiDomNode> child) {
-#if SKIA_DOM_DEBUG
-    printDebugInfo("JS:removeChild(childId: " + std::to_string(child->_nodeId) +
-                   ")");
-#endif
     std::lock_guard<std::mutex> lock(_childrenLock);
     _queuedNodeOps.push_back([child, this]() {
       // Delete child itself
@@ -384,39 +343,25 @@ protected:
    up.
    */
   virtual void dispose() {
-    if (_isDisposing) {
+    if (_isDisposed) {
       return;
     }
 
-    _isDisposing = true;
+    _isDisposed = true;
   }
 
 #if SKIA_DOM_DEBUG
-  std::string getLevelIndentation(size_t indentation = 0) {
-    JsiDomNode *curParent = _parent;
-    while (curParent != nullptr) {
-      indentation++;
-      curParent = curParent->getParent();
-    }
-    return std::string(indentation * 2, ' ');
+  std::string getLevelIndentation(DrawingContext *ctx, size_t indentation = 0) {
+    return std::string((ctx->getLevel() + indentation), ' ');
   }
 
-  void printDebugInfo(const std::string &message, size_t indentation = 0) {
+  void printDebugInfo(DrawingContext *context, const std::string &message,
+                      size_t indentation = 0) {
     RNSkLogger::logToConsole("%s%s %lu: %s",
-                             getLevelIndentation(indentation).c_str(),
+                             getLevelIndentation(context, indentation).c_str(),
                              getType(), getNodeId(), message.c_str());
   }
 #endif
-
-  /**
-   Sets the parent node
-  */
-  void setParent(JsiDomNode *parent) { _parent = parent; }
-
-  /**
-   Returns the parent node if set.
-  */
-  JsiDomNode *getParent() { return _parent; }
 
 private:
   const char *_type;
@@ -429,14 +374,11 @@ private:
   std::vector<std::shared_ptr<JsiDomNode>> _children;
   std::mutex _childrenLock;
 
-  std::atomic<bool> _isDisposing = {false};
-  bool _isDisposed = false;
+  std::atomic<bool> _isDisposed = {false};
 
   size_t _nodeId;
 
   std::vector<std::function<void()>> _queuedNodeOps;
-
-  JsiDomNode *_parent;
 };
 
 } // namespace RNSkia
