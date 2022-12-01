@@ -23,7 +23,7 @@ import {
   Wallet,
   Severance,
 } from "./Examples";
-import { Tests } from "./Tests";
+import { E2E, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
@@ -69,8 +69,6 @@ const HeaderLeft = (props: HeaderBackButtonProps) => {
     />
   );
 };
-
-const E2E = process.env.E2E === "true";
 
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();

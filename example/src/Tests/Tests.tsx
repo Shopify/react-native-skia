@@ -8,11 +8,12 @@ import type { SerializedNode } from "./deserialize";
 import { parseNode } from "./deserialize";
 import { useClient } from "./useClient";
 
+export const E2E = process.env.E2E === "true";
 const scale = 3 / PixelRatio.get();
 const size = 256 * scale;
 // Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI (E2E is availble in separate PR)
 //const timeToDraw = E2E ? 1000 : Platform.OS === "ios" ? 250 : 500;
-const timeToDraw = Platform.OS === "ios" ? 250 : 500;
+const timeToDraw = E2E ? 1500 : Platform.OS === "ios" ? 250 : 500;
 
 interface TestsProps {
   assets: { [key: string]: any };
@@ -63,7 +64,9 @@ export const Tests = ({ assets }: TestsProps) => {
   }, [client, drawing]);
   return (
     <View style={{ flex: 1 }}>
-      <Text>💚 Waiting for the server to send tests</Text>
+      <Text>
+        {client === null ? "❤️" : "💚"} Waiting for the server to send tests
+      </Text>
       <Canvas style={{ width: size, height: size }} ref={ref}>
         <Group transform={[{ scale }]}>{drawing}</Group>
       </Canvas>
