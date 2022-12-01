@@ -11,7 +11,11 @@ import { useClient } from "./useClient";
 const scale = 3 / PixelRatio.get();
 const size = 256 * scale;
 
-export const Tests = () => {
+interface TestsProps {
+  assets: { [key: string]: any };
+}
+
+export const Tests = ({ assets }: TestsProps) => {
   const ref = useRef<SkiaDomView>(null);
   const client = useClient();
   const [drawing, setDrawing] = useState<any>(null);
@@ -29,7 +33,7 @@ export const Tests = () => {
             )
           );
         } else {
-          const node = parseNode(tree);
+          const node = parseNode(tree, assets);
           setDrawing(node as SerializedNode);
         }
       };
@@ -38,7 +42,7 @@ export const Tests = () => {
       };
     }
     return;
-  }, [client]);
+  }, [assets, client]);
   useEffect(() => {
     if (drawing) {
       const it = setTimeout(() => {
@@ -47,7 +51,7 @@ export const Tests = () => {
           const data = image.encodeToBytes();
           client.send(data);
         }
-      }, 500);
+      }, 250);
       return () => {
         clearTimeout(it);
       };

@@ -26,6 +26,7 @@ import {
 import { Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
+import { useAssets } from "./Tests/useAssets";
 
 const linking = {
   config: {
@@ -71,6 +72,10 @@ const HeaderLeft = (props: HeaderBackButtonProps) => {
 
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
+  const assets = useAssets();
+  if (assets === null) {
+    return null;
+  }
   return (
     <>
       <StatusBar hidden />
@@ -85,11 +90,12 @@ const App = () => {
           />
           <Stack.Screen
             name="Tests"
-            component={Tests}
             options={{
               title: "🔧 Tests",
             }}
-          />
+          >
+            {(props) => <Tests {...props} assets={assets} />}
+          </Stack.Screen>
           <Stack.Screen
             name="Vertices"
             component={Vertices}

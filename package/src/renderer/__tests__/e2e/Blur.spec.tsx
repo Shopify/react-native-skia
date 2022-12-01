@@ -5,8 +5,17 @@ import { Blur, Image } from "../../components";
 import { loadImage, PIXEL_RATIO, surface } from "../setup";
 import { Group } from "../../components/Group";
 import { setupSkia } from "../../../skia/__tests__/setup";
+import type { SkImage, SkFont } from "../../../skia/types";
 import { TileMode } from "../../../skia/types";
 import { fitRects } from "../../../dom/nodes";
+
+let oslo: SkImage;
+const assets = new Map<SkImage | SkFont, string>();
+
+beforeAll(() => {
+  oslo = loadImage("skia/__tests__/assets/oslo.jpg");
+  assets.set(oslo, "oslo");
+});
 
 describe("Blur Image Filter", () => {
   it("should build the reference build images for later", async () => {
@@ -15,8 +24,7 @@ describe("Blur Image Filter", () => {
       surface.height * PIXEL_RATIO
     );
     const canvas = ckSurface.getCanvas();
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
+    const imgRect = Skia.XYWHRect(0, 0, oslo.width(), oslo.height());
     const { src, dst } = fitRects("cover", imgRect, {
       x: 0,
       y: 0,
@@ -31,26 +39,25 @@ describe("Blur Image Filter", () => {
     paint.setImageFilter(Skia.ImageFilter.MakeBlur(4, 4, TileMode.Decal, null));
     canvas.save();
     canvas.concat(m3);
-    canvas.drawImageRect(image, src, dst, paint);
+    canvas.drawImageRect(oslo, src, dst, paint);
     canvas.restore();
     processResult(ckSurface, docPath("blur.png"));
   });
   it("should blur the image with tile mode=decal", async () => {
     const { width } = surface;
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    expect(image).toBeTruthy();
     const img = await surface.draw(
       <Group>
         <Blur blur={4} />
         <Image
-          image={image}
+          image={oslo}
           x={0}
           y={0}
           width={width}
           height={width}
           fit="cover"
         />
-      </Group>
+      </Group>,
+      assets
     );
     checkImage(img, docPath("blur.png"));
   });

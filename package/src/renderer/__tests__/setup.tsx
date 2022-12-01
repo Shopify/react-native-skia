@@ -75,20 +75,6 @@ export const loadImage = (uri: string) => {
   return image!;
 };
 
-export const loadFontWithAsset = (uri: string, ftSize?: number) => {
-  const Skia = global.SkiaApi;
-  const typeface = resolveFile(uri);
-  const tf = Skia.Typeface.MakeFreeTypeFaceFromData(
-    Skia.Data.fromBytes(resolveFile(uri))
-  );
-  expect(tf).toBeTruthy();
-  const size = ftSize ?? fontSize;
-  const font = Skia.Font(tf!, size);
-  const assets = new Map<SkFont, number[]>();
-  assets.set(font, Array.from(new Uint8Array(typeface)));
-  return { font, assets };
-};
-
 export const loadFont = (uri: string, ftSize?: number) => {
   const Skia = global.SkiaApi;
   const tf = Skia.Typeface.MakeFreeTypeFaceFromData(
@@ -264,14 +250,14 @@ const serializeSkOjects = (obj: any, assets: Assets): any => {
     } else if (obj.__typename__ === "Image") {
       return {
         __typename__: "Image",
-        bytes: Array.from((obj as SkImage).encodeToBytes()),
+        name: assets.get(obj)!,
       };
     } else if (obj.__typename__ === "Font") {
       const font: SkFont = obj;
       return {
         __typename__: "Font",
         size: font.getSize(),
-        typeface: assets.get(font)!,
+        name: assets.get(font)!,
       };
     }
   }
@@ -295,7 +281,7 @@ const serializeNode = (node: Node<any>, assets: Assets): SerializedNode => {
   };
 };
 
-type Assets = Map<SkFont, number[]>;
+type Assets = Map<SkFont | SkImage, string>;
 
 interface TestingSurface {
   eval(code: string): Promise<any>;
