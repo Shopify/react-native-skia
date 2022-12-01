@@ -97,11 +97,11 @@ export const Gooey = () => {
       >
         {icons.map((_, i) => (
           <Group key={i} transform={transforms[i]}>
-            <Circle c={vec(0, 0)} r={R} color={FG} />
+            <Circle r={R} color={FG} />
           </Group>
         ))}
         <Group transform={translate(c)}>
-          <Circle c={vec(0, 0)} r={R} color={FG} />
+          <Circle r={R} color={FG} />
         </Group>
       </Group>
       {icons.map(({ path }, i) => (
