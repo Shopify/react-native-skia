@@ -2,7 +2,7 @@
 import type { SkiaDomView } from "@shopify/react-native-skia";
 import { Group, Canvas, Skia } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import { PixelRatio, Text, View } from "react-native";
+import { PixelRatio, Platform, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
 import { parseNode } from "./deserialize";
@@ -10,6 +10,9 @@ import { useClient } from "./useClient";
 
 const scale = 3 / PixelRatio.get();
 const size = 256 * scale;
+// Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI (E2E is availble in separate PR)
+//const timeToDraw = E2E ? 1000 : Platform.OS === "ios" ? 250 : 500;
+const timeToDraw = Platform.OS === "ios" ? 250 : 500;
 
 interface TestsProps {
   assets: { [key: string]: any };
@@ -51,7 +54,7 @@ export const Tests = ({ assets }: TestsProps) => {
           const data = image.encodeToBytes();
           client.send(data);
         }
-      }, 250);
+      }, timeToDraw);
       return () => {
         clearTimeout(it);
       };
