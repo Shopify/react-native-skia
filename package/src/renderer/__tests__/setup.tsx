@@ -19,23 +19,34 @@ import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
 import { Group } from "../components";
-import type { SkFont, SkImage } from "../../skia/types";
+import type { SkImage, SkFont } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 
 jest.setTimeout(180 * 1000);
 
-export let surface: TestingSurface;
-
 declare global {
   var testServer: Server;
   var testClient: WebSocket;
 }
+export let surface: TestingSurface;
+const assets = new Map<SkImage | SkFont, string>();
+export let images: { oslo: SkImage };
+export let fonts: { "Roboto-Medium": SkFont };
 
 beforeAll(async () => {
-  if (surface === undefined) {
-    surface = E2E ? new RemoteSurface() : new LocalSurface();
-  }
+  await LoadSkiaWeb();
+  const Skia = JsiSkApi(global.CanvasKit);
+  global.SkiaApi = Skia;
+  global.SkiaValueApi = ValueApi;
+  surface = E2E ? new RemoteSurface() : new LocalSurface();
+  const { fontSize } = surface;
+  const font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf", fontSize);
+  const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
+  images = { oslo };
+  fonts = { "Roboto-Medium": font };
+  assets.set(oslo, "oslo");
+  assets.set(font, "Roboto-Medium");
 });
 
 export const wait = (ms: number) =>
@@ -81,8 +92,7 @@ export const loadFont = (uri: string, ftSize?: number) => {
     Skia.Data.fromBytes(resolveFile(uri))
   );
   expect(tf).toBeTruthy();
-  const font = Skia.Font(tf!, ftSize ?? fontSize);
-  return font;
+  return Skia.Font(tf!, ftSize ?? fontSize);
 };
 
 export const importSkia = (): typeof SkiaExports => require("../..");
@@ -91,13 +101,6 @@ export const getSkDOM = () => {
   const depMgr = new DependencyManager(() => () => {});
   return new JsiSkDOM({ Skia, depMgr });
 };
-
-beforeAll(async () => {
-  await LoadSkiaWeb();
-  const Skia = JsiSkApi(global.CanvasKit);
-  global.SkiaApi = Skia;
-  global.SkiaValueApi = ValueApi;
-});
 
 export const PIXEL_RATIO = 3;
 export const fontSize = 32 * PIXEL_RATIO;
@@ -172,7 +175,7 @@ export const mountCanvas = (element: ReactNode) => {
   };
 };
 
-export const serialize = (element: ReactNode, assets: Assets) => {
+export const serialize = (element: ReactNode) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
   const ckSurface = Skia.Surface.Make(width, height)!;
@@ -206,7 +209,7 @@ export const serialize = (element: ReactNode, assets: Assets) => {
   skiaReconciler.updateContainer(element, root, null, () => {
     container.depMgr.update();
   });
-  const serialized = serializeNode(container.root, assets);
+  const serialized = serializeNode(container.root);
   return JSON.stringify(serialized);
 };
 
@@ -220,7 +223,7 @@ interface SerializedNode {
   children: SerializedNode[];
 }
 
-const serializeSkOjects = (obj: any, assets: Assets): any => {
+const serializeSkOjects = (obj: any): any => {
   if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
@@ -253,39 +256,36 @@ const serializeSkOjects = (obj: any, assets: Assets): any => {
         name: assets.get(obj)!,
       };
     } else if (obj.__typename__ === "Font") {
-      const font: SkFont = obj;
       return {
         __typename__: "Font",
-        size: font.getSize(),
-        name: assets.get(font)!,
+        size: obj.getSize(),
+        name: assets.get(obj)!,
       };
     }
   }
   return obj;
 };
 
-const serializeNode = (node: Node<any>, assets: Assets): SerializedNode => {
+const serializeNode = (node: Node<any>): SerializedNode => {
   const props: any = {};
   const ogProps = node.getProps();
   if (ogProps) {
     Object.keys(ogProps)
       .filter((key) => key !== "children")
       .forEach((key) => {
-        props[key] = serializeSkOjects(ogProps[key], assets);
+        props[key] = serializeSkOjects(ogProps[key]);
       });
   }
   return {
     type: node.type,
     props,
-    children: node.children().map((child) => serializeNode(child, assets)),
+    children: node.children().map((child) => serializeNode(child)),
   };
 };
 
-type Assets = Map<SkFont | SkImage, string>;
-
 interface TestingSurface {
   eval(code: string): Promise<any>;
-  draw(node: ReactNode, assets?: Assets): Promise<SkImage>;
+  draw(node: ReactNode): Promise<SkImage>;
   width: number;
   height: number;
   fontSize: number;
@@ -335,7 +335,7 @@ class RemoteSurface implements TestingSurface {
     });
   }
 
-  draw(node: ReactNode, assets: Assets = new Map()): Promise<SkImage> {
+  draw(node: ReactNode): Promise<SkImage> {
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
         const Skia = global.SkiaApi;
@@ -346,7 +346,7 @@ class RemoteSurface implements TestingSurface {
         }
         resolve(image);
       });
-      this.client!.send(serialize(node, assets));
+      this.client!.send(serialize(node));
     });
   }
 }

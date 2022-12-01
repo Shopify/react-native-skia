@@ -1,6 +1,6 @@
 import React from "react";
 
-import { loadImage, surface } from "../setup";
+import { images, surface } from "../setup";
 import {
   BlendColor,
   Circle,
@@ -12,18 +12,10 @@ import {
   SRGBToLinearGamma,
 } from "../../components";
 import { docPath, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
-import type { SkImage } from "../../../skia/types";
-
-let oslo: SkImage;
-const assets = new Map<SkImage, string>();
-
-beforeAll(() => {
-  oslo = loadImage("skia/__tests__/assets/oslo.jpg");
-  assets.set(oslo, "oslo");
-});
 
 describe("Color Filters", () => {
   it("should apply a color matrix to an image", async () => {
+    const { oslo } = images;
     const { width, height } = surface;
     const img = await surface.draw(
       <Image x={0} y={0} width={width} height={height} image={oslo} fit="cover">
@@ -33,8 +25,7 @@ describe("Color Filters", () => {
             -0.703, 0, 0, 0, 0, 0, 1, 0,
           ]}
         />
-      </Image>,
-      assets
+      </Image>
     );
     checkImage(img, docPath("color-filters/color-matrix.png"));
   });
@@ -67,6 +58,7 @@ describe("Color Filters", () => {
     checkImage(img, docPath("color-filters/composition.png"));
   });
   itRunsE2eOnly("should use basic linear interpolation", async () => {
+    const { oslo } = images;
     const { width, height } = surface;
     const blackAndWhite = [
       0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
@@ -92,8 +84,7 @@ describe("Color Filters", () => {
             </Lerp>
           </LinearToSRGBGamma>
         </Image>
-      </>,
-      assets
+      </>
     );
     checkImage(img, docPath("color-filters/simple-lerp.png"));
     img = await surface.draw(
@@ -113,8 +104,7 @@ describe("Color Filters", () => {
             </Lerp>
           </LinearToSRGBGamma>
         </Image>
-      </>,
-      assets
+      </>
     );
     checkImage(img, docPath("color-filters/simple-lerp.png"));
     img = await surface.draw(
@@ -134,14 +124,14 @@ describe("Color Filters", () => {
             </Lerp>
           </LinearToSRGBGamma>
         </Image>
-      </>,
-      assets
+      </>
     );
     checkImage(img, docPath("color-filters/black-and-white.png"));
   });
   itRunsE2eOnly(
     "should use linear interpolation between two color matrices",
     async () => {
+      const { oslo } = images;
       const { width, height } = surface;
       const blackAndWhite = [
         0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
@@ -166,8 +156,7 @@ describe("Color Filters", () => {
               </Lerp>
             </LinearToSRGBGamma>
           </Image>
-        </>,
-        assets
+        </>
       );
       checkImage(img, docPath("color-filters/lerp.png"));
     }

@@ -2,23 +2,15 @@ import React from "react";
 
 import { checkImage, docPath, processResult } from "../../../__tests__/setup";
 import { Blur, Image } from "../../components";
-import { loadImage, PIXEL_RATIO, surface } from "../setup";
+import { PIXEL_RATIO, surface, images } from "../setup";
 import { Group } from "../../components/Group";
 import { setupSkia } from "../../../skia/__tests__/setup";
-import type { SkImage, SkFont } from "../../../skia/types";
 import { TileMode } from "../../../skia/types";
 import { fitRects } from "../../../dom/nodes";
 
-let oslo: SkImage;
-const assets = new Map<SkImage | SkFont, string>();
-
-beforeAll(() => {
-  oslo = loadImage("skia/__tests__/assets/oslo.jpg");
-  assets.set(oslo, "oslo");
-});
-
 describe("Blur Image Filter", () => {
   it("should build the reference build images for later", async () => {
+    const { oslo } = images;
     const { surface: ckSurface, Skia } = setupSkia(
       surface.width * PIXEL_RATIO,
       surface.height * PIXEL_RATIO
@@ -44,6 +36,7 @@ describe("Blur Image Filter", () => {
     processResult(ckSurface, docPath("blur.png"));
   });
   it("should blur the image with tile mode=decal", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const img = await surface.draw(
       <Group>
@@ -56,8 +49,7 @@ describe("Blur Image Filter", () => {
           height={width}
           fit="cover"
         />
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, docPath("blur.png"));
   });
