@@ -11,17 +11,8 @@ import {
   Image,
   LinearGradient,
 } from "../../components";
-import { loadImage, importSkia, surface } from "../setup";
+import { importSkia, surface, images } from "../setup";
 import { Group } from "../../components/Group";
-import type { SkFont, SkImage } from "../../../skia/types";
-
-let oslo: SkImage;
-const assets = new Map<SkImage | SkFont, string>();
-
-beforeAll(() => {
-  oslo = loadImage("skia/__tests__/assets/oslo.jpg");
-  assets.set(oslo, "oslo");
-});
 
 // https://kazzkiq.github.io/svg-color-filter/
 const BLACK_AND_WHITE = [
@@ -30,6 +21,7 @@ const BLACK_AND_WHITE = [
 
 describe("Backdrop Filters", () => {
   it("A black and white color filter as backdrop color filter", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
     const img = await surface.draw(
@@ -46,12 +38,12 @@ describe("Backdrop Filters", () => {
           clip={{ x: 0, y: size / 2, width: size, height: size / 2 }}
           filter={<ColorMatrix matrix={BLACK_AND_WHITE} />}
         />
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, docPath("black-and-white-backdrop-filter.png"));
   });
   it("Blur backdrop filter", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
     const img = await surface.draw(
@@ -71,8 +63,7 @@ describe("Backdrop Filters", () => {
         >
           <Fill color="rgba(0, 0, 0, 0.5)" />
         </BackdropBlur>
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, docPath("blur-backdrop-filter.png"));
   });

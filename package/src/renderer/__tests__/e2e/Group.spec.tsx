@@ -1,20 +1,12 @@
 import React from "react";
 
-import type { SkImage } from "../../../skia/types";
 import { checkImage, docPath } from "../../../__tests__/setup";
 import { Image, Group, Fill, FitBox, Path } from "../../components";
-import { loadImage, importSkia, PIXEL_RATIO, surface } from "../setup";
-
-let oslo: SkImage;
-const assets = new Map<SkImage, string>();
-
-beforeAll(() => {
-  oslo = loadImage("skia/__tests__/assets/oslo.jpg");
-  assets.set(oslo, "oslo");
-});
+import { images, importSkia, PIXEL_RATIO, surface } from "../setup";
 
 describe("Group", () => {
   it("Should use a rectangle as a clip", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
     const padding = 48 / 3;
@@ -34,12 +26,12 @@ describe("Group", () => {
             fit="cover"
           />
         </Group>
-      </>,
-      assets
+      </>
     );
     checkImage(img, docPath("group/clip-rect.png"));
   });
   it("Should use a rounded rectangle as a clip", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
     const padding = 48 / 3;
@@ -60,12 +52,12 @@ describe("Group", () => {
           height={size}
           fit="cover"
         />
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, docPath("group/clip-rrect.png"));
   });
   it("Should use a path as a clip", async () => {
+    const { oslo } = images;
     const { processTransform2d, Skia } = importSkia();
     const star = Skia.Path.MakeFromSVGString(
       "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
@@ -83,12 +75,12 @@ describe("Group", () => {
           height={size}
           fit="cover"
         />
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, docPath("group/clip-path.png"));
   });
   it("Should invert a clip", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
     const { processTransform2d, Skia } = importSkia();
@@ -107,8 +99,7 @@ describe("Group", () => {
           height={size}
           fit="cover"
         />
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, docPath("group/invert-clip.png"));
   });

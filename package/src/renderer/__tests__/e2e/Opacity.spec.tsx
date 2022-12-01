@@ -3,9 +3,9 @@ import React from "react";
 import {
   height as wHeight,
   importSkia,
-  loadImage,
   surface,
   width as wWidth,
+  images,
 } from "../setup";
 import { processResult, checkImage } from "../../../__tests__/setup";
 import {
@@ -18,15 +18,6 @@ import {
 } from "../../components";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { fitRects } from "../../../dom/nodes/datatypes/Fitting";
-import type { SkFont, SkImage } from "../../../skia/types";
-
-let oslo: SkImage;
-const assets = new Map<SkImage | SkFont, string>();
-
-beforeAll(() => {
-  oslo = loadImage("skia/__tests__/assets/oslo.jpg");
-  assets.set(oslo, "oslo");
-});
 
 describe("Opacity", () => {
   it("Should multiply the opacity to 0", async () => {
@@ -151,6 +142,7 @@ describe("Opacity", () => {
       width,
       height,
     } = setupSkia(wWidth, wHeight);
+    const { oslo } = images;
     canvas.drawColor(Skia.Color("lightblue"));
     const paint = Skia.Paint();
     paint.setAlphaf(0.5);
@@ -168,6 +160,7 @@ describe("Opacity", () => {
     processResult(ckSurface, "snapshots/drawings/opacity-image.png");
   });
   it("Should apply opacity to an image (1)", async () => {
+    const { oslo } = images;
     const { width, height } = surface;
     const img = await surface.draw(
       <Group>
@@ -182,12 +175,12 @@ describe("Opacity", () => {
             fit="cover"
           />
         </Group>
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, "snapshots/drawings/opacity-image.png");
   });
   it("Should apply opacity to an image (2)", async () => {
+    const { oslo } = images;
     const {} = importSkia();
     const { width, height } = surface;
     const img = await surface.draw(
@@ -202,12 +195,12 @@ describe("Opacity", () => {
           height={height}
           fit="cover"
         />
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, "snapshots/drawings/opacity-image.png");
   });
   it("Should apply opacity to an image shader (1)", async () => {
+    const { oslo } = images;
     const { width, height } = surface;
     const img = await surface.draw(
       <Group>
@@ -222,12 +215,12 @@ describe("Opacity", () => {
             fit="cover"
           />
         </Fill>
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, "snapshots/drawings/opacity-image.png", false, false, 0.2);
   });
   it("Should apply opacity to an image shader (2)", async () => {
+    const { oslo } = images;
     const {} = importSkia();
     const { width, height } = surface;
     const img = await surface.draw(
@@ -245,8 +238,7 @@ describe("Opacity", () => {
             />
           </Fill>
         </Group>
-      </Group>,
-      assets
+      </Group>
     );
     checkImage(img, "snapshots/drawings/opacity-image.png", false, false, 0.2);
   });
