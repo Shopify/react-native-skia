@@ -6,7 +6,6 @@ import React from "react";
 import type { ReactNode } from "react";
 import ReactReconciler from "react-reconciler";
 import type { Server, WebSocket } from "ws";
-import { WebSocketServer } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
 import { skHostConfig } from "../HostConfig";
@@ -28,18 +27,15 @@ jest.setTimeout(30 * 1000);
 
 export let surface: TestingSurface;
 
+declare global {
+  var testServer: Server;
+  var testClient: WebSocket;
+}
+
 beforeAll(async () => {
   if (surface === undefined) {
     surface = E2E ? new RemoteSurface() : new LocalSurface();
-    await surface.init();
   }
-});
-
-afterAll(() => {
-  surface.dispose();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  surface = undefined;
 });
 
 export const wait = (ms: number) =>
@@ -302,10 +298,8 @@ const serializeNode = (node: Node<any>, assets: Assets): SerializedNode => {
 type Assets = Map<SkFont, number[]>;
 
 interface TestingSurface {
-  init(): Promise<void>;
-  eval(code: string): Promise<string>;
+  eval(code: string): Promise<any>;
   draw(node: ReactNode, assets?: Assets): Promise<SkImage>;
-  dispose(): void;
   width: number;
   height: number;
   fontSize: number;
@@ -316,15 +310,7 @@ class LocalSurface implements TestingSurface {
   readonly height = 256;
   readonly fontSize = 32;
 
-  init() {
-    return new Promise<void>((resolve) => {
-      resolve();
-    });
-  }
-
-  dispose(): void {}
-
-  eval(code: string): Promise<string> {
+  eval(code: string): Promise<any> {
     return Promise.resolve(
       // eslint-disable-next-line no-eval
       eval(`(function Main(){const {Skia} = this;${code}})`).call({
@@ -347,50 +333,25 @@ class RemoteSurface implements TestingSurface {
   readonly height = 256;
   readonly fontSize = 32;
 
-  private server: Server;
-  private client: WebSocket | null = null;
-  constructor() {
-    this.server = new WebSocketServer({ port: 4242 });
-  }
-
-  init() {
-    return new Promise<void>((resolve) => {
-      this.server.on("connection", (client) => {
-        this.client = client;
-        resolve();
-      });
-    });
-  }
-
-  dispose() {
-    if (this.client) {
-      this.client.close();
-    }
-    this.server.close();
-  }
-
-  private assertInit() {
-    if (this.client === null) {
+  private get client() {
+    if (global.testClient === null) {
       throw new Error("Client is not connected. Did you call init?");
     }
+    return global.testClient!;
   }
 
-  eval(code: string): Promise<string> {
-    this.assertInit();
+  eval(code: string): Promise<any> {
     return new Promise((resolve) => {
-      const client = this.client!;
-      client!.once("message", (raw: Buffer) => {
+      this.client.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
-      client!.send(JSON.stringify({ code }));
+      this.client.send(JSON.stringify({ code }));
     });
   }
 
   draw(node: ReactNode, assets: Assets = new Map()): Promise<SkImage> {
-    this.assertInit();
     return new Promise((resolve) => {
-      const client = this.client!;
-      client!.once("message", (raw: Buffer) => {
+      this.client.once("message", (raw: Buffer) => {
         const Skia = global.SkiaApi;
         const data = Skia.Data.fromBytes(new Uint8Array(raw));
         const image = Skia.Image.MakeImageFromEncoded(data);
@@ -399,7 +360,7 @@ class RemoteSurface implements TestingSurface {
         }
         resolve(image);
       });
-      client!.send(serialize(node, assets));
+      this.client!.send(serialize(node, assets));
     });
   }
 }
