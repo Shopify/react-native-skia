@@ -132,31 +132,6 @@ public:
   JsiHostObject();
   ~JsiHostObject();
 
-protected:
-  /**
-   Override to return map of name/functions
-   */
-  virtual const RNJsi::JsiFunctionMap &getExportedFunctionMap() {
-    static const RNJsi::JsiFunctionMap empty;
-    return empty;
-  }
-
-  /**
-   Override to get property getters map of name/functions
-   */
-  virtual const JsiPropertyGettersMap &getExportedPropertyGettersMap() {
-    static const JsiPropertyGettersMap empty;
-    return empty;
-  }
-
-  /**
-   Override to get property setters map of name/functions
-   */
-  virtual const JsiPropertySettersMap &getExportedPropertySettersMap() {
-    static const JsiPropertySettersMap empty;
-    return empty;
-  }
-
   /**
    * Overridden jsi::HostObject set property method
    * @param rt Runtime
@@ -182,6 +157,31 @@ protected:
    * @return List of property names
    */
   std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime &runtime) override;
+
+protected:
+  /**
+   Override to return map of name/functions
+   */
+  virtual const RNJsi::JsiFunctionMap &getExportedFunctionMap() {
+    static const RNJsi::JsiFunctionMap empty;
+    return empty;
+  }
+
+  /**
+   Override to get property getters map of name/functions
+   */
+  virtual const JsiPropertyGettersMap &getExportedPropertyGettersMap() {
+    static const JsiPropertyGettersMap empty;
+    return empty;
+  }
+
+  /**
+   Override to get property setters map of name/functions
+   */
+  virtual const JsiPropertySettersMap &getExportedPropertySettersMap() {
+    static const JsiPropertySettersMap empty;
+    return empty;
+  }
 
   /**
    * Installs a function into the function map
