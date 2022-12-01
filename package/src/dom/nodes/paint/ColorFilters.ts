@@ -8,7 +8,6 @@ import type {
   Node,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { processColor } from "../datatypes";
 import { enumKey } from "../datatypes/Enum";
 import type { LerpColorFilterProps } from "../../types/ColorFilters";
 
@@ -71,7 +70,7 @@ export class BlendColorFilterNode extends ColorFilterDeclaration<BlendColorFilte
 
   materialize() {
     const { mode } = this.props;
-    const color = processColor(this.Skia, this.props.color, 1);
+    const color = this.Skia.Color(this.props.color);
     const cf = this.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
     return this.compose(cf);
   }

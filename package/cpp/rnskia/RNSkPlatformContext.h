@@ -14,7 +14,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkStream.h>
+#include "SkStream.h"
 
 #pragma clang diagnostic pop
 
@@ -188,8 +188,10 @@ public:
     }
   }
 
-  virtual void startDrawLoop() = 0;
-  virtual void stopDrawLoop() = 0;
+  // default implementation does nothing, so it can be called from virtual
+  // destructor.
+  virtual void startDrawLoop() {}
+  virtual void stopDrawLoop() {}
 
 private:
   float _pixelDensity;

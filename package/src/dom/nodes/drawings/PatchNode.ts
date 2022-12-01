@@ -2,7 +2,7 @@ import type { SkColor, SkPoint } from "../../../skia/types";
 import { BlendMode } from "../../../skia/types";
 import type { DrawingContext, PatchProps } from "../../types";
 import { NodeType } from "../../types";
-import { ALPHA, enumKey, processColor } from "../datatypes";
+import { enumKey } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 import type { NodeContext } from "../Node";
 
@@ -39,30 +39,16 @@ export class PatchNode extends JsiDrawingNode<
         patch[3].c2,
         patch[0].c1,
       ],
-      colors: colors
-        ? colors.map((c) => processColor(this.Skia, c, 1))
-        : undefined,
+      colors: colors ? colors.map((c) => this.Skia.Color(c)) : undefined,
     };
   }
 
-  draw({ canvas, paint, opacity }: DrawingContext) {
+  draw({ canvas, paint }: DrawingContext) {
     if (!this.derived) {
       throw new Error("PatchNode: derived props not set");
     }
     const { texture } = this.props;
     const { colors, points, mode } = this.derived;
-    canvas.drawPatch(
-      points,
-      opacity === 1
-        ? colors
-        : colors &&
-            colors.map((c) => {
-              c[ALPHA] = c[ALPHA] * opacity;
-              return c;
-            }),
-      texture,
-      mode,
-      paint
-    );
+    canvas.drawPatch(points, colors, texture, mode, paint);
   }
 }

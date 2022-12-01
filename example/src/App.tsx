@@ -26,6 +26,7 @@ import {
 import { Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
+import { useAssets } from "./Tests/useAssets";
 
 const linking = {
   config: {
@@ -73,6 +74,10 @@ const E2E = process.env.E2E === "true";
 
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
+  const assets = useAssets();
+  if (assets === null) {
+    return null;
+  }
   const Home = (
     <Stack.Screen
       name="Home"
@@ -87,11 +92,12 @@ const App = () => {
     <Stack.Screen
       key="Tests"
       name="Tests"
-      component={Tests}
       options={{
         title: "🔧 Tests",
       }}
-    />
+    >
+      {(props) => <Tests {...props} assets={assets} />}
+    </Stack.Screen>
   );
   return (
     <>

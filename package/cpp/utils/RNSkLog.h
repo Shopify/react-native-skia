@@ -50,7 +50,7 @@ public:
     __android_log_write(ANDROID_LOG_INFO, "RNSkia", buffer);
 #endif
 #ifdef TARGET_OS_IPHONE
-    syslog(LOG_ERR, "%s\n", buffer);
+    syslog(LOG_ERR, "RNSKIA: %s\n", buffer);
 #endif
     va_end(args);
   }

@@ -16,7 +16,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPaint.h>
+#include "SkPaint.h"
 
 #pragma clang diagnostic pop
 
@@ -61,6 +61,11 @@ public:
 
   JSI_HOST_FUNCTION(getStrokeWidth) {
     return static_cast<double>(getObject()->getStrokeWidth());
+  }
+
+  JSI_HOST_FUNCTION(getAlphaf) {
+    float alphaf = getObject()->getAlphaf();
+    return jsi::Value(SkScalarToDouble(alphaf));
   }
 
   JSI_HOST_FUNCTION(setColor) {
@@ -159,6 +164,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPaint, copy),
                        JSI_EXPORT_FUNC(JsiSkPaint, reset),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getAlphaf),
                        JSI_EXPORT_FUNC(JsiSkPaint, getColor),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeCap),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeJoin),

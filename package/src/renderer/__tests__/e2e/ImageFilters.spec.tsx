@@ -1,7 +1,7 @@
 import React from "react";
 
-import { docPath, checkImage, itRunsNodeOnly } from "../../../__tests__/setup";
-import { surface, loadFontWithAsset, loadImage } from "../setup";
+import { docPath, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+import { surface, loadImage, loadFont } from "../setup";
 import {
   Fill,
   Image,
@@ -11,33 +11,35 @@ import {
   Shadow,
   Text,
 } from "../../components";
+import type { SkImage, SkFont } from "../../../skia/types";
+
+let oslo: SkImage;
+let font: SkFont;
+const assets = new Map<SkImage | SkFont, string>();
+
+beforeAll(() => {
+  const { fontSize } = surface;
+  font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf", fontSize);
+  oslo = loadImage("skia/__tests__/assets/oslo.jpg");
+  assets.set(oslo, "oslo");
+  assets.set(font, "Roboto-Medium");
+});
 
 describe("Test Image Filters", () => {
-  itRunsNodeOnly(
-    "Should display the text the same way everywhere",
-    async () => {
-      const { width, fontSize } = surface;
-      const { font, assets } = loadFontWithAsset(
-        "skia/__tests__/assets/Roboto-Medium.ttf",
-        fontSize
-      );
-      const x = width / 8;
-      const image = await surface.draw(
-        <>
-          <Fill color="white" />
-          <Text text="Hello World" x={x} y={x} font={font} />
-        </>,
-        assets
-      );
-      checkImage(image, docPath("image-filters/regular-text.png"));
-    }
-  );
-  itRunsNodeOnly("Should change the text morphology", async () => {
-    const { width, fontSize } = surface;
-    const { font, assets } = loadFontWithAsset(
-      "skia/__tests__/assets/Roboto-Medium.ttf",
-      fontSize
+  itRunsE2eOnly("Should display the text the same way everywhere", async () => {
+    const { width } = surface;
+    const x = width / 8;
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Text text="Hello World" x={x} y={x} font={font} />
+      </>,
+      assets
     );
+    checkImage(image, docPath("image-filters/regular-text.png"));
+  });
+  itRunsE2eOnly("Should change the text morphology", async () => {
+    const { width } = surface;
     const x = width / 8;
     const y = x;
     const y1 = 2 * y;
@@ -58,13 +60,12 @@ describe("Test Image Filters", () => {
     checkImage(image, docPath("image-filters/morphology.png"));
   });
   it("Should offset the image", async () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { width, height } = surface;
     const img = await surface.draw(
       <>
         <Fill color="lightblue" />
         <Image
-          image={image}
+          image={oslo}
           x={0}
           y={0}
           width={width}
@@ -73,7 +74,8 @@ describe("Test Image Filters", () => {
         >
           <Offset x={width / 4} y={width / 4} />
         </Image>
-      </>
+      </>,
+      assets
     );
     checkImage(img, docPath("image-filters/offset.png"));
   });

@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkRRect.h>
+#include "SkRRect.h"
 
 #include "JsiSkRect.h"
 
