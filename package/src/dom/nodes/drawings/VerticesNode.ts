@@ -2,7 +2,7 @@ import type { SkVertices } from "../../../skia/types";
 import { VertexMode, BlendMode } from "../../../skia/types";
 import type { DrawingContext, VerticesProps } from "../../types";
 import { NodeType } from "../../types";
-import { enumKey, processColor } from "../datatypes";
+import { enumKey } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 import type { NodeContext } from "../Node";
 
@@ -18,7 +18,7 @@ export class VerticesNode extends JsiDrawingNode<VerticesProps, SkVertices> {
       vertexMode,
       vertices,
       textures,
-      colors ? colors.map((c) => processColor(this.Skia, c, 1)) : undefined,
+      colors ? colors.map((c) => this.Skia.Color(c)) : undefined,
       indices
     );
   }
