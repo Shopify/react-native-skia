@@ -81,7 +81,7 @@ jobs:
         env:
           cache-name: cache-rn
         with:
-          path: example/android/app/build/react-ndk
+          path: example/android/app/build
           key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
   
       - name: SKDs - download required images
