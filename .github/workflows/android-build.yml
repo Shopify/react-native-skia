@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-11
+    runs-on: ubuntu-latest
     concurrency:
       group: android-example-${{ github.ref }}
       cancel-in-progress: true
