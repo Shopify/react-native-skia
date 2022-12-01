@@ -11,8 +11,8 @@ import { useClient } from "./useClient";
 export const E2E = process.env.E2E === "true";
 const scale = 3 / PixelRatio.get();
 const size = 256 * scale;
-// Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI (E2E is availble in separate PR)
-//const timeToDraw = E2E ? 1000 : Platform.OS === "ios" ? 250 : 500;
+// Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI
+// eslint-disable-next-line no-nested-ternary
 const timeToDraw = E2E ? 1500 : Platform.OS === "ios" ? 250 : 500;
 
 interface TestsProps {

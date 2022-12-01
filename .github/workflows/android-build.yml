@@ -106,10 +106,11 @@ jobs:
         run: E2E=true yarn start &
 
       - name: Build App
-        working-directory: example/android
+        working-directory: example
         run: E2E=true yarn android
 
       - name: Run e2e Tests
+        working-directory: package
         run: yarn e2e
 
       - uses: actions/upload-artifact@v2
