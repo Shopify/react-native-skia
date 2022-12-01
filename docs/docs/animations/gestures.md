@@ -14,6 +14,12 @@ The useTouchHandler hook provides you with callbacks for single touch events.
 To track multiple touches use the `useMultiTouchHandler` hook instead - it has
 the same API as the single touch hook.
 
+The `useTouchHandler` supports 3 touchstages.
+
+1. onActive - This callback is called when the you move your cursor/finger.
+2. onStart - This callback is called when touch is first registered
+3. onEnd - This callback is called when you lift your cursor/finger
+
 ```tsx twoslash
 import {
   Canvas,
