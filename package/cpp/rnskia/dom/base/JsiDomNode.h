@@ -436,7 +436,7 @@ private:
 
   std::vector<std::function<void()>> _queuedNodeOps;
 
-  JsiDomNode *_parent;
+  JsiDomNode *_parent = nullptr;
 };
 
 } // namespace RNSkia
