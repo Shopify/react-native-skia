@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     concurrency:
       group: android-example-${{ github.ref }}
       cancel-in-progress: true
@@ -94,7 +94,7 @@ jobs:
         run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
 
       - name: ADB Wait For Device
-        run: adb wait-for-any-device
+        run: $ANDROID_HOME/platform-tools/adb wait-for-any-device
         timeout-minutes: 3
 
       - name: Reverse TCP
