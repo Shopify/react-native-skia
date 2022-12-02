@@ -100,8 +100,7 @@ protected:
         std::bind(&JsiCustomDrawingNode::notifyPictureNeeded, this,
                   std::placeholders::_1);
 
-    _drawingProp = container->defineProperty(
-        std::make_shared<DrawingProp>(JsiPropId::get("drawing"), cb));
+    _drawingProp = container->defineProperty<DrawingProp>("drawing", cb);
   }
 
 private:

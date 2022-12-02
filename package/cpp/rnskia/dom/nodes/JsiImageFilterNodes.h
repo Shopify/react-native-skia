@@ -94,8 +94,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _blendModeProp = container->defineProperty(
-        std::make_shared<BlendModeProp>(JsiPropId::get("mode")));
+    _blendModeProp = container->defineProperty<BlendModeProp>("mode");
     _blendModeProp->require();
   }
 
@@ -154,19 +153,13 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _dxProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("dx")));
-    _dyProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("dy")));
-    _blurProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("blur")));
-    _colorProp = container->defineProperty(
-        std::make_shared<ColorProp>(JsiPropId::get("color")));
+    _dxProp = container->defineProperty<NodeProp>("dx");
+    _dyProp = container->defineProperty<NodeProp>("dy");
+    _blurProp = container->defineProperty<NodeProp>("blur");
+    _colorProp = container->defineProperty<ColorProp>("color");
 
-    _innerProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("inner")));
-    _shadowOnlyProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("shadowOnly")));
+    _innerProp = container->defineProperty<NodeProp>("inner");
+    _shadowOnlyProp = container->defineProperty<NodeProp>("shadowOnly");
 
     _dxProp->require();
     _dyProp->require();
@@ -212,12 +205,9 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _channelXProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("channelX")));
-    _channelYProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("channelY")));
-    _scaleProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("scale")));
+    _channelXProp = container->defineProperty<NodeProp>("channelX");
+    _channelYProp = container->defineProperty<NodeProp>("channelY");
+    _scaleProp = container->defineProperty<NodeProp>("scale");
 
     _channelXProp->require();
     _channelYProp->require();
@@ -266,10 +256,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _blurProp = container->defineProperty(
-        std::make_shared<RadiusProp>(JsiPropId::get("blur")));
-    _tileModeProp = container->defineProperty(
-        std::make_shared<TileModeProp>(JsiPropId::get("mode")));
+    _blurProp = container->defineProperty<RadiusProp>("blur");
+    _tileModeProp = container->defineProperty<TileModeProp>("mode");
 
     _blurProp->require();
   }
@@ -302,10 +290,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _xProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("x")));
-    _yProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("y")));
+    _xProp = container->defineProperty<NodeProp>("x");
+    _yProp = container->defineProperty<NodeProp>("y");
 
     _xProp->require();
     _yProp->require();
@@ -346,10 +332,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _operatorProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("operator")));
-    _radiusProp = container->defineProperty(
-        std::make_shared<RadiusProp>(JsiPropId::get("radius")));
+    _operatorProp = container->defineProperty<NodeProp>("operator");
+    _radiusProp = container->defineProperty<RadiusProp>("radius");
 
     _operatorProp->require();
     _radiusProp->require();
@@ -398,11 +382,9 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _sourceProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("source")));
+    _sourceProp = container->defineProperty<NodeProp>("source");
     _uniformsProp =
-        container->defineProperty(std::make_shared<SimpleUniformsProp>(
-            JsiPropId::get("uniforms"), _sourceProp));
+        container->defineProperty<SimpleUniformsProp>("uniforms", _sourceProp);
 
     _sourceProp->require();
   }

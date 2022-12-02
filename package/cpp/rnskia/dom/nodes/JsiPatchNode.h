@@ -32,14 +32,10 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _colorsProp = container->defineProperty(
-        std::make_shared<ColorsProp>(JsiPropId::get("colors")));
-    _textureProp = container->defineProperty(
-        std::make_shared<PointsProp>(JsiPropId::get("texture")));
-    _blendModeProp = container->defineProperty(
-        std::make_shared<BlendModeProp>(JsiPropId::get("blendMode")));
-    _patchProp = container->defineProperty(
-        std::make_shared<BezierProp>(JsiPropId::get("patch")));
+    _colorsProp = container->defineProperty<ColorsProp>("colors");
+    _textureProp = container->defineProperty<PointsProp>("texture");
+    _blendModeProp = container->defineProperty<BlendModeProp>("blendMode");
+    _patchProp = container->defineProperty<BezierProp>("patch");
 
     _patchProp->require();
   }
