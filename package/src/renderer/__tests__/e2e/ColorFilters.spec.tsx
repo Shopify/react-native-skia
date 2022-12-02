@@ -1,6 +1,6 @@
 import React from "react";
 
-import { loadImage, surface } from "../setup";
+import { images, surface } from "../setup";
 import {
   BlendColor,
   Circle,
@@ -15,17 +15,10 @@ import { docPath, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 
 describe("Color Filters", () => {
   it("should apply a color matrix to an image", async () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
+    const { oslo } = images;
     const { width, height } = surface;
     const img = await surface.draw(
-      <Image
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        image={image}
-        fit="cover"
-      >
+      <Image x={0} y={0} width={width} height={height} image={oslo} fit="cover">
         <ColorMatrix
           matrix={[
             -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015, 1.69,
@@ -65,8 +58,8 @@ describe("Color Filters", () => {
     checkImage(img, docPath("color-filters/composition.png"));
   });
   itRunsE2eOnly("should use basic linear interpolation", async () => {
+    const { oslo } = images;
     const { width, height } = surface;
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const blackAndWhite = [
       0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
     ];
@@ -81,7 +74,7 @@ describe("Color Filters", () => {
           y={0}
           width={width}
           height={height}
-          image={image}
+          image={oslo}
           fit="cover"
         >
           <LinearToSRGBGamma>
@@ -101,7 +94,7 @@ describe("Color Filters", () => {
           y={0}
           width={width}
           height={height}
-          image={image}
+          image={oslo}
           fit="cover"
         >
           <LinearToSRGBGamma>
@@ -121,7 +114,7 @@ describe("Color Filters", () => {
           y={0}
           width={width}
           height={height}
-          image={image}
+          image={oslo}
           fit="cover"
         >
           <LinearToSRGBGamma>
@@ -138,8 +131,8 @@ describe("Color Filters", () => {
   itRunsE2eOnly(
     "should use linear interpolation between two color matrices",
     async () => {
+      const { oslo } = images;
       const { width, height } = surface;
-      const image = loadImage("skia/__tests__/assets/oslo.jpg");
       const blackAndWhite = [
         0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
       ];
@@ -153,7 +146,7 @@ describe("Color Filters", () => {
             y={0}
             width={width}
             height={height}
-            image={image}
+            image={oslo}
             fit="cover"
           >
             <LinearToSRGBGamma>
