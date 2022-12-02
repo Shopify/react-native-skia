@@ -20,9 +20,9 @@ namespace RNSkia {
 class DrawingContext : public std::enable_shared_from_this<DrawingContext> {
 public:
   /**
-   Creates a root drawing context with paint and opacity
+   Creates a root drawing context with paint
    */
-  DrawingContext(std::shared_ptr<SkPaint> paint, double opacity);
+  explicit DrawingContext(std::shared_ptr<SkPaint> paint);
 
   /**
    Initilalizes a new draw context.
@@ -86,21 +86,6 @@ public:
    Sets the paint in the current sub context
    */
   void setMutablePaint(std::shared_ptr<SkPaint> paint);
-
-  /**
-   Getd the opacity value
-   */
-  double getOpacity();
-
-  /**
-   Sets the opacity value
-   */
-  void setOpacity(double opacity);
-
-  /**
-   Clears the opacity
-   */
-  void clearOpacity();
 
   float getScaledWidth();
 
