@@ -58,4 +58,9 @@ export interface SkRuntimeEffect extends SkJSIInstance<"RuntimeEffect"> {
    * @param index
    */
   getUniformName(index: number): string;
+
+  /**
+   * Returns the SkSL source of the runtime effect shader.
+   */
+  source(): string;
 }
