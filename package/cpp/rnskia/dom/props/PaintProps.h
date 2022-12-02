@@ -103,7 +103,7 @@ public:
     if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
       auto paint = context->getMutablePaint();
       paint->setShader(nullptr);
-      auto opacity = context->getMutablePaint()->getAlphaf();
+      auto opacity = paint->getAlphaf();
       paint->setColor(*_color->getDerivedValue());
       paint->setAlphaf(opacity * paint->getColor4f().fA);
     }
