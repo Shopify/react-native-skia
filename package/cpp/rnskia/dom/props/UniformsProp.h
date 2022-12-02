@@ -16,6 +16,11 @@
 
 namespace RNSkia {
 
+static PropId PropName0 = JsiPropId::get("0");
+static PropId PropName1 = JsiPropId::get("1");
+static PropId PropName2 = JsiPropId::get("2");
+static PropId PropName3 = JsiPropId::get("3");
+
 class UniformsProp : public DerivedSkProp<SkData> {
 public:
   UniformsProp(PropId name, NodeProp *sourceProp) : DerivedSkProp<SkData>() {
@@ -103,12 +108,22 @@ private:
             }
           }
         }
-      } else if (value.getType() == PropType::HostObject ||
-                 value.getType() == PropType::Object) {
+      } else if ((value.getType() == PropType::HostObject ||
+                 value.getType() == PropType::Object) && value.hasValue(PropNameX) && value.hasValue(PropNameY)) {
         // Vector (JsiSkPoint / JsiSkRect)
         auto pointValue = PointProp::processValue(value);
         uniformValues.push_back(pointValue.x());
         uniformValues.push_back(pointValue.y());
+      } else if ((value.getType() == PropType::HostObject ||
+                 value.getType() == PropType::Object) &&
+                 value.hasValue(PropName0) && 
+                 value.hasValue(PropName1) &&
+                 value.hasValue(PropName2) &&
+                 value.hasValue(PropName3)) {
+        uniformValues.push_back(value.getValue(PropName0).getAsNumber());
+        uniformValues.push_back(value.getValue(PropName1).getAsNumber());
+        uniformValues.push_back(value.getValue(PropName2).getAsNumber());
+        uniformValues.push_back(value.getValue(PropName3).getAsNumber());
       }
     }
     return uniformValues;

@@ -54,6 +54,8 @@ const parseProp = (value: any, assets: Assets) => {
         throw new Error(`Asset ${value.name} not found`);
       }
       return asset;
+    } else if (value.__typename__ === "RuntimeEffect") {
+      return Skia.RuntimeEffect.Make(value.source);
     } else if (value.__typename__ === "Font") {
       const asset = assets[value.name];
       if (!asset) {
