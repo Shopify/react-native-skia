@@ -33,6 +33,6 @@ vec4 main(vec2 xy) {
         <Shader source={source} uniforms={{ c1, c2, c3, c4 }} />
       </Fill>
     );
-    checkImage(img, "snapshots/sdf/circle.png", true);
+    checkImage(img, "snapshots/sdf/circle.png");
   });
 });
