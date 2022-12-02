@@ -70,8 +70,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _blendProp = container->defineProperty(
-        std::make_shared<BlendModeProp>(JsiPropId::get("mode")));
+    _blendProp = container->defineProperty<BlendModeProp>("mode");
     _blendProp->require();
   }
 

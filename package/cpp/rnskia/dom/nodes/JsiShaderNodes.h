@@ -89,12 +89,10 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _sourceProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("source")));
-    _uniformsProp = container->defineProperty(std::make_shared<UniformsProp>(
-        JsiPropId::get("uniforms"), _sourceProp));
-    _transformProp = container->defineProperty(
-        std::make_shared<TransformProp>(JsiPropId::get("transform")));
+    _sourceProp = container->defineProperty<NodeProp>("source");
+    _uniformsProp =
+        container->defineProperty<UniformsProp>("uniforms", _sourceProp);
+    _transformProp = container->defineProperty<TransformProp>("transform");
 
     _sourceProp->require();
   }
@@ -141,18 +139,13 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _txProp = container->defineProperty(
-        std::make_shared<TileModeProp>(JsiPropId::get("tx")));
-    _tyProp = container->defineProperty(
-        std::make_shared<TileModeProp>(JsiPropId::get("ty")));
-    _filterModeProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("fm")));
-    _mipmapModeProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("mm")));
+    _txProp = container->defineProperty<TileModeProp>("tx");
+    _tyProp = container->defineProperty<TileModeProp>("ty");
+    _filterModeProp = container->defineProperty<NodeProp>("fm");
+    _mipmapModeProp = container->defineProperty<NodeProp>("mm");
 
-    _imageProps = container->defineProperty(std::make_shared<ImageProps>());
-    _transformProp = container->defineProperty(
-        std::make_shared<TransformProp>(JsiPropId::get("transform")));
+    _imageProps = container->defineProperty<ImageProps>();
+    _transformProp = container->defineProperty<TransformProp>("transform");
 
     _txProp->require();
     _tyProp->require();
@@ -161,10 +154,8 @@ protected:
 
     _transformProp->require();
 
-    // Just require the image
-    container
-        ->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("image")))
-        ->require();
+    // Add and require the image
+    container->defineProperty<NodeProp>("image")->require();
   }
 
 private:
@@ -221,8 +212,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _colorProp = container->defineProperty(
-        std::make_shared<ColorProp>(JsiPropId::get("color")));
+    _colorProp = container->defineProperty<ColorProp>("color");
     _colorProp->require();
   }
 
@@ -239,18 +229,12 @@ public:
 protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _freqXProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("freqX")));
-    _freqYProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("freqY")));
-    _octavesProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("octaves")));
-    _seedProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("seed")));
-    _tileWidthProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("tileWidth")));
-    _tileHeightProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("tileHeight")));
+    _freqXProp = container->defineProperty<NodeProp>("freqX");
+    _freqYProp = container->defineProperty<NodeProp>("freqY");
+    _octavesProp = container->defineProperty<NodeProp>("octaves");
+    _seedProp = container->defineProperty<NodeProp>("seed");
+    _tileWidthProp = container->defineProperty<NodeProp>("tileWidth");
+    _tileHeightProp = container->defineProperty<NodeProp>("tileHeight");
 
     _freqXProp->require();
     _freqYProp->require();
@@ -317,17 +301,12 @@ public:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _transformsProps =
-        container->defineProperty(std::make_shared<TransformsProps>());
+    _transformsProps = container->defineProperty<TransformsProps>();
 
-    _colorsProp = container->defineProperty(
-        std::make_shared<ColorsProp>(JsiPropId::get("colors")));
-    _positionsProp = container->defineProperty(
-        std::make_shared<NumbersProp>(JsiPropId::get("positions")));
-    _modeProp = container->defineProperty(
-        std::make_shared<TileModeProp>(JsiPropId::get("mode")));
-    _flagsProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("flags")));
+    _colorsProp = container->defineProperty<ColorsProp>("colors");
+    _positionsProp = container->defineProperty<NumbersProp>("positions");
+    _modeProp = container->defineProperty<TileModeProp>("mode");
+    _flagsProp = container->defineProperty<NodeProp>("flags");
 
     _colorsProp->require();
   }
@@ -385,10 +364,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseGradientNode::defineProperties(container);
-    _startProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("start")));
-    _endProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("end")));
+    _startProp = container->defineProperty<PointProp>("start");
+    _endProp = container->defineProperty<PointProp>("end");
 
     _startProp->require();
     _endProp->require();
@@ -420,10 +397,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseGradientNode::defineProperties(container);
-    _centerProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("c")));
-    _radiusProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("r")));
+    _centerProp = container->defineProperty<PointProp>("c");
+    _radiusProp = container->defineProperty<NodeProp>("r");
 
     _centerProp->require();
     _radiusProp->require();
@@ -457,12 +432,9 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseGradientNode::defineProperties(container);
-    _startProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("start")));
-    _endProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("end")));
-    _centerProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("c")));
+    _startProp = container->defineProperty<NodeProp>("start");
+    _endProp = container->defineProperty<NodeProp>("end");
+    _centerProp = container->defineProperty<PointProp>("c");
   }
 
 private:
@@ -497,14 +469,10 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseGradientNode::defineProperties(container);
-    _startProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("start")));
-    _startRProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("startR")));
-    _endProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("end")));
-    _endRProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("endR")));
+    _startProp = container->defineProperty<PointProp>("start");
+    _startRProp = container->defineProperty<NodeProp>("startR");
+    _endProp = container->defineProperty<PointProp>("end");
+    _endRProp = container->defineProperty<NodeProp>("endR");
   }
 
 private:

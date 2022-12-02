@@ -44,12 +44,9 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
 
-    _style = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("style")));
-    _respectCTM = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("respectCTM")));
-    _blur = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("blur")));
+    _style = container->defineProperty<NodeProp>("style");
+    _respectCTM = container->defineProperty<NodeProp>("respectCTM");
+    _blur = container->defineProperty<NodeProp>("blur");
 
     _blur->require();
   }

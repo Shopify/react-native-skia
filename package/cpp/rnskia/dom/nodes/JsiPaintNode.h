@@ -64,9 +64,8 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
 
-    _paintProps = container->defineProperty(std::make_shared<PaintProps>());
-    _opacityProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
+    _paintProps = container->defineProperty<PaintProps>();
+    _opacityProp = container->defineProperty<NodeProp>("opacity");
   }
 
 private:

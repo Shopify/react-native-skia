@@ -8,8 +8,6 @@
 
 namespace RNSkia {
 
-static PropId PropNameTransform = JsiPropId::get("transform");
-
 static PropId PropNameTranslateX = JsiPropId::get("translateX");
 static PropId PropNameTranslateY = JsiPropId::get("translateY");
 static PropId PropNameScale = JsiPropId::get("scale");
