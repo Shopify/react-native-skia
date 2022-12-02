@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-12
     concurrency:
       group: android-example-${{ github.ref }}
       cancel-in-progress: true
@@ -56,9 +56,13 @@ jobs:
 
       - name: Copy Skia Headers
         run: yarn copy-skia-headers
+              
+      - name: SDKs - accept licenses
+        run: y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-      - name: Accept licenses
-        run: /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
+      - name: Install Package
+        working-directory: package
+        run: yarn install
 
       - name: Install example app node dependencies
         working-directory: example
@@ -77,9 +81,41 @@ jobs:
         env:
           cache-name: cache-rn
         with:
-          path: example/android/app/build/react-ndk
+          path: example/android/app/build
           key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+  
+      - name: SKDs - download required images
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
-      - name: Build app
-        working-directory: example/android
-        run: ./gradlew assembleDebug --console=plain -PreactNativeArchitectures=arm64-v8a
+      - name: Emulator - Create
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
+
+      - name: Emulator - Boot
+        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
+
+      - name: ADB Wait For Device
+        run: adb wait-for-any-device
+        timeout-minutes: 3
+
+      - name: Reverse TCP
+        working-directory: example
+        run: yarn android-reverse-tcp
+
+      - name: Start Package Manager
+        working-directory: example
+        run: E2E=true yarn start &
+
+      - name: Build App
+        working-directory: example
+        run: E2E=true yarn android
+
+      - name: Run e2e Tests
+        working-directory: package
+        run: yarn e2e
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          path: package/src/__tests__/snapshots/
+          name: Download-screenshots
+
