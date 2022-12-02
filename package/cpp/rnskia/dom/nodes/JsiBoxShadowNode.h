@@ -22,8 +22,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _boxShadowProps =
-        container->defineProperty(std::make_shared<BoxShadowProps>());
+    _boxShadowProps = container->defineProperty<BoxShadowProps>();
   }
 
 private:

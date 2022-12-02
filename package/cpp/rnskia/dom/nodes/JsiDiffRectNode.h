@@ -7,9 +7,6 @@
 
 namespace RNSkia {
 
-static PropId PropNameInner = JsiPropId::get("inner");
-static PropId PropNameOuter = JsiPropId::get("outer");
-
 class JsiDiffRectNode : public JsiDomDrawingNode,
                         public JsiDomNodeCtor<JsiDiffRectNode> {
 public:
@@ -25,10 +22,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _innerRectProp =
-        container->defineProperty(std::make_shared<RRectProp>(PropNameInner));
-    _outerRectProp =
-        container->defineProperty(std::make_shared<RRectProp>(PropNameOuter));
+    _innerRectProp = container->defineProperty<RRectProp>("inner");
+    _outerRectProp = container->defineProperty<RRectProp>("outer");
 
     _innerRectProp->require();
     _outerRectProp->require();

@@ -77,8 +77,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _matrixProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("matrix")));
+    _matrixProp = container->defineProperty<NodeProp>("matrix");
     _matrixProp->require();
   }
 
@@ -103,10 +102,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _blendModeProp = container->defineProperty(
-        std::make_shared<BlendModeProp>(JsiPropId::get("mode")));
-    _colorProp = container->defineProperty(
-        std::make_shared<ColorProp>(JsiPropId::get("color")));
+    _blendModeProp = container->defineProperty<BlendModeProp>("mode");
+    _colorProp = container->defineProperty<ColorProp>("color");
 
     _blendModeProp->require();
     _colorProp->require();
@@ -180,8 +177,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
-    _tProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("t")));
+    _tProp = container->defineProperty<NodeProp>("t");
     _tProp->require();
   }
 

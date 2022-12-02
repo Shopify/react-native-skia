@@ -29,10 +29,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _verticesProps =
-        container->defineProperty(std::make_shared<VerticesProps>());
-    _blendModeProp = container->defineProperty(
-        std::make_shared<BlendModeProp>(JsiPropId::get("blendMode")));
+    _verticesProps = container->defineProperty<VerticesProps>();
+    _blendModeProp = container->defineProperty<BlendModeProp>("blendMode");
   }
 
 private:

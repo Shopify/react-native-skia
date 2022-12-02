@@ -23,7 +23,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _imageProps = container->defineProperty(std::make_shared<ImageProps>());
+    _imageProps = container->defineProperty<ImageProps>();
     _imageProps->require();
   }
 
