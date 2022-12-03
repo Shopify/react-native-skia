@@ -85,13 +85,12 @@ describe("Test Shader component", () => {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(hue)!;
     expect(source).toBeTruthy();
-    // Skia.Point(width / 2, height / 2)
     const img = await surface.draw(
       <Group>
         <Shader
           source={source}
           uniforms={{
-            c: { x: width / 2, y: height / 2 },
+            c: Skia.Point(width / 2, height / 2),
             r: width / 2,
           }}
         />
@@ -106,14 +105,13 @@ describe("Test Shader component", () => {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
     expect(source).toBeTruthy();
-    // Skia.Point(width / 2, height / 2)
     const img = await surface.draw(
       <Group>
         <Shader
           source={source}
           uniforms={{
             scale: 0.6,
-            center: { x: width / 2, y: height / 2 },
+            center: Skia.Point(width / 2, height / 2),
             colors: [
               [1, 0, 0, 1], // red
               [0, 1, 0, 1], // green
