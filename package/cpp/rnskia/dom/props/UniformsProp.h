@@ -30,8 +30,7 @@ bool isSkPoint(const JsiValue &value) {
 }
 
 bool isIndexable(const JsiValue &value) {
-  return value.getType() == PropType::Object && value.hasValue(PropName0) &&
-         value.hasValue(PropNameLength);
+  return value.getType() == PropType::Object && value.hasValue(PropName0);
 }
 
 void processValue(std::vector<SkScalar> &values, const JsiValue &value) {
@@ -49,7 +48,7 @@ void processValue(std::vector<SkScalar> &values, const JsiValue &value) {
     values.push_back(pointValue.x());
     values.push_back(pointValue.y());
   } else if (isIndexable(value)) {
-    auto length = value.getValue(PropNameLength).getAsNumber();
+    auto length = value.getKeys().size();
     for (size_t i = 0; i < length; ++i) {
       values.push_back(
           value.getValue(JsiPropId::get(std::to_string(i))).getAsNumber());

@@ -226,7 +226,6 @@ interface SerializedNode {
 const serializeSkOjects = (obj: any): any => {
   if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
-      console.log({ x: obj.x, y: obj.y });
       return { __typename__: "Point", x: obj.x, y: obj.y };
     } else if (obj.__typename__ === "Rect") {
       return {
