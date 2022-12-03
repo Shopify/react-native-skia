@@ -16,6 +16,64 @@
 
 namespace RNSkia {
 
+static PropId PropNameLength = JsiPropId::get("length");
+
+bool isJSPoint(const JsiValue &value) {
+  return value.getType() == PropType::Object && value.hasValue(PropNameX) &&
+         value.hasValue(PropNameY);
+}
+
+bool isSkPoint(const JsiValue &value) {
+  return value.getType() == PropType::HostObject &&
+         std::dynamic_pointer_cast<JsiSkPoint>(value.getAsHostObject()) !=
+             nullptr;
+}
+
+bool isIndexable(const JsiValue &value) {
+  return value.getType() == PropType::Object && value.hasValue(PropName0) &&
+         value.hasValue(PropNameLength);
+}
+
+void processValue(std::vector<SkScalar> &values, const JsiValue &value) {
+  if (value.getType() == PropType::Number) {
+    auto n = value.getAsNumber();
+    values.push_back(n);
+  } else if (value.getType() == PropType::Array) {
+    auto arrayValue = value.getAsArray();
+    for (size_t i = 0; i < arrayValue.size(); ++i) {
+      auto a = arrayValue[i];
+      processValue(values, a);
+    }
+  } else if (isJSPoint(value) || isSkPoint(value)) {
+    auto pointValue = PointProp::processValue(value);
+    values.push_back(pointValue.x());
+    values.push_back(pointValue.y());
+  } else if (isIndexable(value)) {
+    auto length = value.getValue(PropNameLength).getAsNumber();
+    for (size_t i = 0; i < length; ++i) {
+      values.push_back(
+          value.getValue(JsiPropId::get(std::to_string(i))).getAsNumber());
+    }
+  }
+}
+
+void processUniform(std::vector<SkScalar> &values, SkRuntimeEffect *source,
+                    const JsiValue &uniforms, SkRuntimeShaderBuilder *rtb) {
+  auto uniformsCount = source->uniforms().size();
+  for (size_t i = 0; i < uniformsCount; ++i) {
+    auto it = source->uniforms().begin() + i;
+    auto name = JsiPropId::get(std::string(it->name));
+    if (!uniforms.hasValue(name)) {
+      throw std::runtime_error("The runtime effect has the uniform value \"" +
+                               std::string(name) +
+                               "\" declared, but it is missing from the "
+                               "uniforms property of the Runtime effect.");
+    }
+    auto value = uniforms.getValue(name);
+    processValue(values, value);
+  }
+}
+
 class UniformsProp : public DerivedSkProp<SkData> {
 public:
   UniformsProp(PropId name, NodeProp *sourceProp) : DerivedSkProp<SkData>() {
@@ -32,7 +90,9 @@ public:
     auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>()->getObject();
 
     // Flatten uniforms from property
-    auto uniformValues = flattenUniforms(source.get(), _uniformsProp->value());
+    std::vector<SkScalar> uniformValues;
+    processUniform(uniformValues, source.get(), _uniformsProp->value(),
+                   nullptr);
 
     // Cast uniforms according to the declaration in the shader
     auto uniformsData = castUniforms(source.get(), uniformValues);
@@ -45,7 +105,14 @@ private:
   sk_sp<SkData> castUniforms(SkRuntimeEffect *source,
                              const std::vector<SkScalar> &values) {
     // Create memory for uniforms
-    auto uniformsData = SkData::MakeUninitialized(source->uniformSize());
+    auto uniformSize = source->uniformSize();
+    if (values.size() * sizeof(float) != uniformSize) {
+      throw std::runtime_error(
+          "Uniforms size differs from effect's uniform size. Received " +
+          std::to_string(values.size()) + " expected " +
+          std::to_string(uniformSize / sizeof(float)));
+    }
+    auto uniformsData = SkData::MakeUninitialized(uniformSize);
 
     // Loop through all uniforms in the effect and load data from the flattened
     // array of values
@@ -65,62 +132,6 @@ private:
     }
 
     return uniformsData;
-  }
-
-  std::vector<SkScalar> flattenUniforms(SkRuntimeEffect *source,
-                                        const JsiValue &propObject) {
-    auto uniformsCount = source->uniforms().size();
-    std::vector<SkScalar> uniformValues;
-
-    for (size_t i = 0; i < uniformsCount; ++i) {
-      auto it = source->uniforms().begin() + i;
-      auto name = JsiPropId::get(std::string(it->name));
-
-      if (!propObject.hasValue(name)) {
-        throw std::runtime_error("The runtime effect has the uniform value \"" +
-                                 std::string(name) +
-                                 "\" declared, but it is missing from the "
-                                 "uniforms property of the Runtime effect.");
-      }
-
-      auto value = propObject.getValue(name);
-
-      // A uniform value can be a single number, a vector or an array of numbers
-      // Or an array of the above
-      if (value.getType() == PropType::Number) {
-        // Set numeric uniform
-        uniformValues.push_back(value.getAsNumber());
-      } else if (value.getType() == PropType::Array) {
-        // Array
-        auto arrayValue = value.getAsArray();
-        for (size_t n = 0; n < arrayValue.size(); ++n) {
-          auto a = arrayValue[n];
-          if (a.getType() == PropType::Number) {
-            uniformValues.push_back(a.getAsNumber());
-          } else {
-            for (size_t j = 0; j < a.getAsArray().size(); ++j) {
-              uniformValues.push_back(a.getAsArray()[j].getAsNumber());
-            }
-          }
-        }
-      } else if ((value.getType() == PropType::HostObject ||
-                  value.getType() == PropType::Object) &&
-                 value.hasValue(PropNameX) && value.hasValue(PropNameY)) {
-        // Vector (JsiSkPoint / JsiSkRect)
-        auto pointValue = PointProp::processValue(value);
-        uniformValues.push_back(pointValue.x());
-        uniformValues.push_back(pointValue.y());
-      } else if ((value.getType() == PropType::HostObject ||
-                  value.getType() == PropType::Object) &&
-                 value.hasValue(PropName0) && value.hasValue(PropName1) &&
-                 value.hasValue(PropName2) && value.hasValue(PropName3)) {
-        uniformValues.push_back(value.getValue(PropName0).getAsNumber());
-        uniformValues.push_back(value.getValue(PropName1).getAsNumber());
-        uniformValues.push_back(value.getValue(PropName2).getAsNumber());
-        uniformValues.push_back(value.getValue(PropName3).getAsNumber());
-      }
-    }
-    return uniformValues;
   }
 
   NodeProp *_uniformsProp;

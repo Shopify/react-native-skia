@@ -44,10 +44,10 @@ half4 main(vec2 uv) {
 
 const spiral = `
 uniform float scale;
-uniform int2   center;
+uniform float2   center;
 uniform float4 colors[2];
 half4 main(float2 p) {
-    float2 pp = p - float2(center);
+    float2 pp = p - center;
     float radius = sqrt(dot(pp, pp));
     radius = sqrt(radius);
     float angle = atan(pp.y / pp.x);
@@ -58,6 +58,30 @@ half4 main(float2 p) {
 }`;
 
 describe("Test Shader component", () => {
+  it("should display a green and red spiral", async () => {
+    const { width, height } = surface;
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(spiral)!;
+    expect(source).toBeTruthy();
+    const img = await surface.draw(
+      <Group>
+        <Shader
+          source={source}
+          uniforms={{
+            scale: 0.6,
+            center: { x: width / 2, y: height / 2 },
+            colors: [
+              [1, 0, 0, 1], // red
+              [0, 1, 0, 1], // green
+            ],
+          }}
+        />
+        <Fill />
+      </Group>
+    );
+    checkImage(img, "snapshots/runtime-effects/spiral.png");
+  });
+
   it("should flatten shader uniforms", async () => {
     const { width, height } = surface;
     const { Skia } = importSkia();
@@ -90,7 +114,7 @@ describe("Test Shader component", () => {
         <Shader
           source={source}
           uniforms={{
-            c: Skia.Point(width / 2, height / 2),
+            c: { x: width / 2, y: height / 2 },
             r: width / 2,
           }}
         />
@@ -98,30 +122,6 @@ describe("Test Shader component", () => {
       </Group>
     );
     checkImage(img, "snapshots/shader/hue.png");
-  });
-
-  it("should display a green and red spiral", async () => {
-    const { width, height } = surface;
-    const { Skia } = importSkia();
-    const source = Skia.RuntimeEffect.Make(spiral)!;
-    expect(source).toBeTruthy();
-    const img = await surface.draw(
-      <Group>
-        <Shader
-          source={source}
-          uniforms={{
-            scale: 0.6,
-            center: Skia.Point(width / 2, height / 2),
-            colors: [
-              [1, 0, 0, 1], // red
-              [0, 1, 0, 1], // green
-            ],
-          }}
-        />
-        <Fill />
-      </Group>
-    );
-    checkImage(img, "snapshots/runtime-effects/spiral.png");
   });
 
   it("should display a linear gradient", async () => {
