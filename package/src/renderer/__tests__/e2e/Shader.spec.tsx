@@ -58,6 +58,32 @@ half4 main(float2 p) {
 }`;
 
 describe("Test Shader component", () => {
+  it("should cast int to a float properly", async () => {
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(`
+uniform int opacity;
+
+half4 main(float2 p) {
+  return vec4(0.33, 0.66, 1.0, opacity);
+}
+`)!;
+    expect(source).toBeTruthy();
+    const img = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group>
+          <Shader
+            source={source}
+            uniforms={{
+              opacity: 1.5,
+            }}
+          />
+          <Fill />
+        </Group>
+      </>
+    );
+    checkImage(img, "snapshots/runtime-effects/int-uniform.png");
+  });
   it("should display a green and red spiral", async () => {
     const { width, height } = surface;
     const { Skia } = importSkia();
