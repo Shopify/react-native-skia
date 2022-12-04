@@ -217,7 +217,7 @@ describe("Opacity", () => {
         </Fill>
       </Group>
     );
-    checkImage(img, "snapshots/drawings/opacity-image.png", false, false, 0.2);
+    checkImage(img, "snapshots/drawings/opacity-image.png", { threshold: 0.2 });
   });
   it("Should apply opacity to an image shader (2)", async () => {
     const { oslo } = images;
@@ -240,6 +240,6 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    checkImage(img, "snapshots/drawings/opacity-image.png", false, false, 0.2);
+    checkImage(img, "snapshots/drawings/opacity-image.png", { threshold: 0.2 });
   });
 });

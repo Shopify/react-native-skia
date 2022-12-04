@@ -16,8 +16,6 @@
 
 namespace RNSkia {
 
-static PropId PropNameLength = JsiPropId::get("length");
-
 bool isJSPoint(const JsiValue &value) {
   return value.getType() == PropType::Object && value.hasValue(PropNameX) &&
          value.hasValue(PropNameY);

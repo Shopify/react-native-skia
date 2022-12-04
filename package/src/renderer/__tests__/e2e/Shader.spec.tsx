@@ -64,22 +64,26 @@ describe("Test Shader component", () => {
     const source = Skia.RuntimeEffect.Make(spiral)!;
     expect(source).toBeTruthy();
     const img = await surface.draw(
-      <Group>
-        <Shader
-          source={source}
-          uniforms={{
-            scale: 0.6,
-            center: { x: width / 2, y: height / 2 },
-            colors: [
-              [1, 0, 0, 1], // red
-              [0, 1, 0, 1], // green
-            ],
-          }}
-        />
-        <Fill />
-      </Group>
+      <>
+        <Group>
+          <Shader
+            source={source}
+            uniforms={{
+              scale: 0.6,
+              center: { x: width / 2, y: height / 2 },
+              colors: [
+                [1, 0, 0, 1], // red
+                [0, 1, 0, 1], // green
+              ],
+            }}
+          />
+          <Fill />
+        </Group>
+      </>
     );
-    checkImage(img, "snapshots/runtime-effects/spiral.png");
+    checkImage(img, "snapshots/runtime-effects/spiral.png", {
+      maxPixelDiff: 1,
+    });
   });
 
   it("should flatten shader uniforms", async () => {
