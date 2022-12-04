@@ -107,6 +107,7 @@ public:
     if (!_uniformsProp->isSet()) {
       return;
     }
+
     // Get the effect
     auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>()->getObject();
     // Flatten uniforms from property

@@ -1,7 +1,7 @@
 import React from "react";
 
 import { surface, importSkia } from "../setup";
-import { Circle, Fill, Group, RuntimeShader } from "../../components";
+import { Circle, Fill, Group, Paint, RuntimeShader } from "../../components";
 import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 
 const spiral = `
@@ -52,19 +52,27 @@ half4 main(float2 xy) {
     expect(source).toBeTruthy();
     const img = await surface.draw(
       <>
-        <Group>
-          <RuntimeShader
-            source={source}
-            uniforms={{
-              scale: 0.6,
-              center: { x: width / 2, y: height / 2 },
-              colors: [
-                [1, 0, 0, 1], // red
-                [0, 1, 0, 1], // green
-              ],
-            }}
-          />
-          <Fill color="blue" />
+        <Group transform={[{ scale: 1 / 3 }]}>
+          <Group
+            layer={
+              <Paint>
+                <RuntimeShader
+                  source={source}
+                  uniforms={{
+                    scale: 0.3,
+                    center: { x: (width * 3) / 2, y: (height * 3) / 2 },
+                    colors: [
+                      [1, 0, 0, 1], // red
+                      [0, 1, 0, 1], // green
+                    ],
+                  }}
+                />
+              </Paint>
+            }
+            transform={[{ scale: 3 }]}
+          >
+            <Fill color="blue" />
+          </Group>
         </Group>
       </>
     );
