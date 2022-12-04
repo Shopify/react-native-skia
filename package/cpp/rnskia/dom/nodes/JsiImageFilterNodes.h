@@ -384,14 +384,14 @@ protected:
     JsiBaseDomDeclarationNode::defineProperties(container);
     _sourceProp = container->defineProperty<NodeProp>("source");
     _uniformsProp =
-        container->defineProperty<SimpleUniformsProp>("uniforms", _sourceProp);
+        container->defineProperty<UniformsProp>("uniforms", _sourceProp);
 
     _sourceProp->require();
   }
 
 private:
   NodeProp *_sourceProp;
-  SimpleUniformsProp *_uniformsProp;
+  UniformsProp *_uniformsProp;
 };
 
 } // namespace RNSkia

@@ -67,7 +67,13 @@ void processUniform(std::vector<SkScalar> &values, SkRuntimeEffect *source,
                                "uniforms property of the Runtime effect.");
     }
     auto value = uniforms.getValue(name);
-    processValue(values, value);
+    if (rtb == nullptr) {
+      processValue(values, value);
+    } else {
+      std::vector<SkScalar> uniformValue;
+      processValue(uniformValue, value);
+      rtb->uniform(name).set(uniformValue.data(), static_cast<int>(uniformValue.size()));
+    }
   }
 }
 
@@ -88,14 +94,24 @@ public:
 
     // Flatten uniforms from property
     std::vector<SkScalar> uniformValues;
-    processUniform(uniformValues, source.get(), _uniformsProp->value(),
-                   nullptr);
+    processUniform(uniformValues, source.get(), _uniformsProp->value(), nullptr);
 
     // Cast uniforms according to the declaration in the shader
     auto uniformsData = castUniforms(source.get(), uniformValues);
 
     // Save derived value
     setDerivedValue(uniformsData);
+  }
+
+  void processUniforms(SkRuntimeShaderBuilder &rtb) {
+    if (!_uniformsProp->isSet()) {
+      return;
+    }
+    // Get the effect
+    auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>()->getObject();
+    // Flatten uniforms from property
+    std::vector<SkScalar> uniformValues;
+    processUniform(uniformValues, source.get(), _uniformsProp->value(), &rtb);
   }
 
 private:
@@ -131,79 +147,6 @@ private:
     return uniformsData;
   }
 
-  NodeProp *_uniformsProp;
-  NodeProp *_sourceProp;
-};
-
-class SimpleUniformsProp : public BaseDerivedProp {
-public:
-  SimpleUniformsProp(PropId name, NodeProp *sourceProp) : BaseDerivedProp() {
-    _uniformsProp = addProperty(std::make_shared<NodeProp>(name));
-    _sourceProp = sourceProp;
-  }
-
-  void processUniforms(SkRuntimeShaderBuilder &rtb) {
-    if (!_uniformsProp->isSet()) {
-      return;
-    }
-
-    auto propObject = _uniformsProp->value();
-    auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>()->getObject();
-
-    auto uniformsCount = source->uniforms().size();
-
-    for (size_t i = 0; i < uniformsCount; ++i) {
-      auto it = source->uniforms().begin() + i;
-      auto name = JsiPropId::get(std::string(it->name));
-
-      if (!propObject.hasValue(name)) {
-        throw std::runtime_error("The runtime effect has the uniform value \"" +
-                                 std::string(name) +
-                                 "\" declared, but it is missing from the "
-                                 "uniforms property of the Runtime effect.");
-      }
-
-      auto value = propObject.getValue(name);
-
-      // A uniform value can be a single number, a vector or an array of numbers
-      // Or an array of the above
-      if (value.getType() == PropType::Number) {
-        // Set numeric uniform
-        rtb.uniform(name) = value.getAsNumber();
-      } else if (value.getType() == PropType::Array) {
-        // Array
-        auto arrayValue = value.getAsArray();
-        std::vector<SkScalar> set;
-        for (size_t n = 0; n < arrayValue.size(); ++n) {
-          auto a = arrayValue[n];
-          if (a.getType() == PropType::Number) {
-            set.push_back(a.getAsNumber());
-          } else {
-            for (size_t j = 0; j < a.getAsArray().size(); ++j) {
-              set.push_back(a.getAsArray()[j].getAsNumber());
-            }
-          }
-        }
-        rtb.uniform(name).set(set.data(), static_cast<int>(set.size()));
-
-      } else if (value.getType() == PropType::HostObject ||
-                 value.getType() == PropType::Object) {
-        // Vector (JsiSkPoint / JsiSkRect)
-        auto pointValue = PointProp::processValue(value);
-        std::vector<SkScalar> set = {pointValue.x(), pointValue.y()};
-
-        rtb.uniform(name).set(set.data(), static_cast<int>(set.size()));
-      } else {
-        throw std::runtime_error("Unexpected type for uniform prop \"" +
-                                 std::string(name) + "\". Got " +
-                                 value.getTypeAsString(value.getType()));
-      }
-    }
-  }
-
-  void updateDerivedValue() override {}
-
-private:
   NodeProp *_uniformsProp;
   NodeProp *_sourceProp;
 };
