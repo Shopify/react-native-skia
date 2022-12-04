@@ -7,11 +7,7 @@ import {
   width as wWidth,
   images,
 } from "../setup";
-import {
-  processResult,
-  checkImage,
-  itFailsE2e,
-} from "../../../__tests__/setup";
+import { processResult, checkImage } from "../../../__tests__/setup";
 import {
   ColorShader,
   Fill,
@@ -24,6 +20,39 @@ import { setupSkia } from "../../../skia/__tests__/setup";
 import { fitRects } from "../../../dom/nodes/datatypes/Fitting";
 
 describe("Opacity", () => {
+  it("Build reference result", async () => {
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Fill color="rgba(0, 0, 255, 0.25)" />
+      </>
+    );
+    checkImage(image, "snapshots/drawings/violet.png");
+  });
+  it("Should multiply multiply the color opacity (1)", async () => {
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group opacity={0.5}>
+          <Fill color="rgba(0, 0, 255, 0.5)" />
+        </Group>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/violet.png");
+  });
+  it("Should multiply multiply the color opacity (2)", async () => {
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group opacity={0.5}>
+          <Group opacity={0.5}>
+            <Fill color="blue" />
+          </Group>
+        </Group>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/violet.png");
+  });
   it("Should multiply the opacity to 0", async () => {
     const { rect, rrect } = importSkia();
     const { width } = surface;
@@ -118,7 +147,7 @@ describe("Opacity", () => {
     );
     checkImage(image, "snapshots/drawings/shader-opacity-reference.png");
   });
-  itFailsE2e("Should multiply the opacity to 0.25 using a Shader", async () => {
+  it("Should multiply the opacity to 0.25 using a Shader", async () => {
     const { rect, rrect } = importSkia();
     const { width } = surface;
     const r = width * 0.5;

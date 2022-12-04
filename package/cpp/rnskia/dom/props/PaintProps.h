@@ -89,12 +89,6 @@ public:
 
   void decorate(DrawingContext *context) {
     // Now we can start updating the context
-
-    // Opacity
-    if (_opacity->isSet() && (_opacity->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setAlphaf(_opacity->value().getAsNumber());
-    }
-
     // COLOR
     if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
       auto paint = context->getMutablePaint();
@@ -148,6 +142,11 @@ public:
     if (_antiAlias->isSet() &&
         (_antiAlias->isChanged() || context->isChanged())) {
       context->getMutablePaint()->setAntiAlias(_antiAlias->value().getAsBool());
+    }
+
+    // Opacity
+    if (_opacity->isSet() && (_opacity->isChanged() || context->isChanged())) {
+      context->getMutablePaint()->setAlphaf(_opacity->value().getAsNumber());
     }
   }
 
