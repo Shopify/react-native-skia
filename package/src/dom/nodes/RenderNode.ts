@@ -228,7 +228,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
     }
     const paint = this.paintCache.child;
     // TODO: can we only recreate a new context here if needed?
-    const ctx = { ...parentCtx, opacity, paint };
+    const ctx = { ...parentCtx, paint };
     const hasTransform = matrix !== undefined || transform !== undefined;
     const hasClip =
       this.clipRect !== undefined ||

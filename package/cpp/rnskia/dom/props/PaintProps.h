@@ -91,10 +91,8 @@ public:
     // Now we can start updating the context
 
     // Opacity
-    if (_opacity->isChanged() || context->isChanged()) {
-      if (_opacity->isSet()) {
-        context->getMutablePaint()->setAlphaf(_opacity->value().getAsNumber());
-      }
+    if (_opacity->isSet() && (_opacity->isChanged() || context->isChanged())) {
+      context->getMutablePaint()->setAlphaf(_opacity->value().getAsNumber());
     }
 
     // COLOR

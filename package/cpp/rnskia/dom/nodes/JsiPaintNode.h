@@ -65,12 +65,9 @@ protected:
     JsiBaseDomDeclarationNode::defineProperties(container);
 
     _paintProps = container->defineProperty(std::make_shared<PaintProps>());
-    _opacityProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameOpacity));
   }
 
 private:
-  NodeProp *_opacityProp;
   PaintProps *_paintProps;
 
   std::shared_ptr<DrawingContext> _localContext;
