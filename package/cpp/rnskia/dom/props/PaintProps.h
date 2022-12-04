@@ -93,9 +93,7 @@ public:
     // Opacity
     if (_opacity->isChanged() || context->isChanged()) {
       if (_opacity->isSet()) {
-        context->getMutablePaint()->setAlphaf(
-            context->getMutablePaint()->getAlphaf() *
-            _opacity->value().getAsNumber());
+        context->getMutablePaint()->setAlphaf(_opacity->value().getAsNumber());
       }
     }
 
