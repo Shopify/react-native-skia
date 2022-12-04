@@ -96,7 +96,7 @@ public:
       context->getMutablePaint()->setAlphaf(paint->getAlphaf() *
                                             _opacity->value().getAsNumber());
     }
-    // COLOR
+    // Color
     if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
       auto paint = context->getMutablePaint();
       auto opacity = paint->getAlphaf();

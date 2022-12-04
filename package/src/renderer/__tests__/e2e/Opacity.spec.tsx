@@ -167,7 +167,7 @@ describe("Opacity", () => {
     );
     checkImage(image, "snapshots/drawings/opacity-multiplication2.png");
   });
-  it("Build reference result", () => {
+  it("Build reference result (2)", () => {
     const {
       surface: ckSurface,
       Skia,
