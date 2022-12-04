@@ -72,7 +72,8 @@ void processUniform(std::vector<SkScalar> &values, SkRuntimeEffect *source,
     } else {
       std::vector<SkScalar> uniformValue;
       processValue(uniformValue, value);
-      rtb->uniform(name).set(uniformValue.data(), static_cast<int>(uniformValue.size()));
+      rtb->uniform(name).set(uniformValue.data(),
+                             static_cast<int>(uniformValue.size()));
     }
   }
 }
@@ -94,7 +95,8 @@ public:
 
     // Flatten uniforms from property
     std::vector<SkScalar> uniformValues;
-    processUniform(uniformValues, source.get(), _uniformsProp->value(), nullptr);
+    processUniform(uniformValues, source.get(), _uniformsProp->value(),
+                   nullptr);
 
     // Cast uniforms according to the declaration in the shader
     auto uniformsData = castUniforms(source.get(), uniformValues);
