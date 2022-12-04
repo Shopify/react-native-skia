@@ -64,7 +64,7 @@ describe("Test Shader component", () => {
 uniform int opacity;
 
 half4 main(float2 p) {
-  return vec4(0.33, 0.66, 1.0, opacity);
+  return vec4(0.33, 0.66, 1.0, float(opacity)/255.0);
 }
 `)!;
     expect(source).toBeTruthy();
@@ -75,7 +75,7 @@ half4 main(float2 p) {
           <Shader
             source={source}
             uniforms={{
-              opacity: 1.5,
+              opacity: 128,
             }}
           />
           <Fill />

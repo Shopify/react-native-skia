@@ -211,7 +211,7 @@ private:
         const std::size_t offset = reu.slot + j;
         float fValue = jsiUniforms.getValueAtIndex(runtime, offset).asNumber();
         int iValue = static_cast<int>(fValue);
-        auto value = reu.isInteger ? iValue : fValue;
+        auto value = reu.isInteger ? SkBits2Float(iValue) : fValue;
         memcpy(SkTAddOffset<void>(uniforms->writable_data(),
                                   offset * sizeof(value)),
                &value, sizeof(value));
