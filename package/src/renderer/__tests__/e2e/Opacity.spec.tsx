@@ -7,7 +7,11 @@ import {
   width as wWidth,
   images,
 } from "../setup";
-import { processResult, checkImage } from "../../../__tests__/setup";
+import {
+  processResult,
+  checkImage,
+  itFailsE2e,
+} from "../../../__tests__/setup";
 import {
   ColorShader,
   Fill,
@@ -114,7 +118,7 @@ describe("Opacity", () => {
     );
     checkImage(image, "snapshots/drawings/shader-opacity-reference.png");
   });
-  it("Should multiply the opacity to 0.25 using a Shader", async () => {
+  itFailsE2e("Should multiply the opacity to 0.25 using a Shader", async () => {
     const { rect, rrect } = importSkia();
     const { width } = surface;
     const r = width * 0.5;
