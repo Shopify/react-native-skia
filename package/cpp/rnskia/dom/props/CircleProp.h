@@ -34,6 +34,8 @@ public:
                                     _cy->value().getAsNumber()));
     } else if (_c->isSet()) {
       setDerivedValue(_c->getDerivedValue());
+    } else {
+      setDerivedValue(SkPoint::Make(0.0, 0.0));
     }
   }
 

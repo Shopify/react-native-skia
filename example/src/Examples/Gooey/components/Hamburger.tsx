@@ -8,7 +8,7 @@ const R = 50;
 export const Hamburger = () => {
   return (
     <>
-      <Circle c={vec(0, 0)} r={R} color={FG} />
+      <Circle r={R} color={FG} />
       <Line
         p1={vec(-20, -15)}
         p2={vec(20, -15)}

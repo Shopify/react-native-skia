@@ -25,8 +25,6 @@ protected:
     _circleProp = container->defineProperty(std::make_shared<CircleProp>());
     _radiusProp =
         container->defineProperty(std::make_shared<NodeProp>(PropNameR));
-
-    _circleProp->require();
     _radiusProp->require();
   }
 

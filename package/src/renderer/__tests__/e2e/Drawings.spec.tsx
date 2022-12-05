@@ -8,6 +8,7 @@ import {
   Group,
   LinearGradient,
   Path,
+  Rect,
 } from "../../components";
 import { importSkia, surface } from "../setup";
 
@@ -155,5 +156,15 @@ return path.getBounds().width;
       </FitBox>
     );
     checkImage(image, "snapshots/paths/skia-trimmed.png");
+  });
+
+  it("should use default props", async () => {
+    const image = await surface.draw(
+      <Group strokeJoin="round" strokeCap="round" color="black">
+        <Rect width={64} height={64} color="lightblue" />
+        <Circle r={128} color="rgba(100, 200, 300, 0.5)" />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/default-props.png");
   });
 });
