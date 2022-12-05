@@ -22,7 +22,7 @@ public:
   /**
    Creates a root drawing context with paint and opacity
    */
-  DrawingContext(std::shared_ptr<SkPaint> paint);
+  explicit DrawingContext(std::shared_ptr<SkPaint> paint);
 
   /**
    Initilalizes a new draw context.
