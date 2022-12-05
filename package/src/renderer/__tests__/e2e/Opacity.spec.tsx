@@ -250,7 +250,9 @@ describe("Opacity", () => {
         </Fill>
       </Group>
     );
-    checkImage(img, "snapshots/drawings/opacity-image.png", false, false);
+    checkImage(img, "snapshots/drawings/opacity-image.png", {
+      maxPixelDiff: 8,
+    });
   });
   it("Should apply opacity to an image shader (2)", async () => {
     const { oslo } = images;
@@ -273,6 +275,8 @@ describe("Opacity", () => {
         </Group>
       </Group>
     );
-    checkImage(img, "snapshots/drawings/opacity-image.png", false, false);
+    checkImage(img, "snapshots/drawings/opacity-image.png", {
+      maxPixelDiff: 8,
+    });
   });
 });
