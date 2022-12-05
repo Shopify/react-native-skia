@@ -88,11 +88,6 @@ public:
   void setMutablePaint(std::shared_ptr<SkPaint> paint);
 
   /**
-   Getd the opacity value
-   */
-  double getOpacity();
-
-  /**
    Sets the opacity value
    */
   void setOpacity(double opacity);
