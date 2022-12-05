@@ -9,8 +9,9 @@ import {
   LinearGradient,
   Path,
   Rect,
+  Image,
 } from "../../components";
-import { importSkia, surface } from "../setup";
+import { images, importSkia, surface } from "../setup";
 
 describe("Drawings", () => {
   it("Should blend colors using multiplication", async () => {
@@ -160,7 +161,7 @@ return path.getBounds().width;
     checkImage(image, "snapshots/paths/skia-trimmed.png");
   });
 
-  it("should use default props", async () => {
+  it("should use default props (1)", async () => {
     const image = await surface.draw(
       <Group strokeJoin="round" strokeCap="round" color="black">
         <Rect width={64} height={64} color="lightblue" />
@@ -168,5 +169,16 @@ return path.getBounds().width;
       </Group>
     );
     checkImage(image, "snapshots/drawings/default-props.png");
+  });
+
+  it("should use default props for Images (2)", async () => {
+    const { oslo } = images;
+    const { width, height } = surface;
+    const image = await surface.draw(
+      <Group>
+        <Image image={oslo} x={0} y={0} width={width} height={height} />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/image-default-props.png");
   });
 });
