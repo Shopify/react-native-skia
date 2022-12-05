@@ -87,16 +87,6 @@ public:
    */
   void setMutablePaint(std::shared_ptr<SkPaint> paint);
 
-  /**
-   Sets the opacity value
-   */
-  void setOpacity(double opacity);
-
-  /**
-   Clears the opacity
-   */
-  void clearOpacity();
-
   float getScaledWidth();
 
   float getScaledHeight();
@@ -106,6 +96,8 @@ public:
 
   void setRequestRedraw(std::function<void()> &&requestRedraw);
   const std::function<void()> &getRequestRedraw();
+
+  DrawingContext *getParent();
 
 private:
   explicit DrawingContext(const char *source);

@@ -164,28 +164,6 @@ void DrawingContext::setMutablePaint(std::shared_ptr<SkPaint> paint) {
   _paint = paint;
 }
 
-/**
- Sets the opacity value
- */
-void DrawingContext::setOpacity(double opacity) {
-  auto currentOpacity = opacity;
-  if (_parent != nullptr) {
-    currentOpacity *= _parent->getPaint()->getAlphaf();
-  }
-  getMutablePaint()->setAlphaf(currentOpacity);
-}
-
-/**
- Clears the opacity value
- */
-void DrawingContext::clearOpacity() {
-  if (_parent != nullptr) {
-    getMutablePaint()->setAlphaf(_parent->getPaint()->getAlphaf());
-  } else {
-    getMutablePaint()->setAlphaf(1.0);
-  }
-}
-
 float DrawingContext::getScaledWidth() {
   if (_parent != nullptr) {
     return _parent->getScaledWidth();
@@ -199,6 +177,8 @@ float DrawingContext::getScaledHeight() {
   }
   return _scaledHeight;
 }
+
+DrawingContext *DrawingContext::getParent() { return _parent; }
 
 void DrawingContext::setScaledWidth(float v) { _scaledWidth = v; }
 void DrawingContext::setScaledHeight(float v) { _scaledHeight = v; }
