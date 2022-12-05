@@ -19,7 +19,8 @@ public:
   /**
    Constructs a new optional dom node properrty
    */
-  explicit NodeProp(PropId name) : _name(name), BaseNodeProp() {}
+  explicit NodeProp(const std::string &name)
+      : _name(JsiPropId::get(name)), BaseNodeProp() {}
 
   /**
    Reads JS value and swaps out with a new value

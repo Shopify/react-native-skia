@@ -76,10 +76,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomRenderNode::defineProperties(container);
-    _rrectProp = container->defineProperty(
-        std::make_shared<RRectProp>(JsiPropId::get("box")));
-    _rectProp = container->defineProperty(
-        std::make_shared<RectProp>(JsiPropId::get("box")));
+    _rrectProp = container->defineProperty<RRectProp>("box");
+    _rectProp = container->defineProperty<RectProp>("box");
   }
 
 private:

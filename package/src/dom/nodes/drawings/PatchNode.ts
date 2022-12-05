@@ -2,7 +2,7 @@ import type { SkColor, SkPoint } from "../../../skia/types";
 import { BlendMode } from "../../../skia/types";
 import type { DrawingContext, PatchProps } from "../../types";
 import { NodeType } from "../../types";
-import { enumKey, processColor } from "../datatypes";
+import { enumKey } from "../datatypes";
 import { JsiDrawingNode } from "../DrawingNode";
 import type { NodeContext } from "../Node";
 
@@ -39,9 +39,7 @@ export class PatchNode extends JsiDrawingNode<
         patch[3].c2,
         patch[0].c1,
       ],
-      colors: colors
-        ? colors.map((c) => processColor(this.Skia, c, 1))
-        : undefined,
+      colors: colors ? colors.map((c) => this.Skia.Color(c)) : undefined,
     };
   }
 

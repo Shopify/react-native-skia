@@ -12,24 +12,29 @@ export interface SerializedNode {
   children: SerializedNode[];
 }
 
-export const parseNode = (serializedNode: SerializedNode): any => {
+type Assets = { [name: string]: any };
+
+export const parseNode = (
+  serializedNode: SerializedNode,
+  assets: Assets
+): any => {
   const { type, props, children } = serializedNode;
   return React.createElement(
     type,
-    { ...parseProps(props), key: `${Math.random()}` },
-    children.map(parseNode)
+    { ...parseProps(props, assets), key: `${Math.random()}` },
+    children.map((child) => parseNode(child, assets))
   );
 };
 
-const parseProps = (props: SerializedProps) => {
+const parseProps = (props: SerializedProps, assets: Assets) => {
   const newProps: SerializedProps = {};
   Object.keys(props).forEach((key) => {
-    newProps[key] = parseProp(props[key]);
+    newProps[key] = parseProp(props[key], assets);
   });
   return newProps;
 };
 
-const parseProp = (value: any) => {
+const parseProp = (value: any, assets: Assets) => {
   if (value && typeof value === "object" && "__typename__" in value) {
     if (value.__typename__ === "Point") {
       return Skia.Point(value.x, value.y);
@@ -44,14 +49,17 @@ const parseProp = (value: any) => {
     } else if (value.__typename__ === "Path") {
       return Skia.Path.MakeFromCmds(value.cmds);
     } else if (value.__typename__ === "Image") {
-      const raw = new Uint8Array(value.bytes);
-      const data = Skia.Data.fromBytes(raw);
-      return Skia.Image.MakeImageFromEncoded(data);
+      const asset = assets[value.name];
+      if (!asset) {
+        throw new Error(`Asset ${value.name} not found`);
+      }
+      return asset;
     } else if (value.__typename__ === "Font") {
-      const raw = new Uint8Array(value.typeface);
-      const data = Skia.Data.fromBytes(raw);
-      const typeface = Skia.Typeface.MakeFreeTypeFaceFromData(data)!;
-      return Skia.Font(typeface, value.size);
+      const asset = assets[value.name];
+      if (!asset) {
+        throw new Error(`Asset ${value.name} not found`);
+      }
+      return Skia.Font(asset, value.size);
     }
   }
   return value;

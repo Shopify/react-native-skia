@@ -16,7 +16,7 @@ public:
 protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomRenderNode::defineProperties(container);
-    container->defineProperty(std::make_shared<PaintProp>());
+    container->defineProperty<PaintProp>();
   }
 
   /**

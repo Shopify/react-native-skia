@@ -85,10 +85,8 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
 
-    _intervals = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("intervals")));
-    _phase = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("phase")));
+    _intervals = container->defineProperty<NodeProp>("intervals");
+    _phase = container->defineProperty<NodeProp>("phase");
 
     _intervals->require();
   }
@@ -123,12 +121,9 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
 
-    _lengthProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("length")));
-    _deviationProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("deviation")));
-    _seedProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("seed")));
+    _lengthProp = container->defineProperty<NodeProp>("length");
+    _deviationProp = container->defineProperty<NodeProp>("deviation");
+    _seedProp = container->defineProperty<NodeProp>("seed");
 
     _lengthProp->require();
     _deviationProp->require();
@@ -161,8 +156,7 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
 
-    _rProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("r")));
+    _rProp = container->defineProperty<NodeProp>("r");
     _rProp->require();
   }
 
@@ -193,14 +187,10 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
 
-    _phaseProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("phase")));
-    _advanceProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("advance")));
-    _pathProp = container->defineProperty(
-        std::make_shared<PathProp>(JsiPropId::get("path")));
-    _styleProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("style")));
+    _phaseProp = container->defineProperty<NodeProp>("phase");
+    _advanceProp = container->defineProperty<NodeProp>("advance");
+    _pathProp = container->defineProperty<PathProp>("path");
+    _styleProp = container->defineProperty<NodeProp>("style");
 
     _phaseProp->require();
     _advanceProp->require();
@@ -248,10 +238,8 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
 
-    _matrixProp = container->defineProperty(
-        std::make_shared<MatrixProp>(JsiPropId::get("matrix")));
-    _pathProp = container->defineProperty(
-        std::make_shared<PathProp>(JsiPropId::get("path")));
+    _matrixProp = container->defineProperty<MatrixProp>("matrix");
+    _pathProp = container->defineProperty<PathProp>("path");
 
     _matrixProp->require();
     _pathProp->require();
@@ -283,10 +271,8 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseDomDeclarationNode::defineProperties(container);
 
-    _matrixProp = container->defineProperty(
-        std::make_shared<MatrixProp>(JsiPropId::get("matrix")));
-    _widthProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("width")));
+    _matrixProp = container->defineProperty<MatrixProp>("matrix");
+    _widthProp = container->defineProperty<NodeProp>("width");
 
     _matrixProp->require();
     _widthProp->require();

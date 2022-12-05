@@ -22,8 +22,7 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
 
-    _rrectProp =
-        container->defineProperty(std::make_shared<RRectProps>(PropNameRect));
+    _rrectProp = container->defineProperty<RRectProps>("rect");
     _rrectProp->require();
   }
 

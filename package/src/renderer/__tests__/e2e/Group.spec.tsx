@@ -2,24 +2,23 @@ import React from "react";
 
 import { checkImage, docPath } from "../../../__tests__/setup";
 import { Image, Group, Fill, FitBox, Path } from "../../components";
-import { loadImage, importSkia, PIXEL_RATIO, surface } from "../setup";
+import { images, importSkia, PIXEL_RATIO, surface } from "../setup";
 
 describe("Group", () => {
   it("Should use a rectangle as a clip", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
     const padding = 48 / 3;
 
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { rect } = importSkia();
-    expect(image).toBeTruthy();
     const rct = rect(padding, padding, size - padding * 2, size - padding * 2);
     const img = await surface.draw(
       <>
         <Fill color="lightblue" />
         <Group clip={rct}>
           <Image
-            image={image}
+            image={oslo}
             x={0}
             y={0}
             width={size}
@@ -32,14 +31,12 @@ describe("Group", () => {
     checkImage(img, docPath("group/clip-rect.png"));
   });
   it("Should use a rounded rectangle as a clip", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
     const padding = 48 / 3;
     const r = 24 / 3;
-
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { rect, rrect } = importSkia();
-    expect(image).toBeTruthy();
     const rct = rrect(
       rect(padding, padding, size - padding * 2, size - padding * 2),
       r,
@@ -48,7 +45,7 @@ describe("Group", () => {
     const img = await surface.draw(
       <Group clip={rct}>
         <Image
-          image={image}
+          image={oslo}
           x={0}
           y={0}
           width={size}
@@ -60,9 +57,8 @@ describe("Group", () => {
     checkImage(img, docPath("group/clip-rrect.png"));
   });
   it("Should use a path as a clip", async () => {
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
+    const { oslo } = images;
     const { processTransform2d, Skia } = importSkia();
-    expect(image).toBeTruthy();
     const star = Skia.Path.MakeFromSVGString(
       "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
     )!;
@@ -72,7 +68,7 @@ describe("Group", () => {
     const img = await surface.draw(
       <Group clip={star}>
         <Image
-          image={image}
+          image={oslo}
           x={0}
           y={0}
           width={size}
@@ -84,11 +80,10 @@ describe("Group", () => {
     checkImage(img, docPath("group/clip-path.png"));
   });
   it("Should invert a clip", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const { processTransform2d, Skia } = importSkia();
-    expect(image).toBeTruthy();
     const star = Skia.Path.MakeFromSVGString(
       "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
     )!;
@@ -97,7 +92,7 @@ describe("Group", () => {
     const img = await surface.draw(
       <Group clip={star} invertClip>
         <Image
-          image={image}
+          image={oslo}
           x={0}
           y={0}
           width={size}

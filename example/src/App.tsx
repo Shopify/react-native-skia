@@ -23,9 +23,10 @@ import {
   Wallet,
   Severance,
 } from "./Examples";
-import { Tests } from "./Tests";
+import { E2E, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
+import { useAssets } from "./Tests/useAssets";
 
 const linking = {
   config: {
@@ -71,25 +72,37 @@ const HeaderLeft = (props: HeaderBackButtonProps) => {
 
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
+  const assets = useAssets();
+  if (assets === null) {
+    return null;
+  }
+  const Home = (
+    <Stack.Screen
+      name="Home"
+      key="Home"
+      component={HomeScreen}
+      options={{
+        title: "🎨 Skia",
+      }}
+    />
+  );
+  const E2ETests = (
+    <Stack.Screen
+      key="Tests"
+      name="Tests"
+      options={{
+        title: "🔧 Tests",
+      }}
+    >
+      {(props) => <Tests {...props} assets={assets} />}
+    </Stack.Screen>
+  );
   return (
     <>
       <StatusBar hidden />
       <NavigationContainer linking={linking}>
         <Stack.Navigator screenOptions={{ headerLeft: HeaderLeft }}>
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{
-              title: "🎨 Skia",
-            }}
-          />
-          <Stack.Screen
-            name="Tests"
-            component={Tests}
-            options={{
-              title: "🔧 Tests",
-            }}
-          />
+          {E2E ? [E2ETests, Home] : [Home, E2ETests]}
           <Stack.Screen
             name="Vertices"
             component={Vertices}

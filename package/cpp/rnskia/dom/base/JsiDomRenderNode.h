@@ -18,12 +18,6 @@
 
 namespace RNSkia {
 
-static PropId PropNameOrigin = JsiPropId::get("origin");
-static PropId PropNameOpacity = JsiPropId::get("opacity");
-static PropId PropNameClip = JsiPropId::get("clip");
-static PropId PropNameInvertClip = JsiPropId::get("invertClip");
-static PropId PropNameLayer = JsiPropId::get("layer");
-
 class JsiDomRenderNode : public JsiDomNode {
 public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
@@ -177,20 +171,14 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomNode::defineProperties(container);
 
-    _paintProps = container->defineProperty(std::make_shared<PaintProps>());
+    _paintProps = container->defineProperty<PaintProps>();
 
-    _matrixProp =
-        container->defineProperty(std::make_shared<MatrixProp>(PropNameMatrix));
-    _transformProp = container->defineProperty(
-        std::make_shared<TransformProp>(PropNameTransform));
-    _originProp =
-        container->defineProperty(std::make_shared<PointProp>(PropNameOrigin));
-    _clipProp =
-        container->defineProperty(std::make_shared<ClipProp>(PropNameClip));
-    _invertClip = container->defineProperty(
-        std::make_shared<NodeProp>(PropNameInvertClip));
-    _layerProp =
-        container->defineProperty(std::make_shared<LayerProp>(PropNameLayer));
+    _matrixProp = container->defineProperty<MatrixProp>("matrix");
+    _transformProp = container->defineProperty<TransformProp>("transform");
+    _originProp = container->defineProperty<PointProp>("origin");
+    _clipProp = container->defineProperty<ClipProp>("clip");
+    _invertClip = container->defineProperty<NodeProp>("invertClip");
+    _layerProp = container->defineProperty<LayerProp>("layer");
   }
 
 private:
