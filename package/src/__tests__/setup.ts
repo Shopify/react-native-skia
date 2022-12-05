@@ -35,13 +35,27 @@ export const processResult = (
   ckSurface.getCanvas().clear(Float32Array.of(0, 0, 0, 0));
 };
 
+interface CheckImageOptions {
+  maxPixelDiff?: number;
+  threshold?: number;
+  overwrite?: boolean;
+  mute?: boolean;
+}
+
+const defaultCheckImageOptions = {
+  maxPixelDiff: 0,
+  threshold: 0.1,
+  overwrite: false,
+  mute: false,
+};
+
 export const checkImage = (
   image: SkImage,
   relPath: string,
-  overwrite = false,
-  mute = false,
-  threshold = 0.1
+  opts?: CheckImageOptions
 ) => {
+  const options = { ...defaultCheckImageOptions, ...opts };
+  const { overwrite, threshold, mute, maxPixelDiff } = options;
   const png = image.encodeToBytes();
   const p = path.resolve(__dirname, relPath);
   if (fs.existsSync(p) && !overwrite) {
@@ -61,11 +75,11 @@ export const checkImage = (
       { threshold }
     );
     if (!mute) {
-      if (diffPixelsCount !== 0) {
+      if (diffPixelsCount > maxPixelDiff) {
         fs.writeFileSync(`${p}.test.png`, PNG.sync.write(toTest));
-        // fs.writeFileSync(`${p}-diff-test.png`, PNG.sync.write(diffImage));
+        fs.writeFileSync(`${p}-diff-test.png`, PNG.sync.write(diffImage));
       }
-      expect(diffPixelsCount).toBe(0);
+      expect(diffPixelsCount).toBeLessThanOrEqual(maxPixelDiff);
     }
     return diffPixelsCount;
   } else {
