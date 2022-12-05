@@ -179,8 +179,12 @@ double DrawingContext::getOpacity() {
  Sets the opacity value
  */
 void DrawingContext::setOpacity(double opacity) {
-  getMutablePaint()->setAlphaf(_opacity);
-  _opacity = opacity;
+    auto currentOpacity = opacity;
+    if (_parent != nullptr) {
+      currentOpacity *= _parent->getOpacity();
+    }
+  getMutablePaint()->setAlphaf(currentOpacity);
+  _opacity = currentOpacity;
 }
 
 /**

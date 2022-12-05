@@ -93,7 +93,7 @@ public:
     // Opacity
     if (_opacity->isChanged() || context->isChanged()) {
       if (_opacity->isSet()) {
-        context->setOpacity(context->getOpacity() *
+        context->setOpacity(
                             _opacity->value().getAsNumber());
       } else {
         context->clearOpacity();
