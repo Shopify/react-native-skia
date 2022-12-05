@@ -22,7 +22,7 @@ public:
   /**
    Creates a root drawing context with paint and opacity
    */
-  DrawingContext(std::shared_ptr<SkPaint> paint, double opacity);
+  DrawingContext(std::shared_ptr<SkPaint> paint);
 
   /**
    Initilalizes a new draw context.
@@ -120,7 +120,6 @@ private:
   bool _isChanged = true;
 
   std::shared_ptr<SkPaint> _paint;
-  double _opacity = 1.0f;
 
   SkCanvas *_canvas = nullptr;
   const char *_source;

@@ -102,12 +102,10 @@ public:
     // COLOR
     if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
       auto paint = context->getMutablePaint();
+      auto opacity = context->getOpacity();
       paint->setShader(nullptr);
       paint->setColor(*_color->getDerivedValue());
-      paint->setAlphaf(context->getOpacity() * paint->getColor4f().fA);
-    } else if (context->isChanged()) {
-      auto paint = context->getMutablePaint();
-      paint->setAlphaf(context->getOpacity());
+      paint->setAlphaf(opacity * paint->getColor4f().fA);
     }
 
     // Style
