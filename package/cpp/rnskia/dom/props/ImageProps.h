@@ -68,7 +68,7 @@ public:
 
     auto rect = _rectProp->getDerivedValue() ? *_rectProp->getDerivedValue()
                                              : imageRect;
-    auto fit = _fitProp->isSet() ? _fitProp->value().getAsString() : "none";
+    auto fit = _fitProp->isSet() ? _fitProp->value().getAsString() : "contain";
 
     setDerivedValue(fitRects(fit, imageRect, rect));
   }

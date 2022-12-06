@@ -1,12 +1,11 @@
 import React from "react";
 
 import type { MorphologyImageFilterProps } from "../../../dom/types";
-import type { SkiaProps } from "../../processors";
+import type { SkiaDefaultProps } from "../../processors";
 
-export const Morphology = (props: SkiaProps<MorphologyImageFilterProps>) => {
-  return <skMorphologyImageFilter {...props} />;
-};
-
-Morphology.defaultProps = {
-  operator: "dilate",
+export const Morphology = ({
+  operator = "dilate",
+  ...props
+}: SkiaDefaultProps<MorphologyImageFilterProps, "operator">) => {
+  return <skMorphologyImageFilter operator={operator} {...props} />;
 };

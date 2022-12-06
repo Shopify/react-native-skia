@@ -21,7 +21,7 @@ interface ControlProps {
   progress: SkiaValue<number>;
   label: string;
   children: ReactNode;
-  active: boolean;
+  active?: boolean;
   font: SkFont;
 }
 
@@ -32,7 +32,7 @@ export const Control = ({
   font,
   label,
   progress,
-  active,
+  active = false,
 }: ControlProps) => {
   const labelWidth = font.getTextWidth(label);
   return (
@@ -80,9 +80,4 @@ export const Control = ({
       </Group>
     </Group>
   );
-};
-
-Control.defaultProps = {
-  progress: 0,
-  active: false,
 };
