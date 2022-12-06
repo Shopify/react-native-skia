@@ -23,7 +23,7 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
     _circleProp = container->defineProperty<CircleProp>();
-    _radiusProp =
+    _radiusProp = container->defineProperty<NodeProp>("r");
     _radiusProp->require();
   }
 
