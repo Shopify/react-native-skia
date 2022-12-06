@@ -208,27 +208,19 @@ export abstract class JsiRenderNode<P extends GroupProps>
     const { invertClip, layer, matrix, transform } = this.props;
     const { canvas } = parentCtx;
 
-    const opacity =
-      this.props.opacity !== undefined
-        ? parentCtx.paint.getAlphaf() * this.props.opacity
-        : parentCtx.paint.getAlphaf();
-
     if (
       this.paintCache === null ||
       this.paintCache.parent !== parentCtx.paint
     ) {
       const paintCtx = this.getPaintCtx();
-      if (paintCtx) {
-        paintCtx.opacity = opacity;
-      }
       const child = paintCtx
-        ? concatPaint(parentCtx.paint, paintCtx)
+        ? concatPaint(parentCtx.paint.copy(), paintCtx)
         : parentCtx.paint;
       this.paintCache = { parent: parentCtx.paint, child };
     }
     const paint = this.paintCache.child;
     // TODO: can we only recreate a new context here if needed?
-    const ctx = { ...parentCtx, opacity, paint };
+    const ctx = { ...parentCtx, paint };
     const hasTransform = matrix !== undefined || transform !== undefined;
     const hasClip =
       this.clipRect !== undefined ||
@@ -270,7 +262,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
 }
 
 const concatPaint = (
-  parent: SkPaint,
+  paint: SkPaint,
   {
     color,
     strokeWidth,
@@ -288,10 +280,14 @@ const concatPaint = (
     style,
   }: PaintContext
 ) => {
-  const paint = parent.copy();
+  if (opacity !== undefined) {
+    paint.setAlphaf(paint.getAlphaf() * opacity);
+  }
   if (color !== undefined) {
+    const currentOpacity = paint.getAlphaf();
     paint.setShader(null);
     paint.setColor(color);
+    paint.setAlphaf(currentOpacity * paint.getAlphaf());
   }
   if (strokeWidth !== undefined) {
     paint.setStrokeWidth(strokeWidth);
@@ -329,6 +325,5 @@ const concatPaint = (
   if (style !== undefined) {
     paint.setStyle(style);
   }
-  paint.setAlphaf(paint.getAlphaf() * (opacity ?? 1));
   return paint;
 };

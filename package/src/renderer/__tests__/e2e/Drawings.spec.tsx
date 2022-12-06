@@ -50,7 +50,9 @@ describe("Drawings", () => {
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
       </Group>
     );
-    const diff = checkImage(image, "snapshots/drawings/blur.png", false, true);
+    const diff = checkImage(image, "snapshots/drawings/blur.png", {
+      mute: true,
+    });
     expect(diff).not.toBe(0);
   });
 

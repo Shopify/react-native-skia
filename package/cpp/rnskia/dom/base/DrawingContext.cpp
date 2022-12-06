@@ -2,10 +2,9 @@
 
 namespace RNSkia {
 
-DrawingContext::DrawingContext(std::shared_ptr<SkPaint> paint, double opacity)
+DrawingContext::DrawingContext(std::shared_ptr<SkPaint> paint)
     : DrawingContext("root") {
   _paint = paint;
-  _opacity = opacity;
 }
 
 DrawingContext::DrawingContext(DrawingContext *parent, const char *source)
@@ -43,7 +42,8 @@ std::string DrawingContext::getDebugDescription() {
       v += " blendMode:" + std::to_string(static_cast<size_t>(blendMode));
     }
 
-    v += " opacity:" + std::to_string(_opacity);
+    auto opacity = _paint->getAlphaf();
+    v += " opacity:" + std::to_string(opacity);
 
     if (_paint->getPathEffect() != nullptr) {
       v += " [PathEffect]";
@@ -148,7 +148,6 @@ std::shared_ptr<SkPaint> DrawingContext::getMutablePaint() {
   if (_paint == nullptr) {
     auto parentPaint = _parent->getPaint();
     _paint = std::make_shared<SkPaint>(*parentPaint);
-    _opacity = _parent->getOpacity();
   }
   // Calling the getMutablePaint accessor implies that the paint
   // is about to be mutatet and will therefore invalidate
@@ -165,36 +164,6 @@ void DrawingContext::setMutablePaint(std::shared_ptr<SkPaint> paint) {
   _paint = paint;
 }
 
-/**
- Getd the opacity value
- */
-double DrawingContext::getOpacity() {
-  if (_paint == nullptr) {
-    return _parent->getOpacity();
-  }
-  return _opacity;
-}
-
-/**
- Sets the opacity value
- */
-void DrawingContext::setOpacity(double opacity) {
-  getMutablePaint()->setAlphaf(_opacity);
-  _opacity = opacity;
-}
-
-/**
- Clears the opacity value
- */
-void DrawingContext::clearOpacity() {
-  if (_parent != nullptr) {
-    _opacity = _parent->getOpacity();
-  } else {
-    _opacity = 1.0;
-  }
-  markChildrenAsChanged();
-}
-
 float DrawingContext::getScaledWidth() {
   if (_parent != nullptr) {
     return _parent->getScaledWidth();
@@ -208,6 +177,8 @@ float DrawingContext::getScaledHeight() {
   }
   return _scaledHeight;
 }
+
+DrawingContext *DrawingContext::getParent() { return _parent; }
 
 void DrawingContext::setScaledWidth(float v) { _scaledWidth = v; }
 void DrawingContext::setScaledHeight(float v) { _scaledHeight = v; }

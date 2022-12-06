@@ -22,7 +22,7 @@ public:
   /**
    Creates a root drawing context with paint and opacity
    */
-  DrawingContext(std::shared_ptr<SkPaint> paint, double opacity);
+  explicit DrawingContext(std::shared_ptr<SkPaint> paint);
 
   /**
    Initilalizes a new draw context.
@@ -87,21 +87,6 @@ public:
    */
   void setMutablePaint(std::shared_ptr<SkPaint> paint);
 
-  /**
-   Getd the opacity value
-   */
-  double getOpacity();
-
-  /**
-   Sets the opacity value
-   */
-  void setOpacity(double opacity);
-
-  /**
-   Clears the opacity
-   */
-  void clearOpacity();
-
   float getScaledWidth();
 
   float getScaledHeight();
@@ -112,6 +97,8 @@ public:
   void setRequestRedraw(std::function<void()> &&requestRedraw);
   const std::function<void()> &getRequestRedraw();
 
+  DrawingContext *getParent();
+
 private:
   explicit DrawingContext(const char *source);
 
@@ -120,7 +107,6 @@ private:
   bool _isChanged = true;
 
   std::shared_ptr<SkPaint> _paint;
-  double _opacity = 1.0f;
 
   SkCanvas *_canvas = nullptr;
   const char *_source;
