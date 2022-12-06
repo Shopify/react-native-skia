@@ -24,8 +24,6 @@ protected:
     JsiDomDrawingNode::defineProperties(container);
     _circleProp = container->defineProperty<CircleProp>();
     _radiusProp = container->defineProperty<NodeProp>("r");
-
-    _circleProp->require();
     _radiusProp->require();
   }
 
