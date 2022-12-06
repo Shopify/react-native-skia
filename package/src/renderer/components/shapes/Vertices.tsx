@@ -1,12 +1,11 @@
 import React from "react";
 
-import type { SkiaProps } from "../../processors";
+import type { SkiaDefaultProps } from "../../processors";
 import type { VerticesProps } from "../../../dom/types";
 
-export const Vertices = (props: SkiaProps<VerticesProps>) => {
-  return <skVertices {...props} />;
-};
-
-Vertices.defaultProps = {
-  mode: "triangles",
+export const Vertices = ({
+  mode = "triangles",
+  ...props
+}: SkiaDefaultProps<VerticesProps, "mode">) => {
+  return <skVertices mode={mode} {...props} />;
 };

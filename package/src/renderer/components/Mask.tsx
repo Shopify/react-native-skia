@@ -6,13 +6,18 @@ import { LumaColorFilter } from "./colorFilters/LumaColorFilter";
 import { Paint } from "./Paint";
 
 interface MaskProps {
-  mode: "luminance" | "alpha";
-  clip: boolean;
+  mode?: "luminance" | "alpha";
+  clip?: boolean;
   mask: ReactNode | ReactNode[];
   children: ReactNode | ReactNode[];
 }
 
-export const Mask = ({ children, mask, mode, clip }: MaskProps) => {
+export const Mask = ({
+  children,
+  mask,
+  mode = "alpha",
+  clip = true,
+}: MaskProps) => {
   return (
     <Group layer>
       <Group
@@ -28,9 +33,4 @@ export const Mask = ({ children, mask, mode, clip }: MaskProps) => {
       <Group blendMode="srcIn">{children}</Group>
     </Group>
   );
-};
-
-Mask.defaultProps = {
-  mode: "alpha",
-  clip: true,
 };

@@ -76,10 +76,17 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (_x->isSet() && _y->isSet() && _width->isSet() && _height->isSet()) {
-      setDerivedValue(SkRect::MakeXYWH(
-          _x->value().getAsNumber(), _y->value().getAsNumber(),
-          _width->value().getAsNumber(), _height->value().getAsNumber()));
+    if (_width->isSet() && _height->isSet()) {
+      auto x = 0.0;
+      auto y = 0.0;
+      if (_x->isSet()) {
+        x = _x->value().getAsNumber();
+      }
+      if (_y->isSet()) {
+        y = _y->value().getAsNumber();
+      }
+      setDerivedValue(SkRect::MakeXYWH(x, y, _width->value().getAsNumber(),
+                                       _height->value().getAsNumber()));
     }
   }
 

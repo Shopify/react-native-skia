@@ -37,21 +37,21 @@ export interface ChildrenProps {
 }
 
 export interface RectCtor {
-  x: number;
-  y: number;
+  x?: number;
+  y?: number;
   width: number;
   height: number;
 }
 
 export interface RRectCtor extends RectCtor {
-  r: Radius;
+  r?: Radius;
 }
 
 export type RectDef = RectCtor | { rect: SkRect };
 export type RRectDef = RRectCtor | { rect: SkRRect };
 
 export interface PointCircleDef {
-  c: Vector;
+  c?: Vector;
   r: number;
 }
 
