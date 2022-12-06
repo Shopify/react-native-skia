@@ -92,22 +92,31 @@ public:
 
     // Opacity
     if (_opacity->isChanged() || context->isChanged()) {
+      auto parent = context->getParent();
+      auto paint = context->getMutablePaint();
       if (_opacity->isSet()) {
-        context->setOpacity(_opacity->value().getAsNumber());
+        auto currentOpacity = _opacity->value().getAsNumber();
+        auto parent = context->getParent();
+        if (parent != nullptr) {
+          currentOpacity *= parent->getPaint()->getAlphaf();
+        }
+        paint->setAlphaf(currentOpacity);
       } else {
-        context->clearOpacity();
+        if (parent != nullptr) {
+          paint->setAlphaf(parent->getPaint()->getAlphaf());
+        } else {
+          paint->setAlphaf(1.0);
+        }
       }
     }
 
     // COLOR
     if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
       auto paint = context->getMutablePaint();
+      auto opacity = paint->getAlphaf();
       paint->setShader(nullptr);
       paint->setColor(*_color->getDerivedValue());
-      paint->setAlphaf(context->getOpacity() * paint->getColor4f().fA);
-    } else if (context->isChanged()) {
-      auto paint = context->getMutablePaint();
-      paint->setAlphaf(context->getOpacity());
+      paint->setAlphaf(opacity * paint->getColor4f().fA);
     }
 
     // Style
