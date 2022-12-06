@@ -30,7 +30,7 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (!_imageProp->isSet() &&
+    if (!_imageProp->isSet() ||
         _imageProp->value().getType() != PropType::HostObject) {
       throw std::runtime_error("Expected SkImage object for the " +
                                std::string(getName()) + " property.");
