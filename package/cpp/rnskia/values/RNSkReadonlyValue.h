@@ -142,12 +142,8 @@ protected:
    @param runtime Current JS Runtime
    */
   void notifyListeners(jsi::Runtime &runtime) {
-    std::unordered_map<long, std::function<void(jsi::Runtime &)>> tmp;
-    {
-      std::lock_guard<std::mutex> lock(_mutex);
-      tmp.insert(_listeners.cbegin(), _listeners.cend());
-    }
-    for (const auto &listener : tmp) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    for (const auto &listener : _listeners) {
       listener.second(runtime);
     }
   }
