@@ -9,7 +9,7 @@ export type SkShader = SkJSIInstance<"Shader">;
 
 export type UniformValue = number | Vector | readonly number[];
 
-export type Uniform = UniformValue | readonly UniformValue[];
+export type Uniform = UniformValue | readonly UniformValue[] | Float32Array;
 
 export interface Uniforms {
   [name: string]: Uniform;
@@ -36,10 +36,12 @@ export const processUniforms = (
     .fill(0)
     .flatMap((_, i) => {
       const name = source.getUniformName(i);
-      const value = uniforms[name];
-      if (value === undefined) {
+      const rawValue = uniforms[name];
+      if (rawValue === undefined) {
         throw new Error(`No value specified for uniform ${name}`);
       }
+      const value =
+        rawValue instanceof Float32Array ? Array.from(rawValue) : rawValue;
       const result = Array.isArray(value)
         ? value.flatMap(processValue)
         : processValue(value as UniformValue);

@@ -117,6 +117,10 @@ public:
     return result;
   }
 
+  JSI_HOST_FUNCTION(source) {
+    return jsi::String::createFromAscii(runtime, getObject()->source());
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeEffect, makeShader),
                        JSI_EXPORT_FUNC(JsiSkRuntimeEffect,
                                        makeShaderWithChildren),
@@ -124,7 +128,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkRuntimeEffect,
                                        getUniformFloatCount),
                        JSI_EXPORT_FUNC(JsiSkRuntimeEffect, getUniformName),
-                       JSI_EXPORT_FUNC(JsiSkRuntimeEffect, getUniform))
+                       JSI_EXPORT_FUNC(JsiSkRuntimeEffect, getUniform),
+                       JSI_EXPORT_FUNC(JsiSkRuntimeEffect, source))
 
   JsiSkRuntimeEffect(std::shared_ptr<RNSkPlatformContext> context,
                      sk_sp<SkRuntimeEffect> rt)
@@ -206,7 +211,7 @@ private:
         const std::size_t offset = reu.slot + j;
         float fValue = jsiUniforms.getValueAtIndex(runtime, offset).asNumber();
         int iValue = static_cast<int>(fValue);
-        auto value = reu.isInteger ? iValue : fValue;
+        auto value = reu.isInteger ? SkBits2Float(iValue) : fValue;
         memcpy(SkTAddOffset<void>(uniforms->writable_data(),
                                   offset * sizeof(value)),
                &value, sizeof(value));

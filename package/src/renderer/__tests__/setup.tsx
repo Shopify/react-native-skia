@@ -261,6 +261,11 @@ const serializeSkOjects = (obj: any): any => {
         size: obj.getSize(),
         name: assets.get(obj)!,
       };
+    } else if (obj.__typename__ === "RuntimeEffect") {
+      return {
+        __typename__: "RuntimeEffect",
+        source: obj.source(),
+      };
     }
   }
   return obj;

@@ -11,8 +11,12 @@ export class JsiSkRuntimeEffect
   extends HostObject<RuntimeEffect, "RuntimeEffect">
   implements SkRuntimeEffect
 {
-  constructor(CanvasKit: CanvasKit, ref: RuntimeEffect) {
+  constructor(CanvasKit: CanvasKit, ref: RuntimeEffect, private sksl: string) {
     super(CanvasKit, ref, "RuntimeEffect");
+  }
+
+  source() {
+    return this.sksl;
   }
 
   makeShader(uniforms: number[], localMatrix?: SkMatrix) {
