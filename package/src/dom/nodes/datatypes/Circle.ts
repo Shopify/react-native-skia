@@ -10,5 +10,5 @@ export const processCircle = (Skia: Skia, def: CircleDef) => {
   if (isCircleScalarDef(def)) {
     return { c: Skia.Point(def.cx, def.cy), r: def.r };
   }
-  return def;
+  return { ...def, c: def.c ?? { x: 0, y: 0 } };
 };

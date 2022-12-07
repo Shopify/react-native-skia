@@ -30,7 +30,8 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (_imageProp->value().getType() != PropType::HostObject) {
+    if (!_imageProp->isSet() ||
+        _imageProp->value().getType() != PropType::HostObject) {
       throw std::runtime_error("Expected SkImage object for the " +
                                std::string(getName()) + " property.");
     }
@@ -67,7 +68,7 @@ public:
 
     auto rect = _rectProp->getDerivedValue() ? *_rectProp->getDerivedValue()
                                              : imageRect;
-    auto fit = _fitProp->isSet() ? _fitProp->value().getAsString() : "none";
+    auto fit = _fitProp->isSet() ? _fitProp->value().getAsString() : "contain";
 
     setDerivedValue(fitRects(fit, imageRect, rect));
   }

@@ -9,6 +9,11 @@
 
 namespace RNSkia {
 
+static PropId PropName0 = JsiPropId::get("0");
+static PropId PropName1 = JsiPropId::get("1");
+static PropId PropName2 = JsiPropId::get("2");
+static PropId PropName3 = JsiPropId::get("3");
+
 class ColorProp : public DerivedProp<SkColor> {
 public:
   explicit ColorProp(PropId name) : DerivedProp<SkColor>() {
@@ -28,10 +33,10 @@ public:
   static SkColor parseColorValue(const JsiValue &color) {
     if (color.getType() == PropType::Object) {
       // Float array
-      auto r = color.getValue(JsiPropId::get("0"));
-      auto g = color.getValue(JsiPropId::get("1"));
-      auto b = color.getValue(JsiPropId::get("2"));
-      auto a = color.getValue(JsiPropId::get("3"));
+      auto r = color.getValue(PropName0);
+      auto g = color.getValue(PropName1);
+      auto b = color.getValue(PropName2);
+      auto a = color.getValue(PropName3);
       return SkColorSetARGB(a.getAsNumber() * 255.0f, r.getAsNumber() * 255.0f,
                             g.getAsNumber() * 255.0f, b.getAsNumber() * 255.0f);
 

@@ -26,12 +26,9 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
 
-    _textBlobProp = container->defineProperty(
-        std::make_shared<TextBlobProp>(JsiPropId::get("blob")));
-    _xProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("x")));
-    _yProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("y")));
+    _textBlobProp = container->defineProperty<TextBlobProp>("blob");
+    _xProp = container->defineProperty<NodeProp>("x");
+    _yProp = container->defineProperty<NodeProp>("y");
 
     _textBlobProp->require();
     _xProp->require();

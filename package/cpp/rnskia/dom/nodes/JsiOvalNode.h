@@ -15,15 +15,13 @@ public:
 
 protected:
   void draw(DrawingContext *context) override {
-    RNSkLogger::logToConsole(context->getDebugDescription());
     context->getCanvas()->drawOval(*_rectProp->getDerivedValue(),
                                    *context->getPaint());
   }
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _rectProp =
-        container->defineProperty(std::make_shared<RectProps>(PropNameRect));
+    _rectProp = container->defineProperty<RectProps>("rect");
     _rectProp->require();
   }
 

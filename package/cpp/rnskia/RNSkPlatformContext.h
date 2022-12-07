@@ -178,12 +178,8 @@ public:
     if (!_isValid) {
       return;
     }
-    std::unordered_map<size_t, std::function<void(bool)>> tmp;
-    {
-      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-      tmp.insert(_drawCallbacks.cbegin(), _drawCallbacks.cend());
-    }
-    for (auto it = tmp.begin(); it != tmp.end(); it++) {
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
       it->second(invalidated);
     }
   }

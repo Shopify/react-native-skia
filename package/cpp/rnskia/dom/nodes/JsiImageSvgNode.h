@@ -28,10 +28,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _svgDomProp = container->defineProperty(
-        std::make_shared<SvgProp>(JsiPropId::get("svg")));
-    _rectProp = container->defineProperty(
-        std::make_shared<RectProps>(JsiPropId::get("rect")));
+    _svgDomProp = container->defineProperty<SvgProp>("svg");
+    _rectProp = container->defineProperty<RectProps>("rect");
 
     _svgDomProp->require();
   }

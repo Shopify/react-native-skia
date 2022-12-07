@@ -14,7 +14,8 @@ export class ImageNode extends JsiDrawingNode<
   }
 
   deriveProps() {
-    const { image, fit } = this.props;
+    const { image } = this.props;
+    const fit = this.props.fit ?? "contain";
     const rect = processRect(this.Skia, this.props);
     const { src, dst } = fitRects(
       fit,

@@ -18,6 +18,6 @@ export class JsiSkRuntimeEffectFactory
     if (re === null) {
       return null;
     }
-    return new JsiSkRuntimeEffect(this.CanvasKit, re);
+    return new JsiSkRuntimeEffect(this.CanvasKit, re, sksl);
   }
 }

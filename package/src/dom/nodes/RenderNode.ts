@@ -141,7 +141,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
       opacity !== undefined ||
       antiAlias !== undefined
     ) {
-      ctx = {};
+      ctx = { opacity: 1 };
       if (color !== undefined) {
         ctx.color = this.Skia.Color(color);
       }
@@ -208,24 +208,19 @@ export abstract class JsiRenderNode<P extends GroupProps>
     const { invertClip, layer, matrix, transform } = this.props;
     const { canvas } = parentCtx;
 
-    const opacity =
-      this.props.opacity !== undefined
-        ? parentCtx.opacity * this.props.opacity
-        : parentCtx.opacity;
-
     if (
       this.paintCache === null ||
       this.paintCache.parent !== parentCtx.paint
     ) {
       const paintCtx = this.getPaintCtx();
       const child = paintCtx
-        ? concatPaint(parentCtx.paint, paintCtx, parentCtx.opacity)
+        ? concatPaint(parentCtx.paint.copy(), paintCtx)
         : parentCtx.paint;
       this.paintCache = { parent: parentCtx.paint, child };
     }
     const paint = this.paintCache.child;
     // TODO: can we only recreate a new context here if needed?
-    const ctx = { ...parentCtx, opacity, paint };
+    const ctx = { ...parentCtx, paint };
     const hasTransform = matrix !== undefined || transform !== undefined;
     const hasClip =
       this.clipRect !== undefined ||
@@ -267,7 +262,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
 }
 
 const concatPaint = (
-  parent: SkPaint,
+  paint: SkPaint,
   {
     color,
     strokeWidth,
@@ -278,23 +273,21 @@ const concatPaint = (
     imageFilter,
     maskFilter,
     pathEffect,
-    opacity: alpha,
+    opacity,
     strokeCap,
     strokeJoin,
     strokeMiter,
     style,
-  }: PaintContext,
-  opacity: number
+  }: PaintContext
 ) => {
-  const paint = parent.copy();
+  if (opacity !== undefined) {
+    paint.setAlphaf(paint.getAlphaf() * opacity);
+  }
   if (color !== undefined) {
+    const currentOpacity = paint.getAlphaf();
     paint.setShader(null);
-    color[3] *= opacity;
     paint.setColor(color);
-  } else {
-    const cl = paint.getColor();
-    cl[3] = opacity;
-    paint.setColor(cl);
+    paint.setAlphaf(currentOpacity * paint.getAlphaf());
   }
   if (strokeWidth !== undefined) {
     paint.setStrokeWidth(strokeWidth);
@@ -319,9 +312,6 @@ const concatPaint = (
   }
   if (pathEffect !== undefined) {
     paint.setPathEffect(pathEffect);
-  }
-  if (alpha !== undefined) {
-    paint.setAlphaf(alpha * opacity);
   }
   if (strokeCap !== undefined) {
     paint.setStrokeCap(strokeCap);

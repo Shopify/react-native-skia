@@ -15,12 +15,7 @@
 
 namespace RNSkia {
 
-static PropId PropNamePath = JsiPropId::get("path");
-static PropId PropNameStart = JsiPropId::get("start");
-static PropId PropNameEnd = JsiPropId::get("end");
-static PropId PropNameFillType = JsiPropId::get("fillType");
 static PropId PropNameMiterLimit = JsiPropId::get("miter_limit");
-static PropId PropNameStroke = JsiPropId::get("stroke");
 static PropId PropNamePrecision = JsiPropId::get("precision");
 
 class JsiPathNode : public JsiDomDrawingNode,
@@ -132,16 +127,11 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _pathProp =
-        container->defineProperty(std::make_shared<PathProp>(PropNamePath));
-    _startProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameStart));
-    _endProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameEnd));
-    _fillTypeProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameFillType));
-    _strokeOptsProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameStroke));
+    _pathProp = container->defineProperty<PathProp>("path");
+    _startProp = container->defineProperty<NodeProp>("start");
+    _endProp = container->defineProperty<NodeProp>("end");
+    _fillTypeProp = container->defineProperty<NodeProp>("fillType");
+    _strokeOptsProp = container->defineProperty<NodeProp>("stroke");
 
     _pathProp->require();
   }
@@ -173,7 +163,7 @@ private:
 class StrokeOptsProps : public BaseDerivedProp {
 public:
   StrokeOptsProps() : BaseDerivedProp() {
-    _strokeProp = addProperty(std::make_shared<NodeProp>(PropNameStroke));
+    _strokeProp = addProperty(std::make_shared<NodeProp>("stroke"));
   }
 
 private:
