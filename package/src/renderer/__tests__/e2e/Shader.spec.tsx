@@ -123,9 +123,9 @@ half4 main(float2 p) {
           source={source}
           uniforms={{
             position: [0, 0, width, height],
-            colors: ["#dafb61", "#61DAFB", "#fb61da", "#61fbcf"]
-              .map(Skia.Color)
-              .map(([r, g, b, a]) => [r, g, b, a]),
+            colors: ["#dafb61", "#61DAFB", "#fb61da", "#61fbcf"].map(
+              Skia.Color
+            ),
           }}
         />
         <Fill />
