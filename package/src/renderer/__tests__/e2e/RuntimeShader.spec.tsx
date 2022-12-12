@@ -61,10 +61,7 @@ half4 main(float2 xy) {
                   uniforms={{
                     scale: 0.3,
                     center: { x: (width * 3) / 2, y: (height * 3) / 2 },
-                    colors: [
-                      [1, 0, 0, 1], // red
-                      [0, 1, 0, 1], // green
-                    ],
+                    colors: [Skia.Color("red"), Skia.Color("rgb(0, 255, 0)")],
                   }}
                 />
               </Paint>
