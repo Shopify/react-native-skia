@@ -19,8 +19,6 @@
 
 namespace RNSkia {
 
-static PropId PropNameCurrent = JsiPropId::get("current");
-
 class PaintProp : public DerivedProp<SkPaint> {
 public:
   explicit PaintProp(PropId name) : DerivedProp<SkPaint>() {
@@ -39,20 +37,6 @@ public:
         } else {
           throw std::runtime_error("Expected SkPaint object, got unknown "
                                    "object when reading paint property.");
-        }
-      } else if (_paintProp->value().getType() == PropType::Object) {
-        // We have a JS object - is it a ref?
-        auto ref = _paintProp->value().getValue(PropNameCurrent);
-        if (ref.getType() == PropType::HostObject) {
-          auto ptr = ref.getAs<JsiSkPaint>();
-          if (ptr != nullptr) {
-            // Update the local paint for the current context
-            setDerivedValue(ptr->getObject());
-          } else {
-            throw std::runtime_error(
-                "Expected reference to a SkPaint object, got unknown object "
-                "when reading paint property.");
-          }
         }
       } else {
         setDerivedValue(nullptr);
