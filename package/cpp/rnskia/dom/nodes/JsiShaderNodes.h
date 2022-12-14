@@ -135,7 +135,7 @@ protected:
           _matrix.set(SkMatrix::kMPersp0, lm->get(SkMatrix::kMPersp0));
           _matrix.set(SkMatrix::kMPersp1, lm->get(SkMatrix::kMPersp1));
           _matrix.set(SkMatrix::kMPersp2, lm->get(SkMatrix::kMPersp2));
-          
+
           _matrix.preTranslate(m3.x(), m3.y());
           _matrix.preScale(m3.width(), m3.height());
         }
