@@ -59,20 +59,22 @@ protected:
                 ", end: " + std::to_string(_endProp->value().getAsNumber()));
           }
           filteredPath.swap(filteredPath);
-          _path = std::make_shared<SkPath>(filteredPath);
+          _path = std::make_shared<const SkPath>(filteredPath);
         } else if (hasStartOffset || hasEndOffset) {
           throw std::runtime_error(
               "Failed trimming path with parameters start: " +
               std::to_string(_startProp->value().getAsNumber()) +
               ", end: " + std::to_string(_endProp->value().getAsNumber()));
         } else {
-          _path = std::make_shared<SkPath>(filteredPath);
+          _path = std::make_shared<const SkPath>(filteredPath);
         }
 
         // Set fill style
         if (_fillTypeProp->isSet()) {
           auto fillType = _fillTypeProp->value().getAsString();
-          _path->setFillType(getFillTypeFromStringValue(fillType));
+          auto p = std::make_shared<SkPath>(*_path.get());
+          p->setFillType(getFillTypeFromStringValue(fillType));
+          _path = std::const_pointer_cast<const SkPath>(p);
         }
 
         // do we have a special paint here?
@@ -105,9 +107,14 @@ protected:
             precision = opts.getValue(PropNamePrecision).getAsNumber();
           }
 
-          if (!strokePaint.getFillPath(*_path.get(), _path.get(), nullptr,
+          // _path is const so we can't mutate it directly, let's replace the
+          // path like this:
+          auto p = std::make_shared<SkPath>(*_path.get());
+          if (!strokePaint.getFillPath(*_path.get(), p.get(), nullptr,
                                        precision)) {
             _path = nullptr;
+          } else {
+            _path = std::const_pointer_cast<const SkPath>(p);
           }
         }
 
@@ -157,7 +164,7 @@ private:
   NodeProp *_fillTypeProp;
   NodeProp *_strokeOptsProp;
 
-  std::shared_ptr<SkPath> _path;
+  std::shared_ptr<const SkPath> _path;
 };
 
 class StrokeOptsProps : public BaseDerivedProp {

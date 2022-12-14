@@ -116,7 +116,7 @@ public:
   /**
   Returns the derived value
    */
-  std::shared_ptr<T> getDerivedValue() { return _derivedValue; }
+  std::shared_ptr<const T> getDerivedValue() { return _derivedValue; }
 
   /**
    Returns true if is optional and one of the child props has a value, or all
@@ -128,7 +128,7 @@ protected:
   /**
    Set derived value from sub classes
    */
-  void setDerivedValue(std::shared_ptr<T> value) {
+  void setDerivedValue(std::shared_ptr<const T> value) {
     setIsChanged(_derivedValue != value);
     _derivedValue = value;
   }
@@ -138,11 +138,11 @@ protected:
    */
   void setDerivedValue(const T &&value) {
     setIsChanged(true);
-    _derivedValue = std::make_shared<T>(std::move(value));
+    _derivedValue = std::make_shared<const T>(std::move(value));
   }
 
 private:
-  std::shared_ptr<T> _derivedValue;
+  std::shared_ptr<const T> _derivedValue;
 };
 
 /**

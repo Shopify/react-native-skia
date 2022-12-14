@@ -40,9 +40,9 @@ public:
   bool hasColors() { return _colorsProp->isSet(); }
 
   void updateDerivedValue() override {
-    SkVertices::VertexMode *vertextMode =
+    const SkVertices::VertexMode *vertextMode =
         _vertexModeProp->getDerivedValue().get();
-    std::vector<SkColor> *colors = _colorsProp->getDerivedValue().get();
+    const std::vector<SkColor> *colors = _colorsProp->getDerivedValue().get();
     auto vertices = _verticesProp->getDerivedValue();
     auto textures = _texturesProp->getDerivedValue();
     auto indices = _indicesProp->getDerivedValue();
