@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Platform, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
-import { parseNode } from "./deserialize";
+import { parseNode, parseProps } from "./deserialize";
 import { useClient } from "./useClient";
 
 export const E2E = process.env.E2E === "true";
@@ -31,8 +31,11 @@ export const Tests = ({ assets }: TestsProps) => {
           client.send(
             JSON.stringify(
               // eslint-disable-next-line no-eval
-              eval(`(function Main(){const {Skia} = this;${tree.code}})`).call({
+              eval(
+                `(function Main(){const {Skia, ctx} = this;${tree.code}})`
+              ).call({
                 Skia,
+                ctx: parseProps(tree.ctx, assets),
               })
             )
           );
