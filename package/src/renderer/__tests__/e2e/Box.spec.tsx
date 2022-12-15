@@ -24,7 +24,7 @@ describe("Box", () => {
         </Box>
       </>
     );
-    checkImage(img, docPath("Box/simple-box-shadow.png"));
+    checkImage(img, docPath("box/simple-box-shadow.png"));
   });
   it("should render negative values", async () => {
     const { rect } = importSkia();
@@ -43,7 +43,7 @@ describe("Box", () => {
         </Box>
       </FitBox>
     );
-    checkImage(img, docPath("Box/box-shadow.png"), { overwrite: true });
+    checkImage(img, docPath("box/box-shadow.png"), { overwrite: true });
   });
   it("should draw a box with red stroke", async () => {
     const { width } = surface;
@@ -59,6 +59,6 @@ describe("Box", () => {
         />
       </>
     );
-    checkImage(img, docPath("Box/box-stroke.png"));
+    checkImage(img, docPath("box/box-stroke.png"));
   });
 });
