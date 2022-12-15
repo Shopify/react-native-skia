@@ -81,8 +81,8 @@ protected:
   }
 
 private:
-  SkRRect inflate(const SkRRect &box, SkScalar dx, SkScalar dy, size_t tx = 0,
-                  size_t ty = 0) {
+  SkRRect inflate(const SkRRect &box, SkScalar dx, SkScalar dy, SkScalar tx = 0,
+                  SkScalar ty = 0) {
     return SkRRect::MakeRectXY(
         SkRect::MakeXYWH(box.rect().x() - dx + tx, box.rect().y() - dy + ty,
                          box.rect().width() + 2 * dx,
@@ -90,8 +90,8 @@ private:
         box.getSimpleRadii().x() + dx, box.getSimpleRadii().y() + dy);
   }
 
-  SkRRect deflate(const SkRRect &box, SkScalar dx, SkScalar dy, size_t tx = 0,
-                  size_t ty = 0) {
+  SkRRect deflate(const SkRRect &box, SkScalar dx, SkScalar dy, SkScalar tx = 0,
+                  SkScalar ty = 0) {
     return inflate(box, -dx, -dy, tx, ty);
   }
 
