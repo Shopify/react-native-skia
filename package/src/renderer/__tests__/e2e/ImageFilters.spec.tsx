@@ -16,7 +16,7 @@ describe("Test Image Filters", () => {
   itRunsNodeOnly(
     "Should display the text the same way everywhere",
     async () => {
-      const font = fonts["Roboto-Medium"];
+      const font = fonts.RobotoMedium;
       const { width } = surface;
       const x = width / 8;
       const image = await surface.draw(
@@ -29,7 +29,7 @@ describe("Test Image Filters", () => {
     }
   );
   itRunsNodeOnly("Should change the text morphology", async () => {
-    const font = fonts["Roboto-Medium"];
+    const font = fonts.RobotoMedium;
     const { width } = surface;
     const x = width / 8;
     const y = x;

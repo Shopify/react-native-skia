@@ -32,7 +32,11 @@ declare global {
 export let surface: TestingSurface;
 const assets = new Map<SkImage | SkFont, string>();
 export let images: { oslo: SkImage };
-export let fonts: { "Roboto-Medium": SkFont };
+export let fonts: {
+  RobotoMedium: SkFont;
+  NotoColorEmoji: SkFont;
+  NotoSansSCRegular: SkFont;
+};
 
 beforeAll(async () => {
   await LoadSkiaWeb();
@@ -41,12 +45,25 @@ beforeAll(async () => {
   global.SkiaValueApi = ValueApi;
   surface = E2E ? new RemoteSurface() : new LocalSurface();
   const { fontSize } = surface;
-  const font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf", fontSize);
+  const NotoSansSCRegular = loadFont(
+    "skia/__tests__/assets/NotoSansSC-Regular.otf",
+    fontSize
+  );
+  const NotoColorEmoji = loadFont(
+    "skia/__tests__/assets/NotoColorEmoji.ttf",
+    fontSize
+  );
+  const RobotoMedium = loadFont(
+    "skia/__tests__/assets/Roboto-Medium.ttf",
+    fontSize
+  );
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
   images = { oslo };
-  fonts = { "Roboto-Medium": font };
+  fonts = { RobotoMedium, NotoColorEmoji, NotoSansSCRegular };
   assets.set(oslo, "oslo");
-  assets.set(font, "Roboto-Medium");
+  assets.set(RobotoMedium, "RobotoMedium");
+  assets.set(NotoColorEmoji, "NotoColorEmoji");
+  assets.set(NotoSansSCRegular, "NotoSansSCRegular");
 });
 
 export const wait = (ms: number) =>
@@ -288,8 +305,10 @@ const serializeNode = (node: Node<any>): SerializedNode => {
   };
 };
 
+type EvalContext = Record<string, any>;
+
 interface TestingSurface {
-  eval(code: string): Promise<any>;
+  eval(code: string, ctx?: EvalContext): Promise<any>;
   draw(node: ReactNode): Promise<SkImage>;
   width: number;
   height: number;
@@ -301,11 +320,12 @@ class LocalSurface implements TestingSurface {
   readonly height = 256;
   readonly fontSize = 32;
 
-  eval(code: string): Promise<any> {
+  eval(code: string, ctx: EvalContext = {}): Promise<any> {
     return Promise.resolve(
       // eslint-disable-next-line no-eval
-      eval(`(function Main(){const {Skia} = this;${code}})`).call({
+      eval(`(function Main(){const {Skia, ctx} = this;${code}})`).call({
         Skia: global.SkiaApi,
+        ctx,
       })
     );
   }
@@ -331,12 +351,16 @@ class RemoteSurface implements TestingSurface {
     return global.testClient!;
   }
 
-  eval(code: string): Promise<any> {
+  eval(code: string, context: EvalContext = {}): Promise<any> {
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
-      this.client.send(JSON.stringify({ code }));
+      const ctx: EvalContext = {};
+      Object.keys(context).forEach((key) => {
+        ctx[key] = serializeSkOjects(context[key]);
+      });
+      this.client.send(JSON.stringify({ code, ctx }));
     });
   }
 
