@@ -140,7 +140,7 @@ export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterP
 
 export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadowImageFilterProps> {
   constructor(ctx: NodeContext, props: DropShadowImageFilterProps) {
-    super(ctx, NodeType.BlurImageFilter, props);
+    super(ctx, NodeType.DropShadowImageFilter, props);
   }
 
   materialize() {

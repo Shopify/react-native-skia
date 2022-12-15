@@ -90,7 +90,9 @@ describe("Test Image Filters", () => {
         </RoundedRect>
       </>
     );
-    checkImage(img, docPath("image-filters/dropshadow.png"));
+    checkImage(img, docPath("image-filters/dropshadow.png"), {
+      threshold: 0.05,
+    });
   });
   // This test should fail because it is not scaled properly but
   // it passes because of the low tolerance in the canvas result
@@ -119,6 +121,8 @@ describe("Test Image Filters", () => {
         </RoundedRect>
       </>
     );
-    checkImage(img, docPath("image-filters/innershadow.png"));
+    checkImage(img, docPath("image-filters/innershadow.png"), {
+      threshold: 0.05,
+    });
   });
 });
