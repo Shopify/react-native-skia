@@ -126,16 +126,8 @@ protected:
           // modify values contained in properties - this would have caused the
           // matrix to be translated and scaled more and more for each render
           // even thought the matrix prop did not change.
-          _matrix.set(SkMatrix::kMScaleX, lm->get(SkMatrix::kMScaleX));
-          _matrix.set(SkMatrix::kMSkewX, lm->get(SkMatrix::kMSkewX));
-          _matrix.set(SkMatrix::kMTransX, lm->get(SkMatrix::kMTransX));
-          _matrix.set(SkMatrix::kMSkewY, lm->get(SkMatrix::kMSkewY));
-          _matrix.set(SkMatrix::kMScaleY, lm->get(SkMatrix::kMScaleY));
-          _matrix.set(SkMatrix::kMTransY, lm->get(SkMatrix::kMTransY));
-          _matrix.set(SkMatrix::kMPersp0, lm->get(SkMatrix::kMPersp0));
-          _matrix.set(SkMatrix::kMPersp1, lm->get(SkMatrix::kMPersp1));
-          _matrix.set(SkMatrix::kMPersp2, lm->get(SkMatrix::kMPersp2));
-
+          _matrix.reset();
+          _matrix.preConcat(*lm);
           _matrix.preTranslate(m3.x(), m3.y());
           _matrix.preScale(m3.width(), m3.height());
         }
