@@ -26,7 +26,7 @@ export const parseNode = (
   );
 };
 
-const parseProps = (props: SerializedProps, assets: Assets) => {
+export const parseProps = (props: SerializedProps, assets: Assets) => {
   const newProps: SerializedProps = {};
   Object.keys(props).forEach((key) => {
     newProps[key] = parseProp(props[key], assets);
