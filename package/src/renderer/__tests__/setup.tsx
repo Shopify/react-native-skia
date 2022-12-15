@@ -32,7 +32,11 @@ declare global {
 export let surface: TestingSurface;
 const assets = new Map<SkImage | SkFont, string>();
 export let images: { oslo: SkImage };
-export let fonts: { RobotoMedium: SkFont; NotoColorEmoji: SkFont };
+export let fonts: {
+  RobotoMedium: SkFont;
+  NotoColorEmoji: SkFont;
+  NotoSansSCRegular: SkFont;
+};
 
 beforeAll(async () => {
   await LoadSkiaWeb();
@@ -41,6 +45,10 @@ beforeAll(async () => {
   global.SkiaValueApi = ValueApi;
   surface = E2E ? new RemoteSurface() : new LocalSurface();
   const { fontSize } = surface;
+  const NotoSansSCRegular = loadFont(
+    "skia/__tests__/assets/NotoSansSC-Regular.otf",
+    fontSize
+  );
   const NotoColorEmoji = loadFont(
     "skia/__tests__/assets/NotoColorEmoji.ttf",
     fontSize
@@ -51,10 +59,11 @@ beforeAll(async () => {
   );
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
   images = { oslo };
-  fonts = { RobotoMedium, NotoColorEmoji };
+  fonts = { RobotoMedium, NotoColorEmoji, NotoSansSCRegular };
   assets.set(oslo, "oslo");
   assets.set(RobotoMedium, "RobotoMedium");
   assets.set(NotoColorEmoji, "NotoColorEmoji");
+  assets.set(NotoSansSCRegular, "NotoSansSCRegular");
 });
 
 export const wait = (ms: number) =>
