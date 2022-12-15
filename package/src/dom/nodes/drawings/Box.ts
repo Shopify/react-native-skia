@@ -40,7 +40,7 @@ export class BoxShadowNode extends JsiDeclarationNode<
   BoxShadowProps
 > {
   constructor(ctx: NodeContext, props: BoxShadowProps) {
-    super(ctx, DeclarationType.Unknown, NodeType.Box, props);
+    super(ctx, DeclarationType.Unknown, NodeType.BoxShadow, props);
   }
 
   materialize() {
