@@ -4,12 +4,9 @@ import path from "path";
 
 import React from "react";
 import type { ReactNode } from "react";
-import ReactReconciler from "react-reconciler";
 import type { Server, WebSocket } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
-import { skHostConfig } from "../HostConfig";
-import { Container } from "../Container";
 import type { DrawingContext } from "../DrawingContext";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
@@ -22,6 +19,7 @@ import { Group } from "../components";
 import type { SkImage, SkFont } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
+import { SkiaRoot } from "../Reconciler";
 
 jest.setTimeout(180 * 1000);
 
@@ -125,14 +123,6 @@ export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
 
-const skiaReconciler = ReactReconciler(skHostConfig);
-
-skiaReconciler.injectIntoDevTools({
-  bundleType: 1,
-  version: "0.0.1",
-  rendererPackageName: "react-native-skia",
-});
-
 export const drawOnNode = (element: ReactNode) => {
   const { surface: ckSurface, draw } = mountCanvas(element);
   draw();
@@ -151,28 +141,9 @@ export const mountCanvas = (element: ReactNode) => {
   const ref = {
     current: new SkiaView({}) as any,
   };
-  const registerValues = (values: Array<SkiaExports.SkiaValue<unknown>>) => {
-    if (ref.current === null) {
-      throw new Error("Canvas ref is not set");
-    }
-    return ref.current.registerValues(values);
-  };
+  const root = new SkiaRoot(Skia, ref);
+  root.render(element);
 
-  const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr);
-  const root = skiaReconciler.createContainer(
-    container,
-    0,
-    null,
-    true,
-    null,
-    "",
-    console.error,
-    null
-  );
-  skiaReconciler.updateContainer(element, root, null, () => {
-    container.depMgr.update();
-  });
   const ctx: DrawingContext = {
     width,
     height,
@@ -185,10 +156,10 @@ export const mountCanvas = (element: ReactNode) => {
   };
   return {
     draw: () => {
-      container.draw(ctx);
+      root.draw(ctx);
     },
     surface: ckSurface,
-    container,
+    root: root.dom,
   };
 };
 
@@ -204,29 +175,8 @@ export const serialize = (element: ReactNode) => {
   const ref = {
     current: new SkiaView({}) as any,
   };
-  const registerValues = (values: Array<SkiaExports.SkiaValue<unknown>>) => {
-    if (ref.current === null) {
-      throw new Error("Canvas ref is not set");
-    }
-    return ref.current.registerValues(values);
-  };
-
-  const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr);
-  const root = skiaReconciler.createContainer(
-    container,
-    0,
-    null,
-    true,
-    null,
-    "",
-    console.error,
-    null
-  );
-  skiaReconciler.updateContainer(element, root, null, () => {
-    container.depMgr.update();
-  });
-  const serialized = serializeNode(container.root);
+  const root = new SkiaRoot(Skia, ref);
+  const serialized = serializeNode(root.dom);
   return JSON.stringify(serialized);
 };
 
