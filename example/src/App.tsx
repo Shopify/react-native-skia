@@ -23,7 +23,7 @@ import {
   Wallet,
   Severance,
 } from "./Examples";
-import { E2E, Tests } from "./Tests";
+import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
@@ -102,7 +102,7 @@ const App = () => {
       <StatusBar hidden />
       <NavigationContainer linking={linking}>
         <Stack.Navigator screenOptions={{ headerLeft: HeaderLeft }}>
-          {E2E ? [E2ETests, Home] : [Home, E2ETests]}
+          {CI ? [E2ETests, Home] : [Home, E2ETests]}
           <Stack.Screen
             name="Vertices"
             component={Vertices}

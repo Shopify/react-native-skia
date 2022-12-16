@@ -71,7 +71,7 @@ jobs:
 
       - name: Build app
         working-directory: example
-        run: E2E=true yarn ios --simulator 'iPhone 14 Pro'
+        run: CI=true yarn ios --simulator 'iPhone 14 Pro'
 
       # - name: Run e2e tests
       #   working-directory: package

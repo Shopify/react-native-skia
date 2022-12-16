@@ -8,12 +8,12 @@ import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
 import { useClient } from "./useClient";
 
-export const E2E = process.env.E2E === "true";
+export const CI = process.env.CI === "true";
 const scale = 3 / PixelRatio.get();
 const size = 256 * scale;
 // Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI
 // eslint-disable-next-line no-nested-ternary
-const timeToDraw = E2E ? 1500 : Platform.OS === "ios" ? 250 : 500;
+const timeToDraw = CI ? 1500 : Platform.OS === "ios" ? 250 : 500;
 
 interface TestsProps {
   assets: { [key: string]: any };
