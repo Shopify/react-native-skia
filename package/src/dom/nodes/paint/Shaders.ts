@@ -67,20 +67,20 @@ export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
   materialize() {
     const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = this.props;
     const rct = getRect(this.Skia, imageShaderProps);
+    const m3 = this.Skia.Matrix();
     if (rct) {
       const rects = fitRects(
         fit,
         { x: 0, y: 0, width: image.width(), height: image.height() },
         rct
       );
-      const m3 = rect2rect(rects.src, rects.dst);
-      imageShaderProps.transform = [
-        ...(imageShaderProps.transform ?? []),
-        ...m3,
-      ];
+      const [x, y, sx, sy] = rect2rect(rects.src, rects.dst);
+      m3.translate(x.translateX, y.translateY);
+      m3.scale(sx.scaleX, sy.scaleY);
     }
     const lm = this.Skia.Matrix();
     processTransformProps(lm, imageShaderProps);
+    lm.concat(m3);
     return image.makeShaderOptions(
       TileMode[enumKey(tx)],
       TileMode[enumKey(ty)],

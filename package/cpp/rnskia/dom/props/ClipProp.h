@@ -45,18 +45,18 @@ public:
     return _pathProp->isSet() || _rectProp->isSet() || _rrectProp->isSet();
   }
 
-  SkPath *getPath() { return _path.get(); }
-  SkRect *getRect() { return _rect.get(); }
-  SkRRect *getRRect() { return _rrect.get(); }
+  const SkPath *getPath() { return _path.get(); }
+  const SkRect *getRect() { return _rect.get(); }
+  const SkRRect *getRRect() { return _rrect.get(); }
 
 private:
   PathProp *_pathProp;
   RectProp *_rectProp;
   RRectProp *_rrectProp;
 
-  std::shared_ptr<SkPath> _path;
-  std::shared_ptr<SkRect> _rect;
-  std::shared_ptr<SkRRect> _rrect;
+  std::shared_ptr<const SkPath> _path;
+  std::shared_ptr<const SkRect> _rect;
+  std::shared_ptr<const SkRRect> _rrect;
 };
 
 } // namespace RNSkia

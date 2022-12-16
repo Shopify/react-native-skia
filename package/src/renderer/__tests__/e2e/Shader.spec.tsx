@@ -9,7 +9,8 @@ import {
   Shader,
   ColorShader,
 } from "../../components";
-import { importSkia, surface } from "../setup";
+import { images, importSkia, surface } from "../setup";
+import { ImageShader } from "../../components/image/ImageShader";
 
 const bilinearInterpolation = `
 uniform vec4 position;
@@ -176,5 +177,28 @@ half4 main(float2 p) {
       </Fill>
     );
     checkImage(img, docPath("shaders/color.png"));
+  });
+
+  it("should display an image and respect the transform", async () => {
+    const { oslo } = images;
+    const { width, height } = surface;
+    const { vec } = importSkia();
+    const img = await surface.draw(
+      <Fill>
+        <ImageShader
+          image={oslo}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          transform={[{ scale: 2 }]}
+          origin={vec(width / 2, height / 2)}
+        />
+      </Fill>
+    );
+    checkImage(img, docPath("shaders/image-with-transform.png"), {
+      overwrite: true,
+    });
   });
 });

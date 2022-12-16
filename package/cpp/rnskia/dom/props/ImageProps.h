@@ -74,7 +74,9 @@ public:
   }
 
   sk_sp<SkImage> getImage() { return _imageProp->getDerivedValue(); }
-  std::shared_ptr<SkRect> getRect() { return _rectProp->getDerivedValue(); }
+  std::shared_ptr<const SkRect> getRect() {
+    return _rectProp->getDerivedValue();
+  }
 
   SkRect rect2rect(SkRect src, SkRect dst) {
     auto scaleX = dst.width() / src.width();

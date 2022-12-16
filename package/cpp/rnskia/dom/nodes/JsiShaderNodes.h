@@ -121,8 +121,16 @@ protected:
       if (rect != nullptr && lm != nullptr) {
         auto rc = _imageProps->getDerivedValue();
         auto m3 = _imageProps->rect2rect(rc->src, rc->dst);
-        lm->preTranslate(m3.x(), m3.y());
-        lm->preScale(m3.width(), m3.height());
+        if (_transformProp->isChanged()) {
+          // To modify the matrix we need to copy it since we're not allowed to
+          // modify values contained in properties - this would have caused the
+          // matrix to be translated and scaled more and more for each render
+          // even thought the matrix prop did not change.
+          _matrix.reset();
+          _matrix.preConcat(*lm);
+          _matrix.preTranslate(m3.x(), m3.y());
+          _matrix.preScale(m3.width(), m3.height());
+        }
       }
 
       setShader(
@@ -133,7 +141,7 @@ protected:
                                     _filterModeProp->value().getAsString()),
                                 getMipmapModeFromString(
                                     _mipmapModeProp->value().getAsString())),
-              lm));
+              &_matrix));
     }
   }
 
@@ -184,6 +192,8 @@ private:
     throw std::runtime_error("The value \"" + value +
                              "\" is not a valid Mipmap Mode.");
   }
+
+  SkMatrix _matrix;
 
   TileModeProp *_txProp;
   TileModeProp *_tyProp;
@@ -328,12 +338,12 @@ protected:
     }
   }
 
-  SkColor *_colors;
-  SkTileMode _mode;
+  const SkColor *_colors;
   double _flags;
-  SkScalar *_positions;
-  SkMatrix *_matrix;
   int _colorCount;
+  SkTileMode _mode;
+  const SkScalar *_positions;
+  const SkMatrix *_matrix;
 
 private:
   TransformsProps *_transformsProps;
