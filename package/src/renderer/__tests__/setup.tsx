@@ -143,19 +143,18 @@ export const mountCanvas = (element: ReactNode) => {
   };
   const root = new SkiaRoot(Skia, ref);
   root.render(element);
-
-  const ctx: DrawingContext = {
-    width,
-    height,
-    timestamp: 0,
-    canvas,
-    paint: Skia.Paint(),
-    ref,
-    center: Skia.Point(width / 2, height / 2),
-    Skia,
-  };
   return {
     draw: () => {
+      const ctx: DrawingContext = {
+        width,
+        height,
+        timestamp: 0,
+        canvas,
+        paint: Skia.Paint(),
+        ref,
+        center: Skia.Point(width / 2, height / 2),
+        Skia,
+      };
       root.draw(ctx);
     },
     surface: ckSurface,
@@ -176,6 +175,7 @@ export const serialize = (element: ReactNode) => {
     current: new SkiaView({}) as any,
   };
   const root = new SkiaRoot(Skia, ref);
+  root.render(element);
   const serialized = serializeNode(root.dom);
   return JSON.stringify(serialized);
 };

@@ -39,7 +39,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       innerRef.current?.redraw();
     }, [innerRef]);
 
-    const root = useMemo(() => new SkiaRoot(Skia, ref), [ref]);
+    const root = useMemo(() => new SkiaRoot(Skia, ref, redraw), [redraw, ref]);
 
     // Render effect
     useEffect(() => {
