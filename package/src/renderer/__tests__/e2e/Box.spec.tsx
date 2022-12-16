@@ -43,7 +43,7 @@ describe("Box", () => {
         </Box>
       </FitBox>
     );
-    checkImage(img, docPath("box/box-shadow.png"), { overwrite: true });
+    checkImage(img, docPath("box/box-shadow.png"));
   });
   it("should draw a box with red stroke", async () => {
     const { width } = surface;

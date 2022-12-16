@@ -19,7 +19,7 @@ import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
 import { Group } from "../components";
-import type { SkImage, SkFont } from "../../skia/types";
+import type { SkImage, SkFont, Skia } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 
@@ -308,7 +308,10 @@ const serializeNode = (node: Node<any>): SerializedNode => {
 type EvalContext = Record<string, any>;
 
 interface TestingSurface {
-  eval(code: string, ctx?: EvalContext): Promise<any>;
+  eval(
+    fn: (Skia: Skia, ctx: EvalContext) => any,
+    ctx?: EvalContext
+  ): Promise<any>;
   draw(node: ReactNode): Promise<SkImage>;
   width: number;
   height: number;
@@ -320,10 +323,15 @@ class LocalSurface implements TestingSurface {
   readonly height = 256;
   readonly fontSize = 32;
 
-  eval(code: string, ctx: EvalContext = {}): Promise<any> {
+  eval(
+    fn: (Skia: Skia, ctx: EvalContext) => any,
+    ctx: EvalContext = {}
+  ): Promise<any> {
     return Promise.resolve(
       // eslint-disable-next-line no-eval
-      eval(`(function Main(){const {Skia, ctx} = this;${code}})`).call({
+      eval(
+        `(function Main(){return (${fn.toString()})(this.Skia, this.ctx);})`
+      ).call({
         Skia: global.SkiaApi,
         ctx,
       })
@@ -351,7 +359,10 @@ class RemoteSurface implements TestingSurface {
     return global.testClient!;
   }
 
-  eval(code: string, context: EvalContext = {}): Promise<any> {
+  eval(
+    fn: (Skia: Skia, ctx: EvalContext) => any,
+    context: EvalContext = {}
+  ): Promise<any> {
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
@@ -360,7 +371,7 @@ class RemoteSurface implements TestingSurface {
       Object.keys(context).forEach((key) => {
         ctx[key] = serializeSkOjects(context[key]);
       });
-      this.client.send(JSON.stringify({ code, ctx }));
+      this.client.send(JSON.stringify({ code: fn.toString(), ctx }));
     });
   }
 
