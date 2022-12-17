@@ -9,7 +9,6 @@ import type { SkiaDomView } from "../views";
 import { DependencyManager } from "./DependencyManager";
 import { skHostConfig, debug as hostDebug } from "./HostConfig";
 import { Container } from "./Container";
-import type { DrawingContext } from "./DrawingContext";
 
 const skiaReconciler = ReactReconciler(skHostConfig);
 
@@ -66,10 +65,6 @@ export class SkiaRoot {
     skiaReconciler.updateContainer(null, this.root, null, () => {
       this.container.depMgr.remove();
     });
-  }
-
-  draw(ctx: DrawingContext) {
-    this.container.draw(ctx);
   }
 
   get dom() {

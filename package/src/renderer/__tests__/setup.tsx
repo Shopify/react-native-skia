@@ -144,6 +144,8 @@ export const mountCanvas = (element: ReactNode) => {
   const root = new SkiaRoot(Skia, ref);
   root.render(element);
   return {
+    surface: ckSurface,
+    root: root.dom,
     draw: () => {
       const ctx: DrawingContext = {
         width,
@@ -155,10 +157,8 @@ export const mountCanvas = (element: ReactNode) => {
         center: Skia.Point(width / 2, height / 2),
         Skia,
       };
-      root.draw(ctx);
+      root.dom.render(ctx);
     },
-    surface: ckSurface,
-    root: root.dom,
   };
 };
 
