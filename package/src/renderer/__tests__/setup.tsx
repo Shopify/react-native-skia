@@ -11,7 +11,6 @@ import type { DrawingContext } from "../DrawingContext";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
-import { SkiaView } from "../../views/SkiaView.web";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
@@ -135,13 +134,8 @@ export const mountCanvas = (element: ReactNode) => {
   const ckSurface = Skia.Surface.Make(width, height)!;
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
-  expect(canvas).toBeDefined();
-  expect(element).toBeDefined();
 
-  const ref = {
-    current: new SkiaView({}) as any,
-  };
-  const root = new SkiaRoot(Skia, ref);
+  const root = new SkiaRoot(Skia);
   root.render(element);
   return {
     surface: ckSurface,
@@ -153,8 +147,6 @@ export const mountCanvas = (element: ReactNode) => {
         timestamp: 0,
         canvas,
         paint: Skia.Paint(),
-        ref,
-        center: Skia.Point(width / 2, height / 2),
         Skia,
       };
       root.dom.render(ctx);
@@ -163,20 +155,8 @@ export const mountCanvas = (element: ReactNode) => {
 };
 
 export const serialize = (element: ReactNode) => {
-  const Skia = global.SkiaApi;
-  expect(Skia).toBeDefined();
-  const ckSurface = Skia.Surface.Make(width, height)!;
-  expect(ckSurface).toBeDefined();
-  const canvas = ckSurface.getCanvas();
-  expect(canvas).toBeDefined();
-  expect(element).toBeDefined();
-
-  const ref = {
-    current: new SkiaView({}) as any,
-  };
-  const root = new SkiaRoot(Skia, ref);
-  root.render(element);
-  const serialized = serializeNode(root.dom);
+  const { root } = mountCanvas(element);
+  const serialized = serializeNode(root);
   return JSON.stringify(serialized);
 };
 

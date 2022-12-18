@@ -18,6 +18,8 @@ import type { TouchHandler } from "../views";
 import { Skia } from "../skia/Skia";
 
 // import { debugTree } from "./nodes";
+import type { SkiaValue } from "../values/types";
+
 import { SkiaRoot } from "./Reconciler";
 
 export const useCanvasRef = () => useRef<SkiaDomView>(null);
@@ -39,7 +41,19 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       innerRef.current?.redraw();
     }, [innerRef]);
 
-    const root = useMemo(() => new SkiaRoot(Skia, ref, redraw), [redraw, ref]);
+    const registerValues = useCallback(
+      (values: Array<SkiaValue<unknown>>) => {
+        if (ref.current === null) {
+          throw new Error("Canvas ref is not set");
+        }
+        return ref.current.registerValues(values);
+      },
+      [ref]
+    );
+    const root = useMemo(
+      () => new SkiaRoot(Skia, registerValues, redraw),
+      [redraw, registerValues]
+    );
 
     // Render effect
     useEffect(() => {

@@ -1,10 +1,9 @@
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
 import type { Skia } from "../skia/types";
 import type { SkiaValue } from "../values/types";
-import type { SkiaDomView } from "../views";
 
 import { DependencyManager } from "./DependencyManager";
 import { skHostConfig, debug as hostDebug } from "./HostConfig";
@@ -12,9 +11,9 @@ import { Container } from "./Container";
 
 const skiaReconciler = ReactReconciler(skHostConfig);
 
-const createDependencyManager = (
-  registerValues: (values: Array<SkiaValue<unknown>>) => () => void
-) =>
+type RegisterValues = (values: Array<SkiaValue<unknown>>) => () => void;
+
+const createDependencyManager = (registerValues: RegisterValues) =>
   global.SkiaDomApi && global.SkiaDomApi.DependencyManager
     ? global.SkiaDomApi.DependencyManager(registerValues)
     : new DependencyManager(registerValues);
@@ -31,15 +30,9 @@ export class SkiaRoot {
 
   constructor(
     Skia: Skia,
-    ref: RefObject<SkiaDomView>,
+    registerValues: RegisterValues = () => () => {},
     redraw: () => void = () => {}
   ) {
-    const registerValues = (values: Array<SkiaValue<unknown>>) => {
-      if (ref.current === null) {
-        throw new Error("Canvas ref is not set");
-      }
-      return ref.current.registerValues(values);
-    };
     const depMgr = createDependencyManager(registerValues);
     this.container = new Container(Skia, depMgr, redraw);
     this.root = skiaReconciler.createContainer(
