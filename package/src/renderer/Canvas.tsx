@@ -14,10 +14,8 @@ import type {
 } from "react";
 
 import { SkiaDomView } from "../views";
-import type { TouchHandler } from "../views";
 import { Skia } from "../skia/Skia";
-
-// import { debugTree } from "./nodes";
+import type { TouchHandler } from "../views";
 import type { SkiaValue } from "../values/types";
 
 import { SkiaRoot } from "./Reconciler";
