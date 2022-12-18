@@ -32,7 +32,7 @@ export const Tests = ({ assets }: TestsProps) => {
             JSON.stringify(
               // eslint-disable-next-line no-eval
               eval(
-                `(function Main(){const {Skia, ctx} = this;${tree.code}})`
+                `(function Main(){return (${tree.code})(this.Skia, this.ctx); })`
               ).call({
                 Skia,
                 ctx: parseProps(tree.ctx, assets),

@@ -6,10 +6,9 @@ describe("Text", () => {
   itRunsCIAndNodeOnly("Glyph emojis", async () => {
     const font = fonts.NotoColorEmoji;
     const result = await surface.eval(
-      `
-const {font} = ctx;
-return font.getGlyphIDs("😉😍");
-`,
+      (_Skia, ctx) => {
+        return ctx.font.getGlyphIDs("😉😍");
+      },
       { font }
     );
     expect(result).toEqual([892, 896]);
@@ -17,9 +16,9 @@ return font.getGlyphIDs("😉😍");
   it("Should calculate chinese text width correctly", async () => {
     const font = fonts.NotoSansSCRegular;
     const result = await surface.eval(
-      `
-const {font} = ctx;
-return font.getTextWidth("欢迎")`,
+      (_Skia, ctx) => {
+        return ctx.font.getTextWidth("欢迎");
+      },
       { font }
     );
     expect(result).toBe(64);

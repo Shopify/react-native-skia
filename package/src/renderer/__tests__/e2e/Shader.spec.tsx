@@ -197,8 +197,6 @@ half4 main(float2 p) {
         />
       </Fill>
     );
-    checkImage(img, docPath("shaders/image-with-transform.png"), {
-      overwrite: true,
-    });
+    checkImage(img, docPath("shaders/image-with-transform.png"));
   });
 });
