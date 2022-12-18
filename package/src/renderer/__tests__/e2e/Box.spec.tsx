@@ -1,6 +1,6 @@
 import React from "react";
 
-import { checkImage, docPath } from "../../../__tests__/setup";
+import { checkImage } from "../../../__tests__/setup";
 import { Box, BoxShadow, Fill, FitBox } from "../../components";
 import { surface, importSkia, PIXEL_RATIO } from "../setup";
 
@@ -24,7 +24,7 @@ describe("Box", () => {
         </Box>
       </>
     );
-    checkImage(img, docPath("box/simple-box-shadow.png"));
+    checkImage(img, "snapshots/box/box-shadow.png");
   });
   it("should render negative values", async () => {
     const { rect } = importSkia();
@@ -43,7 +43,7 @@ describe("Box", () => {
         </Box>
       </FitBox>
     );
-    checkImage(img, docPath("box/box-shadow.png"), { overwrite: true });
+    checkImage(img, "snapshots/box/box-shadow2.png");
   });
   it("should draw a box with red stroke", async () => {
     const { width } = surface;
@@ -59,6 +59,6 @@ describe("Box", () => {
         />
       </>
     );
-    checkImage(img, docPath("box/box-stroke.png"));
+    checkImage(img, "snapshots/box/box-stroke.png");
   });
 });
