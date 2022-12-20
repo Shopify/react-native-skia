@@ -79,8 +79,8 @@ export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
       m3.scale(sx.scaleX, sy.scaleY);
     }
     const lm = this.Skia.Matrix();
-    processTransformProps(lm, imageShaderProps);
     lm.concat(m3);
+    processTransformProps(lm, imageShaderProps);
     return image.makeShaderOptions(
       TileMode[enumKey(tx)],
       TileMode[enumKey(ty)],

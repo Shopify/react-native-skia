@@ -155,6 +155,28 @@ half4 main(float2 p) {
     checkImage(img, "snapshots/shader/hue.png");
   });
 
+  it("should display a hue wheel with transform", async () => {
+    const { width, height } = surface;
+    const { Skia, vec } = importSkia();
+    const source = Skia.RuntimeEffect.Make(hue)!;
+    expect(source).toBeTruthy();
+    const img = await surface.draw(
+      <Group>
+        <Shader
+          source={source}
+          uniforms={{
+            c: { x: width / 2, y: height / 2 },
+            r: width / 2,
+          }}
+          origin={vec(width / 2, height / 2)}
+          transform={[{ scale: 2 }]}
+        />
+        <Fill />
+      </Group>
+    );
+    checkImage(img, "snapshots/shader/hue2.png");
+  });
+
   it("should display a linear gradient", async () => {
     const { width, height } = surface;
     const img = await surface.draw(
@@ -183,6 +205,7 @@ half4 main(float2 p) {
     const { oslo } = images;
     const { width, height } = surface;
     const { vec } = importSkia();
+
     const img = await surface.draw(
       <Fill>
         <ImageShader
