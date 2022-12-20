@@ -44,7 +44,7 @@ describe("Box", () => {
     );
     checkImage(img, "snapshots/box/box-shadow2.png");
   });
-  it("should render not have rounded corners", async () => {
+  it("should render have rounded corners", async () => {
     const { rect } = importSkia();
     const { width } = surface;
     const w = width;
