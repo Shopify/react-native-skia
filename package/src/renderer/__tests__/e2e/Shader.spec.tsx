@@ -192,6 +192,24 @@ half4 main(float2 p) {
     checkImage(img, "snapshots/runtime-effects/linear-gradient.png");
   });
 
+  it("should display a linear gradient with transform", async () => {
+    const { vec } = importSkia();
+    const { width, height } = surface;
+    const img = await surface.draw(
+      <Group>
+        <LinearGradient
+          colors={["cyan", "magenta", "yellow"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: width, y: height }}
+          origin={vec(width / 2, height / 2)}
+          transform={[{ scale: 2 }]}
+        />
+        <Fill />
+      </Group>
+    );
+    checkImage(img, "snapshots/runtime-effects/linear-gradient2.png");
+  });
+
   it("should display a color", async () => {
     const img = await surface.draw(
       <Fill>
