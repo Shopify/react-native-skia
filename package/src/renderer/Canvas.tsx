@@ -12,42 +12,15 @@ import type {
   MutableRefObject,
   ForwardedRef,
 } from "react";
-import type { OpaqueRoot } from "react-reconciler";
-import ReactReconciler from "react-reconciler";
 
 import { SkiaDomView } from "../views";
-import type { TouchHandler } from "../views";
 import { Skia } from "../skia/Skia";
-import type { SkiaValue } from "../values";
+import type { TouchHandler } from "../views";
+import type { SkiaValue } from "../values/types";
 
-import { debug as hostDebug, skHostConfig } from "./HostConfig";
-// import { debugTree } from "./nodes";
-import { Container } from "./Container";
-import { DependencyManager } from "./DependencyManager";
-
-export const skiaReconciler = ReactReconciler(skHostConfig);
-
-skiaReconciler.injectIntoDevTools({
-  bundleType: 1,
-  version: "0.0.1",
-  rendererPackageName: "react-native-skia",
-});
-
-const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
-  skiaReconciler.updateContainer(element, root, null, () => {
-    hostDebug("updateContainer");
-    container.depMgr.update();
-  });
-};
+import { SkiaRoot } from "./Reconciler";
 
 export const useCanvasRef = () => useRef<SkiaDomView>(null);
-
-const createDependencyManager = (
-  registerValues: (values: Array<SkiaValue<unknown>>) => () => void
-) =>
-  global.SkiaDomApi && global.SkiaDomApi.DependencyManager
-    ? global.SkiaDomApi.DependencyManager(registerValues)
-    : new DependencyManager(registerValues);
 
 export interface CanvasProps extends ComponentProps<typeof SkiaDomView> {
   ref?: RefObject<SkiaDomView>;
@@ -75,48 +48,27 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       },
       [ref]
     );
-
-    const container = useMemo(() => {
-      return new Container(
-        Skia,
-        createDependencyManager(registerValues),
-        redraw
-      );
-    }, [redraw, registerValues]);
-
     const root = useMemo(
-      () =>
-        skiaReconciler.createContainer(
-          container,
-          0,
-          null,
-          true,
-          null,
-          "",
-          console.error,
-          null
-        ),
-      [container]
+      () => new SkiaRoot(Skia, registerValues, redraw),
+      [redraw, registerValues]
     );
 
     // Render effect
     useEffect(() => {
-      render(children, root, container);
-    }, [children, root, redraw, container]);
+      root.render(children);
+    }, [children, root, redraw]);
 
     useEffect(() => {
       return () => {
-        skiaReconciler.updateContainer(null, root, null, () => {
-          container.depMgr.remove();
-        });
+        root.unmount();
       };
-    }, [container, root]);
+    }, [root]);
 
     return (
       <SkiaDomView
         ref={ref}
         style={style}
-        root={container.root}
+        root={root.dom}
         onTouch={onTouch}
         onSize={onSize}
         mode={mode}

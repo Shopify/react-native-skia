@@ -4,17 +4,13 @@ import path from "path";
 
 import React from "react";
 import type { ReactNode } from "react";
-import ReactReconciler from "react-reconciler";
 import type { Server, WebSocket } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
-import { skHostConfig } from "../HostConfig";
-import { Container } from "../Container";
 import type { DrawingContext } from "../DrawingContext";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
-import { SkiaView } from "../../views/SkiaView.web";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
@@ -22,6 +18,7 @@ import { Group } from "../components";
 import type { SkImage, SkFont, Skia } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
+import { SkiaRoot } from "../Reconciler";
 
 jest.setTimeout(180 * 1000);
 
@@ -125,14 +122,6 @@ export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
 
-const skiaReconciler = ReactReconciler(skHostConfig);
-
-skiaReconciler.injectIntoDevTools({
-  bundleType: 1,
-  version: "0.0.1",
-  rendererPackageName: "react-native-skia",
-});
-
 export const drawOnNode = (element: ReactNode) => {
   const { surface: ckSurface, draw } = mountCanvas(element);
   draw();
@@ -145,88 +134,29 @@ export const mountCanvas = (element: ReactNode) => {
   const ckSurface = Skia.Surface.Make(width, height)!;
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
-  expect(canvas).toBeDefined();
-  expect(element).toBeDefined();
 
-  const ref = {
-    current: new SkiaView({}) as any,
-  };
-  const registerValues = (values: Array<SkiaExports.SkiaValue<unknown>>) => {
-    if (ref.current === null) {
-      throw new Error("Canvas ref is not set");
-    }
-    return ref.current.registerValues(values);
-  };
-
-  const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr);
-  const root = skiaReconciler.createContainer(
-    container,
-    0,
-    null,
-    true,
-    null,
-    "",
-    console.error,
-    null
-  );
-  skiaReconciler.updateContainer(element, root, null, () => {
-    container.depMgr.update();
-  });
-  const ctx: DrawingContext = {
-    width,
-    height,
-    timestamp: 0,
-    canvas,
-    paint: Skia.Paint(),
-    ref,
-    center: Skia.Point(width / 2, height / 2),
-    Skia,
-  };
+  const root = new SkiaRoot(Skia);
+  root.render(element);
   return {
-    draw: () => {
-      container.draw(ctx);
-    },
     surface: ckSurface,
-    container,
+    root: root.dom,
+    draw: () => {
+      const ctx: DrawingContext = {
+        width,
+        height,
+        timestamp: 0,
+        canvas,
+        paint: Skia.Paint(),
+        Skia,
+      };
+      root.dom.render(ctx);
+    },
   };
 };
 
 export const serialize = (element: ReactNode) => {
-  const Skia = global.SkiaApi;
-  expect(Skia).toBeDefined();
-  const ckSurface = Skia.Surface.Make(width, height)!;
-  expect(ckSurface).toBeDefined();
-  const canvas = ckSurface.getCanvas();
-  expect(canvas).toBeDefined();
-  expect(element).toBeDefined();
-
-  const ref = {
-    current: new SkiaView({}) as any,
-  };
-  const registerValues = (values: Array<SkiaExports.SkiaValue<unknown>>) => {
-    if (ref.current === null) {
-      throw new Error("Canvas ref is not set");
-    }
-    return ref.current.registerValues(values);
-  };
-
-  const depMgr = new DependencyManager(registerValues);
-  const container = new Container(Skia, depMgr);
-  const root = skiaReconciler.createContainer(
-    container,
-    0,
-    null,
-    true,
-    null,
-    "",
-    console.error,
-    null
-  );
-  skiaReconciler.updateContainer(element, root, null, () => {
-    container.depMgr.update();
-  });
-  const serialized = serializeNode(container.root);
+  const { root } = mountCanvas(element);
+  const serialized = serializeNode(root);
   return JSON.stringify(serialized);
 };
 
