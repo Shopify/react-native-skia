@@ -259,15 +259,7 @@ class LocalSurface implements TestingSurface {
     fn: (Skia: Skia, ctx: EvalContext) => any,
     ctx: EvalContext = {}
   ): Promise<any> {
-    return Promise.resolve(
-      // eslint-disable-next-line no-eval
-      eval(
-        `(function Main(){return (${fn.toString()})(this.Skia, this.ctx);})`
-      ).call({
-        Skia: global.SkiaApi,
-        ctx,
-      })
-    );
+    return Promise.resolve(fn(global.SkiaApi, ctx));
   }
 
   draw(node: ReactNode): Promise<SkImage> {
