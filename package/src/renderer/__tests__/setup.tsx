@@ -171,7 +171,9 @@ interface SerializedNode {
 }
 
 const serializeSkOjects = (obj: any): any => {
-  if (obj && typeof obj === "object" && "__typename__" in obj) {
+  if (Array.isArray(obj)) {
+    return obj.map((item) => serializeSkOjects(item));
+  } else if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
     } else if (obj.__typename__ === "Rect") {
