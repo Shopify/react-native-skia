@@ -6,6 +6,28 @@ import { checkImage } from "../../../__tests__/setup";
 import { PaintStyle } from "../../../skia/types";
 
 describe("Paths", () => {
+  it("should add a path", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      const path2 = Skia.Path.Make();
+      path.moveTo(20, 20);
+      path.lineTo(20, 40);
+      path.lineTo(40, 20);
+      path2.moveTo(60, 60);
+      path2.lineTo(80, 60);
+      path2.lineTo(80, 40);
+      const results: string[] = [];
+      for (let j = 0; j < 2; j++) {
+        const p = path.copy().addPath(path2, undefined, j === 1);
+        results.push(p.toSVGString());
+      }
+      return results;
+    });
+    expect(result).toEqual([
+      "M20 20L20 40L40 20M60 60L80 60L80 40",
+      "M20 20L20 40L40 20L60 60L80 60L80 40",
+    ]);
+  });
   it("should draw a pattern properly", async () => {
     const { Skia, translate } = importSkia();
 
