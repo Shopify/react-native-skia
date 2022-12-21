@@ -45,10 +45,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     throw new Error("Not implemented on React Native Web");
   },
   RRectXY: (rect: SkRect, rx: number, ry: number) =>
-    new JsiSkRRect(
-      CanvasKit,
-      CanvasKit.RRectXY(JsiSkRect.fromValue(CanvasKit, rect), rx, ry)
-    ),
+    new JsiSkRRect(CanvasKit, rect, rx, ry),
   RSXform: (scos: number, ssin: number, tx: number, ty: number) =>
     new JsiSkRSXform(CanvasKit, Float32Array.of(scos, ssin, tx, ty)),
   Color,
