@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { docPath, processResult } from "../../__tests__/setup";
-import {
-  Blur,
-  Circle,
-  DiffRect,
-  Fill,
-  Group,
-  Paint,
-} from "../components";
+import { Blur, Circle, DiffRect, Fill, Group, Paint } from "../components";
 
 import {
   drawOnNode,
