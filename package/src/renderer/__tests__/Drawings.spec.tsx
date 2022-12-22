@@ -8,7 +8,6 @@ import {
   Fill,
   Group,
   Paint,
-  RoundedRect,
 } from "../components";
 
 import {
