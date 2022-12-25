@@ -8,21 +8,20 @@ import React, {
 import type {
   RefObject,
   ReactNode,
-  ComponentProps,
   MutableRefObject,
   ForwardedRef,
 } from "react";
 
 import { SkiaDomView } from "../views";
 import { Skia } from "../skia/Skia";
-import type { TouchHandler } from "../views";
+import type { TouchHandler, SkiaBaseViewProps } from "../views";
 import type { SkiaValue } from "../values/types";
 
 import { SkiaRoot } from "./Reconciler";
 
 export const useCanvasRef = () => useRef<SkiaDomView>(null);
 
-export interface CanvasProps extends ComponentProps<typeof SkiaDomView> {
+export interface CanvasProps extends SkiaBaseViewProps {
   ref?: RefObject<SkiaDomView>;
   children: ReactNode;
   onTouch?: TouchHandler;
@@ -77,7 +76,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       />
     );
   }
-);
+) as React.FC<CanvasProps & React.RefAttributes<SkiaDomView>>;
 
 /**
  * Combines a list of refs into a single ref. This can be used to provide
