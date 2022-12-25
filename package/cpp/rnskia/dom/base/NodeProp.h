@@ -13,20 +13,19 @@ namespace RNSkia {
  Simple class for reading a property by name from the Dom Node properties
  object.
  */
-class NodeProp : public BaseNodeProp,
-                 public std::enable_shared_from_this<NodeProp> {
+class NodeProp : public BaseNodeProp {
 public:
   /**
    Constructs a new optional dom node properrty
    */
-  explicit NodeProp(const std::string &name)
-      : _name(JsiPropId::get(name)), BaseNodeProp() {}
+  explicit NodeProp(const std::string &name,
+                    PropertyDidUpdateCallback &propertyDidUpdate)
+      : _name(JsiPropId::get(name)), BaseNodeProp(propertyDidUpdate) {}
 
   /**
    Reads JS value and swaps out with a new value
    */
-  void readValueFromJs(jsi::Runtime &runtime,
-                       const ReadPropFunc &read) override {
+  void readValue(jsi::Runtime &runtime, const ReadPropFunc &read) override {
     // If the value is a nullptr this is the first call to the
     // readValueFromJS Function (which comes from the reconciler
     // setting a new property value on the property
@@ -34,6 +33,7 @@ public:
       _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
       _isChanged = true;
       _hasNewValue = false;
+      callPropertyDidUpdate();
     } else {
       // Otherwise we'll just update the buffer and commit it later.
       std::lock_guard<std::mutex> lock(_swapMutex);
@@ -62,6 +62,7 @@ public:
     // This is almost always a change - meaning a swap is
     // cheaper than comparing for equality.
     _hasNewValue = true;
+    callPropertyDidUpdate();
   }
 
   /**

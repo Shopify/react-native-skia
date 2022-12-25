@@ -4,73 +4,98 @@
 #include "JsiValue.h"
 
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
 
 namespace RNSkia {
 
+template <typename T> class BackBuffered {
+public:
+  BackBuffered() { _activeBuffer = &_buffer1; }
+
+  T &active() { return *_activeBuffer; }
+  T &other() { return _activeBuffer == &_buffer1 ? _buffer2 : _buffer1; }
+  void swap() {
+    std::lock_guard<std::mutex> lock(_concurrencyLock);
+    _activeBuffer = &other();
+  }
+  bool isEmpty() {
+    std::lock_guard<std::mutex> lock(_concurrencyLock);
+    return _activeBuffer->size() == 0;
+  }
+
+private:
+  T _buffer1;
+  T _buffer2;
+  T *_activeBuffer;
+  std::mutex _concurrencyLock;
+};
+
 /**
  Class for composing multiple properties into a derived property value
  */
-class BaseDerivedProp : public BaseNodeProp {
+class BaseDerivedProp : public BaseNodeProp,
+                        public std::enable_shared_from_this<BaseDerivedProp> {
 public:
-  BaseDerivedProp() : BaseNodeProp() {}
+  explicit BaseDerivedProp(PropertyDidUpdateCallback &propertyDidUpdate)
+      : BaseNodeProp(propertyDidUpdate) {}
 
   /**
    Starts the process of updating and reading props
    */
   void updatePendingChanges() override {
-    auto changed = false;
-    for (auto &prop : _properties) {
-      prop->updatePendingChanges();
-      if (prop->isChanged()) {
-        changed = true;
-      }
+    if (_changedProps.isEmpty()) {
+      return;
     }
 
-    // We only need to update the derived value when any of the derived
-    // properties have changed.
-    if (changed) {
-      updateDerivedValue();
+    _changedProps.swap();
+    for (auto &prop : _changedProps.other()) {
+      prop->updatePendingChanges();
     }
+    updateDerivedValue();
   }
 
   /*
    Marks properties as no longer changed
    */
   void markAsResolved() override {
-    for (auto &prop : _properties) {
+    for (auto &prop : _changedProps.other()) {
       prop->markAsResolved();
     }
-
-    _isChanged = false;
+    _changedProps.other().clear();
   }
 
   /**
    Returns the changed state of the prop
    */
-  bool isChanged() override { return _isChanged; }
+  bool isChanged() override { return !_changedProps.isEmpty(); }
 
   /**
    Delegate read value to child nodes
    */
-  void readValueFromJs(jsi::Runtime &runtime,
-                       const ReadPropFunc &read) override {
+  void readValue(jsi::Runtime &runtime, const ReadPropFunc &read) override {
     for (auto &prop : _properties) {
-      prop->readValueFromJs(runtime, read);
+      prop->readValue(runtime, read);
     }
   }
 
   /**
    Override to calculate the derived value from child properties
    */
-  virtual void updateDerivedValue() = 0;
+  virtual void updateDerivedValue() {}
 
   /**
-   Adds a property to the derived property child props.
+   Defines a property that will be updated with the container changes.
    */
-  template <typename P = BaseNodeProp> P *addProperty(std::shared_ptr<P> prop) {
+  template <class _Tp, class... _Args,
+            class = std::_EnableIf<!std::is_array<_Tp>::value>>
+  _Tp *addProperty(_Args &&...__args) {
+    auto prop =
+        std::make_shared<_Tp>(std::forward<_Args>(__args)...,
+                              std::bind(&BaseDerivedProp::propertyDidUpdate,
+                                        this, std::placeholders::_1));
     _properties.push_back(prop);
     return prop.get();
   }
@@ -98,12 +123,16 @@ public:
     return false;
   }
 
-protected:
-  void setIsChanged(bool isChanged) { _isChanged = isChanged; }
-
 private:
+  void propertyDidUpdate(BaseNodeProp *prop) {
+    // Save locally that we have a sub property change
+    _changedProps.active().insert(prop);
+    // Notify node that we have changed due to this
+    callPropertyDidUpdate();
+  }
+
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
-  std::atomic<bool> _isChanged = {false};
+  BackBuffered<std::set<BaseNodeProp *>> _changedProps;
 };
 
 /**
@@ -111,7 +140,8 @@ private:
  */
 template <typename T> class DerivedProp : public BaseDerivedProp {
 public:
-  DerivedProp() : BaseDerivedProp() {}
+  explicit DerivedProp(PropertyDidUpdateCallback &propertyDidUpdate)
+      : BaseDerivedProp(propertyDidUpdate) {}
 
   /**
   Returns the derived value
@@ -129,15 +159,15 @@ protected:
    Set derived value from sub classes
    */
   void setDerivedValue(std::shared_ptr<const T> value) {
-    setIsChanged(_derivedValue != value);
-    _derivedValue = value;
+    if (_derivedValue != value) {
+      _derivedValue = value;
+    }
   }
 
   /**
    Set derived value from sub classes
    */
   void setDerivedValue(const T &&value) {
-    setIsChanged(true);
     _derivedValue = std::make_shared<const T>(std::move(value));
   }
 
@@ -150,7 +180,8 @@ private:
  */
 template <typename T> class DerivedSkProp : public BaseDerivedProp {
 public:
-  DerivedSkProp() : BaseDerivedProp() {}
+  explicit DerivedSkProp(PropertyDidUpdateCallback &propertyDidUpdate)
+      : BaseDerivedProp(propertyDidUpdate) {}
 
   /**
   Returns the derived value
@@ -168,15 +199,15 @@ protected:
    Set derived value from sub classes
    */
   void setDerivedValue(sk_sp<T> value) {
-    setIsChanged(_derivedValue != value);
-    _derivedValue = value;
+    if (_derivedValue != value) {
+      _derivedValue = value;
+    }
   }
 
   /**
    Set derived value from sub classes
    */
   void setDerivedValue(const T &&value) {
-    setIsChanged(true);
     _derivedValue = sk_make_sp<T>(std::move(value));
   }
 

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "BaseNodeProp.h"
 #include "DrawingContext.h"
 #include "JsiValue.h"
-#include "NodeProp.h"
 
 #include <map>
 #include <memory>
@@ -24,7 +24,9 @@ public:
    and a function that will be called when any property was changed from within
    this class as a result of a Skia value change.
    */
-  explicit NodePropsContainer(PropId componentType) : _type(componentType) {}
+  explicit NodePropsContainer(PropId componentType,
+                              PropertyDidUpdateCallback &propertyDidUpdate)
+      : _type(componentType), _propertyDidUpdate(propertyDidUpdate) {}
 
   /**
    Returns true if there are any changes in the props container in the current
@@ -44,30 +46,6 @@ public:
    */
   const std::map<PropId, std::vector<NodeProp *>> &getMappedProperties() {
     return _mappedProperties;
-  }
-
-  /**
-   Updates any props that has changes waiting, updates props that have derived
-   values
-   */
-  void updatePendingValues() {
-    for (auto &prop : _properties) {
-      prop->updatePendingChanges();
-      if (!prop->isSet() && prop->isRequired()) {
-        throw std::runtime_error("Missing one or more required properties " +
-                                 std::string(prop->getName()) + " in the " +
-                                 _type + " component.");
-      }
-    }
-  }
-
-  /**
-   We're done, mark any changes as committed in all props
-   */
-  void markAsResolved() {
-    for (auto &prop : _properties) {
-      prop->markAsResolved();
-    }
   }
 
   /**
@@ -97,17 +75,8 @@ public:
     };
 
     for (auto &prop : _properties) {
-      prop->readValueFromJs(runtime, read);
+      prop->readValue(runtime, read);
     }
-  }
-
-  /**
-   Defines a property that will be updated with the container changes.
-   */
-  template <typename T = BaseNodeProp>
-  T *defineProperty(std::shared_ptr<T> prop) {
-    _properties.push_back(prop);
-    return prop.get();
   }
 
   /**
@@ -116,13 +85,16 @@ public:
   template <class _Tp, class... _Args,
             class = std::_EnableIf<!std::is_array<_Tp>::value>>
   _Tp *defineProperty(_Args &&...__args) {
-    return defineProperty(
-        std::make_shared<_Tp>(std::forward<_Args>(__args)...));
+    auto prop = std::make_shared<_Tp>(std::forward<_Args>(__args)...,
+                                      _propertyDidUpdate);
+    _properties.push_back(prop);
+    return prop.get();
   }
 
 private:
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
   std::map<PropId, std::vector<NodeProp *>> _mappedProperties;
+  PropertyDidUpdateCallback _propertyDidUpdate;
   PropId _type;
 };
 

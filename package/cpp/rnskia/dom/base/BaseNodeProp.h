@@ -14,11 +14,24 @@ using namespace RNJsi; // NOLINT
 using ReadPropFunc =
     std::function<jsi::Value(jsi::Runtime &, PropId, NodeProp *prop)>;
 
+class BaseNodeProp;
+
+using PropertyDidUpdateCallback = const std::function<void(BaseNodeProp *prop)>;
+
 /**
  Base class for Dom Node Properties
  */
-class BaseNodeProp {
+class BaseNodeProp : public std::enable_shared_from_this<BaseNodeProp> {
 public:
+  /**
+   Default ctor
+   */
+  explicit BaseNodeProp(PropertyDidUpdateCallback &propertyDidUpdate)
+      : _propertyDidUpdate(propertyDidUpdate) {}
+
+  /**
+   Base destructor
+   */
   virtual ~BaseNodeProp() {}
 
   /**
@@ -47,8 +60,7 @@ public:
    Override to read the value represented by this property from the Javascript
    property object
    */
-  virtual void readValueFromJs(jsi::Runtime &runtime,
-                               const ReadPropFunc &read) = 0;
+  virtual void readValue(jsi::Runtime &runtime, const ReadPropFunc &read) = 0;
 
   /**
    Returns the name (or names) in a property
@@ -64,6 +76,22 @@ public:
    Returns true for required props
    */
   bool isRequired() { return _isRequired; }
+
+protected:
+  /*
+   Notifies that the property did change
+   */
+  void callPropertyDidUpdate() {
+    if (_propertyDidUpdate != nullptr) {
+      _propertyDidUpdate(this);
+    } else {
+      auto name = getName();
+      throw std::runtime_error("Missing propertyDidUpdate for prop " +
+                               getName() + ".");
+    }
+  }
+
+  const PropertyDidUpdateCallback _propertyDidUpdate;
 
 private:
   bool _isRequired = false;

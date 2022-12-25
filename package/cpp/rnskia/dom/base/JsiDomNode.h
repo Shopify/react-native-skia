@@ -1,10 +1,12 @@
 #pragma once
 
+#include "DerivedNodeProp.h"
 #include "JsiHostObject.h"
 #include "NodeProp.h"
 #include "NodePropsContainer.h"
 
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -45,10 +47,12 @@ public:
       : _type(type), _context(context), _nodeId(NodeIdent++), JsiHostObject() {}
 
   /**
-   Called when creating the node, resolves properties from the node constructor.
-   These properties are materialized, ie. no animated values or anything.
+   Called when constructing the node, resolves properties from the node
+   constructor. These properties are materialized, ie. no animated values or
+   anything.
    */
-  JSI_HOST_FUNCTION(initializeNode) {
+  jsi::Value initializeNode(jsi::Runtime &runtime, const jsi::Value &thisValue,
+                            const jsi::Value *arguments, size_t count) {
     return setProps(runtime, thisValue, arguments, count);
   }
 
@@ -60,7 +64,7 @@ public:
       // Initialize properties container
       setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
     } else {
-      setEmptyProps();
+      initializeProps();
     }
     return jsi::Value::undefined();
   }
@@ -182,14 +186,29 @@ public:
    not.
    */
   void commitPendingChanges() {
-    // Update properties container
-    if (_propsContainer != nullptr) {
-      _propsContainer->updatePendingValues();
+    // Update properties container for the root node only
+    {
+      if (!_changedProps.isEmpty()) {
+        // Swap active changed props list to avoid the JS thread continuing
+        // to fill up the property list while we're updating the already
+        // changed props
+        _changedProps.swap();
+        // Iterate over the other (ie the one that will no longer change)
+        for (auto &prop : _changedProps.other()) {
+          prop->updatePendingChanges();
+          if (!prop->isSet() && prop->isRequired()) {
+            throw std::runtime_error(
+                "Missing one or more required properties " +
+                std::string(prop->getName()) + " in the " + _type +
+                " component.");
+          }
+        }
+      }
     }
 
     // Run all pending node operations
     {
-      std::lock_guard<std::mutex> lock(_childrenLock);
+      std::lock_guard<std::mutex> lock(_concurrencyLock);
       for (auto &op : _queuedNodeOps) {
         op();
       }
@@ -214,9 +233,17 @@ public:
    child nodes
    */
   virtual void resetPendingChanges() {
-    // Mark self as resolved
-    if (_propsContainer != nullptr) {
-      _propsContainer->markAsResolved();
+    // Update property state - the current state belongs
+    // to the other parth of the changed props list, since
+    // new changes are always added to the active part of
+    // the buffered set.
+    if (_changedProps.other().size() > 0) {
+      for (auto &prop : _changedProps.other()) {
+        prop->markAsResolved();
+      }
+      // Now we can clear it so that it is ready to be used i the
+      // next render pass when we swap again.
+      _changedProps.other().clear();
     }
 
     // Now let's dispose if needed
@@ -239,7 +266,7 @@ public:
       // Remove children
       std::vector<std::shared_ptr<JsiDomNode>> tmp;
       {
-        std::lock_guard<std::mutex> lock(_childrenLock);
+        std::lock_guard<std::mutex> lock(_concurrencyLock);
         tmp.reserve(_children.size());
         for (auto &child : _children) {
           tmp.push_back(child);
@@ -285,12 +312,9 @@ protected:
     printDebugInfo("JS:setProps(nodeId: " + std::to_string(_nodeId) + ")");
 #endif
     if (_propsContainer == nullptr) {
-
-      // Initialize properties container
-      _propsContainer = std::make_shared<NodePropsContainer>(getType());
-
-      // Ask sub classes to define their properties
-      defineProperties(_propsContainer.get());
+      // Set empty props initializes the props containes and calls
+      // defineProperties.
+      initializeProps();
     }
     // Update properties container
     _propsContainer->setProps(runtime, std::move(props));
@@ -302,16 +326,18 @@ protected:
   /**
    Called for components that has no properties
    */
-  void setEmptyProps() {
+  void initializeProps() {
 #if SKIA_DOM_DEBUG
     printDebugInfo("JS:setEmptyProps(nodeId: " + std::to_string(_nodeId) + ")");
 #endif
     if (_propsContainer == nullptr) {
 
       // Initialize properties container
-      _propsContainer = std::make_shared<NodePropsContainer>(getType());
+      _propsContainer = std::make_shared<NodePropsContainer>(
+          getType(), std::bind(&JsiDomNode::propertyDidUpdate, this,
+                               std::placeholders::_1));
 
-      // Ask sub classes to define their properties
+      // Define properties
       defineProperties(_propsContainer.get());
     }
   }
@@ -320,7 +346,7 @@ protected:
    Returns all child JsiDomNodes for this node.
    */
   const std::vector<std::shared_ptr<JsiDomNode>> &getChildren() {
-    std::lock_guard<std::mutex> lock(_childrenLock);
+    std::lock_guard<std::mutex> lock(_concurrencyLock);
     return _children;
   }
 
@@ -332,7 +358,7 @@ protected:
     printDebugInfo("JS:addChild(childId: " + std::to_string(child->_nodeId) +
                    ")");
 #endif
-    std::lock_guard<std::mutex> lock(_childrenLock);
+    std::lock_guard<std::mutex> lock(_concurrencyLock);
     _queuedNodeOps.push_back([child, this]() {
       _children.push_back(child);
       child->setParent(this);
@@ -350,7 +376,7 @@ protected:
         "JS:insertChildBefore(childId: " + std::to_string(child->_nodeId) +
         ", beforeId: " + std::to_string(before->_nodeId) + ")");
 #endif
-    std::lock_guard<std::mutex> lock(_childrenLock);
+    std::lock_guard<std::mutex> lock(_concurrencyLock);
     _queuedNodeOps.push_back([child, before, this]() {
       auto position = std::find(_children.begin(), _children.end(), before);
       _children.insert(position, child);
@@ -367,7 +393,7 @@ protected:
     printDebugInfo("JS:removeChild(childId: " + std::to_string(child->_nodeId) +
                    ")");
 #endif
-    std::lock_guard<std::mutex> lock(_childrenLock);
+    std::lock_guard<std::mutex> lock(_concurrencyLock);
     _queuedNodeOps.push_back([child, this]() {
       // Delete child itself
       _children.erase(
@@ -418,16 +444,35 @@ protected:
   */
   JsiDomNode *getParent() { return _parent; }
 
+  /**
+   Returns the root node in the DOM
+   */
+  JsiDomNode *getRoot() {
+    if (_parent == nullptr) {
+      return this;
+    }
+    return _parent;
+  }
+
+  void propertyDidUpdate(BaseNodeProp *prop) {
+    if (_parent) {
+      getRoot()->propertyDidUpdate(prop);
+    } else {
+      _changedProps.active().insert(prop);
+    }
+  }
+
 private:
   const char *_type;
   std::shared_ptr<RNSkPlatformContext> _context;
 
   std::shared_ptr<NodePropsContainer> _propsContainer;
+  BackBuffered<std::set<BaseNodeProp *>> _changedProps;
 
   std::function<void()> _disposeCallback;
 
   std::vector<std::shared_ptr<JsiDomNode>> _children;
-  std::mutex _childrenLock;
+  std::mutex _concurrencyLock;
 
   std::atomic<bool> _isDisposing = {false};
   bool _isDisposed = false;
