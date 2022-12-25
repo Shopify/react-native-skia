@@ -65,12 +65,13 @@ public:
       prop->markAsResolved();
     }
     _changedProps.other().clear();
+    _isChanged = false;
   }
 
   /**
    Returns the changed state of the prop
    */
-  bool isChanged() override { return !_changedProps.isEmpty(); }
+  bool isChanged() override { return _isChanged; }
 
   /**
    Delegate read value to child nodes
@@ -129,10 +130,13 @@ private:
     _changedProps.active().insert(prop);
     // Notify node that we have changed due to this
     callPropertyDidUpdate();
+    // Mark as changed locally
+    _isChanged = true;
   }
 
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
   BackBuffered<std::set<BaseNodeProp *>> _changedProps;
+  std::atomic<bool> _isChanged = {false};
 };
 
 /**
