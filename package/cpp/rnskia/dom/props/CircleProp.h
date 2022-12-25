@@ -20,10 +20,11 @@ static PropId PropNameC = JsiPropId::get("c");
 
 class CircleProp : public DerivedProp<SkPoint> {
 public:
-  CircleProp() : DerivedProp<SkPoint>() {
-    _c = addProperty(std::make_shared<PointProp>(PropNameC));
-    _cx = addProperty(std::make_shared<NodeProp>(PropNameCx));
-    _cy = addProperty(std::make_shared<NodeProp>(PropNameCy));
+  explicit CircleProp(PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPoint>(propertyDidUpdate) {
+    _c = addProperty<PointProp>(PropNameC);
+    _cx = addProperty<NodeProp>(PropNameCx);
+    _cy = addProperty<NodeProp>(PropNameCy);
   }
 
   void updateDerivedValue() override {

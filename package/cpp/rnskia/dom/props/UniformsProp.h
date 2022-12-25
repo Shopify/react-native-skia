@@ -80,8 +80,10 @@ void processUniform(std::vector<SkScalar> &values, SkRuntimeEffect *source,
 
 class UniformsProp : public DerivedSkProp<SkData> {
 public:
-  UniformsProp(PropId name, NodeProp *sourceProp) : DerivedSkProp<SkData>() {
-    _uniformsProp = addProperty(std::make_shared<NodeProp>(name));
+  UniformsProp(PropId name, NodeProp *sourceProp,
+               PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedSkProp<SkData>(propertyDidUpdate) {
+    _uniformsProp = addProperty<NodeProp>(name);
     _sourceProp = sourceProp;
   }
 

@@ -11,8 +11,10 @@ namespace RNSkia {
 
 class PictureProp : public DerivedSkProp<SkPicture> {
 public:
-  explicit PictureProp(PropId name) : DerivedSkProp<SkPicture>() {
-    _pictureProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit PictureProp(PropId name,
+                       PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedSkProp<SkPicture>(propertyDidUpdate) {
+    _pictureProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {

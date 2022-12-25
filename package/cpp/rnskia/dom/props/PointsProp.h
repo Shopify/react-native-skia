@@ -19,8 +19,10 @@ namespace RNSkia {
 
 class PointModeProp : public DerivedProp<SkCanvas::PointMode> {
 public:
-  explicit PointModeProp(PropId name) : DerivedProp<SkCanvas::PointMode>() {
-    _pointModeProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit PointModeProp(PropId name,
+                         PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkCanvas::PointMode>(propertyDidUpdate) {
+    _pointModeProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
@@ -51,8 +53,9 @@ private:
 
 class PointsProp : public DerivedProp<std::vector<SkPoint>> {
 public:
-  explicit PointsProp(PropId name) : DerivedProp<std::vector<SkPoint>>() {
-    _pointsProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit PointsProp(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<std::vector<SkPoint>>(propertyDidUpdate) {
+    _pointsProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {

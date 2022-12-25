@@ -16,8 +16,10 @@ namespace RNSkia {
 
 class StrokeCapProp : public DerivedProp<SkPaint::Cap> {
 public:
-  explicit StrokeCapProp(PropId name) : DerivedProp<SkPaint::Cap>() {
-    _strokeCap = addProperty(std::make_shared<NodeProp>(name));
+  explicit StrokeCapProp(PropId name,
+                         PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPaint::Cap>(propertyDidUpdate) {
+    _strokeCap = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
@@ -45,8 +47,10 @@ private:
 
 class StrokeJoinProp : public DerivedProp<SkPaint::Join> {
 public:
-  explicit StrokeJoinProp(PropId name) : DerivedProp<SkPaint::Join>() {
-    _strokeJoin = addProperty(std::make_shared<NodeProp>(name));
+  explicit StrokeJoinProp(PropId name,
+                          PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPaint::Join>(propertyDidUpdate) {
+    _strokeJoin = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {

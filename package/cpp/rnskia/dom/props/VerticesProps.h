@@ -21,17 +21,13 @@ namespace RNSkia {
 
 class VerticesProps : public DerivedSkProp<SkVertices> {
 public:
-  VerticesProps() : DerivedSkProp<SkVertices>() {
-    _vertexModeProp =
-        addProperty(std::make_shared<VertexModeProp>(JsiPropId::get("mode")));
-    _colorsProp =
-        addProperty(std::make_shared<ColorsProp>(JsiPropId::get("colors")));
-    _verticesProp =
-        addProperty(std::make_shared<PointsProp>(JsiPropId::get("vertices")));
-    _texturesProp =
-        addProperty(std::make_shared<PointsProp>(JsiPropId::get("textures")));
-    _indicesProp =
-        addProperty(std::make_shared<Numbers16Prop>(JsiPropId::get("indices")));
+  explicit VerticesProps(PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedSkProp<SkVertices>(propertyDidUpdate) {
+    _vertexModeProp = addProperty<VertexModeProp>("mode");
+    _colorsProp = addProperty<ColorsProp>("colors");
+    _verticesProp = addProperty<PointsProp>("vertices");
+    _texturesProp = addProperty<PointsProp>("textures");
+    _indicesProp = addProperty<Numbers16Prop>("indices");
 
     _vertexModeProp->require();
     _verticesProp->require();

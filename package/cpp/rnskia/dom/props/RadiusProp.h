@@ -16,9 +16,10 @@ namespace RNSkia {
 
 class RadiusProp : public DerivedProp<SkPoint> {
 public:
-  explicit RadiusProp(PropId name) : DerivedProp<SkPoint>() {
-    _pointProp = addProperty(std::make_shared<PointProp>(name));
-    _radiusProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit RadiusProp(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPoint>(propertyDidUpdate) {
+    _pointProp = addProperty<PointProp>(name);
+    _radiusProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {

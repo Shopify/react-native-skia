@@ -16,8 +16,10 @@ namespace RNSkia {
 
 class TileModeProp : public DerivedProp<SkTileMode> {
 public:
-  explicit TileModeProp(PropId name) : DerivedProp<SkTileMode>() {
-    _tileModeProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit TileModeProp(PropId name,
+                        PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkTileMode>(propertyDidUpdate) {
+    _tileModeProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {

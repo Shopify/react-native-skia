@@ -16,8 +16,9 @@ namespace RNSkia {
 
 class PathProp : public DerivedProp<SkPath> {
 public:
-  explicit PathProp(PropId name) : DerivedProp<SkPath>() {
-    _pathProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit PathProp(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPath>(propertyDidUpdate) {
+    _pathProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {

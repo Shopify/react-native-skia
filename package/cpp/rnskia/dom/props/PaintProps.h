@@ -21,11 +21,13 @@ namespace RNSkia {
 
 class PaintProp : public DerivedProp<SkPaint> {
 public:
-  explicit PaintProp(PropId name) : DerivedProp<SkPaint>() {
-    _paintProp = addProperty(std::make_shared<NodeProp>(name));
+  PaintProp(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPaint>(propertyDidUpdate) {
+    _paintProp = addProperty<NodeProp>(name);
   }
 
-  PaintProp() : PaintProp(JsiPropId::get("paint")) {}
+  explicit PaintProp(PropertyDidUpdateCallback &propertyDidUpdate)
+      : PaintProp("paint", propertyDidUpdate) {}
 
   void updateDerivedValue() override {
     if (_paintProp->isSet()) {
@@ -52,23 +54,17 @@ private:
 
 class PaintProps : public BaseDerivedProp {
 public:
-  PaintProps() : BaseDerivedProp() {
-    _color = addProperty(std::make_shared<ColorProp>(JsiPropId::get("color")));
-    _style = addProperty(std::make_shared<NodeProp>(JsiPropId::get("style")));
-    _strokeWidth =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("strokeWidth")));
-    _blendMode = addProperty(
-        std::make_shared<BlendModeProp>(JsiPropId::get("blendMode")));
-    _strokeJoin = addProperty(
-        std::make_shared<StrokeJoinProp>(JsiPropId::get("strokeJoin")));
-    _strokeCap = addProperty(
-        std::make_shared<StrokeCapProp>(JsiPropId::get("strokeCap")));
-    _strokeMiter =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("strokeMiter")));
-    _antiAlias =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("antiAlias")));
-    _opacity =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("opacity")));
+  explicit PaintProps(PropertyDidUpdateCallback &propertyDidUpdate)
+      : BaseDerivedProp(propertyDidUpdate) {
+    _color = addProperty<ColorProp>("color");
+    _style = addProperty<NodeProp>("style");
+    _strokeWidth = addProperty<NodeProp>("strokeWidth");
+    _blendMode = addProperty<BlendModeProp>("blendMode");
+    _strokeJoin = addProperty<StrokeJoinProp>("strokeJoin");
+    _strokeCap = addProperty<StrokeCapProp>("strokeCap");
+    _strokeMiter = addProperty<NodeProp>("strokeMiter");
+    _antiAlias = addProperty<NodeProp>("antiAlias");
+    _opacity = addProperty<NodeProp>("opacity");
   }
 
   void decorate(DrawingContext *context) {

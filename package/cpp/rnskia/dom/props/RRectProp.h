@@ -27,8 +27,9 @@ static PropId PropNameR = JsiPropId::get("r");
  */
 class RRectProp : public DerivedProp<SkRRect> {
 public:
-  explicit RRectProp(PropId name) : DerivedProp() {
-    _prop = addProperty(std::make_shared<NodeProp>(name));
+  explicit RRectProp(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp(propertyDidUpdate) {
+    _prop = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
@@ -78,12 +79,13 @@ private:
  */
 class RRectPropFromProps : public DerivedProp<SkRRect> {
 public:
-  RRectPropFromProps() : DerivedProp<SkRRect>() {
-    _x = addProperty(std::make_shared<NodeProp>(PropNameX));
-    _y = addProperty(std::make_shared<NodeProp>(PropNameY));
-    _width = addProperty(std::make_shared<NodeProp>(PropNameWidth));
-    _height = addProperty(std::make_shared<NodeProp>(PropNameHeight));
-    _r = addProperty(std::make_shared<NodeProp>(PropNameR));
+  explicit RRectPropFromProps(PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkRRect>(propertyDidUpdate) {
+    _x = addProperty<NodeProp>(PropNameX);
+    _y = addProperty<NodeProp>(PropNameY);
+    _width = addProperty<NodeProp>(PropNameWidth);
+    _height = addProperty<NodeProp>(PropNameHeight);
+    _r = addProperty<NodeProp>(PropNameR);
   }
 
   void updateDerivedValue() override {
@@ -111,10 +113,10 @@ private:
  */
 class RRectProps : public DerivedProp<SkRRect> {
 public:
-  explicit RRectProps(PropId name) : DerivedProp<SkRRect>() {
-    _rectProp = addProperty<RRectProp>(std::make_shared<RRectProp>(name));
-    _rectPropFromProps =
-        addProperty<RRectPropFromProps>(std::make_shared<RRectPropFromProps>());
+  explicit RRectProps(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkRRect>(propertyDidUpdate) {
+    _rectProp = addProperty<RRectProp>(name);
+    _rectPropFromProps = addProperty<RRectPropFromProps>();
   }
 
   void updateDerivedValue() override {

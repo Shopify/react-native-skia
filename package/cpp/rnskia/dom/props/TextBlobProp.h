@@ -12,8 +12,10 @@ namespace RNSkia {
 
 class TextBlobProp : public DerivedSkProp<SkTextBlob> {
 public:
-  explicit TextBlobProp(PropId name) : DerivedSkProp<SkTextBlob>() {
-    _textBlobProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit TextBlobProp(PropId name,
+                        PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedSkProp<SkTextBlob>(propertyDidUpdate) {
+    _textBlobProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
@@ -37,12 +39,12 @@ private:
 
 class TextPathBlobProp : public DerivedSkProp<SkTextBlob> {
 public:
-  TextPathBlobProp() : DerivedSkProp<SkTextBlob>() {
-    _fontProp = addProperty(std::make_shared<FontProp>(JsiPropId::get("font")));
-    _textProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("text")));
-    _pathProp = addProperty(std::make_shared<PathProp>(JsiPropId::get("path")));
-    _offsetProp = addProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("initialOffset")));
+  explicit TextPathBlobProp(PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedSkProp<SkTextBlob>(propertyDidUpdate) {
+    _fontProp = addProperty<FontProp>("font");
+    _textProp = addProperty<NodeProp>("text");
+    _pathProp = addProperty<PathProp>("path");
+    _offsetProp = addProperty<NodeProp>("initialOffset");
 
     _fontProp->require();
     _textProp->require();

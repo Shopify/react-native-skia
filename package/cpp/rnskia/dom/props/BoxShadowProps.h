@@ -9,16 +9,14 @@ namespace RNSkia {
 
 class BoxShadowProps : public DerivedProp<SkPaint> {
 public:
-  BoxShadowProps() : DerivedProp<SkPaint>() {
-    _dxProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("dx")));
-    _dyProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("dy")));
-    _spreadProp =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("spread")));
-    _blurProp = addProperty(std::make_shared<NodeProp>(JsiPropId::get("blur")));
-    _colorProp =
-        addProperty(std::make_shared<ColorProp>(JsiPropId::get("color")));
-    _innerProp =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("inner")));
+  explicit BoxShadowProps(PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPaint>(propertyDidUpdate) {
+    _dxProp = addProperty<NodeProp>("dx");
+    _dyProp = addProperty<NodeProp>("dy");
+    _spreadProp = addProperty<NodeProp>("spread");
+    _blurProp = addProperty<NodeProp>("blur");
+    _colorProp = addProperty<ColorProp>("color");
+    _innerProp = addProperty<NodeProp>("inner");
 
     _blurProp->require();
   }

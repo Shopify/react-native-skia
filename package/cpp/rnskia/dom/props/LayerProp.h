@@ -10,9 +10,10 @@ namespace RNSkia {
 
 class LayerProp : public DerivedProp<SkPaint> {
 public:
-  explicit LayerProp(PropId name) : DerivedProp<SkPaint>() {
-    _layerPaintProp = addProperty(std::make_shared<PaintProp>(name));
-    _layerBoolProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit LayerProp(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPaint>(propertyDidUpdate) {
+    _layerPaintProp = addProperty<PaintProp>(name);
+    _layerBoolProp = addProperty<NodeProp>(name);
   }
 
   /**

@@ -21,8 +21,9 @@ static SkPoint EmptyPoint = SkPoint::Make(-1, -1);
 
 class PointProp : public DerivedProp<SkPoint> {
 public:
-  explicit PointProp(PropId name) : DerivedProp<SkPoint>() {
-    _pointProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit PointProp(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkPoint>(propertyDidUpdate) {
+    _pointProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
