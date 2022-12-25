@@ -28,8 +28,9 @@ public:
     if (_pointProp->isSet()) {
       // Check for JsiSkRect and JsiSkPoint
       setDerivedValue(std::move(processValue(_pointProp->value())));
+    } else {
+      setDerivedValue(nullptr);
     }
-    setDerivedValue(nullptr);
   }
 
   static SkPoint processValue(const JsiValue &value) {
@@ -52,7 +53,7 @@ public:
       auto y = value.getValue(PropNameY);
       return SkPoint::Make(x.getAsNumber(), y.getAsNumber());
     }
-    throw std::runtime_error("Expected array of points for points property.");
+    throw std::runtime_error("Expected point value.");
   }
 
 private:
