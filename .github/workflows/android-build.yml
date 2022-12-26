@@ -1,14 +1,6 @@
 name: Test Android build
 
-on:
-  pull_request:
-    paths:
-      - 'package/android/**'
-      - 'package/cpp/**'
-      - 'example/package.json'
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
   build:

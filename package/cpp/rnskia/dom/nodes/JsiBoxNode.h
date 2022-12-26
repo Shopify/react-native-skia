@@ -15,15 +15,8 @@ public:
 
 protected:
   void renderNode(DrawingContext *context) override {
-    // Verify
-    if (!_rrectProp->isSet() && !_rectProp->isSet()) {
-      throw std::runtime_error("The box property must be set on the Box node.");
-    }
-
     // Get rect - we'll try to end up with an rrect:
-    auto box = _rrectProp->isSet()
-                   ? *_rrectProp->getDerivedValue()
-                   : SkRRect::MakeRectXY(*_rectProp->getDerivedValue(), 0, 0);
+    auto box = *_boxProp->getDerivedValue();
 
     // Get shadows
     std::vector<std::shared_ptr<JsiBoxShadowNode>> shadows;
@@ -76,8 +69,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomRenderNode::defineProperties(container);
-    _rrectProp = container->defineProperty<RRectProp>("box");
-    _rectProp = container->defineProperty<RectProp>("box");
+    _boxProp = container->defineProperty<BoxProps>("box");
+    _boxProp->require();
   }
 
 private:
@@ -95,8 +88,7 @@ private:
     return inflate(box, -dx, -dy, tx, ty);
   }
 
-  RRectProp *_rrectProp;
-  RectProp *_rectProp;
+  BoxProps *_boxProp;
 };
 
 } // namespace RNSkia
