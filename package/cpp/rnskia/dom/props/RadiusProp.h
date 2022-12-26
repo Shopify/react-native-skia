@@ -18,26 +18,24 @@ class RadiusProp : public DerivedProp<SkPoint> {
 public:
   explicit RadiusProp(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
       : DerivedProp<SkPoint>(propertyDidUpdate) {
-    _pointProp = addProperty<PointProp>(name);
     _radiusProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
-    if (_pointProp->isSet()) {
-      setDerivedValue(_pointProp->getDerivedValue());
-      return;
-    }
-
     if (_radiusProp->isSet()) {
-      setDerivedValue(SkPoint::Make(_radiusProp->value().getAsNumber(),
-                                    _radiusProp->value().getAsNumber()));
+      // Check for simple number:
+      if (_radiusProp->value().getType() == PropType::Number) {
+        setDerivedValue(SkPoint::Make(_radiusProp->value().getAsNumber(),
+                                      _radiusProp->value().getAsNumber()));
+      } else {
+        setDerivedValue(PointProp::processValue(_radiusProp->value()));
+      }
     } else {
       setDerivedValue(nullptr);
     }
   }
 
 private:
-  PointProp *_pointProp;
   NodeProp *_radiusProp;
 };
 
