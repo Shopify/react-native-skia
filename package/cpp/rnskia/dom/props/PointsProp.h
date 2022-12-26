@@ -62,13 +62,7 @@ public:
       points.reserve(pointsArray.size());
       for (size_t i = 0; i < pointsArray.size(); ++i) {
         auto p = pointsArray[i];
-        auto point = PointProp::processValue(p);
-        if (point != EmptyPoint) {
-          points.push_back(point);
-        } else {
-          throw std::runtime_error(
-              "Expected array of points for points property.");
-        }
+        points.push_back(PointProp::processValue(p));
       }
       setDerivedValue(std::move(points));
     } else {

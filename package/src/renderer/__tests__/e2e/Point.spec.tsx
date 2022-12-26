@@ -1,11 +1,11 @@
 import React from "react";
 
-import { checkImage, itFailsE2e } from "../../../__tests__/setup";
+import { checkImage } from "../../../__tests__/setup";
 import { Fill, Points } from "../../components";
 import { surface, importSkia } from "../setup";
 
 describe("Points", () => {
-  itFailsE2e("should draw a point without throwing an error", async () => {
+  it("should draw a point without throwing an error", async () => {
     const { vec } = importSkia();
     const img = await surface.draw(
       <>
