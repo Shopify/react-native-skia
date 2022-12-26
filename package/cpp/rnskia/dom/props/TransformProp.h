@@ -54,9 +54,9 @@ public:
         } else if (key == PropNameScaleY) {
           m->preScale(1, value);
         } else if (key == PropNameSkewX) {
-          m->preScale(value, 0);
+          m->preSkew(value, 0);
         } else if (key == PropNameSkewY) {
-          m->preScale(value, 0);
+          m->preSkew(0, value);
         } else if (key == PropNameRotate || key == PropNameRotateZ) {
           m->preRotate(SkRadiansToDegrees(value));
         } else {
