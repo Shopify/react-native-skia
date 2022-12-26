@@ -67,8 +67,21 @@ protected:
       }
       auto uniforms =
           _uniformsProp->isSet() ? _uniformsProp->getDerivedValue() : nullptr;
-      auto localMatrix =
+
+      SkMatrix lm;
+      auto tm =
           _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
+
+      if (tm != nullptr) {
+        if (_originProp->isSet()) {
+          auto tr = _originProp->getDerivedValue();
+          lm.preTranslate(tr->x(), tr->y());
+          lm.preConcat(*tm);
+          lm.preTranslate(-tr->x(), -tr->y());
+        } else {
+          lm.preConcat(*tm);
+        }
+      }
 
       // get all children that are shader nodes
       std::vector<sk_sp<SkShader>> children;
@@ -82,8 +95,7 @@ protected:
 
       // Update shader
       setShader(context, source->getObject()->makeShader(
-                             uniforms, children.data(), children.size(),
-                             localMatrix.get()));
+                             uniforms, children.data(), children.size(), &lm));
     }
   }
 
@@ -93,6 +105,7 @@ protected:
     _uniformsProp =
         container->defineProperty<UniformsProp>("uniforms", _sourceProp);
     _transformProp = container->defineProperty<TransformProp>("transform");
+    _originProp = container->defineProperty<PointProp>("origin");
 
     _sourceProp->require();
   }
@@ -101,6 +114,7 @@ private:
   NodeProp *_sourceProp;
   UniformsProp *_uniformsProp;
   TransformProp *_transformProp;
+  PointProp *_originProp;
 };
 
 class JsiImageShaderNode : public JsiBaseShaderNode,
@@ -114,9 +128,8 @@ protected:
     if (isChanged(context)) {
       auto image = _imageProps->getImage();
       auto rect = _imageProps->getRect();
-      auto lm = _transformProp->isSet()
-                    ? _transformProp->getDerivedValue().get()
-                    : nullptr;
+      auto lm =
+          _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
 
       if (rect != nullptr && lm != nullptr) {
         auto rc = _imageProps->getDerivedValue();
@@ -127,9 +140,15 @@ protected:
           // matrix to be translated and scaled more and more for each render
           // even thought the matrix prop did not change.
           _matrix.reset();
-          _matrix.preConcat(*lm);
-          _matrix.preTranslate(m3.x(), m3.y());
-          _matrix.preScale(m3.width(), m3.height());
+          _matrix.preConcat(m3);
+          if (_originProp->isSet()) {
+            auto tr = _originProp->getDerivedValue();
+            _matrix.preTranslate(tr->x(), tr->y());
+            _matrix.preConcat(*lm);
+            _matrix.preTranslate(-tr->x(), -tr->y());
+          } else {
+            _matrix.preConcat(*lm);
+          }
         }
       }
 
@@ -154,6 +173,7 @@ protected:
 
     _imageProps = container->defineProperty<ImageProps>();
     _transformProp = container->defineProperty<TransformProp>("transform");
+    _originProp = container->defineProperty<PointProp>("origin");
 
     _txProp->require();
     _tyProp->require();
@@ -201,6 +221,7 @@ private:
   NodeProp *_mipmapModeProp;
   ImageProps *_imageProps;
   TransformProp *_transformProp;
+  PointProp *_originProp;
 };
 
 class JsiColorShaderNode : public JsiBaseShaderNode,

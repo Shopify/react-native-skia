@@ -41,6 +41,23 @@ public:
     return jsi::String::createFromUtf8(runtime, "Path");
   }
 
+  JSI_HOST_FUNCTION(addPath) {
+    auto src = JsiSkPath::fromValue(runtime, arguments[0]);
+    auto matrix =
+        count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()
+            ? JsiSkMatrix::fromValue(runtime, arguments[1])
+            : nullptr;
+    auto mode = count > 2 && arguments[2].asBool()
+                    ? SkPath::kExtend_AddPathMode
+                    : SkPath::kAppend_AddPathMode;
+    if (matrix == nullptr) {
+      getObject()->addPath(*src, mode);
+    } else {
+      getObject()->addPath(*src, *matrix, mode);
+    }
+    return thisValue.getObject(runtime);
+  }
+
   JSI_HOST_FUNCTION(addArc) {
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto start = arguments[1].asNumber();
@@ -512,9 +529,9 @@ public:
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPath, __typename__))
 
   JSI_EXPORT_FUNCTIONS(
-      JSI_EXPORT_FUNC(JsiSkPath, addArc), JSI_EXPORT_FUNC(JsiSkPath, addOval),
-      JSI_EXPORT_FUNC(JsiSkPath, addPoly), JSI_EXPORT_FUNC(JsiSkPath, addRect),
-      JSI_EXPORT_FUNC(JsiSkPath, addRRect),
+      JSI_EXPORT_FUNC(JsiSkPath, addPath), JSI_EXPORT_FUNC(JsiSkPath, addArc),
+      JSI_EXPORT_FUNC(JsiSkPath, addOval), JSI_EXPORT_FUNC(JsiSkPath, addPoly),
+      JSI_EXPORT_FUNC(JsiSkPath, addRect), JSI_EXPORT_FUNC(JsiSkPath, addRRect),
       JSI_EXPORT_FUNC(JsiSkPath, arcToOval),
       JSI_EXPORT_FUNC(JsiSkPath, arcToRotated),
       JSI_EXPORT_FUNC(JsiSkPath, rArcTo),

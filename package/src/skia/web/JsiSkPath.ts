@@ -33,6 +33,16 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     super(CanvasKit, ref, "Path");
   }
 
+  addPath(src: SkPath, matrix?: SkMatrix, extend = false) {
+    const args = [
+      JsiSkPath.fromValue(src),
+      ...(matrix ? JsiSkMatrix.fromValue<Float32Array>(matrix) : []),
+      extend,
+    ];
+    this.ref.addPath(...args);
+    return this;
+  }
+
   addArc(
     oval: SkRect,
     startAngleInDegrees: number,
