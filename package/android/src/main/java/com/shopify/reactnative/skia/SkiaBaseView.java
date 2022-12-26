@@ -32,11 +32,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        // We do not accept the touch event if this view is not supposed to receive it.
-        if (!PointerEvents.canBeTouchTarget(getPointerEvents())) {
-            return false;
-        }
-
         // https://developer.android.com/training/gestures/multi
         int action = ev.getActionMasked();
 
