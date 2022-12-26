@@ -78,12 +78,15 @@ public:
     return _rectProp->getDerivedValue();
   }
 
-  SkRect rect2rect(SkRect src, SkRect dst) {
-    auto scaleX = dst.width() / src.width();
-    auto scaleY = dst.height() / src.height();
-    auto translateX = dst.x() - src.x() * scaleX;
-    auto translateY = dst.y() - src.y() * scaleY;
-    return SkRect::MakeXYWH(translateX, translateY, scaleX, scaleY);
+  SkMatrix rect2rect(SkRect src, SkRect dst) {
+    auto sx = dst.width() / src.width();
+    auto sy = dst.height() / src.height();
+    auto tx = dst.x() - src.x() * sx;
+    auto ty = dst.y() - src.y() * sy;
+    SkMatrix m3;
+    m3.preTranslate(tx, ty);
+    m3.preScale(sx, sy);
+    return m3;
   }
 
 private:
