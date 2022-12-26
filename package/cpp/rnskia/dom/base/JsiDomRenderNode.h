@@ -215,7 +215,7 @@ private:
    */
   void materializeDeclarations() {
     for (auto &child : getChildren()) {
-      if (child->getNodeClass() == JsiDomNodeClass::RenderNode) {
+      if (child->getNodeClass() == JsiDomNodeClass::DeclarationNode) {
         std::static_pointer_cast<JsiBaseDomDeclarationNode>(child)
             ->decorateContext(_localContext.get());
       }
