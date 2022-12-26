@@ -30,6 +30,11 @@ public:
 
 static std::atomic<size_t> NodeIdent = 1000;
 
+typedef enum {
+  RenderNode = 1,
+  DeclarationNode = 2,
+} JsiDomNodeClass;
+
 /**
  Implements an abstract base class for nodes in the Skia Reconciler. This node
  coresponds to the native implementation of the Node.ts class in Javascript.
@@ -173,6 +178,12 @@ public:
    empty implementation
    */
   virtual void invalidateContext() = 0;
+
+  /*
+   Returns the class of node so that we can do loops faster without
+   having to check using runtime type information
+   */
+  virtual JsiDomNodeClass getNodeClass() = 0;
 
   /**
    Updates any pending property changes in all nodes and child nodes. This
