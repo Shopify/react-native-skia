@@ -140,7 +140,8 @@ private:
  */
 class BoxProps : public DerivedProp<SkRRect> {
 public:
-  explicit BoxProps(PropId name, PropertyDidUpdateCallback &propertyDidUpdate) : DerivedProp<SkRRect>(propertyDidUpdate) {
+  explicit BoxProps(PropId name, PropertyDidUpdateCallback &propertyDidUpdate)
+      : DerivedProp<SkRRect>(propertyDidUpdate) {
     _boxProp = addProperty<NodeProp>(name);
   }
 
