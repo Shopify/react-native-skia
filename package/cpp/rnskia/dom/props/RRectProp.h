@@ -140,8 +140,8 @@ private:
  */
 class BoxProps : public DerivedProp<SkRRect> {
 public:
-  explicit BoxProps(PropId name) : DerivedProp<SkRRect>() {
-    _boxProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit BoxProps(PropId name, PropertyDidUpdateCallback &propertyDidUpdate) : DerivedProp<SkRRect>(propertyDidUpdate) {
+    _boxProp = addProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
