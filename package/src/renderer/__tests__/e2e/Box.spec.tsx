@@ -32,7 +32,25 @@ describe("Box", () => {
     const w = width;
     const h = width;
     const src = { x: 15, y: 15, width: w - 30, height: h - 30 };
-    const border = { ...src, rx: 10, ry: 10 };
+    const img = await surface.draw(
+      <FitBox src={src} dst={rect(30, 15, w - 30, h - 10)}>
+        <Box box={src} color={"white"}>
+          <BoxShadow dx={5} dy={12} blur={5} color={"red"} />
+          <BoxShadow dx={5} dy={12} blur={5} color={"red"} />
+          <BoxShadow dx={-5} dy={-12} blur={5} color={"green"} />
+          <BoxShadow dx={-5} dy={-12} blur={5} color={"green"} />
+        </Box>
+      </FitBox>
+    );
+    checkImage(img, "snapshots/box/box-shadow2.png");
+  });
+  it("should render have rounded corners", async () => {
+    const { rect } = importSkia();
+    const { width } = surface;
+    const w = width;
+    const h = width;
+    const src = { x: 15, y: 15, width: w - 30, height: h - 30 };
+    const border = { rect: src, rx: 10, ry: 10 };
     const img = await surface.draw(
       <FitBox src={src} dst={rect(30, 15, w - 30, h - 10)}>
         <Box box={border} color={"white"}>
@@ -43,8 +61,9 @@ describe("Box", () => {
         </Box>
       </FitBox>
     );
-    checkImage(img, "snapshots/box/box-shadow2.png");
+    checkImage(img, "snapshots/box/box-shadow3.png");
   });
+
   it("should draw a box with red stroke", async () => {
     const { width } = surface;
     const size = width / 2;
