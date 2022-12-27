@@ -13,15 +13,16 @@ namespace RNJsi {
 namespace jsi = facebook::jsi;
 
 enum struct PropType {
-  Undefined = 1,
-  Null = 2,
-  Bool = 4,
-  Number = 8,
-  String = 16,
-  Object = 32,
-  HostObject = 64,
-  HostFunction = 128,
-  Array = 256
+  Undefined = 0,
+  Null =
+      1, // Keep undefined / null constant so that we can do checks faster
+  Bool = 2,
+  Number = 3,
+  String = 4,
+  Object = 5,
+  HostObject = 6,
+  HostFunction = 7,
+  Array = 8
 };
 
 using PropId = const char *;
@@ -80,7 +81,7 @@ public:
   /**
    Returns true if the value is undefined or null.
    */
-  bool isUndefinedOrNull() const { return isUndefined() || isNull(); }
+  bool isUndefinedOrNull() const { return _type <= PropType::Null; }
 
   /**
    Returns true if the value is undefined.
