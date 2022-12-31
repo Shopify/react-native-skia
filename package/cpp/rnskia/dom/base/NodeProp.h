@@ -33,7 +33,6 @@ public:
       _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
       _isChanged = true;
       _hasNewValue = false;
-      callPropertyDidUpdate();
     } else {
       // Otherwise we'll just update the buffer and commit it later.
       std::lock_guard<std::mutex> lock(_swapMutex);
@@ -45,6 +44,8 @@ public:
       }
       _hasNewValue = *_buffer.get() != *_value.get();
     }
+    // Notify parent dom tree that we have a property update
+    callPropertyDidUpdate();
   }
 
   /**
@@ -62,6 +63,7 @@ public:
     // This is almost always a change - meaning a swap is
     // cheaper than comparing for equality.
     _hasNewValue = true;
+    // Notify parent dom tree that we have a property update
     callPropertyDidUpdate();
   }
 
