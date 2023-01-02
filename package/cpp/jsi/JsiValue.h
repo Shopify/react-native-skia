@@ -14,8 +14,7 @@ namespace jsi = facebook::jsi;
 
 enum struct PropType {
   Undefined = 0,
-  Null =
-      1, // Keep undefined / null constant so that we can do checks faster
+  Null = 1, // Keep undefined / null constant so that we can do checks faster
   Bool = 2,
   Number = 3,
   String = 4,
