@@ -17,6 +17,7 @@ export interface Node<P> {
   setProps(props: P): void;
   setProp<K extends keyof P>(name: K, v: P[K]): boolean;
   getProps(): P;
+  getNodeId(): number;
 
   children(): Node<unknown>[];
   addChild(child: Node<unknown>): void;

@@ -115,6 +115,13 @@ public:
     return info->view->callJsiMethod(runtime, action, params, paramsCount);
   }
 
+  void requestRedraw(size_t nativeId) {
+    auto info = getEnsuredViewInfo(nativeId);
+    if (info->view != nullptr) {
+      info->view->requestRedraw();
+    }
+  }
+
   JSI_HOST_FUNCTION(requestRedraw) {
     if (count != 1) {
       _platformContext->raiseError(
@@ -134,10 +141,7 @@ public:
     // find Skia View
     int nativeId = arguments[0].asNumber();
 
-    auto info = getEnsuredViewInfo(nativeId);
-    if (info->view != nullptr) {
-      info->view->requestRedraw();
-    }
+    requestRedraw(nativeId);
     return jsi::Value::undefined();
   }
 
@@ -317,9 +321,9 @@ private:
    * @return The callback info object for the requested view
    */
   RNSkViewInfo *getEnsuredViewInfo(size_t nativeId) {
+    std::lock_guard<std::mutex> lock(_mutex);
     if (_viewInfos.count(nativeId) == 0) {
       RNSkViewInfo info;
-      std::lock_guard<std::mutex> lock(_mutex);
       _viewInfos.emplace(nativeId, info);
     }
     return &_viewInfos.at(nativeId);

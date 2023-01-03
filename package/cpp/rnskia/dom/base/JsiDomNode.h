@@ -52,6 +52,10 @@ public:
     return setProps(runtime, thisValue, arguments, count);
   }
 
+  JSI_HOST_FUNCTION(getNodeId) {
+    return jsi::Value(static_cast<double>(_nodeId));
+  }
+
   /**
    JS-function for setting the properties from the JS reconciler on the node.
    */
@@ -138,6 +142,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDomNode, setProps),
                        JSI_EXPORT_FUNC(JsiDomNode, setProp),
+                       JSI_EXPORT_FUNC(JsiDomNode, getNodeId),
                        JSI_EXPORT_FUNC(JsiDomNode, addChild),
                        JSI_EXPORT_FUNC(JsiDomNode, removeChild),
                        JSI_EXPORT_FUNC(JsiDomNode, insertChildBefore),

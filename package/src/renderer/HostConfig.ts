@@ -11,12 +11,61 @@ import type { AnimatedProps } from "./processors";
 import { isSelector, isValue } from "./processors";
 import { mapKeys, shallowEq } from "./typeddash";
 
+import { startMapper } from "react-native-reanimated/src/reanimated2/core";
+import { SkiaViewApi } from "../views/api";
+
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
   }
 };
+
+let reanimatedInitialized = false;
+
+function sanitizeReanimatedProps(props) {
+  const sharedProps = {};
+  const otherProps = {};
+  for (let propName in props) {
+    const propValue = props[propName];
+    if (isSharedValue(propValue)) {
+      sharedProps[propName] = propValue;
+      otherProps[propName] = propValue.value;
+    } else {
+      otherProps[propName] = propValue;
+    }
+  }
+  return [otherProps, sharedProps];
+}
+
+function bindReanimated(container, node, sharedProps) {
+  maybeInitializeReanimated(container.depMgr);
+  const sharedValues = Object.values(sharedProps);
+  if (sharedValues.length > 0) {
+    const viewId = container.getNativeId();
+    const nodeId = node.getNodeId();
+    startMapper(() => {
+      "worklet";
+      const updates = {};
+      for (let propName in sharedProps) {
+        updates[propName] = sharedProps[propName].value;
+      }
+      global._updateSkiaProps(viewId, nodeId, updates);
+    }, sharedValues);
+  }
+}
+
+function isSharedValue(value) {
+  return typeof value === "object" && "value" in value;
+}
+
+function maybeInitializeReanimated(depMgr) {
+  if (reanimatedInitialized) {
+    return;
+  }
+  depMgr.initializeReanimated(global._WORKLET_RUNTIME, SkiaViewApi);
+  reanimatedInitialized = true;
+}
 
 type Instance = Node<unknown>;
 
@@ -121,8 +170,9 @@ export const skHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    const props = { ...pristineProps };
+    const [props, sharedProps] = sanitizeReanimatedProps({ ...pristineProps });
     const node = createNode(container, type, materialize(props));
+    bindReanimated(container, node, sharedProps);
     container.depMgr.subscribeNode(node, props);
     return node;
   },

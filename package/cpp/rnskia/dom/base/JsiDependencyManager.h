@@ -2,6 +2,7 @@
 
 #include "JsiHostObject.h"
 
+#include "RNSkJsiViewApi.h"
 #include "RNSkPlatformContext.h"
 
 #include "JsiDomNode.h"
@@ -22,6 +23,7 @@ class JsiDependencyManager
     : public JsiHostObject,
       public std::enable_shared_from_this<JsiDependencyManager> {
 public:
+  std::unordered_map<size_t, std::shared_ptr<JsiDomNode>> nodez;
   JsiDependencyManager(std::shared_ptr<RNSkPlatformContext> context,
                        jsi::Object &&registerValuesCallback)
       : _registerValuesCallback(std::move(registerValuesCallback)),
@@ -55,6 +57,8 @@ public:
         getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 0);
     auto nextProps = getArgumentAsObject(runtime, arguments, count, 1);
 
+    nodez[node->getNodeId()] = node;
+
     // Save unsubscribe callbacks
     std::vector<
         std::pair<std::shared_ptr<RNSkReadonlyValue>, std::function<void()>>>
@@ -83,7 +87,6 @@ public:
 
         // Save unsubscribe methods
         unsubscribers.push_back(std::make_pair(animatedValue, unsubscribe));
-
       } else if (isSelector(nativeValue)) {
         // Handle Skia Animation Value Selectors
         auto animatedValue = std::dynamic_pointer_cast<RNSkReadonlyValue>(
@@ -190,8 +193,52 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(initializeReanimated) {
+    jsi::ArrayBuffer workletRuntimeArrayBuffer =
+        arguments[0].asObject(runtime).getArrayBuffer(runtime);
+    uintptr_t rawWorkletRuntimePointer =
+        *reinterpret_cast<uintptr_t *>(workletRuntimeArrayBuffer.data(runtime));
+    jsi::Runtime &workletRuntime =
+        *reinterpret_cast<jsi::Runtime *>(rawWorkletRuntimePointer);
+
+    auto viewApiObject =
+        arguments[1].asObject(runtime).asHostObject<RNSkJsiViewApi>(runtime);
+
+    // do this on UI thread
+    auto updateSkiaProps = [=](jsi::Runtime &rt, const jsi::Value &thisValue,
+                               const jsi::Value *args,
+                               const size_t count) -> jsi::Value {
+      auto viewId = static_cast<size_t>(args[0].asNumber());
+      auto nodeId = static_cast<size_t>(args[1].asNumber());
+      auto node = nodez[nodeId];
+      auto props = args[2].asObject(rt);
+      for (const auto &propMapping :
+           node->getPropsContainer()->getMappedProperties()) {
+        for (auto &prop : propMapping.second) {
+          auto value = props.getProperty(rt, prop->getName().c_str());
+          if (!value.isUndefined()) {
+            prop->updateValue(rt, value);
+          }
+        }
+      }
+      viewApiObject->requestRedraw(viewId);
+
+      return jsi::Value::undefined();
+    };
+    jsi::Value updatePropsHostFunction = jsi::Function::createFromHostFunction(
+        workletRuntime,
+        jsi::PropNameID::forAscii(workletRuntime, "_updateSkiaProps"), 2,
+        updateSkiaProps);
+    workletRuntime.global().setProperty(workletRuntime, "_updateSkiaProps",
+                                        updatePropsHostFunction);
+
+    return jsi::Value::undefined();
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDependencyManager, unsubscribeNode),
                        JSI_EXPORT_FUNC(JsiDependencyManager, subscribeNode),
+                       JSI_EXPORT_FUNC(JsiDependencyManager,
+                                       initializeReanimated),
                        JSI_EXPORT_FUNC(JsiDependencyManager, update),
                        JSI_EXPORT_FUNC(JsiDependencyManager, remove))
 
