@@ -47,7 +47,7 @@ public:
         count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()
             ? JsiSkMatrix::fromValue(runtime, arguments[1])
             : nullptr;
-    auto mode = count > 2 && arguments[2].asBool()
+    auto mode = count > 2 && arguments[2].isBool() && arguments[2].getBool()
                     ? SkPath::kExtend_AddPathMode
                     : SkPath::kAppend_AddPathMode;
     if (matrix == nullptr) {

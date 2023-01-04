@@ -39,7 +39,7 @@ Draws an oval based on its bounding rectangle.
 |:-------|:---------|:--------------------------------------------|
 | x      | `number` | X coordinate of the bounding rectangle.     |
 | y      | `number` | Y coordinate of the bounding rectangle.     |
-| width  | `number` | Width of the bounding rectangle. rectangle. |
+| width  | `number` | Width of the bounding rectangle.            |
 | height | `number` | Height of the bounding rectangle.           |
 
 
