@@ -1,31 +1,37 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
-import {
-  Canvas,
-  Circle,
-  Easing,
-  Fill,
-  mix,
-  useComputedValue,
-  useLoop,
-} from "@shopify/react-native-skia";
+import { Canvas, Circle, Fill } from "@shopify/react-native-skia";
 
 import { AnimationDemo, Size, Padding } from "./Components";
+import {
+  useDerivedValue,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
+
+function mix(value: number, x: number, y: number) {
+  "worklet";
+  return x * (1 - value) + y * value;
+}
 
 export const InterpolationWithEasing = () => {
   const { width } = useWindowDimensions();
-  // Create timing loop
-  const progress = useLoop({
-    duration: 1000,
-    easing: Easing.inOut(Easing.cubic),
+  const progress = useSharedValue(0);
+  const position = useDerivedValue(() => {
+    return mix(progress.value, 10, width - (Size + Padding));
   });
-  // Animate position of circle
-  const position = useComputedValue(
-    () => mix(progress.current, 10, width - (Size + Padding)),
-    [progress]
-  );
-  // Animate radius of circle
-  const radius = useComputedValue(() => 5 + progress.current * 55, [progress]);
+  const radius = useDerivedValue(() => {
+    return 5 + progress.value * 55;
+  });
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.cubic) }),
+      -1,
+      true
+    );
+  }, []);
   return (
     <AnimationDemo title={"Interpolating value using an easing"}>
       <Canvas style={styles.canvas}>

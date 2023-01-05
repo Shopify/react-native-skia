@@ -14,6 +14,9 @@
 #include <RNSkView.h>
 #include <jsi/jsi.h>
 
+#include "JsiDomNode.h"
+#include "JsiSkApi.h"
+
 namespace RNSkia {
 namespace jsi = facebook::jsi;
 
@@ -182,6 +185,76 @@ public:
     return jsi::Value::undefined();
   }
 
+  void initializeReanimated(jsi::Runtime &rt,
+                            const jsi::Value &workletRuntimeAddr) {
+    jsi::ArrayBuffer workletRuntimeArrayBuffer =
+        workletRuntimeAddr.asObject(rt).getArrayBuffer(rt);
+    uintptr_t rawWorkletRuntimePointer =
+        *reinterpret_cast<uintptr_t *>(workletRuntimeArrayBuffer.data(rt));
+    jsi::Runtime *workletRuntime =
+        reinterpret_cast<jsi::Runtime *>(rawWorkletRuntimePointer);
+
+    // do this on UI thread
+    auto updateSkiaProps = [=](jsi::Runtime &rt, const jsi::Value &thisValue,
+                               const jsi::Value *args,
+                               const size_t count) -> jsi::Value {
+      auto viewId = static_cast<size_t>(args[0].asNumber());
+      auto nodeId = static_cast<size_t>(args[1].asNumber());
+      std::shared_ptr<JsiDomNode> node;
+      {
+        std::lock_guard<std::mutex> lock(_reanimatedNodesLock);
+        node = _reanimatedNodes[nodeId];
+      }
+      if (node == nullptr) {
+        return jsi::Value::undefined();
+      }
+      auto props = args[2].asObject(rt);
+      for (const auto &propMapping :
+           node->getPropsContainer()->getMappedProperties()) {
+        for (auto &prop : propMapping.second) {
+          auto value = props.getProperty(rt, prop->getName().c_str());
+          if (!value.isUndefined()) {
+            prop->updateValue(rt, value);
+          }
+        }
+      }
+      requestRedraw(viewId);
+
+      return jsi::Value::undefined();
+    };
+
+    // this is just a simple workaround for a lack of a way to schedule stuff on
+    // the ui thread unfortunately removing draw loop callback from within a
+    // callback causes a deadlock, so we just keep it going, just not doing a
+    // thing
+    _platformContext->beginDrawLoop(0xbadbeef, [=](bool invalidated) {
+      if (reanimatedRuntimeInitialized) {
+        return;
+      }
+      reanimatedRuntimeInitialized = true;
+      jsi::Runtime &rt = *workletRuntime;
+      jsi::Value updatePropsHostFunction =
+          jsi::Function::createFromHostFunction(
+              rt, jsi::PropNameID::forAscii(rt, "_updateSkiaProps"), 2,
+              updateSkiaProps);
+      rt.global().setProperty(rt, "_updateSkiaProps", updatePropsHostFunction);
+      auto skiaApi = std::make_shared<JsiSkApi>(rt, _platformContext);
+      rt.global().setProperty(rt, "SkiaApi", jsi::Object::createFromHostObject(rt, std::move(skiaApi)));
+    });
+  }
+
+  JSI_HOST_FUNCTION(registerReanimatedNode) {
+    if (!reanimatedRuntimeInitialized) {
+      initializeReanimated(runtime, arguments[0]);
+      //        reanimatedRuntimeInitialized = true;
+    }
+    auto node =
+        getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 1);
+    std::lock_guard<std::mutex> lock(_reanimatedNodesLock);
+    _reanimatedNodes[node->getNodeId()] = node;
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(registerValuesInView) {
     // Check params
     if (!arguments[1].isObject() ||
@@ -234,6 +307,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerReanimatedNode),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
@@ -332,5 +406,8 @@ private:
   std::unordered_map<size_t, RNSkViewInfo> _viewInfos;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::mutex _mutex;
+  bool reanimatedRuntimeInitialized = false;
+  std::unordered_map<size_t, std::shared_ptr<JsiDomNode>> _reanimatedNodes;
+  std::mutex _reanimatedNodesLock;
 };
 } // namespace RNSkia

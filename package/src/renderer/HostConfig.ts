@@ -39,7 +39,6 @@ function sanitizeReanimatedProps(props) {
 }
 
 function bindReanimated(container, node, sharedProps) {
-  maybeInitializeReanimated(container.depMgr);
   const sharedValues = Object.values(sharedProps);
   if (sharedValues.length > 0) {
     const viewId = container.getNativeId();
@@ -50,21 +49,14 @@ function bindReanimated(container, node, sharedProps) {
       for (let propName in sharedProps) {
         updates[propName] = sharedProps[propName].value;
       }
-      global._updateSkiaProps(viewId, nodeId, updates);
+      global._updateSkiaProps?.(viewId, nodeId, updates);
     }, sharedValues);
+    SkiaViewApi.registerReanimatedNode(global._WORKLET_RUNTIME, node);
   }
 }
 
 function isSharedValue(value) {
-  return typeof value === "object" && "value" in value;
-}
-
-function maybeInitializeReanimated(depMgr) {
-  if (reanimatedInitialized) {
-    return;
-  }
-  depMgr.initializeReanimated(global._WORKLET_RUNTIME, SkiaViewApi);
-  reanimatedInitialized = true;
+  return typeof value === "object" && value.modify !== undefined;
 }
 
 type Instance = Node<unknown>;
