@@ -73,7 +73,7 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
   auto state = UIApplication.sharedApplication.applicationState;
   if (state == UIApplicationStateBackground || state == UIApplicationStateInactive)
   {
-    
+    return;
   }
   
   // Get render context for current thread
