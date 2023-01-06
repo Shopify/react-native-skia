@@ -41,9 +41,9 @@ public:
     // Materialize children first so that any inner nodes get the opportunity
     // to calculate their state before this node continues.
     for (auto &child : getChildren()) {
-      auto decl = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
-      if (decl != nullptr) {
-        decl->decorateContext(context);
+      if (child->getNodeClass() == JsiDomNodeClass::DeclarationNode) {
+        std::static_pointer_cast<JsiBaseDomDeclarationNode>(child)
+            ->decorateContext(context);
       }
     }
 
@@ -53,6 +53,10 @@ public:
 #if SKIA_DOM_DEBUG
     printDebugInfo("End / Commit Materialize " + std::string(getType()));
 #endif
+  }
+
+  JsiDomNodeClass getNodeClass() override {
+    return JsiDomNodeClass::DeclarationNode;
   }
 
 protected:

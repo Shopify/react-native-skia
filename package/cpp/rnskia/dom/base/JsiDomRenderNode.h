@@ -149,6 +149,10 @@ public:
     }
   }
 
+  JsiDomNodeClass getNodeClass() override {
+    return JsiDomNodeClass::RenderNode;
+  }
+
 protected:
   /**
    Invalidates and marks then context as changed.
@@ -211,9 +215,9 @@ private:
    */
   void materializeDeclarations() {
     for (auto &child : getChildren()) {
-      auto ptr = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
-      if (ptr != nullptr) {
-        ptr->decorateContext(_localContext.get());
+      if (child->getNodeClass() == JsiDomNodeClass::DeclarationNode) {
+        std::static_pointer_cast<JsiBaseDomDeclarationNode>(child)
+            ->decorateContext(_localContext.get());
       }
     }
   }
