@@ -66,6 +66,16 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
     return;
   }
   
+  // Make sure to NOT render or try any render operations while we're in the background or inactive.
+  // This will cause an error that might clear the CAMetalLayer so that the canvas is empty when
+  // the app receives focus again.
+  // Reference: https://github.com/Shopify/react-native-skia/issues/1257
+  auto state = UIApplication.sharedApplication.applicationState;
+  if (state == UIApplicationStateBackground || state == UIApplicationStateInactive)
+  {
+    
+  }
+  
   // Get render context for current thread
   auto renderContext = getMetalRenderContext();
   
