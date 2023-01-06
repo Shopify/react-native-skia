@@ -86,9 +86,7 @@ public:
       {
         // Swap buffers
         std::lock_guard<std::mutex> lock(_swapMutex);
-        auto tmp = _value;
-        _value = _buffer;
-        _buffer = tmp;
+        _value.swap(_buffer);
 
         // turn off pending changes flag
         _hasNewValue = false;
