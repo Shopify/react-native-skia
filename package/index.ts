@@ -1,2 +1,2 @@
 export * from "./src";
-import "./src/web";
+import "./web";
