@@ -98,6 +98,9 @@ process.chdir("./package");
 console.log("Build package", process.cwd());
 executeCmdSync("yarn build");
 
+console.log("Copy type definition for React Native Web");
+fs.copyFileSync("./web.d.ts", "./lib/typescript/web.d.ts");
+
 console.log("Running `npm pack` in package folder", process.cwd());
 executeCmdSync("npm pack");
 process.chdir(currentDir);
