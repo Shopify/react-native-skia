@@ -107,7 +107,6 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
     }
     
     SkCanvas *canvas = skSurface->getCanvas();
-    canvas->clear(SK_AlphaTRANSPARENT);
     cb(canvas);    
     skSurface->flushAndSubmit();
     

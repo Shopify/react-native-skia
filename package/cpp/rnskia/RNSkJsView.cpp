@@ -197,6 +197,7 @@ void RNSkJsRenderer::drawInJsiCanvas(std::shared_ptr<JsiSkCanvas> jsiCanvas,
   if (_drawCallback != nullptr && skCanvas != nullptr) {
     // Make sure to scale correctly
     auto pd = _platformContext->getPixelDensity();
+    skCanvas->clear(SK_ColorTRANSPARENT);
     skCanvas->save();
     skCanvas->scale(pd, pd);
 

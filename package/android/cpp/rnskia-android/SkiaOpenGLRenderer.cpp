@@ -57,13 +57,8 @@ void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
       // during rendering.
       getThreadDrawingContext()->skContext->resetContext();
 
-      // Clear with transparent
-      glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-      glClear(GL_COLOR_BUFFER_BIT);
-
       // Draw picture into surface
       cb(_skSurface->getCanvas());
-
       // Flush
       _skSurface->flushAndSubmit();
 
