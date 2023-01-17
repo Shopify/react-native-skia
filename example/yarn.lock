@@ -6967,7 +6967,7 @@ minimatch@^3.0.2, minimatch@^3.0.4, minimatch@^3.0.5, minimatch@^3.1.1, minimatc
   dependencies:
     brace-expansion "^1.1.7"
 
-minimist@^1.1.1, minimist@^1.2.0, minimist@^1.2.6:
+minimist@^1.2.0, minimist@^1.2.6:
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.7.tgz#daa1c4d91f507390437c6a8bc01078e7000c4d18"
   integrity sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==
@@ -7763,10 +7763,10 @@ react-native-web@^0.18.0:
     postcss-value-parser "^4.2.0"
     styleq "^0.1.2"
 
-react-native@0.71.0-rc.6:
-  version "0.71.0-rc.6"
-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.71.0-rc.6.tgz#a509ea105e58c1b329ddb822160bd4abdee88f7f"
-  integrity sha512-1eT8bjuCz7Khi1aDlhNQGc4bVsxqKfZ6epwIe6kzzjGNbhDbL0O3BIijrP62DV6EDPTTHyqUZKOMMsNeORNONA==
+react-native@0.71.0:
+  version "0.71.0"
+  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.71.0.tgz#ce47c3cb6239484fcd686d1f45b363b7014b6c62"
+  integrity sha512-b5oCS/cPVqXT5E2K+0CfQMERAoRu6/6g1no9XRAcjQ4b5JG608WgDh5QgXPHaMSVhAvsJ1DuRoU8C/xqTjQITA==
   dependencies:
     "@jest/create-cache-key-function" "^29.2.1"
     "@react-native-community/cli" "10.0.0"
