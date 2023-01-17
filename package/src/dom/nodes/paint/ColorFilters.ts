@@ -19,7 +19,7 @@ export abstract class ColorFilterDeclaration<P> extends JsiDeclarationNode<P> {
   protected compose(cf1: SkColorFilter, ctx: DeclarationContext) {
     const cf2 = ctx.popColorFilter();
     const cf =
-      cf2 === undefined ? cf1 : this.Skia.ColorFilter.MakeCompose(cf2, cf1);
+      cf2 === undefined ? cf1 : this.Skia.ColorFilter.MakeCompose(cf1, cf2);
     ctx.pushColorFilter(cf);
   }
 }
@@ -69,6 +69,7 @@ export class SRGBToLinearGammaColorFilterNode extends ColorFilterDeclaration<nul
   }
 
   decorate(ctx: DeclarationContext) {
+    this.decorateChildren(ctx);
     const cf = this.Skia.ColorFilter.MakeSRGBToLinearGamma();
     this.compose(cf, ctx);
   }
@@ -80,6 +81,7 @@ export class LumaColorFilterNode extends ColorFilterDeclaration<null> {
   }
 
   decorate(ctx: DeclarationContext) {
+    this.decorateChildren(ctx);
     const cf = this.Skia.ColorFilter.MakeLumaColorFilter();
     this.compose(cf, ctx);
   }
@@ -91,6 +93,7 @@ export class LerpColorFilterNode extends ColorFilterDeclaration<LerpColorFilterP
   }
 
   decorate(ctx: DeclarationContext) {
+    this.decorateChildren(ctx);
     const { t } = this.props;
     const [first, second] = ctx.popColorFilters(2);
     if (!first || !second) {

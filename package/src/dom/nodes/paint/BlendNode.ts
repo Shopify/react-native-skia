@@ -17,21 +17,25 @@ export class BlendNode extends JsiDeclarationNode<BlendProps> {
     const blend = BlendMode[enumKey(this.props.mode)];
     // Blend ImageFilters
     const imageFilters = ctx.popImageFilters();
-    const imageFilter = imageFilters.reverse().reduce((inner, outer) => {
-      if (inner === null) {
-        return outer;
-      }
-      return Skia.ImageFilter.MakeBlend(blend, outer, inner);
-    });
-    ctx.pushImageFilter(imageFilter);
-    // Blend Shaders
+    if (imageFilters.length > 0) {
+      const imageFilter = imageFilters.reverse().reduce((inner, outer) => {
+        if (inner === null) {
+          return outer;
+        }
+        return Skia.ImageFilter.MakeBlend(blend, outer, inner);
+      });
+      ctx.pushImageFilter(imageFilter);
+    }
     const shaders = ctx.popShaders();
-    const shader = shaders.reverse().reduce((inner, outer) => {
-      if (inner === null) {
-        return outer;
-      }
-      return Skia.Shader.MakeBlend(blend, outer, inner);
-    });
-    ctx.pushShader(shader);
+    if (shaders.length > 0) {
+      // Blend Shaders
+      const shader = shaders.reverse().reduce((inner, outer) => {
+        if (inner === null) {
+          return outer;
+        }
+        return Skia.Shader.MakeBlend(blend, outer, inner);
+      });
+      ctx.pushShader(shader);
+    }
   }
 }
