@@ -1,5 +1,5 @@
-import { BlendMode } from "../../../skia/types";
 import type { SkColorFilter } from "../../../skia/types";
+import { BlendMode } from "../../../skia/types";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import type {
@@ -16,8 +16,10 @@ export abstract class ColorFilterDeclaration<P> extends JsiDeclarationNode<P> {
     super(ctx, DeclarationType.ColorFilter, type, props);
   }
 
-  protected compose(cf: SkColorFilter, ctx: DeclarationContext) {
-    this.decorateChildren(ctx);
+  compose(ctx: DeclarationContext, cf1: SkColorFilter) {
+    const childCtx = this.childDeclarationContext();
+    const cf2 = childCtx.popColorFiltersAsOne();
+    const cf = cf2 ? this.Skia.ColorFilter.MakeCompose(cf1, cf2) : cf1;
     ctx.pushColorFilter(cf);
   }
 }
@@ -30,7 +32,7 @@ export class MatrixColorFilterNode extends ColorFilterDeclaration<MatrixColorFil
   decorate(ctx: DeclarationContext) {
     const { matrix } = this.props;
     const cf = this.Skia.ColorFilter.MakeMatrix(matrix);
-    this.compose(cf, ctx);
+    this.compose(ctx, cf);
   }
 }
 
@@ -43,7 +45,7 @@ export class BlendColorFilterNode extends ColorFilterDeclaration<BlendColorFilte
     const { mode } = this.props;
     const color = this.Skia.Color(this.props.color);
     const cf = this.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
-    this.compose(cf, ctx);
+    this.compose(ctx, cf);
   }
 }
 
@@ -54,7 +56,7 @@ export class LinearToSRGBGammaColorFilterNode extends ColorFilterDeclaration<nul
 
   decorate(ctx: DeclarationContext) {
     const cf = this.Skia.ColorFilter.MakeLinearToSRGBGamma();
-    this.compose(cf, ctx);
+    this.compose(ctx, cf);
   }
 }
 
@@ -65,7 +67,7 @@ export class SRGBToLinearGammaColorFilterNode extends ColorFilterDeclaration<nul
 
   decorate(ctx: DeclarationContext) {
     const cf = this.Skia.ColorFilter.MakeSRGBToLinearGamma();
-    this.compose(cf, ctx);
+    this.compose(ctx, cf);
   }
 }
 
@@ -76,7 +78,7 @@ export class LumaColorFilterNode extends ColorFilterDeclaration<null> {
 
   decorate(ctx: DeclarationContext) {
     const cf = this.Skia.ColorFilter.MakeLumaColorFilter();
-    this.compose(cf, ctx);
+    this.compose(ctx, cf);
   }
 }
 
@@ -86,14 +88,14 @@ export class LerpColorFilterNode extends ColorFilterDeclaration<LerpColorFilterP
   }
 
   decorate(ctx: DeclarationContext) {
-    this.decorateChildren(ctx);
+    const childCtx = this.childDeclarationContext();
     const { t } = this.props;
-    const [first, second] = ctx.popColorFilters(2);
+    const [first, second] = childCtx.popColorFilters(2);
     if (!first || !second) {
       throw new Error(
         "LerpColorFilterNode: missing two color filters as children"
       );
     }
-    return this.Skia.ColorFilter.MakeLerp(t, first, second);
+    ctx.pushColorFilter(this.Skia.ColorFilter.MakeLerp(t, first, second));
   }
 }

@@ -13,7 +13,10 @@ const popAll = <T>(arr: T[], limit?: number): T[] => {
   return arr.splice(-n);
 };
 
-const popAllAsOne = <T>(arr: T[], composer: (outer: T, inner: T) => T) => {
+const popAllAsOne = <T>(
+  arr: T[],
+  composer: (outer: T, inner: T) => T
+): T | undefined => {
   const filters = popAll(arr);
   if (filters.length <= 1) {
     return filters[0];

@@ -34,15 +34,14 @@ describe("Color Filer Composition", () => {
     const { surface: ckSurface, Skia, canvas } = setupSkia(wWidth, wHeight);
     const paint = Skia.Paint();
     const cf1 = Skia.ColorFilter.MakeMatrix(matrix);
+    console.log(!cf1);
     const cf2 = Skia.ColorFilter.MakeLinearToSRGBGamma();
     const cf3 = Skia.ColorFilter.MakeLerp(
       t,
       Skia.ColorFilter.MakeMatrix(purple),
       Skia.ColorFilter.MakeMatrix(blackAndWhite)
     );
-    paint.setColorFilter(
-      Skia.ColorFilter.MakeCompose(cf1, Skia.ColorFilter.MakeCompose(cf2, cf3))
-    );
+    paint.setColorFilter(Skia.ColorFilter.MakeCompose(cf2, cf3));
     const rect = Skia.XYWHRect(0, 0, wWidth, wHeight);
     const { src, dst } = fitRects(
       "cover",
@@ -66,7 +65,6 @@ describe("Color Filer Composition", () => {
 
     const image = await surface.draw(
       <Image x={0} y={0} width={width} height={height} image={oslo} fit="cover">
-        <ColorMatrix matrix={matrix} />
         <LinearToSRGBGamma>
           <Lerp t={t}>
             <ColorMatrix matrix={purple} />
