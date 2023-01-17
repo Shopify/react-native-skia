@@ -15,7 +15,7 @@ export class PaintNode
     super(ctx, DeclarationType.Paint, NodeType.Paint, props);
   }
 
-  decorate(_ctx: DeclarationContext) {
+  decorate(ctx: DeclarationContext) {
     const {
       color,
       strokeWidth,
@@ -81,6 +81,6 @@ export class PaintNode
     if (maskFilter) {
       paint.setMaskFilter(maskFilter);
     }
-    return paint;
+    ctx.pushPaint(paint);
   }
 }
