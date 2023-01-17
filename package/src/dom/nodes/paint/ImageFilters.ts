@@ -91,13 +91,14 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
   decorate(ctx: DeclarationContext) {
     this.decorateChildren(ctx);
     const { channelX, channelY, scale } = this.props;
-    return this.Skia.ImageFilter.MakeDisplacementMap(
+    const imgf = this.Skia.ImageFilter.MakeDisplacementMap(
       ColorChannel[enumKey(channelX)],
       ColorChannel[enumKey(channelY)],
       scale,
       ctx.popImageFilter()!,
       this.input(ctx)
     );
+    ctx.pushImageFilter(imgf);
   }
 }
 
@@ -110,12 +111,13 @@ export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterP
     this.decorateChildren(ctx);
     const { mode, blur } = this.props;
     const sigma = processRadius(this.Skia, blur);
-    return this.Skia.ImageFilter.MakeBlur(
+    const imgf = this.Skia.ImageFilter.MakeBlur(
       sigma.x,
       sigma.y,
       TileMode[enumKey(mode)],
       this.input(ctx)
     );
+    ctx.pushImageFilter(imgf);
   }
 }
 
@@ -136,7 +138,8 @@ export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadow
         ? this.Skia.ImageFilter.MakeDropShadowOnly.bind(this.Skia.ImageFilter)
         : this.Skia.ImageFilter.MakeDropShadow.bind(this.Skia.ImageFilter);
     }
-    return factory(dx, dy, blur, blur, color, this.input(ctx));
+    const imgf = factory(dx, dy, blur, blur, color, this.input(ctx));
+    ctx.pushImageFilter(imgf);
   }
 }
 
@@ -155,9 +158,11 @@ export class MorphologyImageFilterNode extends ImageFilterDeclaration<Morphology
     const { operator } = this.props;
     const r = processRadius(this.Skia, this.props.radius);
     if (MorphologyOperator[enumKey(operator)] === MorphologyOperator.Erode) {
-      return this.Skia.ImageFilter.MakeErode(r.x, r.y, this.input(ctx));
+      const imgf = this.Skia.ImageFilter.MakeErode(r.x, r.y, this.input(ctx));
+      ctx.pushImageFilter(imgf);
     }
-    return this.Skia.ImageFilter.MakeDilate(r.x, r.y, this.input(ctx));
+    const imgf = this.Skia.ImageFilter.MakeDilate(r.x, r.y, this.input(ctx));
+    ctx.pushImageFilter(imgf);
   }
 }
 
@@ -174,7 +179,8 @@ export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilte
     if (!a || !b) {
       throw new Error("BlendImageFilter requires two image filters");
     }
-    return this.Skia.ImageFilter.MakeBlend(mode, a, b);
+    const imgf = this.Skia.ImageFilter.MakeBlend(mode, a, b);
+    ctx.pushImageFilter(imgf);
   }
 }
 
@@ -190,6 +196,11 @@ export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<Runtime
     if (uniforms) {
       processUniforms(source, uniforms, rtb);
     }
-    return this.Skia.ImageFilter.MakeRuntimeShader(rtb, null, this.input(ctx));
+    const imgf = this.Skia.ImageFilter.MakeRuntimeShader(
+      rtb,
+      null,
+      this.input(ctx)
+    );
+    ctx.pushImageFilter(imgf);
   }
 }
