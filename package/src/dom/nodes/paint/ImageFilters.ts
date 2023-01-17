@@ -65,12 +65,19 @@ export abstract class ImageFilterDeclaration<P> extends JsiDeclarationNode<P> {
     return ctx.popImageFilter() ?? null;
   }
 
-  protected compose(imgf1: SkImageFilter, ctx: DeclarationContext) {
-    const imgf2 = ctx.popImageFilter();
-    const imgf =
-      imgf2 === undefined
-        ? imgf1
-        : this.Skia.ImageFilter.MakeCompose(imgf2, imgf1);
+  protected compose(ctx: DeclarationContext, imgf1: SkImageFilter) {
+    const childCtx = this.childDeclarationContext();
+    let imgf2 = childCtx.popImageFiltersAsOne();
+    const cf = childCtx.popColorFiltersAsOne();
+    if (cf) {
+      imgf2 = this.Skia.ImageFilter.MakeCompose(
+        imgf2 ?? null,
+        this.Skia.ImageFilter.MakeColorFilter(cf, null)
+      );
+    }
+    const imgf = imgf2
+      ? this.Skia.ImageFilter.MakeCompose(imgf1, imgf2)
+      : imgf1;
     ctx.pushImageFilter(imgf);
   }
 }
@@ -83,12 +90,8 @@ export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFil
   decorate(ctx: DeclarationContext) {
     this.decorateChildren(ctx);
     const { x, y } = this.props;
-    const imgf = this.Skia.ImageFilter.MakeOffset(
-      x,
-      y,
-      ctx.popImageFilter() ?? null
-    );
-    ctx.pushImageFilter(imgf);
+    const imgf = this.Skia.ImageFilter.MakeOffset(x, y, null);
+    this.compose(ctx, imgf);
   }
 }
 
@@ -98,7 +101,6 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
   }
 
   decorate(ctx: DeclarationContext) {
-    this.decorateChildren(ctx);
     const { channelX, channelY, scale } = this.props;
     const imgf = this.Skia.ImageFilter.MakeDisplacementMap(
       ColorChannel[enumKey(channelX)],
@@ -107,7 +109,7 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
       ctx.popImageFilter()!,
       this.input(ctx)
     );
-    ctx.pushImageFilter(imgf);
+    this.compose(ctx, imgf);
   }
 }
 
@@ -117,7 +119,6 @@ export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterP
   }
 
   decorate(ctx: DeclarationContext) {
-    this.decorateChildren(ctx);
     const { mode, blur } = this.props;
     const sigma = processRadius(this.Skia, blur);
     const imgf = this.Skia.ImageFilter.MakeBlur(
@@ -126,7 +127,7 @@ export class BlurImageFilterNode extends ImageFilterDeclaration<BlurImageFilterP
       TileMode[enumKey(mode)],
       this.input(ctx)
     );
-    ctx.pushImageFilter(imgf);
+    this.compose(ctx, imgf);
   }
 }
 
@@ -136,7 +137,6 @@ export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadow
   }
 
   decorate(ctx: DeclarationContext) {
-    this.decorateChildren(ctx);
     const { dx, dy, blur, shadowOnly, color: cl, inner } = this.props;
     const color = this.Skia.Color(cl);
     let factory;
@@ -148,7 +148,7 @@ export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadow
         : this.Skia.ImageFilter.MakeDropShadow.bind(this.Skia.ImageFilter);
     }
     const imgf = factory(dx, dy, blur, blur, color, this.input(ctx));
-    ctx.pushImageFilter(imgf);
+    this.compose(ctx, imgf);
   }
 }
 
@@ -163,7 +163,6 @@ export class MorphologyImageFilterNode extends ImageFilterDeclaration<Morphology
   }
 
   decorate(ctx: DeclarationContext) {
-    this.decorateChildren(ctx);
     const { operator } = this.props;
     const r = processRadius(this.Skia, this.props.radius);
     let imgf;
@@ -172,7 +171,7 @@ export class MorphologyImageFilterNode extends ImageFilterDeclaration<Morphology
     } else {
       imgf = this.Skia.ImageFilter.MakeDilate(r.x, r.y, this.input(ctx));
     }
-    ctx.pushImageFilter(imgf);
+    this.compose(ctx, imgf);
   }
 }
 
@@ -182,7 +181,6 @@ export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilte
   }
 
   decorate(ctx: DeclarationContext) {
-    this.decorateChildren(ctx);
     const { mode } = this.props;
     const a = ctx.popImageFilter();
     const b = ctx.popImageFilter();
@@ -190,7 +188,7 @@ export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilte
       throw new Error("BlendImageFilter requires two image filters");
     }
     const imgf = this.Skia.ImageFilter.MakeBlend(mode, a, b);
-    ctx.pushImageFilter(imgf);
+    this.compose(ctx, imgf);
   }
 }
 
@@ -200,7 +198,6 @@ export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<Runtime
   }
 
   decorate(ctx: DeclarationContext) {
-    this.decorateChildren(ctx);
     const { source, uniforms } = this.props;
     const rtb = this.Skia.RuntimeShaderBuilder(source);
     if (uniforms) {
@@ -211,6 +208,6 @@ export class RuntimeShaderImageFilterNode extends ImageFilterDeclaration<Runtime
       null,
       this.input(ctx)
     );
-    ctx.pushImageFilter(imgf);
+    this.compose(ctx, imgf);
   }
 }
