@@ -7,71 +7,24 @@ import type {
   DashPathEffectProps,
   DiscretePathEffectProps,
   Line2DPathEffectProps,
-  Node,
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
 import { enumKey } from "../datatypes/Enum";
 import { processPath } from "../datatypes";
+import type { DeclarationContext } from "../../types/DeclarationContext";
 
-abstract class PathEffectDeclaration<
-  P,
-  Nullable extends null | never = never
-> extends JsiDeclarationNode<P, SkPathEffect, Nullable> {
+abstract class PathEffectDeclaration<P> extends JsiDeclarationNode<P> {
   constructor(ctx: NodeContext, type: NodeType, props: P) {
     super(ctx, DeclarationType.PathEffect, type, props);
   }
 
-  addChild(child: Node<unknown>) {
-    if (!(child instanceof PathEffectDeclaration)) {
-      throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
-    }
-    super.addChild(child);
-  }
-
-  insertChildBefore(child: Node<unknown>, before: Node<unknown>): void {
-    if (!(child instanceof PathEffectDeclaration)) {
-      throw new Error(`Cannot add child of type ${child.type} to ${this.type}`);
-    }
-    super.insertChildBefore(child, before);
-  }
-
-  compose(pe: SkPathEffect) {
-    const children = this._children as PathEffectDeclaration<unknown>[];
-    if (this._children.length === 0) {
-      return pe;
-    } else {
-      return this.Skia.PathEffect.MakeCompose(
-        pe,
-        children.reduce<SkPathEffect | null>((acc, child) => {
-          if (acc === null) {
-            return child.materialize();
-          }
-          return this.Skia.PathEffect.MakeCompose(acc, child.materialize());
-        }, null) as SkPathEffect
-      );
-    }
-  }
-  getOptionalChildInstance(index: number) {
-    const child = this._children[index];
-    if (!child) {
-      return null;
-    }
-    return this.getMandatoryChildInstance(index);
-  }
-
-  getMandatoryChildInstance(index: number) {
-    const child = this._children[index];
-    if (child instanceof JsiDeclarationNode) {
-      if (child.isPathEffect()) {
-        return child.materialize();
-      } else {
-        throw new Error(`Found invalid child ${child.type} in ${this.type}`);
-      }
-    } else {
-      throw new Error(`Found invalid child ${child.type} in ${this.type}`);
-    }
+  protected compose(pe1: SkPathEffect, ctx: DeclarationContext) {
+    const pe2 = ctx.popPathEffect();
+    const pe =
+      pe2 === undefined ? pe1 : this.Skia.PathEffect.MakeCompose(pe1!, pe2);
+    ctx.pushPathEffect(pe);
   }
 }
 
@@ -80,29 +33,26 @@ export class DiscretePathEffectNode extends PathEffectDeclaration<DiscretePathEf
     super(ctx, NodeType.DiscretePathEffect, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { length, deviation, seed } = this.props;
     const pe = this.Skia.PathEffect.MakeDiscrete(length, deviation, seed);
-    return this.compose(pe);
+    this.compose(pe, ctx);
   }
 }
 
-export class Path2DPathEffectNode extends PathEffectDeclaration<
-  Path2DPathEffectProps,
-  null
-> {
+export class Path2DPathEffectNode extends PathEffectDeclaration<Path2DPathEffectProps> {
   constructor(ctx: NodeContext, props: Path2DPathEffectProps) {
     super(ctx, NodeType.Path2DPathEffect, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { matrix } = this.props;
     const path = processPath(this.Skia, this.props.path);
     const pe = this.Skia.PathEffect.MakePath2D(matrix, path);
     if (pe === null) {
-      return null;
+      throw new Error("Path2DPathEffectNode: invalid path");
     }
-    return this.compose(pe);
+    this.compose(pe, ctx);
   }
 }
 
@@ -111,28 +61,25 @@ export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProp
     super(ctx, NodeType.DashPathEffect, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { intervals, phase } = this.props;
     const pe = this.Skia.PathEffect.MakeDash(intervals, phase);
-    return this.compose(pe);
+    return this.compose(pe, ctx);
   }
 }
 
-export class CornerPathEffectNode extends PathEffectDeclaration<
-  CornerPathEffectProps,
-  null
-> {
+export class CornerPathEffectNode extends PathEffectDeclaration<CornerPathEffectProps> {
   constructor(ctx: NodeContext, props: CornerPathEffectProps) {
     super(ctx, NodeType.CornerPathEffect, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { r } = this.props;
     const pe = this.Skia.PathEffect.MakeCorner(r);
     if (pe === null) {
-      return null;
+      throw new Error("CornerPathEffectNode: couldn't create path effect");
     }
-    return this.compose(pe);
+    this.compose(pe, ctx);
   }
 }
 
@@ -141,41 +88,37 @@ export class SumPathEffectNode extends PathEffectDeclaration<null> {
     super(ctx, NodeType.SumPathEffect, null);
   }
 
-  materialize() {
-    return this.Skia.PathEffect.MakeSum(
-      this.getMandatoryChildInstance(0),
-      this.getMandatoryChildInstance(1)
-    );
+  decorate(ctx: DeclarationContext) {
+    this.decorateChildren(ctx);
+    const [pe1, pe2] = ctx.popPathEffects(2);
+    if (pe1 === undefined || pe2 === undefined) {
+      throw new Error("SumPathEffectNode: invalid children");
+    }
+    return this.Skia.PathEffect.MakeSum(pe1, pe2);
   }
 }
 
-export class Line2DPathEffectNode extends PathEffectDeclaration<
-  Line2DPathEffectProps,
-  null
-> {
+export class Line2DPathEffectNode extends PathEffectDeclaration<Line2DPathEffectProps> {
   constructor(ctx: NodeContext, props: Line2DPathEffectProps) {
     super(ctx, NodeType.Line2DPathEffect, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { width, matrix } = this.props;
     const pe = this.Skia.PathEffect.MakeLine2D(width, matrix);
     if (pe === null) {
-      return null;
+      throw new Error("Line2DPathEffectNode: could not create path effect");
     }
-    return this.compose(pe);
+    return this.compose(pe, ctx);
   }
 }
 
-export class Path1DPathEffectNode extends PathEffectDeclaration<
-  Path1DPathEffectProps,
-  null
-> {
+export class Path1DPathEffectNode extends PathEffectDeclaration<Path1DPathEffectProps> {
   constructor(ctx: NodeContext, props: Path1DPathEffectProps) {
     super(ctx, NodeType.Path1DPathEffect, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { advance, phase, style } = this.props;
     const path = processPath(this.Skia, this.props.path);
     const pe = this.Skia.PathEffect.MakePath1D(
@@ -185,8 +128,8 @@ export class Path1DPathEffectNode extends PathEffectDeclaration<
       Path1DEffectStyle[enumKey(style)]
     );
     if (pe === null) {
-      return null;
+      throw new Error("Path1DPathEffectNode: could not create path effect");
     }
-    return this.compose(pe);
+    this.compose(pe, ctx);
   }
 }

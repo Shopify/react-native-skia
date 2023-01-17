@@ -20,6 +20,7 @@ import type {
   NodeType,
   Node,
 } from "../types";
+import { DeclarationContext } from "../types/DeclarationContext";
 
 import { isPathDef, processPath, processTransformProps } from "./datatypes";
 import type { NodeContext } from "./Node";
@@ -170,37 +171,37 @@ export abstract class JsiRenderNode<P extends GroupProps>
         ctx.antiAlias = antiAlias;
       }
     }
+    const declCtx = new DeclarationContext();
     this._children.forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
-        if (child.isColorFilter()) {
-          ctx = ctx || {};
-          const cf = child.materialize();
-          ctx.colorFilter = ctx.colorFilter
-            ? this.Skia.ColorFilter.MakeCompose(cf, ctx.colorFilter)
-            : cf;
-        } else if (child.isShader()) {
-          ctx = ctx || {};
-          const shader = child.materialize();
-          ctx.shader = shader;
-        } else if (child.isPathEffect()) {
-          ctx = ctx || {};
-          const pe = child.materialize();
-          ctx.pathEffect = ctx.pathEffect
-            ? this.Skia.PathEffect.MakeCompose(pe, ctx.pathEffect)
-            : pe;
-        } else if (child.isImageFilter()) {
-          ctx = ctx || {};
-          const filter = child.materialize();
-          ctx.imageFilter = ctx.imageFilter
-            ? this.Skia.ImageFilter.MakeCompose(filter, ctx.imageFilter)
-            : filter;
-        } else if (child.isMaskFilter()) {
-          ctx = ctx || {};
-          const filter = child.materialize();
-          ctx.maskFilter = filter;
-        }
+        child.decorate(declCtx);
       }
     });
+    const colorFilter = declCtx.popColorFilter();
+    const imageFilter = declCtx.popImageFilter();
+    const shader = declCtx.popShader();
+    const maskFilter = declCtx.popMaskFilter();
+    const pathEffect = declCtx.popPathEffect();
+    if (imageFilter) {
+      ctx = ctx || {};
+      ctx.imageFilter = imageFilter;
+    }
+    if (shader) {
+      ctx = ctx || {};
+      ctx.shader = shader;
+    }
+    if (pathEffect) {
+      ctx = ctx || {};
+      ctx.pathEffect = pathEffect;
+    }
+    if (colorFilter) {
+      ctx = ctx || {};
+      ctx.colorFilter = colorFilter;
+    }
+    if (maskFilter) {
+      ctx = ctx || {};
+      ctx.maskFilter = maskFilter;
+    }
     return ctx;
   }
 
