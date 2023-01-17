@@ -1,16 +1,11 @@
-import type { DeclarationNode, DrawingContext, Node } from "../types";
+import type { DrawingContext } from "../types";
 import { NodeType } from "../types";
 import type { ChildrenProps } from "../types/Common";
-import type { SkPaint } from "../../skia";
+import { DeclarationContext } from "../types/DeclarationContext";
 
 import { JsiRenderNode } from "./RenderNode";
 import type { NodeContext } from "./Node";
 import { JsiDeclarationNode } from "./Node";
-
-const isLayer = (
-  node: Node<unknown>
-): node is DeclarationNode<unknown, SkPaint> =>
-  node instanceof JsiDeclarationNode && node.isPaint();
 
 export class LayerNode extends JsiRenderNode<ChildrenProps> {
   constructor(ctx: NodeContext, props: ChildrenProps) {
@@ -18,17 +13,23 @@ export class LayerNode extends JsiRenderNode<ChildrenProps> {
   }
 
   renderNode(ctx: DrawingContext): void {
+    let hasLayer = false;
     const [layer, ...children] = this.children();
-    if (isLayer(layer)) {
-      const paint = layer.materialize() as SkPaint;
-      ctx.canvas.saveLayer(paint);
+    if (layer instanceof JsiDeclarationNode) {
+      const declCtx = new DeclarationContext();
+      layer.decorate(declCtx);
+      const paint = declCtx.popPaint();
+      if (paint) {
+        hasLayer = true;
+        ctx.canvas.saveLayer(paint);
+      }
     }
     children.map((child) => {
       if (child instanceof JsiRenderNode) {
         child.render(ctx);
       }
     });
-    if (isLayer(layer)) {
+    if (hasLayer) {
       ctx.canvas.restore();
     }
   }

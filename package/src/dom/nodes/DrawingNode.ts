@@ -5,6 +5,7 @@ import type {
   NodeType,
   RenderNode,
 } from "../types";
+import { DeclarationContext } from "../types/DeclarationContext";
 
 import type { NodeContext } from "./Node";
 import { JsiDeclarationNode } from "./Node";
@@ -59,7 +60,9 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
     }
     this.children().map((child) => {
       if (child instanceof PaintNode) {
-        const paint = child.materialize();
+        const declCtx = new DeclarationContext();
+        child.decorate(declCtx);
+        const paint = declCtx.popPaint()!;
         this.draw({ ...ctx, paint });
       }
     });

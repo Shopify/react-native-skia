@@ -1,6 +1,5 @@
-import { isColorFilter } from "../../../skia/types";
 import type { ChildrenProps, DrawingContext } from "../../types";
-import { NodeType } from "../../types";
+import { DeclarationContext, NodeType } from "../../types";
 import { JsiDrawingNode } from "../DrawingNode";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
@@ -16,15 +15,21 @@ export class BackdropFilterNode extends JsiDrawingNode<ChildrenProps, null> {
 
   draw({ canvas }: DrawingContext) {
     const child = this._children[0];
-    const filter =
-      child instanceof JsiDeclarationNode ? child.materialize() : null;
-    canvas.saveLayer(
-      undefined,
-      null,
-      isColorFilter(filter)
-        ? this.Skia.ImageFilter.MakeColorFilter(filter, null)
-        : filter
-    );
+    let imageFilter = null;
+    if (child instanceof JsiDeclarationNode) {
+      const declCtx = new DeclarationContext();
+      child.decorate(declCtx);
+      const imgf = declCtx.popImageFilter();
+      if (imgf) {
+        imageFilter = imgf;
+      } else {
+        const cf = declCtx.popColorFilter();
+        if (cf) {
+          imageFilter = this.Skia.ImageFilter.MakeColorFilter(cf, null);
+        }
+      }
+    }
+    canvas.saveLayer(undefined, null, imageFilter);
     canvas.restore();
   }
 }

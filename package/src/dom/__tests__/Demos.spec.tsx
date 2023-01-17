@@ -27,7 +27,6 @@ describe("Drawings", () => {
       style: "solid",
       respectCTM: true,
     });
-    expect(blur.isMaskFilter()).toBe(true);
     rings.addChild(blur);
     for (let i = 0; i < 6; i++) {
       const theta = (i * (2 * Math.PI)) / 6;
@@ -66,7 +65,6 @@ describe("Drawings", () => {
       style: "solid",
       respectCTM: true,
     });
-    expect(blur.isMaskFilter()).toBe(true);
     rings.addChild(blur);
     for (let i = 0; i < 6; i++) {
       const theta = (i * (2 * Math.PI)) / 6;
@@ -100,7 +98,6 @@ describe("Drawings", () => {
       style: "solid",
       respectCTM: true,
     });
-    expect(blur.isMaskFilter()).toBe(true);
     rings.addChild(blur);
     for (let i = 0; i < 6; i++) {
       const theta = (i * (2 * Math.PI)) / 6;
