@@ -87,7 +87,7 @@ export abstract class JsiDeclarationNode<P>
 
   abstract decorate(ctx: DeclarationContext): void;
 
-  childDeclarationContext() {
+  protected childDeclarationContext() {
     const ctx = new DeclarationContext(this.Skia);
     this.children().forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
@@ -97,7 +97,6 @@ export abstract class JsiDeclarationNode<P>
     return ctx;
   }
 
-  // TODO: remove
   protected decorateChildren(ctx: DeclarationContext) {
     this.children().forEach((child) => {
       if (child instanceof JsiDeclarationNode) {

@@ -20,10 +20,10 @@ abstract class PathEffectDeclaration<P> extends JsiDeclarationNode<P> {
     super(ctx, DeclarationType.PathEffect, type, props);
   }
 
-  protected compose(pe1: SkPathEffect, ctx: DeclarationContext) {
-    const pe2 = ctx.popPathEffect();
-    const pe =
-      pe2 === undefined ? pe1 : this.Skia.PathEffect.MakeCompose(pe2, pe1);
+  protected compose(ctx: DeclarationContext, pe1: SkPathEffect) {
+    const childCtx = this.childDeclarationContext();
+    const pe2 = childCtx.popPathEffectsAsOne();
+    const pe = pe2 ? this.Skia.PathEffect.MakeCompose(pe1, pe2) : pe1;
     ctx.pushPathEffect(pe);
   }
 }
@@ -36,7 +36,7 @@ export class DiscretePathEffectNode extends PathEffectDeclaration<DiscretePathEf
   decorate(ctx: DeclarationContext) {
     const { length, deviation, seed } = this.props;
     const pe = this.Skia.PathEffect.MakeDiscrete(length, deviation, seed);
-    this.compose(pe, ctx);
+    this.compose(ctx, pe);
   }
 }
 
@@ -52,7 +52,7 @@ export class Path2DPathEffectNode extends PathEffectDeclaration<Path2DPathEffect
     if (pe === null) {
       throw new Error("Path2DPathEffectNode: invalid path");
     }
-    this.compose(pe, ctx);
+    this.compose(ctx, pe);
   }
 }
 
@@ -64,7 +64,7 @@ export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProp
   decorate(ctx: DeclarationContext) {
     const { intervals, phase } = this.props;
     const pe = this.Skia.PathEffect.MakeDash(intervals, phase);
-    return this.compose(pe, ctx);
+    return this.compose(ctx, pe);
   }
 }
 
@@ -79,7 +79,7 @@ export class CornerPathEffectNode extends PathEffectDeclaration<CornerPathEffect
     if (pe === null) {
       throw new Error("CornerPathEffectNode: couldn't create path effect");
     }
-    this.compose(pe, ctx);
+    this.compose(ctx, pe);
   }
 }
 
@@ -109,7 +109,7 @@ export class Line2DPathEffectNode extends PathEffectDeclaration<Line2DPathEffect
     if (pe === null) {
       throw new Error("Line2DPathEffectNode: could not create path effect");
     }
-    return this.compose(pe, ctx);
+    return this.compose(ctx, pe);
   }
 }
 
@@ -130,6 +130,6 @@ export class Path1DPathEffectNode extends PathEffectDeclaration<Path1DPathEffect
     if (pe === null) {
       throw new Error("Path1DPathEffectNode: could not create path effect");
     }
-    this.compose(pe, ctx);
+    this.compose(ctx, pe);
   }
 }
