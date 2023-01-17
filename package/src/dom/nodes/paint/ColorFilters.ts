@@ -19,7 +19,7 @@ export abstract class ColorFilterDeclaration<P> extends JsiDeclarationNode<P> {
   protected compose(cf1: SkColorFilter, ctx: DeclarationContext) {
     const cf2 = ctx.popColorFilter();
     const cf =
-      cf2 === undefined ? cf1 : this.Skia.ColorFilter.MakeCompose(cf1!, cf2);
+      cf2 === undefined ? cf1 : this.Skia.ColorFilter.MakeCompose(cf2, cf1);
     ctx.pushColorFilter(cf);
   }
 }

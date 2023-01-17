@@ -64,6 +64,15 @@ export abstract class ImageFilterDeclaration<P> extends JsiDeclarationNode<P> {
   protected input(ctx: DeclarationContext) {
     return ctx.popImageFilter() ?? null;
   }
+
+  protected compose(imgf1: SkImageFilter, ctx: DeclarationContext) {
+    const imgf2 = ctx.popImageFilter();
+    const imgf =
+      imgf2 === undefined
+        ? imgf1
+        : this.Skia.ImageFilter.MakeCompose(imgf2, imgf1);
+    ctx.pushImageFilter(imgf);
+  }
 }
 
 export class OffsetImageFilterNode extends ImageFilterDeclaration<OffsetImageFilterProps> {
@@ -157,11 +166,12 @@ export class MorphologyImageFilterNode extends ImageFilterDeclaration<Morphology
     this.decorateChildren(ctx);
     const { operator } = this.props;
     const r = processRadius(this.Skia, this.props.radius);
+    let imgf;
     if (MorphologyOperator[enumKey(operator)] === MorphologyOperator.Erode) {
-      const imgf = this.Skia.ImageFilter.MakeErode(r.x, r.y, this.input(ctx));
-      ctx.pushImageFilter(imgf);
+      imgf = this.Skia.ImageFilter.MakeErode(r.x, r.y, this.input(ctx));
+    } else {
+      imgf = this.Skia.ImageFilter.MakeDilate(r.x, r.y, this.input(ctx));
     }
-    const imgf = this.Skia.ImageFilter.MakeDilate(r.x, r.y, this.input(ctx));
     ctx.pushImageFilter(imgf);
   }
 }
