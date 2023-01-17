@@ -5,11 +5,25 @@ import type {
   SkColorFilter,
   SkMaskFilter,
   SkPathEffect,
+  Skia,
 } from "../../skia/types";
 
-const pops = <T>(arr: T[], limit?: number): T[] | [] => {
+const popAll = <T>(arr: T[], limit?: number): T[] => {
   const n = limit ?? arr.length;
   return arr.splice(-n);
+};
+
+const popAllAsOne = <T>(arr: T[], composer: (outer: T, inner: T) => T) => {
+  const filters = popAll(arr);
+  if (filters.length <= 1) {
+    return filters[0];
+  }
+  return filters.reverse().reduce((inner, outer) => {
+    if (!inner) {
+      return outer;
+    }
+    return composer(outer, inner);
+  });
 };
 
 export class DeclarationContext {
@@ -20,6 +34,8 @@ export class DeclarationContext {
   private shaders: SkShader[] = [];
   private pathEffects: SkPathEffect[] = [];
 
+  constructor(private Skia: Skia) {}
+
   pushPathEffect(pathEffect: SkPathEffect) {
     this.pathEffects.push(pathEffect);
   }
@@ -29,7 +45,14 @@ export class DeclarationContext {
   }
 
   popPathEffects(limit?: number) {
-    return pops(this.pathEffects, limit);
+    return popAll(this.pathEffects, limit);
+  }
+
+  popPathEffectsAsOne() {
+    return popAllAsOne(
+      this.pathEffects,
+      this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect)
+    );
   }
 
   pushPaint(paint: SkPaint) {
@@ -49,7 +72,14 @@ export class DeclarationContext {
   }
 
   popImageFilters(limit?: number) {
-    return pops(this.imageFilters, limit);
+    return popAll(this.imageFilters, limit);
+  }
+
+  popImageFiltersAsOne() {
+    return popAllAsOne(
+      this.imageFilters,
+      this.Skia.ImageFilter.MakeCompose.bind(this.Skia.ImageFilter)
+    );
   }
 
   pushColorFilter(colorFilter: SkColorFilter) {
@@ -61,7 +91,14 @@ export class DeclarationContext {
   }
 
   popColorFilters(limit?: number) {
-    return pops(this.colorFilters, limit);
+    return popAll(this.colorFilters, limit);
+  }
+
+  popColorFiltersAsOne() {
+    return popAllAsOne(
+      this.colorFilters,
+      this.Skia.ColorFilter.MakeCompose.bind(this.Skia.ColorFilter)
+    );
   }
 
   pushMaskFilter(maskFilter: SkMaskFilter) {
@@ -81,6 +118,6 @@ export class DeclarationContext {
   }
 
   popShaders(limit?: number) {
-    return pops(this.shaders, limit);
+    return popAll(this.shaders, limit);
   }
 }

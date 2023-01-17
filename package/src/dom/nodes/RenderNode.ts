@@ -171,17 +171,17 @@ export abstract class JsiRenderNode<P extends GroupProps>
         ctx.antiAlias = antiAlias;
       }
     }
-    const declCtx = new DeclarationContext();
+    const declCtx = new DeclarationContext(this.Skia);
     this._children.forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
         child.decorate(declCtx);
       }
     });
-    const colorFilter = declCtx.popColorFilter();
-    const imageFilter = declCtx.popImageFilter();
+    const colorFilter = declCtx.popColorFiltersAsOne();
+    const imageFilter = declCtx.popImageFiltersAsOne();
     const shader = declCtx.popShader();
     const maskFilter = declCtx.popMaskFilter();
-    const pathEffect = declCtx.popPathEffect();
+    const pathEffect = declCtx.popPathEffectsAsOne();
     if (imageFilter) {
       ctx = ctx || {};
       ctx.imageFilter = imageFilter;

@@ -18,7 +18,7 @@ export class BackdropFilterNode extends JsiDrawingNode<ChildrenProps, null> {
     const child = this._children[0];
     let imageFilter: SkImageFilter | null = null;
     if (child instanceof JsiDeclarationNode) {
-      const declCtx = new DeclarationContext();
+      const declCtx = new DeclarationContext(this.Skia);
       child.decorate(declCtx);
       const imgf = declCtx.popImageFilter();
       if (imgf) {

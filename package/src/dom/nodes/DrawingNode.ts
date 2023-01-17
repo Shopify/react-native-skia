@@ -60,7 +60,7 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
     }
     this.children().map((child) => {
       if (child instanceof PaintNode) {
-        const declCtx = new DeclarationContext();
+        const declCtx = new DeclarationContext(this.Skia);
         child.decorate(declCtx);
         const paint = declCtx.popPaint()!;
         this.draw({ ...ctx, paint });

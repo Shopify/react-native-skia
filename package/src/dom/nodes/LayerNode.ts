@@ -16,7 +16,7 @@ export class LayerNode extends JsiRenderNode<ChildrenProps> {
     let hasLayer = false;
     const [layer, ...children] = this.children();
     if (layer instanceof JsiDeclarationNode) {
-      const declCtx = new DeclarationContext();
+      const declCtx = new DeclarationContext(this.Skia);
       layer.decorate(declCtx);
       const paint = declCtx.popPaint();
       if (paint) {
