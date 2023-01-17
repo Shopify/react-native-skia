@@ -3,6 +3,7 @@ import { DeclarationContext, NodeType } from "../../types";
 import { JsiDrawingNode } from "../DrawingNode";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
+import type { SkImageFilter } from "../../../skia/types/ImageFilter/ImageFilter";
 
 export class BackdropFilterNode extends JsiDrawingNode<ChildrenProps, null> {
   constructor(ctx: NodeContext, props: ChildrenProps) {
@@ -15,7 +16,7 @@ export class BackdropFilterNode extends JsiDrawingNode<ChildrenProps, null> {
 
   draw({ canvas }: DrawingContext) {
     const child = this._children[0];
-    let imageFilter = null;
+    let imageFilter: SkImageFilter | null = null;
     if (child instanceof JsiDeclarationNode) {
       const declCtx = new DeclarationContext();
       child.decorate(declCtx);
