@@ -28,7 +28,7 @@ const purple = [
 ];
 const t = 0.5;
 
-describe("Color Filer Composition", () => {
+describe("Color Filter Composition", () => {
   it("should build a reference result", async () => {
     const { oslo } = images;
     const { surface: ckSurface, Skia, canvas } = setupSkia(wWidth, wHeight);
