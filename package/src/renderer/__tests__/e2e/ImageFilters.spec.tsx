@@ -1,11 +1,6 @@
 import React from "react";
 
-import {
-  docPath,
-  checkImage,
-  itRunsNodeOnly,
-  itFailsE2e,
-} from "../../../__tests__/setup";
+import { docPath, checkImage, itRunsNodeOnly } from "../../../__tests__/setup";
 import { fonts, images, surface } from "../setup";
 import {
   Fill,
@@ -101,7 +96,7 @@ describe("Test Image Filters", () => {
   });
   // This test should fail because it is not scaled properly but
   // it passes because of the low tolerance in the canvas result
-  itFailsE2e("Should draw a innershadow", async () => {
+  it("Should draw a innershadow", async () => {
     const { width } = surface;
     const padding = width / 8;
     const img = await surface.draw(
