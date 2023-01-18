@@ -89,11 +89,7 @@ export abstract class JsiDeclarationNode<P>
 
   protected childDeclarationContext() {
     const ctx = new DeclarationContext(this.Skia);
-    this.children().forEach((child) => {
-      if (child instanceof JsiDeclarationNode) {
-        child.decorate(ctx);
-      }
-    });
+    this.decorateChildren(ctx);
     return ctx;
   }
 
