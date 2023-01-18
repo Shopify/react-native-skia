@@ -62,6 +62,24 @@
     "webpack-dev-server": "^4.8.1"
   },
   "jest": {
-    "preset": "react-native"
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "moduleNameMapper": {
+      "^.+.(css|styl|less|sass|scss|png|jpg|ttf|otf|woff|woff2)$": "jest-transform-stub"
+    },
+    "modulePathIgnorePatterns": [
+      "<rootDir>/lib/typescript",
+      "setup.(ts|tsx)$"
+    ],
+    "preset": "react-native",
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@react-native|react-native|react-native.*|@?react-navigation.*)/)"
+    ]
   }
 }
