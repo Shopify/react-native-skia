@@ -10,6 +10,7 @@ import {
   Path,
   Rect,
   Image,
+  Drawing,
 } from "../../components";
 import { images, importSkia, surface } from "../setup";
 
@@ -178,5 +179,16 @@ describe("Drawings", () => {
       </Group>
     );
     checkImage(image, "snapshots/drawings/image-default-props.png");
+  });
+
+  it("should allow to use the the JS API directly", async () => {
+    const image = await surface.draw(
+      <Group color="red">
+        <Drawing
+          drawing={({ canvas, paint }) => canvas.drawCircle(0, 0, 100, paint)}
+        />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/custom-drawing.png");
   });
 });
