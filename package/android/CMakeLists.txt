@@ -12,6 +12,11 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 #set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 #set (SKIA_SKUNICODE_LIB "skunicode")
 
+# Clear some variables
+unset(LIBRN_DIR CACHE)
+unset(libfbjni_link_DIRS CACHE)
+unset(libfbjni_include_DIRS CACHE)
+
 set(build_DIR ${CMAKE_SOURCE_DIR}/build)
 file(GLOB LIBRN_DIR "${PREBUILT_DIR}/${ANDROID_ABI}")
 file(GLOB libfbjni_link_DIRS "${build_DIR}/fbjni*.aar/jni/${ANDROID_ABI}")
@@ -114,49 +119,72 @@ find_library(
         LOG_LIB
         log
 )
-
 message("-- LOG     : " ${LOG_LIB})
 
- if(${REACT_NATIVE_VERSION} LESS 66)
-         # JSI lib didn't exist on RN 0.65 and before. Simply omit it.
-         set (JSI_LIB "")
- else()
-         # RN 0.66 distributes libjsi.so, can be used instead of compiling jsi.cpp manually.
-         find_library(
-                 JSI_LIB
-                 jsi
-                 PATHS ${LIBRN_DIR}
-                 NO_CMAKE_FIND_ROOT_PATH
-         )
- endif()
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+    # We need to find packages since from RN 0.71 binaries are prebuilt
+    find_package(fbjni REQUIRED CONFIG)
+    find_package(ReactAndroid REQUIRED CONFIG)
+endif()
 
- message("-- JSI     : " ${JSI_LIB})
-
-find_library(
-        REACT_LIB
-        react_nativemodule_core
+unset(JSI_LIB CACHE)
+if(${REACT_NATIVE_VERSION} LESS 66)
+    # JSI lib didn't exist on RN 0.65 and before. Simply omit it.
+    set (JSI_LIB "")
+elseif(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+    # RN 0.71 distributes prebuilt binaries.
+    set (JSI_LIB ReactAndroid::jsi)
+else()
+    # RN 0.66 distributes libjsi.so, can be used instead of compiling jsi.cpp manually.
+    find_library(
+        JSI_LIB
+        jsi
         PATHS ${LIBRN_DIR}
         NO_CMAKE_FIND_ROOT_PATH
-)
+    )
+endif()
+message("-- JSI     : " ${JSI_LIB})
 
+unset(REACT_LIB CACHE)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+    # RN 0.71 distributes prebuilt binaries.
+    set (REACT_LIB ReactAndroid::react_nativemodule_core)
+else()
+    find_library(
+            REACT_LIB
+            react_nativemodule_core
+            PATHS ${LIBRN_DIR}
+            NO_CMAKE_FIND_ROOT_PATH
+    )
+endif()
 message("-- REACT   : " ${REACT_LIB})
 
-find_library(
-        FBJNI_LIBRARY 
-        fbjni 
-        PATHS ${libfbjni_link_DIRS}
-        NO_CMAKE_FIND_ROOT_PATH
-)
-
+unset(FBJNI_LIBRARY CACHE)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+    # RN 0.71 distributes prebuilt binaries.
+    set (FBJNI_LIBRARY fbjni::fbjni)
+else()
+    find_library(
+            FBJNI_LIBRARY
+            fbjni
+            PATHS ${libfbjni_link_DIRS}
+            NO_CMAKE_FIND_ROOT_PATH
+    )
+endif()
 message("-- FBJNI   : " ${FBJNI_LIBRARY})
 
-find_library(
-        TURBOMODULES_LIB
-        turbomodulejsijni
-        PATHS ${LIBRN_DIR}
-        NO_CMAKE_FIND_ROOT_PATH
-)
-
+unset(TURBOMODULES_LIB CACHE)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+    # RN 0.71 distributes prebuilt binaries.
+    set (TURBOMODULES_LIB "ReactAndroid::turbomodulejsijni")
+else()
+    find_library(
+            TURBOMODULES_LIB
+            turbomodulejsijni
+            PATHS ${LIBRN_DIR}
+            NO_CMAKE_FIND_ROOT_PATH
+    )
+endif()
 message("-- TURBO   : " ${TURBOMODULES_LIB})
 
 # Link
