@@ -5,6 +5,7 @@ import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import { enumKey } from "../datatypes";
 import type { DeclarationContext } from "../../types/DeclarationContext";
+import { composeDeclarations } from "../../types/DeclarationContext";
 
 export class BlendNode extends JsiDeclarationNode<BlendProps> {
   constructor(ctx: NodeContext, props: BlendProps) {
@@ -18,24 +19,14 @@ export class BlendNode extends JsiDeclarationNode<BlendProps> {
     // Blend ImageFilters
     const imageFilters = ctx.popImageFilters();
     if (imageFilters.length > 0) {
-      const imageFilter = imageFilters.reverse().reduce((inner, outer) => {
-        if (inner === null) {
-          return outer;
-        }
-        return Skia.ImageFilter.MakeBlend(blend, outer, inner);
-      });
-      ctx.pushImageFilter(imageFilter);
+      const composer = Skia.ImageFilter.MakeBlend.bind(Skia.ImageFilter, blend);
+      ctx.pushImageFilter(composeDeclarations(imageFilters, composer));
     }
+    // Blend Shaders
     const shaders = ctx.popShaders();
     if (shaders.length > 0) {
-      // Blend Shaders
-      const shader = shaders.reverse().reduce((inner, outer) => {
-        if (inner === null) {
-          return outer;
-        }
-        return Skia.Shader.MakeBlend(blend, outer, inner);
-      });
-      ctx.pushShader(shader);
+      const composer = Skia.Shader.MakeBlend.bind(Skia.Shader, blend);
+      ctx.pushShader(composeDeclarations(shaders, composer));
     }
   }
 }

@@ -8,6 +8,21 @@ import type {
   Skia,
 } from "../../skia/types";
 
+export const composeDeclarations = <T>(
+  filters: T[],
+  composer: (outer: T, inner: T) => T
+) => {
+  if (filters.length <= 1) {
+    return filters[0];
+  }
+  return filters.reverse().reduce((inner, outer) => {
+    if (!inner) {
+      return outer;
+    }
+    return composer(outer, inner);
+  });
+};
+
 const popAll = <T>(arr: T[], limit?: number): T[] => {
   const n = limit ?? arr.length;
   return arr.splice(-n);
@@ -18,15 +33,7 @@ const popAllAsOne = <T>(
   composer: (outer: T, inner: T) => T
 ): T | undefined => {
   const filters = popAll(arr);
-  if (filters.length <= 1) {
-    return filters[0];
-  }
-  return filters.reverse().reduce((inner, outer) => {
-    if (!inner) {
-      return outer;
-    }
-    return composer(outer, inner);
-  });
+  return composeDeclarations(filters, composer);
 };
 
 export class DeclarationContext {
