@@ -73,6 +73,10 @@ void RNSkMetalCanvasProvider::renderToCanvas(const std::function<void(SkCanvas*)
   auto state = UIApplication.sharedApplication.applicationState;
   if (state == UIApplicationStateBackground || state == UIApplicationStateInactive)
   {
+    // Request a redraw in the next run loop callback
+    _requestRedraw();
+    // and don't draw now since it might cause errors in the metal renderer if 
+    // we try to render while in the background. (see above issue)
     return;
   }
   
