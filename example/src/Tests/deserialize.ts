@@ -29,8 +29,10 @@ export const parseNode = (
 export const parseProps = (props: SerializedProps, assets: Assets) => {
   const newProps: SerializedProps = {};
   Object.keys(props).forEach((key) => {
-    newProps[key] = parseProp(props[key], assets);
+    const value = parseProp(props[key], assets);
+    newProps[key] = value;
   });
+  console.log({ newProps });
   return newProps;
 };
 
@@ -62,6 +64,13 @@ const parseProp = (value: any, assets: Assets) => {
         throw new Error(`Asset ${value.name} not found`);
       }
       return Skia.Font(asset, value.size);
+    } else if (value.__typename__ === "Function") {
+      // eslint-disable-next-line no-eval
+      return eval(
+        `(function Main(){ const {Skia} = this; return (${value.source}); })`
+      ).call({
+        Skia,
+      });
     }
   }
   return value;
