@@ -32,7 +32,6 @@ export const parseProps = (props: SerializedProps, assets: Assets) => {
     const value = parseProp(props[key], assets);
     newProps[key] = value;
   });
-  console.log({ newProps });
   return newProps;
 };
 
