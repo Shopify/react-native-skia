@@ -66,7 +66,11 @@ const parseProp = (value: any, assets: Assets) => {
       return Skia.Font(asset, value.size);
     } else if (value.__typename__ === "Function") {
       // eslint-disable-next-line no-eval
-      return eval(`(${value.source})`);
+      return eval(
+        `(function Main(){ const {Skia} = this; return (${value.source}); })`
+      ).call({
+        Skia,
+      });
     }
   }
   return value;

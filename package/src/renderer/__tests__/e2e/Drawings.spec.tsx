@@ -182,10 +182,11 @@ describe("Drawings", () => {
   });
 
   it("should allow to use the the JS API directly", async () => {
+    const { Skia } = importSkia();
     const image = await surface.draw(
       <Group color="red">
         <Drawing
-          drawing={({ canvas, paint }) => canvas.drawCircle(0, 0, 100, paint)}
+          drawing={({ canvas }) => canvas.drawCircle(0, 0, 100, Skia.Paint())}
         />
       </Group>
     );
