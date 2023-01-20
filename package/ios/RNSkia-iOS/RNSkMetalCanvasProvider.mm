@@ -41,7 +41,7 @@ RNSkCanvasProvider(requestRedraw),
   _layer.opaque = false;
   _layer.contentsScale = _context->getPixelDensity();
   _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-  _layer.contentsGravity = kCAGravityBottomRight;
+  _layer.contentsGravity = kCAGravityBottomLeft;
 }
 
 RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {
