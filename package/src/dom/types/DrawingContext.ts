@@ -256,8 +256,14 @@ class PaintDecoration {
   }
 
   concat(paint: SkPaint) {
+    if (this._opacity !== undefined) {
+      paint.setAlphaf(paint.getAlphaf() * this._opacity);
+    }
     if (this._color !== undefined) {
+      const currentOpacity = paint.getAlphaf();
+      paint.setShader(null);
       paint.setColor(this._color);
+      paint.setAlphaf(currentOpacity * paint.getAlphaf());
     }
     if (this._strokeWidth !== undefined) {
       paint.setStrokeWidth(this._strokeWidth);
@@ -276,9 +282,6 @@ class PaintDecoration {
     }
     if (this._strokeMiter !== undefined) {
       paint.setStrokeMiter(this._strokeMiter);
-    }
-    if (this._opacity !== undefined) {
-      paint.setAlphaf(paint.getAlphaf() * this._opacity);
     }
     if (this._antiAlias !== undefined) {
       paint.setAntiAlias(this._antiAlias);
