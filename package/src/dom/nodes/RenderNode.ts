@@ -1,4 +1,10 @@
-import type { SkMatrix, SkRect, SkRRect, SkPath } from "../../skia/types";
+import type {
+  SkMatrix,
+  SkRect,
+  SkRRect,
+  SkPath,
+  SkPaint,
+} from "../../skia/types";
 import { ClipOp, isRRect } from "../../skia/types";
 import type {
   RenderNode,
@@ -24,11 +30,16 @@ const paintProps = [
   "opacity",
 ];
 
+interface PaintCache {
+  parent: SkPaint;
+  child: SkPaint;
+}
+
 export abstract class JsiRenderNode<P extends GroupProps>
   extends JsiNode<P>
   implements RenderNode<P>
 {
-  private useCache = false;
+  paintCache: PaintCache | null = null;
 
   matrix: SkMatrix;
   clipRect?: SkRect;
@@ -51,7 +62,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
     if (hasChanged) {
       this.onPropChange();
       if (paintProps.includes(key as string)) {
-        this.useCache = false;
+        this.paintCache = null;
       }
     }
     return hasChanged;
@@ -68,14 +79,14 @@ export abstract class JsiRenderNode<P extends GroupProps>
 
   addChild(child: Node<unknown>) {
     if (child instanceof JsiDeclarationNode) {
-      child.setInvalidate(() => (this.useCache = false));
+      child.setInvalidate(() => (this.paintCache = null));
     }
     super.addChild(child);
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
     if (child instanceof JsiDeclarationNode) {
-      child.setInvalidate(() => (this.useCache = false));
+      child.setInvalidate(() => (this.paintCache = null));
     }
     super.insertChildBefore(child, before);
   }
@@ -100,8 +111,12 @@ export abstract class JsiRenderNode<P extends GroupProps>
   render(ctx: DrawingContext) {
     const { invertClip, layer, matrix, transform } = this.props;
     const { canvas } = ctx;
+    const parentPaint = ctx.paint;
 
-    const shouldRestore = ctx.saveAndConcat(this, this.useCache);
+    const shouldUseCache =
+      this.paintCache !== null || parentPaint === ctx.paint;
+    const cache = shouldUseCache ? this.paintCache?.child : undefined;
+    const shouldRestore = ctx.saveAndConcat(this, cache);
 
     const hasTransform = matrix !== undefined || transform !== undefined;
     const hasClip =
@@ -139,7 +154,10 @@ export abstract class JsiRenderNode<P extends GroupProps>
       canvas.restore();
     }
     if (shouldRestore) {
-      this.useCache = true;
+      this.paintCache = {
+        parent: parentPaint,
+        child: ctx.paint,
+      };
       ctx.restore();
     }
   }
