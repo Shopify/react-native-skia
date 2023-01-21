@@ -28,6 +28,8 @@ export abstract class JsiRenderNode<P extends GroupProps>
   extends JsiNode<P>
   implements RenderNode<P>
 {
+  private useCache = false;
+
   matrix: SkMatrix;
   clipRect?: SkRect;
   clipRRect?: SkRRect;
@@ -49,7 +51,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
     if (hasChanged) {
       this.onPropChange();
       if (paintProps.includes(key as string)) {
-        //  this.paintCache = null;
+        this.useCache = false;
       }
     }
     return hasChanged;
@@ -66,14 +68,14 @@ export abstract class JsiRenderNode<P extends GroupProps>
 
   addChild(child: Node<unknown>) {
     if (child instanceof JsiDeclarationNode) {
-      // child.setInvalidate(() => (this.paintCache = null));
+      child.setInvalidate(() => (this.useCache = false));
     }
     super.addChild(child);
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
     if (child instanceof JsiDeclarationNode) {
-      //child.setInvalidate(() => (this.paintCache = null));
+      child.setInvalidate(() => (this.useCache = false));
     }
     super.insertChildBefore(child, before);
   }
@@ -99,7 +101,8 @@ export abstract class JsiRenderNode<P extends GroupProps>
     const { invertClip, layer, matrix, transform } = this.props;
     const { canvas } = ctx;
 
-    const shouldRestore = ctx.saveAndConcat(this);
+    const shouldRestore = ctx.saveAndConcat(this, this.useCache);
+
     const hasTransform = matrix !== undefined || transform !== undefined;
     const hasClip =
       this.clipRect !== undefined ||
@@ -136,6 +139,7 @@ export abstract class JsiRenderNode<P extends GroupProps>
       canvas.restore();
     }
     if (shouldRestore) {
+      this.useCache = true;
       ctx.restore();
     }
   }

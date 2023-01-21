@@ -20,12 +20,12 @@ import type { Node } from "./Node";
 export interface DrawingContext {
   canvas: SkCanvas;
   paint: SkPaint;
-  saveAndConcat(node: Node<PaintProps>): boolean;
+  saveAndConcat(node: Node<PaintProps>, useCache: boolean): boolean;
   restore(): void;
 }
 
 export class JsiDrawingContext implements DrawingContext {
-  //private paintCache = new Map<SkPaint, SkPaint>();
+  private paintCache = new Map<SkPaint, SkPaint>();
 
   paints: SkPaint[];
 
@@ -38,19 +38,29 @@ export class JsiDrawingContext implements DrawingContext {
     return this.paints[this.paints.length - 1];
   }
 
-  save() {
-    this.paints.push(this.paint.copy());
+  private save(useCache: boolean): boolean {
+    const cachedPaint = this.paintCache.get(this.paint);
+    if (cachedPaint !== undefined && useCache) {
+      this.paints.push(cachedPaint);
+      return true;
+    }
+    const childPaint = this.paint.copy();
+    this.paintCache.set(this.paint, childPaint);
+    this.paints.push(childPaint);
+    return false;
   }
 
   restore(): void {
     this.paints.pop();
   }
 
-  saveAndConcat(node: Node<PaintProps>) {
+  saveAndConcat(node: Node<PaintProps>, useCache: boolean) {
     const paintDecoration = this.getPaintDecoration(node);
     if (!paintDecoration.isPristine()) {
-      this.save();
-      paintDecoration.concat(this.paint);
+      const usedCached = this.save(useCache);
+      if (!usedCached) {
+        paintDecoration.concat(this.paint);
+      }
       return true;
     }
     return false;
