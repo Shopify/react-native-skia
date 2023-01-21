@@ -1,7 +1,7 @@
 import type { GroupProps } from "./Common";
-import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationType, NodeType } from "./NodeType";
 import type { DeclarationContext } from "./DeclarationContext";
+import type { DrawingContext } from "./DrawingContext";
 
 export interface Node<P> {
   type: NodeType;

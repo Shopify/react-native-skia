@@ -7,6 +7,7 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
+import { JsiDrawingContext } from "../types";
 
 describe("Compose", () => {
   it("should compose image filters", () => {
@@ -34,7 +35,7 @@ describe("Compose", () => {
     blur.addChild(cf);
     root.addChild(blur);
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("image-filters/composing.png"));
   });

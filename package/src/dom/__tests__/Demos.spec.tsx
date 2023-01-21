@@ -6,6 +6,7 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
+import { JsiDrawingContext } from "../types";
 
 describe("Drawings", () => {
   it("Apple Breathe Demo", () => {
@@ -41,7 +42,7 @@ describe("Drawings", () => {
       rings.addChild(ring);
     }
     root.addChild(rings);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/demos/breathe.png");
   });
@@ -74,7 +75,7 @@ describe("Drawings", () => {
       rings.addChild(Sk.Circle({ c, r: R, matrix, color: i % 2 ? c1 : c2 }));
     }
     root.addChild(rings);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/demos/breathe.png");
   });
@@ -107,11 +108,11 @@ describe("Drawings", () => {
       rings.addChild(Sk.Circle({ c, r: R, matrix, color: i % 2 ? c1 : c2 }));
     }
     root.addChild(rings);
-    let ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    let ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/demos/breathe.png");
 
-    ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    ctx = new JsiDrawingContext(Skia, canvas);
     blur.setProp("blur", 0);
     root.setProp("transform", [
       { translateX: c.x },
