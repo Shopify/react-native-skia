@@ -50,44 +50,13 @@ export class JsiDrawingContext implements DrawingContext {
       this.paints.push(cache);
       return true;
     }
-    const paintDecoration = this.getPaintDecoration(node);
+    const paintDecoration = new PaintDecoration(this.Skia, node);
     if (!paintDecoration.isPristine()) {
       this.save();
       paintDecoration.concat(this.paint);
       return true;
     }
     return false;
-  }
-
-  getPaintDecoration(node: Node<PaintProps>) {
-    const paintDecoration = new PaintDecoration(this.Skia, node.getProps());
-    const declCtx = new DeclarationContext(this.Skia);
-    node.children().forEach((child) => {
-      if (child instanceof JsiDeclarationNode) {
-        child.decorate(declCtx);
-      }
-    });
-    const colorFilter = declCtx.popColorFiltersAsOne();
-    const imageFilter = declCtx.popImageFiltersAsOne();
-    const shader = declCtx.popShader();
-    const maskFilter = declCtx.popMaskFilter();
-    const pathEffect = declCtx.popPathEffectsAsOne();
-    if (imageFilter) {
-      paintDecoration.setImageFilter(imageFilter);
-    }
-    if (shader) {
-      paintDecoration.setShader(shader);
-    }
-    if (pathEffect) {
-      paintDecoration.setPathEffect(pathEffect);
-    }
-    if (colorFilter) {
-      paintDecoration.setColorFilter(colorFilter);
-    }
-    if (maskFilter) {
-      paintDecoration.setMaskFilter(maskFilter);
-    }
-    return paintDecoration;
   }
 }
 
@@ -111,7 +80,9 @@ class PaintDecoration {
   _colorFilter?: SkColorFilter;
   _maskFilter?: SkMaskFilter;
 
-  constructor(Skia: Skia, props: PaintProps) {
+  constructor(Skia: Skia, node: Node<PaintProps>) {
+    const props = node.getProps();
+    const children = node.children();
     this.setColor(
       props.color !== undefined ? Skia.Color(props.color) : props.color
     );
@@ -123,6 +94,32 @@ class PaintDecoration {
     this.setStrokeMiter(props.strokeMiter);
     this.setOpacity(props.opacity);
     this.setAntiAlias(props.antiAlias);
+    const declCtx = new DeclarationContext(Skia);
+    children.forEach((child) => {
+      if (child instanceof JsiDeclarationNode) {
+        child.decorate(declCtx);
+      }
+    });
+    const colorFilter = declCtx.popColorFiltersAsOne();
+    const imageFilter = declCtx.popImageFiltersAsOne();
+    const shader = declCtx.popShader();
+    const maskFilter = declCtx.popMaskFilter();
+    const pathEffect = declCtx.popPathEffectsAsOne();
+    if (imageFilter) {
+      this.setImageFilter(imageFilter);
+    }
+    if (shader) {
+      this.setShader(shader);
+    }
+    if (pathEffect) {
+      this.setPathEffect(pathEffect);
+    }
+    if (colorFilter) {
+      this.setColorFilter(colorFilter);
+    }
+    if (maskFilter) {
+      this.setMaskFilter(maskFilter);
+    }
   }
 
   private enum<T>(value: T, key?: Uncapitalize<string>) {

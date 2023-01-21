@@ -79,14 +79,18 @@ export abstract class JsiRenderNode<P extends GroupProps>
 
   addChild(child: Node<unknown>) {
     if (child instanceof JsiDeclarationNode) {
-      child.setInvalidate(() => (this.paintCache = null));
+      child.setInvalidate(() => {
+        this.paintCache = null;
+      });
     }
     super.addChild(child);
   }
 
   insertChildBefore(child: Node<unknown>, before: Node<unknown>) {
     if (child instanceof JsiDeclarationNode) {
-      child.setInvalidate(() => (this.paintCache = null));
+      child.setInvalidate(() => {
+        this.paintCache = null;
+      });
     }
     super.insertChildBefore(child, before);
   }
@@ -113,9 +117,10 @@ export abstract class JsiRenderNode<P extends GroupProps>
     const { canvas } = ctx;
     const parentPaint = ctx.paint;
 
-    const shouldUseCache =
-      this.paintCache !== null || parentPaint === ctx.paint;
-    const cache = shouldUseCache ? this.paintCache?.child : undefined;
+    const cache =
+      this.paintCache !== null && this.paintCache.parent === ctx.paint
+        ? this.paintCache.child
+        : undefined;
     const shouldRestore = ctx.saveAndConcat(this, cache);
 
     const hasTransform = matrix !== undefined || transform !== undefined;

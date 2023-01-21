@@ -108,11 +108,10 @@ describe("Drawings", () => {
       rings.addChild(Sk.Circle({ c, r: R, matrix, color: i % 2 ? c1 : c2 }));
     }
     root.addChild(rings);
-    let ctx = new JsiDrawingContext(Skia, canvas);
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/demos/breathe.png");
 
-    ctx = new JsiDrawingContext(Skia, canvas);
     blur.setProp("blur", 0);
     root.setProp("transform", [
       { translateX: c.x },
