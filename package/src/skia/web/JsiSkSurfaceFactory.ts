@@ -21,13 +21,14 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
   }
 
   drawAsImage(cb: (canvas: SkCanvas) => void, width: number, height: number) {
-    // On Node we can use webgl view headless-gl, for now default to CPU here.
-    // OffscreenCanvas is not available on Safari.
+    // OffscreenCanvas may also be unvailable in some environments.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const OC = (globalThis as any).OffscreenCanvas;
     let surface: Surface | null;
-    if (globalThis.OffscreenCanvas === undefined) {
+    if (OC === undefined) {
       surface = this.CanvasKit.MakeSurface(width, height);
     } else {
-      const offscreen = new globalThis.OffscreenCanvas(width, height);
+      const offscreen = new OC(width, height);
       surface = this.CanvasKit.MakeWebGLCanvasSurface(
         offscreen as unknown as HTMLCanvasElement
       );

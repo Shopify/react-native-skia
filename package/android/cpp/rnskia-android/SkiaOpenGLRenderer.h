@@ -46,7 +46,7 @@ enum RenderState : int {
 
 class SkiaOpenGLRenderer {
 public:
-  explicit SkiaOpenGLRenderer();
+  SkiaOpenGLRenderer();
   explicit SkiaOpenGLRenderer(jobject surface);
   ~SkiaOpenGLRenderer();
 
