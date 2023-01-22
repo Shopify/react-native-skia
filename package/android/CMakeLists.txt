@@ -91,7 +91,9 @@ target_include_directories(
         cpp/rnskia/dom/base
         cpp/rnskia/dom/nodes
         cpp/rnskia/dom/props
-        cpp/utils  
+        cpp/utils
+
+        android/cpp/rnskia-android
 
         ${libfbjni_include_DIRS}
 )
