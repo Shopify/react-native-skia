@@ -1,10 +1,15 @@
-#import <MetalKit/MetalKit.h>
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkSurface.h"
-#include "GrDirectContext.h"
-#include "GrBackendSurface.h"
-#include "GrTypes.h"
-#include "SkColorType.h"
+#import "SkColorSpace.h"
+#import "SkSurface.h"
+#import "SkCanvas.h"
+
+#import <include/gpu/GrDirectContext.h>
+
+#pragma clang diagnostic pop
+
+#import <MetalKit/MetalKit.h>
 
 sk_sp<SkSurface> MakeOffscreenMetalSurface(int width, int height) {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
