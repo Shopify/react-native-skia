@@ -8,8 +8,10 @@
 #include "JsiSkHostObjects.h"
 
 #include <JsiSkSurface.h>
-#if defined(__ANDROID_API__)
+#ifdef ANDROID
 #include "SkiaOpenGLRenderer.h"
+#else
+#include "SkiaMetalRenderer.h"
 #endif
 
 #pragma clang diagnostic push
@@ -40,10 +42,11 @@ public:
 
   JSI_HOST_FUNCTION(drawAsImage) {
     auto fn = arguments[0].asObject(runtime).asFunction(runtime);
+    // TODO: we should support float here
     auto width = static_cast<int>(arguments[1].asNumber());
     auto height = static_cast<int>(arguments[2].asNumber());
     auto context = getContext();
-#if defined(__ANDROID_API__)
+#ifdef ANDROID
     auto renderer = std::make_shared<SkiaOpenGLRenderer>();
     renderer->run(
         [&context, &runtime, &fn](SkCanvas *canvas) {
@@ -54,7 +57,7 @@ public:
         width, height);
     auto surface = renderer->getSurface();
 #else
-    auto surface = SkSurface::MakeRasterN32Premul(width, height);
+    auto surface = MakeOffscreenMetalSurface(width, height);
     auto canvas = surface->getCanvas();
     if (surface == nullptr) {
       return jsi::Value::null();
