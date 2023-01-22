@@ -211,17 +211,12 @@ bool SkiaOpenGLRenderer::initGLSurface(int width, int height) {
   // Create the opengl surface
   auto ctx = getThreadDrawingContext();
   if (_nativeWindow == nullptr) {
-    const EGLint _offScreenSurfaceAttribs[] = {
-      EGL_WIDTH, width,
-      EGL_HEIGHT, height,
-      EGL_NONE
-    };
-    _glSurface = eglCreatePbufferSurface(ctx->glDisplay,
-                                         ctx->glConfig,
+    const EGLint _offScreenSurfaceAttribs[] = {EGL_WIDTH, width, EGL_HEIGHT,
+                                               height, EGL_NONE};
+    _glSurface = eglCreatePbufferSurface(ctx->glDisplay, ctx->glConfig,
                                          _offScreenSurfaceAttribs);
   } else {
-    _glSurface = eglCreateWindowSurface(ctx->glDisplay,
-                                        ctx->glConfig,
+    _glSurface = eglCreateWindowSurface(ctx->glDisplay, ctx->glConfig,
                                         _nativeWindow, nullptr);
   }
 

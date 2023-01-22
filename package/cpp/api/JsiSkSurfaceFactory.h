@@ -38,36 +38,38 @@ public:
         std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
   }
 
-#if defined(__ANDROID_API__)
   JSI_HOST_FUNCTION(drawAsImage) {
+    auto fn = arguments[0].asObject(runtime).asFunction(runtime);
     auto width = static_cast<int>(arguments[1].asNumber());
     auto height = static_cast<int>(arguments[2].asNumber());
+    auto context = getContext();
+#if defined(__ANDROID_API__)
     auto renderer = std::make_shared<SkiaOpenGLRenderer>();
     renderer->run(
-        [&](SkCanvas *canvas) {
-          canvas->clear(SK_ColorBLUE);
-          SkPaint paint;
-          paint.setColor(SK_ColorRED);
-          canvas->drawCircle(0, 0, 50, paint);
-          // Create jsi canvas
-          // auto jsiCanvas = std::make_shared<JsiSkCanvas>(_platformContext);
-          // jsiCanvas->setCanvas(canvas);
-
-          // drawInJsiCanvas(std::move(jsiCanvas),
-          // canvasProvider->getScaledWidth(),
-          //                 canvasProvider->getScaledHeight(), ms.count() /
-          //                 1000);
+        [&context, &runtime, &fn](SkCanvas *canvas) {
+          auto jsiCanvas = jsi::Object::createFromHostObject(
+              runtime, std::make_shared<JsiSkCanvas>(context, canvas));
+          fn.call(runtime, jsiCanvas);
         },
         width, height);
-
-    auto image = renderer->getSurface()->makeImageSnapshot();
+    auto surface = renderer->getSurface();
+#else
+    auto surface = SkSurface::MakeRasterN32Premul(width, height);
+    auto canvas = surface->getCanvas();
+    if (surface == nullptr) {
+      return jsi::Value::null();
+    }
+    auto jsiCanvas = jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkCanvas>(context, canvas));
+    fn.call(runtime, jsiCanvas);
+#endif
+    auto image = surface->makeImageSnapshot();
     if (image == nullptr) {
       return jsi::Value::null();
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
-#endif
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurfaceFactory, Make),
                        JSI_EXPORT_FUNC(JsiSkSurfaceFactory, drawAsImage))
