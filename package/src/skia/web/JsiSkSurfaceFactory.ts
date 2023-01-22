@@ -1,4 +1,4 @@
-import type { CanvasKit } from "canvaskit-wasm";
+import type { CanvasKit, Surface } from "canvaskit-wasm";
 
 import type { SkCanvas, SurfaceFactory } from "../types";
 
@@ -21,10 +21,17 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
   }
 
   drawAsImage(cb: (canvas: SkCanvas) => void, width: number, height: number) {
-    const offscreen = new OffscreenCanvas(width, height);
-    const surface = this.CanvasKit.MakeWebGLCanvasSurface(
-      offscreen as unknown as HTMLCanvasElement
-    );
+    // On Node we can use webgl view headless-gl, for now default to CPU here.
+    // OffscreenCanvas is not available on Safari.
+    let surface: Surface | null;
+    if (globalThis.OffscreenCanvas === undefined) {
+      surface = this.CanvasKit.MakeSurface(width, height);
+    } else {
+      const offscreen = new globalThis.OffscreenCanvas(width, height);
+      surface = this.CanvasKit.MakeWebGLCanvasSurface(
+        offscreen as unknown as HTMLCanvasElement
+      );
+    }
     if (!surface) {
       throw new Error("Could not create surface");
     }

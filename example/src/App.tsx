@@ -58,17 +58,6 @@ const linking = {
   prefixes: ["rnskia://"],
 };
 
-console.log(Skia.Surface.drawAsImage);
-const img = Skia.Surface.drawAsImage(
-  (canvas) => {
-    const paint = Skia.Paint();
-    canvas.drawCircle(0, 0, 50, paint);
-  },
-  50,
-  50
-);
-console.log(img.encodeToBase64());
-
 const HeaderLeft = (props: HeaderBackButtonProps) => {
   const navigation = useNavigation();
   return (
