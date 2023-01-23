@@ -5,8 +5,6 @@ import { StatusBar } from "react-native";
 import type { HeaderBackButtonProps } from "@react-navigation/elements";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { FiberProvider } from "its-fine";
-import type { SkImage } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
 
 import {
   AnimationExample,
