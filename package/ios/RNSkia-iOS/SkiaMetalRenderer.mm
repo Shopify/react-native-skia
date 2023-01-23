@@ -31,14 +31,21 @@ sk_sp<SkSurface> MakeOffscreenMetalSurface(int width, int height) {
   // Create a Metal texture
   id<MTLTexture> offscreenBuffer = [device newTextureWithDescriptor:textureDescriptor];
   // Retain the metal texture to make sure it's not released before the callback is called.
-  //CFRetain((__bridge void*)offscreenBuffer);
-
+  void* ctx = (__bridge void*)offscreenBuffer;
+  CFRetain(ctx);
+    
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
-  info.fTexture.retain((__bridge void*)offscreenBuffer);
+  info.fTexture = sk_cfp<const void*>(ctx);
   GrBackendTexture backendTexture(width, height, GrMipMapped::kNo, info);
 
   // Create a SkSurface from the GrBackendTexture
-  auto surface = SkSurface::MakeFromBackendTexture(skiaContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0, kBGRA_8888_SkColorType, nullptr, nullptr);
+  auto surface = SkSurface::MakeFromBackendTexture(
+   skiaContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0, kBGRA_8888_SkColorType, nullptr, nullptr,
+   [](void* ctx) {
+     CFRelease(ctx);
+   }, ctx
+  );
+
   return surface;
 }

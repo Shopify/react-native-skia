@@ -42,7 +42,6 @@ public:
 
   JSI_HOST_FUNCTION(drawAsImage) {
     auto fn = arguments[0].asObject(runtime).asFunction(runtime);
-    // TODO: we should support float here
     auto width = static_cast<int>(arguments[1].asNumber());
     auto height = static_cast<int>(arguments[2].asNumber());
     auto context = getContext();

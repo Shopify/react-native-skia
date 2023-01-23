@@ -1,10 +1,7 @@
-import React from "react";
-
 import { checkImage, docPath } from "../../../__tests__/setup";
-import { Group, Circle } from "../../components";
 import { surface, importSkia } from "../setup";
 
-describe("Offscreen Drawibgs", () => {
+describe("Offscreen Drawings", () => {
   it("Should use the canvas API to build an image", async () => {
     const { width, height } = surface;
     const raw = await surface.eval(
