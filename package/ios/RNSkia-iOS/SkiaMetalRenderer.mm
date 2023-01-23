@@ -21,10 +21,10 @@ struct OffscreenRenderContext {
     device = MTLCreateSystemDefaultDevice();
     commandQueue =
         id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    skiaContext = GrDirectContext::MakeMetal((__bridge void*)device,
-                                             (__bridge void*)commandQueue);
+    skiaContext = GrDirectContext::MakeMetal((__bridge void *)device,
+                                             (__bridge void *)commandQueue);
     // Create a Metal texture descriptor
-    MTLTextureDescriptor* textureDescriptor = [MTLTextureDescriptor
+    MTLTextureDescriptor *textureDescriptor = [MTLTextureDescriptor
         texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
                                      width:width
                                     height:height
@@ -40,17 +40,14 @@ sk_sp<SkSurface> MakeOffscreenMetalSurface(int width, int height) {
 
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
-  info.fTexture.retain((__bridge void*)ctx->texture);
+  info.fTexture.retain((__bridge void *)ctx->texture);
   GrBackendTexture backendTexture(width, height, GrMipMapped::kNo, info);
 
   // Create a SkSurface from the GrBackendTexture
   auto surface = SkSurface::MakeFromBackendTexture(
       ctx->skiaContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
       kBGRA_8888_SkColorType, nullptr, nullptr,
-      [](void* addr) {
-        delete (OffscreenRenderContext *)addr;
-      },
-      ctx);
+      [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
   return surface;
 }
