@@ -58,7 +58,7 @@ export const Demo = () => {
 
 ## Offscreen rendering
 
-It is also possible directly possible to get an image directly from a drawing using drawAsImage.
+It is also possible directly possible to get an image directly from a drawing using `drawAsImage`.
 
 ```tsx twoslash
 import {drawAsImage, Circle, Canvas, Image} from "@shopify/react-native-skia";

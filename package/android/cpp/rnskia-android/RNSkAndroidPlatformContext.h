@@ -37,7 +37,7 @@ public:
     _jniPlatformContext->raiseError(err);
   }
 
-  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
     return MakeOffscreenGLSurface(width, height);
   }
 
