@@ -5,6 +5,15 @@
 #include <utility>
 
 #include <RNSkMeasureTime.h>
+#include <SkiaMetalRenderer.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include "SkSurface.h"
+
+#pragma clang diagnostic pop
+
 
 namespace RNSkia {
 
@@ -31,6 +40,11 @@ namespace RNSkia {
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
     RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }
+
+sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width, int height)  {
+  return MakeOffscreenMetalSurface(width, height);
+}
+
 
 void RNSkiOSPlatformContext::startDrawLoop() {
   if(_displayLink == nullptr) {

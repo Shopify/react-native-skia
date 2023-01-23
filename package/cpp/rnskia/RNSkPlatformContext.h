@@ -15,6 +15,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "SkStream.h"
+#include "SkSurface.h"
 
 #pragma clang diagnostic pop
 
@@ -108,6 +109,14 @@ public:
    * @param err Error to raise
    */
   virtual void raiseError(const std::exception &err) = 0;
+
+  /**
+   * Creates an offscreen surface
+   * @param width 
+   * @param height 
+   * @return sk_sp<SkSurface> 
+   */
+  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
 
   /**
    * Raises an exception on the platform. This function does not necessarily
