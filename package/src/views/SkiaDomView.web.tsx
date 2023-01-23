@@ -10,6 +10,8 @@ import type { SkiaDomViewProps, TouchInfo } from "./types";
 const pd = PixelRatio.get();
 
 export class SkiaDomView extends SkiaBaseWebView<SkiaDomViewProps> {
+  private paint = Skia.Paint();
+
   constructor(props: SkiaDomViewProps) {
     super(props);
   }
