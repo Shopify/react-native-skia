@@ -59,9 +59,6 @@ public:
         runtime, std::make_shared<JsiSkCanvas>(context, canvas));
     fn.call(runtime, jsiCanvas);
     auto image = surface->makeImageSnapshot();
-    if (image == nullptr) {
-      return jsi::Value::null();
-    }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }

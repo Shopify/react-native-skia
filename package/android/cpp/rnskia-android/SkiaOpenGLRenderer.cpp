@@ -98,9 +98,19 @@ namespace RNSkia {
         auto renderTarget =
                 GrBackendRenderTarget(width, height, samples, stencil, fbInfo);
 
+        struct DrawingContext {
+            EGLDisplay display;
+            EGLSurface surface;
+        };
+        DrawingContext* ctx = new DrawingContext({eglDisplay, eglSurface});
+
         auto surface = SkSurface::MakeFromBackendRenderTarget(
                 grContext.get(), renderTarget,
-                kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, nullptr, nullptr);
+                kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, nullptr, nullptr, [](void *addr) {
+                    auto ctx = (DrawingContext*)addr;
+            eglDestroySurface(ctx->display, ctx->surface);
+            delete ctx;
+        }, (void*)ctx);
         return surface;
     }
 

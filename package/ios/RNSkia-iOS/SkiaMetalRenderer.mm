@@ -30,6 +30,8 @@ sk_sp<SkSurface> MakeOffscreenMetalSurface(int width, int height) {
 
   // Create a Metal texture
   id<MTLTexture> offscreenBuffer = [device newTextureWithDescriptor:textureDescriptor];
+  // Retain the metal texture to make sure it's not released before the callback is called.
+  //CFRetain((__bridge void*)offscreenBuffer);
 
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
