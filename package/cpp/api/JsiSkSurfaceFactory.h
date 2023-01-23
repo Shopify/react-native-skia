@@ -47,25 +47,17 @@ public:
     auto height = static_cast<int>(arguments[2].asNumber());
     auto context = getContext();
 #ifdef ANDROID
-    auto renderer = std::make_shared<SkiaOpenGLRenderer>();
-    renderer->run(
-        [&context, &runtime, &fn](SkCanvas *canvas) {
-          auto jsiCanvas = jsi::Object::createFromHostObject(
-              runtime, std::make_shared<JsiSkCanvas>(context, canvas));
-          fn.call(runtime, jsiCanvas);
-        },
-        width, height);
-    auto surface = renderer->getSurface();
+    auto surface = MakeOffscreenGLSurface(width, height);
 #else
     auto surface = MakeOffscreenMetalSurface(width, height);
-    auto canvas = surface->getCanvas();
+#endif
     if (surface == nullptr) {
       return jsi::Value::null();
     }
+    auto canvas = surface->getCanvas();
     auto jsiCanvas = jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkCanvas>(context, canvas));
     fn.call(runtime, jsiCanvas);
-#endif
     auto image = surface->makeImageSnapshot();
     if (image == nullptr) {
       return jsi::Value::null();
