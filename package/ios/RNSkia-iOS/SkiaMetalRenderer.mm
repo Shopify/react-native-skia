@@ -1,9 +1,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#import "SkCanvas.h"
 #import "SkColorSpace.h"
 #import "SkSurface.h"
-#import "SkCanvas.h"
 
 #import <include/gpu/GrDirectContext.h>
 
@@ -11,41 +11,46 @@
 
 #import <MetalKit/MetalKit.h>
 
+struct OffscreenRenderContext {
+  id<MTLDevice> device;
+  id<MTLCommandQueue> commandQueue;
+  sk_sp<GrDirectContext> skiaContext;
+  id<MTLTexture> texture;
+
+  OffscreenRenderContext(int width, int height) {
+    device = MTLCreateSystemDefaultDevice();
+    commandQueue =
+        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
+    skiaContext = GrDirectContext::MakeMetal((__bridge void*)device,
+                                             (__bridge void*)commandQueue);
+    // Create a Metal texture descriptor
+    MTLTextureDescriptor* textureDescriptor = [MTLTextureDescriptor
+        texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                     width:width
+                                    height:height
+                                 mipmapped:NO];
+    textureDescriptor.usage =
+        MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
+    texture = [device newTextureWithDescriptor:textureDescriptor];
+  }
+};
+
 sk_sp<SkSurface> MakeOffscreenMetalSurface(int width, int height) {
-  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  auto ctx = new OffscreenRenderContext(width, height);
 
-  // Create a Metal command queue
-  id<MTLCommandQueue> commandQueue = [device newCommandQueue];
-
-  // Create a Skia GrDirectContext
-  auto skiaContext = GrDirectContext::MakeMetal((__bridge void*)device, (__bridge void*)commandQueue);
-
-  // Create a Metal texture descriptor
-  MTLTextureDescriptor *textureDescriptor = [[MTLTextureDescriptor alloc] init];
-  textureDescriptor.textureType = MTLTextureType2D;
-  textureDescriptor.pixelFormat = MTLPixelFormatBGRA8Unorm;
-  textureDescriptor.width = width;
-  textureDescriptor.height = height;
-  textureDescriptor.usage = MTLTextureUsageRenderTarget;
-
-  // Create a Metal texture
-  id<MTLTexture> offscreenBuffer = [device newTextureWithDescriptor:textureDescriptor];
-  // Retain the metal texture to make sure it's not released before the callback is called.
-  void* ctx = (__bridge void*)offscreenBuffer;
-  CFRetain(ctx);
-    
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
-  info.fTexture = sk_cfp<const void*>(ctx);
+  info.fTexture.retain((__bridge void*)ctx->texture);
   GrBackendTexture backendTexture(width, height, GrMipMapped::kNo, info);
 
   // Create a SkSurface from the GrBackendTexture
   auto surface = SkSurface::MakeFromBackendTexture(
-   skiaContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0, kBGRA_8888_SkColorType, nullptr, nullptr,
-   [](void* ctx) {
-     CFRelease(ctx);
-   }, ctx
-  );
+      ctx->skiaContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
+      kBGRA_8888_SkColorType, nullptr, nullptr,
+      [](void* addr) {
+        delete (OffscreenRenderContext *)addr;
+      },
+      ctx);
 
   return surface;
 }
