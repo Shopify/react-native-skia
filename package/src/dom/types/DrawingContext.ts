@@ -50,17 +50,17 @@ export class JsiDrawingContext implements DrawingContext {
       this.paints.push(cache);
       return true;
     }
-    const paintDecoration = new ConcatableSkPaint(this.Skia, node);
-    if (!paintDecoration.isPristine()) {
+    const paint = new ConcatablePaint(this.Skia, node);
+    if (!paint.isPristine()) {
       this.save();
-      paintDecoration.concat(this.paint);
+      paint.concatTo(this.paint);
       return true;
     }
     return false;
   }
 }
 
-class ConcatableSkPaint {
+class ConcatablePaint {
   private pristine = true;
 
   _color?: SkColor;
@@ -254,7 +254,7 @@ class ConcatableSkPaint {
     return this.pristine;
   }
 
-  concat(paint: SkPaint) {
+  concatTo(paint: SkPaint) {
     if (this._opacity !== undefined) {
       paint.setAlphaf(paint.getAlphaf() * this._opacity);
     }
