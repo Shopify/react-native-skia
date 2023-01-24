@@ -41,17 +41,19 @@ function sanitizeReanimatedProps(props) {
 function bindReanimated(container, node, sharedProps) {
   const sharedValues = Object.values(sharedProps);
   if (sharedValues.length > 0) {
+    if (!reanimatedInitialized) {
+      reanimatedInitialized = true;
+      SkiaViewApi.initializeReanimated(global._WORKLET_RUNTIME);
+    }
     const viewId = container.getNativeId();
-    const nodeId = node.getNodeId();
     startMapper(() => {
       "worklet";
       const updates = {};
       for (let propName in sharedProps) {
         updates[propName] = sharedProps[propName].value;
       }
-      global._updateSkiaProps?.(viewId, nodeId, updates);
+      global._updateSkiaProps?.(viewId, node, updates);
     }, sharedValues);
-    SkiaViewApi.registerReanimatedNode(global._WORKLET_RUNTIME, node);
   }
 }
 

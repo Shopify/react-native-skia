@@ -185,12 +185,11 @@ public:
     return jsi::Value::undefined();
   }
 
-  void initializeReanimated(jsi::Runtime &rt,
-                            const jsi::Value &workletRuntimeAddr) {
+  JSI_HOST_FUNCTION(initializeReanimated) {
     jsi::ArrayBuffer workletRuntimeArrayBuffer =
-        workletRuntimeAddr.asObject(rt).getArrayBuffer(rt);
+        arguments[0].asObject(runtime).getArrayBuffer(runtime);
     uintptr_t rawWorkletRuntimePointer =
-        *reinterpret_cast<uintptr_t *>(workletRuntimeArrayBuffer.data(rt));
+        *reinterpret_cast<uintptr_t *>(workletRuntimeArrayBuffer.data(runtime));
     jsi::Runtime *workletRuntime =
         reinterpret_cast<jsi::Runtime *>(rawWorkletRuntimePointer);
 
@@ -199,15 +198,7 @@ public:
                                const jsi::Value *args,
                                const size_t count) -> jsi::Value {
       auto viewId = static_cast<size_t>(args[0].asNumber());
-      auto nodeId = static_cast<size_t>(args[1].asNumber());
-      std::shared_ptr<JsiDomNode> node;
-      {
-        std::lock_guard<std::mutex> lock(_reanimatedNodesLock);
-        node = _reanimatedNodes[nodeId];
-      }
-      if (node == nullptr) {
-        return jsi::Value::undefined();
-      }
+      auto node = getArgumentAsHostObject<JsiDomNode>(rt, args, count, 1);
       auto props = args[2].asObject(rt);
       for (const auto &propMapping :
            node->getPropsContainer()->getMappedProperties()) {
@@ -224,14 +215,15 @@ public:
     };
 
     // this is just a simple workaround for a lack of a way to schedule stuff on
-    // the ui thread unfortunately removing draw loop callback from within a
+    // the ui thread. Unfortunately removing draw loop callback from within a
     // callback causes a deadlock, so we just keep it going, just not doing a
-    // thing
+    // thing after we set initialized = true
+    auto initialized = std::make_shared<bool>(false);
     _platformContext->beginDrawLoop(0xbadbeef, [=](bool invalidated) {
-      if (reanimatedRuntimeInitialized) {
+      if (*initialized) {
         return;
       }
-      reanimatedRuntimeInitialized = true;
+      *initialized = true;
       jsi::Runtime &rt = *workletRuntime;
       jsi::Value updatePropsHostFunction =
           jsi::Function::createFromHostFunction(
@@ -241,18 +233,8 @@ public:
       auto skiaApi = std::make_shared<JsiSkApi>(rt, _platformContext);
       rt.global().setProperty(rt, "SkiaApi", jsi::Object::createFromHostObject(rt, std::move(skiaApi)));
     });
-  }
 
-  JSI_HOST_FUNCTION(registerReanimatedNode) {
-    if (!reanimatedRuntimeInitialized) {
-      initializeReanimated(runtime, arguments[0]);
-      //        reanimatedRuntimeInitialized = true;
-    }
-    auto node =
-        getArgumentAsHostObject<JsiDomNode>(runtime, arguments, count, 1);
-    std::lock_guard<std::mutex> lock(_reanimatedNodesLock);
-    _reanimatedNodes[node->getNodeId()] = node;
-    return jsi::Value::undefined();
+    return jsi::Value();
   }
 
   JSI_HOST_FUNCTION(registerValuesInView) {
@@ -307,7 +289,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerReanimatedNode),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, initializeReanimated),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
@@ -406,8 +388,5 @@ private:
   std::unordered_map<size_t, RNSkViewInfo> _viewInfos;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::mutex _mutex;
-  bool reanimatedRuntimeInitialized = false;
-  std::unordered_map<size_t, std::shared_ptr<JsiDomNode>> _reanimatedNodes;
-  std::mutex _reanimatedNodesLock;
 };
 } // namespace RNSkia

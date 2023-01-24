@@ -2,7 +2,6 @@
 
 #include "JsiHostObject.h"
 
-#include "RNSkJsiViewApi.h"
 #include "RNSkPlatformContext.h"
 
 #include "JsiDomNode.h"
@@ -84,6 +83,7 @@ public:
 
         // Save unsubscribe methods
         unsubscribers.push_back(std::make_pair(animatedValue, unsubscribe));
+
       } else if (isSelector(nativeValue)) {
         // Handle Skia Animation Value Selectors
         auto animatedValue = std::dynamic_pointer_cast<RNSkReadonlyValue>(
@@ -190,12 +190,8 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(initializeReanimated) { return jsi::Value::undefined(); }
-
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiDependencyManager, unsubscribeNode),
                        JSI_EXPORT_FUNC(JsiDependencyManager, subscribeNode),
-                       JSI_EXPORT_FUNC(JsiDependencyManager,
-                                       initializeReanimated),
                        JSI_EXPORT_FUNC(JsiDependencyManager, update),
                        JSI_EXPORT_FUNC(JsiDependencyManager, remove))
 
