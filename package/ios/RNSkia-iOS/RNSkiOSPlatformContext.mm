@@ -14,7 +14,6 @@
 
 #pragma clang diagnostic pop
 
-
 namespace RNSkia {
 
 void RNSkiOSPlatformContext::performStreamOperation(
@@ -42,10 +41,10 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }
 
-sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width, int height)  {
+sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
+                                                              int height) {
   return MakeOffscreenMetalSurface(width, height);
 }
-
 
 void RNSkiOSPlatformContext::startDrawLoop() {
   if (_displayLink == nullptr) {
