@@ -21,3 +21,4 @@ jobs:
         clang-format-version: '13'
         check-path: ${{ matrix.path['check'] }}
         exclude-regex: ${{ matrix.path['exclude'] }}
+        include-regex: '^.*\.((((c|C|mm)(c|pp|xx|\+\+)?$)|((h|H)h?(pp|xx|\+\+)?$))|(ino|pde|proto|cu))$'
