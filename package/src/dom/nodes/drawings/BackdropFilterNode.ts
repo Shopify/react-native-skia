@@ -20,11 +20,11 @@ export class BackdropFilterNode extends JsiDrawingNode<ChildrenProps, null> {
     if (child instanceof JsiDeclarationNode) {
       const declCtx = new DeclarationContext(this.Skia);
       child.decorate(declCtx);
-      const imgf = declCtx.popImageFilter();
+      const imgf = declCtx.imageFilters.pop();
       if (imgf) {
         imageFilter = imgf;
       } else {
-        const cf = declCtx.popColorFilter();
+        const cf = declCtx.colorFilters.pop();
         if (cf) {
           imageFilter = this.Skia.ImageFilter.MakeColorFilter(cf, null);
         }

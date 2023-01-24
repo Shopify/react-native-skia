@@ -24,7 +24,7 @@ abstract class PathEffectDeclaration<P> extends JsiDeclarationNode<P> {
     const childCtx = this.childDeclarationContext();
     const pe2 = childCtx.popPathEffectsAsOne();
     const pe = pe2 ? this.Skia.PathEffect.MakeCompose(pe1, pe2) : pe1;
-    ctx.pushPathEffect(pe);
+    ctx.pathEffects.push(pe);
   }
 }
 
@@ -90,7 +90,8 @@ export class SumPathEffectNode extends PathEffectDeclaration<null> {
 
   decorate(ctx: DeclarationContext) {
     this.decorateChildren(ctx);
-    const [pe1, pe2] = ctx.popPathEffects(2);
+    const pe2 = ctx.pathEffects.pop();
+    const pe1 = ctx.pathEffects.pop();
     if (pe1 === undefined || pe2 === undefined) {
       throw new Error("SumPathEffectNode: invalid children");
     }

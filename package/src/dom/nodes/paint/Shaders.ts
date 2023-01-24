@@ -49,7 +49,7 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
       ctx.popShaders(),
       m3
     );
-    ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }
 
@@ -82,7 +82,7 @@ export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
       MipmapMode[enumKey(mm)],
       lm
     );
-    ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }
 
@@ -94,7 +94,7 @@ export class ColorNode extends ShaderDeclaration<ColorProps> {
   decorate(ctx: DeclarationContext) {
     const { color } = this.props;
     const shader = this.Skia.Shader.MakeColor(this.Skia.Color(color));
-    ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }
 
@@ -113,7 +113,7 @@ export class TurbulenceNode extends ShaderDeclaration<TurbulenceProps> {
       tileWidth,
       tileHeight
     );
-    ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }
 
@@ -132,7 +132,7 @@ export class FractalNoiseNode extends ShaderDeclaration<FractalNoiseProps> {
       tileWidth,
       tileHeight
     );
-    ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }
 
@@ -154,7 +154,7 @@ export class LinearGradientNode extends ShaderDeclaration<LinearGradientProps> {
       localMatrix,
       flags
     );
-    ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }
 
@@ -176,7 +176,7 @@ export class RadialGradientNode extends ShaderDeclaration<RadialGradientProps> {
       localMatrix,
       flags
     );
-    ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }
 
@@ -200,7 +200,7 @@ export class SweepGradientNode extends ShaderDeclaration<SweepGradientProps> {
       start,
       end
     );
-    ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }
 
@@ -224,6 +224,6 @@ export class TwoPointConicalGradientNode extends ShaderDeclaration<TwoPointConic
       localMatrix,
       flags
     );
-    return ctx.pushShader(shader);
+    ctx.shaders.push(shader);
   }
 }

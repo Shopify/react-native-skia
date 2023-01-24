@@ -20,13 +20,13 @@ export class BlendNode extends JsiDeclarationNode<BlendProps> {
     const imageFilters = ctx.popImageFilters();
     if (imageFilters.length > 0) {
       const composer = Skia.ImageFilter.MakeBlend.bind(Skia.ImageFilter, blend);
-      ctx.pushImageFilter(composeDeclarations(imageFilters, composer));
+      ctx.imageFilters.push(composeDeclarations(imageFilters, composer));
     }
     // Blend Shaders
     const shaders = ctx.popShaders();
     if (shaders.length > 0) {
       const composer = Skia.Shader.MakeBlend.bind(Skia.Shader, blend);
-      ctx.pushShader(composeDeclarations(shaders, composer));
+      ctx.shaders.push(composeDeclarations(shaders, composer));
     }
   }
 }

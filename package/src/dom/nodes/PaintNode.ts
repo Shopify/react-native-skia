@@ -63,8 +63,8 @@ export class PaintNode
     });
     const colorFilter = declCtx.popColorFiltersAsOne();
     const imageFilter = declCtx.popImageFiltersAsOne();
-    const shader = declCtx.popShader();
-    const maskFilter = declCtx.popMaskFilter();
+    const shader = declCtx.shaders.pop();
+    const maskFilter = declCtx.maskFilters.pop();
     const pathEffect = declCtx.popPathEffectsAsOne();
     if (imageFilter) {
       paint.setImageFilter(imageFilter);
@@ -81,6 +81,6 @@ export class PaintNode
     if (maskFilter) {
       paint.setMaskFilter(maskFilter);
     }
-    ctx.pushPaint(paint);
+    ctx.paints.push(paint);
   }
 }

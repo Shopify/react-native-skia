@@ -50,7 +50,7 @@ export class JsiDrawingContext implements DrawingContext {
       this.paints.push(cache);
       return true;
     }
-    const paintDecoration = new PaintDecoration(this.Skia, node);
+    const paintDecoration = new ConcatableSkPaint(this.Skia, node);
     if (!paintDecoration.isPristine()) {
       this.save();
       paintDecoration.concat(this.paint);
@@ -60,8 +60,7 @@ export class JsiDrawingContext implements DrawingContext {
   }
 }
 
-// This is like SKPaint but structure in a way that makes it "concatanable"
-class PaintDecoration {
+class ConcatableSkPaint {
   private pristine = true;
 
   _color?: SkColor;
@@ -102,8 +101,8 @@ class PaintDecoration {
     });
     const colorFilter = declCtx.popColorFiltersAsOne();
     const imageFilter = declCtx.popImageFiltersAsOne();
-    const shader = declCtx.popShader();
-    const maskFilter = declCtx.popMaskFilter();
+    const shader = declCtx.shaders.pop();
+    const maskFilter = declCtx.maskFilters.pop();
     const pathEffect = declCtx.popPathEffectsAsOne();
     if (imageFilter) {
       this.setImageFilter(imageFilter);

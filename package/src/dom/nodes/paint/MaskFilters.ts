@@ -18,6 +18,6 @@ export class BlurMaskFilterNode extends JsiDeclarationNode<BlurMaskFilterProps> 
       blur,
       respectCTM
     );
-    ctx.pushMaskFilter(mf);
+    ctx.maskFilters.push(mf);
   }
 }

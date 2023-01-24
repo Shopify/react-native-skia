@@ -62,7 +62,7 @@ export abstract class ImageFilterDeclaration<P> extends JsiDeclarationNode<P> {
   }
 
   protected input(ctx: DeclarationContext) {
-    return ctx.popImageFilter() ?? null;
+    return ctx.imageFilters.pop() ?? null;
   }
 
   protected compose(ctx: DeclarationContext, imgf1: SkImageFilter) {
@@ -78,7 +78,7 @@ export abstract class ImageFilterDeclaration<P> extends JsiDeclarationNode<P> {
     const imgf = imgf2
       ? this.Skia.ImageFilter.MakeCompose(imgf1, imgf2)
       : imgf1;
-    ctx.pushImageFilter(imgf);
+    ctx.imageFilters.push(imgf);
   }
 }
 
@@ -106,7 +106,7 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
       ColorChannel[enumKey(channelX)],
       ColorChannel[enumKey(channelY)],
       scale,
-      ctx.popImageFilter()!,
+      ctx.imageFilters.pop()!,
       this.input(ctx)
     );
     this.compose(ctx, imgf);
@@ -182,8 +182,8 @@ export class BlendImageFilterNode extends ImageFilterDeclaration<BlendImageFilte
 
   decorate(ctx: DeclarationContext) {
     const { mode } = this.props;
-    const a = ctx.popImageFilter();
-    const b = ctx.popImageFilter();
+    const a = ctx.imageFilters.pop();
+    const b = ctx.imageFilters.pop();
     if (!a || !b) {
       throw new Error("BlendImageFilter requires two image filters");
     }

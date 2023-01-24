@@ -23,9 +23,8 @@ export const composeDeclarations = <T>(
   });
 };
 
-const popAll = <T>(arr: T[], limit?: number): T[] => {
-  const n = limit ?? arr.length;
-  return arr.splice(-n);
+const popAll = <T>(arr: T[]): T[] => {
+  return arr.splice(-arr.length);
 };
 
 const popAllAsOne = <T>(
@@ -37,97 +36,65 @@ const popAllAsOne = <T>(
 };
 
 export class DeclarationContext {
-  private paints: SkPaint[] = [];
-  private imageFilters: SkImageFilter[] = [];
-  private colorFilters: SkColorFilter[] = [];
-  private maskFilters: SkMaskFilter[] = [];
-  private shaders: SkShader[] = [];
-  private pathEffects: SkPathEffect[] = [];
+  private _paints: SkPaint[] = [];
+  private _imageFilters: SkImageFilter[] = [];
+  private _colorFilters: SkColorFilter[] = [];
+  private _maskFilters: SkMaskFilter[] = [];
+  private _shaders: SkShader[] = [];
+  private _pathEffects: SkPathEffect[] = [];
 
   constructor(private Skia: Skia) {}
 
-  pushPathEffect(pathEffect: SkPathEffect) {
-    this.pathEffects.push(pathEffect);
-  }
-
-  popPathEffect() {
-    return this.pathEffects.pop();
-  }
-
-  popPathEffects(limit?: number) {
-    return popAll(this.pathEffects, limit);
+  get pathEffects() {
+    return this._pathEffects;
   }
 
   popPathEffectsAsOne() {
     return popAllAsOne(
-      this.pathEffects,
+      this._pathEffects,
       this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect)
     );
   }
 
-  pushPaint(paint: SkPaint) {
-    this.paints.push(paint);
+  get paints() {
+    return this._paints;
   }
 
-  popPaint() {
-    return this.paints.pop();
+  get imageFilters() {
+    return this._imageFilters;
   }
 
-  pushImageFilter(imageFilter: SkImageFilter) {
-    this.imageFilters.push(imageFilter);
-  }
-
-  popImageFilter() {
-    return this.imageFilters.pop();
-  }
-
-  popImageFilters(limit?: number) {
-    return popAll(this.imageFilters, limit);
+  popImageFilters() {
+    return popAll(this._imageFilters);
   }
 
   popImageFiltersAsOne() {
     return popAllAsOne(
-      this.imageFilters,
+      this._imageFilters,
       this.Skia.ImageFilter.MakeCompose.bind(this.Skia.ImageFilter)
     );
   }
 
-  pushColorFilter(colorFilter: SkColorFilter) {
-    this.colorFilters.push(colorFilter);
-  }
-
-  popColorFilter() {
-    return this.colorFilters.pop();
-  }
-
-  popColorFilters(limit?: number) {
-    return popAll(this.colorFilters, limit);
+  get colorFilters() {
+    return this._colorFilters;
   }
 
   popColorFiltersAsOne() {
     return popAllAsOne(
-      this.colorFilters,
+      this._colorFilters,
       this.Skia.ColorFilter.MakeCompose.bind(this.Skia.ColorFilter)
     );
   }
 
-  pushMaskFilter(maskFilter: SkMaskFilter) {
-    this.maskFilters.push(maskFilter);
+  get shaders() {
+    return this._shaders;
   }
 
-  popMaskFilter() {
-    return this.maskFilters.pop();
+  popShaders() {
+    return popAll(this._shaders);
   }
 
-  pushShader(shader: SkShader) {
-    this.shaders.push(shader);
-  }
-
-  popShader() {
-    return this.shaders.pop();
-  }
-
-  popShaders(limit?: number) {
-    return popAll(this.shaders, limit);
+  get maskFilters() {
+    return this._maskFilters;
   }
 }
