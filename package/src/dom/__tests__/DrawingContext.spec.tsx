@@ -48,7 +48,7 @@ describe("DrawingContext", () => {
     expect(ctx.paint.getColor()).toEqual(Skia.Color("red"));
   });
 
-  it("should only visit ", () => {
+  it("should only visit declarations if needed", () => {
     const { canvas } = setupSkia(width, height);
     const { Skia } = importSkia();
     const Sk = getSkDOM();
