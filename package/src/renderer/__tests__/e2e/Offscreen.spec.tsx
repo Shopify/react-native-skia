@@ -10,15 +10,16 @@ describe("Offscreen Drawings", () => {
     const raw = await surface.eval(
       (Skia, ctx) => {
         const r = ctx.width / 2;
-        return Skia.Surface.drawAsImage(
-          (canvas) => {
-            const paint = Skia.Paint();
-            paint.setColor(Skia.Color("lightblue"));
-            canvas.drawCircle(r, r, r, paint);
-          },
-          ctx.width,
-          ctx.height
-        ).encodeToBase64();
+        const offscreen = Skia.Surface.MakeOffscreen(ctx.width, ctx.height)!;
+        if (!offscreen) {
+          throw new Error("Could not create offscreen surface");
+        }
+        const canvas = offscreen.getCanvas();
+        const paint = Skia.Paint();
+        paint.setColor(Skia.Color("lightblue"));
+        canvas.drawCircle(r, r, r, paint);
+        offscreen.flush();
+        return offscreen.makeImageSnapshot().encodeToBase64();
       },
       { width, height }
     );

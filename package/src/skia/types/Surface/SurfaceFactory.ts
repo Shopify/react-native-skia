@@ -1,6 +1,3 @@
-import type { SkImage } from "../Image";
-import type { SkCanvas } from "../Canvas";
-
 import type { SkSurface } from "./Surface";
 
 export interface SurfaceFactory {
@@ -12,9 +9,11 @@ export interface SurfaceFactory {
    * @param height - number of pixels of the height of the drawable area.
    */
   Make: (width: number, height: number) => SkSurface | null;
-  drawAsImage: (
-    cb: (canvas: SkCanvas) => void,
-    width: number,
-    height: number
-  ) => SkImage;
+
+  /**
+   * Creates a GPU backed surface.
+   * @param width - number of pixels of the width of the drawable area.
+   * @param height - number of pixels of the height of the drawable area.
+   */
+  MakeOffscreen: (width: number, height: number) => SkSurface | null;
 }

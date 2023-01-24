@@ -40,6 +40,11 @@ public:
         std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas()));
   }
 
+  JSI_HOST_FUNCTION(flush) {
+    getObject()->flush();
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(makeImageSnapshot) {
     sk_sp<SkImage> image;
     if (count == 1) {
@@ -55,7 +60,8 @@ public:
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkSurface, __typename__))
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),
-                       JSI_EXPORT_FUNC(JsiSkSurface, makeImageSnapshot))
+                       JSI_EXPORT_FUNC(JsiSkSurface, makeImageSnapshot),
+                       JSI_EXPORT_FUNC(JsiSkSurface, flush))
 
   /**
     Returns the underlying object from a host object of this type
