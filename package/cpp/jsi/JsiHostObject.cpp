@@ -58,10 +58,10 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
   // Do the happy-paths first
 
   // Check function cache
-  auto cachedFunc = _hostFunctionCache.find(nameStr);
-  if (cachedFunc != _hostFunctionCache.end()) {
-    return cachedFunc->second.asFunction(runtime);
-  }
+//  auto cachedFunc = _hostFunctionCache.find(nameStr);
+//  if (cachedFunc != _hostFunctionCache.end()) {
+//    return cachedFunc->second.asFunction(runtime);
+//  }
 
   // Check the static getters map
   const JsiPropertyGettersMap &getters = getExportedPropertyGettersMap();
@@ -82,10 +82,11 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 
     // Add to cache - it is important to cache the results from the
     // createFromHostFunction function which takes some time.
-    return _hostFunctionCache
-        .emplace(nameStr, jsi::Function::createFromHostFunction(runtime, name,
-                                                                0, dispatcher))
-        .first->second.asFunction(runtime);
+//    return _hostFunctionCache
+//        .emplace(nameStr, jsi::Function::createFromHostFunction(runtime, name,
+//                                                                0, dispatcher))
+//        .first->second.asFunction(runtime);
+    return jsi::Function::createFromHostFunction(runtime, name, 0, dispatcher);
   }
 
   if (_funcMap.count(nameStr) > 0) {

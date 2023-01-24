@@ -1,34 +1,37 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
-  Easing,
   Fill,
   TextPath,
-  useComputedValue,
-  useLoop,
   useFont,
   Skia,
 } from "@shopify/react-native-skia";
 
 import { AnimationDemo, Padding } from "./Components";
+import {
+  useSharedValue,
+  Easing,
+  withTiming,
+  withRepeat,
+  useDerivedValue,
+} from "react-native-reanimated";
 
 const ExampleHeight = 60;
 const Font = require("../../assets/SF-Mono-Semibold.otf");
+
+function useSharedValueThunk(generator, deps) {
+  // We may want to add "thunk" support to reanimated's useSharedValue method
+  const initial = useMemo(generator, deps);
+  return useSharedValue(initial, true);
+}
 
 export const AnimateTextOnPath = () => {
   const { width } = useWindowDimensions();
 
   const font = useFont(Font, 12);
 
-  // Create a progress going from 0..1 and back
-  const progress = useLoop({
-    duration: 700,
-    easing: Easing.inOut(Easing.cubic),
-  });
-
-  // Create the start path
-  const { path1, path2 } = useMemo(() => {
+  const path1 = useSharedValueThunk(() => {
     const p1 = Skia.Path.Make();
     p1.moveTo(Padding, ExampleHeight / 2);
     p1.quadTo(
@@ -38,6 +41,10 @@ export const AnimateTextOnPath = () => {
       ExampleHeight / 2
     );
     p1.simplify();
+    return p1;
+  }, [width]);
+
+  const path2 = useSharedValueThunk(() => {
     const p2 = Skia.Path.Make();
     p2.moveTo(Padding, ExampleHeight / 2);
     p2.quadTo(
@@ -47,15 +54,21 @@ export const AnimateTextOnPath = () => {
       ExampleHeight / 2
     );
     p2.simplify();
-    return { path1: p1, path2: p2 };
+    return p2;
   }, [width]);
 
-  // Create a derived value that interpolates between
-  // the start and end path
-  const path = useComputedValue(
-    () => path1.interpolate(path2, progress.current)!,
-    [progress]
-  );
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, { duration: 700, easing: Easing.inOut(Easing.cubic) }),
+      -1,
+      true
+    );
+  }, []);
+
+  const path = useDerivedValue(() => {
+    return path1.value.interpolate(path2.value, progress.value);
+  });
 
   return (
     <AnimationDemo title={"Interpolating text on path."}>
