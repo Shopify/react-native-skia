@@ -9,6 +9,8 @@ import type { SkiaDomViewProps, TouchInfo } from "./types";
 const pd = PixelRatio.get();
 
 export class SkiaDomView extends SkiaBaseWebView<SkiaDomViewProps> {
+  private paint = Skia.Paint();
+
   constructor(props: SkiaDomViewProps) {
     super(props);
   }
@@ -22,10 +24,9 @@ export class SkiaDomView extends SkiaBaseWebView<SkiaDomViewProps> {
       this.props.onSize.current = { width, height };
     }
     if (this.props.root) {
-      const paint = Skia.Paint();
       const ctx = {
         canvas,
-        paint,
+        paint: this.paint,
         opacity: 1,
       };
       canvas.save();
