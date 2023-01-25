@@ -77,33 +77,33 @@ const App = () => {
   if (assets === null) {
     return null;
   }
-  const Home = (
-    <Stack.Screen
-      name="Home"
-      key="Home"
-      component={HomeScreen}
-      options={{
-        title: "🎨 Skia",
-      }}
-    />
-  );
-  const E2ETests = (
-    <Stack.Screen
-      key="Tests"
-      name="Tests"
-      options={{
-        title: "🔧 Tests",
-      }}
-    >
-      {(props) => <Tests {...props} assets={assets} />}
-    </Stack.Screen>
-  );
   return (
     <FiberProvider>
       <StatusBar hidden />
       <NavigationContainer linking={linking}>
-        <Stack.Navigator screenOptions={{ headerLeft: HeaderLeft }}>
-          {CI ? [E2ETests, Home] : [Home, E2ETests]}
+        <Stack.Navigator
+          screenOptions={{
+            headerLeft: HeaderLeft,
+          }}
+          initialRouteName={CI ? "Tests" : "Home"}
+        >
+          <Stack.Screen
+            name="Home"
+            key="Home"
+            component={HomeScreen}
+            options={{
+              title: "🎨 Skia",
+            }}
+          />
+          <Stack.Screen
+            key="Tests"
+            name="Tests"
+            options={{
+              title: "🔧 Tests",
+            }}
+          >
+            {(props) => <Tests {...props} assets={assets} />}
+          </Stack.Screen>
           <Stack.Screen
             name="Vertices"
             component={Vertices}
