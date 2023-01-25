@@ -106,8 +106,12 @@ export abstract class SkiaBaseWebView<
       if (this._canvas) {
         const touches = [...this._touches];
         this._touches = [];
-        this._canvas!.clear(CanvasKit.TRANSPARENT);
-        this.renderInCanvas(this._canvas!, touches);
+        const canvas = this._canvas!;
+        canvas.clear(Float32Array.of(0, 0, 0, 0));
+        canvas.save();
+        canvas.scale(pd, pd);
+        this.renderInCanvas(canvas, touches);
+        canvas.restore();
         this._surface?.ref.flush();
       }
     }

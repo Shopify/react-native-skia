@@ -77,6 +77,8 @@ private:
       canvas->scale(pd, pd);
 
       canvas->drawPicture(_picture->getObject());
+
+      canvas->restore();
     });
   }
 

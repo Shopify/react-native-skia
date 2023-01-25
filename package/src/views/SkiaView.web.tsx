@@ -20,10 +20,7 @@ export class SkiaView extends SkiaBaseWebView<SkiaDrawViewProps> {
         timestamp: Date.now(),
         touches: touches.map((t) => [t]),
       };
-      canvas.save();
-      canvas.scale(pd, pd);
       this.props.onDraw(canvas, info);
-      canvas.restore();
     }
   }
 }
