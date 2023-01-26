@@ -1,11 +1,7 @@
-import { PixelRatio } from "react-native";
-
 import type { SkCanvas } from "../skia/types";
 
 import type { DrawingInfo, SkiaDrawViewProps, TouchInfo } from "./types";
 import { SkiaBaseWebView } from "./SkiaBaseWebView";
-
-const pd = PixelRatio.get();
 
 export class SkiaView extends SkiaBaseWebView<SkiaDrawViewProps> {
   constructor(props: SkiaDrawViewProps) {
