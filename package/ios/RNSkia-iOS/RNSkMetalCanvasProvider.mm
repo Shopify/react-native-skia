@@ -112,7 +112,6 @@ void RNSkMetalCanvasProvider::renderToCanvas(
     }
 
     SkCanvas *canvas = skSurface->getCanvas();
-    canvas->clear(SK_AlphaTRANSPARENT);
     cb(canvas);
 
     skSurface->flushAndSubmit();
