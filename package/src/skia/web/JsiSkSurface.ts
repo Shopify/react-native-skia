@@ -15,6 +15,10 @@ export class JsiSkSurface
     super(CanvasKit, ref, "Surface");
   }
 
+  flush() {
+    this.ref.flush();
+  }
+
   getCanvas(): SkCanvas {
     return new JsiSkCanvas(this.CanvasKit, this.ref.getCanvas());
   }
