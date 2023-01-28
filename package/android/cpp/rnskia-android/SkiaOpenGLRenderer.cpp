@@ -104,7 +104,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
       grContext.get(), renderTarget, kBottomLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, nullptr, nullptr,
       [](void *addr) {
-        auto ctx = reinterpret_cast<DrawingContext *>(addr);
+        auto ctx = reinterpret_cast<OffscreenRenderContext *>(addr);
         eglDestroySurface(ctx->display, ctx->surface);
         delete ctx;
       },
