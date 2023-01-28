@@ -13,6 +13,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "SkStream.h"
+#include "SkSurface.h"
 
 #pragma clang diagnostic pop
 
@@ -59,6 +60,7 @@ public:
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
 
   void raiseError(const std::exception &err) override;
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
 
   void willInvalidateModules() {
     // We need to do some house-cleaning here!
