@@ -262,10 +262,9 @@ public:
    Renders the view into an SkImage instead of the screen.
    */
   sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
-    
+
     auto provider = std::make_shared<RNSkImageCanvasProvider>(
-        getPlatformContext(),
-        std::bind(&RNSkView::requestRedraw, this),
+        getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
         _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight());
 
     _renderer->renderImmediate(provider);
