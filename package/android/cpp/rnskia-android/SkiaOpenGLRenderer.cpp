@@ -94,7 +94,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
   auto renderTarget =
       GrBackendRenderTarget(width, height, samples, stencil, fbInfo);
 
-  struct DrawingContext {
+  struct OffscreenRenderContext {
     EGLDisplay display;
     EGLSurface surface;
   };
