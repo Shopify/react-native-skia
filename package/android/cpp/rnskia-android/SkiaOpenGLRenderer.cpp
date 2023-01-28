@@ -98,7 +98,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
     EGLDisplay display;
     EGLSurface surface;
   };
-  DrawingContext *ctx = new DrawingContext({eglDisplay, eglSurface});
+  auto ctx = new OffscreenRenderContext({eglDisplay, eglSurface});
 
   auto surface = SkSurface::MakeFromBackendRenderTarget(
       grContext.get(), renderTarget, kBottomLeft_GrSurfaceOrigin,
