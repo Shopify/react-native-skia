@@ -2,6 +2,7 @@
 import fs from "fs";
 import path from "path";
 
+import GL from "gl";
 import React from "react";
 import type { ReactNode } from "react";
 import type { Server, WebSocket } from "ws";
@@ -21,6 +22,21 @@ import { E2E } from "../../__tests__/setup";
 import { SkiaRoot } from "../Reconciler";
 
 jest.setTimeout(180 * 1000);
+globalThis.WebGLRenderingContext = GL.WebGLRenderingContext;
+globalThis.OffscreenCanvas = class OffscreenCanvas {
+  private gl: WebGLRenderingContext;
+  constructor(width: number, height: number) {
+    this.gl = GL(width, height, {
+      preserveDrawingBuffer: true,
+    });
+  }
+  getContext(ctx: string) {
+    if (ctx === "webgl") {
+      return this.gl;
+    }
+    return null;
+  }
+} as any;
 
 declare global {
   var testServer: Server;
@@ -131,7 +147,7 @@ export const drawOnNode = (element: ReactNode) => {
 export const mountCanvas = (element: ReactNode) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
-  const ckSurface = Skia.Surface.Make(width, height)!;
+  const ckSurface = Skia.Surface.MakeOffscreen(width, height)!;
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
 
