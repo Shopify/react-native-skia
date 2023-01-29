@@ -32,6 +32,21 @@ globalThis.OffscreenCanvas = class OffscreenCanvas {
   }
   getContext(ctx: string) {
     if (ctx === "webgl") {
+      const _getUniformLocation = this.gl.getUniformLocation;
+      // Temporary fix https://github.com/stackgl/headless-gl/issues/170
+      this.gl.getUniformLocation = function (program: any, name: any) {
+        if (program._uniforms && !/\[\d+\]$/.test(name)) {
+          const reg = new RegExp(`${name}\\[\\d+\\]$`);
+          for (let i = 0; i < program._uniforms.length; i++) {
+            const _name = program._uniforms[i].name;
+            if (reg.test(_name)) {
+              name = _name;
+            }
+          }
+        }
+        return _getUniformLocation.call(this, program, name);
+      };
+
       return this.gl;
     }
     return null;
@@ -144,10 +159,12 @@ export const drawOnNode = (element: ReactNode) => {
   return ckSurface;
 };
 
-export const mountCanvas = (element: ReactNode) => {
+export const mountCanvas = (element: ReactNode, cpu = false) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
-  const ckSurface = Skia.Surface.MakeOffscreen(width, height)!;
+  const ckSurface = cpu
+    ? Skia.Surface.Make(width, height)!
+    : Skia.Surface.MakeOffscreen(width, height)!;
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
 
@@ -171,7 +188,7 @@ export const mountCanvas = (element: ReactNode) => {
 };
 
 export const serialize = (element: ReactNode) => {
-  const { root } = mountCanvas(element);
+  const { root } = mountCanvas(element, true);
   const serialized = serializeNode(root);
   return JSON.stringify(serialized);
 };
