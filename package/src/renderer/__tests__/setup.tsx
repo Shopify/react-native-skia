@@ -23,7 +23,7 @@ import { SkiaRoot } from "../Reconciler";
 
 jest.setTimeout(180 * 1000);
 globalThis.WebGLRenderingContext = GL.WebGLRenderingContext;
-globalThis.OffscreenCanvas = class OffscreenCanvas {
+(globalThis as any).OffscreenCanvas = class OffscreenCanvas {
   private gl: WebGLRenderingContext;
   constructor(width: number, height: number) {
     this.gl = GL(width, height, {
