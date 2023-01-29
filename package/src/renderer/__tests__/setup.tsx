@@ -159,7 +159,7 @@ export const drawOnNode = (element: ReactNode) => {
   return ckSurface;
 };
 
-export const mountCanvas = (element: ReactNode, cpu = false) => {
+export const mountCanvas = (element: ReactNode, cpu = true) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
   const ckSurface = cpu
@@ -188,7 +188,7 @@ export const mountCanvas = (element: ReactNode, cpu = false) => {
 };
 
 export const serialize = (element: ReactNode) => {
-  const { root } = mountCanvas(element, true);
+  const { root } = mountCanvas(element);
   const serialized = serializeNode(root);
   return JSON.stringify(serialized);
 };
@@ -299,7 +299,8 @@ class LocalSurface implements TestingSurface {
 
   draw(node: ReactNode): Promise<SkImage> {
     const { surface: ckSurface, draw } = mountCanvas(
-      <Group transform={[{ scale: PIXEL_RATIO }]}>{node}</Group>
+      <Group transform={[{ scale: PIXEL_RATIO }]}>{node}</Group>,
+      false
     );
     draw();
     return Promise.resolve(ckSurface.makeImageSnapshot());
