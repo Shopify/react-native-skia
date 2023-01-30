@@ -14,9 +14,6 @@
 #include <RNSkView.h>
 #include <jsi/jsi.h>
 
-#include "JsiDomNode.h"
-#include "JsiSkApi.h"
-
 namespace RNSkia {
 namespace jsi = facebook::jsi;
 
@@ -118,13 +115,6 @@ public:
     return info->view->callJsiMethod(runtime, action, params, paramsCount);
   }
 
-  void requestRedraw(size_t nativeId) {
-    auto info = getEnsuredViewInfo(nativeId);
-    if (info->view != nullptr) {
-      info->view->requestRedraw();
-    }
-  }
-
   JSI_HOST_FUNCTION(requestRedraw) {
     if (count != 1) {
       _platformContext->raiseError(
@@ -144,7 +134,10 @@ public:
     // find Skia View
     int nativeId = arguments[0].asNumber();
 
-    requestRedraw(nativeId);
+    auto info = getEnsuredViewInfo(nativeId);
+    if (info->view != nullptr) {
+      info->view->requestRedraw();
+    }
     return jsi::Value::undefined();
   }
 
@@ -183,58 +176,6 @@ public:
     }
     throw jsi::JSError(runtime, "No Skia View currently available.");
     return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(initializeReanimated) {
-    jsi::ArrayBuffer workletRuntimeArrayBuffer =
-        arguments[0].asObject(runtime).getArrayBuffer(runtime);
-    uintptr_t rawWorkletRuntimePointer =
-        *reinterpret_cast<uintptr_t *>(workletRuntimeArrayBuffer.data(runtime));
-    jsi::Runtime *workletRuntime =
-        reinterpret_cast<jsi::Runtime *>(rawWorkletRuntimePointer);
-
-    // do this on UI thread
-    auto updateSkiaProps = [=](jsi::Runtime &rt, const jsi::Value &thisValue,
-                               const jsi::Value *args,
-                               const size_t count) -> jsi::Value {
-      auto viewId = static_cast<size_t>(args[0].asNumber());
-      auto node = getArgumentAsHostObject<JsiDomNode>(rt, args, count, 1);
-      auto props = args[2].asObject(rt);
-      for (const auto &propMapping :
-           node->getPropsContainer()->getMappedProperties()) {
-        for (auto &prop : propMapping.second) {
-          auto value = props.getProperty(rt, prop->getName().c_str());
-          if (!value.isUndefined()) {
-            prop->updateValue(rt, value);
-          }
-        }
-      }
-      requestRedraw(viewId);
-
-      return jsi::Value::undefined();
-    };
-
-    // this is just a simple workaround for a lack of a way to schedule stuff on
-    // the ui thread. Unfortunately removing draw loop callback from within a
-    // callback causes a deadlock, so we just keep it going, just not doing a
-    // thing after we set initialized = true
-    auto initialized = std::make_shared<bool>(false);
-    _platformContext->beginDrawLoop(0xbadbeef, [=](bool invalidated) {
-      if (*initialized) {
-        return;
-      }
-      *initialized = true;
-      jsi::Runtime &rt = *workletRuntime;
-      jsi::Value updatePropsHostFunction =
-          jsi::Function::createFromHostFunction(
-              rt, jsi::PropNameID::forAscii(rt, "_updateSkiaProps"), 2,
-              updateSkiaProps);
-      rt.global().setProperty(rt, "_updateSkiaProps", updatePropsHostFunction);
-      auto skiaApi = std::make_shared<JsiSkApi>(rt, _platformContext);
-      rt.global().setProperty(rt, "SkiaApi", jsi::Object::createFromHostObject(rt, std::move(skiaApi)));
-    });
-
-    return jsi::Value();
   }
 
   JSI_HOST_FUNCTION(registerValuesInView) {
@@ -289,7 +230,6 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, initializeReanimated),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
@@ -377,9 +317,9 @@ private:
    * @return The callback info object for the requested view
    */
   RNSkViewInfo *getEnsuredViewInfo(size_t nativeId) {
-    std::lock_guard<std::mutex> lock(_mutex);
     if (_viewInfos.count(nativeId) == 0) {
       RNSkViewInfo info;
+      std::lock_guard<std::mutex> lock(_mutex);
       _viewInfos.emplace(nativeId, info);
     }
     return &_viewInfos.at(nativeId);

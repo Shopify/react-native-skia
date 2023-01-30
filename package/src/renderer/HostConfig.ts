@@ -12,7 +12,6 @@ import { isSelector, isValue } from "./processors";
 import { mapKeys, shallowEq } from "./typeddash";
 
 import { startMapper } from "react-native-reanimated/src/reanimated2/core";
-import { SkiaViewApi } from "../views/api";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -20,8 +19,6 @@ export const debug = (...args: Parameters<typeof console.log>) => {
     console.log(...args);
   }
 };
-
-let reanimatedInitialized = false;
 
 function sanitizeReanimatedProps(props) {
   const sharedProps = {};
@@ -41,18 +38,14 @@ function sanitizeReanimatedProps(props) {
 function bindReanimated(container, node, sharedProps) {
   const sharedValues = Object.values(sharedProps);
   if (sharedValues.length > 0) {
-    if (!reanimatedInitialized) {
-      reanimatedInitialized = true;
-      SkiaViewApi.initializeReanimated(global._WORKLET_RUNTIME);
-    }
     const viewId = container.getNativeId();
+    const SkiaViewApi = global.SkiaViewApi;
     startMapper(() => {
       "worklet";
-      const updates = {};
       for (let propName in sharedProps) {
-        updates[propName] = sharedProps[propName].value;
+        node && node.setProp(propName, sharedProps[propName].value);
       }
-      global._updateSkiaProps?.(viewId, node, updates);
+      SkiaViewApi && SkiaViewApi.requestRedraw(viewId);
     }, sharedValues);
   }
 }
