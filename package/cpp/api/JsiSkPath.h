@@ -564,9 +564,9 @@ public:
       JSI_EXPORT_FUNC(JsiSkPath, interpolate),
       JSI_EXPORT_FUNC(JsiSkPath, toCmds), )
 
-  JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, const SkPath &path)
+  JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
       : JsiSkWrappingSharedPtrHostObject<SkPath>(
-            std::move(context), std::make_shared<SkPath>(path)) {}
+            std::move(context), std::make_shared<SkPath>(std::move(path))) {}
 
   /**
     Returns the underlying object from a host object of this type
