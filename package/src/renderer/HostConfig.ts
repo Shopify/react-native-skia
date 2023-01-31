@@ -10,8 +10,7 @@ import { createNode } from "./HostComponents";
 import type { AnimatedProps } from "./processors";
 import { isSelector, isValue } from "./processors";
 import { mapKeys, shallowEq } from "./typeddash";
-
-import { startMapper } from "react-native-reanimated/src/reanimated2/core";
+import { bindReanimatedProps, sanitizeReanimatedProps } from "./Reanimated";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -19,40 +18,6 @@ export const debug = (...args: Parameters<typeof console.log>) => {
     console.log(...args);
   }
 };
-
-function sanitizeReanimatedProps(props) {
-  const sharedProps = {};
-  const otherProps = {};
-  for (let propName in props) {
-    const propValue = props[propName];
-    if (isSharedValue(propValue)) {
-      sharedProps[propName] = propValue;
-      otherProps[propName] = propValue.value;
-    } else {
-      otherProps[propName] = propValue;
-    }
-  }
-  return [otherProps, sharedProps];
-}
-
-function bindReanimated(container, node, sharedProps) {
-  const sharedValues = Object.values(sharedProps);
-  if (sharedValues.length > 0) {
-    const viewId = container.getNativeId();
-    const SkiaViewApi = global.SkiaViewApi;
-    startMapper(() => {
-      "worklet";
-      for (let propName in sharedProps) {
-        node && node.setProp(propName, sharedProps[propName].value);
-      }
-      SkiaViewApi && SkiaViewApi.requestRedraw(viewId);
-    }, sharedValues);
-  }
-}
-
-function isSharedValue(value) {
-  return typeof value === "object" && value.modify !== undefined;
-}
 
 type Instance = Node<unknown>;
 
@@ -157,9 +122,9 @@ export const skHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    const [props, sharedProps] = sanitizeReanimatedProps({ ...pristineProps });
+    const [props, reanimatedProps] = sanitizeReanimatedProps(pristineProps);
     const node = createNode(container, type, materialize(props));
-    bindReanimated(container, node, sharedProps);
+    bindReanimatedProps(container, node, reanimatedProps);
     container.depMgr.subscribeNode(node, props);
     return node;
   },
@@ -229,9 +194,10 @@ export const skHostConfig: SkiaHostConfig = {
     if (shallowEq(prevProps, nextProps)) {
       return;
     }
-    const props = { ...nextProps };
+    const [props, reanimatedProps] = sanitizeReanimatedProps(nextProps);
     updatePayload.depMgr.unsubscribeNode(instance);
     instance.setProps(materialize(props));
+    bindReanimatedProps(container, node, reanimatedProps);
     updatePayload.depMgr.subscribeNode(instance, props);
   },
 
