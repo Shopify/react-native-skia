@@ -1,17 +1,21 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
-  Easing,
   Fill,
   TextPath,
-  useComputedValue,
-  useLoop,
   useFont,
   Skia,
 } from "@shopify/react-native-skia";
 
 import { AnimationDemo, Padding } from "./Components";
+import {
+  useSharedValue,
+  Easing,
+  withTiming,
+  withRepeat,
+  useDerivedValue,
+} from "react-native-reanimated";
 
 const ExampleHeight = 60;
 const Font = require("../../assets/SF-Mono-Semibold.otf");
@@ -21,13 +25,6 @@ export const AnimateTextOnPath = () => {
 
   const font = useFont(Font, 12);
 
-  // Create a progress going from 0..1 and back
-  const progress = useLoop({
-    duration: 700,
-    easing: Easing.inOut(Easing.cubic),
-  });
-
-  // Create the start path
   const { path1, path2 } = useMemo(() => {
     const p1 = Skia.Path.Make();
     p1.moveTo(Padding, ExampleHeight / 2);
@@ -38,6 +35,7 @@ export const AnimateTextOnPath = () => {
       ExampleHeight / 2
     );
     p1.simplify();
+
     const p2 = Skia.Path.Make();
     p2.moveTo(Padding, ExampleHeight / 2);
     p2.quadTo(
@@ -50,12 +48,18 @@ export const AnimateTextOnPath = () => {
     return { path1: p1, path2: p2 };
   }, [width]);
 
-  // Create a derived value that interpolates between
-  // the start and end path
-  const path = useComputedValue(
-    () => path1.interpolate(path2, progress.current)!,
-    [progress]
-  );
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, { duration: 700, easing: Easing.inOut(Easing.cubic) }),
+      -1,
+      true
+    );
+  }, []);
+
+  const path = useDerivedValue(() => {
+    return path1?.interpolate(path2, progress.value);
+  });
 
   return (
     <AnimationDemo title={"Interpolating text on path."}>

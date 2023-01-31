@@ -1,24 +1,29 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import {
-  useDerivedValue,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from "react-native-reanimated";
-import { Canvas, Fill, Rect } from "@shopify/react-native-skia";
+  Canvas,
+  Fill,
+  Rect,
+  useComputedValue,
+  useClockValue,
+} from "@shopify/react-native-skia";
 
 import { AnimationDemo, Size } from "./Components";
 
 export const SimpleAnimation = () => {
-  const { width: windowWidth } = useWindowDimensions();
-  const width = useSharedValue(20);
-  const rect = useDerivedValue(() => {
-    return { x: 0, y: 10, width: width.value, height: Size };
-  });
-  useEffect(() => {
-    width.value = withRepeat(withTiming(windowWidth, { duration: 1000 }), -1);
-  }, []);
+  const { width } = useWindowDimensions();
+  // Clock for driving the animation
+  const clock = useClockValue();
+  // Normalize the clock value to a value between 0 and 1
+  const normalized = useComputedValue(
+    () => (clock.current / 1000) % 1.0,
+    [clock]
+  );
+  // Create a rect as a derived value
+  const rect = useComputedValue(
+    () => ({ x: 0, y: 10, width: normalized.current * width, height: Size }),
+    [normalized]
+  );
   return (
     <AnimationDemo title={"Basic animation using derived values"}>
       <Canvas style={styles.canvas}>

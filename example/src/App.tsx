@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import {
   AnimationExample,
+  ReanimatedExample,
   API,
   Aurora,
   Breathe,
@@ -48,6 +49,7 @@ const linking = {
       Wallet: "wallet",
       Graphs: "graphs",
       Animation: "animation",
+      Reanimated: "reanimated",
       Performance: "performance",
       Tests: "test",
       TestList: "tests",
@@ -161,6 +163,7 @@ const App = () => {
           />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
+          <Stack.Screen name="Reanimated" component={ReanimatedExample} />
           <Stack.Screen name="Performance" component={PerformanceDrawingTest} />
         </Stack.Navigator>
       </NavigationContainer>

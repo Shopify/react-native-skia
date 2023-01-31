@@ -103,7 +103,6 @@ export const Shapes = () => {
   );
 
   const style = useMemo(() => ({ width, height: SIZE + 32 }), [SIZE, width]);
-  console.log("OUTER", outer);
 
   return (
     <ScrollView>

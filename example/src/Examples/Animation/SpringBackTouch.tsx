@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
-import { Canvas, Circle, Fill, Line } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Circle,
+  Fill,
+  Line,
+  runSpring,
+  Spring,
+  useComputedValue,
+  useTouchHandler,
+  useValue,
+} from "@shopify/react-native-skia";
 
 import { AnimationDemo, Size, Padding } from "./Components";
-import {
-  useDerivedValue,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
-import { GestureDetector, Gesture } from "react-native-gesture-handler";
 
 const FgColor = "#DC4C4C";
 const BgColor = "#EC795A";
@@ -16,47 +20,59 @@ const BgColor = "#EC795A";
 export const SpringBackTouchAnimation = () => {
   const { width } = useWindowDimensions();
 
-  const startX = width / 2 - (Size * 2 - Padding) + Size;
-  const startY = 2 * Size;
-  const centerX = useSharedValue(startX);
-  const centerY = useSharedValue(startY);
+  // Translate values for the rect
+  const centerX = useMemo(() => width / 2 - (Size * 2 - Padding), [width]);
+  const rectX = useValue(centerX);
+  const rectY = useValue(Size);
 
-  const rectCenter = useDerivedValue(() => {
-    return { x: centerX.value, y: centerY.value };
+  // Offset to let us pick up the rect from anywhere
+  const offsetX = useValue(0);
+  const offsetY = useValue(0);
+
+  const rectCenter = useComputedValue(
+    () => ({ x: rectX.current + Size, y: rectY.current + Size }),
+    [rectX, rectY]
+  );
+
+  // Touch handler
+  const touchHandler = useTouchHandler({
+    onStart: ({ x, y }) => {
+      offsetX.current = x - rectX.current;
+      offsetY.current = y - rectY.current;
+    },
+    onActive: ({ x, y }) => {
+      rectX.current = Math.max(
+        Size,
+        Math.min(width - Size - Padding, x - offsetX.current)
+      );
+      rectY.current = y - offsetY.current;
+    },
+    onEnd: ({ velocityX, velocityY }) => {
+      runSpring(rectX, centerX, Spring.Gentle({ velocity: velocityX }));
+      runSpring(rectY, Size, Spring.Gentle({ velocity: velocityY }));
+    },
   });
-
-  const gesture = Gesture.Pan()
-    .onChange((e) => {
-      centerX.value += e.changeX;
-      centerY.value += e.changeY;
-    })
-    .onEnd((e) => {
-      centerX.value = withSpring(startX);
-      centerY.value = withSpring(startY);
-    });
 
   return (
     <AnimationDemo title={"Spring back animation"}>
-      <GestureDetector gesture={gesture}>
-        <Canvas style={styles.canvas}>
-          <Fill color="white" />
-          <Line
-            p1={{ x: width / 2 - (Size - Padding), y: 0 }}
-            p2={rectCenter}
-            color={BgColor}
-            strokeWidth={2}
-            style="fill"
-          />
-          <Circle c={rectCenter} r={Size} color={FgColor} />
-          <Circle
-            c={rectCenter}
-            r={Size}
-            color={BgColor}
-            strokeWidth={5}
-            style="stroke"
-          />
-        </Canvas>
-      </GestureDetector>
+      <Canvas style={styles.canvas} onTouch={touchHandler}>
+        <Fill color="white" />
+        <Line
+          p1={{ x: width / 2 - (Size - Padding), y: 0 }}
+          p2={rectCenter}
+          color={BgColor}
+          strokeWidth={2}
+          style="fill"
+        />
+        <Circle c={rectCenter} r={Size} color={FgColor} />
+        <Circle
+          c={rectCenter}
+          r={Size}
+          color={BgColor}
+          strokeWidth={5}
+          style="stroke"
+        />
+      </Canvas>
     </AnimationDemo>
   );
 };
