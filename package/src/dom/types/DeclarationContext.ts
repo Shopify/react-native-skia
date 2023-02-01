@@ -33,12 +33,8 @@ class Declaration<T> {
     return this.indexes[this.indexes.length - 1];
   }
 
-  private set index(index: number) {
-    this.indexes.push(index);
-  }
-
   save() {
-    this.index = this.decls.length;
+    this.indexes.push(this.decls.length);
   }
 
   restore() {
