@@ -1,9 +1,8 @@
 import React, { useCallback, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import type {
-  SkCanvas,
+  DrawingContext,
   SkColor,
-  SkPaint,
   TouchInfo,
 } from "@shopify/react-native-skia";
 import {
@@ -62,20 +61,17 @@ export const Touch = () => {
     },
   });
 
-  const handleDraw = useCallback(
-    ({ canvas, paint }: { canvas: SkCanvas; paint: SkPaint }) => {
-      // Draw an indicator for all of the active touches. Each touch
-      // event will request a new redraw of the view, so the ref will
-      // always contain the correct current touches.
-      currentTouches.current.forEach((t) => {
-        if (t.type === TouchType.Active || t.type === TouchType.Start) {
-          paint.setColor(t.color);
-          canvas.drawCircle(t.x, t.y, 40, paint);
-        }
-      });
-    },
-    []
-  );
+  const handleDraw = useCallback(({ canvas, paint }: DrawingContext) => {
+    // Draw an indicator for all of the active touches. Each touch
+    // event will request a new redraw of the view, so the ref will
+    // always contain the correct current touches.
+    currentTouches.current.forEach((t) => {
+      if (t.type === TouchType.Active || t.type === TouchType.Start) {
+        paint.setColor(t.color);
+        canvas.drawCircle(t.x, t.y, 40, paint);
+      }
+    });
+  }, []);
 
   return (
     <View style={styles.container}>
