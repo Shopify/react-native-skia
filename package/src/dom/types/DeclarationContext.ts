@@ -29,11 +29,11 @@ class Declaration<T> {
 
   constructor(private composer?: (outer: T, inner: T) => T) {}
 
-  get index() {
+  private get index() {
     return this.indexes[this.indexes.length - 1];
   }
 
-  set index(index: number) {
+  private set index(index: number) {
     this.indexes.push(index);
   }
 

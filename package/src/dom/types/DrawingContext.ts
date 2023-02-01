@@ -22,14 +22,18 @@ export interface DrawingContext {
   paint: SkPaint;
   saveAndConcat(node: Node<PaintProps>, cache?: SkPaint): boolean;
   restore(): void;
+  declarationCtx: DeclarationContext;
 }
 
 export class JsiDrawingContext implements DrawingContext {
   paints: SkPaint[];
 
+  declarationCtx: DeclarationContext;
+
   constructor(private readonly Skia: Skia, public readonly canvas: SkCanvas) {
     const paint = this.Skia.Paint();
     this.paints = [paint];
+    this.declarationCtx = new DeclarationContext(Skia);
   }
 
   get paint() {
