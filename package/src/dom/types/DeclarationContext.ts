@@ -25,11 +25,16 @@ export const composeDeclarations = <T>(
 
 class Declaration<T> {
   private decls: T[] = [];
+  // private index = 0;
 
   constructor(private composer?: (outer: T, inner: T) => T) {}
 
-  get() {
-    return this.decls;
+  pop() {
+    return this.decls.pop();
+  }
+
+  push(decl: T) {
+    this.decls.push(decl);
   }
 
   popAll() {
@@ -66,7 +71,7 @@ export class DeclarationContext {
   }
 
   get pathEffects() {
-    return this._pathEffects.get();
+    return this._pathEffects;
   }
 
   popPathEffectsAsOne() {
@@ -74,11 +79,11 @@ export class DeclarationContext {
   }
 
   get paints() {
-    return this._paints.get();
+    return this._paints;
   }
 
   get imageFilters() {
-    return this._imageFilters.get();
+    return this._imageFilters;
   }
 
   popImageFilters() {
@@ -90,7 +95,7 @@ export class DeclarationContext {
   }
 
   get colorFilters() {
-    return this._colorFilters.get();
+    return this._colorFilters;
   }
 
   popColorFiltersAsOne() {
@@ -98,7 +103,7 @@ export class DeclarationContext {
   }
 
   get shaders() {
-    return this._shaders.get();
+    return this._shaders;
   }
 
   popShaders() {
@@ -106,6 +111,6 @@ export class DeclarationContext {
   }
 
   get maskFilters() {
-    return this._maskFilters.get();
+    return this._maskFilters;
   }
 }
