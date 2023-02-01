@@ -11,7 +11,7 @@ import {
   LinearToSRGBGamma,
   SRGBToLinearGamma,
 } from "../../components";
-import { docPath, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+import { docPath, checkImage } from "../../../__tests__/setup";
 
 describe("Color Filters", () => {
   it("should apply a color matrix to an image", async () => {
@@ -57,7 +57,7 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/composition.png"));
   });
-  itRunsE2eOnly("should use basic linear interpolation", async () => {
+  it("should use basic linear interpolation", async () => {
     const { oslo } = images;
     const { width, height } = surface;
     const blackAndWhite = [
@@ -128,37 +128,34 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/black-and-white.png"));
   });
-  itRunsE2eOnly(
-    "should use linear interpolation between two color matrices",
-    async () => {
-      const { oslo } = images;
-      const { width, height } = surface;
-      const blackAndWhite = [
-        0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
-      ];
-      const purple = [
-        1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
-      ];
-      const img = await surface.draw(
-        <>
-          <Image
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            image={oslo}
-            fit="cover"
-          >
-            <LinearToSRGBGamma>
-              <Lerp t={0.5}>
-                <ColorMatrix matrix={purple} />
-                <ColorMatrix matrix={blackAndWhite} />
-              </Lerp>
-            </LinearToSRGBGamma>
-          </Image>
-        </>
-      );
-      checkImage(img, docPath("color-filters/lerp.png"));
-    }
-  );
+  it("should use linear interpolation between two color matrices", async () => {
+    const { oslo } = images;
+    const { width, height } = surface;
+    const blackAndWhite = [
+      0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
+    ];
+    const purple = [
+      1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
+    ];
+    const img = await surface.draw(
+      <>
+        <Image
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          image={oslo}
+          fit="cover"
+        >
+          <LinearToSRGBGamma>
+            <Lerp t={0.5}>
+              <ColorMatrix matrix={purple} />
+              <ColorMatrix matrix={blackAndWhite} />
+            </Lerp>
+          </LinearToSRGBGamma>
+        </Image>
+      </>
+    );
+    checkImage(img, docPath("color-filters/lerp.png"));
+  });
 });
