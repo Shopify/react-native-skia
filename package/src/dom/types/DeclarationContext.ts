@@ -25,7 +25,7 @@ export const composeDeclarations = <T>(
 
 class Declaration<T> {
   private decls: T[] = [];
-  // private index = 0;
+  private index = 0;
 
   constructor(private composer?: (outer: T, inner: T) => T) {}
 
@@ -38,7 +38,7 @@ class Declaration<T> {
   }
 
   popAll() {
-    return this.decls.splice(-this.decls.length);
+    return this.decls.splice(this.index, this.decls.length - this.index);
   }
 
   popAllAsOne() {
