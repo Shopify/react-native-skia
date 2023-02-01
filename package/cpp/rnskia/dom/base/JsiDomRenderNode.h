@@ -22,7 +22,7 @@ class JsiDomRenderNode : public JsiDomNode {
 public:
   JsiDomRenderNode(std::shared_ptr<RNSkPlatformContext> context,
                    const char *type)
-      : JsiDomNode(context, type) {}
+      : JsiDomNode(context, type, NodeClass::RenderNode) {}
 
   void render(DrawingContext *context) {
 #if SKIA_DOM_DEBUG
@@ -106,10 +106,11 @@ public:
     // Let any local paint props decorate the context
     _paintProps->decorate(_localContext.get());
 
-    // Now let's make sure the local context is resolved correctly - ie. that
-    // all children of type declaration (except paint) is given the opportunity
-    // to decorate the context.
-    materializeDeclarations();
+    // Let children decorate the context
+    decorateChildren(_localContext.get());
+
+    // And materialize into paint
+    _localContext->materializeDeclarations();
 
     // Render the node
     renderNode(_localContext.get());
@@ -147,10 +148,6 @@ public:
       _localContext->dispose();
       _localContext = nullptr;
     }
-  }
-
-  JsiDomNodeClass getNodeClass() override {
-    return JsiDomNodeClass::RenderNode;
   }
 
 protected:
@@ -206,19 +203,6 @@ private:
       printDebugInfo("canvas->clipPath()");
 #endif
       canvas->clipPath(*_clipProp->getPath(), op, true);
-    }
-  }
-
-  /**
-   Loops through all declaration nodes and gives each one of them the
-   opportunity to decorate the context
-   */
-  void materializeDeclarations() {
-    for (auto &child : getChildren()) {
-      if (child->getNodeClass() == JsiDomNodeClass::DeclarationNode) {
-        std::static_pointer_cast<JsiBaseDomDeclarationNode>(child)
-            ->decorateContext(_localContext.get());
-      }
     }
   }
 

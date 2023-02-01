@@ -32,13 +32,17 @@ protected:
 #if SKIA_DOM_DEBUG
     printDebugInfo(context->getDebugDescription(), 2);
 #endif
+
+    // Call abstract draw method
     draw(context);
 
     // Draw once more for each child paint node
     for (auto &child : getChildren()) {
-      auto ptr = std::dynamic_pointer_cast<JsiPaintNode>(child);
-      if (ptr != nullptr) {
-        draw(ptr->getDrawingContext());
+      if (child->getNodeClass() == NodeClass::DeclarationNode &&
+          std::static_pointer_cast<JsiDomDeclarationNode>(child)
+                  ->getDeclarationType() == DeclarationType::Paint) {
+        draw(
+            std::static_pointer_cast<JsiPaintNode>(child)->getDrawingContext());
       }
     }
 #if SKIA_DOM_DEBUG

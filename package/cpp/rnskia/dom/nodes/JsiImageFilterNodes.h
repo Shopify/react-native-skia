@@ -22,49 +22,24 @@
 
 namespace RNSkia {
 
-class JsiBaseImageFilterNode
-    : public JsiDomDeclarationNode<JsiBaseImageFilterNode,
-                                   sk_sp<SkImageFilter>> {
+class JsiBaseImageFilterNode : public JsiDomDeclarationNode {
 public:
   JsiBaseImageFilterNode(std::shared_ptr<RNSkPlatformContext> context,
                          const char *type)
-      : JsiDomDeclarationNode<JsiBaseImageFilterNode, sk_sp<SkImageFilter>>(
-            context, type) {}
+      : JsiDomDeclarationNode(context, type, DeclarationType::ImageFilter) {}
 
 protected:
-  sk_sp<SkImageFilter> resolve(std::shared_ptr<JsiDomNode> child) override {
-    auto imageFilterPtr =
-        std::dynamic_pointer_cast<JsiBaseImageFilterNode>(child);
-    if (imageFilterPtr) {
-      return imageFilterPtr->getCurrent();
+  void composeAndPush(sk_sp<SkImageFilter> imgf1) {
+    auto imgf2 = getChildDeclarationContext()->getImageFilters()->popAsOne();
+    auto cf = getChildDeclarationContext()->getColorFilters()->popAsOne();
+    if (cf != nullptr) {
+      imgf2 = SkImageFilters::Compose(imgf2,
+                                      SkImageFilters::ColorFilter(cf, nullptr));
     }
-    auto shaderPtr = std::dynamic_pointer_cast<JsiBaseShaderNode>(child);
-    if (shaderPtr) {
-      return SkImageFilters::Shader(shaderPtr->getCurrent());
-    }
-    auto colorFilterPtr =
-        std::dynamic_pointer_cast<JsiBaseColorFilterNode>(child);
-    if (colorFilterPtr) {
-      return SkImageFilters::ColorFilter(colorFilterPtr->getCurrent(), nullptr);
-    }
-    return nullptr;
-  }
+    auto imgf =
+        imgf2 != nullptr ? SkImageFilters::Compose(imgf1, imgf2) : imgf1;
 
-  void setImageFilter(DrawingContext *context, sk_sp<SkImageFilter> f) {
-    set(context, f);
-  }
-
-  void set(DrawingContext *context, sk_sp<SkImageFilter> imageFilter) override {
-    auto paint = context->getMutablePaint();
-    if (paint->getImageFilter() != nullptr &&
-        paint->getImageFilter() != getCurrent().get()) {
-      paint->setImageFilter(
-          SkImageFilters::Compose(paint->refImageFilter(), imageFilter));
-    } else {
-      paint->setImageFilter(imageFilter);
-    }
-
-    setCurrent(imageFilter);
+    getDeclarationContext()->getImageFilters()->push(imgf);
   }
 };
 
@@ -83,17 +58,16 @@ protected:
         throw std::runtime_error("Blend image filter needs two child nodes.");
       }
 
-      auto background = requireChild(0);
-      auto foreground = requireChild(1);
+      auto background = getChildDeclarationContext()->getImageFilters()->pop();
+      auto foreground = getChildDeclarationContext()->getImageFilters()->pop();
 
       SkBlendMode blendMode = *_blendModeProp->getDerivedValue();
-      setImageFilter(context,
-                     SkImageFilters::Blend(blendMode, background, foreground));
+      composeAndPush(SkImageFilters::Blend(blendMode, background, foreground));
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _blendModeProp = container->defineProperty<BlendModeProp>("mode");
     _blendModeProp->require();
   }
@@ -117,7 +91,7 @@ protected:
       auto dx = _dxProp->value().getAsNumber();
       auto dy = _dxProp->value().getAsNumber();
       auto blur = _blurProp->value().getAsNumber();
-      auto input = optionalChild(0);
+      auto input = getChildDeclarationContext()->getImageFilters()->pop();
 
       auto inner = _innerProp->isSet() && _innerProp->value().getAsBool();
       auto shadowOnly =
@@ -134,14 +108,12 @@ protected:
         auto f3 = SkImageFilters::Blur(blur, blur, SkTileMode::kDecal, f2);
         auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, srcAlpha, f3);
 
-        setImageFilter(context, SkImageFilters::Compose(
-                                    input ? input : nullptr,
-                                    SkImageFilters::Blend(SkBlendMode::kSrcOver,
-                                                          srcGraphic, f4)));
+        composeAndPush(SkImageFilters::Compose(
+            input ? input : nullptr,
+            SkImageFilters::Blend(SkBlendMode::kSrcOver, srcGraphic, f4)));
 
       } else {
-        setImageFilter(
-            context,
+        composeAndPush(
             shadowOnly
                 ? SkImageFilters::DropShadowOnly(dx, dy, blur, blur, *color,
                                                  input ? input : nullptr)
@@ -152,7 +124,7 @@ protected:
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _dxProp = container->defineProperty<NodeProp>("dx");
     _dyProp = container->defineProperty<NodeProp>("dy");
     _blurProp = container->defineProperty<NodeProp>("blur");
@@ -194,17 +166,18 @@ protected:
           getColorChannelFromStringValue(_channelYProp->value().getAsString());
       auto scale = _scaleProp->value().getAsNumber();
 
-      auto displacement = requireChild(0);
-      auto color = optionalChild(1);
+      auto displacement =
+          getChildDeclarationContext()->getImageFilters()->pop();
 
-      setImageFilter(context, SkImageFilters::DisplacementMap(
-                                  channelX, channelY, scale, displacement,
-                                  color ? color : nullptr));
+      auto color = getChildDeclarationContext()->getImageFilters()->pop();
+
+      composeAndPush(SkImageFilters::DisplacementMap(
+          channelX, channelY, scale, displacement, color ? color : nullptr));
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _channelXProp = container->defineProperty<NodeProp>("channelX");
     _channelYProp = container->defineProperty<NodeProp>("channelY");
     _scaleProp = container->defineProperty<NodeProp>("scale");
@@ -243,19 +216,17 @@ public:
 protected:
   void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
-      auto input = optionalChild(0);
-      setImageFilter(
-          context, SkImageFilters::Blur(_blurProp->getDerivedValue()->x(),
-                                        _blurProp->getDerivedValue()->y(),
-                                        _tileModeProp->isSet()
-                                            ? *_tileModeProp->getDerivedValue()
-                                            : SkTileMode::kDecal,
-                                        input ? input : nullptr));
+      auto input = getChildDeclarationContext()->getImageFilters()->pop();
+      composeAndPush(SkImageFilters::Blur(
+          _blurProp->getDerivedValue()->x(), _blurProp->getDerivedValue()->y(),
+          _tileModeProp->isSet() ? *_tileModeProp->getDerivedValue()
+                                 : SkTileMode::kDecal,
+          input));
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _blurProp = container->defineProperty<RadiusProp>("blur");
     _tileModeProp = container->defineProperty<TileModeProp>("mode");
 
@@ -278,10 +249,9 @@ public:
 protected:
   void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
-      auto input = optionalChild(0);
+      auto input = getChildDeclarationContext()->getImageFilters()->pop();
       if (getPropsContainer()->isChanged()) {
-        setImageFilter(context,
-                       SkImageFilters::Offset(_xProp->value().getAsNumber(),
+        composeAndPush(SkImageFilters::Offset(_xProp->value().getAsNumber(),
                                               _yProp->value().getAsNumber(),
                                               input ? input : nullptr));
       }
@@ -289,7 +259,7 @@ protected:
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _xProp = container->defineProperty<NodeProp>("x");
     _yProp = container->defineProperty<NodeProp>("y");
 
@@ -317,21 +287,20 @@ protected:
     if (isChanged(context)) {
       auto op = getTypeFromStringValue(_operatorProp->value().getAsString());
       auto radius = _radiusProp->getDerivedValue();
-      auto input = optionalChild(0);
+      auto input = getChildDeclarationContext()->getImageFilters()->pop();
 
       if (op == Type::Dilate) {
-        setImageFilter(context,
-                       SkImageFilters::Dilate(radius->x(), radius->y(),
+        composeAndPush(SkImageFilters::Dilate(radius->x(), radius->y(),
                                               input ? input : nullptr));
       } else {
-        setImageFilter(context, SkImageFilters::Erode(radius->x(), radius->y(),
-                                                      input ? input : nullptr));
+        composeAndPush(SkImageFilters::Erode(radius->x(), radius->y(),
+                                             input ? input : nullptr));
       }
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _operatorProp = container->defineProperty<NodeProp>("operator");
     _radiusProp = container->defineProperty<RadiusProp>("radius");
 
@@ -372,16 +341,15 @@ protected:
       }
 
       auto builder = SkRuntimeShaderBuilder(source->getObject());
-      auto input = optionalChild(0);
+      auto input = getChildDeclarationContext()->getImageFilters()->pop();
       _uniformsProp->processUniforms(builder);
 
-      setImageFilter(context,
-                     SkImageFilters::RuntimeShader(builder, "", input));
+      composeAndPush(SkImageFilters::RuntimeShader(builder, "", input));
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _sourceProp = container->defineProperty<NodeProp>("source");
     _uniformsProp =
         container->defineProperty<UniformsProp>("uniforms", _sourceProp);

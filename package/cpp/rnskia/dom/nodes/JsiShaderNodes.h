@@ -23,39 +23,11 @@
 
 namespace RNSkia {
 
-class JsiBaseShaderNode
-    : public JsiDomDeclarationNode<JsiBaseShaderNode, sk_sp<SkShader>> {
-public:
-  JsiBaseShaderNode(std::shared_ptr<RNSkPlatformContext> context,
-                    const char *type)
-      : JsiDomDeclarationNode<JsiBaseShaderNode, sk_sp<SkShader>>(context,
-                                                                  type) {}
-
-protected:
-  sk_sp<SkShader> resolve(std::shared_ptr<JsiDomNode> child) override {
-    auto ptr = std::dynamic_pointer_cast<JsiBaseShaderNode>(child);
-    if (ptr) {
-      return ptr->getCurrent();
-    }
-    return nullptr;
-  }
-
-  void setShader(DrawingContext *context, sk_sp<SkShader> f) {
-    set(context, f);
-  }
-
-  void set(DrawingContext *context, sk_sp<SkShader> shader) override {
-    auto paint = context->getMutablePaint();
-    paint->setShader(shader);
-    setCurrent(shader);
-  }
-};
-
-class JsiShaderNode : public JsiBaseShaderNode,
+class JsiShaderNode : public JsiDomDeclarationNode,
                       public JsiDomNodeCtor<JsiShaderNode> {
 public:
   explicit JsiShaderNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseShaderNode(context, "skShader") {}
+      : JsiDomDeclarationNode(context, "skShader", DeclarationType::Shader) {}
 
 protected:
   void decorate(DrawingContext *context) override {
@@ -84,23 +56,17 @@ protected:
       }
 
       // get all children that are shader nodes
-      std::vector<sk_sp<SkShader>> children;
-      children.reserve(getChildren().size());
-      for (auto &child : getChildren()) {
-        auto ptr = std::dynamic_pointer_cast<JsiBaseShaderNode>(child);
-        if (ptr != nullptr) {
-          children.push_back(ptr->getCurrent());
-        }
-      }
+      auto children = getChildDeclarationContext()->getShaders()->popAll();
 
       // Update shader
-      setShader(context, source->getObject()->makeShader(
-                             uniforms, children.data(), children.size(), &lm));
+      getDeclarationContext()->getShaders()->push(
+          source->getObject()->makeShader(uniforms, children.data(),
+                                          children.size(), &lm));
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _sourceProp = container->defineProperty<NodeProp>("source");
     _uniformsProp =
         container->defineProperty<UniformsProp>("uniforms", _sourceProp);
@@ -117,11 +83,12 @@ private:
   PointProp *_originProp;
 };
 
-class JsiImageShaderNode : public JsiBaseShaderNode,
+class JsiImageShaderNode : public JsiDomDeclarationNode,
                            public JsiDomNodeCtor<JsiImageShaderNode> {
 public:
   explicit JsiImageShaderNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseShaderNode(context, "skImageShader") {}
+      : JsiDomDeclarationNode(context, "skImageShader",
+                              DeclarationType::Shader) {}
 
 protected:
   void decorate(DrawingContext *context) override {
@@ -152,20 +119,17 @@ protected:
         }
       }
 
-      setShader(
-          context,
-          image->makeShader(
-              *_txProp->getDerivedValue(), *_tyProp->getDerivedValue(),
-              SkSamplingOptions(getFilterModeFromString(
-                                    _filterModeProp->value().getAsString()),
-                                getMipmapModeFromString(
-                                    _mipmapModeProp->value().getAsString())),
-              &_matrix));
+      getDeclarationContext()->getShaders()->push(image->makeShader(
+          *_txProp->getDerivedValue(), *_tyProp->getDerivedValue(),
+          SkSamplingOptions(
+              getFilterModeFromString(_filterModeProp->value().getAsString()),
+              getMipmapModeFromString(_mipmapModeProp->value().getAsString())),
+          &_matrix));
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _txProp = container->defineProperty<TileModeProp>("tx");
     _tyProp = container->defineProperty<TileModeProp>("ty");
     _filterModeProp = container->defineProperty<NodeProp>("fm");
@@ -224,25 +188,25 @@ private:
   PointProp *_originProp;
 };
 
-class JsiColorShaderNode : public JsiBaseShaderNode,
+class JsiColorShaderNode : public JsiDomDeclarationNode,
                            public JsiDomNodeCtor<JsiColorShaderNode> {
 public:
   explicit JsiColorShaderNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseShaderNode(context, "skColorShader") {}
+      : JsiDomDeclarationNode(context, "skColorShader",
+                              DeclarationType::Shader) {}
 
 protected:
   void decorate(DrawingContext *context) override {
     if (isChanged(context)) {
       if (_colorProp->isSet()) {
-        setShader(context, SkShaders::Color(*_colorProp->getDerivedValue()));
-      } else {
-        setShader(context, nullptr);
+        getDeclarationContext()->getShaders()->push(
+            SkShaders::Color(*_colorProp->getDerivedValue()));
       }
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _colorProp = container->defineProperty<ColorProp>("color");
     _colorProp->require();
   }
@@ -251,15 +215,15 @@ private:
   ColorProp *_colorProp;
 };
 
-class JsiBasePerlinNoiseNode : public JsiBaseShaderNode {
+class JsiBasePerlinNoiseNode : public JsiDomDeclarationNode {
 public:
   JsiBasePerlinNoiseNode(std::shared_ptr<RNSkPlatformContext> context,
                          PropId type)
-      : JsiBaseShaderNode(context, type) {}
+      : JsiDomDeclarationNode(context, type, DeclarationType::Shader) {}
 
 protected:
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _freqXProp = container->defineProperty<NodeProp>("freqX");
     _freqYProp = container->defineProperty<NodeProp>("freqY");
     _octavesProp = container->defineProperty<NodeProp>("octaves");
@@ -295,11 +259,12 @@ protected:
       SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
                                    _tileHeightProp->value().getAsNumber());
 
-      setShader(context, SkPerlinNoiseShader::MakeTurbulence(
-                             _freqXProp->value().getAsNumber(),
-                             _freqYProp->value().getAsNumber(),
-                             _octavesProp->value().getAsNumber(),
-                             _seedProp->value().getAsNumber(), &size));
+      getDeclarationContext()->getShaders()->push(
+          SkPerlinNoiseShader::MakeTurbulence(
+              _freqXProp->value().getAsNumber(),
+              _freqYProp->value().getAsNumber(),
+              _octavesProp->value().getAsNumber(),
+              _seedProp->value().getAsNumber(), &size));
     }
   }
 };
@@ -316,22 +281,23 @@ protected:
       SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
                                    _tileHeightProp->value().getAsNumber());
 
-      setShader(context, SkPerlinNoiseShader::MakeFractalNoise(
-                             _freqXProp->value().getAsNumber(),
-                             _freqYProp->value().getAsNumber(),
-                             _octavesProp->value().getAsNumber(),
-                             _seedProp->value().getAsNumber(), &size));
+      getDeclarationContext()->getShaders()->push(
+          SkPerlinNoiseShader::MakeFractalNoise(
+              _freqXProp->value().getAsNumber(),
+              _freqYProp->value().getAsNumber(),
+              _octavesProp->value().getAsNumber(),
+              _seedProp->value().getAsNumber(), &size));
     }
   }
 };
 
-class JsiBaseGradientNode : public JsiBaseShaderNode {
+class JsiBaseGradientNode : public JsiDomDeclarationNode {
 public:
   JsiBaseGradientNode(std::shared_ptr<RNSkPlatformContext> context, PropId type)
-      : JsiBaseShaderNode(context, type) {}
+      : JsiDomDeclarationNode(context, type, DeclarationType::Shader) {}
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
     _transformsProps = container->defineProperty<TransformsProps>();
 
     _colorsProp = container->defineProperty<ColorsProp>("colors");
@@ -387,9 +353,8 @@ protected:
     if (isChanged(context)) {
       SkPoint pts[] = {*_startProp->getDerivedValue(),
                        *_endProp->getDerivedValue()};
-      setShader(context, SkGradientShader::MakeLinear(pts, _colors, _positions,
-                                                      _colorCount, _mode,
-                                                      _flags, _matrix));
+      getDeclarationContext()->getShaders()->push(SkGradientShader::MakeLinear(
+          pts, _colors, _positions, _colorCount, _mode, _flags, _matrix));
     }
   }
 
@@ -420,9 +385,9 @@ protected:
     if (isChanged(context)) {
       auto c = _centerProp->getDerivedValue();
       auto r = _radiusProp->value().getAsNumber();
-      setShader(context, SkGradientShader::MakeRadial(*c, r, _colors,
-                                                      _positions, _colorCount,
-                                                      _mode, _flags, _matrix));
+      auto shader = SkGradientShader::MakeRadial(
+          *c, r, _colors, _positions, _colorCount, _mode, _flags, _matrix);
+      getDeclarationContext()->getShaders()->push(shader);
     }
   }
 
@@ -455,9 +420,9 @@ protected:
       auto end = _endProp->isSet() ? _endProp->value().getAsNumber() : 360;
       auto c = _centerProp->getDerivedValue();
 
-      setShader(context, SkGradientShader::MakeSweep(
-                             c->x(), c->y(), _colors, _positions, _colorCount,
-                             _mode, start, end, _flags, _matrix));
+      getDeclarationContext()->getShaders()->push(SkGradientShader::MakeSweep(
+          c->x(), c->y(), _colors, _positions, _colorCount, _mode, start, end,
+          _flags, _matrix));
     }
   }
 
@@ -492,9 +457,10 @@ protected:
       auto startR = _startRProp->value().getAsNumber();
       auto endR = _endRProp->value().getAsNumber();
 
-      setShader(context, SkGradientShader::MakeTwoPointConical(
-                             *start, startR, *end, endR, _colors, _positions,
-                             _colorCount, _mode, _flags, _matrix));
+      getDeclarationContext()->getShaders()->push(
+          SkGradientShader::MakeTwoPointConical(
+              *start, startR, *end, endR, _colors, _positions, _colorCount,
+              _mode, _flags, _matrix));
     }
   }
 

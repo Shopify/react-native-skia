@@ -1,6 +1,13 @@
 #include "DrawingContext.h"
 
+#include <numeric>
+
 namespace RNSkia {
+
+DrawingContext::DrawingContext(const char *source) {
+  _source = source;
+  _rootDeclarations = std::make_shared<DeclarationContext>();
+}
 
 DrawingContext::DrawingContext(std::shared_ptr<SkPaint> paint)
     : DrawingContext("root") {
@@ -19,60 +26,36 @@ DrawingContext::inheritContext(const char *source) {
   return result;
 }
 
-std::string DrawingContext::getDebugDescription() {
-  std::string v = "ctx for " + std::string(_source) + ":";
+void DrawingContext::materializeDeclarations() {
 
-  if (_paint != nullptr) {
-    auto clr = _paint->getColor();
-    auto a = SkColorGetA(clr);
-    auto r = SkColorGetR(clr);
-    auto g = SkColorGetG(clr);
-    auto b = SkColorGetB(clr);
+  // TODO: We need to keep track of changes in the declarations as well as in the
+  // context itself.
+  if (isChanged()) {
 
-    if (r > 0 || g > 0 || b > 0) {
-      v += " color:rgba(" + std::to_string(r) + ", " + std::to_string(g) +
-           ", " + std::to_string(b) + ", " + std::to_string(a) + ")";
+    if (_rootDeclarations->getColorFilters()->size() > 0) {
+      getMutablePaint()->setColorFilter(
+          _rootDeclarations->getColorFilters()->peekAsOne());
     }
 
-    if (_paint->getMaskFilter() != nullptr) {
-      v += " maskFilter:set";
-    }
-    auto blendMode = _paint->getBlendMode_or(SkBlendMode::kSrc);
-    if (blendMode != SkBlendMode::kSrc) {
-      v += " blendMode:" + std::to_string(static_cast<size_t>(blendMode));
+    if (_rootDeclarations->getImageFilters()->size() > 0) {
+      getMutablePaint()->setImageFilter(
+          _rootDeclarations->getImageFilters()->peekAsOne());
     }
 
-    auto opacity = _paint->getAlphaf();
-    v += " opacity:" + std::to_string(opacity);
-
-    if (_paint->getPathEffect() != nullptr) {
-      v += " [PathEffect]";
+    if (_rootDeclarations->getShaders()->size() > 0) {
+      getMutablePaint()->setShader(_rootDeclarations->getShaders()->peek());
     }
 
-    if (_paint->getShader() != nullptr) {
-      v += " [Shader]";
+    if (_rootDeclarations->getMaskFilters()->size() > 0) {
+      getMutablePaint()->setMaskFilter(
+          _rootDeclarations->getMaskFilters()->peek());
     }
 
-    if (_paint->getImageFilter() != nullptr) {
-      v += " [ImageFilter]";
+    if (_rootDeclarations->getPathEffects()->size() > 0) {
+      getMutablePaint()->setPathEffect(
+          _rootDeclarations->getPathEffects()->peekAsOne());
     }
-
-    if (_paint->getMaskFilter() != nullptr) {
-      v += " [MaskFilter]";
-    }
-
-    if (_paint->getColorFilter() != nullptr) {
-      v += " [ColorFilter]";
-    }
-
-  } else {
-    v = v + "[inherited] " +
-        (_parent != nullptr ? _parent->getDebugDescription() : "");
   }
-
-  v = v + "\n";
-
-  return v;
 }
 
 /**
@@ -80,6 +63,7 @@ std::string DrawingContext::getDebugDescription() {
  */
 void DrawingContext::markAsChanged() {
   markChildrenAsChanged();
+  _rootDeclarations->reset();
   _paint = nullptr;
   _isChanged = true;
 }
@@ -198,12 +182,66 @@ const std::function<void()> &DrawingContext::getRequestRedraw() {
   return _requestRedraw;
 }
 
-DrawingContext::DrawingContext(const char *source) { _source = source; }
-
 void DrawingContext::markChildrenAsChanged() {
   for (auto &child : _children) {
     child->markAsChanged();
   }
+}
+
+std::string DrawingContext::getDebugDescription() {
+  std::string v = "ctx for " + std::string(_source) + ":";
+
+  if (_paint != nullptr) {
+    auto clr = _paint->getColor();
+    auto a = SkColorGetA(clr);
+    auto r = SkColorGetR(clr);
+    auto g = SkColorGetG(clr);
+    auto b = SkColorGetB(clr);
+
+    if (r > 0 || g > 0 || b > 0) {
+      v += " color:rgba(" + std::to_string(r) + ", " + std::to_string(g) +
+           ", " + std::to_string(b) + ", " + std::to_string(a) + ")";
+    }
+
+    if (_paint->getMaskFilter() != nullptr) {
+      v += " maskFilter:set";
+    }
+    auto blendMode = _paint->getBlendMode_or(SkBlendMode::kSrc);
+    if (blendMode != SkBlendMode::kSrc) {
+      v += " blendMode:" + std::to_string(static_cast<size_t>(blendMode));
+    }
+
+    auto opacity = _paint->getAlphaf();
+    v += " opacity:" + std::to_string(opacity);
+
+    if (_paint->getPathEffect() != nullptr) {
+      v += " [PathEffect]";
+    }
+
+    if (_paint->getShader() != nullptr) {
+      v += " [Shader]";
+    }
+
+    if (_paint->getImageFilter() != nullptr) {
+      v += " [ImageFilter]";
+    }
+
+    if (_paint->getMaskFilter() != nullptr) {
+      v += " [MaskFilter]";
+    }
+
+    if (_paint->getColorFilter() != nullptr) {
+      v += " [ColorFilter]";
+    }
+
+  } else {
+    v = v + "[inherited] " +
+        (_parent != nullptr ? _parent->getDebugDescription() : "");
+  }
+
+  v = v + "\n";
+
+  return v;
 }
 
 } // namespace RNSkia

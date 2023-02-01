@@ -33,7 +33,7 @@ static std::atomic<size_t> NodeIdent = 1000;
 typedef enum {
   RenderNode = 1,
   DeclarationNode = 2,
-} JsiDomNodeClass;
+} NodeClass;
 
 /**
  Implements an abstract base class for nodes in the Skia Reconciler. This node
@@ -46,8 +46,10 @@ public:
    Contructor. Takes as parameters the values comming from the JS world that
    initialized the class.
    */
-  JsiDomNode(std::shared_ptr<RNSkPlatformContext> context, const char *type)
-      : _type(type), _context(context), _nodeId(NodeIdent++), JsiHostObject() {}
+  JsiDomNode(std::shared_ptr<RNSkPlatformContext> context, const char *type,
+             NodeClass nodeClass)
+      : _type(type), _context(context), _nodeClass(nodeClass),
+        _nodeId(NodeIdent++), JsiHostObject() {}
 
   /**
    Called when creating the node, resolves properties from the node constructor.
@@ -183,7 +185,7 @@ public:
    Returns the class of node so that we can do loops faster without
    having to check using runtime type information
    */
-  virtual JsiDomNodeClass getNodeClass() = 0;
+  NodeClass getNodeClass() { return _nodeClass; }
 
   /**
    Updates any pending property changes in all nodes and child nodes. This
@@ -266,6 +268,13 @@ public:
     for (auto &child : _children) {
       child->resetPendingChanges();
     }
+  }
+
+  /**
+  Empty implementation of the decorate context method
+  */
+  virtual void decorateContext(DrawingContext *context) {
+    // Empty implementation
   }
 
 protected:
@@ -429,6 +438,18 @@ protected:
   */
   JsiDomNode *getParent() { return _parent; }
 
+  /**
+  Loops through all declaration nodes and gives each one of them the
+  opportunity to decorate the context.
+  */
+  void decorateChildren(DrawingContext *context) {
+    for (auto &child : getChildren()) {
+      // All JsiDomNodes has the decorateContext method - but only the
+      // JsiDomDeclarationNode is actually doing stuff inside this method.
+      child->decorateContext(context);
+    }
+  }
+
 private:
   const char *_type;
   std::shared_ptr<RNSkPlatformContext> _context;
@@ -448,6 +469,8 @@ private:
   std::vector<std::function<void()>> _queuedNodeOps;
 
   JsiDomNode *_parent = nullptr;
+
+  NodeClass _nodeClass;
 };
 
 } // namespace RNSkia

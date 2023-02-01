@@ -26,26 +26,29 @@ protected:
     for (size_t i = 0; i < size; ++i) {
       if (i == 0) {
         // Check for paint node as layer
-        auto paintNode =
-            std::dynamic_pointer_cast<JsiPaintNode>(children.at(i));
+        if (children.at(i)->getNodeClass() == NodeClass::DeclarationNode) {
+          auto declarationNode =
+              std::static_pointer_cast<JsiDomDeclarationNode>(children.at(i));
+          if (declarationNode->getDeclarationType() == DeclarationType::Paint) {
+            // Yes, it is a paint node - which we can use as a layer.
+            isLayer = true;
 
-        if (paintNode != nullptr) {
-          // Yes, it is a paint node - which we can use as a layer.
-          isLayer = true;
-          // Save canvas with the paint node's paint!
-          context->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(
-              nullptr, paintNode->getPaint().get(), nullptr, 0));
+            auto paintNode =
+                std::static_pointer_cast<JsiPaintNode>(children.at(i));
 
-          continue;
+            // Save canvas with the paint node's paint!
+            context->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(
+                nullptr, paintNode->getPaint().get(), nullptr, 0));
+
+            continue;
+          }
         }
       }
 
       // Render rest of the children
-      auto renderNode =
-          std::dynamic_pointer_cast<JsiDomRenderNode>(children.at(i));
-
-      if (renderNode != nullptr) {
-        renderNode->render(context);
+      if (children.at(i)->getNodeClass() == NodeClass::RenderNode) {
+        std::static_pointer_cast<JsiDomRenderNode>(children.at(i))
+            ->render(context);
       }
     }
 

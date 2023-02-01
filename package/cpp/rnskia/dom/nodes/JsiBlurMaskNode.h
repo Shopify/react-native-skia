@@ -16,11 +16,12 @@
 
 namespace RNSkia {
 
-class JsiBlurMaskNode : public JsiBaseDomDeclarationNode,
+class JsiBlurMaskNode : public JsiDomDeclarationNode,
                         public JsiDomNodeCtor<JsiBlurMaskNode> {
 public:
   explicit JsiBlurMaskNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseDomDeclarationNode(context, "skBlurMaskFilter") {}
+      : JsiDomDeclarationNode(context, "skBlurMaskFilter",
+                              DeclarationType::MaskFilter) {}
 
 protected:
   void decorate(DrawingContext *context) override {
@@ -37,12 +38,12 @@ protected:
                                            respectCTM);
 
       // Set the mask filter
-      context->getMutablePaint()->setMaskFilter(filter);
+      getDeclarationContext()->getMaskFilters()->push(filter);
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
 
     _style = container->defineProperty<NodeProp>("style");
     _respectCTM = container->defineProperty<NodeProp>("respectCTM");

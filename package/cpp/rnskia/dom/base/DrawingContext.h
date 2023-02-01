@@ -2,6 +2,9 @@
 
 #include "JsiHostObject.h"
 
+#include "DeclarationContext.h"
+#include "DeclarationsStack.h"
+
 #include <memory>
 #include <string>
 #include <utility>
@@ -97,7 +100,26 @@ public:
   void setRequestRedraw(std::function<void()> &&requestRedraw);
   const std::function<void()> &getRequestRedraw();
 
+  /**
+   Returns the parent drawing context
+   */
   DrawingContext *getParent();
+
+  std::shared_ptr<DeclarationContext>
+  createDeclarations(DeclarationContext *parent) {
+    return std::make_shared<DeclarationContext>(parent);
+  }
+
+  /**
+   Restores declaration context for shaders/images/colorFilters/pathEffects and
+   mask filters.
+   */
+  void materializeDeclarations();
+
+  /*
+   Returns the root declaratiins object
+   */
+  DeclarationContext *getDeclarations() { return _rootDeclarations.get(); }
 
 private:
   explicit DrawingContext(const char *source);
@@ -118,6 +140,8 @@ private:
   float _scaledHeight = -1;
 
   std::function<void()> _requestRedraw;
+
+  std::shared_ptr<DeclarationContext> _rootDeclarations;
 };
 
 } // namespace RNSkia

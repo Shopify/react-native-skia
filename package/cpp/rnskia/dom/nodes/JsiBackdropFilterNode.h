@@ -19,18 +19,27 @@ protected:
       throw std::runtime_error(
           "Expected at least one child in the BackdropFilter node.");
     }
-    auto child = getChildren()[0];
-    auto colorFilter = std::dynamic_pointer_cast<JsiBaseColorFilterNode>(child);
-    auto imageFilter = std::dynamic_pointer_cast<JsiBaseImageFilterNode>(child);
+
+    auto child = getChildren().at(0);
+    if (child->getNodeClass() != NodeClass::DeclarationNode) {
+      throw std::runtime_error(
+          "Expected declaration as child in the BackdropFilter node.");
+    }
+
+    // Decorate!
+    child->decorateContext(context);
+
+    auto imageFilter = context->getDeclarations()->getImageFilters()->peek();
+    auto colorFilter = context->getDeclarations()->getColorFilters()->peek();
 
     auto canvas = context->getCanvas();
-    auto filter =
-        colorFilter != nullptr
-            ? SkImageFilters::ColorFilter(colorFilter->getCurrent(), nullptr)
-            : imageFilter->getCurrent();
+    if (colorFilter) {
+      imageFilter = SkImageFilters::ColorFilter(colorFilter, nullptr);
+    }
 
     canvas->saveLayer(
-        SkCanvas::SaveLayerRec(nullptr, nullptr, filter.get(), 0));
+        SkCanvas::SaveLayerRec(nullptr, nullptr, imageFilter.get(), 0));
+
     canvas->restore();
   }
 };

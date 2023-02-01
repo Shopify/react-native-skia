@@ -7,15 +7,11 @@
 
 namespace RNSkia {
 
-// TODO: implement feature: A paint node has its own paint not inherited,
-//       and when found the drawing node should render an extra time for
-//       each paint node in its children.
-
-class JsiPaintNode : public JsiBaseDomDeclarationNode,
+class JsiPaintNode : public JsiDomDeclarationNode,
                      public JsiDomNodeCtor<JsiPaintNode> {
 public:
   explicit JsiPaintNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseDomDeclarationNode(context, "skPaint") {}
+      : JsiDomDeclarationNode(context, "skPaint", DeclarationType::Paint) {}
 
   /**
    Returns a pointer to the local paint context in the paint node. This is a
@@ -29,7 +25,10 @@ public:
    decorate before we have created our child context.
    */
   void decorateContext(DrawingContext *context) override {
-    // A paint node should have its own local paint
+    // We totally override calling parent - so don't enable this line:
+    // JsiDomDeclarationNode::decorateContext(context);
+
+    // A paint node should have its own local context.
     if (_localContext == nullptr) {
       _localContext = context->inheritContext("PaintNode");
     }
@@ -42,16 +41,46 @@ public:
       _localContext->setMutablePaint(paint);
     }
 
+    // Ensure that we have a child context
+    ensureChildDeclarationContext(_localContext.get());
+
     // Let's decorate paint props
     _paintProps->decorate(_localContext.get());
 
-    // Materialize children who will now only change the paint node's paint
-    for (auto &child : getChildren()) {
-      auto decl = std::dynamic_pointer_cast<JsiBaseDomDeclarationNode>(child);
-      if (decl != nullptr) {
-        decl->decorateContext(_localContext.get());
+    // Let children decorate
+    decorateChildren(_localContext.get());
+
+    // Propagate all declarations to parent declaration context if it is
+    // changed.
+    if (_localContext->isChanged()) {
+
+      if (getChildDeclarationContext()->getColorFilters()->size() > 0) {
+        _localContext->getDeclarations()->getColorFilters()->push(
+            getChildDeclarationContext()->getColorFilters()->peekAsOne());
+      }
+
+      if (getChildDeclarationContext()->getImageFilters()->size() > 0) {
+        _localContext->getDeclarations()->getImageFilters()->push(
+            getChildDeclarationContext()->getImageFilters()->peekAsOne());
+      }
+
+      if (getChildDeclarationContext()->getShaders()->size() > 0) {
+        _localContext->getDeclarations()->getShaders()->push(
+            getChildDeclarationContext()->getShaders()->peek());
+      }
+
+      if (getChildDeclarationContext()->getMaskFilters()->size() > 0) {
+        _localContext->getDeclarations()->getMaskFilters()->push(
+            getChildDeclarationContext()->getMaskFilters()->peek());
+      }
+
+      if (getChildDeclarationContext()->getPathEffects()->size() > 0) {
+        _localContext->getDeclarations()->getPathEffects()->push(
+            getChildDeclarationContext()->getPathEffects()->peekAsOne());
       }
     }
+
+    _localContext->materializeDeclarations();
   }
 
   std::shared_ptr<const SkPaint> getPaint() {
@@ -62,7 +91,7 @@ protected:
   void decorate(DrawingContext *context) override {}
 
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
+    JsiDomDeclarationNode::defineProperties(container);
 
     _paintProps = container->defineProperty<PaintProps>();
     _opacityProp = container->defineProperty<NodeProp>("opacity");
