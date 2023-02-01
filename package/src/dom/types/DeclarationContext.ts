@@ -2,10 +2,10 @@ import type {
   SkShader,
   SkPaint,
   SkImageFilter,
-  SkColorFilter,
   SkMaskFilter,
   SkPathEffect,
   Skia,
+  SkColorFilter,
 } from "../../skia/types";
 
 export const composeDeclarations = <T>(
@@ -23,78 +23,89 @@ export const composeDeclarations = <T>(
   });
 };
 
-const popAll = <T>(arr: T[]): T[] => {
-  return arr.splice(-arr.length);
-};
+class Declaration<T> {
+  private decls: T[] = [];
 
-const popAllAsOne = <T>(
-  arr: T[],
-  composer: (outer: T, inner: T) => T
-): T | undefined => {
-  const filters = popAll(arr);
-  return composeDeclarations(filters, composer);
-};
+  constructor(private composer?: (outer: T, inner: T) => T) {}
+
+  get() {
+    return this.decls;
+  }
+
+  popAll() {
+    return this.decls.splice(-this.decls.length);
+  }
+
+  popAllAsOne() {
+    if (!this.composer) {
+      throw new Error("No composer for this type of declaration");
+    }
+    const decls = this.popAll();
+    return composeDeclarations(decls, this.composer!);
+  }
+}
 
 export class DeclarationContext {
-  private _paints: SkPaint[] = [];
-  private _imageFilters: SkImageFilter[] = [];
-  private _colorFilters: SkColorFilter[] = [];
-  private _maskFilters: SkMaskFilter[] = [];
-  private _shaders: SkShader[] = [];
-  private _pathEffects: SkPathEffect[] = [];
+  private _paints = new Declaration<SkPaint>();
+  private _maskFilters = new Declaration<SkMaskFilter>();
+  private _shaders = new Declaration<SkShader>();
+  private _pathEffects: Declaration<SkPathEffect>;
+  private _imageFilters: Declaration<SkImageFilter>;
+  private _colorFilters: Declaration<SkColorFilter>;
 
-  constructor(private Skia: Skia) {}
-
-  get pathEffects() {
-    return this._pathEffects;
-  }
-
-  popPathEffectsAsOne() {
-    return popAllAsOne(
-      this._pathEffects,
+  constructor(private Skia: Skia) {
+    this._pathEffects = new Declaration<SkPathEffect>(
       this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect)
     );
-  }
-
-  get paints() {
-    return this._paints;
-  }
-
-  get imageFilters() {
-    return this._imageFilters;
-  }
-
-  popImageFilters() {
-    return popAll(this._imageFilters);
-  }
-
-  popImageFiltersAsOne() {
-    return popAllAsOne(
-      this._imageFilters,
+    this._imageFilters = new Declaration<SkImageFilter>(
       this.Skia.ImageFilter.MakeCompose.bind(this.Skia.ImageFilter)
     );
-  }
-
-  get colorFilters() {
-    return this._colorFilters;
-  }
-
-  popColorFiltersAsOne() {
-    return popAllAsOne(
-      this._colorFilters,
+    this._colorFilters = new Declaration<SkColorFilter>(
       this.Skia.ColorFilter.MakeCompose.bind(this.Skia.ColorFilter)
     );
   }
 
+  get pathEffects() {
+    return this._pathEffects.get();
+  }
+
+  popPathEffectsAsOne() {
+    return this._pathEffects.popAllAsOne();
+  }
+
+  get paints() {
+    return this._paints.get();
+  }
+
+  get imageFilters() {
+    return this._imageFilters.get();
+  }
+
+  popImageFilters() {
+    return this._imageFilters.popAll();
+  }
+
+  popImageFiltersAsOne() {
+    return this._imageFilters.popAllAsOne();
+  }
+
+  get colorFilters() {
+    return this._colorFilters.get();
+  }
+
+  popColorFiltersAsOne() {
+    return this._colorFilters.popAllAsOne();
+  }
+
   get shaders() {
-    return this._shaders;
+    return this._shaders.get();
   }
 
   popShaders() {
-    return popAll(this._shaders);
+    return this._shaders.popAll();
   }
 
   get maskFilters() {
-    return this._maskFilters;
+    return this._maskFilters.get();
   }
 }
