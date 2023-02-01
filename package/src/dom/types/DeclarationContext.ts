@@ -25,9 +25,25 @@ export const composeDeclarations = <T>(
 
 class Declaration<T> {
   private decls: T[] = [];
-  private index = 0;
+  private indexes = [0];
 
   constructor(private composer?: (outer: T, inner: T) => T) {}
+
+  get index() {
+    return this.indexes[this.indexes.length - 1];
+  }
+
+  set index(index: number) {
+    this.indexes.push(index);
+  }
+
+  save() {
+    this.index = this.decls.length;
+  }
+
+  restore() {
+    this.indexes.pop();
+  }
 
   pop() {
     return this.decls.pop();
