@@ -1,6 +1,7 @@
 #include <JsiHostObject.h>
 #include <functional>
 #include <vector>
+#include <unordered_set>
 
 // To be able to find objects that aren't cleaned up correctly,
 // we can set this value to 1 and debug the constructor/destructor
@@ -31,6 +32,46 @@ JsiHostObject::~JsiHostObject() {
 #endif
 }
 
+static std::unordered_map<jsi::Runtime*, std::unordered_set<RuntimeMonitorListener*>> listeners;
+
+struct RuntimeMonitorHO : public jsi::HostObject {
+  jsi::Runtime *_rt;
+  RuntimeMonitorHO(jsi::Runtime *rt) : _rt(rt) {}
+  ~RuntimeMonitorHO() {
+    auto listenersSet = listeners.find(_rt);
+    if (listenersSet != listeners.end()) {
+      for (auto listener : listenersSet->second) {
+        listener->onRuntimeDestroyed(_rt);
+      }
+      listeners.erase(listenersSet);
+    }
+  }
+};
+
+void RuntimeMonitor::addRuntimeListener(jsi::Runtime &rt, RuntimeMonitorListener *listener) {
+  auto listenersSet = listeners.find(&rt);
+  if (listenersSet == listeners.end()) {
+    // We install a global host object in the provided runtime, this way we can use that host object
+    // destructor to get notified when the runtime is being terminated. We use a unique name for the
+    // object as it gets saved with the runtime's global object.
+    rt.global().setProperty(rt, "__rnskia_runtime_monitor", jsi::Object::createFromHostObject(rt, std::make_shared<RuntimeMonitorHO>(&rt)));
+    std::unordered_set<RuntimeMonitorListener*> newSet;
+    newSet.insert(listener);
+    listeners.emplace(&rt, std::move(newSet));
+  } else {
+    listenersSet->second.insert(listener);
+  }
+}
+
+void RuntimeMonitor::removeRuntimeListener(jsi::Runtime &rt, RuntimeMonitorListener *listener) {
+  auto listenersSet = listeners.find(&rt);
+  if (listenersSet == listeners.end()) {
+    // nothing to do here
+  } else {
+    listenersSet->second.erase(listener);
+  }
+}
+
 void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,
                         const jsi::Value &value) {
 
@@ -58,10 +99,10 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
   // Do the happy-paths first
 
   // Check function cache
-//  auto cachedFunc = _hostFunctionCache.find(nameStr);
-//  if (cachedFunc != _hostFunctionCache.end()) {
-//    return cachedFunc->second.asFunction(runtime);
-//  }
+  auto cachedFunc = _hostFunctionCache.get(runtime).find(nameStr);
+  if (cachedFunc != _hostFunctionCache.get(runtime).end()) {
+    return cachedFunc->second.asFunction(runtime);
+  }
 
   // Check the static getters map
   const JsiPropertyGettersMap &getters = getExportedPropertyGettersMap();
@@ -82,11 +123,10 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 
     // Add to cache - it is important to cache the results from the
     // createFromHostFunction function which takes some time.
-//    return _hostFunctionCache
-//        .emplace(nameStr, jsi::Function::createFromHostFunction(runtime, name,
-//                                                                0, dispatcher))
-//        .first->second.asFunction(runtime);
-    return jsi::Function::createFromHostFunction(runtime, name, 0, dispatcher);
+    return _hostFunctionCache.get(runtime)
+        .emplace(nameStr, jsi::Function::createFromHostFunction(runtime, name,
+                                                                0, dispatcher))
+        .first->second.asFunction(runtime);
   }
 
   if (_funcMap.count(nameStr) > 0) {
