@@ -6,7 +6,7 @@ import type {
   DeclarationType,
 } from "../types";
 import type { DependencyManager } from "../../renderer/DependencyManager";
-import { DeclarationContext } from "../types/DeclarationContext";
+import type { DeclarationContext } from "../types/DeclarationContext";
 
 export interface NodeContext {
   Skia: Skia;
@@ -86,12 +86,6 @@ export abstract class JsiDeclarationNode<P>
   }
 
   abstract decorate(ctx: DeclarationContext): void;
-
-  protected childDeclarationContext() {
-    const ctx = new DeclarationContext(this.Skia);
-    this.decorateChildren(ctx);
-    return ctx;
-  }
 
   protected decorateChildren(ctx: DeclarationContext) {
     this.children().forEach((child) => {

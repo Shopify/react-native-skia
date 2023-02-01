@@ -67,23 +67,45 @@ class Declaration<T> {
 }
 
 export class DeclarationContext {
-  private _paints = new Declaration<SkPaint>();
-  private _maskFilters = new Declaration<SkMaskFilter>();
-  private _shaders = new Declaration<SkShader>();
+  private _paints: Declaration<SkPaint>;
+  private _maskFilters: Declaration<SkMaskFilter>;
+  private _shaders: Declaration<SkShader>;
   private _pathEffects: Declaration<SkPathEffect>;
   private _imageFilters: Declaration<SkImageFilter>;
   private _colorFilters: Declaration<SkColorFilter>;
 
   constructor(private Skia: Skia) {
-    this._pathEffects = new Declaration<SkPathEffect>(
-      this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect)
+    const peComp = this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect);
+    const ifComp = this.Skia.ImageFilter.MakeCompose.bind(
+      this.Skia.ImageFilter
     );
-    this._imageFilters = new Declaration<SkImageFilter>(
-      this.Skia.ImageFilter.MakeCompose.bind(this.Skia.ImageFilter)
+    const cfComp = this.Skia.ColorFilter.MakeCompose.bind(
+      this.Skia.ColorFilter
     );
-    this._colorFilters = new Declaration<SkColorFilter>(
-      this.Skia.ColorFilter.MakeCompose.bind(this.Skia.ColorFilter)
-    );
+    this._paints = new Declaration<SkPaint>();
+    this._maskFilters = new Declaration<SkMaskFilter>();
+    this._shaders = new Declaration<SkShader>();
+    this._pathEffects = new Declaration<SkPathEffect>(peComp);
+    this._imageFilters = new Declaration<SkImageFilter>(ifComp);
+    this._colorFilters = new Declaration<SkColorFilter>(cfComp);
+  }
+
+  save() {
+    this._paints.save();
+    this._maskFilters.save();
+    this._shaders.save();
+    this._pathEffects.save();
+    this._imageFilters.save();
+    this._colorFilters.save();
+  }
+
+  restore() {
+    this._paints.restore();
+    this._maskFilters.restore();
+    this._shaders.restore();
+    this._pathEffects.restore();
+    this._imageFilters.restore();
+    this._colorFilters.restore();
   }
 
   get pathEffects() {

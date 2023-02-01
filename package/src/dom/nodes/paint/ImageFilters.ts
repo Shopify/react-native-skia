@@ -66,9 +66,11 @@ export abstract class ImageFilterDeclaration<P> extends JsiDeclarationNode<P> {
   }
 
   protected compose(ctx: DeclarationContext, imgf1: SkImageFilter) {
-    const childCtx = this.childDeclarationContext();
-    let imgf2 = childCtx.popImageFiltersAsOne();
-    const cf = childCtx.popColorFiltersAsOne();
+    ctx.save();
+    this.decorateChildren(ctx);
+    let imgf2 = ctx.popImageFiltersAsOne();
+    const cf = ctx.popColorFiltersAsOne();
+    ctx.restore();
     if (cf) {
       imgf2 = this.Skia.ImageFilter.MakeCompose(
         imgf2 ?? null,

@@ -17,8 +17,10 @@ export abstract class ColorFilterDeclaration<P> extends JsiDeclarationNode<P> {
   }
 
   compose(ctx: DeclarationContext, cf1: SkColorFilter) {
-    const childCtx = this.childDeclarationContext();
-    const cf2 = childCtx.popColorFiltersAsOne();
+    ctx.save();
+    this.decorateChildren(ctx);
+    const cf2 = ctx.popColorFiltersAsOne();
+    ctx.restore();
     const cf = cf2 ? this.Skia.ColorFilter.MakeCompose(cf1, cf2) : cf1;
     ctx.colorFilters.push(cf);
   }
@@ -88,10 +90,12 @@ export class LerpColorFilterNode extends ColorFilterDeclaration<LerpColorFilterP
   }
 
   decorate(ctx: DeclarationContext) {
-    const childCtx = this.childDeclarationContext();
+    ctx.save();
+    this.decorateChildren(ctx);
     const { t } = this.props;
-    const second = childCtx.colorFilters.pop();
-    const first = childCtx.colorFilters.pop();
+    const second = ctx.colorFilters.pop();
+    const first = ctx.colorFilters.pop();
+    ctx.restore();
     if (!first || !second) {
       throw new Error(
         "LerpColorFilterNode: missing two color filters as children"
