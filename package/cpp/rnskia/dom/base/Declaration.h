@@ -18,7 +18,7 @@ namespace RNSkia {
 /**
  Small container for shaders, filters, masks and effects
  */
-template <typename T> class DeclarationsStack {
+template <typename T> class Declaration {
 public:
   // Pushes to the stack
   void push(sk_sp<T> el) {
@@ -127,20 +127,20 @@ protected:
  Small container for shaders, filters, masks and effects
  */
 template <typename T>
-class ComposableDeclarationsStack : public DeclarationsStack<T> {
+class ComposableDeclarationsStack : public Declaration<T> {
 public:
   /**
    Constructor
    */
   explicit ComposableDeclarationsStack(
       std::function<sk_sp<T>(sk_sp<T> inner, sk_sp<T> outer)> composer)
-      : DeclarationsStack<T>(), _composer(composer) {}
+      : Declaration<T>(), _composer(composer) {}
 
   // Clears and returns through reducer function in reversed order
-  sk_sp<T> popAsOne() { return DeclarationsStack<T>::popAsOne(_composer); }
+  sk_sp<T> popAsOne() { return Declaration<T>::popAsOne(_composer); }
 
   // Returns through reducer function in reversed order
-  sk_sp<T> peekAsOne() { return DeclarationsStack<T>::peekAsOne(_composer); }
+  sk_sp<T> peekAsOne() { return Declaration<T>::peekAsOne(_composer); }
 
 private:
   std::function<sk_sp<T>(sk_sp<T> inner, sk_sp<T> outer)> _composer;
