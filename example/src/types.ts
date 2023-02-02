@@ -3,10 +3,6 @@ export type StackParamList = {
     title?: string;
     path?: string[];
   };
-  Test: {
-    title?: string;
-    path?: string[];
-  };
   Home: undefined;
   Vertices: undefined;
   API: undefined;

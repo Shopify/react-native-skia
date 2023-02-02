@@ -20,7 +20,7 @@ abstract class PathEffectDeclaration<P> extends JsiDeclarationNode<P> {
     super(ctx, DeclarationType.PathEffect, type, props);
   }
 
-  protected compose(ctx: DeclarationContext, pe1: SkPathEffect) {
+  protected composeAndPush(ctx: DeclarationContext, pe1: SkPathEffect) {
     ctx.save();
     this.decorateChildren(ctx);
     const pe2 = ctx.popPathEffectsAsOne();
@@ -38,7 +38,7 @@ export class DiscretePathEffectNode extends PathEffectDeclaration<DiscretePathEf
   decorate(ctx: DeclarationContext) {
     const { length, deviation, seed } = this.props;
     const pe = this.Skia.PathEffect.MakeDiscrete(length, deviation, seed);
-    this.compose(ctx, pe);
+    this.composeAndPush(ctx, pe);
   }
 }
 
@@ -54,7 +54,7 @@ export class Path2DPathEffectNode extends PathEffectDeclaration<Path2DPathEffect
     if (pe === null) {
       throw new Error("Path2DPathEffectNode: invalid path");
     }
-    this.compose(ctx, pe);
+    this.composeAndPush(ctx, pe);
   }
 }
 
@@ -66,7 +66,7 @@ export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProp
   decorate(ctx: DeclarationContext) {
     const { intervals, phase } = this.props;
     const pe = this.Skia.PathEffect.MakeDash(intervals, phase);
-    return this.compose(ctx, pe);
+    return this.composeAndPush(ctx, pe);
   }
 }
 
@@ -81,7 +81,7 @@ export class CornerPathEffectNode extends PathEffectDeclaration<CornerPathEffect
     if (pe === null) {
       throw new Error("CornerPathEffectNode: couldn't create path effect");
     }
-    this.compose(ctx, pe);
+    this.composeAndPush(ctx, pe);
   }
 }
 
@@ -112,7 +112,7 @@ export class Line2DPathEffectNode extends PathEffectDeclaration<Line2DPathEffect
     if (pe === null) {
       throw new Error("Line2DPathEffectNode: could not create path effect");
     }
-    return this.compose(ctx, pe);
+    return this.composeAndPush(ctx, pe);
   }
 }
 
@@ -133,6 +133,6 @@ export class Path1DPathEffectNode extends PathEffectDeclaration<Path1DPathEffect
     if (pe === null) {
       throw new Error("Path1DPathEffectNode: could not create path effect");
     }
-    this.compose(ctx, pe);
+    this.composeAndPush(ctx, pe);
   }
 }

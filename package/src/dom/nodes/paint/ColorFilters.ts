@@ -16,7 +16,7 @@ export abstract class ColorFilterDeclaration<P> extends JsiDeclarationNode<P> {
     super(ctx, DeclarationType.ColorFilter, type, props);
   }
 
-  compose(ctx: DeclarationContext, cf1: SkColorFilter) {
+  protected composeAndPush(ctx: DeclarationContext, cf1: SkColorFilter) {
     ctx.save();
     this.decorateChildren(ctx);
     const cf2 = ctx.popColorFiltersAsOne();
@@ -34,7 +34,7 @@ export class MatrixColorFilterNode extends ColorFilterDeclaration<MatrixColorFil
   decorate(ctx: DeclarationContext) {
     const { matrix } = this.props;
     const cf = this.Skia.ColorFilter.MakeMatrix(matrix);
-    this.compose(ctx, cf);
+    this.composeAndPush(ctx, cf);
   }
 }
 
@@ -47,7 +47,7 @@ export class BlendColorFilterNode extends ColorFilterDeclaration<BlendColorFilte
     const { mode } = this.props;
     const color = this.Skia.Color(this.props.color);
     const cf = this.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
-    this.compose(ctx, cf);
+    this.composeAndPush(ctx, cf);
   }
 }
 
@@ -58,7 +58,7 @@ export class LinearToSRGBGammaColorFilterNode extends ColorFilterDeclaration<nul
 
   decorate(ctx: DeclarationContext) {
     const cf = this.Skia.ColorFilter.MakeLinearToSRGBGamma();
-    this.compose(ctx, cf);
+    this.composeAndPush(ctx, cf);
   }
 }
 
@@ -69,7 +69,7 @@ export class SRGBToLinearGammaColorFilterNode extends ColorFilterDeclaration<nul
 
   decorate(ctx: DeclarationContext) {
     const cf = this.Skia.ColorFilter.MakeSRGBToLinearGamma();
-    this.compose(ctx, cf);
+    this.composeAndPush(ctx, cf);
   }
 }
 
@@ -80,7 +80,7 @@ export class LumaColorFilterNode extends ColorFilterDeclaration<null> {
 
   decorate(ctx: DeclarationContext) {
     const cf = this.Skia.ColorFilter.MakeLumaColorFilter();
-    this.compose(ctx, cf);
+    this.composeAndPush(ctx, cf);
   }
 }
 
