@@ -25,7 +25,7 @@ public:
 
 protected:
   void decorate(DrawingContext *context) override {
-    if (context->isChanged() || getPropsContainer()->isChanged()) {
+    if (isChanged(context)) {
 
       bool respectCTM =
           _respectCTM->isSet() ? _respectCTM->value().getAsBool() : true;

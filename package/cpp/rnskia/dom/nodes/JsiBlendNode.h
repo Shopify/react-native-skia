@@ -17,7 +17,7 @@ public:
 
 protected:
   void decorate(DrawingContext *context) override {
-    if (context->isChanged() || getPropsContainer()->isChanged()) {
+    if (isChanged(context)) {
       // No need to do anything if there are no children here
       if (getChildren().size() == 0) {
         return;
@@ -39,7 +39,7 @@ protected:
       auto imageFilter =
           getChildDeclarationContext()
               ->getImageFilters()
-              ->DeclarationsStack<SkImageFilter>::popAsOne(
+              ->Declaration<SkImageFilter>::popAsOne(
                   [blendMode](sk_sp<SkImageFilter> inner,
                               sk_sp<SkImageFilter> outer) {
                     return SkImageFilters::Blend(blendMode, outer, inner);
