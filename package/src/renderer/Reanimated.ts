@@ -36,13 +36,13 @@ export function bindReanimatedProps(
   if (previousMapperId !== undefined) {
     const {
       stopMapper,
-    } = require("react-native-reanimated/src/reanimated2/core");
+    } = require("react-native-reanimated");
     stopMapper(previousMapperId);
   }
   if (sharedValues.length > 0) {
     const {
       startMapper,
-    } = require("react-native-reanimated/src/reanimated2/core");
+    } = require("react-native-reanimated");
     const viewId = container.getNativeId();
     const SkiaViewApi = global.SkiaViewApi;
     const mapperId = startMapper(() => {
