@@ -69,4 +69,31 @@ describe("DrawingContext", () => {
     expect(ctx.paint).toBe(cachedPaint);
     ctx.restore();
   });
+
+  it("should keep a paint stable if the parent doesn't change", () => {
+    const { canvas } = setupSkia(width, height);
+    const { Skia } = importSkia();
+    const Sk = getSkDOM();
+    const root = Sk.Group({});
+    const child = Sk.Group({ color: "red" });
+    root.addChild(child);
+
+    const ctx = new JsiDrawingContext(Skia, canvas);
+    const rootPaint = ctx.paint;
+    expect(rootPaint).toBeDefined();
+
+    ctx.saveAndConcat(root);
+
+    ctx.saveAndConcat(child);
+    const p1 = ctx.paint;
+    ctx.restore();
+
+    ctx.saveAndConcat(child, p1);
+    const p2 = ctx.paint;
+    ctx.restore();
+
+    ctx.restore();
+
+    expect(p1).toBe(p2);
+  });
 });
