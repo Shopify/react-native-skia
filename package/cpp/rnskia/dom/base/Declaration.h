@@ -21,9 +21,7 @@ namespace RNSkia {
 template <typename T> class Declaration {
 public:
   // Pushes to the stack
-  void push(sk_sp<T> el) {
-    _elements.push(el);
-  }
+  void push(sk_sp<T> el) { _elements.push(el); }
 
   // Clears and returns all elements
   std::vector<sk_sp<T>> popAll() {
@@ -97,7 +95,7 @@ public:
       _elements.pop();
     }
   }
-  
+
   // Resets without calling did Change
   void reset() {
     while (!_elements.empty()) {
@@ -126,8 +124,7 @@ protected:
 /**
  Small container for shaders, filters, masks and effects
  */
-template <typename T>
-class ComposableDeclaration : public Declaration<T> {
+template <typename T> class ComposableDeclaration : public Declaration<T> {
 public:
   /**
    Constructor
