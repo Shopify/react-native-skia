@@ -127,12 +127,12 @@ protected:
  Small container for shaders, filters, masks and effects
  */
 template <typename T>
-class ComposableDeclarationsStack : public Declaration<T> {
+class ComposableDeclaration : public Declaration<T> {
 public:
   /**
    Constructor
    */
-  explicit ComposableDeclarationsStack(
+  explicit ComposableDeclaration(
       std::function<sk_sp<T>(sk_sp<T> inner, sk_sp<T> outer)> composer)
       : Declaration<T>(), _composer(composer) {}
 

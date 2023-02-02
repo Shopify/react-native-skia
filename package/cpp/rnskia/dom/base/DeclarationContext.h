@@ -26,17 +26,17 @@ public:
       : _shaders(
             std::make_unique<Declaration<SkShader>>()),
         _imageFilters(
-            std::make_unique<ComposableDeclarationsStack<SkImageFilter>>(
+            std::make_unique<ComposableDeclaration<SkImageFilter>>(
                 [](sk_sp<SkImageFilter> inner, sk_sp<SkImageFilter> outer) {
                   return SkImageFilters::Compose(outer, inner);
                 })),
         _colorFilters(
-            std::make_unique<ComposableDeclarationsStack<SkColorFilter>>(
+            std::make_unique<ComposableDeclaration<SkColorFilter>>(
                 [](sk_sp<SkColorFilter> inner, sk_sp<SkColorFilter> outer) {
                   return SkColorFilters::Compose(outer, inner);
                 })),
         _pathEffects(
-            std::make_unique<ComposableDeclarationsStack<SkPathEffect>>(
+            std::make_unique<ComposableDeclaration<SkPathEffect>>(
                 [](sk_sp<SkPathEffect> inner, sk_sp<SkPathEffect> outer) {
                   return SkPathEffect::MakeCompose(outer, inner);
                 })),
@@ -53,13 +53,13 @@ public:
   DeclarationContext *getParent() { return _parent; }
 
   Declaration<SkShader> *getShaders() { return _shaders.get(); }
-  ComposableDeclarationsStack<SkImageFilter> *getImageFilters() {
+  ComposableDeclaration<SkImageFilter> *getImageFilters() {
     return _imageFilters.get();
   }
-  ComposableDeclarationsStack<SkColorFilter> *getColorFilters() {
+  ComposableDeclaration<SkColorFilter> *getColorFilters() {
     return _colorFilters.get();
   }
-  ComposableDeclarationsStack<SkPathEffect> *getPathEffects() {
+  ComposableDeclaration<SkPathEffect> *getPathEffects() {
     return _pathEffects.get();
   }
   Declaration<SkMaskFilter> *getMaskFilters() {
@@ -82,9 +82,9 @@ private:
   std::vector<DeclarationContext *> _children;
 
   std::unique_ptr<Declaration<SkShader>> _shaders;
-  std::unique_ptr<ComposableDeclarationsStack<SkImageFilter>> _imageFilters;
-  std::unique_ptr<ComposableDeclarationsStack<SkColorFilter>> _colorFilters;
-  std::unique_ptr<ComposableDeclarationsStack<SkPathEffect>> _pathEffects;
+  std::unique_ptr<ComposableDeclaration<SkImageFilter>> _imageFilters;
+  std::unique_ptr<ComposableDeclaration<SkColorFilter>> _colorFilters;
+  std::unique_ptr<ComposableDeclaration<SkPathEffect>> _pathEffects;
   std::unique_ptr<Declaration<SkMaskFilter>> _maskFilters;
 };
 
