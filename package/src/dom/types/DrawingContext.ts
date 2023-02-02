@@ -22,14 +22,18 @@ export interface DrawingContext {
   paint: SkPaint;
   saveAndConcat(node: Node<PaintProps>, cache?: SkPaint): boolean;
   restore(): void;
+  declarationCtx: DeclarationContext;
 }
 
 export class JsiDrawingContext implements DrawingContext {
   paints: SkPaint[];
 
+  declarationCtx: DeclarationContext;
+
   constructor(private readonly Skia: Skia, public readonly canvas: SkCanvas) {
     const paint = this.Skia.Paint();
     this.paints = [paint];
+    this.declarationCtx = new DeclarationContext(Skia);
   }
 
   get paint() {
@@ -50,7 +54,7 @@ export class JsiDrawingContext implements DrawingContext {
       this.paints.push(cache);
       return true;
     }
-    const paint = new ConcatablePaint(this.Skia, node);
+    const paint = new ConcatablePaint(this.Skia, this.declarationCtx, node);
     if (!paint.isPristine()) {
       this.save();
       paint.concatTo(this.paint);
@@ -79,7 +83,7 @@ class ConcatablePaint {
   _colorFilter?: SkColorFilter;
   _maskFilter?: SkMaskFilter;
 
-  constructor(Skia: Skia, node: Node<PaintProps>) {
+  constructor(Skia: Skia, declCtx: DeclarationContext, node: Node<PaintProps>) {
     const props = node.getProps();
     const children = node.children();
     this.setColor(
@@ -93,7 +97,7 @@ class ConcatablePaint {
     this.setStrokeMiter(props.strokeMiter);
     this.setOpacity(props.opacity);
     this.setAntiAlias(props.antiAlias);
-    const declCtx = new DeclarationContext(Skia);
+    declCtx.save();
     children.forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
         child.decorate(declCtx);
@@ -104,6 +108,7 @@ class ConcatablePaint {
     const shader = declCtx.shaders.pop();
     const maskFilter = declCtx.maskFilters.pop();
     const pathEffect = declCtx.popPathEffectsAsOne();
+    declCtx.restore();
     if (imageFilter) {
       this.setImageFilter(imageFilter);
     }

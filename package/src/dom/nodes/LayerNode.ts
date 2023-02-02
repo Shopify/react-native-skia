@@ -1,7 +1,6 @@
 import type { DrawingContext } from "../types";
 import { NodeType } from "../types";
 import type { ChildrenProps } from "../types/Common";
-import { DeclarationContext } from "../types/DeclarationContext";
 
 import { JsiRenderNode } from "./RenderNode";
 import type { NodeContext } from "./Node";
@@ -16,9 +15,11 @@ export class LayerNode extends JsiRenderNode<ChildrenProps> {
     let hasLayer = false;
     const [layer, ...children] = this.children();
     if (layer instanceof JsiDeclarationNode) {
-      const declCtx = new DeclarationContext(this.Skia);
+      const declCtx = ctx.declarationCtx;
+      declCtx.save();
       layer.decorate(declCtx);
       const paint = declCtx.paints.pop();
+      declCtx.restore();
       if (paint) {
         hasLayer = true;
         ctx.canvas.saveLayer(paint);

@@ -1,3 +1,4 @@
+import type { LinkingOptions } from "@react-navigation/native";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -29,7 +30,7 @@ import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
 
-const linking = {
+const linking: LinkingOptions<StackParamList> = {
   config: {
     screens: {
       Home: "",
@@ -50,7 +51,6 @@ const linking = {
       Animation: "animation",
       Performance: "performance",
       Tests: "test",
-      TestList: "tests",
     },
   },
   prefixes: ["rnskia://"],
@@ -77,33 +77,33 @@ const App = () => {
   if (assets === null) {
     return null;
   }
-  const Home = (
-    <Stack.Screen
-      name="Home"
-      key="Home"
-      component={HomeScreen}
-      options={{
-        title: "🎨 Skia",
-      }}
-    />
-  );
-  const E2ETests = (
-    <Stack.Screen
-      key="Tests"
-      name="Tests"
-      options={{
-        title: "🔧 Tests",
-      }}
-    >
-      {(props) => <Tests {...props} assets={assets} />}
-    </Stack.Screen>
-  );
   return (
     <FiberProvider>
       <StatusBar hidden />
       <NavigationContainer linking={linking}>
-        <Stack.Navigator screenOptions={{ headerLeft: HeaderLeft }}>
-          {CI ? [E2ETests, Home] : [Home, E2ETests]}
+        <Stack.Navigator
+          screenOptions={{
+            headerLeft: HeaderLeft,
+          }}
+          initialRouteName={CI ? "Tests" : "Home"}
+        >
+          <Stack.Screen
+            name="Home"
+            key="Home"
+            component={HomeScreen}
+            options={{
+              title: "🎨 Skia",
+            }}
+          />
+          <Stack.Screen
+            key="Tests"
+            name="Tests"
+            options={{
+              title: "🔧 Tests",
+            }}
+          >
+            {(props) => <Tests {...props} assets={assets} />}
+          </Stack.Screen>
           <Stack.Screen
             name="Vertices"
             component={Vertices}

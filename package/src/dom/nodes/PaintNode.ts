@@ -1,7 +1,7 @@
 import { StrokeCap, StrokeJoin, PaintStyle, BlendMode } from "../../skia/types";
 import type { DeclarationNode, PaintProps } from "../types";
 import { DeclarationType, NodeType } from "../types";
-import { DeclarationContext } from "../types/DeclarationContext";
+import type { DeclarationContext } from "../types/DeclarationContext";
 
 import { enumKey } from "./datatypes";
 import type { NodeContext } from "./Node";
@@ -55,17 +55,18 @@ export class PaintNode
     if (antiAlias !== undefined) {
       paint.setAntiAlias(antiAlias);
     }
-    const declCtx = new DeclarationContext(this.Skia);
+    ctx.save();
     this._children.forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
-        child.decorate(declCtx);
+        child.decorate(ctx);
       }
     });
-    const colorFilter = declCtx.popColorFiltersAsOne();
-    const imageFilter = declCtx.popImageFiltersAsOne();
-    const shader = declCtx.shaders.pop();
-    const maskFilter = declCtx.maskFilters.pop();
-    const pathEffect = declCtx.popPathEffectsAsOne();
+    const colorFilter = ctx.popColorFiltersAsOne();
+    const imageFilter = ctx.popImageFiltersAsOne();
+    const shader = ctx.shaders.pop();
+    const maskFilter = ctx.maskFilters.pop();
+    const pathEffect = ctx.popPathEffectsAsOne();
+    ctx.restore();
     if (imageFilter) {
       paint.setImageFilter(imageFilter);
     }
