@@ -16,10 +16,10 @@ export abstract class ColorFilterDeclaration<P> extends JsiDeclarationNode<P> {
     super(ctx, DeclarationType.ColorFilter, type, props);
   }
 
-  composeAndPush(ctx: DeclarationContext, cf1: SkColorFilter) {
+  protected composeAndPush(ctx: DeclarationContext, cf1: SkColorFilter) {
     ctx.save();
     this.decorateChildren(ctx);
-    const cf2 = ctx.popColorFiltersAsOne();
+    const cf2 = ctx.colorFilters.popAllAsOne();
     ctx.restore();
     const cf = cf2 ? this.Skia.ColorFilter.MakeCompose(cf1, cf2) : cf1;
     ctx.colorFilters.push(cf);
