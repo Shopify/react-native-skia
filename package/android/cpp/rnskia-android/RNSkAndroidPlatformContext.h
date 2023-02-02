@@ -7,6 +7,7 @@
 
 #include <JniPlatformContext.h>
 #include <RNSkPlatformContext.h>
+#include <SkiaOpenGLRenderer.h>
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -34,6 +35,10 @@ public:
 
   void raiseError(const std::exception &err) override {
     _jniPlatformContext->raiseError(err);
+  }
+
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
+    return MakeOffscreenGLSurface(width, height);
   }
 
   void startDrawLoop() override { _jniPlatformContext->startDrawLoop(); }
