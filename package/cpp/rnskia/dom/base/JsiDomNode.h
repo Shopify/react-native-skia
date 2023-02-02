@@ -66,7 +66,7 @@ public:
   }
 
   /**
-   Updates the selecetd property value
+   Updates the selected property value
    */
   JSI_HOST_FUNCTION(setProp) {
     if (_propsContainer == nullptr) {

@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "JsiRuntimeAwareStore.h"
+
 #define STR_CAT_NX(A, B) A##B
 #define STR_CAT(A, B) STR_CAT_NX(A, B)
 #define STR_GET get_
@@ -109,8 +111,6 @@ using JsPropertyType = struct {
   std::function<void(jsi::Runtime &, const jsi::Value &)> set;
 };
 
-using JsiFunctionCacheKey = std::pair<jsi::Runtime*,std::string>;
-
 class JsiHostObject;
 
 using JsiFunctionMap =
@@ -125,70 +125,6 @@ using JsiPropertyGettersMap =
 using JsiPropertySettersMap =
     std::unordered_map<std::string, void (JsiHostObject::*)(
                                         jsi::Runtime &, const jsi::Value &)>;
-
-struct RuntimeMonitorListener {
-  virtual ~RuntimeMonitorListener() {}
-  virtual void onRuntimeDestroyed(jsi::Runtime *) = 0;
-};
-
-struct RuntimeMonitor {
-  static void addRuntimeListener(jsi::Runtime &rt, RuntimeMonitorListener *listener);
-  static void removeRuntimeListener(jsi::Runtime &rt, RuntimeMonitorListener *listener);
-};
-
-template <typename StoreType>
-class JsiRuntimeAwareStore : public RuntimeMonitorListener {
-
-private:
-  jsi::Runtime *_primaryRuntime, *_secondaryRuntime;
-  std::unique_ptr<StoreType> _primaryStore, _secondaryStore;
-
-public:
-
-  void onRuntimeDestroyed(jsi::Runtime *rt) override {
-    if (_primaryRuntime == rt) {
-      _primaryRuntime = _secondaryRuntime;
-      _secondaryRuntime = nullptr;
-      _primaryStore = nullptr;
-      _primaryStore.swap(_secondaryStore);
-    } else if (_secondaryRuntime == rt) {
-      _secondaryRuntime = nullptr;
-      _secondaryStore = nullptr;
-    }
-  }
-
-  ~JsiRuntimeAwareStore() {
-    if (_secondaryRuntime != nullptr) {
-      RuntimeMonitor::removeRuntimeListener(*_secondaryRuntime, this);
-    }
-  }
-
-  StoreType& get(jsi::Runtime &rt) {
-    if (_primaryRuntime == &rt) {
-      return *_primaryStore;
-    } else if (_primaryRuntime == nullptr) {
-      _primaryRuntime = &rt;
-      _primaryStore = std::make_unique<StoreType>();
-      return *_primaryStore;
-    } else if (_secondaryRuntime == &rt) {
-      return *_secondaryStore;
-    } else if (_secondaryStore == nullptr) {
-      _secondaryRuntime = &rt;
-      _secondaryStore = std::make_unique<StoreType>();
-      // we only add listener when the secondary runtime is used, this assumes that the secondary
-      // runtime is terminated first. This lets us avoid additional complexity for the majority of
-      // cases when objects are not shared between runtimes. Otherwise we'd have to register all
-      // objecrts with the RuntimeMonitor as opposed to only registering ones that are used in secondary
-      // runtime. Note that we can't register listener here with the primary runtime as it may run
-      // on a separate thread.
-      RuntimeMonitor::addRuntimeListener(rt, this);
-      return *_secondaryStore;
-    } else {
-      // we don't support more than two stores
-      throw std::runtime_error("RuntimeAwareStore supports up to two separate JSI runtimes");
-    }
-  }
-};
 
 /**
  * Base class for jsi host objects
