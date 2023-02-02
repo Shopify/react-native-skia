@@ -46,7 +46,7 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
     processTransformProps(m3, transform);
     const shader = source.makeShaderWithChildren(
       processUniforms(source, uniforms),
-      ctx.popShaders(),
+      ctx.shaders.popAll(),
       m3
     );
     ctx.shaders.push(shader);

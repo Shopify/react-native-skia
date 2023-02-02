@@ -23,7 +23,7 @@ abstract class PathEffectDeclaration<P> extends JsiDeclarationNode<P> {
   protected composeAndPush(ctx: DeclarationContext, pe1: SkPathEffect) {
     ctx.save();
     this.decorateChildren(ctx);
-    const pe2 = ctx.popPathEffectsAsOne();
+    const pe2 = ctx.pathEffects.popAllAsOne();
     ctx.restore();
     const pe = pe2 ? this.Skia.PathEffect.MakeCompose(pe1, pe2) : pe1;
     ctx.pathEffects.push(pe);

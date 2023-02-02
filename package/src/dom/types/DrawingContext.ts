@@ -103,11 +103,11 @@ class ConcatablePaint {
         child.decorate(declCtx);
       }
     });
-    const colorFilter = declCtx.popColorFiltersAsOne();
-    const imageFilter = declCtx.popImageFiltersAsOne();
+    const colorFilter = declCtx.colorFilters.popAllAsOne();
+    const imageFilter = declCtx.imageFilters.popAllAsOne();
     const shader = declCtx.shaders.pop();
     const maskFilter = declCtx.maskFilters.pop();
-    const pathEffect = declCtx.popPathEffectsAsOne();
+    const pathEffect = declCtx.pathEffects.popAllAsOne();
     declCtx.restore();
     if (imageFilter) {
       this.setImageFilter(imageFilter);

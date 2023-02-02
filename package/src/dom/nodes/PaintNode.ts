@@ -61,11 +61,11 @@ export class PaintNode
         child.decorate(ctx);
       }
     });
-    const colorFilter = ctx.popColorFiltersAsOne();
-    const imageFilter = ctx.popImageFiltersAsOne();
+    const colorFilter = ctx.colorFilters.popAllAsOne();
+    const imageFilter = ctx.imageFilters.popAllAsOne();
     const shader = ctx.shaders.pop();
     const maskFilter = ctx.maskFilters.pop();
-    const pathEffect = ctx.popPathEffectsAsOne();
+    const pathEffect = ctx.pathEffects.popAllAsOne();
     ctx.restore();
     if (imageFilter) {
       paint.setImageFilter(imageFilter);
