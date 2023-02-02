@@ -79,7 +79,7 @@ void RNSkDomRenderer::renderCanvas(SkCanvas *canvas, float scaledWidth,
   _renderTimingInfo.beginTiming();
 
   auto pd = _platformContext->getPixelDensity();
-
+  canvas->clear(SK_ColorTRANSPARENT);
   canvas->save();
   canvas->scale(pd, pd);
 
