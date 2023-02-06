@@ -32,6 +32,7 @@ import { Fill, draw } from "@shopify/react-native-skia/lib/commonjs/headless";
 ```
 
 To benefit from the GPU acceleration, you can provide a polyfill of the [OffscreenCanvas API](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) that supports WebGL.
+Below is an implementation we use ourselves with [headless-gl](https://github.com/stackgl/headless-gl).
 
 ```tsx
 // Here we use gl for headless webgl support.
