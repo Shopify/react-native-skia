@@ -1,6 +1,5 @@
 import React from "react";
 
-import type { JsiSkPaint } from "../../skia/web/JsiSkPaint";
 import { processResult } from "../../__tests__/setup";
 import { Drawing, FitBox, Group, LinearGradient, Path } from "../components";
 
@@ -112,7 +111,8 @@ describe("Path Examples", () => {
           <Path path={path} style="stroke" strokeWidth={116} />
           <Drawing
             drawing={(ctx) => {
-              const paint = ctx.paint as JsiSkPaint;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const paint = ctx.paint as any;
               expect(paint.ref.getStrokeCap()).toBe(
                 paint.CanvasKit.StrokeCap.Round
               );

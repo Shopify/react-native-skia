@@ -9,11 +9,7 @@ export class NotImplementedOnRNWeb extends Error {
 }
 
 export abstract class Host {
-  readonly CanvasKit: CanvasKit;
-
-  constructor(CanvasKit: CanvasKit) {
-    this.CanvasKit = CanvasKit;
-  }
+  constructor(protected readonly CanvasKit: CanvasKit) {}
 }
 
 export abstract class BaseHostObject<T, N extends string>

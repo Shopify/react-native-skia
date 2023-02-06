@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Image } from "react-native";
 
 import { Skia } from "../Skia";
 import { isRNModule } from "../types";
@@ -7,7 +6,7 @@ import type { SkData, DataModule, DataSourceParam } from "../types";
 
 const resolveAsset = (source: DataModule) => {
   return isRNModule(source)
-    ? Image.resolveAssetSource(source).uri
+    ? require("react-native").Image.resolveAssetSource(source).uri
     : source.default;
 };
 

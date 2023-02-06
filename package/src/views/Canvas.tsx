@@ -3,7 +3,7 @@ import React from "react";
 import type { PointerEvent, ReactNode } from "react";
 
 import type { SkRect, SkCanvas, SkSize } from "../skia/types";
-import type { SkiaMutableValue, SkiaValue } from "../values";
+import type { SkiaMutableValue, SkiaValue } from "../values/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 import { Skia } from "../skia";
 import { SkiaRoot } from "../renderer/Reconciler";
@@ -19,7 +19,7 @@ type PointerEvents =
   | "onPointerLeave"
   | "onPointerOut";
 
-interface HTMLCanvasProps
+interface CanvasProps
   extends Omit<React.HTMLAttributes<HTMLCanvasElement>, PointerEvents> {
   mode?: DrawMode;
   onTouch?: TouchHandler;
@@ -28,8 +28,8 @@ interface HTMLCanvasProps
   children?: ReactNode;
 }
 
-export class HTMLCanvas extends React.Component<HTMLCanvasProps> {
-  constructor(props: HTMLCanvasProps) {
+export class Canvas extends React.Component<CanvasProps> {
+  constructor(props: CanvasProps) {
     super(props);
     this._mode = props.mode ?? "default";
     this.root = new SkiaRoot(Skia, this.registerValues.bind(this), this.redraw);
@@ -75,10 +75,6 @@ export class HTMLCanvas extends React.Component<HTMLCanvasProps> {
     }
   }
 
-  protected getSize() {
-    return { width: this.width, height: this.height };
-  }
-
   componentDidMount() {
     const resizeObserver = new ResizeObserver(
       ([
@@ -122,8 +118,7 @@ export class HTMLCanvas extends React.Component<HTMLCanvasProps> {
       this.props.onTouch([touches]);
     }
     if (this.props.onSize) {
-      const { width, height } = this.getSize();
-      this.props.onSize.current = { width, height };
+      this.props.onSize.current = { width: this.width, height: this.height };
     }
     const ctx = {
       canvas,
@@ -209,7 +204,7 @@ export class HTMLCanvas extends React.Component<HTMLCanvasProps> {
   }
 
   render() {
-    const { style, children, ...props } = this.props;
+    const { children, ...props } = this.props;
     return (
       <canvas
         ref={this._canvasRef}

@@ -41,7 +41,6 @@ To use React Native Skia on [snack](https://snack.expo.dev/), you will need to u
 
 <Snack id="@wcandillon/hello-snack" />
 
-
 ## Remotion
 
 To use React Native Skia with Remotion, please follow [the following installation steps](https://remotion.dev/skia).
@@ -49,8 +48,8 @@ To use React Native Skia with Remotion, please follow [the following installatio
 ## React
 
 It is possible to use React Native Skia on the Web without the `react-native-web` dependency.
-Simply use `HTMLCanvas` instead of `Canvas`.
 First, you need to pick your strategy to [Load Skia](#loading-skia).
+Then, you will need to change the import path for the Skia components.
 In the example below, we use [code splitting](#using-code-splitting) to load Skia and display our canvas.
 
 **index.ts**
@@ -68,13 +67,14 @@ export default function App() {
 **HelloWorld.tsx**
 
 ```tsx
-import {HTMLCanvas, Circle, Group} from "@shopify/react-native-skia";
+// Note that the import is not the same as in React Native 
+import {Canvas, Circle, Group} from "@shopify/react-native-skia/lib/module/web/Canvas";
  
 export const HelloWorld = () => {
   const size = 256;
   const r = size * 0.33;
   return (
-    <HTMLCanvas style={{ display: "flex", flex: 1 }}>
+    <Canvas style={{ width: 300, height: 300 }}>
       <Group blendMode="multiply">
         <Circle cx={r} cy={r} r={r} color="cyan" />
         <Circle cx={size - r} cy={r} r={r} color="magenta" />
@@ -85,7 +85,7 @@ export const HelloWorld = () => {
           color="yellow"
         />
       </Group>
-    </HTMLCanvas>
+    </Canvas>
   );
 };
 ```
