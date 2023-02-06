@@ -11,8 +11,8 @@ React Native Skia runs in a web browser thanks to [CanvasKit](https://skia.org/d
 The WebAssembly file is loaded asynchronously and has a size of 7.2MB.
 While this is a substantial file size, you have control over the user experience: you can decide when to load Skia and how the loading experience should be.
 
-We provide direct integrations with [Expo](#Expo) and [Remotion](#Remotion).
-Below you will also find the manual installation steps to run the module on any React Native Web projects.
+We provide direct integrations with [React](#React), [Expo](#Expo), and [Remotion](#Remotion).
+Below you will also find the manual installation steps to run the module on any React or React Native Web projects.
 
 ## Expo
 
@@ -45,6 +45,68 @@ To use React Native Skia on [snack](https://snack.expo.dev/), you will need to u
 ## Remotion
 
 To use React Native Skia with Remotion, please follow [the following installation steps](https://remotion.dev/skia).
+
+## React
+
+It is possible to use React Native Skia on the Web without the `react-native-web` dependency.
+Simply use `HTMLCanvas` instead of `Canvas`.
+First, you need to pick your strategy to [Load Skia](#loading-skia).
+In the example below, we use [code splitting](#using-code-splitting) to load Skia and display our canvas.
+
+**index.ts**
+```tsx
+import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+export default function App() {
+  return (
+    <WithSkiaWeb
+      getComponent={() => import("./HelloWorld")}
+      fallback={<Text>Loading Skia...</Text>} />}
+  );
+}
+```
+
+**HelloWorld.tsx**
+
+```tsx
+import {HTMLCanvas, Circle, Group} from "@shopify/react-native-skia";
+ 
+export const HelloWorld = () => {
+  const size = 256;
+  const r = size * 0.33;
+  return (
+    <HTMLCanvas style={{ display: "flex", flex: 1 }}>
+      <Group blendMode="multiply">
+        <Circle cx={r} cy={r} r={r} color="cyan" />
+        <Circle cx={size - r} cy={r} r={r} color="magenta" />
+        <Circle
+          cx={size/2}
+          cy={size - r}
+          r={r}
+          color="yellow"
+        />
+      </Group>
+    </HTMLCanvas>
+  );
+};
+```
+
+And below is an example using [defered component registration](#using-defered-component-registration).
+
+**index.ts**
+
+```tsx
+import {createRoot} from "react-dom/client";
+import React from "react";
+import { LoadSkia } from "@shopify/react-native-skia/src/web";
+
+LoadSkia().then(async () => {
+    const App = await (await import("./HelloWorld")).default;
+    const domNode = document.getElementById('app-root');
+    const root = createRoot(domNode);
+    root.render(React.createElement(App));
+});
+```
+
 
 ## Manual Webpack Installation
 
@@ -103,7 +165,6 @@ import React from 'react';
 import { Text } from "react-native";
 // Notice the import path `@shopify/react-native-skia/lib/module/web`
 // This is important only to pull the code responsible for loading Skia.
-// @ts-expect-error
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 
 export default function App() {
@@ -124,7 +185,6 @@ The following is an example of an `index.web.js` file.
 ```tsx
 // Notice the import path `@shopify/react-native-skia/lib/module/web`
 // This is important only to pull the code responsible for loading Skia.
-// @ts-expect-error
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 
 LoadSkiaWeb().then(async () => {

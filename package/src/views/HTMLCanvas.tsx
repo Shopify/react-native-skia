@@ -20,7 +20,8 @@ type PointerEvents =
   | "onPointerCancel"
   | "onPointerLeave"
   | "onPointerOut";
-interface CanvasProps
+
+interface HTMLCanvasProps
   extends Omit<React.HTMLAttributes<HTMLCanvasElement>, PointerEvents> {
   mode?: DrawMode;
   onTouch?: TouchHandler;
@@ -29,8 +30,8 @@ interface CanvasProps
   children?: ReactNode;
 }
 
-export class Canvas extends React.Component<CanvasProps> {
-  constructor(props: CanvasProps) {
+export class HTMLCanvas extends React.Component<HTMLCanvasProps> {
+  constructor(props: HTMLCanvasProps) {
     super(props);
     this._mode = props.mode ?? "default";
     this.root = new SkiaRoot(Skia, this.registerValues.bind(this), this.redraw);
