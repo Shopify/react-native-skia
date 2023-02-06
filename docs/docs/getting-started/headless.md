@@ -38,8 +38,9 @@ Below is an implementation we use ourselves with [headless-gl](https://github.co
 // Here we use gl for headless webgl support.
 import GL from "gl";
 
+// Now we need to provide polyfill for WebGLRenderingContext and OffscreenCanvas 
+// for Skia to be able to leverage WebGL
 global.WebGLRenderingContext = GL.WebGLRenderingContext;
-
 global.OffscreenCanvas = class OffscreenCanvasPolyfill
   implements OffscreenCanvas
 {
