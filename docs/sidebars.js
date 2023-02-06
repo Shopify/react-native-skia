@@ -22,6 +22,7 @@ const sidebars = {
         "getting-started/installation",
         "getting-started/hello-world",
         "getting-started/web",
+        "getting-started/headless",
         "getting-started/bundle-size",
       ],
     },
