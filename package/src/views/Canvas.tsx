@@ -208,7 +208,7 @@ export class Canvas extends React.Component<CanvasProps> {
   }
 
   render() {
-    const { style, ...props } = this.props;
+    const { style, children, ...props } = this.props;
     return (
       <canvas
         ref={this._canvasRef}
