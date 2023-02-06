@@ -11,8 +11,6 @@ import { SkiaRoot } from "../renderer/Reconciler";
 import type { DrawMode, TouchHandler, TouchInfo } from "./types";
 import { TouchType } from "./types";
 
-const pd = window.devicePixelRatio;
-
 type PointerEvents =
   | "onPointerDown"
   | "onPointerMove"
@@ -64,6 +62,7 @@ export class HTMLCanvas extends React.Component<HTMLCanvasProps> {
     // Reset canvas / surface on layout change
     if (this._canvasRef.current) {
       const canvas = this._canvasRef.current;
+      const pd = window.devicePixelRatio;
       canvas.width = width * pd;
       canvas.height = height * pd;
       const surface = CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current);
@@ -143,6 +142,7 @@ export class HTMLCanvas extends React.Component<HTMLCanvasProps> {
       if (this._canvas) {
         const touches = [...this._touches];
         this._touches = [];
+        const pd = window.devicePixelRatio;
         const canvas = this._canvas!;
         canvas.clear(Float32Array.of(0, 0, 0, 0));
         canvas.save();

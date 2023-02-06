@@ -3,8 +3,6 @@ import React, { useMemo, lazy, Suspense } from "react";
 
 import { LoadSkiaWeb } from "./LoadSkiaWeb";
 
-const isWeb = !!globalThis.document;
-
 interface WithSkiaProps {
   fallback?: ComponentProps<typeof Suspense>["fallback"];
   getComponent: () => Promise<{ default: ComponentType }>;
@@ -21,6 +19,7 @@ export const WithSkiaWeb = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (): any =>
       lazy(async () => {
+        const isWeb = !!globalThis.document;
         if (isWeb) {
           await LoadSkiaWeb(opts);
         } else {
