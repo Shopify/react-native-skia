@@ -5,25 +5,31 @@ import type { PointerEvent, ReactNode } from "react";
 import type { SkRect, SkCanvas, SkSize } from "../skia/types";
 import type { SkiaMutableValue, SkiaValue } from "../values";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
-
-import type { DrawMode, TouchHandler, TouchInfo } from "./types";
-import { TouchType } from "./types";
 import { Skia } from "../skia";
 import { SkiaRoot } from "../renderer/Reconciler";
 
+import type { DrawMode, TouchHandler, TouchInfo } from "./types";
+import { TouchType } from "./types";
+
 const pd = window.devicePixelRatio;
 
-type PointerEvents = "onPointerDown" | "onPointerMove" | "onPointerUp" | "onPointerCancel" | "onPointerLeave" | "onPointerOut";
-interface CanvasProps extends Omit<React.HTMLAttributes<HTMLCanvasElement>, PointerEvents> {
-    mode?: DrawMode;
-    onTouch?: TouchHandler;
-    onSize?: SkiaMutableValue<SkSize>;
-    debug?: boolean;
-    children?: ReactNode;
+type PointerEvents =
+  | "onPointerDown"
+  | "onPointerMove"
+  | "onPointerUp"
+  | "onPointerCancel"
+  | "onPointerLeave"
+  | "onPointerOut";
+interface CanvasProps
+  extends Omit<React.HTMLAttributes<HTMLCanvasElement>, PointerEvents> {
+  mode?: DrawMode;
+  onTouch?: TouchHandler;
+  onSize?: SkiaMutableValue<SkSize>;
+  debug?: boolean;
+  children?: ReactNode;
 }
 
-export class Canvas
- extends React.Component<CanvasProps> {
+export class Canvas extends React.Component<CanvasProps> {
   constructor(props: CanvasProps) {
     super(props);
     this._mode = props.mode ?? "default";
@@ -74,9 +80,15 @@ export class Canvas
   }
 
   componentDidMount() {
-    const resizeObserver = new ResizeObserver(([{ contentRect: {width, height}}]) => {
-      this.onLayout(width, height);
-    });
+    const resizeObserver = new ResizeObserver(
+      ([
+        {
+          contentRect: { width, height },
+        },
+      ]) => {
+        this.onLayout(width, height);
+      }
+    );
     resizeObserver.observe(this._canvasRef.current!);
     // Start render loop
     this.tick();
@@ -105,23 +117,20 @@ export class Canvas
   /**
    * Override to render
    */
-  protected renderInCanvas(
-    canvas: SkCanvas,
-    touches: TouchInfo[]
-  ) {
+  protected renderInCanvas(canvas: SkCanvas, touches: TouchInfo[]) {
     if (this.props.onTouch) {
-        this.props.onTouch([touches]);
-      }
-      if (this.props.onSize) {
-        const { width, height } = this.getSize();
-        this.props.onSize.current = { width, height };
-      }
-      const ctx = {
-        canvas,
-        paint: this.paint,
-      };
-      this.root.render(this.props.children);
-      this.root.dom.render(ctx);
+      this.props.onTouch([touches]);
+    }
+    if (this.props.onSize) {
+      const { width, height } = this.getSize();
+      this.props.onSize.current = { width, height };
+    }
+    const ctx = {
+      canvas,
+      paint: this.paint,
+    };
+    this.root.render(this.props.children);
+    this.root.dom.render(ctx);
   }
 
   /**
@@ -199,18 +208,18 @@ export class Canvas
   }
 
   render() {
-    const {style, ...props} = this.props;
+    const { style, ...props } = this.props;
     return (
-        <canvas
-          ref={this._canvasRef}
-          onPointerDown={this.createTouchHandler(TouchType.Start)}
-          onPointerMove={this.createTouchHandler(TouchType.Active)}
-          onPointerUp={this.createTouchHandler(TouchType.End)}
-          onPointerCancel={this.createTouchHandler(TouchType.Cancelled)}
-          onPointerLeave={this.createTouchHandler(TouchType.End)}
-          onPointerOut={this.createTouchHandler(TouchType.End)}
-          {...props}
-        />
+      <canvas
+        ref={this._canvasRef}
+        onPointerDown={this.createTouchHandler(TouchType.Start)}
+        onPointerMove={this.createTouchHandler(TouchType.Active)}
+        onPointerUp={this.createTouchHandler(TouchType.End)}
+        onPointerCancel={this.createTouchHandler(TouchType.Cancelled)}
+        onPointerLeave={this.createTouchHandler(TouchType.End)}
+        onPointerOut={this.createTouchHandler(TouchType.End)}
+        {...props}
+      />
     );
   }
 }
