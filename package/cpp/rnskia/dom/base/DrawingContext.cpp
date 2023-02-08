@@ -10,6 +10,7 @@ namespace RNSkia {
 
 DrawingContext::DrawingContext(std::shared_ptr<SkPaint> paint) {
   _declarationContext = std::make_unique<DeclarationContext>();
+  paint->setAntiAlias(true);
   _paints.push_back(paint);
 }
 

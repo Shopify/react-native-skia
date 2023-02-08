@@ -15,6 +15,7 @@ public:
 
   void decorate(DeclarationContext *context) override {
     auto paint = std::make_shared<SkPaint>();
+    paint->setAntiAlias(true);
 
     if (_paintProps->getOpacity()->isSet()) {
       paint->setAlphaf(paint->getAlphaf() *
@@ -65,12 +66,17 @@ public:
     if (_paintProps->getAntiAlias()->isSet()) {
       paint->setAntiAlias(_paintProps->getAntiAlias()->value().getAsBool());
     }
+    
+    context->save();
+    decorateChildren(context);
 
     auto imageFilter = context->getImageFilters()->popAsOne();
     auto colorFilter = context->getColorFilters()->popAsOne();
     auto shader = context->getShaders()->pop();
     auto maskFilter = context->getMaskFilters()->pop();
     auto pathEffect = context->getPathEffects()->popAsOne();
+    
+    context->restore();
 
     if (imageFilter) {
       paint->setImageFilter(imageFilter);
