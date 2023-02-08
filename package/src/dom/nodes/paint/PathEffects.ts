@@ -97,7 +97,8 @@ export class SumPathEffectNode extends PathEffectDeclaration<null> {
     if (pe1 === undefined || pe2 === undefined) {
       throw new Error("SumPathEffectNode: invalid children");
     }
-    return this.Skia.PathEffect.MakeSum(pe1, pe2);
+    const pe = this.Skia.PathEffect.MakeSum(pe1, pe2);
+    ctx.pathEffects.push(pe);
   }
 }
 
