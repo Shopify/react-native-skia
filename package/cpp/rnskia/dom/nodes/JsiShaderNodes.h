@@ -30,7 +30,7 @@ public:
       : JsiDomDeclarationNode(context, "skShader", DeclarationType::Shader) {}
 
   void decorate(DeclarationContext *context) override {
-
+    decorateChildren(context);
     auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>();
     if (source == nullptr) {
       throw std::runtime_error("Expected runtime effect when reading source "
