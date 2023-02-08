@@ -207,11 +207,6 @@ public:
         op();
       }
 
-      // If there are any ops here we should invalidate the cached context
-      if (_queuedNodeOps.size() > 0) {
-        invalidateContext();
-      }
-
       _queuedNodeOps.clear();
     }
 
@@ -273,11 +268,18 @@ public:
   /**
   Empty implementation of the decorate context method
   */
-  virtual void decorateContext(DrawingContext *context) {
+  virtual void decorateContext(DeclarationContext *context) {
     // Empty implementation
   }
 
 protected:
+  /**
+   Adds an operation that will be executed when the render cycle is finished.
+   */
+  void enqueAsynOperation(std::function<void()> &&fp) {
+    std::lock_guard<std::mutex> lock(_childrenLock);
+    _queuedNodeOps.push_back(std::move(fp));
+  }
   /**
    Override to define properties in node implementations
    */
@@ -307,7 +309,8 @@ protected:
     if (_propsContainer == nullptr) {
 
       // Initialize properties container
-      _propsContainer = std::make_shared<NodePropsContainer>(getType());
+      _propsContainer = std::make_shared<NodePropsContainer>(
+          getType(), [=](BaseNodeProp *p) { onPropertyChanged(p); });
 
       // Ask sub classes to define their properties
       defineProperties(_propsContainer.get());
@@ -329,7 +332,8 @@ protected:
     if (_propsContainer == nullptr) {
 
       // Initialize properties container
-      _propsContainer = std::make_shared<NodePropsContainer>(getType());
+      _propsContainer = std::make_shared<NodePropsContainer>(
+          getType(), [=](BaseNodeProp *p) { onPropertyChanged(p); });
 
       // Ask sub classes to define their properties
       defineProperties(_propsContainer.get());
@@ -345,6 +349,11 @@ protected:
   }
 
   /**
+   Override to be notified when a node property has changed
+   */
+  virtual void onPropertyChanged(BaseNodeProp *prop) {}
+
+  /**
    Adds a child node to the array of children for this node
    */
   virtual void addChild(std::shared_ptr<JsiDomNode> child) {
@@ -352,8 +361,7 @@ protected:
     printDebugInfo("JS:addChild(childId: " + std::to_string(child->_nodeId) +
                    ")");
 #endif
-    std::lock_guard<std::mutex> lock(_childrenLock);
-    _queuedNodeOps.push_back([child, this]() {
+    enqueAsynOperation([child, this]() {
       _children.push_back(child);
       child->setParent(this);
     });
@@ -370,8 +378,7 @@ protected:
         "JS:insertChildBefore(childId: " + std::to_string(child->_nodeId) +
         ", beforeId: " + std::to_string(before->_nodeId) + ")");
 #endif
-    std::lock_guard<std::mutex> lock(_childrenLock);
-    _queuedNodeOps.push_back([child, before, this]() {
+    enqueAsynOperation([child, before, this]() {
       auto position = std::find(_children.begin(), _children.end(), before);
       _children.insert(position, child);
       child->setParent(this);
@@ -387,8 +394,7 @@ protected:
     printDebugInfo("JS:removeChild(childId: " + std::to_string(child->_nodeId) +
                    ")");
 #endif
-    std::lock_guard<std::mutex> lock(_childrenLock);
-    _queuedNodeOps.push_back([child, this]() {
+    enqueAsynOperation([child, this]() {
       // Delete child itself
       _children.erase(
           std::remove_if(_children.begin(), _children.end(),
@@ -442,7 +448,7 @@ protected:
   Loops through all declaration nodes and gives each one of them the
   opportunity to decorate the context.
   */
-  void decorateChildren(DrawingContext *context) {
+  void decorateChildren(DeclarationContext *context) {
     for (auto &child : getChildren()) {
       // All JsiDomNodes has the decorateContext method - but only the
       // JsiDomDeclarationNode is actually doing stuff inside this method.

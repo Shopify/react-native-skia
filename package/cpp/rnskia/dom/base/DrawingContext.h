@@ -2,8 +2,8 @@
 
 #include "JsiHostObject.h"
 
+#include "Declaration.h"
 #include "DeclarationContext.h"
-#include "DeclarationsStack.h"
 
 #include <memory>
 #include <string>
@@ -15,42 +15,34 @@
 
 #include <SkCanvas.h>
 #include <SkPaint.h>
+#include <SkRefCnt.h>
 
 #pragma clang diagnostic pop
 
 namespace RNSkia {
+
+class PaintProps;
+class JsiDomNode;
 
 class DrawingContext : public std::enable_shared_from_this<DrawingContext> {
 public:
   /**
    Creates a root drawing context with paint and opacity
    */
+  DrawingContext();
+
+  /**
+   Creates a drawing context with the given paint as its starting paint object
+  */
   explicit DrawingContext(std::shared_ptr<SkPaint> paint);
 
   /**
-   Initilalizes a new draw context.
+   Factory for saving/restoring the context for a node
    */
-  DrawingContext(DrawingContext *parent, const char *source);
-
-  /**
-   Factory for creating a child context that inherits from this context
-   */
-  std::shared_ptr<DrawingContext> inheritContext(const char *source);
-
-  /**
-   Returns the debug description for the context
-   */
-  std::string getDebugDescription();
-
-  /**
-   Mark the drawing context and any child contexts as changed
-   */
-  void markAsChanged();
-
-  /**
-   Call to reset invalidate flag after render cycle
-   */
-  void resetChangedFlag();
+  bool saveAndConcat(PaintProps *paintProps,
+                     const std::vector<std::shared_ptr<JsiDomNode>> &children,
+                     std::shared_ptr<SkPaint> paintCache);
+  void restore();
 
   /**
    Dispose and remove the drawing context from its parent.
@@ -75,20 +67,7 @@ public:
   /**
    Gets the paint object
    */
-  std::shared_ptr<const SkPaint> getPaint();
-
-  /**
-   To be able to mutate and change the paint in a context we need to mutate the
-   underlying paint object - otherwise we'll just use the parent paint object
-   (to avoid having to create multiple paint objects for nodes that does not
-   change the paint).
-   */
-  std::shared_ptr<SkPaint> getMutablePaint();
-
-  /**
-   Sets the paint in the current sub context
-   */
-  void setMutablePaint(std::shared_ptr<SkPaint> paint);
+  std::shared_ptr<SkPaint> getPaint();
 
   float getScaledWidth();
 
@@ -100,48 +79,27 @@ public:
   void setRequestRedraw(std::function<void()> &&requestRedraw);
   const std::function<void()> &getRequestRedraw();
 
-  /**
-   Returns the parent drawing context
-   */
-  DrawingContext *getParent();
-
-  std::shared_ptr<DeclarationContext>
-  createDeclarations(DeclarationContext *parent) {
-    return std::make_shared<DeclarationContext>(parent);
-  }
-
-  /**
-   Restores declaration context for shaders/images/colorFilters/pathEffects and
-   mask filters.
-   */
-  void materializeDeclarations();
-
   /*
    Returns the root declaratiins object
    */
-  DeclarationContext *getDeclarations() { return _rootDeclarations.get(); }
+  DeclarationContext *getDeclarationContext() {
+    return _declarationContext.get();
+  }
 
 private:
+  void save();
+
   explicit DrawingContext(const char *source);
 
-  void markChildrenAsChanged();
-
-  bool _isChanged = true;
-
-  std::shared_ptr<SkPaint> _paint;
-
   SkCanvas *_canvas = nullptr;
-  const char *_source;
 
-  DrawingContext *_parent = nullptr;
-  std::vector<std::shared_ptr<DrawingContext>> _children;
+  std::vector<std::shared_ptr<SkPaint>> _paints;
 
   float _scaledWidth = -1;
   float _scaledHeight = -1;
-
   std::function<void()> _requestRedraw;
 
-  std::shared_ptr<DeclarationContext> _rootDeclarations;
+  std::unique_ptr<DeclarationContext> _declarationContext;
 };
 
 } // namespace RNSkia

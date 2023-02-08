@@ -15,41 +15,38 @@ public:
       : JsiDomDeclarationNode(context, "skBlend",
                               DeclarationType::ImageFilter) {}
 
-protected:
-  void decorate(DrawingContext *context) override {
-    if (isChanged(context)) {
-      // No need to do anything if there are no children here
-      if (getChildren().size() == 0) {
-        return;
-      }
+  void decorate(DeclarationContext *context) override {
 
-      // Blend mode
-      auto blendMode = *_blendProp->getDerivedValue();
+    // No need to do anything if there are no children here
+    if (getChildren().size() == 0) {
+      return;
+    }
 
-      // Shader
-      auto shader = getChildDeclarationContext()->getShaders()->popAsOne(
-          [blendMode](sk_sp<SkShader> inner, sk_sp<SkShader> outer) {
-            return SkShaders::Blend(blendMode, outer, inner);
-          });
+    // Blend mode
+    auto blendMode = *_blendProp->getDerivedValue();
 
-      if (shader != nullptr) {
-        getDeclarationContext()->getShaders()->push(shader);
-      }
+    // Shader
+    auto shader = context->getShaders()->popAsOne(
+        [blendMode](sk_sp<SkShader> inner, sk_sp<SkShader> outer) {
+          return SkShaders::Blend(blendMode, outer, inner);
+        });
 
-      auto imageFilter =
-          getChildDeclarationContext()
-              ->getImageFilters()
-              ->Declaration<SkImageFilter>::popAsOne(
-                  [blendMode](sk_sp<SkImageFilter> inner,
-                              sk_sp<SkImageFilter> outer) {
-                    return SkImageFilters::Blend(blendMode, outer, inner);
-                  });
-      if (imageFilter != nullptr) {
-        getDeclarationContext()->getImageFilters()->push(imageFilter);
-      }
+    if (shader != nullptr) {
+      context->getShaders()->push(shader);
+    }
+
+    auto imageFilter =
+        context->getImageFilters()->Declaration<sk_sp<SkImageFilter>>::popAsOne(
+            [blendMode](sk_sp<SkImageFilter> inner,
+                        sk_sp<SkImageFilter> outer) {
+              return SkImageFilters::Blend(blendMode, outer, inner);
+            });
+    if (imageFilter != nullptr) {
+      context->getImageFilters()->push(imageFilter);
     }
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDeclarationNode::defineProperties(container);
     _blendProp = container->defineProperty<BlendModeProp>("mode");

@@ -23,25 +23,23 @@ public:
       : JsiDomDeclarationNode(context, "skBlurMaskFilter",
                               DeclarationType::MaskFilter) {}
 
-protected:
-  void decorate(DrawingContext *context) override {
-    if (isChanged(context)) {
+  void decorate(DeclarationContext *context) override {
 
-      bool respectCTM =
-          _respectCTM->isSet() ? _respectCTM->value().getAsBool() : true;
-      SkBlurStyle style = SkBlurStyle::kNormal_SkBlurStyle;
-      if (_style->isSet()) {
-        style = getBlurStyleFromString(_style->value().getAsString());
-      }
-
-      auto filter = SkMaskFilter::MakeBlur(style, _blur->value().getAsNumber(),
-                                           respectCTM);
-
-      // Set the mask filter
-      getDeclarationContext()->getMaskFilters()->push(filter);
+    bool respectCTM =
+        _respectCTM->isSet() ? _respectCTM->value().getAsBool() : true;
+    SkBlurStyle style = SkBlurStyle::kNormal_SkBlurStyle;
+    if (_style->isSet()) {
+      style = getBlurStyleFromString(_style->value().getAsString());
     }
+
+    auto filter =
+        SkMaskFilter::MakeBlur(style, _blur->value().getAsNumber(), respectCTM);
+
+    // Set the mask filter
+    context->getMaskFilters()->push(filter);
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDeclarationNode::defineProperties(container);
 

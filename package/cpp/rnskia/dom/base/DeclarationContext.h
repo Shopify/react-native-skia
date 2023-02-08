@@ -3,6 +3,7 @@
 #include "Declaration.h"
 
 #include <memory>
+#include <stack>
 #include <vector>
 
 #pragma clang diagnostic push
@@ -22,63 +23,57 @@ namespace RNSkia {
 
 class DeclarationContext {
 public:
-  explicit DeclarationContext()
-      : _shaders(std::make_unique<Declaration<SkShader>>()),
-        _imageFilters(std::make_unique<ComposableDeclaration<SkImageFilter>>(
-            [](sk_sp<SkImageFilter> inner, sk_sp<SkImageFilter> outer) {
-              return SkImageFilters::Compose(outer, inner);
-            })),
-        _colorFilters(std::make_unique<ComposableDeclaration<SkColorFilter>>(
-            [](sk_sp<SkColorFilter> inner, sk_sp<SkColorFilter> outer) {
-              return SkColorFilters::Compose(outer, inner);
-            })),
-        _pathEffects(std::make_unique<ComposableDeclaration<SkPathEffect>>(
-            [](sk_sp<SkPathEffect> inner, sk_sp<SkPathEffect> outer) {
-              return SkPathEffect::MakeCompose(outer, inner);
-            })),
-        _maskFilters(std::make_unique<Declaration<SkMaskFilter>>()) {}
+  DeclarationContext() { save(); }
 
-  DeclarationContext(DeclarationContext *parent) : DeclarationContext() {
-    _parent = parent;
-    if (_parent != nullptr) {
-      _parent->_children.push_back(this);
-    }
+  Declaration<sk_sp<SkShader>> *getShaders() { return &_shaders.top(); }
+  ComposableDeclaration<sk_sp<SkImageFilter>> *getImageFilters() {
+    return &_imageFilters.top();
+  }
+  ComposableDeclaration<sk_sp<SkColorFilter>> *getColorFilters() {
+    return &_colorFilters.top();
+  }
+  ComposableDeclaration<sk_sp<SkPathEffect>> *getPathEffects() {
+    return &_pathEffects.top();
+  }
+  Declaration<sk_sp<SkMaskFilter>> *getMaskFilters() {
+    return &_maskFilters.top();
+  }
+  Declaration<std::shared_ptr<SkPaint>> *getPaints() { return &_paints.top(); }
+
+  void save() {
+    _paints.emplace();
+    _shaders.emplace();
+    _imageFilters.emplace(
+        [](sk_sp<SkImageFilter> inner, sk_sp<SkImageFilter> outer) {
+          return SkImageFilters::Compose(outer, inner);
+        });
+    _colorFilters.emplace(
+        [](sk_sp<SkColorFilter> inner, sk_sp<SkColorFilter> outer) {
+          return SkColorFilters::Compose(outer, inner);
+        });
+    _pathEffects.emplace(
+        [](sk_sp<SkPathEffect> inner, sk_sp<SkPathEffect> outer) {
+          return SkPathEffect::MakeCompose(outer, inner);
+        });
+    _maskFilters.emplace();
   }
 
-  DeclarationContext *getParent() { return _parent; }
-
-  Declaration<SkShader> *getShaders() { return _shaders.get(); }
-  ComposableDeclaration<SkImageFilter> *getImageFilters() {
-    return _imageFilters.get();
-  }
-  ComposableDeclaration<SkColorFilter> *getColorFilters() {
-    return _colorFilters.get();
-  }
-  ComposableDeclaration<SkPathEffect> *getPathEffects() {
-    return _pathEffects.get();
-  }
-  Declaration<SkMaskFilter> *getMaskFilters() { return _maskFilters.get(); }
-
-  void reset() {
-    getShaders()->reset();
-    getImageFilters()->reset();
-    getMaskFilters()->reset();
-    getColorFilters()->reset();
-    getPathEffects()->reset();
-    for (auto child : _children) {
-      child->reset();
-    }
+  void restore() {
+    _shaders.pop();
+    _imageFilters.pop();
+    _colorFilters.pop();
+    _pathEffects.pop();
+    _maskFilters.pop();
+    _paints.pop();
   }
 
 private:
-  DeclarationContext *_parent;
-  std::vector<DeclarationContext *> _children;
-
-  std::unique_ptr<Declaration<SkShader>> _shaders;
-  std::unique_ptr<ComposableDeclaration<SkImageFilter>> _imageFilters;
-  std::unique_ptr<ComposableDeclaration<SkColorFilter>> _colorFilters;
-  std::unique_ptr<ComposableDeclaration<SkPathEffect>> _pathEffects;
-  std::unique_ptr<Declaration<SkMaskFilter>> _maskFilters;
+  std::stack<Declaration<sk_sp<SkShader>>> _shaders;
+  std::stack<ComposableDeclaration<sk_sp<SkImageFilter>>> _imageFilters;
+  std::stack<ComposableDeclaration<sk_sp<SkColorFilter>>> _colorFilters;
+  std::stack<ComposableDeclaration<sk_sp<SkPathEffect>>> _pathEffects;
+  std::stack<Declaration<sk_sp<SkMaskFilter>>> _maskFilters;
+  std::stack<Declaration<std::shared_ptr<SkPaint>>> _paints;
 };
 
 } // namespace RNSkia

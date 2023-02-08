@@ -16,11 +16,11 @@ public:
 
   BoxShadowProps *getBoxShadowProps() { return _boxShadowProps; }
 
-protected:
-  void decorate(DrawingContext *context) override {
+  void decorate(DeclarationContext *context) override {
     // Do nothing, we are just a container for properties
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDeclarationNode::defineProperties(container);
     _boxShadowProps = container->defineProperty<BoxShadowProps>();

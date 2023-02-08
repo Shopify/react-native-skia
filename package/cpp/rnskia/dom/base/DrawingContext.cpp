@@ -1,247 +1,74 @@
 #include "DrawingContext.h"
 
+#include "ConcatablePaint.h"
+#include "JsiDomNode.h"
+#include "PaintProps.h"
+
 #include <numeric>
 
 namespace RNSkia {
 
-DrawingContext::DrawingContext(const char *source) {
-  _source = source;
-  _rootDeclarations = std::make_shared<DeclarationContext>();
+DrawingContext::DrawingContext(std::shared_ptr<SkPaint> paint) {
+  _declarationContext = std::make_unique<DeclarationContext>();
+  _paints.push_back(paint);
 }
 
-DrawingContext::DrawingContext(std::shared_ptr<SkPaint> paint)
-    : DrawingContext("root") {
-  _paint = paint;
-}
+DrawingContext::DrawingContext()
+    : DrawingContext(std::make_shared<SkPaint>()) {}
 
-DrawingContext::DrawingContext(DrawingContext *parent, const char *source)
-    : DrawingContext(source) {
-  _parent = parent;
-}
+bool DrawingContext::saveAndConcat(
+    PaintProps *paintProps,
+    const std::vector<std::shared_ptr<JsiDomNode>> &children,
+    std::shared_ptr<SkPaint> paintCache) {
 
-std::shared_ptr<DrawingContext>
-DrawingContext::inheritContext(const char *source) {
-  auto result = std::make_shared<DrawingContext>(this, source);
-  _children.push_back(result);
-  return result;
-}
-
-void DrawingContext::materializeDeclarations() {
-
-  // TODO: We need to keep track of changes in the declarations as well as in the
-  // context itself.
-  if (isChanged()) {
-
-    if (_rootDeclarations->getColorFilters()->size() > 0) {
-      getMutablePaint()->setColorFilter(
-          _rootDeclarations->getColorFilters()->peekAsOne());
-    }
-
-    if (_rootDeclarations->getImageFilters()->size() > 0) {
-      getMutablePaint()->setImageFilter(
-          _rootDeclarations->getImageFilters()->peekAsOne());
-    }
-
-    if (_rootDeclarations->getShaders()->size() > 0) {
-      getMutablePaint()->setShader(_rootDeclarations->getShaders()->peek());
-    }
-
-    if (_rootDeclarations->getMaskFilters()->size() > 0) {
-      getMutablePaint()->setMaskFilter(
-          _rootDeclarations->getMaskFilters()->peek());
-    }
-
-    if (_rootDeclarations->getPathEffects()->size() > 0) {
-      getMutablePaint()->setPathEffect(
-          _rootDeclarations->getPathEffects()->peekAsOne());
-    }
-  }
-}
-
-/**
- Invalidate cache
- */
-void DrawingContext::markAsChanged() {
-  markChildrenAsChanged();
-  _rootDeclarations->reset();
-  _paint = nullptr;
-  _isChanged = true;
-}
-
-/**
- Call to reset invalidate flag after render cycle
- */
-void DrawingContext::resetChangedFlag() { _isChanged = false; }
-
-/**
- Dispose and remove the drawing context from its parent.
- */
-void DrawingContext::dispose() {
-  if (_parent != nullptr) {
-    auto position = std::find(_parent->_children.begin(),
-                              _parent->_children.end(), shared_from_this());
-
-    if (position != _parent->_children.end()) {
-      _parent->_children.erase(position);
-    }
-    // TODO: This is called from the JS thread so we need somehow to avoid
-    // rendering after setting this to null, and we also need to protect this
-    // section.
-    _parent = nullptr;
-  }
-}
-
-/**
- Returns true if the current cache is changed
- */
-bool DrawingContext::isChanged() { return _isChanged; }
-
-/**
- Get/Sets the canvas object
- */
-SkCanvas *DrawingContext::getCanvas() {
-  if (_parent != nullptr) {
-    return _parent->getCanvas();
+  if (paintCache) {
+    _paints.push_back(paintCache);
+    return true;
   }
 
-  return _canvas;
+  ConcatablePaint paint(_declarationContext.get(), paintProps, children);
+  if (!paint.isEmpty()) {
+    save();
+    paint.concatTo(getPaint());
+    return true;
+  }
+
+  return false;
 }
 
-/**
- Sets the canvas
- */
+void DrawingContext::save() {
+  // Copy paint and push
+  _paints.push_back(std::make_shared<SkPaint>(*getPaint()));
+}
+
+void DrawingContext::restore() { _paints.pop_back(); }
+
+void DrawingContext::dispose() {}
+
+SkCanvas *DrawingContext::getCanvas() { return _canvas; }
+
 void DrawingContext::setCanvas(SkCanvas *canvas) { _canvas = canvas; }
 
-/**
- Gets the paint object
- */
-std::shared_ptr<const SkPaint> DrawingContext::getPaint() {
-  if (_paint != nullptr) {
-    return _paint;
-  }
-  return _parent->getPaint();
+std::shared_ptr<SkPaint> DrawingContext::getPaint() {
+  return _paints[_paints.size() - 1];
 }
 
-/**
- To be able to mutate and change the paint in a context we need to mutate the
- underlying paint object - otherwise we'll just use the parent paint object
- (to avoid having to create multiple paint objects for nodes that does not
- change the paint).
- */
-std::shared_ptr<SkPaint> DrawingContext::getMutablePaint() {
-  if (_paint == nullptr) {
-    auto parentPaint = _parent->getPaint();
-    _paint = std::make_shared<SkPaint>(*parentPaint);
-  }
-  // Calling the getMutablePaint accessor implies that the paint
-  // is about to be mutatet and will therefore invalidate
-  // any child contexts to pick up changes from this context as
-  // the parent context.
-  markChildrenAsChanged();
-  return _paint;
-}
+/** Begin should be refactored */
+float DrawingContext::getScaledWidth() { return _scaledWidth; }
 
-/**
- Sets the paint in the current sub context
- */
-void DrawingContext::setMutablePaint(std::shared_ptr<SkPaint> paint) {
-  _paint = paint;
-}
-
-float DrawingContext::getScaledWidth() {
-  if (_parent != nullptr) {
-    return _parent->getScaledWidth();
-  }
-  return _scaledWidth;
-}
-
-float DrawingContext::getScaledHeight() {
-  if (_parent != nullptr) {
-    return _parent->getScaledHeight();
-  }
-  return _scaledHeight;
-}
-
-DrawingContext *DrawingContext::getParent() { return _parent; }
+float DrawingContext::getScaledHeight() { return _scaledHeight; }
 
 void DrawingContext::setScaledWidth(float v) { _scaledWidth = v; }
 void DrawingContext::setScaledHeight(float v) { _scaledHeight = v; }
 
 void DrawingContext::setRequestRedraw(std::function<void()> &&requestRedraw) {
-  if (_parent != nullptr) {
-    _parent->setRequestRedraw(std::move(requestRedraw));
-  } else {
-    _requestRedraw = std::move(requestRedraw);
-  }
+  _requestRedraw = std::move(requestRedraw);
 }
 
 const std::function<void()> &DrawingContext::getRequestRedraw() {
-  if (_parent != nullptr) {
-    return _parent->getRequestRedraw();
-  }
   return _requestRedraw;
 }
 
-void DrawingContext::markChildrenAsChanged() {
-  for (auto &child : _children) {
-    child->markAsChanged();
-  }
-}
-
-std::string DrawingContext::getDebugDescription() {
-  std::string v = "ctx for " + std::string(_source) + ":";
-
-  if (_paint != nullptr) {
-    auto clr = _paint->getColor();
-    auto a = SkColorGetA(clr);
-    auto r = SkColorGetR(clr);
-    auto g = SkColorGetG(clr);
-    auto b = SkColorGetB(clr);
-
-    if (r > 0 || g > 0 || b > 0) {
-      v += " color:rgba(" + std::to_string(r) + ", " + std::to_string(g) +
-           ", " + std::to_string(b) + ", " + std::to_string(a) + ")";
-    }
-
-    if (_paint->getMaskFilter() != nullptr) {
-      v += " maskFilter:set";
-    }
-    auto blendMode = _paint->getBlendMode_or(SkBlendMode::kSrc);
-    if (blendMode != SkBlendMode::kSrc) {
-      v += " blendMode:" + std::to_string(static_cast<size_t>(blendMode));
-    }
-
-    auto opacity = _paint->getAlphaf();
-    v += " opacity:" + std::to_string(opacity);
-
-    if (_paint->getPathEffect() != nullptr) {
-      v += " [PathEffect]";
-    }
-
-    if (_paint->getShader() != nullptr) {
-      v += " [Shader]";
-    }
-
-    if (_paint->getImageFilter() != nullptr) {
-      v += " [ImageFilter]";
-    }
-
-    if (_paint->getMaskFilter() != nullptr) {
-      v += " [MaskFilter]";
-    }
-
-    if (_paint->getColorFilter() != nullptr) {
-      v += " [ColorFilter]";
-    }
-
-  } else {
-    v = v + "[inherited] " +
-        (_parent != nullptr ? _parent->getDebugDescription() : "");
-  }
-
-  v = v + "\n";
-
-  return v;
-}
+/** End should be refactored */
 
 } // namespace RNSkia

@@ -20,8 +20,10 @@ static PropId PropNameY = JsiPropId::get("y");
 
 class PointProp : public DerivedProp<SkPoint> {
 public:
-  explicit PointProp(PropId name) : DerivedProp<SkPoint>() {
-    _pointProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit PointProp(PropId name,
+                     const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<SkPoint>(onChange) {
+    _pointProp = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {

@@ -18,27 +18,34 @@ public:
 protected:
   void renderNode(DrawingContext *context) override {
 
-    bool isLayer = false;
+    auto hasLayer = false;
     auto children = getChildren();
-    auto size = children.size();
 
     // Is the first children a layer?
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < children.size(); ++i) {
       if (i == 0) {
         // Check for paint node as layer
         if (children.at(i)->getNodeClass() == NodeClass::DeclarationNode) {
           auto declarationNode =
               std::static_pointer_cast<JsiDomDeclarationNode>(children.at(i));
+
           if (declarationNode->getDeclarationType() == DeclarationType::Paint) {
             // Yes, it is a paint node - which we can use as a layer.
-            isLayer = true;
-
-            auto paintNode =
-                std::static_pointer_cast<JsiPaintNode>(children.at(i));
+            auto declarationContext = context->getDeclarationContext();
+            auto layerNode =
+                std::static_pointer_cast<JsiDomDeclarationNode>(children.at(i));
 
             // Save canvas with the paint node's paint!
-            context->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(
-                nullptr, paintNode->getPaint().get(), nullptr, 0));
+            declarationContext->save();
+            layerNode->decorate(declarationContext);
+            auto paint = declarationContext->getPaints()->pop();
+            declarationContext->restore();
+
+            if (paint) {
+              hasLayer = true;
+              context->getCanvas()->saveLayer(
+                  SkCanvas::SaveLayerRec(nullptr, paint.get(), nullptr, 0));
+            }
 
             continue;
           }
@@ -52,7 +59,7 @@ protected:
       }
     }
 
-    if (isLayer) {
+    if (hasLayer) {
       context->getCanvas()->restore();
     }
   }

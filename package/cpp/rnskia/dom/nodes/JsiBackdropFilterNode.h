@@ -15,31 +15,33 @@ public:
 
 protected:
   void draw(DrawingContext *context) override {
-    if (getChildren().size() == 0) {
-      throw std::runtime_error(
-          "Expected at least one child in the BackdropFilter node.");
+    auto children = getChildren();
+
+    if (children.size() == 0) {
+      return;
     }
-
-    auto child = getChildren().at(0);
-    if (child->getNodeClass() != NodeClass::DeclarationNode) {
-      throw std::runtime_error(
-          "Expected declaration as child in the BackdropFilter node.");
-    }
-
-    // Decorate!
-    child->decorateContext(context);
-
-    auto imageFilter = context->getDeclarations()->getImageFilters()->peek();
-    auto colorFilter = context->getDeclarations()->getColorFilters()->peek();
 
     auto canvas = context->getCanvas();
-    if (colorFilter) {
-      imageFilter = SkImageFilters::ColorFilter(colorFilter, nullptr);
+    auto firstChild = children[0];
+    sk_sp<SkImageFilter> imageFilter;
+
+    if (firstChild->getNodeClass() == NodeClass::DeclarationNode) {
+      context->getDeclarationContext()->save();
+      firstChild->decorateContext(context->getDeclarationContext());
+      auto imgF = context->getDeclarationContext()->getImageFilters()->pop();
+      if (imgF) {
+        imageFilter = imgF;
+      } else {
+        auto cf = context->getDeclarationContext()->getColorFilters()->pop();
+        if (cf) {
+          imageFilter = SkImageFilters::ColorFilter(cf, nullptr);
+        }
+      }
+      context->getDeclarationContext()->restore();
     }
 
     canvas->saveLayer(
         SkCanvas::SaveLayerRec(nullptr, nullptr, imageFilter.get(), 0));
-
     canvas->restore();
   }
 };

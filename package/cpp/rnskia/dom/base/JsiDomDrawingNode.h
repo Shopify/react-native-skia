@@ -16,7 +16,7 @@ public:
 protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomRenderNode::defineProperties(container);
-    container->defineProperty<PaintProp>();
+    _paintProp = container->defineProperty<PaintDrawingContextProp>();
   }
 
   /**
@@ -28,27 +28,42 @@ protected:
 #if SKIA_DOM_DEBUG
     printDebugInfo("Begin Draw", 1);
 #endif
-
-#if SKIA_DOM_DEBUG
-    printDebugInfo(context->getDebugDescription(), 2);
-#endif
-
-    // Call abstract draw method
-    draw(context);
+    // Save paint if the paint property is set
+    if (_paintProp->isSet()) {
+      draw(_paintProp->getUnsafeDerivedValue().get());
+    } else {
+      // Call abstract draw method
+      draw(context);
+    }
 
     // Draw once more for each child paint node
+    auto declarationCtx = context->getDeclarationContext();
     for (auto &child : getChildren()) {
       if (child->getNodeClass() == NodeClass::DeclarationNode &&
           std::static_pointer_cast<JsiDomDeclarationNode>(child)
                   ->getDeclarationType() == DeclarationType::Paint) {
-        draw(
-            std::static_pointer_cast<JsiPaintNode>(child)->getDrawingContext());
+        auto paintNode = std::static_pointer_cast<JsiPaintNode>(child);
+        // Draw once again with the paint
+        declarationCtx->save();
+        paintNode->decorate(declarationCtx);
+        auto paint = declarationCtx->getPaints()->pop();
+        declarationCtx->restore();
+
+        // FIXME: Can we avoid creating a new drawing context here each time?
+        auto localContext =
+            std::make_shared<DrawingContext>(std::shared_ptr<SkPaint>(paint));
+        localContext->setCanvas(context->getCanvas());
+        draw(localContext.get());
       }
     }
+
 #if SKIA_DOM_DEBUG
     printDebugInfo("End Draw", 1);
 #endif
   }
+
+private:
+  PaintDrawingContextProp *_paintProp;
 };
 
 } // namespace RNSkia
