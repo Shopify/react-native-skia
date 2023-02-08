@@ -30,8 +30,11 @@ public:
 
 protected:
   void composeAndPush(DeclarationContext *context, sk_sp<SkImageFilter> imgf1) {
+    context->save();
+    decorateChildren(context);
     auto imgf2 = context->getImageFilters()->popAsOne();
     auto cf = context->getColorFilters()->popAsOne();
+    context->restore();
     if (cf != nullptr) {
       imgf2 = SkImageFilters::Compose(imgf2,
                                       SkImageFilters::ColorFilter(cf, nullptr));
@@ -242,14 +245,13 @@ public:
       : JsiBaseImageFilterNode(context, "skOffsetImageFilter") {}
 
   void decorate(DeclarationContext *context) override {
-
+    decorateChildren(context);
     auto input = context->getImageFilters()->pop();
-    if (_xProp->isChanged() || _yProp->isChanged()) {
-      composeAndPush(context,
-                     SkImageFilters::Offset(_xProp->value().getAsNumber(),
-                                            _yProp->value().getAsNumber(),
-                                            input ? input : nullptr));
-    }
+    composeAndPush(context,
+                   SkImageFilters::Offset(_xProp->value().getAsNumber(),
+                                          _yProp->value().getAsNumber(),
+                                          input ? input : nullptr));
+  
   }
 
 protected:
