@@ -61,7 +61,8 @@ public:
     _paintProp = defineProperty<NodeProp>(name);
   }
 
-  explicit PaintDrawingContextProp(const std::function<void(BaseNodeProp *)> &onChange)
+  explicit PaintDrawingContextProp(
+      const std::function<void(BaseNodeProp *)> &onChange)
       : PaintDrawingContextProp(JsiPropId::get("paint"), onChange) {}
 
   void updateDerivedValue() override {

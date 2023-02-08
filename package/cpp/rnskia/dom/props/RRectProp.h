@@ -80,7 +80,8 @@ private:
  */
 class RRectPropFromProps : public DerivedProp<SkRRect> {
 public:
-  explicit RRectPropFromProps(const std::function<void(BaseNodeProp *)> &onChange)
+  explicit RRectPropFromProps(
+      const std::function<void(BaseNodeProp *)> &onChange)
       : DerivedProp<SkRRect>(onChange) {
     _x = defineProperty<NodeProp>(PropNameX);
     _y = defineProperty<NodeProp>(PropNameY);
