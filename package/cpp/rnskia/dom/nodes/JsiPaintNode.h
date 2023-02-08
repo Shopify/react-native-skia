@@ -66,7 +66,7 @@ public:
     if (_paintProps->getAntiAlias()->isSet()) {
       paint->setAntiAlias(_paintProps->getAntiAlias()->value().getAsBool());
     }
-    
+
     context->save();
     decorateChildren(context);
 
@@ -75,7 +75,7 @@ public:
     auto shader = context->getShaders()->pop();
     auto maskFilter = context->getMaskFilters()->pop();
     auto pathEffect = context->getPathEffects()->popAsOne();
-    
+
     context->restore();
 
     if (imageFilter) {
