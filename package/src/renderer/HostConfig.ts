@@ -10,7 +10,10 @@ import { createNode } from "./HostComponents";
 import type { AnimatedProps } from "./processors";
 import { isSelector, isValue } from "./processors";
 import { mapKeys, shallowEq } from "./typeddash";
-import { bindReanimatedProps, sanitizeReanimatedProps } from "./Reanimated";
+import {
+  bindReanimatedProps,
+  sanitizeReanimatedProps,
+} from "../external/reanimated";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
