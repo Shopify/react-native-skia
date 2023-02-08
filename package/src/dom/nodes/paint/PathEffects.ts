@@ -66,7 +66,7 @@ export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProp
   decorate(ctx: DeclarationContext) {
     const { intervals, phase } = this.props;
     const pe = this.Skia.PathEffect.MakeDash(intervals, phase);
-    return this.composeAndPush(ctx, pe);
+    this.composeAndPush(ctx, pe);
   }
 }
 
@@ -112,7 +112,7 @@ export class Line2DPathEffectNode extends PathEffectDeclaration<Line2DPathEffect
     if (pe === null) {
       throw new Error("Line2DPathEffectNode: could not create path effect");
     }
-    return this.composeAndPush(ctx, pe);
+    this.composeAndPush(ctx, pe);
   }
 }
 
