@@ -25,7 +25,10 @@ public:
 
 protected:
   void composeAndPush(DeclarationContext *context, sk_sp<SkColorFilter> cf1) {
+    context->save();
+    decorateChildren(context);
     auto cf2 = context->getColorFilters()->popAsOne();
+    context->restore();
     auto cf = cf2 ? SkColorFilters::Compose(cf1, cf2) : cf1;
     context->getColorFilters()->push(cf);
   }
@@ -68,8 +71,9 @@ public:
       : JsiBaseColorFilterNode(context, "skBlendColorFilter") {}
 
   void decorate(DeclarationContext *context) override {
-    context->getColorFilters()->push(SkColorFilters::Blend(
-        *_colorProp->getDerivedValue(), *_blendModeProp->getDerivedValue()));
+    auto color = _colorProp->getDerivedValue();
+    auto mode = _blendModeProp->getDerivedValue();
+    composeAndPush(context, SkColorFilters::Blend(*color, *mode));
   }
 
 protected:
@@ -131,16 +135,19 @@ public:
       : JsiBaseColorFilterNode(context, "skLerpColorFilter") {}
 
   void decorate(DeclarationContext *context) override {
-
+    context->save();
+    decorateChildren(context);
     auto second = context->getColorFilters()->pop();
     auto first = context->getColorFilters()->pop();
+    context->restore();
+
     if (first == nullptr || second == nullptr) {
       throw std::runtime_error(
           "LerpColorFilterNode: missing two color filters as children");
     }
 
-    composeAndPush(context, SkColorFilters::Lerp(_tProp->value().getAsNumber(),
-                                                 first, second));
+    auto t = _tProp->value().getAsNumber();
+    context->getColorFilters()->push(SkColorFilters::Lerp(t, first, second));
   }
 
 protected:
