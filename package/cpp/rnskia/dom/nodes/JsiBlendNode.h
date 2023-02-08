@@ -21,6 +21,8 @@ public:
     if (getChildren().size() == 0) {
       return;
     }
+    
+    decorateChildren(context);
 
     // Blend mode
     auto blendMode = *_blendProp->getDerivedValue();
