@@ -25,7 +25,10 @@ public:
 
 protected:
   void composeAndPush(DeclarationContext *context, sk_sp<SkPathEffect> pe1) {
+    context->save();
+    decorateChildren(context);
     auto pe2 = context->getPathEffects()->popAsOne();
+    context->restore();
     auto pe = pe2 ? SkPathEffect::MakeCompose(pe1, pe2) : pe1;
     context->getPathEffects()->push(pe);
   }
@@ -253,10 +256,14 @@ public:
 
 protected:
   void decorate(DeclarationContext *context) override {
-    auto inner = context->getPathEffects()->pop();
-    auto outer = context->getPathEffects()->pop();
+    decorateChildren(context);
+    auto pe1 = context->getPathEffects()->pop();
+    auto pe2 = context->getPathEffects()->pop();
+    if (pe1 == nullptr || pe2 == nullptr) {
+      throw std::runtime_error("SumPathEffectNode: invalid children");
+    }
 
-    composeAndPush(context, SkPathEffect::MakeSum(inner, outer));
+    composeAndPush(context, SkPathEffect::MakeSum(pe1, pe2));
   }
 };
 } // namespace RNSkia

@@ -251,7 +251,6 @@ public:
                    SkImageFilters::Offset(_xProp->value().getAsNumber(),
                                           _yProp->value().getAsNumber(),
                                           input ? input : nullptr));
-  
   }
 
 protected:
