@@ -11,12 +11,7 @@ import {
   LinearToSRGBGamma,
   SRGBToLinearGamma,
 } from "../../components";
-import {
-  docPath,
-  checkImage,
-  processResult,
-  itFailsE2e,
-} from "../../../__tests__/setup";
+import { docPath, checkImage, processResult } from "../../../__tests__/setup";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { fitRects } from "../../../dom/nodes";
 
