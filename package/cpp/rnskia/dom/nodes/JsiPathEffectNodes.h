@@ -263,7 +263,8 @@ protected:
       throw std::runtime_error("SumPathEffectNode: invalid children");
     }
 
-    composeAndPush(context, SkPathEffect::MakeSum(pe1, pe2));
+    auto pe = SkPathEffect::MakeSum(pe1, pe2);
+    context->getPathEffects()->push(pe);
   }
 };
 } // namespace RNSkia
