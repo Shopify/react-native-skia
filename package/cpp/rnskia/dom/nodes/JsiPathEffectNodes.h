@@ -257,16 +257,11 @@ public:
 protected:
   void decorate(DeclarationContext *context) override {
     decorateChildren(context);
-    auto pes = context->getPathEffects()->popAll();
-    auto pe = std::accumulate(
-        std::begin(pes), std::end(pes),
-        static_cast<sk_sp<SkPathEffect>>(nullptr),
-        [=](sk_sp<SkPathEffect> inner, sk_sp<SkPathEffect> outer) {
-          if (inner == nullptr) {
-            return outer;
-          }
-          return SkPathEffect::MakeSum(inner, outer);
-        });
+    auto pe =
+        context->getPathEffects()->Declaration<sk_sp<SkPathEffect>>::popAsOne(
+            [=](sk_sp<SkPathEffect> inner, sk_sp<SkPathEffect> outer) {
+              return SkPathEffect::MakeSum(inner, outer);
+            });
     context->getPathEffects()->push(pe);
   }
 };
