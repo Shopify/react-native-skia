@@ -44,7 +44,7 @@ describe("Path Effects", () => {
         <Fill color="white" />
         <Path path={path} style="stroke" strokeWidth={2} color="lightblue">
           <SumPathEffect>
-            <DiscretePathEffect length={10} deviation={4} />
+            <DiscretePathEffect length={10} deviation={4} seed={0} />
             <DiscretePathEffect length={10} deviation={4} seed={12345} />
           </SumPathEffect>
         </Path>
@@ -59,7 +59,7 @@ describe("Path Effects", () => {
         <Fill color="white" />
         <Path path={path} style="stroke" strokeWidth={2} color="lightblue">
           <SumPathEffect>
-            <DiscretePathEffect length={10} deviation={4} />
+            <DiscretePathEffect length={10} deviation={4} seed={0} />
             <DiscretePathEffect length={10} deviation={4} seed={12345} />
             <DiscretePathEffect length={10} deviation={4} seed={123456789} />
           </SumPathEffect>

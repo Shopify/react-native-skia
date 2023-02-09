@@ -257,13 +257,16 @@ public:
 protected:
   void decorate(DeclarationContext *context) override {
     decorateChildren(context);
-    auto pe1 = context->getPathEffects()->pop();
-    auto pe2 = context->getPathEffects()->pop();
-    if (pe1 == nullptr || pe2 == nullptr) {
-      throw std::runtime_error("SumPathEffectNode: invalid children");
-    }
-
-    auto pe = SkPathEffect::MakeSum(pe1, pe2);
+    auto pes = context->getPathEffects()->popAll();
+    auto pe = std::accumulate(
+        std::begin(pes), std::end(pes),
+        static_cast<sk_sp<SkPathEffect>>(nullptr),
+        [=](sk_sp<SkPathEffect> inner, sk_sp<SkPathEffect> outer) {
+          if (inner == nullptr) {
+            return outer;
+          }
+          return SkPathEffect::MakeSum(inner, outer);
+        });
     context->getPathEffects()->push(pe);
   }
 };
