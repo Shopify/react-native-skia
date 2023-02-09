@@ -89,7 +89,7 @@ public:
 
     auto color = _colorProp->getDerivedValue();
     auto dx = _dxProp->value().getAsNumber();
-    auto dy = _dxProp->value().getAsNumber();
+    auto dy = _dyProp->value().getAsNumber();
     auto blur = _blurProp->value().getAsNumber();
     auto input = context->getImageFilters()->pop();
 
