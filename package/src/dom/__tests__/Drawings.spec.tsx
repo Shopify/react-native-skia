@@ -7,6 +7,7 @@ import {
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
+import { JsiDrawingContext } from "../types/DrawingContext";
 
 describe("Drawings", () => {
   it("Hello World", () => {
@@ -32,7 +33,7 @@ describe("Drawings", () => {
     c3.addChild(Sk.Circle({ c: vec(width / 2, height - r), r }));
     root.addChild(c3);
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/drawings/blend-mode-multiply.png");
   });
@@ -87,7 +88,7 @@ describe("Drawings", () => {
     );
     const pathNode = Sk.Path({ path, start: 0, end: 1 });
     root.addChild(pathNode);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/paths/skia.png");
   });

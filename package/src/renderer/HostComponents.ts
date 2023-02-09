@@ -56,16 +56,7 @@ import type {
   BlendProps,
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
-import type {
-  SkColorFilter,
-  SkImageFilter,
-  SkMaskFilter,
-  SkPaint,
-  SkPathEffect,
-  SkRect,
-  SkRRect,
-  SkShader,
-} from "../skia";
+import type { SkRect, SkRRect } from "../skia/types";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
 import type { SkiaValue } from "../values";
 
@@ -86,7 +77,7 @@ declare global {
       props: RoundedRectProps
     ) => JsiDrawingNode<RoundedRectProps, SkRRect>;
     GroupNode: (props: GroupProps) => RenderNode<GroupProps>;
-    PaintNode: (props: PaintProps) => DeclarationNode<PaintProps, SkPaint>;
+    PaintNode: (props: PaintProps) => DeclarationNode<PaintProps>;
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;
     CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
     PathNode: (props: PathProps) => RenderNode<PathProps>;
@@ -102,98 +93,90 @@ declare global {
     // Mask filters
     BlurMaskFilterNode: (
       props: BlurMaskFilterProps
-    ) => DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
+    ) => DeclarationNode<BlurMaskFilterProps>;
 
     // Path effects
     DashPathEffectNode: (
       props: DashPathEffectProps
-    ) => DeclarationNode<DashPathEffectProps, SkPathEffect>;
+    ) => DeclarationNode<DashPathEffectProps>;
     DiscretePathEffectNode: (
       props: DiscretePathEffectProps
-    ) => DeclarationNode<DiscretePathEffectProps, SkPathEffect>;
+    ) => DeclarationNode<DiscretePathEffectProps>;
     CornerPathEffectNode: (
       props: CornerPathEffectProps
-    ) => DeclarationNode<CornerPathEffectProps, SkPathEffect>;
+    ) => DeclarationNode<CornerPathEffectProps>;
     Path1DPathEffectNode: (
       props: Path1DPathEffectProps
-    ) => DeclarationNode<Path1DPathEffectProps, SkPathEffect>;
+    ) => DeclarationNode<Path1DPathEffectProps>;
     Path2DPathEffectNode: (
       props: Path2DPathEffectProps
-    ) => DeclarationNode<Path2DPathEffectProps, SkPathEffect>;
+    ) => DeclarationNode<Path2DPathEffectProps>;
     Line2DPathEffectNode: (
       props: Line2DPathEffectProps
-    ) => DeclarationNode<Line2DPathEffectProps, SkPathEffect>;
-    SumPathEffectNode: () => DeclarationNode<null, SkPathEffect>;
+    ) => DeclarationNode<Line2DPathEffectProps>;
+    SumPathEffectNode: () => DeclarationNode<null>;
 
     // Image filters
     BlendImageFilterNode: (
       props: BlendImageFilterProps
-    ) => DeclarationNode<BlendImageFilterProps, SkImageFilter>;
+    ) => DeclarationNode<BlendImageFilterProps>;
     DropShadowImageFilterNode: (
       props: DropShadowImageFilterProps
-    ) => DeclarationNode<DropShadowImageFilterProps, SkImageFilter>;
+    ) => DeclarationNode<DropShadowImageFilterProps>;
     DisplacementMapImageFilterNode: (
       props: DisplacementMapImageFilterProps
-    ) => DeclarationNode<DisplacementMapImageFilterProps, SkImageFilter>;
+    ) => DeclarationNode<DisplacementMapImageFilterProps>;
     BlurImageFilterNode: (
       props: BlurImageFilterProps
-    ) => DeclarationNode<BlurImageFilterProps, SkImageFilter>;
+    ) => DeclarationNode<BlurImageFilterProps>;
     OffsetImageFilterNode: (
       props: OffsetImageFilterProps
-    ) => DeclarationNode<OffsetImageFilterProps, SkImageFilter>;
+    ) => DeclarationNode<OffsetImageFilterProps>;
     MorphologyImageFilterNode: (
       props: MorphologyImageFilterProps
-    ) => DeclarationNode<MorphologyImageFilterProps, SkImageFilter>;
+    ) => DeclarationNode<MorphologyImageFilterProps>;
     RuntimeShaderImageFilterNode: (
       props: RuntimeShaderImageFilterProps
-    ) => DeclarationNode<RuntimeShaderImageFilterProps, SkImageFilter>;
+    ) => DeclarationNode<RuntimeShaderImageFilterProps>;
 
     // Color filters
     MatrixColorFilterNode: (
       props: MatrixColorFilterProps
-    ) => DeclarationNode<MatrixColorFilterProps, SkColorFilter>;
+    ) => DeclarationNode<MatrixColorFilterProps>;
     BlendColorFilterNode: (
       props: BlendColorFilterProps
-    ) => DeclarationNode<BlendColorFilterProps, SkColorFilter>;
-    LinearToSRGBGammaColorFilterNode: () => DeclarationNode<
-      null,
-      SkColorFilter
-    >;
-    SRGBToLinearGammaColorFilterNode: () => DeclarationNode<
-      null,
-      SkColorFilter
-    >;
-    LumaColorFilterNode: () => DeclarationNode<null, SkColorFilter>;
+    ) => DeclarationNode<BlendColorFilterProps>;
+    LinearToSRGBGammaColorFilterNode: () => DeclarationNode<null>;
+    SRGBToLinearGammaColorFilterNode: () => DeclarationNode<null>;
+    LumaColorFilterNode: () => DeclarationNode<null>;
     LerpColorFilterNode: (
       props: LerpColorFilterProps
-    ) => DeclarationNode<LerpColorFilterProps, SkColorFilter>;
+    ) => DeclarationNode<LerpColorFilterProps>;
 
     // Shaders
-    ShaderNode: (props: ShaderProps) => DeclarationNode<ShaderProps, SkShader>;
+    ShaderNode: (props: ShaderProps) => DeclarationNode<ShaderProps>;
     ImageShaderNode: (
       props: ImageShaderProps
-    ) => DeclarationNode<ImageShaderProps, SkShader>;
-    ColorShaderNode: (
-      props: ColorProps
-    ) => DeclarationNode<ColorProps, SkShader>;
+    ) => DeclarationNode<ImageShaderProps>;
+    ColorShaderNode: (props: ColorProps) => DeclarationNode<ColorProps>;
     TurbulenceNode: (
       props: TurbulenceProps
-    ) => DeclarationNode<TurbulenceProps, SkShader>;
+    ) => DeclarationNode<TurbulenceProps>;
     FractalNoiseNode: (
       props: FractalNoiseProps
-    ) => DeclarationNode<FractalNoiseProps, SkShader>;
+    ) => DeclarationNode<FractalNoiseProps>;
     LinearGradientNode: (
       props: LinearGradientProps
-    ) => DeclarationNode<LinearGradientProps, SkShader>;
+    ) => DeclarationNode<LinearGradientProps>;
     RadialGradientNode: (
       props: RadialGradientProps
-    ) => DeclarationNode<RadialGradientProps, SkShader>;
+    ) => DeclarationNode<RadialGradientProps>;
     SweepGradientNode: (
       props: SweepGradientProps
-    ) => DeclarationNode<SweepGradientProps, SkShader>;
+    ) => DeclarationNode<SweepGradientProps>;
     TwoPointConicalGradientNode: (
       props: TwoPointConicalGradientProps
-    ) => DeclarationNode<TwoPointConicalGradientProps, SkShader>;
+    ) => DeclarationNode<TwoPointConicalGradientProps>;
     PictureNode: (props: PictureProps) => RenderNode<PictureProps>;
     ImageSVGNode: (props: ImageSVGProps) => RenderNode<ImageSVGProps>;
     VerticesNode: (props: VerticesProps) => RenderNode<VerticesProps>;
@@ -201,12 +184,10 @@ declare global {
     TextPathNode: (prop: TextPathProps) => RenderNode<TextPathProps>;
     TextBlobNode: (prop: TextBlobProps) => RenderNode<TextBlobProps>;
     GlyphsNode: (prop: GlyphsProps) => RenderNode<GlyphsProps>;
-    BlendNode: (prop: BlendProps) => DeclarationNode<BlendProps, SkImageFilter>;
+    BlendNode: (prop: BlendProps) => DeclarationNode<BlendProps>;
     BackdropFilterNode: (prop: ChildrenProps) => RenderNode<ChildrenProps>;
     BoxNode: (prop: BoxProps) => RenderNode<BoxProps>;
-    BoxShadowNode: (
-      prop: BoxShadowProps
-    ) => DeclarationNode<BoxShadowProps, BoxShadowProps>;
+    BoxShadowNode: (prop: BoxShadowProps) => DeclarationNode<BoxShadowProps>;
     LayerNode: (prop: ChildrenProps) => RenderNode<ChildrenProps>;
   };
 
