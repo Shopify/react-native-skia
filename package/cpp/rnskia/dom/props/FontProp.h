@@ -15,7 +15,8 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (_fontProp->value().getType() != PropType::HostObject) {
+    if (!_fontProp->isSet() ||
+        _fontProp->value().getType() != PropType::HostObject) {
       throw std::runtime_error("Expected SkFont object for the Font property.");
     }
 

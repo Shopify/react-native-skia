@@ -47,7 +47,7 @@ def nodeModules = findNodeModules(projectDir)
 logger.warn("react-native-skia: node_modules/ found at: ${nodeModules}")
 
 def sourceBuild = false
-def defaultDir = null
+def defaultDir
 
 if (rootProject.ext.has('reactNativeAndroidRoot')) {
   defaultDir = rootProject.ext.get('reactNativeAndroidRoot')
@@ -55,7 +55,7 @@ if (rootProject.ext.has('reactNativeAndroidRoot')) {
     sourceBuild = true
     defaultDir = project(':ReactAndroid').projectDir
 } else {
-  defaultDir = file("$nodeModules/react-native/android")
+  defaultDir = file("$nodeModules/react-native")
 }
 
 if (!defaultDir.exists()) {
@@ -78,7 +78,7 @@ if (gradle.startParameter.taskRequests.args[0].toString().contains("Release")) {
 
 def reactProperties = new Properties()
 file("$nodeModules/react-native/ReactAndroid/gradle.properties").withInputStream { reactProperties.load(it) }
-def FULL_RN_VERSION = reactProperties.getProperty("VERSION_NAME")
+def FULL_RN_VERSION =  (System.getenv("REACT_NATIVE_OVERRIDE_VERSION") ?: reactProperties.getProperty("VERSION_NAME"))
 def REACT_NATIVE_VERSION = FULL_RN_VERSION.split("\\.")[1].toInteger()
 
 logger.warn("react-native-skia: RN Version: ${REACT_NATIVE_VERSION} / ${FULL_RN_VERSION}")
@@ -136,6 +136,10 @@ android {
         }
     }
 
+    buildFeatures {
+        prefab true
+    }
+
     packagingOptions {
         excludes = [
              "**/libc++_shared.so",
@@ -145,8 +149,6 @@ android {
              "**/libturbomodulejsijni.so"
         ]
     }
-
-
 
     // Create new configurations that can be referred to in dependencies.
     // The Android Gradle Plugin 3.* does not allow hooking into existing
@@ -181,17 +183,25 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
 
-    //noinspection GradleDynamicVersion
-    extractHeaders("com.facebook.fbjni:fbjni:0.2.2:headers")
-    //noinspection GradleDynamicVersion
-    extractJNI("com.facebook.fbjni:fbjni:0.2.2")
+    if (REACT_NATIVE_VERSION < 71) {
+        logger.warn("react-native-skia: Extracting files from AAR (pre RN 0.71)")
+        //noinspection GradleDynamicVersion
+        extractHeaders("com.facebook.fbjni:fbjni:0.2.2:headers")
+        //noinspection GradleDynamicVersion
+        extractJNI("com.facebook.fbjni:fbjni:0.2.2")
+    }
 
     if (!sourceBuild) {
         def rnAarMatcher = "**/react-native/**/*${buildType}.aar"
         if (REACT_NATIVE_VERSION < 69) {
+            logger.warn("react-native-skia: aar state pre 69. match **/**/*.aar")
             rnAarMatcher = "**/**/*.aar"
+        } else if (REACT_NATIVE_VERSION >= 71) {
+            logger.warn("react-native-skia: aar state post 70, do nothing")
+            return
         }
-        def rnAAR = fileTree("${nodeModules}/react-native/android").matching({ it.include rnAarMatcher }).singleFile        
+        def rnAAR = fileTree("${nodeModules}/react-native/android").matching({ it.include rnAarMatcher }).singleFile
+        logger.warn("react-native-skia: Extracting JNI files (pre RN 0.71) ${rnAAR}")
         extractJNI(files(rnAAR))
     }
 }
