@@ -44,8 +44,6 @@ void DrawingContext::save() {
 
 void DrawingContext::restore() { _paints.pop_back(); }
 
-void DrawingContext::dispose() {}
-
 SkCanvas *DrawingContext::getCanvas() { return _canvas; }
 
 void DrawingContext::setCanvas(SkCanvas *canvas) { _canvas = canvas; }

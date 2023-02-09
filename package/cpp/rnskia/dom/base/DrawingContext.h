@@ -45,11 +45,6 @@ public:
   void restore();
 
   /**
-   Dispose and remove the drawing context from its parent.
-   */
-  void dispose();
-
-  /**
    Returns true if the current cache is changed
    */
   bool isChanged();
