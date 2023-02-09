@@ -52,22 +52,4 @@ std::shared_ptr<SkPaint> DrawingContext::getPaint() {
   return _paints[_paints.size() - 1];
 }
 
-/** Begin should be refactored */
-float DrawingContext::getScaledWidth() { return _scaledWidth; }
-
-float DrawingContext::getScaledHeight() { return _scaledHeight; }
-
-void DrawingContext::setScaledWidth(float v) { _scaledWidth = v; }
-void DrawingContext::setScaledHeight(float v) { _scaledHeight = v; }
-
-void DrawingContext::setRequestRedraw(std::function<void()> &&requestRedraw) {
-  _requestRedraw = std::move(requestRedraw);
-}
-
-const std::function<void()> &DrawingContext::getRequestRedraw() {
-  return _requestRedraw;
-}
-
-/** End should be refactored */
-
 } // namespace RNSkia

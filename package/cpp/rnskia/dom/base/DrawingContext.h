@@ -24,7 +24,29 @@ namespace RNSkia {
 class PaintProps;
 class JsiDomNode;
 
-class DrawingContext : public std::enable_shared_from_this<DrawingContext> {
+class DomRenderContext {
+public:
+  float getScaledWidth() { return _scaledWidth; }
+  float getScaledHeight() { return _scaledHeight; }
+
+  void setScaledWidth(float v) { _scaledWidth = v; }
+  void setScaledHeight(float v) { _scaledHeight = v; }
+
+  void setRequestRedraw(std::function<void()> &&requestRedraw) {
+    _requestRedraw = std::move(requestRedraw);
+  }
+
+  const std::function<void()> &getRequestRedraw() {
+    return _requestRedraw;
+  }
+  
+private:
+  float _scaledWidth = -1;
+  float _scaledHeight = -1;
+  std::function<void()> _requestRedraw;
+};
+
+class DrawingContext : public DomRenderContext, public std::enable_shared_from_this<DrawingContext> {
 public:
   /**
    Creates a root drawing context with paint and opacity
@@ -64,16 +86,6 @@ public:
    */
   std::shared_ptr<SkPaint> getPaint();
 
-  float getScaledWidth();
-
-  float getScaledHeight();
-
-  void setScaledWidth(float v);
-  void setScaledHeight(float v);
-
-  void setRequestRedraw(std::function<void()> &&requestRedraw);
-  const std::function<void()> &getRequestRedraw();
-
   /*
    Returns the root declaratiins object
    */
@@ -85,15 +97,8 @@ private:
   void save();
 
   explicit DrawingContext(const char *source);
-
   SkCanvas *_canvas = nullptr;
-
   std::vector<std::shared_ptr<SkPaint>> _paints;
-
-  float _scaledWidth = -1;
-  float _scaledHeight = -1;
-  std::function<void()> _requestRedraw;
-
   std::unique_ptr<DeclarationContext> _declarationContext;
 };
 
