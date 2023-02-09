@@ -1,6 +1,4 @@
 import type { ReactElement } from "react";
-import { JsiDrawingContext } from "../dom/types";
-
 
 import { JsiDrawingContext } from "../dom/types";
 import { Skia } from "../skia";
