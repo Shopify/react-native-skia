@@ -77,7 +77,8 @@ public:
     if (_propsContainer == nullptr) {
       // TODO: we ignore individual properties updates if the initial properties
       // hasn't been defined. It is likely an error if we reach this branch and
-      // perhaps should throw an exception but platformContext isn't available here.
+      // perhaps should throw an exception but platformContext isn't available
+      // here.
       return jsi::Value::undefined();
     }
     auto propName = arguments[0].asString(runtime).utf8(runtime);

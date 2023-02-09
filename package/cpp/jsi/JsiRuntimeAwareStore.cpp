@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace RNJsi {
 
@@ -11,7 +12,7 @@ static std::unordered_map<jsi::Runtime *,
 
 struct RuntimeLifecycleMonitorObject : public jsi::HostObject {
   jsi::Runtime *_rt;
-  RuntimeLifecycleMonitorObject(jsi::Runtime *rt) : _rt(rt) {}
+  explicit RuntimeLifecycleMonitorObject(jsi::Runtime *rt) : _rt(rt) {}
   ~RuntimeLifecycleMonitorObject() {
     auto listenersSet = listeners.find(_rt);
     if (listenersSet != listeners.end()) {
