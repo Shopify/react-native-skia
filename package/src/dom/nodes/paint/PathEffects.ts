@@ -14,6 +14,7 @@ import { DeclarationType, NodeType } from "../../types";
 import { enumKey } from "../datatypes/Enum";
 import { processPath } from "../datatypes";
 import type { DeclarationContext } from "../../types/DeclarationContext";
+import { composeDeclarations } from "../../types/DeclarationContext";
 
 abstract class PathEffectDeclaration<P> extends JsiDeclarationNode<P> {
   constructor(ctx: NodeContext, type: NodeType, props: P) {
@@ -66,7 +67,7 @@ export class DashPathEffectNode extends PathEffectDeclaration<DashPathEffectProp
   decorate(ctx: DeclarationContext) {
     const { intervals, phase } = this.props;
     const pe = this.Skia.PathEffect.MakeDash(intervals, phase);
-    return this.composeAndPush(ctx, pe);
+    this.composeAndPush(ctx, pe);
   }
 }
 
@@ -92,12 +93,12 @@ export class SumPathEffectNode extends PathEffectDeclaration<null> {
 
   decorate(ctx: DeclarationContext) {
     this.decorateChildren(ctx);
-    const pe2 = ctx.pathEffects.pop();
-    const pe1 = ctx.pathEffects.pop();
-    if (pe1 === undefined || pe2 === undefined) {
-      throw new Error("SumPathEffectNode: invalid children");
-    }
-    return this.Skia.PathEffect.MakeSum(pe1, pe2);
+    const pes = ctx.pathEffects.popAll();
+    const pe = composeDeclarations(
+      pes,
+      this.Skia.PathEffect.MakeSum.bind(this.Skia.PathEffect)
+    );
+    ctx.pathEffects.push(pe);
   }
 }
 
@@ -112,7 +113,7 @@ export class Line2DPathEffectNode extends PathEffectDeclaration<Line2DPathEffect
     if (pe === null) {
       throw new Error("Line2DPathEffectNode: could not create path effect");
     }
-    return this.composeAndPush(ctx, pe);
+    this.composeAndPush(ctx, pe);
   }
 }
 
