@@ -12,11 +12,7 @@ import {
   Lerp,
   LinearToSRGBGamma,
 } from "../../../components";
-import {
-  checkImage,
-  processResult,
-  itFailsE2e,
-} from "../../../../__tests__/setup";
+import { checkImage, processResult } from "../../../../__tests__/setup";
 import { setupSkia } from "../../../../skia/__tests__/setup";
 import { fitRects } from "../../../../dom/nodes";
 
