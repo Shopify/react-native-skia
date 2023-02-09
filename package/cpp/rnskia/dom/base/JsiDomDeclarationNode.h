@@ -111,11 +111,6 @@ protected:
 
 private:
   /**
-   Local decorators
-   */
-  std::shared_ptr<DeclarationContext> _childDeclarationContext;
-
-  /**
    Type of declaration
    */
   DeclarationType _declarationType;
