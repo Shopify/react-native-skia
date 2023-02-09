@@ -36,17 +36,16 @@ public:
     _requestRedraw = std::move(requestRedraw);
   }
 
-  const std::function<void()> &getRequestRedraw() {
-    return _requestRedraw;
-  }
-  
+  const std::function<void()> &getRequestRedraw() { return _requestRedraw; }
+
 private:
   float _scaledWidth = -1;
   float _scaledHeight = -1;
   std::function<void()> _requestRedraw;
 };
 
-class DrawingContext : public DomRenderContext, public std::enable_shared_from_this<DrawingContext> {
+class DrawingContext : public DomRenderContext,
+                       public std::enable_shared_from_this<DrawingContext> {
 public:
   /**
    Creates a root drawing context with paint and opacity
