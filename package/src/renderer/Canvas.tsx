@@ -40,10 +40,10 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
 
     const registerValues = useCallback(
       (values: Array<SkiaValue<unknown>>) => {
-        if (ref.current === null) {
-          throw new Error("Canvas ref is not set");
+        if (ref.current !== null) {
+          return ref.current.registerValues(values);
         }
-        return ref.current.registerValues(values);
+        return () => {};
       },
       [ref]
     );
