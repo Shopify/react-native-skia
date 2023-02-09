@@ -7510,10 +7510,9 @@ react-native-gradle-plugin@^0.70.3:
   resolved "https://registry.yarnpkg.com/react-native-gradle-plugin/-/react-native-gradle-plugin-0.70.3.tgz#cbcf0619cbfbddaa9128701aa2d7b4145f9c4fc8"
   integrity sha512-oOanj84fJEXUg9FoEAQomA8ISG+DVIrTZ3qF7m69VQUJyOGYyDZmPqKcjvRku4KXlEH6hWO9i4ACLzNBh8gC0A==
 
-react-native-reanimated@^3.0.0-rc.9:
-  version "3.0.0-rc.9"
-  resolved "https://repo.huaweicloud.com/repository/npm/react-native-reanimated/-/react-native-reanimated-3.0.0-rc.9.tgz#d5761da4f4262b33eab5d9ec400e15235cebfcd7"
-  integrity sha512-n0xlETpPQF5duyjneGkgA2YwbN3Bshldg1mH9wB+zqKOlYItq1w1Q2dqn6rVXoC2Gh/c+d2xhbabI/dipocB7g==
+"react-native-reanimated@https://github.com/software-mansion/react-native-reanimated":
+  version "3.0.0-rc.10"
+  resolved "https://github.com/software-mansion/react-native-reanimated#923edf387407fc7c2235848d1b7255d778d72049"
   dependencies:
     "@babel/plugin-transform-object-assign" "^7.16.7"
     "@babel/preset-typescript" "^7.16.7"
