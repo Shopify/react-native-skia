@@ -18,8 +18,10 @@ namespace RNSkia {
 
 class BlendModeProp : public DerivedProp<SkBlendMode> {
 public:
-  explicit BlendModeProp(PropId name) : DerivedProp<SkBlendMode>() {
-    _blendMode = addProperty(std::make_shared<NodeProp>(name));
+  explicit BlendModeProp(PropId name,
+                         const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<SkBlendMode>(onChange) {
+    _blendMode = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {

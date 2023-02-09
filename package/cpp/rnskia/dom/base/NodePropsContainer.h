@@ -20,11 +20,12 @@ namespace RNSkia {
 class NodePropsContainer {
 public:
   /**
-   Constructor. Pass the runtime and the JS object representing the properties,
-   and a function that will be called when any property was changed from within
-   this class as a result of a Skia value change.
+   Constructor for the node prop container
    */
-  explicit NodePropsContainer(PropId componentType) : _type(componentType) {}
+  explicit NodePropsContainer(
+      PropId componentType,
+      const std::function<void(BaseNodeProp *)> &onPropChanged)
+      : _onPropChanged(onPropChanged), _type(componentType) {}
 
   /**
    Returns true if there are any changes in the props container in the current
@@ -102,25 +103,23 @@ public:
   }
 
   /**
-   Defines a property that will be updated with the container changes.
-   */
-  template <typename T = BaseNodeProp>
-  T *defineProperty(std::shared_ptr<T> prop) {
-    _properties.push_back(prop);
-    return prop.get();
-  }
-
-  /**
-   Defines a property that will be updated with the container changes.
+   Defines a property that will be added to the container
    */
   template <class _Tp, class... _Args,
             class = std::_EnableIf<!std::is_array<_Tp>::value>>
   _Tp *defineProperty(_Args &&...__args) {
-    return defineProperty(
-        std::make_shared<_Tp>(std::forward<_Args>(__args)...));
+    // Create property and set onChange callback
+    auto prop =
+        std::make_shared<_Tp>(std::forward<_Args>(__args)..., _onPropChanged);
+
+    // Add to props list
+    _properties.push_back(prop);
+
+    return prop.get();
   }
 
 private:
+  std::function<void(BaseNodeProp *)> _onPropChanged;
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
   std::map<PropId, std::vector<NodeProp *>> _mappedProperties;
   PropId _type;

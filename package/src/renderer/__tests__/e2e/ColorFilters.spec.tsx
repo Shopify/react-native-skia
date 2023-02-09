@@ -11,12 +11,7 @@ import {
   LinearToSRGBGamma,
   SRGBToLinearGamma,
 } from "../../components";
-import {
-  docPath,
-  checkImage,
-  processResult,
-  itFailsE2e,
-} from "../../../__tests__/setup";
+import { docPath, checkImage, processResult } from "../../../__tests__/setup";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { fitRects } from "../../../dom/nodes";
 
@@ -101,7 +96,7 @@ describe("Color Filters", () => {
     canvas.drawImageRect(oslo, src, dst, paint);
     processResult(ckSurface, docPath("color-filters/simple-lerp.png"));
   });
-  itFailsE2e("should use basic linear interpolation", async () => {
+  it("should use basic linear interpolation", async () => {
     const { oslo } = images;
     const { width, height } = surface;
     let img = await surface.draw(
@@ -190,31 +185,28 @@ describe("Color Filters", () => {
     canvas.drawImageRect(oslo, src, dst, paint);
     processResult(ckSurface, docPath("color-filters/lerp.png"));
   });
-  itFailsE2e(
-    "should use linear interpolation between two color matrices",
-    async () => {
-      const { oslo } = images;
-      const { width, height } = surface;
-      const img = await surface.draw(
-        <>
-          <Image
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            image={oslo}
-            fit="cover"
-          >
-            <LinearToSRGBGamma>
-              <Lerp t={0.5}>
-                <ColorMatrix matrix={purple} />
-                <ColorMatrix matrix={blackAndWhite} />
-              </Lerp>
-            </LinearToSRGBGamma>
-          </Image>
-        </>
-      );
-      checkImage(img, docPath("color-filters/lerp.png"));
-    }
-  );
+  it("should use linear interpolation between two color matrices", async () => {
+    const { oslo } = images;
+    const { width, height } = surface;
+    const img = await surface.draw(
+      <>
+        <Image
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          image={oslo}
+          fit="cover"
+        >
+          <LinearToSRGBGamma>
+            <Lerp t={0.5}>
+              <ColorMatrix matrix={purple} />
+              <ColorMatrix matrix={blackAndWhite} />
+            </Lerp>
+          </LinearToSRGBGamma>
+        </Image>
+      </>
+    );
+    checkImage(img, docPath("color-filters/lerp.png"));
+  });
 });

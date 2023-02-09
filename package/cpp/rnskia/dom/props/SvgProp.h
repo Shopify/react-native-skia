@@ -10,8 +10,10 @@ namespace RNSkia {
 
 class SvgProp : public DerivedSkProp<SkSVGDOM> {
 public:
-  explicit SvgProp(PropId name) : DerivedSkProp<SkSVGDOM>() {
-    _imageSvgProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit SvgProp(PropId name,
+                   const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedSkProp<SkSVGDOM>(onChange) {
+    _imageSvgProp = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
