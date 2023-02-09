@@ -1,15 +1,12 @@
+import type { Skia } from "../../skia/types";
 import type {
-  SkColorFilter,
-  Skia,
-  SkImageFilter,
-  SkMaskFilter,
-  SkShader,
-  SkPathEffect,
-  SkPaint,
-} from "../../skia/types";
-import type { Node, DeclarationNode, NodeType } from "../types";
-import { DeclarationType } from "../types";
+  Node,
+  DeclarationNode,
+  NodeType,
+  DeclarationType,
+} from "../types";
 import type { DependencyManager } from "../../renderer/DependencyManager";
+import type { DeclarationContext } from "../types/DeclarationContext";
 
 export interface NodeContext {
   Skia: Skia;
@@ -73,13 +70,9 @@ export abstract class JsiNode<P> implements Node<P> {
 
 export type Invalidate = () => void;
 
-export abstract class JsiDeclarationNode<
-    P,
-    T,
-    Nullable extends null | never = never
-  >
+export abstract class JsiDeclarationNode<P>
   extends JsiNode<P>
-  implements DeclarationNode<P, T, Nullable>
+  implements DeclarationNode<P>
 {
   private invalidate: Invalidate = () => {};
 
@@ -92,7 +85,15 @@ export abstract class JsiDeclarationNode<
     super(ctx, type, props);
   }
 
-  abstract materialize(): T | Nullable;
+  abstract decorate(ctx: DeclarationContext): void;
+
+  protected decorateChildren(ctx: DeclarationContext) {
+    this.children().forEach((child) => {
+      if (child instanceof JsiDeclarationNode) {
+        child.decorate(ctx);
+      }
+    });
+  }
 
   addChild(child: Node<unknown>): void {
     if (!(child instanceof JsiDeclarationNode)) {
@@ -130,29 +131,5 @@ export abstract class JsiDeclarationNode<
       this.invalidate();
     }
     return hasChanged;
-  }
-
-  isPaint(): this is DeclarationNode<unknown, SkPaint> {
-    return this.declarationType === DeclarationType.Paint;
-  }
-
-  isImageFilter(): this is DeclarationNode<unknown, SkImageFilter> {
-    return this.declarationType === DeclarationType.ImageFilter;
-  }
-
-  isColorFilter(): this is DeclarationNode<unknown, SkColorFilter> {
-    return this.declarationType === DeclarationType.ColorFilter;
-  }
-
-  isShader(): this is DeclarationNode<unknown, SkShader> {
-    return this.declarationType === DeclarationType.Shader;
-  }
-
-  isMaskFilter(): this is DeclarationNode<unknown, SkMaskFilter> {
-    return this.declarationType === DeclarationType.MaskFilter;
-  }
-
-  isPathEffect(): this is DeclarationNode<unknown, SkPathEffect> {
-    return this.declarationType === DeclarationType.PathEffect;
   }
 }
