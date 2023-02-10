@@ -6,7 +6,7 @@ import type { Skia } from "../skia/types";
 import type { SkiaValue } from "../values/types";
 
 import { DependencyManager } from "./DependencyManager";
-import { skHostConfig } from "./HostConfig";
+import { skHostConfig, debug as hostDebug } from "./HostConfig";
 import { Container } from "./Container";
 
 const skiaReconciler = ReactReconciler(skHostConfig);
@@ -48,7 +48,9 @@ export class SkiaRoot {
   }
 
   render(element: ReactNode) {
-    skiaReconciler.updateContainer(element, this.root, null);
+    skiaReconciler.updateContainer(element, this.root, null, () => {
+      hostDebug("updateContainer");
+    });
   }
 
   unmount() {
