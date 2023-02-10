@@ -48,10 +48,7 @@ export class SkiaRoot {
   }
 
   render(element: ReactNode) {
-    skiaReconciler.updateContainer(element, this.root, null, () => {
-      hostDebug("updateContainer");
-      this.container.depMgr.update();
-    });
+    skiaReconciler.updateContainer(element, this.root, null);
   }
 
   unmount() {
