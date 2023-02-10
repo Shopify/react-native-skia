@@ -6,7 +6,7 @@ import type { Skia } from "../skia/types";
 import type { SkiaValue } from "../values/types";
 
 import { DependencyManager } from "./DependencyManager";
-import { skHostConfig, debug as hostDebug } from "./HostConfig";
+import { skHostConfig } from "./HostConfig";
 import { Container } from "./Container";
 
 const skiaReconciler = ReactReconciler(skHostConfig);
