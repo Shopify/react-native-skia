@@ -9,9 +9,11 @@ import type { SkSurface, SkImage } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
 export const E2E = process.env.E2E === "true";
+export const CI = process.env.CI === "true";
 export const itFailsE2e = E2E ? it.failing : it;
 export const itRunsE2eOnly = E2E ? it : it.skip;
 export const itRunsNodeOnly = E2E ? it.skip : it;
+export const itRunsCIAndNodeOnly = CI || !E2E ? it : it.skip;
 
 export const docPath = (relPath: string) =>
   path.resolve(process.cwd(), `../docs/static/img/${relPath}`);
@@ -35,13 +37,29 @@ export const processResult = (
   ckSurface.getCanvas().clear(Float32Array.of(0, 0, 0, 0));
 };
 
+interface CheckImageOptions {
+  maxPixelDiff?: number;
+  threshold?: number;
+  overwrite?: boolean;
+  mute?: boolean;
+  shouldFail?: boolean;
+}
+
+const defaultCheckImageOptions = {
+  maxPixelDiff: 0,
+  threshold: 0.1,
+  overwrite: false,
+  mute: false,
+  shouldFail: false,
+};
+
 export const checkImage = (
   image: SkImage,
   relPath: string,
-  overwrite = false,
-  mute = false,
-  threshold = 0.1
+  opts?: CheckImageOptions
 ) => {
+  const options = { ...defaultCheckImageOptions, ...opts };
+  const { overwrite, threshold, mute, maxPixelDiff, shouldFail } = options;
   const png = image.encodeToBytes();
   const p = path.resolve(__dirname, relPath);
   if (fs.existsSync(p) && !overwrite) {
@@ -61,11 +79,15 @@ export const checkImage = (
       { threshold }
     );
     if (!mute) {
-      if (diffPixelsCount !== 0) {
-        fs.writeFileSync(`${p}-result-test.png`, PNG.sync.write(toTest));
-        // fs.writeFileSync(`${p}-diff-test.png`, PNG.sync.write(diffImage));
+      if (diffPixelsCount > maxPixelDiff && !shouldFail) {
+        fs.writeFileSync(`${p}.test.png`, PNG.sync.write(toTest));
+        fs.writeFileSync(`${p}-diff-test.png`, PNG.sync.write(diffImage));
       }
-      expect(diffPixelsCount).toBe(0);
+      if (shouldFail) {
+        expect(diffPixelsCount).not.toBeLessThanOrEqual(maxPixelDiff);
+      } else {
+        expect(diffPixelsCount).toBeLessThanOrEqual(maxPixelDiff);
+      }
     }
     return diffPixelsCount;
   } else {

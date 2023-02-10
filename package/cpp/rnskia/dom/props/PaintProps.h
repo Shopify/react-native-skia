@@ -19,15 +19,16 @@
 
 namespace RNSkia {
 
-static PropId PropNameCurrent = JsiPropId::get("current");
-
 class PaintProp : public DerivedProp<SkPaint> {
 public:
-  explicit PaintProp(PropId name) : DerivedProp<SkPaint>() {
-    _paintProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit PaintProp(PropId name,
+                     const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<SkPaint>(onChange) {
+    _paintProp = defineProperty<NodeProp>(name);
   }
 
-  PaintProp() : PaintProp(JsiPropId::get("paint")) {}
+  explicit PaintProp(const std::function<void(BaseNodeProp *)> &onChange)
+      : PaintProp(JsiPropId::get("paint"), onChange) {}
 
   void updateDerivedValue() override {
     if (_paintProp->isSet()) {
@@ -40,19 +41,40 @@ public:
           throw std::runtime_error("Expected SkPaint object, got unknown "
                                    "object when reading paint property.");
         }
-      } else if (_paintProp->value().getType() == PropType::Object) {
-        // We have a JS object - is it a ref?
-        auto ref = _paintProp->value().getValue(PropNameCurrent);
-        if (ref.getType() == PropType::HostObject) {
-          auto ptr = ref.getAs<JsiSkPaint>();
-          if (ptr != nullptr) {
-            // Update the local paint for the current context
-            setDerivedValue(ptr->getObject());
-          } else {
-            throw std::runtime_error(
-                "Expected reference to a SkPaint object, got unknown object "
-                "when reading paint property.");
-          }
+      } else {
+        setDerivedValue(nullptr);
+      }
+    } else {
+      setDerivedValue(nullptr);
+    }
+  }
+
+private:
+  NodeProp *_paintProp;
+};
+
+class PaintDrawingContextProp : public DerivedProp<DrawingContext> {
+public:
+  explicit PaintDrawingContextProp(
+      PropId name, const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<DrawingContext>(onChange) {
+    _paintProp = defineProperty<NodeProp>(name);
+  }
+
+  explicit PaintDrawingContextProp(
+      const std::function<void(BaseNodeProp *)> &onChange)
+      : PaintDrawingContextProp(JsiPropId::get("paint"), onChange) {}
+
+  void updateDerivedValue() override {
+    if (_paintProp->isSet()) {
+      if (_paintProp->value().getType() == PropType::HostObject) {
+        // Read paint property as Host Object - JsiSkPaint
+        auto ptr = _paintProp->value().getAs<JsiSkPaint>();
+        if (ptr != nullptr) {
+          setDerivedValue(std::make_shared<DrawingContext>(ptr->getObject()));
+        } else {
+          throw std::runtime_error("Expected SkPaint object, got unknown "
+                                   "object when reading paint property.");
         }
       } else {
         setDerivedValue(nullptr);
@@ -68,97 +90,30 @@ private:
 
 class PaintProps : public BaseDerivedProp {
 public:
-  PaintProps() : BaseDerivedProp() {
-    _color = addProperty(std::make_shared<ColorProp>(JsiPropId::get("color")));
-    _style = addProperty(std::make_shared<NodeProp>(JsiPropId::get("style")));
-    _strokeWidth =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("strokeWidth")));
-    _blendMode = addProperty(
-        std::make_shared<BlendModeProp>(JsiPropId::get("blendMode")));
-    _strokeJoin = addProperty(
-        std::make_shared<StrokeJoinProp>(JsiPropId::get("strokeJoin")));
-    _strokeCap = addProperty(
-        std::make_shared<StrokeCapProp>(JsiPropId::get("strokeCap")));
-    _strokeMiter =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("strokeMiter")));
-    _antiAlias =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("antiAlias")));
-    _opacity =
-        addProperty(std::make_shared<NodeProp>(JsiPropId::get("opacity")));
-  }
-
-  void decorate(DrawingContext *context) {
-    // Now we can start updating the context
-
-    // Opacity
-    if (_opacity->isChanged() || context->isChanged()) {
-      if (_opacity->isSet()) {
-        context->setOpacity(context->getOpacity() *
-                            _opacity->value().getAsNumber());
-      } else {
-        context->clearOpacity();
-      }
-    }
-
-    // COLOR
-    if (_color->isSet() && (_color->isChanged() || context->isChanged())) {
-      auto paint = context->getMutablePaint();
-      paint->setShader(nullptr);
-      paint->setColor(*_color->getDerivedValue());
-      paint->setAlphaf(context->getOpacity() * paint->getColor4f().fA);
-    } else if (context->isChanged()) {
-      auto paint = context->getMutablePaint();
-      paint->setAlphaf(context->getOpacity());
-    }
-
-    // Style
-    if (_style->isSet() && (_style->isChanged() || context->isChanged())) {
-      auto styleValue = _style->value().getAsString();
-      if (styleValue == "stroke") {
-        context->getMutablePaint()->setStyle(SkPaint::Style::kStroke_Style);
-      } else if (styleValue == "fill") {
-        context->getMutablePaint()->setStyle(SkPaint::Style::kFill_Style);
-      } else {
-        throw std::runtime_error(
-            styleValue + " is not a valud value for the style property.");
-      }
-    }
-    // Stroke Width
-    if (_strokeWidth->isSet() &&
-        (_strokeWidth->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setStrokeWidth(
-          _strokeWidth->value().getAsNumber());
-    }
-    // Blend mode
-    if (_blendMode->isSet() &&
-        (_blendMode->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setBlendMode(*_blendMode->getDerivedValue());
-    }
-    // Stroke Join
-    if (_strokeJoin->isSet() &&
-        (_strokeJoin->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setStrokeJoin(
-          *_strokeJoin->getDerivedValue());
-    }
-    // Stroke Cap
-    if (_strokeCap->isSet() &&
-        (_strokeCap->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setStrokeCap(*_strokeCap->getDerivedValue());
-    }
-    // Stroke Miter
-    if (_strokeMiter->isSet() &&
-        (_strokeMiter->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setStrokeMiter(
-          _strokeMiter->value().getAsNumber());
-    }
-    // AntiAlias
-    if (_antiAlias->isSet() &&
-        (_antiAlias->isChanged() || context->isChanged())) {
-      context->getMutablePaint()->setAntiAlias(_antiAlias->value().getAsBool());
-    }
+  explicit PaintProps(const std::function<void(BaseNodeProp *)> &onChange)
+      : BaseDerivedProp(onChange) {
+    _color = defineProperty<ColorProp>("color");
+    _style = defineProperty<NodeProp>("style");
+    _strokeWidth = defineProperty<NodeProp>("strokeWidth");
+    _blendMode = defineProperty<BlendModeProp>("blendMode");
+    _strokeJoin = defineProperty<StrokeJoinProp>("strokeJoin");
+    _strokeCap = defineProperty<StrokeCapProp>("strokeCap");
+    _strokeMiter = defineProperty<NodeProp>("strokeMiter");
+    _antiAlias = defineProperty<NodeProp>("antiAlias");
+    _opacity = defineProperty<NodeProp>("opacity");
   }
 
   void updateDerivedValue() override {}
+
+  ColorProp *getColor() { return _color; }
+  NodeProp *getStyle() { return _style; }
+  NodeProp *getStrokeWidth() { return _strokeWidth; }
+  BlendModeProp *getBlendMode() { return _blendMode; }
+  StrokeJoinProp *getStrokeJoin() { return _strokeJoin; }
+  StrokeCapProp *getStrokeCap() { return _strokeCap; }
+  NodeProp *getStrokeMiter() { return _strokeMiter; }
+  NodeProp *getAntiAlias() { return _antiAlias; }
+  NodeProp *getOpacity() { return _opacity; }
 
 private:
   ColorProp *_color;

@@ -19,10 +19,12 @@ namespace RNSkia {
 
 class ClipProp : public BaseDerivedProp {
 public:
-  explicit ClipProp(PropId name) : BaseDerivedProp() {
-    _pathProp = addProperty(std::make_shared<PathProp>(name));
-    _rectProp = addProperty(std::make_shared<RectProp>(name));
-    _rrectProp = addProperty(std::make_shared<RRectProp>(name));
+  explicit ClipProp(PropId name,
+                    const std::function<void(BaseNodeProp *)> &onChange)
+      : BaseDerivedProp(onChange) {
+    _pathProp = defineProperty<PathProp>(name);
+    _rectProp = defineProperty<RectProp>(name);
+    _rrectProp = defineProperty<RRectProp>(name);
   }
 
   void updateDerivedValue() override {
@@ -45,18 +47,18 @@ public:
     return _pathProp->isSet() || _rectProp->isSet() || _rrectProp->isSet();
   }
 
-  SkPath *getPath() { return _path.get(); }
-  SkRect *getRect() { return _rect.get(); }
-  SkRRect *getRRect() { return _rrect.get(); }
+  const SkPath *getPath() { return _path.get(); }
+  const SkRect *getRect() { return _rect.get(); }
+  const SkRRect *getRRect() { return _rrect.get(); }
 
 private:
   PathProp *_pathProp;
   RectProp *_rectProp;
   RRectProp *_rrectProp;
 
-  std::shared_ptr<SkPath> _path;
-  std::shared_ptr<SkRect> _rect;
-  std::shared_ptr<SkRRect> _rrect;
+  std::shared_ptr<const SkPath> _path;
+  std::shared_ptr<const SkRect> _rect;
+  std::shared_ptr<const SkRRect> _rrect;
 };
 
 } // namespace RNSkia

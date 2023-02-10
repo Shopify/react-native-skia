@@ -17,18 +17,19 @@ namespace RNSkia {
 
 static PropId PropNameX = JsiPropId::get("x");
 static PropId PropNameY = JsiPropId::get("y");
-static SkPoint EmptyPoint = SkPoint::Make(-1, -1);
 
 class PointProp : public DerivedProp<SkPoint> {
 public:
-  explicit PointProp(PropId name) : DerivedProp<SkPoint>() {
-    _pointProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit PointProp(PropId name,
+                     const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<SkPoint>(onChange) {
+    _pointProp = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
-    auto point = processProperty(_pointProp);
-    if (EmptyPoint != point) {
-      setDerivedValue(std::move(point));
+    if (_pointProp->isSet()) {
+      // Check for JsiSkRect and JsiSkPoint
+      setDerivedValue(std::move(processValue(_pointProp->value())));
     } else {
       setDerivedValue(nullptr);
     }
@@ -54,15 +55,7 @@ public:
       auto y = value.getValue(PropNameY);
       return SkPoint::Make(x.getAsNumber(), y.getAsNumber());
     }
-    return EmptyPoint;
-  }
-
-  static SkPoint processProperty(NodeProp *prop) {
-    if (prop->isSet()) {
-      // Check for JsiSkRect and JsiSkPoint
-      return processValue(prop->value());
-    }
-    return EmptyPoint;
+    throw std::runtime_error("Expected point value.");
   }
 
 private:

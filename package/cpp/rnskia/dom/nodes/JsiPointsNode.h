@@ -14,7 +14,6 @@
 
 namespace RNSkia {
 
-static PropId PropNamePoints = JsiPropId::get("points");
 static PropId PropNamePointsMode = JsiPropId::get("mode");
 
 class JsiPointsNode : public JsiDomDrawingNode,
@@ -34,10 +33,8 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _pointModeProp = container->defineProperty(
-        std::make_shared<PointModeProp>(PropNamePointsMode));
-    _pointsProp =
-        container->defineProperty(std::make_shared<PointsProp>(PropNamePoints));
+    _pointModeProp = container->defineProperty<PointModeProp>("mode");
+    _pointsProp = container->defineProperty<PointsProp>("points");
 
     _pointsProp->require();
     _pointModeProp->require();

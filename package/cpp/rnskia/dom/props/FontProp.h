@@ -10,12 +10,15 @@ namespace RNSkia {
 
 class FontProp : public DerivedProp<SkFont> {
 public:
-  explicit FontProp(PropId name) : DerivedProp<SkFont>() {
-    _fontProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit FontProp(PropId name,
+                    const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<SkFont>(onChange) {
+    _fontProp = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
-    if (_fontProp->value().getType() != PropType::HostObject) {
+    if (!_fontProp->isSet() ||
+        _fontProp->value().getType() != PropType::HostObject) {
       throw std::runtime_error("Expected SkFont object for the Font property.");
     }
 

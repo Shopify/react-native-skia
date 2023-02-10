@@ -11,7 +11,7 @@ import {
   Image,
   LinearGradient,
 } from "../../components";
-import { loadImage, importSkia, surface } from "../setup";
+import { importSkia, surface, images } from "../setup";
 import { Group } from "../../components/Group";
 
 // https://kazzkiq.github.io/svg-color-filter/
@@ -21,14 +21,13 @@ const BLACK_AND_WHITE = [
 
 describe("Backdrop Filters", () => {
   it("A black and white color filter as backdrop color filter", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    expect(image).toBeTruthy();
     const img = await surface.draw(
       <Group>
         <Image
-          image={image}
+          image={oslo}
           x={0}
           y={0}
           width={width}
@@ -44,15 +43,14 @@ describe("Backdrop Filters", () => {
     checkImage(img, docPath("black-and-white-backdrop-filter.png"));
   });
   it("Blur backdrop filter", async () => {
+    const { oslo } = images;
     const { width } = surface;
     const size = width;
-    const image = loadImage("skia/__tests__/assets/oslo.jpg");
-    expect(image).toBeTruthy();
     const img = await surface.draw(
       <Group>
         <Fill color="white" />
         <Image
-          image={image}
+          image={oslo}
           x={0}
           y={0}
           width={width}

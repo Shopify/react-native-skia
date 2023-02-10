@@ -7,9 +7,7 @@ export const isShader = (obj: SkJSIInstance<string> | null): obj is SkShader =>
 
 export type SkShader = SkJSIInstance<"Shader">;
 
-export type UniformValue = number | Vector | readonly number[];
-
-export type Uniform = UniformValue | readonly UniformValue[];
+export type Uniform = number | Vector | Float32Array | Uniform[];
 
 export interface Uniforms {
   [name: string]: Uniform;
@@ -20,11 +18,16 @@ const isVector = (obj: unknown): obj is Vector =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (obj as any).x !== undefined && (obj as any).y !== undefined;
 
-const processValue = (value: UniformValue): number | readonly number[] => {
-  if (isVector(value)) {
-    return [value.x, value.y];
+const processValue = (values: number[], value: Uniform) => {
+  if (typeof value === "number") {
+    values.push(value);
+  } else if (Array.isArray(value)) {
+    value.forEach((v) => processValue(values, v));
+  } else if (isVector(value)) {
+    values.push(value.x, value.y);
+  } else if (value instanceof Float32Array) {
+    values.push(...value);
   }
-  return value;
 };
 
 export const processUniforms = (
@@ -32,34 +35,25 @@ export const processUniforms = (
   uniforms: Uniforms,
   builder?: SkRuntimeShaderBuilder
 ) => {
-  const processed = new Array(source.getUniformCount())
-    .fill(0)
-    .flatMap((_, i) => {
-      const name = source.getUniformName(i);
-      const value = uniforms[name];
-      if (value === undefined) {
-        throw new Error(`No value specified for uniform ${name}`);
-      }
-      const result = Array.isArray(value)
-        ? value.flatMap(processValue)
-        : processValue(value as UniformValue);
-      builder?.setUniform(name, typeof result === "number" ? [result] : result);
-      return result;
-    });
-  const names = Object.keys(uniforms);
-  if (names.length > source.getUniformCount()) {
-    const usedUniforms = new Array(source.getUniformCount())
-      .fill(0)
-      .map((_, i) => source.getUniformName(i));
-    const unusedUniform = names
-      .map((name) => {
-        if (usedUniforms.indexOf(name) === -1) {
-          return name;
-        }
-        return null;
-      })
-      .filter((n) => n !== null);
-    console.warn("Unused uniforms were provided: " + unusedUniform.join(", "));
+  const result: number[] = [];
+  const uniformsCount = source.getUniformCount();
+  for (let i = 0; i < uniformsCount; i++) {
+    const name = source.getUniformName(i);
+    const value = uniforms[name];
+    if (!value === undefined) {
+      throw new Error(
+        // eslint-disable-next-line max-len
+        `The runtime effect has the uniform value "${name}" declared, but it is missing from the uniforms property of the Runtime effect.`
+      );
+    }
+    if (builder === undefined) {
+      processValue(result, value);
+    } else {
+      const uniformValue: number[] = [];
+      processValue(uniformValue, value);
+      builder.setUniform(name, uniformValue);
+      result.push(...uniformValue);
+    }
   }
-  return processed;
+  return result;
 };

@@ -29,14 +29,10 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
 
-    _fontProp = container->defineProperty(
-        std::make_shared<FontProp>(JsiPropId::get("font")));
-    _textProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("text")));
-    _xProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("x")));
-    _yProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("y")));
+    _fontProp = container->defineProperty<FontProp>("font");
+    _textProp = container->defineProperty<NodeProp>("text");
+    _xProp = container->defineProperty<NodeProp>("x");
+    _yProp = container->defineProperty<NodeProp>("y");
 
     _fontProp->require();
     _textProp->require();

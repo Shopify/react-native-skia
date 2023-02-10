@@ -8,8 +8,11 @@ import {
   Group,
   LinearGradient,
   Path,
+  Rect,
+  Image,
+  Drawing,
 } from "../../components";
-import { importSkia, surface } from "../setup";
+import { images, importSkia, surface } from "../setup";
 
 describe("Drawings", () => {
   it("Should blend colors using multiplication", async () => {
@@ -50,7 +53,9 @@ describe("Drawings", () => {
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
       </Group>
     );
-    const diff = checkImage(image, "snapshots/drawings/blur.png", false, true);
+    const diff = checkImage(image, "snapshots/drawings/blur.png", {
+      mute: true,
+    });
     expect(diff).not.toBe(0);
   });
 
@@ -78,13 +83,11 @@ describe("Drawings", () => {
   });
 
   it("Should do rect marshalling properly", async () => {
-    const result = await surface.eval(
-      `
-const path = Skia.Path.Make();
-path.addRect({ x: 0, y: 0, width: 100, height: 100 });
-return path.getBounds().width;
-`
-    );
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.addRect({ x: 0, y: 0, width: 100, height: 100 });
+      return path.getBounds().width;
+    });
     expect(result).toBe(100);
   });
 
@@ -155,5 +158,38 @@ return path.getBounds().width;
       </FitBox>
     );
     checkImage(image, "snapshots/paths/skia-trimmed.png");
+  });
+
+  it("should use default props (1)", async () => {
+    const image = await surface.draw(
+      <Group strokeJoin="round" strokeCap="round" color="black">
+        <Rect width={64} height={64} color="lightblue" />
+        <Circle r={128} color="rgba(100, 200, 300, 0.5)" />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/default-props.png");
+  });
+
+  it("should use default props for Images (2)", async () => {
+    const { oslo } = images;
+    const { width, height } = surface;
+    const image = await surface.draw(
+      <Group>
+        <Image image={oslo} x={0} y={0} width={width} height={height} />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/image-default-props.png");
+  });
+
+  it("should allow to use the the JS API directly", async () => {
+    const { Skia } = importSkia();
+    const image = await surface.draw(
+      <Group color="red">
+        <Drawing
+          drawing={({ canvas }) => canvas.drawCircle(0, 0, 100, Skia.Paint())}
+        />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/custom-drawing.png");
   });
 });

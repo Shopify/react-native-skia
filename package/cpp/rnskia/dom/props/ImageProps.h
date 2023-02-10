@@ -25,12 +25,15 @@ static PropId PropNameFit = JsiPropId::get("fit");
 
 class ImageProp : public DerivedSkProp<SkImage> {
 public:
-  explicit ImageProp(PropId name) : DerivedSkProp<SkImage>() {
-    _imageProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit ImageProp(PropId name,
+                     const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedSkProp<SkImage>(onChange) {
+    _imageProp = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
-    if (_imageProp->value().getType() != PropType::HostObject) {
+    if (!_imageProp->isSet() ||
+        _imageProp->value().getType() != PropType::HostObject) {
       throw std::runtime_error("Expected SkImage object for the " +
                                std::string(getName()) + " property.");
     }
@@ -51,10 +54,11 @@ private:
 
 class ImageProps : public DerivedProp<FitRects> {
 public:
-  ImageProps() : DerivedProp<FitRects>() {
-    _fitProp = addProperty(std::make_shared<NodeProp>(PropNameFit));
-    _imageProp = addProperty(std::make_shared<ImageProp>(PropNameImage));
-    _rectProp = addProperty(std::make_shared<RectProps>(PropNameRect));
+  explicit ImageProps(const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<FitRects>(onChange) {
+    _fitProp = defineProperty<NodeProp>(PropNameFit);
+    _imageProp = defineProperty<ImageProp>(PropNameImage);
+    _rectProp = defineProperty<RectProps>(PropNameRect);
   }
 
   void updateDerivedValue() override {
@@ -67,20 +71,25 @@ public:
 
     auto rect = _rectProp->getDerivedValue() ? *_rectProp->getDerivedValue()
                                              : imageRect;
-    auto fit = _fitProp->isSet() ? _fitProp->value().getAsString() : "none";
+    auto fit = _fitProp->isSet() ? _fitProp->value().getAsString() : "contain";
 
     setDerivedValue(fitRects(fit, imageRect, rect));
   }
 
   sk_sp<SkImage> getImage() { return _imageProp->getDerivedValue(); }
-  std::shared_ptr<SkRect> getRect() { return _rectProp->getDerivedValue(); }
+  std::shared_ptr<const SkRect> getRect() {
+    return _rectProp->getDerivedValue();
+  }
 
-  SkRect rect2rect(SkRect src, SkRect dst) {
-    auto scaleX = dst.width() / src.width();
-    auto scaleY = dst.height() / src.height();
-    auto translateX = dst.x() - src.x() * scaleX;
-    auto translateY = dst.y() - src.y() * scaleY;
-    return SkRect::MakeXYWH(translateX, translateY, scaleX, scaleY);
+  SkMatrix rect2rect(SkRect src, SkRect dst) {
+    auto sx = dst.width() / src.width();
+    auto sy = dst.height() / src.height();
+    auto tx = dst.x() - src.x() * sx;
+    auto ty = dst.y() - src.y() * sy;
+    SkMatrix m3;
+    m3.preTranslate(tx, ty);
+    m3.preScale(sx, sy);
+    return m3;
   }
 
 private:

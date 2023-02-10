@@ -1,9 +1,11 @@
+import type { LinkingOptions } from "@react-navigation/native";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 import type { HeaderBackButtonProps } from "@react-navigation/elements";
 import { HeaderBackButton } from "@react-navigation/elements";
+import { FiberProvider } from "its-fine";
 
 import {
   AnimationExample,
@@ -23,11 +25,12 @@ import {
   Wallet,
   Severance,
 } from "./Examples";
-import { Tests } from "./Tests";
+import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
+import { useAssets } from "./Tests/useAssets";
 
-const linking = {
+const linking: LinkingOptions<StackParamList> = {
   config: {
     screens: {
       Home: "",
@@ -48,7 +51,6 @@ const linking = {
       Animation: "animation",
       Performance: "performance",
       Tests: "test",
-      TestList: "tests",
     },
   },
   prefixes: ["rnskia://"],
@@ -71,25 +73,37 @@ const HeaderLeft = (props: HeaderBackButtonProps) => {
 
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
+  const assets = useAssets();
+  if (assets === null) {
+    return null;
+  }
   return (
-    <>
+    <FiberProvider>
       <StatusBar hidden />
       <NavigationContainer linking={linking}>
-        <Stack.Navigator screenOptions={{ headerLeft: HeaderLeft }}>
+        <Stack.Navigator
+          screenOptions={{
+            headerLeft: HeaderLeft,
+          }}
+          initialRouteName={CI ? "Tests" : "Home"}
+        >
           <Stack.Screen
             name="Home"
+            key="Home"
             component={HomeScreen}
             options={{
               title: "🎨 Skia",
             }}
           />
           <Stack.Screen
+            key="Tests"
             name="Tests"
-            component={Tests}
             options={{
               title: "🔧 Tests",
             }}
-          />
+          >
+            {(props) => <Tests {...props} assets={assets} />}
+          </Stack.Screen>
           <Stack.Screen
             name="Vertices"
             component={Vertices}
@@ -150,7 +164,7 @@ const App = () => {
           <Stack.Screen name="Performance" component={PerformanceDrawingTest} />
         </Stack.Navigator>
       </NavigationContainer>
-    </>
+    </FiberProvider>
   );
 };
 

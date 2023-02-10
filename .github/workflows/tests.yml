@@ -14,6 +14,18 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Run clang-format-ios
+        run: yarn clang-format-ios --dry-run --Werror
+
+      - name: Run clang-format-android
+        run: yarn clang-format-android --dry-run --Werror
+
+      - name: Run clang-format-common
+        run: yarn clang-format-common --dry-run --Werror
+
       - uses: actions/setup-node@v3
         with:
           node-version: 16

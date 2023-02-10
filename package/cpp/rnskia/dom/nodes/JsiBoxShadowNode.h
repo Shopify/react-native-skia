@@ -7,23 +7,23 @@
 
 namespace RNSkia {
 
-class JsiBoxShadowNode : public JsiBaseDomDeclarationNode,
+class JsiBoxShadowNode : public JsiDomDeclarationNode,
                          public JsiDomNodeCtor<JsiBoxShadowNode> {
 public:
   explicit JsiBoxShadowNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseDomDeclarationNode(context, "skBoxShadow") {}
+      : JsiDomDeclarationNode(context, "skBoxShadow",
+                              DeclarationType::Unknown) {}
 
   BoxShadowProps *getBoxShadowProps() { return _boxShadowProps; }
 
-protected:
-  void decorate(DrawingContext *context) override {
+  void decorate(DeclarationContext *context) override {
     // Do nothing, we are just a container for properties
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
-    _boxShadowProps =
-        container->defineProperty(std::make_shared<BoxShadowProps>());
+    JsiDomDeclarationNode::defineProperties(container);
+    _boxShadowProps = container->defineProperty<BoxShadowProps>();
   }
 
 private:

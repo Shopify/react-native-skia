@@ -1,12 +1,11 @@
 import React from "react";
 
-import type { SkiaProps } from "../../processors/Animations/Animations";
+import type { SkiaDefaultProps } from "../../processors/Animations/Animations";
 import type { PointsProps } from "../../../dom/types";
 
-export const Points = (props: SkiaProps<PointsProps>) => {
-  return <skPoints {...props} />;
-};
-
-Points.defaultProps = {
-  mode: "points",
+export const Points = ({
+  mode = "points",
+  ...props
+}: SkiaDefaultProps<PointsProps, "mode">) => {
+  return <skPoints mode={mode} {...props} />;
 };

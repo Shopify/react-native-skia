@@ -15,6 +15,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "SkStream.h"
+#include "SkSurface.h"
 
 #pragma clang diagnostic pop
 
@@ -110,6 +111,14 @@ public:
   virtual void raiseError(const std::exception &err) = 0;
 
   /**
+   * Creates an offscreen surface
+   * @param width
+   * @param height
+   * @return sk_sp<SkSurface>
+   */
+  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+
+  /**
    * Raises an exception on the platform. This function does not necessarily
    * throw an exception and stop execution, so it is important to stop execution
    * by returning after calling the function
@@ -178,12 +187,8 @@ public:
     if (!_isValid) {
       return;
     }
-    std::unordered_map<size_t, std::function<void(bool)>> tmp;
-    {
-      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-      tmp.insert(_drawCallbacks.cbegin(), _drawCallbacks.cend());
-    }
-    for (auto it = tmp.begin(); it != tmp.end(); it++) {
+    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
+    for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
       it->second(invalidated);
     }
   }

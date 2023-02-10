@@ -25,8 +25,10 @@ static PropId PropNameHeight = JsiPropId::get("height");
  */
 class RectProp : public DerivedProp<SkRect> {
 public:
-  explicit RectProp(PropId name) : DerivedProp() {
-    _prop = addProperty(std::make_shared<NodeProp>(name));
+  explicit RectProp(PropId name,
+                    const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp(onChange) {
+    _prop = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
@@ -68,18 +70,27 @@ private:
  */
 class RectPropFromProps : public DerivedProp<SkRect> {
 public:
-  RectPropFromProps() : DerivedProp<SkRect>() {
-    _x = addProperty(std::make_shared<NodeProp>(PropNameX));
-    _y = addProperty(std::make_shared<NodeProp>(PropNameY));
-    _width = addProperty(std::make_shared<NodeProp>(PropNameWidth));
-    _height = addProperty(std::make_shared<NodeProp>(PropNameHeight));
+  explicit RectPropFromProps(
+      const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<SkRect>(onChange) {
+    _x = defineProperty<NodeProp>(PropNameX);
+    _y = defineProperty<NodeProp>(PropNameY);
+    _width = defineProperty<NodeProp>(PropNameWidth);
+    _height = defineProperty<NodeProp>(PropNameHeight);
   }
 
   void updateDerivedValue() override {
-    if (_x->isSet() && _y->isSet() && _width->isSet() && _height->isSet()) {
-      setDerivedValue(SkRect::MakeXYWH(
-          _x->value().getAsNumber(), _y->value().getAsNumber(),
-          _width->value().getAsNumber(), _height->value().getAsNumber()));
+    if (_width->isSet() && _height->isSet()) {
+      auto x = 0.0;
+      auto y = 0.0;
+      if (_x->isSet()) {
+        x = _x->value().getAsNumber();
+      }
+      if (_y->isSet()) {
+        y = _y->value().getAsNumber();
+      }
+      setDerivedValue(SkRect::MakeXYWH(x, y, _width->value().getAsNumber(),
+                                       _height->value().getAsNumber()));
     }
   }
 
@@ -96,16 +107,18 @@ private:
  */
 class RectProps : public DerivedProp<SkRect> {
 public:
-  explicit RectProps(PropId name) : DerivedProp<SkRect>() {
-    _rectProp = addProperty(std::make_shared<RectProp>(name));
-    _rectPropFromProps = addProperty(std::make_shared<RectPropFromProps>());
+  explicit RectProps(PropId name,
+                     const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<SkRect>(onChange) {
+    _rectProp = defineProperty<RectProp>(name);
+    _rectPropFromProps = defineProperty<RectPropFromProps>();
   }
 
   void updateDerivedValue() override {
     if (_rectProp->isSet()) {
-      setDerivedValue(_rectProp->getDerivedValue());
+      setDerivedValue(_rectProp->getUnsafeDerivedValue());
     } else if (_rectPropFromProps->isSet()) {
-      setDerivedValue(_rectPropFromProps->getDerivedValue());
+      setDerivedValue(_rectPropFromProps->getUnsafeDerivedValue());
     } else {
       setDerivedValue(nullptr);
     }

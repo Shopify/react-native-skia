@@ -7,6 +7,7 @@
 #include "JsiSkPaint.h"
 
 #include <memory>
+#include <mutex>
 #include <utility>
 
 namespace RNSkia {
@@ -28,7 +29,6 @@ protected:
         float scaledWidth = context->getScaledWidth();
         float scaledHeight = context->getScaledHeight();
         auto paint = context->getPaint();
-        auto opacity = context->getOpacity();
         auto platformContext = getContext();
         auto requestRedraw = context->getRequestRedraw();
 
@@ -44,7 +44,7 @@ protected:
         }
 
         // Run rendering on the javascript thread
-        getContext()->runOnJavascriptThread([this, platformContext, opacity,
+        getContext()->runOnJavascriptThread([this, platformContext,
                                              requestRedraw, scaledWidth,
                                              scaledHeight]() {
           // Get the runtime
@@ -65,7 +65,6 @@ protected:
               *runtime, "paint",
               jsi::Object::createFromHostObject(*runtime, this->_jsiPaint));
 
-          jsiCtx.setProperty(*runtime, "opacity", opacity);
           jsiCtx.setProperty(
               *runtime, "canvas",
               jsi::Object::createFromHostObject(*runtime, jsiCanvas));
@@ -78,7 +77,11 @@ protected:
                    static_cast<const jsi::Value *>(args.data()), 1);
 
           auto picture = recorder.finishRecordingAsPicture();
-          this->_drawingProp->setPicture(picture);
+          {
+            // Lock access to the picture property's setter
+            std::lock_guard<std::mutex> lock(_pictureLock);
+            this->_drawingProp->setPicture(picture);
+          }
 
           // Ask view to redraw itself
           _inRedrawCycle = true;
@@ -88,6 +91,7 @@ protected:
     }
 
     if (_drawingProp->isSet()) {
+      std::lock_guard<std::mutex> lock(_pictureLock);
       context->getCanvas()->drawPicture(_drawingProp->getDerivedValue());
       _inRedrawCycle = false;
     }
@@ -100,8 +104,7 @@ protected:
         std::bind(&JsiCustomDrawingNode::notifyPictureNeeded, this,
                   std::placeholders::_1);
 
-    _drawingProp = container->defineProperty(
-        std::make_shared<DrawingProp>(JsiPropId::get("drawing"), cb));
+    _drawingProp = container->defineProperty<DrawingProp>("drawing", cb);
   }
 
 private:
@@ -118,6 +121,7 @@ private:
   std::shared_ptr<JsiSkCanvas> _jsiCanvas;
 
   std::atomic<bool> _inRedrawCycle = {false};
+  std::mutex _pictureLock;
 };
 
 } // namespace RNSkia

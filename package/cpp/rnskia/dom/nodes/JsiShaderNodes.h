@@ -23,78 +23,53 @@
 
 namespace RNSkia {
 
-class JsiBaseShaderNode
-    : public JsiDomDeclarationNode<JsiBaseShaderNode, sk_sp<SkShader>> {
-public:
-  JsiBaseShaderNode(std::shared_ptr<RNSkPlatformContext> context,
-                    const char *type)
-      : JsiDomDeclarationNode<JsiBaseShaderNode, sk_sp<SkShader>>(context,
-                                                                  type) {}
-
-protected:
-  sk_sp<SkShader> resolve(std::shared_ptr<JsiDomNode> child) override {
-    auto ptr = std::dynamic_pointer_cast<JsiBaseShaderNode>(child);
-    if (ptr) {
-      return ptr->getCurrent();
-    }
-    return nullptr;
-  }
-
-  void setShader(DrawingContext *context, sk_sp<SkShader> f) {
-    set(context, f);
-  }
-
-  void set(DrawingContext *context, sk_sp<SkShader> shader) override {
-    auto paint = context->getMutablePaint();
-    paint->setShader(shader);
-    setCurrent(shader);
-  }
-};
-
-class JsiShaderNode : public JsiBaseShaderNode,
+class JsiShaderNode : public JsiDomDeclarationNode,
                       public JsiDomNodeCtor<JsiShaderNode> {
 public:
   explicit JsiShaderNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseShaderNode(context, "skShader") {}
+      : JsiDomDeclarationNode(context, "skShader", DeclarationType::Shader) {}
 
-protected:
-  void decorate(DrawingContext *context) override {
-    if (isChanged(context)) {
-      auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>();
-      if (source == nullptr) {
-        throw std::runtime_error("Expected runtime effect when reading source "
-                                 "property of RuntimeEffectImageFilter.");
-      }
-      auto uniforms =
-          _uniformsProp->isSet() ? _uniformsProp->getDerivedValue() : nullptr;
-      auto localMatrix =
-          _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
-
-      // get all children that are shader nodes
-      std::vector<sk_sp<SkShader>> children;
-      children.reserve(getChildren().size());
-      for (auto &child : getChildren()) {
-        auto ptr = std::dynamic_pointer_cast<JsiBaseShaderNode>(child);
-        if (ptr != nullptr) {
-          children.push_back(ptr->getCurrent());
-        }
-      }
-
-      // Update shader
-      setShader(context, source->getObject()->makeShader(
-                             uniforms, children.data(), children.size(),
-                             localMatrix.get()));
+  void decorate(DeclarationContext *context) override {
+    decorateChildren(context);
+    auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>();
+    if (source == nullptr) {
+      throw std::runtime_error("Expected runtime effect when reading source "
+                               "property of RuntimeEffectImageFilter.");
     }
+    auto uniforms =
+        _uniformsProp->isSet() ? _uniformsProp->getDerivedValue() : nullptr;
+
+    SkMatrix lm;
+    auto tm =
+        _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
+
+    if (tm != nullptr) {
+      if (_originProp->isSet()) {
+        auto tr = _originProp->getDerivedValue();
+        lm.preTranslate(tr->x(), tr->y());
+        lm.preConcat(*tm);
+        lm.preTranslate(-tr->x(), -tr->y());
+      } else {
+        lm.preConcat(*tm);
+      }
+    }
+
+    // get all children that are shader nodes
+    auto children = context->getShaders()->popAll();
+
+    // Update shader
+    context->getShaders()->push(source->getObject()->makeShader(
+        uniforms, children.data(), children.size(), &lm));
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
-    _sourceProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("source")));
-    _uniformsProp = container->defineProperty(std::make_shared<UniformsProp>(
-        JsiPropId::get("uniforms"), _sourceProp));
-    _transformProp = container->defineProperty(
-        std::make_shared<TransformProp>(JsiPropId::get("transform")));
+    JsiDomDeclarationNode::defineProperties(container);
+    _sourceProp = container->defineProperty<NodeProp>("source");
+    _uniformsProp =
+        container->defineProperty<UniformsProp>("uniforms", _sourceProp);
+    _transformProp = container->defineProperty<TransformProp>("transform");
+    _originProp = container->defineProperty<PointProp>("origin");
 
     _sourceProp->require();
   }
@@ -103,56 +78,63 @@ private:
   NodeProp *_sourceProp;
   UniformsProp *_uniformsProp;
   TransformProp *_transformProp;
+  PointProp *_originProp;
 };
 
-class JsiImageShaderNode : public JsiBaseShaderNode,
+class JsiImageShaderNode : public JsiDomDeclarationNode,
                            public JsiDomNodeCtor<JsiImageShaderNode> {
 public:
   explicit JsiImageShaderNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseShaderNode(context, "skImageShader") {}
+      : JsiDomDeclarationNode(context, "skImageShader",
+                              DeclarationType::Shader) {}
 
-protected:
-  void decorate(DrawingContext *context) override {
-    if (isChanged(context)) {
-      auto image = _imageProps->getImage();
-      auto rect = _imageProps->getRect();
-      auto lm = _transformProp->isSet()
-                    ? _transformProp->getDerivedValue().get()
-                    : nullptr;
+  void decorate(DeclarationContext *context) override {
 
-      if (rect != nullptr && lm != nullptr) {
-        auto rc = _imageProps->getDerivedValue();
-        auto m3 = _imageProps->rect2rect(rc->src, rc->dst);
-        lm->preTranslate(m3.x(), m3.y());
-        lm->preScale(m3.width(), m3.height());
+    auto image = _imageProps->getImage();
+    auto rect = _imageProps->getRect();
+    auto lm =
+        _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
+
+    if (rect != nullptr && lm != nullptr) {
+      auto rc = _imageProps->getDerivedValue();
+      auto m3 = _imageProps->rect2rect(rc->src, rc->dst);
+      if (_transformProp->isChanged()) {
+        // To modify the matrix we need to copy it since we're not allowed to
+        // modify values contained in properties - this would have caused the
+        // matrix to be translated and scaled more and more for each render
+        // even thought the matrix prop did not change.
+        _matrix.reset();
+        _matrix.preConcat(m3);
+        if (_originProp->isSet()) {
+          auto tr = _originProp->getDerivedValue();
+          _matrix.preTranslate(tr->x(), tr->y());
+          _matrix.preConcat(*lm);
+          _matrix.preTranslate(-tr->x(), -tr->y());
+        } else {
+          _matrix.preConcat(*lm);
+        }
       }
-
-      setShader(
-          context,
-          image->makeShader(
-              *_txProp->getDerivedValue(), *_tyProp->getDerivedValue(),
-              SkSamplingOptions(getFilterModeFromString(
-                                    _filterModeProp->value().getAsString()),
-                                getMipmapModeFromString(
-                                    _mipmapModeProp->value().getAsString())),
-              lm));
     }
+
+    context->getShaders()->push(image->makeShader(
+        *_txProp->getDerivedValue(), *_tyProp->getDerivedValue(),
+        SkSamplingOptions(
+            getFilterModeFromString(_filterModeProp->value().getAsString()),
+            getMipmapModeFromString(_mipmapModeProp->value().getAsString())),
+        &_matrix));
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
-    _txProp = container->defineProperty(
-        std::make_shared<TileModeProp>(JsiPropId::get("tx")));
-    _tyProp = container->defineProperty(
-        std::make_shared<TileModeProp>(JsiPropId::get("ty")));
-    _filterModeProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("fm")));
-    _mipmapModeProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("mm")));
+    JsiDomDeclarationNode::defineProperties(container);
+    _txProp = container->defineProperty<TileModeProp>("tx");
+    _tyProp = container->defineProperty<TileModeProp>("ty");
+    _filterModeProp = container->defineProperty<NodeProp>("fm");
+    _mipmapModeProp = container->defineProperty<NodeProp>("mm");
 
-    _imageProps = container->defineProperty(std::make_shared<ImageProps>());
-    _transformProp = container->defineProperty(
-        std::make_shared<TransformProp>(JsiPropId::get("transform")));
+    _imageProps = container->defineProperty<ImageProps>();
+    _transformProp = container->defineProperty<TransformProp>("transform");
+    _originProp = container->defineProperty<PointProp>("origin");
 
     _txProp->require();
     _tyProp->require();
@@ -161,10 +143,8 @@ protected:
 
     _transformProp->require();
 
-    // Just require the image
-    container
-        ->defineProperty(std::make_shared<NodeProp>(JsiPropId::get("image")))
-        ->require();
+    // Add and require the image
+    container->defineProperty<NodeProp>("image")->require();
   }
 
 private:
@@ -194,35 +174,35 @@ private:
                              "\" is not a valid Mipmap Mode.");
   }
 
+  SkMatrix _matrix;
+
   TileModeProp *_txProp;
   TileModeProp *_tyProp;
   NodeProp *_filterModeProp;
   NodeProp *_mipmapModeProp;
   ImageProps *_imageProps;
   TransformProp *_transformProp;
+  PointProp *_originProp;
 };
 
-class JsiColorShaderNode : public JsiBaseShaderNode,
+class JsiColorShaderNode : public JsiDomDeclarationNode,
                            public JsiDomNodeCtor<JsiColorShaderNode> {
 public:
   explicit JsiColorShaderNode(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiBaseShaderNode(context, "skColorShader") {}
+      : JsiDomDeclarationNode(context, "skColorShader",
+                              DeclarationType::Shader) {}
 
-protected:
-  void decorate(DrawingContext *context) override {
-    if (isChanged(context)) {
-      if (_colorProp->isSet()) {
-        setShader(context, SkShaders::Color(*_colorProp->getDerivedValue()));
-      } else {
-        setShader(context, nullptr);
-      }
+  void decorate(DeclarationContext *context) override {
+    if (_colorProp->isSet()) {
+      context->getShaders()->push(
+          SkShaders::Color(*_colorProp->getDerivedValue()));
     }
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
-    _colorProp = container->defineProperty(
-        std::make_shared<ColorProp>(JsiPropId::get("color")));
+    JsiDomDeclarationNode::defineProperties(container);
+    _colorProp = container->defineProperty<ColorProp>("color");
     _colorProp->require();
   }
 
@@ -230,27 +210,20 @@ private:
   ColorProp *_colorProp;
 };
 
-class JsiBasePerlinNoiseNode : public JsiBaseShaderNode {
+class JsiBasePerlinNoiseNode : public JsiDomDeclarationNode {
 public:
   JsiBasePerlinNoiseNode(std::shared_ptr<RNSkPlatformContext> context,
                          PropId type)
-      : JsiBaseShaderNode(context, type) {}
+      : JsiDomDeclarationNode(context, type, DeclarationType::Shader) {}
 
-protected:
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
-    _freqXProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("freqX")));
-    _freqYProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("freqY")));
-    _octavesProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("octaves")));
-    _seedProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("seed")));
-    _tileWidthProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("tileWidth")));
-    _tileHeightProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("tileHeight")));
+    JsiDomDeclarationNode::defineProperties(container);
+    _freqXProp = container->defineProperty<NodeProp>("freqX");
+    _freqYProp = container->defineProperty<NodeProp>("freqY");
+    _octavesProp = container->defineProperty<NodeProp>("octaves");
+    _seedProp = container->defineProperty<NodeProp>("seed");
+    _tileWidthProp = container->defineProperty<NodeProp>("tileWidth");
+    _tileHeightProp = container->defineProperty<NodeProp>("tileHeight");
 
     _freqXProp->require();
     _freqYProp->require();
@@ -274,18 +247,15 @@ public:
   explicit JsiTurbulenceNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePerlinNoiseNode(context, "skTurbulence") {}
 
-protected:
-  void decorate(DrawingContext *context) override {
-    if (isChanged(context)) {
-      SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
-                                   _tileHeightProp->value().getAsNumber());
+  void decorate(DeclarationContext *context) override {
 
-      setShader(context, SkPerlinNoiseShader::MakeTurbulence(
-                             _freqXProp->value().getAsNumber(),
-                             _freqYProp->value().getAsNumber(),
-                             _octavesProp->value().getAsNumber(),
-                             _seedProp->value().getAsNumber(), &size));
-    }
+    SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
+                                 _tileHeightProp->value().getAsNumber());
+
+    context->getShaders()->push(SkPerlinNoiseShader::MakeTurbulence(
+        _freqXProp->value().getAsNumber(), _freqYProp->value().getAsNumber(),
+        _octavesProp->value().getAsNumber(), _seedProp->value().getAsNumber(),
+        &size));
   }
 };
 
@@ -295,66 +265,57 @@ public:
   explicit JsiFractalNoiseNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBasePerlinNoiseNode(context, "skFractalNoise") {}
 
-protected:
-  void decorate(DrawingContext *context) override {
-    if (isChanged(context)) {
-      SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
-                                   _tileHeightProp->value().getAsNumber());
+  void decorate(DeclarationContext *context) override {
 
-      setShader(context, SkPerlinNoiseShader::MakeFractalNoise(
-                             _freqXProp->value().getAsNumber(),
-                             _freqYProp->value().getAsNumber(),
-                             _octavesProp->value().getAsNumber(),
-                             _seedProp->value().getAsNumber(), &size));
-    }
+    SkISize size = SkISize::Make(_tileWidthProp->value().getAsNumber(),
+                                 _tileHeightProp->value().getAsNumber());
+
+    context->getShaders()->push(SkPerlinNoiseShader::MakeFractalNoise(
+        _freqXProp->value().getAsNumber(), _freqYProp->value().getAsNumber(),
+        _octavesProp->value().getAsNumber(), _seedProp->value().getAsNumber(),
+        &size));
   }
 };
 
-class JsiBaseGradientNode : public JsiBaseShaderNode {
+class JsiBaseGradientNode : public JsiDomDeclarationNode {
 public:
   JsiBaseGradientNode(std::shared_ptr<RNSkPlatformContext> context, PropId type)
-      : JsiBaseShaderNode(context, type) {}
+      : JsiDomDeclarationNode(context, type, DeclarationType::Shader) {}
 
+  void decorate(DeclarationContext *context) override {
+
+    _colors = _colorsProp->getDerivedValue()->data();
+    _colorCount = static_cast<int>(_colorsProp->getDerivedValue()->size());
+    _flags = _flagsProp->isSet() ? _flagsProp->value().getAsNumber() : 0;
+    _mode =
+        _modeProp->isSet() ? *_modeProp->getDerivedValue() : SkTileMode::kClamp;
+    _positions = _positionsProp->isSet()
+                     ? _positionsProp->getDerivedValue()->data()
+                     : nullptr;
+    _matrix = _transformsProps->isSet()
+                  ? _transformsProps->getDerivedValue().get()
+                  : nullptr;
+  }
+
+protected:
   void defineProperties(NodePropsContainer *container) override {
-    JsiBaseDomDeclarationNode::defineProperties(container);
-    _transformsProps =
-        container->defineProperty(std::make_shared<TransformsProps>());
+    JsiDomDeclarationNode::defineProperties(container);
+    _transformsProps = container->defineProperty<TransformsProps>();
 
-    _colorsProp = container->defineProperty(
-        std::make_shared<ColorsProp>(JsiPropId::get("colors")));
-    _positionsProp = container->defineProperty(
-        std::make_shared<NumbersProp>(JsiPropId::get("positions")));
-    _modeProp = container->defineProperty(
-        std::make_shared<TileModeProp>(JsiPropId::get("mode")));
-    _flagsProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("flags")));
+    _colorsProp = container->defineProperty<ColorsProp>("colors");
+    _positionsProp = container->defineProperty<NumbersProp>("positions");
+    _modeProp = container->defineProperty<TileModeProp>("mode");
+    _flagsProp = container->defineProperty<NodeProp>("flags");
 
     _colorsProp->require();
   }
 
-protected:
-  void decorate(DrawingContext *context) override {
-    if (isChanged(context)) {
-      _colors = _colorsProp->getDerivedValue()->data();
-      _colorCount = static_cast<int>(_colorsProp->getDerivedValue()->size());
-      _flags = _flagsProp->isSet() ? _flagsProp->value().getAsNumber() : 0;
-      _mode = _modeProp->isSet() ? *_modeProp->getDerivedValue()
-                                 : SkTileMode::kClamp;
-      _positions = _positionsProp->isSet()
-                       ? _positionsProp->getDerivedValue()->data()
-                       : nullptr;
-      _matrix = _transformsProps->isSet()
-                    ? _transformsProps->getDerivedValue().get()
-                    : nullptr;
-    }
-  }
-
-  SkColor *_colors;
-  SkTileMode _mode;
+  const SkColor *_colors;
   double _flags;
-  SkScalar *_positions;
-  SkMatrix *_matrix;
   int _colorCount;
+  SkTileMode _mode;
+  const SkScalar *_positions;
+  const SkMatrix *_matrix;
 
 private:
   TransformsProps *_transformsProps;
@@ -370,25 +331,21 @@ public:
   explicit JsiLinearGradientNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skLinearGradient") {}
 
-protected:
-  void decorate(DrawingContext *context) override {
+  void decorate(DeclarationContext *context) override {
     JsiBaseGradientNode::decorate(context);
 
-    if (isChanged(context)) {
-      SkPoint pts[] = {*_startProp->getDerivedValue(),
-                       *_endProp->getDerivedValue()};
-      setShader(context, SkGradientShader::MakeLinear(pts, _colors, _positions,
-                                                      _colorCount, _mode,
-                                                      _flags, _matrix));
-    }
+    SkPoint pts[] = {*_startProp->getDerivedValue(),
+                     *_endProp->getDerivedValue()};
+    auto shader = SkGradientShader::MakeLinear(
+        pts, _colors, _positions, _colorCount, _mode, _flags, _matrix);
+    context->getShaders()->push(shader);
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseGradientNode::defineProperties(container);
-    _startProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("start")));
-    _endProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("end")));
+    _startProp = container->defineProperty<PointProp>("start");
+    _endProp = container->defineProperty<PointProp>("end");
 
     _startProp->require();
     _endProp->require();
@@ -405,25 +362,21 @@ public:
   explicit JsiRadialGradientNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skRadialGradient") {}
 
-protected:
-  void decorate(DrawingContext *context) override {
+  void decorate(DeclarationContext *context) override {
     JsiBaseGradientNode::decorate(context);
 
-    if (isChanged(context)) {
-      auto c = _centerProp->getDerivedValue();
-      auto r = _radiusProp->value().getAsNumber();
-      setShader(context, SkGradientShader::MakeRadial(*c, r, _colors,
-                                                      _positions, _colorCount,
-                                                      _mode, _flags, _matrix));
-    }
+    auto c = _centerProp->getDerivedValue();
+    auto r = _radiusProp->value().getAsNumber();
+    auto shader = SkGradientShader::MakeRadial(
+        *c, r, _colors, _positions, _colorCount, _mode, _flags, _matrix);
+    context->getShaders()->push(shader);
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseGradientNode::defineProperties(container);
-    _centerProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("c")));
-    _radiusProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("r")));
+    _centerProp = container->defineProperty<PointProp>("c");
+    _radiusProp = container->defineProperty<NodeProp>("r");
 
     _centerProp->require();
     _radiusProp->require();
@@ -440,29 +393,24 @@ public:
   explicit JsiSweepGradientNode(std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skSweepGradient") {}
 
-protected:
-  void decorate(DrawingContext *context) override {
+  void decorate(DeclarationContext *context) override {
     JsiBaseGradientNode::decorate(context);
 
-    if (isChanged(context)) {
-      auto start = _startProp->isSet() ? _startProp->value().getAsNumber() : 0;
-      auto end = _endProp->isSet() ? _endProp->value().getAsNumber() : 360;
-      auto c = _centerProp->getDerivedValue();
+    auto start = _startProp->isSet() ? _startProp->value().getAsNumber() : 0;
+    auto end = _endProp->isSet() ? _endProp->value().getAsNumber() : 360;
+    auto c = _centerProp->getDerivedValue();
 
-      setShader(context, SkGradientShader::MakeSweep(
-                             c->x(), c->y(), _colors, _positions, _colorCount,
-                             _mode, start, end, _flags, _matrix));
-    }
+    context->getShaders()->push(SkGradientShader::MakeSweep(
+        c->x(), c->y(), _colors, _positions, _colorCount, _mode, start, end,
+        _flags, _matrix));
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseGradientNode::defineProperties(container);
-    _startProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("start")));
-    _endProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("end")));
-    _centerProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("c")));
+    _startProp = container->defineProperty<NodeProp>("start");
+    _endProp = container->defineProperty<NodeProp>("end");
+    _centerProp = container->defineProperty<PointProp>("c");
   }
 
 private:
@@ -479,32 +427,26 @@ public:
       std::shared_ptr<RNSkPlatformContext> context)
       : JsiBaseGradientNode(context, "skTwoPointConicalGradient") {}
 
-protected:
-  void decorate(DrawingContext *context) override {
+  void decorate(DeclarationContext *context) override {
     JsiBaseGradientNode::decorate(context);
 
-    if (isChanged(context)) {
-      auto start = _startProp->getDerivedValue();
-      auto end = _endProp->getDerivedValue();
-      auto startR = _startRProp->value().getAsNumber();
-      auto endR = _endRProp->value().getAsNumber();
+    auto start = _startProp->getDerivedValue();
+    auto end = _endProp->getDerivedValue();
+    auto startR = _startRProp->value().getAsNumber();
+    auto endR = _endRProp->value().getAsNumber();
 
-      setShader(context, SkGradientShader::MakeTwoPointConical(
-                             *start, startR, *end, endR, _colors, _positions,
-                             _colorCount, _mode, _flags, _matrix));
-    }
+    context->getShaders()->push(SkGradientShader::MakeTwoPointConical(
+        *start, startR, *end, endR, _colors, _positions, _colorCount, _mode,
+        _flags, _matrix));
   }
 
+protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiBaseGradientNode::defineProperties(container);
-    _startProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("start")));
-    _startRProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("startR")));
-    _endProp = container->defineProperty(
-        std::make_shared<PointProp>(JsiPropId::get("end")));
-    _endRProp = container->defineProperty(
-        std::make_shared<NodeProp>(JsiPropId::get("endR")));
+    _startProp = container->defineProperty<PointProp>("start");
+    _startRProp = container->defineProperty<NodeProp>("startR");
+    _endProp = container->defineProperty<PointProp>("end");
+    _endRProp = container->defineProperty<NodeProp>("endR");
   }
 
 private:

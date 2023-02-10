@@ -15,15 +15,8 @@ public:
 
 protected:
   void renderNode(DrawingContext *context) override {
-    // Verify
-    if (!_rrectProp->isSet() && !_rectProp->isSet()) {
-      throw std::runtime_error("The box property must be set on the Box node.");
-    }
-
     // Get rect - we'll try to end up with an rrect:
-    auto box = _rrectProp->isSet()
-                   ? *_rrectProp->getDerivedValue()
-                   : SkRRect::MakeRectXY(*_rectProp->getDerivedValue(), 0, 0);
+    auto box = *_boxProp->getDerivedValue();
 
     // Get shadows
     std::vector<std::shared_ptr<JsiBoxShadowNode>> shadows;
@@ -76,15 +69,13 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomRenderNode::defineProperties(container);
-    _rrectProp = container->defineProperty(
-        std::make_shared<RRectProp>(JsiPropId::get("box")));
-    _rectProp = container->defineProperty(
-        std::make_shared<RectProp>(JsiPropId::get("box")));
+    _boxProp = container->defineProperty<BoxProps>("box");
+    _boxProp->require();
   }
 
 private:
-  SkRRect inflate(const SkRRect &box, SkScalar dx, SkScalar dy, size_t tx = 0,
-                  size_t ty = 0) {
+  SkRRect inflate(const SkRRect &box, SkScalar dx, SkScalar dy, SkScalar tx = 0,
+                  SkScalar ty = 0) {
     return SkRRect::MakeRectXY(
         SkRect::MakeXYWH(box.rect().x() - dx + tx, box.rect().y() - dy + ty,
                          box.rect().width() + 2 * dx,
@@ -92,13 +83,12 @@ private:
         box.getSimpleRadii().x() + dx, box.getSimpleRadii().y() + dy);
   }
 
-  SkRRect deflate(const SkRRect &box, SkScalar dx, SkScalar dy, size_t tx = 0,
-                  size_t ty = 0) {
+  SkRRect deflate(const SkRRect &box, SkScalar dx, SkScalar dy, SkScalar tx = 0,
+                  SkScalar ty = 0) {
     return inflate(box, -dx, -dy, tx, ty);
   }
 
-  RRectProp *_rrectProp;
-  RectProp *_rectProp;
+  BoxProps *_boxProp;
 };
 
 } // namespace RNSkia

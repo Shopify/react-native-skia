@@ -45,6 +45,8 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
           strokeJoin="round"
           strokeCap="round"
           color="#cccc66"
+          start={0}
+          end={1}
         />
       </Canvas>
       <Text>Transitions between graphs</Text>
@@ -54,8 +56,12 @@ export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
 
 const TransitioningPath = ({
   path,
+  start = 0,
+  end = 1,
   ...props
-}: AnimatedProps<PathProps> & { path: SkPath }) => {
+}: AnimatedProps<PathProps> & {
+  path: SkPath;
+}) => {
   // Save current and next paths (initially the same)
   const currentPathRef = useRef(path);
   const nextPathRef = useRef(path);
@@ -99,11 +105,6 @@ const TransitioningPath = ({
   }, [animatedPath, path, progress]);
 
   return <Path {...props} path={animatedPath} />;
-};
-
-TransitioningPath.defaultProps = {
-  start: 0,
-  end: 1,
 };
 
 const styles = StyleSheet.create({

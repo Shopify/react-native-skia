@@ -16,6 +16,7 @@ public:
 protected:
   void draw(DrawingContext *context) override {
     auto rects = _imageProps->getDerivedValue();
+
     context->getCanvas()->drawImageRect(
         _imageProps->getImage(), rects->src, rects->dst, SkSamplingOptions(),
         context->getPaint().get(), SkCanvas::kStrict_SrcRectConstraint);
@@ -23,7 +24,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _imageProps = container->defineProperty(std::make_shared<ImageProps>());
+    _imageProps = container->defineProperty<ImageProps>();
     _imageProps->require();
   }
 

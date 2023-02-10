@@ -15,12 +15,7 @@
 
 namespace RNSkia {
 
-static PropId PropNamePath = JsiPropId::get("path");
-static PropId PropNameStart = JsiPropId::get("start");
-static PropId PropNameEnd = JsiPropId::get("end");
-static PropId PropNameFillType = JsiPropId::get("fillType");
 static PropId PropNameMiterLimit = JsiPropId::get("miter_limit");
-static PropId PropNameStroke = JsiPropId::get("stroke");
 static PropId PropNamePrecision = JsiPropId::get("precision");
 
 class JsiPathNode : public JsiDomDrawingNode,
@@ -64,20 +59,22 @@ protected:
                 ", end: " + std::to_string(_endProp->value().getAsNumber()));
           }
           filteredPath.swap(filteredPath);
-          _path = std::make_shared<SkPath>(filteredPath);
+          _path = std::make_shared<const SkPath>(filteredPath);
         } else if (hasStartOffset || hasEndOffset) {
           throw std::runtime_error(
               "Failed trimming path with parameters start: " +
               std::to_string(_startProp->value().getAsNumber()) +
               ", end: " + std::to_string(_endProp->value().getAsNumber()));
         } else {
-          _path = std::make_shared<SkPath>(filteredPath);
+          _path = std::make_shared<const SkPath>(filteredPath);
         }
 
         // Set fill style
         if (_fillTypeProp->isSet()) {
           auto fillType = _fillTypeProp->value().getAsString();
-          _path->setFillType(getFillTypeFromStringValue(fillType));
+          auto p = std::make_shared<SkPath>(*_path.get());
+          p->setFillType(getFillTypeFromStringValue(fillType));
+          _path = std::const_pointer_cast<const SkPath>(p);
         }
 
         // do we have a special paint here?
@@ -110,9 +107,14 @@ protected:
             precision = opts.getValue(PropNamePrecision).getAsNumber();
           }
 
-          if (!strokePaint.getFillPath(*_path.get(), _path.get(), nullptr,
+          // _path is const so we can't mutate it directly, let's replace the
+          // path like this:
+          auto p = std::make_shared<SkPath>(*_path.get());
+          if (!strokePaint.getFillPath(*_path.get(), p.get(), nullptr,
                                        precision)) {
             _path = nullptr;
+          } else {
+            _path = std::const_pointer_cast<const SkPath>(p);
           }
         }
 
@@ -132,16 +134,11 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _pathProp =
-        container->defineProperty(std::make_shared<PathProp>(PropNamePath));
-    _startProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameStart));
-    _endProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameEnd));
-    _fillTypeProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameFillType));
-    _strokeOptsProp =
-        container->defineProperty(std::make_shared<NodeProp>(PropNameStroke));
+    _pathProp = container->defineProperty<PathProp>("path");
+    _startProp = container->defineProperty<NodeProp>("start");
+    _endProp = container->defineProperty<NodeProp>("end");
+    _fillTypeProp = container->defineProperty<NodeProp>("fillType");
+    _strokeOptsProp = container->defineProperty<NodeProp>("stroke");
 
     _pathProp->require();
   }
@@ -167,13 +164,14 @@ private:
   NodeProp *_fillTypeProp;
   NodeProp *_strokeOptsProp;
 
-  std::shared_ptr<SkPath> _path;
+  std::shared_ptr<const SkPath> _path;
 };
 
 class StrokeOptsProps : public BaseDerivedProp {
 public:
-  StrokeOptsProps() : BaseDerivedProp() {
-    _strokeProp = addProperty(std::make_shared<NodeProp>(PropNameStroke));
+  explicit StrokeOptsProps(const std::function<void(BaseNodeProp *)> &onChange)
+      : BaseDerivedProp(onChange) {
+    _strokeProp = defineProperty<NodeProp>("stroke");
   }
 
 private:

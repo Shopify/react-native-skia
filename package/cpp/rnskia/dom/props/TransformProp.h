@@ -8,8 +8,6 @@
 
 namespace RNSkia {
 
-static PropId PropNameTransform = JsiPropId::get("transform");
-
 static PropId PropNameTranslateX = JsiPropId::get("translateX");
 static PropId PropNameTranslateY = JsiPropId::get("translateY");
 static PropId PropNameScale = JsiPropId::get("scale");
@@ -22,8 +20,10 @@ static PropId PropNameRotateZ = JsiPropId::get("rotateZ");
 
 class TransformProp : public DerivedProp<SkMatrix> {
 public:
-  explicit TransformProp(PropId name) : DerivedProp<SkMatrix>() {
-    _transformProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit TransformProp(PropId name,
+                         const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<SkMatrix>(onChange) {
+    _transformProp = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
@@ -56,9 +56,9 @@ public:
         } else if (key == PropNameScaleY) {
           m->preScale(1, value);
         } else if (key == PropNameSkewX) {
-          m->preScale(value, 0);
+          m->preSkew(value, 0);
         } else if (key == PropNameSkewY) {
-          m->preScale(value, 0);
+          m->preSkew(0, value);
         } else if (key == PropNameRotate || key == PropNameRotateZ) {
           m->preRotate(SkRadiansToDegrees(value));
         } else {
