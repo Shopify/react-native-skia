@@ -7,7 +7,6 @@ import type { ReactNode } from "react";
 import type { Server, WebSocket } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
-import type { DrawingContext } from "../DrawingContext";
 import { ValueApi } from "../../values/web";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
@@ -19,6 +18,7 @@ import type { SkImage, SkFont, Skia } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 import { SkiaRoot } from "../Reconciler";
+import { JsiDrawingContext } from "../../dom/types/DrawingContext";
 
 jest.setTimeout(180 * 1000);
 
@@ -141,14 +141,7 @@ export const mountCanvas = (element: ReactNode) => {
     surface: ckSurface,
     root: root.dom,
     draw: () => {
-      const ctx: DrawingContext = {
-        width,
-        height,
-        timestamp: 0,
-        canvas,
-        paint: Skia.Paint(),
-        Skia,
-      };
+      const ctx = new JsiDrawingContext(Skia, canvas);
       root.dom.render(ctx);
     },
   };

@@ -56,6 +56,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDispatchQueue.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/dom/base/DrawingContext.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia/dom/base/ConcatablePaint.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/api/third_party/CSSColorParser.cpp"
         

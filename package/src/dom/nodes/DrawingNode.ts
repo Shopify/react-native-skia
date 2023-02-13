@@ -59,7 +59,11 @@ export abstract class JsiDrawingNode<P extends DrawingNodeProps, C>
     }
     this.children().map((child) => {
       if (child instanceof PaintNode) {
-        const paint = child.materialize();
+        const declCtx = ctx.declarationCtx;
+        declCtx.save();
+        child.decorate(declCtx);
+        const paint = declCtx.paints.pop()!;
+        declCtx.restore();
         this.draw({ ...ctx, paint });
       }
     });
