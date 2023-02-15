@@ -132,12 +132,8 @@ android {
 
     externalNativeBuild {
         cmake {
-            path file('CMakeLists.txt')            
+            path file('CMakeLists.txt')
         }
-    }
-
-    buildFeatures {
-        prefab true
     }
 
     packagingOptions {
@@ -148,6 +144,17 @@ android {
              "**/libreact_nativemodule_core.so",
              "**/libturbomodulejsijni.so"
         ]
+    }
+
+    buildFeatures {
+        prefab true
+        prefabPublishing true
+    }
+
+    prefab {
+        rnskia {
+            headers "${project.buildDir}/headers/rnskia/"
+        }
     }
 
     // Create new configurations that can be referred to in dependencies.
@@ -255,6 +262,14 @@ task extractJNIFiles {
 
 extractJNIFiles.mustRunAfter extractAARHeaders
 
+task prepareHeaders(type: Copy) {
+  from fileTree('../cpp').filter { it.isFile() }
+  into "${project.buildDir}/headers/rnskia/"
+  includeEmptyDirs = false
+}
+
+preBuild.dependsOn(prepareHeaders)
+
 def nativeBuildDependsOn(dependsOnTask, variant) {
   def buildTasks = tasks.findAll({ task ->
       !task.name.contains("Clean") && (task.name.contains("externalNative") || task.name.contains("CMake")) })
@@ -266,5 +281,5 @@ def nativeBuildDependsOn(dependsOnTask, variant) {
 
 afterEvaluate {
   nativeBuildDependsOn(extractAARHeaders, null)
-  nativeBuildDependsOn(extractJNIFiles, null)  
+  nativeBuildDependsOn(extractJNIFiles, null)
 }
