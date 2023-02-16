@@ -200,7 +200,7 @@ export const skHostConfig: SkiaHostConfig = {
     const [props, reanimatedProps] = sanitizeReanimatedProps(nextProps);
     updatePayload.depMgr.unsubscribeNode(instance);
     instance.setProps(materialize(props));
-    bindReanimatedProps(container, node, reanimatedProps);
+    bindReanimatedProps(updatePayload, instance, reanimatedProps);
     updatePayload.depMgr.subscribeNode(instance, props);
   },
 
