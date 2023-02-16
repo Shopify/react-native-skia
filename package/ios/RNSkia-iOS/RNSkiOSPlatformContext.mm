@@ -36,7 +36,7 @@ void RNSkiOSPlatformContext::performStreamOperation(
       // name by adding the png extension. We don't know if we're loading an
       // image or data here, but if the scheme is empty and the extension is
       // empty it is safe to assume that we're trying to load from the bundle
-      // and we can therefore append the png extension if no extension is set.
+      // and we can therefore load this as an image using the imageNamed method.
       auto image = [UIImage imageNamed:[url absoluteString]];
       data = UIImagePNGRepresentation(image);
 
