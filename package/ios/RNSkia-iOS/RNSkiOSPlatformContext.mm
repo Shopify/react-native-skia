@@ -24,7 +24,26 @@ void RNSkiOSPlatformContext::performStreamOperation(
   auto loader = [=]() {
     NSURL *url = [[NSURL alloc]
         initWithString:[NSString stringWithUTF8String:sourceUri.c_str()]];
-    NSData *data = [NSData dataWithContentsOfURL:url];
+
+    NSData *data = nullptr;
+    auto scheme = url.scheme;
+    auto extension = url.pathExtension;
+
+    if (scheme == nullptr &&
+        (extension == nullptr || [extension isEqualToString:@""])) {
+      // Load from bundle? We accept loading png images from bundle - nothing
+      // else. The reason is that React Native loads images from bundles through
+      // name by adding the png extension. We don't know if we're loading an
+      // image or data here, but if the scheme is empty and the extension is
+      // empty it is safe to assume that we're trying to load from the bundle
+      // and we can therefore append the png extension if no extension is set.
+      auto image = [UIImage imageNamed:[url absoluteString]];
+      data = UIImagePNGRepresentation(image);
+
+    } else {
+      // Load from metro / node
+      data = [NSData dataWithContentsOfURL:url];
+    }
 
     auto bytes = [data bytes];
     auto skData = SkData::MakeWithCopy(bytes, [data length]);
