@@ -25,8 +25,10 @@ static PropId PropNameFit = JsiPropId::get("fit");
 
 class ImageProp : public DerivedSkProp<SkImage> {
 public:
-  explicit ImageProp(PropId name) : DerivedSkProp<SkImage>() {
-    _imageProp = addProperty(std::make_shared<NodeProp>(name));
+  explicit ImageProp(PropId name,
+                     const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedSkProp<SkImage>(onChange) {
+    _imageProp = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
@@ -52,10 +54,11 @@ private:
 
 class ImageProps : public DerivedProp<FitRects> {
 public:
-  ImageProps() : DerivedProp<FitRects>() {
-    _fitProp = addProperty(std::make_shared<NodeProp>(PropNameFit));
-    _imageProp = addProperty(std::make_shared<ImageProp>(PropNameImage));
-    _rectProp = addProperty(std::make_shared<RectProps>(PropNameRect));
+  explicit ImageProps(const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<FitRects>(onChange) {
+    _fitProp = defineProperty<NodeProp>(PropNameFit);
+    _imageProp = defineProperty<ImageProp>(PropNameImage);
+    _rectProp = defineProperty<RectProps>(PropNameRect);
   }
 
   void updateDerivedValue() override {

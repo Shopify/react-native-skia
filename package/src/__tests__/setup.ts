@@ -42,6 +42,7 @@ interface CheckImageOptions {
   threshold?: number;
   overwrite?: boolean;
   mute?: boolean;
+  shouldFail?: boolean;
 }
 
 const defaultCheckImageOptions = {
@@ -49,6 +50,7 @@ const defaultCheckImageOptions = {
   threshold: 0.1,
   overwrite: false,
   mute: false,
+  shouldFail: false,
 };
 
 export const checkImage = (
@@ -57,7 +59,7 @@ export const checkImage = (
   opts?: CheckImageOptions
 ) => {
   const options = { ...defaultCheckImageOptions, ...opts };
-  const { overwrite, threshold, mute, maxPixelDiff } = options;
+  const { overwrite, threshold, mute, maxPixelDiff, shouldFail } = options;
   const png = image.encodeToBytes();
   const p = path.resolve(__dirname, relPath);
   if (fs.existsSync(p) && !overwrite) {
@@ -77,11 +79,15 @@ export const checkImage = (
       { threshold }
     );
     if (!mute) {
-      if (diffPixelsCount > maxPixelDiff) {
+      if (diffPixelsCount > maxPixelDiff && !shouldFail) {
         fs.writeFileSync(`${p}.test.png`, PNG.sync.write(toTest));
         fs.writeFileSync(`${p}-diff-test.png`, PNG.sync.write(diffImage));
       }
-      expect(diffPixelsCount).toBeLessThanOrEqual(maxPixelDiff);
+      if (shouldFail) {
+        expect(diffPixelsCount).not.toBeLessThanOrEqual(maxPixelDiff);
+      } else {
+        expect(diffPixelsCount).toBeLessThanOrEqual(maxPixelDiff);
+      }
     }
     return diffPixelsCount;
   } else {

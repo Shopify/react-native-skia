@@ -16,6 +16,7 @@ public:
 protected:
   void draw(DrawingContext *context) override {
     auto rects = _imageProps->getDerivedValue();
+
     context->getCanvas()->drawImageRect(
         _imageProps->getImage(), rects->src, rects->dst, SkSamplingOptions(),
         context->getPaint().get(), SkCanvas::kStrict_SrcRectConstraint);

@@ -169,8 +169,9 @@ private:
 
 class StrokeOptsProps : public BaseDerivedProp {
 public:
-  StrokeOptsProps() : BaseDerivedProp() {
-    _strokeProp = addProperty(std::make_shared<NodeProp>("stroke"));
+  explicit StrokeOptsProps(const std::function<void(BaseNodeProp *)> &onChange)
+      : BaseDerivedProp(onChange) {
+    _strokeProp = defineProperty<NodeProp>("stroke");
   }
 
 private:

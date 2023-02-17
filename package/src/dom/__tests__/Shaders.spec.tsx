@@ -8,6 +8,7 @@ import {
 import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { fitRects, rect2rect } from "../nodes/datatypes";
+import { JsiDrawingContext } from "../types";
 
 describe("Drawings", () => {
   it("Should display a simple shader", () => {
@@ -27,7 +28,7 @@ describe("Drawings", () => {
     });
     root.addChild(filter);
     root.addChild(Sk.Fill());
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/drawings/cyan.png");
   });
@@ -69,7 +70,7 @@ half4 main(float2 xy) {
     const root = Sk.Group();
     root.addChild(filter);
     root.addChild(Sk.Fill());
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
   });
@@ -111,11 +112,11 @@ half4 main(float2 xy) {
     const root = Sk.Group();
     root.addChild(filter);
     root.addChild(Sk.Fill());
-    let ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
+    let ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
     filter.setProp("uniforms", { r: 25 });
-    ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
+    ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader2.png", true);
   });
