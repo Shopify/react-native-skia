@@ -31,15 +31,15 @@ void RNSkiOSPlatformContext::performStreamOperation(
 
     if (scheme == nullptr &&
         (extension == nullptr || [extension isEqualToString:@""])) {
-      // Load from bundle? We accept loading png images from bundle - nothing
-      // else. The reason is that React Native loads images from bundles through
-      // name by adding the png extension. We don't know if we're loading an
-      // image or data here, but if the scheme is empty and the extension is
-      // empty it is safe to assume that we're trying to load from the bundle
-      // and we can therefore load this as an image using the imageNamed method.
+      // If the extension and scheme is nil, we assume that we're trying to
+      // load from the embedded iOS app bundle and will try to load image
+      // and get data from the image directly. imageNamed will return the
+      // best version of the requested image:
       auto image = [UIImage imageNamed:[url absoluteString]];
+      // We have no idea if this image is a JPEG or PNG since we cannot
+      // get the image format or raw image data now without having to
+      // ditch the imageNamed function and start working on a file level
       data = UIImagePNGRepresentation(image);
-
     } else {
       // Load from metro / node
       data = [NSData dataWithContentsOfURL:url];
