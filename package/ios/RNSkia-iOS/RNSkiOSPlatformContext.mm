@@ -36,8 +36,8 @@ void RNSkiOSPlatformContext::performStreamOperation(
       // and get data from the image directly. imageNamed will return the
       // best version of the requested image:
       auto image = [UIImage imageNamed:[url absoluteString]];
-      // We don't know the image format (png, jpg, etc) but UIImagePNGRepresentation
-      // will support all of them
+      // We don't know the image format (png, jpg, etc) but
+      // UIImagePNGRepresentation will support all of them
       data = UIImagePNGRepresentation(image);
     } else {
       // Load from metro / node
