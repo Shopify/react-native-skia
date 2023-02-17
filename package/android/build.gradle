@@ -21,6 +21,7 @@ def DEFAULT_COMPILE_SDK_VERSION = 28
 def DEFAULT_BUILD_TOOLS_VERSION = '28.0.3'
 def DEFAULT_MIN_SDK_VERSION = 16
 def DEFAULT_TARGET_SDK_VERSION = 28
+def ENABLE_PREFAB = REACT_NATIVE_VERSION > 68
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -87,6 +88,7 @@ logger.warn("react-native-skia: PrebuiltDir: ${prebuiltDir}")
 logger.warn("react-native-skia: buildType: ${buildType}")
 logger.warn("react-native-skia: buildDir: ${buildDir}")
 logger.warn("react-native-skia: node_modules: ${nodeModules}")
+logger.warn("react-native-skia: Enable Prefab: ${ENABLE_PREFAB}")
 
 buildscript {
     // The Android Gradle plugin is only required when opening the android folder stand-alone.
@@ -146,14 +148,15 @@ android {
         ]
     }
 
-    buildFeatures {
-        prefab true
-        prefabPublishing true
-    }
-
-    prefab {
-        rnskia {
-            headers "${project.buildDir}/headers/rnskia/"
+    if (ENABLE_PREFAB) {
+        buildFeatures {
+                prefab true
+                prefabPublishing true
+        }
+        prefab {
+            rnskia {
+                headers "${project.buildDir}/headers/rnskia/"
+            }
         }
     }
 
@@ -262,13 +265,14 @@ task extractJNIFiles {
 
 extractJNIFiles.mustRunAfter extractAARHeaders
 
-task prepareHeaders(type: Copy) {
-  from fileTree('../cpp').filter { it.isFile() }
-  into "${project.buildDir}/headers/rnskia/"
-  includeEmptyDirs = false
+if (ENABLE_PREFAB) {
+    task prepareHeaders(type: Copy) {
+        from fileTree('../cpp').filter { it.isFile() }
+        into "${project.buildDir}/headers/rnskia/"
+        includeEmptyDirs = false
+    }
+    preBuild.dependsOn(prepareHeaders)
 }
-
-preBuild.dependsOn(prepareHeaders)
 
 def nativeBuildDependsOn(dependsOnTask, variant) {
   def buildTasks = tasks.findAll({ task ->
