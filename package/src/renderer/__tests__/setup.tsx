@@ -28,7 +28,11 @@ declare global {
 }
 export let surface: TestingSurface;
 const assets = new Map<SkImage | SkFont, string>();
-export let images: { oslo: SkImage };
+export let images: {
+  oslo: SkImage;
+  skiaLogoPng: SkImage;
+  skiaLogoJpeg: SkImage;
+};
 export let fonts: {
   RobotoMedium: SkFont;
   NotoColorEmoji: SkFont;
@@ -55,12 +59,16 @@ beforeAll(async () => {
     fontSize
   );
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
-  images = { oslo };
+  const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
+  const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
+  images = { oslo, skiaLogoPng, skiaLogoJpeg };
   fonts = { RobotoMedium, NotoColorEmoji, NotoSansSCRegular };
   assets.set(oslo, "oslo");
   assets.set(RobotoMedium, "RobotoMedium");
   assets.set(NotoColorEmoji, "NotoColorEmoji");
   assets.set(NotoSansSCRegular, "NotoSansSCRegular");
+  assets.set(skiaLogoPng, "skiaLogoPng");
+  assets.set(skiaLogoJpeg, "skiaLogoJpeg");
 });
 
 export const wait = (ms: number) =>

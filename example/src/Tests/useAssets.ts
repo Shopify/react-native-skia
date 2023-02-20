@@ -12,6 +12,8 @@ export const useAssets = () => {
   const [error, setError] = useState<Error | null>(null);
   const errorHandler = useCallback((e: Error) => setError(e), []);
   const oslo = useImage(require("./assets/oslo.jpg"), errorHandler);
+  const skiaLogoJpeg = useImage("skia_logo_jpeg", errorHandler);
+  const skiaLogoPng = useImage("skia_logo", errorHandler);
   const RobotoMedium = useTypeface(
     require("./assets/Roboto-Medium.ttf"),
     errorHandler
@@ -24,8 +26,22 @@ export const useAssets = () => {
   if (error) {
     throw new Error("Failed to load assets: " + error.message);
   }
-  if (!RobotoMedium || !oslo || !NotoColorEmoji || !NotoSansSCRegular) {
+  if (
+    !RobotoMedium ||
+    !oslo ||
+    !NotoColorEmoji ||
+    !NotoSansSCRegular ||
+    !skiaLogoJpeg ||
+    !skiaLogoPng
+  ) {
     return null;
   }
-  return { RobotoMedium, NotoColorEmoji, NotoSansSCRegular, oslo };
+  return {
+    RobotoMedium,
+    NotoColorEmoji,
+    NotoSansSCRegular,
+    oslo,
+    skiaLogoJpeg,
+    skiaLogoPng,
+  };
 };
