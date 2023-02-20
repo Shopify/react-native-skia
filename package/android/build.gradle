@@ -266,8 +266,9 @@ task extractJNIFiles {
 extractJNIFiles.mustRunAfter extractAARHeaders
 
 if (ENABLE_PREFAB) {
+    // Package everything with the original file structure
     task prepareHeaders(type: Copy) {
-        from fileTree('../cpp').filter { it.isFile() }
+        from('./cpp')
         into "${project.buildDir}/headers/rnskia/"
         includeEmptyDirs = false
     }
