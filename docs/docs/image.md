@@ -1,9 +1,29 @@
 ---
 id: image
-title: Image
+title: Images
 sidebar_label: Image
 slug: /images
 ---
+
+## Loading Images
+
+Images are loaded using the `useImage` hook. This hook returns an `SkImage` instance which can be passed to the `Image` component.
+
+Images can be loaded using require statements, or by passing a network URL directly. It is also possible to load images from the app bundle using named images.
+
+```tsx twoslash
+import {useImage} from "@shopify/react-native-skia";
+// Loads an image from the JavaScript bundle
+const image1 = useImage(require("./assets/oslo"));
+// Loads an image from the network
+const image2 = useImage("https://picsum.photos/200/300");
+// Loads an image that was added to the Android/iOS bundle
+const image3 = useImage("Logo");
+```
+
+Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is loaded. You can use this to conditionally render the `Image` component like in the [example below](#example). The hook also provides an optional error handler as a second parameter. 
+
+## Image
 
 Images can be drawn by specifying the output rectangle and how the image should fit into that rectangle.
 
@@ -16,29 +36,13 @@ Images can be drawn by specifying the output rectangle and how the image should 
 | height | `number`  | Height of the destination image.                                                                                                                              |
 | fit?   | `Fit`     | Method to make the image fit into the rectangle. Value can be `contain`, `fill`, `cover` `fitHeight`, `fitWidth`, `scaleDown`, `none` (default is `contain`). |
 
-### Image Loading
-
-Images are loaded using the `useImage` hook. This hook returns an `SkImage` instance which can be passed to the `Image` component.
-
-Images can be loaded using require statements, or by passing a network URL directly. It is also possible to load images from the app bundle using named images:
-
-| Usage                                       | Description                                                                                |
-| :------------------------------------------ | :----------------------------------------------------------------------------------------- |
-| useImage(require("../../assets/oslo.jpg"))  | Loads an image that was included in the app javascript bundle along your javascript code.  |
-| useImage("https://picsum.photos/200/300")   | Loads an image using a network request                                                     |
-| useImage("Logo")                            | Loads an image that was added to the Android/iOS bundle                                    |
-
-Loading an image is an asynchronous operation, so the `useImage` hook will return undefined until the image is loaded. You can use this to conditionally render the `Image` component like in the example below.
-
 ### Example
 
 ```tsx twoslash
 import { Canvas, Image, useImage } from "@shopify/react-native-skia";
 
 const ImageDemo = () => {
-  // Alternatively, you can pass an image URL directly
-  // for instance: const image = useImage("https://bit.ly/3fkulX5");
-  const image = useImage(require("../../assets/oslo.jpg"));
+  const image = useImage(require("./assets/oslo.jpg"));
   return (
     <Canvas style={{ flex: 1 }}>
       {image && (
