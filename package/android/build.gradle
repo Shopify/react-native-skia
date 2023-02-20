@@ -266,12 +266,20 @@ task extractJNIFiles {
 extractJNIFiles.mustRunAfter extractAARHeaders
 
 if (ENABLE_PREFAB) {
+    // Package everything with the original file structure
     task prepareHeaders(type: Copy) {
-        from fileTree('./cpp').filter { it.isFile() }
+        from('./cpp')
         into "${project.buildDir}/headers/rnskia/"
         includeEmptyDirs = false
     }
     preBuild.dependsOn(prepareHeaders)
+    // Also package everything into the flat structure so that the user can simply import it
+    task prepareHeadersFlat(type: Copy) {
+        from fileTree('./cpp')
+        into "${project.buildDir}/headers/rnskia/"
+        includeEmptyDirs = false
+    }
+    preBuild.dependsOn(prepareHeadersFlat)
 }
 
 def nativeBuildDependsOn(dependsOnTask, variant) {
