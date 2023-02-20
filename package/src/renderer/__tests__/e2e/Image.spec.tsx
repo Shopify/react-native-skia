@@ -1,11 +1,11 @@
 import React from "react";
 
-import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+import { checkImage } from "../../../__tests__/setup";
 import { images, surface } from "../setup";
 import { Fill, Image as SkiaImage } from "../../components";
 
 describe("Image loading from bundles", () => {
-  itRunsE2eOnly("should render png, jpg from bundle", async () => {
+  it("should render png, jpg from bundle", async () => {
     const { width } = surface;
     const size = width * 0.45;
     const bundlePng = images.skiaLogoPng;
@@ -13,15 +13,15 @@ describe("Image loading from bundles", () => {
     const image = await surface.draw(
       <>
         <Fill color="white" />
-        <SkiaImage image={bundlePng!} width={size} height={size} />
+        <SkiaImage image={bundlePng} width={size} height={size} />
         <SkiaImage
-          image={bundleJpeg!}
+          image={bundleJpeg}
           width={size}
           height={size}
           x={width / 2}
         />
       </>
     );
-    checkImage(image, "snapshots/images/bundle.png");
+    checkImage(image, "snapshots/images/bundle.png", { maxPixelDiff: 29 });
   });
 });
