@@ -273,13 +273,6 @@ if (ENABLE_PREFAB) {
         includeEmptyDirs = false
     }
     preBuild.dependsOn(prepareHeaders)
-    // Also package everything into the flat structure so that the user can simply import it
-    task prepareHeadersFlat(type: Copy) {
-        from fileTree('./cpp')
-        into "${project.buildDir}/headers/rnskia/"
-        includeEmptyDirs = false
-    }
-    preBuild.dependsOn(prepareHeadersFlat)
 }
 
 def nativeBuildDependsOn(dependsOnTask, variant) {
