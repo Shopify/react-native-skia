@@ -59,8 +59,6 @@ beforeAll(async () => {
     fontSize
   );
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
-  // The next two images will be loaded from the bundle in the app when
-  // running e2e tests - here we're just using the oslo image as a placeholder
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
   images = { oslo, skiaLogoPng, skiaLogoJpeg };
