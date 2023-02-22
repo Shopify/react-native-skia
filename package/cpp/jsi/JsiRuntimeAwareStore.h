@@ -55,7 +55,7 @@ template <typename StoreType>
 class JsiRuntimeAwareStore : public RuntimeLifecycleListener {
 
 private:
-  jsi::Runtime *_primaryRuntime, *_secondaryRuntime;
+  jsi::Runtime *_primaryRuntime = nullptr, *_secondaryRuntime = nullptr;
   std::unique_ptr<StoreType> _primaryStore, _secondaryStore;
 
 public:
