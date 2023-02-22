@@ -9,7 +9,7 @@ const _bindings = new WeakMap<Node<unknown>, unknown>();
 export function sanitizeReanimatedProps(props: AnimatedProps<any>) {
   const reanimatedProps = {} as AnimatedProps<any>;
   const otherProps = {} as AnimatedProps<any>;
-  for (let propName in props) {
+  for (const propName in props) {
     const propValue = props[propName];
     if (isSharedValue(propValue)) {
       reanimatedProps[propName] = propValue;
@@ -33,10 +33,10 @@ export function bindReanimatedProps(
   }
   if (sharedValues.length > 0) {
     const viewId = container.getNativeId();
-    const SkiaViewApi = global.SkiaViewApi;
+    const { SkiaViewApi } = global;
     const mapperId = startMapper(() => {
       "worklet";
-      for (let propName in reanimatedProps) {
+      for (const propName in reanimatedProps) {
         node && node.setProp(propName, reanimatedProps[propName].value);
       }
       SkiaViewApi && SkiaViewApi.requestRedraw(viewId);

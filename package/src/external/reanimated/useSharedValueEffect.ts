@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
+import type { SharedValueType } from "./moduleWrapper";
 import {
   HAS_REANIMATED,
   useSharedValue,
-  SharedValueType,
   runOnJS,
   startMapper,
   stopMapper,

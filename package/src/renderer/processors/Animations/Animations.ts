@@ -1,4 +1,4 @@
-import { SharedValueType } from "../../../external/reanimated/moduleWrapper";
+import type { SharedValueType } from "../../../external/reanimated/moduleWrapper";
 import type { SkiaSelector, SkiaValue } from "../../../values";
 
 export const isValue = (value: unknown): value is SkiaValue<unknown> => {

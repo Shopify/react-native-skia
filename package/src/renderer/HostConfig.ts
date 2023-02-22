@@ -4,16 +4,16 @@ import { DefaultEventPriority } from "react-reconciler/constants";
 
 import type { NodeType, Node } from "../dom/types";
 import type { SkiaValue } from "../values";
+import {
+  bindReanimatedProps,
+  sanitizeReanimatedProps,
+} from "../external/reanimated";
 
 import type { Container } from "./Container";
 import { createNode } from "./HostComponents";
 import type { AnimatedProps } from "./processors";
 import { isSelector, isValue } from "./processors";
 import { mapKeys, shallowEq } from "./typeddash";
-import {
-  bindReanimatedProps,
-  sanitizeReanimatedProps,
-} from "../external/reanimated";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
