@@ -1,14 +1,14 @@
 import React from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import { Canvas, Circle, Fill, Line } from "@shopify/react-native-skia";
-
-import { AnimationDemo, Size, Padding } from "./Components";
 import {
   useDerivedValue,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
+
+import { AnimationDemo, Size, Padding } from "./Components";
 
 const FgColor = "#DC4C4C";
 const BgColor = "#EC795A";

@@ -7,8 +7,6 @@ import {
   useFont,
   Skia,
 } from "@shopify/react-native-skia";
-
-import { AnimationDemo, Padding } from "./Components";
 import {
   useSharedValue,
   Easing,
@@ -16,6 +14,8 @@ import {
   withRepeat,
   useDerivedValue,
 } from "react-native-reanimated";
+
+import { AnimationDemo, Padding } from "./Components";
 
 const ExampleHeight = 60;
 const Font = require("../../assets/SF-Mono-Semibold.otf");
@@ -55,10 +55,10 @@ export const AnimateTextOnPath = () => {
       -1,
       true
     );
-  }, []);
+  }, [progress]);
 
   const path = useDerivedValue(() => {
-    return path1?.interpolate(path2, progress.value);
+    return path1.interpolate(path2, progress.value)!;
   });
 
   return (

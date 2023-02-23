@@ -1,17 +1,17 @@
-import { Dimensions, StyleSheet, View } from 'react-native';
-
-import React from 'react';
+import { Dimensions, StyleSheet, View } from "react-native";
+import React from "react";
 import {
   Easing,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
   withTiming,
-} from 'react-native-reanimated';
-import { AnimationDemo } from './Components';
-import { Canvas, Circle, Fill } from '@shopify/react-native-skia';
+} from "react-native-reanimated";
+import { Canvas, Circle, Fill } from "@shopify/react-native-skia";
 
-const { width } = Dimensions.get('window');
+import { AnimationDemo } from "./Components";
+
+const { width } = Dimensions.get("window");
 const ExampleHeight = 300;
 
 function getRandomWidth() {
@@ -57,10 +57,18 @@ function MovingCircle() {
   });
 
   const color = useDerivedValue(() => {
-    return `hsl(${hue.value}, 100%, 50%)`
-  })
+    return `hsl(${hue.value}, 100%, 50%)`;
+  });
 
-  return <Circle cx={x} cy={y} r={size} color={color} opacity={0.1 + (1 - power) * 0.1}/>;
+  return (
+    <Circle
+      cx={x}
+      cy={y}
+      r={size}
+      color={color}
+      opacity={0.1 + (1 - power) * 0.1}
+    />
+  );
 }
 
 interface BokehProps {
@@ -77,11 +85,11 @@ function Bokeh({ count }: BokehProps) {
   );
 }
 
-export default function BokehExample() {
+export function BokehExample() {
   return (
     <AnimationDemo title={"Reanimated's bokeh"}>
       <Canvas style={styles.canvas}>
-        <Fill color="black"/>
+        <Fill color="black" />
         <Bokeh count={100} />
       </Canvas>
     </AnimationDemo>

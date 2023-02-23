@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import { Canvas, Circle, Fill } from "@shopify/react-native-skia";
-
-import { AnimationDemo, Size, Padding } from "./Components";
 import {
   useDerivedValue,
   useSharedValue,
@@ -10,6 +8,8 @@ import {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+
+import { AnimationDemo, Size, Padding } from "./Components";
 
 function mix(value: number, x: number, y: number) {
   "worklet";
@@ -31,7 +31,7 @@ export const InterpolationWithEasing = () => {
       -1,
       true
     );
-  }, []);
+  }, [progress]);
   return (
     <AnimationDemo title={"Interpolating value using an easing"}>
       <Canvas style={styles.canvas}>
