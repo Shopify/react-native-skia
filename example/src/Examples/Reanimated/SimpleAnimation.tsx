@@ -18,7 +18,7 @@ export const SimpleAnimation = () => {
   });
   useEffect(() => {
     width.value = withRepeat(withTiming(windowWidth, { duration: 1000 }), -1);
-  }, []);
+  }, [width, windowWidth]);
   return (
     <AnimationDemo title={"Basic animation using derived values"}>
       <Canvas style={styles.canvas}>

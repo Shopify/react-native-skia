@@ -28,6 +28,7 @@
     "prism-react-renderer": "^1.2.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-native-gesture-handler": "^2.9.0",
     "react-native-reanimated": "^2.4.1",
     "url-loader": "^4.1.1"
   },
