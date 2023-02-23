@@ -2,11 +2,19 @@ import type { Container } from "../../renderer/Container";
 import type { AnimatedProp, AnimatedProps } from "../../renderer/processors";
 import type { Node } from "../../dom/types";
 
-import { startMapper, stopMapper, isSharedValue } from "./moduleWrapper";
+import {
+  startMapper,
+  stopMapper,
+  isSharedValue,
+  HAS_REANIMATED,
+} from "./moduleWrapper";
 
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
 export function sanitizeReanimatedProps(props: AnimatedProps<any>) {
+  if (!HAS_REANIMATED) {
+    return [props, null];
+  }
   const reanimatedProps = {} as AnimatedProps<any>;
   const otherProps = {} as AnimatedProps<any>;
   for (let propName in props) {
@@ -26,6 +34,9 @@ export function bindReanimatedProps(
   node: Node<any>,
   reanimatedProps: AnimatedProps<any>
 ) {
+  if (!HAS_REANIMATED) {
+    return;
+  }
   const sharedValues = Object.values(reanimatedProps);
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
