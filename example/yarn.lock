@@ -7875,7 +7875,7 @@ react-native-gradle-plugin@^0.71.12:
 
 "react-native-reanimated@https://github.com/software-mansion/react-native-reanimated":
   version "3.0.0-rc.10"
-  resolved "https://github.com/software-mansion/react-native-reanimated#923edf387407fc7c2235848d1b7255d778d72049"
+  resolved "https://github.com/software-mansion/react-native-reanimated#4d3b1af2ef15af750302362444f81a1fd2e55ce9"
   dependencies:
     "@babel/plugin-transform-object-assign" "^7.16.7"
     "@babel/preset-typescript" "^7.16.7"
