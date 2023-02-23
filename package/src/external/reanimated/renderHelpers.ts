@@ -15,7 +15,7 @@ const _bindings = new WeakMap<Node<unknown>, unknown>();
 
 export function sanitizeReanimatedProps(props: AnimatedProps<any>) {
   if (!HAS_REANIMATED) {
-    return [props, null];
+    return [props, {}];
   }
   const reanimatedProps = {} as AnimatedProps<any>;
   const otherProps = {} as AnimatedProps<any>;
