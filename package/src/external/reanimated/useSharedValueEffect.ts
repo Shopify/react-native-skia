@@ -20,6 +20,10 @@ export const useSharedValueEffect = <T = number>(
   value: SharedValueType<T>,
   ...values: SharedValueType<T>[]
 ) => {
+  console.warn(
+    `useSharedValueEffect() is now deprecated, you can use Reanimated values directly.
+Learn more at https://shopify.github.io/react-native-skia/.`
+  );
   const input = useSharedValue(0);
 
   useEffect(() => {
