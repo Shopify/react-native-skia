@@ -38,7 +38,8 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       innerRef.current?.redraw();
     }, [innerRef]);
     const getNativeId = useCallback(() => {
-      return innerRef.current?.nativeId;
+      const id = innerRef.current?.nativeId ?? -1;
+      return id;
     }, [innerRef]);
 
     const registerValues = useCallback(

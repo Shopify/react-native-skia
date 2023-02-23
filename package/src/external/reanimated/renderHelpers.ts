@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable reanimated/js-function-in-worklet */
 import type { Container } from "../../renderer/Container";
 import type { AnimatedProp, AnimatedProps } from "../../renderer/processors";
