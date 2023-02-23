@@ -160,6 +160,7 @@ export const skHostConfig: SkiaHostConfig = {
 
   resetAfterCommit(container) {
     debug("resetAfterCommit");
+    container.depMgr.update();
     container.redraw();
   },
 

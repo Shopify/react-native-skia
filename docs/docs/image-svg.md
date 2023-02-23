@@ -80,6 +80,11 @@ We expect most SVG files to render correctly out of the box, especially if they 
 However, please be aware of some of the quirks below when using it.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
 
+### CSS Styles
+
+CSS styles included in SVG are not supported.
+A tool like [SVGO](#using-svgo) can help with converting CSS style attributes to SVG attributes if possible. 
+
 ### Using SVGO
 
 Using [SVGO](https://github.com/svg/svgo) to normalize the SVG file helps a lot. You can use it online [here](https://jakearchibald.github.io/svgomg/). For instance, it can normalize CSS style attributes that contain transformations to the proper transform property.
