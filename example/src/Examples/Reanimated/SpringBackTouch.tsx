@@ -30,7 +30,7 @@ export const SpringBackTouchAnimation = () => {
       centerX.value += e.changeX;
       centerY.value += e.changeY;
     })
-    .onEnd((e) => {
+    .onEnd(() => {
       centerX.value = withSpring(startX);
       centerY.value = withSpring(startY);
     });
