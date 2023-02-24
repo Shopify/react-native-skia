@@ -55,11 +55,18 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
                               const jsi::PropNameID &name) {
   auto nameStr = name.utf8(runtime);
 
-  // Do the happy-paths first
+  // get mapped runtime / function cache
+  auto hostFunctionCache =
+    _hostFunctionCache.find(static_cast<void *>(&runtime));
+  if (hostFunctionCache == _hostFunctionCache.end()) {
+    std::map<std::string, jsi::Function> map;
+    _hostFunctionCache.emplace(static_cast<void *>(&runtime), std::move(map));
+    hostFunctionCache = _hostFunctionCache.find(static_cast<void *>(&runtime));
+  }
 
   // Check function cache
-  auto cachedFunc = _hostFunctionCache.get(runtime).find(nameStr);
-  if (cachedFunc != _hostFunctionCache.get(runtime).end()) {
+  auto cachedFunc = hostFunctionCache->second.find(nameStr);
+  if (cachedFunc != hostFunctionCache->second.end()) {
     return cachedFunc->second.asFunction(runtime);
   }
 
@@ -82,7 +89,7 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 
     // Add to cache - it is important to cache the results from the
     // createFromHostFunction function which takes some time.
-    return _hostFunctionCache.get(runtime)
+    return hostFunctionCache->second
         .emplace(nameStr, jsi::Function::createFromHostFunction(runtime, name,
                                                                 0, dispatcher))
         .first->second.asFunction(runtime);
