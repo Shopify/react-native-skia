@@ -1,5 +1,6 @@
 #include <JsiHostObject.h>
 #include <functional>
+#include <utility>
 #include <vector>
 
 // To be able to find objects that aren't cleaned up correctly,
@@ -57,7 +58,7 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
 
   // get mapped runtime / function cache
   auto hostFunctionCache =
-    _hostFunctionCache.find(static_cast<void *>(&runtime));
+      _hostFunctionCache.find(static_cast<void *>(&runtime));
   if (hostFunctionCache == _hostFunctionCache.end()) {
     std::map<std::string, jsi::Function> map;
     _hostFunctionCache.emplace(static_cast<void *>(&runtime), std::move(map));

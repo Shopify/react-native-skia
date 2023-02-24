@@ -365,6 +365,6 @@ private:
   std::unordered_map<std::string, jsi::HostFunctionType> _funcMap;
   std::unordered_map<std::string, JsPropertyType> _propMap;
 
-  std::map<void *, std::map<std::string, jsi::Function>> _hostFunctionCache;  
+  std::map<void *, std::map<std::string, jsi::Function>> _hostFunctionCache;
 };
 } // namespace RNJsi
