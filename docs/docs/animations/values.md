@@ -7,7 +7,7 @@ slug: /animations/values
 
 :::info
 
-Currently, built-in Skia animations run on the JS-thread.
+Currently, built-in Skia animations are dependant on the JS thread.
 
 :::
 
