@@ -25,8 +25,14 @@ export const useSharedValue =
 export const startMapper = Reanimated?.startMapper || throwOnMissingReanimated;
 export const stopMapper = Reanimated?.stopMapper || throwOnMissingReanimated;
 export const runOnJS = Reanimated?.runOnJS || throwOnMissingReanimated;
-export const isSharedValue =
-  Reanimated?.isSharedValue || throwOnMissingReanimated;
+export const isSharedValue = <T>(
+  value: unknown
+): value is SharedValueType<T> => {
+  if (!Reanimated) {
+    throwOnMissingReanimated();
+  }
+  return !!value && Reanimated.isSharedValue(value);
+};
 
 export type SharedValueType<T = number> = {
   value: T;
