@@ -1,21 +1,24 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 import { AnimateTextOnPath } from "./AnimateTextOnPath";
 import { AnimationWithTouchHandler } from "./AnimationWithTouchHandler";
+import { BokehExample } from "./BokehExample";
 import { InterpolationWithEasing } from "./InterpolationWithEasing";
 import { SimpleAnimation } from "./SimpleAnimation";
 import { SpringBackTouchAnimation } from "./SpringBackTouch";
 
 export const ReanimatedExample: React.FC = () => {
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <SimpleAnimation />
       <InterpolationWithEasing />
       <AnimationWithTouchHandler />
       <AnimateTextOnPath />
       <SpringBackTouchAnimation />
-    </View>
+      <BokehExample />
+    </ScrollView>
   );
 };
 
