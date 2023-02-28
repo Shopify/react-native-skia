@@ -25,7 +25,7 @@ export const AnimationWithTouchHandler = () => {
     });
 
   return (
-    <AnimationDemo title={"Bouncing animation with touch handler"}>
+    <AnimationDemo title={"Decay animation with touch handler"}>
       <GestureDetector gesture={gesture}>
         <Canvas style={styles.canvas}>
           <Fill color="white" />

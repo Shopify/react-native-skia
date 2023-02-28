@@ -65,7 +65,7 @@ export const AnimationWithTouchHandler = () => {
   });
 
   return (
-    <AnimationDemo title={"Decay animation with touch handler"}>
+    <AnimationDemo title={"Bouncing animation with touch handler"}>
       <Canvas style={styles.canvas} onTouch={touchHandler}>
         <Fill color="white" />
         <Circle cx={translateX} cy={40} r={20} color="#3E3E" />
