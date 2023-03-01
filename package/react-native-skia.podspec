@@ -24,7 +24,12 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = {
     'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) SK_GL=1 SK_METAL=1',
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
-    'DEFINES_MODULE' => 'YES'
+    'DEFINES_MODULE' => 'YES',
+    "HEADER_SEARCH_PATHS" => '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/" ' + 
+                             '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/api/" ' + 
+                             '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/rnskia/" ' + 
+                             '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/rnskia/dom/" ' + 
+                             '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/skia/"'
   }
 
   s.frameworks = 'GLKit', 'MetalKit'
@@ -40,32 +45,8 @@ Pod::Spec.new do |s|
   # All iOS cpp/h files
   s.source_files = [
     "ios/**/*.{h,c,cc,cpp,m,mm,swift}",  
+    "cpp/**/*.{h,cpp}"    
   ]
-
-  s.subspec 'SkiaHeaders' do |ss|
-    ss.header_mappings_dir = 'cpp/skia'
-    ss.source_files = "cpp/skia/**/*.{h,cpp}"
-  end
-
-  s.subspec 'Utils' do |ss|
-    ss.header_mappings_dir = 'cpp/utils'
-    ss.source_files = "cpp/utils/**/*.{h,cpp}"
-  end
-
-  s.subspec 'Jsi' do |ss|
-    ss.header_mappings_dir = 'cpp/jsi'
-    ss.source_files = "cpp/jsi/**/*.{h,cpp}"
-  end
-
-  s.subspec 'Api' do |ss|
-    ss.header_mappings_dir = 'cpp/api'
-    ss.source_files = "cpp/api/**/*.{h,cpp}"
-  end
-
-  s.subspec 'RNSkia' do |ss|
-    ss.header_mappings_dir = 'cpp/rnskia'
-    ss.source_files = "cpp/rnskia/**/*.{h,cpp}"
-  end
 
   s.dependency "React"
   s.dependency "React-callinvoker"
