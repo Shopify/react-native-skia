@@ -86,7 +86,7 @@ The imperative API provides a `Drawing` component that allows you to use the imp
 ### Example
 
 ```tsx twoslash
-import {Canvas, Circle, Group, Drawing, Skia} from "@shopify/react-native-skia";
+import {Canvas, Group, Drawing, Skia} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
   const size = 256;

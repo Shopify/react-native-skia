@@ -1,4 +1,3 @@
-/*global btoa, atob*/
 import type { CanvasKit } from "canvaskit-wasm";
 
 import type { SkData } from "../types";

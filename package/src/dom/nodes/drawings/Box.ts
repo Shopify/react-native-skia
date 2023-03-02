@@ -6,6 +6,7 @@ import type { BoxShadowProps, BoxProps } from "../../types/Drawings";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import { JsiRenderNode } from "../RenderNode";
+import type { DeclarationContext } from "../../types/DeclarationContext";
 
 const inflate = (
   Skia: Skia,
@@ -35,12 +36,13 @@ const deflate = (
   ty = 0
 ) => inflate(Skia, box, -dx, -dy, tx, ty);
 
-export class BoxShadowNode extends JsiDeclarationNode<
-  BoxShadowProps,
-  BoxShadowProps
-> {
+export class BoxShadowNode extends JsiDeclarationNode<BoxShadowProps> {
   constructor(ctx: NodeContext, props: BoxShadowProps) {
     super(ctx, DeclarationType.Unknown, NodeType.BoxShadow, props);
+  }
+
+  decorate(_ctx: DeclarationContext) {
+    // do nothing
   }
 
   materialize() {

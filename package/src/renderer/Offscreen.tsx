@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { JsiDrawingContext } from "../dom/types";
 import { Skia } from "../skia";
 
 import { SkiaRoot } from "./Reconciler";
@@ -16,11 +17,7 @@ export const drawAsImage = (
   const canvas = surface.getCanvas();
   const root = new SkiaRoot(Skia);
   root.render(element);
-  const paint = Skia.Paint();
-  const ctx = {
-    canvas,
-    paint,
-  };
+  const ctx = new JsiDrawingContext(Skia, canvas);
   root.dom.render(ctx);
   surface.flush();
   return surface.makeImageSnapshot();
