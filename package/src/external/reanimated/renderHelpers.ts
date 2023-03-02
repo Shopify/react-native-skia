@@ -13,7 +13,7 @@ import {
 
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
-export function sanitizeReanimatedProps(props: AnimatedProps<any>) {
+export function extractReanimatedProps(props: AnimatedProps<any>) {
   if (!HAS_REANIMATED) {
     return [props, {}];
   }
@@ -56,8 +56,4 @@ export function bindReanimatedProps(
     }, sharedValues);
     _bindings.set(node, mapperId);
   }
-}
-
-export function sanitizeReanimatedProp(value: AnimatedProp<any>) {
-  return value.value;
 }

@@ -9,7 +9,7 @@ try {
   // Ignore
 }
 
-export const HAS_REANIMATED = Reanimated !== undefined;
+export const HAS_REANIMATED = !!Reanimated;
 
 function throwOnMissingReanimated() {
   throw new Error(

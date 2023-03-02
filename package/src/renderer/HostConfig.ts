@@ -6,7 +6,7 @@ import type { NodeType, Node } from "../dom/types";
 import type { SkiaValue } from "../values";
 import {
   bindReanimatedProps,
-  sanitizeReanimatedProps,
+  extractReanimatedProps,
 } from "../external/reanimated";
 
 import type { Container } from "./Container";
@@ -125,7 +125,7 @@ export const skHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    const [props, reanimatedProps] = sanitizeReanimatedProps(pristineProps);
+    const [props, reanimatedProps] = extractReanimatedProps(pristineProps);
     const node = createNode(container, type, materialize(props));
     bindReanimatedProps(container, node, reanimatedProps);
     container.depMgr.subscribeNode(node, props);
@@ -198,7 +198,7 @@ export const skHostConfig: SkiaHostConfig = {
     if (shallowEq(prevProps, nextProps)) {
       return;
     }
-    const [props, reanimatedProps] = sanitizeReanimatedProps(nextProps);
+    const [props, reanimatedProps] = extractReanimatedProps(nextProps);
     updatePayload.depMgr.unsubscribeNode(instance);
     instance.setProps(materialize(props));
     bindReanimatedProps(updatePayload, instance, reanimatedProps);
