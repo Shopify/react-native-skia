@@ -92,9 +92,6 @@ public:
       for (auto &prop : propMapIt->second) {
         prop->updateValue(runtime, propValue);
       }
-
-      // Invalidate context
-      invalidateContext();
     }
 
     return jsi::Value::undefined();
