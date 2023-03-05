@@ -49,7 +49,8 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiValue.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiRuntimeAwareStore.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/jsi/RuntimeLifecycleMonitor.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/jsi/RuntimeAwareCache.cpp"        
 
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkJsView.cpp"

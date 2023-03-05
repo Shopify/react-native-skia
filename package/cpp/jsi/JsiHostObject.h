@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "JsiRuntimeAwareStore.h"
+#include "RuntimeAwareCache.h"
 
 #define STR_CAT_NX(A, B) A##B
 #define STR_CAT(A, B) STR_CAT_NX(A, B)
@@ -365,6 +365,6 @@ private:
   std::unordered_map<std::string, jsi::HostFunctionType> _funcMap;
   std::unordered_map<std::string, JsPropertyType> _propMap;
 
-  JsiRuntimeAwareStore<std::map<std::string, jsi::Function>> _hostFunctionCache;
+  RuntimeAwareCache<std::map<std::string, jsi::Function>> _hostFunctionCache;
 };
 } // namespace RNJsi
