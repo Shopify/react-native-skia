@@ -5,6 +5,7 @@ on:
       - 'package/ios/**'
       - 'package/cpp/**'
       - 'example/package.json'
+      - '.github/workflows/**'
   push:
     branches:
       - main
