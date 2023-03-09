@@ -1,5 +1,8 @@
-import { itRunsCIAndNodeOnly } from "../../../__tests__/setup";
-import { fonts, surface } from "../setup";
+import React from "react";
+
+import { checkImage, itRunsCIAndNodeOnly } from "../../../__tests__/setup";
+import { Fill, Group, TextPath } from "../../components";
+import { fonts, importSkia, surface } from "../setup";
 
 describe("Text", () => {
   // The NotoColorEmoji font is not supported on iOS
@@ -22,5 +25,21 @@ describe("Text", () => {
       { font }
     );
     expect(result).toBe(64);
+  });
+  it("Should draw text along a circle", async () => {
+    const font = fonts.RobotoMedium;
+    const { Skia } = importSkia();
+    const path = Skia.Path.Make();
+    const r = surface.width / 2;
+    path.addCircle(r, r, r / 2);
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group transform={[{ rotate: Math.PI }]} origin={Skia.Point(r, r)}>
+          <TextPath font={font} path={path} text="Hello World!" />
+        </Group>
+      </>
+    );
+    checkImage(image, `snapshots/text/text-path1-${surface.OS}.png`);
   });
 });
