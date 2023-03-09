@@ -1,7 +1,7 @@
 import { WebSocketServer } from "ws";
 
 const isOS = (os: string): os is "android" | "ios" | "web" => {
-  return ["ios", "android", "web"].indexOf(os) !== 1;
+  return ["ios", "android", "web"].indexOf(os) !== -1;
 };
 
 const globalSetup = () => {
