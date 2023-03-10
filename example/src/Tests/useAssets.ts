@@ -2,6 +2,13 @@ import { useImage, useTypeface } from "@shopify/react-native-skia";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 
+const SkiaLogo =
+  Platform.OS === "web" ? require("./assets/skia_logo.png") : "skia_logo";
+const SkiaLogoJpeg =
+  Platform.OS === "web"
+    ? require("./assets/skia_logo_jpeg.jpg")
+    : "skia_logo_jpeg";
+
 // NotoColorEmoji.ttf is only available on iOS
 const NotoColorEmojiSrc =
   Platform.OS === "ios"
@@ -12,8 +19,8 @@ export const useAssets = () => {
   const [error, setError] = useState<Error | null>(null);
   const errorHandler = useCallback((e: Error) => setError(e), []);
   const oslo = useImage(require("./assets/oslo.jpg"), errorHandler);
-  const skiaLogoJpeg = useImage("skia_logo_jpeg", errorHandler);
-  const skiaLogoPng = useImage("skia_logo", errorHandler);
+  const skiaLogoJpeg = useImage(SkiaLogoJpeg, errorHandler);
+  const skiaLogoPng = useImage(SkiaLogo, errorHandler);
   const RobotoMedium = useTypeface(
     require("./assets/Roboto-Medium.ttf"),
     errorHandler
