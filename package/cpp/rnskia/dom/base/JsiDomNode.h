@@ -55,7 +55,7 @@ public:
 #endif
   }
   
-  ~JsiDomNode() {
+  virtual ~JsiDomNode() {
 #if SKIA_DOM_DEBUG
     printDebugInfo("JsiDomNode." + std::string(_type) + " DTOR - nodeId: " + std::to_string(_nodeId));
 #endif
