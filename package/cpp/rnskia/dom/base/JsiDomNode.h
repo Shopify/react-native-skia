@@ -460,7 +460,6 @@ private:
 #endif
 
       _isDisposed = true;
-      printf("RNSkia: JsiDomNode.%s invalidate() %zu\n", _type, _nodeId);
 
       // Clear parent
       this->setParent(nullptr);
