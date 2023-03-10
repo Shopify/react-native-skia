@@ -501,13 +501,12 @@ private:
   void ensurePropertyContainer() {
     if (_propsContainer == nullptr) {
       _propsContainer = std::make_shared<NodePropsContainer>(
-          getType(), [](BaseNodeProp *) {});
-      /*[weakSelf = weak_from_this()](BaseNodeProp *p) {
-auto self = weakSelf.lock();
-if (self) {
-self->onPropertyChanged(p);
-}
-});*/
+          getType(), [weakSelf = weak_from_this()](BaseNodeProp *p) {
+            auto self = weakSelf.lock();
+            if (self) {
+              self->onPropertyChanged(p);
+            }
+          });
 
       // Ask sub classes to define their properties
       defineProperties(_propsContainer.get());
