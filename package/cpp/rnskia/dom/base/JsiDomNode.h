@@ -40,7 +40,7 @@ typedef enum {
  coresponds to the native implementation of the Node.ts class in Javascript.
  */
 class JsiDomNode : public JsiHostObject,
-                   public std::enable_shared_from_this<JsiDomNode> {
+public std::enable_shared_from_this<JsiDomNode> {
 public:
   /**
    Contructor. Takes as parameters the values comming from the JS world that
@@ -48,8 +48,18 @@ public:
    */
   JsiDomNode(std::shared_ptr<RNSkPlatformContext> context, const char *type,
              NodeClass nodeClass)
-      : _type(type), _context(context), _nodeClass(nodeClass),
-        _nodeId(NodeIdent++), JsiHostObject() {}
+  : _type(type), _context(context), _nodeClass(nodeClass),
+  _nodeId(NodeIdent++), JsiHostObject() {
+#if SKIA_DOM_DEBUG
+    printDebugInfo("JsiDomNode." + std::string(_type) + " CTOR - nodeId: " + std::to_string(_nodeId));
+#endif
+  }
+  
+  ~JsiDomNode() {
+#if SKIA_DOM_DEBUG
+    printDebugInfo("JsiDomNode." + std::string(_type) + " DTOR - nodeId: " + std::to_string(_nodeId));
+#endif
+  }
 
   /**
    Called when creating the node, resolves properties from the node constructor.
@@ -65,7 +75,7 @@ public:
   JSI_HOST_FUNCTION(setProps) {
     if (count == 1) {
       // Initialize properties container
-      setProps(runtime, getArgumentAsObject(runtime, arguments, count, 0));
+      setProps(runtime, arguments[0]);
     } else {
       setEmptyProps();
     }
@@ -81,8 +91,8 @@ public:
    JS Function to be called when the node is no longer part of the reconciler
    tree. Use for cleaning up.
    */
-  JSI_HOST_FUNCTION(dispose) {
-    dispose();
+    JSI_HOST_FUNCTION(dispose) {
+    dispose(false);
     return jsi::Value::undefined();
   }
 
@@ -227,36 +237,9 @@ public:
       _propsContainer->markAsResolved();
     }
 
-    // Now let's dispose if needed
+    // Now let's invalidate if needed
     if (_isDisposing && !_isDisposed) {
-      _isDisposed = true;
-
-      this->setParent(nullptr);
-
-      // Callback signaling that we're done
-      if (_disposeCallback != nullptr) {
-        _disposeCallback();
-        _disposeCallback = nullptr;
-      }
-
-      // Clear props
-      if (_propsContainer != nullptr) {
-        _propsContainer->dispose();
-      }
-
-      // Remove children
-      std::vector<std::shared_ptr<JsiDomNode>> tmp;
-      {
-        std::lock_guard<std::mutex> lock(_childrenLock);
-        tmp.reserve(_children.size());
-        for (auto &child : _children) {
-          tmp.push_back(child);
-        }
-        _children.clear();
-      }
-      for (auto &child : tmp) {
-        child->dispose();
-      }
+      invalidate();
     }
 
     // Resolve children
@@ -270,6 +253,22 @@ public:
   */
   virtual void decorateContext(DeclarationContext *context) {
     // Empty implementation
+  }
+
+  /**
+   Called when a node has been removed from the dom tree and needs to be cleaned
+   up. If the invalidate parameter is set, we will invalidate the node directly.
+   Calling dispose from the JS dispose function calls this with invalidate set
+   to false, while the dom render view calls this with true.
+   */
+  virtual void dispose(bool invalidateNode) {
+    if (_isDisposing) {
+      return;
+    }
+    _isDisposing = true;
+    if (invalidateNode) {
+      invalidate();
+    }
   }
 
 protected:
@@ -299,24 +298,17 @@ protected:
 
   /**
    Native implementation of the set properties method. This is called from the
-   reconciler when properties are set due to changes in React. This method will
-   always call the onPropsSet method as a signal that things have changed.
+   reconciler when properties are set due to changes in React.
    */
-  void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
+  void setProps(jsi::Runtime &runtime, const jsi::Value &maybeProps) {
 #if SKIA_DOM_DEBUG
     printDebugInfo("JS:setProps(nodeId: " + std::to_string(_nodeId) + ")");
 #endif
-    if (_propsContainer == nullptr) {
+    // Initialize properties container
+    ensurePropertyContainer();
 
-      // Initialize properties container
-      _propsContainer = std::make_shared<NodePropsContainer>(
-          getType(), [=](BaseNodeProp *p) { onPropertyChanged(p); });
-
-      // Ask sub classes to define their properties
-      defineProperties(_propsContainer.get());
-    }
     // Update properties container
-    _propsContainer->setProps(runtime, std::move(props));
+    _propsContainer->setProps(runtime, maybeProps);
 
     // Invalidate context
     invalidateContext();
@@ -329,15 +321,8 @@ protected:
 #if SKIA_DOM_DEBUG
     printDebugInfo("JS:setEmptyProps(nodeId: " + std::to_string(_nodeId) + ")");
 #endif
-    if (_propsContainer == nullptr) {
-
-      // Initialize properties container
-      _propsContainer = std::make_shared<NodePropsContainer>(
-          getType(), [=](BaseNodeProp *p) { onPropertyChanged(p); });
-
-      // Ask sub classes to define their properties
-      defineProperties(_propsContainer.get());
-    }
+    // Initialize properties container
+    ensurePropertyContainer();
   }
 
   /**
@@ -361,9 +346,12 @@ protected:
     printDebugInfo("JS:addChild(childId: " + std::to_string(child->_nodeId) +
                    ")");
 #endif
-    enqueAsynOperation([child, this]() {
-      _children.push_back(child);
-      child->setParent(this);
+    enqueAsynOperation([child, weakSelf = weak_from_this()]() {
+      auto self = weakSelf.lock();
+      if (self) {
+        self->_children.push_back(child);
+        child->setParent(self.get());
+      }
     });
   }
 
@@ -378,10 +366,14 @@ protected:
         "JS:insertChildBefore(childId: " + std::to_string(child->_nodeId) +
         ", beforeId: " + std::to_string(before->_nodeId) + ")");
 #endif
-    enqueAsynOperation([child, before, this]() {
-      auto position = std::find(_children.begin(), _children.end(), before);
-      _children.insert(position, child);
-      child->setParent(this);
+    enqueAsynOperation([child, before, weakSelf = weak_from_this()]() {
+      auto self = weakSelf.lock();
+      if (self) {
+        auto position =
+            std::find(self->_children.begin(), self->_children.end(), before);
+        self->_children.insert(position, child);
+        child->setParent(self.get());
+      }
     });
   }
 
@@ -394,27 +386,25 @@ protected:
     printDebugInfo("JS:removeChild(childId: " + std::to_string(child->_nodeId) +
                    ")");
 #endif
-    enqueAsynOperation([child, this]() {
-      // Delete child itself
-      _children.erase(
-          std::remove_if(_children.begin(), _children.end(),
-                         [child](const auto &node) { return node == child; }),
-          _children.end());
+    auto removeChild = [child,
+                        weakSelf = weak_from_this()](bool immediate = false) {
+      auto self = weakSelf.lock();
+      if (self) {
+        // Delete child itself
+        self->_children.erase(
+            std::remove_if(self->_children.begin(), self->_children.end(),
+                           [child](const auto &node) { return node == child; }),
+            self->_children.end());
 
-      child->dispose();
-    });
-  }
+        child->dispose(immediate);
+      }
+    };
 
-  /**
-   Called when a node has been removed from the dom tree and needs to be cleaned
-   up.
-   */
-  virtual void dispose() {
     if (_isDisposing) {
-      return;
+      removeChild(false);
+    } else {
+      enqueAsynOperation(removeChild);
     }
-
-    _isDisposing = true;
   }
 
 #if SKIA_DOM_DEBUG
@@ -457,6 +447,70 @@ protected:
   }
 
 private:
+  /**
+   Invalidates the node - meaning removing and clearing children and properties
+   **/
+  void invalidate() {
+    if (_isDisposing && !_isDisposed) {
+#if SKIA_DOM_DEBUG
+      printDebugInfo("JsiDomNode::invalidate: nodeid: " +
+                     std::to_string(_nodeId));
+#endif
+
+      _isDisposed = true;
+      printf("RNSkia: JsiDomNode.%s invalidate() %zu\n", _type, _nodeId);
+
+      // Clear parent
+      this->setParent(nullptr);
+
+      // Clear any async operations
+      _queuedNodeOps.clear();
+
+      // Callback signaling that we're done
+      if (_disposeCallback != nullptr) {
+        _disposeCallback();
+        _disposeCallback = nullptr;
+      }
+
+      // Clear props
+      if (_propsContainer != nullptr) {
+        _propsContainer->dispose();
+      }
+
+      // Remove children
+      std::vector<std::shared_ptr<JsiDomNode>> tmp;
+      {
+        std::lock_guard<std::mutex> lock(_childrenLock);
+        tmp.reserve(_children.size());
+        for (auto &child : _children) {
+          tmp.push_back(child);
+        }
+        _children.clear();
+      }
+      for (auto &child : tmp) {
+        child->dispose(true);
+      }
+    }
+  }
+
+  /**
+   Creates and sets up the property container
+   */
+  void ensurePropertyContainer() {
+    if (_propsContainer == nullptr) {
+      _propsContainer = std::make_shared<NodePropsContainer>(getType(), [] (BaseNodeProp*) {});
+                                                             /*[weakSelf = weak_from_this()](BaseNodeProp *p) {
+            auto self = weakSelf.lock();
+            if (self) {
+              self->onPropertyChanged(p);
+            }
+          });*/
+
+      // Ask sub classes to define their properties
+      defineProperties(_propsContainer.get());
+    }
+  }
+
   const char *_type;
   std::shared_ptr<RNSkPlatformContext> _context;
 
