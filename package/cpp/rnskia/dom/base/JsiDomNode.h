@@ -40,7 +40,7 @@ typedef enum {
  coresponds to the native implementation of the Node.ts class in Javascript.
  */
 class JsiDomNode : public JsiHostObject,
-public std::enable_shared_from_this<JsiDomNode> {
+                   public std::enable_shared_from_this<JsiDomNode> {
 public:
   /**
    Contructor. Takes as parameters the values comming from the JS world that
@@ -48,16 +48,18 @@ public:
    */
   JsiDomNode(std::shared_ptr<RNSkPlatformContext> context, const char *type,
              NodeClass nodeClass)
-  : _type(type), _context(context), _nodeClass(nodeClass),
-  _nodeId(NodeIdent++), JsiHostObject() {
+      : _type(type), _context(context), _nodeClass(nodeClass),
+        _nodeId(NodeIdent++), JsiHostObject() {
 #if SKIA_DOM_DEBUG
-    printDebugInfo("JsiDomNode." + std::string(_type) + " CTOR - nodeId: " + std::to_string(_nodeId));
+    printDebugInfo("JsiDomNode." + std::string(_type) +
+                   " CTOR - nodeId: " + std::to_string(_nodeId));
 #endif
   }
-  
+
   virtual ~JsiDomNode() {
 #if SKIA_DOM_DEBUG
-    printDebugInfo("JsiDomNode." + std::string(_type) + " DTOR - nodeId: " + std::to_string(_nodeId));
+    printDebugInfo("JsiDomNode." + std::string(_type) +
+                   " DTOR - nodeId: " + std::to_string(_nodeId));
 #endif
   }
 
@@ -91,7 +93,7 @@ public:
    JS Function to be called when the node is no longer part of the reconciler
    tree. Use for cleaning up.
    */
-    JSI_HOST_FUNCTION(dispose) {
+  JSI_HOST_FUNCTION(dispose) {
     dispose(false);
     return jsi::Value::undefined();
   }
@@ -498,13 +500,14 @@ private:
    */
   void ensurePropertyContainer() {
     if (_propsContainer == nullptr) {
-      _propsContainer = std::make_shared<NodePropsContainer>(getType(), [] (BaseNodeProp*) {});
-                                                             /*[weakSelf = weak_from_this()](BaseNodeProp *p) {
-            auto self = weakSelf.lock();
-            if (self) {
-              self->onPropertyChanged(p);
-            }
-          });*/
+      _propsContainer = std::make_shared<NodePropsContainer>(
+          getType(), [](BaseNodeProp *) {});
+      /*[weakSelf = weak_from_this()](BaseNodeProp *p) {
+auto self = weakSelf.lock();
+if (self) {
+self->onPropertyChanged(p);
+}
+});*/
 
       // Ask sub classes to define their properties
       defineProperties(_propsContainer.get());

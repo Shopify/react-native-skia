@@ -141,8 +141,9 @@ protected:
       auto self = weakSelf.lock();
       if (self) {
         std::static_pointer_cast<JsiDomRenderNode>(self)->_paintCache.parent =
-    nullptr; std::static_pointer_cast<JsiDomRenderNode>(self)->_paintCache.child
-    = nullptr;
+            nullptr;
+        std::static_pointer_cast<JsiDomRenderNode>(self)->_paintCache.child =
+            nullptr;
       }
     });
   }
