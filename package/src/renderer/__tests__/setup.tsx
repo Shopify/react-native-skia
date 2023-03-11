@@ -25,6 +25,7 @@ jest.setTimeout(180 * 1000);
 declare global {
   var testServer: Server;
   var testClient: WebSocket;
+  var testOS: "ios" | "android" | "web";
 }
 export let surface: TestingSurface;
 const assets = new Map<SkImage | SkFont, string>();
@@ -251,12 +252,14 @@ interface TestingSurface {
   width: number;
   height: number;
   fontSize: number;
+  OS: string;
 }
 
 class LocalSurface implements TestingSurface {
   readonly width = 256;
   readonly height = 256;
   readonly fontSize = 32;
+  readonly OS = "node";
 
   eval(
     fn: (Skia: Skia, ctx: EvalContext) => any,
@@ -278,6 +281,7 @@ class RemoteSurface implements TestingSurface {
   readonly width = 256;
   readonly height = 256;
   readonly fontSize = 32;
+  readonly OS = global.testOS;
 
   private get client() {
     if (global.testClient === null) {
