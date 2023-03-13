@@ -93,7 +93,7 @@ half4 main(float2 xy) {
     });
   });
   itRunsE2eOnly(
-    "should be the reference result for the next test",
+    "should be the reference result for the next test (1)",
     async () => {
       const { width, height } = surface;
       const { oslo } = images;
@@ -114,7 +114,7 @@ half4 main(float2 xy) {
       checkImage(img, "snapshots/runtime-shader/unscaled-image.png");
     }
   );
-  itRunsE2eOnly("should display display the image untouched (2)", async () => {
+  itRunsE2eOnly("should display display the image untouched (1)", async () => {
     const { width, height } = surface;
     const { Skia } = importSkia();
     const { oslo } = images;
@@ -136,5 +136,34 @@ half4 main(float2 xy) {
       </Group>
     );
     checkImage(img, "snapshots/runtime-shader/unscaled-image.png");
+  });
+  itRunsE2eOnly(
+    "should be the reference result for the next test (2)",
+    async () => {
+      const { vec } = importSkia();
+      const img = await surface.draw(
+        <>
+          <Group transform={[{ scale: 3 }]}>
+            <Circle c={vec(0, 0)} r={25} color="lightblue" />
+          </Group>
+        </>
+      );
+      checkImage(img, "snapshots/runtime-shader/scaled-circle.png");
+    }
+  );
+  itRunsE2eOnly("should display display the circle untouched (1)", async () => {
+    const { vec } = importSkia();
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(passThrough)!;
+    expect(source).toBeTruthy();
+    const img = await surface.draw(
+      <Group>
+        <Group transform={[{ scale: 3 }]}>
+          <RuntimeShader source={source} />
+          <Circle c={vec(0, 0)} r={25} color="lightblue" />
+        </Group>
+      </Group>
+    );
+    checkImage(img, "snapshots/runtime-shader/scaled-circle.png");
   });
 });
