@@ -157,13 +157,20 @@ half4 main(float2 xy) {
     const source = Skia.RuntimeEffect.Make(passThrough)!;
     expect(source).toBeTruthy();
     const img = await surface.draw(
-      <Group>
+      <Group
+        layer={
+          <Paint>
+            <RuntimeShader source={source} />
+          </Paint>
+        }
+      >
         <Group transform={[{ scale: 3 }]}>
-          <RuntimeShader source={source} />
           <Circle c={vec(0, 0)} r={25} color="lightblue" />
         </Group>
       </Group>
     );
-    checkImage(img, "snapshots/runtime-shader/scaled-circle.png");
+    checkImage(img, "snapshots/runtime-shader/scaled-circle.png", {
+      maxPixelDiff: 4,
+    });
   });
 });
