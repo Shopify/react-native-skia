@@ -1,8 +1,23 @@
 import React from "react";
 
-import { surface, importSkia } from "../setup";
-import { Circle, Fill, Group, Paint, RuntimeShader } from "../../components";
+import { surface, importSkia, images } from "../setup";
+import {
+  Circle,
+  Fill,
+  Group,
+  Paint,
+  RuntimeShader,
+  Image,
+} from "../../components";
 import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+
+const passThrough = `
+uniform shader image;
+
+half4 main(float2 xy) {
+  return image.eval(xy);
+}
+`;
 
 const spiral = `
 uniform float scale;
@@ -76,5 +91,50 @@ half4 main(float2 xy) {
     checkImage(img, "snapshots/runtime-shader/spiral.png", {
       maxPixelDiff: 1,
     });
+  });
+  itRunsE2eOnly(
+    "should be the reference result for the next test",
+    async () => {
+      const { width, height } = surface;
+      const { oslo } = images;
+      const img = await surface.draw(
+        <>
+          <Group>
+            <Image
+              image={oslo}
+              x={0}
+              y={0}
+              width={width}
+              height={height}
+              fit="none"
+            />
+          </Group>
+        </>
+      );
+      checkImage(img, "snapshots/runtime-shader/unscaled-image.png");
+    }
+  );
+  itRunsE2eOnly("should display display the image untouched (2)", async () => {
+    const { width, height } = surface;
+    const { Skia } = importSkia();
+    const { oslo } = images;
+    const source = Skia.RuntimeEffect.Make(passThrough)!;
+    expect(source).toBeTruthy();
+    const img = await surface.draw(
+      <Group>
+        <Group>
+          <RuntimeShader source={source} />
+          <Image
+            image={oslo}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="none"
+          />
+        </Group>
+      </Group>
+    );
+    checkImage(img, "snapshots/runtime-shader/unscaled-image.png");
   });
 });
