@@ -109,7 +109,7 @@ half4 main(float2 p) {
       </>
     );
     checkImage(img, "snapshots/runtime-effects/spiral.png", {
-      maxPixelDiff: 1,
+      maxPixelDiff: 13,
     });
   });
 

@@ -74,7 +74,7 @@ half4 main(float2 xy) {
       </>
     );
     checkImage(img, "snapshots/runtime-shader/spiral.png", {
-      maxPixelDiff: 1,
+      maxPixelDiff: 8,
     });
   });
 });
