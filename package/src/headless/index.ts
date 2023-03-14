@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { JsiSkApi } from "../skia/web";
 import { SkiaRoot } from "../renderer/Reconciler";
 import { Skia } from "../skia/types";
+import { JsiDrawingContext } from "../dom/types";
 
 export * from "../renderer/components";
 
@@ -22,10 +23,7 @@ export const draw = (element: ReactNode, width: number, height: number) => {
   const root = new SkiaRoot(Skia);
   root.render(element);
   const canvas = surface.getCanvas();
-  const ctx = {
-    canvas,
-    paint: Skia.Paint(),
-  };
+  const ctx = new JsiDrawingContext(Skia, canvas);
   root.dom.render(ctx);
   surface.flush();
   const image = surface.makeImageSnapshot();
