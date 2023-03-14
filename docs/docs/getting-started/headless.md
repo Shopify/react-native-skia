@@ -39,8 +39,9 @@ import { Fill, draw } from "@shopify/react-native-skia/lib/commonjs/headless";
 
 ## GPU Acceleration
 
-To benefit from the GPU acceleration, you can provide a polyfill of the [OffscreenCanvas API](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) that supports WebGL.
-Below is an implementation we use ourselves with [headless-gl](https://github.com/stackgl/headless-gl).
+React Native Skia relies on the [OffscreenCanvas API](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) to support GPU-Accelerated offscreen surfacs.
+This means, that to benefit from the GPU acceleration, you will need to provide a polyfill of the [OffscreenCanvas API](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) on Node.
+Below is our own OffScreenCanvas polyfill implementation that relies on WebGL using [headless-gl](https://github.com/stackgl/headless-gl).
 
 ```tsx
 // Here we use gl for headless webgl support.
@@ -84,7 +85,7 @@ global.OffscreenCanvas = class OffscreenCanvasPolyfill
   getContext(ctx: string) {
     if (ctx === "webgl") {
       const _getUniformLocation = this.gl.getUniformLocation;
-      // Temporary fix https://github.com/stackgl/headless-gl/issues/170
+      // Temporary fix for https://github.com/stackgl/headless-gl/issues/170
       this.gl.getUniformLocation = function (program: any, name: any) {
         if (program._uniforms && !/\[\d+\]$/.test(name)) {
           const reg = new RegExp(`${name}\\[\\d+\\]$`);
