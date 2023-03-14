@@ -8,7 +8,7 @@ RNSkJsRenderer::RNSkJsRenderer(std::function<void()> requestRedraw,
                                std::shared_ptr<RNSkPlatformContext> context)
     : RNSkRenderer(requestRedraw),
       _jsiCanvas(std::make_shared<JsiSkCanvas>(context)),
-      _platformContext(std::move(context)),
+      _platformContext(context),
       _infoObject(std::make_shared<RNSkInfoObject>()),
       _jsDrawingLock(std::make_shared<std::timed_mutex>()),
       _gpuDrawingLock(std::make_shared<std::timed_mutex>()),

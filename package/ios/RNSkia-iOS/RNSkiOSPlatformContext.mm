@@ -24,7 +24,25 @@ void RNSkiOSPlatformContext::performStreamOperation(
   auto loader = [=]() {
     NSURL *url = [[NSURL alloc]
         initWithString:[NSString stringWithUTF8String:sourceUri.c_str()]];
-    NSData *data = [NSData dataWithContentsOfURL:url];
+
+    NSData *data = nullptr;
+    auto scheme = url.scheme;
+    auto extension = url.pathExtension;
+
+    if (scheme == nullptr &&
+        (extension == nullptr || [extension isEqualToString:@""])) {
+      // If the extension and scheme is nil, we assume that we're trying to
+      // load from the embedded iOS app bundle and will try to load image
+      // and get data from the image directly. imageNamed will return the
+      // best version of the requested image:
+      auto image = [UIImage imageNamed:[url absoluteString]];
+      // We don't know the image format (png, jpg, etc) but
+      // UIImagePNGRepresentation will support all of them
+      data = UIImagePNGRepresentation(image);
+    } else {
+      // Load from metro / node
+      data = [NSData dataWithContentsOfURL:url];
+    }
 
     auto bytes = [data bytes];
     auto skData = SkData::MakeWithCopy(bytes, [data length]);
