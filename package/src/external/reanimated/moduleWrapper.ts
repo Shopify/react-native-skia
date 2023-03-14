@@ -18,6 +18,30 @@ function throwOnMissingReanimated() {
   );
 }
 
+let ReanimatedVersionTested = false;
+
+export function throwOnIncompatibleReanimatedVersion() {
+  if (ReanimatedVersionTested) {
+    // we avoid testing version more than once as it won't change and we throw
+    // an error when version is incompatible
+    return;
+  }
+  ReanimatedVersionTested = true;
+  const reanimatedVersion =
+    require("react-native-reanimated/package.json").version;
+  // The first compatible version is 3.0.0 but we need to exclude 3.0.0 pre-releases
+  // as they have limited support for the used API.
+  if (
+    !reanimatedVersion ||
+    reanimatedVersion < "3.0.0" ||
+    reanimatedVersion.includes("3.0.0-")
+  ) {
+    throw new Error(
+      `Reanimated version ${reanimatedVersion} is not supported, please upgrade to 3.0.0 or newer.`
+    );
+  }
+}
+
 export const useSharedValue =
   Reanimated?.useSharedValue ||
   ((value: number) => useMemo(() => ({ value }), [value]));

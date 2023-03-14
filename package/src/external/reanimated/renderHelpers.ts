@@ -8,6 +8,7 @@ import {
   startMapper,
   stopMapper,
   isSharedValue,
+  throwOnIncompatibleReanimatedVersion,
   HAS_REANIMATED,
 } from "./moduleWrapper";
 
@@ -38,6 +39,9 @@ export function bindReanimatedProps(
 ) {
   if (!HAS_REANIMATED) {
     return;
+  }
+  if (__DEV__) {
+    throwOnIncompatibleReanimatedVersion();
   }
   const sharedValues = Object.values(reanimatedProps);
   const previousMapperId = _bindings.get(node);
