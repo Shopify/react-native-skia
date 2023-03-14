@@ -298,17 +298,19 @@ class RemoteSurface implements TestingSurface {
   }
 
   eval<Ctx extends EvalContext, R>(
-    fn: (Skia: Skia, ctx: Ctx) => R,
-    context: Ctx
-  ): Promise<any> {
+    fn: (Skia: Skia, ctx: Ctx) => any,
+    context?: Ctx
+  ): Promise<R> {
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
       const ctx: EvalContext = {};
-      Object.keys(context).forEach((key) => {
-        ctx[key] = serializeSkOjects(context[key]);
-      });
+      if (context) {
+        Object.keys(context).forEach((key) => {
+          ctx[key] = serializeSkOjects(context[key]);
+        });
+      }
       this.client.send(JSON.stringify({ code: fn.toString(), ctx }));
     });
   }
