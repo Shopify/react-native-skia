@@ -86,6 +86,9 @@ export abstract class SkiaBaseWebView<
    * @returns An Image object.
    */
   public makeImageSnapshot(rect?: SkRect) {
+    this._canvas!.clear(CanvasKit.TRANSPARENT);
+    this.renderInCanvas(this._canvas!, []);
+    this._surface?.ref.flush();
     return this._surface?.makeImageSnapshot(rect);
   }
 

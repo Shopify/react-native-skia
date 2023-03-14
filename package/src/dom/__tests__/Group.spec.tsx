@@ -9,6 +9,7 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
+import { JsiDrawingContext } from "../types/DrawingContext";
 
 const size = width;
 const padding = 48;
@@ -36,7 +37,7 @@ describe("Group", () => {
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })
     );
     root.addChild(clipNode);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("group/clip-rect.png"));
   });
@@ -54,7 +55,7 @@ describe("Group", () => {
     root.addChild(
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })
     );
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("group/clip-rrect.png"));
   });
@@ -75,7 +76,7 @@ describe("Group", () => {
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })
     );
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("group/clip-path.png"));
   });
@@ -94,7 +95,7 @@ describe("Group", () => {
     root.addChild(
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })
     );
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("group/invert-clip.png"));
   });
@@ -124,7 +125,7 @@ describe("Group", () => {
         end: 1,
       })
     );
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("group/scale-path.png"));
   });

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { images, surface } from "../setup";
+import { images, surface, width as wWidth, height as wHeight } from "../setup";
 import {
   BlendColor,
   Circle,
@@ -11,7 +11,21 @@ import {
   LinearToSRGBGamma,
   SRGBToLinearGamma,
 } from "../../components";
-import { docPath, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+import { docPath, checkImage, processResult } from "../../../__tests__/setup";
+import { setupSkia } from "../../../skia/__tests__/setup";
+import { fitRects } from "../../../dom/nodes";
+
+const blackAndWhite = [
+  0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
+];
+const purple = [
+  1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
+];
+
+const identity = [
+  1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+  0.0, 0.0, 0.0, 1.0, 0.0,
+];
 
 describe("Color Filters", () => {
   it("should apply a color matrix to an image", async () => {
@@ -57,16 +71,34 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/composition.png"));
   });
-  itRunsE2eOnly("should use basic linear interpolation", async () => {
+  it("should build the reference result for simple-lerp.png", async () => {
+    const { oslo } = images;
+    const { surface: ckSurface, Skia, canvas } = setupSkia(wWidth, wHeight);
+    const paint = Skia.Paint();
+    const cf2 = Skia.ColorFilter.MakeLinearToSRGBGamma();
+    const cf1 = Skia.ColorFilter.MakeLerp(
+      0.5,
+      Skia.ColorFilter.MakeMatrix(identity),
+      Skia.ColorFilter.MakeMatrix(blackAndWhite)
+    );
+    paint.setColorFilter(Skia.ColorFilter.MakeCompose(cf2, cf1));
+    const rect = Skia.XYWHRect(0, 0, wWidth, wHeight);
+    const { src, dst } = fitRects(
+      "cover",
+      {
+        x: 0,
+        y: 0,
+        width: oslo.width(),
+        height: oslo.height(),
+      },
+      rect
+    );
+    canvas.drawImageRect(oslo, src, dst, paint);
+    processResult(ckSurface, docPath("color-filters/simple-lerp.png"));
+  });
+  it("should use basic linear interpolation", async () => {
     const { oslo } = images;
     const { width, height } = surface;
-    const blackAndWhite = [
-      0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
-    ];
-    const identity = [
-      1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 1.0, 0.0,
-    ];
     let img = await surface.draw(
       <>
         <Image
@@ -128,37 +160,53 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/black-and-white.png"));
   });
-  itRunsE2eOnly(
-    "should use linear interpolation between two color matrices",
-    async () => {
-      const { oslo } = images;
-      const { width, height } = surface;
-      const blackAndWhite = [
-        0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
-      ];
-      const purple = [
-        1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
-      ];
-      const img = await surface.draw(
-        <>
-          <Image
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            image={oslo}
-            fit="cover"
-          >
-            <LinearToSRGBGamma>
-              <Lerp t={0.5}>
-                <ColorMatrix matrix={purple} />
-                <ColorMatrix matrix={blackAndWhite} />
-              </Lerp>
-            </LinearToSRGBGamma>
-          </Image>
-        </>
-      );
-      checkImage(img, docPath("color-filters/lerp.png"));
-    }
-  );
+  it("should build the reference result for lerp.png", async () => {
+    const { oslo } = images;
+    const { surface: ckSurface, Skia, canvas } = setupSkia(wWidth, wHeight);
+    const paint = Skia.Paint();
+    const cf2 = Skia.ColorFilter.MakeLinearToSRGBGamma();
+    const cf1 = Skia.ColorFilter.MakeLerp(
+      0.5,
+      Skia.ColorFilter.MakeMatrix(purple),
+      Skia.ColorFilter.MakeMatrix(blackAndWhite)
+    );
+    paint.setColorFilter(Skia.ColorFilter.MakeCompose(cf2, cf1));
+    const rect = Skia.XYWHRect(0, 0, wWidth, wHeight);
+    const { src, dst } = fitRects(
+      "cover",
+      {
+        x: 0,
+        y: 0,
+        width: oslo.width(),
+        height: oslo.height(),
+      },
+      rect
+    );
+    canvas.drawImageRect(oslo, src, dst, paint);
+    processResult(ckSurface, docPath("color-filters/lerp.png"));
+  });
+  it("should use linear interpolation between two color matrices", async () => {
+    const { oslo } = images;
+    const { width, height } = surface;
+    const img = await surface.draw(
+      <>
+        <Image
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          image={oslo}
+          fit="cover"
+        >
+          <LinearToSRGBGamma>
+            <Lerp t={0.5}>
+              <ColorMatrix matrix={purple} />
+              <ColorMatrix matrix={blackAndWhite} />
+            </Lerp>
+          </LinearToSRGBGamma>
+        </Image>
+      </>
+    );
+    checkImage(img, docPath("color-filters/lerp.png"));
+  });
 });

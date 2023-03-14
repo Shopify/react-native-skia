@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace RNSkia {
@@ -19,8 +20,9 @@ public:
   /**
    Constructs a new optional dom node properrty
    */
-  explicit NodeProp(const std::string &name)
-      : _name(JsiPropId::get(name)), BaseNodeProp() {}
+  explicit NodeProp(const std::string &name,
+                    const std::function<void(BaseNodeProp *)> &onChange)
+      : _name(JsiPropId::get(name)), _onChange(onChange), BaseNodeProp() {}
 
   /**
    Reads JS value and swaps out with a new value
@@ -44,6 +46,9 @@ public:
         _buffer->setCurrent(runtime, read(runtime, _name, this));
       }
       _hasNewValue = *_buffer.get() != *_value.get();
+      if (_hasNewValue && _onChange != nullptr) {
+        _onChange(this);
+      }
     }
   }
 
@@ -62,6 +67,9 @@ public:
     // This is almost always a change - meaning a swap is
     // cheaper than comparing for equality.
     _hasNewValue = true;
+    if (_onChange != nullptr) {
+      _onChange(this);
+    }
   }
 
   /**
@@ -118,6 +126,8 @@ public:
 
 private:
   PropId _name;
+
+  std::function<void(BaseNodeProp *)> _onChange;
 
   std::shared_ptr<JsiValue> _value;
   std::shared_ptr<JsiValue> _buffer;
