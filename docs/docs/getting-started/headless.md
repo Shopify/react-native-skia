@@ -5,7 +5,13 @@ sidebar_label: Headless
 slug: /getting-started/headless
 ---
 
-You can also run React Native Skia on Node.
+Thanks to its offscreen capabilities, React Native Skia can run on Node.
+This means that you can use the Skia API to draw things that can be encoded and saved as images.
+By default, drawings will be executed on the CPU but it is possible to also use [GPU Acceleration](#gpu-acceleration).
+
+## Hello World
+
+You will notice in the example below that the import URL looks different than the one used in React Native. There are two reasons for it. First, because Node programs don't rely on module bundlers such as Webpack, you will need to use the commonjs build of React Native Skia. Finally, we want to import the Skia APIs we need on Node without importing the one that rely on pure React Native APIs.
 
 ```tsx
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/commonjs/web/LoadSkiaWeb";
@@ -30,6 +36,8 @@ import { Fill, draw } from "@shopify/react-native-skia/lib/commonjs/headless";
   console.log(image.encodeToBase64());
 })();
 ```
+
+## GPU Acceleration
 
 To benefit from the GPU acceleration, you can provide a polyfill of the [OffscreenCanvas API](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) that supports WebGL.
 Below is an implementation we use ourselves with [headless-gl](https://github.com/stackgl/headless-gl).
