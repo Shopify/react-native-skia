@@ -244,10 +244,10 @@ const serializeNode = (node: Node<any>): SerializedNode => {
 type EvalContext = Record<string, any>;
 
 interface TestingSurface {
-  eval(
-    fn: (Skia: Skia, ctx: EvalContext) => any,
-    ctx?: EvalContext
-  ): Promise<any>;
+  eval<Ctx extends EvalContext, R>(
+    fn: (Skia: Skia, ctx: Ctx) => R,
+    ctx?: Ctx
+  ): Promise<R>;
   draw(node: ReactNode): Promise<SkImage>;
   width: number;
   height: number;
@@ -261,11 +261,11 @@ class LocalSurface implements TestingSurface {
   readonly fontSize = 32;
   readonly OS = "node";
 
-  eval(
-    fn: (Skia: Skia, ctx: EvalContext) => any,
-    ctx: EvalContext = {}
-  ): Promise<any> {
-    return Promise.resolve(fn(global.SkiaApi, ctx));
+  eval<Ctx extends EvalContext, R>(
+    fn: (Skia: Skia, ctx: Ctx) => any,
+    ctx?: Ctx
+  ): Promise<R> {
+    return Promise.resolve(fn(global.SkiaApi, ctx ?? ({} as any)));
   }
 
   draw(node: ReactNode): Promise<SkImage> {
@@ -290,18 +290,20 @@ class RemoteSurface implements TestingSurface {
     return global.testClient!;
   }
 
-  eval(
-    fn: (Skia: Skia, ctx: EvalContext) => any,
-    context: EvalContext = {}
-  ): Promise<any> {
+  eval<Ctx extends EvalContext, R>(
+    fn: (Skia: Skia, ctx: Ctx) => any,
+    context?: Ctx
+  ): Promise<R> {
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
       const ctx: EvalContext = {};
-      Object.keys(context).forEach((key) => {
-        ctx[key] = serializeSkOjects(context[key]);
-      });
+      if (context) {
+        Object.keys(context).forEach((key) => {
+          ctx[key] = serializeSkOjects(context[key]);
+        });
+      }
       this.client.send(JSON.stringify({ code: fn.toString(), ctx }));
     });
   }
