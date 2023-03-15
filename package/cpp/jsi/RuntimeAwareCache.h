@@ -64,10 +64,8 @@ public:
 
   ~RuntimeAwareCache() {
     for (auto &cache : _secondaryRuntimeCaches) {
-      if (cache.first != getMainJsRuntime()) {
-        RuntimeLifecycleMonitor::removeListener(
-            *static_cast<jsi::Runtime *>(cache.first), this);
-      }
+      RuntimeLifecycleMonitor::removeListener(
+          *static_cast<jsi::Runtime *>(cache.first), this);
     }
   }
 
