@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import {
   GestureHandlerRootView,
   ScrollView,
@@ -19,7 +19,7 @@ export const ReanimatedExample: React.FC = () => {
         <SimpleAnimation />
         <InterpolationWithEasing />
         <AnimationWithTouchHandler />
-        <AnimateTextOnPath />
+        {Platform.OS !== "web" && <AnimateTextOnPath />}
         <SpringBackTouchAnimation />
         <BokehExample />
       </ScrollView>

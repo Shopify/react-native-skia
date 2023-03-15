@@ -56,7 +56,11 @@ export function bindReanimatedProps(
       for (const propName in reanimatedProps) {
         node && node.setProp(propName, reanimatedProps[propName].value);
       }
-      SkiaViewApi && SkiaViewApi.requestRedraw(viewId);
+      if (SkiaViewApi) {
+        SkiaViewApi.requestRedraw(viewId);
+      } else {
+        container.redraw();
+      }
     }, sharedValues);
     _bindings.set(node, mapperId);
   }
