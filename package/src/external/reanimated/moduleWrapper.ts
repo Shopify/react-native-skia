@@ -28,6 +28,7 @@ export function throwOnIncompatibleReanimatedVersion() {
   }
   ReanimatedVersionTested = true;
   const reanimatedVersion =
+    // eslint-disable-next-line import/extensions
     require("react-native-reanimated/package.json").version;
   // The first compatible version is 3.0.0 but we need to exclude 3.0.0 pre-releases
   // as they have limited support for the used API.
