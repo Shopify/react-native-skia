@@ -2,6 +2,9 @@ import { AppRegistry } from "react-native";
 // TODO: we might have this a simple JS file so it's the same URL from the dev or production package
 import { LoadSkia } from "@shopify/react-native-skia/src/web";
 
+globalThis.setImmediate = requestAnimationFrame;
+globalThis.process = { env: {} };
+
 if (module.hot) {
   module.hot.accept();
 }
