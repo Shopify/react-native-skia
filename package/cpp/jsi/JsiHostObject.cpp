@@ -55,12 +55,18 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
                               const jsi::PropNameID &name) {
   auto nameStr = name.utf8(runtime);
 
-  // Do the happy-paths first
+  // Happy path - cached host functions are cheapest to look up
+  const JsiFunctionMap &funcs = getExportedFunctionMap();
+  auto func = funcs.find(nameStr);
 
   // Check function cache
-  auto cachedFunc = _hostFunctionCache.get(runtime).find(nameStr);
-  if (cachedFunc != _hostFunctionCache.get(runtime).end()) {
-    return cachedFunc->second.asFunction(runtime);
+  if (func != funcs.end()) {
+    std::map<std::string, jsi::Function> &runtimeCache =
+        _hostFunctionCache.get(runtime);
+    auto cachedFunc = runtimeCache.find(nameStr);
+    if (cachedFunc != runtimeCache.end()) {
+      return cachedFunc->second.asFunction(runtime);
+    }
   }
 
   // Check the static getters map
@@ -72,9 +78,9 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
   }
 
   // Check the static function map
-  const JsiFunctionMap &funcs = getExportedFunctionMap();
-  auto func = funcs.find(nameStr);
   if (func != funcs.end()) {
+
+    // Create dispatcher
     auto dispatcher =
         std::bind(func->second, reinterpret_cast<JsiHostObject *>(this),
                   std::placeholders::_1, std::placeholders::_2,
