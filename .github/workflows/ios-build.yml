@@ -68,6 +68,7 @@ jobs:
         run: |
           if git diff --name-only | grep -q "Podfile.lock"; then
             echo "Podfile.lock has local change please update it"
+            git diff example/ios/Podfile.lock
             exit 1
           else
             echo "Podfile.lock up to date"
