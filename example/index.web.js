@@ -3,7 +3,11 @@ import { AppRegistry } from "react-native";
 import { LoadSkia } from "@shopify/react-native-skia/src/web";
 
 globalThis.setImmediate = requestAnimationFrame;
-globalThis.process = { env: {} };
+globalThis.process = {
+  env: {
+    CI: "false",
+  },
+};
 
 if (module.hot) {
   module.hot.accept();
