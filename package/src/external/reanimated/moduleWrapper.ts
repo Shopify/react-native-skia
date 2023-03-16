@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import type { SharedValueType } from "../../renderer/processors/Animations";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let Reanimated: any;
 
@@ -57,8 +59,4 @@ export const isSharedValue = <T>(
     throwOnMissingReanimated();
   }
   return !!value && Reanimated.isSharedValue(value);
-};
-
-export type SharedValueType<T = number> = {
-  value: T;
 };

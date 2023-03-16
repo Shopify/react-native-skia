@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
-import type { SharedValueType } from "./moduleWrapper";
+import type { SharedValueType } from "../../renderer/processors/Animations";
+
 import {
   HAS_REANIMATED,
   useSharedValue,
