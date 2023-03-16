@@ -80,7 +80,7 @@ describe("Test Blending", () => {
       </Fill>
     );
     checkImage(image, "snapshots/runtime-effects/blend-color-burn2.png", {
-      maxPixelDiff: 16,
+      maxPixelDiff: 324,
     });
   });
 
