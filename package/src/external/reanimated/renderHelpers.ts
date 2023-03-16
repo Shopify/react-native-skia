@@ -21,6 +21,9 @@ export function extractReanimatedProps(props: AnimatedProps<any>) {
   const reanimatedProps = {} as AnimatedProps<any>;
   const otherProps = {} as AnimatedProps<any>;
   for (const propName in props) {
+    if (propName === "children") {
+      continue;
+    }
     const propValue = props[propName];
     if (isSharedValue(propValue)) {
       reanimatedProps[propName] = propValue;
@@ -56,6 +59,10 @@ export function bindReanimatedProps(
       for (const propName in reanimatedProps) {
         node && node.setProp(propName, reanimatedProps[propName].value);
       }
+      // On React Native we use the SkiaViewApi to redraw because it can
+      // run on the worklet thread (container.redraw can't)
+      // if SkiaViewApi is undefined, we are on web and container.redraw()
+      // can safely be invoked
       if (SkiaViewApi) {
         SkiaViewApi.requestRedraw(viewId);
       } else {
