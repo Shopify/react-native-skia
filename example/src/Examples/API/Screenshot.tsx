@@ -8,9 +8,9 @@ import {
   useWindowDimensions,
   ScrollView,
 } from "react-native";
+import type { SkImage } from "@shopify/react-native-skia";
 import {
   Canvas,
-  SkImage,
   Fill,
   Skia,
   RoundedRect,
