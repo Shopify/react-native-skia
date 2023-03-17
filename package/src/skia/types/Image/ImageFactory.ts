@@ -64,6 +64,14 @@ export interface ImageFactory {
   MakeImageFromEncoded: (encoded: SkData) => SkImage | null;
 
   /**
+   * Returns an image that will be a screenshot of the view represented by
+   * the view tag
+   * @param viewTag - The tag of the view to make an image from.
+   * @returns Returns a valid SkImage, if the view tag is invalid, nullptr is returned.
+   */
+  MakeImageFromViewTag: (viewTag: number) => Promise<SkImage | null>;
+
+  /**
    * Returns an image with the given pixel data and format.
    * Note that we will always make a copy of the pixel data, because of inconsistencies in
    * behavior between GPU and CPU (i.e. the pixel data will be turned into a GPU texture and
