@@ -14,11 +14,7 @@ React Native Skia brings the Skia Graphics Library to React Native. Skia serves 
 
 ## Getting Started
 
-```sh
-npm install @shopify/react-native-skia
-```
-
-Documentation is available at [https://shopify.github.io/react-native-skia](https://shopify.github.io/react-native-skia/docs/getting-started/installation/).
+[Installation instructions](https://shopify.github.io/react-native-skia/docs/getting-started/installation/)
 
 ## Library Development
 

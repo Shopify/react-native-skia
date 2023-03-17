@@ -9,6 +9,7 @@ import { FiberProvider } from "its-fine";
 
 import {
   AnimationExample,
+  ReanimatedExample,
   API,
   Aurora,
   Breathe,
@@ -49,6 +50,7 @@ const linking: LinkingOptions<StackParamList> = {
       Wallet: "wallet",
       Graphs: "graphs",
       Animation: "animation",
+      Reanimated: "reanimated",
       Performance: "performance",
       Tests: "test",
     },
@@ -161,6 +163,7 @@ const App = () => {
           />
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
+          <Stack.Screen name="Reanimated" component={ReanimatedExample} />
           <Stack.Screen name="Performance" component={PerformanceDrawingTest} />
         </Stack.Navigator>
       </NavigationContainer>

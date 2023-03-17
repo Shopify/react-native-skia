@@ -85,9 +85,29 @@ public:
   }
 
   /**
-   Empty setProp implementation - compatibility with JS node
+   Updates the selected property value
    */
-  JSI_HOST_FUNCTION(setProp) { return jsi::Value::undefined(); }
+  JSI_HOST_FUNCTION(setProp) {
+    if (_propsContainer == nullptr) {
+      // TODO: we ignore individual properties updates if the initial properties
+      // hasn't been defined. It is likely an error if we reach this branch and
+      // perhaps should throw an exception but platformContext isn't available
+      // here.
+      return jsi::Value::undefined();
+    }
+    auto propName = arguments[0].asString(runtime).utf8(runtime);
+    const jsi::Value &propValue = arguments[1];
+
+    auto mappedProps = _propsContainer->getMappedProperties();
+    auto propMapIt = mappedProps.find(JsiPropId::get(propName));
+    if (propMapIt != mappedProps.end()) {
+      for (auto &prop : propMapIt->second) {
+        prop->updateValue(runtime, propValue);
+      }
+    }
+
+    return jsi::Value::undefined();
+  }
 
   /**
    JS Function to be called when the node is no longer part of the reconciler

@@ -65,12 +65,14 @@ jobs:
         run: pod install
         
       - name: Check if Podfile.lock has changed
+        working-directory: example/ios
         run: |
-          if git diff --name-only | grep -q "Podfile.lock"; then
-            echo "Podfile.lock has local change please update it"
-            exit 1
+          if git diff --quiet --ignore-all-space -I 'COCOAPODS:' HEAD -- ios/Podfile.lock; then
+            echo "Podfile.lock is up to date."
           else
-            echo "Podfile.lock up to date"
+              echo "Podfile.lock has local changes, please update it."
+              git diff ios/Podfile.lock
+              exit 1
           fi
 
       - name: Restore build artifacts from cache
