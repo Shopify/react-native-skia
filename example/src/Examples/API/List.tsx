@@ -75,10 +75,6 @@ export const examples = [
     title: "↕️ useCanvas()",
   },
   {
-    screen: "Reanimated",
-    title: "🐎 Reanimated",
-  },
-  {
     screen: "OnLayout",
     title: "🎛️ OnLayout",
   },

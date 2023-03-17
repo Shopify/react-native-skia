@@ -1,5 +1,9 @@
 import type { SkiaSelector, SkiaValue } from "../../../values";
 
+export type SharedValueType<T = number> = {
+  value: T;
+};
+
 export const isValue = (value: unknown): value is SkiaValue<unknown> => {
   if (value === undefined || value === null) {
     return false;
@@ -44,7 +48,11 @@ export const isAnimated = <T>(props: AnimatedProps<T>) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnimatedProp<T, P = any> = T | SkiaValue<T> | SkiaSelector<T, P>;
+export type AnimatedProp<T, P = any> =
+  | T
+  | SkiaValue<T>
+  | SkiaSelector<T, P>
+  | SharedValueType<T>;
 
 export type AnimatedProps<T, O extends keyof T | never = never> = {
   [K in keyof T]: K extends "children"

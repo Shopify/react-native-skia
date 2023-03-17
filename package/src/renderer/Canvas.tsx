@@ -37,6 +37,10 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
     const redraw = useCallback(() => {
       innerRef.current?.redraw();
     }, [innerRef]);
+    const getNativeId = useCallback(() => {
+      const id = innerRef.current?.nativeId ?? -1;
+      return id;
+    }, [innerRef]);
 
     const registerValues = useCallback(
       (values: Array<SkiaValue<unknown>>) => {
@@ -48,8 +52,8 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       [ref]
     );
     const root = useMemo(
-      () => new SkiaRoot(Skia, registerValues, redraw),
-      [redraw, registerValues]
+      () => new SkiaRoot(Skia, registerValues, redraw, getNativeId),
+      [redraw, registerValues, getNativeId]
     );
 
     // Render effect
