@@ -23,6 +23,10 @@ export const examples = [
     title: "🖱 Touch Handling",
   },
   {
+    screen: "Screenshot",
+    title: "📺 View Screenshot",
+  },
+  {
     screen: "PathEffect",
     title: "⭐️ Path Effect",
   },

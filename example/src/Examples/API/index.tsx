@@ -21,6 +21,7 @@ import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
 import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
+import { Screenshot } from "./Screenshot";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -46,6 +47,13 @@ export const API = () => {
         component={Images}
         options={{
           title: "🏞 Images",
+        }}
+      />
+      <Stack.Screen
+        name="Screenshot"
+        component={Screenshot}
+        options={{
+          title: "📺 View Screenshot",
         }}
       />
       <Stack.Screen
