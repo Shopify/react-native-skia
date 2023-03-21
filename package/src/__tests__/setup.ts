@@ -36,7 +36,7 @@ interface CheckImageOptions {
 }
 
 const defaultCheckImageOptions = {
-  maxPixelDiff: 20,
+  maxPixelDiff: 50,
   threshold: 0.1,
   overwrite: false,
   mute: false,

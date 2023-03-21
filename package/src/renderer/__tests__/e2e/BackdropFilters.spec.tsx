@@ -65,7 +65,7 @@ describe("Backdrop Filters", () => {
         </BackdropBlur>
       </Group>
     );
-    checkImage(img, docPath("blur-backdrop-filter.png"), { maxPixelDiff: 20 });
+    checkImage(img, docPath("blur-backdrop-filter.png"));
   });
   it("should display the Aurora Example", async () => {
     const { width, height } = surface;

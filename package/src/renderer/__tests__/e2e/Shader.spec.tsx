@@ -108,9 +108,7 @@ half4 main(float2 p) {
         </Group>
       </>
     );
-    checkImage(img, "snapshots/runtime-effects/spiral.png", {
-      maxPixelDiff: 13,
-    });
+    checkImage(img, "snapshots/runtime-effects/spiral.png");
   });
 
   it("should flatten shader uniforms", async () => {

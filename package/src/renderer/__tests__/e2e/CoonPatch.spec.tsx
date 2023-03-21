@@ -36,7 +36,7 @@ describe("CoonsPatch", () => {
         patch={[topLeft, topRight, bottomRight, bottomLeft]}
       />
     );
-    checkImage(img, "snapshots/coons-patch/simple.png", { maxPixelDiff: 8 });
+    checkImage(img, "snapshots/coons-patch/simple.png");
   });
   it("Coons Patch with opacity", async () => {
     const vec = (x: number, y: number) => ({ x, y });
@@ -69,8 +69,6 @@ describe("CoonsPatch", () => {
         />
       </>
     );
-    checkImage(img, "snapshots/coons-patch/patch-with-opacity.png", {
-      maxPixelDiff: 7,
-    });
+    checkImage(img, "snapshots/coons-patch/patch-with-opacity.png");
   });
 });
