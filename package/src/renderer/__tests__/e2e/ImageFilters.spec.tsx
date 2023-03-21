@@ -1,6 +1,11 @@
 import React from "react";
 
-import { docPath, checkImage, itRunsNodeOnly } from "../../../__tests__/setup";
+import {
+  docPath,
+  checkImage,
+  itRunsNodeOnly,
+  itRunsE2eOnly,
+} from "../../../__tests__/setup";
 import { fonts, images, surface } from "../setup";
 import {
   Fill,
@@ -11,6 +16,8 @@ import {
   RoundedRect,
   Shadow,
   Text,
+  DisplacementMap,
+  Turbulence,
 } from "../../components";
 
 describe("Test Image Filters", () => {
@@ -141,5 +148,25 @@ describe("Test Image Filters", () => {
       </>
     );
     checkImage(img, "snapshots/image-filter/test-shadow.png");
+  });
+  itRunsE2eOnly("use the displacement map as documented", async () => {
+    const { oslo } = images;
+    const img = await surface.draw(
+      <>
+        <Image
+          image={oslo}
+          x={0}
+          y={0}
+          width={surface.width}
+          height={surface.height}
+          fit="cover"
+        >
+          <DisplacementMap channelX="g" channelY="a" scale={20}>
+            <Turbulence freqX={0.01} freqY={0.05} octaves={2} seed={2} />
+          </DisplacementMap>
+        </Image>
+      </>
+    );
+    checkImage(img, docPath("displacement-map.png"));
   });
 });
