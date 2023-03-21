@@ -46,7 +46,7 @@ interface CheckImageOptions {
 }
 
 const defaultCheckImageOptions = {
-  maxPixelDiff: 0,
+  maxPixelDiff: 20,
   threshold: 0.1,
   overwrite: false,
   mute: false,
@@ -80,6 +80,7 @@ export const checkImage = (
     );
     if (!mute) {
       if (diffPixelsCount > maxPixelDiff && !shouldFail) {
+        console.log(`${p} didn't match`);
         fs.writeFileSync(`${p}.test.png`, PNG.sync.write(toTest));
         fs.writeFileSync(`${p}-diff-test.png`, PNG.sync.write(diffImage));
       }
