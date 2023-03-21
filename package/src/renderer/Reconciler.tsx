@@ -31,10 +31,11 @@ export class SkiaRoot {
   constructor(
     Skia: Skia,
     registerValues: RegisterValues = () => () => {},
-    redraw: () => void = () => {}
+    redraw: () => void = () => {},
+    getNativeId: () => number = () => 0
   ) {
     const depMgr = createDependencyManager(registerValues);
-    this.container = new Container(Skia, depMgr, redraw);
+    this.container = new Container(Skia, depMgr, redraw, getNativeId);
     this.root = skiaReconciler.createContainer(
       this.container,
       0,

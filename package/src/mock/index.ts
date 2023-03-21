@@ -6,10 +6,8 @@ import * as ValuesHooks from "../values/hooks";
 import { Selector } from "../values/selector";
 import * as BaseSkia from "../skia/types";
 import type * as SkiaExports from "../skia";
-import type * as ExternalExports from "../external";
 import type * as ValueExports from "../values";
 import type * as AnimationExports from "../animation";
-import { useSharedValueEffect } from "../external/reanimated/useSharedValueEffect";
 import * as timingFunctions from "../animation/timing";
 import * as springFunctions from "../animation/spring";
 import * as decayFunctions from "../animation/decay";
@@ -35,7 +33,6 @@ export const Skia: SkiaApi = new Stub() as any;
 export const vec = (x?: number, y?: number) => ({ x: x ?? 0, y: y ?? x ?? 0 });
 
 export const Mock: typeof SkiaExports &
-  typeof ExternalExports &
   typeof ValueExports &
   typeof AnimationExports & {
     createDrawing: () => any;
@@ -82,8 +79,6 @@ export const Mock: typeof SkiaExports &
   bottomRight: Noop,
   center: Noop,
   processTransform2d: Noop,
-  // ExternalExports
-  useSharedValueEffect,
   // ValueExports
   ...Values,
   ...ValuesHooks,
