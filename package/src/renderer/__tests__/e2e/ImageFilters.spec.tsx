@@ -167,6 +167,7 @@ describe("Test Image Filters", () => {
         </Image>
       </>
     );
-    checkImage(img, docPath("displacement-map.png"));
+    // on Github action the image is decoded differently, allowing for somewhat small differences
+    checkImage(img, docPath("displacement-map.png"), { maxPixelDiff: 8000 });
   });
 });
