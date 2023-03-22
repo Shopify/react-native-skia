@@ -5,12 +5,12 @@ import type { ReactNode } from "react";
 
 import { JsiSkApi } from "../skia/web";
 import { SkiaRoot } from "../renderer/Reconciler";
-import { Skia } from "../skia/types";
 import { JsiDrawingContext } from "../dom/types";
 
 export * from "../renderer/components";
 
-let Skia: Skia;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Skia: any;
 
 export const draw = (element: ReactNode, width: number, height: number) => {
   if (!Skia) {
