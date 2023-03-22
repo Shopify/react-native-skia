@@ -23,14 +23,15 @@ const star = (Skia: Skia) => {
 };
 
 describe("Path Effects", () => {
-  it("should apply the discrete path effect nicely", async () => {
+  // Everything noise related, we don't want to run on a CPU backend
+  itRunsE2eOnly("should apply the discrete path effect nicely", async () => {
     const { Skia } = importSkia();
     const path = star(Skia);
     const img = await surface.draw(
       <>
         <Fill color="white" />
         <Path path={path} style="stroke" strokeWidth={2} color="lightblue">
-          <DiscretePathEffect length={10} deviation={4} />
+          <DiscretePathEffect length={10} deviation={4} seed={0} />
         </Path>
       </>
     );
