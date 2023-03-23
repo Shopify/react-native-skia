@@ -29,11 +29,16 @@ export function throwOnIncompatibleReanimatedVersion() {
     return;
   }
   ReanimatedVersionTested = true;
-  const reanimatedVersion =
+  let reanimatedVersion: false | string = false;
+  try {
+    // The first compatible version is 3.0.0 but we need to exclude 3.0.0 pre-releases
+    // as they have limited support for the used API.
     // eslint-disable-next-line import/extensions
-    require("react-native-reanimated/package.json").version;
-  // The first compatible version is 3.0.0 but we need to exclude 3.0.0 pre-releases
-  // as they have limited support for the used API.
+    reanimatedVersion = require("react-native-reanimated/package.json").version;
+  } catch (e) {
+    // Ignore
+  }
+
   if (
     !reanimatedVersion ||
     reanimatedVersion < "3.0.0" ||
