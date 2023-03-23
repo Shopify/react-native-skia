@@ -103,15 +103,21 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
   }
 
   decorate(ctx: DeclarationContext) {
+    this.decorateChildren(ctx);
     const { channelX, channelY, scale } = this.props;
+    const shader = ctx.shaders.pop();
+    if (!shader) {
+      throw new Error("DisplacementMap expects a shader as child");
+    }
+    const map = this.Skia.ImageFilter.MakeShader(shader, null);
     const imgf = this.Skia.ImageFilter.MakeDisplacementMap(
       ColorChannel[enumKey(channelX)],
       ColorChannel[enumKey(channelY)],
       scale,
-      ctx.imageFilters.pop()!,
+      map,
       this.input(ctx)
     );
-    this.composeAndPush(ctx, imgf);
+    ctx.imageFilters.push(imgf);
   }
 }
 
