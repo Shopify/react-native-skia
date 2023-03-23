@@ -147,6 +147,7 @@ export const mountCanvas = (element: ReactNode) => {
   const root = new SkiaRoot(Skia);
   root.render(element);
   return {
+    unmount: root.unmount.bind(root),
     surface: ckSurface,
     root: root.dom,
     draw: () => {
