@@ -8,13 +8,13 @@ import {
   startMapper,
   stopMapper,
   isSharedValue,
-  HAS_REANIMATED3,
+  HAS_REANIMATED,
 } from "./moduleWrapper";
 
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
 export function extractReanimatedProps(props: AnimatedProps<any>) {
-  if (!HAS_REANIMATED3) {
+  if (!HAS_REANIMATED) {
     return [props, {}];
   }
   const reanimatedProps = {} as AnimatedProps<any>;
@@ -39,7 +39,7 @@ export function bindReanimatedProps(
   node: Node<any>,
   reanimatedProps: AnimatedProps<any>
 ) {
-  if (!HAS_REANIMATED3) {
+  if (!HAS_REANIMATED) {
     return;
   }
   const sharedValues = Object.values(reanimatedProps);
