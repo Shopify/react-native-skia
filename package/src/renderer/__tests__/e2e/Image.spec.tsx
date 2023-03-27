@@ -22,6 +22,6 @@ describe("Image loading from bundles", () => {
         />
       </>
     );
-    checkImage(image, "snapshots/images/bundle.png", { maxPixelDiff: 29 });
+    checkImage(image, `snapshots/images/bundle-${surface.OS}.png`);
   });
 });

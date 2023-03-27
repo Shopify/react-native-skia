@@ -88,10 +88,11 @@ protected:
 
 class RNSkImageCanvasProvider : public RNSkCanvasProvider {
 public:
-  RNSkImageCanvasProvider(std::function<void()> requestRedraw, float width,
+  RNSkImageCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
+                          std::function<void()> requestRedraw, float width,
                           float height)
       : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
-    _surface = SkSurface::MakeRasterN32Premul(_width, _height);
+    _surface = context->makeOffscreenSurface(_width, _height);
   }
 
   /**
@@ -261,8 +262,9 @@ public:
    Renders the view into an SkImage instead of the screen.
    */
   sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
+
     auto provider = std::make_shared<RNSkImageCanvasProvider>(
-        std::bind(&RNSkView::requestRedraw, this),
+        getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
         _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight());
 
     _renderer->renderImmediate(provider);
