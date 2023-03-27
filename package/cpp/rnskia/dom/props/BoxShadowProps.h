@@ -2,6 +2,8 @@
 
 #include "NodeProp.h"
 
+#include "SkBlurTypes.h"
+
 #include <memory>
 #include <utility>
 

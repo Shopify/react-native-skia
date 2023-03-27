@@ -11,6 +11,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include <SkMaskFilter.h>
+#include <SkBlurTypes.h>
 
 #pragma clang diagnostic pop
 

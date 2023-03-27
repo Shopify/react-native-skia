@@ -10,6 +10,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include <SkTrimPathEffect.h>
+#include <SkPathUtils.h>
 
 #pragma clang diagnostic pop
 
@@ -102,16 +103,16 @@ protected:
                 opts.getValue(PropNameMiterLimit).getAsNumber());
           }
 
-          double precision = 1.0;
+          double scale = 1.0;
           if (opts.hasValue(PropNamePrecision)) {
-            precision = opts.getValue(PropNamePrecision).getAsNumber();
+              scale = opts.getValue(PropNamePrecision).getAsNumber();
           }
 
           // _path is const so we can't mutate it directly, let's replace the
           // path like this:
           auto p = std::make_shared<SkPath>(*_path.get());
-          if (!strokePaint.getFillPath(*_path.get(), p.get(), nullptr,
-                                       precision)) {
+          if (!skpathutils::FillPathWithPaint(*_path.get(), strokePaint, p.get(), nullptr,
+                                       scale)) {
             _path = nullptr;
           } else {
             _path = std::const_pointer_cast<const SkPath>(p);

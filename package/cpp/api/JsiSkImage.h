@@ -14,6 +14,7 @@
 #include "SkBase64.h"
 #include "SkImage.h"
 #include "SkStream.h"
+#include "SkEncodedImageFormat.h"
 #include <include/codec/SkCodec.h>
 
 #pragma clang diagnostic pop

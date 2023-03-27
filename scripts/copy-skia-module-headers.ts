@@ -14,7 +14,8 @@ const copyModule = (module: string) => [
   `mkdir -p ./package/cpp/skia/src/`,
   `mkdir -p ./package/cpp/skia/src/core/`,
   `cp -a ./externals/skia/src/core/SkLRUCache.h ./package/cpp/skia/src/core/.`,
-  `cp -a ./externals/skia/src/core/SkTInternalLList.h ./package/cpp/skia/src/core/.`,
+  `cp -a ./externals/skia/src/core/SkTHash.h ./package/cpp/skia/src/core/.`
+  //`cp -a ./externals/skia/src/core/SkTInternalLList.h ./package/cpp/skia/src/core/.`,
 ].map((cmd) => {
   console.log(cmd);
   executeCmdSync(cmd);
