@@ -30,7 +30,7 @@ const NdkDir: string = process.env.ANDROID_NDK ?? "";
 //    Line 66-67, uncomment
 // 6) Workflow-copy-libs.ts:
 //    27-28 and 36-37, uncomment
-export const BUILD_WITH_PARAGRAPH = false;
+export const BUILD_WITH_PARAGRAPH = true;
 const ParagraphArgs = BUILD_WITH_PARAGRAPH
   ? [
       ["skia_enable_paragraph", true],
