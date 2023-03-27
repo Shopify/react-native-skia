@@ -2,66 +2,59 @@ import { useMemo } from "react";
 
 import type { SharedValueType } from "../../renderer/processors/Animations";
 
+// This one is needed for the deprecated useSharedValue function
+// We can remove it once we remove the deprecation
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Reanimated: any;
+let Reanimated2: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Reanimated3: any;
+let reanimatedVersion: string;
 
 try {
-  Reanimated = require("react-native-reanimated");
-} catch (e) {
-  // Ignore
-}
-
-export const HAS_REANIMATED = !!Reanimated;
-
-function throwOnMissingReanimated() {
-  throw new Error(
-    "Reanimated was not found, make sure react-native-reanimated package is installed if you want to use \
-    react-naitve-skia's integration layer API."
-  );
-}
-
-let ReanimatedVersionTested = false;
-
-export function throwOnIncompatibleReanimatedVersion() {
-  if (ReanimatedVersionTested) {
-    // we avoid testing version more than once as it won't change and we throw
-    // an error when version is incompatible
-    return;
-  }
-  ReanimatedVersionTested = true;
-  let reanimatedVersion: false | string = false;
-  try {
-    // The first compatible version is 3.0.0 but we need to exclude 3.0.0 pre-releases
-    // as they have limited support for the used API.
+  Reanimated2 = require("react-native-reanimated");
+  reanimatedVersion =
     // eslint-disable-next-line import/extensions
-    reanimatedVersion = require("react-native-reanimated/package.json").version;
-  } catch (e) {
-    // Ignore
-  }
-
+    require("react-native-reanimated/package.json").version;
   if (
-    !reanimatedVersion ||
-    reanimatedVersion < "3.0.0" ||
-    reanimatedVersion.includes("3.0.0-")
+    reanimatedVersion &&
+    (reanimatedVersion >= "3.0.0" || reanimatedVersion.includes("3.0.0-"))
   ) {
+    Reanimated3 = Reanimated2;
+  }
+} catch (e) {}
+
+export const HAS_REANIMATED2 = !!Reanimated2;
+export const HAS_REANIMATED3 = !!Reanimated3;
+
+function throwOnMissingReanimated2() {
+  if (!HAS_REANIMATED2) {
     throw new Error(
-      `Reanimated version ${reanimatedVersion} is not supported, please upgrade to 3.0.0 or newer.`
+      "Reanimated was not found, make sure react-native-reanimated package is installed if you want to use \
+      react-naitve-skia's integration layer API."
     );
   }
 }
 
+function throwOnMissingReanimated3() {
+  if (!HAS_REANIMATED3) {
+    throw new Error(
+      `Reanimated version ${reanimatedVersion} is not supported, please upgrade to 3.0.0 or newer.`
+    );
+  }
+  throwOnMissingReanimated2();
+}
+
 export const useSharedValue =
-  Reanimated?.useSharedValue ||
+  Reanimated2?.useSharedValue ||
   ((value: number) => useMemo(() => ({ value }), [value]));
 
-export const startMapper = Reanimated?.startMapper || throwOnMissingReanimated;
-export const stopMapper = Reanimated?.stopMapper || throwOnMissingReanimated;
-export const runOnJS = Reanimated?.runOnJS || throwOnMissingReanimated;
+export const startMapper =
+  Reanimated2?.startMapper || throwOnMissingReanimated2;
+export const stopMapper = Reanimated2?.stopMapper || throwOnMissingReanimated2;
+export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated2;
 export const isSharedValue = <T>(
   value: unknown
 ): value is SharedValueType<T> => {
-  if (!Reanimated) {
-    throwOnMissingReanimated();
-  }
-  return !!value && Reanimated.isSharedValue(value);
+  throwOnMissingReanimated3();
+  return !!value && Reanimated3.isSharedValue(value);
 };
