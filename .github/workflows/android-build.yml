@@ -109,5 +109,11 @@ jobs:
         if: failure()
         with:
           path: package/src/__tests__/snapshots/
-          name: Download-screenshots
+          name: snapshots-screenshots
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          path: docs/static
+          name: docs-screenshots
 

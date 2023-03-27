@@ -158,20 +158,21 @@ public:
       : JsiBaseImageFilterNode(context, "skDisplacementMapImageFilter") {}
 
   void decorate(DeclarationContext *context) override {
-
+    decorateChildren(context);
     auto channelX =
         getColorChannelFromStringValue(_channelXProp->value().getAsString());
     auto channelY =
         getColorChannelFromStringValue(_channelYProp->value().getAsString());
     auto scale = _scaleProp->value().getAsNumber();
-
-    auto displacement = context->getImageFilters()->pop();
-
-    auto color = context->getImageFilters()->pop();
-
-    composeAndPush(context, SkImageFilters::DisplacementMap(
-                                channelX, channelY, scale, displacement,
-                                color ? color : nullptr));
+    auto shader = context->getShaders()->pop();
+    if (!shader) {
+      throw std::runtime_error("DisplacementMap expects a shader as child");
+    }
+    auto map = SkImageFilters::Shader(shader);
+    auto input = context->getImageFilters()->pop();
+    auto imgf = SkImageFilters::DisplacementMap(channelX, channelY, scale, map,
+                                                input ? input : nullptr);
+    context->getImageFilters()->push(imgf);
   }
 
 protected:

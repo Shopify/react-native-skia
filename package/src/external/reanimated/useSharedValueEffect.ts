@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import type { SharedValueType } from "../../renderer/processors/Animations";
 
 import {
-  HAS_REANIMATED,
+  HAS_REANIMATED2,
   useSharedValue,
   runOnJS,
   startMapper,
@@ -28,7 +28,7 @@ Learn more at https://shopify.github.io/react-native-skia/.`
   const input = useSharedValue(0);
 
   useEffect(() => {
-    if (!HAS_REANIMATED) {
+    if (!HAS_REANIMATED2) {
       console.warn(
         "Reanimated was not found and the useSharedValueEffect hook will have no effect."
       );
