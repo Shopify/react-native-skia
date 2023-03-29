@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   Button,
-  findNodeHandle,
   Text,
   useWindowDimensions,
   ScrollView,
@@ -14,6 +13,7 @@ import {
   Fill,
   Skia,
   RoundedRect,
+  makeImageFromView,
   useLoop,
   useComputedValue,
   mix,
@@ -46,8 +46,7 @@ export const Screenshot = () => {
     if (viewRef.current == null) {
       return;
     }
-    const nodeHandle = findNodeHandle(viewRef.current);
-    const snapshot = await Skia.Image.MakeImageFromViewTag(nodeHandle!);
+    const snapshot = await makeImageFromView(viewRef);
     setImage(snapshot);
   }, []);
   return (
