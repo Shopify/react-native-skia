@@ -288,7 +288,7 @@ public:
       return;
     }
     _isDisposing = true;
-    if (invalidateNode) {
+    if (immediate) {
       invalidate();
     }
   }
