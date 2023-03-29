@@ -12,7 +12,7 @@ Images are loaded using the `useImage` hook. This hook returns an `SkImage` inst
 Images can be loaded using require statements, or by passing a network URL directly. It is also possible to load images from the app bundle using named images.
 
 ```tsx twoslash
-import {useImage} from "@shopify/react-native-skia";
+import { useImage } from "@shopify/react-native-skia";
 // Loads an image from the JavaScript bundle
 const image1 = useImage(require("./assets/oslo"));
 // Loads an image from the network
@@ -21,7 +21,7 @@ const image2 = useImage("https://picsum.photos/200/300");
 const image3 = useImage("Logo");
 ```
 
-Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is loaded. You can use this to conditionally render the `Image` component like in the [example below](#example). The hook also provides an optional error handler as a second parameter. 
+Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is loaded. You can use this to conditionally render the `Image` component like in the [example below](#example). The hook also provides an optional error handler as a second parameter.
 
 ## Image
 
@@ -96,3 +96,32 @@ const ImageDemo = () => {
 | width          | Returns the possibly scaled width of the image.                   |
 | encodeToBytes  | Encodes Image pixels, returning result as UInt8Array              |
 | encodeToBase64 | Encodes Image pixels, returning result as a base64 encoded string |
+
+## Creating screenshots of views
+
+It is possible to take a screenshot of a view using the `makeImageFromView` function. This function takes a ref to a view and returns a promise that resolves to an SkImage instance on success.
+
+```tsx twoslash
+import { useState, useRef } from "react";
+import { View } from "react-native";
+import type { SkImage } from "@shopify/react-native-skia";
+import { makeImageFromView } from "@shopify/react-native-skia";
+
+// Create a ref for the view you'd like to take a screenshot of
+const viewRef = useRef<View>(null);
+
+// Create a state variable to store the screenshot
+const [image, setImage] = useState<SkImage | null>(null);
+
+// Create a function to take the screenshot
+const takeScreenshot = async () => {
+  if (viewRef.current == null) {
+    return;
+  }
+  // Take the screenshot of the view
+  const snapshot = await makeImageFromView(viewRef);
+  setImage(snapshot);
+};
+```
+
+**Note**: On React Native Web this function is implemented using a callback that takes the actual screenshot and converts it to a Skia SkImage since the web platform does not have direct support for taking screenshots of views.
