@@ -23,8 +23,10 @@ class JsiDependencyManager
       public std::enable_shared_from_this<JsiDependencyManager> {
 public:
   JsiDependencyManager(std::shared_ptr<RNSkPlatformContext> context,
-                       jsi::Object &&registerValuesCallback)
-      : _registerValuesCallback(std::move(registerValuesCallback)),
+                       jsi::Runtime &runtime,
+                       const jsi::Value &registerValuesCallback)
+      : _registerValuesCallback(std::make_shared<jsi::Object>(
+            registerValuesCallback.asObject(runtime))),
         JsiHostObject() {}
 
   ~JsiDependencyManager() { unsubscribeAll(); }
@@ -158,7 +160,7 @@ public:
     }
 
     // Call JS registerValues callback
-    auto func = _registerValuesCallback.asFunction(runtime);
+    auto func = _registerValuesCallback->asFunction(runtime);
     _unregisterValues = std::make_shared<jsi::Object>(
         func.call(runtime, array, 1).asObject(runtime));
 
@@ -187,6 +189,8 @@ public:
 
     unsubscribeAll();
 
+    _registerValuesCallback = nullptr;
+
     return jsi::Value::undefined();
   }
 
@@ -203,8 +207,8 @@ public:
     return JSI_HOST_FUNCTION_LAMBDA {
       // Params: registerValues: (values: Array<SkiaValue<unknown>>) => () =>
       // void
-      auto obj = std::make_shared<JsiDependencyManager>(
-          context, getArgumentAsObject(runtime, arguments, count, 0));
+      auto obj = std::make_shared<JsiDependencyManager>(context, runtime,
+                                                        arguments[0]);
 
       return jsi::Object::createFromHostObject(runtime, std::move(obj));
     };
@@ -283,7 +287,7 @@ private:
     return false;
   }
 
-  jsi::Object _registerValuesCallback;
+  std::shared_ptr<jsi::Object> _registerValuesCallback;
   std::shared_ptr<jsi::Object> _unregisterValues;
   std::map<JsiDomNode *,
            std::vector<std::pair<std::shared_ptr<RNSkReadonlyValue>,
