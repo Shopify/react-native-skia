@@ -283,7 +283,7 @@ public:
    Calling dispose from the JS dispose function calls this with invalidate set
    to false, while the dom render view calls this with true.
    */
-  virtual void dispose(bool invalidateNode) {
+  virtual void dispose(bool immediate) {
     if (_isDisposing) {
       return;
     }
