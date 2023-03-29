@@ -33,7 +33,7 @@ public:
     // readValueFromJS Function (which comes from the reconciler
     // setting a new property value on the property
     if (_value == nullptr) {
-      _value = std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
+      _value = std::make_unique<JsiValue>(runtime, read(runtime, _name, this));
       _isChanged = true;
       _hasNewValue = false;
     } else {
@@ -41,7 +41,7 @@ public:
       std::lock_guard<std::mutex> lock(_swapMutex);
       if (_buffer == nullptr) {
         _buffer =
-            std::make_shared<JsiValue>(runtime, read(runtime, _name, this));
+            std::make_unique<JsiValue>(runtime, read(runtime, _name, this));
       } else {
         _buffer->setCurrent(runtime, read(runtime, _name, this));
       }
@@ -60,7 +60,7 @@ public:
     // and we don't want to rip out the underlying value object.
     std::lock_guard<std::mutex> lock(_swapMutex);
     if (_buffer == nullptr) {
-      _buffer = std::make_shared<JsiValue>(runtime, value);
+      _buffer = std::make_unique<JsiValue>(runtime, value);
     } else {
       _buffer->setCurrent(runtime, value);
     }
@@ -129,8 +129,8 @@ private:
 
   std::function<void(BaseNodeProp *)> _onChange;
 
-  std::shared_ptr<JsiValue> _value;
-  std::shared_ptr<JsiValue> _buffer;
+  std::unique_ptr<JsiValue> _value;
+  std::unique_ptr<JsiValue> _buffer;
   std::atomic<bool> _isChanged = {false};
   std::atomic<bool> _hasNewValue = {false};
   std::mutex _swapMutex;

@@ -82,9 +82,15 @@ public:
   /**
    Called when the React / JS side sets properties on a node
    */
-  void setProps(jsi::Runtime &runtime, jsi::Object &&props) {
+  void setProps(jsi::Runtime &runtime, const jsi::Value &maybePropsObject) {
     // Clear property mapping
     _mappedProperties.clear();
+
+    if (!maybePropsObject.isObject()) {
+      throw jsi::JSError(runtime, "Expected property object.");
+    }
+
+    auto props = maybePropsObject.asObject(runtime);
 
     // Use specialized reader function to be able to intercept calls that
     // reads specific named values from the js property object.

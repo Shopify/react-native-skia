@@ -4,7 +4,6 @@
 #include <thread>
 #include <utility>
 
-#include <RNSkMeasureTime.h>
 #include <SkiaMetalRenderer.h>
 
 #pragma clang diagnostic push
@@ -20,7 +19,6 @@ void RNSkiOSPlatformContext::performStreamOperation(
     const std::string &sourceUri,
     const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) {
 
-  RNSkMeasureTime("PlatformContext::performStreamOperation");
   auto loader = [=]() {
     NSURL *url = [[NSURL alloc]
         initWithString:[NSString stringWithUTF8String:sourceUri.c_str()]];
