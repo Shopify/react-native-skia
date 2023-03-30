@@ -112,8 +112,8 @@ public:
 
   /**
    * Creates an offscreen surface
-   * @param width
-   * @param height
+   * @param width width of the surface
+   * @param height height of the surface
    * @return sk_sp<SkSurface>
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;

@@ -29,7 +29,7 @@ public:
   void updateDerivedValue() override {
     if (_pointProp->isSet()) {
       // Check for JsiSkRect and JsiSkPoint
-      setDerivedValue(std::move(processValue(_pointProp->value())));
+      setDerivedValue(processValue(_pointProp->value()));
     } else {
       setDerivedValue(nullptr);
     }
