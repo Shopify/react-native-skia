@@ -14,7 +14,7 @@
 
 namespace RNSkia {
 
-std::shared_ptr<SkPath> processPath(JsiValue &value) {
+std::shared_ptr<SkPath> processPath(const JsiValue &value) {
   if (value.getType() == PropType::HostObject) {
     // Try reading as Path
     auto ptr = std::dynamic_pointer_cast<JsiSkPath>(value.getAsHostObject());

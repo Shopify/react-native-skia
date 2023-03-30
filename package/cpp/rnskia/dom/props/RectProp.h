@@ -18,7 +18,7 @@ static PropId PropNameRect = JsiPropId::get("rect");
 static PropId PropNameWidth = JsiPropId::get("width");
 static PropId PropNameHeight = JsiPropId::get("height");
 
-std::shared_ptr<SkRect> processRect(JsiValue &value) {
+std::shared_ptr<SkRect> processRect(const JsiValue &value) {
   if (value.getType() == PropType::HostObject) {
     auto rectPtr =
         std::dynamic_pointer_cast<JsiSkRect>(value.getAsHostObject());

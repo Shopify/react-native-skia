@@ -20,7 +20,7 @@ static PropId PropNameRx = JsiPropId::get("rx");
 static PropId PropNameRy = JsiPropId::get("ry");
 static PropId PropNameR = JsiPropId::get("r");
 
-std::shared_ptr<SkRRect> processRRect(JsiValue &value) {
+std::shared_ptr<SkRRect> processRRect(const JsiValue &value) {
   if (value.getType() == PropType::HostObject) {
     // Try reading as rect
     auto rectPtr =
@@ -160,7 +160,7 @@ public:
     auto value = _boxProp->value();
     auto rect = processRect(value);
     if (rect) {
-      setDerivedValue(rect);
+      setDerivedValue(SkRRect::MakeRect(*rect));
     } else {
       setDerivedValue(processRRect(value));
     }
