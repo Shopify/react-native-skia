@@ -27,8 +27,9 @@ std::shared_ptr<SkRect> processRect(JsiValue &value) {
           rectPtr->getObject()->x(), rectPtr->getObject()->y(),
           rectPtr->getObject()->width(), rectPtr->getObject()->height()));
     }
-  } else if (value.getType() == PropType::Object && value.hasValue(PropNameX) && value.hasValue(PropNameY) &&
-             value.hasValue(PropNameWidth) && value.hasValue(PropNameHeight)) {
+  } else if (value.getType() == PropType::Object && value.hasValue(PropNameX) &&
+             value.hasValue(PropNameY) && value.hasValue(PropNameWidth) &&
+             value.hasValue(PropNameHeight)) {
     // Save props for fast access
     auto x = value.getValue(PropNameX);
     auto y = value.getValue(PropNameY);

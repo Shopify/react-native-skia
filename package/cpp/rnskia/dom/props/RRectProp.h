@@ -34,23 +34,24 @@ std::shared_ptr<SkRRect> processRRect(JsiValue &value) {
     }
   } else {
     if (value.getType() == PropType::Object) {
-      if (value.hasValue(PropNameRect) &&
-          value.hasValue(PropNameRx) && value.hasValue(PropNameRy)) {
-		  auto rect = value.getValue(PropNameRect);
-		  if (rect.hasValue(PropNameX) && rect.hasValue(PropNameY) && rect.hasValue(PropNameWidth) && rect.hasValue(PropNameHeight)) {
-			auto x = rect.getValue(PropNameX);
-			auto y = rect.getValue(PropNameY);
-			auto width = rect.getValue(PropNameWidth);
-			auto height = rect.getValue(PropNameHeight);
-			auto rx = value.getValue(PropNameRx);
-			auto ry = value.getValue(PropNameRy);
+      if (value.hasValue(PropNameRect) && value.hasValue(PropNameRx) &&
+          value.hasValue(PropNameRy)) {
+        auto rect = value.getValue(PropNameRect);
+        if (rect.hasValue(PropNameX) && rect.hasValue(PropNameY) &&
+            rect.hasValue(PropNameWidth) && rect.hasValue(PropNameHeight)) {
+          auto x = rect.getValue(PropNameX);
+          auto y = rect.getValue(PropNameY);
+          auto width = rect.getValue(PropNameWidth);
+          auto height = rect.getValue(PropNameHeight);
+          auto rx = value.getValue(PropNameRx);
+          auto ry = value.getValue(PropNameRy);
 
-			// Update cache from js object value
-			return std::make_shared<SkRRect>(SkRRect::MakeRectXY(
-				SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
-								 width.getAsNumber(), height.getAsNumber()),
-				rx.getAsNumber(), ry.getAsNumber()));
-		  }
+          // Update cache from js object value
+          return std::make_shared<SkRRect>(SkRRect::MakeRectXY(
+              SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
+                               width.getAsNumber(), height.getAsNumber()),
+              rx.getAsNumber(), ry.getAsNumber()));
+        }
       }
     }
   }
