@@ -132,19 +132,19 @@ public:
    */
   void resetPendingChanges() override { JsiDomNode::resetPendingChanges(); }
 
-  /**
-   Signal from the JS side that the node is removed from the dom.
-   */
-  void dispose() override { JsiDomNode::dispose(); }
-
 protected:
   /**
    Invalidates and marks then context as changed.
    */
   void invalidateContext() override {
-    enqueAsynOperation([=]() {
-      _paintCache.parent = nullptr;
-      _paintCache.child = nullptr;
+    enqueAsynOperation([weakSelf = weak_from_this()]() {
+      auto self = weakSelf.lock();
+      if (self) {
+        std::static_pointer_cast<JsiDomRenderNode>(self)->_paintCache.parent =
+            nullptr;
+        std::static_pointer_cast<JsiDomRenderNode>(self)->_paintCache.child =
+            nullptr;
+      }
     });
   }
 
