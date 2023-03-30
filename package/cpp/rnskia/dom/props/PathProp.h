@@ -14,6 +14,27 @@
 
 namespace RNSkia {
 
+std::shared_ptr<SkPath> processPath(JsiValue &value) {
+  if (value.getType() == PropType::HostObject) {
+    // Try reading as Path
+    auto ptr = std::dynamic_pointer_cast<JsiSkPath>(value.getAsHostObject());
+    if (ptr != nullptr) {
+      return ptr->getObject();
+    }
+  } else if (value.getType() == PropType::String) {
+    // Read as string
+    auto pathString = value.getAsString();
+    SkPath result;
+
+    if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {
+      return std::make_shared<SkPath>(result);
+    } else {
+      throw std::runtime_error("Could not parse path from string.");
+    }
+  }
+  return nullptr;
+}
+
 class PathProp : public DerivedProp<SkPath> {
 public:
   explicit PathProp(PropId name,
@@ -27,27 +48,8 @@ public:
       setDerivedValue(nullptr);
       return;
     }
-
-    if (_pathProp->value().getType() == PropType::HostObject) {
-      // Try reading as Path
-      auto ptr = std::dynamic_pointer_cast<JsiSkPath>(
-          _pathProp->value().getAsHostObject());
-      if (ptr != nullptr) {
-        setDerivedValue(ptr->getObject());
-      }
-    } else if (_pathProp->value().getType() == PropType::String) {
-      // Read as string
-      auto pathString = _pathProp->value().getAsString();
-      SkPath result;
-
-      if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {
-        setDerivedValue(std::make_shared<SkPath>(result));
-      } else {
-        throw std::runtime_error("Could not parse path from string.");
-      }
-    } else {
-      setDerivedValue(nullptr);
-    }
+    auto value = _pathProp->value();
+    setDerivedValue(processPath(value));
   }
 
 private:
