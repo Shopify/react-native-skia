@@ -27,9 +27,7 @@ std::shared_ptr<SkRRect> processRRect(const JsiValue &value) {
         std::dynamic_pointer_cast<JsiSkRRect>(value.getAsHostObject());
     if (rectPtr != nullptr) {
       auto rrect = rectPtr->getObject();
-      return std::make_shared<SkRRect>(SkRRect::MakeRectXY(
-          SkRect::MakeXYWH(rrect->rect().x(), rrect->rect().y(),
-                           rrect->rect().width(), rrect->rect().height()),
+      return std::make_shared<SkRRect>(SkRRect::MakeRectXY(rrect->rect(),
           rrect->getSimpleRadii().x(), rrect->getSimpleRadii().y()));
     }
   } else {
