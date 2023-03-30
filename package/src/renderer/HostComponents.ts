@@ -65,7 +65,7 @@ import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
 import type { DependencyManager } from "./DependencyManager";
 
-export const NATIVE_DOM = false;
+export const NATIVE_DOM = true;
 
 declare global {
   var SkiaDomApi: {
