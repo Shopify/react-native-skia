@@ -56,6 +56,7 @@ import type {
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../types/PathEffects";
+import { NATIVE_DOM } from "../../renderer/HostComponents";
 
 import {
   FillNode,
@@ -127,203 +128,203 @@ export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
 
   Layer(props?: ChildrenProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.LayerNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.LayerNode(props ?? {})
       : new LayerNode(this.ctx, props ?? {});
   }
 
   Group(props?: GroupProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.GroupNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.GroupNode(props ?? {})
       : new GroupNode(this.ctx, props ?? {});
   }
 
   Paint(props: PaintProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.PaintNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.PaintNode(props ?? {})
       : new PaintNode(this.ctx, props);
   }
 
   // Drawings
   Fill(props?: DrawingNodeProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.FillNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.FillNode(props ?? {})
       : new FillNode(this.ctx, props);
   }
 
   Image(props: ImageProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.ImageNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.ImageNode(props ?? {})
       : new ImageNode(this.ctx, props);
   }
 
   Circle(props: CircleProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.CircleNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.CircleNode(props ?? {})
       : new CircleNode(this.ctx, props);
   }
 
   Path(props: PathProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.PathNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.PathNode(props ?? {})
       : new PathNode(this.ctx, props);
   }
 
   CustomDrawing(props: CustomDrawingNodeProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.CustomDrawingNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.CustomDrawingNode(props ?? {})
       : new CustomDrawingNode(this.ctx, props);
   }
 
   Line(props: LineProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.LineNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.LineNode(props ?? {})
       : new LineNode(this.ctx, props);
   }
 
   Oval(props: OvalProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.OvalNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.OvalNode(props ?? {})
       : new OvalNode(this.ctx, props);
   }
 
   Patch(props: PatchProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.PatchNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.PatchNode(props ?? {})
       : new PatchNode(this.ctx, props);
   }
 
   Points(props: PointsProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.PointsNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.PointsNode(props ?? {})
       : new PointsNode(this.ctx, props);
   }
 
   Rect(props: RectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.RectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.RectNode(props)
       : new RectNode(this.ctx, props);
   }
 
   RRect(props: RoundedRectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.RRectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.RRectNode(props)
       : new RRectNode(this.ctx, props);
   }
 
   Vertices(props: VerticesProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.VerticesNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.VerticesNode(props)
       : new VerticesNode(this.ctx, props);
   }
 
   Text(props: TextProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.TextNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.TextNode(props)
       : new TextNode(this.ctx, props);
   }
 
   TextPath(props: TextPathProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.TextPathNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.TextPathNode(props)
       : new TextPathNode(this.ctx, props);
   }
 
   TextBlob(props: TextBlobProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.TextBlobNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.TextBlobNode(props)
       : new TextBlobNode(this.ctx, props);
   }
 
   Glyphs(props: GlyphsProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.GlyphsNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.GlyphsNode(props)
       : new GlyphsNode(this.ctx, props);
   }
 
   DiffRect(props: DiffRectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.DiffRectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.DiffRectNode(props)
       : new DiffRectNode(this.ctx, props);
   }
 
   Picture(props: PictureProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.PictureNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.PictureNode(props)
       : new PictureNode(this.ctx, props);
   }
 
   ImageSVG(props: ImageSVGProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.ImageSVGNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.ImageSVGNode(props)
       : new ImageSVGNode(this.ctx, props);
   }
 
   // BlurMaskFilters
   BlurMaskFilter(props: BlurMaskFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.BlurMaskFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.BlurMaskFilterNode(props)
       : new BlurMaskFilterNode(this.ctx, props);
   }
 
   // ImageFilters
   BlendImageFilter(props: BlendImageFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.BlendImageFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.BlendImageFilterNode(props)
       : new BlendImageFilterNode(this.ctx, props);
   }
 
   DropShadowImageFilter(props: DropShadowImageFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.DropShadowImageFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.DropShadowImageFilterNode(props)
       : new DropShadowImageFilterNode(this.ctx, props);
   }
 
   DisplacementMapImageFilter(props: DisplacementMapImageFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.DisplacementMapImageFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.DisplacementMapImageFilterNode(props)
       : new DisplacementMapImageFilterNode(this.ctx, props);
   }
 
   BlurImageFilter(props: BlurImageFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.BlurImageFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.BlurImageFilterNode(props)
       : new BlurImageFilterNode(this.ctx, props);
   }
 
   OffsetImageFilter(props: OffsetImageFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.OffsetImageFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.OffsetImageFilterNode(props)
       : new OffsetImageFilterNode(this.ctx, props);
   }
 
   MorphologyImageFilter(props: MorphologyImageFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.MorphologyImageFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.MorphologyImageFilterNode(props)
       : new MorphologyImageFilterNode(this.ctx, props);
   }
 
   RuntimeShaderImageFilter(props: RuntimeShaderImageFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.RuntimeShaderImageFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.RuntimeShaderImageFilterNode(props)
       : new RuntimeShaderImageFilterNode(this.ctx, props);
   }
 
   // Color Filters
   MatrixColorFilter(props: MatrixColorFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.MatrixColorFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.MatrixColorFilterNode(props)
       : new MatrixColorFilterNode(this.ctx, props);
   }
 
   BlendColorFilter(props: BlendColorFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.BlendColorFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.BlendColorFilterNode(props)
       : new BlendColorFilterNode(this.ctx, props);
   }
 
   LumaColorFilter() {
-    return global.SkiaDomApi && global.SkiaDomApi.LumaColorFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.LumaColorFilterNode()
       : new LumaColorFilterNode(this.ctx);
   }
@@ -343,129 +344,129 @@ export class JsiSkDOM implements SkDOM {
   }
 
   LerpColorFilter(props: LerpColorFilterProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.LerpColorFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.LerpColorFilterNode(props)
       : new LerpColorFilterNode(this.ctx, props);
   }
 
   // Shaders
   Shader(props: ShaderProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.ShaderNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.ShaderNode(props)
       : new ShaderNode(this.ctx, props);
   }
 
   ImageShader(props: ImageShaderProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.ImageShaderNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.ImageShaderNode(props)
       : new ImageShaderNode(this.ctx, props);
   }
 
   ColorShader(props: ColorProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.ColorShaderNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.ColorShaderNode(props)
       : new ColorNode(this.ctx, props);
   }
 
   SweepGradient(props: SweepGradientProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.SweepGradientNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.SweepGradientNode(props)
       : new SweepGradientNode(this.ctx, props);
   }
 
   Turbulence(props: TurbulenceProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.TurbulenceNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.TurbulenceNode(props)
       : new TurbulenceNode(this.ctx, props);
   }
 
   FractalNoise(props: FractalNoiseProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.FractalNoiseNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.FractalNoiseNode(props)
       : new FractalNoiseNode(this.ctx, props);
   }
 
   LinearGradient(props: LinearGradientProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.LinearGradientNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.LinearGradientNode(props)
       : new LinearGradientNode(this.ctx, props);
   }
 
   RadialGradient(props: RadialGradientProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.RadialGradientNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.RadialGradientNode(props)
       : new RadialGradientNode(this.ctx, props);
   }
 
   TwoPointConicalGradient(props: TwoPointConicalGradientProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.TwoPointConicalGradientNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.TwoPointConicalGradientNode(props)
       : new TwoPointConicalGradientNode(this.ctx, props);
   }
 
   // Path Effects
   CornerPathEffect(props: CornerPathEffectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.CornerPathEffectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.CornerPathEffectNode(props)
       : new CornerPathEffectNode(this.ctx, props);
   }
 
   DiscretePathEffect(props: DiscretePathEffectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.DiscretePathEffectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.DiscretePathEffectNode(props)
       : new DiscretePathEffectNode(this.ctx, props);
   }
 
   DashPathEffect(props: DashPathEffectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.DashPathEffectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.DashPathEffectNode(props)
       : new DashPathEffectNode(this.ctx, props);
   }
 
   Path1DPathEffect(props: Path1DPathEffectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.Path1DPathEffectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.Path1DPathEffectNode(props)
       : new Path1DPathEffectNode(this.ctx, props);
   }
 
   Path2DPathEffect(props: Path2DPathEffectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.Path2DPathEffectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.Path2DPathEffectNode(props)
       : new Path2DPathEffectNode(this.ctx, props);
   }
 
   SumPathEffect() {
-    return global.SkiaDomApi && global.SkiaDomApi.SumPathEffectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.SumPathEffectNode()
       : new SumPathEffectNode(this.ctx);
   }
 
   Line2DPathEffect(props: Line2DPathEffectProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.Line2DPathEffectNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.Line2DPathEffectNode(props)
       : new Line2DPathEffectNode(this.ctx, props);
   }
 
   Blend(props: BlendProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.BlendNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.BlendNode(props)
       : new BlendNode(this.ctx, props);
   }
 
   BackdropFilter(props: ChildrenProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.BackdropFilterNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.BackdropFilterNode(props)
       : new BackdropFilterNode(this.ctx, props);
   }
 
   Box(props: BoxProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.BoxNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.BoxNode(props)
       : new BoxNode(this.ctx, props);
   }
 
   BoxShadow(props: BoxShadowProps) {
-    return global.SkiaDomApi && global.SkiaDomApi.BoxShadowNode
+    return NATIVE_DOM
       ? global.SkiaDomApi.BoxShadowNode(props)
       : new BoxShadowNode(this.ctx, props);
   }
