@@ -78,6 +78,11 @@ export abstract class SkiaBaseWebView<
   componentWillUnmount() {
     this.unsubscribeAll();
     cancelAnimationFrame(this.requestId);
+    // https://developer.mozilla.org/en-US/docs/Web/API/WEBGL_lose_context
+    this._canvasRef.current
+      ?.getContext("webgl2")
+      ?.getExtension("WEBGL_lose_context")
+      ?.loseContext();
   }
 
   /**
