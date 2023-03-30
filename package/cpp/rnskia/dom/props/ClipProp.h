@@ -28,13 +28,13 @@ public:
   void updateDerivedValue() override {
     if (_clipProp->isSet()) {
       auto value = _clipProp->value();
-      _rect = processRect(value);
+      _rect = RectProp::processRect(value);
       _rrect = nullptr;
       _path = nullptr;
       if (!_rect) {
-        _path = processPath(value);
+        _path = PathProp::processPath(value);
         if (!_path) {
-          _rrect = processRRect(value);
+          _rrect = RRectProp::processRRect(value);
         }
       }
     }
