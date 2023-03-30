@@ -58,8 +58,7 @@ public:
 
   void updateDerivedValue() override {
     if (_prop->isSet()) {
-      auto value = _prop->value();
-      setDerivedValue(processRect(value));
+      setDerivedValue(processRect(_prop->value()));
     }
   }
 

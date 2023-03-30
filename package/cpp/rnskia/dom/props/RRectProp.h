@@ -160,10 +160,9 @@ public:
     auto value = _boxProp->value();
     auto rect = processRect(value);
     if (rect) {
-      setDerivedValue(SkRRect::MakeRect(*rect));
+      setDerivedValue(rect);
     } else {
-      auto rrect = processRRect(value);
-      setDerivedValue(rrect);
+      setDerivedValue(processRRect(value));
     }
   }
 
