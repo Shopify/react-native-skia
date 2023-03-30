@@ -10,6 +10,7 @@
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
 #include "JsiSkRect.h"
+#include "SkPathUtils.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -289,7 +290,8 @@ public:
 
     auto jsiPrecision = opts.getProperty(runtime, "precision");
     auto precision = jsiPrecision.isUndefined() ? 1 : jsiPrecision.asNumber();
-    auto result = p.getFillPath(path, &path, nullptr, precision);
+    auto result =
+        skpathutils::FillPathWithPaint(path, p, &path, nullptr, precision);
     getObject()->swap(path);
     return result ? thisValue.getObject(runtime) : jsi::Value::null();
   }
@@ -325,8 +327,7 @@ public:
 
   JSI_HOST_FUNCTION(toSVGString) {
     SkPath path = *getObject();
-    SkString s;
-    SkParsePath::ToSVGString(path, &s);
+    SkString s = SkParsePath::ToSVGString(path);
     return jsi::String::createFromUtf8(runtime, s.c_str());
   }
 

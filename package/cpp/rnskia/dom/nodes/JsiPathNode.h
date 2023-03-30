@@ -9,6 +9,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include <SkPathUtils.h>
 #include <SkTrimPathEffect.h>
 
 #pragma clang diagnostic pop
@@ -110,8 +111,8 @@ protected:
           // _path is const so we can't mutate it directly, let's replace the
           // path like this:
           auto p = std::make_shared<SkPath>(*_path.get());
-          if (!strokePaint.getFillPath(*_path.get(), p.get(), nullptr,
-                                       precision)) {
+          if (!skpathutils::FillPathWithPaint(*_path.get(), strokePaint,
+                                              p.get(), nullptr, scale)) {
             _path = nullptr;
           } else {
             _path = std::const_pointer_cast<const SkPath>(p);
