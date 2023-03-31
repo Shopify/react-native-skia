@@ -111,9 +111,9 @@ jobs:
       
       - name: Start Emulator
         uses: reactivecircus/android-emulator-runner@v2
-        working-directory: example/android
         with:
           api-level: 29
+          working-directory: example/android
           script: ./gradlew connectedCheck
 
       - name: Reverse TCP
