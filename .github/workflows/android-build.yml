@@ -79,6 +79,10 @@ jobs:
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
+      - name: Build Android app
+        working-directory: example/android
+        run: ./gradlew assembleDebug
+
       - uses: actions/upload-artifact@v2
         with:
           path: example/android/app/build/outputs/apk/debug/
