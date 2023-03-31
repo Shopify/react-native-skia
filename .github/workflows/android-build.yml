@@ -75,9 +75,6 @@ jobs:
         with:
           path: example/android/app/build
           key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
-  
-      - name: SKDs - download required images
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
       - name: Build Android app
         working-directory: example/android
