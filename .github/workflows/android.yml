@@ -129,4 +129,16 @@ jobs:
       - name: Run e2e Tests
         working-directory: package
         run: CI=true yarn e2e
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          path: package/src/__tests__/snapshots/
+          name: snapshots-screenshots
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          path: docs/static
+          name: docs-screenshots
       
