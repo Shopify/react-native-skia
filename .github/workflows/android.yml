@@ -109,12 +109,18 @@ jobs:
         with:
           name: app-debug.apk
       
-      - name: Start Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 29
-          working-directory: example/android
-          script: ./gradlew connectedCheck
+      - name: SKDs - download required images
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
+
+      - name: Emulator - Create
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
+
+      - name: Emulator - Boot
+        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
+
+      - name: ADB Wait For Device
+        run: adb wait-for-any-device
+        timeout-minutes: 3
 
       - name: Reverse TCP
         working-directory: example
