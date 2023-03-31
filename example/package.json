@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "react-native run-android --active-arch-only",
     "ios": "react-native run-ios",
     "start": "react-native start",
     "web": "webpack serve --mode=development --config webpack.config.js",
