@@ -132,6 +132,15 @@ public:
    */
   void resetPendingChanges() override { JsiDomNode::resetPendingChanges(); }
 
+  
+  /**
+   Overridden dispose to release resources
+   */
+  void dispose(bool immediate) override {
+    JsiDomNode::dispose(immediate);
+    _paintCache.clear();
+  }
+
 protected:
   /**
    Invalidates and marks then context as changed.
@@ -206,7 +215,7 @@ protected:
       invalidateContext();
     }
   }
-
+  
 private:
   /**
    Clips the canvas depending on the clip property
@@ -232,6 +241,10 @@ private:
   }
 
   struct PaintCache {
+    void clear() {
+      parent = nullptr;
+      child = nullptr;
+    }
     std::shared_ptr<SkPaint> parent;
     std::shared_ptr<SkPaint> child;
   };
