@@ -76,6 +76,10 @@ jobs:
           path: example/android/app/build
           key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
   
+      - name: Build Android app
+        working-directory: example/android
+        run: ./gradlew assembleDebug
+  
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
@@ -97,7 +101,7 @@ jobs:
         working-directory: example
         run: E2E=true yarn start &
 
-      - name: Build App
+      - name: Install App
         working-directory: example
         run: E2E=true yarn android
 
