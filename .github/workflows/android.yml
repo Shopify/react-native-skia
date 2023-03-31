@@ -80,11 +80,13 @@ jobs:
         working-directory: example/android
         run: ./gradlew assembleDebug
 
-      - uses: actions/upload-artifact@v2
+      - name: Cache apk
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-apk
         with:
           path: example/android/app/build/outputs/apk/debug/app-debug.apk
-          name: app-debug-${{ github.sha }}.apk
-          retention-days: 1
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('package/**') }}
   test:
     needs: build
     runs-on: macos-12
@@ -105,10 +107,11 @@ jobs:
       - name: Install root dependencies
         run: yarn bootstrap
       
-      - name: Download APK
-        uses: actions/download-artifact@v3
+      - name: Restore APK
+        id: cache-apk
+        uses: actions/cache/restore@v3
         with:
-          name: app-debug-${{ github.sha }}.apk
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('package/**') }}
       
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
@@ -132,7 +135,7 @@ jobs:
         run: E2E=true yarn start &
 
       - name: Install APK
-        run: adb install -r app-debug-${{ github.sha }}.apk        
+        run: adb install -r example/android/app/build/outputs/apk/debug/app-debug.apk      
 
       - name: Run e2e Tests
         working-directory: package
