@@ -80,13 +80,10 @@ jobs:
         working-directory: example/android
         run: ./gradlew assembleDebug
 
-      - name: Rename app
-        run: mv example/android/app/build/outputs/apk/debug/app-debug.apk example/android/app/build/outputs/apk/debug/app-debug-${{ github.sha }}.apk
-
       - uses: actions/upload-artifact@v2
         with:
-          path: example/android/app/build/outputs/apk/debug/app-debug-${{ github.sha }}.apk
-          name: app-debug.apk
+          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          name: app-debug-${{ github.sha }}.apk
           retention-days: 1
   test:
     needs: build
