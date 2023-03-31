@@ -80,10 +80,14 @@ jobs:
         working-directory: example/android
         run: ./gradlew assembleDebug
 
+      - name: Rename app
+        run: mv example/android/app/build/outputs/apk/debug/app-debug.apk example/android/app/build/outputs/apk/debug/app-debug-${{ github.sha }}.apk
+
       - uses: actions/upload-artifact@v2
         with:
-          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          path: example/android/app/build/outputs/apk/debug/app-debug-${{ github.sha }}.apk
           name: app-debug.apk
+          retention-days: 1
   test:
     needs: build
     runs-on: macos-12
@@ -101,13 +105,13 @@ jobs:
           node-version: 16
           cache: 'yarn'
 
-      - name: Install root node dependencies
-        run: yarn
+      - name: Install root dependencies
+        run: yarn bootstrap
       
       - name: Download APK
         uses: actions/download-artifact@v3
         with:
-          name: app-debug.apk
+          name: app-debug-${{ github.sha }}.apk
       
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
@@ -131,7 +135,7 @@ jobs:
         run: E2E=true yarn start &
 
       - name: Install APK
-        run: adb install -r app-debug.apk        
+        run: adb install -r app-debug-${{ github.sha }}.apk        
 
       - name: Run e2e Tests
         working-directory: package
