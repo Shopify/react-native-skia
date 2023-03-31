@@ -132,7 +132,6 @@ public:
    */
   void resetPendingChanges() override { JsiDomNode::resetPendingChanges(); }
 
-  
   /**
    Overridden dispose to release resources
    */
@@ -215,7 +214,7 @@ protected:
       invalidateContext();
     }
   }
-  
+
 private:
   /**
    Clips the canvas depending on the clip property
