@@ -124,7 +124,7 @@ jobs:
         run: E2E=true yarn start &
 
       - name: Install APK
-        working-directory: adb install -r app-debug.apk
+        run: adb install -r app-debug.apk        
 
       - name: Run e2e Tests
         working-directory: package
