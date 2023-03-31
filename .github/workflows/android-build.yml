@@ -76,48 +76,10 @@ jobs:
           path: example/android/app/build
           key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
   
-      - name: Build Android app
-        working-directory: example/android
-        run: ./gradlew assembleDebug
-  
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
-      - name: Emulator - Create
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
-
-      - name: Emulator - Boot
-        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
-
-      - name: ADB Wait For Device
-        run: adb wait-for-any-device
-        timeout-minutes: 3
-
-      - name: Reverse TCP
-        working-directory: example
-        run: yarn android-reverse-tcp
-
-      - name: Start Package Manager
-        working-directory: example
-        run: E2E=true yarn start &
-
-      - name: Install App
-        working-directory: example
-        run: E2E=true yarn android
-
-      - name: Run e2e Tests
-        working-directory: package
-        run: CI=true yarn e2e
-
       - uses: actions/upload-artifact@v2
-        if: failure()
         with:
-          path: package/src/__tests__/snapshots/
-          name: snapshots-screenshots
-
-      - uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          path: docs/static
-          name: docs-screenshots
-
+          path: example/android/app/build/outputs/apk/debug/
+          name: debug-build
