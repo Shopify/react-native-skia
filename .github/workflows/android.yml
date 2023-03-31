@@ -111,6 +111,7 @@ jobs:
         id: cache-apk
         uses: actions/cache/restore@v3
         with:
+          path: example/android/app/build/outputs/apk/debug/app-debug.apk
           key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('package/**') }}
       
       - name: SKDs - download required images
