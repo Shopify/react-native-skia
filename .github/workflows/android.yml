@@ -81,7 +81,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Cache apk
-      - uses: actions/cache/save@v3
+        uses: actions/cache/save@v3
         env:
           cache-name: cache-apk
         with:
