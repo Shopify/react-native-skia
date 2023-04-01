@@ -86,7 +86,7 @@ jobs:
           cache-name: cache-apk
         with:
           path: example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: apk-${{ hashFiles('package/**') }}
+          key: apk-${{ hashFiles('package/**') }}-${{ hashFiles('example/**') }}
   test:
     needs: build
     runs-on: macos-12
@@ -112,7 +112,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: apk-${{ hashFiles('package/**') }}
+          key: apk-${{ hashFiles('package/**') }}-${{ hashFiles('example/**') }}
       
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
