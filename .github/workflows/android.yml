@@ -81,12 +81,12 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Cache apk
-        uses: actions/cache@v3
+      - uses: actions/cache/save@v3
         env:
           cache-name: cache-apk
         with:
           path: example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('package/**') }}
+          key: apk-${{ hashFiles('package/**') }}
   test:
     needs: build
     runs-on: macos-12
@@ -112,7 +112,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('package/**') }}
+          key: apk-${{ hashFiles('package/**') }}
       
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
