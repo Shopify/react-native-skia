@@ -142,7 +142,7 @@ jobs:
           fail: true
 
       - name: Install APK
-        run: adb install -r example/android/app/build/outputs/apk/debug/app-debug.apk      
+        run: adb install example/android/app/build/outputs/apk/debug/app-debug.apk      
 
       - name: Run e2e Tests
         working-directory: package
