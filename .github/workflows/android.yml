@@ -116,8 +116,8 @@ jobs:
       
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
-        working-directory: example/android
         with:
+          working-directory: example/android
           api-level: 29
           script: |
             cd ..
