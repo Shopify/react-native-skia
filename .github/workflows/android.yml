@@ -125,7 +125,7 @@ jobs:
 
       - name: ADB Wait For Device
         run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-        timeout-minutes: 3
+        timeout-minutes: 10
 
       - name: Reverse TCP
         working-directory: example
