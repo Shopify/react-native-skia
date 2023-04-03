@@ -114,18 +114,39 @@ jobs:
           path: example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
       
-      - name: run tests
-        uses: reactivecircus/android-emulator-runner@v2
+      - name: SKDs - download required images
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
+
+      - name: Emulator - Create
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
+
+      - name: Emulator - Boot
+        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
+
+      - name: ADB Wait For Device
+        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+        timeout-minutes: 3
+
+      - name: Reverse TCP
+        working-directory: example
+        run: yarn android-reverse-tcp
+
+      - name: Start Package Manager
+        working-directory: example
+        run: E2E=true yarn start &
+
+      - name: Check APK existence
+        uses: andstor/file-existence-action@v2
         with:
-          working-directory: example/android
-          api-level: 29
-          script: |
-            cd ..
-            pwd
-            yarn android-reverse-tcp
-            E2E=true yarn start &
-            adb install android/app/build/outputs/apk/debug/app-debug.apk
-            CI=true yarn e2e
+          files: example/android/app/build/outputs/apk/debug/app-debug.apk
+          fail: true
+
+      - name: Install APK
+        run: adb install -r example/android/app/build/outputs/apk/debug/app-debug.apk      
+
+      - name: Run e2e Tests
+        working-directory: package
+        run: CI=true yarn e2e
 
       - uses: actions/upload-artifact@v2
         if: failure()
