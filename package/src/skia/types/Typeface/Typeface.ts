@@ -1,3 +1,3 @@
-import type { SkJSIInstance } from "../JsiInstance";
+import type { JsiDisposable, SkJSIInstance } from "../JsiInstance";
 
-export type SkTypeface = SkJSIInstance<"Typeface">;
+export type SkTypeface = SkJSIInstance<"Typeface"> & JsiDisposable;
