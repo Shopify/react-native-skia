@@ -3,7 +3,12 @@ import { Image } from "react-native";
 
 import { Skia } from "../Skia";
 import { isRNModule } from "../types";
-import type { SkData, DataModule, DataSourceParam } from "../types";
+import type {
+  SkData,
+  DataModule,
+  DataSourceParam,
+  JsiDisposable,
+} from "../types";
 
 const resolveAsset = (source: DataModule) => {
   return isRNModule(source)
@@ -27,7 +32,7 @@ const factoryWrapper = <T>(
 
 const loadData = <T>(
   source: DataSourceParam,
-  factory: (data: SkData) => T,
+  factory: (data: SkData) => T | null,
   onError?: (err: Error) => void
 ): Promise<T | null> => {
   if (source === null || source === undefined) {
@@ -43,20 +48,23 @@ const loadData = <T>(
     );
   }
 };
-const useLoading = <T>(
+const useLoading = <T extends JsiDisposable>(
   source: DataSourceParam,
   loader: () => Promise<T | null>
 ) => {
   const mounted = useRef(false);
   const [data, setData] = useState<T | null>(null);
+  const dataRef = useRef<T | null>(null);
   useEffect(() => {
     mounted.current = true;
     loader().then((value) => {
       if (mounted.current) {
         setData(value);
+        dataRef.current = value;
       }
     });
     return () => {
+      dataRef.current?.dispose();
       mounted.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,11 +72,11 @@ const useLoading = <T>(
   return data;
 };
 
-export const useRawData = <T>(
+export const useRawData = <T extends JsiDisposable>(
   source: DataSourceParam,
-  factory: (data: SkData) => T,
+  factory: (data: SkData) => T | null,
   onError?: (err: Error) => void
-) => useLoading(source, () => loadData(source, factory, onError));
+) => useLoading(source, () => loadData<T>(source, factory, onError));
 
 const identity = (data: SkData) => data;
 

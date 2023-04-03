@@ -1,6 +1,6 @@
-import type { SkJSIInstance } from "../JsiInstance";
+import type { JsiDisposable, SkJSIInstance } from "../JsiInstance";
 
-export type SkData = SkJSIInstance<"Data">;
+export type SkData = SkJSIInstance<"Data"> & JsiDisposable;
 
 type RNModule = number;
 type ESModule = {
