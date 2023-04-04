@@ -1,17 +1,15 @@
 import React from "react";
 import { Text, View, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import type { SkiaMutableValue } from "@shopify/react-native-skia";
 import {
   Canvas,
-  Easing,
   Group,
   LinearGradient,
   RoundedRect,
-  runTiming,
-  useComputedValue,
-  vec,
   mix,
+  vec,
 } from "@shopify/react-native-skia";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue, withTiming } from "react-native-reanimated";
 
 import type { Graphs } from "../Model";
 
@@ -47,24 +45,24 @@ export interface GraphState {
 }
 
 interface SelectionProps {
-  state: SkiaMutableValue<GraphState>;
-  transition: SkiaMutableValue<number>;
+  state: SharedValue<GraphState>;
+  transition: SharedValue<number>;
   graphs: Graphs;
 }
 
 export const Selection = ({ state, transition, graphs }: SelectionProps) => {
-  const transform = useComputedValue(() => {
-    const { current, next } = state.current;
+  const transform = useDerivedValue(() => {
+    const { current, next } = state.value;
     return [
       {
         translateX: mix(
-          transition.current,
+          transition.value,
           current * buttonWidth,
           next * buttonWidth
         ),
       },
     ];
-  }, [state, transition]);
+  });
   return (
     <View style={styles.root}>
       <View style={styles.container}>
@@ -83,12 +81,10 @@ export const Selection = ({ state, transition, graphs }: SelectionProps) => {
           <TouchableWithoutFeedback
             key={index}
             onPress={() => {
-              state.current.current = state.current.next;
-              state.current.next = index;
-              transition.current = 0;
-              runTiming(transition, 1, {
+              state.value = { current: state.value.next, next: index };
+              transition.value = 0;
+              transition.value = withTiming(1, {
                 duration: 750,
-                easing: Easing.inOut(Easing.cubic),
               });
             }}
           >
