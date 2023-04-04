@@ -8,7 +8,7 @@ slug: /animations/reanimated
 React Native Skia renders drawings on the UI-thread and it provides an integration with Reanimated that allows for animations
 to be executed on the UI-thread as well.
 
-First, you need will need to install [Reanimated v3](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation).
+You need will need to install [Reanimated v3](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, you can integrate with Skia on the JS-thread, see [Reanimated 2 support](#reanimated-2).
 
 ## Hello World
 
@@ -87,6 +87,52 @@ export const AnimationWithTouchHandler = () => {
         <Circle cx={translateX} cy={40} r={15} color="#AEAE" />
       </Canvas>
     </GestureDetector>
+  );
+};
+```
+
+## Reanimated 2
+
+If you are using Reanimated 2, we offer a hook named `useSharedValueEffect` where you can update Skia values when Reanimated values are updated.
+
+:::info
+
+useSharedValueEffect() runs on the JS thread. For UI-thread animated, see [Reanimated 3 support](#reanimated).
+
+:::
+
+
+### Example
+
+In the example below we are running a Reanimated animation on the shared value named progress - and then we have callback invoked on any shared value change thanks to the useSharedValueEffect hook:
+
+```tsx twoslash
+import {useEffect} from "react";
+import {Canvas, Rect, mix, useSharedValueEffect, useValue} from "@shopify/react-native-skia";
+import {useSharedValue, withRepeat, withTiming} from "react-native-reanimated";
+
+const MyComponent = () => {
+  const x = useValue(0);
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(withTiming(1, { duration: 3000 }), -1, true);
+  }, [progress]);
+
+  useSharedValueEffect(() => {
+    x.current = mix(progress.value, 0, 100);
+  }, progress); // you can pass other shared values as extra parameters
+
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Rect
+        x={x}
+        y={100}
+        width={10}
+        height={10}
+        color="red"
+      />
+    </Canvas>
   );
 };
 ```

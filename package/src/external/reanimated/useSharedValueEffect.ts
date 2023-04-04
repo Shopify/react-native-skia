@@ -8,6 +8,7 @@ import {
   runOnJS,
   startMapper,
   stopMapper,
+  HAS_REANIMATED3,
 } from "./moduleWrapper";
 
 /**
@@ -21,10 +22,12 @@ export const useSharedValueEffect = <T = number>(
   value: SharedValueType<T>,
   ...values: SharedValueType<T>[]
 ) => {
-  console.warn(
-    `useSharedValueEffect() is now deprecated, you can use Reanimated values directly.
-Learn more at https://shopify.github.io/react-native-skia/.`
-  );
+  if (HAS_REANIMATED3) {
+    console.warn(
+      `useSharedValueEffect() is deprecated with Reanimated 3, you can use Reanimated values directly.
+Learn more at https://shopify.github.io/react-native-skia/docs/animations/reanimated.`
+    );
+  }
   const input = useSharedValue(0);
 
   useEffect(() => {
