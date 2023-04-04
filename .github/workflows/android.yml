@@ -124,7 +124,7 @@ jobs:
         run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
 
       - name: ADB Wait For Device
-        run: adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
         timeout-minutes: 10
 
       - name: Reverse TCP
