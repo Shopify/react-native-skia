@@ -6,15 +6,23 @@ export const vec = (x = 0, y?: number) => {
   return Skia.Point(x, y ?? x);
 };
 export const point = vec;
-export const neg = (a: Vector) => vec(-a.x, -a.y);
+export const neg = (a: Vector) => {
+  "worklet";
+  return vec(-a.x, -a.y);
+};
 export const add = (a: Vector, b: Vector) => {
   "worklet";
   return vec(a.x + b.x, a.y + b.y);
 };
-export const sub = (a: Vector, b: Vector) => vec(a.x - b.x, a.y - b.y);
+export const sub = (a: Vector, b: Vector) => {
+  "worklet";
+  return vec(a.x - b.x, a.y - b.y);
+};
 export const dist = (a: Vector, b: Vector) => {
   "worklet";
   return Math.hypot(a.x - b.x, a.y - b.y);
 };
-export const translate = ({ x, y }: Vector) =>
-  [{ translateX: x }, { translateY: y }] as const;
+export const translate = ({ x, y }: Vector) => {
+  "worklet";
+  return [{ translateX: x }, { translateY: y }] as const;
+};
