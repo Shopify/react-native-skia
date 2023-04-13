@@ -5,6 +5,13 @@ sidebar_label: Animations
 slug: /animations/animations
 ---
 
+:::info
+
+Currently, built-in Skia animations are dependant on the JS thread.
+For UI-thread animations with Reanimated 3, see [Reanimated support](/docs/animations/reanimated).
+
+:::
+
 To ease building animation, the library provides some utilities to help you. There are two types of utility functions - imperative functions and hooks.
 
 If you have a Skia Value that you want to animate declaratively, a hook is the best choice.

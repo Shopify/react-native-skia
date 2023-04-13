@@ -8,6 +8,7 @@ slug: /animations/values
 :::info
 
 Currently, built-in Skia animations are dependant on the JS thread.
+For UI-thread animations with Reanimated 3, see [Reanimated support](/docs/animations/reanimated).
 
 :::
 
