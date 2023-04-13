@@ -7,20 +7,25 @@ export const interpolateVector = (
   inputRange: readonly number[],
   outputRange: readonly Vector[],
   options?: Parameters<typeof interpolate>[3]
-) => ({
-  x: interpolate(
-    value,
-    inputRange,
-    outputRange.map((v) => v.x),
-    options
-  ),
-  y: interpolate(
-    value,
-    inputRange,
-    outputRange.map((v) => v.y),
-    options
-  ),
-});
+) => {
+  "worklet";
+  return {
+    x: interpolate(
+      value,
+      inputRange,
+      outputRange.map((v) => v.x),
+      options
+    ),
+    y: interpolate(
+      value,
+      inputRange,
+      outputRange.map((v) => v.y),
+      options
+    ),
+  };
+};
 
-export const mixVector = (value: number, from: Vector, to: Vector) =>
-  interpolateVector(value, [0, 1], [from, to]);
+export const mixVector = (value: number, from: Vector, to: Vector) => {
+  "worklet";
+  return interpolateVector(value, [0, 1], [from, to]);
+};

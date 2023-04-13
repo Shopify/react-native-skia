@@ -1,14 +1,11 @@
 import type { SkPath } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
 
 import data from "./data.json";
 import { curveLines } from "./Math";
 
 export const PADDING = 16;
 
-export const COLORS = ["#F69D69", "#FFC37D", "#61E0A1", "#31CBD1"].map(
-  Skia.Color
-);
+export const COLORS = ["#F69D69", "#FFC37D", "#61E0A1", "#31CBD1"];
 
 interface Amount {
   amount: string;
