@@ -104,12 +104,18 @@ public:
     return jsi::String::createFromAscii(runtime, buffer);
   }
 
+  JSI_HOST_FUNCTION(dispose) {
+    setObject(nullptr);
+    return jsi::Value::undefined();
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
                        JSI_EXPORT_FUNC(JsiSkImage, height),
                        JSI_EXPORT_FUNC(JsiSkImage, makeShaderOptions),
                        JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBytes),
-                       JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64))
+                       JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64),
+                       JSI_EXPORT_FUNC(JsiSkImage, dispose))
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)

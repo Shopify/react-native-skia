@@ -29,6 +29,13 @@ public:
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkTypeface, __typename__))
 
+  JSI_HOST_FUNCTION(dispose) {
+    setObject(nullptr);
+    return jsi::Value::undefined();
+  }
+
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypeface, dispose))
+
   JsiSkTypeface(std::shared_ptr<RNSkPlatformContext> context,
                 sk_sp<SkTypeface> typeface)
       : JsiSkWrappingSkPtrHostObject(std::move(context), std::move(typeface)) {}

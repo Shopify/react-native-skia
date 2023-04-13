@@ -8,13 +8,14 @@ import type { SkiaValue } from "../values/types";
 import { DependencyManager } from "./DependencyManager";
 import { skHostConfig, debug as hostDebug } from "./HostConfig";
 import { Container } from "./Container";
+import { NATIVE_DOM } from "./HostComponents";
 
 const skiaReconciler = ReactReconciler(skHostConfig);
 
 type RegisterValues = (values: Array<SkiaValue<unknown>>) => () => void;
 
 const createDependencyManager = (registerValues: RegisterValues) =>
-  global.SkiaDomApi && global.SkiaDomApi.DependencyManager
+  NATIVE_DOM
     ? global.SkiaDomApi.DependencyManager(registerValues)
     : new DependencyManager(registerValues);
 

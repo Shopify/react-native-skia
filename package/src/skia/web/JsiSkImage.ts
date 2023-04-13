@@ -109,4 +109,8 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     const bytes = this.encodeToBytes(fmt, quality);
     return toBase64String(bytes);
   }
+
+  dispose() {
+    this.ref.delete();
+  }
 }
