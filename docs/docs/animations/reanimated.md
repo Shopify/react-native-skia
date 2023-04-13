@@ -5,10 +5,10 @@ sidebar_label: Reanimated
 slug: /animations/reanimated
 ---
 
-React Native Skia renders drawings on the UI-thread and it provides an integration with Reanimated that allows for animations
-to be executed on the UI-thread as well.
+React Native Skia provides an integration with Reanimated that allows for animations
+to be executed on the UI-thread. 
 
-You need will need to install [Reanimated v3](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, you can integrate with Skia on the JS-thread, see [Reanimated 2 support](#reanimated-2).
+This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).
 
 ## Hello World
 
@@ -97,7 +97,7 @@ If you are using Reanimated 2, we offer a hook named `useSharedValueEffect` wher
 
 :::info
 
-useSharedValueEffect() runs on the JS thread. For UI-thread animated, see [Reanimated 3 support](#reanimated).
+useSharedValueEffect() runs on the JS thread. We suggest using Reanimated 3 if possible, [see Reanimated 3 support](/docs/animations/reanimated).
 
 :::
 
