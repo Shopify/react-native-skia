@@ -1,47 +1,36 @@
-import type { SkiaMutableValue, SkiaValue } from "@shopify/react-native-skia";
-import {
-  runDecay,
-  add,
-  clamp,
-  dist,
-  vec,
-  useValue,
-  useTouchHandler,
-} from "@shopify/react-native-skia";
+import { vec, add, dist, clamp } from "@shopify/react-native-skia";
+import type { SharedValue } from "react-native-reanimated";
+import { useSharedValue, withDecay } from "react-native-reanimated";
+import { Gesture } from "react-native-gesture-handler";
 
 import { PADDING } from "../Model";
 
 export const useGraphTouchHandler = (
-  x: SkiaMutableValue<number>,
-  y: SkiaValue<number>,
+  x: SharedValue<number>,
+  y: SharedValue<number>,
   width: number,
   height: number
 ) => {
   const translateY = height + PADDING;
-  const gestureActive = useValue(false);
-  const offsetX = useValue(0);
-  const onTouch = useTouchHandler({
-    onStart: (pos) => {
-      const normalizedCenter = add(
-        vec(x.current, y.current),
-        vec(0, translateY)
-      );
+  const gestureActive = useSharedValue(false);
+  const offsetX = useSharedValue(0);
+  return Gesture.Pan()
+    .onBegin((pos) => {
+      const normalizedCenter = add(vec(x.value, y.value), vec(0, translateY));
       if (dist(normalizedCenter, pos) < 50) {
-        gestureActive.current = true;
-        offsetX.current = x.current - pos.x;
+        gestureActive.value = true;
+        offsetX.value = x.value - pos.x;
       }
-    },
-    onActive: (pos) => {
-      if (gestureActive.current) {
-        x.current = clamp(offsetX.current + pos.x, 0, width);
+    })
+    .onChange((pos) => {
+      if (gestureActive.value) {
+        x.value = clamp(offsetX.value + pos.x, 0, width);
       }
-    },
-    onEnd: ({ velocityX }) => {
-      if (gestureActive.current) {
-        gestureActive.current = false;
-        runDecay(x, { velocity: velocityX, clamp: [0, width] });
+    })
+    .onEnd(({ velocityX }) => {
+      if (gestureActive.value) {
+        gestureActive.value = false;
+        x.value = withDecay({ velocity: velocityX, clamp: [0, width] });
       }
-    },
-  });
-  return onTouch;
+    });
 };
