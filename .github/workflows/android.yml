@@ -1,4 +1,4 @@
-name: Test Android build
+name: Android
 
 on: [push]
 
@@ -75,7 +75,45 @@ jobs:
         with:
           path: example/android/app/build
           key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
-  
+
+      - name: Build Android app
+        working-directory: example/android
+        run: ./gradlew assembleDebug
+
+      - name: Cache apk
+        uses: actions/cache/save@v3
+        env:
+          cache-name: cache-apk
+        with:
+          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-${{ github.sha }}
+  test:
+    needs: build
+    runs-on: macos-12
+    concurrency:
+      group: android-example-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Install root dependencies
+        run: yarn bootstrap
+      
+      - name: Restore APK
+        id: cache-apk
+        uses: actions/cache/restore@v3
+        with:
+          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-${{ github.sha }}
+      
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
@@ -86,8 +124,8 @@ jobs:
         run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
 
       - name: ADB Wait For Device
-        run: adb wait-for-any-device
-        timeout-minutes: 3
+        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+        timeout-minutes: 10
 
       - name: Reverse TCP
         working-directory: example
@@ -97,9 +135,17 @@ jobs:
         working-directory: example
         run: E2E=true yarn start &
 
-      - name: Build App
-        working-directory: example
-        run: E2E=true yarn android
+      - name: Check APK existence
+        uses: andstor/file-existence-action@v2
+        with:
+          files: example/android/app/build/outputs/apk/debug/app-debug.apk
+          fail: true
+
+      - name: Install APK
+        run: adb install -r example/android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Launch APK
+        run: adb shell monkey -p com.rnskia 1    
 
       - name: Run e2e Tests
         working-directory: package
@@ -116,4 +162,4 @@ jobs:
         with:
           path: docs/static
           name: docs-screenshots
-
+      
