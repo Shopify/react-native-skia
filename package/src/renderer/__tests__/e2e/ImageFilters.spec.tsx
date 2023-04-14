@@ -102,6 +102,34 @@ describe("Test Image Filters", () => {
       threshold: 0.05,
     });
   });
+  it("Should draw a dropshadow only", async () => {
+    const { width } = surface;
+    const padding = width / 8;
+    const img = await surface.draw(
+      <>
+        <Fill color="lightblue" />
+        <RoundedRect
+          x={padding}
+          y={padding}
+          width={width - 2 * padding}
+          height={width - 2 * padding}
+          r={padding}
+          color="lightblue"
+        >
+          <Shadow
+            dx={-36 / 3}
+            dy={-36 / 3}
+            blur={75 / 3}
+            color="red"
+            shadowOnly
+          />
+        </RoundedRect>
+      </>
+    );
+    checkImage(img, docPath("image-filters/dropshadow-only.png"), {
+      threshold: 0.05,
+    });
+  });
   // This test should fail because it is not scaled properly but
   // it passes because of the low tolerance in the canvas result
   it("Should draw a innershadow", async () => {
@@ -130,6 +158,35 @@ describe("Test Image Filters", () => {
       </>
     );
     checkImage(img, docPath("image-filters/innershadow.png"), {
+      threshold: 0.05,
+    });
+  });
+  it("Should draw a innershadow with only the shadow", async () => {
+    const { width } = surface;
+    const padding = width / 8;
+    const img = await surface.draw(
+      <>
+        <Fill color="lightblue" />
+        <RoundedRect
+          x={padding}
+          y={padding}
+          width={width - 2 * padding}
+          height={width - 2 * padding}
+          r={padding}
+          color="lightblue"
+        >
+          <Shadow
+            dx={-36 / 3}
+            dy={-36 / 3}
+            blur={75 / 3}
+            color="red"
+            inner
+            shadowOnly
+          />
+        </RoundedRect>
+      </>
+    );
+    checkImage(img, docPath("image-filters/innershadow-only.png"), {
       threshold: 0.05,
     });
   });
