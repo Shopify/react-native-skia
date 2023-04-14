@@ -107,7 +107,7 @@ void RNSkMetalCanvasProvider::renderToCanvas(
      inside this autoreleasepool and not depend on Skia's
      SkSurface::MakeFromCAMetalLayer to encapsulate since we're seeing a lot of
      drawables leaking if they're not done this way.
-     
+
      This is now reverted from:
      (https://github.com/Shopify/react-native-skia/commit/2e2290f8e6dfc6921f97b79f779d920fbc1acceb)
      back to the original implementation.
