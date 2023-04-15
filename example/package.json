@@ -79,6 +79,7 @@
       "<rootDir>/lib/typescript",
       "setup.(ts|tsx)$"
     ],
+    "globalSetup": "<rootDir>/src/__tests__/setup.ts",
     "preset": "react-native",
     "transformIgnorePatterns": [
       "node_modules/(?!(@react-native|react-native|react-native.*|@?react-navigation.*)/)"

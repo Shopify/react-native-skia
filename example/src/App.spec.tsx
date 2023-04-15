@@ -19,7 +19,7 @@ jest.mock("react-native-reanimated", () => {
 jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
 
 jest.mock("@shopify/react-native-skia", () => {
-  return require("../../package/src/mock").Mock;
+  return require("../../package/src/mock").Mock(global.CanvasKit);
 });
 
 it("renders correctly", () => {
