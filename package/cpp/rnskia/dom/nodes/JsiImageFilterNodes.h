@@ -107,11 +107,15 @@ public:
       auto f2 = SkImageFilters::Offset(dx, dy, f1);
       auto f3 = SkImageFilters::Blur(blur, blur, SkTileMode::kDecal, f2);
       auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, srcAlpha, f3);
-
-      composeAndPush(context, SkImageFilters::Compose(
+      if (shadowOnly) {
+        composeAndPush(context, f4);
+      } else {
+        composeAndPush(context, SkImageFilters::Compose(
                                   input ? input : nullptr,
                                   SkImageFilters::Blend(SkBlendMode::kSrcOver,
                                                         srcGraphic, f4)));
+
+      }
 
     } else {
       composeAndPush(

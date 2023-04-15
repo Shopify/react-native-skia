@@ -166,20 +166,20 @@ describe("Test Image Filters", () => {
     const padding = width / 8;
     const img = await surface.draw(
       <>
-        <Fill color="lightblue" />
+        <Fill color="cyan" />
         <RoundedRect
           x={padding}
           y={padding}
           width={width - 2 * padding}
           height={width - 2 * padding}
           r={padding}
-          color="lightblue"
+          color="yellow"
         >
           <Shadow
             dx={-36 / 3}
             dy={-36 / 3}
             blur={75 / 3}
-            color="red"
+            color="magenta"
             inner
             shadowOnly
           />
