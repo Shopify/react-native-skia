@@ -111,10 +111,9 @@ public:
         composeAndPush(context, f4);
       } else {
         composeAndPush(context, SkImageFilters::Compose(
-                                  input ? input : nullptr,
-                                  SkImageFilters::Blend(SkBlendMode::kSrcOver,
-                                                        srcGraphic, f4)));
-
+                                    input ? input : nullptr,
+                                    SkImageFilters::Blend(SkBlendMode::kSrcOver,
+                                                          srcGraphic, f4)));
       }
 
     } else {
