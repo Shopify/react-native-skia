@@ -54,7 +54,7 @@ describe("Offscreen Drawings", () => {
     const data = Skia.Data.fromBase64(raw);
     const image = Skia.Image.MakeImageFromEncoded(data)!;
     expect(data).toBeDefined();
-    checkImage(image, docPath("offscreen/different-surfaces.png"));
+    checkImage(image, docPath("offscreen/circle.png"));
   });
   it("Should use the React API to build an image", async () => {
     const { width, height } = surface;
