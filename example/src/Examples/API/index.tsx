@@ -21,6 +21,7 @@ import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
 import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
+import { Backbuffer } from "./Backbuffer";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -158,6 +159,13 @@ export const API = () => {
         component={OnLayoutDemo}
         options={{
           title: "🎛️ OnLayout",
+        }}
+      />
+      <Stack.Screen
+        name="Backbuffer"
+        component={Backbuffer}
+        options={{
+          title: "🔄 Backbuffer",
         }}
       />
     </Stack.Navigator>

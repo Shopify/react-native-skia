@@ -78,6 +78,10 @@ export const examples = [
     screen: "OnLayout",
     title: "🎛️ OnLayout",
   },
+  {
+    screen: "Backbuffer",
+    title: "🔄 Backbuffer",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
