@@ -55,6 +55,8 @@ export const Backbuffer = () => {
     // 2. Swap
     backbuffer.current = offscreen
       .makeImageSnapshot()
+      // TODO: we shouldn't need to do this GPU re-upload.
+      .makeNonTextureImage()
       .makeShaderOptions(
         TileMode.Decal,
         TileMode.Decal,

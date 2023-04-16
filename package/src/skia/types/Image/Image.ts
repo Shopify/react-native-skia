@@ -93,4 +93,11 @@ export interface SkImage extends SkJSIInstance<"Image">, JsiDisposable {
     @return  base64 encoded string of data
   */
   encodeToBase64(fmt?: ImageFormat, quality?: number): string;
+
+  /**
+   * Returns raster image. Copies SkImage backed by GPU texture into CPU
+   *  memory, or decodes SkImage from lazy image. Returns original SkImage if
+   *  decoded in raster bitmap.
+   */
+  makeNonTextureImage(): SkImage;
 }
