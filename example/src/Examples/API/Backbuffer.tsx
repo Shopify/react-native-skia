@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import type { SkImage } from "@shopify/react-native-skia";
+import type { SkShader } from "@shopify/react-native-skia";
 import {
   FilterMode,
   MipmapMode,
@@ -30,7 +30,9 @@ const { width, height } = Dimensions.get("window");
 const offscreen = Skia.Surface.Make(width, height)!;
 
 export const Backbuffer = () => {
-  const backbuffer = useRef<SkImage | null>(null);
+  const backbuffer = useRef<SkShader>(
+    Skia.Shader.MakeColor(Float32Array.of(0, 0, 0, 1))
+  );
   const onDraw = useDrawCallback((canvas, info) => {
     const touch = { x: 0, y: 0, z: 0 };
     const lastTouch = info.touches[0];
@@ -45,33 +47,24 @@ export const Backbuffer = () => {
     paint.setShader(
       bufferA.makeShaderWithChildren(
         [touch.x, touch.y, touch.z],
-        [
-          backbuffer.current
-            ? backbuffer.current.makeShaderOptions(
-                TileMode.Decal,
-                TileMode.Decal,
-                FilterMode.Nearest,
-                MipmapMode.None
-              )
-            : Skia.Shader.MakeColor(Float32Array.of(0, 0, 0, 1)),
-        ]
+        [backbuffer.current]
       )
     );
     offscreen.getCanvas().drawPaint(paint);
 
     // 2. Swap
-    backbuffer.current = offscreen.makeImageSnapshot();
-
-    // 3. Draw Result
-    const frontPaint = Skia.Paint();
-    frontPaint.setShader(
-      backbuffer.current.makeShaderOptions(
+    backbuffer.current = offscreen
+      .makeImageSnapshot()
+      .makeShaderOptions(
         TileMode.Decal,
         TileMode.Decal,
         FilterMode.Nearest,
         MipmapMode.None
-      )
-    );
+      );
+
+    // 3. Draw Result
+    const frontPaint = Skia.Paint();
+    frontPaint.setShader(backbuffer.current);
     canvas.drawPaint(frontPaint);
   });
   return <SkiaView style={{ flex: 1 }} onDraw={onDraw} />;
