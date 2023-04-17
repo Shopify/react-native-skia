@@ -86,9 +86,9 @@ In order to load CanvasKit and in turn loading the React Native Skia mock, you n
 
 ```js
 // This is needed to load CanvasKit
-"globalSetup": [require.resolve("@shopify/react-native-skia/globalSetup.js")], 
+"globalSetup": "@shopify/react-native-skia/globalSetup.js", 
  // This is needed to load the mock
-"setupFiles": [require.resolve("@shopify/react-native-skia/jestSetup.js")]
+"setupFiles": ["@shopify/react-native-skia/jestSetup.js"]
 ```
 
 
