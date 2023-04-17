@@ -171,9 +171,8 @@ public:
                            "Could not create image from current surface.");
         return jsi::Value::undefined();
       }
-      auto result = image->makeNonTextureImage();
       return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkImage>(_platformContext, result));
+          runtime, std::make_shared<JsiSkImage>(_platformContext, image));
     }
     throw jsi::JSError(runtime, "No Skia View currently available.");
     return jsi::Value::undefined();
