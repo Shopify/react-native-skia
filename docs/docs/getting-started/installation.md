@@ -80,19 +80,15 @@ There is also an [React Native VSCode extension](https://marketplace.visualstudi
 
 ## Testing with Jest
 
-In order to load the mock provided by React Native Skia add following to your jest config:
+React Native Skia test mocks use web implementation which depends on loading CanvasKit. Before you begin using the mocks you need some setup actions.
+
+In order to load CanvasKit and in turn loading the React Native Skia mock, you need to add the following your jest config:
 
 ```js
+// This is needed to load CanvasKit
+"globalSetup": [require.resolve("@shopify/react-native-skia/globalSetup.js")], 
+ // This is needed to load the mock
 "setupFiles": [require.resolve("@shopify/react-native-skia/jestSetup.js")]
-```
-
-Example:
-
-```js
-module.exports = {
-  "preset": "react-native",
-  "setupFiles": [require.resolve("@shopify/react-native-skia/jestSetup.js")]
-}
 ```
 
 
