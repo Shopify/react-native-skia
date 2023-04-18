@@ -16,6 +16,7 @@
 
 #include "SkStream.h"
 #include "SkSurface.h"
+#include "SkTypeface.h"
 
 #pragma clang diagnostic pop
 
@@ -117,6 +118,9 @@ public:
    * @return sk_sp<SkSurface>
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+
+  // TODO: add style, weight, see https://github.com/facebook/react-native/blob/c447b25c01ce5665a7888ac0f902bdcacb87d6ed/ReactAndroid/src/main/java/com/facebook/react/views/text/TypefaceStyle.java#L45-L55
+  virtual sk_sp<SkTypeface> getTypeFace(const std::string &familyName) = 0;
 
   /**
    * Raises an exception on the platform. This function does not necessarily

@@ -1,6 +1,9 @@
 #include "RNSkiOSPlatformContext.h"
 
 #import <React/RCTUtils.h>
+#import <Foundation/Foundation.h>
+#import <CoreText/CoreText.h>
+
 #include <thread>
 #include <utility>
 
@@ -10,6 +13,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "SkSurface.h"
+
 
 #pragma clang diagnostic pop
 
@@ -60,6 +64,34 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
   return MakeOffscreenMetalSurface(width, height);
+}
+
+sk_sp<SkTypeface> RNSkiOSPlatformContext::getTypeFace(const std::string &familyName) {
+  // Get the font descriptor for a specific system font
+  auto fontDescriptor = CTFontDescriptorCreateWithNameAndSize(CFStringCreateWithCString(kCFAllocatorDefault, familyName.c_str(), kCFStringEncodingUTF8), 0.0);
+
+  // If the font descriptor is null, the font was not found
+  if (!fontDescriptor) {
+      return nil;
+  }
+
+  // Get the URL of the font file
+  CFURLRef fontURL = (CFURLRef)CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontURLAttribute);
+  CFRelease(fontDescriptor);
+
+  // If the URL is null, there was an error getting the font file
+  if (!fontURL) {
+      return nil;
+  }
+
+  // Read the font data into an NSData object
+  NSData *fontData = [NSData dataWithContentsOfURL:(__bridge NSURL *)fontURL];
+  CFRelease(fontURL);
+
+  auto bytes = [fontData bytes];
+  auto data = SkData::MakeWithCopy(bytes, [fontData length]);
+  auto typeface = SkTypeface::MakeFromData(data);
+  return typeface;
 }
 
 void RNSkiOSPlatformContext::startDrawLoop() {

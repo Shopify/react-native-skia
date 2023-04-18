@@ -1,4 +1,4 @@
-import { useFont, Text } from "@shopify/react-native-skia";
+import { Text, Skia } from "@shopify/react-native-skia";
 import React from "react";
 import type { SharedValue } from "react-native-reanimated";
 import { interpolate, useDerivedValue } from "react-native-reanimated";
@@ -8,7 +8,10 @@ import { PADDING } from "../Model";
 
 import type { GraphState } from "./Selection";
 
-const sfMono = require("../../Severance/SF-Mono-Medium.otf");
+const sfMono = Skia.Typeface.MakeFromSystem("Bodoni 72");
+const titleFont = Skia.Font(sfMono, 64);
+const subtitleFont = Skia.Font(sfMono, 24);
+
 const format = (value: number) => {
   "worklet";
   return (
@@ -28,8 +31,6 @@ interface LabelProps {
 }
 
 export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
-  const titleFont = useFont(sfMono, 64);
-  const subtitleFont = useFont(sfMono, 24);
   const translateY = height + PADDING;
   const AJUSTED_SIZE = height - PADDING * 2;
   const text = useDerivedValue(() => {
