@@ -104,6 +104,12 @@ public:
     return jsi::String::createFromAscii(runtime, buffer);
   }
 
+  JSI_HOST_FUNCTION(makeNonTextureImage) {
+    auto image = getObject()->makeNonTextureImage();
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+  }
+
   JSI_HOST_FUNCTION(dispose) {
     setObject(nullptr);
     return jsi::Value::undefined();
@@ -115,6 +121,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBytes),
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64),
+                       JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
                        JSI_EXPORT_FUNC(JsiSkImage, dispose))
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,

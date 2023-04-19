@@ -99,13 +99,15 @@ public:
    Returns a snapshot of the current surface/canvas
    */
   sk_sp<SkImage> makeSnapshot(std::shared_ptr<SkRect> bounds) {
+    sk_sp<SkImage> image;
     if (bounds != nullptr) {
       SkIRect b = SkIRect::MakeXYWH(bounds->x(), bounds->y(), bounds->width(),
                                     bounds->height());
-      return _surface->makeImageSnapshot(b);
+      image = _surface->makeImageSnapshot(b);
     } else {
-      return _surface->makeImageSnapshot();
+      image = _surface->makeImageSnapshot();
     }
+    return image->makeNonTextureImage();
   }
 
   /**
