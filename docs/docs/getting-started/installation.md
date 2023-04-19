@@ -8,6 +8,7 @@ slug: /getting-started/installation
 React Native Skia brings the [Skia Graphics Library](https://skia.org/) to React Native.
 Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox, Firefox OS, and many other products.
 
+> **Version compatibility**: `react-native@>=0.66` and `react@>=18` are required.
 
 ```sh
 yarn add @shopify/react-native-skia
@@ -32,8 +33,6 @@ Below is the app size increase to be expected when adding React Native Skia to y
 Run `pod install` on the `ios/` directory.
 
 ## Android
-
-> **Version compatibility**: `react-native@>=0.66` is required.
 
 Currently, you will need Android NDK to be installed.
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
