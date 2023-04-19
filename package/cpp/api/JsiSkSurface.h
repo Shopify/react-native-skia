@@ -54,9 +54,8 @@ public:
     } else {
       image = getObject()->makeImageSnapshot();
     }
-    auto result = image->makeNonTextureImage();
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(result)));
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkSurface, __typename__))
