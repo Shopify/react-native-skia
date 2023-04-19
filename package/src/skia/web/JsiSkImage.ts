@@ -113,4 +113,11 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   dispose() {
     this.ref.delete();
   }
+
+  makeNonTextureImage(): SkImage {
+    return new JsiSkImage(
+      this.CanvasKit,
+      this.CanvasKit.MakeImageFromEncoded(this.encodeToBytes())!
+    );
+  }
 }
