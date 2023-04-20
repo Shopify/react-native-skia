@@ -7,8 +7,12 @@ import {
   LinearGradient,
   vec,
 } from "@shopify/react-native-skia";
-import { useDerivedValue, useSharedValue } from "react-native-reanimated";
-import { GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
+import { GestureDetector, ScrollView } from "react-native-gesture-handler";
 
 import { PADDING, COLORS, getGraph } from "./Model";
 import { getYForX } from "./Math";
@@ -19,9 +23,10 @@ import { Header } from "./components/Header";
 import { Label } from "./components/Label";
 import { useGraphTouchHandler } from "./components/useGraphTouchHandler";
 
+const touchableCursorSize = 60;
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#1F1D2B",
   },
 });
@@ -49,11 +54,20 @@ export const Wallet = () => {
   // x and y values of the cursor
   const x = useSharedValue(0);
   const y = useDerivedValue(() => getYForX(path.value.toCmds(), x.value));
-  const gesture = useGraphTouchHandler(x, y, width, height);
+  const gesture = useGraphTouchHandler(x, y, width);
+  const style = useAnimatedStyle(() => {
+    return {
+      position: "absolute",
+      width: touchableCursorSize,
+      height: touchableCursorSize,
+      left: x.value - touchableCursorSize / 2,
+      top: translateY + y.value - touchableCursorSize / 2,
+    };
+  });
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Header />
-      <GestureDetector gesture={gesture}>
+      <View>
         <Canvas style={{ width, height: 2 * height + 30 }}>
           <Label
             state={state}
@@ -79,9 +93,12 @@ export const Wallet = () => {
             <Cursor x={x} y={y} width={width} />
           </Group>
         </Canvas>
-      </GestureDetector>
+        <GestureDetector gesture={gesture}>
+          <Animated.View style={style} />
+        </GestureDetector>
+      </View>
       <Selection state={state} transition={transition} graphs={graphs} />
       <List />
-    </View>
+    </ScrollView>
   );
 };
