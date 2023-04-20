@@ -112,7 +112,7 @@ public:
    Defines a property that will be added to the container
    */
   template <class _Tp, class... _Args,
-            class = std::_EnableIf<!std::is_array<_Tp>::value>>
+            class = std::enable_if_t<!std::is_array<_Tp>::value>>
   _Tp *defineProperty(_Args &&...__args) {
     // Create property and set onChange callback
     auto prop =

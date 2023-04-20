@@ -72,7 +72,7 @@ public:
    Adds a property to the derived property child props.
    */
   template <class _Tp, class... _Args,
-            class = std::_EnableIf<!std::is_array<_Tp>::value>>
+            class = std::enable_if_t<!std::is_array<_Tp>::value>>
   _Tp *defineProperty(_Args &&...__args) {
     auto prop =
         std::make_shared<_Tp>(std::forward<_Args>(__args)..., _onChange);

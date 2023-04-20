@@ -103,11 +103,29 @@ void RNSkMetalCanvasProvider::renderToCanvas(
   // usage growing very fast in the simulator without this.
   @autoreleasepool {
 
-    GrMTLHandle drawableHandle;
-    auto skSurface = SkSurface::MakeFromCAMetalLayer(
-        renderContext->skContext.get(), (__bridge GrMTLHandle)_layer,
-        kTopLeft_GrSurfaceOrigin, 1, kBGRA_8888_SkColorType, nullptr, nullptr,
-        &drawableHandle);
+    /* It is super important that we use the pattern of calling nextDrawable
+     inside this autoreleasepool and not depend on Skia's
+     SkSurface::MakeFromCAMetalLayer to encapsulate since we're seeing a lot of
+     drawables leaking if they're not done this way.
+
+     This is now reverted from:
+     (https://github.com/Shopify/react-native-skia/commit/2e2290f8e6dfc6921f97b79f779d920fbc1acceb)
+     back to the original implementation.
+     */
+    id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
+    if (currentDrawable == nullptr) {
+      return;
+    }
+
+    GrMtlTextureInfo fbInfo;
+    fbInfo.fTexture.retain((__bridge void *)currentDrawable.texture);
+
+    GrBackendRenderTarget backendRT(_layer.drawableSize.width,
+                                    _layer.drawableSize.height, 1, fbInfo);
+
+    auto skSurface = SkSurface::MakeFromBackendRenderTarget(
+        renderContext->skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
+        kBGRA_8888_SkColorType, nullptr, nullptr);
 
     if (skSurface == nullptr || skSurface->getCanvas() == nullptr) {
       RNSkia::RNSkLogger::logToConsole(
@@ -120,11 +138,8 @@ void RNSkMetalCanvasProvider::renderToCanvas(
 
     skSurface->flushAndSubmit();
 
-    id<CAMetalDrawable> currentDrawable =
-        (__bridge id<CAMetalDrawable>)drawableHandle;
     id<MTLCommandBuffer> commandBuffer(
         [renderContext->commandQueue commandBuffer]);
-    commandBuffer.label = @"PresentSkia";
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
   }

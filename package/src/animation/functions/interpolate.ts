@@ -36,6 +36,7 @@ function getVal(
   rightEdgeOutput: number,
   x: number
 ): number {
+  "worklet";
   switch (type) {
     case Extrapolate.IDENTITY:
       return x;
@@ -51,6 +52,7 @@ function getVal(
 }
 
 function isExtrapolate(value: string): value is Extrapolate {
+  "worklet";
   return (
     value === Extrapolate.EXTEND ||
     value === Extrapolate.CLAMP ||
@@ -63,6 +65,7 @@ function isExtrapolate(value: string): value is Extrapolate {
 export function validateInterpolationOptions(
   type: ExtrapolationType
 ): RequiredExtrapolationConfig {
+  "worklet";
   // initialize extrapolationConfig with default extrapolation
   const extrapolationConfig: RequiredExtrapolationConfig = {
     extrapolateLeft: Extrapolate.EXTEND,
@@ -108,6 +111,7 @@ function internalInterpolate(
   narrowedInput: InterpolationNarrowedInput,
   extrapolationConfig: RequiredExtrapolationConfig
 ) {
+  "worklet";
   const { leftEdgeInput, rightEdgeInput, leftEdgeOutput, rightEdgeOutput } =
     narrowedInput;
   if (rightEdgeInput - leftEdgeInput === 0) {
@@ -147,6 +151,7 @@ export function interpolate(
   output: readonly number[],
   type?: ExtrapolationType
 ): number {
+  "worklet";
   if (input.length < 2 || output.length < 2) {
     throw Error(
       "Interpolation input and output should contain at least two values."

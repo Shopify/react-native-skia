@@ -1,47 +1,24 @@
-import type { SkiaMutableValue, SkiaValue } from "@shopify/react-native-skia";
-import {
-  runDecay,
-  add,
-  clamp,
-  dist,
-  vec,
-  useValue,
-  useTouchHandler,
-} from "@shopify/react-native-skia";
-
-import { PADDING } from "../Model";
+import type { SharedValue } from "react-native-reanimated";
+import { withDecay } from "react-native-reanimated";
+import { Gesture } from "react-native-gesture-handler";
+import { useMemo } from "react";
 
 export const useGraphTouchHandler = (
-  x: SkiaMutableValue<number>,
-  y: SkiaValue<number>,
-  width: number,
-  height: number
+  x: SharedValue<number>,
+  y: SharedValue<number>,
+  width: number
 ) => {
-  const translateY = height + PADDING;
-  const gestureActive = useValue(false);
-  const offsetX = useValue(0);
-  const onTouch = useTouchHandler({
-    onStart: (pos) => {
-      const normalizedCenter = add(
-        vec(x.current, y.current),
-        vec(0, translateY)
-      );
-      if (dist(normalizedCenter, pos) < 50) {
-        gestureActive.current = true;
-        offsetX.current = x.current - pos.x;
-      }
-    },
-    onActive: (pos) => {
-      if (gestureActive.current) {
-        x.current = clamp(offsetX.current + pos.x, 0, width);
-      }
-    },
-    onEnd: ({ velocityX }) => {
-      if (gestureActive.current) {
-        gestureActive.current = false;
-        runDecay(x, { velocity: velocityX, clamp: [0, width] });
-      }
-    },
-  });
-  return onTouch;
+  const gesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .onChange((pos) => {
+          x.value += pos.x;
+          y.value += pos.y;
+        })
+        .onEnd(({ velocityX }) => {
+          x.value = withDecay({ velocity: velocityX, clamp: [0, width] });
+        }),
+    [width, x, y]
+  );
+  return gesture;
 };
