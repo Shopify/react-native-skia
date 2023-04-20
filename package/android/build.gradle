@@ -149,7 +149,8 @@ android {
              "**/libfbjni.so",
              "**/libjsi.so",
              "**/libreact_nativemodule_core.so",
-             "**/libturbomodulejsijni.so"
+             "**/libturbomodulejsijni.so",
+             "META-INF/**"
         ]
     }
 
