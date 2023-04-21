@@ -27,24 +27,44 @@
   }
 
   // Get size
-  auto size = view.frame.size;
+  CGSize size = view.frame.size;
+  
+  // Setup context
+  UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat defaultFormat];
+  format.opaque = NO;
+  UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:size format:format];
 
-  // Setup contextr
-  UIGraphicsBeginImageContextWithOptions(size, NO, 0);
+  // Render to context - this is now the only part of this function that shows up in the profiler!
+  UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {
+      [view drawViewHierarchyInRect:(CGRect){CGPointZero, size} afterScreenUpdates:YES];
+  }];
 
-  // Render to context
-  //[view.layer renderInContext:UIGraphicsGetCurrentContext()];
-  [view drawViewHierarchyInRect:(CGRect){CGPointZero, size}
-             afterScreenUpdates:YES];
+  // Convert from UIImage -> CGImage -> SkImage
+  CGImageRef cgImage = image.CGImage;
+  
+  // Get some info about the image
+  auto width = CGImageGetWidth(cgImage);
+  auto height = CGImageGetHeight(cgImage);
+  auto bytesPerRow = CGImageGetBytesPerRow(cgImage);
+    
+  // Convert from UIImage -> SkImage, start by getting the pixels directly from the CGImage:
+  auto dataRef = CGDataProviderCopyData(CGImageGetDataProvider(cgImage));
+  auto length = CFDataGetLength(dataRef);
+  void *data = CFDataGetMutableBytePtr((CFMutableDataRef)dataRef);
+  
+  // Now we'll capture the data in an SkData object and control releasing it:
+  auto skData = SkData::MakeWithProc(data, length, [](const void* ptr, void* context) {
+      CFDataRef dataRef = (CFDataRef)context;
+      CFRelease(dataRef);
+  }, (void*)dataRef);
+  
+  // Make SkImageInfo
+  SkImageInfo info =
+      SkImageInfo::Make(static_cast<int>(width), static_cast<int>(height),
+                        kRGBA_8888_SkColorType, kPremul_SkAlphaType);
 
-  // Convert to image and release context
-  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-
-  // Convert to SkImage
-  NSData *data = UIImagePNGRepresentation(image);
-  sk_sp<SkData> skData = SkData::MakeWithCopy(data.bytes, data.length);
-  return SkImage::MakeFromEncoded(skData);
+  // ... and then create the SkImage itself!
+  return SkImage::MakeRasterData(info, skData, bytesPerRow);
 }
 
 @end
