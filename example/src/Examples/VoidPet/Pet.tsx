@@ -53,9 +53,9 @@ const pet: PetDef = {
       Skia.Path.MakeFromSVGString(s.props.d)!.computeTightBounds()
     )
   ),
-  members: startingPaths.map((e, i) => {
+  members: exampleStartingPaths.map((e, i) => {
     const start = Skia.Path.MakeFromSVGString(e.props.d)!;
-    const end = Skia.Path.MakeFromSVGString(endingPaths[i].props.d)!;
+    const end = Skia.Path.MakeFromSVGString(exampleEndingPaths[i].props.d)!;
     if (start.isInterpolatable(end) === false) {
       throw new Error("Paths are not interpolatable");
     }
@@ -66,8 +66,6 @@ const pet: PetDef = {
     };
   }),
 };
-
-console.log({ pet });
 
 interface PetProps {
   progress: SharedValue<number>;
@@ -100,9 +98,9 @@ interface MemberProps {
 
 const Member = ({ start, end, color, progress }: MemberProps) => {
   const pathHolder = Skia.Path.Make();
-  useDerivedValue(() => {
-    Skia.Path.MakeFromPathInterpolation(start, end, progress.value, pathHolder);
-    return pathHolder;
+  const path = useDerivedValue(() => {
+    return end.interpolate(start, progress.value)!;
+    //Skia.Path.MakeFromPathInterpolation(start, end, progress.value, pathHolder);
   });
-  return <Path path={pathHolder} color={color} />;
+  return <Path path={path} color={color} />;
 };

@@ -10,7 +10,7 @@ import { Dimensions, ScrollView } from "react-native";
 
 import { Pet } from "./Pet";
 
-const pets = new Array(40).fill(0).map((_, i) => i);
+const pets = new Array(30).fill(0).map((_, i) => i);
 const { width } = Dimensions.get("window");
 
 const speed = 2;
@@ -39,7 +39,7 @@ export const VoidPet = () => {
           <Group
             transform={[
               { translateY: size * Math.floor(i / petPerRow) },
-              { translateX: size * (i % petPerRow) + 12 },
+              { translateX: size * (i % petPerRow) + 2 },
             ]}
           >
             <Pet key={i} progress={progress} size={size} />
