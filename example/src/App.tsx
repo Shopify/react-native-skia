@@ -25,6 +25,7 @@ import {
   Vertices,
   Wallet,
   Severance,
+  VoidPet,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -87,7 +88,7 @@ const App = () => {
           screenOptions={{
             headerLeft: HeaderLeft,
           }}
-          initialRouteName={CI ? "Tests" : "Home"}
+          initialRouteName={CI ? "Tests" : "VoidPet"}
         >
           <Stack.Screen
             name="Home"
@@ -113,6 +114,7 @@ const App = () => {
               header: () => null,
             }}
           />
+          <Stack.Screen name="VoidPet" component={VoidPet} />
           <Stack.Screen name="API" component={API} />
           <Stack.Screen name="Breathe" component={Breathe} />
           <Stack.Screen name="Filters" component={Filters} />
