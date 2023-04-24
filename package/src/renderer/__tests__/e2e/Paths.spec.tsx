@@ -130,4 +130,67 @@ describe("Paths", () => {
     );
     checkImage(img, "snapshots/paths/pattern.png");
   });
+  it("Should interpolate paths", async () => {
+    // https://fiddle.skia.org/c/@Path_isInterpolatable
+    const { Skia } = importSkia();
+    const path = Skia.Path.Make();
+    const path2 = Skia.Path.Make();
+    path.moveTo(20, 20);
+    path.lineTo(40, 40);
+    path.lineTo(20, 20);
+    path.lineTo(40, 40);
+    path.close();
+    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    expect(path.isInterpolatable(path2)).toBe(true);
+    const result = path2.interpolate(path, 0.5)!;
+    expect(result).toBeDefined();
+    const img = await surface.draw(
+      <Path path={result} style="stroke" strokeWidth={3} />
+    );
+    checkImage(img, "snapshots/paths/interpolation1.png");
+  });
+  it("Should interpolate paths with a pre-allocated Path", async () => {
+    // https://fiddle.skia.org/c/@Path_isInterpolatable
+    const { Skia } = importSkia();
+    const path = Skia.Path.Make();
+    const path2 = Skia.Path.Make();
+    path.moveTo(20, 20);
+    path.lineTo(40, 40);
+    path.lineTo(20, 20);
+    path.lineTo(40, 40);
+    path.close();
+    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    expect(path.isInterpolatable(path2)).toBe(true);
+    const result = Skia.Path.Make();
+    Skia.Path.MakeFromPathInterpolation(path2, path, 0.5, result);
+    const img = await surface.draw(
+      <Path path={result} style="stroke" strokeWidth={3} />
+    );
+    checkImage(img, "snapshots/paths/interpolation1.png");
+  });
+  it("Shouldn't interpolate paths with a pre-allocated Path", async () => {
+    // https://fiddle.skia.org/c/@Path_isInterpolatable
+    const { Skia } = importSkia();
+    const path = Skia.Path.Make();
+    const path2 = Skia.Path.Make();
+    path.moveTo(20, 20);
+    path.lineTo(40, 40);
+    path.lineTo(20, 20);
+    path.lineTo(40, 40);
+    path.lineTo(0, 0);
+    path.close();
+    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    const result = Skia.Path.Make();
+    const success = Skia.Path.MakeFromPathInterpolation(
+      path2,
+      path,
+      0.5,
+      result
+    );
+    expect(success).toBe(false);
+    const img = await surface.draw(
+      <Path path={result} style="stroke" strokeWidth={3} />
+    );
+    checkImage(img, "snapshots/paths/emptyPath.png");
+  });
 });

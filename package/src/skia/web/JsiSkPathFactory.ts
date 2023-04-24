@@ -15,6 +15,21 @@ export class JsiSkPathFactory extends Host implements PathFactory {
     return new JsiSkPath(this.CanvasKit, new this.CanvasKit.Path());
   }
 
+  MakeFromPathInterpolation(
+    from: SkPath,
+    to: SkPath,
+    weight: number,
+    result: SkPath
+  ): boolean {
+    const success = from.copy().interpolate(to, weight);
+    if (!success) {
+      return false;
+    }
+    result.reset();
+    result.addPath(success);
+    return true;
+  }
+
   MakeFromSVGString(str: string) {
     const path = this.CanvasKit.Path.MakeFromSVGString(str);
     if (path === null) {

@@ -36,6 +36,15 @@ public:
         runtime, std::make_shared<JsiSkPath>(getContext(), SkPath()));
   }
 
+  JSI_HOST_FUNCTION(MakeFromPathInterpolation) {
+    auto from = JsiSkPath::fromValue(runtime, arguments[0]);
+    auto to = JsiSkPath::fromValue(runtime, arguments[1]);
+    auto weight = arguments[2].asNumber();
+    auto dst = JsiSkPath::fromValue(runtime, arguments[3]);
+    auto succeed = from->interpolate(*to, weight, dst.get());
+    return succeed;
+  }
+
   JSI_HOST_FUNCTION(MakeFromSVGString) {
     auto svgString = arguments[0].asString(runtime).utf8(runtime);
     SkPath result;
@@ -164,7 +173,9 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromSVGString),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromOp),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromCmds),
-                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromText))
+                       JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromText),
+                       JSI_EXPORT_FUNC(JsiSkPathFactory,
+                                       MakeFromPathInterpolation))
 
   explicit JsiSkPathFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
