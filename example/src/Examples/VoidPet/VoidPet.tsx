@@ -39,7 +39,7 @@ export const VoidPet = () => {
           <Group
             transform={[
               { translateY: size * Math.floor(i / petPerRow) },
-              { translateX: size * (i % petPerRow) + 10 },
+              { translateX: size * (i % petPerRow) + 12 },
             ]}
           >
             <Pet key={i} progress={progress} size={size} />

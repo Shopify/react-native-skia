@@ -10,6 +10,7 @@ import {
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
+import _ from "lodash";
 
 import { exampleStartingPaths, exampleEndingPaths } from "./data";
 
@@ -24,15 +25,37 @@ interface PetDef {
   boundingBox: SkRect;
 }
 
+const startingGroup = _.groupBy(exampleStartingPaths, "props.fill");
+const startingPaths = _.flatMap(startingGroup, (group: any) => {
+  return {
+    tagName: "path",
+    props: {
+      d: group.map((g: any) => g.props.d).join(" "),
+      fill: group[0].props.fill,
+    },
+  };
+});
+
+const endingGroup = _.groupBy(exampleEndingPaths, "props.fill");
+const endingPaths = _.flatMap(endingGroup, (group: any) => {
+  return {
+    tagName: "path",
+    props: {
+      d: group.map((g: any) => g.props.d).join(" "),
+      fill: group[0].props.fill,
+    },
+  };
+});
+
 const pet: PetDef = {
   boundingBox: bounds(
     exampleStartingPaths.map((s) =>
       Skia.Path.MakeFromSVGString(s.props.d)!.computeTightBounds()
     )
   ),
-  members: exampleStartingPaths.map((e, i) => {
+  members: startingPaths.map((e, i) => {
     const start = Skia.Path.MakeFromSVGString(e.props.d)!;
-    const end = Skia.Path.MakeFromSVGString(exampleEndingPaths[i].props.d)!;
+    const end = Skia.Path.MakeFromSVGString(endingPaths[i].props.d)!;
     if (start.isInterpolatable(end) === false) {
       throw new Error("Paths are not interpolatable");
     }
@@ -43,6 +66,8 @@ const pet: PetDef = {
     };
   }),
 };
+
+console.log({ pet });
 
 interface PetProps {
   progress: SharedValue<number>;
