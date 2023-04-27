@@ -18,5 +18,5 @@ export type Routes = {
   UseCanvas: undefined;
   PictureView: undefined;
   OnLayout: undefined;
-  Screenshot: undefined;
+  Snapshot: undefined;
 };
