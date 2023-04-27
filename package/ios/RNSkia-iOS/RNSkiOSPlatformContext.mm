@@ -62,6 +62,14 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
   return MakeOffscreenMetalSurface(width, height);
 }
 
+void RNSkiOSPlatformContext::runOnMainThread(std::function<void()> func) {
+  _dispatchMainThread(func);
+}
+
+sk_sp<SkImage> RNSkiOSPlatformContext::takeScreenshotFromViewTag(size_t tag) {
+  return _takeViewScreenshot(tag);
+}
+
 void RNSkiOSPlatformContext::startDrawLoop() {
   if (_displayLink == nullptr) {
     _displayLink = [[DisplayLink alloc] init];

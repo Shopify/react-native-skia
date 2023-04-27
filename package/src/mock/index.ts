@@ -99,4 +99,5 @@ export const Mock: typeof SkiaExports &
   ShaderLib,
   createDrawing: Noop,
   createDeclaration: Noop,
+  makeImageFromView: Noop,
 };
