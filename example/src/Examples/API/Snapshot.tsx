@@ -31,7 +31,7 @@ half4 main(float2 xy) {
   return image.eval(xy).rgba;
 }`)!;
 
-export const Screenshot = () => {
+export const Snapshot = () => {
   const { width } = useWindowDimensions();
   const viewRef = useRef<View>(null);
 
@@ -42,7 +42,7 @@ export const Screenshot = () => {
   );
 
   const [image, setImage] = useState<SkImage | null>(null);
-  const takeScreenshot = useCallback(async () => {
+  const takeSnapshot = useCallback(async () => {
     if (viewRef.current == null) {
       return;
     }
@@ -54,7 +54,7 @@ export const Screenshot = () => {
       <View ref={viewRef} style={styles.view}>
         <Component />
       </View>
-      <Button title="Take screenshot" onPress={takeScreenshot} />
+      <Button title="Take snapshot" onPress={takeSnapshot} />
       <Canvas style={styles.canvas}>
         <Fill color="white" />
         {image ? (
