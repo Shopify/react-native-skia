@@ -57,6 +57,8 @@ const parseProp = (value: any, assets: Assets) => {
       return asset;
     } else if (value.__typename__ === "RuntimeEffect") {
       return Skia.RuntimeEffect.Make(value.source);
+    } else if (value.__typename__ === "SVG") {
+      return Skia.SVG.MakeFromString(value.source);
     } else if (value.__typename__ === "Font") {
       const asset = assets[value.name];
       if (!asset) {

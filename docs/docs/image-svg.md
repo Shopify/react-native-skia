@@ -78,11 +78,11 @@ As mentionned above, if the root dimensions are in absolute units, the width/hei
 
 ```tsx
 import React from "react";
-import { Canvas, ImageSVG, Skia, rect } from "@shopify/react-native-skia";
+import { Canvas, ImageSVG, Skia, rect, fitbox } from "@shopify/react-native-skia";
 
 const svg = Skia.SVG.MakeFromString(
-  `<svg viewBox='0 0 290 500' width="290" height="500" xmlns='http://www.w3.org/2000/svg'>
-    <circle cx='31' cy='325' r='120px' fill='#c02aaa'/>
+  `<svg viewBox='0 0 20 20' width="20" height="20" xmlns='http://www.w3.org/2000/svg'>
+    <circle cx='10' cy='10' r='10' fill='#00ffff'/>
   </svg>`
 )!;
 
@@ -95,18 +95,14 @@ export const SVG = () => {
   return (
     <Canvas style={{ flex: 1 }}>
     <Group transform={fitbox("contain", src, dst)}>
-      <ImageSVG
-        svg={svg}
-        x={0}
-        y={0}
-        width={290}
-        height={500}
-      />
+      <ImageSVG svg={svg} x={0} y={0} width={20} height={20} />
       </Group>
     </Canvas>
   );
 };
 ```
+
+<img src={require("/static/img/svg.png").default} width="256" height="256" />
 
 ## SVG Support
 
