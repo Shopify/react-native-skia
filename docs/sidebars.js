@@ -59,8 +59,8 @@ const sidebars = {
     {
       collapsed: true,
       type: "category",
-      label: "Image",
-      items: ["image", "image-svg"],
+      label: "Images",
+      items: ["image", "image-svg", "snapshotviews"],
     },
     {
       collapsed: true,
