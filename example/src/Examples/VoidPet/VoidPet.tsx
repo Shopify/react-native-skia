@@ -37,12 +37,13 @@ export const VoidPet = () => {
       >
         {pets.map((i) => (
           <Group
+            key={i}
             transform={[
               { translateY: size * Math.floor(i / petPerRow) },
               { translateX: size * (i % petPerRow) + 2 },
             ]}
           >
-            <Pet key={i} progress={progress} size={size} />
+            <Pet progress={progress} size={size} />
           </Group>
         ))}
       </Canvas>
