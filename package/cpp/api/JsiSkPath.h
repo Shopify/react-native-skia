@@ -501,12 +501,20 @@ public:
       outputPath = std::make_shared<JsiSkPath>(getContext(), SkPath());
     }
 
+    // Perform interpolation
     auto succeed =
         getObject()->interpolate(*path2, weight, outputPath->getObject().get());
+
     if (!succeed) {
       return nullptr;
     }
 
+    // Return output path directly if it was provided as an argument:
+    if (count == 3) {
+      return arguments[2].asObject(runtime);
+    }
+
+    // Return new host object
     return jsi::Object::createFromHostObject(runtime, outputPath);
   }
 
