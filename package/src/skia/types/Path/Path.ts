@@ -558,10 +558,12 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param ending  path to interpolate with
    * @param weight  contribution of this path, and
    *                 one minus contribution of ending path
+   * @param output  Preallocated SkPath for storing result. Optional.
    * @return        Path replaced by interpolated averages or null if 
-   *                not interpolatable
+   *                not interpolatable. Replaced path will be the same
+   *                as the output path if the output path is provided.
    * */
-  interpolate(end: SkPath, weight: number): SkPath | null;
+  interpolate(end: SkPath, weight: number, output?: SkPath): SkPath | null;
 
   /** Returns true if Path contain equal verbs and equal weights.
    *     @param compare  path to compare

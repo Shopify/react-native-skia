@@ -486,13 +486,28 @@ public:
   JSI_HOST_FUNCTION(interpolate) {
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
     auto weight = arguments[1].asNumber();
-    SkPath result;
-    auto succeed = getObject()->interpolate(*path2, weight, &result);
+
+    // We also allow a Path object that receives the output passed as
+    // the third parameter to avoid recreating a new JsiSkPath on each
+    // interpolation step.
+    std::shared_ptr<JsiSkPath> outputPath;
+
+    if (count == 3) {
+      // Get a pointer to the JsiSkPath and set the result object
+      outputPath = std::static_pointer_cast<JsiSkPath>(
+          arguments[2].getObject(runtime).getHostObject(runtime));
+    } else {
+      // Create new output path
+      outputPath = std::make_shared<JsiSkPath>(getContext(), SkPath());
+    }
+
+    auto succeed =
+        getObject()->interpolate(*path2, weight, outputPath->getObject().get());
     if (!succeed) {
       return nullptr;
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
+
+    return jsi::Object::createFromHostObject(runtime, outputPath);
   }
 
   JSI_HOST_FUNCTION(toCmds) {
