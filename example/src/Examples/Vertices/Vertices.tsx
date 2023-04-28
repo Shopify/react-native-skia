@@ -66,9 +66,7 @@ export const Demo = () => {
       }),
     [clock]
   );
-  if (!oslo) {
-    return null;
-  }
+
   return (
     <Canvas style={{ width, height }}>
       <Vertices

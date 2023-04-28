@@ -7,7 +7,7 @@ import {
   useWindowDimensions,
   ScrollView,
 } from "react-native";
-import type { SkImage } from "@shopify/react-native-skia";
+import { SkImage, useValue } from "@shopify/react-native-skia";
 import {
   Canvas,
   Fill,
@@ -41,14 +41,14 @@ export const Snapshot = () => {
     [progress]
   );
 
-  const [image, setImage] = useState<SkImage | null>(null);
+  const image = useValue<SkImage | null>(null);
   const takeSnapshot = useCallback(async () => {
     if (viewRef.current == null) {
       return;
     }
-    const snapshot = await makeImageFromView(viewRef);
-    setImage(snapshot);
+    image.current = await makeImageFromView(viewRef);
   }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <View ref={viewRef} style={styles.view}>
@@ -57,20 +57,18 @@ export const Snapshot = () => {
       <Button title="Take snapshot" onPress={takeSnapshot} />
       <Canvas style={styles.canvas}>
         <Fill color="white" />
-        {image ? (
-          <Fill>
-            <Shader source={source} uniforms={uniforms}>
-              <ImageShader
-                image={image}
-                fit="contain"
-                x={20}
-                y={20}
-                width={width - 40}
-                height={width - 120}
-              />
-            </Shader>
-          </Fill>
-        ) : null}
+        <Fill>
+          <Shader source={source} uniforms={uniforms}>
+            <ImageShader
+              image={image}
+              fit="contain"
+              x={20}
+              y={20}
+              width={width - 40}
+              height={width - 120}
+            />
+          </Shader>
+        </Fill>
       </Canvas>
     </View>
   );

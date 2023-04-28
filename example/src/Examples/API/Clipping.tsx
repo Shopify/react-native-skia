@@ -41,9 +41,7 @@ export const Clipping = () => {
   const progress = useLoop({ duration: 3000 });
   const x = useComputedValue(() => mix(progress.current, 0, 200), [progress]);
   const oslo = useImage(require("../../assets/oslo.jpg"));
-  if (oslo === null) {
-    return null;
-  }
+
   return (
     <ScrollView>
       <Canvas style={{ width, height: SIZE + 32 }}>

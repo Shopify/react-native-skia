@@ -19,9 +19,7 @@ import { Examples, SIZE } from "./components/Examples";
 
 const DisplacementMapDemo = () => {
   const image = useImage(require("../../assets/oslo.jpg"));
-  if (!image) {
-    return null;
-  }
+
   return (
     <Group>
       <DisplacementMap channelX="r" channelY="a" scale={20}>
@@ -33,9 +31,7 @@ const DisplacementMapDemo = () => {
 };
 const OffsetDemo = () => {
   const image = useImage(require("../../assets/oslo.jpg"));
-  if (!image) {
-    return null;
-  }
+
   return (
     <Group>
       <Fill color="lightblue" />
