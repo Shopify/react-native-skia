@@ -49,6 +49,33 @@ export const HelloWorld = () => {
 };
 ```
 
+:::info
+
+Reanimated and Skia use different color formats. You can interpolate colors using `interpolateColors` from Skia. If you use `interpolateColor` from Reanimated, you need to convert it using `convertToRGBA` from Reanimated.
+
+```tsx twoslash
+import {
+  interpolateColor,
+  useDerivedValue,
+  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  convertToRGBA,
+} from "react-native-reanimated";
+
+  const color = useDerivedValue(() =>
+    convertToRGBA(
+      interpolateColor(
+        0,
+        [0, 1],
+        ["cyan", "magenta"]
+      )
+    )
+  );
+```
+
+:::
+
 ## Gesture Handler
 
 This allows you to integrate with any library that supports Reanimated.

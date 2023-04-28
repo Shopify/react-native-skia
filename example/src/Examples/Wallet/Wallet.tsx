@@ -23,7 +23,7 @@ import { Header } from "./components/Header";
 import { Label } from "./components/Label";
 import { useGraphTouchHandler } from "./components/useGraphTouchHandler";
 
-const touchableCursorSize = 60;
+const touchableCursorSize = 80;
 
 const styles = StyleSheet.create({
   container: {

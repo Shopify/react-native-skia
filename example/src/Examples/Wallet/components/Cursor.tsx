@@ -1,12 +1,14 @@
-import {
-  Circle,
-  Group,
-  Paint,
-  interpolateColors,
-} from "@shopify/react-native-skia";
+import { Circle, Group, Paint } from "@shopify/react-native-skia";
 import React from "react";
 import type { SharedValue } from "react-native-reanimated";
-import { interpolateColor, useDerivedValue } from "react-native-reanimated";
+import {
+  interpolateColor,
+  useDerivedValue,
+  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  convertToRGBA,
+} from "react-native-reanimated";
 
 import { COLORS } from "../Model";
 
@@ -17,14 +19,15 @@ interface CursorProps {
 }
 
 export const Cursor = ({ x, y, width }: CursorProps) => {
-  const color = useDerivedValue(() => {
-    const result = interpolateColors(
-      x.value / width,
-      COLORS.map((_, i) => i / COLORS.length),
-      COLORS
-    );
-    return result;
-  });
+  const color = useDerivedValue(() =>
+    convertToRGBA(
+      interpolateColor(
+        x.value / width,
+        COLORS.map((_, i) => i / COLORS.length),
+        COLORS
+      )
+    )
+  );
   const transform = useDerivedValue(() => [
     { translateX: x.value },
     { translateY: y.value },
