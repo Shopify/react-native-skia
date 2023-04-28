@@ -72,6 +72,38 @@ export const SVG = () => {
 };
 ```
 
+## Scaling the SVG
+
+As mentionned above, if the root dimensions are in absolute units, the width/height properties have no effect since the initial viewport is fixed. However you can access these values and use the fitbox function.
+
+```tsx
+import React from "react";
+import { Canvas, ImageSVG, Skia, rect, fitbox } from "@shopify/react-native-skia";
+
+const svg = Skia.SVG.MakeFromString(
+  `<svg viewBox='0 0 20 20' width="20" height="20" xmlns='http://www.w3.org/2000/svg'>
+    <circle cx='10' cy='10' r='10' fill='#00ffff'/>
+  </svg>`
+)!;
+
+const width = 256;
+const height = 256;
+const src = rect(0, 0, svg.width(), svg.height());
+const dst = rect(0, 0, width, height);
+
+export const SVG = () => {
+  return (
+    <Canvas style={{ flex: 1 }}>
+    <Group transform={fitbox("contain", src, dst)}>
+      <ImageSVG svg={svg} x={0} y={0} width={20} height={20} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+<img src={require("/static/img/svg.png").default} width="256" height="256" />
+
 ## SVG Support
 
 The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) displays SVGs as images.
