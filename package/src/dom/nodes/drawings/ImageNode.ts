@@ -15,6 +15,12 @@ export class ImageNode extends JsiDrawingNode<
 
   deriveProps() {
     const { image } = this.props;
+    if (!image) {
+      return {
+        src: { x: 0, y: 0, width: 0, height: 0 },
+        dst: { x: 0, y: 0, width: 0, height: 0 },
+      };
+    }
     const fit = this.props.fit ?? "contain";
     const rect = processRect(this.Skia, this.props);
     const { src, dst } = fitRects(
@@ -36,6 +42,8 @@ export class ImageNode extends JsiDrawingNode<
       throw new Error("ImageNode: src and dst are undefined");
     }
     const { src, dst } = this.derived;
-    canvas.drawImageRect(image, src, dst, paint);
+    if (image) {
+      canvas.drawImageRect(image, src, dst, paint);
+    }
   }
 }

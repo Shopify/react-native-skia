@@ -60,6 +60,10 @@ export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
 
   decorate(ctx: DeclarationContext) {
     const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = this.props;
+    if (!image) {
+      return;
+    }
+
     const rct = getRect(this.Skia, imageShaderProps);
     const m3 = this.Skia.Matrix();
     if (rct) {
