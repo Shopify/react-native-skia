@@ -91,6 +91,10 @@ public:
   void decorate(DeclarationContext *context) override {
 
     auto image = _imageProps->getImage();
+    if (image == nullptr) {
+      return;
+    }
+
     auto rect = _imageProps->getRect();
     auto lm =
         _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
@@ -144,7 +148,7 @@ protected:
     _transformProp->require();
 
     // Add and require the image
-    container->defineProperty<NodeProp>("image")->require();
+    container->defineProperty<NodeProp>("image");
   }
 
 private:
