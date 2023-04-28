@@ -20,8 +20,8 @@ protected:
     auto rect = _rectProp->getDerivedValue();
     auto x = _xProp->isSet() ? _xProp->value().getAsNumber() : -1;
     auto y = _yProp->isSet() ? _yProp->value().getAsNumber() : -1;
-    auto width =  _widthProp->isSet() ? _widthProp->value().getAsNumber() : -1;
-    auto height =_widthProp->isSet() ?  _heightProp->value().getAsNumber() : -1;
+    auto width = _widthProp->isSet() ? _widthProp->value().getAsNumber() : -1;
+    auto height = _widthProp->isSet() ? _heightProp->value().getAsNumber() : -1;
     context->getCanvas()->save();
     if (rect != nullptr) {
       context->getCanvas()->translate(rect->x(), rect->y());
@@ -56,7 +56,6 @@ private:
   NodeProp *_yProp;
   NodeProp *_widthProp;
   NodeProp *_heightProp;
-
 };
 
 } // namespace RNSkia
