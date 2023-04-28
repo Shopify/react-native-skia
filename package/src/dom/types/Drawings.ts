@@ -35,7 +35,7 @@ export interface DrawingNodeProps extends GroupProps {
 export type ImageProps = DrawingNodeProps &
   RectDef & {
     fit?: Fit;
-    image: SkImage;
+    image: SkImage | null;
   };
 
 export type CircleProps = CircleDef & DrawingNodeProps;
