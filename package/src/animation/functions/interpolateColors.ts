@@ -34,6 +34,7 @@ const interpolateColorsRGB = (
     outputRange.map((c) => c[3]),
     "clamp"
   );
+  // TODO: once Float32Array are supported in the reanimated integration we can switch there
   return [r, g, b, a];
 };
 

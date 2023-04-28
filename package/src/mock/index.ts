@@ -94,7 +94,7 @@ export const Mock: typeof SkiaExports &
     _value: number,
     _inputRange: number[],
     _outputRange: Color[]
-  ) => Float32Array.of(0, 0, 0, 0),
+  ) => [0, 0, 0, 0],
   mixColors: (_v: number, _x: Color, _y: Color) => Float32Array.of(0, 0, 0, 0),
   ShaderLib,
   createDrawing: Noop,
