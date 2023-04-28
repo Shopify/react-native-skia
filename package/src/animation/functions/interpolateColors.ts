@@ -34,7 +34,7 @@ const interpolateColorsRGB = (
     outputRange.map((c) => c[3]),
     "clamp"
   );
-  return new Float32Array([r, g, b, a]);
+  return [r, g, b, a];
 };
 
 export const interpolateColors = (
