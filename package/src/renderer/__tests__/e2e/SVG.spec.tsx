@@ -83,4 +83,22 @@ describe("Displays SVGs", () => {
     );
     checkImage(image, docPath("svg2.png"));
   });
+
+  itRunsE2eOnly(
+    "should set the SVG base layer using the rect prop",
+    async () => {
+      const { Skia } = importSkia();
+      const { width, height } = surface;
+      const image = await surface.draw(
+        <>
+          <Fill color="white" />
+          <ImageSVG
+            svg={svgWithoutSize}
+            rect={Skia.XYWHRect(width / 2, height / 2, width / 2, height / 2)}
+          />
+        </>
+      );
+      checkImage(image, docPath("svg2.png"));
+    }
+  );
 });
