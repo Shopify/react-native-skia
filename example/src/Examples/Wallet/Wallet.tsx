@@ -54,7 +54,7 @@ export const Wallet = () => {
   // x and y values of the cursor
   const x = useSharedValue(0);
   const y = useDerivedValue(() => getYForX(path.value.toCmds(), x.value));
-  const gesture = useGraphTouchHandler(x, y, width);
+  const gesture = useGraphTouchHandler(x, width);
   const style = useAnimatedStyle(() => {
     return {
       position: "absolute",

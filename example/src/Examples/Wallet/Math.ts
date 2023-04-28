@@ -117,7 +117,8 @@ export const cubicBezierYForX = (
   const t = solveCubic(pa, pb, pc, pd)
     .map((root) => round(root, precision))
     .filter((root) => root >= 0 && root <= 1)[0];
-  return cubicBezier(t, a.y, b.y, c.y, d.y);
+  const y = cubicBezier(t, a.y, b.y, c.y, d.y);
+  return y;
 };
 
 interface Cubic {
