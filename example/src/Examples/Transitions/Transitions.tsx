@@ -1,10 +1,10 @@
-import React from "react";
-import { Dimensions, View } from "react-native";
+import React, { useEffect } from "react";
+import { Dimensions, View, StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  useAnimatedStyle,
+import {
   useDerivedValue,
   useSharedValue,
+  withRepeat,
   withTiming,
 } from "react-native-reanimated";
 import {
@@ -12,6 +12,7 @@ import {
   Fill,
   ImageShader,
   Shader,
+  clamp,
   interpolate,
   rect,
   useImage,
@@ -53,23 +54,25 @@ half4 main(vec2 xy) {
 `;
 
 export const Transitions = () => {
-  const x = useSharedValue(0);
+  const progress = useSharedValue(0);
+  //const x = useSharedValue(0);
   const image1 = useImage(require("./assets/1.jpg"));
   const image2 = useImage(require("./assets/2.jpg"));
   const image3 = useImage(require("./assets/3.jpg"));
-  const pan = Gesture.Pan()
-    .onChange((pos) => {
-      x.value += pos.changeX;
-    })
-    .onEnd(({ velocityX }) => {
-      const dst = snapPoint(x.value, velocityX, [0, -width, -2 * width]);
-      x.value = withTiming(dst);
-    });
+  useEffect(() => {
+    progress.value = withRepeat(withTiming(1, { duration: 1000 }), Infinity);
+  }, [progress]);
+  // const pan = Gesture.Pan()
+  //   .onChange((pos) => {
+  //     x.value += pos.changeX;
+  //   })
+  //   .onEnd(({ velocityX }) => {
+  //     const dst = snapPoint(x.value, velocityX, [0, -width]);
+  //     x.value = withTiming(dst);
+  //   });
   const uniforms = useDerivedValue(() => {
-    const progress = interpolate(x.value, [0, -width, -2 * width], [0, 1, 2]);
-    console.log(progress);
     return {
-      progress,
+      progress: progress.value,
       resolution: [width, height],
     };
   });
@@ -77,7 +80,7 @@ export const Transitions = () => {
     return null;
   }
   return (
-    <GestureDetector gesture={pan}>
+    <View style={{ flex: 1 }}>
       <Canvas style={{ flex: 1 }}>
         <Fill>
           <Shader source={source} uniforms={uniforms}>
@@ -87,6 +90,9 @@ export const Transitions = () => {
           </Shader>
         </Fill>
       </Canvas>
-    </GestureDetector>
+      {/* <GestureDetector gesture={pan}>
+        <View style={StyleSheet.absoluteFill} />
+      </GestureDetector> */}
+    </View>
   );
 };
