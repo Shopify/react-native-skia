@@ -26,6 +26,7 @@ import {
   Vertices,
   Wallet,
   Severance,
+  Transitions,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -54,6 +55,7 @@ const linking: LinkingOptions<StackParamList> = {
       Reanimated: "reanimated",
       Performance: "performance",
       Tests: "test",
+      Transitions: "transitions",
     },
   },
   prefixes: ["rnskia://"],
@@ -89,7 +91,7 @@ const App = () => {
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={CI ? "Tests" : "Home"}
+            initialRouteName={CI ? "Tests" : "Transitions"}
           >
             <Stack.Screen
               name="Home"
@@ -166,6 +168,13 @@ const App = () => {
             <Stack.Screen name="Graphs" component={GraphsScreen} />
             <Stack.Screen name="Animation" component={AnimationExample} />
             <Stack.Screen name="Reanimated" component={ReanimatedExample} />
+            <Stack.Screen
+              name="Transitions"
+              component={Transitions}
+              options={{
+                header: () => null,
+              }}
+            />
             <Stack.Screen
               name="Performance"
               component={PerformanceDrawingTest}
