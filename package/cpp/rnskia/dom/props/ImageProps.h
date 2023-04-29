@@ -76,6 +76,7 @@ public:
   void updateDerivedValue() override {
     auto image = _imageProp->getDerivedValue();
     if (image == nullptr) {
+      setDerivedValue(nullptr);
       return;
     }
 

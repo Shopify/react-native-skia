@@ -102,7 +102,7 @@ public:
     if (rect != nullptr && lm != nullptr) {
       auto rc = _imageProps->getDerivedValue();
       auto m3 = _imageProps->rect2rect(rc->src, rc->dst);
-      if (_transformProp->isChanged()) {
+      if (_transformProp->isChanged() || _imageProps->isChanged()) {
         // To modify the matrix we need to copy it since we're not allowed to
         // modify values contained in properties - this would have caused the
         // matrix to be translated and scaled more and more for each render
