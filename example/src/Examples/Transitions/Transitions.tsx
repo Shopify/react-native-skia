@@ -15,7 +15,10 @@ import {
   clamp,
   interpolate,
   rect,
+  useComputedValue,
   useImage,
+  useLoop,
+  useValue,
 } from "@shopify/react-native-skia";
 
 import { frag } from "../../components/ShaderLib/Tags";
@@ -54,14 +57,14 @@ half4 main(vec2 xy) {
 `;
 
 export const Transitions = () => {
-  const progress = useSharedValue(0);
+  const progress = useLoop();
   //const x = useSharedValue(0);
   const image1 = useImage(require("./assets/1.jpg"));
   const image2 = useImage(require("./assets/2.jpg"));
   const image3 = useImage(require("./assets/3.jpg"));
-  useEffect(() => {
-    progress.value = withRepeat(withTiming(1, { duration: 1000 }), Infinity);
-  }, [progress]);
+  // useEffect(() => {
+  //   progress.value = withRepeat(withTiming(1, { duration: 1000 }), Infinity);
+  // }, [progress]);
   // const pan = Gesture.Pan()
   //   .onChange((pos) => {
   //     x.value += pos.changeX;
@@ -70,12 +73,12 @@ export const Transitions = () => {
   //     const dst = snapPoint(x.value, velocityX, [0, -width]);
   //     x.value = withTiming(dst);
   //   });
-  const uniforms = useDerivedValue(() => {
+  const uniforms = useComputedValue(() => {
     return {
-      progress: progress.value,
+      progress: progress.current,
       resolution: [width, height],
     };
-  });
+  }, [progress]);
   if (!image1 || !image2 || !image3) {
     return null;
   }
