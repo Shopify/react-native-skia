@@ -30,7 +30,9 @@ public:
       : JsiDomDeclarationNode(context, "skShader", DeclarationType::Shader) {}
 
   void decorate(DeclarationContext *context) override {
-    decorateChildren(context);
+      if (_children.empty()) {
+          decorateChildren(context);
+      }
     auto source = _sourceProp->value().getAs<JsiSkRuntimeEffect>();
     if (source == nullptr) {
       throw std::runtime_error("Expected runtime effect when reading source "
@@ -55,11 +57,13 @@ public:
     }
 
     // get all children that are shader nodes
-    auto children = context->getShaders()->popAll();
+    if (_children.empty()) {
+        _children = context->getShaders()->popAll();
+    }
 
     // Update shader
     context->getShaders()->push(source->getObject()->makeShader(
-        uniforms, children.data(), children.size(), &lm));
+        uniforms, _children.data(), _children.size(), &lm));
   }
 
 protected:
@@ -79,6 +83,7 @@ private:
   UniformsProp *_uniformsProp;
   TransformProp *_transformProp;
   PointProp *_originProp;
+  std::vector<sk_sp<SkShader>> _children;
 };
 
 class JsiImageShaderNode : public JsiDomDeclarationNode,
