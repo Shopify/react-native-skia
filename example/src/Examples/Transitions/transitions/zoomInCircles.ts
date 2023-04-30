@@ -1,18 +1,23 @@
 import { glsl } from "../../../components/ShaderLib/Tags";
 
-export const zoomInCircles = glsl`
-// License: MIT
-// Author: dycm8009
-// ported by gre from https://gist.github.com/dycm8009/948e99b1800e81ad909a
+import type { Transition } from "./Base";
+
+export const zoomInCircles: Transition = (
+  name: string,
+  getFromColor: string,
+  getToColor: string
+) => glsl`
+
+struct Context {
+ vec2 uv;
+ float t;
+};
 
 vec2 zoom(vec2 uv, float amount) {
   return 0.5 + ((uv - 0.5) * amount);	
 }
 
-vec4 zoomInCircles(vec2 uv) {
-  // TODO: some timing are hardcoded but should be one or many parameters
-  // TODO: should also be able to configure how much circles
-  // TODO: if() branching should be avoided when possible, prefer use of step() & other functions
+Context getUV(vec2 uv, float progress) {
   vec2 r = 2.0 * (vec2(uv.xy) - 0.5);
   float pro = progress / 0.8;
   float z = pro * 0.2;
@@ -35,6 +40,11 @@ vec4 zoomInCircles(vec2 uv) {
   else {
     uv = zoom(uv, 1.0 - 0.25 * pro);
   }
-  return mix(getFromColor(uv), getToColor(uv), t);
+  return Context(uv, t);
+}
+
+vec4 ${name}(vec2 uv, float progress) {
+  Context result = getUV(uv, progress);
+  return mix(${getFromColor}(result.uv), ${getToColor}(result.uv), result.t);
 }
 `;
