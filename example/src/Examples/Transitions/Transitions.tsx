@@ -19,6 +19,7 @@ import { snapPoint } from "./Math";
 import {
   transition,
   linear,
+  swirl,
   zoomInCircles,
   glitchMemories,
 } from "./transitions";
@@ -53,7 +54,7 @@ export const Transitions = () => {
       <Canvas style={{ flex: 1 }}>
         <Fill>
           <Shader
-            source={transition(glitchMemories, zoomInCircles)}
+            source={transition(glitchMemories, swirl)}
             uniforms={uniforms}
           >
             <ImageShader image={image1} fit="cover" rect={rct} />
