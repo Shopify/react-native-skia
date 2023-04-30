@@ -9,13 +9,11 @@ vec2 zoom(vec2 uv, float amount) {
   return 0.5 + ((uv - 0.5) * amount);	
 }
 
-vec2 ratio2 = vec2(1.0, 1.0 / 1.0);
-
 vec4 zoomInCircles(vec2 uv) {
   // TODO: some timing are hardcoded but should be one or many parameters
   // TODO: should also be able to configure how much circles
   // TODO: if() branching should be avoided when possible, prefer use of step() & other functions
-  vec2 r = 2.0 * ((vec2(uv.xy) - 0.5) * ratio2);
+  vec2 r = 2.0 * (vec2(uv.xy) - 0.5);
   float pro = progress / 0.8;
   float z = pro * 0.2;
   float t = 0.0;
