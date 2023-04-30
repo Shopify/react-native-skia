@@ -109,14 +109,14 @@ export interface DiffRectProps extends DrawingNodeProps {
 }
 
 export interface TextProps extends DrawingNodeProps {
-  font: SkFont;
+  font: SkFont | null;
   text: string;
   x: number;
   y: number;
 }
 
 export interface TextPathProps extends DrawingNodeProps {
-  font: SkFont;
+  font: SkFont | null;
   text: string;
   path: PathDef;
   initialOffset: number;
@@ -134,7 +134,7 @@ export interface Glyph {
 }
 
 export interface GlyphsProps extends DrawingNodeProps {
-  font: SkFont;
+  font: SkFont | null;
   x: number;
   y: number;
   glyphs: Glyph[];
