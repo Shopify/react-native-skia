@@ -2,11 +2,8 @@ import { glsl } from "../../../components/ShaderLib/Tags";
 
 import type { Transition } from "./Base";
 
-export const zoomInCircles: Transition = (
-  name: string,
-  getFromColor: string,
-  getToColor: string
-) => glsl`
+export const zoomInCircles: Transition = {
+  transition: (name: string, getFromColor: string, getToColor: string) => glsl`
 
 struct Context {
  vec2 uv;
@@ -47,4 +44,5 @@ vec4 ${name}(vec2 uv, float progress) {
   Context result = getUV(uv, progress);
   return mix(${getFromColor}(result.uv), ${getToColor}(result.uv), result.t);
 }
-`;
+`,
+};

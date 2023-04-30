@@ -3,11 +3,8 @@ import { glsl } from "../../../components/ShaderLib";
 
 import type { Transition } from "./Base";
 
-export const glitchMemories: Transition = (
-  name: string,
-  getFromColor: string,
-  getToColor: string
-) => glsl`
+export const glitchMemories: Transition = {
+  transition: (name: string, getFromColor: string, getToColor: string) => glsl`
 vec4 ${name}(vec2 p, float progress) {
   vec2 block = floor(p.xy / vec2(16));
   vec2 uv_noise = block / vec2(64);
@@ -19,4 +16,5 @@ vec4 ${name}(vec2 p, float progress) {
 
   return vec4(mix(${getFromColor}(red), ${getToColor}(red), progress).r,mix(${getFromColor}(green), ${getToColor}(green), progress).g,mix(${getFromColor}(blue), ${getToColor}(blue), progress).b,1.0);
 }
-`;
+`,
+};

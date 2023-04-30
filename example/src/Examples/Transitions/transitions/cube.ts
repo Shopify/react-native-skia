@@ -2,11 +2,8 @@ import { glsl } from "../../../components/ShaderLib";
 
 import type { Transition } from "./Base";
 
-export const cube: Transition = (
-  name: string,
-  getFromColor: string,
-  getToColor: string
-) => glsl`
+export const cube: Transition = {
+  common: glsl`
 const float persp = 0.7;
 const float unzoom = 0.3;
 const float reflection = 0.4;
@@ -18,20 +15,6 @@ vec2 project (vec2 p) {
 
 bool inBounds (vec2 p) {
   return all(lessThan(vec2(0.0), p)) && all(lessThan(p, vec2(1.0)));
-}
-
-vec4 bgColor_${name}(vec2 p, vec2 pfr, vec2 pto) {
-  vec4 c = vec4(0.0, 0.0, 0.0, 1.0);
-  pfr = project(pfr);
-  // FIXME avoid branching might help perf!
-  if (inBounds(pfr)) {
-    c += mix(vec4(0.0), ${getFromColor}(pfr), reflection * mix(1.0, 0.0, pfr.y));
-  }
-  pto = project(pto);
-  if (inBounds(pto)) {
-    c += mix(vec4(0.0), ${getToColor}(pto), reflection * mix(1.0, 0.0, pto.y));
-  }
-  return c;
 }
 
 // p : the position
@@ -48,6 +31,22 @@ vec2 xskew (vec2 p, float persp, float center) {
     + vec2(center<0.5 ? 0.0 : 1.0, 0.0)
   );
 }
+`,
+  transition: (name: string, getFromColor: string, getToColor: string) => glsl`
+vec4 bgColor_${name}(vec2 p, vec2 pfr, vec2 pto) {
+  vec4 c = vec4(0.0, 0.0, 0.0, 1.0);
+  pfr = project(pfr);
+  // FIXME avoid branching might help perf!
+  if (inBounds(pfr)) {
+    c += mix(vec4(0.0), ${getFromColor}(pfr), reflection * mix(1.0, 0.0, pfr.y));
+  }
+  pto = project(pto);
+  if (inBounds(pto)) {
+    c += mix(vec4(0.0), ${getToColor}(pto), reflection * mix(1.0, 0.0, pto.y));
+  }
+  return c;
+}
+
 
 vec4 ${name}(vec2 op, float progress) {
   float uz = unzoom * 2.0*(0.5-distance(0.5, progress));
@@ -71,4 +70,5 @@ vec4 ${name}(vec2 op, float progress) {
   }
   return bgColor_${name}(op, fromP, toP);
 }
-`;
+`,
+};

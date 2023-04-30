@@ -4,12 +4,15 @@ type Options = {
   clamp?: boolean;
 };
 
-export type Transition = (
-  name: string,
-  image1: string,
-  image2: string,
-  opt?: Options
-) => string;
+export type Transition = {
+  common?: string;
+  transition: (
+    name: string,
+    image1: string,
+    image2: string,
+    opt?: Options
+  ) => string;
+};
 
 const defaultOptions: Options = {
   clamp: true,
@@ -41,8 +44,10 @@ half4 getColor3(float2 uv) {
   return image3.eval(uv * resolution);
 }
 
-${t1("transition1", "getColor1", "getColor2")}
-${t2("transition2", "getColor2", "getColor3")}
+${t1.common ?? ""}
+${t2 !== t1 ? t2.common ?? "" : ""}
+${t1.transition("transition1", "getColor1", "getColor2")}
+${t2.transition("transition2", "getColor2", "getColor3")}
 
 float clampValue(float value) {
   return ${clamp ? "saturate(value)" : "value"};
