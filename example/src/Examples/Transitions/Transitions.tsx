@@ -34,25 +34,37 @@ const rct = rect(0, 0, width, height);
 const source = frag`
 uniform shader image1;
 uniform shader image2;
+uniform shader image3;
 
-uniform float progress;
+uniform float p1;
+uniform float p2;
 uniform float2 resolution;
 
-half4 getFromColor(float2 uv) {
+half4 getColor1(float2 uv) {
   return image1.eval(uv * resolution);
 }
 
-half4 getToColor(float2 uv) {
+half4 getColor2(float2 uv) {
   return image2.eval(uv * resolution);
+}
+
+half4 getColor3(float2 uv) {
+  return image3.eval(uv * resolution);
 }
 
 ${linear}
 
 half4 main(vec2 xy) {
   vec2 uv = xy / resolution;
-  return linear(
-    uv
-  );
+  if (p2 > 0) {
+    return linear2(
+      uv
+    );
+  } else {
+    return linear1(
+      uv
+    );
+  }
 }
 
 `;
@@ -62,7 +74,6 @@ export const Transitions = () => {
   const image1 = useImage(require("./assets/1.jpg"));
   const image2 = useImage(require("./assets/2.jpg"));
   const image3 = useImage(require("./assets/3.jpg"));
-
   const pan = Gesture.Pan()
     .onChange((pos) => {
       progress.value += pos.changeX / width;
@@ -71,34 +82,26 @@ export const Transitions = () => {
       const dst = snapPoint(progress.value, velocityX / width, [-1, 0, 1]);
       progress.value = withTiming(dst);
     });
-  const uniforms1 = useDerivedValue(() => {
-    const p = interpolate(progress.value, [0, 1], [1, 0], "clamp");
-    console.log({ progress12: p });
+  const uniforms = useDerivedValue(() => {
+    const p2 = interpolate(progress.value, [0, 1], [0, 1], "clamp");
+    const p1 = interpolate(progress.value, [-1, 0], [1, 0], "clamp");
     return {
-      progress: p,
-      resolution: [width, height],
-    };
-  });
-  const uniforms2 = useDerivedValue(() => {
-    return {
-      progress: interpolate(progress.value, [-1, 0], [0, 1], "clamp"),
+      p1,
+      p2,
       resolution: [width, height],
     };
   });
   if (!image1 || !image2 || !image3) {
     return null;
   }
-  // <ImageShader image={image1} fit="cover" rect={rct} />
   return (
     <View style={{ flex: 1 }}>
       <Canvas style={{ flex: 1 }}>
         <Fill>
-          <Shader source={source} uniforms={uniforms2}>
-            <Shader source={source} uniforms={uniforms1}>
-              <ColorShader color="cyan" />
-              <ColorShader color="magenta" />
-            </Shader>
+          <Shader source={source} uniforms={uniforms}>
             <ColorShader color="yellow" />
+            <ColorShader color="cyan" />
+            <ColorShader color="magenta" />
           </Shader>
         </Fill>
       </Canvas>
