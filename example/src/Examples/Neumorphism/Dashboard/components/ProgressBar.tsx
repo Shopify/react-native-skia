@@ -38,9 +38,7 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
     () => `${Math.round(progress.current * 100)}°C`,
     [progress]
   );
-  if (font === null) {
-    return null;
-  }
+
   const textWidth = font.getTextWidth("00°C");
   return (
     <Group transform={translate({ x: 100, y: 223 })}>

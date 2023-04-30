@@ -57,9 +57,6 @@ export const Glassmorphism = () => {
     () => [{ translateY: x.current }, { translateX: y.current }],
     [x, y]
   );
-  if (titleFont === null || subtitleFont === null || font === null) {
-    return null;
-  }
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
       <Background />
