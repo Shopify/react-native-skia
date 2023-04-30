@@ -91,7 +91,7 @@ export interface VerticesProps extends DrawingNodeProps {
 }
 
 export type ImageSVGProps = RectDef & {
-  svg: SkSVG;
+  svg: SkSVG | null;
 } & DrawingNodeProps;
 
 export interface PictureProps extends DrawingNodeProps {
