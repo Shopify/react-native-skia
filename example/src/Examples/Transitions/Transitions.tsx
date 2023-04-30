@@ -22,6 +22,7 @@ import {
   swirl,
   zoomInCircles,
   glitchMemories,
+  cube,
 } from "./transitions";
 
 const { width, height } = Dimensions.get("window");
@@ -53,10 +54,7 @@ export const Transitions = () => {
     <View style={{ flex: 1 }}>
       <Canvas style={{ flex: 1 }}>
         <Fill>
-          <Shader
-            source={transition(glitchMemories, swirl)}
-            uniforms={uniforms}
-          >
+          <Shader source={transition(glitchMemories, cube)} uniforms={uniforms}>
             <ImageShader image={image1} fit="cover" rect={rct} />
             <ImageShader image={image2} fit="cover" rect={rct} />
             <ImageShader image={image3} fit="cover" rect={rct} />

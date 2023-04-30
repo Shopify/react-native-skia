@@ -3,3 +3,4 @@ export * from "./linear";
 export * from "./glitchMemories";
 export * from "./zoomInCircles";
 export * from "./swirl";
+export * from "./cube";
