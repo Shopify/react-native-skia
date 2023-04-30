@@ -72,8 +72,8 @@ export const Transitions = () => {
       progress.value = withTiming(dst);
     });
   const uniforms1 = useDerivedValue(() => {
-    const p = interpolate(progress.value, [0, 1], [0, 1], "clamp");
-    console.log({ progress12: progress.value });
+    const p = interpolate(progress.value, [0, 1], [1, 0], "clamp");
+    console.log({ progress12: p });
     return {
       progress: p,
       resolution: [width, height],
