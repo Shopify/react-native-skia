@@ -21,6 +21,9 @@ import {Canvas, TextBlob, Skia, useFont} from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
   const font = useFont(require("./SF-Pro.ttf"), 24);
+  if (font === null) {
+    return null;
+  }
   const blob = Skia.TextBlob.MakeFromText("Hello World!", font);
   return (
       <Canvas style={{ flex: 1 }}>
