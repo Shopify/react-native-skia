@@ -6,7 +6,6 @@ import {
   vec,
   useComputedValue,
   Vertices,
-  useImage,
   Skia,
   isEdge,
 } from "@shopify/react-native-skia";
@@ -49,7 +48,6 @@ export const Demo = () => {
     [indices]
   );
 
-  const oslo = useImage(require("../../assets/oslo.jpg"));
   const clock = useClockValue();
 
   const vertices = useComputedValue(

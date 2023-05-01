@@ -22,7 +22,7 @@ interface ControlProps {
   label: string;
   children: ReactNode;
   active?: boolean;
-  font: SkFont;
+  font: SkFont | null;
 }
 
 export const Control = ({
@@ -34,6 +34,9 @@ export const Control = ({
   progress,
   active = false,
 }: ControlProps) => {
+  if (font === null) {
+    return null;
+  }
   const labelWidth = font.getTextWidth(label);
   return (
     <Group transform={translate({ x: x + 30, y: y + 30 })}>

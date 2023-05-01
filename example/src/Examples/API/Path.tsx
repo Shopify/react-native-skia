@@ -119,6 +119,9 @@ export const PathExample = () => {
       ),
     [progress]
   );
+  if (!font) {
+    return null;
+  }
   const textPath =
     Platform.OS === "web"
       ? Skia.Path.MakeFromSVGString(
