@@ -8,6 +8,7 @@
 #include <thread>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "RNSkDispatchQueue.h"
 
@@ -195,11 +196,15 @@ public:
     }
     auto shouldStop = false;
     {
-      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-      if (_drawCallbacks.count(nativeId) > 0) {
-        _drawCallbacks.erase(nativeId);
+      if (_drawCallbacksLock.try_lock()) {
+        if (_drawCallbacks.count(nativeId) > 0) {
+          _drawCallbacks.erase(nativeId);
+        }
+        shouldStop = _drawCallbacks.size() == 0;
+        _drawCallbacksLock.unlock();
+      } else {
+        _drawCallbacksToRemove.push_back(nativeId);
       }
-      shouldStop = _drawCallbacks.size() == 0;
     }
     if (shouldStop) {
       stopDrawLoop();
@@ -220,6 +225,18 @@ public:
     for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
       it->second(invalidated);
     }
+
+    if (_drawCallbacksToRemove.size() > 0) {
+      for (size_t i = 0; i < _drawCallbacksToRemove.size(); i++) {
+        _drawCallbacks.erase(_drawCallbacksToRemove[i]);
+      }
+      _drawCallbacksToRemove.clear();
+
+      if (_drawCallbacks.size() == 0) {
+        // stop!
+        stopDrawLoop();
+      }
+    }
   }
 
   // default implementation does nothing, so it can be called from virtual
@@ -237,6 +254,7 @@ private:
   std::unique_ptr<RNSkDispatchQueue> _dispatchQueue;
 
   std::unordered_map<size_t, std::function<void(bool)>> _drawCallbacks;
+  std::vector<size_t> _drawCallbacksToRemove;
   std::mutex _drawCallbacksLock;
   std::atomic<bool> _isValid = {true};
 };
