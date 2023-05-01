@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -7,7 +7,7 @@ import {
   useWindowDimensions,
   ScrollView,
 } from "react-native";
-import { SkImage, useValue } from "@shopify/react-native-skia";
+import type { SkImage } from "@shopify/react-native-skia";
 import {
   Canvas,
   Fill,
@@ -19,6 +19,7 @@ import {
   mix,
   Shader,
   ImageShader,
+  useValue,
 } from "@shopify/react-native-skia";
 import { Switch } from "react-native-gesture-handler";
 
@@ -47,7 +48,7 @@ export const Snapshot = () => {
       return;
     }
     image.current = await makeImageFromView(viewRef);
-  }, []);
+  }, [image]);
 
   return (
     <View style={{ flex: 1 }}>
