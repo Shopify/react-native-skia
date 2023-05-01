@@ -9,33 +9,184 @@ JsiValue::JsiValue(jsi::Runtime &runtime, const jsi::Value &value)
   setCurrent(runtime, value);
 }
 
-void JsiValue::setCurrent(jsi::Runtime &runtime, const jsi::Value &value) {
+JsiValue::JsiValue(JsiValue &other) { setCurrent(other); }
+
+JsiValue::JsiValue(const JsiValue &other) { setCurrent(other); }
+
+void JsiValue::setNumber(double value) {
+  _type = PropType::Number;
+  _numberValue = value;
+}
+
+void JsiValue::setBool(bool value) {
+  _type = PropType::Bool;
+  _boolValue = value;
+}
+
+void JsiValue::setString(const std::string &value) {
+  _type = PropType::String;
+  _stringValue = value;
+}
+
+void JsiValue::setUndefined() {
+  clear();
+  _type = PropType::Undefined;
+}
+
+void JsiValue::setNull() {
+  clear();
+  _type = PropType::Null;
+}
+
+void JsiValue::setArray(const std::vector<JsiValue> &arr) {
+  if (&arr == &_array) {
+    return;
+  }
+  clear();
+  _type = PropType::Array;
+  _array.resize(arr.size());
+  for (size_t i = 0; i < arr.size(); i++) {
+    _array[i] = arr[i];
+  }
+}
+
+void JsiValue::setValue(const PropId &key, const JsiValue &value) {
+  _type = PropType::Object;
+  _props.try_emplace(key, value);
+  _keysCache.push_back(key);
+}
+
+void JsiValue::setValue(const PropId &key, double value) {
+  _type = PropType::Object;
+  if (!_props.count(key)) {
+    _keysCache.push_back(key);
+    _props.emplace(key, value);
+  } else {
+    _props[key].setNumber(value);
+  }
+}
+
+void JsiValue::setValue(const PropId &key, bool value) {
+  _type = PropType::Object;
+  if (!_props.count(key)) {
+    _keysCache.push_back(key);
+    _props.try_emplace(key, value);
+  } else {
+    _props[key].setBool(value);
+  }
+}
+
+void JsiValue::setValue(const PropId &key, const std::string &value) {
+  _type = PropType::Object;
+  if (!_props.count(key)) {
+    _keysCache.push_back(key);
+    _props.try_emplace(key, value);
+  } else {
+    _props[key].setString(value);
+  }
+}
+
+void JsiValue::setHostObject(std::shared_ptr<jsi::HostObject> object) {
+  clear();
+  _type = PropType::HostObject;
+  _hostObject = object;
+}
+
+void JsiValue::setObject(const JsiValue &value) {
+  clear();
+
+  _type = value.getType();
+
+  if (value.getType() == PropType::Object) {
+    auto keys = value.getKeys();
+    size_t size = keys.size();
+
+    _keysCache.clear();
+    _keysCache.reserve(size);
+    _props.clear();
+    _props.reserve(size);
+
+    // Copy key / values
+    for (size_t i = 0; i < size; ++i) {
+      auto key = JsiPropId::get(keys[i]);
+      _props.try_emplace(key, value.getValue(key));
+      _keysCache.push_back(key);
+    }
+  } else if (value.getType() == PropType::HostObject) {
+    _hostObject = value.getAsHostObject();
+  } else if (value.getType() == PropType::HostFunction) {
+    _hostFunction = value.getAsHostFunction();
+  } else if (value.getType() == PropType::Array) {
+    auto arr = value.getAsArray();
+    _array.reserve(arr.size());
+    for (size_t i = 0; i < arr.size(); ++i) {
+      _array.emplace_back(arr[i]);
+    }
+  } else {
+    // Not supported
+    throw std::runtime_error(
+        "Type not a valid object, hostobject, hostfunction or array: " +
+        value.getTypeAsString() + ".");
+  }
+}
+
+void JsiValue::clear() {
   _stringValue = "";
   _hostObject = nullptr;
   _hostFunction = nullptr;
   _props.clear();
   _array.clear();
   _keysCache.clear();
+}
+
+void JsiValue::setCurrent(const JsiValue &value) {
+  clear();
+  switch (value.getType()) {
+  case PropType::Undefined:
+    setUndefined();
+    break;
+  case PropType::Null:
+    setNull();
+    break;
+  case PropType::Number:
+    setNumber(value.getAsNumber());
+    break;
+  case PropType::Bool:
+    setBool(value.getAsBool());
+    break;
+  case PropType::String:
+    setString(value.getAsString());
+    break;
+  case PropType::Object:
+  case PropType::HostObject:
+  case PropType::HostFunction:
+  case PropType::Array:
+    setObject(value);
+    break;
+  }
+}
+
+void JsiValue::setCurrent(jsi::Runtime &runtime, const jsi::Value &value) {
+  clear();
 
   if (value.isNumber()) {
-    _type = PropType::Number;
-    _numberValue = value.asNumber();
+    setNumber(value.asNumber());
   } else if (value.isBool()) {
-    _type = PropType::Bool;
-    _boolValue = value.getBool();
+    setBool(value.getBool());
   } else if (value.isString()) {
-    _type = PropType::String;
-    _stringValue = value.asString(runtime).utf8(runtime);
+    setString(value.asString(runtime).utf8(runtime));
   } else if (value.isUndefined()) {
-    _type = PropType::Undefined;
+    setUndefined();
   } else if (value.isNull()) {
-    _type = PropType::Null;
+    setNull();
   } else if (value.isObject()) {
     setObject(runtime, value);
   } else {
     throw std::runtime_error("Could not store jsi::Value of provided type");
   }
 }
+
+void JsiValue::setCurrent(double newValue) { setNumber(newValue); }
 
 bool JsiValue::getAsBool() const {
   if (_type != PropType::Bool) {
@@ -73,6 +224,14 @@ const std::vector<JsiValue> &JsiValue::getAsArray() const {
   return _array;
 }
 
+std::vector<JsiValue> &JsiValue::getAsArray() {
+  if (_type != PropType::Array) {
+    throw std::runtime_error("Expected type array, got " +
+                             getTypeAsString(_type));
+  }
+  return _array;
+}
+
 const JsiValue &JsiValue::getValue(PropId name) const {
   if (_type != PropType::Object) {
     throw std::runtime_error("Expected type object, got " +
@@ -89,7 +248,7 @@ bool JsiValue::hasValue(PropId name) const {
   return _props.count(name) > 0;
 }
 
-std::vector<PropId> JsiValue::getKeys() const {
+const std::vector<PropId> &JsiValue::getKeys() const {
   if (_type != PropType::Object) {
     throw std::runtime_error("Expected type object, got " +
                              getTypeAsString(_type));

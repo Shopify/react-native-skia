@@ -62,6 +62,23 @@ public:
   JsiValue();
 
   /**
+   JsiValue of given type
+   */
+  explicit JsiValue(double initialValue) : JsiValue() {
+    setNumber(initialValue);
+  }
+  explicit JsiValue(bool initialValue) : JsiValue() { setBool(initialValue); }
+  explicit JsiValue(const std::string &initialValue) : JsiValue() {
+    setString(initialValue);
+  }
+
+  /**
+   Copy constsructor
+   */
+  JsiValue(JsiValue &other);
+  JsiValue(const JsiValue &other);
+
+  /**
    Constructs an instance of the JsiValue object with a current value
    */
   JsiValue(jsi::Runtime &runtime, const jsi::Value &value);
@@ -71,6 +88,32 @@ public:
    perform a deep copy of the javascript value.
    */
   void setCurrent(jsi::Runtime &runtime, const jsi::Value &value);
+
+  /**
+   Updates the current value from another JsiValue
+   */
+  void setCurrent(const JsiValue &value);
+
+  /**
+   Short path to set a numeric value
+   */
+  void setCurrent(double newValue);
+
+  /**
+   Sets the numeric value directly
+   */
+  void setNumber(double value);
+  void setString(const std::string &value);
+  void setBool(bool value);
+  void setObject(const JsiValue &value);
+  void setUndefined();
+  void setNull();
+  void setArray(const std::vector<JsiValue> &arr);
+  void setValue(const PropId &key, const JsiValue &value);
+  void setValue(const PropId &key, double value);
+  void setValue(const PropId &key, bool value);
+  void setValue(const PropId &key, const std::string &value);
+  void setHostObject(std::shared_ptr<jsi::HostObject> object);
 
   /**
    Returns the type of value contained in this JsiValue
@@ -111,6 +154,7 @@ public:
    Returns the array value. Requires that the underlying type is array
    */
   const std::vector<JsiValue> &getAsArray() const;
+  std::vector<JsiValue> &getAsArray();
 
   /**
    Returns an inner value by name. Requires that the underlying type is Object
@@ -125,7 +169,7 @@ public:
   /**
    Returns the names of the properties stored in this value
    */
-  std::vector<PropId> getKeys() const;
+  const std::vector<PropId> &getKeys() const;
 
   /**
    Returns the host object value. Requires that the underlying type is Host
@@ -172,6 +216,11 @@ public:
   static std::string getTypeAsString(PropType type);
 
   /**
+   Returns a string representing the type.
+   */
+  std::string getTypeAsString() const { return getTypeAsString(getType()); }
+
+  /**
    Implements the equals operator
    */
   bool operator==(const JsiValue &other) const;
@@ -185,6 +234,8 @@ protected:
   const std::unordered_map<PropId, JsiValue> &getProps() const {
     return _props;
   }
+
+  void clear();
 
   bool boolValue() const { return _boolValue; }
   double numberValue() const { return _numberValue; }
@@ -211,7 +262,7 @@ private:
   PropType _type = PropType::Undefined;
   bool _boolValue;
   double _numberValue;
-  std::string _stringValue = "";
+  std::string _stringValue;
   std::shared_ptr<jsi::HostObject> _hostObject;
   jsi::HostFunctionType _hostFunction;
   std::vector<JsiValue> _array;
