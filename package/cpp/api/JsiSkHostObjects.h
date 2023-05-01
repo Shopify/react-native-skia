@@ -39,26 +39,21 @@ public:
    * @param context Platform context
    */
   JsiSkWrappingHostObject(std::shared_ptr<RNSkPlatformContext> context,
-                          T &&object)
+                          T object)
       : JsiSkHostObject(std::move(context)), _object(std::move(object)) {}
-
-  JsiSkWrappingHostObject(std::shared_ptr<RNSkPlatformContext> context,
-                          const T &object)
-      : JsiSkHostObject(std::move(context)), _object(object) {}
 
   /**
    * Returns the underlying object exposed by this host object. This object
    * should be wrapped in a shared pointer of some kind
    * @return Underlying object
    */
-  T &getObject() { return _object; }
-  const T &getObject() const { return _object; }
+  T getObject() { return _object; }
+  const T getObject() const { return _object; }
 
   /**
    Updates the inner object with a new version of the object.
    */
-  void setObject(T &object) { _object = object; }
-  void setObject(const T &object) { _object = object; }
+  void setObject(T object) { _object = object; }
 
 private:
   /**
