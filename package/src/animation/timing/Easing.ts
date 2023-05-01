@@ -3,6 +3,22 @@
 
 import { bezier } from "./functions";
 
+export enum EasingType {
+  Step0 = 0,
+  Step1 = 1,
+  Linear = 2,
+  Ease = 3,
+  Quad = 4,
+  Cubic = 5,
+  Poly = 6,
+  Sin = 7,
+  Circle = 8,
+  Exp = 9,
+  Elastic = 10,
+  Back = 11,
+  Bounce = 12,
+}
+
 export class Easing {
   static step0(n: number): number {
     return n > 0 ? 1 : 0;

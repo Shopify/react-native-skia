@@ -3,6 +3,8 @@
 #include "NodeProp.h"
 #include "PointProp.h"
 
+#include "RNSkRRectConverter.h"
+
 #include <memory>
 
 #pragma clang diagnostic push
@@ -13,10 +15,6 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-
-static PropId PropNameRect = JsiPropId::get("rect");
-static PropId PropNameWidth = JsiPropId::get("width");
-static PropId PropNameHeight = JsiPropId::get("height");
 
 /**
  Reads a rect from a given propety in the node. The name of the property is
@@ -31,35 +29,9 @@ public:
     _prop = defineProperty<NodeProp>(name);
   }
 
-  static std::shared_ptr<SkRect> processRect(const JsiValue &value) {
-    if (value.getType() == PropType::HostObject) {
-      auto rectPtr =
-          std::dynamic_pointer_cast<JsiSkRect>(value.getAsHostObject());
-      if (rectPtr != nullptr) {
-        return std::make_shared<SkRect>(SkRect::MakeXYWH(
-            rectPtr->getObject()->x(), rectPtr->getObject()->y(),
-            rectPtr->getObject()->width(), rectPtr->getObject()->height()));
-      }
-    } else if (value.getType() == PropType::Object &&
-               value.hasValue(PropNameX) && value.hasValue(PropNameY) &&
-               value.hasValue(PropNameWidth) &&
-               value.hasValue(PropNameHeight)) {
-      // Save props for fast access
-      auto x = value.getValue(PropNameX);
-      auto y = value.getValue(PropNameY);
-      auto width = value.getValue(PropNameWidth);
-      auto height = value.getValue(PropNameHeight);
-      // Update cache from js object value
-      return std::make_shared<SkRect>(
-          SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
-                           width.getAsNumber(), height.getAsNumber()));
-    }
-    return nullptr;
-  }
-
   void updateDerivedValue() override {
     if (_prop->isSet()) {
-      setDerivedValue(RectProp::processRect(_prop->value()));
+      setDerivedValue(RNSkRectConverter::convert(_prop->value()));
     }
   }
 

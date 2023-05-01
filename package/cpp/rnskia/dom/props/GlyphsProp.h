@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DerivedNodeProp.h"
-#include "PointProp.h"
+#include "RNSkPointConverter.h"
 
 #include <memory>
 #include <utility>
@@ -38,10 +38,10 @@ public:
 
     for (size_t i = 0; i < arr.size(); ++i) {
       auto obj = arr[i];
-      auto pos = PointProp::processValue(obj.getValue(PropNamePos));
+      auto pos = RNSkPointConverter::convert(obj.getValue(PropNamePos));
       auto identifier =
           static_cast<SkGlyphID>(obj.getValue(PropNameId).getAsNumber());
-      glyphInfo.positions.push_back(pos);
+      glyphInfo.positions.push_back(*pos);
       glyphInfo.glyphIds.push_back(identifier);
     }
 

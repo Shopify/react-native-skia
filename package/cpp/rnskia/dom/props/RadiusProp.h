@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NodeProp.h"
-#include "PointProp.h"
+#include "RNSkPointConverter.h"
 
 #include <memory>
 
@@ -29,7 +29,7 @@ public:
         setDerivedValue(SkPoint::Make(_radiusProp->value().getAsNumber(),
                                       _radiusProp->value().getAsNumber()));
       } else {
-        setDerivedValue(PointProp::processValue(_radiusProp->value()));
+        setDerivedValue(RNSkPointConverter::convert(_radiusProp->value()));
       }
     } else {
       setDerivedValue(nullptr);

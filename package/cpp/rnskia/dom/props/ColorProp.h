@@ -7,12 +7,9 @@
 #include <utility>
 #include <vector>
 
-namespace RNSkia {
+#include "RNSkColorConverter.h"
 
-static PropId PropName0 = JsiPropId::get("0");
-static PropId PropName1 = JsiPropId::get("1");
-static PropId PropName2 = JsiPropId::get("2");
-static PropId PropName3 = JsiPropId::get("3");
+namespace RNSkia {
 
 class ColorProp : public DerivedProp<SkColor> {
 public:
@@ -25,8 +22,7 @@ public:
   void updateDerivedValue() override {
     if (_colorProp->isSet()) {
       // Color might be a number, a string or a Float32Array of rgba values
-      setDerivedValue(
-          std::make_shared<SkColor>(parseColorValue(_colorProp->value())));
+      setDerivedValue(RNSkColorConverter::convert(_colorProp->value()));
     } else {
       setDerivedValue(nullptr);
     }
@@ -81,7 +77,7 @@ public:
       derivedColors.reserve(colors.size());
 
       for (size_t i = 0; i < colors.size(); ++i) {
-        derivedColors.push_back(ColorProp::parseColorValue(colors[i]));
+        derivedColors.push_back(RNSkColorConverter::convert(colors[i]));
       }
       setDerivedValue(std::move(derivedColors));
     } else {

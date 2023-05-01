@@ -6,6 +6,8 @@
 
 #include <memory>
 
+#include "RNSkRRectConverter.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -15,10 +17,6 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-
-static PropId PropNameRx = JsiPropId::get("rx");
-static PropId PropNameRy = JsiPropId::get("ry");
-static PropId PropNameR = JsiPropId::get("r");
 
 /**
  Reads a rect from a given propety in the node. The name of the property is
@@ -33,47 +31,9 @@ public:
     _prop = defineProperty<NodeProp>(name);
   }
 
-  static std::shared_ptr<SkRRect> processRRect(const JsiValue &value) {
-    if (value.getType() == PropType::HostObject) {
-      // Try reading as rect
-      auto rectPtr =
-          std::dynamic_pointer_cast<JsiSkRRect>(value.getAsHostObject());
-      if (rectPtr != nullptr) {
-        auto rrect = rectPtr->getObject();
-        return std::make_shared<SkRRect>(
-            SkRRect::MakeRectXY(rrect->rect(), rrect->getSimpleRadii().x(),
-                                rrect->getSimpleRadii().y()));
-      }
-    } else {
-      if (value.getType() == PropType::Object) {
-        if (value.hasValue(PropNameRect) && value.hasValue(PropNameRx) &&
-            value.hasValue(PropNameRy)) {
-          auto rect = value.getValue(PropNameRect);
-          if (rect.hasValue(PropNameX) && rect.hasValue(PropNameY) &&
-              rect.hasValue(PropNameWidth) && rect.hasValue(PropNameHeight)) {
-            auto x = rect.getValue(PropNameX);
-            auto y = rect.getValue(PropNameY);
-            auto width = rect.getValue(PropNameWidth);
-            auto height = rect.getValue(PropNameHeight);
-            auto rx = value.getValue(PropNameRx);
-            auto ry = value.getValue(PropNameRy);
-
-            // Update cache from js object value
-            return std::make_shared<SkRRect>(SkRRect::MakeRectXY(
-                SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
-                                 width.getAsNumber(), height.getAsNumber()),
-                rx.getAsNumber(), ry.getAsNumber()));
-          }
-        }
-      }
-    }
-    return nullptr;
-  }
-
   void updateDerivedValue() override {
     if (_prop->isSet()) {
-      auto value = _prop->value();
-      setDerivedValue(RRectProp::processRRect(value));
+      setDerivedValue(RNSkRRectConverter::convert(_prop->value()));
     }
   }
 
@@ -157,11 +117,11 @@ public:
 
   void updateDerivedValue() override {
     auto value = _boxProp->value();
-    auto rect = RectProp::processRect(value);
+    auto rect = RNSkRectConverter::convert(value);
     if (rect) {
       setDerivedValue(SkRRect::MakeRect(*rect));
     } else {
-      setDerivedValue(RRectProp::processRRect(value));
+      setDerivedValue(RNSkRRectConverter::convert(value));
     }
   }
 

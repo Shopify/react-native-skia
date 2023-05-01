@@ -1,116 +1,311 @@
 #pragma once
 
+#include <algorithm>
 #include <functional>
+#include <iostream>
 #include <memory>
+#include <mutex>
+#include <unordered_map>
+#include <utility>
 
-#include "JsiHostObject.h"
-#include "RNSkAnimation.h"
-#include "RNSkPlatformContext.h"
-#include "RNSkReadonlyValue.h"
 #include <jsi/jsi.h>
 
+#include "JsiSkHostObjects.h"
+#include "JsiValue.h"
+#include "RNSkPlatformContext.h"
+
+#include "RNSkColorConverter.h"
+#include "RNSkColorInterpolator.h"
+#include "RNSkNumericConverter.h"
+
 namespace RNSkia {
-namespace jsi = facebook::jsi;
+
+using namespace RNJsi; // NOLINT
+
+class RNSkMutableValue;
+
 /**
- Implements a Value that can be both read and written to. It inherits from the
- ReadonlyValue with functionailty for subscribing to changes.
+ Implements a non-mutable value class
  */
-class RNSkValue : public RNSkReadonlyValue {
+class RNSkValue : public JsiSkHostObject,
+                  public std::enable_shared_from_this<RNSkValue> {
 public:
+  /**
+   Constructor
+   */
   RNSkValue(std::shared_ptr<RNSkPlatformContext> platformContext,
-            jsi::Runtime &runtime, const jsi::Value *arguments, size_t count)
-      : RNSkReadonlyValue(platformContext) {
-    if (count == 1) {
-      update(runtime, arguments[0]);
+            JsiValue &initialValue)
+      : JsiSkHostObject(platformContext) {
+    setCurrent(initialValue);
+  }
+
+  /**
+   Constructor
+   */
+  explicit RNSkValue(std::shared_ptr<RNSkPlatformContext> platformContext)
+      : JsiSkHostObject(platformContext) {
+    auto jsiValue = JsiValue(0.0);
+    setCurrent(jsiValue);
+  }
+
+  /**
+   Returns the inner value
+   */
+  virtual JsiValue &getCurrent() { return _current; }
+
+  /**
+   Adds listener value as a weak dependency that listents to changes in this
+   value.
+   */
+  std::function<void()> addListener(std::function<void(RNSkValue *)> listener) {
+    // Add listener
+    auto currentListenerId = _listenerId++;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      _listeners.emplace(currentListenerId, listener);
     }
-  }
 
-  ~RNSkValue() { unsubscribe(); }
+    // Return method for unsubscribing to the value
+    return [weakSelf = weak_from_this(), currentListenerId]() {
+      auto self = weakSelf.lock();
+      if (self) {
+        auto selfAsThis = std::static_pointer_cast<RNSkValue>(self);
+        std::lock_guard<std::mutex> lock(selfAsThis->_mutex);
+        selfAsThis->_listeners.erase(currentListenerId);
 
-  JSI_PROPERTY_SET(current) {
-    // When someone else is setting the value we need to stop any ongoing
-    // animations
-    unsubscribe();
-    update(runtime, value);
-  }
-
-  JSI_PROPERTY_SET(animation) {
-    // Cancel existing animation
-    unsubscribe();
-
-    // Verify input
-    if (value.isObject() &&
-        value.asObject(runtime).isHostObject<RNSkAnimation>(runtime)) {
-      auto animation =
-          value.asObject(runtime).getHostObject<RNSkAnimation>(runtime);
-      if (animation != nullptr) {
-        // Now we have a value animation - let us connect and start
-        subscribe(animation);
+        if (selfAsThis->_listeners.size() == 0) {
+          selfAsThis->onListenersEmpty();
+        }
       }
-    } else if (value.isUndefined() || value.isNull()) {
-      // Do nothing - we've already unsubscribed
-    } else {
-      throw jsi::JSError(runtime, "Animation expected.");
-    }
+    };
   }
 
-  JSI_PROPERTY_GET(animation) {
-    if (_animation != nullptr) {
-      return jsi::Object::createFromHostObject(runtime, _animation);
+  JSI_PROPERTY_GET(__typename__) {
+    return jsi::String::createFromUtf8(runtime, "RNSkValue");
+  }
+
+  JSI_PROPERTY_GET(current) { return getCurrent().getAsJsiValue(runtime); }
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkValue, __typename__),
+                              JSI_EXPORT_PROP_GET(RNSkValue, current))
+
+  JSI_HOST_FUNCTION(addListener) {
+    if (!arguments[0].isObject() ||
+        !arguments[0].asObject(runtime).isFunction(runtime)) {
+      throw jsi::JSError(runtime, "Expected function as first parameter.");
+      return jsi::Value::undefined();
     }
+    auto callback = std::make_shared<jsi::Function>(
+        arguments[0].asObject(runtime).asFunction(runtime));
+
+    auto unsubscribe =
+        addListener([weakSelf = weak_from_this(),
+                     callback = std::move(callback), &runtime](RNSkValue *) {
+          auto self = weakSelf.lock();
+          if (self) {
+            self->getContext()->runOnJavascriptThread(
+                [&weakSelf, callback = std::move(callback), &runtime]() {
+                  auto self = weakSelf.lock();
+                  if (self) {
+                    callback->call(runtime, self->get_current(runtime));
+                  }
+                });
+          }
+        });
+
+    return jsi::Function::createFromHostFunction(
+        runtime, jsi::PropNameID::forUtf8(runtime, "unsubscribe"), 0,
+        JSI_HOST_FUNCTION_LAMBDA {
+          unsubscribe();
+          return jsi::Value::undefined();
+        });
+  }
+
+  JSI_HOST_FUNCTION(__invalidate) {
+    invalidate();
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(RNSkValue, current),
-                              JSI_EXPORT_PROP_SET(RNSkValue, animation))
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, __invalidate),
+                       JSI_EXPORT_FUNC(RNSkValue, addListener))
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkReadonlyValue,
-                                                  __typename__),
-                              JSI_EXPORT_PROP_GET(RNSkValue, current),
-                              JSI_EXPORT_PROP_GET(RNSkValue, animation))
+protected:
+  /**
+     Override to implement invalidation logic for the value. In the base class
+     this function clears all subscribers.
+   */
+  virtual void invalidate() { _listeners.clear(); }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, addListener),
-                       JSI_EXPORT_FUNC(RNSkReadonlyValue, __invalidate))
+  /**
+   Notifies all listeners that this value has changed.
+   */
+  void notifyListeners() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    for (auto &listener : _listeners) {
+      listener.second(this);
+    }
+  }
+
+  /**
+   Override to implement logic that will run when the listeners vector becomes
+   empty due to the last one being removed.
+   */
+  virtual void onListenersEmpty() {}
+
+  /**
+   Sets the current numeric inner value for this value
+  */
+  void setCurrent(JsiValue newValue) {
+    // printf("BaseValue: %f\n", newValue);
+    _current.setCurrent(newValue);
+    notifyListeners();
+  }
+
+  /**
+   Sets the current numeric inner value for this value
+  */
+  void setCurrent(double newValue) {
+    _current.setCurrent(newValue);
+    notifyListeners();
+  }
 
 private:
-  void subscribe(std::shared_ptr<RNSkAnimation> animation) {
-    if (animation != nullptr) {
-      _animation = animation;
-      _unsubscribe =
-          std::make_shared<std::function<void()>>(_animation->addListener(
-              [weakSelf = weak_from_this()](jsi::Runtime &runtime) {
-                auto self = weakSelf.lock();
-                if (self) {
-                  auto selfAsThis = std::dynamic_pointer_cast<RNSkValue>(self);
-                  selfAsThis->animationDidUpdate(runtime);
-                }
-              }));
-      // Start the animation
-      _animation->startClock();
-    }
+  JsiValue _current;
+
+  // Identifier of listener
+  size_t _listenerId = 1000;
+
+  // Stores listeners
+  std::unordered_map<size_t, std::function<void(RNSkValue *)>> _listeners;
+
+  // Mutex for locking access to listeners
+  std::mutex _mutex;
+};
+
+/**
+ Implements a mutable Skia Value class
+ */
+class RNSkMutableValue : public RNSkValue {
+public:
+  /**
+   Constructs a new Mutable Skia Value from a given initial JsiValue.
+   */
+  RNSkMutableValue(std::shared_ptr<RNSkPlatformContext> platformContext,
+                   const JsiValue &initialValue)
+      : RNSkValue(platformContext) {
+    auto jsiValue = JsiValue(initialValue);
+    setCurrent(jsiValue);
   }
 
-  void animationDidUpdate(jsi::Runtime &runtime) {
-    if (_animation != nullptr) {
-      // Update ourselves from the current animation value
-      update(runtime, _animation->get_current(runtime));
-    }
+  /**
+   Constructs a new Mutable Skia Value with an empty start value
+   */
+  explicit RNSkMutableValue(
+      std::shared_ptr<RNSkPlatformContext> platformContext)
+      : RNSkMutableValue(platformContext, std::move(JsiValue(0.0))) {}
+
+  /**
+   Constructs a new Mutable Skia Value from a given initial runtime and
+   jsi::Value
+   */
+  RNSkMutableValue(std::shared_ptr<RNSkPlatformContext> platformContext,
+                   jsi::Runtime &runtime, const jsi::Value &value)
+      : RNSkMutableValue(platformContext, JsiValue(runtime, value)) {}
+
+  /**
+   Sets the current numeric inner value for this value
+  */
+  void setCurrent(const JsiValue &newValue) { RNSkValue::setCurrent(newValue); }
+
+  JSI_PROPERTY_SET(current) {
+    auto wrapped = JsiValue(runtime, value);
+    setCurrent(wrapped);
   }
 
-  void unsubscribe() {
+  JSI_PROPERTY_SET(animation) {
+    // Let's accept removing the animation by setting it to empty
+    if (value.isUndefined() || value.isNull()) {
+      setAnimation(nullptr);
+      return;
+    }
+
+    // Verify argument
+    if (!value.isObject()) {
+      throw jsi::JSError(
+          runtime, "Expected animation value for the animation property.");
+    }
+
+    auto valueObj = value.asObject(runtime);
+    if (!valueObj.isHostObject(runtime)) {
+      throw jsi::JSError(
+          runtime, "Expected animation object for the animation property.");
+    }
+
+    // Get the underlying animation object
+    auto animation =
+        std::dynamic_pointer_cast<RNSkValue>(valueObj.getHostObject(runtime));
+
+    if (animation == nullptr) {
+      throw jsi::JSError(runtime, "Expected Skia animation, got something else "
+                                  "for the animation property.");
+    }
+
+    setAnimation(animation);
+  }
+
+  JSI_PROPERTY_GET(animation) { return getAnimation(runtime); }
+
+  JSI_EXPORT_PROPERTY_SETTERS(JSI_EXPORT_PROP_SET(RNSkMutableValue, current),
+                              JSI_EXPORT_PROP_SET(RNSkMutableValue, animation))
+
+  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkValue, __typename__),
+                              JSI_EXPORT_PROP_GET(RNSkValue, current),
+                              JSI_EXPORT_PROP_GET(RNSkMutableValue, animation))
+
+protected:
+  /**
+   Sets the animation object - ie the driver of this value. We'll keep a
+   reference to the value so that it will live as long as we're using it for
+   input. When it is removed it will be stopped.
+   */
+  void setAnimation(std::shared_ptr<RNSkValue> animation) {
     if (_unsubscribe != nullptr) {
       (*_unsubscribe)();
       _unsubscribe = nullptr;
     }
 
-    if (_animation != nullptr) {
-      _animation->stopClock();
-      _animation = nullptr;
+    _animation = animation;
+    if (_animation == nullptr) {
+      return;
     }
+
+    // Subscribe to the animation
+    _unsubscribe =
+        std::make_unique<std::function<void()>>(_animation->addListener(
+            [weakSelf = weak_from_this()](RNSkValue *value) {
+              auto self = weakSelf.lock();
+              if (self) {
+                // Animation did update - let's update our inner animation value
+                auto selfAsThis =
+                    std::static_pointer_cast<RNSkMutableValue>(self);
+                selfAsThis->setCurrent(value->getCurrent());
+              }
+            }));
   }
 
-  std::shared_ptr<RNSkAnimation> _animation;
-  std::shared_ptr<std::function<void()>> _unsubscribe;
-};
+private:
+  /**
+   Returns the current animation value if it is set.
+   */
+  jsi::Value getAnimation(jsi::Runtime &runtime) {
+    if (_animation == nullptr) {
+      return jsi::Value::undefined();
+    }
 
+    return jsi::Object::createFromHostObject(runtime, _animation);
+  }
+
+  std::unique_ptr<std::function<void()>> _unsubscribe;
+  std::shared_ptr<RNSkValue> _animation;
+};
 } // namespace RNSkia

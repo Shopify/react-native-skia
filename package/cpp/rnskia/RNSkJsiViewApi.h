@@ -198,12 +198,12 @@ public:
     for (size_t i = 0; i < size; ++i) {
       auto value = values.getValueAtIndex(runtime, i)
                        .asObject(runtime)
-                       .asHostObject<RNSkReadonlyValue>(runtime);
+                       .asHostObject<RNSkValue>(runtime);
 
       if (value != nullptr) {
         // Add change listener
         unsubscribers.push_back(value->addListener(
-            [weakSelf = weak_from_this(), nativeId](jsi::Runtime &) {
+            [weakSelf = weak_from_this(), nativeId](RNSkValue *) {
               auto self = weakSelf.lock();
               if (self) {
                 auto info = self->getEnsuredViewInfo(nativeId);

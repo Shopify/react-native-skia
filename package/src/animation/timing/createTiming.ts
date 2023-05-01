@@ -3,10 +3,8 @@ import type {
   RequiredAnimationParams,
   AnimationCallback,
 } from "../types";
-import type { AnimationState, SkiaMutableValue } from "../../values/types";
+import type { SkiaMutableValue } from "../../values/types";
 import { ValueApi } from "../../values/api";
-
-import { timing } from "./functions";
 
 /**
  * Creates an animation that is driven by a clock value.
@@ -34,29 +32,39 @@ export const createTiming = (
     from: params.from ?? value?.current ?? 0,
   };
 
-  // Update function for the animation value
-  const animationFunction = (t: number, state: AnimationState | undefined) => {
-    // Update the input value using the provided update function
-    const nextState = timing(
-      t,
-      params.duration,
-      params.easing,
-      params.loop ?? false,
-      params.yoyo ?? false,
-      state ?? { current: params.from!, finished: false }
-    );
-    const current =
-      nextState.current * (resolvedParams.to - resolvedParams.from!) +
-      resolvedParams.from!;
-    if (callback && nextState.finished === true) {
-      callback(current);
-    }
-    return {
-      ...nextState,
-      current,
-    };
-  };
+  // Handle easing - it should be
+  let easingValue: SkiaMutableValue;
+  if (typeof resolvedParams.easing === "function") {
+    // TODO: easingValue = ValueApi.createComputedValue(() => resolvedParams.easing;
+  } else {
+    easingValue = ValueApi.createEasing(resolvedParams.easing);
+  }
 
-  // Create animation value
-  return ValueApi.createAnimation(animationFunction);
+  return ValueApi.createTiming(resolvedParams, callback);
+
+  // // Update function for the animation value
+  // const animationFunction = (t: number, state: AnimationState | undefined) => {
+  //   // Update the input value using the provided update function
+  //   const nextState = timing(
+  //     t,
+  //     params.duration,
+  //     params.easing,
+  //     params.loop ?? false,
+  //     params.yoyo ?? false,
+  //     state ?? { current: params.from!, finished: false }
+  //   );
+  //   const current =
+  //     nextState.current * (resolvedParams.to - resolvedParams.from!) +
+  //     resolvedParams.from!;
+  //   if (callback && nextState.finished === true) {
+  //     callback(current);
+  //   }
+  //   return {
+  //     ...nextState,
+  //     current,
+  //   };
+  // };
+
+  // // Create animation value
+  // return ValueApi.createAnimation(animationFunction);
 };

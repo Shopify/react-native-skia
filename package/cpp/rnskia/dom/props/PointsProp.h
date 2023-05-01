@@ -66,7 +66,7 @@ public:
       points.reserve(pointsArray.size());
       for (size_t i = 0; i < pointsArray.size(); ++i) {
         auto p = pointsArray[i];
-        points.push_back(PointProp::processValue(p));
+        points.push_back(*RNSkPointConverter::convert(p));
       }
       setDerivedValue(std::move(points));
     } else {

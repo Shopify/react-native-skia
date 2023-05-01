@@ -3,6 +3,7 @@
 #include "DerivedNodeProp.h"
 
 #include "JsiSkPicture.h"
+#include "RNSkPointConverter.h"
 
 #include <memory>
 #include <utility>
@@ -30,29 +31,29 @@ public:
       points.reserve(12);
 
       points.push_back(
-          PointProp::processValue(arr[0].getValue(JsiPropId::get("pos"))));
+          *RNSkPointConverter::convert(arr[0].getValue(JsiPropId::get("pos"))));
       points.push_back(
-          PointProp::processValue(arr[0].getValue(JsiPropId::get("c2"))));
+          *RNSkPointConverter::convert(arr[0].getValue(JsiPropId::get("c2"))));
       points.push_back(
-          PointProp::processValue(arr[1].getValue(JsiPropId::get("c1"))));
+          *RNSkPointConverter::convert(arr[1].getValue(JsiPropId::get("c1"))));
       points.push_back(
-          PointProp::processValue(arr[1].getValue(JsiPropId::get("pos"))));
+          *RNSkPointConverter::convert(arr[1].getValue(JsiPropId::get("pos"))));
       points.push_back(
-          PointProp::processValue(arr[1].getValue(JsiPropId::get("c2"))));
+          *RNSkPointConverter::convert(arr[1].getValue(JsiPropId::get("c2"))));
       points.push_back(
-          PointProp::processValue(arr[2].getValue(JsiPropId::get("c1"))));
+          *RNSkPointConverter::convert(arr[2].getValue(JsiPropId::get("c1"))));
       points.push_back(
-          PointProp::processValue(arr[2].getValue(JsiPropId::get("pos"))));
+          *RNSkPointConverter::convert(arr[2].getValue(JsiPropId::get("pos"))));
       points.push_back(
-          PointProp::processValue(arr[2].getValue(JsiPropId::get("c2"))));
+          *RNSkPointConverter::convert(arr[2].getValue(JsiPropId::get("c2"))));
       points.push_back(
-          PointProp::processValue(arr[3].getValue(JsiPropId::get("c1"))));
+          *RNSkPointConverter::convert(arr[3].getValue(JsiPropId::get("c1"))));
       points.push_back(
-          PointProp::processValue(arr[3].getValue(JsiPropId::get("pos"))));
+          *RNSkPointConverter::convert(arr[3].getValue(JsiPropId::get("pos"))));
       points.push_back(
-          PointProp::processValue(arr[3].getValue(JsiPropId::get("c2"))));
+          *RNSkPointConverter::convert(arr[3].getValue(JsiPropId::get("c2"))));
       points.push_back(
-          PointProp::processValue(arr[0].getValue(JsiPropId::get("c1"))));
+          *RNSkPointConverter::convert(arr[0].getValue(JsiPropId::get("c1"))));
 
       setDerivedValue(std::move(points));
     }

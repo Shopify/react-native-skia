@@ -58,8 +58,7 @@ public:
     auto nextProps = getArgumentAsObject(runtime, arguments, count, 1);
 
     // Save unsubscribe callbacks
-    std::vector<
-        std::pair<std::shared_ptr<RNSkReadonlyValue>, std::function<void()>>>
+    std::vector<std::pair<std::shared_ptr<RNSkValue>, std::function<void()>>>
         unsubscribers;
 
     // Enumerate registered keys for the given node to only handle known
@@ -105,8 +104,7 @@ public:
                   for (auto &prop : propMapping) {
                     prop->updateValue(runtime, selectedJsValue);
                   }
-                });
-
+                });      
             // Save unsubscribe methods
             unsubscribers.push_back(std::make_pair(animatedValue, unsubscribe));
           }
@@ -141,7 +139,7 @@ public:
     }
 
     // Now let's create connection between view and unique values
-    std::set<std::shared_ptr<RNSkReadonlyValue>> uniqueValues;
+    std::set<std::shared_ptr<RNSkValue>> uniqueValues;
 
     for (auto &nodeSub : _subscriptions) {
       for (auto &sub : nodeSub.second) {
@@ -253,20 +251,19 @@ private:
   }
   /**
    Returns true if the given value is a HostObject and it inherits from
-   RNSkReadonlyValue.
+   RNSkValue.
    */
   bool isAnimatedValue(JsiValue &value) {
     return value.getType() == PropType::HostObject &&
-           std::dynamic_pointer_cast<RNSkReadonlyValue>(
-               value.getAsHostObject()) != nullptr;
+           std::dynamic_pointer_cast<RNSkValue>(value.getAsHostObject()) !=
+               nullptr;
   }
 
   /**
-   Returns the RNSkReadonlyValue pointer for a value that is an Animated value
+   Returns the RNSkValue pointer for a value that is an Animated value
    */
-  std::shared_ptr<RNSkReadonlyValue> getAnimatedValue(JsiValue &value) {
-    return std::dynamic_pointer_cast<RNSkReadonlyValue>(
-        value.getAsHostObject());
+  std::shared_ptr<RNSkValue> getAnimatedValue(JsiValue &value) {
+    return std::dynamic_pointer_cast<RNSkValue>(value.getAsHostObject());
   }
 
   /**
@@ -289,9 +286,9 @@ private:
 
   std::shared_ptr<jsi::Object> _registerValuesCallback;
   std::shared_ptr<jsi::Object> _unregisterValues;
-  std::map<JsiDomNode *,
-           std::vector<std::pair<std::shared_ptr<RNSkReadonlyValue>,
-                                 std::function<void()>>>>
+  std::map<
+      JsiDomNode *,
+      std::vector<std::pair<std::shared_ptr<RNSkValue>, std::function<void()>>>>
       _subscriptions;
 };
 } // namespace RNSkia

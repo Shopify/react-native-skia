@@ -2,6 +2,7 @@
 
 #include "DerivedNodeProp.h"
 #include "JsiSkRuntimeEffect.h"
+#include "RNSkPointConverter.h"
 
 #include <memory>
 #include <string>
@@ -42,9 +43,9 @@ void processValue(std::vector<SkScalar> &values, const JsiValue &value) {
       processValue(values, a);
     }
   } else if (isJSPoint(value) || isSkPoint(value)) {
-    auto pointValue = PointProp::processValue(value);
-    values.push_back(pointValue.x());
-    values.push_back(pointValue.y());
+    auto pointValue = RNSkPointConverter::convert(value);
+    values.push_back(pointValue->x());
+    values.push_back(pointValue->y());
   } else if (isIndexable(value)) {
     auto length = value.getKeys().size();
     for (size_t i = 0; i < length; ++i) {

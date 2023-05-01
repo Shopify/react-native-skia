@@ -196,7 +196,7 @@ public:
 
         // Add listener
         _onSizeUnsubscribe =
-            _onSize->addListener([weakSelf = weak_from_this()](jsi::Runtime &) {
+            _onSize->addListener([weakSelf = weak_from_this()](RNSkValue *) {
               auto self = weakSelf.lock();
               if (self) {
                 self->requestRedraw();
@@ -324,7 +324,7 @@ private:
             auto self = weakSelf.lock();
             if (self) {
               auto runtime = self->_platformContext->getJsRuntime();
-              auto onSize = self->_onSize->getCurrent(*runtime);
+              auto onSize = self->_onSize->getCurrent().getAsJsiValue(*runtime);
               if (!onSize.isObject()) {
                 throw jsi::JSError(
                     *runtime,
@@ -350,7 +350,7 @@ private:
                   auto nextSize =
                       std::make_shared<SkPoint>(SkPoint::Make(width, height));
                   point->setObject(nextSize);
-                  self->_onSize->set_current(*runtime, onSize);
+                  self->_onSize->getCurrent().setCurrent(*runtime, onSize);
                 }
 
               } else {
@@ -371,7 +371,7 @@ private:
                   // Update
                   onSizeObj.setProperty(*runtime, "width", width);
                   onSizeObj.setProperty(*runtime, "height", height);
-                  self->_onSize->set_current(*runtime, onSize);
+                  self->_onSize->getCurrent().setCurrent(*runtime, onSize);
                 }
               }
             }

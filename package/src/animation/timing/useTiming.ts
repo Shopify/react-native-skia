@@ -56,7 +56,11 @@ export const useTiming = (
   // Run animation on the value - and stop it on unmount
   useEffect(() => {
     value.animation = animation;
-    return () => (value.animation = undefined);
+    animation.start();
+    return () => {
+      console.log("STOPPING ANIMATION");
+      value.animation = undefined;
+    };
   }, [animation, value]);
 
   // Return the value that is animated

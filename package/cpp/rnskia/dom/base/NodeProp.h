@@ -53,6 +53,26 @@ public:
   }
 
   /**
+   Updates property value directly.
+   */
+  void updateValue(const JsiValue &nextValue) {
+    // Always use the next field since this method is called on the JS thread
+    // and we don't want to rip out the underlying value object.
+    std::lock_guard<std::mutex> lock(_swapMutex);
+    if (_buffer == nullptr) {
+      _buffer = std::make_unique<JsiValue>(nextValue);
+    } else {
+      _buffer->setCurrent(nextValue);
+    }
+    // This is almost always a change - meaning a swap is
+    // cheaper than comparing for equality.
+    _hasNewValue = true;
+    if (_onChange != nullptr) {
+      _onChange(this);
+    }
+  }
+
+  /**
    Property value has changed - let's save this as a change to be commited later
    */
   void updateValue(jsi::Runtime &runtime, const jsi::Value &value) {

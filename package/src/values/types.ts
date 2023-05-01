@@ -1,3 +1,6 @@
+import { EasingType } from "../animation/timing/Easing";
+import { AnimationCallback, SpringConfig } from "../animation/types";
+
 export interface SkiaValue<T = number> {
   /**
    * Gets the value hold by the Value object
@@ -24,9 +27,11 @@ export interface SkiaMutableValue<T = number> extends SkiaValue<T> {
    */
   current: T;
   /**
-   * Get/sets the animation controlling the value
+   * Get/sets the animation controlling the value. The animation
+   * can be any Skia Value - meaning that it is possible to chain
+   * Skia values together and create complex animations.
    * */
-  animation: SkiaAnimation | undefined;
+  animation: SkiaValue<number> | undefined;
 }
 
 export interface SkiaClockValue extends SkiaValue<number> {
@@ -49,6 +54,7 @@ export interface ISkiaValueApi {
    * can be changed.
    */
   createValue: <T>(initialValue: T) => SkiaMutableValue<T>;
+
   /**
    * Creates a computed value. This is a calculated value that returns the result of
    * a function that is called with the values of the dependencies.
@@ -62,12 +68,45 @@ export interface ISkiaValueApi {
    * since the clock was created
    */
   createClockValue: () => SkiaClockValue;
+
   /**
-   * Creates an animation that is driven from a clock and updated every frame.
-   * @param cb Callback to calculate next value from time.
-   * @returns An animation object that can control a value.
+   * Creates a spring easing interpolator.
+   * @returns Skia Value
    */
-  createAnimation: <S extends AnimationState = AnimationState>(
-    cb: (t: number, state: S | undefined) => S
+  createSpringEasing: (config: SpringConfig) => SkiaMutableValue;
+
+  /**
+   * Creates an Easing value
+   * @param type Type of easing
+   * @returns Skia Value that will interpolate between 0..1 using the provided easing
+   */
+  createEasing: (type: EasingType) => SkiaMutableValue;
+
+  /**
+   * Creates a timing value
+   * @param resolvedParams
+   * @param callback Called when timing is
+   * @returns Timing based animation value
+   */
+  createTiming: (
+    resolvedParams: {
+      from: number;
+      to: number;
+      loop: boolean;
+      yoyo: boolean;
+      duration: number;
+    },
+    callback?: AnimationCallback
   ) => SkiaAnimation;
+
+  /**
+   * Creates an interpolator value that can interpolate between a set of values like
+   * numbers, colors, transforms, matrices, paths, rects, rrects and points.
+   * @param config
+   * @returns Interpolating Skia value.
+   */
+  createInterpolator: <T>(config: {
+    inputs: Array<number>;
+    outputs: Array<T>;
+  }) => SkiaMutableValue<T>;
 }

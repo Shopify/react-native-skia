@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "RNSkPlatformContext.h"
@@ -7,33 +6,67 @@
 
 #include <algorithm>
 #include <chrono>
-#include <functional>
 #include <memory>
+#include <utility>
+
+#include "RNSkValue.h"
 
 namespace RNSkia {
-namespace jsi = facebook::jsi;
-/**
- Implements a readonly Value that is updated every time the screen is redrawn.
- Its value will be the number of milliseconds since the animation value was
- started.
- */
-class RNSkClockValue : public RNSkReadonlyValue {
-  enum RNSkClockState { NotStarted = 0, Running = 1, Stopped = 2 };
 
+static size_t ClockIdentifier = 50000;
+
+/**
+ Implements a base clock value class
+ */
+class RNSkClockValue : public RNSkValue {
 public:
-  RNSkClockValue(std::shared_ptr<RNSkPlatformContext> platformContext,
-                 size_t identifier, jsi::Runtime &runtime,
-                 const jsi::Value *arguments, size_t count)
-      : RNSkReadonlyValue(platformContext), _runtime(runtime),
-        _identifier(identifier) {
-    // Start by updating to zero (start value)
-    update(_runtime, static_cast<double>(0));
+  /**
+   Constructor
+   */
+  explicit RNSkClockValue(std::shared_ptr<RNSkPlatformContext> platformContext)
+      : RNSkValue(platformContext), _identifier(ClockIdentifier++) {}
+
+  /**
+   Destructor
+   */
+  ~RNSkClockValue() { stopClock(); }
+
+  /**
+   Starts the clock
+   */
+  void startClock() {
+    if (_isRunning) {
+      return;
+    }
+
+    _isRunning = true;
+    _identifier = getContext()->beginDrawLoop(
+        _identifier, [weakSelf = weak_from_this()](bool invalidated) {
+          auto self = weakSelf.lock();
+          if (self) {
+            std::static_pointer_cast<RNSkClockValue>(self)->drawLoopCallback(
+                invalidated);
+          }
+        });
+
+    _startTime = std::chrono::high_resolution_clock::now();
+    onClockStarted();
   }
 
-  virtual ~RNSkClockValue() { stopClock(); }
+  /**
+   Stops the clock
+   */
+  void stopClock() {
+    if (!_isRunning) {
+      return;
+    }
+    getContext()->endDrawLoop(_identifier);
+    _isRunning = false;
+    onClockStopped();
+  }
 
-  JSI_HOST_FUNCTION(start) {
-    startClock();
+  JSI_HOST_FUNCTION(cancel) {
+    stopClock();
     return jsi::Value::undefined();
   }
 
@@ -42,99 +75,54 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkReadonlyValue, addListener),
+  JSI_HOST_FUNCTION(start) {
+    startClock();
+    return jsi::Value::undefined();
+  }
+
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkClockValue, cancel),
+                       JSI_EXPORT_FUNC(RNSkClockValue, stop),
                        JSI_EXPORT_FUNC(RNSkClockValue, start),
-                       JSI_EXPORT_FUNC(RNSkClockValue, stop))
-
-  virtual void startClock() {
-    if (_state == RNSkClockState::Running) {
-      return;
-    }
-
-    auto now = std::chrono::high_resolution_clock::now();
-    if (_state == RNSkClockState::NotStarted) {
-      _start = now;
-      _stop = now;
-    }
-
-    // Subtract pause time from start
-    auto timeSinceStop = now - _stop;
-    _start += timeSinceStop;
-
-    _state = RNSkClockState::Running;
-
-    getContext()->beginDrawLoop(
-        _identifier, [weakSelf = weak_from_this()](bool invalidated) {
-          auto self = weakSelf.lock();
-          if (self) {
-            std::dynamic_pointer_cast<RNSkClockValue>(self)->notifyUpdate(
-                invalidated);
-          }
-        });
-  }
-
-  virtual void stopClock() {
-    if (_state == RNSkClockState::Running) {
-      _state = RNSkClockState::Stopped;
-      _stop = std::chrono::high_resolution_clock::now();
-      getContext()->endDrawLoop(_identifier);
-    }
-  }
+                       JSI_EXPORT_FUNC(RNSkValue, __invalidate),
+                       JSI_EXPORT_FUNC(RNSkValue, addListener))
 
 protected:
-  virtual void tick(jsi::Runtime &runtime, const jsi::Value &value) {
-    RNSkClockValue::update(runtime, value);
+  /**
+   Callback when clock source triggers.
+   */
+  virtual void onClockUpdated(double ellapsedTimeMs) {
+    setCurrent(ellapsedTimeMs);
   }
 
-  void notifyUpdate(bool invalidated) {
-    if (invalidated) {
-      stopClock();
-      return;
-    }
+  virtual void onClockStarted() {}
+  virtual void onClockStopped() {}
 
-    if (_state != RNSkClockState::Running) {
-      return;
-    }
+  /*
+   Handles callback when listeners are empty. Then we'll just stop the
+   clock
+   */
+  void onListenersEmpty() override { stopClock(); }
 
-    // Ensure we call any updates from the draw loop on the javascript thread
-    getContext()->runOnJavascriptThread(
-        // To ensure that this shared_ptr instance is not deallocated before we
-        // are done running the update lambda we pass a shared from this to the
-        // lambda scope.
-        [weakSelf = weak_from_this()]() {
-          auto self = weakSelf.lock();
-          if (self) {
-            auto selfClockValue =
-                std::dynamic_pointer_cast<RNSkClockValue>(self);
-            if (selfClockValue->getState() == RNSkClockState::Running) {
-              auto now = std::chrono::high_resolution_clock::now();
-              auto deltaFromStart =
-                  std::chrono::duration_cast<std::chrono::milliseconds>(
-                      now - selfClockValue->_start)
-                      .count();
-              selfClockValue->tick(selfClockValue->_runtime,
-                                   static_cast<double>(deltaFromStart));
-            }
-          }
-        });
+private:
+  /*
+   Callback from the draw loop. The invalidated parameter is true if the
+   platform context triggering the clock has been invalidated.
+   */
+  void drawLoopCallback(bool invalidated) {
+    auto now = std::chrono::high_resolution_clock::now();
+    onClockUpdated(
+        std::chrono::duration_cast<std::chrono::milliseconds>(now - _startTime)
+            .count());
   }
 
-  /**
-   Returns the draw identifier for the clock. This identifier is used
-   for the draw loop.
-   */
-  size_t getIdentifier() { return _identifier; }
-
-  /**
-   Returns the state of the clock
-   */
-  RNSkClockState getState() { return _state; }
-
-  jsi::Runtime &_runtime;
+  // Identifier for the clock. Used to track draw loop for
+  // registration/unregistration
   size_t _identifier;
-  std::chrono::time_point<std::chrono::steady_clock> _start;
-  std::chrono::time_point<std::chrono::steady_clock> _stop;
-  std::atomic<RNSkClockState> _state = {RNSkClockState::NotStarted};
-};
 
+  // Flag for current clock state.
+  bool _isRunning;
+
+  // Start time. Will be reset first time we start.
+  std::chrono::time_point<std::chrono::steady_clock> _startTime;
+};
 } // namespace RNSkia
