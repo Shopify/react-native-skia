@@ -16,14 +16,7 @@ import {
 } from "@shopify/react-native-skia";
 
 import { snapPoint } from "./Math";
-import {
-  transition,
-  linear,
-  swirl,
-  zoomInCircles,
-  glitchMemories,
-  cube,
-} from "./transitions";
+import { cube, swap, transition, pageCurl } from "./transitions";
 
 const { width, height } = Dimensions.get("window");
 const rct = rect(0, 0, width, height);
@@ -54,7 +47,7 @@ export const Transitions = () => {
     <View style={{ flex: 1 }}>
       <Canvas style={{ flex: 1 }}>
         <Fill>
-          <Shader source={transition(cube, cube)} uniforms={uniforms}>
+          <Shader source={transition(pageCurl, cube)} uniforms={uniforms}>
             <ImageShader image={image1} fit="cover" rect={rct} />
             <ImageShader image={image2} fit="cover" rect={rct} />
             <ImageShader image={image3} fit="cover" rect={rct} />
