@@ -217,6 +217,11 @@ public:
   */
   void setCurrent(const JsiValue &newValue) { RNSkValue::setCurrent(newValue); }
 
+  /**
+   Sets the current numeric inner value for this value
+  */
+  void setCurrent(double newValue) { RNSkValue::setCurrent(newValue); }
+
   JSI_PROPERTY_SET(current) {
     auto wrapped = JsiValue(runtime, value);
     setCurrent(wrapped);

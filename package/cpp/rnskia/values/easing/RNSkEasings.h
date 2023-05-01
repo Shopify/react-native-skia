@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include <math.h>
+#include <memory>
 
 #include "RNSkBaseEasing.h"
 
@@ -34,7 +34,7 @@ public:
    Constructs a regular time based easing from configuration
    */
   explicit RNSkEasings(std::shared_ptr<RNSkPlatformContext> platformContext,
-                       RNSkEasingType type)
+                       RNSkEasingType type, size_t parameter)
       : RNSkBaseEasing(platformContext), _type(type) {
     switch (type) {
     case RNSkEasingType::Step0:

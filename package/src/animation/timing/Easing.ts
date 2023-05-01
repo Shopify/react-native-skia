@@ -19,6 +19,11 @@ export enum EasingType {
   Bounce = 12,
 }
 
+export type EasingConfig = {
+  type: EasingType;
+  parameter?: number;
+};
+
 export class Easing {
   static step0(n: number): number {
     return n > 0 ? 1 : 0;

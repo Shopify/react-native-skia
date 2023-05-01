@@ -65,10 +65,11 @@ protected:
       }
     }
 
-    // Apply easing - clamp to 0 - 1
-    current = std::max(0.0, std::min(1.0, current));
-    _config.easing->setCurrent(current);
-    current = _config.easing->getCurrent().getAsNumber();
+    // Apply easing    
+    if (_config.easing != nullptr) {
+      _config.easing->setCurrent(clamped);
+      clamped = _config.easing->getCurrent().getAsNumber();
+    }
 
     // Interpolate
     _state.current = clamped * (_config.to - _config.from) + _config.from;

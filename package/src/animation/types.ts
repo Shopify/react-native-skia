@@ -1,4 +1,4 @@
-import { EasingType } from "./timing/Easing";
+import { EasingConfig } from "./timing/Easing";
 
 export interface SpringConfig {
   mass?: number;
@@ -9,7 +9,7 @@ export interface SpringConfig {
 
 export interface TimingConfig {
   duration?: number;
-  easing?: EasingType | ((t: number) => number);
+  easing?: EasingConfig | ((t: number) => number);
 }
 
 export interface AnimationParams {

@@ -1,4 +1,4 @@
-import { EasingType } from "../animation/timing/Easing";
+import { EasingConfig } from "../animation/timing/Easing";
 import { AnimationCallback, SpringConfig } from "../animation/types";
 
 export interface SkiaValue<T = number> {
@@ -80,12 +80,13 @@ export interface ISkiaValueApi {
    * @param type Type of easing
    * @returns Skia Value that will interpolate between 0..1 using the provided easing
    */
-  createEasing: (type: EasingType) => SkiaMutableValue;
+  createEasing: (type: EasingConfig) => SkiaMutableValue;
 
   /**
    * Creates a timing value
    * @param resolvedParams
-   * @param callback Called when timing is
+   * @param easingValue Easing value. Optional
+   * @param callback Called when timing is. Optional
    * @returns Timing based animation value
    */
   createTiming: (
@@ -96,6 +97,7 @@ export interface ISkiaValueApi {
       yoyo: boolean;
       duration: number;
     },
+    easing?: SkiaMutableValue,
     callback?: AnimationCallback
   ) => SkiaAnimation;
 

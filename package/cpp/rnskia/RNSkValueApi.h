@@ -62,10 +62,15 @@ public:
     auto configObject = arguments[0].asObject(runtime);
 
     size_t type = configObject.getProperty(runtime, "type").asNumber();
+    size_t parameter = -1;
+    if (configObject.hasProperty(runtime, "parameter")) {
+      parameter = configObject.getProperty(runtime, "parameter").asNumber();
+    }
 
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<RNSkEasings>(
-                     _platformContext, static_cast<RNSkEasingType>(type)));
+        runtime,
+        std::make_shared<RNSkEasings>(
+            _platformContext, static_cast<RNSkEasingType>(type), parameter));
   }
 
   JSI_HOST_FUNCTION(createTiming) {
@@ -78,18 +83,24 @@ public:
     auto yoyo = configObject.getProperty(runtime, "yoyo").asBool();
 
     auto duration = configObject.getProperty(runtime, "duration").asNumber();
-    
-    // Read easing - easing is a value that will be driven by the timing if provided.
-    auto easing = configObject.getProperty(runtime, "easing").getObject(runtime).asHostObject<RNSkMutableValue>(runtime);
-    
+
+    // Read easing - easing is a value that will be driven by the timing if
+    // provided.
+    std::shared_ptr<RNSkMutableValue> easing = nullptr;
+    if (count > 1) {
+      easing = arguments[1].getObject(runtime).asHostObject<RNSkMutableValue>(
+          runtime);
+    }
+
     // TODO: Read animation done callback
 
-    RNSkTimingConfig config = {.from = from,
-                               .to = to,
-                               .loop = loop,
-                               .yoyo = yoyo,
-                               .duration = duration,
-                               .easing = easing,
+    RNSkTimingConfig config = {
+        .from = from,
+        .to = to,
+        .loop = loop,
+        .yoyo = yoyo,
+        .duration = duration,
+        .easing = easing,
     };
 
     return jsi::Object::createFromHostObject(

@@ -33,14 +33,16 @@ export const createTiming = (
   };
 
   // Handle easing - it should be
-  let easingValue: SkiaMutableValue;
+  let easingValue: SkiaMutableValue | undefined = undefined;
   if (typeof resolvedParams.easing === "function") {
-    // TODO: easingValue = ValueApi.createComputedValue(() => resolvedParams.easing;
+    console.warn(
+      "TODO: easingValue = ValueApi.createComputedValue(() => resolvedParams.easing;"
+    );
   } else {
     easingValue = ValueApi.createEasing(resolvedParams.easing);
   }
 
-  return ValueApi.createTiming(resolvedParams, callback);
+  return ValueApi.createTiming(resolvedParams, easingValue, callback);
 
   // // Update function for the animation value
   // const animationFunction = (t: number, state: AnimationState | undefined) => {
