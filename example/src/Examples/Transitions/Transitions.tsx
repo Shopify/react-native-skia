@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dimensions, View, StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
@@ -17,15 +17,15 @@ import {
 
 import { snapPoint } from "./Math";
 import { cube, swap, transition, pageCurl } from "./transitions";
+import { useAssets } from "./Assets";
 
 const { width, height } = Dimensions.get("window");
 const rct = rect(0, 0, width, height);
 
 export const Transitions = () => {
+  const [osset, setOffset] = useState(0);
   const progress = useSharedValue(0);
-  const image1 = useImage(require("./assets/1.jpg"));
-  const image2 = useImage(require("./assets/2.jpg"));
-  const image3 = useImage(require("./assets/3.jpg"));
+  const assets = useAssets();
   const pan = Gesture.Pan()
     .onChange((pos) => {
       progress.value += pos.changeX / width;
@@ -40,7 +40,7 @@ export const Transitions = () => {
       resolution: [width, height],
     };
   });
-  if (!image1 || !image2 || !image3) {
+  if (!assets) {
     return null;
   }
   return (
@@ -48,9 +48,9 @@ export const Transitions = () => {
       <Canvas style={{ flex: 1 }}>
         <Fill>
           <Shader source={transition(pageCurl, cube)} uniforms={uniforms}>
-            <ImageShader image={image1} fit="cover" rect={rct} />
-            <ImageShader image={image2} fit="cover" rect={rct} />
-            <ImageShader image={image3} fit="cover" rect={rct} />
+            <ImageShader image={assets[0]} fit="cover" rect={rct} />
+            <ImageShader image={assets[1]} fit="cover" rect={rct} />
+            <ImageShader image={assets[2]} fit="cover" rect={rct} />
           </Shader>
         </Fill>
       </Canvas>
