@@ -34,7 +34,12 @@ vec4 main( vec2 fragCoord ) {
   vec3 rotatedColor = hueRotation(vec3(1, 0, 0), hueAngle);
 
   if (texColor.a == 0.0) {
-      return vec4(rotatedColor, 1.0);
+    vec2 center = vec2(0.5) * resolution;
+    float radius =  resolution.x;
+    float distanceFromCenter = distance(fragCoord, center);
+    float gradientValue = smoothstep(radius, 0.0, distanceFromCenter);
+    vec3 lighterColor = mix(rotatedColor, rotatedColor + vec3(0.4), 1);
+    return vec4(mix(rotatedColor, lighterColor, gradientValue), 1.0);
   } else {
       vec3 rotatedTexColor = hueRotation(texColor.rgb, hueAngle);
       return vec4(rotatedTexColor, texColor.a);
