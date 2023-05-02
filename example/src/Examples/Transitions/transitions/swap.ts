@@ -45,17 +45,17 @@ vec4 ${name}(vec2 p, float progress) {
   pto = (p + vec2(-1.0, -0.5)) * vec2(size/(1.0-perspective*(1.0-progress)), size/(1.0-size*persp*(0.5-p.x))) + vec2(1.0, 0.5);
 
   if (progress < 0.5) {
-    if (inBounds(pfr)) {
+    if (inBounds1(pfr)) {
       return ${getFromColor}(pfr);
     }
-    if (inBounds(pto)) {
+    if (inBounds1(pto)) {
       return ${getToColor}(pto);
     }  
   }
-  if (inBounds(pto)) {
+  if (inBounds1(pto)) {
     return ${getToColor}(pto);
   }
-  if (inBounds(pfr)) {
+  if (inBounds1(pfr)) {
     return ${getFromColor}(pfr);
   }
   return bgColor${name}(p, pfr, pto);
