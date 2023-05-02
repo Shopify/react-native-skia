@@ -37,13 +37,25 @@ const transitions = [
   cube,
 ].map((t) => transition(t));
 
+/*
+ // Example usage:
+const arr = [1, 2, 3, 4, 5];
+console.log(getElementAtIndex(arr, 7)); // Output: 3
+console.log(getElementAtIndex(arr, -2)); // Output: 4
+*/
+const at = <T,>(array: T[], index: number) => {
+  if (array.length === 0) {
+    throw new Error("Array is empty.");
+  }
+  return array[((index % array.length) + array.length) % array.length];
+};
+
 export const Transitions = () => {
   const progressLeft = useSharedValue(0);
   const assets = useAssets();
   const panLeft = useMemo(
     () =>
       Gesture.Pan()
-        .activeOffsetX(-10)
         .onChange((pos) => {
           progressLeft.value = clamp(
             progressLeft.value - pos.changeX / width,
