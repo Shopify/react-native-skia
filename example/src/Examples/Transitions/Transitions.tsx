@@ -13,7 +13,6 @@ import {
   ImageShader,
   Shader,
   clamp,
-  rect,
 } from "@shopify/react-native-skia";
 
 import { snapPoint } from "./Math";
@@ -28,6 +27,7 @@ import { useAssets } from "./Assets";
 
 const { width, height } = Dimensions.get("window");
 const transitions = [
+  pageCurl,
   pageCurl,
   glitchMemories,
   swap,
