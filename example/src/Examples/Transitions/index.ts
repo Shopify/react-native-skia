@@ -1,1 +1,1 @@
-export * from "./Hue";
+export * from "./Transitions";

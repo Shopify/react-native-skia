@@ -25,7 +25,6 @@ import {
   swap,
 } from "./transitions/index";
 import { useAssets } from "./Assets";
-import { HueRotation } from "./HueRotation";
 
 const { width, height } = Dimensions.get("window");
 const transitions = [
@@ -39,18 +38,8 @@ const transitions = [
 ].map((t) => transition(t));
 
 export const Transitions = () => {
-  const [offset, setOffset] = useState(1);
   const progressLeft = useSharedValue(0);
-  const progressRight = useSharedValue(0);
   const assets = useAssets();
-  const updatePage = useCallback(
-    (back: boolean) => {
-      setOffset((o) => (back ? o - 1 : o + 1));
-      progressLeft.value = 0;
-      progressRight.value = 0;
-    },
-    [progressLeft, progressRight]
-  );
   const panLeft = useMemo(
     () =>
       Gesture.Pan()
@@ -64,34 +53,9 @@ export const Transitions = () => {
         })
         .onEnd(({ velocityX }) => {
           const dst = snapPoint(progressLeft.value, -velocityX / width, [0, 1]);
-          progressLeft.value = withTiming(dst, { duration: 250 }, () => {
-            if (dst === 1) {
-              runOnJS(updatePage)(false);
-            }
-          });
+          progressLeft.value = withTiming(dst, { duration: 250 });
         }),
-    [progressLeft, updatePage]
-  );
-  const panRight = useMemo(
-    () =>
-      Gesture.Pan()
-        .activeOffsetX(10)
-        .onChange((pos) => {
-          progressRight.value = clamp(
-            progressRight.value + pos.changeX / width,
-            0,
-            1
-          );
-        })
-        .onEnd(({ velocityX }) => {
-          const dst = snapPoint(progressRight.value, velocityX / width, [0, 1]);
-          progressRight.value = withTiming(dst, { duration: 250 }, () => {
-            if (dst === 1) {
-              runOnJS(updatePage)(true);
-            }
-          });
-        }),
-    [progressRight, updatePage]
+    [progressLeft]
   );
 
   const uniformsLeft = useDerivedValue(() => {
@@ -101,37 +65,23 @@ export const Transitions = () => {
     };
   });
 
-  const uniformsRight = useDerivedValue(() => {
-    return {
-      progress: progressRight.value,
-      resolution: [width, height],
-    };
-  });
   if (!assets) {
     return null;
   }
   return (
     <View style={{ flex: 1 }}>
-      <GestureDetector gesture={Gesture.Race(panLeft, panRight)}>
+      <GestureDetector gesture={panLeft}>
         <Canvas style={{ flex: 1 }}>
           <Fill>
-            <Shader source={transitions[offset - 1]} uniforms={uniformsRight}>
-              <Shader source={transitions[offset]} uniforms={uniformsLeft}>
-                <ImageShader
-                  image={assets[offset]}
-                  fit="cover"
-                  width={width}
-                  height={height}
-                />
-                <ImageShader
-                  image={assets[offset + 1]}
-                  fit="cover"
-                  width={width}
-                  height={height}
-                />
-              </Shader>
+            <Shader source={transitions[0]} uniforms={uniformsLeft}>
               <ImageShader
-                image={assets[offset - 1]}
+                image={assets[0]}
+                fit="cover"
+                width={width}
+                height={height}
+              />
+              <ImageShader
+                image={assets[1]}
                 fit="cover"
                 width={width}
                 height={height}
