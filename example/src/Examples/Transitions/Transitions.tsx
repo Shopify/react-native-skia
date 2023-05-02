@@ -37,6 +37,19 @@ const transitions = [
   cube,
 ].map((t) => transition(t));
 
+/*
+ // Example usage:
+const arr = [1, 2, 3, 4, 5];
+console.log(getElementAtIndex(arr, 7)); // Output: 3
+console.log(getElementAtIndex(arr, -2)); // Output: 4
+*/
+const at = <T,>(array: T[], index: number) => {
+  if (array.length === 0) {
+    throw new Error("Array is empty.");
+  }
+  return array[((index % array.length) + array.length) % array.length];
+};
+
 export const Transitions = () => {
   const [offset, setOffset] = useState(0);
   const progressLeft = useSharedValue(0);
@@ -112,40 +125,25 @@ export const Transitions = () => {
         <Canvas style={{ flex: 1 }}>
           <Fill>
             <Shader
-              source={
-                transitions[
-                  offset === 0
-                    ? transitions.length - 1
-                    : (offset - 1) % transitions.length
-                ]
-              }
+              source={at(transitions, offset - 1)}
               uniforms={uniformsRight}
             >
-              <Shader
-                source={transitions[offset % transitions.length]}
-                uniforms={uniformsLeft}
-              >
+              <Shader source={at(transitions, offset)} uniforms={uniformsLeft}>
                 <ImageShader
-                  image={assets[offset % assets.length]}
+                  image={at(assets, offset)}
                   fit="cover"
                   width={width}
                   height={height}
                 />
                 <ImageShader
-                  image={assets[(offset + 1) % assets.length]}
+                  image={at(assets, offset + 1)}
                   fit="cover"
                   width={width}
                   height={height}
                 />
               </Shader>
               <ImageShader
-                image={
-                  assets[
-                    offset === 0
-                      ? assets.length - 1
-                      : (offset - 1) % assets.length
-                  ]
-                }
+                image={at(assets, offset - 1)}
                 fit="cover"
                 width={width}
                 height={height}
