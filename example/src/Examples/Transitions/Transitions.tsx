@@ -27,7 +27,6 @@ import {
 import { useAssets } from "./Assets";
 
 const { width, height } = Dimensions.get("window");
-const rct = rect(0, 0, width, height);
 const transitions = [
   pageCurl,
   glitchMemories,
@@ -38,32 +37,71 @@ const transitions = [
 ].map((t) => transition(t));
 
 export const Transitions = () => {
-  const [offset, setOffset] = useState(0);
-  const progress = useSharedValue(0);
+  const [offset, setOffset] = useState(1);
+  const progressLeft = useSharedValue(0);
+  const progressRight = useSharedValue(0);
   const assets = useAssets();
-  const updatePage = useCallback(() => {
-    setOffset((o) => o + 1);
-    progress.value = 0;
-  }, [progress]);
-  const pan = useMemo(
+  const updatePage = useCallback(
+    (back: boolean) => {
+      setOffset((o) => (back ? o - 1 : o + 1));
+      progressLeft.value = 0;
+      progressRight.value = 0;
+    },
+    [progressLeft, progressRight]
+  );
+  const panLeft = useMemo(
     () =>
       Gesture.Pan()
+        .activeOffsetX(-10)
         .onChange((pos) => {
-          progress.value = clamp(progress.value - pos.changeX / width, 0, 1);
+          progressLeft.value = clamp(
+            progressLeft.value - pos.changeX / width,
+            0,
+            1
+          );
         })
         .onEnd(({ velocityX }) => {
-          const dst = snapPoint(progress.value, -velocityX / width, [0, 1]);
-          progress.value = withTiming(dst, { duration: 250 }, () => {
+          const dst = snapPoint(progressLeft.value, -velocityX / width, [0, 1]);
+          progressLeft.value = withTiming(dst, { duration: 250 }, () => {
             if (dst === 1) {
-              runOnJS(updatePage)();
+              runOnJS(updatePage)(false);
             }
           });
         }),
-    [progress, updatePage]
+    [progressLeft, updatePage]
   );
-  const uniforms = useDerivedValue(() => {
+  const panRight = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetX(10)
+        .onChange((pos) => {
+          progressRight.value = clamp(
+            progressRight.value + pos.changeX / width,
+            0,
+            1
+          );
+        })
+        .onEnd(({ velocityX }) => {
+          const dst = snapPoint(progressRight.value, velocityX / width, [0, 1]);
+          progressRight.value = withTiming(dst, { duration: 250 }, () => {
+            if (dst === 1) {
+              runOnJS(updatePage)(true);
+            }
+          });
+        }),
+    [progressRight, updatePage]
+  );
+
+  const uniformsLeft = useDerivedValue(() => {
     return {
-      progress: progress.value,
+      progress: progressLeft.value,
+      resolution: [width, height],
+    };
+  });
+
+  const uniformsRight = useDerivedValue(() => {
+    return {
+      progress: progressRight.value,
       resolution: [width, height],
     };
   });
@@ -72,18 +110,26 @@ export const Transitions = () => {
   }
   return (
     <View style={{ flex: 1 }}>
-      <GestureDetector gesture={pan}>
+      <GestureDetector gesture={Gesture.Race(panLeft, panRight)}>
         <Canvas style={{ flex: 1 }}>
           <Fill>
-            <Shader source={transitions[offset]} uniforms={uniforms}>
+            <Shader source={transitions[offset - 1]} uniforms={uniformsRight}>
+              <Shader source={transitions[offset]} uniforms={uniformsLeft}>
+                <ImageShader
+                  image={assets[offset]}
+                  fit="cover"
+                  width={width}
+                  height={height}
+                />
+                <ImageShader
+                  image={assets[offset + 1]}
+                  fit="cover"
+                  width={width}
+                  height={height}
+                />
+              </Shader>
               <ImageShader
-                image={assets[offset]}
-                fit="cover"
-                width={width}
-                height={height}
-              />
-              <ImageShader
-                image={assets[offset + 1]}
+                image={assets[offset - 1]}
                 fit="cover"
                 width={width}
                 height={height}
