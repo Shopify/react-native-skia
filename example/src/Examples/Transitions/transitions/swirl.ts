@@ -2,9 +2,8 @@ import { glsl } from "../../../components/ShaderLib";
 
 import type { Transition } from "./Base";
 
-export const swirl: Transition = {
-  transition: (name: string, getFromColor: string, getToColor: string) => glsl`
-vec4 ${name}(vec2 UV, float progress) {
+export const swirl: Transition = glsl`
+vec4 transition(vec2 UV) {
 	float Radius = 1.0;
 
 	float T = progress;
@@ -24,10 +23,9 @@ vec4 ${name}(vec2 UV, float progress) {
 	}
 	UV += vec2( 0.5, 0.5 );
 
-	vec4 C0 = ${getFromColor}(UV);
-	vec4 C1 = ${getToColor}(UV);
+	vec4 C0 = getFromColor(UV);
+	vec4 C1 = getToColor(UV);
 
 	return mix( C0, C1, T );
 }
-`,
-};
+`;

@@ -2,14 +2,12 @@ import { glsl } from "../../../components/ShaderLib";
 
 import type { Transition } from "./Base";
 
-export const linear: Transition = {
-  transition: (name: string, getFromColor: string, getToColor: string) => glsl`
-vec4 ${name}(vec2 uv, float progress) {
+export const linear: Transition = glsl`
+vec4 transition(vec2 uv) {
   return mix(
-    ${getFromColor}(uv),
-    ${getToColor}(uv),
+    getFromColor(uv),
+    getToColor(uv),
     progress
   );
 }
-`,
-};
+`;

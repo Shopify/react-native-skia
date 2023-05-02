@@ -18,22 +18,23 @@ import {
 import { snapPoint } from "./Math";
 import {
   transition,
+  cube,
   pageCurl,
   glitchMemories,
+  swirl,
   swap,
-  linear,
 } from "./transitions/index";
 import { useAssets } from "./Assets";
 
 const { width, height } = Dimensions.get("window");
 const transitions = [
+  cube,
   pageCurl,
-  pageCurl,
+  cube,
   glitchMemories,
+  swirl,
   swap,
-  linear,
-  glitchMemories,
-  swap,
+  cube,
 ].map((t) => transition(t));
 
 export const Transitions = () => {

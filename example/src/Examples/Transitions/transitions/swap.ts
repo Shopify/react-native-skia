@@ -1,9 +1,9 @@
+/* eslint-disable max-len */
 import { glsl } from "../../../components/ShaderLib";
 
 import type { Transition } from "./Base";
 
-export const swap: Transition = {
-  common: glsl`
+export const swap: Transition = glsl`
 const float reflection1 = 0.4;
 const float perspective = 0.2;
 const float depth = 3.0;
@@ -18,22 +18,22 @@ bool inBounds1 (vec2 p) {
   
 vec2 project1(vec2 p) {
   return p * vec2(1.0, -1.2) + vec2(0.0, -0.02);
-}`,
-  transition: (name: string, getFromColor: string, getToColor: string) => glsl`
-vec4 bgColor${name}(vec2 p, vec2 pfr, vec2 pto) {
+}
+
+vec4 bgColor(vec2 p, vec2 pfr, vec2 pto) {
   vec4 c = black;
   pfr = project1(pfr);
   if (inBounds1(pfr)) {
-    c += mix(black, ${getFromColor}(pfr), reflection1 * mix(1.0, 0.0, pfr.y));
+    c += mix(black, getFromColor(pfr), reflection1 * mix(1.0, 0.0, pfr.y));
   }
   pto = project1(pto);
   if (inBounds1(pto)) {
-    c += mix(black, ${getToColor}(pto), reflection1 * mix(1.0, 0.0, pto.y));
+    c += mix(black, getToColor(pto), reflection1 * mix(1.0, 0.0, pto.y));
   }
   return c;
 }
 
-vec4 ${name}(vec2 p, float progress) {
+vec4 transition(vec2 p) {
   vec2 pfr, pto = vec2(-1.);
  
   float size = mix(1.0, depth, progress);
@@ -46,19 +46,18 @@ vec4 ${name}(vec2 p, float progress) {
 
   if (progress < 0.5) {
     if (inBounds1(pfr)) {
-      return ${getFromColor}(pfr);
+      return getFromColor(pfr);
     }
     if (inBounds1(pto)) {
-      return ${getToColor}(pto);
+      return getToColor(pto);
     }  
   }
   if (inBounds1(pto)) {
-    return ${getToColor}(pto);
+    return getToColor(pto);
   }
   if (inBounds1(pfr)) {
-    return ${getFromColor}(pfr);
+    return getFromColor(pfr);
   }
-  return bgColor${name}(p, pfr, pto);
+  return bgColor(p, pfr, pto);
 }
-`,
-};
+`;
