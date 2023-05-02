@@ -44,6 +44,7 @@ console.log(getElementAtIndex(arr, 7)); // Output: 3
 console.log(getElementAtIndex(arr, -2)); // Output: 4
 */
 const at = <T,>(array: T[], index: number) => {
+  "worklet";
   if (array.length === 0) {
     throw new Error("Array is empty.");
   }
