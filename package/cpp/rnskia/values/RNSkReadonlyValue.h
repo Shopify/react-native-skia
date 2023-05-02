@@ -11,7 +11,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
-#include <JsiValueWrapper.h>
+#include "JsiValueWrapper.h"
 #include "RNSkPlatformContext.h"
 
 namespace RNSkia {

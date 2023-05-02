@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include <JsiHostObject.h>
-#include <JsiValueWrapper.h>
+#include "JsiHostObject.h"
+#include "JsiValueWrapper.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkValue.h"
 #include "RNSkView.h"

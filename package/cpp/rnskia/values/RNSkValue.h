@@ -3,7 +3,7 @@
 #include <functional>
 #include <memory>
 
-#include <JsiHostObject.h>
+#include "JsiHostObject.h"
 #include "RNSkAnimation.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkReadonlyValue.h"

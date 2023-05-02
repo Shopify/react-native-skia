@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <JsiHostObject.h>
+#include "JsiHostObject.h"
 #include "RNSkAnimation.h"
 #include "RNSkComputedValue.h"
 #include "RNSkPlatformContext.h"

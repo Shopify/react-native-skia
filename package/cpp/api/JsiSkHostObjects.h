@@ -4,7 +4,7 @@
 #include <utility>
 
 #include "RNSkPlatformContext.h"
-#include <JsiHostObject.h>
+#include "JsiHostObject.h"
 
 namespace RNSkia {
 

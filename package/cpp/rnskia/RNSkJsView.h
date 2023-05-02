@@ -9,7 +9,7 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiValueWrapper.h>
+#include "JsiValueWrapper.h"
 #include "RNSkView.h"
 
 #include "JsiSkCanvas.h"
