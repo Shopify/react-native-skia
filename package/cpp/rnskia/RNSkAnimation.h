@@ -4,8 +4,8 @@
 #include <memory>
 
 #include <JsiHostObject.h>
-#include <RNSkClockValue.h>
-#include <RNSkPlatformContext.h>
+#include "RNSkClockValue.h"
+#include "RNSkPlatformContext.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {

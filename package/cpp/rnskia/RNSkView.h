@@ -7,12 +7,12 @@
 #include <vector>
 
 #include <JsiValueWrapper.h>
-#include <RNSkPlatformContext.h>
-#include <RNSkValue.h>
+#include "RNSkPlatformContext.h"
+#include "RNSkValue.h"
 
-#include <JsiSkImage.h>
-#include <JsiSkPoint.h>
-#include <JsiSkRect.h>
+#include "JsiSkImage.h"
+#include "JsiSkPoint.h"
+#include "JsiSkRect.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

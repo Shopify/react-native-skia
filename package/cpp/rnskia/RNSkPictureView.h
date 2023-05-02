@@ -10,13 +10,13 @@
 #include <jsi/jsi.h>
 
 #include <JsiValueWrapper.h>
-#include <RNSkView.h>
+#include "RNSkView.h"
 
-#include <JsiSkPicture.h>
-#include <RNSkInfoParameter.h>
-#include <RNSkLog.h>
-#include <RNSkPlatformContext.h>
-#include <RNSkTimingInfo.h>
+#include "JsiSkPicture.h"
+#include "RNSkInfoParameter.h"
+#include "RNSkLog.h"
+#include "RNSkPlatformContext.h"
+#include "RNSkTimingInfo.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

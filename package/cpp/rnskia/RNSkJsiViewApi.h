@@ -9,9 +9,9 @@
 
 #include <JsiHostObject.h>
 #include <JsiValueWrapper.h>
-#include <RNSkPlatformContext.h>
-#include <RNSkValue.h>
-#include <RNSkView.h>
+#include "RNSkPlatformContext.h"
+#include "RNSkValue.h"
+#include "RNSkView.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {

@@ -4,9 +4,9 @@
 #include <memory>
 
 #include <JsiHostObject.h>
-#include <RNSkAnimation.h>
-#include <RNSkPlatformContext.h>
-#include <RNSkReadonlyValue.h>
+#include "RNSkAnimation.h"
+#include "RNSkPlatformContext.h"
+#include "RNSkReadonlyValue.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {

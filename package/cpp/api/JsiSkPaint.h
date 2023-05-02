@@ -5,13 +5,13 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkColor.h>
-#include <JsiSkColorFilter.h>
-#include <JsiSkHostObjects.h>
-#include <JsiSkImageFilter.h>
-#include <JsiSkMaskFilter.h>
-#include <JsiSkPathEffect.h>
-#include <JsiSkShader.h>
+#include "JsiSkColor.h"
+#include "JsiSkColorFilter.h"
+#include "JsiSkHostObjects.h"
+#include "JsiSkImageFilter.h"
+#include "JsiSkMaskFilter.h"
+#include "JsiSkPathEffect.h"
+#include "JsiSkShader.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
