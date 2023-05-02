@@ -25,6 +25,7 @@ import {
   swap,
 } from "./transitions/index";
 import { useAssets } from "./Assets";
+import { HueRotation } from "./HueRotation";
 
 const { width, height } = Dimensions.get("window");
 const transitions = [
