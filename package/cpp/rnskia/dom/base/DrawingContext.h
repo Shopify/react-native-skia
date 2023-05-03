@@ -13,9 +13,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkCanvas.h>
-#include <SkPaint.h>
-#include <SkRefCnt.h>
+#include "SkCanvas.h"
+#include "SkPaint.h"
+#include "SkRefCnt.h"
 
 #pragma clang diagnostic pop
 

@@ -5,7 +5,7 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkHostObjects.h>
+#include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
