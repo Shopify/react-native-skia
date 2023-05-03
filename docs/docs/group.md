@@ -8,26 +8,27 @@ slug: /group
 The Group component is an essential construct in React Native Skia.
 Group components can be deeply nested with one another.
 It can apply the following operations to its children:
-* [Paint properties](#paint-properties)
-* [Transformations](#transformations)
-* [Clipping operations](#clipping-operations)
-* [Bitmap Effects](#bitmap-effects)
 
-| Name       | Type               |  Description                                                  |
-|:-----------|:-------------------|:--------------------------------------------------------------|
-| transform? | `Transform2d`      | [Same API that's in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is, however, different. It is the center object in React Native and the top-left corner in Skia. |
-| origin?    | `Point`            | Sets the origin of the transformation. This property is not inherited by its children. |
-| clip?   | `RectOrRRectOrPath`     | Rectangle, rounded rectangle, or Path to use to clip the children. |
-| invertClip? | `boolean`         | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden. |
-| layer? | `RefObject<Paint>` | Draws the children as a bitmap and applies the effects provided by the paint. |
+- [Paint properties](#paint-properties)
+- [Transformations](#transformations)
+- [Clipping operations](#clipping-operations)
+- [Bitmap Effects](#bitmap-effects)
+
+| Name        | Type                | Description                                                                                                                                                                                                           |
+| :---------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| transform?  | `Transform2d`       | [Same API that's in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is, however, different. It is the center object in React Native and the top-left corner in Skia. |
+| origin?     | `Point`             | Sets the origin of the transformation. This property is not inherited by its children.                                                                                                                                |
+| clip?       | `RectOrRRectOrPath` | Rectangle, rounded rectangle, or Path to use to clip the children.                                                                                                                                                    |
+| invertClip? | `boolean`           | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden.                                                                                                               |
+| layer?      | `RefObject<Paint>`  | Draws the children as a bitmap and applies the effects provided by the paint.                                                                                                                                         |
 
 ## Paint Properties
 
 Its children will inherit all paint attributes applied to a group. These attributes can be properties like `color` or `style` or children like `<Shader />`, or `<ImageFilter />` for instance ([see painting](/docs/paint/overview)).
 
 ```tsx twoslash
-import {Canvas, Circle, Group} from "@shopify/react-native-skia";
- 
+import { Canvas, Circle, Group } from "@shopify/react-native-skia";
+
 export const PaintDemo = () => {
   const r = 128;
   return (
@@ -54,7 +55,7 @@ The origin property is a helper to set the origin of the transformation. This pr
 ### Simple Transformation
 
 ```tsx twoslash
-import {Canvas, Fill, Group, RoundedRect} from "@shopify/react-native-skia";
+import { Canvas, Fill, Group, RoundedRect } from "@shopify/react-native-skia";
 
 const SimpleTransform = () => {
   return (
@@ -73,7 +74,7 @@ const SimpleTransform = () => {
 ### Transformation of Origin
 
 ```tsx twoslash
-import {Canvas, Fill, Group, RoundedRect} from "@shopify/react-native-skia";
+import { Canvas, Fill, Group, RoundedRect } from "@shopify/react-native-skia";
 
 const SimpleTransform = () => {
   return (
@@ -93,7 +94,6 @@ const SimpleTransform = () => {
 
 ![Origin Transformation](assets/group/origin-transform.png)
 
-
 ## Clipping Operations
 
 `clip` provides a clipping region that sets what part of the children should be shown.
@@ -103,7 +103,16 @@ When using `invertClip`, everything outside the clipping region will be shown, a
 ### Clip Rectangle
 
 ```tsx twoslash
-import {Canvas, Group, Image, useImage, Skia, rrect, rect, Fill} from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Group,
+  Image,
+  useImage,
+  Skia,
+  rrect,
+  rect,
+  Fill,
+} from "@shopify/react-native-skia";
 
 const size = 256;
 const padding = 32;
@@ -111,9 +120,7 @@ const padding = 32;
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
   const rct = rect(padding, padding, size - padding * 2, size - padding * 2);
-  if (!image) {
-    return null;
-  }
+
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="lightblue" />
@@ -137,7 +144,15 @@ const Clip = () => {
 ### Clip Rounded Rectangle
 
 ```tsx twoslash
-import {Canvas, Group, Image, useImage, Skia, rrect, rect} from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Group,
+  Image,
+  useImage,
+  Skia,
+  rrect,
+  rect,
+} from "@shopify/react-native-skia";
 
 const size = 256;
 const padding = 32;
@@ -145,10 +160,12 @@ const r = 8;
 
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
-  const roundedRect = rrect(rect(padding, padding, size - padding * 2, size - padding * 2), r, r);
-  if (!image) {
-    return null;
-  }
+  const roundedRect = rrect(
+    rect(padding, padding, size - padding * 2, size - padding * 2),
+    r,
+    r
+  );
+
   return (
     <Canvas style={{ flex: 1 }}>
       <Group clip={roundedRect}>
@@ -171,27 +188,24 @@ const Clip = () => {
 ### Clip Path
 
 ```tsx twoslash
-import {Canvas, Group, Image, useImage, Skia} from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Group,
+  Image,
+  useImage,
+  Skia,
+} from "@shopify/react-native-skia";
 
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
   const star = Skia.Path.MakeFromSVGString(
     "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
   )!;
-  if (!image) {
-    return null;
-  }
+
   return (
     <Canvas style={{ flex: 1 }}>
       <Group clip={star}>
-        <Image
-          image={image}
-          x={0}
-          y={0}
-          width={256}
-          height={256}
-          fit="cover"
-        />
+        <Image image={image} x={0} y={0} width={256} height={256} fit="cover" />
       </Group>
     </Canvas>
   );
@@ -200,31 +214,27 @@ const Clip = () => {
 
 <img src={require("/static/img/group/clip-path.png").default} width="256" height="256" />
 
-
 ### Invert Clip
 
 ```tsx twoslash
-import {Canvas, Group, Image, useImage, Skia} from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Group,
+  Image,
+  useImage,
+  Skia,
+} from "@shopify/react-native-skia";
 
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
   const star = Skia.Path.MakeFromSVGString(
     "M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
   )!;
-  if (!image) {
-    return null;
-  }
+
   return (
     <Canvas style={{ flex: 1 }}>
       <Group clip={star} invertClip>
-        <Image
-          image={image}
-          x={0}
-          y={0}
-          width={256}
-          height={256}
-          fit="cover"
-        />
+        <Image image={image} x={0} y={0} width={256} height={256} fit="cover" />
       </Group>
     </Canvas>
   );
@@ -240,28 +250,33 @@ You can use it to apply effects.
 This is particularly useful to build effects that need to be applied to a group of elements and not one in particular.
 
 ```tsx twoslash
-import {Canvas, Group, Circle, Blur, Paint, ColorMatrix} from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Group,
+  Circle,
+  Blur,
+  Paint,
+  ColorMatrix,
+} from "@shopify/react-native-skia";
 
 const Clip = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Group
         color="lightblue"
-        layer={<Paint>
-          <Blur blur={20} />
-          <ColorMatrix
-            matrix={[
-              1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
-            ]}
-          />
-        </Paint>}
+        layer={
+          <Paint>
+            <Blur blur={20} />
+            <ColorMatrix
+              matrix={[
+                1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
+              ]}
+            />
+          </Paint>
+        }
       >
         <Circle cx={0} cy={128} r={128 * 0.95} />
-        <Circle
-          cx={256}
-          cy={128}
-          r={128 * 0.95}
-        />
+        <Circle cx={256} cy={128} r={128 * 0.95} />
       </Group>
     </Canvas>
   );
@@ -270,15 +285,14 @@ const Clip = () => {
 
 <img alt="Rasterize" src={require("/static/img/group/rasterize.png").default} width="256" height="256" />
 
-
 ## Fitbox
 
 The `FitBox` component is based on the `Group` component and allows you to scale drawings to fit into a destination rectangle automatically.
 
-| Name | Type     |  Description                                       |
-|:-----|:---------|:---------------------------------------------------|
-| src  | `SKRect` | Bounding rectangle of the drawing before scaling  |
-| dst  | `SKRect` | Bounding rectangle of the drawing after scale      |
+| Name | Type     | Description                                                                                                                                                  |
+| :--- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| src  | `SKRect` | Bounding rectangle of the drawing before scaling                                                                                                             |
+| dst  | `SKRect` | Bounding rectangle of the drawing after scale                                                                                                                |
 | fit? | `Fit`    | Method to make the image fit into the rectangle. Value can be `contain`, `fill`, `cover` `fitHeight`, `fitWidth`, `scaleDown`, `none` (default is `contain`) |
 
 ### Example
@@ -295,7 +309,7 @@ Its bounding source rectangle is `0, 0, 664, 308`:
 We would like to automatically scale that path to our canvas of size `256 x 256`:
 
 ```tsx twoslash
-import {Canvas, FitBox, Path, rect} from "@shopify/react-native-skia";
+import { Canvas, FitBox, Path, rect } from "@shopify/react-native-skia";
 
 const Hello = () => {
   return (
@@ -311,8 +325,7 @@ const Hello = () => {
       </FitBox>
     </Canvas>
   );
-}
+};
 ```
 
 <img src={require("/static/img/group/scale-path.png").default} width="256" height="256" />
-

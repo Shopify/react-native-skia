@@ -17,6 +17,7 @@ public:
 protected:
   void draw(DrawingContext *context) override {
     auto svgDom = _svgDomProp->getDerivedValue();
+    if (svgDom != nullptr) {
     auto rect = _rectProp->getDerivedValue();
     auto x = _xProp->isSet() ? _xProp->value().getAsNumber() : -1;
     auto y = _yProp->isSet() ? _yProp->value().getAsNumber() : -1;
@@ -36,6 +37,7 @@ protected:
     }
     svgDom->render(context->getCanvas());
     context->getCanvas()->restore();
+    }
   }
 
   void defineProperties(NodePropsContainer *container) override {
@@ -46,7 +48,6 @@ protected:
     _yProp = container->defineProperty<NodeProp>("y");
     _widthProp = container->defineProperty<NodeProp>("width");
     _heightProp = container->defineProperty<NodeProp>("height");
-    _svgDomProp->require();
   }
 
 private:

@@ -25,6 +25,9 @@ export class ImageSVGNode extends JsiDrawingNode<
       throw new Error("ImageSVGNode: derived props unresolved");
     }
     const { x, y, width, height } = this.derived;
+    if (svg === null) {
+      return;
+    }
     canvas.save();
     if (x && y) {
       canvas.translate(x, y);

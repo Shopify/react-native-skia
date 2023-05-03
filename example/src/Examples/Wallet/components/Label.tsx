@@ -52,10 +52,8 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
     const titleWidth = titleFont.getTextWidth(title);
     return width / 2 - titleWidth / 2;
   }, [state, titleFont]);
-  if (!titleFont || !subtitleFont) {
-    return null;
-  }
-  const subtitleWidth = subtitleFont.getTextWidth(subtitle);
+
+  const subtitleWidth = subtitleFont?.getTextWidth(subtitle) ?? 0;
   return (
     <>
       <Text

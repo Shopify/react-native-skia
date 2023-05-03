@@ -9,13 +9,13 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkColorFilter.h>
-#include <SkImageFilter.h>
-#include <SkImageFilters.h>
-#include <SkMaskFilter.h>
-#include <SkPaint.h>
-#include <SkPathEffect.h>
-#include <SkShader.h>
+#include "SkColorFilter.h"
+#include "SkImageFilter.h"
+#include "SkImageFilters.h"
+#include "SkMaskFilter.h"
+#include "SkPaint.h"
+#include "SkPathEffect.h"
+#include "SkShader.h"
 
 #pragma clang diagnostic pop
 
