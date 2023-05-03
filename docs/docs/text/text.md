@@ -23,9 +23,6 @@ import {Canvas, Text, useFont, Fill} from "@shopify/react-native-skia";
 export const HelloWorld = () => {
   const fontSize = 32;
   const font = useFont(require("./my-font.ttf"), fontSize);
-  if (font === null) {
-    return null;
-  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="white" />
@@ -42,7 +39,6 @@ export const HelloWorld = () => {
 
 <img src={require("/static/img/text/hello-world.png").default} width="256" height="256" />
 
-
 ### Emojis
 
 ```tsx twoslash
@@ -51,9 +47,6 @@ import {Canvas, Text, useFont, Fill} from "@shopify/react-native-skia";
 export const HelloWorld = () => {
   const fontSize = 32;
   const font = useFont(require("./NotoColorEmoji.ttf"), fontSize);
-  if (font === null) {
-    return null;
-  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="white" />

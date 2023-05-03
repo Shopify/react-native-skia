@@ -15,6 +15,9 @@ export class ImageSVGNode extends JsiDrawingNode<ImageSVGProps, null> {
 
   draw({ canvas }: DrawingContext) {
     const { svg } = this.props;
+    if (!svg) {
+      return;
+    }
     const { x, y, width, height } = processRect(this.Skia, this.props);
     canvas.save();
     canvas.translate(x, y);
