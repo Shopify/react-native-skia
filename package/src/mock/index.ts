@@ -31,9 +31,9 @@ export const Mock = (CanvasKit: CanvasKit) => {
     useValueEffect: Noop,
     useRawData: Noop,
     useData: Noop,
-    useFont: Noop,
-    useTypeface: Noop,
-    useImage: Noop,
-    useSVG: Noop,
+    useFont: () => Skia.Font(undefined, 0),
+    useTypeface: () => null,
+    useImage: () => null,
+    useSVG: () => null,
   };
 };
