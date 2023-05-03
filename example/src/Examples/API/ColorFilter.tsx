@@ -118,9 +118,6 @@ export const ColorFilter = () => {
   );
 
   const r = IMG_HEIGHT;
-  if (!image) {
-    return null;
-  }
 
   return (
     <ScrollView>

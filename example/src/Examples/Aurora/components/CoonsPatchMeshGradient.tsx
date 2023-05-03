@@ -173,9 +173,7 @@ export const CoonsPatchMeshGradient = ({
 
   const onTouch = useHandles(meshGesture, defaultMesh, window);
   const mesh = play ? meshNoise : meshGesture;
-  if (image === null) {
-    return null;
-  }
+
   return (
     <Canvas style={{ width, height }} onTouch={onTouch}>
       <Group>
