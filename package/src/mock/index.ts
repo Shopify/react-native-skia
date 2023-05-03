@@ -27,6 +27,8 @@ export const Mock = (CanvasKit: CanvasKit) => {
     useTiming: NoopValue,
     useLoop: NoopValue,
     useSpring: NoopValue,
+    useClockValue: NoopValue,
+    useValueEffect: Noop,
     useRawData: Noop,
     useData: Noop,
     useFont: Noop,
