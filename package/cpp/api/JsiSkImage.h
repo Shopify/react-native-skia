@@ -4,9 +4,9 @@
 #include <string>
 #include <utility>
 
+#include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
-#include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
