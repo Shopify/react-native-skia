@@ -1,0 +1,17 @@
+name: Publish Documentation
+on:
+  workflow_run:
+    workflows: ["Tests"]
+    types: 
+      - completed
+jobs:
+  deploy_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
