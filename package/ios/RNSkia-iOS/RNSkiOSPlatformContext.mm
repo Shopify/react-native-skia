@@ -63,11 +63,13 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 }
 
 void RNSkiOSPlatformContext::runOnMainThread(std::function<void()> func) {
-  _dispatchMainThread(func);
+  dispatch_async(dispatch_get_main_queue(), ^{
+    func();
+  });
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::takeScreenshotFromViewTag(size_t tag) {
-  return _takeViewScreenshot(tag);
+  return [_screenshotService screenshotOfViewWithTag:[NSNumber numberWithLong:viewTag]];
 }
 
 void RNSkiOSPlatformContext::startDrawLoop() {

@@ -8,6 +8,7 @@
 
 #include "DisplayLink.h"
 #include "RNSkPlatformContext.h"
+#include "ViewScreenshotService.h"
 
 #include <jsi/jsi.h>
 
@@ -28,12 +29,10 @@ static void handleNotification(CFNotificationCenterRef center, void *observer,
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
   RNSkiOSPlatformContext(
-      jsi::Runtime *runtime, std::shared_ptr<react::CallInvoker> callInvoker,
-      std::function<void(std::function<void()>)> dispatchMainThread,
-      std::function<sk_sp<SkImage>(size_t viewTag)> takeViewScreenshot)
+      jsi::Runtime *runtime, RCTBridge *bridge)
       : _dispatchMainThread(dispatchMainThread),
         _takeViewScreenshot(takeViewScreenshot),
-        RNSkPlatformContext(runtime, callInvoker,
+        RNSkPlatformContext(runtime, bridge.callInvoker,
                             [[UIScreen mainScreen] scale]) {
 
     // We need to make sure we invalidate when modules are freed
@@ -41,6 +40,10 @@ public:
         CFNotificationCenterGetLocalCenter(), this, &handleNotification,
         (__bridge CFStringRef)RCTBridgeWillInvalidateModulesNotification, NULL,
         CFNotificationSuspensionBehaviorDeliverImmediately);
+
+    // Create screenshot manager
+    _screenshotService =
+        [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
   }
 
   ~RNSkiOSPlatformContext() {
@@ -70,8 +73,7 @@ public:
 
 private:
   DisplayLink *_displayLink;
-  std::function<void(std::function<void()>)> _dispatchMainThread;
-  std::function<sk_sp<SkImage>(size_t viewTag)> _takeViewScreenshot;
+  ViewScreenshotService *_screenshotService;
 };
 
 static void handleNotification(CFNotificationCenterRef center, void *observer,
