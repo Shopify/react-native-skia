@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include <RNSkDispatchQueue.h>
+#include "RNSkDispatchQueue.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

@@ -8,9 +8,10 @@ const createSymlink = (p) => {
   const srcDir = path.resolve(`./cpp/${p}`);
   const dstDir = path.resolve(`./android/cpp/${p}`);
 
-  if (!fs.existsSync(dstDir) || !fs.lstatSync(dstDir).isSymbolicLink()) {
-    fs.symlinkSync(srcDir, dstDir, "junction");
+  if (fs.existsSync(dstDir)) {
+    fs.unlinkSync(dstDir);
   }
+  fs.symlinkSync(srcDir, dstDir, "junction");
 };
 
 // Copy common cpp files from the package root to the android folder

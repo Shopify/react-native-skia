@@ -6,8 +6,8 @@
 #include <memory>
 #include <string>
 
-#include <DisplayLink.h>
-#include <RNSkPlatformContext.h>
+#include "DisplayLink.h"
+#include "RNSkPlatformContext.h"
 
 #include <jsi/jsi.h>
 
