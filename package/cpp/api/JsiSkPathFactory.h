@@ -13,7 +13,7 @@
 
 #include "SkPath.h"
 #include "SkPathOps.h"
-#include <RNSkLog.h>
+#include "RNSkLog.h"
 
 #pragma clang diagnostic pop
 

@@ -3,8 +3,8 @@
 #include <memory>
 
 #include "JsiSkHostObjects.h"
-#include <JsiSkData.h>
-#include <JsiSkShader.h>
+#include "JsiSkData.h"
+#include "JsiSkShader.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
