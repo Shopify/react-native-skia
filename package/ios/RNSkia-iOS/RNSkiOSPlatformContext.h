@@ -1,6 +1,7 @@
 #pragma once
 
 #import <React/RCTBridge.h>
+#import <React/RCTBridge+Private.h>
 
 #include <functional>
 #include <memory>
