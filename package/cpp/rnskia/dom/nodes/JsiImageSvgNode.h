@@ -18,25 +18,26 @@ protected:
   void draw(DrawingContext *context) override {
     auto svgDom = _svgDomProp->getDerivedValue();
     if (svgDom != nullptr) {
-    auto rect = _rectProp->getDerivedValue();
-    auto x = _xProp->isSet() ? _xProp->value().getAsNumber() : -1;
-    auto y = _yProp->isSet() ? _yProp->value().getAsNumber() : -1;
-    auto width = _widthProp->isSet() ? _widthProp->value().getAsNumber() : -1;
-    auto height = _widthProp->isSet() ? _heightProp->value().getAsNumber() : -1;
-    context->getCanvas()->save();
-    if (rect != nullptr) {
-      context->getCanvas()->translate(rect->x(), rect->y());
-      svgDom->setContainerSize(SkSize::Make(rect->width(), rect->height()));
-    } else {
-      if (x != -1 && y != -1) {
-        context->getCanvas()->translate(x, y);
+      auto rect = _rectProp->getDerivedValue();
+      auto x = _xProp->isSet() ? _xProp->value().getAsNumber() : -1;
+      auto y = _yProp->isSet() ? _yProp->value().getAsNumber() : -1;
+      auto width = _widthProp->isSet() ? _widthProp->value().getAsNumber() : -1;
+      auto height =
+          _widthProp->isSet() ? _heightProp->value().getAsNumber() : -1;
+      context->getCanvas()->save();
+      if (rect != nullptr) {
+        context->getCanvas()->translate(rect->x(), rect->y());
+        svgDom->setContainerSize(SkSize::Make(rect->width(), rect->height()));
+      } else {
+        if (x != -1 && y != -1) {
+          context->getCanvas()->translate(x, y);
+        }
+        if (width != -1 && height != -1) {
+          svgDom->setContainerSize(SkSize::Make(width, height));
+        }
       }
-      if (width != -1 && height != -1) {
-        svgDom->setContainerSize(SkSize::Make(width, height));
-      }
-    }
-    svgDom->render(context->getCanvas());
-    context->getCanvas()->restore();
+      svgDom->render(context->getCanvas());
+      context->getCanvas()->restore();
     }
   }
 
