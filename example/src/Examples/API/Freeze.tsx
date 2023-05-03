@@ -20,9 +20,6 @@ export const FreezeExample = () => {
     [clock]
   );
 
-  if (font === null) {
-    return null;
-  }
   return (
     <Canvas style={{ flex: 1, margin: 50 }}>
       <Group origin={{ x: size / 2, y: size / 2 }} transform={transform}>

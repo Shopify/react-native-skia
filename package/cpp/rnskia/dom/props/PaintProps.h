@@ -13,7 +13,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPaint.h>
+#include "SkPaint.h"
 
 #pragma clang diagnostic pop
 

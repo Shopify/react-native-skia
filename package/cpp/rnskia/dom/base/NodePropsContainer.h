@@ -54,7 +54,7 @@ public:
   void updatePendingValues() {
     for (auto &prop : _properties) {
       prop->updatePendingChanges();
-      if (!prop->isSet() && prop->isRequired()) {
+      if (prop->isRequired() && !prop->isSet()) {
         throw std::runtime_error("Missing one or more required properties " +
                                  std::string(prop->getName()) + " in the " +
                                  _type + " component.");

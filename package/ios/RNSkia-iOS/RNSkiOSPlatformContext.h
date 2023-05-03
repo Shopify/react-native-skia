@@ -6,16 +6,8 @@
 #include <memory>
 #include <string>
 
-#include <DisplayLink.h>
-#include <RNSkPlatformContext.h>
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
-
-#include "SkStream.h"
-#include "SkSurface.h"
-
-#pragma clang diagnostic pop
+#include "DisplayLink.h"
+#include "RNSkPlatformContext.h"
 
 #include <jsi/jsi.h>
 
@@ -35,10 +27,15 @@ static void handleNotification(CFNotificationCenterRef center, void *observer,
 
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
-  RNSkiOSPlatformContext(jsi::Runtime *runtime,
-                         std::shared_ptr<react::CallInvoker> callInvoker)
-      : RNSkPlatformContext(runtime, callInvoker,
+  RNSkiOSPlatformContext(
+      jsi::Runtime *runtime, std::shared_ptr<react::CallInvoker> callInvoker,
+      std::function<void(std::function<void()>)> dispatchMainThread,
+      std::function<sk_sp<SkImage>(size_t viewTag)> takeViewScreenshot)
+      : _dispatchMainThread(dispatchMainThread),
+        _takeViewScreenshot(takeViewScreenshot),
+        RNSkPlatformContext(runtime, callInvoker,
                             [[UIScreen mainScreen] scale]) {
+
     // We need to make sure we invalidate when modules are freed
     CFNotificationCenterAddObserver(
         CFNotificationCenterGetLocalCenter(), this, &handleNotification,
@@ -55,6 +52,10 @@ public:
   void startDrawLoop() override;
   void stopDrawLoop() override;
 
+  void runOnMainThread(std::function<void()>) override;
+
+  sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override;
+
   virtual void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
@@ -69,6 +70,8 @@ public:
 
 private:
   DisplayLink *_displayLink;
+  std::function<void(std::function<void()>)> _dispatchMainThread;
+  std::function<sk_sp<SkImage>(size_t viewTag)> _takeViewScreenshot;
 };
 
 static void handleNotification(CFNotificationCenterRef center, void *observer,

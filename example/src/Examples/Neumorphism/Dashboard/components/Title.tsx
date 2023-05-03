@@ -11,10 +11,7 @@ interface Title {
 
 export const Title = ({ title }: Title) => {
   const font = useFont(require("./SF-Pro-Display-Bold.otf"), 28);
-  if (!font) {
-    return null;
-  }
-  const titleWidth = font.getTextWidth(title);
+  const titleWidth = font?.getTextWidth(title) ?? 0;
   const offsetX = 30 + BUTTON_SIZE;
   const space = 298 - offsetX;
   return (
@@ -25,7 +22,7 @@ export const Title = ({ title }: Title) => {
       <Text
         text={title}
         x={offsetX + (space - titleWidth) / 2}
-        y={BUTTON_SIZE - font.getSize()}
+        y={BUTTON_SIZE - (font?.getSize() ?? 0)}
         font={font}
         color="white"
       />
