@@ -277,7 +277,7 @@ if (ENABLE_PREFAB) {
         from('./cpp')
         into "${project.buildDir}/headers/rnskia/"
         includeEmptyDirs = false
-        include '**/*'
+        include '**/*.h'
         eachFile {
             // flatten the directory structure
             String path = it.path
