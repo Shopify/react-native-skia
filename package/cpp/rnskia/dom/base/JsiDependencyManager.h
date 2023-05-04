@@ -72,12 +72,12 @@ public:
             // Handle Skia Animation Values
             auto animatedValue = getAnimatedValue(nativeValue);
             auto unsubscribe = animatedValue->addListener(
-                [animatedValue, propMapping](jsi::Runtime &runtime) {
+                [animatedValue, propMapping](RNSkValue*) {
                   // Get value from animation value
-                  auto nextJsValue = animatedValue->getCurrent(runtime);
+                  auto nextJsValue = animatedValue->getCurrent();
                   // Update all props that listens to this animation value
                   for (auto &prop : propMapping) {
-                    prop->updateValue(runtime, nextJsValue);
+                    prop->updateValue(nextJsValue);
                   }
                 });
 
@@ -86,17 +86,17 @@ public:
 
           } else if (isSelector(nativeValue)) {
             // Handle Skia Animation Value Selectors
-            auto animatedValue = std::dynamic_pointer_cast<RNSkReadonlyValue>(
+            auto animatedValue = std::dynamic_pointer_cast<RNSkValue>(
                 nativeValue.getValue(PropNameValue).getAsHostObject());
 
             auto selector =
                 nativeValue.getValue(PropNameSelector).getAsFunction();
             // Add subscription to animated value in selector
             auto unsubscribe = animatedValue->addListener(
-                [nativeValue, propMapping, selector = std::move(selector),
-                 animatedValue](jsi::Runtime &runtime) {
+                [&runtime, nativeValue, propMapping, selector = std::move(selector),
+                 animatedValue](RNSkValue*) {
                   // Get value from animation value
-                  jsi::Value jsValue = animatedValue->getCurrent(runtime);
+                  jsi::Value jsValue = animatedValue->getCurrent().getAsJsiValue(runtime);
                   // Call selector to transform new value
                   auto selectedJsValue =
                       selector(runtime, jsi::Value::null(), &jsValue, 1);
