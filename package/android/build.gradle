@@ -274,14 +274,20 @@ extractJNIFiles.mustRunAfter extractAARHeaders
 if (ENABLE_PREFAB) {
     // Package all the cpp code in a flattened directory structure
     task prepareHeaders(type: Copy) {
-        from('./cpp')
+        from("./cpp")
         into "${project.buildDir}/headers/rnskia/"
         includeEmptyDirs = false
-        include '**/*.h'
+        include "**/*.h"
         eachFile {
-            // flatten the directory structure
             String path = it.path
-            path = path.substring(path.lastIndexOf('/') + 1)
+
+            // Skip flattening third_party dir
+            if (path.contains("api/third_party")) {
+                path = path.substring("api/".length())
+            } else {
+                // flatten anything else
+                path = path.substring(path.lastIndexOf("/") + 1)
+            }
             it.path = path
         }
     }
