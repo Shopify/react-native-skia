@@ -50,6 +50,8 @@ import type {
   LerpColorFilterProps,
   BoxProps,
   BoxShadowProps,
+  RichTextProps,
+  SpanProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type {
@@ -66,7 +68,7 @@ import type { SkiaProps } from "./processors";
 import type { DependencyManager } from "./DependencyManager";
 
 // This flag should only be turned on for debugging/testing
-const shouldUseJSDomOnNative = false;
+const shouldUseJSDomOnNative = true;
 export const NATIVE_DOM = shouldUseJSDomOnNative ? false : !!global.SkiaDomApi;
 
 declare global {

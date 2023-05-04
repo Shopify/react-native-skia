@@ -7,6 +7,7 @@ import type {
   SkPaint,
   SkPathEffect,
   SkShader,
+  SkTypefaceFontProvider,
   Skia,
 } from "../../skia/types";
 import { BlendMode, PaintStyle, StrokeCap, StrokeJoin } from "../../skia/types";
@@ -30,10 +31,13 @@ export class JsiDrawingContext implements DrawingContext {
 
   declarationCtx: DeclarationContext;
 
+  typefaceProvider: SkTypefaceFontProvider;
+
   constructor(private readonly Skia: Skia, public readonly canvas: SkCanvas) {
     const paint = this.Skia.Paint();
     this.paints = [paint];
     this.declarationCtx = new DeclarationContext(Skia);
+    this.typefaceProvider = this.Skia.TypefaceFontProvider.Make();
   }
 
   get paint() {

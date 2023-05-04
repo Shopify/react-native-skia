@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Fill, Group, RichText, Span } from "../../components";
-import { importSkia, surface } from "../setup";
+import { surface } from "../setup";
 import { checkImage } from "../../../__tests__/setup";
 
 describe("RichText", () => {

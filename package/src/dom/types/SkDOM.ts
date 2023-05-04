@@ -37,6 +37,8 @@ import type {
   DrawingNodeProps,
   BoxProps,
   BoxShadowProps,
+  RichTextProps,
+  SpanProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -87,6 +89,8 @@ export interface SkDOM {
   RRect(props: RoundedRectProps): DrawingNode<RoundedRectProps>;
   Vertices(props: VerticesProps): DrawingNode<VerticesProps>;
   Text(props: TextProps): DrawingNode<TextProps>;
+  RichText(props: RichTextProps): DrawingNode<RichTextProps>;
+  Span(props: SpanProps): DrawingNode<SpanProps>;
   TextPath(props: TextPathProps): DrawingNode<TextPathProps>;
   TextBlob(props: TextBlobProps): DrawingNode<TextBlobProps>;
   Glyphs(props: GlyphsProps): DrawingNode<GlyphsProps>;

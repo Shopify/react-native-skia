@@ -39,6 +39,8 @@ import type {
   BoxProps,
   BoxShadowProps,
   ChildrenProps,
+  RichTextProps,
+  SpanProps,
 } from "../types";
 import type {
   BlendImageFilterProps,
@@ -123,6 +125,7 @@ import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
 import type { NodeContext } from "./Node";
 import { LayerNode } from "./LayerNode";
+import { SpanNode } from "./drawings/RichText";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
@@ -222,6 +225,20 @@ export class JsiSkDOM implements SkDOM {
     return NATIVE_DOM
       ? global.SkiaDomApi.TextNode(props)
       : new TextNode(this.ctx, props);
+  }
+
+  RichText(props: RichTextProps) {
+    if (NATIVE_DOM) {
+      throw new Error("Not implemented yet");
+    }
+    return new RichTextNode(this.ctx, props);
+  }
+
+  Span(props: SpanProps) {
+    if (NATIVE_DOM) {
+      throw new Error("Not implemented yet");
+    }
+    return new SpanNode(this.ctx, props);
   }
 
   TextPath(props: TextPathProps) {
