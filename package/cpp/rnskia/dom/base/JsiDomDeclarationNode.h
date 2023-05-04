@@ -82,7 +82,10 @@ protected:
   /**
    A property changed
    */
-  void onPropertyChanged(BaseNodeProp *prop) override { invalidateContext(); }
+  void onPropertyChanged(BaseNodeProp *prop) override {
+    JsiDomNode::onPropertyChanged(prop);
+    invalidateContext();
+  }
 
   /**
    Validates that only declaration nodes can be children
