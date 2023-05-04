@@ -87,13 +87,14 @@ public:
     // Read easing - easing is a value that will be driven by the timing if
     // provided.
     std::shared_ptr<RNSkMutableValue> easing = nullptr;
-    if (count > 1) {
+    if (arguments[1].isObject()) {
       easing = arguments[1].getObject(runtime).asHostObject<RNSkMutableValue>(
           runtime);
     }
 
     // TODO: Read animation done callback
 
+    // Create config
     RNSkTimingConfig config = {
         .from = from,
         .to = to,
