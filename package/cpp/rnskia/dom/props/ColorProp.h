@@ -42,6 +42,13 @@ public:
       return SkColorSetARGB(a.getAsNumber() * 255.0f, r.getAsNumber() * 255.0f,
                             g.getAsNumber() * 255.0f, b.getAsNumber() * 255.0f);
 
+    } else if (color.getType() == PropType::Array) {
+      auto r = color.getAsArray().at(0);
+      auto g = color.getAsArray().at(1);
+      auto b = color.getAsArray().at(2);
+      auto a = color.getAsArray().at(3);
+      return SkColorSetARGB(a.getAsNumber() * 255.0f, r.getAsNumber() * 255.0f,
+                            g.getAsNumber() * 255.0f, b.getAsNumber() * 255.0f);
     } else if (color.getType() == PropType::Number) {
       return static_cast<SkColor>(color.getAsNumber());
     } else {
