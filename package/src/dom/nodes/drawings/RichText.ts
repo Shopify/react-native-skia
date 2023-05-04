@@ -119,7 +119,10 @@ const processSpans = (builder: SkParagraphBuilder, spans: SkSpan[]) => {
   }
 };
 
-export class TextNode extends JsiDrawingNode<RichTextProps, ParagraphStyle> {
+export class RichTextNode extends JsiDrawingNode<
+  RichTextProps,
+  ParagraphStyle
+> {
   constructor(ctx: NodeContext, props: RichTextProps) {
     super(ctx, NodeType.Text, props);
   }

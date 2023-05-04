@@ -125,7 +125,7 @@ import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
 import type { NodeContext } from "./Node";
 import { LayerNode } from "./LayerNode";
-import { SpanNode } from "./drawings/RichText";
+import { RichTextNode, SpanNode } from "./drawings/RichText";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
