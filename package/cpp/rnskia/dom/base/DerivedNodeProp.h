@@ -23,12 +23,8 @@ public:
    */
   void updatePendingChanges() override {
     for (auto &prop : _properties) {
-      prop->updatePendingChanges();
       if (prop->isChanged()) {
-        // We only need to update the derived value when any of the derived
-        // properties have changed.
         updateDerivedValue();
-        break;
       }
     }
   }
@@ -74,11 +70,12 @@ public:
   _Tp *defineProperty(_Args &&...__args) {
     auto prop = std::make_shared<_Tp>(std::forward<_Args>(__args)...,
                                       [&](BaseNodeProp *prop) {
-                                        if (!_isChanged) {
-                                          _onChange(this);
-                                          _isChanged = true;
-                                        }
-                                      });
+      _onChange(prop);
+      if (!_isChanged) {
+        _onChange(this);
+        _isChanged = true;
+      }
+    });
 
     // Add to internal props list
     _properties.push_back(prop);
