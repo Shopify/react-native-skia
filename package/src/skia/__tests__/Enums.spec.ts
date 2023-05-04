@@ -5,6 +5,7 @@ import {
   BlurStyle,
   ClipOp,
   ColorType,
+  DecorationStyle,
   FillType,
   FilterMode,
   FontEdging,
@@ -17,10 +18,15 @@ import {
   PaintStyle,
   PathOp,
   PathVerb,
+  PlaceholderAlignment,
   PointMode,
   SaveLayerFlag,
   StrokeCap,
   StrokeJoin,
+  TextAlign,
+  TextBaseline,
+  TextDirection,
+  TextHeightBehavior,
   TileMode,
   VertexMode,
 } from "../types";
@@ -61,6 +67,15 @@ describe("Enums", () => {
     checkEnum(FontSlant, CanvasKit.FontSlant);
     checkEnum(FontWidth, CanvasKit.FontWidth);
     checkEnum(FontWeight, CanvasKit.FontWeight);
+  });
+  it("Should match Paragraph enums values with CanvasKit", () => {
+    const { CanvasKit } = setupSkia();
+    checkEnum(TextAlign, CanvasKit.TextAlign);
+    checkEnum(TextBaseline, CanvasKit.TextBaseline);
+    checkEnum(TextDirection, CanvasKit.TextDirection);
+    checkEnum(TextHeightBehavior, CanvasKit.TextHeightBehavior);
+    checkEnum(DecorationStyle, CanvasKit.DecorationStyle);
+    checkEnum(PlaceholderAlignment, CanvasKit.PlaceholderAlignment);
   });
   it("Should match PointMode enums values with CanvasKit", () => {
     const { CanvasKit } = setupSkia();

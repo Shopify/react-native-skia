@@ -68,6 +68,10 @@ export const enum NodeType {
   Glyphs = "skGlyphs",
   Picture = "skPicture",
   ImageSVG = "skImageSVG",
+
+  // Rich Text
+  RichText = "skRichText",
+  Span = "skSpan",
 }
 
 export const enum DeclarationType {

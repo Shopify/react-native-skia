@@ -14,6 +14,7 @@ import type {
   SkImageFilter,
   SkMatrix,
   SkPaint,
+  SkParagraph,
   SkPath,
   SkPicture,
   SkPoint,
@@ -37,6 +38,7 @@ import { JsiSkPicture } from "./JsiSkPicture";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkImageFilter } from "./JsiSkImageFilter";
 import { JsiSkPoint } from "./JsiSkPoint";
+import { JsiSkParagraph } from "./JsiSkParagraph";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -264,6 +266,10 @@ export class JsiSkCanvas
       JsiSkPaint.fromValue(paint),
       JsiSkFont.fromValue(font)
     );
+  }
+
+  drawParagraph(paragraph: SkParagraph, x: 0, y: 0): void {
+    this.ref.drawParagraph(JsiSkParagraph.fromValue(paragraph), x, y);
   }
 
   drawTextBlob(blob: SkTextBlob, x: number, y: number, paint: SkPaint) {

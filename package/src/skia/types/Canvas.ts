@@ -13,6 +13,7 @@ import type { SkImageFilter } from "./ImageFilter";
 import type { SkVertices } from "./Vertices";
 import type { SkTextBlob } from "./TextBlob";
 import type { SkPicture } from "./Picture";
+import type { SkParagraph } from "./Paragraph";
 
 export enum ClipOp {
   Difference,
@@ -329,6 +330,15 @@ export interface SkCanvas {
     paint: SkPaint,
     font: SkFont
   ): void;
+
+  /**
+   * Draws the given Paragraph at the provided coordinates.
+   * Requires the Paragraph code to be compiled in.
+   * @param p
+   * @param x
+   * @param y
+   */
+  drawParagraph(paragraph: SkParagraph, x: number, y: number): void;
 
   /**
    * Draws the given TextBlob at (x, y) using the current clip, current matrix, and the
