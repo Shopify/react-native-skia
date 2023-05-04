@@ -43,6 +43,9 @@ public:
     // Get callback for calculating result
     _callback = std::make_shared<jsi::Function>(
         arguments[0].asObject(runtime).asFunction(runtime));
+
+    // Set initial value to undefined in the computed value
+    getCurrent().setUndefined();
   }
 
   void invalidate() override {
@@ -101,11 +104,20 @@ private:
       if (self) {
         // Update value
         auto selfAsThis = std::static_pointer_cast<RNSkComputedValue>(self);
-        auto newValue =
-            selfAsThis->_callback->call(selfAsThis->_runtime, nullptr, 0);
-        // TODO: Shouldn't this be done on the main thread??
-        selfAsThis->setCurrent(
-            std::move(JsiValue(selfAsThis->_runtime, newValue)));
+        auto newValue = JsiValue(
+            selfAsThis->_runtime,
+            selfAsThis->_callback->call(selfAsThis->_runtime, nullptr, 0));
+        // Updated should be done on the main thread
+        selfAsThis->getContext()->runOnMainThread(
+            [weakSelf, current = std::move(newValue)]() {
+              auto self = weakSelf.lock();
+              if (self) {
+                // Update value
+                auto selfAsThis =
+                    std::static_pointer_cast<RNSkComputedValue>(self);
+                selfAsThis->setCurrent(std::move(current));
+              }
+            });
       }
     });
   }

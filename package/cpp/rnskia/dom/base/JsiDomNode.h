@@ -226,9 +226,14 @@ public:
    not.
    */
   void commitPendingChanges() {
-    // Update properties container
-    if (_propsContainer != nullptr) {
-      _propsContainer->updatePendingValues();
+    // Update pending properties
+    for (auto &prop : _updatedProps) {
+      prop->updatePendingChanges();
+      if (!prop->isSet() && prop->isRequired()) {
+        throw std::runtime_error("Missing one or more required properties " +
+                                 std::string(prop->getName()) + " in the " +
+                                 _type + " component.");
+      }
     }
 
     // Run all pending node operations
@@ -252,11 +257,13 @@ public:
    this function to mark any changes as processed. This call also resolves all
    child nodes
    */
-  virtual void resetPendingChanges() {
-    // Mark self as resolved
-    if (_propsContainer != nullptr) {
-      _propsContainer->markAsResolved();
+  void resetPendingChanges() {
+    // Mark changed props as resolved
+    for (auto &prop : _updatedProps) {
+      prop->markAsResolved();
     }
+
+    _updatedProps.clear();
 
     // Now let's invalidate if needed
     if (_isDisposing && !_isDisposed) {
@@ -357,7 +364,14 @@ protected:
   /**
    Override to be notified when a node property has changed
    */
-  virtual void onPropertyChanged(BaseNodeProp *prop) {}
+  virtual void onPropertyChanged(BaseNodeProp *prop) {
+    if (_parent) {
+      _parent->onPropertyChanged(prop);
+    } else {
+      // We are the top-most node - let's update list of props to update
+      _updatedProps.push_back(prop);
+    }
+  }
 
   /**
    Adds a child node to the array of children for this node
@@ -551,6 +565,8 @@ private:
   JsiDomNode *_parent = nullptr;
 
   NodeClass _nodeClass;
+
+  std::vector<BaseNodeProp *> _updatedProps;
 };
 
 } // namespace RNSkia

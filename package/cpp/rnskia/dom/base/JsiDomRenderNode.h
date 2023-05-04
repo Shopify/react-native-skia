@@ -127,12 +127,6 @@ public:
   }
 
   /**
-   Override reset (last thing that happens in the render cycle) to also reset
-   the changed flag on the local drawing context if necessary.
-   */
-  void resetPendingChanges() override { JsiDomNode::resetPendingChanges(); }
-
-  /**
    Overridden dispose to release resources
    */
   void dispose(bool immediate) override {
@@ -201,6 +195,8 @@ protected:
    A property changed
    */
   void onPropertyChanged(BaseNodeProp *prop) override {
+    JsiDomNode::onPropertyChanged(prop);
+
     static std::vector<const char *> paintProps = {
         JsiPropId::get("color"),      JsiPropId::get("strokeWidth"),
         JsiPropId::get("blendMode"),  JsiPropId::get("strokeCap"),

@@ -65,7 +65,7 @@ protected:
       }
     }
 
-    // Apply easing    
+    // Apply easing
     if (_config.easing != nullptr) {
       _config.easing->setCurrent(clamped);
       clamped = _config.easing->getCurrent().getAsNumber();

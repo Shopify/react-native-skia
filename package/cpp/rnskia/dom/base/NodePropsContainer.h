@@ -68,30 +68,6 @@ public:
   }
 
   /**
-   Updates any props that has changes waiting, updates props that have derived
-   values
-   */
-  void updatePendingValues() {
-    for (auto &prop : _properties) {
-      prop->updatePendingChanges();
-      if (prop->isRequired() && !prop->isSet()) {
-        throw std::runtime_error("Missing one or more required properties " +
-                                 std::string(prop->getName()) + " in the " +
-                                 _type + " component.");
-      }
-    }
-  }
-
-  /**
-   We're done, mark any changes as committed in all props
-   */
-  void markAsResolved() {
-    for (auto &prop : _properties) {
-      prop->markAsResolved();
-    }
-  }
-
-  /**
    Clears all props and data from the container
    */
   void dispose() {
