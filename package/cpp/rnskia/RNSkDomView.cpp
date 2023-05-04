@@ -100,21 +100,21 @@ void RNSkDomRenderer::renderCanvas(SkCanvas *canvas, float scaledWidth,
   // Update canvas before drawing
   _drawingContext->setCanvas(canvas);
 
-  try {
-    // Ask the root node to render to the provided canvas
-    std::lock_guard<std::mutex> lock(_rootLock);
-    if (_root != nullptr) {
+  // Ask the root node to render to the provided canvas
+  std::lock_guard<std::mutex> lock(_rootLock);
+  if (_root != nullptr) {
+    try {
       _root->commitPendingChanges();
       _root->render(_drawingContext.get());
-      _root->resetPendingChanges();
+    } catch (std::runtime_error err) {
+      _platformContext->raiseError(err);
+    } catch (jsi::JSError err) {
+      _platformContext->raiseError(err);
+    } catch (...) {
+      _platformContext->raiseError(
+          std::runtime_error("Error rendering the Skia view."));
     }
-  } catch (std::runtime_error err) {
-    _platformContext->raiseError(err);
-  } catch (jsi::JSError err) {
-    _platformContext->raiseError(err);
-  } catch (...) {
-    _platformContext->raiseError(
-        std::runtime_error("Error rendering the Skia view."));
+    _root->resetPendingChanges();
   }
 
   renderDebugOverlays(canvas);
