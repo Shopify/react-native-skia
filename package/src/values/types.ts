@@ -97,7 +97,7 @@ export interface ISkiaValueApi {
       yoyo: boolean;
       duration: number;
     },
-    easing?: SkiaMutableValue,
+    easing: SkiaMutableValue | null | undefined,
     callback?: AnimationCallback
   ) => SkiaAnimation;
 

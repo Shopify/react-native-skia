@@ -58,6 +58,7 @@ export const useTiming = (
     value.animation = animation;
     animation.start();
     return () => {
+      // TODO: remove:
       console.log("STOPPING ANIMATION");
       value.animation = undefined;
     };
