@@ -57,8 +57,7 @@ Reanimated and Skia use different color formats. You can interpolate colors usin
 import {
   interpolateColor,
   useDerivedValue,
-  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet in the types
   // @ts-ignore
   convertToRGBA,
 } from "react-native-reanimated";

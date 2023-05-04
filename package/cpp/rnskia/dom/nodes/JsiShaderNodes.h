@@ -17,7 +17,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkShader.h>
+#include "SkShader.h"
 
 #pragma clang diagnostic pop
 
@@ -94,6 +94,10 @@ public:
   void decorate(DeclarationContext *context) override {
 
     auto image = _imageProps->getImage();
+    if (image == nullptr) {
+      return;
+    }
+
     auto rect = _imageProps->getRect();
     auto lm =
         _transformProp->isSet() ? _transformProp->getDerivedValue() : nullptr;
@@ -101,7 +105,7 @@ public:
     if (rect != nullptr && lm != nullptr) {
       auto rc = _imageProps->getDerivedValue();
       auto m3 = _imageProps->rect2rect(rc->src, rc->dst);
-      if (_transformProp->isChanged()) {
+      if (_transformProp->isChanged() || _imageProps->isChanged()) {
         // To modify the matrix we need to copy it since we're not allowed to
         // modify values contained in properties - this would have caused the
         // matrix to be translated and scaled more and more for each render
@@ -147,7 +151,7 @@ protected:
     _transformProp->require();
 
     // Add and require the image
-    container->defineProperty<NodeProp>("image")->require();
+    container->defineProperty<NodeProp>("image");
   }
 
 private:

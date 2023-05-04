@@ -19,6 +19,8 @@
     "@react-navigation/native-stack": "6.9.0",
     "@shopify/react-native-skia": "link:../package/",
     "@svgr/webpack": "^6.2.1",
+    "@testing-library/jest-native": "^5.4.2",
+    "@testing-library/react-hooks": "^8.0.1",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "cdt2d": "^1.0.0",
     "color": "^4.2.1",
@@ -38,7 +40,7 @@
     "@babel/preset-env": "^7.20.0",
     "@babel/runtime": "^7.20.0",
     "@react-native-community/eslint-config": "^3.2.0",
-    "@testing-library/react-native": "^10.1.1",
+    "@testing-library/react-native": "12.1.1",
     "@tsconfig/react-native": "^2.0.2",
     "@types/jest": "^29.2.1",
     "@types/react": "^18.0.24",
@@ -78,6 +80,11 @@
     "modulePathIgnorePatterns": [
       "<rootDir>/lib/typescript",
       "setup.(ts|tsx)$"
+    ],
+    "globalSetup": "<rootDir>/globalJestSetup.js",
+    "setupFilesAfterEnv": [
+      "<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js",
+      "<rootDir>/jestSetup.js"
     ],
     "preset": "react-native",
     "transformIgnorePatterns": [
