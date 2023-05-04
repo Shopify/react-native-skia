@@ -7,9 +7,9 @@
     "setup-skia-web": "./scripts/setup-canvaskit.js"
   },
   "title": "React Native Skia",
-  "version": "0.1.187",
+  "version": "0.1.0-development",
   "description": "High-performance React Native Graphics using Skia",
-  "main": "lib/module/index.js",
+  "main": "index.ts",
   "files": [
     "src",
     "lib",
@@ -121,8 +121,5 @@
       ],
       "typescript"
     ]
-  },
-  "types": "lib/typescript/index.d.ts",
-  "module": "lib/module/index.js",
-  "react-native": "lib/module/index.js"
+  }
 }
