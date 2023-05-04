@@ -22,18 +22,14 @@ public:
    Starts the process of updating and reading props
    */
   void updatePendingChanges() override {
-    auto changed = false;
     for (auto &prop : _properties) {
       prop->updatePendingChanges();
       if (prop->isChanged()) {
-        changed = true;
+        // We only need to update the derived value when any of the derived
+        // properties have changed.
+        updateDerivedValue();
+        break;
       }
-    }
-
-    // We only need to update the derived value when any of the derived
-    // properties have changed.
-    if (changed) {
-      updateDerivedValue();
     }
   }
 
@@ -61,6 +57,8 @@ public:
     for (auto &prop : _properties) {
       prop->readValueFromJs(runtime, read);
     }
+    // calculate initial value
+    updateDerivedValue();
   }
 
   /**
@@ -74,9 +72,17 @@ public:
   template <class _Tp, class... _Args,
             class = std::enable_if_t<!std::is_array<_Tp>::value>>
   _Tp *defineProperty(_Args &&...__args) {
-    auto prop =
-        std::make_shared<_Tp>(std::forward<_Args>(__args)..., _onChange);
+    auto prop = std::make_shared<_Tp>(std::forward<_Args>(__args)...,
+                                      [&](BaseNodeProp *prop) {
+                                        if (!_isChanged) {
+                                          _onChange(this);
+                                          _isChanged = true;
+                                        }
+                                      });
+
+    // Add to internal props list
     _properties.push_back(prop);
+
     return prop.get();
   }
 
