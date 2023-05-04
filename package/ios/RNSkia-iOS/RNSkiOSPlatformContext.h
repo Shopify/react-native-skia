@@ -1,7 +1,8 @@
 #pragma once
 
-#import <React/RCTBridge.h>
 #import <React/RCTBridge+Private.h>
+#import <React/RCTBridge.h>
+#import <ReactCommon/RCTTurboModule.h>
 
 #include <functional>
 #include <memory>
@@ -29,11 +30,8 @@ static void handleNotification(CFNotificationCenterRef center, void *observer,
 
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
-  RNSkiOSPlatformContext(
-      jsi::Runtime *runtime, RCTBridge *bridge)
-      : _dispatchMainThread(dispatchMainThread),
-        _takeViewScreenshot(takeViewScreenshot),
-        RNSkPlatformContext(runtime, bridge.callInvoker,
+  RNSkiOSPlatformContext(jsi::Runtime *runtime, RCTBridge *bridge)
+      : RNSkPlatformContext(runtime, bridge.jsCallInvoker,
                             [[UIScreen mainScreen] scale]) {
 
     // We need to make sure we invalidate when modules are freed

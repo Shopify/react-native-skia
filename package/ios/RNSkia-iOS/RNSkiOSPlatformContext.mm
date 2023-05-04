@@ -68,8 +68,10 @@ void RNSkiOSPlatformContext::runOnMainThread(std::function<void()> func) {
   });
 }
 
-sk_sp<SkImage> RNSkiOSPlatformContext::takeScreenshotFromViewTag(size_t tag) {
-  return [_screenshotService screenshotOfViewWithTag:[NSNumber numberWithLong:viewTag]];
+sk_sp<SkImage>
+RNSkiOSPlatformContext::takeScreenshotFromViewTag(size_t viewTag) {
+  return [_screenshotService
+      screenshotOfViewWithTag:[NSNumber numberWithLong:viewTag]];
 }
 
 void RNSkiOSPlatformContext::startDrawLoop() {
