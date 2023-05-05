@@ -10,14 +10,14 @@ import type { ParagraphStyle, Skia, TextStyle } from "../../../skia/types";
 import type {
   DeclarationContext,
   DrawingContext,
+  RenderNode,
   RichTextProps,
   SpanProps,
   TextStyleProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { JsiDrawingNode } from "../DrawingNode";
 import type { NodeContext } from "../Node";
-import { JsiDeclarationNode } from "../Node";
+import { JsiNode, JsiDeclarationNode } from "../Node";
 import { enumKey } from "../datatypes";
 
 const addTextStyleProp = <K extends keyof TextStyle>(
@@ -89,15 +89,34 @@ const textStyleFromProps = (Skia: Skia, props: TextStyleProps) => {
   return style;
 };
 
-export class RichTextNode extends JsiDrawingNode<
-  RichTextProps,
-  ParagraphStyle
-> {
+export class RichTextNode
+  extends JsiNode<RichTextProps>
+  implements RenderNode<RichTextProps>
+{
   constructor(ctx: NodeContext, props: RichTextProps) {
-    super(ctx, NodeType.Text, props);
+    super(ctx, NodeType.RichText, props);
   }
 
-  protected deriveProps() {
+  render(ctx: DrawingContext): void {
+    const { canvas } = ctx;
+    const style = this.getStyle();
+    const { x, y, width } = this.props;
+    ctx.declarationCtx.paragraphBuilder =
+      this.Skia.ParagraphBuilder.MakeFromFontProvider(
+        style,
+        ctx.typefaceProvider
+      );
+    this.children().forEach((child) => {
+      if (child instanceof JsiDeclarationNode) {
+        child.decorate(ctx.declarationCtx);
+      }
+    });
+    const paragraph = ctx.declarationCtx.paragraphBuilder!.build();
+    paragraph.layout(width);
+    canvas.drawParagraph(paragraph, x, y);
+  }
+
+  protected getStyle() {
     const {
       disableHinting,
       ellipsis,
@@ -128,19 +147,6 @@ export class RichTextNode extends JsiDrawingNode<
     }
 
     return style;
-  }
-
-  draw(ctx: DrawingContext) {
-    const { canvas } = ctx;
-
-    if (!this.derived) {
-      throw new Error("TextNode: paragraph style is undefined");
-    }
-    const { x, y, width } = this.props;
-    console.log({ this: this });
-    const paragraph = ctx.declarationCtx.paragraphBuilder!.build();
-    paragraph.layout(width);
-    canvas.drawParagraph(paragraph, x, y);
   }
 }
 

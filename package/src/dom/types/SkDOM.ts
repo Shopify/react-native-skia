@@ -89,7 +89,7 @@ export interface SkDOM {
   RRect(props: RoundedRectProps): DrawingNode<RoundedRectProps>;
   Vertices(props: VerticesProps): DrawingNode<VerticesProps>;
   Text(props: TextProps): DrawingNode<TextProps>;
-  RichText(props: RichTextProps): DrawingNode<RichTextProps>;
+  RichText(props: RichTextProps): RenderNode<RichTextProps>;
   Span(props: SpanProps): DeclarationNode<SpanProps>;
   TextPath(props: TextPathProps): DrawingNode<TextPathProps>;
   TextBlob(props: TextBlobProps): DrawingNode<TextBlobProps>;
