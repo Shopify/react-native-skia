@@ -6,14 +6,9 @@ import {
   FontStyle,
   TextBaseline,
 } from "../../../skia/types";
+import type { ParagraphStyle, Skia, TextStyle } from "../../../skia/types";
 import type {
-  ParagraphStyle,
-  SkSpan,
-  Skia,
-  TextStyle,
-  SkParagraphBuilder,
-} from "../../../skia/types";
-import type {
+  DeclarationContext,
   DrawingContext,
   RichTextProps,
   SpanProps,
@@ -94,31 +89,6 @@ const textStyleFromProps = (Skia: Skia, props: TextStyleProps) => {
   return style;
 };
 
-const processSpans = (builder: SkParagraphBuilder, spans: SkSpan[]) => {
-  for (const span of spans) {
-    const { text, children, fg, bg, style } = span;
-    const shouldSavePaint = fg !== undefined || bg !== undefined;
-    const shouldSave = shouldSavePaint || style !== undefined;
-    if (shouldSave) {
-      if (shouldSavePaint) {
-        // TODO: one of the two paint might be undefined
-        // TODO: is this using also the color or can it be a shader too?
-        builder.pushPaintStyle(style!, fg!, bg!);
-      } else {
-        builder.pushStyle(style!);
-      }
-    }
-    if (text) {
-      builder.addText(text);
-    } else if (children) {
-      processSpans(builder, children);
-    }
-    if (shouldSave) {
-      builder.pop();
-    }
-  }
-};
-
 export class RichTextNode extends JsiDrawingNode<
   RichTextProps,
   ParagraphStyle
@@ -160,56 +130,55 @@ export class RichTextNode extends JsiDrawingNode<
     return style;
   }
 
-  draw({ typefaceProvider, canvas }: DrawingContext) {
+  draw(ctx: DrawingContext) {
+    const { canvas } = ctx;
+
     if (!this.derived) {
       throw new Error("TextNode: paragraph style is undefined");
     }
     const { x, y, width } = this.props;
-    // TODO: update styles to match the current opacity
-    const builder = this.Skia.ParagraphBuilder.MakeFromFontProvider(
-      this.derived,
-      typefaceProvider
-    );
-    const spans = this.children()
-      .filter(
-        (child): child is JsiDeclarationNode<unknown, SkSpan> =>
-          child instanceof JsiDeclarationNode && child.isSpan()
-      )
-      .map((child) => child.materialize());
-    processSpans(builder, spans);
-    const paragraph = builder.build();
+    console.log({ this: this });
+    const paragraph = ctx.declarationCtx.paragraphBuilder!.build();
     paragraph.layout(width);
     canvas.drawParagraph(paragraph, x, y);
   }
 }
 
-export class SpanNode extends JsiDeclarationNode<SpanProps, SkSpan> {
+export class SpanNode extends JsiDeclarationNode<SpanProps> {
   constructor(ctx: NodeContext, props: SpanProps) {
     super(ctx, DeclarationType.Span, NodeType.Span, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const {
       text,
       foregroundPaint: fg,
       backgroundPaint: bg,
-      ...style
+      ...rawStyle
     } = this.props;
-    const children = this.children()
-      .filter(
-        (child): child is JsiDeclarationNode<unknown, SkSpan> =>
-          child instanceof JsiDeclarationNode && child.isSpan()
-      )
-      .map((child) => child.materialize());
-    return {
-      text,
-      fg,
-      bg,
-      children,
-      style:
-        Object.keys(style).length !== 0
-          ? textStyleFromProps(this.Skia, style)
-          : undefined,
-    };
+    const builder = ctx.paragraphBuilder;
+    if (!builder) {
+      throw new Error("SpanNode: paragraph builder is undefined");
+    }
+    const style = textStyleFromProps(this.Skia, rawStyle);
+    const shouldSavePaint = fg !== undefined || bg !== undefined;
+    const shouldSave = shouldSavePaint || style !== undefined;
+    if (shouldSave) {
+      if (shouldSavePaint) {
+        // TODO: one of the two paint might be undefined
+        // TODO: is this using also the color or can it be a shader too?
+        builder.pushPaintStyle(style, fg!, bg!);
+      } else {
+        builder.pushStyle(style);
+      }
+    }
+    if (text) {
+      builder.addText(text);
+    } else {
+      this.decorateChildren(ctx);
+    }
+    if (shouldSave) {
+      builder.pop();
+    }
   }
 }

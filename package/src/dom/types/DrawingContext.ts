@@ -24,6 +24,8 @@ export interface DrawingContext {
   saveAndConcat(node: Node<PaintProps>, cache?: SkPaint): boolean;
   restore(): void;
   declarationCtx: DeclarationContext;
+  // TODO: we can remove typefaceProvider here
+  typefaceProvider: SkTypefaceFontProvider;
 }
 
 export class JsiDrawingContext implements DrawingContext {
@@ -37,6 +39,7 @@ export class JsiDrawingContext implements DrawingContext {
     const paint = this.Skia.Paint();
     this.paints = [paint];
     this.declarationCtx = new DeclarationContext(Skia);
+    // TODO: move to decl ctx?
     this.typefaceProvider = this.Skia.TypefaceFontProvider.Make();
   }
 

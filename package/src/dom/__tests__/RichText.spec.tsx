@@ -9,7 +9,7 @@ import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import { JsiDrawingContext } from "../types";
 
-const roboto = resolveFile("skia/__tests__/assets/Roboto-Regular.ttf");
+const roboto = resolveFile("skia/__tests__/assets/Roboto-Medium.ttf");
 const noto = resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf");
 
 describe("Paragraph", () => {

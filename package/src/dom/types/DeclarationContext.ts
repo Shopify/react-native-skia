@@ -6,6 +6,7 @@ import type {
   SkPathEffect,
   Skia,
   SkColorFilter,
+  SkParagraphBuilder,
 } from "../../skia/types";
 
 type Composer<T> = (outer: T, inner: T) => T;
@@ -68,6 +69,7 @@ export class DeclarationContext {
   readonly pathEffects: Declaration<SkPathEffect>;
   readonly imageFilters: Declaration<SkImageFilter>;
   readonly colorFilters: Declaration<SkColorFilter>;
+  paragraphBuilder: SkParagraphBuilder | null = null;
 
   constructor(private Skia: Skia) {
     const peComp = this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect);
