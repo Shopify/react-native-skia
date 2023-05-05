@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "RNSkValue.h"
 #include "JsiHostObject.h"
 #include "RNSkPlatformContext.h"
+#include "RNSkValue.h"
 
 #include "RNSkComputedValue.h"
 #include "RNSkEasings.h"
@@ -58,19 +58,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(createEasing) {
-    // Read parameters from Javascript
-    auto configObject = arguments[0].asObject(runtime);
-
-    size_t type = configObject.getProperty(runtime, "type").asNumber();
-    size_t parameter = -1;
-    if (configObject.hasProperty(runtime, "parameter")) {
-      parameter = configObject.getProperty(runtime, "parameter").asNumber();
-    }
-
     return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<RNSkEasings>(
-            _platformContext, static_cast<RNSkEasingType>(type), parameter));
+        runtime, std::make_shared<RNSkEasings>(
+                     _platformContext, JsiValue(runtime, arguments[0])));
   }
 
   JSI_HOST_FUNCTION(createTiming) {

@@ -1,8 +1,3 @@
-// eslint-disable-next-line max-len
-// Taken from https://github.com/facebook/react-native/blob/0b9ea60b4fee8cacc36e7160e31b91fc114dbc0d/Libraries/Animated/src/Easing.js
-
-import { bezier } from "./functions";
-
 export enum EasingType {
   Step0 = 0,
   Step1 = 1,
@@ -17,107 +12,61 @@ export enum EasingType {
   Elastic = 10,
   Back = 11,
   Bounce = 12,
+
+  Out = 20,
+  InOut = 21,
+  Bezier = 22,
 }
 
 export type EasingConfig = {
   type: EasingType;
-  parameter?: number;
+  parameters?: {};
+  child?: EasingConfig;
 };
 
 export class Easing {
-  static step0(n: number): number {
-    return n > 0 ? 1 : 0;
+  static step0 = { type: EasingType.Step0 };
+  static step1 = { type: EasingType.Step1 };
+  static linear = { type: EasingType.Linear };
+  static quad = { type: EasingType.Quad };
+  static cubic = { type: EasingType.Cubic };
+  static sin = { type: EasingType.Sin };
+  static circle = { type: EasingType.Circle };
+  static exp = { type: EasingType.Exp };
+  static bounce = { type: EasingType.Bounce };
+  static poly = (n: number): EasingConfig => ({
+    type: EasingType.Poly,
+    parameters: { n },
+  });
+
+  static in = (easing: EasingConfig): EasingConfig => easing;
+
+  static out = (easing: EasingConfig): EasingConfig => ({
+    type: EasingType.Out,
+    child: easing,
+  });
+
+  static inOut(easing: EasingConfig): EasingConfig {
+    return { type: EasingType.InOut, child: easing };
   }
 
-  static step1(n: number): number {
-    return n >= 1 ? 1 : 0;
+  static elastic(bounciness = 1): EasingConfig {
+    return { type: EasingType.Elastic, parameters: { bounciness } };
   }
 
-  static linear(t: number): number {
-    return t;
+  static back(s = 1.70158): EasingConfig {
+    return { type: EasingType.Back, parameters: { s } };
   }
 
-  static ease(t: number): number {
-    return Easing.bezier(0.42, 0, 1, 1)(t);
-  }
-
-  static quad(t: number): number {
-    return t * t;
-  }
-
-  static cubic(t: number): number {
-    return t * t * t;
-  }
-
-  static poly(n: number): (t: number) => number {
-    return (t: number): number => t ** n;
-  }
-
-  static sin(t: number): number {
-    return 1 - Math.cos((t * Math.PI) / 2);
-  }
-
-  static circle(t: number): number {
-    return 1 - Math.sqrt(1 - t * t);
-  }
-
-  static exp(t: number): number {
-    return 2 ** (10 * (t - 1));
-  }
-
-  static elastic(bounciness = 1): (t: number) => number {
-    const p = bounciness * Math.PI;
-    return (t): number =>
-      1 - Math.cos((t * Math.PI) / 2) ** 3 * Math.cos(t * p);
-  }
-
-  static back(s = 1.70158): (t: number) => number {
-    return (t): number => t * t * ((s + 1) * t - s);
-  }
-
-  static bounce(t: number): number {
-    if (t < 1 / 2.75) {
-      return 7.5625 * t * t;
-    }
-
-    if (t < 2 / 2.75) {
-      const t2_ = t - 1.5 / 2.75;
-      return 7.5625 * t2_ * t2_ + 0.75;
-    }
-
-    if (t < 2.5 / 2.75) {
-      const t2_ = t - 2.25 / 2.75;
-      return 7.5625 * t2_ * t2_ + 0.9375;
-    }
-
-    const t2 = t - 2.625 / 2.75;
-    return 7.5625 * t2 * t2 + 0.984375;
-  }
-
-  static bezier(
+  static bezier = (
     x1: number,
     y1: number,
     x2: number,
     y2: number
-  ): (t: number) => number {
-    return bezier(x1, y1, x2, y2);
-  }
+  ): EasingConfig => ({
+    type: EasingType.Bezier,
+    parameters: { bezier: [x1, y1, x2, y2] },
+  });
 
-  static in(easing: (t: number) => number): (t: number) => number {
-    return easing;
-  }
-
-  static out(easing: (t: number) => number): (t: number) => number {
-    return (t): number => 1 - easing(1 - t);
-  }
-
-  static inOut(easing: (t: number) => number): (t: number) => number {
-    return (t): number => {
-      if (t < 0.5) {
-        return easing(t * 2) / 2;
-      }
-
-      return 1 - easing((1 - t) * 2) / 2;
-    };
-  }
+  static ease = Easing.bezier(0.42, 0, 1, 1);
 }

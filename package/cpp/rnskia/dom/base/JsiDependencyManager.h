@@ -72,7 +72,7 @@ public:
             // Handle Skia Animation Values
             auto animatedValue = getAnimatedValue(nativeValue);
             auto unsubscribe = animatedValue->addListener(
-                [animatedValue, propMapping](RNSkValue*) {
+                [animatedValue, propMapping](RNSkValue *) {
                   // Get value from animation value
                   auto nextJsValue = animatedValue->getCurrent();
                   // Update all props that listens to this animation value
@@ -93,10 +93,11 @@ public:
                 nativeValue.getValue(PropNameSelector).getAsFunction();
             // Add subscription to animated value in selector
             auto unsubscribe = animatedValue->addListener(
-                [&runtime, nativeValue, propMapping, selector = std::move(selector),
-                 animatedValue](RNSkValue*) {
+                [&runtime, nativeValue, propMapping,
+                 selector = std::move(selector), animatedValue](RNSkValue *) {
                   // Get value from animation value
-                  jsi::Value jsValue = animatedValue->getCurrent().getAsJsiValue(runtime);
+                  jsi::Value jsValue =
+                      animatedValue->getCurrent().getAsJsiValue(runtime);
                   // Call selector to transform new value
                   auto selectedJsValue =
                       selector(runtime, jsi::Value::null(), &jsValue, 1);
@@ -104,7 +105,7 @@ public:
                   for (auto &prop : propMapping) {
                     prop->updateValue(runtime, selectedJsValue);
                   }
-                });      
+                });
             // Save unsubscribe methods
             unsubscribers.push_back(std::make_pair(animatedValue, unsubscribe));
           }

@@ -57,7 +57,7 @@ public:
         changed = true;
       }
     }
-    
+
     if (changed) {
       _onChange(this);
     }
@@ -76,12 +76,12 @@ public:
   _Tp *defineProperty(_Args &&...__args) {
     auto prop = std::make_shared<_Tp>(std::forward<_Args>(__args)...,
                                       [&](BaseNodeProp *prop) {
-      _onChange(prop);
-      if (!_isChanged) {
-        _onChange(this);
-        _isChanged = true;
-      }
-    });
+                                        _onChange(prop);
+                                        if (!_isChanged) {
+                                          _onChange(this);
+                                          _isChanged = true;
+                                        }
+                                      });
 
     // Add to internal props list
     _properties.push_back(prop);
