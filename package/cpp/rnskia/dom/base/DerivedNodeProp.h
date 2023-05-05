@@ -50,11 +50,17 @@ public:
    */
   void readValueFromJs(jsi::Runtime &runtime,
                        const ReadPropFunc &read) override {
+    auto changed = false;
     for (auto &prop : _properties) {
       prop->readValueFromJs(runtime, read);
+      if (prop->isChanged()) {
+        changed = true;
+      }
     }
-    // calculate initial value
-    updateDerivedValue();
+    
+    if (changed) {
+      _onChange(this);
+    }
   }
 
   /**
