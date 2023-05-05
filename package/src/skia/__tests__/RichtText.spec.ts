@@ -5,7 +5,7 @@ import { TextAlign } from "../types/Paragraph";
 
 import { setupSkia } from "./setup";
 
-const roboto = resolveFile("skia/__tests__/assets/Roboto-Regular.ttf");
+const roboto = resolveFile("skia/__tests__/assets/Roboto-Medium.ttf");
 const noto = resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf");
 
 describe("Text", () => {
@@ -35,7 +35,7 @@ describe("Text", () => {
     paragraph.layout(width);
     expect(paragraph.getHeight()).not.toBe(0);
     canvas.drawParagraph(paragraph, 0, 0);
-    processResult(surface, "snapshots/drawings/paragraph.png");
+    processResult(surface, "snapshots/drawings/paragraph-2.png");
   });
   it("should display the paragraph layout with different text color", async () => {
     const { surface, canvas, width, Skia } = setupSkia();
@@ -81,6 +81,6 @@ describe("Text", () => {
     paragraph.layout(width);
     expect(paragraph.getHeight()).not.toBe(0);
     canvas.drawParagraph(paragraph, 0, 0);
-    processResult(surface, "snapshots/drawings/paragraph-with-colors.png");
+    processResult(surface, "snapshots/drawings/paragraph-with-colors-2.png");
   });
 });
