@@ -155,7 +155,7 @@ protected:
   /**
    Sets the current numeric inner value for this value
   */
-  void setCurrent(JsiValue newValue) {
+  void setCurrent(const JsiValue &newValue) {
     // printf("BaseValue: %f\n", newValue);
     _current.setCurrent(newValue);
     notifyListeners();

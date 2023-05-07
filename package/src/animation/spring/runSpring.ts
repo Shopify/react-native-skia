@@ -7,7 +7,7 @@ import type {
 import { runTiming } from "../timing/runTiming";
 
 import { Spring } from "./Spring";
-import { createSpringEasing } from "./functions/spring";
+import { createSpringEasing } from "./createSpringEasing";
 
 /**
  * Creates a new animation on an existing value that will be driven by

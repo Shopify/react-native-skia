@@ -73,7 +73,10 @@ export interface ISkiaValueApi {
    * Creates a spring easing interpolator.
    * @returns Skia Value
    */
-  createSpringEasing: (config: SpringConfig) => SkiaMutableValue;
+  createSpringEasing: (config: SpringConfig) => {
+    duration: number;
+    easing: SkiaMutableValue;
+  };
 
   /**
    * Creates an Easing value

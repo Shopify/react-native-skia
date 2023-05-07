@@ -39,7 +39,12 @@ export const createTiming = (
       "TODO: easingValue = ValueApi.createComputedValue(() => resolvedParams.easing;"
     );
   } else {
-    easingValue = ValueApi.createEasing(resolvedParams.easing);
+    if ("duration" in resolvedParams.easing) {
+      easingValue = resolvedParams.easing;
+      resolvedParams.duration = resolvedParams.duration;
+    } else {
+      easingValue = ValueApi.createEasing(resolvedParams.easing);
+    }
   }
 
   return ValueApi.createTiming(resolvedParams, easingValue, callback);

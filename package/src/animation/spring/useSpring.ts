@@ -7,7 +7,8 @@ import type {
 import { useTiming } from "../timing";
 
 import { Spring } from "./Spring";
-import { createSpringEasing } from "./functions/spring";
+import { createSpringEasing } from "./createSpringEasing";
+import { useMemo } from "react";
 
 /**
  * Creats a spring based animation value that will run whenever
@@ -20,9 +21,10 @@ export const useSpring = (
   toOrParams: number | AnimationParams,
   config?: SpringConfig,
   callback?: AnimationCallback
-): SkiaValue<number> =>
-  useTiming(
-    toOrParams,
-    createSpringEasing(config ?? Spring.Config.Default),
-    callback
+): SkiaValue<number> => {
+  const spring = useMemo(
+    () => createSpringEasing(config ?? Spring.Config.Default),
+    [config]
   );
+  return useTiming(toOrParams, spring, callback);
+};

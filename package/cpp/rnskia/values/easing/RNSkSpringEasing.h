@@ -49,10 +49,32 @@ public:
    */
   explicit RNSkSpringEasing(
       std::shared_ptr<RNSkPlatformContext> platformContext,
-      RNSkSpringConfig config)
+      jsi::Runtime &runtime, const jsi::Value &config)
       : RNSkFixedDurationEasing(platformContext) {
-    // We'll pre-create the cached spring here
-    solveSpring(config);
+
+    auto configObject = config.asObject(runtime);
+    double mass = configObject.getProperty(runtime, "mass").asNumber();
+    double stiffness =
+        configObject.getProperty(runtime, "stiffness").asNumber();
+    double damping = configObject.getProperty(runtime, "damping").asNumber();
+
+    auto velocityProp = configObject.getProperty(runtime, "velocity");
+    double velocity = 0.0;
+    if (!velocityProp.isUndefined() && !velocityProp.isNull()) {
+      velocity = velocityProp.asNumber();
+    }
+
+    RNSkSpringConfig springConfig = {mass, stiffness, velocity, damping};
+
+    // Calc new spring
+    auto key = getKeyFromConfig(springConfig);
+    if (_springCache.count(key) == 0) {
+      // Solve the spring
+      solveSpring(key, springConfig);
+    }
+
+    // Use cached spring solver with duration
+    _spring = &(_springCache.at(key));
   }
 
   /**
@@ -88,38 +110,30 @@ private:
    Spring solver - calculates the spring duration and creates a solver function
    that will be cached and ready for reuse given the same configuration.
    */
-  void solveSpring(const RNSkSpringConfig &config) {
-    auto key = getKeyFromConfig(config);
-    if (_springCache.count(key) == 0) {
+  void solveSpring(size_t key, const RNSkSpringConfig &config) {
 
-      double stiffness = config.stiffness;
-      double mass = config.mass;
-      double damping = config.damping;
-      double initialVelocity = config.velocity;
+    double stiffness = config.stiffness;
+    double mass = config.mass;
+    double damping = config.damping;
+    double initialVelocity = config.velocity;
 
-      // Setup spring state
-      RNSkSpringState state = {std::sqrt(stiffness / mass), 0, 0, 1, 0};
+    // Setup spring state
+    RNSkSpringState state = {std::sqrt(stiffness / mass), 0, 0, 1, 0};
 
-      state.zeta = damping / (2 * std::sqrt(stiffness * mass));
-      state.wd = state.zeta < 1
-                     ? state.w0 * std::sqrt(1 - state.zeta * state.zeta)
-                     : 0;
-      state.a = 1;
-      state.b = state.zeta < 1
-                    ? (state.zeta * state.w0 + -initialVelocity) / state.wd
-                    : -initialVelocity + state.w0;
+    state.zeta = damping / (2 * std::sqrt(stiffness * mass));
+    state.wd =
+        state.zeta < 1 ? state.w0 * std::sqrt(1 - state.zeta * state.zeta) : 0;
+    state.a = 1;
+    state.b = state.zeta < 1
+                  ? (state.zeta * state.w0 + -initialVelocity) / state.wd
+                  : -initialVelocity + state.w0;
 
-      double durationMs = getDurationMs(state);
-      std::function<double(double)> solver = [this, durationMs,
-                                              state](double t) {
-        return update(t, durationMs, state);
-      };
+    double durationMs = getDurationMs(state);
+    std::function<double(double)> solver = [this, durationMs, state](double t) {
+      return update(t, durationMs, state);
+    };
 
-      _springCache.try_emplace(key, durationMs, std::move(solver));
-    }
-
-    // Use cached spring solver with duration
-    _spring = &(_springCache.at(key));
+    _springCache.try_emplace(key, durationMs, std::move(solver));
   }
 
   /**

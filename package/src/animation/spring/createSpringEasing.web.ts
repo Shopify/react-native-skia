@@ -1,5 +1,5 @@
-import type { SpringConfig } from "../types";
-import type { TimingConfig } from "../../types";
+import type { SpringConfig } from "./types";
+import type { TimingConfig } from "../types";
 
 /**
  * @description Returns a cached jsContext function for a spring with duration
@@ -22,7 +22,12 @@ export const createSpringEasing = (
   return getSpringEasing(config);
 };
 
-const getSpringEasing = (config: Required<SpringConfig>) => {
+const getSpringEasing = (
+  config: Required<SpringConfig>
+): {
+  duration: number;
+  easing: (t: number) => number;
+} => {
   const { stiffness, mass, damping, velocity: initialVelocity } = config;
   // Setup spring state
   const state = {

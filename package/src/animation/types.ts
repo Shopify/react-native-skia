@@ -1,3 +1,4 @@
+import { SkiaMutableValue } from "../values";
 import { EasingConfig } from "./timing/Easing";
 
 export interface SpringConfig {
@@ -9,7 +10,7 @@ export interface SpringConfig {
 
 export interface TimingConfig {
   duration?: number;
-  easing?: EasingConfig | ((t: number) => number);
+  easing?: SkiaMutableValue | EasingConfig | ((t: number) => number);
 }
 
 export interface AnimationParams {

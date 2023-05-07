@@ -1,5 +1,5 @@
 import { ValueApi } from "../../values";
-import { SpringConfig } from "../types";
+import { SpringConfig, TimingConfig } from "../types";
 
 /**
  * @description Returns a cached jsContext function for a spring with duration
@@ -8,6 +8,6 @@ import { SpringConfig } from "../types";
  * @param damping Spring damping
  * @param velocity The initial velocity
  */
-export const createSpringEasing = (config: SpringConfig) => {
+export const createSpringEasing = (config: SpringConfig): TimingConfig => {
   return ValueApi.createSpringEasing(config);
 };

@@ -40,21 +40,16 @@ public:
   }
 
   JSI_HOST_FUNCTION(createSpringEasing) {
-    // Read parameters from Javascript
-    auto configObject = arguments[0].asObject(runtime);
+    auto springEasing = std::make_shared<RNSkSpringEasing>(
+        _platformContext, runtime, arguments[0]);
 
-    double mass = configObject.getProperty(runtime, "mass").asNumber();
-    double stiffness =
-        configObject.getProperty(runtime, "stiffness").asNumber();
-    double damping = configObject.getProperty(runtime, "damping").asNumber();
-    double velocity = configObject.hasProperty(runtime, "velocity")
-                          ? configObject.getProperty(runtime, "yoyo").asNumber()
-                          : 0;
-
-    RNSkSpringConfig config = {mass, stiffness, velocity, damping};
-
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<RNSkSpringEasing>(_platformContext, config));
+    auto duration = springEasing->getDurationMs();
+    auto retVal = jsi::Object(runtime);
+    retVal.setProperty(runtime, "duration", duration);
+    retVal.setProperty(
+        runtime, "easing",
+        jsi::Object::createFromHostObject(runtime, springEasing));
+    return retVal;
   }
 
   JSI_HOST_FUNCTION(createEasing) {

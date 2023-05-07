@@ -71,8 +71,8 @@ double newtonRaphsonIterate(double aX, double _aGuessT, double mX1,
 
 class RNSkBezier {
 public:
-  static std::function<double(double)> bezier(double mX1, double mY1, double mX2,
-                                              double mY2) {
+  static std::function<double(double)> bezier(double mX1, double mY1,
+                                              double mX2, double mY2) {
     if (!(mX1 >= 0 && mX1 <= 1 && mX2 >= 0 && mX2 <= 1)) {
       throw std::invalid_argument("bezier x values must be in [0, 1] range");
     }
@@ -86,7 +86,8 @@ public:
       }
     }
 
-    auto getTForX = [sampleValues = std::move(sampleValues), mX1, mX2](double aX) -> double {
+    auto getTForX = [sampleValues = std::move(sampleValues), mX1,
+                     mX2](double aX) -> double {
       double intervalStart = 0.0;
       size_t currentSample = 1;
       auto lastSample = kSplineTableSize - 1;
@@ -99,8 +100,9 @@ public:
       --currentSample;
 
       // Interpolate to provide an initial guess for t
-      auto dist = (aX - sampleValues[currentSample]) /
-                  (sampleValues[currentSample + 1] - sampleValues[currentSample]);
+      auto dist =
+          (aX - sampleValues[currentSample]) /
+          (sampleValues[currentSample + 1] - sampleValues[currentSample]);
       auto guessForT = intervalStart + dist * kSampleStepSize;
 
       auto initialSlope = getSlope(guessForT, mX1, mX2);
@@ -116,13 +118,14 @@ public:
                              mX1, mX2);
     };
 
-    return [getTForX = std::move(getTForX), mX1, mY1, mX2, mY2](double x) -> double {
+    return [getTForX = std::move(getTForX), mX1, mY1, mX2,
+            mY2](double x) -> double {
       if (mX1 == mY1 && mX2 == mY2) {
         return x; // linear
       }
 
-      // Because JavaScript number are imprecise, we should guarantee the extremes
-      // are right.
+      // Because JavaScript number are imprecise, we should guarantee the
+      // extremes are right.
       if (x == 0) {
         return 0;
       }
@@ -135,6 +138,5 @@ public:
     };
   }
 };
-
 
 } // namespace RNSkia

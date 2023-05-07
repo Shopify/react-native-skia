@@ -132,7 +132,8 @@ private:
     }
   }
 
-  std::vector<double> getParameterAsArray(const std::string &name, const JsiValue &config) {
+  std::vector<double> getParameterAsArray(const std::string &name,
+                                          const JsiValue &config) {
     auto parameters = config.getValue(JsiPropId::get("parameters"));
     if (parameters.getType() != PropType::Object) {
       throw std::invalid_argument(
@@ -152,12 +153,12 @@ private:
     }
     auto array = param.getAsArray();
     std::vector<double> result(array.size());
-    for(size_t i=0; i<array.size(); ++i) {
+    for (size_t i = 0; i < array.size(); ++i) {
       result[i] = array[i].getAsNumber();
     }
     return result;
   }
-  
+
   double getParameterAsNumber(const std::string &name, const JsiValue &config) {
     auto parameters = config.getValue(JsiPropId::get("parameters"));
     if (parameters.getType() != PropType::Object) {
