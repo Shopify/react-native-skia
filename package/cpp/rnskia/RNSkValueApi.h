@@ -119,10 +119,21 @@ public:
       outputs.emplace_back(runtime, outputsArray.getValueAtIndex(runtime, i));
     }
 
-    // TODO: Clamping
-
+    // Clamping
+    auto extrapolateLeftProp = configObject.getProperty(runtime, "extrapolateLeft");
+    std::string extrapolateLeft = "extend";
+    if (extrapolateLeftProp.isString()) {
+      extrapolateLeft = extrapolateLeftProp.asString(runtime).utf8(runtime);
+    }
+    
+    auto extrapolateRightProp = configObject.getProperty(runtime, "extrapolateRight");
+    std::string extrapolateRight = "extend";
+    if (extrapolateRightProp.isString()) {
+      extrapolateRight = extrapolateRightProp.asString(runtime).utf8(runtime);
+    }
+    
     // Create config
-    RNSkInterpolatorConfig config = {inputs, outputs};
+    RNSkInterpolatorConfig config = {inputs, outputs, extrapolateLeft, extrapolateRight};
 
     return jsi::Object::createFromHostObject(
         runtime,

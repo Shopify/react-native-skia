@@ -1,3 +1,4 @@
+import { Extrapolate } from "../animation/interpolator/types";
 import { EasingConfig } from "../animation/timing/Easing";
 import { AnimationCallback, SpringConfig } from "../animation/types";
 
@@ -113,5 +114,7 @@ export interface ISkiaValueApi {
   createInterpolator: <T>(config: {
     inputs: Array<number>;
     outputs: Array<T>;
+    extrapolateLeft: Extrapolate;
+    extrapolateRight: Extrapolate;
   }) => SkiaMutableValue<T>;
 }

@@ -8,19 +8,25 @@
 
 namespace RNSkia {
 
+static std::string EXTRAPOLATE_IDENTITY = "identity";
+static std::string EXTRAPOLATE_CLAMP = "clamp";
+static std::string EXTRAPOLATE_EXTEND = "extend";
+
 /*
  The API looks like this:
 
  interpolate([0, 1], [start, end]);
  interpolate([0, 0.5, 1], [start, start*0.5, end]);
-
+ 
  We can also add clamping information like this:
- TODO
+ interpolate([0, 0.5, 1], [start, start*0.5, end], "clamp");
 
  */
 struct RNSkInterpolatorConfig {
   std::vector<double> inputs;
   std::vector<JsiValue> outputs;
+  std::string extrapolateLeft;
+  std::string extrapolateRight;
 };
 
 /**
@@ -47,7 +53,30 @@ public:
     auto inputMin = _config.inputs[index];
     auto inputMax = _config.inputs[index + 1];
 
+    if (current < inputMin) {
+      if (_config.extrapolateLeft == EXTRAPOLATE_IDENTITY) {
+        _value.setCurrent(current);
+        return _value;
+     } else if (_config.extrapolateLeft == EXTRAPOLATE_CLAMP) {
+        current = inputMin;
+      } else if (_config.extrapolateLeft == EXTRAPOLATE_EXTEND) {
+        // noop
+      }
+    }
+
+    if (current > inputMax) {
+      if (_config.extrapolateRight == EXTRAPOLATE_IDENTITY) {
+        _value.setCurrent(current);
+        return _value;
+      } else if (_config.extrapolateRight == EXTRAPOLATE_CLAMP) {
+        current = inputMax;
+      } else if (_config.extrapolateRight == EXTRAPOLATE_EXTEND) {
+        // noop
+      }
+    }
+    
     interpolateRange(current, index, inputMin, inputMax, _value);
+    
     return _value;
   }
 
