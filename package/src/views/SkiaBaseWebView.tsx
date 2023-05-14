@@ -109,15 +109,14 @@ export abstract class SkiaBaseWebView<
   private onLayout(evt: LayoutChangeEvent) {
     const { CanvasKit } = global;
     const { width, height } = evt.nativeEvent.layout;
+    const sameHeight = width === this.width && height === this.height;
     this.width = width;
     this.height = height;
     // Reset canvas / surface on layout change
-    if (this._canvasRef.current) {
+    if (this._canvasRef.current && !sameHeight) {
       const canvas = this._canvasRef.current;
       canvas.width = width * pd;
       canvas.height = height * pd;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
       const surface = CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current);
       if (!surface) {
         throw new Error("Could not create surface");
@@ -261,7 +260,7 @@ export abstract class SkiaBaseWebView<
       <div style={defaultStyle} {...viewProps}>
         <canvas
           ref={this._canvasRef}
-          style={{ display: "flex", flex: 1 }}
+          style={{ display: "flex", flex: 1, width: "100%", height: "100%" }}
           onPointerDown={this.createTouchHandler(TouchType.Start)}
           onPointerMove={this.createTouchHandler(TouchType.Active)}
           onPointerUp={this.createTouchHandler(TouchType.End)}
