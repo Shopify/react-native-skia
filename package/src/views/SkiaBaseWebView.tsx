@@ -249,9 +249,14 @@ export abstract class SkiaBaseWebView<
   }
 
   render() {
-    const { mode, debug = false, ...viewProps } = this.props;
+    const { mode, debug = false, onSize, style, ...viewProps } = this.props;
+    const defaultStyle = {
+      ...(style ?? {}),
+      display: "flex",
+      flex: 1,
+    };
     return (
-      <div {...viewProps} onLayout={this.onLayout.bind(this)}>
+      <div style={defaultStyle} {...viewProps}>
         <canvas
           ref={this._canvasRef}
           style={{ display: "flex", flex: 1 }}
