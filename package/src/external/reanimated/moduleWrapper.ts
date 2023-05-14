@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import type { SharedValueType } from "../../renderer/processors/Animations";
+
 import { Reanimated2, Reanimated3, reanimatedVersion } from "./import";
 
 // This one is needed for the deprecated useSharedValue function
