@@ -6,7 +6,6 @@ import { Reanimated2, Reanimated3, reanimatedVersion } from "./import";
 
 // This one is needed for the deprecated useSharedValue function
 // We can remove it once we remove the deprecation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 export const HAS_REANIMATED2 = !!Reanimated2;
 export const HAS_REANIMATED3 = !!Reanimated3;
