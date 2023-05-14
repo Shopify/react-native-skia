@@ -1,27 +1,11 @@
 import { useMemo } from "react";
 
 import type { SharedValueType } from "../../renderer/processors/Animations";
+import { Reanimated2, Reanimated3, reanimatedVersion } from "./import";
 
 // This one is needed for the deprecated useSharedValue function
 // We can remove it once we remove the deprecation
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Reanimated2: any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Reanimated3: any;
-let reanimatedVersion: string;
-
-try {
-  Reanimated2 = require("react-native-reanimated");
-  reanimatedVersion =
-    // eslint-disable-next-line import/extensions
-    require("react-native-reanimated/package.json").version;
-  if (
-    reanimatedVersion &&
-    (reanimatedVersion >= "3.0.0" || reanimatedVersion.includes("3.0.0-"))
-  ) {
-    Reanimated3 = Reanimated2;
-  }
-} catch (e) {}
 
 export const HAS_REANIMATED2 = !!Reanimated2;
 export const HAS_REANIMATED3 = !!Reanimated3;
@@ -30,7 +14,7 @@ function throwOnMissingReanimated2() {
   if (!HAS_REANIMATED2) {
     throw new Error(
       "Reanimated was not found, make sure react-native-reanimated package is installed if you want to use \
-      react-naitve-skia's integration layer API."
+      react-native-skia's integration layer API."
     );
   }
 }
