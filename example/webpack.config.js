@@ -85,6 +85,10 @@ module.exports = {
         __dirname,
         "./node_modules/react-native-web"
       ),
+      "react-native-reanimated/package.json": require.resolve(
+        "react-native-reanimated/package.json"
+      ),
+      "react-native-reanimated": require.resolve("react-native-reanimated"),
     },
   },
   module: {
