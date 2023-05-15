@@ -3,6 +3,7 @@ import type {
   AnimationParams,
   TimingConfig,
 } from "../../types";
+import { Easing } from "../Easing";
 
 const DefaultParameters = {
   to: 1,
@@ -13,7 +14,7 @@ const DefaultParameters = {
 
 const DefaultTimingConfig = {
   duration: 1000,
-  easing: (t: number) => t,
+  easing: Easing.linear,
 };
 
 /**
