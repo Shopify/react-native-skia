@@ -168,7 +168,15 @@ protected:
     _current.setCurrent(newValue);
     notifyListeners();
   }
-
+  
+  /**
+   Sets the current from a js value
+  */
+  void setCurrent(jsi::Runtime &runtime, const jsi::Value& value) {
+    _current.setCurrent(JsiValue(runtime, value));
+    notifyListeners();
+  }
+                    
 private:
   JsiValue _current;
 
