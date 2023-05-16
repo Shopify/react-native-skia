@@ -1,6 +1,7 @@
 import type { ComponentProps, ComponentType } from "react";
 import React, { useMemo, lazy, Suspense } from "react";
-import { platformOS } from "../crossplatform/platform";
+
+import { Platform } from "../Platform";
 
 import { LoadSkiaWeb } from "./LoadSkiaWeb";
 
@@ -20,7 +21,7 @@ export const WithSkiaWeb = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (): any =>
       lazy(async () => {
-        if (platformOS === "web") {
+        if (Platform.OS === "web") {
           await LoadSkiaWeb(opts);
         } else {
           console.warn(

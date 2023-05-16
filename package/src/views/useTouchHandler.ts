@@ -1,8 +1,8 @@
 import type { DependencyList } from "react";
 import { useCallback, useRef } from "react";
-import { crossplatformPixelRatio } from "../crossplatform/pixelratio";
 
 import type { Vector } from "../skia/types";
+import { Platform } from "../Platform";
 
 import type {
   ExtendedTouchInfo,
@@ -46,8 +46,8 @@ const useInternalTouchHandler = (
           timeDiffseconds > 0
         ) {
           prevVelocityRef.current[touch.id] = {
-            x: distX / timeDiffseconds / crossplatformPixelRatio.get(),
-            y: distY / timeDiffseconds / crossplatformPixelRatio.get(),
+            x: distX / timeDiffseconds / Platform.PixelRatio,
+            y: distY / timeDiffseconds / Platform.PixelRatio,
           };
         }
 

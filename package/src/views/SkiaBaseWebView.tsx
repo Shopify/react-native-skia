@@ -6,12 +6,12 @@ import type { LayoutChangeEvent } from "react-native";
 import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
+import { Platform } from "../Platform";
 
 import type { DrawMode, SkiaWebProps, TouchInfo } from "./types";
 import { TouchType } from "./types";
-import { crossplatformPixelRatio } from "../crossplatform/pixelratio";
 
-const pd = crossplatformPixelRatio.get();
+const pd = Platform.PixelRatio;
 
 const getRect = (node: HTMLElement) => {
   const height = node.offsetHeight;

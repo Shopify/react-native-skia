@@ -1,6 +1,4 @@
-import { crossplatformFindNodeHandle } from "../../crossplatform/find-node-handle";
-import { crossPlatformOS } from "../../crossplatform/platform";
-
+import { Platform } from "../../Platform";
 import { Skia } from "../Skia";
 import type { DataSourceParam, SkImage } from "../types";
 
@@ -38,7 +36,7 @@ export const makeImageFromView = <
     | ((viewRef: React.RefObject<T>) => Promise<SkImage | null>) = null
 ) => {
   // In web implementation we just delegate the work to the provided callback
-  if (crossPlatformOS.OS === "web") {
+  if (Platform.OS === "web") {
     if (callback) {
       return callback(viewRef);
     } else {
@@ -49,7 +47,7 @@ export const makeImageFromView = <
       );
     }
   }
-  const viewTag = crossplatformFindNodeHandle.findNodeHandle(viewRef.current);
+  const viewTag = Platform.findNodeHandle(viewRef.current);
   if (viewTag !== null && viewTag !== 0) {
     return Skia.Image.MakeImageFromViewTag(viewTag);
   }

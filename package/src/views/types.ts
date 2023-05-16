@@ -1,4 +1,4 @@
-import { HTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
 import type { LayoutChangeEvent, ViewProps } from "react-native";
 
 import type { GroupProps, RenderNode } from "../dom/types";

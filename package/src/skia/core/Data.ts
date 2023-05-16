@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { crossPlatformAsset } from "../../crossplatform/asset";
 
 import { Skia } from "../Skia";
 import type { SkData, DataSourceParam, JsiDisposable } from "../types";
+import { Platform } from "../../Platform";
 
 const factoryWrapper = <T>(
   data2: SkData,
@@ -31,9 +31,7 @@ const loadData = <T>(
     );
   } else {
     const uri =
-      typeof source === "string"
-        ? source
-        : crossPlatformAsset.resolveAsset(source);
+      typeof source === "string" ? source : Platform.resolveAsset(source);
     return Skia.Data.fromURI(uri).then((d) =>
       factoryWrapper(d, factory, onError)
     );
