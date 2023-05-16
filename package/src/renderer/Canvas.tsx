@@ -20,6 +20,8 @@ import { JsiDrawingContext } from "../dom/types";
 
 import { SkiaRoot } from "./Reconciler";
 import { NATIVE_DOM } from "./HostComponents";
+import { useValue } from "../values";
+import { isValue } from "./processors";
 
 export const useCanvasRef = () => useRef<SkiaDomView>(null);
 
@@ -31,9 +33,18 @@ export interface CanvasProps extends SkiaBaseViewProps {
 
 export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
   (
-    { children, style, debug, mode, onTouch, onSize, ...props },
+    { children, style, debug, mode, onTouch, onSize: onSizeReanimatedOrSkia, ...props },
     forwardedRef
   ) => {
+    const size = useValue({ width: 0, height: 0});
+    const onSize = isValue(onSizeReanimatedOrSkia) ? onSizeReanimatedOrSkia : size;
+    useEffect(() => {
+      if (!isValue(onSizeReanimatedOrSkia) && onSizeReanimatedOrSkia) {
+        const sub = size.addListener((v) => onSizeReanimatedOrSkia.value = v);
+        return sub;
+      }
+      return undefined;
+    }, [size]);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const redraw = useCallback(() => {
