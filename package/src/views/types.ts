@@ -9,7 +9,7 @@ import type {
   SkSize,
 } from "../skia/types";
 import type { SkiaMutableValue, SkiaValue } from "../values";
-import { SharedValueType } from "../renderer/processors/Animations/Animations";
+import type { SharedValueType } from "../renderer/processors/Animations/Animations";
 
 export type DrawMode = "continuous" | "default";
 
