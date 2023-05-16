@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import type { ViewComponent, ViewProps, ViewStyle } from "react-native";
 
 import type { DataModule } from "../skia/types";
@@ -16,7 +16,7 @@ const View = (({ children, style: rawStyle, onLayout }: ViewProps) => {
         for (const entry of entries) {
           const { left, top, width, height } = entry.contentRect;
           onLayout({
-            timeStamp: 0,
+            timeStamp: new Date().getTime(),
             currentTarget: 0,
             target: 0,
             bubbles: false,
@@ -24,19 +24,19 @@ const View = (({ children, style: rawStyle, onLayout }: ViewProps) => {
             defaultPrevented: false,
             eventPhase: 0,
             isDefaultPrevented() {
-              throw new Error("Method not supported on web.");
+              throw new Error("Method not supported on skia web.");
             },
             isPropagationStopped() {
-              throw new Error("Method not supported on web.");
+              throw new Error("Method not supported on skia web.");
             },
             persist() {
-              throw new Error("Method not supported on web.");
+              throw new Error("Method not supported on skia web.");
             },
             preventDefault() {
-              throw new Error("Method not supported on web.");
+              throw new Error("Method not supported on skia web.");
             },
             stopPropagation() {
-              throw new Error("Method not supported on web.");
+              throw new Error("Method not supported on skia web.");
             },
             isTrusted: true,
             type: "",
@@ -52,18 +52,20 @@ const View = (({ children, style: rawStyle, onLayout }: ViewProps) => {
     return undefined;
   }, [onLayout]);
 
-  let cssStyles = {};
-  if (style) {
-    cssStyles = {
-      ...style,
-      display: "flex",
-      flexDirection: style.flexDirection || "column",
-      flexWrap: style.flexWrap || "nowrap",
-      justifyContent: style.justifyContent || "flex-start",
-      alignItems: style.alignItems || "stretch",
-      alignContent: style.alignContent || "stretch",
-    };
-  }
+  const cssStyles = useMemo(() => {
+    if (style) {
+      return {
+        ...style,
+        display: "flex",
+        flexDirection: style.flexDirection || "column",
+        flexWrap: style.flexWrap || "nowrap",
+        justifyContent: style.justifyContent || "flex-start",
+        alignItems: style.alignItems || "stretch",
+        alignContent: style.alignContent || "stretch",
+      };
+    }
+    return {};
+  }, [style]);
 
   return (
     <div ref={ref} style={cssStyles}>
