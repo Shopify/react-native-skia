@@ -1,57 +1,25 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import type { ViewProps } from "react-native";
+import React, { useEffect, useRef } from "react";
+import type { ViewComponent, ViewProps, ViewStyle } from "react-native";
 
 import type { DataModule } from "../skia/types";
 import { isRNModule } from "../skia/types";
 
 import type { IPlatform } from "./IPlatform";
 
-const getRect = (node: HTMLElement) => {
-  const height = node.offsetHeight;
-  const width = node.offsetWidth;
-  let left = node.offsetLeft;
-  let top = node.offsetTop;
-  node = node.offsetParent as HTMLDivElement;
+const View: typeof ViewComponent = ({
+  children,
+  style: rawStyle,
+  onLayout,
+}: ViewProps) => {
+  const style = rawStyle as ViewStyle;
+  const ref = useRef(null);
 
-  while (node && node.nodeType === 1 /* Node.ELEMENT_NODE */) {
-    left += node.offsetLeft + node.clientLeft - node.scrollLeft;
-    top += node.offsetTop + node.clientTop - node.scrollTop;
-    node = node.offsetParent as HTMLDivElement;
-  }
-
-  top -= window.scrollY;
-  left -= window.scrollX;
-
-  return { width, height, top, left };
-};
-
-const measureLayout = (node: HTMLElement) => {
-  const relativeNode = node && node.parentNode;
-  if (node && relativeNode) {
-    if (node.isConnected && relativeNode.isConnected) {
-      const relativeRect = getRect(relativeNode as HTMLElement);
-      const { height, left, top, width } = getRect(node);
-      const x = left - relativeRect.left;
-      const y = top - relativeRect.top;
-      return { x, y, width, height, left, top };
-    }
-  }
-  return null;
-};
-
-const View = ({ onLayout, style, children }: ViewProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const resizeObserver = useMemo(
-    () =>
-      new ResizeObserver(() => {
-        const layout = measureLayout(ref.current!);
-        if (layout === null) {
-          throw new Error("expected layout to be non-null");
-        }
-
-        onLayout &&
+  useEffect(() => {
+    if (onLayout && ref.current) {
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { left, top, width, height } = entry.contentRect;
           onLayout({
-            nativeEvent: { layout: layout },
             timeStamp: 0,
             currentTarget: 0,
             target: 0,
@@ -76,43 +44,33 @@ const View = ({ onLayout, style, children }: ViewProps) => {
             },
             isTrusted: true,
             type: "",
+            nativeEvent: { layout: { x: left, y: top, width, height } },
           });
-      }),
-    [onLayout]
-  );
+        }
+      });
 
-  useEffect(() => {
-    const divRef = ref.current!;
-    if (divRef) {
-      resizeObserver.observe(divRef);
-      return () => {
-        resizeObserver.unobserve(divRef);
-      };
+      observer.observe(ref.current);
+
+      return () => observer.disconnect();
     }
     return undefined;
-  }, [resizeObserver]);
+  }, [onLayout]);
+
+  let cssStyles = {};
+  if (style) {
+    cssStyles = {
+      ...style,
+      display: "flex",
+      flexDirection: style.flexDirection || "column",
+      flexWrap: style.flexWrap || "nowrap",
+      justifyContent: style.justifyContent || "flex-start",
+      alignItems: style.alignItems || "stretch",
+      alignContent: style.alignContent || "stretch",
+    };
+  }
+
   return (
-    <div
-      ref={ref}
-      style={{
-        alignItems: "stretch",
-        backgroundColor: "transparent",
-        border: "0 solid black",
-        boxSizing: "border-box",
-        display: "flex",
-        flexBasis: "auto",
-        flexDirection: "column",
-        flexShrink: 0,
-        listStyle: "none",
-        margin: 0,
-        minHeight: 0,
-        minWidth: 0,
-        padding: 0,
-        position: "relative",
-        textDecoration: "none",
-        zIndex: 0,
-      }}
-    >
+    <div ref={ref} style={cssStyles}>
       {children}
     </div>
   );
