@@ -6,11 +6,7 @@ import { isRNModule } from "../skia/types";
 
 import type { IPlatform } from "./IPlatform";
 
-const View: typeof ViewComponent = ({
-  children,
-  style: rawStyle,
-  onLayout,
-}: ViewProps) => {
+const View = (({ children, style: rawStyle, onLayout }: ViewProps) => {
   const style = rawStyle as ViewStyle;
   const ref = useRef(null);
 
@@ -74,7 +70,7 @@ const View: typeof ViewComponent = ({
       {children}
     </div>
   );
-};
+}) as unknown as typeof ViewComponent;
 
 export const Platform: IPlatform = {
   OS: "web",
