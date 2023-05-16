@@ -1,56 +1,65 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import type { ViewComponent, ViewProps, ViewStyle } from "react-native";
+import React, { useLayoutEffect, useMemo, useRef } from "react";
+import type {
+  LayoutChangeEvent,
+  ViewComponent,
+  ViewProps,
+  ViewStyle,
+} from "react-native";
 
 import type { DataModule } from "../skia/types";
 import { isRNModule } from "../skia/types";
 
 import type { IPlatform } from "./IPlatform";
 
-const View = (({ children, style: rawStyle, onLayout }: ViewProps) => {
-  const style = rawStyle as ViewStyle;
-  const ref = useRef(null);
+const DOM_LAYOUT_HANDLER_NAME = "__reactLayoutHandler";
+type Div = HTMLDivElement & {
+  __reactLayoutHandler: ((event: LayoutChangeEvent) => void) | undefined;
+};
 
-  useEffect(() => {
-    if (onLayout && ref.current) {
-      const observer = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const { left, top, width, height } = entry.contentRect;
-          onLayout({
-            timeStamp: new Date().getTime(),
-            currentTarget: 0,
-            target: 0,
-            bubbles: false,
-            cancelable: false,
-            defaultPrevented: false,
-            eventPhase: 0,
-            isDefaultPrevented() {
-              throw new Error("Method not supported on skia web.");
-            },
-            isPropagationStopped() {
-              throw new Error("Method not supported on skia web.");
-            },
-            persist() {
-              throw new Error("Method not supported on skia web.");
-            },
-            preventDefault() {
-              throw new Error("Method not supported on skia web.");
-            },
-            stopPropagation() {
-              throw new Error("Method not supported on skia web.");
-            },
-            isTrusted: true,
-            type: "",
-            nativeEvent: { layout: { x: left, y: top, width, height } },
-          });
-        }
-      });
-
-      observer.observe(ref.current);
-
-      return () => observer.disconnect();
+const observer = new ResizeObserver(
+  ([
+    {
+      contentRect: { left, top, width, height },
+      target,
+    },
+  ]) => {
+    const node = target as Div;
+    if (node[DOM_LAYOUT_HANDLER_NAME]) {
+      node[DOM_LAYOUT_HANDLER_NAME]({
+        timestamp: Date.now(),
+        nativeEvent: { layout: { x: left, y: top, width, height } },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
     }
-    return undefined;
-  }, [onLayout]);
+  }
+);
+
+const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
+  const style = rawStyle as ViewStyle;
+  const ref = useRef<Div>(null);
+
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (node !== null) {
+      node[DOM_LAYOUT_HANDLER_NAME] = onLayout;
+    }
+  }, [ref, onLayout]);
+
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (node != null && observer != null) {
+      if (typeof node[DOM_LAYOUT_HANDLER_NAME] === "function") {
+        observer.observe(node);
+      } else {
+        observer.unobserve(node);
+      }
+    }
+    return () => {
+      if (node != null && observer != null) {
+        observer.unobserve(node);
+      }
+    };
+  }, [ref]);
 
   const cssStyles = useMemo(() => {
     if (style) {
