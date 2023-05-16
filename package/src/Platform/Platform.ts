@@ -5,6 +5,7 @@ import {
   Platform as RNPlatform,
   findNodeHandle,
   NativeModules,
+  View,
 } from "react-native";
 
 import type { DataModule } from "../skia/types";
@@ -23,4 +24,5 @@ export const Platform: IPlatform = {
   },
   findNodeHandle,
   NativeModules,
+  View,
 };

@@ -1,5 +1,4 @@
-import type { HTMLAttributes } from "react";
-import type { LayoutChangeEvent, ViewProps } from "react-native";
+import type { ViewProps } from "react-native";
 
 import type { GroupProps, RenderNode } from "../dom/types";
 import type {
@@ -80,7 +79,7 @@ export interface ISkiaViewApi {
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
 }
 
-export interface SkiaBaseProps {
+export interface SkiaBaseViewProps extends ViewProps {
   /**
    * Sets the drawing mode for the skia view. There are two drawing
    * modes, "continuous" and "default", where the continuous mode will
@@ -99,13 +98,6 @@ export interface SkiaBaseProps {
    * the Skia view is resized.
    */
   onSize?: SkiaMutableValue<SkSize>;
-}
-
-export interface SkiaBaseViewProps extends ViewProps, SkiaBaseProps {}
-export interface SkiaWebProps
-  extends HTMLAttributes<HTMLDivElement>,
-    SkiaBaseProps {
-  onLayout?: ((event: LayoutChangeEvent) => void) | undefined;
 }
 
 export interface SkiaDrawViewProps extends SkiaBaseViewProps {
