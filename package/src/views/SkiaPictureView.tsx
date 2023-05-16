@@ -1,5 +1,5 @@
 import React from "react";
-import { requireNativeComponent } from "react-native";
+import { crossplatformRequireNativeComponent } from "../crossplatform/require-native-component";
 
 import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
@@ -9,7 +9,9 @@ import { SkiaViewNativeId } from "./SkiaView";
 import type { NativeSkiaViewProps, SkiaPictureViewProps } from "./types";
 
 const NativeSkiaPictureView =
-  requireNativeComponent<NativeSkiaViewProps>("SkiaPictureView");
+  crossplatformRequireNativeComponent.requireNativeComponent<NativeSkiaViewProps>(
+    "SkiaPictureView"
+  );
 
 export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   constructor(props: SkiaPictureViewProps) {

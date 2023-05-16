@@ -1,8 +1,9 @@
-import { NativeModules, Platform } from "react-native";
+import { nativeModules } from "../crossplatform/nativemodules";
+import { crossPlatformOS } from "../crossplatform/platform";
 
-if (Platform.OS !== "web" && global.SkiaApi == null) {
+if (crossPlatformOS.OS !== "web" && global.SkiaApi == null) {
   // Initialize RN Skia
-  const SkiaModule = NativeModules.RNSkia;
+  const SkiaModule = nativeModules.RNSkia;
   if (SkiaModule == null || typeof SkiaModule.install !== "function") {
     throw new Error(
       "Native RNSkia Module cannot be found! Make sure you correctly " +

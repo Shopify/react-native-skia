@@ -1,5 +1,4 @@
 import React from "react";
-import { requireNativeComponent, Platform } from "react-native";
 import type { HostComponent } from "react-native";
 
 import type { SkRect } from "../skia/types";
@@ -8,10 +7,14 @@ import type { SkiaValue } from "../values";
 import { SkiaViewApi } from "./api";
 import { SkiaViewNativeId } from "./SkiaView";
 import type { NativeSkiaViewProps, SkiaDomViewProps } from "./types";
+import { crossPlatformOS } from "../crossplatform/platform";
+import { crossplatformRequireNativeComponent } from "../crossplatform/require-native-component";
 
 const NativeSkiaDomView: HostComponent<SkiaDomViewProps> =
-  Platform.OS !== "web"
-    ? requireNativeComponent<NativeSkiaViewProps>("SkiaDomView")
+  crossPlatformOS.OS !== "web"
+    ? crossplatformRequireNativeComponent.requireNativeComponent<NativeSkiaViewProps>(
+        "SkiaDomView"
+      )
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (null as any);
 

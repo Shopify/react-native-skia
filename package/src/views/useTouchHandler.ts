@@ -1,6 +1,6 @@
 import type { DependencyList } from "react";
 import { useCallback, useRef } from "react";
-import { PixelRatio } from "react-native";
+import { crossplatformPixelRatio } from "../crossplatform/pixelratio";
 
 import type { Vector } from "../skia/types";
 
@@ -46,8 +46,8 @@ const useInternalTouchHandler = (
           timeDiffseconds > 0
         ) {
           prevVelocityRef.current[touch.id] = {
-            x: distX / timeDiffseconds / PixelRatio.get(),
-            y: distY / timeDiffseconds / PixelRatio.get(),
+            x: distX / timeDiffseconds / crossplatformPixelRatio.get(),
+            y: distY / timeDiffseconds / crossplatformPixelRatio.get(),
           };
         }
 

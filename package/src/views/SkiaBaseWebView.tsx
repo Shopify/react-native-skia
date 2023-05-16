@@ -2,23 +2,91 @@
 import React from "react";
 import type { PointerEvent } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import { PixelRatio, View } from "react-native";
 
 import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 
-import type { DrawMode, SkiaBaseViewProps, TouchInfo } from "./types";
+import type { DrawMode, SkiaWebProps, TouchInfo } from "./types";
 import { TouchType } from "./types";
+import { crossplatformPixelRatio } from "../crossplatform/pixelratio";
 
-const pd = PixelRatio.get();
+const pd = crossplatformPixelRatio.get();
+
+const getRect = (node: HTMLElement) => {
+  const height = node.offsetHeight;
+  const width = node.offsetWidth;
+  let left = node.offsetLeft;
+  let top = node.offsetTop;
+  node = node.offsetParent as HTMLElement;
+
+  while (node && node.nodeType === 1 /* Node.ELEMENT_NODE */) {
+    left += node.offsetLeft + node.clientLeft - node.scrollLeft;
+    top += node.offsetTop + node.clientTop - node.scrollTop;
+    node = node.offsetParent as HTMLElement;
+  }
+
+  top -= window.scrollY;
+  left -= window.scrollX;
+
+  return { width, height, top, left };
+};
+
+const measureLayout = (node: HTMLCanvasElement) => {
+  const relativeNode = node && node.parentNode;
+  if (node && relativeNode) {
+    if (node.isConnected && relativeNode.isConnected) {
+      const relativeRect = getRect(relativeNode as HTMLElement);
+      const { height, left, top, width } = getRect(node);
+      const x = left - relativeRect.left;
+      const y = top - relativeRect.top;
+      return { x, y, width, height, left, top };
+    }
+  }
+  return null;
+};
 
 export abstract class SkiaBaseWebView<
-  TProps extends SkiaBaseViewProps
+  TProps extends SkiaWebProps
 > extends React.Component<TProps> {
+  resizeObserver: ResizeObserver;
   constructor(props: TProps) {
     super(props);
     this._mode = props.mode ?? "default";
+    this.resizeObserver = new ResizeObserver(() => {
+      const layout = measureLayout(this._canvasRef.current!);
+      if (layout === null) {
+        throw new Error("expected layout to be non-null");
+      }
+
+      this.onLayout({
+        nativeEvent: { layout: layout },
+        timeStamp: 0,
+        currentTarget: 0,
+        target: 0,
+        bubbles: false,
+        cancelable: false,
+        defaultPrevented: false,
+        eventPhase: 0,
+        isDefaultPrevented() {
+          throw new Error("Method not supported on web.");
+        },
+        isPropagationStopped() {
+          throw new Error("Method not supported on web.");
+        },
+        persist() {
+          throw new Error("Method not supported on web.");
+        },
+        preventDefault() {
+          throw new Error("Method not supported on web.");
+        },
+        stopPropagation() {
+          throw new Error("Method not supported on web.");
+        },
+        isTrusted: true,
+        type: "",
+      });
+    });
   }
 
   private _surface: JsiSkSurface | null = null;
@@ -41,10 +109,11 @@ export abstract class SkiaBaseWebView<
   private onLayout(evt: LayoutChangeEvent) {
     const { CanvasKit } = global;
     const { width, height } = evt.nativeEvent.layout;
+    const sameHeight = width === this.width && height === this.height;
     this.width = width;
     this.height = height;
     // Reset canvas / surface on layout change
-    if (this._canvasRef.current) {
+    if (this._canvasRef.current && !sameHeight) {
       const canvas = this._canvasRef.current;
       canvas.width = width * pd;
       canvas.height = height * pd;
@@ -69,6 +138,7 @@ export abstract class SkiaBaseWebView<
   componentDidMount() {
     // Start render loop
     this.tick();
+    this.resizeObserver.observe(this._canvasRef.current!);
   }
 
   componentDidUpdate() {
@@ -83,6 +153,7 @@ export abstract class SkiaBaseWebView<
       ?.getContext("webgl2")
       ?.getExtension("WEBGL_lose_context")
       ?.loseContext();
+    this.resizeObserver.unobserve(this._canvasRef.current!);
   }
 
   /**
@@ -179,12 +250,17 @@ export abstract class SkiaBaseWebView<
   }
 
   render() {
-    const { mode, debug = false, ...viewProps } = this.props;
+    const { mode, debug = false, onSize, style, ...viewProps } = this.props;
+    const defaultStyle = {
+      ...(style ?? {}),
+      display: "flex",
+      flex: 1,
+    };
     return (
-      <View {...viewProps} onLayout={this.onLayout.bind(this)}>
+      <div style={defaultStyle} {...viewProps}>
         <canvas
           ref={this._canvasRef}
-          style={{ display: "flex", flex: 1 }}
+          style={{ display: "flex", flex: 1, width: "100%", height: "100%" }}
           onPointerDown={this.createTouchHandler(TouchType.Start)}
           onPointerMove={this.createTouchHandler(TouchType.Active)}
           onPointerUp={this.createTouchHandler(TouchType.End)}
@@ -192,7 +268,7 @@ export abstract class SkiaBaseWebView<
           onPointerLeave={this.createTouchHandler(TouchType.End)}
           onPointerOut={this.createTouchHandler(TouchType.End)}
         />
-      </View>
+      </div>
     );
   }
 }
