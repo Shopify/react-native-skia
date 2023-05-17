@@ -15,50 +15,56 @@ type Div = HTMLDivElement & {
   __reactLayoutHandler: OnLayout;
 };
 
-const useElementLayout = (ref: RefObject<Div>, onLayout: OnLayout) => {
-  const observer = useMemo(
-    () =>
-      new ResizeObserver(
-        ([
-          {
-            contentRect: { left, top, width, height },
-            target,
-          },
-        ]) => {
-          const node = target as Div;
-          if (node[DOM_LAYOUT_HANDLER_NAME]) {
-            node[DOM_LAYOUT_HANDLER_NAME]({
-              timeStamp: Date.now(),
-              nativeEvent: { layout: { x: left, y: top, width, height } },
-              currentTarget: 0,
-              target: 0,
-              bubbles: false,
-              cancelable: false,
-              defaultPrevented: false,
-              eventPhase: 0,
-              isDefaultPrevented() {
-                throw new Error("Method not supported on web.");
-              },
-              isPropagationStopped() {
-                throw new Error("Method not supported on web.");
-              },
-              persist() {
-                throw new Error("Method not supported on web.");
-              },
-              preventDefault() {
-                throw new Error("Method not supported on web.");
-              },
-              stopPropagation() {
-                throw new Error("Method not supported on web.");
-              },
-              isTrusted: true,
-              type: "",
-            });
-          }
+let resizeObserver: ResizeObserver | null = null;
+
+const getObserver = () => {
+  if (resizeObserver == null) {
+    resizeObserver = new window.ResizeObserver(function (entries) {
+      entries.forEach((entry) => {
+        const node = entry.target as Div;
+        const { left, top, width, height } = entry.contentRect;
+        const onLayout = node[DOM_LAYOUT_HANDLER_NAME];
+        if (typeof onLayout === "function") {
+          setTimeout(
+            () =>
+              onLayout({
+                timeStamp: Date.now(),
+                nativeEvent: { layout: { x: left, y: top, width, height } },
+                currentTarget: 0,
+                target: 0,
+                bubbles: false,
+                cancelable: false,
+                defaultPrevented: false,
+                eventPhase: 0,
+                isDefaultPrevented() {
+                  throw new Error("Method not supported on web.");
+                },
+                isPropagationStopped() {
+                  throw new Error("Method not supported on web.");
+                },
+                persist() {
+                  throw new Error("Method not supported on web.");
+                },
+                preventDefault() {
+                  throw new Error("Method not supported on web.");
+                },
+                stopPropagation() {
+                  throw new Error("Method not supported on web.");
+                },
+                isTrusted: true,
+                type: "",
+              }),
+            0
+          );
         }
-      ),
-    []
-  );
+      });
+    });
+  }
+  return resizeObserver;
+};
+
+const useElementLayout = (ref: RefObject<Div>, onLayout: OnLayout) => {
+  const observer = getObserver();
 
   useLayoutEffect(() => {
     const node = ref.current;

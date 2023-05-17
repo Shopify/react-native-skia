@@ -47,7 +47,6 @@ export abstract class SkiaBaseWebView<
       this.height = canvas.clientHeight;
       canvas.width = this.width * pd;
       canvas.height = this.height * pd;
-      console.log("MakeWebGLCanvasSurface");
       const surface = CanvasKit.MakeWebGLCanvasSurface(canvas);
       if (!surface) {
         throw new Error("Could not create surface");
