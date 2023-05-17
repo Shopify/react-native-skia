@@ -25,6 +25,7 @@ const getObserver = () => {
         const { left, top, width, height } = entry.contentRect;
         const onLayout = node[DOM_LAYOUT_HANDLER_NAME];
         if (typeof onLayout === "function") {
+          // setTimeout 0 is taken from react-native-web (UIManager)
           setTimeout(
             () =>
               onLayout({
