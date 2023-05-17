@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 #include "JsiHostObject.h"
 #include "RNSkPlatformContext.h"
@@ -120,20 +121,23 @@ public:
     }
 
     // Clamping
-    auto extrapolateLeftProp = configObject.getProperty(runtime, "extrapolateLeft");
+    auto extrapolateLeftProp =
+        configObject.getProperty(runtime, "extrapolateLeft");
     std::string extrapolateLeft = "extend";
     if (extrapolateLeftProp.isString()) {
       extrapolateLeft = extrapolateLeftProp.asString(runtime).utf8(runtime);
     }
-    
-    auto extrapolateRightProp = configObject.getProperty(runtime, "extrapolateRight");
+
+    auto extrapolateRightProp =
+        configObject.getProperty(runtime, "extrapolateRight");
     std::string extrapolateRight = "extend";
     if (extrapolateRightProp.isString()) {
       extrapolateRight = extrapolateRightProp.asString(runtime).utf8(runtime);
     }
-    
+
     // Create config
-    RNSkInterpolatorConfig config = {inputs, outputs, extrapolateLeft, extrapolateRight};
+    RNSkInterpolatorConfig config = {inputs, outputs, extrapolateLeft,
+                                     extrapolateRight};
 
     return jsi::Object::createFromHostObject(
         runtime,

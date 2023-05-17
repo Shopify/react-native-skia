@@ -96,7 +96,9 @@ public:
     // Set initial value - if we're constructing this value from the JS thread
     // (Which we should since this ctor takes the runtime as its parameter)
     if (!getContext()->isOnJavascriptThread()) {
-      throw std::runtime_error("Computed values must be created on the Javascript thread so that their initial value can be calculated.");
+      throw std::runtime_error(
+          "Computed values must be created on the Javascript thread so that "
+          "their initial value can be calculated.");
     } else {
       auto initialValue = _callback->call(runtime, nullptr, 0);
       setCurrent(runtime, initialValue);

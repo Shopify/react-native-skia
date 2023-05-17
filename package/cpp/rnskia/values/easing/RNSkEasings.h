@@ -2,6 +2,8 @@
 
 #include <math.h>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "RNSkBaseEasing.h"
 #include "RNSkBezier.h"

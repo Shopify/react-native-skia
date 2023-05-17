@@ -17,7 +17,7 @@ static std::string EXTRAPOLATE_EXTEND = "extend";
 
  interpolate([0, 1], [start, end]);
  interpolate([0, 0.5, 1], [start, start*0.5, end]);
- 
+
  We can also add clamping information like this:
  interpolate([0, 0.5, 1], [start, start*0.5, end], "clamp");
 
@@ -57,7 +57,7 @@ public:
       if (_config.extrapolateLeft == EXTRAPOLATE_IDENTITY) {
         _value.setCurrent(current);
         return _value;
-     } else if (_config.extrapolateLeft == EXTRAPOLATE_CLAMP) {
+      } else if (_config.extrapolateLeft == EXTRAPOLATE_CLAMP) {
         current = inputMin;
       } else if (_config.extrapolateLeft == EXTRAPOLATE_EXTEND) {
         // noop
@@ -74,9 +74,9 @@ public:
         // noop
       }
     }
-    
+
     interpolateRange(current, index, inputMin, inputMax, _value);
-    
+
     return _value;
   }
 
