@@ -1,20 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Image } from "react-native";
 
 import { Skia } from "../Skia";
-import { isRNModule } from "../types";
-import type {
-  SkData,
-  DataModule,
-  DataSourceParam,
-  JsiDisposable,
-} from "../types";
-
-const resolveAsset = (source: DataModule) => {
-  return isRNModule(source)
-    ? Image.resolveAssetSource(source).uri
-    : source.default;
-};
+import type { SkData, DataSourceParam, JsiDisposable } from "../types";
+import { Platform } from "../../Platform";
 
 const factoryWrapper = <T>(
   data2: SkData,
@@ -42,7 +30,8 @@ const loadData = <T>(
       resolve(factoryWrapper(Skia.Data.fromBytes(source), factory, onError))
     );
   } else {
-    const uri = typeof source === "string" ? source : resolveAsset(source);
+    const uri =
+      typeof source === "string" ? source : Platform.resolveAsset(source);
     return Skia.Data.fromURI(uri).then((d) =>
       factoryWrapper(d, factory, onError)
     );

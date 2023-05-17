@@ -17,6 +17,18 @@ jest.mock("react-native-reanimated", () => {
 jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
 
 jest.mock("@shopify/react-native-skia", () => {
+  jest.mock("../package/src/Platform", () => {
+    const Noop = () => undefined;
+    return {
+      OS: "web",
+      PixelRatio: 1,
+      requireNativeComponent: Noop,
+      resolveAsset: Noop,
+      findNodeHandle: Noop,
+      NativeModules: Noop,
+      View: Noop,
+    };
+  });
   return require("../package/src/mock").Mock(global.CanvasKit);
 });
 
