@@ -40,15 +40,14 @@ export abstract class SkiaBaseWebView<
 
   private onLayout(evt: LayoutChangeEvent) {
     const { CanvasKit } = global;
-    const { width, height } = evt.nativeEvent.layout;
-    this.width = width;
-    this.height = height;
     // Reset canvas / surface on layout change
-    if (this._canvasRef.current) {
-      const canvas = this._canvasRef.current;
-      canvas.width = width * pd;
-      canvas.height = height * pd;
-      const surface = CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current);
+    const canvas = this._canvasRef.current;
+    if (canvas) {
+      this.width = canvas.clientWidth;
+      this.height = canvas.clientHeight;
+      canvas.width = this.width * pd;
+      canvas.height = this.height * pd;
+      const surface = CanvasKit.MakeWebGLCanvasSurface(canvas);
       if (!surface) {
         throw new Error("Could not create surface");
       }

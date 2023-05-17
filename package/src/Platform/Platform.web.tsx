@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import React, { useLayoutEffect, useMemo, useRef } from "react";
 import type {
   LayoutChangeEvent,
@@ -11,33 +12,35 @@ import { isRNModule } from "../skia/types";
 
 import type { IPlatform } from "./IPlatform";
 
+// eslint-disable-next-line max-len
+// https://github.com/necolas/react-native-web/blob/master/packages/react-native-web/src/modules/useElementLayout/index.js
 const DOM_LAYOUT_HANDLER_NAME = "__reactLayoutHandler";
+type OnLayout = ((event: LayoutChangeEvent) => void) | undefined;
 type Div = HTMLDivElement & {
-  __reactLayoutHandler: ((event: LayoutChangeEvent) => void) | undefined;
+  __reactLayoutHandler: OnLayout;
 };
 
-const observer = new ResizeObserver(
-  ([
-    {
-      contentRect: { left, top, width, height },
-      target,
-    },
-  ]) => {
-    const node = target as Div;
-    if (node[DOM_LAYOUT_HANDLER_NAME]) {
-      node[DOM_LAYOUT_HANDLER_NAME]({
-        timestamp: Date.now(),
-        nativeEvent: { layout: { x: left, y: top, width, height } },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
-    }
-  }
-);
-
-const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
-  const style = rawStyle as ViewStyle;
-  const ref = useRef<Div>(null);
-
+const useElementLayout = (ref: RefObject<Div>, onLayout: OnLayout) => {
+  const observer = useMemo(
+    () =>
+      new ResizeObserver(
+        ([
+          {
+            contentRect: { left, top, width, height },
+            target,
+          },
+        ]) => {
+          const node = target as Div;
+          if (node[DOM_LAYOUT_HANDLER_NAME]) {
+            node[DOM_LAYOUT_HANDLER_NAME]({
+              timestamp: Date.now(),
+              nativeEvent: { layout: { x: left, y: top, width, height } },
+            });
+          }
+        }
+      ),
+    []
+  );
   useLayoutEffect(() => {
     const node = ref.current;
     if (node !== null) {
@@ -59,8 +62,13 @@ const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
         observer.unobserve(node);
       }
     };
-  }, [ref]);
+  }, [observer, ref]);
+};
 
+const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
+  const style = rawStyle as ViewStyle;
+  const ref = useRef<Div>(null);
+  useElementLayout(ref, onLayout);
   const cssStyles = useMemo(() => {
     if (style) {
       return {
