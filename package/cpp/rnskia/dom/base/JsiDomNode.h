@@ -229,7 +229,7 @@ public:
     // Update pending properties
     for (auto &prop : _updatedProps) {
       prop->updatePendingChanges();
-      if (!prop->isSet() && prop->isRequired()) {
+      if (prop->isRequired() && !prop->isSet()) {
         throw std::runtime_error("Missing one or more required properties " +
                                  std::string(prop->getName()) + " in the " +
                                  _type + " component.");

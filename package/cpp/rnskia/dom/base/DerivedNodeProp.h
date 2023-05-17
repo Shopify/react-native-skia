@@ -22,10 +22,14 @@ public:
    Starts the process of updating and reading props
    */
   void updatePendingChanges() override {
-    for (auto &prop : _properties) {
-      if (prop->isChanged()) {
-        updateDerivedValue();
-      }
+    for (auto &prop : _updatedProps) {
+      prop->updatePendingChanges();
+    }
+
+    // We only need to update the derived value when any of the derived
+    // properties have changed.
+    if (_isChanged) {
+      updateDerivedValue();
     }
   }
 
@@ -33,11 +37,12 @@ public:
    Marks properties as no longer changed
    */
   void markAsResolved() override {
-    for (auto &prop : _properties) {
+    for (auto &prop : _updatedProps) {
       prop->markAsResolved();
     }
 
     _isChanged = false;
+    _updatedProps.clear();
   }
 
   /**
@@ -76,15 +81,23 @@ public:
   _Tp *defineProperty(_Args &&...__args) {
     auto prop = std::make_shared<_Tp>(std::forward<_Args>(__args)...,
                                       [&](BaseNodeProp *prop) {
-                                        _onChange(prop);
-                                        if (!_isChanged) {
-                                          _onChange(this);
-                                          _isChanged = true;
-                                        }
-                                      });
+      // TODO: Fix so that we don't need to push a prop change
+      // to the parent for each child in derived prop. The error
+      // is that if we remove next line the color doesn't change
+      // in the breathe example
+      _onChange(prop);
+      _updatedProps.push_back(prop);
+      if (!_isChanged) {
+        _onChange(this);
+        _isChanged = true;
+      }
+    });
 
     // Add to internal props list
     _properties.push_back(prop);
+
+    // Mark as changed so that we run our update derived value method
+    _isChanged = true;
 
     return prop.get();
   }
@@ -119,6 +132,7 @@ private:
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
   std::atomic<bool> _isChanged = {false};
   std::function<void(BaseNodeProp *)> _onChange;
+  std::vector<BaseNodeProp *> _updatedProps;
 };
 
 /**
