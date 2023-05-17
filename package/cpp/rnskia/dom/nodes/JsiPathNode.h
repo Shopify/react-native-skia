@@ -3,9 +3,9 @@
 #include "JsiDomDrawingNode.h"
 #include "PathProp.h"
 
+#include <algorithm>
 #include <memory>
 #include <string>
-#include <algorithm>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,8 +28,10 @@ public:
 protected:
   void draw(DrawingContext *context) override {
     if (getPropsContainer()->isChanged()) {
-	  auto start = saturate(_startProp->isSet() ? _startProp->value().getAsNumber() : 0.0);
-	  auto end = saturate(_endProp->isSet() ? _endProp->value().getAsNumber() : 1.0);
+      auto start = saturate(
+          _startProp->isSet() ? _startProp->value().getAsNumber() : 0.0);
+      auto end =
+          saturate(_endProp->isSet() ? _endProp->value().getAsNumber() : 1.0);
       // Can we use the path directly, or do we need to copy to
       // mutate / modify the path?
       auto hasStartOffset = start != 0.0;
@@ -53,16 +55,14 @@ protected:
           if (!pe->filterPath(&filteredPath, filteredPath, &rec, nullptr)) {
             throw std::runtime_error(
                 "Failed trimming path with parameters start: " +
-                std::to_string(start) +
-                ", end: " + std::to_string(end));
+                std::to_string(start) + ", end: " + std::to_string(end));
           }
           filteredPath.swap(filteredPath);
           _path = std::make_shared<const SkPath>(filteredPath);
         } else if (hasStartOffset || hasEndOffset) {
           throw std::runtime_error(
               "Failed trimming path with parameters start: " +
-              std::to_string(start) +
-              ", end: " + std::to_string(end));
+              std::to_string(start) + ", end: " + std::to_string(end));
         } else {
           _path = std::make_shared<const SkPath>(filteredPath);
         }
@@ -142,10 +142,7 @@ protected:
   }
 
 private:
-
-  float saturate(float x) {
-    return std::max(0.0f, std::min(1.0f, x));
-  }
+  float saturate(float x) { return std::max(0.0f, std::min(1.0f, x)); }
 
   SkPathFillType getFillTypeFromStringValue(const std::string &value) {
     if (value == "winding") {
