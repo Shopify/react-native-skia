@@ -1,11 +1,6 @@
-import type { RefObject } from "react";
+import type { RefObject, CSSProperties } from "react";
 import React, { useLayoutEffect, useMemo, useRef } from "react";
-import type {
-  LayoutChangeEvent,
-  ViewComponent,
-  ViewProps,
-  ViewStyle,
-} from "react-native";
+import type { LayoutChangeEvent, ViewComponent, ViewProps } from "react-native";
 
 import type { DataModule } from "../skia/types";
 import { isRNModule } from "../skia/types";
@@ -33,14 +28,38 @@ const useElementLayout = (ref: RefObject<Div>, onLayout: OnLayout) => {
           const node = target as Div;
           if (node[DOM_LAYOUT_HANDLER_NAME]) {
             node[DOM_LAYOUT_HANDLER_NAME]({
-              timestamp: Date.now(),
+              timeStamp: Date.now(),
               nativeEvent: { layout: { x: left, y: top, width, height } },
+              currentTarget: 0,
+              target: 0,
+              bubbles: false,
+              cancelable: false,
+              defaultPrevented: false,
+              eventPhase: 0,
+              isDefaultPrevented() {
+                throw new Error("Method not supported on web.");
+              },
+              isPropagationStopped() {
+                throw new Error("Method not supported on web.");
+              },
+              persist() {
+                throw new Error("Method not supported on web.");
+              },
+              preventDefault() {
+                throw new Error("Method not supported on web.");
+              },
+              stopPropagation() {
+                throw new Error("Method not supported on web.");
+              },
+              isTrusted: true,
+              type: "",
             });
           }
         }
       ),
     []
   );
+
   useLayoutEffect(() => {
     const node = ref.current;
     if (node !== null) {
@@ -66,22 +85,19 @@ const useElementLayout = (ref: RefObject<Div>, onLayout: OnLayout) => {
 };
 
 const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
-  const style = rawStyle as ViewStyle;
+  const style = useMemo(() => (rawStyle ?? {}) as CSSProperties, [rawStyle]);
   const ref = useRef<Div>(null);
   useElementLayout(ref, onLayout);
   const cssStyles = useMemo(() => {
-    if (style) {
-      return {
-        ...style,
-        display: "flex",
-        flexDirection: style.flexDirection || "column",
-        flexWrap: style.flexWrap || "nowrap",
-        justifyContent: style.justifyContent || "flex-start",
-        alignItems: style.alignItems || "stretch",
-        alignContent: style.alignContent || "stretch",
-      };
-    }
-    return {};
+    return {
+      ...style,
+      display: "flex",
+      flexDirection: style.flexDirection || "column",
+      flexWrap: style.flexWrap || "nowrap",
+      justifyContent: style.justifyContent || "flex-start",
+      alignItems: style.alignItems || "stretch",
+      alignContent: style.alignContent || "stretch",
+    };
   }, [style]);
 
   return (

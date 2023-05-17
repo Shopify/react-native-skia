@@ -38,7 +38,7 @@ export abstract class SkiaBaseWebView<
     this._unsubscriptions = [];
   }
 
-  private onLayout(evt: LayoutChangeEvent) {
+  private onLayoutEvent(evt: LayoutChangeEvent) {
     const { CanvasKit } = global;
     // Reset canvas / surface on layout change
     const canvas = this._canvasRef.current;
@@ -60,6 +60,8 @@ export abstract class SkiaBaseWebView<
       this.props.onLayout(evt);
     }
   }
+
+  private onLayout = this.onLayoutEvent.bind(this);
 
   protected getSize() {
     return { width: this.width, height: this.height };
@@ -180,7 +182,7 @@ export abstract class SkiaBaseWebView<
   render() {
     const { mode, debug = false, ...viewProps } = this.props;
     return (
-      <Platform.View {...viewProps} onLayout={this.onLayout.bind(this)}>
+      <Platform.View {...viewProps} onLayout={this.onLayout}>
         <canvas
           ref={this._canvasRef}
           style={{ display: "flex", flex: 1 }}
