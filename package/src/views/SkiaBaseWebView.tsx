@@ -47,6 +47,7 @@ export abstract class SkiaBaseWebView<
       this.height = canvas.clientHeight;
       canvas.width = this.width * pd;
       canvas.height = this.height * pd;
+      console.log("MakeWebGLCanvasSurface");
       const surface = CanvasKit.MakeWebGLCanvasSurface(canvas);
       if (!surface) {
         throw new Error("Could not create surface");
@@ -60,8 +61,6 @@ export abstract class SkiaBaseWebView<
       this.props.onLayout(evt);
     }
   }
-
-  private onLayout = this.onLayoutEvent.bind(this);
 
   protected getSize() {
     return { width: this.width, height: this.height };
@@ -179,6 +178,12 @@ export abstract class SkiaBaseWebView<
     return (evt: PointerEvent) => this.handleTouchEvent(evt, touchType);
   }
 
+  private onStart = this.createTouchHandler(TouchType.Start);
+  private onActive = this.createTouchHandler(TouchType.Active);
+  private onCancel = this.createTouchHandler(TouchType.Cancelled);
+  private onEnd = this.createTouchHandler(TouchType.End);
+  private onLayout = this.onLayoutEvent.bind(this);
+
   render() {
     const { mode, debug = false, ...viewProps } = this.props;
     return (
@@ -186,12 +191,12 @@ export abstract class SkiaBaseWebView<
         <canvas
           ref={this._canvasRef}
           style={{ display: "flex", flex: 1 }}
-          onPointerDown={this.createTouchHandler(TouchType.Start)}
-          onPointerMove={this.createTouchHandler(TouchType.Active)}
-          onPointerUp={this.createTouchHandler(TouchType.End)}
-          onPointerCancel={this.createTouchHandler(TouchType.Cancelled)}
-          onPointerLeave={this.createTouchHandler(TouchType.End)}
-          onPointerOut={this.createTouchHandler(TouchType.End)}
+          onPointerDown={this.onStart}
+          onPointerMove={this.onActive}
+          onPointerUp={this.onEnd}
+          onPointerCancel={this.onCancel}
+          onPointerLeave={this.onEnd}
+          onPointerOut={this.onEnd}
         />
       </Platform.View>
     );
