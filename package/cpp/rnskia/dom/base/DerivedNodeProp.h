@@ -22,10 +22,6 @@ public:
    Starts the process of updating and reading props
    */
   void updatePendingChanges() override {
-    for (auto &prop : _updatedProps) {
-      prop->updatePendingChanges();
-    }
-
     // We only need to update the derived value when any of the derived
     // properties have changed.
     if (_isChanged) {
@@ -36,14 +32,7 @@ public:
   /*
    Marks properties as no longer changed
    */
-  void markAsResolved() override {
-    for (auto &prop : _updatedProps) {
-      prop->markAsResolved();
-    }
-
-    _isChanged = false;
-    _updatedProps.clear();
-  }
+  void markAsResolved() override { _isChanged = false; }
 
   /**
    Returns the changed state of the prop
@@ -55,17 +44,12 @@ public:
    */
   void readValueFromJs(jsi::Runtime &runtime,
                        const ReadPropFunc &read) override {
-    auto changed = false;
+
     for (auto &prop : _properties) {
       prop->readValueFromJs(runtime, read);
-      if (prop->isChanged()) {
-        changed = true;
-      }
     }
 
-    if (changed) {
-      _onChange(this);
-    }
+    _onChange(this);
   }
 
   /**
@@ -79,19 +63,10 @@ public:
   template <class _Tp, class... _Args,
             class = std::enable_if_t<!std::is_array<_Tp>::value>>
   _Tp *defineProperty(_Args &&...__args) {
-    auto prop = std::make_shared<_Tp>(std::forward<_Args>(__args)...,
-                                      [&](BaseNodeProp *prop) {
-      // TODO: Fix so that we don't need to push a prop change
-      // to the parent for each child in derived prop. The error
-      // is that if we remove next line the color doesn't change
-      // in the breathe example
-      _onChange(prop);
-      _updatedProps.push_back(prop);
-      if (!_isChanged) {
-        _onChange(this);
-        _isChanged = true;
-      }
-    });
+    auto prop =
+        std::make_shared<_Tp>(std::forward<_Args>(__args)...,
+                              std::bind(&BaseDerivedProp::onPropertyChanged,
+                                        this, std::placeholders::_1));
 
     // Add to internal props list
     _properties.push_back(prop);
@@ -126,13 +101,20 @@ public:
   }
 
 protected:
-  void setIsChanged(bool isChanged) { _isChanged = isChanged; }
+  void onPropertyChanged(BaseNodeProp *prop) {
+    _onChange(prop);
+    if (!_isChanged) {
+      _onChange(this);
+      _isChanged = true;
+    }
+  }
+
+  void setIsChanged() { _isChanged = true; }
 
 private:
   std::vector<std::shared_ptr<BaseNodeProp>> _properties;
   std::atomic<bool> _isChanged = {false};
   std::function<void(BaseNodeProp *)> _onChange;
-  std::vector<BaseNodeProp *> _updatedProps;
 };
 
 /**
@@ -167,16 +149,16 @@ protected:
    Set derived value from sub classes
    */
   void setDerivedValue(std::shared_ptr<T> value) {
-    setIsChanged(_derivedValue != value);
     _derivedValue = value;
+    setIsChanged();
   }
 
   /**
    Set derived value from sub classes
    */
   void setDerivedValue(T &&value) {
-    setIsChanged(true);
     _derivedValue = std::make_shared<T>(std::move(value));
+    setIsChanged();
   }
 
 private:
@@ -207,7 +189,7 @@ protected:
    Set derived value from sub classes
    */
   void setDerivedValue(sk_sp<T> value) {
-    setIsChanged(_derivedValue != value);
+    setIsChanged();
     _derivedValue = value;
   }
 
@@ -215,7 +197,7 @@ protected:
    Set derived value from sub classes
    */
   void setDerivedValue(const T &&value) {
-    setIsChanged(true);
+    setIsChanged();
     _derivedValue = sk_make_sp<T>(std::move(value));
   }
 
