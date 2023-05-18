@@ -57,7 +57,7 @@ public:
           std::make_shared<RNSkPointInterpolator>(platformContext, config);
     } else {
       throw std::runtime_error("Could not interpolate the value " +
-                               config.outputs[0].asString() + ".");
+                               config.outputs[0].description() + ".");
     }
   }
 

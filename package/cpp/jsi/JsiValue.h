@@ -203,7 +203,7 @@ public:
   /**
    Returns a string representation of the value
    */
-  std::string asString() const;
+  std::string description() const;
 
   /**
    Converts the underlying value back to a JS value

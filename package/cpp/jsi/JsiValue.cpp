@@ -276,7 +276,7 @@ const jsi::HostFunctionType JsiValue::getAsFunction() const {
   return getAsHostFunction();
 }
 
-std::string JsiValue::asString() const {
+std::string JsiValue::description() const {
   switch (_type) {
   case PropType::Null:
     return "(null)";

@@ -58,7 +58,7 @@ public:
       }
     }
     // An error -we can't convert this value
-    throw std::runtime_error("Could not convert value " + input.asString() +
+    throw std::runtime_error("Could not convert value " + input.description() +
                              " as a color value.");
   }
 
