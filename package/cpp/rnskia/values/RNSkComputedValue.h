@@ -107,7 +107,7 @@ public:
 
 private:
   void dependencyUpdated() {
-    getContext()->runOnJavascriptThread([weakSelf = weak_from_this()]() {
+    auto updateFunc = [weakSelf = weak_from_this()]() {
       auto self = weakSelf.lock();
       if (self) {
         // Update value
@@ -127,7 +127,12 @@ private:
               }
             });
       }
-    });
+    };
+    if (getContext()->isOnJavascriptThread()) {
+      updateFunc();
+    } else {
+      getContext()->runOnJavascriptThread(updateFunc);
+    }
   }
 
   jsi::Runtime &_runtime;
