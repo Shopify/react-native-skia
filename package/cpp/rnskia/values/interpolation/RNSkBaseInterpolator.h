@@ -2,15 +2,16 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 #include "JsiValue.h"
 #include "RNSkPlatformContext.h"
 
 namespace RNSkia {
 
-static std::string EXTRAPOLATE_IDENTITY = "identity";
-static std::string EXTRAPOLATE_CLAMP = "clamp";
-static std::string EXTRAPOLATE_EXTEND = "extend";
+static const char* EXTRAPOLATE_IDENTITY = "identity";
+static const char* EXTRAPOLATE_CLAMP = "clamp";
+static const char* EXTRAPOLATE_EXTEND = "extend";
 
 /*
  The API looks like this:
