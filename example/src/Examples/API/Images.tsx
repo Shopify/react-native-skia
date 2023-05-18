@@ -69,41 +69,37 @@ export const Images = () => {
                     height={height}
                     color="lightblue"
                   />
-                  {oslo ? (
-                    <Image
-                      image={oslo}
-                      x={x}
-                      y={y}
-                      width={width}
-                      height={height}
-                      fit={fit}
-                    />
-                  ) : null}
+                  <Image
+                    image={oslo}
+                    x={x}
+                    y={y}
+                    width={width}
+                    height={height}
+                    fit={fit}
+                  />
                 </React.Fragment>
               );
             })}
           </Canvas>
         </React.Fragment>
       ))}
-      {coffee ? (
-        <Canvas
-          style={{
-            alignSelf: "center",
-            width: 320,
-            height: 180,
-            marginVertical: PAD,
-          }}
-        >
-          <Image
-            image={coffee}
-            x={0}
-            y={0}
-            width={320}
-            height={180}
-            fit="contain"
-          />
-        </Canvas>
-      ) : null}
+      <Canvas
+        style={{
+          alignSelf: "center",
+          width: 320,
+          height: 180,
+          marginVertical: PAD,
+        }}
+      >
+        <Image
+          image={coffee}
+          x={0}
+          y={0}
+          width={320}
+          height={180}
+          fit="contain"
+        />
+      </Canvas>
     </ScrollView>
   );
 };

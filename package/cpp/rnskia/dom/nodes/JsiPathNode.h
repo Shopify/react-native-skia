@@ -9,8 +9,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPathUtils.h>
-#include <SkTrimPathEffect.h>
+#include "SkPathUtils.h"
+#include "SkTrimPathEffect.h"
 
 #pragma clang diagnostic pop
 

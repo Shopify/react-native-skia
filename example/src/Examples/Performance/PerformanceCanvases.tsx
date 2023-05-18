@@ -29,9 +29,6 @@ export const PerformanceDrawingTest: React.FC = () => {
     return () => clearTimeout(to);
   }, []);
 
-  if (image === null) {
-    return null;
-  }
   return (
     <View style={styles.container}>
       <View style={styles.mode}>

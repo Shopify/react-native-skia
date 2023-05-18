@@ -220,6 +220,11 @@ const serializeSkOjects = (obj: any): any => {
         __typename__: "RuntimeEffect",
         source: obj.source(),
       };
+    } else if (obj.__typename__ === "SVG") {
+      return {
+        __typename__: "SVG",
+        source: obj.source(),
+      };
     }
   }
   return obj;

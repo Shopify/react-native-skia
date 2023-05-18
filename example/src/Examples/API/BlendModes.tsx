@@ -64,9 +64,6 @@ const dst = Skia.Path.MakeFromSVGString(
 
 export const BlendModes = () => {
   const font = useFont(require("../../assets/SF-Pro-Display-Bold.otf"), 50);
-  if (font === null) {
-    return null;
-  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Group blendMode="multiply">

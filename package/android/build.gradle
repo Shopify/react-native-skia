@@ -149,7 +149,8 @@ android {
              "**/libfbjni.so",
              "**/libjsi.so",
              "**/libreact_nativemodule_core.so",
-             "**/libturbomodulejsijni.so"
+             "**/libturbomodulejsijni.so",
+             "META-INF/**"
         ]
     }
 
@@ -271,11 +272,24 @@ task extractJNIFiles {
 extractJNIFiles.mustRunAfter extractAARHeaders
 
 if (ENABLE_PREFAB) {
-    // Package everything with the original file structure
+    // Package all the cpp code in a flattened directory structure
     task prepareHeaders(type: Copy) {
-        from('./cpp')
+        from("./cpp")
         into "${project.buildDir}/headers/rnskia/"
         includeEmptyDirs = false
+        include "**/*.h"
+        eachFile {
+            String path = it.path
+
+            // Skip flattening third_party dir
+            if (path.contains("api/third_party")) {
+                path = path.substring("api/".length())
+            } else {
+                // flatten anything else
+                path = path.substring(path.lastIndexOf("/") + 1)
+            }
+            it.path = path
+        }
     }
     preBuild.dependsOn(prepareHeaders)
 }

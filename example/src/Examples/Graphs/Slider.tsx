@@ -53,9 +53,6 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
     [touchPos]
   );
 
-  if (font === null) {
-    return null;
-  }
   return (
     <View style={{ height, marginBottom: 10 }}>
       <Canvas style={styles.graph} onTouch={touchHandler}>

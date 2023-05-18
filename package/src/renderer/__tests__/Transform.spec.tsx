@@ -26,9 +26,10 @@ describe("Renderer", () => {
     const size = width;
     const matrix = Skia.Matrix();
     const origin = Skia.Point(size / 2, size / 2);
-    matrix.translate(origin.x, origin.y);
-    matrix.scale(0.5);
-    matrix.translate(-origin.x, -origin.y);
+    matrix
+      .translate(origin.x, origin.y)
+      .scale(0.5)
+      .translate(-origin.x, -origin.y);
     expect(matrix.get()).toStrictEqual([0.5, 0, 192, 0, 0.5, 192, 0, 0, 1]);
     const surface = drawOnNode(
       <Group matrix={matrix}>

@@ -57,9 +57,7 @@ export const Neumorphism = () => {
       runSpring(translateY, 0);
     },
   });
-  if (!font) {
-    return null;
-  }
+
   return (
     <Canvas style={{ flex: 1 }} mode="continuous" onTouch={onTouch}>
       <Group transform={transform}>

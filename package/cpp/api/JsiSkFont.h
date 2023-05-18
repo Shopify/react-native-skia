@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "JsiSkHostObjects.h"
-#include <RNSkLog.h>
+#include "RNSkLog.h"
 #include <jsi/jsi.h>
 
 #include "JsiSkPaint.h"
