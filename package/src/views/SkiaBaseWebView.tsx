@@ -77,14 +77,15 @@ export abstract class SkiaBaseWebView<
   componentWillUnmount() {
     this.unsubscribeAll();
     cancelAnimationFrame(this.requestId);
+    // eslint-disable-next-line max-len
     // https://stackoverflow.com/questions/23598471/how-do-i-clean-up-and-unload-a-webgl-canvas-context-from-gpu-after-use
     // https://developer.mozilla.org/en-US/docs/Web/API/WEBGL_lose_context
     // We delete the context, only if the context has been intialized
     if (this._surface) {
       this._canvasRef.current
-      ?.getContext("webgl2")
-      ?.getExtension("WEBGL_lose_context")
-      ?.loseContext();
+        ?.getContext("webgl2")
+        ?.getExtension("WEBGL_lose_context")
+        ?.loseContext();
     }
   }
 
