@@ -9,8 +9,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkRRect.h>
-#include <SkRect.h>
+#include "SkRRect.h"
+#include "SkRect.h"
 
 #pragma clang diagnostic pop
 
@@ -33,41 +33,47 @@ public:
     _prop = defineProperty<NodeProp>(name);
   }
 
-  void updateDerivedValue() override {
-    if (_prop->isSet()) {
-      // Check for JsiSkRRect
-      if (_prop->value().getType() == PropType::HostObject) {
-        // Try reading as rect
-        auto rectPtr = std::dynamic_pointer_cast<JsiSkRRect>(
-            _prop->value().getAsHostObject());
-        if (rectPtr != nullptr) {
-          auto rrect = rectPtr->getObject();
-          setDerivedValue(SkRRect::MakeRectXY(
-              SkRect::MakeXYWH(rrect->rect().x(), rrect->rect().y(),
-                               rrect->rect().width(), rrect->rect().height()),
-              rrect->getSimpleRadii().x(), rrect->getSimpleRadii().y()));
-        }
-      } else {
-        if (_prop->isSet() && _prop->value().getType() == PropType::Object) {
-          auto p = _prop->value();
-          if (p.hasValue(PropNameX) && p.hasValue(PropNameY) &&
-              p.hasValue(PropNameWidth) && p.hasValue(PropNameHeight) &&
-              p.hasValue(PropNameRx) && p.hasValue(PropNameRy)) {
-            auto x = _prop->value().getValue(PropNameX);
-            auto y = _prop->value().getValue(PropNameY);
-            auto width = _prop->value().getValue(PropNameWidth);
-            auto height = _prop->value().getValue(PropNameHeight);
-            auto rx = _prop->value().getValue(PropNameRx);
-            auto ry = _prop->value().getValue(PropNameRy);
+  static std::shared_ptr<SkRRect> processRRect(const JsiValue &value) {
+    if (value.getType() == PropType::HostObject) {
+      // Try reading as rect
+      auto rectPtr =
+          std::dynamic_pointer_cast<JsiSkRRect>(value.getAsHostObject());
+      if (rectPtr != nullptr) {
+        auto rrect = rectPtr->getObject();
+        return std::make_shared<SkRRect>(
+            SkRRect::MakeRectXY(rrect->rect(), rrect->getSimpleRadii().x(),
+                                rrect->getSimpleRadii().y()));
+      }
+    } else {
+      if (value.getType() == PropType::Object) {
+        if (value.hasValue(PropNameRect) && value.hasValue(PropNameRx) &&
+            value.hasValue(PropNameRy)) {
+          auto rect = value.getValue(PropNameRect);
+          if (rect.hasValue(PropNameX) && rect.hasValue(PropNameY) &&
+              rect.hasValue(PropNameWidth) && rect.hasValue(PropNameHeight)) {
+            auto x = rect.getValue(PropNameX);
+            auto y = rect.getValue(PropNameY);
+            auto width = rect.getValue(PropNameWidth);
+            auto height = rect.getValue(PropNameHeight);
+            auto rx = value.getValue(PropNameRx);
+            auto ry = value.getValue(PropNameRy);
 
             // Update cache from js object value
-            setDerivedValue(SkRRect::MakeRectXY(
+            return std::make_shared<SkRRect>(SkRRect::MakeRectXY(
                 SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
                                  width.getAsNumber(), height.getAsNumber()),
                 rx.getAsNumber(), ry.getAsNumber()));
           }
         }
       }
+    }
+    return nullptr;
+  }
+
+  void updateDerivedValue() override {
+    if (_prop->isSet()) {
+      auto value = _prop->value();
+      setDerivedValue(RRectProp::processRRect(value));
     }
   }
 
@@ -150,40 +156,12 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (_boxProp->value().getType() == PropType::HostObject) {
-      auto rectPtr = std::dynamic_pointer_cast<JsiSkRect>(
-          _boxProp->value().getAsHostObject());
-      auto rrectPtr = std::dynamic_pointer_cast<JsiSkRRect>(
-          _boxProp->value().getAsHostObject());
-      // 1. box is SkRect
-      if (rectPtr != nullptr) {
-        auto rect = rectPtr->getObject();
-        setDerivedValue(SkRRect::MakeRect(*rect));
-        // 2. box is SkRRect
-      } else if (rrectPtr != nullptr) {
-        setDerivedValue(rrectPtr->getObject());
-      }
-    } else if (_boxProp->value().getType() == PropType::Object) {
-      if (_boxProp->value().hasValue(PropNameRect)) {
-        // 3. box is { rect: { x, y, width, height }, rx, ry }
-        auto rectProp = _boxProp->value().getValue(PropNameRect);
-        auto x = rectProp.getValue(PropNameX).getAsNumber();
-        auto y = rectProp.getValue(PropNameY).getAsNumber();
-        auto width = rectProp.getValue(PropNameWidth).getAsNumber();
-        auto height = rectProp.getValue(PropNameHeight).getAsNumber();
-        auto rx = _boxProp->value().getValue(PropNameRx).getAsNumber();
-        auto ry = _boxProp->value().getValue(PropNameRy).getAsNumber();
-        setDerivedValue(
-            SkRRect::MakeRectXY(SkRect::MakeXYWH(x, y, width, height), rx, ry));
-      } else {
-        // 4. box is { x, y, width, height }
-        auto x = _boxProp->value().getValue(PropNameX).getAsNumber();
-        auto y = _boxProp->value().getValue(PropNameY).getAsNumber();
-        auto width = _boxProp->value().getValue(PropNameWidth).getAsNumber();
-        auto height = _boxProp->value().getValue(PropNameHeight).getAsNumber();
-        setDerivedValue(
-            SkRRect::MakeRect(SkRect::MakeXYWH(x, y, width, height)));
-      }
+    auto value = _boxProp->value();
+    auto rect = RectProp::processRect(value);
+    if (rect) {
+      setDerivedValue(SkRRect::MakeRect(*rect));
+    } else {
+      setDerivedValue(RRectProp::processRRect(value));
     }
   }
 

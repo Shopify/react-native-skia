@@ -25,7 +25,7 @@ _On *Android* you should use [App Bundles](https://developer.android.com/guide/a
 
 When building an APK in release mode, you will see an increase of 41.3 MB after adding React Native Skia.
 This is because the library is built for different target architectures.
-If we take `arm-64-bit` for instance, the `libreactskia.so` library file is only around 3,8 MB.
+If we take `arm-64-bit` for instance, the `librnskia.so` library file is only around 3,8 MB.
 
 This implies that if you distribute your apps using [App Bundles](https://developer.android.com/guide/app-bundle), the increase in download size should be around 4 MB on Android devices when distributed (including an increase of 220 KB to the Javascript Bundle).
 

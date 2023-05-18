@@ -11,7 +11,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPath.h>
+#include "SkPath.h"
 
 #pragma clang diagnostic pop
 
@@ -22,39 +22,32 @@ public:
   explicit ClipProp(PropId name,
                     const std::function<void(BaseNodeProp *)> &onChange)
       : BaseDerivedProp(onChange) {
-    _pathProp = defineProperty<PathProp>(name);
-    _rectProp = defineProperty<RectProp>(name);
-    _rrectProp = defineProperty<RRectProp>(name);
+    _clipProp = defineProperty<NodeProp>(name);
   }
 
   void updateDerivedValue() override {
-    if (_pathProp->isSet()) {
-      _rect = nullptr;
-      _rrect = nullptr;
-      _path = _pathProp->getDerivedValue();
-    } else if (_rrectProp->isSet()) {
-      _rect = nullptr;
-      _rrect = _rrectProp->getDerivedValue();
-      _path = nullptr;
-    } else if (_rectProp->isSet()) {
-      _rect = _rectProp->getDerivedValue();
+    if (_clipProp->isSet()) {
+      auto value = _clipProp->value();
+      _rect = RectProp::processRect(value);
       _rrect = nullptr;
       _path = nullptr;
+      if (!_rect) {
+        _path = PathProp::processPath(value);
+        if (!_path) {
+          _rrect = RRectProp::processRRect(value);
+        }
+      }
     }
   }
 
-  bool isSet() override {
-    return _pathProp->isSet() || _rectProp->isSet() || _rrectProp->isSet();
-  }
+  bool isSet() override { return _clipProp->isSet(); }
 
   const SkPath *getPath() { return _path.get(); }
   const SkRect *getRect() { return _rect.get(); }
   const SkRRect *getRRect() { return _rrect.get(); }
 
 private:
-  PathProp *_pathProp;
-  RectProp *_rectProp;
-  RRectProp *_rrectProp;
+  NodeProp *_clipProp;
 
   std::shared_ptr<const SkPath> _path;
   std::shared_ptr<const SkRect> _rect;

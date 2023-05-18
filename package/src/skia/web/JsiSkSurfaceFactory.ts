@@ -27,9 +27,12 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
       surface = this.CanvasKit.MakeSurface(width, height);
     } else {
       const offscreen = new OC(width, height);
-      surface = this.CanvasKit.MakeWebGLCanvasSurface(
-        offscreen as unknown as HTMLCanvasElement
-      );
+      const webglContext = this.CanvasKit.GetWebGLContext(offscreen);
+      const grContext = this.CanvasKit.MakeWebGLContext(webglContext);
+      if (!grContext) {
+        throw new Error("Could not make a graphics context");
+      }
+      surface = this.CanvasKit.MakeRenderTarget(grContext, width, height);
     }
     if (!surface) {
       return null;

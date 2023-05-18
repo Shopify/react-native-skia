@@ -9,7 +9,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPoint.h>
+#include "SkPoint.h"
 
 #pragma clang diagnostic pop
 
@@ -29,7 +29,7 @@ public:
   void updateDerivedValue() override {
     if (_pointProp->isSet()) {
       // Check for JsiSkRect and JsiSkPoint
-      setDerivedValue(std::move(processValue(_pointProp->value())));
+      setDerivedValue(processValue(_pointProp->value()));
     } else {
       setDerivedValue(nullptr);
     }

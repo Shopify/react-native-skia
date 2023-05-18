@@ -32,9 +32,7 @@ export const Filters = () => {
   );
 
   const image = useImage(require("../../assets/oslo.jpg"));
-  if (image === null) {
-    return null;
-  }
+
   return (
     <Canvas style={{ width, height }} onTouch={() => setState((i) => i + 1)}>
       <Fill>

@@ -16,7 +16,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkImageFilter.h>
+#include "SkImageFilter.h"
 
 #pragma clang diagnostic pop
 
@@ -107,11 +107,14 @@ public:
       auto f2 = SkImageFilters::Offset(dx, dy, f1);
       auto f3 = SkImageFilters::Blur(blur, blur, SkTileMode::kDecal, f2);
       auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, srcAlpha, f3);
-
-      composeAndPush(context, SkImageFilters::Compose(
-                                  input ? input : nullptr,
-                                  SkImageFilters::Blend(SkBlendMode::kSrcOver,
-                                                        srcGraphic, f4)));
+      if (shadowOnly) {
+        composeAndPush(context, f4);
+      } else {
+        composeAndPush(context, SkImageFilters::Compose(
+                                    input ? input : nullptr,
+                                    SkImageFilters::Blend(SkBlendMode::kSrcOver,
+                                                          srcGraphic, f4)));
+      }
 
     } else {
       composeAndPush(
@@ -158,20 +161,21 @@ public:
       : JsiBaseImageFilterNode(context, "skDisplacementMapImageFilter") {}
 
   void decorate(DeclarationContext *context) override {
-
+    decorateChildren(context);
     auto channelX =
         getColorChannelFromStringValue(_channelXProp->value().getAsString());
     auto channelY =
         getColorChannelFromStringValue(_channelYProp->value().getAsString());
     auto scale = _scaleProp->value().getAsNumber();
-
-    auto displacement = context->getImageFilters()->pop();
-
-    auto color = context->getImageFilters()->pop();
-
-    composeAndPush(context, SkImageFilters::DisplacementMap(
-                                channelX, channelY, scale, displacement,
-                                color ? color : nullptr));
+    auto shader = context->getShaders()->pop();
+    if (!shader) {
+      throw std::runtime_error("DisplacementMap expects a shader as child");
+    }
+    auto map = SkImageFilters::Shader(shader);
+    auto input = context->getImageFilters()->pop();
+    auto imgf = SkImageFilters::DisplacementMap(channelX, channelY, scale, map,
+                                                input ? input : nullptr);
+    context->getImageFilters()->push(imgf);
   }
 
 protected:

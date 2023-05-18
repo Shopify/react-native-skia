@@ -22,6 +22,7 @@ const sidebars = {
         "getting-started/installation",
         "getting-started/hello-world",
         "getting-started/web",
+        "getting-started/headless",
         "getting-started/bundle-size",
       ],
     },
@@ -58,8 +59,8 @@ const sidebars = {
     {
       collapsed: true,
       type: "category",
-      label: "Image",
-      items: ["image", "image-svg"],
+      label: "Images",
+      items: ["image", "image-svg", "snapshotviews"],
     },
     {
       collapsed: true,
@@ -123,10 +124,10 @@ const sidebars = {
       type: "category",
       label: "Animations",
       items: [
+        "animations/reanimated",
         "animations/values",
         "animations/animations",
         "animations/touch-events",
-        "animations/reanimated",
       ],
     },
   ],

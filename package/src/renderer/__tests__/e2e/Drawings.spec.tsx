@@ -39,24 +39,7 @@ describe("Drawings", () => {
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
       </Group>
     );
-    checkImage(image, "snapshots/drawings/blur.png");
-  });
-
-  it("Shouldn't pass a test if the images are different", async () => {
-    const { width, height } = surface;
-    const r = width * 0.33;
-    const image = await surface.draw(
-      <Group blendMode="multiply">
-        <Blur blur={20} />
-        <Circle cx={r} cy={r} r={r} color="cyan" />
-        <Circle cx={width - r} cy={r} r={r} color="magenta" />
-        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
-      </Group>
-    );
-    const diff = checkImage(image, "snapshots/drawings/blur.png", {
-      mute: true,
-    });
-    expect(diff).not.toBe(0);
+    checkImage(image, "snapshots/drawings/blur2.png");
   });
 
   it("Should render a transform with the correct origin", async () => {

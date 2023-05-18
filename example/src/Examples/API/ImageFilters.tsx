@@ -19,9 +19,7 @@ import { Examples, SIZE } from "./components/Examples";
 
 const DisplacementMapDemo = () => {
   const image = useImage(require("../../assets/oslo.jpg"));
-  if (!image) {
-    return null;
-  }
+
   return (
     <Group>
       <DisplacementMap channelX="r" channelY="a" scale={20}>
@@ -33,9 +31,7 @@ const DisplacementMapDemo = () => {
 };
 const OffsetDemo = () => {
   const image = useImage(require("../../assets/oslo.jpg"));
-  if (!image) {
-    return null;
-  }
+
   return (
     <Group>
       <Fill color="lightblue" />
@@ -56,9 +52,7 @@ const OffsetDemo = () => {
 
 const MorphologyDemo = () => {
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 24);
-  if (font === null) {
-    return null;
-  }
+
   return (
     <Group>
       <Text text="Hello World" x={32} y={32} font={font} />

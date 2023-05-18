@@ -8,7 +8,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkRect.h>
+#include "SkRect.h"
 
 #pragma clang diagnostic pop
 
@@ -31,33 +31,35 @@ public:
     _prop = defineProperty<NodeProp>(name);
   }
 
+  static std::shared_ptr<SkRect> processRect(const JsiValue &value) {
+    if (value.getType() == PropType::HostObject) {
+      auto rectPtr =
+          std::dynamic_pointer_cast<JsiSkRect>(value.getAsHostObject());
+      if (rectPtr != nullptr) {
+        return std::make_shared<SkRect>(SkRect::MakeXYWH(
+            rectPtr->getObject()->x(), rectPtr->getObject()->y(),
+            rectPtr->getObject()->width(), rectPtr->getObject()->height()));
+      }
+    } else if (value.getType() == PropType::Object &&
+               value.hasValue(PropNameX) && value.hasValue(PropNameY) &&
+               value.hasValue(PropNameWidth) &&
+               value.hasValue(PropNameHeight)) {
+      // Save props for fast access
+      auto x = value.getValue(PropNameX);
+      auto y = value.getValue(PropNameY);
+      auto width = value.getValue(PropNameWidth);
+      auto height = value.getValue(PropNameHeight);
+      // Update cache from js object value
+      return std::make_shared<SkRect>(
+          SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
+                           width.getAsNumber(), height.getAsNumber()));
+    }
+    return nullptr;
+  }
+
   void updateDerivedValue() override {
     if (_prop->isSet()) {
-      // Check for JsiSkRect
-      if (_prop->value().getType() == PropType::HostObject) {
-        auto rectPtr = std::dynamic_pointer_cast<JsiSkRect>(
-            _prop->value().getAsHostObject());
-        if (rectPtr != nullptr) {
-          setDerivedValue(SkRect::MakeXYWH(
-              rectPtr->getObject()->x(), rectPtr->getObject()->y(),
-              rectPtr->getObject()->width(), rectPtr->getObject()->height()));
-        }
-      } else {
-        auto p = _prop->value();
-        if (p.hasValue(PropNameX) && p.hasValue(PropNameY) &&
-            p.hasValue(PropNameWidth) && p.hasValue(PropNameHeight)) {
-          // Save props for fast access
-          auto x = p.getValue(PropNameX);
-          auto y = p.getValue(PropNameY);
-          auto width = p.getValue(PropNameWidth);
-          auto height = p.getValue(PropNameHeight);
-
-          // Update cache from js object value
-          setDerivedValue(SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
-                                           width.getAsNumber(),
-                                           height.getAsNumber()));
-        }
-      }
+      setDerivedValue(RectProp::processRect(_prop->value()));
     }
   }
 

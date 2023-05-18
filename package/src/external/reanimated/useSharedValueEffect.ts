@@ -1,22 +1,15 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Reanimated: any;
+import type { SharedValueType } from "../../renderer/processors/Animations";
 
-try {
-  Reanimated = require("react-native-reanimated");
-} catch (e) {
-  // Ignore
-}
-
-type SharedValueTypeWrapper<T = number> = {
-  value: T;
-};
-
-const useSharedValueWrapper =
-  Reanimated?.useSharedValue === undefined
-    ? (value: number) => useMemo(() => ({ value }), [value])
-    : Reanimated.useSharedValue;
+import {
+  HAS_REANIMATED2,
+  useSharedValue,
+  runOnJS,
+  startMapper,
+  stopMapper,
+  HAS_REANIMATED3,
+} from "./moduleWrapper";
 
 /**
  * Connects a shared value from reanimated to a SkiaView or Canvas
@@ -26,19 +19,23 @@ const useSharedValueWrapper =
  */
 export const useSharedValueEffect = <T = number>(
   cb: () => void,
-  value: SharedValueTypeWrapper<T>,
-  ...values: SharedValueTypeWrapper<T>[]
+  value: SharedValueType<T>,
+  ...values: SharedValueType<T>[]
 ) => {
-  const input = useSharedValueWrapper(0);
+  if (HAS_REANIMATED3) {
+    console.warn(
+      `useSharedValueEffect() is deprecated with Reanimated 3, you can use Reanimated values directly.
+Learn more at https://shopify.github.io/react-native-skia/docs/animations/reanimated.`
+    );
+  }
+  const input = useSharedValue(0);
 
   useEffect(() => {
-    if (!Reanimated) {
+    if (!HAS_REANIMATED2) {
       console.warn(
         "Reanimated was not found and the useSharedValueEffect hook will have no effect."
       );
     } else {
-      const { runOnJS, startMapper, stopMapper } = Reanimated;
-
       // Start a mapper in Reanimated
       const mapperId = startMapper(
         () => {

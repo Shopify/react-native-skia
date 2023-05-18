@@ -16,7 +16,7 @@ export type Routes = {
   Picture: undefined;
   Checker: undefined;
   UseCanvas: undefined;
-  Reanimated: undefined;
   PictureView: undefined;
   OnLayout: undefined;
+  Snapshot: undefined;
 };

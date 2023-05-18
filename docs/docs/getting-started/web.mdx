@@ -14,6 +14,8 @@ While this is a substantial file size, you have control over the user experience
 We provide direct integrations with [Expo](#Expo) and [Remotion](#Remotion).
 Below you will also find the manual installation steps to run the module on any React Native Web projects.
 
+You can use React Native Skia without React Native Web.
+
 ## Expo
 
 Using React Native Skia on Expo web is reasonably straightforward.
@@ -79,8 +81,8 @@ const newConfiguration = {
     ...currentConfiguration.externals,
     // 3. Avoid warning if reanimated is not present
     "react-native-reanimated": "require('react-native-reanimated')",
-    "react-native-reanimated/lib/reanimated2/core":
-      "require('react-native-reanimated/lib/reanimated2/core')",
+    "react-native-reanimated/package.json":
+      "require('react-native-reanimated/package.json')",
   },
 }
 ```
@@ -111,6 +113,7 @@ export default function App() {
     <WithSkiaWeb
       getComponent={() => import("./MySkiaComponent")}
       fallback={<Text>Loading Skia...</Text>} />}
+    />
   );
 }
 ```

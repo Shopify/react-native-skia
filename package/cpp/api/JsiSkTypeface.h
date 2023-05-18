@@ -6,7 +6,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
-#include <RNSkLog.h>
+#include "RNSkLog.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,6 +28,13 @@ public:
   }
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkTypeface, __typename__))
+
+  JSI_HOST_FUNCTION(dispose) {
+    setObject(nullptr);
+    return jsi::Value::undefined();
+  }
+
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypeface, dispose))
 
   JsiSkTypeface(std::shared_ptr<RNSkPlatformContext> context,
                 sk_sp<SkTypeface> typeface)

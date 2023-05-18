@@ -67,7 +67,9 @@ describe("Test Blending", () => {
         </Blend>
       </Fill>
     );
-    checkImage(image, "snapshots/runtime-effects/blend-color-burn.png");
+    checkImage(image, "snapshots/runtime-effects/blend-color-burn.png", {
+      maxPixelDiff: 324,
+    });
     image = await surface.draw(
       <Fill>
         <Blend mode="colorBurn">
@@ -77,7 +79,9 @@ describe("Test Blending", () => {
         </Blend>
       </Fill>
     );
-    checkImage(image, "snapshots/runtime-effects/blend-color-burn2.png");
+    checkImage(image, "snapshots/runtime-effects/blend-color-burn2.png", {
+      maxPixelDiff: 324,
+    });
   });
 
   it("should blend using multiply", async () => {

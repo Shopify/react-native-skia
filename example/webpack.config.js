@@ -85,6 +85,10 @@ module.exports = {
         __dirname,
         "./node_modules/react-native-web"
       ),
+      "react-native-reanimated/package.json": require.resolve(
+        "react-native-reanimated/package.json"
+      ),
+      "react-native-reanimated": require.resolve("react-native-reanimated"),
     },
   },
   module: {
@@ -112,13 +116,4 @@ module.exports = {
       ],
     }),
   ],
-  // FIXME:
-  // To be able to ignore missing reanimated (if not installed), we
-  // add this section - it fixes any webpack errors in the useValueEffect.ts
-  // file.
-  externals: {
-    "react-native-reanimated": "require('react-native-reanimated')",
-    "react-native-reanimated/lib/reanimated2/core":
-      "require('react-native-reanimated/lib/reanimated2/core')",
-  },
 };

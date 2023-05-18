@@ -1,6 +1,7 @@
 import type { ComponentProps, ComponentType } from "react";
 import React, { useMemo, lazy, Suspense } from "react";
-import { Platform } from "react-native";
+
+import { Platform } from "../Platform";
 
 import { LoadSkiaWeb } from "./LoadSkiaWeb";
 

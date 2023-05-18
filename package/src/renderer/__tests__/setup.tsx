@@ -25,10 +25,15 @@ jest.setTimeout(180 * 1000);
 declare global {
   var testServer: Server;
   var testClient: WebSocket;
+  var testOS: "ios" | "android" | "web";
 }
 export let surface: TestingSurface;
 const assets = new Map<SkImage | SkFont, string>();
-export let images: { oslo: SkImage };
+export let images: {
+  oslo: SkImage;
+  skiaLogoPng: SkImage;
+  skiaLogoJpeg: SkImage;
+};
 export let fonts: {
   RobotoMedium: SkFont;
   NotoColorEmoji: SkFont;
@@ -55,12 +60,16 @@ beforeAll(async () => {
     fontSize
   );
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
-  images = { oslo };
+  const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
+  const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
+  images = { oslo, skiaLogoPng, skiaLogoJpeg };
   fonts = { RobotoMedium, NotoColorEmoji, NotoSansSCRegular };
   assets.set(oslo, "oslo");
   assets.set(RobotoMedium, "RobotoMedium");
   assets.set(NotoColorEmoji, "NotoColorEmoji");
   assets.set(NotoSansSCRegular, "NotoSansSCRegular");
+  assets.set(skiaLogoPng, "skiaLogoPng");
+  assets.set(skiaLogoJpeg, "skiaLogoJpeg");
 });
 
 export const wait = (ms: number) =>
@@ -138,6 +147,7 @@ export const mountCanvas = (element: ReactNode) => {
   const root = new SkiaRoot(Skia);
   root.render(element);
   return {
+    unmount: root.unmount.bind(root),
     surface: ckSurface,
     root: root.dom,
     draw: () => {
@@ -210,6 +220,11 @@ const serializeSkOjects = (obj: any): any => {
         __typename__: "RuntimeEffect",
         source: obj.source(),
       };
+    } else if (obj.__typename__ === "SVG") {
+      return {
+        __typename__: "SVG",
+        source: obj.source(),
+      };
     }
   }
   return obj;
@@ -235,26 +250,28 @@ const serializeNode = (node: Node<any>): SerializedNode => {
 type EvalContext = Record<string, any>;
 
 interface TestingSurface {
-  eval(
-    fn: (Skia: Skia, ctx: EvalContext) => any,
-    ctx?: EvalContext
-  ): Promise<any>;
+  eval<Ctx extends EvalContext, R>(
+    fn: (Skia: Skia, ctx: Ctx) => R,
+    ctx?: Ctx
+  ): Promise<R>;
   draw(node: ReactNode): Promise<SkImage>;
   width: number;
   height: number;
   fontSize: number;
+  OS: string;
 }
 
 class LocalSurface implements TestingSurface {
   readonly width = 256;
   readonly height = 256;
   readonly fontSize = 32;
+  readonly OS = "node";
 
-  eval(
-    fn: (Skia: Skia, ctx: EvalContext) => any,
-    ctx: EvalContext = {}
-  ): Promise<any> {
-    return Promise.resolve(fn(global.SkiaApi, ctx));
+  eval<Ctx extends EvalContext, R>(
+    fn: (Skia: Skia, ctx: Ctx) => any,
+    ctx?: Ctx
+  ): Promise<R> {
+    return Promise.resolve(fn(global.SkiaApi, ctx ?? ({} as any)));
   }
 
   draw(node: ReactNode): Promise<SkImage> {
@@ -270,6 +287,7 @@ class RemoteSurface implements TestingSurface {
   readonly width = 256;
   readonly height = 256;
   readonly fontSize = 32;
+  readonly OS = global.testOS;
 
   private get client() {
     if (global.testClient === null) {
@@ -278,18 +296,20 @@ class RemoteSurface implements TestingSurface {
     return global.testClient!;
   }
 
-  eval(
-    fn: (Skia: Skia, ctx: EvalContext) => any,
-    context: EvalContext = {}
-  ): Promise<any> {
+  eval<Ctx extends EvalContext, R>(
+    fn: (Skia: Skia, ctx: Ctx) => any,
+    context?: Ctx
+  ): Promise<R> {
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
       const ctx: EvalContext = {};
-      Object.keys(context).forEach((key) => {
-        ctx[key] = serializeSkOjects(context[key]);
-      });
+      if (context) {
+        Object.keys(context).forEach((key) => {
+          ctx[key] = serializeSkOjects(context[key]);
+        });
+      }
       this.client.send(JSON.stringify({ code: fn.toString(), ctx }));
     });
   }

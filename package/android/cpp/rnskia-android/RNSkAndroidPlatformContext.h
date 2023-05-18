@@ -41,6 +41,14 @@ public:
     return MakeOffscreenGLSurface(width, height);
   }
 
+  void runOnMainThread(std::function<void()> task) override {
+    _jniPlatformContext->runTaskOnMainThread(task);
+  }
+
+  sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override {
+    return _jniPlatformContext->takeScreenshotFromViewTag(tag);
+  }
+
   void startDrawLoop() override { _jniPlatformContext->startDrawLoop(); }
 
   void stopDrawLoop() override { _jniPlatformContext->stopDrawLoop(); }

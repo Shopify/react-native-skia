@@ -23,6 +23,10 @@ export const examples = [
     title: "🖱 Touch Handling",
   },
   {
+    screen: "Snapshot",
+    title: "📺 View Snapshot",
+  },
+  {
     screen: "PathEffect",
     title: "⭐️ Path Effect",
   },
@@ -73,10 +77,6 @@ export const examples = [
   {
     screen: "UseCanvas",
     title: "↕️ useCanvas()",
-  },
-  {
-    screen: "Reanimated",
-    title: "🐎 Reanimated",
   },
   {
     screen: "OnLayout",

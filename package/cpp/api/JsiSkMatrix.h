@@ -47,39 +47,39 @@ public:
   JSI_HOST_FUNCTION(concat) {
     auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
     getObject()->preConcat(*m3);
-    return jsi::Value::undefined();
+    return thisValue.asObject(runtime);
   }
 
   JSI_HOST_FUNCTION(translate) {
     auto x = arguments[0].asNumber();
     auto y = arguments[1].asNumber();
     getObject()->preTranslate(x, y);
-    return jsi::Value::undefined();
+    return thisValue.asObject(runtime);
   }
 
   JSI_HOST_FUNCTION(scale) {
     auto x = arguments[0].asNumber();
     auto y = count > 1 ? arguments[1].asNumber() : 1;
     getObject()->preScale(x, y);
-    return jsi::Value::undefined();
+    return thisValue.asObject(runtime);
   }
 
   JSI_HOST_FUNCTION(skew) {
     auto x = arguments[0].asNumber();
     auto y = arguments[1].asNumber();
     getObject()->preSkew(x, y);
-    return jsi::Value::undefined();
+    return thisValue.asObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rotate) {
     auto a = arguments[0].asNumber();
     getObject()->preRotate(SkRadiansToDegrees(a));
-    return jsi::Value::undefined();
+    return thisValue.asObject(runtime);
   }
 
   JSI_HOST_FUNCTION(identity) {
     getObject()->setIdentity();
-    return jsi::Value::undefined();
+    return thisValue.asObject(runtime);
   }
 
   JSI_HOST_FUNCTION(get) {

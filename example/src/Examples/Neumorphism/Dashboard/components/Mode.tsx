@@ -24,9 +24,7 @@ export const Mode = ({ translateY }: ModeProps) => {
     [translateY]
   );
   const image = useImage(require("./settings.png"));
-  if (!image) {
-    return null;
-  }
+
   return (
     <Group transform={transform}>
       <BackdropBlur blur={40 / 3} clip={clip}>

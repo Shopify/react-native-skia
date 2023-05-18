@@ -5,6 +5,14 @@ sidebar_label: Touch Events
 slug: /animations/touch-events
 ---
 
+
+:::info
+
+Currently, built-in Skia animations are dependant on the JS thread.
+For UI-thread animations with Reanimated 3, see [Reanimated support](/docs/animations/reanimated).
+
+:::
+
 ### useTouchHandler
 
 The `useTouchHandler` hook handles touches in the `Canvas`.

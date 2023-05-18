@@ -8,6 +8,7 @@ slug: /getting-started/installation
 React Native Skia brings the [Skia Graphics Library](https://skia.org/) to React Native.
 Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox, Firefox OS, and many other products.
 
+> **Version compatibility**: `react-native@>=0.66` and `react@>=18` are required.
 
 ```sh
 yarn add @shopify/react-native-skia
@@ -32,8 +33,6 @@ Below is the app size increase to be expected when adding React Native Skia to y
 Run `pod install` on the `ios/` directory.
 
 ## Android
-
-> **Version compatibility**: `react-native@>=0.66` is required.
 
 Currently, you will need Android NDK to be installed.
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
@@ -80,19 +79,15 @@ There is also an [React Native VSCode extension](https://marketplace.visualstudi
 
 ## Testing with Jest
 
-In order to load the mock provided by React Native Skia add following to your jest config:
+React Native Skia test mocks use web implementation which depends on loading CanvasKit. Before you begin using the mocks you need some setup actions.
+
+In order to load CanvasKit and in turn loading the React Native Skia mock, you need to add the following your jest config:
 
 ```js
-"setupFiles": [require.resolve("@shopify/react-native-skia/jestSetup.js")]
-```
-
-Example:
-
-```js
-module.exports = {
-  "preset": "react-native",
-  "setupFiles": [require.resolve("@shopify/react-native-skia/jestSetup.js")]
-}
+// This is needed to load CanvasKit
+"globalSetup": "@shopify/react-native-skia/globalJestSetup.js", 
+ // This is needed to load the mock
+"setupFiles": ["@shopify/react-native-skia/jestSetup.js"]
 ```
 
 
