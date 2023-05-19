@@ -22,7 +22,7 @@ class SVGAsset implements SkSVG {
   source() {
     return this._source;
   }
- 
+
   width() {
     return this._width;
   }
@@ -124,7 +124,7 @@ describe("Displays SVGs", () => {
       checkImage(image, docPath("svg2.png"));
     }
   );
-  
+
   itRunsE2eOnly("should apply an image filter to the svg", async () => {
     const { rect } = importSkia();
     const { width, height } = surface;
