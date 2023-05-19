@@ -14,7 +14,8 @@ If the root dimensions are in absolute units, the width/height properties have n
 | svg       | `SVG` | SVG Image. |
 | width?    | `number`  | Width of the destination image. This is used to resolve the initial viewport when the root SVG width is specified in relative units. |
 | height?   | `number`  | Height of the destination image. This is used to resolve the initial viewport when the root SVG height is specified in relative units.                              |
-
+| x?    | `number`  | Optional displayed x coordinate of the svg container.  |
+| y?   | `number`  | Optional displayed y coordinate of the svg container.                            |
 
 ### Example
 
@@ -34,8 +35,6 @@ const ImageSVGDemo = () => {
       { svg && (
         <ImageSVG
           svg={svg}
-          x={0}
-          y={0}
           width={256}
           height={256}
         />)
