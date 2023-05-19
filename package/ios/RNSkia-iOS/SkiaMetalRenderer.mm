@@ -5,7 +5,7 @@
 #import "SkColorSpace.h"
 #import "SkSurface.h"
 
-#import <include/gpu/GrDirectContext.h>
+#import "include/gpu/GrDirectContext.h"
 
 #pragma clang diagnostic pop
 

@@ -109,6 +109,7 @@ export const configurations: Configuration = {
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_runtime_icu", true],
+      ["skia_enable_gpu", true],
       ["skia_use_gl", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
@@ -165,7 +166,7 @@ export const configurations: Configuration = {
     },
     args: [
       ["skia_use_metal", true],
-      ["skia_use_gl", true],
+      ["skia_enable_gpu", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
     ],
