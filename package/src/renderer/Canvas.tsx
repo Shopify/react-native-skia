@@ -50,8 +50,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       : size;
     useEffect(() => {
       if (!isValue(onSizeReanimatedOrSkia) && onSizeReanimatedOrSkia) {
-        const sub = size.addListener((v) => (onSizeReanimatedOrSkia.value = v));
-        return sub;
+        return size.addListener((v) => (onSizeReanimatedOrSkia.value = v));
       }
       return undefined;
     }, [onSizeReanimatedOrSkia, size]);
