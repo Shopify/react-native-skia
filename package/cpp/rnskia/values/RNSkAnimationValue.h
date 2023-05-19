@@ -7,11 +7,6 @@
 
 namespace RNSkia {
 
-struct AnimationState {
-  double current;
-  bool finished;
-};
-
 /**
  Implements a base clock value class
  */

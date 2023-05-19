@@ -49,7 +49,7 @@ export const createTiming = (
 
   return ValueApi.createTiming(resolvedParams, easingValue, callback);
 
-  // // Update function for the animation value
+  // // Update function for the animation value - TODO: Move to web implementation
   // const animationFunction = (t: number, state: AnimationState | undefined) => {
   //   // Update the input value using the provided update function
   //   const nextState = timing(

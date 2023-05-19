@@ -23,6 +23,11 @@ using RNSkTimingConfig = struct RNSkTimingConfig {
  */
 class RNSkTimingAnimatedValue : public RNSkAnimationValue {
 public:
+  struct RNSkAnimationState {
+    double current;
+    bool finished;
+  };
+
   /**
    Constructor
    */
@@ -83,7 +88,7 @@ protected:
 
 private:
   // Animation's state
-  AnimationState _state;
+  RNSkAnimationState _state;
   RNSkTimingConfig _config;
 };
 } // namespace RNSkia

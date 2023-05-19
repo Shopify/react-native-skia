@@ -106,6 +106,23 @@ export interface ISkiaValueApi {
   ) => SkiaAnimation;
 
   /**
+   * Creates a decay value
+   * @param resolvedParams
+   * @param callback Called when timing is. Optional
+   * @returns Decay based animation value
+   */
+  createDecay: (
+    resolvedParams: {
+      from: number;
+      deceleration: number;
+      velocityFactor: number;
+      clamp?: number[];
+      velocity: number;
+    },
+    callback?: AnimationCallback
+  ) => SkiaAnimation;
+
+  /**
    * Creates an interpolator value that can interpolate between a set of values like
    * numbers, colors, transforms, matrices, paths, rects, rrects and points.
    * @param config

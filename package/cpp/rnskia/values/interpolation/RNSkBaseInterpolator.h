@@ -1,17 +1,17 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "JsiValue.h"
 #include "RNSkPlatformContext.h"
 
 namespace RNSkia {
 
-static const char* EXTRAPOLATE_IDENTITY = "identity";
-static const char* EXTRAPOLATE_CLAMP = "clamp";
-static const char* EXTRAPOLATE_EXTEND = "extend";
+static const char *EXTRAPOLATE_IDENTITY = "identity";
+static const char *EXTRAPOLATE_CLAMP = "clamp";
+static const char *EXTRAPOLATE_EXTEND = "extend";
 
 /*
  The API looks like this:

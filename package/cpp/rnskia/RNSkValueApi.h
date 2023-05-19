@@ -9,6 +9,7 @@
 #include "RNSkValue.h"
 
 #include "RNSkComputedValue.h"
+#include "RNSkDecayValue.h"
 #include "RNSkEasings.h"
 #include "RNSkInterpolatorValue.h"
 #include "RNSkSpringEasing.h"
@@ -95,6 +96,36 @@ public:
         std::make_shared<RNSkTimingAnimatedValue>(_platformContext, config));
   }
 
+  JSI_HOST_FUNCTION(createDecay) {
+    // Read parameters from Javascript
+    auto configObject = arguments[0].asObject(runtime);
+
+    auto from = configObject.getProperty(runtime, "from").asNumber();
+    auto deceleration =
+        configObject.getProperty(runtime, "deceleration").asNumber();
+    auto velocityFactor =
+        configObject.getProperty(runtime, "velocityFactor").asNumber();
+    auto clamp = configObject.getProperty(runtime, "clamp")
+                     .asObject(runtime)
+                     .asArray(runtime);
+    auto velocity = configObject.getProperty(runtime, "velocity").asNumber();
+
+    // TODO: Read animation done callback
+
+    // Create config
+    std::vector<double> clampArray(clamp.size(runtime));
+    for (auto i = 0; i < clampArray.size(); ++i) {
+      clampArray[i] = clamp.getValueAtIndex(runtime, i).asNumber();
+    }
+
+    RNSkDecayConfig config = {from, deceleration, velocityFactor,
+                              .clamp = clampArray, velocity};
+
+    return jsi::Object::createFromHostObject(
+        runtime,
+        std::make_shared<RNSkDecayAnimatedValue>(_platformContext, config));
+  }
+
   JSI_HOST_FUNCTION(createInterpolator) {
     // Read parameters from Javascript
     auto configObject = arguments[0].asObject(runtime);
@@ -162,6 +193,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValueApi, createValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createClockValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createTiming),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createDecay),
                        JSI_EXPORT_FUNC(RNSkValueApi, createInterpolator),
                        JSI_EXPORT_FUNC(RNSkValueApi, createComputedValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createSpringEasing),
