@@ -99,7 +99,7 @@ const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
     return {
       ...style,
       display: "flex",
-      flexDirection: style.flexDirection || "column",
+      flexDirection: style.flexDirection || "inherit",
       flexWrap: style.flexWrap || "nowrap",
       justifyContent: style.justifyContent || "flex-start",
       alignItems: style.alignItems || "stretch",
