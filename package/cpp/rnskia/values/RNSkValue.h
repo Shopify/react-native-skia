@@ -51,7 +51,9 @@ public:
   /**
    Returns the inner value
    */
-  virtual JsiValue &getCurrent() { return _current; }
+  virtual JsiValue &getCurrent() {
+    return _current;
+  }
 
   /**
    Adds listener value as a weak dependency that listents to changes in this
@@ -61,7 +63,7 @@ public:
     // Add listener
     auto currentListenerId = _listenerId++;
     {
-      std::lock_guard<std::mutex> lock(_mutex);
+      std::lock_guard<std::mutex> lock(_listenerMutex);
       _listeners.emplace(currentListenerId, listener);
     }
 
@@ -70,7 +72,7 @@ public:
       auto self = weakSelf.lock();
       if (self) {
         auto selfAsThis = std::static_pointer_cast<RNSkValue>(self);
-        std::lock_guard<std::mutex> lock(selfAsThis->_mutex);
+        std::lock_guard<std::mutex> lock(selfAsThis->_listenerMutex);
         selfAsThis->_listeners.erase(currentListenerId);
 
         if (selfAsThis->_listeners.size() == 0) {
@@ -84,7 +86,10 @@ public:
     return jsi::String::createFromUtf8(runtime, "RNSkValue");
   }
 
-  JSI_PROPERTY_GET(current) { return getCurrent().getAsJsiValue(runtime); }
+  JSI_PROPERTY_GET(current) {
+    std::lock_guard<std::mutex> lock(_valueMutex);
+    return getCurrent().getAsJsiValue(runtime);
+  }
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(RNSkValue, __typename__),
                               JSI_EXPORT_PROP_GET(RNSkValue, current))
@@ -140,7 +145,7 @@ protected:
    Notifies all listeners that this value has changed.
    */
   void notifyListeners() {
-    std::lock_guard<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_listenerMutex);
     for (auto &listener : _listeners) {
       listener.second(this);
     }
@@ -156,8 +161,10 @@ protected:
    Sets the current numeric inner value for this value
   */
   void setCurrent(const JsiValue &newValue) {
-    // printf("BaseValue: %f\n", newValue);
-    _current.setCurrent(newValue);
+    {
+      std::lock_guard<std::mutex> lock(_valueMutex);
+      _current.setCurrent(newValue);
+    }
     notifyListeners();
   }
 
@@ -173,7 +180,10 @@ protected:
    Sets the current from a js value
   */
   void setCurrent(jsi::Runtime &runtime, const jsi::Value &value) {
-    _current.setCurrent(JsiValue(runtime, value));
+    {
+      std::lock_guard<std::mutex> lock(_valueMutex);
+      _current.setCurrent(JsiValue(runtime, value));
+    }
     notifyListeners();
   }
 
@@ -187,7 +197,10 @@ private:
   std::unordered_map<size_t, std::function<void(RNSkValue *)>> _listeners;
 
   // Mutex for locking access to listeners
-  std::mutex _mutex;
+  std::mutex _listenerMutex;
+                    
+  // Mutex for ensuring thread safe access to the current value
+  std::mutex _valueMutex;
 };
 
 /**
@@ -231,8 +244,7 @@ public:
   void setCurrent(double newValue) { RNSkValue::setCurrent(newValue); }
 
   JSI_PROPERTY_SET(current) {
-    auto wrapped = JsiValue(runtime, value);
-    setCurrent(wrapped);
+    setCurrent(JsiValue(runtime, value));
   }
 
   JSI_PROPERTY_SET(animation) {

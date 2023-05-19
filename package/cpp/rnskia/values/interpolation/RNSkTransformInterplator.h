@@ -24,7 +24,7 @@ public:
       : RNSkBaseInterpolator(platformContext, config) {
     _outputs.resize(config.outputs.size());
     for (size_t i = 0; i < config.outputs.size(); ++i) {
-      _outputs[i] = config.outputs[i].getAsArray();
+      _outputs[i] = std::move(config.outputs[i].getAsArray());
     }
   }
 
