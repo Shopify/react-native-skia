@@ -1,7 +1,7 @@
 import React from "react";
 
 import { docPath, checkImage } from "../../../__tests__/setup";
-import { Group, Mask, Circle, Rect, Image } from "../../components";
+import { Group, Mask, Circle, Rect, Image, Paint } from "../../components";
 import { importSkia, surface, images } from "../setup";
 
 describe("Mask Documentation Examples", () => {
@@ -52,7 +52,7 @@ describe("Mask Documentation Examples", () => {
     const image = await surface.draw(
       <>
         <Rect rect={rct} color={"cyan"} />
-        <Group blendMode={"multiply"}>
+        <Group layer={<Paint blendMode="multiply" />}>
           <Mask
             mode="luminance"
             mask={
