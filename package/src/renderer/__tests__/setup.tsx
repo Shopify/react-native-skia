@@ -33,6 +33,7 @@ export let images: {
   oslo: SkImage;
   skiaLogoPng: SkImage;
   skiaLogoJpeg: SkImage;
+  mask: SkImage;
 };
 export let fonts: {
   RobotoMedium: SkFont;
@@ -62,8 +63,10 @@ beforeAll(async () => {
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
-  images = { oslo, skiaLogoPng, skiaLogoJpeg };
+  const mask = loadImage("skia/__tests__/assets/mask.png");
+  images = { oslo, skiaLogoPng, skiaLogoJpeg, mask };
   fonts = { RobotoMedium, NotoColorEmoji, NotoSansSCRegular };
+  assets.set(mask, "mask");
   assets.set(oslo, "oslo");
   assets.set(RobotoMedium, "RobotoMedium");
   assets.set(NotoColorEmoji, "NotoColorEmoji");
