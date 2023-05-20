@@ -1,5 +1,6 @@
 // webpack.config.js
 const path = require("path");
+const fs = require("fs");
 
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -108,7 +109,7 @@ module.exports = {
       __DEV__: JSON.stringify(true),
     }),
     new (class CopySkiaPlugin {
-      apply(compiler: Compiler) {
+      apply(compiler) {
         compiler.hooks.thisCompilation.tap("AddSkiaPlugin", (compilation) => {
           compilation.hooks.processAssets.tapPromise(
             {
@@ -127,7 +128,7 @@ module.exports = {
 
               compilation.emitAsset(
                 "/canvaskit.wasm",
-                new sources.RawSource(await fs.promises.readFile(src))
+                new webpack.sources.RawSource(await fs.promises.readFile(src))
               );
             }
           );
