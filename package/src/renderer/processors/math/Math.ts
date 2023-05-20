@@ -24,3 +24,8 @@ export const clamp = (
   "worklet";
   return Math.min(Math.max(lowerBound, value), upperBound);
 };
+
+export const saturate = (value: number) => {
+  "worklet";
+  return clamp(value, 0, 1);
+};
