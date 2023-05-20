@@ -1,9 +1,11 @@
 #pragma once
 
-#include "NodeProp.h"
-
 #include <memory>
 #include <utility>
+
+#include "NodeProp.h"
+#include "SkBlurTypes.h"
+
 
 namespace RNSkia {
 
