@@ -109,7 +109,7 @@ protected:
           // path like this:
           auto p = std::make_shared<SkPath>(*_path.get());
           if (!skpathutils::FillPathWithPaint(*_path.get(), strokePaint,
-                                                    p.get(), nullptr, precision)) {
+                                              p.get(), nullptr, precision)) {
             _path = nullptr;
           } else {
             _path = std::const_pointer_cast<const SkPath>(p);

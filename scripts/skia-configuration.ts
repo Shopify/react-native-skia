@@ -106,12 +106,10 @@ export const configurations: Configuration = {
       },
     },
     args: [
-      // TODO: skia_enable_skunicode is not needed above m112
-      ["skia_enable_skunicode", true],
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_runtime_icu", true],
-      ["skia_use_gl", true],
+      ["skia_enable_ganesh", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
       [
@@ -166,10 +164,7 @@ export const configurations: Configuration = {
       },
     },
     args: [
-      // TODO: skia_enable_skunicode is not needed above m112
-      ["skia_enable_skunicode", true],
       ["skia_use_metal", true],
-      ["skia_use_gl", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
     ],

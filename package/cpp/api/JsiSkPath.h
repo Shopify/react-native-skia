@@ -14,18 +14,18 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "JsiSkMatrix.h"
 #include "SkDashPathEffect.h"
 #include "SkParsePath.h"
 #include "SkPath.h"
 #include "SkPathEffect.h"
 #include "SkPathOps.h"
 #include "SkPathTypes.h"
+#include "SkPathUtils.h"
 #include "SkString.h"
 #include "SkStrokeRec.h"
 #include "SkTextUtils.h"
 #include "SkTrimPathEffect.h"
-#include "SkPathUtils.h"
-#include "JsiSkMatrix.h"
 
 #pragma clang diagnostic pop
 
@@ -289,7 +289,8 @@ public:
 
     auto jsiPrecision = opts.getProperty(runtime, "precision");
     auto precision = jsiPrecision.isUndefined() ? 1 : jsiPrecision.asNumber();
-    auto result = skpathutils::FillPathWithPaint(path, p, &path, nullptr, precision);
+    auto result =
+        skpathutils::FillPathWithPaint(path, p, &path, nullptr, precision);
     getObject()->swap(path);
     return result ? thisValue.getObject(runtime) : jsi::Value::null();
   }

@@ -46,6 +46,10 @@ export class JsiSkCanvas
     super(CanvasKit, ref, "Canvas");
   }
 
+  draw3DScene(): void {
+    throw new Error("Method not implemented.");
+  }
+
   drawRect(rect: SkRect, paint: SkPaint) {
     this.ref.drawRect(
       JsiSkRect.fromValue(this.CanvasKit, rect),
