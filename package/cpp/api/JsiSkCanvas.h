@@ -42,6 +42,9 @@ namespace jsi = facebook::jsi;
 
 class JsiSkCanvas : public JsiSkHostObject {
 public:
+    
+  MeshGM* _mesh;
+    
   JSI_HOST_FUNCTION(drawPaint) {
     auto paint = JsiSkPaint::fromValue(runtime, arguments[0]);
     _canvas->drawPaint(*paint);
@@ -495,11 +498,19 @@ public:
     return jsi::Value::undefined();
   }
 
+    JSI_HOST_FUNCTION(init3DScene) {
+      _mesh = new MeshGM();
+      _mesh->onOnceBeforeDraw();
+      _mesh->onGpuSetup(_canvas);
+    return jsi::Value::undefined();
+
+    }
+    
   JSI_HOST_FUNCTION(draw3DScene) {
-    auto mesh = new MeshGM();
-    mesh->onOnceBeforeDraw();
-    mesh->onGpuSetup(_canvas);
-    mesh->onDraw(_canvas);
+    auto now = std::chrono::high_resolution_clock::now();
+    auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+   // _mesh->onAnimate(nanos);
+    _mesh->onDraw(_canvas);
     return jsi::Value::undefined();
   }
 
@@ -542,7 +553,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, clear),
                        JSI_EXPORT_FUNC(JsiSkCanvas, concat),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPicture),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, draw3DScene))
+                       JSI_EXPORT_FUNC(JsiSkCanvas, draw3DScene),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, init3DScene))
 
   explicit JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
