@@ -15,8 +15,8 @@ class DrawingProp : public DerivedSkProp<SkPicture> {
 public:
   DrawingProp(PropId name, NotifyNeedRenderCallback notifyPictureNeeded,
               const std::function<void(BaseNodeProp *)> &onChange)
-      : _notifyPictureNeeded(notifyPictureNeeded), DerivedSkProp<SkPicture>(
-                                                       onChange) {
+      : _notifyPictureNeeded(notifyPictureNeeded),
+        DerivedSkProp<SkPicture>(onChange) {
     _drawingProp = defineProperty<NodeProp>(name);
   }
 

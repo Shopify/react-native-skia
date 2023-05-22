@@ -73,14 +73,14 @@ public:
 
     // Get data
     sk_sp<SkData> data;
-	if (format == SkEncodedImageFormat::kJPEG) {
-		SkJpegEncoder::Options options;
-		options.fQuality = quality;
-		data = SkJpegEncoder::Encode(nullptr, getObject().get(), options);
-	} else {
-		SkPngEncoder::Options options;
-		data = SkPngEncoder::Encode(nullptr, getObject().get(), options);
-	}
+    if (format == SkEncodedImageFormat::kJPEG) {
+      SkJpegEncoder::Options options;
+      options.fQuality = quality;
+      data = SkJpegEncoder::Encode(nullptr, getObject().get(), options);
+    } else {
+      SkPngEncoder::Options options;
+      data = SkPngEncoder::Encode(nullptr, getObject().get(), options);
+    }
     auto arrayCtor =
         runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
     size_t size = data->size();
@@ -106,8 +106,8 @@ public:
 
     auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
     auto image = getObject();
-	if (image->isTextureBacked()) {
-		image = image->makeNonTextureImage();
+    if (image->isTextureBacked()) {
+      image = image->makeNonTextureImage();
     }
     sk_sp<SkData> data;
     if (format == SkEncodedImageFormat::kJPEG) {
