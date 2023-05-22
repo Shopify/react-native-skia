@@ -501,7 +501,7 @@ public:
     JSI_HOST_FUNCTION(init3DScene) {
       _mesh = new MeshGM();
       _mesh->onOnceBeforeDraw();
-      _mesh->onGpuSetup(_canvas);
+        //  _mesh->onGpuSetup(_canvas);
     return jsi::Value::undefined();
 
     }
@@ -509,7 +509,7 @@ public:
   JSI_HOST_FUNCTION(draw3DScene) {
     auto now = std::chrono::high_resolution_clock::now();
     auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
-   // _mesh->onAnimate(nanos);
+    _mesh->onAnimate(nanos);
     _mesh->onDraw(_canvas);
     return jsi::Value::undefined();
   }
