@@ -16,6 +16,7 @@
 #include "JsiSkSVG.h"
 #include "JsiSkTextBlob.h"
 #include "JsiSkVertices.h"
+#include "Mesh.h"
 
 #include <jsi/jsi.h>
 
@@ -32,6 +33,7 @@
 #include "SkRegion.h"
 #include "SkSurface.h"
 #include "SkTypeface.h"
+#include "include/gpu/GrDirectContext.h"
 
 #pragma clang diagnostic pop
 
@@ -494,84 +496,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(draw3DScene) {
-    // Define the cube's vertices (assuming each vertex has a position and
-    // color).
-    std::array<SkPoint3, 8> positions = {
-        SkPoint3{-1, -1, -1}, SkPoint3{1, -1, -1}, SkPoint3{1, 1, -1},
-        SkPoint3{-1, 1, -1},  SkPoint3{-1, -1, 1}, SkPoint3{1, -1, 1},
-        SkPoint3{1, 1, 1},    SkPoint3{-1, 1, 1}};
-    std::array<SkColor, 8> colors = {
-        SK_ColorRED,     SK_ColorGREEN,  SK_ColorBLUE,  SK_ColorCYAN,
-        SK_ColorMAGENTA, SK_ColorYELLOW, SK_ColorWHITE, SK_ColorBLACK};
-
-    // Define the cube's faces using vertex indices.
-    std::array<uint16_t, 36> indices = {
-        0, 1, 2, 2, 3, 0, // front
-        1, 5, 6, 6, 2, 1, // right
-        5, 4, 7, 7, 6, 5, // back
-        4, 0, 3, 3, 7, 4, // left
-        3, 2, 6, 6, 7, 3, // top
-        4, 5, 1, 1, 0, 4  // bottom
-    };
-      
-  
-
-    // Define vertex shader.
-    const SkString vs = SkString(R"(
-uniform float4x4 uTransform;
-Varyings main(const Attributes a) {
-    Varyings v;
-    v.position = uTransform * float4(a.position, 1.0);
-    v.color = half4(a.color);
-    return v;
-}
-)");
-
-    // Define fragment shader.
-    const SkString fs = SkString(R"(
-float2 main(Varyings v, out half4 color) {
-    color = v.color;
-    return float2(0.0);
-}
-)");
-
-    // Define attributes.
-    std::array<SkMeshSpecification::Attribute, 2> attributes = {
-        SkMeshSpecification::Attribute{
-            SkMeshSpecification::Attribute::Type::kFloat3, 0,
-            SkString("position")},
-        SkMeshSpecification::Attribute{
-            SkMeshSpecification::Attribute::Type::kUByte4_unorm,
-            sizeof(SkPoint3), SkString("color")}};
-
-    // Create mesh specification.
-    SkMeshSpecification::Result specResult = SkMeshSpecification::Make(
-        attributes, sizeof(SkPoint3) + sizeof(SkColor), {}, vs, fs);
-    if (!specResult.error.isEmpty()) {
-        RNSkLogger::logToConsole(specResult.error.c_str());
-    }
-      
-      // Create vertices data.
-      std::vector<char> vertices(positions.size() * (sizeof(SkPoint3) + sizeof(SkColor)));
-      for (size_t i = 0; i < positions.size(); ++i) {
-          memcpy(vertices.data() + i * (sizeof(SkPoint3) + sizeof(SkColor)), &positions[i], sizeof(SkPoint3));
-          SkColor color = colors[i];
-          memcpy(vertices.data() + i * (sizeof(SkPoint3) + sizeof(SkColor)) + sizeof(SkPoint3), &color, sizeof(SkColor));
-      }
-
-      // Create indices data.
-      std::vector<uint16_t> indicesData(indices.begin(), indices.end());
-      auto dc = GrAsDirectContext(canvas->recordingContext());
-      sk_sp<SkMesh::VertexBuffer> vertexBuffer =  SkMesh::MakeVertexBuffer(dc, , );
-
-      auto mesh = SkMesh::MakeIndexed(specResult.specification, SkMesh::Mode::kTriangles, vertexBuffer, 36, 0, {}, bounds);
-/*
- 
- sk_sp<SkMeshSpecification>, Mode, sk_sp<VertexBuffer>,
-                    size_t vertexCount, size_t vertexOffset,
-                    sk_sp<const SkData> uniforms, const SkRect &bounds
- */
-    _canvas->drawMesh(mesh, nullptr, nullptr);
+    auto mesh = new MeshUniformsGM();
+    mesh->onOnceBeforeDraw();
+    mesh->onDraw(_canvas);
     return jsi::Value::undefined();
   }
 
