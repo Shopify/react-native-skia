@@ -496,8 +496,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(draw3DScene) {
-    auto mesh = new MeshUniformsGM();
+    auto mesh = new MeshGM();
     mesh->onOnceBeforeDraw();
+    mesh->onGpuSetup(_canvas);
     mesh->onDraw(_canvas);
     return jsi::Value::undefined();
   }
