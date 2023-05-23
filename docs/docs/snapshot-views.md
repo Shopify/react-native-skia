@@ -15,10 +15,10 @@ import { View } from "react-native";
 import type { SkImage } from "@shopify/react-native-skia";
 import { makeImageFromView } from "@shopify/react-native-skia";
 
-// Create a ref for the view you'd like to take a screenshot of
+// Create a ref for the view you'd like to take a snapshot of
 const viewRef = useRef<View>(null);
 
-// Create a state variable to store the screenshot
+// Create a state variable to store the snapshot
 const [image, setImage] = useState<SkImage | null>(null);
 
 // Create a function to take the snapshot
@@ -26,7 +26,7 @@ const takeSnapshot = async () => {
   if (viewRef.current == null) {
     return;
   }
-  // Take the screenshot of the view
+  // Take the snapshot of the view
   const snapshot = await makeImageFromView(viewRef);
   setImage(snapshot);
 };

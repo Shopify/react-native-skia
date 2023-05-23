@@ -48,7 +48,6 @@
     "babel-jest": "^29.2.1",
     "babel-loader": "^8.2.5",
     "babel-plugin-react-native-web": "^0.17.7",
-    "copy-webpack-plugin": "^11.0.0",
     "eslint": "^8.19.0",
     "eslint-config-react-native-wcandillon": "3.9.0",
     "eslint-plugin-reanimated": "2.0.0",

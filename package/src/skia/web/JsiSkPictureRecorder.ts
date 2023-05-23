@@ -16,6 +16,10 @@ export class JsiSkPictureRecorder
     super(CanvasKit, ref, "PictureRecorder");
   }
 
+  dispose = () => {
+    this.ref.delete();
+  };
+
   beginRecording(bounds: SkRect) {
     return new JsiSkCanvas(
       this.CanvasKit,

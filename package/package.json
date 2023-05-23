@@ -76,6 +76,9 @@
   "peerDependenciesMeta": {
     "react-native-reanimated": {
       "optional": true
+    },
+    "react-native": {
+      "optional": true
     }
   },
   "devDependencies": {

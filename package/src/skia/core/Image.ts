@@ -1,5 +1,4 @@
-import { findNodeHandle, Platform } from "react-native";
-
+import { Platform } from "../../Platform";
 import { Skia } from "../Skia";
 import type { DataSourceParam, SkImage } from "../types";
 
@@ -48,7 +47,7 @@ export const makeImageFromView = <
       );
     }
   }
-  const viewTag = findNodeHandle(viewRef.current);
+  const viewTag = Platform.findNodeHandle(viewRef.current);
   if (viewTag !== null && viewTag !== 0) {
     return Skia.Image.MakeImageFromViewTag(viewTag);
   }

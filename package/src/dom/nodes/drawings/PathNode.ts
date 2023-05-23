@@ -1,3 +1,4 @@
+import { saturate } from "../../../renderer/processors/math";
 import { FillType } from "../../../skia/types";
 import type { SkPath } from "../../../skia/types";
 import type { DrawingContext, PathProps } from "../../types";
@@ -12,7 +13,15 @@ export class PathNode extends JsiDrawingNode<PathProps, SkPath> {
   }
 
   protected deriveProps() {
-    const { start, end, fillType, stroke, ...pathProps } = this.props;
+    const {
+      start: trimStart,
+      end: trimEnd,
+      fillType,
+      stroke,
+      ...pathProps
+    } = this.props;
+    const start = saturate(trimStart);
+    const end = saturate(trimEnd);
     const hasStartOffset = start !== 0;
     const hasEndOffset = end !== 1;
     const hasStrokeOptions = stroke !== undefined;
