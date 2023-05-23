@@ -242,7 +242,7 @@ half4 main(float2 p) {
   it("should display a lightblue color", async () => {
     const { Skia } = importSkia();
     const colorSelection = Skia.RuntimeEffect.Make(`uniform shader child1;
-  uniform shader child2;
+uniform shader child2;
 
 vec4 main(vec2 pos) {
   return child1.eval(pos);

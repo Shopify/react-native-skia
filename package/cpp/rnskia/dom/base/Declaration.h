@@ -24,17 +24,15 @@ public:
   void push(T el) { _elements.push(el); }
 
   // Clears and returns all elements
-  std::vector<T> popAll() { return popMultiple(_elements.size()); }
-
-  // Pops the number of items up to limit
-  std::vector<T> popMultiple(size_t limit) {
-    auto size = std::min(limit, _elements.size());
+  std::vector<T> popAll() {
+    auto size = _elements.size();
     std::vector<T> tmp;
     tmp.reserve(size);
     for (size_t i = 0; i < size; ++i) {
       tmp.push_back(_elements.top());
       _elements.pop();
     }
+    std::reverse(std::begin(tmp), std::end(tmp));
     return tmp;
   }
 
@@ -50,7 +48,7 @@ public:
   // Clears and returns through reducer function in reversed order
   T popAsOne(std::function<T(T inner, T outer)> composer) {
     auto tmp = popAll();
-    // std::reverse(std::begin(tmp), std::end(tmp));
+    std::reverse(std::begin(tmp), std::end(tmp));
     return std::accumulate(std::begin(tmp), std::end(tmp),
                            static_cast<T>(nullptr), [=](T inner, T outer) {
                              if (inner == nullptr) {

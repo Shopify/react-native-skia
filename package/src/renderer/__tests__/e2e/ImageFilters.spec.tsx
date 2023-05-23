@@ -127,8 +127,7 @@ describe("Test Image Filters", () => {
       </>
     );
     checkImage(img, docPath("image-filters/dropshadow-only.png"), {
-      threshold: 0.05,
-      overwrite: true,
+      threshold: 0.05
     });
   });
   // This test should fail because it is not scaled properly but
