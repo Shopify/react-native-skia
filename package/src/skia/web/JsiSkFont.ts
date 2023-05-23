@@ -20,6 +20,10 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
     super(CanvasKit, ref, "Font");
   }
 
+  dispose = () => {
+    this.ref.delete();
+  };
+
   getTextWidth(text: string, paint?: SkPaint | undefined) {
     const ids = this.getGlyphIDs(text);
     const widths = this.getGlyphWidths(ids, paint);

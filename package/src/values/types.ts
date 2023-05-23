@@ -11,7 +11,7 @@ export interface SkiaValue<T = number> {
   /**
    * Invalidates the value. Has different meaning depending on the type of the value.
    */
-  __invalidate: () => void;
+  dispose: () => void;
   /**
    * Field to make typechecking easier
    */
