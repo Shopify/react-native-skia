@@ -40,10 +40,6 @@ public:
                              pers0, pers1, pers2);
   }
 
-  JSI_PROPERTY_GET(__typename__) {
-    return jsi::String::createFromUtf8(runtime, "Matrix");
-  }
-
   JSI_HOST_FUNCTION(concat) {
     auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
     getObject()->preConcat(*m3);
@@ -90,7 +86,7 @@ public:
     return values;
   }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkMatrix, __typename__))
+  EXPORT_JSI_API_TYPENAME(JsiSkMatrix, "Matrix")
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMatrix, concat),
                        JSI_EXPORT_FUNC(JsiSkMatrix, translate),
@@ -98,7 +94,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkMatrix, skew),
                        JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
                        JSI_EXPORT_FUNC(JsiSkMatrix, identity),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, get), )
+                       JSI_EXPORT_FUNC(JsiSkMatrix, get),
+                       JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
 
   /**
    * Returns the underlying object from a host object of this type

@@ -70,7 +70,7 @@ public:
                               JSI_EXPORT_PROP_GET(RNSkValue, animation))
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, addListener),
-                       JSI_EXPORT_FUNC(RNSkReadonlyValue, __invalidate))
+                       JSI_EXPORT_FUNC(RNSkReadonlyValue, dispose))
 
 private:
   void subscribe(std::shared_ptr<RNSkAnimation> animation) {
