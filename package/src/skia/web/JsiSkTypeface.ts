@@ -26,7 +26,7 @@ export class JsiSkTypeface
     return false;
   }
 
-  dispose() {
+  dispose = () => {
     this.ref.delete();
-  }
+  };
 }

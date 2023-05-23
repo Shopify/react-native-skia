@@ -36,11 +36,6 @@ namespace jsi = facebook::jsi;
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
 
 public:
-  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
-  JSI_PROPERTY_GET(__typename__) {
-    return jsi::String::createFromUtf8(runtime, "Path");
-  }
-
   JSI_HOST_FUNCTION(addPath) {
     auto src = JsiSkPath::fromValue(runtime, arguments[0]);
     auto matrix =
@@ -528,7 +523,7 @@ public:
     return cmds;
   }
 
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPath, __typename__))
+  EXPORT_JSI_API_TYPENAME(JsiSkPath, "Path")
 
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkPath, addPath), JSI_EXPORT_FUNC(JsiSkPath, addArc),
@@ -564,19 +559,11 @@ public:
       JSI_EXPORT_FUNC(JsiSkPath, op),
       JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable),
       JSI_EXPORT_FUNC(JsiSkPath, interpolate),
-      JSI_EXPORT_FUNC(JsiSkPath, toCmds), )
+      JSI_EXPORT_FUNC(JsiSkPath, toCmds), JSI_EXPORT_FUNC(JsiSkPath, dispose))
 
   JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
       : JsiSkWrappingSharedPtrHostObject<SkPath>(
             std::move(context), std::make_shared<SkPath>(std::move(path))) {}
-
-  /**
-    Returns the underlying object from a host object of this type
-   */
-  static std::shared_ptr<SkPath> fromValue(jsi::Runtime &runtime,
-                                           const jsi::Value &obj) {
-    return obj.asObject(runtime).asHostObject<JsiSkPath>(runtime)->getObject();
-  }
 
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
