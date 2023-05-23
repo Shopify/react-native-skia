@@ -238,4 +238,23 @@ half4 main(float2 p) {
     );
     checkImage(img, docPath("shaders/image-with-transform.png"));
   });
+
+  it("should display a lightblue color", async () => {
+    const { Skia } = importSkia();
+    const colorSelection = Skia.RuntimeEffect.Make(`uniform shader child1;
+  uniform shader child2;
+
+vec4 main(vec2 pos) {
+  return child1.eval(pos);
+}`)!;
+    const img = await surface.draw(
+      <Fill>
+        <Shader source={colorSelection}>
+          <ColorShader color="lightblue" />
+          <ColorShader color="red" />
+        </Shader>
+      </Fill>
+    );
+    checkImage(img, docPath("shaders/color.png"));
+  });
 });
