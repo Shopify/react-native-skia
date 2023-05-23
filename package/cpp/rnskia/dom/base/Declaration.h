@@ -61,7 +61,7 @@ public:
   // Returns the size of the elements
   size_t size() { return _elements.size(); }
 
-protected:
+private:
   std::stack<T> _elements;
 };
 
