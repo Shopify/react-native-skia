@@ -165,7 +165,6 @@ export const configurations: Configuration = {
     },
     args: [
       ["skia_use_metal", true],
-      ["skia_use_gl", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
     ],

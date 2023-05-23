@@ -101,7 +101,7 @@ sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
   // Create pixmap from pixels and make a copy of it so that
   // the SkImage owns its own pixels
   SkPixmap pm(skInfo, pixels, bmi.stride);
-  auto skImage = SkImage::MakeRasterCopy(pm);
+  auto skImage = SkImages::RasterFromPixmapCopy(pm);
 
   // Unlock pixels
   AndroidBitmap_unlockPixels(env, bitmap);
