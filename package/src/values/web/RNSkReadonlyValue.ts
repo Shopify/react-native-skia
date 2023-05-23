@@ -32,7 +32,7 @@ export class RNSkReadonlyValue<T> implements SkiaValue<T> {
     };
   }
 
-  public __invalidate(): void {
+  public dispose(): void {
     this._listeners = [];
   }
 }

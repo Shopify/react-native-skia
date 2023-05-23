@@ -131,10 +131,7 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
-  JSI_HOST_FUNCTION(dispose) {
-    setObject(nullptr);
-    return jsi::Value::undefined();
-  }
+  EXPORT_JSI_API_TYPENAME(JsiSkImage, "Image")
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
                        JSI_EXPORT_FUNC(JsiSkImage, height),
@@ -149,14 +146,6 @@ public:
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {}
-
-  /**
-  Returns the underlying object from a host object of this type
- */
-  static sk_sp<SkImage> fromValue(jsi::Runtime &runtime,
-                                  const jsi::Value &obj) {
-    return obj.asObject(runtime).asHostObject<JsiSkImage>(runtime)->getObject();
-  }
 };
 
 } // namespace RNSkia

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Skia } from "../Skia";
-import type { SkData, DataSourceParam, JsiDisposable } from "../types";
+import type { SkData, DataSourceParam, BaseSkJSIInstance } from "../types";
 import { Platform } from "../../Platform";
 
 const factoryWrapper = <T>(
@@ -37,7 +37,7 @@ const loadData = <T>(
     );
   }
 };
-const useLoading = <T extends JsiDisposable>(
+const useLoading = <T extends BaseSkJSIInstance>(
   source: DataSourceParam,
   loader: () => Promise<T | null>
 ) => {
@@ -61,7 +61,7 @@ const useLoading = <T extends JsiDisposable>(
   return data;
 };
 
-export const useRawData = <T extends JsiDisposable>(
+export const useRawData = <T extends BaseSkJSIInstance>(
   source: DataSourceParam,
   factory: (data: SkData) => T | null,
   onError?: (err: Error) => void

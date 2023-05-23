@@ -33,6 +33,10 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     super(CanvasKit, ref, "Path");
   }
 
+  dispose = () => {
+    this.ref.delete();
+  };
+
   addPath(src: SkPath, matrix?: SkMatrix, extend = false) {
     const args = [
       JsiSkPath.fromValue(src),
