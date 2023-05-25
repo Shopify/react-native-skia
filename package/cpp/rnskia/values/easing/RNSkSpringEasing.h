@@ -61,7 +61,7 @@ public:
     auto velocityProp = configObject.getProperty(runtime, "velocity");
     double velocity = 0.0;
     if (!velocityProp.isUndefined() && !velocityProp.isNull()) {
-      velocity = velocityProp.asNumber();
+      velocity = velocityProp.asNumber() / 100.0;
     }
 
     RNSkSpringConfig springConfig = {mass, stiffness, velocity, damping};
