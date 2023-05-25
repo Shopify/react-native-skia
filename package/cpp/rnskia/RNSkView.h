@@ -296,6 +296,13 @@ protected:
 
 private:
   /**
+    Redraws the Skia View directly. It is imperative that the caller knows that
+   we're on the main thread and that the view is set up correctly before calling
+   this function.
+   */
+  void forceRedrawDirect() { _renderer->tryRender(_canvasProvider); }
+
+  /**
    Starts beginDrawCallback loop if the drawing mode is continuous
    */
   void beginDrawingLoop() {
@@ -310,6 +317,16 @@ private:
             self->drawLoopCallback(invalidated);
           }
         });
+
+    // Now we know that we have a valid view and that the view should be more
+    // than ready to render. The view uses a message loop to render, but we'd
+    // like to be able to avoid waiting for the first initial frame loop and
+    // draw directly
+    // - so let us call a little special function we've added for doing that:
+    if (!_initialDrawingDone) {
+      _initialDrawingDone = true;
+      forceRedrawDirect();
+    }
   }
 
   void updateOnSize() {
@@ -409,6 +426,7 @@ private:
 
   size_t _drawingLoopId = 0;
   std::atomic<int> _redrawRequestCounter = {1};
+  bool _initialDrawingDone = false;
 };
 
 } // namespace RNSkia
