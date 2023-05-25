@@ -85,7 +85,7 @@
                         kBGRA_8888_SkColorType, kPremul_SkAlphaType);
 
   // ... and then create the SkImage itself!
-  return SkImage::MakeRasterData(info, skData, bytesPerRow);
+  return SkImages::RasterFromData(info, skData, bytesPerRow);
 }
 
 @end

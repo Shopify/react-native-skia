@@ -12,6 +12,10 @@ export class JsiSkMatrix
     super(CanvasKit, ref, "Matrix");
   }
 
+  dispose = () => {
+    // Do nothing - the matrix is represenetd by a Float32Array
+  };
+
   concat(matrix: SkMatrix) {
     this.ref.set(
       this.CanvasKit.Matrix.multiply(this.ref, JsiSkMatrix.fromValue(matrix))

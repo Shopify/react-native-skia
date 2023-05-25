@@ -15,6 +15,10 @@ export class JsiSkSurface
     super(CanvasKit, ref, "Surface");
   }
 
+  dispose = () => {
+    this.ref.delete();
+  };
+
   flush() {
     this.ref.flush();
   }

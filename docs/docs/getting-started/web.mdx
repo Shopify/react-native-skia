@@ -51,15 +51,17 @@ To use React Native Skia with Remotion, please follow [the following installatio
 ## Manual Webpack Installation
 
 To run React Native Skia on Web, you need to do three things:
-* Make sure that the WebAssembly file is available from the build system. This can easily be done using the [webpack copy plugin](https://webpack.js.org/plugins/copy-webpack-plugin/). Another option is to [load CanvasKit from a CDN](#using-a-cdn).
-* Configure the build system to resolve the following two node modules: `fs` and `path`. One way to do it is to use the [node polyfill plugin](https://www.npmjs.com/package/node-polyfill-webpack-plugin).
-* If you are not using the `react-native-reanimated`, Webpack will throw a warning since React Native Skia refers to that module.
+
+- Make sure that the WebAssembly file is available from the build system.
+- Configure the build system to resolve the following two node modules: `fs` and `path`. One way to do it is to use the [node polyfill plugin](https://www.npmjs.com/package/node-polyfill-webpack-plugin).
+- If you are not using the `react-native-reanimated`, Webpack will throw a warning since React Native Skia refers to that module.
 
 So following is an example of a Webpack v5 configuration that supports React Native Skia.
 These three steps can easily be adapted to your build system.
 
 ```tsx
-import CopyPlugin from "copy-webpack-plugin";
+import fs from "fs";
+import { sources } from "webpack";
 import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 
 const newConfiguration = {
@@ -67,13 +69,33 @@ const newConfiguration = {
   plugins: [
     ...currentConfiguration.plugins,
     // 1. Make the wasm file available to the build system
-    new CopyPlugin({
-      patterns: [
-        {
-          from: "node_modules/canvaskit-wasm/bin/full/canvaskit.wasm",
-        },
-      ],
-    }),
+    new (class CopySkiaPlugin {
+      apply(compiler) {
+        compiler.hooks.thisCompilation.tap("AddSkiaPlugin", (compilation) => {
+          compilation.hooks.processAssets.tapPromise(
+            {
+              name: "copy-skia",
+              stage:
+                compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+            },
+            async () => {
+              const src = require.resolve(
+                "canvaskit-wasm/bin/full/canvaskit.wasm"
+              );
+              if (compilation.getAsset(src)) {
+                // Skip emitting the asset again because it's immutable
+                return;
+              }
+
+              compilation.emitAsset(
+                "/canvaskit.wasm",
+                new sources.RawSource(await fs.promises.readFile(src))
+              );
+            }
+          );
+        });
+      }
+    })(),
     // 2. Polyfill fs and path module from node
     new NodePolyfillPlugin()
   ],
