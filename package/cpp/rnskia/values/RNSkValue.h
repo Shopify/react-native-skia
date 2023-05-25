@@ -124,21 +124,29 @@ public:
         });
   }
 
-  JSI_HOST_FUNCTION(__invalidate) {
-    invalidate();
+  JSI_HOST_FUNCTION(dispose) {
+    if (!_isDisposed) {
+      _isDisposed = true;
+      invalidate();
+    }
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, __invalidate),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkValue, dispose),
                        JSI_EXPORT_FUNC(RNSkValue, addListener))
 
 protected:
+  
   /**
-     Override to implement invalidation logic for the value. In the base class
-     this function clears all subscribers.
+   Override to implement invalidation logic for the value. In the base class
+   this function clears all subscribers.
    */
-  virtual void invalidate() { _listeners.clear(); }
-
+  virtual void invalidate() {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    _listeners.clear();
+    onListenersBecameEmpty();
+  }
+                    
   /**
    Notifies all listeners that this value has changed.
    */
@@ -152,10 +160,7 @@ protected:
         }
       });
     } else {
-      std::lock_guard<std::mutex> lock(_listenerMutex);
-      for (auto &listener : _listeners) {
-        listener.second(this);
-      }
+      internalNotifyListeners();
     }
   }
 
@@ -206,7 +211,7 @@ private:
    */
   void internalNotifyListeners() {
     std::lock_guard<std::mutex> lock(_listenerMutex);
-    for (auto &listener : _listeners) {
+    for (const auto &listener : _listeners) {
       listener.second(this);
     }
   }
@@ -224,6 +229,9 @@ private:
 
   // Mutex for ensuring thread safe access to the current value
   std::mutex _valueMutex;
+                    
+  // Dispose flag
+  bool _isDisposed = false;
 };
 
 /**
@@ -313,6 +321,7 @@ public:
                               JSI_EXPORT_PROP_GET(RNSkValue, current),
                               JSI_EXPORT_PROP_GET(RNSkMutableValue, animation))
 
+
 protected:
   /**
    Sets the animation object - ie the driver of this value. We'll keep a
@@ -345,6 +354,13 @@ protected:
             }));
   }
 
+  /**
+   Clean up on dispose
+   */
+  void invalidate() override {
+    setAnimation(nullptr);
+    RNSkValue::invalidate();
+  }
 private:
   /**
    Returns the current animation value if it is set.

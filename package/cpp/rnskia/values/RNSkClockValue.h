@@ -80,11 +80,11 @@ public:
     startClock();
     return jsi::Value::undefined();
   }
-
+  
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkClockValue, cancel),
                        JSI_EXPORT_FUNC(RNSkClockValue, stop),
                        JSI_EXPORT_FUNC(RNSkClockValue, start),
-                       JSI_EXPORT_FUNC(RNSkValue, __invalidate),
+                       JSI_EXPORT_FUNC(RNSkValue, dispose),
                        JSI_EXPORT_FUNC(RNSkValue, addListener))
 
 protected:
@@ -102,7 +102,7 @@ protected:
    Handles callback when listeners are empty. Then we'll just stop the
    clock
    */
-  void onListenersBecameEmpty() override { stopClock(); }
+  void onListenersBecameEmpty() override { stopClock(); }  
 
 private:
   /*
