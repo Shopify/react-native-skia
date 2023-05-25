@@ -76,7 +76,7 @@ public:
         selfAsThis->_listeners.erase(currentListenerId);
 
         if (selfAsThis->_listeners.size() == 0) {
-          selfAsThis->onListenersEmpty();
+          selfAsThis->onListenersBecameEmpty();
         }
       }
     };
@@ -145,9 +145,19 @@ protected:
    Notifies all listeners that this value has changed.
    */
   void notifyListeners() {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    for (auto &listener : _listeners) {
-      listener.second(this);
+    if (getContext()->isOnJavascriptThread()) {
+      // Invoked from javascript - ensure we run on main thread
+      getContext()->runOnMainThread([weakSelf = weak_from_this()]() {
+        auto self = weakSelf.lock();
+        if (self) {
+          self->internalNotifyListeners();
+        }
+      });
+    } else {
+      std::lock_guard<std::mutex> lock(_listenerMutex);
+      for (auto &listener : _listeners) {
+        listener.second(this);
+      }
     }
   }
 
@@ -155,15 +165,19 @@ protected:
    Override to implement logic that will run when the listeners vector becomes
    empty due to the last one being removed.
    */
-  virtual void onListenersEmpty() {}
+  virtual void onListenersBecameEmpty() {}
 
   /**
    Sets the current numeric inner value for this value
   */
   void setCurrent(const JsiValue &newValue) {
     {
-      std::lock_guard<std::mutex> lock(_valueMutex);
-      _current.setCurrent(newValue);
+      // Happy path for numbers - they're a bit more easy to set.
+      if (newValue.getType() == PropType::Number) {
+        setCurrent(newValue.getAsNumber());
+      } else {
+        _current.setCurrent(newValue);
+      }
     }
     notifyListeners();
   }
@@ -188,6 +202,16 @@ protected:
   }
 
 private:
+  /**
+   Notifies listeners - this method is not thread safe - use notifyListeners instead.
+   */
+  void internalNotifyListeners () {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    for (auto &listener : _listeners) {
+      listener.second(this);
+    }
+  }
+                    
   JsiValue _current;
 
   // Identifier of listener
@@ -245,6 +269,9 @@ public:
 
   JSI_PROPERTY_SET(current) {
     setCurrent(JsiValue(runtime, value));
+    // Unset any animations to stop them - since setting the current property should
+    // automatically "take over" updating from a running animation
+    setAnimation(nullptr);
   }
 
   JSI_PROPERTY_SET(animation) {
@@ -294,6 +321,7 @@ protected:
    input. When it is removed it will be stopped.
    */
   void setAnimation(std::shared_ptr<RNSkValue> animation) {
+    // Do we already have an animation running? Unsubscribe
     if (_unsubscribe != nullptr) {
       (*_unsubscribe)();
       _unsubscribe = nullptr;

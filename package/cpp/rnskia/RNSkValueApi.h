@@ -61,6 +61,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(createTiming) {
+    printf("@@@ createTiming\n");
     // Read parameters from Javascript
     auto configObject = arguments[0].asObject(runtime);
 

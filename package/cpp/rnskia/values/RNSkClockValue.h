@@ -39,11 +39,15 @@ public:
       return;
     }
 
+    printf("@@@ ------------------------->\n");
+    printf("@@@ Starting clock %zu\n", _identifier);
     _isRunning = true;
     _identifier = getContext()->beginDrawLoop(
         _identifier, [weakSelf = weak_from_this()](bool invalidated) {
           auto self = weakSelf.lock();
           if (self) {
+            printf("@@@ Updating clock %s %zu\n", std::static_pointer_cast<RNSkClockValue>(self)->_isRunning ? "TRUE" : "FALSE",
+                   std::static_pointer_cast<RNSkClockValue>(self)->_identifier);
             std::static_pointer_cast<RNSkClockValue>(self)->drawLoopCallback(
                 invalidated);
           }
@@ -60,6 +64,10 @@ public:
     if (!_isRunning) {
       return;
     }
+    
+    printf("@@@ Stopping clock %zu\n", _identifier);
+    printf("@@@ <--------------------------\n");
+    
     getContext()->endDrawLoop(_identifier);
     _isRunning = false;
     onClockStopped();
@@ -101,7 +109,9 @@ protected:
    Handles callback when listeners are empty. Then we'll just stop the
    clock
    */
-  void onListenersEmpty() override { stopClock(); }
+  void onListenersBecameEmpty() override {
+    stopClock();    
+  }
 
 private:
   /*
