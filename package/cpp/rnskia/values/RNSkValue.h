@@ -51,9 +51,7 @@ public:
   /**
    Returns the inner value
    */
-  virtual JsiValue &getCurrent() {
-    return _current;
-  }
+  virtual JsiValue &getCurrent() { return _current; }
 
   /**
    Adds listener value as a weak dependency that listents to changes in this
@@ -203,15 +201,16 @@ protected:
 
 private:
   /**
-   Notifies listeners - this method is not thread safe - use notifyListeners instead.
+   Notifies listeners - this method is not thread safe - use notifyListeners
+   instead.
    */
-  void internalNotifyListeners () {
+  void internalNotifyListeners() {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     for (auto &listener : _listeners) {
       listener.second(this);
     }
   }
-                    
+
   JsiValue _current;
 
   // Identifier of listener
@@ -222,7 +221,7 @@ private:
 
   // Mutex for locking access to listeners
   std::mutex _listenerMutex;
-                    
+
   // Mutex for ensuring thread safe access to the current value
   std::mutex _valueMutex;
 };
@@ -269,8 +268,8 @@ public:
 
   JSI_PROPERTY_SET(current) {
     setCurrent(JsiValue(runtime, value));
-    // Unset any animations to stop them - since setting the current property should
-    // automatically "take over" updating from a running animation
+    // Unset any animations to stop them - since setting the current property
+    // should automatically "take over" updating from a running animation
     setAnimation(nullptr);
   }
 

@@ -11,7 +11,7 @@
 #include "RNSkComputedValue.h"
 #include "RNSkDecayValue.h"
 #include "RNSkEasings.h"
-#include "RNSkInterpolatorValue.h"
+#include "RNSkInterpolatorValues.h"
 #include "RNSkSpringEasing.h"
 #include "RNSkTimingValue.h"
 
@@ -45,6 +45,8 @@ public:
     auto springEasing = std::make_shared<RNSkSpringEasing>(
         _platformContext, runtime, arguments[0]);
 
+    // Return spring easing config object as a JS object with
+    // props for duration and the easing value itself
     auto duration = springEasing->getDurationMs();
     auto retVal = jsi::Object(runtime);
     retVal.setProperty(runtime, "duration", duration);
@@ -61,118 +63,63 @@ public:
   }
 
   JSI_HOST_FUNCTION(createTiming) {
-    // Read parameters from Javascript
-    auto configObject = arguments[0].asObject(runtime);
-
-    auto from = configObject.getProperty(runtime, "from").asNumber();
-    auto to = configObject.getProperty(runtime, "to").asNumber();
-    auto loop = configObject.getProperty(runtime, "loop").asBool();
-    auto yoyo = configObject.getProperty(runtime, "yoyo").asBool();
-
-    auto duration = configObject.getProperty(runtime, "duration").asNumber();
-
-    // Read easing - easing is a value that will be driven by the timing if
-    // provided.
-    std::shared_ptr<RNSkMutableValue> easing = nullptr;
-    if (arguments[1].isObject()) {
-      easing = arguments[1].getObject(runtime).asHostObject<RNSkMutableValue>(
-          runtime);
-    }
-
-    // TODO: Read animation done callback
-
-    // Create config
-    RNSkTimingConfig config = {
-        .from = from,
-        .to = to,
-        .loop = loop,
-        .yoyo = yoyo,
-        .duration = duration,
-        .easing = easing,
-    };
-
     return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<RNSkTimingAnimatedValue>(_platformContext, config));
+        runtime, std::make_shared<RNSkTimingAnimatedValue>(
+                     _platformContext, runtime, arguments[0], arguments[1]));
   }
 
   JSI_HOST_FUNCTION(createDecay) {
-    // Read parameters from Javascript
-    auto configObject = arguments[0].asObject(runtime);
-
-    auto from = configObject.getProperty(runtime, "from").asNumber();
-    auto deceleration =
-        configObject.getProperty(runtime, "deceleration").asNumber();
-    auto velocityFactor =
-        configObject.getProperty(runtime, "velocityFactor").asNumber();
-    auto clamp = configObject.getProperty(runtime, "clamp")
-                     .asObject(runtime)
-                     .asArray(runtime);
-    auto velocity = configObject.getProperty(runtime, "velocity").asNumber();
-
-    // TODO: Read animation done callback
-
-    // Create config
-    std::vector<double> clampArray(clamp.size(runtime));
-    for (auto i = 0; i < clampArray.size(); ++i) {
-      clampArray[i] = clamp.getValueAtIndex(runtime, i).asNumber();
-    }
-
-    RNSkDecayConfig config = {from, deceleration, velocityFactor,
-                              .clamp = clampArray, velocity};
-
     return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<RNSkDecayAnimatedValue>(_platformContext, config));
+        runtime, std::make_shared<RNSkDecayAnimatedValue>(
+                     _platformContext, runtime, arguments[0]));
   }
 
-  JSI_HOST_FUNCTION(createInterpolator) {
-    // Read parameters from Javascript
-    auto configObject = arguments[0].asObject(runtime);
-
-    // Create configuration
-    std::vector<double> inputs;
-    std::vector<JsiValue> outputs;
-
-    auto inputsArray =
-        configObject.getPropertyAsObject(runtime, "inputs").asArray(runtime);
-    auto outputsArray =
-        configObject.getPropertyAsObject(runtime, "outputs").asArray(runtime);
-
-    // Resize and set numbers from input
-    inputs.resize(inputsArray.size(runtime));
-    for (size_t i = 0; i < inputs.size(); ++i) {
-      inputs[i] = inputsArray.getValueAtIndex(runtime, i).asNumber();
-    }
-
-    // Reserve on outputs since we're constructing JsiValues here
-    outputs.reserve(outputsArray.size(runtime));
-    for (size_t i = 0; i < inputs.size(); ++i) {
-      outputs.emplace_back(runtime, outputsArray.getValueAtIndex(runtime, i));
-    }
-
-    // Clamping
-    auto extrapolateLeftProp =
-        configObject.getProperty(runtime, "extrapolateLeft");
-    std::string extrapolateLeft = "extend";
-    if (extrapolateLeftProp.isString()) {
-      extrapolateLeft = extrapolateLeftProp.asString(runtime).utf8(runtime);
-    }
-
-    auto extrapolateRightProp =
-        configObject.getProperty(runtime, "extrapolateRight");
-    std::string extrapolateRight = "extend";
-    if (extrapolateRightProp.isString()) {
-      extrapolateRight = extrapolateRightProp.asString(runtime).utf8(runtime);
-    }
-
-    // Create config
-    RNSkInterpolatorConfig config = {inputs, outputs, extrapolateLeft,
-                                     extrapolateRight};
-
+  JSI_HOST_FUNCTION(createColorInterpolator) {
     return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<RNSkInterpolatorValue>(_platformContext, config));
+        runtime, std::make_shared<RNSkColorInterpolatorValue>(
+                     _platformContext, runtime, arguments[0]));
+  }
+
+  JSI_HOST_FUNCTION(createMatrixInterpolator) {
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<RNSkMatrixInterpolatorValue>(
+                     _platformContext, runtime, arguments[0]));
+  }
+
+  JSI_HOST_FUNCTION(createNumericInterpolator) {
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<RNSkNumericInterpolatorValue>(
+                     _platformContext, runtime, arguments[0]));
+  }
+
+  JSI_HOST_FUNCTION(createPathInterpolator) {
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<RNSkPathInterpolatorValue>(
+                     _platformContext, runtime, arguments[0]));
+  }
+
+  JSI_HOST_FUNCTION(createPointInterpolator) {
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<RNSkPointInterpolatorValue>(
+                     _platformContext, runtime, arguments[0]));
+  }
+
+  JSI_HOST_FUNCTION(createRectInterpolator) {
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<RNSkRectInterpolatorValue>(
+                     _platformContext, runtime, arguments[0]));
+  }
+
+  JSI_HOST_FUNCTION(createRRectInterpolator) {
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<RNSkRRectInterpolatorValue>(
+                     _platformContext, runtime, arguments[0]));
+  }
+
+  JSI_HOST_FUNCTION(createTransformInterpolator) {
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<RNSkTransformInterpolatorValue>(
+                     _platformContext, runtime, arguments[0]));
   }
 
   JSI_HOST_FUNCTION(createClockValue) {
@@ -194,7 +141,15 @@ public:
                        JSI_EXPORT_FUNC(RNSkValueApi, createClockValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createTiming),
                        JSI_EXPORT_FUNC(RNSkValueApi, createDecay),
-                       JSI_EXPORT_FUNC(RNSkValueApi, createInterpolator),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createColorInterpolator),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createMatrixInterpolator),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createNumericInterpolator),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createPathInterpolator),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createPointInterpolator),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createRectInterpolator),
+                       JSI_EXPORT_FUNC(RNSkValueApi, createRRectInterpolator),
+                       JSI_EXPORT_FUNC(RNSkValueApi,
+                                       createTransformInterpolator),
                        JSI_EXPORT_FUNC(RNSkValueApi, createComputedValue),
                        JSI_EXPORT_FUNC(RNSkValueApi, createSpringEasing),
                        JSI_EXPORT_FUNC(RNSkValueApi, createEasing))

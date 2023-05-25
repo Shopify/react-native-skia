@@ -19,19 +19,14 @@ public:
    */
   RNSkColorInterpolator(std::shared_ptr<RNSkPlatformContext> platformContext,
                         RNSkInterpolatorConfig config)
-      : RNSkBaseInterpolator(platformContext, config) {
-    // Convert outputs from dynamic to SkColor and get the
-    // color components as well so that we don't need to
-    // do that on each interpolation
-    _outputs.resize(config.inputs.size());
-    for (size_t i = 0; i < config.inputs.size(); i++) {
-      auto output = RNSkColorConverter::convert(config.outputs[i]);
-      _outputs[i][0] = SkColorGetA(output);
-      _outputs[i][1] = SkColorGetR(output);
-      _outputs[i][2] = SkColorGetG(output);
-      _outputs[i][3] = SkColorGetB(output);
-    }
-  }
+      : RNSkBaseInterpolator(platformContext, config) {}
+
+  /**
+   Constructor from jsi values
+   */
+  RNSkColorInterpolator(std::shared_ptr<RNSkPlatformContext> platformContext,
+                        jsi::Runtime &runtime, const jsi::Value &maybeConfig)
+      : RNSkBaseInterpolator(platformContext, runtime, maybeConfig) {}
 
 protected:
   /**
@@ -53,6 +48,20 @@ protected:
     // Update and return value
     output.setNumber(SkColorSetARGB(a, r, g, b));
   };
+
+  void readFromConfig(const RNSkInterpolatorConfig &config) override {
+    // Convert outputs from dynamic to SkColor and get the
+    // color components as well so that we don't need to
+    // do that on each interpolation
+    _outputs.resize(config.inputs.size());
+    for (size_t i = 0; i < config.inputs.size(); i++) {
+      auto output = RNSkColorConverter::convert(config.outputs[i]);
+      _outputs[i][0] = SkColorGetA(output);
+      _outputs[i][1] = SkColorGetR(output);
+      _outputs[i][2] = SkColorGetG(output);
+      _outputs[i][3] = SkColorGetB(output);
+    }
+  }
 
 private:
   // Cache of converted JsiValue's for outputs

@@ -123,12 +123,95 @@ export interface ISkiaValueApi {
   ) => SkiaAnimation;
 
   /**
-   * Creates an interpolator value that can interpolate between a set of values like
-   * numbers, colors, transforms, matrices, paths, rects, rrects and points.
+   * Creates a color interpolator value that can interpolate between a set of values
    * @param config
    * @returns Interpolating Skia value.
    */
-  createInterpolator: <T>(config: {
+  createColorInterpolator: <T>(config: {
+    inputs: Array<number>;
+    outputs: Array<T>;
+    extrapolateLeft: Extrapolate;
+    extrapolateRight: Extrapolate;
+  }) => SkiaMutableValue<T>;
+
+  /**
+   * Creates a matrix interpolator value that can interpolate between a set of values
+   * @param config
+   * @returns Interpolating Skia value.
+   */
+  createMatrixInterpolator: <T>(config: {
+    inputs: Array<number>;
+    outputs: Array<T>;
+    extrapolateLeft: Extrapolate;
+    extrapolateRight: Extrapolate;
+  }) => SkiaMutableValue<T>;
+
+  /**
+   * Creates a numeric interpolator value that can interpolate between a set of values
+   * @param config
+   * @returns Interpolating Skia value.
+   */
+  createNumericInterpolator: <T>(config: {
+    inputs: Array<number>;
+    outputs: Array<T>;
+    extrapolateLeft: Extrapolate;
+    extrapolateRight: Extrapolate;
+  }) => SkiaMutableValue<T>;
+
+  /**
+   * Creates a path interpolator value that can interpolate between a set of values
+   * @param config
+   * @returns Interpolating Skia value.
+   */
+  createPathInterpolator: <T>(config: {
+    inputs: Array<number>;
+    outputs: Array<T>;
+    extrapolateLeft: Extrapolate;
+    extrapolateRight: Extrapolate;
+  }) => SkiaMutableValue<T>;
+
+  /**
+   * Creates a point interpolator value that can interpolate between a set of values
+   * @param config
+   * @returns Interpolating Skia value.
+   */
+  createPointInterpolator: <T>(config: {
+    inputs: Array<number>;
+    outputs: Array<T>;
+    extrapolateLeft: Extrapolate;
+    extrapolateRight: Extrapolate;
+  }) => SkiaMutableValue<T>;
+
+  /**
+   * Creates a rect interpolator value that can interpolate between a set of values
+   * @param config
+   * @returns Interpolating Skia value.
+   */
+  createRectInterpolator: <T>(config: {
+    inputs: Array<number>;
+    outputs: Array<T>;
+    extrapolateLeft: Extrapolate;
+    extrapolateRight: Extrapolate;
+  }) => SkiaMutableValue<T>;
+
+  /**
+   * Creates a rrect interpolator value that can interpolate between a set of values
+   * @param config
+   * @returns Interpolating Skia value.
+   */
+  createRRectInterpolator: <T>(config: {
+    inputs: Array<number>;
+    outputs: Array<T>;
+    extrapolateLeft: Extrapolate;
+    extrapolateRight: Extrapolate;
+  }) => SkiaMutableValue<T>;
+
+  /**
+   * Creates a transform interpolator value that can interpolate between a set of values
+   * @param config
+   * @returns Interpolating Skia value.
+   */
+  createTransformInterpolator: <T>(config: {
     inputs: Array<number>;
     outputs: Array<T>;
     extrapolateLeft: Extrapolate;

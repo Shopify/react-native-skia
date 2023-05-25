@@ -18,12 +18,14 @@ public:
    */
   RNSkRRectInterpolator(std::shared_ptr<RNSkPlatformContext> platformContext,
                         RNSkInterpolatorConfig config)
-      : RNSkBaseInterpolator(platformContext, config) {
-    _outputs.resize(config.outputs.size());
-    for (size_t i = 0; i < config.outputs.size(); ++i) {
-      _outputs[i] = RNSkRRectConverter::convert(config.outputs[i]);
-    }
-  }
+      : RNSkBaseInterpolator(platformContext, config) {}
+
+  /**
+   Constructor from jsi values
+   */
+  RNSkRRectInterpolator(std::shared_ptr<RNSkPlatformContext> platformContext,
+                        jsi::Runtime &runtime, const jsi::Value &maybeConfig)
+      : RNSkBaseInterpolator(platformContext, runtime, maybeConfig) {}
 
 protected:
   /**
@@ -58,6 +60,13 @@ protected:
 
     output.setHostObject(_jsiRRrect);
   };
+
+  void readFromConfig(const RNSkInterpolatorConfig &config) override {
+    _outputs.resize(config.outputs.size());
+    for (size_t i = 0; i < config.outputs.size(); ++i) {
+      _outputs[i] = RNSkRRectConverter::convert(config.outputs[i]);
+    }
+  }
 
 private:
   std::vector<std::shared_ptr<SkRRect>> _outputs;

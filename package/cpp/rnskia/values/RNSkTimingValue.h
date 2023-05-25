@@ -35,7 +35,6 @@ public:
                           RNSkTimingConfig config)
       : RNSkAnimationValue(platformContext), _config(std::move(config)) {
     _state = {config.from, .finished = false};
-    // TODO: Override duration if the easing is providing it
   }
 
   /**
@@ -44,6 +43,50 @@ public:
   RNSkTimingAnimatedValue(std::function<void()> animationDidFinish,
                           std::shared_ptr<RNSkPlatformContext> platformContext)
       : RNSkAnimationValue(animationDidFinish, platformContext) {}
+
+  RNSkTimingAnimatedValue(std::shared_ptr<RNSkPlatformContext> platformContext,
+                          jsi::Runtime &runtime, const jsi::Value &maybeConfig,
+                          const jsi::Value &maybeEasing)
+      : RNSkAnimationValue(platformContext) {
+    // Read parameters from Javascript
+    if (!maybeConfig.isObject()) {
+      throw std::runtime_error("Expected a config object as the first "
+                               "parameter for the timing value.");
+    }
+
+    // Read parameters from Javascript
+    auto configObject = maybeConfig.asObject(runtime);
+
+    auto from = configObject.getProperty(runtime, "from").asNumber();
+    auto to = configObject.getProperty(runtime, "to").asNumber();
+    auto loop = configObject.getProperty(runtime, "loop").asBool();
+    auto yoyo = configObject.getProperty(runtime, "yoyo").asBool();
+
+    auto duration = configObject.getProperty(runtime, "duration").asNumber();
+
+    // Read easing - easing is a value that will be driven by the timing if
+    // provided.
+    std::shared_ptr<RNSkMutableValue> easing = nullptr;
+    if (!maybeEasing.isObject()) {
+      throw std::runtime_error("Expected an easing object as the second "
+                               "parameter for the timing value.");
+    }
+
+    easing =
+        maybeEasing.getObject(runtime).asHostObject<RNSkMutableValue>(runtime);
+
+    // TODO: Read animation done callback
+
+    // Create config
+    _config = {
+        .from = from,
+        .to = to,
+        .loop = loop,
+        .yoyo = yoyo,
+        .duration = duration,
+        .easing = easing,
+    };
+  }
 
 protected:
   /**

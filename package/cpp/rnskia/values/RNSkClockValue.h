@@ -60,7 +60,7 @@ public:
     if (!_isRunning) {
       return;
     }
-    
+
     getContext()->endDrawLoop(_identifier);
     _isRunning = false;
     onClockStopped();
@@ -102,9 +102,7 @@ protected:
    Handles callback when listeners are empty. Then we'll just stop the
    clock
    */
-  void onListenersBecameEmpty() override {
-    stopClock();    
-  }
+  void onListenersBecameEmpty() override { stopClock(); }
 
 private:
   /*

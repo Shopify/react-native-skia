@@ -57,6 +57,42 @@ public:
                          std::shared_ptr<RNSkPlatformContext> platformContext)
       : RNSkAnimationValue(animationDidFinish, platformContext) {}
 
+  /**
+   Constructor from jsi values
+   */
+  RNSkDecayAnimatedValue(std::shared_ptr<RNSkPlatformContext> platformContext,
+                         jsi::Runtime &runtime, const jsi::Value &maybeConfig)
+      : RNSkAnimationValue(platformContext) {
+    // Read parameters from Javascript
+    if (!maybeConfig.isObject()) {
+      throw std::runtime_error(
+          "Expected a config object as the first parameter for a decay value.");
+    }
+
+    auto configObject = maybeConfig.asObject(runtime);
+
+    auto from = configObject.getProperty(runtime, "from").asNumber();
+    auto deceleration =
+        configObject.getProperty(runtime, "deceleration").asNumber();
+    auto velocityFactor =
+        configObject.getProperty(runtime, "velocityFactor").asNumber();
+    auto clamp = configObject.getProperty(runtime, "clamp")
+                     .asObject(runtime)
+                     .asArray(runtime);
+    auto velocity = configObject.getProperty(runtime, "velocity").asNumber();
+
+    // TODO: Read animation done callback
+
+    // Create config
+    std::vector<double> clampArray(clamp.size(runtime));
+    for (auto i = 0; i < clampArray.size(); ++i) {
+      clampArray[i] = clamp.getValueAtIndex(runtime, i).asNumber();
+    }
+
+    _config = {from, deceleration, velocityFactor, .clamp = clampArray,
+               velocity};
+  }
+
 protected:
   /**
    Override to provide animation function that will be called when the dependant

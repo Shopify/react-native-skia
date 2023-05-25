@@ -19,12 +19,14 @@ public:
    */
   RNSkPathInterpolator(std::shared_ptr<RNSkPlatformContext> platformContext,
                        RNSkInterpolatorConfig config)
-      : RNSkBaseInterpolator(platformContext, config) {
-    _outputs.resize(config.inputs.size());
-    for (size_t i = 0; i < config.inputs.size(); i++) {
-      _outputs[i] = RNSkPathConverter::convert(config.outputs[i]);
-    }
-  }
+      : RNSkBaseInterpolator(platformContext, config) {}
+
+  /**
+   Constructor from jsi values
+   */
+  RNSkPathInterpolator(std::shared_ptr<RNSkPlatformContext> platformContext,
+                       jsi::Runtime &runtime, const jsi::Value &maybeConfig)
+      : RNSkBaseInterpolator(platformContext, runtime, maybeConfig) {}
 
 protected:
   /**
@@ -47,6 +49,13 @@ protected:
 
     output.setHostObject(_jsiPath);
   };
+
+  void readFromConfig(const RNSkInterpolatorConfig &config) override {
+    _outputs.resize(config.inputs.size());
+    for (size_t i = 0; i < config.inputs.size(); i++) {
+      _outputs[i] = RNSkPathConverter::convert(config.outputs[i]);
+    }
+  }
 
 private:
   // Cache of converted JsiValue's for outputs

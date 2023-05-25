@@ -42,13 +42,71 @@ public:
                        RNSkInterpolatorConfig config)
       : _config(config), _platformContext(platformContext) {}
 
-  ~RNSkBaseInterpolator() { printf("RNSkBaseInterpolator DTOR\n"); }
+  /**
+   Constructor from jsi values
+   */
+  RNSkBaseInterpolator(std::shared_ptr<RNSkPlatformContext> platformContext,
+                       jsi::Runtime &runtime, const jsi::Value &maybeConfig) {
+    // Read parameters from Javascript
+    if (!maybeConfig.isObject()) {
+      throw std::runtime_error("Expected a config object as the first "
+                               "parameter for an interpolator value.");
+    }
+
+    auto configObject = maybeConfig.asObject(runtime);
+
+    // Create configuration
+    std::vector<double> inputs;
+    std::vector<JsiValue> outputs;
+
+    auto inputsArray =
+        configObject.getPropertyAsObject(runtime, "inputs").asArray(runtime);
+    auto outputsArray =
+        configObject.getPropertyAsObject(runtime, "outputs").asArray(runtime);
+
+    // Resize and set numbers from input
+    inputs.resize(inputsArray.size(runtime));
+    for (size_t i = 0; i < inputs.size(); ++i) {
+      inputs[i] = inputsArray.getValueAtIndex(runtime, i).asNumber();
+    }
+
+    // Reserve on outputs since we're constructing JsiValues here
+    outputs.reserve(outputsArray.size(runtime));
+    for (size_t i = 0; i < inputs.size(); ++i) {
+      outputs.emplace_back(runtime, outputsArray.getValueAtIndex(runtime, i));
+    }
+
+    // Clamping
+    auto extrapolateLeftProp =
+        configObject.getProperty(runtime, "extrapolateLeft");
+    std::string extrapolateLeft = "extend";
+    if (extrapolateLeftProp.isString()) {
+      extrapolateLeft = extrapolateLeftProp.asString(runtime).utf8(runtime);
+    }
+
+    auto extrapolateRightProp =
+        configObject.getProperty(runtime, "extrapolateRight");
+    std::string extrapolateRight = "extend";
+    if (extrapolateRightProp.isString()) {
+      extrapolateRight = extrapolateRightProp.asString(runtime).utf8(runtime);
+    }
+
+    // Create config
+    _config = {inputs, outputs, extrapolateLeft, extrapolateRight};
+  }
+
+  virtual ~RNSkBaseInterpolator() { printf("RNSkBaseInterpolator DTOR\n"); }
 
   /**
    Computes the interpolated value from the inputs, outputs and the current
    passed in to the function
    */
   JsiValue &interpolate(double current) {
+    if (!_isInitialized) {
+      _isInitialized = true;
+      readFromConfig(_config);
+    }
+
     size_t index = getIndexOfNearestValue(current);
 
     auto inputMin = _config.inputs[index];
@@ -109,6 +167,11 @@ protected:
     return _platformContext;
   }
 
+  /**
+   Reads data from configuration
+   */
+  virtual void readFromConfig(const RNSkInterpolatorConfig &config) = 0;
+
 private:
   /**
    Returns the index in the input/output we're at given the input value
@@ -126,5 +189,6 @@ private:
   JsiValue _value;
   RNSkInterpolatorConfig _config;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
+  bool _isInitialized = false;
 };
 } // namespace RNSkia
