@@ -377,4 +377,10 @@ describe("Path", () => {
     const p4 = interpolatePaths(1.1, [0, 1], [p1, p2], "clamp");
     expect(p4.toCmds()).toEqual(p2.toCmds());
   });
+  it("should be possible to call dispose on a path", () => {
+    const { Skia } = setupSkia();
+    const path = Skia.Path.Make();
+    path.moveTo(20, 20).lineTo(20, 40).lineTo(40, 20);
+    path.dispose();
+  });
 });

@@ -13,4 +13,8 @@ export class JsiSkRSXform
   constructor(CanvasKit: CanvasKit, ref: RSXform) {
     super(CanvasKit, ref, "RSXform");
   }
+
+  dispose = () => {
+    // Do nothing in the web implementation
+  };
 }

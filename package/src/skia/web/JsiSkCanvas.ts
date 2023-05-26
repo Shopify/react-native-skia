@@ -46,6 +46,10 @@ export class JsiSkCanvas
     super(CanvasKit, ref, "Canvas");
   }
 
+  dispose = () => {
+    this.ref.delete();
+  };
+
   drawRect(rect: SkRect, paint: SkPaint) {
     this.ref.drawRect(
       JsiSkRect.fromValue(this.CanvasKit, rect),

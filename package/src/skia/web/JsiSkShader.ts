@@ -11,4 +11,8 @@ export class JsiSkShader
   constructor(CanvasKit: CanvasKit, ref: Shader) {
     super(CanvasKit, ref, "Shader");
   }
+
+  dispose = () => {
+    this.ref.delete();
+  };
 }

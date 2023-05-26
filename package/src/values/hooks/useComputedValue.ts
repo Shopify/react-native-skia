@@ -16,6 +16,6 @@ export const useComputedValue = <R>(cb: () => R, values: unknown[]) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     values
   );
-  useEffect(() => () => value.__invalidate(), [value]);
+  useEffect(() => () => value.dispose(), [value]);
   return value;
 };
