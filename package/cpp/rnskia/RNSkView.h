@@ -44,7 +44,7 @@ public:
   /**
    Render to a canvas
    */
-  virtual void renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
+  virtual bool renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
 
 protected:
   std::function<void()> _requestRedraw;
@@ -123,8 +123,9 @@ public:
   /**
    Render to a canvas
    */
-  void renderToCanvas(const std::function<void(SkCanvas *)> &cb) override {
+  bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override {
     cb(_surface->getCanvas());
+    return true;
   };
 
 private:
@@ -225,6 +226,12 @@ public:
   void requestRedraw() { _redrawRequestCounter++; }
 
   /**
+   Renders immediate. Be carefull to not call this method from another thread
+   than the UI thread
+   */
+  void renderImmediate() { _renderer->renderImmediate(_canvasProvider); }
+
+  /**
    Sets the native id of the view
    */
   virtual void setNativeId(size_t nativeId) {
@@ -317,16 +324,6 @@ private:
             self->drawLoopCallback(invalidated);
           }
         });
-
-    // Now we know that we have a valid view and that the view should be more
-    // than ready to render. The view uses a message loop to render, but we'd
-    // like to be able to avoid waiting for the first initial frame loop and
-    // draw directly
-    // - so let us call a little special function we've added for doing that:
-    if (!_initialDrawingDone) {
-      _initialDrawingDone = true;
-      forceRedrawDirect();
-    }
   }
 
   void updateOnSize() {

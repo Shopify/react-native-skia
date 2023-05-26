@@ -63,10 +63,10 @@ float RNSkMetalCanvasProvider::getScaledHeight() {
 /**
  Render to a canvas
  */
-void RNSkMetalCanvasProvider::renderToCanvas(
+bool RNSkMetalCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
   if (_width <= 0 || _height <= 0) {
-    return;
+    return false;
   }
 
   // Make sure to NOT render or try any render operations while we're in the
@@ -83,7 +83,7 @@ void RNSkMetalCanvasProvider::renderToCanvas(
       _requestRedraw();
       // and don't draw now since it might cause errors in the metal renderer if
       // we try to render while in the background. (see above issue)
-      return;
+      return false;
     }
   }
 
@@ -114,7 +114,7 @@ void RNSkMetalCanvasProvider::renderToCanvas(
      */
     id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
     if (currentDrawable == nullptr) {
-      return;
+      return false;
     }
 
     GrMtlTextureInfo fbInfo;
@@ -130,7 +130,7 @@ void RNSkMetalCanvasProvider::renderToCanvas(
     if (skSurface == nullptr || skSurface->getCanvas() == nullptr) {
       RNSkia::RNSkLogger::logToConsole(
           "Skia surface could not be created from parameters.");
-      return;
+      return false;
     }
 
     SkCanvas *canvas = skSurface->getCanvas();
@@ -143,6 +143,8 @@ void RNSkMetalCanvasProvider::renderToCanvas(
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
   }
+
+  return true;
 };
 
 void RNSkMetalCanvasProvider::setSize(int width, int height) {

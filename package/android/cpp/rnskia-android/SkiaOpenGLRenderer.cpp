@@ -137,7 +137,7 @@ SkiaOpenGLRenderer::~SkiaOpenGLRenderer() {
   _nativeWindow = nullptr;
 }
 
-void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
+bool SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
                              int width, int height) {
   switch (_renderState) {
   case RenderState::Initializing: {
@@ -148,14 +148,14 @@ void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
   case RenderState::Rendering: {
     // Make sure to initialize the rendering pipeline
     if (!ensureInitialised()) {
-      break;
+      return false;
     }
 
     // Ensure we have the Skia surface to draw on. We need to
     // pass width and height since the surface will be recreated
     // when the view is resized.
     if (!ensureSkiaSurface(width, height)) {
-      return;
+      return false;
     }
 
     if (cb != nullptr) {
@@ -170,9 +170,13 @@ void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
 
       if (!eglSwapBuffers(getThreadDrawingContext()->glDisplay, _glSurface)) {
         RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
+        return false;
+      } else {
+        return true;
       }
     }
-    break;
+
+    return false;
   }
   case RenderState::Finishing: {
     _renderState = RenderState::Done;
@@ -187,11 +191,11 @@ void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
     // Release Skia Surface
     _skSurface = nullptr;
 
-    break;
+    return true;
   }
   case RenderState::Done: {
     // Do nothing. We're done.
-    break;
+    return true;
   }
   }
 }

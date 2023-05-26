@@ -44,8 +44,7 @@ public:
       : RNSkRenderer(requestRedraw), _platformContext(context) {}
 
   bool tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
-    performDraw(canvasProvider);
-    return true;
+    return performDraw(canvasProvider);
   }
 
   void
@@ -64,12 +63,12 @@ public:
   }
 
 private:
-  void performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
+  bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
     if (_picture == nullptr) {
-      return;
+      return false;
     }
 
-    canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
+    return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);
