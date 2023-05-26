@@ -303,13 +303,6 @@ protected:
 
 private:
   /**
-    Redraws the Skia View directly. It is imperative that the caller knows that
-   we're on the main thread and that the view is set up correctly before calling
-   this function.
-   */
-  void forceRedrawDirect() { _renderer->tryRender(_canvasProvider); }
-
-  /**
    Starts beginDrawCallback loop if the drawing mode is continuous
    */
   void beginDrawingLoop() {
