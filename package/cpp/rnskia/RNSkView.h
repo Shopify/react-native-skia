@@ -223,13 +223,18 @@ public:
    * This method schedules a draw request that will be run on the correct
    * thread and js runtime.
    */
-  void requestRedraw() { _redrawRequestCounter++; }
+  void requestRedraw() {
+    _redrawRequestCounter++;
+  }
 
   /**
    Renders immediate. Be carefull to not call this method from another thread
    than the UI thread
    */
-  void renderImmediate() { _renderer->renderImmediate(_canvasProvider); }
+  void renderImmediate() {
+    _renderer->renderImmediate(_canvasProvider);
+    _redrawRequestCounter = 0;
+  }
 
   /**
    Sets the native id of the view
