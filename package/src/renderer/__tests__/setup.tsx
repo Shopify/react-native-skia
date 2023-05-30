@@ -195,6 +195,8 @@ const serializeSkOjects = (obj: any): any => {
   } else if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
+    } else if (obj.__typename__ === "Paint") {
+      return { __typename__: "Paint", color: Array.from(obj.getColor()) };
     } else if (obj.__typename__ === "Rect") {
       return {
         __typename__: "Rect",
