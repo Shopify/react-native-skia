@@ -71,7 +71,7 @@ public:
         // Read paint property as Host Object - JsiSkPaint
         auto ptr = _paintProp->value().getAs<JsiSkPaint>();
         if (ptr != nullptr) {
-		  auto paint = ptr->getObject();
+          auto paint = ptr->getObject();
           setDerivedValue(std::make_shared<DrawingContext>(paint));
         } else {
           throw std::runtime_error("Expected SkPaint object, got unknown "
