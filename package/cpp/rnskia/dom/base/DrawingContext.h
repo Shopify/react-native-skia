@@ -63,6 +63,7 @@ public:
   bool saveAndConcat(PaintProps *paintProps,
                      const std::vector<std::shared_ptr<JsiDomNode>> &children,
                      std::shared_ptr<SkPaint> paintCache);
+  void savePaint(std::shared_ptr<SkPaint> paintCache);
   void restore();
 
   /**

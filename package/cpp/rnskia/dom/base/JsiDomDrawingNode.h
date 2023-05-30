@@ -30,7 +30,10 @@ protected:
 #endif
     // Save paint if the paint property is set
     if (_paintProp->isSet()) {
-      draw(_paintProp->getUnsafeDerivedValue().get());
+	  auto ctx = _paintProp->getUnsafeDerivedValue().get();
+	  context->savePaint(ctx->getPaint());
+      draw(context);
+	  context->restore();
     } else {
       // Call abstract draw method
       draw(context);

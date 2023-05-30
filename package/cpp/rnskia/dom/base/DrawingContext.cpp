@@ -17,6 +17,11 @@ DrawingContext::DrawingContext(std::shared_ptr<SkPaint> paint) {
 DrawingContext::DrawingContext()
     : DrawingContext(std::make_shared<SkPaint>()) {}
 
+void DrawingContext::savePaint(std::shared_ptr<SkPaint> paintCache) {
+  save();
+  _paints.push_back(paintCache);
+}
+
 bool DrawingContext::saveAndConcat(
     PaintProps *paintProps,
     const std::vector<std::shared_ptr<JsiDomNode>> &children,

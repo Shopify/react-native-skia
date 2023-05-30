@@ -37,6 +37,11 @@ export const parseProps = (props: SerializedProps, assets: Assets) => {
 
 const parseProp = (value: any, assets: Assets) => {
   if (value && typeof value === "object" && "__typename__" in value) {
+    if (value.__typename__ === "Paint") {
+      const paint = Skia.Paint();
+      paint.setColor(Float32Array.of(...value.color));
+      return paint;
+    }
     if (value.__typename__ === "Point") {
       return Skia.Point(value.x, value.y);
     } else if (value.__typename__ === "Rect") {
