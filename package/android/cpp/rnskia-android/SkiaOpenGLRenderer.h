@@ -103,15 +103,6 @@ private:
   bool initGLSurface();
 
   /**
-   * Ensures that we have a valid Skia surface to draw to. The surface will
-   * be recreated if the width/height change.
-   * @param width Width of the underlying view
-   * @param height Height of the underlying view
-   * @return True if initialization went well
-   */
-  bool ensureSkiaSurface(int width, int height);
-
-  /**
    * To be able to use static contexts (and avoid reloading the skia context for
    * each new view, we track the OpenGL and Skia drawing context per thread.
    * @return The drawing context for the current thread
@@ -120,9 +111,7 @@ private:
 
   EGLSurface _glSurface = EGL_NO_SURFACE;
 
-  ANativeWindow *_nativeWindow = nullptr;
-  GrBackendRenderTarget _skRenderTarget;
-  sk_sp<SkSurface> _skSurface;
+  ANativeWindow *_nativeWindow = nullptr;  
 
   int _prevWidth = 0;
   int _prevHeight = 0;
