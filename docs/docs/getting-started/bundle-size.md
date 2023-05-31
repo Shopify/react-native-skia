@@ -9,13 +9,14 @@ Below is the app size increase to be expected when adding React Native Skia to y
 
 | iOS  | Android | Web    |
 | ---- | ------- | ------ |
-| 6 MB | 4 MB    | 7,2 MB |
+| 6 MB | 4 MB    | 2.9 MB* |
+
+
+*This figure is the size of the gzipped file served through a CDN ([learn more](web)).
 
 React Native Skia includes both prebuilt library files and C++ files that are compiled and linked with your app when being built - adding to the size of your app.
 
 For a regular arm 64-bit **Android** device, the increased download size will be around **4 MB** added after adding React Native Skia - on **iOS**, the increased download size will be around **6 MB**.
-
-On **Web**, the increase will be around **7,2 MB**, which can be reduced by distributing the included CanvasKit Web Assembly file through a CDN ([learn more](web)).
 
 Below is an explanation of how these numbers were found - using a bare-bones React Native app created with `npx react-native init` before and after adding React Native Skia.
 
