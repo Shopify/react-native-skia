@@ -23,6 +23,11 @@ export const HomeScreen = () => {
         route="Breathe"
       />
       <HomeScreenButton
+        title="⽐ SVG Comparison"
+        description="Comparison between RN Skia and RN SVG"
+        route="SVGComparison"
+      />
+      <HomeScreenButton
         title="🏞 Filters"
         description="Simple Image Filters"
         route="Filters"
