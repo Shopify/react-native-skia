@@ -54,6 +54,7 @@ const sidebars = {
         "shapes/vertices",
         "shapes/patch",
         "shapes/box",
+        "shapes/custom-drawing",
       ],
     },
     {
