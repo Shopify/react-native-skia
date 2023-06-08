@@ -26,12 +26,12 @@ import {
   Vertices,
   Wallet,
   Severance,
+  SvgComparison,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
-import { SvgComparison } from "./Examples/Comparison/Comparison";
 
 const linking: LinkingOptions<StackParamList> = {
   config: {

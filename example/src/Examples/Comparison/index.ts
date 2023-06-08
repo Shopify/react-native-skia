@@ -1,1 +1,1 @@
-export { Breathe } from "./Comparison";
+export { SvgComparison } from "./Comparison";
