@@ -111,7 +111,7 @@ private:
 
   EGLSurface _glSurface = EGL_NO_SURFACE;
 
-  ANativeWindow *_nativeWindow = nullptr;  
+  ANativeWindow *_nativeWindow = nullptr;
 
   int _prevWidth = 0;
   int _prevHeight = 0;

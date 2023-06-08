@@ -223,9 +223,7 @@ public:
    * This method schedules a draw request that will be run on the correct
    * thread and js runtime.
    */
-  void requestRedraw() {
-    _redrawRequestCounter++;
-  }
+  void requestRedraw() { _redrawRequestCounter++; }
 
   /**
    Renders immediate. Be carefull to not call this method from another thread

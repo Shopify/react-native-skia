@@ -155,7 +155,7 @@ bool SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
 
     if (cb != nullptr) {
       // RNSkLogger::logToConsole("SKIARENDER - Render begin");
-      
+
       getThreadDrawingContext()->skContext->resetContext();
 
       SkColorType colorType;
@@ -164,17 +164,18 @@ bool SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
       fboInfo.fFBOID = 0;
       fboInfo.fFormat = 0x8058;
       colorType = kN32_SkColorType;
-      
-      GrBackendRenderTarget backendRT(width, height, 0, STENCIL_BUFFER_SIZE, fboInfo);
+
+      GrBackendRenderTarget backendRT(width, height, 0, STENCIL_BUFFER_SIZE,
+                                      fboInfo);
 
       SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
       sk_sp<SkSurface> renderTarget(SkSurface::MakeFromBackendRenderTarget(
-              getThreadDrawingContext()->skContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin, colorType,
-              nullptr, &props));
+          getThreadDrawingContext()->skContext.get(), backendRT,
+          kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props));
 
       auto canvas = renderTarget->getCanvas();
-      
+
       // Draw picture into surface
       cb(canvas);
 
@@ -187,7 +188,7 @@ bool SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
       }
 
       // RNSkLogger::logToConsole("SKIARENDER - render done");
-      return true;      
+      return true;
     }
 
     return false;
