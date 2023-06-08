@@ -77,8 +77,7 @@ void RNSkMetalCanvasProvider::renderToCanvas(
   // accessed from the main thread so we need to check here.
   if ([[NSThread currentThread] isMainThread]) {
     auto state = UIApplication.sharedApplication.applicationState;
-    if (state == UIApplicationStateBackground ||
-        state == UIApplicationStateInactive) {
+    if (state == UIApplicationStateBackground) {
       // Request a redraw in the next run loop callback
       _requestRedraw();
       // and don't draw now since it might cause errors in the metal renderer if
