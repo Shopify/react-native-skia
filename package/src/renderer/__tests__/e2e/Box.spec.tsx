@@ -1,6 +1,6 @@
 import React from "react";
 
-import { checkImage } from "../../../__tests__/setup";
+import { checkImage, docPath } from "../../../__tests__/setup";
 import { Box, BoxShadow, Fill, FitBox } from "../../components";
 import { surface, importSkia, PIXEL_RATIO } from "../setup";
 
@@ -24,7 +24,7 @@ describe("Box", () => {
         </Box>
       </>
     );
-    checkImage(img, "snapshots/box/box-shadow.png");
+    checkImage(img, docPath("box/box-shadow.png"));
   });
   it("should render negative values", async () => {
     const { rect } = importSkia();
