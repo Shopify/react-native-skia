@@ -71,13 +71,35 @@ public class ViewScreenshotService {
         canvas.save();
         applyTransformations(canvas, view);
 
-        // Render view itself
-        view.draw(canvas);
-
         // Draw children if the view has children
         if ((view instanceof ViewGroup)) {
             // Draw children
             ViewGroup group = (ViewGroup) view;
+
+            // Hide visible children - this needs to be done because view.draw(canvas)
+            // will render all visible non-texture/surface views directly - causing
+            // views to be rendered twice - once by view.draw() and once when we
+            // enumerate children. We therefore need to turn off rendering of visible
+            // children before we call view.draw:
+            List<View> visibleChildren = new ArrayList<>();
+            for (int i = 0; i < group.getChildCount(); i++) {
+                View child = group.getChildAt(i);
+                if (child.getVisibility() == VISIBLE) {
+                    visibleChildren.add(child);
+                    child.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            // Draw ourselves
+            view.draw(canvas);
+
+            // Enable children again
+            for (int i = 0; i < visibleChildren.size(); i++) {
+                View child = visibleChildren.get(i);
+                child.setVisibility(VISIBLE);
+            }
+
+            // Draw children
             for (int i = 0; i < group.getChildCount(); i++) {
                 View child = group.getChildAt(i);
 
@@ -90,7 +112,7 @@ public class ViewScreenshotService {
                     tvChild.setOpaque(false); // <-- switch off background fill
 
                     canvas.save();
-                    applyTransformations(canvas, view);
+                    applyTransformations(canvas, child);
 
                     // TextureView should use bitmaps with matching size,
                     // otherwise content of the TextureView will be scaled to provided bitmap dimensions
@@ -108,7 +130,7 @@ public class ViewScreenshotService {
                         try {
                             PixelCopy.request(svChild, childBitmapBuffer, copyResult -> {
                                 canvas.save();
-                                applyTransformations(canvas, view);
+                                applyTransformations(canvas, child);
                                 canvas.drawBitmap(childBitmapBuffer, 0, 0, paint);
                                 canvas.restore();
                                 latch.countDown();
@@ -121,19 +143,20 @@ public class ViewScreenshotService {
                         Bitmap cache = svChild.getDrawingCache();
                         if (cache != null) {
                             canvas.save();
-                            applyTransformations(canvas, view);
+                            applyTransformations(canvas, child);
                             canvas.drawBitmap(svChild.getDrawingCache(), 0, 0, paint);
                             canvas.restore();
                         }
                     }
                 } else {
                     // Regular views needs to be rendered again to ensure correct z-index
-                    // order with texture views and surface views. This is a bit stupid
-                    // it'll result in rendering regular views twice - but it is the only
-                    // way we can possibly render both surrounding and child views
+                    // order with texture views and surface views.
                     renderViewToCanvas(canvas, child, paint);
                 }
             }
+        } else {
+            // Draw ourselves
+            view.draw(canvas);
         }
 
         // Restore canvas
