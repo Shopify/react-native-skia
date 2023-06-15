@@ -1,3 +1,6 @@
-import type { JsiDisposable, SkJSIInstance } from "../JsiInstance";
+import type { SkJSIInstance } from "../JsiInstance";
 
-export type SkSVG = SkJSIInstance<"SVG"> & JsiDisposable;
+export interface SkSVG extends SkJSIInstance<"SVG"> {
+  width(): number;
+  height(): number;
+}

@@ -98,13 +98,12 @@ public:
     auto propName = arguments[0].asString(runtime).utf8(runtime);
     const jsi::Value &propValue = arguments[1];
 
-    auto mappedProps = _propsContainer->getMappedProperties();
-    auto propMapIt = mappedProps.find(JsiPropId::get(propName));
-    if (propMapIt != mappedProps.end()) {
-      for (auto &prop : propMapIt->second) {
-        prop->updateValue(runtime, propValue);
-      }
-    }
+    // Enumerate all props with this name and update. The
+    // enumerateMappedPropsByName function is thread safe and locks props so it
+    // can be called from all threads.
+    _propsContainer->enumerateMappedPropsByName(propName, [&](NodeProp *prop) {
+      prop->updateValue(runtime, propValue);
+    });
 
     return jsi::Value::undefined();
   }

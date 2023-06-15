@@ -54,13 +54,14 @@ const sidebars = {
         "shapes/vertices",
         "shapes/patch",
         "shapes/box",
+        "shapes/custom-drawing",
       ],
     },
     {
       collapsed: true,
       type: "category",
-      label: "Image",
-      items: ["image", "image-svg"],
+      label: "Images",
+      items: ["image", "image-svg", "snapshotviews"],
     },
     {
       collapsed: true,

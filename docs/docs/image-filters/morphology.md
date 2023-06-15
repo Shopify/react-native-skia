@@ -22,9 +22,6 @@ import {Canvas, Text, Morphology, useFont} from "@shopify/react-native-skia";
 
 export const MorphologyDemo = () => {
   const font = useFont(require("./SF-Pro.ttf"), 24);
-  if (font === null) {
-    return null;
-  }
   return (
     <Canvas style={{ width: 256, height: 256 }}>
       <Text

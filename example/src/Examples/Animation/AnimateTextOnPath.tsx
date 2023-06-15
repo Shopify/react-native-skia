@@ -52,10 +52,10 @@ export const AnimateTextOnPath = () => {
 
   // Create a derived value that interpolates between
   // the start and end path
-  const path = useComputedValue(
-    () => path1.interpolate(path2, progress.current)!,
-    [progress]
-  );
+  const path = useComputedValue(() => {
+    path?.current?.dispose();
+    return path1.interpolate(path2, progress.current)!;
+  }, [progress]);
 
   return (
     <AnimationDemo title={"Interpolating text on path."}>

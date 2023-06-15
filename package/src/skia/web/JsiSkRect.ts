@@ -12,6 +12,10 @@ export class JsiSkRect extends BaseHostObject<Rect, "Rect"> implements SkRect {
     return CanvasKit.XYWHRect(rect.x, rect.y, rect.width, rect.height);
   }
 
+  dispose = () => {
+    // Float32Array
+  };
+
   constructor(CanvasKit: CanvasKit, ref: Rect) {
     super(CanvasKit, ref, "Rect");
   }

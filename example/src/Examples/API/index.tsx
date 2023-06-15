@@ -22,6 +22,7 @@ import { Touch } from "./Touch";
 import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
 import { Backbuffer } from "./Backbuffer";
+import { Snapshot } from "./Snapshot";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -47,6 +48,13 @@ export const API = () => {
         component={Images}
         options={{
           title: "🏞 Images",
+        }}
+      />
+      <Stack.Screen
+        name="Snapshot"
+        component={Snapshot}
+        options={{
+          title: "📺 View Snapshot",
         }}
       />
       <Stack.Screen

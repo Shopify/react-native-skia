@@ -19,4 +19,5 @@ export type Routes = {
   PictureView: undefined;
   OnLayout: undefined;
   Backbuffer: undefined;
+  Snapshot: undefined;
 };

@@ -12,7 +12,7 @@ Images are loaded using the `useImage` hook. This hook returns an `SkImage` inst
 Images can be loaded using require statements, or by passing a network URL directly. It is also possible to load images from the app bundle using named images.
 
 ```tsx twoslash
-import {useImage} from "@shopify/react-native-skia";
+import { useImage } from "@shopify/react-native-skia";
 // Loads an image from the JavaScript bundle
 const image1 = useImage(require("./assets/oslo"));
 // Loads an image from the network
@@ -21,7 +21,7 @@ const image2 = useImage("https://picsum.photos/200/300");
 const image3 = useImage("Logo");
 ```
 
-Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is loaded. You can use this to conditionally render the `Image` component like in the [example below](#example). The hook also provides an optional error handler as a second parameter. 
+Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is loaded. You can use this to conditionally render the `Image` component like in the [example below](#example). The hook also provides an optional error handler as a second parameter.
 
 ## Image
 
@@ -45,16 +45,7 @@ const ImageDemo = () => {
   const image = useImage(require("./assets/oslo.jpg"));
   return (
     <Canvas style={{ flex: 1 }}>
-      {image && (
-        <Image
-          image={image}
-          fit="contain"
-          x={0}
-          y={0}
-          width={256}
-          height={256}
-        />
-      )}
+      <Image image={image} fit="contain" x={0} y={0} width={256} height={256} />
     </Canvas>
   );
 };

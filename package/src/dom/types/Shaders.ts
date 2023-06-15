@@ -30,7 +30,7 @@ export interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   mm: SkEnum<typeof MipmapMode>;
   fit: Fit;
   rect?: SkRect;
-  image: SkImage;
+  image: SkImage | null;
 }
 
 export interface ColorProps {

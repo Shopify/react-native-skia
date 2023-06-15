@@ -13,6 +13,10 @@ export class JsiSkVertices
     super(CanvasKit, ref, "Vertices");
   }
 
+  dispose = () => {
+    this.ref.delete();
+  };
+
   bounds() {
     return new JsiSkRect(this.CanvasKit, this.ref.bounds());
   }

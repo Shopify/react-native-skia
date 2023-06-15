@@ -11,4 +11,8 @@ export class JsiSkImageFilter
   constructor(CanvasKit: CanvasKit, ref: ImageFilter) {
     super(CanvasKit, ref, "ImageFilter");
   }
+
+  dispose = () => {
+    this.ref.delete();
+  };
 }

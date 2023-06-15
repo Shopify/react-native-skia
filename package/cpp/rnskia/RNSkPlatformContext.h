@@ -9,11 +9,13 @@
 #include <unordered_map>
 #include <utility>
 
-#include <RNSkDispatchQueue.h>
+#include "RNSkDispatchQueue.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "SkData.h"
+#include "SkImage.h"
 #include "SkStream.h"
 #include "SkSurface.h"
 
@@ -89,6 +91,18 @@ public:
   }
 
   /**
+   * Runs the passed function on the main thread
+   * @param func Function to run.
+   */
+  virtual void runOnMainThread(std::function<void()> func) = 0;
+
+  /**
+   * Takes a screenshot of a given view represented by the view tag
+   * @param tag React view tag
+   */
+  virtual sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) = 0;
+
+  /**
    Returns the javascript runtime
    */
   jsi::Runtime *getJsRuntime() { return _jsRuntime; }
@@ -112,11 +126,26 @@ public:
 
   /**
    * Creates an offscreen surface
-   * @param width width of the surface
-   * @param height height of the surface
+   * @param width Width of the offscreen surface
+   * @param height Height of the offscreen surface
    * @return sk_sp<SkSurface>
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+
+  /**
+   * Creates an skImage containing the screenshot of a native view and its
+   * children.
+   * @param viewTag React viewtag
+   * @param callback Called when image is ready or with null if something
+   * failed.
+   */
+  virtual void
+  makeViewScreenshot(int viewTag,
+                     std::function<void(sk_sp<SkImage>)> callback) {
+    runOnMainThread([this, callback, viewTag]() {
+      callback(takeScreenshotFromViewTag(viewTag));
+    });
+  }
 
   /**
    * Raises an exception on the platform. This function does not necessarily
