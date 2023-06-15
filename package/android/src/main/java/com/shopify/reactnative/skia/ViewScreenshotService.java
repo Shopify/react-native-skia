@@ -58,123 +58,96 @@ public class ViewScreenshotService {
         paint.setDither(true);
 
         // Render the main view and its children
-        final Canvas c = new Canvas(bitmap);
-        view.draw(c);
+        final Canvas canvas = new Canvas(bitmap);
 
-        // Enumerate children
-        final List<View> childrenList = getAllChildren(view);
-
-        for (final View child : childrenList) {
-            // skip any child that we don't know how to process
-            if (child instanceof TextureView) {
-                // skip all invisible to user child views
-                if (child.getVisibility() != VISIBLE) continue;
-
-                final TextureView tvChild = (TextureView) child;
-                tvChild.setOpaque(false); // <-- switch off background fill
-
-                // TextureView should use bitmaps with matching size,
-                // otherwise content of the TextureView will be scaled to provided bitmap dimensions
-                final Bitmap childBitmapBuffer = tvChild.getBitmap(Bitmap.createBitmap(child.getWidth(), child.getHeight(), Bitmap.Config.ARGB_8888));
-
-                final int countCanvasSave = c.save();
-                applyTransformations(c, view, child);
-
-                // due to re-use of bitmaps for screenshot, we can get bitmap that is bigger in size than requested
-                c.drawBitmap(childBitmapBuffer, 0, 0, paint);
-
-                c.restoreToCount(countCanvasSave);
-            } else if (child instanceof SurfaceView) {
-                final SurfaceView svChild = (SurfaceView)child;
-                final CountDownLatch latch = new CountDownLatch(1);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    final Bitmap childBitmapBuffer = Bitmap.createBitmap(child.getWidth(), child.getHeight(), Bitmap.Config.ARGB_8888);
-                    try {
-                        PixelCopy.request(svChild, childBitmapBuffer, new PixelCopy.OnPixelCopyFinishedListener() {
-                            @Override
-                            public void onPixelCopyFinished(int copyResult) {
-                                final int countCanvasSave = c.save();
-                                applyTransformations(c, view, child);
-                                c.drawBitmap(childBitmapBuffer, 0, 0, paint);
-                                c.restoreToCount(countCanvasSave);
-                                latch.countDown();
-                            }
-                        }, new Handler(Looper.getMainLooper()));
-                        latch.await(SURFACE_VIEW_READ_PIXELS_TIMEOUT, TimeUnit.SECONDS);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Cannot PixelCopy for " + svChild, e);
-                    }
-                } else {
-                    Bitmap cache = svChild.getDrawingCache();
-                    if (cache != null) {
-                        c.drawBitmap(svChild.getDrawingCache(), 0, 0, paint);
-                    }
-                }
-            }
-        }
+        // Renders view with child views to canvas
+        renderViewToCanvas(canvas, view, paint);
 
         return bitmap;
     }
 
-    private static List<View> getAllChildren(@NonNull final View v) {
-        if (!(v instanceof ViewGroup)) {
-            final ArrayList<View> viewArrayList = new ArrayList<>();
-            viewArrayList.add(v);
+    private static void renderViewToCanvas(Canvas canvas, View view, Paint paint) {
+        // Apply transformations for the current view
+        canvas.save();
+        applyTransformations(canvas, view);
 
-            return viewArrayList;
+        // Render view itself
+        view.draw(canvas);
+
+        // Draw children if the view has children
+        if ((view instanceof ViewGroup)) {
+            // Draw children
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                View child = group.getChildAt(i);
+
+                // skip all invisible to user child views
+                if (child.getVisibility() != VISIBLE) continue;
+
+                // skip any child that we don't know how to process
+                if (child instanceof TextureView) {
+                    final TextureView tvChild = (TextureView) child;
+                    tvChild.setOpaque(false); // <-- switch off background fill
+
+                    canvas.save();
+                    applyTransformations(canvas, view);
+
+                    // TextureView should use bitmaps with matching size,
+                    // otherwise content of the TextureView will be scaled to provided bitmap dimensions
+                    final Bitmap childBitmapBuffer = tvChild.getBitmap(Bitmap.createBitmap(child.getWidth(), child.getHeight(), Bitmap.Config.ARGB_8888));
+                    canvas.drawBitmap(childBitmapBuffer, 0, 0, paint);
+
+                    canvas.restore();
+
+                } else if (child instanceof SurfaceView) {
+                    final SurfaceView svChild = (SurfaceView) child;
+                    final CountDownLatch latch = new CountDownLatch(1);
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        final Bitmap childBitmapBuffer = Bitmap.createBitmap(child.getWidth(), child.getHeight(), Bitmap.Config.ARGB_8888);
+                        try {
+                            PixelCopy.request(svChild, childBitmapBuffer, copyResult -> {
+                                canvas.save();
+                                applyTransformations(canvas, view);
+                                canvas.drawBitmap(childBitmapBuffer, 0, 0, paint);
+                                canvas.restore();
+                                latch.countDown();
+                            }, new Handler(Looper.getMainLooper()));
+                            latch.await(SURFACE_VIEW_READ_PIXELS_TIMEOUT, TimeUnit.SECONDS);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Cannot PixelCopy for " + svChild, e);
+                        }
+                    } else {
+                        Bitmap cache = svChild.getDrawingCache();
+                        if (cache != null) {
+                            canvas.save();
+                            applyTransformations(canvas, view);
+                            canvas.drawBitmap(svChild.getDrawingCache(), 0, 0, paint);
+                            canvas.restore();
+                        }
+                    }
+                } else {
+                    // Regular views needs to be rendered again to ensure correct z-index
+                    // order with texture views and surface views. This is a bit stupid
+                    // it'll result in rendering regular views twice - but it is the only
+                    // way we can possibly render both surrounding and child views
+                    renderViewToCanvas(canvas, child, paint);
+                }
+            }
         }
 
-        final ArrayList<View> result = new ArrayList<>();
-
-        ViewGroup viewGroup = (ViewGroup) v;
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            View child = viewGroup.getChildAt(i);
-
-            //Do not add any parents, just add child elements
-            result.addAll(getAllChildren(child));
-        }
-
-        return result;
+        // Restore canvas
+        canvas.restore();
     }
 
-    /**
-     * Concat all the transformation matrix's from parent to child.
-     */
     @NonNull
-    @SuppressWarnings("UnusedReturnValue")
-    private static Matrix applyTransformations(final Canvas c, @NonNull final View root, @NonNull final View child) {
-        final Matrix transform = new Matrix();
-        final LinkedList<View> ms = new LinkedList<>();
-
-        // find all parents of the child view
-        View iterator = child;
-        do {
-            ms.add(iterator);
-
-            iterator = (View) iterator.getParent();
-        } while (iterator != root);
-
-        // apply transformations from parent --> child order
-        Collections.reverse(ms);
-
-        for (final View v : ms) {
-            c.save();
-
-            // apply each view transformations, so each child will be affected by them
-            final float dx = v.getLeft() + ((v != child) ? v.getPaddingLeft() : 0) + v.getTranslationX();
-            final float dy = v.getTop() + ((v != child) ? v.getPaddingTop() : 0) + v.getTranslationY();
-            c.translate(dx, dy);
-            c.rotate(v.getRotation(), v.getPivotX(), v.getPivotY());
-            c.scale(v.getScaleX(), v.getScaleY());
-
-            // compute the matrix just for any future use
-            transform.postTranslate(dx, dy);
-            transform.postRotate(v.getRotation(), v.getPivotX(), v.getPivotY());
-            transform.postScale(v.getScaleX(), v.getScaleY());
-        }
-
-        return transform;
+    private static void applyTransformations(final Canvas c, @NonNull final View view) {
+        // apply each view transformations, so each child will be affected by them
+        final float dx = view.getLeft() + view.getPaddingLeft() + view.getTranslationX();
+        final float dy = view.getTop() + view.getPaddingTop() + view.getTranslationY();
+        c.translate(dx, dy);
+        c.rotate(view.getRotation(), view.getPivotX(), view.getPivotY());
+        c.scale(view.getScaleX(), view.getScaleY());
     }
 
 }
