@@ -142,12 +142,17 @@ public class ViewScreenshotService {
 
     @NonNull
     private static void applyTransformations(final Canvas c, @NonNull final View view) {
-        // apply each view transformations, so each child will be affected by them
+        // Get the transformation matrix of the view
+        final Matrix matrix = view.getMatrix();
+
+        // Create a new matrix for translation
+        final Matrix translateMatrix = new Matrix();
         final float dx = view.getLeft() + view.getPaddingLeft() + view.getTranslationX();
         final float dy = view.getTop() + view.getPaddingTop() + view.getTranslationY();
-        c.translate(dx, dy);
-        c.rotate(view.getRotation(), view.getPivotX(), view.getPivotY());
-        c.scale(view.getScaleX(), view.getScaleY());
-    }
+        translateMatrix.setTranslate(dx, dy);
 
+        // Pre-concatenate the current matrix of the canvas with the translation and transformation matrices of the view
+        c.concat(translateMatrix);
+        c.concat(matrix);
+    }
 }
