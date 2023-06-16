@@ -1,1 +1,0 @@
-export { SvgComparison } from "./Comparison";
