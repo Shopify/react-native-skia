@@ -1,8 +1,15 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Canvas, Rect, SkPicture } from "@shopify/react-native-skia";
-import { SkiaPictureView, Skia, useSVG } from "@shopify/react-native-skia";
+import type { SkPicture } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Rect,
+  SkiaPictureView,
+  Skia,
+  useSVG,
+} from "@shopify/react-native-skia";
+
 import { Octocat } from "./SvgIcons/OctocatIcon";
 import { StackExchange } from "./SvgIcons/StackExchangeIcon";
 import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
@@ -23,13 +30,13 @@ const useSVGPicture = (module: number) => {
 };
 
 const useLoadSVGs = () => {
-  const github = useSVGPicture(require("../../assets/icons8-github.svg"));
-  const octocat = useSVGPicture(require("../../assets/icons8-octocat.svg"));
+  const github = useSVGPicture(require("../../../assets/icons8-github.svg"));
+  const octocat = useSVGPicture(require("../../../assets/icons8-octocat.svg"));
   const stackExchange = useSVGPicture(
-    require("../../assets/icons8-stack-exchange.svg")
+    require("../../../assets/icons8-stack-exchange.svg")
   );
   const overflow = useSVGPicture(
-    require("../../assets/icons8-stack-overflow.svg")
+    require("../../../assets/icons8-stack-overflow.svg")
   );
   if (github && octocat && stackExchange && overflow) {
     return {
@@ -85,22 +92,22 @@ const Screen = () => {
       <View style={{ flex: 1, alignItems: "center" }}>
         <Text>React Native Skia Picture</Text>
         <Icon icon={github} />
-        {/* <Icon icon={octocat} />
+        <Icon icon={octocat} />
         <Icon icon={stackExchange} />
-        <Icon icon={overflow} /> */}
-        {/* <Text>React Native Skia Canvas</Text>
+        <Icon icon={overflow} />
+        <Text>React Native Skia Canvas</Text>
         <Canvas style={{ width: 50, height: 50 }}>
           <Rect x={0} y={0} width={50} height={50} color="red" />
-        </Canvas> */}
+        </Canvas>
         <Text>React Native View</Text>
         <View style={{ backgroundColor: "orange", width: 50, height: 50 }} />
       </View>
       <View style={{ flex: 1, alignItems: "center" }}>
         <Text>React Native SVG</Text>
         <Github />
-        {/* <Octocat />
+        <Octocat />
         <StackExchange />
-        <StackOverflow /> */}
+        <StackOverflow />
         <Text>React Native View</Text>
         <View style={{ backgroundColor: "orange", width: 50, height: 50 }} />
       </View>
@@ -114,7 +121,7 @@ const SettingsScreen = () => <Screen />;
 
 const Tab = createBottomTabNavigator();
 
-export const SvgComparison = () => {
+export const IconsExample = () => {
   const assets = useLoadSVGs();
   if (!assets) {
     return null;
