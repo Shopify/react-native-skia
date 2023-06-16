@@ -65,10 +65,6 @@ public:
 
 private:
   void performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-    if (_picture == nullptr) {
-      return;
-    }
-
     canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
@@ -76,7 +72,9 @@ private:
       canvas->save();
       canvas->scale(pd, pd);
 
-      canvas->drawPicture(_picture->getObject());
+      if (_picture != nullptr) {
+        canvas->drawPicture(_picture->getObject());
+      }
 
       canvas->restore();
     });
