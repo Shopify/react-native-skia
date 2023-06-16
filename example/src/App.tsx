@@ -26,7 +26,6 @@ import {
   Vertices,
   Wallet,
   Severance,
-  SvgComparison,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -54,7 +53,6 @@ const linking: LinkingOptions<StackParamList> = {
       Animation: "animation",
       Reanimated: "reanimated",
       Performance: "performance",
-      SVGComparison: "comparison",
       Tests: "test",
     },
   },
@@ -119,7 +117,6 @@ const App = () => {
             />
             <Stack.Screen name="API" component={API} />
             <Stack.Screen name="Breathe" component={Breathe} />
-            <Stack.Screen name="SVGComparison" component={SvgComparison} />
             <Stack.Screen name="Filters" component={Filters} />
             <Stack.Screen name="Gooey" component={Gooey} />
             <Stack.Screen name="Hue" component={Hue} />
