@@ -31,6 +31,10 @@ export const examples = [
     title: "⭐️ Path Effect",
   },
   {
+    screen: "IconsExample",
+    title: "📱 Icons",
+  },
+  {
     screen: "Transform",
     title: "🔄 Transformations",
   },
