@@ -77,7 +77,7 @@ private:
 
       canvas->restore();
     });
-	return true;
+    return true;
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
