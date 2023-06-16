@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  void performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
+  bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
     canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
@@ -77,6 +77,7 @@ private:
 
       canvas->restore();
     });
+	return true;
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
