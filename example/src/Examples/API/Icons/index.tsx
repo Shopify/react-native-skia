@@ -24,7 +24,6 @@ const useSVGPicture = (module: number) => {
     const recorder = Skia.PictureRecorder();
     const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, 48, 48));
     canvas.drawSvg(svg);
-    console.log("finishRecordingAsPicture");
     return recorder.finishRecordingAsPicture();
   }, [svg]);
 };
