@@ -31,6 +31,46 @@ export interface CanvasProps extends SkiaBaseViewProps {
   onTouch?: TouchHandler;
 }
 
+export const useOnSize = (
+  resultValue: SkiaBaseViewProps['onSize'],
+) => {
+  const onSize = useValue({
+    width: 0,
+    height: 0,
+  });
+
+  useLayoutEffect(
+    () => {
+      if (!resultValue) {
+        return
+      }
+
+      return onSize.addListener((newValue) => {
+        const currentValue =
+          'value' in resultValue ? resultValue.value : resultValue.current;
+
+        if (
+          currentValue.height === newValue.height &&
+          currentValue.width === newValue.width
+        ) {
+          return;
+        }
+
+        const valueCopy = Object.assign({}, newValue);
+        if ('value' in resultValue) {
+          resultValue.value = valueCopy;
+          return;
+        }
+
+        resultValue.current = valueCopy;
+      })
+    },
+    [resultValue, onSize],
+  );
+
+  return onSize;
+};
+
 export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
   (
     {
@@ -39,21 +79,12 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       debug,
       mode,
       onTouch,
-      onSize: onSizeReanimatedOrSkia,
+      onSize: _onSize,
       ...props
     },
     forwardedRef
   ) => {
-    const size = useValue({ width: 0, height: 0 });
-    const onSize = isValue(onSizeReanimatedOrSkia)
-      ? onSizeReanimatedOrSkia
-      : size;
-    useEffect(() => {
-      if (!isValue(onSizeReanimatedOrSkia) && onSizeReanimatedOrSkia) {
-        return size.addListener((v) => (onSizeReanimatedOrSkia.value = v));
-      }
-      return undefined;
-    }, [onSizeReanimatedOrSkia, size]);
+    const onSize = useOnSize(_onSize)
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const redraw = useCallback(() => {
