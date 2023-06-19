@@ -4,6 +4,7 @@ import React, {
   useMemo,
   forwardRef,
   useRef,
+  useLayoutEffect
 } from "react";
 import type {
   RefObject,
