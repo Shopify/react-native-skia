@@ -29,4 +29,6 @@ export interface SkSurface extends SkJSIInstance<"Surface"> {
    * Make sure any queued draws are sent to the screen or the GPU.
    */
   flush(): void;
+
+  readPixels(): Uint8Array;
 }

@@ -19,6 +19,6 @@ public class RNSkiaPackage implements ReactPackage {
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
         return Arrays.<ViewManager>asList(new SkiaDrawViewManager(),
-                new SkiaPictureViewManager(), new SkiaDomViewManager());
+                new SkiaPictureViewManager(), new SkiaDomViewManager(), new SkiaBitmapViewManager());
     }
 }

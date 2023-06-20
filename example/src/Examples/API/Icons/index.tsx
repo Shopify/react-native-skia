@@ -1,19 +1,48 @@
 import React, { createContext, useContext, useMemo } from "react";
-import { Text, View } from "react-native";
+import { PixelRatio, Text, View, requireNativeComponent } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import type { SkPicture } from "@shopify/react-native-skia";
 import {
+  AlphaType,
   Canvas,
+  ColorType,
   Rect,
-  SkiaPictureView,
   Skia,
   useSVG,
 } from "@shopify/react-native-skia";
+import { encode as btoa } from "base-64";
+import type { ViewProps } from "react-native-svg/lib/typescript/fabric/utils";
 
 import { Octocat } from "./SvgIcons/OctocatIcon";
 import { StackExchange } from "./SvgIcons/StackExchangeIcon";
 import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
 import { Github } from "./SvgIcons/GithubIcon";
+
+const SkiaBitmapView = requireNativeComponent<{
+  bitmap: string;
+  style?: ViewProps["style"];
+}>("SkiaBitmapView");
+
+const pixels = new Uint8Array(256 * 256 * 4);
+pixels.fill(255);
+let i = 0;
+for (let x = 0; x < 256 * 4; x++) {
+  for (let y = 0; y < 256 * 4; y++) {
+    pixels[i++] = (x * y) % 255;
+  }
+}
+const data = Skia.Data.fromBytes(pixels);
+const img = Skia.Image.MakeImage(
+  {
+    width: 256,
+    height: 256,
+    alphaType: AlphaType.Opaque,
+    colorType: ColorType.RGBA_8888,
+  },
+  data,
+  256 * 4
+)!;
+
+const pd = PixelRatio.get();
 
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);
@@ -21,10 +50,15 @@ const useSVGPicture = (module: number) => {
     if (!svg) {
       return null;
     }
-    const recorder = Skia.PictureRecorder();
-    const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, 48, 48));
+    const surface = Skia.Surface.MakeOffscreen(48 * pd, 48 * pd);
+    if (!surface) {
+      throw new Error("Couldn't create offscreen surface");
+    }
+    const canvas = surface.getCanvas();
     canvas.drawSvg(svg);
-    return recorder.finishRecordingAsPicture();
+    //surface.flush();
+    // const pixels = surface.readPixels();
+    return pixels;
   }, [svg]);
 };
 
@@ -50,10 +84,10 @@ const useLoadSVGs = () => {
 };
 
 interface SVGAssets {
-  github: SkPicture;
-  octocat: SkPicture;
-  stackExchange: SkPicture;
-  overflow: SkPicture;
+  github: Uint8Array;
+  octocat: Uint8Array;
+  stackExchange: Uint8Array;
+  overflow: c;
 }
 
 const SVGContext = createContext<SVGAssets | null>(null);
@@ -67,14 +101,24 @@ const useSVGs = () => {
 };
 
 interface IconProps {
-  icon: SkPicture;
+  icon: Uint8Array;
   size?: number;
+}
+
+function toBase64(arr: Uint8Array) {
+  let binaryStr = "";
+  const len = arr.byteLength;
+  for (let i = 0; i < len; i++) {
+    binaryStr += String.fromCharCode(arr[i]);
+  }
+  return btoa(binaryStr);
 }
 
 const style = { width: 48, height: 48 };
 
 const Icon = ({ icon }: IconProps) => {
-  return <SkiaPictureView picture={icon} style={style} />;
+  const bitmap = toBase64(pixels);
+  return <SkiaBitmapView bitmap={bitmap} style={style} />;
 };
 
 const Screen = () => {

@@ -23,6 +23,7 @@
     "@testing-library/jest-native": "^5.4.2",
     "@testing-library/react-hooks": "^8.0.1",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
+    "base-64": "^1.0.0",
     "cdt2d": "^1.0.0",
     "color": "^4.2.1",
     "its-fine": "^1.0.8",
