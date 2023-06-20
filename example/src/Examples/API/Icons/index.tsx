@@ -15,8 +15,14 @@ import { StackExchange } from "./SvgIcons/StackExchangeIcon";
 import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
 import { Github } from "./SvgIcons/GithubIcon";
 
-const surface = Skia.Surface.MakeOffscreen(48, 48);
-console.log({ surface });
+const surface1 = Skia.Surface.MakeOffscreen(48, 48);
+const surface2 = Skia.Surface.MakeOffscreen(48, 48);
+if (!surface1 || !surface2) {
+  throw new Error("Couldn't create offscreen surfaces");
+}
+surface1.getCanvas().drawColor(Skia.Color("cyan"));
+surface2.getCanvas().drawImage(surface1.makeImageSnapshot(), 0, 0);
+const image = surface2.makeImageSnapshot().makeNonTextureImage();
 
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);
@@ -27,6 +33,7 @@ const useSVGPicture = (module: number) => {
     const recorder = Skia.PictureRecorder();
     const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, 48, 48));
     canvas.drawSvg(svg);
+    canvas.drawImage(image, 0, 0);
     return recorder.finishRecordingAsPicture();
   }, [svg]);
 };
