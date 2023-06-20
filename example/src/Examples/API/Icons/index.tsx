@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import type { SkPicture } from "@shopify/react-native-skia";
+import type { SkSurface } from "@shopify/react-native-skia";
 import {
   Canvas,
   Rect,
@@ -15,24 +15,19 @@ import { StackExchange } from "./SvgIcons/StackExchangeIcon";
 import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
 import { Github } from "./SvgIcons/GithubIcon";
 
-const surface1 = Skia.Surface.MakeOffscreen(48, 48);
-const surface2 = Skia.Surface.MakeOffscreen(48, 48);
-if (!surface1 || !surface2) {
-  throw new Error("Couldn't create offscreen surfaces");
-}
-surface1.getCanvas().drawColor(Skia.Color("cyan"));
-surface2.getCanvas().drawImage(surface1.makeImageSnapshot(), 0, 0);
-
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);
   return useMemo(() => {
     if (!svg) {
       return null;
     }
-    const recorder = Skia.PictureRecorder();
-    const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, 48, 48));
+    const surface = Skia.Surface.MakeOffscreen(48, 48);
+    if (!surface) {
+      throw new Error("Couldn't create offscreen surface");
+    }
+    const canvas = surface.getCanvas();
     canvas.drawSvg(svg);
-    return recorder.finishRecordingAsPicture();
+    return surface;
   }, [svg]);
 };
 
@@ -58,10 +53,10 @@ const useLoadSVGs = () => {
 };
 
 interface SVGAssets {
-  github: SkPicture;
-  octocat: SkPicture;
-  stackExchange: SkPicture;
-  overflow: SkPicture;
+  github: SkSurface;
+  octocat: SkSurface;
+  stackExchange: SkSurface;
+  overflow: SkSurface;
 }
 
 const SVGContext = createContext<SVGAssets | null>(null);
@@ -75,14 +70,14 @@ const useSVGs = () => {
 };
 
 interface IconProps {
-  icon: SkPicture;
+  icon: SkSurface;
   size?: number;
 }
 
 const style = { width: 48, height: 48 };
 
 const Icon = ({ icon }: IconProps) => {
-  return <SkiaPictureView picture={icon} style={style} texture={surface1} />;
+  return <SkiaPictureView style={style} texture={icon} />;
 };
 
 const Screen = () => {

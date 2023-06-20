@@ -84,7 +84,7 @@ private:
       canvas->scale(pd, pd);
 
       if (_texture != nullptr) {
-        canvas->drawImage(_texture->getObject()->makeImageSnapshot()->makeNonTextureImage(), 0, 0);
+        canvas->drawImage(_texture->getObject()->makeImageSnapshot(), 0, 0);
       } else if (_picture != nullptr) {
         canvas->drawPicture(_picture->getObject());
       }
