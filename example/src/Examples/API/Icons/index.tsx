@@ -22,7 +22,6 @@ if (!surface1 || !surface2) {
 }
 surface1.getCanvas().drawColor(Skia.Color("cyan"));
 surface2.getCanvas().drawImage(surface1.makeImageSnapshot(), 0, 0);
-const image = surface2.makeImageSnapshot().makeNonTextureImage();
 
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);
@@ -33,7 +32,6 @@ const useSVGPicture = (module: number) => {
     const recorder = Skia.PictureRecorder();
     const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, 48, 48));
     canvas.drawSvg(svg);
-    canvas.drawImage(image, 0, 0);
     return recorder.finishRecordingAsPicture();
   }, [svg]);
 };
@@ -84,7 +82,7 @@ interface IconProps {
 const style = { width: 48, height: 48 };
 
 const Icon = ({ icon }: IconProps) => {
-  return <SkiaPictureView picture={icon} style={style} />;
+  return <SkiaPictureView picture={icon} style={style} texture={surface1} />;
 };
 
 const Screen = () => {

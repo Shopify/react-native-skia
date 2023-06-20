@@ -13,6 +13,7 @@
 #include "RNSkView.h"
 
 #include "JsiSkPicture.h"
+#include "JsiSkSurface.h"
 #include "RNSkInfoParameter.h"
 #include "RNSkLog.h"
 #include "RNSkPlatformContext.h"
@@ -62,6 +63,17 @@ public:
     _requestRedraw();
   }
 
+
+  void setTexture(std::shared_ptr<jsi::HostObject> texture) {
+    if (texture == nullptr) {
+      _texture = nullptr;
+      return;
+    }
+
+    _texture = std::dynamic_pointer_cast<JsiSkSurface>(texture);
+    _requestRedraw();
+  }
+
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
     canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
@@ -71,7 +83,9 @@ private:
       canvas->save();
       canvas->scale(pd, pd);
 
-      if (_picture != nullptr) {
+      if (_texture != nullptr) {
+        canvas->drawImage(_texture->getObject()->makeImageSnapshot()->makeNonTextureImage(), 0, 0);
+      } else if (_picture != nullptr) {
         canvas->drawPicture(_picture->getObject());
       }
 
@@ -82,6 +96,7 @@ private:
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<JsiSkPicture> _picture;
+  std::shared_ptr<JsiSkSurface> _texture;
 };
 
 class RNSkPictureView : public RNSkView {
@@ -102,7 +117,12 @@ public:
     RNSkView::setJsiProperties(props);
 
     for (auto &prop : props) {
-      if (prop.first == "picture") {
+      if (prop.first == "texture") {
+          // Clear picture
+          std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
+              ->setTexture(prop.second.getAsHostObject());
+          requestRedraw();
+      } else if (prop.first == "picture") {
         if (prop.second.isUndefinedOrNull()) {
           // Clear picture
           std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())

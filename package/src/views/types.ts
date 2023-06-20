@@ -7,6 +7,7 @@ import type {
   SkPicture,
   SkRect,
   SkSize,
+  SkSurface,
 } from "../skia/types";
 import type { SkiaMutableValue, SkiaValue } from "../values";
 import type { SharedValueType } from "../renderer/processors/Animations/Animations";
@@ -114,6 +115,7 @@ export interface SkiaDrawViewProps extends SkiaBaseViewProps {
 
 export interface SkiaPictureViewProps extends SkiaBaseViewProps {
   picture?: SkPicture;
+  texture?: SkSurface;
 }
 
 export interface SkiaDomViewProps extends SkiaBaseViewProps {
