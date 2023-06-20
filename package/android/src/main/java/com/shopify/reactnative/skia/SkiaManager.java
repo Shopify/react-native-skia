@@ -53,6 +53,6 @@ public class SkiaManager {
 
     private native void initializeRuntime();
     public native void invalidate();
-    public native byte[] getJsiProperty(int nativeId, String name);
+    public native int[] getJsiProperty(int nativeId, String name);
 
 }

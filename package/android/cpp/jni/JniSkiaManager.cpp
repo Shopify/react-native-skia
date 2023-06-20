@@ -40,7 +40,7 @@ void JniSkiaManager::initializeRuntime() {
       std::make_shared<RNSkManager>(_jsRuntime, _jsCallInvoker, _context);
 }
 
-jbyteArray JniSkiaManager::getJsiProperty(jint nativeId, jstring name) {
+jintArray JniSkiaManager::getJsiProperty(jint nativeId, jstring name) {
     JNIEnv* env = jni::Environment::current();
     
     // Convert the nativeId and name parameters to C++ values
@@ -50,26 +50,23 @@ jbyteArray JniSkiaManager::getJsiProperty(jint nativeId, jstring name) {
     // Generate a 100x100 bitmap of the color cyan
     const int width = 100;
     const int height = 100;
-    const int pixelSize = 4;  // ARGB_8888 format
-    const int byteArrayLength = width * height * pixelSize;
-    jbyteArray byteArray = env->NewByteArray(byteArrayLength);
-    jbyte* byteArrayData = env->GetByteArrayElements(byteArray, nullptr);
+    const int pixelSize = 1;  // Single integer per pixel (ARGB format)
+    const int arrayLength = width * height;
+    jintArray intArray = env->NewIntArray(arrayLength);
+    jint* intArrayData = env->GetIntArrayElements(intArray, nullptr);
     
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            int offset = (y * width + x) * pixelSize;
-            byteArrayData[offset] = 0xFF;     // Alpha
-            byteArrayData[offset + 1] = 0x00; // Red
-            byteArrayData[offset + 2] = 0xFF; // Green
-            byteArrayData[offset + 3] = 0xFF; // Blue
+            int offset = y * width + x;
+            int pixel = 0xFF00FFFF; // ARGB value for cyan
+            intArrayData[offset] = pixel;
         }
     }
     
-    env->ReleaseByteArrayElements(byteArray, byteArrayData, 0);
+    env->ReleaseIntArrayElements(intArray, intArrayData, 0);
     env->ReleaseStringUTFChars(name, convertedName);
     
-    return byteArray;
+    return intArray;
 }
-
 
 } // namespace RNSkia
