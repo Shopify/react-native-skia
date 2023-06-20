@@ -42,7 +42,6 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
-#include "JsiGrDirectContext.h"
 
 namespace RNSkia {
 
@@ -58,7 +57,6 @@ public:
   JsiSkApi(jsi::Runtime &runtime, std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {
 
-    installFunction("MakeGrDirectContext", JsiGrDirectContext::createCtor(context));
     installFunction("Font", JsiSkFont::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
     installFunction("RSXform", JsiSkRSXform::createCtor(context));

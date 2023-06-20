@@ -57,8 +57,21 @@ sk_sp<GrDirectContext> MakeGLDirectContext() {
         return nullptr;
     }
 
-    // Make the context current
-    eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, eglContext);
+    EGLint pbufferAttribs[] = {
+        EGL_WIDTH, 1,
+        EGL_HEIGHT, 1,
+        EGL_NONE,
+    };
+    EGLSurface eglPbufferSurface = eglCreatePbufferSurface(eglDisplay, eglConfig, pbufferAttribs);
+    if (eglPbufferSurface == EGL_NO_SURFACE) {
+        RNSkLogger::logToConsole("eglCreatePbufferSurface failed: %d\n", eglGetError());
+        return nullptr;
+    }
+
+    if (!eglMakeCurrent(eglDisplay, eglPbufferSurface, eglPbufferSurface, eglContext)) {
+        RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+        return nullptr;
+    }
 
     // Create the Skia backend context
     auto backendInterface = GrGLMakeNativeInterface();
@@ -127,7 +140,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height, sk_sp<GrDirectCon
   EGLSurface eglSurface =
       eglCreatePbufferSurface(eglDisplay, eglConfig, offScreenSurfaceAttribs);
   if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
-    RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+    RNSkLogger::logToConsole("eglMakeCurrent failed on MakeOffscreenSurface: %d\n", eglGetError());
     return nullptr;
   }
   GLint buffer;
@@ -393,7 +406,7 @@ bool SkiaOpenGLRenderer::initGLSurface() {
 
   if (!eglMakeCurrent(getThreadDrawingContext()->glDisplay, _glSurface,
                       _glSurface, getThreadDrawingContext()->glContext)) {
-    RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+    RNSkLogger::logToConsole("eglMakeCurrent failed in initGLSurface: %d\n", eglGetError());
     return false;
   }
 

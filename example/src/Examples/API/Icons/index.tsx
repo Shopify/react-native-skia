@@ -17,9 +17,6 @@ import { Github } from "./SvgIcons/GithubIcon";
 
 const surface = Skia.Surface.MakeOffscreen(48, 48);
 console.log({ surface });
-if (!surface) {
-  throw new Error("Couldn't create offscreen surface");
-}
 
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);

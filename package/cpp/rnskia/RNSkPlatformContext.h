@@ -133,8 +133,6 @@ public:
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
 
-  virtual sk_sp<GrDirectContext> makeGrDirectContext() = 0;
-
   /**
    * Creates an skImage containing the screenshot of a native view and its
    * children.

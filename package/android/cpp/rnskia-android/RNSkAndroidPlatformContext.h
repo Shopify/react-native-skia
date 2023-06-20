@@ -50,12 +50,6 @@ public:
     }
   }
 
-  // TODO: to remove
-  sk_sp<GrDirectContext> makeGrDirectContext() override {
-    return MakeGLDirectContext();
-  }
-
-
   void runOnMainThread(std::function<void()> task) override {
     _jniPlatformContext->runTaskOnMainThread(task);
   }
