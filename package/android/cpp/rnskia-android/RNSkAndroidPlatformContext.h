@@ -38,16 +38,7 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    if (!grDirectContext) {
-      grDirectContext = MakeGLDirectContext();
-    }
-
-    if (grDirectContext) {
-      return MakeOffscreenGLSurface(width, height, grDirectContext);
-    } else {
-      RNSkLogger::logToConsole("Failed to create GrDirectContext");
-      return nullptr;
-    }
+    return MakeOffscreenGLSurface(width, height);
   }
 
   void runOnMainThread(std::function<void()> task) override {

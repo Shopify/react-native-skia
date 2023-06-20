@@ -8,6 +8,14 @@
 
 namespace RNSkia {
 
+sk_sp<GrDirectContext> grDirectContext = nullptr;
+sk_sp<GrDirectContext> getGrDirectContext() {
+    if (!grDirectContext) {
+      grDirectContext = MakeGLDirectContext();
+    }
+    return grDirectContext;
+}
+
 sk_sp<GrDirectContext> MakeGLDirectContext() {
     EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (eglDisplay == EGL_NO_DISPLAY) {
@@ -93,7 +101,8 @@ sk_sp<GrDirectContext> MakeGLDirectContext() {
     return grContext;
 }
 
-sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height, sk_sp<GrDirectContext> grContext) {
+sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
+  sk_sp<GrDirectContext> grContext = getGrDirectContext();
   EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
   if (eglDisplay == EGL_NO_DISPLAY) {
     RNSkLogger::logToConsole("eglGetdisplay failed : %i", glGetError());
