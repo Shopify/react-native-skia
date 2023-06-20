@@ -10,36 +10,22 @@ import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.views.view.ReactViewGroup;
 
-public class SkiaBitmapView extends View {
+public class SkiaBitmapView extends ReactViewGroup {
     private static final String TAG = "SkiaBitmapView";
 
     private Bitmap bitmap;
+    private SkiaManager skiaManager;
 
     public SkiaBitmapView(Context context) {
         super(context);
+        RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
+        skiaManager = skiaModule.getSkiaManager();
         Log.d(TAG, "SkiaBitmapView created");
-        init();
-    }
-
-    private void init() {
-        // Generate cyan bitmap by default
-        this.bitmap = generateCyanBitmap(100, 100);
-    }
-
-    public void setBitmap(String base64Bitmap) {
-        Log.d(TAG, "setBitmap called with data: " + base64Bitmap.substring(0, 30) + "..."); // log the first 30 characters
-        byte[] decodedString = Base64.decode(base64Bitmap, Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        if (decodedByte == null) {
-            Log.d(TAG, "Bitmap decoding failed");
-        } else {
-            Log.d(TAG, "Bitmap decoding succeeded");
-            this.bitmap = decodedByte;
-        }
-        invalidate(); // Cause the view to redraw
     }
 
     @Override
@@ -50,13 +36,6 @@ public class SkiaBitmapView extends View {
             Rect destRect = new Rect(0, 0, getWidth(), getHeight());
             canvas.drawBitmap(bitmap, null, destRect, null);
         }
-    }
-
-    private Bitmap generateCyanBitmap(int width, int height) {
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.CYAN);
-        return bitmap;
     }
 
     @Override
@@ -77,4 +56,14 @@ public class SkiaBitmapView extends View {
 
         setMeasuredDimension(width, height);
     }
+
+
+    protected void registerView(int nativeId){
+        Log.d(TAG, "registerView()");
+        byte[] byteArray = this.skiaManager.getJsiProperty(nativeId, "bitmap");
+        this.bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        Log.d(TAG, "Bitmap is set");
+    }
+
+    protected void unregisterView(){}
 }

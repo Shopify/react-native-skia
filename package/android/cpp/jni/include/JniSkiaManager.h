@@ -60,6 +60,8 @@ public:
     _context = nullptr;
   }
 
+  jbyteArray getJsiProperty(jint nativeId, jstring name);
+
 private:
   friend HybridBase;
 

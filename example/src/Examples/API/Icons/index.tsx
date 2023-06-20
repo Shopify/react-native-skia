@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { Component, createContext, useContext, useMemo } from "react";
 import { PixelRatio, Text, View, requireNativeComponent } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
@@ -7,9 +7,9 @@ import {
   ColorType,
   Rect,
   Skia,
+  SkiaViewNativeId,
   useSVG,
 } from "@shopify/react-native-skia";
-import { encode as btoa } from "base-64";
 import type { ViewProps } from "react-native-svg/lib/typescript/fabric/utils";
 
 import { Octocat } from "./SvgIcons/OctocatIcon";
@@ -17,10 +17,33 @@ import { StackExchange } from "./SvgIcons/StackExchangeIcon";
 import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
 import { Github } from "./SvgIcons/GithubIcon";
 
-const SkiaBitmapView = requireNativeComponent<{
-  bitmap: string;
+interface SkiaBitmapViewProps {
+  bitmap: Uint8Array;
+  style?: ViewProps["style"];
+}
+
+const SkiaBitmapViewNative = requireNativeComponent<{
+  nativeID: string;
   style?: ViewProps["style"];
 }>("SkiaBitmapView");
+
+class SkiaBitmapView extends Component<SkiaBitmapViewProps> {
+  private nativeID: number;
+
+  constructor(props: SkiaBitmapViewProps) {
+    super(props);
+    this.nativeID = SkiaViewNativeId.current++;
+    if (props.bitmap) {
+      SkiaViewApi.setJsiProperty(this.nativeID, "bitmap", props.bitmap);
+    }
+  }
+
+  render() {
+    const { nativeID } = this;
+    const { style } = this.props;
+    return <SkiaBitmapViewNative nativeID={`${nativeID}`} style={style} />;
+  }
+}
 
 const pixels = new Uint8Array(256 * 256 * 4);
 pixels.fill(255);
@@ -87,7 +110,7 @@ interface SVGAssets {
   github: Uint8Array;
   octocat: Uint8Array;
   stackExchange: Uint8Array;
-  overflow: c;
+  overflow: Uint8Array;
 }
 
 const SVGContext = createContext<SVGAssets | null>(null);
@@ -105,20 +128,10 @@ interface IconProps {
   size?: number;
 }
 
-function toBase64(arr: Uint8Array) {
-  let binaryStr = "";
-  const len = arr.byteLength;
-  for (let i = 0; i < len; i++) {
-    binaryStr += String.fromCharCode(arr[i]);
-  }
-  return btoa(binaryStr);
-}
-
 const style = { width: 48, height: 48 };
 
 const Icon = ({ icon }: IconProps) => {
-  const bitmap = toBase64(pixels);
-  return <SkiaBitmapView bitmap={bitmap} style={style} />;
+  return <SkiaBitmapView bitmap={pixels} style={style} />;
 };
 
 const Screen = () => {

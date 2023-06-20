@@ -1,10 +1,13 @@
 package com.shopify.reactnative.skia;
 
-import com.facebook.react.uimanager.SimpleViewManager;
-import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.uimanager.annotations.ReactProp;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-public class SkiaBitmapViewManager extends SimpleViewManager<SkiaBitmapView> {
+import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.views.view.ReactViewGroup;
+import com.facebook.react.views.view.ReactViewManager;
+
+public class SkiaBitmapViewManager extends ReactViewManager {
     private static final String REACT_CLASS = "SkiaBitmapView";
 
     @Override
@@ -13,12 +16,15 @@ public class SkiaBitmapViewManager extends SimpleViewManager<SkiaBitmapView> {
     }
 
     @Override
-    public SkiaBitmapView createViewInstance(ThemedReactContext context) {
-        return new SkiaBitmapView(context);
+    public void setNativeId(@NonNull ReactViewGroup view, @Nullable String nativeId) {
+        super.setNativeId(view, nativeId);
+        int nativeIdResolved = Integer.parseInt(nativeId);
+        ((SkiaBitmapView) view).registerView(nativeIdResolved);
     }
 
-    @ReactProp(name = "bitmap")
-    public void setBitmap(SkiaBitmapView view, String bitmap) {
-        view.setBitmap(bitmap);
+    @NonNull
+    @Override
+    public SkiaBitmapView createViewInstance(@NonNull ThemedReactContext reactContext) {
+        return new SkiaBitmapView(reactContext);
     }
 }
