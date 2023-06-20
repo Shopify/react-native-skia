@@ -15,8 +15,11 @@ import { StackExchange } from "./SvgIcons/StackExchangeIcon";
 import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
 import { Github } from "./SvgIcons/GithubIcon";
 
-const grContext = Skia.MakeGrDirectContext();
-console.log({ grContext });
+const surface = Skia.Surface.MakeOffscreen(48, 48);
+console.log({ surface });
+if (!surface) {
+  throw new Error("Couldn't create offscreen surface");
+}
 
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);

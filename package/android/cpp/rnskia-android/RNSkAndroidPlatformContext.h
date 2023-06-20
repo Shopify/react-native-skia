@@ -38,9 +38,19 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    return MakeOffscreenGLSurface(width, height);
+    if (!grDirectContext) {
+      grDirectContext = MakeGLDirectContext();
+    }
+
+    if (grDirectContext) {
+      return MakeOffscreenGLSurface(width, height, grDirectContext);
+    } else {
+      RNSkLogger::logToConsole("Failed to create GrDirectContext");
+      return nullptr;
+    }
   }
 
+  // TODO: to remove
   sk_sp<GrDirectContext> makeGrDirectContext() override {
     return MakeGLDirectContext();
   }
@@ -60,6 +70,8 @@ public:
 
 private:
   JniPlatformContext *_jniPlatformContext;
+  sk_sp<GrDirectContext> grDirectContext;
+
 };
 
 } // namespace RNSkia

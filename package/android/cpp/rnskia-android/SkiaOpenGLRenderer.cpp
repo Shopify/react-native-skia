@@ -71,7 +71,7 @@ sk_sp<GrDirectContext> MakeGLDirectContext() {
     return grContext;
 }
 
-sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
+sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height, sk_sp<GrDirectContext> grContext) {
   EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
   if (eglDisplay == EGL_NO_DISPLAY) {
     RNSkLogger::logToConsole("eglGetdisplay failed : %i", glGetError());
@@ -139,13 +139,6 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
   GLint samples;
   glGetIntegerv(GL_SAMPLES, &samples);
 
-  // Create the Skia backend context
-  auto backendInterface = GrGLMakeNativeInterface();
-  auto grContext = GrDirectContext::MakeGL(backendInterface);
-  if (grContext == nullptr) {
-    RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
-    return nullptr;
-  }
   auto maxSamples =
       grContext->maxSurfaceSampleCountForColorType(kRGBA_8888_SkColorType);
 
@@ -176,6 +169,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
       reinterpret_cast<void *>(ctx));
   return surface;
 }
+
 
 std::shared_ptr<OpenGLDrawingContext>
 SkiaOpenGLRenderer::getThreadDrawingContext() {
