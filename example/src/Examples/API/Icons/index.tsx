@@ -15,6 +15,9 @@ import { StackExchange } from "./SvgIcons/StackExchangeIcon";
 import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
 import { Github } from "./SvgIcons/GithubIcon";
 
+const grContext = Skia.MakeGrDirectContext();
+console.log({ grContext });
+
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);
   return useMemo(() => {

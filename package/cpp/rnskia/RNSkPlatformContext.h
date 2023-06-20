@@ -24,6 +24,7 @@
 #include <jsi/jsi.h>
 
 #include <ReactCommon/CallInvoker.h>
+#include "include/gpu/GrDirectContext.h"
 
 namespace RNSkia {
 
@@ -131,6 +132,8 @@ public:
    * @return sk_sp<SkSurface>
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+
+  virtual sk_sp<GrDirectContext> makeGrDirectContext() = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its

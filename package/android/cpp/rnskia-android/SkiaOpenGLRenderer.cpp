@@ -7,7 +7,70 @@
 #define STENCIL_BUFFER_SIZE 8
 
 namespace RNSkia {
-/** Static members */
+
+sk_sp<GrDirectContext> MakeGLDirectContext() {
+    EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (eglDisplay == EGL_NO_DISPLAY) {
+        RNSkLogger::logToConsole("eglGetdisplay failed : %i", glGetError());
+        return nullptr;
+    }
+
+    EGLint major;
+    EGLint minor;
+    if (!eglInitialize(eglDisplay, &major, &minor)) {
+        RNSkLogger::logToConsole("eglInitialize failed : %i", glGetError());
+        return nullptr;
+    }
+
+    EGLint att[] = {EGL_RENDERABLE_TYPE,
+                    EGL_OPENGL_ES2_BIT,
+                    EGL_SURFACE_TYPE,
+                    EGL_PBUFFER_BIT,
+                    EGL_ALPHA_SIZE,
+                    8,
+                    EGL_BLUE_SIZE,
+                    8,
+                    EGL_GREEN_SIZE,
+                    8,
+                    EGL_RED_SIZE,
+                    8,
+                    EGL_DEPTH_SIZE,
+                    0,
+                    EGL_STENCIL_SIZE,
+                    0,
+                    EGL_NONE};
+
+    EGLint numConfigs;
+    EGLConfig eglConfig;
+    eglConfig = 0;
+    if (!eglChooseConfig(eglDisplay, att, &eglConfig, 1, &numConfigs) ||
+        numConfigs == 0) {
+        RNSkLogger::logToConsole("Failed to choose a config %d\n", eglGetError());
+        return nullptr;
+    }
+
+    EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    EGLContext eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, contextAttribs);
+
+    if (eglContext == EGL_NO_CONTEXT) {
+        RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());
+        return nullptr;
+    }
+
+    // Make the context current
+    eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, eglContext);
+
+    // Create the Skia backend context
+    auto backendInterface = GrGLMakeNativeInterface();
+    auto grContext = GrDirectContext::MakeGL(backendInterface);
+    if (grContext == nullptr) {
+        RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
+        return nullptr;
+    }
+
+    return grContext;
+}
+
 sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
   EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
   if (eglDisplay == EGL_NO_DISPLAY) {

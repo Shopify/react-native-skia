@@ -1,4 +1,8 @@
+import type { SkJSIInstance } from "../JsiInstance";
+
 import type { SkSurface } from "./Surface";
+
+export type SkGrDirectContext = SkJSIInstance<"GrDirectContext">;
 
 export interface SurfaceFactory {
   /**

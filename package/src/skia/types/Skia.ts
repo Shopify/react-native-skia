@@ -21,7 +21,7 @@ import type { SkVertices, VertexMode } from "./Vertices/Vertices";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
 import type { TextBlobFactory } from "./TextBlob";
-import type { SurfaceFactory } from "./Surface";
+import type { SkGrDirectContext, SurfaceFactory } from "./Surface";
 import type { SkRSXform } from "./RSXform";
 import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
@@ -79,4 +79,5 @@ export interface Skia {
   SVG: SVGFactory;
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
+  MakeGrDirectContext: () => SkGrDirectContext;
 }
