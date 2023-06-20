@@ -22,6 +22,14 @@ sk_sp<GrDirectContext> MakeGLDirectContext() {
         return nullptr;
     }
 
+    const char* eglExtensions = eglQueryString(eglDisplay, EGL_EXTENSIONS);
+    if (eglExtensions == nullptr) {
+        RNSkLogger::logToConsole("eglQueryString failed : %i", eglGetError());
+        return nullptr;
+    }
+
+    bool hasSurfacelessContext = strstr(eglExtensions, "EGL_KHR_surfaceless_context") != nullptr;
+
     EGLint att[] = {EGL_RENDERABLE_TYPE,
                     EGL_OPENGL_ES2_BIT,
                     EGL_SURFACE_TYPE,
@@ -57,18 +65,19 @@ sk_sp<GrDirectContext> MakeGLDirectContext() {
         return nullptr;
     }
 
-    EGLint pbufferAttribs[] = {
-        EGL_WIDTH, 1,
-        EGL_HEIGHT, 1,
-        EGL_NONE,
-    };
-    EGLSurface eglPbufferSurface = eglCreatePbufferSurface(eglDisplay, eglConfig, pbufferAttribs);
-    if (eglPbufferSurface == EGL_NO_SURFACE) {
-        RNSkLogger::logToConsole("eglCreatePbufferSurface failed: %d\n", eglGetError());
-        return nullptr;
+    EGLSurface eglSurface = EGL_NO_SURFACE;
+    if (!hasSurfacelessContext) {
+        // If the EGL implementation doesn't support surfaceless contexts, create a tiny pbuffer surface
+        const EGLint surfaceAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
+        eglSurface = eglCreatePbufferSurface(eglDisplay, eglConfig, surfaceAttribs);
+        if (eglSurface == EGL_NO_SURFACE) {
+            RNSkLogger::logToConsole("eglCreatePbufferSurface failed: %d\n", eglGetError());
+            return nullptr;
+        }
     }
 
-    if (!eglMakeCurrent(eglDisplay, eglPbufferSurface, eglPbufferSurface, eglContext)) {
+    // Make the context current
+    if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
         RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
         return nullptr;
     }
