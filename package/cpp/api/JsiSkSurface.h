@@ -14,8 +14,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkSurface.h"
 #include "SkBitmap.h"
+#include "SkSurface.h"
 
 #pragma clang diagnostic pop
 
@@ -61,7 +61,8 @@ public:
 
     int width = surface->width();
     int height = surface->height();
-    SkImageInfo info = SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType);
+    SkImageInfo info =
+        SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType);
 
     SkBitmap bitmap;
     bitmap.setInfo(info);
@@ -71,7 +72,8 @@ public:
     }
 
     // Get a pointer to the bitmap's pixel data
-    const uint8_t* pixels = reinterpret_cast<const uint8_t*>(bitmap.getPixels());
+    const uint8_t *pixels =
+        reinterpret_cast<const uint8_t *>(bitmap.getPixels());
 
     // Calculate the size of the pixel data in bytes
     size_t size = bitmap.computeByteSize();

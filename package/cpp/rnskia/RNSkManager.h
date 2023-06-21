@@ -19,6 +19,8 @@ namespace jsi = facebook::jsi;
 namespace react = facebook::react;
 
 class RNSkManager {
+  friend class JniSkiaManager;
+
 public:
   /**
     Initialializes a new instance of the RNSkManager

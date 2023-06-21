@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "JniSkiaDrawView.h"
+#include <RNSkJsiViewApi.h>
 #include <RNSkManager.h>
 
 namespace RNSkia {
@@ -43,38 +44,49 @@ void JniSkiaManager::initializeRuntime() {
 }
 
 jint JniSkiaManager::getBitmapWidth(jint nativeId) {
-    return 100;
+  // Check if the Bitmap exists in the map
+  auto it = _skManager->_viewApi->bitmapMap.find(nativeId);
+  if (it != _skManager->_viewApi->bitmapMap.end()) {
+    // Bitmap found, return its width
+    return it->second.width;
+  } else {
+    // Bitmap not found, return a default value
+    return -1;
+  }
 }
 
 jint JniSkiaManager::getBitmapHeight(jint nativeId) {
-    return 100;
+  // Check if the Bitmap exists in the map
+  auto it = _skManager->_viewApi->bitmapMap.find(nativeId);
+  if (it != _skManager->_viewApi->bitmapMap.end()) {
+    // Bitmap found, return its width
+    return it->second.height;
+  } else {
+    // Bitmap not found, return a default value
+    return -1;
+  }
 }
 
 jintArray JniSkiaManager::getBitmap(jint nativeId) {
-    JNIEnv* env = jni::Environment::current();
-    
-    // Convert the nativeId and name parameters to C++ values
-    int convertedNativeId = static_cast<int>(nativeId);
-    _skManager;   
-    // Generate a 100x100 bitmap of the color cyan
-    const int width = 100;
-    const int height = 100;
-    const int pixelSize = 1;  // Single integer per pixel (ARGB format)
-    const int arrayLength = width * height;
-    jintArray intArray = env->NewIntArray(arrayLength);
-    jint* intArrayData = env->GetIntArrayElements(intArray, nullptr);
-    
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            int offset = y * width + x;
-            int pixel = 0xFF00FFFF; // ARGB value for cyan
-            intArrayData[offset] = pixel;
-        }
-    }
-    
-    env->ReleaseIntArrayElements(intArray, intArrayData, 0);
-    
-    return intArray;
+  JNIEnv *env = jni::Environment::current();
+
+  // Check if the Bitmap exists in the map
+  auto it = _skManager->_viewApi->bitmapMap.find(nativeId);
+  if (it == _skManager->_viewApi->bitmapMap.end()) {
+    // Bitmap not found, return nullptr or throw an exception
+    return nullptr;
+  }
+
+  // Bitmap found, convert its data to a jintArray
+  const BitmapData &bitmap = it->second;
+  jintArray result = env->NewIntArray(bitmap.data.size());
+
+  // This assumes that the data in bitmap.data is 32-bit ARGB pixel data
+  // If your data is different, you will need to modify this conversion
+  env->SetIntArrayRegion(result, 0, bitmap.data.size(),
+                         reinterpret_cast<const jint *>(bitmap.data.data()));
+
+  return result;
 }
 
 } // namespace RNSkia
