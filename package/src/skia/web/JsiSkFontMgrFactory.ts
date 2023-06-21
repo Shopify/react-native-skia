@@ -1,6 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { SkFontMgrFactory, SkFontMgr } from "../types";
+import type { SkFontMgrFactory, SkFontMgr, WebFont } from "../types";
 
 import { Host } from "./Host";
 import { JsiSkFontMgr } from "./JsiSkFontMgr";
@@ -11,12 +11,8 @@ export class JsiSkFontMgrFactory extends Host implements SkFontMgrFactory {
   constructor(CanvasKit: CanvasKit) {
     super(CanvasKit);
   }
-  initializeWithDataOnWeb(...buffers: ArrayBuffer[]) {
-    const fontMgr = this.CanvasKit.FontMgr.FromData(...buffers);
-    if (!fontMgr) {
-      throw new Error("Couldn't create FontMgr");
-    }
-    JsiSkFontMgrFactory.instance = new JsiSkFontMgr(this.CanvasKit, fontMgr);
+  loadFontsOnWeb(...fonts: WebFont[]) {
+    JsiSkFontMgrFactory.instance = new JsiSkFontMgr(this.CanvasKit, fonts);
     return JsiSkFontMgrFactory.instance;
   }
   getInstance() {

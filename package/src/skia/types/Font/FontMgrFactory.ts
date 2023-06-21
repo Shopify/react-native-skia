@@ -1,6 +1,12 @@
-import type { SkFontMgr } from "./Font";
+import type { FontStyle, SkFontMgr } from "./Font";
+
+export interface WebFont {
+  typeface: ArrayBuffer;
+  familyName: string;
+  fontStyle: FontStyle;
+}
 
 export interface SkFontMgrFactory {
-  initializeWithDataOnWeb(...buffers: ArrayBuffer[]): SkFontMgr;
+  loadFontsOnWeb(...fonts: WebFont[]): SkFontMgr;
   getInstance(): SkFontMgr;
 }
