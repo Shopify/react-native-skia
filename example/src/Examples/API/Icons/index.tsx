@@ -69,15 +69,6 @@ class SkiaBitmapView extends Component<SkiaBitmapViewProps> {
   }
 }
 
-const pixels = new Uint8Array(256 * 256 * 4);
-pixels.fill(255);
-let i = 0;
-for (let x = 0; x < 256 * 4; x++) {
-  for (let y = 0; y < 256 * 4; y++) {
-    pixels[i++] = (x * y) % 255;
-  }
-}
-
 const pd = PixelRatio.get();
 
 const useSVGPicture = (module: number) => {
@@ -91,9 +82,10 @@ const useSVGPicture = (module: number) => {
       throw new Error("Couldn't create offscreen surface");
     }
     const canvas = surface.getCanvas();
+    canvas.scale(pd, pd);
     canvas.drawSvg(svg);
-    //surface.flush();
-    // const pixels = surface.readPixels();
+    surface.flush();
+    const pixels = surface.readPixels();
     return pixels;
   }, [svg]);
 };
@@ -144,7 +136,7 @@ interface IconProps {
 const style = { width: 48, height: 48 };
 
 const Icon = ({ icon }: IconProps) => {
-  return <SkiaBitmapView data={pixels} width={48} height={48} />;
+  return <SkiaBitmapView data={icon} width={48} height={48} />;
 };
 
 const Screen = () => {
