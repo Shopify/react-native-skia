@@ -7,6 +7,7 @@
 
 #include "JsiSkHostObjects.h"
 #include "RNSkLog.h"
+#include "JsiSkFontStyle.h"
 #include <jsi/jsi.h>
 
 #pragma clang diagnostic push
@@ -39,10 +40,8 @@ public:
 
   JSI_HOST_FUNCTION(matchFamilyStyle) {
     auto name = arguments[0].asString(runtime).utf8(runtime);
-    SkFontStyle normalStyle(SkFontStyle::kNormal_Weight,
-                            SkFontStyle::kNormal_Width,
-                            SkFontStyle::kUpright_Slant);
-    auto typeface = getObject()->matchFamilyStyle(name.c_str(), normalStyle);
+    auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
+    auto typeface = getObject()->matchFamilyStyle(name.c_str(), *fontStyle);
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
   }

@@ -14,6 +14,7 @@ import {
   Text as SkiaText,
   vec,
   Skia,
+  FontStyle,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -25,7 +26,7 @@ const fontMgr = Skia.FontMgr();
 new Array(fontMgr.countFamilies()).fill(0).forEach((_, i) => {
   console.log(fontMgr.getFamilyName(i));
 });
-const tf = fontMgr.matchFamilyStyle("helvetica");
+const tf = fontMgr.matchFamilyStyle("helvetica", FontStyle.Bold);
 const font = Skia.Font(tf, 17);
 
 export const Slider: React.FC<GraphProps> = ({ height, width }) => {

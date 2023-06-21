@@ -7,7 +7,7 @@ import type { SkTypeface } from "../Typeface";
 export interface SkFontMgr extends SkJSIInstance<"FontMgr"> {
   countFamilies(): number;
   getFamilyName(index: number): string;
-  matchFamilyStyle(name: string, style?: FontStyle): SkTypeface;
+  matchFamilyStyle(name: string, style: FontStyle): SkTypeface;
 }
 
 export interface FontMetrics {
