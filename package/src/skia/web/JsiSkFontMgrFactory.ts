@@ -11,22 +11,19 @@ export class JsiSkFontMgrFactory extends Host implements SkFontMgrFactory {
   constructor(CanvasKit: CanvasKit) {
     super(CanvasKit);
   }
-  MakeFromData(...buffers: ArrayBuffer[]) {
-    if (JsiSkFontMgrFactory.instance !== null) {
-      throw new Error(
-        "JsiFontManagerFactory has been initialized already. use Skia.FontMgr.getInstance() instead"
-      );
-    }
+  initializeWithDataOnWeb(...buffers: ArrayBuffer[]) {
     const fontMgr = this.CanvasKit.FontMgr.FromData(...buffers);
     if (!fontMgr) {
       throw new Error("Couldn't create FontMgr");
     }
-    return new JsiSkFontMgr(this.CanvasKit, fontMgr);
+    JsiSkFontMgrFactory.instance = new JsiSkFontMgr(this.CanvasKit, fontMgr);
+    return JsiSkFontMgrFactory.instance;
   }
   getInstance() {
     if (!JsiSkFontMgrFactory.instance) {
       throw new Error(
-        "JsiFontManagerFactory hasn't been initialized. use Skia.FontMgr.MakeFromData() to initialize the font manager"
+        `JsiFontManagerFactory hasn't been initialized.
+use Skia.FontMgr.initializeWithDataOnWeb() to initialize the font manager`
       );
     }
     return JsiSkFontMgrFactory.instance;

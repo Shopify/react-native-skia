@@ -24,7 +24,7 @@ namespace jsi = facebook::jsi;
 
 class JsiSkFontMgrFactory : public JsiSkHostObject {
 public:
-  JSI_HOST_FUNCTION(MakeFromData) {
+  JSI_HOST_FUNCTION(initializeWithDataOnWeb) {
     throw jsi::JSError(
         runtime, "FontMgrFactory::MakeFromData is only implemented on Web.");
   }
@@ -37,7 +37,7 @@ public:
         runtime, std::make_shared<JsiSkFontMgr>(std::move(context), fontMgr));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgrFactory, MakeFromData),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgrFactory, initializeWithDataOnWeb),
                        JSI_EXPORT_FUNC(JsiSkFontMgrFactory, getInstance))
 
   explicit JsiSkFontMgrFactory(std::shared_ptr<RNSkPlatformContext> context)
