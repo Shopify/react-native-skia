@@ -1,7 +1,7 @@
 import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
-import type { SkFont, SkFontMgr } from "./Font";
+import type { SkFontMgrFactory, SkFont } from "./Font";
 import type { SkTypeface, TypefaceFactory } from "./Typeface";
 import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
@@ -79,5 +79,5 @@ export interface Skia {
   SVG: SVGFactory;
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
-  FontMgr: () => SkFontMgr;
+  FontMgr: SkFontMgrFactory;
 }

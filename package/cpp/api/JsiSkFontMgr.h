@@ -49,23 +49,6 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgr, countFamilies),
                        JSI_EXPORT_FUNC(JsiSkFontMgr, getFamilyName),
                        JSI_EXPORT_FUNC(JsiSkFontMgr, matchFamilyStyle))
-
-  /**
-   * Creates the function for construction a new instance of the SkFontMgr
-   * wrapper
-   * @param context Platform context
-   * @return A function for creating a new host object wrapper for the SkFontMgr
-   * class
-   */
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-      auto fontMgr = context->getFontMgr();
-      // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkFontMgr>(std::move(context), fontMgr));
-    };
-  }
 };
 
 } // namespace RNSkia

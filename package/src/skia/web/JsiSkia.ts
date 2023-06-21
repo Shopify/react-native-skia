@@ -37,7 +37,7 @@ import { JsiSkFont } from "./JsiSkFont";
 import { MakeVertices } from "./JsiSkVerticesFactory";
 import { JsiSkPath } from "./JsiSkPath";
 import { JsiSkTypeface } from "./JsiSkTypeface";
-import { JsiSkFontMgr } from "./JsiSkFontMgr";
+import { JsiSkFontMgrFactory } from "./JsiSkFontMgrFactory";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => {
   return {
@@ -104,12 +104,6 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => {
       return new JsiSkRect(CanvasKit, CanvasKit.XYWHRect(x, y, width, height));
     },
     Surface: new JsiSkSurfaceFactory(CanvasKit),
-    FontMgr: (...buffers: ArrayBuffer[]) => {
-      const fontMgr = CanvasKit.FontMgr.FromData(...buffers);
-      if (!fontMgr) {
-        throw new Error("Couldn't create FontMgr");
-      }
-      return new JsiSkFontMgr(CanvasKit, fontMgr);
-    },
+    FontMgr: new JsiSkFontMgrFactory(CanvasKit),
   };
 };

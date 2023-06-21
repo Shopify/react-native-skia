@@ -43,6 +43,7 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
+#include "JsiSkFontMgrFactory.h"
 
 namespace RNSkia {
 
@@ -57,7 +58,6 @@ public:
    */
   JsiSkApi(jsi::Runtime &runtime, std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {
-    installFunction("FontMgr", JsiSkFontMgr::createCtor(context));
     installFunction("Font", JsiSkFont::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
     installFunction("RSXform", JsiSkRSXform::createCtor(context));
@@ -101,6 +101,8 @@ public:
                             std::make_shared<JsiSkSurfaceFactory>(context));
     installReadonlyProperty("Picture",
                             std::make_shared<JsiSkPictureFactory>(context));
+    installReadonlyProperty("FontMgr",
+                            std::make_shared<JsiSkFontMgrFactory>(context));
   }
 };
 } // namespace RNSkia
