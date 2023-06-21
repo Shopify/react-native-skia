@@ -29,7 +29,7 @@ export abstract class BaseHostObject<T, N extends string>
     this.__typename__ = typename;
   }
 
-  abstract dispose: () => void;
+  abstract dispose(): void;
 }
 
 export abstract class HostObject<T, N extends string> extends BaseHostObject<
