@@ -79,4 +79,5 @@ export interface Skia {
   SVG: SVGFactory;
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
+  FontMgr: () => SkFontMgr;
 }

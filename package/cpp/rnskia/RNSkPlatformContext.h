@@ -18,6 +18,7 @@
 #include "SkImage.h"
 #include "SkStream.h"
 #include "SkSurface.h"
+#include "SkFontMgr.h"
 
 #pragma clang diagnostic pop
 
@@ -131,6 +132,11 @@ public:
    * @return sk_sp<SkSurface>
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+
+  /**
+   * Return the Platform specific font manager
+   */
+  virtual sk_sp<SkFontMgr> getFontMgr() = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its

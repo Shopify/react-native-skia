@@ -4,6 +4,8 @@ import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
 import type { SkTypeface } from "../Typeface";
 
+export type SkFontMgr = SkJSIInstance<"FontMgr">;
+
 export interface FontMetrics {
   ascent: number; // suggested space above the baseline. < 0
   descent: number; // suggested space below the baseline. > 0

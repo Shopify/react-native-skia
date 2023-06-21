@@ -41,6 +41,10 @@ public:
     return MakeOffscreenGLSurface(width, height);
   }
 
+  sk_sp<SkFontMgr> getFontMgr() override {
+    return nullptr;
+  }
+
   void runOnMainThread(std::function<void()> task) override {
     _jniPlatformContext->runTaskOnMainThread(task);
   }
