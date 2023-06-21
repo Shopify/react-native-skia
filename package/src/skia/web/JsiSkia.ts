@@ -39,71 +39,69 @@ import { JsiSkPath } from "./JsiSkPath";
 import { JsiSkTypeface } from "./JsiSkTypeface";
 import { JsiSkFontMgrFactory } from "./JsiSkFontMgrFactory";
 
-export const JsiSkApi = (CanvasKit: CanvasKit): Skia => {
-  return {
-    Point: (x: number, y: number) =>
-      new JsiSkPoint(CanvasKit, Float32Array.of(x, y)),
-    RuntimeShaderBuilder: (_: SkRuntimeEffect): SkRuntimeShaderBuilder => {
-      throw new Error("Not implemented on React Native Web");
-    },
-    RRectXY: (rect: SkRect, rx: number, ry: number) =>
-      new JsiSkRRect(CanvasKit, rect, rx, ry),
-    RSXform: (scos: number, ssin: number, tx: number, ty: number) =>
-      new JsiSkRSXform(CanvasKit, Float32Array.of(scos, ssin, tx, ty)),
-    Color,
-    ContourMeasureIter: (
-      path: SkPath,
-      forceClosed: boolean,
-      resScale: number
-    ): SkContourMeasureIter =>
-      new JsiSkContourMeasureIter(
-        CanvasKit,
-        new CanvasKit.ContourMeasureIter(
-          JsiSkPath.fromValue(path),
-          forceClosed,
-          resScale
-        )
-      ),
-    Paint: () => {
-      const paint = new JsiSkPaint(CanvasKit, new CanvasKit.Paint());
-      paint.setAntiAlias(true);
-      return paint;
-    },
-    PictureRecorder: () =>
-      new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder()),
-    Picture: new JsiSkPictureFactory(CanvasKit),
-    Path: new JsiSkPathFactory(CanvasKit),
-    Matrix: (matrix?: readonly number[]) =>
-      new JsiSkMatrix(
-        CanvasKit,
-        matrix
-          ? Float32Array.of(...matrix)
-          : Float32Array.of(...CanvasKit.Matrix.identity())
-      ),
-    ColorFilter: new JsiSkColorFilterFactory(CanvasKit),
-    Font: (typeface?: SkTypeface, size?: number) =>
-      new JsiSkFont(
-        CanvasKit,
-        new CanvasKit.Font(
-          typeface === undefined ? null : JsiSkTypeface.fromValue(typeface),
-          size
-        )
-      ),
-    Typeface: new JsiSkTypefaceFactory(CanvasKit),
-    MaskFilter: new JsiSkMaskFilterFactory(CanvasKit),
-    RuntimeEffect: new JsiSkRuntimeEffectFactory(CanvasKit),
-    ImageFilter: new JsiSkImageFilterFactory(CanvasKit),
-    Shader: new JsiSkShaderFactory(CanvasKit),
-    PathEffect: new JsiSkPathEffectFactory(CanvasKit),
-    MakeVertices: MakeVertices.bind(null, CanvasKit),
-    Data: new JsiSkDataFactory(CanvasKit),
-    Image: new JsiSkImageFactory(CanvasKit),
-    SVG: new JsiSkSVGFactory(CanvasKit),
-    TextBlob: new JsiSkTextBlobFactory(CanvasKit),
-    XYWHRect: (x: number, y: number, width: number, height: number) => {
-      return new JsiSkRect(CanvasKit, CanvasKit.XYWHRect(x, y, width, height));
-    },
-    Surface: new JsiSkSurfaceFactory(CanvasKit),
-    FontMgr: new JsiSkFontMgrFactory(CanvasKit),
-  };
-};
+export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
+  Point: (x: number, y: number) =>
+    new JsiSkPoint(CanvasKit, Float32Array.of(x, y)),
+  RuntimeShaderBuilder: (_: SkRuntimeEffect): SkRuntimeShaderBuilder => {
+    throw new Error("Not implemented on React Native Web");
+  },
+  RRectXY: (rect: SkRect, rx: number, ry: number) =>
+    new JsiSkRRect(CanvasKit, rect, rx, ry),
+  RSXform: (scos: number, ssin: number, tx: number, ty: number) =>
+    new JsiSkRSXform(CanvasKit, Float32Array.of(scos, ssin, tx, ty)),
+  Color,
+  ContourMeasureIter: (
+    path: SkPath,
+    forceClosed: boolean,
+    resScale: number
+  ): SkContourMeasureIter =>
+    new JsiSkContourMeasureIter(
+      CanvasKit,
+      new CanvasKit.ContourMeasureIter(
+        JsiSkPath.fromValue(path),
+        forceClosed,
+        resScale
+      )
+    ),
+  Paint: () => {
+    const paint = new JsiSkPaint(CanvasKit, new CanvasKit.Paint());
+    paint.setAntiAlias(true);
+    return paint;
+  },
+  PictureRecorder: () =>
+    new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder()),
+  Picture: new JsiSkPictureFactory(CanvasKit),
+  Path: new JsiSkPathFactory(CanvasKit),
+  Matrix: (matrix?: readonly number[]) =>
+    new JsiSkMatrix(
+      CanvasKit,
+      matrix
+        ? Float32Array.of(...matrix)
+        : Float32Array.of(...CanvasKit.Matrix.identity())
+    ),
+  ColorFilter: new JsiSkColorFilterFactory(CanvasKit),
+  Font: (typeface?: SkTypeface, size?: number) =>
+    new JsiSkFont(
+      CanvasKit,
+      new CanvasKit.Font(
+        typeface === undefined ? null : JsiSkTypeface.fromValue(typeface),
+        size
+      )
+    ),
+  Typeface: new JsiSkTypefaceFactory(CanvasKit),
+  MaskFilter: new JsiSkMaskFilterFactory(CanvasKit),
+  RuntimeEffect: new JsiSkRuntimeEffectFactory(CanvasKit),
+  ImageFilter: new JsiSkImageFilterFactory(CanvasKit),
+  Shader: new JsiSkShaderFactory(CanvasKit),
+  PathEffect: new JsiSkPathEffectFactory(CanvasKit),
+  MakeVertices: MakeVertices.bind(null, CanvasKit),
+  Data: new JsiSkDataFactory(CanvasKit),
+  Image: new JsiSkImageFactory(CanvasKit),
+  SVG: new JsiSkSVGFactory(CanvasKit),
+  TextBlob: new JsiSkTextBlobFactory(CanvasKit),
+  XYWHRect: (x: number, y: number, width: number, height: number) => {
+    return new JsiSkRect(CanvasKit, CanvasKit.XYWHRect(x, y, width, height));
+  },
+  Surface: new JsiSkSurfaceFactory(CanvasKit),
+  FontMgr: new JsiSkFontMgrFactory(CanvasKit),
+});
