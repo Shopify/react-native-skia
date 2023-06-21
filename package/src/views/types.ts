@@ -78,6 +78,8 @@ export interface ISkiaViewApi {
   ) => () => void;
   requestRedraw: (nativeId: number) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
+  registerBitmap: (nativeId: number, data: Uint8Array) => void;
+  unregisterBitmap: (nativeId: number) => void;
 }
 
 export interface SkiaBaseViewProps extends ViewProps {

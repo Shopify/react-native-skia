@@ -18,7 +18,7 @@ void JniSkiaManager::registerNatives() {
       makeNativeMethod("initHybrid", JniSkiaManager::initHybrid),
       makeNativeMethod("initializeRuntime", JniSkiaManager::initializeRuntime),
       makeNativeMethod("invalidate", JniSkiaManager::invalidate),
-      makeNativeMethod("getJsiProperty", JniSkiaManager::getJsiProperty),
+      makeNativeMethod("getBitmap", JniSkiaManager::getBitmap),
   });
 }
 
@@ -40,13 +40,12 @@ void JniSkiaManager::initializeRuntime() {
       std::make_shared<RNSkManager>(_jsRuntime, _jsCallInvoker, _context);
 }
 
-jintArray JniSkiaManager::getJsiProperty(jint nativeId, jstring name) {
+jintArray JniSkiaManager::getBitmap(jint nativeId) {
     JNIEnv* env = jni::Environment::current();
     
     // Convert the nativeId and name parameters to C++ values
     int convertedNativeId = static_cast<int>(nativeId);
-    const char* convertedName = env->GetStringUTFChars(name, nullptr);
-    
+    _skManager;   
     // Generate a 100x100 bitmap of the color cyan
     const int width = 100;
     const int height = 100;
@@ -64,7 +63,6 @@ jintArray JniSkiaManager::getJsiProperty(jint nativeId, jstring name) {
     }
     
     env->ReleaseIntArrayElements(intArray, intArrayData, 0);
-    env->ReleaseStringUTFChars(name, convertedName);
     
     return intArray;
 }

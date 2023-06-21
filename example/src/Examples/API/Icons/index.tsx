@@ -1,5 +1,11 @@
 import React, { Component, createContext, useContext, useMemo } from "react";
-import { PixelRatio, Text, View, requireNativeComponent } from "react-native";
+import {
+  PixelRatio,
+  StyleSheet,
+  Text,
+  View,
+  requireNativeComponent,
+} from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   AlphaType,
@@ -18,14 +24,19 @@ import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
 import { Github } from "./SvgIcons/GithubIcon";
 
 interface SkiaBitmapViewProps {
-  bitmap: Uint8Array;
+  data: Uint8Array;
+  width: number;
+  height: number;
   style?: ViewProps["style"];
 }
 
-const SkiaBitmapViewNative = requireNativeComponent<{
+interface SkiaBitmapViewNativeProps {
   nativeID: string;
   style?: ViewProps["style"];
-}>("SkiaBitmapView");
+}
+
+const SkiaBitmapViewNative =
+  requireNativeComponent<SkiaBitmapViewNativeProps>("SkiaBitmapView");
 
 class SkiaBitmapView extends Component<SkiaBitmapViewProps> {
   private nativeID: number;
@@ -33,15 +44,24 @@ class SkiaBitmapView extends Component<SkiaBitmapViewProps> {
   constructor(props: SkiaBitmapViewProps) {
     super(props);
     this.nativeID = SkiaViewNativeId.current++;
-    if (props.bitmap) {
-      SkiaViewApi.setJsiProperty(this.nativeID, "bitmap", props.bitmap);
-    }
+    const { data } = this.props;
+    SkiaViewApi.registerBitmap(this.nativeID, data);
+  }
+
+  componentWillUnmount() {
+    SkiaViewApi.unregisterBitmap(this.nativeID);
   }
 
   render() {
     const { nativeID } = this;
-    const { style } = this.props;
-    return <SkiaBitmapViewNative nativeID={`${nativeID}`} style={style} />;
+    const { style, width, height } = this.props;
+    const flattenedStyle = StyleSheet.flatten(style);
+    return (
+      <SkiaBitmapViewNative
+        nativeID={`${nativeID}`}
+        style={{ ...flattenedStyle, width, height }}
+      />
+    );
   }
 }
 
@@ -131,7 +151,7 @@ interface IconProps {
 const style = { width: 48, height: 48 };
 
 const Icon = ({ icon }: IconProps) => {
-  return <SkiaBitmapView bitmap={pixels} style={style} />;
+  return <SkiaBitmapView data={pixels} width={48} height={48} />;
 };
 
 const Screen = () => {

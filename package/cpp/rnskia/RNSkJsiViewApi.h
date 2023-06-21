@@ -228,11 +228,21 @@ public:
         });
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
+    JSI_HOST_FUNCTION(registerBitmap) {
+      return jsi::Value::undefined();
+    }
+
+    JSI_HOST_FUNCTION(unregisterBitmap) {
+      return jsi::Value::undefined();
+    }
+
+    JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerBitmap),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, unregisterBitmap))
 
   /**
    * Constructor
