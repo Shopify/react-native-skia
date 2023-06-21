@@ -12,6 +12,7 @@
 #include "JsiSkContourMeasureIter.h"
 #include "JsiSkDataFactory.h"
 #include "JsiSkFont.h"
+#include "JsiSkFontMgr.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageFactory.h"
 #include "JsiSkImageFilter.h"
@@ -42,7 +43,6 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
-#include "JsiSkFontMgr.h"
 
 namespace RNSkia {
 

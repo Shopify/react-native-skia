@@ -9,8 +9,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkSurface.h"
 #include "SkFontMgr.h"
+#include "SkSurface.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
 
@@ -64,7 +64,6 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
   return MakeOffscreenMetalSurface(width, height);
 }
-
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::getFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
