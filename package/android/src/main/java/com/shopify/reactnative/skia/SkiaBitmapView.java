@@ -19,8 +19,8 @@ public class SkiaBitmapView extends ReactViewGroup {
     private static final String TAG = "SkiaBitmapView";
 
     private Bitmap bitmap;
-    private int width = 100;
-    private int height = 100;
+    private int width;
+    private int height;
     private SkiaManager skiaManager;
 
     public SkiaBitmapView(Context context) {
@@ -43,11 +43,11 @@ public class SkiaBitmapView extends ReactViewGroup {
 
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-       // this.width = this.getMeasuredWidth();
-       // this.height = this.getMinimumHeight();
     }
 
     protected void registerView(int nativeId){
+        this.width = this.skiaManager.getBitmapWidth(nativeId);
+        this.height = this.skiaManager.getBitmapHeight(nativeId);
         int[] array = this.skiaManager.getBitmap(nativeId);
         this.bitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888);
         this.bitmap.setPixels(array, 0, this.width, 0, 0, this.width, this.height);

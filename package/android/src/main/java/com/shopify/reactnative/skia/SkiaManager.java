@@ -54,4 +54,6 @@ public class SkiaManager {
     private native void initializeRuntime();
     public native void invalidate();
     public native int[] getBitmap(int nativeId);
+    public native int getBitmapWidth(int nativeId);
+    public native int getBitmapHeight(int nativeId);
 }

@@ -19,6 +19,8 @@ void JniSkiaManager::registerNatives() {
       makeNativeMethod("initializeRuntime", JniSkiaManager::initializeRuntime),
       makeNativeMethod("invalidate", JniSkiaManager::invalidate),
       makeNativeMethod("getBitmap", JniSkiaManager::getBitmap),
+      makeNativeMethod("getBitmapWidth", JniSkiaManager::getBitmapWidth),
+      makeNativeMethod("getBitmapHeight", JniSkiaManager::getBitmapHeight),
   });
 }
 
@@ -38,6 +40,14 @@ void JniSkiaManager::initializeRuntime() {
   // Create the cross platform skia manager
   _skManager =
       std::make_shared<RNSkManager>(_jsRuntime, _jsCallInvoker, _context);
+}
+
+jint JniSkiaManager::getBitmapWidth(jint nativeId) {
+    return 100;
+}
+
+jint JniSkiaManager::getBitmapHeight(jint nativeId) {
+    return 100;
 }
 
 jintArray JniSkiaManager::getBitmap(jint nativeId) {

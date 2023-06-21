@@ -61,6 +61,8 @@ public:
   }
 
   jintArray getBitmap(jint nativeId);
+  jint getBitmapWidth(jint nativeId);
+  jint getBitmapHeight(jint nativeId);
 
 private:
   friend HybridBase;
