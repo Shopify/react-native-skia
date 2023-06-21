@@ -2,6 +2,7 @@
 import { useMemo } from "react";
 
 import { Skia } from "../Skia";
+import { FontStyle } from "../types";
 import type { DataSourceParam } from "../types";
 
 import { useTypeface } from "./Typeface";
@@ -24,4 +25,13 @@ export const useFont = (
       return null;
     }
   }, [size, typeface]);
+};
+
+export const matchFont = (
+  name: string,
+  fontSize: number,
+  fontStyle: FontStyle = FontStyle.Normal
+) => {
+  const typeface = Skia.FontMgr().matchFamilyStyle(name, fontStyle);
+  return Skia.Font(typeface, fontSize);
 };

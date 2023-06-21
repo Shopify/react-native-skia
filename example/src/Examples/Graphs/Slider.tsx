@@ -13,8 +13,7 @@ import {
   useTouchHandler,
   Text as SkiaText,
   vec,
-  Skia,
-  FontStyle,
+  matchFont,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -22,15 +21,9 @@ import { StyleSheet, Text, View } from "react-native";
 import { createGraphPath } from "./createGraphPath";
 import type { GraphProps } from "./types";
 
-const fontMgr = Skia.FontMgr();
-new Array(fontMgr.countFamilies()).fill(0).forEach((_, i) => {
-  console.log(fontMgr.getFamilyName(i));
-});
-const tf = fontMgr.matchFamilyStyle("helvetica", FontStyle.BoldItalic);
-const font = Skia.Font(tf, 17);
+const font = matchFont("helvetica", 17);
 
 export const Slider: React.FC<GraphProps> = ({ height, width }) => {
-  //const font = useFont(require("../../assets/SF-Pro-Display-Bold.otf"), 17);
   const path = useMemo(
     () => createGraphPath(width, height, 60, false),
     [height, width]
