@@ -4,7 +4,11 @@ import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
 import type { SkTypeface } from "../Typeface";
 
-export type SkFontMgr = SkJSIInstance<"FontMgr">;
+export interface SkFontMgr extends SkJSIInstance<"FontMgr"> {
+  countFamilies(): number;
+  getFamilyName(index: number): string;
+  matchFamilyStyle(name: string, style?: FontStyle): SkTypeface;
+}
 
 export interface FontMetrics {
   ascent: number; // suggested space above the baseline. < 0

@@ -1,7 +1,7 @@
 import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
-import type { SkFont } from "./Font";
+import type { SkFont, SkFontMgr } from "./Font";
 import type { SkTypeface, TypefaceFactory } from "./Typeface";
 import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
