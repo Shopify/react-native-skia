@@ -68,25 +68,32 @@ jint JniSkiaManager::getBitmapHeight(jint nativeId) {
 }
 
 jintArray JniSkiaManager::getBitmap(jint nativeId) {
-  JNIEnv *env = jni::Environment::current();
+    JNIEnv* env = jni::Environment::current();
 
-  // Check if the Bitmap exists in the map
-  auto it = _skManager->_viewApi->bitmapMap.find(nativeId);
-  if (it == _skManager->_viewApi->bitmapMap.end()) {
-    // Bitmap not found, return nullptr or throw an exception
-    return nullptr;
-  }
+    // Check if the Bitmap exists in the map
+    auto it = _skManager->_viewApi->bitmapMap.find(nativeId);
+    if (it == _skManager->_viewApi->bitmapMap.end()) {
+        // Bitmap not found, return nullptr or throw an exception
+        return nullptr;
+    }
 
-  // Bitmap found, convert its data to a jintArray
-  const BitmapData &bitmap = it->second;
-  jintArray result = env->NewIntArray(bitmap.data.size());
+    // Bitmap found, convert its data to a jintArray
+    const BitmapData& bitmap = it->second;
+    jintArray result = env->NewIntArray(bitmap.width * bitmap.height);
 
-  // This assumes that the data in bitmap.data is 32-bit ARGB pixel data
-  // If your data is different, you will need to modify this conversion
-  env->SetIntArrayRegion(result, 0, bitmap.data.size(),
-                         reinterpret_cast<const jint *>(bitmap.data.data()));
+    std::vector<jint> tempData(bitmap.width * bitmap.height);
+    for (int i = 0; i < bitmap.width * bitmap.height; ++i) {
+        // This assumes the data in bitmap.data is in RGBA format.
+        uint8_t r = bitmap.data[i * 4 + 0];
+        uint8_t g = bitmap.data[i * 4 + 1];
+        uint8_t b = bitmap.data[i * 4 + 2];
+        uint8_t a = bitmap.data[i * 4 + 3];
+        tempData[i] = (a << 24) | (r << 16) | (g << 8) | b;
+    }
 
-  return result;
+    env->SetIntArrayRegion(result, 0, tempData.size(), tempData.data());
+    
+    return result;
 }
 
 } // namespace RNSkia

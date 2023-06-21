@@ -45,7 +45,11 @@ class SkiaBitmapView extends Component<SkiaBitmapViewProps> {
     super(props);
     this.nativeID = SkiaViewNativeId.current++;
     const { data, width, height } = this.props;
-    SkiaViewApi.registerBitmap(this.nativeID, { data, width, height });
+    SkiaViewApi.registerBitmap(this.nativeID, {
+      data,
+      width: width * pd,
+      height: height * pd,
+    });
   }
 
   componentWillUnmount() {
@@ -73,17 +77,6 @@ for (let x = 0; x < 256 * 4; x++) {
     pixels[i++] = (x * y) % 255;
   }
 }
-const data = Skia.Data.fromBytes(pixels);
-const img = Skia.Image.MakeImage(
-  {
-    width: 256,
-    height: 256,
-    alphaType: AlphaType.Opaque,
-    colorType: ColorType.RGBA_8888,
-  },
-  data,
-  256 * 4
-)!;
 
 const pd = PixelRatio.get();
 
