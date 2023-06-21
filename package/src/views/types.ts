@@ -78,7 +78,7 @@ export interface ISkiaViewApi {
   ) => () => void;
   requestRedraw: (nativeId: number) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
-  registerBitmap: (nativeId: number, data: Uint8Array) => void;
+  registerBitmap: (nativeId: number, bitmap: { data: Uint8Array, width: number, height: number}) => void;
   unregisterBitmap: (nativeId: number) => void;
 }
 

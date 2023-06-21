@@ -44,8 +44,8 @@ class SkiaBitmapView extends Component<SkiaBitmapViewProps> {
   constructor(props: SkiaBitmapViewProps) {
     super(props);
     this.nativeID = SkiaViewNativeId.current++;
-    const { data } = this.props;
-    SkiaViewApi.registerBitmap(this.nativeID, data);
+    const { data, width, height } = this.props;
+    SkiaViewApi.registerBitmap(this.nativeID, { data, width, height });
   }
 
   componentWillUnmount() {

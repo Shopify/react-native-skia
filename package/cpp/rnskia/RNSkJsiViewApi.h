@@ -229,12 +229,36 @@ public:
   }
 
     JSI_HOST_FUNCTION(registerBitmap) {
-      return jsi::Value::undefined();
+        int nativeId = arguments[0].getNumber();
+
+        // Extract the width, height and data of the bitmap
+        jsi::Object bitmapObject = arguments[1].asObject(runtime);
+        int width = bitmapObject.getProperty(runtime, "width").asNumber();
+        int height = bitmapObject.getProperty(runtime, "height").asNumber();
+        jsi::Object dataObject = bitmapObject.getProperty(runtime, "data").asObject(runtime);
+        jsi::ArrayBuffer buffer = dataObject.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+                        .asObject(runtime)
+                        .getArrayBuffer(runtime);
+        BitmapData bitmap;
+        bitmap.width = width;
+        bitmap.height = height;
+        bitmap.data.resize(buffer.length(runtime));
+        std::memcpy(bitmap.data.data(), buffer.data(runtime), buffer.length(runtime));
+
+        // Store the bitmap in the map
+        bitmapMap[nativeId] = bitmap;
+
+        return jsi::Value::undefined();
     }
 
+
     JSI_HOST_FUNCTION(unregisterBitmap) {
-      return jsi::Value::undefined();
+        int nativeId = arguments[0].getNumber();
+        // Remove the bitmap from the map
+        bitmapMap.erase(nativeId);
+        return jsi::Value::undefined();
     }
+
 
     JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
@@ -338,5 +362,14 @@ private:
   std::unordered_map<size_t, RNSkViewInfo> _viewInfos;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::mutex _mutex;
+
+
+    struct BitmapData {
+        int width;
+        int height;
+        std::vector<uint8_t> data;  // RGBA pixel data
+    };
+
+  std::unordered_map<int, BitmapData> bitmapMap;
 };
 } // namespace RNSkia
