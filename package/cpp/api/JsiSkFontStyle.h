@@ -36,12 +36,11 @@ namespace RNSkia {
             if (object.isHostObject(runtime)) {
                 return object.asHostObject<JsiSkFontStyle>(runtime)->getObject();
             } else {
-//                auto x = object.getProperty(runtime, "x").asNumber();
-//                auto y = object.getProperty(runtime, "y").asNumber();
-                SkFontStyle normalStyle(SkFontStyle::kNormal_Weight,
-                                        SkFontStyle::kNormal_Width,
-                                        SkFontStyle::kUpright_Slant);
-                return std::make_shared<SkFontStyle>(normalStyle);
+                auto weight = static_cast<int>(object.getProperty(runtime, "weight").asNumber());
+                auto width = static_cast<int>(object.getProperty(runtime, "width").asNumber());
+                auto slant = static_cast<SkFontStyle::Slant>(object.getProperty(runtime, "slant").asNumber());
+                SkFontStyle style(weight, width, slant);
+                return std::make_shared<SkFontStyle>(style);
             }
         }
 
@@ -53,26 +52,6 @@ namespace RNSkia {
                                   const SkFontStyle &fontStyle) {
             return jsi::Object::createFromHostObject(
                     runtime, std::make_shared<JsiSkFontStyle>(std::move(context), fontStyle));
-        }
-
-        /**
-         * Creates the function for construction a new instance of the SkPoint
-         * wrapper
-         * @param context platform context
-         * @return A function for creating a new host object wrapper for the SkPoint
-         * class
-         */
-        static const jsi::HostFunctionType
-        createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-            return JSI_HOST_FUNCTION_LAMBDA {
-                    auto point =
-                    SkPoint::Make(arguments[0].asNumber(), arguments[1].asNumber());
-
-                    // Return the newly constructed object
-                    return jsi::Object::createFromHostObject(
-                    runtime,
-                    std::make_shared<JsiSkPoint>(std::move(context), std::move(point)));
-            };
         }
     };
 } // namespace RNSkia

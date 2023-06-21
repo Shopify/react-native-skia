@@ -26,7 +26,7 @@ const fontMgr = Skia.FontMgr();
 new Array(fontMgr.countFamilies()).fill(0).forEach((_, i) => {
   console.log(fontMgr.getFamilyName(i));
 });
-const tf = fontMgr.matchFamilyStyle("helvetica", FontStyle.Bold);
+const tf = fontMgr.matchFamilyStyle("helvetica", FontStyle.BoldItalic);
 const font = Skia.Font(tf, 17);
 
 export const Slider: React.FC<GraphProps> = ({ height, width }) => {
