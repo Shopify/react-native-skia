@@ -20,27 +20,28 @@
 
 namespace RNSkia {
 
-    namespace jsi = facebook::jsi;
+namespace jsi = facebook::jsi;
 
-    class JsiSkFontMgrFactory : public JsiSkHostObject {
-    public:
-        JSI_HOST_FUNCTION(MakeFromData) {
-            throw jsi::JSError(runtime, "FontMgrFactory::MakeFromData is only implemented on Web.");
-        }
+class JsiSkFontMgrFactory : public JsiSkHostObject {
+public:
+  JSI_HOST_FUNCTION(MakeFromData) {
+    throw jsi::JSError(
+        runtime, "FontMgrFactory::MakeFromData is only implemented on Web.");
+  }
 
-        JSI_HOST_FUNCTION(getInstance) {
-            auto context = getContext();
-            // Use a static local variable to store the singleton instance.
-            static sk_sp<SkFontMgr> fontMgr = context->getFontMgr();
-                  return jsi::Object::createFromHostObject(
-                         runtime, std::make_shared<JsiSkFontMgr>(std::move(context), fontMgr));
-        }
+  JSI_HOST_FUNCTION(getInstance) {
+    auto context = getContext();
+    // Use a static local variable to store the singleton instance.
+    static sk_sp<SkFontMgr> fontMgr = context->getFontMgr();
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkFontMgr>(std::move(context), fontMgr));
+  }
 
-        JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgrFactory, MakeFromData),
-                             JSI_EXPORT_FUNC(JsiSkFontMgrFactory, getInstance))
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgrFactory, MakeFromData),
+                       JSI_EXPORT_FUNC(JsiSkFontMgrFactory, getInstance))
 
-        explicit JsiSkFontMgrFactory(std::shared_ptr<RNSkPlatformContext> context)
-                : JsiSkHostObject(std::move(context)) {}
-    };
+  explicit JsiSkFontMgrFactory(std::shared_ptr<RNSkPlatformContext> context)
+      : JsiSkHostObject(std::move(context)) {}
+};
 
 } // namespace RNSkia

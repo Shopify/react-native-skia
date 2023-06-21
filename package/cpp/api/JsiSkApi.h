@@ -13,6 +13,7 @@
 #include "JsiSkDataFactory.h"
 #include "JsiSkFont.h"
 #include "JsiSkFontMgr.h"
+#include "JsiSkFontMgrFactory.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageFactory.h"
 #include "JsiSkImageFilter.h"
@@ -43,7 +44,6 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
-#include "JsiSkFontMgrFactory.h"
 
 namespace RNSkia {
 

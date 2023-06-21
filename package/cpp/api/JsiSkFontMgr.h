@@ -5,9 +5,9 @@
 #include <utility>
 #include <vector>
 
+#include "JsiSkFontStyle.h"
 #include "JsiSkHostObjects.h"
 #include "RNSkLog.h"
-#include "JsiSkFontStyle.h"
 #include <jsi/jsi.h>
 
 #pragma clang diagnostic push
