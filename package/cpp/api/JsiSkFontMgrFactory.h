@@ -34,7 +34,7 @@ public:
       static SkOnce once;
       static sk_sp<SkFontMgr> fontMgr;
       once([&context, &runtime]{
-          fontMgr = context->getFontMgr();
+          fontMgr = std::move(context->getFontMgr());
       });
       return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkFontMgr>(std::move(context), fontMgr));
   }

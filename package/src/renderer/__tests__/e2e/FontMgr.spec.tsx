@@ -36,13 +36,8 @@ describe("FontMgr", () => {
   });
   itRunsE2eOnly("Non-emoji font shouldn't resolve emojis", async () => {
     const width = await surface.eval(
-      (Skia, { OS, fontStyle }) => {
-        let fontMgr: SkFontMgr;
-        if (OS === "node" || OS === "web") {
-          fontMgr = Skia.FontMgr.FromData(...testingFonts);
-        } else {
-          fontMgr = Skia.FontMgr.System();
-        }
+      (Skia, { fontStyle }) => {
+        const fontMgr = Skia.FontMgr.System();
         const typeface = fontMgr.matchFamilyStyle(
           fontMgr.getFamilyName(0),
           fontStyle.Normal
@@ -50,7 +45,7 @@ describe("FontMgr", () => {
         const font = Skia.Font(typeface, 10);
         return font.getGlyphIDs("😉😍");
       },
-      { OS: surface.OS, fontStyle: FontStyle }
+      { fontStyle: FontStyle }
     );
     expect(width).toEqual([0, 0]);
   });
@@ -58,18 +53,13 @@ describe("FontMgr", () => {
     const fontName =
       surface.OS === "ios" ? "Apple Color Emoji" : "Noto Color Emoji";
     const width = await surface.eval(
-      (Skia, { OS, fontStyle, familyName }) => {
-        let fontMgr: SkFontMgr;
-        if (OS === "node" || OS === "web") {
-          fontMgr = Skia.FontMgr.FromData(...testingFonts);
-        } else {
-          fontMgr = Skia.FontMgr.System();
-        }
+      (Skia, { fontStyle, familyName }) => {
+        const fontMgr = Skia.FontMgr.System();
         const typeface = fontMgr.matchFamilyStyle(familyName, fontStyle.Normal);
         const font = Skia.Font(typeface, 10);
         return font.getGlyphIDs("😉😍");
       },
-      { OS: surface.OS, fontStyle: FontStyle, familyName: fontName }
+      { fontStyle: FontStyle, familyName: fontName }
     );
     if (surface.OS === "android") {
       expect(width).toEqual([0, 0]);
