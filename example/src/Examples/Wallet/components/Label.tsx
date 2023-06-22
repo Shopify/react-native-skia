@@ -1,7 +1,8 @@
-import { useFont, Text, resolveFont } from "@shopify/react-native-skia";
+import { Text, resolveFont } from "@shopify/react-native-skia";
 import React from "react";
 import type { SharedValue } from "react-native-reanimated";
 import { interpolate, useDerivedValue } from "react-native-reanimated";
+import { Platform } from "react-native";
 
 import type { Graphs } from "../Model";
 import { PADDING } from "../Model";

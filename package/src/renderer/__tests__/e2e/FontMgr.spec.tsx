@@ -67,4 +67,19 @@ describe("FontMgr", () => {
       expect(width).not.toEqual([0, 0]);
     }
   });
+  it("Custom font manager should work on every platform", async () => {
+    const names = await surface.eval(
+      (Skia, { fonts }) => {
+        const buffers = fonts.map((font) => new Uint8Array(font));
+        const fontMgr = Skia.FontMgr.FromData(...buffers);
+        return new Array(fontMgr.countFamilies())
+          .fill(0)
+          .map((_, i) => fontMgr.getFamilyName(i));
+      },
+      { fonts: testingFonts.map((font) => [...new Uint8Array(font)]) }
+    );
+    expect(names.length).toBeGreaterThan(0);
+    expect(names.indexOf("Helvetica")).toBe(-1);
+    expect(names.indexOf("Roboto")).not.toBe(-1);
+  });
 });

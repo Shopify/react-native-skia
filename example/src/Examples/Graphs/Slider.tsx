@@ -15,17 +15,21 @@ import {
   resolveFont,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 import { createGraphPath } from "./createGraphPath";
 import type { GraphProps } from "./types";
 
-const font = resolveFont({
-  fontFamily: "Helvetica",
-  fontSize: 17,
-  fontWeight: "bold",
-  fontStyle: "italic",
-});
+const font = resolveFont(
+  {
+    fontFamily: "Helvetica",
+    fontSize: 17,
+    fontWeight: "bold",
+    fontStyle: "italic",
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Platform.OS === "web" ? (window as any).fontMgr : undefined
+);
 
 export const Slider: React.FC<GraphProps> = ({ height, width }) => {
   const path = useMemo(
