@@ -100,31 +100,11 @@ export const resolveFile = (uri: string) =>
   })
 );
 
-const regularFontStyle = { weight: 400, width: 5, slant: 0 };
-const blackItalicFontStyle = { weight: 900, width: 5, slant: 0 };
 export const testingFonts = [
-  {
-    familyName: "Noto Sans SC",
-    typeface: resolveFile("skia/__tests__/assets/NotoSansSC-Regular.otf")
-      .buffer,
-    fontStyle: regularFontStyle,
-  },
-  {
-    familyName: "Roboto",
-    typeface: resolveFile("skia/__tests__/assets/Roboto-Regular.ttf").buffer,
-    fontStyle: regularFontStyle,
-  },
-  {
-    familyName: "Roboto",
-    typeface: resolveFile("skia/__tests__/assets/Roboto-BlackItalic.ttf")
-      .buffer,
-    fontStyle: blackItalicFontStyle,
-  },
-  {
-    familyName: "Noto Color Emoji",
-    typeface: resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf").buffer,
-    fontStyle: regularFontStyle,
-  },
+  resolveFile("skia/__tests__/assets/NotoSansSC-Regular.otf").buffer,
+  resolveFile("skia/__tests__/assets/Roboto-Regular.ttf").buffer,
+  resolveFile("skia/__tests__/assets/Roboto-BlackItalic.ttf").buffer,
+  resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf").buffer,
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

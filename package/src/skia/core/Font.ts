@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 import { Skia } from "../Skia";
 import { FontSlant } from "../types";
-import type { DataSourceParam } from "../types";
+import type { DataSourceParam, SkFontMgr } from "../types";
 import { Platform } from "../../Platform";
 
 import { useTypeface } from "./Typeface";
@@ -78,7 +78,10 @@ const weight = (fontWeight: Weight) => {
 };
 
 // https://github.com/facebook/react-native/blob/main/packages/react-native/React/Views/RCTFont.mm#LL426C1-L427C1
-export const resolveFont = (inputStyle: Partial<RNFontStyle> = {}) => {
+export const resolveFont = (
+  inputStyle: Partial<RNFontStyle> = {},
+  fontMgr: SkFontMgr = Skia.FontMgr.System()
+) => {
   const fontStyle = {
     ...defaultFontStyle,
     ...inputStyle,
@@ -92,6 +95,6 @@ export const resolveFont = (inputStyle: Partial<RNFontStyle> = {}) => {
     Platform.OS === "android"
       ? fontStyle.fontFamily.toLowerCase()
       : fontStyle.fontFamily;
-  const typeface = Skia.FontMgr.getInstance().matchFamilyStyle(name, style);
+  const typeface = fontMgr.matchFamilyStyle(name, style);
   return Skia.Font(typeface, fontStyle.fontSize);
 };

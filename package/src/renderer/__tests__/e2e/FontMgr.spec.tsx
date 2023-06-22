@@ -1,3 +1,5 @@
+import { itRunsE2eOnly } from "../../../__tests__/setup";
+import type { SkFontMgr } from "../../../skia/types";
 import { FontStyle } from "../../../skia/types";
 import { surface, testingFonts } from "../setup";
 
@@ -5,10 +7,12 @@ describe("FontMgr", () => {
   it("should have at least one font", async () => {
     const names = await surface.eval(
       (Skia, { OS }) => {
+        let fontMgr: SkFontMgr;
         if (OS === "node" || OS === "web") {
-          Skia.FontMgr.loadFontsOnWeb(...testingFonts);
+          fontMgr = Skia.FontMgr.FromData(...testingFonts);
+        } else {
+          fontMgr = Skia.FontMgr.System();
         }
-        const fontMgr = Skia.FontMgr.getInstance();
         return new Array(fontMgr.countFamilies())
           .fill(0)
           .map((_, i) => fontMgr.getFamilyName(i));
@@ -27,15 +31,18 @@ describe("FontMgr", () => {
       expect(names.indexOf("helvetica")).not.toBe(-1);
     } else {
       expect(names.indexOf("Helvetica")).toBe(-1);
+      expect(names.indexOf("Roboto")).not.toBe(-1);
     }
   });
-  it("Non-emoji font shouldn't resolve emojis", async () => {
+  itRunsE2eOnly("Non-emoji font shouldn't resolve emojis", async () => {
     const width = await surface.eval(
       (Skia, { OS, fontStyle }) => {
+        let fontMgr: SkFontMgr;
         if (OS === "node" || OS === "web") {
-          Skia.FontMgr.loadFontsOnWeb(...testingFonts);
+          fontMgr = Skia.FontMgr.FromData(...testingFonts);
+        } else {
+          fontMgr = Skia.FontMgr.System();
         }
-        const fontMgr = Skia.FontMgr.getInstance();
         const typeface = fontMgr.matchFamilyStyle(
           fontMgr.getFamilyName(0),
           fontStyle.Normal
@@ -47,15 +54,17 @@ describe("FontMgr", () => {
     );
     expect(width).toEqual([0, 0]);
   });
-  it("Emoji fonts should resolve emojis", async () => {
+  itRunsE2eOnly("Emoji fonts should resolve emojis", async () => {
     const fontName =
       surface.OS === "ios" ? "Apple Color Emoji" : "Noto Color Emoji";
     const width = await surface.eval(
       (Skia, { OS, fontStyle, familyName }) => {
+        let fontMgr: SkFontMgr;
         if (OS === "node" || OS === "web") {
-          Skia.FontMgr.loadFontsOnWeb(...testingFonts);
+          fontMgr = Skia.FontMgr.FromData(...testingFonts);
+        } else {
+          fontMgr = Skia.FontMgr.System();
         }
-        const fontMgr = Skia.FontMgr.getInstance();
         const typeface = fontMgr.matchFamilyStyle(familyName, fontStyle.Normal);
         const font = Skia.Font(typeface, 10);
         return font.getGlyphIDs("😉😍");
