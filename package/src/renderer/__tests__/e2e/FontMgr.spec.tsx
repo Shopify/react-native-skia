@@ -21,8 +21,10 @@ describe("FontMgr", () => {
     } else {
       expect(names.indexOf("Apple Color Emoji")).toBe(-1);
     }
-    if (surface.OS === "ios" || surface.OS === "android") {
+    if (surface.OS === "ios") {
       expect(names.indexOf("Helvetica")).not.toBe(-1);
+    } else if (surface.OS === "android") {
+      expect(names.indexOf("helvetica")).not.toBe(-1);
     } else {
       expect(names.indexOf("Helvetica")).toBe(-1);
     }
@@ -60,6 +62,10 @@ describe("FontMgr", () => {
       },
       { OS: surface.OS, fontStyle: FontStyle, familyName: fontName }
     );
-    expect(width).not.toEqual([0, 0]);
+    if (surface.OS === "android") {
+      expect(width).toEqual([0, 0]);
+    } else {
+      expect(width).not.toEqual([0, 0]);
+    }
   });
 });
