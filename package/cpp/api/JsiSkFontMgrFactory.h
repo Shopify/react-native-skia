@@ -6,15 +6,12 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkFont.h"
 #include "JsiSkHostObjects.h"
-#include "JsiSkRSXform.h"
-#include "JsiSkTextBlob.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkTextBlob.h"
+#include "SkFontMgr.h"
 #include "include/ports/SkFontMgr_data.h"
 
 #pragma clang diagnostic pop
@@ -62,7 +59,7 @@ public:
     auto context = getContext();
     static SkOnce once;
     static sk_sp<SkFontMgr> fontMgr;
-    once([&context, &runtime] { fontMgr = std::move(context->getFontMgr()); });
+    once([&context, &runtime] { fontMgr = context->getFontMgr(); });
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkFontMgr>(std::move(context), fontMgr));
   }
