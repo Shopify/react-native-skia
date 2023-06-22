@@ -32,6 +32,10 @@ export const matchFont = (
   fontSize: number,
   fontStyle: FontStyle = FontStyle.Normal
 ) => {
+  const fontMgr = Skia.FontMgr.getInstance();
+  new Array(fontMgr.countFamilies()).fill(0).forEach((_, i) => {
+    console.log(fontMgr.getFamilyName(i));
+  });
   const typeface = Skia.FontMgr.getInstance().matchFamilyStyle(name, fontStyle);
   return Skia.Font(typeface, fontSize);
 };

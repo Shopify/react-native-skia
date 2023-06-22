@@ -100,13 +100,30 @@ export const resolveFile = (uri: string) =>
   })
 );
 
-const normalFontStyle = { weight: 400, width: 5, slant: 0 };
+const regularFontStyle = { weight: 400, width: 5, slant: 0 };
+const blackItalicFontStyle = { weight: 900, width: 5, slant: 0 };
 export const testingFonts = [
   {
-    familyName: "NotoSansSC",
+    familyName: "Noto Sans SC",
     typeface: resolveFile("skia/__tests__/assets/NotoSansSC-Regular.otf")
       .buffer,
-    fontStyle: normalFontStyle,
+    fontStyle: regularFontStyle,
+  },
+  {
+    familyName: "Roboto",
+    typeface: resolveFile("skia/__tests__/assets/Roboto-Regular.ttf").buffer,
+    fontStyle: regularFontStyle,
+  },
+  {
+    familyName: "Roboto",
+    typeface: resolveFile("skia/__tests__/assets/Roboto-BlackItalic.ttf")
+      .buffer,
+    fontStyle: blackItalicFontStyle,
+  },
+  {
+    familyName: "Noto Color Emoji",
+    typeface: resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf").buffer,
+    fontStyle: regularFontStyle,
   },
 ];
 
