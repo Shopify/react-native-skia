@@ -30,7 +30,7 @@ Below is the app size increase to be expected when adding React Native Skia to y
 
 | iOS  | Android | Web    |
 | ---- | ------- | ------ |
-| 6 MB | 4 MB    | 7,2 MB |
+| 6 MB | 4 MB    | 2.9 MB |
 
 ## iOS
 
