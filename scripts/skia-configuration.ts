@@ -165,6 +165,8 @@ export const configurations: Configuration = {
     },
     args: [
       ["skia_use_metal", true],
+      ['skia_use_freetype', true],
+      ["skia_use_system_freetype2", false],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
     ],
