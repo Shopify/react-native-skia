@@ -13,7 +13,19 @@ if (module.hot) {
   module.hot.accept();
 }
 
-LoadSkia().then(async () => {
+const loadTypeface = (mod) =>
+  fetch(mod.default).then((response) => response.arrayBuffer());
+
+Promise.all([
+  LoadSkia(),
+  loadTypeface(require("./src/Tests/assets/Roboto-Medium.ttf")),
+]).then(async ([, Roboto]) => {
+  const SkiaModule = await import("@shopify/react-native-skia");
+  SkiaModule.Skia.FontMgr.loadFontsOnWeb({
+    typeface: Roboto,
+    familyName: "Roboto Medium",
+    fontStyle: { width: 5, weight: 500, fontStyle: 0 },
+  });
   const App = (await import("./src/App")).default;
   const appInfo = await import("./app.json");
   AppRegistry.registerComponent(appInfo.name, () => App);

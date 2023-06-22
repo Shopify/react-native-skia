@@ -11,6 +11,7 @@ export class JsiSkFontMgrFactory extends Host implements SkFontMgrFactory {
   constructor(CanvasKit: CanvasKit) {
     super(CanvasKit);
   }
+
   loadFontsOnWeb(...fonts: WebFont[]) {
     JsiSkFontMgrFactory.instance = new JsiSkFontMgr(this.CanvasKit, fonts);
     return JsiSkFontMgrFactory.instance;

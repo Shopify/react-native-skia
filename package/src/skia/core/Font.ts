@@ -2,8 +2,9 @@
 import { useMemo } from "react";
 
 import { Skia } from "../Skia";
-import { FontStyle } from "../types";
+import { FontSlant } from "../types";
 import type { DataSourceParam } from "../types";
+import { Platform } from "../../Platform";
 
 import { useTypeface } from "./Typeface";
 
@@ -27,15 +28,70 @@ export const useFont = (
   }, [size, typeface]);
 };
 
-export const matchFont = (
-  name: string,
-  fontSize: number,
-  fontStyle: FontStyle = FontStyle.Normal
-) => {
-  const fontMgr = Skia.FontMgr.getInstance();
-  new Array(fontMgr.countFamilies()).fill(0).forEach((_, i) => {
-    console.log(fontMgr.getFamilyName(i));
-  });
-  const typeface = Skia.FontMgr.getInstance().matchFamilyStyle(name, fontStyle);
-  return Skia.Font(typeface, fontSize);
+type Slant = "normal" | "italic" | "oblique";
+type Weight =
+  | "normal"
+  | "bold"
+  | "100"
+  | "200"
+  | "300"
+  | "400"
+  | "500"
+  | "600"
+  | "700"
+  | "800"
+  | "900";
+
+interface RNFontStyle {
+  fontFamily: string;
+  fontSize: number;
+  fontStyle: Slant;
+  fontWeight: Weight;
+}
+
+const defaultFontStyle: RNFontStyle = {
+  fontFamily: "System",
+  fontSize: 14,
+  fontStyle: "normal",
+  fontWeight: "normal",
+};
+
+const slant = (s: Slant) => {
+  if (s === "italic") {
+    return FontSlant.Italic;
+  } else if (s === "oblique") {
+    return FontSlant.Oblique;
+  } else {
+    return FontSlant.Upright;
+  }
+};
+
+const weight = (fontWeight: Weight) => {
+  switch (fontWeight) {
+    case "normal":
+      return 400;
+    case "bold":
+      return 700;
+    default:
+      return parseInt(fontWeight, 10);
+  }
+};
+
+// https://github.com/facebook/react-native/blob/main/packages/react-native/React/Views/RCTFont.mm#LL426C1-L427C1
+export const resolveFont = (inputStyle: Partial<RNFontStyle> = {}) => {
+  const fontStyle = {
+    ...defaultFontStyle,
+    ...inputStyle,
+  };
+  const style = {
+    weight: weight(fontStyle.fontWeight),
+    width: 5,
+    slant: slant(fontStyle.fontStyle),
+  };
+  const name =
+    Platform.OS === "android"
+      ? fontStyle.fontFamily.toLowerCase()
+      : fontStyle.fontFamily;
+  const typeface = Skia.FontMgr.getInstance().matchFamilyStyle(name, style);
+  return Skia.Font(typeface, fontStyle.fontSize);
 };
