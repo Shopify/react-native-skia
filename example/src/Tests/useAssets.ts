@@ -1,12 +1,4 @@
-import type { WebFont } from "@shopify/react-native-skia";
-import {
-  FontStyle,
-  useData,
-  useImage,
-  useRawData,
-  useTypeface,
-} from "@shopify/react-native-skia";
-import type { JsiSkTypeface } from "@shopify/react-native-skia/src/skia/web/JsiSkTypeface";
+import { useImage, useTypeface } from "@shopify/react-native-skia";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 

@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { Skia } from "../Skia";
 import { FontSlant } from "../types";
 import type { DataSourceParam, SkFontMgr } from "../types";
-import { Platform } from "../../Platform";
 
 import { useTypeface } from "./Typeface";
 import { useDataCollection } from "./Data";
@@ -101,10 +100,11 @@ export const matchFont = (
     width: 5,
     slant: slant(fontStyle.fontStyle),
   };
-  const name =
-    Platform.OS === "android"
-      ? fontStyle.fontFamily.toLowerCase()
-      : fontStyle.fontFamily;
-  const typeface = fontMgr.matchFamilyStyle(name, style);
+  const typeface = fontMgr.matchFamilyStyle(fontStyle.fontFamily, style);
   return Skia.Font(typeface, fontStyle.fontSize);
 };
+
+export const listFontFamilies = (fontMgr: SkFontMgr = Skia.FontMgr.System()) =>
+  new Array(fontMgr.countFamilies())
+    .fill(0)
+    .map((_, i) => fontMgr.getFamilyName(i));

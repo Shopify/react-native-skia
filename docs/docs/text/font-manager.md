@@ -21,11 +21,33 @@ You can create two kinds of font managers:
 
 We provide you with two helper functions:
 * A `matchFont` function to resolve fonts using StyleSheet attributes from React Native.
+* A `listFontFamilies` function to list the available system font families.
 * A `useFonts` hook to load font files and create a custom font manager from it.
 
 It should be noted that Skia handles fonts differently from React Native.
 In React Native, a key maps to a font file.
 However, in Skia, when providing a font file, the font manager analyzes the font metadata and uses it to match fonts accordingly.
+
+## listFontFamilies
+
+The `listFontFamilies` function returns the list of available system font families.
+By default the function will list system fonts but you can pass an optional `fontMgr` object as parameter.
+
+```jsx twoslash
+import {listFontFamilies} from "@shopify/react-native-skia";
+
+console.log(listFontFamilies());
+```
+
+Output example on Android:
+```
+["sans-serif", "arial", "helvetica", "tahoma", "verdana", ...]
+```
+
+or on iOS:
+```
+["Academy Engraved LET", "Al Nile", "American Typewriter", "Apple Color Emoji", ...]
+```
 
 ## matchFont
 
