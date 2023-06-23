@@ -77,8 +77,7 @@ const weight = (fontWeight: Weight) => {
   }
 };
 
-// https://github.com/facebook/react-native/blob/main/packages/react-native/React/Views/RCTFont.mm#LL426C1-L427C1
-export const resolveFont = (
+export const matchFont = (
   inputStyle: Partial<RNFontStyle> = {},
   fontMgr: SkFontMgr = Skia.FontMgr.System()
 ) => {
