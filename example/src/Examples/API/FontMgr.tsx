@@ -1,6 +1,12 @@
 import React from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
-import { Canvas, Skia, Text, matchFont } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Skia,
+  Text,
+  matchFont,
+  useFontMgr,
+} from "@shopify/react-native-skia";
 
 const PADDING = 16;
 
@@ -24,9 +30,19 @@ const title2Y = subtitleY + 16 * familyNames.length + PADDING + titleFontSize;
 
 export const FontMgr = () => {
   const { width } = useWindowDimensions();
+  const customFontMgr = useFontMgr([
+    require("../../Tests/assets/Roboto-Medium.ttf"),
+    require("../../Tests/assets/UberMove-Medium_mono.ttf"),
+  ]);
+  if (customFontMgr === null) {
+    return null;
+  }
+  const customfamilyNames = new Array(customFontMgr.countFamilies())
+    .fill(0)
+    .map((_, i) => customFontMgr.getFamilyName(i));
   return (
     <ScrollView>
-      <Canvas style={{ width: width, height: 2000 }}>
+      <Canvas style={{ width: width, height: 1800 }}>
         <Text font={titleFont} text={titleText} x={PADDING} y={titleY} />
         <Text
           font={subtitleFont}
@@ -49,6 +65,20 @@ export const FontMgr = () => {
           );
         })}
         <Text font={titleFont} text="Custom Fonts" x={PADDING} y={title2Y} />
+        {customfamilyNames.map((fontFamily, i) => {
+          const font = matchFont({ fontFamily }, customFontMgr);
+          const resolvedFont =
+            font.getGlyphIDs(fontFamily)[0] === 0 ? subtitleFont : font;
+          return (
+            <Text
+              key={fontFamily}
+              font={resolvedFont}
+              x={PADDING}
+              y={title2Y + 16 * (i + 1)}
+              text={fontFamily}
+            />
+          );
+        })}
       </Canvas>
     </ScrollView>
   );

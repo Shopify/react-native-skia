@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Skia } from "../Skia";
 import type { SkData, DataSourceParam, BaseSkJSIInstance } from "../types";
@@ -37,6 +37,7 @@ const loadData = <T>(
     );
   }
 };
+
 const useLoading = <T extends BaseSkJSIInstance>(
   source: DataSourceParam,
   loader: () => Promise<T | null>
@@ -61,6 +62,35 @@ const useLoading = <T extends BaseSkJSIInstance>(
   return data;
 };
 
+const useCollectionLoading = <T extends BaseSkJSIInstance>(
+  source: DataSourceParam[],
+  loader: () => Promise<(T | null)[]>
+) => {
+  const mounted = useRef(false);
+  const [data, setData] = useState<T[] | null>(null);
+  const dataRef = useRef<T[] | null>(null);
+
+  useEffect(() => {
+    mounted.current = true;
+    loader().then((result) => {
+      const value = result.filter((r) => r !== null) as T[];
+      if (mounted.current) {
+        setData(value);
+        dataRef.current = value;
+      }
+    });
+
+    return () => {
+      dataRef.current?.forEach((instance) => instance?.dispose());
+      mounted.current = false;
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source]);
+
+  return data;
+};
+
 export const useRawData = <T extends BaseSkJSIInstance>(
   source: DataSourceParam,
   factory: (data: SkData) => T | null,
@@ -73,3 +103,16 @@ export const useData = (
   source: DataSourceParam,
   onError?: (err: Error) => void
 ) => useRawData(source, identity, onError);
+
+export const useDataCollection = (
+  sources: DataSourceParam[],
+  onError?: (err: Error) => void
+) => {
+  const loader = () =>
+    Promise.all(sources.map((source) => loadData(source, identity, onError)));
+  const results = useCollectionLoading(sources, loader);
+  return useMemo(
+    () => (results === null ? results : Skia.FontMgr.FromData(results)),
+    [results]
+  );
+};

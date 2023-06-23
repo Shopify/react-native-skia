@@ -100,7 +100,7 @@ export const resolveFile = (uri: string) =>
   })
 );
 
-export const testingFonts: ArrayBuffer[] = [
+export const testingFonts = [
   resolveFile("skia/__tests__/assets/NotoSansSC-Regular.otf").buffer,
   resolveFile("skia/__tests__/assets/Roboto-Regular.ttf").buffer,
   resolveFile("skia/__tests__/assets/Roboto-BlackItalic.ttf").buffer,

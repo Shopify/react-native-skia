@@ -7,8 +7,10 @@ describe("FontMgr", () => {
   it("Custom font manager should work on every platform", async () => {
     const names = await surface.eval(
       (Skia, { fonts }) => {
-        const buffers = fonts.map((font) => new Uint8Array(font));
-        const fontMgr = Skia.FontMgr.FromData(...buffers);
+        const data = fonts.map((font) =>
+          Skia.Data.fromBytes(new Uint8Array(font))
+        );
+        const fontMgr = Skia.FontMgr.FromData(data);
         return new Array(fontMgr.countFamilies())
           .fill(0)
           .map((_, i) => fontMgr.getFamilyName(i));
@@ -24,7 +26,11 @@ describe("FontMgr", () => {
       (Skia, { OS }) => {
         let fontMgr: SkFontMgr;
         if (OS === "node" || OS === "web") {
-          fontMgr = Skia.FontMgr.FromData(...testingFonts);
+          fontMgr = Skia.FontMgr.FromData(
+            testingFonts.map((font) =>
+              Skia.Data.fromBytes(new Uint8Array(font))
+            )
+          );
         } else {
           fontMgr = Skia.FontMgr.System();
         }

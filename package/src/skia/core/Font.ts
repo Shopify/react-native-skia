@@ -7,6 +7,7 @@ import type { DataSourceParam, SkFontMgr } from "../types";
 import { Platform } from "../../Platform";
 
 import { useTypeface } from "./Typeface";
+import { useDataCollection } from "./Data";
 
 /**
  * Returns a Skia Font object
@@ -26,6 +27,16 @@ export const useFont = (
       return null;
     }
   }, [size, typeface]);
+};
+
+export const useFontMgr = (sources: DataSourceParam[]) => {
+  const collection = useDataCollection(sources);
+  return useMemo(() => {
+    if (collection === null) {
+      return null;
+    }
+    return collection;
+  }, [collection]);
 };
 
 type Slant = "normal" | "italic" | "oblique";
