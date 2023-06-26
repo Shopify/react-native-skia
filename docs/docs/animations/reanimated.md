@@ -8,7 +8,7 @@ slug: /animations/reanimated
 React Native Skia provides an integration with Reanimated 3 that allows for animations
 to be executed on the UI-thread. 
 
-This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).
+This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).  Currently, if you run `yarn add react-native-reanimated` it will install v2.  You will need to run `yarn add react-native-reanimated@3.3.0` or whatever version is the latest v3.  If you have already installed v2 you will need to do a scorched earth drill of removing it from your project(clean caches, new builds...).
 
 ## Hello World
 
