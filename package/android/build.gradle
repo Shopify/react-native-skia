@@ -274,7 +274,6 @@ if (ENABLE_PREFAB) {
         into "${project.buildDir}/headers/rnskia/"
         includeEmptyDirs = false
         include "**/*.h"
-        duplicatesStrategy = 'include'
         eachFile {
             String path = it.path
 
