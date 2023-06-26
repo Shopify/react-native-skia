@@ -6,9 +6,9 @@ slug: /animations/reanimated
 ---
 
 React Native Skia provides an integration with Reanimated 3 that allows for animations
-to be executed on the UI-thread. 
+to be executed on the UI-thread.
 
-This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).
+This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).  Expo Go and dev client do not currently support v3.  You will need to eject or `npx expo prebuild`.
 
 ## Hello World
 
@@ -175,7 +175,6 @@ If you are using Reanimated 2, we offer a hook named `useSharedValueEffect` wher
 useSharedValueEffect() runs on the JS thread. We suggest using Reanimated 3 if possible, [see Reanimated 3 support](/docs/animations/reanimated).
 
 :::
-
 
 ### Example
 
