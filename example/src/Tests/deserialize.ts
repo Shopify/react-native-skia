@@ -37,6 +37,11 @@ export const parseProps = (props: SerializedProps, assets: Assets) => {
 
 const parseProp = (value: any, assets: Assets) => {
   if (value && typeof value === "object" && "__typename__" in value) {
+    if (value.__typename__ === "Paint") {
+      const paint = Skia.Paint();
+      paint.setColor(Float32Array.of(...value.color));
+      return paint;
+    }
     if (value.__typename__ === "Point") {
       return Skia.Point(value.x, value.y);
     } else if (value.__typename__ === "Rect") {
@@ -57,6 +62,8 @@ const parseProp = (value: any, assets: Assets) => {
       return asset;
     } else if (value.__typename__ === "RuntimeEffect") {
       return Skia.RuntimeEffect.Make(value.source);
+    } else if (value.__typename__ === "SVG") {
+      return Skia.SVG.MakeFromString(value.source);
     } else if (value.__typename__ === "Font") {
       const asset = assets[value.name];
       if (!asset) {

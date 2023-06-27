@@ -1,9 +1,9 @@
 // webpack.config.js
 const path = require("path");
+const fs = require("fs");
 
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 
 const { presets, plugins } = require(`${__dirname}/babel.config.js`);
 
@@ -85,6 +85,10 @@ module.exports = {
         __dirname,
         "./node_modules/react-native-web"
       ),
+      "react-native-reanimated/package.json": require.resolve(
+        "react-native-reanimated/package.json"
+      ),
+      "react-native-reanimated": require.resolve("react-native-reanimated"),
     },
   },
   module: {
@@ -104,21 +108,32 @@ module.exports = {
       // See: <https://github.com/necolas/react-native-web/issues/349>
       __DEV__: JSON.stringify(true),
     }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: "node_modules/canvaskit-wasm/bin/full/canvaskit.wasm",
-        },
-      ],
-    }),
+    new (class CopySkiaPlugin {
+      apply(compiler) {
+        compiler.hooks.thisCompilation.tap("AddSkiaPlugin", (compilation) => {
+          compilation.hooks.processAssets.tapPromise(
+            {
+              name: "copy-skia",
+              stage:
+                compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+            },
+            async () => {
+              const src = require.resolve(
+                "canvaskit-wasm/bin/full/canvaskit.wasm"
+              );
+              if (compilation.getAsset(src)) {
+                // Skip emitting the asset again because it's immutable
+                return;
+              }
+
+              compilation.emitAsset(
+                "/canvaskit.wasm",
+                new webpack.sources.RawSource(await fs.promises.readFile(src))
+              );
+            }
+          );
+        });
+      }
+    })(),
   ],
-  // FIXME:
-  // To be able to ignore missing reanimated (if not installed), we
-  // add this section - it fixes any webpack errors in the useValueEffect.ts
-  // file.
-  externals: {
-    "react-native-reanimated": "require('react-native-reanimated')",
-    "react-native-reanimated/lib/reanimated2/core":
-      "require('react-native-reanimated/lib/reanimated2/core')",
-  },
 };

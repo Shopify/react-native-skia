@@ -4,6 +4,10 @@ import { DefaultEventPriority } from "react-reconciler/constants";
 
 import type { NodeType, Node } from "../dom/types";
 import type { SkiaValue } from "../values";
+import {
+  bindReanimatedProps,
+  extractReanimatedProps,
+} from "../external/reanimated";
 
 import type { Container } from "./Container";
 import { createNode } from "./HostComponents";
@@ -121,8 +125,9 @@ export const skHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    const props = { ...pristineProps };
+    const [props, reanimatedProps] = extractReanimatedProps(pristineProps);
     const node = createNode(container, type, materialize(props));
+    bindReanimatedProps(container, node, reanimatedProps);
     container.depMgr.subscribeNode(node, props);
     return node;
   },
@@ -193,9 +198,10 @@ export const skHostConfig: SkiaHostConfig = {
     if (shallowEq(prevProps, nextProps)) {
       return;
     }
-    const props = { ...nextProps };
+    const [props, reanimatedProps] = extractReanimatedProps(nextProps);
     updatePayload.depMgr.unsubscribeNode(instance);
     instance.setProps(materialize(props));
+    bindReanimatedProps(updatePayload, instance, reanimatedProps);
     updatePayload.depMgr.subscribeNode(instance, props);
   },
 

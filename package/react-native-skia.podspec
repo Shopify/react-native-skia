@@ -22,14 +22,10 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
   s.pod_target_xcconfig = {
-    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) SK_GL=1 SK_METAL=1',
+    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) SK_METAL=1 SK_GANESH=1',
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
     'DEFINES_MODULE' => 'YES',
-    "HEADER_SEARCH_PATHS" => '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/" ' + 
-                             '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/api/" ' + 
-                             '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/rnskia/" ' + 
-                             '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/rnskia/dom/" ' + 
-                             '"$(PODS_ROOT)/../../node_modules/@shopify/react-native-skia/cpp/skia/"'
+    "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/**'
   }
 
   s.frameworks = 'GLKit', 'MetalKit'
@@ -45,7 +41,7 @@ Pod::Spec.new do |s|
   # All iOS cpp/h files
   s.source_files = [
     "ios/**/*.{h,c,cc,cpp,m,mm,swift}",  
-    "cpp/**/*.{h,cpp}"    
+    "cpp/**/*.{h,cpp}"
   ]
 
   s.dependency "React"

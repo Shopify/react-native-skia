@@ -1,6 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { SkData, ImageInfo } from "../types";
+import type { SkData, ImageInfo, SkImage } from "../types";
 import type { ImageFactory } from "../types/Image/ImageFactory";
 
 import { Host, ckEnum } from "./Host";
@@ -10,6 +10,13 @@ import { JsiSkData } from "./JsiSkData";
 export class JsiSkImageFactory extends Host implements ImageFactory {
   constructor(CanvasKit: CanvasKit) {
     super(CanvasKit);
+  }
+
+  MakeImageFromViewTag(viewTag: number): Promise<SkImage | null> {
+    const view = viewTag as unknown as HTMLElement;
+    // TODO: Implement screenshot from view in React JS
+    console.log(view);
+    return Promise.resolve(null);
   }
 
   MakeImageFromEncoded(encoded: SkData) {

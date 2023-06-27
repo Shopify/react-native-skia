@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Image } from "react-native";
 
 import { Skia } from "../Skia";
-import { isRNModule } from "../types";
-import type { SkData, DataModule, DataSourceParam } from "../types";
-
-const resolveAsset = (source: DataModule) => {
-  return isRNModule(source)
-    ? Image.resolveAssetSource(source).uri
-    : source.default;
-};
+import type { SkData, DataSourceParam, BaseSkJSIInstance } from "../types";
+import { Platform } from "../../Platform";
 
 const factoryWrapper = <T>(
   data2: SkData,
@@ -27,7 +20,7 @@ const factoryWrapper = <T>(
 
 const loadData = <T>(
   source: DataSourceParam,
-  factory: (data: SkData) => T,
+  factory: (data: SkData) => T | null,
   onError?: (err: Error) => void
 ): Promise<T | null> => {
   if (source === null || source === undefined) {
@@ -37,26 +30,30 @@ const loadData = <T>(
       resolve(factoryWrapper(Skia.Data.fromBytes(source), factory, onError))
     );
   } else {
-    const uri = typeof source === "string" ? source : resolveAsset(source);
+    const uri =
+      typeof source === "string" ? source : Platform.resolveAsset(source);
     return Skia.Data.fromURI(uri).then((d) =>
       factoryWrapper(d, factory, onError)
     );
   }
 };
-const useLoading = <T>(
+const useLoading = <T extends BaseSkJSIInstance>(
   source: DataSourceParam,
   loader: () => Promise<T | null>
 ) => {
   const mounted = useRef(false);
   const [data, setData] = useState<T | null>(null);
+  const dataRef = useRef<T | null>(null);
   useEffect(() => {
     mounted.current = true;
     loader().then((value) => {
       if (mounted.current) {
         setData(value);
+        dataRef.current = value;
       }
     });
     return () => {
+      dataRef.current?.dispose();
       mounted.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,11 +61,11 @@ const useLoading = <T>(
   return data;
 };
 
-export const useRawData = <T>(
+export const useRawData = <T extends BaseSkJSIInstance>(
   source: DataSourceParam,
-  factory: (data: SkData) => T,
+  factory: (data: SkData) => T | null,
   onError?: (err: Error) => void
-) => useLoading(source, () => loadData(source, factory, onError));
+) => useLoading(source, () => loadData<T>(source, factory, onError));
 
 const identity = (data: SkData) => data;
 

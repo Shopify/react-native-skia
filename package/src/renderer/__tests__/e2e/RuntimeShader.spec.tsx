@@ -81,9 +81,7 @@ half4 main(float2 xy) {
         </Group>
       </>
     );
-    checkImage(img, "snapshots/runtime-shader/spiral.png", {
-      maxPixelDiff: 1,
-    });
+    checkImage(img, "snapshots/runtime-shader/spiral.png");
   });
   itRunsE2eOnly(
     "should be the reference result for the next test (1)",

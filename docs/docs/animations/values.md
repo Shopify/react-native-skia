@@ -5,6 +5,13 @@ sidebar_label: Values
 slug: /animations/values
 ---
 
+:::info
+
+Currently, built-in Skia animations are dependant on the JS thread.
+For UI-thread animations with Reanimated 3, see [Reanimated support](/docs/animations/reanimated).
+
+:::
+
 React Native Skia supports Animations through the concept of Skia Values. A value can be seen as the state in the library where a change in will trigger a repaint request on the `Canvas` component where it is used.
 
 A simple example below shows how a value is used as a property for the x position of the `Rect` element.
@@ -91,7 +98,7 @@ const Demo = () => {
 
 ## Canvas Size
 
-The `onSize` property will update the provided Skia Value with the current canvas size when the Canvas is resized.
+The `onSize` property will update the provided Skia Value with the current canvas size when the Canvas is resized. This property can also be a Reanimated shared value (see [reanimated integration](/docs/animations/reanimated)).
 
 ```tsx twoslash
 import React from "react";

@@ -90,4 +90,52 @@ describe("Backdrop Filters", () => {
     );
     checkImage(img, docPath("blur-backdrop-aurora.png"));
   });
+  it("should display the Aurora Example with the BackdropBlur component", async () => {
+    const { width, height } = surface;
+    const { vec } = importSkia();
+    const c = vec(width / 2, height / 2);
+    const r = c.x - 32 / 3;
+    const clip = { x: 0, y: c.y, width, height: c.y };
+    const img = await surface.draw(
+      <>
+        <Fill color="black" />
+        <Circle c={c} r={r}>
+          <LinearGradient
+            start={vec(c.x - r, c.y - r)}
+            end={vec(c.x + r, c.y + r)}
+            colors={["#FFF723", "#E70696"]}
+          />
+        </Circle>
+        <BackdropBlur blur={10 / 3} clip={clip}>
+          <Fill color="rgba(0, 0, 0, 0.3)" />
+        </BackdropBlur>
+      </>
+    );
+    checkImage(img, docPath("blur-backdrop-aurora.png"));
+  });
+  it("should display the Aurora Example with the BackdropBlur component and a string as clipping path", async () => {
+    const { width, height } = surface;
+    const { vec, Skia } = importSkia();
+    const c = vec(width / 2, height / 2);
+    const r = c.x - 32 / 3;
+    const path = Skia.Path.Make();
+    path.addRect(Skia.XYWHRect(0, c.y, width, c.y));
+    const clip = path.toSVGString();
+    const img = await surface.draw(
+      <>
+        <Fill color="black" />
+        <Circle c={c} r={r}>
+          <LinearGradient
+            start={vec(c.x - r, c.y - r)}
+            end={vec(c.x + r, c.y + r)}
+            colors={["#FFF723", "#E70696"]}
+          />
+        </Circle>
+        <BackdropBlur blur={10 / 3} clip={clip}>
+          <Fill color="rgba(0, 0, 0, 0.3)" />
+        </BackdropBlur>
+      </>
+    );
+    checkImage(img, docPath("blur-backdrop-aurora.png"));
+  });
 });

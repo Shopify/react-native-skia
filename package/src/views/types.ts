@@ -9,6 +9,7 @@ import type {
   SkSize,
 } from "../skia/types";
 import type { SkiaMutableValue, SkiaValue } from "../values";
+import type { SharedValueType } from "../renderer/processors/Animations/Animations";
 
 export type DrawMode = "continuous" | "default";
 
@@ -97,7 +98,7 @@ export interface SkiaBaseViewProps extends ViewProps {
    * Pass an animated value to the onSize property to get updates when
    * the Skia view is resized.
    */
-  onSize?: SkiaMutableValue<SkSize>;
+  onSize?: SkiaMutableValue<SkSize> | SharedValueType<SkSize>;
 }
 
 export interface SkiaDrawViewProps extends SkiaBaseViewProps {

@@ -11,7 +11,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPoint.h>
+#include "SkPoint.h"
 
 #pragma clang diagnostic pop
 

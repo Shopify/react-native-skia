@@ -25,4 +25,8 @@ export class JsiSkTypeface
     );
     return false;
   }
+
+  dispose = () => {
+    this.ref.delete();
+  };
 }

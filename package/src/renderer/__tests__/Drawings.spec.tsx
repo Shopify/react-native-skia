@@ -52,7 +52,7 @@ describe("Test introductionary examples from our documentation", () => {
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
       </Group>
     );
-    processResult(surface, "snapshots/drawings/blur.png");
+    processResult(surface, "snapshots/drawings/blur-node.png");
   });
 
   it("Should use multiple paint definitions for one drawing command", () => {

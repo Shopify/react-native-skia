@@ -2,7 +2,7 @@
 import React from "react";
 
 import { surface, importSkia } from "../setup";
-import { Group, Paint, Path } from "../../components";
+import { Circle, Fill, Group, Paint, Path } from "../../components";
 import { checkImage } from "../../../__tests__/setup";
 import { fitbox } from "../../components/shapes/FitBox";
 
@@ -42,7 +42,35 @@ const SIZE = 32;
 const COLS = 256 / SIZE;
 
 describe("Paint", () => {
-  it("Blend modes", async () => {
+  it("should interpret the #rrggbbaa correctly", async () => {
+    const { width, height } = surface;
+    const { rect } = importSkia();
+
+    const image = await surface.draw(
+      <>
+        <Group clip={rect(0, 0, width / 2, height)}>
+          <Fill color="#ff000079" />
+        </Group>
+        <Group clip={rect(width / 2, 0, width / 2, height)}>
+          <Fill color="#ff000080" />
+        </Group>
+      </>
+    );
+    checkImage(image, "snapshots/paint/colors.png");
+  });
+  it("should accept a paint object as property", async () => {
+    const { width, height } = surface;
+    const { Skia } = importSkia();
+    const paint = Skia.Paint();
+    paint.setColor(Skia.Color("lightblue"));
+    const image = await surface.draw(
+      <>
+        <Circle cx={width / 2} cy={height / 2} r={width / 2} paint={paint} />
+      </>
+    );
+    checkImage(image, "snapshots/paint/circle.png");
+  });
+  it("should display blend modes properly", async () => {
     const { Skia, rect } = importSkia();
     const src = Skia.Path.MakeFromSVGString(
       [
