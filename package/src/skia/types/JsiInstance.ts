@@ -1,7 +1,4 @@
-export interface BaseSkJSIInstance {
-  dispose: () => void;
-}
-
-export interface SkJSIInstance<T extends string> extends BaseSkJSIInstance {
+export interface SkJSIInstance<T extends string> {
   __typename__: T;
+  dispose: () => void;
 }
