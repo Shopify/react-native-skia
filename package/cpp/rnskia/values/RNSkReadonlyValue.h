@@ -29,7 +29,7 @@ public:
   explicit RNSkReadonlyValue(
       std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
-        _valueHolder(std::make_shared<JsiValue>()) {}
+        _valueHolder(std::make_shared<RNJsi::JsiValue>()) {}
 
   virtual ~RNSkReadonlyValue() { invalidate(); }
 
