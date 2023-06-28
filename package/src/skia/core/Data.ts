@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Skia } from "../Skia";
-import type { SkData, DataSourceParam, BaseSkJSIInstance } from "../types";
+import type { SkData, DataSourceParam, SkJSIInstance } from "../types";
 import { Platform } from "../../Platform";
 
 const factoryWrapper = <T>(
@@ -37,7 +37,7 @@ const loadData = <T>(
     );
   }
 };
-const useLoading = <T extends BaseSkJSIInstance>(
+const useLoading = <T extends SkJSIInstance<string>>(
   source: DataSourceParam,
   loader: () => Promise<T | null>
 ) => {
@@ -61,7 +61,7 @@ const useLoading = <T extends BaseSkJSIInstance>(
   return data;
 };
 
-export const useRawData = <T extends BaseSkJSIInstance>(
+export const useRawData = <T extends SkJSIInstance<string>>(
   source: DataSourceParam,
   factory: (data: SkData) => T | null,
   onError?: (err: Error) => void
