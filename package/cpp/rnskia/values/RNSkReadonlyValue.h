@@ -16,7 +16,6 @@
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
-using namespace RNJsi; // NOLINT
 
 /**
  Implements a readonly Value that is updated every time the screen is redrawn.
@@ -107,7 +106,7 @@ public:
    @param value Next value
    */
   virtual void update(jsi::Runtime &runtime, const jsi::Value &value) {
-    auto equal = _valueHolder->operator==(JsiValue(runtime, value));
+    auto equal = _valueHolder->operator==(RNJsi::JsiValue(runtime, value));
     if (!equal) {
       _valueHolder->setCurrent(runtime, value);
       notifyListeners(runtime);
@@ -134,7 +133,7 @@ public:
    Returns the underlying current value wrapper. This can be used to query the
    holder for data type and get pointers to elements in the holder.
    */
-  std::shared_ptr<JsiValue> getCurrent() { return _valueHolder; }
+  std::shared_ptr<RNJsi::JsiValue> getCurrent() { return _valueHolder; }
 
 protected:
   /**
@@ -158,7 +157,7 @@ protected:
   }
 
 private:
-  std::shared_ptr<JsiValue> _valueHolder;
+  std::shared_ptr<RNJsi::JsiValue> _valueHolder;
 
   long _listenerId = 0;
   std::unordered_map<long, std::function<void(jsi::Runtime &)>> _listeners;
