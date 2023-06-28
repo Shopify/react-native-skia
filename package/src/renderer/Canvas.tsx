@@ -4,7 +4,7 @@ import React, {
   useMemo,
   forwardRef,
   useRef,
-  useLayoutEffect
+  useLayoutEffect,
 } from "react";
 import type {
   RefObject,
@@ -32,60 +32,47 @@ export interface CanvasProps extends SkiaBaseViewProps {
   onTouch?: TouchHandler;
 }
 
-const useOnSize = (
-  resultValue: SkiaBaseViewProps['onSize'],
-) => {
+const useOnSizeEvent = (resultValue: SkiaBaseViewProps["onSize"]) => {
   const onSize = useValue({
     width: 0,
     height: 0,
   });
 
-  useLayoutEffect(
-    () => {
-      if (!resultValue) {
-        return
+  useLayoutEffect(() => {
+    if (!resultValue) {
+      return;
+    }
+
+    return onSize.addListener((newValue) => {
+      const currentValue = isValue(resultValue)
+        ? resultValue.current
+        : resultValue.value;
+
+      if (
+        currentValue.height === newValue.height &&
+        currentValue.width === newValue.width
+      ) {
+        return;
       }
 
-      return onSize.addListener((newValue) => {
-        const currentValue =
-          'value' in resultValue ? resultValue.value : resultValue.current;
-
-        if (
-          currentValue.height === newValue.height &&
-          currentValue.width === newValue.width
-        ) {
-          return;
-        }
-
-        const valueCopy = Object.assign({}, newValue);
-        if ('value' in resultValue) {
-          resultValue.value = valueCopy;
-          return;
-        }
-
+      const valueCopy = Object.assign({}, newValue);
+      if (isValue(resultValue)) {
         resultValue.current = valueCopy;
-      })
-    },
-    [resultValue, onSize],
-  );
+      } else {
+        resultValue.value = valueCopy;
+      }
+    });
+  }, [resultValue, onSize]);
 
   return onSize;
 };
 
 export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
   (
-    {
-      children,
-      style,
-      debug,
-      mode,
-      onTouch,
-      onSize: _onSize,
-      ...props
-    },
+    { children, style, debug, mode, onTouch, onSize: _onSize, ...props },
     forwardedRef
   ) => {
-    const onSize = useOnSize(_onSize)
+    const onSize = useOnSizeEvent(_onSize);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const redraw = useCallback(() => {
