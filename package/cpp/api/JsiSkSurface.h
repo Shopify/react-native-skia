@@ -9,7 +9,6 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkImage.h"
-#include "JsiSkSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
