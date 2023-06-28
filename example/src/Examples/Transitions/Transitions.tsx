@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useMemo } from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
@@ -49,7 +43,7 @@ const arr = [1, 2, 3, 4, 5];
 console.log(getElementAtIndex(arr, 7)); // Output: 3
 console.log(getElementAtIndex(arr, -2)); // Output: 4
 */
-const at = <T,>(array: T[] | null, index: number): T => {
+const at = <T,>(array: T[] | null, index: number): T | null => {
   "worklet";
   if (array === null) {
     return null;
@@ -128,11 +122,11 @@ export const Transitions = () => {
     };
   });
   const transition1 = useDerivedValue(() => {
-    return at(transitions, offset.value - 1);
+    return at(transitions, offset.value - 1)!;
   });
 
   const transition2 = useDerivedValue(() => {
-    return at(transitions, offset.value);
+    return at(transitions, offset.value)!;
   });
 
   const assets1 = useDerivedValue(() => {
