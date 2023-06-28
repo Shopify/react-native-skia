@@ -42,24 +42,11 @@ const useOnSizeEvent = (resultValue: SkiaBaseViewProps["onSize"]) => {
     if (!resultValue) {
       return;
     }
-
     return onSize.addListener((newValue) => {
-      const currentValue = isValue(resultValue)
-        ? resultValue.current
-        : resultValue.value;
-
-      if (
-        currentValue.height === newValue.height &&
-        currentValue.width === newValue.width
-      ) {
-        return;
-      }
-
-      const valueCopy = Object.assign({}, newValue);
       if (isValue(resultValue)) {
-        resultValue.current = valueCopy;
+        resultValue.current = newValue;
       } else {
-        resultValue.value = valueCopy;
+        resultValue.value = newValue;
       }
     });
   }, [resultValue, onSize]);
