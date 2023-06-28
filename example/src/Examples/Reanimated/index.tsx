@@ -1,9 +1,5 @@
 import React from "react";
 import { StyleSheet } from "react-native";
-import {
-  GestureHandlerRootView,
-  ScrollView,
-} from "react-native-gesture-handler";
 import { ScrollView } from "react-native-gesture-handler";
 
 import { AnimateTextOnPath } from "./AnimateTextOnPath";

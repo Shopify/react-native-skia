@@ -56,9 +56,6 @@ public:
 
     // get all children that are shader nodes
     auto children = context->getShaders()->popAll();
-    // TODO: This is probably an issue everywhere.
-    // the js skia dom is not affected by it, investigate
-    std::reverse(std::begin(children), std::end(children));
 
     // Update shader
     context->getShaders()->push(source->getObject()->makeShader(
