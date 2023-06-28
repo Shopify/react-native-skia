@@ -32,7 +32,7 @@ export interface CanvasProps extends SkiaBaseViewProps {
   onTouch?: TouchHandler;
 }
 
-export const useOnSize = (
+const useOnSize = (
   resultValue: SkiaBaseViewProps['onSize'],
 ) => {
   const onSize = useValue({
