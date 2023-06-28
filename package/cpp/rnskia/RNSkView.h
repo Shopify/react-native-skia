@@ -343,46 +343,24 @@ private:
               }
               auto onSizeObj = onSize.asObject(*runtime);
 
-              // Is this a host SkSize object?
-              if (onSizeObj.isHostObject(*runtime)) {
-                auto point = std::dynamic_pointer_cast<JsiSkPoint>(
-                    onSizeObj.asHostObject(*runtime));
-                if (point == nullptr) {
-                  throw jsi::JSError(*runtime,
-                                     "Expected onSize property to be a mutable "
-                                     "Skia value of type SkSize.");
-                  return;
-                }
+              auto wVal = onSizeObj.getProperty(*runtime, "width");
+              auto hVal = onSizeObj.getProperty(*runtime, "height");
 
-                auto w = point->getObject()->x();
-                auto h = point->getObject()->y();
-                if (w != width || h != height) {
-                  auto nextSize =
-                      std::make_shared<SkPoint>(SkPoint::Make(width, height));
-                  point->setObject(nextSize);
-                  self->_onSize->set_current(*runtime, onSize);
-                }
+              if (!wVal.isNumber() || !hVal.isNumber()) {
+                throw jsi::JSError(*runtime,
+                                   "Expected onSize property to be a mutable "
+                                   "Skia value of type SkSize.");
+                return;
+              }
 
-              } else {
-                auto wVal = onSizeObj.getProperty(*runtime, "width");
-                auto hVal = onSizeObj.getProperty(*runtime, "height");
+              auto w = wVal.asNumber();
+              auto h = hVal.asNumber();
 
-                if (!wVal.isNumber() || !hVal.isNumber()) {
-                  throw jsi::JSError(*runtime,
-                                     "Expected onSize property to be a mutable "
-                                     "Skia value of type SkSize.");
-                  return;
-                }
-
-                auto w = wVal.asNumber();
-                auto h = hVal.asNumber();
-
-                if (w != width || h != height) {
-                  // Update
-                  onSizeObj.setProperty(*runtime, "width", width);
-                  onSizeObj.setProperty(*runtime, "height", height);
-                  self->_onSize->set_current(*runtime, onSize);
-                }
+              if (w != width || h != height) {
+                // Update
+                onSizeObj.setProperty(*runtime, "width", width);
+                onSizeObj.setProperty(*runtime, "height", height);
+                self->_onSize->set_current(*runtime, onSize);
               }
             }
           });
