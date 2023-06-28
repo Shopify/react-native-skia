@@ -26,6 +26,7 @@ import {
   Vertices,
   Wallet,
   Severance,
+  Transitions,
   Stickers,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
@@ -55,6 +56,7 @@ const linking: LinkingOptions<StackParamList> = {
       Reanimated: "reanimated",
       Performance: "performance",
       Tests: "test",
+      Transitions: "transitions",
       Stickers: "stickers",
     },
   },
@@ -169,6 +171,13 @@ const App = () => {
             <Stack.Screen name="Animation" component={AnimationExample} />
             <Stack.Screen name="Reanimated" component={ReanimatedExample} />
             <Stack.Screen name="Stickers" component={Stickers} />
+            <Stack.Screen
+              name="Transitions"
+              component={Transitions}
+              options={{
+                header: () => null,
+              }}
+            />
             <Stack.Screen
               name="Performance"
               component={PerformanceDrawingTest}

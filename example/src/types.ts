@@ -21,5 +21,6 @@ export type StackParamList = {
   Animation: undefined;
   Reanimated: undefined;
   Performance: undefined;
+  Transitions: undefined;
   Stickers: undefined;
 };
