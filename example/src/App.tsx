@@ -27,6 +27,7 @@ import {
   Wallet,
   Severance,
   Transitions,
+  Stickers,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -56,6 +57,7 @@ const linking: LinkingOptions<StackParamList> = {
       Performance: "performance",
       Tests: "test",
       Transitions: "transitions",
+      Stickers: "stickers",
     },
   },
   prefixes: ["rnskia://"],
@@ -168,6 +170,7 @@ const App = () => {
             <Stack.Screen name="Graphs" component={GraphsScreen} />
             <Stack.Screen name="Animation" component={AnimationExample} />
             <Stack.Screen name="Reanimated" component={ReanimatedExample} />
+            <Stack.Screen name="Stickers" component={Stickers} />
             <Stack.Screen
               name="Transitions"
               component={Transitions}

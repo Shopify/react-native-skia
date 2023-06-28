@@ -48,6 +48,11 @@ export const HomeScreen = () => {
         route="Aurora"
       />
       <HomeScreenButton
+        title="📸 Stickers"
+        description="Stickers"
+        route="Stickers"
+      />
+      <HomeScreenButton
         title="🌈 Mesh Gradient"
         description="Mesh Gradients"
         route="Vertices"

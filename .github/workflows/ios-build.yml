@@ -67,11 +67,11 @@ jobs:
       - name: Check if Podfile.lock has changed
         working-directory: example/ios
         run: |
-          if git diff --quiet --ignore-all-space -I 'COCOAPODS:' HEAD -- ios/Podfile.lock; then
+          if git diff --quiet --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock; then
             echo "Podfile.lock is up to date."
           else
               echo "Podfile.lock has local changes, please update it."
-              git diff ios/Podfile.lock
+              git diff Podfile.lock
               exit 1
           fi
 

@@ -379,9 +379,11 @@ private:
 
                 if (w != width || h != height) {
                   // Update
-                  onSizeObj.setProperty(*runtime, "width", width);
-                  onSizeObj.setProperty(*runtime, "height", height);
-                  self->_onSize->set_current(*runtime, onSize);
+                  auto newValue = jsi::Object(*runtime);
+                  newValue.setProperty(*runtime, "width", width);
+                  newValue.setProperty(*runtime, "height", height);
+                  self->_onSize->set_current(*runtime,
+                                             jsi::Value(*runtime, newValue));
                 }
               }
             }

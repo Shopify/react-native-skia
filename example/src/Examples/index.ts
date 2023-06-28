@@ -21,3 +21,4 @@ export * from "./Vertices";
 export * from "./Wallet";
 export * from "./Severance";
 export * from "./Transitions";
+export * from "./Stickers";
