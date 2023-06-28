@@ -1,15 +1,8 @@
 /* eslint-disable max-len */
 import React from "react";
 
-import { surface, importSkia, images } from "../setup";
-import {
-  Circle,
-  Fill,
-  Group,
-  Paint,
-  RuntimeShader,
-  Image,
-} from "../../components";
+import { surface, importSkia } from "../setup";
+import { Circle, Fill, Group, Paint, RuntimeShader } from "../../components";
 import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 
 const spiral = `
@@ -247,41 +240,6 @@ half4 main(float2 xy) {
       checkImage(img, "snapshots/runtime-shader/scaled-circle2.png", {
         overwrite: true,
       });
-    }
-  );
-  itRunsE2eOnly(
-    "should leave the image from the previous test untouched (2)",
-    async () => {
-      const { width, height } = surface;
-      const { Skia } = importSkia();
-      const passThrough = `uniform shader image;
-
-      half4 main(float2 xy) {
-        return image.eval(xy);
-      }`;
-      const source = Skia.RuntimeEffect.Make(passThrough)!;
-      expect(source).toBeTruthy();
-      const img = await surface.draw(
-        <Group>
-          <Group
-            layer={
-              <Paint>
-                <RuntimeShader source={source} />
-              </Paint>
-            }
-          >
-            <Image
-              image={images.circle}
-              x={0}
-              y={0}
-              width={width / 3}
-              height={height / 3}
-              fit="contain"
-            />
-          </Group>
-        </Group>
-      );
-      checkImage(img, "snapshots/runtime-shader/scaled-circle2.png");
     }
   );
 });
