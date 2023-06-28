@@ -14,7 +14,7 @@
 #include "SkBase64.h"
 #include "SkImage.h"
 #include "SkStream.h"
-#include "codec/SkEncodedImageFormat.h"
+#include "include/codec/SkEncodedImageFormat.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 
