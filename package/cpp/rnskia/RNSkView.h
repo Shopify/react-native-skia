@@ -382,7 +382,8 @@ private:
                   auto newValue = jsi::Object(*runtime);
                   newValue.setProperty(*runtime, "width", width);
                   newValue.setProperty(*runtime, "height", height);
-                  self->_onSize->set_current(*runtime, jsi::Value(*runtime, newValue));
+                  self->_onSize->set_current(*runtime,
+                                             jsi::Value(*runtime, newValue));
                 }
               }
             }
