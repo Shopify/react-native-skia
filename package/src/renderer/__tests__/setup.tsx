@@ -293,7 +293,7 @@ class LocalSurface implements TestingSurface {
   readonly OS = "node";
 
   eval<Ctx extends EvalContext, R>(
-    fn: (Skia: Skia, ctx: Ctx) => any,
+    fn: (Skia: Skia, ctx: Ctx) => R,
     ctx?: Ctx
   ): Promise<R> {
     return Promise.resolve(fn(global.SkiaApi, ctx ?? ({} as any)));
