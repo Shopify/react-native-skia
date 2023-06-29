@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 import React from "react";
 
-import { surface, importSkia } from "../setup";
-import { Circle, Fill, Group, Paint, Path } from "../../components";
-import { checkImage } from "../../../__tests__/setup";
+import { surface, importSkia, height } from "../setup";
+import { Circle, Fill, Group, LinearGradient, Paint, Path } from "../../components";
+import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import { fitbox } from "../../components/shapes/FitBox";
 
 const blendModes = [
@@ -118,5 +118,25 @@ describe("Paint", () => {
       </>
     );
     checkImage(img, "snapshots/paint/blend-mode.png");
+  });
+  itRunsE2eOnly("Dithering", async () => {
+    const { vec } = importSkia();
+    const c1 = "#202225ff";
+    const c2 = "#141619FF";
+    async function drawGradientWithDither(dither: boolean) {
+      return surface.draw(
+        <Fill antiAlias dither={dither}>
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(0, height)}
+            colors={[c1, c2]}
+          />
+        </Fill>
+      );
+    }
+    const withDither = await drawGradientWithDither(true);
+    const withoutDither = await drawGradientWithDither(false);
+    checkImage(withDither, "snapshots/paint/dither.png");
+    checkImage(withoutDither, "snapshots/paint/dither.png", {shouldFail: true});
   });
 });

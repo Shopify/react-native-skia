@@ -3519,10 +3519,10 @@ caniuse-lite@^1.0.30001400:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001414.tgz#5f1715e506e71860b4b07c50060ea6462217611e"
   integrity sha512-t55jfSaWjCdocnFdKQoO+d2ct9C59UZg4dY3OnUlSZ447r8pUtIKdp0hpAzrGFultmTC+Us+KpKi4GZl/LXlFg==
 
-canvaskit-wasm@0.38.0:
-  version "0.38.0"
-  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.38.0.tgz#83e6c46f3015c2ff3f6503157f47453af76a7be7"
-  integrity sha512-ZEG6lucpbQ4Ld+mY8C1Ng+PMLVP+/AX02jS0Sdl28NyMxuKSa9uKB8oGd1BYp1XWPyO2Jgr7U8pdyjJ/F3xR5Q==
+canvaskit-wasm@0.38.1:
+  version "0.38.1"
+  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.38.1.tgz#0caf5a5b7dfe89d037b360cadc7663c7c7cd3311"
+  integrity sha512-iGEoP55jY2itbdiFONJBH6nRb8rMMNGbT2yWUg8Pah2okNdn/eLW92rutbzAUl7Yd1nutCMQNta+yDYCj/nlWA==
 
 cdt2d@^1.0.0:
   version "1.0.0"
