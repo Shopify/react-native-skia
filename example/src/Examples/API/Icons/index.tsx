@@ -28,7 +28,7 @@ const useSVGPicture = (module: number) => {
       throw new Error("Couldn't create offscreen surface");
     }
     const canvas = surface.getCanvas();
-    canvas.clear(Float32Array.of(0, 0, 0, 0));
+    // canvas.clear(Float32Array.of(0, 0, 0, 0));
     canvas.save();
     canvas.scale(pd, pd);
     canvas.drawSvg(svg);

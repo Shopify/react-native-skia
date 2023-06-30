@@ -3,16 +3,19 @@
 #include <RNSkLog.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+#include <mutex>
 
 #define STENCIL_BUFFER_SIZE 8
 
 namespace RNSkia {
 
+std::once_flag flag;
 sk_sp<GrDirectContext> grDirectContext = nullptr;
+
 sk_sp<GrDirectContext> getGrDirectContext() {
-    if (!grDirectContext) {
-      grDirectContext = MakeGLDirectContext();
-    }
+    std::call_once(flag, [](){
+        grDirectContext = MakeGLDirectContext();
+    });
     return grDirectContext;
 }
 
