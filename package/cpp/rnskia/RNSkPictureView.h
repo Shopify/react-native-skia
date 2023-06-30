@@ -25,6 +25,8 @@
 #include "SkBBHFactory.h"
 #include "SkCanvas.h"
 #include "SkPictureRecorder.h"
+#include "SkImage.h"
+#include "gpu/ganesh/SkImageGanesh.h"
 
 #pragma clang diagnostic pop
 
@@ -70,7 +72,7 @@ public:
       return;
     }
 
-    _texture = std::dynamic_pointer_cast<JsiSkSurface>(texture);
+    _texture = std::dynamic_pointer_cast<JsiSkImage>(texture);
     _requestRedraw();
   }
 
@@ -80,23 +82,25 @@ private:
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);
-      canvas->save();
-      canvas->scale(pd, pd);
+      //canvas->save();
+      //canvas->scale(pd, pd);
 
+      auto backEndImage = _texture->getObject();
       if (_texture != nullptr) {
-        canvas->drawImage(_texture->getObject()->makeImageSnapshot(), 0, 0);
+      //  canvas->drawColor(SK_ColorCYAN);
+        canvas->drawImage(backEndImage, 0, 0);
       } else if (_picture != nullptr) {
         canvas->drawPicture(_picture->getObject());
       }
 
-      canvas->restore();
+      //canvas->restore();
     });
     return true;
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<JsiSkPicture> _picture;
-  std::shared_ptr<JsiSkSurface> _texture;
+  std::shared_ptr<JsiSkImage> _texture;
 };
 
 class RNSkPictureView : public RNSkView {

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo } from "react";
-import { Text, View } from "react-native";
+import { PixelRatio, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import type { SkSurface } from "@shopify/react-native-skia";
+import type { SkImage } from "@shopify/react-native-skia";
 import {
   Canvas,
   Rect,
@@ -15,19 +15,26 @@ import { StackExchange } from "./SvgIcons/StackExchangeIcon";
 import { StackOverflow } from "./SvgIcons/StackOverflowIcon";
 import { Github } from "./SvgIcons/GithubIcon";
 
+const pd = PixelRatio.get();
+
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);
   return useMemo(() => {
     if (!svg) {
       return null;
     }
-    const surface = Skia.Surface.MakeOffscreen(48, 48);
+    const surface = Skia.Surface.MakeOffscreen(48 * pd, 48 * pd);
     if (!surface) {
       throw new Error("Couldn't create offscreen surface");
     }
     const canvas = surface.getCanvas();
+    canvas.clear(Float32Array.of(0, 0, 0, 0));
+    canvas.save();
+    canvas.scale(pd, pd);
     canvas.drawSvg(svg);
-    return surface;
+    canvas.restore();
+    //surface.flush();
+    return surface.makeImageSnapshot();
   }, [svg]);
 };
 
@@ -53,10 +60,10 @@ const useLoadSVGs = () => {
 };
 
 interface SVGAssets {
-  github: SkSurface;
-  octocat: SkSurface;
-  stackExchange: SkSurface;
-  overflow: SkSurface;
+  github: SkImage;
+  octocat: SkImage;
+  stackExchange: SkImage;
+  overflow: SkImage;
 }
 
 const SVGContext = createContext<SVGAssets | null>(null);
@@ -70,7 +77,7 @@ const useSVGs = () => {
 };
 
 interface IconProps {
-  icon: SkSurface;
+  icon: SkImage;
   size?: number;
 }
 
