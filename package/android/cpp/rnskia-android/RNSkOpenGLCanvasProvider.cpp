@@ -2,6 +2,9 @@
 
 #include <memory>
 
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -26,7 +29,12 @@ float RNSkOpenGLCanvasProvider::getScaledHeight() { return _height; }
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
   if (_renderer != nullptr) {
-    return _renderer->run(cb, _width, _height);
+      auto canvas = _renderer->getCanvas();
+      // Draw picture into surface
+      cb(canvas);
+      // Flush
+      canvas->flush();
+      return true;
   }
   return false;
 }
@@ -38,40 +46,42 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width,
 
   if (_renderer == nullptr) {
     // Create renderer!
-    _renderer = std::make_unique<SkiaOpenGLRenderer>(surface);
+    // TODO: this needs to be cleaned up
+    ANativeWindow* window = ANativeWindow_fromSurface(facebook::jni::Environment::current(), surface);
+    _renderer = OpenGLSurfaceProvider::Instance().MakeOnscreen(window, width, height);
 
     // Redraw
     _requestRedraw();
   }
 }
 void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
-  if (_renderer != nullptr) {
-    // teardown
-    _renderer->teardown();
+  // if (_renderer != nullptr) {
+  //   // teardown
+  //   _renderer->teardown();
 
-    // Teardown renderer on the render thread since OpenGL demands
-    // same thread access for OpenGL contexts.
-    std::condition_variable cv;
-    std::mutex m;
-    std::unique_lock<std::mutex> lock(m);
+  //   // Teardown renderer on the render thread since OpenGL demands
+  //   // same thread access for OpenGL contexts.
+  //   std::condition_variable cv;
+  //   std::mutex m;
+  //   std::unique_lock<std::mutex> lock(m);
 
-    _context->runOnRenderThread([&cv, &m, weakSelf = weak_from_this()]() {
-      // Lock
-      std::unique_lock<std::mutex> lock(m);
+  //   _context->runOnRenderThread([&cv, &m, weakSelf = weak_from_this()]() {
+  //     // Lock
+  //     std::unique_lock<std::mutex> lock(m);
 
-      auto self = weakSelf.lock();
-      if (self) {
-        if (self->_renderer != nullptr) {
-          self->_renderer->run(nullptr, 0, 0);
-        }
-        // Remove renderer
-        self->_renderer = nullptr;
-      }
-      cv.notify_one();
-    });
+  //     auto self = weakSelf.lock();
+  //     if (self) {
+  //       if (self->_renderer != nullptr) {
+  //         self->_renderer->run(nullptr, 0, 0);
+  //       }
+  //       // Remove renderer
+  //       self->_renderer = nullptr;
+  //     }
+  //     cv.notify_one();
+  //   });
 
-    cv.wait(lock);
-  }
+  //   cv.wait(lock);
+  // }
 }
 
 void RNSkOpenGLCanvasProvider::surfaceSizeChanged(int width, int height) {

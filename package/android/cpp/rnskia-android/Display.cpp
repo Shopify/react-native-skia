@@ -1,4 +1,5 @@
 #include "Display.h"
+#include "RNSkLog.h"
 
 #include <vector>
 
@@ -63,6 +64,7 @@ std::unique_ptr<Context> Display::CreateContext(const Config& config,
 
 std::unique_ptr<Config> Display::ChooseConfig(ConfigDescriptor config) const {
   if (!display_) {
+    RNSkLogger::logToConsole("No display");
     return nullptr;
   }
 
@@ -154,16 +156,16 @@ std::unique_ptr<Config> Display::ChooseConfig(ConfigDescriptor config) const {
   }
 
   if (config_count_out != 1u) {
-      LOG_EGL_ERROR;
+    LOG_EGL_ERROR;
     return nullptr;
   }
-
+  RNSkLogger::logToConsole("RETURN CONFIG");
   return std::make_unique<Config>(config, config_out);
 }
 
 std::unique_ptr<Surface> Display::CreateWindowSurface(
     const Config& config,
-    EGLNativeWindowType window) {
+    ANativeWindow* window) {
   const EGLint attribs[] = {EGL_NONE};
   auto surface = ::eglCreateWindowSurface(display_,            // display
                                           config.GetHandle(),  // config

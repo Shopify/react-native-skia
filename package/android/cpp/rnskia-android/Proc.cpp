@@ -52,7 +52,7 @@ static const char* EGLErrorToString(EGLint error) {
 
 void LogEGLError(const char* file, int line) {
   const auto error = ::eglGetError();
-  RNSkLogger::logToConsole("eglGetdisplay failed : %s %i %i", EGLErrorToString(error), file, line);
+  RNSkLogger::logToConsole("%s %s %i", EGLErrorToString(error), file, line);
 }
 
 }
