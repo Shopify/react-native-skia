@@ -51,6 +51,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/Proc.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/Surface.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/Context.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/OpenGLSkiaContext.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiValue.cpp"
