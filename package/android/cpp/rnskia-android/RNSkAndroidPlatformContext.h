@@ -7,8 +7,7 @@
 
 #include <JniPlatformContext.h>
 #include <RNSkPlatformContext.h>
-
-#include "OpenGLSurfaceProvider.h"
+#include <SkiaOpenGLRenderer.h>
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -39,7 +38,7 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    return OpenGLSurfaceProvider::Instance().MakeOffscreen(width, height);
+    return MakeOffscreenGLSurface(width, height);
   }
 
   void runOnMainThread(std::function<void()> task) override {
@@ -56,8 +55,6 @@ public:
 
 private:
   JniPlatformContext *_jniPlatformContext;
-  sk_sp<GrDirectContext> grDirectContext;
-
 };
 
 } // namespace RNSkia
