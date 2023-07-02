@@ -64,8 +64,7 @@ sk_sp<SkSurface> OpenGLSkiaContext::MakeOffscreenSurface(int width, int height) 
         RNSkLogger::logToConsole("Couldn't make context current");
         return nullptr;
     }
-    _surfaces.push_back(std::move(eglSurface));  // Store the surface for deletion later
-
+    _surfaces.push_back(std::move(eglSurface));
     auto desc = _config->GetDescriptor();
 
     GrGLFramebufferInfo info;
@@ -75,8 +74,8 @@ sk_sp<SkSurface> OpenGLSkiaContext::MakeOffscreenSurface(int width, int height) 
     auto samples = static_cast<int>(desc.samples);
     int stencilBits = static_cast<int>(desc.stencil_bits);
 
-    // TODO: Should clean the eglSurface? Is is getting deleted too soon?
     GrBackendRenderTarget backendRT(width, height, samples, stencilBits, info);
+    // TODO: instead of deleting all EGLSurface in the destructor, we should delete them here
     sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(_grContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, nullptr, nullptr);
     if (!surface) {
         RNSkLogger::logToConsole("Failed to create offscreen surface");
