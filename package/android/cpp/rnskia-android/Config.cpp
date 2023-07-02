@@ -13,16 +13,10 @@ Config::Config(ConfigDescriptor descriptor, EGLConfig config)
 
 Config::~Config() = default;
 
-const ConfigDescriptor& Config::GetDescriptor() const {
-  return desc_;
-}
+const ConfigDescriptor &Config::GetDescriptor() const { return desc_; }
 
-const EGLConfig& Config::GetHandle() const {
-  return config_;
-}
+const EGLConfig &Config::GetHandle() const { return config_; }
 
-bool Config::IsValid() const {
-  return config_ != nullptr;
-}
+bool Config::IsValid() const { return config_ != nullptr; }
 
-}
+} // namespace RNSkia

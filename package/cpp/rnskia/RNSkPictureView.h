@@ -24,8 +24,8 @@
 
 #include "SkBBHFactory.h"
 #include "SkCanvas.h"
-#include "SkPictureRecorder.h"
 #include "SkImage.h"
+#include "SkPictureRecorder.h"
 #include "gpu/ganesh/SkImageGanesh.h"
 
 #pragma clang diagnostic pop
@@ -65,7 +65,6 @@ public:
     _requestRedraw();
   }
 
-
   void setTexture(std::shared_ptr<jsi::HostObject> texture) {
     if (texture == nullptr) {
       _texture = nullptr;
@@ -82,18 +81,18 @@ private:
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);
-      //canvas->save();
-      //canvas->scale(pd, pd);
+      // canvas->save();
+      // canvas->scale(pd, pd);
 
       auto backEndImage = _texture->getObject();
       if (_texture != nullptr) {
-      //  canvas->drawColor(SK_ColorCYAN);
+        //  canvas->drawColor(SK_ColorCYAN);
         canvas->drawImage(backEndImage, 0, 0);
       } else if (_picture != nullptr) {
         canvas->drawPicture(_picture->getObject());
       }
 
-      //canvas->restore();
+      // canvas->restore();
     });
     return true;
   }
@@ -122,10 +121,10 @@ public:
 
     for (auto &prop : props) {
       if (prop.first == "texture") {
-          // Clear picture
-          std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
-              ->setTexture(prop.second.getAsHostObject());
-          requestRedraw();
+        // Clear picture
+        std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
+            ->setTexture(prop.second.getAsHostObject());
+        requestRedraw();
       } else if (prop.first == "picture") {
         if (prop.second.isUndefinedOrNull()) {
           // Clear picture

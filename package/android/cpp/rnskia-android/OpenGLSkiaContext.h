@@ -4,10 +4,10 @@
 
 #include "EGL/egl.h"
 #include "GLES2/gl2.h"
+#include "SkSurface.h"
 #include "android/native_window.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLAssembleInterface.h"
-#include "SkSurface.h"
 
 #include "Display.h"
 
@@ -37,7 +37,6 @@ private:
   std::unique_ptr<Surface> _surface = nullptr;
   sk_sp<GrDirectContext> _grContext = nullptr;
   std::vector<std::unique_ptr<Surface>> _surfaces;
-
 };
 
 } // namespace RNSkia

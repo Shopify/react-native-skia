@@ -17,13 +17,9 @@ Surface::~Surface() {
   }
 }
 
-const EGLSurface& Surface::GetHandle() const {
-  return surface_;
-}
+const EGLSurface &Surface::GetHandle() const { return surface_; }
 
-bool Surface::IsValid() const {
-  return surface_ != EGL_NO_SURFACE;
-}
+bool Surface::IsValid() const { return surface_ != EGL_NO_SURFACE; }
 
 bool Surface::Present() const {
   const auto result = ::eglSwapBuffers(display_, surface_) == EGL_TRUE;
@@ -33,4 +29,4 @@ bool Surface::Present() const {
   return result;
 }
 
-}
+} // namespace RNSkia

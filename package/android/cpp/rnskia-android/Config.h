@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "Macros.h"
 #include "EGL/egl.h"
 #include "GLES2/gl2.h"
+#include "Macros.h"
 
 namespace RNSkia {
 
@@ -52,22 +52,22 @@ struct ConfigDescriptor {
 };
 
 class Config {
- public:
+public:
   Config(ConfigDescriptor descriptor, EGLConfig config);
 
   ~Config();
 
   bool IsValid() const;
 
-  const ConfigDescriptor& GetDescriptor() const;
+  const ConfigDescriptor &GetDescriptor() const;
 
-  const EGLConfig& GetHandle() const;
+  const EGLConfig &GetHandle() const;
 
- private:
+private:
   const ConfigDescriptor desc_;
   EGLConfig config_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(Config);
 };
 
-}  // namespace RNSkia
+} // namespace RNSkia

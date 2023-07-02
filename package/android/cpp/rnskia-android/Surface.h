@@ -10,22 +10,22 @@
 namespace RNSkia {
 
 class Surface {
- public:
+public:
   Surface(EGLDisplay display, EGLSurface surface);
 
   ~Surface();
 
   bool IsValid() const;
 
-  const EGLSurface& GetHandle() const;
+  const EGLSurface &GetHandle() const;
 
   bool Present() const;
 
- private:
+private:
   EGLDisplay display_ = EGL_NO_DISPLAY;
   EGLSurface surface_ = EGL_NO_SURFACE;
 
   DISALLOW_COPY_AND_ASSIGN(Surface);
 };
 
-}  // namespace RNSkia
+} // namespace RNSkia

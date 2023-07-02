@@ -6,9 +6,9 @@
 #include <string>
 
 #include <JniPlatformContext.h>
+#include <OpenGLSkiaContext.h>
 #include <RNSkPlatformContext.h>
 #include <SkiaOpenGLRenderer.h>
-#include <OpenGLSkiaContext.h>
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;

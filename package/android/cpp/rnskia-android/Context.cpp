@@ -18,16 +18,11 @@ Context::~Context() {
   }
 }
 
-bool Context::IsValid() const {
-  return context_ != EGL_NO_CONTEXT;
-}
+bool Context::IsValid() const { return context_ != EGL_NO_CONTEXT; }
 
-const EGLContext& Context::GetHandle() const {
-  return context_;
-}
+const EGLContext &Context::GetHandle() const { return context_; }
 
-static EGLBoolean EGLMakeCurrentIfNecessary(EGLDisplay display,
-                                            EGLSurface draw,
+static EGLBoolean EGLMakeCurrentIfNecessary(EGLDisplay display, EGLSurface draw,
                                             EGLSurface read,
                                             EGLContext context) {
   if (display != ::eglGetCurrentDisplay() ||
@@ -40,28 +35,28 @@ static EGLBoolean EGLMakeCurrentIfNecessary(EGLDisplay display,
   return EGL_TRUE;
 }
 
-bool Context::MakeCurrent(const Surface& surface) const {
+bool Context::MakeCurrent(const Surface &surface) const {
   if (context_ == EGL_NO_CONTEXT) {
     return false;
   }
-  const auto result = EGLMakeCurrentIfNecessary(display_,             //
-                                                surface.GetHandle(),  //
-                                                surface.GetHandle(),  //
-                                                context_              //
+  const auto result = EGLMakeCurrentIfNecessary(display_,            //
+                                                surface.GetHandle(), //
+                                                surface.GetHandle(), //
+                                                context_             //
                                                 ) == EGL_TRUE;
   if (!result) {
     LOG_EGL_ERROR;
   }
-  //DispatchLifecyleEvent(LifecycleEvent::kDidMakeCurrent);
+  // DispatchLifecyleEvent(LifecycleEvent::kDidMakeCurrent);
   return result;
 }
 
 bool Context::ClearCurrent() const {
-  //DispatchLifecyleEvent(LifecycleEvent::kWillClearCurrent);
-  const auto result = EGLMakeCurrentIfNecessary(display_,        //
-                                                EGL_NO_SURFACE,  //
-                                                EGL_NO_SURFACE,  //
-                                                EGL_NO_CONTEXT   //
+  // DispatchLifecyleEvent(LifecycleEvent::kWillClearCurrent);
+  const auto result = EGLMakeCurrentIfNecessary(display_,       //
+                                                EGL_NO_SURFACE, //
+                                                EGL_NO_SURFACE, //
+                                                EGL_NO_CONTEXT  //
                                                 ) == EGL_TRUE;
   if (!result) {
     LOG_EGL_ERROR;
@@ -69,4 +64,4 @@ bool Context::ClearCurrent() const {
   return result;
 }
 
-}
+} // namespace RNSkia

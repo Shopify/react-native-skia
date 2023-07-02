@@ -17,16 +17,16 @@
 namespace RNSkia {
 
 class Context {
- public:
+public:
   Context(EGLDisplay display, EGLContext context);
 
   ~Context();
 
   bool IsValid() const;
 
-  const EGLContext& GetHandle() const;
+  const EGLContext &GetHandle() const;
 
-  bool MakeCurrent(const Surface& surface) const;
+  bool MakeCurrent(const Surface &surface) const;
 
   bool ClearCurrent() const;
 
@@ -34,22 +34,22 @@ class Context {
     kDidMakeCurrent,
     kWillClearCurrent,
   };
-//   using LifecycleListener = std::function<void(LifecycleEvent)>;
-//   std::optional<UniqueID> AddLifecycleListener(
-//       const LifecycleListener& listener);
+  //   using LifecycleListener = std::function<void(LifecycleEvent)>;
+  //   std::optional<UniqueID> AddLifecycleListener(
+  //       const LifecycleListener& listener);
 
-//   bool RemoveLifecycleListener(UniqueID id);
+  //   bool RemoveLifecycleListener(UniqueID id);
 
- private:
+private:
   EGLDisplay display_ = EGL_NO_DISPLAY;
   EGLContext context_ = EGL_NO_CONTEXT;
-//   mutable RWMutex listeners_mutex_;
-//   std::map<UniqueID, LifecycleListener> listeners_
-//       IPLR_GUARDED_BY(listeners_mutex_);
+  //   mutable RWMutex listeners_mutex_;
+  //   std::map<UniqueID, LifecycleListener> listeners_
+  //       IPLR_GUARDED_BY(listeners_mutex_);
 
-//   void DispatchLifecyleEvent(LifecycleEvent event) const;
+  //   void DispatchLifecyleEvent(LifecycleEvent event) const;
 
   DISALLOW_COPY_AND_ASSIGN(Context);
 };
 
-}
+} // namespace RNSkia

@@ -10,10 +10,10 @@
 
 namespace RNSkia {
 
-std::function<void*(const char*)> CreateProcAddressResolver();
+std::function<void *(const char *)> CreateProcAddressResolver();
 
 #define LOG_EGL_ERROR LogEGLError(__FILE__, __LINE__);
 
-void LogEGLError(const char* file, int line);
+void LogEGLError(const char *file, int line);
 
-}
+} // namespace RNSkia
