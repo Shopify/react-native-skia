@@ -34,7 +34,10 @@ private:
   std::unique_ptr<Display> _display = nullptr;
   std::unique_ptr<Config> _config = nullptr;
   std::unique_ptr<Context> _context = nullptr;
+  std::unique_ptr<Surface> _surface = nullptr;
   sk_sp<GrDirectContext> _grContext = nullptr;
+  std::vector<std::unique_ptr<Surface>> _surfaces;
+
 };
 
 } // namespace RNSkia

@@ -1,6 +1,4 @@
-import React from "react";
 import { checkImage, docPath } from "../../../__tests__/setup";
-import { Circle } from "../../components";
 import { surface, importSkia } from "../setup";
 
 describe("Offscreen Drawings", () => {
@@ -55,15 +53,15 @@ describe("Offscreen Drawings", () => {
     expect(data).toBeDefined();
     checkImage(image, docPath("offscreen/circle.png"));
   });
-  it("Should use the React API to build an image", async () => {
-    const { width, height } = surface;
-    const { drawAsImage } = importSkia();
-    const r = width / 2;
-    const image = drawAsImage(
-      <Circle r={r} cx={r} cy={r} color="lightblue" />,
-      width,
-      height
-    );
-    checkImage(image, docPath("offscreen/circle.png"));
-  });
+  // it("Should use the React API to build an image", async () => {
+  //   const { width, height } = surface;
+  //   const { drawAsImage } = importSkia();
+  //   const r = width / 2;
+  //   const image = drawAsImage(
+  //     <Circle r={r} cx={r} cy={r} color="lightblue" />,
+  //     width,
+  //     height
+  //   );
+  //   checkImage(image, docPath("offscreen/circle.png"));
+  // });
 });

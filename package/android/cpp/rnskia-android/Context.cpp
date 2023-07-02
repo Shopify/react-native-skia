@@ -69,32 +69,4 @@ bool Context::ClearCurrent() const {
   return result;
 }
 
-// std::optional<UniqueID> Context::AddLifecycleListener(
-//     const LifecycleListener& listener) {
-//   if (!listener) {
-//     return std::nullopt;
-//   }
-//   WriterLock lock(listeners_mutex_);
-//   UniqueID id;
-//   listeners_[id] = listener;
-//   return id;
-// }
-
-// bool Context::RemoveLifecycleListener(UniqueID id) {
-//   WriterLock lock(listeners_mutex_);
-//   auto found = listeners_.find(id);
-//   if (found == listeners_.end()) {
-//     return false;
-//   }
-//   listeners_.erase(found);
-//   return true;
-// }
-
-// void Context::DispatchLifecyleEvent(LifecycleEvent event) const {
-//   ReaderLock lock(listeners_mutex_);
-//   for (const auto& listener : listeners_) {
-//     listener.second(event);
-//   }
-// }
-
 }

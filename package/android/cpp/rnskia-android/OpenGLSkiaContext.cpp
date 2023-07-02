@@ -4,6 +4,12 @@
 
 #include "SkColorSpace.h"
 
+#define GL_FRAMEBUFFER_UNDEFINED 33305
+#define GL_FRAMEBUFFER_COMPLETE 0x00008cd5
+#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT 0x00008cd6
+#define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT 0x00008cd7
+#define GL_FRAMEBUFFER_UNSUPPORTED 0x00008cdd
+
 namespace RNSkia {
 
 OpenGLSkiaContext::OpenGLSkiaContext() {
@@ -35,8 +41,8 @@ OpenGLSkiaContext::OpenGLSkiaContext() {
         RNSkLogger::logToConsole("Couldn't create a context");
         return;
     }
-    auto surface = _display->CreatePixelBufferSurface(*_config, 1, 1);
-    if (!_context->MakeCurrent(*surface)) {
+    _surface = _display->CreatePixelBufferSurface(*_config, 1, 1);
+    if (!_context->MakeCurrent(*_surface)) {
         RNSkLogger::logToConsole("Couldn't create a context");
         return;
     }
@@ -48,7 +54,6 @@ OpenGLSkiaContext::OpenGLSkiaContext() {
 }
 
 OpenGLSkiaContext::~OpenGLSkiaContext() {
-    // TODO: cleanup
 }
 
 sk_sp<SkSurface> OpenGLSkiaContext::MakeOffscreenSurface(int width, int height) {
@@ -63,11 +68,38 @@ sk_sp<SkSurface> OpenGLSkiaContext::MakeOffscreenSurface(int width, int height) 
         RNSkLogger::logToConsole("Couldn't make context current");
         return nullptr;
     }
+    _surfaces.push_back(std::move(eglSurface));  // Store the surface
 
     auto desc = _config->GetDescriptor();
 
     GLint buffer;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
+
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        switch(status) {
+            case GL_FRAMEBUFFER_UNDEFINED:
+                RNSkLogger::logToConsole("Framebuffer: The specified framebuffer is the default read or draw framebuffer, but the default framebuffer does not exist.");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                RNSkLogger::logToConsole("Framebuffer: Any of the framebuffer attachment points are framebuffer incomplete.");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                RNSkLogger::logToConsole("Framebuffer: The framebuffer does not have at least one image attached to it.");
+                break;
+    
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                RNSkLogger::logToConsole("Framebuffer: The combination of internal formats of the attached images violates an implementation-dependent set of restrictions.");
+                break;
+            default:
+                RNSkLogger::logToConsole("Framebuffer: Unknown error.");
+                break;
+        }
+    } else {
+        RNSkLogger::logToConsole("Framebuffer is complete.");
+    }
+
 
     GrGLFramebufferInfo info;
     info.fFBOID = buffer; // FBO ID for offscreen surface, 0 for default framebuffer
@@ -76,9 +108,9 @@ sk_sp<SkSurface> OpenGLSkiaContext::MakeOffscreenSurface(int width, int height) 
     auto samples = static_cast<int>(desc.samples);
     int stencilBits = static_cast<int>(desc.stencil_bits);
 
+    // TODO: Should clean the eglSurface? Is is getting deleted too soon?
     GrBackendRenderTarget backendRT(width, height, samples, stencilBits, info);
     sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(_grContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, nullptr, nullptr);
-    
     if (!surface) {
         RNSkLogger::logToConsole("Failed to create offscreen surface");
     }
