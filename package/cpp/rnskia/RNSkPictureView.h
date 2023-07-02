@@ -13,7 +13,6 @@
 #include "RNSkView.h"
 
 #include "JsiSkPicture.h"
-#include "JsiSkSurface.h"
 #include "RNSkInfoParameter.h"
 #include "RNSkLog.h"
 #include "RNSkPlatformContext.h"
@@ -24,9 +23,7 @@
 
 #include "SkBBHFactory.h"
 #include "SkCanvas.h"
-#include "SkImage.h"
 #include "SkPictureRecorder.h"
-#include "gpu/ganesh/SkImageGanesh.h"
 
 #pragma clang diagnostic pop
 
@@ -58,20 +55,9 @@ public:
   void setPicture(std::shared_ptr<jsi::HostObject> picture) {
     if (picture == nullptr) {
       _picture = nullptr;
-      return;
+    } else {
+      _picture = std::dynamic_pointer_cast<JsiSkPicture>(picture);
     }
-
-    _picture = std::dynamic_pointer_cast<JsiSkPicture>(picture);
-    _requestRedraw();
-  }
-
-  void setTexture(std::shared_ptr<jsi::HostObject> texture) {
-    if (texture == nullptr) {
-      _texture = nullptr;
-      return;
-    }
-
-    _texture = std::dynamic_pointer_cast<JsiSkImage>(texture);
     _requestRedraw();
   }
 
@@ -81,25 +67,20 @@ private:
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);
-      // canvas->save();
-      // canvas->scale(pd, pd);
+      canvas->save();
+      canvas->scale(pd, pd);
 
-      auto backEndImage = _texture->getObject();
-      if (_texture != nullptr) {
-        //  canvas->drawColor(SK_ColorCYAN);
-        canvas->drawImage(backEndImage, 0, 0);
-      } else if (_picture != nullptr) {
+      if (_picture != nullptr) {
         canvas->drawPicture(_picture->getObject());
       }
 
-      // canvas->restore();
+      canvas->restore();
     });
     return true;
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<JsiSkPicture> _picture;
-  std::shared_ptr<JsiSkImage> _texture;
 };
 
 class RNSkPictureView : public RNSkView {
@@ -120,17 +101,11 @@ public:
     RNSkView::setJsiProperties(props);
 
     for (auto &prop : props) {
-      if (prop.first == "texture") {
-        // Clear picture
-        std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
-            ->setTexture(prop.second.getAsHostObject());
-        requestRedraw();
-      } else if (prop.first == "picture") {
+      if (prop.first == "picture") {
         if (prop.second.isUndefinedOrNull()) {
           // Clear picture
           std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
               ->setPicture(nullptr);
-          requestRedraw();
           continue;
         } else if (prop.second.getType() !=
                    RNJsi::JsiWrapperValueType::HostObject) {
@@ -142,9 +117,6 @@ public:
         // Save picture
         std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
             ->setPicture(prop.second.getAsHostObject());
-
-        // Request redraw
-        requestRedraw();
       }
     }
   }

@@ -23,7 +23,6 @@
 
 #include <jsi/jsi.h>
 
-#include "include/gpu/GrDirectContext.h"
 #include <ReactCommon/CallInvoker.h>
 
 namespace RNSkia {
