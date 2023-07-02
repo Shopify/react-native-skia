@@ -137,6 +137,12 @@ android {
         abortOnError false
     }
 
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
+
     externalNativeBuild {
         cmake {
             path file('CMakeLists.txt')
@@ -223,12 +229,6 @@ dependencies {
 }
 
 afterEvaluate { project ->
-    task androidSourcesJar(type: Jar) {
-        classifier = 'sources'
-        from android.sourceSets.main.java.srcDirs
-        include '**/*.java'
-    }
-
     android.libraryVariants.all { variant ->
         def name = variant.name.capitalize()
         def javaCompileTask = variant.javaCompileProvider.get()
@@ -236,10 +236,6 @@ afterEvaluate { project ->
         task "jar${name}"(type: Jar, dependsOn: javaCompileTask) {
             from javaCompileTask.destinationDir
         }
-    }
-
-    artifacts {
-        archives androidSourcesJar
     }
 }
 
@@ -278,7 +274,6 @@ if (ENABLE_PREFAB) {
         into "${project.buildDir}/headers/rnskia/"
         includeEmptyDirs = false
         include "**/*.h"
-        duplicatesStrategy = 'include'
         eachFile {
             String path = it.path
 
