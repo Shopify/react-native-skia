@@ -91,7 +91,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
 
   GrGLFramebufferInfo fbInfo;
   fbInfo.fFBOID = buffer;
-  fbInfo.fFormat = 0x8058;
+  fbInfo.fFormat = 0x8058; // GL_RGBA8 0x8058
 
   auto renderTarget =
       GrBackendRenderTarget(width, height, samples, stencil, fbInfo);

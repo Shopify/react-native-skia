@@ -57,6 +57,13 @@ sk_sp<SkSurface> OpenGLSkiaContext::MakeOffscreenSurface(int width, int height) 
         return nullptr;
     }
 
+    // Create a new PBuffer surface with desired width and height
+    auto eglSurface = _display->CreatePixelBufferSurface(*_config, width, height);
+    if (!_context->MakeCurrent(*eglSurface)) {
+        RNSkLogger::logToConsole("Couldn't make context current");
+        return nullptr;
+    }
+
     auto desc = _config->GetDescriptor();
 
     GLint buffer;
@@ -68,6 +75,7 @@ sk_sp<SkSurface> OpenGLSkiaContext::MakeOffscreenSurface(int width, int height) 
 
     auto samples = static_cast<int>(desc.samples);
     int stencilBits = static_cast<int>(desc.stencil_bits);
+
     GrBackendRenderTarget backendRT(width, height, samples, stencilBits, info);
     sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(_grContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, nullptr, nullptr);
     

@@ -1,83 +1,33 @@
-import React, { useMemo } from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
-import type { SkiaValue } from "@shopify/react-native-skia";
+import React from "react";
+import { StyleSheet } from "react-native";
 import {
-  useComputedValue,
-  useLoop,
-  BlurMask,
-  vec,
   Canvas,
-  Circle,
   Fill,
-  Group,
-  polar2Canvas,
-  Easing,
-  mix,
+  Image,
+  Skia
 } from "@shopify/react-native-skia";
 
-const c1 = "#61bea2";
-const c2 = "#529ca0";
+// const backSurface = Skia.Surface.MakeOffscreen(500, 500)!;
+// let canvas = backSurface.getCanvas();
+// canvas.drawColor(Skia.Color("green"));
+// backSurface.flush();
+// let encoded = backSurface.makeImageSnapshot().encodeToBase64()!;
+// let image = Skia.Image.MakeImageFromEncoded(Skia.Data.fromBase64(encoded))!;
 
-interface RingProps {
-  index: number;
-  progress: SkiaValue<number>;
-}
-
-const Ring = ({ index, progress }: RingProps) => {
-  const { width, height } = useWindowDimensions();
-  const R = width / 4;
-  const center = useMemo(
-    () => vec(width / 2, height / 2 - 64),
-    [height, width]
-  );
-
-  const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useComputedValue(() => {
-    const { x, y } = polar2Canvas(
-      { theta, radius: progress.current * R },
-      { x: 0, y: 0 }
-    );
-    const scale = mix(progress.current, 0.3, 1);
-    return [{ translateX: x }, { translateY: y }, { scale }];
-  }, [progress, R]);
-
-  return (
-    <Circle
-      c={center}
-      r={R}
-      color={index % 2 ? c1 : c2}
-      origin={center}
-      transform={transform}
-    />
-  );
-};
+const surface = Skia.Surface.MakeOffscreen(500, 500)!;
+const canvas = surface.getCanvas();
+//canvas.drawImage(image, 0, 0);
+canvas.drawColor(Skia.Color("red"));
+surface.flush();
+// TODO: Make non image texture should work
+const encoded = surface.makeImageSnapshot().encodeToBase64()!;
+const image = Skia.Image.MakeImageFromEncoded(Skia.Data.fromBase64(encoded))!;
 
 export const Breathe = () => {
-  const { width, height } = useWindowDimensions();
-  const center = useMemo(
-    () => vec(width / 2, height / 2 - 64),
-    [height, width]
-  );
-
-  const progress = useLoop({
-    duration: 3000,
-    easing: Easing.inOut(Easing.ease),
-  });
-
-  const transform = useComputedValue(
-    () => [{ rotate: mix(progress.current, -Math.PI, 0) }],
-    [progress]
-  );
-
   return (
     <Canvas style={styles.container} debug>
-      <Fill color="rgb(36,43,56)" />
-      <Group origin={center} transform={transform} blendMode="screen">
-        <BlurMask style="solid" blur={40} />
-        {new Array(6).fill(0).map((_, index) => {
-          return <Ring key={index} index={index} progress={progress} />;
-        })}
-      </Group>
+      <Fill color="cyan" />
+      <Image image={image} x={0} y={0} width={500} height={500} />
     </Canvas>
   );
 };
