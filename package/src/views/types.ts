@@ -114,7 +114,6 @@ export interface SkiaDrawViewProps extends SkiaBaseViewProps {
 
 export interface SkiaPictureViewProps extends SkiaBaseViewProps {
   picture?: SkPicture;
-  texture?: SkImage;
 }
 
 export interface SkiaDomViewProps extends SkiaBaseViewProps {
