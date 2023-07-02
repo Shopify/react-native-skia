@@ -44,7 +44,7 @@ describe("Offscreen Drawings", () => {
         paint.setColor(Skia.Color("lightblue"));
         canvas.drawCircle(r, r, r, paint);
         backSurface.flush();
-        const image = backSurface.makeImageSnapshot().makeNonTextureImage();
+        const image = backSurface.makeImageSnapshot();
         frontSurface.getCanvas().drawImage(image, 0, 0);
         return frontSurface.makeImageSnapshot().encodeToBase64();
       },

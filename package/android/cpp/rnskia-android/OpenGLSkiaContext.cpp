@@ -4,14 +4,7 @@
 
 #include "SkColorSpace.h"
 
-#define GL_FRAMEBUFFER_UNDEFINED 33305
-#define GL_FRAMEBUFFER_COMPLETE 0x00008cd5
-#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT 0x00008cd6
-#define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT 0x00008cd7
-#define GL_FRAMEBUFFER_UNSUPPORTED 0x00008cdd
-#define GL_RGBA 0x1908
 #define GL_RGBA8 0x8058
-
 
 namespace RNSkia {
 
@@ -71,13 +64,13 @@ sk_sp<SkSurface> OpenGLSkiaContext::MakeOffscreenSurface(int width, int height) 
         RNSkLogger::logToConsole("Couldn't make context current");
         return nullptr;
     }
-    _surfaces.push_back(std::move(eglSurface));  // Store the surface
+    _surfaces.push_back(std::move(eglSurface));  // Store the surface for deletion later
 
     auto desc = _config->GetDescriptor();
 
     GrGLFramebufferInfo info;
-    info.fFBOID = 0; // FBO ID for offscreen surface, 0 for default framebuffer
-    info.fFormat = GL_RGBA8; // this should match the format in ConfigDescriptor used to create the GrContext
+    info.fFBOID = 0;
+    info.fFormat = GL_RGBA8;
 
     auto samples = static_cast<int>(desc.samples);
     int stencilBits = static_cast<int>(desc.stencil_bits);
