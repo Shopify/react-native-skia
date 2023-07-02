@@ -6,7 +6,7 @@
 
 #include <RNSkJsView.h>
 
-#include "OpenGLSurfaceProvider.h"
+#include "SkiaOpenGLRenderer.h"
 #include <android/native_window.h>
 
 namespace RNSkia {
@@ -34,7 +34,7 @@ public:
   void surfaceSizeChanged(int width, int height);
 
 private:
-  sk_sp<SkSurface> _renderer = nullptr;
+  std::unique_ptr<SkiaOpenGLRenderer> _renderer = nullptr;
   std::shared_ptr<RNSkPlatformContext> _context;
   float _width = -1;
   float _height = -1;
