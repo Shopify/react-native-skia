@@ -1,17 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { docPath, processResult } from "../../__tests__/setup";
-import {
-  Blur,
-  Circle,
-  DiffRect,
-  Fill,
-  Group,
-  Paint,
-  RoundedRect,
-} from "../components";
+import { Blur, Circle, DiffRect, Fill, Group, Paint } from "../components";
 
-import { drawOnNode, width, height, importSkia, PIXEL_RATIO } from "./setup";
+import {
+  drawOnNode,
+  width,
+  height,
+  importSkia,
+  PIXEL_RATIO,
+  mountCanvas,
+  wait,
+} from "./setup";
+
+const CheckEmptyCanvas = () => {
+  const { Skia } = importSkia();
+  const [color, setColor] = useState("green");
+  useEffect(() => {
+    setTimeout(() => {
+      setColor("transparent");
+    }, 16);
+  }, [Skia]);
+
+  return (
+    <Group>
+      <Fill color={color} />
+    </Group>
+  );
+};
 
 describe("Test introductionary examples from our documentation", () => {
   it("Should blend colors using multiplication", () => {
@@ -36,42 +52,7 @@ describe("Test introductionary examples from our documentation", () => {
         <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
       </Group>
     );
-    processResult(surface, "snapshots/drawings/blur.png");
-  });
-
-  it("Should render a transform with the correct origin", () => {
-    const { Skia } = importSkia();
-    const r = width * 0.33;
-    const surface = drawOnNode(
-      <Group
-        blendMode="multiply"
-        transform={[{ rotate: Math.PI }]}
-        origin={Skia.Point(width / 2, height / 2)}
-      >
-        <Circle cx={r} cy={r} r={r} color="cyan" />
-        <Circle cx={width - r} cy={r} r={r} color="magenta" />
-        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
-      </Group>
-    );
-    processResult(surface, "snapshots/drawings/transform-origin.png");
-  });
-
-  it("Should use radians for the skew transformation", () => {
-    const { Skia } = importSkia();
-    const r = width / 4;
-    const surface = drawOnNode(
-      <>
-        <Fill color="#e8f4f8" />
-        <Group
-          color="lightblue"
-          origin={Skia.Point(r, r)}
-          transform={[{ skewX: Math.PI / 6 }]}
-        >
-          <RoundedRect x={r} y={r} width={2 * r} height={2 * r} r={10} />
-        </Group>
-      </>
-    );
-    processResult(surface, "snapshots/drawings/skew-transform.png");
+    processResult(surface, "snapshots/drawings/blur-node.png");
   });
 
   it("Should use multiple paint definitions for one drawing command", () => {
@@ -102,5 +83,14 @@ describe("Test introductionary examples from our documentation", () => {
       <DiffRect inner={inner} outer={outer} color="lightblue" />
     );
     processResult(surface, docPath("shapes/drect.png"));
+  });
+
+  it("should clear the canvas even if it's empty", async () => {
+    const { surface, draw } = mountCanvas(<CheckEmptyCanvas />);
+    draw();
+    processResult(surface, "snapshots/green.png");
+    await wait(32);
+    draw();
+    processResult(surface, "snapshots/transparent.png");
   });
 });

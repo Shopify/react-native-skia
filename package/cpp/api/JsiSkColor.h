@@ -12,7 +12,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkColor.h>
+#include "SkColor.h"
 
 #pragma clang diagnostic pop
 

@@ -4,6 +4,7 @@ import type { SkContourMeasure } from "../types";
 
 import { HostObject } from "./Host";
 import { JsiSkPath } from "./JsiSkPath";
+import { JsiSkPoint } from "./JsiSkPoint";
 
 export class JsiSkContourMeasure
   extends HostObject<ContourMeasure, "ContourMeasure">
@@ -13,9 +14,12 @@ export class JsiSkContourMeasure
     super(CanvasKit, ref, "ContourMeasure");
   }
 
-  getPosTan(distance: number) {
-    const [px, py, tx, ty] = this.ref.getPosTan(distance);
-    return { px, py, tx, ty };
+  getPosTan(distance: number): [position: JsiSkPoint, tangent: JsiSkPoint] {
+    const posTan = this.ref.getPosTan(distance);
+    return [
+      new JsiSkPoint(this.CanvasKit, posTan.slice(0, 2)),
+      new JsiSkPoint(this.CanvasKit, posTan.slice(2)),
+    ];
   }
 
   getSegment(startD: number, stopD: number, startWithMoveTo: boolean) {
@@ -32,4 +36,8 @@ export class JsiSkContourMeasure
   length() {
     return this.ref.length();
   }
+
+  dispose = () => {
+    this.ref.delete();
+  };
 }

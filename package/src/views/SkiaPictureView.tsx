@@ -1,24 +1,28 @@
 import React from "react";
-import { requireNativeComponent } from "react-native";
 
 import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
+import { Platform } from "../Platform";
 
 import { SkiaViewApi } from "./api";
 import { SkiaViewNativeId } from "./SkiaView";
 import type { NativeSkiaViewProps, SkiaPictureViewProps } from "./types";
 
 const NativeSkiaPictureView =
-  requireNativeComponent<NativeSkiaViewProps>("SkiaPictureView");
+  Platform.requireNativeComponent<NativeSkiaViewProps>("SkiaPictureView");
 
 export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   constructor(props: SkiaPictureViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId.current++;
-    const { picture } = props;
+    const { picture, onSize } = props;
     if (picture) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "picture", picture);
+    }
+    if (onSize) {
+      assertSkiaViewApi();
+      SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
   }
 
@@ -29,10 +33,14 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   }
 
   componentDidUpdate(prevProps: SkiaPictureViewProps) {
-    const { picture } = this.props;
+    const { picture, onSize } = this.props;
     if (picture !== prevProps.picture) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "picture", picture);
+    }
+    if (onSize !== prevProps.onSize) {
+      assertSkiaViewApi();
+      SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
   }
 

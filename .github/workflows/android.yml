@@ -1,0 +1,165 @@
+name: Android
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-12
+    concurrency:
+      group: android-example-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+
+      - name: Install NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r21d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
+
+      - name: Install root node dependencies
+        run: yarn
+
+      - name: Download Skia Binary Artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: "build-skia.yml"
+          repo: shopify/react-native-skia
+          path: artifacts
+
+      - name: Copy Artifacts to libs folder
+        run: yarn workflow-copy-libs
+
+      - name: Copy Skia Headers
+        run: yarn copy-skia-headers
+              
+      - name: SDKs - accept licenses
+        run: y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+
+      - name: Install Package
+        working-directory: package
+        run: yarn install
+
+      - name: Install example app node dependencies
+        working-directory: example
+        run: yarn
+
+      - name: Cache hermes build
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-rn-hermes-engine
+        with:
+          path: example/node_modules/react-native
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+
+      - name: Cache android libraries
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-rn
+        with:
+          path: example/android/app/build
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+
+      - name: Build Android app
+        working-directory: example/android
+        run: ./gradlew assembleDebug
+
+      - name: Cache apk
+        uses: actions/cache/save@v3
+        env:
+          cache-name: cache-apk
+        with:
+          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-${{ github.sha }}
+  test:
+    needs: build
+    runs-on: macos-12
+    concurrency:
+      group: android-example-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Install root dependencies
+        run: yarn bootstrap
+      
+      - name: Restore APK
+        id: cache-apk
+        uses: actions/cache/restore@v3
+        with:
+          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-${{ github.sha }}
+      
+      - name: SKDs - download required images
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
+
+      - name: Emulator - Create
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
+
+      - name: Emulator - Boot
+        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
+
+      - name: ADB Wait For Device
+        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+        timeout-minutes: 10
+
+      - name: Reverse TCP
+        working-directory: example
+        run: yarn android-reverse-tcp
+
+      - name: Start Package Manager
+        working-directory: example
+        run: E2E=true yarn start &
+
+      - name: Check APK existence
+        uses: andstor/file-existence-action@v2
+        with:
+          files: example/android/app/build/outputs/apk/debug/app-debug.apk
+          fail: true
+
+      - name: Install APK
+        run: adb install -r example/android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Launch APK
+        run: adb shell monkey -p com.rnskia 1    
+
+      - name: Run e2e Tests
+        working-directory: package
+        run: CI=true yarn e2e
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          path: package/src/__tests__/snapshots/
+          name: snapshots-screenshots
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          path: docs/static
+          name: docs-screenshots
+      

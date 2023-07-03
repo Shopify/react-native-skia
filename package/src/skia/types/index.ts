@@ -25,3 +25,4 @@ export * from "./RSXform";
 export * from "./JsiInstance";
 export * from "./Skia";
 export * from "./TextBlob";
+export * from "./Size";

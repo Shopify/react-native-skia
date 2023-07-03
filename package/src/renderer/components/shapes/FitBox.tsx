@@ -7,7 +7,7 @@ import type { SkRect } from "../../../skia/types";
 import { Group } from "../Group";
 
 interface FitProps {
-  fit: Fit;
+  fit?: Fit;
   src: SkRect;
   dst: SkRect;
   children: ReactNode | ReactNode[];
@@ -18,11 +18,7 @@ export const fitbox = (fit: Fit, src: SkRect, dst: SkRect) => {
   return rect2rect(rects.src, rects.dst);
 };
 
-export const FitBox = ({ fit, src, dst, children }: FitProps) => {
+export const FitBox = ({ fit = "contain", src, dst, children }: FitProps) => {
   const transform = useMemo(() => fitbox(fit, src, dst), [dst, fit, src]);
   return <Group transform={transform}>{children}</Group>;
-};
-
-FitBox.defaultProps = {
-  fit: "contain",
 };

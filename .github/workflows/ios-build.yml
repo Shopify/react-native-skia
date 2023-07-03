@@ -1,10 +1,11 @@
 name: Test iOS build
 on:
-#  pull_request:
-#    paths:
-#      - 'package/ios/**'
-#      - 'package/cpp/**'
-#      - 'example/package.json'
+  pull_request:
+    paths:
+      - 'package/ios/**'
+      - 'package/cpp/**'
+      - 'example/package.json'
+      - '.github/workflows/**'
   push:
     branches:
       - main
@@ -42,6 +43,10 @@ jobs:
       - name: Copy Skia Headers
         run: yarn copy-skia-headers
 
+      - name: Install Package
+        working-directory: package
+        run: yarn install --frozen-lockfile
+
       - name: Install app node_modules
         working-directory: example
         run: yarn install --frozen-lockfile
@@ -58,6 +63,17 @@ jobs:
       - name: Install Pods
         working-directory: example/ios
         run: pod install
+        
+      - name: Check if Podfile.lock has changed
+        working-directory: example/ios
+        run: |
+          if git diff --quiet --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock; then
+            echo "Podfile.lock is up to date."
+          else
+              echo "Podfile.lock has local changes, please update it."
+              git diff Podfile.lock
+              exit 1
+          fi
 
       - name: Restore build artifacts from cache
         uses: actions/cache@v3
@@ -67,4 +83,20 @@ jobs:
 
       - name: Build app
         working-directory: example
-        run: npx react-native run-ios --configuration Release --simulator 'iPhone 14 Pro'
+        run: CI=true yarn ios --simulator 'iPhone 14 Pro'
+
+      # - name: Run e2e tests
+      #   working-directory: package
+      #   run: yarn e2e
+
+      # - name: Start package manager
+      #   working-directory: example
+      #   run: E2E=true yarn start &
+
+      # - name: Take screenshot
+      #   run: xcrun simctl io booted screenshot screenshot.png
+        
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     path: screenshot.png
+      #     name: Download-screenshots

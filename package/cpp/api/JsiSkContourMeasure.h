@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkContourMeasure.h>
+#include "SkContourMeasure.h"
 
 #include "JsiSkPath.h"
 
@@ -40,11 +40,13 @@ public:
     if (!result) {
       throw jsi::JSError(runtime, "getSegment() failed");
     }
-    auto posTan = jsi::Object(runtime);
-    posTan.setProperty(runtime, "px", position.x());
-    posTan.setProperty(runtime, "py", position.y());
-    posTan.setProperty(runtime, "tx", tangent.x());
-    posTan.setProperty(runtime, "ty", tangent.y());
+    auto posTan = jsi::Array(runtime, 2);
+    auto pos = jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkPoint>(getContext(), position));
+    auto tan = jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkPoint>(getContext(), tangent));
+    posTan.setValueAtIndex(runtime, 0, pos);
+    posTan.setValueAtIndex(runtime, 1, tan);
     return posTan;
   }
 
@@ -66,26 +68,12 @@ public:
     return JsiSkPath::toValue(runtime, getContext(), std::move(path));
   }
 
-  JSI_PROPERTY_GET(__typename__) {
-    return jsi::String::createFromUtf8(runtime, "ContourMeasure");
-  }
-
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkContourMeasure,
-                                                  __typename__))
+  EXPORT_JSI_API_TYPENAME(JsiSkContourMeasure, "ContourMeasure")
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkContourMeasure, getPosTan),
                        JSI_EXPORT_FUNC(JsiSkContourMeasure, length),
                        JSI_EXPORT_FUNC(JsiSkContourMeasure, isClosed),
-                       JSI_EXPORT_FUNC(JsiSkContourMeasure, getSegment))
-
-  /**
-    Returns the underlying object from a host object of this type
-   */
-  static sk_sp<SkContourMeasure> fromValue(jsi::Runtime &runtime,
-                                           const jsi::Value &obj) {
-    return obj.asObject(runtime)
-        .asHostObject<JsiSkContourMeasure>(runtime)
-        ->getObject();
-  }
+                       JSI_EXPORT_FUNC(JsiSkContourMeasure, getSegment),
+                       JSI_EXPORT_FUNC(JsiSkContourMeasure, dispose))
 };
 } // namespace RNSkia

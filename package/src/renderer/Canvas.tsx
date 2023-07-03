@@ -1,156 +1,132 @@
 import React, {
   useEffect,
-  useState,
   useCallback,
   useMemo,
   forwardRef,
   useRef,
+  useLayoutEffect,
 } from "react";
 import type {
   RefObject,
   ReactNode,
-  ComponentProps,
   MutableRefObject,
   ForwardedRef,
 } from "react";
-import type { OpaqueRoot } from "react-reconciler";
-import ReactReconciler from "react-reconciler";
 
-import { SkiaView, useDrawCallback } from "../views";
-import type { TouchHandler } from "../views";
-import { useValue } from "../values/hooks/useValue";
+import { SkiaDomView, SkiaView } from "../views";
 import { Skia } from "../skia/Skia";
-import type { SkiaValue } from "../values";
+import type { TouchHandler, SkiaBaseViewProps } from "../views";
+import type { SkiaValue } from "../values/types";
+import { JsiDrawingContext } from "../dom/types";
+import { useValue } from "../values";
 
-import { debug as hostDebug, skHostConfig } from "./HostConfig";
-// import { debugTree } from "./nodes";
-import { Container } from "./Container";
-import { DependencyManager } from "./DependencyManager";
-import { CanvasProvider } from "./useCanvas";
+import { SkiaRoot } from "./Reconciler";
+import { NATIVE_DOM } from "./HostComponents";
+import { isValue } from "./processors";
 
-export const skiaReconciler = ReactReconciler(skHostConfig);
+export const useCanvasRef = () => useRef<SkiaDomView>(null);
 
-skiaReconciler.injectIntoDevTools({
-  bundleType: 1,
-  version: "0.0.1",
-  rendererPackageName: "react-native-skia",
-});
-
-const render = (element: ReactNode, root: OpaqueRoot, container: Container) => {
-  skiaReconciler.updateContainer(element, root, null, () => {
-    hostDebug("updateContainer");
-    container.depMgr.update();
-  });
-};
-
-export const useCanvasRef = () => useRef<SkiaView>(null);
-
-export interface CanvasProps extends ComponentProps<typeof SkiaView> {
-  ref?: RefObject<SkiaView>;
+export interface CanvasProps extends SkiaBaseViewProps {
+  ref?: RefObject<SkiaDomView>;
   children: ReactNode;
   onTouch?: TouchHandler;
 }
 
-export const Canvas = forwardRef<SkiaView, CanvasProps>(
-  ({ children, style, debug, mode, onTouch }, forwardedRef) => {
-    const size = useValue({ width: 0, height: 0 });
-    const canvasCtx = useMemo(() => ({ Skia, size }), [size]);
+const useOnSizeEvent = (resultValue: SkiaBaseViewProps["onSize"]) => {
+  const onSize = useValue({
+    width: 0,
+    height: 0,
+  });
+
+  useLayoutEffect(() => {
+    if (!resultValue) {
+      return;
+    }
+    return onSize.addListener((newValue) => {
+      if (isValue(resultValue)) {
+        resultValue.current = newValue;
+      } else {
+        resultValue.value = newValue;
+      }
+    });
+  }, [resultValue, onSize]);
+
+  return onSize;
+};
+
+export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
+  (
+    { children, style, debug, mode, onTouch, onSize: _onSize, ...props },
+    forwardedRef
+  ) => {
+    const onSize = useOnSizeEvent(_onSize);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
-    const [tick, setTick] = useState(0);
     const redraw = useCallback(() => {
-      setTick((t) => t + 1);
-    }, []);
+      innerRef.current?.redraw();
+    }, [innerRef]);
+    const getNativeId = useCallback(() => {
+      const id = innerRef.current?.nativeId ?? -1;
+      return id;
+    }, [innerRef]);
 
     const registerValues = useCallback(
       (values: Array<SkiaValue<unknown>>) => {
-        if (ref.current === null) {
-          throw new Error("Canvas ref is not set");
+        if (ref.current !== null) {
+          return ref.current.registerValues(values);
         }
-        return ref.current.registerValues(values);
+        return () => {};
       },
       [ref]
     );
-
-    const container = useMemo(() => {
-      return new Container(Skia, new DependencyManager(registerValues), redraw);
-    }, [redraw, registerValues]);
-
     const root = useMemo(
-      () =>
-        skiaReconciler.createContainer(
-          container,
-          0,
-          null,
-          true,
-          null,
-          "",
-          console.error,
-          null
-        ),
-      [container]
+      () => new SkiaRoot(Skia, registerValues, redraw, getNativeId),
+      [redraw, registerValues, getNativeId]
     );
+
     // Render effect
     useEffect(() => {
-      render(
-        <CanvasProvider value={canvasCtx}>{children}</CanvasProvider>,
-        root,
-        container
-      );
-    }, [children, root, redraw, container, canvasCtx]);
-
-    const paint = useMemo(() => Skia.Paint(), []);
-
-    // Draw callback
-    const onDraw = useDrawCallback(
-      (canvas, info) => {
-        // TODO: if tree is empty (count === 1) maybe we should not render?
-        const { width, height, timestamp } = info;
-        if (onTouch) {
-          onTouch(info.touches);
-        }
-        if (
-          width !== canvasCtx.size.current.width ||
-          height !== canvasCtx.size.current.height
-        ) {
-          canvasCtx.size.current = { width, height };
-        }
-        paint.reset();
-        const ctx = {
-          width,
-          height,
-          timestamp,
-          canvas,
-          paint,
-          opacity: 1,
-          ref,
-          center: { x: width / 2, y: height / 2 },
-          Skia,
-        };
-        container.draw(ctx);
-      },
-      [tick, onTouch]
-    );
+      root.render(children);
+    }, [children, root, redraw]);
 
     useEffect(() => {
       return () => {
-        skiaReconciler.updateContainer(null, root, null, () => {
-          container.depMgr.remove();
-        });
+        root.unmount();
       };
-    }, [container, root]);
-
-    return (
-      <SkiaView
-        ref={ref}
-        style={style}
-        onDraw={onDraw}
-        mode={mode}
-        debug={debug}
-      />
-    );
+    }, [root]);
+    if (NATIVE_DOM) {
+      return (
+        <SkiaDomView
+          ref={ref}
+          style={style}
+          root={root.dom}
+          onTouch={onTouch}
+          onSize={onSize}
+          mode={mode}
+          debug={debug}
+          {...props}
+        />
+      );
+    } else {
+      return (
+        <SkiaView
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ref={ref as any}
+          style={style}
+          mode={mode}
+          debug={debug}
+          onSize={onSize}
+          onDraw={(canvas, info) => {
+            onTouch && onTouch(info.touches);
+            const ctx = new JsiDrawingContext(Skia, canvas);
+            root.dom.render(ctx);
+          }}
+          {...props}
+        />
+      );
+    }
   }
-);
+) as React.FC<CanvasProps & React.RefAttributes<SkiaDomView>>;
 
 /**
  * Combines a list of refs into a single ref. This can be used to provide

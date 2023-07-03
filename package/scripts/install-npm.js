@@ -8,7 +8,17 @@ const createSymlink = (p) => {
   const srcDir = path.resolve(`./cpp/${p}`);
   const dstDir = path.resolve(`./android/cpp/${p}`);
 
-  if (!fs.existsSync(dstDir) || !fs.lstatSync(dstDir).isSymbolicLink()) {
+  // Case in PNPM which might turn symlink into a directory:
+  // In that case, remove the directory before creating the symlink
+  if (fs.existsSync(dstDir)) {
+    const lstat = fs.lstatSync(dstDir);
+    const isSymbolicLink = lstat.isSymbolicLink();
+    if (lstat.isDirectory() && !isSymbolicLink) {
+      fs.rmSync(dstDir, { recursive: true });
+    }
+  }
+
+  if (!fs.existsSync(dstDir)) {
     fs.symlinkSync(srcDir, dstDir, "junction");
   }
 };

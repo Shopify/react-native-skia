@@ -7,11 +7,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include <JsiHostObject.h>
-#include <JsiValueWrapper.h>
-#include <RNSkPlatformContext.h>
-#include <RNSkValue.h>
-#include <RNSkView.h>
+#include "JsiHostObject.h"
+#include "JsiValueWrapper.h"
+#include "RNSkPlatformContext.h"
+#include "RNSkValue.h"
+#include "RNSkView.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -55,8 +55,8 @@ public:
     auto info = getEnsuredViewInfo(nativeId);
 
     std::lock_guard<std::mutex> lock(_mutex);
-    info->props.emplace(arguments[1].asString(runtime).utf8(runtime),
-                        RNJsi::JsiValueWrapper(runtime, arguments[2]));
+    info->props.insert_or_assign(arguments[1].asString(runtime).utf8(runtime),
+                                 RNJsi::JsiValueWrapper(runtime, arguments[2]));
 
     // Now let's see if we have a view that we can update
     if (info->view != nullptr) {

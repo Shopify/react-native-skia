@@ -14,7 +14,8 @@ If the root dimensions are in absolute units, the width/height properties have n
 | svg       | `SVG` | SVG Image. |
 | width?    | `number`  | Width of the destination image. This is used to resolve the initial viewport when the root SVG width is specified in relative units. |
 | height?   | `number`  | Height of the destination image. This is used to resolve the initial viewport when the root SVG height is specified in relative units.                              |
-
+| x?    | `number`  | Optional displayed x coordinate of the svg container.  |
+| y?   | `number`  | Optional displayed y coordinate of the svg container.                            |
 
 ### Example
 
@@ -34,8 +35,6 @@ const ImageSVGDemo = () => {
       { svg && (
         <ImageSVG
           svg={svg}
-          x={0}
-          y={0}
           width={256}
           height={256}
         />)
@@ -72,6 +71,82 @@ export const SVG = () => {
 };
 ```
 
+## Scaling the SVG
+
+As mentionned above, if the root dimensions are in absolute units, the width/height properties have no effect since the initial viewport is fixed. However you can access these values and use the fitbox function.
+
+### Example
+
+In the example below we scale the SVG to the canvas width and height.
+
+```tsx twoslash
+import React from "react";
+import { Canvas, ImageSVG, Skia, rect, fitbox, Group } from "@shopify/react-native-skia";
+
+const svg = Skia.SVG.MakeFromString(
+  `<svg viewBox='0 0 20 20' width="20" height="20" xmlns='http://www.w3.org/2000/svg'>
+    <circle cx='10' cy='10' r='10' fill='#00ffff'/>
+  </svg>`
+)!;
+
+const width = 256;
+const height = 256;
+const src = rect(0, 0, svg.width(), svg.height());
+const dst = rect(0, 0, width, height);
+
+export const SVG = () => {
+  return (
+    <Canvas style={{ flex: 1 }}>
+    <Group transform={fitbox("contain", src, dst)}>
+      <ImageSVG svg={svg} x={0} y={0} width={20} height={20} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+### Result
+
+<img src={require("/static/img/svg.png").default} width="256" height="256" />
+
+## Applying Filters
+
+The `ImageSVG` component doesn't follow the same painting rules as other components.
+This is because behind the scene, we use the SVG module from Skia.
+However you can apply image filters using the `layer` property.
+
+### Example
+
+In the example below we apply a blur image filter to the SVG.
+
+```tsx twoslash
+import React from "react";
+import { Canvas, ImageSVG, Skia, rect, fitbox, useSVG, Group, Paint, Blur } from "@shopify/react-native-skia";
+
+const width = 256;
+const height = 256;
+
+export const SVG = () => {
+  const tiger = useSVG(require("./tiger.svg"));
+  if (!tiger) {
+    return null;
+  }
+  const src = rect(0, 0, tiger.width(), tiger.height());
+  const dst = rect(0, 0, width, height);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group transform={fitbox("contain", src, dst)} layer={<Paint><Blur blur={10} /></Paint>}>
+        <ImageSVG svg={tiger} x={0} y={0} width={800} height={800} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+### Result
+
+<img src={require("/static/img/blurred-tiger.png").default} width="256" height="256" />
+
 ## SVG Support
 
 The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) displays SVGs as images.
@@ -79,6 +154,11 @@ Its capabilities and compliance level are pretty strong.
 We expect most SVG files to render correctly out of the box, especially if they come from Figma or Illustrator.
 However, please be aware of some of the quirks below when using it.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
+
+### CSS Styles
+
+CSS styles included in SVG are not supported.
+A tool like [SVGO](#using-svgo) can help with converting CSS style attributes to SVG attributes if possible. 
 
 ### Using SVGO
 

@@ -108,7 +108,7 @@ export const Shapes = () => {
     <ScrollView>
       <Title>Rectangles</Title>
       <Canvas style={style}>
-        <Group color="#61DAFB">
+        <Group color="#61DAFB" antiAlias={true}>
           <Rect rect={{ x: PADDING, y: PADDING, width: 100, height: 100 }} />
           <RoundedRect
             x={SIZE + 2 * PADDING}

@@ -107,4 +107,13 @@ describe("Drawings", () => {
     );
     processResult(surface, "snapshots/drawings/arc.png");
   });
+
+  it("Transparent Circle", () => {
+    const { surface, canvas, Skia } = setupSkia(100, 100);
+    const paint = Skia.Paint();
+    const rct = Skia.XYWHRect(0, 0, 100, 100);
+    paint.setColor(Float32Array.of(1, 0, 0, 0));
+    canvas.drawRect(rct, paint);
+    processResult(surface, "snapshots/drawings/transparent.png");
+  });
 });

@@ -7,6 +7,7 @@ import {
 } from "../../renderer/__tests__/setup";
 import { setupSkia } from "../../skia/__tests__/setup";
 import { docPath, processResult } from "../../__tests__/setup";
+import { JsiDrawingContext } from "../types/DrawingContext";
 
 describe("Paint", () => {
   it("should assign a paint directly", () => {
@@ -24,7 +25,7 @@ describe("Paint", () => {
     const circle = Sk.Circle({ c: vec(r, r), r, paint });
     root.addChild(circle);
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("paint/assignement.png"));
   });
@@ -57,7 +58,7 @@ describe("Paint", () => {
       })
     );
     root.addChild(circle);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("paint/stroke.png"));
   });
@@ -92,7 +93,7 @@ describe("Paint", () => {
     c3.addChild(Sk.Circle({ c, r }));
     root.addChild(c3);
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, docPath("paint/opacity.png"));
   });

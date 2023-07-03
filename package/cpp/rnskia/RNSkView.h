@@ -6,18 +6,19 @@
 #include <unordered_map>
 #include <vector>
 
-#include <RNSkPlatformContext.h>
+#include "JsiValueWrapper.h"
+#include "RNSkPlatformContext.h"
+#include "RNSkValue.h"
 
-#include <JsiValueWrapper.h>
-
-#include <JsiSkImage.h>
-#include <JsiSkRect.h>
+#include "JsiSkImage.h"
+#include "JsiSkPoint.h"
+#include "JsiSkRect.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkCanvas.h>
-#include <SkSurface.h>
+#include "SkCanvas.h"
+#include "SkSurface.h"
 
 #pragma clang diagnostic pop
 
@@ -43,7 +44,7 @@ public:
   /**
    Render to a canvas
    */
-  virtual void renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
+  virtual bool renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
 
 protected:
   std::function<void()> _requestRedraw;
@@ -87,23 +88,26 @@ protected:
 
 class RNSkImageCanvasProvider : public RNSkCanvasProvider {
 public:
-  RNSkImageCanvasProvider(std::function<void()> requestRedraw, float width,
+  RNSkImageCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
+                          std::function<void()> requestRedraw, float width,
                           float height)
       : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
-    _surface = SkSurface::MakeRasterN32Premul(_width, _height);
+    _surface = context->makeOffscreenSurface(_width, _height);
   }
 
   /**
    Returns a snapshot of the current surface/canvas
    */
   sk_sp<SkImage> makeSnapshot(std::shared_ptr<SkRect> bounds) {
+    sk_sp<SkImage> image;
     if (bounds != nullptr) {
       SkIRect b = SkIRect::MakeXYWH(bounds->x(), bounds->y(), bounds->width(),
                                     bounds->height());
-      return _surface->makeImageSnapshot(b);
+      image = _surface->makeImageSnapshot(b);
     } else {
-      return _surface->makeImageSnapshot();
+      image = _surface->makeImageSnapshot();
     }
+    return image->makeNonTextureImage();
   }
 
   /**
@@ -119,8 +123,9 @@ public:
   /**
    Render to a canvas
    */
-  void renderToCanvas(const std::function<void(SkCanvas *)> &cb) override {
+  bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override {
     cb(_surface->getCanvas());
+    return true;
   };
 
 private:
@@ -157,7 +162,13 @@ public:
   /**
    Destructor
    */
-  virtual ~RNSkView() { endDrawingLoop(); }
+  virtual ~RNSkView() {
+    endDrawingLoop();
+    if (_onSizeUnsubscribe != nullptr) {
+      _onSizeUnsubscribe();
+      _onSizeUnsubscribe = nullptr;
+    }
+  }
 
   /**
    Sets custom properties. Custom properties are properties that are set
@@ -165,8 +176,37 @@ public:
    */
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) {
-    throw std::runtime_error(
-        "The base Skia View does not support any custom properties.");
+
+    for (auto &prop : props) {
+      if (prop.first == "onSize") {
+        // Start by removing any subscribers to the current onSize
+        if (_onSizeUnsubscribe != nullptr) {
+          _onSizeUnsubscribe();
+          _onSizeUnsubscribe = nullptr;
+        }
+        if (prop.second.isUndefinedOrNull()) {
+          // Clear touchCallback
+          _onSize = nullptr;
+        } else if (prop.second.getType() !=
+                   RNJsi::JsiWrapperValueType::HostObject) {
+          // We expect a function for the draw callback custom property
+          throw std::runtime_error(
+              "Expected a Skia mutable value for the onSize property.");
+        }
+        // Save onSize
+        _onSize =
+            std::dynamic_pointer_cast<RNSkValue>(prop.second.getAsHostObject());
+
+        // Add listener
+        _onSizeUnsubscribe =
+            _onSize->addListener([weakSelf = weak_from_this()](jsi::Runtime &) {
+              auto self = weakSelf.lock();
+              if (self) {
+                self->requestRedraw();
+              }
+            });
+      }
+    }
   }
 
   /**
@@ -186,6 +226,15 @@ public:
    * thread and js runtime.
    */
   void requestRedraw() { _redrawRequestCounter++; }
+
+  /**
+   Renders immediate. Be carefull to not call this method from another thread
+   than the UI thread
+   */
+  void renderImmediate() {
+    _renderer->renderImmediate(_canvasProvider);
+    _redrawRequestCounter = 0;
+  }
 
   /**
    Sets the native id of the view
@@ -227,8 +276,9 @@ public:
    Renders the view into an SkImage instead of the screen.
    */
   sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
+
     auto provider = std::make_shared<RNSkImageCanvasProvider>(
-        std::bind(&RNSkView::requestRedraw, this),
+        getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
         _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight());
 
     _renderer->renderImmediate(provider);
@@ -274,6 +324,53 @@ private:
         });
   }
 
+  void updateOnSize() {
+    if (_onSize != nullptr) {
+      auto width = _canvasProvider->getScaledWidth() /
+                   _platformContext->getPixelDensity();
+      auto height = _canvasProvider->getScaledHeight() /
+                    _platformContext->getPixelDensity();
+
+      _platformContext->runOnJavascriptThread(
+          [width, height, weakSelf = weak_from_this()]() {
+            auto self = weakSelf.lock();
+            if (self) {
+              auto runtime = self->_platformContext->getJsRuntime();
+              auto onSize = self->_onSize->getCurrent(*runtime);
+              if (!onSize.isObject()) {
+                throw jsi::JSError(
+                    *runtime,
+                    "Expected onSize property to be a mutable Skia value.");
+                return;
+              }
+              auto onSizeObj = onSize.asObject(*runtime);
+
+              auto wVal = onSizeObj.getProperty(*runtime, "width");
+              auto hVal = onSizeObj.getProperty(*runtime, "height");
+
+              if (!wVal.isNumber() || !hVal.isNumber()) {
+                throw jsi::JSError(*runtime,
+                                   "Expected onSize property to be a mutable "
+                                   "Skia value of type SkSize.");
+                return;
+              }
+
+              auto w = wVal.asNumber();
+              auto h = hVal.asNumber();
+
+              if (w != width || h != height) {
+                // Update
+                auto newValue = jsi::Object(*runtime);
+                newValue.setProperty(*runtime, "width", width);
+                newValue.setProperty(*runtime, "height", height);
+                self->_onSize->set_current(*runtime,
+                                           jsi::Value(*runtime, newValue));
+              }
+            }
+          });
+    }
+  }
+
   /**
     Draw loop callback
    */
@@ -281,6 +378,9 @@ private:
     if (_redrawRequestCounter > 0 ||
         _drawingMode == RNSkDrawingMode::Continuous) {
       _redrawRequestCounter = 0;
+
+      // Update size if needed
+      updateOnSize();
 
       if (!_renderer->tryRender(_canvasProvider)) {
         // The renderer could not render cause it was busy, just schedule
@@ -294,11 +394,14 @@ private:
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
   std::shared_ptr<RNSkRenderer> _renderer;
 
+  std::shared_ptr<RNSkValue> _onSize;
+  std::function<void()> _onSizeUnsubscribe;
   RNSkDrawingMode _drawingMode;
   size_t _nativeId;
 
   size_t _drawingLoopId = 0;
   std::atomic<int> _redrawRequestCounter = {1};
+  bool _initialDrawingDone = false;
 };
 
 } // namespace RNSkia

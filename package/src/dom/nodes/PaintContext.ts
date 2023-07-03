@@ -11,6 +11,7 @@ import type {
 } from "../../skia/types";
 import type { SkColor } from "../../skia/types/Color";
 
+// TODO: to remove
 export interface PaintContext {
   color?: SkColor;
   strokeWidth?: number;

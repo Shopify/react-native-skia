@@ -1,5 +1,6 @@
 import type { SkJSIInstance } from "./JsiInstance";
 import type { SkPath } from "./Path/Path";
+import type { SkPoint } from "./Point";
 
 export interface PosTan {
   px: number;
@@ -11,10 +12,10 @@ export interface PosTan {
 export interface SkContourMeasure extends SkJSIInstance<"ContourMeasure"> {
   /**
    * Returns the given position and tangent line for the distance on the given contour.
-   * The return value is 4 floats in this order: posX, posY, vecX, vecY.
+   * The return value an array of 2 vectors: [position, tangent]
    * @param distance - will be pinned between 0 and length().
    */
-  getPosTan(distance: number): PosTan;
+  getPosTan(distance: number): [position: SkPoint, tangent: SkPoint];
 
   /**
    * Returns an Path representing the segment of this contour.

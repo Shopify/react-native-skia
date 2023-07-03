@@ -1,5 +1,9 @@
 import type { SkiaSelector, SkiaValue } from "../../../values";
 
+export type SharedValueType<T = number> = {
+  value: T;
+};
+
 export const isValue = (value: unknown): value is SkiaValue<unknown> => {
   if (value === undefined || value === null) {
     return false;
@@ -44,7 +48,11 @@ export const isAnimated = <T>(props: AnimatedProps<T>) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnimatedProp<T, P = any> = T | SkiaValue<T> | SkiaSelector<T, P>;
+export type AnimatedProp<T, P = any> =
+  | T
+  | SkiaValue<T>
+  | SkiaSelector<T, P>
+  | SharedValueType<T>;
 
 export type AnimatedProps<T, O extends keyof T | never = never> = {
   [K in keyof T]: K extends "children"
@@ -54,10 +62,16 @@ export type AnimatedProps<T, O extends keyof T | never = never> = {
     : AnimatedProp<T[K]>;
 };
 
-// TODO: switch to AnimatedProps<GroupProps> and remove duplicate properties.
-// For instance matrix in color filter becomes colorMatrix
-
 export type SkiaProps<
   P = object,
   O extends keyof P | never = never
 > = AnimatedProps<P, O>;
+
+type WithOptional<T extends object, N extends keyof T> = Omit<T, N> & {
+  [K in N]?: T[K];
+};
+
+export type SkiaDefaultProps<
+  T extends object,
+  N extends keyof T
+> = WithOptional<SkiaProps<T>, N>;

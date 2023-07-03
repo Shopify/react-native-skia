@@ -4,11 +4,11 @@ import {
   MipmapMode,
   TileMode,
 } from "../../../skia/types";
-import type { SkShader } from "../../../skia/types";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import type {
   ColorProps,
+  DeclarationContext,
   FractalNoiseProps,
   ImageShaderProps,
   LinearGradientProps,
@@ -19,7 +19,6 @@ import type {
   TwoPointConicalGradientProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
-import { processColor } from "../datatypes/Color";
 import {
   enumKey,
   fitRects,
@@ -29,10 +28,7 @@ import {
   rect2rect,
 } from "../datatypes";
 
-export abstract class ShaderDeclaration<P> extends JsiDeclarationNode<
-  P,
-  SkShader
-> {
+export abstract class ShaderDeclaration<P> extends JsiDeclarationNode<P> {
   constructor(ctx: NodeContext, type: NodeType, props: P) {
     super(ctx, DeclarationType.Shader, type, props);
   }
@@ -43,20 +39,17 @@ export class ShaderNode extends ShaderDeclaration<ShaderProps> {
     super(ctx, NodeType.Shader, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
+    this.decorateChildren(ctx);
     const { source, uniforms, ...transform } = this.props;
     const m3 = this.Skia.Matrix();
     processTransformProps(m3, transform);
-    return source.makeShaderWithChildren(
+    const shader = source.makeShaderWithChildren(
       processUniforms(source, uniforms),
-      this.children()
-        .filter(
-          (child): child is JsiDeclarationNode<unknown, SkShader> =>
-            child instanceof JsiDeclarationNode && child.isShader()
-        )
-        .map((child) => child.materialize()),
+      ctx.shaders.popAll(),
       m3
     );
+    ctx.shaders.push(shader);
   }
 }
 
@@ -65,30 +58,35 @@ export class ImageShaderNode extends ShaderDeclaration<ImageShaderProps> {
     super(ctx, NodeType.ImageShader, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = this.props;
+    if (!image) {
+      return;
+    }
+
     const rct = getRect(this.Skia, imageShaderProps);
+    const m3 = this.Skia.Matrix();
     if (rct) {
       const rects = fitRects(
         fit,
         { x: 0, y: 0, width: image.width(), height: image.height() },
         rct
       );
-      const m3 = rect2rect(rects.src, rects.dst);
-      imageShaderProps.transform = [
-        ...(imageShaderProps.transform ?? []),
-        ...m3,
-      ];
+      const [x, y, sx, sy] = rect2rect(rects.src, rects.dst);
+      m3.translate(x.translateX, y.translateY);
+      m3.scale(sx.scaleX, sy.scaleY);
     }
     const lm = this.Skia.Matrix();
+    lm.concat(m3);
     processTransformProps(lm, imageShaderProps);
-    return image.makeShaderOptions(
+    const shader = image.makeShaderOptions(
       TileMode[enumKey(tx)],
       TileMode[enumKey(ty)],
       FilterMode[enumKey(fm)],
       MipmapMode[enumKey(mm)],
       lm
     );
+    ctx.shaders.push(shader);
   }
 }
 
@@ -97,9 +95,10 @@ export class ColorNode extends ShaderDeclaration<ColorProps> {
     super(ctx, NodeType.ColorShader, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { color } = this.props;
-    return this.Skia.Shader.MakeColor(processColor(this.Skia, color, 1));
+    const shader = this.Skia.Shader.MakeColor(this.Skia.Color(color));
+    ctx.shaders.push(shader);
   }
 }
 
@@ -108,9 +107,9 @@ export class TurbulenceNode extends ShaderDeclaration<TurbulenceProps> {
     super(ctx, NodeType.Turbulence, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = this.props;
-    return this.Skia.Shader.MakeTurbulence(
+    const shader = this.Skia.Shader.MakeTurbulence(
       freqX,
       freqY,
       octaves,
@@ -118,6 +117,7 @@ export class TurbulenceNode extends ShaderDeclaration<TurbulenceProps> {
       tileWidth,
       tileHeight
     );
+    ctx.shaders.push(shader);
   }
 }
 
@@ -126,9 +126,9 @@ export class FractalNoiseNode extends ShaderDeclaration<FractalNoiseProps> {
     super(ctx, NodeType.FractalNoise, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = this.props;
-    return this.Skia.Shader.MakeFractalNoise(
+    const shader = this.Skia.Shader.MakeFractalNoise(
       freqX,
       freqY,
       octaves,
@@ -136,6 +136,7 @@ export class FractalNoiseNode extends ShaderDeclaration<FractalNoiseProps> {
       tileWidth,
       tileHeight
     );
+    ctx.shaders.push(shader);
   }
 }
 
@@ -144,11 +145,11 @@ export class LinearGradientNode extends ShaderDeclaration<LinearGradientProps> {
     super(ctx, NodeType.LinearGradient, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { start, end } = this.props;
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(this.Skia, this.props);
-    return this.Skia.Shader.MakeLinearGradient(
+    const shader = this.Skia.Shader.MakeLinearGradient(
       start,
       end,
       colors,
@@ -157,6 +158,7 @@ export class LinearGradientNode extends ShaderDeclaration<LinearGradientProps> {
       localMatrix,
       flags
     );
+    ctx.shaders.push(shader);
   }
 }
 
@@ -165,11 +167,11 @@ export class RadialGradientNode extends ShaderDeclaration<RadialGradientProps> {
     super(ctx, NodeType.RadialGradient, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { c, r } = this.props;
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(this.Skia, this.props);
-    return this.Skia.Shader.MakeRadialGradient(
+    const shader = this.Skia.Shader.MakeRadialGradient(
       c,
       r,
       colors,
@@ -178,6 +180,7 @@ export class RadialGradientNode extends ShaderDeclaration<RadialGradientProps> {
       localMatrix,
       flags
     );
+    ctx.shaders.push(shader);
   }
 }
 
@@ -186,11 +189,11 @@ export class SweepGradientNode extends ShaderDeclaration<SweepGradientProps> {
     super(ctx, NodeType.SweepGradient, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { c, start, end } = this.props;
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(this.Skia, this.props);
-    return this.Skia.Shader.MakeSweepGradient(
+    const shader = this.Skia.Shader.MakeSweepGradient(
       c.x,
       c.y,
       colors,
@@ -201,6 +204,7 @@ export class SweepGradientNode extends ShaderDeclaration<SweepGradientProps> {
       start,
       end
     );
+    ctx.shaders.push(shader);
   }
 }
 
@@ -209,11 +213,11 @@ export class TwoPointConicalGradientNode extends ShaderDeclaration<TwoPointConic
     super(ctx, NodeType.TwoPointConicalGradient, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const { startR, endR, start, end } = this.props;
     const { colors, positions, mode, localMatrix, flags } =
       processGradientProps(this.Skia, this.props);
-    return this.Skia.Shader.MakeTwoPointConicalGradient(
+    const shader = this.Skia.Shader.MakeTwoPointConicalGradient(
       start,
       startR,
       end,
@@ -224,5 +228,6 @@ export class TwoPointConicalGradientNode extends ShaderDeclaration<TwoPointConic
       localMatrix,
       flags
     );
+    ctx.shaders.push(shader);
   }
 }

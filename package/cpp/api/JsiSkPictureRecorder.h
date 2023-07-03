@@ -10,8 +10,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkBBHFactory.h>
-#include <SkPictureRecorder.h>
+#include "SkBBHFactory.h"
+#include "SkPictureRecorder.h"
 
 #pragma clang diagnostic pop
 
@@ -40,9 +40,12 @@ public:
         runtime, std::make_shared<JsiSkPicture>(getContext(), picture));
   }
 
+  EXPORT_JSI_API_TYPENAME(JsiSkPictureRecorder, "PictureRecorder")
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPictureRecorder, beginRecording),
                        JSI_EXPORT_FUNC(JsiSkPictureRecorder,
-                                       finishRecordingAsPicture))
+                                       finishRecordingAsPicture),
+                       JSI_EXPORT_FUNC(JsiSkPictureRecorder, dispose))
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {

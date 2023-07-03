@@ -12,12 +12,12 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "SkCornerPathEffect.h"
+#include "SkDashPathEffect.h"
+#include "SkDiscretePathEffect.h"
+#include "SkPathEffect.h"
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/Sk2DPathEffect.h"
-#include <SkCornerPathEffect.h>
-#include <SkDashPathEffect.h>
-#include <SkDiscretePathEffect.h>
-#include <SkPathEffect.h>
 
 #pragma clang diagnostic pop
 

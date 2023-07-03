@@ -40,8 +40,8 @@ describe("RNSkComputedValue", () => {
     expect(changeFlag.changed).toBe(5);
 
     // Now invalidate both values
-    computed.__invalidate();
-    nextComputed.__invalidate();
+    computed.dispose();
+    nextComputed.dispose();
 
     // Change current and verify that changeFlag is same as above
     dependency.current = 40;

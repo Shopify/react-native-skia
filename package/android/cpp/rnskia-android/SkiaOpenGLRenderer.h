@@ -16,24 +16,27 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "SkCanvas.h"
+#include "SkColorSpace.h"
+#include "SkPicture.h"
+#include "SkSurface.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
-#include <SkCanvas.h>
-#include <SkColorSpace.h>
-#include <SkPicture.h>
-#include <SkSurface.h>
 
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-using DrawingContext = struct {
+sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height);
+
+using OpenGLDrawingContext = struct {
   EGLContext glContext;
   EGLDisplay glDisplay;
   EGLConfig glConfig;
   sk_sp<GrDirectContext> skContext;
 };
 
-static std::unordered_map<std::thread::id, std::shared_ptr<DrawingContext>>
+static std::unordered_map<std::thread::id,
+                          std::shared_ptr<OpenGLDrawingContext>>
     threadContexts;
 
 enum RenderState : int {
@@ -57,7 +60,7 @@ public:
    * @param width Width of surface to render if there is a picture
    * @param height Height of surface to render if there is a picture
    */
-  void run(const std::function<void(SkCanvas *)> &cb, int width, int height);
+  bool run(const std::function<void(SkCanvas *)> &cb, int width, int height);
 
   /**
    * Sets the state to finishing. Next time the renderer will be called it
@@ -100,26 +103,15 @@ private:
   bool initGLSurface();
 
   /**
-   * Ensures that we have a valid Skia surface to draw to. The surface will
-   * be recreated if the width/height change.
-   * @param width Width of the underlying view
-   * @param height Height of the underlying view
-   * @return True if initialization went well
-   */
-  bool ensureSkiaSurface(int width, int height);
-
-  /**
    * To be able to use static contexts (and avoid reloading the skia context for
    * each new view, we track the OpenGL and Skia drawing context per thread.
    * @return The drawing context for the current thread
    */
-  static std::shared_ptr<DrawingContext> getThreadDrawingContext();
+  static std::shared_ptr<OpenGLDrawingContext> getThreadDrawingContext();
 
   EGLSurface _glSurface = EGL_NO_SURFACE;
 
   ANativeWindow *_nativeWindow = nullptr;
-  GrBackendRenderTarget _skRenderTarget;
-  sk_sp<SkSurface> _skSurface;
 
   int _prevWidth = 0;
   int _prevHeight = 0;

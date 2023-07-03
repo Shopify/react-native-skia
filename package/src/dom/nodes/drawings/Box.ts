@@ -5,8 +5,8 @@ import { DeclarationType, NodeType } from "../../types";
 import type { BoxShadowProps, BoxProps } from "../../types/Drawings";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
-import { processColor } from "../datatypes";
 import { JsiRenderNode } from "../RenderNode";
+import type { DeclarationContext } from "../../types/DeclarationContext";
 
 const inflate = (
   Skia: Skia,
@@ -36,12 +36,13 @@ const deflate = (
   ty = 0
 ) => inflate(Skia, box, -dx, -dy, tx, ty);
 
-export class BoxShadowNode extends JsiDeclarationNode<
-  BoxShadowProps,
-  BoxShadowProps
-> {
+export class BoxShadowNode extends JsiDeclarationNode<BoxShadowProps> {
   constructor(ctx: NodeContext, props: BoxShadowProps) {
-    super(ctx, DeclarationType.Unknown, NodeType.Box, props);
+    super(ctx, DeclarationType.Unknown, NodeType.BoxShadow, props);
+  }
+
+  decorate(_ctx: DeclarationContext) {
+    // do nothing
   }
 
   materialize() {
@@ -54,8 +55,9 @@ export class BoxNode extends JsiRenderNode<BoxProps> {
     super(ctx, NodeType.Box, props);
   }
 
-  renderNode({ canvas, paint, opacity }: DrawingContext) {
+  renderNode({ canvas, paint }: DrawingContext) {
     const { box: defaultBox } = this.props;
+    const opacity = paint.getAlphaf();
     const box = isRRect(defaultBox)
       ? defaultBox
       : this.Skia.RRectXY(defaultBox, 0, 0);
@@ -72,7 +74,8 @@ export class BoxNode extends JsiRenderNode<BoxProps> {
       .map((shadow) => {
         const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
         const lPaint = this.Skia.Paint();
-        lPaint.setColor(processColor(this.Skia, color, opacity));
+        lPaint.setColor(this.Skia.Color(color));
+        lPaint.setAlphaf(paint.getAlphaf() * opacity);
         lPaint.setMaskFilter(
           this.Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
         );
@@ -92,7 +95,9 @@ export class BoxNode extends JsiRenderNode<BoxProps> {
         canvas.save();
         canvas.clipRRect(box, ClipOp.Intersect, false);
         const lPaint = this.Skia.Paint();
-        lPaint.setColor(processColor(this.Skia, color, opacity));
+        lPaint.setColor(this.Skia.Color(color));
+        lPaint.setAlphaf(paint.getAlphaf() * opacity);
+
         lPaint.setMaskFilter(
           this.Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
         );

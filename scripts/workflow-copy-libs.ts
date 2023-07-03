@@ -24,6 +24,8 @@ const androidFiles = [
   "libsvg.a",
   "libskottie.a",
   "libsksg.a",
+  // "libskparagraph.a",
+  // "libskunicode.a",
 ];
 const iosFiles = [
   "libskia.xcframework",
@@ -31,6 +33,8 @@ const iosFiles = [
   "libsvg.xcframework",
   "libskottie.xcframework",
   "libsksg.xcframework",
+  // "libskparagraph.xcframework",
+  // "libskunicode.xcframework",
 ];
 
 const copyFiles = (from: string, to: string, files: string[]) => {

@@ -5,18 +5,18 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkColor.h>
-#include <JsiSkColorFilter.h>
-#include <JsiSkHostObjects.h>
-#include <JsiSkImageFilter.h>
-#include <JsiSkMaskFilter.h>
-#include <JsiSkPathEffect.h>
-#include <JsiSkShader.h>
+#include "JsiSkColor.h"
+#include "JsiSkColorFilter.h"
+#include "JsiSkHostObjects.h"
+#include "JsiSkImageFilter.h"
+#include "JsiSkMaskFilter.h"
+#include "JsiSkPathEffect.h"
+#include "JsiSkShader.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include <SkPaint.h>
+#include "SkPaint.h"
 
 #pragma clang diagnostic pop
 
@@ -25,12 +25,7 @@ namespace jsi = facebook::jsi;
 
 class JsiSkPaint : public JsiSkWrappingSharedPtrHostObject<SkPaint> {
 public:
-  // TODO: declare in JsiSkWrappingSkPtrHostObject via extra template parameter?
-  JSI_PROPERTY_GET(__typename__) {
-    return jsi::String::createFromUtf8(runtime, "Paint");
-  }
-
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkPaint, __typename__))
+  EXPORT_JSI_API_TYPENAME(JsiSkPaint, "Paint")
 
   JSI_HOST_FUNCTION(copy) {
     const auto *paint = getObject().get();
@@ -61,6 +56,11 @@ public:
 
   JSI_HOST_FUNCTION(getStrokeWidth) {
     return static_cast<double>(getObject()->getStrokeWidth());
+  }
+
+  JSI_HOST_FUNCTION(getAlphaf) {
+    float alphaf = getObject()->getAlphaf();
+    return jsi::Value(SkScalarToDouble(alphaf));
   }
 
   JSI_HOST_FUNCTION(setColor) {
@@ -159,6 +159,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPaint, copy),
                        JSI_EXPORT_FUNC(JsiSkPaint, reset),
+                       JSI_EXPORT_FUNC(JsiSkPaint, getAlphaf),
                        JSI_EXPORT_FUNC(JsiSkPaint, getColor),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeCap),
                        JSI_EXPORT_FUNC(JsiSkPaint, getStrokeJoin),
@@ -177,18 +178,18 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPaint, setStrokeWidth),
                        JSI_EXPORT_FUNC(JsiSkPaint, setStyle),
                        JSI_EXPORT_FUNC(JsiSkPaint, setColor),
-                       JSI_EXPORT_FUNC(JsiSkPaint, setAlphaf))
+                       JSI_EXPORT_FUNC(JsiSkPaint, setAlphaf),
+                       JSI_EXPORT_FUNC(JsiSkPaint, dispose))
 
   JsiSkPaint(std::shared_ptr<RNSkPlatformContext> context, SkPaint paint)
       : JsiSkWrappingSharedPtrHostObject<SkPaint>(
             std::move(context), std::make_shared<SkPaint>(std::move(paint))) {}
 
   /**
-Returns the underlying object from a host object of this type
-*/
-  static std::shared_ptr<SkPaint> fromValue(jsi::Runtime &runtime,
-                                            const jsi::Value &obj) {
-    return obj.asObject(runtime).asHostObject<JsiSkPaint>(runtime)->getObject();
+   Copy from another paint
+   */
+  void fromPaint(const SkPaint &paint) {
+    setObject(std::make_shared<SkPaint>(std::move(paint)));
   }
 
   /**

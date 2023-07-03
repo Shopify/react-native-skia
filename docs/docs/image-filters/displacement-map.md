@@ -52,4 +52,4 @@ const Filter = () => {
 };
 ```
 
-![Morphology Image Filter](./assets/displacement-map.png)
+<img src={require("/static/img/displacement-map.png").default} width="256" height="256" />

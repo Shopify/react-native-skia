@@ -1,4 +1,4 @@
-import { mix, rgbaColor } from "@shopify/react-native-skia";
+import { mix } from "@shopify/react-native-skia";
 
 const TAU = Math.PI * 2;
 
@@ -54,5 +54,5 @@ export const polar2Color = (
   const h = normalizeRad(theta) / TAU;
   const s = quadraticIn(radius / maxRadius);
   const { r, g, b } = hsv2rgb(h, s, 1);
-  return rgbaColor(r / 255, g / 255, b / 255, 1);
+  return Float32Array.of(r / 255, g / 255, b / 255, 1);
 };

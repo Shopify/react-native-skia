@@ -12,7 +12,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "JsiSkRuntimeEffect.h"
-#include <SkRuntimeEffect.h>
+#include "SkRuntimeEffect.h"
 
 #pragma clang diagnostic pop
 
@@ -47,16 +47,8 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeShaderBuilder, setUniform))
-
-  /**
-    Returns the underlying object from a host object of this type
-   */
-  static std::shared_ptr<SkRuntimeShaderBuilder>
-  fromValue(jsi::Runtime &runtime, const jsi::Value &obj) {
-    const auto &object = obj.asObject(runtime);
-    return object.asHostObject<JsiSkRuntimeShaderBuilder>(runtime)->getObject();
-  }
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeShaderBuilder, setUniform),
+                       JSI_EXPORT_FUNC(JsiSkRuntimeShaderBuilder, dispose))
 
   /**
     Returns the jsi object from a host object of this type

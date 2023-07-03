@@ -441,6 +441,20 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    */
   addRRect(rrect: SkRRect, isCCW?: boolean): SkPath;
 
+  /** Appends src to SkPath, transformed by matrix. Transformed curves may have
+     different verbs, SkPoint, and conic weights.
+
+      If mode is kAppend_AddPathMode, src verb array, SkPoint array, and conic
+     weights are added unaltered. If mode is kExtend_AddPathMode, add line
+     before appending verbs, SkPoint, and conic weights.
+
+      @param src     SkPath verbs, SkPoint, and conic weights to add
+      @param matrix  transform applied to src
+      @param extend  extends path with line if true
+      @return        reference to SkPath
+  */
+  addPath(src: SkPath, matrix?: SkMatrix, extend?: boolean): SkPath;
+
   /**
    * Returns the Point at index in Point array. Valid range for index is
    * 0 to countPoints() - 1.

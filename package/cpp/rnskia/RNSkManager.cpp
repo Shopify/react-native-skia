@@ -10,6 +10,9 @@
 #include <RNSkValueApi.h>
 #include <RNSkView.h>
 
+#include <JsiDomApi.h>
+#include <RuntimeAwareCache.h>
+
 namespace RNSkia {
 namespace jsi = facebook::jsi;
 
@@ -20,6 +23,9 @@ RNSkManager::RNSkManager(
     : _jsRuntime(jsRuntime), _jsCallInvoker(jsCallInvoker),
       _platformContext(platformContext),
       _viewApi(std::make_shared<RNSkJsiViewApi>(platformContext)) {
+
+  // Register main runtime
+  BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
 
   // Install bindings
   installBindings();
@@ -78,5 +84,10 @@ void RNSkManager::installBindings() {
   _jsRuntime->global().setProperty(
       *_jsRuntime, "SkiaValueApi",
       jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaValueApi)));
+
+  auto skiaDomApi = std::make_shared<JsiDomApi>(_platformContext);
+  _jsRuntime->global().setProperty(
+      *_jsRuntime, "SkiaDomApi",
+      jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaDomApi)));
 }
 } // namespace RNSkia

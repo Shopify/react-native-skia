@@ -1,12 +1,3 @@
-import type {
-  SkImageFilter,
-  SkMaskFilter,
-  SkShader,
-  SkColorFilter,
-  SkPathEffect,
-  SkPaint,
-} from "../../skia/types";
-
 import type { ChildrenProps, GroupProps, PaintProps } from "./Common";
 import type {
   BlendImageFilterProps,
@@ -68,17 +59,17 @@ import type {
   Path2DPathEffectProps,
 } from "./PathEffects";
 
-type ImageFilterNode<P> = DeclarationNode<P, SkImageFilter>;
+type ImageFilterNode<P> = DeclarationNode<P>;
 
-type PathEffectNode<P> = DeclarationNode<P, SkPathEffect>;
-type NullablePathEffectNode<P> = DeclarationNode<P, SkPathEffect, null>;
+type PathEffectNode<P> = DeclarationNode<P>;
+type NullablePathEffectNode<P> = DeclarationNode<P>;
 
 type DrawingNode<P extends GroupProps> = RenderNode<P>;
 
 export interface SkDOM {
   Layer(props?: ChildrenProps): RenderNode<ChildrenProps>;
   Group(props?: GroupProps): RenderNode<GroupProps>;
-  Paint(props: PaintProps): DeclarationNode<PaintProps, SkPaint>;
+  Paint(props: PaintProps): DeclarationNode<PaintProps>;
 
   // Drawings
   Fill(props?: DrawingNodeProps): DrawingNode<DrawingNodeProps>;
@@ -106,7 +97,7 @@ export interface SkDOM {
   // BlurMaskFilters
   BlurMaskFilter(
     props: BlurMaskFilterProps
-  ): DeclarationNode<BlurMaskFilterProps, SkMaskFilter>;
+  ): DeclarationNode<BlurMaskFilterProps>;
 
   // ImageFilters
   BlendImageFilter(
@@ -134,41 +125,33 @@ export interface SkDOM {
   // ColorFilters
   MatrixColorFilter(
     props: MatrixColorFilterProps
-  ): DeclarationNode<MatrixColorFilterProps, SkColorFilter>;
+  ): DeclarationNode<MatrixColorFilterProps>;
   BlendColorFilter(
     props: BlendColorFilterProps
-  ): DeclarationNode<BlendColorFilterProps, SkColorFilter>;
-  LumaColorFilter(): DeclarationNode<null, SkColorFilter>;
-  LinearToSRGBGammaColorFilter(): DeclarationNode<null, SkColorFilter>;
-  SRGBToLinearGammaColorFilter(): DeclarationNode<null, SkColorFilter>;
+  ): DeclarationNode<BlendColorFilterProps>;
+  LumaColorFilter(): DeclarationNode<null>;
+  LinearToSRGBGammaColorFilter(): DeclarationNode<null>;
+  SRGBToLinearGammaColorFilter(): DeclarationNode<null>;
   LerpColorFilter(
     props: LerpColorFilterProps
-  ): DeclarationNode<LerpColorFilterProps, SkColorFilter>;
+  ): DeclarationNode<LerpColorFilterProps>;
 
   // Shaders
-  Shader(props: ShaderProps): DeclarationNode<ShaderProps, SkShader>;
-  ImageShader(
-    props: ImageShaderProps
-  ): DeclarationNode<ImageShaderProps, SkShader>;
-  ColorShader(props: ColorProps): DeclarationNode<ColorProps, SkShader>;
-  Turbulence(
-    props: TurbulenceProps
-  ): DeclarationNode<TurbulenceProps, SkShader>;
-  FractalNoise(
-    props: FractalNoiseProps
-  ): DeclarationNode<FractalNoiseProps, SkShader>;
+  Shader(props: ShaderProps): DeclarationNode<ShaderProps>;
+  ImageShader(props: ImageShaderProps): DeclarationNode<ImageShaderProps>;
+  ColorShader(props: ColorProps): DeclarationNode<ColorProps>;
+  Turbulence(props: TurbulenceProps): DeclarationNode<TurbulenceProps>;
+  FractalNoise(props: FractalNoiseProps): DeclarationNode<FractalNoiseProps>;
   LinearGradient(
     props: LinearGradientProps
-  ): DeclarationNode<LinearGradientProps, SkShader>;
+  ): DeclarationNode<LinearGradientProps>;
   RadialGradient(
     props: RadialGradientProps
-  ): DeclarationNode<RadialGradientProps, SkShader>;
-  SweepGradient(
-    props: SweepGradientProps
-  ): DeclarationNode<SweepGradientProps, SkShader>;
+  ): DeclarationNode<RadialGradientProps>;
+  SweepGradient(props: SweepGradientProps): DeclarationNode<SweepGradientProps>;
   TwoPointConicalGradient(
     props: TwoPointConicalGradientProps
-  ): DeclarationNode<TwoPointConicalGradientProps, SkShader>;
+  ): DeclarationNode<TwoPointConicalGradientProps>;
 
   // Path Effects
   CornerPathEffect(
@@ -192,12 +175,8 @@ export interface SkDOM {
   ): NullablePathEffectNode<Line2DPathEffectProps>;
 
   // Mixed
-  Blend(
-    props: BlendProps
-  ): DeclarationNode<BlendProps, SkShader | SkImageFilter>;
+  Blend(props: BlendProps): DeclarationNode<BlendProps>;
   BackdropFilter(props: ChildrenProps): RenderNode<ChildrenProps>;
   Box(props: BoxProps): RenderNode<BoxProps>;
-  BoxShadow(
-    props: BoxShadowProps
-  ): DeclarationNode<BoxShadowProps, BoxShadowProps>;
+  BoxShadow(props: BoxShadowProps): DeclarationNode<BoxShadowProps>;
 }

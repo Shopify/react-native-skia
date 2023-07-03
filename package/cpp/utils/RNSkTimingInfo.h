@@ -1,6 +1,6 @@
 #pragma once
 
-#include <RNSkLog.h>
+#include "RNSkLog.h"
 #include <chrono>
 #include <string>
 #include <utility>
@@ -29,6 +29,7 @@ public:
     _frameCount = 0;
     _lastFrameCount = -1;
     _didSkip = false;
+    _average = 0;
   }
 
   void beginTiming() { _start = high_resolution_clock::now(); }

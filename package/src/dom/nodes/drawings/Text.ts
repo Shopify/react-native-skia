@@ -22,11 +22,16 @@ export class TextNode extends JsiDrawingNode<TextProps, null> {
 
   draw({ canvas, paint }: DrawingContext) {
     const { text, x, y, font } = this.props;
-    canvas.drawText(text, x, y, paint, font);
+    if (font) {
+      canvas.drawText(text, x, y, paint, font);
+    }
   }
 }
 
-export class TextPathNode extends JsiDrawingNode<TextPathProps, SkTextBlob> {
+export class TextPathNode extends JsiDrawingNode<
+  TextPathProps,
+  SkTextBlob | null
+> {
   constructor(ctx: NodeContext, props: TextPathProps) {
     super(ctx, NodeType.TextPath, props);
   }
@@ -34,6 +39,9 @@ export class TextPathNode extends JsiDrawingNode<TextPathProps, SkTextBlob> {
   deriveProps() {
     const path = processPath(this.Skia, this.props.path);
     const { font, initialOffset } = this.props;
+    if (!font) {
+      return null;
+    }
     let { text } = this.props;
     const ids = font.getGlyphIDs(text);
     const widths = font.getGlyphWidths(ids);
@@ -57,10 +65,10 @@ export class TextPathNode extends JsiDrawingNode<TextPathProps, SkTextBlob> {
       }
       // Gives us the (x, y) coordinates as well as the cos/sin of the tangent
       // line at that position.
-      const { px, py, tx, ty } = cont.getPosTan(dist);
-      const adjustedX = px - (width / 2) * tx;
-      const adjustedY = py - (width / 2) * ty;
-      rsx.push(this.Skia.RSXform(tx, ty, adjustedX, adjustedY));
+      const [p, t] = cont.getPosTan(dist);
+      const adjustedX = p.x - (width / 2) * t.x;
+      const adjustedY = p.y - (width / 2) * t.y;
+      rsx.push(this.Skia.RSXform(t.x, t.y, adjustedX, adjustedY));
       dist += width / 2;
     }
     return this.Skia.TextBlob.MakeFromRSXform(text, rsx, font);
@@ -117,6 +125,8 @@ export class GlyphsNode extends JsiDrawingNode<GlyphsProps, ProcessedGlyphs> {
     }
     const { glyphs, positions } = this.derived;
     const { x, y, font } = this.props;
-    canvas.drawGlyphs(glyphs, positions, x, y, font, paint);
+    if (font) {
+      canvas.drawGlyphs(glyphs, positions, x, y, font, paint);
+    }
   }
 }

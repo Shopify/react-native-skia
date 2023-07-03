@@ -1,21 +1,21 @@
-import type { SkPaint } from "../../skia/types";
 import { StrokeCap, StrokeJoin, PaintStyle, BlendMode } from "../../skia/types";
 import type { DeclarationNode, PaintProps } from "../types";
 import { DeclarationType, NodeType } from "../types";
+import type { DeclarationContext } from "../types/DeclarationContext";
 
 import { enumKey } from "./datatypes";
 import type { NodeContext } from "./Node";
 import { JsiDeclarationNode } from "./Node";
 
 export class PaintNode
-  extends JsiDeclarationNode<PaintProps, SkPaint>
-  implements DeclarationNode<PaintProps, SkPaint>
+  extends JsiDeclarationNode<PaintProps>
+  implements DeclarationNode<PaintProps>
 {
   constructor(ctx: NodeContext, props: PaintProps = {}) {
     super(ctx, DeclarationType.Paint, NodeType.Paint, props);
   }
 
-  materialize() {
+  decorate(ctx: DeclarationContext) {
     const {
       color,
       strokeWidth,
@@ -55,23 +55,33 @@ export class PaintNode
     if (antiAlias !== undefined) {
       paint.setAntiAlias(antiAlias);
     }
+    ctx.save();
     this._children.forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
-        if (child.isShader()) {
-          paint.setShader(child.materialize());
-        } else if (child.isColorFilter()) {
-          paint.setColorFilter(child.materialize());
-        } else if (child.isImageFilter()) {
-          paint.setImageFilter(child.materialize());
-        } else if (child.isMaskFilter()) {
-          paint.setMaskFilter(child.materialize());
-        } else if (child.isPathEffect()) {
-          paint.setPathEffect(child.materialize());
-        } else {
-          throw new Error(`Unknown paint child ${child.type}`);
-        }
+        child.decorate(ctx);
       }
     });
-    return paint;
+    const colorFilter = ctx.colorFilters.popAllAsOne();
+    const imageFilter = ctx.imageFilters.popAllAsOne();
+    const shader = ctx.shaders.pop();
+    const maskFilter = ctx.maskFilters.pop();
+    const pathEffect = ctx.pathEffects.popAllAsOne();
+    ctx.restore();
+    if (imageFilter) {
+      paint.setImageFilter(imageFilter);
+    }
+    if (shader) {
+      paint.setShader(shader);
+    }
+    if (pathEffect) {
+      paint.setPathEffect(pathEffect);
+    }
+    if (colorFilter) {
+      paint.setColorFilter(colorFilter);
+    }
+    if (maskFilter) {
+      paint.setMaskFilter(maskFilter);
+    }
+    ctx.paints.push(paint);
   }
 }

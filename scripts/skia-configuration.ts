@@ -2,8 +2,53 @@ import { executeCmdSync } from "./utils";
 
 const NdkDir: string = process.env.ANDROID_NDK ?? "";
 
+// To build with the paragraph API's, you need to set this to true, and
+// you need to update the following files with some uncommenting:
+// 1) CMakeLists.txt
+// 2) react-native-skia.podspec
+// 3) package.json - add the following files to the files array:
+//    "libs/ios/libskparagraph.xcframework",
+//    "libs/ios/libskunicode.xcframework",
+// 4) build-skia.yml:
+//    Line 60:
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskparagraph.a
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskunicode.a
+//    Line 72:
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskparagraph.a
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskunicode.a
+//    Line 84:
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskparagraph.a
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskunicode.a
+//   Line 96:
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskparagraph.a
+//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskunicode.a
+//   Line 108:
+//      ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskparagraph.xcframework
+//      ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskunicode.xcframework
+// 5) build-npm-package.ts:
+//    Line 47-48, uncomment
+//    Line 66-67, uncomment
+// 6) Workflow-copy-libs.ts:
+//    27-28 and 36-37, uncomment
+export const BUILD_WITH_PARAGRAPH = false;
+const ParagraphArgs = BUILD_WITH_PARAGRAPH
+  ? [
+      ["skia_enable_paragraph", true],
+      ["skia_use_icu", true],
+      ["skia_use_system_icu", false],
+      ["skia_use_harfbuzz", true],
+      ["skia_use_system_harfbuzz", false],
+    ]
+  : [
+      ["skia_use_harfbuzz", false],
+      ["skia_use_icu", false],
+    ];
+
+const ParagraphOutputs = BUILD_WITH_PARAGRAPH
+  ? ["libskparagraph.a", "libskunicode.a"]
+  : [];
+
 export const commonArgs = [
-  ["skia_use_icu", false],
   ["skia_use_piex", true],
   ["skia_use_sfntly", false],
   ["skia_use_system_expat", false],
@@ -19,20 +64,8 @@ export const commonArgs = [
   ["skia_enable_flutter_defines", true],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
+  ...ParagraphArgs,
 ];
-
-// Get paths to iPhone SDKs
-export const iPhoneosSdk = executeCmdSync(
-  "xcrun --sdk iphoneos --show-sdk-path"
-)
-  .toString()
-  .trim();
-
-export const iPhoneSimulatorSdk = executeCmdSync(
-  "xcrun --sdk iphonesimulator --show-sdk-path"
-)
-  .toString()
-  .trim();
 
 export type PlatformName = "ios" | "android";
 
@@ -75,6 +108,7 @@ export const configurations: Configuration = {
     args: [
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
+      ["skia_use_runtime_icu", true],
       ["skia_use_gl", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
@@ -90,61 +124,47 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
+      ...ParagraphOutputs,
     ],
   },
   ios: {
     targets: {
-      // This one can probably be removed now?
-      // arm: {
-      //   cpu: "arm",
-      //   args: [
-      //     ["ios_min_target", '"10.0"'],
-      //     [
-      //       "extra_cflags",
-      //       '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios"]',
-      //     ],
-      //   ],
-      // },
       "arm64-iphoneos": {
         cpu: "arm64",
         args: [
-          ["ios_min_target", '"11.0"'],
-          ["xcode_sysroot", `"${iPhoneosSdk}"`],
-          ["extra_ldflags", `["--sysroot='${iPhoneosSdk}'"]`],
+          ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios", "-fembed-bitcode"]'],
           [
-            "extra_cflags",
-            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios", "-fembed-bitcode"]',
+            "extra_asmflags",
+            '["-target", "arm64-apple-ios", "-fembed-bitcode"]',
+          ],
+          [
+            "extra_ldflags",
+            '["-target", "arm64-apple-ios", "-fembed-bitcode"]',
           ],
         ],
       },
       "arm64-iphonesimulator": {
         cpu: "arm64",
         args: [
-          ["ios_min_target", '"11.0"'],
-          ["xcode_sysroot", `"${iPhoneSimulatorSdk}"`],
-          ["extra_ldflags", `["--sysroot='${iPhoneSimulatorSdk}'"]`],
-          [
-            "extra_cflags",
-            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios-simulator"]',
-          ],
+          ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
         ],
       },
       x64: {
         cpu: "x64",
         args: [
-          ["ios_min_target", '"11.0"'],
-          ["xcode_sysroot", `"${iPhoneSimulatorSdk}"`],
-          ["extra_ldflags", `["--sysroot='${iPhoneSimulatorSdk}'"]`],
-          [
-            "extra_cflags",
-            '["-DSKIA_C_DLL", "-DHAVE_ARC4RANDOM_BUF", "-target", "arm64-apple-ios-simulator"]',
-          ],
+          ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
         ],
       },
     },
     args: [
       ["skia_use_metal", true],
-      ["skia_use_gl", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
     ],
@@ -155,6 +175,7 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
+      ...ParagraphOutputs,
     ],
   },
 };

@@ -26,12 +26,20 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
     super(CanvasKit, ref, "Paint");
   }
 
+  dispose = () => {
+    this.ref.delete();
+  };
+
   copy() {
     return new JsiSkPaint(this.CanvasKit, this.ref.copy());
   }
 
   reset() {
     this.ref = new this.CanvasKit.Paint();
+  }
+
+  getAlphaf() {
+    return this.getColor()[3];
   }
 
   getColor() {

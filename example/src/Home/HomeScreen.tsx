@@ -13,6 +13,11 @@ export const HomeScreen = () => {
         testId="API"
       />
       <HomeScreenButton
+        title="🎥 Reanimated"
+        description="Reanimated & Gesture Handler"
+        route="Reanimated"
+      />
+      <HomeScreenButton
         title="🧘 Breathe"
         description="Simple declarative example"
         route="Breathe"
@@ -41,6 +46,11 @@ export const HomeScreen = () => {
         title="☀️ Aurora"
         description="Aurora Design via Mesh Gradients"
         route="Aurora"
+      />
+      <HomeScreenButton
+        title="📸 Stickers"
+        description="Stickers"
+        route="Stickers"
       />
       <HomeScreenButton
         title="🌈 Mesh Gradient"
@@ -72,6 +82,11 @@ export const HomeScreen = () => {
         title="🔢 Severance"
         description="Severance"
         route="Severance"
+      />
+      <HomeScreenButton
+        title="🚃 Transitions"
+        description="Transitions"
+        route="Transitions"
       />
       <HomeScreenButton
         title="🎥 Animation"

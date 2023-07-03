@@ -2,16 +2,16 @@
 import React from "react";
 import type { PointerEvent } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import { PixelRatio, View } from "react-native";
 
 import type { SkRect, SkCanvas } from "../skia/types";
 import type { SkiaValue } from "../values";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
+import { Platform } from "../Platform";
 
 import type { DrawMode, SkiaBaseViewProps, TouchInfo } from "./types";
 import { TouchTool, TouchType } from "./types";
 
-const pd = PixelRatio.get();
+const pd = Platform.PixelRatio;
 
 export abstract class SkiaBaseWebView<
   TProps extends SkiaBaseViewProps
@@ -38,17 +38,16 @@ export abstract class SkiaBaseWebView<
     this._unsubscriptions = [];
   }
 
-  private onLayout(evt: LayoutChangeEvent) {
+  private onLayoutEvent(evt: LayoutChangeEvent) {
     const { CanvasKit } = global;
-    const { width, height } = evt.nativeEvent.layout;
-    this.width = width;
-    this.height = height;
     // Reset canvas / surface on layout change
-    if (this._canvasRef.current) {
-      const canvas = this._canvasRef.current;
-      canvas.width = canvas.clientWidth * pd;
-      canvas.height = canvas.clientHeight * pd;
-      const surface = CanvasKit.MakeWebGLCanvasSurface(this._canvasRef.current);
+    const canvas = this._canvasRef.current;
+    if (canvas) {
+      this.width = canvas.clientWidth;
+      this.height = canvas.clientHeight;
+      canvas.width = this.width * pd;
+      canvas.height = this.height * pd;
+      const surface = CanvasKit.MakeWebGLCanvasSurface(canvas);
       if (!surface) {
         throw new Error("Could not create surface");
       }
@@ -56,6 +55,14 @@ export abstract class SkiaBaseWebView<
       this._canvas = this._surface.getCanvas();
       this.redraw();
     }
+    // Call onLayout callback if it exists
+    if (this.props.onLayout) {
+      this.props.onLayout(evt);
+    }
+  }
+
+  protected getSize() {
+    return { width: this.width, height: this.height };
   }
 
   componentDidMount() {
@@ -70,6 +77,16 @@ export abstract class SkiaBaseWebView<
   componentWillUnmount() {
     this.unsubscribeAll();
     cancelAnimationFrame(this.requestId);
+    // eslint-disable-next-line max-len
+    // https://stackoverflow.com/questions/23598471/how-do-i-clean-up-and-unload-a-webgl-canvas-context-from-gpu-after-use
+    // https://developer.mozilla.org/en-US/docs/Web/API/WEBGL_lose_context
+    // We delete the context, only if the context has been intialized
+    if (this._surface) {
+      this._canvasRef.current
+        ?.getContext("webgl2")
+        ?.getExtension("WEBGL_lose_context")
+        ?.loseContext();
+    }
   }
 
   /**
@@ -78,6 +95,9 @@ export abstract class SkiaBaseWebView<
    * @returns An Image object.
    */
   public makeImageSnapshot(rect?: SkRect) {
+    this._canvas!.clear(CanvasKit.TRANSPARENT);
+    this.renderInCanvas(this._canvas!, []);
+    this._surface?.ref.flush();
     return this._surface?.makeImageSnapshot(rect);
   }
 
@@ -98,7 +118,12 @@ export abstract class SkiaBaseWebView<
       if (this._canvas) {
         const touches = [...this._touches];
         this._touches = [];
-        this.renderInCanvas(this._canvas!, touches);
+        const canvas = this._canvas!;
+        canvas.clear(Float32Array.of(0, 0, 0, 0));
+        canvas.save();
+        canvas.scale(pd, pd);
+        this.renderInCanvas(canvas, touches);
+        canvas.restore();
         this._surface?.ref.flush();
       }
     }
@@ -171,21 +196,27 @@ export abstract class SkiaBaseWebView<
     return (evt: PointerEvent) => this.handleTouchEvent(evt, touchType);
   }
 
+  private onStart = this.createTouchHandler(TouchType.Start);
+  private onActive = this.createTouchHandler(TouchType.Active);
+  private onCancel = this.createTouchHandler(TouchType.Cancelled);
+  private onEnd = this.createTouchHandler(TouchType.End);
+  private onLayout = this.onLayoutEvent.bind(this);
+
   render() {
     const { mode, debug = false, ...viewProps } = this.props;
     return (
-      <View {...viewProps} onLayout={this.onLayout.bind(this)}>
+      <Platform.View {...viewProps} onLayout={this.onLayout}>
         <canvas
           ref={this._canvasRef}
           style={{ display: "flex", flex: 1 }}
-          onPointerDown={this.createTouchHandler(TouchType.Start)}
-          onPointerMove={this.createTouchHandler(TouchType.Active)}
-          onPointerUp={this.createTouchHandler(TouchType.End)}
-          onPointerCancel={this.createTouchHandler(TouchType.Cancelled)}
-          onPointerLeave={this.createTouchHandler(TouchType.End)}
-          onPointerOut={this.createTouchHandler(TouchType.End)}
+          onPointerDown={this.onStart}
+          onPointerMove={this.onActive}
+          onPointerUp={this.onEnd}
+          onPointerCancel={this.onCancel}
+          onPointerLeave={this.onEnd}
+          onPointerOut={this.onEnd}
         />
-      </View>
+      </Platform.View>
     );
   }
 }

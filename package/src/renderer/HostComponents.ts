@@ -1,7 +1,8 @@
-import type { ForwardedRef } from "react";
-
 import { NodeType } from "../dom/types";
 import type {
+  DeclarationNode,
+  FractalNoiseProps,
+  RenderNode,
   CircleProps,
   DrawingNodeProps,
   ImageProps,
@@ -55,19 +56,151 @@ import type {
   BlendProps,
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
-import type { PaintNode } from "../dom/nodes/PaintNode";
+import type { SkRect, SkRRect } from "../skia/types";
+import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
+import type { SkiaValue } from "../values";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
+import type { DependencyManager } from "./DependencyManager";
+
+// This flag should only be turned on for debugging/testing
+const shouldUseJSDomOnNative = false;
+export const NATIVE_DOM = shouldUseJSDomOnNative ? false : !!global.SkiaDomApi;
 
 declare global {
+  var SkiaDomApi: {
+    DependencyManager: (
+      registerValues: (values: Array<SkiaValue<unknown>>) => () => void
+    ) => DependencyManager;
+
+    // FIXME: We need a better type for this
+    RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
+    RRectNode: (
+      props: RoundedRectProps
+    ) => JsiDrawingNode<RoundedRectProps, SkRRect>;
+    GroupNode: (props: GroupProps) => RenderNode<GroupProps>;
+    PaintNode: (props: PaintProps) => DeclarationNode<PaintProps>;
+    FillNode: (props: PaintProps) => RenderNode<PaintProps>;
+    CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
+    PathNode: (props: PathProps) => RenderNode<PathProps>;
+    CustomDrawingNode: (
+      props: CustomDrawingNodeProps
+    ) => RenderNode<CustomDrawingNodeProps>;
+    LineNode: (props: LineProps) => RenderNode<LineProps>;
+    ImageNode: (props: ImageProps) => RenderNode<ImageProps>;
+    OvalNode: (props: OvalProps) => RenderNode<OvalProps>;
+    PatchNode: (props: PatchProps) => RenderNode<PatchProps>;
+    PointsNode: (props: PointsProps) => RenderNode<PointsProps>;
+    DiffRectNode: (props: DiffRectProps) => RenderNode<DiffRectProps>;
+    // Mask filters
+    BlurMaskFilterNode: (
+      props: BlurMaskFilterProps
+    ) => DeclarationNode<BlurMaskFilterProps>;
+
+    // Path effects
+    DashPathEffectNode: (
+      props: DashPathEffectProps
+    ) => DeclarationNode<DashPathEffectProps>;
+    DiscretePathEffectNode: (
+      props: DiscretePathEffectProps
+    ) => DeclarationNode<DiscretePathEffectProps>;
+    CornerPathEffectNode: (
+      props: CornerPathEffectProps
+    ) => DeclarationNode<CornerPathEffectProps>;
+    Path1DPathEffectNode: (
+      props: Path1DPathEffectProps
+    ) => DeclarationNode<Path1DPathEffectProps>;
+    Path2DPathEffectNode: (
+      props: Path2DPathEffectProps
+    ) => DeclarationNode<Path2DPathEffectProps>;
+    Line2DPathEffectNode: (
+      props: Line2DPathEffectProps
+    ) => DeclarationNode<Line2DPathEffectProps>;
+    SumPathEffectNode: () => DeclarationNode<null>;
+
+    // Image filters
+    BlendImageFilterNode: (
+      props: BlendImageFilterProps
+    ) => DeclarationNode<BlendImageFilterProps>;
+    DropShadowImageFilterNode: (
+      props: DropShadowImageFilterProps
+    ) => DeclarationNode<DropShadowImageFilterProps>;
+    DisplacementMapImageFilterNode: (
+      props: DisplacementMapImageFilterProps
+    ) => DeclarationNode<DisplacementMapImageFilterProps>;
+    BlurImageFilterNode: (
+      props: BlurImageFilterProps
+    ) => DeclarationNode<BlurImageFilterProps>;
+    OffsetImageFilterNode: (
+      props: OffsetImageFilterProps
+    ) => DeclarationNode<OffsetImageFilterProps>;
+    MorphologyImageFilterNode: (
+      props: MorphologyImageFilterProps
+    ) => DeclarationNode<MorphologyImageFilterProps>;
+    RuntimeShaderImageFilterNode: (
+      props: RuntimeShaderImageFilterProps
+    ) => DeclarationNode<RuntimeShaderImageFilterProps>;
+
+    // Color filters
+    MatrixColorFilterNode: (
+      props: MatrixColorFilterProps
+    ) => DeclarationNode<MatrixColorFilterProps>;
+    BlendColorFilterNode: (
+      props: BlendColorFilterProps
+    ) => DeclarationNode<BlendColorFilterProps>;
+    LinearToSRGBGammaColorFilterNode: () => DeclarationNode<null>;
+    SRGBToLinearGammaColorFilterNode: () => DeclarationNode<null>;
+    LumaColorFilterNode: () => DeclarationNode<null>;
+    LerpColorFilterNode: (
+      props: LerpColorFilterProps
+    ) => DeclarationNode<LerpColorFilterProps>;
+
+    // Shaders
+    ShaderNode: (props: ShaderProps) => DeclarationNode<ShaderProps>;
+    ImageShaderNode: (
+      props: ImageShaderProps
+    ) => DeclarationNode<ImageShaderProps>;
+    ColorShaderNode: (props: ColorProps) => DeclarationNode<ColorProps>;
+    TurbulenceNode: (
+      props: TurbulenceProps
+    ) => DeclarationNode<TurbulenceProps>;
+    FractalNoiseNode: (
+      props: FractalNoiseProps
+    ) => DeclarationNode<FractalNoiseProps>;
+    LinearGradientNode: (
+      props: LinearGradientProps
+    ) => DeclarationNode<LinearGradientProps>;
+    RadialGradientNode: (
+      props: RadialGradientProps
+    ) => DeclarationNode<RadialGradientProps>;
+    SweepGradientNode: (
+      props: SweepGradientProps
+    ) => DeclarationNode<SweepGradientProps>;
+    TwoPointConicalGradientNode: (
+      props: TwoPointConicalGradientProps
+    ) => DeclarationNode<TwoPointConicalGradientProps>;
+    PictureNode: (props: PictureProps) => RenderNode<PictureProps>;
+    ImageSVGNode: (props: ImageSVGProps) => RenderNode<ImageSVGProps>;
+    VerticesNode: (props: VerticesProps) => RenderNode<VerticesProps>;
+    TextNode: (prop: TextProps) => RenderNode<TextProps>;
+    TextPathNode: (prop: TextPathProps) => RenderNode<TextPathProps>;
+    TextBlobNode: (prop: TextBlobProps) => RenderNode<TextBlobProps>;
+    GlyphsNode: (prop: GlyphsProps) => RenderNode<GlyphsProps>;
+    BlendNode: (prop: BlendProps) => DeclarationNode<BlendProps>;
+    BackdropFilterNode: (prop: ChildrenProps) => RenderNode<ChildrenProps>;
+    BoxNode: (prop: BoxProps) => RenderNode<BoxProps>;
+    BoxShadowNode: (prop: BoxShadowProps) => DeclarationNode<BoxShadowProps>;
+    LayerNode: (prop: ChildrenProps) => RenderNode<ChildrenProps>;
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       skGroup: SkiaProps<GroupProps>;
       skLayer: SkiaProps<ChildrenProps>;
-      skPaint: SkiaProps<PaintProps> & { ref: ForwardedRef<PaintNode> };
+      skPaint: SkiaProps<PaintProps>;
 
       // Drawings
       skFill: SkiaProps<DrawingNodeProps>;
@@ -115,7 +248,7 @@ declare global {
       skImageShader: SkiaProps<ImageShaderProps>;
       skColorShader: SkiaProps<ColorProps>;
       skTurbulence: SkiaProps<TurbulenceProps>;
-      skFractalNoise: SkiaProps<TurbulenceProps>;
+      skFractalNoise: SkiaProps<FractalNoiseProps>;
       skLinearGradient: SkiaProps<LinearGradientProps>;
       skRadialGradient: SkiaProps<RadialGradientProps>;
       skSweepGradient: SkiaProps<SweepGradientProps>;

@@ -7,9 +7,7 @@ export const SVG = () => {
   const svg = useSVG(require("./tiger.svg"));
   return (
     <Canvas style={{ flex: 1 }}>
-      {svg ? (
-        <ImageSVG svg={svg} x={0} y={0} width={width / 2} height={height / 2} />
-      ) : null}
+      <ImageSVG svg={svg} x={0} y={0} width={width / 2} height={height / 2} />
     </Canvas>
   );
 };

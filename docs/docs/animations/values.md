@@ -5,6 +5,13 @@ sidebar_label: Values
 slug: /animations/values
 ---
 
+:::info
+
+Currently, built-in Skia animations are dependant on the JS thread.
+For UI-thread animations with Reanimated 3, see [Reanimated support](/docs/animations/reanimated).
+
+:::
+
 React Native Skia supports Animations through the concept of Skia Values. A value can be seen as the state in the library where a change in will trigger a repaint request on the `Canvas` component where it is used.
 
 A simple example below shows how a value is used as a property for the x position of the `Rect` element.
@@ -89,16 +96,9 @@ const Demo = () => {
 };
 ```
 
-## Canvas
+## Canvas Size
 
-The `useCanvas` hook returns a `size` value that updates every time the canvas size updates.
-On the first frame, the size is zero.
-
-:::caution
-
-`useCanvas` can only be used inside the Canvas element because it relies on context.
-
-:::
+The `onSize` property will update the provided Skia Value with the current canvas size when the Canvas is resized. This property can also be a Reanimated shared value (see [reanimated integration](/docs/animations/reanimated)).
 
 ```tsx twoslash
 import React from "react";
@@ -108,22 +108,19 @@ import {
   Group,
   Rect,
   rect,
-  useCanvas,
+  useValue,
   useComputedValue,
 } from "@shopify/react-native-skia";
-
-const MyComp = () => {
-  // 💚 useCanvas() can safely be used here
-  const { size } = useCanvas();
-  // 💚 canvas is a regular skia value that can be used for animations
+const Example = () => {
+  const size = useValue({ width: 0, height: 0 });
   const rct = useComputedValue(() => {
     return rect(0, 0, size.current.width, size.current.height / 2);
   }, [size]);
   return (
+    <Canvas style={{ flex: 1 }} onSize={size}>
     <Group>
       <Fill color="magenta" />
       <Rect color="cyan" rect={rct} />
-      {/* ❌ this won't update since canvas is a skia value */}
       <Rect
         x={0}
         y={0}
@@ -132,14 +129,6 @@ const MyComp = () => {
         color="red"
       />
     </Group>
-  );
-};
-
-const Example = () => {
-  // ❌ Using useCanvas() here would crash
-  return (
-    <Canvas style={{ flex: 1 }}>
-      <MyComp />
     </Canvas>
   );
 };

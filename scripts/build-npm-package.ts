@@ -36,9 +36,6 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
   process.exit(1);
 }
 
-// FIXME: We can't use skia configuration here since it depends on
-// iPhone SDKs that we get from xcrun...
-
 // Check that Android Skia libs are built
 ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"].forEach((cpu) => {
   [
@@ -47,6 +44,8 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
     "libsvg.a",
     "libskottie.a",
     "libsksg.a",
+    //"libskparagraph.a",
+    //"libskunicode.a",
   ].forEach((target) => {
     const path = `./package/libs/android/${cpu}/${target}`;
     checkFileExists(
@@ -64,6 +63,8 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
   "libsvg.xcframework",
   "libskottie.xcframework",
   "libsksg.xcframework",
+  // "libskparagraph.xcframework",
+  // "libskunicode.xcframework",
 ].forEach((lib) => {
   checkFileExists(
     `./package/libs/ios/${lib}`,

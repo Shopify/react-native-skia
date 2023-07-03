@@ -15,7 +15,8 @@ export class Container {
   constructor(
     Skia: Skia,
     public depMgr: DependencyManager,
-    public redraw: () => void
+    public redraw: () => void = () => {},
+    public getNativeId: () => number = () => 0
   ) {
     this.Sk = new JsiSkDOM({ Skia, depMgr });
     this._root = this.Sk.Group();

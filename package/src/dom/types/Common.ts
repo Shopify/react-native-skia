@@ -1,4 +1,4 @@
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode } from "react";
 
 import type {
   BlendMode,
@@ -14,8 +14,6 @@ import type {
   Transforms2d,
   Vector,
 } from "../../skia/types";
-
-import type { DeclarationNode } from "./Node";
 
 export type SkEnum<T> = Uncapitalize<keyof T extends string ? keyof T : never>;
 
@@ -39,21 +37,21 @@ export interface ChildrenProps {
 }
 
 export interface RectCtor {
-  x: number;
-  y: number;
+  x?: number;
+  y?: number;
   width: number;
   height: number;
 }
 
 export interface RRectCtor extends RectCtor {
-  r: Radius;
+  r?: Radius;
 }
 
 export type RectDef = RectCtor | { rect: SkRect };
 export type RRectDef = RRectCtor | { rect: SkRRect };
 
 export interface PointCircleDef {
-  c: Vector;
+  c?: Vector;
   r: number;
 }
 
@@ -86,5 +84,5 @@ export interface PaintProps extends ChildrenProps {
 export interface GroupProps extends PaintProps, TransformProps {
   clip?: ClipDef;
   invertClip?: boolean;
-  layer?: RefObject<DeclarationNode<unknown, SkPaint>> | SkPaint | boolean;
+  layer?: SkPaint | boolean;
 }

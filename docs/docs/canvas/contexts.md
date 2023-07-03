@@ -10,7 +10,8 @@ It is currently impossible to automatically share a React context between two re
 This means that a React Native context won't be available from your drawing directly.
 We recommend preparing the data needed for your drawing outside the `<Canvas>` element.
 However, if you need to use a React context within your drawing, you must re-inject it.
-This module provides the `useContextBridge` hook from [pmndrs/drei](https://github.com/pmndrs/drei#usecontextbridge) to help you bridge between contexts.
+
+We found [its-fine](https://github.com/pmndrs/its-fine), also used by [react-three-fiber](https://github.com/pmndrs/react-three-fiber), to provide an elegant solution to this problem.
 
 ## Manual Context Injection
 
@@ -45,12 +46,13 @@ export const App = () => {
 };
 ```
 
-## Using `useContextBridge()`
+## Using `its-fine`
 
 ```tsx twoslash
 import React from "react";
-import { useContextBridge, Canvas, Fill } from "@shopify/react-native-skia";
+import { Canvas, Fill } from "@shopify/react-native-skia";
 import {useTheme, ThemeProvider, ThemeContext} from "./docs/getting-started/Theme";
+import { useContextBridge, FiberProvider } from "its-fine";
 
 const MyDrawing = () => {
   const { primary } = useTheme();
@@ -58,7 +60,7 @@ const MyDrawing = () => {
 };
 
 export const Layer = () => {
-  const ContextBridge = useContextBridge(ThemeContext);
+  const ContextBridge = useContextBridge();
   return (
     <Canvas style={{ flex: 1 }}>
       <ContextBridge>
@@ -71,9 +73,11 @@ export const Layer = () => {
 
 export const App = () => {
   return (
-    <ThemeProvider primary="red">
-      <Layer />
-    </ThemeProvider>
+    <FiberProvider>
+      <ThemeProvider primary="red">
+        <Layer />
+      </ThemeProvider>
+    </FiberProvider>
   );
 };
 ```

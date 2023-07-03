@@ -9,4 +9,11 @@ export interface SurfaceFactory {
    * @param height - number of pixels of the height of the drawable area.
    */
   Make: (width: number, height: number) => SkSurface | null;
+
+  /**
+   * Creates a GPU backed surface.
+   * @param width - number of pixels of the width of the drawable area.
+   * @param height - number of pixels of the height of the drawable area.
+   */
+  MakeOffscreen: (width: number, height: number) => SkSurface | null;
 }

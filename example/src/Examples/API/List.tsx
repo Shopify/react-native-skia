@@ -23,8 +23,16 @@ export const examples = [
     title: "🖱 Touch Handling",
   },
   {
+    screen: "Snapshot",
+    title: "📺 View Snapshot",
+  },
+  {
     screen: "PathEffect",
     title: "⭐️ Path Effect",
+  },
+  {
+    screen: "IconsExample",
+    title: "📱 Icons",
   },
   {
     screen: "Transform",
@@ -75,8 +83,8 @@ export const examples = [
     title: "↕️ useCanvas()",
   },
   {
-    screen: "Reanimated",
-    title: "🐎 Reanimated",
+    screen: "OnLayout",
+    title: "🎛️ OnLayout",
   },
 ] as const;
 

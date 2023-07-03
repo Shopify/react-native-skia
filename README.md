@@ -12,15 +12,9 @@ Checkout the full documentation [here](https://shopify.github.io/react-native-sk
 
 React Native Skia brings the Skia Graphics Library to React Native. Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox and Firefox OS, and many other products.
 
-_This is an alpha release. Use with caution._
-
 ## Getting Started
 
-```sh
-npm install @shopify/react-native-skia
-```
-
-Documentation is available at [https://shopify.github.io/react-native-skia](https://shopify.github.io/react-native-skia/docs/getting-started/installation/).
+[Installation instructions](https://shopify.github.io/react-native-skia/docs/getting-started/installation/)
 
 ## Library Development
 
@@ -58,10 +52,10 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 
 If a new version of Skia is included in an upgrade of this library, you need to perform a few extra steps before continuing:
 
-1. Update submodules: `git submodule update --recursive`
-2. Copy Skia Headers: `yarn copy-skia-headers`
-3. Clean Skia: `yarn clean-skia`
-4. Build Skia: `yarn build-skia`
+1. Update submodules: `git submodule update --recursive --remote`
+2. Clean Skia: `yarn clean-skia`
+3. Build Skia: `yarn build-skia`
+4. Copy Skia Headers: `yarn copy-skia-headers`
 5. Run pod install in the example project
 
 ### Publishing

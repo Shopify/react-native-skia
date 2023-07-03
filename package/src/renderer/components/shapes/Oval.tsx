@@ -6,8 +6,3 @@ import type { SkiaProps } from "../../processors";
 export const Oval = (props: SkiaProps<OvalProps>) => {
   return <skOval {...props} />;
 };
-
-Oval.defaultProps = {
-  x: 0,
-  y: 0,
-};

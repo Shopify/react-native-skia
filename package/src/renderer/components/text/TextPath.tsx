@@ -1,12 +1,11 @@
 import React from "react";
 
-import type { SkiaProps } from "../../processors";
+import type { SkiaDefaultProps } from "../../processors";
 import type { TextPathProps } from "../../../dom/types";
 
-export const TextPath = (props: SkiaProps<TextPathProps>) => {
-  return <skTextPath {...props} />;
-};
-
-TextPath.defaultProps = {
-  initialOffset: 0,
+export const TextPath = ({
+  initialOffset = 0,
+  ...props
+}: SkiaDefaultProps<TextPathProps, "initialOffset">) => {
+  return <skTextPath initialOffset={initialOffset} {...props} />;
 };

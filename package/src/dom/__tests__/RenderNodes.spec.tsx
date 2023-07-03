@@ -8,6 +8,7 @@ import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
 import type { NodeType } from "../types";
 import type { CircleProps } from "../types/Drawings";
+import { JsiDrawingContext } from "../types/DrawingContext";
 
 describe("Drawings", () => {
   it("Hello World", () => {
@@ -27,7 +28,7 @@ describe("Drawings", () => {
 
     const circle = Sk.Circle({ c, r: R, color: c1 });
     root.addChild(circle);
-    let ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    let ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/render-nodes/simple.png");
 
@@ -36,7 +37,7 @@ describe("Drawings", () => {
     circle.setProp("cx" as keyof CircleProps, 0);
     circle.setProp("cy" as keyof CircleProps, 0);
     circle.setProp("color", c2);
-    ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    ctx = new JsiDrawingContext(Skia, canvas);
     root.render(ctx);
     processResult(surface, "snapshots/render-nodes/simple2.png");
   });

@@ -24,9 +24,11 @@
     "clsx": "^1.1.1",
     "docusaurus-preset-shiki-twoslash": "^1.1.33",
     "file-loader": "^6.2.0",
+    "its-fine": "^1.0.8",
     "prism-react-renderer": "^1.2.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-native-gesture-handler": "^2.9.0",
     "react-native-reanimated": "^2.4.1",
     "url-loader": "^4.1.1"
   },

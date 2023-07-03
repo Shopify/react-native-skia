@@ -10,11 +10,9 @@ export const processTransformProps = (m3: SkMatrix, props: TransformProps) => {
       m3.concat(matrix);
       m3.translate(-origin.x, -origin.y);
     } else {
-      m3.identity();
       m3.concat(matrix);
     }
   } else if (transform) {
-    m3.identity();
     if (origin) {
       m3.translate(origin.x, origin.y);
     }

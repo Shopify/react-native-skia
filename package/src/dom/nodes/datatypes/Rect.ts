@@ -16,7 +16,7 @@ const isRectCtor = (def: RectDef): def is RectCtor =>
 
 export const processRect = (Skia: Skia, def: RectDef) => {
   if (isRectCtor(def)) {
-    return Skia.XYWHRect(def.x, def.y, def.width, def.height);
+    return Skia.XYWHRect(def.x ?? 0, def.y ?? 0, def.width, def.height);
   } else {
     return def.rect;
   }
@@ -24,9 +24,9 @@ export const processRect = (Skia: Skia, def: RectDef) => {
 
 export const processRRect = (Skia: Skia, def: RRectDef) => {
   if (isRRectCtor(def)) {
-    const r = processRadius(Skia, def.r);
+    const r = processRadius(Skia, def.r ?? 0);
     return Skia.RRectXY(
-      Skia.XYWHRect(def.x, def.y, def.width, def.height),
+      Skia.XYWHRect(def.x ?? 0, def.y ?? 0, def.width, def.height),
       r.x,
       r.y
     );

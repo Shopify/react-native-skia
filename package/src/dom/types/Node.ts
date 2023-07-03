@@ -1,15 +1,7 @@
-import type {
-  SkColorFilter,
-  SkImageFilter,
-  SkMaskFilter,
-  SkPaint,
-  SkPathEffect,
-  SkShader,
-} from "../../skia/types";
-
 import type { GroupProps } from "./Common";
-import type { DrawingContext } from "./DrawingContext";
 import type { DeclarationType, NodeType } from "./NodeType";
+import type { DeclarationContext } from "./DeclarationContext";
+import type { DrawingContext } from "./DrawingContext";
 
 export interface Node<P> {
   type: NodeType;
@@ -26,19 +18,11 @@ export interface Node<P> {
 
 export type Invalidate = () => void;
 
-export interface DeclarationNode<P, T, Nullable extends null | never = never>
-  extends Node<P> {
+export interface DeclarationNode<P> extends Node<P> {
   declarationType: DeclarationType;
-  materialize(): T | Nullable;
+  decorate(ctx: DeclarationContext): void;
 
   setInvalidate(invalidate: Invalidate): void;
-
-  isPaint(): this is DeclarationNode<unknown, SkPaint>;
-  isImageFilter(): this is DeclarationNode<unknown, SkImageFilter>;
-  isColorFilter(): this is DeclarationNode<unknown, SkColorFilter>;
-  isShader(): this is DeclarationNode<unknown, SkShader>;
-  isMaskFilter(): this is DeclarationNode<unknown, SkMaskFilter>;
-  isPathEffect(): this is DeclarationNode<unknown, SkPathEffect>;
 }
 
 export interface RenderNode<P extends GroupProps> extends Node<P> {

@@ -1,12 +1,6 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
-import {
-  commonArgs,
-  configurations,
-  iPhoneosSdk,
-  iPhoneSimulatorSdk,
-  PlatformName,
-} from "./skia-configuration";
+import { commonArgs, configurations, PlatformName } from "./skia-configuration";
 const fs = require("fs");
 const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
 
@@ -37,20 +31,6 @@ if (!process.env.ANDROID_NDK) {
   console.log("☑ ANDROID_NDK");
 }
 
-// Test for existence of iOS SDK
-if (!iPhoneosSdk) {
-  console.log("iPhoneOS SDK not set.");
-  exit(1);
-} else {
-  console.log("☑ iPhoneOS SDK");
-}
-
-if (!iPhoneSimulatorSdk) {
-  console.log("iPhoneSimulatorOS SDK not set.");
-  exit(1);
-} else {
-  console.log("☑ iPhoneSimulatorOS SDK");
-}
 console.log("");
 console.log("Requirements met. Starting build.");
 console.log("");

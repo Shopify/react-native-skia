@@ -11,4 +11,8 @@ export class JsiSkMaskFilter
   constructor(CanvasKit: CanvasKit, ref: MaskFilter) {
     super(CanvasKit, ref, "MaskFilter");
   }
+
+  dispose = () => {
+    this.ref.delete();
+  };
 }
