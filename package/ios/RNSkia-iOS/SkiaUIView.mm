@@ -190,16 +190,16 @@
 
       auto toolType = [touch type];
       switch(toolType) {
-        case UITouchTypeDirect:
-          nextTouch.toolType = RNSkia::RNSkTouchInfo::TouchTool::Finger;
-          break;
-        case UITouchTypeStylus:
-        case UITouchTypePencil:
-          nextTouch.toolType = RNSkia::RNSkTouchInfo::TouchTool::Stylus;
-          break;
-        default:
-          nextTouch.toolType = RNSkia::RNSkTouchInfo::TouchTool::Unknown;
-          break;
+      case UITouchTypeDirect:
+        nextTouch.toolType = RNSkia::RNSkTouchInfo::TouchTool::Finger;
+        break;
+      case UITouchTypeStylus:
+      case UITouchTypePencil:
+        nextTouch.toolType = RNSkia::RNSkTouchInfo::TouchTool::Stylus;
+        break;
+      default:
+        nextTouch.toolType = RNSkia::RNSkTouchInfo::TouchTool::Unknown;
+        break;
       }
       nextTouches.push_back(nextTouch);
     }
