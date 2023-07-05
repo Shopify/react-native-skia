@@ -63,6 +63,16 @@ const svgWithoutSize = {
 };
 
 describe("Displays SVGs", () => {
+  itRunsE2eOnly("should return the with and height of the SVG canvas", async () => {
+    const [width, height] = await surface.eval((Skia) => {
+      const svg = Skia.SVG.MakeFromString(`<svg viewBox='0 0 20 20' width="20" height="20" xmlns='http://www.w3.org/2000/svg'>
+      <circle cx='10' cy='10' r='10' fill='#00ffff'/>
+    </svg>`)!;
+      return [svg.width(), svg.height()];
+    });
+    expect(width).toBe(20);
+    expect(height).toBe(20);
+  });
   itRunsE2eOnly("should render the SVG scaled properly", async () => {
     const { rect } = importSkia();
     const { width, height } = surface;
