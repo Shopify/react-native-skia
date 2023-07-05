@@ -1,8 +1,15 @@
 /* eslint-disable max-len */
 import React from "react";
 
-import { surface, importSkia, height } from "../setup";
-import { Circle, Fill, Group, LinearGradient, Paint, Path } from "../../components";
+import { surface, importSkia, height, width } from "../setup";
+import {
+  Circle,
+  Fill,
+  Group,
+  LinearGradient,
+  Paint,
+  Path,
+} from "../../components";
 import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import { fitbox } from "../../components/shapes/FitBox";
 
@@ -43,7 +50,6 @@ const COLS = 256 / SIZE;
 
 describe("Paint", () => {
   it("should interpret the #rrggbbaa correctly", async () => {
-    const { width, height } = surface;
     const { rect } = importSkia();
 
     const image = await surface.draw(
@@ -59,7 +65,6 @@ describe("Paint", () => {
     checkImage(image, "snapshots/paint/colors.png");
   });
   it("should accept a paint object as property", async () => {
-    const { width, height } = surface;
     const { Skia } = importSkia();
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("lightblue"));
@@ -137,6 +142,8 @@ describe("Paint", () => {
     const withDither = await drawGradientWithDither(true);
     const withoutDither = await drawGradientWithDither(false);
     checkImage(withDither, "snapshots/paint/dither.png");
-    checkImage(withoutDither, "snapshots/paint/dither.png", {shouldFail: true});
+    checkImage(withoutDither, "snapshots/paint/dither.png", {
+      shouldFail: true,
+    });
   });
 });

@@ -26,7 +26,7 @@ export class PaintNode
       strokeMiter,
       opacity,
       antiAlias,
-      dither
+      dither,
     } = this.props;
     const paint = this.Skia.Paint();
     if (color !== undefined) {
