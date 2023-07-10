@@ -45,7 +45,8 @@ public:
          makeNativeMethod("updateTouchPoints",
                           JniSkiaDomView::updateTouchPoints),
          makeNativeMethod("registerView", JniSkiaDomView::registerView),
-         makeNativeMethod("unregisterView", JniSkiaDomView::unregisterView)});
+         makeNativeMethod("unregisterView", JniSkiaDomView::unregisterView),
+         makeNativeMethod("renderToBitmap", JniSkiaDomView::renderToBitmap)});
   }
 
 protected:
@@ -72,6 +73,10 @@ protected:
   }
 
   void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+
+  jobject renderToBitmap(jobject bitmap, int width, int height) override {
+    return JniSkiaBaseView::renderToBitmap(bitmap, width, height);
+  }
 
 private:
   friend HybridBase;

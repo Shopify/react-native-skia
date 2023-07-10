@@ -1,6 +1,7 @@
 package com.shopify.reactnative.skia;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
@@ -42,4 +43,5 @@ public class SkiaDomView extends SkiaBaseView {
 
     protected native void unregisterView();
 
+    protected native Object renderToBitmap(Object bitmap, int width, int height);
 }
