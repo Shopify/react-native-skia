@@ -2,6 +2,8 @@
 
 #include <RNSkLog.h>
 
+#include "SkiaOpenGLHelper.h"
+
 #include "EGL/egl.h"
 #include "GLES2/gl2.h"
 #include "android/native_window.h"
@@ -26,23 +28,16 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height);
 
-using OpenGLDrawingContext = struct {
-  EGLContext glContext;
-  EGLDisplay glDisplay;
-  EGLConfig glConfig;
-  sk_sp<GrDirectContext> skContext;
-};
-
-static std::unordered_map<std::thread::id,
-                          std::shared_ptr<OpenGLDrawingContext>>
-    threadContexts;
+static EGLContext sharedEglContext = EGL_NO_CONTEXT;
+/**
+ * To be able to use static contexts (and avoid reloading the skia context for
+ * each new view, we track the OpenGL and Skia drawing context per thread.
+ */
+static thread_local SkiaOpenGLHelper::ThreadRenderContext ThreadContext;
 
 enum RenderState : int {
-  Initializing,
   Rendering,
-  Finishing,
   Done,
 };
 
@@ -73,49 +68,19 @@ public:
    */
   void teardown();
 
+  /**
+   * Creates an offscreen GPU / OpenGL surface
+   * @param width
+   * @param height
+   * @return
+   */
+  static sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height);
+
 private:
-  /**
-   * Initializes all required OpenGL and Skia objects
-   * @return True if initialization went well.
-   */
-  bool ensureInitialised();
-
-  /**
-   * Initializes the static OpenGL context that is shared between
-   * all instances of the renderer.
-   * @return True if initialization went well
-   */
-  bool initStaticGLContext();
-
-  /**
-   * Initializes the static Skia context that is shared between
-   * all instances of the renderer
-   * @return True if initialization went well
-   */
-  bool initStaticSkiaContext();
-
-  /**
-   * Inititalizes the OpenGL surface from the native view pointer we
-   * got on initialization. Each renderer has its own OpenGL surface to
-   * render on.
-   * @return True if initialization went well
-   */
-  bool initGLSurface();
-
-  /**
-   * To be able to use static contexts (and avoid reloading the skia context for
-   * each new view, we track the OpenGL and Skia drawing context per thread.
-   * @return The drawing context for the current thread
-   */
-  static std::shared_ptr<OpenGLDrawingContext> getThreadDrawingContext();
-
-  EGLSurface _glSurface = EGL_NO_SURFACE;
+  bool ensureContextInitialized();
 
   ANativeWindow *_nativeWindow = nullptr;
-
-  int _prevWidth = 0;
-  int _prevHeight = 0;
-
-  std::atomic<RenderState> _renderState = {RenderState::Initializing};
+  EGLSurface _glSurface = EGL_NO_SURFACE;
+  std::atomic<RenderState> _renderState = {RenderState::Rendering};
 };
 } // namespace RNSkia

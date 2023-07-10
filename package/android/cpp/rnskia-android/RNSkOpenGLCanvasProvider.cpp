@@ -48,29 +48,7 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   if (_renderer != nullptr) {
     // teardown
     _renderer->teardown();
-
-    // Teardown renderer on the render thread since OpenGL demands
-    // same thread access for OpenGL contexts.
-    std::condition_variable cv;
-    std::mutex m;
-    std::unique_lock<std::mutex> lock(m);
-
-    _context->runOnRenderThread([&cv, &m, weakSelf = weak_from_this()]() {
-      // Lock
-      std::unique_lock<std::mutex> lock(m);
-
-      auto self = weakSelf.lock();
-      if (self) {
-        if (self->_renderer != nullptr) {
-          self->_renderer->run(nullptr, 0, 0);
-        }
-        // Remove renderer
-        self->_renderer = nullptr;
-      }
-      cv.notify_one();
-    });
-
-    cv.wait(lock);
+    _renderer = nullptr;
   }
 }
 
