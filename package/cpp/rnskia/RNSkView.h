@@ -98,7 +98,7 @@ public:
   /**
    Returns a snapshot of the current surface/canvas
    */
-  sk_sp<SkImage> makeSnapshot(std::shared_ptr<SkRect> bounds) {
+  sk_sp<SkImage> makeSnapshot(SkRect *bounds) {
     sk_sp<SkImage> image;
     if (bounds != nullptr) {
       SkIRect b = SkIRect::MakeXYWH(bounds->x(), bounds->y(), bounds->width(),
@@ -273,7 +273,7 @@ public:
   /**
    Renders the view into an SkImage instead of the screen.
    */
-  sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
+  sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) {
 
     auto provider = std::make_shared<RNSkImageCanvasProvider>(
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
@@ -283,6 +283,8 @@ public:
     return provider->makeSnapshot(bounds);
   }
 
+  std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
+
 protected:
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
     return _platformContext;
@@ -290,7 +292,6 @@ protected:
   std::shared_ptr<RNSkCanvasProvider> getCanvasProvider() {
     return _canvasProvider;
   }
-  std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
 
   /**
    Ends an ongoing beginDrawCallback loop for this view. This method is made
@@ -419,7 +420,6 @@ private:
 
   size_t _drawingLoopId = 0;
   std::atomic<int> _redrawRequestCounter = {1};
-  bool _initialDrawingDone = false;
 };
 
 } // namespace RNSkia
