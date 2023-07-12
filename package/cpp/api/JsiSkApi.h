@@ -43,6 +43,8 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
+#include "JsiSkFontMgr.h"
+#include "JsiSkFontMgrFactory.h"
 
 namespace RNSkia {
 
@@ -91,8 +93,8 @@ public:
                             std::make_shared<JsiSkColorFilterFactory>(context));
     installReadonlyProperty("MaskFilter",
                             std::make_shared<JsiSkMaskFilterFactory>(context));
-    installReadonlyProperty(
-        "RuntimeEffect", std::make_shared<JsiSkRuntimeEffectFactory>(context));
+    installReadonlyProperty("RuntimeEffect",
+							std::make_shared<JsiSkRuntimeEffectFactory>(context));
     installReadonlyProperty("Shader",
                             std::make_shared<JsiSkShaderFactory>(context));
     installReadonlyProperty("TextBlob",
@@ -101,6 +103,8 @@ public:
                             std::make_shared<JsiSkSurfaceFactory>(context));
     installReadonlyProperty("Picture",
                             std::make_shared<JsiSkPictureFactory>(context));
+    installReadonlyProperty("FontMgr",
+                            std::make_shared<JsiSkFontMgrFactory>(context));
     installReadonlyProperty(
         "TypeFaceFontProvider",
         std::make_shared<JsiSkTypefaceFontProviderFactory>(context));

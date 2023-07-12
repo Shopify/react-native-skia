@@ -28,7 +28,7 @@ export class JsiSkTypefaceFontProvider
     this.CanvasKit._registerFont(typeface, strPtr);
   }
 
-  dispose = () => {
+  dispose() {
     this.ref.delete();
-  };
+  }
 }

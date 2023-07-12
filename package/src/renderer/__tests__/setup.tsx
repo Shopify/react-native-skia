@@ -22,10 +22,12 @@ import { JsiDrawingContext } from "../../dom/types/DrawingContext";
 
 jest.setTimeout(180 * 1000);
 
+type TestOS = "ios" | "android" | "web" | "node";
+
 declare global {
   var testServer: Server;
   var testClient: WebSocket;
-  var testOS: "ios" | "android" | "web";
+  var testOS: TestOS;
 }
 export let surface: TestingSurface;
 const assets = new Map<SkImage | SkFont, string>();
@@ -97,6 +99,13 @@ export const resolveFile = (uri: string) =>
     arrayBuffer: () => Promise.resolve(resolveFile(uri)),
   })
 );
+
+export const testingFonts = [
+  resolveFile("skia/__tests__/assets/NotoSansSC-Regular.otf").buffer,
+  resolveFile("skia/__tests__/assets/Roboto-Regular.ttf").buffer,
+  resolveFile("skia/__tests__/assets/Roboto-BlackItalic.ttf").buffer,
+  resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf").buffer,
+];
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmptyProps {}
@@ -274,7 +283,7 @@ interface TestingSurface {
   width: number;
   height: number;
   fontSize: number;
-  OS: string;
+  OS: TestOS;
 }
 
 class LocalSurface implements TestingSurface {
