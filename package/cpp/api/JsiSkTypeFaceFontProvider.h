@@ -5,9 +5,9 @@
 
 #include <jsi/jsi.h>
 
+#include "JsiSkFontStyle.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkTypeface.h"
-#include "JsiSkFontStyle.h"
 
 #include "RNSkLog.h"
 
@@ -24,18 +24,19 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 namespace para = skia::textlayout;
 
-class JsiSkTypefaceFontProvider : public JsiSkWrappingSkPtrHostObject<para::TypefaceFontProvider> {
+class JsiSkTypefaceFontProvider
+    : public JsiSkWrappingSkPtrHostObject<para::TypefaceFontProvider> {
 public:
   EXPORT_JSI_API_TYPENAME(JsiSkTypefaceFontProvider, "TypefaceFontProvider")
-  JSI_EXPORT_FUNCTIONS(
-    JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, dispose),
-    JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, registerFont),
-    JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, matchFamilyStyle)
-  )
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, dispose),
+                       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, registerFont),
+                       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider,
+                                       matchFamilyStyle))
 
   JSI_HOST_FUNCTION(registerFont) {
-	sk_sp<SkTypeface> typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
-	SkString familyName(arguments[1].asString(runtime).utf8(runtime).c_str());
+    sk_sp<SkTypeface> typeface =
+        JsiSkTypeface::fromValue(runtime, arguments[0]);
+    SkString familyName(arguments[1].asString(runtime).utf8(runtime).c_str());
     getObject()->registerTypeface(typeface, familyName);
     return jsi::Value::undefined();
   }
@@ -49,8 +50,9 @@ public:
   }
 
   JsiSkTypefaceFontProvider(std::shared_ptr<RNSkPlatformContext> context,
-                sk_sp<para::TypefaceFontProvider> tfProvider)
-      : JsiSkWrappingSkPtrHostObject(std::move(context), std::move(tfProvider)) {}
+                            sk_sp<para::TypefaceFontProvider> tfProvider)
+      : JsiSkWrappingSkPtrHostObject(std::move(context),
+                                     std::move(tfProvider)) {}
 
   /**
    Returns the jsi object from a host object of this type
@@ -59,8 +61,8 @@ public:
                             std::shared_ptr<RNSkPlatformContext> context,
                             sk_sp<para::TypefaceFontProvider> tfProvider) {
     return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkTypefaceFontProvider>(std::move(context), std::move(tfProvider)));
+        runtime, std::make_shared<JsiSkTypefaceFontProvider>(
+                     std::move(context), std::move(tfProvider)));
   }
 };
 
