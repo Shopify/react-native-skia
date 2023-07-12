@@ -2,54 +2,29 @@ import { executeCmdSync } from "./utils";
 
 const NdkDir: string = process.env.ANDROID_NDK ?? "";
 
-// To build with the paragraph API's, you need to set this to true, and
-// you need to update the following files with some uncommenting:
-// 1) CMakeLists.txt
-// 2) react-native-skia.podspec
-// 3) package.json - add the following files to the files array:
-//    "libs/ios/libskparagraph.xcframework",
-//    "libs/ios/libskunicode.xcframework",
-// 4) build-skia.yml:
-//    Line 60:
-//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskparagraph.a
-//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskunicode.a
-//    Line 72:
-//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskparagraph.a
-//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskunicode.a
-//    Line 84:
-//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskparagraph.a
-//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskunicode.a
-//   Line 96:
-//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskparagraph.a
-//      ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskunicode.a
-//   Line 108:
-//      ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskparagraph.xcframework
-//      ${{ env.WORKING_DIRECTORY }}/package/libs/ios/libskunicode.xcframework
-// 5) build-npm-package.ts:
-//    Line 47-48, uncomment
-//    Line 66-67, uncomment
-// 6) Workflow-copy-libs.ts:
-//    27-28 and 36-37, uncomment
 export const BUILD_WITH_PARAGRAPH = true;
-// For the paragraph API, on Android, we use system ICU, on iOS we don't use ICU
 const NoParagraphArgs = [
   ["skia_use_harfbuzz", false],
   ["skia_use_icu", false],
 ];
-const ParagraphArgsAndroid = BUILD_WITH_PARAGRAPH ? [
+const CommonParagraphArgs = [
   ["skia_enable_paragraph", true],
   ["skia_use_icu", true],
-  ["skia_use_system_icu", false],
   ["skia_use_harfbuzz", true],
   ["skia_use_system_harfbuzz", false],
+];
+// To build the paragraph API:
+// On Android: we use system ICU
+// On iOS: we use neither system nor client ICU
+const ParagraphArgsAndroid = BUILD_WITH_PARAGRAPH ? [
+  ...CommonParagraphArgs,
+  ["skia_use_system_icu", true],
 ] : NoParagraphArgs;
 
 const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH ? [
-  ["skia_enable_paragraph", true],
-  ["skia_use_icu", false],
+  ...CommonParagraphArgs,
   ["skia_use_system_icu", false],
-  ["skia_use_harfbuzz", true],
-  ["skia_use_system_harfbuzz", false],
+  ["skia_use_client_icu", false],
 ] : NoParagraphArgs;
 
 const ParagraphOutputs = BUILD_WITH_PARAGRAPH

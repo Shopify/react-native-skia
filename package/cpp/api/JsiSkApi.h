@@ -42,6 +42,7 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
+#include "JsiSkTypeFaceFontProviderFactory.h"
 
 namespace RNSkia {
 
@@ -100,6 +101,8 @@ public:
                             std::make_shared<JsiSkSurfaceFactory>(context));
     installReadonlyProperty("Picture",
                             std::make_shared<JsiSkPictureFactory>(context));
+    installReadonlyProperty("TypeFaceFontProvider",
+                            std::make_shared<JsiSkTypefaceFontProviderFactory>(context));
   }
 };
 } // namespace RNSkia
