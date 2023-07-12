@@ -30,19 +30,27 @@ const NdkDir: string = process.env.ANDROID_NDK ?? "";
 //    Line 66-67, uncomment
 // 6) Workflow-copy-libs.ts:
 //    27-28 and 36-37, uncomment
-export const BUILD_WITH_PARAGRAPH = false;
-const ParagraphArgs = BUILD_WITH_PARAGRAPH
-  ? [
-      ["skia_enable_paragraph", true],
-      ["skia_use_icu", true],
-      ["skia_use_system_icu", false],
-      ["skia_use_harfbuzz", true],
-      ["skia_use_system_harfbuzz", false],
-    ]
-  : [
-      ["skia_use_harfbuzz", false],
-      ["skia_use_icu", false],
-    ];
+export const BUILD_WITH_PARAGRAPH = true;
+// For the paragraph API, on Android, we use system ICU, on iOS we don't use ICU
+const NoParagraphArgs = [
+  ["skia_use_harfbuzz", false],
+  ["skia_use_icu", false],
+];
+const ParagraphArgsAndroid = BUILD_WITH_PARAGRAPH ? [
+  ["skia_enable_paragraph", true],
+  ["skia_use_icu", true],
+  ["skia_use_system_icu", false],
+  ["skia_use_harfbuzz", true],
+  ["skia_use_system_harfbuzz", false],
+] : NoParagraphArgs;
+
+const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH ? [
+  ["skia_enable_paragraph", true],
+  ["skia_use_icu", false],
+  ["skia_use_system_icu", false],
+  ["skia_use_harfbuzz", true],
+  ["skia_use_system_harfbuzz", false],
+] : NoParagraphArgs;
 
 const ParagraphOutputs = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode.a"]
@@ -64,7 +72,6 @@ export const commonArgs = [
   ["skia_enable_flutter_defines", true],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
-  ...ParagraphArgs,
 ];
 
 export type PlatformName = "ios" | "android";
@@ -116,6 +123,7 @@ export const configurations: Configuration = {
         "extra_cflags",
         '["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"]',
       ],
+      ...ParagraphArgsIOS,
     ],
     outputRoot: "package/libs/android",
     outputNames: [
@@ -167,6 +175,7 @@ export const configurations: Configuration = {
       ["skia_use_metal", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
+      ...ParagraphArgsIOS
     ],
     outputRoot: "package/libs/ios",
     outputNames: [

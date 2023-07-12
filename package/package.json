@@ -33,6 +33,8 @@
     "libs/ios/libsvg.xcframework",
     "libs/ios/libskottie.xcframework",
     "libs/ios/libsksg.xcframework",
+    "libs/ios/libskparagraph.xcframework",
+    "libs/ios/libskunicode.xcframework",
     "react-native-skia.podspec",
     "scripts/install-npm.js",
     "scripts/setup-canvaskit.js",
