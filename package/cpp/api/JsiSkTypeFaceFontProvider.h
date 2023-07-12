@@ -13,7 +13,7 @@
 
 #include "SkFont.h"
 #include "SkTypeface.h"
-#include "include/TypefaceFontProvider.h"
+#include "skparagraph/include/TypefaceFontProvider.h"
 
 #pragma clang diagnostic pop
 
