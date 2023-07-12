@@ -150,7 +150,7 @@ export const configurations: Configuration = {
       ["skia_use_metal", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
-      ...ParagraphArgsIOS
+      ...ParagraphArgsAndroid
     ],
     outputRoot: "package/libs/ios",
     outputNames: [
