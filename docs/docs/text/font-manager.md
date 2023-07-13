@@ -7,24 +7,64 @@ slug: /text/font-manager
 
 In Skia, the `FontMgr` object manages a collection of font families.
 It allows you to access fonts from the system and manage custom fonts.
-This API will be the primary entry point for upcoming Text APIs.
-You can create two kinds of font managers:
 
-* System Font Manager via `Skia.FontMgr.System()`: Allows you to access system fonts. This font manager is a singleton and is only available on iOS and Android.
-* Custom Font Manager via `Skia.FontMgr.Custom()`: Allows you to create a font manager from your font files.
+## Custom Fonts
 
-We provide you with two helper functions:
-* A `matchFont` function to resolve fonts using StyleSheet attributes from React Native.
-* A `listFontFamilies` function to list the available system font families.
-* A `useFonts` hook to load font files and create a custom font manager from it.
+The `useFonts` hooks allows you to load custom fonts to be used for your Skia drawing.
+The font files should be organized by family names.
+For instance:
 
-It should be noted that Skia handles fonts differently from React Native.
-In React Native, a key maps to a font file.
-However, in Skia, when providing a font file, the font manager analyzes the font metadata and uses it to match fonts accordingly.
+```tsx twoslash
+import {useFonts} from "@shopify/react-native-skia";
 
-## listFontFamilies
+const fontMgr = useFonts({
+  Roboto: [
+    require("./Roboto-Medium.ttf"),
+    require("./Roboto-Regular.ttf"),
+    require("./Roboto-Bold.ttf"),
+  ],
+  UberMove: [require("./UberMove-Medium_mono.ttf")],
+});
+// Returns null until all fonts are loaded
+if (!fontMgr) {
+  return null;
+}
+// Now the fonts are available
+```
 
-The `listFontFamilies` function returns the list of available system font families.
+Once the fonts are loaded, we provide a `matchFont` function that given a font style will return a font object that you can use directly.
+
+```tsx twoslash
+import {useFonts, Text, matchFont} from "@shopify/react-native-skia";
+
+const Demo = () => {
+  const fontMgr = useFonts({
+    Roboto: [
+      require("./Roboto-Medium.ttf"),
+      require("./Roboto-Regular.ttf"),
+      require("./Roboto-Bold.ttf"),
+    ],
+    UberMove: [require("./UberMove-Medium_mono.ttf")],
+  });
+  if (!fontMgr) {
+    return null;
+  }
+  const fontStyle = {
+    fontFamily: "Roboto",
+    fontWeight: "bold",
+    fontSize: 16
+  };
+  const font = matchFont(fontStyle, fontMgr);
+  return (
+    <Text text="Hello World" y={32} x={32} font={font} />
+  );
+};
+```
+
+## System Fonts
+
+System fonts are available via `Skia.FontMgr.System()`.
+You can list system fonts via  `listFontFamilies` function returns the list of available system font families.
 By default the function will list system fonts but you can pass an optional `fontMgr` object as parameter.
 
 ```jsx twoslash
@@ -43,11 +83,7 @@ or on iOS:
 ["Academy Engraved LET", "Al Nile", "American Typewriter", "Apple Color Emoji", ...]
 ```
 
-## matchFont
-
-The `matchFont` function matches a font based on attributes from the React Native `StyleSheet`. 
-
-Here is its usage:
+By default matchFont, will match fonts from the system font manager:
 
 ```jsx twoslash
 import {Platform} from "react-native";
@@ -87,50 +123,15 @@ The `fontStyle` object can have the following list of optional attributes:
 By default, `matchFont` uses the system font manager to match the font style. However, if you want to use your custom font manager, you can pass it as the second parameter to the `matchFont` function:
 
 ```jsx
-const customFontMgr = useFontMgr([
+const fontMgr = useFonts([
   require("../../Tests/assets/Roboto-Medium.ttf"),
   require("../../Tests/assets/Roboto-Bold.ttf"),
 ]);
 
-const font = matchFont(fontStyle, customFontMgr);
+const font = matchFont(fontStyle, fontMgr);
 ```
 
-## Custom Font Manager
-
-We offer a `useFontMgr` hook to load a collection of font files and create a custom font manager from it.
-
-```jsx twoslash
-import {Platform} from "react-native";
-import {Canvas, Text, matchFont, Fill, useFontMgr, Skia} from "@shopify/react-native-skia";
- 
-
-export const HelloWorld = () => {
-  const customFontMgr = useFontMgr([
-    require("../../Tests/assets/Roboto-Medium.ttf"),
-    require("../../Tests/assets/Roboto-Bold.ttf"),
-  ]);
-  const fontFamily = "Roboto";
-  const fontStyle = {
-    fontFamily,
-    fontWeight: "bold",
-  };
-  // Here we need to pass customFontMgr as parameter
-  const font = matchFont(fontStyle, customFontMgr);
-  return (
-    <Canvas style={{ flex: 1 }}>
-      <Fill color="white" />
-      <Text
-        x={0}
-        y={fontStyle.fontSize}
-        text="Hello World"
-        font={font}
-      />
-    </Canvas>
-  );
-};
-```
-
-## System Font Manager
+## Low-level API
 
 The basic usage of the system font manager is as follows.
 These are the APIs used behind the scene by the `matchFont` function.
