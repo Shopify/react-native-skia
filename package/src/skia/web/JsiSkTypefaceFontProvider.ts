@@ -14,14 +14,19 @@ export class JsiSkTypefaceFontProvider
   constructor(CanvasKit: CanvasKit, ref: TypefaceFontProvider) {
     super(CanvasKit, ref, "FontMgr");
   }
+
   matchFamilyStyle(_name: string, _style: FontStyle): SkTypeface {
     throw new Error("Method not implemented.");
   }
-  countFamilies(): number {
-    throw new Error("Method not implemented.");
+  countFamilies() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return this.ref.countFamilies();
   }
-  getFamilyName(_index: number): string {
-    throw new Error("Method not implemented.");
+  getFamilyName(index: number) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return this.ref.getFamilyName(index);
   }
   registerFont(typeface: SkTypeface, familyName: string) {
     const strLen = lengthBytesUTF8(familyName) + 1;

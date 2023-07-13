@@ -3,35 +3,30 @@ import { surface, testingFonts } from "../setup";
 import { FontStyle } from "../../../skia/types";
 
 describe("FontMgr", () => {
-  itRunsE2eOnly(
-    "Custom font manager should work on every platform",
-    async () => {
-      const names = await surface.eval(
-        (Skia, { fonts }) => {
-          const fontMgr = Skia.TypefaceFontProvider.Make();
-          (Object.keys(fonts) as (keyof typeof fonts)[]).flatMap(
-            (familyName) => {
-              const typefaces = fonts[familyName];
-              typefaces.forEach((typeface) => {
-                const data = Skia.Data.fromBytes(new Uint8Array(typeface));
-                fontMgr.registerFont(
-                  Skia.Typeface.MakeFreeTypeFaceFromData(data)!,
-                  familyName
-                );
-              });
-            }
-          );
-          return new Array(fontMgr.countFamilies())
-            .fill(0)
-            .map((_, i) => fontMgr.getFamilyName(i));
-        },
-        { fonts: testingFonts }
-      );
-      expect(names.length).toBeGreaterThan(0);
-      expect(names.indexOf("Helvetica")).toBe(-1);
-      expect(names.indexOf("Roboto")).not.toBe(-1);
-    }
-  );
+  it("Custom font manager should work on every platform", async () => {
+    const names = await surface.eval(
+      (Skia, { fonts }) => {
+        const fontMgr = Skia.TypefaceFontProvider.Make();
+        (Object.keys(fonts) as (keyof typeof fonts)[]).flatMap((familyName) => {
+          const typefaces = fonts[familyName];
+          typefaces.forEach((typeface) => {
+            const data = Skia.Data.fromBytes(new Uint8Array(typeface));
+            fontMgr.registerFont(
+              Skia.Typeface.MakeFreeTypeFaceFromData(data)!,
+              familyName
+            );
+          });
+        });
+        return new Array(fontMgr.countFamilies())
+          .fill(0)
+          .map((_, i) => fontMgr.getFamilyName(i));
+      },
+      { fonts: testingFonts }
+    );
+    expect(names.length).toBeGreaterThan(0);
+    expect(names.indexOf("Helvetica")).toBe(-1);
+    expect(names.indexOf("Roboto")).not.toBe(-1);
+  });
   itRunsE2eOnly("system font managers have at least one font", async () => {
     const names = await surface.eval((Skia) => {
       const fontMgr = Skia.FontMgr.System();
