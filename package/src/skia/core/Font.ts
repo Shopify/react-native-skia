@@ -5,9 +5,9 @@ import { Skia } from "../Skia";
 import { FontSlant } from "../types";
 import type { DataModule, DataSourceParam, SkFontMgr } from "../types";
 import { Platform } from "../../Platform";
+import type { SkTypefaceFontProvider } from "../types/Paragraph/TypefaceFontProvider";
 
 import { useTypeface } from "./Typeface";
-import { SkTypefaceFontProvider } from "../types/Paragraph/TypefaceFontProvider";
 
 /**
  * Returns a Skia Font object
@@ -119,7 +119,7 @@ const loadTypefaces = (typefacesToLoad: Record<string, DataModule[]>) => {
 
 export const useFonts = (sources: Record<string, DataModule[]>) => {
   const [fontMgr, setFontMgr] = useState<null | SkTypefaceFontProvider>(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     loadTypefaces(sources).then((result) => {
       const fMgr = Skia.TypefaceFontProvider.Make();
@@ -128,7 +128,7 @@ export const useFonts = (sources: Record<string, DataModule[]>) => {
       });
       setFontMgr(fMgr);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return fontMgr;
 };

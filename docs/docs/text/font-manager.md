@@ -140,10 +140,19 @@ These are the APIs used behind the scene by the `matchFont` function.
 import {Platform} from "react-native";
 import {Skia, FontStyle} from "@shopify/react-native-skia";
  
+const customTypeFace = Skia.Typeface.MakeFreeTypeFaceFromData(data);
+
 const familyName = Platform.select({ ios: "Helvetica", default: "serif" });
 const fontSize = 32;
 // Get the system font manager
 const fontMgr = Skia.FontMgr.System();
+// The custom font manager is available via Skia.TypefaceFontProvider.Make()
+const customFontMgr = Skia.TypefaceFontProvider.Make();
+// typeface needs to be loaded via Skia.Data and instanciated via
+// Skia.Typeface.MakeFreeTypeFaceFromData()
+// customFontMgr.registerTypeface(customTypeFace, "Roboto");
+
+// Matching a font
 const typeface =  fontMgr.matchFamilyStyle(familyName, FontStyle.Bold);
 const font = Skia.Font(typeface, fontSize);
 ```

@@ -94,18 +94,23 @@ export const wait = (ms: number) =>
 export const resolveFile = (uri: string) =>
   fs.readFileSync(path.resolve(__dirname, `../../${uri}`));
 
+export const resolveFont = (uri: string) =>
+  Array.from(fs.readFileSync(path.resolve(__dirname, `../../${uri}`)));
+
 (global as any).fetch = jest.fn((uri: string) =>
   Promise.resolve({
     arrayBuffer: () => Promise.resolve(resolveFile(uri)),
   })
 );
 
-export const testingFonts = [
-  resolveFile("skia/__tests__/assets/NotoSansSC-Regular.otf").buffer,
-  resolveFile("skia/__tests__/assets/Roboto-Regular.ttf").buffer,
-  resolveFile("skia/__tests__/assets/Roboto-BlackItalic.ttf").buffer,
-  resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf").buffer,
-];
+export const testingFonts = {
+  //  Noto: [resolveFont("skia/__tests__/assets/NotoSansSC-Regular.otf")],
+  Roboto: [
+    resolveFont("skia/__tests__/assets/Roboto-Regular.ttf"),
+    resolveFont("skia/__tests__/assets/Roboto-BlackItalic.ttf"),
+  ],
+  //  NotoColorEmoji: [resolveFont("skia/__tests__/assets/NotoColorEmoji.ttf")],
+};
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmptyProps {}
