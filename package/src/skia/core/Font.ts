@@ -1,5 +1,5 @@
 /*global SkiaApi*/
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Skia } from "../Skia";
 import { FontSlant } from "../types";
@@ -7,6 +7,7 @@ import type { DataModule, DataSourceParam, SkFontMgr } from "../types";
 import { Platform } from "../../Platform";
 
 import { useTypeface } from "./Typeface";
+import { SkTypefaceFontProvider } from "../types/Paragraph/TypefaceFontProvider";
 
 /**
  * Returns a Skia Font object
@@ -117,16 +118,17 @@ const loadTypefaces = (typefacesToLoad: Record<string, DataModule[]>) => {
 };
 
 export const useFonts = (sources: Record<string, DataModule[]>) => {
+  const [fontMgr, setFontMgr] = useState<null | SkTypefaceFontProvider>(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fontMgr = useMemo(() => Skia.TypefaceFontProvider.Make(), [sources]);
   useEffect(() => {
     loadTypefaces(sources).then((result) => {
+      const fMgr = Skia.TypefaceFontProvider.Make();
       result.forEach(([familyName, typeface]) => {
-        console.log(familyName)
-        fontMgr.registerFont(typeface, familyName);
+        fMgr.registerFont(typeface, familyName);
       });
+      setFontMgr(fMgr);
     });
-  }, [fontMgr, sources]);
+  }, []);
 
   return fontMgr;
 };
