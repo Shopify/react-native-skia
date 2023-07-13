@@ -1,8 +1,10 @@
 /*global SkiaApi*/
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { Skia } from "../Skia";
-import type { DataSourceParam } from "../types";
+import { FontSlant } from "../types";
+import type { DataModule, DataSourceParam, SkFontMgr } from "../types";
+import { Platform } from "../../Platform";
 
 import { useTypeface } from "./Typeface";
 
@@ -24,4 +26,107 @@ export const useFont = (
       return null;
     }
   }, [size, typeface]);
+};
+
+type Slant = "normal" | "italic" | "oblique";
+type Weight =
+  | "normal"
+  | "bold"
+  | "100"
+  | "200"
+  | "300"
+  | "400"
+  | "500"
+  | "600"
+  | "700"
+  | "800"
+  | "900";
+
+interface RNFontStyle {
+  fontFamily: string;
+  fontSize: number;
+  fontStyle: Slant;
+  fontWeight: Weight;
+}
+
+const defaultFontStyle: RNFontStyle = {
+  fontFamily: "System",
+  fontSize: 14,
+  fontStyle: "normal",
+  fontWeight: "normal",
+};
+
+const slant = (s: Slant) => {
+  if (s === "italic") {
+    return FontSlant.Italic;
+  } else if (s === "oblique") {
+    return FontSlant.Oblique;
+  } else {
+    return FontSlant.Upright;
+  }
+};
+
+const weight = (fontWeight: Weight) => {
+  switch (fontWeight) {
+    case "normal":
+      return 400;
+    case "bold":
+      return 700;
+    default:
+      return parseInt(fontWeight, 10);
+  }
+};
+
+export const matchFont = (
+  inputStyle: Partial<RNFontStyle> = {},
+  fontMgr: SkFontMgr = Skia.FontMgr.System()
+) => {
+  const fontStyle = {
+    ...defaultFontStyle,
+    ...inputStyle,
+  };
+  const style = {
+    weight: weight(fontStyle.fontWeight),
+    width: 5,
+    slant: slant(fontStyle.fontStyle),
+  };
+  const typeface = fontMgr.matchFamilyStyle(fontStyle.fontFamily, style);
+  return Skia.Font(typeface, fontStyle.fontSize);
+};
+
+export const listFontFamilies = (fontMgr: SkFontMgr = Skia.FontMgr.System()) =>
+  new Array(fontMgr.countFamilies())
+    .fill(0)
+    .map((_, i) => fontMgr.getFamilyName(i));
+
+const loadTypefaces = (typefacesToLoad: Record<string, DataModule[]>) => {
+  const promises = Object.keys(typefacesToLoad).flatMap((familyName) => {
+    return typefacesToLoad[familyName].map((typefaceToLoad) => {
+      return Skia.Data.fromURI(Platform.resolveAsset(typefaceToLoad)).then(
+        (data) => {
+          const tf = Skia.Typeface.MakeFreeTypeFaceFromData(data);
+          if (tf === null) {
+            throw new Error(`Couldn't create typeface for ${familyName}`);
+          }
+          return [familyName, tf] as const;
+        }
+      );
+    });
+  });
+  return Promise.all(promises);
+};
+
+export const useFonts = (sources: Record<string, DataModule[]>) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fontMgr = useMemo(() => Skia.TypefaceFontProvider.Make(), [sources]);
+  useEffect(() => {
+    loadTypefaces(sources).then((result) => {
+      result.forEach(([familyName, typeface]) => {
+        console.log(familyName)
+        fontMgr.registerFont(typeface, familyName);
+      });
+    });
+  }, [fontMgr, sources]);
+
+  return fontMgr;
 };

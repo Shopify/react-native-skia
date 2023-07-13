@@ -1,5 +1,5 @@
 import type { SkFontMgr } from "./FontMgr";
 
-export interface SkFontMgrFactory {
+export interface FontMgrFactory {
   System(): SkFontMgr;
 }

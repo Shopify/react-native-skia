@@ -27,11 +27,15 @@ namespace para = skia::textlayout;
 class JsiSkTypefaceFontProvider
     : public JsiSkWrappingSkPtrHostObject<para::TypefaceFontProvider> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkTypefaceFontProvider, "TypefaceFontProvider")
+  EXPORT_JSI_API_TYPENAME(JsiSkTypefaceFontProvider, "FontMgr")
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, dispose),
                        JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, registerFont),
                        JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider,
-                                       matchFamilyStyle))
+                                       matchFamilyStyle),
+                       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider,
+                                       countFamilies),
+                       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider,
+                                       getFamilyName))
 
   JSI_HOST_FUNCTION(registerFont) {
     sk_sp<SkTypeface> typeface =
@@ -47,6 +51,15 @@ public:
     auto typeface = getObject()->matchFamilyStyle(name.c_str(), *fontStyle);
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
+  }
+
+   JSI_HOST_FUNCTION(countFamilies) { return getObject()->countFamilies(); }
+
+  JSI_HOST_FUNCTION(getFamilyName) {
+    auto i = static_cast<int>(arguments[0].asNumber());
+    SkString name;
+    getObject()->getFamilyName(i, &name);
+    return jsi::String::createFromUtf8(runtime, name.c_str());
   }
 
   JsiSkTypefaceFontProvider(std::shared_ptr<RNSkPlatformContext> context,

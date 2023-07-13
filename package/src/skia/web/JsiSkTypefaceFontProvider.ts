@@ -1,16 +1,25 @@
 import type { CanvasKit, TypefaceFontProvider } from "canvaskit-wasm";
 
 import type { SkTypefaceFontProvider } from "../types/Paragraph/TypefaceFontProvider";
-import type { SkTypeface } from "../types";
+import type { FontStyle, SkTypeface } from "../types";
 
 import { HostObject } from "./Host";
 
 export class JsiSkTypefaceFontProvider
-  extends HostObject<TypefaceFontProvider, "TypefaceFontProvider">
+  extends HostObject<TypefaceFontProvider, "FontMgr">
   implements SkTypefaceFontProvider
 {
   constructor(CanvasKit: CanvasKit, ref: TypefaceFontProvider) {
-    super(CanvasKit, ref, "TypefaceFontProvider");
+    super(CanvasKit, ref, "FontMgr");
+  }
+  matchFamilyStyle(_name: string, _style: FontStyle): SkTypeface {
+    throw new Error("Method not implemented.");
+  }
+  countFamilies(): number {
+    throw new Error("Method not implemented.");
+  }
+  getFamilyName(_index: number): string {
+    throw new Error("Method not implemented.");
   }
   registerFont(typeface: SkTypeface, familyName: string) {
     //https://emscripten.org/docs/api_reference/preamble.js.html#stringToUTF8

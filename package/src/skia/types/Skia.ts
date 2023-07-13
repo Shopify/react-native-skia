@@ -1,7 +1,7 @@
 import type { ImageFilterFactory } from "./ImageFilter";
 import type { PathFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
-import type { SkFont } from "./Font";
+import type { SkFont, FontMgrFactory } from "./Font";
 import type { SkTypeface, TypefaceFactory } from "./Typeface";
 import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
@@ -28,7 +28,6 @@ import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
 import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProviderFactory";
-
 /**
  * Declares the interface for the native Skia API
  */
@@ -53,6 +52,7 @@ export interface Skia {
   Font: (typeface?: SkTypeface, size?: number) => SkFont;
   Typeface: TypefaceFactory;
   TypefaceFontProvider: TypefaceFontProviderFactory;
+  FontMgr: FontMgrFactory;
   MaskFilter: MaskFilterFactory;
   RuntimeEffect: RuntimeEffectFactory;
   ImageFilter: ImageFilterFactory;

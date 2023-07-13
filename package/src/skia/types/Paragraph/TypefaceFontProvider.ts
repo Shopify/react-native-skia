@@ -1,8 +1,7 @@
-import type { SkJSIInstance } from "../JsiInstance";
+import type { SkFontMgr } from "../Font";
 import type { SkTypeface } from "../Typeface";
 
-export interface SkTypefaceFontProvider
-  extends SkJSIInstance<"TypefaceFontProvider"> {
+export interface SkTypefaceFontProvider extends SkFontMgr {
   /**
    * Registers a given typeface with the given family name.
    * @param typeface - Typeface.

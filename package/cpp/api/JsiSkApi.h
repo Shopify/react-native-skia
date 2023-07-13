@@ -106,7 +106,7 @@ public:
     installReadonlyProperty("FontMgr",
                             std::make_shared<JsiSkFontMgrFactory>(context));
     installReadonlyProperty(
-        "TypeFaceFontProvider",
+        "TypefaceFontProvider",
         std::make_shared<JsiSkTypefaceFontProviderFactory>(context));
   }
 };
