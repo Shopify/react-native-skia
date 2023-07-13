@@ -1,6 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { SkData, FontMgrFactory } from "../types";
+import type { FontMgrFactory } from "../types";
 
 import { Host } from "./Host";
 import { JsiSkFontMgr } from "./JsiSkFontMgr";
