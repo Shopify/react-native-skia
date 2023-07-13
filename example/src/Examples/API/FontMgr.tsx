@@ -11,14 +11,9 @@ import {
 const PADDING = 16;
 
 const titleFontSize = 32;
-const titleFont = matchFont({
-  fontFamily: "Helvetica",
-  fontSize: titleFontSize,
-  fontWeight: "bold",
-});
+
 const titleText = "Fonts from the System";
 const titleY = titleFontSize + PADDING;
-const subtitleFont = matchFont();
 const subtitleY = titleY + 14 + PADDING;
 
 const fontMgr = Skia.FontMgr.System();
@@ -43,6 +38,12 @@ export const FontMgr = () => {
   const customfamilyNames = new Array(customFontMgr.countFamilies())
     .fill(0)
     .map((_, i) => customFontMgr.getFamilyName(i));
+  const titleFont = matchFont({
+    fontFamily: "Helvetica",
+    fontSize: titleFontSize,
+    fontWeight: "bold",
+  });
+  const subtitleFont = matchFont();
   return (
     <ScrollView>
       <Canvas style={{ width: width, height: 1800 }}>
