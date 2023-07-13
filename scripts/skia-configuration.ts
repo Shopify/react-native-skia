@@ -90,7 +90,6 @@ export const configurations: Configuration = {
     args: [
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
-      ["skia_use_runtime_icu", true],
       ["skia_use_gl", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
@@ -98,7 +97,7 @@ export const configurations: Configuration = {
         "extra_cflags",
         '["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"]',
       ],
-      ...ParagraphArgsIOS,
+      ...ParagraphArgsAndroid,
     ],
     outputRoot: "package/libs/android",
     outputNames: [
@@ -150,7 +149,7 @@ export const configurations: Configuration = {
       ["skia_use_metal", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
-      ...ParagraphArgsAndroid
+      ...ParagraphArgsIOS
     ],
     outputRoot: "package/libs/ios",
     outputNames: [
