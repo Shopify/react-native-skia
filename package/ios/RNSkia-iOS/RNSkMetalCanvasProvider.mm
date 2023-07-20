@@ -36,7 +36,7 @@ RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
 
   auto device = MTLCreateSystemDefaultDevice();
 
-  _layer.framebufferOnly = NO;
+  _layer.framebufferOnly = YES;
   _layer.device = device;
   _layer.opaque = false;
   _layer.contentsScale = _context->getPixelDensity();
