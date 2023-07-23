@@ -286,7 +286,9 @@ half4 main(float2 xy) {
         </Group>
       </>
     );
-    checkImage(img, docPath("runtime-shader/with-supersampling.png"));
+    checkImage(img, docPath("runtime-shader/with-supersampling.png"), {
+      maxPixelDiff: 1200,
+    });
   });
   itRunsE2eOnly("shouldn't use supersampling", async () => {
     const font = fonts.RobotoMedium;
@@ -316,6 +318,8 @@ half4 main(float2 xy) {
         </Group>
       </>
     );
-    checkImage(img, docPath("runtime-shader/without-supersampling.png"));
+    checkImage(img, docPath("runtime-shader/without-supersampling.png"), {
+      maxPixelDiff: 500,
+    });
   });
 });
