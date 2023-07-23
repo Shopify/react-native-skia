@@ -57,33 +57,73 @@ export const RuntimeShaderDemo = () => {
 To keep the output of the image filter crisp, We upscale to filtered drawing to the [pixel density of the app](https://reactnative.dev/docs/pixelratio). Once the drawing is filtered, we scale it back to the original size. This can be seen in the example below. These operations need to be performed on a Skia layer via the `layer` property.
 
 ```tsx twoslash
-import {Canvas, Text, RuntimeShader, Skia, Group, Circle, Paint} from "@shopify/react-native-skia";
+import {Canvas, Text, RuntimeShader, Skia, Group, Circle, Paint, Fill, useFont} from "@shopify/react-native-skia";
 import {PixelRatio} from "react-native";
 
+const pd = PixelRatio.get();
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 
 half4 main(float2 xy) {
+  if (xy.x < 256 * ${pd}/2) {
+    return color;
+  }
   return image.eval(xy).rbga;
 }
 `)!;
 
 export const RuntimeShaderDemo = () => {
   const r = 128;
-  const pd = PixelRatio.get();
+  const font = useFont(require("./SF-Pro.ttf"), 24);
   return (
     <Canvas style={{ flex: 1 }}>
-      <Group transform={[{ scale: 1/ pd }]}>
+      <Group transform={[{ scale: 1 / pd }]}>
         <Group
+          layer={
+            <Paint>
+              <RuntimeShader source={source} />
+            </Paint>
+          }
           transform={[{ scale: pd }]}
-          layer={<Paint>
-            <RuntimeShader source={source} />
-          </Paint>}
         >
-          <Circle cx={r} cy={r} r={r} color="lightblue" />
+          <Fill color="#b7c9e2" />
+          <Text
+            text="Hello World"
+            x={16}
+            y={32}
+            color="#e38ede"
+            font={font}
+          />
         </Group>
       </Group>
     </Canvas>
   );
 };
 ```
+
+<table style={{ width: '100%' }}>
+    <tr>
+      <td><b>With supersampling</b></td>
+      <td><b>Without supersampling</b></td>
+    </tr>
+    <tr>
+        <td style={{ textAlign: 'left', width: '50%' }}>
+          <div style={{ overflow: 'hidden', height: 100 }}>
+          <img
+            alt="Runtime Shader" 
+            src={require("/static/img/runtime-shader/with-supersampling.png").default}
+            style={{ width: 512, height: 512 }}
+          />
+          </div>
+        </td>
+        <td style={{ textAlign: 'right', width: '50%' }}>
+          <div style={{ overflow: 'hidden', height: 100 }}>
+          <img
+            alt="Runtime Shader"
+            src={require("/static/img/runtime-shader/without-supersampling.png").default}
+            style={{ width: 512, height: 512 }}
+          />
+          </div>
+        </td>
+    </tr>
+</table>
