@@ -1,9 +1,16 @@
 /* eslint-disable max-len */
 import React from "react";
 
-import { surface, importSkia } from "../setup";
-import { Circle, Fill, Group, Paint, RuntimeShader } from "../../components";
-import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+import { surface, importSkia, fonts } from "../setup";
+import {
+  Circle,
+  Fill,
+  Group,
+  Paint,
+  RuntimeShader,
+  Text,
+} from "../../components";
+import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
 
 const spiral = `
 uniform float scale;
@@ -242,4 +249,73 @@ half4 main(float2 xy) {
       });
     }
   );
+  itRunsE2eOnly("should use supersampling", async () => {
+    const font = fonts.RobotoMedium;
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(`
+uniform shader image;
+
+half4 main(float2 xy) {
+  vec4 color =  image.eval(xy);
+  if (xy.x < 256 * 3/2) {
+    return color;
+  }
+  return color.rbga;
+}
+`)!;
+    const img = await surface.draw(
+      <>
+        <Group transform={[{ scale: 1 / 3 }]}>
+          <Group
+            layer={
+              <Paint>
+                <RuntimeShader source={source} />
+              </Paint>
+            }
+            transform={[{ scale: 3 }]}
+          >
+            <Fill color="#B7C9E2" />
+            <Text
+              text="Hello World"
+              x={16}
+              y={32}
+              color="#e38ede"
+              font={font}
+            />
+          </Group>
+        </Group>
+      </>
+    );
+    checkImage(img, docPath("runtime-shader/with-supersampling.png"));
+  });
+  itRunsE2eOnly("shouldn't use supersampling", async () => {
+    const font = fonts.RobotoMedium;
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(`
+uniform shader image;
+
+half4 main(float2 xy) {
+  vec4 color =  image.eval(xy);
+  if (xy.x < 256 / 2) {
+    return color;
+  }
+  return color.rbga;
+}
+`)!;
+    const img = await surface.draw(
+      <>
+        <Group
+          layer={
+            <Paint>
+              <RuntimeShader source={source} />
+            </Paint>
+          }
+        >
+          <Fill color="#B7C9E2" />
+          <Text text="Hello World" x={16} y={32} color="#e38ede" font={font} />
+        </Group>
+      </>
+    );
+    checkImage(img, docPath("runtime-shader/without-supersampling.png"));
+  });
 });
