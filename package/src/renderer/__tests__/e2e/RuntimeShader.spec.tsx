@@ -62,7 +62,7 @@ half4 main(float2 xy) {
                   uniforms={{
                     scale: 0.3,
                     center: { x: (width * 3) / 2, y: (height * 3) / 2 },
-                    colors: [Skia.Color("red"), Skia.Color("rgb(0, 255, 0)")],
+                    colors: [Skia.Color("red"), Skia.Color("green")],
                   }}
                 />
               </Paint>
@@ -74,7 +74,7 @@ half4 main(float2 xy) {
         </Group>
       </>
     );
-    checkImage(img, "snapshots/runtime-shader/spiral.png");
+    checkImage(img, "snapshots/runtime-shader/spiral.png", { overwrite: true });
   });
   itRunsE2eOnly(
     "should be the reference result for the next test (1)",
@@ -237,9 +237,7 @@ half4 main(float2 xy) {
       const img = Skia.Image.MakeImageFromEncoded(data)!;
       expect(data).toBeDefined();
 
-      checkImage(img, "snapshots/runtime-shader/scaled-circle2.png", {
-        overwrite: true,
-      });
+      checkImage(img, "snapshots/runtime-shader/scaled-circle2.png");
     }
   );
 });

@@ -4,7 +4,6 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
-
 #pragma clang diagnostic push
 
 #define STENCIL_BUFFER_SIZE 8

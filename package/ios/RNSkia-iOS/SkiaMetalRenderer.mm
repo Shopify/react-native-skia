@@ -5,9 +5,9 @@
 #import "SkColorSpace.h"
 #import "SkSurface.h"
 
-#import <include/gpu/ganesh/SkSurfaceGanesh.h>
-#import <include/gpu/GrDirectContext.h>
 #import <include/gpu/GrBackendSurface.h>
+#import <include/gpu/GrDirectContext.h>
+#import <include/gpu/ganesh/SkSurfaceGanesh.h>
 
 #pragma clang diagnostic pop
 
