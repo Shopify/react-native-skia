@@ -37,6 +37,7 @@ build/
 local.properties
 *.iml
 .cxx
+*.settings**
 
 # Externals
 libs
