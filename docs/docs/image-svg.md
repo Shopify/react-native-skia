@@ -17,6 +17,13 @@ If the root dimensions are in absolute units, the width/height properties have n
 | x?    | `number`  | Optional displayed x coordinate of the svg container.  |
 | y?   | `number`  | Optional displayed y coordinate of the svg container.                            |
 
+:::info
+
+The `ImageSVG` component doesn't follow the same painting rules as other components.
+[see applying effects](#applying-effects).
+
+:::
+
 ### Example
 
 ```tsx twoslash
@@ -105,17 +112,48 @@ export const SVG = () => {
 };
 ```
 
-### Result
-
 <img src={require("/static/img/svg.png").default} width="256" height="256" />
 
-## Applying Filters
+## Applying Effects
 
 The `ImageSVG` component doesn't follow the same painting rules as other components.
 This is because behind the scene, we use the SVG module from Skia.
-However you can apply image filters using the `layer` property.
+However you can apply effets using the `layer` property.
 
-### Example
+### Opacity Example
+
+In the example below we apply an opacity effect via the `ColorMatrix` component.
+
+```tsx twoslash
+import React from "react";
+import { Canvas, ImageSVG, Skia, rect, fitbox, useSVG, Group, Paint, OpacityMatrix, ColorMatrix } from "@shopify/react-native-skia";
+
+const width = 256;
+const height = 256;
+
+export const SVG = () => {
+  const tiger = useSVG(require("./tiger.svg"));
+  if (!tiger) {
+    return null;
+  }
+  const src = rect(0, 0, tiger.width(), tiger.height());
+  const dst = rect(0, 0, width, height);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group
+        transform={fitbox("contain", src, dst)}
+        layer={<Paint><ColorMatrix matrix={OpacityMatrix(0.5)} /></Paint>}
+      >
+        <ImageSVG svg={tiger} x={0} y={0} width={800} height={800} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+<img src={require("/static/img/opacity-tiger.png").default} width="256" height="256" />
+
+### Blur Example
 
 In the example below we apply a blur image filter to the SVG.
 
