@@ -112,8 +112,6 @@ export const SVG = () => {
 };
 ```
 
-### Result
-
 <img src={require("/static/img/svg.png").default} width="256" height="256" />
 
 ## Applying Effects
@@ -128,7 +126,7 @@ In the example below we apply an opacity effect via the `ColorMatrix` component.
 
 ```tsx twoslash
 import React from "react";
-import { Canvas, ImageSVG, Skia, rect, fitbox, useSVG, Group, Paint, OpacityMatrix } from "@shopify/react-native-skia";
+import { Canvas, ImageSVG, Skia, rect, fitbox, useSVG, Group, Paint, OpacityMatrix, ColorMatrix } from "@shopify/react-native-skia";
 
 const width = 256;
 const height = 256;
@@ -153,9 +151,8 @@ export const SVG = () => {
 };
 ```
 
-### Result
-
 <img src={require("/static/img/opacity-tiger.png").default} width="256" height="256" />
+
 ### Blur Example
 
 In the example below we apply a blur image filter to the SVG.
