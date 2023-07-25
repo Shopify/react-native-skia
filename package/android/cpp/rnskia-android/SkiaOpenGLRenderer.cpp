@@ -61,7 +61,6 @@ sk_sp<SkSurface> SkiaOpenGLRenderer::MakeOffscreenGLSurface(int width,
 
   auto ctx = new OffscreenRenderContext(
       {context.glDisplay, eglOffscreenSurface, context.glContext,
-
        GrBackendRenderTarget(width, height, samples, stencil, fbInfo)});
 
   auto surface = SkSurface::MakeFromBackendRenderTarget(
