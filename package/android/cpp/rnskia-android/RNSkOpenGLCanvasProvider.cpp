@@ -26,7 +26,7 @@ float RNSkOpenGLCanvasProvider::getScaledHeight() { return _height; }
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
   if (_renderer != nullptr) {
-    return _renderer->run(cb, _width, _height);
+    return _renderer->render(cb, _width, _height);
   }
   return false;
 }
@@ -46,8 +46,8 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width,
 }
 void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   if (_renderer != nullptr) {
-    // teardown
-    _renderer->teardown();
+    // destroy the renderer (a unique pointer so the dtor will be called
+    // immediately.)
     _renderer = nullptr;
   }
 }

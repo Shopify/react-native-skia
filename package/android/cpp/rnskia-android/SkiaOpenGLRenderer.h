@@ -30,16 +30,12 @@
 namespace RNSkia {
 
 static EGLContext sharedEglContext = EGL_NO_CONTEXT;
+
 /**
  * To be able to use static contexts (and avoid reloading the skia context for
  * each new view, we track the OpenGL and Skia drawing context per thread.
  */
 static thread_local SkiaOpenGLHelper::ThreadRenderContext ThreadContext;
-
-enum RenderState : int {
-  Rendering,
-  Done,
-};
 
 class SkiaOpenGLRenderer {
 public:
@@ -47,26 +43,15 @@ public:
   ~SkiaOpenGLRenderer();
 
   /**
-   * Initializes, renders and tears down the render pipeline depending on the
-   * state of the renderer. All OpenGL/Skia context operations are done on a
-   * separate thread which must be the same for all calls to the render method.
+   * Initializes and ensures a canvas that will be passed to the callback
+   * to perform drawing operations on. After the callback is called the
+   * drawing will be rendered to the underlying graphic context.
    *
    * @param callback Render callback
    * @param width Width of surface to render if there is a picture
    * @param height Height of surface to render if there is a picture
    */
-  bool run(const std::function<void(SkCanvas *)> &cb, int width, int height);
-
-  /**
-   * Sets the state to finishing. Next time the renderer will be called it
-   * will tear down and release its resources. It is important that this
-   * is done on the same thread as the other OpenGL context stuff is handled.
-   *
-   * Teardown can be called fom whatever thread we want - but we must ensure
-   * that at least one call to render on the render thread is done after calling
-   * teardown.
-   */
-  void teardown();
+  bool render(const std::function<void(SkCanvas *)> &cb, int width, int height);
 
   /**
    * Creates an offscreen GPU / OpenGL surface
@@ -77,10 +62,13 @@ public:
   static sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height);
 
 private:
+  /*
+   * Ensures that a valid OpenGL and Skia context is available. Used by the
+   * render method to initialize on the same thread as we render.
+   */
   bool ensureContextInitialized();
 
   ANativeWindow *_nativeWindow = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
-  std::atomic<RenderState> _renderState = {RenderState::Rendering};
 };
 } // namespace RNSkia

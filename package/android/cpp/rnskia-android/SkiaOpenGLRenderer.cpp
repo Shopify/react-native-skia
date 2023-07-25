@@ -87,89 +87,7 @@ SkiaOpenGLRenderer::SkiaOpenGLRenderer(jobject surface) {
 }
 
 SkiaOpenGLRenderer::~SkiaOpenGLRenderer() {
-  // Release surface
-  ANativeWindow_release(_nativeWindow);
-  _nativeWindow = nullptr;
-}
-
-bool SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
-                             int width, int height) {
-  switch (_renderState) {
-  case RenderState::Rendering: {
-    // Ensure surface
-    if (!ensureContextInitialized()) {
-      RNSkLogger::logToConsole("Could not initialize render context.");
-      return false;
-    }
-
-    if (cb != nullptr) {
-      if (!eglMakeCurrent(ThreadContext.glDisplay, _glSurface, _glSurface,
-                          ThreadContext.glContext)) {
-        RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
-        return false;
-      }
-
-      // setup surface for fbo0
-      GrGLFramebufferInfo fboInfo;
-      fboInfo.fFBOID = 0;
-      fboInfo.fFormat = 0x8058;
-
-      auto colorType = kN32_SkColorType;
-
-      GLint stencil;
-      glGetIntegerv(GL_STENCIL_BITS, &stencil);
-
-      GLint samples;
-      glGetIntegerv(GL_SAMPLES, &samples);
-
-      auto maxSamples =
-          ThreadContext.skContext->maxSurfaceSampleCountForColorType(colorType);
-
-      if (samples > maxSamples) {
-        samples = maxSamples;
-      }
-
-      GrBackendRenderTarget renderTarget(width, height, samples, stencil,
-                                         fboInfo);
-
-      SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
-
-      sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(
-          ThreadContext.skContext.get(), renderTarget,
-          kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props));
-
-      if (surface == nullptr) {
-        RNSkLogger::logToConsole(
-            "Could not create Skia surface from underlying OpenGL context.");
-        return false;
-      }
-
-      auto canvas = surface->getCanvas();
-
-      // Draw into canvas using callback
-      cb(canvas);
-
-      // Flush (flushing on canvas is deprecated)
-      ThreadContext.skContext->flushAndSubmit();
-
-      if (!eglSwapBuffers(ThreadContext.glDisplay, _glSurface)) {
-        RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
-        return false;
-      }
-
-      return true;
-    }
-
-    return false;
-  }
-  case RenderState::Done: {
-    // Do nothing. We're done.
-    return true;
-  }
-  }
-}
-
-void SkiaOpenGLRenderer::teardown() {
+  // Tear down
   if (_glSurface != EGL_NO_SURFACE) {
     // Clear glSurface
     eglMakeCurrent(ThreadContext.glDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
@@ -179,6 +97,79 @@ void SkiaOpenGLRenderer::teardown() {
     }
     _glSurface = EGL_NO_SURFACE;
   }
+
+  // Release surface
+  ANativeWindow_release(_nativeWindow);
+  _nativeWindow = nullptr;
+}
+
+bool SkiaOpenGLRenderer::render(const std::function<void(SkCanvas *)> &cb,
+                                int width, int height) {
+  // Ensure surface
+  if (!ensureContextInitialized()) {
+    RNSkLogger::logToConsole("Could not initialize render context.");
+    return false;
+  }
+
+  if (cb != nullptr) {
+    if (!eglMakeCurrent(ThreadContext.glDisplay, _glSurface, _glSurface,
+                        ThreadContext.glContext)) {
+      RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+      return false;
+    }
+
+    // setup surface for fbo0
+    GrGLFramebufferInfo fboInfo;
+    fboInfo.fFBOID = 0;
+    fboInfo.fFormat = 0x8058;
+
+    auto colorType = kN32_SkColorType;
+
+    GLint stencil;
+    glGetIntegerv(GL_STENCIL_BITS, &stencil);
+
+    GLint samples;
+    glGetIntegerv(GL_SAMPLES, &samples);
+
+    auto maxSamples =
+        ThreadContext.skContext->maxSurfaceSampleCountForColorType(colorType);
+
+    if (samples > maxSamples) {
+      samples = maxSamples;
+    }
+
+    GrBackendRenderTarget renderTarget(width, height, samples, stencil,
+                                       fboInfo);
+
+    SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
+
+    sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(
+        ThreadContext.skContext.get(), renderTarget,
+        kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props));
+
+    if (surface == nullptr) {
+      RNSkLogger::logToConsole(
+          "Could not create Skia surface from underlying OpenGL context.");
+      return false;
+    }
+
+    auto canvas = surface->getCanvas();
+
+    // Draw into canvas using callback
+    cb(canvas);
+
+    // Flush (flushing on canvas is deprecated)
+    ThreadContext.skContext->flushAndSubmit();
+
+    if (!eglSwapBuffers(ThreadContext.glDisplay, _glSurface)) {
+      RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
+      return false;
+    }
+
+    return true;
+  }
+
+  return false;
 }
 
 bool SkiaOpenGLRenderer::ensureContextInitialized() {
