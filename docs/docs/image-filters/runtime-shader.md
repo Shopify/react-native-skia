@@ -10,7 +10,7 @@ This component receives the currently filtered image as a shader uniform (or the
 
 :::info
 
-Because RuntimeShader relies on texture sampling of the Skia drawing, we recommend to apply a technic known as super sampling. [See below](#supersampling).
+Because RuntimeShader relies on texture sampling of the Skia drawing, we recommend to apply a technique known as super sampling. [See below](#supersampling).
 
 :::
 
@@ -54,7 +54,7 @@ export const RuntimeShaderDemo = () => {
 
 ## Supersampling
 
-To keep the output of the image filter crisp, We upscale to filtered drawing to the [pixel density of the app](https://reactnative.dev/docs/pixelratio). Once the drawing is filtered, we scale it back to the original size. This can be seen in the example below. These operations need to be performed on a Skia layer via the `layer` property.
+To keep the output of the image filter crisp, We upscale the filtered drawing to the [pixel density of the app](https://reactnative.dev/docs/pixelratio). Once the drawing is filtered, we scale it back to the original size. This can be seen in the example below. These operations need to be performed on a Skia layer via the `layer` property.
 
 ```tsx twoslash
 import {Canvas, Text, RuntimeShader, Skia, Group, Circle, Paint, Fill, useFont} from "@shopify/react-native-skia";
