@@ -3,7 +3,7 @@ import type { CanvasKit, TypefaceFontProvider } from "canvaskit-wasm";
 import type { SkTypefaceFontProvider } from "../types/Paragraph/TypefaceFontProvider";
 import type { FontStyle, SkTypeface } from "../types";
 
-import { HostObject } from "./Host";
+import { HostObject, NotImplementedOnRNWeb } from "./Host";
 
 export class JsiSkTypefaceFontProvider
   extends HostObject<TypefaceFontProvider, "FontMgr">
@@ -16,7 +16,7 @@ export class JsiSkTypefaceFontProvider
   }
 
   matchFamilyStyle(_name: string, _style: FontStyle): SkTypeface {
-    throw new Error("Method not implemented.");
+    throw new NotImplementedOnRNWeb();
   }
   countFamilies() {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

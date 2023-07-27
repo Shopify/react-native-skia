@@ -12,6 +12,8 @@
 #include "JsiSkContourMeasureIter.h"
 #include "JsiSkDataFactory.h"
 #include "JsiSkFont.h"
+#include "JsiSkFontMgr.h"
+#include "JsiSkFontMgrFactory.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageFactory.h"
 #include "JsiSkImageFilter.h"
@@ -43,8 +45,6 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
-#include "JsiSkFontMgr.h"
-#include "JsiSkFontMgrFactory.h"
 
 namespace RNSkia {
 
@@ -93,8 +93,8 @@ public:
                             std::make_shared<JsiSkColorFilterFactory>(context));
     installReadonlyProperty("MaskFilter",
                             std::make_shared<JsiSkMaskFilterFactory>(context));
-    installReadonlyProperty("RuntimeEffect",
-							std::make_shared<JsiSkRuntimeEffectFactory>(context));
+    installReadonlyProperty(
+        "RuntimeEffect", std::make_shared<JsiSkRuntimeEffectFactory>(context));
     installReadonlyProperty("Shader",
                             std::make_shared<JsiSkShaderFactory>(context));
     installReadonlyProperty("TextBlob",

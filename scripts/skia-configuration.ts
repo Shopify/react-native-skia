@@ -13,19 +13,20 @@ const NoParagraphArgs = [
 // On iOS: we use neither system nor client ICU
 const CommonParagraphArgs = [
   ["skia_enable_paragraph", true],
-  ["skia_use_icu", true],
   ["skia_use_system_icu", false],
-  ["skia_use_client_icu", false],
   ["skia_use_harfbuzz", true],
   ["skia_use_system_harfbuzz", false],
 ];
 const ParagraphArgsAndroid = BUILD_WITH_PARAGRAPH ? [
   ...CommonParagraphArgs,
+  ["skia_use_icu", true],
   ["skia_use_runtime_icu", true],
 ] : NoParagraphArgs;
 
 const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH ? [
   ...CommonParagraphArgs,
+  ["skia_use_icu", false],
+  ["skia_use_client_icu", true],
 ] : NoParagraphArgs;
 
 const ParagraphOutputs = BUILD_WITH_PARAGRAPH
