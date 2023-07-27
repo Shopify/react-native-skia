@@ -53,7 +53,6 @@ const sidebars = {
         "shapes/ellipses",
         "shapes/vertices",
         "shapes/patch",
-        "shapes/box",
         "shapes/custom-drawing",
       ],
     },
@@ -130,6 +129,11 @@ const sidebars = {
         "animations/animations",
         "animations/touch-events",
       ],
+    },
+    {
+      type: "doc",
+      label: "Tutorials",
+      id: "tutorials",
     },
   ],
 };
