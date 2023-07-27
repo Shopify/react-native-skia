@@ -4,7 +4,16 @@ import React from "react";
 
 import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
 import { importSkia, surface } from "../setup";
-import { Blur, Fill, Group, ImageSVG, Paint, fitbox } from "../../components";
+import {
+  Blur,
+  ColorMatrix,
+  Fill,
+  Group,
+  ImageSVG,
+  OpacityMatrix,
+  Paint,
+  fitbox,
+} from "../../components";
 import type { SkSVG } from "../../../skia/types";
 
 // Because SkSVG doesn't exist on web,
@@ -161,5 +170,29 @@ describe("Displays SVGs", () => {
       </>
     );
     checkImage(image, docPath("blurred-tiger.png"));
+  });
+
+  itRunsE2eOnly("should apply an opacity filter to the svg", async () => {
+    const { rect } = importSkia();
+    const { width, height } = surface;
+
+    const src = rect(0, 0, tiger.width(), tiger.height());
+    const dst = rect(0, 0, width, height);
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group
+          transform={fitbox("contain", src, dst)}
+          layer={
+            <Paint>
+              <ColorMatrix matrix={OpacityMatrix(0.5)} />
+            </Paint>
+          }
+        >
+          <ImageSVG svg={tiger} x={0} y={0} width={800} height={800} />
+        </Group>
+      </>
+    );
+    checkImage(image, docPath("opacity-tiger.png"));
   });
 });

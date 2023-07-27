@@ -136,6 +136,11 @@ const sidebars = {
         "animations/touch-events",
       ],
     },
+    {
+      type: "doc",
+      label: "Tutorials",
+      id: "tutorials",
+    },
   ],
 };
 
