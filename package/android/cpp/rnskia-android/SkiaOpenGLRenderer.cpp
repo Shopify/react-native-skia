@@ -6,80 +6,6 @@
 
 namespace RNSkia {
 
-sk_sp<SkSurface> SkiaOpenGLRenderer::MakeOffscreenGLSurface(int width,
-                                                            int height) {
-
-  SkiaOpenGLHelper::ThreadRenderContext context;
-  SkiaOpenGLHelper::initializeOpenGL(&context, EGL_PBUFFER_BIT,
-                                     sharedEglContext);
-
-  // Create a new pbuffer surface
-  const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, width, EGL_HEIGHT,
-                                            height, EGL_NONE};
-
-  EGLSurface eglOffscreenSurface = eglCreatePbufferSurface(
-      context.glDisplay, context.glConfig, offScreenSurfaceAttribs);
-
-  if (!eglMakeCurrent(context.glDisplay, eglOffscreenSurface,
-                      eglOffscreenSurface, context.glContext)) {
-    RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
-    return nullptr;
-  }
-
-  GLint stencil;
-  glGetIntegerv(GL_STENCIL_BITS, &stencil);
-
-  GLint samples;
-  glGetIntegerv(GL_SAMPLES, &samples);
-
-  // Create the Skia backend context
-  auto backendInterface = GrGLMakeNativeInterface();
-  auto grContext = GrDirectContext::MakeGL(backendInterface);
-  if (grContext == nullptr) {
-    RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
-    return nullptr;
-  }
-  auto maxSamples =
-      grContext->maxSurfaceSampleCountForColorType(kRGBA_8888_SkColorType);
-
-  if (samples > maxSamples)
-    samples = maxSamples;
-
-  GLint buffer;
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
-
-  GrGLFramebufferInfo fbInfo;
-  fbInfo.fFBOID = buffer;
-  fbInfo.fFormat = 0x8058; // GL_RGBA8
-
-  struct OffscreenRenderContext {
-    EGLDisplay display;
-    EGLSurface surface;
-    EGLContext context;
-    GrBackendRenderTarget renderTarget;
-  };
-
-  auto ctx = new OffscreenRenderContext(
-      {context.glDisplay, eglOffscreenSurface, context.glContext,
-       GrBackendRenderTarget(width, height, samples, stencil, fbInfo)});
-
-  auto surface = SkSurface::MakeFromBackendRenderTarget(
-      grContext.get(), ctx->renderTarget, kBottomLeft_GrSurfaceOrigin,
-      kRGBA_8888_SkColorType, nullptr, nullptr,
-      [](void *addr) {
-        auto ctx = reinterpret_cast<OffscreenRenderContext *>(addr);
-        eglMakeCurrent(ctx->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                       EGL_NO_CONTEXT);
-        eglDestroySurface(ctx->display, ctx->surface);
-        eglDestroyContext(ctx->display, ctx->context);
-        eglTerminate(ctx->display);
-        delete ctx;
-      },
-      reinterpret_cast<void *>(ctx));
-
-  return surface;
-}
-
 SkiaOpenGLRenderer::SkiaOpenGLRenderer(jobject surface) {
   _nativeWindow =
       ANativeWindow_fromSurface(facebook::jni::Environment::current(), surface);
@@ -105,7 +31,7 @@ SkiaOpenGLRenderer::~SkiaOpenGLRenderer() {
 bool SkiaOpenGLRenderer::render(const std::function<void(SkCanvas *)> &cb,
                                 int width, int height) {
   // Ensure surface
-  if (!ensureContextInitialized()) {
+  if (!ensureRenderContextInitialized()) {
     RNSkLogger::logToConsole("Could not initialize render context.");
     return false;
   }
@@ -171,11 +97,11 @@ bool SkiaOpenGLRenderer::render(const std::function<void(SkCanvas *)> &cb,
   return false;
 }
 
-bool SkiaOpenGLRenderer::ensureContextInitialized() {
+bool SkiaOpenGLRenderer::ensureRenderContextInitialized() {
   // Check OpenGL is initialized
   if (ThreadContext.glDisplay == EGL_NO_DISPLAY) {
     // Ensure OpenGL context
-    if (!SkiaOpenGLHelper::initializeOpenGL(&ThreadContext, true,
+    if (!SkiaOpenGLHelper::initializeRenderContext(&ThreadContext, false,
                                             sharedEglContext)) {
       RNSkLogger::logToConsole("Failed to initialize Thread OpenGL context.");
       return false;
@@ -208,7 +134,14 @@ bool SkiaOpenGLRenderer::ensureContextInitialized() {
 
   if (ThreadContext.skContext == nullptr) {
     // Now let's create the Skia context
-    return SkiaOpenGLHelper::initializeSkiaContext(&ThreadContext);
+    // Create the Skia Context
+    auto backendInterface = GrGLMakeNativeInterface();
+    ThreadContext.skContext = GrDirectContext::MakeGL(backendInterface);
+
+    if (ThreadContext.skContext == nullptr) {
+      RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
+      return false;
+    }
   }
   return true;
 }

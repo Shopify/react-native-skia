@@ -29,6 +29,10 @@
 
 namespace RNSkia {
 
+/**
+ * The first context created will be considered the parent / shared context and
+ * will be used as the parent / shareable context when creating subsequent contexts.
+ */
 static EGLContext sharedEglContext = EGL_NO_CONTEXT;
 
 /**
@@ -53,20 +57,12 @@ public:
    */
   bool render(const std::function<void(SkCanvas *)> &cb, int width, int height);
 
-  /**
-   * Creates an offscreen GPU / OpenGL surface
-   * @param width
-   * @param height
-   * @return
-   */
-  static sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height);
-
 private:
   /*
    * Ensures that a valid OpenGL and Skia context is available. Used by the
    * render method to initialize on the same thread as we render.
    */
-  bool ensureContextInitialized();
+  bool ensureRenderContextInitialized();
 
   ANativeWindow *_nativeWindow = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
