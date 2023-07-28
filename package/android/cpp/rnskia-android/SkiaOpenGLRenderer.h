@@ -31,7 +31,8 @@ namespace RNSkia {
 
 /**
  * The first context created will be considered the parent / shared context and
- * will be used as the parent / shareable context when creating subsequent contexts.
+ * will be used as the parent / shareable context when creating subsequent
+ * contexts.
  */
 static EGLContext sharedEglContext = EGL_NO_CONTEXT;
 

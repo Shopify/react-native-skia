@@ -102,7 +102,7 @@ bool SkiaOpenGLRenderer::ensureRenderContextInitialized() {
   if (ThreadContext.glDisplay == EGL_NO_DISPLAY) {
     // Ensure OpenGL context
     if (!SkiaOpenGLHelper::initializeRenderContext(&ThreadContext, false,
-                                            sharedEglContext)) {
+                                                   sharedEglContext)) {
       RNSkLogger::logToConsole("Failed to initialize Thread OpenGL context.");
       return false;
     }
