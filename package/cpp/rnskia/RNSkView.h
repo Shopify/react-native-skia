@@ -86,11 +86,11 @@ protected:
   bool _showDebugOverlays;
 };
 
-class RNSkImageCanvasProvider : public RNSkCanvasProvider {
+class RNSkOffscreenCanvasProvider : public RNSkCanvasProvider {
 public:
-  RNSkImageCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
-                          std::function<void()> requestRedraw, float width,
-                          float height)
+  RNSkOffscreenCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
+                              std::function<void()> requestRedraw, float width,
+                              float height)
       : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
     _surface = context->makeOffscreenSurface(_width, _height);
   }
@@ -275,7 +275,7 @@ public:
    */
   sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) {
 
-    auto provider = std::make_shared<RNSkImageCanvasProvider>(
+    auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
         _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight());
 

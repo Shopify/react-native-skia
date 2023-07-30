@@ -3,7 +3,6 @@ package com.shopify.reactnative.skia;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
@@ -13,6 +12,8 @@ import android.view.TextureView;
 
 import com.facebook.jni.annotations.DoNotStrip;
 import com.facebook.react.views.view.ReactViewGroup;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener {
 
@@ -44,7 +45,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
             if (width > 0 && height > 0) {
                 Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Bitmap result = (Bitmap) renderToBitmap((Object) bitmap, width, height);
+                Bitmap result = (Bitmap) renderToBitmap(bitmap, width, height);
 
                 canvas.drawBitmap(
                         result,
@@ -133,31 +134,45 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Log.i("SkiaBaseView", "onSurfaceTextureAvailable");
+        Log.i("SkiaBaseView", "onSurfaceTextureAvailable " + width + "/" + height);
         mSurface = new Surface(surface);
         surfaceAvailable(mSurface, width, height);
+        // Clear rendered bitmap when the surface texture has rendered
+        // We'll post a message to the main loop asking to invalidate
+        postUpdate(new AtomicInteger());
+    }
+
+    /**
+     * This method is a way for us to clear the bitmap rendered on the first frame
+     * after at least 16 frames have passed - to avoid seeing blinks on the screen caused by
+     * TextureView frame sync issues. This is a hack to avoid those pesky blinks. Have no
+     * idea on how to sync the TextureView OpenGL updates.
+     * @param counter
+     */
+    void postUpdate(AtomicInteger counter) {
+        counter.getAndIncrement();
+        if (counter.get() > 16) {
+            invalidate();
+        } else {
+            this.post(() -> {
+                postUpdate(counter);
+            });
+        }
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        Log.i("SkiaBaseView", "onSurfaceTextureSizeChanged");
+        Log.i("SkiaBaseView", "onSurfaceTextureSizeChanged " + width + "/" + height);
         surfaceSizeChanged(width, height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         Log.i("SkiaBaseView", "onSurfaceTextureDestroyed");
-        // Notify the native side
+        // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         surfaceDestroyed();
         mSurface = null;
-        // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
-        // Invoked when the specified SurfaceTexture is about to be destroyed. If returns true,
-        // no rendering should happen inside the surface texture after this method is invoked.
-        // We've measured this and it seems like we need to call release and return true - and
-        // then handle the issue with this being ripped out underneath the native layer in the C++
-        // code.
-        // Return true - we promise that no more rendering will be done now.
-        return true;
+        return false;
     }
 
     @Override

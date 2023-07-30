@@ -69,7 +69,7 @@ protected:
    */
   virtual jobject renderToBitmap(jobject bitmapIn, int width, int height) {
     auto platformContext = getSkiaManager()->getPlatformContext();
-    auto provider = std::make_shared<RNSkImageCanvasProvider>(
+    auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
         platformContext, []() {}, width, height);
 
     // Render into a gpu backed buffer
