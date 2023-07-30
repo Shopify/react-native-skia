@@ -228,7 +228,7 @@ class OffscreenSurfaceFactory : public BaseSkiaSurfaceFactory {
 public:
   OffscreenSurfaceFactory(int width, int height)
       : BaseSkiaSurfaceFactory(SkiaSurfaceType::Offscreen, width, height),
-        _skiaOpenGlContext(new SurfaceFactoryContext()){}
+        _skiaOpenGlContext(new SurfaceFactoryContext()) {}
 
   EGLSurface createOpenGLSurface(SurfaceFactoryContext *context) override {
     const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, _width, EGL_HEIGHT,
