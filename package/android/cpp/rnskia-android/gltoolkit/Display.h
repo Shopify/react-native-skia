@@ -2,11 +2,11 @@
 
 #include <memory>
 
+#include "EGL/egl.h"
+#include "GLES2/gl2.h"
 #include "gltoolkit/Config.h"
 #include "gltoolkit/Context.h"
 #include "gltoolkit/Macros.h"
-#include "EGL/egl.h"
-#include "GLES2/gl2.h"
 
 namespace RNSkia {
 

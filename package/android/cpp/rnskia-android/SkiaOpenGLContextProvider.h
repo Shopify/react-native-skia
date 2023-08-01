@@ -3,9 +3,9 @@
 #include <memory>
 #include <mutex>
 
+#include "gltoolkit/Config.h"
 #include "gltoolkit/Context.h"
 #include "gltoolkit/Display.h"
-#include "gltoolkit/Config.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,15 +28,19 @@ private:
 
   SkiaOpenGLContextProvider();
 
+  std::unique_ptr<Display> display = nullptr;
+
+  std::unique_ptr<Config> uiConfig = nullptr;
+  std::unique_ptr<Context> uiContext = nullptr;
+
+  std::unique_ptr<Config> jsConfig = nullptr;
+  std::unique_ptr<Context> jsContext = nullptr;
+
   sk_sp<GrDirectContext> jsThreadContext = nullptr;
   sk_sp<GrDirectContext> uiThreadContext = nullptr;
 
 public:
   ~SkiaOpenGLContextProvider();
-
-  std::unique_ptr<Display> display = nullptr;
-  std::unique_ptr<Config>  config = nullptr;
-  std::unique_ptr<Context> context = nullptr;
 
   // Delete copy and assignment operations
   SkiaOpenGLContextProvider(SkiaOpenGLContextProvider &other) = delete;
