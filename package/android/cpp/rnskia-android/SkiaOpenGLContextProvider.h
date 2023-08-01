@@ -36,14 +36,15 @@ private:
   GrRecordingContext *_grContext;
   ANativeWindow *_window;
   Display *_display;
+  Context *_rootContext;
   std::unique_ptr<Config> config;
   std::unique_ptr<Context> context;
   std::unique_ptr<Surface> surface;
 
 public:
   OnscreenSurface(GrRecordingContext *grContext, ANativeWindow *window,
-                  Display *display)
-      : _grContext(grContext), _window(window), _display(display) {
+                  Display *display, Context *rootContext)
+      : _grContext(grContext), _window(window), _display(display), _rootContext(rootContext) {
     ConfigDescriptor desc;
     desc.api = API::kOpenGLES2;
     desc.color_format = ColorFormat::kRGBA8888;
@@ -65,7 +66,7 @@ public:
     }
     // Create a new PBuffer surface with desired width and height
     surface = display->CreateWindowSurface(*config, window);
-    context = display->CreateContext(*config, nullptr);
+    context = display->CreateContext(*config, _rootContext);
     if (!context) {
       RNSkLogger::logToConsole("Couldn't create context");
       return;
@@ -79,9 +80,10 @@ public:
   ~OnscreenSurface() { ANativeWindow_release(_window); }
 
   bool beginRender() {
-    // if (!makeCurrent()) {
-    //   return false;
-    // }
+    if (!context->MakeCurrent(*surface)) {
+      RNSkLogger::logToConsole("Couldn't make context current");
+      return false;
+    }
 
     return true;
   }
@@ -100,21 +102,41 @@ public:
       return nullptr;
     }
 
+    GLint buffer;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
+
     GrGLFramebufferInfo info;
-    info.fFBOID = 0;
-    info.fFormat = 0x8058; // GL_RGBA8;
+    info.fFBOID = buffer;
+    info.fFormat = 0x8058; // GL_RGBA8
 
-    auto samples = static_cast<int>(Samples::kFour);
-    int stencilBits = static_cast<int>(StencilBits::kEight);
+    auto colorType = kN32_SkColorType; // native 32-bit RGBA encoding
 
-    GrBackendRenderTarget backendRT(width, height, samples, stencilBits, info);
+    GLint stencil;
+    glGetIntegerv(GL_STENCIL_BITS, &stencil);
+
+    GLint samples;
+    glGetIntegerv(GL_SAMPLES, &samples);
+
+    auto maxSamples =
+        _grContext->maxSurfaceSampleCountForColorType(
+            colorType);
+
+    if (samples > maxSamples) {
+      samples = maxSamples;
+    }
+
+    GrBackendRenderTarget renderTarget(width, height, samples, stencil, info);
+
+    SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
     sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
-        _grContext, backendRT, kBottomLeft_GrSurfaceOrigin,
-        kRGBA_8888_SkColorType, nullptr, nullptr);
+        _grContext, renderTarget,
+        kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props);
 
     if (!surface) {
       RNSkLogger::logToConsole("Failed to create offscreen surface");
+    } else {
+      RNSkLogger::logToConsole("Surface created");
     }
 
     return surface;
@@ -159,7 +181,7 @@ public:
   }
 
   std::unique_ptr<OnscreenSurface> MakeOnscreenSurface(jobject surface,
-                                                      int width, int height);
+                                                       int width, int height);
   sk_sp<SkSurface> MakeOffscreenSurface(int width, int height);
   sk_sp<SkSurface> MakeSnapshottingSurface(int width, int height);
 };

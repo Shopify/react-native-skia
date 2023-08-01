@@ -63,7 +63,8 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width,
 
   // Create renderer!
   auto contextProvider = SkiaOpenGLContextProvider::getInstance();
-  _onscreenSurface = contextProvider->MakeOnscreenSurface(surface, width, height);
+  _onscreenSurface =
+      contextProvider->MakeOnscreenSurface(surface, width, height);
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();

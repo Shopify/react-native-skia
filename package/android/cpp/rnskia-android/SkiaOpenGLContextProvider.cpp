@@ -117,12 +117,12 @@ SkiaOpenGLContextProvider::~SkiaOpenGLContextProvider() {
 
 std::unique_ptr<OnscreenSurface>
 SkiaOpenGLContextProvider::MakeOnscreenSurface(jobject jSurface, int width,
-                                              int height) {
+                                               int height) {
   auto window = ANativeWindow_fromSurface(facebook::jni::Environment::current(),
                                           jSurface);
   std::unique_ptr<OnscreenSurface> onscreenSurface =
       std::make_unique<OnscreenSurface>(uiThreadContext.get(), window,
-                                        display.get());
+                                        display.get(), uiContext.get());
   return onscreenSurface;
 }
 
