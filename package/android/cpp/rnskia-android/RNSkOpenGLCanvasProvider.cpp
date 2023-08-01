@@ -61,7 +61,8 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width,
   _height = height;
 
   // Create renderer!
-  _surfacefactory = std::make_unique<WindowedSurfaceFactory>(surface, width, height);
+  _surfacefactory =
+      std::make_unique<WindowedSurfaceFactory>(surface, width, height);
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();
