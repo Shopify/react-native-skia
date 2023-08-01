@@ -4,7 +4,6 @@
 #include "GLES2/gl2.h"
 
 #include "gltoolkit/Config.h"
-#include "gltoolkit/Display.h"
 #include "gltoolkit/Surface.h"
 
 #include <RNSkLog.h>
@@ -17,7 +16,7 @@ std::unique_ptr<SkiaOpenGLContextProvider> SkiaOpenGLContextProvider::instance =
 
 SkiaOpenGLContextProvider::SkiaOpenGLContextProvider() {
   // 1. Create root context
-  auto display = std::make_unique<Display>();
+  display = std::make_unique<Display>();
   ConfigDescriptor desc;
   desc.api = API::kOpenGLES2;
   desc.color_format = ColorFormat::kRGBA8888;
@@ -25,7 +24,7 @@ SkiaOpenGLContextProvider::SkiaOpenGLContextProvider() {
   desc.stencil_bits = StencilBits::kEight;
   desc.samples = Samples::kFour;
   desc.surface_type = SurfaceType::kPBuffer;
-  auto config = display->ChooseConfig(desc);
+  config = display->ChooseConfig(desc);
   if (!config) {
     desc.samples = Samples::kOne;
     config = display->ChooseConfig(desc);
@@ -37,13 +36,13 @@ SkiaOpenGLContextProvider::SkiaOpenGLContextProvider() {
     }
   }
 
-  rootContext = display->CreateContext(*config, nullptr);
-  if (!rootContext) {
+  context = display->CreateContext(*config, nullptr);
+  if (!context) {
     RNSkLogger::logToConsole("Couldn't create the root context");
     return;
   }
   auto surface = display->CreatePixelBufferSurface(*config, 1, 1);
-  if (!rootContext->MakeCurrent(*surface)) {
+  if (!context->MakeCurrent(*surface)) {
     RNSkLogger::logToConsole("Couldn't create the root context");
     return;
   }
@@ -73,29 +72,34 @@ SkiaOpenGLContextProvider::~SkiaOpenGLContextProvider() {
 
 sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
     sk_sp<GrDirectContext> grContext, int width, int height) {
-  grContext->resetContext();
-  auto display = std::make_unique<Display>();
-  ConfigDescriptor desc;
-  desc.api = API::kOpenGLES2;
-  desc.color_format = ColorFormat::kRGBA8888;
-  desc.depth_bits = DepthBits::kZero;
-  desc.stencil_bits = StencilBits::kEight;
-  desc.samples = Samples::kFour;
-  desc.surface_type = SurfaceType::kPBuffer;
-  auto config = display->ChooseConfig(desc);
-    if (!config) {
-    desc.samples = Samples::kOne;
-    config = display->ChooseConfig(desc);
-    if (config) {
-        RNSkLogger::logToConsole("Falling back to a single sample (device doesn't support MSAA)");
-    } else {
-        RNSkLogger::logToConsole("Couldn't choose an offscreen config");
-        return nullptr;
-    }
+  if (grContext == jsThreadContext) {
+    RNSkLogger::logToConsole("grContext is null");
+    return nullptr;
   }
+  grContext->resetContext();
+  // auto display = std::make_unique<Display>();
+  // ConfigDescriptor desc;
+  // desc.api = API::kOpenGLES2;
+  // desc.color_format = ColorFormat::kRGBA8888;
+  // desc.depth_bits = DepthBits::kZero;
+  // desc.stencil_bits = StencilBits::kEight;
+  // desc.samples = Samples::kFour;
+  // desc.surface_type = SurfaceType::kPBuffer;
+  // auto config = display->ChooseConfig(desc);
+  //   if (!config) {
+  //   desc.samples = Samples::kOne;
+  //   config = display->ChooseConfig(desc);
+  //   if (config) {
+  //       RNSkLogger::logToConsole("Falling back to a single sample (device doesn't support MSAA)");
+  //   } else {
+  //       RNSkLogger::logToConsole("Couldn't choose an offscreen config");
+  //       return nullptr;
+  //   }
+  // }
+  // display->ChooseConfig(desc);
   // Create a new PBuffer surface with desired width and height
   auto eglSurface = display->CreatePixelBufferSurface(*config, width, height);
-  auto context = display->CreateContext(*config, rootContext.get());
+ // auto context = display->CreateContext(*config, context.get());
   if (!context->MakeCurrent(*eglSurface)) {
     RNSkLogger::logToConsole("Couldn't make context current");
     return nullptr;
@@ -105,23 +109,23 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
   info.fFBOID = 0;
   info.fFormat = 0x8058;//GL_RGBA8;
 
-  auto samples = static_cast<int>(desc.samples);
-  int stencilBits = static_cast<int>(desc.stencil_bits);
+  auto samples = static_cast<int>(Samples::kFour);
+  int stencilBits = static_cast<int>(StencilBits::kEight);
 
   GrBackendRenderTarget backendRT(width, height, samples, stencilBits, info);
-  auto releaseProcLambda = [context = std::move(context)](void* /*unused*/) mutable {
-    // The context's destructor will be called once this lambda goes out of scope.
-    // We've moved the ownership of the context into the lambda.
-  };
+  // auto releaseProcLambda = [context = std::move(context)](void* /*unused*/) mutable {
+  //   // The context's destructor will be called once this lambda goes out of scope.
+  //   // We've moved the ownership of the context into the lambda.
+  // };
 
   sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
       grContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin,
-      kRGBA_8888_SkColorType, nullptr, nullptr,
-      [](void* ctx) { 
-          auto* lambda = static_cast<decltype(&releaseProcLambda)>(ctx);
-          (*lambda)(nullptr); 
-      },
-      &releaseProcLambda);
+      kRGBA_8888_SkColorType, nullptr, nullptr);
+      // [](void* ctx) { 
+      //     auto* lambda = static_cast<decltype(&releaseProcLambda)>(ctx);
+      //     (*lambda)(nullptr); 
+      // },
+      // &releaseProcLambda);
   if (!surface) {
     RNSkLogger::logToConsole("Failed to create offscreen surface");
   }

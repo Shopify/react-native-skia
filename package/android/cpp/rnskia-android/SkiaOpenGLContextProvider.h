@@ -1,7 +1,11 @@
+#pragma once
+
 #include <memory>
 #include <mutex>
 
 #include "gltoolkit/Context.h"
+#include "gltoolkit/Display.h"
+#include "gltoolkit/Config.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -30,7 +34,9 @@ private:
 public:
   ~SkiaOpenGLContextProvider();
 
-  std::unique_ptr<Context> rootContext = nullptr;
+  std::unique_ptr<Display> display = nullptr;
+  std::unique_ptr<Config>  config = nullptr;
+  std::unique_ptr<Context> context = nullptr;
 
   // Delete copy and assignment operations
   SkiaOpenGLContextProvider(SkiaOpenGLContextProvider &other) = delete;
