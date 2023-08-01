@@ -1,8 +1,7 @@
 #include <memory>
 #include <mutex>
 
-#include "EGL/egl.h"
-#include "GLES2/gl2.h"
+#include "gltoolkit/Context.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -25,15 +24,13 @@ private:
 
   SkiaOpenGLContextProvider();
 
-  EGLDisplay eglDisplay = EGL_NO_DISPLAY;
-  EGLConfig  eglConfig = nullptr;
-  EGLContext eglContext = EGL_NO_CONTEXT;
-
   sk_sp<GrDirectContext> jsThreadContext = nullptr;
   sk_sp<GrDirectContext> uiThreadContext = nullptr;
 
 public:
   ~SkiaOpenGLContextProvider();
+
+  std::unique_ptr<Context> rootContext = nullptr;
 
   // Delete copy and assignment operations
   SkiaOpenGLContextProvider(SkiaOpenGLContextProvider &other) = delete;
@@ -54,6 +51,7 @@ public:
   sk_sp<GrDirectContext> getUIContext() { return uiThreadContext; }
 
   // Offscreen surfaces can be created on the UI or the JS thread
-  sk_sp<SkSurface> MakeOffscreenSurface(sk_sp<GrDirectContext> context, int width, int height);
+  sk_sp<SkSurface> MakeOffscreenSurface(sk_sp<GrDirectContext> context,
+                                        int width, int height);
 };
 } // namespace RNSkia

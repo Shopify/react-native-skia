@@ -1,5 +1,12 @@
 #include "SkiaOpenGLContextProvider.h"
 
+#include "EGL/egl.h"
+#include "GLES2/gl2.h"
+
+#include "gltoolkit/Config.h"
+#include "gltoolkit/Display.h"
+#include "gltoolkit/Surface.h"
+
 #include <RNSkLog.h>
 
 namespace RNSkia {
@@ -8,81 +15,42 @@ std::mutex SkiaOpenGLContextProvider::mtx;
 std::unique_ptr<SkiaOpenGLContextProvider> SkiaOpenGLContextProvider::instance =
     nullptr;
 
+void customRenderTargetReleaseProc(void* releaseContext) {
+  // We know that our releaseContext is our Context instance wrapped in a unique_ptr.
+  // The unique_ptr's destructor will handle the deletion.
+  std::unique_ptr<Context> context(static_cast<Context*>(releaseContext));
+}
+
 SkiaOpenGLContextProvider::SkiaOpenGLContextProvider() {
-  // 1. Create root OpenGL Context by create a 1x1 offscreen surface
-  eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-  if (eglDisplay == EGL_NO_DISPLAY) {
-    RNSkLogger::logToConsole("eglGetdisplay failed : %i", glGetError());
-    return;
-  }
-
-  EGLint major;
-  EGLint minor;
-  if (!eglInitialize(eglDisplay, &major, &minor)) {
-    RNSkLogger::logToConsole("eglInitialize failed : %i", glGetError());
-    return;
-  }
-
-  const char *eglExtensions = eglQueryString(eglDisplay, EGL_EXTENSIONS);
-  if (eglExtensions == nullptr) {
-    RNSkLogger::logToConsole("eglQueryString failed : %i", eglGetError());
-    return;
-  }
-
-  bool hasSurfacelessContext =
-      strstr(eglExtensions, "EGL_KHR_surfaceless_context") != nullptr;
-
-  EGLint att[] = {EGL_RENDERABLE_TYPE,
-                  EGL_OPENGL_ES2_BIT,
-                  EGL_SURFACE_TYPE,
-                  EGL_PBUFFER_BIT,
-                  EGL_ALPHA_SIZE,
-                  8,
-                  EGL_BLUE_SIZE,
-                  8,
-                  EGL_GREEN_SIZE,
-                  8,
-                  EGL_RED_SIZE,
-                  8,
-                  EGL_DEPTH_SIZE,
-                  0,
-                  EGL_STENCIL_SIZE,
-                  0,
-                  EGL_NONE};
-
-  EGLint numConfigs;
-  eglConfig = 0;
-  if (!eglChooseConfig(eglDisplay, att, &eglConfig, 1, &numConfigs) ||
-      numConfigs == 0) {
-    RNSkLogger::logToConsole("Failed to choose a config %d\n", eglGetError());
-    return;
-  }
-
-  EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-  eglContext =
-      eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, contextAttribs);
-
-  if (eglContext == EGL_NO_CONTEXT) {
-    RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());
-    return;
-  }
-
-  EGLSurface eglSurface = EGL_NO_SURFACE;
-  if (!hasSurfacelessContext) {
-    // If the EGL implementation doesn't support surfaceless contexts, create a
-    // tiny pbuffer surface
-    const EGLint surfaceAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
-    eglSurface = eglCreatePbufferSurface(eglDisplay, eglConfig, surfaceAttribs);
-    if (eglSurface == EGL_NO_SURFACE) {
-      RNSkLogger::logToConsole("eglCreatePbufferSurface failed: %d\n",
-                               eglGetError());
-      return;
+  // 1. Create root context
+  auto display = std::make_unique<Display>();
+  ConfigDescriptor desc;
+  desc.api = API::kOpenGLES2;
+  desc.color_format = ColorFormat::kRGBA8888;
+  desc.depth_bits = DepthBits::kZero;
+  desc.stencil_bits = StencilBits::kEight;
+  desc.samples = Samples::kFour;
+  desc.surface_type = SurfaceType::kPBuffer;
+  auto config = display->ChooseConfig(desc);
+  if (!config) {
+    desc.samples = Samples::kOne;
+    config = display->ChooseConfig(desc);
+    if (config) {
+        RNSkLogger::logToConsole("Falling back to a single sample (device doesn't support MSAA)");
+    } else {
+        RNSkLogger::logToConsole("Couldn't choose an offscreen config");
+        return;
     }
   }
 
-  // Make the context current
-  if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
-    RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+  rootContext = display->CreateContext(*config, nullptr);
+  if (!rootContext) {
+    RNSkLogger::logToConsole("Couldn't create the root context");
+    return;
+  }
+  auto surface = display->CreatePixelBufferSurface(*config, 1, 1);
+  if (!rootContext->MakeCurrent(*surface)) {
+    RNSkLogger::logToConsole("Couldn't create the root context");
     return;
   }
   // 2. Create uiThreadContext
@@ -107,65 +75,54 @@ SkiaOpenGLContextProvider::~SkiaOpenGLContextProvider() {
 
   jsThreadContext->releaseResourcesAndAbandonContext();
   jsThreadContext.reset();
-
-  if (eglContext != EGL_NO_CONTEXT) {
-    eglDestroyContext(eglDisplay, eglContext);
-    eglContext = EGL_NO_CONTEXT;
-  }
-
-  if (eglDisplay != EGL_NO_DISPLAY) {
-      eglTerminate(eglDisplay);
-      eglDisplay = EGL_NO_DISPLAY;
-  }
 }
 
-sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(sk_sp<GrDirectContext> grContext, int width, int height) {
-  const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, width, EGL_HEIGHT,
-                                            height, EGL_NONE};
-  EGLSurface eglSurface =
-      eglCreatePbufferSurface(eglDisplay, eglConfig, offScreenSurfaceAttribs);
-  if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
-    RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
+    sk_sp<GrDirectContext> grContext, int width, int height) {
+  auto display = std::make_unique<Display>();
+  ConfigDescriptor desc;
+  desc.api = API::kOpenGLES2;
+  desc.color_format = ColorFormat::kRGBA8888;
+  desc.depth_bits = DepthBits::kZero;
+  desc.stencil_bits = StencilBits::kEight;
+  desc.samples = Samples::kFour;
+  desc.surface_type = SurfaceType::kPBuffer;
+  auto config = display->ChooseConfig(desc);
+    if (!config) {
+    desc.samples = Samples::kOne;
+    config = display->ChooseConfig(desc);
+    if (config) {
+        RNSkLogger::logToConsole("Falling back to a single sample (device doesn't support MSAA)");
+    } else {
+        RNSkLogger::logToConsole("Couldn't choose an offscreen config");
+        return nullptr;
+    }
+  }
+  // Create a new PBuffer surface with desired width and height
+  auto eglSurface = display->CreatePixelBufferSurface(*config, width, height);
+  auto context = display->CreateContext(*config, rootContext.get());
+  if (!context->MakeCurrent(*eglSurface)) {
+    RNSkLogger::logToConsole("Couldn't make context current");
     return nullptr;
   }
-  GLint buffer;
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
 
-  GLint stencil;
-  glGetIntegerv(GL_STENCIL_BITS, &stencil);
+  GrGLFramebufferInfo info;
+  info.fFBOID = 0;
+  info.fFormat = 0x8058;//GL_RGBA8;
 
-  GLint samples;
-  glGetIntegerv(GL_SAMPLES, &samples);
+  auto samples = static_cast<int>(desc.samples);
+  int stencilBits = static_cast<int>(desc.stencil_bits);
 
-  auto maxSamples =
-      grContext->maxSurfaceSampleCountForColorType(kRGBA_8888_SkColorType);
+  GrBackendRenderTarget backendRT(width, height, samples, stencilBits, info);
 
-  if (samples > maxSamples) {
-    samples = maxSamples;
+  sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
+      grContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin,
+      kRGBA_8888_SkColorType, nullptr, nullptr);
+     // &customRenderTargetReleaseProc, context.get());
+  if (!surface) {
+    RNSkLogger::logToConsole("Failed to create offscreen surface");
   }
 
-  GrGLFramebufferInfo fbInfo;
-  fbInfo.fFBOID = buffer;
-  fbInfo.fFormat = 0x8058;
-
-  auto renderTarget =
-      GrBackendRenderTarget(width, height, samples, stencil, fbInfo);
-
-  struct OffscreenRenderContext {
-    EGLDisplay display;
-    EGLSurface surface;
-  };
-  auto ctx = new OffscreenRenderContext({eglDisplay, eglSurface});
-
-  auto surface = SkSurface::MakeFromBackendRenderTarget(
-      grContext.get(), renderTarget, kBottomLeft_GrSurfaceOrigin,
-      kRGBA_8888_SkColorType, nullptr, nullptr,
-      [](void *addr) {
-        auto ctx = reinterpret_cast<OffscreenRenderContext *>(addr);
-        eglDestroySurface(ctx->display, ctx->surface);
-        delete ctx;
-      },
-      reinterpret_cast<void *>(ctx));
   return surface;
 }
 
