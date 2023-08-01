@@ -15,12 +15,6 @@ std::mutex SkiaOpenGLContextProvider::mtx;
 std::unique_ptr<SkiaOpenGLContextProvider> SkiaOpenGLContextProvider::instance =
     nullptr;
 
-void customRenderTargetReleaseProc(void* releaseContext) {
-  // We know that our releaseContext is our Context instance wrapped in a unique_ptr.
-  // The unique_ptr's destructor will handle the deletion.
-  std::unique_ptr<Context> context(static_cast<Context*>(releaseContext));
-}
-
 SkiaOpenGLContextProvider::SkiaOpenGLContextProvider() {
   // 1. Create root context
   auto display = std::make_unique<Display>();
@@ -79,6 +73,7 @@ SkiaOpenGLContextProvider::~SkiaOpenGLContextProvider() {
 
 sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
     sk_sp<GrDirectContext> grContext, int width, int height) {
+  grContext->resetContext();
   auto display = std::make_unique<Display>();
   ConfigDescriptor desc;
   desc.api = API::kOpenGLES2;
@@ -114,11 +109,19 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
   int stencilBits = static_cast<int>(desc.stencil_bits);
 
   GrBackendRenderTarget backendRT(width, height, samples, stencilBits, info);
+  auto releaseProcLambda = [context = std::move(context)](void* /*unused*/) mutable {
+    // The context's destructor will be called once this lambda goes out of scope.
+    // We've moved the ownership of the context into the lambda.
+  };
 
   sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
       grContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin,
-      kRGBA_8888_SkColorType, nullptr, nullptr);
-     // &customRenderTargetReleaseProc, context.get());
+      kRGBA_8888_SkColorType, nullptr, nullptr,
+      [](void* ctx) { 
+          auto* lambda = static_cast<decltype(&releaseProcLambda)>(ctx);
+          (*lambda)(nullptr); 
+      },
+      &releaseProcLambda);
   if (!surface) {
     RNSkLogger::logToConsole("Failed to create offscreen surface");
   }
