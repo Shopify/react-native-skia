@@ -1,8 +1,5 @@
 #include "SkiaOpenGLContextProvider.h"
 
-#include "EGL/egl.h"
-#include "GLES2/gl2.h"
-
 #include "gltoolkit/Config.h"
 #include "gltoolkit/Surface.h"
 
@@ -116,6 +113,17 @@ SkiaOpenGLContextProvider::~SkiaOpenGLContextProvider() {
 
   jsThreadContext->releaseResourcesAndAbandonContext();
   jsThreadContext.reset();
+}
+
+std::unique_ptr<OnscreenSurface>
+SkiaOpenGLContextProvider::MakeOnscreeSurface(jobject jSurface, int width,
+                                              int height) {
+  auto window = ANativeWindow_fromSurface(facebook::jni::Environment::current(),
+                                          jSurface);
+  std::unique_ptr<OnscreenSurface> onscreenSurface =
+      std::make_unique<OnscreenSurface>(uiThreadContext.get(), window,
+                                        display.get());
+  return onscreenSurface;
 }
 
 sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(int width,
