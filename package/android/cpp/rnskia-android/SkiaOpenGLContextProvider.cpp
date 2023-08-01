@@ -70,13 +70,13 @@ SkiaOpenGLContextProvider::~SkiaOpenGLContextProvider() {
   jsThreadContext.reset();
 }
 
-sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
-    sk_sp<GrDirectContext> grContext, int width, int height) {
-  if (grContext == jsThreadContext) {
-    RNSkLogger::logToConsole("grContext is null");
-    return nullptr;
-  }
-  grContext->resetContext();
+sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(int width, int height) {
+  return nullptr;
+}
+
+sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeSnapshottingSurface(int width, int height) {
+  //uiThreadContext->resetContext();
+  
   // auto display = std::make_unique<Display>();
   // ConfigDescriptor desc;
   // desc.api = API::kOpenGLES2;
@@ -119,7 +119,7 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
   // };
 
   sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
-      grContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin,
+      uiThreadContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, nullptr, nullptr);
       // [](void* ctx) { 
       //     auto* lambda = static_cast<decltype(&releaseProcLambda)>(ctx);

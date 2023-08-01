@@ -53,11 +53,8 @@ public:
     return instance.get();
   }
 
-  sk_sp<GrDirectContext> getJSContext() { return jsThreadContext; }
-  sk_sp<GrDirectContext> getUIContext() { return uiThreadContext; }
-
   // Offscreen surfaces can be created on the UI or the JS thread
-  sk_sp<SkSurface> MakeOffscreenSurface(sk_sp<GrDirectContext> context,
-                                        int width, int height);
+  sk_sp<SkSurface> MakeOffscreenSurface(int width, int height);
+  sk_sp<SkSurface> MakeSnapshottingSurface(int width, int height);
 };
 } // namespace RNSkia

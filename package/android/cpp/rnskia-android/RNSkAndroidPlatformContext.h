@@ -40,15 +40,13 @@ public:
   sk_sp<SkSurface> makeOffscreenSurfaceOnUIThread(int width,
                                                   int height) override {
     auto contextProvider = SkiaOpenGLContextProvider::getInstance();
-    return contextProvider->MakeOffscreenSurface(
-        contextProvider->getUIContext(), width, height);
+    return contextProvider->MakeSnapshottingSurface(width, height);
   }
 
   sk_sp<SkSurface> makeOffscreenSurfaceOnJSThread(int width,
                                                   int height) override {
     auto contextProvider = SkiaOpenGLContextProvider::getInstance();
-    return contextProvider->MakeOffscreenSurface(
-        contextProvider->getJSContext(), width, height);
+    return contextProvider->MakeOffscreenSurface(width, height);
   }
 
   void runOnMainThread(std::function<void()> task) override {
