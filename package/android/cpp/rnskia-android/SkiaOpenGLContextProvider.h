@@ -67,12 +67,32 @@ public:
     surface = display->CreateWindowSurface(*config, window);
     context = display->CreateContext(*config, nullptr);
     if (!context) {
-      RNSkLogger::logToConsole("Couldn't create the root context");
+      RNSkLogger::logToConsole("Couldn't create context");
+      return;
+    }
+    if (!surface) {
+      RNSkLogger::logToConsole("Couldn't create surface");
       return;
     }
   }
 
   ~OnscreenSurface() { ANativeWindow_release(_window); }
+
+  bool beginRender() {
+    // if (!makeCurrent()) {
+    //   return false;
+    // }
+
+    return true;
+  }
+
+  bool commitRender() {
+    if (!eglSwapBuffers(_display, surface.get())) {
+      RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
+      return false;
+    }
+    return true;
+  }
 
   sk_sp<SkSurface> makeSurface(int width, int height) {
     if (!context->MakeCurrent(*surface)) {
@@ -138,7 +158,7 @@ public:
     return instance.get();
   }
 
-  std::unique_ptr<OnscreenSurface> MakeOnscreeSurface(jobject surface,
+  std::unique_ptr<OnscreenSurface> MakeOnscreenSurface(jobject surface,
                                                       int width, int height);
   sk_sp<SkSurface> MakeOffscreenSurface(int width, int height);
   sk_sp<SkSurface> MakeSnapshottingSurface(int width, int height);

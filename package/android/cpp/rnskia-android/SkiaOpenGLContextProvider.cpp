@@ -116,7 +116,7 @@ SkiaOpenGLContextProvider::~SkiaOpenGLContextProvider() {
 }
 
 std::unique_ptr<OnscreenSurface>
-SkiaOpenGLContextProvider::MakeOnscreeSurface(jobject jSurface, int width,
+SkiaOpenGLContextProvider::MakeOnscreenSurface(jobject jSurface, int width,
                                               int height) {
   auto window = ANativeWindow_fromSurface(facebook::jni::Environment::current(),
                                           jSurface);
@@ -158,6 +158,7 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(int width,
 
 sk_sp<SkSurface>
 SkiaOpenGLContextProvider::MakeSnapshottingSurface(int width, int height) {
+  uiThreadContext->flushAndSubmit();
   // Create a new PBuffer surface with desired width and height
   auto eglSurface = display->CreatePixelBufferSurface(*uiConfig, width, height);
   // auto context = display->CreateContext(*config, context.get());
