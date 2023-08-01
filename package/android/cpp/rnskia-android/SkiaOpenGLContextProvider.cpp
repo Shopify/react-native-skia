@@ -88,9 +88,17 @@ SkiaOpenGLContextProvider::SkiaOpenGLContextProvider() {
   // 2. Create uiThreadContext
   auto backendInterface = GrGLMakeNativeInterface();
   uiThreadContext = GrDirectContext::MakeGL(backendInterface);
+  if (!uiThreadContext) {
+    RNSkLogger::logToConsole("Could not create uiThreadContext");
+    return;
+  }
 
   // 3. Create jsThreadContext
   jsThreadContext = GrDirectContext::MakeGL(backendInterface);
+  if (!jsThreadContext) {
+    RNSkLogger::logToConsole("Could not create jsThreadContext");
+    return;
+  }
 }
 
 SkiaOpenGLContextProvider::~SkiaOpenGLContextProvider() {
@@ -117,7 +125,7 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(sk_sp<GrDirectC
   EGLSurface eglSurface =
       eglCreatePbufferSurface(eglDisplay, eglConfig, offScreenSurfaceAttribs);
   if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
-    RNSkLogger::logToConsole("eglMakeCurrent failed on MakeOffscreenSurface: %d\n", eglGetError());
+    RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
     return nullptr;
   }
   GLint buffer;
@@ -132,8 +140,9 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(sk_sp<GrDirectC
   auto maxSamples =
       grContext->maxSurfaceSampleCountForColorType(kRGBA_8888_SkColorType);
 
-  if (samples > maxSamples)
+  if (samples > maxSamples) {
     samples = maxSamples;
+  }
 
   GrGLFramebufferInfo fbInfo;
   fbInfo.fFBOID = buffer;

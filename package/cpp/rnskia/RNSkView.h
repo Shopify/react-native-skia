@@ -92,7 +92,7 @@ public:
                               std::function<void()> requestRedraw, float width,
                               float height)
       : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
-    _surface = context->makeOffscreenSurface(_width, _height);
+    _surface = context->makeOffscreenSurfaceOnUIThread(_width, _height);
   }
 
   /**
