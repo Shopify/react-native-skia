@@ -237,9 +237,7 @@ half4 main(float2 xy) {
       const img = Skia.Image.MakeImageFromEncoded(data)!;
       expect(data).toBeDefined();
 
-      checkImage(img, "snapshots/runtime-shader/scaled-circle2.png", {
-        overwrite: true,
-      });
+      checkImage(img, "snapshots/runtime-shader/scaled-circle2.png");
     }
   );
 });
