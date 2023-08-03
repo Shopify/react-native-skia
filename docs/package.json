@@ -16,8 +16,8 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.1.0",
-    "@docusaurus/preset-classic": "^2.1.0",
+    "@docusaurus/core": "^2.4.1",
+    "@docusaurus/preset-classic": "^2.4.1",
     "@mdx-js/react": "^1.6.21",
     "@shopify/react-native-skia": "link:../package/",
     "@svgr/webpack": "^5.5.0",
@@ -29,11 +29,11 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-native-gesture-handler": "^2.9.0",
-    "react-native-reanimated": "^2.4.1",
+    "react-native-reanimated": "^3.4.1",
     "url-loader": "^4.1.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.1.0",
+    "@docusaurus/module-type-aliases": "^2.4.1",
     "@tsconfig/docusaurus": "^1.0.4",
     "@types/react-native": "0.66.2",
     "eslint": "^7.32.0",
