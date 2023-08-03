@@ -10,7 +10,8 @@ EGLContext BaseSkiaSurfaceFactory::_SharedEglContext = EGL_NO_CONTEXT;
 
 thread_local SurfaceFactoryContext BaseSkiaSurfaceFactory::_ThreadContext;
 
-BaseSkiaSurfaceFactory::BaseSkiaSurfaceFactory(SkiaSurfaceType type, int width, int height) {
+BaseSkiaSurfaceFactory::BaseSkiaSurfaceFactory(SkiaSurfaceType type, int width,
+                                               int height) {
   _glSurface = EGL_NO_SURFACE;
   _type = type;
   _width = width;
@@ -97,7 +98,7 @@ EGLContext BaseSkiaSurfaceFactory::createOpenGLContext(EGLDisplay glDisplay,
 
   // Initialize the offscreen context for this thread
   EGLContext newGLContext = eglCreateContext(
-          glDisplay, getConfig(glDisplay, type), _SharedEglContext, contextAttribs);
+      glDisplay, getConfig(glDisplay, type), _SharedEglContext, contextAttribs);
 
   if (newGLContext == EGL_NO_CONTEXT) {
     RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());
@@ -179,7 +180,8 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
     samples = maxSamples;
   }
 
-  GrBackendRenderTarget renderTarget(_width, _height, samples, stencil, fboInfo);
+  GrBackendRenderTarget renderTarget(_width, _height, samples, stencil,
+                                     fboInfo);
 
   SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
@@ -200,10 +202,11 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
       [](void *addr) {
         auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
 
-        eglMakeCurrent(releaseCtx->context->glDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                       EGL_NO_CONTEXT);
+        eglMakeCurrent(releaseCtx->context->glDisplay, EGL_NO_SURFACE,
+                       EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
-        eglDestroySurface(releaseCtx->context->glDisplay, releaseCtx->glSurface);
+        eglDestroySurface(releaseCtx->context->glDisplay,
+                          releaseCtx->glSurface);
 
         // Call subclass release proc
         releaseCtx->releaseProc(releaseCtx->context);

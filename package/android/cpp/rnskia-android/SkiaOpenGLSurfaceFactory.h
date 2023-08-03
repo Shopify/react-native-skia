@@ -91,9 +91,10 @@ public:
   bool makeCurrent();
 
   /**
-   * Creates a new Skia Surface based on the current configuration and underlying
-   * contexts. The surface will live as long as there are references to it, meaning
-   * that the Skia Surface Factory that created the surface can be deleted.
+   * Creates a new Skia Surface based on the current configuration and
+   * underlying contexts. The surface will live as long as there are references
+   * to it, meaning that the Skia Surface Factory that created the surface can
+   * be deleted.
    * @return
    */
   sk_sp<SkSurface> createSkSurface();
@@ -127,22 +128,24 @@ protected:
   /**
    * Creates an OpenGL surface for the given configuration found in the provided
    * context
-   * @param context SurfaceFactoryContext containing the current OpenGL / Skia context
+   * @param context SurfaceFactoryContext containing the current OpenGL / Skia
+   * context
    * @return A valid OpenGL surface of the requested type
    */
   virtual EGLSurface createOpenGLSurface(SurfaceFactoryContext *context) = 0;
   EGLSurface _glSurface = EGL_NO_SURFACE;
 
   /*
-   * Virtual method for providing the context that should be used. Some surface types works well
-   * with sharing contexts, while others needs to have a local context.
+   * Virtual method for providing the context that should be used. Some surface
+   * types works well with sharing contexts, while others needs to have a local
+   * context.
    */
   virtual SurfaceFactoryContext *getContext() = 0;
 
   /**
-   * Creates a function that will release any resources aquired when the surface was created
-   * so that we can clean up when the Skia Surface is destroyed and not when the factory is
-   * destroyed.
+   * Creates a function that will release any resources aquired when the surface
+   * was created so that we can clean up when the Skia Surface is destroyed and
+   * not when the factory is destroyed.
    * @return A function that will release any resources aquired.
    */
   virtual std::function<void(SurfaceFactoryContext *context)>
@@ -165,7 +168,8 @@ protected:
 
 /**
  * The window render context can use a thread local shared context for rendering
- * and will render to a native window, ie a surface from the Java side of things.
+ * and will render to a native window, ie a surface from the Java side of
+ * things.
  */
 class WindowedSurfaceFactory : public BaseSkiaSurfaceFactory {
 public:
@@ -239,7 +243,8 @@ public:
       return EGL_NO_SURFACE;
     }
 
-    return eglCreatePbufferSurface(context->glDisplay, config, offScreenSurfaceAttribs);
+    return eglCreatePbufferSurface(context->glDisplay, config,
+                                   offScreenSurfaceAttribs);
   }
 
   SurfaceFactoryContext *getContext() override { return _skiaOpenGlContext; }
@@ -258,6 +263,6 @@ public:
   }
 
 private:
-  SurfaceFactoryContext* _skiaOpenGlContext;
+  SurfaceFactoryContext *_skiaOpenGlContext;
 };
 } // namespace RNSkia
