@@ -148,7 +148,9 @@ protected:
    * @return A function that will release any resources aquired.
    */
   virtual std::function<void(SurfaceFactoryContext *context)>
-  getSurfaceReleasedProc() { return [](SurfaceFactoryContext *){}; };
+  getSurfaceReleasedProc() {
+    return [](SurfaceFactoryContext *) {};
+  };
 
   /**
    * Initializes OpenGL with the given context

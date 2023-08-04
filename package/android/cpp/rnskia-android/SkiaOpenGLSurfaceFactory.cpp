@@ -92,8 +92,8 @@ EGLContext BaseSkiaSurfaceFactory::createOpenGLContext(EGLDisplay glDisplay,
   EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
   // Initialize the offscreen context for this thread
-  EGLContext newGLContext = eglCreateContext(
-      glDisplay, getConfig(glDisplay), _SharedEglContext, contextAttribs);
+  EGLContext newGLContext = eglCreateContext(glDisplay, getConfig(glDisplay),
+                                             _SharedEglContext, contextAttribs);
 
   if (newGLContext == EGL_NO_CONTEXT) {
     RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());
