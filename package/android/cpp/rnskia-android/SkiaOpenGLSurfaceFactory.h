@@ -111,10 +111,9 @@ protected:
   /**
    * Returns the OpenGL configuration for the given display and render type
    * @param glDisplay Display to get config for
-   * @param type Requested surface type, offscreen or windowed
    * @return A valid GLConfig or 0
    */
-  static EGLConfig getConfig(EGLDisplay glDisplay, SkiaSurfaceType type);
+  static EGLConfig getConfig(EGLDisplay glDisplay);
 
   /**
    * Creates the OpenGL context based on the given surface type
@@ -149,7 +148,7 @@ protected:
    * @return A function that will release any resources aquired.
    */
   virtual std::function<void(SurfaceFactoryContext *context)>
-  getSurfaceReleasedProc() = 0;
+  getSurfaceReleasedProc() { return [](SurfaceFactoryContext *){}; };
 
   /**
    * Initializes OpenGL with the given context
@@ -167,9 +166,7 @@ protected:
 };
 
 /**
- * The window render context can use a thread local shared context for rendering
- * and will render to a native window, ie a surface from the Java side of
- * things.
+ * Factory for creating a windowed surface
  */
 class WindowedSurfaceFactory : public BaseSkiaSurfaceFactory {
 public:
@@ -178,19 +175,7 @@ public:
         _window(ANativeWindow_fromSurface(facebook::jni::Environment::current(),
                                           surface)) {}
 
-  bool beginRender() {
-    if (!makeCurrent()) {
-      return false;
-    }
-
-    // This is needed since we might be sharing the direct context
-    getContext()->directContext->resetContext();
-    return true;
-  }
-
-  bool commitRender() {
-    _ThreadContext.directContext->flushAndSubmit();
-
+  bool present() {
     if (!eglSwapBuffers(_ThreadContext.glDisplay, _glSurface)) {
       RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
       return false;
@@ -201,7 +186,7 @@ public:
 
 protected:
   EGLSurface createOpenGLSurface(SurfaceFactoryContext *context) override {
-    auto config = getConfig(context->glDisplay, _type);
+    auto config = getConfig(context->glDisplay);
     if (config == 0) {
       return EGL_NO_SURFACE;
     }
@@ -211,6 +196,11 @@ protected:
 
   SurfaceFactoryContext *getContext() override { return &_ThreadContext; }
 
+  /**
+   * We should release the native window when the SkSurface is release - since
+   * this class is a factory we might delete the factory before the surface.
+   * @return
+   */
   std::function<void(SurfaceFactoryContext *context)>
   getSurfaceReleasedProc() override {
     return [window = _window](SurfaceFactoryContext *) {
@@ -223,10 +213,7 @@ private:
 };
 
 /**
- * The offscreen render context needs a separate GrDirectContext for each
- * offscreen buffer - because otherwise there will be sharing / state issues
- * that we solve by calling resetContext in the renderer (which we don't have
- * here)
+ * Factory for creating an offscreen surface
  */
 class OffscreenSurfaceFactory : public BaseSkiaSurfaceFactory {
 public:
@@ -238,7 +225,7 @@ public:
     const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, _width, EGL_HEIGHT,
                                               _height, EGL_NONE};
 
-    auto config = getConfig(context->glDisplay, _type);
+    auto config = getConfig(context->glDisplay);
     if (config == 0) {
       return EGL_NO_SURFACE;
     }

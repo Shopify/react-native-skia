@@ -55,14 +55,10 @@ bool BaseSkiaSurfaceFactory::initializeOpenGL(SurfaceFactoryContext *context) {
   return true;
 }
 
-EGLConfig BaseSkiaSurfaceFactory::getConfig(EGLDisplay glDisplay,
-                                            SkiaSurfaceType type) {
+EGLConfig BaseSkiaSurfaceFactory::getConfig(EGLDisplay glDisplay) {
 
   EGLint att[] = {EGL_RENDERABLE_TYPE,
                   EGL_OPENGL_ES2_BIT,
-                  EGL_SURFACE_TYPE,
-                  type == SkiaSurfaceType::Offscreen ? EGL_PBUFFER_BIT
-                                                     : EGL_WINDOW_BIT,
                   EGL_ALPHA_SIZE,
                   8,
                   EGL_BLUE_SIZE,
@@ -83,7 +79,6 @@ EGLConfig BaseSkiaSurfaceFactory::getConfig(EGLDisplay glDisplay,
       numConfigs == 0) {
     RNSkLogger::logToConsole(
         "Failed to choose a config for %s surface. Error code: %d\n",
-        type == SkiaSurfaceType::Offscreen ? "Offscreen" : "Windowed",
         eglGetError());
     return 0;
   }
@@ -98,7 +93,7 @@ EGLContext BaseSkiaSurfaceFactory::createOpenGLContext(EGLDisplay glDisplay,
 
   // Initialize the offscreen context for this thread
   EGLContext newGLContext = eglCreateContext(
-      glDisplay, getConfig(glDisplay, type), _SharedEglContext, contextAttribs);
+      glDisplay, getConfig(glDisplay), _SharedEglContext, contextAttribs);
 
   if (newGLContext == EGL_NO_CONTEXT) {
     RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());

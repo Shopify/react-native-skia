@@ -35,17 +35,14 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
     if (_surface) {
 
       // If we have a render context let's make it current.
-      if (!_surfacefactory->beginRender()) {
-        return false;
-      }
-
       auto canvas = _surface->getCanvas();
 
       // Draw into canvas using callback
       cb(canvas);
 
       // Commit - flush and swap buffers
-      return _surfacefactory->commitRender();
+      canvas->flush();
+      return _surfacefactory->present();
     } else {
       // the render context did not provide a surface
       return false;
