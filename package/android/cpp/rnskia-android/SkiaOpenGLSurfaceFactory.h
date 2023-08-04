@@ -150,7 +150,7 @@ protected:
   virtual std::function<void(SurfaceFactoryContext *context)>
   getSurfaceReleasedProc() {
     return [](SurfaceFactoryContext *) {};
-  };
+  }
 
   /**
    * Initializes OpenGL with the given context
