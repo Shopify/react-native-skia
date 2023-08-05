@@ -4,7 +4,7 @@
 #include <thread>
 #include <utility>
 
-#include <SkiaMetalRenderer.h>
+#include <RNSkMetalCanvasProvider.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -60,7 +60,7 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 sk_sp<SkSurface>
 RNSkiOSPlatformContext::makeOffscreenSurface(int width, int height,
                                              bool isOnJSThread) {
-  return MakeOffscreenMetalSurface(width, height);
+  return RNSkMetalCanvasProvider::MakeOffscreenMetalSurface(width, height);
 }
 
 void RNSkiOSPlatformContext::runOnMainThread(std::function<void()> func) {
