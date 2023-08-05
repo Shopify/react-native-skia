@@ -58,7 +58,8 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 }
 
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
-                                                              int height) {
+                                                              int height,
+															  bool isOnJSThread) {
   return MakeOffscreenMetalSurface(width, height);
 }
 
