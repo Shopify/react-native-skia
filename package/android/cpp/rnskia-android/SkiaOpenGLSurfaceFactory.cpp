@@ -6,14 +6,14 @@ namespace RNSkia {
  * will be used as the parent / shareable context when creating subsequent
  * contexts.
  */
-EGLContext BaseSkiaSurfaceFactory::_SharedEglContext = EGL_NO_CONTEXT;
+BaseSkiaSurfaceFactory *BaseSkiaSurfaceFactory::SharedContext =
+    new OffscreenSurfaceFactory(1, 1);
 
-thread_local SurfaceFactoryContext WindowedSurfaceFactory::_skiaOpenGlContext;
+thread_local SurfaceFactoryContext
+    BaseSkiaSurfaceFactory::ThreadedSkiaOpenGlContext;
 
-BaseSkiaSurfaceFactory::BaseSkiaSurfaceFactory(SkiaSurfaceType type, int width,
-                                               int height) {
+BaseSkiaSurfaceFactory::BaseSkiaSurfaceFactory(int width, int height) {
   _glSurface = EGL_NO_SURFACE;
-  _type = type;
   _width = width;
   _height = height;
 }
@@ -45,7 +45,7 @@ bool BaseSkiaSurfaceFactory::initializeOpenGL(SurfaceFactoryContext *context) {
   EGLint major;
   EGLint minor;
 
-  if (!eglInitialize(context->glDisplay, &major, &minor)) {
+  if (eglInitialize(context->glDisplay, &major, &minor) != EGL_TRUE) {
     RNSkLogger::logToConsole("eglInitialize failed : %i", glGetError());
     eglTerminate(context->glDisplay);
     context->glDisplay = EGL_NO_DISPLAY;
@@ -71,6 +71,8 @@ EGLConfig BaseSkiaSurfaceFactory::getConfig(EGLDisplay glDisplay) {
                   0,
                   EGL_STENCIL_SIZE,
                   0,
+                  EGL_SAMPLE_BUFFERS,
+                  0,
                   EGL_NONE};
 
   EGLint numConfigs;
@@ -86,23 +88,18 @@ EGLConfig BaseSkiaSurfaceFactory::getConfig(EGLDisplay glDisplay) {
   return glConfig;
 }
 
-EGLContext BaseSkiaSurfaceFactory::createOpenGLContext(EGLDisplay glDisplay) {
+EGLContext BaseSkiaSurfaceFactory::createOpenGLContext(
+    EGLDisplay glDisplay, EGLConfig config, EGLContext sharedContext) {
   // Create OpenGL context
   EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
   // Initialize the offscreen context for this thread
-  EGLContext newGLContext = eglCreateContext(glDisplay, getConfig(glDisplay),
-                                             _SharedEglContext, contextAttribs);
+  EGLContext newGLContext =
+      eglCreateContext(glDisplay, config, sharedContext, contextAttribs);
 
   if (newGLContext == EGL_NO_CONTEXT) {
     RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());
     return EGL_NO_CONTEXT;
-  }
-
-  // If this is the initial (first) context created, we should save it and use
-  // it as the share context for subsequent calls to glCreateContext:
-  if (_SharedEglContext == EGL_NO_CONTEXT) {
-    _SharedEglContext = newGLContext;
   }
 
   return newGLContext;
@@ -121,7 +118,12 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
 
   // Create the OpenGL context if necessary
   if (context->glContext == EGL_NO_CONTEXT) {
-    context->glContext = createOpenGLContext(context->glDisplay);
+    // Create config for the current display
+    context->glConfig = getConfig(context->glDisplay);
+    context->glContext =
+        createOpenGLContext(context->glDisplay, context->glConfig,
+                            SharedContext->getContext()->glContext);
+
     if (context->glContext == EGL_NO_CONTEXT) {
       return nullptr;
     }
@@ -151,12 +153,14 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
     }
   }
 
-  // Create the SkSurface
-  GLint buffer;
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
-
+  // Set up parameters for the render target so that it
+  // matches the underlying OpenGL context.
   GrGLFramebufferInfo fboInfo;
-  fboInfo.fFBOID = buffer;
+
+  // We pass 0 as the framebuffer id, since the
+  // underlying Skia GrGlGpu will read this when wrapping the context in the
+  // render target and the GrGlGpu object.
+  fboInfo.fFBOID = 0;
   fboInfo.fFormat = 0x8058; // GL_RGBA8
 
   auto colorType = kN32_SkColorType; // native 32-bit RGBA encoding

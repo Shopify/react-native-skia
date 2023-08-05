@@ -28,16 +28,16 @@
 
 namespace RNSkia {
 
-enum SkiaSurfaceType { Window, Offscreen };
-
 struct SurfaceFactoryContext {
   SurfaceFactoryContext() {
     glDisplay = EGL_NO_DISPLAY;
     glContext = EGL_NO_CONTEXT;
+    glConfig = 0;
     directContext = nullptr;
   }
   EGLContext glContext;
   EGLDisplay glDisplay;
+  EGLConfig glConfig;
   sk_sp<GrDirectContext> directContext;
 };
 
@@ -55,25 +55,10 @@ struct SurfaceFactoryContext {
  * - eglInitialize    -> initializes the display if needed
  * - eglChooseConfig  -> finds the requested configuration
  * - eglCreateContext -> creates the context for the current thread
- *
- * SkiaRenderContext:
  * - eglCreateWindowSurface / eglCreatePBufferSurface
  * - eglMakeCurrent
  * - GrDirectContext::MakeGL()
- *
- * On each render:
- * - eglMakeCurrent()
- * - SkSurface::MakeFromBackendRenderTarget with release proc
- *
- * A windowed OpenGL surface can share almost anything except the surface /
- * _glSurface object (of course) since they are bound to the current window
- *
- * An offscreen OpenGL surface needs its own context since we cannot ensure that
- * this is called, so we need to have a separate OpenGL / GrDirectContext for
- * each one.
- *
- * They all share the first OpenGL context created so that shaders and textures
- * and other GPU resources are available cross surfaces.
+ * - Create Skia backend and direct context
  */
 class BaseSkiaSurfaceFactory {
 public:
@@ -102,11 +87,10 @@ public:
 protected:
   /**
    * CTOR for the Base Skia Surface Factory class
-   * @param type Type, offscreen or windowed
    * @param width width of surface
    * @param height height of surface
    */
-  BaseSkiaSurfaceFactory(SkiaSurfaceType type, int width, int height);
+  BaseSkiaSurfaceFactory(int width, int height);
 
   /**
    * Returns the OpenGL configuration for the given display and render type
@@ -118,9 +102,13 @@ protected:
   /**
    * Creates the OpenGL context based on the given surface type
    * @param glDisplay Display to get config for
+   * @param glConfig Configuration to use when creating the context
+   * @param sharedglContext Shared / parent context
    * @return A valid GLContext or EGL_NO_CONTEXT
    */
-  static EGLContext createOpenGLContext(EGLDisplay glDisplay);
+  static EGLContext createOpenGLContext(EGLDisplay glDisplay,
+                                        EGLConfig glConfig,
+                                        EGLContext sharedglContext);
 
   /**
    * Creates an OpenGL surface for the given configuration found in the provided
@@ -137,7 +125,9 @@ protected:
    * types works well with sharing contexts, while others needs to have a local
    * context.
    */
-  virtual SurfaceFactoryContext *getContext() = 0;
+  virtual SurfaceFactoryContext *getContext() {
+    return &ThreadedSkiaOpenGlContext;
+  }
 
   /**
    * Creates a function that will release any resources aquired when the surface
@@ -157,9 +147,9 @@ protected:
    */
   static bool initializeOpenGL(SurfaceFactoryContext *context);
 
-  static EGLContext _SharedEglContext;
+  static BaseSkiaSurfaceFactory *SharedContext;
+  static thread_local SurfaceFactoryContext ThreadedSkiaOpenGlContext;
 
-  SkiaSurfaceType _type;
   int _width;
   int _height;
 };
@@ -170,7 +160,7 @@ protected:
 class WindowedSurfaceFactory : public BaseSkiaSurfaceFactory {
 public:
   WindowedSurfaceFactory(jobject surface, int width, int height)
-      : BaseSkiaSurfaceFactory(SkiaSurfaceType::Window, width, height),
+      : BaseSkiaSurfaceFactory(width, height),
         _window(ANativeWindow_fromSurface(facebook::jni::Environment::current(),
                                           surface)) {}
 
@@ -185,15 +175,10 @@ public:
 
 protected:
   EGLSurface createOpenGLSurface(SurfaceFactoryContext *context) override {
-    auto config = getConfig(context->glDisplay);
-    if (config == 0) {
-      return EGL_NO_SURFACE;
-    }
-
-    return eglCreateWindowSurface(context->glDisplay, config, _window, nullptr);
+    const EGLint attribs[] = {EGL_NONE};
+    return eglCreateWindowSurface(context->glDisplay, context->glConfig,
+                                  _window, attribs);
   }
-
-  SurfaceFactoryContext *getContext() override { return &_skiaOpenGlContext; }
 
   /**
    * We should release the native window when the SkSurface is release - since
@@ -209,7 +194,6 @@ protected:
 
 private:
   ANativeWindow *_window;
-  static thread_local SurfaceFactoryContext _skiaOpenGlContext;
 };
 
 /**
@@ -218,38 +202,14 @@ private:
 class OffscreenSurfaceFactory : public BaseSkiaSurfaceFactory {
 public:
   OffscreenSurfaceFactory(int width, int height)
-      : BaseSkiaSurfaceFactory(SkiaSurfaceType::Offscreen, width, height),
-        _skiaOpenGlContext(new SurfaceFactoryContext()) {}
+      : BaseSkiaSurfaceFactory(width, height) {}
 
   EGLSurface createOpenGLSurface(SurfaceFactoryContext *context) override {
     const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, _width, EGL_HEIGHT,
                                               _height, EGL_NONE};
 
-    auto config = getConfig(context->glDisplay);
-    if (config == 0) {
-      return EGL_NO_SURFACE;
-    }
-
-    return eglCreatePbufferSurface(context->glDisplay, config,
+    return eglCreatePbufferSurface(context->glDisplay, context->glConfig,
                                    offScreenSurfaceAttribs);
   }
-
-  SurfaceFactoryContext *getContext() override { return _skiaOpenGlContext; }
-
-  std::function<void(SurfaceFactoryContext *context)>
-  getSurfaceReleasedProc() override {
-    return [ctxToDelete = _skiaOpenGlContext](SurfaceFactoryContext *context) {
-      // Don't destroy the shared GL Context!
-      if (context->glContext != EGL_NO_CONTEXT &&
-          context->glContext != _SharedEglContext) {
-        eglDestroyContext(context->glDisplay, context->glContext);
-        context->glContext = EGL_NO_CONTEXT;
-        delete ctxToDelete;
-      }
-    };
-  }
-
-private:
-  SurfaceFactoryContext *_skiaOpenGlContext;
 };
 } // namespace RNSkia
