@@ -44,8 +44,9 @@ describe("Offscreen Drawings", () => {
         paint.setColor(Skia.Color("lightblue"));
         canvas.drawCircle(r, r, r, paint);
         backSurface.flush();
-        const image = backSurface.makeImageSnapshot().makeNonTextureImage();
+        const image = backSurface.makeImageSnapshot();
         frontSurface.getCanvas().drawImage(image, 0, 0);
+        frontSurface.flush();
         return frontSurface.makeImageSnapshot().encodeToBase64();
       },
       { width, height }
@@ -67,15 +68,4 @@ describe("Offscreen Drawings", () => {
     );
     checkImage(image, docPath("offscreen/circle.png"));
   });
-
-  // Create offscreen surface 1
-  // Create offscreen surface 2
-  // Draw to surface 1
-  // Draw to surface 2
-  // encode snapshot surface 1
-  // encode snapshot surface 2
-  // Draw again to surface 1
-  // Draw again to surface 2
-  // encode snapshot surface 1
-  // encode snapshot surface 2
 });
