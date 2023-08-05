@@ -118,11 +118,9 @@ protected:
   /**
    * Creates the OpenGL context based on the given surface type
    * @param glDisplay Display to get config for
-   * @param type Requested surface type, offscreen or windowed
    * @return A valid GLContext or EGL_NO_CONTEXT
    */
-  static EGLContext createOpenGLContext(EGLDisplay glDisplay,
-                                        SkiaSurfaceType type);
+  static EGLContext createOpenGLContext(EGLDisplay glDisplay);
 
   /**
    * Creates an OpenGL surface for the given configuration found in the provided
@@ -159,7 +157,6 @@ protected:
    */
   static bool initializeOpenGL(SurfaceFactoryContext *context);
 
-  static thread_local SurfaceFactoryContext _ThreadContext;
   static EGLContext _SharedEglContext;
 
   SkiaSurfaceType _type;
@@ -178,7 +175,7 @@ public:
                                           surface)) {}
 
   bool present() {
-    if (!eglSwapBuffers(_ThreadContext.glDisplay, _glSurface)) {
+    if (!eglSwapBuffers(getContext()->glDisplay, _glSurface)) {
       RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
       return false;
     }
@@ -196,7 +193,7 @@ protected:
     return eglCreateWindowSurface(context->glDisplay, config, _window, nullptr);
   }
 
-  SurfaceFactoryContext *getContext() override { return &_ThreadContext; }
+  SurfaceFactoryContext *getContext() override { return &_skiaOpenGlContext; }
 
   /**
    * We should release the native window when the SkSurface is release - since
@@ -212,6 +209,7 @@ protected:
 
 private:
   ANativeWindow *_window;
+  static thread_local SurfaceFactoryContext _skiaOpenGlContext;
 };
 
 /**

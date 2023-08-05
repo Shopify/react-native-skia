@@ -8,7 +8,7 @@ namespace RNSkia {
  */
 EGLContext BaseSkiaSurfaceFactory::_SharedEglContext = EGL_NO_CONTEXT;
 
-thread_local SurfaceFactoryContext BaseSkiaSurfaceFactory::_ThreadContext;
+thread_local SurfaceFactoryContext WindowedSurfaceFactory::_skiaOpenGlContext;
 
 BaseSkiaSurfaceFactory::BaseSkiaSurfaceFactory(SkiaSurfaceType type, int width,
                                                int height) {
@@ -86,8 +86,7 @@ EGLConfig BaseSkiaSurfaceFactory::getConfig(EGLDisplay glDisplay) {
   return glConfig;
 }
 
-EGLContext BaseSkiaSurfaceFactory::createOpenGLContext(EGLDisplay glDisplay,
-                                                       SkiaSurfaceType type) {
+EGLContext BaseSkiaSurfaceFactory::createOpenGLContext(EGLDisplay glDisplay) {
   // Create OpenGL context
   EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
@@ -122,7 +121,7 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
 
   // Create the OpenGL context if necessary
   if (context->glContext == EGL_NO_CONTEXT) {
-    context->glContext = createOpenGLContext(context->glDisplay, _type);
+    context->glContext = createOpenGLContext(context->glDisplay);
     if (context->glContext == EGL_NO_CONTEXT) {
       return nullptr;
     }
@@ -184,11 +183,10 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
     SurfaceFactoryContext *context;
     EGLSurface glSurface;
     std::function<void(SurfaceFactoryContext *)> releaseProc;
-    SkiaSurfaceType type;
   };
 
-  auto releaseCtx = new ReleaseContext(
-      {context, _glSurface, getSurfaceReleasedProc(), _type});
+  auto releaseCtx =
+      new ReleaseContext({context, _glSurface, getSurfaceReleasedProc()});
 
   // Create surface object
   auto retVal = SkSurface::MakeFromBackendRenderTarget(
