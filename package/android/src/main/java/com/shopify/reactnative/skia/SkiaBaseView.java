@@ -171,6 +171,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         Log.i("SkiaBaseView", "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         surfaceDestroyed();
+        mSurface.release();
         mSurface = null;
         return false;
     }
