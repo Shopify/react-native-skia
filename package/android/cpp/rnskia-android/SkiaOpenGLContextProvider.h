@@ -56,11 +56,12 @@ public:
 
   ~OnscreenSurface() { ANativeWindow_release(window); }
 
-  bool startRender() {
-    return context->MakeCurrent(*surface);
-  }
-
-  bool endRender() {
+  bool present() {
+    if (!context->MakeCurrent(*surface)) {
+      RNSkLogger::logToConsole("Couldn't make context current");
+      return false;
+    }
+    grContext->flushAndSubmit();
     return surface->Present();
   }
 
@@ -116,7 +117,7 @@ private:
   sk_sp<GrDirectContext> jsThreadContext = nullptr;
   sk_sp<GrDirectContext> uiThreadContext = nullptr;
 
-  sk_sp<SkSurface> _MakeOffscreenSurface(Config *config, Context *context,
+  sk_sp<SkSurface> MakeOffscreenSurface(Config *config, Context *context,
                                          GrDirectContext *grContext, int width,
                                          int height);
 
@@ -140,7 +141,6 @@ public:
 
   std::unique_ptr<OnscreenSurface> MakeOnscreenSurface(jobject surface,
                                                        int width, int height);
-  sk_sp<SkSurface> MakeOffscreenSurface(int width, int height);
-  sk_sp<SkSurface> MakeSnapshottingSurface(int width, int height);
+  sk_sp<SkSurface> MakeOffscreenSurface(int width, int height, bool onJSThread);
 };
 } // namespace RNSkia

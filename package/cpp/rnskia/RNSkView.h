@@ -90,9 +90,9 @@ class RNSkOffscreenCanvasProvider : public RNSkCanvasProvider {
 public:
   RNSkOffscreenCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
                               std::function<void()> requestRedraw, float width,
-                              float height, bool useJSThread)
+                              float height, bool isOnJSThread)
       : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
-    _surface = useJSThread ?  context->makeOffscreenSurfaceOnJSThread(_width, _height) : context->makeOffscreenSurfaceOnUIThread(_width, _height);
+    _surface = context->makeOffscreenSurface(_width, _height, isOnJSThread);
   }
 
   /**

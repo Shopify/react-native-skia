@@ -120,12 +120,11 @@ public:
    * Creates an offscreen surface
    * @param width Width of the offscreen surface
    * @param height Height of the offscreen surface
+   * @param onJSThread Whether the surface is created on the JS thread
    * @return sk_sp<SkSurface>
    */
-  virtual sk_sp<SkSurface> makeOffscreenSurfaceOnUIThread(int width,
-                                                          int height) = 0;
-  virtual sk_sp<SkSurface> makeOffscreenSurfaceOnJSThread(int width,
-                                                          int height) = 0;
+  virtual sk_sp<SkSurface> makeOffscreenSurface(int width,
+                                                          int height, bool onJSThread) = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its

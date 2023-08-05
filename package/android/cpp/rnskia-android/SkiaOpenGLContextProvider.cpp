@@ -70,7 +70,7 @@ SkiaOpenGLContextProvider::MakeOnscreenSurface(jobject jSurface, int width,
   return onscreenSurface;
 }
 
-sk_sp<SkSurface> SkiaOpenGLContextProvider::_MakeOffscreenSurface(
+sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
     Config *config, Context *context, GrDirectContext *grContext, int width,
     int height) {
   // Create a new PBuffer surface with desired width and height
@@ -105,16 +105,15 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::_MakeOffscreenSurface(
   return surface;
 }
 
-sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(int width,
-                                                                 int height) {
-  return _MakeOffscreenSurface(jsConfig.get(), jsContext.get(),
-                               jsThreadContext.get(), width, height);
-}
-
 sk_sp<SkSurface>
-SkiaOpenGLContextProvider::MakeSnapshottingSurface(int width, int height) {
-  return _MakeOffscreenSurface(uiConfig.get(), uiContext.get(),
-                               uiThreadContext.get(), width, height);
+SkiaOpenGLContextProvider::MakeOffscreenSurface(int width, int height, bool onJSThread) {
+  if (onJSThread) {
+    return MakeOffscreenSurface(jsConfig.get(), jsContext.get(),
+                                jsThreadContext.get(), width, height);
+  } else {
+    return MakeOffscreenSurface(uiConfig.get(), uiContext.get(),
+                                uiThreadContext.get(), width, height);
+  }
 }
 
 } // namespace RNSkia

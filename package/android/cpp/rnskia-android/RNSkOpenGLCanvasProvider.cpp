@@ -33,13 +33,9 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       _surface = _onscreenSurface->makeSurface(_width, _height);
     }
     if (_surface) {
-      _onscreenSurface->startRender();
       auto canvas = _surface->getCanvas();
-      // Draw into canvas using callback
       cb(canvas);
-      _surface->flushAndSubmit();
-      // swap buffers
-      return _onscreenSurface->endRender();
+      return _onscreenSurface->present();
     } else {
       // the render context did not provide a surface
       return false;
