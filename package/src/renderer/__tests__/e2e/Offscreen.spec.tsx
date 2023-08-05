@@ -67,4 +67,15 @@ describe("Offscreen Drawings", () => {
     );
     checkImage(image, docPath("offscreen/circle.png"));
   });
+
+  // Create offscreen surface 1
+  // Create offscreen surface 2
+  // Draw to surface 1
+  // Draw to surface 2
+  // encode snapshot surface 1
+  // encode snapshot surface 2
+  // Draw again to surface 1
+  // Draw again to surface 2
+  // encode snapshot surface 1
+  // encode snapshot surface 2
 });

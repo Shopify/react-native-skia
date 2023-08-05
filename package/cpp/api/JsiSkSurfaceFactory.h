@@ -38,7 +38,7 @@ public:
     auto width = static_cast<int>(arguments[0].asNumber());
     auto height = static_cast<int>(arguments[1].asNumber());
     auto context = getContext();
-    auto surface = context->makeOffscreenSurface(width, height);
+    auto surface = context->makeOffscreenSurfaceOnJSThread(width, height);
     if (surface == nullptr) {
       return jsi::Value::null();
     }

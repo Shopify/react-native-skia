@@ -6,7 +6,7 @@
 
 #include <RNSkJsView.h>
 
-#include "SkiaOpenGLRenderer.h"
+#include "SkiaOpenGLContextProvider.h"
 #include <android/native_window.h>
 
 namespace RNSkia {
@@ -17,7 +17,7 @@ class RNSkOpenGLCanvasProvider
 public:
   RNSkOpenGLCanvasProvider(
       std::function<void()> requestRedraw,
-      std::shared_ptr<RNSkia::RNSkPlatformContext> context);
+      std::shared_ptr<RNSkia::RNSkPlatformContext> platformContext);
 
   ~RNSkOpenGLCanvasProvider();
 
@@ -34,8 +34,9 @@ public:
   void surfaceSizeChanged(int width, int height);
 
 private:
-  std::unique_ptr<SkiaOpenGLRenderer> _renderer = nullptr;
-  std::shared_ptr<RNSkPlatformContext> _context;
+  std::unique_ptr<OnscreenSurface> _onscreenSurface = nullptr;
+  sk_sp<SkSurface> _surface = nullptr;
+  std::shared_ptr<RNSkPlatformContext> _platformContext;
   float _width = -1;
   float _height = -1;
 };

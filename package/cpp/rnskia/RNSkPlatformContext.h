@@ -42,7 +42,6 @@ public:
         _callInvoker(callInvoker),
         _dispatchQueue(
             std::make_unique<RNSkDispatchQueue>("skia-render-thread")) {
-    _jsThreadId = std::this_thread::get_id();
   }
 
   /**
@@ -60,13 +59,6 @@ public:
     // set to true signalling that we are done and can clean up.
     notifyDrawLoop(true);
     _isValid = false;
-  }
-
-  /*
-   Returns true if the current execution context is the javascript thread.
-   */
-  bool isOnJavascriptThread() {
-    return _jsThreadId == std::this_thread::get_id();
   }
 
   /**
@@ -130,7 +122,10 @@ public:
    * @param height Height of the offscreen surface
    * @return sk_sp<SkSurface>
    */
-  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+  virtual sk_sp<SkSurface> makeOffscreenSurfaceOnUIThread(int width,
+                                                          int height) = 0;
+  virtual sk_sp<SkSurface> makeOffscreenSurfaceOnJSThread(int width,
+                                                          int height) = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its
@@ -229,8 +224,6 @@ public:
 
 private:
   float _pixelDensity;
-
-  std::thread::id _jsThreadId;
 
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;

@@ -1,6 +1,7 @@
 package com.shopify.reactnative.skia;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
@@ -20,6 +21,13 @@ public class SkiaDrawView extends SkiaBaseView {
     protected void finalize() throws Throwable {
         super.finalize();
         mHybridData.resetNative();
+    }
+
+    @Override
+    protected boolean isMainThreadRendererSupported() {
+        // Since we're rendering on the JS thread we'll never
+        // be able to deliver first frame rendering
+        return false;
     }
 
     private native HybridData initHybrid(SkiaManager skiaManager);
@@ -42,4 +50,5 @@ public class SkiaDrawView extends SkiaBaseView {
 
     protected native void unregisterView();
 
+    protected native Object renderToBitmap(Object bitmap, int width, int height);
 }

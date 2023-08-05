@@ -45,7 +45,14 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniPlatformContext.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkOpenGLCanvasProvider.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLRenderer.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLContextProvider.cpp"
+
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/gltoolkit/Config.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/gltoolkit/Context.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/gltoolkit/Display.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/gltoolkit/Macros.h"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/gltoolkit/Proc.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/gltoolkit/Surface.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiValue.cpp"
