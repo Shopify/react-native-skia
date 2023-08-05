@@ -25,7 +25,7 @@ public:
   JsiDependencyManager(std::shared_ptr<RNSkPlatformContext> context,
                        jsi::Runtime &runtime,
                        const jsi::Value &registerValuesCallback)
-      : _registerValuesCallback(std::make_shared<jsi::Object>(
+      : _registerValuesCallback(std::make_unique<jsi::Object>(
             registerValuesCallback.asObject(runtime))),
         JsiHostObject() {}
 
@@ -161,7 +161,7 @@ public:
 
     // Call JS registerValues callback
     auto func = _registerValuesCallback->asFunction(runtime);
-    _unregisterValues = std::make_shared<jsi::Object>(
+    _unregisterValues = std::make_unique<jsi::Object>(
         func.call(runtime, array, 1).asObject(runtime));
 
     return jsi::Value::undefined();
@@ -287,8 +287,8 @@ private:
     return false;
   }
 
-  std::shared_ptr<jsi::Object> _registerValuesCallback;
-  std::shared_ptr<jsi::Object> _unregisterValues;
+  std::unique_ptr<jsi::Object> _registerValuesCallback;
+  std::unique_ptr<jsi::Object> _unregisterValues;
   std::map<JsiDomNode *,
            std::vector<std::pair<std::shared_ptr<RNSkReadonlyValue>,
                                  std::function<void()>>>>

@@ -23,10 +23,15 @@ export class Container {
   }
 
   draw(ctx: DrawingContext) {
-    this._root.render(ctx);
+    this._root?.render(ctx);
   }
 
   get root() {
     return this._root;
+  }
+
+  unmount() {
+    this.depMgr.remove();
+    this._root.dispose();
   }
 }

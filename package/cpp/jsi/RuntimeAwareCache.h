@@ -93,6 +93,11 @@ public:
     return _secondaryRuntimeCaches.at(&rt);
   }
 
+  void dispose() {
+    _primaryCache.clear();
+    _secondaryRuntimeCaches.clear();
+  }
+
 private:
   std::unordered_map<void *, T> _secondaryRuntimeCaches;
   T _primaryCache;

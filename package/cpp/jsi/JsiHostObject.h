@@ -186,6 +186,11 @@ protected:
   }
 
   /**
+   Call dispose to release any resources
+   */
+  virtual void dispose() { _hostFunctionCache.dispose(); }
+
+  /**
    * Installs a function into the function map
    */
   void installFunction(const std::string &name,

@@ -57,7 +57,7 @@ export class SkiaRoot {
 
   unmount() {
     skiaReconciler.updateContainer(null, this.root, null, () => {
-      this.container.depMgr.remove();
+      this.container.unmount();
     });
   }
 

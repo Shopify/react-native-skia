@@ -75,9 +75,10 @@ public:
             class = std::enable_if_t<!std::is_array<_Tp>::value>>
   _Tp *defineProperty(_Args &&...__args) {
     auto prop =
-        std::make_shared<_Tp>(std::forward<_Args>(__args)..., _onChange);
-    _properties.push_back(prop);
-    return prop.get();
+        std::make_unique<_Tp>(std::forward<_Args>(__args)..., _onChange);
+    auto ptr = prop.get();
+    _properties.push_back(std::move(prop));
+    return ptr;
   }
 
   /*
@@ -107,7 +108,7 @@ protected:
   void setIsChanged(bool isChanged) { _isChanged = isChanged; }
 
 private:
-  std::vector<std::shared_ptr<BaseNodeProp>> _properties;
+  std::vector<std::unique_ptr<BaseNodeProp>> _properties;
   std::atomic<bool> _isChanged = {false};
   std::function<void(BaseNodeProp *)> _onChange;
 };

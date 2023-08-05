@@ -139,17 +139,19 @@ public:
   _Tp *defineProperty(_Args &&...__args) {
     // Create property and set onChange callback
     auto prop =
-        std::make_shared<_Tp>(std::forward<_Args>(__args)..., _onPropChanged);
+        std::make_unique<_Tp>(std::forward<_Args>(__args)..., _onPropChanged);
+
+    auto ptr = prop.get();
 
     // Add to props list
-    _properties.push_back(prop);
+    _properties.push_back(std::move(prop));
 
-    return prop.get();
+    return ptr;
   }
 
 private:
   std::function<void(BaseNodeProp *)> _onPropChanged;
-  std::vector<std::shared_ptr<BaseNodeProp>> _properties;
+  std::vector<std::unique_ptr<BaseNodeProp>> _properties;
   std::map<PropId, std::vector<NodeProp *>> _mappedProperties;
   PropId _type;
   std::mutex _mappedPropsLock;

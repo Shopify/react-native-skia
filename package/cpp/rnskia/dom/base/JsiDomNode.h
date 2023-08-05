@@ -3,6 +3,7 @@
 #include "JsiHostObject.h"
 #include "NodeProp.h"
 #include "NodePropsContainer.h"
+#include "RNSkLog.h"
 
 #include <memory>
 #include <string>
@@ -61,6 +62,7 @@ public:
     printDebugInfo("JsiDomNode." + std::string(_type) +
                    " DTOR - nodeId: " + std::to_string(_nodeId));
 #endif
+    RNSkLogger::logToConsole("DTOR: Removing node %s", _type);
   }
 
   /**
@@ -283,6 +285,8 @@ public:
    to false, while the dom render view calls this with true.
    */
   virtual void dispose(bool immediate) {
+    JsiHostObject::dispose();
+
     if (_isDisposing) {
       return;
     }
@@ -474,8 +478,8 @@ private:
   void invalidate() {
     if (_isDisposing && !_isDisposed) {
 #if SKIA_DOM_DEBUG
-      printDebugInfo("JsiDomNode::invalidate: nodeid: " +
-                     std::to_string(_nodeId));
+      printDebugInfo("JsiDomNode(" + std::string(getType()) +
+                     ")::invalidate: nodeid: " + std::to_string(_nodeId));
 #endif
 
       _isDisposed = true;
@@ -495,6 +499,7 @@ private:
       // Clear props
       if (_propsContainer != nullptr) {
         _propsContainer->dispose();
+        _propsContainer = nullptr;
       }
 
       // Remove children
@@ -518,7 +523,7 @@ private:
    */
   void ensurePropertyContainer() {
     if (_propsContainer == nullptr) {
-      _propsContainer = std::make_shared<NodePropsContainer>(
+      _propsContainer = std::make_unique<NodePropsContainer>(
           getType(), [weakSelf = weak_from_this()](BaseNodeProp *p) {
             auto self = weakSelf.lock();
             if (self) {
@@ -534,7 +539,7 @@ private:
   const char *_type;
   std::shared_ptr<RNSkPlatformContext> _context;
 
-  std::shared_ptr<NodePropsContainer> _propsContainer;
+  std::unique_ptr<NodePropsContainer> _propsContainer;
 
   std::function<void()> _disposeCallback;
 

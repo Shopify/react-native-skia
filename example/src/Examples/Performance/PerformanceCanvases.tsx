@@ -2,15 +2,9 @@ import { Canvas, useImage, Image } from "@shopify/react-native-skia";
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
-const oslo = require("../../assets/oslo.jpg");
-
-const SIZE = 26;
-const PADDING = 2;
 const numberOfItems = 100;
 
 export const PerformanceDrawingTest: React.FC = () => {
-  const image = useImage(oslo);
-
   const [items, setItems] = useState([{ visible: true }]);
   const shuffle = () => {
     setItems(
@@ -35,20 +29,14 @@ export const PerformanceDrawingTest: React.FC = () => {
         {items.map((item, index) => (
           <View
             key={index}
-            style={{ width: 30, height: 40, backgroundColor: "red", margin: 2 }}
+            style={{
+              width: 30,
+              height: 40,
+              backgroundColor: item.visible ? "red" : "gray",
+              margin: 2,
+            }}
           >
-            {item.visible && (
-              <Canvas style={styles.container}>
-                <Image
-                  image={image}
-                  x={PADDING}
-                  y={PADDING}
-                  width={SIZE}
-                  height={SIZE}
-                  fit="cover"
-                />
-              </Canvas>
-            )}
+            {item.visible && <Canvas style={styles.container}></Canvas>}
           </View>
         ))}
       </View>

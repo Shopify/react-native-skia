@@ -85,7 +85,7 @@ void RNSkDomRenderer::renderCanvas(SkCanvas *canvas, float scaledWidth,
   canvas->scale(pd, pd);
 
   if (_drawingContext == nullptr) {
-    _drawingContext = std::make_shared<DrawingContext>();
+    _drawingContext = std::make_unique<DrawingContext>();
 
     _drawingContext->setRequestRedraw([weakSelf = weak_from_this()]() {
       auto self = weakSelf.lock();

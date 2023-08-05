@@ -35,7 +35,7 @@ export const Filters = () => {
 
   return (
     <Canvas style={{ width, height }} onTouch={() => setState((i) => i + 1)}>
-      <Fill>
+      {/* <Fill>
         <Shader source={source} uniforms={uniforms}>
           <ImageShader
             image={image}
@@ -48,7 +48,7 @@ export const Filters = () => {
             height={height}
           />
         </Shader>
-      </Fill>
+      </Fill> */}
     </Canvas>
   );
 };

@@ -66,7 +66,7 @@ private:
   std::shared_ptr<std::timed_mutex> _touchCallbackLock;
 
   std::shared_ptr<JsiDomRenderNode> _root;
-  std::shared_ptr<DrawingContext> _drawingContext;
+  std::unique_ptr<DrawingContext> _drawingContext;
 
   RNSkTimingInfo _renderTimingInfo;
 

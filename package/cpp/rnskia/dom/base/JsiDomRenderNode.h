@@ -136,6 +136,9 @@ public:
    Overridden dispose to release resources
    */
   void dispose(bool immediate) override {
+#if SKIA_DOM_DEBUG
+    printDebugInfo("dispose");
+#endif
     JsiDomNode::dispose(immediate);
     _paintCache.clear();
   }
