@@ -56,7 +56,11 @@ public:
 
   ~OnscreenSurface() { ANativeWindow_release(window); }
 
-  bool present() {
+  bool startRender() {
+    return context->MakeCurrent(*surface);
+  }
+
+  bool endRender() {
     return surface->Present();
   }
 
