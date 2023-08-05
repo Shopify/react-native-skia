@@ -21,8 +21,8 @@ public:
 
   virtual std::unique_ptr<Config> ChooseConfig(ConfigDescriptor config) const;
 
-  virtual std::unique_ptr<Context> CreateContext(const Config &config,
-                                                 const Context *share_context = nullptr);
+  virtual std::unique_ptr<Context>
+  CreateContext(const Config &config, const Context *share_context = nullptr);
 
   virtual std::unique_ptr<Surface>
   CreateWindowSurface(const Config &config, EGLNativeWindowType window);

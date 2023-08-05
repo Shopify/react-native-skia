@@ -41,8 +41,7 @@ public:
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker),
         _dispatchQueue(
-            std::make_unique<RNSkDispatchQueue>("skia-render-thread")) {
-  }
+            std::make_unique<RNSkDispatchQueue>("skia-render-thread")) {}
 
   /**
    * Destructor
@@ -123,8 +122,8 @@ public:
    * @param onJSThread Whether the surface is created on the JS thread
    * @return sk_sp<SkSurface>
    */
-  virtual sk_sp<SkSurface> makeOffscreenSurface(int width,
-                                                          int height, bool onJSThread) = 0;
+  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                                bool onJSThread) = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its

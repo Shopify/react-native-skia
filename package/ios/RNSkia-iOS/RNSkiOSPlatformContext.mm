@@ -57,9 +57,9 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }
 
-sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
-                                                              int height,
-															  bool isOnJSThread) {
+sk_sp<SkSurface>
+RNSkiOSPlatformContext::makeOffscreenSurface(int width, int height,
+                                             bool isOnJSThread) {
   return MakeOffscreenMetalSurface(width, height);
 }
 

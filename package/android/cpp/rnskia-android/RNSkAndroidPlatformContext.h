@@ -37,7 +37,8 @@ public:
     _jniPlatformContext->raiseError(err);
   }
 
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height, bool onJSThread) override {
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                        bool onJSThread) override {
     auto contextProvider = SkiaOpenGLContextProvider::getInstance();
     return contextProvider->MakeOffscreenSurface(width, height, onJSThread);
   }

@@ -84,8 +84,7 @@ std::unique_ptr<Config> Display::ChooseConfig(ConfigDescriptor config) const {
     }
   }
 
-  if (config.surface_type != SurfaceType::kNonSpecified)
-  {
+  if (config.surface_type != SurfaceType::kNonSpecified) {
     attributes.push_back(EGL_SURFACE_TYPE);
     switch (config.surface_type) {
     case SurfaceType::kWindow:

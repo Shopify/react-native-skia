@@ -45,8 +45,8 @@ private:
 public:
   OnscreenSurface(GrDirectContext *aGrContext, ANativeWindow *aWindow,
                   Display *aDisplay, Config *aConfig, Context *aContext)
-      : grContext(aGrContext), window(aWindow), display(aDisplay), config(aConfig),
-        context(aContext) {
+      : grContext(aGrContext), window(aWindow), display(aDisplay),
+        config(aConfig), context(aContext) {
     surface = display->CreateWindowSurface(*config, window);
     if (!surface) {
       RNSkLogger::logToConsole("Couldn't create surface");
@@ -73,7 +73,7 @@ public:
 
     GrGLFramebufferInfo info;
     info.fFBOID = 0;
-    info.fFormat = 0x8058; // GL_RGBA8
+    info.fFormat = 0x8058;             // GL_RGBA8
     auto colorType = kN32_SkColorType; // native 32-bit RGBA encoding
 
     auto stencil = static_cast<GLint>(config->GetDescriptor().stencil_bits);
@@ -85,8 +85,8 @@ public:
 
     GrBackendRenderTarget backendRT(width, height, samples, stencil, info);
     sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
-        grContext, backendRT, kBottomLeft_GrSurfaceOrigin,
-        colorType, nullptr, nullptr);
+        grContext, backendRT, kBottomLeft_GrSurfaceOrigin, colorType, nullptr,
+        nullptr);
 
     if (!surface) {
       RNSkLogger::logToConsole("Failed to create offscreen surface");
@@ -118,8 +118,8 @@ private:
   sk_sp<GrDirectContext> uiThreadContext = nullptr;
 
   sk_sp<SkSurface> MakeOffscreenSurface(Config *config, Context *context,
-                                         GrDirectContext *grContext, int width,
-                                         int height);
+                                        GrDirectContext *grContext, int width,
+                                        int height);
 
 public:
   ~SkiaOpenGLContextProvider();

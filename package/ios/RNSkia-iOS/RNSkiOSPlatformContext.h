@@ -63,7 +63,8 @@ public:
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
 
   void raiseError(const std::exception &err) override;
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height, bool isOnJSThread) override;
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                        bool isOnJSThread) override;
 
   void willInvalidateModules() {
     // We need to do some house-cleaning here!

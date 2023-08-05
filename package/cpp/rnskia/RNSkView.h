@@ -277,7 +277,8 @@ public:
 
     auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
-        _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight(), true);
+        _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight(),
+        true);
 
     _renderer->renderImmediate(provider);
     return provider->makeSnapshot(bounds)->makeNonTextureImage();

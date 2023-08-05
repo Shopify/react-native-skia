@@ -66,7 +66,8 @@ SkiaOpenGLContextProvider::MakeOnscreenSurface(jobject jSurface, int width,
                                           jSurface);
   std::unique_ptr<OnscreenSurface> onscreenSurface =
       std::make_unique<OnscreenSurface>(uiThreadContext.get(), window,
-                                        display.get(), uiConfig.get(), uiContext.get());
+                                        display.get(), uiConfig.get(),
+                                        uiContext.get());
   return onscreenSurface;
 }
 
@@ -95,8 +96,8 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
   }
   GrBackendRenderTarget backendRT(width, height, samples, stencil, info);
   sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
-      grContext, backendRT, kBottomLeft_GrSurfaceOrigin, colorType,
-      nullptr, nullptr);
+      grContext, backendRT, kBottomLeft_GrSurfaceOrigin, colorType, nullptr,
+      nullptr);
 
   if (!surface) {
     RNSkLogger::logToConsole("Failed to create offscreen surface");
@@ -106,7 +107,8 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
 }
 
 sk_sp<SkSurface>
-SkiaOpenGLContextProvider::MakeOffscreenSurface(int width, int height, bool onJSThread) {
+SkiaOpenGLContextProvider::MakeOffscreenSurface(int width, int height,
+                                                bool onJSThread) {
   if (onJSThread) {
     return MakeOffscreenSurface(jsConfig.get(), jsContext.get(),
                                 jsThreadContext.get(), width, height);
