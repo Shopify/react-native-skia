@@ -52,6 +52,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
                         new Rect(0, 0, width, height),
                         new Rect(0, 0, width, height),
                         null);
+
+                bitmap.recycle();
             }
         }
     }
