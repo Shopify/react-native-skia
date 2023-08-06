@@ -26,10 +26,20 @@ bool BaseSkiaSurfaceFactory::resize(int width, int height) {
 }
 
 bool BaseSkiaSurfaceFactory::makeCurrent() {
-  if (!eglMakeCurrent(getContext()->glDisplay, _glSurface, _glSurface,
-                      getContext()->glContext)) {
-    RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
-    return false;
+  // We don't need to call make current if we already are current:
+  auto context = getContext();
+  if (eglGetCurrentDisplay() != context->glDisplay ||
+      eglGetCurrentSurface(EGL_DRAW) != _glSurface ||
+      eglGetCurrentSurface(EGL_READ) != _glSurface ||
+      eglGetCurrentContext() != context->glContext) {
+
+    // Make current!
+    if (eglMakeCurrent(getContext()->glDisplay, _glSurface, _glSurface,
+                       getContext()->glContext) != EGL_TRUE) {
+      RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+      return false;
+    }
+    return true;
   }
   return true;
 }
@@ -77,7 +87,7 @@ EGLConfig BaseSkiaSurfaceFactory::getConfig(EGLDisplay glDisplay) {
 
   EGLint numConfigs;
   EGLConfig glConfig = 0;
-  if (!eglChooseConfig(glDisplay, att, &glConfig, 1, &numConfigs) ||
+  if (eglChooseConfig(glDisplay, att, &glConfig, 1, &numConfigs) != EGL_TRUE ||
       numConfigs == 0) {
     RNSkLogger::logToConsole(
         "Failed to choose a config for %s surface. Error code: %d\n",

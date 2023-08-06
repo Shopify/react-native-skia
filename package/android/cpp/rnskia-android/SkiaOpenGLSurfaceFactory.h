@@ -132,7 +132,6 @@ protected:
    * @return A valid OpenGL surface of the requested type
    */
   virtual EGLSurface createOpenGLSurface(SurfaceFactoryContext *context) = 0;
-  EGLSurface _glSurface = EGL_NO_SURFACE;
 
   /**
    * Creates the SkSurface from a valid Skia surface. This method is where we
@@ -165,6 +164,8 @@ protected:
   static BaseSkiaSurfaceFactory *SharedContext;
   static thread_local SurfaceFactoryContext ThreadedSkiaOpenGlContext;
 
+  EGLSurface _glSurface = EGL_NO_SURFACE;
+
   int _width;
   int _height;
 };
@@ -182,7 +183,10 @@ public:
   ~WindowedSurfaceFactory() { ANativeWindow_release(_window); }
 
   bool present() {
-    if (!eglSwapBuffers(getContext()->glDisplay, _glSurface)) {
+    // Flush and submit
+    getContext()->directContext->flushAndSubmit();
+
+    if (eglSwapBuffers(getContext()->glDisplay, _glSurface) != EGL_TRUE) {
       RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
       return false;
     }
