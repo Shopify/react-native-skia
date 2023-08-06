@@ -59,6 +59,19 @@ struct SurfaceFactoryContext {
  * - eglMakeCurrent
  * - GrDirectContext::MakeGL()
  * - Create Skia backend and direct context
+ *
+ * So the principle will be: for a single thread we'll have a glDisplay, glContext and a direct
+ * Skia context (GrDirectContext). The glContext will be created with the shared context parameter
+ * so that we can share gpu resources created by Skia on multiple threads (think javascript and
+ * main thread).
+ *
+ * When creating windowed surfaces we just create a glSurface using eglCreateWindowedSurface, and
+ * then a SkSurface using a backend render target pointing to the windowed surface.
+ *
+ * When creating offscreen surfaces we create a simple 1x1 pbuffer surface, and then create
+ * a texture using the Skia direct context's createBackendTexture. Then we can create an
+ * SkSurface wrapping the backend texture surface.
+ *
  */
 class BaseSkiaSurfaceFactory {
 public:
@@ -119,6 +132,18 @@ protected:
    */
   virtual EGLSurface createOpenGLSurface(SurfaceFactoryContext *context) = 0;
   EGLSurface _glSurface = EGL_NO_SURFACE;
+
+  /**
+   * Creates the SkSurface from a valid Skia surface. This method is where we
+   * bind the SkSurface to the created underlying surface.
+   * @param context
+   * @param glSurface
+   * @param colorType
+   * @return
+   */
+  virtual sk_sp<SkSurface>
+  createSkSurfaceFromContext(SurfaceFactoryContext *context,
+                             EGLSurface glSurface, SkColorType colorType);
 
   /*
    * Virtual method for providing the context that should be used. Some surface
@@ -205,11 +230,49 @@ public:
       : BaseSkiaSurfaceFactory(width, height) {}
 
   EGLSurface createOpenGLSurface(SurfaceFactoryContext *context) override {
-    const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, _width, EGL_HEIGHT,
-                                              _height, EGL_NONE};
+    const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1,
+                                              EGL_NONE};
 
     return eglCreatePbufferSurface(context->glDisplay, context->glConfig,
                                    offScreenSurfaceAttribs);
+  }
+
+  sk_sp<SkSurface> createSkSurfaceFromContext(SurfaceFactoryContext *context,
+                                              EGLSurface glSurface,
+                                              SkColorType colorType) override {
+
+    SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
+
+    auto texture = context->directContext->createBackendTexture(
+        _width, _height, colorType, GrMipMapped::kNo, GrRenderable::kYes);
+
+    struct ReleaseContext {
+      SurfaceFactoryContext *context;
+      GrBackendTexture texture;
+      EGLSurface glSurface;
+    };
+
+    auto releaseCtx = new ReleaseContext({context, texture, _glSurface});
+
+    // Create a SkSurface from the GrBackendTexture
+    auto surface = SkSurface::MakeFromBackendTexture(
+        context->directContext.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
+        colorType, nullptr, &props,
+        [](void *addr) {
+          auto releaseCtx = (ReleaseContext *)addr;
+
+          releaseCtx->context->directContext->deleteBackendTexture(
+              releaseCtx->texture);
+
+          eglMakeCurrent(releaseCtx->context->glDisplay, EGL_NO_SURFACE,
+                         EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+          eglDestroySurface(releaseCtx->context->glDisplay,
+                            releaseCtx->glSurface);
+        },
+        releaseCtx);
+
+    return surface;
   }
 };
 } // namespace RNSkia

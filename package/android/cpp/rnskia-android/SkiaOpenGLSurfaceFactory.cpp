@@ -153,6 +153,13 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
     }
   }
 
+  return createSkSurfaceFromContext(
+      context, _glSurface, kN32_SkColorType); // native 32-bit RGBA encoding
+}
+
+sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurfaceFromContext(
+    SurfaceFactoryContext *context, EGLSurface glSurface,
+    SkColorType colorType) {
   // Set up parameters for the render target so that it
   // matches the underlying OpenGL context.
   GrGLFramebufferInfo fboInfo;
@@ -162,8 +169,6 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
   // render target and the GrGlGpu object.
   fboInfo.fFBOID = 0;
   fboInfo.fFormat = 0x8058; // GL_RGBA8
-
-  auto colorType = kN32_SkColorType; // native 32-bit RGBA encoding
 
   GLint stencil;
   glGetIntegerv(GL_STENCIL_BITS, &stencil);
@@ -190,7 +195,7 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurface() {
   };
 
   auto releaseCtx =
-      new ReleaseContext({context, _glSurface, getSurfaceReleasedProc()});
+      new ReleaseContext({context, glSurface, getSurfaceReleasedProc()});
 
   // Create surface object
   auto retVal = SkSurface::MakeFromBackendRenderTarget(
