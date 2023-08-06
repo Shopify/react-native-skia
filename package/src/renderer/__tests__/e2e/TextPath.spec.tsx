@@ -40,8 +40,6 @@ describe("Text Paths", () => {
         </Group>
       </>
     );
-    checkImage(image, `snapshots/text/text-path-bug-${surface.OS}.png`, {
-      overwrite: true,
-    });
+    checkImage(image, `snapshots/text/text-path-bug-${surface.OS}.png`);
   });
 });
