@@ -239,7 +239,7 @@ public:
         context->directContext.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
         colorType, nullptr, &props,
         [](void *addr) {
-          auto releaseCtx = reinterpret_cast<ReleaseContext*>(addr);
+          auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
 
           releaseCtx->context->directContext->deleteBackendTexture(
               releaseCtx->texture);
