@@ -191,11 +191,9 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurfaceFromContext(
   struct ReleaseContext {
     SurfaceFactoryContext *context;
     EGLSurface glSurface;
-    std::function<void(SurfaceFactoryContext *)> releaseProc;
   };
 
-  auto releaseCtx =
-      new ReleaseContext({context, glSurface, getSurfaceReleasedProc()});
+  auto releaseCtx = new ReleaseContext({context, glSurface});
 
   // Create surface object
   auto retVal = SkSurface::MakeFromBackendRenderTarget(
@@ -209,9 +207,6 @@ sk_sp<SkSurface> BaseSkiaSurfaceFactory::createSkSurfaceFromContext(
 
         eglDestroySurface(releaseCtx->context->glDisplay,
                           releaseCtx->glSurface);
-
-        // Call subclass release proc
-        releaseCtx->releaseProc(releaseCtx->context);
 
         delete releaseCtx;
       },

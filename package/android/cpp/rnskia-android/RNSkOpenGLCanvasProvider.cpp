@@ -81,6 +81,9 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(int width, int height) {
   _width = width;
   _height = height;
 
+  // Clear surface
+  _surface = nullptr;
+
   // Recreate RenderContext surface based on size change???
   if (_surfacefactory->resize(width, height)) {
     // Redraw after size change

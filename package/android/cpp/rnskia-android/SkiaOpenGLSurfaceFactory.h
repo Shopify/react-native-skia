@@ -60,17 +60,18 @@ struct SurfaceFactoryContext {
  * - GrDirectContext::MakeGL()
  * - Create Skia backend and direct context
  *
- * So the principle will be: for a single thread we'll have a glDisplay, glContext and a direct
- * Skia context (GrDirectContext). The glContext will be created with the shared context parameter
- * so that we can share gpu resources created by Skia on multiple threads (think javascript and
- * main thread).
+ * So the principle will be: for a single thread we'll have a glDisplay,
+ * glContext and a direct Skia context (GrDirectContext). The glContext will be
+ * created with the shared context parameter so that we can share gpu resources
+ * created by Skia on multiple threads (think javascript and main thread).
  *
- * When creating windowed surfaces we just create a glSurface using eglCreateWindowedSurface, and
- * then a SkSurface using a backend render target pointing to the windowed surface.
+ * When creating windowed surfaces we just create a glSurface using
+ * eglCreateWindowedSurface, and then a SkSurface using a backend render target
+ * pointing to the windowed surface.
  *
- * When creating offscreen surfaces we create a simple 1x1 pbuffer surface, and then create
- * a texture using the Skia direct context's createBackendTexture. Then we can create an
- * SkSurface wrapping the backend texture surface.
+ * When creating offscreen surfaces we create a simple 1x1 pbuffer surface, and
+ * then create a texture using the Skia direct context's createBackendTexture.
+ * Then we can create an SkSurface wrapping the backend texture surface.
  *
  */
 class BaseSkiaSurfaceFactory {
@@ -155,17 +156,6 @@ protected:
   }
 
   /**
-   * Creates a function that will release any resources aquired when the surface
-   * was created so that we can clean up when the Skia Surface is destroyed and
-   * not when the factory is destroyed.
-   * @return A function that will release any resources aquired.
-   */
-  virtual std::function<void(SurfaceFactoryContext *context)>
-  getSurfaceReleasedProc() {
-    return [](SurfaceFactoryContext *) {};
-  }
-
-  /**
    * Initializes OpenGL with the given context
    * @param context Context to save initialized members to
    * @return True on success
@@ -189,6 +179,8 @@ public:
         _window(ANativeWindow_fromSurface(facebook::jni::Environment::current(),
                                           surface)) {}
 
+  ~WindowedSurfaceFactory() { ANativeWindow_release(_window); }
+
   bool present() {
     if (!eglSwapBuffers(getContext()->glDisplay, _glSurface)) {
       RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
@@ -203,18 +195,6 @@ protected:
     const EGLint attribs[] = {EGL_NONE};
     return eglCreateWindowSurface(context->glDisplay, context->glConfig,
                                   _window, attribs);
-  }
-
-  /**
-   * We should release the native window when the SkSurface is release - since
-   * this class is a factory we might delete the factory before the surface.
-   * @return
-   */
-  std::function<void(SurfaceFactoryContext *context)>
-  getSurfaceReleasedProc() override {
-    return [window = _window](SurfaceFactoryContext *) {
-      ANativeWindow_release(window);
-    };
   }
 
 private:
@@ -259,7 +239,7 @@ public:
         context->directContext.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
         colorType, nullptr, &props,
         [](void *addr) {
-          auto releaseCtx = (ReleaseContext *)addr;
+          auto releaseCtx = reinterpret_cast<ReleaseContext*>(addr);
 
           releaseCtx->context->directContext->deleteBackendTexture(
               releaseCtx->texture);
