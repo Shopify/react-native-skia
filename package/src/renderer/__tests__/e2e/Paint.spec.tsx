@@ -64,11 +64,28 @@ describe("Paint", () => {
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("lightblue"));
     const image = await surface.draw(
-      <>
-        <Circle cx={width / 2} cy={height / 2} r={width / 2} paint={paint} />
-      </>
+      <Group>
+        <Circle
+          cx={width / 2}
+          cy={height / 2}
+          r={width / 2}
+          paint={paint}
+          color="red"
+        />
+      </Group>
     );
     checkImage(image, "snapshots/paint/circle.png");
+  });
+  it("should accept a paint object as path property", async () => {
+    const { Skia } = importSkia();
+    const paint = Skia.Paint();
+    paint.setColor(Skia.Color("lightblue"));
+    const image = await surface.draw(
+      <Group>
+        <Path path="M0 0h100v100H0z" paint={paint} color="red" />
+      </Group>
+    );
+    checkImage(image, "snapshots/paint/path-paint.png");
   });
   it("should display blend modes properly", async () => {
     const { Skia, rect } = importSkia();
