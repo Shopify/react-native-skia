@@ -68,7 +68,7 @@ RNSkMetalCanvasProvider::MakeOffscreenMetalSurface(int width, int height) {
   GrBackendTexture backendTexture(width, height, GrMipMapped::kNo, info);
 
   // Create a SkSurface from the GrBackendTexture
-  auto surface = SkSurface::MakeFromBackendTexture(
+  auto surface = SkSurfaces::WrapBackendTexture(
       renderContext->skContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin,
       0, kBGRA_8888_SkColorType, nullptr, nullptr,
       [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
