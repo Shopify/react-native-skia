@@ -133,15 +133,9 @@ export const configurations: Configuration = {
         cpu: "arm64",
         args: [
           ["ios_min_target", '"13.0"'],
-          ["extra_cflags", '["-target", "arm64-apple-ios", "-fembed-bitcode"]'],
-          [
-            "extra_asmflags",
-            '["-target", "arm64-apple-ios", "-fembed-bitcode"]',
-          ],
-          [
-            "extra_ldflags",
-            '["-target", "arm64-apple-ios", "-fembed-bitcode"]',
-          ],
+          ["extra_cflags", '["-target", "arm64-apple-ios"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-ios"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-ios"]'],
         ],
       },
       "arm64-iphonesimulator": {
