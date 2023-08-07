@@ -19,11 +19,6 @@ struct OffscreenRenderContext {
                          sk_sp<GrDirectContext> skiaContext,
                          id<MTLCommandQueue> commandQueue, int width,
                          int height) {
-    device = MTLCreateSystemDefaultDevice();
-    commandQueue =
-        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    skiaContext = GrDirectContext::MakeMetal((__bridge void *)device,
-                                             (__bridge void *)commandQueue);
     // Create a Metal texture descriptor
     MTLTextureDescriptor *textureDescriptor = [MTLTextureDescriptor
         texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm

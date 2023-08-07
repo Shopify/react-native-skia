@@ -12,7 +12,10 @@ std::unique_ptr<SkiaOpenGLContextProvider> SkiaOpenGLContextProvider::instance =
     nullptr;
 
 SkiaOpenGLContextProvider::SkiaOpenGLContextProvider() {
+  // 1. Display is shared across thread
   display = std::make_unique<Display>();
+
+  // 2. UI Thread context
   ConfigDescriptor desc;
   uiConfig = display->ChooseConfig(desc);
   uiContext = display->CreateContext(*uiConfig);
@@ -20,25 +23,25 @@ SkiaOpenGLContextProvider::SkiaOpenGLContextProvider() {
     RNSkLogger::logToConsole("Couldn't create the root context");
     return;
   }
-  auto uiSurface = display->CreatePixelBufferSurface(*uiConfig, 1, 1);
+  uiSurface = display->CreatePixelBufferSurface(*uiConfig, 1, 1);
   if (!uiContext->MakeCurrent(*uiSurface)) {
     RNSkLogger::logToConsole("Couldn't create the root context");
     return;
   }
-
   uiThreadContext = GrDirectContext::MakeGL(GrGLMakeNativeInterface());
   if (!uiThreadContext) {
     RNSkLogger::logToConsole("Could not create uiThreadContext");
     return;
   }
 
+  // 2. JS Thread context
   jsConfig = display->ChooseConfig(desc);
   jsContext = display->CreateContext(*jsConfig);
   if (!jsContext) {
     RNSkLogger::logToConsole("Couldn't create the context");
     return;
   }
-  auto jsSurface = display->CreatePixelBufferSurface(*jsConfig, 1, 1);
+  jsSurface = display->CreatePixelBufferSurface(*jsConfig, 1, 1);
   if (!jsContext->MakeCurrent(*jsSurface)) {
     RNSkLogger::logToConsole("Couldn't make the context current");
     return;
@@ -72,32 +75,19 @@ SkiaOpenGLContextProvider::MakeOnscreenSurface(jobject jSurface, int width,
 }
 
 sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
-    Config *config, Context *context, GrDirectContext *grContext, int width,
+    Config *config, Context *context, GrDirectContext *grContext, Surface* eglSurface,  int width,
     int height) {
-  // Create a new PBuffer surface with desired width and height
-  auto eglSurface = display->CreatePixelBufferSurface(*config, width, height);
-
   if (!context->MakeCurrent(*eglSurface)) {
     RNSkLogger::logToConsole("Couldn't make context current");
     return nullptr;
   }
-
-  GrGLFramebufferInfo info;
-  info.fFBOID = 0;
-  info.fFormat = 0x8058; // GL_RGBA8
-
   auto colorType = kN32_SkColorType; // native 32-bit RGBA encoding
+  auto texture = grContext->createBackendTexture(width, height, colorType, GrMipMapped::kNo, GrRenderable::kYes);      SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-  auto stencil = static_cast<GLint>(config->GetDescriptor().stencil_bits);
-  auto samples = static_cast<GLint>(config->GetDescriptor().samples);
-  auto maxSamples = grContext->maxSurfaceSampleCountForColorType(colorType);
-  if (samples > maxSamples) {
-    samples = maxSamples;
-  }
-  GrBackendRenderTarget backendRT(width, height, samples, stencil, info);
-  sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
-      grContext, backendRT, kBottomLeft_GrSurfaceOrigin, colorType, nullptr,
-      nullptr);
+  sk_sp<SkSurface> surface = SkSurface::MakeFromBackendTexture(
+     grContext, texture, kTopLeft_GrSurfaceOrigin, 0,
+     colorType, nullptr, &props
+  );
 
   if (!surface) {
     RNSkLogger::logToConsole("Failed to create offscreen surface");
@@ -111,10 +101,10 @@ SkiaOpenGLContextProvider::MakeOffscreenSurface(int width, int height,
                                                 bool onJSThread) {
   if (onJSThread) {
     return MakeOffscreenSurface(jsConfig.get(), jsContext.get(),
-                                jsThreadContext.get(), width, height);
+                                jsThreadContext.get(), jsSurface.get(), width, height);
   } else {
     return MakeOffscreenSurface(uiConfig.get(), uiContext.get(),
-                                uiThreadContext.get(), width, height);
+                                uiThreadContext.get(), uiSurface.get(), width, height);
   }
 }
 
