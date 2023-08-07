@@ -84,7 +84,7 @@ sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
   auto colorType = kN32_SkColorType; // native 32-bit RGBA encoding
   auto texture = grContext->createBackendTexture(width, height, colorType, GrMipMapped::kNo, GrRenderable::kYes);      SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-  sk_sp<SkSurface> surface = SkSurface::MakeFromBackendTexture(
+  sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
      grContext, texture, kTopLeft_GrSurfaceOrigin, 0,
      colorType, nullptr, &props
   );
