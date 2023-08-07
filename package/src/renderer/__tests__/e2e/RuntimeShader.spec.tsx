@@ -1,14 +1,21 @@
 /* eslint-disable max-len */
 import React from "react";
 
-import { surface, importSkia } from "../setup";
-import { Circle, Fill, Group, Paint, RuntimeShader } from "../../components";
-import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+import { surface, importSkia, fonts } from "../setup";
+import {
+  Circle,
+  Fill,
+  Group,
+  Paint,
+  RuntimeShader,
+  Text,
+} from "../../components";
+import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
 
 const spiral = `
 uniform float scale;
-uniform float2   center;
-uniform float4 colors[2];
+uniform float2 center;
+uniform float4 color;
 uniform shader image;
 
 half4 main(float2 p) {
@@ -19,7 +26,7 @@ half4 main(float2 p) {
     float t = (angle + 3.1415926/2) / (3.1415926);
     t += radius * scale;
     t = fract(t);
-    return half4(mix(image.eval(vec2(0, 0)), colors[1], t));
+    return half4(mix(image.eval(vec2(0.5, 0.5)), color, t));
 }`;
 
 describe("Runtime Shader", () => {
@@ -46,28 +53,29 @@ half4 main(float2 xy) {
     );
     checkImage(img, "snapshots/runtime-shader/simple.png");
   });
-  itRunsE2eOnly("should display a green and red spiral", async () => {
+  itRunsE2eOnly("should display a green and blue spiral", async () => {
     const { width, height } = surface;
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
     expect(source).toBeTruthy();
+    const scale = 3;
     const img = await surface.draw(
       <>
-        <Group transform={[{ scale: 1 / 3 }]}>
+        <Group transform={[{ scale: 1 / scale }]}>
           <Group
             layer={
               <Paint>
                 <RuntimeShader
                   source={source}
                   uniforms={{
-                    scale: 0.3,
-                    center: { x: (width * 3) / 2, y: (height * 3) / 2 },
-                    colors: [Skia.Color("red"), Skia.Color("rgb(0, 255, 0)")],
+                    scale: 1 / scale,
+                    center: { x: (width * scale) / 2, y: (height * scale) / 2 },
+                    color: Skia.Color("rgb(0, 255, 0)"),
                   }}
                 />
               </Paint>
             }
-            transform={[{ scale: 3 }]}
+            transform={[{ scale }]}
           >
             <Fill color="blue" />
           </Group>
@@ -237,9 +245,80 @@ half4 main(float2 xy) {
       const img = Skia.Image.MakeImageFromEncoded(data)!;
       expect(data).toBeDefined();
 
-      checkImage(img, "snapshots/runtime-shader/scaled-circle2.png", {
-        overwrite: true,
-      });
+      checkImage(img, "snapshots/runtime-shader/scaled-circle2.png");
     }
   );
+  itRunsE2eOnly("should use supersampling", async () => {
+    const font = fonts.RobotoMedium;
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(`
+uniform shader image;
+
+half4 main(float2 xy) {
+  vec4 color =  image.eval(xy);
+  if (xy.x < 256 * 3/2) {
+    return color;
+  }
+  return color.rbga;
+}
+`)!;
+    const img = await surface.draw(
+      <>
+        <Group transform={[{ scale: 1 / 3 }]}>
+          <Group
+            layer={
+              <Paint>
+                <RuntimeShader source={source} />
+              </Paint>
+            }
+            transform={[{ scale: 3 }]}
+          >
+            <Fill color="#B7C9E2" />
+            <Text
+              text="Hello World"
+              x={16}
+              y={32}
+              color="#e38ede"
+              font={font}
+            />
+          </Group>
+        </Group>
+      </>
+    );
+    checkImage(img, docPath("runtime-shader/with-supersampling.png"), {
+      maxPixelDiff: 1200,
+    });
+  });
+  itRunsE2eOnly("shouldn't use supersampling", async () => {
+    const font = fonts.RobotoMedium;
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(`
+uniform shader image;
+
+half4 main(float2 xy) {
+  vec4 color =  image.eval(xy);
+  if (xy.x < 256 / 2) {
+    return color;
+  }
+  return color.rbga;
+}
+`)!;
+    const img = await surface.draw(
+      <>
+        <Group
+          layer={
+            <Paint>
+              <RuntimeShader source={source} />
+            </Paint>
+          }
+        >
+          <Fill color="#B7C9E2" />
+          <Text text="Hello World" x={16} y={32} color="#e38ede" font={font} />
+        </Group>
+      </>
+    );
+    checkImage(img, docPath("runtime-shader/without-supersampling.png"), {
+      maxPixelDiff: 500,
+    });
+  });
 });

@@ -47,21 +47,21 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkOpenGLCanvasProvider.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLRenderer.cpp"
 
-        "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiValue.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/jsi/RuntimeLifecycleMonitor.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/jsi/RuntimeAwareCache.cpp"        
-        "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiPromises.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiHostObject.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiValue.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi/RuntimeLifecycleMonitor.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi/RuntimeAwareCache.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiPromises.cpp"
 
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkManager.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkJsView.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDomView.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia/RNSkDispatchQueue.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkManager.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkJsView.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkDomView.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkDispatchQueue.cpp"
 
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia/dom/base/DrawingContext.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia/dom/base/ConcatablePaint.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/dom/base/DrawingContext.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/dom/base/ConcatablePaint.cpp"
 
-        "${PROJECT_SOURCE_DIR}/cpp/api/third_party/CSSColorParser.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/CSSColorParser.cpp"
 
 )
 
@@ -75,27 +75,28 @@ target_include_directories(
         "${NODE_MODULES_DIR}/react-native/ReactCommon/react/nativemodule/core"
         "${NODE_MODULES_DIR}/react-native/ReactAndroid/src/main/java/com/facebook/react/turbomodule/core/jni"
 
-        cpp/skia/include/config/
-        cpp/skia/include/core/
-        cpp/skia/include/effects/
-        cpp/skia/include/utils/
-        cpp/skia/include/pathops/
-        cpp/skia/modules/
-        cpp/skia/modules/skparagraph/include/
-        cpp/skia/include/
-        cpp/skia
-
-        cpp/api
-        cpp/jsi
         cpp/jni/include
         cpp/rnskia-android
-        cpp/rnskia
-        cpp/rnskia/values
-        cpp/rnskia/dom
-        cpp/rnskia/dom/base
-        cpp/rnskia/dom/nodes
-        cpp/rnskia/dom/props
-        cpp/utils
+
+        ../cpp/skia/include/config/
+        ../cpp/skia/include/core/
+        ../cpp/skia/include/effects/
+        ../cpp/skia/include/utils/
+        ../cpp/skia/include/pathops/
+        ../cpp/skia/modules/
+        ../cpp/skia/modules/skparagraph/include/
+        ../cpp/skia/include/
+        ../cpp/skia
+
+        ../cpp/api
+        ../cpp/jsi
+        ../cpp/rnskia
+        ../cpp/rnskia/values
+        ../cpp/rnskia/dom
+        ../cpp/rnskia/dom/base
+        ../cpp/rnskia/dom/nodes
+        ../cpp/rnskia/dom/props
+        ../cpp/utils
 
         ${libfbjni_include_DIRS}
 )
