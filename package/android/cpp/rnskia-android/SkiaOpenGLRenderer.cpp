@@ -4,6 +4,8 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
+#pragma clang diagnostic push
+
 #define STENCIL_BUFFER_SIZE 8
 
 namespace RNSkia {
@@ -102,7 +104,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
   };
   auto ctx = new OffscreenRenderContext({eglDisplay, eglSurface});
 
-  auto surface = SkSurface::MakeFromBackendRenderTarget(
+  auto surface = SkSurfaces::WrapBackendRenderTarget(
       grContext.get(), renderTarget, kBottomLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, nullptr, nullptr,
       [](void *addr) {
@@ -170,7 +172,7 @@ bool SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
 
       SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-      sk_sp<SkSurface> renderTarget(SkSurface::MakeFromBackendRenderTarget(
+      sk_sp<SkSurface> renderTarget(SkSurfaces::WrapBackendRenderTarget(
           getThreadDrawingContext()->skContext.get(), backendRT,
           kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props));
 
