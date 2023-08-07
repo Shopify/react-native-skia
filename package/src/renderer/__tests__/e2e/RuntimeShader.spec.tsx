@@ -7,8 +7,8 @@ import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 
 const spiral = `
 uniform float scale;
-uniform float2   center;
-uniform float4 colors[2];
+uniform float2 center;
+uniform float4 color;
 uniform shader image;
 
 half4 main(float2 p) {
@@ -19,7 +19,7 @@ half4 main(float2 p) {
     float t = (angle + 3.1415926/2) / (3.1415926);
     t += radius * scale;
     t = fract(t);
-    return half4(mix(image.eval(vec2(0, 0)), colors[1], t));
+    return half4(mix(image.eval(vec2(1, 1)), color, t));
 }`;
 
 describe("Runtime Shader", () => {
@@ -46,7 +46,7 @@ half4 main(float2 xy) {
     );
     checkImage(img, "snapshots/runtime-shader/simple.png");
   });
-  itRunsE2eOnly("should display a green and red spiral", async () => {
+  itRunsE2eOnly("should display a green and blue spiral", async () => {
     const { width, height } = surface;
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
@@ -62,7 +62,7 @@ half4 main(float2 xy) {
                   uniforms={{
                     scale: 0.3,
                     center: { x: (width * 3) / 2, y: (height * 3) / 2 },
-                    colors: [Skia.Color("red"), Skia.Color("green")],
+                    color: Skia.Color("rgb(0, 255, 0)"),
                   }}
                 />
               </Paint>
@@ -74,7 +74,7 @@ half4 main(float2 xy) {
         </Group>
       </>
     );
-    checkImage(img, "snapshots/runtime-shader/spiral.png", { overwrite: true });
+    checkImage(img, "snapshots/runtime-shader/spiral.png");
   });
   itRunsE2eOnly(
     "should be the reference result for the next test (1)",
