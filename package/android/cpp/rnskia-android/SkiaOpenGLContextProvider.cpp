@@ -75,19 +75,20 @@ SkiaOpenGLContextProvider::MakeOnscreenSurface(jobject jSurface, int width,
 }
 
 sk_sp<SkSurface> SkiaOpenGLContextProvider::MakeOffscreenSurface(
-    Config *config, Context *context, GrDirectContext *grContext, Surface* eglSurface,  int width,
-    int height) {
+    Config *config, Context *context, GrDirectContext *grContext,
+    Surface *eglSurface, int width, int height) {
   if (!context->MakeCurrent(*eglSurface)) {
     RNSkLogger::logToConsole("Couldn't make context current");
     return nullptr;
   }
   auto colorType = kN32_SkColorType; // native 32-bit RGBA encoding
-  auto texture = grContext->createBackendTexture(width, height, colorType, GrMipMapped::kNo, GrRenderable::kYes);      SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
+  auto texture = grContext->createBackendTexture(
+      width, height, colorType, GrMipMapped::kNo, GrRenderable::kYes);
+  SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
   sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
-     grContext, texture, kTopLeft_GrSurfaceOrigin, 0,
-     colorType, nullptr, &props
-  );
+      grContext, texture, kTopLeft_GrSurfaceOrigin, 0, colorType, nullptr,
+      &props);
 
   if (!surface) {
     RNSkLogger::logToConsole("Failed to create offscreen surface");
@@ -101,10 +102,12 @@ SkiaOpenGLContextProvider::MakeOffscreenSurface(int width, int height,
                                                 bool onJSThread) {
   if (onJSThread) {
     return MakeOffscreenSurface(jsConfig.get(), jsContext.get(),
-                                jsThreadContext.get(), jsSurface.get(), width, height);
+                                jsThreadContext.get(), jsSurface.get(), width,
+                                height);
   } else {
     return MakeOffscreenSurface(uiConfig.get(), uiContext.get(),
-                                uiThreadContext.get(), uiSurface.get(), width, height);
+                                uiThreadContext.get(), uiSurface.get(), width,
+                                height);
   }
 }
 
