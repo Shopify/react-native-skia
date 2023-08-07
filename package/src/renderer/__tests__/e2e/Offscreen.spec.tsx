@@ -152,4 +152,3 @@ describe("Offscreen Drawings", () => {
     checkImage(image, docPath("offscreen/multiple_circles.png"));
   });
 });
-});

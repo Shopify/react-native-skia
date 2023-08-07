@@ -114,12 +114,15 @@ private:
   std::unique_ptr<Config> jsConfig = nullptr;
   std::unique_ptr<Context> jsContext = nullptr;
 
+  std::unique_ptr<Surface> jsSurface = nullptr;
+  std::unique_ptr<Surface> uiSurface = nullptr;
+
   sk_sp<GrDirectContext> jsThreadContext = nullptr;
   sk_sp<GrDirectContext> uiThreadContext = nullptr;
 
-  sk_sp<SkSurface> MakeOffscreenSurface(Config *config, Context *context,
-                                        GrDirectContext *grContext, int width,
-                                        int height);
+  sk_sp<SkSurface> MakeOffscreenSurface(
+    Config *config, Context *context, GrDirectContext *grContext, Surface* eglSurface,  int width,
+    int height);
 
 public:
   ~SkiaOpenGLContextProvider();
