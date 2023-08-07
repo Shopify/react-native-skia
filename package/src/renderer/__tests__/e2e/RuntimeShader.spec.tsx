@@ -19,7 +19,7 @@ half4 main(float2 p) {
     float t = (angle + 3.1415926/2) / (3.1415926);
     t += radius * scale;
     t = fract(t);
-    return half4(mix(image.eval(vec2(1, 1)), color, t));
+    return half4(mix(image.eval(vec2(0.5, 0.5)), color, t));
 }`;
 
 describe("Runtime Shader", () => {
@@ -51,23 +51,24 @@ half4 main(float2 xy) {
     const { Skia } = importSkia();
     const source = Skia.RuntimeEffect.Make(spiral)!;
     expect(source).toBeTruthy();
+    const scale = 3;
     const img = await surface.draw(
       <>
-        <Group transform={[{ scale: 1 / 3 }]}>
+        <Group transform={[{ scale: 1 / scale }]}>
           <Group
             layer={
               <Paint>
                 <RuntimeShader
                   source={source}
                   uniforms={{
-                    scale: 0.3,
-                    center: { x: (width * 3) / 2, y: (height * 3) / 2 },
+                    scale: 1 / scale,
+                    center: { x: (width * scale) / 2, y: (height * scale) / 2 },
                     color: Skia.Color("rgb(0, 255, 0)"),
                   }}
                 />
               </Paint>
             }
-            transform={[{ scale: 3 }]}
+            transform={[{ scale }]}
           >
             <Fill color="blue" />
           </Group>
