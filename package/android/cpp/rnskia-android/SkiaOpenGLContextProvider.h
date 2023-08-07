@@ -24,7 +24,10 @@
 #include "SkColorSpace.h"
 #include "SkPicture.h"
 #include "SkSurface.h"
+
+#include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "include/gpu/gl/GrGLInterface.h"
 
 #pragma clang diagnostic pop
@@ -84,7 +87,7 @@ public:
     }
 
     GrBackendRenderTarget backendRT(width, height, samples, stencil, info);
-    sk_sp<SkSurface> surface = SkSurface::MakeFromBackendRenderTarget(
+    sk_sp<SkSurface> surface = SkSurfaces::WrapBackendRenderTarget(
         grContext, backendRT, kBottomLeft_GrSurfaceOrigin, colorType, nullptr,
         nullptr);
 
