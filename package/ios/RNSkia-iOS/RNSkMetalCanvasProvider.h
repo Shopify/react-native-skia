@@ -30,6 +30,8 @@ public:
 
   CALayer *getLayer();
 
+  static sk_sp<SkSurface> MakeOffscreenMetalSurface(int width, int height);
+
 private:
   /**
    * To be able to use static contexts (and avoid reloading the skia context for
@@ -38,6 +40,7 @@ private:
    */
   static std::shared_ptr<MetalRenderContext> getMetalRenderContext();
 
+  static id<MTLDevice> device;
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
   float _width = -1;
   float _height = -1;
