@@ -93,6 +93,7 @@ public:
                           float height)
       : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
     _surface = context->makeOffscreenSurface(_width, _height);
+    _pd = context->getPixelDensity();
   }
 
   /**
@@ -101,8 +102,8 @@ public:
   sk_sp<SkImage> makeSnapshot(std::shared_ptr<SkRect> bounds) {
     sk_sp<SkImage> image;
     if (bounds != nullptr) {
-      SkIRect b = SkIRect::MakeXYWH(bounds->x(), bounds->y(), bounds->width(),
-                                    bounds->height());
+      SkIRect b = SkIRect::MakeXYWH(bounds->x() * _pd, bounds->y() * _pd, bounds->width() * _pd,
+                                    bounds->height() * _pd);
       image = _surface->makeImageSnapshot(b);
     } else {
       image = _surface->makeImageSnapshot();
@@ -131,7 +132,9 @@ public:
 private:
   float _width;
   float _height;
+  float _pd = 1.0f;
   sk_sp<SkSurface> _surface;
+
 };
 
 enum RNSkDrawingMode { Default, Continuous };
