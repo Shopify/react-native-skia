@@ -102,8 +102,9 @@ public:
   sk_sp<SkImage> makeSnapshot(std::shared_ptr<SkRect> bounds) {
     sk_sp<SkImage> image;
     if (bounds != nullptr) {
-      SkIRect b = SkIRect::MakeXYWH(bounds->x() * _pd, bounds->y() * _pd, bounds->width() * _pd,
-                                    bounds->height() * _pd);
+      SkIRect b =
+          SkIRect::MakeXYWH(bounds->x() * _pd, bounds->y() * _pd,
+                            bounds->width() * _pd, bounds->height() * _pd);
       image = _surface->makeImageSnapshot(b);
     } else {
       image = _surface->makeImageSnapshot();
@@ -134,7 +135,6 @@ private:
   float _height;
   float _pd = 1.0f;
   sk_sp<SkSurface> _surface;
-
 };
 
 enum RNSkDrawingMode { Default, Continuous };
