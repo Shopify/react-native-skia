@@ -24,4 +24,11 @@ describe("Image loading from bundles", () => {
     );
     checkImage(image, `snapshots/images/bundle-${surface.OS}.png`);
   });
+  it("should not crash with an invalid viewTag", async () => {
+    const result = await surface.eval((Skia) => {
+      Skia.Image.MakeImageFromViewTag(-1);
+      return true;
+    });
+    expect(result).toBe(true);
+  });
 });
