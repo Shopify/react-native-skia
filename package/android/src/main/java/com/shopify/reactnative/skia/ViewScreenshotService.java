@@ -18,17 +18,13 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
-import com.facebook.react.bridge.CatalystInstance;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 
 public class ViewScreenshotService {
     private static final long SURFACE_VIEW_READ_PIXELS_TIMEOUT = 5;
