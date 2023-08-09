@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.react.bridge.CatalystInstance;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 
@@ -35,9 +36,14 @@ public class ViewScreenshotService {
 
     public static Bitmap makeViewScreenshotFromTag(ReactContext context, int tag) {
         UIManagerModule uiManager = context.getNativeModule(UIManagerModule.class);
-        View view = uiManager.resolveView(tag);
+        View view = null;
+        try {
+            view = uiManager.resolveView(tag);
+        } catch (RuntimeException e) {
+            context.handleException(e);
+        }
         if (view == null) {
-            throw new RuntimeException("Could not resolve view from view tag " + tag);
+            return null;
         }
 
         // Measure and get size of view
