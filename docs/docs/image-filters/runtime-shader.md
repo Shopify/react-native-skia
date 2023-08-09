@@ -10,7 +10,7 @@ This component receives the currently filtered image as a shader uniform (or the
 
 :::info
 
-Because RuntimeShader doesn't take into account the pixel density scaling, we recommend applying a technique known as supersampling. [See below](#supersampling).
+Because RuntimeShader doesn't take into account the pixel density scaling, we recommend applying a technique known as supersampling. [See below](#pixel-density).
 
 :::
 
@@ -52,7 +52,7 @@ export const RuntimeShaderDemo = () => {
 
 <img alt="Runtime Shader" src={require("/static/img/image-filters/runtime-shader.png").default} width="256" height="256" />
 
-## Supersampling
+## Pixel Density
 
 `RuntimeShader` is not taking into account the pixel density scaling ([learn more why](https://issues.skia.org/issues/40044507)).
 To keep the image filter output crisp, We upscale the filtered drawing to the [pixel density of the app](https://reactnative.dev/docs/pixelratio). Once the drawing is filtered, we scale it back to the original size. This can be seen in the example below. These operations must be performed on a Skia layer via the `layer` property.
