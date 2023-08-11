@@ -19,30 +19,32 @@ RNSkOpenGLCanvasProvider::RNSkOpenGLCanvasProvider(
 
 RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() {}
 
-float RNSkOpenGLCanvasProvider::getScaledWidth() { return _width; }
+float RNSkOpenGLCanvasProvider::getScaledWidth() {
+  return _surfaceHolder ? _surfaceHolder->getWidth() : 0;
+}
 
-float RNSkOpenGLCanvasProvider::getScaledHeight() { return _height; }
+float RNSkOpenGLCanvasProvider::getScaledHeight() {
+  return _surfaceHolder ? _surfaceHolder->getHeight() : 0;
+}
 
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
 
-  if (_surfacefactory != nullptr && cb != nullptr) {
-
+  if (_surfaceHolder != nullptr && cb != nullptr) {
     // Get the surface
-    if (_surface == nullptr) {
-      _surface = _surfacefactory->createSkSurface();
-    }
-
-    if (_surface) {
+    auto surface = _surfaceHolder->getSurface();
+    if (surface) {
 
       // Ensure we are ready to render
-      _surfacefactory->makeCurrent();
+      if (!_surfaceHolder->makeCurrent()) {
+        return false;
+      }
 
       // Draw into canvas using callback
-      cb(_surface->getCanvas());
+      cb(surface->getCanvas());
 
       // Swap buffers and show on screen
-      return _surfacefactory->present();
+      return _surfaceHolder->present();
 
     } else {
       // the render context did not provide a surface
@@ -55,12 +57,9 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
 void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width,
                                                 int height) {
-  _width = width;
-  _height = height;
-
   // Create renderer!
-  _surfacefactory =
-      std::make_unique<WindowedSurfaceFactory>(surface, width, height);
+  _surfaceHolder =
+      SkiaOpenGLSurfaceFactory::makeWindowedSurface(surface, width, height);
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();
@@ -68,8 +67,7 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width,
 void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   // destroy the renderer (a unique pointer so the dtor will be called
   // immediately.)
-  _surfacefactory = nullptr;
-  _surface = nullptr;
+  _surfaceHolder = nullptr;
 }
 
 void RNSkOpenGLCanvasProvider::surfaceSizeChanged(int width, int height) {
@@ -79,16 +77,10 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(int width, int height) {
     return;
   }
 
-  _width = width;
-  _height = height;
-
-  // Clear surface
-  _surface = nullptr;
-
   // Recreate RenderContext surface based on size change???
-  if (_surfacefactory->resize(width, height)) {
-    // Redraw after size change
-    _requestRedraw();
-  }
+  _surfaceHolder->resize(width, height);
+
+  // Redraw after size change
+  _requestRedraw();
 }
 } // namespace RNSkia

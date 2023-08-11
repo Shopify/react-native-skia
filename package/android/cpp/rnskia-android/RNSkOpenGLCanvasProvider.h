@@ -34,10 +34,7 @@ public:
   void surfaceSizeChanged(int width, int height);
 
 private:
-  std::unique_ptr<WindowedSurfaceFactory> _surfacefactory = nullptr;
-  sk_sp<SkSurface> _surface = nullptr;
+  std::unique_ptr<WindowSurfaceHolder> _surfaceHolder = nullptr;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
-  float _width = -1;
-  float _height = -1;
 };
 } // namespace RNSkia
