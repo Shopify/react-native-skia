@@ -38,8 +38,7 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    OffscreenSurfaceFactory rc(width, height);
-    return rc.createSkSurface();
+    return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
   }
 
   void runOnMainThread(std::function<void()> task) override {
