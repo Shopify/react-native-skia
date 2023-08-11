@@ -37,13 +37,6 @@ public:
 };
 
 /**
- * The first context created will be considered the parent / shared context and
- * will be used as the parent / shareable context when creating subsequent
- * contexts.
- */
-static std::atomic<EGLContext> SharedEglContext = EGL_NO_CONTEXT;
-
-/**
  * Holder of the Windowed SkSurface with support for making current
  * and presenting to screen
  */

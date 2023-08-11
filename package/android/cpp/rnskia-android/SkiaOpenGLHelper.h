@@ -5,6 +5,8 @@
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
+#include <atomic>
+
 #include "RNSkLog.h"
 
 #pragma clang diagnostic push
@@ -19,16 +21,75 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
+
+/**
+ * Singleton holding the default display and shared eglContext that will be the
+ * first context we create so that we can share data between contexts.
+ */
+class OpenGLResourceHolder {
+private:
+  OpenGLResourceHolder() {}
+  ~OpenGLResourceHolder() {
+    if (glContext != EGL_NO_CONTEXT) {
+      eglDestroyContext(glDisplay, glContext);
+      glContext = EGL_NO_CONTEXT;
+    }
+
+    if (glDisplay != EGL_NO_DISPLAY) {
+      eglTerminate(glDisplay);
+      glDisplay = EGL_NO_DISPLAY;
+    }
+  }
+  /* Explicitly disallow copying. */
+  OpenGLResourceHolder(const OpenGLResourceHolder &) = delete;
+  OpenGLResourceHolder &operator=(const OpenGLResourceHolder &) = delete;
+
+public:
+  static OpenGLResourceHolder &getInstance() {
+    static OpenGLResourceHolder Instance;
+    return Instance;
+  }
+
+  /**
+   * The first context created will be considered the parent / shared context
+   * and will be used as the parent / shareable context when creating subsequent
+   * contexts.
+   */
+  EGLContext glContext = EGL_NO_CONTEXT;
+  /**
+   * Shared egl display
+   */
+  EGLDisplay glDisplay = EGL_NO_DISPLAY;
+};
+
 struct SkiaOpenGLContext {
   SkiaOpenGLContext() {
-    glDisplay = EGL_NO_DISPLAY;
     glContext = EGL_NO_CONTEXT;
     gl1x1Surface = EGL_NO_SURFACE;
     glConfig = 0;
     directContext = nullptr;
   }
+  ~SkiaOpenGLContext() {
+    if (OpenGLResourceHolder::getInstance().glDisplay != EGL_NO_DISPLAY) {
+
+      if (gl1x1Surface != EGL_NO_SURFACE) {
+        eglDestroySurface(OpenGLResourceHolder::getInstance().glDisplay,
+                          gl1x1Surface);
+        gl1x1Surface = EGL_NO_SURFACE;
+      }
+
+      if (directContext) {
+        directContext->releaseResourcesAndAbandonContext();
+      }
+
+      if (glContext != EGL_NO_CONTEXT) {
+        eglDestroyContext(OpenGLResourceHolder::getInstance().glDisplay,
+                          glContext);
+        glContext = EGL_NO_CONTEXT;
+      }
+    }
+  }
   EGLContext glContext;
-  EGLDisplay glDisplay;
   EGLConfig glConfig;
   EGLSurface gl1x1Surface;
   sk_sp<GrDirectContext> directContext;
@@ -45,13 +106,13 @@ public:
    */
   static bool makeCurrent(SkiaOpenGLContext *context, EGLSurface glSurface) {
     // We don't need to call make current if we already are current:
-    if (eglGetCurrentDisplay() != context->glDisplay ||
-        eglGetCurrentSurface(EGL_DRAW) != glSurface ||
+    if (eglGetCurrentSurface(EGL_DRAW) != glSurface ||
         eglGetCurrentSurface(EGL_READ) != glSurface ||
         eglGetCurrentContext() != context->glContext) {
 
       // Make current!
-      if (eglMakeCurrent(context->glDisplay, glSurface, glSurface,
+      if (eglMakeCurrent(OpenGLResourceHolder::getInstance().glDisplay,
+                         glSurface, glSurface,
                          context->glContext) != EGL_TRUE) {
         RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
         return false;
@@ -62,13 +123,44 @@ public:
   }
 
   /**
+   * Creates a new windowed surface
+   * @param window ANativeWindow to create surface in
+   * @return EGLSurface or EGL_NO_SURFACE if the call failed
+   */
+  static EGLSurface createWindowedSurface(ANativeWindow *window) {
+    const EGLint attribs[] = {EGL_NONE};
+    return eglCreateWindowSurface(
+        OpenGLResourceHolder::getInstance().glDisplay,
+        getConfig(OpenGLResourceHolder::getInstance().glDisplay), window,
+        attribs);
+  }
+
+  /**
+   * Destroys an egl surface
+   * @param glSurface
+   * @return
+   */
+  static bool destroySurface(EGLSurface glSurface) {
+    if (!eglMakeCurrent(OpenGLResourceHolder::getInstance().glDisplay,
+                        EGL_NO_SURFACE, EGL_NO_SURFACE,
+                        EGL_NO_CONTEXT) == EGL_TRUE) {
+      RNSkLogger::logToConsole(
+          "destroySurface: Could not clear selected surface");
+      return false;
+    }
+    return eglDestroySurface(OpenGLResourceHolder::getInstance().glDisplay,
+                             glSurface) == EGL_TRUE;
+  }
+
+  /**
    * Calls the eglSwapBuffer in the current thread with the provided surface
    * @param context Thread context
    * @param glSurface surface to present
    * @return true if eglSwapBuffers succeeded.
    */
   static bool swapBuffers(SkiaOpenGLContext *context, EGLSurface glSurface) {
-    if (eglSwapBuffers(context->glDisplay, glSurface) != EGL_TRUE) {
+    if (eglSwapBuffers(OpenGLResourceHolder::getInstance().glDisplay,
+                       glSurface) != EGL_TRUE) {
       RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
       return false;
     }
@@ -82,16 +174,14 @@ public:
    * @param sharedContext Shared Context
    * @return true if the call to create a skia direct context suceeded.
    */
-  static bool
-  createSkiaDirectContext(SkiaOpenGLContext *context,
-                          std::atomic<EGLContext> *sharedEglContext) {
+  static bool createSkiaDirectContext(SkiaOpenGLContext *context) {
     // Initialize OpenGL
-    if (!initializeOpenGL(context)) {
+    if (!initializeOpenGL()) {
       return false;
     }
 
     // Create the OpenGL context
-    if (!createOpenGLContext(context, sharedEglContext)) {
+    if (!createOpenGLContext(context)) {
       return false;
     }
 
@@ -101,8 +191,9 @@ public:
       const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1,
                                                 EGL_NONE};
 
-      context->gl1x1Surface = eglCreatePbufferSurface(
-          context->glDisplay, context->glConfig, offScreenSurfaceAttribs);
+      context->gl1x1Surface =
+          eglCreatePbufferSurface(OpenGLResourceHolder::getInstance().glDisplay,
+                                  context->glConfig, offScreenSurfaceAttribs);
 
       if (context->gl1x1Surface == EGL_NO_SURFACE) {
         RNSkLogger::logToConsole("Failed creating a 1x1 pbuffer surface");
@@ -134,15 +225,15 @@ private:
    * getting the default display and calling eglInitializeContext. If the
    * context already have a valid initialised display nothing will be done and
    * the method will return true.
-   * @param context to store resulting eglDisplay in
    * @return True if already initialized or if eglGetDisplay and eglInitialize
    * was successfull.
    */
-  static bool initializeOpenGL(SkiaOpenGLContext *context) {
-    if (context->glDisplay == EGL_NO_DISPLAY) {
+  static bool initializeOpenGL() {
+    if (OpenGLResourceHolder::getInstance().glDisplay == EGL_NO_DISPLAY) {
       // Get default display
-      context->glDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-      if (context->glDisplay == EGL_NO_DISPLAY) {
+      OpenGLResourceHolder::getInstance().glDisplay =
+          eglGetDisplay(EGL_DEFAULT_DISPLAY);
+      if (OpenGLResourceHolder::getInstance().glDisplay == EGL_NO_DISPLAY) {
         RNSkLogger::logToConsole("eglGetDisplay failed : %i", glGetError());
         return false;
       }
@@ -150,10 +241,9 @@ private:
       EGLint major;
       EGLint minor;
 
-      if (eglInitialize(context->glDisplay, &major, &minor) != EGL_TRUE) {
+      if (eglInitialize(OpenGLResourceHolder::getInstance().glDisplay, &major,
+                        &minor) != EGL_TRUE) {
         RNSkLogger::logToConsole("eglInitialize failed : %i", glGetError());
-        eglTerminate(context->glDisplay);
-        context->glDisplay = EGL_NO_DISPLAY;
         return false;
       }
     }
@@ -165,19 +255,18 @@ private:
    * Creates a new GLContext. If the context has a valid context no new context
    * will be created.
    * @param context Context to save results in
-   * @param sharedContext Shared OpenGL Context
    * @return True if the call to eglCreateContext returned a valid OpenGL
    * Context or if the context already is setup.
    */
-  static bool createOpenGLContext(SkiaOpenGLContext *context,
-                                  std::atomic<EGLContext> *sharedEglContext) {
+  static bool createOpenGLContext(SkiaOpenGLContext *context) {
     // No need to create new EGL Context if it already exists.
     if (context->glContext != EGL_NO_CONTEXT) {
       return true;
     }
 
     // Create config
-    context->glConfig = getConfig(context->glDisplay);
+    context->glConfig =
+        getConfig(OpenGLResourceHolder::getInstance().glDisplay);
     if (context->glConfig == 0) {
       return false;
     }
@@ -186,8 +275,9 @@ private:
     EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
     // Initialize the offscreen context for this thread
-    context->glContext = eglCreateContext(context->glDisplay, context->glConfig,
-                                          *sharedEglContext, contextAttribs);
+    context->glContext = eglCreateContext(
+        OpenGLResourceHolder::getInstance().glDisplay, context->glConfig,
+        OpenGLResourceHolder::getInstance().glContext, contextAttribs);
 
     if (context->glContext == EGL_NO_CONTEXT) {
       RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());
@@ -197,8 +287,8 @@ private:
     // Save to shared context so that we can share data between threads in
     // OpenGL. The first context created will be the one passed to any
     // subsequent EGLContexts created.
-    if (*sharedEglContext == EGL_NO_CONTEXT) {
-      *sharedEglContext = context->glContext;
+    if (OpenGLResourceHolder::getInstance().glContext == EGL_NO_CONTEXT) {
+      OpenGLResourceHolder::getInstance().glContext = context->glContext;
     }
 
     return true;
