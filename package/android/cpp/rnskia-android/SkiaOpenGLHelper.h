@@ -209,9 +209,9 @@ public:
    * @return
    */
   static bool destroySurface(EGLSurface glSurface) {
-    if (!eglMakeCurrent(OpenGLResourceHolder::getInstance().glDisplay,
-                        EGL_NO_SURFACE, EGL_NO_SURFACE,
-                        EGL_NO_CONTEXT) == EGL_TRUE) {
+    if (eglMakeCurrent(OpenGLResourceHolder::getInstance().glDisplay,
+                       EGL_NO_SURFACE, EGL_NO_SURFACE,
+                       EGL_NO_CONTEXT) != EGL_TRUE) {
       RNSkLogger::logToConsole(
           "destroySurface: Could not clear selected surface");
       return false;
