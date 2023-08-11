@@ -1,7 +1,6 @@
 package com.shopify.reactnative.skia;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;

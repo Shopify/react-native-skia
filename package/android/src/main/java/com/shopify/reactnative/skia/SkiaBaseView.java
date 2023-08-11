@@ -1,9 +1,6 @@
 package com.shopify.reactnative.skia;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -12,9 +9,6 @@ import android.view.TextureView;
 
 import com.facebook.jni.annotations.DoNotStrip;
 import com.facebook.react.views.view.ReactViewGroup;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
 public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener {
 
     @DoNotStrip
