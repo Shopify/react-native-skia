@@ -55,11 +55,12 @@ public:
    * and will be used as the parent / shareable context when creating subsequent
    * contexts.
    */
-  EGLContext glContext = EGL_NO_CONTEXT;
+  std::atomic<EGLContext> glContext = EGL_NO_CONTEXT;
   /**
    * Shared egl display
    */
-  EGLDisplay glDisplay = EGL_NO_DISPLAY;
+  std::atomic<EGLDisplay> glDisplay = EGL_NO_DISPLAY;
+
 };
 
 struct SkiaOpenGLContext {
