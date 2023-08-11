@@ -142,23 +142,21 @@ struct SkiaOpenGLContext {
     directContext = nullptr;
   }
   ~SkiaOpenGLContext() {
-    if (OpenGLResourceHolder::getInstance().glDisplay != EGL_NO_DISPLAY) {
+    if (gl1x1Surface != EGL_NO_SURFACE) {
+      eglDestroySurface(OpenGLResourceHolder::getInstance().glDisplay,
+                        gl1x1Surface);
+      gl1x1Surface = EGL_NO_SURFACE;
+    }
 
-      if (gl1x1Surface != EGL_NO_SURFACE) {
-        eglDestroySurface(OpenGLResourceHolder::getInstance().glDisplay,
-                          gl1x1Surface);
-        gl1x1Surface = EGL_NO_SURFACE;
-      }
+    if (directContext) {
+      directContext->releaseResourcesAndAbandonContext();
+      directContext = nullptr;
+    }
 
-      if (directContext) {
-        directContext->releaseResourcesAndAbandonContext();
-      }
-
-      if (glContext != EGL_NO_CONTEXT) {
-        eglDestroyContext(OpenGLResourceHolder::getInstance().glDisplay,
-                          glContext);
-        glContext = EGL_NO_CONTEXT;
-      }
+    if (glContext != EGL_NO_CONTEXT) {
+      eglDestroyContext(OpenGLResourceHolder::getInstance().glDisplay,
+                        glContext);
+      glContext = EGL_NO_CONTEXT;
     }
   }
   EGLContext glContext;
@@ -244,13 +242,12 @@ public:
    * @param sharedContext Shared Context
    * @return true if the call to create a skia direct context suceeded.
    */
-  static bool createSkiaDirectContext(SkiaOpenGLContext *context) {
-    // Create the OpenGL context
-    if (!createOpenGLContext(context)) {
-      return false;
-    }
-
+  static bool createSkiaDirectContextIfNecessary(SkiaOpenGLContext *context) {
     if (context->directContext == nullptr) {
+
+      // Create OpenGL context
+      createOpenGLContext(context);
+
       // Create attributes for a simple 1x1 pbuffer surface that we can
       // use to activate and create Skia direct context for
       const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1,

@@ -8,8 +8,7 @@ thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
 sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
                                                                 int height) {
   // Setup OpenGL and Skia:
-  // Setup OpenGL and Skia:
-  if (!SkiaOpenGLHelper::createSkiaDirectContext(
+  if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
           &ThreadContextHolder::ThreadSkiaOpenGLContext)) {
 
     RNSkLogger::logToConsole(
@@ -53,7 +52,7 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
   if (_skSurface == nullptr) {
 
     // Setup OpenGL and Skia
-    if (!SkiaOpenGLHelper::createSkiaDirectContext(
+    if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
             &ThreadContextHolder::ThreadSkiaOpenGLContext)) {
       RNSkLogger::logToConsole(
           "Could not create Skia Surface from native window / surface. "
