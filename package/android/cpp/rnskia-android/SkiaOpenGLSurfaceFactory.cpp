@@ -8,20 +8,20 @@ namespace RNSkia {
  * will be used as the parent / shareable context when creating subsequent
  * contexts.
  */
-SkiaOpenGLContext ThreadContextHolder::SharedSkiaOpenContext;
+SkiaOpenGLContext ThreadContextHolder::SharedSkiaOpenGLContext;
 
 /**
  * This is the context that is static and local to each thread.
  */
-thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGlContext;
+thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
 
 sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
                                                                 int height) {
   RNSkLogger::logToConsole("makeOffscreenSurface Setting up Skia");
   // Setup OpenGL and Skia:
   if (!SkiaOpenGLHelper::createSkiaDirectContext(
-          &ThreadContextHolder::ThreadSkiaOpenGlContext,
-          &ThreadContextHolder::SharedSkiaOpenContext)) {
+          &ThreadContextHolder::ThreadSkiaOpenGLContext,
+          &ThreadContextHolder::SharedSkiaOpenGLContext)) {
     RNSkLogger::logToConsole(
         "Could not create Skia Surface from native window / surface. "
         "Failed creating Skia Direct Context");
@@ -34,7 +34,7 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
 
   // Create texture
   auto texture =
-      ThreadContextHolder::ThreadSkiaOpenGlContext.directContext
+      ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
           ->createBackendTexture(width, height, colorType, GrMipMapped::kNo,
                                  GrRenderable::kYes);
 
@@ -44,31 +44,31 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
   };
 
   auto releaseCtx = new ReleaseContext(
-      {&ThreadContextHolder::ThreadSkiaOpenGlContext, texture});
+      {&ThreadContextHolder::ThreadSkiaOpenGLContext, texture});
 
   // Create a SkSurface from the GrBackendTexture
   return SkSurface::MakeFromBackendTexture(
-      ThreadContextHolder::ThreadSkiaOpenGlContext.directContext.get(), texture,
-      kTopLeft_GrSurfaceOrigin, 0, colorType, nullptr, &props,
-      [](void *addr) {
+          ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(), texture,
+          kTopLeft_GrSurfaceOrigin, 0, colorType, nullptr, &props,
+          [](void *addr) {
         auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
 
         releaseCtx->context->directContext->deleteBackendTexture(
             releaseCtx->texture);
       },
-      releaseCtx);
+          releaseCtx);
 }
 
 sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
   if (_skSurface == nullptr) {
 
     // Do we need to setup OpenGL and Skia?
-    if (ThreadContextHolder::ThreadSkiaOpenGlContext.glDisplay ==
+    if (ThreadContextHolder::ThreadSkiaOpenGLContext.glDisplay ==
         EGL_NO_DISPLAY) {
       // Setup OpenGL and Skia:
       if (!SkiaOpenGLHelper::createSkiaDirectContext(
-              &ThreadContextHolder::ThreadSkiaOpenGlContext,
-              &ThreadContextHolder::SharedSkiaOpenContext)) {
+              &ThreadContextHolder::ThreadSkiaOpenGLContext,
+              &ThreadContextHolder::SharedSkiaOpenGLContext)) {
         RNSkLogger::logToConsole(
             "Could not create Skia Surface from native window / surface. "
             "Failed creating Skia Direct Context");
@@ -79,9 +79,9 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
     // Now we can create a surface
     const EGLint attribs[] = {EGL_NONE};
     _glSurface = eglCreateWindowSurface(
-        ThreadContextHolder::ThreadSkiaOpenGlContext.glDisplay,
-        ThreadContextHolder::ThreadSkiaOpenGlContext.glConfig, _window,
-        attribs);
+            ThreadContextHolder::ThreadSkiaOpenGLContext.glDisplay,
+            ThreadContextHolder::ThreadSkiaOpenGLContext.glConfig, _window,
+            attribs);
 
     if (_glSurface == EGL_NO_SURFACE) {
       RNSkLogger::logToConsole(
@@ -91,7 +91,7 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
 
     // Now make this one current
     if (!SkiaOpenGLHelper::makeCurrent(
-            &ThreadContextHolder::ThreadSkiaOpenGlContext, _glSurface)) {
+            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface)) {
       RNSkLogger::logToConsole(
           "Could not create EGL Surface from native window / surface. Could "
           "not set new surface as current surface.");
@@ -117,7 +117,7 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
     auto colorType = kN32_SkColorType;
 
     auto maxSamples =
-        ThreadContextHolder::ThreadSkiaOpenGlContext.directContext
+        ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
             ->maxSurfaceSampleCountForColorType(colorType);
 
     if (samples > maxSamples) {
@@ -135,11 +135,11 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
     };
 
     auto releaseCtx = new ReleaseContext(
-        {&ThreadContextHolder::ThreadSkiaOpenGlContext, _glSurface});
+        {&ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface});
 
     // Create surface object
     _skSurface = SkSurface::MakeFromBackendRenderTarget(
-        ThreadContextHolder::ThreadSkiaOpenGlContext.directContext.get(),
+        ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
         renderTarget, kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
         [](void *addr) {
           auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);

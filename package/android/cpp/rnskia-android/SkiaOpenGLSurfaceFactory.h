@@ -31,8 +31,8 @@ namespace RNSkia {
  */
 class ThreadContextHolder {
 public:
-  static SkiaOpenGLContext SharedSkiaOpenContext;
-  static thread_local SkiaOpenGLContext ThreadSkiaOpenGlContext;
+  static SkiaOpenGLContext SharedSkiaOpenGLContext;
+  static thread_local SkiaOpenGLContext ThreadSkiaOpenGLContext;
 };
 
 /**
@@ -73,7 +73,7 @@ public:
    */
   bool makeCurrent() {
     return SkiaOpenGLHelper::makeCurrent(
-        &ThreadContextHolder::ThreadSkiaOpenGlContext, _glSurface);
+            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 
   /**
@@ -82,12 +82,12 @@ public:
    */
   bool present() {
     // Flush and submit the direct context
-    ThreadContextHolder::ThreadSkiaOpenGlContext.directContext
+    ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
         ->flushAndSubmit();
 
     // Swap buffers
     return SkiaOpenGLHelper::swapBuffers(
-        &ThreadContextHolder::ThreadSkiaOpenGlContext, _glSurface);
+            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 
 private:
