@@ -27,13 +27,19 @@
 namespace RNSkia {
 
 /**
- * Holder of the static and thread local SkiaOpenGLContext members
+ * Holder of the thread local SkiaOpenGLContext member
  */
 class ThreadContextHolder {
 public:
-  static SkiaOpenGLContext SharedSkiaOpenGLContext;
   static thread_local SkiaOpenGLContext ThreadSkiaOpenGLContext;
 };
+
+/**
+ * The first context created will be considered the parent / shared context and
+ * will be used as the parent / shareable context when creating subsequent
+ * contexts.
+ */
+static std::atomic<EGLContext> SharedEglContext = EGL_NO_CONTEXT;
 
 /**
  * Holder of the Windowed SkSurface with support for making current
@@ -73,7 +79,7 @@ public:
    */
   bool makeCurrent() {
     return SkiaOpenGLHelper::makeCurrent(
-            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
+        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 
   /**
@@ -87,7 +93,7 @@ public:
 
     // Swap buffers
     return SkiaOpenGLHelper::swapBuffers(
-            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
+        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 
 private:

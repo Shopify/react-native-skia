@@ -82,15 +82,16 @@ public:
    * @param sharedContext Shared Context
    * @return true if the call to create a skia direct context suceeded.
    */
-  static bool createSkiaDirectContext(SkiaOpenGLContext *context,
-                                      SkiaOpenGLContext *sharedContext) {
+  static bool
+  createSkiaDirectContext(SkiaOpenGLContext *context,
+                          std::atomic<EGLContext> *sharedEglContext) {
     // Initialize OpenGL
     if (!initializeOpenGL(context)) {
       return false;
     }
 
     // Create the OpenGL context
-    if (!createOpenGLContext(context, sharedContext)) {
+    if (!createOpenGLContext(context, sharedEglContext)) {
       return false;
     }
 
@@ -164,12 +165,12 @@ private:
    * Creates a new GLContext. If the context has a valid context no new context
    * will be created.
    * @param context Context to save results in
-   * @param sharedContext Shared OpenGLContext
+   * @param sharedContext Shared OpenGL Context
    * @return True if the call to eglCreateContext returned a valid OpenGL
    * Context or if the context already is setup.
    */
   static bool createOpenGLContext(SkiaOpenGLContext *context,
-                                  SkiaOpenGLContext *sharedContext) {
+                                  std::atomic<EGLContext> *sharedEglContext) {
     // No need to create new EGL Context if it already exists.
     if (context->glContext != EGL_NO_CONTEXT) {
       return true;
@@ -185,9 +186,8 @@ private:
     EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
     // Initialize the offscreen context for this thread
-    context->glContext =
-        eglCreateContext(context->glDisplay, context->glConfig,
-                         sharedContext->glContext, contextAttribs);
+    context->glContext = eglCreateContext(context->glDisplay, context->glConfig,
+                                          *sharedEglContext, contextAttribs);
 
     if (context->glContext == EGL_NO_CONTEXT) {
       RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());
@@ -197,8 +197,8 @@ private:
     // Save to shared context so that we can share data between threads in
     // OpenGL. The first context created will be the one passed to any
     // subsequent EGLContexts created.
-    if (sharedContext->glContext == EGL_NO_CONTEXT) {
-      sharedContext->glContext = context->glDisplay;
+    if (*sharedEglContext == EGL_NO_CONTEXT) {
+      *sharedEglContext = context->glContext;
     }
 
     return true;
