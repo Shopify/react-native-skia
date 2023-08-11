@@ -36,7 +36,7 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
       {&ThreadContextHolder::ThreadSkiaOpenGLContext, texture});
 
   // Create a SkSurface from the GrBackendTexture
-  return SkSurface::MakeFromBackendTexture(
+  return SkSurfaces::WrapBackendTexture(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(), texture,
       kTopLeft_GrSurfaceOrigin, 0, colorType, nullptr, &props,
       [](void *addr) {
@@ -127,7 +127,7 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
         {&ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface});
 
     // Create surface object
-    _skSurface = SkSurface::MakeFromBackendRenderTarget(
+    _skSurface = SkSurfaces::WrapBackendRenderTarget(
         ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
         renderTarget, kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
         [](void *addr) {
