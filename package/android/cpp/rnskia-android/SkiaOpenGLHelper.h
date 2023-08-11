@@ -284,18 +284,12 @@ public:
 
 private:
   /**
-   * Creates a new GLContext. If the context has a valid context no new context
-   * will be created.
+   * Creates a new GLContext.
    * @param context Context to save results in
    * @return True if the call to eglCreateContext returned a valid OpenGL
    * Context or if the context already is setup.
    */
   static bool createOpenGLContext(SkiaOpenGLContext *context) {
-    // No need to create new EGL Context if it already exists.
-    if (context->glContext != EGL_NO_CONTEXT) {
-      return true;
-    }
-
     // Create OpenGL context attributes
     EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
