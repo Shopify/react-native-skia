@@ -8,7 +8,9 @@
 #import "SkColorSpace.h"
 #import "SkSurface.h"
 
+#import <include/gpu/GrBackendSurface.h>
 #import <include/gpu/GrDirectContext.h>
+#import <include/gpu/ganesh/SkSurfaceGanesh.h>
 
 #pragma clang diagnostic pop
 
@@ -122,7 +124,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     GrBackendRenderTarget backendRT(_layer.drawableSize.width,
                                     _layer.drawableSize.height, 1, fbInfo);
 
-    auto skSurface = SkSurface::MakeFromBackendRenderTarget(
+    auto skSurface = SkSurfaces::WrapBackendRenderTarget(
         renderContext->skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
         kBGRA_8888_SkColorType, nullptr, nullptr);
 
