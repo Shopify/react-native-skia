@@ -23,13 +23,6 @@ public class SkiaDrawView extends SkiaBaseView {
         mHybridData.resetNative();
     }
 
-    @Override
-    protected boolean isMainThreadRendererSupported() {
-        // Since we're rendering on the JS thread we'll never
-        // be able to deliver first frame rendering
-        return false;
-    }
-
     private native HybridData initHybrid(SkiaManager skiaManager);
 
     protected native void surfaceAvailable(Object surface, int width, int height);

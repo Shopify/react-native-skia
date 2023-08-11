@@ -23,7 +23,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     public SkiaBaseView(Context context) {
         super(context);
-        setWillNotDraw(false);
+        setWillNotDraw(!shouldRenderFirstFrameAsBitmap());
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
@@ -39,7 +39,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         // is typically only called once - for the first frame, and
         // then the surface will be available and all rendering will
         // be done directly to the surface itself.
-        if (isMainThreadRendererSupported() && mSurface == null) {
+        if (shouldRenderFirstFrameAsBitmap() && mSurface == null) {
             int width = getWidth();
             int height = getHeight();
 
@@ -139,9 +139,12 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         Log.i("SkiaBaseView", "onSurfaceTextureAvailable " + width + "/" + height);
         mSurface = new Surface(surface);
         surfaceAvailable(mSurface, width, height);
+
         // Clear rendered bitmap when the surface texture has rendered
         // We'll post a message to the main loop asking to invalidate
-        postUpdate(new AtomicInteger());
+        if (shouldRenderFirstFrameAsBitmap()) {
+            postUpdate(new AtomicInteger());
+        }
     }
 
     /**
@@ -188,8 +191,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
      * main thread. This can f.ex then be used to create a first frame
      * render of the view. Returns true by default - override if not.
      */
-    protected boolean isMainThreadRendererSupported() {
-        return true;
+    protected boolean shouldRenderFirstFrameAsBitmap() {
+        return false;
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
