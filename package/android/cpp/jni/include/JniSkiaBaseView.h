@@ -67,10 +67,13 @@ protected:
    * bitmap. The result can be used to render the first frame of the Skia render
    * to avoid flickering on android.
    */
-  virtual jobject renderToBitmap(jobject bitmapIn, int width, int height) {
-    auto platformContext = getSkiaManager()->getPlatformContext();
-    auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
-        platformContext, []() {}, width, height);
+  /*
+   // TODO: Remove if we find another solution for first frame rendering
+    // protected native Object renderToBitmap(Object bitmap, int width, int
+  height); virtual jobject renderToBitmap(jobject bitmapIn, int width, int
+  height) { auto platformContext = getSkiaManager()->getPlatformContext(); auto
+  provider = std::make_shared<RNSkOffscreenCanvasProvider>( platformContext,
+  []() {}, width, height);
 
     // Render into a gpu backed buffer
     _skiaAndroidView->getSkiaView()->getRenderer()->renderImmediate(provider);
@@ -113,7 +116,7 @@ protected:
     provider = nullptr;
 
     return bitmapIn;
-  }
+  }*/
 
 private:
   JniSkiaManager *_manager;

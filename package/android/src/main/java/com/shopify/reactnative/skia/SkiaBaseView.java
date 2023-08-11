@@ -23,14 +23,16 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     public SkiaBaseView(Context context) {
         super(context);
-        setWillNotDraw(!shouldRenderFirstFrameAsBitmap());
+        // TODO: Remove if we find another solution for first frame rendering
+        //setWillNotDraw(!shouldRenderFirstFrameAsBitmap());
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
         addView(mTexture);
     }
 
-    @Override
+    /*@Override
+    TODO: Remove if we find another solution for first frame rendering
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
@@ -56,7 +58,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
                 bitmap.recycle();
             }
         }
-    }
+    }*/
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -140,11 +142,13 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         mSurface = new Surface(surface);
         surfaceAvailable(mSurface, width, height);
 
+        /*
+        TODO: Remove if we find another solution for first frame rendering
         // Clear rendered bitmap when the surface texture has rendered
         // We'll post a message to the main loop asking to invalidate
         if (shouldRenderFirstFrameAsBitmap()) {
             postUpdate(new AtomicInteger());
-        }
+        }*/
     }
 
     /**
@@ -154,6 +158,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
      * idea on how to sync the TextureView OpenGL updates.
      * @param counter
      */
+    /*
+    TODO: Remove if we find another solution for first frame rendering
     void postUpdate(AtomicInteger counter) {
         counter.getAndIncrement();
         if (counter.get() > 16) {
@@ -163,7 +169,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
                 postUpdate(counter);
             });
         }
-    }
+    }*/
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
@@ -191,9 +197,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
      * main thread. This can f.ex then be used to create a first frame
      * render of the view. Returns true by default - override if not.
      */
+    /*
+    TODO: Remove if we find another solution for first frame rendering
     protected boolean shouldRenderFirstFrameAsBitmap() {
         return false;
-    }
+    }*/
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
 
@@ -211,5 +219,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     protected abstract void unregisterView();
 
-    protected abstract Object renderToBitmap(Object bitmap, int width, int height);
+    // TODO: Remove if we find another solution for first frame rendering
+    // protected native Object renderToBitmap(Object bitmap, int width, int height);
 }
