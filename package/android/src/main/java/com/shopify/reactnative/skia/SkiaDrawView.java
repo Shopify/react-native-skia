@@ -42,4 +42,6 @@ public class SkiaDrawView extends SkiaBaseView {
 
     protected native void unregisterView();
 
+    // TODO: Remove if we find another solution for first frame rendering
+    // protected native Object renderToBitmap(Object bitmap, int width, int height);
 }

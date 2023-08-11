@@ -77,7 +77,8 @@ const Icon = ({ icon }: IconProps) => {
   return <SkiaPictureView picture={icon} style={style} />;
 };
 
-const Screen = () => {
+type Props = { color: string };
+const Screen: React.FC<Props> = ({ color }) => {
   const { github, octocat, stackExchange, overflow } = useSVGs();
   return (
     <View
@@ -96,10 +97,8 @@ const Screen = () => {
         <Icon icon={overflow} />
         <Text>React Native Skia Canvas</Text>
         <Canvas style={{ width: 50, height: 50 }}>
-          <Rect x={0} y={0} width={50} height={50} color="red" />
+          <Rect x={0} y={0} width={50} height={50} color={color} />
         </Canvas>
-        <Text>React Native View</Text>
-        <View style={{ backgroundColor: "orange", width: 50, height: 50 }} />
       </View>
       <View style={{ flex: 1, alignItems: "center" }}>
         <Text>React Native SVG</Text>
@@ -114,9 +113,9 @@ const Screen = () => {
   );
 };
 
-const HomeScreen = () => <Screen />;
+const HomeScreen = () => <Screen color="red" />;
 
-const SettingsScreen = () => <Screen />;
+const SettingsScreen = () => <Screen color="green" />;
 
 const Tab = createBottomTabNavigator();
 
