@@ -33,21 +33,21 @@ public:
   }
 
   static void registerNatives() {
-    registerHybrid({
-        makeNativeMethod("initHybrid", JniSkiaPictureView::initHybrid),
-        makeNativeMethod("surfaceAvailable",
-                         JniSkiaPictureView::surfaceAvailable),
-        makeNativeMethod("surfaceDestroyed",
-                         JniSkiaPictureView::surfaceDestroyed),
-        makeNativeMethod("surfaceSizeChanged",
-                         JniSkiaPictureView::surfaceSizeChanged),
-        makeNativeMethod("setMode", JniSkiaPictureView::setMode),
-        makeNativeMethod("setDebugMode", JniSkiaPictureView::setDebugMode),
-        makeNativeMethod("updateTouchPoints",
-                         JniSkiaPictureView::updateTouchPoints),
-        makeNativeMethod("registerView", JniSkiaPictureView::registerView),
-        makeNativeMethod("unregisterView", JniSkiaPictureView::unregisterView)
-    });
+    registerHybrid(
+        {makeNativeMethod("initHybrid", JniSkiaPictureView::initHybrid),
+         makeNativeMethod("surfaceAvailable",
+                          JniSkiaPictureView::surfaceAvailable),
+         makeNativeMethod("surfaceDestroyed",
+                          JniSkiaPictureView::surfaceDestroyed),
+         makeNativeMethod("surfaceSizeChanged",
+                          JniSkiaPictureView::surfaceSizeChanged),
+         makeNativeMethod("setMode", JniSkiaPictureView::setMode),
+         makeNativeMethod("setDebugMode", JniSkiaPictureView::setDebugMode),
+         makeNativeMethod("updateTouchPoints",
+                          JniSkiaPictureView::updateTouchPoints),
+         makeNativeMethod("registerView", JniSkiaPictureView::registerView),
+         makeNativeMethod("unregisterView",
+                          JniSkiaPictureView::unregisterView)});
   }
 
 protected:

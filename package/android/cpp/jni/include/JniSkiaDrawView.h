@@ -33,19 +33,20 @@ public:
   }
 
   static void registerNatives() {
-    registerHybrid({
-        makeNativeMethod("initHybrid", JniSkiaDrawView::initHybrid),
-        makeNativeMethod("surfaceAvailable", JniSkiaDrawView::surfaceAvailable),
-        makeNativeMethod("surfaceDestroyed", JniSkiaDrawView::surfaceDestroyed),
-        makeNativeMethod("surfaceSizeChanged",
-                         JniSkiaDrawView::surfaceSizeChanged),
-        makeNativeMethod("setMode", JniSkiaDrawView::setMode),
-        makeNativeMethod("setDebugMode", JniSkiaDrawView::setDebugMode),
-        makeNativeMethod("updateTouchPoints",
-                         JniSkiaDrawView::updateTouchPoints),
-        makeNativeMethod("registerView", JniSkiaDrawView::registerView),
-        makeNativeMethod("unregisterView", JniSkiaDrawView::unregisterView)
-    });
+    registerHybrid(
+        {makeNativeMethod("initHybrid", JniSkiaDrawView::initHybrid),
+         makeNativeMethod("surfaceAvailable",
+                          JniSkiaDrawView::surfaceAvailable),
+         makeNativeMethod("surfaceDestroyed",
+                          JniSkiaDrawView::surfaceDestroyed),
+         makeNativeMethod("surfaceSizeChanged",
+                          JniSkiaDrawView::surfaceSizeChanged),
+         makeNativeMethod("setMode", JniSkiaDrawView::setMode),
+         makeNativeMethod("setDebugMode", JniSkiaDrawView::setDebugMode),
+         makeNativeMethod("updateTouchPoints",
+                          JniSkiaDrawView::updateTouchPoints),
+         makeNativeMethod("registerView", JniSkiaDrawView::registerView),
+         makeNativeMethod("unregisterView", JniSkiaDrawView::unregisterView)});
   }
 
 protected:
