@@ -33,7 +33,6 @@ describe("Offscreen Drawings", () => {
     const { width, height } = surface;
     const raw = await surface.eval(
       (Skia, ctx) => {
-        const { OS } = ctx;
         const r = ctx.width / 2;
         const backSurface = Skia.Surface.MakeOffscreen(ctx.width, ctx.height)!;
         const frontSurface = Skia.Surface.MakeOffscreen(ctx.width, ctx.height)!;
@@ -45,13 +44,11 @@ describe("Offscreen Drawings", () => {
         paint.setColor(Skia.Color("lightblue"));
         canvas.drawCircle(r, r, r, paint);
         backSurface.flush();
-        const snapshot = backSurface.makeImageSnapshot();
-        // TODO: thread-based shared contextes is only available on iOS for now
-        const image = OS === "ios" ? snapshot : snapshot.makeNonTextureImage();
+        const image = backSurface.makeImageSnapshot();
         frontSurface.getCanvas().drawImage(image, 0, 0);
         return frontSurface.makeImageSnapshot().encodeToBase64();
       },
-      { width, height, OS: surface.OS }
+      { width, height }
     );
     const { Skia } = importSkia();
     const data = Skia.Data.fromBase64(raw);
