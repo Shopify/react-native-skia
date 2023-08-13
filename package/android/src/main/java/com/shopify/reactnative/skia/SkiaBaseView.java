@@ -19,14 +19,13 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     public SkiaBaseView(Context context) {
         super(context);
-        setWillNotDraw(false);
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
         addView(mTexture);
     }
 
-    public void init() {
+    public void createSurfaceTexture() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Log.i("SkiaBaseView", "Create SurfaceTexture");
             SurfaceTexture surface = new SurfaceTexture(false);
@@ -130,7 +129,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         surfaceDestroyed();
         mSurface.release();
-        this.init();
+        // We create a new SurfaceTexture
+        this.createSurfaceTexture();
         return false;
     }
 

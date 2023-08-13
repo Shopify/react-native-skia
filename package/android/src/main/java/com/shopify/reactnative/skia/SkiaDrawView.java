@@ -14,7 +14,7 @@ public class SkiaDrawView extends SkiaBaseView {
         super(context);
         RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
-        this.init();
+        this.createSurfaceTexture();
     }
 
     @Override
