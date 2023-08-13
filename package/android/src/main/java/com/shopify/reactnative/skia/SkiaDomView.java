@@ -14,6 +14,7 @@ public class SkiaDomView extends SkiaBaseView {
         super(context);
         RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
+        this.init();
     }
 
     @Override
@@ -41,7 +42,4 @@ public class SkiaDomView extends SkiaBaseView {
     protected native void registerView(int nativeId);
 
     protected native void unregisterView();
-
-    // TODO: Remove if we find another solution for first frame rendering
-    // protected native Object renderToBitmap(Object bitmap, int width, int height);
 }
