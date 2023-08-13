@@ -8,6 +8,7 @@ import {
   SkiaPictureView,
   Skia,
   useSVG,
+  Picture,
 } from "@shopify/react-native-skia";
 
 import { Octocat } from "./SvgIcons/OctocatIcon";
@@ -75,6 +76,11 @@ const style = { width: 48, height: 48 };
 
 const Icon = ({ icon }: IconProps) => {
   return <SkiaPictureView picture={icon} style={style} />;
+  // return (
+  //   <Canvas style={style}>
+  //     <Picture picture={icon} />
+  //   </Canvas>
+  // );
 };
 
 type Props = { color: string };

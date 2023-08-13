@@ -1,5 +1,7 @@
 package com.shopify.reactnative.skia;
 
+import android.util.Log;
+
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.views.view.ReactViewGroup;
@@ -26,6 +28,8 @@ public abstract class SkiaBaseViewManager<T extends SkiaBaseView> extends Simple
     public void setDebug(T view, boolean show) {
         ((SkiaBaseView)view).setDebugMode(show);
     }
+
+
 
     @Override
     public void onDropViewInstance(@NonNull T view) {

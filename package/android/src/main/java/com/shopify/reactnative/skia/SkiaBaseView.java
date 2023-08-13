@@ -1,25 +1,24 @@
 package com.shopify.reactnative.skia;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
 
 import com.facebook.jni.annotations.DoNotStrip;
 public abstract class SkiaBaseView extends TextureView implements TextureView.SurfaceTextureListener {
 
     @DoNotStrip
-    private Surface mSurface;
+    private Surface mSurface = null;
 
     public SkiaBaseView(Context context) {
         super(context);
         this.setSurfaceTextureListener(this);
         this.setOpaque(false);
+        Log.i("SkiaBaseView", "SkiaBaseView(context)");
     }
 
     public void init() {
@@ -28,10 +27,27 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
             SurfaceTexture surface = new SurfaceTexture(false);
             this.setSurfaceTexture(surface);
             this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
-        } else {
-            Log.i("SkiaBaseView", "Not using the new SurfaceTexture constructor SDK is " + android.os.Build.VERSION.SDK_INT);
         }
     }
+//    @Override
+//    public void invalidate() {
+//        super.invalidate();
+//        Log.i("SkiaBaseView", "invalidate()");
+//    }
+
+//    @Override
+//    public void startViewTransition(View view) {
+//    }
+
+//    @Override
+//    protected void onVisibilityChanged(View changedView, int visibility) {
+//        super.onVisibilityChanged(changedView, visibility);
+//        if (visibility == VISIBLE) {
+//            if (mSurface == null) {
+//                this.init();
+//            }
+//        }
+//    }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
@@ -128,7 +144,6 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        // Nothing special to do here
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
@@ -146,7 +161,4 @@ public abstract class SkiaBaseView extends TextureView implements TextureView.Su
     protected abstract void registerView(int nativeId);
 
     protected abstract void unregisterView();
-
-    // TODO: Remove if we find another solution for first frame rendering
-    // protected native Object renderToBitmap(Object bitmap, int width, int height);
 }
