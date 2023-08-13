@@ -53,7 +53,12 @@ export const Tests = ({ assets }: TestsProps) => {
   useEffect(() => {
     if (drawing) {
       const it = setTimeout(() => {
-        const image = ref.current?.makeImageSnapshot();
+        const image = ref.current?.makeImageSnapshot({
+          x: 0,
+          y: 0,
+          width: size,
+          height: size,
+        });
         if (image && client) {
           const data = image.encodeToBytes();
           client.send(data);
