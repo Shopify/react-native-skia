@@ -6,13 +6,23 @@
 #import <MetalKit/MetalKit.h>
 #import <QuartzCore/CAMetalLayer.h>
 
-using MetalRenderContext = struct {
-  id<MTLCommandQueue> commandQueue;
-  sk_sp<GrDirectContext> skContext;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#import <include/gpu/GrDirectContext.h>
+
+#pragma clang diagnostic pop
+
+using MetalContext = struct MetalContext {
+  id<MTLCommandQueue> commandQueue = nullptr;
+  sk_sp<GrDirectContext> skContext = nullptr;
 };
 
-static std::unordered_map<std::thread::id, std::shared_ptr<MetalRenderContext>>
-    renderContexts;
+class ThreadContextHolder {
+public:
+  static thread_local MetalContext ThreadMetalContext;
+};
 
 class RNSkMetalCanvasProvider : public RNSkia::RNSkCanvasProvider {
 public:
@@ -38,8 +48,7 @@ private:
    * each new view, we track the Skia drawing context per thread.
    * @return The drawing context for the current thread
    */
-  static std::shared_ptr<MetalRenderContext> getMetalRenderContext();
-
+  static MetalContext& getMetalContext();
   static id<MTLDevice> device;
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
   float _width = -1;

@@ -14,6 +14,8 @@
 
 #pragma clang diagnostic pop
 
+thread_local MetalContext ThreadContextHolder::ThreadMetalContext;
+
 struct OffscreenRenderContext {
   id<MTLTexture> texture;
 
@@ -36,31 +38,23 @@ struct OffscreenRenderContext {
 /** Static members */
 id<MTLDevice> RNSkMetalCanvasProvider::device = MTLCreateSystemDefaultDevice();
 
-std::shared_ptr<MetalRenderContext>
-RNSkMetalCanvasProvider::getMetalRenderContext() {
-  auto threadId = std::this_thread::get_id();
-  if (renderContexts.count(threadId) == 0) {
-    auto drawingContext = std::make_shared<MetalRenderContext>();
-    drawingContext->commandQueue = nullptr;
-    drawingContext->skContext = nullptr;
-    renderContexts.emplace(threadId, drawingContext);
+MetalContext&
+RNSkMetalCanvasProvider::getMetalContext() {
+  if (ThreadContextHolder::ThreadMetalContext.skContext == nullptr) {
+	  ThreadContextHolder::ThreadMetalContext.commandQueue =
+        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
+	  ThreadContextHolder::ThreadMetalContext.skContext = GrDirectContext::MakeMetal(
+        (__bridge void *)device, (__bridge void *)ThreadContextHolder::ThreadMetalContext.commandQueue);
   }
-  return renderContexts.at(threadId);
+  return ThreadContextHolder::ThreadMetalContext;
 }
 
 sk_sp<SkSurface>
 RNSkMetalCanvasProvider::MakeOffscreenMetalSurface(int width, int height) {
-  auto renderContext = getMetalRenderContext();
-
-  if (renderContext->skContext == nullptr) {
-    renderContext->commandQueue =
-        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    renderContext->skContext = GrDirectContext::MakeMetal(
-        (__bridge void *)device, (__bridge void *)renderContext->commandQueue);
-  }
+  auto metalContext = getMetalContext();
   auto ctx =
-      new OffscreenRenderContext(device, renderContext->skContext,
-                                 renderContext->commandQueue, width, height);
+      new OffscreenRenderContext(device, metalContext.skContext,
+								 metalContext.commandQueue, width, height);
 
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
@@ -69,7 +63,7 @@ RNSkMetalCanvasProvider::MakeOffscreenMetalSurface(int width, int height) {
 
   // Create a SkSurface from the GrBackendTexture
   auto surface = SkSurfaces::WrapBackendTexture(
-      renderContext->skContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin,
+												metalContext.skContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin,
       0, kBGRA_8888_SkColorType, nullptr, nullptr,
       [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
@@ -84,9 +78,8 @@ RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
-
   _layer.framebufferOnly = NO;
-  _layer.device = device;
+  _layer.device = MTLCreateSystemDefaultDevice();
   _layer.opaque = false;
   _layer.contentsScale = _context->getPixelDensity();
   _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -136,16 +129,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
   }
 
   // Get render context for current thread
-  auto renderContext = getMetalRenderContext();
-
-  if (renderContext->skContext == nullptr) {
-    auto device = MTLCreateSystemDefaultDevice();
-    renderContext->commandQueue =
-        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    renderContext->skContext = GrDirectContext::MakeMetal(
-        (__bridge void *)device, (__bridge void *)renderContext->commandQueue);
-  }
-
+  auto metalContext = getMetalContext();
   // Wrap in auto release pool since we want the system to clean up after
   // rendering and not wait until later - we've seen some example of memory
   // usage growing very fast in the simulator without this.
@@ -172,7 +156,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
                                     _layer.drawableSize.height, 1, fbInfo);
 
     auto skSurface = SkSurfaces::WrapBackendRenderTarget(
-        renderContext->skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
+        metalContext.skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
         kBGRA_8888_SkColorType, nullptr, nullptr);
 
     if (skSurface == nullptr || skSurface->getCanvas() == nullptr) {
@@ -187,7 +171,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     skSurface->flushAndSubmit();
 
     id<MTLCommandBuffer> commandBuffer(
-        [renderContext->commandQueue commandBuffer]);
+        [metalContext.commandQueue commandBuffer]);
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
   }
