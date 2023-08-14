@@ -6,7 +6,12 @@ slug: /shapes/custom-drawing
 ---
 
 The `Drawing` component that allows you to use the imperative API within the declarative API.
-Please note that because this component relies on the JavaScript thread, this component is expected to be slower than its declarative counterpart.
+
+:::info
+
+Please note that because this component relies on the JavaScript thread to be available, this component is expected to be slower than its declarative counterpart. Use with caution. If you are looking to animate on the number of drawing commands, we recommend using Reanimated 3 with the [Picture](/docs/shapes/pictures/) component.
+
+:::
 
 ### Example
 
