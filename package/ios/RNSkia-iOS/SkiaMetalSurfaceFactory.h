@@ -21,9 +21,9 @@ public:
 class SkiaMetalSurfaceFactory {
 private:
   static id<MTLDevice> device;
+  static SkiaMetalContext &createSkiaDirectContextIfNecessary();
 
 public:
-  static SkiaMetalContext &createSkiaDirectContextIfNecessary();
   API_AVAILABLE(ios(13.0))
   static bool drawOnScreen(CAMetalLayer *layer, const std::function<void(SkCanvas *)> &cb);
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
