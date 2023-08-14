@@ -36,7 +36,8 @@ struct OffscreenRenderContext {
 
 id<MTLDevice> SkiaMetalSurfaceFactory::device = MTLCreateSystemDefaultDevice();
 
-SkiaMetalContext &SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary() {
+SkiaMetalContext &
+SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary() {
   if (ThreadContextHolder::ThreadMetalContext.skContext == nullptr) {
     ThreadContextHolder::ThreadMetalContext.commandQueue =
         id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
@@ -48,7 +49,8 @@ SkiaMetalContext &SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary() 
   return ThreadContextHolder::ThreadMetalContext;
 }
 
-sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width, int height) {
+sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
+                                                               int height) {
   auto metalContext = createSkiaDirectContextIfNecessary();
   auto ctx = new OffscreenRenderContext(
       device, metalContext.skContext, metalContext.commandQueue, width, height);

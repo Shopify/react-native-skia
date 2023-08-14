@@ -28,6 +28,7 @@ public:
   void setSize(int width, int height);
 
   CALayer *getLayer();
+
 private:
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
   float _width = -1;

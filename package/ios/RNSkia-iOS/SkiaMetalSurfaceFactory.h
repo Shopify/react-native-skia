@@ -9,7 +9,7 @@
 
 using SkiaMetalContext = struct SkiaMetalContext {
   id<MTLCommandQueue> commandQueue = nullptr;
-  sk_sp<GrDirectContext> skContext = nullptr;	
+  sk_sp<GrDirectContext> skContext = nullptr;
 };
 
 class ThreadContextHolder {
@@ -19,8 +19,9 @@ public:
 
 class SkiaMetalSurfaceFactory {
 private:
-	static id<MTLDevice> device;
+  static id<MTLDevice> device;
+
 public:
-	static SkiaMetalContext &createSkiaDirectContextIfNecessary();
-    static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
+  static SkiaMetalContext &createSkiaDirectContextIfNecessary();
+  static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
 };

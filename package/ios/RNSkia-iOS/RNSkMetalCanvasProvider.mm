@@ -74,7 +74,8 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
   }
 
   // Get render context for current thread
-  auto metalContext = SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary();
+  auto metalContext =
+      SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary();
   // Wrap in auto release pool since we want the system to clean up after
   // rendering and not wait until later - we've seen some example of memory
   // usage growing very fast in the simulator without this.
