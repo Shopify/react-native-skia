@@ -72,30 +72,34 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       return false;
     }
   }
-	// Wrap in auto release pool since we want the system to clean up after
-	// rendering and not wait until later - we've seen some example of memory
-	// usage growing very fast in the simulator without this.
-	@autoreleasepool {
-		id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
-		if (currentDrawable == nullptr) {
-		  return false;
-		}
+  // Wrap in auto release pool since we want the system to clean up after
+  // rendering and not wait until later - we've seen some example of memory
+  // usage growing very fast in the simulator without this.
+  @autoreleasepool {
+    id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
+    if (currentDrawable == nullptr) {
+      return false;
+    }
 
-		// This is new:
-		auto skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(currentDrawable.texture, _layer.drawableSize.width,
-		   _layer.drawableSize.height);
+    // This is new:
+    auto skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
+        currentDrawable.texture, _layer.drawableSize.width,
+        _layer.drawableSize.height);
 
-		SkCanvas *canvas = skSurface->getCanvas();
-		cb(canvas);
+    SkCanvas *canvas = skSurface->getCanvas();
+    cb(canvas);
 
-		skSurface->flushAndSubmit();
-		auto metalContext =
-			SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary();
-		id<MTLCommandBuffer> commandBuffer(
-			[metalContext.commandQueue commandBuffer]);
-		[commandBuffer presentDrawable:currentDrawable];
-		[commandBuffer commit];
-	}
+    skSurface->flushAndSubmit();
+    if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
+            &ThreadContextHolder::ThreadSkiaMetalContext)) {
+      return false;
+    }
+    id<MTLCommandBuffer> commandBuffer(
+        [ThreadContextHolder::ThreadSkiaMetalContext
+                .commandQueue commandBuffer]);
+    [commandBuffer presentDrawable:currentDrawable];
+    [commandBuffer commit];
+  }
   return true;
 };
 

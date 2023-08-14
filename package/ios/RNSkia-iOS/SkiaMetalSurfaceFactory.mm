@@ -15,7 +15,7 @@
 
 #pragma clang diagnostic pop
 
-thread_local SkiaMetalContext ThreadContextHolder::ThreadMetalContext;
+thread_local SkiaMetalContext ThreadContextHolder::ThreadSkiaMetalContext;
 
 struct OffscreenRenderContext {
   id<MTLTexture> texture;
@@ -38,45 +38,56 @@ struct OffscreenRenderContext {
 
 id<MTLDevice> SkiaMetalSurfaceFactory::device = MTLCreateSystemDefaultDevice();
 
-SkiaMetalContext &
-SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary() {
-  if (ThreadContextHolder::ThreadMetalContext.skContext == nullptr) {
-    ThreadContextHolder::ThreadMetalContext.commandQueue =
+bool SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
+    SkiaMetalContext *skiaMetalContext) {
+  if (skiaMetalContext->skContext == nullptr) {
+    skiaMetalContext->commandQueue =
         id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    ThreadContextHolder::ThreadMetalContext
-        .skContext = GrDirectContext::MakeMetal(
+    skiaMetalContext->skContext = GrDirectContext::MakeMetal(
         (__bridge void *)device,
-        (__bridge void *)ThreadContextHolder::ThreadMetalContext.commandQueue);
+        (__bridge void *)skiaMetalContext->commandQueue);
+    if (skiaMetalContext->skContext == nullptr) {
+      RNSkia::RNSkLogger::logToConsole("Couldn't create a Skia Metal Context");
+      return false;
+    }
   }
-  return ThreadContextHolder::ThreadMetalContext;
+  return true;
 }
 
-sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeWindowedSurface(id<MTLTexture> texture, int width, int height) {
-	// Get render context for current thread
-	auto metalContext =
-		SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary();
-	  GrMtlTextureInfo fbInfo;
-	  fbInfo.fTexture.retain((__bridge void *)texture);
+sk_sp<SkSurface>
+SkiaMetalSurfaceFactory::makeWindowedSurface(id<MTLTexture> texture, int width,
+                                             int height) {
+  // Get render context for current thread
+  if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
+          &ThreadContextHolder::ThreadSkiaMetalContext)) {
+    return nullptr;
+  }
+  GrMtlTextureInfo fbInfo;
+  fbInfo.fTexture.retain((__bridge void *)texture);
 
-	  GrBackendRenderTarget backendRT(width, height, 1, fbInfo);
+  GrBackendRenderTarget backendRT(width, height, 1, fbInfo);
 
-	  auto skSurface = SkSurfaces::WrapBackendRenderTarget(
-		  metalContext.skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
-		  kBGRA_8888_SkColorType, nullptr, nullptr);
+  auto skSurface = SkSurfaces::WrapBackendRenderTarget(
+      ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(), backendRT,
+      kTopLeft_GrSurfaceOrigin, kBGRA_8888_SkColorType, nullptr, nullptr);
 
-	  if (skSurface == nullptr || skSurface->getCanvas() == nullptr) {
-		RNSkia::RNSkLogger::logToConsole(
-			"Skia surface could not be created from parameters.");
-		return nullptr;
-	  }
-	return skSurface;
+  if (skSurface == nullptr || skSurface->getCanvas() == nullptr) {
+    RNSkia::RNSkLogger::logToConsole(
+        "Skia surface could not be created from parameters.");
+    return nullptr;
+  }
+  return skSurface;
 }
 
 sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
                                                                int height) {
-  auto metalContext = createSkiaDirectContextIfNecessary();
+  if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
+          &ThreadContextHolder::ThreadSkiaMetalContext)) {
+    return nullptr;
+  }
   auto ctx = new OffscreenRenderContext(
-      device, metalContext.skContext, metalContext.commandQueue, width, height);
+      device, ThreadContextHolder::ThreadSkiaMetalContext.skContext,
+      ThreadContextHolder::ThreadSkiaMetalContext.commandQueue, width, height);
 
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
@@ -85,8 +96,9 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
 
   // Create a SkSurface from the GrBackendTexture
   auto surface = SkSurfaces::WrapBackendTexture(
-      metalContext.skContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
-      kBGRA_8888_SkColorType, nullptr, nullptr,
+      ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(),
+      backendTexture, kTopLeft_GrSurfaceOrigin, 0, kBGRA_8888_SkColorType,
+      nullptr, nullptr,
       [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
   return surface;

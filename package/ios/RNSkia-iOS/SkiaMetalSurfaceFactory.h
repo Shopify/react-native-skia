@@ -15,7 +15,7 @@ using SkiaMetalContext = struct SkiaMetalContext {
 
 class ThreadContextHolder {
 public:
-  static thread_local SkiaMetalContext ThreadMetalContext;
+  static thread_local SkiaMetalContext ThreadSkiaMetalContext;
 };
 
 class SkiaMetalSurfaceFactory {
@@ -23,7 +23,9 @@ private:
   static id<MTLDevice> device;
 
 public:
-  static SkiaMetalContext &createSkiaDirectContextIfNecessary();
-  static sk_sp<SkSurface> makeWindowedSurface(id<MTLTexture> texture, int width, int height);
+  static bool
+  createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
+  static sk_sp<SkSurface> makeWindowedSurface(id<MTLTexture> texture, int width,
+                                              int height);
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
 };
