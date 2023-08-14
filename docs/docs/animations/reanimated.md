@@ -8,7 +8,7 @@ slug: /animations/reanimated
 React Native Skia provides an integration with Reanimated 3 that allows for animations
 to be executed on the UI-thread. 
 
-This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).
+This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).
 
 ## Hello World
 
