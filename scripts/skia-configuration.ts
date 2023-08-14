@@ -106,6 +106,7 @@ export const configurations: Configuration = {
       },
     },
     args: [
+      ["ndk_api", 26],
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_runtime_icu", true],
