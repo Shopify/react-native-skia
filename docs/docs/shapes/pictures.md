@@ -1,8 +1,8 @@
 ---
-id: picture
-title: Picture
-sidebar_label: Picture
-slug: /pictures
+id: pictures
+title: Pictures
+sidebar_label: Pictures
+slug: /shapes/pictures
 ---
 
 A Picture renders a previously recorded list of drawing operations on the canvas. The picture is immutable and cannot be edited or changed after it has been created. It can be used multiple times in any canvas.
