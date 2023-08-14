@@ -14,7 +14,7 @@
 
 #pragma clang diagnostic pop
 
-thread_local MetalContext ThreadContextHolder::ThreadMetalContext;
+thread_local SkiaMetalContext ThreadContextHolder::ThreadMetalContext;
 
 struct OffscreenRenderContext {
   id<MTLTexture> texture;
@@ -38,7 +38,7 @@ struct OffscreenRenderContext {
 /** Static members */
 id<MTLDevice> RNSkMetalCanvasProvider::device = MTLCreateSystemDefaultDevice();
 
-MetalContext &RNSkMetalCanvasProvider::createSkiaDirectContextIfNecessary() {
+SkiaMetalContext &RNSkMetalCanvasProvider::createSkiaDirectContextIfNecessary() {
   if (ThreadContextHolder::ThreadMetalContext.skContext == nullptr) {
     ThreadContextHolder::ThreadMetalContext.commandQueue =
         id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
