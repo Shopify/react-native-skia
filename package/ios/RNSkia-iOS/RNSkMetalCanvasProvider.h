@@ -26,7 +26,6 @@ public:
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 
   void setSize(int width, int height);
-
   CALayer *getLayer();
 
 private:

@@ -3,6 +3,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#import "SkCanvas.h"
 #import <include/gpu/GrDirectContext.h>
 
 #pragma clang diagnostic pop
@@ -23,5 +24,7 @@ private:
 
 public:
   static SkiaMetalContext &createSkiaDirectContextIfNecessary();
+  API_AVAILABLE(ios(13.0))
+  static bool drawOnScreen(CAMetalLayer *layer, const std::function<void(SkCanvas *)> &cb);
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
 };

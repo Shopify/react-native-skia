@@ -72,57 +72,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       return false;
     }
   }
-
-  // Get render context for current thread
-  auto metalContext =
-      SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary();
-  // Wrap in auto release pool since we want the system to clean up after
-  // rendering and not wait until later - we've seen some example of memory
-  // usage growing very fast in the simulator without this.
-  @autoreleasepool {
-
-    /* It is super important that we use the pattern of calling nextDrawable
-     inside this autoreleasepool and not depend on Skia's
-     SkSurface::MakeFromCAMetalLayer to encapsulate since we're seeing a lot of
-     drawables leaking if they're not done this way.
-
-     This is now reverted from:
-     (https://github.com/Shopify/react-native-skia/commit/2e2290f8e6dfc6921f97b79f779d920fbc1acceb)
-     back to the original implementation.
-     */
-    id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
-    if (currentDrawable == nullptr) {
-      return false;
-    }
-
-    GrMtlTextureInfo fbInfo;
-    fbInfo.fTexture.retain((__bridge void *)currentDrawable.texture);
-
-    GrBackendRenderTarget backendRT(_layer.drawableSize.width,
-                                    _layer.drawableSize.height, 1, fbInfo);
-
-    auto skSurface = SkSurfaces::WrapBackendRenderTarget(
-        metalContext.skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
-        kBGRA_8888_SkColorType, nullptr, nullptr);
-
-    if (skSurface == nullptr || skSurface->getCanvas() == nullptr) {
-      RNSkia::RNSkLogger::logToConsole(
-          "Skia surface could not be created from parameters.");
-      return false;
-    }
-
-    SkCanvas *canvas = skSurface->getCanvas();
-    cb(canvas);
-
-    skSurface->flushAndSubmit();
-
-    id<MTLCommandBuffer> commandBuffer(
-        [metalContext.commandQueue commandBuffer]);
-    [commandBuffer presentDrawable:currentDrawable];
-    [commandBuffer commit];
-  }
-
-  return true;
+  return SkiaMetalSurfaceFactory::drawOnScreen(_layer, cb);
 };
 
 void RNSkMetalCanvasProvider::setSize(int width, int height) {
