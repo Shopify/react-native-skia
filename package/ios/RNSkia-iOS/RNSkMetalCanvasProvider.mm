@@ -38,7 +38,7 @@ struct OffscreenRenderContext {
 /** Static members */
 id<MTLDevice> RNSkMetalCanvasProvider::device = MTLCreateSystemDefaultDevice();
 
-MetalContext &RNSkMetalCanvasProvider::getMetalContext() {
+MetalContext &RNSkMetalCanvasProvider::createSkiaDirectContextIfNecessary() {
   if (ThreadContextHolder::ThreadMetalContext.skContext == nullptr) {
     ThreadContextHolder::ThreadMetalContext.commandQueue =
         id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
@@ -52,7 +52,7 @@ MetalContext &RNSkMetalCanvasProvider::getMetalContext() {
 
 sk_sp<SkSurface>
 RNSkMetalCanvasProvider::MakeOffscreenMetalSurface(int width, int height) {
-  auto metalContext = getMetalContext();
+  auto metalContext = createSkiaDirectContextIfNecessary();
   auto ctx = new OffscreenRenderContext(
       device, metalContext.skContext, metalContext.commandQueue, width, height);
 
@@ -129,7 +129,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
   }
 
   // Get render context for current thread
-  auto metalContext = getMetalContext();
+  auto metalContext = createSkiaDirectContextIfNecessary();
   // Wrap in auto release pool since we want the system to clean up after
   // rendering and not wait until later - we've seen some example of memory
   // usage growing very fast in the simulator without this.

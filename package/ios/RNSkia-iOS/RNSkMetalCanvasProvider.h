@@ -47,7 +47,7 @@ private:
    * each new view, we track the Skia drawing context per thread.
    * @return The drawing context for the current thread
    */
-  static MetalContext &getMetalContext();
+  static MetalContext &createSkiaDirectContextIfNecessary();
   static id<MTLDevice> device;
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
   float _width = -1;
