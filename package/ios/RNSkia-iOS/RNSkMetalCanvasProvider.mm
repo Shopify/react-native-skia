@@ -81,7 +81,6 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       return false;
     }
 
-    // This is new:
     auto skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
         currentDrawable.texture, _layer.drawableSize.width,
         _layer.drawableSize.height);
@@ -90,10 +89,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     cb(canvas);
 
     skSurface->flushAndSubmit();
-    if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
-            &ThreadContextHolder::ThreadSkiaMetalContext)) {
-      return false;
-    }
+
     id<MTLCommandBuffer> commandBuffer(
         [ThreadContextHolder::ThreadSkiaMetalContext
                 .commandQueue commandBuffer]);
