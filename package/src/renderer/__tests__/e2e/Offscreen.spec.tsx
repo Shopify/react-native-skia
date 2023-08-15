@@ -44,7 +44,7 @@ describe("Offscreen Drawings", () => {
         paint.setColor(Skia.Color("lightblue"));
         canvas.drawCircle(r, r, r, paint);
         backSurface.flush();
-        const image = backSurface.makeImageSnapshot().makeNonTextureImage();
+        const image = backSurface.makeImageSnapshot();
         frontSurface.getCanvas().drawImage(image, 0, 0);
         return frontSurface.makeImageSnapshot().encodeToBase64();
       },
@@ -56,18 +56,8 @@ describe("Offscreen Drawings", () => {
     expect(data).toBeDefined();
     checkImage(image, docPath("offscreen/circle.png"));
   });
-  it("Should use the React API to build an image", async () => {
-    const { width, height } = surface;
-    const { drawAsImage } = importSkia();
-    const r = width / 2;
-    const image = drawAsImage(
-      <Circle r={r} cx={r} cy={r} color="lightblue" />,
-      width,
-      height
-    );
-    checkImage(image, docPath("offscreen/circle.png"));
-  });
-  it("Should render to multiple offscreen surfaces at once", async () => {
+
+  it("Should render to multiple offscreen surfaces at once (1)", async () => {
     const { width, height } = surface;
     const raw = await surface.eval(
       (Skia, ctx) => {
@@ -89,13 +79,11 @@ describe("Offscreen Drawings", () => {
         const canvas2 = backSurface2.getCanvas();
         const paint2 = Skia.Paint();
         paint2.setColor(Skia.Color("magenta"));
-        canvas2.drawCircle(r, r, r, paint2);
+        canvas2.drawCircle(r, r, r / 2, paint2);
         backSurface2.flush();
 
-        // TODO: When we've implemented sharing on iOS we can remove makeNonTextureImage here:
-        const image1 = backSurface1.makeImageSnapshot().makeNonTextureImage();
-        const image2 = backSurface2.makeImageSnapshot().makeNonTextureImage();
-
+        const image1 = backSurface1.makeImageSnapshot();
+        const image2 = backSurface2.makeImageSnapshot();
         frontSurface.getCanvas().drawImage(image1, 0, 0);
         frontSurface.getCanvas().drawImage(image2, ctx.width / 2, 0);
         return frontSurface.makeImageSnapshot().encodeToBase64();
@@ -107,5 +95,16 @@ describe("Offscreen Drawings", () => {
     const image = Skia.Image.MakeImageFromEncoded(data)!;
     expect(data).toBeDefined();
     checkImage(image, docPath("offscreen/multiple_circles.png"));
+  });
+  it("Should use the React API to build an image", async () => {
+    const { width, height } = surface;
+    const { drawAsImage } = importSkia();
+    const r = width / 2;
+    const image = drawAsImage(
+      <Circle r={r} cx={r} cy={r} color="lightblue" />,
+      width,
+      height
+    );
+    checkImage(image, docPath("offscreen/circle.png"));
   });
 });
