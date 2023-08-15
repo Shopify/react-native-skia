@@ -19,13 +19,13 @@ public:
 };
 
 class SkiaMetalSurfaceFactory {
-private:
-  static id<MTLDevice> device;
-  static bool
-  createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
-
 public:
   static sk_sp<SkSurface> makeWindowedSurface(id<MTLTexture> texture, int width,
                                               int height);
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
+
+private:
+  static id<MTLDevice> device;
+  static bool
+  createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
 };
