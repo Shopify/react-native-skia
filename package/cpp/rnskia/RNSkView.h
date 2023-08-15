@@ -109,7 +109,7 @@ public:
     } else {
       image = _surface->makeImageSnapshot();
     }
-    return image->makeNonTextureImage();
+    return image;
   }
 
   /**
