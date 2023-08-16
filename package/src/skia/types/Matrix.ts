@@ -23,6 +23,19 @@ export interface SkMatrix extends SkJSIInstance<"Matrix"> {
   rotate: (theta: number) => SkMatrix;
   identity: () => SkMatrix;
   get: () => number[];
+  reset: () => void;
+  setAll: (
+    scaleX: number,
+    skewX: number,
+    transX: number,
+    skewY: number,
+    scaleY: number,
+    transY: number,
+    pers0: number,
+    pers1: number,
+    pers2: number
+  ) => void;
+  setMatrix: (matrix: SkMatrix) => void;
 }
 
 type Transform2dName =

@@ -16,6 +16,40 @@ export class JsiSkMatrix
     // Do nothing - the matrix is represenetd by a Float32Array
   };
 
+  reset() {
+    this.ref.set(this.CanvasKit.Matrix.identity());
+  }
+
+  setAll(
+    scaleX: number,
+    skewX: number,
+    transX: number,
+    skewY: number,
+    scaleY: number,
+    transY: number,
+    pers0: number,
+    pers1: number,
+    pers2: number
+  ) {
+    this.ref.set(
+      Float32Array.of(
+        scaleX,
+        skewX,
+        transX,
+        skewY,
+        scaleY,
+        transY,
+        pers0,
+        pers1,
+        pers2
+      )
+    );
+  }
+
+  setMatrix(matrix: SkMatrix) {
+    this.ref.set(JsiSkMatrix.fromValue(matrix));
+  }
+
   concat(matrix: SkMatrix) {
     this.ref.set(
       this.CanvasKit.Matrix.multiply(this.ref, JsiSkMatrix.fromValue(matrix))
