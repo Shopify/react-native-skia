@@ -4,7 +4,7 @@
 #include <thread>
 #include <utility>
 
-#include <SkiaMetalRenderer.h>
+#include <SkiaMetalSurfaceFactory.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -62,7 +62,7 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
-  return MakeOffscreenMetalSurface(width, height);
+  return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::getFontMgr() {

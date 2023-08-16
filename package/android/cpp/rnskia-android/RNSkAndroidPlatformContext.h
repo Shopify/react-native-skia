@@ -7,7 +7,7 @@
 
 #include <JniPlatformContext.h>
 #include <RNSkPlatformContext.h>
-#include <SkiaOpenGLRenderer.h>
+#include <SkiaOpenGLSurfaceFactory.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -45,7 +45,7 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    return MakeOffscreenGLSurface(width, height);
+    return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
   }
 
   sk_sp<SkFontMgr> getFontMgr() override {

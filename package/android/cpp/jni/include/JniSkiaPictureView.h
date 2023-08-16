@@ -33,21 +33,24 @@ public:
   }
 
   static void registerNatives() {
-    registerHybrid(
-        {makeNativeMethod("initHybrid", JniSkiaPictureView::initHybrid),
-         makeNativeMethod("surfaceAvailable",
-                          JniSkiaPictureView::surfaceAvailable),
-         makeNativeMethod("surfaceDestroyed",
-                          JniSkiaPictureView::surfaceDestroyed),
-         makeNativeMethod("surfaceSizeChanged",
-                          JniSkiaPictureView::surfaceSizeChanged),
-         makeNativeMethod("setMode", JniSkiaPictureView::setMode),
-         makeNativeMethod("setDebugMode", JniSkiaPictureView::setDebugMode),
-         makeNativeMethod("updateTouchPoints",
-                          JniSkiaPictureView::updateTouchPoints),
-         makeNativeMethod("registerView", JniSkiaPictureView::registerView),
-         makeNativeMethod("unregisterView",
-                          JniSkiaPictureView::unregisterView)});
+    registerHybrid({
+        makeNativeMethod("initHybrid", JniSkiaPictureView::initHybrid),
+        makeNativeMethod("surfaceAvailable",
+                         JniSkiaPictureView::surfaceAvailable),
+        makeNativeMethod("surfaceDestroyed",
+                         JniSkiaPictureView::surfaceDestroyed),
+        makeNativeMethod("surfaceSizeChanged",
+                         JniSkiaPictureView::surfaceSizeChanged),
+        makeNativeMethod("setMode", JniSkiaPictureView::setMode),
+        makeNativeMethod("setDebugMode", JniSkiaPictureView::setDebugMode),
+        makeNativeMethod("updateTouchPoints",
+                         JniSkiaPictureView::updateTouchPoints),
+        makeNativeMethod("registerView", JniSkiaPictureView::registerView),
+        makeNativeMethod("unregisterView", JniSkiaPictureView::unregisterView),
+        // TODO: Remove if we find another solution for first frame rendering
+        // makeNativeMethod("renderToBitmap",
+        //                 JniSkiaPictureView::renderToBitmap)
+    });
   }
 
 protected:
@@ -74,6 +77,12 @@ protected:
   }
 
   void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+
+  /*
+  TODO: Remove if we find another solution for first frame rendering
+  jobject renderToBitmap(jobject bitmap, int width, int height) override {
+    return JniSkiaBaseView::renderToBitmap(bitmap, width, height);
+  }*/
 
 private:
   friend HybridBase;

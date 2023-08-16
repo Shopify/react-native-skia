@@ -33,20 +33,21 @@ public:
   }
 
   static void registerNatives() {
-    registerHybrid(
-        {makeNativeMethod("initHybrid", JniSkiaDrawView::initHybrid),
-         makeNativeMethod("surfaceAvailable",
-                          JniSkiaDrawView::surfaceAvailable),
-         makeNativeMethod("surfaceDestroyed",
-                          JniSkiaDrawView::surfaceDestroyed),
-         makeNativeMethod("surfaceSizeChanged",
-                          JniSkiaDrawView::surfaceSizeChanged),
-         makeNativeMethod("setMode", JniSkiaDrawView::setMode),
-         makeNativeMethod("setDebugMode", JniSkiaDrawView::setDebugMode),
-         makeNativeMethod("updateTouchPoints",
-                          JniSkiaDrawView::updateTouchPoints),
-         makeNativeMethod("registerView", JniSkiaDrawView::registerView),
-         makeNativeMethod("unregisterView", JniSkiaDrawView::unregisterView)});
+    registerHybrid({
+        makeNativeMethod("initHybrid", JniSkiaDrawView::initHybrid),
+        makeNativeMethod("surfaceAvailable", JniSkiaDrawView::surfaceAvailable),
+        makeNativeMethod("surfaceDestroyed", JniSkiaDrawView::surfaceDestroyed),
+        makeNativeMethod("surfaceSizeChanged",
+                         JniSkiaDrawView::surfaceSizeChanged),
+        makeNativeMethod("setMode", JniSkiaDrawView::setMode),
+        makeNativeMethod("setDebugMode", JniSkiaDrawView::setDebugMode),
+        makeNativeMethod("updateTouchPoints",
+                         JniSkiaDrawView::updateTouchPoints),
+        makeNativeMethod("registerView", JniSkiaDrawView::registerView),
+        makeNativeMethod("unregisterView", JniSkiaDrawView::unregisterView),
+        // TODO: Remove if we find another solution for first frame rendering
+        // makeNativeMethod("renderToBitmap", JniSkiaDrawView::renderToBitmap)
+    });
   }
 
 protected:
@@ -73,6 +74,11 @@ protected:
   }
 
   void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+
+  // TODO: Remove if we find another solution for first frame rendering
+  /*jobject renderToBitmap(jobject bitmap, int width, int height) override {
+    return JniSkiaBaseView::renderToBitmap(bitmap, width, height);
+  }*/
 
 private:
   friend HybridBase;
