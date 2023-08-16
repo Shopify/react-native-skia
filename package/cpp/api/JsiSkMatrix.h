@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include <jsi/jsi.h>
 
