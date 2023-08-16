@@ -94,20 +94,20 @@ public:
   JSI_HOST_FUNCTION(setAll) {
     auto scaleX = arguments[0].asNumber();
     auto skewX = arguments[1].asNumber();
-    auto transX =  arguments[2].asNumber();
-    auto skewY =  arguments[3].asNumber();
-    auto scaleY =  arguments[4].asNumber();
-    auto transY =  arguments[5].asNumber();
-    auto pers0 =  arguments[6].asNumber();
-    auto pers1 =  arguments[7].asNumber();
-    auto pers2 =  arguments[8].asNumber();
-    getObject()->setAll(scaleX, skewX, transX, skewY, scaleY, transY,
-                             pers0, pers1, pers2);
+    auto transX = arguments[2].asNumber();
+    auto skewY = arguments[3].asNumber();
+    auto scaleY = arguments[4].asNumber();
+    auto transY = arguments[5].asNumber();
+    auto pers0 = arguments[6].asNumber();
+    auto pers1 = arguments[7].asNumber();
+    auto pers2 = arguments[8].asNumber();
+    getObject()->setAll(scaleX, skewX, transX, skewY, scaleY, transY, pers0,
+                        pers1, pers2);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(swap) {
-    std::vector<SkScalar> values = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::vector<SkScalar> values = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
     m3->get9(values.data());
     getObject()->set9(values.data());
@@ -116,17 +116,14 @@ public:
 
   EXPORT_JSI_API_TYPENAME(JsiSkMatrix, "Matrix")
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMatrix, reset),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setAll),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, swap),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, concat),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, translate),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, scale),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, skew),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, identity),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, get),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
+  JSI_EXPORT_FUNCTIONS(
+      JSI_EXPORT_FUNC(JsiSkMatrix, reset), JSI_EXPORT_FUNC(JsiSkMatrix, setAll),
+      JSI_EXPORT_FUNC(JsiSkMatrix, swap), JSI_EXPORT_FUNC(JsiSkMatrix, concat),
+      JSI_EXPORT_FUNC(JsiSkMatrix, translate),
+      JSI_EXPORT_FUNC(JsiSkMatrix, scale), JSI_EXPORT_FUNC(JsiSkMatrix, skew),
+      JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
+      JSI_EXPORT_FUNC(JsiSkMatrix, identity), JSI_EXPORT_FUNC(JsiSkMatrix, get),
+      JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
 
   /**
    * Returns the underlying object from a host object of this type
