@@ -41,6 +41,18 @@ describe("Paths", () => {
       "M20 20L20 40L40 20L60 60L80 60L80 40",
     ]);
   });
+  it("should swap a path", async () => {
+    const result = await surface.eval((Skia) => {
+      const path2 = Skia.Path.Make();
+      const path = Skia.Path.Make();
+      path.moveTo(20, 20);
+      path.lineTo(20, 40);
+      path.lineTo(40, 20);
+      path2.swap(path);
+      return [path.toSVGString(), path2.toSVGString()];
+    });
+    expect(result).toEqual(["", "M20 20L20 40L40 20"]);
+  });
   it("should draw a pattern properly", async () => {
     const { Skia, translate } = importSkia();
 

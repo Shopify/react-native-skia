@@ -523,6 +523,13 @@ public:
     return cmds;
   }
 
+
+  JSI_HOST_FUNCTION(swap) {
+    auto path = JsiSkPath::fromValue(runtime, arguments[0]);
+    getObject()->swap(*path);
+    return jsi::Value::undefined();
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiSkPath, "Path")
 
   JSI_EXPORT_FUNCTIONS(
@@ -559,7 +566,10 @@ public:
       JSI_EXPORT_FUNC(JsiSkPath, op),
       JSI_EXPORT_FUNC(JsiSkPath, isInterpolatable),
       JSI_EXPORT_FUNC(JsiSkPath, interpolate),
-      JSI_EXPORT_FUNC(JsiSkPath, toCmds), JSI_EXPORT_FUNC(JsiSkPath, dispose))
+      JSI_EXPORT_FUNC(JsiSkPath, toCmds),
+      JSI_EXPORT_FUNC(JsiSkPath, dispose),
+      JSI_EXPORT_FUNC(JsiSkPath, swap)
+  )
 
   JsiSkPath(std::shared_ptr<RNSkPlatformContext> context, SkPath path)
       : JsiSkWrappingSharedPtrHostObject<SkPath>(

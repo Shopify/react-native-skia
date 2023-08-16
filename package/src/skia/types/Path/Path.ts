@@ -574,4 +574,9 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * Serializes the contents of this path as a series of commands.
    */
   toCmds(): PathCommand[];
+
+  /**
+   * Exchanges the verb array, SkPoint array, weights, and SkPath::FillType with path parameter.
+   */
+  swap(path: SkPath): void;
 }

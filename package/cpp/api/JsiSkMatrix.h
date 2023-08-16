@@ -106,7 +106,7 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(setMatrix) {
+  JSI_HOST_FUNCTION(swap) {
     std::vector<SkScalar> values = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
     m3->get9(values.data());
@@ -118,7 +118,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMatrix, reset),
                        JSI_EXPORT_FUNC(JsiSkMatrix, setAll),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, setMatrix),
+                       JSI_EXPORT_FUNC(JsiSkMatrix, swap),
                        JSI_EXPORT_FUNC(JsiSkMatrix, concat),
                        JSI_EXPORT_FUNC(JsiSkMatrix, translate),
                        JSI_EXPORT_FUNC(JsiSkMatrix, scale),

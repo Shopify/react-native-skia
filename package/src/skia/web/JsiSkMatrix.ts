@@ -46,7 +46,7 @@ export class JsiSkMatrix
     );
   }
 
-  setMatrix(matrix: SkMatrix) {
+  swap(matrix: SkMatrix) {
     this.ref.set(JsiSkMatrix.fromValue(matrix));
   }
 

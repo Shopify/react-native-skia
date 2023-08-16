@@ -371,4 +371,11 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     }, []);
     return result;
   }
+
+  swap(path: SkPath) {
+    const oldRef = this.ref;
+    const newRef = (path as JsiSkPath).ref;
+    this.ref = newRef;
+    (path as JsiSkPath).ref = oldRef;
+  }
 }

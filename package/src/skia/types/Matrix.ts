@@ -35,7 +35,7 @@ export interface SkMatrix extends SkJSIInstance<"Matrix"> {
     pers1: number,
     pers2: number
   ) => void;
-  setMatrix: (matrix: SkMatrix) => void;
+  swap: (matrix: SkMatrix) => void;
 }
 
 type Transform2dName =
