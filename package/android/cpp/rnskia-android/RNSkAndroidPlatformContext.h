@@ -48,7 +48,7 @@ public:
     return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
   }
 
-  sk_sp<SkFontMgr> getFontMgr() override {
+  sk_sp<SkFontMgr> createFontMgr() override {
     return SkFontMgr_New_Android(nullptr);
   }
 
