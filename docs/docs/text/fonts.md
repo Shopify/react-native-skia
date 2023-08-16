@@ -12,7 +12,7 @@ It allows you to access fonts from the system and manage custom fonts.
 
 The `useFonts` hooks allows you to load custom fonts to be used for your Skia drawing.
 The font files should be organized by family names.
-For instance:
+For example:
 
 ```tsx twoslash
 import {useFonts} from "@shopify/react-native-skia";
