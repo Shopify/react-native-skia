@@ -6,13 +6,13 @@
 #include <unordered_map>
 #include <vector>
 
-#include <JsiValueWrapper.h>
-#include <RNSkPlatformContext.h>
-#include <RNSkValue.h>
+#include "JsiValueWrapper.h"
+#include "RNSkPlatformContext.h"
+#include "RNSkValue.h"
 
-#include <JsiSkImage.h>
-#include <JsiSkPoint.h>
-#include <JsiSkRect.h>
+#include "JsiSkImage.h"
+#include "JsiSkPoint.h"
+#include "JsiSkRect.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -44,7 +44,7 @@ public:
   /**
    Render to a canvas
    */
-  virtual void renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
+  virtual bool renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
 
 protected:
   std::function<void()> _requestRedraw;
@@ -86,23 +86,25 @@ protected:
   bool _showDebugOverlays;
 };
 
-class RNSkImageCanvasProvider : public RNSkCanvasProvider {
+class RNSkOffscreenCanvasProvider : public RNSkCanvasProvider {
 public:
-  RNSkImageCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
-                          std::function<void()> requestRedraw, float width,
-                          float height)
+  RNSkOffscreenCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
+                              std::function<void()> requestRedraw, float width,
+                              float height)
       : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
     _surface = context->makeOffscreenSurface(_width, _height);
+    _pd = context->getPixelDensity();
   }
 
   /**
    Returns a snapshot of the current surface/canvas
    */
-  sk_sp<SkImage> makeSnapshot(std::shared_ptr<SkRect> bounds) {
+  sk_sp<SkImage> makeSnapshot(SkRect *bounds) {
     sk_sp<SkImage> image;
     if (bounds != nullptr) {
-      SkIRect b = SkIRect::MakeXYWH(bounds->x(), bounds->y(), bounds->width(),
-                                    bounds->height());
+      SkIRect b =
+          SkIRect::MakeXYWH(bounds->x() * _pd, bounds->y() * _pd,
+                            bounds->width() * _pd, bounds->height() * _pd);
       image = _surface->makeImageSnapshot(b);
     } else {
       image = _surface->makeImageSnapshot();
@@ -123,13 +125,15 @@ public:
   /**
    Render to a canvas
    */
-  void renderToCanvas(const std::function<void(SkCanvas *)> &cb) override {
+  bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override {
     cb(_surface->getCanvas());
+    return true;
   };
 
 private:
   float _width;
   float _height;
+  float _pd = 1.0f;
   sk_sp<SkSurface> _surface;
 };
 
@@ -225,6 +229,15 @@ public:
   void requestRedraw() { _redrawRequestCounter++; }
 
   /**
+   Renders immediate. Be carefull to not call this method from another thread
+   than the UI thread
+   */
+  void renderImmediate() {
+    _renderer->renderImmediate(_canvasProvider);
+    _redrawRequestCounter = 0;
+  }
+
+  /**
    Sets the native id of the view
    */
   virtual void setNativeId(size_t nativeId) {
@@ -263,15 +276,17 @@ public:
   /**
    Renders the view into an SkImage instead of the screen.
    */
-  sk_sp<SkImage> makeImageSnapshot(std::shared_ptr<SkRect> bounds) {
+  sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) {
 
-    auto provider = std::make_shared<RNSkImageCanvasProvider>(
+    auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
         _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight());
 
     _renderer->renderImmediate(provider);
     return provider->makeSnapshot(bounds);
   }
+
+  std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
 
 protected:
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
@@ -280,7 +295,6 @@ protected:
   std::shared_ptr<RNSkCanvasProvider> getCanvasProvider() {
     return _canvasProvider;
   }
-  std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
 
   /**
    Ends an ongoing beginDrawCallback loop for this view. This method is made
@@ -333,46 +347,26 @@ private:
               }
               auto onSizeObj = onSize.asObject(*runtime);
 
-              // Is this a host SkSize object?
-              if (onSizeObj.isHostObject(*runtime)) {
-                auto point = std::dynamic_pointer_cast<JsiSkPoint>(
-                    onSizeObj.asHostObject(*runtime));
-                if (point == nullptr) {
-                  throw jsi::JSError(*runtime,
-                                     "Expected onSize property to be a mutable "
-                                     "Skia value of type SkSize.");
-                  return;
-                }
+              auto wVal = onSizeObj.getProperty(*runtime, "width");
+              auto hVal = onSizeObj.getProperty(*runtime, "height");
 
-                auto w = point->getObject()->x();
-                auto h = point->getObject()->y();
-                if (w != width || h != height) {
-                  auto nextSize =
-                      std::make_shared<SkPoint>(SkPoint::Make(width, height));
-                  point->setObject(nextSize);
-                  self->_onSize->set_current(*runtime, onSize);
-                }
+              if (!wVal.isNumber() || !hVal.isNumber()) {
+                throw jsi::JSError(*runtime,
+                                   "Expected onSize property to be a mutable "
+                                   "Skia value of type SkSize.");
+                return;
+              }
 
-              } else {
-                auto wVal = onSizeObj.getProperty(*runtime, "width");
-                auto hVal = onSizeObj.getProperty(*runtime, "height");
+              auto w = wVal.asNumber();
+              auto h = hVal.asNumber();
 
-                if (!wVal.isNumber() || !hVal.isNumber()) {
-                  throw jsi::JSError(*runtime,
-                                     "Expected onSize property to be a mutable "
-                                     "Skia value of type SkSize.");
-                  return;
-                }
-
-                auto w = wVal.asNumber();
-                auto h = hVal.asNumber();
-
-                if (w != width || h != height) {
-                  // Update
-                  onSizeObj.setProperty(*runtime, "width", width);
-                  onSizeObj.setProperty(*runtime, "height", height);
-                  self->_onSize->set_current(*runtime, onSize);
-                }
+              if (w != width || h != height) {
+                // Update
+                auto newValue = jsi::Object(*runtime);
+                newValue.setProperty(*runtime, "width", width);
+                newValue.setProperty(*runtime, "height", height);
+                self->_onSize->set_current(*runtime,
+                                           jsi::Value(*runtime, newValue));
               }
             }
           });

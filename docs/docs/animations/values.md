@@ -98,7 +98,7 @@ const Demo = () => {
 
 ## Canvas Size
 
-The `onSize` property will update the provided Skia Value with the current canvas size when the Canvas is resized.
+The `onSize` property will update the provided Skia Value with the current canvas size when the Canvas is resized. This property can also be a Reanimated shared value (see [reanimated integration](/docs/animations/reanimated)).
 
 ```tsx twoslash
 import React from "react";

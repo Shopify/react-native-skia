@@ -24,9 +24,6 @@ path.addCircle(size, size, size/2);
 
 export const HelloWorld = () => {
   const font = useFont(require("./my-font.ttf"), 24);
-  if (font === null) {
-    return null;
-  }
   return (
     <Canvas style={{ flex: 1 }}>
       <Fill color="white" />

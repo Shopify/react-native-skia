@@ -1,9 +1,22 @@
 import React from "react";
 
 import { surface, importSkia } from "../setup";
-import { Group, Path, Rect } from "../../components";
-import { checkImage } from "../../../__tests__/setup";
+import { Fill, Group, Path, Rect } from "../../components";
+import { checkImage, docPath } from "../../../__tests__/setup";
+import type { Skia } from "../../../skia/types";
 import { PaintStyle } from "../../../skia/types";
+
+const star = (Skia: Skia) => {
+  const R = 115.2;
+  const C = 128.0;
+  const path = Skia.Path.Make();
+  path.moveTo(C + R, C);
+  for (let i = 1; i < 8; ++i) {
+    const a = 2.6927937 * i;
+    path.lineTo(C + R * Math.cos(a), C + R * Math.sin(a));
+  }
+  return path;
+};
 
 describe("Paths", () => {
   it("should add a path", async () => {
@@ -130,7 +143,39 @@ describe("Paths", () => {
     );
     checkImage(img, "snapshots/paths/pattern.png");
   });
-  it("Should interpolate paths", async () => {
+  it("should be possible to call dispose on a path", async () => {
+    await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.moveTo(20, 20).lineTo(20, 40).lineTo(40, 20);
+      path.dispose();
+      return path;
+    });
+  });
+  it("Path with default fillType", async () => {
+    const { Skia } = importSkia();
+    const path = star(Skia);
+    const img = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Path path={path} style="stroke" strokeWidth={4} color="#3EB489" />
+        <Path path={path} color="lightblue" />
+      </>
+    );
+    checkImage(img, docPath("paths/default-filltype.png"));
+  });
+  it("Path with even odd fillType", async () => {
+    const { Skia } = importSkia();
+    const path = star(Skia);
+    const img = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Path path={path} style="stroke" strokeWidth={4} color="#3EB489" />
+        <Path path={path} color="lightblue" fillType="evenOdd" />
+      </>
+    );
+    checkImage(img, docPath("paths/evenodd-filltype.png"));
+  });
+    it("Should interpolate paths", async () => {
     // https://fiddle.skia.org/c/@Path_isInterpolatable
     const { Skia } = importSkia();
     const path = Skia.Path.Make();

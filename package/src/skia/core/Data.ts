@@ -1,20 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Image } from "react-native";
 
 import { Skia } from "../Skia";
-import { isRNModule } from "../types";
-import type {
-  SkData,
-  DataModule,
-  DataSourceParam,
-  JsiDisposable,
-} from "../types";
-
-const resolveAsset = (source: DataModule) => {
-  return isRNModule(source)
-    ? Image.resolveAssetSource(source).uri
-    : source.default;
-};
+import type { SkData, DataSourceParam, SkJSIInstance } from "../types";
+import { Platform } from "../../Platform";
 
 const factoryWrapper = <T>(
   data2: SkData,
@@ -42,13 +30,14 @@ const loadData = <T>(
       resolve(factoryWrapper(Skia.Data.fromBytes(source), factory, onError))
     );
   } else {
-    const uri = typeof source === "string" ? source : resolveAsset(source);
+    const uri =
+      typeof source === "string" ? source : Platform.resolveAsset(source);
     return Skia.Data.fromURI(uri).then((d) =>
       factoryWrapper(d, factory, onError)
     );
   }
 };
-const useLoading = <T extends JsiDisposable>(
+const useLoading = <T extends SkJSIInstance<string>>(
   source: DataSourceParam,
   loader: () => Promise<T | null>
 ) => {
@@ -72,7 +61,7 @@ const useLoading = <T extends JsiDisposable>(
   return data;
 };
 
-export const useRawData = <T extends JsiDisposable>(
+export const useRawData = <T extends SkJSIInstance<string>>(
   source: DataSourceParam,
   factory: (data: SkData) => T | null,
   onError?: (err: Error) => void

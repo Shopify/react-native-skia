@@ -1,8 +1,8 @@
 import type { DependencyList } from "react";
 import { useCallback, useRef } from "react";
-import { PixelRatio } from "react-native";
 
 import type { Vector } from "../skia/types";
+import { Platform } from "../Platform";
 
 import type {
   ExtendedTouchInfo,
@@ -46,8 +46,8 @@ const useInternalTouchHandler = (
           timeDiffseconds > 0
         ) {
           prevVelocityRef.current[touch.id] = {
-            x: distX / timeDiffseconds / PixelRatio.get(),
-            y: distY / timeDiffseconds / PixelRatio.get(),
+            x: distX / timeDiffseconds / Platform.PixelRatio,
+            y: distY / timeDiffseconds / Platform.PixelRatio,
           };
         }
 

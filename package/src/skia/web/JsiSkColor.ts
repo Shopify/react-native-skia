@@ -318,6 +318,8 @@ const parseCSSColor = (cssStr: string) => {
 export const Color = (color: InputColor): SkColor => {
   if (color instanceof Float32Array) {
     return color;
+  } else if (Array.isArray(color)) {
+    return new Float32Array(color);
   } else if (typeof color === "string") {
     const r = parseCSSColor(color);
     const rgba = r === null ? CSSColorTable.black : r;

@@ -24,4 +24,13 @@ describe("Image loading from bundles", () => {
     );
     checkImage(image, `snapshots/images/bundle-${surface.OS}.png`);
   });
+  // This test should only run on CI because it will trigger a redbox.
+  // While this is fine on CI, it is undesirable on local dev.
+  // it("should not crash with an invalid viewTag", async () => {
+  //   const result = await surface.eval((Skia) => {
+  //     Skia.Image.MakeImageFromViewTag(-1);
+  //     return true;
+  //   });
+  //   expect(result).toBe(true);
+  // });
 });

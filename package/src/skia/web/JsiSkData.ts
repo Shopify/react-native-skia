@@ -11,7 +11,7 @@ export class JsiSkData extends HostObject<Data, "Data"> implements SkData {
     super(CanvasKit, ref, "Data");
   }
 
-  dispose() {
-    // Not implemented in data
-  }
+  dispose = () => {
+    // Not implemented in data - since data is a raw ArrayBuffer
+  };
 }

@@ -33,11 +33,13 @@ export let images: {
   oslo: SkImage;
   skiaLogoPng: SkImage;
   skiaLogoJpeg: SkImage;
+  mask: SkImage;
 };
 export let fonts: {
   RobotoMedium: SkFont;
   NotoColorEmoji: SkFont;
   NotoSansSCRegular: SkFont;
+  UberMoveMediumMono: SkFont;
 };
 
 beforeAll(async () => {
@@ -59,15 +61,27 @@ beforeAll(async () => {
     "skia/__tests__/assets/Roboto-Medium.ttf",
     fontSize
   );
+  const UberMoveMediumMono = loadFont(
+    "skia/__tests__/assets/UberMove-Medium_mono.ttf",
+    fontSize
+  );
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
-  images = { oslo, skiaLogoPng, skiaLogoJpeg };
-  fonts = { RobotoMedium, NotoColorEmoji, NotoSansSCRegular };
+  const mask = loadImage("skia/__tests__/assets/mask.png");
+  images = { oslo, skiaLogoPng, skiaLogoJpeg, mask };
+  fonts = {
+    RobotoMedium,
+    NotoColorEmoji,
+    NotoSansSCRegular,
+    UberMoveMediumMono,
+  };
+  assets.set(mask, "mask");
   assets.set(oslo, "oslo");
   assets.set(RobotoMedium, "RobotoMedium");
   assets.set(NotoColorEmoji, "NotoColorEmoji");
   assets.set(NotoSansSCRegular, "NotoSansSCRegular");
+  assets.set(UberMoveMediumMono, "UberMoveMediumMono");
   assets.set(skiaLogoPng, "skiaLogoPng");
   assets.set(skiaLogoJpeg, "skiaLogoJpeg");
 });
@@ -181,6 +195,8 @@ const serializeSkOjects = (obj: any): any => {
   } else if (obj && typeof obj === "object" && "__typename__" in obj) {
     if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
+    } else if (obj.__typename__ === "Paint") {
+      return { __typename__: "Paint", color: Array.from(obj.getColor()) };
     } else if (obj.__typename__ === "Rect") {
       return {
         __typename__: "Rect",
@@ -268,7 +284,7 @@ class LocalSurface implements TestingSurface {
   readonly OS = "node";
 
   eval<Ctx extends EvalContext, R>(
-    fn: (Skia: Skia, ctx: Ctx) => any,
+    fn: (Skia: Skia, ctx: Ctx) => R,
     ctx?: Ctx
   ): Promise<R> {
     return Promise.resolve(fn(global.SkiaApi, ctx ?? ({} as any)));

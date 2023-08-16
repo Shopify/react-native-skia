@@ -1,5 +1,5 @@
 import type { SkMatrix } from "../Matrix";
-import type { JsiDisposable, SkJSIInstance } from "../JsiInstance";
+import type { SkJSIInstance } from "../JsiInstance";
 import type { TileMode } from "../ImageFilter";
 import type { SkShader } from "../Shader";
 
@@ -20,7 +20,7 @@ export enum ImageFormat {
   WEBP = 6,
 }
 
-export interface SkImage extends SkJSIInstance<"Image">, JsiDisposable {
+export interface SkImage extends SkJSIInstance<"Image"> {
   /**
    * Returns the possibly scaled height of the image.
    */

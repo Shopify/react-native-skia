@@ -17,17 +17,22 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (!_fontProp->isSet() ||
-        _fontProp->value().getType() != PropType::HostObject) {
-      throw std::runtime_error("Expected SkFont object for the Font property.");
-    }
+    if (_fontProp->isSet()) {
+      if (_fontProp->value().getType() == PropType::HostObject) {
+        auto ptr = _fontProp->value().getAs<JsiSkFont>();
+        if (ptr == nullptr) {
+          throw std::runtime_error(
+              "Expected SkFont object for the Font property.");
+        }
+        setDerivedValue(ptr->getObject());
 
-    auto ptr = _fontProp->value().getAs<JsiSkFont>();
-    if (ptr == nullptr) {
-      throw std::runtime_error("Expected SkFont object for the Font property.");
+      } else {
+        throw std::runtime_error(
+            "Expected SkFont object or null/undefined for the Font property.");
+      }
+    } else {
+      setDerivedValue(nullptr);
     }
-
-    setDerivedValue(ptr->getObject());
   }
 
 private:

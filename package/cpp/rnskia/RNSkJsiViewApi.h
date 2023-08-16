@@ -7,11 +7,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include <JsiHostObject.h>
-#include <JsiValueWrapper.h>
-#include <RNSkPlatformContext.h>
-#include <RNSkValue.h>
-#include <RNSkView.h>
+#include "JsiHostObject.h"
+#include "JsiValueWrapper.h"
+#include "RNSkPlatformContext.h"
+#include "RNSkValue.h"
+#include "RNSkView.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -162,7 +162,7 @@ public:
     if (info->view != nullptr) {
       if (count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()) {
         auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
-        image = info->view->makeImageSnapshot(rect);
+        image = info->view->makeImageSnapshot(rect.get());
       } else {
         image = info->view->makeImageSnapshot(nullptr);
       }

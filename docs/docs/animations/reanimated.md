@@ -8,7 +8,7 @@ slug: /animations/reanimated
 React Native Skia provides an integration with Reanimated 3 that allows for animations
 to be executed on the UI-thread. 
 
-This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).
+This integration is available with [Reanimated v3 or higher](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/). If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).
 
 ## Hello World
 
@@ -48,6 +48,32 @@ export const HelloWorld = () => {
   );
 };
 ```
+
+:::info
+
+Reanimated and Skia use different color formats. You can interpolate colors using `interpolateColors` from Skia. If you use `interpolateColor` from Reanimated, you need to convert it using `convertToRGBA` from Reanimated.
+
+```tsx twoslash
+import {
+  interpolateColor,
+  useDerivedValue,
+  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet in the types
+  // @ts-ignore
+  convertToRGBA,
+} from "react-native-reanimated";
+
+  const color = useDerivedValue(() =>
+    convertToRGBA(
+      interpolateColor(
+        0,
+        [0, 1],
+        ["cyan", "magenta"]
+      )
+    )
+  );
+```
+
+:::
 
 ## Gesture Handler
 

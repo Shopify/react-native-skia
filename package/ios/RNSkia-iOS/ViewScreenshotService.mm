@@ -24,6 +24,7 @@
   auto view = [_uiManager viewForReactTag:viewTag];
   if (view == NULL) {
     RCTFatal(RCTErrorWithMessage(@"Could not find view with tag"));
+    return nullptr;
   }
 
   // Get size
@@ -33,6 +34,15 @@
   UIGraphicsImageRendererFormat *format =
       [UIGraphicsImageRendererFormat defaultFormat];
   format.opaque = NO;
+
+  // Explicitly ask for the standard format to get ARGB 32bits and not 64bits.
+  if (@available(iOS 12.0, *)) {
+    format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
+  } else {
+    // Fallback on earlier versions
+    format.prefersExtendedRange = false;
+  }
+
   UIGraphicsImageRenderer *renderer =
       [[UIGraphicsImageRenderer alloc] initWithSize:size format:format];
 
@@ -68,12 +78,15 @@
       (void *)dataRef);
 
   // Make SkImageInfo
+  // We're using kBGRA_8888_SkColorType since this is what we get when the
+  // UIGraphicsImageRenderer uses the standard format (the extended is using
+  // 64bits so it is not suitable for us).
   SkImageInfo info =
       SkImageInfo::Make(static_cast<int>(width), static_cast<int>(height),
-                        kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+                        kBGRA_8888_SkColorType, kPremul_SkAlphaType);
 
   // ... and then create the SkImage itself!
-  return SkImage::MakeRasterData(info, skData, bytesPerRow);
+  return SkImages::RasterFromData(info, skData, bytesPerRow);
 }
 
 @end

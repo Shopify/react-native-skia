@@ -10,9 +10,9 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkHostObjects.h>
-#include <JsiValueWrapper.h>
-#include <RNSkPlatformContext.h>
+#include "JsiSkHostObjects.h"
+#include "JsiValue.h"
+#include "RNSkPlatformContext.h"
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -29,8 +29,7 @@ public:
   explicit RNSkReadonlyValue(
       std::shared_ptr<RNSkPlatformContext> platformContext)
       : JsiSkHostObject(platformContext),
-        _valueHolder(std::make_shared<RNJsi::JsiValueWrapper>(
-            *platformContext->getJsRuntime())) {}
+        _valueHolder(std::make_shared<RNJsi::JsiValue>()) {}
 
   virtual ~RNSkReadonlyValue() { invalidate(); }
 
@@ -72,13 +71,13 @@ public:
         });
   }
 
-  JSI_HOST_FUNCTION(__invalidate) {
+  JSI_HOST_FUNCTION(dispose) {
     invalidate();
     return jsi::Value::undefined();
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkReadonlyValue, addListener),
-                       JSI_EXPORT_FUNC(RNSkReadonlyValue, __invalidate))
+                       JSI_EXPORT_FUNC(RNSkReadonlyValue, dispose))
 
   /**
    * Adds a callback that will be called whenever the value changes
@@ -107,7 +106,7 @@ public:
    @param value Next value
    */
   virtual void update(jsi::Runtime &runtime, const jsi::Value &value) {
-    auto equal = _valueHolder->equals(runtime, value);
+    auto equal = _valueHolder->operator==(RNJsi::JsiValue(runtime, value));
     if (!equal) {
       _valueHolder->setCurrent(runtime, value);
       notifyListeners(runtime);
@@ -127,14 +126,14 @@ public:
    Returns the current value as a jsi::Value
    */
   jsi::Value getCurrent(jsi::Runtime &runtime) {
-    return _valueHolder->getCurrent(runtime);
+    return _valueHolder->getAsJsiValue(runtime);
   }
 
   /**
    Returns the underlying current value wrapper. This can be used to query the
    holder for data type and get pointers to elements in the holder.
    */
-  std::shared_ptr<RNJsi::JsiValueWrapper> getCurrent() { return _valueHolder; }
+  std::shared_ptr<RNJsi::JsiValue> getCurrent() { return _valueHolder; }
 
 protected:
   /**
@@ -158,7 +157,7 @@ protected:
   }
 
 private:
-  std::shared_ptr<RNJsi::JsiValueWrapper> _valueHolder;
+  std::shared_ptr<RNJsi::JsiValue> _valueHolder;
 
   long _listenerId = 0;
   std::unordered_map<long, std::function<void(jsi::Runtime &)>> _listeners;

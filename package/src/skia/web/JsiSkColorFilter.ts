@@ -11,4 +11,8 @@ export class JsiSkColorFilter
   constructor(CanvasKit: CanvasKit, ref: ColorFilter) {
     super(CanvasKit, ref, "ColorFilter");
   }
+
+  dispose = () => {
+    this.ref.delete();
+  };
 }

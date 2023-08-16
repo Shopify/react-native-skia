@@ -2,7 +2,7 @@
 import React from "react";
 
 import { surface, importSkia } from "../setup";
-import { Fill, Group, Paint, Path } from "../../components";
+import { Circle, Fill, Group, Paint, Path } from "../../components";
 import { checkImage } from "../../../__tests__/setup";
 import { fitbox } from "../../components/shapes/FitBox";
 
@@ -57,6 +57,35 @@ describe("Paint", () => {
       </>
     );
     checkImage(image, "snapshots/paint/colors.png");
+  });
+  it("should accept a paint object as property", async () => {
+    const { width, height } = surface;
+    const { Skia } = importSkia();
+    const paint = Skia.Paint();
+    paint.setColor(Skia.Color("lightblue"));
+    const image = await surface.draw(
+      <Group>
+        <Circle
+          cx={width / 2}
+          cy={height / 2}
+          r={width / 2}
+          paint={paint}
+          color="red"
+        />
+      </Group>
+    );
+    checkImage(image, "snapshots/paint/circle.png");
+  });
+  it("should accept a paint object as path property", async () => {
+    const { Skia } = importSkia();
+    const paint = Skia.Paint();
+    paint.setColor(Skia.Color("lightblue"));
+    const image = await surface.draw(
+      <Group>
+        <Path path="M0 0h100v100H0z" paint={paint} color="red" />
+      </Group>
+    );
+    checkImage(image, "snapshots/paint/path-paint.png");
   });
   it("should display blend modes properly", async () => {
     const { Skia, rect } = importSkia();
