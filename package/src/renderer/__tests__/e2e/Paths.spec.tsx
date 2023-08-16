@@ -175,7 +175,7 @@ describe("Paths", () => {
     );
     checkImage(img, docPath("paths/evenodd-filltype.png"));
   });
-    it("Should interpolate paths", async () => {
+  it("Should interpolate paths", async () => {
     // https://fiddle.skia.org/c/@Path_isInterpolatable
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
