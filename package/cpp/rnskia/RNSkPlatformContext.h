@@ -136,7 +136,7 @@ public:
   /**
    * Return the Platform specific font manager
    */
-  virtual sk_sp<SkFontMgr> getFontMgr() = 0;
+  virtual sk_sp<SkFontMgr> createFontMgr() = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its

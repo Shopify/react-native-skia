@@ -65,7 +65,7 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
   return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
 }
 
-sk_sp<SkFontMgr> RNSkiOSPlatformContext::getFontMgr() {
+sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
 }
 
