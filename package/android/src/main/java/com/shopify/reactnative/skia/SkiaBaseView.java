@@ -25,6 +25,13 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         addView(mTexture);
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        surfaceDestroyed();
+        mSurface.release();
+        mSurface = null;
+    }
+
     public void createSurfaceTexture() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Log.i("SkiaBaseView", "Create SurfaceTexture");
