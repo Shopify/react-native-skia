@@ -27,12 +27,22 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     @Override
     protected void finalize() throws Throwable {
+        // This API Level is >= 26, we created our own SurfaceTexture,
+        // onSurfaceTextureDestroyed won't be invoked by the texture view
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            destroySurface();
+        }
+    }
+
+    public void destroySurface() {
+        Log.i("SkiaBaseView", "destroySurface");
         surfaceDestroyed();
         mSurface.release();
         mSurface = null;
     }
 
     public void createSurfaceTexture() {
+        // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Log.i("SkiaBaseView", "Create SurfaceTexture");
             SurfaceTexture surface = new SurfaceTexture(false);
@@ -134,10 +144,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         Log.i("SkiaBaseView", "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
-        surfaceDestroyed();
-        mSurface.release();
-        // We create a new SurfaceTexture
-        this.createSurfaceTexture();
+        destroySurface();
+        // We create again a new SurfaceTexture to have a faster time to first frame (if API >= 26)
+        createSurfaceTexture();
         return false;
     }
 
