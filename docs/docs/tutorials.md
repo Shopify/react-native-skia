@@ -9,7 +9,7 @@ Below is a list of tutorials sorted by category.
 Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/docs/tutorials.md) if you would like to add entries to the list.
 
 ## Animations
-* [The React Native Avengers: GestureHandler, Reanimated, and Skia (youtu.be)](https://www.youtube.com/watch?v=yBuhnVDXekQ)
+* [Instagram Stickers - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=5yM4NPcTwY4)
 * [The Matrix Reacts (youtu.be)](https://www.youtube.com/watch?v=49QR0wUDMG0)
 * [Animated 3D Card in React Native (youtu.be)](https://www.youtube.com/watch?v=pVesCl7TY8A)
 * [Metaball Animation in React Native (youtu.be)](https://www.youtube.com/watch?v=HOxZegqnDC4)
@@ -30,8 +30,10 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 ## Image Filters
 * [Neumorphism in React Native (youtu.be)](https://www.youtube.com/watch?v=GFssmWUhwww)
 
-## Mesh Gradients
+## Gradients
 * [Introducing Gen-Z Mode (youtu.be)](https://www.youtube.com/watch?v=0FC8O9mRUmg)
+* [iPhone wallpapers, but in React Native Skia](https://www.youtube.com/watch?v=Apqd749v34I)
+* [Experimental Blur Gradient in React Native](https://www.youtube.com/watch?v=oboF_H1MApo)
 
 ## Noise
 * [The Joy of Painting with React Native (youtu.be)](https://www.youtube.com/watch?v=GQqL1OCoOFM)
