@@ -12,6 +12,7 @@ export type Routes = {
   SVG: undefined;
   Touch: undefined;
   BlendModes: undefined;
+  FontMgr: undefined;
   Data: undefined;
   Picture: undefined;
   Checker: undefined;

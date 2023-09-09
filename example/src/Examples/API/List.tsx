@@ -63,6 +63,10 @@ export const examples = [
     title: "🎨 Blend Modes",
   },
   {
+    screen: "FontMgr",
+    title: "💬 Font Manager",
+  },
+  {
     screen: "Data",
     title: "📊 Data",
   },

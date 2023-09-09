@@ -18,7 +18,7 @@ const factoryWrapper = <T>(
   }
 };
 
-const loadData = <T>(
+export const loadData = <T>(
   source: DataSourceParam,
   factory: (data: SkData) => T | null,
   onError?: (err: Error) => void
@@ -37,6 +37,7 @@ const loadData = <T>(
     );
   }
 };
+
 const useLoading = <T extends SkJSIInstance<string>>(
   source: DataSourceParam,
   loader: () => Promise<T | null>
@@ -58,6 +59,35 @@ const useLoading = <T extends SkJSIInstance<string>>(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
+  return data;
+};
+
+export const useCollectionLoading = <T extends SkJSIInstance<string>>(
+  source: DataSourceParam[],
+  loader: () => Promise<(T | null)[]>
+) => {
+  const mounted = useRef(false);
+  const [data, setData] = useState<T[] | null>(null);
+  const dataRef = useRef<T[] | null>(null);
+
+  useEffect(() => {
+    mounted.current = true;
+    loader().then((result) => {
+      const value = result.filter((r) => r !== null) as T[];
+      if (mounted.current) {
+        setData(value);
+        dataRef.current = value;
+      }
+    });
+
+    return () => {
+      dataRef.current?.forEach((instance) => instance?.dispose());
+      mounted.current = false;
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source]);
+
   return data;
 };
 
