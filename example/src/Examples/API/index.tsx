@@ -23,6 +23,7 @@ import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
 import { Snapshot } from "./Snapshot";
 import { IconsExample } from "./Icons";
+import { FontMgr } from "./FontMgr";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -132,6 +133,13 @@ export const API = () => {
         component={BlendModes}
         options={{
           title: "🎨 Blend Modes",
+        }}
+      />
+      <Stack.Screen
+        name="FontMgr"
+        component={FontMgr}
+        options={{
+          title: "💬 Font Manager",
         }}
       />
       <Stack.Screen

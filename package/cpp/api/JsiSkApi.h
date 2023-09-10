@@ -12,6 +12,8 @@
 #include "JsiSkContourMeasureIter.h"
 #include "JsiSkDataFactory.h"
 #include "JsiSkFont.h"
+#include "JsiSkFontMgr.h"
+#include "JsiSkFontMgrFactory.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageFactory.h"
 #include "JsiSkImageFilter.h"
@@ -39,6 +41,7 @@
 #include "JsiSkShaderFactory.h"
 #include "JsiSkSurfaceFactory.h"
 #include "JsiSkTextBlobFactory.h"
+#include "JsiSkTypeFaceFontProviderFactory.h"
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
@@ -100,6 +103,11 @@ public:
                             std::make_shared<JsiSkSurfaceFactory>(context));
     installReadonlyProperty("Picture",
                             std::make_shared<JsiSkPictureFactory>(context));
+    installReadonlyProperty("FontMgr",
+                            std::make_shared<JsiSkFontMgrFactory>(context));
+    installReadonlyProperty(
+        "TypefaceFontProvider",
+        std::make_shared<JsiSkTypefaceFontProviderFactory>(context));
   }
 };
 } // namespace RNSkia

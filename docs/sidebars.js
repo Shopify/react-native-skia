@@ -67,7 +67,13 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Text",
-      items: ["text/text", "text/glyphs", "text/path", "text/blob"],
+      items: [
+        "text/fonts",
+        "text/text",
+        "text/glyphs",
+        "text/path",
+        "text/blob",
+      ],
     },
     {
       collapsed: true,
