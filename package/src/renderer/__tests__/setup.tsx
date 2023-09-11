@@ -22,10 +22,12 @@ import { JsiDrawingContext } from "../../dom/types/DrawingContext";
 
 jest.setTimeout(180 * 1000);
 
+type TestOS = "ios" | "android" | "web" | "node";
+
 declare global {
   var testServer: Server;
   var testClient: WebSocket;
-  var testOS: "ios" | "android" | "web";
+  var testOS: TestOS;
 }
 export let surface: TestingSurface;
 const assets = new Map<SkImage | SkFont, string>();
@@ -92,11 +94,23 @@ export const wait = (ms: number) =>
 export const resolveFile = (uri: string) =>
   fs.readFileSync(path.resolve(__dirname, `../../${uri}`));
 
+export const resolveFont = (uri: string) =>
+  Array.from(fs.readFileSync(path.resolve(__dirname, `../../${uri}`)));
+
 (global as any).fetch = jest.fn((uri: string) =>
   Promise.resolve({
     arrayBuffer: () => Promise.resolve(resolveFile(uri)),
   })
 );
+
+export const testingFonts = {
+  //  Noto: [resolveFont("skia/__tests__/assets/NotoSansSC-Regular.otf")],
+  Roboto: [
+    resolveFont("skia/__tests__/assets/Roboto-Regular.ttf"),
+    resolveFont("skia/__tests__/assets/Roboto-BlackItalic.ttf"),
+  ],
+  //  NotoColorEmoji: [resolveFont("skia/__tests__/assets/NotoColorEmoji.ttf")],
+};
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmptyProps {}
@@ -274,7 +288,7 @@ interface TestingSurface {
   width: number;
   height: number;
   fontSize: number;
-  OS: string;
+  OS: TestOS;
 }
 
 class LocalSurface implements TestingSurface {
