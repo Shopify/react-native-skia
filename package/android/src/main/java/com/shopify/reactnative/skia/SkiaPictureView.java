@@ -14,7 +14,6 @@ public class SkiaPictureView extends SkiaBaseView {
         super(context);
         RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
-        this.createSurfaceTexture();
     }
 
     @Override
