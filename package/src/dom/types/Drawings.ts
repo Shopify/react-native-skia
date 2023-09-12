@@ -1,6 +1,7 @@
 import type {
   FillType,
   SkImage,
+  SkAnimatedImage,
   StrokeOpts,
   Vector,
   Color,
@@ -36,6 +37,12 @@ export type ImageProps = DrawingNodeProps &
   RectDef & {
     fit?: Fit;
     image: SkImage | null;
+  };
+
+export type AnimatedImageProps = DrawingNodeProps &
+  RectDef & {
+    fit?: Fit;
+    image: SkAnimatedImage | null;
   };
 
 export type CircleProps = CircleDef & DrawingNodeProps;
