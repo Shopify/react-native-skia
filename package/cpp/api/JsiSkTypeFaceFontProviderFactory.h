@@ -7,7 +7,7 @@
 
 #include "JsiSkData.h"
 #include "JsiSkHostObjects.h"
-#include "JsiSkTypefaceFontProvider.h"
+#include "JsiSkTypeFaceFontProvider.h"
 
 namespace RNSkia {
 

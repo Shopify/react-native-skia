@@ -62,62 +62,6 @@ protected:
     _skiaAndroidView->viewDidUnmount();
   }
 
-  /**
-   * Android specific method for rendering an offscreen GPU buffer to an Android
-   * bitmap. The result can be used to render the first frame of the Skia render
-   * to avoid flickering on android.
-   */
-  /*
-   // TODO: Remove if we find another solution for first frame rendering
-    // protected native Object renderToBitmap(Object bitmap, int width, int
-  height); virtual jobject renderToBitmap(jobject bitmapIn, int width, int
-  height) { auto platformContext = getSkiaManager()->getPlatformContext(); auto
-  provider = std::make_shared<RNSkOffscreenCanvasProvider>( platformContext,
-  []() {}, width, height);
-
-    // Render into a gpu backed buffer
-    _skiaAndroidView->getSkiaView()->getRenderer()->renderImmediate(provider);
-    auto rect = SkRect::MakeXYWH(0, 0, width, height);
-    auto image = provider->makeSnapshot(&rect);
-
-    AndroidBitmapInfo infoIn;
-    auto env = facebook::jni::Environment::current();
-    void *pixels;
-
-    // Get image info
-    if (AndroidBitmap_getInfo(env, bitmapIn, &infoIn) !=
-        ANDROID_BITMAP_RESULT_SUCCESS) {
-      return env->NewStringUTF("failed");
-    }
-
-    // Check image
-    if (infoIn.format != ANDROID_BITMAP_FORMAT_RGBA_8888 &&
-        infoIn.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-      return env->NewStringUTF("Only support ANDROID_BITMAP_FORMAT_RGBA_8888 "
-                               "and ANDROID_BITMAP_FORMAT_RGB_565");
-    }
-
-    auto imageInfo = SkImageInfo::Make(image->width(), image->height(),
-                                       image->colorType(), image->alphaType());
-
-    // Lock all images
-    if (AndroidBitmap_lockPixels(env, bitmapIn, &pixels) !=
-        ANDROID_BITMAP_RESULT_SUCCESS) {
-      return env->NewStringUTF("AndroidBitmap_lockPixels failed!");
-    }
-
-    // Set pixels from SkImage
-    image->readPixels(imageInfo, pixels, imageInfo.minRowBytes(), 0, 0);
-
-    // Unlocks everything
-    AndroidBitmap_unlockPixels(env, bitmapIn);
-
-    image = nullptr;
-    provider = nullptr;
-
-    return bitmapIn;
-  }*/
-
 private:
   JniSkiaManager *_manager;
   std::shared_ptr<RNSkBaseAndroidView> _skiaAndroidView;
