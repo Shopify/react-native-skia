@@ -9,53 +9,51 @@ import android.view.TextureView;
 
 import com.facebook.jni.annotations.DoNotStrip;
 import com.facebook.react.views.view.ReactViewGroup;
+
 public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener {
 
     @DoNotStrip
     private Surface mSurface;
     private TextureView mTexture;
 
+    private String tag = "SkiaView";
+
     public SkiaBaseView(Context context) {
         super(context);
-        // TODO: Remove if we find another solution for first frame rendering
-        //setWillNotDraw(!shouldRenderFirstFrameAsBitmap());
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
         addView(mTexture);
     }
 
-    /*@Override
-    TODO: Remove if we find another solution for first frame rendering
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    public void destroySurface() {
+        Log.i(tag, "destroySurface");
+        surfaceDestroyed();
+        mSurface.release();
+        mSurface = null;
+    }
 
-        // If we haven't got a surface yet, let's ask the view to
-        // draw into a bitmap and then render the bitmap. This method
-        // is typically only called once - for the first frame, and
-        // then the surface will be available and all rendering will
-        // be done directly to the surface itself.
-        if (shouldRenderFirstFrameAsBitmap() && mSurface == null) {
-            int width = getWidth();
-            int height = getHeight();
-
-            if (width > 0 && height > 0) {
-                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Bitmap result = (Bitmap) renderToBitmap(bitmap, width, height);
-
-                canvas.drawBitmap(
-                        result,
-                        new Rect(0, 0, width, height),
-                        new Rect(0, 0, width, height),
-                        null);
-
-                bitmap.recycle();
-            }
+    private void createSurfaceTexture() {
+        // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Log.i(tag, "Create SurfaceTexture");
+            SurfaceTexture surface = new SurfaceTexture(false);
+            mTexture.setSurfaceTexture(surface);
+            this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
         }
-    }*/
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (this.getMeasuredWidth() == 0) {
+            createSurfaceTexture();
+        }
+    }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        Log.i(tag, "onLayout " + this.getMeasuredWidth() + "/" + this.getMeasuredHeight());
         super.onLayout(changed, left, top, right, bottom);
         mTexture.layout(0, 0, this.getMeasuredWidth(), this.getMeasuredHeight());
     }
@@ -132,52 +130,23 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Log.i("SkiaBaseView", "onSurfaceTextureAvailable " + width + "/" + height);
+        Log.i(tag, "onSurfaceTextureAvailable " + width + "/" + height);
         mSurface = new Surface(surface);
         surfaceAvailable(mSurface, width, height);
-
-        /*
-        TODO: Remove if we find another solution for first frame rendering
-        // Clear rendered bitmap when the surface texture has rendered
-        // We'll post a message to the main loop asking to invalidate
-        if (shouldRenderFirstFrameAsBitmap()) {
-            postUpdate(new AtomicInteger());
-        }*/
     }
-
-    /**
-     * This method is a way for us to clear the bitmap rendered on the first frame
-     * after at least 16 frames have passed - to avoid seeing blinks on the screen caused by
-     * TextureView frame sync issues. This is a hack to avoid those pesky blinks. Have no
-     * idea on how to sync the TextureView OpenGL updates.
-     * @param counter
-     */
-    /*
-    TODO: Remove if we find another solution for first frame rendering
-    void postUpdate(AtomicInteger counter) {
-        counter.getAndIncrement();
-        if (counter.get() > 16) {
-            invalidate();
-        } else {
-            this.post(() -> {
-                postUpdate(counter);
-            });
-        }
-    }*/
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        Log.i("SkiaBaseView", "onSurfaceTextureSizeChanged " + width + "/" + height);
+        Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
         surfaceSizeChanged(width, height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        Log.i("SkiaBaseView", "onSurfaceTextureDestroyed");
+        Log.i(tag, "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
-        surfaceDestroyed();
-        mSurface.release();
-        mSurface = null;
+        destroySurface();
+        createSurfaceTexture();
         return false;
     }
 
@@ -185,17 +154,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         // Nothing special to do here
     }
-
-    /**
-     * Returns true if the view is able to directly render on the
-     * main thread. This can f.ex then be used to create a first frame
-     * render of the view. Returns true by default - override if not.
-     */
-    /*
-    TODO: Remove if we find another solution for first frame rendering
-    protected boolean shouldRenderFirstFrameAsBitmap() {
-        return false;
-    }*/
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
 
@@ -212,7 +170,4 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     protected abstract void registerView(int nativeId);
 
     protected abstract void unregisterView();
-
-    // TODO: Remove if we find another solution for first frame rendering
-    // protected native Object renderToBitmap(Object bitmap, int width, int height);
 }
