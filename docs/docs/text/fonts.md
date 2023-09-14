@@ -121,11 +121,15 @@ The `fontStyle` object can have the following list of optional attributes:
 
 By default, `matchFont` uses the system font manager to match the font style. However, if you want to use your custom font manager, you can pass it as the second parameter to the `matchFont` function:
 
-```jsx
-const fontMgr = useFonts([
-  require("../../Tests/assets/Roboto-Medium.ttf"),
-  require("../../Tests/assets/Roboto-Bold.ttf"),
-]);
+```jsx twoslash
+import {matchFont, useFonts} from "@shopify/react-native-skia";
+
+const fontMgr = useFonts({
+  Roboto: [
+    require("../../Tests/assets/Roboto-Medium.ttf"),
+    require("../../Tests/assets/Roboto-Bold.ttf"),
+  ]
+});
 
 const font = matchFont(fontStyle, fontMgr);
 ```
