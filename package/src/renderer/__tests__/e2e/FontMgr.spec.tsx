@@ -4,7 +4,7 @@ import { FontStyle } from "../../../skia/types";
 
 describe("FontMgr", () => {
   it("Custom font manager should work on every platform", async () => {
-    const names = await surface.eval(
+    const result = await surface.eval(
       (Skia, { fonts }) => {
         const fontMgr = Skia.TypefaceFontProvider.Make();
         (Object.keys(fonts) as (keyof typeof fonts)[]).flatMap((familyName) => {
@@ -17,15 +17,29 @@ describe("FontMgr", () => {
             );
           });
         });
-        return new Array(fontMgr.countFamilies())
+        const familyNames = new Array(fontMgr.countFamilies())
           .fill(0)
           .map((_, i) => fontMgr.getFamilyName(i));
+
+        const identities = new Array(fontMgr.countFamilies())
+          .fill(0)
+          .map((_, i) => {
+            const t1 = fontMgr.matchFamilyStyle(fontMgr.getFamilyName(i), {
+              weight: 400,
+            });
+            const t2 = fontMgr.matchFamilyStyle(fontMgr.getFamilyName(i), {
+              weight: 900,
+            });
+            return t1 !== t2;
+          });
+        return { familyNames, identities };
       },
       { fonts: testingFonts }
     );
-    expect(names.length).toBeGreaterThan(0);
-    expect(names.indexOf("Helvetica")).toBe(-1);
-    expect(names.indexOf("Roboto")).not.toBe(-1);
+    expect(result.identities).toEqual([false, false]);
+    expect(result.familyNames.length).toBeGreaterThan(0);
+    expect(result.familyNames.indexOf("Helvetica")).toBe(-1);
+    expect(result.familyNames.indexOf("Roboto")).not.toBe(-1);
   });
   itRunsE2eOnly("system font managers have at least one font", async () => {
     const names = await surface.eval((Skia) => {

@@ -70,7 +70,7 @@ export const FontMgr = () => {
         })}
         <Text font={titleFont} text="Custom Fonts" x={PADDING} y={title2Y} />
         {customfamilyNames.map((fontFamily, i) => {
-          const font = matchFont({ fontFamily }, customFontMgr);
+          const font = matchFont({ fontFamily, fontSize: 24 }, customFontMgr);
 
           const resolvedFont =
             font.getGlyphIDs(fontFamily)[0] === 0 ? subtitleFont : font;
@@ -79,7 +79,7 @@ export const FontMgr = () => {
               key={fontFamily}
               font={resolvedFont}
               x={PADDING}
-              y={title2Y + 16 * (i + 1)}
+              y={title2Y + 24 * (i + 1)}
               text={fontFamily}
             />
           );
