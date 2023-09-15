@@ -523,7 +523,7 @@ public:
     return cmds;
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkPath, "Path")
+  EXPORT_JSI_API_TYPENAME(JsiSkPath, Path)
 
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkPath, addPath), JSI_EXPORT_FUNC(JsiSkPath, addArc),

@@ -28,6 +28,7 @@ class JsiSkTypefaceFontProvider
     : public JsiSkWrappingSkPtrHostObject<para::TypefaceFontProvider> {
 public:
   EXPORT_JSI_API_TYPENAME(JsiSkTypefaceFontProvider, TypefaceFontProvider)
+
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, dispose),
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, registerFont),

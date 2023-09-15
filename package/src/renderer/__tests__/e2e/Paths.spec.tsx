@@ -143,6 +143,13 @@ describe("Paths", () => {
     );
     checkImage(img, "snapshots/paths/pattern.png");
   });
+  it("typename should be correct", async () => {
+    const typename = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      return path.__typename__;
+    });
+    return expect(typename).toBe("Path");
+  });
   it("should be possible to call dispose on a path", async () => {
     await surface.eval((Skia) => {
       const path = Skia.Path.Make();
