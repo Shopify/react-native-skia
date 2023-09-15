@@ -2,45 +2,53 @@ import { itRunsE2eOnly } from "../../../__tests__/setup";
 import { surface, testingFonts } from "../setup";
 import { FontStyle } from "../../../skia/types";
 
+// Currently this tests only run on iOS and Android
+// We've contributed a patch to CanvasKit to make it work on Web too in the next release:
+// https://github.com/google/skia/blob/main/modules/canvaskit/CHANGELOG.md#unreleased
 describe("FontMgr", () => {
-  it("Custom font manager should work on every platform", async () => {
-    const result = await surface.eval(
-      (Skia, { fonts }) => {
-        const fontMgr = Skia.TypefaceFontProvider.Make();
-        (Object.keys(fonts) as (keyof typeof fonts)[]).flatMap((familyName) => {
-          const typefaces = fonts[familyName];
-          typefaces.forEach((typeface) => {
-            const data = Skia.Data.fromBytes(new Uint8Array(typeface));
-            fontMgr.registerFont(
-              Skia.Typeface.MakeFreeTypeFaceFromData(data)!,
-              familyName
-            );
-          });
-        });
-        const familyNames = new Array(fontMgr.countFamilies())
-          .fill(0)
-          .map((_, i) => fontMgr.getFamilyName(i));
+  itRunsE2eOnly(
+    "Custom font manager should work on every platform",
+    async () => {
+      const result = await surface.eval(
+        (Skia, { fonts }) => {
+          const fontMgr = Skia.TypefaceFontProvider.Make();
+          (Object.keys(fonts) as (keyof typeof fonts)[]).flatMap(
+            (familyName) => {
+              const typefaces = fonts[familyName];
+              typefaces.forEach((typeface) => {
+                const data = Skia.Data.fromBytes(new Uint8Array(typeface));
+                fontMgr.registerFont(
+                  Skia.Typeface.MakeFreeTypeFaceFromData(data)!,
+                  familyName
+                );
+              });
+            }
+          );
+          const familyNames = new Array(fontMgr.countFamilies())
+            .fill(0)
+            .map((_, i) => fontMgr.getFamilyName(i));
 
-        const identities = new Array(fontMgr.countFamilies())
-          .fill(0)
-          .map((_, i) => {
-            const t1 = fontMgr.matchFamilyStyle(fontMgr.getFamilyName(i), {
-              weight: 400,
+          const identities = new Array(fontMgr.countFamilies())
+            .fill(0)
+            .map((_, i) => {
+              const t1 = fontMgr.matchFamilyStyle(fontMgr.getFamilyName(i), {
+                weight: 400,
+              });
+              const t2 = fontMgr.matchFamilyStyle(fontMgr.getFamilyName(i), {
+                weight: 900,
+              });
+              return t1 !== t2;
             });
-            const t2 = fontMgr.matchFamilyStyle(fontMgr.getFamilyName(i), {
-              weight: 900,
-            });
-            return t1 !== t2;
-          });
-        return { familyNames, identities };
-      },
-      { fonts: testingFonts }
-    );
-    expect(result.identities).toEqual([true]);
-    expect(result.familyNames.length).toBeGreaterThan(0);
-    expect(result.familyNames.indexOf("Helvetica")).toBe(-1);
-    expect(result.familyNames.indexOf("Roboto")).not.toBe(-1);
-  });
+          return { familyNames, identities };
+        },
+        { fonts: testingFonts }
+      );
+      expect(result.identities).toEqual([true]);
+      expect(result.familyNames.length).toBeGreaterThan(0);
+      expect(result.familyNames.indexOf("Helvetica")).toBe(-1);
+      expect(result.familyNames.indexOf("Roboto")).not.toBe(-1);
+    }
+  );
   itRunsE2eOnly("system font managers have at least one font", async () => {
     const names = await surface.eval((Skia) => {
       const fontMgr = Skia.FontMgr.System();
