@@ -23,7 +23,7 @@ export class TextNode extends JsiDrawingNode<TextProps, SkFont | null> {
 
   protected deriveProps() {
     const { font } = this.props;
-    if (font === null || font === undefined) {
+    if (font === null) {
       return null;
     } else if (font === undefined) {
       console.warn(
