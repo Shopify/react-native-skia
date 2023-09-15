@@ -10,6 +10,7 @@ It allows you to access fonts from the system and manage custom fonts.
 
 The `matchFont()` function will always return a font.
 And the font property in `<Text />` is optional.
+
 So a fast way to display text in React Native Skia would be the following:
 
 ```tsx twoslash
