@@ -1,4 +1,9 @@
-import type { SkRSXform, SkTextBlob, SkPoint } from "../../../skia/types";
+import type {
+  SkRSXform,
+  SkTextBlob,
+  SkPoint,
+  SkFont,
+} from "../../../skia/types";
 import type {
   DrawingContext,
   TextBlobProps,
@@ -11,18 +16,39 @@ import type { GlyphsProps } from "../../types/Drawings";
 import { JsiDrawingNode } from "../DrawingNode";
 import type { NodeContext } from "../Node";
 
-export class TextNode extends JsiDrawingNode<TextProps, null> {
+export class TextNode extends JsiDrawingNode<TextProps, SkFont | null> {
   constructor(ctx: NodeContext, props: TextProps) {
     super(ctx, NodeType.Text, props);
   }
 
   protected deriveProps() {
-    return null;
+    const { font } = this.props;
+    if (font === null || font === undefined) {
+      return null;
+    } else if (font === undefined) {
+      console.warn(
+        "<Text />: the font property is mandatory on React Native Web"
+      );
+      return null;
+      // return this.Skia.Font(
+      //   this.Skia.FontMgr.System().matchFamilyStyle("System", {
+      //     width: 5,
+      //     weight: 400,
+      //     slant: 0,
+      //   }),
+      //   14
+      // );
+    }
+    return font;
   }
 
   draw({ canvas, paint }: DrawingContext) {
-    const { text, x, y, font } = this.props;
-    if (font) {
+    const { text, x, y } = this.props;
+    const font = this.derived;
+    if (font === undefined) {
+      throw new Error("TextNode: font hasn't been derived");
+    }
+    if (font != null) {
       canvas.drawText(text, x, y, paint, font);
     }
   }
