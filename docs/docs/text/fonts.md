@@ -8,6 +8,19 @@ slug: /text/fonts
 In Skia, the `FontMgr` object manages a collection of font families.
 It allows you to access fonts from the system and manage custom fonts.
 
+The `matchFont()` function will always return a font.
+So a fast way to display text in React Native Skia would be the following:
+
+```tsx twoslash
+import {Text, matchFont} from "@shopify/react-native-skia";
+
+const Demo = () => {
+  return (
+    <Text text="Hello World" y={32} x={32} font={matchFont()} />
+  );
+};
+```
+
 ## Custom Fonts
 
 The `useFonts` hooks allows you to load custom fonts to be used for your Skia drawing.
@@ -121,11 +134,15 @@ The `fontStyle` object can have the following list of optional attributes:
 
 By default, `matchFont` uses the system font manager to match the font style. However, if you want to use your custom font manager, you can pass it as the second parameter to the `matchFont` function:
 
-```jsx
-const fontMgr = useFonts([
-  require("../../Tests/assets/Roboto-Medium.ttf"),
-  require("../../Tests/assets/Roboto-Bold.ttf"),
-]);
+```jsx twoslash
+import {matchFont, useFonts} from "@shopify/react-native-skia";
+
+const fontMgr = useFonts({
+  Roboto: [
+    require("../../Tests/assets/Roboto-Medium.ttf"),
+    require("../../Tests/assets/Roboto-Bold.ttf"),
+  ]
+});
 
 const font = matchFont(fontStyle, fontMgr);
 ```

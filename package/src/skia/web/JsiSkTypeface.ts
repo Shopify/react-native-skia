@@ -26,6 +26,10 @@ export class JsiSkTypeface
     return false;
   }
 
+  getGlyphIDs(str: string, numCodePoints?: number) {
+    return Array.from(this.ref.getGlyphIDs(str, numCodePoints));
+  }
+
   dispose = () => {
     this.ref.delete();
   };

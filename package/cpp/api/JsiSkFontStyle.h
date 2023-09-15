@@ -36,12 +36,18 @@ public:
     if (object.isHostObject(runtime)) {
       return object.asHostObject<JsiSkFontStyle>(runtime)->getObject();
     } else {
-      auto weight =
-          static_cast<int>(object.getProperty(runtime, "weight").asNumber());
-      auto width =
-          static_cast<int>(object.getProperty(runtime, "width").asNumber());
+      auto weightProp = object.getProperty(runtime, "weight");
+      auto weight = static_cast<int>(weightProp.isUndefined()
+                                         ? SkFontStyle::Weight::kNormal_Weight
+                                         : weightProp.asNumber());
+      auto widthProp = object.getProperty(runtime, "width");
+      auto width = static_cast<int>(widthProp.isUndefined()
+                                        ? SkFontStyle::Width::kNormal_Width
+                                        : widthProp.asNumber());
+      auto slantProp = object.getProperty(runtime, "slant");
       auto slant = static_cast<SkFontStyle::Slant>(
-          object.getProperty(runtime, "slant").asNumber());
+          slantProp.isUndefined() ? SkFontStyle::Slant::kUpright_Slant
+                                  : slantProp.asNumber());
       SkFontStyle style(weight, width, slant);
       return std::make_shared<SkFontStyle>(style);
     }
