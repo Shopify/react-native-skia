@@ -27,7 +27,8 @@ namespace para = skia::textlayout;
 class JsiSkTypefaceFontProvider
     : public JsiSkWrappingSkPtrHostObject<para::TypefaceFontProvider> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkTypefaceFontProvider, FontMgr)
+  EXPORT_JSI_API_TYPENAME(JsiSkTypefaceFontProvider, TypefaceFontProvider)
+
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, dispose),
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, registerFont),
@@ -46,7 +47,8 @@ public:
   JSI_HOST_FUNCTION(matchFamilyStyle) {
     auto name = arguments[0].asString(runtime).utf8(runtime);
     auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
-    auto typeface = getObject()->matchFamilyStyle(name.c_str(), *fontStyle);
+    sk_sp<SkFontStyleSet> set(getObject()->onMatchFamily(name.c_str()));
+    sk_sp<SkTypeface> typeface(set->matchStyle(*fontStyle));
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
   }

@@ -70,8 +70,7 @@ export const FontMgr = () => {
         })}
         <Text font={titleFont} text="Custom Fonts" x={PADDING} y={title2Y} />
         {customfamilyNames.map((fontFamily, i) => {
-          const font = matchFont({ fontFamily }, customFontMgr);
-
+          const font = matchFont({ fontFamily, fontSize: 16 }, customFontMgr);
           const resolvedFont =
             font.getGlyphIDs(fontFamily)[0] === 0 ? subtitleFont : font;
           return (
@@ -84,6 +83,12 @@ export const FontMgr = () => {
             />
           );
         })}
+        <Text
+          font={matchFont()}
+          x={PADDING}
+          y={title2Y + 16 * (customfamilyNames.length + 1)}
+          text="Default font"
+        />
       </Canvas>
     </ScrollView>
   );
