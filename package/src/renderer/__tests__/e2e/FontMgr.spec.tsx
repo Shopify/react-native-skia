@@ -101,7 +101,4 @@ describe("FontMgr", () => {
       expect(width).not.toEqual([0, 0]);
     }
   });
-  // Add test
-  //     *  Passing |nullptr| as the parameter for |familyName| will return the
-  // *  default system font.
 });
