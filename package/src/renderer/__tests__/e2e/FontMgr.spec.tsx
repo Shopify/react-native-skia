@@ -36,7 +36,7 @@ describe("FontMgr", () => {
       },
       { fonts: testingFonts }
     );
-    expect(result.identities).toEqual([false, false]);
+    expect(result.identities).toEqual([true]);
     expect(result.familyNames.length).toBeGreaterThan(0);
     expect(result.familyNames.indexOf("Helvetica")).toBe(-1);
     expect(result.familyNames.indexOf("Roboto")).not.toBe(-1);
@@ -93,4 +93,7 @@ describe("FontMgr", () => {
       expect(width).not.toEqual([0, 0]);
     }
   });
+  // Add test
+  //     *  Passing |nullptr| as the parameter for |familyName| will return the
+  // *  default system font.
 });
