@@ -27,7 +27,7 @@ namespace para = skia::textlayout;
 class JsiSkTypefaceFontProvider
     : public JsiSkWrappingSkPtrHostObject<para::TypefaceFontProvider> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkTypefaceFontProvider, "FontMgr")
+  EXPORT_JSI_API_TYPENAME(JsiSkTypefaceFontProvider, FontMgr)
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, dispose),
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, registerFont),

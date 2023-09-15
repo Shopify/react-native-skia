@@ -28,7 +28,7 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
                                                 std::move(surface)) {}
 
-  EXPORT_JSI_API_TYPENAME(JsiSkSurface, "Surface")
+  EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
 
   JSI_HOST_FUNCTION(getCanvas) {
     return jsi::Object::createFromHostObject(
