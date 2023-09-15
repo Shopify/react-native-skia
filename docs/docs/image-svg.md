@@ -197,10 +197,8 @@ If your SVG doesn't render correctly and you've considered all the items below, 
 
 CSS styles included in SVG are not supported.
 A tool like [SVGO](#using-svgo) can help with converting CSS style attributes to SVG attributes if possible. 
-
-### Using SVGO
-
-Using [SVGO](https://github.com/svg/svgo) to normalize the SVG file helps a lot. You can use it online [here](https://jakearchibald.github.io/svgomg/). For instance, it can normalize CSS style attributes that contain transformations to the proper transform property.
+You can use it online [here](https://jakearchibald.github.io/svgomg/).
+For instance, it can normalize CSS style attributes that contain transformations to the proper `transform` property.
 
 ### RGBA Colors
 
@@ -251,30 +249,23 @@ Below is the list of non-supported element. Often these SVGs can be rewritten to
 
 ### Font Family
 
-When rendering your SVG with Skia, all fonts available in your app are also available to your SVG. However, the way you can set the `font-family` attribute is not flexible.
-This is [a known issue](https://github.com/google/skia/blob/main/modules/svg/src/SkSVGText.cpp#L77) in the SVG Skia module. 
-The fallback syntax won't work:
+When rendering your SVG with Skia, all fonts available in your app are also available to your SVG.
+However, the way you can set the `font-family` attribute is as flexible as on the web.
 ```jsx
-// Here we assume that if MyFont is not available, it will default to monospace.
-// But it won't work. If MyFont is available, this syntax will be accepted.
-<text font-family="MyFont, monospace" />
-// This is really all that is supported:
+// ✅ This is really all that is supported:
 <text font-family="MyFont" />
-```
-
-The single quote syntax won't work either.
-```jsx
-// This won't work
-<text font-family="'MyFont', monospace" />
-// This will work if MyFont is available in the app
+// ❌ This won't work. If MyFont is available, this syntax will be accepted.
+// but it will never fallback to monospace
 <text font-family="MyFont, monospace" />
+// ❌ The single quote syntax won't work either.
+<text font-family="'MyFont'" />
 ```
 
 ### Inlined SVGs
 
 Some SVGs contain inlined SVGs via the `<image>` or `<feImage>` elements. This is not supported.
 
-## Gradient Templates
+### Gradient Templates
 
 The deprecated `xlink:href` attribute is not supported in gradients.
 You can use the `href` attribute instead.
