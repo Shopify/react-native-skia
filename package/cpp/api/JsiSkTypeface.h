@@ -22,7 +22,7 @@ namespace jsi = facebook::jsi;
 
 class JsiSkTypeface : public JsiSkWrappingSkPtrHostObject<SkTypeface> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkTypeface, "Typeface")
+  EXPORT_JSI_API_TYPENAME(JsiSkTypeface, Typeface)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypeface, dispose))
 
   JsiSkTypeface(std::shared_ptr<RNSkPlatformContext> context,

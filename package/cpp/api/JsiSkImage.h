@@ -131,7 +131,7 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkImage, "Image")
+  EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
                        JSI_EXPORT_FUNC(JsiSkImage, height),

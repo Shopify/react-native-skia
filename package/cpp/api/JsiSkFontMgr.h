@@ -23,7 +23,7 @@ namespace jsi = facebook::jsi;
 
 class JsiSkFontMgr : public JsiSkWrappingSkPtrHostObject<SkFontMgr> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkFontMgr, "FontMgr")
+  EXPORT_JSI_API_TYPENAME(JsiSkFontMgr, FontMgr)
 
   JsiSkFontMgr(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkFontMgr> fontMgr)
