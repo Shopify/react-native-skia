@@ -239,7 +239,7 @@ public:
     return jsi::Value::undefined();
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkFont, "Font")
+  EXPORT_JSI_API_TYPENAME(JsiSkFont, Font)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFont, getSize),
                        JSI_EXPORT_FUNC(JsiSkFont, getMetrics),

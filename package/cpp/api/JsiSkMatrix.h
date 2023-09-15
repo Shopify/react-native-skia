@@ -86,7 +86,7 @@ public:
     return values;
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkMatrix, "Matrix")
+  EXPORT_JSI_API_TYPENAME(JsiSkMatrix, Matrix)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMatrix, concat),
                        JSI_EXPORT_FUNC(JsiSkMatrix, translate),

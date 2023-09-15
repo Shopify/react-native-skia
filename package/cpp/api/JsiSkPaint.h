@@ -25,7 +25,7 @@ namespace jsi = facebook::jsi;
 
 class JsiSkPaint : public JsiSkWrappingSharedPtrHostObject<SkPaint> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkPaint, "Paint")
+  EXPORT_JSI_API_TYPENAME(JsiSkPaint, Paint)
 
   JSI_HOST_FUNCTION(copy) {
     const auto *paint = getObject().get();
