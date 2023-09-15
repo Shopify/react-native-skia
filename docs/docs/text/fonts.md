@@ -14,7 +14,7 @@ And the font property in `<Text />` is optional.
 So a fast way to display text in React Native Skia would be the following:
 
 ```tsx twoslash
-import {Text, matchFont} from "@shopify/react-native-skia";
+import {Text} from "@shopify/react-native-skia";
 
 const Demo = () => {
   return (
