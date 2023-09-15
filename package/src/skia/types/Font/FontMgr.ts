@@ -8,5 +8,4 @@ export interface SkFontMgr extends SkJSIInstance<"FontMgr"> {
   getFamilyName(index: number): string;
   // TODO: name could be null
   matchFamilyStyle(name: string, style: FontStyle): SkTypeface;
-  matchFamily(name: string): FontStyle[];
 }

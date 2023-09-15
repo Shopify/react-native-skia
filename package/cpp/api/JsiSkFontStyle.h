@@ -36,8 +36,6 @@ public:
     if (object.isHostObject(runtime)) {
       return object.asHostObject<JsiSkFontStyle>(runtime)->getObject();
     } else {
-      //     constexpr SkFontStyle() : SkFontStyle{kNormal_Weight,
-      //     kNormal_Width, kUpright_Slant} { }
       auto weightProp = object.getProperty(runtime, "weight");
       auto weight = static_cast<int>(weightProp.isUndefined()
                                          ? SkFontStyle::Weight::kNormal_Weight

@@ -31,7 +31,6 @@ public:
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, dispose),
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, registerFont),
-      JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, matchFamily),
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, matchFamilyStyle),
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, countFamilies),
       JSI_EXPORT_FUNC(JsiSkTypefaceFontProvider, getFamilyName))
@@ -51,36 +50,6 @@ public:
     sk_sp<SkTypeface> typeface(set->matchStyle(*fontStyle));
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
-  }
-
-  JSI_HOST_FUNCTION(matchFamily) {
-    auto name = arguments[0].asString(runtime).utf8(runtime);
-    auto fontStyleSet = getObject()->matchFamily(name.c_str());
-    int setSize = fontStyleSet->count();
-    jsi::Array resultArray = jsi::Array(runtime, setSize);
-
-    for (int i = 0; i < setSize; i++) {
-      SkFontStyle skStyle;
-      SkString skStringStyle;
-
-      fontStyleSet->getStyle(i, &skStyle, &skStringStyle);
-
-      // Convert SkFontStyle and SkString to jsi::Object.
-      jsi::Object jsStyleObj(runtime);
-      jsStyleObj.setProperty(runtime, "weight",
-                             jsi::Value(static_cast<int>(skStyle.weight())));
-      jsStyleObj.setProperty(runtime, "width",
-                             jsi::Value(static_cast<int>(skStyle.width())));
-      jsStyleObj.setProperty(runtime, "slant",
-                             jsi::Value(static_cast<int>(skStyle.slant())));
-      jsStyleObj.setProperty(
-          runtime, "name",
-          jsi::String::createFromUtf8(runtime, skStringStyle.c_str()));
-
-      resultArray.setValueAtIndex(runtime, i, jsStyleObj);
-    }
-
-    return resultArray;
   }
 
   JSI_HOST_FUNCTION(countFamilies) { return getObject()->countFamilies(); }
