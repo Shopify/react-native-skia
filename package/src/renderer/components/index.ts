@@ -1,7 +1,6 @@
 export * from "./shapes";
 export * from "./backdrop";
 export * from "./image";
-export * from "./animatedImage";
 export * from "./shaders";
 export * from "./text";
 export * from "./colorFilters";
