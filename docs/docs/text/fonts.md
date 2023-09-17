@@ -9,14 +9,16 @@ In Skia, the `FontMgr` object manages a collection of font families.
 It allows you to access fonts from the system and manage custom fonts.
 
 The `matchFont()` function will always return a font.
+And the font property in `<Text />` is optional.
+
 So a fast way to display text in React Native Skia would be the following:
 
 ```tsx twoslash
-import {Text, matchFont} from "@shopify/react-native-skia";
+import {Text} from "@shopify/react-native-skia";
 
 const Demo = () => {
   return (
-    <Text text="Hello World" y={32} x={32} font={matchFont()} />
+    <Text text="Hello World" y={32} x={32} />
   );
 };
 ```
