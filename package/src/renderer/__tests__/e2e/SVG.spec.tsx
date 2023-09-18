@@ -5,7 +5,9 @@ import React from "react";
 import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
 import { importSkia, surface } from "../setup";
 import {
+  BackdropBlur,
   Blur,
+  Circle,
   ColorMatrix,
   Fill,
   Group,
@@ -194,5 +196,25 @@ describe("Displays SVGs", () => {
       </>
     );
     checkImage(image, docPath("opacity-tiger.png"));
+  });
+
+  itRunsE2eOnly("should work with backdrop filters", async () => {
+    const { rect } = importSkia();
+    const { width, height } = surface;
+
+    const src = rect(0, 0, tiger.width(), tiger.height());
+    const dst = rect(0, 0, width, height);
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Circle cx={0} cy={0} r={height / 2} color="cyan" />
+        <BackdropBlur blur={30}>
+          <Group transform={fitbox("contain", src, dst)}>
+            <ImageSVG svg={tiger} x={0} y={0} width={800} height={800} />
+          </Group>
+        </BackdropBlur>
+      </>
+    );
+    checkImage(image, docPath("svg-backdrop-filter.png"));
   });
 });
