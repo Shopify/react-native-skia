@@ -55,3 +55,6 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 ## Vertices
 * [Song of Bloom - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=PfCQEA72ljU)
 * [Introducing Gen-Z Mode (youtu.be)](https://www.youtube.com/watch?v=0FC8O9mRUmg)
+
+## Snapshots
+* [Telegram Dark Mode - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=vKYEFpO06Tk)
