@@ -93,7 +93,9 @@ public class ViewScreenshotService {
             }
 
             // Draw ourselves
+            canvas.saveLayerAlpha(null, Math.round(view.getAlpha() * 255));
             view.draw(canvas);
+            canvas.restore();
 
             // Enable children again
             for (int i = 0; i < visibleChildren.size(); i++) {

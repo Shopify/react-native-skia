@@ -17,6 +17,7 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [Arc Slider with React-Native Skia, React-Native Gesture Handler and Reanimated 2 (youtu.be)](https://www.youtube.com/watch?v=fWLyKzEXaJI)
 * [Confetti Animation with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=qOhYFDOEOmo)
 * [Pixelated Image with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=_iU9i9ivTrU)
+* [Typography Metaball with React Native Skia (youtu.be)](https://www.youtube.com/watch?v=B8a8ty54_OI)
 
 ## Backdrop Filters
 * [Glassmorphism in React Native (youtu.be)](https://www.youtube.com/watch?v=ao2i_sOD-z0)
@@ -54,3 +55,6 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 ## Vertices
 * [Song of Bloom - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=PfCQEA72ljU)
 * [Introducing Gen-Z Mode (youtu.be)](https://www.youtube.com/watch?v=0FC8O9mRUmg)
+
+## Snapshots
+* [Telegram Dark Mode - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=vKYEFpO06Tk)
