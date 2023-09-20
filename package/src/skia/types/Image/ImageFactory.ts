@@ -9,6 +9,17 @@ export enum AlphaType {
   Unpremul,
 }
 
+/*
+    Alpha_8: ColorType;
+    RGB_565: ColorType;
+    RGBA_8888: ColorType;
+    BGRA_8888: ColorType;
+    RGBA_1010102: ColorType;
+    RGB_101010x: ColorType;
+    Gray_8: ColorType;
+    RGBA_F16: ColorType;
+    RGBA_F32: ColorType;
+    */
 export enum ColorType {
   Unknown, //!< uninitialized
   Alpha_8, //!< pixel with alpha in 8-bit byte
@@ -21,6 +32,7 @@ export enum ColorType {
   BGRA_1010102, //!< 10 bits for blue, green, red; 2 bits for alpha; in 32-bit word
   RGB_101010x, //!< pixel with 10 bits each for red, green, blue; in 32-bit word
   BGR_101010x, //!< pixel with 10 bits each for blue, green, red; in 32-bit word
+  BGR_101010x_XR, //!< pixel with 10 bits each for blue, green, red; in 32-bit word, extended range
   Gray_8, //!< pixel with grayscale level in 8-bit byte
   RGBA_F16Norm, //!< pixel with half floats in [0,1] for red, green, blue, alpha;
   //   in 64-bit word
