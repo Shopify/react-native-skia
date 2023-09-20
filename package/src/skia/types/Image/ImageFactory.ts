@@ -9,17 +9,6 @@ export enum AlphaType {
   Unpremul,
 }
 
-/*
-    Alpha_8: ColorType;
-    RGB_565: ColorType;
-    RGBA_8888: ColorType;
-    BGRA_8888: ColorType;
-    RGBA_1010102: ColorType;
-    RGB_101010x: ColorType;
-    Gray_8: ColorType;
-    RGBA_F16: ColorType;
-    RGBA_F32: ColorType;
-    */
 export enum ColorType {
   Unknown, //!< uninitialized
   Alpha_8, //!< pixel with alpha in 8-bit byte
