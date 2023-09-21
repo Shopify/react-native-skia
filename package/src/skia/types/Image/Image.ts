@@ -94,6 +94,12 @@ export interface SkImage extends SkJSIInstance<"Image"> {
   */
   encodeToBase64(fmt?: ImageFormat, quality?: number): string;
 
+  /** Read Image RGBA pixels, returning result as a UInt8Array.
+   * 
+   * @return  Uint8Array with data
+   */
+  readPixels(): Uint8Array;
+
   /**
    * Returns raster image or lazy image. Copies SkImage backed by GPU texture
    * into CPU memory if needed. Returns original SkImage if decoded in raster

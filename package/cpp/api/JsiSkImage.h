@@ -125,6 +125,34 @@ public:
     return jsi::String::createFromAscii(runtime, buffer);
   }
 
+  JSI_HOST_FUNCTION(readPixels) {
+    auto image = getObject();
+    if (image->isTextureBacked()) {
+      image = image->makeNonTextureImage();
+    }
+    auto info = SkImageInfo::MakeN32Premul(image->width(), image->height());
+    size_t size = info.computeMinByteSize();
+    void* pixels = sk_malloc_throw(size);
+    if (!image->readPixels(info, pixels, info.minRowBytes(), 0, 0)) {
+      return jsi::Value::undefined();
+    }
+
+    auto arrayCtor =
+        runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
+    jsi::Object array =
+        arrayCtor.callAsConstructor(runtime, static_cast<double>(size))
+            .getObject(runtime);
+    jsi::ArrayBuffer buffer =
+        array.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+            .asObject(runtime)
+            .getArrayBuffer(runtime);
+
+    auto bfrPtr = reinterpret_cast<uint8_t *>(buffer.data(runtime));
+    memcpy(bfrPtr, pixels, size);
+    sk_free(pixels);
+    return array;
+  }
+
   JSI_HOST_FUNCTION(makeNonTextureImage) {
     auto image = getObject()->makeNonTextureImage();
     return jsi::Object::createFromHostObject(
@@ -139,6 +167,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBytes),
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64),
+                       JSI_EXPORT_FUNC(JsiSkImage, readPixels),
                        JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
                        JSI_EXPORT_FUNC(JsiSkImage, dispose))
 

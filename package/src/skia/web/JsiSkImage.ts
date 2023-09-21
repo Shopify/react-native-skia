@@ -110,6 +110,17 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return toBase64String(bytes);
   }
 
+  readPixels() {
+    const imageInfo = {
+      width: this.width(),
+      height: this.height(),
+      colorSpace: null,
+      colorType: this.CanvasKit.ColorType.RGBA_8888,
+      alphaType: this.CanvasKit.AlphaType.Unpremul,
+    };
+    return this.ref.readPixels(0, 0, imageInfo);
+  }
+
   dispose = () => {
     this.ref.delete();
   };
