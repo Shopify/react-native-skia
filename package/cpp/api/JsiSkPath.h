@@ -36,7 +36,7 @@ namespace jsi = facebook::jsi;
 
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
 private:
-  float pintT(double value) {
+  float pinT(double value) {
     // Clamp the double value between 0 and 1 and then cast it to float
     return static_cast<float>(std::clamp(value, 0.0, 1.0));
   }
@@ -299,8 +299,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(trim) {
-    auto start = pintT(arguments[0].asNumber());
-    auto end = pintT(arguments[1].asNumber());
+    auto start = pinT(arguments[0].asNumber());
+    auto end = pinT(arguments[1].asNumber());
     auto isComplement = arguments[2].getBool();
     auto path = *getObject();
     auto mode = isComplement ? SkTrimPathEffect::Mode::kInverted
