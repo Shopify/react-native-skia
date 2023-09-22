@@ -322,6 +322,9 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   trim(start: number, stop: number, isComplement: boolean) {
     const startT = pinT(start);
     const stopT = pinT(stop);
+    if (startT === 0 && stopT === 1) {
+      return this;
+    }
     const result = this.ref.trim(startT, stopT, isComplement);
     return result === null ? result : this;
   }
@@ -334,7 +337,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     const path = this.CanvasKit.Path.MakeFromPathInterpolation(
       this.ref,
       JsiSkPath.fromValue(end),
-      pinT(t)
+      t
     );
     if (path === null) {
       return null;

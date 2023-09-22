@@ -487,7 +487,7 @@ public:
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
     auto weight = pintT(arguments[1].asNumber());
     SkPath result;
-    auto succeed = getObject()->interpolate(*path2, pintT(weight), &result);
+    auto succeed = getObject()->interpolate(*path2, weight, &result);
     if (!succeed) {
       return nullptr;
     }
