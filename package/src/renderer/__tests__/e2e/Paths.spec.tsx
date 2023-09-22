@@ -47,10 +47,10 @@ describe("Paths", () => {
       path.moveTo(20, 20);
       path.lineTo(20, 40);
       path.lineTo(40, 20);
-      path.trim(0.0001, 1.00001, false);
+      path.trim(0, 1.2, false);
       return path.toSVGString();
     });
-    expect(result).toEqual("M20 20.0048L20 40L40 20");
+    expect(result).toEqual("M20 20L20 40L40 20");
   });
   it("interpolation values are pined between 0 and 1", async () => {
     const result = await surface.eval((Skia) => {
