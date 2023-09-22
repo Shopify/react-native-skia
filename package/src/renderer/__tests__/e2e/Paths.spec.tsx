@@ -19,6 +19,67 @@ const star = (Skia: Skia) => {
 };
 
 describe("Paths", () => {
+  it("should accept [0, 1] as trim value", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.moveTo(20, 20);
+      path.lineTo(20, 40);
+      path.lineTo(40, 20);
+      path.trim(0, 1, false);
+      return path.toSVGString();
+    });
+    expect(result).toEqual("M20 20L20 40L40 20");
+  });
+  it("should accept [0.0001, 1.00001] as trim value", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.moveTo(20, 20);
+      path.lineTo(20, 40);
+      path.lineTo(40, 20);
+      path.trim(0.0001, 1.00001, false);
+      return path.toSVGString();
+    });
+    expect(result).toEqual("M20 20.0048L20 40L40 20");
+  });
+  it("should accept [0, 1.2] as trim value", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.moveTo(20, 20);
+      path.lineTo(20, 40);
+      path.lineTo(40, 20);
+      path.trim(0.0001, 1.00001, false);
+      return path.toSVGString();
+    });
+    expect(result).toEqual("M20 20.0048L20 40L40 20");
+  });
+  it("interpolation values are pined between 0 and 1", async () => {
+    const result = await surface.eval((Skia) => {
+      const path2 = Skia.Path.Make();
+      path2.moveTo(0, 0);
+      path2.lineTo(20, 20);
+      path2.lineTo(20, 40);
+      const path = Skia.Path.Make();
+      path.moveTo(20, 20);
+      path.lineTo(20, 40);
+      path.lineTo(40, 20);
+      path.trim(0, 1, false);
+      return [
+        path.interpolate(path2, -1)!.toSVGString(),
+        path.interpolate(path2, 0)!.toSVGString(),
+        path.interpolate(path2, 0.0001)!.toSVGString(),
+        path.interpolate(path2, 1)!.toSVGString(),
+        path.interpolate(path2, 1.0001)!.toSVGString(),
+        path.interpolate(path2, 1.2)!.toSVGString(),
+      ];
+    });
+    expect(result).toEqual([
+      "M0 0L20 20L20 40",
+      "M0 0L20 20L20 40",
+      "M0.002 0.002L20 20.002L20.002 39.998",
+      "M20 20L20 40L40 20",
+      "M20 20L20 40L40 20",
+    ]);
+  });
   it("should add a path", async () => {
     const result = await surface.eval((Skia) => {
       const path = Skia.Path.Make();

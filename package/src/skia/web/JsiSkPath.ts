@@ -28,6 +28,8 @@ const CommandCount = {
   [PathVerb.Close]: 1,
 };
 
+const pinT = (t: number) => Math.min(Math.max(t, 0), 1);
+
 export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   constructor(CanvasKit: CanvasKit, ref: Path) {
     super(CanvasKit, ref, "Path");
@@ -317,7 +319,9 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     return this.ref.toSVGString();
   }
 
-  trim(startT: number, stopT: number, isComplement: boolean) {
+  trim(start: number, stop: number, isComplement: boolean) {
+    const startT = pinT(start);
+    const stopT = pinT(stop);
     const result = this.ref.trim(startT, stopT, isComplement);
     return result === null ? result : this;
   }
@@ -330,7 +334,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     const path = this.CanvasKit.Path.MakeFromPathInterpolation(
       this.ref,
       JsiSkPath.fromValue(end),
-      t
+      pinT(t)
     );
     if (path === null) {
       return null;

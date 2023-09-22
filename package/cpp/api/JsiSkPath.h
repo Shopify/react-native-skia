@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -34,6 +35,11 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
+private:
+  float pintT(double value) {
+    // Clamp the double value between 0 and 1 and then cast it to float
+    return static_cast<float>(std::clamp(value, 0.0, 1.0));
+  }
 
 public:
   JSI_HOST_FUNCTION(addPath) {
@@ -293,24 +299,21 @@ public:
   }
 
   JSI_HOST_FUNCTION(trim) {
-    auto start = arguments[0].asNumber();
-    auto end = arguments[1].asNumber();
+    auto start = pintT(arguments[0].asNumber());
+    auto end = pintT(arguments[1].asNumber());
     auto isComplement = arguments[2].getBool();
     auto path = *getObject();
     auto mode = isComplement ? SkTrimPathEffect::Mode::kInverted
                              : SkTrimPathEffect::Mode::kNormal;
     auto pe = SkTrimPathEffect::Make(start, end, mode);
-    if (!pe) {
-      // SkDebugf("Invalid args to trim(): startT and stopT must be in
-      // [0,1]\n");
-      return jsi::Value::null();
-    }
     SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
+    if (!pe) {
+      return thisValue.getObject(runtime);
+    }
     if (pe->filterPath(&path, path, &rec, nullptr)) {
       getObject()->swap(path);
       return thisValue.getObject(runtime);
     }
-    SkDebugf("Could not trim path\n");
     return jsi::Value::null();
   }
 
@@ -482,9 +485,9 @@ public:
 
   JSI_HOST_FUNCTION(interpolate) {
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
-    auto weight = arguments[1].asNumber();
+    auto weight = pintT(arguments[1].asNumber());
     SkPath result;
-    auto succeed = getObject()->interpolate(*path2, weight, &result);
+    auto succeed = getObject()->interpolate(*path2, pintT(weight), &result);
     if (!succeed) {
       return nullptr;
     }
