@@ -1,4 +1,4 @@
-require("react-native-reanimated/lib/commonjs/reanimated2/jestUtils").setUpTests();
+require("react-native-reanimated/lib/module/reanimated2/jestUtils").setUpTests();
 global.__reanimatedWorkletInit = () => {};
 jest.mock("react-native-reanimated", () => {
   const Reanimated = require("react-native-reanimated/mock");
