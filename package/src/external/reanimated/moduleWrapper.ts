@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo } from "react";
 
 import type { SharedValueType } from "../../renderer/processors/Animations";
 
 // This one is needed for the deprecated useSharedValue function
 // We can remove it once we remove the deprecation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 let Reanimated2: any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 let Reanimated3: any;
 let reanimatedVersion: string;
 
@@ -35,15 +36,6 @@ function throwOnMissingReanimated2() {
   }
 }
 
-function throwOnMissingReanimated3() {
-  if (!HAS_REANIMATED3) {
-    throw new Error(
-      `Reanimated version ${reanimatedVersion} is not supported, please upgrade to 3.0.0 or newer.`
-    );
-  }
-  throwOnMissingReanimated2();
-}
-
 export const useSharedValue =
   Reanimated2?.useSharedValue ||
   ((value: number) => useMemo(() => ({ value }), [value]));
@@ -55,6 +47,10 @@ export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated2;
 export const isSharedValue = <T>(
   value: unknown
 ): value is SharedValueType<T> => {
-  throwOnMissingReanimated3();
-  return !!value && Reanimated3.isSharedValue(value);
+  return (
+    !!value &&
+    (Reanimated3
+      ? Reanimated3.isSharedValue(value)
+      : (value as any).value !== undefined)
+  );
 };
