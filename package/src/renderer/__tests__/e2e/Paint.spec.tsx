@@ -161,8 +161,10 @@ describe("Paint", () => {
     const withDither = await drawGradientWithDither(true);
     const withoutDither = await drawGradientWithDither(false);
     checkImage(withDither, "snapshots/paint/dither.png");
+    checkImage(withoutDither, "snapshots/paint/without-dither.png");
     checkImage(withoutDither, "snapshots/paint/dither.png", {
       shouldFail: true,
+      threshold: 0,
     });
   });
 });
