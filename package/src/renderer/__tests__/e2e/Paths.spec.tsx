@@ -52,7 +52,7 @@ describe("Paths", () => {
     });
     expect(result).toEqual("M20 20L20 40L40 20");
   });
-  it("interpolation values are pined between 0 and 1", async () => {
+  it("interpolation values can overshoot", async () => {
     const result = await surface.eval((Skia) => {
       const path2 = Skia.Path.Make();
       path2.moveTo(0, 0);
