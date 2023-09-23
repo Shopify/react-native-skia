@@ -61,7 +61,7 @@ If a new version of Skia is included in an upgrade of this library, you need to 
 ### Publishing
 
 - Run the commands in the [Building](#building) section
-- Build the Android binaries with `yarn build-android`
+- Build the Android binaries with `yarn build-skia-android`
 - Build the NPM package with `yarn build-npm`
 
 Publish the NPM package manually. The output is found in the `dist` folder.

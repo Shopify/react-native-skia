@@ -44,8 +44,8 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
     "libsvg.a",
     "libskottie.a",
     "libsksg.a",
-    //"libskparagraph.a",
-    //"libskunicode.a",
+    "libskparagraph.a",
+    "libskunicode.a",
   ].forEach((target) => {
     const path = `./package/libs/android/${cpu}/${target}`;
     checkFileExists(
@@ -63,8 +63,8 @@ if (process.env.GITHUB_RUN_NUMBER === undefined) {
   "libsvg.xcframework",
   "libskottie.xcframework",
   "libsksg.xcframework",
-  // "libskparagraph.xcframework",
-  // "libskunicode.xcframework",
+  "libskparagraph.xcframework",
+  "libskunicode.xcframework",
 ].forEach((lib) => {
   checkFileExists(
     `./package/libs/ios/${lib}`,
@@ -84,7 +84,6 @@ pck.types = "lib/typescript/index.d.ts";
 pck.main = "lib/module/index.js";
 pck.module = "lib/module/index.js";
 pck["react-native"] = "lib/module/index.js";
-pck.scripts.postinstall = "node scripts/install-npm.js";
 console.log("Building version:", nextVersion);
 
 // Overwrite the package.json file

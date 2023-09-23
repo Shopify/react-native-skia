@@ -53,7 +53,7 @@ const sidebars = {
         "shapes/ellipses",
         "shapes/vertices",
         "shapes/patch",
-        "shapes/box",
+        "shapes/pictures",
         "shapes/custom-drawing",
       ],
     },
@@ -67,7 +67,13 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Text",
-      items: ["text/text", "text/glyphs", "text/path", "text/blob"],
+      items: [
+        "text/fonts",
+        "text/text",
+        "text/glyphs",
+        "text/path",
+        "text/blob",
+      ],
     },
     {
       collapsed: true,
@@ -130,6 +136,11 @@ const sidebars = {
         "animations/animations",
         "animations/touch-events",
       ],
+    },
+    {
+      type: "doc",
+      label: "Tutorials",
+      id: "tutorials",
     },
   ],
 };

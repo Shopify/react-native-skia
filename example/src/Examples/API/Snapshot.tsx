@@ -82,6 +82,33 @@ const Component = () => {
   return (
     <ScrollView style={styles.scrollview}>
       <Text>Hello World!</Text>
+      <View style={{ flexDirection: "row" }}>
+        <View
+          style={{
+            width: 80,
+            height: 80,
+            backgroundColor: "blue",
+            opacity: 0.5,
+          }}
+        >
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              backgroundColor: "green",
+              opacity: 0.5,
+            }}
+          />
+        </View>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            backgroundColor: "red",
+            opacity: 0.5,
+          }}
+        />
+      </View>
       <Button
         title={"Press me to increment (" + counter + ")"}
         onPress={() => setCounter((i) => i + 1)}

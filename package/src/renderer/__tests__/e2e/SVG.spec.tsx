@@ -4,7 +4,16 @@ import React from "react";
 
 import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
 import { importSkia, surface } from "../setup";
-import { Blur, Fill, Group, ImageSVG, Paint, fitbox } from "../../components";
+import {
+  Blur,
+  ColorMatrix,
+  Fill,
+  Group,
+  ImageSVG,
+  OpacityMatrix,
+  Paint,
+  fitbox,
+} from "../../components";
 import type { SkSVG } from "../../../skia/types";
 
 // Because SkSVG doesn't exist on web,
@@ -63,6 +72,20 @@ const svgWithoutSize = {
 };
 
 describe("Displays SVGs", () => {
+  itRunsE2eOnly(
+    "should return the with and height of the SVG canvas",
+    async () => {
+      const [width, height] = await surface.eval((Skia) => {
+        const svg = Skia.SVG
+          .MakeFromString(`<svg viewBox='0 0 20 20' width="20" height="20" xmlns='http://www.w3.org/2000/svg'>
+      <circle cx='10' cy='10' r='10' fill='#00ffff'/>
+    </svg>`)!;
+        return [svg.width(), svg.height()];
+      });
+      expect(width).toBe(20);
+      expect(height).toBe(20);
+    }
+  );
   itRunsE2eOnly("should render the SVG scaled properly", async () => {
     const { rect } = importSkia();
     const { width, height } = surface;
@@ -147,5 +170,29 @@ describe("Displays SVGs", () => {
       </>
     );
     checkImage(image, docPath("blurred-tiger.png"));
+  });
+
+  itRunsE2eOnly("should apply an opacity filter to the svg", async () => {
+    const { rect } = importSkia();
+    const { width, height } = surface;
+
+    const src = rect(0, 0, tiger.width(), tiger.height());
+    const dst = rect(0, 0, width, height);
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group
+          transform={fitbox("contain", src, dst)}
+          layer={
+            <Paint>
+              <ColorMatrix matrix={OpacityMatrix(0.5)} />
+            </Paint>
+          }
+        >
+          <ImageSVG svg={tiger} x={0} y={0} width={800} height={800} />
+        </Group>
+      </>
+    );
+    checkImage(image, docPath("opacity-tiger.png"));
   });
 });

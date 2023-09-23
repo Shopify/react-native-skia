@@ -41,5 +41,4 @@ public class SkiaDomView extends SkiaBaseView {
     protected native void registerView(int nativeId);
 
     protected native void unregisterView();
-
 }

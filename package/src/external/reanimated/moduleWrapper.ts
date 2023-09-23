@@ -30,7 +30,7 @@ function throwOnMissingReanimated2() {
   if (!HAS_REANIMATED2) {
     throw new Error(
       "Reanimated was not found, make sure react-native-reanimated package is installed if you want to use \
-      react-naitve-skia's integration layer API."
+      react-native-skia's integration layer API."
     );
   }
 }
