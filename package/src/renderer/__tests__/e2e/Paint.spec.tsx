@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from "react";
 
-import { surface, importSkia, height, width } from "../setup";
+import { surface, importSkia } from "../setup";
 import {
   Circle,
   Fill,
@@ -10,7 +10,7 @@ import {
   Paint,
   Path,
 } from "../../components";
-import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
+import { checkImage } from "../../../__tests__/setup";
 import { fitbox } from "../../components/shapes/FitBox";
 
 const blendModes = [
@@ -50,8 +50,8 @@ const COLS = 256 / SIZE;
 
 describe("Paint", () => {
   it("should interpret the #rrggbbaa correctly", async () => {
+    const { width, height } = surface;
     const { rect } = importSkia();
-
     const image = await surface.draw(
       <>
         <Group clip={rect(0, 0, width / 2, height)}>
@@ -65,6 +65,7 @@ describe("Paint", () => {
     checkImage(image, "snapshots/paint/colors.png");
   });
   it("should accept a paint object as property", async () => {
+    const { width, height } = surface;
     const { Skia } = importSkia();
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("lightblue"));
@@ -141,13 +142,14 @@ describe("Paint", () => {
     );
     checkImage(img, "snapshots/paint/blend-mode.png");
   });
-  itRunsE2eOnly("Dithering", async () => {
+  it("Dithering", async () => {
+    const { height } = surface;
     const { vec } = importSkia();
     const c1 = "#202225ff";
     const c2 = "#141619FF";
     async function drawGradientWithDither(dither: boolean) {
       return surface.draw(
-        <Fill antiAlias dither={dither}>
+        <Fill dither={dither}>
           <LinearGradient
             start={vec(0, 0)}
             end={vec(0, height)}
