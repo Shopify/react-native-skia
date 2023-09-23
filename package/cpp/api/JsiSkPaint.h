@@ -81,6 +81,12 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(setDither) {
+    bool dithered = arguments[0].getBool();
+    getObject()->setDither(dithered);
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(setStrokeWidth) {
     SkScalar width = arguments[0].asNumber();
     getObject()->setStrokeWidth(width);
@@ -175,6 +181,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPaint, setStrokeJoin),
                        JSI_EXPORT_FUNC(JsiSkPaint, setStrokeCap),
                        JSI_EXPORT_FUNC(JsiSkPaint, setAntiAlias),
+                       JSI_EXPORT_FUNC(JsiSkPaint, setDither),
                        JSI_EXPORT_FUNC(JsiSkPaint, setStrokeWidth),
                        JSI_EXPORT_FUNC(JsiSkPaint, setStyle),
                        JSI_EXPORT_FUNC(JsiSkPaint, setColor),

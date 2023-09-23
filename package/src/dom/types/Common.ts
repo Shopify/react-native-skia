@@ -79,6 +79,7 @@ export interface PaintProps extends ChildrenProps {
   strokeMiter?: number;
   opacity?: number;
   antiAlias?: boolean;
+  dither?: boolean;
 }
 
 export interface GroupProps extends PaintProps, TransformProps {
