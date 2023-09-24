@@ -92,10 +92,10 @@ public:
     if (count > 1) {
       auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
       getObject()->measureText(str.c_str(), str.length(), SkTextEncoding::kUTF8,
-                             &bounds, paint.get());
+                               &bounds, paint.get());
     } else {
       getObject()->measureText(str.c_str(), str.length(), SkTextEncoding::kUTF8,
-                             &bounds);
+                               &bounds);
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkRect>(getContext(), std::move(bounds)));
