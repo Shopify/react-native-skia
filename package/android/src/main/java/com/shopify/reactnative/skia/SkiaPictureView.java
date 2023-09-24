@@ -11,7 +11,7 @@ public class SkiaPictureView extends SkiaBaseView {
     private HybridData mHybridData;
 
     public SkiaPictureView(Context context) {
-        super(context);
+        super(context, true);
         RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
