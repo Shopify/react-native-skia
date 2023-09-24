@@ -15,7 +15,7 @@ export const ReanimatedExample: React.FC = () => {
       <SimpleAnimation />
       <InterpolationWithEasing />
       <AnimationWithTouchHandler />
-      {/* <AnimateTextOnPath /> */}
+      <AnimateTextOnPath />
       <SpringBackTouchAnimation />
       <BokehExample />
     </ScrollView>
