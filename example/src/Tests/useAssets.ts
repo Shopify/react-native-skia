@@ -35,6 +35,10 @@ export const useAssets = () => {
     require("./assets/NotoSansSC-Regular.otf"),
     errorHandler
   );
+  const DinMedium = useTypeface(
+    require("./assets/DIN-Medium.ttf"),
+    errorHandler
+  );
   if (error) {
     throw new Error("Failed to load assets: " + error.message);
   }
@@ -44,6 +48,7 @@ export const useAssets = () => {
     !NotoColorEmoji ||
     !NotoSansSCRegular ||
     !UberMoveMediumMono ||
+    !DinMedium ||
     !skiaLogoJpeg ||
     !skiaLogoPng ||
     !mask
@@ -55,6 +60,7 @@ export const useAssets = () => {
     NotoColorEmoji,
     NotoSansSCRegular,
     UberMoveMediumMono,
+    DinMedium,
     oslo,
     skiaLogoJpeg,
     skiaLogoPng,
