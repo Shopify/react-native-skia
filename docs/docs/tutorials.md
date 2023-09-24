@@ -27,6 +27,7 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [D3 Charts and React Native Skia for Beginners (youtu.be)](https://www.youtube.com/watch?v=-a-3gAQB4eg)
 * [How to build Animated D3 Bar Charts with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=NLvNSxIUN0w)
 * [How to build an Animated Donut Chart with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=VSynoqXjQvg)
+* [Circular Progress in React Native (youtu.be)](https://www.youtube.com/watch?v=5-95kYTJMb4)
 
 ## Image Filters
 * [Neumorphism in React Native (youtu.be)](https://www.youtube.com/watch?v=GFssmWUhwww)
