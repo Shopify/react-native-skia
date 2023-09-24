@@ -66,7 +66,7 @@ describe("Text", () => {
         </Group>
       </>
     );
-    checkImage(image, "snapshots/text/text-bounds.png");
+    checkImage(image, `snapshots/text/text-bounds-${surface.OS}.png`);
   });
 
   // We test it only on Android and iOS now because there might be no default font on Web
