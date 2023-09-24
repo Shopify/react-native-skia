@@ -22,6 +22,7 @@ export interface PaintContext {
   strokeMiter?: number;
   opacity?: number;
   antiAlias?: boolean;
+  dither?: boolean;
 
   shader?: SkShader;
   colorFilter?: SkColorFilter;

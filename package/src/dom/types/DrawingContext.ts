@@ -76,6 +76,7 @@ class ConcatablePaint {
   _strokeMiter?: number;
   _opacity = 1;
   _antiAlias?: boolean;
+  _dither?: boolean;
 
   _imageFilter?: SkImageFilter;
   _shader?: SkShader;
@@ -97,6 +98,7 @@ class ConcatablePaint {
     this.setStrokeMiter(props.strokeMiter);
     this.setOpacity(props.opacity);
     this.setAntiAlias(props.antiAlias);
+    this.setDither(props.dither);
     declCtx.save();
     children.forEach((child) => {
       if (child instanceof JsiDeclarationNode) {
@@ -215,6 +217,14 @@ class ConcatablePaint {
     return this._antiAlias;
   }
 
+  setDither(dither?: boolean) {
+    this.setValue("_dither", dither);
+  }
+
+  getDither() {
+    return this._dither;
+  }
+
   setImageFilter(imageFilter?: SkImageFilter) {
     this.setValue("_imageFilter", imageFilter);
   }
@@ -289,6 +299,9 @@ class ConcatablePaint {
     }
     if (this._antiAlias !== undefined) {
       paint.setAntiAlias(this._antiAlias);
+    }
+    if (this._dither !== undefined) {
+      paint.setDither(this._dither);
     }
     if (this._imageFilter !== undefined) {
       paint.setImageFilter(this._imageFilter);
