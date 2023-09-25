@@ -11,22 +11,19 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "skparagraph/include/ParagraphBuilder.h"
+#include "skparagraph/src/ParagraphBuilderImpl.h"
 
 #pragma clang diagnostic pop
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
+namespace para = skia::textlayout;
 
 class JsiSkParagraphFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(RequiresClientICU) {
-	#if defined(SK_UNICODE_CLIENT_IMPLEMENTATION)
-		return true;
-	#else
-		return false;
-	#endif
+	return jsi::Value(para::ParagraphBuilderImpl::RequiresClientICU());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphFactory,

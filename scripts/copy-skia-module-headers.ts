@@ -4,6 +4,10 @@ const copyModule = (module: string) => [
   `mkdir -p ./package/cpp/skia/modules/${module}/include`,
   `cp -a ./externals/skia/modules/${module}/include/. ./package/cpp/skia/modules/${module}/include`,
 ];
+const copySrcModule = (module: string) => [
+  `mkdir -p ./package/cpp/skia/modules/${module}/src`,
+  `cp -a ./externals/skia/modules/${module}/src/. ./package/cpp/skia/modules/${module}/src`,
+];
 
 [
   "yarn rimraf ./package/cpp/skia/modules/",
@@ -11,6 +15,8 @@ const copyModule = (module: string) => [
   ...copyModule("skresources"),
   ...copyModule("skparagraph"),
   ...copyModule("skunicode"),
+  ...copyModule("skshaper"),
+  ...copySrcModule("skparagraph"),
   `cp -a ./externals/skia/modules/skcms/. ./package/cpp/skia/modules/skcms`,
   `mkdir -p ./package/cpp/skia/src/`,
   `mkdir -p ./package/cpp/skia/src/core/`,
