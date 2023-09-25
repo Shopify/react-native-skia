@@ -7,7 +7,6 @@
 
 #include "JsiSkHostObjects.h"
 
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -23,7 +22,7 @@ namespace para = skia::textlayout;
 class JsiSkParagraphFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(RequiresClientICU) {
-	return jsi::Value(para::ParagraphBuilderImpl::RequiresClientICU());
+    return jsi::Value(para::ParagraphBuilderImpl::RequiresClientICU());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphFactory,
