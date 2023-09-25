@@ -45,6 +45,7 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
+#include "JsiSkParagraphFactory.h"
 
 namespace RNSkia {
 
@@ -105,6 +106,8 @@ public:
                             std::make_shared<JsiSkPictureFactory>(context));
     installReadonlyProperty("FontMgr",
                             std::make_shared<JsiSkFontMgrFactory>(context));
+    installReadonlyProperty("Paragraph",
+                            std::make_shared<JsiSkParagraphFactory>(context));
     installReadonlyProperty(
         "TypefaceFontProvider",
         std::make_shared<JsiSkTypefaceFontProviderFactory>(context));
