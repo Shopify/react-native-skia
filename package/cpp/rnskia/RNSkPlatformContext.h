@@ -19,6 +19,7 @@
 #include "SkImage.h"
 #include "SkStream.h"
 #include "SkSurface.h"
+#include "skparagraph/include/ParagraphBuilder.h"
 
 #pragma clang diagnostic pop
 
@@ -30,6 +31,7 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 namespace react = facebook::react;
+namespace para = skia::textlayout;
 
 class RNSkPlatformContext {
 public:
@@ -137,6 +139,12 @@ public:
    * Return the Platform specific font manager
    */
   virtual sk_sp<SkFontMgr> createFontMgr() = 0;
+
+  /**
+   * Provices Unicode data to the paragraph API: words, graphemes, and line breaks.
+   * On Android, this method is a no-op since the paragraph API will use ICU directly.
+   */
+  virtual void provideUnicodeDataToParagraph(para::ParagraphBuilder* paragraphBuilder) = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its

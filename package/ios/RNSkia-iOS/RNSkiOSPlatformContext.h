@@ -65,6 +65,7 @@ public:
   void raiseError(const std::exception &err) override;
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
   sk_sp<SkFontMgr> createFontMgr() override;
+  void provideUnicodeDataToParagraph(para::ParagraphBuilder* paragraphBuilder) override;
 
   void willInvalidateModules() {
     // We need to do some house-cleaning here!
