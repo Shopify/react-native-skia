@@ -1,31 +1,23 @@
 import type { TestOS } from "../setup";
 import { surface } from "../setup";
 
-const getWords = (text: string) => {
-  const segmenter = new Intl.Segmenter("en", { granularity: "word" });
+const getTokens = (text: string, granularity: "grapheme" | "word") => {
+  const segmenter = new Intl.Segmenter("en", { granularity });
   const segments = segmenter.segment(text);
 
   const boundaries: number[] = [];
   for (const segment of segments) {
-    if (segment.isWordLike) {
-      boundaries.push(segment.index);
+    if (granularity === "word" && !segment.isWordLike) {
+      continue;
     }
-  }
-  boundaries.push(text.length);
-  return boundaries;
-};
-
-const getGraphemes = (text: string) => {
-  const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
-  const segments = segmenter.segment(text);
-
-  const boundaries: number[] = [];
-  for (const segment of segments) {
     boundaries.push(segment.index);
   }
   boundaries.push(text.length);
   return boundaries;
 };
+
+const getWords = (text: string) => getTokens(text, "word");
+const getGraphemes = (text: string) => getTokens(text, "grapheme");
 
 describe("Paragraph", () => {
   it("Should return whether the paragraph builder requires ICU data to be provided by the client", async () => {
