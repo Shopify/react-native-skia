@@ -22,7 +22,7 @@ import { JsiDrawingContext } from "../../dom/types/DrawingContext";
 
 jest.setTimeout(180 * 1000);
 
-type TestOS = "ios" | "android" | "web" | "node";
+export type TestOS = "ios" | "android" | "web" | "node";
 
 declare global {
   var testServer: Server;

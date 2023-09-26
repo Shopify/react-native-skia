@@ -138,6 +138,12 @@ public:
    */
   virtual sk_sp<SkFontMgr> createFontMgr() = 0;
 
+  /*
+   * Whether the paragraph builder requires ICU data to be provided by the
+   * client.
+   */
+  virtual bool requiresClientICU() = 0;
+
   /**
    * Creates an skImage containing the screenshot of a native view and its
    * children.

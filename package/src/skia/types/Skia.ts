@@ -27,7 +27,10 @@ import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
-import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProviderFactory";
+import type {
+  TypefaceFontProviderFactory,
+  ParagraphFactory,
+} from "./Paragraph";
 /**
  * Declares the interface for the native Skia API
  */
@@ -81,4 +84,5 @@ export interface Skia {
   SVG: SVGFactory;
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
+  Paragraph: ParagraphFactory;
 }

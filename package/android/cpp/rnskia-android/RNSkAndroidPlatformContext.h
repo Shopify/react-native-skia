@@ -52,6 +52,8 @@ public:
     return SkFontMgr_New_Android(nullptr);
   }
 
+  bool requiresClientICU() override { return false; }
+
   void runOnMainThread(std::function<void()> task) override {
     _jniPlatformContext->runTaskOnMainThread(task);
   }

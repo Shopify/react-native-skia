@@ -66,6 +66,8 @@ public:
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
   sk_sp<SkFontMgr> createFontMgr() override;
 
+  bool requiresClientICU() override { return true; }
+
   void willInvalidateModules() {
     // We need to do some house-cleaning here!
     invalidate();
