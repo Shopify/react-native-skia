@@ -11,7 +11,6 @@
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
-namespace para = skia::textlayout;
 
 class JsiSkParagraphFactory : public JsiSkHostObject {
 public:
