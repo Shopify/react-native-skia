@@ -10,6 +10,7 @@ const copyModule = (module: string) => [
   ...copyModule("svg"),
   ...copyModule("skresources"),
   ...copyModule("skparagraph"),
+  ...copyModule("skunicode"),
   `cp -a ./externals/skia/modules/skcms/. ./package/cpp/skia/modules/skcms`,
   `mkdir -p ./package/cpp/skia/src/`,
   `mkdir -p ./package/cpp/skia/src/core/`,

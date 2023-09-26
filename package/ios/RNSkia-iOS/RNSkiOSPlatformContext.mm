@@ -69,6 +69,57 @@ sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
 }
 
+std::tuple<std::vector<SkUnicode::Position>, std::vector<SkUnicode::Position>, std::vector<SkUnicode::LineBreakBefore>> RNSkiOSPlatformContext::tokenizeText(const std::string &inputText) {
+	__block std::vector<SkUnicode::Position> wordsUtf16;
+	__block std::vector<SkUnicode::Position> graphemesUtf16;
+	__block std::vector<SkUnicode::LineBreakBefore> lineBreaksUtf16;
+
+	// Convert SkSpan<char> to NSString
+	NSString *text = [NSString stringWithUTF8String:inputText.c_str()];
+	
+	// Check for conversion errors
+	if (!text) {
+		RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:"Couldn't convert text to NSString"]));
+		return {}; // Return empty vectors
+	}
+	
+	// Calculate word breaks
+	NSLinguisticTagger *wordTagger = [[NSLinguisticTagger alloc] initWithTagSchemes:@[NSLinguisticTagSchemeTokenType] options:0];
+	wordTagger.string = text;
+	[wordTagger enumerateTagsInRange:NSMakeRange(0, text.length)
+							 scheme:NSLinguisticTagSchemeTokenType
+							options:NSLinguisticTaggerOmitWhitespace
+						 usingBlock:^(NSLinguisticTag tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) {
+		if ([tag isEqualToString:NSLinguisticTagWord]) {
+			wordsUtf16.push_back(tokenRange.location + tokenRange.length);
+		}
+	}];
+	
+	// Calculate grapheme breaks
+	__block NSUInteger graphemeStart = 0;
+	[text enumerateSubstringsInRange:NSMakeRange(0, text.length)
+							 options:NSStringEnumerationByComposedCharacterSequences
+						  usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
+		graphemesUtf16.push_back(graphemeStart + substringRange.length);
+		graphemeStart = graphemeStart + substringRange.length;
+	}];
+	
+	// Calculate line breaks
+	NSLinguisticTagger *sentenceTagger = [[NSLinguisticTagger alloc] initWithTagSchemes:@[NSLinguisticTagSchemeLexicalClass] options:0];
+	sentenceTagger.string = text;
+	[sentenceTagger enumerateTagsInRange:NSMakeRange(0, text.length)
+								  scheme:NSLinguisticTagSchemeLexicalClass
+								 options:NSLinguisticTaggerOmitPunctuation
+							  usingBlock:^(NSLinguisticTag tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) {
+		if ([tag isEqualToString:NSLinguisticTagSentenceTerminator]) {
+			SkUnicode::LineBreakType breakType = SkUnicode::LineBreakType::kHardLineBreak;
+			lineBreaksUtf16.push_back(SkUnicode::LineBreakBefore(tokenRange.location + tokenRange.length, breakType));
+		}
+	}];
+	
+	return {wordsUtf16, graphemesUtf16, lineBreaksUtf16};
+}
+
 void RNSkiOSPlatformContext::runOnMainThread(std::function<void()> func) {
   dispatch_async(dispatch_get_main_queue(), ^{
     func();

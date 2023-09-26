@@ -53,6 +53,10 @@ public:
   }
 
   bool requiresClientICU() override { return false; }
+  std::tuple<std::vector<SkUnicode::Position>, std::vector<SkUnicode::Position>, std::vector<SkUnicode::LineBreakBefore>>
+  tokenizeText(const std::string &inputText) override {
+    return {{}, {}, {}};
+  }
 
   void runOnMainThread(std::function<void()> task) override {
     _jniPlatformContext->runTaskOnMainThread(task);

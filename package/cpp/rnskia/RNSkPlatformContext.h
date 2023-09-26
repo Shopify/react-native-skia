@@ -19,6 +19,7 @@
 #include "SkImage.h"
 #include "SkStream.h"
 #include "SkSurface.h"
+#include "modules/skunicode/include/SkUnicode.h"
 
 #pragma clang diagnostic pop
 
@@ -143,6 +144,10 @@ public:
    * client.
    */
   virtual bool requiresClientICU() = 0;
+
+  virtual 
+  std::tuple<std::vector<SkUnicode::Position>, std::vector<SkUnicode::Position>, std::vector<SkUnicode::LineBreakBefore>>
+  tokenizeText(const std::string &inputText) = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its
