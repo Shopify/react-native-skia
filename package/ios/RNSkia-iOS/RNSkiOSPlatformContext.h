@@ -1,9 +1,9 @@
 #pragma once
 
+#import <Foundation/Foundation.h>
 #import <React/RCTBridge+Private.h>
 #import <React/RCTBridge.h>
 #import <ReactCommon/RCTTurboModule.h>
-#import <Foundation/Foundation.h>
 
 #include <functional>
 #include <memory>
@@ -69,7 +69,8 @@ public:
 
   bool requiresClientICU() override { return true; }
 
-  std::tuple<std::vector<SkUnicode::Position>, std::vector<SkUnicode::Position>, std::vector<SkUnicode::LineBreakBefore>>
+  std::tuple<std::vector<SkUnicode::Position>, std::vector<SkUnicode::Position>,
+             std::vector<SkUnicode::LineBreakBefore>>
   tokenizeText(const std::string &inputText) override;
 
   void willInvalidateModules() {

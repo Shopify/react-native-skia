@@ -8,6 +8,8 @@
 #include <thread>
 #include <unordered_map>
 #include <utility>
+#include <tuple>
+#include <vector>
 
 #include "RNSkDispatchQueue.h"
 
@@ -145,8 +147,9 @@ public:
    */
   virtual bool requiresClientICU() = 0;
 
-  virtual 
-  std::tuple<std::vector<SkUnicode::Position>, std::vector<SkUnicode::Position>, std::vector<SkUnicode::LineBreakBefore>>
+  virtual std::tuple<std::vector<SkUnicode::Position>,
+                     std::vector<SkUnicode::Position>,
+                     std::vector<SkUnicode::LineBreakBefore>>
   tokenizeText(const std::string &inputText) = 0;
 
   /**

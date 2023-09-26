@@ -22,6 +22,7 @@
 #include "JsiSkMaskFilterFactory.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
+#include "JsiSkParagraphFactory.h"
 #include "JsiSkPath.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
@@ -45,7 +46,6 @@
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkVertices.h"
-#include "JsiSkParagraphFactory.h"
 
 namespace RNSkia {
 

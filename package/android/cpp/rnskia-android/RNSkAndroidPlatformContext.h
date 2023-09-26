@@ -4,6 +4,8 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <tuple>
+#include <vector>
 
 #include <JniPlatformContext.h>
 #include <RNSkPlatformContext.h>
@@ -53,7 +55,8 @@ public:
   }
 
   bool requiresClientICU() override { return false; }
-  std::tuple<std::vector<SkUnicode::Position>, std::vector<SkUnicode::Position>, std::vector<SkUnicode::LineBreakBefore>>
+  std::tuple<std::vector<SkUnicode::Position>, std::vector<SkUnicode::Position>,
+             std::vector<SkUnicode::LineBreakBefore>>
   tokenizeText(const std::string &inputText) override {
     return {{}, {}, {}};
   }
