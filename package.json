@@ -20,7 +20,7 @@
     "build-skia-android": "ts-node ./scripts/build-skia-android.ts",
     "build-skia": "yarn build-skia-ios && yarn build-skia-android",
     "clean-skia": "yarn rimraf ./package/libs && yarn rimraf ./externals/skia/out",
-    "copy-skia-include-headers": "yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
+    "copy-skia-include-headers": "yarn rimraf ./package/cpp/skia/src/ && yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
     "copy-skia-module-headers": "ts-node ./scripts/copy-skia-module-headers.ts",
     "copy-skia-headers": "yarn copy-skia-include-headers && yarn copy-skia-module-headers",
     "build-npm": "yarn ts-node ./scripts/build-npm-package.ts",
