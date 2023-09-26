@@ -100,7 +100,8 @@ RNSkiOSPlatformContext::tokenizeText(const std::string &inputText) {
                             wordsUtf16.push_back(tokenRange.location);
                           }
                         }];
-  wordsUtf16.push_back(inputText.length());
+  wordsUtf16.push_back(text.length);
+
   // Calculate grapheme breaks
   __block NSUInteger graphemeStart = 0;
   [text
@@ -111,7 +112,7 @@ RNSkiOSPlatformContext::tokenizeText(const std::string &inputText) {
                         graphemesUtf16.push_back(graphemeStart);
                         graphemeStart = graphemeStart + substringRange.length;
                       }];
-  graphemesUtf16.push_back(inputText.length());
+  graphemesUtf16.push_back(graphemeStart);
 
   // Calculate line breaks
   NSLinguisticTagger *sentenceTagger = [[NSLinguisticTagger alloc]
@@ -124,12 +125,23 @@ RNSkiOSPlatformContext::tokenizeText(const std::string &inputText) {
                    options:NSLinguisticTaggerOmitPunctuation
                 usingBlock:^(NSLinguisticTag tag, NSRange tokenRange,
                              NSRange sentenceRange, BOOL *stop) {
+                  // Check if the tag is a sentence terminator
                   if ([tag isEqualToString:NSLinguisticTagSentenceTerminator]) {
-                    SkUnicode::LineBreakType breakType =
-                        SkUnicode::LineBreakType::kHardLineBreak;
+
                     lineBreaksUtf16.push_back(SkUnicode::LineBreakBefore(
-                        tokenRange.location + tokenRange.length, breakType));
+                        tokenRange.location + tokenRange.length,
+                        SkUnicode::LineBreakType::kSoftLineBreak));
                   }
+                  //                  // Check for newline character in the
+                  //                  range else if ([text rangeOfString:@"\n"
+                  //                  options:0 range:tokenRange]
+                  //                               .location != NSNotFound) {
+                  //                    breakType = SkUnicode::LineBreakType::
+                  //                        kHardLineBreak; // Use hard break
+                  //                        for newlines
+                  //                  } else {
+                  //                    return;
+                  //                  }
                 }];
 
   return {wordsUtf16, graphemesUtf16, lineBreaksUtf16};
