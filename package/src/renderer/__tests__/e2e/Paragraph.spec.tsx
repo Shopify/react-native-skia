@@ -1,11 +1,22 @@
 import type { TestOS } from "../setup";
 import { surface } from "../setup";
 
-const getBoundaries = (
-  text: string,
-  granularity: "word" | "grapheme" | "sentence"
-) => {
-  const segmenter = new Intl.Segmenter("en", { granularity });
+const getWords = (text: string) => {
+  const segmenter = new Intl.Segmenter("en", { granularity: "word" });
+  const segments = segmenter.segment(text);
+
+  const boundaries: number[] = [];
+  for (const segment of segments) {
+    if (segment.isWordLike) {
+      boundaries.push(segment.index);
+    }
+  }
+  boundaries.push(text.length);
+  return boundaries;
+};
+
+const getGraphemes = (text: string) => {
+  const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
   const segments = segmenter.segment(text);
 
   const boundaries: number[] = [];
@@ -31,11 +42,12 @@ describe("Paragraph", () => {
     expect(result).toEqual(expectResults[surface.OS]);
   });
   it("Should tokenize text", async () => {
-    const text = `  On the other hand, we denounce with righteous indignation and dislike men
-    who are so beguiled and demoralized by the charms of pleasure of the moment,
-    so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue;
-    and equal blame belongs to those who fail in their duty through weakness of will,
-    which is the same as saying through shrinking from toil and pain.`;
+    const text = `  On the other hand, we denounce with righteous indignation and 
+    dislike men who are so beguiled and demoralized by the charms of 
+    pleasure of the moment, so blinded by desire, that they cannot foresee 
+    the pain and trouble that are bound to ensue; and equal blame belongs 
+    to those who fail in their duty through weakness of will, which is 
+    the same as saying through shrinking from toil and pain. `;
     const result = await surface.eval(
       (Skia, ctx) => {
         return Skia.Paragraph.TokenizeText(ctx.text);
@@ -45,9 +57,8 @@ describe("Paragraph", () => {
     if (surface.OS === "ios") {
       expect(result).toBeTruthy();
       const tokens = result!;
-      // TODO: add missing first index
-      expect([0, ...tokens.words]).toEqual(getBoundaries(text, "word"));
-      expect([0, ...tokens.graphemes]).toEqual(getBoundaries(text, "grapheme"));
+      expect(tokens.words).toEqual(getWords(text));
+      expect(tokens.graphemes).toEqual(getGraphemes(text));
       //expect(tokens.breaks).toEqual(getBoundaries(text, "sentence"));
     } else {
       expect(result).toEqual(null);

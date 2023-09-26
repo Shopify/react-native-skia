@@ -97,11 +97,10 @@ RNSkiOSPlatformContext::tokenizeText(const std::string &inputText) {
                         usingBlock:^(NSLinguisticTag tag, NSRange tokenRange,
                                      NSRange sentenceRange, BOOL *stop) {
                           if ([tag isEqualToString:NSLinguisticTagWord]) {
-                            wordsUtf16.push_back(tokenRange.location +
-                                                 tokenRange.length);
+                            wordsUtf16.push_back(tokenRange.location);
                           }
                         }];
-
+  wordsUtf16.push_back(inputText.length());
   // Calculate grapheme breaks
   __block NSUInteger graphemeStart = 0;
   [text
@@ -109,10 +108,10 @@ RNSkiOSPlatformContext::tokenizeText(const std::string &inputText) {
                          options:NSStringEnumerationByComposedCharacterSequences
                       usingBlock:^(NSString *substring, NSRange substringRange,
                                    NSRange enclosingRange, BOOL *stop) {
-                        graphemesUtf16.push_back(graphemeStart +
-                                                 substringRange.length);
+                        graphemesUtf16.push_back(graphemeStart);
                         graphemeStart = graphemeStart + substringRange.length;
                       }];
+  graphemesUtf16.push_back(inputText.length());
 
   // Calculate line breaks
   NSLinguisticTagger *sentenceTagger = [[NSLinguisticTagger alloc]
