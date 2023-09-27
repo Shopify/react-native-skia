@@ -8,7 +8,6 @@ import {
   useAnimatedImage,
 } from "@shopify/react-native-skia";
 import { useSharedValue } from "react-native-reanimated";
-import { base64Gif } from "./base64Gif";
 
 export const AnimatedImages = () => {
   const { width: wWidth } = useWindowDimensions();
@@ -39,7 +38,8 @@ export const AnimatedImages = () => {
   const example1 = useAnimatedImage(require("../../assets/birdFlying.gif"));
   const currentFrame1 = useCurrentFrame(example1);
 
-  const example2 = useAnimatedImage(base64Gif);
+  // Transparent gif with a different frame duration
+  const example2 = useAnimatedImage(require("../../assets/birdFlying2.gif"));
   const currentFrame2 = useCurrentFrame(example2);
 
   return (
