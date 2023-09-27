@@ -106,6 +106,7 @@ describe("Paragraph", () => {
       const tokens = result!;
       expect(tokens.words).toEqual(getWords(text));
       expect(tokens.graphemes).toEqual(getGraphemes(text));
+      // expect(tokens.breaks).toEqual(getLineBreaks(text));
     } else {
       expect(result).toEqual(null);
     }
@@ -133,6 +134,5 @@ describe("Paragraph", () => {
   //   واحد (اثنان) ثلاثة
 
   // You can separate Thai words as well.
-
   //'แยกคำภาษาไทยก็ทำได้นะจ้ะ'
 });
