@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import {
   Canvas,
@@ -7,7 +7,54 @@ import {
   SkImage,
   useAnimatedImage,
 } from "@shopify/react-native-skia";
-import { useSharedValue } from "react-native-reanimated";
+import { useSharedValue, useFrameCallback } from "react-native-reanimated";
+
+const AnimatedImage = ({
+  animatedImage,
+}: {
+  animatedImage: SkAnimatedImage | null;
+}) => {
+  // Many gifs are incorrectly encoded and have a frame duration of 0 so we set a default of 60ms
+  const DEFAULT_FRAME_DURATION = 60;
+
+  const currentFrame = useSharedValue<SkImage | null>(null);
+  const lastTimestamp = useSharedValue(0);
+  const frameDuration =
+    animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
+
+  useFrameCallback((frameInfo) => {
+    if (!animatedImage) {
+      currentFrame.value = null;
+      return;
+    }
+
+    const timestamp = frameInfo.timestamp;
+    const elapsed = timestamp - lastTimestamp.value;
+
+    // Check if it's time to switch frames based on GIF frame duration
+    if (elapsed < frameDuration) {
+      return;
+    }
+
+    // Update the current frame
+    animatedImage.decodeNextFrame();
+    currentFrame.value = animatedImage.getCurrentFrame();
+
+    // Update the last timestamp
+    lastTimestamp.value = timestamp;
+  }, true);
+
+  return (
+    <Image
+      image={currentFrame}
+      x={0}
+      y={0}
+      width={320}
+      height={180}
+      fit="contain"
+    />
+  );
+};
 
 export const AnimatedImages = () => {
   const { width: wWidth } = useWindowDimensions();
@@ -15,6 +62,7 @@ export const AnimatedImages = () => {
   const S2 = 60;
   const PAD = (SIZE - S2) / 2;
 
+  // TODO - move this to a test
   // Verifies that the error handler for animated images are working correctly.
   useAnimatedImage(new Uint8Array([0, 0, 0, 255]), (err) => {
     if (err.message !== "Could not load data") {
@@ -30,17 +78,12 @@ export const AnimatedImages = () => {
       );
     }
   });
-
   // Verifies that we can use this hook with a null/undefined input parameter
   useAnimatedImage(null);
   useAnimatedImage(undefined);
 
   const example1 = useAnimatedImage(require("../../assets/birdFlying.gif"));
-  const currentFrame1 = useCurrentFrame(example1);
-
-  // Transparent gif with a different frame duration
   const example2 = useAnimatedImage(require("../../assets/birdFlying2.gif"));
-  const currentFrame2 = useCurrentFrame(example2);
 
   return (
     <ScrollView>
@@ -52,14 +95,7 @@ export const AnimatedImages = () => {
           marginVertical: PAD,
         }}
       >
-        <Image
-          image={currentFrame1}
-          x={0}
-          y={0}
-          width={320}
-          height={180}
-          fit="contain"
-        />
+        <AnimatedImage animatedImage={example1} />
       </Canvas>
       <Canvas
         style={{
@@ -72,53 +108,8 @@ export const AnimatedImages = () => {
           marginVertical: PAD,
         }}
       >
-        <Image
-          image={currentFrame2}
-          x={0}
-          y={0}
-          width={320}
-          height={180}
-          fit="contain"
-        />
+        <AnimatedImage animatedImage={example2} />
       </Canvas>
     </ScrollView>
   );
 };
-
-/**
- * Custom hook that returns the current frame of an animated image
- *
- * @param animatedImage
- * @returns the current frame as a SkImage or null
- */
-const useCurrentFrame = (animatedImage: SkAnimatedImage | null) => {
-  // Many gifs are incorrectly encoded and have a frame duration of 0 so we set a minimum of 60ms
-  // This is consistent with the behavior of web browsers
-  const MIN_FRAME_DURATION = 60;
-  const currentFrame = useSharedValue<SkImage | null>(null);
-
-  useEffect(() => {
-    if (!animatedImage) {
-      currentFrame.value = null;
-      return;
-    }
-
-    currentFrame.value = animatedImage.getCurrentFrame();
-    let frameDuration = animatedImage.currentFrameDuration();
-
-    const runAnimation = async () => {
-      while (frameDuration > -1) {
-        // Wait the duration of the current frame
-        await delay(Math.max(frameDuration, MIN_FRAME_DURATION));
-        frameDuration = animatedImage.decodeNextFrame();
-        currentFrame.value = animatedImage.getCurrentFrame();
-      }
-    };
-
-    runAnimation();
-  }, [animatedImage]);
-
-  return currentFrame;
-};
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
