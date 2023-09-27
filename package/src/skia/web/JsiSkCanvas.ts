@@ -7,6 +7,8 @@ import type {
   MipmapMode,
   PointMode,
   SaveLayerFlag,
+  ImageInfo,
+  MallocObj,
   SkCanvas,
   SkColor,
   SkFont,
@@ -373,5 +375,48 @@ export class JsiSkCanvas
 
   drawPicture(skp: SkPicture) {
     this.ref.drawPicture(JsiSkPicture.fromValue(skp));
+  }
+
+  readPixels(
+    srcX: number,
+    srcY: number,
+    imageInfo: ImageInfo,
+    dest?: MallocObj,
+    bytesPerRow?: number
+  ): Float32Array | Uint8Array | null {
+    const pxInfo = {
+      width: imageInfo.width,
+      height: imageInfo.height,
+      colorSpace: this.CanvasKit.ColorSpace.SRGB,
+      colorType: ckEnum(imageInfo.alphaType),
+      alphaType: ckEnum(imageInfo.alphaType),
+    };
+    if (typeof bytesPerRow !== 'number') {
+      bytesPerRow = 4 * pxInfo.width;
+      if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F16.value) {
+        bytesPerRow *= 2;
+      } else if (pxInfo.colorType === this.CanvasKit.ColorType.RGBA_F32.value) {
+        bytesPerRow *= 4;
+      }
+    }
+    let destObj = dest;
+    if (!destObj) {
+      if (pxInfo.colorType === this.CanvasKit.ColorType.RGBA_F32.value) {
+        destObj = this.CanvasKit.Malloc(Float32Array, pxInfo.width * pxInfo.height);
+      } else {
+        destObj = this.CanvasKit.Malloc(Uint8Array, bytesPerRow * pxInfo.height);
+      }
+    }
+    const out = this.ref.readPixels(
+      srcX,
+      srcY,
+      pxInfo,
+      destObj,
+      bytesPerRow
+    );
+    if (!dest) {
+      this.CanvasKit.Free(destObj);
+    }
+    return out;
   }
 }
