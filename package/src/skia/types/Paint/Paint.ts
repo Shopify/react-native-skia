@@ -85,6 +85,12 @@ export interface SkPaint extends SkJSIInstance<"Paint"> {
   setAntiAlias: (aa: boolean) => void;
 
   /**
+   * Requests, but does not require, to distribute color error.
+   * @param dither
+   */
+  setDither: (dither: boolean) => void;
+
+  /**
    * Sets the blend mode that is, the mode used to combine source color
    * with destination color.
    * @param mode
