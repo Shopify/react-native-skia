@@ -29,8 +29,11 @@ const getLineBreaks = (text: string, locales = "en") => {
   const segmenter = new Intl.Segmenter(locales, { granularity: "word" });
   const segments = segmenter.segment(text);
 
-  const boundaries: number[] = [];
+  const boundaries: number[] = [0, 0];
   for (const segment of segments) {
+    if (segment.index === 0) {
+      continue;
+    }
     if (segment.isWordLike) {
       boundaries.push(segment.index, 0);
     } else if (segment.segment === "\n") {
@@ -64,6 +67,13 @@ describe("Paragraph", () => {
           54, 0,
         ],
       },
+      { text: " Hello", result: [0, 0, 1, 0, 6, 0] },
+
+      {
+        text: ` 
+      Hello`,
+        result: [0, 0, 2, 1, 8, 0, 13, 0],
+      },
       { text: "Hello", result: [0, 0, 5, 0] },
       { text: "Hello.", result: [0, 0, 6, 0] },
       { text: "Hello World.", result: [0, 0, 6, 0, 12, 0] },
@@ -83,6 +93,22 @@ describe("Paragraph", () => {
     for (const example of examples) {
       const tokens = getLineBreaks(example.text);
       expect(tokens).toEqual(example.result);
+    }
+  });
+  it("Simple test", async () => {
+    const text = "Hello";
+    const result = await surface.eval(
+      (Skia, ctx) => {
+        return Skia.Paragraph.TokenizeText(ctx.text);
+      },
+      { text }
+    );
+    if (surface.OS === "ios") {
+      expect(result).toBeTruthy();
+      const tokens = result!;
+      expect(tokens.breaks.flat()).toEqual(getLineBreaks(text));
+    } else {
+      expect(result).toEqual(null);
     }
   });
   it("Should tokenize english text", async () => {
@@ -106,7 +132,7 @@ describe("Paragraph", () => {
       const tokens = result!;
       expect(tokens.words).toEqual(getWords(text));
       expect(tokens.graphemes).toEqual(getGraphemes(text));
-      // expect(tokens.breaks).toEqual(getLineBreaks(text));
+      //expect(tokens.breaks).toEqual(getLineBreaks(text));
     } else {
       expect(result).toEqual(null);
     }

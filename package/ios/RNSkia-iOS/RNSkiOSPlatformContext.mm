@@ -84,33 +84,48 @@ RNSkiOSPlatformContext::tokenizeText(const std::string &inputText) {
     return {};
   }
 
-  // Calculate word breaks and line breaks
-  NSLinguisticTagger *wordTagger = [[NSLinguisticTagger alloc]
-      initWithTagSchemes:@[ NSLinguisticTagSchemeTokenType ]
-                 options:0];
-  wordTagger.string = text;
+	// Initialize the lineBreaksUtf16 vector with a soft line break at the beginning of the text
+	lineBreaksUtf16.push_back(SkUnicode::LineBreakBefore(0, SkUnicode::LineBreakType::kSoftLineBreak));
 
-  [wordTagger
-      enumerateTagsInRange:NSMakeRange(0, text.length)
-                    scheme:NSLinguisticTagSchemeTokenType
-                   options:NSLinguisticTaggerOmitWhitespace
-                usingBlock:^(NSLinguisticTag tag, NSRange tokenRange,
-                             NSRange sentenceRange, BOOL *stop) {
-                  if ([tag isEqualToString:NSLinguisticTagWord]) {
-                    wordsUtf16.push_back(tokenRange.location);
-                  } else {
-                    // Check for newline character within the tokenRange
-                    NSRange newlineRange = [text rangeOfString:@"\n"
-                                                       options:0
-                                                         range:tokenRange];
-                    if (newlineRange.location != NSNotFound) {
-                      lineBreaksUtf16.push_back(SkUnicode::LineBreakBefore(
-                          newlineRange.location + newlineRange.length,
-                          SkUnicode::LineBreakType::kSoftLineBreak));
-                    }
-                  }
-                }];
-  wordsUtf16.push_back(text.length);
+	// Calculate word breaks and line breaks
+	NSLinguisticTagger *wordTagger = [[NSLinguisticTagger alloc]
+		initWithTagSchemes:@[NSLinguisticTagSchemeTokenType]
+				   options:0];
+	wordTagger.string = text;
+
+	[wordTagger
+		enumerateTagsInRange:NSMakeRange(0, text.length)
+					  scheme:NSLinguisticTagSchemeTokenType
+					 options:NSLinguisticTaggerOmitWhitespace
+				  usingBlock:^(NSLinguisticTag tag, NSRange tokenRange,
+							   NSRange sentenceRange, BOOL *stop) {
+					// Skip the first segment
+					if (tokenRange.location == 0) {
+						return;
+					}
+					if ([tag isEqualToString:NSLinguisticTagWord]) {
+					  wordsUtf16.push_back(tokenRange.location);
+					  // Add a soft line break at the end of a word
+					  lineBreaksUtf16.push_back(SkUnicode::LineBreakBefore(
+						  tokenRange.location,
+						  SkUnicode::LineBreakType::kSoftLineBreak));
+					} else {
+					  // Check for newline character within the tokenRange
+					  NSRange newlineRange = [text rangeOfString:@"\n"
+														 options:0
+														   range:tokenRange];
+					  if (newlineRange.location != NSNotFound) {
+						// Add a hard line break for newline character
+						lineBreaksUtf16.push_back(SkUnicode::LineBreakBefore(
+							newlineRange.location + newlineRange.length,
+							SkUnicode::LineBreakType::kHardLineBreak));
+					  }
+					}
+				  }];
+	wordsUtf16.push_back(text.length);
+	// Add a soft line break at the end of the text
+	lineBreaksUtf16.push_back(SkUnicode::LineBreakBefore(text.length, SkUnicode::LineBreakType::kSoftLineBreak));
+
 
   // Calculate grapheme breaks
   __block NSUInteger graphemeStart = 0;
