@@ -2,6 +2,8 @@ import type { CanvasKit, Image } from "canvaskit-wasm";
 
 import type {
   ImageFormat,
+  ImageInfo,
+  MallocObj,
   FilterMode,
   MipmapMode,
   SkImage,
@@ -50,6 +52,16 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
 
   width() {
     return this.ref.width();
+  }
+
+  getImageInfo(): ImageInfo {
+    const info = this.ref.getImageInfo();
+    return {
+      width: info.width,
+      height: info.height,
+      colorType: info.colorType.value,
+      alphaType: info.alphaType.value,
+    };
   }
 
   makeShaderOptions(
@@ -110,15 +122,48 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return toBase64String(bytes);
   }
 
-  readPixels() {
-    const imageInfo = {
-      width: this.width(),
-      height: this.height(),
-      colorSpace: null,
-      colorType: this.CanvasKit.ColorType.RGBA_8888,
-      alphaType: this.CanvasKit.AlphaType.Unpremul,
+  readPixels(
+    srcX?: number,
+    srcY?: number,
+    imageInfo?: ImageInfo,
+    dest?: MallocObj,
+    bytesPerRow?: number
+  ): Float32Array | Uint8Array | null {
+    const info = this.getImageInfo();
+    const pxInfo = {
+      colorSpace: this.CanvasKit.ColorSpace.SRGB,
+      width: imageInfo?.width ?? info.width,
+      height: imageInfo?.height ?? info.height,
+      colorType: ckEnum(imageInfo?.colorType ?? this.CanvasKit.ColorType.RGBA_8888.value),
+      alphaType: ckEnum(imageInfo?.alphaType ?? info.alphaType),
     };
-    return this.ref.readPixels(0, 0, imageInfo);
+    if (typeof bytesPerRow !== 'number') {
+      bytesPerRow = 4 * pxInfo.width;
+      if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F16.value) {
+        bytesPerRow *= 2;
+      } else if (pxInfo.colorType === this.CanvasKit.ColorType.RGBA_F32.value) {
+        bytesPerRow *= 4;
+      }
+    }
+    let destObj = dest;
+    if (!destObj) {
+      if (pxInfo.colorType === this.CanvasKit.ColorType.RGBA_F32.value) {
+        destObj = this.CanvasKit.Malloc(Float32Array, pxInfo.width * pxInfo.height);
+      } else {
+        destObj = this.CanvasKit.Malloc(Uint8Array, bytesPerRow * pxInfo.height);
+      }
+    }
+    const out = this.ref.readPixels(
+      srcX ?? 0,
+      srcY ?? 0,
+      pxInfo,
+      destObj,
+      bytesPerRow
+    );
+    if (!dest) {
+      this.CanvasKit.Free(destObj);
+    }
+    return out;
   }
 
   dispose = () => {

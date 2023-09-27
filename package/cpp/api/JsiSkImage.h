@@ -5,8 +5,11 @@
 #include <utility>
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
+
+#include "RNSkTypedArray.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -32,6 +35,11 @@ public:
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
   JSI_HOST_FUNCTION(height) {
     return static_cast<double>(getObject()->height());
+  }
+
+  JSI_HOST_FUNCTION(getImageInfo) {
+    return JsiSkImageInfo::toValue(runtime, getContext(),
+                                   getObject()->imageInfo());
   }
 
   JSI_HOST_FUNCTION(makeShaderOptions) {
@@ -126,31 +134,43 @@ public:
   }
 
   JSI_HOST_FUNCTION(readPixels) {
-    auto image = getObject();
-    if (image->isTextureBacked()) {
-      image = image->makeNonTextureImage();
+    int srcX = 0;
+    int srcY = 0;
+    if (count > 0 && !arguments[0].isUndefined()) {
+      srcX = static_cast<int>(arguments[0].asNumber());
     }
-    auto info = SkImageInfo::MakeN32Premul(image->width(), image->height());
-    size_t size = info.computeMinByteSize();
-    void* pixels = sk_malloc_throw(size);
-    if (!image->readPixels(info, pixels, info.minRowBytes(), 0, 0)) {
-      return jsi::Value::undefined();
+    if (count > 1 && !arguments[1].isUndefined()) {
+      srcY = static_cast<int>(arguments[1].asNumber());
     }
-
-    auto arrayCtor =
-        runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
-    jsi::Object array =
-        arrayCtor.callAsConstructor(runtime, static_cast<double>(size))
-            .getObject(runtime);
+    SkImageInfo info =
+        (count > 2 && !arguments[2].isUndefined())
+            ? *JsiSkImageInfo::fromValue(runtime, arguments[2])
+            : SkImageInfo::MakeN32(getObject()->width(), getObject()->height(),
+                                   getObject()->imageInfo().alphaType());
+    size_t bytesPerRow = 0;
+    if (count > 4 && !arguments[4].isUndefined()) {
+      bytesPerRow = static_cast<size_t>(arguments[4].asNumber());
+    } else {
+      bytesPerRow = info.minRowBytes();
+    }
+    auto dest =
+        count > 3
+            ? RNSkTypedArray::getTypedArray(runtime, arguments[3], info)
+            : RNSkTypedArray::getTypedArray(runtime, jsi::Value::null(), info);
+    if (!dest.isObject()) {
+      return jsi::Value::null();
+    }
     jsi::ArrayBuffer buffer =
-        array.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+        dest.asObject(runtime)
+            .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
             .asObject(runtime)
             .getArrayBuffer(runtime);
+    auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
 
-    auto bfrPtr = reinterpret_cast<uint8_t *>(buffer.data(runtime));
-    memcpy(bfrPtr, pixels, size);
-    sk_free(pixels);
-    return array;
+    if (!getObject()->readPixels(info, bfrPtr, bytesPerRow, srcX, srcY)) {
+      return jsi::Value::null();
+    }
+    return std::move(dest);
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
@@ -163,6 +183,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
                        JSI_EXPORT_FUNC(JsiSkImage, height),
+                       JSI_EXPORT_FUNC(JsiSkImage, getImageInfo),
                        JSI_EXPORT_FUNC(JsiSkImage, makeShaderOptions),
                        JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBytes),

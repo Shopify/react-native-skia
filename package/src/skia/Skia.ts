@@ -9,3 +9,11 @@ declare global {
 }
 
 export const Skia = SkiaApi;
+
+export const Malloc = (
+  TypedArrayCls: typeof Uint8Array | typeof Float32Array,
+  length: number
+): Uint8Array | Float32Array => new TypedArrayCls(length);
+
+// @ts-ignore: Unused variable error
+export const Free = (typedArray: Uint8Array | Float32Array): void => {};
