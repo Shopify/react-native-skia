@@ -1,7 +1,7 @@
-import type { SkJSIInstance } from '../JsiInstance';
-import { SkImage } from '../Image';
+import type { SkJSIInstance } from "../JsiInstance";
+import type { SkImage } from "../Image";
 
-export interface SkAnimatedImage extends SkJSIInstance<'AnimatedImage'> {
+export interface SkAnimatedImage extends SkJSIInstance<"AnimatedImage"> {
   /**
    *  Decode the next frame.
    *

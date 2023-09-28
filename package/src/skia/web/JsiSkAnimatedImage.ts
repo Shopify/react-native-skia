@@ -1,7 +1,8 @@
 import type { AnimatedImage, CanvasKit } from "canvaskit-wasm";
 
+import type { SkAnimatedImage } from "../types/AnimatedImage";
+
 import { HostObject } from "./Host";
-import { SkAnimatedImage } from "../types/AnimatedImage";
 import { JsiSkImage } from "./JsiSkImage";
 
 export class JsiSkAnimatedImage
