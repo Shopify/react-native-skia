@@ -67,8 +67,8 @@ public:
   sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {
     // Get optional parameters
     auto format =
-                count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
-                : SkEncodedImageFormat::kPNG;
+        count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
+                   : SkEncodedImageFormat::kPNG;
 
     auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
     auto image = getObject();
@@ -86,7 +86,6 @@ public:
     }
     return data;
   }
-
 
   JSI_HOST_FUNCTION(encodeToBytes) {
     auto data = encodeImageData(arguments, count);
