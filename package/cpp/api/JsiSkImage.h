@@ -84,7 +84,6 @@ public:
       SkPngEncoder::Options options;
       data = SkPngEncoder::Encode(nullptr, image.get(), options);
     }
-
     return data;
   }
 
@@ -94,13 +93,11 @@ public:
 
     auto arrayCtor =
         runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
-
     size_t size = data->size();
 
     jsi::Object array =
         arrayCtor.callAsConstructor(runtime, static_cast<double>(size))
             .getObject(runtime);
-
     jsi::ArrayBuffer buffer =
         array.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
             .asObject(runtime)
@@ -108,7 +105,6 @@ public:
 
     auto bfrPtr = reinterpret_cast<uint8_t *>(buffer.data(runtime));
     memcpy(bfrPtr, data->bytes(), size);
-
     return array;
   }
 
