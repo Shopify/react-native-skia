@@ -507,10 +507,8 @@ public:
     } else {
       bytesPerRow = info->minRowBytes();
     }
-    auto dest =
-        count > 3
-            ? RNSkTypedArray::getTypedArray(runtime, arguments[3], *info)
-            : RNSkTypedArray::getTypedArray(runtime, jsi::Value::null(), *info);
+    auto dest = RNSkTypedArray::getTypedArray(
+        runtime, count > 3 ? arguments[3] : jsi::Value::null(), *info);
     if (!dest.isObject()) {
       return jsi::Value::null();
     }
