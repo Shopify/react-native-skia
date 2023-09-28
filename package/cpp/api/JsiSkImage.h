@@ -17,7 +17,6 @@
 #include "include/codec/SkEncodedImageFormat.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
-#include <android/log.h>
 
 #pragma clang diagnostic pop
 
