@@ -6,9 +6,9 @@
 #include <jsi/jsi.h>
 
 #include "JsiPromises.h"
+#include "JsiSkAnimatedImage.h"
 #include "JsiSkData.h"
 #include "JsiSkHostObjects.h"
-#include "JsiSkAnimatedImage.h"
 
 namespace RNSkia {
 
@@ -24,12 +24,15 @@ public:
       return jsi::Value::null();
     }
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkAnimatedImage>(getContext(), std::move(image)));
+        runtime,
+        std::make_shared<JsiSkAnimatedImage>(getContext(), std::move(image)));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkAnimatedImageFactory, MakeAnimatedImageFromEncoded) )
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkAnimatedImageFactory,
+                                       MakeAnimatedImageFromEncoded))
 
-  explicit JsiSkAnimatedImageFactory(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkAnimatedImageFactory(
+      std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 
