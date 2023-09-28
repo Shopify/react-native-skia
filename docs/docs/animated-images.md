@@ -50,10 +50,10 @@ export const AnimatedImages = () => {
 
 ## Manual API
 
-To load an image as a `SkAnimatedImage`` object, we offer a `useAnimatedImage` hook:
+To load an image as a `SkAnimatedImage` object, we offer a `useAnimatedImage` hook:
 
 ```tsx twoslash
-import {useAnimatedImageValue} from "@shopify/react-native-skia";
+import {useAnimatedImage} from "@shopify/react-native-skia";
 
 // bird is an SkAnimatedImage
 const bird = useAnimatedImage(
