@@ -75,7 +75,14 @@ describe("Animated Images", () => {
     const { width, height } = surface;
     const img = await surface.draw(
       <>
-        <Image image={frame} x={0} y={0} width={width} height={height} />
+        <Image
+          image={frame}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+        />
       </>
     );
     checkImage(img, "snapshots/animated-images/bird.png");
