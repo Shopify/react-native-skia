@@ -1,47 +1,10 @@
 import React from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
-import type { DataSourceParam, SkImage } from "@shopify/react-native-skia";
-import { Canvas, Image, useAnimatedImage } from "@shopify/react-native-skia";
-import { useSharedValue, useFrameCallback } from "react-native-reanimated";
-
-const DEFAULT_FRAME_DURATION = 60;
-
-const useAnimatedImageValue = (source: DataSourceParam) => {
-  const currentFrame = useSharedValue<SkImage | null>(null);
-  const lastTimestamp = useSharedValue(0);
-  const animatedImage = useAnimatedImage(source, (err) => {
-    console.error(err);
-    throw new Error(`Could not load animated image - got '${err.message}'`);
-  });
-  const frameDuration =
-    animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
-
-  useFrameCallback((frameInfo) => {
-    if (!animatedImage) {
-      currentFrame.value = null;
-      return;
-    }
-
-    const { timestamp } = frameInfo;
-    const elapsed = timestamp - lastTimestamp.value;
-
-    // Check if it's time to switch frames based on GIF frame duration
-    if (elapsed < frameDuration) {
-      return;
-    }
-
-    // Update the current frame
-    animatedImage.decodeNextFrame();
-    if (currentFrame.value) {
-      currentFrame.value.dispose();
-    }
-    currentFrame.value = animatedImage.getCurrentFrame();
-
-    // Update the last timestamp
-    lastTimestamp.value = timestamp;
-  }, true);
-  return currentFrame;
-};
+import {
+  Canvas,
+  Image,
+  useAnimatedImageValue,
+} from "@shopify/react-native-skia";
 
 export const AnimatedImages = () => {
   const { width: wWidth } = useWindowDimensions();
