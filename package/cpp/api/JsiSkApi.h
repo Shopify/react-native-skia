@@ -18,6 +18,8 @@
 #include "JsiSkImageFactory.h"
 #include "JsiSkImageFilter.h"
 #include "JsiSkImageFilterFactory.h"
+#include "JsiSkAnimatedImage.h"
+#include "JsiSkAnimatedImageFactory.h"
 #include "JsiSkMaskFilter.h"
 #include "JsiSkMaskFilterFactory.h"
 #include "JsiSkMatrix.h"
@@ -79,6 +81,8 @@ public:
     installReadonlyProperty("SVG", std::make_shared<JsiSkSVGFactory>(context));
     installReadonlyProperty("Image",
                             std::make_shared<JsiSkImageFactory>(context));
+    installReadonlyProperty("AnimatedImage",
+                            std::make_shared<JsiSkAnimatedImageFactory>(context));
     installReadonlyProperty("Typeface",
                             std::make_shared<JsiSkTypefaceFactory>(context));
     installReadonlyProperty("Data",
