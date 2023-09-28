@@ -70,6 +70,10 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
     this.ref.setAntiAlias(aa);
   }
 
+  setDither(dither: boolean) {
+    this.ref.setDither(dither);
+  }
+
   setBlendMode(blendMode: BlendMode) {
     this.ref.setBlendMode(ckEnum(blendMode));
   }
