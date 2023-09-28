@@ -58,7 +58,7 @@ import {useAnimatedImage} from "@shopify/react-native-skia";
 // bird is an SkAnimatedImage
 const bird = useAnimatedImage(
   require("../../assets/birdFlying.gif")
-);
+)!;
 // SkAnimatedImage offers 3 methods: decodeNextFrame(), getCurrentFrame(), and currentFrameDuration()
 // getCurrentFrame() returns a regular SkImage
 const image = bird.getCurrentFrame();
