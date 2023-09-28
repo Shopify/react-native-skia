@@ -1,24 +1,18 @@
 import React from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
-import {
-  Canvas,
-  Image,
-  SkAnimatedImage,
-  SkImage,
-  useAnimatedImage,
-} from "@shopify/react-native-skia";
+import type { DataSourceParam, SkImage } from "@shopify/react-native-skia";
+import { Canvas, Image, useAnimatedImage } from "@shopify/react-native-skia";
 import { useSharedValue, useFrameCallback } from "react-native-reanimated";
 
-const AnimatedImage = ({
-  animatedImage,
-}: {
-  animatedImage: SkAnimatedImage | null;
-}) => {
-  // Many gifs are incorrectly encoded and have a frame duration of 0 so we set a default of 60ms
-  const DEFAULT_FRAME_DURATION = 60;
+const DEFAULT_FRAME_DURATION = 60;
 
+const useAnimatedImageValue = (source: DataSourceParam) => {
   const currentFrame = useSharedValue<SkImage | null>(null);
   const lastTimestamp = useSharedValue(0);
+  const animatedImage = useAnimatedImage(source, (err) => {
+    console.error(err);
+    throw new Error(`Could not load animated image - got '${err.message}'`);
+  });
   const frameDuration =
     animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
 
@@ -28,7 +22,7 @@ const AnimatedImage = ({
       return;
     }
 
-    const timestamp = frameInfo.timestamp;
+    const { timestamp } = frameInfo;
     const elapsed = timestamp - lastTimestamp.value;
 
     // Check if it's time to switch frames based on GIF frame duration
@@ -38,22 +32,15 @@ const AnimatedImage = ({
 
     // Update the current frame
     animatedImage.decodeNextFrame();
+    if (currentFrame.value) {
+      currentFrame.value.dispose();
+    }
     currentFrame.value = animatedImage.getCurrentFrame();
 
     // Update the last timestamp
     lastTimestamp.value = timestamp;
   }, true);
-
-  return (
-    <Image
-      image={currentFrame}
-      x={0}
-      y={0}
-      width={320}
-      height={180}
-      fit="contain"
-    />
-  );
+  return currentFrame;
 };
 
 export const AnimatedImages = () => {
@@ -62,28 +49,12 @@ export const AnimatedImages = () => {
   const S2 = 60;
   const PAD = (SIZE - S2) / 2;
 
-  // TODO - move this to a test
-  // Verifies that the error handler for animated images are working correctly.
-  useAnimatedImage(new Uint8Array([0, 0, 0, 255]), (err) => {
-    if (err.message !== "Could not load data") {
-      throw new Error(
-        `Expected error message to be 'Could not load data' - got '${err.message}'`
-      );
-    }
-  });
-  useAnimatedImage("https://reactjs.org/invalid.jpg", (err) => {
-    if (err.message !== "Could not load data") {
-      throw new Error(
-        `Expected error message to be 'Could not load data' - got '${err.message}'`
-      );
-    }
-  });
-  // Verifies that we can use this hook with a null/undefined input parameter
-  useAnimatedImage(null);
-  useAnimatedImage(undefined);
-
-  const example1 = useAnimatedImage(require("../../assets/birdFlying.gif"));
-  const example2 = useAnimatedImage(require("../../assets/birdFlying2.gif"));
+  const example1 = useAnimatedImageValue(
+    require("../../assets/birdFlying.gif")
+  );
+  const example2 = useAnimatedImageValue(
+    require("../../assets/birdFlying2.gif")
+  );
 
   return (
     <ScrollView>
@@ -95,7 +66,14 @@ export const AnimatedImages = () => {
           marginVertical: PAD,
         }}
       >
-        <AnimatedImage animatedImage={example1} />
+        <Image
+          image={example1}
+          x={0}
+          y={0}
+          width={320}
+          height={180}
+          fit="contain"
+        />
       </Canvas>
       <Canvas
         style={{
@@ -108,7 +86,14 @@ export const AnimatedImages = () => {
           marginVertical: PAD,
         }}
       >
-        <AnimatedImage animatedImage={example2} />
+        <Image
+          image={example2}
+          x={0}
+          y={0}
+          width={320}
+          height={180}
+          fit="contain"
+        />
       </Canvas>
     </ScrollView>
   );
