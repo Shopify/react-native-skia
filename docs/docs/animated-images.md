@@ -56,7 +56,7 @@ To load an image as a `SkAnimatedImage`` object, we offer a `useAnimatedImage` h
 import {useAnimatedImageValue} from "@shopify/react-native-skia";
 
 // bird is an SkAnimatedImage
-const bird = useAnimatedImageValue(
+const bird = useAnimatedImage(
   require("../../assets/birdFlying.gif")
 );
 // SkAnimatedImage offers 3 methods: decodeNextFrame(), getCurrentFrame(), and currentFrameDuration()
