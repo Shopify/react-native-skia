@@ -44,6 +44,37 @@ const getLineBreaks = (text: string, locales = "en") => {
   return boundaries;
 };
 
+const examples = [
+  {
+    text: "Jack    and Jill, went over hill, and got lost. Alert!",
+    result: [
+      0, 0, 8, 0, 12, 0, 18, 0, 23, 0, 28, 0, 34, 0, 38, 0, 42, 0, 48, 0, 54, 0,
+    ],
+  },
+  { text: " Hello", result: [0, 0, 1, 0, 6, 0] },
+
+  {
+    text: ` 
+  Hello`,
+    result: [0, 0, 2, 1, 8, 0, 13, 0],
+  },
+  { text: "Hello", result: [0, 0, 5, 0] },
+  { text: "Hello.", result: [0, 0, 6, 0] },
+  { text: "Hello World.", result: [0, 0, 6, 0, 12, 0] },
+  { text: "Hello World. ", result: [0, 0, 6, 0, 13, 0] },
+
+  {
+    text: "Hello World. I'm Skia.",
+    result: [0, 0, 6, 0, 13, 0, 17, 0, 22, 0],
+  },
+  {
+    text: `Hello
+    World.
+    I am Skia.`,
+    result: [0, 0, 6, 1, 14, 0, 21, 1, 29, 0, 31, 0, 34, 0, 39, 0],
+  },
+];
+
 describe("Paragraph", () => {
   it("Should return whether the paragraph builder requires ICU data to be provided by the client", async () => {
     const result = await surface.eval((Skia) => {
@@ -59,56 +90,28 @@ describe("Paragraph", () => {
     expect(result).toEqual(expectResults[surface.OS]);
   });
   it("should first check if our JS reference results are correct", async () => {
-    const examples = [
-      {
-        text: "Jack    and Jill, went over hill, and got lost. Alert!",
-        result: [
-          0, 0, 8, 0, 12, 0, 18, 0, 23, 0, 28, 0, 34, 0, 38, 0, 42, 0, 48, 0,
-          54, 0,
-        ],
-      },
-      { text: " Hello", result: [0, 0, 1, 0, 6, 0] },
-
-      {
-        text: ` 
-      Hello`,
-        result: [0, 0, 2, 1, 8, 0, 13, 0],
-      },
-      { text: "Hello", result: [0, 0, 5, 0] },
-      { text: "Hello.", result: [0, 0, 6, 0] },
-      { text: "Hello World.", result: [0, 0, 6, 0, 12, 0] },
-      { text: "Hello World. ", result: [0, 0, 6, 0, 13, 0] },
-
-      {
-        text: "Hello World. I'm Skia.",
-        result: [0, 0, 6, 0, 13, 0, 17, 0, 22, 0],
-      },
-      {
-        text: `Hello
-        World.
-        I am Skia.`,
-        result: [0, 0, 6, 1, 14, 0, 21, 1, 29, 0, 31, 0, 34, 0, 39, 0],
-      },
-    ];
     for (const example of examples) {
       const tokens = getLineBreaks(example.text);
       expect(tokens).toEqual(example.result);
     }
   });
-  it("Simple test", async () => {
-    const text = "Hello";
-    const result = await surface.eval(
+  it("Test line breaks", async () => {
+    const results = await surface.eval(
       (Skia, ctx) => {
-        return Skia.Paragraph.TokenizeText(ctx.text);
+        return ctx.examples
+          .map(({ text }) => Skia.Paragraph.TokenizeText(text))
+          .filter((c) => c !== null);
       },
-      { text }
+      { examples }
     );
     if (surface.OS === "ios") {
-      expect(result).toBeTruthy();
-      const tokens = result!;
-      expect(tokens.breaks.flat()).toEqual(getLineBreaks(text));
+      examples.forEach((example, i) => {
+        expect(results[i]).toBeTruthy();
+        const tokens = results[i]!;
+        expect(tokens.breaks.flat()).toEqual(example.result);
+      });
     } else {
-      expect(result).toEqual(null);
+      expect(results).toEqual([]);
     }
   });
   it("Should tokenize english text", async () => {
