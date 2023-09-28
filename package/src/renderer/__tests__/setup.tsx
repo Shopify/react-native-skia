@@ -132,6 +132,10 @@ jest.mock("react-native", () => ({
   requireNativeComponent: jest.fn,
 }));
 
+export const BirdGIF = resolveFile("skia/__tests__/assets/bird.gif").toString(
+  "base64"
+);
+
 export const loadImage = (uri: string) => {
   const Skia = global.SkiaApi;
   const image = Skia.Image.MakeImageFromEncoded(
@@ -239,9 +243,16 @@ const serializeSkOjects = (obj: any): any => {
         cmds: obj.toCmds(),
       };
     } else if (obj.__typename__ === "Image") {
+      const asset = assets.get(obj)!;
+      if (!asset) {
+        return {
+          __typename__: "RawImage",
+          data: obj.encodeToBase64(),
+        };
+      }
       return {
         __typename__: "Image",
-        name: assets.get(obj)!,
+        name: asset,
       };
     } else if (obj.__typename__ === "Font") {
       return {

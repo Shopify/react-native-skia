@@ -6,6 +6,7 @@ export * from "./Vertices";
 export * from "./RuntimeEffect";
 export * from "./Shader";
 export * from "./Image";
+export * from "./AnimatedImage";
 export * from "./ColorFilter";
 export * from "./ImageFilter";
 export * from "./Font";
