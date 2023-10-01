@@ -214,13 +214,35 @@ describe("Paths", () => {
     });
     return expect(typename).toBe("Path");
   });
-  it("should be possible to call dispose on a path", async () => {
-    await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      path.moveTo(20, 20).lineTo(20, 40).lineTo(40, 20);
-      path.dispose();
-      return path;
+  it("generate svg properly", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make().lineTo(0, 0);
+      const cmds = path.toSVGString();
+      return cmds;
     });
+    expect(result).toEqual("M0 0L0 0");
+  });
+  it("generate commands properly", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.lineTo(30, 30);
+      const cmds = path.toCmds();
+      return cmds;
+    });
+    expect(result).toEqual([
+      [0, 0, 0],
+      [1, 30, 30],
+    ]);
+  });
+  it("closePath shouldn't crash", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.moveTo(0, 0).lineTo(1, 0).lineTo(1, 1);
+      path.close();
+      const cmds = path.toCmds();
+      return cmds;
+    });
+    expect(result).toEqual([[0, 0, 0], [1, 1, 0], [1, 1, 1], [5]]);
   });
   it("Path with default fillType", async () => {
     const { Skia } = importSkia();
