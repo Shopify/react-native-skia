@@ -1,11 +1,10 @@
 import React, { useRef } from "react";
 import type { SkFont } from "@shopify/react-native-skia";
 import { interpolateColors, vec, Glyphs } from "@shopify/react-native-skia";
-import { Platform } from "react-native";
 import { useDerivedValue, type SharedValue } from "react-native-reanimated";
 
-export const COLS = Platform.OS === "web" ? 15 : 15;
-export const ROWS = Platform.OS === "web" ? 30 : 30;
+export const COLS = 15;
+export const ROWS = 30;
 const pos = vec(0, 0);
 
 interface SymbolProps {
