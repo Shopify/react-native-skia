@@ -27,7 +27,7 @@ try {
 export const HAS_REANIMATED2 = !!Reanimated2;
 export const HAS_REANIMATED3 = !!Reanimated3;
 
-function throwOnMissingReanimated2() {
+export function throwOnMissingReanimated() {
   if (!HAS_REANIMATED2) {
     throw new Error(
       "Reanimated was not found, make sure react-native-reanimated package is installed if you want to use \
@@ -39,11 +39,12 @@ function throwOnMissingReanimated2() {
 export const useSharedValue =
   Reanimated2?.useSharedValue ||
   ((value: number) => useMemo(() => ({ value }), [value]));
+export const useFrameCallback: (...args: any[]) => any =
+  Reanimated2?.useFrameCallback || throwOnMissingReanimated;
 
-export const startMapper =
-  Reanimated2?.startMapper || throwOnMissingReanimated2;
-export const stopMapper = Reanimated2?.stopMapper || throwOnMissingReanimated2;
-export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated2;
+export const startMapper = Reanimated2?.startMapper || throwOnMissingReanimated;
+export const stopMapper = Reanimated2?.stopMapper || throwOnMissingReanimated;
+export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated;
 export const isSharedValue = <T>(
   value: unknown
 ): value is SharedValueType<T> => {

@@ -6,10 +6,11 @@ import type {
   SkFont,
   SkPaint,
   SkPoint,
+  SkRect,
   SkTypeface,
 } from "../types";
 
-import { HostObject, ckEnum } from "./Host";
+import { HostObject, NotImplementedOnRNWeb, ckEnum } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
@@ -18,6 +19,10 @@ import { JsiSkTypeface } from "./JsiSkTypeface";
 export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
   constructor(CanvasKit: CanvasKit, ref: Font) {
     super(CanvasKit, ref, "Font");
+  }
+
+  measureText(_text: string, _paint?: SkPaint | undefined): SkRect {
+    throw new NotImplementedOnRNWeb();
   }
 
   dispose = () => {
