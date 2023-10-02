@@ -1,21 +1,17 @@
 import React, { useRef } from "react";
-import type { SkiaValue, SkFont } from "@shopify/react-native-skia";
-import {
-  useComputedValue,
-  interpolateColors,
-  vec,
-  Glyphs,
-} from "@shopify/react-native-skia";
+import type { SkFont } from "@shopify/react-native-skia";
+import { interpolateColors, vec, Glyphs } from "@shopify/react-native-skia";
 import { Platform } from "react-native";
+import { useDerivedValue, type SharedValue } from "react-native-reanimated";
 
-export const COLS = Platform.OS === "web" ? 15 : 5;
-export const ROWS = Platform.OS === "web" ? 30 : 10;
+export const COLS = Platform.OS === "web" ? 15 : 15;
+export const ROWS = Platform.OS === "web" ? 30 : 30;
 const pos = vec(0, 0);
 
 interface SymbolProps {
   i: number;
   j: number;
-  timestamp: SkiaValue<number>;
+  timestamp: SharedValue<number>;
   stream: number[];
   font: SkFont;
   symbols: number[];
@@ -36,20 +32,20 @@ export const Symbol = ({
   const x = i * symbol.width;
   const y = j * symbol.height;
 
-  const glyphs = useComputedValue(() => {
-    const idx = offset.current + Math.floor(timestamp.current / range.current);
+  const glyphs = useDerivedValue(() => {
+    const idx = offset.current + Math.floor(timestamp.value / range.current);
     return [{ id: symbols[idx % symbols.length], pos }];
   }, [timestamp]);
 
-  const opacity = useComputedValue(() => {
-    const idx = Math.round(timestamp.current / 100);
+  const opacity = useDerivedValue(() => {
+    const idx = Math.round(timestamp.value / 100);
     return stream[(stream.length - j + idx) % stream.length];
   }, [timestamp]);
 
-  const color = useComputedValue(
+  const color = useDerivedValue(
     () =>
       interpolateColors(
-        opacity.current,
+        opacity.value,
         [0.8, 1],
         ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]
       ),

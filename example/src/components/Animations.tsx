@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import {
   Easing,
   cancelAnimation,
+  useFrameCallback,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -20,4 +21,12 @@ export const useLoop = ({ duration }: { duration: number }) => {
     };
   }, [duration, progress]);
   return progress;
+};
+
+export const useClock = () => {
+  const clock = useSharedValue(0);
+  useFrameCallback((info) => {
+    clock.value = info.timeSinceFirstFrame;
+  });
+  return clock;
 };
