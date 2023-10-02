@@ -54,8 +54,8 @@ export const Images = () => {
 
   useEffect(() => {
     if (oslo) {
-      console.log("ImageInfo:", oslo.getImageInfo());
-      console.log("Pixels:", oslo.readPixels().slice(0, 10));
+      console.log("ImageInfo:", oslo?.getImageInfo());
+      console.log("Pixels:", oslo?.readPixels()?.slice(0, 10));
     }
   }, [oslo]);
 
