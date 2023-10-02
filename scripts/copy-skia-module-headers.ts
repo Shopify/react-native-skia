@@ -15,6 +15,7 @@ const copyModule = (module: string) => [
   `mkdir -p ./package/cpp/skia/src/`,
   `mkdir -p ./package/cpp/skia/src/core/`,
   `mkdir -p ./package/cpp/skia/src/base/`,
+  `cp -a ./externals/skia/src/core/SkPathPriv.h ./package/cpp/skia/src/core/.`,
   `cp -a ./externals/skia/src/core/SkChecksum.h ./package/cpp/skia/src/core/.`,
   `cp -a ./externals/skia/src/core/SkTHash.h ./package/cpp/skia/src/core/.`,
   `cp -a ./externals/skia/src/base/SkUTF.h ./package/cpp/skia/src/base/.`,

@@ -1812,10 +1812,8 @@
   integrity sha512-o6aam+0Ug1xGK3ABYmBm0B1YuEKfM/5kaoZO0eHbZwSpw9UzDX4G5y4Nx/K20FHqUmJHkZmLvOUFYwN4N+HqKA==
 
 "@shopify/react-native-skia@link:../package":
-  version "0.1.0-development"
-  dependencies:
-    canvaskit-wasm "0.38.0"
-    react-reconciler "^0.27.0"
+  version "0.0.0"
+  uid ""
 
 "@sideway/address@^4.1.3":
   version "4.1.4"
@@ -3098,10 +3096,10 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001399, caniuse-lite@^1.0.30001400:
   resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001482.tgz"
   integrity sha512-F1ZInsg53cegyjroxLNW9DmrEQ1SuGRTO1QlpA0o2/6OpQ0gFeDRoq1yFmnr8Sakn9qwwt9DmbxHB6w167OSuQ==
 
-canvaskit-wasm@0.38.0:
-  version "0.38.0"
-  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.38.0.tgz#83e6c46f3015c2ff3f6503157f47453af76a7be7"
-  integrity sha512-ZEG6lucpbQ4Ld+mY8C1Ng+PMLVP+/AX02jS0Sdl28NyMxuKSa9uKB8oGd1BYp1XWPyO2Jgr7U8pdyjJ/F3xR5Q==
+canvaskit-wasm@0.38.2:
+  version "0.38.2"
+  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.38.2.tgz#b6c2be236670fd0f18977b9026652b2c0e201fee"
+  integrity sha512-ieRb6DO4yL91qUfyRgmyhp2Hi1KmQ9lIMfKacxHVlfp/CpKCkzgAxRGUbCsJFzwLKjs9fufGrIyvnzEYRwm1XQ==
 
 ccount@^1.0.0:
   version "1.1.0"

@@ -1,5 +1,6 @@
 export type Routes = {
   Images: undefined;
+  AnimatedImages: undefined;
   List: undefined;
   Shapes: undefined;
   PathEffect: undefined;

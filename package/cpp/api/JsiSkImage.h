@@ -64,41 +64,7 @@ public:
         std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
   }
 
-  JSI_HOST_FUNCTION(encodeToBytes) {
-    // Get optional parameters
-    auto format =
-        count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
-                   : SkEncodedImageFormat::kPNG;
-    auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
-
-    // Get data
-    sk_sp<SkData> data;
-    if (format == SkEncodedImageFormat::kJPEG) {
-      SkJpegEncoder::Options options;
-      options.fQuality = quality;
-      data = SkJpegEncoder::Encode(nullptr, getObject().get(), options);
-    } else {
-      SkPngEncoder::Options options;
-      data = SkPngEncoder::Encode(nullptr, getObject().get(), options);
-    }
-    auto arrayCtor =
-        runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
-    size_t size = data->size();
-
-    jsi::Object array =
-        arrayCtor.callAsConstructor(runtime, static_cast<double>(size))
-            .getObject(runtime);
-    jsi::ArrayBuffer buffer =
-        array.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
-            .asObject(runtime)
-            .getArrayBuffer(runtime);
-
-    auto bfrPtr = reinterpret_cast<uint8_t *>(buffer.data(runtime));
-    memcpy(bfrPtr, data->bytes(), size);
-    return array;
-  }
-
-  JSI_HOST_FUNCTION(encodeToBase64) {
+  sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {
     // Get optional parameters
     auto format =
         count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
@@ -118,6 +84,32 @@ public:
       SkPngEncoder::Options options;
       data = SkPngEncoder::Encode(nullptr, image.get(), options);
     }
+    return data;
+  }
+
+  JSI_HOST_FUNCTION(encodeToBytes) {
+    auto data = encodeImageData(arguments, count);
+
+    auto arrayCtor =
+        runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
+    size_t size = data->size();
+
+    jsi::Object array =
+        arrayCtor.callAsConstructor(runtime, static_cast<double>(size))
+            .getObject(runtime);
+    jsi::ArrayBuffer buffer =
+        array.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+            .asObject(runtime)
+            .getArrayBuffer(runtime);
+
+    auto bfrPtr = reinterpret_cast<uint8_t *>(buffer.data(runtime));
+    memcpy(bfrPtr, data->bytes(), size);
+    return array;
+  }
+
+  JSI_HOST_FUNCTION(encodeToBase64) {
+    auto data = encodeImageData(arguments, count);
+
     auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
     auto buffer = std::string(len, 0);
     SkBase64::Encode(data->bytes(), data->size(),
