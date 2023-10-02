@@ -143,7 +143,9 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
       bytesPerRow = 4 * pxInfo.width;
       if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F16.value) {
         bytesPerRow *= 2;
-      } else if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F32.value) {
+      } else if (
+        pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F32.value
+      ) {
         bytesPerRow *= 4;
       }
     }
