@@ -7,10 +7,11 @@ import {
   Skia,
   Shader,
   mix,
-  useComputedValue,
   Fill,
-  useLoop,
 } from "@shopify/react-native-skia";
+import { useDerivedValue } from "react-native-reanimated";
+
+import { useLoop } from "../../components/Animations";
 
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -26,8 +27,8 @@ export const Filters = () => {
   const progress = useLoop({ duration: 1500 });
   const [, setState] = React.useState(0);
 
-  const uniforms = useComputedValue(
-    () => ({ r: mix(progress.current, 1, 100) }),
+  const uniforms = useDerivedValue(
+    () => ({ r: mix(progress.value, 1, 100) }),
     [progress]
   );
 
