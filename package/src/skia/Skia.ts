@@ -15,5 +15,4 @@ export const Malloc = (
   length: number
 ): Uint8Array | Float32Array => new TypedArrayCls(length);
 
-// @ts-ignore: Unused variable error
-export const Free = (typedArray: Uint8Array | Float32Array): void => {};
+export const Free = (_: Uint8Array | Float32Array): void => {};

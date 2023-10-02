@@ -391,29 +391,29 @@ export class JsiSkCanvas
       colorType: ckEnum(imageInfo.alphaType),
       alphaType: ckEnum(imageInfo.alphaType),
     };
-    if (typeof bytesPerRow !== 'number') {
+    if (typeof bytesPerRow !== "number") {
       bytesPerRow = 4 * pxInfo.width;
       if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F16.value) {
         bytesPerRow *= 2;
-      } else if (pxInfo.colorType === this.CanvasKit.ColorType.RGBA_F32.value) {
+      } else if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F32.value) {
         bytesPerRow *= 4;
       }
     }
     let destObj = dest;
     if (!destObj) {
-      if (pxInfo.colorType === this.CanvasKit.ColorType.RGBA_F32.value) {
-        destObj = this.CanvasKit.Malloc(Float32Array, pxInfo.width * pxInfo.height);
+      if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F32.value) {
+        destObj = this.CanvasKit.Malloc(
+          Float32Array,
+          pxInfo.width * pxInfo.height
+        );
       } else {
-        destObj = this.CanvasKit.Malloc(Uint8Array, bytesPerRow * pxInfo.height);
+        destObj = this.CanvasKit.Malloc(
+          Uint8Array,
+          bytesPerRow * pxInfo.height
+        );
       }
     }
-    const out = this.ref.readPixels(
-      srcX,
-      srcY,
-      pxInfo,
-      destObj,
-      bytesPerRow
-    );
+    const out = this.ref.readPixels(srcX, srcY, pxInfo, destObj, bytesPerRow);
     if (!dest) {
       this.CanvasKit.Free(destObj);
     }
