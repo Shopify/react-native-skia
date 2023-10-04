@@ -42,14 +42,18 @@ public:
   JSI_HOST_FUNCTION(decodeNextFrame) {
     return static_cast<int>(getObject()->decodeNextFrame());
   }
+      
+  JSI_HOST_FUNCTION(getFrameCount) {
+    return static_cast<int>(getObject()->getFrameCount());
+  }
 
   EXPORT_JSI_API_TYPENAME(JsiSkAnimatedImage, "AnimatedImage")
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkAnimatedImage, dispose),
                        JSI_EXPORT_FUNC(JsiSkAnimatedImage, getCurrentFrame),
-                       JSI_EXPORT_FUNC(JsiSkAnimatedImage,
-                                       currentFrameDuration),
-                       JSI_EXPORT_FUNC(JsiSkAnimatedImage, decodeNextFrame))
+                       JSI_EXPORT_FUNC(JsiSkAnimatedImage, currentFrameDuration),
+                       JSI_EXPORT_FUNC(JsiSkAnimatedImage, decodeNextFrame),
+                       JSI_EXPORT_FUNC(JsiSkAnimatedImage, getFrameCount))
 
   JsiSkAnimatedImage(std::shared_ptr<RNSkPlatformContext> context,
                      const sk_sp<SkAnimatedImage> image)
