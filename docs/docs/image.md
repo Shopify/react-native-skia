@@ -81,9 +81,11 @@ const ImageDemo = () => {
 
 ## Instance Methods
 
-| Name           | Description                                                       |
-| :------------- | :---------------------------------------------------------------- |
-| height         | Returns the possibly scaled height of the image.                  |
-| width          | Returns the possibly scaled width of the image.                   |
-| encodeToBytes  | Encodes Image pixels, returning result as UInt8Array              |
-| encodeToBase64 | Encodes Image pixels, returning result as a base64 encoded string |
+| Name           | Description                                                            |
+| :------------- | :--------------------------------------------------------------------- |
+| height         | Returns the possibly scaled height of the image.                       |
+| width          | Returns the possibly scaled width of the image.                        |
+| getImageInfo   | Returns the image info for the image.                                  |
+| encodeToBytes  | Encodes Image pixels, returning result as UInt8Array                   |
+| encodeToBase64 | Encodes Image pixels, returning result as a base64 encoded string      |
+| readPixels     | Reads the image pixels, returning result as UInt8Array or Float32Array |

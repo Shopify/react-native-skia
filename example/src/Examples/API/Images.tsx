@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import { useImage, Canvas, Image, Rect } from "@shopify/react-native-skia";
 
@@ -51,6 +51,13 @@ export const Images = () => {
     ],
     [PAD, SIZE]
   );
+
+  useEffect(() => {
+    if (oslo) {
+      console.log("ImageInfo:", oslo?.getImageInfo());
+      console.log("Pixels:", oslo?.readPixels()?.slice(0, 10));
+    }
+  }, [oslo]);
 
   return (
     <ScrollView>
