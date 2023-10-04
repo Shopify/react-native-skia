@@ -42,7 +42,7 @@ public:
   JSI_HOST_FUNCTION(decodeNextFrame) {
     return static_cast<int>(getObject()->decodeNextFrame());
   }
-      
+
   JSI_HOST_FUNCTION(getFrameCount) {
     return static_cast<int>(getObject()->getFrameCount());
   }
