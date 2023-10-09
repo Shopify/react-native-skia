@@ -113,6 +113,11 @@ buildscript {
 }
 
 android {
+    def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    if (agpVersion.tokenize('.')[0].toInteger() >= 7) {
+      namespace "com.shopify.reactnative.skia"
+    }
+
     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
     buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
     defaultConfig {
