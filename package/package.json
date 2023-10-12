@@ -74,10 +74,10 @@
     "react-native-reanimated": ">=2.0.0"
   },
   "peerDependenciesMeta": {
-    "react-native-reanimated": {
+    "react-native": {
       "optional": true
     },
-    "react-native": {
+    "react-native-reanimated": {
       "optional": true
     }
   },
