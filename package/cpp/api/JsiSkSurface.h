@@ -14,6 +14,8 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "SkSurface.h"
+#include "include/gpu/GrDirectContext.h"
+
 
 #pragma clang diagnostic pop
 
@@ -37,7 +39,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(flush) {
-    getObject()->flush();
+	if (auto dContext = GrAsDirectContext(getObject()->recordingContext())) {
+	  dContext->flushAndSubmit();
+	}
     return jsi::Value::undefined();
   }
 
