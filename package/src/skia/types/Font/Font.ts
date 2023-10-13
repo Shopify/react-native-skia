@@ -11,7 +11,21 @@ export interface FontMetrics {
   bounds?: SkRect; // smallest rect containing all glyphs (relative to 0,0)
 }
 
+export type EllipsizeMode = "clip" | "head" | "middle" | "tail";
+export type EllipsisParams = {
+  text: string;
+  width: number;
+  mode: EllipsizeMode;
+};
+
 export interface SkFont extends SkJSIInstance<"Font"> {
+  /**
+   * Returns ellipsize text.
+   * @param args
+   * @param paint
+   */
+  ellipsisText(args: EllipsisParams, paint?: SkPaint): string;
+
   /**
    * Returns the advance width of text.
    * The advance is the normal distance to move before drawing additional text.

@@ -27,6 +27,36 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkFont : public JsiSkWrappingSharedPtrHostObject<SkFont> {
+private:
+  std::string getTextInWidth(std::string str, double width, SkRect *bounds, std::shared_ptr<SkPaint> *paint)
+  {
+    std::string res = "";
+    auto currentWidth = 0;
+
+    for (int i = 0; i < str.length(); i++)
+    {
+      std::string currentChar(1, str[i]);
+      if (paint->get() != nullptr) {
+        getObject()->measureText(currentChar.c_str(), 1, SkTextEncoding::kUTF8, bounds, paint->get());
+      } else {
+        getObject()->measureText(currentChar.c_str(), 1, SkTextEncoding::kUTF8, bounds);
+      }
+
+      auto charWidth = bounds->width();
+      if (currentWidth + charWidth > width) {
+        return res;
+      }
+
+      if (currentWidth + charWidth == width) {
+        return res + currentChar;
+      }
+
+      res += currentChar;
+      currentWidth += charWidth;
+    }
+    return res;
+  }
+
 public:
   JSI_HOST_FUNCTION(getGlyphWidths) {
     auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
@@ -99,6 +129,64 @@ public:
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkRect>(getContext(), std::move(bounds)));
+  }
+
+  JSI_HOST_FUNCTION(ellipsisText)
+  {
+    auto object = arguments[0].asObject(runtime);
+    auto str = object.getProperty(runtime, "text").asString(runtime).utf8(runtime);
+    auto width = object.getProperty(runtime, "width").asNumber();
+    auto type = object.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+    auto paint = count > 1 ? JsiSkPaint::fromValue(runtime, arguments[1]) : nullptr;
+
+    SkRect bounds;
+
+    if (paint) {
+      getObject()->measureText(str.c_str(), str.length(), SkTextEncoding::kUTF8, &bounds, paint.get());
+    } else {
+      getObject()->measureText(str.c_str(), str.length(), SkTextEncoding::kUTF8, &bounds);
+    }
+    auto strWidth = static_cast<double>(bounds.width());
+    if (strWidth <= width)
+    {
+      return jsi::Value(runtime, jsi::String::createFromUtf8(runtime, str));
+    }
+
+    if (type == "clip") {
+      return jsi::Value(runtime, jsi::String::createFromUtf8(runtime, getTextInWidth(str, width, &bounds, &paint)));
+    }
+
+    std::string threeDot = "…";
+    getObject()->measureText(threeDot.c_str(), threeDot.length(), SkTextEncoding::kUTF8, &bounds);
+    auto dotsWidth = bounds.width();
+    if (dotsWidth >= width) {
+      return jsi::Value(runtime, jsi::String::createFromUtf8(runtime, threeDot));
+    }
+
+    auto maxWidth = width - dotsWidth;
+    if (type == "tail") {
+      std::string headResult = getTextInWidth(str, maxWidth, &bounds, &paint);
+      return jsi::Value(runtime, jsi::String::createFromUtf8(runtime, headResult + threeDot));
+    }
+
+    if (type == "head") {
+      std::string copy(str);
+      std::reverse(copy.begin(), copy.end());
+      std::string tailResult = getTextInWidth(copy, maxWidth, &bounds, &paint);
+      std::reverse(tailResult.begin(), tailResult.end());
+      return jsi::Value(runtime, jsi::String::createFromUtf8(runtime, threeDot + tailResult));
+    }
+
+    if (type == "middle") {
+      std::string headResult = getTextInWidth(str, maxWidth / 2, &bounds, &paint);
+      std::string copy(str);
+      std::reverse(copy.begin(), copy.end());
+      std::string tailResult = getTextInWidth(copy, maxWidth / 2, &bounds, &paint);
+      std::reverse(tailResult.begin(), tailResult.end());
+      return jsi::Value(runtime, jsi::String::createFromUtf8(runtime, headResult + threeDot + tailResult));
+    }
+
+    return jsi::Value(runtime, jsi::String::createFromUtf8(runtime, str));
   }
 
   JSI_HOST_FUNCTION(getMetrics) {
@@ -277,6 +365,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkFont, getGlyphWidths),
                        JSI_EXPORT_FUNC(JsiSkFont, getTextWidth),
                        JSI_EXPORT_FUNC(JsiSkFont, measureText),
+                       JSI_EXPORT_FUNC(JsiSkFont, ellipsisText),
                        JSI_EXPORT_FUNC(JsiSkFont, dispose))
 
   JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)
