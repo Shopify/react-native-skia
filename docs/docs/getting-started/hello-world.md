@@ -9,12 +9,14 @@ React Native Skia provides a declarative API using its own React Renderer.
 
 ```tsx twoslash
 import {Canvas, Circle, Group} from "@shopify/react-native-skia";
+import {useWindowDimensions} from 'react-native'
 
 export const HelloWorld = () => {
   const size = 256;
   const r = size * 0.33;
+  const {width, height} = useWindowDimensions()
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ flex: 1, width, height }}>
       <Group blendMode="multiply">
         <Circle cx={r} cy={r} r={r} color="cyan" />
         <Circle cx={size - r} cy={r} r={r} color="magenta" />
