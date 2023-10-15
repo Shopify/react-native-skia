@@ -26,10 +26,7 @@ export default function App() {
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      {/* <Text>Open up App.tsx to start working on your app!</Text> */}
-      {/* <Breathe /> */}
       <HelloWorld />
-      <StatusBar style="auto" />
     </View>
   );
 }
