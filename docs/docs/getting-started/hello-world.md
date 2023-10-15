@@ -8,11 +8,9 @@ slug: /getting-started/hello-world
 React Native Skia provides a declarative API using its own React Renderer.
 
 ```tsx twoslash
-import { StatusBar } from 'expo-status-bar';
 import {  View } from 'react-native';
 
 import React from "react";
-import {  useWindowDimensions } from "react-native";
 import {
   Canvas,
   Circle,
@@ -35,7 +33,6 @@ export default function App() {
 
 export const HelloWorld = () => {
   const size = 256;
-  const { width, height } = useWindowDimensions();
   const r = size * 0.33;
 
   return (
