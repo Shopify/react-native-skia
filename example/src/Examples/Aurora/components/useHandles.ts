@@ -1,14 +1,7 @@
-import type {
-  SkiaMutableValue,
-  CubicBezierHandle,
-  SkRect,
-} from "@shopify/react-native-skia";
-import {
-  isEdge,
-  sub,
-  useTouchHandler,
-  useValue,
-} from "@shopify/react-native-skia";
+import type { CubicBezierHandle, SkRect } from "@shopify/react-native-skia";
+import { isEdge, sub } from "@shopify/react-native-skia";
+import { useSharedValue, type SharedValue } from "react-native-reanimated";
+import { Gesture } from "react-native-gesture-handler";
 
 import { inRadius, symmetric } from "./Math";
 
@@ -18,66 +11,65 @@ type TouchSelection = null | {
 };
 
 export const useHandles = (
-  mesh: SkiaMutableValue<CubicBezierHandle[]>,
+  mesh: SharedValue<CubicBezierHandle[]>,
   defaultMesh: CubicBezierHandle[],
   window: SkRect
 ) => {
-  const selection = useValue<TouchSelection>(null);
-  return useTouchHandler({
-    onActive: (pt) => {
-      if (selection.current) {
-        const { index, point } = selection.current;
-        const { pos, c1, c2 } = mesh.current[index];
+  const selection = useSharedValue<TouchSelection>(null);
+  return Gesture.Pan()
+    .onChange((pt) => {
+      if (selection.value) {
+        const { index, point } = selection.value;
+        const { pos, c1, c2 } = mesh.value[index];
         if (point === "pos") {
           const delta = sub(pos, pt);
-          mesh.current[index].pos = pt;
-          mesh.current[index].c1 = sub(c1, delta);
-          mesh.current[index].c2 = sub(c2, delta);
+          mesh.value[index].pos = pt;
+          mesh.value[index].c1 = sub(c1, delta);
+          mesh.value[index].c2 = sub(c2, delta);
         } else if (point === "c3") {
-          mesh.current[index].c1 = symmetric(pt, mesh.current[index].pos);
+          mesh.value[index].c1 = symmetric(pt, mesh.value[index].pos);
         } else if (point === "c4") {
-          mesh.current[index].c2 = symmetric(pt, mesh.current[index].pos);
+          mesh.value[index].c2 = symmetric(pt, mesh.value[index].pos);
         } else {
-          mesh.current[index][point] = pt;
+          mesh.value[index][point] = pt;
         }
       } else {
         defaultMesh.every(({ pos: p }, index) => {
           if (!isEdge(p, window)) {
-            const { pos, c1, c2 } = mesh.current[index];
+            const { pos, c1, c2 } = mesh.value[index];
             const c3 = symmetric(c1, pos);
             const c4 = symmetric(c2, pos);
             if (inRadius(pt, pos)) {
               const delta = sub(pos, pt);
-              mesh.current[index].pos = pt;
-              mesh.current[index].c1 = sub(c1, delta);
-              mesh.current[index].c2 = sub(c2, delta);
-              selection.current = { index, point: "pos" };
+              mesh.value[index].pos = pt;
+              mesh.value[index].c1 = sub(c1, delta);
+              mesh.value[index].c2 = sub(c2, delta);
+              selection.value = { index, point: "pos" };
               return false;
             } else if (inRadius(pt, c1)) {
-              mesh.current[index].c1 = pt;
-              selection.current = { index, point: "c1" };
+              mesh.value[index].c1 = pt;
+              selection.value = { index, point: "c1" };
               return false;
             } else if (inRadius(pt, c2)) {
-              mesh.current[index].c2 = pt;
-              selection.current = { index, point: "c2" };
+              mesh.value[index].c2 = pt;
+              selection.value = { index, point: "c2" };
               return false;
             } else if (inRadius(pt, c3)) {
-              mesh.current[index].c1 = symmetric(pt, mesh.current[index].pos);
-              selection.current = { index, point: "c3" };
+              mesh.value[index].c1 = symmetric(pt, mesh.value[index].pos);
+              selection.value = { index, point: "c3" };
               return false;
             } else if (inRadius(pt, c4)) {
-              mesh.current[index].c2 = symmetric(pt, mesh.current[index].pos);
-              selection.current = { index, point: "c4" };
+              mesh.value[index].c2 = symmetric(pt, mesh.value[index].pos);
+              selection.value = { index, point: "c4" };
               return false;
             }
           }
           return true;
         });
       }
-      mesh.current = mesh.current.slice();
-    },
-    onEnd: () => {
-      selection.current = null;
-    },
-  });
+      mesh.value = mesh.value.slice();
+    })
+    .onEnd(() => {
+      selection.value = null;
+    });
 };

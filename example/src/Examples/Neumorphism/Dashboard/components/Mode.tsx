@@ -1,4 +1,3 @@
-import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   BackdropBlur,
   rect,
@@ -8,19 +7,19 @@ import {
   Group,
   useImage,
   Image,
-  useComputedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
+import { useDerivedValue, type SharedValue } from "react-native-reanimated";
 
 const clip = rrect(rect(0, 596, 390, 844), 40, 40);
 
 interface ModeProps {
-  translateY: SkiaValue<number>;
+  translateY: SharedValue<number>;
 }
 
 export const Mode = ({ translateY }: ModeProps) => {
-  const transform = useComputedValue(
-    () => [{ translateY: translateY.current }],
+  const transform = useDerivedValue(
+    () => [{ translateY: translateY.value }],
     [translateY]
   );
   const image = useImage(require("./settings.png"));

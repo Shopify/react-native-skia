@@ -1,13 +1,7 @@
-import type {
-  SkFont,
-  Vector,
-  SkiaValue,
-  SkiaClockValue,
-} from "@shopify/react-native-skia";
+import type { SkFont, Vector } from "@shopify/react-native-skia";
 import {
   interpolate,
   dist,
-  useComputedValue,
   vec,
   Group,
   Text,
@@ -15,6 +9,7 @@ import {
 import React from "react";
 import SimplexNoise from "simplex-noise";
 import { useWindowDimensions } from "react-native";
+import { useDerivedValue, type SharedValue } from "react-native-reanimated";
 
 import { FG } from "./Theme";
 
@@ -29,8 +24,8 @@ interface SymbolProps {
   i: number;
   j: number;
   font: SkFont;
-  pointer: SkiaValue<Vector>;
-  clock: SkiaClockValue;
+  pointer: SharedValue<Vector>;
+  clock: SharedValue<number>;
 }
 
 export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
@@ -42,28 +37,23 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
   const text = DIGITS[Math.round(Math.random() * 9)];
   const [symbolWidth] = font.getGlyphWidths(font.getGlyphIDs(text));
   const origin = vec(x + SIZE.width / 2, y + SIZE.height / 2);
-  const transform = useComputedValue(
+  const transform = useDerivedValue(
     () => [
       {
-        scale: interpolate(
-          dist(pointer.current, origin),
-          [0, R],
-          [1.25, 0.25],
-          {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }
-        ),
+        scale: interpolate(dist(pointer.value, origin), [0, R], [1.25, 0.25], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        }),
       },
     ],
     [pointer]
   );
-  const dx = useComputedValue(() => {
-    const d = A * noise.noise2D(x, clock.current * F);
+  const dx = useDerivedValue(() => {
+    const d = 0; //A * noise.noise2D(x, clock.value * F);
     return origin.x - symbolWidth / 2 + d;
   }, [clock]);
-  const dy = useComputedValue(() => {
-    const d = A * noise.noise2D(y, clock.current * F);
+  const dy = useDerivedValue(() => {
+    const d = 0; //A * noise.noise2D(y, clock.value * F);
     return origin.y + font.getSize() / 2 + d;
   }, [clock]);
   return (

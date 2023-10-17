@@ -1,7 +1,6 @@
 import React from "react";
 import { useWindowDimensions } from "react-native";
 import {
-  runSpring,
   mix,
   Blur,
   Canvas,
@@ -12,13 +11,12 @@ import {
   rect,
   useFont,
   vec,
-  useTouchHandler,
-  useValue,
   fitRects,
   rect2rect,
   useComputedValue,
   useLoop,
 } from "@shopify/react-native-skia";
+import { useSharedValue } from "react-native-reanimated";
 
 import { Title } from "./components/Title";
 import { ProgressBar } from "./components/ProgressBar";
@@ -40,26 +38,14 @@ export const Neumorphism = () => {
   const dst = rect(0, 0, window.width, window.height);
   const rects = fitRects("cover", src, dst);
   const transform = rect2rect(rects.src, rects.dst);
-  const translateY = useValue(0);
-  const offsetY = useValue(0);
+  const translateY = useSharedValue(0);
   const t = useLoop({ duration: 3000 });
   const x = useComputedValue(() => mix(t.current, 0, 180), [t]);
   const progress = useComputedValue(() => x.current / 192, [x]);
   const font = useFont(require("./components/SF-Pro-Display-Bold.otf"), 17);
-  const onTouch = useTouchHandler({
-    onStart: (pt) => {
-      offsetY.current = translateY.current - pt.y;
-    },
-    onActive: (pt) => {
-      translateY.current = offsetY.current + pt.y;
-    },
-    onEnd: () => {
-      runSpring(translateY, 0);
-    },
-  });
 
   return (
-    <Canvas style={{ flex: 1 }} mode="continuous" onTouch={onTouch}>
+    <Canvas style={{ flex: 1 }} mode="continuous">
       <Group transform={transform}>
         <Group>
           <LinearGradient
