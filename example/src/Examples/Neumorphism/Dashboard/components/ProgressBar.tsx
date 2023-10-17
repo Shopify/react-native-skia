@@ -1,4 +1,3 @@
-import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   BoxShadow,
   rect,
@@ -13,10 +12,11 @@ import {
   SweepGradient,
   useFont,
   Text,
-  useComputedValue,
   Box,
 } from "@shopify/react-native-skia";
 import React from "react";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 const r1 = 85;
 const path = Skia.Path.Make();
@@ -27,15 +27,15 @@ const fromCircle = (cx: number, cy: number, r: number) =>
   rrect(rect(cx - r, cy - r, 2 * r, 2 * r), r, r);
 
 interface ProgressBarProps {
-  progress: SkiaValue<number>;
+  progress: SharedValue<number>;
 }
 
 const colors = ["#2FB8FF", "#9EECD9"];
 
 export const ProgressBar = ({ progress }: ProgressBarProps) => {
   const font = useFont(require("./SF-Mono-Semibold.otf"), 32);
-  const text = useComputedValue(
-    () => `${Math.round(progress.current * 100)}°C`,
+  const text = useDerivedValue(
+    () => `${Math.round(progress.value * 100)}°C`,
     [progress]
   );
   if (font === null) {

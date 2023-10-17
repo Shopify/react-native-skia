@@ -9,7 +9,6 @@ import { FiberProvider } from "its-fine";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import {
-  AnimationExample,
   ReanimatedExample,
   API,
   Aurora,
@@ -168,7 +167,6 @@ const App = () => {
               }}
             />
             <Stack.Screen name="Graphs" component={GraphsScreen} />
-            <Stack.Screen name="Animation" component={AnimationExample} />
             <Stack.Screen name="Reanimated" component={ReanimatedExample} />
             <Stack.Screen name="Stickers" component={Stickers} />
             <Stack.Screen

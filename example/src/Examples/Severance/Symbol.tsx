@@ -7,9 +7,10 @@ import {
   Text,
 } from "@shopify/react-native-skia";
 import React from "react";
-import SimplexNoise from "simplex-noise";
 import { useWindowDimensions } from "react-native";
 import { useDerivedValue, type SharedValue } from "react-native-reanimated";
+
+import { getSeed, perlin } from "../../components/Animations";
 
 import { FG } from "./Theme";
 
@@ -33,7 +34,7 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
   const SIZE = { width: width / COLS, height: height / ROWS };
   const x = i * SIZE.width;
   const y = j * SIZE.height;
-  const noise = new SimplexNoise(`${i}-${j}`);
+  const noise = getSeed();
   const text = DIGITS[Math.round(Math.random() * 9)];
   const [symbolWidth] = font.getGlyphWidths(font.getGlyphIDs(text));
   const origin = vec(x + SIZE.width / 2, y + SIZE.height / 2);
@@ -49,11 +50,11 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
     [pointer]
   );
   const dx = useDerivedValue(() => {
-    const d = 0; //A * noise.noise2D(x, clock.value * F);
+    const d = A * perlin(noise, x, clock.value * F);
     return origin.x - symbolWidth / 2 + d;
   }, [clock]);
   const dy = useDerivedValue(() => {
-    const d = 0; //A * noise.noise2D(y, clock.value * F);
+    const d = A * perlin(noise, y, clock.value * F);
     return origin.y + font.getSize() / 2 + d;
   }, [clock]);
   return (

@@ -13,10 +13,10 @@ import {
   vec,
   fitRects,
   rect2rect,
-  useComputedValue,
-  useLoop,
 } from "@shopify/react-native-skia";
-import { useSharedValue } from "react-native-reanimated";
+import { useDerivedValue, useSharedValue } from "react-native-reanimated";
+
+import { useLoop } from "../../../components/Animations";
 
 import { Title } from "./components/Title";
 import { ProgressBar } from "./components/ProgressBar";
@@ -40,8 +40,8 @@ export const Neumorphism = () => {
   const transform = rect2rect(rects.src, rects.dst);
   const translateY = useSharedValue(0);
   const t = useLoop({ duration: 3000 });
-  const x = useComputedValue(() => mix(t.current, 0, 180), [t]);
-  const progress = useComputedValue(() => x.current / 192, [x]);
+  const x = useDerivedValue(() => mix(t.value, 0, 180), [t]);
+  const progress = useDerivedValue(() => x.value / 192, [x]);
   const font = useFont(require("./components/SF-Pro-Display-Bold.otf"), 17);
 
   return (

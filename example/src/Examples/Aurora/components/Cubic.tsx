@@ -1,12 +1,7 @@
 import React from "react";
 import type { CubicBezierHandle } from "@shopify/react-native-skia";
-import {
-  Line,
-  Paint,
-  Circle,
-  useComputedValue,
-} from "@shopify/react-native-skia";
-import type { SharedValue } from "react-native-reanimated";
+import { Line, Paint, Circle } from "@shopify/react-native-skia";
+import { useDerivedValue, type SharedValue } from "react-native-reanimated";
 
 import { symmetric } from "./Math";
 
@@ -17,17 +12,17 @@ interface CubicProps {
 }
 
 export const Cubic = ({ mesh, index, color }: CubicProps) => {
-  const c1 = useComputedValue(() => mesh.value[index].c1, [mesh]);
-  const c1S = useComputedValue(
+  const c1 = useDerivedValue(() => mesh.value[index].c1, [mesh]);
+  const c1S = useDerivedValue(
     () => symmetric(mesh.value[index].c1, mesh.value[index].pos),
     [mesh]
   );
-  const c2 = useComputedValue(() => mesh.value[index].c2, [mesh]);
-  const c2S = useComputedValue(
+  const c2 = useDerivedValue(() => mesh.value[index].c2, [mesh]);
+  const c2S = useDerivedValue(
     () => symmetric(mesh.value[index].c2, mesh.value[index].pos),
     [mesh]
   );
-  const pos = useComputedValue(() => mesh.value[index].pos, [mesh]);
+  const pos = useDerivedValue(() => mesh.value[index].pos, [mesh]);
   return (
     <>
       <Line strokeWidth={2} color="white" p1={c1} p2={c1S} />

@@ -1,14 +1,14 @@
 import type { PatchProps } from "@shopify/react-native-skia";
-import { useComputedValue, Path, Skia } from "@shopify/react-native-skia";
+import { Path, Skia } from "@shopify/react-native-skia";
 import React from "react";
-import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue, type SharedValue } from "react-native-reanimated";
 
 interface CurvesProps {
   patch: SharedValue<PatchProps["patch"]>;
 }
 
 export const Curves = ({ patch }: CurvesProps) => {
-  const path = useComputedValue(() => {
+  const path = useDerivedValue(() => {
     const [p1, p2, p3, p4] = patch.value;
     const d = Skia.Path.Make();
     d.moveTo(p1.pos.x, p1.pos.y)

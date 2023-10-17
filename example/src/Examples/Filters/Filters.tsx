@@ -1,5 +1,5 @@
 import React from "react";
-import { useWindowDimensions } from "react-native";
+import { Pressable, useWindowDimensions } from "react-native";
 import {
   useImage,
   Canvas,
@@ -35,21 +35,23 @@ export const Filters = () => {
   const image = useImage(require("../../assets/oslo.jpg"));
 
   return (
-    <Canvas style={{ width, height }} onTouch={() => setState((i) => i + 1)}>
-      <Fill>
-        <Shader source={source} uniforms={uniforms}>
-          <ImageShader
-            image={image}
-            fit="cover"
-            x={0}
-            y={0}
-            tx="repeat"
-            ty="repeat"
-            width={width}
-            height={height}
-          />
-        </Shader>
-      </Fill>
-    </Canvas>
+    <Pressable style={{ width, height }} onPress={() => setState((i) => i + 1)}>
+      <Canvas style={{ width, height }}>
+        <Fill>
+          <Shader source={source} uniforms={uniforms}>
+            <ImageShader
+              image={image}
+              fit="cover"
+              x={0}
+              y={0}
+              tx="repeat"
+              ty="repeat"
+              width={width}
+              height={height}
+            />
+          </Shader>
+        </Fill>
+      </Canvas>
+    </Pressable>
   );
 };
