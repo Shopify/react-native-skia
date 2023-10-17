@@ -1,9 +1,5 @@
 import type { CanvasProps, SkiaDomView } from "@shopify/react-native-skia";
-import {
-  useTouchHandler,
-  ImageFormat,
-  Canvas,
-} from "@shopify/react-native-skia";
+import { ImageFormat, Canvas } from "@shopify/react-native-skia";
 import React, { useCallback, useRef } from "react";
 import { Alert, Pressable, Share } from "react-native";
 
