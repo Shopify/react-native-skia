@@ -5,11 +5,7 @@ sidebar_label: Animated Images
 slug: /animated-images
 ---
 
-React Native Skia supports animated images.
-
-Supported formats: 
-- GIF
-- WebP (animated)
+React Native Skia supports animated images. Supported formats are GIF and animated WebP.
 
 ## Using Reanimated
 
