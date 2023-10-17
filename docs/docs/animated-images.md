@@ -7,6 +7,10 @@ slug: /animated-images
 
 React Native Skia supports animated images.
 
+Supported formats: 
+- GIF
+- WebP (animated)
+
 ## Using Reanimated
 
 If you use Reanimated, we offer a `useAnimatedImageValue` hook that does everything automatically. `useAnimatedImageValue` returns a shared value that automatically updates on every frame.
@@ -22,6 +26,7 @@ import {
 } from "@shopify/react-native-skia";
 
 export const AnimatedImages = () => {
+  // This can be an animated GIF or WebP file
   const bird = useAnimatedImageValue(
     require("../../assets/birdFlying.gif")
   );
