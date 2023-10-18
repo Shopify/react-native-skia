@@ -333,7 +333,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     this.ref.transform(JsiSkMatrix.fromValue(m3));
   }
 
-  interpolate(end: SkPath, t: number) {
+  interpolate(end: SkPath, t: number, output?: SkPath) {
     const path = this.CanvasKit.Path.MakeFromPathInterpolation(
       this.ref,
       JsiSkPath.fromValue(end),
@@ -342,7 +342,12 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     if (path === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, path);
+    if (output) {
+      (output as JsiSkPath).ref = path;
+      return output;
+    } else {
+      return new JsiSkPath(this.CanvasKit, path);
+    }
   }
 
   isInterpolatable(path2: SkPath): boolean {
