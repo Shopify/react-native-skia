@@ -8,7 +8,6 @@ import {
   runOnJS,
   startMapper,
   stopMapper,
-  HAS_REANIMATED3,
 } from "./moduleWrapper";
 
 /**
