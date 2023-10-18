@@ -12,7 +12,6 @@ import {
   useImage,
 } from "@shopify/react-native-skia";
 import { View, useWindowDimensions, StyleSheet } from "react-native";
-import SimplexNoise from "simplex-noise";
 import Animated, {
   useDerivedValue,
   type SharedValue,
@@ -20,7 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
 
-import { useClock } from "../../../components/Animations";
+import { getSeed, perlin, useClock } from "../../../components/Animations";
 
 import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";
@@ -140,34 +139,33 @@ export const CoonsPatchMeshGradient = ({
       })
     )
     .flat();
+  const seeds = defaultMesh.map(() => [getSeed(), getSeed(), getSeed()]);
   const meshNoise = useDerivedValue(() => {
     return defaultMesh.map((pt, i) => {
       if (isEdge(pt.pos, window)) {
         return pt;
       }
-      const noisePos = new SimplexNoise(`${i}-pos`);
-      const noiseC1 = new SimplexNoise(`${i}-c1`);
-      const noiseC2 = new SimplexNoise(`${i}-c2`);
+      const [noisePos, noiseC1, noiseC2] = seeds[i];
       return {
         pos: add(
           pt.pos,
           vec(
-            A * noisePos.noise2D(clock.value / F, 0),
-            A * noisePos.noise2D(0, clock.value / F)
+            A * perlin(noisePos, clock.value / F, 0),
+            A * perlin(noisePos, 0, clock.value / F)
           )
         ),
         c1: add(
           pt.c1,
           vec(
-            A * noiseC1.noise2D(clock.value / F, 0),
-            A * noiseC1.noise2D(0, clock.value / F)
+            A * perlin(noiseC1, clock.value / F, 0),
+            A * perlin(noiseC1, 0, clock.value / F)
           )
         ),
         c2: add(
           pt.c1,
           vec(
-            A * noiseC2.noise2D(clock.value / F, 0),
-            A * noiseC2.noise2D(0, clock.value / F)
+            A * perlin(noiseC2, clock.value / F, 0),
+            A * perlin(noiseC2, 0, clock.value / F)
           )
         ),
       };
