@@ -6,8 +6,10 @@ import { processRadius } from "./Radius";
 
 export const isEdge = (pos: Vector, b: SkRect) => {
   "worklet";
-  return pos.x === b.x || pos.y === b.y || pos.x === b.width || pos.y === b.height;
-}
+  return (
+    pos.x === b.x || pos.y === b.y || pos.x === b.width || pos.y === b.height
+  );
+};
 
 // We have an issue to check property existence on JSI backed instances
 const isRRectCtor = (def: RRectDef): def is RRectCtor =>
