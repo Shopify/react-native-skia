@@ -65,7 +65,6 @@ export const PerformanceDrawingTest: React.FC = () => {
           />
         </View>
       </View>
-      (
       <View style={{ flex: 1 }}>
         <Canvas style={styles.container} mode="default">
           {rects.map((_, i) => (
