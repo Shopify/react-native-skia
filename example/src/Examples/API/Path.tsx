@@ -19,7 +19,11 @@ import {
   FitBox,
   interpolatePaths,
 } from "@shopify/react-native-skia";
-import { useDerivedValue } from "react-native-reanimated";
+import {
+  useAnimatedReaction,
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
@@ -109,14 +113,18 @@ export const PathExample = () => {
   }, [circle, rect1]);
 
   const font = useFont(require("./Roboto-Regular.otf"), 32);
-  const path = useDerivedValue(
-    () =>
+  const path = useSharedValue(Skia.Path.Make());
+  useAnimatedReaction(
+    () => progress.value,
+    (value) => {
       interpolatePaths(
-        progress.value,
+        value,
         [0, 0.5, 1],
-        [angryPath, normalPath, goodPath]
-      ),
-    [progress]
+        [angryPath, normalPath, goodPath],
+        {},
+        path.value
+      );
+    }
   );
   if (!font) {
     return null;
