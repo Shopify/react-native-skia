@@ -5,58 +5,154 @@ sidebar_label: Animations
 slug: /animations/animations
 ---
 
-:::info
+React Native Skia provides an integration with [Reanimated v3](https://docs.swmansion.com/react-native-reanimated/) that allows for animations
+to be executed on the UI-thread. 
 
-Currently, built-in Skia animations are dependant on the JS thread.
-For UI-thread animations with Reanimated 3, see [Reanimated support](/docs/animations/reanimated).
+This integration is available with Reanimated v3 or higher. If you are using Reanimated 2, [see Reanimated 2 support](#reanimated-2).
 
-:::
+## Hello World
 
-To ease building animation, the library provides some utilities to help you. There are two types of utility functions - imperative functions and hooks.
-
-If you have a Skia Value that you want to animate declaratively, a hook is the best choice.
-
-In the example below, we want the position of the rectangle to animate when we toggle a given value, and we want it to do this with a spring animation.
-
-## Declarative animation
+React Native Skia accepts Reanimated shared and derived values directly as properties.
+There is no need to use functions like `createAnimatedComponent` or `useAnimatedProps`, you can pass the reanimated values as properties directly. 
 
 ```tsx twoslash
-import React, { useState } from "react";
-import { Canvas, Rect, useSpring } from "@shopify/react-native-skia";
-import { Button, StyleSheet } from "react-native";
+import {useEffect} from "react";
+import {Canvas, Circle, Group} from "@shopify/react-native-skia";
+import {
+  useDerivedValue,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
-export const AnimationExample = () => {
-  const [toggled, setToggled] = useState(false);
-  const position = useSpring(toggled ? 100 : 0);
+export const HelloWorld = () => {
+  const size = 256;
+  const r = useSharedValue(0);
+  const c = useDerivedValue(() => size - r.value);
+  useEffect(() => {
+    r.value = withRepeat(withTiming(size * 0.33, { duration: 1000 }), -1);
+  }, [r, size]);
   return (
-    <>
-      <Canvas style={{ flex: 1 }}>
-        <Rect x={position} y={100} width={10} height={10} color={"red"} />
-      </Canvas>
-      <Button title="Toggle" onPress={() => setToggled((p) => !p)} />
-    </>
+    <Canvas style={{ flex: 1 }}>
+      <Group blendMode="multiply">
+        <Circle cx={r} cy={r} r={r} color="cyan" />
+        <Circle cx={c} cy={r} r={r} color="magenta" />
+        <Circle
+          cx={size/2}
+          cy={c}
+          r={r}
+          color="yellow"
+        />
+      </Group>
+    </Canvas>
   );
 };
 ```
 
-## Imperative animation
+:::info
 
-Almost the same thing can be accomplished with an imperative function (except that we are not toggling back and forth in this example):
+Reanimated and Skia use different color formats. You can interpolate colors using `interpolateColors` from Skia. If you use `interpolateColor` from Reanimated, you need to convert it using `convertToRGBA` from Reanimated.
 
 ```tsx twoslash
-import { Canvas, Rect, runSpring, useValue } from "@shopify/react-native-skia";
-import { Button } from "react-native";
+import {
+  interpolateColor,
+  useDerivedValue,
+  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet in the types
+  // @ts-ignore
+  convertToRGBA,
+} from "react-native-reanimated";
 
-export const AnimationExample = () => {
-  const position = useValue(0);
-  const changePosition = () => runSpring(position, 100);
+  const color = useDerivedValue(() =>
+    convertToRGBA(
+      interpolateColor(
+        0,
+        [0, 1],
+        ["cyan", "magenta"]
+      )
+    )
+  );
+```
+
+:::
+
+## Reanimated 2
+
+:::info
+
+The Reanimated 2 integration runs on the JS thread. We suggest using Reanimated 3 if possible, [see Reanimated 3 support](/docs/animations/reanimated).
+
+:::
+
+We also provide a seamless integration with Reanimated v2 but it contains two caveats:
+* [Animations are executed on the JS thread](#animations-on-the-js-thread)
+* [Host Objects](#object-objects)
+
+### Animations on the JS thread
+
+In the example below we are running a simple animation but with Reanimated v2, it will run on the JS thread.
+
+```tsx twoslash
+import {useEffect} from "react";
+import {Canvas, Rect, mix, useValue} from "@shopify/react-native-skia";
+import {useSharedValue, withRepeat, withTiming, useDerivedValue} from "react-native-reanimated";
+
+const MyComponent = () => {
+  const x = useValue(0);
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(withTiming(1, { duration: 3000 }), -1, true);
+  }, [progress]);
+
+  useDerivedValue(() => {
+    return mix(progress.value, 0, 100);
+  });
+
   return (
-    <>
-      <Canvas style={{ flex: 1 }}>
-        <Rect x={position} y={100} width={10} height={10} color={"red"} />
-      </Canvas>
-      <Button title="Toggle" onPress={changePosition} />
-    </>
+    <Canvas style={{ flex: 1 }}>
+      <Rect
+        x={x}
+        y={100}
+        width={10}
+        height={10}
+        color="red"
+      />
+    </Canvas>
   );
 };
+```
+
+### Host Objects
+
+If you animations invokes Skia objects with Reanimated v2, we need to execute the code explicitly on the JS thread.
+We provide a `useDerivedValueOnJS` hook to help with that process.
+
+```tsx twoslash
+import {useDerivedValueOnJS, Skia} from "@shopify/react-native-skia";
+import {useDerivedValue} from "react-native-reanimated";
+
+const path = Skia.Path.MakeFromSVGString("M 344 172 Q 344 167 343.793 163")!;
+const path2 = Skia.Path.MakeFromSVGString("M 347 169 Q 344 167 349 164")!;
+
+// ❌ this will crash as it's running on the worklet thread
+useDerivedValue(() => path.interpolate(path2, 0.5));
+
+// ✅ this will work as expected
+useDerivedValueOnJS(() => path.interpolate(path2, 0.5));
+```
+
+Similarly, if you want to use host objects within a gesture handler, you will need to execute it on the JS thread:
+
+```tsx twoslash
+import {vec} from "@shopify/react-native-skia";
+import {Gesture} from "react-native-gesture-handler";
+import {useSharedValue} from "react-native-reanimated";
+
+const pos = useSharedValue(vec(0, 0));
+
+// ❌ this will crash as it's running on the worklet thread
+Gesture.Pan().onChange(e => pos.value = vec(e.x, 0));
+
+// ✅ this will work as expected
+Gesture.Pan().runOnJS(true).onChange(e => pos.value = vec(e.x, 0));
 ```
