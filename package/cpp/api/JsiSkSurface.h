@@ -16,7 +16,6 @@
 #include "SkSurface.h"
 #include "include/gpu/GrDirectContext.h"
 
-
 #pragma clang diagnostic pop
 
 namespace RNSkia {
@@ -39,9 +38,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(flush) {
-	if (auto dContext = GrAsDirectContext(getObject()->recordingContext())) {
-	  dContext->flushAndSubmit();
-	}
+    if (auto dContext = GrAsDirectContext(getObject()->recordingContext())) {
+      dContext->flushAndSubmit();
+    }
     return jsi::Value::undefined();
   }
 
