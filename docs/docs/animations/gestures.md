@@ -5,18 +5,15 @@ sidebar_label: Gestures
 slug: /animations/gestures
 ---
 
+When integrating with [reanimated](/docs/animations/animations), we recommend using [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/docs/).
 
-In combination with [reanimated](/docs/animations/animations), we recommend to use [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/docs/).
-
-We have built a couple of [tutorial](docs/tutorials#gestures) that showcase the use of advanced gestures in the context of Skia drawings.
+We've prepared a few [tutorials](docs/tutorials#gestures) that showcase the use of advanced gestures within the context of Skia drawings.
 
 ```tsx twoslash
 import { useWindowDimensions } from "react-native";
 import { Canvas, Circle, Fill } from "@shopify/react-native-skia";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-
 import { useSharedValue, withDecay } from "react-native-reanimated";
-
 
 export const AnimationWithTouchHandler = () => {
   const { width } = useWindowDimensions();
@@ -47,18 +44,14 @@ export const AnimationWithTouchHandler = () => {
 ```
 
 ## Element Tracking
+A common use-case involves activating gestures only for a specific element on the Canvas. The Gesture Handler excels in this area as it can account for all the transformations applied to an element, such as translations, scaling, and rotations. To track each element, overlay an animated view on it, ensuring that the same transformations applied to the canvas element are mirrored on the animated view.
 
-A common use-case is to have gestures only activate the gesture for a particular element on the Canvas.
-Gesture Handler is really good at that because it can take into account all the transformations applied to an element (translations, scaling, rotations).
-For each element you would like to track, simply overlay an animated view onto which you apply the exact same transformations than the one you apply to your canvas element.
+In the example below, each circle is tracked separately by two gesture handlers.
 
-In the example below, each circle is track separately by two gesture handlers.
-
-```tsx
+```tsx twoslash
 import { View } from "react-native";
 import { Canvas, Circle, Fill } from "@shopify/react-native-skia";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-
 import Animated, { useSharedValue, useAnimatedStyle } from "react-native-reanimated";
 
 const radius = 30;
@@ -67,8 +60,8 @@ export const ElementTracking = () => {
   // The position of the ball
   const x = useSharedValue(100);
   const y = useSharedValue(100);
-  // This is the style we will apply to the "invisible" animated view
-  // that will overlay the ball
+  // This style will be applied to the "invisible" animated view
+  // that overlays the ball
   const style = useAnimatedStyle(() => ({
     position: "absolute",
     top: -radius,
