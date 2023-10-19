@@ -50,8 +50,7 @@ export const usePathInterpolation = (
     () => value.value,
     (val) => {
       interpolatePaths(val, input, outputRange, options, output.value);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (output as any)._value = output.value;
+      notifiyChange(output);
     }
   );
   return output;
