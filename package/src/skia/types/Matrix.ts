@@ -21,6 +21,10 @@ export interface SkMatrix extends SkJSIInstance<"Matrix"> {
   scale: (x: number, y?: number) => SkMatrix;
   skew: (x: number, y: number) => SkMatrix;
   rotate: (theta: number) => SkMatrix;
+  postTranslate: (x: number, y: number) => SkMatrix;
+  postScale: (x: number, y?: number) => SkMatrix;
+  postSkew: (x: number, y: number) => SkMatrix;
+  postRotate: (theta: number) => SkMatrix;
   identity: () => SkMatrix;
   get: () => number[];
 }

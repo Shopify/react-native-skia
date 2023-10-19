@@ -1,3 +1,4 @@
+import type { SkJSIInstance } from "@shopify/react-native-skia";
 import {
   interpolatePaths,
   Skia,
@@ -54,6 +55,12 @@ export const usePathInterpolation = (
     }
   );
   return output;
+};
+
+export const notifiyChange = (value: SharedValue<unknown>) => {
+  "worklet";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (value as any)._value = value.value;
 };
 
 const fade = (t: number) => {

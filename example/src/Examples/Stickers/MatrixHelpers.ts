@@ -1,30 +1,50 @@
 import type { SkMatrix, Vector } from "@shopify/react-native-skia";
-import { Skia, MatrixIndex } from "@shopify/react-native-skia";
+import { MatrixIndex } from "@shopify/react-native-skia";
+import type { SharedValue } from "react-native-reanimated";
 
-export const scale = (matrix: SkMatrix, s: number, origin: Vector) => {
+import { notifiyChange } from "../../components/Animations";
+
+export const scale = (
+  matrix: SharedValue<SkMatrix>,
+  offset: SkMatrix,
+  s: number,
+  origin: Vector
+) => {
   "worklet";
-  const source = Skia.Matrix(matrix.get());
+  const source = matrix.value;
+  source.identity();
+  source.concat(offset);
   source.translate(origin.x, origin.y);
   source.scale(s, s);
   source.translate(-origin.x, -origin.y);
-  return source;
+  notifiyChange(matrix);
 };
 
-export const rotateZ = (matrix: SkMatrix, theta: number, origin: Vector) => {
+export const rotateZ = (
+  matrix: SharedValue<SkMatrix>,
+  offset: SkMatrix,
+  theta: number,
+  origin: Vector
+) => {
   "worklet";
-  const source = Skia.Matrix(matrix.get());
+  const source = matrix.value;
+  source.identity();
+  source.concat(offset);
   source.translate(origin.x, origin.y);
   source.rotate(theta);
   source.translate(-origin.x, -origin.y);
-  return source;
+  notifiyChange(matrix);
 };
 
-export const translate = (matrix: SkMatrix, x: number, y: number) => {
+export const translate = (
+  matrix: SharedValue<SkMatrix>,
+  x: number,
+  y: number
+) => {
   "worklet";
-  const m = Skia.Matrix();
-  m.translate(x, y);
-  m.concat(matrix);
-  return m;
+  const source = matrix.value;
+  source.postTranslate(x, y);
+  notifiyChange(matrix);
 };
 
 export const toM4 = (m3: SkMatrix) => {

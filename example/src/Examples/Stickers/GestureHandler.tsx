@@ -22,29 +22,31 @@ export const GestureHandler = ({
   debug,
 }: GestureHandlerProps) => {
   const { x, y, width, height } = dimensions;
-  const origin = useSharedValue(Skia.Point(0, 0));
+  const origin = useSharedValue({ x: 0, y: 0 });
   const offset = useSharedValue(Skia.Matrix());
 
   const pan = Gesture.Pan().onChange((e) => {
-    matrix.value = translate(matrix.value, e.changeX, e.changeY);
+    translate(matrix, e.changeX, e.changeY);
   });
 
   const rotate = Gesture.Rotation()
     .onBegin((e) => {
-      origin.value = Skia.Point(e.anchorX, e.anchorY);
-      offset.value = matrix.value;
+      origin.value = { x: e.anchorX, y: e.anchorY };
+      offset.value.identity();
+      offset.value.concat(matrix.value);
     })
     .onChange((e) => {
-      matrix.value = rotateZ(offset.value, e.rotation, origin.value);
+      rotateZ(matrix, offset.value, e.rotation, origin.value);
     });
 
   const pinch = Gesture.Pinch()
     .onBegin((e) => {
-      origin.value = Skia.Point(e.focalX, e.focalY);
-      offset.value = matrix.value;
+      origin.value = { x: e.focalX, y: e.focalY };
+      offset.value.identity();
+      offset.value.concat(matrix.value);
     })
     .onChange((e) => {
-      matrix.value = scale(offset.value, e.scale, origin.value);
+      scale(matrix, offset.value, e.scale, origin.value);
     });
 
   const style = useAnimatedStyle(() => {
