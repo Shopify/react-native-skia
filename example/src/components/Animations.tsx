@@ -1,7 +1,14 @@
+import {
+  interpolatePaths,
+  Skia,
+  type SkPath,
+} from "@shopify/react-native-skia";
 import { useEffect } from "react";
+import type { ExtrapolationType, SharedValue } from "react-native-reanimated";
 import {
   Easing,
   cancelAnimation,
+  useAnimatedReaction,
   useFrameCallback,
   useSharedValue,
   withRepeat,
@@ -29,6 +36,24 @@ export const useClock = () => {
     clock.value = info.timeSinceFirstFrame;
   });
   return clock;
+};
+
+export const usePathInterpolation = (
+  value: SharedValue<number>,
+  input: number[],
+  outputRange: SkPath[],
+  options?: ExtrapolationType
+) => {
+  const output = useSharedValue(Skia.Path.Make());
+  useAnimatedReaction(
+    () => value.value,
+    (val) => {
+      interpolatePaths(val, input, outputRange, options, output.value);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (output as any)._value = output.value;
+    }
+  );
+  return output;
 };
 
 const fade = (t: number) => {
