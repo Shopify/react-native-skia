@@ -5,7 +5,7 @@ sidebar_label: Animated Images
 slug: /animated-images
 ---
 
-React Native Skia supports animated images.
+React Native Skia supports animated images. Supported formats are GIF and animated WebP.
 
 ## Using Reanimated
 
@@ -22,6 +22,7 @@ import {
 } from "@shopify/react-native-skia";
 
 export const AnimatedImages = () => {
+  // This can be an animated GIF or WebP file
   const bird = useAnimatedImageValue(
     require("../../assets/birdFlying.gif")
   );
