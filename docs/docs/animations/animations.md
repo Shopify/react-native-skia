@@ -73,6 +73,25 @@ import {
 
 :::
 
+### Canvas Size
+
+The Canvas element has a `onSize` property that can receive a shared value that will be updated when the canvas size changes.
+
+```tsx twoslash
+import {useSharedValue} from "react-native-reanimated";
+import {Fill, Canvas} from "@shopify/react-native-skia";
+
+const Demo = () => {
+  // size will be updated as the canvas size changes
+  const size = useSharedValue({ width: 0, height: 0 });
+  return (
+    <Canvas style={{ flex: 1 }} onSize={size}>
+      <Fill color="white" />
+    </Canvas>
+  );
+};
+```
+
 ## Reanimated 2
 
 :::info
