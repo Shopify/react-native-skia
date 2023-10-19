@@ -15,6 +15,7 @@
 #include "SkCanvas.h"
 #include "SkColorSpace.h"
 #include "SkSurface.h"
+#include "include/gpu/GrDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
 

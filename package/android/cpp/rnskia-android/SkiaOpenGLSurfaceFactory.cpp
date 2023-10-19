@@ -1,6 +1,13 @@
 #include "SkiaOpenGLHelper.h"
 #include <SkiaOpenGLSurfaceFactory.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
+
+#pragma clang diagnostic pop
+
 namespace RNSkia {
 
 thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
@@ -103,8 +110,8 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
       samples = maxSamples;
     }
 
-    GrBackendRenderTarget renderTarget(_width, _height, samples, stencil,
-                                       fboInfo);
+    auto renderTarget = GrBackendRenderTargets::MakeGL(_width, _height, samples,
+                                                       stencil, fboInfo);
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
