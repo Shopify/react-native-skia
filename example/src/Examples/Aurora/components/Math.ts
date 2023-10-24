@@ -6,15 +6,20 @@ export const bilinearInterpolate = (
   size: Vector,
   pos: Vector
 ) => {
+  "worklet";
   const uv = vec(pos.x / size.x, pos.y / size.y);
   const colorA = mixColors(uv.x, color0, color1);
   const colorB = mixColors(uv.x, color2, color3);
   return mixColors(uv.y, colorA, colorB);
 };
 
-export const inRadius = (a: Vector, b: Vector, r = 20) => dist(a, b) < r;
+export const inRadius = (a: Vector, b: Vector, r = 20) => {
+  "worklet";
+  return dist(a, b) < r;
+};
 
 export const getPointAtLength = (length: number, from: Vector, to: Vector) => {
+  "worklet";
   const angle = Math.atan2(to.y - from.y, to.x - from.x);
   const x = from.x + length * Math.cos(angle);
   const y = from.y + length * Math.sin(angle);
@@ -22,6 +27,7 @@ export const getPointAtLength = (length: number, from: Vector, to: Vector) => {
 };
 
 export const symmetric = (v: Vector, center: Vector) => {
+  "worklet";
   const d = dist(v, center);
   return getPointAtLength(d * 2, v, center);
 };

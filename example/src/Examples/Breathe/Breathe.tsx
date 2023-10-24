@@ -1,9 +1,6 @@
 import React, { useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
-import type { SkiaValue } from "@shopify/react-native-skia";
 import {
-  useComputedValue,
-  useLoop,
   BlurMask,
   vec,
   Canvas,
@@ -11,16 +8,19 @@ import {
   Fill,
   Group,
   polar2Canvas,
-  Easing,
   mix,
 } from "@shopify/react-native-skia";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
+
+import { useLoop } from "../../components/Animations";
 
 const c1 = "#61bea2";
 const c2 = "#529ca0";
 
 interface RingProps {
   index: number;
-  progress: SkiaValue<number>;
+  progress: SharedValue<number>;
 }
 
 const Ring = ({ index, progress }: RingProps) => {
@@ -32,12 +32,12 @@ const Ring = ({ index, progress }: RingProps) => {
   );
 
   const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useComputedValue(() => {
+  const transform = useDerivedValue(() => {
     const { x, y } = polar2Canvas(
-      { theta, radius: progress.current * R },
+      { theta, radius: progress.value * R },
       { x: 0, y: 0 }
     );
-    const scale = mix(progress.current, 0.3, 1);
+    const scale = mix(progress.value, 0.3, 1);
     return [{ translateX: x }, { translateY: y }, { scale }];
   }, [progress, R]);
 
@@ -59,18 +59,15 @@ export const Breathe = () => {
     [height, width]
   );
 
-  const progress = useLoop({
-    duration: 3000,
-    easing: Easing.inOut(Easing.ease),
-  });
+  const progress = useLoop({ duration: 3000 });
 
-  const transform = useComputedValue(
-    () => [{ rotate: mix(progress.current, -Math.PI, 0) }],
+  const transform = useDerivedValue(
+    () => [{ rotate: mix(progress.value, -Math.PI, 0) }],
     [progress]
   );
 
   return (
-    <Canvas style={styles.container} debug>
+    <Canvas style={styles.container}>
       <Fill color="rgb(36,43,56)" />
       <Group origin={center} transform={transform} blendMode="screen">
         <BlurMask style="solid" blur={40} />

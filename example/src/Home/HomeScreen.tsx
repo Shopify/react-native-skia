@@ -89,11 +89,6 @@ export const HomeScreen = () => {
         route="Transitions"
       />
       <HomeScreenButton
-        title="🎥 Animation"
-        description="Animated with Skia"
-        route="Animation"
-      />
-      <HomeScreenButton
         title="🏎 Performance"
         description="Drawing Performance Test"
         route="Performance"

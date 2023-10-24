@@ -130,12 +130,7 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Animations",
-      items: [
-        "animations/reanimated",
-        "animations/values",
-        "animations/animations",
-        "animations/touch-events",
-      ],
+      items: ["animations/animations", "animations/gestures"],
     },
     {
       type: "doc",

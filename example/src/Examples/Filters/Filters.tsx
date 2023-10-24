@@ -1,5 +1,5 @@
 import React from "react";
-import { useWindowDimensions } from "react-native";
+import { Pressable, useWindowDimensions } from "react-native";
 import {
   useImage,
   Canvas,
@@ -7,10 +7,11 @@ import {
   Skia,
   Shader,
   mix,
-  useComputedValue,
   Fill,
-  useLoop,
 } from "@shopify/react-native-skia";
+import { useDerivedValue } from "react-native-reanimated";
+
+import { useLoop } from "../../components/Animations";
 
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -26,29 +27,31 @@ export const Filters = () => {
   const progress = useLoop({ duration: 1500 });
   const [, setState] = React.useState(0);
 
-  const uniforms = useComputedValue(
-    () => ({ r: mix(progress.current, 1, 100) }),
+  const uniforms = useDerivedValue(
+    () => ({ r: mix(progress.value, 1, 100) }),
     [progress]
   );
 
   const image = useImage(require("../../assets/oslo.jpg"));
 
   return (
-    <Canvas style={{ width, height }} onTouch={() => setState((i) => i + 1)}>
-      <Fill>
-        <Shader source={source} uniforms={uniforms}>
-          <ImageShader
-            image={image}
-            fit="cover"
-            x={0}
-            y={0}
-            tx="repeat"
-            ty="repeat"
-            width={width}
-            height={height}
-          />
-        </Shader>
-      </Fill>
-    </Canvas>
+    <Pressable style={{ width, height }} onPress={() => setState((i) => i + 1)}>
+      <Canvas style={{ width, height }}>
+        <Fill>
+          <Shader source={source} uniforms={uniforms}>
+            <ImageShader
+              image={image}
+              fit="cover"
+              x={0}
+              y={0}
+              tx="repeat"
+              ty="repeat"
+              width={width}
+              height={height}
+            />
+          </Shader>
+        </Fill>
+      </Canvas>
+    </Pressable>
   );
 };

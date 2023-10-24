@@ -36,14 +36,6 @@ export function throwOnMissingReanimated() {
   }
 }
 
-function throwOnMissingReanimated3() {
-  if (!HAS_REANIMATED3) {
-    throw new Error(
-      `Reanimated version ${reanimatedVersion} is not supported, please upgrade to 3.0.0 or newer.`
-    );
-  }
-}
-
 export const useSharedValue =
   Reanimated2?.useSharedValue ||
   ((value: number) => useMemo(() => ({ value }), [value]));
@@ -56,6 +48,10 @@ export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated;
 export const isSharedValue = <T>(
   value: unknown
 ): value is SharedValueType<T> => {
-  throwOnMissingReanimated3();
-  return !!value && Reanimated3.isSharedValue(value);
+  return (
+    !!value &&
+    (Reanimated3
+      ? Reanimated3.isSharedValue(value)
+      : (value as any).value !== undefined)
+  );
 };
