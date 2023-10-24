@@ -19,8 +19,8 @@ import {
   FitBox,
   interpolatePaths,
 } from "@shopify/react-native-skia";
-import { useAnimatedReaction, useSharedValue } from "react-native-reanimated";
 
+import { useAnimatedReaction, useSharedValue } from "react-native-reanimated";
 import { useLoop, usePathInterpolation } from "../../components/Animations";
 
 import { Title } from "./components/Title";

@@ -6,10 +6,11 @@ import {
 } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import type { ExtrapolationType, SharedValue } from "react-native-reanimated";
+
+import { useEffect } from "react";
 import {
   Easing,
   cancelAnimation,
-  useAnimatedReaction,
   useFrameCallback,
   useSharedValue,
   withRepeat,
