@@ -39,6 +39,7 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [Introducing Gen-Z Mode (youtu.be)](https://www.youtube.com/watch?v=0FC8O9mRUmg)
 * [iPhone wallpapers, but in React Native Skia](https://www.youtube.com/watch?v=Apqd749v34I)
 * [Experimental Blur Gradient in React Native](https://www.youtube.com/watch?v=oboF_H1MApo)
+* [Animated Gradient with React Native Skia (youtu.be)](https://www.youtube.com/watch?v=ZSPvvGU2LBg)
 
 ## Noise
 * [The Joy of Painting with React Native (youtu.be)](https://www.youtube.com/watch?v=GQqL1OCoOFM)
