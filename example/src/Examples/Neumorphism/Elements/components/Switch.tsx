@@ -1,4 +1,3 @@
-import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   mix,
   Group,
@@ -8,9 +7,9 @@ import {
   rect,
   rrect,
   Circle,
-  useComputedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
+import { useDerivedValue, type SharedValue } from "react-native-reanimated";
 
 import { Theme } from "./Theme";
 
@@ -22,15 +21,15 @@ interface SwitchProps {
   x: number;
   y: number;
   width: number;
-  pressed: SkiaValue<number>;
+  pressed: SharedValue<number>;
 }
 
 export const Switch = ({ x, y, width, pressed }: SwitchProps) => {
-  const transform = useComputedValue(
-    () => [{ translateX: mix(pressed.current, 0, 24) }],
+  const transform = useDerivedValue(
+    () => [{ translateX: mix(pressed.value, 0, 24) }],
     [pressed]
   );
-  const r = useComputedValue(() => mix(pressed.current, 0, 2), [pressed]);
+  const r = useDerivedValue(() => mix(pressed.value, 0, 2), [pressed]);
   return (
     <FitBox src={rect(0, 0, 48, 24)} dst={rect(x, y, width, width * 2)}>
       <Box box={border} color={Theme.white1}>

@@ -1,4 +1,3 @@
-import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   BoxShadow,
   Box,
@@ -9,22 +8,23 @@ import {
   translate,
   LinearGradient,
   vec,
-  useComputedValue,
 } from "@shopify/react-native-skia";
 import React from "react";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 import { Knob } from "./Knob";
 
 interface SliderProps {
   x: number;
   y: number;
-  progress: SkiaValue<number>;
+  progress: SharedValue<number>;
 }
 
 export const Slider = ({ x, y, progress }: SliderProps) => {
-  const width = useComputedValue(() => progress.current * 192, [progress]);
-  const transform = useComputedValue(
-    () => [{ translateX: progress.current * 192 }],
+  const width = useDerivedValue(() => progress.value * 192, [progress]);
+  const transform = useDerivedValue(
+    () => [{ translateX: progress.value * 192 }],
     [progress]
   );
   return (

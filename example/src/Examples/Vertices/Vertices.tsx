@@ -1,23 +1,21 @@
 import React, { useMemo } from "react";
 import { useWindowDimensions } from "react-native";
+import cdt2d from "cdt2d";
 import {
   Canvas,
-  useClockValue,
   vec,
-  useComputedValue,
   Vertices,
   Skia,
   isEdge,
 } from "@shopify/react-native-skia";
-import cdt2d from "cdt2d";
-import SimplexNoise from "simplex-noise";
+import { useDerivedValue } from "react-native-reanimated";
 
-import "./cdt2d.d";
+import { getSeed, perlin, useClock } from "../../components/Animations";
 
 const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);
 
-const F = 6000;
+const F = 5000;
 const palette = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf"];
 
 export const Demo = () => {
@@ -48,18 +46,18 @@ export const Demo = () => {
     [indices]
   );
 
-  const clock = useClockValue();
+  const clock = useClock();
+  const seeds = new Array(defaultVertices.length).fill(0).map(() => getSeed());
 
-  const vertices = useComputedValue(
+  const vertices = useDerivedValue(
     () =>
       defaultVertices.map((vertex, i) => {
         if (isEdge(vertex, window)) {
           return vertex;
         }
-        const noise = new SimplexNoise(i);
         return {
-          x: vertex.x + AX * noise.noise2D(clock.current / F, 0),
-          y: vertex.y + AY * noise.noise2D(0, clock.current / F),
+          x: vertex.x + AX * perlin(seeds[i], clock.value / F, 0),
+          y: vertex.y + AY * perlin(seeds[i], 0, clock.value / F),
         };
       }),
     [clock]

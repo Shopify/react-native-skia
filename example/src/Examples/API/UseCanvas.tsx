@@ -1,28 +1,22 @@
-import type { SkiaValue, SkSize } from "@shopify/react-native-skia";
-import {
-  useValue,
-  Canvas,
-  Fill,
-  Group,
-  Rect,
-  rect,
-  useComputedValue,
-} from "@shopify/react-native-skia";
+import type { SkSize } from "@shopify/react-native-skia";
+import { Canvas, Fill, Group, Rect, rect } from "@shopify/react-native-skia";
 import React, { useEffect, useRef } from "react";
 import { View, Animated } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useContextBridge } from "its-fine";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
 interface MyCompProps {
-  size: SkiaValue<SkSize>;
+  size: SharedValue<SkSize>;
 }
 
 const MyComp = ({ size }: MyCompProps) => {
   const navigation = useNavigation();
   const { routeNames } = navigation.getState();
   console.log({ routeNames });
-  const rct = useComputedValue(() => {
-    return rect(0, 0, size.current.width, size.current.height / 2);
+  const rct = useDerivedValue(() => {
+    return rect(0, 0, size.value.width, size.value.height / 2);
   }, [size]);
   return (
     <Group>
@@ -34,7 +28,7 @@ const MyComp = ({ size }: MyCompProps) => {
 
 export const UseCanvas = () => {
   const Bridge = useContextBridge();
-  const size = useValue({ width: 0, height: 0 });
+  const size = useSharedValue({ width: 0, height: 0 });
   const height = useRef(new Animated.Value(0));
   useEffect(() => {
     Animated.loop(

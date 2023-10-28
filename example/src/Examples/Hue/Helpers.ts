@@ -8,14 +8,17 @@ const quadraticIn = (t: number) => {
 };
 
 const fract = (x: number) => {
+  "worklet";
   return x - Math.floor(x);
 };
 
 const clamp = (value: number, lowerBound: number, upperBound: number) => {
+  "worklet";
   return Math.min(Math.max(lowerBound, value), upperBound);
 };
 
 const hsv2rgb = (h: number, s: number, v: number) => {
+  "worklet";
   const K = {
     x: 1,
     y: 2 / 3,
@@ -42,6 +45,7 @@ const hsv2rgb = (h: number, s: number, v: number) => {
 };
 
 const normalizeRad = (value: number) => {
+  "worklet";
   const rest = value % TAU;
   return rest > 0 ? rest : TAU + rest;
 };
@@ -51,6 +55,7 @@ export const polar2Color = (
   radius: number,
   maxRadius: number
 ) => {
+  "worklet";
   const h = normalizeRad(theta) / TAU;
   const s = quadraticIn(radius / maxRadius);
   const { r, g, b } = hsv2rgb(h, s, 1);

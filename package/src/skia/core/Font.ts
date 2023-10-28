@@ -9,20 +9,20 @@ import type { SkTypefaceFontProvider } from "../types/Paragraph/TypefaceFontProv
 
 import { useTypeface } from "./Typeface";
 
+const defaultFontSize = 14;
+
 /**
  * Returns a Skia Font object
  * */
 export const useFont = (
   font: DataSourceParam,
-  size?: number,
+  size = defaultFontSize,
   onError?: (err: Error) => void
 ) => {
   const typeface = useTypeface(font, onError);
   return useMemo(() => {
-    if (typeface && size) {
+    if (typeface) {
       return Skia.Font(typeface, size);
-    } else if (typeface && !size) {
-      return Skia.Font(typeface);
     } else {
       return null;
     }
@@ -52,7 +52,7 @@ interface RNFontStyle {
 
 const defaultFontStyle: RNFontStyle = {
   fontFamily: "System",
-  fontSize: 14,
+  fontSize: defaultFontSize,
   fontStyle: "normal",
   fontWeight: "normal",
 };

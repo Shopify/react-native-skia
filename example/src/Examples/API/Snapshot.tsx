@@ -14,16 +14,16 @@ import {
   Skia,
   RoundedRect,
   makeImageFromView,
-  useLoop,
-  useComputedValue,
   mix,
   Shader,
   ImageShader,
-  useValue,
   useImage,
   Image,
 } from "@shopify/react-native-skia";
 import { Switch } from "react-native-gesture-handler";
+import { useDerivedValue, useSharedValue } from "react-native-reanimated";
+
+import { useLoop } from "../../components/Animations";
 
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
@@ -39,17 +39,17 @@ export const Snapshot = () => {
   const viewRef = useRef<View>(null);
 
   const progress = useLoop({ duration: 1500 });
-  const uniforms = useComputedValue(
-    () => ({ r: mix(progress.current, 1, 100) }),
+  const uniforms = useDerivedValue(
+    () => ({ r: mix(progress.value, 1, 100) }),
     [progress]
   );
 
-  const image = useValue<SkImage | null>(null);
+  const image = useSharedValue<SkImage | null>(null);
   const takeSnapshot = useCallback(async () => {
     if (viewRef.current == null) {
       return;
     }
-    image.current = await makeImageFromView(viewRef);
+    image.value = await makeImageFromView(viewRef);
   }, [image]);
 
   return (
