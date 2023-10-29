@@ -4,7 +4,7 @@ import {
   useSharedValue,
 } from "../../external/reanimated/moduleWrapper";
 import { Skia } from "../Skia";
-import type { DataSourceParam } from "../types";
+import type { DataSourceParam, SkImage } from "../types";
 
 import { useRawData } from "./Data";
 
@@ -24,7 +24,7 @@ const DEFAULT_FRAME_DURATION = 60;
 
 export const useAnimatedImageValue = (source: DataSourceParam) => {
   throwOnMissingReanimated();
-  const currentFrame = useSharedValue(null);
+  const currentFrame = useSharedValue<null | SkImage>(null);
   const lastTimestamp = useSharedValue(0);
   const animatedImage = useAnimatedImage(source, (err) => {
     console.error(err);

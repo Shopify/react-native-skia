@@ -1,4 +1,4 @@
-import { useEffect, type DependencyList } from "react";
+import { useEffect } from "react";
 
 import {
   useSharedValue,
@@ -10,7 +10,7 @@ import {
 export const useDerivedValueOnJS = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: () => any,
-  deps?: DependencyList
+  deps: unknown[]
 ) => {
   const value = useSharedValue(fn());
   useEffect(() => {
