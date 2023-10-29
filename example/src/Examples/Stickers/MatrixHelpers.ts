@@ -1,8 +1,6 @@
 import type { SkMatrix, Vector } from "@shopify/react-native-skia";
-import { MatrixIndex } from "@shopify/react-native-skia";
+import { MatrixIndex, notifiyChange } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
-
-import { notifiyChange } from "../../components/Animations";
 
 export const scale = (
   matrix: SharedValue<SkMatrix>,

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { DependencyList } from "react";
 import type {
   FrameCallback,
   FrameInfo,
@@ -51,9 +52,18 @@ export const startMapper: (
   inputs?: unknown[],
   outputs?: unknown[]
 ) => number = Reanimated2?.startMapper || throwOnMissingReanimated;
+
 export const stopMapper: (mapperID: number) => void =
   Reanimated2?.stopMapper || throwOnMissingReanimated;
+
 export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated;
+
+export const useAnimatedReaction: <T>(
+  prepare: () => T,
+  react: (v: T) => void,
+  dependencies?: DependencyList
+) => void = Reanimated2?.useAnimatedReaction || throwOnMissingReanimated;
+
 export const isSharedValue = <T>(value: unknown): value is SharedValue<T> => {
   return (
     !!value &&

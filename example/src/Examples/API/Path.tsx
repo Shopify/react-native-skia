@@ -17,11 +17,10 @@ import {
   TextPath,
   useFont,
   FitBox,
-  interpolatePaths,
+  usePathInterpolation,
 } from "@shopify/react-native-skia";
 
-import { useAnimatedReaction, useSharedValue } from "react-native-reanimated";
-import { useLoop, usePathInterpolation } from "../../components/Animations";
+import { useLoop } from "../../components/Animations";
 
 import { Title } from "./components/Title";
 import {

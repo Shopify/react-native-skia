@@ -1,17 +1,7 @@
-import type { SkJSIInstance } from "@shopify/react-native-skia";
-import {
-  interpolatePaths,
-  Skia,
-  type SkPath,
-} from "@shopify/react-native-skia";
-import { useEffect } from "react";
-import type { ExtrapolationType, SharedValue } from "react-native-reanimated";
-
 import { useEffect } from "react";
 import {
   Easing,
   cancelAnimation,
-  useFrameCallback,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -30,37 +20,6 @@ export const useLoop = ({ duration }: { duration: number }) => {
     };
   }, [duration, progress]);
   return progress;
-};
-
-export const useClock = () => {
-  const clock = useSharedValue(0);
-  useFrameCallback((info) => {
-    clock.value = info.timeSinceFirstFrame;
-  });
-  return clock;
-};
-
-export const usePathInterpolation = (
-  value: SharedValue<number>,
-  input: number[],
-  outputRange: SkPath[],
-  options?: ExtrapolationType
-) => {
-  const output = useSharedValue(Skia.Path.Make());
-  useAnimatedReaction(
-    () => value.value,
-    (val) => {
-      interpolatePaths(val, input, outputRange, options, output.value);
-      notifiyChange(output);
-    }
-  );
-  return output;
-};
-
-export const notifiyChange = (value: SharedValue<unknown>) => {
-  "worklet";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (value as any)._value = value.value;
 };
 
 const fade = (t: number) => {
