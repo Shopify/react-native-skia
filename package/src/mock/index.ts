@@ -6,6 +6,7 @@ import { ValueApi } from "../values/web";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Noop: () => any = () => undefined;
 const NoopValue = () => ({ current: 0 });
+const NoopSharedValue = () => ({ value: 0 });
 
 export const Mock = (CanvasKit: CanvasKit) => {
   global.SkiaApi = JsiSkApi(CanvasKit);
@@ -21,6 +22,7 @@ export const Mock = (CanvasKit: CanvasKit) => {
     ...require("../dom/nodes"),
     // We could use the real Canvas if we mock the SkiaView component for node
     Canvas: Noop,
+    // Skia Animations
     useValue: NoopValue,
     useComputedValue: NoopValue,
     useTouchHandler: Noop,
@@ -29,6 +31,9 @@ export const Mock = (CanvasKit: CanvasKit) => {
     useSpring: NoopValue,
     useClockValue: NoopValue,
     useValueEffect: Noop,
+    // Reanimated hooks
+    useClock: NoopSharedValue,
+    usePathInterpolation: NoopSharedValue,
     useRawData: Noop,
     useData: Noop,
     useFont: () => Skia.Font(undefined, 0),
