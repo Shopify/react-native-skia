@@ -38,6 +38,8 @@ angryPath.cubicTo(50.63, 76.96, 40.4, 74.65, 27.48, 54.51);
 angryPath.cubicTo(24.68, 50.15, 20.85, 40.32, 27.48, 54.51);
 angryPath.close();
 
+console.log({ angry: angryPath.toSVGString() });
+
 const normalPath = Skia.Path.Make();
 normalPath.moveTo(20.9, 30.94);
 normalPath.cubicTo(31.26, 31.66, 38.61, 32.2, 42.96, 32.56);
@@ -47,6 +49,8 @@ normalPath.cubicTo(61.95, 60.95, 45.72, 58.91, 32.42, 49.7);
 normalPath.cubicTo(23.56, 43.56, 19.71, 37.3, 20.9, 30.94);
 normalPath.close();
 
+console.log({ normal: normalPath.toSVGString() });
+
 const goodPath = Skia.Path.Make();
 goodPath.moveTo(21, 45);
 goodPath.cubicTo(21, 36.78, 24.26, 29.42, 29.41, 24.47);
@@ -55,6 +59,8 @@ goodPath.cubicTo(58.25, 18, 69, 30.09, 69, 45);
 goodPath.cubicTo(69, 59.91, 58.25, 72, 45, 72);
 goodPath.cubicTo(31.75, 72, 21, 59.91, 21, 45);
 goodPath.close();
+
+console.log({ good: goodPath.toSVGString() });
 
 const c1 = angryPath.computeTightBounds();
 

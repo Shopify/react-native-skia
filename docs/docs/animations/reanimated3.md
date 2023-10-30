@@ -9,8 +9,6 @@ React Native Skia offers integration with [Reanimated v3](https://docs.swmansion
 
 Note: This integration is available starting from Reanimated v3. If you are using Reanimated 2, refer to the [Reanimated 2 support section](#reanimated-2).
 
-## Hello World
-
 React Native Skia supports direct usage of Reanimated's shared and derived values as properties. There's no need for functions like `createAnimatedComponent` or `useAnimatedProps`; simply pass the reanimated values directly as properties.
 
 ```tsx twoslash
@@ -46,32 +44,6 @@ export const HelloWorld = () => {
   );
 };
 ```
-
-:::info
-
-It's important to note that Reanimated and Skia employ different color formats. For color interpolation in Skia, use `interpolateColors`. If you're using interpolateColor from Reanimated, ensure you convert it with `convertToRGBA` from Reanimated.
-
-```tsx twoslash
-import {
-  interpolateColor,
-  useDerivedValue,
-  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet in the types
-  // @ts-ignore
-  convertToRGBA,
-} from "react-native-reanimated";
-
-  const color = useDerivedValue(() =>
-    convertToRGBA(
-      interpolateColor(
-        0,
-        [0, 1],
-        ["cyan", "magenta"]
-      )
-    )
-  );
-```
-
-:::
 
 ### Canvas Size
 

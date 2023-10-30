@@ -132,8 +132,8 @@ const sidebars = {
       label: "Animations",
       items: [
         "animations/reanimated3",
-        "animations/hooks",
         "animations/gestures",
+        "animations/hooks",
         "animations/textures",
         "animations/reanimated2",
       ],
