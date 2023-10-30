@@ -1,3 +1,5 @@
+import type { FrameInfo } from "react-native-reanimated";
+
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
 import type { DataSourceParam, SkImage } from "../../skia/types";
 
@@ -20,8 +22,7 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
   const frameDuration =
     animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useFrameCallback((frameInfo: any) => {
+  useFrameCallback((frameInfo: FrameInfo) => {
     if (!animatedImage) {
       currentFrame.value = null;
       return;

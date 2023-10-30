@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   useSharedValue,
@@ -12,7 +12,8 @@ export const useDerivedValueOnJS = (
   fn: () => any,
   deps: unknown[]
 ) => {
-  const value = useSharedValue(fn());
+  const init = useMemo(() => fn(), [fn]);
+  const value = useSharedValue(init);
   useEffect(() => {
     const mapperId = startMapper(() => {
       "worklet";
