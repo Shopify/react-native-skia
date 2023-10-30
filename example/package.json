@@ -81,7 +81,6 @@
       "<rootDir>/lib/typescript",
       "setup.(ts|tsx)$"
     ],
-    "globalSetup": "<rootDir>/globalJestSetup.js",
     "setupFilesAfterEnv": [
       "<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js",
       "<rootDir>/jestSetup.js"

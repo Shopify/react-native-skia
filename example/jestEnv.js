@@ -1,4 +1,17 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
+import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
+
+const LoadSkiaWeb = async (opts) => {
+  if (global.CanvasKit !== undefined) {
+    return;
+  }
+  const CanvasKit = await CanvasKitInit(opts);
+  // The CanvasKit API is stored on the global object and used
+  // to create the JsiSKApi in the Skia.web.ts file.
+  return CanvasKit;
+};
+
+// eslint-disable-next-line import/no-extraneous-dependencies
 const NodeEnvironment = require("jest-environment-node").TestEnvironment;
 
 class SkiaEnvironment extends NodeEnvironment {
@@ -8,9 +21,6 @@ class SkiaEnvironment extends NodeEnvironment {
 
   async setup() {
     await super.setup();
-    const {
-      LoadSkiaWeb,
-    } = require("@shopify/react-native-skia/lib/commonjs/web/LoadSkiaWeb");
     this.global.CanvasKit = await LoadSkiaWeb();
   }
 
