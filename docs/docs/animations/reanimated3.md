@@ -1,0 +1,93 @@
+---
+id: reanimated3
+title: Reanimated 3
+sidebar_label: Reanimated 3
+slug: /animations/reanimated3
+---
+
+React Native Skia offers integration with [Reanimated v3](https://docs.swmansion.com/react-native-reanimated/), enabling animations to be executed on the UI-thread.
+
+Note: This integration is available starting from Reanimated v3. If you are using Reanimated 2, refer to the [Reanimated 2 support section](#reanimated-2).
+
+## Hello World
+
+React Native Skia supports direct usage of Reanimated's shared and derived values as properties. There's no need for functions like `createAnimatedComponent` or `useAnimatedProps`; simply pass the reanimated values directly as properties.
+
+```tsx twoslash
+import {useEffect} from "react";
+import {Canvas, Circle, Group} from "@shopify/react-native-skia";
+import {
+  useDerivedValue,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
+
+export const HelloWorld = () => {
+  const size = 256;
+  const r = useSharedValue(0);
+  const c = useDerivedValue(() => size - r.value);
+  useEffect(() => {
+    r.value = withRepeat(withTiming(size * 0.33, { duration: 1000 }), -1);
+  }, [r, size]);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group blendMode="multiply">
+        <Circle cx={r} cy={r} r={r} color="cyan" />
+        <Circle cx={c} cy={r} r={r} color="magenta" />
+        <Circle
+          cx={size/2}
+          cy={c}
+          r={r}
+          color="yellow"
+        />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+:::info
+
+It's important to note that Reanimated and Skia employ different color formats. For color interpolation in Skia, use `interpolateColors`. If you're using interpolateColor from Reanimated, ensure you convert it with `convertToRGBA` from Reanimated.
+
+```tsx twoslash
+import {
+  interpolateColor,
+  useDerivedValue,
+  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet in the types
+  // @ts-ignore
+  convertToRGBA,
+} from "react-native-reanimated";
+
+  const color = useDerivedValue(() =>
+    convertToRGBA(
+      interpolateColor(
+        0,
+        [0, 1],
+        ["cyan", "magenta"]
+      )
+    )
+  );
+```
+
+:::
+
+### Canvas Size
+
+The Canvas element has a `onSize` property that can receive a shared value that will be updated when the canvas size changes.
+
+```tsx twoslash
+import {useSharedValue} from "react-native-reanimated";
+import {Fill, Canvas} from "@shopify/react-native-skia";
+
+const Demo = () => {
+  // size will be updated as the canvas size changes
+  const size = useSharedValue({ width: 0, height: 0 });
+  return (
+    <Canvas style={{ flex: 1 }} onSize={size}>
+      <Fill color="white" />
+    </Canvas>
+  );
+};
+```
