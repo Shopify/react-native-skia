@@ -7,17 +7,17 @@ slug: /animations/reanimated2
 
 :::info
 
-The Reanimated 2 integration operates on the JS thread. We recommend using Reanimated 3 when possible. For details, refer to the [Reanimated 3 support section](/docs/animations/animations).
+The Reanimated 2 integration operates on the JS thread. We recommend using Reanimated 3 when possible for better performance and features. For more details, refer to the [Reanimated 3 support section](/docs/animations/animations).
 
 :::
 
-While we do provide a seamless integration with Reanimated v2, it comes with two caveats:
+While Reanimated v2 is fully integrated and functional, there are two important caveats to consider:
 * [Animations are executed on the JS thread](#animations-on-the-js-thread)
-* [Host Objects](#object-objects)
+* [Working with Host Objects](#working-with-host-objects)
 
-## Animations on the JS thread
+## Animations on the JS Thread
 
-In the example below, even though the animation is simple, it runs on the JS thread due to its use of Reanimated v2.
+In the example below, the animation runs on the JS thread due to the use of Reanimated v2, even though the animation itself is fairly simple.
 
 ```tsx twoslash
 import {useEffect} from "react";
@@ -33,7 +33,7 @@ const MyComponent = () => {
   }, [progress]);
 
   useDerivedValue(() => {
-    return mix(progress.value, 0, 100);
+    x.value = mix(progress.value, 0, 100);
   });
 
   return (
@@ -50,25 +50,25 @@ const MyComponent = () => {
 };
 ```
 
-## Host Objects
+## Working with Host Objects
 
-When your animation invokes Skia objects with Reanimated v2, the code must explicitly run on the JS thread. To assist with this, we offer a `useDerivedValueOnJS` hook.
+When your animation involves Skia objects and Reanimated v2, you must ensure that the code explicitly runs on the JS thread. To facilitate this, you can use the `useDerivedValueOnJS` hook.
 
-```tsx twoslash
+```tsx
 import {useDerivedValueOnJS, Skia} from "@shopify/react-native-skia";
 import {useDerivedValue} from "react-native-reanimated";
 
 const path = Skia.Path.MakeFromSVGString("M 344 172 Q 344 167 343.793 163")!;
 const path2 = Skia.Path.MakeFromSVGString("M 347 169 Q 344 167 349 164")!;
 
-// ❌ this will crash as it's running on the worklet thread
+// ❌ This will crash as it's running on the worklet thread
 useDerivedValue(() => path.interpolate(path2, 0.5));
 
-// ✅ this will work as expected
+// ✅ This will work as expected since it runs on the JS thread
 useDerivedValueOnJS(() => path.interpolate(path2, 0.5));
 ```
 
-Similarly, if you intend to use host objects inside a gesture handler, ensure its execution on the JS thread:
+Similarly, when using host objects inside a gesture handler, ensure that its execution is on the JS thread:
 
 ```tsx twoslash
 import {vec} from "@shopify/react-native-skia";
@@ -77,9 +77,9 @@ import {useSharedValue} from "react-native-reanimated";
 
 const pos = useSharedValue(vec(0, 0));
 
-// ❌ this will crash as it's running on the worklet thread
+// ❌ This will crash as it's running on the worklet thread
 Gesture.Pan().onChange(e => pos.value = vec(e.x, 0));
 
-// ✅ this will work as expected
+// ✅ This will work as expected since it runs on the JS thread
 Gesture.Pan().runOnJS(true).onChange(e => pos.value = vec(e.x, 0));
 ```
