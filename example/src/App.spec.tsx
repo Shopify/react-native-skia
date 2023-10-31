@@ -1,5 +1,5 @@
 /**
- * @jest-environment ./jestEnv.js
+ * @jest-environment ./jestEnv.mjs
  */
 import "react-native";
 import React from "react";
