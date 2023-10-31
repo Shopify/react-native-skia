@@ -1,4 +1,4 @@
-import { useEffect, type DependencyList } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   useSharedValue,
@@ -10,9 +10,10 @@ import {
 export const useDerivedValueOnJS = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: () => any,
-  deps?: DependencyList
+  deps: unknown[]
 ) => {
-  const value = useSharedValue(fn());
+  const init = useMemo(() => fn(), [fn]);
+  const value = useSharedValue(init);
   useEffect(() => {
     const mapperId = startMapper(() => {
       "worklet";
