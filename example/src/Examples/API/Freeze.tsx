@@ -1,8 +1,13 @@
 import React from "react";
-import { useFont, Canvas, Group, Rect, Text } from "@shopify/react-native-skia";
+import {
+  useFont,
+  Canvas,
+  Group,
+  Rect,
+  Text,
+  useClock,
+} from "@shopify/react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
-
-import { useClock } from "../../components/Animations";
 
 const size = 200;
 const n = 49;

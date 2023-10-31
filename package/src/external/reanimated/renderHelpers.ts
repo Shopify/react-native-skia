@@ -44,7 +44,7 @@ function bindReanimatedProps2(
   const sharedValues = Object.values(reanimatedProps);
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
-    stopMapper(previousMapperId);
+    stopMapper(previousMapperId as number);
   }
   if (sharedValues.length > 0) {
     const viewId = container.getNativeId();
@@ -85,7 +85,7 @@ export function bindReanimatedProps(
   const sharedValues = Object.values(reanimatedProps);
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
-    stopMapper(previousMapperId);
+    stopMapper(previousMapperId as number);
   }
   if (sharedValues.length > 0) {
     const viewId = container.getNativeId();

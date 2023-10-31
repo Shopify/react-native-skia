@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo } from "react";
-
-import type { SharedValueType } from "../../renderer/processors/Animations";
+import type { DependencyList } from "react";
+import type {
+  FrameCallback,
+  FrameInfo,
+  SharedValue,
+} from "react-native-reanimated";
 
 // This one is needed for the deprecated useSharedValue function
 // We can remove it once we remove the deprecation
@@ -13,9 +16,7 @@ let reanimatedVersion: string;
 
 try {
   Reanimated2 = require("react-native-reanimated");
-  reanimatedVersion =
-    // eslint-disable-next-line import/extensions
-    require("react-native-reanimated/package.json").version;
+  reanimatedVersion = require("react-native-reanimated/package.json").version;
   if (
     reanimatedVersion &&
     (reanimatedVersion >= "3.0.0" || reanimatedVersion.includes("3.0.0-"))
@@ -36,18 +37,34 @@ export function throwOnMissingReanimated() {
   }
 }
 
-export const useSharedValue =
-  Reanimated2?.useSharedValue ||
-  ((value: number) => useMemo(() => ({ value }), [value]));
-export const useFrameCallback: (...args: any[]) => any =
-  Reanimated2?.useFrameCallback || throwOnMissingReanimated;
+export const useSharedValue: <T>(
+  init: T,
+  oneWayReadsOnly?: boolean
+) => SharedValue<T> = Reanimated2?.useSharedValue || throwOnMissingReanimated;
 
-export const startMapper = Reanimated2?.startMapper || throwOnMissingReanimated;
-export const stopMapper = Reanimated2?.stopMapper || throwOnMissingReanimated;
+export const useFrameCallback: (
+  callback: (frameInfo: FrameInfo) => void,
+  autostart?: boolean
+) => FrameCallback = Reanimated2?.useFrameCallback || throwOnMissingReanimated;
+
+export const startMapper: (
+  worklet: () => void,
+  inputs?: unknown[],
+  outputs?: unknown[]
+) => number = Reanimated2?.startMapper || throwOnMissingReanimated;
+
+export const stopMapper: (mapperID: number) => void =
+  Reanimated2?.stopMapper || throwOnMissingReanimated;
+
 export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated;
-export const isSharedValue = <T>(
-  value: unknown
-): value is SharedValueType<T> => {
+
+export const useAnimatedReaction: <T>(
+  prepare: () => T,
+  react: (v: T) => void,
+  dependencies?: DependencyList
+) => void = Reanimated2?.useAnimatedReaction || throwOnMissingReanimated;
+
+export const isSharedValue = <T>(value: unknown): value is SharedValue<T> => {
   return (
     !!value &&
     (Reanimated3

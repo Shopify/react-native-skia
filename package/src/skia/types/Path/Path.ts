@@ -213,7 +213,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * Sets FillType, the rule used to fill Path.
    * @param fill
    */
-  setFillType(fill: FillType): void;
+  setFillType(fill: FillType): SkPath;
 
   /**
    * Specifies whether Path is volatile; whether it will be altered or discarded
@@ -223,7 +223,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * Mark unchanging Path non-volatile to improve repeated rendering.
    * @param volatile
    */
-  setIsVolatile(volatile: boolean): void;
+  setIsVolatile(volatile: boolean): SkPath;
 
   /**
    * Turns this path into the filled equivalent of the stroked path. Returns false if the operation
@@ -237,14 +237,14 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * Appends CLOSE_VERB to Path. A closed contour connects the first and last point
    * with a line, forming a continuous loop.
    */
-  close(): void;
+  close(): SkPath;
 
   /**
    * Sets Path to its initial state.
    * Removes verb array, point array, and weights, and sets FillType to Winding.
    * Internal storage associated with Path is released
    */
-  reset(): void;
+  reset(): SkPath;
 
   /**
    * Sets Path to its initial state.
@@ -253,7 +253,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * Use rewind() instead of reset() if Path storage will be reused and performance
    * is critical.
    */
-  rewind(): void;
+  rewind(): SkPath;
 
   /**
    * Returns minimum and maximum axes values of the lines and curves in Path.
@@ -420,7 +420,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    reference to SkPath
    example: https://fiddle.skia.org/c/@Path_quadTo
   */
-  quadTo(x1: number, y1: number, x2: number, y2: number): void;
+  quadTo(x1: number, y1: number, x2: number, y2: number): SkPath;
 
   /**
    * Adds Rect to Path, appending kMove_Verb, three kLine_Verb, and kClose_Verb,
@@ -431,7 +431,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param rect
    * @param isCCW
    */
-  addRect(rect: SkRect, isCCW?: boolean): void;
+  addRect(rect: SkRect, isCCW?: boolean): SkPath;
 
   /**
    * Adds rrect to Path, creating a new closed contour.
@@ -540,7 +540,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
   /**
    * Transforms the path by the specified matrix.
    */
-  transform(m3: SkMatrix): void;
+  transform(m3: SkMatrix): SkPath;
 
   /**
    * Interpolates between Path with point array of equal size.
@@ -558,10 +558,11 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param ending  path to interpolate with
    * @param weight  contribution of this path, and
    *                 one minus contribution of ending path
+   * @param output  path to be replaced with the interpolated averages
    * @return        Path replaced by interpolated averages or null if 
    *                not interpolatable
    * */
-  interpolate(end: SkPath, weight: number): SkPath | null;
+  interpolate(end: SkPath, weight: number, output?: SkPath): SkPath | null;
 
   /** Returns true if Path contain equal verbs and equal weights.
    *     @param compare  path to compare
