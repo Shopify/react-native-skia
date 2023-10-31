@@ -11,9 +11,6 @@ import { Vertices } from "./Vertices";
 import { Severance } from "./Severance";
 import { PerformanceDrawingTest } from "./Performance";
 import { GraphsScreen } from "./Graphs";
-import { SimpleAnimation } from "./Animation/SimpleAnimation";
-import { InterpolationWithEasing } from "./Animation/InterpolationWithEasing";
-import { AnimationWithTouchHandler } from "./Animation/AnimationWithTouchHandler";
 import { Neumorphism } from "./Neumorphism";
 import { Matrix } from "./Matrix";
 import { Hue } from "./Hue";
@@ -42,16 +39,6 @@ it("should render the Vertices example correctly", () => {
 
 it("should render the Severance example correctly", () => {
   render(<Severance />);
-});
-
-it("should render the Reanimated example correctly", () => {
-  render(
-    <>
-      <SimpleAnimation />
-      <InterpolationWithEasing />
-      <AnimationWithTouchHandler />
-    </>
-  );
 });
 
 it("should render the Performance example correctly", () => {

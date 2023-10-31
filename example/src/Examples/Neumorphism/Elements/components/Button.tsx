@@ -1,15 +1,15 @@
-import type { SkiaValue } from "@shopify/react-native-skia";
 import {
   FitBox,
   rect,
   rrect,
   Box,
   BoxShadow,
-  useComputedValue,
   mix,
 } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 import { Theme } from "./Theme";
 
@@ -21,7 +21,7 @@ interface ButtonProps {
   y: number;
   width: number;
   height: number;
-  pressed: SkiaValue<number>;
+  pressed: SharedValue<number>;
   children: ReactNode | ReactNode[];
 }
 
@@ -33,12 +33,12 @@ export const Button = ({
   pressed,
   children,
 }: ButtonProps) => {
-  const c1 = useComputedValue(
-    () => `rgba(255, 255, 255, ${mix(pressed.current, 0, 0.7)})"`,
+  const c1 = useDerivedValue(
+    () => `rgba(255, 255, 255, ${mix(pressed.value, 0, 0.7)})"`,
     [pressed]
   );
-  const c2 = useComputedValue(
-    () => `rgba(174, 174, 192, ${mix(pressed.current, 0, 0.5)})"`,
+  const c2 = useDerivedValue(
+    () => `rgba(174, 174, 192, ${mix(pressed.value, 0, 0.5)})"`,
     [pressed]
   );
   return (

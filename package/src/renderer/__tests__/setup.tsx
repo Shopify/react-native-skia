@@ -8,7 +8,6 @@ import type { Server, WebSocket } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
 import { ValueApi } from "../../values/web";
-import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import type * as SkiaExports from "../..";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
@@ -19,6 +18,7 @@ import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 import { SkiaRoot } from "../Reconciler";
 import { JsiDrawingContext } from "../../dom/types/DrawingContext";
+import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 
 jest.setTimeout(180 * 1000);
 
@@ -155,6 +155,7 @@ export const loadFont = (uri: string, ftSize?: number) => {
 };
 
 export const importSkia = (): typeof SkiaExports => require("../..");
+
 export const getSkDOM = () => {
   const { Skia } = importSkia();
   const depMgr = new DependencyManager(() => () => {});

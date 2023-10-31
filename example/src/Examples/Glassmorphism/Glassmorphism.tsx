@@ -6,14 +6,15 @@ import {
   vec,
   sub,
   Fill,
-  useLoop,
   mix,
   BackdropFilter,
   Blur,
-  useComputedValue,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 import { useWindowDimensions } from "react-native";
+import { useDerivedValue } from "react-native-reanimated";
+
+import { useLoop } from "../../components/Animations";
 
 export const Glassmorphism = () => {
   const { width, height } = useWindowDimensions();
@@ -25,16 +26,16 @@ export const Glassmorphism = () => {
   );
 
   const progress = useLoop({ duration: 2000 });
-  const start = useComputedValue(
-    () => sub(c, vec(0, mix(progress.current, r, r / 2))),
+  const start = useDerivedValue(
+    () => sub(c, vec(0, mix(progress.value, r, r / 2))),
     [progress]
   );
-  const end = useComputedValue(
-    () => add(c, vec(0, mix(progress.current, r, r / 2))),
+  const end = useDerivedValue(
+    () => add(c, vec(0, mix(progress.value, r, r / 2))),
     []
   );
-  const radius = useComputedValue(
-    () => mix(progress.current, r, r / 2),
+  const radius = useDerivedValue(
+    () => mix(progress.value, r, r / 2),
     [progress]
   );
 

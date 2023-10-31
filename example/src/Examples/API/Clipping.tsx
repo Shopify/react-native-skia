@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import {
-  useLoop,
   Skia,
   Canvas,
   Image,
@@ -10,9 +9,11 @@ import {
   Rect,
   Mask,
   useImage,
-  useComputedValue,
   mix,
 } from "@shopify/react-native-skia";
+import { useDerivedValue } from "react-native-reanimated";
+
+import { useLoop } from "../../components/Animations";
 
 const star = Skia.Path.MakeFromSVGString(
   // eslint-disable-next-line max-len
@@ -39,7 +40,7 @@ export const Clipping = () => {
   );
 
   const progress = useLoop({ duration: 3000 });
-  const x = useComputedValue(() => mix(progress.current, 0, 200), [progress]);
+  const x = useDerivedValue(() => mix(progress.value, 0, 200), [progress]);
   const oslo = useImage(require("../../assets/oslo.jpg"));
 
   return (

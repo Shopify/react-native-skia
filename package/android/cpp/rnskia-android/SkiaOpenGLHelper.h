@@ -16,6 +16,7 @@
 #include "SkColorSpace.h"
 #include "SkSurface.h"
 #include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
 
 #pragma clang diagnostic pop
@@ -270,10 +271,10 @@ public:
 
       // Create the Skia context
       auto backendInterface = GrGLMakeNativeInterface();
-      context->directContext = GrDirectContext::MakeGL(backendInterface);
+      context->directContext = GrDirectContexts::MakeGL(backendInterface);
 
       if (context->directContext == nullptr) {
-        RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
+        RNSkLogger::logToConsole("GrDirectContexts::MakeGL failed");
         return false;
       }
     }

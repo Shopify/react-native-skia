@@ -1,4 +1,3 @@
-export * from "./Animation";
 export * from "./Reanimated";
 export * from "./API";
 export * from "./Breathe";

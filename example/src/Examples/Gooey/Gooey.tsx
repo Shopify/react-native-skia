@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
+import type { SkPath, Vector } from "@shopify/react-native-skia";
 import {
   Canvas,
   Fill,
@@ -14,16 +15,51 @@ import {
   Circle,
   Blur,
   ColorMatrix,
-  useTouchHandler,
-  useSpring,
-  Spring,
-  ValueApi,
 } from "@shopify/react-native-skia";
-import { useWindowDimensions } from "react-native";
+import { View, useWindowDimensions, StyleSheet } from "react-native";
+import type { SharedValue } from "react-native-reanimated";
+import Animated, {
+  useDerivedValue,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { Icon, R } from "./components/Icon";
 import { Hamburger } from "./components/Hamburger";
 import { BG, FG } from "./components/Theme";
+
+interface IconProps {
+  c: Vector;
+  progress: SharedValue<number>;
+  dst: Vector;
+}
+
+const IconBackground = ({ progress, c, dst }: IconProps) => {
+  const transform = useDerivedValue(() => {
+    return translate(mixVector(progress.value, c, dst));
+  });
+  return (
+    <Group transform={transform}>
+      <Circle r={R} color={FG} />
+    </Group>
+  );
+};
+
+interface IconForegroundProps extends IconProps {
+  path: SkPath;
+}
+
+const IconForeground = ({ progress, c, dst, path }: IconForegroundProps) => {
+  const transform = useDerivedValue(() => {
+    return translate(mixVector(progress.value, c, dst));
+  });
+  return (
+    <Group transform={transform}>
+      <Icon path={path} />
+    </Group>
+  );
+};
 
 const p1 = Skia.Path.MakeFromSVGString(
   "M 22.54 6.42 A 2.78 2.78 0 0 0 20.6 4.42 C 18.88 4 12 4 12 4 C 12 4 5.12 4 3.4 4.46 A 2.78 2.78 0 0 0 1.46 6.46 A 29 29 0 0 0 1 11.75 A 29 29 0 0 0 1.46 17.08 A 2.78 2.78 0 0 0 3.4 19 C 5.12 19.46 12 19.46 12 19.46 C 12 19.46 18.88 19.46 20.6 19 A 2.78 2.78 0 0 0 22.54 17 A 29 29 0 0 0 23 11.75 A 29 29 0 0 0 22.54 6.42 Z"
@@ -64,54 +100,53 @@ export const Gooey = () => {
     ],
     [c]
   );
+  const progress = useSharedValue(0);
+  const toggle = useSharedValue(0);
 
-  const [toggled, setToggled] = useState(false);
-  const onTouch = useTouchHandler({ onEnd: () => setToggled((t) => !t) });
-  const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
-
-  const transforms = useMemo(
-    () =>
-      icons.map((icon) =>
-        ValueApi.createComputedValue(
-          () => translate(mixVector(progress.current, c, icon.dst)),
-          [progress]
-        )
-      ),
-    [c, icons, progress]
-  );
+  const gesture = Gesture.Tap().onEnd(() => {
+    toggle.value = toggle.value === 0 ? 1 : 0;
+    progress.value = withSpring(toggle.value);
+  });
 
   return (
-    <Canvas style={{ flex: 1 }} onTouch={onTouch}>
-      <Fill color={BG} />
-      <Group
-        layer={
-          <Paint>
-            <ColorMatrix
-              matrix={[
-                1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
-              ]}
-            />
-            <Blur blur={20} />
-          </Paint>
-        }
-      >
-        {icons.map((_, i) => (
-          <Group key={i} transform={transforms[i]}>
+    <View style={{ flex: 1 }}>
+      <Canvas style={{ flex: 1 }}>
+        <Fill color={BG} />
+        <Group
+          layer={
+            <Paint>
+              <ColorMatrix
+                matrix={[
+                  1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
+                ]}
+              />
+              <Blur blur={20} />
+            </Paint>
+          }
+        >
+          {icons.map((icon, i) => (
+            <IconBackground key={i} progress={progress} c={c} dst={icon.dst} />
+          ))}
+          <Group transform={translate(c)}>
             <Circle r={R} color={FG} />
           </Group>
+        </Group>
+        {icons.map((icon, i) => (
+          <IconForeground
+            key={i}
+            progress={progress}
+            c={c}
+            dst={icon.dst}
+            path={icon.path}
+          />
         ))}
         <Group transform={translate(c)}>
-          <Circle r={R} color={FG} />
+          <Hamburger />
         </Group>
-      </Group>
-      {icons.map(({ path }, i) => (
-        <Group key={i} transform={transforms[i]}>
-          <Icon path={path} />
-        </Group>
-      ))}
-      <Group transform={translate(c)}>
-        <Hamburger />
-      </Group>
-    </Canvas>
+      </Canvas>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={StyleSheet.absoluteFill} />
+      </GestureDetector>
+    </View>
   );
 };

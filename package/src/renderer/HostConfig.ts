@@ -7,7 +7,7 @@ import type { SkiaValue } from "../values";
 import {
   bindReanimatedProps,
   extractReanimatedProps,
-} from "../external/reanimated";
+} from "../external/reanimated/renderHelpers";
 
 import type { Container } from "./Container";
 import { createNode } from "./HostComponents";

@@ -150,10 +150,12 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   setFillType(fill: FillType) {
     this.ref.setFillType(ckEnum(fill));
+    return this;
   }
 
   setIsVolatile(volatile: boolean) {
     this.ref.setIsVolatile(volatile);
+    return this;
   }
 
   stroke(opts?: StrokeOpts) {
@@ -174,14 +176,17 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   close() {
     this.ref.close();
+    return this;
   }
 
   reset() {
     this.ref.reset();
+    return this;
   }
 
   rewind() {
     this.ref.rewind();
+    return this;
   }
 
   computeTightBounds(): SkRect {
@@ -272,10 +277,12 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   quadTo(x1: number, y1: number, x2: number, y2: number) {
     this.ref.quadTo(x1, y1, x2, y2);
+    return this;
   }
 
   addRect(rect: SkRect, isCCW?: boolean) {
     this.ref.addRect(JsiSkRect.fromValue(this.CanvasKit, rect), isCCW);
+    return this;
   }
 
   addRRect(rrect: SkRRect, isCCW?: boolean) {
@@ -331,9 +338,10 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
 
   transform(m3: SkMatrix) {
     this.ref.transform(JsiSkMatrix.fromValue(m3));
+    return this;
   }
 
-  interpolate(end: SkPath, t: number) {
+  interpolate(end: SkPath, t: number, output?: SkPath) {
     const path = this.CanvasKit.Path.MakeFromPathInterpolation(
       this.ref,
       JsiSkPath.fromValue(end),
@@ -342,7 +350,12 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     if (path === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, path);
+    if (output) {
+      (output as JsiSkPath).ref = path;
+      return output;
+    } else {
+      return new JsiSkPath(this.CanvasKit, path);
+    }
   }
 
   isInterpolatable(path2: SkPath): boolean {

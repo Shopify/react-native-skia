@@ -2,20 +2,22 @@ import type { SkPath } from "@shopify/react-native-skia";
 import {
   useFont,
   Group,
-  useComputedValue,
-  useValue,
   Line,
   Canvas,
   Circle,
   Fill,
   LinearGradient,
   Path,
-  useTouchHandler,
   Text as SkiaText,
   vec,
 } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
 
 import { createGraphPath } from "./createGraphPath";
 import type { GraphProps } from "./types";
@@ -27,35 +29,32 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
     [height, width]
   );
 
-  const touchPos = useValue(
+  const touchPos = useSharedValue(
     getPointAtPositionInPath(width / 2, width, 60, path)
   );
 
-  const touchHandler = useTouchHandler({
-    onActive: ({ x }) =>
-      (touchPos.current = getPointAtPositionInPath(x, width, 60, path)),
+  const label = useDerivedValue(
+    () => "$ " + (touchPos.value ? (touchPos.value.y * -1).toFixed(2) : "-"),
+    [touchPos]
+  );
+
+  const textX = useDerivedValue(() => touchPos.value.x - 24, [touchPos]);
+  const textY = useDerivedValue(() => touchPos.value.y - 18, [touchPos]);
+  const lineP1 = useDerivedValue(
+    () => vec(touchPos.value.x, touchPos.value.y + 14),
+    [touchPos]
+  );
+  const lineP2 = useDerivedValue(
+    () => vec(touchPos.value.x, height),
+    [touchPos]
+  );
+
+  const gesture = Gesture.Pan().onChange((e) => {
+    touchPos.value = getPointAtPositionInPath(e.x, width, 60, path);
   });
-
-  const label = useComputedValue(
-    () =>
-      "$ " + (touchPos.current ? (touchPos.current.y * -1).toFixed(2) : "-"),
-    [touchPos]
-  );
-
-  const textX = useComputedValue(() => touchPos.current.x - 24, [touchPos]);
-  const textY = useComputedValue(() => touchPos.current.y - 18, [touchPos]);
-  const lineP1 = useComputedValue(
-    () => vec(touchPos.current.x, touchPos.current.y + 14),
-    [touchPos]
-  );
-  const lineP2 = useComputedValue(
-    () => vec(touchPos.current.x, height),
-    [touchPos]
-  );
-
   return (
     <View style={{ height, marginBottom: 10 }}>
-      <Canvas style={styles.graph} onTouch={touchHandler}>
+      <Canvas style={styles.graph}>
         <Fill color="black" />
         <Path
           path={path}
@@ -77,6 +76,9 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
           <Line p1={lineP1} p2={lineP2} />
         </Group>
       </Canvas>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={StyleSheet.absoluteFill} />
+      </GestureDetector>
       <Text>Touch and drag to move center point</Text>
     </View>
   );
@@ -88,6 +90,7 @@ const getPointAtPositionInPath = (
   steps: number,
   path: SkPath
 ) => {
+  "worklet";
   const index = Math.max(0, Math.floor(x / (width / steps)));
   const fraction = (x / (width / steps)) % 1;
   const p1 = path.getPoint(index);

@@ -131,10 +131,11 @@ const sidebars = {
       type: "category",
       label: "Animations",
       items: [
-        "animations/reanimated",
-        "animations/values",
         "animations/animations",
-        "animations/touch-events",
+        "animations/gestures",
+        "animations/hooks",
+        "animations/textures",
+        "animations/reanimated2",
       ],
     },
     {
