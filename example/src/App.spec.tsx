@@ -1,6 +1,3 @@
-/**
- * @jest-environment ./jestEnv.mjs
- */
 import "react-native";
 import React from "react";
 // Test renderer must be required after react-native.

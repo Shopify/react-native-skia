@@ -80,16 +80,56 @@ To run the example project on iOS, you will need to run `pod install`, and on An
 
 As the library uses JSI for synchronous native methods access, remote debugging is no longer possible. You can use [Flipper](https://fbflipper.com) for debugging your JS code, however, connecting the debugger to the JS context.
 There is also an [React Native VSCode extension](https://marketplace.visualstudio.com/items?itemName=msjsdiag.vscode-react-native#debugging-react-native-applications) that can provide a great debugging experience when using React Native Skia.
+Your documentation is quite detailed and informative. I've made some edits for clarity and grammar:
+
+---
 
 ## Testing with Jest
 
-React Native Skia test mocks use web implementation which depends on loading CanvasKit. Before you begin using the mocks you need some setup actions.
+React Native Skia test mocks use a web implementation that depends on loading CanvasKit. Before using the mocks, some setup actions are required.
 
-In order to load CanvasKit and in turn loading the React Native Skia mock, you need to add the following your jest config:
+We recommend using [ESM](https://jestjs.io/docs/ecmascript-modules). To enable ESM support, you need to update your `jest` command to `node --experimental-vm-modules node_modules/.bin/jest`.
+
+### ESM Setup
+
+To load CanvasKit and subsequently the React Native Skia mock, add the following setup file to your Jest configuration:
 
 ```js
-// This is needed to load CanvasKit
-"globalSetup": "@shopify/react-native-skia/globalJestSetup.js",
- // This is needed to load the mock
+"setupFiles": ["@shopify/react-native-skia/jestSetup.mjs"]
+```
+
+### CommonJS Setup
+
+We also offer a version of the setup file without ECMAScript modules support. To use this version, add the following setup file to your Jest configuration:
+
+```js
 "setupFiles": ["@shopify/react-native-skia/jestSetup.js"]
 ```
+
+With this setup, you need to load the Skia environment in your test. Include the following at the top of your test file:
+
+```js
+/**
+ * @jest-environment @shopify/react-native-skia/jestEnv.mjs
+ */
+```
+
+For instance:
+
+```js
+/**
+ * @jest-environment @shopify/react-native-skia/jestEnv.mjs
+ */
+import "react-native";
+import React from "react";
+import { cleanup, render } from "@testing-library/react-native";
+import App from "./App";
+
+it("renders correctly", () => {
+  render(<App />);
+});
+
+afterEach(cleanup);
+```
+
+With this configuration, you will have properly set up Jest to work with React Native Skia mocks using either ECMAScript Modules or CommonJS.

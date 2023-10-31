@@ -1,8 +1,16 @@
-require("react-native-reanimated/lib/module/reanimated2/jestUtils").setUpTests();
-global.__reanimatedWorkletInit = () => {};
-jest.mock("react-native-reanimated", () => {
-  const Reanimated = require("react-native-reanimated/mock");
+/* eslint-disable import/no-extraneous-dependencies */
+import { jest } from "@jest/globals";
+import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
+import JestUtils from "react-native-reanimated/lib/module/reanimated2/jestUtils";
+import Reanimated from "react-native-reanimated/mock";
 
+import Mock from "../package/src/mock";
+
+JestUtils.setUpTests();
+global.__reanimatedWorkletInit = () => {};
+global.CanvasKit = await CanvasKitInit({});
+
+jest.mock("react-native-reanimated", () => {
   // The mock for `call` immediately calls the callback which is incorrect
   // So we override it with a no-op
   Reanimated.default.call = () => {};
@@ -30,7 +38,7 @@ jest.mock("@shopify/react-native-skia", () => {
       View: Noop,
     };
   });
-  return require("../package/src/mock").Mock(global.CanvasKit);
+  return Mock.Mock(global.CanvasKit);
 });
 
 const mockedNavigate = jest.fn();
