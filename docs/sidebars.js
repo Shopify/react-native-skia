@@ -131,7 +131,7 @@ const sidebars = {
       type: "category",
       label: "Animations",
       items: [
-        "animations/reanimated3",
+        "animations/animations",
         "animations/gestures",
         "animations/hooks",
         "animations/textures",

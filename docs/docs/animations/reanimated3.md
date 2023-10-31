@@ -1,8 +1,8 @@
 ---
-id: reanimated3
+id: animations
 title: Reanimated 3
 sidebar_label: Reanimated 3
-slug: /animations/reanimated3
+slug: /animations/animations
 ---
 
 React Native Skia offers integration with [Reanimated v3](https://docs.swmansion.com/react-native-reanimated/), enabling animations to be executed on the UI-thread.

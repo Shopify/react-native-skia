@@ -7,7 +7,7 @@ slug: /animations/reanimated2
 
 :::info
 
-The Reanimated 2 integration operates on the JS thread. We recommend using Reanimated 3 when possible. For details, refer to the [Reanimated 3 support section](/docs/reanimated3).
+The Reanimated 2 integration operates on the JS thread. We recommend using Reanimated 3 when possible. For details, refer to the [Reanimated 3 support section](/docs/animations/animations).
 
 :::
 
