@@ -13,9 +13,19 @@ export interface FontMetrics {
 
 export interface SkFont extends SkJSIInstance<"Font"> {
   /**
+   * Returns the advance width of text.
+   * The advance is the normal distance to move before drawing additional text.
+   * Returns the bounding box of text
+   * @param text
+   * @param paint
+   */
+  measureText(text: string, paint?: SkPaint): SkRect;
+
+  /**
    * Retrieves the total width of the provided text
    * @param text
    * @param paint
+   * @deprecated Use measureText or getGlyphWidths instead
    */
   getTextWidth(text: string, paint?: SkPaint): number;
 

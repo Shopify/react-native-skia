@@ -12,54 +12,60 @@ export class JsiSkMatrix
     super(CanvasKit, ref, "Matrix");
   }
 
+  private preMultiply(matrix: number[]) {
+    this.ref.set(this.CanvasKit.Matrix.multiply(this.ref, matrix));
+  }
+
+  private postMultiply(matrix: number[]) {
+    this.ref.set(this.CanvasKit.Matrix.multiply(matrix, this.ref));
+  }
+
   dispose = () => {
     // Do nothing - the matrix is represenetd by a Float32Array
   };
 
   concat(matrix: SkMatrix) {
-    this.ref.set(
-      this.CanvasKit.Matrix.multiply(this.ref, JsiSkMatrix.fromValue(matrix))
-    );
+    this.preMultiply(JsiSkMatrix.fromValue(matrix));
     return this;
   }
 
   translate(x: number, y: number) {
-    this.concat(
-      new JsiSkMatrix(
-        this.CanvasKit,
-        Float32Array.of(...this.CanvasKit.Matrix.translated(x, y))
-      )
-    );
+    this.preMultiply(this.CanvasKit.Matrix.translated(x, y));
+    return this;
+  }
+
+  postTranslate(x: number, y: number) {
+    this.postMultiply(this.CanvasKit.Matrix.translated(x, y));
     return this;
   }
 
   scale(x: number, y?: number) {
-    this.concat(
-      new JsiSkMatrix(
-        this.CanvasKit,
-        Float32Array.of(...this.CanvasKit.Matrix.scaled(x, y ?? x))
-      )
-    );
+    this.preMultiply(this.CanvasKit.Matrix.scaled(x, y ?? x));
+    return this;
+  }
+
+  postScale(x: number, y?: number) {
+    this.postMultiply(this.CanvasKit.Matrix.scaled(x, y ?? x));
     return this;
   }
 
   skew(x: number, y: number) {
-    this.concat(
-      new JsiSkMatrix(
-        this.CanvasKit,
-        Float32Array.of(...this.CanvasKit.Matrix.skewed(x, y))
-      )
-    );
+    this.preMultiply(this.CanvasKit.Matrix.skewed(x, y));
+    return this;
+  }
+
+  postSkew(x: number, y: number) {
+    this.postMultiply(this.CanvasKit.Matrix.skewed(x, y));
     return this;
   }
 
   rotate(value: number) {
-    this.concat(
-      new JsiSkMatrix(
-        this.CanvasKit,
-        Float32Array.of(...this.CanvasKit.Matrix.rotated(value))
-      )
-    );
+    this.preMultiply(this.CanvasKit.Matrix.rotated(value));
+    return this;
+  }
+
+  postRotate(value: number) {
+    this.postMultiply(this.CanvasKit.Matrix.rotated(value));
     return this;
   }
 

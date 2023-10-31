@@ -1,21 +1,26 @@
 import React, { useMemo } from "react";
-import type { CubicBezierHandle, SkiaValue } from "@shopify/react-native-skia";
+import type { CubicBezierHandle } from "@shopify/react-native-skia";
 import {
   Skia,
   isEdge,
   Group,
-  useClockValue,
   add,
-  useValue,
   Canvas,
   ImageShader,
   Patch,
   vec,
   useImage,
-  useComputedValue,
+  useClock,
 } from "@shopify/react-native-skia";
-import { useWindowDimensions } from "react-native";
-import SimplexNoise from "simplex-noise";
+import { View, useWindowDimensions, StyleSheet } from "react-native";
+import Animated, {
+  useDerivedValue,
+  type SharedValue,
+  useSharedValue,
+} from "react-native-reanimated";
+import { GestureDetector } from "react-native-gesture-handler";
+
+import { getSeed, perlin } from "../../../components/Animations";
 
 import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";
@@ -41,16 +46,16 @@ const rectToColors = (colors: string[], [tl, tr, br, bl]: number[]) => [
 ];
 
 const useRectToPatch = (
-  mesh: SkiaValue<CubicBezierHandle[]>,
+  mesh: SharedValue<CubicBezierHandle[]>,
   indices: number[]
-): SkiaValue<
+): SharedValue<
   [CubicBezierHandle, CubicBezierHandle, CubicBezierHandle, CubicBezierHandle]
 > =>
-  useComputedValue(() => {
-    const tl = mesh.current[indices[0]];
-    const tr = mesh.current[indices[1]];
-    const br = mesh.current[indices[2]];
-    const bl = mesh.current[indices[3]];
+  useDerivedValue(() => {
+    const tl = mesh.value[indices[0]];
+    const tr = mesh.value[indices[1]];
+    const br = mesh.value[indices[2]];
+    const bl = mesh.value[indices[3]];
     return [
       {
         pos: tl.pos,
@@ -103,7 +108,7 @@ export const CoonsPatchMeshGradient = ({
     [height, width]
   );
 
-  const clock = useClockValue();
+  const clock = useClock();
   const image = useImage(require("../../../assets/debug.png"));
   const dx = width / cols;
   const dy = height / rows;
@@ -135,72 +140,81 @@ export const CoonsPatchMeshGradient = ({
       })
     )
     .flat();
-  const meshNoise = useComputedValue(() => {
+  const seeds = defaultMesh.map(() => [getSeed(), getSeed(), getSeed()]);
+  const meshNoise = useDerivedValue(() => {
     return defaultMesh.map((pt, i) => {
       if (isEdge(pt.pos, window)) {
         return pt;
       }
-      const noisePos = new SimplexNoise(`${i}-pos`);
-      const noiseC1 = new SimplexNoise(`${i}-c1`);
-      const noiseC2 = new SimplexNoise(`${i}-c2`);
+      const [noisePos, noiseC1, noiseC2] = seeds[i];
       return {
         pos: add(
           pt.pos,
           vec(
-            A * noisePos.noise2D(clock.current / F, 0),
-            A * noisePos.noise2D(0, clock.current / F)
+            A * perlin(noisePos, clock.value / F, 0),
+            A * perlin(noisePos, 0, clock.value / F)
           )
         ),
         c1: add(
           pt.c1,
           vec(
-            A * noiseC1.noise2D(clock.current / F, 0),
-            A * noiseC1.noise2D(0, clock.current / F)
+            A * perlin(noiseC1, clock.value / F, 0),
+            A * perlin(noiseC1, 0, clock.value / F)
           )
         ),
         c2: add(
           pt.c1,
           vec(
-            A * noiseC2.noise2D(clock.current / F, 0),
-            A * noiseC2.noise2D(0, clock.current / F)
+            A * perlin(noiseC2, clock.value / F, 0),
+            A * perlin(noiseC2, 0, clock.value / F)
           )
         ),
       };
     });
   }, [clock]);
 
-  const meshGesture = useValue(defaultMesh);
+  const meshGesture = useSharedValue(defaultMesh);
 
-  const onTouch = useHandles(meshGesture, defaultMesh, window);
+  const gesture = useHandles(meshGesture, defaultMesh, window);
   const mesh = play ? meshNoise : meshGesture;
 
   return (
-    <Canvas style={{ width, height }} onTouch={onTouch}>
-      <Group>
-        <ImageShader image={image} tx="repeat" ty="repeat" />
-        {rects.map((r, i) => {
+    <View>
+      <Canvas style={{ width, height }}>
+        <Group>
+          <ImageShader image={image} tx="repeat" ty="repeat" />
+          {rects.map((r, i) => {
+            return (
+              <RectPatch
+                key={i}
+                r={r}
+                mesh={mesh}
+                debug={debug}
+                lines={lines}
+                colors={colors}
+                defaultMesh={defaultMesh}
+              />
+            );
+          })}
+        </Group>
+        {defaultMesh.map(({ pos }, index) => {
+          if (isEdge(pos, window) || !handles) {
+            return null;
+          }
           return (
-            <RectPatch
-              key={i}
-              r={r}
+            <Cubic
+              key={index}
               mesh={mesh}
-              debug={debug}
-              lines={lines}
-              colors={colors}
-              defaultMesh={defaultMesh}
+              index={index}
+              color={colors[index]}
             />
           );
         })}
-      </Group>
-      {defaultMesh.map(({ pos }, index) => {
-        if (isEdge(pos, window) || !handles) {
-          return null;
-        }
-        return (
-          <Cubic key={index} mesh={mesh} index={index} color={colors[index]} />
-        );
-      })}
-    </Canvas>
+      </Canvas>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={StyleSheet.absoluteFill} />
+      </GestureDetector>
+    </View>
   );
 };
 
@@ -209,7 +223,7 @@ interface RectPatchProps {
   debug?: boolean;
   lines?: boolean;
   colors: string[];
-  mesh: SkiaValue<CubicBezierHandle[]>;
+  mesh: SharedValue<CubicBezierHandle[]>;
   defaultMesh: CubicBezierHandle[];
 }
 

@@ -1,4 +1,4 @@
-require("react-native-reanimated/lib/commonjs/reanimated2/jestUtils").setUpTests();
+require("react-native-reanimated/lib/module/reanimated2/jestUtils").setUpTests();
 global.__reanimatedWorkletInit = () => {};
 jest.mock("react-native-reanimated", () => {
   const Reanimated = require("react-native-reanimated/mock");
@@ -11,6 +11,7 @@ jest.mock("react-native-reanimated", () => {
   };
   Reanimated.useEvent = () => {};
   Reanimated.scrollTo = () => {};
+  Reanimated.useFrameCallback = () => {};
   return Reanimated;
 });
 // Silence the warning: Animated: `useNativeDriver` is not supported because the native animated module is missing

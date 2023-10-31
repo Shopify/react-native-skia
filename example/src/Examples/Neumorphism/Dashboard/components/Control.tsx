@@ -7,9 +7,10 @@ import {
   Circle,
   LinearGradient,
 } from "@shopify/react-native-skia";
-import type { SkiaValue, SkFont } from "@shopify/react-native-skia";
+import type { SkFont } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
+import type { SharedValue } from "react-native-reanimated";
 
 import { Slider } from "./Slider";
 
@@ -18,7 +19,7 @@ const r = 25;
 interface ControlProps {
   x: number;
   y: number;
-  progress: SkiaValue<number>;
+  progress: SharedValue<number>;
   label: string;
   children: ReactNode;
   active?: boolean;

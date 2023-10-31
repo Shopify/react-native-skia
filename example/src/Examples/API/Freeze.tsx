@@ -5,18 +5,18 @@ import {
   Group,
   Rect,
   Text,
-  useClockValue,
-  useComputedValue,
+  useClock,
 } from "@shopify/react-native-skia";
+import { useDerivedValue } from "react-native-reanimated";
 
 const size = 200;
 const n = 49;
 
 export const FreezeExample = () => {
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 32);
-  const clock = useClockValue();
-  const transform = useComputedValue(
-    () => [{ translateY: 100 }, { rotate: (Math.PI * clock.current) / 4000 }],
+  const clock = useClock();
+  const transform = useDerivedValue(
+    () => [{ translateY: 100 }, { rotate: (Math.PI * clock.value) / 4000 }],
     [clock]
   );
 

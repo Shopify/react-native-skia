@@ -5,7 +5,7 @@ import {
   itRunsCIAndNodeOnly,
   itRunsE2eOnly,
 } from "../../../__tests__/setup";
-import { Fill, Group, Text, TextPath } from "../../components";
+import { Fill, Group, Rect, Text, TextPath } from "../../components";
 import { fonts, importSkia, surface } from "../setup";
 
 describe("Text", () => {
@@ -29,6 +29,44 @@ describe("Text", () => {
       { font }
     );
     expect(result).toBe(64);
+  });
+  itRunsE2eOnly("Should calculate text width correctly", async () => {
+    const font = fonts.DinMedium;
+    const result = await surface.eval(
+      (_Skia, ctx) => {
+        return ctx.font.measureText(
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do"
+        ).width;
+      },
+      { font }
+    );
+    expect(result).toBeLessThan(1000);
+  });
+
+  itRunsE2eOnly("should draw the text bound measure correctly", async () => {
+    const font = fonts.DinMedium;
+    const bounds = await surface.eval(
+      (_Skia, ctx) => {
+        return ctx.font.measureText("Lorem ipsum");
+      },
+      { font }
+    );
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group>
+          <Rect
+            color="orange"
+            x={bounds.x + 0}
+            y={bounds.y + 64}
+            width={bounds.width}
+            height={bounds.height}
+          />
+          <Text x={0} y={64} text="Lorem ipsum" font={font} />
+        </Group>
+      </>
+    );
+    checkImage(image, `snapshots/text/text-bounds-${surface.OS}.png`);
   });
 
   // We test it only on Android and iOS now because there might be no default font on Web

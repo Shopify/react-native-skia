@@ -28,6 +28,8 @@ import type { SkContourMeasureIter } from "./ContourMeasure";
 import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
 import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProviderFactory";
+import type { AnimatedImageFactory } from "./AnimatedImage";
+
 /**
  * Declares the interface for the native Skia API
  */
@@ -78,6 +80,7 @@ export interface Skia {
   ): SkVertices;
   Data: DataFactory;
   Image: ImageFactory;
+  AnimatedImage: AnimatedImageFactory;
   SVG: SVGFactory;
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;

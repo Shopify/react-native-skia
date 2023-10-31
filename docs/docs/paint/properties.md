@@ -7,7 +7,7 @@ slug: /paint/properties
 
 Below are the properties of a Paint component.
 The following children can also be assigned to a Paint:
-* [Shaders](/docs/shaders/overview) 
+* [Shaders](/docs/shaders/overview)
 * [Image Filters](/docs/image-filters/overview)
 * [Color Filters](/docs/color-filters)
 * [Mask Filters](/docs/mask-filters)
@@ -101,3 +101,7 @@ Limit at which a sharp corner is drawn beveled.
 ## antiAlias
 
 Requests, but does not require, that edge pixels draw opaque or with partial transparency.
+
+## dither
+
+Requests, but does not require, to distribute color error.

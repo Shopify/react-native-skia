@@ -1,19 +1,17 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import { StyleSheet, View } from "react-native";
-import type {
-  DrawingContext,
-  SkColor,
-  TouchInfo,
-} from "@shopify/react-native-skia";
+import type { SkPicture, SkSize } from "@shopify/react-native-skia";
 import {
   Group,
-  useMultiTouchHandler,
   Fill,
   Canvas,
-  Drawing,
+  Picture,
   Skia,
-  TouchType,
+  PaintStyle,
 } from "@shopify/react-native-skia";
+import type { TouchData } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useSharedValue } from "react-native-reanimated";
 
 import { Title } from "./components/Title";
 
@@ -31,57 +29,59 @@ const Colors = [
   "#5819D7",
 ] as const;
 
-export const Touch = () => {
-  // Store current touches together with their color
-  const currentTouches = useRef<Array<TouchInfo & { color: SkColor }>>([]);
+const rec = Skia.PictureRecorder();
+rec.beginRecording(Skia.XYWHRect(0, 0, 1, 1));
+const emptyPicture = rec.finishRecordingAsPicture();
 
-  const handleTouches = useMultiTouchHandler({
-    onStart: (t) => {
-      // Add specific color to the given touch (tracked by touch.id)
-      const color = Skia.Color(
-        Colors[Math.round(Math.random() * (Colors.length - 1))]
-      );
-      currentTouches.current.push({ ...t, color });
-    },
-    onActive: (t) => {
-      // Updated the touch with the new position
-      const index = currentTouches.current.findIndex((p) => p.id === t.id);
-      if (index >= 0) {
-        currentTouches.current[index] = {
-          ...currentTouches.current[index],
-          ...t,
-        };
-      }
-    },
-    onEnd: (t) => {
-      // Remove the touch from the list of touch/colors
-      currentTouches.current = currentTouches.current.filter(
-        (p) => p.id !== t.id
-      );
-    },
+const paint = Skia.Paint();
+paint.setColor(Skia.Color("cyan"));
+paint.setStyle(PaintStyle.Stroke);
+paint.setStrokeWidth(10);
+
+const drawTouches = (touches: TouchData[], size: SkSize, colors: string[]) => {
+  "worklet";
+  const recorder = Skia.PictureRecorder();
+  const canvas = recorder.beginRecording(
+    Skia.XYWHRect(0, 0, size.width, size.height)
+  );
+  touches.forEach((touch) => {
+    const p = paint.copy();
+    p.setColor(Skia.Color(colors[touch.id % colors.length]));
+    canvas.drawCircle(touch.x, touch.y, 50, p);
   });
+  return recorder.finishRecordingAsPicture();
+};
 
-  const handleDraw = useCallback(({ canvas, paint }: DrawingContext) => {
-    // Draw an indicator for all of the active touches. Each touch
-    // event will request a new redraw of the view, so the ref will
-    // always contain the correct current touches.
-    currentTouches.current.forEach((t) => {
-      if (t.type === TouchType.Active || t.type === TouchType.Start) {
-        paint.setColor(t.color);
-        canvas.drawCircle(t.x, t.y, 40, paint);
-      }
+export const Touch = () => {
+  const picture = useSharedValue<SkPicture>(emptyPicture);
+  const size = useSharedValue({ width: 0, height: 0 });
+  const colors = useSharedValue<string[]>([]);
+  const gesture = Gesture.Native()
+    .onTouchesDown((event) => {
+      const start = Math.round(Math.random() * 4);
+      colors.value = Colors.slice(start, start + event.allTouches.length);
+      picture.value = drawTouches(event.allTouches, size.value, colors.value);
+    })
+    .onTouchesMove((event) => {
+      picture.value = drawTouches(event.allTouches, size.value, colors.value);
+    })
+    .onTouchesUp(() => {
+      picture.value = emptyPicture;
     });
-  }, []);
-
   return (
     <View style={styles.container}>
       <Title>Touch handling</Title>
-      <Canvas style={styles.container} onTouch={handleTouches}>
-        <Fill color="white" />
-        <Group style="stroke" strokeWidth={8}>
-          <Drawing drawing={handleDraw} />
-        </Group>
-      </Canvas>
+      <View style={{ flex: 1 }}>
+        <Canvas style={styles.container} onSize={size}>
+          <Fill color="white" />
+          <Group style="stroke" strokeWidth={8}>
+            <Picture picture={picture} />
+          </Group>
+        </Canvas>
+        <GestureDetector gesture={gesture}>
+          <View style={StyleSheet.absoluteFill} />
+        </GestureDetector>
+      </View>
     </View>
   );
 };
