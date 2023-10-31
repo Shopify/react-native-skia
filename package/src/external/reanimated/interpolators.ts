@@ -87,8 +87,3 @@ export const useVectorInterpolation = (
     outputRange,
     options
   );
-
-// useMatrixInterpolation
-// useColorInterpolation
-// useRectInterpolation
-// useRRectInterpolation
