@@ -6,18 +6,8 @@ import { TestEnvironment } from "jest-environment-node";
 const CanvasKit = await CanvasKitInit({});
 
 export default class SkiaEnvironment extends TestEnvironment {
-  constructor(config, context) {
-    super(config, context);
-  }
-
-  async setup() {
-    await super.setup();
+  constructor(...args) {
+    super(...args);
     this.global.CanvasKit = CanvasKit;
-  }
-
-  async teardown() {}
-
-  getVmContext() {
-    return super.getVmContext();
   }
 }
