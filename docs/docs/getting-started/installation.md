@@ -92,6 +92,7 @@ We recommend using [ESM](https://jestjs.io/docs/ecmascript-modules). To enable E
 To load CanvasKit and subsequently the React Native Skia mock, add the following setup file to your Jest configuration:
 
 ```js
+// notice the extension: .mjs
 "setupFiles": ["@shopify/react-native-skia/jestSetup.mjs"]
 ```
 
@@ -100,6 +101,7 @@ To load CanvasKit and subsequently the React Native Skia mock, add the following
 We also offer a version of the setup file without ECMAScript modules support. To use this version, add the following setup file to your Jest configuration:
 
 ```js
+// notice the extension: .js
 "setupFiles": ["@shopify/react-native-skia/jestSetup.js"]
 ```
 
