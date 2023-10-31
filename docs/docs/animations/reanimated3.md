@@ -53,7 +53,7 @@ Consider the following example:
 ```tsx twoslash
 import {Gesture} from "react-native-gesture-handler";
 import {useSharedValue} from "react-native-reanimated";
-import {Skia, notifiyChange} from "@shopify/react-native-skia";
+import {Skia, notifyChange} from "@shopify/react-native-skia";
 
 const matrix = useSharedValue(Skia.Matrix());
 const path = useSharedValue(Skia.Path.Make().moveTo(0, 0));
@@ -67,7 +67,7 @@ const pan = Gesture.Pan().onChange((e) => {
 const pan2 = Gesture.Pan().onChange((e) => {
   // ✅ Instead we mutate the value and notify reanimated that it has changed
   path.value.lineTo(e.changeX, e.changeY);
-  notifiyChange(path);
+  notifyChange(path);
 });
 
 const pinch = Gesture.Pinch().onChange((e) => {
@@ -79,8 +79,7 @@ const pinch = Gesture.Pinch().onChange((e) => {
 const pinch2 = Gesture.Pinch().onChange((e) => {
   // ✅ Here we mutate and then notify
   matrix.value.scale(e.scale);
-  notifiyChange(matrix);
-
+  notifyChange(matrix);
 });
 ```
 

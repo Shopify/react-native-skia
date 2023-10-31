@@ -1,5 +1,5 @@
 import type { SkMatrix, Vector } from "@shopify/react-native-skia";
-import { MatrixIndex, notifiyChange } from "@shopify/react-native-skia";
+import { MatrixIndex, notifyChange } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 
 export const scale = (
@@ -15,7 +15,7 @@ export const scale = (
   source.translate(origin.x, origin.y);
   source.scale(s, s);
   source.translate(-origin.x, -origin.y);
-  notifiyChange(matrix);
+  notifyChange(matrix);
 };
 
 export const rotateZ = (
@@ -31,7 +31,7 @@ export const rotateZ = (
   source.translate(origin.x, origin.y);
   source.rotate(theta);
   source.translate(-origin.x, -origin.y);
-  notifiyChange(matrix);
+  notifyChange(matrix);
 };
 
 export const translate = (
@@ -42,7 +42,7 @@ export const translate = (
   "worklet";
   const source = matrix.value;
   source.postTranslate(x, y);
-  notifiyChange(matrix);
+  notifyChange(matrix);
 };
 
 export const toM4 = (m3: SkMatrix) => {

@@ -11,7 +11,7 @@ import {
   useSharedValue,
 } from "./moduleWrapper";
 
-export const notifiyChange = (value: SharedValue<unknown>) => {
+export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (value as any)._value = value.value;
@@ -51,7 +51,7 @@ const useInterpolator = <T>(
     () => value.value,
     (val) => {
       result.value = interpolator(val, input, output, options, result.value);
-      notifiyChange(result);
+      notifyChange(result);
     },
     [input, output, options]
   );
