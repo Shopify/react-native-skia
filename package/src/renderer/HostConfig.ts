@@ -7,6 +7,7 @@ import type { SkiaValue } from "../values";
 import {
   bindReanimatedProps,
   extractReanimatedProps,
+  unbindReanimatedNode,
 } from "../external/reanimated/renderHelpers";
 
 import type { Container } from "./Container";
@@ -56,6 +57,7 @@ const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
 };
 
 const removeNode = (parent: Node<unknown>, child: Node<unknown>) => {
+  unbindReanimatedNode(child);
   return parent.removeChild(child);
 };
 
