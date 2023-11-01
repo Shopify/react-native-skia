@@ -76,7 +76,7 @@ export function bindReanimatedProps(
   node: Node<any>,
   reanimatedProps: AnimatedProps<any>
 ) {
-  if (HAS_REANIMATED2) {
+  if (HAS_REANIMATED2 && !HAS_REANIMATED3) {
     return bindReanimatedProps2(container, node, reanimatedProps);
   }
   if (!HAS_REANIMATED3) {
