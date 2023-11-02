@@ -129,7 +129,8 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     bytesPerRow?: number
   ): Float32Array | Uint8Array | null {
     const info = this.getImageInfo();
-    const colorType = imageInfo?.colorType ?? this.CanvasKit.ColorType.RGBA_8888.value;
+    const colorType =
+      imageInfo?.colorType ?? this.CanvasKit.ColorType.RGBA_8888.value;
     const alphaType = imageInfo?.alphaType ?? info.alphaType;
     const pxInfo = {
       colorSpace: this.CanvasKit.ColorSpace.SRGB,
@@ -142,13 +143,7 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
         ({ value }) => value === alphaType
       ),
     };
-    return this.ref.readPixels(
-      srcX ?? 0,
-      srcY ?? 0,
-      pxInfo,
-      dest,
-      bytesPerRow
-    );
+    return this.ref.readPixels(srcX ?? 0, srcY ?? 0, pxInfo, dest, bytesPerRow);
   }
 
   dispose = () => {
