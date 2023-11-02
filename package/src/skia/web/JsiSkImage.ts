@@ -129,50 +129,26 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     bytesPerRow?: number
   ): Float32Array | Uint8Array | null {
     const info = this.getImageInfo();
+    const colorType = imageInfo?.colorType ?? this.CanvasKit.ColorType.RGBA_8888.value;
+    const alphaType = imageInfo?.alphaType ?? info.alphaType;
     const pxInfo = {
       colorSpace: this.CanvasKit.ColorSpace.SRGB,
       width: imageInfo?.width ?? info.width,
       height: imageInfo?.height ?? info.height,
-      colorType: ckEnum(
-        imageInfo?.colorType ?? this.CanvasKit.ColorType.RGBA_8888.value
+      colorType: Object.values(this.CanvasKit.ColorType).find(
+        ({ value }) => value === colorType
       ),
-      alphaType: ckEnum(imageInfo?.alphaType ?? info.alphaType),
+      alphaType: Object.values(this.CanvasKit.AlphaType).find(
+        ({ value }) => value === alphaType
+      ),
     };
-    if (typeof bytesPerRow !== "number") {
-      bytesPerRow = 4 * pxInfo.width;
-      if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F16.value) {
-        bytesPerRow *= 2;
-      } else if (
-        pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F32.value
-      ) {
-        bytesPerRow *= 4;
-      }
-    }
-    let destObj = dest;
-    if (!destObj) {
-      if (pxInfo.colorType.value === this.CanvasKit.ColorType.RGBA_F32.value) {
-        destObj = this.CanvasKit.Malloc(
-          Float32Array,
-          pxInfo.width * pxInfo.height
-        );
-      } else {
-        destObj = this.CanvasKit.Malloc(
-          Uint8Array,
-          bytesPerRow * pxInfo.height
-        );
-      }
-    }
-    const out = this.ref.readPixels(
+    return this.ref.readPixels(
       srcX ?? 0,
       srcY ?? 0,
       pxInfo,
-      destObj,
+      dest,
       bytesPerRow
     );
-    if (!dest) {
-      this.CanvasKit.Free(destObj);
-    }
-    return out;
   }
 
   dispose = () => {
