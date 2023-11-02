@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable reanimated/js-function-in-worklet */
+import {
+  makeMutable,
+  runOnUI,
+  type SharedValue,
+} from "react-native-reanimated";
+
 import type { Container } from "../../renderer/Container";
-import type { AnimatedProps } from "../../renderer/processors";
+import { type AnimatedProps } from "../../renderer/processors";
 import type { Node } from "../../dom/types";
 
 import {
@@ -13,7 +19,38 @@ import {
   runOnJS,
 } from "./moduleWrapper";
 
+interface ReanimatedSelector<T> {
+  __typename__: "ReanimatedSelector";
+  value: SharedValue<T>;
+  selector: (value: T) => unknown;
+}
+
+const isReanimatedSelector = (
+  value: unknown
+): value is ReanimatedSelector<any> =>
+  !!value &&
+  typeof value === "object" &&
+  "__typename__" in value &&
+  (value as any).__typename__ === "ReanimatedSelector";
+
+export const select = <T>(
+  value: SharedValue<T>,
+  selector: (value: T) => unknown
+) => {
+  return {
+    __typename__: "ReanimatedSelector",
+    value,
+    selector,
+  };
+};
+
 const _bindings = new WeakMap<Node<unknown>, unknown>();
+const _selectors = makeMutable<((values: any) => unknown)[]>([]);
+
+export const getSelectorsForValue = () => {
+  "worklet";
+  return _selectors.value;
+};
 
 export const unbindReanimatedNode = (node: Node<unknown>) => {
   const previousMapperId = _bindings.get(node);
@@ -22,25 +59,35 @@ export const unbindReanimatedNode = (node: Node<unknown>) => {
   }
 };
 
-export function extractReanimatedProps(props: AnimatedProps<any>) {
+let _id = 0;
+
+export function extractReanimatedProps(_props: AnimatedProps<any>): {
+  props: AnimatedProps<any, never>;
+  reanimatedProps: AnimatedProps<any, SharedValue<unknown>>;
+  selectors: Record<string, ReanimatedSelector<unknown>>;
+} {
   if (!HAS_REANIMATED3 && !HAS_REANIMATED2) {
-    return [props, {}];
+    return { props: _props, reanimatedProps: {}, selectors: {} };
   }
   const reanimatedProps = {} as AnimatedProps<any>;
-  const otherProps = {} as AnimatedProps<any>;
-  for (const propName in props) {
+  const props = {} as AnimatedProps<any>;
+  const selectors = {} as Record<string, ReanimatedSelector<unknown>>;
+  for (const propName in _props) {
     if (propName === "children") {
       continue;
     }
-    const propValue = props[propName];
+    const propValue = _props[propName];
     if (isSharedValue(propValue)) {
       reanimatedProps[propName] = propValue;
-      otherProps[propName] = propValue.value;
+      props[propName] = propValue.value;
+    } else if (isReanimatedSelector(propValue)) {
+      selectors[propName] = propValue;
+      props[propName] = propValue.selector(propValue.value.value);
     } else {
-      otherProps[propName] = propValue;
+      props[propName] = propValue;
     }
   }
-  return [otherProps, reanimatedProps];
+  return { props, reanimatedProps, selectors };
 }
 
 function bindReanimatedProps2(
@@ -81,21 +128,52 @@ function bindReanimatedProps2(
 export function bindReanimatedProps(
   container: Container,
   node: Node<any>,
-  reanimatedProps: AnimatedProps<any>
+  reanimatedProps: AnimatedProps<any>,
+  selectorProps: Record<string, ReanimatedSelector<unknown>>
 ) {
   if (HAS_REANIMATED2 && !HAS_REANIMATED3) {
+    if (Object.keys(selectorProps).length > 0) {
+      console.warn(
+        "Reanimated selectors are only supported from version 3 and onwards"
+      );
+    }
     return bindReanimatedProps2(container, node, reanimatedProps);
   }
   if (!HAS_REANIMATED3) {
     return;
   }
   const sharedValues = Object.values(reanimatedProps);
+  const selectorValues = Object.values(selectorProps);
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
     stopMapper(previousMapperId as number);
   }
+  const viewId = container.getNativeId();
+  if (selectorValues.length > 0) {
+    for (const propName in selectorProps) {
+      const selector = selectorProps[propName];
+      const id = _id++;
+      runOnUI(() => {
+      selector.value.addListener(_id++, () => {
+        "worklet";
+        const value = selector.selector(selector.value.value);
+        node.setProp(propName, value);
+      })})();
+      // _selectors.value.push(() => {
+      //   "worklet";
+      //   const value = selector.selector(selector.value.value);
+      //   node.setProp(propName, value);
+
+      //   // // TODO: move outside
+      //   // if (SkiaViewApi) {
+      //   //   SkiaViewApi.requestRedraw(viewId);
+      //   // } else {
+      //   //   container.redraw();
+      //   // }
+      // });
+    }
+  }
   if (sharedValues.length > 0) {
-    const viewId = container.getNativeId();
     const { SkiaViewApi } = global;
     const mapperId = startMapper(() => {
       "worklet";

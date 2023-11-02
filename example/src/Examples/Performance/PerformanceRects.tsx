@@ -1,6 +1,13 @@
-import { Canvas, Rect, Skia, Group } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Rect,
+  Skia,
+  Group,
+  select,
+  getSelectorsForValue,
+} from "@shopify/react-native-skia";
 import type { SkRect } from "@shopify/react-native-skia";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   StyleSheet,
   useWindowDimensions,
@@ -13,13 +20,14 @@ import type { SharedValue } from "react-native-reanimated";
 import Animated, {
   useDerivedValue,
   useSharedValue,
+  useAnimatedReaction,
 } from "react-native-reanimated";
 
 const Size = 25;
 const Increaser = 50;
 
 export const PerformanceDrawingTest: React.FC = () => {
-  const [numberOfBoxes, setNumberOfBoxes] = useState(150);
+  const [numberOfBoxes, setNumberOfBoxes] = useState(100);
 
   const { width, height } = useWindowDimensions();
 
@@ -47,7 +55,24 @@ export const PerformanceDrawingTest: React.FC = () => {
   );
 
   const gesture = Gesture.Pan().onChange((e) => (pos.value = e));
-
+  const rotations = useDerivedValue(() => {
+    return rects.map((rct) => {
+      const p1 = { x: rct.x, y: rct.y };
+      const p2 = pos.value;
+      const r = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      return r;
+    });
+  });
+  // useAnimatedReaction(
+  //   () => pos.value,
+  //   (val) => {
+  //     getSelectorsForValue().map((s) => s());
+  //     // selectors[1].map((selector) => {
+  //     //   console.log({ selector });
+  //     //   selector(val);
+  //     // });
+  //   }
+  // );
   return (
     <View style={styles.container}>
       <View style={styles.mode}>
@@ -66,9 +91,9 @@ export const PerformanceDrawingTest: React.FC = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <Canvas style={styles.container} mode="default">
+        <Canvas style={styles.container} mode="continuous">
           {rects.map((_, i) => (
-            <Rct pos={pos} key={i} rct={rects[i]} />
+            <Rct rotations={rotations} index={i} key={i} rct={rects[i]} />
           ))}
         </Canvas>
         <GestureDetector gesture={gesture}>
@@ -80,19 +105,20 @@ export const PerformanceDrawingTest: React.FC = () => {
 };
 
 interface RctProps {
-  pos: SharedValue<{ x: number; y: number }>;
+  rotations: SharedValue<number[]>;
+  index: number;
   rct: SkRect;
 }
 
-const Rct = ({ pos, rct }: RctProps) => {
-  const transform = useDerivedValue(() => {
-    const p1 = { x: rct.x, y: rct.y };
-    const p2 = pos.value;
-    const r = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-    return [{ rotate: r }];
-  });
+const Rct = ({ rotations, index, rct }: RctProps) => {
   return (
-    <Group transform={transform} origin={rct}>
+    <Group
+      transform={select(rotations, (values) => {
+        "worklet";
+        return [{ rotate: values[index] }];
+      })}
+      origin={rct}
+    >
       <Rect rect={rct} color="#00ff00" />
       <Rect rect={rct} color="#4060A3" style="stroke" strokeWidth={2} />
     </Group>
