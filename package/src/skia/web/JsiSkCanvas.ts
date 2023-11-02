@@ -384,10 +384,12 @@ export class JsiSkCanvas
     dest?: MallocObj,
     bytesPerRow?: number
   ): Float32Array | Uint8Array | null {
-    const colorType = Object.values(this.CanvasKit.ColorType)
-      .find(({ value }) => value === imageInfo.colorType);
-    const alphaType = Object.values(this.CanvasKit.AlphaType)
-      .find(({ value }) => value === imageInfo.alphaType);
+    const colorType = Object.values(this.CanvasKit.ColorType).find(
+      ({ value }) => value === imageInfo.colorType
+    );
+    const alphaType = Object.values(this.CanvasKit.AlphaType).find(
+      ({ value }) => value === imageInfo.alphaType
+    );
     const pxInfo = {
       width: imageInfo.width,
       height: imageInfo.height,
