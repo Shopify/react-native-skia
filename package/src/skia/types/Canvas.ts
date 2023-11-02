@@ -502,7 +502,7 @@ export interface SkCanvas {
    * @param bytesPerRow - optional number of bytes per row to read.
    *                      If not provided, imageInfo.width * imageInfo.bytesPerPixel will be used.
    *
-   * @return Float32Array or Uint8Array with data
+   * @return Float32Array or Uint8Array with data or null if the read failed.
    */
   readPixels(
     srcX: number,
