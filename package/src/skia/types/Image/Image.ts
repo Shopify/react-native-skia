@@ -2,7 +2,6 @@ import type { SkMatrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 import type { TileMode } from "../ImageFilter";
 import type { SkShader } from "../Shader";
-import type { MallocObj } from "../Memory";
 
 import type { ImageInfo } from "./ImageFactory";
 
@@ -117,7 +116,7 @@ export interface SkImage extends SkJSIInstance<"Image"> {
     srcX?: number,
     srcY?: number,
     imageInfo?: ImageInfo,
-    dest?: Float32Array | Uint8Array | MallocObj,
+    dest?: Float32Array | Uint8Array,
     bytesPerRow?: number
   ): Float32Array | Uint8Array | null;
 

@@ -13,7 +13,6 @@ import type { SkImageFilter } from "./ImageFilter";
 import type { SkVertices } from "./Vertices";
 import type { SkTextBlob } from "./TextBlob";
 import type { SkPicture } from "./Picture";
-import type { MallocObj } from "./Memory";
 
 export enum ClipOp {
   Difference,
@@ -509,7 +508,7 @@ export interface SkCanvas {
     srcX: number,
     srcY: number,
     imageInfo: ImageInfo,
-    dest?: Float32Array | Uint8Array | MallocObj,
+    dest?: Float32Array | Uint8Array,
     bytesPerRow?: number
   ): Float32Array | Uint8Array | null;
 }

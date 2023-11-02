@@ -3,7 +3,6 @@ import type { CanvasKit, Image } from "canvaskit-wasm";
 import type {
   ImageFormat,
   ImageInfo,
-  MallocObj,
   FilterMode,
   MipmapMode,
   SkImage,
@@ -126,7 +125,7 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     srcX?: number,
     srcY?: number,
     imageInfo?: ImageInfo,
-    dest?: MallocObj,
+    dest?: any,
     bytesPerRow?: number
   ): Float32Array | Uint8Array | null {
     const info = this.getImageInfo();

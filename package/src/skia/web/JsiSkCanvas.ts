@@ -8,7 +8,6 @@ import type {
   PointMode,
   SaveLayerFlag,
   ImageInfo,
-  MallocObj,
   SkCanvas,
   SkColor,
   SkFont,
@@ -381,7 +380,7 @@ export class JsiSkCanvas
     srcX: number,
     srcY: number,
     imageInfo: ImageInfo,
-    dest?: MallocObj,
+    dest?: any,
     bytesPerRow?: number
   ): Float32Array | Uint8Array | null {
     const colorType = Object.values(this.CanvasKit.ColorType).find(
