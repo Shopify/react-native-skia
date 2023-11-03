@@ -48,6 +48,7 @@
 #include "nodes/JsiTextPathNode.h"
 
 #include "nodes/JsiLayerNode.h"
+#include "nodes/JsiParagraphNode.h"
 
 namespace RNSkia {
 
@@ -162,6 +163,9 @@ public:
     installFunction("TextBlobNode", JsiTextBlobNode::createCtor(context));
 
     installFunction("LayerNode", JsiLayerNode::createCtor(context));
+
+    // Paragraph node
+    installFunction("ParagraphNode", JsiParagraphNode::createCtor(context));
   }
 };
 
