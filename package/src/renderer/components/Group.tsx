@@ -1,4 +1,4 @@
-import React, { isValidElement } from "react";
+import React, { forwardRef, isValidElement } from "react";
 
 import type { SkiaProps } from "../processors";
 import type { GroupProps } from "../../dom/types";
@@ -8,14 +8,18 @@ export interface PublicGroupProps extends Omit<GroupProps, "layer"> {
   layer?: GroupProps["layer"] | ChildrenProps["children"];
 }
 
-export const Group = ({ layer, ...props }: SkiaProps<PublicGroupProps>) => {
-  if (isValidElement(layer) && typeof layer === "object") {
+export const Group = forwardRef(
+  ({ layer, ...props }: SkiaProps<PublicGroupProps>, ref) => {
+    if (isValidElement(layer) && typeof layer === "object") {
+      return (
+        <skLayer>
+          {layer}
+          <skGroup {...props} ref={ref} />
+        </skLayer>
+      );
+    }
     return (
-      <skLayer>
-        {layer}
-        <skGroup {...props} />
-      </skLayer>
+      <skGroup layer={layer as GroupProps["layer"]} {...props} ref={ref} />
     );
   }
-  return <skGroup layer={layer as GroupProps["layer"]} {...props} />;
-};
+);

@@ -1,6 +1,8 @@
 import { Canvas, Rect, Skia, Group } from "@shopify/react-native-skia";
-import type { SkRect } from "@shopify/react-native-skia";
-import React, { useMemo, useState } from "react";
+import type { Node, SkRect } from "@shopify/react-native-skia";
+import { useAnimatedReaction } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
+import type { RefObject } from "react";
+import React, { forwardRef, useMemo, useState } from "react";
 import {
   StyleSheet,
   useWindowDimensions,
@@ -19,7 +21,7 @@ const Size = 25;
 const Increaser = 50;
 
 export const PerformanceDrawingTest: React.FC = () => {
-  const [numberOfBoxes, setNumberOfBoxes] = useState(150);
+  const [numberOfBoxes, setNumberOfBoxes] = useState(450);
 
   const { width, height } = useWindowDimensions();
 
@@ -45,8 +47,26 @@ export const PerformanceDrawingTest: React.FC = () => {
         ),
     [numberOfBoxes, width, SizeWidth, SizeHeight]
   );
-
+  const refs = useMemo(() => rects.map(() => React.createRef()), [rects]);
   const gesture = Gesture.Pan().onChange((e) => (pos.value = e));
+
+  useAnimatedReaction(
+    () => pos.value,
+    (val) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      refs.forEach((ref: RefObject<Node<any>>, i) => {
+        const rct = rects[i];
+        const p2 = val;
+        const r = Math.atan2(p2.y - rct.y, p2.x - rct.x);
+        if (ref.current) {
+          ref.current!.setProps({
+            transform: [{ rotate: r }],
+            origin: rct,
+          });
+        }
+      });
+    }
+  );
 
   return (
     <View style={styles.container}>
@@ -66,9 +86,9 @@ export const PerformanceDrawingTest: React.FC = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <Canvas style={styles.container} mode="default">
+        <Canvas style={styles.container} mode="continuous">
           {rects.map((_, i) => (
-            <Rct pos={pos} key={i} rct={rects[i]} />
+            <Rct pos={pos} key={i} rct={rects[i]} ref={refs[i]} />
           ))}
         </Canvas>
         <GestureDetector gesture={gesture}>
@@ -84,20 +104,14 @@ interface RctProps {
   rct: SkRect;
 }
 
-const Rct = ({ pos, rct }: RctProps) => {
-  const transform = useDerivedValue(() => {
-    const p1 = { x: rct.x, y: rct.y };
-    const p2 = pos.value;
-    const r = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-    return [{ rotate: r }];
-  });
+const Rct = forwardRef(({ pos, rct }: RctProps, ref) => {
   return (
-    <Group transform={transform} origin={rct}>
+    <Group ref={ref}>
       <Rect rect={rct} color="#00ff00" />
       <Rect rect={rct} color="#4060A3" style="stroke" strokeWidth={2} />
     </Group>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
