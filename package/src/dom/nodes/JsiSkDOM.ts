@@ -123,6 +123,8 @@ import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
 import type { NodeContext } from "./Node";
 import { LayerNode } from "./LayerNode";
+import { ParagraphProps } from "../types/Paragraph";
+import { ParagraphNode } from "./drawings/ParagraphNode";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
@@ -469,5 +471,12 @@ export class JsiSkDOM implements SkDOM {
     return NATIVE_DOM
       ? global.SkiaDomApi.BoxShadowNode(props)
       : new BoxShadowNode(this.ctx, props);
+  }
+
+  // Paragraph
+  Paragraph(props: ParagraphProps) {
+    return NATIVE_DOM
+      ? global.SkiaDomApi.ParagraphNode(props)
+      : new ParagraphNode(this.ctx, props);
   }
 }

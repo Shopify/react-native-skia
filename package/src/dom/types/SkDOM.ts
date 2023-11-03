@@ -59,6 +59,8 @@ import type {
   Path2DPathEffectProps,
 } from "./PathEffects";
 
+import { ParagraphProps } from "./Paragraph";
+
 type ImageFilterNode<P> = DeclarationNode<P>;
 
 type PathEffectNode<P> = DeclarationNode<P>;
@@ -179,4 +181,7 @@ export interface SkDOM {
   BackdropFilter(props: ChildrenProps): RenderNode<ChildrenProps>;
   Box(props: BoxProps): RenderNode<BoxProps>;
   BoxShadow(props: BoxShadowProps): DeclarationNode<BoxShadowProps>;
+
+  // Paragraph
+  Paragraph(props: ParagraphProps): RenderNode<ParagraphProps>;
 }

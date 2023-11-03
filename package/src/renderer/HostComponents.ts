@@ -50,6 +50,7 @@ import type {
   LerpColorFilterProps,
   BoxProps,
   BoxShadowProps,
+  ParagraphProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type {
@@ -193,6 +194,9 @@ declare global {
     BoxNode: (prop: BoxProps) => RenderNode<BoxProps>;
     BoxShadowNode: (prop: BoxShadowProps) => DeclarationNode<BoxShadowProps>;
     LayerNode: (prop: ChildrenProps) => RenderNode<ChildrenProps>;
+
+    // Paragraph
+    ParagraphNode: (props: ParagraphProps) => RenderNode<ParagraphProps>;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -268,6 +272,9 @@ declare global {
       skBackdropFilter: SkiaProps<ChildrenProps>;
       skBox: SkiaProps<BoxProps>;
       skBoxShadow: SkiaProps<BoxShadowProps>;
+
+      // Paragraph
+      skParagraph: SkiaProps<ParagraphProps>;
     }
   }
 }
@@ -399,6 +406,9 @@ export const createNode = (
       return Sk.Box(props);
     case NodeType.BoxShadow:
       return Sk.BoxShadow(props);
+    // Paragraph
+    case NodeType.Paragraph:
+      return Sk.Paragraph(props);
     default:
       return exhaustiveCheck(type);
   }
