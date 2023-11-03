@@ -166,11 +166,7 @@ const processOutput = (platformName: PlatformName, targetName: string) => {
 
 try {
   console.log(`Entering directory ${SkiaDir}`);
-  console.log("Running gclient sync...");
   process.chdir(SkiaDir);
-  // Start by running sync
-  executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
-  console.log("gclient sync done");
 
   // Find platform/target
   const platform = configurations[SelectedPlatform];
@@ -185,6 +181,22 @@ try {
     );
     exit(1);
   }
+
+  // lets check for any dependencies
+  if (platform.dependencies) {
+    console.log(`Found dependencies for platform ${SelectedPlatform}`);
+    platform.dependencies.forEach((dep) => {
+      console.log(`Running dependency ${dep.name}`);
+      dep.executable();
+    });
+  }
+
+  // Run glient sync
+  console.log("Running gclient sync...");
+
+  // Start by running sync
+  executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
+  console.log("gclient sync done");
 
   try {
     // Configure the platform
