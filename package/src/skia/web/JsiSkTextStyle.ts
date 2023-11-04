@@ -26,11 +26,6 @@ export class JsiSkTextStyle
   getFontFamilies() {
     return this.ref.fontFamilies;
   }
-  getForegroundColor(): SkColor | undefined {
-    return this.ref.foregroundColor
-      ? (this.ref.foregroundColor as SkColor)
-      : undefined;
-  }
   getBackgroundColor(): SkColor | undefined {
     return this.ref.backgroundColor
       ? (this.ref.backgroundColor as SkColor)
@@ -61,10 +56,6 @@ export class JsiSkTextStyle
   }
   setFontFamilies(fontFamilies: string[]): SkTextStyle {
     this.ref.fontFamilies = fontFamilies;
-    return this;
-  }
-  setForegroundColor(color: SkColor): SkTextStyle {
-    this.ref.foregroundColor = color;
     return this;
   }
   setBackgroundColor(color: SkColor): SkTextStyle {

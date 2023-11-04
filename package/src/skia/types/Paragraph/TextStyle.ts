@@ -19,12 +19,7 @@ export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
    */
   setFontFamilies: (fontFamilies: string[]) => SkTextStyle;
   /**
-   * Sets the paint element used to paint the foreground of text.
-   * @param color Color to use for foreground text
-   */
-  setForegroundColor: (color: SkColor) => SkTextStyle;
-  /**
-   * Sets the paint element used to paint the background of text.
+   * Sets the color used to paint the background of text.
    * @param color Color to use for background text
    */
   setBackgroundColor: (color: SkColor) => SkTextStyle;
@@ -62,38 +57,33 @@ export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
   /**
    * Gets the font size of the Paragraph TextStyle.
    */
-  getFontSize: () => number| undefined;
+  getFontSize: () => number | undefined;
   /**
    * Gets the font families of the Paragraph TextStyle.
    */
-  getFontFamilies: () => string[] | undefined;
-  /**
-   * Gets the paint element used to paint the foreground of text.
-   */
-  getForegroundColor: () => SkColor| undefined;
+  getFontFamilies: () => string[] | undefined;
   /**
    * Gets the paint element used to paint the background of text.
    */
-  getBackgroundColor: () => SkColor| undefined;
+  getBackgroundColor: () => SkColor | undefined;
   /**
    * Get font weight for the style
    */
-  getFontWeight: () => FontWeight| undefined;
+  getFontWeight: () => FontWeight | undefined;
   /**
    * Get font width for the style
    */
-  getFontWidth: () => FontWidth| undefined;
+  getFontWidth: () => FontWidth | undefined;
   /**
    * Get font slant for the style
    */
-  getFontSlant: () => FontSlant| undefined;
+  getFontSlant: () => FontSlant | undefined;
   /**
    * Gets the letter spacing for the text.
    */
-  getLetterSpacing: () => number| undefined;
+  getLetterSpacing: () => number | undefined;
   /**
    * Gets the word spacing for the text
    */
-  getWordSpacing: () => number| undefined;
-
+  getWordSpacing: () => number | undefined;
 }

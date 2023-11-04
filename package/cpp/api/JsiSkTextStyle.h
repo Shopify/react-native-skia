@@ -37,14 +37,6 @@ public:
     return thisValue.asObject(runtime);
   }
 
-  JSI_HOST_FUNCTION(setForegroundColor) {
-    SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
-    SkPaint p;
-    p.setColor(color);
-    getObject()->setForegroundPaint(p);
-    return thisValue.asObject(runtime);
-  }
-
   JSI_HOST_FUNCTION(setBackgroundColor) {
     SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
     SkPaint p;
@@ -117,11 +109,6 @@ public:
     return JsiSkColor::toValue(runtime, getObject()->getColor());
   }
 
-  JSI_HOST_FUNCTION(getForegroundColor) {
-    return JsiSkColor::toValue(runtime,
-                               getObject()->getForeground().getColor());
-  }
-
   JSI_HOST_FUNCTION(getBackgroundColor) {
     return JsiSkColor::toValue(runtime,
                                getObject()->getBackground().getColor());
@@ -165,7 +152,6 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextStyle, setColor),
-                       JSI_EXPORT_FUNC(JsiSkTextStyle, setForegroundColor),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setBackgroundColor),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setFontSize),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setFontWeight),
@@ -175,7 +161,6 @@ public:
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setLetterSpacing),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setWordSpacing),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, getColor),
-                       JSI_EXPORT_FUNC(JsiSkTextStyle, getForegroundColor),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, getBackgroundColor),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, getFontSize),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, getFontWeight),
