@@ -1,7 +1,7 @@
 import type { SkJSIInstance } from "../JsiInstance";
 import type { SkColor } from "../Color";
 import type { FontSlant, FontWeight, FontWidth } from "../Font";
-import { SkPoint } from "../Point";
+import type { SkPoint } from "../Point";
 
 export enum TextDecoration {
   NoDecoration = 0x0,

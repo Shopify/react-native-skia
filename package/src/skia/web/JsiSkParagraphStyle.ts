@@ -32,7 +32,17 @@ export class JsiSkParagraphStyle
         width: { value: textStyle.getFontWidth() ?? FontWidth.Normal },
         slant: { value: textStyle.getFontSlant() ?? FontSlant.Upright },
       },
-      decoration,
+      decoration: textStyle.getDecorationStyle(),
+      decorationColor: textStyle.getDecorationColor() as InputColor,
+      decorationStyle: textStyle.getDecorationStyle()
+        ? { value: textStyle.getDecorationStyle() as number }
+        : undefined,
+      decorationThickness: textStyle.getDecorationThickness(),
+      shadows: textStyle.getShadows()?.map((s) => ({
+        blurRadius: s.blurRadius,
+        color: s.color,
+        offset: s.offset ? [s.offset.x, s.offset.y] : undefined,
+      })),
     };
     return this;
   }

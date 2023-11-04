@@ -1,6 +1,14 @@
 import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
-import { Canvas, Paragraph, Skia } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  FontSlant,
+  FontWeight,
+  Paragraph,
+  Skia,
+  TextDecoration,
+  TextDecorationStyle,
+} from "@shopify/react-native-skia";
 
 export const Paragraphs = () => {
   const { width } = useWindowDimensions();
@@ -12,13 +20,34 @@ export const Paragraphs = () => {
 
     textStyle
       .setFontSize(fontSize)
-      .setFontFamilies(["Helvetica"])
+      .setFontFamilies(["Roboto"])
       .setColor(Skia.Color("#000"));
 
     coloredTextStyle
       .setFontSize(fontSize * 1.3)
-      .setFontFamilies(["Helvetica"])
+      .setFontFamilies(["Roboto"])
       .setColor(Skia.Color("#61bea2"));
+
+    const crazyStyle = Skia.TextStyle.Make()
+      .setColor(Skia.Color("#e42fac"))
+      .setBackgroundColor(Skia.Color("#CECECE"))
+      .setFontSize(fontSize * 1.3)
+      .setFontFamilies(["Roboto"])
+      .setLetterSpacing(-1)
+      .setWordSpacing(20)
+      .setFontSlant(FontSlant.Italic)
+      .setShadows([
+        {
+          color: Skia.Color("#00000044"),
+          blurRadius: 4,
+          offset: { x: 4, y: 4 },
+        },
+      ])
+      .setDecorationColor(Skia.Color("#00223A"))
+      .setDecorationStyle(TextDecorationStyle.Dotted)
+      .setDecorationThickness(2)
+      .setDecorationType(TextDecoration.LineThrough)
+      .setFontWeight(FontWeight.ExtraBlack);
 
     paragraphBuilder
       .pushStyle(textStyle)
@@ -36,7 +65,13 @@ export const Paragraphs = () => {
       .pop()
       .addText("on iOS.")
       .pushStyle(textStyle)
-      .addText("\n\nOn other platforms it uses the default implementations.")
+      .addText(
+        "\n\nOn Android we use built-in ICU while on web we use CanvasKit's."
+      )
+      .pop()
+      .pushStyle(crazyStyle)
+      .addText("\n\nWow - this is cool.")
+      .pop()
       .build();
 
     return retVal;
