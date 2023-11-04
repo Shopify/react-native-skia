@@ -32,6 +32,8 @@ using namespace skia::textlayout; // NOLINT
 class JsiSkParagraphStyle
     : public JsiSkWrappingSharedPtrHostObject<ParagraphStyle> {
 public:
+  JSI_API_TYPENAME("ParagraphStyle");
+
   JSI_HOST_FUNCTION(setTextStyle) {
     auto textStyle =
         getArgumentAsHostObject<JsiSkTextStyle>(runtime, arguments, count, 0);

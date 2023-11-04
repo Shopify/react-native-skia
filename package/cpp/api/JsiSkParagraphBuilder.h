@@ -30,6 +30,8 @@ using namespace skia::textlayout; // NOLINT
  */
 class JsiSkParagraphBuilder : public JsiSkHostObject {
 public:
+  JSI_API_TYPENAME("ParagraphBuilder");
+
   JSI_HOST_FUNCTION(build) {
     return jsi::Object::createFromHostObject(
         runtime,
@@ -44,6 +46,21 @@ public:
   JSI_HOST_FUNCTION(addText) {
     auto text = getArgumentAsString(runtime, arguments, count, 0).utf8(runtime);
     _builder->addText(text.c_str());
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(addPlaceholder) {
+    auto width = getArgumentAsNumber(runtime, arguments, count, 0);
+    auto height = getArgumentAsNumber(runtime, arguments, count, 1);
+    auto alignment = static_cast<PlaceholderAlignment>(
+        getArgumentAsNumber(runtime, arguments, count, 2));
+    auto baseline = static_cast<TextBaseline>(
+        getArgumentAsNumber(runtime, arguments, count, 3));
+    auto offset = getArgumentAsNumber(runtime, arguments, count, 4);
+
+    PlaceholderStyle style(width, height, alignment, baseline, offset);
+    _builder->addPlaceholder(style);
+
     return thisValue.asObject(runtime);
   }
 
@@ -62,6 +79,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilder, build),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, reset),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, addText),
+                       JSI_EXPORT_FUNC(JsiSkParagraphBuilder, addPlaceholder),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pushStyle),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pop))
 

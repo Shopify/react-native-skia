@@ -7,6 +7,7 @@
 
 #include <jsi/jsi.h>
 
+#include <JsiSkCanvas.h>
 #include <JsiSkHostObjects.h>
 #include <JsiSkPath.h>
 #include <JsiSkRect.h>
@@ -37,16 +38,21 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(paint) {
+    auto jsiCanvas =
+        getArgumentAsHostObject<JsiSkCanvas>(runtime, arguments, count, 0);
+    auto x = getArgumentAsNumber(runtime, arguments, count, 1);
+    auto y = getArgumentAsNumber(runtime, arguments, count, 2);
+    _paragraph->paint(jsiCanvas->getCanvas(), x, y);
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(getHeight) {
     return static_cast<double>(_paragraph->getHeight());
   }
 
   JSI_HOST_FUNCTION(getMaxWidth) {
     return static_cast<double>(_paragraph->getMaxWidth());
-  }
-
-  JSI_HOST_FUNCTION(getLineCount) {
-    return static_cast<double>(_paragraph->lineNumber());
   }
 
   JSI_HOST_FUNCTION(getGlyphPositionAtCoordinate) {
@@ -70,12 +76,6 @@ public:
     return returnValue;
   }
 
-  JSI_HOST_FUNCTION(getLineNumberAt) {
-    auto index =
-        static_cast<size_t>(getArgumentAsNumber(runtime, arguments, count, 0));
-    return static_cast<double>(_paragraph->getLineNumberAt(index));
-  }
-
   JSI_HOST_FUNCTION(getLineMetrics) {
     std::vector<LineMetrics> metrics;
     _paragraph->getLineMetrics(metrics);
@@ -93,22 +93,13 @@ public:
     return returnValue;
   }
 
-  JSI_HOST_FUNCTION(getPath) {
-    auto line = getArgumentAsNumber(runtime, arguments, count, 0);
-    SkPath paths;
-    _paragraph->getPath(line, &paths);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(paths)));
-  }
-
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraph, layout),
+                       JSI_EXPORT_FUNC(JsiSkParagraph, paint),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getMaxWidth),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getHeight),
                        JSI_EXPORT_FUNC(JsiSkParagraph,
                                        getGlyphPositionAtCoordinate),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getRectsForRange),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getLineCount),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getLineNumberAt),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getLineMetrics))
 
   explicit JsiSkParagraph(std::shared_ptr<RNSkPlatformContext> context,

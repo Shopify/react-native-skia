@@ -9,7 +9,6 @@
 #include "JsiSkImage.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
-#include "JsiSkParagraph.h"
 #include "JsiSkPath.h"
 #include "JsiSkPicture.h"
 #include "JsiSkPoint.h"
@@ -39,15 +38,6 @@ namespace jsi = facebook::jsi;
 
 class JsiSkCanvas : public JsiSkHostObject {
 public:
-  JSI_HOST_FUNCTION(drawParagraph) {
-    auto paragraph =
-        getArgumentAsHostObject<JsiSkParagraph>(runtime, arguments, count, 0);
-    auto x = getArgumentAsNumber(runtime, arguments, count, 1);
-    auto y = getArgumentAsNumber(runtime, arguments, count, 2);
-    paragraph->getParagraph()->paint(_canvas, x, y);
-    return jsi::Value::undefined();
-  }
-
   JSI_HOST_FUNCTION(drawPaint) {
     auto paint = JsiSkPaint::fromValue(runtime, arguments[0]);
     _canvas->drawPaint(*paint);
@@ -501,8 +491,7 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkCanvas, drawParagraph),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawPaint),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkCanvas, drawPaint),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawLine),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawRect),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawImage),
