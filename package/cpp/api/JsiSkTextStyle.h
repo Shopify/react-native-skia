@@ -144,35 +144,46 @@ public:
         getArgumentAsNumber(runtime, arguments, count, 0));
     return thisValue.asObject(runtime);
   }
-  
+
   JSI_HOST_FUNCTION(setShadows) {
     auto jsiShadows = getArgumentAsArray(runtime, arguments, count, 0);
-    
+
     getObject()->resetShadows();
     size_t size = jsiShadows.size(runtime);
-    
-    for(size_t i=0; i < size; ++i) {
+
+    for (size_t i = 0; i < size; ++i) {
       auto shadow = jsiShadows.getValueAtIndex(runtime, i).asObject(runtime);
-      auto color = shadow.hasProperty(runtime, "color") ? JsiSkColor::fromValue(runtime, shadow.getProperty(runtime, "color")) : SK_ColorBLACK;
-      
-      auto offset = shadow.hasProperty(runtime, "offset") ? *JsiSkPoint::fromValue(runtime, shadow.getProperty(runtime, "offset")).get() :
-      SkPoint::Make(0, 0);
-      
-      double blur = shadow.hasProperty(runtime, "blurRadius") ? shadow.getProperty(runtime, "blurRadius").asNumber() : 0;
+      auto color = shadow.hasProperty(runtime, "color")
+                       ? JsiSkColor::fromValue(
+                             runtime, shadow.getProperty(runtime, "color"))
+                       : SK_ColorBLACK;
+
+      auto offset = shadow.hasProperty(runtime, "offset")
+                        ? *JsiSkPoint::fromValue(
+                               runtime, shadow.getProperty(runtime, "offset"))
+                               .get()
+                        : SkPoint::Make(0, 0);
+
+      double blur = shadow.hasProperty(runtime, "blurRadius")
+                        ? shadow.getProperty(runtime, "blurRadius").asNumber()
+                        : 0;
       getObject()->addShadow(TextShadow(color, offset, blur));
     }
-    
+
     return thisValue.asObject(runtime);
   }
-  
+
   JSI_HOST_FUNCTION(getShadows) {
     auto shadows = getObject()->getShadows();
     size_t size = shadows.size();
     auto retVal = jsi::Array(runtime, size);
-    for (size_t i=0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       auto shadow = jsi::Object(runtime);
-      shadow.setProperty(runtime, "color", JsiSkColor::toValue(runtime, shadows[i].fColor));
-      shadow.setProperty(runtime, "offset", JsiSkPoint::toValue(runtime, getContext(), shadows[i].fOffset));
+      shadow.setProperty(runtime, "color",
+                         JsiSkColor::toValue(runtime, shadows[i].fColor));
+      shadow.setProperty(
+          runtime, "offset",
+          JsiSkPoint::toValue(runtime, getContext(), shadows[i].fOffset));
       shadow.setProperty(runtime, "blur", shadows[i].fBlurSigma);
     }
     return retVal;
