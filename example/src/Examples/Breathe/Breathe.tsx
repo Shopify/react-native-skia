@@ -1,86 +1,93 @@
-import React, { useMemo } from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
 import {
-  BlurMask,
-  vec,
   Canvas,
-  Circle,
-  Fill,
   Group,
-  polar2Canvas,
-  mix,
+  Rect,
+  Skia,
+  SkiaView,
+  useClock,
 } from "@shopify/react-native-skia";
-import type { SharedValue } from "react-native-reanimated";
-import { useDerivedValue } from "react-native-reanimated";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useDerivedValue,
+} from "react-native-reanimated";
 
-import { useLoop } from "../../components/Animations";
+const array = new Array(1).fill(0).map((_, index) => index);
+const paint = Skia.Paint();
+paint.setColor(Skia.Color("pink"));
 
-const c1 = "#61bea2";
-const c2 = "#529ca0";
-
-interface RingProps {
-  index: number;
-  progress: SharedValue<number>;
+export function Breathe() {
+  const clock = useClock();
+  const offsetTx = useDerivedValue(() => [
+    { translateY: 300 + Math.sin(clock.value / 300) * 300 - 300 },
+  ]);
+  const style = useAnimatedStyle(() => ({
+    ...StyleSheet.absoluteFillObject,
+    transform: [{ translateY: 300 + Math.sin(clock.value / 300) * 300 - 300 }],
+  }));
+  return (
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "row",
+      }}
+    >
+      <View style={{ flex: 1 }}>
+        <Animated.View style={style}>
+          {array.map((index) => (
+            <View
+              key={index}
+              style={{
+                position: "absolute",
+                top: 150 * index + 50,
+                left: 15,
+                width: 100,
+                height: 100,
+                backgroundColor: "blue",
+              }}
+            />
+          ))}
+        </Animated.View>
+      </View>
+      <SkiaView
+        style={StyleSheet.absoluteFill}
+        onDraw={(canvas) => {
+          canvas.save();
+          canvas.translate(0, 300 + Math.sin(clock.value / 300) * 300 - 300);
+          array.forEach((index) => {
+            canvas.drawRect(
+              {
+                x: 15,
+                y: 150 * index + 50,
+                width: 100,
+                height: 100,
+              },
+              paint
+            );
+          });
+          canvas.restore();
+        }}
+        mode="continuous"
+      />
+      <Canvas
+        mode="continuous"
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      >
+        <Group transform={offsetTx}>
+          {array.map((index) => (
+            <Rect
+              key={index}
+              x={15}
+              y={150 * index + 50}
+              width={100}
+              height={100}
+              color="red"
+            />
+          ))}
+        </Group>
+      </Canvas>
+    </View>
+  );
 }
-
-const Ring = ({ index, progress }: RingProps) => {
-  const { width, height } = useWindowDimensions();
-  const R = width / 4;
-  const center = useMemo(
-    () => vec(width / 2, height / 2 - 64),
-    [height, width]
-  );
-
-  const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useDerivedValue(() => {
-    const { x, y } = polar2Canvas(
-      { theta, radius: progress.value * R },
-      { x: 0, y: 0 }
-    );
-    const scale = mix(progress.value, 0.3, 1);
-    return [{ translateX: x }, { translateY: y }, { scale }];
-  }, [progress, R]);
-
-  return (
-    <Circle
-      c={center}
-      r={R}
-      color={index % 2 ? c1 : c2}
-      origin={center}
-      transform={transform}
-    />
-  );
-};
-
-export const Breathe = () => {
-  const { width, height } = useWindowDimensions();
-  const center = useMemo(
-    () => vec(width / 2, height / 2 - 64),
-    [height, width]
-  );
-
-  const progress = useLoop({ duration: 3000 });
-
-  const transform = useDerivedValue(
-    () => [{ rotate: mix(progress.value, -Math.PI, 0) }],
-    [progress]
-  );
-
-  return (
-    <Canvas style={styles.container}>
-      <Fill color="rgb(36,43,56)" />
-      <Group origin={center} transform={transform} blendMode="screen">
-        <BlurMask style="solid" blur={40} />
-        {new Array(6).fill(0).map((_, index) => {
-          return <Ring key={index} index={index} progress={progress} />;
-        })}
-      </Group>
-    </Canvas>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
