@@ -8,8 +8,9 @@
 #include <jsi/jsi.h>
 
 #include <JsiSkFont.h>
-#include <JsiSkFontMgr.h>
+#include <JsiSkFontStyle.h>
 #include <JsiSkHostObjects.h>
+#include <JsiSkPaint.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -27,19 +28,54 @@ namespace jsi = facebook::jsi;
 using namespace skia::textlayout; // NOLINT
 
 /**
- Implementation of the TextStyle object in JSI
+ Implementation of the TextStyle object in JSI for the paragraph builder
  */
 class JsiSkTextStyle : public JsiSkWrappingSharedPtrHostObject<TextStyle> {
 public:
-  JSI_HOST_FUNCTION(setFontSize) {
-    getObject()->setFontSize(getArgumentAsNumber(runtime, arguments, count, 0));
-    return jsi::Value::undefined();
-  }
-
   JSI_HOST_FUNCTION(setColor) {
     SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
     getObject()->setColor(color);
-    return jsi::Value::undefined();
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setFontSize) {
+    getObject()->setFontSize(getArgumentAsNumber(runtime, arguments, count, 0));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setFontWeight) {
+    auto current = getObject()->getFontStyle();
+    getObject()->setFontStyle(
+        SkFontStyle(static_cast<SkFontStyle::Weight>(
+                        getArgumentAsNumber(runtime, arguments, count, 0)),
+                    current.width(), current.slant()));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setFontSlant) {
+    auto current = getObject()->getFontStyle();
+    getObject()->setFontStyle(
+        SkFontStyle(current.weight(), current.width(),
+                    static_cast<SkFontStyle::Slant>(
+                        getArgumentAsNumber(runtime, arguments, count, 0))));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setFontWidth) {
+    auto current = getObject()->getFontStyle();
+    getObject()->setFontStyle(
+        SkFontStyle(current.weight(),
+                    static_cast<SkFontStyle::Weight>(
+                        getArgumentAsNumber(runtime, arguments, count, 0)),
+                    current.slant()));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setFontStyle) {
+    auto style = JsiSkFontStyle::fromValue(
+        runtime, getArgumentAsObject(runtime, arguments, count, 0));
+    getObject()->setFontStyle(*style.get());
+    return thisValue.asObject(runtime);
   }
 
   JSI_HOST_FUNCTION(setFontFamilies) {
@@ -54,12 +90,66 @@ public:
       fontFamilies[i] = SkString(string);
     }
     getObject()->setFontFamilies(fontFamilies);
-    return jsi::Value::undefined();
+    return thisValue.asObject(runtime);
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextStyle, setFontSize),
-                       JSI_EXPORT_FUNC(JsiSkTextStyle, setColor),
-                       JSI_EXPORT_FUNC(JsiSkTextStyle, setFontFamilies))
+  JSI_HOST_FUNCTION(setForegroundPaint) {
+    auto paint =
+        getArgumentAsHostObject<JsiSkPaint>(runtime, arguments, count, 0);
+    getObject()->setForegroundPaint(*paint->getObject().get());
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setBackgroundPaint) {
+    auto paint =
+        getArgumentAsHostObject<JsiSkPaint>(runtime, arguments, count, 0);
+    getObject()->setBackgroundPaint(*paint->getObject().get());
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setLetterSpacing) {
+    getObject()->setLetterSpacing(
+        getArgumentAsNumber(runtime, arguments, count, 0));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setWordSpacing) {
+    getObject()->setWordSpacing(
+        getArgumentAsNumber(runtime, arguments, count, 0));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setBaselineShift) {
+    getObject()->setBaselineShift(
+        getArgumentAsNumber(runtime, arguments, count, 0));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setHeight) {
+    getObject()->setHeight(getArgumentAsNumber(runtime, arguments, count, 0));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setHeightOverride) {
+    getObject()->setHeightOverride(
+        getArgumentAsNumber(runtime, arguments, count, 0));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextStyle, setColor),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setFontSize),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setFontStyle),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setFontWeight),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setFontSlant),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setFontWidth),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setFontFamilies),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setForegroundPaint),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setBackgroundPaint),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setLetterSpacing),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setWordSpacing),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setHeight),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setHeightOverride),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setBaselineShift))
 
   explicit JsiSkTextStyle(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrHostObject(std::move(context),

@@ -1,4 +1,3 @@
-import { SkColor } from "../Color";
 import { SkJSIInstance } from "../JsiInstance";
 import { SkTextStyle } from "./TextStyle";
 
