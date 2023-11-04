@@ -1,5 +1,5 @@
+import { SkCanvas } from "../Canvas";
 import { SkJSIInstance } from "../JsiInstance";
-import { SkPath } from "../Path";
 import { SkRect } from "../Rect";
 
 export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
@@ -8,6 +8,13 @@ export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
    * @param width Max width of the paragraph
    */
   layout(width: number): void;
+  /**
+   * Paints the paragraph to the provded canvas
+   * @param canvas Canvas to paint into
+   * @param x X coordinate to paint at
+   * @param y Y coordinate to paint at
+   */
+  paint(canvas: SkCanvas, x: number, y: number): void;
   /**
    * Returns the height of the paragraph. This method requires the layout
    * method to have been called first.
@@ -18,11 +25,6 @@ export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
    * method to have been called first.
    */
   getMaxWidth(): number;
-  /**
-   * Returns the number of lines in the paragraph. This method requires the
-   * layout method to have been called first.
-   */
-  getLineCount(): number;
   /**
    * Returns the index of the glyph at the given position. This method requires
    * the layout method to have been called first.
@@ -37,18 +39,6 @@ export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
    * @param end End index of the range
    */
   getRectsForRange(start: number, end: number): SkRect[];
-  /**
-   * Returns the glyphs in a given line to a path. This method requires the
-   * layout method to have been called first.
-   * @param line Line to get paths from
-   */
-  getPath(line: number): SkPath;
-  /**
-   * Returns the line number for the given glyph index. This method requires
-   * the layout method to have been called first.
-   * @param index Index of glyph to find line number for
-   */
-  getLineNumberAt(index: number): number;
   /**
    * Returns the bounding boxes for all lines in the paragraph. This method
    * requires the layout method to have been called first.

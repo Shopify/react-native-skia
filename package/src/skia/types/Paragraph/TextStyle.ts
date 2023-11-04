@@ -1,7 +1,6 @@
 import { SkJSIInstance } from "../JsiInstance";
 import { SkColor } from "../Color";
-import { SkPaint } from "../Paint";
-import { FontSlant, FontWeight, FontWidth, FontStyle } from "../Font";
+import { FontSlant, FontWeight, FontWidth } from "../Font";
 
 export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
   /**
@@ -21,19 +20,14 @@ export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
   setFontFamilies: (fontFamilies: string[]) => SkTextStyle;
   /**
    * Sets the paint element used to paint the foreground of text.
-   * @param paint Paint to use for foreground text
+   * @param color Color to use for foreground text
    */
-  setForegroundPaint: (paint: SkPaint) => SkTextStyle;
+  setForegroundColor: (color: SkColor) => SkTextStyle;
   /**
    * Sets the paint element used to paint the background of text.
-   * @param paint Paint to use for foreground text
+   * @param color Color to use for background text
    */
-  setBackgroundPaint: (paint: SkPaint) => SkTextStyle;
-  /**
-   * Sets the font style for the text from predefined values.
-   * @param fontStyle Fontstyle to set
-   */
-  setFontStyle: (fontStyle: FontStyle) => SkTextStyle;
+  setBackgroundColor: (color: SkColor) => SkTextStyle;
   /**
    * Set font weight for the style
    * @param fontWeight Weight
@@ -59,19 +53,47 @@ export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
    * @param wordSpacing Word spacing
    */
   setWordSpacing: (wordSpacing: number) => SkTextStyle;
+
   /**
-   * Sets the height of the style
-   * @param height Height
+   * Sets the color of the Paragraph TextStyle.
+   * @param color Skia color
    */
-  setHeight: (height: number) => SkTextStyle;
+  getColor: () => SkColor | undefined;
   /**
-   * Sets the height override of the style
-   * @param heightOverride Height override
+   * Gets the font size of the Paragraph TextStyle.
    */
-  setHeightOverride: (heightOverride: boolean) => SkTextStyle;
+  getFontSize: () => number| undefined;
   /**
-   * Sets the baseline shift for the text
-   * @param baselineShift Baseline shift
+   * Gets the font families of the Paragraph TextStyle.
    */
-  setBaselineShift: (baselineShift: number) => SkTextStyle;
+  getFontFamilies: () => string[] | undefined;
+  /**
+   * Gets the paint element used to paint the foreground of text.
+   */
+  getForegroundColor: () => SkColor| undefined;
+  /**
+   * Gets the paint element used to paint the background of text.
+   */
+  getBackgroundColor: () => SkColor| undefined;
+  /**
+   * Get font weight for the style
+   */
+  getFontWeight: () => FontWeight| undefined;
+  /**
+   * Get font width for the style
+   */
+  getFontWidth: () => FontWidth| undefined;
+  /**
+   * Get font slant for the style
+   */
+  getFontSlant: () => FontSlant| undefined;
+  /**
+   * Gets the letter spacing for the text.
+   */
+  getLetterSpacing: () => number| undefined;
+  /**
+   * Gets the word spacing for the text
+   */
+  getWordSpacing: () => number| undefined;
+
 }
