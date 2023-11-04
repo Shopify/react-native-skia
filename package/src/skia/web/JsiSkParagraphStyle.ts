@@ -1,3 +1,5 @@
+import type { CanvasKit, InputColor, ParagraphStyle } from "canvaskit-wasm";
+
 import {
   FontSlant,
   FontWeight,
@@ -7,8 +9,6 @@ import {
   type TextAlign,
   type TextDirection,
 } from "../types";
-
-import type { CanvasKit, InputColor, ParagraphStyle } from "canvaskit-wasm";
 
 import { HostObject } from "./Host";
 
@@ -23,7 +23,6 @@ export class JsiSkParagraphStyle
     this.ref.textStyle = {
       backgroundColor: textStyle.getBackgroundColor() as InputColor,
       color: textStyle.getColor() as InputColor,
-      foregroundColor: textStyle.getForegroundColor() as InputColor,
       fontFamilies: textStyle.getFontFamilies(),
       fontSize: textStyle.getFontSize(),
       letterSpacing: textStyle.getLetterSpacing(),
@@ -33,6 +32,7 @@ export class JsiSkParagraphStyle
         width: { value: textStyle.getFontWidth() ?? FontWidth.Normal },
         slant: { value: textStyle.getFontSlant() ?? FontSlant.Upright },
       },
+      decoration,
     };
     return this;
   }

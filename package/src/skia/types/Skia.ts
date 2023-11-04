@@ -29,9 +29,9 @@ import type { PictureFactory, SkPictureRecorder } from "./Picture";
 import type { Color, SkColor } from "./Color";
 import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProviderFactory";
 import type { AnimatedImageFactory } from "./AnimatedImage";
-import { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
-import { ParagraphStyleFactory } from "./Paragraph/ParagraphStyleFactory";
-import { TextStyleFactory } from "./Paragraph/TextStyleFactory";
+import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
+import type { ParagraphStyleFactory } from "./Paragraph/ParagraphStyleFactory";
+import type { TextStyleFactory } from "./Paragraph/TextStyleFactory";
 
 /**
  * Declares the interface for the native Skia API

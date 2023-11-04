@@ -5,6 +5,7 @@ import type {
   SkFontMgr,
   SkParagraphStyle,
 } from "../types";
+
 import { Host } from "./Host";
 import { JsiSkParagraphBuilder } from "./JsiSkParagraphBuilder";
 import { JsiSkParagraphStyle } from "./JsiSkParagraphStyle";
@@ -35,10 +36,10 @@ export class JsiSkParagraphBuilderFactory
         });
     const fontMgr: FontMgr = fontManager
       ? JsiSkFontMgr.fromValue(fontManager)
-      // TODO: Fix this one?
-      : this.CanvasKit.FontMgr.FromData(new ArrayBuffer(0))!;
+      : // TODO: Fix this one?
+        this.CanvasKit.FontMgr.FromData(new ArrayBuffer(0))!;
 
-      this.CanvasKit.FontMgr
+    this.CanvasKit.FontMgr;
     return new JsiSkParagraphBuilder(
       this.CanvasKit,
       this.CanvasKit.ParagraphBuilder.Make(style, fontMgr)

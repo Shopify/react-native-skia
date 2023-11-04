@@ -1,5 +1,6 @@
-import { SkJSIInstance } from "../JsiInstance";
-import { SkTextStyle } from "./TextStyle";
+import type { SkJSIInstance } from "../JsiInstance";
+
+import type { SkTextStyle } from "./TextStyle";
 
 export enum TextDirection {
   LTR = 0,

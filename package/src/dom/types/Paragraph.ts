@@ -1,5 +1,6 @@
-import { SkParagraph } from "../../skia/types/Paragraph";
-import { GroupProps } from "./Common";
+import type { SkParagraph } from "../../skia/types/Paragraph";
+
+import type { GroupProps } from "./Common";
 
 export interface ParagraphProps extends GroupProps {
   paragraph: SkParagraph;

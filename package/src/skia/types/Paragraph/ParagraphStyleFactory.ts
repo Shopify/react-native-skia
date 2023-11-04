@@ -1,4 +1,4 @@
-import { SkParagraphStyle } from ".";
+import type { SkParagraphStyle } from ".";
 
 export interface ParagraphStyleFactory {
   /**

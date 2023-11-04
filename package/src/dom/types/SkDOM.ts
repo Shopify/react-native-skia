@@ -58,8 +58,7 @@ import type {
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "./PathEffects";
-
-import { ParagraphProps } from "./Paragraph";
+import type { ParagraphProps } from "./Paragraph";
 
 type ImageFilterNode<P> = DeclarationNode<P>;
 

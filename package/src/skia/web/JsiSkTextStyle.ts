@@ -6,6 +6,8 @@ import type {
   FontWidth,
   SkColor,
   SkTextStyle,
+  TextDecoration,
+  TextDecorationStyle,
 } from "../types";
 
 import { HostObject } from "./Host";
@@ -17,6 +19,36 @@ export class JsiSkTextStyle
   constructor(CanvasKit: CanvasKit, ref: TextStyle) {
     super(CanvasKit, ref, "TextStyle");
   }
+  setDecorationType(decoration: TextDecoration): SkTextStyle {
+    this.ref.decoration = decoration;
+    return this;
+  }
+  setDecorationColor(color: Float32Array): SkTextStyle {
+    this.ref.color = color;
+    return this;
+  }
+  setDecorationThickness(thickness: number): SkTextStyle {
+    this.ref.decorationThickness = thickness;
+    return this;
+  }
+  setDecorationStyle(style: TextDecorationStyle): SkTextStyle {
+    this.ref.decorationStyle = { value: style };
+    return this;
+  }
+
+  getDecorationType() {
+    return this.ref.decoration;
+  }
+  getDecorationColor() {
+    return this.ref.color ? (this.ref.decorationColor as SkColor) : undefined;
+  }
+  getDecorationThickness() {
+    return this.ref.decorationThickness;
+  }
+  getDecorationStyle() {
+    return this.ref.decorationStyle?.value;
+  }
+
   getColor(): SkColor | undefined {
     return this.ref.color ? (this.ref.color as SkColor) : undefined;
   }

@@ -31,6 +31,46 @@ class JsiSkTextStyle : public JsiSkWrappingSharedPtrHostObject<TextStyle> {
 public:
   JSI_API_TYPENAME("TextStyle");
 
+  JSI_HOST_FUNCTION(setDecorationType) {
+    getObject()->setDecoration(static_cast<TextDecoration>(
+        getArgumentAsNumber(runtime, arguments, count, 0)));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setDecorationColor) {
+    SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
+    getObject()->setDecorationColor(color);
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setDecorationThickness) {
+    getObject()->setDecorationThicknessMultiplier(
+        static_cast<double>(getArgumentAsNumber(runtime, arguments, count, 0)));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(setDecorationStyle) {
+    getObject()->setDecorationStyle(static_cast<TextDecorationStyle>(
+        getArgumentAsNumber(runtime, arguments, count, 0)));
+    return thisValue.asObject(runtime);
+  }
+
+  JSI_HOST_FUNCTION(getDecorationType) {
+    return static_cast<double>(getObject()->getDecorationType());
+  }
+
+  JSI_HOST_FUNCTION(getDecorationColor) {
+    return JsiSkColor::toValue(runtime, getObject()->getDecorationColor());
+  }
+
+  JSI_HOST_FUNCTION(getDecorationThickness) {
+    return static_cast<double>(getObject()->getDecorationThicknessMultiplier());
+  }
+
+  JSI_HOST_FUNCTION(getDecorationStyle) {
+    return static_cast<double>(getObject()->getDecorationStyle());
+  }
+
   JSI_HOST_FUNCTION(setColor) {
     SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
     getObject()->setColor(color);
@@ -151,7 +191,11 @@ public:
     return static_cast<double>(getObject()->getWordSpacing());
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextStyle, setColor),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextStyle, setDecorationType),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setDecorationThickness),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setDecorationColor),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setDecorationStyle),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, setColor),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setBackgroundColor),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setFontSize),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setFontWeight),
@@ -168,7 +212,11 @@ public:
                        JSI_EXPORT_FUNC(JsiSkTextStyle, getFontWidth),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, getFontFamilies),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, getLetterSpacing),
-                       JSI_EXPORT_FUNC(JsiSkTextStyle, getWordSpacing))
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, getWordSpacing),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, getDecorationType),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, getDecorationThickness),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, getDecorationColor),
+                       JSI_EXPORT_FUNC(JsiSkTextStyle, getDecorationStyle))
 
   explicit JsiSkTextStyle(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrHostObject(std::move(context),

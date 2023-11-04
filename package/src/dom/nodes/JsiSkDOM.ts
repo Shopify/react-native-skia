@@ -57,6 +57,7 @@ import type {
   Path2DPathEffectProps,
 } from "../types/PathEffects";
 import { NATIVE_DOM } from "../../renderer/HostComponents";
+import type { ParagraphProps } from "../types/Paragraph";
 
 import {
   FillNode,
@@ -123,7 +124,6 @@ import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
 import type { NodeContext } from "./Node";
 import { LayerNode } from "./LayerNode";
-import { ParagraphProps } from "../types/Paragraph";
 import { ParagraphNode } from "./drawings/ParagraphNode";
 
 export class JsiSkDOM implements SkDOM {

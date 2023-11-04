@@ -1,6 +1,6 @@
-import { SkCanvas } from "../Canvas";
-import { SkJSIInstance } from "../JsiInstance";
-import { SkRect } from "../Rect";
+import type { SkCanvas } from "../Canvas";
+import type { SkJSIInstance } from "../JsiInstance";
+import type { SkRect } from "../Rect";
 
 export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
   /**

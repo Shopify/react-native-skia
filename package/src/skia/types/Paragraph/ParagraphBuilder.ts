@@ -1,6 +1,7 @@
-import { SkFontMgr } from "../Font";
-import { SkJSIInstance } from "../JsiInstance";
-import { SkParagraph, SkParagraphStyle, SkTextStyle } from "../Paragraph";
+import type { SkFontMgr } from "../Font";
+import type { SkJSIInstance } from "../JsiInstance";
+
+import type { SkParagraph, SkParagraphStyle, SkTextStyle } from ".";
 
 export interface ParagraphBuilderFactory {
   /**

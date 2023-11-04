@@ -1,9 +1,10 @@
-import { SkRect, type SkParagraph } from "../types";
-
 import type { CanvasKit, Paragraph } from "canvaskit-wasm";
 
+import type { SkRect } from "../types";
+import { type SkParagraph } from "../types";
+
 import { HostObject } from "./Host";
-import { JsiSkCanvas } from "./JsiSkCanvas";
+import type { JsiSkCanvas } from "./JsiSkCanvas";
 
 export class JsiSkParagraph
   extends HostObject<Paragraph, "Paragraph">
@@ -43,14 +44,12 @@ export class JsiSkParagraph
       }));
   }
   getLineMetrics(): SkRect[] {
-    return this.ref
-      .getLineMetrics()
-      .map((r, index) => ({
-        x: r.left,
-        y: index * r.height,
-        width: r.width,
-        height: r.height,
-      }));
+    return this.ref.getLineMetrics().map((r, index) => ({
+      x: r.left,
+      y: index * r.height,
+      width: r.width,
+      height: r.height,
+    }));
   }
 
   dispose() {

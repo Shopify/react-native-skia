@@ -1,57 +1,77 @@
-import { SkJSIInstance } from "../JsiInstance";
-import { SkColor } from "../Color";
-import { FontSlant, FontWeight, FontWidth } from "../Font";
+import type { SkJSIInstance } from "../JsiInstance";
+import type { SkColor } from "../Color";
+import type { FontSlant, FontWeight, FontWidth } from "../Font";
+
+export enum TextDecoration {
+  NoDecoration = 0x0,
+  Underline = 0x1,
+  Overline = 0x2,
+  LineThrough = 0x4,
+}
+
+export enum TextDecorationStyle {
+  Solid = 0,
+  Double,
+  Dotted,
+  Dashed,
+  Wavy,
+}
 
 export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
   /**
+   * Sets the decoration of the Paragraph TextStyle.
+   */
+  setDecorationType: (decoration: TextDecoration) => SkTextStyle;
+  /**
+   * Sets the color of the decorator
+   */
+  setDecorationColor: (color: SkColor) => SkTextStyle;
+  /**
+   * Sets the thickness of the decorator
+   */
+  setDecorationThickness: (thickness: number) => SkTextStyle;
+  /**
+   * Sets the style of the decorator
+   */
+  setDecorationStyle: (style: TextDecorationStyle) => SkTextStyle;
+  /**
    * Sets the color of the Paragraph TextStyle.
-   * @param color Skia color
    */
   setColor: (color: SkColor) => SkTextStyle;
   /**
    * Sets the font size of the Paragraph TextStyle.
-   * @param fontSize size of font
    */
   setFontSize: (fontSize: number) => SkTextStyle;
   /**
    * Sets the font families of the Paragraph TextStyle.
-   * @param fontSize size of font
    */
   setFontFamilies: (fontFamilies: string[]) => SkTextStyle;
   /**
    * Sets the color used to paint the background of text.
-   * @param color Color to use for background text
    */
   setBackgroundColor: (color: SkColor) => SkTextStyle;
   /**
    * Set font weight for the style
-   * @param fontWeight Weight
    */
   setFontWeight: (fontWeight: FontWeight) => SkTextStyle;
   /**
    * Set font width for the style
-   * @param fontWidth Width
    */
   setFontWidth: (fontWidth: FontWidth) => SkTextStyle;
   /**
    * Set font slant for the style
-   * @param fontSlant Slant
    */
   setFontSlant: (fontSlant: FontSlant) => SkTextStyle;
   /**
    * Sets the letter spacing for the text.
-   * @param letterSpacing Letter spacing
    */
   setLetterSpacing: (letterSpacing: number) => SkTextStyle;
   /**
    * Sets the word spacing for the text
-   * @param wordSpacing Word spacing
    */
   setWordSpacing: (wordSpacing: number) => SkTextStyle;
-
   /**
    * Sets the color of the Paragraph TextStyle.
-   * @param color Skia color
    */
   getColor: () => SkColor | undefined;
   /**
@@ -86,4 +106,20 @@ export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
    * Gets the word spacing for the text
    */
   getWordSpacing: () => number | undefined;
+  /**
+   * Gets the decoration of the Paragraph TextStyle.
+   */
+  getDecorationType: () => TextDecoration | undefined;
+  /**
+   * Gets the color of the decorator
+   */
+  getDecorationColor: () => SkColor | undefined;
+  /**
+   * Gets the thickness of the decorator
+   */
+  getDecorationThickness: () => number | undefined;
+  /**
+   * Gets the style of the decorator
+   */
+  getDecorationStyle: () => TextDecorationStyle | undefined;
 }
