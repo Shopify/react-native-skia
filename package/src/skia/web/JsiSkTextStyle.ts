@@ -5,6 +5,7 @@ import type {
   FontWeight,
   FontWidth,
   SkColor,
+  SkTextShadow,
   SkTextStyle,
   TextDecoration,
   TextDecorationStyle,
@@ -34,6 +35,23 @@ export class JsiSkTextStyle
   setDecorationStyle(style: TextDecorationStyle): SkTextStyle {
     this.ref.decorationStyle = { value: style };
     return this;
+  }
+
+  setShadows(shadows: SkTextShadow[]): SkTextStyle {
+    this.ref.shadows = shadows.map((s) => ({
+      blurRadius: s.blurRadius,
+      color: s.color,
+      offset: s.offset ? [s.offset.x, s.offset.y] : undefined,
+    }));
+    return this;
+  }
+
+  getShadows(): SkTextShadow[] | undefined {
+    return this.ref.shadows?.map((s) => ({
+      ...s,
+      color: s.color as SkColor,
+      offset: s.offset ? { x: s.offset[0], y: s.offset[1] } : undefined,
+    }));
   }
 
   getDecorationType() {

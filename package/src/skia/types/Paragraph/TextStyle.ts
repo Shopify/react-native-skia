@@ -1,6 +1,7 @@
 import type { SkJSIInstance } from "../JsiInstance";
 import type { SkColor } from "../Color";
 import type { FontSlant, FontWeight, FontWidth } from "../Font";
+import { SkPoint } from "../Point";
 
 export enum TextDecoration {
   NoDecoration = 0x0,
@@ -15,6 +16,15 @@ export enum TextDecorationStyle {
   Dotted,
   Dashed,
   Wavy,
+}
+
+export interface SkTextShadow {
+  color?: SkColor;
+  /**
+   * 2d array for x and y offset. Defaults to [0, 0]
+   */
+  offset?: SkPoint;
+  blurRadius?: number;
 }
 
 export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
@@ -70,6 +80,14 @@ export interface SkTextStyle extends SkJSIInstance<"TextStyle"> {
    * Sets the word spacing for the text
    */
   setWordSpacing: (wordSpacing: number) => SkTextStyle;
+  /**
+   * Sets the list of shadows for the text
+   */
+  setShadows: (shadows: SkTextShadow[]) => SkTextStyle;
+  /**
+   * Returns the shadows for the text
+   */
+  getShadows: () => SkTextShadow[] | undefined;
   /**
    * Sets the color of the Paragraph TextStyle.
    */
