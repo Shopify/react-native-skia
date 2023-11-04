@@ -22,8 +22,7 @@ export const Paragraphs = () => {
 
     paragraphBuilder
       .pushStyle(textStyle)
-      .addText("Hello Skia!\n")
-      .addText("This text rendered using the ")
+      .addText("Hello Skia!\n\nThis text rendered using the ")
       .pushStyle(coloredTextStyle)
       .addText("SkParagraph ")
       .pop()
