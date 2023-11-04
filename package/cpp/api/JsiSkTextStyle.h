@@ -118,14 +118,18 @@ public:
   }
 
   JSI_HOST_FUNCTION(getForegroundColor) {
-    return JsiSkColor::toValue(runtime, getObject()->getForeground().getColor());
+    return JsiSkColor::toValue(runtime,
+                               getObject()->getForeground().getColor());
   }
 
   JSI_HOST_FUNCTION(getBackgroundColor) {
-    return JsiSkColor::toValue(runtime, getObject()->getBackground().getColor());
+    return JsiSkColor::toValue(runtime,
+                               getObject()->getBackground().getColor());
   }
 
-  JSI_HOST_FUNCTION(getFontSize) { return static_cast<double>(getObject()->getFontSize()); }
+  JSI_HOST_FUNCTION(getFontSize) {
+    return static_cast<double>(getObject()->getFontSize());
+  }
 
   JSI_HOST_FUNCTION(getFontWeight) {
     return getObject()->getFontStyle().weight();
@@ -156,7 +160,9 @@ public:
     return static_cast<double>(getObject()->getLetterSpacing());
   }
 
-  JSI_HOST_FUNCTION(getWordSpacing) { return static_cast<double>(getObject()->getWordSpacing()); }
+  JSI_HOST_FUNCTION(getWordSpacing) {
+    return static_cast<double>(getObject()->getWordSpacing());
+  }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextStyle, setColor),
                        JSI_EXPORT_FUNC(JsiSkTextStyle, setForegroundColor),

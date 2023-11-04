@@ -1,5 +1,5 @@
 import type { CanvasKit, ParagraphBuilder } from "canvaskit-wasm";
-import type {
+import {
   SkParagraphBuilder,
   SkParagraph,
   SkTextStyle,
@@ -20,19 +20,20 @@ export class JsiSkParagraphBuilder
     super(CanvasKit, ref, "ParagraphBuilder");
   }
   addPlaceholder(
-    width?: number | undefined,
-    height?: number | undefined,
-    alignment?: PlaceholderAlignment | undefined,
-    baseline?: TextBaseline | undefined,
-    offset?: number | undefined
-  ): void {
+    width: number | undefined = 0 ,
+    height: number | undefined = 0,
+    alignment: PlaceholderAlignment | undefined = PlaceholderAlignment.Baseline,
+    baseline: TextBaseline | undefined = TextBaseline.Alphabetic,
+    offset: number | undefined = 0
+  ): SkParagraphBuilder {
     this.ref.addPlaceholder(
       width,
       height,
-      alignment ? { value: alignment } : undefined,
-      baseline ? { value: baseline } : undefined,
+      { value: alignment } ,
+      { value: baseline } ,
       offset
     );
+    return this;
   }
   build(): SkParagraph {
     return new JsiSkParagraph(this.CanvasKit, this.ref.build());

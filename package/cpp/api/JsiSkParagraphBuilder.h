@@ -50,13 +50,19 @@ public:
   }
 
   JSI_HOST_FUNCTION(addPlaceholder) {
-    auto width = getArgumentAsNumber(runtime, arguments, count, 0);
-    auto height = getArgumentAsNumber(runtime, arguments, count, 1);
-    auto alignment = static_cast<PlaceholderAlignment>(
-        getArgumentAsNumber(runtime, arguments, count, 2));
-    auto baseline = static_cast<TextBaseline>(
-        getArgumentAsNumber(runtime, arguments, count, 3));
-    auto offset = getArgumentAsNumber(runtime, arguments, count, 4);
+    auto width =
+        count >= 1 ? getArgumentAsNumber(runtime, arguments, count, 0) : 0;
+    auto height =
+        count >= 2 ? getArgumentAsNumber(runtime, arguments, count, 1) : 0;
+    auto alignment =
+        count >= 3 ? static_cast<PlaceholderAlignment>(
+                         getArgumentAsNumber(runtime, arguments, count, 2))
+                   : PlaceholderAlignment::kBaseline;
+    auto baseline = count >= 4 ? static_cast<TextBaseline>(getArgumentAsNumber(
+                                     runtime, arguments, count, 3))
+                               : TextBaseline::kAlphabetic;
+    auto offset =
+        count >= 5 ? getArgumentAsNumber(runtime, arguments, count, 4) : 0;
 
     PlaceholderStyle style(width, height, alignment, baseline, offset);
     _builder->addPlaceholder(style);

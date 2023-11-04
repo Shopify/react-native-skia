@@ -19,6 +19,10 @@ export const examples = [
     title: "🌅 Animated Images",
   },
   {
+    screen: "Paragraphs",
+    title: "📚 Text & Paragraphs",
+  },
+  {
     screen: "Clipping",
     title: "✂️ & 🎭 Clipping & Masking",
   },

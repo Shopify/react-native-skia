@@ -87,5 +87,5 @@ export interface SkParagraphBuilder extends SkJSIInstance<"ParagraphBuilder"> {
     alignment?: PlaceholderAlignment,
     baseline?: TextBaseline,
     offset?: number
-  ): void;
+  ): SkParagraphBuilder;
 }
