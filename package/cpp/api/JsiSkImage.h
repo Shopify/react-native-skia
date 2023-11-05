@@ -82,31 +82,24 @@ public:
     }
     sk_sp<SkData> data;
 
-    switch (format) {
-      case SkEncodedImageFormat::kJPEG: {
-        SkJpegEncoder::Options options;
-        options.fQuality = quality;
-        data = SkJpegEncoder::Encode(nullptr, image.get(), options);
-        break;
-      };
-      case SkEncodedImageFormat::kWEBP: {
-        const bool lossy = count == 3 ? arguments[2].asBool() : true;
+    if (format == SkEncodedImageFormat::kJPEG) {
+      SkJpegEncoder::Options options;
+      options.fQuality = quality;
+      data = SkJpegEncoder::Encode(nullptr, image.get(), options);
+    } else if (format == SkEncodedImageFormat::kWEBP) {
+      const bool lossy = count == 3 ? arguments[2].asBool() : true;
 
-        SkWebpEncoder::Options options;
-        options.fQuality = quality;
-        options.fCompression = lossy ? SkWebpEncoder::Compression::kLossy : SkWebpEncoder::Compression::kLossless;
-        data = SkWebpEncoder::Encode(nullptr, image.get(), options);
-        break;
-      };
-      default: {
-        const double t = quality / 100.0;
-        const int level = static_cast<int>(std::round(lerp(9.0, 0.0, t))); // Must be in [0, 9] where 9 corresponds to maximal compression.
+      SkWebpEncoder::Options options;
+      options.fQuality = quality;
+      options.fCompression = lossy ? SkWebpEncoder::Compression::kLossy : SkWebpEncoder::Compression::kLossless;
+      data = SkWebpEncoder::Encode(nullptr, image.get(), options);
+    } else {
+      const double t = quality / 100.0;
+      const int level = static_cast<int>(std::round(lerp(9.0, 0.0, t)));
 
-        SkPngEncoder::Options options;
-        options.fZLibLevel = level;
-        data = SkPngEncoder::Encode(nullptr, image.get(), options);
-        break;
-      };
+      SkPngEncoder::Options options;
+      options.fZLibLevel = level; // Must be in [0, 9] where 9 corresponds to maximal compression.
+      data = SkPngEncoder::Encode(nullptr, image.get(), options);
     }
 
     return data;
