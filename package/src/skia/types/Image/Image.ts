@@ -89,10 +89,11 @@ export interface SkImage extends SkJSIInstance<"Image"> {
 
     @param fmt - PNG is the default value.
     @param quality - a value from 0 to 100; 100 is the least lossy. May be ignored.
+    @param lossy - WEBP lossy compression flag, default value is true. May be ignored.
 
     @return  base64 encoded string of data
   */
-  encodeToBase64(fmt?: ImageFormat, quality?: number): string;
+  encodeToBase64(fmt?: ImageFormat, quality?: number, lossy?: boolean): string;
 
   /**
    * Returns raster image or lazy image. Copies SkImage backed by GPU texture

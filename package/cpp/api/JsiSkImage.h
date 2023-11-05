@@ -17,6 +17,7 @@
 #include "include/codec/SkEncodedImageFormat.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
 
 #pragma clang diagnostic pop
 
@@ -27,6 +28,10 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
+private:
+  double lerp(double a, double b, double t) {
+    return (a * (1.0 - t)) + (b * t);
+  }
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -76,14 +81,34 @@ public:
       image = image->makeNonTextureImage();
     }
     sk_sp<SkData> data;
-    if (format == SkEncodedImageFormat::kJPEG) {
-      SkJpegEncoder::Options options;
-      options.fQuality = quality;
-      data = SkJpegEncoder::Encode(nullptr, image.get(), options);
-    } else {
-      SkPngEncoder::Options options;
-      data = SkPngEncoder::Encode(nullptr, image.get(), options);
+
+    switch (format) {
+      case SkEncodedImageFormat::kJPEG: {
+        SkJpegEncoder::Options options;
+        options.fQuality = quality;
+        data = SkJpegEncoder::Encode(nullptr, image.get(), options);
+        break;
+      };
+      case SkEncodedImageFormat::kWEBP: {
+        const bool lossy = count == 3 ? arguments[2].asBool() : true;
+
+        SkWebpEncoder::Options options;
+        options.fQuality = quality;
+        options.fCompression = lossy ? SkWebpEncoder::Compression::kLossy : SkWebpEncoder::Compression::kLossless;
+        data = SkWebpEncoder::Encode(nullptr, image.get(), options);
+        break; 
+      };
+      default: {
+        const double t = quality / 100.0;
+        const int level = (int)std::round(lerp(9.0, 0.0, t)); // Must be in [0, 9] where 9 corresponds to maximal compression.
+
+        SkPngEncoder::Options options;
+        options.fZLibLevel = level;
+        data = SkPngEncoder::Encode(nullptr, image.get(), options);
+        break;
+      };
     }
+
     return data;
   }
 
