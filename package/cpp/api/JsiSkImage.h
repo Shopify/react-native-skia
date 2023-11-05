@@ -96,11 +96,11 @@ public:
         options.fQuality = quality;
         options.fCompression = lossy ? SkWebpEncoder::Compression::kLossy : SkWebpEncoder::Compression::kLossless;
         data = SkWebpEncoder::Encode(nullptr, image.get(), options);
-        break; 
+        break;
       };
       default: {
         const double t = quality / 100.0;
-        const int level = (int)std::round(lerp(9.0, 0.0, t)); // Must be in [0, 9] where 9 corresponds to maximal compression.
+        const int level = static_cast<int>(std::round(lerp(9.0, 0.0, t))); // Must be in [0, 9] where 9 corresponds to maximal compression.
 
         SkPngEncoder::Options options;
         options.fZLibLevel = level;
