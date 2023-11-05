@@ -92,9 +92,8 @@ public:
 
       SkWebpEncoder::Options options;
       options.fQuality = quality;
-      options.fCompression =
-          lossy ? SkWebpEncoder::Compression::kLossy
-                : SkWebpEncoder::Compression::kLossless;
+      options.fCompression = lossy ? SkWebpEncoder::Compression::kLossy
+                                   : SkWebpEncoder::Compression::kLossless;
       data = SkWebpEncoder::Encode(nullptr, image.get(), options);
     } else {
       const double t = quality / 100.0;
