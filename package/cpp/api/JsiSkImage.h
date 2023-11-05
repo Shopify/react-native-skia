@@ -32,6 +32,7 @@ private:
   double lerp(double a, double b, double t) {
     return (a * (1.0 - t)) + (b * t);
   }
+
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -91,14 +92,17 @@ public:
 
       SkWebpEncoder::Options options;
       options.fQuality = quality;
-      options.fCompression = lossy ? SkWebpEncoder::Compression::kLossy : SkWebpEncoder::Compression::kLossless;
+      options.fCompression =
+          lossy ? SkWebpEncoder::Compression::kLossy
+                : SkWebpEncoder::Compression::kLossless;
       data = SkWebpEncoder::Encode(nullptr, image.get(), options);
     } else {
       const double t = quality / 100.0;
       const int level = static_cast<int>(std::round(lerp(9.0, 0.0, t)));
 
       SkPngEncoder::Options options;
-      options.fZLibLevel = level; // Must be in [0, 9] where 9 corresponds to maximal compression.
+      // must be in [0, 9] where 9 corresponds to maximal compression.
+      options.fZLibLevel = level;
       data = SkPngEncoder::Encode(nullptr, image.get(), options);
     }
 
