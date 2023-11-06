@@ -90,11 +90,9 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     );
   }
 
-  encodeToBytes(fmt?: ImageFormat, quality?: number, lossy?: boolean) {
+  encodeToBytes(fmt?: ImageFormat, quality?: number) {
     let result: Uint8Array | null;
-    if (fmt && quality && lossy) {
-      result = this.ref.encodeToBytes(ckEnum(fmt), quality, lossy);
-    } else if (fmt && quality) {
+    if (fmt && quality) {
       result = this.ref.encodeToBytes(ckEnum(fmt), quality);
     } else if (fmt) {
       result = this.ref.encodeToBytes(ckEnum(fmt));
@@ -107,8 +105,8 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return result;
   }
 
-  encodeToBase64(fmt?: ImageFormat, quality?: number, lossy?: boolean) {
-    const bytes = this.encodeToBytes(fmt, quality, lossy);
+  encodeToBase64(fmt?: ImageFormat, quality?: number) {
+    const bytes = this.encodeToBytes(fmt, quality);
     return toBase64String(bytes);
   }
 
