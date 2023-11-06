@@ -130,7 +130,7 @@ describe("Image Encoding", () => {
           data,
           width * bytesPerPixel
         )!;
-        const minQuality = image.encodeToBase64(ctx.format, 0).length;
+        const minQuality = image.encodeToBase64(ctx.format, 1e-8).length; // failed on CanvasKit with 0 quality.
         const midQuality = image.encodeToBase64(ctx.format, 50).length;
         const defaultQuality = image.encodeToBase64(ctx.format).length; // default quality: 100.
         const maxQuality = image.encodeToBase64(ctx.format, 100).length;
