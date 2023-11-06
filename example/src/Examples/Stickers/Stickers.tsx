@@ -35,6 +35,7 @@ export const Stickers = () => {
         dimensions={HelloStickerDimensions}
       />
       <GestureHandler
+        debug
         matrix={locationMatrix}
         dimensions={LocationStickerDimensions}
       />

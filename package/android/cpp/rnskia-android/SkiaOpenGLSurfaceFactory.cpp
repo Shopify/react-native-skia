@@ -109,7 +109,10 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
     if (samples > maxSamples) {
       samples = maxSamples;
     }
-
+    EGLBoolean it = eglSwapInterval(OpenGLResourceHolder::getInstance().glDisplay, 1);
+    if (it == EGL_FALSE) {
+      RNSkLogger::logToConsole("eglSwapInterval failed : %i", glGetError());
+    }
     auto renderTarget = GrBackendRenderTargets::MakeGL(_width, _height, samples,
                                                        stencil, fboInfo);
 

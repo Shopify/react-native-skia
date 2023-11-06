@@ -35,6 +35,9 @@ public class PlatformContext {
 
     private final String TAG = "PlatformContext";
 
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
         mHybridData = initHybrid(reactContext.getResources().getDisplayMetrics().density);
@@ -49,26 +52,36 @@ public class PlatformContext {
         }
         return buffer.toByteArray();
     }
+    private long _prevTimestamp = 0;
+    private String tag = "SkiaView";
 
     private void postFrameLoop() {
         Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
             @Override
             public void doFrame(long frameTimeNanos) {
-                if (_isPaused) {
-                    return;
+                // Do the current frame's work if not paused
+                if (!_isPaused) {
+                    long timestamp = frameTimeNanos/1000000;
+
+                    long frameDuration = (timestamp - _prevTimestamp);
+                   // Log.i(tag, "Choreographer "+frameDuration+"ms");
+                    _prevTimestamp = timestamp;
+                    notifyDrawLoop();
                 }
-                notifyDrawLoop();
-                if (_drawLoopActive) {
-                    postFrameLoop();
+                // Schedule the next frame at the beginning
+                if (_drawLoopActive && !_isPaused) {
+                    Choreographer.getInstance().postFrameCallback(this);
                 }
             }
         };
+
+        // Post the initial callback
         Choreographer.getInstance().postFrameCallback(frameCallback);
     }
 
     @DoNotStrip
     public void notifyTaskReadyOnMainThread() {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+        mainHandler.post(new Runnable() {
             @Override
             public void run() {
                 notifyTaskReady();
@@ -83,7 +96,7 @@ public class PlatformContext {
 
     @DoNotStrip
     public void raise(final String message) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+        mainHandler.post(new Runnable() {
             @Override
             public void run() {
                 mContext.handleException(new Exception(message));
@@ -97,7 +110,7 @@ public class PlatformContext {
             return;
         }
         _drawLoopActive = true;
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+        mainHandler.post(new Runnable() {
             @Override
             public void run() {
                 postFrameLoop();
@@ -169,7 +182,7 @@ public class PlatformContext {
         Log.i(TAG, "Resume");
         if(_drawLoopActive) {
             // Restart draw loop
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
+            mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     postFrameLoop();

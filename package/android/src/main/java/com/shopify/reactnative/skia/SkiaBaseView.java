@@ -2,6 +2,7 @@ package com.shopify.reactnative.skia;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -22,7 +23,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     public SkiaBaseView(Context context, boolean manageTexture) {
         super(context);
-        this.manageTexture = manageTexture;
+        //this.manageTexture = manageTexture;
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
@@ -139,6 +140,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureAvailable " + width + "/" + height);
         mSurface = new Surface(surface);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//            mSurface.setFrameRate(60.0f, 	Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+//        }
         surfaceAvailable(mSurface, width, height);
     }
 
@@ -157,9 +161,14 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         return false;
     }
 
+    private long _prevTimestamp = 0;
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        // Nothing special to do here
+        long timestamp = surface.getTimestamp();
+
+        long frameDuration = (timestamp - _prevTimestamp)/1000000;
+       // Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
+        _prevTimestamp = timestamp;
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
