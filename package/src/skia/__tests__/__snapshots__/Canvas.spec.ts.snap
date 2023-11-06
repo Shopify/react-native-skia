@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Canvas readPixels 1`] = `
+Uint8Array [
+  0,
+  0,
+  0,
+  0,
+]
+`;

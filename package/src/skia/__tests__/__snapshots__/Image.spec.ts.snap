@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Image readPixels 1`] = `
+Uint8Array [
+  170,
+  186,
+  199,
+  255,
+  170,
+  186,
+  199,
+  255,
+  170,
+  186,
+  199,
+  255,
+  170,
+  186,
+  199,
+  255,
+]
+`;
