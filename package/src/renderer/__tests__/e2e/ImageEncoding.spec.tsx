@@ -105,7 +105,7 @@ describe("Image Encoding", () => {
     expect(result).toEqual(MAGIC_BYTES.JPEG);
   });
 
-  it('SkImage.encodeToBase64: JPEG checking of the "quality" argument work', async () => {
+  it("SkImage.encodeToBase64: JPEG checking of the quality argument work", async () => {
     const result = await surface.eval(
       (Skia, ctx) => {
         const width = 1024;
@@ -153,7 +153,7 @@ describe("Image Encoding", () => {
   });
 
   // this test can be failed on CanvasKit
-  it('SkImage.encodeToBase64: PNG checking of the "quality" argument work', async () => {
+  it("SkImage.encodeToBase64: PNG checking of the quality argument work", async () => {
     const result = await surface.eval(
       (Skia, ctx) => {
         const width = 1024;
@@ -200,7 +200,7 @@ describe("Image Encoding", () => {
   });
 
   // this test can be failed on CanvasKit
-  it('SkImage.encodeToBase64: WEBP checking of the "quality" argument work with default lossy - true', async () => {
+  it("SkImage.encodeToBase64: WEBP checking of the quality argument work with lossy", async () => {
     const result = await surface.eval(
       (Skia, ctx) => {
         const width = 1024;
@@ -228,9 +228,9 @@ describe("Image Encoding", () => {
         const midQuality = image.encodeToBase64(ctx.format, 50, true).length;
         const defaultQuality = image.encodeToBase64(
           ctx.format,
-          undefined,
+          undefined, // default quality: 100.
           true
-        ).length; // default quality: 100.
+        ).length;
         const maxQuality = image.encodeToBase64(ctx.format, 100, true).length;
 
         return {
@@ -251,7 +251,7 @@ describe("Image Encoding", () => {
   });
 
   // this test can be failed on CanvasKit
-  it('SkImage.encodeToBase64: WEBP checking of the "quality" argument work with lossless', async () => {
+  it("SkImage.encodeToBase64: WEBP checking of the quality argument work with lossless", async () => {
     const result = await surface.eval(
       (Skia, ctx) => {
         const width = 1024;
@@ -302,7 +302,7 @@ describe("Image Encoding", () => {
   });
 
   // this test can be failed on CanvasKit
-  it('SkImage.encodeToBase64: WEBP checking of the "lossy" argument work', async () => {
+  it("SkImage.encodeToBase64: WEBP checking of the lossy argument work", async () => {
     const result = await surface.eval(
       (Skia, ctx) => {
         const width = 1024;
@@ -330,9 +330,9 @@ describe("Image Encoding", () => {
         const lossy = image.encodeToBase64(ctx.format, undefined, true).length; // default quality: 100.
         const lossless = image.encodeToBase64(
           ctx.format,
-          undefined,
+          undefined, // default quality: 100.
           false
-        ).length; // default quality: 100.
+        ).length;
 
         return {
           defaultLossy,
