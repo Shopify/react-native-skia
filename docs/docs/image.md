@@ -7,9 +7,11 @@ slug: /images
 
 ## Loading Images
 
-Images are loaded using the `useImage` hook. This hook returns an `SkImage` instance which can be passed to the `Image` component.
+### useImage
 
-Images can be loaded using require statements, or by passing a network URL directly. It is also possible to load images from the app bundle using named images.
+Images are loaded using the `useImage` hook. This hook returns an `SkImage` instance, which can be passed to the `Image` component.
+
+Images can be loaded using require statements or by passing a network URL directly. It is also possible to load images from the app bundle using named images.
 
 ```tsx twoslash
 import { useImage } from "@shopify/react-native-skia";
@@ -21,20 +23,66 @@ const image2 = useImage("https://picsum.photos/200/300");
 const image3 = useImage("Logo");
 ```
 
-Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is loaded. You can use this to conditionally render the `Image` component like in the [example below](#example). The hook also provides an optional error handler as a second parameter.
+Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is fully loaded. You can use this behavior to conditionally render the `Image` component, as shown in the [example below](#example). The hook also provides an optional error handler as a second parameter.
 
-## Image
+### MakeImageFromEncoded
+
+You can also create image instances manually using `MakeImageFromEncoded`.
+
+```tsx twoslash
+import { Skia } from "@shopify/react-native-skia";
+
+// A sample base64-encoded pixel
+const data = Skia.Data.fromBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==");
+const image = Skia.Image.MakeImageFromEncoded(data);
+```
+
+### MakeImage
+
+`MakeImage` allows you to create an image by providing pixel data and specifying the format.
+
+```tsx twoslash
+import { Skia, AlphaType, ColorType } from "@shopify/react-native-skia";
+
+const pixels = new Uint8Array(256 * 256 * 4);
+pixels.fill(255);
+let i = 0;
+for (let x = 0; x < 256; x++) {
+  for (let y = 0; y < 256; y++) {
+    pixels[i++] = (x * y) % 255;
+  }
+}
+const data = Skia.Data.fromBytes(pixels);
+const img = Skia.Image.MakeImage(
+  {
+    width: 256,
+    height: 256,
+    alphaType: AlphaType.Opaque,
+    colorType: ColorType.RGBA_8888,
+  },
+  data,
+  256 * 4
+);
+```
+
+**Note**: The nested for-loops in the code sample above seem to have a mistake in the loop conditions. They should loop up to `256`, not `256 * 4`, as the pixel data array has been initialized with `256 * 256 * 4` elements representing a 256 by 256 image where each pixel is represented by 4 bytes (RGBA).
+
+### useImage
+
+`useImage` is simply a helper function to load image data. 
+
+## Image Component
 
 Images can be drawn by specifying the output rectangle and how the image should fit into that rectangle.
 
 | Name   | Type      | Description                                                                                                                                                   |
 | :----- | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| image  | `SkImage` | Image instance.                                                                                                                                               |
-| x      | `number`  | Left position of the destination image.                                                                                                                       |
-| y      | `number`  | Right position of the destination image.                                                                                                                      |
-| width  | `number`  | Width of the destination image.                                                                                                                               |
-| height | `number`  | Height of the destination image.                                                                                                                              |
-| fit?   | `Fit`     | Method to make the image fit into the rectangle. Value can be `contain`, `fill`, `cover` `fitHeight`, `fitWidth`, `scaleDown`, `none` (default is `contain`). |
+| image  | `SkImage` | An instance of the image.                                                                                                                                               |
+| x      | `number`  | The left position of the destination image.                                                                                                                       |
+| y      | `number`  | The top position of the destination image.                                                                                                                      |
+| width  | `number`  | The width of the destination image.                                                                                                                               |
+| height | `number`  | The height of the destination image.                                                                                                                              |
+| fit?   | `Fit`     | The method used to fit the image into the rectangle. Values can be `contain`, `fill`, `cover`, `fitHeight`, `fitWidth`, `scaleDown`, or `none` (the default is `contain`). |
 
 ### Example
 
@@ -73,7 +121,7 @@ const ImageDemo = () => {
 
 ### fit="scaleDown"
 
-![fit="fitWidth"](assets/images/scaleDown.png)
+![fit="scaleDown"](assets/images/scaleDown.png)
 
 ### fit="none"
 
@@ -81,11 +129,11 @@ const ImageDemo = () => {
 
 ## Instance Methods
 
-| Name           | Description                                                            |
-| :------------- | :--------------------------------------------------------------------- |
-| height         | Returns the possibly scaled height of the image.                       |
-| width          | Returns the possibly scaled width of the image.                        |
-| getImageInfo   | Returns the image info for the image.                                  |
-| encodeToBytes  | Encodes Image pixels, returning result as UInt8Array                   |
-| encodeToBase64 | Encodes Image pixels, returning result as a base64 encoded string      |
-| readPixels     | Reads the image pixels, returning result as UInt8Array or Float32Array |
+| Name            | Description                                                           |
+| :-------------- | :-------------------------------------------------------------------- |
+| `height`        | Returns the possibly scaled height of the image.                      |
+| `width`         | Returns the possibly scaled width of the image.                       |
+| `getImageInfo`  | Returns the image info for the image.                                 |
+| `encodeToBytes` | Encodes the image pixels, returning the result as a `UInt8Array`.     |
+| `encodeToBase64`| Encodes the image pixels, returning the result as a base64-encoded string. |
+| `readPixels`    | Reads the image pixels, returning result as UInt8Array or Float32Array |
