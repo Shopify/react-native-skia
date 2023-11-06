@@ -76,7 +76,9 @@ public:
         count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
                    : SkEncodedImageFormat::kPNG;
 
-    auto quality = count >= 2 ? arguments[1].asNumber() : 100.0;
+    auto quality = (count >= 2 && arguments[1].isNumber())
+                       ? arguments[1].asNumber()
+                       : 100.0;
     auto image = getObject();
     if (image->isTextureBacked()) {
       image = image->makeNonTextureImage();
@@ -88,7 +90,8 @@ public:
       options.fQuality = quality;
       data = SkJpegEncoder::Encode(nullptr, image.get(), options);
     } else if (format == SkEncodedImageFormat::kWEBP) {
-      const bool lossy = count == 3 ? arguments[2].asBool() : true;
+      const bool lossy =
+          (count >= 3 && arguments[2].isBool()) ? arguments[2].asBool() : true;
 
       SkWebpEncoder::Options options;
       options.fQuality = quality;
