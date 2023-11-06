@@ -114,8 +114,8 @@ describe("Image Encoding", () => {
         const bytes = new Uint8Array(width * height * bytesPerPixel);
         bytes.fill(255);
         let i = 0;
-        for (let x = 0; x < 256; x++) {
-          for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < width; x++) {
+          for (let y = 0; y < height; y++) {
             bytes[i++] = (x * y) % 255;
           }
         }
@@ -161,8 +161,8 @@ describe("Image Encoding", () => {
         const bytesPerPixel = 4;
         const bytes = new Uint8Array(width * height * bytesPerPixel);
         let i = 0;
-        for (let x = 0; x < 256; x++) {
-          for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < width; x++) {
+          for (let y = 0; y < height; y++) {
             bytes[i++] = (x * y) % 255;
           }
         }
@@ -208,8 +208,8 @@ describe("Image Encoding", () => {
         const bytesPerPixel = 4;
         const bytes = new Uint8Array(width * height * bytesPerPixel);
         let i = 0;
-        for (let x = 0; x < 256; x++) {
-          for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < width; x++) {
+          for (let y = 0; y < height; y++) {
             bytes[i++] = (x * y) % 255;
           }
         }
@@ -259,8 +259,8 @@ describe("Image Encoding", () => {
         const bytesPerPixel = 4;
         const bytes = new Uint8Array(width * height * bytesPerPixel);
         let i = 0;
-        for (let x = 0; x < 256; x++) {
-          for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < width; x++) {
+          for (let y = 0; y < height; y++) {
             bytes[i++] = (x * y) % 255;
           }
         }
@@ -310,8 +310,8 @@ describe("Image Encoding", () => {
         const bytesPerPixel = 4;
         const bytes = new Uint8Array(width * height * bytesPerPixel);
         let i = 0;
-        for (let x = 0; x < 256; x++) {
-          for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < width; x++) {
+          for (let y = 0; y < height; y++) {
             bytes[i++] = (x * y) % 255;
           }
         }
