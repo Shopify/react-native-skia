@@ -1,191 +1,62 @@
-import type { LinkingOptions } from "@react-navigation/native";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
-import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StatusBar } from "react-native";
-import type { HeaderBackButtonProps } from "@react-navigation/elements";
-import { HeaderBackButton } from "@react-navigation/elements";
-import { FiberProvider } from "its-fine";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import React, { useMemo } from "react";
+import { useWindowDimensions } from "react-native";
 import {
-  ReanimatedExample,
-  API,
-  Aurora,
-  Breathe,
-  Filters,
-  Gooey,
-  GraphsScreen,
-  Hue,
-  Matrix,
-  Glassmorphism,
-  Neumorphism,
-  PerformanceDrawingTest,
-  Wallpaper,
-  Vertices,
-  Wallet,
-  Severance,
-  Transitions,
-  Stickers,
-} from "./Examples";
-import { CI, Tests } from "./Tests";
-import { HomeScreen } from "./Home";
-import type { StackParamList } from "./types";
-import { useAssets } from "./Tests/useAssets";
+  vec,
+  Circle,
+  polar2Canvas,
+  mix,
+  SkiaPictureView,
+  Skia,
+} from "@shopify/react-native-skia";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
-const linking: LinkingOptions<StackParamList> = {
-  config: {
-    screens: {
-      Home: "",
-      Vertices: "vertices",
-      API: "api",
-      Breathe: "breathe",
-      Filters: "filters",
-      Gooey: "gooey",
-      Hue: "hue",
-      Matrix: "matrix",
-      Severance: "severance",
-      Aurora: "aurora",
-      Glassmorphism: "glassmorphism",
-      Neumorphism: "neumorphism",
-      Wallpaper: "wallpaper",
-      Wallet: "wallet",
-      Graphs: "graphs",
-      Animation: "animation",
-      Reanimated: "reanimated",
-      Performance: "performance",
-      Tests: "test",
-      Transitions: "transitions",
-      Stickers: "stickers",
-    },
-  },
-  prefixes: ["rnskia://"],
-};
+const c1 = "#61bea2";
+const c2 = "#529ca0";
 
-const HeaderLeft = (props: HeaderBackButtonProps) => {
-  const navigation = useNavigation();
+interface RingProps {
+  index: number;
+  progress: SharedValue<number>;
+}
+
+const Ring = ({ index, progress }: RingProps) => {
+  const { width, height } = useWindowDimensions();
+  const R = width / 4;
+  const center = useMemo(
+    () => vec(width / 2, height / 2 - 64),
+    [height, width]
+  );
+
+  const theta = (index * (2 * Math.PI)) / 6;
+  const transform = useDerivedValue(() => {
+    const { x, y } = polar2Canvas(
+      { theta, radius: progress.value * R },
+      { x: 0, y: 0 }
+    );
+    const scale = mix(progress.value, 0.3, 1);
+    return [{ translateX: x }, { translateY: y }, { scale }];
+  }, [progress, R]);
+
   return (
-    <HeaderBackButton
-      {...props}
-      onPress={() => {
-        if (navigation.canGoBack()) {
-          navigation.goBack();
-        }
-      }}
-      testID="back"
+    <Circle
+      c={center}
+      r={R}
+      color={index % 2 ? c1 : c2}
+      origin={center}
+      transform={transform}
     />
   );
 };
 
+const recorder = Skia.PictureRecorder();
+const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, 48, 48));
+canvas.drawColor(Skia.Color("rgb(36,43,56)"));
+const picture = recorder.finishRecordingAsPicture();
+
 const App = () => {
-  const Stack = createNativeStackNavigator<StackParamList>();
-  const assets = useAssets();
-  if (assets === null) {
-    return null;
-  }
   return (
-    <FiberProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar hidden />
-        <NavigationContainer linking={linking}>
-          <Stack.Navigator
-            screenOptions={{
-              headerLeft: HeaderLeft,
-            }}
-            initialRouteName={CI ? "Tests" : "Home"}
-          >
-            <Stack.Screen
-              name="Home"
-              key="Home"
-              component={HomeScreen}
-              options={{
-                title: "🎨 Skia",
-              }}
-            />
-            <Stack.Screen
-              key="Tests"
-              name="Tests"
-              options={{
-                title: "🔧 Tests",
-              }}
-            >
-              {(props) => <Tests {...props} assets={assets} />}
-            </Stack.Screen>
-            <Stack.Screen
-              name="Vertices"
-              component={Vertices}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen name="API" component={API} />
-            <Stack.Screen name="Breathe" component={Breathe} />
-            <Stack.Screen name="Filters" component={Filters} />
-            <Stack.Screen name="Gooey" component={Gooey} />
-            <Stack.Screen name="Hue" component={Hue} />
-            <Stack.Screen
-              name="Matrix"
-              component={Matrix}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="Severance"
-              component={Severance}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="Aurora"
-              component={Aurora}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="Glassmorphism"
-              component={Glassmorphism}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen name="Neumorphism" component={Neumorphism} />
-            <Stack.Screen
-              name="Wallpaper"
-              component={Wallpaper}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="Wallet"
-              component={Wallet}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen name="Graphs" component={GraphsScreen} />
-            <Stack.Screen name="Reanimated" component={ReanimatedExample} />
-            <Stack.Screen name="Stickers" component={Stickers} />
-            <Stack.Screen
-              name="Transitions"
-              component={Transitions}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="Performance"
-              component={PerformanceDrawingTest}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </GestureHandlerRootView>
-    </FiberProvider>
+    <SkiaPictureView picture={picture} style={{ flex: 1 }} mode="continuous" />
   );
 };
 
-// eslint-disable-next-line import/no-default-export
 export default App;

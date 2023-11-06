@@ -167,7 +167,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         long timestamp = surface.getTimestamp();
 
         long frameDuration = (timestamp - _prevTimestamp)/1000000;
-       // Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
+        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
         _prevTimestamp = timestamp;
     }
 

@@ -64,7 +64,7 @@ public class PlatformContext {
                     long timestamp = frameTimeNanos/1000000;
 
                     long frameDuration = (timestamp - _prevTimestamp);
-                   // Log.i(tag, "Choreographer "+frameDuration+"ms");
+                    Log.i(tag, "Choreographer "+frameDuration+"ms");
                     _prevTimestamp = timestamp;
                     notifyDrawLoop();
                 }

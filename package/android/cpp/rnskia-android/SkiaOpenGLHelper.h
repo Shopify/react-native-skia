@@ -175,6 +175,11 @@ public:
    * @return true if eglMakeCurrent was successfull
    */
   static bool makeCurrent(SkiaOpenGLContext *context, EGLSurface glSurface) {
+    EGLBoolean it;
+    it = eglSwapInterval(OpenGLResourceHolder::getInstance().glDisplay, 0);
+    if (it == EGL_FALSE) {
+      RNSkLogger::logToConsole("eglSwapInterval failed : %i", glGetError());
+    }
     // We don't need to call make current if we already are current:
     if (eglGetCurrentSurface(EGL_DRAW) != glSurface ||
         eglGetCurrentSurface(EGL_READ) != glSurface ||
