@@ -76,7 +76,7 @@ public:
         count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
                    : SkEncodedImageFormat::kPNG;
 
-    auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
+    auto quality = count >= 2 ? arguments[1].asNumber() : 100.0;
     auto image = getObject();
     if (image->isTextureBacked()) {
       image = image->makeNonTextureImage();
