@@ -79,7 +79,11 @@ export interface SkImage extends SkJSIInstance<"Image"> {
 
     @return  Uint8Array with data
   */
-  encodeToBytes(fmt?: ImageFormat, quality?: number, lossy?: boolean): Uint8Array;
+  encodeToBytes(
+    fmt?: ImageFormat,
+    quality?: number,
+    lossy?: boolean
+  ): Uint8Array;
 
   /** Encodes Image pixels, returning result as a base64 encoded string. Returns existing
      encoded data if present; otherwise, SkImage is encoded with
