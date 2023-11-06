@@ -7,6 +7,8 @@ slug: /images
 
 ## Loading Images
 
+### useImage
+
 Images are loaded using the `useImage` hook. This hook returns an `SkImage` instance which can be passed to the `Image` component.
 
 Images can be loaded using require statements, or by passing a network URL directly. It is also possible to load images from the app bundle using named images.
@@ -22,6 +24,51 @@ const image3 = useImage("Logo");
 ```
 
 Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is loaded. You can use this to conditionally render the `Image` component like in the [example below](#example). The hook also provides an optional error handler as a second parameter.
+
+### MakeImageFromEncoded
+
+You can also create image instances yourself using `MakeImageFromEncoded`.
+
+```tsx twoslash
+import {Skia} from "@shopify/react-native-skia";
+
+// https://png-pixel.com/
+const data = Skia.Data.fromBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==");
+const image = Skia.Image.MakeImageFromEncoded(data);
+```
+
+### MakeImage
+
+`MakeImage` allows you to create an image given pixel data and format.
+
+```tsx twoslash
+import {Skia, AlphaType, ColorType} from "@shopify/react-native-skia";
+
+const pixels = new Uint8Array(256 * 256 * 4);
+pixels.fill(255);
+let i = 0;
+for (let x = 0; x < 256 * 4; x++) {
+  for (let y = 0; y < 256 * 4; y++) {
+    pixels[i++] = (x * y) % 255;
+  }
+}
+const data = Skia.Data.fromBytes(pixels);
+const img = Skia.Image.MakeImage(
+  {
+    width: 256,
+    height: 256,
+    alphaType: AlphaType.Opaque,
+    colorType: ColorType.RGBA_8888,
+  },
+  data,
+  256 * 4
+);
+```
+
+### MakeImage
+
+`useImage` is simply an helper function to load the image data.
+You can also 
 
 ## Image
 
