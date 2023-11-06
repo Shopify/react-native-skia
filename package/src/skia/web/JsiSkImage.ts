@@ -1,4 +1,4 @@
-import type { CanvasKit, Image } from "canvaskit-wasm";
+import type { CanvasKit, Image, MallocObj } from "canvaskit-wasm";
 
 import type {
   ImageFormat,
@@ -125,7 +125,7 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     srcX?: number,
     srcY?: number,
     imageInfo?: ImageInfo,
-    dest?: any,
+    dest?: object,
     bytesPerRow?: number
   ): Float32Array | Uint8Array | null {
     const info = this.getImageInfo();
@@ -143,7 +143,13 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
         ({ value }) => value === alphaType
       ),
     };
-    return this.ref.readPixels(srcX ?? 0, srcY ?? 0, pxInfo, dest, bytesPerRow);
+    return this.ref.readPixels(
+      srcX ?? 0,
+      srcY ?? 0,
+      pxInfo,
+      dest as MallocObj,
+      bytesPerRow
+    );
   }
 
   dispose = () => {
