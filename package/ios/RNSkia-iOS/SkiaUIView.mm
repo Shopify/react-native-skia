@@ -93,36 +93,31 @@
 }
 
 - (void)dealloc {
-    [self unregisterView];
-    [[NSNotificationCenter defaultCenter]
-        removeObserver:self
-                  name:RCTBridgeWillInvalidateModulesNotification
-     object:nil];
+  [self unregisterView];
+  [[NSNotificationCenter defaultCenter]
+      removeObserver:self
+                name:RCTBridgeWillInvalidateModulesNotification
+              object:nil];
 }
 
-- (void)prepareForRecycle
-{
-    [super prepareForRecycle];
-    [self unregisterView];
+- (void)prepareForRecycle {
+  [super prepareForRecycle];
+  [self unregisterView];
 }
-
 
 #ifdef RCT_NEW_ARCH_ENABLED
-- (void)finalizeUpdates:(RNComponentViewUpdateMask)updateMask
-{
-    [super finalizeUpdates:updateMask];
-    if (updateMask == RNComponentViewUpdateMaskAll) {
-        // this flag is only set when the view is inserted and we want to set the manager
-        // here since the view could be recycled or the app could be refreshed and we would
-        // have a stale manager then
-        _manager = [[self skiaManager] skManager].get();
-    }
+- (void)finalizeUpdates:(RNComponentViewUpdateMask)updateMask {
+  [super finalizeUpdates:updateMask];
+  if (updateMask == RNComponentViewUpdateMaskAll) {
+    // this flag is only set when the view is inserted and we want to set the
+    // manager here since the view could be recycled or the app could be
+    // refreshed and we would have a stale manager then
+    _manager = [[self skiaManager] skManager].get();
+  }
 }
 #endif // RCT_NEW_ARCH_ENABLED
 
-
-- (void)unregisterView
-{
+- (void)unregisterView {
   if (_manager != nullptr && _nativeId != 0) {
     _manager->unregisterSkiaView(_nativeId);
   }

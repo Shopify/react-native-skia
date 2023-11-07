@@ -55,8 +55,6 @@ using namespace facebook::react;
   [self setNativeId:nativeId];
   [self setDrawingMode:newProps.mode];
   [self setDebugMode:newProps.debug];
-
-  [super updateProps:props oldProps:oldProps];
 }
 
 @end
