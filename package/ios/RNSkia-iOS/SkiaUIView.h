@@ -16,12 +16,11 @@
 
 class RNSkiOSJsView;
 
-
-@interface SkiaUIView : 
+@interface SkiaUIView :
 #if RCT_NEW_ARCH_ENABLED
-RCTViewComponentView
+    RCTViewComponentView
 #else
-UIView
+    UIView
 #endif // RCT_NEW_ARCH_ENABLED
 
 - (instancetype)
@@ -29,8 +28,8 @@ UIView
             factory:(std::function<std::shared_ptr<RNSkBaseiOSView>(
                          std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory;
 - (void)initCommon:(RNSkia::RNSkManager *)manager
-                factory:
-                    (std::function<std::shared_ptr<RNSkBaseiOSView>(                                                                    std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory;
+           factory:(std::function<std::shared_ptr<RNSkBaseiOSView>(
+                        std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory;
 - (std::shared_ptr<RNSkBaseiOSView>)impl;
 - (SkiaManager *)skiaManager;
 

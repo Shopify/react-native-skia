@@ -10,9 +10,9 @@
 
 @interface RNSkiaModule : NSObject
 #ifdef RCT_NEW_ARCH_ENABLED
-                                   <NativeSkiaModuleSpec>
+                          <NativeSkiaModuleSpec>
 #else
-                                   <RCTBridgeModule>
+                          <RCTBridgeModule>
 #endif
 
 - (SkiaManager *)manager;

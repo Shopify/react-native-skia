@@ -12,7 +12,6 @@
 #import <React/RCTBridge+Private.h>
 #import <React/RCTConversions.h>
 #import <React/RCTFabricComponentsPlugins.h>
-#import <React/RCTBridge+Private.h>
 
 #import <react/renderer/components/rnskia/ComponentDescriptors.h>
 #import <react/renderer/components/rnskia/EventEmitters.h>
@@ -23,43 +22,43 @@ using namespace facebook::react;
 
 @implementation SkiaDomView
 
-- (instancetype)initWithFrame:(CGRect)frame
-{
-    if (self = [super initWithFrame:frame]) {
-        auto skManager = [[self skiaManager] skManager];
-        // Pass SkManager as a raw pointer to avoid circular dependenciesr
-        [self initCommon:skManager.get() factory:[](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
-            return std::make_shared<RNSkiOSView<RNSkia::RNSkDomView>>(
-                context);
-          }];
-        static const auto defaultProps = std::make_shared<const SkiaDomViewProps>();
-        _props = defaultProps;
-    }
-    return self;
+- (instancetype)initWithFrame:(CGRect)frame {
+  if (self = [super initWithFrame:frame]) {
+    auto skManager = [[self skiaManager] skManager];
+    // Pass SkManager as a raw pointer to avoid circular dependenciesr
+    [self
+        initCommon:skManager.get()
+           factory:[](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
+             return std::make_shared<RNSkiOSView<RNSkia::RNSkDomView>>(context);
+           }];
+    static const auto defaultProps = std::make_shared<const SkiaDomViewProps>();
+    _props = defaultProps;
+  }
+  return self;
 }
 
 #pragma mark - RCTComponentViewProtocol
 
-+ (ComponentDescriptorProvider)componentDescriptorProvider
-{
++ (ComponentDescriptorProvider)componentDescriptorProvider {
   return concreteComponentDescriptorProvider<SkiaDomViewComponentDescriptor>();
 }
 
-- (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
-{
-  const auto &newProps = *std::static_pointer_cast<const SkiaDomViewProps>(props);
-    int nativeId = [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
-    [self setNativeId:nativeId];
-    [self setDrawingMode:newProps.mode];
-    [self setDebugMode:newProps.debug];
+- (void)updateProps:(const Props::Shared &)props
+           oldProps:(const Props::Shared &)oldProps {
+  const auto &newProps =
+      *std::static_pointer_cast<const SkiaDomViewProps>(props);
+  int nativeId =
+      [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
+  [self setNativeId:nativeId];
+  [self setDrawingMode:newProps.mode];
+  [self setDebugMode:newProps.debug];
 
   [super updateProps:props oldProps:oldProps];
 }
 
 @end
 
-Class<RCTComponentViewProtocol> SkiaDomViewCls(void)
-{
+Class<RCTComponentViewProtocol> SkiaDomViewCls(void) {
   return SkiaDomView.class;
 }
 

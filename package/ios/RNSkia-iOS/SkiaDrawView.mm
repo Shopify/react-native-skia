@@ -5,13 +5,12 @@
 #import <RNSkIOSView.h>
 #import <RNSkPlatformContext.h>
 
-#import <SkiaUIView.h>
 #import <RNSkJsView.h>
+#import <SkiaUIView.h>
 
 #import <React/RCTBridge+Private.h>
 #import <React/RCTConversions.h>
 #import <React/RCTFabricComponentsPlugins.h>
-#import <React/RCTBridge+Private.h>
 
 #import <react/renderer/components/rnskia/ComponentDescriptors.h>
 #import <react/renderer/components/rnskia/EventEmitters.h>
@@ -22,54 +21,52 @@ using namespace facebook::react;
 
 @implementation SkiaDrawView
 
-- (instancetype)initWithFrame:(CGRect)frame
-{
-    if (self = [super initWithFrame:frame]) {
-        [self prepareView];
-        static const auto defaultProps = std::make_shared<const SkiaDrawViewProps>();
-        _props = defaultProps;
-    }
-    return self;
-}
-
-- (void)prepareView
-{
-    auto skManager = [[self skiaManager] skManager];
-    // Pass SkManager as a raw pointer to avoid circular dependenciesr
-    [self initCommon:skManager.get() factory:[](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
-        return std::make_shared<RNSkiOSView<RNSkia::RNSkJsView>>(
-            context);
-      }];
-}
-
-- (void)prepareForRecycle
-{
-    [super prepareForRecycle];
+- (instancetype)initWithFrame:(CGRect)frame {
+  if (self = [super initWithFrame:frame]) {
     [self prepareView];
+    static const auto defaultProps =
+        std::make_shared<const SkiaDrawViewProps>();
+    _props = defaultProps;
+  }
+  return self;
+}
+
+- (void)prepareView {
+  auto skManager = [[self skiaManager] skManager];
+  // Pass SkManager as a raw pointer to avoid circular dependenciesr
+  [self initCommon:skManager.get()
+           factory:[](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
+             return std::make_shared<RNSkiOSView<RNSkia::RNSkJsView>>(context);
+           }];
+}
+
+- (void)prepareForRecycle {
+  [super prepareForRecycle];
+  [self prepareView];
 }
 
 #pragma mark - RCTComponentViewProtocol
 
-+ (ComponentDescriptorProvider)componentDescriptorProvider
-{
++ (ComponentDescriptorProvider)componentDescriptorProvider {
   return concreteComponentDescriptorProvider<SkiaDrawViewComponentDescriptor>();
 }
 
-- (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
-{
-  const auto &newProps = *std::static_pointer_cast<const SkiaDrawViewProps>(props);
-    int nativeId = [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
-    [self setNativeId:nativeId];
-    [self setDrawingMode:newProps.mode];
-    [self setDebugMode:newProps.debug];
+- (void)updateProps:(const Props::Shared &)props
+           oldProps:(const Props::Shared &)oldProps {
+  const auto &newProps =
+      *std::static_pointer_cast<const SkiaDrawViewProps>(props);
+  int nativeId =
+      [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
+  [self setNativeId:nativeId];
+  [self setDrawingMode:newProps.mode];
+  [self setDebugMode:newProps.debug];
 
   [super updateProps:props oldProps:oldProps];
 }
 
 @end
 
-Class<RCTComponentViewProtocol> SkiaDrawViewCls(void)
-{
+Class<RCTComponentViewProtocol> SkiaDrawViewCls(void) {
   return SkiaDrawView.class;
 }
 

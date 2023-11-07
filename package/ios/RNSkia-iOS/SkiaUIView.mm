@@ -28,27 +28,25 @@
                                 factory {
   self = [super init];
   if (self) {
-      [self initCommon:manager factory:factory];
+    [self initCommon:manager factory:factory];
   }
-    // Listen to notifications about module invalidation
-    [[NSNotificationCenter defaultCenter]
-        addObserver:self
-           selector:@selector(willInvalidateModules)
-               name:RCTBridgeWillInvalidateModulesNotification
-             object:nil];
+  // Listen to notifications about module invalidation
+  [[NSNotificationCenter defaultCenter]
+      addObserver:self
+         selector:@selector(willInvalidateModules)
+             name:RCTBridgeWillInvalidateModulesNotification
+           object:nil];
   return self;
 }
 
 - (void)initCommon:(RNSkia::RNSkManager *)manager
-                factory:
-                    (std::function<std::shared_ptr<RNSkBaseiOSView>(
-                         std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory
-{
-    _manager = manager;
-    _nativeId = 0;
-    _debugMode = false;
-    _drawingMode = RNSkia::RNSkDrawingMode::Default;
-    _factory = factory;
+           factory:(std::function<std::shared_ptr<RNSkBaseiOSView>(
+                        std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory {
+  _manager = manager;
+  _nativeId = 0;
+  _debugMode = false;
+  _drawingMode = RNSkia::RNSkDrawingMode::Default;
+  _factory = factory;
 }
 
 - (SkiaManager *)skiaManager {
@@ -56,7 +54,6 @@
   auto skiaModule = (RNSkiaModule *)[bridge moduleForName:@"RNSkiaModule"];
   return [skiaModule manager];
 }
-
 
 - (void)willInvalidateModules {
   _impl = nullptr;
@@ -80,24 +77,24 @@
   } else {
     // Create implementation view when the parent view is set
     if (_impl == nullptr) {
+      if (_manager == nullptr) {
+        auto skManager = [[self skiaManager] skManager];
+        _manager = skManager.get();
         if (_manager == nullptr) {
-            auto skManager = [[self skiaManager] skManager];
-            _manager = skManager.get();
-            if (_manager == nullptr) {
-                return;
-            }
+          return;
         }
-        _impl = _factory(_manager->getPlatformContext());
-        if (_impl == nullptr) {
-          throw std::runtime_error(
-              "Expected Skia view implementation, got nullptr.");
-        }
-        [self.layer addSublayer:_impl->getLayer()];
-        if (_nativeId != 0) {
-          _manager->setSkiaView(_nativeId, _impl->getDrawView());
-        }
-        _impl->getDrawView()->setDrawingMode(_drawingMode);
-        _impl->getDrawView()->setShowDebugOverlays(_debugMode);
+      }
+      _impl = _factory(_manager->getPlatformContext());
+      if (_impl == nullptr) {
+        throw std::runtime_error(
+            "Expected Skia view implementation, got nullptr.");
+      }
+      [self.layer addSublayer:_impl->getLayer()];
+      if (_nativeId != 0) {
+        _manager->setSkiaView(_nativeId, _impl->getDrawView());
+      }
+      _impl->getDrawView()->setDrawingMode(_drawingMode);
+      _impl->getDrawView()->setShowDebugOverlays(_debugMode);
     }
     // TODO: fast refresh on new arch
     // if (_impl == nullptr) {
