@@ -6,8 +6,8 @@ import {
   FontWidth,
   type SkParagraphStyle,
   type SkTextStyle,
-  type TextAlign,
-  type TextDirection,
+  type SkTextAlign,
+  type SkTextDirection,
 } from "../types";
 
 import { HostObject } from "./Host";
@@ -46,11 +46,11 @@ export class JsiSkParagraphStyle
     };
     return this;
   }
-  setTextDirection(textDirection: TextDirection): SkParagraphStyle {
+  setTextDirection(textDirection: SkTextDirection): SkParagraphStyle {
     this.ref.textDirection = { value: textDirection };
     return this;
   }
-  setTextAlign(textAlign: TextAlign): SkParagraphStyle {
+  setTextAlign(textAlign: SkTextAlign): SkParagraphStyle {
     this.ref.textAlign = { value: textAlign };
     return this;
   }

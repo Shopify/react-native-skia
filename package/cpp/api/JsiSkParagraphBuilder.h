@@ -71,9 +71,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(pushStyle) {
-    auto textStyle =
-        getArgumentAsHostObject<JsiSkTextStyle>(runtime, arguments, count, 0);
-    _builder->pushStyle(*textStyle->getObject().get());
+    _builder->pushStyle(JsiSkTextStyle::fromValue(runtime, arguments[0]));
     return thisValue.asObject(runtime);
   }
 
@@ -89,10 +87,9 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pushStyle),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pop))
 
-  explicit JsiSkParagraphBuilder(
-      std::shared_ptr<RNSkPlatformContext> context,
-      std::shared_ptr<JsiSkParagraphStyle> paragraphStyle,
-      std::shared_ptr<JsiSkFontMgr> fontManager)
+  explicit JsiSkParagraphBuilder(std::shared_ptr<RNSkPlatformContext> context,
+                                 ParagraphStyle paragraphStyle,
+                                 std::shared_ptr<JsiSkFontMgr> fontManager)
       : JsiSkHostObject(std::move(context)) {
 
     _fontCollection = sk_make_sp<FontCollection>();
@@ -103,10 +100,7 @@ public:
     }
     _fontCollection->enableFontFallback();
 
-    _builder = ParagraphBuilder::make(paragraphStyle != nullptr
-                                          ? *paragraphStyle->getObject()
-                                          : ParagraphStyle(),
-                                      _fontCollection);
+    _builder = ParagraphBuilder::make(paragraphStyle, _fontCollection);
   }
 
 private:
@@ -122,15 +116,12 @@ class JsiSkParagraphBuilderFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(Make) {
     // Get paragraph style from params
-    auto paragraphStyle = count >= 1
-                              ? getArgumentAsHostObject<JsiSkParagraphStyle>(
-                                    runtime, arguments, count, 0)
-                              : nullptr;
+    auto paragraphStyle =
+        count >= 1 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
+                   : ParagraphStyle();
 
     // get font manager
-    auto fontMgr = count == 2 ? getArgumentAsHostObject<JsiSkFontMgr>(
-                                    runtime, arguments, count, 1)
-                              : nullptr;
+    auto fontMgr = nullptr;
 
     // Create the paragraph builder
     return jsi::Object::createFromHostObject(

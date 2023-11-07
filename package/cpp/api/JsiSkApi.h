@@ -25,7 +25,6 @@
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
 #include "JsiSkParagraphBuilder.h"
-#include "JsiSkParagraphStyle.h"
 #include "JsiSkPath.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
@@ -45,7 +44,6 @@
 #include "JsiSkShaderFactory.h"
 #include "JsiSkSurfaceFactory.h"
 #include "JsiSkTextBlobFactory.h"
-#include "JsiSkTextStyle.h"
 #include "JsiSkTypeFaceFontProviderFactory.h"
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
@@ -119,13 +117,6 @@ public:
     installReadonlyProperty(
         "ParagraphBuilder",
         std::make_shared<JsiSkParagraphBuilderFactory>(context));
-
-    installReadonlyProperty(
-        "ParagraphStyle",
-        std::make_shared<JsiSkParagraphStyleFactory>(context));
-
-    installReadonlyProperty("TextStyle",
-                            std::make_shared<JsiSkTextStyleFactory>(context));
   }
 };
 } // namespace RNSkia

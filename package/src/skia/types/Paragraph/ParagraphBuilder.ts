@@ -1,7 +1,9 @@
 import type { SkFontMgr } from "../Font";
 import type { SkJSIInstance } from "../JsiInstance";
 
-import type { SkParagraph, SkParagraphStyle, SkTextStyle } from ".";
+import type { SkParagraph } from "./Paragraph";
+import type { SkParagraphStyle } from "./ParagraphStyle";
+import type { SkTextStyle, TextBaseline } from "./TextStyle";
 
 export interface ParagraphBuilderFactory {
   /**
@@ -41,11 +43,6 @@ export enum PlaceholderAlignment {
   /// placeholder is very tall, the extra space will grow equally from
   /// the top and bottom of the line.
   Middle,
-}
-
-export enum TextBaseline {
-  Alphabetic = 0,
-  Ideographic,
 }
 
 export interface SkParagraphBuilder extends SkJSIInstance<"ParagraphBuilder"> {

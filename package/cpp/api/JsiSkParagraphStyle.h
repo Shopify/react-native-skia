@@ -9,15 +9,13 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkHostObjects.h>
+#include <JsiSkStrutStyle.h>
 #include <JsiSkTextStyle.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "Paragraph.h"
-#include "ParagraphBuilder.h"
-#include "ParagraphStyle.h"
 
 #pragma clang diagnostic pop
 
@@ -29,83 +27,92 @@ using namespace skia::textlayout; // NOLINT
 /**
  Implementation of the ParagraphStyle object in JSI
  */
-class JsiSkParagraphStyle
-    : public JsiSkWrappingSharedPtrHostObject<ParagraphStyle> {
+class JsiSkParagraphStyle {
 public:
-  JSI_API_TYPENAME("ParagraphStyle");
+  /**
+   disableHinting?: boolean;
+   ellipsis?: string;
+   heightMultiplier?: number;
+   maxLines?: number;
+   replaceTabCharacters?: boolean;
+   strutStyle?: SkStrutStyle;
+   textAlign?: SkTextAlign;
+   textDirection?: SkTextDirection;
+   textHeightBehavior?: SkTextHeightBehavior;
+   textStyle?: SkTextStyle;
+   */
+  static ParagraphStyle fromValue(jsi::Runtime &runtime,
+                                  const jsi::Value &value) {
+    // Read values from the argument - expected to be a ParagraphStyle shaped
+    // object
+    if (!value.isObject()) {
+      throw jsi::JSError(runtime, "Expected SkParagrahStyle as first argument");
+    }
 
-  JSI_HOST_FUNCTION(setTextStyle) {
-    auto textStyle =
-        getArgumentAsHostObject<JsiSkTextStyle>(runtime, arguments, count, 0);
-    getObject()->setTextStyle(*textStyle->getObject().get());
-    return thisValue.asObject(runtime);
+    auto object = value.asObject(runtime);
+
+    ParagraphStyle retVal;
+
+    if (object.hasProperty(runtime, "disableHinting")) {
+      auto propValue = object.getProperty(runtime, "disableHinting");
+      if (propValue.asBool()) {
+        retVal.turnHintingOff();
+      }
+    }
+    if (object.hasProperty(runtime, "ellipsis")) {
+      auto propValue = object.getProperty(runtime, "ellipsis");
+      auto inStr = propValue.asString(runtime).utf8(runtime);
+      std::u16string uStr;
+      fromUTF8(inStr, uStr);
+      retVal.setEllipsis(uStr);
+    }
+    if (object.hasProperty(runtime, "heightMultiplier")) {
+      auto propValue = object.getProperty(runtime, "heightMultiplier");
+      retVal.setHeight(propValue.asNumber());
+    }
+    if (object.hasProperty(runtime, "maxLines")) {
+      auto propValue = object.getProperty(runtime, "maxLines");
+      if (propValue.asNumber() != 0) {
+        retVal.setMaxLines(propValue.asNumber());
+      }
+    }
+    if (object.hasProperty(runtime, "replaceTabCharacters")) {
+      auto propValue = object.getProperty(runtime, "replaceTabCharacters");
+      retVal.setReplaceTabCharacters(propValue.asBool());
+    }
+    if (object.hasProperty(runtime, "textAlign")) {
+      auto propValue = object.getProperty(runtime, "textAlign");
+      retVal.setTextAlign(static_cast<TextAlign>(propValue.asNumber()));
+    }
+    if (object.hasProperty(runtime, "textDirection")) {
+      auto propValue = object.getProperty(runtime, "textDirection");
+      retVal.setTextDirection(static_cast<TextDirection>(propValue.asNumber()));
+    }
+    if (object.hasProperty(runtime, "textHeightBehavior")) {
+      auto propValue = object.getProperty(runtime, "textHeightBehavior");
+      retVal.setTextHeightBehavior(
+          static_cast<TextHeightBehavior>(propValue.asNumber()));
+    }
+    if (object.hasProperty(runtime, "strutStyle")) {
+      auto propValue = object.getProperty(runtime, "strutStyle");
+      retVal.setStrutStyle(JsiSkStrutStyle::fromValue(runtime, propValue));
+    }
+    if (object.hasProperty(runtime, "textStyle")) {
+      auto propValue = object.getProperty(runtime, "textStyle");
+      retVal.setTextStyle(JsiSkTextStyle::fromValue(runtime, propValue));
+    }
+
+    return retVal;
   }
-
-  JSI_HOST_FUNCTION(setTextDirection) {
-    auto value = static_cast<TextDirection>(
-        getArgumentAsNumber(runtime, arguments, count, 0));
-    getObject()->setTextDirection(value);
-    return thisValue.asObject(runtime);
-  }
-
-  JSI_HOST_FUNCTION(setTextAlign) {
-    auto value = static_cast<TextAlign>(
-        getArgumentAsNumber(runtime, arguments, count, 0));
-    getObject()->setTextAlign(value);
-    return thisValue.asObject(runtime);
-  }
-
-  JSI_HOST_FUNCTION(setEllipsis) {
-    auto value =
-        getArgumentAsString(runtime, arguments, count, 0).utf8(runtime);
-    std::u16string uStr;
-    fromUTF8(value, uStr);
-    getObject()->setEllipsis(uStr);
-    return thisValue.asObject(runtime);
-  }
-
-  JSI_HOST_FUNCTION(setMaxLines) {
-    auto value = getArgumentAsNumber(runtime, arguments, count, 0);
-    getObject()->setMaxLines(value);
-    return thisValue.asObject(runtime);
-  }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphStyle, setTextStyle),
-                       JSI_EXPORT_FUNC(JsiSkParagraphStyle, setTextDirection),
-                       JSI_EXPORT_FUNC(JsiSkParagraphStyle, setTextAlign),
-                       JSI_EXPORT_FUNC(JsiSkParagraphStyle, setEllipsis),
-                       JSI_EXPORT_FUNC(JsiSkParagraphStyle, setMaxLines))
-
-  explicit JsiSkParagraphStyle(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkWrappingSharedPtrHostObject(std::move(context),
-                                         std::make_shared<ParagraphStyle>()) {}
 
 private:
   template <typename T>
-  void fromUTF8(
+  static void fromUTF8(
       const std::string &source,
       std::basic_string<T, std::char_traits<T>, std::allocator<T>> &result) {
     std::wstring_convert<std::codecvt_utf8_utf16<T>, T> convertor;
     result = convertor.from_bytes(source);
   }
-};
-
-/**
- Implementation of the ParagraphStyleFactory for making ParagraphStyle JSI
- objects
- */
-class JsiSkParagraphStyleFactory : public JsiSkHostObject {
-public:
-  JSI_HOST_FUNCTION(Make) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkParagraphStyle>(getContext()));
-  }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphStyleFactory, Make))
-
-  explicit JsiSkParagraphStyleFactory(
-      std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
 };
 
 } // namespace RNSkia

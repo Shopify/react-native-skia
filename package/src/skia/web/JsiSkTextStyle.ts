@@ -7,7 +7,7 @@ import type {
   SkColor,
   SkTextShadow,
   SkTextStyle,
-  TextDecoration,
+  TextDecorationType,
   TextDecorationStyle,
 } from "../types";
 
@@ -20,7 +20,7 @@ export class JsiSkTextStyle
   constructor(CanvasKit: CanvasKit, ref: TextStyle) {
     super(CanvasKit, ref, "TextStyle");
   }
-  setDecorationType(decoration: TextDecoration): SkTextStyle {
+  setDecorationType(decoration: TextDecorationType): SkTextStyle {
     this.ref.decoration = decoration;
     return this;
   }

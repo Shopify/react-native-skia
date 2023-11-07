@@ -30,8 +30,6 @@ import type { Color, SkColor } from "./Color";
 import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProviderFactory";
 import type { AnimatedImageFactory } from "./AnimatedImage";
 import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
-import type { ParagraphStyleFactory } from "./Paragraph/ParagraphStyleFactory";
-import type { TextStyleFactory } from "./Paragraph/TextStyleFactory";
 
 /**
  * Declares the interface for the native Skia API
@@ -89,6 +87,4 @@ export interface Skia {
   Surface: SurfaceFactory;
   // Paragraph
   ParagraphBuilder: ParagraphBuilderFactory;
-  ParagraphStyle: ParagraphStyleFactory;
-  TextStyle: TextStyleFactory;
 }
