@@ -9,11 +9,12 @@ const lerp = (
   from: number,
   to: number,
   p1: SkPath,
-  p2: SkPath
+  p2: SkPath,
+  output?: SkPath
 ) => {
   "worklet";
   const t = (value - from) / (to - from);
-  return p2.interpolate(p1, t)!;
+  return p2.interpolate(p1, t, output)!;
 };
 
 /**
@@ -36,7 +37,8 @@ export const interpolatePaths = (
   value: number,
   input: number[],
   outputRange: SkPath[],
-  options?: ExtrapolationType
+  options?: ExtrapolationType,
+  output?: SkPath
 ) => {
   "worklet";
   const extrapolation = validateInterpolationOptions(options);
@@ -84,6 +86,7 @@ export const interpolatePaths = (
     input[i],
     input[i + 1],
     outputRange[i],
-    outputRange[i + 1]
+    outputRange[i + 1],
+    output
   );
 };

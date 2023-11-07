@@ -3,12 +3,11 @@ import {
   Canvas,
   Fill,
   Group,
+  useClock,
   useFont,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { useWindowDimensions } from "react-native";
-
-import { useClock } from "../../components/Animations";
 
 import { COLS, ROWS, Symbol } from "./Symbol";
 

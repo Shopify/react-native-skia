@@ -108,7 +108,7 @@ public:
       direction = SkPathDirection::kCCW;
     }
     getObject()->addRect(*rect, direction);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(addRRect) {
@@ -246,14 +246,14 @@ public:
   JSI_HOST_FUNCTION(setFillType) {
     auto ft = (SkPathFillType)arguments[0].asNumber();
     getObject()->setFillType(ft);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   // TODO-API: Property?
   JSI_HOST_FUNCTION(setIsVolatile) {
     auto v = arguments[0].getBool();
     getObject()->setIsVolatile(v);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(isVolatile) {
@@ -263,7 +263,7 @@ public:
   JSI_HOST_FUNCTION(transform) {
     auto m3 = *JsiSkMatrix::fromValue(runtime, arguments[0]);
     getObject()->transform(m3);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(stroke) {
@@ -407,12 +407,12 @@ public:
 
   JSI_HOST_FUNCTION(reset) {
     getObject()->reset();
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rewind) {
     getObject()->rewind();
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(quadTo) {
@@ -452,7 +452,7 @@ public:
 
   JSI_HOST_FUNCTION(close) {
     getObject()->close();
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(simplify) {
@@ -494,6 +494,14 @@ public:
   JSI_HOST_FUNCTION(interpolate) {
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
     auto weight = arguments[1].asNumber();
+    if (count > 2) {
+      auto path3 = JsiSkPath::fromValue(runtime, arguments[2]);
+      auto succeed = getObject()->interpolate(*path2, weight, path3.get());
+      if (!succeed) {
+        return nullptr;
+      }
+      return arguments[2].asObject(runtime);
+    }
     SkPath result;
     auto succeed = getObject()->interpolate(*path2, weight, &result);
     if (!succeed) {
