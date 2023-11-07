@@ -110,7 +110,7 @@ export const Gooey = () => {
 
   return (
     <View style={{flex: 1}}>
-      <Canvas style={{flex: 0.99}}>
+      <Canvas style={{flex: 1}}>
         <Fill color={BG} />
         <Group
           layer={
