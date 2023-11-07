@@ -53,7 +53,6 @@ public class PlatformContext {
         return buffer.toByteArray();
     }
     //private long _prevTimestamp = 0;
-    private String tag = "SkiaView";
 
     private void postFrameLoop() {
         Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
@@ -114,7 +113,6 @@ public class PlatformContext {
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                Log.i(tag, "beginDrawLoop ");
                 postFrameLoop();
             }
         });
@@ -187,8 +185,6 @@ public class PlatformContext {
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Log.i(tag, "Resume ");
-
                     postFrameLoop();
                 }
             });
