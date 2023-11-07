@@ -111,6 +111,14 @@
     "node_modules/",
     "lib/"
   ],
+  "codegenConfig": {
+    "name": "rnskia",
+    "type": "all",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "com.shopify.reactnative.skia"
+    }
+  },
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",
