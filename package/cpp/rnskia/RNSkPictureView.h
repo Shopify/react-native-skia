@@ -72,7 +72,7 @@ private:
       canvas->scale(pd, pd);
 
       if (_picture != nullptr) {
-        canvas->drawColor(i % 2  ? SK_ColorBLACK : SK_ColorRED);
+        canvas->drawColor(i % 2  ? SK_ColorBLUE : SK_ColorRED);
         i++;
       }
 
