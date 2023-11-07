@@ -78,6 +78,7 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
     // Now make this one current
     if (!SkiaOpenGLHelper::makeCurrent(
             &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface)) {
+
       RNSkLogger::logToConsole(
           "Could not create EGL Surface from native window / surface. Could "
           "not set new surface as current surface.");
@@ -108,11 +109,6 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
 
     if (samples > maxSamples) {
       samples = maxSamples;
-    }
-    EGLBoolean it;
-    it = eglSwapInterval(OpenGLResourceHolder::getInstance().glDisplay, 1);
-    if (it == EGL_FALSE) {
-      RNSkLogger::logToConsole("eglSwapInterval failed : %i", glGetError());
     }
     auto renderTarget = GrBackendRenderTargets::MakeGL(_width, _height, samples,
                                                        stencil, fboInfo);
