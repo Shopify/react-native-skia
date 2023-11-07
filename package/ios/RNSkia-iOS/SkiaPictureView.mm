@@ -49,6 +49,7 @@ using namespace facebook::react;
            oldProps:(const Props::Shared &)oldProps {
   const auto &newProps =
       *std::static_pointer_cast<const SkiaPictureViewProps>(props);
+  [super updateProps:props oldProps:oldProps];
   int nativeId =
       [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
   [self setNativeId:nativeId];

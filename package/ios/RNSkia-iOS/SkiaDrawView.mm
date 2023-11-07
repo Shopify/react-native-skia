@@ -55,13 +55,13 @@ using namespace facebook::react;
            oldProps:(const Props::Shared &)oldProps {
   const auto &newProps =
       *std::static_pointer_cast<const SkiaDrawViewProps>(props);
+    [super updateProps:props oldProps:oldProps];
   int nativeId =
       [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
   [self setNativeId:nativeId];
   [self setDrawingMode:newProps.mode];
   [self setDebugMode:newProps.debug];
 
-  [super updateProps:props oldProps:oldProps];
 }
 
 @end
