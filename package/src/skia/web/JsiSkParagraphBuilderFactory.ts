@@ -1,4 +1,4 @@
-import type { CanvasKit, FontMgr, ParagraphStyle } from "canvaskit-wasm";
+import type { CanvasKit, FontMgr } from "canvaskit-wasm";
 
 import type {
   ParagraphBuilderFactory,
@@ -8,8 +8,8 @@ import type {
 
 import { Host } from "./Host";
 import { JsiSkParagraphBuilder } from "./JsiSkParagraphBuilder";
-import { JsiSkParagraphStyle } from "./JsiSkParagraphStyle";
 import { JsiSkFontMgr } from "./JsiSkFontMgr";
+import { JsiSkParagraphStyle } from "./JsiSkParagraphStyle";
 
 export class JsiSkParagraphBuilderFactory
   extends Host
@@ -20,20 +20,12 @@ export class JsiSkParagraphBuilderFactory
   }
 
   Make(paragraphStyle?: SkParagraphStyle, fontManager?: SkFontMgr) {
-    const style: ParagraphStyle = paragraphStyle
-      ? JsiSkParagraphStyle.fromValue(paragraphStyle)
-      : new this.CanvasKit.ParagraphStyle({
-          disableHinting: undefined,
-          ellipsis: undefined,
-          heightMultiplier: undefined,
-          maxLines: undefined,
-          replaceTabCharacters: undefined,
-          strutStyle: undefined,
-          textAlign: undefined,
-          textDirection: undefined,
-          textHeightBehavior: undefined,
-          textStyle: {},
-        });
+    const style = new this.CanvasKit.ParagraphStyle(
+      paragraphStyle
+        ? JsiSkParagraphStyle.toParagraphStyle(paragraphStyle)
+        : { textStyle: { color: [0, 0, 0, 0] } }
+    );
+
     const fontMgr: FontMgr = fontManager
       ? JsiSkFontMgr.fromValue(fontManager)
       : // TODO: Fix this one?

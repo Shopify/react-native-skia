@@ -1,18 +1,22 @@
-import type { CanvasKit, ParagraphBuilder } from "canvaskit-wasm";
+import type { CanvasKit, ParagraphBuilder, TextStyle } from "canvaskit-wasm";
 
 import type { SkParagraphBuilder, SkParagraph, SkTextStyle } from "../types";
 import { PlaceholderAlignment, TextBaseline } from "../types";
 
 import { HostObject } from "./Host";
-import { JsiSkParagraph } from "./JsiSkParagraph";
+import { JsiSkParagraph, ParagraphNode } from "./JsiSkParagraph";
 import { JsiSkTextStyle } from "./JsiSkTextStyle";
+import { E2E } from "../../__tests__/setup";
 
 export class JsiSkParagraphBuilder
   extends HostObject<ParagraphBuilder, "ParagraphBuilder">
   implements SkParagraphBuilder
 {
+  elements: Array<ParagraphNode>;
+
   constructor(CanvasKit: CanvasKit, ref: ParagraphBuilder) {
     super(CanvasKit, ref, "ParagraphBuilder");
+    this.elements = [];
   }
   addPlaceholder(
     width: number | undefined = 0,
@@ -28,26 +32,62 @@ export class JsiSkParagraphBuilder
       { value: baseline },
       offset
     );
-    return this;
-  }
-  build(): SkParagraph {
-    return new JsiSkParagraph(this.CanvasKit, this.ref.build());
-  }
-  reset(): void {
-    this.ref.reset();
-  }
-  pushStyle(style: SkTextStyle): SkParagraphBuilder {
-    this.ref.pushStyle(JsiSkTextStyle.fromValue(style));
-    return this;
-  }
-  pop(): SkParagraphBuilder {
-    this.ref.pop();
+    if (E2E) {
+      this.elements.push({
+        type: "placeholder",
+        width,
+        height,
+        alignment,
+        baseline,
+        offset,
+      });
+    }
     return this;
   }
   addText(text: string): SkParagraphBuilder {
+    if (E2E) {
+      this.elements.push({
+        type: "text",
+        text,
+      });
+    }
+
     this.ref.addText(text);
     return this;
   }
+
+  build(): SkParagraph {
+    return new JsiSkParagraph(this.CanvasKit, this.ref.build(), this.elements);
+  }
+
+  reset(): void {
+    if (E2E) {
+      this.elements = [];
+    }
+
+    this.ref.reset();
+  }
+
+  pushStyle(style: SkTextStyle): SkParagraphBuilder {
+    if (E2E) {
+      this.elements.push({ type: "push_style", style });
+    }
+
+    const textStyle: TextStyle = JsiSkTextStyle.toTextStyle(style);
+    this.ref.pushStyle(new this.CanvasKit.TextStyle(textStyle));
+
+    return this;
+  }
+
+  pop(): SkParagraphBuilder {
+    if (E2E) {
+      this.elements.push({ type: "pop_style" });
+    }
+
+    this.ref.pop();
+    return this;
+  }
+
   dispose() {
     this.ref.delete();
   }

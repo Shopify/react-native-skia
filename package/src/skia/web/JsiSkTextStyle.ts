@@ -1,147 +1,52 @@
-import type { CanvasKit, TextStyle } from "canvaskit-wasm";
+import type { TextStyle } from "canvaskit-wasm";
+import { SkTextStyle } from "../types";
 
-import type {
-  FontSlant,
-  FontWeight,
-  FontWidth,
-  SkColor,
-  SkTextShadow,
-  SkTextStyle,
-  TextDecorationType,
-  TextDecorationStyle,
-} from "../types";
-
-import { HostObject } from "./Host";
-
-export class JsiSkTextStyle
-  extends HostObject<TextStyle, "TextStyle">
-  implements SkTextStyle
-{
-  constructor(CanvasKit: CanvasKit, ref: TextStyle) {
-    super(CanvasKit, ref, "TextStyle");
-  }
-  setDecorationType(decoration: TextDecorationType): SkTextStyle {
-    this.ref.decoration = decoration;
-    return this;
-  }
-  setDecorationColor(color: Float32Array): SkTextStyle {
-    this.ref.color = color;
-    return this;
-  }
-  setDecorationThickness(thickness: number): SkTextStyle {
-    this.ref.decorationThickness = thickness;
-    return this;
-  }
-  setDecorationStyle(style: TextDecorationStyle): SkTextStyle {
-    this.ref.decorationStyle = { value: style };
-    return this;
-  }
-
-  setShadows(shadows: SkTextShadow[]): SkTextStyle {
-    this.ref.shadows = shadows.map((s) => ({
-      blurRadius: s.blurRadius,
-      color: s.color,
-      offset: s.offset ? [s.offset.x, s.offset.y] : undefined,
-    }));
-    return this;
-  }
-
-  getShadows(): SkTextShadow[] | undefined {
-    return this.ref.shadows?.map((s) => ({
-      ...s,
-      color: s.color as SkColor,
-      offset: s.offset ? { x: s.offset[0], y: s.offset[1] } : undefined,
-    }));
-  }
-
-  getDecorationType() {
-    return this.ref.decoration;
-  }
-  getDecorationColor() {
-    return this.ref.color ? (this.ref.decorationColor as SkColor) : undefined;
-  }
-  getDecorationThickness() {
-    return this.ref.decorationThickness;
-  }
-  getDecorationStyle() {
-    return this.ref.decorationStyle?.value;
-  }
-
-  getColor(): SkColor | undefined {
-    return this.ref.color ? (this.ref.color as SkColor) : undefined;
-  }
-  getFontSize() {
-    return this.ref.fontSize;
-  }
-  getFontFamilies() {
-    return this.ref.fontFamilies;
-  }
-  getBackgroundColor(): SkColor | undefined {
-    return this.ref.backgroundColor
-      ? (this.ref.backgroundColor as SkColor)
-      : undefined;
-  }
-  getFontWeight() {
-    return this.ref.fontStyle?.weight?.value;
-  }
-  getFontWidth() {
-    return this.ref.fontStyle?.width?.value;
-  }
-  getFontSlant() {
-    return this.ref.fontStyle?.slant?.value;
-  }
-  getLetterSpacing() {
-    return this.ref.letterSpacing;
-  }
-  getWordSpacing() {
-    return this.ref.wordSpacing;
-  }
-  setColor(color: SkColor): SkTextStyle {
-    this.ref.color = color;
-    return this;
-  }
-  setFontSize(fontSize: number): SkTextStyle {
-    this.ref.fontSize = fontSize;
-    return this;
-  }
-  setFontFamilies(fontFamilies: string[]): SkTextStyle {
-    this.ref.fontFamilies = fontFamilies;
-    return this;
-  }
-  setBackgroundColor(color: SkColor): SkTextStyle {
-    this.ref.backgroundColor = color;
-    return this;
-  }
-  setFontWeight(fontWeight: FontWeight): SkTextStyle {
-    this.ref.fontStyle = {
-      ...(this.ref.fontStyle ?? {}),
-      weight: { value: fontWeight },
+export class JsiSkTextStyle {
+  static toTextStyle(value: SkTextStyle): TextStyle {
+    return {
+      backgroundColor: value.backgroundColor,
+      color: value.color,
+      decoration: value.decoration,
+      decorationColor: value.decorationColor,
+      decorationStyle: value.decorationStyle
+        ? { value: value.decorationStyle }
+        : undefined,
+      decorationThickness: value.decorationThickness,
+      fontFamilies: value.fontFamilies,
+      fontSize: value.fontSize,
+      fontStyle: value.fontStyle
+        ? {
+            slant: value.fontStyle.slant
+              ? { value: value.fontStyle.slant }
+              : undefined,
+            weight: value.fontStyle.weight
+              ? { value: value.fontStyle.weight }
+              : undefined,
+            width: value.fontStyle.width
+              ? { value: value.fontStyle.width }
+              : undefined,
+          }
+        : undefined,
+      fontFeatures: value.fontFeatures,
+      foregroundColor: value.foregroundColor,
+      fontVariations: value.fontVariations,
+      halfLeading: value.halfLeading,
+      heightMultiplier: value.heightMultiplier,
+      letterSpacing: value.letterSpacing,
+      locale: value.locale,
+      shadows: value.shadows
+        ? value.shadows.map((shadow) => ({
+            blurRadius: shadow.blurRadius,
+            color: shadow.color,
+            offset: shadow.offset
+              ? [shadow.offset.x, shadow.offset.y]
+              : undefined,
+          }))
+        : undefined,
+      textBaseline: value.textBaseline
+        ? { value: value.textBaseline }
+        : undefined,
+      wordSpacing: value.wordSpacing,
     };
-    return this;
-  }
-  setFontWidth(fontWidth: FontWidth): SkTextStyle {
-    this.ref.fontStyle = {
-      ...(this.ref.fontStyle ?? {}),
-      width: { value: fontWidth },
-    };
-    return this;
-  }
-  setFontSlant(fontSlant: FontSlant): SkTextStyle {
-    this.ref.fontStyle = {
-      ...(this.ref.fontStyle ?? {}),
-      slant: { value: fontSlant },
-    };
-    return this;
-  }
-  setLetterSpacing(letterSpacing: number): SkTextStyle {
-    this.ref.letterSpacing = letterSpacing;
-    return this;
-  }
-  setWordSpacing(wordSpacing: number): SkTextStyle {
-    this.ref.wordSpacing = wordSpacing;
-    return this;
-  }
-  dispose() {
-    // Do nothing - Text styles are not disposable in CanvasKit
   }
 }

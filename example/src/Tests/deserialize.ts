@@ -79,6 +79,32 @@ const parseProp = (value: any, assets: Assets) => {
       ).call({
         Skia,
       });
+    } else if (value.__typename__ === "Paragraph") {
+      const elements = JSON.parse(value.json) as Array<any>;
+      const builder = Skia.ParagraphBuilder.Make();
+      elements.forEach((el) => {
+        switch (el.type) {
+          case "text":
+            builder.addText(el.text);
+            break;
+          case "placeholder":
+            builder.addPlaceholder(
+              el.width,
+              el.height,
+              el.alignment,
+              el.baseline,
+              el.offset
+            );
+            break;
+          case "push_style":
+            builder.pushStyle(el.style);
+            break;
+          case "pop_style":
+            builder.pop();
+            break;
+        }
+      });
+      return builder.build();
     }
   }
   return value;

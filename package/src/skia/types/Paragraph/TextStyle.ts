@@ -2,7 +2,7 @@ import type { SkColor } from "../Color";
 import type { FontSlant, FontWeight, FontWidth } from "../Font";
 import type { SkPoint } from "../Point";
 
-export enum TextDecorationType {
+export enum TextDecoration {
   NoDecoration = 0x0,
   Underline = 0x1,
   Overline = 0x2,
@@ -50,10 +50,10 @@ export enum TextBaseline {
 export interface SkTextStyle {
   backgroundColor?: SkColor;
   color?: SkColor;
-  decoration?: TextDecorationType;
+  decoration?: number;
   decorationColor?: SkColor;
   decorationThickness?: number;
-  decorationStyle?: TextDecorationStyle;
+  decorationStyle?: TextDecoration;
   fontFamilies?: string[];
   fontFeatures?: SkTextFontFeatures[];
   fontSize?: number;
