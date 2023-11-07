@@ -2,14 +2,13 @@ import React from "react";
 
 import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
-import { Platform } from "../Platform";
 
 import { SkiaViewApi } from "./api";
 import { SkiaViewNativeId } from "./SkiaView";
-import type { NativeSkiaViewProps, SkiaPictureViewProps } from "./types";
+import type { SkiaPictureViewProps } from "./types";
+import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 
-const NativeSkiaPictureView =
-  Platform.requireNativeComponent<NativeSkiaViewProps>("SkiaPictureView");
+const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
 export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   constructor(props: SkiaPictureViewProps) {

@@ -7,11 +7,12 @@ import { Platform } from "../Platform";
 
 import { SkiaViewApi } from "./api";
 import { SkiaViewNativeId } from "./SkiaView";
-import type { NativeSkiaViewProps, SkiaDomViewProps } from "./types";
+import type { SkiaDomViewProps } from "./types";
+import SkiaDomViewNativeComponent from "../specs/SkiaDomViewNativeComponent";
 
 const NativeSkiaDomView: HostComponent<SkiaDomViewProps> =
   Platform.OS !== "web"
-    ? Platform.requireNativeComponent<NativeSkiaViewProps>("SkiaDomView")
+    ? SkiaDomViewNativeComponent
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (null as any);
 
