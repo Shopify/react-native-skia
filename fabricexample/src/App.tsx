@@ -28,8 +28,10 @@ import {
   Transitions,
   Stickers,
 } from './Examples';
+import {CI, Tests} from './Tests';
 import {HomeScreen} from './Home';
 import type {StackParamList} from './types';
+import {useAssets} from './Tests/useAssets';
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
@@ -52,6 +54,7 @@ const linking: LinkingOptions<StackParamList> = {
       Animation: 'animation',
       Reanimated: 'reanimated',
       Performance: 'performance',
+      Tests: 'test',
       Transitions: 'transitions',
       Stickers: 'stickers',
     },
@@ -76,6 +79,10 @@ const HeaderLeft = (props: HeaderBackButtonProps) => {
 
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
+  const assets = useAssets();
+  if (assets === null) {
+    return null;
+  }
   return (
     <FiberProvider>
       <GestureHandlerRootView style={{flex: 1}}>
@@ -85,7 +92,7 @@ const App = () => {
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={'Home'}>
+            initialRouteName={CI ? 'Tests' : 'Home'}>
             <Stack.Screen
               name="Home"
               key="Home"
@@ -94,6 +101,14 @@ const App = () => {
                 title: '🎨 Skia',
               }}
             />
+            <Stack.Screen
+              key="Tests"
+              name="Tests"
+              options={{
+                title: '🔧 Tests',
+              }}>
+              {props => <Tests {...props} assets={assets} />}
+            </Stack.Screen>
             <Stack.Screen
               name="Vertices"
               component={Vertices}
