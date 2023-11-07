@@ -9,6 +9,7 @@
 #include "JsiValueWrapper.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkValue.h"
+#include "RNSkLog.h"
 
 #include "JsiSkImage.h"
 #include "JsiSkPoint.h"
@@ -385,9 +386,12 @@ private:
       updateOnSize();
 
       if (!_renderer->tryRender(_canvasProvider)) {
+        RNSkLogger::logToConsole("We'll try next time");
         // The renderer could not render cause it was busy, just schedule
         // redrawing on the next frame.
         requestRedraw();
+      } else {
+        RNSkLogger::logToConsole("We've drawn!");
       }
     }
   }

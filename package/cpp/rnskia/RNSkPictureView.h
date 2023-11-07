@@ -62,6 +62,7 @@ public:
   }
 
 private:
+  int i = 0;
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
     canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       // Make sure to scale correctly
@@ -71,7 +72,8 @@ private:
       canvas->scale(pd, pd);
 
       if (_picture != nullptr) {
-        canvas->drawPicture(_picture->getObject());
+        canvas->drawColor(i % 2  ? SK_ColorBLACK : SK_ColorRED);
+        i++;
       }
 
       canvas->restore();

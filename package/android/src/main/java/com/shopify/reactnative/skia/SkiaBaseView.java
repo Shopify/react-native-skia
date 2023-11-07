@@ -22,7 +22,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     public SkiaBaseView(Context context, boolean manageTexture) {
         super(context);
-        this.manageTexture = manageTexture;
+        //this.manageTexture = manageTexture;
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
@@ -140,7 +140,10 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         Log.i(tag, "onSurfaceTextureAvailable " + width + "/" + height);
         mSurface = new Surface(surface);
         surfaceAvailable(mSurface, width, height);
+        //surface.setOnFrameAvailableListener(this);
     }
+
+
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
@@ -157,9 +160,14 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         return false;
     }
 
+    private long _prevTimestamp = 0;
+
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        // Nothing special to do here
+        long timestamp = surface.getTimestamp();
+        long frameDuration = (timestamp - _prevTimestamp)/1000000;
+        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
+        _prevTimestamp = timestamp;
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
