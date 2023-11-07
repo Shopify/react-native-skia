@@ -12,7 +12,7 @@ import { executeCmdSync, checkFileExists } from "./utils";
  * This build script is run after the Skia Binaries are built.
  */
 
-console.log("Building iOS Fat Libraries from Skia Binaries");
+console.log("Building iOS / tvOS Fat Libraries from Skia Binaries");
 console.log("");
 
 console.log("Checking prerequisites...");
@@ -20,6 +20,15 @@ console.log("Checking prerequisites...");
 // Check deps
 Object.keys(configurations.ios.targets).forEach((targetKey) => {
   configurations.ios.outputNames.forEach((out) => {
+    checkFileExists(
+      `package/libs/ios/${targetKey}/${out}`,
+      `package/libs/ios/${targetKey}/${out}`,
+      `package/libs/ios/${targetKey}/${out} not found`
+    );
+  });
+});
+Object.keys(configurations.tvos.targets).forEach((targetKey) => {
+  configurations.tvos.outputNames.forEach((out) => {
     checkFileExists(
       `package/libs/ios/${targetKey}/${out}`,
       `package/libs/ios/${targetKey}/${out}`,
@@ -53,6 +62,8 @@ configurations.ios.outputNames.forEach((out) => {
     "xcodebuild -create-xcframework " +
       `-library ./package/libs/ios/${libName}.a ` +
       `-library ./package/libs/ios/arm64-iphoneos/${libName}.a ` +
+      `-library ./package/libs/ios/arm64-tvsimulator/${libName}.a ` +
+      `-library ./package/libs/ios/arm64-tvos/${libName}.a ` +
       ` -output ./package/libs/ios/${libName}.xcframework `
   );
 });

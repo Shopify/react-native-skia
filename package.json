@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build-skia-ios-framework": "ts-node ./scripts/build-skia-ios-framework.ts",
-    "build-skia-ios": "ts-node ./scripts/build-skia-ios.ts && yarn build-skia-ios-framework",
+    "build-skia-ios": "ts-node ./scripts/build-skia-ios.ts && ts-node ./scripts/build-skia-tvos.ts && yarn build-skia-ios-framework",
     "build-skia-android": "ts-node ./scripts/build-skia-android.ts",
     "build-skia": "yarn build-skia-ios && yarn build-skia-android",
     "clean-skia": "yarn rimraf ./package/libs && yarn rimraf ./externals/skia/out",

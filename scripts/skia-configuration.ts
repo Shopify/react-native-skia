@@ -51,7 +51,7 @@ export const commonArgs = [
   ["is_component_build", false],
 ];
 
-export type PlatformName = "ios" | "android";
+export type PlatformName = "ios" | "tvos" | "android";
 
 type Arg = (string | boolean | number)[];
 export type Target = {
@@ -138,6 +138,41 @@ export const configurations: Configuration = {
           ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
+        ],
+      },
+    },
+    args: [
+      ["skia_use_metal", true],
+      ["cc", '"clang"'],
+      ["cxx", '"clang++"'],
+      ...ParagraphArgsIOS
+    ],
+    outputRoot: "package/libs/ios",
+    outputNames: [
+      "libskia.a",
+      "libskshaper.a",
+      "libsvg.a",
+      "libskottie.a",
+      "libsksg.a",
+      ...ParagraphOutputs,
+    ],
+  },
+  tvos: {
+    targets: {
+      "arm64-tvos": {
+        cpu: "arm64",
+        args: [
+          ["extra_cflags", '["-target", "arm64-apple-tvos", "-mappletvos-version-min=13.0"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-tvos", "-mappletvos-version-min=13.0"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-tvos", "-mappletvos-version-min=13.0"]'],
+        ],
+      },
+      "arm64-tvsimulator": {
+        cpu: "arm64",
+        args: [
+          ["extra_cflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
         ],
       },
     },

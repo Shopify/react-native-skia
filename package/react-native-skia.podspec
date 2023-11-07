@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   # optional - use expanded license entry instead:
   # s.license    = { :type => "MIT", :file => "LICENSE" }
   s.authors      = { "Your Name" => "yourname@email.com" }
-  s.platforms    = { :ios => "12.0" }
+  s.platforms    = { :ios => "12.0", :tvos => "12.0" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
@@ -31,6 +31,14 @@ Pod::Spec.new do |s|
   s.frameworks = 'GLKit', 'MetalKit'
 
   s.ios.vendored_frameworks = [
+    'libs/ios/libskia.xcframework', 
+    'libs/ios/libsvg.xcframework', 
+    'libs/ios/libskshaper.xcframework',
+    'libs/ios/libskparagraph.xcframework',
+    'libs/ios/libskunicode.xcframework',
+  ]
+
+  s.tvos.vendored_frameworks = [
     'libs/ios/libskia.xcframework', 
     'libs/ios/libsvg.xcframework', 
     'libs/ios/libskshaper.xcframework',
