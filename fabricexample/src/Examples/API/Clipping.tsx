@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import {
@@ -16,7 +17,6 @@ import { useDerivedValue } from "react-native-reanimated";
 import { useLoop } from "../../components/Animations";
 
 const star = Skia.Path.MakeFromSVGString(
-  // eslint-disable-next-line max-len
   "M 293.4 16 C 266.3 16 244.4 37.9 244.4 65 C 244.4 92.1 266.3 114 293.4 114 C 320.4 114 342.4 92.1 342.4 65 C 342.4 37.9 320.4 16 293.4 16 Z M 311 90.6 L 293.4 81.1 L 275.7 90.6 L 279.2 70.9 L 264.8 57 L 284.6 54.2 L 293.4 36.2 L 302.1 54.2 L 321.9 57 L 307.5 70.9 L 311 90.6 V 90.6 Z"
 )!;
 const PADDING = 16;

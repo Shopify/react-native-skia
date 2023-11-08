@@ -19,4 +19,5 @@ export type StackParamList = {
   Performance: undefined;
   Transitions: undefined;
   Stickers: undefined;
+  Tests: undefined;
 };

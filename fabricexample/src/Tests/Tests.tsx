@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-nested-ternary */
 import type { SkiaDomView } from "@shopify/react-native-skia";
 import { Group, Canvas, Skia } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
@@ -12,7 +13,7 @@ export const CI = process.env.CI === "true";
 const scale = 3 / PixelRatio.get();
 const size = 256 * scale;
 // Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI
-// eslint-disable-next-line no-nested-ternary
+
 const timeToDraw = CI ? 1500 : Platform.OS === "ios" ? 250 : 500;
 
 interface TestsProps {

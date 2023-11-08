@@ -1,12 +1,13 @@
-import type {LinkingOptions} from '@react-navigation/native';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
-import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {StatusBar} from 'react-native';
-import type {HeaderBackButtonProps} from '@react-navigation/elements';
-import {HeaderBackButton} from '@react-navigation/elements';
-import {FiberProvider} from 'its-fine';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
+/* eslint-disable import/no-default-export */
+import type { LinkingOptions } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { StatusBar } from "react-native";
+import type { HeaderBackButtonProps } from "@react-navigation/elements";
+import { HeaderBackButton } from "@react-navigation/elements";
+import { FiberProvider } from "its-fine";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import {
   ReanimatedExample,
@@ -27,39 +28,39 @@ import {
   Severance,
   Transitions,
   Stickers,
-} from './Examples';
-import {CI, Tests} from './Tests';
-import {HomeScreen} from './Home';
-import type {StackParamList} from './types';
-import {useAssets} from './Tests/useAssets';
+} from "./Examples";
+import { CI, Tests } from "./Tests";
+import { HomeScreen } from "./Home";
+import type { StackParamList } from "./types";
+import { useAssets } from "./Tests/useAssets";
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
     screens: {
-      Home: '',
-      Vertices: 'vertices',
-      API: 'api',
-      Breathe: 'breathe',
-      Filters: 'filters',
-      Gooey: 'gooey',
-      Hue: 'hue',
-      Matrix: 'matrix',
-      Severance: 'severance',
-      Aurora: 'aurora',
-      Glassmorphism: 'glassmorphism',
-      Neumorphism: 'neumorphism',
-      Wallpaper: 'wallpaper',
-      Wallet: 'wallet',
-      Graphs: 'graphs',
-      Animation: 'animation',
-      Reanimated: 'reanimated',
-      Performance: 'performance',
-      Tests: 'test',
-      Transitions: 'transitions',
-      Stickers: 'stickers',
+      Home: "",
+      Vertices: "vertices",
+      API: "api",
+      Breathe: "breathe",
+      Filters: "filters",
+      Gooey: "gooey",
+      Hue: "hue",
+      Matrix: "matrix",
+      Severance: "severance",
+      Aurora: "aurora",
+      Glassmorphism: "glassmorphism",
+      Neumorphism: "neumorphism",
+      Wallpaper: "wallpaper",
+      Wallet: "wallet",
+      Graphs: "graphs",
+      Animation: "animation",
+      Reanimated: "reanimated",
+      Performance: "performance",
+      Tests: "test",
+      Transitions: "transitions",
+      Stickers: "stickers",
     },
   },
-  prefixes: ['rnskia://'],
+  prefixes: ["rnskia://"],
 };
 
 const HeaderLeft = (props: HeaderBackButtonProps) => {
@@ -85,29 +86,31 @@ const App = () => {
   }
   return (
     <FiberProvider>
-      <GestureHandlerRootView style={{flex: 1}}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <StatusBar hidden />
         <NavigationContainer linking={linking}>
           <Stack.Navigator
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={CI ? 'Tests' : 'Home'}>
+            initialRouteName={CI ? "Tests" : "Home"}
+          >
             <Stack.Screen
               name="Home"
               key="Home"
               component={HomeScreen}
               options={{
-                title: '🎨 Skia',
+                title: "🎨 Skia",
               }}
             />
             <Stack.Screen
               key="Tests"
               name="Tests"
               options={{
-                title: '🔧 Tests',
-              }}>
-              {props => <Tests {...props} assets={assets} />}
+                title: "🔧 Tests",
+              }}
+            >
+              {(props) => <Tests {...props} assets={assets} />}
             </Stack.Screen>
             <Stack.Screen
               name="Vertices"
@@ -185,5 +188,4 @@ const App = () => {
   );
 };
 
-// eslint-disable-next-line import/no-default-export
 export default App;
