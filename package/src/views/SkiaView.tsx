@@ -78,7 +78,7 @@ export class SkiaView extends React.Component<SkiaDrawViewProps> {
       <NativeSkiaView
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        mode={mode}
+        mode={mode ?? "default"}
         debug={debug}
         {...viewProps}
       />

@@ -10,7 +10,8 @@
     "build:web": "rm -rf dist/ && webpack --mode=production --config webpack.config.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
-    "pod-install": "npx pod-install ios",
+    "pod-install": "cd ios && pod install && cd ..",
+    "postinstall": "yarn pod-install",
     "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
   },
   "dependencies": {
