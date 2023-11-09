@@ -5,6 +5,7 @@ on: [push]
 jobs:
   build:
     runs-on: macos-12
+    timeout-minutes: 55
     concurrency:
       group: android-example-${{ github.ref }}
       cancel-in-progress: true
