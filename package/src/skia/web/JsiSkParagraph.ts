@@ -1,6 +1,11 @@
 import type { CanvasKit, Paragraph } from "canvaskit-wasm";
 
-import type { SkParagraphStyle, SkRect, SkTextStyle } from "../types";
+import type {
+  SkParagraphStyle,
+  SkRect,
+  SkRectWithDirection,
+  SkTextStyle,
+} from "../types";
 import { type SkParagraph } from "../types";
 
 import { HostObject } from "./Host";
@@ -71,6 +76,17 @@ export class JsiSkParagraph
   }
   getGlyphPositionAtCoordinate(x: number, y: number): number {
     return this.ref.getGlyphPositionAtCoordinate(x, y).pos;
+  }
+  getRectsForPlaceholders(): SkRectWithDirection[] {
+    return this.ref.getRectsForPlaceholders().map(({ rect, dir }) => ({
+      rect: {
+        x: rect.at(0)!,
+        y: rect.at(1)!,
+        width: rect.at(2)!,
+        height: rect.at(3)!,
+      },
+      direction: dir.value,
+    }));
   }
   getRectsForRange(start: number, end: number): SkRect[] {
     return this.ref

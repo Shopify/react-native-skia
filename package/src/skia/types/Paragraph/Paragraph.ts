@@ -1,6 +1,12 @@
 import type { SkCanvas } from "../Canvas";
 import type { SkJSIInstance } from "../JsiInstance";
 import type { SkRect } from "../Rect";
+import { SkTextDirection } from "./ParagraphStyle";
+
+export interface SkRectWithDirection {
+  rect: SkRect;
+  direction: SkTextDirection;
+}
 
 export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
   /**
@@ -44,4 +50,9 @@ export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
    * requires the layout method to have been called first.
    */
   getLineMetrics(): Array<SkRect>;
+  /**
+   * Returns a list of rects with direction info for the placeholders added
+   * to the paragraph.
+   */
+  getRectsForPlaceholders(): SkRectWithDirection[];
 }

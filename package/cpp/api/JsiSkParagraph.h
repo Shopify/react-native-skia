@@ -93,10 +93,27 @@ public:
     return returnValue;
   }
 
+  JSI_HOST_FUNCTION(getRectsForPlaceholders) {
+    std::vector<TextBox> placeholderInfos =
+        _paragraph->getRectsForPlaceholders();
+    auto returnValue = jsi::Array(runtime, placeholderInfos.size());
+    for (size_t i = 0; i < placeholderInfos.size(); ++i) {
+      auto obj = jsi::Object(runtime);
+      obj.setProperty(
+          runtime, "rect",
+          JsiSkRect::toValue(runtime, getContext(), placeholderInfos[i].rect));
+      obj.setProperty(runtime, "direction",
+                      static_cast<double>(placeholderInfos[i].direction));
+      returnValue.setValueAtIndex(runtime, i, obj);
+    }
+    return returnValue;
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraph, layout),
                        JSI_EXPORT_FUNC(JsiSkParagraph, paint),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getMaxWidth),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getHeight),
+                       JSI_EXPORT_FUNC(JsiSkParagraph, getRectsForPlaceholders),
                        JSI_EXPORT_FUNC(JsiSkParagraph,
                                        getGlyphPositionAtCoordinate),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getRectsForRange),
