@@ -48,7 +48,7 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 
 ### Proguard
 
-If you're using Proguard, make sure to add the following rule:
+If you're using Proguard, make sure to add the following rule at `proguard-rules.pro`:
 
 ```
 -keep class com.shopify.reactnative.skia.** { *; }
