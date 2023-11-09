@@ -82,7 +82,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-ios-derived-data-${{ matrix.working-directory }}-${{ hashFiles(format('{0}/ios/Podfile.lock', matrix.working-directory)) }}
+          key: ${{ runner.os }}-ios-derived-data-${{ hashFiles(format('{0}/ios/Podfile.lock', matrix.working-directory)) }}
   
       - name: Build app
         working-directory: ${{ matrix.working-directory }}
