@@ -217,5 +217,29 @@ describe("Paragraphs", () => {
         "snapshots/paragraph/paragraph-text-style-font-style.png"
       );
     });
+
+    it("should support font shadows", async () => {
+      const img = await renderParagraph(
+        (Skia) =>
+          Skia.ParagraphBuilder.Make()
+            .pushStyle({
+              fontSize: 25,
+              shadows: [
+                {
+                  color: Skia.Color("#ff000044"),
+                  blurRadius: 4,
+                  offset: { x: 4, y: 4 },
+                },
+              ],
+            })
+            .addText("Hello Skia with red shadow")
+            .build(),
+        150
+      );
+      checkImage(
+        img,
+        "snapshots/paragraph/paragraph-text-style-font-shadow.png"
+      );
+    });
   });
 });

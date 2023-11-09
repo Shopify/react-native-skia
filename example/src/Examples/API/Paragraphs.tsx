@@ -53,7 +53,7 @@ export const Paragraphs = () => {
     };
 
     const crazyStyle: SkTextStyle = {
-      color: Skia.Color("#e42fac"),
+      color: Skia.Color("#000"),
       backgroundColor: Skia.Color("#CECECE"),
       fontSize: fontSize * 1.3,
       fontFamilies: ["Roboto"],

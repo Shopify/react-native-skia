@@ -158,6 +158,16 @@ const getTextStyleWithResolvedColors = <T extends SkTextStyle | undefined>(
     );
   }
 
+  if (retVal.shadows) {
+    retVal.shadows.forEach((shadow) => {
+      if (shadow.color) {
+        shadow.color = Skia.Color(
+          parseEmscriptenColor(shadow.color as any as EmScriptenColor)
+        );
+      }
+    });
+  }
+
   return retVal;
 };
 
