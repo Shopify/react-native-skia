@@ -101,7 +101,7 @@
     "react-native-builder-bob": "^0.18.2",
     "react-native-reanimated": "^3.5.4",
     "ts-jest": "^28.0.7",
-    "typescript": "4.8.3",
+    "typescript": "5.2.2",
     "ws": "^8.11.0"
   },
   "dependencies": {
