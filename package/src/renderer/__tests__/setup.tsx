@@ -296,7 +296,7 @@ const serializeSkOjects = (obj: any): any => {
       return {
         __typename__: "Paragraph",
         elements: JSON.stringify(obj.getElements()),
-        style: objStyle ? JSON.stringify(objStyle) : {},
+        style: objStyle ? JSON.stringify(objStyle) : undefined,
       };
     }
   }

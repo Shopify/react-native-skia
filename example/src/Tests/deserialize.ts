@@ -81,7 +81,9 @@ const parseProp = (value: any, assets: Assets) => {
       });
     } else if (value.__typename__ === "Paragraph") {
       const elements = JSON.parse(value.elements) as Array<any>;
-      const builder = Skia.ParagraphBuilder.Make(JSON.parse(value.style));
+      const builder = Skia.ParagraphBuilder.Make(
+        value.style ? JSON.parse(value.style) : undefined
+      );
       elements.forEach((el) => {
         switch (el.type) {
           case "text":

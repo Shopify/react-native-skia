@@ -43,6 +43,13 @@ public:
    */
   static ParagraphStyle fromValue(jsi::Runtime &runtime,
                                   const jsi::Value &value) {
+    ParagraphStyle retVal;
+    
+    // Accept undefined && null
+    if (value.isUndefined() || value.isNull()) {
+      return retVal;
+    }
+    
     // Read values from the argument - expected to be a ParagraphStyle shaped
     // object
     if (!value.isObject()) {
@@ -50,8 +57,6 @@ public:
     }
 
     auto object = value.asObject(runtime);
-
-    ParagraphStyle retVal;
 
     if (object.hasProperty(runtime, "disableHinting")) {
       auto propValue = object.getProperty(runtime, "disableHinting");
