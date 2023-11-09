@@ -7,7 +7,6 @@
     "example": "example"
   },
   "devDependencies": {
-    "@testing-library/react-native": "^10.1.1",
     "@types/node": "^16.11.7",
     "clang-format": "^1.6.0",
     "rimraf": "^3.0.2",
