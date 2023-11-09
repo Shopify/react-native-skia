@@ -27,14 +27,14 @@ using namespace skia::textlayout; // NOLINT
 class JsiSkTextStyle {
 public:
   static TextStyle fromValue(jsi::Runtime &runtime, const jsi::Value &value) {
-    
+
     TextStyle retVal;
-    
+
     // Accept undefined && null
     if (value.isUndefined() || value.isNull()) {
       return retVal;
     }
-    
+
     // Read values from the argument - expected to be a TextStyle shaped object
     if (!value.isObject()) {
       throw jsi::JSError(runtime, "Expected SkTextStyle as first argument");

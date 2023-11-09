@@ -44,12 +44,12 @@ public:
   static ParagraphStyle fromValue(jsi::Runtime &runtime,
                                   const jsi::Value &value) {
     ParagraphStyle retVal;
-    
+
     // Accept undefined && null
     if (value.isUndefined() || value.isNull()) {
       return retVal;
     }
-    
+
     // Read values from the argument - expected to be a ParagraphStyle shaped
     // object
     if (!value.isObject()) {
