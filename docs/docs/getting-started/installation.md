@@ -11,6 +11,7 @@ Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flu
 > **Version compatibility:**  
 > `react-native@>=0.66` and `react@>=18` are required.
 > In addition you should make sure you're on at least `iOS 13` and `Android API level 16` or above.
+> To use React Native Skia with the new architecture, `react-native@>=0.72` is required.
 
 **Install the library using yarn:**
 
