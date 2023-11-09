@@ -7,9 +7,10 @@ import {
   Group,
   Paragraph,
   Rect,
+  SkTextDirection,
   SkTextStyle,
   Skia,
-  TextDecorationType,
+  TextDecoration,
   TextDecorationStyle,
   mix,
   useComputedValue,
@@ -40,7 +41,12 @@ export const Paragraphs = () => {
 
     const fontSize = 20;
 
-    const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
+    const paragraphBuilder = Skia.ParagraphBuilder.Make(
+      {
+        textDirection: SkTextDirection.RTL,
+      },
+      customFontMgr
+    );
     const textStyle = {
       fontSize,
       fontFamilies: ["Roboto"],
@@ -72,9 +78,9 @@ export const Paragraphs = () => {
         },
       ],
       decorationColor: Skia.Color("#00223A"),
-      decorationStyle: TextDecorationStyle.Dotted,
       decorationThickness: 2,
-      decoration: TextDecorationType.LineThrough,
+      decoration: 1,
+      decorationStyle: TextDecoration.Overline,
     };
 
     paragraphBuilder

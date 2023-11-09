@@ -1,8 +1,8 @@
 import type { SkTextFontStyle, SkTextStyle } from "./TextStyle";
 
 export enum SkTextDirection {
-  LTR = 0,
-  RTL = 1,
+  RTL = 0,
+  LTR = 1,
 }
 export enum SkTextAlign {
   Left = 0,

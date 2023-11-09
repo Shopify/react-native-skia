@@ -1,6 +1,6 @@
 import type { CanvasKit, ParagraphStyle } from "canvaskit-wasm";
 
-import { type SkParagraphStyle } from "../types";
+import { SkTextDirection, type SkParagraphStyle } from "../types";
 
 export class JsiSkParagraphStyle {
   static toParagraphStyle(
@@ -21,7 +21,7 @@ export class JsiSkParagraphStyle {
       ? { value: value.textAlign }
       : undefined ?? ps.textAlign;
     ps.textDirection = value.textDirection
-      ? { value: value.textDirection }
+      ? { value: value.textDirection === SkTextDirection.LTR ? 1 : 0 }
       : ps.textDirection;
     ps.textHeightBehavior = value.textHeightBehavior
       ? { value: value.textHeightBehavior }
