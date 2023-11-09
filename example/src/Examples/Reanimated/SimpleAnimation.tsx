@@ -32,7 +32,7 @@ export const SimpleAnimation = () => {
 const styles = StyleSheet.create({
   canvas: {
     height: 40,
-    width: "100%",
-    backgroundColor: "#FEFEFE",
+    width: "100%" as const,
+    backgroundColor: "#FEFEFE" as const,
   },
 });

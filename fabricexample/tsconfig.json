@@ -1,3 +1,6 @@
 {
-  "extends": "@tsconfig/react-native/tsconfig.json"
+  "extends": "eslint-config-react-native-wcandillon/tsconfig.base",
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": false,
+  }
 }

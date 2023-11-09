@@ -50,7 +50,7 @@ export class SkiaRoot {
   }
 
   render(element: ReactNode) {
-    skiaReconciler.updateContainer(element, this.root, null, () => {
+    skiaReconciler.updateContainer(element as any, this.root, null, () => {
       hostDebug("updateContainer");
     });
   }
