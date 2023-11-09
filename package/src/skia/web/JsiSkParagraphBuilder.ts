@@ -1,6 +1,11 @@
 import type { CanvasKit, ParagraphBuilder, TextStyle } from "canvaskit-wasm";
 
-import type { SkParagraphBuilder, SkParagraph, SkTextStyle } from "../types";
+import type {
+  SkParagraphBuilder,
+  SkParagraph,
+  SkTextStyle,
+  SkParagraphStyle,
+} from "../types";
 import { PlaceholderAlignment, TextBaseline } from "../types";
 
 import { HostObject } from "./Host";
@@ -14,10 +19,15 @@ export class JsiSkParagraphBuilder
 {
   elements: Array<ParagraphNode>;
 
-  constructor(CanvasKit: CanvasKit, ref: ParagraphBuilder) {
+  constructor(
+    CanvasKit: CanvasKit,
+    ref: ParagraphBuilder,
+    private style?: SkParagraphStyle
+  ) {
     super(CanvasKit, ref, "ParagraphBuilder");
     this.elements = [];
   }
+
   addPlaceholder(
     width: number | undefined = 0,
     height: number | undefined = 0,
@@ -57,7 +67,12 @@ export class JsiSkParagraphBuilder
   }
 
   build(): SkParagraph {
-    return new JsiSkParagraph(this.CanvasKit, this.ref.build(), this.elements);
+    return new JsiSkParagraph(
+      this.CanvasKit,
+      this.ref.build(),
+      this.elements,
+      this.style
+    );
   }
 
   reset(): void {

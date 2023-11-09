@@ -21,9 +21,7 @@ export class JsiSkParagraphBuilderFactory
 
   Make(paragraphStyle?: SkParagraphStyle, fontManager?: SkFontMgr) {
     const style = new this.CanvasKit.ParagraphStyle(
-      paragraphStyle
-        ? JsiSkParagraphStyle.toParagraphStyle(paragraphStyle)
-        : { textStyle: { color: [0, 0, 0, 0] } }
+      JsiSkParagraphStyle.toParagraphStyle(this.CanvasKit, paragraphStyle ?? {})
     );
 
     const fontMgr: FontMgr = fontManager
@@ -34,7 +32,8 @@ export class JsiSkParagraphBuilderFactory
     this.CanvasKit.FontMgr;
     return new JsiSkParagraphBuilder(
       this.CanvasKit,
-      this.CanvasKit.ParagraphBuilder.Make(style, fontMgr)
+      this.CanvasKit.ParagraphBuilder.Make(style, fontMgr),
+      paragraphStyle
     );
   }
 }

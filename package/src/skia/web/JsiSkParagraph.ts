@@ -1,6 +1,6 @@
 import type { CanvasKit, Paragraph } from "canvaskit-wasm";
 
-import type { SkRect, SkTextStyle } from "../types";
+import type { SkParagraphStyle, SkRect, SkTextStyle } from "../types";
 import { type SkParagraph } from "../types";
 
 import { HostObject } from "./Host";
@@ -43,13 +43,18 @@ export class JsiSkParagraph
   constructor(
     CanvasKit: CanvasKit,
     ref: Paragraph,
-    private elements?: ParagraphNode[]
+    private elements?: ParagraphNode[],
+    private style?: SkParagraphStyle
   ) {
     super(CanvasKit, ref, "Paragraph");
   }
 
   getElements(): ParagraphNode[] | undefined {
     return this.elements;
+  }
+
+  getStyle(): SkParagraphStyle | undefined {
+    return this.style;
   }
 
   layout(width: number): void {

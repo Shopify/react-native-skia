@@ -292,9 +292,11 @@ const serializeSkOjects = (obj: any): any => {
         source: obj.source(),
       };
     } else if (obj.__typename__ === "Paragraph") {
+      const objStyle = obj.getStyle();
       return {
         __typename__: "Paragraph",
-        json: JSON.stringify(obj.getElements()),
+        elements: JSON.stringify(obj.getElements()),
+        style: objStyle ? JSON.stringify(objStyle) : {},
       };
     }
   }
