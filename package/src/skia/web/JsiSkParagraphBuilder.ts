@@ -7,11 +7,12 @@ import type {
   SkParagraphStyle,
 } from "../types";
 import { PlaceholderAlignment, TextBaseline } from "../types";
+import { E2E } from "../../__tests__/setup";
 
 import { HostObject } from "./Host";
-import { JsiSkParagraph, ParagraphNode } from "./JsiSkParagraph";
+import type { ParagraphNode } from "./JsiSkParagraph";
+import { JsiSkParagraph } from "./JsiSkParagraph";
 import { JsiSkTextStyle } from "./JsiSkTextStyle";
-import { E2E } from "../../__tests__/setup";
 
 export class JsiSkParagraphBuilder
   extends HostObject<ParagraphBuilder, "ParagraphBuilder">

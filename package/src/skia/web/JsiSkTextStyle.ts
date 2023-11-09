@@ -1,5 +1,6 @@
 import type { TextStyle } from "canvaskit-wasm";
-import { SkTextStyle } from "../types";
+
+import type { SkTextStyle } from "../types";
 
 export class JsiSkTextStyle {
   static toTextStyle(value: SkTextStyle): TextStyle {

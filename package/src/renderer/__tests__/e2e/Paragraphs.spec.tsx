@@ -3,12 +3,12 @@ import React from "react";
 import { surface, importSkia } from "../setup";
 import { Fill, Paragraph } from "../../components";
 import { checkImage } from "../../../__tests__/setup";
-import { SkParagraph } from "../../../skia";
+import type { SkParagraph } from "../../../skia";
+import type { Skia } from "../../../skia/types";
 import {
   FontStyle,
   SkTextAlign,
   SkTextDirection,
-  Skia,
   TextDecoration,
 } from "../../../skia/types";
 

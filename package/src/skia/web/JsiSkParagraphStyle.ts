@@ -17,15 +17,18 @@ export class JsiSkParagraphStyle {
     ps.maxLines = value.maxLines ?? ps.maxLines;
     ps.replaceTabCharacters =
       value.replaceTabCharacters ?? ps.replaceTabCharacters;
-    ps.textAlign = value.textAlign
-      ? { value: value.textAlign }
-      : undefined ?? ps.textAlign;
-    ps.textDirection = value.textDirection
-      ? { value: value.textDirection === SkTextDirection.LTR ? 1 : 0 }
-      : ps.textDirection;
-    ps.textHeightBehavior = value.textHeightBehavior
-      ? { value: value.textHeightBehavior }
-      : ps.textHeightBehavior;
+    ps.textAlign =
+      value.textAlign !== undefined
+        ? { value: value.textAlign }
+        : undefined ?? ps.textAlign;
+    ps.textDirection =
+      value.textDirection !== undefined
+        ? { value: value.textDirection === SkTextDirection.LTR ? 1 : 0 }
+        : ps.textDirection;
+    ps.textHeightBehavior =
+      value.textHeightBehavior !== undefined
+        ? { value: value.textHeightBehavior }
+        : ps.textHeightBehavior;
 
     ps.strutStyle = ps.strutStyle ?? {};
     ps.strutStyle.fontFamilies =
@@ -40,17 +43,20 @@ export class JsiSkParagraphStyle {
 
     ps.strutStyle.fontStyle = ps.strutStyle.fontStyle ?? {};
 
-    (ps.strutStyle.fontStyle.slant = value.strutStyle?.fontStyle?.slant
-      ? { value: value.strutStyle.fontStyle.slant }
-      : ps.strutStyle.fontStyle.slant),
-      (ps.strutStyle.fontStyle.width = value.strutStyle?.fontStyle?.width
+    ps.strutStyle.fontStyle.slant =
+      value.strutStyle?.fontStyle?.slant !== undefined
+        ? { value: value.strutStyle.fontStyle.slant }
+        : ps.strutStyle.fontStyle.slant;
+    ps.strutStyle.fontStyle.width =
+      value.strutStyle?.fontStyle?.width !== undefined
         ? { value: value.strutStyle.fontStyle.width }
-        : ps.strutStyle.fontStyle.width),
-      (ps.strutStyle.fontStyle.weight = value.strutStyle?.fontStyle?.weight
+        : ps.strutStyle.fontStyle.width;
+    ps.strutStyle.fontStyle.weight =
+      value.strutStyle?.fontStyle?.weight !== undefined
         ? { value: value.strutStyle.fontStyle.weight }
-        : ps.strutStyle.fontStyle.weight),
-      (ps.strutStyle.halfLeading =
-        value.strutStyle?.halfLeading ?? ps.strutStyle.halfLeading);
+        : ps.strutStyle.fontStyle.weight;
+    ps.strutStyle.halfLeading =
+      value.strutStyle?.halfLeading ?? ps.strutStyle.halfLeading;
     ps.strutStyle.strutEnabled =
       value.strutStyle?.strutEnabled ?? ps.strutStyle.strutEnabled;
 
