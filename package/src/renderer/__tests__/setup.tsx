@@ -116,7 +116,6 @@ export const testingFonts = {
   //  NotoColorEmoji: [resolveFont("skia/__tests__/assets/NotoColorEmoji.ttf")],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmptyProps {}
 
 jest.mock("react-native", () => ({

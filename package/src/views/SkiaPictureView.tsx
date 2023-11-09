@@ -2,11 +2,11 @@ import React from "react";
 
 import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
+import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
 import { SkiaViewNativeId } from "./SkiaView";
 import type { SkiaPictureViewProps } from "./types";
-import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 

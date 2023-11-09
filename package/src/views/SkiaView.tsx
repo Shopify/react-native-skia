@@ -2,10 +2,10 @@ import React from "react";
 
 import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
+import SkiaDrawViewNativeComponent from "../specs/SkiaDrawViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
 import type { SkiaDrawViewProps } from "./types";
-import SkiaDrawViewNativeComponent from "../specs/SkiaDrawViewNativeComponent";
 
 export const SkiaViewNativeId = { current: 1000 };
 
