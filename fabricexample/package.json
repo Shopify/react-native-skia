@@ -8,8 +8,7 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "start": "react-native start",
     "test": "jest",
-    "pod-install": "cd ios && pod install && cd ..",
-    "postinstall": "yarn pod-install"
+    "pod-install": "cd ios && pod install && cd .."
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.5.11",
