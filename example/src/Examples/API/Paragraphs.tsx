@@ -7,11 +7,9 @@ import {
   Group,
   Paragraph,
   Rect,
-  SkTextDirection,
   SkTextStyle,
   Skia,
   TextDecoration,
-  TextDecorationStyle,
   mix,
   useComputedValue,
   useFonts,
@@ -40,13 +38,8 @@ export const Paragraphs = () => {
     }
 
     const fontSize = 20;
+    const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
 
-    const paragraphBuilder = Skia.ParagraphBuilder.Make(
-      {
-        textDirection: SkTextDirection.RTL,
-      },
-      customFontMgr
-    );
     const textStyle = {
       fontSize,
       fontFamilies: ["Roboto"],
