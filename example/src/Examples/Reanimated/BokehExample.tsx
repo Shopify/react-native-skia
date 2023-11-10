@@ -98,7 +98,7 @@ export function BokehExample() {
 const styles = StyleSheet.create({
   canvas: {
     height: ExampleHeight,
-    width: "100%",
-    backgroundColor: "black",
+    width: "100%" as const,
+    backgroundColor: "black" as const,
   },
 });
