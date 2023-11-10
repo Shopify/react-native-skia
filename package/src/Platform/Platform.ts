@@ -1,4 +1,3 @@
-import type { TurboModule } from "react-native";
 import {
   Image,
   PixelRatio,
