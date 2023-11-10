@@ -2,6 +2,13 @@ import { useImage, useTypeface } from "@shopify/react-native-skia";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 
+const SkiaLogo =
+  Platform.OS === "web" ? require("./assets/skia_logo.png") : "skia_logo";
+const SkiaLogoJpeg =
+  Platform.OS === "web"
+    ? require("./assets/skia_logo_jpeg.jpg")
+    : "skia_logo_jpeg";
+
 // NotoColorEmoji.ttf is only available on iOS
 const NotoColorEmojiSrc =
   Platform.OS === "ios"
@@ -15,8 +22,8 @@ export const useAssets = () => {
   }, []);
   const mask = useImage(require("./assets/mask.png"), errorHandler);
   const oslo = useImage(require("./assets/oslo.jpg"), errorHandler);
-  // const skiaLogoJpeg = useImage(SkiaLogoJpeg, errorHandler);
-  // const skiaLogoPng = useImage(SkiaLogo, errorHandler);
+  const skiaLogoJpeg = useImage(SkiaLogoJpeg, errorHandler);
+  const skiaLogoPng = useImage(SkiaLogo, errorHandler);
   const RobotoMedium = useTypeface(
     require("./assets/Roboto-Medium.ttf"),
     errorHandler
@@ -45,7 +52,9 @@ export const useAssets = () => {
     !NotoSansSCRegular ||
     !UberMoveMediumMono ||
     !DinMedium ||
-    !mask
+    !mask ||
+    !skiaLogoJpeg ||
+    !skiaLogoPng
   ) {
     return null;
   }
@@ -57,5 +66,7 @@ export const useAssets = () => {
     DinMedium,
     oslo,
     mask,
+    skiaLogoJpeg,
+    skiaLogoPng,
   };
 };

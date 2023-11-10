@@ -8,7 +8,8 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "start": "react-native start",
     "test": "jest",
-    "pod-install": "cd ios && pod install && cd .."
+    "pod-install": "cd ios && pod install && cd ..",
+    "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.5.11",
