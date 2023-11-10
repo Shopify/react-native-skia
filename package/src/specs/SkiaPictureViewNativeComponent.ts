@@ -1,6 +1,5 @@
+import codegenNativeComponent from "react-native/Libraries/Utilities/codegenNativeComponent";
 import type { ViewProps } from "react-native";
-
-import { Platform } from "../Platform";
 
 export interface NativeProps extends ViewProps {
   mode: string;
@@ -8,4 +7,4 @@ export interface NativeProps extends ViewProps {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default Platform.codegenNativeComponent<NativeProps>("SkiaPictureView");
+export default codegenNativeComponent<NativeProps>("SkiaPictureView");

@@ -5,9 +5,7 @@ import {
   Platform as RNPlatform,
   findNodeHandle,
   View,
-  TurboModuleRegistry,
 } from "react-native";
-import codegenNativeComponent from "react-native/Libraries/Utilities/codegenNativeComponent";
 
 import type { DataModule } from "../skia/types";
 import { isRNModule } from "../skia/types";
@@ -24,8 +22,4 @@ export const Platform: IPlatform = {
   },
   findNodeHandle,
   View,
-  codegenNativeComponent,
-  getTurboModule: <T extends TurboModule>(name: string) => {
-    return TurboModuleRegistry.getEnforcing<T>(name);
-  },
 };
