@@ -129,4 +129,10 @@ export const Platform: IPlatform = {
     throw new Error("findNodeHandle is not supported on the web");
   },
   View,
+  codegenNativeComponent: () => {
+    throw new Error("codegenNativeComponent is not supported on the web");
+  },
+  getTurboModule: () => {
+    throw new Error("getTurboModule is not supported on the web");
+  },
 };

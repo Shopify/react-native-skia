@@ -129,7 +129,15 @@ jest.mock("react-native", () => ({
     resolveAssetSource: jest.fn,
   },
   requireNativeComponent: jest.fn,
+  TurboModuleRegistry: {
+    getEnforcing: jest.fn,
+  },
 }));
+
+jest.mock(
+  "react-native/Libraries/Utilities/codegenNativeComponent",
+  () => jest.fn
+);
 
 export const BirdGIF = resolveFile("skia/__tests__/assets/bird.gif").toString(
   "base64"

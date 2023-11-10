@@ -9,13 +9,9 @@ module.exports = {
     "(setup)|(setup.(ts|tsx))$|globalSetup.ts|globalTeardown.ts",
   ],
   transform: {
-    "^.+\\.(js|jsx)$": "ts-jest",
+    "^.+\\.(ts|tsx)$": ["ts-jest", { tsconfig: "./tsconfig.test.json" }],
   },
-  globals: {
-    "ts-jest": {
-      tsconfig: "./tsconfig.test.json",
-    },
-  },
+  globals: {},
   globalSetup: "<rootDir>/src/__tests__/globalSetup.ts",
   globalTeardown: "<rootDir>/src/__tests__/globalTeardown.ts",
 };
