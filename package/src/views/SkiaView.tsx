@@ -2,15 +2,14 @@ import React from "react";
 
 import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
-import { Platform } from "../Platform";
+import SkiaDrawViewNativeComponent from "../specs/SkiaDrawViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
-import type { NativeSkiaViewProps, SkiaDrawViewProps } from "./types";
+import type { SkiaDrawViewProps } from "./types";
 
 export const SkiaViewNativeId = { current: 1000 };
 
-const NativeSkiaView =
-  Platform.requireNativeComponent<NativeSkiaViewProps>("SkiaDrawView");
+const NativeSkiaView = SkiaDrawViewNativeComponent;
 
 export class SkiaView extends React.Component<SkiaDrawViewProps> {
   constructor(props: SkiaDrawViewProps) {
@@ -79,7 +78,7 @@ export class SkiaView extends React.Component<SkiaDrawViewProps> {
       <NativeSkiaView
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        mode={mode}
+        mode={mode ?? "default"}
         debug={debug}
         {...viewProps}
       />

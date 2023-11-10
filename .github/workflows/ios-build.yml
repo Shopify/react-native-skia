@@ -13,8 +13,11 @@ on:
 jobs:
   build:
     runs-on: macos-12
+    strategy:
+      matrix:
+        working-directory: [example, fabricexample]
     concurrency:
-      group: ios-example-${{ github.ref }}
+      group: ios-example-${{ matrix.working-directory }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
@@ -48,24 +51,24 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Install app node_modules
-        working-directory: example
+        working-directory: ${{ matrix.working-directory }}
         run: yarn install --frozen-lockfile
 
       - name: Restore Pods from cache
         uses: actions/cache@v3
         with:
           path: |
-            example/ios/Pods
+            ${{ matrix.working-directory }}/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
-          key: ${{ runner.os }}-pods-example-${{ hashFiles('example/ios/Podfile.lock') }}
+          key: ${{ runner.os }}-pods-${{ matrix.working-directory }}-${{ hashFiles(format('{0}/ios/Podfile.lock', matrix.working-directory)) }}
 
       - name: Install Pods
-        working-directory: example/ios
+        working-directory: ${{ matrix.working-directory }}/ios
         run: pod install
         
       - name: Check if Podfile.lock has changed
-        working-directory: example/ios
+        working-directory: ${{ matrix.working-directory }}/ios
         run: |
           if git diff --quiet --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock; then
             echo "Podfile.lock is up to date."
@@ -79,10 +82,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-ios-derived-data-example-${{ hashFiles('example/ios/Podfile.lock') }}
-
+          key: ${{ runner.os }}-ios-derived-data-${{ hashFiles(format('{0}/ios/Podfile.lock', matrix.working-directory)) }}
+  
       - name: Build app
-        working-directory: example
+        working-directory: ${{ matrix.working-directory }}
         run: CI=true yarn ios --simulator 'iPhone 14 Pro'
 
       # - name: Run e2e tests

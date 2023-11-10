@@ -46,7 +46,7 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 - Install dependencies `yarn bootstrap`
 - Build the Skia libraries with `yarn build-skia` (this can take a while)
 - Copy Skia headers `yarn copy-skia-headers`
-- Run `pod install` in the example project
+- run `pod install` in `example/ios` and `fabricexample/ios`
 
 ### Upgrading
 
