@@ -65,6 +65,4 @@ jobs:
         run: cd docs; yarn install --frozen-lockfile
 
       - name: TypeScript Example Docs
-        env:
-          NODE_OPTIONS: "--max_old_space_size=4096"
         run: cd docs; yarn build;
