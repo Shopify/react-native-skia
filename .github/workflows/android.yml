@@ -8,6 +8,8 @@ jobs:
     strategy:
       matrix:
         working-directory: [example, fabricexample]
+    env:
+      PACKAGE_NAME: ${{ matrix.working-directory == 'fabricexample' && 'com.fabricexample' || 'com.rnskia' }}  
     timeout-minutes: 55
     concurrency:
       group: android-example-${{ matrix.working-directory }}-${{ github.ref }}
@@ -151,8 +153,10 @@ jobs:
       - name: Install APK
         run: adb install -r ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
 
+      - name: Set up environment
+        run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
       - name: Launch APK
-        run: adb shell monkey -p com.rnskia 1    
+        run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
 
       - name: Run e2e Tests
         working-directory: package
