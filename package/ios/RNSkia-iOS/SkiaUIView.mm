@@ -100,12 +100,12 @@
               object:nil];
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
 - (void)prepareForRecycle {
   [super prepareForRecycle];
   [self unregisterView];
 }
 
-#ifdef RCT_NEW_ARCH_ENABLED
 - (void)finalizeUpdates:(RNComponentViewUpdateMask)updateMask {
   [super finalizeUpdates:updateMask];
   if (updateMask == RNComponentViewUpdateMaskAll) {
