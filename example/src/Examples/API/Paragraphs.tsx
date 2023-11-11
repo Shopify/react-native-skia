@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import {
   Canvas,
@@ -11,16 +11,26 @@ import {
   Skia,
   TextDecoration,
   mix,
-  useComputedValue,
   useFonts,
-  useLoop,
 } from "@shopify/react-native-skia";
+
+import {
+  useSharedValue,
+  useDerivedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
 export const Paragraphs = () => {
   const { height, width } = useWindowDimensions();
-  const progress = useLoop({ duration: 3000 });
-  const loopedWidth = useComputedValue(
-    () => mix(progress.current, width * 0.2, width * 0.8),
+  const progress = useSharedValue(1);
+
+  useEffect(() => {
+    progress.value = withRepeat(withTiming(0, { duration: 3000 }), -1, true);
+  }, []);
+
+  const loopedWidth = useDerivedValue(
+    () => mix(progress.value, width * 0.2, width * 0.8),
     [progress]
   );
 
