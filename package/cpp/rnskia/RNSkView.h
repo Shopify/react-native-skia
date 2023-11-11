@@ -398,7 +398,7 @@ private:
 
   std::shared_ptr<RNSkValue> _onSize;
   std::function<void()> _onSizeUnsubscribe;
-  RNSkDrawingMode _drawingMode;
+  RNSkDrawingMode _drawingMode = RNSkDrawingMode::Default;
   size_t _nativeId;
 
   size_t _drawingLoopId = 0;
