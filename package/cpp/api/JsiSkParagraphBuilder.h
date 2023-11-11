@@ -23,7 +23,7 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-using namespace skia::textlayout; // NOLINT
+namespace para = skia::textlayout;
 
 /**
  Implementation of the ParagraphBuilder object in JSI
@@ -55,16 +55,17 @@ public:
     auto height =
         count >= 2 ? getArgumentAsNumber(runtime, arguments, count, 1) : 0;
     auto alignment =
-        count >= 3 ? static_cast<PlaceholderAlignment>(
+        count >= 3 ? static_cast<para::PlaceholderAlignment>(
                          getArgumentAsNumber(runtime, arguments, count, 2))
-                   : PlaceholderAlignment::kBaseline;
-    auto baseline = count >= 4 ? static_cast<TextBaseline>(getArgumentAsNumber(
-                                     runtime, arguments, count, 3))
-                               : TextBaseline::kAlphabetic;
+                   : para::PlaceholderAlignment::kBaseline;
+    auto baseline = count >= 4
+                        ? static_cast<para::TextBaseline>(
+                              getArgumentAsNumber(runtime, arguments, count, 3))
+                        : para::TextBaseline::kAlphabetic;
     auto offset =
         count >= 5 ? getArgumentAsNumber(runtime, arguments, count, 4) : 0;
 
-    PlaceholderStyle style(width, height, alignment, baseline, offset);
+    para::PlaceholderStyle style(width, height, alignment, baseline, offset);
     _builder->addPlaceholder(style);
 
     return thisValue.asObject(runtime);
@@ -88,11 +89,11 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pop))
 
   explicit JsiSkParagraphBuilder(std::shared_ptr<RNSkPlatformContext> context,
-                                 ParagraphStyle paragraphStyle,
+                                 para::ParagraphStyle paragraphStyle,
                                  std::shared_ptr<JsiSkFontMgr> fontManager)
       : JsiSkHostObject(std::move(context)) {
 
-    _fontCollection = sk_make_sp<FontCollection>();
+    _fontCollection = sk_make_sp<para::FontCollection>();
     if (fontManager != nullptr) {
       _fontCollection->setDefaultFontManager(fontManager->getObject());
     } else {
@@ -100,12 +101,12 @@ public:
     }
     _fontCollection->enableFontFallback();
 
-    _builder = ParagraphBuilder::make(paragraphStyle, _fontCollection);
+    _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection);
   }
 
 private:
-  std::unique_ptr<ParagraphBuilder> _builder;
-  sk_sp<FontCollection> _fontCollection;
+  std::unique_ptr<para::ParagraphBuilder> _builder;
+  sk_sp<para::FontCollection> _fontCollection;
 };
 
 /**
@@ -118,7 +119,7 @@ public:
     // Get paragraph style from params
     auto paragraphStyle =
         count >= 1 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
-                   : ParagraphStyle();
+                   : para::ParagraphStyle();
 
     // get font manager
     auto fontMgr = nullptr;

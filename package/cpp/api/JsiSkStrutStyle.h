@@ -18,14 +18,15 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-using namespace skia::textlayout; // NOLINT
+namespace para = skia::textlayout;
 
 /**
  Implementation of the TextStyle object in JSI for the paragraph builder
  */
 class JsiSkStrutStyle {
 public:
-  static StrutStyle fromValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  static para::StrutStyle fromValue(jsi::Runtime &runtime,
+                                    const jsi::Value &value) {
     // Read values from the argument - expected to be a TextStyle shaped object
     if (!value.isObject()) {
       throw jsi::JSError(runtime, "Expected SkStrutStyle as first argument");
@@ -42,7 +43,7 @@ public:
      */
     auto object = value.asObject(runtime);
 
-    StrutStyle retVal;
+    para::StrutStyle retVal;
 
     if (object.hasProperty(runtime, "strutEnabled")) {
       auto propValue = object.getProperty(runtime, "strutEnabled");

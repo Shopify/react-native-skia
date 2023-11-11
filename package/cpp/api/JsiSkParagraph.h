@@ -25,7 +25,7 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-using namespace skia::textlayout; // NOLINT
+namespace para = skia::textlayout;
 
 /**
  Implementation of the Paragraph object in JSI
@@ -65,8 +65,9 @@ public:
   JSI_HOST_FUNCTION(getRectsForRange) {
     auto start = getArgumentAsNumber(runtime, arguments, count, 0);
     auto end = getArgumentAsNumber(runtime, arguments, count, 1);
-    auto result = _paragraph->getRectsForRange(
-        start, end, RectHeightStyle::kTight, RectWidthStyle::kTight);
+    auto result =
+        _paragraph->getRectsForRange(start, end, para::RectHeightStyle::kTight,
+                                     para::RectWidthStyle::kTight);
     auto returnValue = jsi::Array(runtime, result.size());
     for (size_t i = 0; i < result.size(); ++i) {
       returnValue.setValueAtIndex(
@@ -77,7 +78,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(getLineMetrics) {
-    std::vector<LineMetrics> metrics;
+    std::vector<para::LineMetrics> metrics;
     _paragraph->getLineMetrics(metrics);
     auto returnValue = jsi::Array(runtime, metrics.size());
     auto height = 0;
@@ -94,7 +95,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(getRectsForPlaceholders) {
-    std::vector<TextBox> placeholderInfos =
+    std::vector<para::TextBox> placeholderInfos =
         _paragraph->getRectsForPlaceholders();
     auto returnValue = jsi::Array(runtime, placeholderInfos.size());
     for (size_t i = 0; i < placeholderInfos.size(); ++i) {
@@ -120,15 +121,15 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraph, getLineMetrics))
 
   explicit JsiSkParagraph(std::shared_ptr<RNSkPlatformContext> context,
-                          ParagraphBuilder *paragraphBuilder)
+                          para::ParagraphBuilder *paragraphBuilder)
       : JsiSkHostObject(std::move(context)) {
     _paragraph = paragraphBuilder->Build();
   }
 
-  Paragraph *getParagraph() { return _paragraph.get(); }
+  para::Paragraph *getParagraph() { return _paragraph.get(); }
 
 private:
-  std::unique_ptr<Paragraph> _paragraph;
+  std::unique_ptr<para::Paragraph> _paragraph;
 };
 
 } // namespace RNSkia

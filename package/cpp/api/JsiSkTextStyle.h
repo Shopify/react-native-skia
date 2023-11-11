@@ -19,16 +19,17 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-using namespace skia::textlayout; // NOLINT
+namespace para = skia::textlayout;
 
 /**
  Implementation of the TextStyle object in JSI for the paragraph builder
  */
 class JsiSkTextStyle {
 public:
-  static TextStyle fromValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  static para::TextStyle fromValue(jsi::Runtime &runtime,
+                                   const jsi::Value &value) {
 
-    TextStyle retVal;
+    para::TextStyle retVal;
 
     // Accept undefined && null
     if (value.isUndefined() || value.isNull()) {
@@ -54,7 +55,8 @@ public:
     }
     if (object.hasProperty(runtime, "decoration")) {
       auto propValue = object.getProperty(runtime, "decoration");
-      retVal.setDecoration(static_cast<TextDecoration>(propValue.asNumber()));
+      retVal.setDecoration(
+          static_cast<para::TextDecoration>(propValue.asNumber()));
     }
     if (object.hasProperty(runtime, "decorationColor")) {
       auto propValue = object.getProperty(runtime, "decorationColor");
@@ -67,7 +69,7 @@ public:
     if (object.hasProperty(runtime, "decorationStyle")) {
       auto propValue = object.getProperty(runtime, "decorationStyle");
       retVal.setDecorationStyle(
-          static_cast<TextDecorationStyle>(propValue.asNumber()));
+          static_cast<para::TextDecorationStyle>(propValue.asNumber()));
     }
     if (object.hasProperty(runtime, "fontFamilies")) {
       auto propValue = object.getProperty(runtime, "fontFamilies")
@@ -167,12 +169,13 @@ public:
             element.hasProperty(runtime, "blurSigma")
                 ? element.getProperty(runtime, "blurSigma").asNumber()
                 : 0;
-        retVal.addShadow(TextShadow(color, offset, blurSigma));
+        retVal.addShadow(para::TextShadow(color, offset, blurSigma));
       }
     }
     if (object.hasProperty(runtime, "textBaseline")) {
       auto propValue = object.getProperty(runtime, "textBaseline");
-      retVal.setTextBaseline(static_cast<TextBaseline>(propValue.asNumber()));
+      retVal.setTextBaseline(
+          static_cast<para::TextBaseline>(propValue.asNumber()));
     }
 
     return retVal;

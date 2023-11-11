@@ -9,11 +9,11 @@
 
 namespace RNSkia {
 
-class ParagraphProp : public DerivedProp<Paragraph *> {
+class ParagraphProp : public DerivedProp<para::Paragraph *> {
 public:
   explicit ParagraphProp(PropId name,
                          const std::function<void(BaseNodeProp *)> &onChange)
-      : DerivedProp<Paragraph *>(onChange) {
+      : DerivedProp<para::Paragraph *>(onChange) {
     _paragraphProp = defineProperty<NodeProp>(name);
   }
 

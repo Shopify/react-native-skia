@@ -23,7 +23,7 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-using namespace skia::textlayout; // NOLINT
+namespace para = skia::textlayout;
 /**
  Implementation of the ParagraphStyle object in JSI
  */
@@ -41,9 +41,9 @@ public:
    textHeightBehavior?: SkTextHeightBehavior;
    textStyle?: SkTextStyle;
    */
-  static ParagraphStyle fromValue(jsi::Runtime &runtime,
-                                  const jsi::Value &value) {
-    ParagraphStyle retVal;
+  static para::ParagraphStyle fromValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
+    para::ParagraphStyle retVal;
 
     // Accept undefined && null
     if (value.isUndefined() || value.isNull()) {
@@ -87,16 +87,17 @@ public:
     }
     if (object.hasProperty(runtime, "textAlign")) {
       auto propValue = object.getProperty(runtime, "textAlign");
-      retVal.setTextAlign(static_cast<TextAlign>(propValue.asNumber()));
+      retVal.setTextAlign(static_cast<para::TextAlign>(propValue.asNumber()));
     }
     if (object.hasProperty(runtime, "textDirection")) {
       auto propValue = object.getProperty(runtime, "textDirection");
-      retVal.setTextDirection(static_cast<TextDirection>(propValue.asNumber()));
+      retVal.setTextDirection(
+          static_cast<para::TextDirection>(propValue.asNumber()));
     }
     if (object.hasProperty(runtime, "textHeightBehavior")) {
       auto propValue = object.getProperty(runtime, "textHeightBehavior");
       retVal.setTextHeightBehavior(
-          static_cast<TextHeightBehavior>(propValue.asNumber()));
+          static_cast<para::TextHeightBehavior>(propValue.asNumber()));
     }
     if (object.hasProperty(runtime, "strutStyle")) {
       auto propValue = object.getProperty(runtime, "strutStyle");
