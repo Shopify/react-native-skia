@@ -8,12 +8,7 @@ import type { Server, WebSocket } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
 import { ValueApi } from "../../values/web";
-import type * as SkiaExports from "../../skia";
-import type * as AnimationExports from "../../animation";
-import type * as ValuesExports from "../../values";
-import type * as RendererExports from "../index";
-import type * as OffscreenExports from "../Offscreen";
-import type * as TouchHandlerExports from "../../views/useTouchHandler";
+import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
@@ -162,15 +157,15 @@ export const loadFont = (uri: string, ftSize?: number) => {
   return Skia.Font(tf!, ftSize ?? fontSize);
 };
 
-export const importSkia = () => {
+export const importSkia = (): typeof SkiaExports => {
   //const core = require("../../skia/core");
-  const skia: typeof SkiaExports = require("../../skia");
-  const renderer: typeof RendererExports = require("../../renderer");
-  const offscreen: typeof OffscreenExports = require("../Offscreen");
+  const skia = require("../../skia");
+  const renderer = require("../../renderer");
+  const offscreen = require("../Offscreen");
   // TODO: to remove
-  const animation: typeof AnimationExports = require("../../animation");
-  const values: typeof ValuesExports = require("../../values");
-  const useTouchHandler: typeof TouchHandlerExports = require("../../views/useTouchHandler");
+  const animation = require("../../animation");
+  const values = require("../../values");
+  const useTouchHandler = require("../../views/useTouchHandler");
   return {
     ...skia,
     ...renderer,
