@@ -41,6 +41,11 @@ export type PopStyleNode = {
   type: "pop_style";
 };
 
+export type ParagraphJson = {
+  elements: ParagraphNode[];
+  style: SkParagraphStyle | undefined;
+};
+
 export class JsiSkParagraph
   extends HostObject<Paragraph, "Paragraph">
   implements SkParagraph
@@ -54,12 +59,12 @@ export class JsiSkParagraph
     super(CanvasKit, ref, "Paragraph");
   }
 
-  getElements(): ParagraphNode[] | undefined {
-    return this.elements;
-  }
-
-  getStyle(): SkParagraphStyle | undefined {
-    return this.style;
+  source(): string {
+    const source: ParagraphJson = {
+      elements: this.elements ?? [],
+      style: this.style ?? undefined,
+    };
+    return JSON.stringify(source);
   }
 
   layout(width: number): void {

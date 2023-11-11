@@ -1,8 +1,5 @@
-import {
-  SkParagraphStyle,
-  SkTextStyle,
-  Skia,
-} from "@shopify/react-native-skia";
+import { SkParagraph, SkTextStyle, Skia } from "@shopify/react-native-skia";
+import type { ParagraphJson } from "@shopify/react-native-skia/src/skia/web/JsiSkParagraph";
 import React from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -84,46 +81,44 @@ const parseProp = (value: any, assets: Assets) => {
         Skia,
       });
     } else if (value.__typename__ === "Paragraph") {
-      // Elements are the initial values passed to the paragaraph builder
-      // in the order they were added from addText, addPlaceholder, pushStyle, popStyle
-      const elements = JSON.parse(value.elements) as Array<any>;
-      // Style is the SkParagraphStyle used to create the paragraph-builder
-      const style = value.style
-        ? (JSON.parse(value.style) as SkParagraphStyle)
-        : undefined;
-
-      // Now ensure all colors are converted to SkColor
-      if (style) {
-        style.textStyle = getTextStyleWithResolvedColors(style?.textStyle);
-      }
-
-      const builder = Skia.ParagraphBuilder.Make(style);
-      elements.forEach((el) => {
-        switch (el.type) {
-          case "text":
-            builder.addText(el.text);
-            break;
-          case "placeholder":
-            builder.addPlaceholder(
-              el.width,
-              el.height,
-              el.alignment,
-              el.baseline,
-              el.offset
-            );
-            break;
-          case "push_style":
-            builder.pushStyle(getTextStyleWithResolvedColors(el.style));
-            break;
-          case "pop_style":
-            builder.pop();
-            break;
-        }
-      });
-      return builder.build();
+      return makeFromJson(value.source);
     }
   }
   return value;
+};
+
+export const makeFromJson = (json: string): SkParagraph => {
+  const value = JSON.parse(json) as ParagraphJson;
+  // Now ensure all colors are converted to SkColor
+  let style = value.style;
+  if (style) {
+    style.textStyle = getTextStyleWithResolvedColors(style?.textStyle);
+  }
+
+  const builder = Skia.ParagraphBuilder.Make(style ?? {});
+  value.elements.forEach((el) => {
+    switch (el.type) {
+      case "text":
+        builder.addText(el.text);
+        break;
+      case "placeholder":
+        builder.addPlaceholder(
+          el.width,
+          el.height,
+          el.alignment,
+          el.baseline,
+          el.offset
+        );
+        break;
+      case "push_style":
+        builder.pushStyle(getTextStyleWithResolvedColors(el.style));
+        break;
+      case "pop_style":
+        builder.pop();
+        break;
+    }
+  });
+  return builder.build();
 };
 
 const getTextStyleWithResolvedColors = <T extends SkTextStyle | undefined>(
