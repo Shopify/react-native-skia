@@ -17,9 +17,18 @@ protected:
   void draw(DrawingContext *context) override {
     auto x = _xProp->value().getAsNumber();
     auto y = _yProp->value().getAsNumber();
-    auto width = _widthProp->value().getAsNumber();
+    auto width = static_cast<SkScalar>(_widthProp->value().getAsNumber());
     auto p = _paragraphProp->getDerivedValue();
-    (*p)->layout(width);
+    // Let's ensure that we don't perform unessecary layouts on the paragraph.
+    // We should only layout if we have a new paragraph or if the layout width
+    // has changed.
+    if (_lastLayoutWidth != width || _lastLayoutParagraph != *p) {
+      // perform layout!
+      (*p)->layout(width);
+      _lastLayoutWidth = width;
+      _lastLayoutParagraph = *p;
+    }
+    // Paint the layout to the canvas
     (*p)->paint(context->getCanvas(), x, y);
   }
 
@@ -43,6 +52,8 @@ private:
   NodeProp *_xProp;
   NodeProp *_yProp;
   NodeProp *_widthProp;
+  SkScalar _lastLayoutWidth;
+  para::Paragraph *_lastLayoutParagraph = nullptr;
 };
 
 } // namespace RNSkia
