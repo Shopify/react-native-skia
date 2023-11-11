@@ -81,13 +81,13 @@ const parseProp = (value: any, assets: Assets) => {
         Skia,
       });
     } else if (value.__typename__ === "Paragraph") {
-      return makeFromJson(value.source);
+      return makeParagraphFromSource(value.source);
     }
   }
   return value;
 };
 
-export const makeFromJson = (json: string): SkParagraph => {
+export const makeParagraphFromSource = (json: string): SkParagraph => {
   const value = JSON.parse(json) as ParagraphJson;
   // Now ensure all colors are converted to SkColor
   let style = value.style;
