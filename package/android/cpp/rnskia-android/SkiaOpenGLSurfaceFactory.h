@@ -5,6 +5,8 @@
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
+#include <android/surface_texture.h>
+#include <android/surface_texture_jni.h>
 #include <android/native_window_jni.h>
 #include <condition_variable>
 #include <memory>
@@ -44,8 +46,11 @@ class WindowSurfaceHolder {
 public:
   WindowSurfaceHolder(jobject surface, int width, int height)
       : _width(width), _height(height),
-        _window(ANativeWindow_fromSurface(facebook::jni::Environment::current(),
-                                          surface)) {}
+        _window(
+          ASurfaceTexture_acquireANativeWindow(
+            ASurfaceTexture_fromSurfaceTexture(facebook::jni::Environment::current(), surface)
+          )
+        ) {}
 
   ~WindowSurfaceHolder() { ANativeWindow_release(_window); }
 
