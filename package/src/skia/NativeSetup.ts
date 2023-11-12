@@ -1,8 +1,9 @@
 import { Platform } from "../Platform";
+import NativeSkiaModule from "../specs/NativeSkiaModule";
 
 if (Platform.OS !== "web" && global.SkiaApi == null) {
   // Initialize RN Skia
-  const SkiaModule = Platform.NativeModules.RNSkia;
+  const SkiaModule = NativeSkiaModule;
   if (SkiaModule == null || typeof SkiaModule.install !== "function") {
     throw new Error(
       "Native RNSkia Module cannot be found! Make sure you correctly " +

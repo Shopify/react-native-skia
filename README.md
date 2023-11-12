@@ -46,7 +46,7 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 - Install dependencies `yarn bootstrap`
 - Build the Skia libraries with `yarn build-skia` (this can take a while)
 - Copy Skia headers `yarn copy-skia-headers`
-- Run `pod install` in the example project
+- run `pod install` in `example/ios` and `fabricexample/ios`
 
 ### Upgrading
 
@@ -67,3 +67,78 @@ If a new version of Skia is included in an upgrade of this library, you need to 
 Publish the NPM package manually. The output is found in the `dist` folder.
 
 - Install Cocoapods in the example/ios folder `cd example/ios && pod install && cd ..`
+
+### Contributing
+
+In the `package` folder, we have several scripts set up to help you maintain the quality of the codebase and test your changes:
+
+- `yarn lint` — Lints the code for potential errors and to ensure consistency with our coding standards.
+- `yarn tsc` — Runs the TypeScript compiler to check for typing issues.
+- `yarn test` — Executes the unit tests to ensure existing features work as expected after changes.
+- `yarn e2e` — Runs end-to-end tests. For these tests to run properly, you need to have the example app running. Use `yarn ios` or `yarn android` in the `example` folder and navigate to the Tests screen within the app.
+
+#### Running End-to-End Tests
+
+To ensure the best reliability, we encourage running end-to-end tests before submitting your changes:
+
+1. Start the example app:
+```sh
+cd example
+yarn ios # or yarn android for Android testing
+```
+   
+2. With the example app running and the Tests screen open, run the following command in the `package` folder:
+```sh
+yarn e2e
+```
+   
+This will run through the automated tests and verify that your changes have not introduced any regressions.
+
+#### Writing End-to-End Tests
+
+Contributing end-to-end tests to React Native Skia is invaluable. Below you'll find guidelines for writing tests using the `eval` and `draw` commands. 
+
+e2e tests are located in the `package/__tests__/e2e/` directory. You can create a file there or add a new test to an existing file depending on what is most sensible.
+When looking to contribute a new test, you can refer to existing tests to see how these can be built.
+The `eval` command is used to test Skia's imperative API. It requires a pure function that invokes Skia operations and returns a serialized result.
+
+```tsx
+it("should generate commands properly", async () => {
+  const result = await surface.eval((Skia) => {
+    const path = Skia.Path.Make();
+    path.lineTo(30, 30);
+    return path.toCmds();
+  });
+  expect(result).toEqual([[0, 0, 0], [1, 30, 30]]);
+});
+```
+
+Both the `eval` and `draw` commands require a function that will be executed in an isolated context, so the functions must be pure (without external dependencies) and serializable. You can use the second parameter to provide extra data to that function.
+
+```tsx
+it("should generate commands properly", async () => {
+  const result = await surface.eval((Skia, ctx) => {
+    const path = Skia.Path.MakeFromSVGString(ctx.svg);
+    return path.toCmds();
+  }, { svg: "M 0 0, L 30 30" });
+  expect(result).toEqual([[0, 0, 0], [1, 30, 30]]);
+});
+```
+
+Another option is to use the `draw` command:
+```tsx
+it("Path with default fillType", async () => {
+  const { Skia } = importSkia();
+  const path = star(Skia);
+  const img = await surface.draw(
+    <>
+      <Fill color="white" />
+      <Path path={path} style="stroke" strokeWidth={4} color="#3EB489" />
+      <Path path={path} color="lightblue" />
+    </>
+  );
+  checkImage(image, "snapshots/drawings/path.png");
+});
+```
+
+Again, since `eval` and `draw` serialize the function's content, avoid any external dependencies that can't be serialized.
