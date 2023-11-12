@@ -1,11 +1,6 @@
 #pragma once
 
-#ifdef TARGET_OS_IPHONE
-#include <react-native-skia/ImageProps.h>
-#else
-#include "ImageProps.h"
-#endif
-
+#include "SkImageProps.h"
 #include "JsiDomDrawingNode.h"
 
 #include <memory>
