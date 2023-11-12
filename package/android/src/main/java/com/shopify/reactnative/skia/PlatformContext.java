@@ -1,7 +1,5 @@
 package com.shopify.reactnative.skia;
 
-import android.app.Application;
-import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -10,7 +8,6 @@ import android.view.Choreographer;
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.turbomodule.core.CallInvokerHolderImpl;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,8 +18,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class PlatformContext {
     @DoNotStrip
@@ -52,32 +47,23 @@ public class PlatformContext {
         }
         return buffer.toByteArray();
     }
-    //private long _prevTimestamp = 0;
 
     private void postFrameLoop() {
         Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
             @Override
             public void doFrame(long frameTimeNanos) {
-                // Schedule the next frame at the beginning
-                if (_drawLoopActive && !_isPaused) {
-                    Choreographer.getInstance().postFrameCallback(this);
+                if (_isPaused) {
+                    return;
                 }
-                // Do the current frame's work if not paused
-                if (!_isPaused) {
-                   mainHandler.post(() -> {
-//                       long timestamp = frameTimeNanos/1000000;
-//                       long frameDuration = (timestamp - _prevTimestamp);
-//                       Log.i(tag, "Choreographer "+frameDuration+"ms");
-//                       _prevTimestamp = timestamp;
-                       notifyDrawLoop();
-                   });
+                notifyDrawLoop();
+                if (_drawLoopActive) {
+                    postFrameLoop();
                 }
             }
         };
-
-        // Post the initial callback
         Choreographer.getInstance().postFrameCallback(frameCallback);
     }
+
 
     @DoNotStrip
     public void notifyTaskReadyOnMainThread() {
