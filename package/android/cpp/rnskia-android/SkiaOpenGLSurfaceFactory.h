@@ -5,6 +5,9 @@
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
+#include "swappy/swappyGL.h"
+#include "swappy/swappyGL_extra.h"
+
 #include <android/native_window_jni.h>
 #include <condition_variable>
 #include <memory>
@@ -45,7 +48,9 @@ public:
   WindowSurfaceHolder(jobject surface, int width, int height)
       : _width(width), _height(height),
         _window(ANativeWindow_fromSurface(facebook::jni::Environment::current(),
-                                          surface)) {}
+                                          surface)) {
+    SwappyGL_setWindow(_window);
+  }
 
   ~WindowSurfaceHolder() { ANativeWindow_release(_window); }
 
@@ -85,9 +90,9 @@ public:
     // Flush and submit the direct context
     ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
         ->flushAndSubmit();
-
+    RNSkLogger::logToConsole("Swappy enabled %d", SwappyGL_isEnabled());
     // Swap buffers
-    return SkiaOpenGLHelper::swapBuffers(
+    return SwappyGL_swap(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 

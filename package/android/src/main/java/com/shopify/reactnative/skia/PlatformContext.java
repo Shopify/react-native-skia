@@ -1,5 +1,6 @@
 package com.shopify.reactnative.skia;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -36,6 +37,7 @@ public class PlatformContext {
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
         mHybridData = initHybrid(reactContext.getResources().getDisplayMetrics().density);
+        Activity activity = reactContext.getCurrentActivity();
     }
 
     private byte[] getStreamAsBytes(InputStream is) throws IOException {

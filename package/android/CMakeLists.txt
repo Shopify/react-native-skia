@@ -132,6 +132,8 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
     find_package(ReactAndroid REQUIRED CONFIG)
 endif()
 
+find_package(games-frame-pacing REQUIRED CONFIG)
+
 unset(JSI_LIB CACHE)
 if(${REACT_NATIVE_VERSION} LESS 66)
     # JSI lib didn't exist on RN 0.65 and before. Simply omit it.
@@ -209,4 +211,5 @@ target_link_libraries(
         -lGLESv2
         -lEGL
         -landroid
+        games-frame-pacing::swappy_static
     )

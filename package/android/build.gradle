@@ -229,6 +229,9 @@ repositories {
 }
 
 dependencies {
+    // To use the Android Frame Pacing library
+    implementation "androidx.games:games-frame-pacing:2.0.0"
+
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
 

@@ -60,6 +60,8 @@ public:
     _context = nullptr;
   }
 
+  void initializeRuntime(jobject activity);
+
 private:
   friend HybridBase;
 
@@ -71,7 +73,6 @@ private:
   std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
   std::shared_ptr<RNSkAndroidPlatformContext> _context;
 
-  void initializeRuntime();
 };
 
 } // namespace RNSkia

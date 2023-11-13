@@ -1,5 +1,8 @@
 package com.shopify.reactnative.skia;
 
+import android.app.Activity;
+import android.util.Log;
+
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactContext;
@@ -27,8 +30,11 @@ public class SkiaManager {
         mPlatformContext = new PlatformContext(context);
 
         mHybridData = initHybrid(context.getJavaScriptContextHolder().get(), holder, mPlatformContext);
-
-        initializeRuntime();
+        Activity activity = context.getCurrentActivity();
+        if (activity == null) {
+            Log.i("Foo", "Activity is null");
+        }
+        initializeRuntime(activity);
     }
 
     public void destroy() {
@@ -51,7 +57,7 @@ public class SkiaManager {
     private native HybridData initHybrid(long jsContext, CallInvokerHolderImpl jsCallInvokerHolder,
             PlatformContext platformContext);
 
-    private native void initializeRuntime();
+    public native void initializeRuntime(Object activity);
     public native void invalidate();
 
 }

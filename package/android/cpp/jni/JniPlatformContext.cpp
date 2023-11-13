@@ -8,8 +8,12 @@
 #include "SkRefCnt.h"
 #include "SkStream.h"
 #include "SkTypes.h"
+#include "RNSkLog.h"
 
 #include <android/bitmap.h>
+
+#include "swappy/swappyGL.h"
+#include "swappy/swappyGL_extra.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -70,8 +74,7 @@ void JniPlatformContext::registerNatives() {
   });
 }
 
-TSelf JniPlatformContext::initHybrid(jni::alias_ref<jhybridobject> jThis,
-                                     float pixelDensity) {
+TSelf JniPlatformContext::initHybrid(jni::alias_ref<jhybridobject> jThis, float pixelDensity) {
   return makeCxxInstance(jThis, pixelDensity);
 }
 
