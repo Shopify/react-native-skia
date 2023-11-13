@@ -76,6 +76,10 @@ public:
     _skSurface = nullptr;
   }
 
+  void prepare() {
+    _skSurface = nullptr;
+  }
+
   /**
    * Sets the current surface as the active surface
    * @return true if make current succeeds

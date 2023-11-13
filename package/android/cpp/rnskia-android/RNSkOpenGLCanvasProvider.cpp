@@ -32,6 +32,7 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
   if (_surfaceHolder != nullptr && cb != nullptr) {
     // Get the surface
+    _surfaceHolder->prepare();
     auto surface = _surfaceHolder->getSurface();
     if (surface) {
 
