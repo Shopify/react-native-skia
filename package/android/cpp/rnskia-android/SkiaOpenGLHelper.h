@@ -9,6 +9,9 @@
 
 #include "RNSkLog.h"
 
+#include "swappy/swappyGL.h"
+#include "swappy/swappyGL_extra.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -228,7 +231,7 @@ public:
    * @return true if eglSwapBuffers succeeded.
    */
   static bool swapBuffers(SkiaOpenGLContext *context, EGLSurface glSurface) {
-    if (eglSwapBuffers(OpenGLResourceHolder::getInstance().glDisplay,
+    if (SwappyGL_swap(OpenGLResourceHolder::getInstance().glDisplay,
                        glSurface) != EGL_TRUE) {
       RNSkLogger::logToConsole("eglSwapBuffers failed: %d\n", eglGetError());
       return false;

@@ -90,9 +90,8 @@ public:
     // Flush and submit the direct context
     ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
         ->flushAndSubmit();
-    RNSkLogger::logToConsole("Swappy enabled %d", SwappyGL_isEnabled());
     // Swap buffers
-    return SwappyGL_swap(
+    return SkiaOpenGLHelper::swapBuffers(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 

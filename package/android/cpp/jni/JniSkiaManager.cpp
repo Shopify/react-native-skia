@@ -37,10 +37,8 @@ void JniSkiaManager::initializeRuntime(jobject activity) {
   // Create the cross platform skia manager
   _skManager =
       std::make_shared<RNSkManager>(_jsRuntime, _jsCallInvoker, _context);
-
-  auto env = jni::Environment::current(); // Get the current JNI environment
+  auto env = jni::Environment::current();
   SwappyGL_init(env, activity);
-  RNSkLogger::logToConsole("SwappyGL initialized: %d", SwappyGL_isEnabled());
 }
 
 } // namespace RNSkia
