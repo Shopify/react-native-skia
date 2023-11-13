@@ -56,7 +56,6 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
 }
 
 sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
-  if (_skSurface == nullptr) {
 
     // Setup OpenGL and Skia
     if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
@@ -122,7 +121,7 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
     auto releaseCtx = new ReleaseContext({_glSurface});
 
     // Create surface object
-    _skSurface = SkSurfaces::WrapBackendRenderTarget(
+    auto skSurface = SkSurfaces::WrapBackendRenderTarget(
         ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
         renderTarget, kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
         [](void *addr) {
@@ -131,9 +130,7 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
           delete releaseCtx;
         },
         reinterpret_cast<void *>(releaseCtx));
-  }
-
-  return _skSurface;
+   return skSurface;
 }
 
 } // namespace RNSkia

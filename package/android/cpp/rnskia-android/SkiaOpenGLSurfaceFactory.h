@@ -73,11 +73,6 @@ public:
   void resize(int width, int height) {
     _width = width;
     _height = height;
-    _skSurface = nullptr;
-  }
-
-  void prepare() {
-    _skSurface = nullptr;
   }
 
   /**
@@ -106,7 +101,6 @@ public:
 private:
   ANativeWindow *_window = nullptr;
   ASurfaceTexture *_surfaceTexture = nullptr;
-  sk_sp<SkSurface> _skSurface = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;
   int _height = 0;
