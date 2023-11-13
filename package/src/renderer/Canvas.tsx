@@ -11,6 +11,7 @@ import type {
   ReactNode,
   MutableRefObject,
   ForwardedRef,
+  FunctionComponent,
 } from "react";
 
 import { SkiaDomView, SkiaView } from "../views";
@@ -126,7 +127,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       );
     }
   }
-) as React.FC<CanvasProps & React.RefAttributes<SkiaDomView>>;
+) as FunctionComponent<CanvasProps & React.RefAttributes<SkiaDomView>>;
 
 /**
  * Combines a list of refs into a single ref. This can be used to provide

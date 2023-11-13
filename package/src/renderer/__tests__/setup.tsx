@@ -8,7 +8,7 @@ import type { Server, WebSocket } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
 import { ValueApi } from "../../values/web";
-import type * as SkiaExports from "../..";
+import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
@@ -116,7 +116,6 @@ export const testingFonts = {
   //  NotoColorEmoji: [resolveFont("skia/__tests__/assets/NotoColorEmoji.ttf")],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmptyProps {}
 
 jest.mock("react-native", () => ({
@@ -129,8 +128,12 @@ jest.mock("react-native", () => ({
   Image: {
     resolveAssetSource: jest.fn,
   },
-  requireNativeComponent: jest.fn,
+  // requireNativeComponent: jest.fn,
+  // TurboModuleRegistry: {
+  //   getEnforcing: jest.fn,
+  // },
 }));
+//jest.mock("react-native/Libraries/Utilities/codegenNativeComponent", jest.fn);
 
 export const BirdGIF = resolveFile("skia/__tests__/assets/bird.gif").toString(
   "base64"
@@ -154,7 +157,24 @@ export const loadFont = (uri: string, ftSize?: number) => {
   return Skia.Font(tf!, ftSize ?? fontSize);
 };
 
-export const importSkia = (): typeof SkiaExports => require("../..");
+export const importSkia = (): typeof SkiaExports => {
+  //const core = require("../../skia/core");
+  const skia = require("../../skia");
+  const renderer = require("../../renderer");
+  const offscreen = require("../Offscreen");
+  // TODO: to remove
+  const animation = require("../../animation");
+  const values = require("../../values");
+  const useTouchHandler = require("../../views/useTouchHandler");
+  return {
+    ...skia,
+    ...renderer,
+    ...animation,
+    ...values,
+    ...offscreen,
+    ...useTouchHandler,
+  };
+};
 
 export const getSkDOM = () => {
   const { Skia } = importSkia();
