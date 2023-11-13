@@ -13,8 +13,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     private String tag = "SkiaView";
 
+    private boolean manageTexture = false;
+
     public SkiaBaseView(Context context, boolean manageTexture) {
         super(context);
+        this.manageTexture = manageTexture;
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
@@ -22,7 +25,28 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     }
 
     public void destroySurface() {
+        Log.i(tag, "destroySurface");
+        surfaceDestroyed();
+    }
 
+    private void createSurfaceTexture() {
+        if (manageTexture) {
+            // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                Log.i(tag, "Create SurfaceTexture");
+                SurfaceTexture surface = new SurfaceTexture(false);
+                mTexture.setSurfaceTexture(surface);
+                this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
+            }
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (this.getMeasuredWidth() == 0) {
+            createSurfaceTexture();
+        }
     }
 
     @Override
@@ -117,7 +141,10 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         Log.i(tag, "onSurfaceTextureDestroyed");
-        return true;
+        // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
+        destroySurface();
+        createSurfaceTexture();
+        return false;
     }
 
     private long _prevTimestamp = 0;
@@ -128,7 +155,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
         _prevTimestamp = timestamp;
     }
-
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
 
