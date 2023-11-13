@@ -202,9 +202,10 @@ public:
    */
   static EGLSurface createWindowedSurface(ANativeWindow *window) {
     const EGLint attribs[] = {EGL_NONE};
-    return eglCreateWindowSurface(OpenGLResourceHolder::getInstance().glDisplay,
+    EGLSurface eglSurface = eglCreateWindowSurface(OpenGLResourceHolder::getInstance().glDisplay,
                                   OpenGLResourceHolder::getInstance().glConfig,
                                   window, attribs);
+    return eglSurface;
   }
 
   /**

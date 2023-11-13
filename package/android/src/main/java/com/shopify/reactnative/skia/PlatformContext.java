@@ -59,7 +59,7 @@ public class PlatformContext {
                 }
                 notifyDrawLoop();
                 if (_drawLoopActive) {
-                    postFrameLoop();
+                    Choreographer.getInstance().postFrameCallback(this);
                 }
             }
         };

@@ -58,6 +58,7 @@ public:
     _context->notifyDrawLoop(true);
     _skManager = nullptr;
     _context = nullptr;
+    SwappyGL_destroy();
   }
 
   void initializeRuntime(jobject activity);

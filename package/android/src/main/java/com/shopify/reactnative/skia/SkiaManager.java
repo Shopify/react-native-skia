@@ -31,9 +31,6 @@ public class SkiaManager {
 
         mHybridData = initHybrid(context.getJavaScriptContextHolder().get(), holder, mPlatformContext);
         Activity activity = context.getCurrentActivity();
-        if (activity == null) {
-            Log.i("Foo", "Activity is null");
-        }
         initializeRuntime(activity);
     }
 

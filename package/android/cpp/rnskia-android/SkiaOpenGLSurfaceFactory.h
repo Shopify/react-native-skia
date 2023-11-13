@@ -52,7 +52,10 @@ public:
     SwappyGL_setWindow(_window);
   }
 
-  ~WindowSurfaceHolder() { ANativeWindow_release(_window); }
+  ~WindowSurfaceHolder() {
+    SwappyGL_setWindow(nullptr);
+    ANativeWindow_release(_window);
+  }
 
   int getWidth() { return _width; }
   int getHeight() { return _height; }
@@ -78,6 +81,7 @@ public:
    * @return true if make current succeeds
    */
   bool makeCurrent() {
+    //SwappyGL_onChoreographer(SWAPPY_SWAP_60FPS);
     return SkiaOpenGLHelper::makeCurrent(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
