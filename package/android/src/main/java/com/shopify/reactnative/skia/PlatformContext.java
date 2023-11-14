@@ -8,6 +8,8 @@ import android.view.Choreographer;
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.modules.core.ChoreographerCompat;
+import com.facebook.react.modules.core.ReactChoreographer;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,19 +51,19 @@ public class PlatformContext {
     }
 
     private void postFrameLoop() {
-        Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
+        ChoreographerCompat.FrameCallback frameCallback = new ChoreographerCompat.FrameCallback() {
             @Override
             public void doFrame(long frameTimeNanos) {
                 if (_isPaused) {
                     return;
                 }
                 if (_drawLoopActive) {
-                    Choreographer.getInstance().postFrameCallback(this);
+                    ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.NATIVE_ANIMATED_MODULE,this);
                 }
                 notifyDrawLoop();
             }
         };
-        Choreographer.getInstance().postFrameCallback(frameCallback);
+        ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.NATIVE_ANIMATED_MODULE, frameCallback);
     }
 
 
