@@ -37,6 +37,7 @@ export const Stickers = () => {
       <GestureHandler
         matrix={locationMatrix}
         dimensions={LocationStickerDimensions}
+        debug
       />
     </View>
   );
