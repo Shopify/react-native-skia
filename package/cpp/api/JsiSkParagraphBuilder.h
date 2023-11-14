@@ -75,21 +75,23 @@ public:
     auto textStyle = JsiSkTextStyle::fromValue(runtime, arguments[0]);
     // Foreground paint
     if (count >= 2) {
-      auto foreground = tryGetArgumentAsHostObject<JsiSkPaint>(runtime, arguments, count, 1);
+      auto foreground =
+          tryGetArgumentAsHostObject<JsiSkPaint>(runtime, arguments, count, 1);
       if (foreground) {
         textStyle.setForegroundPaint(*foreground->getObject().get());
       }
     }
     // Background paint
     if (count >= 3) {
-      auto background = tryGetArgumentAsHostObject<JsiSkPaint>(runtime, arguments, count, 2);
-      if(background) {
+      auto background =
+          tryGetArgumentAsHostObject<JsiSkPaint>(runtime, arguments, count, 2);
+      if (background) {
         textStyle.setBackgroundPaint(*background->getObject().get());
       }
     }
-    
+
     _builder->pushStyle(textStyle);
-    
+
     return thisValue.asObject(runtime);
   }
 

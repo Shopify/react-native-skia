@@ -5,8 +5,8 @@ import type {
   SkRect,
   SkRectWithDirection,
   SkTextStyle,
+  type SkParagraph,
 } from "../types";
-import { type SkParagraph } from "../types";
 
 import { HostObject } from "./Host";
 import type { JsiSkCanvas } from "./JsiSkCanvas";

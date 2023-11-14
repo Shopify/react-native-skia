@@ -105,10 +105,10 @@ export class JsiSkParagraphBuilder
 
     const textStyle: TextStyle = JsiSkTextStyle.toTextStyle(style);
     if (foregroundPaint || backgroundPaint) {
-      let fg: Paint = foregroundPaint
+      const fg: Paint = foregroundPaint
         ? JsiSkPaint.fromValue(foregroundPaint)
         : new this.CanvasKit.Paint();
-      let bg: Paint = backgroundPaint
+      const bg: Paint = backgroundPaint
         ? JsiSkPaint.fromValue(backgroundPaint)
         : new this.CanvasKit.Paint();
       this.ref.pushPaintStyle(new this.CanvasKit.TextStyle(textStyle), fg, bg);

@@ -1,6 +1,6 @@
 import type { SkFontMgr } from "../Font";
 import type { SkJSIInstance } from "../JsiInstance";
-import { SkPaint } from "../Paint";
+import type { SkPaint } from "../Paint";
 
 import type { SkParagraph } from "./Paragraph";
 import type { SkParagraphStyle } from "./ParagraphStyle";
