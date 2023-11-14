@@ -64,8 +64,8 @@ export interface SkParagraphBuilder extends SkJSIInstance<"ParagraphBuilder"> {
    */
   pushStyle: (
     style: SkTextStyle,
-    foregroundPaint?: SkPaint,
-    backgroundPaint?: SkPaint
+    foregroundPaint?: SkPaint | undefined,
+    backgroundPaint?: SkPaint | undefined
   ) => SkParagraphBuilder;
   /**
    * Pops the current text style from the builder

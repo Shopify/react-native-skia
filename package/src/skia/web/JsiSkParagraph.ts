@@ -5,7 +5,7 @@ import type {
   SkRect,
   SkRectWithDirection,
   SkTextStyle,
-  type SkParagraph,
+  SkParagraph,
 } from "../types";
 
 import { HostObject } from "./Host";
