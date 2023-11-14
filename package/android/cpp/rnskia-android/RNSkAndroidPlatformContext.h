@@ -28,8 +28,10 @@ public:
                             jniPlatformContext->getPixelDensity()),
         _jniPlatformContext(jniPlatformContext) {
     // Hook onto the notify draw loop callback in the platform context
-    jniPlatformContext->setOnNotifyDrawLoop(
-        [this]() { notifyDrawLoop(false); });
+    jniPlatformContext->setOnNotifyDrawLoop([this]() {
+      // On Android we delegate all rendering to a separate thread
+      runOnRenderThread([&]() { this->notifyDrawLoop(false); });
+    });
   }
 
   ~RNSkAndroidPlatformContext() { stopDrawLoop(); }
