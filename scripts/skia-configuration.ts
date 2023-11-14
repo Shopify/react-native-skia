@@ -131,7 +131,7 @@ export const configurations: Configuration = {
           ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
         ],
       },
-      x64: {
+      "x64-iphonesimulator": {
         cpu: "x64",
         args: [
           ["ios_min_target", '"13.0"'],
@@ -173,6 +173,15 @@ export const configurations: Configuration = {
           ["extra_cflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
           ["extra_asmflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
           ["extra_ldflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
+        ],
+      },
+      "x64-tvsimulator": {
+        cpu: "x64",
+        args: [
+          ["ios_use_simulator", "true"],
+          ["extra_cflags", '["-target", "x86_64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
+          ["extra_asmflags", '["-target", "x86_64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
+          ["extra_ldflags", '["-target", "x86_64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
         ],
       },
     },
