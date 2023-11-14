@@ -3,6 +3,7 @@ package com.shopify.reactnative.skia;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
@@ -10,7 +11,7 @@ import android.view.TextureView;
 import com.facebook.jni.annotations.DoNotStrip;
 import com.facebook.react.views.view.ReactViewGroup;
 
-public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener {
+public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener,  Choreographer.FrameCallback {
 
     @DoNotStrip
     private Surface mSurface;
@@ -19,6 +20,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     private String tag = "SkiaView";
 
     private boolean manageTexture = false;
+
+    private Choreographer choreographer;
 
     public SkiaBaseView(Context context, boolean manageTexture) {
         super(context);
@@ -36,6 +39,18 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
             mSurface.release();
             mSurface = null;
         }
+        if (choreographer != null) {
+            choreographer.removeFrameCallback(this);
+        }
+    }
+
+    @Override
+    public void doFrame(long frameTimeNanos) {
+        // Call drawFrame() on every frame
+        drawFrame();
+
+        // Register for the next frame
+        choreographer.postFrameCallback(this);
     }
 
     private void createSurfaceTexture() {
@@ -140,6 +155,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         Log.i(tag, "onSurfaceTextureAvailable " + width + "/" + height);
         mSurface = new Surface(surface);
         surfaceAvailable(mSurface, width, height);
+        // Register the frame callback when the surface is available
+        choreographer = Choreographer.getInstance();
+        choreographer.postFrameCallback(this);
     }
 
     @Override
@@ -157,18 +175,20 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         return false;
     }
 
-    //private long _prevTimestamp = 0;
+    private long _prevTimestamp = 0;
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-//        long timestamp = surface.getTimestamp();
-//        long frameDuration = (timestamp - _prevTimestamp)/1000000;
-//        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
-//        _prevTimestamp = timestamp;
+        long timestamp = surface.getTimestamp();
+        long frameDuration = (timestamp - _prevTimestamp)/1000000;
+        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
+        _prevTimestamp = timestamp;
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
 
     protected abstract void surfaceSizeChanged(int width, int height);
+
+    protected abstract void drawFrame();
 
     protected abstract void surfaceDestroyed();
 

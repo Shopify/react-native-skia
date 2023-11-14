@@ -49,19 +49,19 @@ public class PlatformContext {
     }
 
     private void postFrameLoop() {
-        Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
-            @Override
-            public void doFrame(long frameTimeNanos) {
-                if (_isPaused) {
-                    return;
-                }
-                notifyDrawLoop();
-                if (_drawLoopActive) {
-                    postFrameLoop();
-                }
-            }
-        };
-        Choreographer.getInstance().postFrameCallback(frameCallback);
+//        Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
+//            @Override
+//            public void doFrame(long frameTimeNanos) {
+//                if (_isPaused) {
+//                    return;
+//                }
+//                notifyDrawLoop();
+//                if (_drawLoopActive) {
+//                    postFrameLoop();
+//                }
+//            }
+//        };
+//        Choreographer.getInstance().postFrameCallback(frameCallback);
     }
 
 

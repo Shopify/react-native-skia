@@ -37,6 +37,7 @@ public:
     registerHybrid(
         {makeNativeMethod("initHybrid", JniSkiaDomView::initHybrid),
          makeNativeMethod("surfaceAvailable", JniSkiaDomView::surfaceAvailable),
+         makeNativeMethod("drawFrame", JniSkiaDomView::drawFrame),
          makeNativeMethod("surfaceDestroyed", JniSkiaDomView::surfaceDestroyed),
          makeNativeMethod("surfaceSizeChanged",
                           JniSkiaDomView::surfaceSizeChanged),
@@ -51,6 +52,10 @@ public:
 protected:
   void updateTouchPoints(jni::JArrayDouble touches) override {
     JniSkiaBaseView::updateTouchPoints(touches);
+  }
+
+  void drawFrame() override {
+    JniSkiaBaseView::drawFrame();
   }
 
   void surfaceAvailable(jobject surface, int width, int height) override {

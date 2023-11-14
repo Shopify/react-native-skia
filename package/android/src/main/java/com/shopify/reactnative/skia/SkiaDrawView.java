@@ -22,6 +22,8 @@ public class SkiaDrawView extends SkiaBaseView {
         mHybridData.resetNative();
     }
 
+    protected native void drawFrame();
+
     private native HybridData initHybrid(SkiaManager skiaManager);
 
     protected native void surfaceAvailable(Object surface, int width, int height);
