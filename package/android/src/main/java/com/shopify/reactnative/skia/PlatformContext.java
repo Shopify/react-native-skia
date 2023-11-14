@@ -57,7 +57,7 @@ public class PlatformContext {
                 }
                 notifyDrawLoop();
                 if (_drawLoopActive) {
-                    postFrameLoop();
+                    Choreographer.getInstance().postFrameCallback(this);
                 }
             }
         };
@@ -96,12 +96,7 @@ public class PlatformContext {
             return;
         }
         _drawLoopActive = true;
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                postFrameLoop();
-            }
-        });
+        postFrameLoop();
     }
 
     @DoNotStrip
