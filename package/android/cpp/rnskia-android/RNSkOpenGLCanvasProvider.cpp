@@ -36,16 +36,23 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
     if (surface) {
 
       // Ensure we are ready to render
-      if (!_surfaceHolder->makeCurrent()) {
-        return false;
-      }
+      // if (!_surfaceHolder->makeCurrent()) {
+      //  return false;
+      //}
 
       // Draw into canvas using callback
       cb(surface->getCanvas());
 
       // Swap buffers and show on screen
-      return _surfaceHolder->present();
-
+      _surfaceHolder->present();
+      auto ret = ASurfaceTexture_attachToGLContext(_surfaceHolder->_surfaceTexture,
+                                        _surfaceHolder->_texName);
+      RNSkLogger::logToConsole("ASurfaceTexture_attachToGLContext: %d", ret);
+       ret = ASurfaceTexture_updateTexImage(_surfaceHolder->_surfaceTexture);
+      RNSkLogger::logToConsole("ASurfaceTexture_updateTexImage: %d", ret);
+       ret = ASurfaceTexture_detachFromGLContext(_surfaceHolder->_surfaceTexture);
+      RNSkLogger::logToConsole("ASurfaceTexture_detachFromGLContext: %d", ret);
+      return true;
     } else {
       // the render context did not provide a surface
       return false;

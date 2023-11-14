@@ -5,9 +5,9 @@
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
+#include <android/native_window_jni.h>
 #include <android/surface_texture.h>
 #include <android/surface_texture_jni.h>
-#include <android/native_window_jni.h>
 #include <condition_variable>
 #include <memory>
 #include <thread>
@@ -46,16 +46,11 @@ class WindowSurfaceHolder {
 public:
   WindowSurfaceHolder(jobject surface, int width, int height)
       : _width(width), _height(height) {
-          _surfaceTexture = ASurfaceTexture_fromSurfaceTexture(facebook::jni::Environment::current(), surface);
-          _window = ASurfaceTexture_acquireANativeWindow(
-            _surfaceTexture
-          );
-        }
-
-  ~WindowSurfaceHolder() {
-    ASurfaceTexture_release(_surfaceTexture);
-    ANativeWindow_release(_window);
+    _surfaceTexture = ASurfaceTexture_fromSurfaceTexture(
+        facebook::jni::Environment::current(), surface);
   }
+
+  ~WindowSurfaceHolder() { ASurfaceTexture_release(_surfaceTexture); }
 
   int getWidth() { return _width; }
   int getHeight() { return _height; }
@@ -73,6 +68,7 @@ public:
   void resize(int width, int height) {
     _width = width;
     _height = height;
+    _skSurface = nullptr;
   }
 
   /**
@@ -91,17 +87,19 @@ public:
   bool present() {
     // Flush and submit the direct context
     ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
-        ->flushAndSubmit();
-
+        ->flush();
+    return true;
     // Swap buffers
-    return SkiaOpenGLHelper::swapBuffers(
-        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
+    // return SkiaOpenGLHelper::swapBuffers(
+    //     &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 
-private:
-  ANativeWindow *_window = nullptr;
   ASurfaceTexture *_surfaceTexture = nullptr;
+  int _texName = 0;
+
+private:
   EGLSurface _glSurface = EGL_NO_SURFACE;
+  sk_sp<SkSurface> _skSurface = nullptr;
   int _width = 0;
   int _height = 0;
 };
