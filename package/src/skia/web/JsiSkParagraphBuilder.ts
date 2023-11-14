@@ -1,10 +1,16 @@
-import type { CanvasKit, ParagraphBuilder, TextStyle } from "canvaskit-wasm";
+import type {
+  CanvasKit,
+  Paint,
+  ParagraphBuilder,
+  TextStyle,
+} from "canvaskit-wasm";
 
 import type {
   SkParagraphBuilder,
   SkParagraph,
   SkTextStyle,
   SkParagraphStyle,
+  SkPaint,
 } from "../types";
 import { PlaceholderAlignment, TextBaseline } from "../types";
 import { E2E } from "../../__tests__/setup";
@@ -13,6 +19,7 @@ import { HostObject } from "./Host";
 import type { ParagraphNode } from "./JsiSkParagraph";
 import { JsiSkParagraph } from "./JsiSkParagraph";
 import { JsiSkTextStyle } from "./JsiSkTextStyle";
+import { JsiSkPaint } from "./JsiSkPaint";
 
 export class JsiSkParagraphBuilder
   extends HostObject<ParagraphBuilder, "ParagraphBuilder">
@@ -84,13 +91,30 @@ export class JsiSkParagraphBuilder
     this.ref.reset();
   }
 
-  pushStyle(style: SkTextStyle): SkParagraphBuilder {
+  pushStyle(
+    style: SkTextStyle,
+    foregroundPaint?: SkPaint | undefined,
+    backgroundPaint?: SkPaint | undefined
+  ): SkParagraphBuilder {
     if (E2E) {
-      this.elements.push({ type: "push_style", style });
+      this.elements.push({
+        type: "push_style",
+        style,
+      });
     }
 
     const textStyle: TextStyle = JsiSkTextStyle.toTextStyle(style);
-    this.ref.pushStyle(new this.CanvasKit.TextStyle(textStyle));
+    if (foregroundPaint || backgroundPaint) {
+      let fg: Paint = foregroundPaint
+        ? JsiSkPaint.fromValue(foregroundPaint)
+        : new this.CanvasKit.Paint();
+      let bg: Paint = backgroundPaint
+        ? JsiSkPaint.fromValue(backgroundPaint)
+        : new this.CanvasKit.Paint();
+      this.ref.pushPaintStyle(new this.CanvasKit.TextStyle(textStyle), fg, bg);
+    } else {
+      this.ref.pushStyle(new this.CanvasKit.TextStyle(textStyle));
+    }
 
     return this;
   }

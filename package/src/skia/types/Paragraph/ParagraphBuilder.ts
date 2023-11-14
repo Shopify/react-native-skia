@@ -1,5 +1,6 @@
 import type { SkFontMgr } from "../Font";
 import type { SkJSIInstance } from "../JsiInstance";
+import { SkPaint } from "../Paint";
 
 import type { SkParagraph } from "./Paragraph";
 import type { SkParagraphStyle } from "./ParagraphStyle";
@@ -57,9 +58,15 @@ export interface SkParagraphBuilder extends SkJSIInstance<"ParagraphBuilder"> {
   /**
    * Pushes a text-style to the builder
    * @param style Style to push
+   * @param foregroundPaint Foreground paint object
+   * @param backgroundPaint Background paint object
    * @returns The builder
    */
-  pushStyle: (style: SkTextStyle) => SkParagraphBuilder;
+  pushStyle: (
+    style: SkTextStyle,
+    foregroundPaint?: SkPaint,
+    backgroundPaint?: SkPaint
+  ) => SkParagraphBuilder;
   /**
    * Pops the current text style from the builder
    * @returns The builder

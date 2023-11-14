@@ -5,6 +5,7 @@ import {
   FontSlant,
   FontWeight,
   Group,
+  PaintStyle,
   Paragraph,
   Rect,
   SkTextStyle,
@@ -49,6 +50,9 @@ export const Paragraphs = () => {
 
     const fontSize = 20;
     const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
+    const strokePaint = Skia.Paint();
+    strokePaint.setStyle(PaintStyle.Stroke);
+    strokePaint.setStrokeWidth(1);
 
     const textStyle = {
       fontSize,
@@ -109,7 +113,7 @@ export const Paragraphs = () => {
         "\n\nOn Android we use built-in ICU while on web we use CanvasKit's."
       )
       .pop()
-      .pushStyle(crazyStyle)
+      .pushStyle(crazyStyle, strokePaint)
       .addText("\n\nWow - this is cool.")
       .pop()
       .build();
