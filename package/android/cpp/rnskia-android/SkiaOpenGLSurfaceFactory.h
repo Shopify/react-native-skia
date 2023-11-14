@@ -5,9 +5,9 @@
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
+#include <android/native_window_jni.h>
 #include <android/surface_texture.h>
 #include <android/surface_texture_jni.h>
-#include <android/native_window_jni.h>
 #include <condition_variable>
 #include <memory>
 #include <thread>
@@ -44,17 +44,16 @@ public:
  */
 class WindowSurfaceHolder {
 public:
-  WindowSurfaceHolder(jobject surface, int width, int height)
+  WindowSurfaceHolder(jobject surfaceTexture, int width, int height)
       : _width(width), _height(height) {
-          _surfaceTexture = ASurfaceTexture_fromSurfaceTexture(facebook::jni::Environment::current(), surface);
-          _window = ASurfaceTexture_acquireANativeWindow(
-            _surfaceTexture
-          );
-        }
+    JNIEnv* env = facebook::jni::Environment::current();
+    _surfaceTexture = env->NewGlobalRef(surfaceTexture);
+  }
 
   ~WindowSurfaceHolder() {
-    ASurfaceTexture_release(_surfaceTexture);
-    ANativeWindow_release(_window);
+    JNIEnv* env = facebook::jni::Environment::current();
+    env->DeleteGlobalRef(_surfaceTexture);
+   
   }
 
   int getWidth() { return _width; }
@@ -73,6 +72,7 @@ public:
   void resize(int width, int height) {
     _width = width;
     _height = height;
+    _skSurface = nullptr;
   }
 
   /**
@@ -99,11 +99,11 @@ public:
   }
 
 private:
-  ANativeWindow *_window = nullptr;
-  ASurfaceTexture *_surfaceTexture = nullptr;
+  jobject _surfaceTexture = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;
   int _height = 0;
+  sk_sp<SkSurface> _skSurface = nullptr;
 };
 
 class SkiaOpenGLSurfaceFactory {
