@@ -166,8 +166,8 @@ public:
                        .get()
                 : SkPoint::Make(0, 0);
         auto blurSigma =
-            element.hasProperty(runtime, "blurSigma")
-                ? element.getProperty(runtime, "blurSigma").asNumber()
+            element.hasProperty(runtime, "blurRadius")
+                ? element.getProperty(runtime, "blurRadius").asNumber()
                 : 0;
         retVal.addShadow(para::TextShadow(color, offset, blurSigma));
       }
