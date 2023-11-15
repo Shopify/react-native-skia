@@ -11,10 +11,14 @@ import android.view.TextureView;
 import com.facebook.jni.annotations.DoNotStrip;
 import com.facebook.react.views.view.ReactViewGroup;
 
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.egl.EGLSurface;
+
 public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener,  Choreographer.FrameCallback {
 
     @DoNotStrip
-    private Surface mSurface;
+    private EGLSurface mSurface;
     private TextureView mTexture;
 
     private String tag = "SkiaView";
@@ -33,22 +37,24 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     }
 
     public void destroySurface() {
-        if (mSurface != null) {
-            Log.i(tag, "destroySurface");
-            surfaceDestroyed();
-            mSurface.release();
-            mSurface = null;
-        }
         if (choreographer != null) {
             choreographer.removeFrameCallback(this);
+        }
+        if (mSurface != null) {
+            Log.i(tag, "destroySurface");
+            //surfaceDestroyed();
+            SkiaRenderer.getInstance().destroy(mSurface);
+            mSurface = null;
         }
     }
 
     @Override
     public void doFrame(long frameTimeNanos) {
         // Call drawFrame() on every frame
+        SkiaRenderer.getInstance().makeCurrent(mSurface);
         drawFrame();
-
+        SkiaRenderer.getInstance().present(mSurface);
+       // mTexture.getSurfaceTexture().releaseTexImage();
         // Register for the next frame
         choreographer.postFrameCallback(this);
     }
@@ -153,9 +159,10 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureAvailable " + width + "/" + height);
-        mSurface = new Surface(surface);
-        surfaceAvailable(mSurface, width, height);
+        //        mSurface = new Surface(surface);
         // Register the frame callback when the surface is available
+        mSurface = SkiaRenderer.getInstance().makeOnscreenSurface(surface);
+        surfaceAvailable(mSurface, width, height);
         choreographer = Choreographer.getInstance();
         choreographer.postFrameCallback(this);
     }
@@ -172,13 +179,13 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         destroySurface();
         //createSurfaceTexture();
-        return false;
+        return true;
     }
 
     private long _prevTimestamp = 0;
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        long timestamp = surface.getTimestamp();
+        long timestamp = System.nanoTime();
         long frameDuration = (timestamp - _prevTimestamp)/1000000;
         Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
         _prevTimestamp = timestamp;

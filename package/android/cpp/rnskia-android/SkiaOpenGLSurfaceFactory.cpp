@@ -56,7 +56,6 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
 }
 
 sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
-  if (_skSurface == nullptr) {
 
     // Setup OpenGL and Skia
     if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
@@ -64,23 +63,6 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
       RNSkLogger::logToConsole(
           "Could not create Skia Surface from native window / surface. "
           "Failed creating Skia Direct Context");
-      return nullptr;
-    }
-
-    // Now we can create a surface
-    _glSurface = SkiaOpenGLHelper::createWindowedSurface(_window);
-    if (_glSurface == EGL_NO_SURFACE) {
-      RNSkLogger::logToConsole(
-          "Could not create EGL Surface from native window / surface.");
-      return nullptr;
-    }
-
-    // Now make this one current
-    if (!SkiaOpenGLHelper::makeCurrent(
-            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface)) {
-      RNSkLogger::logToConsole(
-          "Could not create EGL Surface from native window / surface. Could "
-          "not set new surface as current surface.");
       return nullptr;
     }
 
@@ -115,23 +97,12 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-    struct ReleaseContext {
-      EGLSurface glSurface;
-    };
 
-    auto releaseCtx = new ReleaseContext({_glSurface});
 
     // Create surface object
-    _skSurface = SkSurfaces::WrapBackendRenderTarget(
+    auto _skSurface = SkSurfaces::WrapBackendRenderTarget(
         ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
-        renderTarget, kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
-        [](void *addr) {
-          auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
-          SkiaOpenGLHelper::destroySurface(releaseCtx->glSurface);
-          delete releaseCtx;
-        },
-        reinterpret_cast<void *>(releaseCtx));
-  }
+        renderTarget, kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props);
 
   return _skSurface;
 }
