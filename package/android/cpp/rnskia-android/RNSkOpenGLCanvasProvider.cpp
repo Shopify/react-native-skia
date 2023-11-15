@@ -39,7 +39,6 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       if (!_surfaceHolder->makeCurrent()) {
         return false;
       }
-
       // Draw into canvas using callback
       cb(surface->getCanvas());
 

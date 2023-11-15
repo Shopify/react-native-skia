@@ -56,7 +56,6 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
 }
 
 sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
-  if (_skSurface == nullptr) {
     // Setup OpenGL and Skia
     if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
             &ThreadContextHolder::ThreadSkiaOpenGLContext)) {
@@ -66,12 +65,8 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
       return nullptr;
     }
 
-    ASurfaceTexture* surfaceTexture = ASurfaceTexture_fromSurfaceTexture(
-        facebook::jni::Environment::current(), _surfaceTexture);
-    ANativeWindow* window = ASurfaceTexture_acquireANativeWindow(surfaceTexture);
-
     // Now we can create a surface
-    _glSurface = SkiaOpenGLHelper::createWindowedSurface(window);
+    _glSurface = SkiaOpenGLHelper::createWindowedSurface(_window);
     if (_glSurface == EGL_NO_SURFACE) {
       RNSkLogger::logToConsole(
           "Could not create EGL Surface from native window / surface.");
@@ -120,26 +115,22 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
 
     struct ReleaseContext {
       EGLSurface glSurface;
-      ANativeWindow *window;
-      ASurfaceTexture *surfaceTexture;
     };
 
-    auto releaseCtx = new ReleaseContext({_glSurface, window, surfaceTexture});
+    auto releaseCtx = new ReleaseContext({_glSurface});
 
     // Create surface object
-    _skSurface = SkSurfaces::WrapBackendRenderTarget(
+    auto skSurface = SkSurfaces::WrapBackendRenderTarget(
         ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
         renderTarget, kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
         [](void *addr) {
           auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
           SkiaOpenGLHelper::destroySurface(releaseCtx->glSurface);
-          ASurfaceTexture_release(releaseCtx->surfaceTexture);
-          ANativeWindow_release(releaseCtx->window);
           delete releaseCtx;
         },
         reinterpret_cast<void *>(releaseCtx));
-  }
-  return _skSurface;
+
+  return skSurface;
 }
 
 } // namespace RNSkia

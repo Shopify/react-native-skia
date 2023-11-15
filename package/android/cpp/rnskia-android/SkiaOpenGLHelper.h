@@ -175,23 +175,36 @@ public:
    * @return true if eglMakeCurrent was successfull
    */
   static bool makeCurrent(SkiaOpenGLContext *context, EGLSurface glSurface) {
-    // We don't need to call make current if we already are current:
-    if (eglGetCurrentSurface(EGL_DRAW) != glSurface ||
-        eglGetCurrentSurface(EGL_READ) != glSurface ||
-        eglGetCurrentContext() != context->glContext) {
+      // We don't need to call make current if we already are current:
+      if (eglGetCurrentSurface(EGL_DRAW) != glSurface ||
+          eglGetCurrentSurface(EGL_READ) != glSurface ||
+          eglGetCurrentContext() != context->glContext) {
 
-      // Make current!
-      if (eglMakeCurrent(OpenGLResourceHolder::getInstance().glDisplay,
-                         glSurface, glSurface,
-                         context->glContext) != EGL_TRUE) {
-        RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
-        return false;
+        // Make current!
+        if (eglMakeCurrent(OpenGLResourceHolder::getInstance().glDisplay,
+                          glSurface, glSurface,
+                          context->glContext) != EGL_TRUE) {
+          RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+          return false;
+        }
+
+        // Check the render buffer of the current context
+        EGLint renderBuffer;
+        if (eglQueryContext(OpenGLResourceHolder::getInstance().glDisplay, 
+                            context->glContext, EGL_RENDER_BUFFER, &renderBuffer) != EGL_TRUE) {
+          RNSkLogger::logToConsole("eglQueryContext failed: %d\n", eglGetError());
+          return false;
+        }
+
+        // You should replace EGL_BACK_BUFFER with the expected render buffer
+        if (renderBuffer != EGL_BACK_BUFFER) {
+          RNSkLogger::logToConsole("Unexpected render buffer: %d\n", renderBuffer);
+          return false;
+        }
+        return true;
       }
-      eglSwapInterval(OpenGLResourceHolder::getInstance().glDisplay, 0);
       return true;
     }
-    return true;
-  }
 
   /**
    * Creates a new windowed surface

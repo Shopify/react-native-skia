@@ -44,16 +44,19 @@ public:
  */
 class WindowSurfaceHolder {
 public:
-  WindowSurfaceHolder(jobject surfaceTexture, int width, int height)
+  WindowSurfaceHolder(jobject jSurfaceTexture, int width, int height)
       : _width(width), _height(height) {
     JNIEnv* env = facebook::jni::Environment::current();
-    _surfaceTexture = env->NewGlobalRef(surfaceTexture);
+    //_jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
+    _surfaceTexture = ASurfaceTexture_fromSurfaceTexture(env, jSurfaceTexture);
+    _window = ASurfaceTexture_acquireANativeWindow(_surfaceTexture);
   }
 
   ~WindowSurfaceHolder() {
-    JNIEnv* env = facebook::jni::Environment::current();
-    env->DeleteGlobalRef(_surfaceTexture);
-   
+   // JNIEnv* env = facebook::jni::Environment::current();
+   // env->DeleteGlobalRef(_jSurfaceTexture);
+    ASurfaceTexture_release(_surfaceTexture);
+    ANativeWindow_release(_window);
   }
 
   int getWidth() { return _width; }
@@ -72,7 +75,6 @@ public:
   void resize(int width, int height) {
     _width = width;
     _height = height;
-    _skSurface = nullptr;
   }
 
   /**
@@ -80,8 +82,15 @@ public:
    * @return true if make current succeeds
    */
   bool makeCurrent() {
-    return SkiaOpenGLHelper::makeCurrent(
+    auto result = SkiaOpenGLHelper::makeCurrent(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
+    if (result) {
+      result = ASurfaceTexture_updateTexImage(_surfaceTexture) == 0;
+    }
+    if (!result) {
+      RNSkLogger::logToConsole("Drop frame");
+    }
+    return result;
   }
 
   /**
@@ -99,11 +108,12 @@ public:
   }
 
 private:
-  jobject _surfaceTexture = nullptr;
+  //jobject _jSurfaceTexture = nullptr;
+  ASurfaceTexture* _surfaceTexture;
+  ANativeWindow* _window;
   EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;
   int _height = 0;
-  sk_sp<SkSurface> _skSurface = nullptr;
 };
 
 class SkiaOpenGLSurfaceFactory {
