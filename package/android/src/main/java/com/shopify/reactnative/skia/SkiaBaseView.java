@@ -2,24 +2,22 @@ package com.shopify.reactnative.skia;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.opengl.EGLSurface;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.TextureView;
 
 import com.facebook.jni.annotations.DoNotStrip;
 import com.facebook.react.views.view.ReactViewGroup;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLSurface;
 
 public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener,  Choreographer.FrameCallback {
 
     @DoNotStrip
     private EGLSurface mSurface;
     private TextureView mTexture;
+
+    private SkiaRenderer mRenderer;
 
     private String tag = "SkiaView";
 
@@ -29,7 +27,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     public SkiaBaseView(Context context, boolean manageTexture) {
         super(context);
-        //this.manageTexture = manageTexture;
+        this.manageTexture = manageTexture;
+        mRenderer = SkiaRenderer.getInstance();
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
@@ -43,20 +42,30 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         if (mSurface != null) {
             Log.i(tag, "destroySurface");
             //surfaceDestroyed();
-            SkiaRenderer.getInstance().destroy(mSurface);
+            mRenderer.destroy(mSurface);
+            mRenderer = null;
             mSurface = null;
         }
     }
 
     @Override
     public void doFrame(long frameTimeNanos) {
-        // Call drawFrame() on every frame
-        SkiaRenderer.getInstance().makeCurrent(mSurface);
-        drawFrame();
-        SkiaRenderer.getInstance().present(mSurface);
-       // mTexture.getSurfaceTexture().releaseTexImage();
-        // Register for the next frame
-        choreographer.postFrameCallback(this);
+        // TODO: E/Surface: freeAllBuffers: 1 buffers were freed while being dequeued!
+        // TODO: This guard should be needed
+        if (mSurface != null) {
+            choreographer.postFrameCallback(this);
+            try {
+                long start = System.nanoTime();
+                mRenderer.makeCurrent(mSurface);
+                mTexture.getSurfaceTexture().updateTexImage();
+                drawFrame();
+                mRenderer.present(mSurface);
+                long end = System.nanoTime();
+                Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
+            } catch (Exception e) {
+                Log.i(tag, "drop frame");
+            }
+        }
     }
 
     private void createSurfaceTexture() {
@@ -162,6 +171,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         //        mSurface = new Surface(surface);
         // Register the frame callback when the surface is available
         mSurface = SkiaRenderer.getInstance().makeOnscreenSurface(surface);
+        //surface.attachToGLContext(142);
         surfaceAvailable(mSurface, width, height);
         choreographer = Choreographer.getInstance();
         choreographer.postFrameCallback(this);

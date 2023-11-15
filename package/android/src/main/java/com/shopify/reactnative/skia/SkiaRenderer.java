@@ -1,14 +1,14 @@
 package com.shopify.reactnative.skia;
 
 import android.graphics.SurfaceTexture;
+import android.opengl.EGL14;
+import android.opengl.EGLConfig;
+import android.opengl.EGLContext;
+import android.opengl.EGLDisplay;
+import android.opengl.EGLExt;
+import android.opengl.EGLSurface;
 import android.opengl.GLUtils;
 import android.util.Log;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
 
 public class SkiaRenderer {
     private static final String LOG_TAG = "SkiaRenderer";
@@ -18,25 +18,22 @@ public class SkiaRenderer {
     private static final int STENCIL_BUFFER_SIZE = 8;
 
     EGLDisplay mEglDisplay;
-    EGL10 mEgl;
     EGLConfig mEglConfig;
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
     private static SkiaRenderer sInstance;
 
     private SkiaRenderer() {
-        mEgl = (EGL10) EGLContext.getEGL();
-
-        mEglDisplay = mEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
-        if (mEglDisplay == EGL10.EGL_NO_DISPLAY) {
+        mEglDisplay = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
+        if (mEglDisplay == EGL14.EGL_NO_DISPLAY) {
             throw new RuntimeException("eglGetDisplay failed "
-                    + GLUtils.getEGLErrorString(mEgl.eglGetError()));
+                    + GLUtils.getEGLErrorString(EGL14.eglGetError()));
         }
 
         int[] version = new int[2];
-        if (!mEgl.eglInitialize(mEglDisplay, version)) {
+        if (!EGL14.eglInitialize(mEglDisplay, null, 0, null, 0)) {
             throw new RuntimeException("eglInitialize failed " +
-                    GLUtils.getEGLErrorString(mEgl.eglGetError()));
+                    GLUtils.getEGLErrorString(EGL14.eglGetError()));
         }
 
         mEglConfig = chooseEglConfig();
@@ -44,24 +41,24 @@ public class SkiaRenderer {
             throw new RuntimeException("eglConfig not initialized");
         }
 
-        mEglContext = createContext(mEgl, mEglDisplay, mEglConfig);
+        mEglContext = createContext( mEglDisplay, mEglConfig);
 
         int[] attribs = new int[] {
-                EGL10.EGL_WIDTH, 1,
-                EGL10.EGL_HEIGHT, 1,
-                EGL10.EGL_NONE
+                EGL14.EGL_WIDTH, 1,
+                EGL14.EGL_HEIGHT, 1,
+                EGL14.EGL_NONE
         };
 
-        mPBufferSurface = mEgl.eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs);
-        if (mPBufferSurface == null || mPBufferSurface == EGL10.EGL_NO_SURFACE) {
-            int error = mEgl.eglGetError();
+        mPBufferSurface = EGL14.eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs, 0);
+        if (mPBufferSurface == null || mPBufferSurface == EGL14.EGL_NO_SURFACE) {
+            int error = EGL14.eglGetError();
             throw new RuntimeException("createPbufferSurface failed "
                     + GLUtils.getEGLErrorString(error));
         }
 
-        if (!mEgl.eglMakeCurrent(mEglDisplay, mPBufferSurface, mPBufferSurface, mEglContext)) {
+        if (!EGL14.eglMakeCurrent(mEglDisplay, mPBufferSurface, mPBufferSurface, mEglContext)) {
             throw new RuntimeException("eglMakeCurrent failed "
-                    + GLUtils.getEGLErrorString(mEgl.eglGetError()));
+                    + GLUtils.getEGLErrorString(EGL14.eglGetError()));
         }
     }
 
@@ -69,9 +66,9 @@ public class SkiaRenderer {
         int[] configsCount = new int[1];
         EGLConfig[] configs = new EGLConfig[1];
         int[] configSpec = getConfig();
-        if (!mEgl.eglChooseConfig(mEglDisplay, configSpec, configs, 1, configsCount)) {
+        if (!EGL14.eglChooseConfig(mEglDisplay, configSpec, 0, configs, 0, configs.length, configsCount, 0)) {
             throw new IllegalArgumentException("eglChooseConfig failed " +
-                    GLUtils.getEGLErrorString(mEgl.eglGetError()));
+                    GLUtils.getEGLErrorString(EGL14.eglGetError()));
         } else if (configsCount[0] > 0) {
             return configs[0];
         }
@@ -80,39 +77,39 @@ public class SkiaRenderer {
 
     private int[] getConfig() {
         return new int[] {
-            EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL10.EGL_RED_SIZE, 8,
-            EGL10.EGL_GREEN_SIZE, 8,
-            EGL10.EGL_BLUE_SIZE, 8,
-            EGL10.EGL_ALPHA_SIZE, 8,
-            EGL10.EGL_DEPTH_SIZE, 0,
-            EGL10.EGL_STENCIL_SIZE, STENCIL_BUFFER_SIZE,
-            EGL10.EGL_NONE
+                EGL14.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                EGL14.EGL_RED_SIZE, 8,
+                EGL14.EGL_GREEN_SIZE, 8,
+                EGL14.EGL_BLUE_SIZE, 8,
+                EGL14.EGL_ALPHA_SIZE, 8,
+                EGL14.EGL_DEPTH_SIZE, 0,
+                EGL14.EGL_STENCIL_SIZE, STENCIL_BUFFER_SIZE,
+                EGL14.EGL_NONE
         };
     }
 
-    EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
-        int[] attrib_list = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE };
-        return egl.eglCreateContext(eglDisplay, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
+    EGLContext createContext(EGLDisplay eglDisplay, EGLConfig eglConfig) {
+        int[] attrib_list = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL14.EGL_NONE };
+        return EGL14.eglCreateContext(eglDisplay, eglConfig, EGL14.EGL_NO_CONTEXT, attrib_list, 0);
     }
 
     EGLSurface makeOnscreenSurface(SurfaceTexture surfaceTexture) {
-        EGLSurface surface = mEgl.eglCreateWindowSurface(mEglDisplay,
-                mEglConfig, surfaceTexture, null);
+        EGLSurface surface = EGL14.eglCreateWindowSurface(mEglDisplay,
+                mEglConfig, surfaceTexture, new int[]{ EGL14.EGL_NONE },  0);
         return surface;
 
     }
 
     void makeCurrent(EGLSurface surface) {
-        mEgl.eglMakeCurrent(mEglDisplay, surface, surface,
+        EGL14.eglMakeCurrent(mEglDisplay, surface, surface,
                 mEglContext);
     }
 
     void present(EGLSurface surface) {
-        if (!mEgl.eglSwapBuffers(mEglDisplay, surface)) {
-            int error = mEgl.eglGetError();
-            if (error == EGL10.EGL_BAD_SURFACE
-                    || error == EGL10.EGL_BAD_NATIVE_WINDOW) {
+        if (!EGL14.eglSwapBuffers(mEglDisplay, surface)) {
+            int error = EGL14.eglGetError();
+            if (error == EGL14.EGL_BAD_SURFACE
+                    || error == EGL14.EGL_BAD_NATIVE_WINDOW) {
 
                 // This really shouldn't happen, but if it does we can recover
                 // easily by just not trying to use the surface anymore
@@ -130,7 +127,7 @@ public class SkiaRenderer {
 
     void destroy(EGLSurface surface) {
         makeCurrent(surface);
-        mEgl.eglDestroySurface(mEglDisplay, surface);
+        EGL14.eglDestroySurface(mEglDisplay, surface);
     }
 
     public static SkiaRenderer getInstance() {
@@ -145,18 +142,18 @@ public class SkiaRenderer {
         try {
             if (mEglDisplay != null) {
                 if (mEglContext != null) {
-                    mEgl.eglDestroyContext(mEglDisplay, mEglContext);
+                    EGL14.eglDestroyContext(mEglDisplay, mEglContext);
                     mEglContext = null;
                 }
                 if (mPBufferSurface != null) {
-                    mEgl.eglDestroySurface(mEglDisplay, mPBufferSurface);
+                    EGL14.eglDestroySurface(mEglDisplay, mPBufferSurface);
                     mPBufferSurface = null;
                 }
 
-                mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,  EGL10.EGL_NO_SURFACE,
-                        EGL10.EGL_NO_CONTEXT);
+                EGL14.eglMakeCurrent(mEglDisplay, EGL14.EGL_NO_SURFACE,  EGL14.EGL_NO_SURFACE,
+                        EGL14.EGL_NO_CONTEXT);
 
-                mEgl.eglTerminate(mEglDisplay);
+                EGL14.eglTerminate(mEglDisplay);
                 mEglDisplay = null;
             }
         } finally {
