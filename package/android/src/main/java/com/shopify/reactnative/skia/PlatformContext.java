@@ -55,10 +55,10 @@ public class PlatformContext {
                 if (_isPaused) {
                     return;
                 }
-                notifyDrawLoop();
                 if (_drawLoopActive) {
                     Choreographer.getInstance().postFrameCallback(this);
                 }
+                notifyDrawLoop();
             }
         };
         Choreographer.getInstance().postFrameCallback(frameCallback);

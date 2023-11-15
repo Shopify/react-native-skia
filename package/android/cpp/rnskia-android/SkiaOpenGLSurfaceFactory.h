@@ -85,10 +85,11 @@ public:
     auto result = SkiaOpenGLHelper::makeCurrent(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
     if (result) {
-      result = ASurfaceTexture_updateTexImage(_surfaceTexture) == 0;
-    }
-    if (!result) {
-      RNSkLogger::logToConsole("Drop frame");
+      int err = ASurfaceTexture_updateTexImage(_surfaceTexture);
+      result = err == 0;
+      if (!result) {
+        RNSkLogger::logToConsole("Drop frame: %d", err);
+      }
     }
     return result;
   }
@@ -103,8 +104,10 @@ public:
         ->flushAndSubmit();
 
     // Swap buffers
-    return SkiaOpenGLHelper::swapBuffers(
+    auto result = SkiaOpenGLHelper::swapBuffers(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
+
+    return result;
   }
 
 private:
