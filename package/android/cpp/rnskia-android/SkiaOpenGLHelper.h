@@ -187,7 +187,7 @@ public:
         RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
         return false;
       }
-      eglSwapInterval(OpenGLResourceHolder::getInstance().glDisplay, 0);
+      //eglSwapInterval(OpenGLResourceHolder::getInstance().glDisplay, 0);
       return true;
     }
     return true;

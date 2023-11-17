@@ -7,6 +7,7 @@ import type { HeaderBackButtonProps } from "@react-navigation/elements";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { FiberProvider } from "its-fine";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { enableScreens } from "react-native-screens";
 
 import {
   ReanimatedExample,
@@ -32,6 +33,8 @@ import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
+
+enableScreens(false);
 
 const linking: LinkingOptions<StackParamList> = {
   config: {

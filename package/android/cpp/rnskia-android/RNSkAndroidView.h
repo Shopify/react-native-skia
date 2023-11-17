@@ -47,7 +47,7 @@ public:
 
     // Try to render directly when the surface has been set so that
     // we don't have to wait until the draw loop returns.
-    RNSkView::renderImmediate();
+    //RNSkView::renderImmediate();
   }
 
   void drawFrame() override {

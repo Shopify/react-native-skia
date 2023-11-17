@@ -81,6 +81,6 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(int width, int height) {
   _surfaceHolder->resize(width, height);
 
   // Redraw after size change
-  _requestRedraw();
+ // _requestRedraw();
 }
 } // namespace RNSkia

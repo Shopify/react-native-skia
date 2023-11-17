@@ -23,13 +23,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     private String tag = "SkiaView";
 
-    private boolean manageTexture = false;
-
     private Choreographer choreographer;
 
     public SkiaBaseView(Context context, boolean manageTexture) {
         super(context);
-        this.manageTexture = manageTexture;
+        choreographer = Choreographer.getInstance();
         mRenderer = SkiaRenderer.getInstance();
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
@@ -37,52 +35,35 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         addView(mTexture);
     }
 
-    public void destroySurface() {
-        if (choreographer != null) {
-            choreographer.removeFrameCallback(this);
-        }
-        if (mSurface != null) {
-            Log.i(tag, "destroySurface");
-            //surfaceDestroyed();
-            mRenderer.destroy(mSurface);
-            mRenderer = null;
-            mSurface = null;
-        }
-    }
-
-    @Override
-    public void doFrame(long frameTimeNanos) {
-        choreographer.postFrameCallback(this);
-            if (mSurface != null) {
-                long start = System.nanoTime();
-                mRenderer.makeCurrent(mSurface);
-                try {
-                    mTexture.getSurfaceTexture().updateTexImage();
-                } catch(Exception e) {}
-                drawFrame();
-                mRenderer.present(mSurface);
-                long end = System.nanoTime();
-                Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
-            }
-    }
-
-    private void createSurfaceTexture() {
-        if (manageTexture) {
-            // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                Log.i(tag, "Create SurfaceTexture");
-                SurfaceTexture surface = new SurfaceTexture(false);
-                mTexture.setSurfaceTexture(surface);
-                this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
-            }
-        }
-    }
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (this.getMeasuredWidth() == 0) {
-            createSurfaceTexture();
+        SurfaceTexture surfaceTexture = new SurfaceTexture(false);
+        Log.i(tag, "surfaceTexture()");
+        mTexture.setSurfaceTexture(surfaceTexture);
+        onSurfaceTextureAvailable(surfaceTexture, this.getMeasuredWidth(), this.getMeasuredHeight());
+    }
+
+    public void destroySurface() {
+        choreographer.removeFrameCallback(this);
+        mSurface = null;
+    }
+
+
+    @Override
+    public void doFrame(long frameTimeNanos) {
+        if (mSurface != null) {
+            choreographer.postFrameCallback(this);
+            long start = System.nanoTime();
+            mRenderer.makeCurrent(mSurface);
+            try {
+                    mTexture.getSurfaceTexture().updateTexImage();
+
+            } catch (Exception e) {}
+            drawFrame();
+            mRenderer.present(mSurface);
+            long end = System.nanoTime();
+            Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
         }
     }
 
@@ -164,14 +145,10 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     }
 
     @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
         Log.i(tag, "onSurfaceTextureAvailable " + width + "/" + height);
-        //        mSurface = new Surface(surface);
-        // Register the frame callback when the surface is available
-        mSurface = SkiaRenderer.getInstance().makeOnscreenSurface(surface);
-        //surface.attachToGLContext(142);
+        mSurface = mRenderer.makeOnscreenSurface(surfaceTexture);
         surfaceAvailable(mSurface, width, height);
-        choreographer = Choreographer.getInstance();
         choreographer.postFrameCallback(this);
     }
 
