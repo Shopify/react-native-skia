@@ -9,6 +9,8 @@ import android.view.MotionEvent;
 import android.view.TextureView;
 
 import com.facebook.jni.annotations.DoNotStrip;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.views.view.ReactViewGroup;
 
 public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener,  Choreographer.FrameCallback {
@@ -50,22 +52,19 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     @Override
     public void doFrame(long frameTimeNanos) {
-        // TODO: E/Surface: freeAllBuffers: 1 buffers were freed while being dequeued!
-        // TODO: This guard should be needed
-        if (mSurface != null) {
-            choreographer.postFrameCallback(this);
-            try {
+        choreographer.postFrameCallback(this);
+        ReactContext ctx = (ReactContext) getContext();
+            if (mSurface != null) {
                 long start = System.nanoTime();
                 mRenderer.makeCurrent(mSurface);
-                mTexture.getSurfaceTexture().updateTexImage();
+                try {
+                    mTexture.getSurfaceTexture().updateTexImage();
+                } catch(Exception e) {}
                 drawFrame();
                 mRenderer.present(mSurface);
                 long end = System.nanoTime();
                 Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
-            } catch (Exception e) {
-                Log.i(tag, "drop frame");
             }
-        }
     }
 
     private void createSurfaceTexture() {
