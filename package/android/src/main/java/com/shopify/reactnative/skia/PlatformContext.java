@@ -52,11 +52,11 @@ public class PlatformContext {
         Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
             @Override
             public void doFrame(long frameTimeNanos) {
-                if (_isPaused) {
-                    return;
-                }
                 if (_drawLoopActive) {
                     Choreographer.getInstance().postFrameCallback(this);
+                }
+                if (_isPaused) {
+                    return;
                 }
                 notifyDrawLoop();
             }

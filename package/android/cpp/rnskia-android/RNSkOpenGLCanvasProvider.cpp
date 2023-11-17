@@ -39,6 +39,11 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       if (!_surfaceHolder->makeCurrent()) {
         return false;
       }
+      int err = ASurfaceTexture_updateTexImage(_surfaceHolder->_surfaceTexture);
+      bool result = err == 0;
+      if (!result) {
+        RNSkLogger::logToConsole("Should drop frame: %d", err);
+      }
       // Draw into canvas using callback
       cb(surface->getCanvas());
 

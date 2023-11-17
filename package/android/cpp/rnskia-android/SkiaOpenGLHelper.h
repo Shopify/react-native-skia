@@ -187,21 +187,6 @@ public:
           RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
           return false;
         }
-
-        // Check the render buffer of the current context
-        EGLint renderBuffer;
-        if (eglQueryContext(OpenGLResourceHolder::getInstance().glDisplay, 
-                            context->glContext, EGL_RENDER_BUFFER, &renderBuffer) != EGL_TRUE) {
-          RNSkLogger::logToConsole("eglQueryContext failed: %d\n", eglGetError());
-          return false;
-        }
-
-        // You should replace EGL_BACK_BUFFER with the expected render buffer
-        if (renderBuffer != EGL_BACK_BUFFER) {
-          RNSkLogger::logToConsole("Unexpected render buffer: %d\n", renderBuffer);
-          return false;
-        }
-        return true;
       }
       return true;
     }

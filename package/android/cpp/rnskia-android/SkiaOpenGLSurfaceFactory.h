@@ -84,13 +84,6 @@ public:
   bool makeCurrent() {
     auto result = SkiaOpenGLHelper::makeCurrent(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
-    if (result) {
-      int err = ASurfaceTexture_updateTexImage(_surfaceTexture);
-      result = err == 0;
-      if (!result) {
-        RNSkLogger::logToConsole("Drop frame: %d", err);
-      }
-    }
     return result;
   }
 
@@ -110,10 +103,10 @@ public:
     return result;
   }
 
-private:
-  //jobject _jSurfaceTexture = nullptr;
   ASurfaceTexture* _surfaceTexture;
   ANativeWindow* _window;
+private:
+  //jobject _jSurfaceTexture = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;
   int _height = 0;
