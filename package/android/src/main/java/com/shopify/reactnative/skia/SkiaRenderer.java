@@ -105,7 +105,8 @@ public class SkiaRenderer {
                 mEglContext);
     }
 
-    void present(EGLSurface surface) {
+    void present(EGLSurface surface, long frameTime) {
+        EGLExt.eglPresentationTimeANDROID(mEglDisplay, surface, frameTime);
         if (!EGL14.eglSwapBuffers(mEglDisplay, surface)) {
             int error = EGL14.eglGetError();
             if (error == EGL14.EGL_BAD_SURFACE

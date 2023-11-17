@@ -13,6 +13,8 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.views.view.ReactViewGroup;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener,  Choreographer.FrameCallback {
 
     @DoNotStrip
@@ -50,20 +52,36 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         }
     }
 
+
+
     @Override
     public void doFrame(long frameTimeNanos) {
+       // Log.i(tag, "doFrame: " + frameTimeNanos);
         choreographer.postFrameCallback(this);
-            if (mSurface != null) {
-                long start = System.nanoTime();
-                mRenderer.makeCurrent(mSurface);
-                try {
-                    mTexture.getSurfaceTexture().updateTexImage();
-                } catch(Exception e) {}
-                drawFrame();
-                mRenderer.present(mSurface);
-                long end = System.nanoTime();
-                Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
-            }
+                if (mSurface != null) {
+                    long start = System.nanoTime();
+                    mRenderer.makeCurrent(mSurface);
+                    try {
+                      //  Log.i(tag, "Queue Size before updateTexImage: " + frameTimestamps.size());
+                        if (toConsume <= 1) {
+                            mTexture.getSurfaceTexture().updateTexImage();
+                            Log.i(tag, "frame updated");
+                        } else {
+                            Log.i(tag, "frame dropped: " + toConsume + " frame left");
+                            return;
+                        }
+                    } catch (Exception e) {
+                    }
+                    //toConsume = 0;
+                    drawFrame();
+                    mRenderer.present(mSurface, frameTimeNanos);
+                    long end = System.nanoTime();
+                    toConsume++;
+                    Log.i(tag, "Produced: " + toConsume);
+
+                    //  Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
+                }
+
     }
 
     private void createSurfaceTexture() {
@@ -191,12 +209,19 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     }
 
     private long _prevTimestamp = 0;
+    private int toConsume = 0;
+
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         long timestamp = System.nanoTime();
         long frameDuration = (timestamp - _prevTimestamp)/1000000;
-        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
+      //  Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
         _prevTimestamp = timestamp;
+        toConsume--;
+        Log.i(tag, "Consumed: " + toConsume);
+
+//        Log.i(tag, "onSurfaceTextureUpdated: " + surface.getTimestamp());
+//        Log.i(tag, "====");
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
