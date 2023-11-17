@@ -53,7 +53,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     @Override
     public void doFrame(long frameTimeNanos) {
         choreographer.postFrameCallback(this);
-        ReactContext ctx = (ReactContext) getContext();
             if (mSurface != null) {
                 long start = System.nanoTime();
                 mRenderer.makeCurrent(mSurface);
