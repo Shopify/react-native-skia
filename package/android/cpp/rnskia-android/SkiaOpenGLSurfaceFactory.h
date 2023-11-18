@@ -46,15 +46,15 @@ class WindowSurfaceHolder {
 public:
   WindowSurfaceHolder(jobject jSurfaceTexture, int width, int height)
       : _width(width), _height(height) {
-    JNIEnv* env = facebook::jni::Environment::current();
+    JNIEnv *env = facebook::jni::Environment::current();
     //_jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
     _surfaceTexture = ASurfaceTexture_fromSurfaceTexture(env, jSurfaceTexture);
     _window = ASurfaceTexture_acquireANativeWindow(_surfaceTexture);
   }
 
   ~WindowSurfaceHolder() {
-   // JNIEnv* env = facebook::jni::Environment::current();
-   // env->DeleteGlobalRef(_jSurfaceTexture);
+    // JNIEnv* env = facebook::jni::Environment::current();
+    // env->DeleteGlobalRef(_jSurfaceTexture);
     ASurfaceTexture_release(_surfaceTexture);
     ANativeWindow_release(_window);
   }
@@ -103,10 +103,11 @@ public:
     return result;
   }
 
-  ASurfaceTexture* _surfaceTexture;
-  ANativeWindow* _window;
+  ASurfaceTexture *_surfaceTexture;
+  ANativeWindow *_window;
+
 private:
-  //jobject _jSurfaceTexture = nullptr;
+  // jobject _jSurfaceTexture = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;
   int _height = 0;

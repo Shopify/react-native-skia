@@ -175,21 +175,21 @@ public:
    * @return true if eglMakeCurrent was successfull
    */
   static bool makeCurrent(SkiaOpenGLContext *context, EGLSurface glSurface) {
-      // We don't need to call make current if we already are current:
-      if (eglGetCurrentSurface(EGL_DRAW) != glSurface ||
-          eglGetCurrentSurface(EGL_READ) != glSurface ||
-          eglGetCurrentContext() != context->glContext) {
+    // We don't need to call make current if we already are current:
+    if (eglGetCurrentSurface(EGL_DRAW) != glSurface ||
+        eglGetCurrentSurface(EGL_READ) != glSurface ||
+        eglGetCurrentContext() != context->glContext) {
 
-        // Make current!
-        if (eglMakeCurrent(OpenGLResourceHolder::getInstance().glDisplay,
-                          glSurface, glSurface,
-                          context->glContext) != EGL_TRUE) {
-          RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
-          return false;
-        }
+      // Make current!
+      if (eglMakeCurrent(OpenGLResourceHolder::getInstance().glDisplay,
+                         glSurface, glSurface,
+                         context->glContext) != EGL_TRUE) {
+        RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+        return false;
       }
-      return true;
     }
+    return true;
+  }
 
   /**
    * Creates a new windowed surface
