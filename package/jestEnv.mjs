@@ -1,7 +1,7 @@
 /* eslint-disable import/no-default-export */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TestEnvironment } from "jest-environment-node";
-import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/commonjs/web/LoadSkiaWeb";
+import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web/LoadSkiaWeb";
 
 const CanvasKit = await LoadSkiaWeb();
 
