@@ -56,6 +56,7 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [Gradient along Path (youtu.be)](https://www.youtube.com/watch?v=7SCzL-XnfUU)
 * [Headspace Player - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=pErnuAx5GjE)
 * [Make an Animated Wave Slider Effect with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=I6elFawLceY)
+* [Liquid Wave Progress Indicator. Skia, Reanimated, D3. (youtu.be)](https://youtu.be/CGcLDoZWciA)
 
 ## Vertices
 * [Song of Bloom - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=PfCQEA72ljU)
