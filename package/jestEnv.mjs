@@ -1,9 +1,9 @@
 /* eslint-disable import/no-default-export */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TestEnvironment } from "jest-environment-node";
-import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/commonjs/web/LoadSkiaWeb";
+import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
 
-const CanvasKit = await LoadSkiaWeb();
+const CanvasKit = await CanvasKitInit({});
 
 export default class SkiaEnvironment extends TestEnvironment {
   constructor(config, context) {

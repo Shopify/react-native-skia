@@ -84,9 +84,17 @@ There is also an [React Native VSCode extension](https://marketplace.visualstudi
 
 ## Testing with Jest
 
-React Native Skia test mocks use a web implementation that depends on loading CanvasKit. Before using the mocks, some setup actions are required.
+React Native Skia test mocks use a web implementation that depends on loading CanvasKit.
 
-We recommend using [ESM](https://jestjs.io/docs/ecmascript-modules). To enable ESM support, you need to update your `jest` command to `node --experimental-vm-modules node_modules/.bin/jest`.
+The very first step is to make sure that your Skia files are not being transformed by jest, for instance, we can add it the `transformIgnorePatterns` directive:
+```js
+"transformIgnorePatterns": [
+  "node_modules/(?!(react-native|react-native.*|@react-native.*|@?react-navigation.*|@shopify/react-native-skia)/)"
+]
+```
+
+Next, we recommend using [ESM](https://jestjs.io/docs/ecmascript-modules). To enable ESM support, you need to update your `jest` command to `node --experimental-vm-modules node_modules/.bin/jest`.
+But we also support [CommonJS](#commonjs-setup).
 
 ### ESM Setup
 
