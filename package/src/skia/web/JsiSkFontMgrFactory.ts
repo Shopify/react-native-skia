@@ -15,8 +15,6 @@ export class JsiSkFontMgrFactory extends Host implements FontMgrFactory {
     if (!fontMgr) {
       throw new Error("Couldn't create system font manager");
     }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     return new JsiSkFontMgr(this.CanvasKit, fontMgr);
   }
 }
