@@ -96,7 +96,12 @@ public class PlatformContext {
             return;
         }
         _drawLoopActive = true;
-        postFrameLoop();
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                postFrameLoop();
+            }
+        });
     }
 
     @DoNotStrip
