@@ -56,6 +56,7 @@ public:
   void surfaceSizeChanged(int width, int height) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
         ->surfaceSizeChanged(width, height);
+    RNSkView::renderImmediate();
   }
 
   float getPixelDensity() override {
