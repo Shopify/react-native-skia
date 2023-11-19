@@ -7,8 +7,8 @@ import type {
   SkMatrix,
   SkShader,
   TileMode,
+  ImageFormat,
 } from "../types";
-import { ImageFormat } from "../types";
 
 import { ckEnum, HostObject } from "./Host";
 import { JsiSkMatrix } from "./JsiSkMatrix";
@@ -91,9 +91,6 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   }
 
   encodeToBytes(fmt?: ImageFormat, quality?: number) {
-    if (fmt === ImageFormat.WEBP) {
-      throw new Error("WEBP format is not supported on web");
-    }
     let result: Uint8Array | null;
     if (fmt && quality) {
       result = this.ref.encodeToBytes(ckEnum(fmt), quality);
