@@ -99,6 +99,7 @@ public:
   void resize(int width, int height) {
     _width = width;
     _height = height;
+    _skSurface = nullptr;
   }
 
   /**
@@ -106,9 +107,8 @@ public:
    * @return true if make current succeeds
    */
   bool makeCurrent() {
-    auto result = SkiaOpenGLHelper::makeCurrent(
+    return SkiaOpenGLHelper::makeCurrent(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
-    return result;
   }
 
   /**
@@ -121,14 +121,13 @@ public:
         ->flushAndSubmit();
 
     // Swap buffers
-    auto result = SkiaOpenGLHelper::swapBuffers(
+    return SkiaOpenGLHelper::swapBuffers(
         &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
-
-    return result;
   }
 
 private:
   ANativeWindow *_window;
+  sk_sp<SkSurface> _skSurface = nullptr;
   jobject _jSurfaceTexture = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;
