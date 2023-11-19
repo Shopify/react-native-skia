@@ -24,7 +24,7 @@ export const ExportableCanvas = ({ children, style }: CanvasProps) => {
     }
   }, [ref]);
   return (
-    <Pressable style={style} onPress={handleShare}>
+    <Pressable onPress={handleShare}>
       <Canvas style={style} ref={ref}>
         {children}
       </Canvas>

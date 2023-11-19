@@ -5,8 +5,12 @@ on: [push]
 jobs:
   build:
     runs-on: macos-12
+    strategy:
+      matrix:
+        working-directory: [example, fabricexample]
+    timeout-minutes: 55
     concurrency:
-      group: android-example-${{ github.ref }}
+      group: android-example-${{ matrix.working-directory }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
@@ -57,7 +61,7 @@ jobs:
         run: yarn install
 
       - name: Install example app node dependencies
-        working-directory: example
+        working-directory: ${{ matrix.working-directory }}
         run: yarn
 
       - name: Cache hermes build
@@ -65,19 +69,19 @@ jobs:
         env:
           cache-name: cache-rn-hermes-engine
         with:
-          path: example/node_modules/react-native
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+          path: ${{ matrix.working-directory }}/node_modules/react-native
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.working-directory }}-${{ hashFiles('**/react-native/package.json') }}
 
       - name: Cache android libraries
         uses: actions/cache@v3
         env:
           cache-name: cache-rn
         with:
-          path: example/android/app/build
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+          path: ${{ matrix.working-directory }}/android/app/build
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.working-directory }}-${{ hashFiles('**/react-native/package.json') }}
 
       - name: Build Android app
-        working-directory: example/android
+        working-directory: ${{ matrix.working-directory }}/android
         run: ./gradlew assembleDebug
 
       - name: Cache apk
@@ -85,13 +89,16 @@ jobs:
         env:
           cache-name: cache-apk
         with:
-          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
   test:
     needs: build
     runs-on: macos-12
+    strategy:
+      matrix:
+        working-directory: [example, fabricexample]
     concurrency:
-      group: android-example-${{ github.ref }}
+      group: android-example-${{ matrix.working-directory }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
@@ -111,7 +118,7 @@ jobs:
         id: cache-apk
         uses: actions/cache/restore@v3
         with:
-          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
       
       - name: SKDs - download required images
@@ -128,24 +135,28 @@ jobs:
         timeout-minutes: 10
 
       - name: Reverse TCP
-        working-directory: example
+        working-directory: ${{ matrix.working-directory }}
         run: yarn android-reverse-tcp
 
       - name: Start Package Manager
-        working-directory: example
+        working-directory: ${{ matrix.working-directory }}
         run: E2E=true yarn start &
 
       - name: Check APK existence
         uses: andstor/file-existence-action@v2
         with:
-          files: example/android/app/build/outputs/apk/debug/app-debug.apk
+          files: ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
           fail: true
 
       - name: Install APK
-        run: adb install -r example/android/app/build/outputs/apk/debug/app-debug.apk
+        run: adb install -r ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
 
+      # - name: Set up environment
+      #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
       - name: Launch APK
-        run: adb shell monkey -p com.rnskia 1    
+        env:
+          PACKAGE_NAME: ${{ matrix.working-directory == 'fabricexample' && 'com.fabricexample' || 'com.rnskia' }}  
+        run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
 
       - name: Run e2e Tests
         working-directory: package

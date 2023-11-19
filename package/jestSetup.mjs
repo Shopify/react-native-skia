@@ -1,8 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { jest } from "@jest/globals";
 import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
-
-import Mock from "./src/mock";
+import { Mock } from "@shopify/react-native-skia/lib/module/mock";
 
 global.CanvasKit = await CanvasKitInit({});
 
@@ -19,5 +18,5 @@ jest.mock("@shopify/react-native-skia", () => {
       View: Noop,
     };
   });
-  return Mock.Mock(global.CanvasKit);
+  return Mock(global.CanvasKit);
 });
