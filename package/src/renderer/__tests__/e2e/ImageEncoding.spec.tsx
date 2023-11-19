@@ -1,3 +1,4 @@
+import { itRunsE2eOnly } from "../../../__tests__/setup";
 import { surface } from "../setup";
 
 const MAGIC_BYTES = {
@@ -18,34 +19,37 @@ const IMAGE_INFO_BASE = {
 };
 
 describe("Image Encoding", () => {
-  it("SkImage.encodeToBase64: check WEBP format by magic bytes sequence UklGR...", async () => {
-    const result = await surface.eval(
-      (Skia, ctx) => {
-        const width = 1;
-        const height = 1;
-        const bytesPerPixel = 4;
-        const bytes = new Uint8Array(width * height * bytesPerPixel);
-        bytes.fill(255);
-        const data = Skia.Data.fromBytes(bytes);
-        const imageInfo = {
-          ...ctx.imageInfoBase,
-          width,
-          height,
-        };
+  itRunsE2eOnly(
+    "SkImage.encodeToBase64: check WEBP format by magic bytes sequence UklGR...",
+    async () => {
+      const result = await surface.eval(
+        (Skia, ctx) => {
+          const width = 1;
+          const height = 1;
+          const bytesPerPixel = 4;
+          const bytes = new Uint8Array(width * height * bytesPerPixel);
+          bytes.fill(255);
+          const data = Skia.Data.fromBytes(bytes);
+          const imageInfo = {
+            ...ctx.imageInfoBase,
+            width,
+            height,
+          };
 
-        return Skia.Image.MakeImage(imageInfo, data, width * bytesPerPixel)!
-          .encodeToBase64(ctx.format)
-          .slice(0, ctx.cutIndex);
-      },
-      {
-        cutIndex: MAGIC_BYTES.WEBP.length,
-        imageInfoBase: IMAGE_INFO_BASE,
-        format: IMAGE_FORMAT.WEBP,
-      }
-    );
+          return Skia.Image.MakeImage(imageInfo, data, width * bytesPerPixel)!
+            .encodeToBase64(ctx.format)
+            .slice(0, ctx.cutIndex);
+        },
+        {
+          cutIndex: MAGIC_BYTES.WEBP.length,
+          imageInfoBase: IMAGE_INFO_BASE,
+          format: IMAGE_FORMAT.WEBP,
+        }
+      );
 
-    expect(result).toEqual(MAGIC_BYTES.WEBP);
-  });
+      expect(result).toEqual(MAGIC_BYTES.WEBP);
+    }
+  );
 
   it("SkImage.encodeToBase64: check PNG format by magic bytes sequence iVBORw0KGgo...", async () => {
     const result = await surface.eval(
@@ -130,9 +134,9 @@ describe("Image Encoding", () => {
           data,
           width * bytesPerPixel
         )!;
-        const minQuality = image.encodeToBase64(ctx.format, 1e-8).length; // failed on CanvasKit with 0 quality.
+        const minQuality = image.encodeToBase64(ctx.format, 1e-8).length;
         const midQuality = image.encodeToBase64(ctx.format, 50).length;
-        const defaultQuality = image.encodeToBase64(ctx.format).length; // default quality: 100.
+        const defaultQuality = image.encodeToBase64(ctx.format).length;
         const maxQuality = image.encodeToBase64(ctx.format, 100).length;
 
         return {
@@ -153,198 +157,215 @@ describe("Image Encoding", () => {
   });
 
   // this test can be failed on CanvasKit
-  it("SkImage.encodeToBase64: PNG checking of the quality argument work", async () => {
-    const result = await surface.eval(
-      (Skia, ctx) => {
-        const width = 1024;
-        const height = 1024;
-        const bytesPerPixel = 4;
-        const bytes = new Uint8Array(width * height * bytesPerPixel);
-        let i = 0;
-        for (let x = 0; x < width; x++) {
-          for (let y = 0; y < height; y++) {
-            bytes[i++] = (x * y) % 255;
+  itRunsE2eOnly(
+    "SkImage.encodeToBase64: PNG checking of the quality argument work",
+    async () => {
+      const result = await surface.eval(
+        (Skia, ctx) => {
+          const width = 1024;
+          const height = 1024;
+          const bytesPerPixel = 4;
+          const bytes = new Uint8Array(width * height * bytesPerPixel);
+          let i = 0;
+          for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+              bytes[i++] = (x * y) % 255;
+            }
           }
-        }
-        const data = Skia.Data.fromBytes(bytes);
-        const imageInfo = {
-          ...ctx.imageInfoBase,
-          width,
-          height,
-        };
-        const image = Skia.Image.MakeImage(
-          imageInfo,
-          data,
-          width * bytesPerPixel
-        )!;
-        const minQuality = image.encodeToBase64(ctx.format, 0).length;
-        const midQuality = image.encodeToBase64(ctx.format, 50).length;
-        const defaultQuality = image.encodeToBase64(ctx.format).length; // default quality: 100.
-        const maxQuality = image.encodeToBase64(ctx.format, 100).length;
+          const data = Skia.Data.fromBytes(bytes);
+          const imageInfo = {
+            ...ctx.imageInfoBase,
+            width,
+            height,
+          };
+          const image = Skia.Image.MakeImage(
+            imageInfo,
+            data,
+            width * bytesPerPixel
+          )!;
+          const minQuality = image.encodeToBase64(ctx.format, 0).length;
+          const midQuality = image.encodeToBase64(ctx.format, 50).length;
+          const defaultQuality = image.encodeToBase64(ctx.format).length; // default quality: 100.
+          const maxQuality = image.encodeToBase64(ctx.format, 100).length;
 
-        return {
-          minQuality,
-          midQuality,
-          defaultQuality,
-          maxQuality,
-        };
-      },
-      { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.PNG }
-    );
+          return {
+            minQuality,
+            midQuality,
+            defaultQuality,
+            maxQuality,
+          };
+        },
+        { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.PNG }
+      );
 
-    expect(result.minQuality).toBeLessThan(result.midQuality);
-    expect(result.minQuality).toBeLessThan(result.defaultQuality);
-    expect(result.minQuality).toBeLessThan(result.maxQuality);
-    expect(result.midQuality).toBeLessThan(result.maxQuality);
-    expect(result.defaultQuality).toEqual(result.maxQuality);
-  });
+      expect(result.minQuality).toBeLessThan(result.midQuality);
+      expect(result.minQuality).toBeLessThan(result.defaultQuality);
+      expect(result.minQuality).toBeLessThan(result.maxQuality);
+      expect(result.midQuality).toBeLessThan(result.maxQuality);
+      expect(result.defaultQuality).toEqual(result.maxQuality);
+    }
+  );
 
-  // this test can be failed on CanvasKit
-  it("SkImage.encodeToBase64: WEBP checking of the quality argument work with lossy", async () => {
-    const result = await surface.eval(
-      (Skia, ctx) => {
-        const width = 1024;
-        const height = 1024;
-        const bytesPerPixel = 4;
-        const bytes = new Uint8Array(width * height * bytesPerPixel);
-        let i = 0;
-        for (let x = 0; x < width; x++) {
-          for (let y = 0; y < height; y++) {
-            bytes[i++] = (x * y) % 255;
+  itRunsE2eOnly(
+    "SkImage.encodeToBase64: WEBP checking of the quality argument work with lossy",
+    async () => {
+      const result = await surface.eval(
+        (Skia, ctx) => {
+          const width = 1024;
+          const height = 1024;
+          const bytesPerPixel = 4;
+          const bytes = new Uint8Array(width * height * bytesPerPixel);
+          let i = 0;
+          for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+              bytes[i++] = (x * y) % 255;
+            }
           }
-        }
-        const data = Skia.Data.fromBytes(bytes);
-        const imageInfo = {
-          ...ctx.imageInfoBase,
-          width,
-          height,
-        };
-        const image = Skia.Image.MakeImage(
-          imageInfo,
-          data,
-          width * bytesPerPixel
-        )!;
-        const minQuality = image.encodeToBase64(ctx.format, 0, true).length;
-        const midQuality = image.encodeToBase64(ctx.format, 50, true).length;
-        const defaultQuality = image.encodeToBase64(
-          ctx.format,
-          undefined, // default quality: 100.
-          true
-        ).length;
-        const maxQuality = image.encodeToBase64(ctx.format, 100, true).length;
+          const data = Skia.Data.fromBytes(bytes);
+          const imageInfo = {
+            ...ctx.imageInfoBase,
+            width,
+            height,
+          };
+          const image = Skia.Image.MakeImage(
+            imageInfo,
+            data,
+            width * bytesPerPixel
+          )!;
+          const minQuality = image.encodeToBase64(ctx.format, 0, true).length;
+          const midQuality = image.encodeToBase64(ctx.format, 50, true).length;
+          const defaultQuality = image.encodeToBase64(
+            ctx.format,
+            undefined, // default quality: 100.
+            true
+          ).length;
+          const maxQuality = image.encodeToBase64(ctx.format, 100, true).length;
 
-        return {
-          minQuality,
-          midQuality,
-          defaultQuality,
-          maxQuality,
-        };
-      },
-      { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
-    );
+          return {
+            minQuality,
+            midQuality,
+            defaultQuality,
+            maxQuality,
+          };
+        },
+        { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
+      );
 
-    expect(result.minQuality).toBeLessThan(result.midQuality);
-    expect(result.minQuality).toBeLessThan(result.defaultQuality);
-    expect(result.minQuality).toBeLessThan(result.maxQuality);
-    expect(result.midQuality).toBeLessThan(result.maxQuality);
-    expect(result.defaultQuality).toEqual(result.maxQuality);
-  });
+      expect(result.minQuality).toBeLessThan(result.midQuality);
+      expect(result.minQuality).toBeLessThan(result.defaultQuality);
+      expect(result.minQuality).toBeLessThan(result.maxQuality);
+      expect(result.midQuality).toBeLessThan(result.maxQuality);
+      expect(result.defaultQuality).toEqual(result.maxQuality);
+    }
+  );
 
-  // this test can be failed on CanvasKit
-  it("SkImage.encodeToBase64: WEBP checking of the quality argument work with lossless", async () => {
-    const result = await surface.eval(
-      (Skia, ctx) => {
-        const width = 1024;
-        const height = 1024;
-        const bytesPerPixel = 4;
-        const bytes = new Uint8Array(width * height * bytesPerPixel);
-        let i = 0;
-        for (let x = 0; x < width; x++) {
-          for (let y = 0; y < height; y++) {
-            bytes[i++] = (x * y) % 255;
+  itRunsE2eOnly(
+    "SkImage.encodeToBase64: WEBP checking of the quality argument work with lossless",
+    async () => {
+      const result = await surface.eval(
+        (Skia, ctx) => {
+          const width = 1024;
+          const height = 1024;
+          const bytesPerPixel = 4;
+          const bytes = new Uint8Array(width * height * bytesPerPixel);
+          let i = 0;
+          for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+              bytes[i++] = (x * y) % 255;
+            }
           }
-        }
-        const data = Skia.Data.fromBytes(bytes);
-        const imageInfo = {
-          ...ctx.imageInfoBase,
-          width,
-          height,
-        };
-        const image = Skia.Image.MakeImage(
-          imageInfo,
-          data,
-          width * bytesPerPixel
-        )!;
-        const minQuality = image.encodeToBase64(ctx.format, 0, false).length;
-        const midQuality = image.encodeToBase64(ctx.format, 50, false).length;
-        const defaultQuality = image.encodeToBase64(
-          ctx.format,
-          undefined,
-          false
-        ).length; // default quality: 100.
-        const maxQuality = image.encodeToBase64(ctx.format, 100, false).length;
+          const data = Skia.Data.fromBytes(bytes);
+          const imageInfo = {
+            ...ctx.imageInfoBase,
+            width,
+            height,
+          };
+          const image = Skia.Image.MakeImage(
+            imageInfo,
+            data,
+            width * bytesPerPixel
+          )!;
+          const minQuality = image.encodeToBase64(ctx.format, 0, false).length;
+          const midQuality = image.encodeToBase64(ctx.format, 50, false).length;
+          const defaultQuality = image.encodeToBase64(
+            ctx.format,
+            undefined,
+            false
+          ).length; // default quality: 100.
+          const maxQuality = image.encodeToBase64(
+            ctx.format,
+            100,
+            false
+          ).length;
 
-        return {
-          minQuality,
-          midQuality,
-          defaultQuality,
-          maxQuality,
-        };
-      },
-      { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
-    );
+          return {
+            minQuality,
+            midQuality,
+            defaultQuality,
+            maxQuality,
+          };
+        },
+        { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
+      );
 
-    expect(result.minQuality).not.toEqual(result.midQuality);
-    expect(result.minQuality).not.toEqual(result.defaultQuality);
-    expect(result.minQuality).not.toEqual(result.maxQuality);
-    expect(result.midQuality).not.toEqual(result.maxQuality);
-    expect(result.defaultQuality).toEqual(result.maxQuality);
-  });
+      expect(result.minQuality).not.toEqual(result.midQuality);
+      expect(result.minQuality).not.toEqual(result.defaultQuality);
+      expect(result.minQuality).not.toEqual(result.maxQuality);
+      expect(result.midQuality).not.toEqual(result.maxQuality);
+      expect(result.defaultQuality).toEqual(result.maxQuality);
+    }
+  );
 
-  // this test can be failed on CanvasKit
-  it("SkImage.encodeToBase64: WEBP checking of the lossy argument work", async () => {
-    const result = await surface.eval(
-      (Skia, ctx) => {
-        const width = 1024;
-        const height = 1024;
-        const bytesPerPixel = 4;
-        const bytes = new Uint8Array(width * height * bytesPerPixel);
-        let i = 0;
-        for (let x = 0; x < width; x++) {
-          for (let y = 0; y < height; y++) {
-            bytes[i++] = (x * y) % 255;
+  itRunsE2eOnly(
+    "SkImage.encodeToBase64: WEBP checking of the lossy argument work",
+    async () => {
+      const result = await surface.eval(
+        (Skia, ctx) => {
+          const width = 1024;
+          const height = 1024;
+          const bytesPerPixel = 4;
+          const bytes = new Uint8Array(width * height * bytesPerPixel);
+          let i = 0;
+          for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+              bytes[i++] = (x * y) % 255;
+            }
           }
-        }
-        const data = Skia.Data.fromBytes(bytes);
-        const imageInfo = {
-          ...ctx.imageInfoBase,
-          width,
-          height,
-        };
-        const image = Skia.Image.MakeImage(
-          imageInfo,
-          data,
-          width * bytesPerPixel
-        )!;
-        const defaultLossy = image.encodeToBase64(ctx.format).length; // default quality: 100.
-        const lossy = image.encodeToBase64(ctx.format, undefined, true).length; // default quality: 100.
-        const lossless = image.encodeToBase64(
-          ctx.format,
-          undefined, // default quality: 100.
-          false
-        ).length;
+          const data = Skia.Data.fromBytes(bytes);
+          const imageInfo = {
+            ...ctx.imageInfoBase,
+            width,
+            height,
+          };
+          const image = Skia.Image.MakeImage(
+            imageInfo,
+            data,
+            width * bytesPerPixel
+          )!;
+          const defaultLossy = image.encodeToBase64(ctx.format).length; // default quality: 100.
+          const lossy = image.encodeToBase64(
+            ctx.format,
+            undefined,
+            true
+          ).length; // default quality: 100.
+          const lossless = image.encodeToBase64(
+            ctx.format,
+            undefined, // default quality: 100.
+            false
+          ).length;
 
-        return {
-          defaultLossy,
-          lossy,
-          lossless,
-        };
-      },
-      { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
-    );
+          return {
+            defaultLossy,
+            lossy,
+            lossless,
+          };
+        },
+        { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
+      );
 
-    expect(result.lossy).toEqual(result.defaultLossy);
-    expect(result.lossy).not.toEqual(result.lossless);
-    expect(result.defaultLossy).not.toEqual(result.lossless);
-  });
+      expect(result.lossy).toEqual(result.defaultLossy);
+      expect(result.lossy).not.toEqual(result.lossless);
+      expect(result.defaultLossy).not.toEqual(result.lossless);
+    }
+  );
 });
