@@ -20,6 +20,7 @@
 #include "include/codec/SkEncodedImageFormat.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
 
 #pragma clang diagnostic pop
 
@@ -78,20 +79,34 @@ public:
         count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
                    : SkEncodedImageFormat::kPNG;
 
-    auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
+    auto quality = (count >= 2 && arguments[1].isNumber())
+                       ? arguments[1].asNumber()
+                       : 100.0;
     auto image = getObject();
     if (image->isTextureBacked()) {
       image = image->makeNonTextureImage();
     }
     sk_sp<SkData> data;
+
     if (format == SkEncodedImageFormat::kJPEG) {
       SkJpegEncoder::Options options;
       options.fQuality = quality;
       data = SkJpegEncoder::Encode(nullptr, image.get(), options);
+    } else if (format == SkEncodedImageFormat::kWEBP) {
+      SkWebpEncoder::Options options;
+      if (quality >= 100) {
+        options.fCompression = SkWebpEncoder::Compression::kLossless;
+        options.fQuality = 75; // This is effort to compress
+      } else {
+        options.fCompression = SkWebpEncoder::Compression::kLossy;
+        options.fQuality = quality;
+      }
+      data = SkWebpEncoder::Encode(nullptr, image.get(), options);
     } else {
       SkPngEncoder::Options options;
       data = SkPngEncoder::Encode(nullptr, image.get(), options);
     }
+
     return data;
   }
 
