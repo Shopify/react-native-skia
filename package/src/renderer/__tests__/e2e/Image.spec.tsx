@@ -28,7 +28,7 @@ describe("Image loading from bundles", () => {
 
   it("should read pixels from an image", async () => {
     const pixels = await surface.eval(
-      (Skia, { colorType, alphaType, data }) => {
+      (Skia, { data }) => {
         const image = Skia.Image.MakeImageFromEncoded(
           Skia.Data.fromBytes(new Uint8Array(data))
         )!;
@@ -36,14 +36,12 @@ describe("Image loading from bundles", () => {
           image.readPixels(0, 0, {
             width: 2,
             height: 2,
-            colorType,
-            alphaType,
+            colorType: image.getImageInfo().colorType,
+            alphaType: image.getImageInfo().alphaType,
           })!
         );
       },
       {
-        colorType: ColorType.RGBA_8888,
-        alphaType: AlphaType.Unpremul,
         data: Array.from(
           loadImage("skia/__tests__/assets/oslo.jpg").encodeToBytes()
         ),
@@ -90,26 +88,26 @@ describe("Image loading from bundles", () => {
   //     255,
   //   ]);
   // });
-  // it("should read pixels from a canvas", async () => {
-  //   const pixels = await surface.eval(
-  //     (Skia, { colorType, alphaType }) => {
-  //       const offscreen = Skia.Surface.MakeOffscreen(10, 10)!;
-  //       const canvas = offscreen.getCanvas();
-  //       canvas.drawColor(Skia.Color("red"));
-  //       return Array.from(
-  //         canvas.readPixels(0, 0, {
-  //           width: 1,
-  //           height: 1,
-  //           colorType,
-  //           alphaType,
-  //         })!
-  //       );
-  //     },
-  //     { colorType: ColorType.RGBA_8888, alphaType: AlphaType.Unpremul }
-  //   );
-  //   expect(pixels).toBeDefined();
-  //   expect(Array.from(pixels!)).toEqual([255, 0, 0, 255]);
-  // });
+  it("should read pixels from a canvas", async () => {
+    const pixels = await surface.eval(
+      (Skia, { colorType, alphaType }) => {
+        const offscreen = Skia.Surface.MakeOffscreen(10, 10)!;
+        const canvas = offscreen.getCanvas();
+        canvas.drawColor(Skia.Color("red"));
+        return Array.from(
+          canvas.readPixels(0, 0, {
+            width: 1,
+            height: 1,
+            colorType,
+            alphaType,
+          })!
+        );
+      },
+      { colorType: ColorType.RGBA_8888, alphaType: AlphaType.Unpremul }
+    );
+    expect(pixels).toBeDefined();
+    expect(Array.from(pixels!)).toEqual([255, 0, 0, 255]);
+  });
   // it("should read pixels from a canvas using a preallocated buffer", async () => {
   //   const pixels = await surface.eval(
   //     (Skia, { colorType, alphaType }) => {

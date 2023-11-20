@@ -4,18 +4,18 @@ import type {
   ImageInfo as CKImageInfo,
 } from "canvaskit-wasm";
 
-import type {
-  ImageFormat,
-  ImageInfo,
-  FilterMode,
-  MipmapMode,
-  SkImage,
-  SkMatrix,
-  SkShader,
-  TileMode,
+import {
+  type ImageFormat,
+  type ImageInfo,
+  type FilterMode,
+  type MipmapMode,
+  type SkImage,
+  type SkMatrix,
+  type SkShader,
+  type TileMode,
 } from "../types";
 
-import { ckEnum, HostObject } from "./Host";
+import { ckEnum, getCkEnum, HostObject } from "./Host";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkShader } from "./JsiSkShader";
 
@@ -127,12 +127,24 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
 
   readPixels(srcX?: number, srcY?: number, imageInfo?: ImageInfo) {
     const info = this.getImageInfo();
+    console.log({
+      alphaType: ckEnum(info.alphaType),
+      colorType: ckEnum(info.colorType),
+      realAlphaType: this.CanvasKit.AlphaType.Opaque.value,
+      realColorType: this.CanvasKit.ColorType.RGBA_8888.value,
+    });
     const pxInfo: CKImageInfo = {
       colorSpace: this.CanvasKit.ColorSpace.SRGB,
       width: imageInfo?.width ?? info.width,
       height: imageInfo?.height ?? info.height,
-      alphaType: this.CanvasKit.AlphaType.Unpremul,
-      colorType: this.CanvasKit.ColorType.RGBA_8888,
+      alphaType: getCkEnum(
+        this.CanvasKit.AlphaType,
+        (imageInfo ?? info).alphaType
+      ),
+      colorType: getCkEnum(
+        this.CanvasKit.ColorType,
+        (imageInfo ?? info).colorType
+      ),
     };
     return this.ref.readPixels(srcX ?? 0, srcY ?? 0, pxInfo);
   }

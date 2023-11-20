@@ -1,4 +1,4 @@
-import type { CanvasKit, EmbindEnumEntity } from "canvaskit-wasm";
+import type { CanvasKit, EmbindEnumEntity, EmbindEnum } from "canvaskit-wasm";
 
 import type { SkJSIInstance } from "../types";
 
@@ -41,6 +41,8 @@ export abstract class HostObject<T, N extends string> extends BaseHostObject<
   }
 }
 
+export const getCkEnum = (e: EmbindEnum, v: number): EmbindEnumEntity =>
+  Object.values(e).find(({ value }) => value === v);
 export const ckEnum = (value: number): EmbindEnumEntity => ({ value });
 export const optEnum = (
   value: number | undefined

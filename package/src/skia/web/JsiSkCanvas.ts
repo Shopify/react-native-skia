@@ -25,7 +25,7 @@ import type {
   SkVertices,
 } from "../types";
 
-import { ckEnum, HostObject } from "./Host";
+import { ckEnum, getCkEnum, HostObject } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
@@ -381,8 +381,8 @@ export class JsiSkCanvas
       width: imageInfo.width,
       height: imageInfo.height,
       colorSpace: this.CanvasKit.ColorSpace.SRGB,
-      alphaType: this.CanvasKit.AlphaType.Unpremul,
-      colorType: this.CanvasKit.ColorType.RGBA_8888,
+      alphaType: getCkEnum(this.CanvasKit.AlphaType, imageInfo.alphaType),
+      colorType: getCkEnum(this.CanvasKit.ColorType, imageInfo.colorType),
     };
     return this.ref.readPixels(srcX, srcY, pxInfo);
   }
