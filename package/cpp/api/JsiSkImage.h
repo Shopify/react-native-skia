@@ -28,11 +28,6 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
-private:
-  double lerp(double a, double b, double t) {
-    return (a * (1.0 - t)) + (b * t);
-  }
-
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -90,22 +85,17 @@ public:
       options.fQuality = quality;
       data = SkJpegEncoder::Encode(nullptr, image.get(), options);
     } else if (format == SkEncodedImageFormat::kWEBP) {
-      const bool lossy =
-          (count >= 3 && arguments[2].isBool()) ? arguments[2].asBool() : true;
-
       SkWebpEncoder::Options options;
-      options.fQuality = quality;
-      options.fCompression = lossy ? SkWebpEncoder::Compression::kLossy
-                                   : SkWebpEncoder::Compression::kLossless;
+      if (quality >= 100) {
+        options.fCompression = SkWebpEncoder::Compression::kLossless;
+        options.fQuality = 75; // This is effort to compress
+      } else {
+        options.fCompression = SkWebpEncoder::Compression::kLossy;
+        options.fQuality = quality;
+      }
       data = SkWebpEncoder::Encode(nullptr, image.get(), options);
     } else {
-      const double t = quality / 100.0;
-      const int level = static_cast<int>(std::round(lerp(9.0, 0.0, t)));
-
-      SkPngEncoder::Options options;
-      // must be in [0, 9] where 9 corresponds to maximal compression.
-      options.fZLibLevel = level;
-      data = SkPngEncoder::Encode(nullptr, image.get(), options);
+      data = SkPngEncoder::Encode(nullptr, image.get(), {});
     }
 
     return data;

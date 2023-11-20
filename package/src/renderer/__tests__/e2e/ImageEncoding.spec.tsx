@@ -114,7 +114,7 @@ describe("Image Encoding", () => {
         const bytes = new Uint8Array(width * height * bytesPerPixel);
         bytes.fill(255);
         let i = 0;
-        for (let x = 0; x < width; x++) {
+        for (let x = 0; x < width * bytesPerPixel; x++) {
           for (let y = 0; y < height; y++) {
             bytes[i++] = (x * y) % 255;
           }
@@ -152,16 +152,16 @@ describe("Image Encoding", () => {
     expect(result.defaultQuality).toEqual(result.maxQuality);
   });
 
-  // this test can be failed on CanvasKit
-  it("SkImage.encodeToBase64: PNG checking of the quality argument work", async () => {
+  it("SkImage.encodeToBase64: PNG checking. The quality argument doesn't work", async () => {
     const result = await surface.eval(
       (Skia, ctx) => {
         const width = 1024;
         const height = 1024;
         const bytesPerPixel = 4;
         const bytes = new Uint8Array(width * height * bytesPerPixel);
+        bytes.fill(255);
         let i = 0;
-        for (let x = 0; x < width; x++) {
+        for (let x = 0; x < width * bytesPerPixel; x++) {
           for (let y = 0; y < height; y++) {
             bytes[i++] = (x * y) % 255;
           }
@@ -177,9 +177,9 @@ describe("Image Encoding", () => {
           data,
           width * bytesPerPixel
         )!;
-        const minQuality = image.encodeToBase64(ctx.format, 0).length;
+        const minQuality = image.encodeToBase64(ctx.format, 1e-8).length;
         const midQuality = image.encodeToBase64(ctx.format, 50).length;
-        const defaultQuality = image.encodeToBase64(ctx.format).length; // default quality: 100.
+        const defaultQuality = image.encodeToBase64(ctx.format).length;
         const maxQuality = image.encodeToBase64(ctx.format, 100).length;
 
         return {
@@ -192,14 +192,12 @@ describe("Image Encoding", () => {
       { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.PNG }
     );
 
-    expect(result.minQuality).toBeLessThan(result.midQuality);
-    expect(result.minQuality).toBeLessThan(result.defaultQuality);
-    expect(result.minQuality).toBeLessThan(result.maxQuality);
-    expect(result.midQuality).toBeLessThan(result.maxQuality);
-    expect(result.defaultQuality).toEqual(result.maxQuality);
+    expect(result.minQuality).toEqual(result.midQuality);
+    expect(result.minQuality).toEqual(result.defaultQuality);
+    expect(result.minQuality).toEqual(result.maxQuality);
   });
 
-  it("SkImage.encodeToBase64: WEBP checking of the quality argument work with lossy", async () => {
+  it("SkImage.encodeToBase64: WEBP checking of the quality argument work", async () => {
     const result = await surface.eval(
       (Skia, ctx) => {
         const width = 1024;
@@ -207,7 +205,7 @@ describe("Image Encoding", () => {
         const bytesPerPixel = 4;
         const bytes = new Uint8Array(width * height * bytesPerPixel);
         let i = 0;
-        for (let x = 0; x < width; x++) {
+        for (let x = 0; x < width * bytesPerPixel; x++) {
           for (let y = 0; y < height; y++) {
             bytes[i++] = (x * y) % 255;
           }
@@ -223,125 +221,35 @@ describe("Image Encoding", () => {
           data,
           width * bytesPerPixel
         )!;
-        const minQuality = image.encodeToBase64(ctx.format, 0, true).length;
-        const midQuality = image.encodeToBase64(ctx.format, 50, true).length;
-        const defaultQuality = image.encodeToBase64(
+        const minQualityLossy = image.encodeToBase64(ctx.format, 1e-8).length;
+        const midQualityLossy = image.encodeToBase64(ctx.format, 50).length;
+        const maxQualityLossy = image.encodeToBase64(
           ctx.format,
-          undefined, // default quality: 100.
-          true
+          100 - 1e-8
         ).length;
-        const maxQuality = image.encodeToBase64(ctx.format, 100, true).length;
-
-        return {
-          minQuality,
-          midQuality,
-          defaultQuality,
-          maxQuality,
-        };
-      },
-      { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
-    );
-
-    expect(result.minQuality).toBeLessThan(result.midQuality);
-    expect(result.minQuality).toBeLessThan(result.defaultQuality);
-    expect(result.minQuality).toBeLessThan(result.maxQuality);
-    expect(result.midQuality).toBeLessThan(result.maxQuality);
-    expect(result.defaultQuality).toEqual(result.maxQuality);
-  });
-
-  it("SkImage.encodeToBase64: WEBP checking of the quality argument work with lossless", async () => {
-    const result = await surface.eval(
-      (Skia, ctx) => {
-        const width = 1024;
-        const height = 1024;
-        const bytesPerPixel = 4;
-        const bytes = new Uint8Array(width * height * bytesPerPixel);
-        let i = 0;
-        for (let x = 0; x < width; x++) {
-          for (let y = 0; y < height; y++) {
-            bytes[i++] = (x * y) % 255;
-          }
-        }
-        const data = Skia.Data.fromBytes(bytes);
-        const imageInfo = {
-          ...ctx.imageInfoBase,
-          width,
-          height,
-        };
-        const image = Skia.Image.MakeImage(
-          imageInfo,
-          data,
-          width * bytesPerPixel
-        )!;
-        const minQuality = image.encodeToBase64(ctx.format, 0, false).length;
-        const midQuality = image.encodeToBase64(ctx.format, 50, false).length;
-        const defaultQuality = image.encodeToBase64(
+        const defaultQualityLossless = image.encodeToBase64(
           ctx.format,
-          undefined,
-          false
-        ).length; // default quality: 100.
-        const maxQuality = image.encodeToBase64(ctx.format, 100, false).length;
-
-        return {
-          minQuality,
-          midQuality,
-          defaultQuality,
-          maxQuality,
-        };
-      },
-      { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
-    );
-
-    expect(result.minQuality).not.toEqual(result.midQuality);
-    expect(result.minQuality).not.toEqual(result.defaultQuality);
-    expect(result.minQuality).not.toEqual(result.maxQuality);
-    expect(result.midQuality).not.toEqual(result.maxQuality);
-    expect(result.defaultQuality).toEqual(result.maxQuality);
-  });
-
-  it("SkImage.encodeToBase64: WEBP checking of the lossy argument work", async () => {
-    const result = await surface.eval(
-      (Skia, ctx) => {
-        const width = 1024;
-        const height = 1024;
-        const bytesPerPixel = 4;
-        const bytes = new Uint8Array(width * height * bytesPerPixel);
-        let i = 0;
-        for (let x = 0; x < width; x++) {
-          for (let y = 0; y < height; y++) {
-            bytes[i++] = (x * y) % 255;
-          }
-        }
-        const data = Skia.Data.fromBytes(bytes);
-        const imageInfo = {
-          ...ctx.imageInfoBase,
-          width,
-          height,
-        };
-        const image = Skia.Image.MakeImage(
-          imageInfo,
-          data,
-          width * bytesPerPixel
-        )!;
-        const defaultLossy = image.encodeToBase64(ctx.format).length; // default quality: 100.
-        const lossy = image.encodeToBase64(ctx.format, undefined, true).length; // default quality: 100.
-        const lossless = image.encodeToBase64(
-          ctx.format,
-          undefined, // default quality: 100.
-          false
+          undefined
         ).length;
+        const maxQualityLossless = image.encodeToBase64(ctx.format, 100).length;
 
         return {
-          defaultLossy,
-          lossy,
-          lossless,
+          minQualityLossy,
+          midQualityLossy,
+          maxQualityLossy,
+          defaultQualityLossless,
+          maxQualityLossless,
         };
       },
       { imageInfoBase: IMAGE_INFO_BASE, format: IMAGE_FORMAT.WEBP }
     );
 
-    expect(result.lossy).toEqual(result.defaultLossy);
-    expect(result.lossy).not.toEqual(result.lossless);
-    expect(result.defaultLossy).not.toEqual(result.lossless);
+    expect(result.minQualityLossy).toBeLessThan(result.midQualityLossy);
+    expect(result.minQualityLossy).toBeLessThan(result.maxQualityLossy);
+    expect(result.midQualityLossy).toBeLessThan(result.maxQualityLossy);
+    expect(result.minQualityLossy).not.toEqual(result.maxQualityLossless);
+    expect(result.midQualityLossy).not.toEqual(result.maxQualityLossless);
+    expect(result.maxQualityLossy).not.toEqual(result.maxQualityLossless);
+    expect(result.defaultQualityLossless).toEqual(result.maxQualityLossless);
   });
 });
