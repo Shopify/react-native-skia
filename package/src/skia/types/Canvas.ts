@@ -498,17 +498,11 @@ export interface SkCanvas {
    * @param srcX - x-axis upper left corner of the rectangle to read from
    * @param srcY - y-axis upper left corner of the rectangle to read from
    * @param imageInfo - describes the pixel format and dimensions of the data to read into
-   * @param dest - optional array to read pixels into. Must be large enough to hold all pixels in imageInfo.
-   * @param bytesPerRow - optional number of bytes per row to read.
-   *                      If not provided, imageInfo.width * imageInfo.bytesPerPixel will be used.
-   *
    * @return Float32Array or Uint8Array with data or null if the read failed.
    */
   readPixels(
     srcX: number,
     srcY: number,
-    imageInfo: ImageInfo,
-    dest?: Float32Array | Uint8Array,
-    bytesPerRow?: number
+    imageInfo: ImageInfo
   ): Float32Array | Uint8Array | null;
 }

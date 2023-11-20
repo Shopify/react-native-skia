@@ -1,4 +1,8 @@
-import type { CanvasKit, Image, MallocObj } from "canvaskit-wasm";
+import type {
+  CanvasKit,
+  Image,
+  ImageInfo as CKImageInfo,
+} from "canvaskit-wasm";
 
 import type {
   ImageFormat,
@@ -121,35 +125,16 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return toBase64String(bytes);
   }
 
-  readPixels(
-    srcX?: number,
-    srcY?: number,
-    imageInfo?: ImageInfo,
-    dest?: object,
-    bytesPerRow?: number
-  ): Float32Array | Uint8Array | null {
+  readPixels(srcX?: number, srcY?: number, imageInfo?: ImageInfo) {
     const info = this.getImageInfo();
-    const colorType =
-      imageInfo?.colorType ?? this.CanvasKit.ColorType.RGBA_8888.value;
-    const alphaType = imageInfo?.alphaType ?? info.alphaType;
-    const pxInfo = {
+    const pxInfo: CKImageInfo = {
       colorSpace: this.CanvasKit.ColorSpace.SRGB,
       width: imageInfo?.width ?? info.width,
       height: imageInfo?.height ?? info.height,
-      colorType: Object.values(this.CanvasKit.ColorType).find(
-        ({ value }) => value === colorType
-      ),
-      alphaType: Object.values(this.CanvasKit.AlphaType).find(
-        ({ value }) => value === alphaType
-      ),
+      alphaType: this.CanvasKit.AlphaType.Unpremul,
+      colorType: this.CanvasKit.ColorType.RGBA_8888,
     };
-    return this.ref.readPixels(
-      srcX ?? 0,
-      srcY ?? 0,
-      pxInfo,
-      dest as MallocObj,
-      bytesPerRow
-    );
+    return this.ref.readPixels(srcX ?? 0, srcY ?? 0, pxInfo);
   }
 
   dispose = () => {
