@@ -133,5 +133,7 @@ const ImageDemo = () => {
 | :-------------- | :-------------------------------------------------------------------- |
 | `height`        | Returns the possibly scaled height of the image.                      |
 | `width`         | Returns the possibly scaled width of the image.                       |
+| `getImageInfo`  | Returns the image info for the image.                                 |
 | `encodeToBytes` | Encodes the image pixels, returning the result as a `UInt8Array`.     |
 | `encodeToBase64`| Encodes the image pixels, returning the result as a base64-encoded string. |
+| `readPixels`    | Reads the image pixels, returning result as UInt8Array or Float32Array |

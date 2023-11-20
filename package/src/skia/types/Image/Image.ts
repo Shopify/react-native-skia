@@ -3,6 +3,8 @@ import type { SkJSIInstance } from "../JsiInstance";
 import type { TileMode } from "../ImageFilter";
 import type { SkShader } from "../Shader";
 
+import type { ImageInfo } from "./ImageFactory";
+
 export enum FilterMode {
   Nearest,
   Linear,
@@ -30,6 +32,11 @@ export interface SkImage extends SkJSIInstance<"Image"> {
    * Returns the possibly scaled width of the image.
    */
   width(): number;
+
+  /**
+   * Returns the ImageInfo describing the image.
+   */
+  getImageInfo(): ImageInfo;
 
   /**
    * Returns this image as a shader with the specified tiling. It will use cubic sampling.
@@ -93,6 +100,19 @@ export interface SkImage extends SkJSIInstance<"Image"> {
     @return  base64 encoded string of data
   */
   encodeToBase64(fmt?: ImageFormat, quality?: number): string;
+
+  /** Read Image pixels
+   *
+   * @param srcX - optional x-axis upper left corner of the rectangle to read from
+   * @param srcY - optional y-axis upper left corner of the rectangle to read from
+   * @param imageInfo - optional describes the pixel format and dimensions of the data to read into
+   * @return Float32Array or Uint8Array with data or null if the read failed.
+   */
+  readPixels(
+    srcX?: number,
+    srcY?: number,
+    imageInfo?: ImageInfo
+  ): Float32Array | Uint8Array | null;
 
   /**
    * Returns raster image or lazy image. Copies SkImage backed by GPU texture
