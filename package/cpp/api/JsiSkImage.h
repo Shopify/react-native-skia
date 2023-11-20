@@ -95,7 +95,8 @@ public:
       }
       data = SkWebpEncoder::Encode(nullptr, image.get(), options);
     } else {
-      data = SkPngEncoder::Encode(nullptr, image.get(), {});
+      SkPngEncoder::Options options;
+      data = SkPngEncoder::Encode(nullptr, image.get(), options);
     }
 
     return data;
