@@ -13,6 +13,10 @@ describe("Image", () => {
       colorType: ColorType.RGBA_8888,
       alphaType: AlphaType.Unpremul,
     });
-    expect(pixels).toMatchSnapshot();
+    expect(pixels).toBeDefined();
+    expect(Array.from(pixels!)).toEqual([
+      170, 186, 199, 255, 170, 186, 199, 255, 170, 186, 199, 255, 170, 186, 199,
+      255,
+    ]);
   });
 });
