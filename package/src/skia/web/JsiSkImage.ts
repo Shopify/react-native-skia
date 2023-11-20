@@ -1,4 +1,10 @@
 import type {
+  CanvasKit,
+  ImageInfo as CKImageInfo,
+  Image,
+} from "canvaskit-wasm";
+
+import type {
   FilterMode,
   MipmapMode,
   SkImage,
@@ -6,6 +12,7 @@ import type {
   SkShader,
   TileMode,
   ImageFormat,
+  ImageInfo,
 } from "../types";
 
 import { ckEnum, getCkEnum, HostObject } from "./Host";
