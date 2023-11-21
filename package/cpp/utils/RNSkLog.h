@@ -7,7 +7,7 @@
 #include <jsi/jsi.h>
 #include <string>
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(__ANDROID__)
 #include <android/log.h>
 #endif
 
@@ -26,7 +26,7 @@ public:
    * @param message Message to be written out
    */
   static void logToConsole(std::string message) {
-#ifdef ANDROID
+#if defined(ANDROID) || defined(__ANDROID__)
     __android_log_write(ANDROID_LOG_INFO, "RNSkia", message.c_str());
 #endif
 
@@ -46,7 +46,7 @@ public:
 
     static char buffer[512];
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-#ifdef ANDROID
+#if defined(ANDROID) || defined(__ANDROID__)
     __android_log_write(ANDROID_LOG_INFO, "RNSkia", buffer);
 #endif
 #ifdef TARGET_OS_IPHONE
