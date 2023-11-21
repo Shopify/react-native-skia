@@ -4,14 +4,15 @@ import type { HostComponent } from "react-native";
 import type { SkRect } from "../skia/types";
 import type { SkiaValue } from "../values";
 import { Platform } from "../Platform";
+import SkiaDomViewNativeComponent from "../specs/SkiaDomViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
 import { SkiaViewNativeId } from "./SkiaView";
-import type { NativeSkiaViewProps, SkiaDomViewProps } from "./types";
+import type { SkiaDomViewProps } from "./types";
 
 const NativeSkiaDomView: HostComponent<SkiaDomViewProps> =
   Platform.OS !== "web"
-    ? Platform.requireNativeComponent<NativeSkiaViewProps>("SkiaDomView")
+    ? SkiaDomViewNativeComponent
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (null as any);
 

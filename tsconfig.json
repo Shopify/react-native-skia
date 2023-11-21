@@ -99,6 +99,7 @@
   "exclude": [
     "package",
     "example",
+    "fabricexample",
     "docs",
     "externals"
   ]
