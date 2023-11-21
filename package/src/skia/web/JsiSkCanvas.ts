@@ -7,6 +7,7 @@ import type {
   MipmapMode,
   PointMode,
   SaveLayerFlag,
+  ImageInfo,
   SkCanvas,
   SkColor,
   SkFont,
@@ -24,7 +25,7 @@ import type {
   SkVertices,
 } from "../types";
 
-import { ckEnum, HostObject } from "./Host";
+import { ckEnum, getCkEnum, HostObject } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
@@ -373,5 +374,16 @@ export class JsiSkCanvas
 
   drawPicture(skp: SkPicture) {
     this.ref.drawPicture(JsiSkPicture.fromValue(skp));
+  }
+
+  readPixels(srcX: number, srcY: number, imageInfo: ImageInfo) {
+    const pxInfo = {
+      width: imageInfo.width,
+      height: imageInfo.height,
+      colorSpace: this.CanvasKit.ColorSpace.SRGB,
+      alphaType: getCkEnum(this.CanvasKit.AlphaType, imageInfo.alphaType),
+      colorType: getCkEnum(this.CanvasKit.ColorType, imageInfo.colorType),
+    };
+    return this.ref.readPixels(srcX, srcY, pxInfo);
   }
 }

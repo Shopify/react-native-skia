@@ -19,13 +19,9 @@ export class JsiSkTypefaceFontProvider
     throw new NotImplementedOnRNWeb();
   }
   countFamilies() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     return this.ref.countFamilies();
   }
   getFamilyName(index: number) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     return this.ref.getFamilyName(index);
   }
   registerFont(typeface: SkTypeface, familyName: string) {
