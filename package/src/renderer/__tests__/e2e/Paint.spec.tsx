@@ -2,7 +2,14 @@
 import React from "react";
 
 import { surface, importSkia } from "../setup";
-import { Circle, Fill, Group, Paint, Path } from "../../components";
+import {
+  Circle,
+  Fill,
+  Group,
+  LinearGradient,
+  Paint,
+  Path,
+} from "../../components";
 import { checkImage } from "../../../__tests__/setup";
 import { fitbox } from "../../components/shapes/FitBox";
 
@@ -45,7 +52,6 @@ describe("Paint", () => {
   it("should interpret the #rrggbbaa correctly", async () => {
     const { width, height } = surface;
     const { rect } = importSkia();
-
     const image = await surface.draw(
       <>
         <Group clip={rect(0, 0, width / 2, height)}>
@@ -135,5 +141,30 @@ describe("Paint", () => {
       </>
     );
     checkImage(img, "snapshots/paint/blend-mode.png");
+  });
+  it("Dithering", async () => {
+    const { height } = surface;
+    const { vec } = importSkia();
+    const c1 = "#202225ff";
+    const c2 = "#141619FF";
+    async function drawGradientWithDither(dither: boolean) {
+      return surface.draw(
+        <Fill dither={dither}>
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(0, height)}
+            colors={[c1, c2]}
+          />
+        </Fill>
+      );
+    }
+    const withDither = await drawGradientWithDither(true);
+    const withoutDither = await drawGradientWithDither(false);
+    checkImage(withDither, "snapshots/paint/dither.png");
+    checkImage(withoutDither, "snapshots/paint/without-dither.png");
+    checkImage(withoutDither, "snapshots/paint/dither.png", {
+      shouldFail: true,
+      threshold: 0,
+    });
   });
 });

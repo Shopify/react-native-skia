@@ -61,7 +61,7 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Images",
-      items: ["image", "image-svg", "snapshotviews"],
+      items: ["image", "animated-images", "image-svg", "snapshotviews"],
     },
     {
       collapsed: true,
@@ -131,10 +131,11 @@ const sidebars = {
       type: "category",
       label: "Animations",
       items: [
-        "animations/reanimated",
-        "animations/values",
         "animations/animations",
-        "animations/touch-events",
+        "animations/gestures",
+        "animations/hooks",
+        "animations/textures",
+        "animations/reanimated2",
       ],
     },
     {

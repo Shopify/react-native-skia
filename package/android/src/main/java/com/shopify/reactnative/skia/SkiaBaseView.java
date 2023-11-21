@@ -18,8 +18,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     private String tag = "SkiaView";
 
-    public SkiaBaseView(Context context) {
+    private boolean manageTexture = false;
+
+    public SkiaBaseView(Context context, boolean manageTexture) {
         super(context);
+        this.manageTexture = manageTexture;
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
@@ -27,19 +30,23 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     }
 
     public void destroySurface() {
-        Log.i(tag, "destroySurface");
-        surfaceDestroyed();
-        mSurface.release();
-        mSurface = null;
+        if (mSurface != null) {
+            Log.i(tag, "destroySurface");
+            surfaceDestroyed();
+            mSurface.release();
+            mSurface = null;
+        }
     }
 
     private void createSurfaceTexture() {
-        // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Log.i(tag, "Create SurfaceTexture");
-            SurfaceTexture surface = new SurfaceTexture(false);
-            mTexture.setSurfaceTexture(surface);
-            this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
+        if (manageTexture) {
+            // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                Log.i(tag, "Create SurfaceTexture");
+                SurfaceTexture surface = new SurfaceTexture(false);
+                mTexture.setSurfaceTexture(surface);
+                this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
+            }
         }
     }
 
@@ -145,14 +152,18 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         Log.i(tag, "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
-        surfaceDestroyed();
+        destroySurface();
         createSurfaceTexture();
         return false;
     }
 
+    //private long _prevTimestamp = 0;
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        // Nothing special to do here
+//        long timestamp = surface.getTimestamp();
+//        long frameDuration = (timestamp - _prevTimestamp)/1000000;
+//        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
+//        _prevTimestamp = timestamp;
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);

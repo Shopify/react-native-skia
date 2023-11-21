@@ -50,7 +50,8 @@ export class SkiaRoot {
   }
 
   render(element: ReactNode) {
-    skiaReconciler.updateContainer(element, this.root, null, () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    skiaReconciler.updateContainer(element as any, this.root, null, () => {
       hostDebug("updateContainer");
     });
   }

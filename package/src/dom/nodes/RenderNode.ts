@@ -27,6 +27,7 @@ const paintProps = [
   "strokeMiter",
   "style",
   "antiAlias",
+  "dither",
   "opacity",
 ];
 

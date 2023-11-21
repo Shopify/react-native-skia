@@ -117,9 +117,6 @@ const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
 export const Platform: IPlatform = {
   OS: "web",
   PixelRatio: window.devicePixelRatio,
-  requireNativeComponent: () => {
-    throw new Error("requireNativeComponent is not supported on the web");
-  },
   resolveAsset: (source: DataModule) => {
     if (isRNModule(source)) {
       throw new Error(
@@ -131,6 +128,5 @@ export const Platform: IPlatform = {
   findNodeHandle: () => {
     throw new Error("findNodeHandle is not supported on the web");
   },
-  NativeModules: {},
   View,
 };

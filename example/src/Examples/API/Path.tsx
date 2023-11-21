@@ -17,11 +17,10 @@ import {
   TextPath,
   useFont,
   FitBox,
-  useComputedValue,
-  interpolatePaths,
-  useTiming,
-  Easing,
+  usePathInterpolation,
 } from "@shopify/react-native-skia";
+
+import { useLoop } from "../../components/Animations";
 
 import { Title } from "./components/Title";
 import {
@@ -83,10 +82,9 @@ s.stroke({
 });
 
 export const PathExample = () => {
-  const progress = useTiming(
-    { to: 1, loop: true },
-    { duration: 3000, easing: Easing.bezier(0.65, 0, 0.35, 1) }
-  );
+  const progress = useLoop({
+    duration: 3000,
+  });
   const { width } = useWindowDimensions();
   const SIZE = width;
   const rect1 = useMemo(() => {
@@ -110,14 +108,10 @@ export const PathExample = () => {
   }, [circle, rect1]);
 
   const font = useFont(require("./Roboto-Regular.otf"), 32);
-  const path = useComputedValue(
-    () =>
-      interpolatePaths(
-        progress.current,
-        [0, 0.5, 1],
-        [angryPath, normalPath, goodPath]
-      ),
-    [progress]
+  const path = usePathInterpolation(
+    progress,
+    [0, 0.5, 1],
+    [angryPath, normalPath, goodPath]
   );
   if (!font) {
     return null;

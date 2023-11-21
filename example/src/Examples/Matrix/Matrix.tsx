@@ -3,7 +3,7 @@ import {
   Canvas,
   Fill,
   Group,
-  useClockValue,
+  useClock,
   useFont,
 } from "@shopify/react-native-skia";
 import React from "react";
@@ -32,7 +32,7 @@ const streams = cols.map(() =>
 );
 
 export const Matrix = () => {
-  const clock = useClockValue();
+  const clock = useClock();
   const { width, height } = useWindowDimensions();
   const symbol = { width: width / COLS, height: height / ROWS };
   const font = useFont(require("./matrix-code-nfi.otf"), symbol.height);

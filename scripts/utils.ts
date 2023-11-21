@@ -23,7 +23,12 @@ export const executeCmd = (
     });
     proc.stderr?.on("data", function (data) {
       console.error(`[${label}]:`, data.trim());
-      exit(1);
+    });
+    proc.on("close", function (code) {
+      if (code) {
+        console.log(`[${label}] exited with code ${code}`);
+        exit(code);
+      }
     });
   }
 };

@@ -64,7 +64,7 @@ export const SpringBackTouchAnimation = () => {
 const styles = StyleSheet.create({
   canvas: {
     height: 280,
-    width: "100%",
-    backgroundColor: "#FEFEFE",
+    width: "100%" as const,
+    backgroundColor: "#FEFEFE" as const,
   },
 });

@@ -174,8 +174,8 @@ public class ViewScreenshotService {
 
         // Create a new matrix for translation
         final Matrix translateMatrix = new Matrix();
-        final float dx = view.getLeft() + view.getPaddingLeft() + view.getTranslationX();
-        final float dy = view.getTop() + view.getPaddingTop() + view.getTranslationY();
+        final float dx = view.getLeft() + view.getPaddingLeft();
+        final float dy = view.getTop() + view.getPaddingTop();
         translateMatrix.setTranslate(dx, dy);
 
         // Pre-concatenate the current matrix of the canvas with the translation and transformation matrices of the view

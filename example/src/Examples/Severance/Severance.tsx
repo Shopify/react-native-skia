@@ -2,13 +2,13 @@ import {
   Canvas,
   Fill,
   Group,
-  useClockValue,
+  useClock,
   useFont,
-  useTouchHandler,
-  useValue,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { useWindowDimensions } from "react-native";
+import { useWindowDimensions, StyleSheet, View } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { CRT } from "./CRT";
 import { COLS, ROWS, Symbol } from "./Symbol";
@@ -19,38 +19,39 @@ const cols = new Array(ROWS).fill(0).map((_, i) => i);
 
 export const Severance = () => {
   const { width, height } = useWindowDimensions();
-  const clock = useClockValue();
+  const clock = useClock();
   const font = useFont(require("./SF-Mono-Medium.otf"), height / ROWS);
-  const pointer = useValue({ x: width / 2, y: height / 2 });
-  const onTouch = useTouchHandler({
-    onActive: (pt) => {
-      pointer.current = pt;
-    },
-  });
+  const pointer = useSharedValue({ x: width / 2, y: height / 2 });
+  const gesture = Gesture.Pan().onChange((e) => (pointer.value = e));
   if (font === null) {
     return null;
   }
   return (
-    <Canvas style={{ flex: 1 }} onTouch={onTouch} debug>
-      <CRT>
-        <Group>
-          <Fill color={BG} />
-          {rows.map((_i, i) =>
-            cols.map((_j, j) => {
-              return (
-                <Symbol
-                  key={`${i}-${j}`}
-                  i={i}
-                  j={j}
-                  font={font}
-                  pointer={pointer}
-                  clock={clock}
-                />
-              );
-            })
-          )}
-        </Group>
-      </CRT>
-    </Canvas>
+    <View style={{ flex: 1 }}>
+      <Canvas style={{ flex: 1 }}>
+        <CRT>
+          <Group>
+            <Fill color={BG} />
+            {rows.map((_i, i) =>
+              cols.map((_j, j) => {
+                return (
+                  <Symbol
+                    key={`${i}-${j}`}
+                    i={i}
+                    j={j}
+                    font={font}
+                    pointer={pointer}
+                    clock={clock}
+                  />
+                );
+              })
+            )}
+          </Group>
+        </CRT>
+      </Canvas>
+      <GestureDetector gesture={gesture}>
+        <View style={StyleSheet.absoluteFill} />
+      </GestureDetector>
+    </View>
   );
 };

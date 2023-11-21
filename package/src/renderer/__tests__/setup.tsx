@@ -8,8 +8,7 @@ import type { Server, WebSocket } from "ws";
 
 import { DependencyManager } from "../DependencyManager";
 import { ValueApi } from "../../values/web";
-import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
-import type * as SkiaExports from "../..";
+import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
@@ -19,6 +18,7 @@ import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 import { SkiaRoot } from "../Reconciler";
 import { JsiDrawingContext } from "../../dom/types/DrawingContext";
+import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 
 jest.setTimeout(180 * 1000);
 
@@ -42,6 +42,7 @@ export let fonts: {
   NotoColorEmoji: SkFont;
   NotoSansSCRegular: SkFont;
   UberMoveMediumMono: SkFont;
+  DinMedium: SkFont;
 };
 
 beforeAll(async () => {
@@ -67,6 +68,7 @@ beforeAll(async () => {
     "skia/__tests__/assets/UberMove-Medium_mono.ttf",
     fontSize
   );
+  const DinMedium = loadFont("skia/__tests__/assets/DIN-Medium.ttf", fontSize);
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
@@ -77,6 +79,7 @@ beforeAll(async () => {
     NotoColorEmoji,
     NotoSansSCRegular,
     UberMoveMediumMono,
+    DinMedium,
   };
   assets.set(mask, "mask");
   assets.set(oslo, "oslo");
@@ -84,6 +87,7 @@ beforeAll(async () => {
   assets.set(NotoColorEmoji, "NotoColorEmoji");
   assets.set(NotoSansSCRegular, "NotoSansSCRegular");
   assets.set(UberMoveMediumMono, "UberMoveMediumMono");
+  assets.set(DinMedium, "DinMedium");
   assets.set(skiaLogoPng, "skiaLogoPng");
   assets.set(skiaLogoJpeg, "skiaLogoJpeg");
 });
@@ -112,7 +116,6 @@ export const testingFonts = {
   //  NotoColorEmoji: [resolveFont("skia/__tests__/assets/NotoColorEmoji.ttf")],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmptyProps {}
 
 jest.mock("react-native", () => ({
@@ -125,8 +128,16 @@ jest.mock("react-native", () => ({
   Image: {
     resolveAssetSource: jest.fn,
   },
-  requireNativeComponent: jest.fn,
+  // requireNativeComponent: jest.fn,
+  // TurboModuleRegistry: {
+  //   getEnforcing: jest.fn,
+  // },
 }));
+//jest.mock("react-native/Libraries/Utilities/codegenNativeComponent", jest.fn);
+
+export const BirdGIF = resolveFile("skia/__tests__/assets/bird.gif").toString(
+  "base64"
+);
 
 export const loadImage = (uri: string) => {
   const Skia = global.SkiaApi;
@@ -146,7 +157,25 @@ export const loadFont = (uri: string, ftSize?: number) => {
   return Skia.Font(tf!, ftSize ?? fontSize);
 };
 
-export const importSkia = (): typeof SkiaExports => require("../..");
+export const importSkia = (): typeof SkiaExports => {
+  //const core = require("../../skia/core");
+  const skia = require("../../skia");
+  const renderer = require("../../renderer");
+  const offscreen = require("../Offscreen");
+  // TODO: to remove
+  const animation = require("../../animation");
+  const values = require("../../values");
+  const useTouchHandler = require("../../views/useTouchHandler");
+  return {
+    ...skia,
+    ...renderer,
+    ...animation,
+    ...values,
+    ...offscreen,
+    ...useTouchHandler,
+  };
+};
+
 export const getSkDOM = () => {
   const { Skia } = importSkia();
   const depMgr = new DependencyManager(() => () => {});
@@ -235,9 +264,16 @@ const serializeSkOjects = (obj: any): any => {
         cmds: obj.toCmds(),
       };
     } else if (obj.__typename__ === "Image") {
+      const asset = assets.get(obj)!;
+      if (!asset) {
+        return {
+          __typename__: "RawImage",
+          data: obj.encodeToBase64(),
+        };
+      }
       return {
         __typename__: "Image",
-        name: assets.get(obj)!,
+        name: asset,
       };
     } else if (obj.__typename__ === "Font") {
       return {

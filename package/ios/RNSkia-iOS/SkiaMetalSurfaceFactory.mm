@@ -65,7 +65,7 @@ SkiaMetalSurfaceFactory::makeWindowedSurface(id<MTLTexture> texture, int width,
   GrMtlTextureInfo fbInfo;
   fbInfo.fTexture.retain((__bridge void *)texture);
 
-  GrBackendRenderTarget backendRT(width, height, 1, fbInfo);
+  GrBackendRenderTarget backendRT(width, height, fbInfo);
 
   auto skSurface = SkSurfaces::WrapBackendRenderTarget(
       ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(), backendRT,

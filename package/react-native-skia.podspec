@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   # optional - use expanded license entry instead:
   # s.license    = { :type => "MIT", :file => "LICENSE" }
   s.authors      = { "Your Name" => "yourname@email.com" }
-  s.platforms    = { :ios => "9.0" }
+  s.platforms    = { :ios => "12.0" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
@@ -44,8 +44,16 @@ Pod::Spec.new do |s|
     "cpp/**/*.{h,cpp}"
   ]
 
-  s.dependency "React"
-  s.dependency "React-callinvoker"
-  s.dependency "React-Core"
+
+  if defined?(install_modules_dependencies()) != nil
+    install_modules_dependencies(s)
+    s.dependency "React"
+    s.dependency "React-callinvoker"
+    s.dependency "React-Core"
+  else
+    s.dependency "React"
+    s.dependency "React-callinvoker"
+    s.dependency "React-Core"
+  end
 end
 

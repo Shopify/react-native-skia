@@ -1,4 +1,11 @@
 import { WebSocketServer } from "ws";
+import type { Server, WebSocket } from "ws";
+
+declare global {
+  var testServer: Server;
+  var testClient: WebSocket;
+  var testOS: "ios" | "android" | "web" | "node";
+}
 
 const isOS = (os: string): os is "android" | "ios" | "web" => {
   return ["ios", "android", "web"].indexOf(os) !== -1;
