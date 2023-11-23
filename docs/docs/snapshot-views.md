@@ -25,7 +25,7 @@ const pd = PixelRatio.get();
 
 const Demo = () => {
   // Create a ref for the view you'd like to take a snapshot of
-  const ref = useRef();
+  const ref = useRef<View>(null);
   // Create a state variable to store the snapshot
   const [image, setImage] = useState<SkImage | null>(null);
   // Create a function to take the snapshot
@@ -37,14 +37,20 @@ const Demo = () => {
   return (
     <View style={{ flex: 1 }}>
       <Pressable onPress={onPress}>
-        <View ref={ref} collapsible={false} style={{ backgroundColor: "cyan", flex: 1 }}>
+        <View ref={ref} collapsable={false} style={{ backgroundColor: "cyan", flex: 1 }}>
           <Text>This is a React Native View</Text>
         </View>
       </Pressable>
       {
         image && (
           <Canvas style={StyleSheet.absoluteFill}>
-            <Image image={image} x={0} y={0} width={image.width() / pd} height={image.height() / pd} />
+            <Image
+              image={image}
+              x={0}
+              y={0}
+              width={image.width() / pd}
+              height={image.height() / pd}
+            />
           </Canvas>
         )
       }
