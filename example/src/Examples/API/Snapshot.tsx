@@ -140,7 +140,9 @@ const Component = () => {
             overflow: "hidden",
           }}
         >
-          <View style={{ width: 150, height: 10, backgroundColor: "cyan" }} />
+          <View style={{ width: 150, height: 10, backgroundColor: "cyan" }}>
+            <View style={{ width: 20, height: 20, backgroundColor: "red" }} />
+          </View>
         </View>
       </View>
       <Button

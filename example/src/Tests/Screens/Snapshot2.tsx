@@ -80,8 +80,13 @@ const Component = () => {
             height: 40,
             backgroundColor: "red",
             opacity: 0.5,
+            overflow: "hidden",
           }}
-        />
+        >
+          <View style={{ width: 150, height: 10, backgroundColor: "cyan" }}>
+            <View style={{ width: 20, height: 20, backgroundColor: "red" }} />
+          </View>
+        </View>
       </View>
       <Button
         title={"Press me to increment (" + 1 + ")"}
