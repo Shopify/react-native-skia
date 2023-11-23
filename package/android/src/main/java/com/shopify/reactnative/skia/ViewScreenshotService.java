@@ -5,7 +5,9 @@ import static android.view.View.VISIBLE;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,6 +23,8 @@ import androidx.annotation.NonNull;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.ReactShadowNode;
 import com.facebook.react.uimanager.UIManagerModule;
+import com.facebook.react.views.view.ReactViewBackgroundDrawable;
+import com.facebook.react.views.view.ReactViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +65,7 @@ public class ViewScreenshotService {
 
         // Render the main view and its children
         final Canvas canvas = new Canvas(bitmap);
-rr
+
         // This is the root view we need to offset the content to 0, 0
         canvas.save();
         canvas.translate(-view.getLeft(), -view.getTop());
@@ -72,9 +76,31 @@ rr
         return bitmap;
     }
 
+    private static boolean viewClipsChildren(ReactViewGroup view) {
+        String overflow = view.getOverflow();
+        if (overflow != null) {
+            return overflow == "hidden" || overflow == "scroll";
+        }
+        return false;
+    }
+
+    private static void clipView(Canvas canvas, ReactViewGroup view) {
+      //  view.setClipToOutline(true);
+//        Drawable bg = view.getBackground();
+//        Outline outline = new Outline();
+//        view.getOutlineProvider().getOutline(view, outline);
+//        outline.canClip()
+    }
+
     private static void renderViewToCanvas(Canvas canvas, View view, Paint paint) {
         // Apply transformations for the current view
         canvas.save();
+        if (view instanceof ReactViewGroup) {
+            ReactViewGroup group = (ReactViewGroup)view;
+            if (viewClipsChildren(group)) {
+                clipView(canvas, group);
+            }
+        }
         applyTransformations(canvas, view);
 
         // Draw children if the view has children
@@ -82,29 +108,12 @@ rr
             // Draw children
             ViewGroup group = (ViewGroup) view;
 
-            // Hide visible children - this needs to be done because view.draw(canvas)
-            // will render all visible non-texture/surface views directly - causing
-            // views to be rendered twice - once by view.draw() and once when we
-            // enumerate children. We therefore need to turn off rendering of visible
-            // children before we call view.draw:
-            List<View> visibleChildren = new ArrayList<>();
-            for (int i = 0; i < group.getChildCount(); i++) {
-                View child = group.getChildAt(i);
-                if (child.getVisibility() == VISIBLE) {
-                    visibleChildren.add(child);
-                    child.setVisibility(View.INVISIBLE);
-                }
-            }
-
             // Draw ourselves
-            canvas.saveLayerAlpha(null, Math.round(view.getAlpha() * 255));
-            view.draw(canvas);
-            canvas.restore();
-
-            // Enable children again
-            for (int i = 0; i < visibleChildren.size(); i++) {
-                View child = visibleChildren.get(i);
-                child.setVisibility(VISIBLE);
+            Drawable bg = view.getBackground();
+            if (bg != null) {
+                canvas.saveLayerAlpha(null, Math.round(view.getAlpha() * 255));
+                view.getBackground().draw(canvas);
+                canvas.restore();
             }
 
             // Draw children
