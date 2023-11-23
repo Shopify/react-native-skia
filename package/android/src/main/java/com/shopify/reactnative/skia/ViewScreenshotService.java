@@ -84,33 +84,6 @@ public class ViewScreenshotService {
         canvas.save();
         applyTransformations(canvas, view);
 
-//        if (view instanceof  ReactViewGroup) {
-//            ReactViewGroup rg = (ReactViewGroup) view;
-//
-//            String overflow = rg.getOverflow();
-//            if (overflow != null) {
-//                boolean shouldClip = overflow.equals("hidden") || overflow.equals("scroll");
-//                if (shouldClip) {
-//                    try {
-//                        Field privateField = ReactViewGroup.class.getDeclaredField("mPath");
-//                        privateField.setAccessible(true); // Bypass the access check
-//                        Path path = (Path) privateField.get(rg);
-//                        if (path != null) {
-//                            canvas.clipPath(path);
-//                        } else {
-//                            // Adjust these coordinates as needed
-//                            Rect rct = new Rect(0, 0, view.getWidth(), view.getHeight());
-//                            if (!rct.isEmpty()) {
-//                                canvas.clipRect(rct);
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//
-//                    }
-//                }
-//            }
-//        }
-
         // Draw children if the view has children
         if ((view instanceof ViewGroup)) {
             // Draw children
