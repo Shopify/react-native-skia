@@ -56,8 +56,8 @@ public:
   void surfaceSizeChanged(int width, int height) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
         ->surfaceSizeChanged(width, height);
-    // This is only need for the first time to frame, this renderImmediate call will invoke
-    // updateTexImage for the previous frame
+    // This is only need for the first time to frame, this renderImmediate call
+    // will invoke updateTexImage for the previous frame
     RNSkView::renderImmediate();
   }
 
