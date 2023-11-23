@@ -128,6 +128,7 @@ public class ViewScreenshotService {
         Bitmap childBitmapBuffer = tv.getBitmap(Bitmap.createBitmap(tv.getWidth(), tv.getHeight(), Bitmap.Config.ARGB_8888));
         canvas.save();
         applyTransformations(canvas, tv);
+        paint.setAlpha(Math.round(opacity * 255)); // Set paint alpha based on opacity
         canvas.drawBitmap(childBitmapBuffer, 0, 0, paint);
         canvas.restore();
     }
@@ -140,6 +141,7 @@ public class ViewScreenshotService {
                 PixelCopy.request(sv, childBitmapBuffer, copyResult -> {
                     canvas.save();
                     applyTransformations(canvas, sv);
+                    paint.setAlpha(Math.round(opacity * 255)); // Set paint alpha based on opacity
                     canvas.drawBitmap(childBitmapBuffer, 0, 0, paint);
                     canvas.restore();
                     latch.countDown();
@@ -153,6 +155,7 @@ public class ViewScreenshotService {
             if (cache != null) {
                 canvas.save();
                 applyTransformations(canvas, sv);
+                paint.setAlpha(Math.round(opacity * 255)); // Set paint alpha based on opacity
                 canvas.drawBitmap(cache, 0, 0, paint);
                 canvas.restore();
             }
