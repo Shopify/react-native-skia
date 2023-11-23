@@ -102,7 +102,7 @@ export const Tests = ({ assets }: TestsProps) => {
   return (
     <View style={{ flex: 1 }}>
       <Text>
-        {client === null ? "❤️" : "💚"} Waiting for the server to send tests
+        {client === null ? "⚪️" : "🟢"} Waiting for the server to send tests
       </Text>
       <Canvas style={{ width: size, height: size }} ref={ref}>
         <Group transform={[{ scale }]}>{drawing}</Group>
