@@ -1,12 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkiaDomView } from "@shopify/react-native-skia";
-import { Group, Canvas, Skia } from "@shopify/react-native-skia";
+import {
+  Group,
+  Canvas,
+  Skia,
+  makeImageFromView,
+} from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Platform, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
 import { useClient } from "./useClient";
+import { Screens } from "./Screens";
 
 export const CI = process.env.CI === "true";
 const scale = 3 / PixelRatio.get();
@@ -20,9 +26,11 @@ interface TestsProps {
 }
 
 export const Tests = ({ assets }: TestsProps) => {
+  const viewRef = useRef<View>(null);
   const ref = useRef<SkiaDomView>(null);
   const client = useClient();
   const [drawing, setDrawing] = useState<any>(null);
+  const [screen, setScreen] = useState<any>(null);
   useEffect(() => {
     if (client !== null) {
       client.onmessage = (e) => {
@@ -39,6 +47,12 @@ export const Tests = ({ assets }: TestsProps) => {
               })
             )
           );
+        } else if (typeof tree.screen === "string") {
+          const Screen = Screens[tree.screen];
+          if (!Screen) {
+            throw new Error(`Unknown screen: ${tree.screen}`);
+          }
+          setScreen(React.createElement(Screen));
         } else {
           const node = parseNode(tree, assets);
           setDrawing(node as SerializedNode);
@@ -70,6 +84,21 @@ export const Tests = ({ assets }: TestsProps) => {
     }
     return;
   }, [client, drawing]);
+  useEffect(() => {
+    if (screen) {
+      const it = setTimeout(async () => {
+        const image = await makeImageFromView(viewRef);
+        if (image && client) {
+          const data = image.encodeToBytes();
+          client.send(data);
+        }
+      }, timeToDraw);
+      return () => {
+        clearTimeout(it);
+      };
+    }
+    return;
+  }, [client, screen]);
   return (
     <View style={{ flex: 1 }}>
       <Text>
@@ -78,6 +107,9 @@ export const Tests = ({ assets }: TestsProps) => {
       <Canvas style={{ width: size, height: size }} ref={ref}>
         <Group transform={[{ scale }]}>{drawing}</Group>
       </Canvas>
+      <View style={{ width: size, height: size }} ref={viewRef}>
+        {screen}
+      </View>
     </View>
   );
 };

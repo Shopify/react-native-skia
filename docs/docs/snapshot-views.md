@@ -9,25 +9,46 @@ slug: /snapshotviews
 
 The function `makeImageFromView` lets you take a snapshot of another React Native View as a Skia SkImage. The function accepts a ref to a native view and returns a promise that resolves to an `SkImage` instance upon success.
 
+::::info
+
+On Android, it is safer to use collapsable=false on the root view of the snapshot to prevent the root view from being removed by React Native.
+
+::::info
+
 ```tsx twoslash
 import { useState, useRef } from "react";
-import { View } from "react-native";
+import { View, Text, PixelRatio, StyleSheet, Pressable } from "react-native";
 import type { SkImage } from "@shopify/react-native-skia";
-import { makeImageFromView } from "@shopify/react-native-skia";
+import { makeImageFromView, Canvas, Image } from "@shopify/react-native-skia";
 
-// Create a ref for the view you'd like to take a snapshot of
-const viewRef = useRef<View>(null);
+const pd = PixelRatio.get();
 
-// Create a state variable to store the snapshot
-const [image, setImage] = useState<SkImage | null>(null);
-
-// Create a function to take the snapshot
-const takeSnapshot = async () => {
-  if (viewRef.current == null) {
-    return;
-  }
-  // Take the snapshot of the view
-  const snapshot = await makeImageFromView(viewRef);
-  setImage(snapshot);
+const Demo = () => {
+  // Create a ref for the view you'd like to take a snapshot of
+  const ref = useRef();
+  // Create a state variable to store the snapshot
+  const [image, setImage] = useState<SkImage | null>(null);
+  // Create a function to take the snapshot
+  const onPress = async () => {
+    // Take the snapshot of the view
+    const snapshot = await makeImageFromView(ref);
+    setImage(snapshot);
+  };
+  return (
+    <View style={{ flex: 1 }}>
+      <Pressable onPress={onPress}>
+        <View ref={ref} collapsible={false} style={{ backgroundColor: "cyan", flex: 1 }}>
+          <Text>This is a React Native View</Text>
+        </View>
+      </Pressable>
+      {
+        image && (
+          <Canvas style={StyleSheet.absoluteFill}>
+            <Image image={image} x={0} y={0} width={image.width() / pd} height={image.height() / pd} />
+          </Canvas>
+        )
+      }
+    </View>
+  )
 };
 ```
