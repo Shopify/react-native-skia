@@ -10,4 +10,8 @@ describe("Snapshot", () => {
     const img = await surface.screen("Snapshot2");
     checkImage(img, `snapshots/screens/snapshot2-${surface.OS}.png`);
   });
+  itRunsE2eOnly("should respect overflow: hidden", async () => {
+    const img = await surface.screen("Snapshot3");
+    checkImage(img, `snapshots/screens/snapshot3-${surface.OS}.png`);
+  });
 });
