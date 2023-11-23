@@ -62,14 +62,12 @@ public class ViewScreenshotService {
         // Render the main view and its children
         final Canvas canvas = new Canvas(bitmap);
 
-
         // This is the root view we need to offset the content to 0, 0
         canvas.save();
         canvas.translate(-view.getLeft(), -view.getTop());
         // Renders view with child views to canvas
         renderViewToCanvas(canvas, view, paint);
         canvas.restore();
-
 
         return bitmap;
     }

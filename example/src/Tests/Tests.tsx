@@ -7,7 +7,7 @@ import {
   makeImageFromView,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import { PixelRatio, Platform, Text, View, ScrollView } from "react-native";
+import { PixelRatio, Platform, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
