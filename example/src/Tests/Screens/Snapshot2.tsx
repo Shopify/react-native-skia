@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   StyleSheet,
@@ -22,7 +22,6 @@ export const Snapshot2 = () => {
 };
 
 const Component = () => {
-  const [counter, setCounter] = useState(0);
   return (
     <ScrollView style={styles.scrollview}>
       <View
@@ -85,8 +84,8 @@ const Component = () => {
         />
       </View>
       <Button
-        title={"Press me to increment (" + counter + ")"}
-        onPress={() => setCounter((i) => i + 1)}
+        title={"Press me to increment (" + 1 + ")"}
+        onPress={() => true}
       />
       <Switch value={true} />
       <Canvas style={{ width: 100, height: 100 }}>
