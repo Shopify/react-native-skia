@@ -2,7 +2,7 @@ import type { SkPaint } from "./Paint";
 import type { SkRect } from "./Rect";
 import type { SkFont } from "./Font";
 import type { SkPath } from "./Path";
-import type { SkImage, MipmapMode, FilterMode } from "./Image";
+import type { SkImage, MipmapMode, FilterMode, ImageInfo } from "./Image";
 import type { SkSVG } from "./SVG";
 import type { SkColor } from "./Color";
 import type { SkRRect } from "./RRect";
@@ -492,4 +492,17 @@ export interface SkCanvas {
    * @param skp
    */
   drawPicture(skp: SkPicture): void;
+
+  /** Read Image pixels
+   *
+   * @param srcX - x-axis upper left corner of the rectangle to read from
+   * @param srcY - y-axis upper left corner of the rectangle to read from
+   * @param imageInfo - describes the pixel format and dimensions of the data to read into
+   * @return Float32Array or Uint8Array with data or null if the read failed.
+   */
+  readPixels(
+    srcX: number,
+    srcY: number,
+    imageInfo: ImageInfo
+  ): Float32Array | Uint8Array | null;
 }
