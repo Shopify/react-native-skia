@@ -8,7 +8,7 @@ export const Snapshot3 = () => {
   return (
     <View
       style={{
-        padding: px(40),
+        margin: px(40),
         borderRadius: px(40),
         overflow: "hidden",
       }}
