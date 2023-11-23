@@ -28,6 +28,7 @@ import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.views.view.ReactViewGroup;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -83,37 +84,48 @@ public class ViewScreenshotService {
         canvas.save();
         applyTransformations(canvas, view);
 
-        if (view instanceof  ReactViewGroup) {
-            ReactViewGroup rg = (ReactViewGroup) view;
-            String overflow = rg.getOverflow();
-            if (overflow != null) {
-                boolean shouldClip = overflow.equals("hidden") || overflow.equals("scroll");
-                if (shouldClip) {
-                    try {
-                        Field privateField = ReactViewGroup.class.getDeclaredField("mPath");
-                        privateField.setAccessible(true); // Bypass the access check
-                        Path path = (Path) privateField.get(rg);
-                        if (path != null) {
-                            canvas.clipPath(path);
-                        } else {
-                            // Adjust these coordinates as needed
-                            Rect rct = new Rect(0, 0, view.getWidth(), view.getHeight());
-                            if (!rct.isEmpty()) {
-                                canvas.clipRect(rct);
-                            }
-                        }
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
-        }
+//        if (view instanceof  ReactViewGroup) {
+//            ReactViewGroup rg = (ReactViewGroup) view;
+//
+//            String overflow = rg.getOverflow();
+//            if (overflow != null) {
+//                boolean shouldClip = overflow.equals("hidden") || overflow.equals("scroll");
+//                if (shouldClip) {
+//                    try {
+//                        Field privateField = ReactViewGroup.class.getDeclaredField("mPath");
+//                        privateField.setAccessible(true); // Bypass the access check
+//                        Path path = (Path) privateField.get(rg);
+//                        if (path != null) {
+//                            canvas.clipPath(path);
+//                        } else {
+//                            // Adjust these coordinates as needed
+//                            Rect rct = new Rect(0, 0, view.getWidth(), view.getHeight());
+//                            if (!rct.isEmpty()) {
+//                                canvas.clipRect(rct);
+//                            }
+//                        }
+//                    } catch (Exception e) {
+//
+//                    }
+//                }
+//            }
+//        }
 
         // Draw children if the view has children
         if ((view instanceof ViewGroup)) {
             // Draw children
             ViewGroup group = (ViewGroup) view;
-
+            if (view instanceof ReactViewGroup) {
+                try {
+                    Class[] cArg = new Class[1];
+                    cArg[0] = Canvas.class;
+                    Method method = ReactViewGroup.class.getDeclaredMethod("dispatchOverflowDraw", cArg);
+                    method.setAccessible(true);
+                    method.invoke(view, canvas);
+                } catch (Exception e) {
+                    Log.e(TAG, "couldn't invoke dispatchOverflowDraw() on ViewGroup");
+                }
+            }
             // Draw ourselves
             Drawable bg = view.getBackground();
             if (bg != null) {
