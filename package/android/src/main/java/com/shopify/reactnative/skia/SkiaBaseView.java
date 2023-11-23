@@ -143,6 +143,10 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         Log.i(tag, "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         destroySurface();
+        // Because of React Native Screens (which dettach the view), we always keep the surface alive.
+        // If not, Texture view will recreate the texture surface by itself and
+        // we will lose the fast first time to frame.
+        // We only delete the surface when the view is dropped (destroySurface invoked by SkiaBaseViewManager);
         createSurfaceTexture();
         return false;
     }
