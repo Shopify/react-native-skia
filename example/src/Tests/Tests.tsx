@@ -7,7 +7,7 @@ import {
   makeImageFromView,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import { PixelRatio, Platform, Text, View } from "react-native";
+import { PixelRatio, Platform, Text, View, ScrollView } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
@@ -67,6 +67,7 @@ export const Tests = ({ assets }: TestsProps) => {
   useEffect(() => {
     if (drawing) {
       const it = setTimeout(() => {
+        console.log("MakeImageSnapshot");
         const image = ref.current?.makeImageSnapshot({
           x: 0,
           y: 0,
@@ -107,7 +108,11 @@ export const Tests = ({ assets }: TestsProps) => {
       <Canvas style={{ width: size, height: size }} ref={ref}>
         <Group transform={[{ scale }]}>{drawing}</Group>
       </Canvas>
-      <View style={{ width: size, height: size }} ref={viewRef}>
+      <View
+        style={{ width: size, height: size }}
+        ref={viewRef}
+        collapsable={false}
+      >
         {screen}
       </View>
     </View>

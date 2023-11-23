@@ -1,16 +1,19 @@
 import React from "react";
-import { View } from "react-native";
+import { PixelRatio, View } from "react-native";
+
+const pd = PixelRatio.get();
+const px = (s: number) => s / pd;
 
 export const Snapshot1 = () => {
   return (
     <View style={{ flex: 1, backgroundColor: "cyan", padding: 16 }}>
       <View
         style={{
-          width: 100,
-          height: 100,
+          width: px(200),
+          height: px(200),
           backgroundColor: "magenta",
-          borderRadius: 10,
-          borderWidth: 4,
+          borderRadius: 20,
+          borderWidth: 8,
           borderColor: "yellow",
         }}
       />

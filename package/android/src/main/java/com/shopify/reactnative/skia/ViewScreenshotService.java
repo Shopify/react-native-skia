@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.uimanager.ReactShadowNode;
 import com.facebook.react.uimanager.UIManagerModule;
 
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ public class ViewScreenshotService {
         if (view == null) {
             return null;
         }
-
         // Measure and get size of view
         int width = view.getWidth();
         int height = view.getHeight();
@@ -62,8 +62,14 @@ public class ViewScreenshotService {
         // Render the main view and its children
         final Canvas canvas = new Canvas(bitmap);
 
+
+        // This is the root view we need to offset the content to 0, 0
+        canvas.save();
+        canvas.translate(-view.getLeft(), -view.getTop());
         // Renders view with child views to canvas
         renderViewToCanvas(canvas, view, paint);
+        canvas.restore();
+
 
         return bitmap;
     }
