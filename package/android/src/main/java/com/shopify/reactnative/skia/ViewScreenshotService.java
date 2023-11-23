@@ -7,6 +7,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
@@ -23,9 +25,9 @@ import androidx.annotation.NonNull;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.ReactShadowNode;
 import com.facebook.react.uimanager.UIManagerModule;
-import com.facebook.react.views.view.ReactViewBackgroundDrawable;
 import com.facebook.react.views.view.ReactViewGroup;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -76,32 +78,36 @@ public class ViewScreenshotService {
         return bitmap;
     }
 
-    private static boolean viewClipsChildren(ReactViewGroup view) {
-        String overflow = view.getOverflow();
-        if (overflow != null) {
-            return overflow == "hidden" || overflow == "scroll";
-        }
-        return false;
-    }
-
-    private static void clipView(Canvas canvas, ReactViewGroup view) {
-      //  view.setClipToOutline(true);
-//        Drawable bg = view.getBackground();
-//        Outline outline = new Outline();
-//        view.getOutlineProvider().getOutline(view, outline);
-//        outline.canClip()
-    }
-
     private static void renderViewToCanvas(Canvas canvas, View view, Paint paint) {
         // Apply transformations for the current view
         canvas.save();
-        if (view instanceof ReactViewGroup) {
-            ReactViewGroup group = (ReactViewGroup)view;
-            if (viewClipsChildren(group)) {
-                clipView(canvas, group);
+        applyTransformations(canvas, view);
+
+        if (view instanceof  ReactViewGroup) {
+            ReactViewGroup rg = (ReactViewGroup) view;
+            String overflow = rg.getOverflow();
+            if (overflow != null) {
+                boolean shouldClip = overflow.equals("hidden") || overflow.equals("scroll");
+                if (shouldClip) {
+                    try {
+                        Field privateField = ReactViewGroup.class.getDeclaredField("mPath");
+                        privateField.setAccessible(true); // Bypass the access check
+                        Path path = (Path) privateField.get(rg);
+                        if (path != null) {
+                            canvas.clipPath(path);
+                        } else {
+                            // Adjust these coordinates as needed
+                            Rect rct = new Rect(0, 0, view.getWidth(), view.getHeight());
+                            if (!rct.isEmpty()) {
+                                canvas.clipRect(rct);
+                            }
+                        }
+                    } catch (Exception e) {
+
+                    }
+                }
             }
         }
-        applyTransformations(canvas, view);
 
         // Draw children if the view has children
         if ((view instanceof ViewGroup)) {
@@ -112,9 +118,12 @@ public class ViewScreenshotService {
             Drawable bg = view.getBackground();
             if (bg != null) {
                 canvas.saveLayerAlpha(null, Math.round(view.getAlpha() * 255));
-                view.getBackground().draw(canvas);
+                bg.draw(canvas);
                 canvas.restore();
             }
+
+
+
 
             // Draw children
             for (int i = 0; i < group.getChildCount(); i++) {
