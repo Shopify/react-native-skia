@@ -326,6 +326,7 @@ interface TestingSurface {
   height: number;
   fontSize: number;
   OS: TestOS;
+  arch: "paper" | "fabric";
 }
 
 class LocalSurface implements TestingSurface {
@@ -333,6 +334,7 @@ class LocalSurface implements TestingSurface {
   readonly height = 256;
   readonly fontSize = 32;
   readonly OS = "node";
+  readonly arch = "paper";
 
   eval<Ctx extends EvalContext, R>(
     fn: (Skia: Skia, ctx: Ctx) => R,
@@ -359,6 +361,7 @@ class RemoteSurface implements TestingSurface {
   readonly height = 256;
   readonly fontSize = 32;
   readonly OS = global.testOS;
+  readonly arch = global.testArch;
 
   private get client() {
     if (global.testClient === null) {
