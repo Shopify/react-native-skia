@@ -321,10 +321,12 @@ interface TestingSurface {
     ctx?: Ctx
   ): Promise<R>;
   draw(node: ReactNode): Promise<SkImage>;
+  screen(name: string): Promise<SkImage>;
   width: number;
   height: number;
   fontSize: number;
   OS: TestOS;
+  arch: "paper" | "fabric";
 }
 
 class LocalSurface implements TestingSurface {
@@ -332,6 +334,7 @@ class LocalSurface implements TestingSurface {
   readonly height = 256;
   readonly fontSize = 32;
   readonly OS = "node";
+  readonly arch = "paper";
 
   eval<Ctx extends EvalContext, R>(
     fn: (Skia: Skia, ctx: Ctx) => R,
@@ -347,6 +350,10 @@ class LocalSurface implements TestingSurface {
     draw();
     return Promise.resolve(ckSurface.makeImageSnapshot());
   }
+
+  screen(_name: string): Promise<SkImage> {
+    throw new Error("screen() is not implemented on node");
+  }
 }
 
 class RemoteSurface implements TestingSurface {
@@ -354,6 +361,7 @@ class RemoteSurface implements TestingSurface {
   readonly height = 256;
   readonly fontSize = 32;
   readonly OS = global.testOS;
+  readonly arch = global.testArch;
 
   private get client() {
     if (global.testClient === null) {
@@ -383,15 +391,28 @@ class RemoteSurface implements TestingSurface {
   draw(node: ReactNode): Promise<SkImage> {
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
-        const Skia = global.SkiaApi;
-        const data = Skia.Data.fromBytes(new Uint8Array(raw));
-        const image = Skia.Image.MakeImageFromEncoded(data);
-        if (image === null) {
-          throw new Error("Unable to decode image");
-        }
-        resolve(image);
+        resolve(this.decodeImage(raw));
       });
       this.client!.send(serialize(node));
     });
+  }
+
+  screen(screen: string): Promise<SkImage> {
+    return new Promise((resolve) => {
+      this.client.once("message", (raw: Buffer) => {
+        resolve(this.decodeImage(raw));
+      });
+      this.client.send(JSON.stringify({ screen }));
+    });
+  }
+
+  private decodeImage(raw: Buffer) {
+    const Skia = global.SkiaApi;
+    const data = Skia.Data.fromBytes(new Uint8Array(raw));
+    const image = Skia.Image.MakeImageFromEncoded(data);
+    if (image === null) {
+      throw new Error("Unable to decode image");
+    }
+    return image;
   }
 }

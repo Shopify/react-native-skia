@@ -5,10 +5,15 @@ declare global {
   var testServer: Server;
   var testClient: WebSocket;
   var testOS: "ios" | "android" | "web" | "node";
+  var testArch: "paper" | "fabric";
 }
 
 const isOS = (os: string): os is "android" | "ios" | "web" => {
   return ["ios", "android", "web"].indexOf(os) !== -1;
+};
+
+const isArch = (arc: string): arc is "paper" | "fabric" => {
+  return ["paper", "fabric"].indexOf(arc) !== -1;
 };
 
 const globalSetup = () => {
@@ -20,12 +25,16 @@ const globalSetup = () => {
       global.testServer.on("connection", (client) => {
         global.testClient = client;
         client.once("message", (msg) => {
-          const str = msg.toString("utf8");
-          const os = str.split("OS: ")[1];
-          if (!isOS(os)) {
-            throw new Error("Unknown testing platform: " + os);
+          const obj = JSON.parse(msg.toString("utf8"));
+          const { OS, arch } = obj;
+          if (!isOS(OS)) {
+            throw new Error("Unknown testing platform: " + OS);
           }
-          global.testOS = os;
+          if (!isArch(arch)) {
+            throw new Error("Unknown testing architecture: " + arch);
+          }
+          global.testOS = OS;
+          global.testArch = arch;
           resolve();
         });
       });
