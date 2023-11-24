@@ -11,7 +11,7 @@ The function `makeImageFromView` lets you take a snapshot of another React Nativ
 
 ::::info
 
-`makeImageFromView` is not support on Fabric yet ([see #2002](https://github.com/Shopify/react-native-skia/issues/2002)).
+`makeImageFromView` is not supported on Fabric yet ([see #2002](https://github.com/Shopify/react-native-skia/issues/2002)).
 
 ::::info
 
