@@ -64,3 +64,6 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 
 ## Snapshots
 * [Telegram Dark Mode - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=vKYEFpO06Tk)
+
+## Pixels
+* [Color Pixelated by Daehyeon Mun (youtu.be)](https://youtu.be/mc56FIJgDAE)
