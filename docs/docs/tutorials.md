@@ -35,6 +35,9 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 ## Image Filters
 * [Neumorphism in React Native (youtu.be)](https://www.youtube.com/watch?v=GFssmWUhwww)
 
+## Pixels
+* [Color Pixelated by Daehyeon Mun (youtu.be)](https://youtu.be/mc56FIJgDAE)
+
 ## Gradients
 * [Introducing Gen-Z Mode (youtu.be)](https://www.youtube.com/watch?v=0FC8O9mRUmg)
 * [iPhone wallpapers, but in React Native Skia](https://www.youtube.com/watch?v=Apqd749v34I)
