@@ -127,12 +127,6 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
 
   readPixels(srcX?: number, srcY?: number, imageInfo?: ImageInfo) {
     const info = this.getImageInfo();
-    console.log({
-      alphaType: ckEnum(info.alphaType),
-      colorType: ckEnum(info.colorType),
-      realAlphaType: this.CanvasKit.AlphaType.Opaque.value,
-      realColorType: this.CanvasKit.ColorType.RGBA_8888.value,
-    });
     const pxInfo: CKImageInfo = {
       colorSpace: this.CanvasKit.ColorSpace.SRGB,
       width: imageInfo?.width ?? info.width,

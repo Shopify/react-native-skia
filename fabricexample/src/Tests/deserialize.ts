@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Skia } from "@shopify/react-native-skia";
 import React from "react";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface SerializedProps {
   [key: string]: any;
 }
