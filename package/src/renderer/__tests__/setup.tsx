@@ -327,7 +327,7 @@ interface TestingSurface {
   ): Promise<R>;
   drawParagraph<Ctx extends EvalContext>(
     fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
-    width: number,
+    width?: number,
     ctx?: Ctx
   ): Promise<SkImage>;
   draw(node: ReactNode): Promise<SkImage>;
@@ -355,13 +355,18 @@ class LocalSurface implements TestingSurface {
 
   async drawParagraph<Ctx extends EvalContext>(
     fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
-    paragraphWidth: number,
+    paragraphWidth?: number,
     ctx?: Ctx
   ) {
     const paragraph = await this.eval(fn, ctx);
     const { surface: ckSurface, draw } = mountCanvas(
       <Group transform={[{ scale: PIXEL_RATIO }]}>
-        <Paragraph paragraph={paragraph} width={paragraphWidth} x={0} y={0} />
+        <Paragraph
+          paragraph={paragraph}
+          width={paragraphWidth ?? this.width}
+          x={0}
+          y={0}
+        />
       </Group>
     );
     draw();
@@ -421,7 +426,7 @@ class RemoteSurface implements TestingSurface {
 
   async drawParagraph<Ctx extends EvalContext>(
     fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
-    paragraphWidth: number,
+    paragraphWidth?: number,
     context?: Ctx
   ): Promise<SkImage> {
     return new Promise((resolve) => {
@@ -429,7 +434,11 @@ class RemoteSurface implements TestingSurface {
         resolve(this.decodeImage(raw));
       });
       const ctx = this.prepareContext(context);
-      const body = { paragraph: fn.toString(), ctx, paragraphWidth };
+      const body = {
+        paragraph: fn.toString(),
+        ctx,
+        paragraphWidth: paragraphWidth ?? this.width,
+      };
       this.client.send(JSON.stringify(body));
     });
   }
