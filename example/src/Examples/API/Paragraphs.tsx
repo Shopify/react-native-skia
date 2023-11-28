@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
+import type { SkTextStyle } from "@shopify/react-native-skia";
 import {
   Canvas,
   FontSlant,
@@ -8,13 +9,11 @@ import {
   PaintStyle,
   Paragraph,
   Rect,
-  SkTextStyle,
   Skia,
   TextDecoration,
   mix,
   useFonts,
 } from "@shopify/react-native-skia";
-
 import {
   useSharedValue,
   useDerivedValue,
@@ -28,7 +27,7 @@ export const Paragraphs = () => {
 
   useEffect(() => {
     progress.value = withRepeat(withTiming(0, { duration: 3000 }), -1, true);
-  }, []);
+  }, [progress]);
 
   const loopedWidth = useDerivedValue(
     () => mix(progress.value, width * 0.2, width * 0.8),
