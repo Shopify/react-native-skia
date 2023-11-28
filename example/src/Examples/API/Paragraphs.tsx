@@ -48,7 +48,8 @@ export const Paragraphs = () => {
     }
 
     const fontSize = 20;
-    const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
+    const paragraphBuilder =
+      Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr);
     const strokePaint = Skia.Paint();
     strokePaint.setStyle(PaintStyle.Stroke);
     strokePaint.setStrokeWidth(1);
