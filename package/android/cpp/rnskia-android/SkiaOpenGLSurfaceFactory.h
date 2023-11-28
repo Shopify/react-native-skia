@@ -90,7 +90,7 @@ public:
     // Check for exceptions
     if (env->ExceptionCheck()) {
       RNSkLogger::logToConsole(
-          "updateTexImage() failed. The exception above can safely be ignored");
+          "updateAndRelease() failed. The exception above can safely be ignored");
       env->ExceptionClear();
     }
   }
