@@ -141,8 +141,8 @@ public:
 
     // Get paragraph style from params
     auto paragraphStyle =
-            count >= 1 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
-                       : para::ParagraphStyle();
+        count >= 1 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
+                   : para::ParagraphStyle();
 
     // Create the paragraph builder
     return jsi::Object::createFromHostObject(
