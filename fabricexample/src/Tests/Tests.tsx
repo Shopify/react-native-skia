@@ -83,7 +83,6 @@ export const Tests = ({ assets }: TestsProps) => {
   useEffect(() => {
     if (drawing) {
       const it = setTimeout(() => {
-        console.log("MakeImageSnapshot");
         const image = ref.current?.makeImageSnapshot({
           x: 0,
           y: 0,

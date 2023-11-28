@@ -388,6 +388,38 @@ class RemoteSurface implements TestingSurface {
   readonly OS = global.testOS;
   readonly arch = global.testArch;
 
+  eval<Ctx extends EvalContext, R>(
+    fn: (Skia: Skia, ctx: Ctx) => any,
+    context?: Ctx
+  ): Promise<R> {
+    const ctx = this.prepareContext(context);
+    const body = { code: fn.toString(), ctx };
+    return this.handleImageResponse<R>(JSON.stringify(body), true);
+  }
+
+  async drawParagraph<Ctx extends EvalContext>(
+    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
+    paragraphWidth?: number,
+    context?: Ctx
+  ) {
+    const ctx = this.prepareContext(context);
+    const body = {
+      paragraph: fn.toString(),
+      ctx,
+      paragraphWidth: paragraphWidth ?? this.width,
+    };
+    this.client.send(JSON.stringify(body));
+    return this.handleImageResponse(JSON.stringify(body));
+  }
+
+  draw(node: ReactNode) {
+    return this.handleImageResponse(serialize(node));
+  }
+
+  screen(screen: string) {
+    return this.handleImageResponse(JSON.stringify({ screen }));
+  }
+
   private get client() {
     if (global.testClient === null) {
       throw new Error("Client is not connected. Did you call init?");
@@ -405,54 +437,15 @@ class RemoteSurface implements TestingSurface {
     return ctx;
   }
 
-  eval<Ctx extends EvalContext, R>(
-    fn: (Skia: Skia, ctx: Ctx) => any,
-    context?: Ctx
+  private handleImageResponse<R = SkImage>(
+    body: string,
+    json?: boolean
   ): Promise<R> {
-    const ctx = this.prepareContext(context);
-    const body = { code: fn.toString(), ctx };
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
-        resolve(JSON.parse(raw.toString()));
+        resolve(json ? JSON.parse(raw.toString()) : this.decodeImage(raw));
       });
-      this.client.send(JSON.stringify(body));
-    });
-  }
-
-  async drawParagraph<Ctx extends EvalContext>(
-    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
-    paragraphWidth?: number,
-    context?: Ctx
-  ): Promise<SkImage> {
-    return new Promise((resolve) => {
-      this.client.once("message", (raw: Buffer) => {
-        resolve(this.decodeImage(raw));
-      });
-      const ctx = this.prepareContext(context);
-      const body = {
-        paragraph: fn.toString(),
-        ctx,
-        paragraphWidth: paragraphWidth ?? this.width,
-      };
-      this.client.send(JSON.stringify(body));
-    });
-  }
-
-  draw(node: ReactNode): Promise<SkImage> {
-    return new Promise((resolve) => {
-      this.client.once("message", (raw: Buffer) => {
-        resolve(this.decodeImage(raw));
-      });
-      this.client!.send(serialize(node));
-    });
-  }
-
-  screen(screen: string): Promise<SkImage> {
-    return new Promise((resolve) => {
-      this.client.once("message", (raw: Buffer) => {
-        resolve(this.decodeImage(raw));
-      });
-      this.client.send(JSON.stringify({ screen }));
+      this.client.send(body);
     });
   }
 
