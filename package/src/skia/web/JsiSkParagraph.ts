@@ -1,70 +1,16 @@
 import type { CanvasKit, Paragraph } from "canvaskit-wasm";
 
-import type {
-  SkParagraphStyle,
-  SkRect,
-  SkRectWithDirection,
-  SkTextStyle,
-  SkParagraph,
-} from "../types";
+import type { SkRect, SkRectWithDirection, SkParagraph } from "../types";
 
 import { HostObject } from "./Host";
 import type { JsiSkCanvas } from "./JsiSkCanvas";
-
-// Used for E2E testing
-export type ParagraphNode =
-  | PlaceholderNode
-  | TextNode
-  | PushStyleNode
-  | PopStyleNode;
-
-export type TextNode = {
-  type: "text";
-  text: string;
-};
-
-export type PlaceholderNode = {
-  type: "placeholder";
-  width: number;
-  height: number;
-  alignment: number;
-  baseline: number;
-  offset: number;
-};
-
-export type PushStyleNode = {
-  type: "push_style";
-  style: SkTextStyle;
-};
-
-export type PopStyleNode = {
-  type: "pop_style";
-};
-
-export type ParagraphJson = {
-  elements: ParagraphNode[];
-  style: SkParagraphStyle | undefined;
-};
 
 export class JsiSkParagraph
   extends HostObject<Paragraph, "Paragraph">
   implements SkParagraph
 {
-  constructor(
-    CanvasKit: CanvasKit,
-    ref: Paragraph,
-    private elements?: ParagraphNode[],
-    private style?: SkParagraphStyle
-  ) {
+  constructor(CanvasKit: CanvasKit, ref: Paragraph) {
     super(CanvasKit, ref, "Paragraph");
-  }
-
-  source(): string {
-    const source: ParagraphJson = {
-      elements: this.elements ?? [],
-      style: this.style ?? undefined,
-    };
-    return JSON.stringify(source);
   }
 
   layout(width: number): void {

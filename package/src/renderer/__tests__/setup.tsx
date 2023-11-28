@@ -291,11 +291,6 @@ const serializeSkOjects = (obj: any): any => {
         __typename__: "SVG",
         source: obj.source(),
       };
-    } else if (obj.__typename__ === "Paragraph") {
-      return {
-        __typename__: "Paragraph",
-        source: obj.source(),
-      };
     }
   }
   return obj;

@@ -32,8 +32,7 @@ export class JsiSkParagraphBuilderFactory
     this.CanvasKit.FontMgr;
     return new JsiSkParagraphBuilder(
       this.CanvasKit,
-      this.CanvasKit.ParagraphBuilder.Make(style, fontMgr),
-      paragraphStyle
+      this.CanvasKit.ParagraphBuilder.Make(style, fontMgr)
     );
   }
 }

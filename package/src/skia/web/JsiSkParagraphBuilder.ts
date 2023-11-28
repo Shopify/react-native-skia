@@ -9,14 +9,11 @@ import type {
   SkParagraphBuilder,
   SkParagraph,
   SkTextStyle,
-  SkParagraphStyle,
   SkPaint,
 } from "../types";
 import { PlaceholderAlignment, TextBaseline } from "../types";
-import { E2E } from "../../__tests__/setup";
 
 import { HostObject } from "./Host";
-import type { ParagraphNode } from "./JsiSkParagraph";
 import { JsiSkParagraph } from "./JsiSkParagraph";
 import { JsiSkTextStyle } from "./JsiSkTextStyle";
 import { JsiSkPaint } from "./JsiSkPaint";
@@ -25,15 +22,8 @@ export class JsiSkParagraphBuilder
   extends HostObject<ParagraphBuilder, "ParagraphBuilder">
   implements SkParagraphBuilder
 {
-  elements: Array<ParagraphNode>;
-
-  constructor(
-    CanvasKit: CanvasKit,
-    ref: ParagraphBuilder,
-    private style?: SkParagraphStyle
-  ) {
+  constructor(CanvasKit: CanvasKit, ref: ParagraphBuilder) {
     super(CanvasKit, ref, "ParagraphBuilder");
-    this.elements = [];
   }
 
   addPlaceholder(
@@ -50,44 +40,18 @@ export class JsiSkParagraphBuilder
       { value: baseline },
       offset
     );
-    if (E2E) {
-      this.elements.push({
-        type: "placeholder",
-        width,
-        height,
-        alignment,
-        baseline,
-        offset,
-      });
-    }
     return this;
   }
   addText(text: string): SkParagraphBuilder {
-    if (E2E) {
-      this.elements.push({
-        type: "text",
-        text,
-      });
-    }
-
     this.ref.addText(text);
     return this;
   }
 
   build(): SkParagraph {
-    return new JsiSkParagraph(
-      this.CanvasKit,
-      this.ref.build(),
-      this.elements,
-      this.style
-    );
+    return new JsiSkParagraph(this.CanvasKit, this.ref.build());
   }
 
   reset(): void {
-    if (E2E) {
-      this.elements = [];
-    }
-
     this.ref.reset();
   }
 
@@ -96,13 +60,6 @@ export class JsiSkParagraphBuilder
     foregroundPaint?: SkPaint | undefined,
     backgroundPaint?: SkPaint | undefined
   ): SkParagraphBuilder {
-    if (E2E) {
-      this.elements.push({
-        type: "push_style",
-        style,
-      });
-    }
-
     const textStyle: TextStyle = JsiSkTextStyle.toTextStyle(style);
     if (foregroundPaint || backgroundPaint) {
       const fg: Paint = foregroundPaint
@@ -120,10 +77,6 @@ export class JsiSkParagraphBuilder
   }
 
   pop(): SkParagraphBuilder {
-    if (E2E) {
-      this.elements.push({ type: "pop_style" });
-    }
-
     this.ref.pop();
     return this;
   }

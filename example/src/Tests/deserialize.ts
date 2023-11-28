@@ -1,5 +1,4 @@
-import { SkParagraph, SkTextStyle, Skia } from "@shopify/react-native-skia";
-import type { ParagraphJson } from "@shopify/react-native-skia/src/skia/web/JsiSkParagraph";
+import { Skia } from "@shopify/react-native-skia";
 import React from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -80,93 +79,7 @@ const parseProp = (value: any, assets: Assets) => {
       ).call({
         Skia,
       });
-    } else if (value.__typename__ === "Paragraph") {
-      return makeParagraphFromSource(value.source);
     }
   }
   return value;
-};
-
-export const makeParagraphFromSource = (json: string): SkParagraph => {
-  const value = JSON.parse(json) as ParagraphJson;
-  // Now ensure all colors are converted to SkColor
-  let style = value.style;
-  if (style) {
-    style.textStyle = getTextStyleWithResolvedColors(style?.textStyle);
-  }
-
-  const builder = Skia.ParagraphBuilder.Make(style ?? {});
-  value.elements.forEach((el) => {
-    switch (el.type) {
-      case "text":
-        builder.addText(el.text);
-        break;
-      case "placeholder":
-        builder.addPlaceholder(
-          el.width,
-          el.height,
-          el.alignment,
-          el.baseline,
-          el.offset
-        );
-        break;
-      case "push_style":
-        builder.pushStyle(getTextStyleWithResolvedColors(el.style));
-        break;
-      case "pop_style":
-        builder.pop();
-        break;
-    }
-  });
-  return builder.build();
-};
-
-const getTextStyleWithResolvedColors = <T extends SkTextStyle | undefined>(
-  textStyle: T
-): T => {
-  if (!textStyle) {
-    return undefined as T;
-  }
-  const retVal = { ...textStyle };
-
-  if (textStyle.color) {
-    retVal.color = Skia.Color(
-      parseEmscriptenColor(textStyle.color as any as EmScriptenColor)
-    );
-  }
-
-  if (textStyle.foregroundColor) {
-    retVal.foregroundColor = Skia.Color(
-      parseEmscriptenColor(textStyle.foregroundColor as any as EmScriptenColor)
-    );
-  }
-
-  if (textStyle.backgroundColor) {
-    retVal.backgroundColor = Skia.Color(
-      parseEmscriptenColor(textStyle.backgroundColor as any as EmScriptenColor)
-    );
-  }
-
-  if (textStyle.decorationColor) {
-    retVal.decorationColor = Skia.Color(
-      parseEmscriptenColor(textStyle.decorationColor as any as EmScriptenColor)
-    );
-  }
-
-  if (retVal.shadows) {
-    retVal.shadows.forEach((shadow) => {
-      if (shadow.color) {
-        shadow.color = Skia.Color(
-          parseEmscriptenColor(shadow.color as any as EmScriptenColor)
-        );
-      }
-    });
-  }
-
-  return retVal;
-};
-
-type EmScriptenColor = { "0": number; "1": number; "2": number; "3": number };
-const parseEmscriptenColor = (v: EmScriptenColor) => {
-  return new Float32Array([v["0"], v["1"], v["2"], v["3"]]);
 };
