@@ -109,12 +109,12 @@ public:
 
   explicit JsiSkParagraphBuilder(std::shared_ptr<RNSkPlatformContext> context,
                                  para::ParagraphStyle paragraphStyle,
-                                 std::shared_ptr<JsiSkFontMgr> fontManager)
+                                 sk_sp<SkFontMgr> fontManager)
       : JsiSkHostObject(std::move(context)) {
 
     _fontCollection = sk_make_sp<para::FontCollection>();
     if (fontManager != nullptr) {
-      _fontCollection->setDefaultFontManager(fontManager->getObject());
+      _fontCollection->setDefaultFontManager(fontManager);
     } else {
       _fontCollection->setDefaultFontManager(getContext()->createFontMgr());
     }
@@ -139,9 +139,25 @@ public:
     auto paragraphStyle =
         count >= 1 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
                    : para::ParagraphStyle();
+    if (count == 0 ||
+        arguments[0]
+            .asObject(runtime)
+            .getProperty(runtime, "textStyle")
+            .isUndefined() ||
+        arguments[0]
+            .asObject(runtime)
+            .getProperty(runtime, "textStyle")
+            .asObject(runtime)
+            .getProperty(runtime, "color")
+            .isUndefined()) {
+      auto textStyle = paragraphStyle.getTextStyle();
+      textStyle.setColor(SkColorSetARGB(255, 0, 0, 0));
+      paragraphStyle.setTextStyle(textStyle);
+    }
 
     // get font manager
-    auto fontMgr = nullptr;
+    auto fontMgr = count >= 2 ? JsiSkFontMgr::fromValue(runtime, arguments[1])
+                              : JsiSkFontMgrFactory::getFontMgr(getContext());
 
     // Create the paragraph builder
     return jsi::Object::createFromHostObject(

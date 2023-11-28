@@ -1,4 +1,4 @@
-import type { CanvasKit, ParagraphBuilder } from "canvaskit-wasm";
+import type { CanvasKit, FontMgr } from "canvaskit-wasm";
 
 import type {
   ParagraphBuilderFactory,
@@ -19,24 +19,17 @@ export class JsiSkParagraphBuilderFactory
     super(CanvasKit);
   }
 
-  Make(paragraphStyle?: SkParagraphStyle, fontManager?: SkFontMgr) {
+  Make(paragraphStyle: SkParagraphStyle, fontManager: SkFontMgr) {
     const style = new this.CanvasKit.ParagraphStyle(
       JsiSkParagraphStyle.toParagraphStyle(this.CanvasKit, paragraphStyle ?? {})
     );
-
-    let builder: ParagraphBuilder;
-    if (fontManager) {
-      builder = this.CanvasKit.ParagraphBuilder.Make(
-        style,
-        JsiSkFontMgr.fromValue(fontManager)
-      );
-    } else {
-      builder = this.CanvasKit.ParagraphBuilder.MakeFromFontProvider(
-        style,
-        this.CanvasKit.TypefaceFontProvider.Make()
-      );
-    }
-
-    return new JsiSkParagraphBuilder(this.CanvasKit, builder);
+    const fontMgr =
+      fontManager === null
+        ? this.CanvasKit.FontMgr.FromData(...[])!
+        : JsiSkFontMgr.fromValue<FontMgr>(fontManager);
+    return new JsiSkParagraphBuilder(
+      this.CanvasKit,
+      this.CanvasKit.ParagraphBuilder.Make(style, fontMgr)
+    );
   }
 }

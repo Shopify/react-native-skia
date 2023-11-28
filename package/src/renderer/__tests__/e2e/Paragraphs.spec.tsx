@@ -9,23 +9,15 @@ import {
 
 describe("Paragraphs", () => {
   it("should render simple paragraph", async () => {
-    const img = await surface.drawParagraph((Skia) =>
-      Skia.ParagraphBuilder.Make({
-        textStyle: { color: Skia.Color("black") },
-      })
-        .addText("Hello from Skia!")
-        .build()
-    );
+    const img = await surface.drawParagraph((Skia) => {
+      return Skia.ParagraphBuilder.Make().addText("Hello from Skia!").build();
+    });
     checkImage(img, `snapshots/paragraph/simple-paragraph-${surface.OS}.png`);
   });
 
   it("should render paragraph linebreaks", async () => {
     const img = await surface.drawParagraph((Skia) =>
-      Skia.ParagraphBuilder.Make({
-        textStyle: { color: Skia.Color("black") },
-      })
-        .addText("Hello\nfrom Skia")
-        .build()
+      Skia.ParagraphBuilder.Make().addText("Hello\nfrom Skia").build()
     );
     checkImage(
       img,
@@ -36,9 +28,7 @@ describe("Paragraphs", () => {
   it("should break when line is long", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
-        Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
-        })
+        Skia.ParagraphBuilder.Make()
           .addText("Hello from a really, really long line - and from Skia!")
           .build(),
       50
@@ -53,7 +43,6 @@ describe("Paragraphs", () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
         Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
           textAlign,
         })
           .addText("Hello Skia!")
@@ -71,7 +60,6 @@ describe("Paragraphs", () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
         Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
           textAlign,
         })
           .addText("Hello Skia!")
@@ -89,7 +77,6 @@ describe("Paragraphs", () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
         Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
           textAlign,
         })
           .addText(
@@ -109,7 +96,6 @@ describe("Paragraphs", () => {
     const img = await surface.drawParagraph(
       (Skia, { textDirection }) =>
         Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
           textDirection,
         })
           .addText("Hello Skia RTL\nThis is a new line")
@@ -127,7 +113,6 @@ describe("Paragraphs", () => {
     const img = await surface.drawParagraph(
       (Skia, { maxLines, ellipsis }) =>
         Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
           maxLines,
           ellipsis,
         })
@@ -160,9 +145,7 @@ describe("Paragraphs", () => {
   it("should support colors", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
-        Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
-        })
+        Skia.ParagraphBuilder.Make()
           .pushStyle({ color: Skia.Color("red") })
           .addText("Hello Skia in red color")
           .pop()
@@ -184,9 +167,7 @@ describe("Paragraphs", () => {
   it("should support text decoration", async () => {
     const img = await surface.drawParagraph(
       (Skia, { Overline, LineThrough, Underline }) =>
-        Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
-        })
+        Skia.ParagraphBuilder.Make()
           .pushStyle({
             decoration: Underline,
             decorationColor: Skia.Color("blue"),
@@ -222,9 +203,7 @@ describe("Paragraphs", () => {
   it("should support font styling", async () => {
     const img = await surface.drawParagraph(
       (Skia, { Italic, Bold, BoldItalic }) =>
-        Skia.ParagraphBuilder.Make({
-          textStyle: { color: Skia.Color("black") },
-        })
+        Skia.ParagraphBuilder.Make()
           .pushStyle({ fontStyle: Italic })
           .addText("Hello Skia in italic")
           .pop()
@@ -253,7 +232,6 @@ describe("Paragraphs", () => {
       (Skia) =>
         Skia.ParagraphBuilder.Make({
           textStyle: {
-            color: Skia.Color("black"),
             fontSize: 25,
             shadows: [
               {

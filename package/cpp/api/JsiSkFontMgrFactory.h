@@ -22,13 +22,18 @@ namespace jsi = facebook::jsi;
 
 class JsiSkFontMgrFactory : public JsiSkHostObject {
 public:
-  JSI_HOST_FUNCTION(System) {
-    auto context = getContext();
+  static sk_sp<SkFontMgr>
+  getFontMgr(std::shared_ptr<RNSkPlatformContext> context) {
     static SkOnce once;
     static sk_sp<SkFontMgr> fontMgr;
-    once([&context, &runtime] { fontMgr = context->createFontMgr(); });
+    once([&context] { fontMgr = context->createFontMgr(); });
+    return fontMgr;
+  }
+
+  JSI_HOST_FUNCTION(System) {
+    auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkFontMgr>(std::move(context), fontMgr));
+        runtime, std::make_shared<JsiSkFontMgr>(getContext(), fontMgr));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgrFactory, System))

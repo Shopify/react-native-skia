@@ -14,7 +14,7 @@ export interface ParagraphBuilderFactory {
    */
   Make(
     paragraphStyle?: SkParagraphStyle,
-    fontManager?: SkFontMgr | null
+    fontManager?: SkFontMgr
   ): SkParagraphBuilder;
 }
 
