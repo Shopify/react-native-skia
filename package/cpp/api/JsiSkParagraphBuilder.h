@@ -136,29 +136,13 @@ private:
 class JsiSkParagraphBuilderFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(Make) {
+    // get font manager
+    auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
+
     // Get paragraph style from params
     auto paragraphStyle =
-        count >= 1 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
-                   : para::ParagraphStyle();
-    if (count == 0 ||
-        arguments[0]
-            .asObject(runtime)
-            .getProperty(runtime, "textStyle")
-            .isUndefined() ||
-        arguments[0]
-            .asObject(runtime)
-            .getProperty(runtime, "textStyle")
-            .asObject(runtime)
-            .getProperty(runtime, "color")
-            .isUndefined()) {
-      auto textStyle = paragraphStyle.getTextStyle();
-      textStyle.setColor(SkColorSetARGB(255, 0, 0, 0));
-      paragraphStyle.setTextStyle(textStyle);
-    }
-
-    // get font manager
-    auto fontMgr = count >= 2 ? JsiSkFontMgr::fromValue(runtime, arguments[1])
-                              : JsiSkFontMgrFactory::getFontMgr(getContext());
+            count >= 1 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
+                       : para::ParagraphStyle();
 
     // Create the paragraph builder
     return jsi::Object::createFromHostObject(
@@ -174,21 +158,6 @@ public:
     auto paragraphStyle =
         count >= 2 ? JsiSkParagraphStyle::fromValue(runtime, arguments[1])
                    : para::ParagraphStyle();
-    if (count <= 1 ||
-        arguments[1]
-            .asObject(runtime)
-            .getProperty(runtime, "textStyle")
-            .isUndefined() ||
-        arguments[1]
-            .asObject(runtime)
-            .getProperty(runtime, "textStyle")
-            .asObject(runtime)
-            .getProperty(runtime, "color")
-            .isUndefined()) {
-      auto textStyle = paragraphStyle.getTextStyle();
-      textStyle.setColor(SkColorSetARGB(255, 0, 0, 0));
-      paragraphStyle.setTextStyle(textStyle);
-    }
 
     // Create the paragraph builder
     return jsi::Object::createFromHostObject(

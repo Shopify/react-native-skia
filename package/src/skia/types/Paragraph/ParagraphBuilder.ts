@@ -1,4 +1,3 @@
-import type { SkFontMgr } from "../Font";
 import type { SkJSIInstance } from "../JsiInstance";
 import type { SkPaint } from "../Paint";
 
@@ -14,10 +13,7 @@ export interface ParagraphBuilderFactory {
    * @param fontManager Font manager
    */
   // TODO: make paragraphStyle the second parameter
-  Make(
-    paragraphStyle?: SkParagraphStyle,
-    fontManager?: SkFontMgr
-  ): SkParagraphBuilder;
+  Make(paragraphStyle?: SkParagraphStyle): SkParagraphBuilder;
 
   MakeFromFontProvider(
     typefaceProvider: SkTypefaceFontProvider,
