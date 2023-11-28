@@ -1,5 +1,5 @@
 import { surface } from "../setup";
-import { checkImage } from "../../../__tests__/setup";
+import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import {
   FontStyle,
   SkTextAlign,
@@ -8,14 +8,14 @@ import {
 } from "../../../skia/types";
 
 describe("Paragraphs", () => {
-  it("should render simple paragraph", async () => {
+  itRunsE2eOnly("should render simple paragraph", async () => {
     const img = await surface.drawParagraph((Skia) => {
       return Skia.ParagraphBuilder.Make().addText("Hello from Skia!").build();
     });
     checkImage(img, `snapshots/paragraph/simple-paragraph-${surface.OS}.png`);
   });
 
-  it("should render paragraph linebreaks", async () => {
+  itRunsE2eOnly("should render paragraph linebreaks", async () => {
     const img = await surface.drawParagraph((Skia) =>
       Skia.ParagraphBuilder.Make().addText("Hello\nfrom Skia").build()
     );
@@ -25,7 +25,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  it("should break when line is long", async () => {
+  itRunsE2eOnly("should break when line is long", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
         Skia.ParagraphBuilder.Make()
@@ -39,7 +39,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  it("should align text to the right", async () => {
+  itRunsE2eOnly("should align text to the right", async () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
         Skia.ParagraphBuilder.Make({
@@ -56,7 +56,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  it("should align text centered", async () => {
+  itRunsE2eOnly("should align text centered", async () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
         Skia.ParagraphBuilder.Make({
@@ -73,7 +73,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  it("should align text justified", async () => {
+  itRunsE2eOnly("should align text justified", async () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
         Skia.ParagraphBuilder.Make({
@@ -92,7 +92,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  it("should render text right to left", async () => {
+  itRunsE2eOnly("should render text right to left", async () => {
     const img = await surface.drawParagraph(
       (Skia, { textDirection }) =>
         Skia.ParagraphBuilder.Make({
@@ -109,23 +109,29 @@ describe("Paragraphs", () => {
     );
   });
   // Test 1
-  it("should show ellipse when line count is above max lines", async () => {
-    const img = await surface.drawParagraph(
-      (Skia, { maxLines, ellipsis }) =>
-        Skia.ParagraphBuilder.Make({
-          maxLines,
-          ellipsis,
-        })
-          .addText("Hello Skia - maxLine is 1!")
-          .build(),
-      50,
-      { maxLines: 1, ellipsis: "..." }
-    );
-    checkImage(img, `snapshots/paragraph/paragraph-ellipse-${surface.OS}.png`);
-  });
+  itRunsE2eOnly(
+    "should show ellipse when line count is above max lines",
+    async () => {
+      const img = await surface.drawParagraph(
+        (Skia, { maxLines, ellipsis }) =>
+          Skia.ParagraphBuilder.Make({
+            maxLines,
+            ellipsis,
+          })
+            .addText("Hello Skia - maxLine is 1!")
+            .build(),
+        50,
+        { maxLines: 1, ellipsis: "..." }
+      );
+      checkImage(
+        img,
+        `snapshots/paragraph/paragraph-ellipse-${surface.OS}.png`
+      );
+    }
+  );
 
   // Test 2
-  it("should use textstyle in paraphstyle", async () => {
+  itRunsE2eOnly("should use textstyle in paraphstyle", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
         Skia.ParagraphBuilder.Make({
@@ -142,7 +148,7 @@ describe("Paragraphs", () => {
   });
 
   // Test 3
-  it("should support colors", async () => {
+  itRunsE2eOnly("should support colors", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
         Skia.ParagraphBuilder.Make()
@@ -164,7 +170,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  it("should support text decoration", async () => {
+  itRunsE2eOnly("should support text decoration", async () => {
     const img = await surface.drawParagraph(
       (Skia, { Overline, LineThrough, Underline }) =>
         Skia.ParagraphBuilder.Make()
@@ -200,7 +206,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  it("should support font styling", async () => {
+  itRunsE2eOnly("should support font styling", async () => {
     const img = await surface.drawParagraph(
       (Skia, { Italic, Bold, BoldItalic }) =>
         Skia.ParagraphBuilder.Make()
@@ -227,7 +233,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  it("should support font shadows", async () => {
+  itRunsE2eOnly("should support font shadows", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
         Skia.ParagraphBuilder.Make({

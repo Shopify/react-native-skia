@@ -19,17 +19,18 @@ export class JsiSkParagraphBuilderFactory
     super(CanvasKit);
   }
 
-  Make(paragraphStyle: SkParagraphStyle, fontManager: SkFontMgr) {
+  Make(paragraphStyle?: SkParagraphStyle, fontManager?: SkFontMgr) {
     const style = new this.CanvasKit.ParagraphStyle(
       JsiSkParagraphStyle.toParagraphStyle(this.CanvasKit, paragraphStyle ?? {})
     );
-    const fontMgr =
-      fontManager === null
-        ? this.CanvasKit.FontMgr.FromData(...[])!
-        : JsiSkFontMgr.fromValue<FontMgr>(fontManager);
-    return new JsiSkParagraphBuilder(
-      this.CanvasKit,
-      this.CanvasKit.ParagraphBuilder.Make(style, fontMgr)
-    );
+    if (fontManager) {
+      const fontMgr = JsiSkFontMgr.fromValue<FontMgr>(fontManager);
+      return new JsiSkParagraphBuilder(
+        this.CanvasKit,
+        this.CanvasKit.ParagraphBuilder.Make(style, fontMgr)
+      );
+    } else {
+      throw new Error("fontManager is required on React Native Web");
+    }
   }
 }
