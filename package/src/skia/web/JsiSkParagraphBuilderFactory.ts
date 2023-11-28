@@ -4,12 +4,14 @@ import type {
   ParagraphBuilderFactory,
   SkFontMgr,
   SkParagraphStyle,
+  SkTypefaceFontProvider,
 } from "../types";
 
 import { Host } from "./Host";
 import { JsiSkParagraphBuilder } from "./JsiSkParagraphBuilder";
 import { JsiSkFontMgr } from "./JsiSkFontMgr";
 import { JsiSkParagraphStyle } from "./JsiSkParagraphStyle";
+import { JsiSkTypeface } from "./JsiSkTypeface";
 
 export class JsiSkParagraphBuilderFactory
   extends Host
@@ -17,6 +19,22 @@ export class JsiSkParagraphBuilderFactory
 {
   constructor(CanvasKit: CanvasKit) {
     super(CanvasKit);
+  }
+
+  MakeFromFontProvider(
+    typefaceProvider: SkTypefaceFontProvider,
+    paragraphStyle?: SkParagraphStyle
+  ) {
+    const style = new this.CanvasKit.ParagraphStyle(
+      JsiSkParagraphStyle.toParagraphStyle(this.CanvasKit, paragraphStyle ?? {})
+    );
+    return new JsiSkParagraphBuilder(
+      this.CanvasKit,
+      this.CanvasKit.ParagraphBuilder.MakeFromFontProvider(
+        style,
+        JsiSkTypeface.fromValue(typefaceProvider)
+      )
+    );
   }
 
   Make(paragraphStyle?: SkParagraphStyle, fontManager?: SkFontMgr) {

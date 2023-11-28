@@ -5,6 +5,7 @@ import type { SkPaint } from "../Paint";
 import type { SkParagraph } from "./Paragraph";
 import type { SkParagraphStyle } from "./ParagraphStyle";
 import type { SkTextStyle, TextBaseline } from "./TextStyle";
+import type { SkTypefaceFontProvider } from "./TypefaceFontProvider";
 
 export interface ParagraphBuilderFactory {
   /**
@@ -12,9 +13,15 @@ export interface ParagraphBuilderFactory {
    * @param paragraphStyle Initial paragraph style
    * @param fontManager Font manager
    */
+  // TODO: make paragraphStyle the second parameter
   Make(
     paragraphStyle?: SkParagraphStyle,
     fontManager?: SkFontMgr
+  ): SkParagraphBuilder;
+
+  MakeFromFontProvider(
+    typefaceProvider: SkTypefaceFontProvider,
+    paragraphStyle?: SkParagraphStyle
   ): SkParagraphBuilder;
 }
 

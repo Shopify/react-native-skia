@@ -11,6 +11,7 @@
 #include <JsiSkParagraph.h>
 #include <JsiSkParagraphStyle.h>
 #include <JsiSkTextStyle.h>
+#include <JsiSkTypefaceFontProvider.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -165,7 +166,39 @@ public:
                      getContext(), paragraphStyle, fontMgr));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, Make))
+  JSI_HOST_FUNCTION(MakeFromFontProvider) {
+    // get font manager
+    auto fontMgr = JsiSkTypefaceFontProvider::fromValue(runtime, arguments[0]);
+
+    // Get paragraph style from params
+    auto paragraphStyle =
+        count >= 2 ? JsiSkParagraphStyle::fromValue(runtime, arguments[1])
+                   : para::ParagraphStyle();
+    if (count <= 1 ||
+        arguments[1]
+            .asObject(runtime)
+            .getProperty(runtime, "textStyle")
+            .isUndefined() ||
+        arguments[1]
+            .asObject(runtime)
+            .getProperty(runtime, "textStyle")
+            .asObject(runtime)
+            .getProperty(runtime, "color")
+            .isUndefined()) {
+      auto textStyle = paragraphStyle.getTextStyle();
+      textStyle.setColor(SkColorSetARGB(255, 0, 0, 0));
+      paragraphStyle.setTextStyle(textStyle);
+    }
+
+    // Create the paragraph builder
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkParagraphBuilder>(
+                     getContext(), paragraphStyle, fontMgr));
+  }
+
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, Make),
+                       JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory,
+                                       MakeFromFontProvider))
 
   explicit JsiSkParagraphBuilderFactory(
       std::shared_ptr<RNSkPlatformContext> context)

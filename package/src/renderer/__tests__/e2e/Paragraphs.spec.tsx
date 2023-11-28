@@ -1,4 +1,4 @@
-import { surface } from "../setup";
+import { resolveFile, surface } from "../setup";
 import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import {
   FontStyle,
@@ -13,6 +13,30 @@ describe("Paragraphs", () => {
       return Skia.ParagraphBuilder.Make().addText("Hello from Skia!").build();
     });
     checkImage(img, `snapshots/paragraph/simple-paragraph-${surface.OS}.png`);
+  });
+  it("should render simple paragraph with custom font", async () => {
+    const Pacifico = Array.from(
+      resolveFile("skia/__tests__/assets/Pacifico-Regular.ttf")
+    );
+    const img = await surface.drawParagraph(
+      (Skia, ctx) => {
+        const tf = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.Pacifico))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(tf, "Pacifico");
+        return Skia.ParagraphBuilder.MakeFromFontProvider(provider)
+          .pushStyle({ fontFamilies: ["Pacifico"], fontSize: 50 })
+          .addText("Hello from Skia!")
+          .build();
+      },
+      surface.width,
+      { Pacifico }
+    );
+    checkImage(
+      img,
+      `snapshots/paragraph/simple-paragraph-with-provider-${surface.OS}.png`
+    );
   });
 
   itRunsE2eOnly("should render paragraph linebreaks", async () => {
