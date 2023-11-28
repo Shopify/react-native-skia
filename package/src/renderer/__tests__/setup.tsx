@@ -12,8 +12,8 @@ import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
-import { Group } from "../components";
-import type { SkImage, SkFont, Skia } from "../../skia/types";
+import { Group, Paragraph } from "../components";
+import type { SkImage, SkFont, Skia, SkParagraph } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 import { SkiaRoot } from "../Reconciler";
@@ -325,6 +325,11 @@ interface TestingSurface {
     fn: (Skia: Skia, ctx: Ctx) => R,
     ctx?: Ctx
   ): Promise<R>;
+  drawParagraph<Ctx extends EvalContext>(
+    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
+    width: number,
+    ctx?: Ctx
+  ): Promise<SkImage>;
   draw(node: ReactNode): Promise<SkImage>;
   screen(name: string): Promise<SkImage>;
   width: number;
@@ -346,6 +351,21 @@ class LocalSurface implements TestingSurface {
     ctx?: Ctx
   ): Promise<R> {
     return Promise.resolve(fn(global.SkiaApi, ctx ?? ({} as any)));
+  }
+
+  async drawParagraph<Ctx extends EvalContext>(
+    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
+    paragraphWidth: number,
+    ctx?: Ctx
+  ) {
+    const paragraph = await this.eval(fn, ctx);
+    const { surface: ckSurface, draw } = mountCanvas(
+      <Group transform={[{ scale: PIXEL_RATIO }]}>
+        <Paragraph paragraph={paragraph} width={paragraphWidth} x={0} y={0} />
+      </Group>
+    );
+    draw();
+    return Promise.resolve(ckSurface.makeImageSnapshot());
   }
 
   draw(node: ReactNode): Promise<SkImage> {
@@ -375,21 +395,42 @@ class RemoteSurface implements TestingSurface {
     return global.testClient!;
   }
 
+  private prepareContext<Ctx extends EvalContext>(context?: Ctx): EvalContext {
+    const ctx: EvalContext = {};
+    if (context) {
+      Object.keys(context).forEach((key) => {
+        ctx[key] = serializeSkOjects(context[key]);
+      });
+    }
+    return ctx;
+  }
+
   eval<Ctx extends EvalContext, R>(
     fn: (Skia: Skia, ctx: Ctx) => any,
     context?: Ctx
   ): Promise<R> {
+    const ctx = this.prepareContext(context);
+    const body = { code: fn.toString(), ctx };
     return new Promise((resolve) => {
       this.client.once("message", (raw: Buffer) => {
         resolve(JSON.parse(raw.toString()));
       });
-      const ctx: EvalContext = {};
-      if (context) {
-        Object.keys(context).forEach((key) => {
-          ctx[key] = serializeSkOjects(context[key]);
-        });
-      }
-      this.client.send(JSON.stringify({ code: fn.toString(), ctx }));
+      this.client.send(JSON.stringify(body));
+    });
+  }
+
+  async drawParagraph<Ctx extends EvalContext>(
+    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
+    paragraphWidth: number,
+    context?: Ctx
+  ): Promise<SkImage> {
+    return new Promise((resolve) => {
+      this.client.once("message", (raw: Buffer) => {
+        resolve(this.decodeImage(raw));
+      });
+      const ctx = this.prepareContext(context);
+      const body = { paragraph: fn.toString(), ctx, paragraphWidth };
+      this.client.send(JSON.stringify(body));
     });
   }
 
