@@ -17,6 +17,7 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [Confetti Animation with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=qOhYFDOEOmo)
 * [Pixelated Image with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=_iU9i9ivTrU)
 * [Typography Metaball with React Native Skia (youtu.be)](https://www.youtube.com/watch?v=B8a8ty54_OI)
+* [Color Pixelated (youtu.be)](https://youtu.be/mc56FIJgDAE)
 
 ## Gestures
 * [Instagram Stickers - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=5yM4NPcTwY4)
@@ -52,7 +53,6 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [It's Severance, but in React Native (youtu.be)](https://www.youtube.com/watch?v=fMMj9oWbWL8)
 
 ## Paths
-
 * [Gradient along Path (youtu.be)](https://www.youtube.com/watch?v=7SCzL-XnfUU)
 * [Headspace Player - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=pErnuAx5GjE)
 * [Make an Animated Wave Slider Effect with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=I6elFawLceY)
@@ -62,5 +62,5 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [Song of Bloom - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=PfCQEA72ljU)
 * [Introducing Gen-Z Mode (youtu.be)](https://www.youtube.com/watch?v=0FC8O9mRUmg)
 
-## Snapshots
+## Native Views
 * [Telegram Dark Mode - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=vKYEFpO06Tk)
