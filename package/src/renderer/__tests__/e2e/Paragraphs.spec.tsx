@@ -16,7 +16,7 @@ describe("Paragraphs", () => {
         .addText("Hello from Skia!")
         .build()
     );
-    checkImage(img, "snapshots/paragraph/simple-paragraph.png");
+    checkImage(img, `snapshots/paragraph/simple-paragraph-${surface.OS}.png`);
   });
 
   it("should render paragraph linebreaks", async () => {
@@ -27,7 +27,10 @@ describe("Paragraphs", () => {
         .addText("Hello\nfrom Skia")
         .build()
     );
-    checkImage(img, "snapshots/paragraph/paragraph-linebreaks.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-linebreaks-${surface.OS}.png`
+    );
   });
 
   it("should break when line is long", async () => {
@@ -40,7 +43,10 @@ describe("Paragraphs", () => {
           .build(),
       50
     );
-    checkImage(img, "snapshots/paragraph/paragraph-auto-linebreaks.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-auto-linebreaks-${surface.OS}.png`
+    );
   });
 
   it("should align text to the right", async () => {
@@ -55,7 +61,10 @@ describe("Paragraphs", () => {
       50,
       { textAlign: SkTextAlign.Right }
     );
-    checkImage(img, "snapshots/paragraph/paragraph-text-align-right.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-align-right-${surface.OS}.png`
+    );
   });
 
   it("should align text centered", async () => {
@@ -70,7 +79,10 @@ describe("Paragraphs", () => {
       50,
       { textAlign: SkTextAlign.Center }
     );
-    checkImage(img, "snapshots/paragraph/paragraph-text-align-center.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-align-center-${surface.OS}.png`
+    );
   });
 
   it("should align text justified", async () => {
@@ -87,7 +99,10 @@ describe("Paragraphs", () => {
       50,
       { textAlign: SkTextAlign.Justify }
     );
-    checkImage(img, "snapshots/paragraph/paragraph-text-align-justify.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-align-justify-${surface.OS}.png`
+    );
   });
 
   it("should render text right to left", async () => {
@@ -102,7 +117,10 @@ describe("Paragraphs", () => {
       150,
       { textDirection: SkTextDirection.RTL }
     );
-    checkImage(img, "snapshots/paragraph/paragraph-text-align-rtl.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-align-rtl-${surface.OS}.png`
+    );
   });
   // Test 1
   it("should show ellipse when line count is above max lines", async () => {
@@ -118,7 +136,7 @@ describe("Paragraphs", () => {
       50,
       { maxLines: 1, ellipsis: "..." }
     );
-    checkImage(img, "snapshots/paragraph/paragraph-ellipse.png");
+    checkImage(img, `snapshots/paragraph/paragraph-ellipse-${surface.OS}.png`);
   });
 
   // Test 2
@@ -134,7 +152,7 @@ describe("Paragraphs", () => {
     );
     checkImage(
       img,
-      "snapshots/paragraph/paragraph-text-style-in-paragraph-style.png"
+      `snapshots/paragraph/paragraph-text-style-in-paragraph-style-${surface.OS}.png`
     );
   });
 
@@ -157,7 +175,10 @@ describe("Paragraphs", () => {
           .build(),
       150
     );
-    checkImage(img, "snapshots/paragraph/paragraph-text-style-colors.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-style-colors-${surface.OS}.png`
+    );
   });
 
   it("should support text decoration", async () => {
@@ -192,7 +213,10 @@ describe("Paragraphs", () => {
         Underline: TextDecoration.Underline,
       }
     );
-    checkImage(img, "snapshots/paragraph/paragraph-text-style-decoration.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-style-decoration-${surface.OS}.png`
+    );
   });
 
   it("should support font styling", async () => {
@@ -218,7 +242,10 @@ describe("Paragraphs", () => {
         BoldItalic: FontStyle.BoldItalic,
       }
     );
-    checkImage(img, "snapshots/paragraph/paragraph-text-style-font-style.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-style-font-style-${surface.OS}.png`
+    );
   });
 
   it("should support font shadows", async () => {
@@ -241,6 +268,9 @@ describe("Paragraphs", () => {
           .build(),
       150
     );
-    checkImage(img, "snapshots/paragraph/paragraph-text-style-font-shadow.png");
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-style-font-shadow-${surface.OS}.png`
+    );
   });
 });
