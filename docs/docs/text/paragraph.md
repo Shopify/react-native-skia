@@ -21,8 +21,13 @@ import { Paragraph, Skia, useFonts } from "@shopify/react-native-skia";
 
 const MyParagraph = () => {
   const customFontMgr = useFonts({
-    Roboto: [require("path/to/Roboto-Regular.ttf")],
-    // Include other fonts as needed
+    Roboto: [
+      require("path/to/Roboto-Regular.ttf"),
+      require("path/to/Roboto-Medium.ttf")
+    ],
+    Noto: [
+      require("path/to/Noto.ttf")
+    ]
   });
 
   const paragraph = useMemo(() => {
@@ -30,17 +35,18 @@ const MyParagraph = () => {
     if (!customFontMgr) {
       return null;
     }
-    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr);
     const textStyle = {
-        fontSize: 20,
-        fontFamilies: ["Roboto"],
-        color: Skia.Color("#000"),
+      color: Skia.Color("black"),
+      fontFamilies: ["Roboto", "Noto"],
+      fontSize: 50,
     };
-
-    // Add text to the paragraph
-    paragraphBuilder.pushStyle(textStyle).addText("Hello, world! ☺️");
-
-    return paragraphBuilder.build();
+    return Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr)
+      .pushStyle(textStyle)
+      .addText("Say Hello to ")
+      .pushStyle({ ...textStyle, fontStyle: { weight: 500 } })
+      .addText("Skia 🎨")
+      .pop()
+      .build();
   }, [customFontMgr]);
 
   // Render the paragraph
@@ -48,48 +54,9 @@ const MyParagraph = () => {
 };
 ```
 
-## Using System Fonts
+### Result
 
-You can also draw a paragraph using system fonts.
-Simply use `Skia.ParagraphBuilder.MakeFromSystem` instead of `Skia.ParagraphBuilder.MakeFromFontProvider`.
-The list of available system fonts can be access via `listFontFamilies()`.
-
-```tsx twoslash
-import { useMemo } from "react";
-import { Canvas, Paragraph, Skia } from "@shopify/react-native-skia";
-import { Platform } from "react-native";
-
-const fontFamily = Platform.select({
-  ios: "Chalkduster",
-  android: "casual",
-  default: "serif",
-});
-
-export const MyParagraph = () => {
-  const paragraph = useMemo(() => {
-    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromSystem();
-    const textStyle = {
-      fontSize: 20,
-      fontFamilies: [fontFamily],
-      color: Skia.Color("#000"),
-    };
-
-    // Add text to the paragraph
-    paragraphBuilder.pushStyle(textStyle).addText("Hello, world! ☺️");
-
-    return paragraphBuilder.build();
-  }, []);
-
-  // Render the paragraph
-  return (
-    <Canvas style={{ flex: 1 }}>
-      <Paragraph paragraph={paragraph} x={0} y={0} width={300} />
-    </Canvas>
-  );
-};
-
-```
-
+<img src={require("/static/img/paragraph/hello-world-node.png").default} width="256" height="256" />
 
 ## Styling Paragraphs
 
@@ -155,15 +122,73 @@ const MyParagraph = () => {
     if (!customFontMgr) {
       return null;
     }
-    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromFontProvider( customFontMgr);
-        paragraphBuilder.pushStyle({ fontStyle: FontStyle.Italic })
-        .addText("Hello Skia in italic")
-        .pop()
-        .pushStyle({ fontStyle: FontStyle.Bold })
-        .addText("Hello Skia in bold");
-        return paragraphBuilder.build();
+    const textStyle = {
+      fontSize: 24,
+      fontFamilies: ["Roboto"],
+      color: Skia.Color("#000"),
+    };
+
+    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr);
+    paragraphBuilder
+      .pushStyle({ ...textStyle, fontStyle: FontStyle.Bold })
+      .addText("This text is bold\n")
+      .pop()
+      .pushStyle({ ...textStyle, fontStyle: FontStyle.Normal })
+      .addText("This text is regular\n")
+      .pop()
+      .pushStyle({ ...textStyle, fontStyle: FontStyle.Italic })
+      .addText("This text is italic")
+      .pop()
+      .build();
+    return paragraphBuilder.build();
   }, [customFontMgr]);
 
   return <Paragraph paragraph={paragraph} x={0} y={0} width={300} />;
 };
 ```
+
+#### Result
+
+<img src={require("/static/img/paragraph/font-style-node.png").default} width="256" height="256" />
+
+## Using System Fonts
+
+You can also draw a paragraph using system fonts.
+Simply use `Skia.ParagraphBuilder.MakeFromSystem` instead of `Skia.ParagraphBuilder.MakeFromFontProvider`.
+The list of available system fonts can be access via `listFontFamilies()`.
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Canvas, Paragraph, Skia } from "@shopify/react-native-skia";
+import { Platform } from "react-native";
+
+const fontFamily = Platform.select({
+  ios: "Chalkduster",
+  android: "casual",
+  default: "serif",
+});
+
+export const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromSystem();
+    const textStyle = {
+      fontSize: 20,
+      fontFamilies: [fontFamily],
+      color: Skia.Color("#000"),
+    };
+
+    // Add text to the paragraph
+    paragraphBuilder.pushStyle(textStyle).addText("Hello, world! ☺️");
+
+    return paragraphBuilder.build();
+  }, []);
+
+  // Render the paragraph
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={300} />
+    </Canvas>
+  );
+};
+```
+
