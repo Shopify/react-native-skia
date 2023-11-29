@@ -1,5 +1,6 @@
 import type {
   CanvasKit,
+  InputColor,
   Paint,
   ParagraphBuilder,
   TextStyle,
@@ -62,12 +63,17 @@ export class JsiSkParagraphBuilder
   ): SkParagraphBuilder {
     const textStyle: TextStyle = JsiSkTextStyle.toTextStyle(style);
     if (foregroundPaint || backgroundPaint) {
+      // Due the canvaskit API not exposing textStyle methods,
+      // we set the default paint color to black for the foreground
+      // and transparent for the background
       const fg: Paint = foregroundPaint
         ? JsiSkPaint.fromValue(foregroundPaint)
-        : new this.CanvasKit.Paint();
+        : this.makePaint(textStyle.color ?? Float32Array.of(0, 0, 0, 1));
       const bg: Paint = backgroundPaint
         ? JsiSkPaint.fromValue(backgroundPaint)
-        : new this.CanvasKit.Paint();
+        : this.makePaint(
+            textStyle.backgroundColor ?? Float32Array.of(0, 0, 0, 0)
+          );
       this.ref.pushPaintStyle(new this.CanvasKit.TextStyle(textStyle), fg, bg);
     } else {
       this.ref.pushStyle(new this.CanvasKit.TextStyle(textStyle));
@@ -83,5 +89,11 @@ export class JsiSkParagraphBuilder
 
   dispose() {
     this.ref.delete();
+  }
+
+  private makePaint(color: InputColor) {
+    const paint = new this.CanvasKit.Paint();
+    paint.setColor(color);
+    return paint;
   }
 }
