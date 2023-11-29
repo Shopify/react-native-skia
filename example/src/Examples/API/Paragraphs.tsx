@@ -39,14 +39,13 @@ export const Paragraphs = () => {
       require("../../Tests/assets/Roboto-Medium.ttf"),
       require("../../Tests/assets/Roboto-Regular.ttf"),
     ],
-    UberMove: [require("../../Tests/assets/UberMove-Medium_mono.ttf")],
+    Noto: [require("../../Tests/assets/NotoColorEmoji-Regular.ttf")],
   });
 
   const paragraph = useMemo(() => {
     if (customFontMgr === null) {
       return null;
     }
-
     const fontSize = 20;
     const paragraphBuilder =
       Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr);
@@ -56,13 +55,16 @@ export const Paragraphs = () => {
 
     const textStyle = {
       fontSize,
-      fontFamilies: ["Roboto"],
+      fontFamilies: ["Roboto", "Noto"],
       color: Skia.Color("#000"),
     };
 
     const coloredTextStyle = {
       fontSize: fontSize * 1.3,
       fontFamilies: ["Roboto"],
+      fontStyle: {
+        weight: FontWeight.Medium,
+      },
       color: Skia.Color("#61bea2"),
     };
 
@@ -92,7 +94,16 @@ export const Paragraphs = () => {
 
     paragraphBuilder
       .pushStyle(textStyle)
-      .addText("Hello Skia! 🥳\n\nThis text rendered using the ")
+      .addText("Hello ")
+      .pushStyle({
+        ...textStyle,
+        fontStyle: {
+          weight: FontWeight.Medium,
+        },
+      })
+      .addText("Skia")
+      .pop()
+      .addText(" 🙋🏼‍♂️\n\nThis text rendered using the ")
       .pushStyle(coloredTextStyle)
       .addText("SkParagraph ")
       .pop()

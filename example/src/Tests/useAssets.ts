@@ -9,11 +9,7 @@ const SkiaLogoJpeg =
     ? require("./assets/skia_logo_jpeg.jpg")
     : "skia_logo_jpeg";
 
-// NotoColorEmoji.ttf is only available on iOS
-const NotoColorEmojiSrc =
-  Platform.OS === "ios"
-    ? require("./assets/Roboto-Medium.ttf")
-    : require("./assets/NotoColorEmoji.ttf");
+const NotoColorEmojiSrc = require("./assets/NotoColorEmoji-Regular.ttf");
 
 export const useAssets = () => {
   const [error, setError] = useState<Error | null>(null);

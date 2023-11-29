@@ -18,20 +18,24 @@ public:
   }
 
   void updateDerivedValue() override {
-    if (_paragraphProp->value().getType() != PropType::HostObject) {
-      throw std::runtime_error("Expected Paragraph object for the " +
-                               std::string(getName()) + " property.");
+    if (_paragraphProp->isSet()) {
+      if (_paragraphProp->value().getType() != PropType::HostObject) {
+        throw std::runtime_error("Expected Paragraph object for the " +
+                                 std::string(getName()) + " property.");
+      }
+
+      auto ptr = std::dynamic_pointer_cast<JsiSkParagraph>(
+          _paragraphProp->value().getAsHostObject());
+
+      if (ptr == nullptr) {
+        throw std::runtime_error("Expected paragraph object for the " +
+                                 std::string(getName()) + " property.");
+      }
+
+      setDerivedValue(ptr->getParagraph());
+    } else {
+      setDerivedValue(nullptr);
     }
-
-    auto ptr = std::dynamic_pointer_cast<JsiSkParagraph>(
-        _paragraphProp->value().getAsHostObject());
-
-    if (ptr == nullptr) {
-      throw std::runtime_error("Expected paragraph object for the " +
-                               std::string(getName()) + " property.");
-    }
-
-    setDerivedValue(ptr->getParagraph());
   }
 
 private:
