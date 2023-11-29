@@ -165,7 +165,8 @@ public:
                      getContext(), paragraphStyle, fontMgr));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, MakeFromSystem),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory,
+                                       MakeFromSystem),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory,
                                        MakeFromFontProvider))
 
