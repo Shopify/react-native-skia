@@ -1,5 +1,10 @@
 import { resolveFile, surface } from "../setup";
-import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
+import {
+  checkImage,
+  docPath,
+  itRunsE2eOnly,
+  itRunsNodeOnly,
+} from "../../../__tests__/setup";
 import {
   FontStyle,
   SkTextAlign,
@@ -32,85 +37,91 @@ const Noto = Array.from(
 );
 
 describe("Paragraphs", () => {
-  it("Should build the first example from the documentation", async () => {
-    const img = await surface.drawParagraph(
-      (Skia, ctx) => {
-        const robotoMedium = Skia.Typeface.MakeFreeTypeFaceFromData(
-          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoMedium))
-        )!;
-        const robotoRegular = Skia.Typeface.MakeFreeTypeFaceFromData(
-          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
-        )!;
-        const noto = Skia.Typeface.MakeFreeTypeFaceFromData(
-          Skia.Data.fromBytes(new Uint8Array(ctx.Noto))
-        )!;
-        const provider = Skia.TypefaceFontProvider.Make();
-        provider.registerFont(robotoMedium, "Roboto");
-        provider.registerFont(robotoRegular, "Roboto");
-        provider.registerFont(noto, "Noto");
-        const textStyle = {
-          color: Skia.Color("black"),
-          fontFamilies: ["Roboto", "Noto"],
-          fontSize: 50,
-        };
-        return Skia.ParagraphBuilder.MakeFromFontProvider(provider)
-          .pushStyle(textStyle)
-          .addText("Say Hello to ")
-          .pushStyle({ ...textStyle, fontStyle: { weight: 500 } })
-          .addText("Skia 🎨")
-          .pop()
-          .build();
-      },
-      surface.width,
-      { RobotoRegular, RobotoMedium, Noto }
-    );
-    checkImage(img, docPath(`paragraph/hello-world-${surface.OS}.png`));
-  });
-  it("Should build the example from the documentation with text styles", async () => {
-    const img = await surface.drawParagraph(
-      (Skia, ctx) => {
-        const robotoBold = Skia.Typeface.MakeFreeTypeFaceFromData(
-          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoBold))
-        )!;
-        const robotoRegular = Skia.Typeface.MakeFreeTypeFaceFromData(
-          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
-        )!;
-        const robotoItalic = Skia.Typeface.MakeFreeTypeFaceFromData(
-          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoItalic))
-        )!;
-        const provider = Skia.TypefaceFontProvider.Make();
-        provider.registerFont(robotoBold, "Roboto");
-        provider.registerFont(robotoRegular, "Roboto");
-        provider.registerFont(robotoItalic, "Roboto");
-        const textStyle = {
-          color: Skia.Color("black"),
-          fontFamilies: ["Roboto"],
-          fontSize: 24,
-        };
-        return Skia.ParagraphBuilder.MakeFromFontProvider(provider)
-          .pushStyle({ ...textStyle, fontStyle: ctx.Bold })
-          .addText("This text is bold\n")
-          .pop()
-          .pushStyle({ ...textStyle, fontStyle: ctx.Normal })
-          .addText("This text is regular\n")
-          .pop()
-          .pushStyle({ ...textStyle, fontStyle: ctx.Italic })
-          .addText("This text is italic")
-          .pop()
-          .build();
-      },
-      surface.width,
-      {
-        RobotoRegular,
-        RobotoBold,
-        RobotoItalic,
-        Bold: FontStyle.Bold,
-        Normal: FontStyle.Normal,
-        Italic: FontStyle.Italic,
-      }
-    );
-    checkImage(img, docPath(`paragraph/font-style-${surface.OS}.png`));
-  });
+  itRunsNodeOnly(
+    "Should build the first example from the documentation",
+    async () => {
+      const img = await surface.drawParagraph(
+        (Skia, ctx) => {
+          const robotoMedium = Skia.Typeface.MakeFreeTypeFaceFromData(
+            Skia.Data.fromBytes(new Uint8Array(ctx.RobotoMedium))
+          )!;
+          const robotoRegular = Skia.Typeface.MakeFreeTypeFaceFromData(
+            Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
+          )!;
+          const noto = Skia.Typeface.MakeFreeTypeFaceFromData(
+            Skia.Data.fromBytes(new Uint8Array(ctx.Noto))
+          )!;
+          const provider = Skia.TypefaceFontProvider.Make();
+          provider.registerFont(robotoMedium, "Roboto");
+          provider.registerFont(robotoRegular, "Roboto");
+          provider.registerFont(noto, "Noto");
+          const textStyle = {
+            color: Skia.Color("black"),
+            fontFamilies: ["Roboto", "Noto"],
+            fontSize: 50,
+          };
+          return Skia.ParagraphBuilder.MakeFromFontProvider(provider)
+            .pushStyle(textStyle)
+            .addText("Say Hello to ")
+            .pushStyle({ ...textStyle, fontStyle: { weight: 500 } })
+            .addText("Skia 🎨")
+            .pop()
+            .build();
+        },
+        surface.width,
+        { RobotoRegular, RobotoMedium, Noto }
+      );
+      checkImage(img, docPath(`paragraph/hello-world-${surface.OS}.png`));
+    }
+  );
+  itRunsNodeOnly(
+    "Should build the example from the documentation with text styles",
+    async () => {
+      const img = await surface.drawParagraph(
+        (Skia, ctx) => {
+          const robotoBold = Skia.Typeface.MakeFreeTypeFaceFromData(
+            Skia.Data.fromBytes(new Uint8Array(ctx.RobotoBold))
+          )!;
+          const robotoRegular = Skia.Typeface.MakeFreeTypeFaceFromData(
+            Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
+          )!;
+          const robotoItalic = Skia.Typeface.MakeFreeTypeFaceFromData(
+            Skia.Data.fromBytes(new Uint8Array(ctx.RobotoItalic))
+          )!;
+          const provider = Skia.TypefaceFontProvider.Make();
+          provider.registerFont(robotoBold, "Roboto");
+          provider.registerFont(robotoRegular, "Roboto");
+          provider.registerFont(robotoItalic, "Roboto");
+          const textStyle = {
+            color: Skia.Color("black"),
+            fontFamilies: ["Roboto"],
+            fontSize: 24,
+          };
+          return Skia.ParagraphBuilder.MakeFromFontProvider(provider)
+            .pushStyle({ ...textStyle, fontStyle: ctx.Bold })
+            .addText("This text is bold\n")
+            .pop()
+            .pushStyle({ ...textStyle, fontStyle: ctx.Normal })
+            .addText("This text is regular\n")
+            .pop()
+            .pushStyle({ ...textStyle, fontStyle: ctx.Italic })
+            .addText("This text is italic")
+            .pop()
+            .build();
+        },
+        surface.width,
+        {
+          RobotoRegular,
+          RobotoBold,
+          RobotoItalic,
+          Bold: FontStyle.Bold,
+          Normal: FontStyle.Normal,
+          Italic: FontStyle.Italic,
+        }
+      );
+      checkImage(img, docPath(`paragraph/font-style-${surface.OS}.png`));
+    }
+  );
   itRunsE2eOnly("should render simple paragraph", async () => {
     const img = await surface.drawParagraph((Skia) => {
       return Skia.ParagraphBuilder.MakeFromSystem()
