@@ -1,8 +1,7 @@
-import type { CanvasKit, FontMgr } from "canvaskit-wasm";
+import type { CanvasKit } from "canvaskit-wasm";
 
 import type {
   ParagraphBuilderFactory,
-  SkFontMgr,
   SkParagraphBuilder,
   SkParagraphStyle,
   SkTypefaceFontProvider,
@@ -10,7 +9,6 @@ import type {
 
 import { Host, NotImplementedOnRNWeb } from "./Host";
 import { JsiSkParagraphBuilder } from "./JsiSkParagraphBuilder";
-import { JsiSkFontMgr } from "./JsiSkFontMgr";
 import { JsiSkParagraphStyle } from "./JsiSkParagraphStyle";
 import { JsiSkTypeface } from "./JsiSkTypeface";
 
