@@ -135,7 +135,7 @@ private:
  */
 class JsiSkParagraphBuilderFactory : public JsiSkHostObject {
 public:
-  JSI_HOST_FUNCTION(Make) {
+  JSI_HOST_FUNCTION(MakeFromSystem) {
     // get font manager
     auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
 
@@ -165,7 +165,7 @@ public:
                      getContext(), paragraphStyle, fontMgr));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, Make),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, MakeFromSystem),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory,
                                        MakeFromFontProvider))
 

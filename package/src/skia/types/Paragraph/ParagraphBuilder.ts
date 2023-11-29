@@ -8,13 +8,16 @@ import type { SkTypefaceFontProvider } from "./TypefaceFontProvider";
 
 export interface ParagraphBuilderFactory {
   /**
-   * Creates a new ParagraphBuilder object.
+   * Creates a new ParagraphBuilder object from system fonts.
    * @param paragraphStyle Initial paragraph style
-   * @param fontManager Font manager
    */
-  // TODO: make paragraphStyle the second parameter
-  Make(paragraphStyle?: SkParagraphStyle): SkParagraphBuilder;
+  MakeFromSystem(paragraphStyle?: SkParagraphStyle): SkParagraphBuilder;
 
+  /**
+   * Creates a new ParagraphBuilder object from custom fonts.
+   * @param typefaceProvider Typeface provider
+   * @param paragraphStyle Initial paragraph style
+   */
   MakeFromFontProvider(
     typefaceProvider: SkTypefaceFontProvider,
     paragraphStyle?: SkParagraphStyle

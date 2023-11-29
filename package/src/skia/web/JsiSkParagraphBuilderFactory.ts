@@ -3,11 +3,12 @@ import type { CanvasKit, FontMgr } from "canvaskit-wasm";
 import type {
   ParagraphBuilderFactory,
   SkFontMgr,
+  SkParagraphBuilder,
   SkParagraphStyle,
   SkTypefaceFontProvider,
 } from "../types";
 
-import { Host } from "./Host";
+import { Host, NotImplementedOnRNWeb } from "./Host";
 import { JsiSkParagraphBuilder } from "./JsiSkParagraphBuilder";
 import { JsiSkFontMgr } from "./JsiSkFontMgr";
 import { JsiSkParagraphStyle } from "./JsiSkParagraphStyle";
@@ -37,18 +38,7 @@ export class JsiSkParagraphBuilderFactory
     );
   }
 
-  Make(paragraphStyle?: SkParagraphStyle, fontManager?: SkFontMgr) {
-    const style = new this.CanvasKit.ParagraphStyle(
-      JsiSkParagraphStyle.toParagraphStyle(this.CanvasKit, paragraphStyle ?? {})
-    );
-    if (fontManager) {
-      const fontMgr = JsiSkFontMgr.fromValue<FontMgr>(fontManager);
-      return new JsiSkParagraphBuilder(
-        this.CanvasKit,
-        this.CanvasKit.ParagraphBuilder.Make(style, fontMgr)
-      );
-    } else {
-      throw new Error("fontManager is required on React Native Web");
-    }
+  MakeFromSystem(_paragraphStyle?: SkParagraphStyle): SkParagraphBuilder {
+    throw new NotImplementedOnRNWeb();
   }
 }

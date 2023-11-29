@@ -13,7 +13,7 @@ You can use custom fonts or system fonts, [see Fonts management](/docs/text/font
 
 ## Hello World
 
-In the example below, we create a simple paragraph based on a couple of custom fonts.
+In the example below, we create a simple paragraph based on  custom fonts.
 
 ```tsx twoslash
 import { useMemo } from "react";
@@ -47,6 +47,49 @@ const MyParagraph = () => {
   return <Paragraph paragraph={paragraph} x={0} y={0} width={300} />;
 };
 ```
+
+## Using System Fonts
+
+You can also draw a paragraph using system fonts.
+Simply use `Skia.ParagraphBuilder.MakeFromSystem` instead of `Skia.ParagraphBuilder.MakeFromFontProvider`.
+The list of available system fonts can be access via `listFontFamilies()`.
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Canvas, Paragraph, Skia } from "@shopify/react-native-skia";
+import { Platform } from "react-native";
+
+const fontFamily = Platform.select({
+  ios: "Chalkduster",
+  android: "casual",
+  default: "serif",
+});
+
+export const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromSystem();
+    const textStyle = {
+      fontSize: 20,
+      fontFamilies: [fontFamily],
+      color: Skia.Color("#000"),
+    };
+
+    // Add text to the paragraph
+    paragraphBuilder.pushStyle(textStyle).addText("Hello, world! ☺️");
+
+    return paragraphBuilder.build();
+  }, []);
+
+  // Render the paragraph
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={300} />
+    </Canvas>
+  );
+};
+
+```
+
 
 ## Styling Paragraphs
 
