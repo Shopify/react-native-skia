@@ -26,7 +26,11 @@ const MyParagraph = () => {
   });
 
   const paragraph = useMemo(() => {
-    const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
+    // Are the font loaded already?
+    if (!customFontMgr) {
+      return null;
+    }
+    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr);
     const textStyle = {
         fontSize: 20,
         fontFamilies: ["Roboto"],
@@ -104,7 +108,11 @@ const MyParagraph = () => {
   });
 
   const paragraph = useMemo(() => {
-    const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
+    // Are the custom fonts loaded?
+    if (!customFontMgr) {
+      return null;
+    }
+    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromFontProvider( customFontMgr);
         paragraphBuilder.pushStyle({ fontStyle: FontStyle.Italic })
         .addText("Hello Skia in italic")
         .pop()

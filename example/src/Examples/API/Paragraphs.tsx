@@ -121,7 +121,7 @@ export const Paragraphs = () => {
     return retVal;
   }, [customFontMgr]);
 
-  return paragraph ? (
+  return (
     <ScrollView>
       <Canvas
         style={{
@@ -135,5 +135,5 @@ export const Paragraphs = () => {
         </Group>
       </Canvas>
     </ScrollView>
-  ) : null;
+  );
 };

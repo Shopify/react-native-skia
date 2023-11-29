@@ -19,6 +19,9 @@ protected:
     auto y = _yProp->value().getAsNumber();
     auto width = static_cast<SkScalar>(_widthProp->value().getAsNumber());
     auto p = _paragraphProp->getDerivedValue();
+    if (p == nullptr) {
+      return;
+    }
     // Let's ensure that we don't perform unessecary layouts on the paragraph.
     // We should only layout if we have a new paragraph or if the layout width
     // has changed.
@@ -35,7 +38,6 @@ protected:
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
     _paragraphProp = container->defineProperty<ParagraphProp>("paragraph");
-    _paragraphProp->require();
 
     _xProp = container->defineProperty<NodeProp>("x");
     _xProp->require();

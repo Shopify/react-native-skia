@@ -14,7 +14,9 @@ export class ParagraphNode extends JsiDrawingNode<ParagraphProps, null> {
 
   draw({ canvas }: DrawingContext) {
     const { paragraph, x, y, width } = this.props;
-    paragraph.layout(width);
-    paragraph.paint(canvas, x, y);
+    if (paragraph) {
+      paragraph.layout(width);
+      paragraph.paint(canvas, x, y);
+    }
   }
 }
