@@ -10,7 +10,7 @@ import {
 describe("Paragraphs", () => {
   itRunsE2eOnly("should render simple paragraph", async () => {
     const img = await surface.drawParagraph((Skia) => {
-      return Skia.ParagraphBuilder.Make()
+      return Skia.ParagraphBuilder.MakeFromSystem()
         .pushStyle({ color: Skia.Color("black") })
         .addText("Hello from Skia!")
         .build();
@@ -48,7 +48,7 @@ describe("Paragraphs", () => {
 
   itRunsE2eOnly("should render paragraph linebreaks", async () => {
     const img = await surface.drawParagraph((Skia) =>
-      Skia.ParagraphBuilder.Make()
+      Skia.ParagraphBuilder.MakeFromSystem()
         .pushStyle({ color: Skia.Color("black") })
         .addText("Hello\nfrom Skia")
         .build()
@@ -62,7 +62,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should break when line is long", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
-        Skia.ParagraphBuilder.Make()
+        Skia.ParagraphBuilder.MakeFromSystem()
           .pushStyle({ color: Skia.Color("black") })
           .addText("Hello from a really, really long line - and from Skia!")
           .build(),
@@ -77,7 +77,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should align text to the right", async () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
-        Skia.ParagraphBuilder.Make({
+        Skia.ParagraphBuilder.MakeFromSystem({
           textAlign,
         })
           .pushStyle({ color: Skia.Color("black") })
@@ -95,7 +95,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should align text centered", async () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
-        Skia.ParagraphBuilder.Make({
+        Skia.ParagraphBuilder.MakeFromSystem({
           textAlign,
         })
           .pushStyle({ color: Skia.Color("black") })
@@ -113,7 +113,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should align text justified", async () => {
     const img = await surface.drawParagraph(
       (Skia, { textAlign }) =>
-        Skia.ParagraphBuilder.Make({
+        Skia.ParagraphBuilder.MakeFromSystem({
           textAlign,
           textStyle: {
             color: Skia.Color("black"),
@@ -135,7 +135,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should align text left", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
-        Skia.ParagraphBuilder.Make({
+        Skia.ParagraphBuilder.MakeFromSystem({
           textStyle: {
             color: Skia.Color("black"),
           },
@@ -155,7 +155,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should render text right to left", async () => {
     const img = await surface.drawParagraph(
       (Skia, { textDirection }) =>
-        Skia.ParagraphBuilder.Make({
+        Skia.ParagraphBuilder.MakeFromSystem({
           textDirection,
           textStyle: {
             color: Skia.Color("black"),
@@ -177,7 +177,7 @@ describe("Paragraphs", () => {
     async () => {
       const img = await surface.drawParagraph(
         (Skia, { maxLines, ellipsis }) =>
-          Skia.ParagraphBuilder.Make({
+          Skia.ParagraphBuilder.MakeFromSystem({
             maxLines,
             ellipsis,
             textStyle: {
@@ -199,7 +199,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should use textstyle in paraphstyle", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
-        Skia.ParagraphBuilder.Make()
+        Skia.ParagraphBuilder.MakeFromSystem()
           .pushStyle({ color: Skia.Color("red") })
           .addText("Hello Skia!")
           .build(),
@@ -214,7 +214,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should support colors", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
-        Skia.ParagraphBuilder.Make()
+        Skia.ParagraphBuilder.MakeFromSystem()
           .pushStyle({ color: Skia.Color("red") })
           .addText("Hello Skia in red color")
           .pop()
@@ -236,7 +236,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should support text decoration", async () => {
     const img = await surface.drawParagraph(
       (Skia, { Overline, LineThrough, Underline }) =>
-        Skia.ParagraphBuilder.Make()
+        Skia.ParagraphBuilder.MakeFromSystem()
           .pushStyle({
             decoration: Underline,
             decorationColor: Skia.Color("blue"),
@@ -275,7 +275,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should support font styling", async () => {
     const img = await surface.drawParagraph(
       (Skia, { Italic, Bold, BoldItalic }) =>
-        Skia.ParagraphBuilder.Make()
+        Skia.ParagraphBuilder.MakeFromSystem()
           .pushStyle({ fontStyle: Italic, color: Skia.Color("black") })
           .addText("Hello Skia in italic")
           .pop()
@@ -302,7 +302,7 @@ describe("Paragraphs", () => {
   itRunsE2eOnly("should support font shadows", async () => {
     const img = await surface.drawParagraph(
       (Skia) =>
-        Skia.ParagraphBuilder.Make()
+        Skia.ParagraphBuilder.MakeFromSystem()
           .pushStyle({
             color: Skia.Color("black"),
             fontSize: 25,
