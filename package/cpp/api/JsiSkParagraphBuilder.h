@@ -11,7 +11,7 @@
 #include <JsiSkParagraph.h>
 #include <JsiSkParagraphStyle.h>
 #include <JsiSkTextStyle.h>
-#include <JsiSkTypefaceFontProvider.h>
+#include <JsiSkTypeFaceFontProvider.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
