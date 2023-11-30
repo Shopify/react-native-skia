@@ -19,30 +19,34 @@ export const buildLibGraphemeiOS = async () => {
 
   console.log("Building libgrapheme for iOS...");
 
-  // Change to the third_party/libgrapheme directory
-  const currentDir = process.cwd();
-  try {
-    process.chdir("./third_party/externals/libgrapheme");
-    // Check if the output has been created - if so skip the build
-    if (!fs.existsSync("./gen/case.o")) {
-      // Run configure
-      console.log("Configuring libgrapheme...");
-      executeCmdSync("./configure");
-      // Up the file handle limit on mac:
-      if (os.platform() === "darwin") {
-        console.log(
-          "Extending file handle count on Mac to avoid `Too many open files` error..."
-        );
-        executeCmdSync("ulimit -n 4096");
-      }
-      // Run make
-      console.log("Building libgrapheme...");
-      executeCmdSync("make");
-      console.log("libgrapheme successfully built.");
-    } else {
-      console.log("Skipping configuring libgrapheme as it is already built.");
-    }
-  } finally {
-    process.chdir(currentDir);
+  // Ensure the third_party/externals/libgrapheme directory exists
+  const libGraphemeDir = "./third_party/externals/libgrapheme";
+  if (!fs.existsSync(libGraphemeDir)) {
+    fs.mkdirSync(libGraphemeDir, { recursive: true });
+    console.log("Created directory:", libGraphemeDir);
   }
+
+  // Change to the third_party/externals/libgrapheme directory
+  const currentDir = process.cwd();
+  process.chdir(libGraphemeDir);
+  // Check if the output has been created - if so skip the build
+  if (!fs.existsSync("./gen/case.o")) {
+    // Run configure
+    console.log("Configuring libgrapheme...");
+    executeCmdSync("./configure");
+    // Up the file handle limit on mac:
+    if (os.platform() === "darwin") {
+      console.log(
+        "Extending file handle count on Mac to avoid `Too many open files` error..."
+      );
+      executeCmdSync("ulimit -n 4096");
+    }
+    // Run make
+    console.log("Building libgrapheme...");
+    executeCmdSync("make");
+    console.log("libgrapheme successfully built.");
+  } else {
+    console.log("Skipping configuring libgrapheme as it is already built.");
+  }
+  process.chdir(currentDir);
 };
