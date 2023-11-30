@@ -112,15 +112,12 @@ public:
                                  para::ParagraphStyle paragraphStyle,
                                  sk_sp<SkFontMgr> fontManager)
       : JsiSkHostObject(std::move(context)) {
-
     _fontCollection = sk_make_sp<para::FontCollection>();
+    _fontCollection->setDefaultFontManager(getContext()->createFontMgr());
     if (fontManager != nullptr) {
-      _fontCollection->setDefaultFontManager(fontManager);
-    } else {
-      _fontCollection->setDefaultFontManager(getContext()->createFontMgr());
+      _fontCollection->setAssetFontManager(fontManager);
     }
     _fontCollection->enableFontFallback();
-
     _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection);
   }
 
@@ -135,29 +132,14 @@ private:
  */
 class JsiSkParagraphBuilderFactory : public JsiSkHostObject {
 public:
-  JSI_HOST_FUNCTION(MakeFromSystem) {
-    // get font manager
-    auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
-
+  JSI_HOST_FUNCTION(Make) {
     // Get paragraph style from params
     auto paragraphStyle =
-        count >= 1 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
+        count > 0 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
                    : para::ParagraphStyle();
-
-    // Create the paragraph builder
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkParagraphBuilder>(
-                     getContext(), paragraphStyle, fontMgr));
-  }
-
-  JSI_HOST_FUNCTION(MakeFromFontProvider) {
+   
     // get font manager
-    auto fontMgr = JsiSkTypefaceFontProvider::fromValue(runtime, arguments[0]);
-
-    // Get paragraph style from params
-    auto paragraphStyle =
-        count >= 2 ? JsiSkParagraphStyle::fromValue(runtime, arguments[1])
-                   : para::ParagraphStyle();
+    auto fontMgr = count > 1 ? nullptr : JsiSkTypefaceFontProvider::fromValue(runtime, arguments[1]);
 
     // Create the paragraph builder
     return jsi::Object::createFromHostObject(
@@ -166,9 +148,7 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory,
-                                       MakeFromSystem),
-                       JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory,
-                                       MakeFromFontProvider))
+                                       Make))
 
   explicit JsiSkParagraphBuilderFactory(
       std::shared_ptr<RNSkPlatformContext> context)

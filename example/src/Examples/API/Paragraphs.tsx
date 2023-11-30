@@ -39,7 +39,6 @@ export const Paragraphs = () => {
       require("../../Tests/assets/Roboto-Medium.ttf"),
       require("../../Tests/assets/Roboto-Regular.ttf"),
     ],
-    Noto: [require("../../Tests/assets/NotoColorEmoji-Regular.ttf")],
   });
 
   const paragraph = useMemo(() => {
@@ -47,15 +46,14 @@ export const Paragraphs = () => {
       return null;
     }
     const fontSize = 20;
-    const paragraphBuilder =
-      Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr);
+    const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
     const strokePaint = Skia.Paint();
     strokePaint.setStyle(PaintStyle.Stroke);
     strokePaint.setStrokeWidth(1);
 
     const textStyle = {
       fontSize,
-      fontFamilies: ["Roboto", "Noto"],
+      fontFamilies: ["Roboto"],
       color: Skia.Color("#000"),
     };
 
