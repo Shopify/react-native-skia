@@ -1,5 +1,10 @@
 import { resolveFile, surface } from "../setup";
-import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
+import {
+  CI,
+  checkImage,
+  docPath,
+  itRunsE2eOnly,
+} from "../../../__tests__/setup";
 import {
   FontStyle,
   SkTextAlign,
@@ -71,7 +76,10 @@ describe("Paragraphs", () => {
         OS: surface.OS,
       }
     );
-    checkImage(img, docPath(`paragraph/hello-world-${surface.OS}.png`));
+    checkImage(img, docPath(`paragraph/hello-world-${surface.OS}.png`), {
+      // In CI, the emoji font is different
+      maxPixelDiff: CI ? 15000 : 200,
+    });
   });
   it("Should build the example from the documentation with text styles", async () => {
     const img = await surface.drawParagraph(
