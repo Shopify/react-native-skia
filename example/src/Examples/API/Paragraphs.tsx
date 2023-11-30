@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
-import { ScrollView, useWindowDimensions } from "react-native";
-import type { SkTextStyle } from "@shopify/react-native-skia";
+import { Platform, ScrollView, useWindowDimensions } from "react-native";
+import type { DataModule, SkTextStyle } from "@shopify/react-native-skia";
 import {
   Canvas,
   FontSlant,
@@ -21,6 +21,17 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
+const fonts: Record<string, DataModule[]> = {
+  Roboto: [
+    require("../../Tests/assets/Roboto-Medium.ttf"),
+    require("../../Tests/assets/Roboto-Regular.ttf"),
+  ],
+};
+// On Web, we need provide a font for emojis
+if (Platform.OS === "web") {
+  fonts.NotoColorEmoji = [require("../../Tests/assets/NotoColorEmoji.ttf")];
+}
+
 export const Paragraphs = () => {
   const { height, width } = useWindowDimensions();
   const progress = useSharedValue(1);
@@ -34,12 +45,7 @@ export const Paragraphs = () => {
     [progress]
   );
 
-  const customFontMgr = useFonts({
-    Roboto: [
-      require("../../Tests/assets/Roboto-Medium.ttf"),
-      require("../../Tests/assets/Roboto-Regular.ttf"),
-    ],
-  });
+  const customFontMgr = useFonts(fonts);
 
   const paragraph = useMemo(() => {
     if (customFontMgr === null) {
@@ -53,7 +59,7 @@ export const Paragraphs = () => {
 
     const textStyle = {
       fontSize,
-      fontFamilies: ["Roboto"],
+      fontFamilies: ["Roboto", "NotoColorEmoji"],
       color: Skia.Color("#000"),
     };
 

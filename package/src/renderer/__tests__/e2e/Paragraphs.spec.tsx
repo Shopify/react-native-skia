@@ -27,10 +27,6 @@ const RobotoItalic = Array.from(
   resolveFile("skia/__tests__/assets/Roboto-Italic.ttf")
 );
 
-const Noto = Array.from(
-  resolveFile("skia/__tests__/assets/NotoColorEmoji-Regular.ttf")
-);
-
 describe("Paragraphs", () => {
   it("Should build the first example from the documentation", async () => {
     const img = await surface.drawParagraph(
@@ -41,13 +37,9 @@ describe("Paragraphs", () => {
         const robotoRegular = Skia.Typeface.MakeFreeTypeFaceFromData(
           Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
         )!;
-        const noto = Skia.Typeface.MakeFreeTypeFaceFromData(
-          Skia.Data.fromBytes(new Uint8Array(ctx.Noto))
-        )!;
         const provider = Skia.TypefaceFontProvider.Make();
         provider.registerFont(robotoMedium, "Roboto");
         provider.registerFont(robotoRegular, "Roboto");
-        provider.registerFont(noto, "Noto");
         const textStyle = {
           color: Skia.Color("black"),
           fontFamilies: ["Roboto", "Noto"],
@@ -62,7 +54,7 @@ describe("Paragraphs", () => {
           .build();
       },
       surface.width,
-      { RobotoRegular, RobotoMedium, Noto }
+      { RobotoRegular, RobotoMedium }
     );
     checkImage(img, docPath(`paragraph/hello-world-${surface.OS}.png`));
   });
