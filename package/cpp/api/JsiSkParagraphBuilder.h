@@ -136,10 +136,12 @@ public:
     // Get paragraph style from params
     auto paragraphStyle =
         count > 0 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
-                   : para::ParagraphStyle();
-   
+                  : para::ParagraphStyle();
+
     // get font manager
-    auto fontMgr = count > 1 ? nullptr : JsiSkTypefaceFontProvider::fromValue(runtime, arguments[1]);
+    auto fontMgr =
+        count > 1 ? JsiSkTypefaceFontProvider::fromValue(runtime, arguments[1])
+                  : nullptr;
 
     // Create the paragraph builder
     return jsi::Object::createFromHostObject(
@@ -147,8 +149,7 @@ public:
                      getContext(), paragraphStyle, fontMgr));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory,
-                                       Make))
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, Make))
 
   explicit JsiSkParagraphBuilderFactory(
       std::shared_ptr<RNSkPlatformContext> context)
