@@ -8,12 +8,10 @@ slug: /text/paragraph
 React Native Skia offers an API to perform text layouts.
 Behind the scene, this API is the Skia Paragraph API.
 
-The first step to create a paragraph, is to specify the set of fonts you would like to use.
-You can use custom fonts or system fonts, [see Fonts management](/docs/text/fonts).
 
 ## Hello World
 
-In the example below, we create a simple paragraph based on  custom fonts.
+In the example below, we create a simple paragraph based on custom fonts.
 
 ```tsx twoslash
 import { useMemo } from "react";
@@ -24,9 +22,6 @@ const MyParagraph = () => {
     Roboto: [
       require("path/to/Roboto-Regular.ttf"),
       require("path/to/Roboto-Medium.ttf")
-    ],
-    Noto: [
-      require("path/to/Noto.ttf")
     ]
   });
 
@@ -37,10 +32,10 @@ const MyParagraph = () => {
     }
     const textStyle = {
       color: Skia.Color("black"),
-      fontFamilies: ["Roboto", "Noto"],
+      fontFamilies: ["Roboto"],
       fontSize: 50,
     };
-    return Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr)
+    return Skia.ParagraphBuilder.Make({}, customFontMgr)
       .pushStyle(textStyle)
       .addText("Say Hello to ")
       .pushStyle({ ...textStyle, fontStyle: { weight: 500 } })
@@ -54,9 +49,33 @@ const MyParagraph = () => {
 };
 ```
 
-### Result
+Below is the result on Android (left) and iOS (right).
+<img src={require("/static/img/paragraph/hello-world-android.png").default} width="256" height="256" />
+<img src={require("/static/img/paragraph/hello-world-ios.png").default} width="256" height="256" />
 
-<img src={require("/static/img/paragraph/hello-world-node.png").default} width="256" height="256" />
+On Web, you will need to provide you own emoji font ([NotoColorEmoji](https://fonts.google.com/noto/specimen/Noto+Color+Emoji) for instance) and add it to the list of font families.
+
+```tsx twoslash
+import { useFonts, Skia } from "@shopify/react-native-skia";
+
+const customFontMgr = useFonts({
+  Roboto: [
+    require("path/to/Roboto-Regular.ttf"),
+    require("path/to/Roboto-Medium.ttf")
+  ],
+  // Only load the emoji font on Web
+  Noto: [
+    require("path/to/NotoColorEmoji.ttf")
+  ]
+});
+
+// We add Noto to the list of font families
+const textStyle = {
+  color: Skia.Color("black"),
+  fontFamilies: ["Roboto", "Noto"],
+  fontSize: 50,
+};
+```
 
 ## Styling Paragraphs
 
@@ -128,7 +147,7 @@ const MyParagraph = () => {
       color: Skia.Color("#000"),
     };
 
-    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromFontProvider(customFontMgr);
+    const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
     paragraphBuilder
       .pushStyle({ ...textStyle, fontStyle: FontStyle.Bold })
       .addText("This text is bold\n")
@@ -150,45 +169,3 @@ const MyParagraph = () => {
 #### Result
 
 <img src={require("/static/img/paragraph/font-style-node.png").default} width="256" height="256" />
-
-## Using System Fonts
-
-You can also draw a paragraph using system fonts.
-Simply use `Skia.ParagraphBuilder.MakeFromSystem` instead of `Skia.ParagraphBuilder.MakeFromFontProvider`.
-The list of available system fonts can be access via `listFontFamilies()`.
-
-```tsx twoslash
-import { useMemo } from "react";
-import { Canvas, Paragraph, Skia } from "@shopify/react-native-skia";
-import { Platform } from "react-native";
-
-const fontFamily = Platform.select({
-  ios: "Chalkduster",
-  android: "casual",
-  default: "serif",
-});
-
-export const MyParagraph = () => {
-  const paragraph = useMemo(() => {
-    const paragraphBuilder = Skia.ParagraphBuilder.MakeFromSystem();
-    const textStyle = {
-      fontSize: 20,
-      fontFamilies: [fontFamily],
-      color: Skia.Color("#000"),
-    };
-
-    // Add text to the paragraph
-    paragraphBuilder.pushStyle(textStyle).addText("Hello, world! ☺️");
-
-    return paragraphBuilder.build();
-  }, []);
-
-  // Render the paragraph
-  return (
-    <Canvas style={{ flex: 1 }}>
-      <Paragraph paragraph={paragraph} x={0} y={0} width={300} />
-    </Canvas>
-  );
-};
-```
-
