@@ -12,6 +12,8 @@ Behind the scene, this API is the Skia Paragraph API.
 ## Hello World
 
 In the example below, we create a simple paragraph based on custom fonts.
+The emojis will be renderer using the emoji font available on the platform.
+Other system fonts will are available as well.
 
 ```tsx twoslash
 import { useMemo } from "react";
