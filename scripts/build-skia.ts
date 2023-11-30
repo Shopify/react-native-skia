@@ -182,6 +182,13 @@ try {
     exit(1);
   }
 
+  // Run glient sync
+  console.log("Running gclient sync...");
+
+  // Start by running sync
+  executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
+  console.log("gclient sync done");
+
   // lets check for any dependencies
   if (platform.dependencies) {
     console.log(`Found dependencies for platform ${SelectedPlatform}`);
@@ -190,13 +197,6 @@ try {
       dep.executable();
     });
   }
-
-  // Run glient sync
-  console.log("Running gclient sync...");
-
-  // Start by running sync
-  executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
-  console.log("gclient sync done");
 
   try {
     // Configure the platform
