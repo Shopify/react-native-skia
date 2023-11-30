@@ -57,6 +57,7 @@ import type {
   Path2DPathEffectProps,
 } from "../types/PathEffects";
 import { NATIVE_DOM } from "../../renderer/HostComponents";
+import type { ParagraphProps } from "../types/Paragraph";
 
 import {
   FillNode,
@@ -123,6 +124,7 @@ import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
 import type { NodeContext } from "./Node";
 import { LayerNode } from "./LayerNode";
+import { ParagraphNode } from "./drawings/ParagraphNode";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
@@ -469,5 +471,12 @@ export class JsiSkDOM implements SkDOM {
     return NATIVE_DOM
       ? global.SkiaDomApi.BoxShadowNode(props)
       : new BoxShadowNode(this.ctx, props);
+  }
+
+  // Paragraph
+  Paragraph(props: ParagraphProps) {
+    return NATIVE_DOM
+      ? global.SkiaDomApi.ParagraphNode(props)
+      : new ParagraphNode(this.ctx, props);
   }
 }

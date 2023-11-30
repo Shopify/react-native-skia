@@ -1,3 +1,4 @@
+/* eslint-disable no-eval */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkiaDomView } from "@shopify/react-native-skia";
 import {
@@ -5,6 +6,7 @@ import {
   Canvas,
   Skia,
   makeImageFromView,
+  Paragraph,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Platform, Text, View } from "react-native";
@@ -38,7 +40,6 @@ export const Tests = ({ assets }: TestsProps) => {
         if (tree.code) {
           client.send(
             JSON.stringify(
-              // eslint-disable-next-line no-eval
               eval(
                 `(function Main(){return (${tree.code})(this.Skia, this.ctx); })`
               ).call({
@@ -46,6 +47,21 @@ export const Tests = ({ assets }: TestsProps) => {
                 ctx: parseProps(tree.ctx, assets),
               })
             )
+          );
+        } else if (tree.paragraph) {
+          const paragraph = eval(
+            `(function Main(){return (${tree.paragraph})(this.Skia, this.ctx); })`
+          ).call({
+            Skia,
+            ctx: parseProps(tree.ctx, assets),
+          });
+          setDrawing(
+            <Paragraph
+              paragraph={paragraph}
+              width={tree.paragraphWidth}
+              x={0}
+              y={0}
+            />
           );
         } else if (typeof tree.screen === "string") {
           const Screen = Screens[tree.screen];
@@ -67,7 +83,6 @@ export const Tests = ({ assets }: TestsProps) => {
   useEffect(() => {
     if (drawing) {
       const it = setTimeout(() => {
-        console.log("MakeImageSnapshot");
         const image = ref.current?.makeImageSnapshot({
           x: 0,
           y: 0,

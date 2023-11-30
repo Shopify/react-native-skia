@@ -10,3 +10,4 @@ export * from "./ColorFilters";
 export * from "./MaskFilters";
 export * from "./PathEffects";
 export * from "./Shaders";
+export * from "./Paragraph";

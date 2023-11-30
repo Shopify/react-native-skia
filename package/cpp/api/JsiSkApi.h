@@ -24,6 +24,7 @@
 #include "JsiSkMaskFilterFactory.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
+#include "JsiSkParagraphBuilder.h"
 #include "JsiSkPath.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
@@ -112,6 +113,10 @@ public:
     installReadonlyProperty(
         "TypefaceFontProvider",
         std::make_shared<JsiSkTypefaceFontProviderFactory>(context));
+
+    installReadonlyProperty(
+        "ParagraphBuilder",
+        std::make_shared<JsiSkParagraphBuilderFactory>(context));
   }
 };
 } // namespace RNSkia
