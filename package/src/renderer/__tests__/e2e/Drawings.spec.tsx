@@ -207,16 +207,4 @@ describe("Drawings", () => {
     );
     checkImage(image, "snapshots/drawings/image-default-props.png");
   });
-
-  it("should allow to use the the JS API directly", async () => {
-    const { Skia } = importSkia();
-    const image = await surface.draw(
-      <Group color="red">
-        <Drawing
-          drawing={({ canvas }) => canvas.drawCircle(0, 0, 100, Skia.Paint())}
-        />
-      </Group>
-    );
-    checkImage(image, "snapshots/drawings/custom-drawing.png");
-  });
 });

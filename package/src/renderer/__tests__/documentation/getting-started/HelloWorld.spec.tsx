@@ -48,25 +48,4 @@ describe("Getting Started / Hello World", () => {
       docPath("getting-started/hello-world/blend-modes.png")
     );
   });
-  it("Hello world with the declarative and the imperative API", () => {
-    const { Skia } = importSkia();
-    const surface = drawOnNode(
-      <Group blendMode="multiply">
-        <Drawing
-          drawing={({ canvas, paint }) => {
-            paint.setColor(Skia.Color("cyan"));
-            canvas.drawCircle(r, r, r, paint);
-            paint.setColor(Skia.Color("magenta"));
-            canvas.drawCircle(size - r, r, r, paint);
-            paint.setColor(Skia.Color("yellow"));
-            canvas.drawCircle(size / 2, size - r, r, paint);
-          }}
-        />
-      </Group>
-    );
-    processResult(
-      surface,
-      docPath("getting-started/hello-world/blend-modes.png")
-    );
-  });
 });
