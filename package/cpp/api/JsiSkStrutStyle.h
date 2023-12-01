@@ -20,6 +20,13 @@ namespace jsi = facebook::jsi;
 
 namespace para = skia::textlayout;
 
+bool asBool(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (!value.isBool()) {
+    throw jsi::JSError(runtime, "Expected boolean value");
+  }
+  return value.getBool();
+}
+
 /**
  Implementation of the TextStyle object in JSI for the paragraph builder
  */
@@ -47,7 +54,7 @@ public:
 
     if (object.hasProperty(runtime, "strutEnabled")) {
       auto propValue = object.getProperty(runtime, "strutEnabled");
-      retVal.setStrutEnabled(propValue.asBool());
+      retVal.setStrutEnabled(asBool(runtime, propValue));
     }
     if (object.hasProperty(runtime, "fontFamilies")) {
       auto propValue = object.getProperty(runtime, "fontFamilies")
@@ -78,7 +85,7 @@ public:
     }
     if (object.hasProperty(runtime, "halfLeading")) {
       auto propValue = object.getProperty(runtime, "halfLeading");
-      retVal.setHalfLeading(propValue.asBool());
+      retVal.setHalfLeading(asBool(runtime, propValue));
     }
     if (object.hasProperty(runtime, "leading")) {
       auto propValue = object.getProperty(runtime, "leading");
@@ -86,7 +93,7 @@ public:
     }
     if (object.hasProperty(runtime, "forceStrutHeight")) {
       auto propValue = object.getProperty(runtime, "forceStrutHeight");
-      retVal.setForceStrutHeight(propValue.asBool());
+      retVal.setForceStrutHeight(asBool(runtime, propValue));
     }
 
     return retVal;
