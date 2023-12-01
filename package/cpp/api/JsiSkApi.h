@@ -44,9 +44,9 @@
 #include "JsiSkShaderFactory.h"
 #include "JsiSkSurfaceFactory.h"
 #include "JsiSkTextBlobFactory.h"
-#include "JsiSkTypeFaceFontProviderFactory.h"
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
+#include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
 
 namespace RNSkia {
