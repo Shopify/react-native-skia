@@ -68,7 +68,6 @@ const sidebars = {
       type: "category",
       label: "Text",
       items: [
-        "text/fonts",
         "text/paragraph",
         "text/text",
         "text/glyphs",
