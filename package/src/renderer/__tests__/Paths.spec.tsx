@@ -1,10 +1,9 @@
 import React from "react";
 
-import type { JsiSkPaint } from "../../skia/web/JsiSkPaint";
 import { processResult } from "../../__tests__/setup";
-import { Drawing, FitBox, Group, LinearGradient, Path } from "../components";
+import { Path } from "../components";
 
-import { drawOnNode, width, height, importSkia } from "./setup";
+import { drawOnNode, width, importSkia } from "./setup";
 
 const size = width;
 

@@ -3,7 +3,7 @@ import React from "react";
 import { BlendMode } from "../../../../skia/types";
 import { setupSkia } from "../../../../skia/__tests__/setup";
 import { docPath, processResult } from "../../../../__tests__/setup";
-import { Circle, Drawing, Group } from "../../../components";
+import { Circle, Group } from "../../../components";
 import { drawOnNode, width, height, importSkia } from "../../setup";
 
 const size = width;

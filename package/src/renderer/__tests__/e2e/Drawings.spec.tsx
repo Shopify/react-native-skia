@@ -10,7 +10,6 @@ import {
   Path,
   Rect,
   Image,
-  Drawing,
 } from "../../components";
 import { images, importSkia, surface } from "../setup";
 
