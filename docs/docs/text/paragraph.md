@@ -8,7 +8,6 @@ slug: /text/paragraph
 React Native Skia offers an API to perform text layouts.
 Behind the scene, this API is the Skia Paragraph API.
 
-
 ## Hello World
 
 In the example below, we create a simple paragraph based on custom fonts.
@@ -79,6 +78,34 @@ const textStyle = {
 };
 ```
 
+## Fonts
+
+By default, the paragraph API will use the system fonts.
+You can also use custom fonts with this API was well. 
+
+The `useFonts` hooks allows you to load custom fonts to be used for your Skia drawing.
+The font files should be organized by family names.
+For example:
+
+```tsx twoslash
+import {useFonts} from "@shopify/react-native-skia";
+
+const fontMgr = useFonts({
+  Roboto: [
+    require("./Roboto-Medium.ttf"),
+    require("./Roboto-Regular.ttf"),
+    require("./Roboto-Bold.ttf"),
+  ],
+  Helvetica: [require("./Helvetica.ttf")],
+});
+if (!fontMgr) {
+  // Returns null until all fonts are loaded
+}
+// Now the fonts are available
+```
+
+You can also list the available system fonts via `listFontFamilies()` function.
+
 ## Styling Paragraphs
 
 These properties define the overall layout and behavior of a paragraph.
@@ -96,7 +123,7 @@ These properties define the overall layout and behavior of a paragraph.
 | `textHeightBehavior`    | Controls the behavior of text ascent and descent in the first and last lines.         |
 | `textStyle`             | Default text style for the paragraph (can be overridden by individual text styles).   |
 
-### Text Style Properties
+## Text Style Properties
 
 These properties are used to style specific segments of text within a paragraph.
 
