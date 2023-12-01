@@ -24,6 +24,7 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 namespace para = skia::textlayout;
+
 /**
  Implementation of the ParagraphStyle object in JSI
  */
@@ -60,7 +61,7 @@ public:
 
     if (object.hasProperty(runtime, "disableHinting")) {
       auto propValue = object.getProperty(runtime, "disableHinting");
-      if (propValue.asBool()) {
+      if (asBool(runtime, propValue)) {
         retVal.turnHintingOff();
       }
     }
@@ -83,7 +84,7 @@ public:
     }
     if (object.hasProperty(runtime, "replaceTabCharacters")) {
       auto propValue = object.getProperty(runtime, "replaceTabCharacters");
-      retVal.setReplaceTabCharacters(propValue.asBool());
+      retVal.setReplaceTabCharacters(asBool(runtime, propValue));
     }
     if (object.hasProperty(runtime, "textAlign")) {
       auto propValue = object.getProperty(runtime, "textAlign");
