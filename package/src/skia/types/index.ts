@@ -12,6 +12,7 @@ export * from "./ImageFilter";
 export * from "./Font";
 export * from "./Typeface";
 export * from "./Paint";
+export * from "./Paragraph";
 export * from "./Path";
 export * from "./Color";
 export * from "./Canvas";

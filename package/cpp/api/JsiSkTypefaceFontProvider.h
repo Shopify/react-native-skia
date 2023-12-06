@@ -47,8 +47,17 @@ public:
   JSI_HOST_FUNCTION(matchFamilyStyle) {
     auto name = arguments[0].asString(runtime).utf8(runtime);
     auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
+
     sk_sp<SkFontStyleSet> set(getObject()->onMatchFamily(name.c_str()));
+    if (set == nullptr) {
+      return jsi::Value::null();
+    }
+
     sk_sp<SkTypeface> typeface(set->matchStyle(*fontStyle));
+    if (typeface == nullptr) {
+      return jsi::Value::null();
+    }
+
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
   }
