@@ -14,6 +14,7 @@
 
 #include "SkFont.h"
 #include "SkTypeface.h"
+#include "SkFontTypes.h"
 
 #pragma clang diagnostic pop
 
