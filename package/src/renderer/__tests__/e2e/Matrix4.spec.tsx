@@ -105,18 +105,14 @@ describe("Matrix4", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    // todo: accept { translate: [width/2, height/2] }
     const m3 = Skia.Matrix(
       processTransform3d([
-        { translateX: width / 2 },
-        { translateY: height / 2 },
+        { translate: [width / 2, height / 2] },
         { perspective: 300 },
         { rotateX: 1 },
-        { translateX: -width / 2 },
-        { translateY: -height / 2 },
+        { translate: [-width / 2, -height / 2] },
       ])
     );
-
     const image = await surface.draw(
       <Group>
         <Rect rect={rct} color="magenta" />

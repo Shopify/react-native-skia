@@ -1,5 +1,6 @@
-export type Vec3 = readonly [number, number, number];
-export type Vec4 = readonly [number, number, number, number];
+type Vec2 = readonly [number, number];
+type Vec3 = readonly [number, number, number];
+type Vec4 = readonly [number, number, number, number];
 
 export type Matrix4 = readonly [
   number,
@@ -24,6 +25,7 @@ type Transform3dName =
   | "translateX"
   | "translateY"
   | "translateZ"
+  | "translate"
   | "scale"
   | "scaleX"
   | "scaleY"
@@ -38,13 +40,18 @@ type Transform3dName =
   | "matrix";
 
 type Transformations = {
-  [Name in Transform3dName]: Name extends "matrix" ? Matrix4 : number;
+  [Name in Transform3dName]: Name extends "matrix"
+    ? Matrix4
+    : Name extends "translate"
+    ? Vec3 | Vec2
+    : number;
 };
 
 export type Transforms3d = (
   | Pick<Transformations, "translateX">
   | Pick<Transformations, "translateY">
   | Pick<Transformations, "translateZ">
+  | Pick<Transformations, "translate">
   | Pick<Transformations, "scale">
   | Pick<Transformations, "scaleX">
   | Pick<Transformations, "scaleY">
@@ -204,6 +211,12 @@ export const processTransform3d = (transforms: Transforms3d) => {
       if (key === "translateX") {
         const value = (transform as Pick<Transformations, typeof key>)[key];
         return multiply4(acc, translate(value, 0, 0));
+      }
+      if (key === "translate") {
+        const [x, y, z = 0] = (transform as Pick<Transformations, typeof key>)[
+          key
+        ];
+        return multiply4(acc, translate(x, y, z));
       }
       if (key === "translateY") {
         const value = (transform as Pick<Transformations, typeof key>)[key];
