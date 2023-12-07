@@ -41,7 +41,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(concat) {
-    if (arguments[0].isObject() && arguments[0].asObject(runtime).isHostObject(runtime)) {
+    if (arguments[0].isObject() &&
+        arguments[0].asObject(runtime).isHostObject(runtime)) {
       auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
       getObject()->preConcat(*m3);
     } else {
