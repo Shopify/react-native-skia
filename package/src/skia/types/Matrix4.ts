@@ -66,9 +66,13 @@ const exhaustiveCheck = (a: never): never => {
   throw new Error(`Unexhaustive handling for ${a}`);
 };
 
-export const Matrix4 = (): Matrix4 => [
-  1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
-];
+/**
+ * @worklet
+ */
+export const Matrix4 = (): Matrix4 => {
+  "worklet";
+  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+};
 
 const translate = (x: number, y: number, z: number): Matrix4 => {
   "worklet";
@@ -112,12 +116,12 @@ const rotatedUnitSinCos = (
   cosAngle: number
 ): Matrix4 => {
   "worklet";
-  var x = axisVec[0];
-  var y = axisVec[1];
-  var z = axisVec[2];
-  var c = cosAngle;
-  var s = sinAngle;
-  var t = 1 - c;
+  const x = axisVec[0];
+  const y = axisVec[1];
+  const z = axisVec[2];
+  const c = cosAngle;
+  const s = sinAngle;
+  const t = 1 - c;
   return [
     t * x * x + c,
     t * x * y - s * z,
