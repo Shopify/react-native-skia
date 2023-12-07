@@ -70,63 +70,66 @@ export const Matrix4 = (): Matrix4 => [
   1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
 ];
 
-/**
- * @worklet
- */
 const translate = (x: number, y: number, z: number): Matrix4 => {
   "worklet";
-  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
+  return [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1];
 };
 
-/**
- * @worklet
- */
 const scale = (sx: number, sy: number, sz: number): Matrix4 => {
   "worklet";
   return [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1];
 };
 
-/**
- * @worklet
- */
 const skewX = (s: number): Matrix4 => {
   "worklet";
   return [1, 0, 0, 0, Math.tan(s), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 };
 
-/**
- * @worklet
- */
 const skewY = (s: number): Matrix4 => {
   "worklet";
   return [1, Math.tan(s), 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 };
 
-/**
- * @worklet
- */
 const perspective = (p: number): Matrix4 => {
   "worklet";
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1 / p, 1];
 };
 
-/**
- * @worklet
- */
-const rotateX = (r: number): Matrix4 => {
+const normalizeVec = (vec: Vec3): Vec3 => {
   "worklet";
+  const [x, y, z] = vec;
+  const length = Math.sqrt(x * x + y * y + z * z);
+  // Check for zero length to avoid division by zero
+  if (length === 0) {
+    return [0, 0, 0];
+  }
+  return [x / length, y / length, z / length];
+};
+
+const rotatedUnitSinCos = (
+  axisVec: Vec3,
+  sinAngle: number,
+  cosAngle: number
+): Matrix4 => {
+  "worklet";
+  var x = axisVec[0];
+  var y = axisVec[1];
+  var z = axisVec[2];
+  var c = cosAngle;
+  var s = sinAngle;
+  var t = 1 - c;
   return [
-    1,
+    t * x * x + c,
+    t * x * y - s * z,
+    t * x * z + s * y,
     0,
+    t * x * y + s * z,
+    t * y * y + c,
+    t * y * z - s * x,
     0,
-    0,
-    0,
-    Math.cos(r),
-    Math.sin(r),
-    0,
-    0,
-    -Math.sin(r),
-    Math.cos(r),
+    t * x * z - s * y,
+    t * y * z + s * x,
+    t * z * z + c,
     0,
     0,
     0,
@@ -135,60 +138,16 @@ const rotateX = (r: number): Matrix4 => {
   ];
 };
 
-/**
- * @worklet
- */
-const rotateY = (r: number): Matrix4 => {
+const rotate = (axis: Vec3, value: number) => {
   "worklet";
-  return [
-    Math.cos(r),
-    0,
-    -Math.sin(r),
-    0,
-    0,
-    1,
-    0,
-    0,
-    Math.sin(r),
-    0,
-    Math.cos(r),
-    0,
-    0,
-    0,
-    0,
-    1,
-  ];
+  return rotatedUnitSinCos(
+    normalizeVec(axis),
+    Math.sin(value),
+    Math.cos(value)
+  );
 };
 
-/**
- * @worklet
- */
-const rotateZ = (r: number): Matrix4 => {
-  "worklet";
-  return [
-    Math.cos(r),
-    Math.sin(r),
-    0,
-    0,
-    -Math.sin(r),
-    Math.cos(r),
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-  ];
-};
-
-/**
- * @worklet
- */
-export const matrixVecMul4 = (m: Matrix4, v: Vec4) => {
+const matrixVecMul4 = (m: Matrix4, v: Vec4) => {
   "worklet";
   const [vx, vy, vz, vw] = v;
   return [
@@ -199,7 +158,7 @@ export const matrixVecMul4 = (m: Matrix4, v: Vec4) => {
   ];
 };
 
-/**
+/*
  * @worklet
  */
 export const mapPoint3d = (m: Matrix4, v: Vec3) => {
@@ -208,70 +167,23 @@ export const mapPoint3d = (m: Matrix4, v: Vec3) => {
   return [r[0] / r[3], r[1] / r[3], r[2] / r[3]] as const;
 };
 
-/**
- * @worklet
- */
-export const multiply4 = (a: Matrix4, b: Matrix4) => {
+const multiply4 = (a: Matrix4, b: Matrix4): Matrix4 => {
   "worklet";
-  const out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  const a00 = a[0],
-    a01 = a[1],
-    a02 = a[2],
-    a03 = a[3],
-    a10 = a[4],
-    a11 = a[5],
-    a12 = a[6],
-    a13 = a[7],
-    a20 = a[8],
-    a21 = a[9],
-    a22 = a[10],
-    a23 = a[11],
-    a30 = a[12],
-    a31 = a[13],
-    a32 = a[14],
-    a33 = a[15];
+  const result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-  let b0 = b[0],
-    b1 = b[1],
-    b2 = b[2],
-    b3 = b[3];
-  out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-  out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-  out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-  out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      result[i * 4 + j] =
+        a[i * 4] * b[j] +
+        a[i * 4 + 1] * b[j + 4] +
+        a[i * 4 + 2] * b[j + 8] +
+        a[i * 4 + 3] * b[j + 12];
+    }
+  }
 
-  b0 = b[4];
-  b1 = b[5];
-  b2 = b[6];
-  b3 = b[7];
-  out[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-  out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-  out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-  out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-
-  b0 = b[8];
-  b1 = b[9];
-  b2 = b[10];
-  b3 = b[11];
-  out[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-  out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-  out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-  out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-
-  b0 = b[12];
-  b1 = b[13];
-  b2 = b[14];
-  b3 = b[15];
-  out[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-  out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-  out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-  out[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-  return out as unknown as Matrix4;
+  return result as unknown as Matrix4;
 };
 
-/**
- * @worklet
- */
 const toMatrix3 = (m: Matrix4) => {
   "worklet";
   return [m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]];
@@ -319,11 +231,11 @@ export const processTransform3d = (transforms: Transforms3d) => {
       }
       if (key === "rotateX") {
         const value = (transform as Pick<Transformations, typeof key>)[key];
-        return multiply4(acc, rotateX(value));
+        return multiply4(acc, rotate([1, 0, 0], value));
       }
       if (key === "rotateY") {
         const value = (transform as Pick<Transformations, typeof key>)[key];
-        return multiply4(acc, rotateY(value));
+        return multiply4(acc, rotate([0, 1, 0], value));
       }
       if (key === "perspective") {
         const value = (transform as Pick<Transformations, typeof key>)[key];
@@ -331,7 +243,7 @@ export const processTransform3d = (transforms: Transforms3d) => {
       }
       if (key === "rotate" || key === "rotateZ") {
         const value = (transform as Pick<Transformations, typeof key>)[key];
-        return multiply4(acc, rotateZ(value));
+        return multiply4(acc, rotate([0, 0, 1], value));
       }
       if (key === "matrix") {
         const matrix = (transform as Pick<Transformations, typeof key>)[key];
