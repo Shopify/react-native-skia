@@ -16,7 +16,7 @@ export const isMatrix = (obj: unknown): obj is SkMatrix =>
   obj !== null && (obj as SkJSIInstance<string>).__typename__ === "Matrix";
 
 export interface SkMatrix extends SkJSIInstance<"Matrix"> {
-  concat: (matrix: SkMatrix) => SkMatrix;
+  concat: (matrix: SkMatrix | number[]) => SkMatrix;
   translate: (x: number, y: number) => SkMatrix;
   scale: (x: number, y?: number) => SkMatrix;
   skew: (x: number, y: number) => SkMatrix;

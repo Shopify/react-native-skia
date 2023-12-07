@@ -66,7 +66,7 @@ export type CircleDef = PointCircleDef | ScalarCircleDef;
 export interface TransformProps {
   transform?: Transforms2d;
   origin?: Vector;
-  matrix?: SkMatrix;
+  matrix?: SkMatrix | number[];
 }
 
 export interface PaintProps extends ChildrenProps {

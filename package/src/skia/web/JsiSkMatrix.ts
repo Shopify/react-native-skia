@@ -24,8 +24,10 @@ export class JsiSkMatrix
     // Do nothing - the matrix is represenetd by a Float32Array
   };
 
-  concat(matrix: SkMatrix) {
-    this.preMultiply(JsiSkMatrix.fromValue(matrix));
+  concat(matrix: SkMatrix | number[]) {
+    this.preMultiply(
+      Array.isArray(matrix) ? matrix : JsiSkMatrix.fromValue(matrix)
+    );
     return this;
   }
 
