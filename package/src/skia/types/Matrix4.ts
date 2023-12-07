@@ -272,9 +272,9 @@ export const multiply4 = (a: Matrix4, b: Matrix4) => {
 /**
  * @worklet
  */
-export const toMatrix3 = (m: Matrix4) => {
+const toMatrix3 = (m: Matrix4) => {
   "worklet";
-  return [m[0], m[1], m[3], m[5], m[6], m[8], m[12], m[13], m[15]];
+  return [m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]];
 };
 
 /**
