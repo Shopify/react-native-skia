@@ -184,6 +184,7 @@ export const configurations: Configuration = {
       "arm64-tvsimulator": {
         cpu: "arm64",
         args: [
+          ["ios_use_simulator", "true"],
           ["extra_cflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
           ["extra_asmflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
           ["extra_ldflags", '["-target", "arm64-apple-tvos-simulator", "-mappletvos-version-min=13.0"]'],
@@ -213,6 +214,12 @@ export const configurations: Configuration = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphOutputs,
+    ],
+    dependencies: [
+      {
+        name: "libgrapheme",
+        executable: buildLibGraphemeiOS,
+      },
     ],
   },
 };
