@@ -99,6 +99,7 @@
   "exclude": [
     "package",
     "example",
+    "exampletvos",
     "fabricexample",
     "docs",
     "externals"
