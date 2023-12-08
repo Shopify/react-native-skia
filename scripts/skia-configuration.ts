@@ -1,3 +1,4 @@
+import { buildLibGraphemeiOS } from "./build-libgrapheme-ios";
 import { executeCmdSync } from "./utils";
 
 const NdkDir: string = process.env.ANDROID_NDK ?? "";
@@ -10,24 +11,29 @@ const NoParagraphArgs = [
 
 // To build the paragraph API:
 // On Android: we use system ICU
-// On iOS: we use neither system nor client ICU
+// On iOS: we use libgrapheme
 const CommonParagraphArgs = [
   ["skia_enable_paragraph", true],
   ["skia_use_system_icu", false],
   ["skia_use_harfbuzz", true],
   ["skia_use_system_harfbuzz", false],
 ];
-const ParagraphArgsAndroid = BUILD_WITH_PARAGRAPH ? [
-  ...CommonParagraphArgs,
-  ["skia_use_icu", true],
-  ["skia_use_runtime_icu", true],
-] : NoParagraphArgs;
+const ParagraphArgsAndroid = BUILD_WITH_PARAGRAPH
+  ? [
+      ...CommonParagraphArgs,
+      ["skia_use_icu", true],
+      ["skia_use_runtime_icu", true],
+    ]
+  : NoParagraphArgs;
 
-const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH ? [
-  ...CommonParagraphArgs,
-  ["skia_use_icu", false],
-  ["skia_use_client_icu", true],
-] : NoParagraphArgs;
+const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH
+  ? [
+      ...CommonParagraphArgs,
+      ["skia_use_icu", false],
+      ["skia_use_client_icu", false],
+      ["skia_use_libgrapheme", true],
+    ]
+  : NoParagraphArgs;
 
 const ParagraphOutputs = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode.a"]
@@ -67,6 +73,7 @@ export type Platform = {
   outputRoot: string;
   outputNames: string[];
   options?: Arg[];
+  dependencies?: { name: string; executable: () => void }[];
 };
 
 export const configurations: Configuration = {
@@ -129,6 +136,7 @@ export const configurations: Configuration = {
           ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["ios_use_simulator", true],
         ],
       },
       "x64-iphonesimulator": {
@@ -145,7 +153,7 @@ export const configurations: Configuration = {
       ["skia_use_metal", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
-      ...ParagraphArgsIOS
+      ...ParagraphArgsIOS,
     ],
     outputRoot: "package/libs/ios",
     outputNames: [
@@ -155,6 +163,12 @@ export const configurations: Configuration = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphOutputs,
+    ],
+    dependencies: [
+      {
+        name: "libgrapheme",
+        executable: buildLibGraphemeiOS,
+      },
     ],
   },
   tvos: {

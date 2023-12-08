@@ -22,4 +22,5 @@ export type Routes = {
   OnLayout: undefined;
   Snapshot: undefined;
   IconsExample: undefined;
+  Paragraphs: undefined;
 };

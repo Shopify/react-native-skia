@@ -17,9 +17,7 @@ const NotoColorEmojiSrc =
 
 export const useAssets = () => {
   const [error, setError] = useState<Error | null>(null);
-  const errorHandler = useCallback((e: Error) => {
-    setError(e);
-  }, []);
+  const errorHandler = useCallback((e: Error) => setError(e), []);
   const mask = useImage(require("./assets/mask.png"), errorHandler);
   const oslo = useImage(require("./assets/oslo.jpg"), errorHandler);
   const skiaLogoJpeg = useImage(SkiaLogoJpeg, errorHandler);
@@ -29,7 +27,6 @@ export const useAssets = () => {
     errorHandler
   );
   const NotoColorEmoji = useTypeface(NotoColorEmojiSrc, errorHandler);
-
   const UberMoveMediumMono = useTypeface(
     require("./assets/UberMove-Medium_mono.ttf"),
     errorHandler
@@ -52,9 +49,9 @@ export const useAssets = () => {
     !NotoSansSCRegular ||
     !UberMoveMediumMono ||
     !DinMedium ||
-    !mask ||
     !skiaLogoJpeg ||
-    !skiaLogoPng
+    !skiaLogoPng ||
+    !mask
   ) {
     return null;
   }
@@ -65,8 +62,8 @@ export const useAssets = () => {
     UberMoveMediumMono,
     DinMedium,
     oslo,
-    mask,
     skiaLogoJpeg,
     skiaLogoPng,
+    mask,
   };
 };

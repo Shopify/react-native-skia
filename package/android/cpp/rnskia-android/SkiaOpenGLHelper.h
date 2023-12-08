@@ -187,7 +187,6 @@ public:
         RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
         return false;
       }
-      return true;
     }
     return true;
   }
