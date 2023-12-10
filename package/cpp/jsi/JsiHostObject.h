@@ -332,6 +332,27 @@ protected:
   }
 
   /**
+   Returns argument as host object or nullptr if the value is not a valid host
+   object of requested type
+   */
+  template <typename T = HostObject>
+  static std::shared_ptr<T>
+  tryGetArgumentAsHostObject(jsi::Runtime &runtime, const jsi::Value *arguments,
+                             size_t count, size_t index) {
+    const jsi::Value &value = getArgument(runtime, arguments, count, index);
+    if (!value.isObject()) {
+      return nullptr;
+    }
+
+    auto object = value.asObject(runtime);
+    if (!object.isHostObject(runtime)) {
+      return nullptr;
+    }
+
+    return object.asHostObject<T>(runtime);
+  }
+
+  /**
    Returns argument as array or throws
    */
   static jsi::Array getArgumentAsArray(jsi::Runtime &runtime,
