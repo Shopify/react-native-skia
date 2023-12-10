@@ -1,13 +1,12 @@
 import {
   Canvas,
-  Rect,
   Skia,
   processTransform3d,
   useImage,
   Image,
-  Blur,
   BackdropFilter,
   Fill,
+  Blur,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
@@ -28,33 +27,37 @@ const rct = Skia.XYWHRect(
   CARD_HEIGHT
 );
 const rrct = Skia.RRectXY(rct, 10, 10);
+const sf = 300;
 
 export const FrostedCard = () => {
   const image = useImage(require("./dynamo.jpg"));
+  const m3 = useSharedValue(Skia.Matrix());
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
 
   const gesture = Gesture.Pan()
     .onChange((event) => {
-      rotateY.value += event.changeX / 300;
-      rotateX.value -= event.changeY / 300;
+      rotateY.value += event.changeX / sf;
+      rotateX.value -= event.changeY / sf;
     })
-    .onFinalize(({ velocityX, velocityY }) => {
-      rotateX.value = withSpring(0, { velocity: velocityY / 300 });
-      rotateY.value = withSpring(0, { velocity: velocityX / 300 });
+    .onEnd(({ velocityX, velocityY }) => {
+      rotateX.value = withSpring(0, { velocity: velocityY / sf });
+      rotateY.value = withSpring(0, { velocity: velocityX / sf });
     });
 
   const clip = useDerivedValue(() => {
-    const m3 = processTransform3d([
-      { translate: [width / 2, height / 2] },
-      { perspective: 300 },
-      { rotateX: rotateX.value },
-      { rotateY: rotateY.value },
-      { translate: [-width / 2, -height / 2] },
-    ]);
+    m3.value = Skia.Matrix(
+      processTransform3d([
+        { translate: [width / 2, height / 2] },
+        { perspective: 300 },
+        { rotateX: rotateX.value },
+        { rotateY: rotateY.value },
+        { translate: [-width / 2, -height / 2] },
+      ])
+    );
     const path = Skia.Path.Make();
     path.addRRect(rrct);
-    path.transform(Skia.Matrix(m3));
+    path.transform(m3.value);
     return path;
   });
   return (
@@ -69,7 +72,7 @@ export const FrostedCard = () => {
             height={height}
             fit="cover"
           />
-          <BackdropFilter filter={<Blur blur={10} />} clip={clip}>
+          <BackdropFilter filter={<Blur blur={30} mode="clamp" />} clip={clip}>
             <Fill color="rgba(255, 255, 255, 0.1)" />
           </BackdropFilter>
         </Canvas>
