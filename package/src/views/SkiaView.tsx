@@ -14,6 +14,10 @@ const NativeSkiaView = SkiaDrawViewNativeComponent;
 export class SkiaView extends React.Component<SkiaDrawViewProps> {
   constructor(props: SkiaDrawViewProps) {
     super(props);
+    console.warn(
+      // eslint-disable-next-line max-len
+      "The SkiaView component is deprecated and will be removed in the next release. If you are looking to use the Skia imperative API, please use the imperative API: https://shopify.github.io/react-native-skia/docs/shapes/pictures/"
+    );
     this._nativeId = SkiaViewNativeId.current++;
     const { onDraw, onSize } = props;
     if (onDraw) {
