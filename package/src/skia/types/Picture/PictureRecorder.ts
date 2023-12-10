@@ -9,7 +9,7 @@ export interface SkPictureRecorder {
    *
    * @param bounds - a rect to cull the results.
    */
-  beginRecording(bounds?: SkRect): SkCanvas;
+  beginRecording(bounds: SkRect): SkCanvas;
 
   /**
    * Returns the captured draw commands as a picture and invalidates the canvas returned earlier.

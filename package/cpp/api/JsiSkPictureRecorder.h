@@ -27,15 +27,9 @@ public:
             context, std::make_shared<SkPictureRecorder>()) {}
 
   JSI_HOST_FUNCTION(beginRecording) {
-    SkCanvas* canvas;
-    if (count == 0 || arguments[0].isUndefined()) {
-      auto rect = SkRect::MakeEmpty();
-      canvas = getObject()->beginRecording(0, 0, nullptr);
-    } else {
-      SkRTreeFactory factory;
-      auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-      canvas = getObject()->beginRecording(*rect, &factory);
-    }
+    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
+    SkRTreeFactory factory;
+    auto canvas = getObject()->beginRecording(*rect, &factory);
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkCanvas>(getContext(), canvas));
   }

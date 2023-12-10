@@ -20,14 +20,10 @@ export class JsiSkPictureRecorder
     this.ref.delete();
   };
 
-  beginRecording(bounds?: SkRect) {
+  beginRecording(bounds: SkRect) {
     return new JsiSkCanvas(
       this.CanvasKit,
-      this.ref.beginRecording(
-        bounds
-          ? JsiSkRect.fromValue(this.CanvasKit, bounds)
-          : Float32Array.of(0, 0, 0, 0)
-      )
+      this.ref.beginRecording(JsiSkRect.fromValue(this.CanvasKit, bounds))
     );
   }
 

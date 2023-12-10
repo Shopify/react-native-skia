@@ -1,5 +1,5 @@
 import { Skia } from "../Skia";
-import type { SkCanvas, SkRect } from "../types";
+import { isRect, type SkCanvas, type SkRect, type SkSize } from "../types";
 
 /**
  * Memoizes and returns an SkPicture that can be drawn to another canvas.
@@ -8,11 +8,13 @@ import type { SkCanvas, SkRect } from "../types";
  * @returns SkPicture
  */
 export const createPicture = (
-  cb: (canvas: SkCanvas) => void,
-  bounds?: SkRect
+  rect: SkRect | SkSize,
+  cb: (canvas: SkCanvas) => void
 ) => {
   const recorder = Skia.PictureRecorder();
-  const canvas = recorder.beginRecording(bounds);
+  const canvas = recorder.beginRecording(
+    isRect(rect) ? rect : Skia.XYWHRect(0, 0, rect.width, rect.height)
+  );
   cb(canvas);
   return recorder.finishRecordingAsPicture();
 };
