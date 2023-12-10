@@ -3,6 +3,11 @@ import {
   Rect,
   Skia,
   processTransform3d,
+  useImage,
+  Image,
+  Blur,
+  BackdropFilter,
+  Fill,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
@@ -22,8 +27,10 @@ const rct = Skia.XYWHRect(
   CARD_WIDTH,
   CARD_HEIGHT
 );
+const rrct = Skia.RRectXY(rct, 10, 10);
 
 export const FrostedCard = () => {
+  const image = useImage(require("./dynamo.jpg"));
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
 
@@ -32,25 +39,39 @@ export const FrostedCard = () => {
       rotateY.value += event.changeX / 300;
       rotateX.value -= event.changeY / 300;
     })
-    .onFinalize(() => {
-      rotateX.value = withSpring(0);
-      rotateY.value = withSpring(0);
+    .onFinalize(({ velocityX, velocityY }) => {
+      rotateX.value = withSpring(0, { velocity: velocityY / 300 });
+      rotateY.value = withSpring(0, { velocity: velocityX / 300 });
     });
 
-  const matrix = useDerivedValue(() => {
-    return processTransform3d([
+  const clip = useDerivedValue(() => {
+    const m3 = processTransform3d([
       { translate: [width / 2, height / 2] },
       { perspective: 300 },
       { rotateX: rotateX.value },
       { rotateY: rotateY.value },
       { translate: [-width / 2, -height / 2] },
     ]);
+    const path = Skia.Path.Make();
+    path.addRRect(rrct);
+    path.transform(Skia.Matrix(m3));
+    return path;
   });
   return (
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
         <Canvas style={{ flex: 1 }}>
-          <Rect rect={rct} matrix={matrix} />
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
+          <BackdropFilter filter={<Blur blur={10} />} clip={clip}>
+            <Fill color="rgba(255, 255, 255, 0.1)" />
+          </BackdropFilter>
         </Canvas>
       </GestureDetector>
     </View>
