@@ -1,20 +1,27 @@
+import {
+  Canvas,
+  Rect,
+  Skia,
+  processTransform3d,
+} from "@shopify/react-native-skia";
 import React from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  Extrapolate,
-  interpolate,
-  useAnimatedStyle,
+import {
+  useDerivedValue,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const HEIGHT = 256;
-const WIDTH = SCREEN_WIDTH * 0.9;
-
-const CARD_HEIGHT = HEIGHT - 5;
-const CARD_WIDTH = WIDTH - 5;
+const { width, height } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.9;
+const CARD_HEIGHT = CARD_WIDTH / 1.618;
+const rct = Skia.XYWHRect(
+  (width - CARD_WIDTH) / 2,
+  (height - CARD_HEIGHT) / 2,
+  CARD_WIDTH,
+  CARD_HEIGHT
+);
 
 export const FrostedCard = () => {
   const rotateX = useSharedValue(0);
@@ -22,96 +29,30 @@ export const FrostedCard = () => {
 
   const gesture = Gesture.Pan()
     .onChange((event) => {
-      rotateY.value += event.changeX / 10;
-      rotateX.value -= event.changeY / 10;
+      rotateY.value += event.changeX / 300;
+      rotateX.value -= event.changeY / 300;
     })
     .onFinalize(() => {
       rotateX.value = withSpring(0);
       rotateY.value = withSpring(0);
     });
 
-  const rStyle = useAnimatedStyle(() => {
-    const rotateXvalue = `${rotateX.value}deg`;
-    const rotateYvalue = `${rotateY.value}deg`;
-
-    return {
-      transform: [
-        {
-          perspective: 300,
-        },
-        { rotateX: rotateXvalue },
-        { rotateY: rotateYvalue },
-      ],
-    };
-  }, []);
-
+  const matrix = useDerivedValue(() => {
+    return processTransform3d([
+      { translate: [width / 2, height / 2] },
+      { perspective: 300 },
+      { rotateX: rotateX.value },
+      { rotateY: rotateY.value },
+      { translate: [-width / 2, -height / 2] },
+    ]);
+  });
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
-        <Animated.View
-          style={[
-            {
-              height: CARD_HEIGHT,
-              width: CARD_WIDTH,
-              backgroundColor: "black",
-              position: "absolute",
-              borderRadius: 20,
-              zIndex: 300,
-            },
-            rStyle,
-          ]}
-        >
-          <View
-            style={{
-              position: "absolute",
-              bottom: "10%",
-              left: "10%",
-              flexDirection: "row",
-            }}
-          >
-            <View
-              style={{
-                height: 50,
-                aspectRatio: 1,
-                borderRadius: 25,
-                backgroundColor: "#272F46",
-              }}
-            />
-            <View
-              style={{
-                flexDirection: "column",
-                marginLeft: 10,
-                justifyContent: "space-around",
-              }}
-            >
-              <View
-                style={{
-                  height: 20,
-                  width: 80,
-                  borderRadius: 25,
-                  backgroundColor: "#272F46",
-                }}
-              />
-              <View
-                style={{
-                  height: 20,
-                  width: 80,
-                  borderRadius: 25,
-                  backgroundColor: "#272F46",
-                }}
-              />
-            </View>
-          </View>
-        </Animated.View>
+        <Canvas style={{ flex: 1 }}>
+          <Rect rect={rct} matrix={matrix} />
+        </Canvas>
       </GestureDetector>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
