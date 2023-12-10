@@ -7,9 +7,12 @@ import type { SkCanvas, SkRect } from "../types";
  * @param cb Callback for drawing to the canvas
  * @returns SkPicture
  */
-export const createPicture = (rect: SkRect, cb: (canvas: SkCanvas) => void) => {
+export const createPicture = (
+  cb: (canvas: SkCanvas) => void,
+  bounds?: SkRect
+) => {
   const recorder = Skia.PictureRecorder();
-  const canvas = recorder.beginRecording(rect);
+  const canvas = recorder.beginRecording(bounds);
   cb(canvas);
   return recorder.finishRecordingAsPicture();
 };

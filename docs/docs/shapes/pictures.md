@@ -11,7 +11,15 @@ A Picture renders a previously recorded list of drawing operations on the canvas
 | :------ | :---------- | :---------------- |
 | picture | `SkPicture` | Picture to render |
 
-### Example
+
+## Hello World
+
+
+## Serialization
+
+You can serialize a picture to a byte array.
+Serialized pictures are only compatible with the version of Skia it was created with.
+You can use serialized pictures with the [Skia debugger](https://skia.org/docs/dev/tools/debugger/).
 
 ```tsx twoslash
 import React, { useMemo } from "react";
@@ -26,7 +34,6 @@ import {
 export const PictureExample = () => {
   // Create picture
   const picture = useMemo(() => createPicture(
-    { x: 0, y: 0, width: 100, height: 100 },
     (canvas) => {
       const paint = Skia.Paint();
       paint.setColor(Skia.Color("pink"));
