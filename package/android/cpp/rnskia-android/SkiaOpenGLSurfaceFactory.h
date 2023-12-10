@@ -89,8 +89,8 @@ public:
 
     // Check for exceptions
     if (env->ExceptionCheck()) {
-      RNSkLogger::logToConsole(
-          "updateAndRelease() failed. The exception above can safely be ignored");
+      RNSkLogger::logToConsole("updateAndRelease() failed. The exception above "
+                               "can safely be ignored");
       env->ExceptionClear();
     }
   }
