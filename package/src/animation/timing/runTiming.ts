@@ -8,6 +8,9 @@ import type {
 import { getResolvedParams } from "./functions";
 import { createTiming } from "./createTiming";
 /**
+ * @deprecated Use Reanimated 3 for animations:
+ * https://shopify.github.io/react-native-skia/docs/animations/animations
+ *
  * Creates a new animation on an existing value that will be driven by
  * an animation value. The value will be run from / to the value in
  * params and modified by the provided easing curve for the length of

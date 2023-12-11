@@ -10,6 +10,9 @@ import { Spring } from "./Spring";
 import { createSpringEasing } from "./functions/spring";
 
 /**
+ * @deprecated Use Reanimated 3 for animations:
+ * https://shopify.github.io/react-native-skia/docs/animations/animations
+ *
  * Creates a new animation on an existing value that will be driven by
  * an animation value. The value will be run from / to the value in
  * params and modified by the provided easing curve for the length of
