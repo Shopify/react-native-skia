@@ -1,5 +1,9 @@
-import type { ExtrapolationType, SharedValue } from "react-native-reanimated";
-import { useMemo } from "react";
+import type {
+  ExtrapolationType,
+  FrameInfo,
+  SharedValue,
+} from "react-native-reanimated";
+import { useMemo, useRef } from "react";
 
 import type { SkPath, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
@@ -19,9 +23,11 @@ export const notifyChange = (value: SharedValue<unknown>) => {
 
 export const useClock = () => {
   const clock = useSharedValue(0);
-  useFrameCallback((info) => {
+  const callback = useRef((info: FrameInfo) => {
+    "worklet";
     clock.value = info.timeSinceFirstFrame;
-  });
+  }).current;
+  useFrameCallback(callback);
   return clock;
 };
 
