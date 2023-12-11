@@ -19,13 +19,10 @@ static PropId PropNameSkewX = JsiPropId::get("skewX");
 static PropId PropNameSkewY = JsiPropId::get("skewY");
 static PropId PropNameRotate = JsiPropId::get("rotate");
 static PropId PropNameRotateZ = JsiPropId::get("rotateZ");
-
-/*
-  | "perspective"
-  | "rotateX"
-  | "rotateY"
-  | "matrix"
-*/
+static PropId PropNameRotateX = JsiPropId::get("rotateX");
+static PropId PropNameRotateY = JsiPropId::get("rotateY");
+static PropId PropNamePerspective = JsiPropId::get("perspective");
+static PropId PropNameMatrix4 = JsiPropId::get("matrix");
 
 class TransformProp : public DerivedProp<SkMatrix> {
 public:
@@ -66,6 +63,20 @@ public:
           auto z = el.getValue(key).getAsNumber();
           SkM44 trZ(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, z, 0, 0, 0, 1);
           m4.preConcat(trZ);
+        } else if (key == PropNameTranslate) {
+          auto arr = el.getValue(key).getAsArray();
+          double x = 0, y = 0, z = 0;
+          for (size_t i = 0; i < arr.size(); ++i) {
+            if (i == 0) {
+              x = arr[i].getAsNumber();
+            } else if (i == 1) {
+              y = arr[i].getAsNumber();
+            } else if (i == 2) {
+              z = arr[i].getAsNumber();
+            }
+          }
+          SkM44 tr(1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1);
+          m4.preConcat(tr);
         } else if (key == PropNameScale) {
           auto s = el.getValue(key).getAsNumber();
           SkM44 scale(s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
@@ -89,8 +100,30 @@ public:
         } else if (key == PropNameRotate || key == PropNameRotateZ) {
           auto angle = el.getValue(key).getAsNumber();
           SkM44 rotate;
-          rotate.setRotateUnit({ 0, 0, 1}, angle);
+          rotate.setRotateUnit({ 0, 0, 1 }, angle);
           m4.preConcat(rotate);
+        } else if (key == PropNameRotateY) {
+          auto angle = el.getValue(key).getAsNumber();
+          SkM44 rotate;
+          rotate.setRotateUnit({ 0, 1, 0 }, angle);
+          m4.preConcat(rotate);
+        } else if (key == PropNameRotateX) {
+          auto angle = el.getValue(key).getAsNumber();
+          SkM44 rotate;
+          rotate.setRotateUnit({ 1, 0, 0 }, angle);
+          m4.preConcat(rotate);
+        } else if (key == PropNamePerspective) {
+          auto p = el.getValue(key).getAsNumber();
+          SkM44 perspective(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1 / p, 1);
+          m4.preConcat(perspective);
+        } else if (key == PropNameMatrix4) {
+          auto arr = el.getValue(key).getAsArray();
+          SkM44 m44;
+          for (size_t i = 0; i < arr.size(); ++i) {
+            auto obj = arr[i];
+            m44.setRC(i / 4, i % 4, obj.getAsNumber());
+          }
+          m4.preConcat(m44);
         } else {
           throw std::runtime_error(
               "Unknown key in transform. Expected translateX, translateY, "

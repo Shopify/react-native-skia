@@ -95,7 +95,7 @@ describe("Matrix4", () => {
       ])
     ).toEqual(toMatrix3(m4));
   });
-  it("Should do a perspective transformation", async () => {
+  it("Should do a perspective transformation (1)", async () => {
     const { width, height } = surface;
     const pad = 32;
     const rct = {
@@ -114,6 +114,33 @@ describe("Matrix4", () => {
       <Group>
         <Rect rect={rct} color="magenta" />
         <Rect rect={rct} color="cyan" opacity={0.5} matrix={m3} />
+      </Group>
+    );
+    checkImage(image, "snapshots/matrix4/perspective.png");
+  });
+  it("Should do a perspective transformation (2)", async () => {
+    const { width, height } = surface;
+    const pad = 32;
+    const rct = {
+      x: pad,
+      y: pad,
+      width: width - pad * 2,
+      height: height - pad * 2,
+    };
+    const image = await surface.draw(
+      <Group>
+        <Rect rect={rct} color="magenta" />
+        <Rect
+          rect={rct}
+          color="cyan"
+          opacity={0.5}
+          transform={[
+            { translate: [width / 2, height / 2] },
+            { perspective: 300 },
+            { rotateX: 1 },
+            { translate: [-width / 2, -height / 2] },
+          ]}
+        />
       </Group>
     );
     checkImage(image, "snapshots/matrix4/perspective.png");
