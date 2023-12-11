@@ -7,7 +7,9 @@ import {
   BackdropFilter,
   Fill,
   Blur,
+  notifyChange,
 } from "@shopify/react-native-skia";
+import { useAnimatedReaction } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -16,6 +18,8 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+
+import { R } from "../Gooey/components/Icon";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.9;
@@ -31,7 +35,7 @@ const sf = 300;
 
 export const FrostedCard = () => {
   const image = useImage(require("./dynamo.jpg"));
-  const m3 = useSharedValue(Skia.Matrix());
+  const path = useSharedValue(Skia.Path.Make());
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
 
@@ -45,21 +49,26 @@ export const FrostedCard = () => {
       rotateY.value = withSpring(0, { velocity: velocityX / sf });
     });
 
-  const clip = useDerivedValue(() => {
-    m3.value = Skia.Matrix(
-      processTransform3d([
-        { translate: [width / 2, height / 2] },
-        { perspective: 300 },
-        { rotateX: rotateX.value },
-        { rotateY: rotateY.value },
-        { translate: [-width / 2, -height / 2] },
-      ])
-    );
-    const path = Skia.Path.Make();
-    path.addRRect(rrct);
-    path.transform(m3.value);
-    return path;
+  const matrix = useDerivedValue(() => {
+    return processTransform3d([
+      { translate: [width / 2, height / 2] },
+      { perspective: 300 },
+      { rotateX: rotateX.value },
+      { rotateY: rotateY.value },
+      { translate: [-width / 2, -height / 2] },
+    ]);
   });
+
+  useAnimatedReaction(
+    () => matrix.value,
+    (m3) => {
+      path.value.reset();
+      path.value.addRRect(rrct);
+      path.value.transform(m3);
+      notifyChange(path);
+    }
+  );
+
   return (
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
@@ -72,7 +81,7 @@ export const FrostedCard = () => {
             height={height}
             fit="cover"
           />
-          <BackdropFilter filter={<Blur blur={30} mode="clamp" />} clip={clip}>
+          <BackdropFilter filter={<Blur blur={30} mode="clamp" />} clip={path}>
             <Fill color="rgba(255, 255, 255, 0.1)" />
           </BackdropFilter>
         </Canvas>
