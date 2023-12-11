@@ -9,7 +9,6 @@ import {
   Blur,
   notifyChange,
 } from "@shopify/react-native-skia";
-import { useAnimatedReaction } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -18,8 +17,6 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-
-import { R } from "../Gooey/components/Icon";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.9;
@@ -31,13 +28,26 @@ const rct = Skia.XYWHRect(
   CARD_HEIGHT
 );
 const rrct = Skia.RRectXY(rct, 10, 10);
+
 const sf = 300;
+const springConfig = (velocity: number) => {
+  "worklet";
+  return {
+    mass: 1,
+    damping: 1,
+    stiffness: 100,
+    overshootClamping: false,
+    restDisplacementThreshold: 0.01,
+    restSpeedThreshold: 2,
+    velocity,
+  };
+};
 
 export const FrostedCard = () => {
   const image = useImage(require("./dynamo.jpg"));
-  const path = useSharedValue(Skia.Path.Make());
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
+  const path = useSharedValue(Skia.Path.Make());
 
   const gesture = Gesture.Pan()
     .onChange((event) => {
@@ -45,29 +55,24 @@ export const FrostedCard = () => {
       rotateX.value -= event.changeY / sf;
     })
     .onEnd(({ velocityX, velocityY }) => {
-      rotateX.value = withSpring(0, { velocity: velocityY / sf });
-      rotateY.value = withSpring(0, { velocity: velocityX / sf });
+      rotateX.value = withSpring(0, springConfig(velocityY / sf));
+      rotateY.value = withSpring(0, springConfig(velocityX / sf));
     });
 
-  const matrix = useDerivedValue(() => {
-    return processTransform3d([
-      { translate: [width / 2, height / 2] },
-      { perspective: 300 },
-      { rotateX: rotateX.value },
-      { rotateY: rotateY.value },
-      { translate: [-width / 2, -height / 2] },
-    ]);
+  useDerivedValue(() => {
+    path.value.reset();
+    path.value.addRRect(rrct);
+    path.value.transform(
+      processTransform3d([
+        { translate: [width / 2, height / 2] },
+        { perspective: 300 },
+        { rotateX: rotateX.value },
+        { rotateY: rotateY.value },
+        { translate: [-width / 2, -height / 2] },
+      ])
+    );
+    notifyChange(path);
   });
-
-  useAnimatedReaction(
-    () => matrix.value,
-    (m3) => {
-      path.value.reset();
-      path.value.addRRect(rrct);
-      path.value.transform(m3);
-      notifyChange(path);
-    }
-  );
 
   return (
     <View style={{ flex: 1 }}>

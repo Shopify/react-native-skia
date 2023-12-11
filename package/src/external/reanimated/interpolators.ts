@@ -18,7 +18,9 @@ import {
 export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (value as any)._value = value.value;
+  if (_WORKLET) {
+    (value as any)._value = value.value;
+  }
 };
 
 export const useClock = () => {
