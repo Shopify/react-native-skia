@@ -36,7 +36,6 @@ type Transform3dName =
   | "perspective"
   | "rotateX"
   | "rotateY"
-  | "rotateZ"
   | "matrix";
 
 type Transformations = {
@@ -87,16 +86,6 @@ const translate = (x: number, y: number, z: number): Matrix4 => {
 const scale = (sx: number, sy: number, sz: number): Matrix4 => {
   "worklet";
   return [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1];
-};
-
-const skewX = (s: number): Matrix4 => {
-  "worklet";
-  return [1, 0, 0, 0, Math.tan(s), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-};
-
-const skewY = (s: number): Matrix4 => {
-  "worklet";
-  return [1, Math.tan(s), 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 };
 
 const perspective = (p: number): Matrix4 => {
@@ -189,6 +178,16 @@ const multiply4 = (a: Matrix4, b: Matrix4): Matrix4 => {
     }
   }
   return result as unknown as Matrix4;
+};
+
+const skewY = (angle: number): Matrix4 => {
+  "worklet";
+  return [1, Math.tan(angle), 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+};
+
+const skewX = (angle: number): Matrix4 => {
+  "worklet";
+  return [1, 0, 0, 0, Math.tan(angle), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 };
 
 const toMatrix3 = (m: Matrix4) => {

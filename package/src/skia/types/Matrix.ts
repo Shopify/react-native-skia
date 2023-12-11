@@ -1,5 +1,7 @@
 import type { SkJSIInstance } from "./JsiInstance";
 import type { SkCanvas } from "./Canvas";
+import type { Transforms3d } from "./Matrix4";
+import { processTransform3d } from "./Matrix4";
 export enum MatrixIndex {
   ScaleX = 0,
   SkewX = 1,
@@ -29,86 +31,17 @@ export interface SkMatrix extends SkJSIInstance<"Matrix"> {
   get: () => number[];
 }
 
-type Transform2dName =
-  | "translateX"
-  | "translateY"
-  | "scale"
-  | "skewX"
-  | "skewY"
-  | "scaleX"
-  | "scaleY"
-  | "rotateZ"
-  | "rotate";
-
-type Transformations = {
-  readonly [Name in Transform2dName]: number;
-};
-
-export type Transforms2d = readonly (
-  | Pick<Transformations, "translateX">
-  | Pick<Transformations, "translateY">
-  | Pick<Transformations, "scale">
-  | Pick<Transformations, "scaleX">
-  | Pick<Transformations, "scaleY">
-  | Pick<Transformations, "skewX">
-  | Pick<Transformations, "skewY">
-  | Pick<Transformations, "rotate">
-)[];
-
 export interface TransformProp {
-  transform?: Transforms2d;
+  transform?: Transforms3d;
 }
 
 export const processTransform = <T extends SkMatrix | SkCanvas>(
   m: T,
-  transforms: Transforms2d
+  transforms: Transforms3d
 ) => {
-  for (const transform of transforms) {
-    const key = Object.keys(transform)[0] as Transform2dName;
-    const value = (transform as Pick<Transformations, typeof key>)[key];
-    if (key === "translateX") {
-      m.translate(value, 0);
-      continue;
-    }
-    if (key === "translateY") {
-      m.translate(0, value);
-      continue;
-    }
-    if (key === "scale") {
-      m.scale(value, value);
-      continue;
-    }
-    if (key === "scaleX") {
-      m.scale(value, 1);
-      continue;
-    }
-    if (key === "scaleY") {
-      m.scale(1, value);
-      continue;
-    }
-    if (key === "skewX") {
-      m.skew(value, 0);
-      continue;
-    }
-    if (key === "skewY") {
-      m.skew(0, value);
-      continue;
-    }
-    if (key === "rotate" || key === "rotateZ") {
-      if (isMatrix(m)) {
-        m.rotate(value);
-      } else {
-        m.rotate(toDegrees(value), 0, 0);
-      }
-      continue;
-    }
-    exhaustiveCheck(key);
-  }
+  const m3 = processTransform3d(transforms);
+  m.concat(m3);
   return m;
-};
-
-const exhaustiveCheck = (a: never): never => {
-  throw new Error(`Unknown transformation: ${a}`);
 };
 
 export const toDegrees = (rad: number) => {
