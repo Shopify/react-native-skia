@@ -21,10 +21,18 @@ Please use Reanimated instead: https://shopify.github.io/react-native-skia/docs/
 };
 
 export const ValueApi = {
+  /**
+   * @deprecated Use Reanimated 3
+   * for animating Skia: https://shopify.github.io/react-native-skia/docs/animations/animations
+   */
   createValue<T>(initialValue: T): SkiaMutableValue<T> {
     deprecatedWarning();
     return SkiaValueApi.createValue(initialValue);
   },
+  /**
+   * @deprecated Use Reanimated 3
+   * for animating Skia: https://shopify.github.io/react-native-skia/docs/animations/animations
+   */
   createComputedValue<R>(
     cb: () => R,
     values: SkiaValue<unknown>[]
@@ -32,10 +40,18 @@ export const ValueApi = {
     deprecatedWarning();
     return SkiaValueApi.createComputedValue(cb, values);
   },
+  /**
+   * @deprecated Use Reanimated 3
+   * for animating Skia: https://shopify.github.io/react-native-skia/docs/animations/animations
+   */
   createClockValue(): SkiaClockValue {
     deprecatedWarning();
     return SkiaValueApi.createClockValue();
   },
+  /**
+   * @deprecated Use Reanimated 3
+   * for animating Skia: https://shopify.github.io/react-native-skia/docs/animations/animations
+   */
   createAnimation<S extends AnimationState = AnimationState>(
     cb: (t: number, state: S | undefined) => S
   ): SkiaAnimation {

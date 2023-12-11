@@ -12,6 +12,9 @@ import { getResolvedParams } from "./functions";
 import { createTiming } from "./createTiming";
 
 /**
+ * @deprecated Use Reanimated 3 for animations:
+ * https://shopify.github.io/react-native-skia/docs/animations/animations
+ *
  * Creats an animation value that will run whenever
  * the animation parameters change. The animation start immediately.
  * @param toOrParams
