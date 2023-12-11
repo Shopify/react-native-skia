@@ -91,30 +91,33 @@ public:
           m4.preConcat(scale);
         } else if (key == PropNameSkewX) {
           auto angle = el.getValue(key).getAsNumber();
-          SkM44 skewX(1, 0, 0, 0, std::tan(angle), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+          SkM44 skewX(1, 0, 0, 0, std::tan(angle), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                      1);
           m4.preConcat(skewX);
         } else if (key == PropNameSkewY) {
           auto angle = el.getValue(key).getAsNumber();
-          SkM44 skewY(1, std::tan(angle), 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+          SkM44 skewY(1, std::tan(angle), 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                      1);
           m4.preConcat(skewY);
         } else if (key == PropNameRotate || key == PropNameRotateZ) {
           auto angle = el.getValue(key).getAsNumber();
           SkM44 rotate;
-          rotate.setRotateUnit({ 0, 0, 1 }, angle);
+          rotate.setRotateUnit({0, 0, 1}, angle);
           m4.preConcat(rotate);
         } else if (key == PropNameRotateY) {
           auto angle = el.getValue(key).getAsNumber();
           SkM44 rotate;
-          rotate.setRotateUnit({ 0, 1, 0 }, angle);
+          rotate.setRotateUnit({0, 1, 0}, angle);
           m4.preConcat(rotate);
         } else if (key == PropNameRotateX) {
           auto angle = el.getValue(key).getAsNumber();
           SkM44 rotate;
-          rotate.setRotateUnit({ 1, 0, 0 }, angle);
+          rotate.setRotateUnit({1, 0, 0}, angle);
           m4.preConcat(rotate);
         } else if (key == PropNamePerspective) {
           auto p = el.getValue(key).getAsNumber();
-          SkM44 perspective(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1 / p, 1);
+          SkM44 perspective(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1 / p,
+                            1);
           m4.preConcat(perspective);
         } else if (key == PropNameMatrix4) {
           auto arr = el.getValue(key).getAsArray();
