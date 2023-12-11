@@ -4,6 +4,9 @@ import { ValueApi } from "../api";
 import { isValue } from "../../renderer/processors/Animations";
 
 /**
+ * @deprecated Use Reanimated 3
+ * for animating Skia: https://shopify.github.io/react-native-skia/docs/animations/animations
+ *
  * Creates a new computed value - a value that will calculate its value depending
  * on other values.
  * @param cb Callback to calculate new value
