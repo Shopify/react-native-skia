@@ -25,13 +25,11 @@ import {
   BlendMode
 } from "@shopify/react-native-skia";
 
-const size = 256;
-
 export const HelloWorld = () => {
   // Create a picture
   const picture = useMemo(() => createPicture(
-    { width: size, height: size },
     (canvas) => {
+      const size = 256;
       const r = 0.33 * size;
       const paint = Skia.Paint();
       paint.setBlendMode(BlendMode.Multiply);
@@ -73,7 +71,6 @@ import {
 export const PictureExample = () => {
   // Create picture
   const picture = useMemo(() => createPicture(
-    { width: 100, height: 100 },
     (canvas) => {
       const paint = Skia.Paint();
       paint.setColor(Skia.Color("pink"));
@@ -82,7 +79,8 @@ export const PictureExample = () => {
       const circlePaint = Skia.Paint();
       circlePaint.setColor(Skia.Color("orange"));
       canvas.drawCircle(50, 50, 50, circlePaint);
-    }
+    },
+    { width: 100, height: 100 },
   ), []);
 
   // Serialize the picture

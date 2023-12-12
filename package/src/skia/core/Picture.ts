@@ -8,13 +8,16 @@ import { isRect, type SkCanvas, type SkRect, type SkSize } from "../types";
  * @returns SkPicture
  */
 export const createPicture = (
-  rect: SkRect | SkSize,
-  cb: (canvas: SkCanvas) => void
+  cb: (canvas: SkCanvas) => void,
+  rect?: SkRect | SkSize
 ) => {
+  "worklet";
   const recorder = Skia.PictureRecorder();
-  const canvas = recorder.beginRecording(
-    isRect(rect) ? rect : Skia.XYWHRect(0, 0, rect.width, rect.height)
-  );
+  let bounds: undefined | SkRect;
+  if (rect) {
+    bounds = isRect(rect) ? rect : Skia.XYWHRect(0, 0, rect.width, rect.height);
+  }
+  const canvas = recorder.beginRecording(bounds);
   cb(canvas);
   return recorder.finishRecordingAsPicture();
 };
