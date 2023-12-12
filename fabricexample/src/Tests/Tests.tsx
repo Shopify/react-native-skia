@@ -6,7 +6,6 @@ import {
   Canvas,
   Skia,
   makeImageFromView,
-  Paragraph,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Platform, Text, View } from "react-native";
@@ -47,21 +46,6 @@ export const Tests = ({ assets }: TestsProps) => {
                 ctx: parseProps(tree.ctx, assets),
               })
             )
-          );
-        } else if (tree.paragraph) {
-          const paragraph = eval(
-            `(function Main(){return (${tree.paragraph})(this.Skia, this.ctx); })`
-          ).call({
-            Skia,
-            ctx: parseProps(tree.ctx, assets),
-          });
-          setDrawing(
-            <Paragraph
-              paragraph={paragraph}
-              width={tree.paragraphWidth}
-              x={0}
-              y={0}
-            />
           );
         } else if (typeof tree.screen === "string") {
           const Screen = Screens[tree.screen];
