@@ -4,7 +4,6 @@ import React, {
   useMemo,
   forwardRef,
   useRef,
-  useLayoutEffect,
 } from "react";
 import type {
   RefObject,
@@ -13,13 +12,13 @@ import type {
   ForwardedRef,
   FunctionComponent,
 } from "react";
+import type { LayoutChangeEvent } from "react-native";
 
 import { SkiaDomView, SkiaPictureView } from "../views";
 import { Skia } from "../skia/Skia";
 import type { TouchHandler, SkiaBaseViewProps } from "../views";
 import type { SkiaValue } from "../values/types";
 import { JsiDrawingContext } from "../dom/types";
-import { useValue } from "../values";
 
 import { SkiaRoot } from "./Reconciler";
 import { NATIVE_DOM } from "./HostComponents";
@@ -33,34 +32,42 @@ export interface CanvasProps extends SkiaBaseViewProps {
   onTouch?: TouchHandler;
 }
 
-const useOnSizeEvent = (resultValue: SkiaBaseViewProps["onSize"]) => {
-  const onSize = useValue({
-    width: 0,
-    height: 0,
-  });
-
-  useLayoutEffect(() => {
-    if (!resultValue) {
-      return;
-    }
-    return onSize.addListener((newValue) => {
-      if (isValue(resultValue)) {
-        resultValue.current = newValue;
-      } else {
-        resultValue.value = newValue;
+const useOnSizeEvent = (
+  resultValue: SkiaBaseViewProps["onSize"],
+  onLayout?: (event: LayoutChangeEvent) => void
+) => {
+  return useCallback(
+    (event: LayoutChangeEvent) => {
+      if (onLayout) {
+        onLayout(event);
       }
-    });
-  }, [resultValue, onSize]);
+      const { width, height } = event.nativeEvent.layout;
 
-  return onSize;
+      if (isValue(resultValue)) {
+        resultValue.current = { width, height };
+      } else if (resultValue) {
+        resultValue.value = { width, height };
+      }
+    },
+    [onLayout, resultValue]
+  );
 };
 
 export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
   (
-    { children, style, debug, mode, onTouch, onSize: _onSize, ...props },
+    {
+      children,
+      style,
+      debug,
+      mode,
+      onTouch,
+      onSize: _onSize,
+      onLayout: _onLayout,
+      ...props
+    },
     forwardedRef
   ) => {
-    const onSize = useOnSizeEvent(_onSize);
+    const onLayout = useOnSizeEvent(_onSize, _onLayout);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const redraw = useCallback(() => {
@@ -102,7 +109,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
           style={style}
           root={root.dom}
           onTouch={onTouch}
-          onSize={onSize}
+          onLayout={onLayout}
           mode={mode}
           debug={debug}
           {...props}
@@ -125,7 +132,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
           mode={mode}
           debug={debug}
           picture={picture}
-          onSize={onSize}
+          onLayout={onLayout}
           {...props}
         />
       );

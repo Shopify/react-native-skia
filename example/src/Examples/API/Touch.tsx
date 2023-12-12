@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { SkPicture, SkSize } from "@shopify/react-native-skia";
+import type { SkPicture } from "@shopify/react-native-skia";
 import {
   Group,
   Fill,

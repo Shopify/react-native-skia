@@ -6,6 +6,7 @@ export interface SkRect {
 }
 
 export const isRect = (def: unknown): def is SkRect => {
+  "worklet";
   if (typeof def === "object" && def !== null) {
     const rect = def as SkRect;
     return (

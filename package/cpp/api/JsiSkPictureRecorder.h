@@ -28,7 +28,7 @@ public:
 
   JSI_HOST_FUNCTION(beginRecording) {
     SkCanvas *canvas;
-    if (count > 0) {
+    if (count > 0 && !arguments[0].isUndefined()) {
       auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
       SkRTreeFactory factory;
       canvas = getObject()->beginRecording(*rect, &factory);

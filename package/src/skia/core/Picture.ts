@@ -11,15 +11,13 @@ export const createPicture = (
   cb: (canvas: SkCanvas) => void,
   rect?: SkRect | SkSize
 ) => {
+  "worklet";
   const recorder = Skia.PictureRecorder();
-  const canvas = recorder.beginRecording(
-    // eslint-disable-next-line no-nested-ternary
-    rect
-      ? isRect(rect)
-        ? rect
-        : Skia.XYWHRect(0, 0, rect.width, rect.height)
-      : undefined
-  );
+  let bounds: undefined | SkRect;
+  if (rect) {
+    bounds = isRect(rect) ? rect : Skia.XYWHRect(0, 0, rect.width, rect.height);
+  }
+  const canvas = recorder.beginRecording(bounds);
   cb(canvas);
   return recorder.finishRecordingAsPicture();
 };
