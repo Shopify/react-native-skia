@@ -62,6 +62,11 @@ export const checkImage = (
       width: baseline.width,
       height: baseline.height,
     });
+    if (baseline.width !== toTest.width || baseline.height !== toTest.height) {
+      throw new Error(
+        `Image sizes don't match: ${baseline.width}x${baseline.height} vs ${toTest.width}x${toTest.height}`
+      );
+    }
     const diffPixelsCount = pixelmatch(
       baseline.data,
       toTest.data,

@@ -6,7 +6,6 @@ import {
   Canvas,
   Skia,
   makeImageFromView,
-  Paragraph,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Platform, Text, View } from "react-native";
@@ -17,7 +16,8 @@ import { useClient } from "./useClient";
 import { Screens } from "./Screens";
 
 export const CI = process.env.CI === "true";
-const scale = 3 / PixelRatio.get();
+const s = 3;
+const scale = s / PixelRatio.get();
 const size = 256 * scale;
 // Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI
 // eslint-disable-next-line no-nested-ternary
@@ -41,27 +41,14 @@ export const Tests = ({ assets }: TestsProps) => {
           client.send(
             JSON.stringify(
               eval(
-                `(function Main(){return (${tree.code})(this.Skia, this.ctx); })`
+                `(function Main(){return (${tree.code})(this.Skia, this.ctx, this.size, this.scale); })`
               ).call({
                 Skia,
                 ctx: parseProps(tree.ctx, assets),
+                size: size * PixelRatio.get(),
+                scale: s,
               })
             )
-          );
-        } else if (tree.paragraph) {
-          const paragraph = eval(
-            `(function Main(){return (${tree.paragraph})(this.Skia, this.ctx); })`
-          ).call({
-            Skia,
-            ctx: parseProps(tree.ctx, assets),
-          });
-          setDrawing(
-            <Paragraph
-              paragraph={paragraph}
-              width={tree.paragraphWidth}
-              x={0}
-              y={0}
-            />
           );
         } else if (typeof tree.screen === "string") {
           const Screen = Screens[tree.screen];

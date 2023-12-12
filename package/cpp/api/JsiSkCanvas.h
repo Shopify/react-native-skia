@@ -37,6 +37,7 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
+
 namespace jsi = facebook::jsi;
 
 class JsiSkCanvas : public JsiSkHostObject {
@@ -524,7 +525,7 @@ public:
     if (!_canvas->readPixels(*info, bfrPtr, bytesPerRow, srcX, srcY)) {
       return jsi::Value::null();
     }
-    return std::move(dest);
+    return dest;
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkCanvas, drawPaint),
